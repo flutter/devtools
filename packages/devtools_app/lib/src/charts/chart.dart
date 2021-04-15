@@ -121,11 +121,19 @@ class ChartState extends State<Chart> with AutoDisposeMixin {
   }
 }
 
-class Point {
-  Point(this.x, this.y);
+/// Used to track current and previous x,y position. The parameter yBase
+/// is for stacked traces. If the Trace is stacked then yBase is the previous
+/// trace's Y position. If a trace is not stacked then yBase is always 0.
+class PointAndBase {
+  PointAndBase(
+    this.x,
+    this.y, {
+    double yBase,
+  }) : base = yBase;
 
   final double x;
   final double y;
+  final double base;
 }
 
 class ChartPainter extends CustomPainter {
@@ -183,10 +191,10 @@ class ChartPainter extends CustomPainter {
     );
 
     /// Key is trace index and value is x,y point.
-    final previousTracesData = <int, Point>{};
+    final previousTracesData = <int, PointAndBase>{};
 
     /// Key is trace index and value is x,y point.
-    final currentTracesData = <int, Point>{};
+    final currentTracesData = <int, PointAndBase>{};
 
     // Visible Y max.
     var visibleYMax = 0.0;
@@ -220,11 +228,19 @@ class ChartPainter extends CustomPainter {
       // larger than the tick area doesn't spill out on the left-side.
       clipChart(canvas);
 
+      // Y base (stackedY) used for stacked traces each Y base for stack traces
+      // starts at zero. Then Y base for the current data point is the previous Y
+      // base (previous Y's datapoint). Then current data point's Y is added to Y base.
+      double stackedY = 0.0;
+
       for (var index = 0; index < tracesLength; index++) {
         final traceDataIndex = tracesDataIndex[index];
         if (traceDataIndex >= 0) {
           final trace = traces[index];
           final traceData = trace.data[traceDataIndex];
+
+          final yValue = (trace.stacked) ? stackedY + traceData.y : traceData.y;
+
           final xTimestamp = traceData.timestamp;
           final xCanvasCoord =
               chartController.timestampToXCanvasCoord(xTimestamp);
@@ -239,19 +255,23 @@ class ChartPainter extends CustomPainter {
                 yTranslation,
                 (canvas) {
                   final xCoord = xCanvasCoord;
-                  final yCoord =
-                      chartController.yPositonToYCanvasCoord(traceData.y);
+                  final yCoord = chartController.yPositonToYCanvasCoord(yValue);
                   final hasMultipleExtensionEvents =
                       traceData is DataAggregate ? traceData.count > 1 : false;
 
                   // Is the visible Y-axis max larger.
-                  if (traceData.y > visibleYMax) {
-                    visibleYMax = traceData.y;
+                  if (yValue > visibleYMax) {
+                    visibleYMax = yValue;
                   }
 
-                  currentTracesData[index] = Point(xCoord, yCoord);
+                  currentTracesData[index] = PointAndBase(
+                    xCoord,
+                    yCoord,
+                    yBase: chartController.yPositonToYCanvasCoord(stackedY),
+                  );
 
                   if (trace.chartType == ChartType.symbol) {
+                    assert(!trace.stacked);
                     drawSymbol(
                       canvas,
                       trace.characteristics,
@@ -300,10 +320,10 @@ class ChartPainter extends CustomPainter {
                         trace.characteristics,
                         previousTracesData[index].x,
                         previousTracesData[index].y,
-                        chartController.yPositonToYCanvasCoord(0),
+                        previousTracesData[index].base,
                         currentTracesData[index].x,
                         currentTracesData[index].y,
-                        chartController.yPositonToYCanvasCoord(0),
+                        currentTracesData[index].base,
                       );
                     } else {
                       // Draw point
@@ -338,6 +358,10 @@ class ChartPainter extends CustomPainter {
                 },
               );
             }
+          }
+
+          if (trace.stacked) {
+            stackedY += traceData.y;
           }
         }
 
