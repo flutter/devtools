@@ -277,6 +277,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
             style: theme.fixedFontStyle,
             child: Expanded(
               child: Scrollbar(
+                controller: textController,
                 child: ValueListenableBuilder<StackFrameAndSourcePosition>(
                   valueListenable: widget.controller.selectedStackFrame,
                   builder: (context, frame, _) {
