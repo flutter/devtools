@@ -306,7 +306,7 @@ class DevToolsScreen<C> {
     this.createController,
     this.controller,
     this.supportsOffline = false,
-  });
+  }) : assert(createController == null || controller == null);
 
   final Screen screen;
 
