@@ -299,6 +299,14 @@ extension DevToolsColorScheme on ColorScheme {
         decoration: TextDecoration.none,
       );
 
+  // Items in a chart's legend.
+  TextStyle get legendTextStyle => TextStyle(
+        color: defaultForeground,
+        fontWeight: FontWeight.normal,
+        fontSize: 10,
+        decoration: TextDecoration.none,
+      );
+
   Color get expandedColor => isLight ? Colors.grey[200] : Colors.grey[800];
 
   Color get expandedTopContentColor =>
