@@ -645,8 +645,10 @@ class MemoryBodyState extends State<MemoryBody>
   // TODO(terry): Compute below heights dynamically.
   static const hoverHeightMinimum = 42.0;
   static const hoverItemHeight = 18.0;
+
   // One extension event to display (4 lines).
   static const hoverOneEventsHeight = 82.0;
+
   // Many extension events to display.
   static const hoverEventsHeight = 120.0;
 
