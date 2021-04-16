@@ -17,8 +17,6 @@ String computeEventGroupKey(
   } else if (event.isRasterEvent) {
     return PerformanceData.rasterKey;
   } else if (threadNamesById[event.threadId] != null) {
-    print(event.traceEvents.first.event.json);
-    print(event.traceEvents[1].event.json);
     return threadNamesById[event.threadId];
   } else {
     return PerformanceData.unknownKey;
