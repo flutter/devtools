@@ -272,8 +272,8 @@ class DevToolsAppState extends State<DevToolsApp> {
 
   Widget _providedControllers({@required Widget child, bool offline = false}) {
     final _providers = widget.screens
-        .where((s) =>
-            s.providesController && (offline ? s.supportsOffline : true))
+        .where(
+            (s) => s.providesController && (offline ? s.supportsOffline : true))
         .map((s) => s.controllerProvider)
         .toList();
 
@@ -581,9 +581,7 @@ List<DevToolsScreen> get defaultScreens {
       createController: () => AppSizeController(),
     ),
     DevToolsScreen<VMDeveloperToolsController>(
-      VMDeveloperToolsScreen(
-        controller: vmDeveloperToolsController
-      ),
+      VMDeveloperToolsScreen(controller: vmDeveloperToolsController),
       controller: vmDeveloperToolsController,
     ),
 // Uncomment to see a sample implementation of a conditional screen.
