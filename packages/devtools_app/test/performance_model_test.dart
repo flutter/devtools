@@ -103,7 +103,7 @@ void main() {
 
     test('initializeEventBuckets', () {
       expect(performanceData.eventGroups, isEmpty);
-      performanceData.initializeEventGroups();
+      performanceData.initializeEventGroups(threadNamesById);
       expect(
         performanceData
             .eventGroups[PerformanceData.uiKey].rows[0].events.length,

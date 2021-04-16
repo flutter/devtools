@@ -16,6 +16,20 @@ const testUiThreadId = 1;
 const testRasterThreadId = 2;
 const testUnknownThreadId = 3;
 
+final threadNamesById = {
+  45079: 'DartWorker (45079)',
+  24835: 'Unknown (24835)',
+  33119: 'DartWorker (33119)',
+  38915: 'Unknown (38915)',
+  24323: 'io.flutter.1.profiler (24323)',
+  24067: 'io.flutter.1.io (24067)',
+  testUiThreadId: 'io.flutter.1.ui (22787)',
+  testRasterThreadId: 'io.flutter.1.raster (40963)',
+  26371: 'DartWorker (26371)',
+  37123: 'Dart Profiler ThreadInterrupter (37123)',
+  775: 'io.flutter.1.platform (775)',
+};
+
 final frameStartEvent = testTraceEventWrapper({
   'name': 'PipelineItem',
   'cat': 'Embedder',
@@ -1147,3 +1161,26 @@ final gcEventEndTrace = testTraceEventWrapper({
 
 final gcEvent = testSyncTimelineEvent(gcEventStartTrace)
   ..addEndEvent(gcEventEndTrace);
+
+final namedThreadEventStartTrace = testTraceEventWrapper({
+  'name': 'Shell::OnPlatformViewDispatchPointerDataPacket',
+  'cat': 'Embedder',
+  'tid': 775,
+  'pid': 71358,
+  'ts': 1011096130619,
+  'ph': 'B',
+  'args': {},
+});
+
+final namedThreadEventEndTrace = testTraceEventWrapper({
+  'name': 'Shell::OnPlatformViewDispatchPointerDataPacket',
+  'cat': 'Embedder',
+  'tid': 775,
+  'pid': 71358,
+  'ts': 1011096130643,
+  'ph': 'E',
+  'args': {},
+});
+
+final eventForNamedThread = testSyncTimelineEvent(namedThreadEventStartTrace)
+  ..addEndEvent(namedThreadEventEndTrace);
