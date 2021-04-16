@@ -73,7 +73,6 @@ class VMDeveloperToolsScreenBody extends StatefulWidget {
 
 class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
     with AutoDisposeMixin {
-
   VMDeveloperToolsController controller;
 
   @override
