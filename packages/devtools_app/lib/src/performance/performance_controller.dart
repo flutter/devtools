@@ -192,9 +192,17 @@ class PerformanceController
   final _displayRefreshRate = ValueNotifier<double>(defaultRefreshRate);
 
   Future<void> selectFrame(FlutterFrame frame) async {
-    if (frame == null || data == null || data.selectedFrame == frame) {
+    if (frame == null || data == null) {
       return;
     }
+
+    // Unselect [frame] if is already selected.
+    if (data.selectedFrame == frame) {
+      data.selectedFrame = null;
+      _selectedFrameNotifier.value = null;
+      return;
+    }
+
     data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
 
