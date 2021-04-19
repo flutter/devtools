@@ -2,7 +2,7 @@ MaterialApp
  │ state: _MaterialAppState#00000
  │
  └─ScrollConfiguration
-   │ behavior: _MaterialScrollBehavior
+   │ behavior: MaterialScrollBehavior
    │
    └─HeroControllerScope
      └─WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]

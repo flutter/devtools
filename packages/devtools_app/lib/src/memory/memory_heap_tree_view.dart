@@ -393,12 +393,12 @@ class HeapTreeViewState extends State<HeapTree>
             _isSnapshotStreaming
                 ? 'Processing...'
                 : _isSnapshotGraphing
-                ? 'Graphing...'
-                : _isSnapshotGrouping
-                ? 'Grouping...'
-                : _isSnapshotComplete
-                ? 'Done'
-                : '...',
+                    ? 'Graphing...'
+                    : _isSnapshotGrouping
+                        ? 'Grouping...'
+                        : _isSnapshotComplete
+                            ? 'Done'
+                            : '...',
           ),
         ],
       );
@@ -479,8 +479,8 @@ class HeapTreeViewState extends State<HeapTree>
     final rightSideTable = controller.isLeafSelected
         ? InstanceTreeView()
         : controller.isAnalysisLeafSelected
-        ? Expanded(child: AnalysisInstanceViewTable())
-        : helpScreen();
+            ? Expanded(child: AnalysisInstanceViewTable())
+            : helpScreen();
 
     return treeMapVisible
         ? snapshotDisplay
