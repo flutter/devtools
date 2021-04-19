@@ -191,7 +191,7 @@ class PerformanceController
   ValueListenable<double> get displayRefreshRate => _displayRefreshRate;
   final _displayRefreshRate = ValueNotifier<double>(defaultRefreshRate);
 
-  Future<void> selectFrame(FlutterFrame frame) async {
+  Future<void> toggleSelectedFrame(FlutterFrame frame) async {
     if (frame == null || data == null) {
       return;
     }
