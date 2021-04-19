@@ -214,7 +214,7 @@ class TimelineFlameChartState
 
   int widestRow = -1;
 
-  PerformanceController _timelineController;
+  PerformanceController _performanceController;
 
   FlutterFrame _selectedFrame;
 
@@ -240,11 +240,11 @@ class TimelineFlameChartState
   void didChangeDependencies() {
     super.didChangeDependencies();
     final newController = Provider.of<PerformanceController>(context);
-    if (newController == _timelineController) return;
-    _timelineController = newController;
+    if (newController == _performanceController) return;
+    _performanceController = newController;
 
     addAutoDisposeListener(
-      _timelineController.selectedFrame,
+      _performanceController.selectedFrame,
       _handleSelectedFrame,
     );
   }
@@ -268,7 +268,10 @@ class TimelineFlameChartState
 
   @override
   double topYForData(TimelineEvent data) {
-    final eventGroup = widget.data.eventGroups[computeEventGroupKey(data)];
+    final eventGroup = widget.data.eventGroups[computeEventGroupKey(
+      data,
+      _performanceController.threadNamesById,
+    )];
     assert(eventGroup != null);
     final rowOffsetInGroup = eventGroup.rowIndexForEvent[data];
     return eventGroupStartYValues[eventGroup] +
@@ -381,7 +384,8 @@ class TimelineFlameChartState
   }
 
   void _handleSelectedFrame() async {
-    final FlutterFrame selectedFrame = _timelineController.selectedFrame.value;
+    final FlutterFrame selectedFrame =
+        _performanceController.selectedFrame.value;
     if (selectedFrame != null) {
       if (selectedFrame == _selectedFrame) return;
 
@@ -433,6 +437,9 @@ class TimelineFlameChartState
       Color backgroundColor;
       if (event.isAsyncEvent) {
         backgroundColor = nextAsyncColor(row);
+      } else if (event.isGCEvent) {
+        // TODO(kenz): should we have a different color palette for GC events?
+        backgroundColor = nextUnknownColor(row);
       } else if (event.isUiEvent) {
         backgroundColor = nextUiColor(row);
       } else if (event.isRasterEvent) {
@@ -563,7 +570,7 @@ class TimelineFlameChartState
 
   Widget _buildSectionLabels({@required BoxConstraints constraints}) {
     final colorScheme = Theme.of(context).colorScheme;
-    final eventGroups = _timelineController.data.eventGroups;
+    final eventGroups = _performanceController.data.eventGroups;
 
     final children = <Widget>[];
     for (int i = 0; i < eventGroups.length; i++) {
@@ -628,7 +635,7 @@ class TimelineFlameChartState
     @required BoxConstraints constraints,
   }) {
     const threadButtonContainerWidth = buttonMinWidth + defaultSpacing;
-    final eventGroups = _timelineController.data.eventGroups;
+    final eventGroups = _performanceController.data.eventGroups;
 
     Widget buildNavigatorButton(int index, {@required bool isNext}) {
       // Add spacing to account for timestamps at top of chart.

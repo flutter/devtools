@@ -9,29 +9,47 @@ import 'package:test/test.dart';
 void main() {
   group('Timeline Utils', () {
     test('computeEventGroupKey for event with a set groupKey', () async {
-      expect(computeEventGroupKey(httpEvent), equals('HTTP/client'));
+      expect(
+        computeEventGroupKey(httpEvent, threadNamesById),
+        equals('HTTP/client'),
+      );
     });
 
     test('computeEventGroupKey for UI event', () async {
-      expect(computeEventGroupKey(goldenUiTimelineEvent), equals('UI'));
+      expect(
+        computeEventGroupKey(goldenUiTimelineEvent, threadNamesById),
+        equals('UI'),
+      );
     });
 
     test('computeEventGroupKey for Raster event', () async {
-      expect(computeEventGroupKey(goldenRasterTimelineEvent), equals('Raster'));
+      expect(
+        computeEventGroupKey(goldenRasterTimelineEvent, threadNamesById),
+        equals('Raster'),
+      );
     });
 
     test('computeEventGroupKey for Async event', () async {
-      expect(computeEventGroupKey(goldenAsyncTimelineEvent), equals('A'));
+      expect(
+        computeEventGroupKey(goldenAsyncTimelineEvent, threadNamesById),
+        equals('A'),
+      );
       // A child async event should return the key of its root.
-      expect(computeEventGroupKey(asyncEventB), equals('A'));
+      expect(computeEventGroupKey(asyncEventB, threadNamesById), equals('A'));
     });
 
-    test('computeEventGroupKey for Async event', () async {
-      expect(computeEventGroupKey(gcEvent), equals('GC'));
+    test('computeEventGroupKey for event with named thread', () {
+      expect(
+        computeEventGroupKey(eventForNamedThread, threadNamesById),
+        equals('io.flutter.1.platform (775)'),
+      );
     });
 
-    test('computeEventGroupKey for Async event', () async {
-      expect(computeEventGroupKey(unknownEvent), equals('Unknown'));
+    test('computeEventGroupKey for unknown event', () async {
+      expect(
+        computeEventGroupKey(unknownEvent, threadNamesById),
+        equals('Unknown'),
+      );
     });
   });
 }

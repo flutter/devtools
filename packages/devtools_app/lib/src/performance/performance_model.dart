@@ -84,10 +84,10 @@ class PerformanceData {
   int get endTimestampMicros => _endTimestampMicros;
   int _endTimestampMicros = -1;
 
-  void initializeEventGroups() {
+  void initializeEventGroups(Map<int, String> threadNamesById) {
     for (TimelineEvent event in timelineEvents) {
-      eventGroups.putIfAbsent(
-          computeEventGroupKey(event), () => TimelineEventGroup())
+      eventGroups.putIfAbsent(computeEventGroupKey(event, threadNamesById),
+          () => TimelineEventGroup())
         ..addEventAtCalculatedRow(event);
     }
   }
@@ -565,6 +565,8 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
   bool get isWellFormed => time.start != null && time.end != null;
 
   bool get isWellFormedDeep => _isWellFormedDeep(this);
+
+  int get threadId => traceEvents.first.event.threadId;
 
   bool _isWellFormedDeep(TimelineEvent event) {
     return !subtreeHasNodeWithCondition((e) => !e.isWellFormed);
