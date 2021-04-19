@@ -89,7 +89,7 @@ Future<void> runPerformanceControllerTests(FlutterTestEnvironment env) async {
 
       // Select a frame.
       expect(performanceController.data.selectedFrame, isNull);
-      await performanceController.selectFrame(testFrame0);
+      await performanceController.toggleSelectedFrame(testFrame0);
       expect(
         performanceController.data.selectedFrame,
         equals(testFrame0),
@@ -107,7 +107,7 @@ Future<void> runPerformanceControllerTests(FlutterTestEnvironment env) async {
           equals(animatorBeginFrameEvent));
 
       // Select a different frame.
-      await performanceController.selectFrame(testFrame1);
+      await performanceController.toggleSelectedFrame(testFrame1);
       expect(
         performanceController.data.selectedFrame,
         equals(testFrame1),
