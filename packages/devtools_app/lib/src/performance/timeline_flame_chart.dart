@@ -1036,12 +1036,7 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (selectedFrame == null) {
-      canvas
-        ..save()
-        ..restore();
-      return;
-    }
+    if (selectedFrame == null) return;
 
     canvas.clipRect(Rect.fromLTWH(
       0.0,
