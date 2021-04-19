@@ -384,18 +384,17 @@ class TimelineFlameChartState
   }
 
   void _handleSelectedFrame() async {
-    final FlutterFrame selectedFrame =
-        _performanceController.selectedFrame.value;
-    if (selectedFrame != null) {
-      if (selectedFrame == _selectedFrame) return;
+    final selectedFrame = _performanceController.selectedFrame.value;
+    if (selectedFrame == _selectedFrame) return;
 
-      setState(() {
-        _selectedFrame = selectedFrame;
-      });
+    setState(() {
+      _selectedFrame = selectedFrame;
+    });
 
-      // TODO(kenz): consider using jumpTo for some of these animations to
-      // improve performance.
+    // TODO(kenz): consider using jumpTo for some of these animations to
+    // improve performance.
 
+    if (_selectedFrame != null) {
       // Zoom and scroll to the frame's UI event.
       await zoomAndScrollToData(
         startMicros: selectedFrame.time.start.inMicroseconds,

@@ -180,7 +180,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   Widget _buildFrame(FlutterFrame frame) {
     return InkWell(
-      onTap: () => _controller.selectFrame(frame),
+      onTap: () => _controller.toggleSelectedFrame(frame),
       child: FlutterFramesChartItem(
         frame: frame,
         selected: frame == _selectedFrame,
