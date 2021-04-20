@@ -108,7 +108,6 @@ abstract class HttpRequestData extends NetworkRequest {
   /// Extracts the extension from [mime], with overrides for shortened
   /// extenstions of common types (e.g., jpe -> jpeg).
   String _extensionFromMime(String mime) {
-
     final extension = extensionFromMime(mime);
     if (extension == 'jpe') {
       return 'jpeg';
