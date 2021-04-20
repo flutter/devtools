@@ -102,7 +102,21 @@ abstract class HttpRequestData extends NetworkRequest {
     // "text/html" is the MIME for both .html and .htm, but since .htm comes
     // first alphabetically, `extensionFromMime` returns "htm". Other cases are
     // more unintuitive such as "text/plain" returning "conf".
-    return extensionFromMime(mime);
+    return _extensionFromMime(mime);
+  }
+
+  /// Extracts the extension from [mime], with overrides for shortened
+  /// extenstions of common types (e.g., jpe -> jpeg).
+  String _extensionFromMime(String mime) {
+
+    final extension = extensionFromMime(mime);
+    if (extension == 'jpe') {
+      return 'jpeg';
+    }
+    if (extension == 'htm') {
+      return 'html';
+    }
+    return extension;
   }
 
   /// Whether the request is safe to display in the UI.
