@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
@@ -593,6 +594,12 @@ class DartIOHttpRequestData extends HttpRequestData {
     } on FormatException {
       return '<binary data>';
     }
+  }
+
+  Uint8List get encodedResponse {
+    if (!_request.isResponseComplete) return null;
+    final fullRequest = _request as HttpProfileRequest;
+    return fullRequest.responseBody;
   }
 
   String _responseBody;

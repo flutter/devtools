@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as image;
 
 import '../common_widgets.dart';
 import '../http/http.dart';
@@ -142,10 +143,104 @@ class HttpResponseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // We shouldn't try and display an image response view when using the
+    // timeline profiler since it's possible for response body data to get
+    // dropped.
+    if (data is DartIOHttpRequestData && data.type.startsWith('image')) {
+      return SingleChildScrollView(
+        child: ImageResponseView(data),
+      );
+    }
     return SingleChildScrollView(
       child: SelectableText(
         data.responseBody,
         style: Theme.of(context).fixedFontStyle,
+      ),
+    );
+  }
+}
+
+class ImageResponseView extends StatelessWidget {
+  const ImageResponseView(this.data);
+
+  final DartIOHttpRequestData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final img = image.decodeImage(data.encodedResponse);
+    // Format should be of the form: [image/$format]
+    String format = data.type.split('/')[1];
+    format = format.substring(0, format.length - 1);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildTile(
+          'Image Preview',
+          [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Image.memory(
+                data.encodedResponse,
+              ),
+            ),
+          ],
+        ),
+        LayoutBuilder(builder: (context, constraints) {
+          return _buildTile(
+            'Metadata',
+            [
+              _buildRow(
+                context,
+                'Format',
+                format,
+                constraints,
+              ),
+              _buildRow(
+                context,
+                'Size',
+                prettyPrintBytes(
+                  data.encodedResponse.lengthInBytes,
+                  includeUnit: true,
+                ),
+                constraints,
+              ),
+              _buildRow(
+                context,
+                'Dimensions',
+                '${img.width} x ${img.height}',
+                constraints,
+              ),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildRow(
+    BuildContext context,
+    String key,
+    dynamic value,
+    BoxConstraints constraints,
+  ) {
+    return Container(
+      width: constraints.minWidth,
+      padding: _rowPadding,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$key: ',
+            style: Theme.of(context).textTheme.subtitle2,
+          ),
+          Expanded(
+            child: Text(
+              value,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 5,
+            ),
+          ),
+        ],
       ),
     );
   }
