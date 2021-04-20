@@ -113,7 +113,7 @@ abstract class HttpRequestData extends NetworkRequest {
     }
     // text/plain -> conf
     if (extension == 'conf') {
-      return 'txt'; 
+      return 'txt';
     }
     return extension;
   }
