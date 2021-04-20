@@ -184,31 +184,29 @@ class ImageResponseView extends StatelessWidget {
             ),
           ],
         ),
-        LayoutBuilder(builder: (context, constraints) {
-          return _buildTile(
-            'Metadata',
-            [
-              _buildRow(
-                context,
-                'Format',
-                data.type,
+        _buildTile(
+          'Metadata',
+          [
+            _buildRow(
+              context,
+              'Format',
+              data.type,
+            ),
+            _buildRow(
+              context,
+              'Size',
+              prettyPrintBytes(
+                data.encodedResponse.lengthInBytes,
+                includeUnit: true,
               ),
-              _buildRow(
-                context,
-                'Size',
-                prettyPrintBytes(
-                  data.encodedResponse.lengthInBytes,
-                  includeUnit: true,
-                ),
-              ),
-              _buildRow(
-                context,
-                'Dimensions',
-                '${img.width} x ${img.height}',
-              ),
-            ],
-          );
-        }),
+            ),
+            _buildRow(
+              context,
+              'Dimensions',
+              '${img.width} x ${img.height}',
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -218,7 +216,7 @@ class ImageResponseView extends StatelessWidget {
     String key,
     String value,
   ) {
-    return Container(
+    return Padding(
       padding: _rowPadding,
       child: Row(
         mainAxisSize: MainAxisSize.min,
