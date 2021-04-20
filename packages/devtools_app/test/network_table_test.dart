@@ -78,7 +78,7 @@ void main() {
           .cast<HttpRequestData>()
           .toList();
       final request = httpRequests.first;
-      expect(column.getDisplayValue(request), 'conf');
+      expect(column.getDisplayValue(request), 'txt');
     });
 
     test('TypeColumn for web socket request', () {
