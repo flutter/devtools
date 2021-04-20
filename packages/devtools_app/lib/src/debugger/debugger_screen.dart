@@ -14,6 +14,7 @@ import '../analytics/analytics_stub.dart'
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/host_platform/host_platform.dart';
+import '../dialogs.dart';
 import '../flex_split_column.dart';
 import '../listenable.dart';
 import '../screen.dart';
@@ -126,11 +127,17 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     final codeView = ValueListenableBuilder(
       valueListenable: controller.currentScriptRef,
       builder: (context, scriptRef, _) {
-        return CodeView(
-          key: DebuggerScreenBody.codeViewKey,
-          controller: controller,
-          scriptRef: scriptRef,
-          onSelected: _toggleBreakpoint,
+        return ValueListenableBuilder(
+          valueListenable: controller.currentParsedScript,
+          builder: (context, parsedScript, _) {
+            return CodeView(
+              key: DebuggerScreenBody.codeViewKey,
+              controller: controller,
+              scriptRef: scriptRef,
+              parsedScript: parsedScript,
+              onSelected: _toggleBreakpoint,
+            );
+          },
         );
       },
     );
@@ -173,11 +180,15 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         focusLibraryFilterKeySet:
             FocusLibraryFilterIntent(_libraryFilterFocusNode, controller),
         goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
+        searchInFileKeySet: SearchInFileIntent(controller),
+        escapeKeySet: EscapeIntent(context, controller),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
           FocusLibraryFilterIntent: FocusLibraryFilterAction(),
           GoToLineNumberIntent: GoToLineNumberAction(),
+          SearchInFileIntent: SearchInFileAction(),
+          EscapeIntent: EscapeAction(),
         },
         child: Split(
           axis: Axis.horizontal,
@@ -273,6 +284,17 @@ final LogicalKeySet goToLineNumberKeySet = LogicalKeySet(
   LogicalKeyboardKey.keyG,
 );
 
+final LogicalKeySet searchInFileKeySet = LogicalKeySet(
+  HostPlatform.instance.isMacOS
+      ? LogicalKeyboardKey.meta
+      : LogicalKeyboardKey.control,
+  LogicalKeyboardKey.keyF,
+);
+
+final LogicalKeySet escapeKeySet = LogicalKeySet(
+  LogicalKeyboardKey.escape,
+);
+
 class FocusLibraryFilterIntent extends Intent {
   const FocusLibraryFilterIntent(
     this.focusNode,
@@ -284,8 +306,16 @@ class FocusLibraryFilterIntent extends Intent {
   final DebuggerController debuggerController;
 }
 
+class FocusLibraryFilterAction extends Action<FocusLibraryFilterIntent> {
+  @override
+  void invoke(FocusLibraryFilterIntent intent) {
+    intent.debuggerController.toggleLibrariesVisible();
+  }
+}
+
 class GoToLineNumberIntent extends Intent {
   const GoToLineNumberIntent(this._context, this._controller);
+
   final BuildContext _context;
   final DebuggerController _controller;
 }
@@ -297,10 +327,31 @@ class GoToLineNumberAction extends Action<GoToLineNumberIntent> {
   }
 }
 
-class FocusLibraryFilterAction extends Action<FocusLibraryFilterIntent> {
+class SearchInFileIntent extends Intent {
+  const SearchInFileIntent(this._controller);
+
+  final DebuggerController _controller;
+}
+
+class SearchInFileAction extends Action<SearchInFileIntent> {
   @override
-  void invoke(FocusLibraryFilterIntent intent) {
-    intent.debuggerController.toggleLibrariesVisible();
+  void invoke(SearchInFileIntent intent) {
+    intent._controller.toggleSearchInFileVisibility(true);
+  }
+}
+
+class EscapeIntent extends Intent {
+  const EscapeIntent(this._context, this._controller);
+
+  final BuildContext _context;
+  final DebuggerController _controller;
+}
+
+class EscapeAction extends Action<EscapeIntent> {
+  @override
+  void invoke(EscapeIntent intent) {
+    Navigator.of(intent._context).pop(dialogDefaultContext);
+    intent._controller.toggleSearchInFileVisibility(false);
   }
 }
 

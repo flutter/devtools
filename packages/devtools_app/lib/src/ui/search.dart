@@ -161,7 +161,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
             showWhenUnlinked: false,
             offset: Offset(0.0, box.size.height),
             child: Material(
-              elevation: 4.0,
+              elevation: defaultElevation,
               child: ListView(
                 padding: EdgeInsets.zero,
                 shrinkWrap: true,
@@ -285,6 +285,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     @required bool searchFieldEnabled,
     @required bool shouldRequestFocus,
     bool supportsNavigation = false,
+    VoidCallback onClose,
   }) {
     return _buildSearchField(
       controller: controller,
@@ -293,6 +294,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
       shouldRequestFocus: shouldRequestFocus,
       autoCompleteLayerLink: null,
       supportsNavigation: supportsNavigation,
+      onClose: onClose,
     );
   }
 
@@ -303,6 +305,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     @required bool shouldRequestFocus,
     @required LayerLink autoCompleteLayerLink,
     bool supportsNavigation = false,
+    VoidCallback onClose,
   }) {
     // Creating new TextEditingController.
     searchFieldFocusNode = FocusNode();
@@ -341,10 +344,13 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
         labelStyle: TextStyle(color: searchColor),
         border: const OutlineInputBorder(),
         labelText: 'Search',
-        suffix: _buildSearchFieldSuffix(
-          controller,
-          supportsNavigation: supportsNavigation,
-        ),
+        suffix: (supportsNavigation || onClose != null)
+            ? _buildSearchFieldSuffix(
+                controller,
+                supportsNavigation: supportsNavigation,
+                onClose: onClose,
+              )
+            : null,
       ),
       cursorColor: searchColor,
     );
@@ -365,12 +371,13 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   Widget _buildSearchFieldSuffix(
     SearchControllerMixin controller, {
     bool supportsNavigation = false,
+    VoidCallback onClose,
   }) {
-    final onClear = () => clearSearchField(controller);
+    assert(supportsNavigation || onClose != null);
     if (supportsNavigation) {
-      return SearchNavigationControls(controller, onClear: onClear);
+      return SearchNavigationControls(controller, onClose: onClose);
     } else {
-      return clearInputButton(onClear);
+      return closeSearchDropdownButton(onClose);
     }
   }
 
@@ -394,11 +401,11 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
 }
 
 class SearchNavigationControls extends StatelessWidget {
-  const SearchNavigationControls(this.controller, {@required this.onClear});
+  const SearchNavigationControls(this.controller, {@required this.onClose});
 
   final SearchControllerMixin controller;
 
-  final VoidCallback onClear;
+  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
@@ -425,7 +432,7 @@ class SearchNavigationControls extends StatelessWidget {
                 numMatches > 1 ? controller.previousMatch : null),
             inputDecorationSuffixButton(Icons.keyboard_arrow_down,
                 numMatches > 1 ? controller.nextMatch : null),
-            clearInputButton(onClear),
+            if (onClose != null) closeSearchDropdownButton(onClose)
           ],
         );
       },

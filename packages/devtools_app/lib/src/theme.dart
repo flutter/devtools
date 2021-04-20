@@ -138,6 +138,7 @@ const denseSpacing = 8.0;
 const denseRowSpacing = 6.0;
 
 const defaultBorderRadius = 4.0;
+const defaultElevation = 4.0;
 
 const borderPadding = 2.0;
 const densePadding = 4.0;
