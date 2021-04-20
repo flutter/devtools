@@ -95,6 +95,9 @@ abstract class HttpRequestData extends NetworkRequest {
     if (mime.startsWith('[')) {
       mime = mime.substring(1);
     }
+    if (mime.endsWith(']')) {
+      mime = mime.substring(0, mime.length - 1);
+    }
     // TODO(kenz): consider special casing some extensions. For example,
     // "text/html" is the MIME for both .html and .htm, but since .htm comes
     // first alphabetically, `extensionFromMime` returns "htm". Other cases are

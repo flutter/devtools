@@ -146,7 +146,7 @@ class HttpResponseView extends StatelessWidget {
     // We shouldn't try and display an image response view when using the
     // timeline profiler since it's possible for response body data to get
     // dropped.
-    if (data is DartIOHttpRequestData && data.type.startsWith('image')) {
+    if (data is DartIOHttpRequestData && data.contentType.contains('image')) {
       return SingleChildScrollView(
         child: ImageResponseView(data),
       );
@@ -168,9 +168,6 @@ class ImageResponseView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final img = image.decodeImage(data.encodedResponse);
-    // Format should be of the form: [image/$format]
-    String format = data.type.split('/')[1];
-    format = format.substring(0, format.length - 1);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -178,7 +175,9 @@ class ImageResponseView extends StatelessWidget {
           'Image Preview',
           [
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(
+                denseSpacing,
+              ),
               child: Image.memory(
                 data.encodedResponse,
               ),
@@ -192,8 +191,7 @@ class ImageResponseView extends StatelessWidget {
               _buildRow(
                 context,
                 'Format',
-                format,
-                constraints,
+                data.type,
               ),
               _buildRow(
                 context,
@@ -202,13 +200,11 @@ class ImageResponseView extends StatelessWidget {
                   data.encodedResponse.lengthInBytes,
                   includeUnit: true,
                 ),
-                constraints,
               ),
               _buildRow(
                 context,
                 'Dimensions',
                 '${img.width} x ${img.height}',
-                constraints,
               ),
             ],
           );
@@ -220,13 +216,12 @@ class ImageResponseView extends StatelessWidget {
   Widget _buildRow(
     BuildContext context,
     String key,
-    dynamic value,
-    BoxConstraints constraints,
+    String value,
   ) {
     return Container(
-      width: constraints.minWidth,
       padding: _rowPadding,
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -237,7 +232,6 @@ class ImageResponseView extends StatelessWidget {
             child: Text(
               value,
               overflow: TextOverflow.ellipsis,
-              maxLines: 5,
             ),
           ),
         ],
