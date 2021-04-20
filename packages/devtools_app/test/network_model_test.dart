@@ -50,7 +50,7 @@ void main() {
     });
 
     test('type returns correct value', () {
-      expect(httpGetEvent.type, equals('conf'));
+      expect(httpGetEvent.type, equals('txt'));
       expect(httpPutEvent.type, equals('json'));
       expect(httpGetEventWithError.type, equals('http'));
       expect(httpInvalidEvent.type, equals('http'));
