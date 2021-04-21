@@ -307,9 +307,8 @@ class _LogDetailsState extends State<LogDetails>
 
     return OutlineDecoration(
       child: ConsoleFrame(
-        title: areaPaneHeader(
-          context,
-          title: 'Details',
+        title: AreaPaneHeader(
+          title: const Text('Details'),
           needsTopBorder: false,
           actions: [
             CopyToClipboardControl(

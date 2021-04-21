@@ -100,9 +100,8 @@ class _TimelineFlameChartContainerState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          areaPaneHeader(
-            context,
-            title: 'Timeline Events',
+          AreaPaneHeader(
+            title: const Text('Timeline Events'),
             tall: true,
             needsTopBorder: false,
             rightPadding: 0.0,

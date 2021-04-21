@@ -213,16 +213,14 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           totalHeight: constraints.maxHeight,
           initialFractions: const [0.40, 0.40, 0.20],
           minSizes: const [0.0, 0.0, 0.0],
-          headers: <SizedBox>[
-            areaPaneHeader(
-              context,
-              title: callStackTitle,
+          headers: <PreferredSizeWidget>[
+            const AreaPaneHeader(
+              title: Text(callStackTitle),
               needsTopBorder: false,
             ),
-            areaPaneHeader(context, title: variablesTitle),
-            areaPaneHeader(
-              context,
-              title: breakpointsTitle,
+            const AreaPaneHeader(title: Text(variablesTitle)),
+            AreaPaneHeader(
+              title: const Text(breakpointsTitle),
               actions: [
                 _breakpointsRightChild(),
               ],
