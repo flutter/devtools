@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider show Provider;
 
 import '../banner_messages.dart';
+import '../common_widgets.dart';
 import '../screen.dart';
 import '../split.dart';
 import './instance_viewer/instance_details.dart';
@@ -65,23 +66,38 @@ class ProviderScreenBody extends ConsumerWidget {
         axis: splitAxis,
         initialFractions: const [0.33, 0.67],
         children: [
-          const _SplitBorder(child: ProviderList()),
-          Column(
-            children: [
-              if (selectedProviderId != null) ...[
-                Expanded(
-                  child: _SplitBorder(
+          OutlineDecoration(
+            child: Column(
+              children: [
+                areaPaneHeader(context, title: 'Providers'),
+                const Expanded(
+                  child: ProviderList(),
+                ),
+              ],
+            ),
+          ),
+          OutlineDecoration(
+            child: Column(
+              children: [
+                if (selectedProviderId != null) ...[
+                  areaPaneHeader(
+                    context,
+                    title: watch(providerNodeProvider(selectedProviderId))
+                            .data
+                            ?.value
+                            ?.type ??
+                        '',
+                  ),
+                  Expanded(
                     child: InstanceViewer(
                       rootPath: InstancePath.fromProviderId(selectedProviderId),
                     ),
-                  ),
-                ),
-              ] else
-                const Expanded(
-                  child: _SplitBorder(child: SizedBox.expand()),
-                )
-            ],
-          ),
+                  )
+                ] else
+                  areaPaneHeader(context, title: '[No provider selected]'),
+              ],
+            ),
+          )
         ],
       ),
     );
@@ -96,20 +112,4 @@ void showProviderErrorBanner(BuildContext context) {
     const ProviderUnknownErrorBanner(screenId: ProviderScreen.id)
         .build(context),
   );
-}
-
-class _SplitBorder extends StatelessWidget {
-  const _SplitBorder({Key key, this.child}) : super(key: key);
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).focusColor),
-      ),
-      child: child,
-    );
-  }
 }
