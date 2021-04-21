@@ -242,27 +242,34 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           completion(
             isA<ObjectInstance>()
                 .having((e) => e.type, 'type', 'Counter')
-                .having((e) => e.hash, 'hash', 42)
-                .having((e) => e.fields, 'fields', [
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', 'complex')
-                  .having((e) => e.isFinal, 'isFinal', true)
-                  .having((e) => e.isPrivate, 'isPrivate', false)
-                  .having((e) => e.isDefinedByDependency,
-                      'isDefinedByDependency', true),
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', '_count')
-                  .having((e) => e.isFinal, 'isFinal', false)
-                  .having((e) => e.isPrivate, 'isPrivate', true)
-                  .having((e) => e.isDefinedByDependency,
-                      'isDefinedByDependency', true),
-              isA<ObjectField>()
-                  .having((e) => e.name, 'name', '_listeners')
-                  .having((e) => e.isFinal, 'isFinal', false)
-                  .having((e) => e.isPrivate, 'isPrivate', true)
-                  .having((e) => e.isDefinedByDependency,
-                      'isDefinedByDependency', false),
-            ]),
+                .having(
+                  (e) => e.fields,
+                  'fields',
+                  containsAllInOrder([
+                    isA<ObjectField>()
+                        .having((e) => e.name, 'name', 'complex')
+                        .having((e) => e.ownerName, 'ownerName', 'Counter')
+                        .having((e) => e.isFinal, 'isFinal', true)
+                        .having((e) => e.isPrivate, 'isPrivate', false)
+                        .having((e) => e.isDefinedByDependency,
+                            'isDefinedByDependency', true),
+                    isA<ObjectField>()
+                        .having((e) => e.ownerName, 'ownerName', 'Counter')
+                        .having((e) => e.name, 'name', '_count')
+                        .having((e) => e.isFinal, 'isFinal', false)
+                        .having((e) => e.isPrivate, 'isPrivate', true)
+                        .having((e) => e.isDefinedByDependency,
+                            'isDefinedByDependency', true),
+                    isA<ObjectField>()
+                        .having(
+                            (e) => e.ownerName, 'ownerName', 'ChangeNotifier')
+                        .having((e) => e.name, 'name', '_listeners')
+                        .having((e) => e.isFinal, 'isFinal', false)
+                        .having((e) => e.isPrivate, 'isPrivate', true)
+                        .having((e) => e.isDefinedByDependency,
+                            'isDefinedByDependency', false),
+                  ]),
+                ),
           ),
         );
 
@@ -270,7 +277,6 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           complexFuture,
           isA<ObjectInstance>()
               .having((e) => e.type, 'type', 'ComplexObject')
-              .having((e) => e.hash, 'hash', 21)
               .having((e) => e.fields, 'fields', [
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'boolean')

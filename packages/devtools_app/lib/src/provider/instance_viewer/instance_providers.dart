@@ -142,8 +142,8 @@ Future<void> _mutate(
     object: (parent) {
       final propertyPath = path.pathToProperty.last as PropertyPath;
 
-      final field =
-          parent.fields.firstWhere((f) => f.name == propertyPath.name);
+      final field = parent.fields.firstWhere((f) =>
+          f.name == propertyPath.name && f.ownerName == propertyPath.ownerName);
 
       return field.eval.safeEval(
         'parent.${propertyPath.name} = $newValueExpression',
