@@ -42,6 +42,8 @@ class ScriptPickerState extends State<ScriptPicker> {
   // TODO(devoncarew): How to retain the filter text state?
   final _filterController = TextEditingController();
 
+  final _maxAutoExpandChildCount = 3;
+
   List<ObjRef> _items = [];
   List<ObjRef> _filteredItems = [];
   List<FileNode> _rootScriptNodes;
@@ -114,6 +116,13 @@ class ScriptPickerState extends State<ScriptPicker> {
           if (!_isLoading)
             Expanded(
               child: TreeView<FileNode>(
+                onTraverse: (node) {
+                  // Auto expand children when there are minimal search results.
+                  if (_filterController.text.isNotEmpty &&
+                      node.children.length <= _maxAutoExpandChildCount) {
+                    node.expand();
+                  }
+                },
                 itemExtent: listItemHeight,
                 dataRoots: _rootScriptNodes,
                 dataDisplayProvider: (item, onTap) =>
@@ -190,7 +199,7 @@ class ScriptPickerState extends State<ScriptPicker> {
 
     _items = widget.scripts;
     _filteredItems = widget.scripts
-        .where((ref) => ref.uri.toLowerCase().contains(filterText))
+        .where((ref) => ref.uri.caseInsensitiveFuzzyMatch(filterText))
         .toList();
 
     // Remove the cached value here; it'll be re-computed the next time we need

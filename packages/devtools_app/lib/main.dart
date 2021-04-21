@@ -11,6 +11,9 @@ import 'src/app.dart';
 import 'src/config_specific/framework_initialize/framework_initialize.dart';
 import 'src/config_specific/ide_theme/ide_theme.dart';
 import 'src/debugger/syntax_highlighter.dart';
+import 'src/extension_points/extensions_base.dart';
+import 'src/extension_points/extensions_external.dart';
+import 'src/globals.dart';
 import 'src/preferences.dart';
 import 'src/provider/riverpod_error_logger_observer.dart';
 
@@ -28,6 +31,9 @@ void main() async {
 
   // Load the Dart syntax highlighting grammar.
   await SyntaxHighlighter.initialize();
+
+  // Set the extension points global.
+  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
 
   // Now run the app.
   runApp(

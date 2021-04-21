@@ -166,6 +166,8 @@ void main() {
       selectionNotifier: ValueNotifier<CpuStackFrame>(null),
       searchMatchesNotifier: null,
       activeSearchMatchNotifier: null,
+      onTapUp: () {},
+      backgroundColor: Colors.transparent,
       zoom: FlameChart.minZoomLevel,
     );
     final zoomedTestRow = ScrollingFlameChartRow(
@@ -177,6 +179,8 @@ void main() {
       selectionNotifier: ValueNotifier<CpuStackFrame>(null),
       searchMatchesNotifier: null,
       activeSearchMatchNotifier: null,
+      onTapUp: () {},
+      backgroundColor: Colors.transparent,
       zoom: 2.0,
     );
 
@@ -226,6 +230,8 @@ void main() {
         selectionNotifier: ValueNotifier<CpuStackFrame>(null),
         searchMatchesNotifier: null,
         activeSearchMatchNotifier: null,
+        backgroundColor: Colors.transparent,
+        onTapUp: () {},
         zoom: FlameChart.minZoomLevel,
       );
 
@@ -233,9 +239,10 @@ void main() {
       expect(find.byWidget(currentRow), findsOneWidget);
       expect(find.byType(MouseRegion), findsNothing);
 
-      final sizedBoxFinder = find.byType(SizedBox);
-      final SizedBox box = tester.widget(sizedBoxFinder);
-      expect(box.height, equals(sectionSpacing));
+      final emptyRowFinder = find.byType(EmptyFlameChartRow);
+      final EmptyFlameChartRow emptyFlameChartRow =
+          tester.widget(emptyRowFinder);
+      expect(emptyFlameChartRow.height, equals(sectionSpacing));
     });
 
     testWidgets('binary search for node returns correct node',

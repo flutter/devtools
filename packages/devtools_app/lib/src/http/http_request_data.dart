@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
@@ -94,11 +95,27 @@ abstract class HttpRequestData extends NetworkRequest {
     if (mime.startsWith('[')) {
       mime = mime.substring(1);
     }
-    // TODO(kenz): consider special casing some extensions. For example,
-    // "text/html" is the MIME for both .html and .htm, but since .htm comes
-    // first alphabetically, `extensionFromMime` returns "htm". Other cases are
-    // more unintuitive such as "text/plain" returning "conf".
-    return extensionFromMime(mime);
+    if (mime.endsWith(']')) {
+      mime = mime.substring(0, mime.length - 1);
+    }
+    return _extensionFromMime(mime);
+  }
+
+  /// Extracts the extension from [mime], with overrides for shortened
+  /// extenstions of common types (e.g., jpe -> jpeg).
+  String _extensionFromMime(String mime) {
+    final extension = extensionFromMime(mime);
+    if (extension == 'jpe') {
+      return 'jpeg';
+    }
+    if (extension == 'htm') {
+      return 'html';
+    }
+    // text/plain -> conf
+    if (extension == 'conf') {
+      return 'txt';
+    }
+    return extension;
   }
 
   /// Whether the request is safe to display in the UI.
@@ -593,6 +610,12 @@ class DartIOHttpRequestData extends HttpRequestData {
     } on FormatException {
       return '<binary data>';
     }
+  }
+
+  Uint8List get encodedResponse {
+    if (!_request.isResponseComplete) return null;
+    final fullRequest = _request as HttpProfileRequest;
+    return fullRequest.responseBody;
   }
 
   String _responseBody;

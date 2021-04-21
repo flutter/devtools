@@ -24,7 +24,7 @@ import '../utils.dart';
 const double rowPadding = 2.0;
 const double rowHeight = 25.0;
 const double rowHeightWithPadding = rowHeight + rowPadding;
-const double sectionSpacing = 15.0;
+const double sectionSpacing = 16.0;
 const double sideInset = 70.0;
 const double sideInsetSmall = 60.0;
 
@@ -48,7 +48,6 @@ abstract class FlameChart<T, V> extends StatefulWidget {
   });
 
   static const minZoomLevel = 1.0;
-  static const maxZoomLevel = double.infinity;
   static const zoomMultiplier = 0.01;
   static const minScrollOffset = 0.0;
   static const rowOffsetForBottomPadding = 1;
@@ -118,6 +117,10 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
 
   double previousZoom = FlameChart.minZoomLevel;
 
+  double horizontalScrollOffset = FlameChart.minScrollOffset;
+
+  double verticalScrollOffset = FlameChart.minScrollOffset;
+
   // Scrolling via WASD controls will pan the left/right 25% of the view.
   double get keyboardScrollUnit => widget.containerWidth * 0.25;
 
@@ -160,9 +163,17 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   /// Starting pixels per microsecond in order to fit all the data in view at
   /// start.
   double get startingPxPerMicro =>
-      widget.startingContentWidth / widget.data.time.duration.inMicroseconds;
+      widget.startingContentWidth / widget.time.duration.inMicroseconds;
 
-  int get startTimeOffset => widget.data.time.start.inMicroseconds;
+  int get startTimeOffset => widget.time.start.inMicroseconds;
+
+  double get maxZoomLevel {
+    // The max zoom level is hit when 1 microsecond is the width of each grid
+    // interval (this may bottom out at 2 micros per interval due to rounding).
+    return TimelineGridPainter.baseGridIntervalPx *
+        widget.time.duration.inMicroseconds /
+        widget.startingContentWidth;
+  }
 
   /// Provides widgets to be layered on top of the flame chart, if overridden.
   ///
@@ -183,12 +194,23 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     horizontalControllerGroup = LinkedScrollControllerGroup();
     verticalControllerGroup = LinkedScrollControllerGroup();
 
+    addAutoDisposeListener(horizontalControllerGroup.offsetNotifier, () {
+      setState(() {
+        horizontalScrollOffset = horizontalControllerGroup.offset;
+      });
+    });
+    addAutoDisposeListener(verticalControllerGroup.offsetNotifier, () {
+      setState(() {
+        verticalScrollOffset = verticalControllerGroup.offset;
+      });
+    });
+
     _flameChartScrollController = verticalControllerGroup.addAndGet();
 
     zoomController = AnimationController(
       value: FlameChart.minZoomLevel,
       lowerBound: FlameChart.minZoomLevel,
-      upperBound: FlameChart.maxZoomLevel,
+      upperBound: maxZoomLevel,
       vsync: this,
     )..addListener(_handleZoomControllerValueUpdate);
 
@@ -243,8 +265,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     // TODO(kenz): handle tooltips hover here instead of wrapping each row in a
     // MouseRegion widget.
     return MouseRegion(
-      onEnter: _handleMouseEnter,
-      onExit: _handleMouseExit,
       onHover: _handleMouseHover,
       child: RawKeyboardListener(
         autofocus: true,
@@ -282,14 +302,37 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       customPointerSignalHandler: _handlePointerSignal,
       childrenDelegate: SliverChildBuilderDelegate(
         (context, index) {
+          final nodes = rows[index].nodes;
+          var rowBackgroundColor = Colors.transparent;
+          if (index >= rowOffsetForTopPadding && nodes.isEmpty) {
+            // If this is a spacer row, we should use the background color of
+            // the previous row with nodes.
+            for (int i = index; i > rowOffsetForTopPadding; i--) {
+              // Look back until we find the first non-empty row.
+              if (rows[i].nodes.isNotEmpty) {
+                rowBackgroundColor = alternatingColorForIndex(
+                  rows[i].nodes.first.sectionIndex,
+                  Theme.of(context).colorScheme,
+                );
+                break;
+              }
+            }
+          } else if (nodes.isNotEmpty) {
+            rowBackgroundColor = alternatingColorForIndex(
+              nodes.first.sectionIndex,
+              Theme.of(context).colorScheme,
+            );
+          }
           return ScrollingFlameChartRow<V>(
             linkedScrollControllerGroup: horizontalControllerGroup,
-            nodes: rows[index].nodes,
+            nodes: nodes,
             width: math.max(constraints.maxWidth, widthWithZoom),
             startInset: widget.startInset,
             selectionNotifier: widget.selectionNotifier,
             searchMatchesNotifier: widget.searchMatchesNotifier,
             activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
+            onTapUp: focusNode.requestFocus,
+            backgroundColor: rowBackgroundColor,
             zoom: zoomController.value,
           );
         },
@@ -313,14 +356,6 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     }
   }
 
-  void _handleMouseEnter(PointerEnterEvent event) {
-    focusNode.requestFocus();
-  }
-
-  void _handleMouseExit(PointerExitEvent event) {
-    focusNode.unfocus();
-  }
-
   void _handleMouseHover(PointerHoverEvent event) {
     mouseHoverX = event.localPosition.dx;
   }
@@ -340,7 +375,7 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       // if the key is held currently.
       if (keyLabel == 'w') {
         zoomTo(math.min(
-          FlameChart.maxZoomLevel,
+          maxZoomLevel,
           zoomController.value + keyboardZoomInUnit,
         ));
       } else if (keyLabel == 's') {
@@ -381,12 +416,15 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
           final multiplier = FlameChart.zoomMultiplier * currentZoom;
           final newZoomLevel = (currentZoom + deltaY * multiplier).clamp(
             FlameChart.minZoomLevel,
-            FlameChart.maxZoomLevel,
+            maxZoomLevel,
           );
           await zoomTo(newZoomLevel, jump: true);
           if (newZoomLevel == FlameChart.minZoomLevel &&
               horizontalControllerGroup.offset != 0.0) {
-            await scrollToX(0.0);
+            // We do not need to call this in a post frame callback because
+            // `FlameChart.minScrollOffset` (0.0) is guaranteed to be less than
+            // the scroll controllers max scroll extent.
+            await scrollToX(FlameChart.minScrollOffset);
           }
         }
       }
@@ -432,11 +470,18 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
       mouseHoverX = forceMouseX;
     }
     await zoomController.animateTo(
-      zoom.clamp(FlameChart.minZoomLevel, FlameChart.maxZoomLevel),
+      zoom.clamp(FlameChart.minZoomLevel, maxZoomLevel),
       duration: jump ? Duration.zero : shortDuration,
     );
   }
 
+  /// Scroll the flame chart horizontally to [offset] scroll position.
+  ///
+  /// If this is being called immediately after a zoom call, without a chance
+  /// for the UI to build between the zoom call and the call to
+  /// this method, the call to this method should be placed inside of a
+  /// postFrameCallback:
+  /// `WidgetsBinding.instance.addPostFrameCallback((_) { ... });`.
   FutureOr<void> scrollToX(
     double offset, {
     bool jump = false,
@@ -468,10 +513,57 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
     );
   }
 
+  /// Scroll the flame chart horizontally to put [data] in view.
+  ///
+  /// If this is being called immediately after a zoom call, the call to
+  /// this method should be placed inside of a postFrameCallback:
+  /// `WidgetsBinding.instance.addPostFrameCallback((_) { ... });`.
   Future<void> scrollHorizontallyToData(V data) async {
     final offset =
         startXForData(data) + widget.startInset - widget.containerWidth * 0.1;
     await scrollToX(offset);
+  }
+
+  Future<void> zoomAndScrollToData({
+    @required int startMicros,
+    @required int durationMicros,
+    @required V data,
+    bool scrollHorizontally = true,
+    bool scrollVertically = true,
+    bool jumpZoom = false,
+  }) async {
+    await Future.wait([
+      zoomToTimeRange(
+        startMicros: startMicros,
+        durationMicros: durationMicros,
+        jump: jumpZoom,
+      ),
+      if (scrollVertically) scrollVerticallyToData(data),
+    ]);
+    // Call this in a post frame callback so that the horizontal scroll
+    // controllers have had time to update their scroll extents. Otherwise, we
+    // can hit a race where are trying to scroll to an offset that is beyond
+    // what the scroll controller thinks its max scroll extent is.
+    if (scrollHorizontally) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await scrollHorizontallyToData(data);
+      });
+    }
+  }
+
+  Future<void> zoomToTimeRange({
+    @required int startMicros,
+    @required int durationMicros,
+    double targetWidth,
+    bool jump = false,
+  }) async {
+    targetWidth ??= widget.containerWidth * 0.8;
+    final startingWidth = durationMicros * startingPxPerMicro;
+    final zoom = targetWidth / startingWidth;
+    final mouseXForZoom = (startMicros - startTimeOffset + durationMicros / 2) *
+            startingPxPerMicro +
+        widget.startInset;
+    await zoomTo(zoom, forceMouseX: mouseXForZoom, jump: jump);
   }
 
   bool isDataVerticallyInView(V data);
@@ -492,6 +584,8 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
     @required this.selectionNotifier,
     @required this.searchMatchesNotifier,
     @required this.activeSearchMatchNotifier,
+    @required this.onTapUp,
+    @required this.backgroundColor,
     @required this.zoom,
   });
 
@@ -508,6 +602,10 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
   final ValueListenable<List<V>> searchMatchesNotifier;
 
   final ValueListenable<V> activeSearchMatchNotifier;
+
+  final VoidCallback onTapUp;
+
+  final Color backgroundColor;
 
   final double zoom;
 
@@ -628,9 +726,10 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
   @override
   Widget build(BuildContext context) {
     if (nodes.isEmpty) {
-      return SizedBox(
+      return EmptyFlameChartRow(
         height: sectionSpacing,
         width: widget.width,
+        backgroundColor: widget.backgroundColor,
       );
     }
     // Having each row handle gestures and mouse events instead of each node
@@ -643,10 +742,7 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
         child: Container(
           height: rowHeightWithPadding,
           width: widget.width,
-          color: alternatingColorForIndex(
-            nodes.first.sectionIndex,
-            Theme.of(context).colorScheme,
-          ),
+          color: widget.backgroundColor,
           // TODO(kenz): investigate if `addAutomaticKeepAlives: false` and
           // `addRepaintBoundaries: false` are needed here for perf improvement.
           child: ExtentDelegateListView(
@@ -714,6 +810,7 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
     if (nodeToSelect != null) {
       nodeToSelect.onSelected(nodeToSelect.data);
     }
+    widget.onTapUp();
   }
 
   @visibleForTesting
@@ -1122,32 +1219,27 @@ abstract class FlameChartPainter extends CustomPainter {
   FlameChartPainter({
     @required this.zoom,
     @required this.constraints,
-    @required this.verticalController,
-    @required this.horizontalController,
+    @required this.verticalScrollOffset,
+    @required this.horizontalScrollOffset,
     @required this.chartStartInset,
     @required this.colorScheme,
-  })  : assert(colorScheme != null),
-        super(
-            repaint: Listenable.merge([
-          verticalController.offsetNotifier,
-          horizontalController.offsetNotifier,
-        ]));
+  }) : assert(colorScheme != null);
 
   final double zoom;
 
   final BoxConstraints constraints;
 
-  final LinkedScrollControllerGroup verticalController;
+  final double verticalScrollOffset;
 
-  final LinkedScrollControllerGroup horizontalController;
+  final double horizontalScrollOffset;
 
   final double chartStartInset;
 
   /// The absolute coordinates of the flame chart's visible section.
   Rect get visibleRect {
     return Rect.fromLTWH(
-      horizontalController.offset,
-      verticalController.offset,
+      horizontalScrollOffset,
+      verticalScrollOffset,
       constraints.maxWidth,
       constraints.maxHeight,
     );
@@ -1158,8 +1250,8 @@ abstract class FlameChartPainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
     if (oldDelegate is FlameChartPainter) {
-      return verticalController != oldDelegate.verticalController ||
-          horizontalController != oldDelegate.horizontalController ||
+      return verticalScrollOffset != oldDelegate.verticalScrollOffset ||
+          horizontalScrollOffset != oldDelegate.horizontalScrollOffset ||
           constraints != oldDelegate.constraints ||
           zoom != oldDelegate.zoom ||
           chartStartInset != oldDelegate.chartStartInset ||
@@ -1173,8 +1265,8 @@ class TimelineGridPainter extends FlameChartPainter {
   TimelineGridPainter({
     @required double zoom,
     @required BoxConstraints constraints,
-    @required LinkedScrollControllerGroup verticalController,
-    @required LinkedScrollControllerGroup horizontalController,
+    @required double verticalScrollOffset,
+    @required double horizontalScrollOffset,
     @required double chartStartInset,
     @required this.chartEndInset,
     @required this.flameChartWidth,
@@ -1183,8 +1275,8 @@ class TimelineGridPainter extends FlameChartPainter {
   }) : super(
           zoom: zoom,
           constraints: constraints,
-          verticalController: verticalController,
-          horizontalController: horizontalController,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
           chartStartInset: chartStartInset,
           colorScheme: colorScheme,
         );
@@ -1282,8 +1374,7 @@ class TimelineGridPainter extends FlameChartPainter {
 
   int _microsPerInterval(double intervalWidth) {
     final contentWidth = flameChartWidth - chartStartInset - chartEndInset;
-    final numCompleteIntervals =
-        (flameChartWidth - chartStartInset - chartEndInset) ~/ intervalWidth;
+    final numCompleteIntervals = contentWidth ~/ intervalWidth;
     final remainderContentWidth =
         contentWidth - (numCompleteIntervals * intervalWidth);
     final remainderMicros =
@@ -1293,8 +1384,6 @@ class TimelineGridPainter extends FlameChartPainter {
   }
 
   int _startingTimestamp(double intervalWidth, int microsPerInterval) {
-    final horizontalScrollOffset = horizontalController.offset;
-
     final startingIntervalIndex = horizontalScrollOffset < chartStartInset
         ? 0
         : (horizontalScrollOffset - chartStartInset) ~/ intervalWidth + 1;
@@ -1309,7 +1398,7 @@ class TimelineGridPainter extends FlameChartPainter {
     return zoom == other.zoom &&
         constraints == other.constraints &&
         flameChartWidth == other.flameChartWidth &&
-        horizontalController == other.horizontalController &&
+        horizontalScrollOffset == other.horizontalScrollOffset &&
         duration == other.duration &&
         colorScheme == other.colorScheme;
   }
@@ -1319,7 +1408,7 @@ class TimelineGridPainter extends FlameChartPainter {
         zoom,
         constraints,
         flameChartWidth,
-        horizontalController,
+        horizontalScrollOffset,
         duration,
         colorScheme,
       );
@@ -1458,6 +1547,29 @@ class _FlameChartHelpDialog extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class EmptyFlameChartRow extends StatelessWidget {
+  const EmptyFlameChartRow({
+    @required this.height,
+    @required this.width,
+    @required this.backgroundColor,
+  });
+
+  final double height;
+
+  final double width;
+
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height,
+      width: width,
+      color: backgroundColor,
     );
   }
 }

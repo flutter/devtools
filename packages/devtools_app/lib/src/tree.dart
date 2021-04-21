@@ -15,6 +15,7 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
     this.onItemPressed,
     this.shrinkWrap = false,
     this.itemExtent = defaultListItemHeight,
+    this.onTraverse,
   });
 
   final List<T> dataRoots;
@@ -32,6 +33,9 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   final void Function(T) onItemPressed;
 
   final double itemExtent;
+
+  /// Called on traversal of child node during [buildFlatList].
+  final void Function(T) onTraverse;
 
   @override
   _TreeViewState<T> createState() => _TreeViewState<T>();
@@ -93,7 +97,10 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
 
   void _updateItems() {
     setState(() {
-      items = buildFlatList(dataRoots);
+      items = buildFlatList(
+        dataRoots,
+        onTraverse: widget.onTraverse,
+      );
     });
   }
 }
@@ -162,10 +169,14 @@ mixin TreeMixin<T extends TreeNode<T>> {
 
   List<T> items;
 
-  List<T> buildFlatList(List<T> roots) {
+  List<T> buildFlatList(
+    List<T> roots, {
+    void onTraverse(T node),
+  }) {
     final flatList = <T>[];
     for (T root in roots) {
       traverse(root, (n) {
+        if (onTraverse != null) onTraverse(n);
         flatList.add(n);
         return n.isExpanded;
       });

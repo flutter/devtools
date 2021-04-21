@@ -440,12 +440,12 @@ class ChartController extends DisposableController
 
   double get zeroYPosition => yCanvasChart + canvasChartHeight;
 
-  double yPositon(double y) => yScale?.tickFromValue(y);
+  double yPosition(double y) => yScale?.tickFromValue(y);
 
   // Returns a negative value, the value is subtracted from zeroPosition to
   // return the real canvas coord (adjusted from Y-axis zero location in the
   // chart).
-  double yPositonToYCanvasCoord(double y) => -yPositon(y);
+  double yPositionToYCanvasCoord(double y) => -yPosition(y);
 
   Trace trace(int index) {
     assert(index < traces.length);
@@ -458,11 +458,16 @@ class ChartController extends DisposableController
     ChartType chartType,
     PaintCharacteristics characteristics, {
     String name,
+    bool stacked = false,
     List<Data> data,
   }) {
     final traceIndex = traces.length;
 
     final trace = Trace(this, chartType, characteristics);
+
+    // Stacked only supported for line charts.
+    assert((stacked && chartType == ChartType.line) || !stacked);
+    trace.stacked = stacked;
 
     if (name != null) trace.name = name;
     if (data != null) trace.addAllData(data);

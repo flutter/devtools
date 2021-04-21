@@ -273,8 +273,8 @@ class DevToolsAppState extends State<DevToolsApp> {
 
   Widget _providedControllers({@required Widget child, bool offline = false}) {
     final _providers = widget.screens
-        .where((s) =>
-            s.createController != null && (offline ? s.supportsOffline : true))
+        .where(
+            (s) => s.providesController && (offline ? s.supportsOffline : true))
         .map((s) => s.controllerProvider)
         .toList();
 
@@ -304,9 +304,10 @@ class DevToolsAppState extends State<DevToolsApp> {
 class DevToolsScreen<C> {
   const DevToolsScreen(
     this.screen, {
-    @required this.createController,
+    this.createController,
+    this.controller,
     this.supportsOffline = false,
-  });
+  }) : assert(createController == null || controller == null);
 
   final Screen screen;
 
@@ -316,9 +317,23 @@ class DevToolsScreen<C> {
   /// widgets depending on this controller can access it by calling
   /// `Provider<C>.of(context)`.
   ///
-  /// If null, [screen] will be responsible for creating and maintaining its own
-  /// controller.
+  /// If [createController] and [controller] are both null, [screen] will be
+  /// responsible for creating and maintaining its own controller.
   final C Function() createController;
+
+  /// A provided controller for this screen, if non-null.
+  ///
+  /// The controller will then be provided via [controllerProvider], and
+  /// widgets depending on this controller can access it by calling
+  /// `Provider<C>.of(context)`.
+  ///
+  /// If [createController] and [controller] are both null, [screen] will be
+  /// responsible for creating and maintaining its own controller.
+  final C controller;
+
+  /// Returns true if a controller was provided for [screen]. If false,
+  /// [screen] is responsible for creating and maintaining its own controller.
+  bool get providesController => createController != null || controller != null;
 
   /// Whether this screen has implemented offline support.
   ///
@@ -326,7 +341,11 @@ class DevToolsScreen<C> {
   final bool supportsOffline;
 
   Provider<C> get controllerProvider {
-    assert(createController != null);
+    assert((createController != null && controller == null) ||
+        (createController == null && controller != null));
+    if (controller != null) {
+      return Provider<C>.value(value: controller);
+    }
     return Provider<C>(create: (_) => createController());
   }
 }
@@ -447,16 +466,14 @@ class DevToolsAboutDialog extends StatelessWidget {
   }
 
   Widget _createFeedbackLink(BuildContext context) {
-    const urlPath = 'github.com/flutter/devtools/issues';
+    final reportIssuesLink = devToolsExtensionPoints.issueTrackerLink();
     final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: () async {
         ga.select(devToolsMain, feedback);
-
-        const reportIssuesUrl = 'https://$urlPath';
-        await launchUrl(reportIssuesUrl, context);
+        await launchUrl(reportIssuesLink.url, context);
       },
-      child: Text(urlPath, style: linkTextStyle(colorScheme)),
+      child: Text(reportIssuesLink.display, style: linkTextStyle(colorScheme)),
     );
   }
 }
@@ -527,53 +544,56 @@ class SettingsDialog extends StatelessWidget {
 ///
 /// Conditional screens can be added to this list, and they will automatically
 /// be shown or hidden based on the [Screen.conditionalLibrary] provided.
-List<DevToolsScreen> get defaultScreens => <DevToolsScreen>[
-      DevToolsScreen<InspectorSettingsController>(
-        const InspectorScreen(),
-        createController: () => InspectorSettingsController(),
-      ),
-      DevToolsScreen<PerformanceController>(
-        const PerformanceScreen(),
-        createController: () => PerformanceController(),
-        supportsOffline: true,
-      ),
-      DevToolsScreen<ProfilerScreenController>(
-        const ProfilerScreen(),
-        createController: () => ProfilerScreenController(),
-        supportsOffline: true,
-      ),
-      DevToolsScreen<MemoryController>(
-        const MemoryScreen(),
-        createController: () => MemoryController(),
-      ),
-      DevToolsScreen<DebuggerController>(
-        const DebuggerScreen(),
-        createController: () => DebuggerController(),
-      ),
-      DevToolsScreen<NetworkController>(
-        const NetworkScreen(),
-        createController: () => NetworkController(),
-      ),
-      DevToolsScreen<LoggingController>(
-        const LoggingScreen(),
-        createController: () => LoggingController(),
-      ),
-      DevToolsScreen<AppSizeController>(
-        const AppSizeScreen(),
-        createController: () => AppSizeController(),
-      ),
-      DevToolsScreen<VMDeveloperToolsController>(
-        const VMDeveloperToolsScreen(),
-        createController: () => VMDeveloperToolsController(),
-      ),
-      DevToolsScreen<void>(
-        const ProviderScreen(),
-        createController: () {},
-      ),
+List<DevToolsScreen> get defaultScreens {
+  final vmDeveloperToolsController = VMDeveloperToolsController();
+  return <DevToolsScreen>[
+    DevToolsScreen<InspectorSettingsController>(
+      const InspectorScreen(),
+      createController: () => InspectorSettingsController(),
+    ),
+    DevToolsScreen<PerformanceController>(
+      const PerformanceScreen(),
+      createController: () => PerformanceController(),
+      supportsOffline: true,
+    ),
+    DevToolsScreen<ProfilerScreenController>(
+      const ProfilerScreen(),
+      createController: () => ProfilerScreenController(),
+      supportsOffline: true,
+    ),
+    DevToolsScreen<MemoryController>(
+      const MemoryScreen(),
+      createController: () => MemoryController(),
+    ),
+    DevToolsScreen<DebuggerController>(
+      const DebuggerScreen(),
+      createController: () => DebuggerController(),
+    ),
+    DevToolsScreen<NetworkController>(
+      const NetworkScreen(),
+      createController: () => NetworkController(),
+    ),
+    DevToolsScreen<LoggingController>(
+      const LoggingScreen(),
+      createController: () => LoggingController(),
+    ),
+    DevToolsScreen<AppSizeController>(
+      const AppSizeScreen(),
+      createController: () => AppSizeController(),
+    ),
+    DevToolsScreen<VMDeveloperToolsController>(
+      VMDeveloperToolsScreen(controller: vmDeveloperToolsController),
+      controller: vmDeveloperToolsController,
+    ),
+    DevToolsScreen<void>(
+      const ProviderScreen(),
+      createController: () {},
+    ),
 // Uncomment to see a sample implementation of a conditional screen.
 //      DevToolsScreen<ExampleController>(
 //        const ExampleConditionalScreen(),
 //        createController: () => ExampleController(),
 //        supportsOffline: true,
 //      ),
-    ];
+  ];
+}

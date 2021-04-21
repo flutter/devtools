@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as image;
 
 import '../common_widgets.dart';
 import '../http/http.dart';
@@ -69,10 +70,9 @@ class HttpRequestHeadersView extends StatelessWidget {
             style: Theme.of(context).textTheme.subtitle2,
           ),
           Expanded(
-            child: Text(
+            child: SelectableText(
               value,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 5,
+              minLines: 1,
             ),
           ),
         ],
@@ -143,10 +143,96 @@ class HttpResponseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // We shouldn't try and display an image response view when using the
+    // timeline profiler since it's possible for response body data to get
+    // dropped.
+    if (data is DartIOHttpRequestData && data.contentType.contains('image')) {
+      return SingleChildScrollView(
+        child: ImageResponseView(data),
+      );
+    }
     return SingleChildScrollView(
-      child: Text(
+      child: SelectableText(
         data.responseBody,
         style: Theme.of(context).fixedFontStyle,
+      ),
+    );
+  }
+}
+
+class ImageResponseView extends StatelessWidget {
+  const ImageResponseView(this.data);
+
+  final DartIOHttpRequestData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final img = image.decodeImage(data.encodedResponse);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildTile(
+          'Image Preview',
+          [
+            Padding(
+              padding: const EdgeInsets.all(
+                denseSpacing,
+              ),
+              child: Image.memory(
+                data.encodedResponse,
+              ),
+            ),
+          ],
+        ),
+        _buildTile(
+          'Metadata',
+          [
+            _buildRow(
+              context,
+              'Format',
+              data.type,
+            ),
+            _buildRow(
+              context,
+              'Size',
+              prettyPrintBytes(
+                data.encodedResponse.lengthInBytes,
+                includeUnit: true,
+              ),
+            ),
+            _buildRow(
+              context,
+              'Dimensions',
+              '${img.width} x ${img.height}',
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRow(
+    BuildContext context,
+    String key,
+    String value,
+  ) {
+    return Padding(
+      padding: _rowPadding,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$key: ',
+            style: Theme.of(context).textTheme.subtitle2,
+          ),
+          Expanded(
+            child: Text(
+              value,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -573,10 +659,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
   }
 
   Widget _valueText(String value) {
-    return Text(
+    return SelectableText(
       value,
-      overflow: TextOverflow.ellipsis,
-      maxLines: 5,
+      minLines: 1,
     );
   }
 }

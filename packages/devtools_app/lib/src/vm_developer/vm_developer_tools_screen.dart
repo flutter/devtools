@@ -38,8 +38,9 @@ abstract class VMDeveloperView {
 }
 
 class VMDeveloperToolsScreen extends Screen {
-  const VMDeveloperToolsScreen()
-      : super.conditional(
+  const VMDeveloperToolsScreen({
+    @required this.controller,
+  }) : super.conditional(
           id: id,
           title: 'VM Tools',
           icon: Icons.settings_applications,
@@ -48,9 +49,11 @@ class VMDeveloperToolsScreen extends Screen {
 
   static const id = 'vm-tools';
 
+  final VMDeveloperToolsController controller;
+
   @override
   ValueListenable<bool> get showIsolateSelector =>
-      _VMDeveloperToolsScreenState.controller.showIsolateSelector;
+      controller.showIsolateSelector;
 
   @override
   Widget build(BuildContext context) => const VMDeveloperToolsScreenBody();
@@ -70,9 +73,7 @@ class VMDeveloperToolsScreenBody extends StatefulWidget {
 
 class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
     with AutoDisposeMixin {
-  // TODO(bkonyi): do we want this to be static? Currently necessary to provide
-  // access to the `showIsolateSelector` via `VMDeveloperToolsScreen`
-  static VMDeveloperToolsController controller;
+  VMDeveloperToolsController controller;
 
   @override
   void didChangeDependencies() {

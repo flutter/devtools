@@ -126,6 +126,8 @@ bool isValidLightColor(Color color) {
 const defaultToolbarHeight = 32.0;
 
 const defaultButtonHeight = 32.0;
+const smallButtonHeight = 20.0;
+
 const buttonMinWidth = 36.0;
 
 const defaultIconSize = 16.0;
@@ -294,6 +296,14 @@ extension DevToolsColorScheme on ColorScheme {
         fontWeight: FontWeight.normal,
         fontSize: 14,
         fontStyle: FontStyle.italic,
+        decoration: TextDecoration.none,
+      );
+
+  // Items in a chart's legend.
+  TextStyle get legendTextStyle => TextStyle(
+        color: defaultForeground,
+        fontWeight: FontWeight.normal,
+        fontSize: 10,
         decoration: TextDecoration.none,
       );
 

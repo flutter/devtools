@@ -103,6 +103,8 @@ class PerformanceController
     vmTimelineStream,
   ];
 
+  final threadNamesById = <int, String>{};
+
   /// Active timeline data.
   ///
   /// This is the true source of data for the UI. In the case of an offline
@@ -191,10 +193,18 @@ class PerformanceController
   ValueListenable<double> get displayRefreshRate => _displayRefreshRate;
   final _displayRefreshRate = ValueNotifier<double>(defaultRefreshRate);
 
-  Future<void> selectFrame(FlutterFrame frame) async {
-    if (frame == null || data == null || data.selectedFrame == frame) {
+  Future<void> toggleSelectedFrame(FlutterFrame frame) async {
+    if (frame == null || data == null) {
       return;
     }
+
+    // Unselect [frame] if is already selected.
+    if (data.selectedFrame == frame) {
+      data.selectedFrame = null;
+      _selectedFrameNotifier.value = null;
+      return;
+    }
+
     data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
 
@@ -266,28 +276,26 @@ class PerformanceController
   }
 
   void primeThreadIds(vm_service.Timeline timeline) {
+    threadNamesById.clear();
     final threadNameEvents = timeline.traceEvents
         .map((event) => TraceEvent(event.json))
         .where((TraceEvent event) {
-      return event.name == 'thread_name';
+      return event.phase == 'M' && event.name == 'thread_name';
     }).toList();
 
     // TODO(kenz): Remove this logic once ui/raster distinction changes are
     // available in the engine.
     int uiThreadId;
     int rasterThreadId;
-    final threadIdsByName = <String, int>{};
-
-    String uiThreadName;
-    String rasterThreadName;
-    String platformThreadName;
     for (TraceEvent event in threadNameEvents) {
       final name = event.args['name'];
 
       // Android: "1.ui (12652)"
       // iOS: "io.flutter.1.ui (12652)"
       // MacOS, Linux, Windows, Dream (g3): "io.flutter.ui (225695)"
-      if (name.contains('.ui')) uiThreadName = name;
+      if (name.contains('.ui')) {
+        uiThreadId = event.threadId;
+      }
 
       // Android: "1.raster (12651)"
       // iOS: "io.flutter.1.raster (12651)"
@@ -296,37 +304,31 @@ class PerformanceController
       // Also look for .gpu here for older versions of Flutter.
       // TODO(kenz): remove check for .gpu name in April 2021.
       if (name.contains('.raster') || name.contains('.gpu')) {
-        rasterThreadName = name;
+        rasterThreadId = event.threadId;
       }
 
       // Android: "1.platform (22585)"
       // iOS: "io.flutter.1.platform (22585)"
       // MacOS, Linux, Windows, Dream (g3): "io.flutter.platform (22596)"
-      if (name.contains('.platform')) platformThreadName = name;
+      if (name.contains('.platform')) {
+        // MacOS and Flutter apps with platform views do not have a .gpu thread.
+        // In these cases, the "Raster" events will come on the .platform thread
+        // instead.
+        rasterThreadId ??= event.threadId;
+      }
 
-      threadIdsByName[name] = event.threadId;
-    }
-
-    if (uiThreadName != null) {
-      uiThreadId = threadIdsByName[uiThreadName];
-    }
-
-    // MacOS and Flutter apps with platform views do not have a .gpu thread.
-    // In these cases, the "Raster" events will come on the .platform thread
-    // instead.
-    if (rasterThreadName != null) {
-      rasterThreadId = threadIdsByName[rasterThreadName];
-    } else {
-      rasterThreadId = threadIdsByName[platformThreadName];
+      threadNamesById[event.threadId] = name;
     }
 
     if (uiThreadId == null || rasterThreadId == null) {
       log('Could not find UI thread and / or Raster thread from names: '
-          '${threadIdsByName.keys}');
+          '${threadNamesById.values}');
     }
 
     processor.primeThreadIds(
-        uiThreadId: uiThreadId, rasterThreadId: rasterThreadId);
+      uiThreadId: uiThreadId,
+      rasterThreadId: rasterThreadId,
+    );
   }
 
   void addTimelineEvent(TimelineEvent event) {
@@ -335,7 +337,7 @@ class PerformanceController
 
   FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) async {
     await processor.processTimeline(traceEvents);
-    data.initializeEventGroups();
+    data.initializeEventGroups(threadNamesById);
     if (data.eventGroups.isEmpty) {
       _emptyTimeline.value = true;
     }

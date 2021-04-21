@@ -255,7 +255,7 @@ void main() {
       expect(controller.filteredData.value, hasLength(3));
 
       controller.filterData(QueryFilter.parse(
-          '-status:error method:get t:conf', controller.filterArgs));
+          '-status:error method:get t:txt', controller.filterArgs));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(1));
     });

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +23,7 @@ import '../ui/utils.dart';
 import '../utils.dart';
 
 import 'memory_android_chart.dart' as android;
+import 'memory_charts.dart';
 import 'memory_controller.dart';
 import 'memory_events_pane.dart' as events;
 import 'memory_heap_tree_view.dart';
@@ -31,6 +31,8 @@ import 'memory_vm_chart.dart' as vm;
 
 /// Width of application when memory buttons loose their text.
 const _primaryControlsMinVerboseWidth = 1100.0;
+
+final legendKey = GlobalKey(debugLabel: MemoryScreen.legendKeyName);
 
 class MemoryScreen extends Screen {
   const MemoryScreen()
@@ -74,6 +76,7 @@ class MemoryScreen extends Screen {
   static const gcButtonKey = Key('GC Button');
   @visibleForTesting
   static const legendButtonkey = Key(legendKeyName);
+
   @visibleForTesting
   static const settingsButtonKey = Key('Memory Configuration');
 
@@ -88,19 +91,6 @@ class MemoryScreen extends Screen {
   static const androidChartButtonKey = Key('Android Memory');
 
   static const memorySourceMenuItemPrefix = 'Source: ';
-
-  @visibleForTesting
-  static const allocatedDisplay = 'Allocated';
-  @visibleForTesting
-  static const usedDisplay = 'Dart/Flutter';
-  @visibleForTesting
-  static const externalDisplay = 'Dart/Flutter Native';
-  @visibleForTesting
-  static const rssDisplay = 'RSS';
-  @visibleForTesting
-  static const layerDisplay = 'Raster Layer';
-  @visibleForTesting
-  static const pictureDisplay = 'Raster Picture';
 
   static void gaAction({Key key, String name}) {
     final recordName = key != null ? keyName(key) : name;
@@ -580,9 +570,9 @@ class MemoryBodyState extends State<MemoryBody>
       children: [
         _memorySourceDropdown(textTheme),
         const SizedBox(width: defaultSpacing),
-        controller.isConnectedDeviceAndroid
-            ? createToggleAdbMemoryButton()
-            : const SizedBox(),
+        if (controller.isConnectedDeviceAndroid ||
+            controller.isOfflineAndAndroidData)
+          createToggleAdbMemoryButton(),
         const SizedBox(width: denseSpacing),
         isAdvancedSettingsEnabled
             ? Row(
@@ -639,13 +629,12 @@ class MemoryBodyState extends State<MemoryBody>
     );
   }
 
-  final legendKey = GlobalKey(debugLabel: MemoryScreen.legendKeyName);
   static const legendXOffset = 20;
   static const legendYOffset = 7.0;
   static const legendWidth = 200.0;
   static const legendTextWidth = 55.0;
-  static const legendHeight1Chart = 185.0;
-  static const legendHeight2Charts = 340.0;
+  static const legendHeight1Chart = 200.0;
+  static const legendHeight2Charts = 323.0;
 
   final hoverKey = GlobalKey(debugLabel: MemoryScreen.hoverKeyName);
   static const hoverXOffset = 10;
@@ -654,10 +643,12 @@ class MemoryBodyState extends State<MemoryBody>
   static const hover_card_border_width = 2.0;
 
   // TODO(terry): Compute below heights dynamically.
-  static const hoverHeightMinimum = 40.0;
+  static const hoverHeightMinimum = 42.0;
   static const hoverItemHeight = 18.0;
-  // One extension event to display (3 lines).
+
+  // One extension event to display (4 lines).
   static const hoverOneEventsHeight = 82.0;
+
   // Many extension events to display.
   static const hoverEventsHeight = 120.0;
 
@@ -676,42 +667,126 @@ class MemoryBodyState extends State<MemoryBody>
               : hoverEventsHeight)
           : 0);
 
-  // TODO(terry): Consider custom painter?
-  static const base = 'assets/img/legend/';
-  static const snapshotManualLegend = '${base}snapshot_manual_glyph.png';
-  static const snapshotAutoLegend = '${base}snapshot_auto_glyph.png';
-  static const monitorLegend = '${base}monitor_glyph.png';
-  static const resetLegend = '${base}reset_glyph.png';
-  static const gcManualLegend = '${base}gc_manual_glyph.png';
-  static const gcVMLegend = '${base}gc_vm_glyph.png';
-  static const eventLegend = '${base}event_glyph.png';
-  static const eventsLegend = '${base}events_glyph.png';
+  Map<String, Map<String, Object>> eventLegend(bool isLight) {
+    final result = <String, Map<String, Object>>{};
 
-  static const allocatedLegend = '${base}capacity_glyph.png';
-  static const usedLegend = '${base}used_glyph.png';
-  static const externalLegend = '${base}external_glyph.png';
-  static const rssLegend = '${base}rss_glyph.png';
-  static const rasterLayerLegend = '${base}layer_glyph.png';
-  static const rasterPictureLegend = '${base}picture_glyph.png';
+    result[events.manualSnapshotLegendName] = traceRender(
+      image: events.snapshotManualLegend,
+    );
+    result[events.autoSnapshotLegendName] = traceRender(
+      image: events.snapshotAutoLegend,
+    );
+    result[events.monitorLegendName] = traceRender(image: events.monitorLegend);
+    result[events.resetLegendName] = traceRender(
+      image: isLight ? events.resetLightLegend : events.resetDarkLegend,
+    );
+    result[events.vmGCLegendName] = traceRender(image: events.gcVMLegend);
+    result[events.manualGCLegendName] = traceRender(
+      image: events.gcManualLegend,
+    );
+    result[events.eventLegendName] = traceRender(image: events.eventLegend);
+    result[events.eventsLegendName] = traceRender(image: events.eventsLegend);
 
-  static const androidTotalLegend = '${base}android_total_glyph.png';
-  static const androidOtherLegend = '${base}android_other_glyph.png';
-  static const androidCodeLegend = '${base}android_code_glyph.png';
-  static const androidNativeLegend = '${base}android_native_glyph.png';
-  static const androidJavaLegend = '${base}android_java_glyph.png';
-  static const androidStackLegend = '${base}android_stack_glyph.png';
-  static const androidGraphicsLegend = '${base}android_graphics_glyph.png';
+    return result;
+  }
 
-  Widget legendRow({String name1, String image1, String name2, String image2}) {
-    final legendEntry = Theme.of(context).textTheme.caption;
+  Map<String, Map<String, Object>> vmLegend() {
+    final result = <String, Map<String, Object>>{};
+
+    final traces = vmChartController.traces;
+    // RSS trace
+    result[rssDisplay] = traceRender(
+      color: traces[vm.TraceName.rSS.index].characteristics.color,
+      dashed: true,
+    );
+
+    // Allocated trace
+    result[allocatedDisplay] = traceRender(
+      color: traces[vm.TraceName.capacity.index].characteristics.color,
+      dashed: true,
+    );
+
+    // Used trace
+    result[usedDisplay] = traceRender(
+      color: traces[vm.TraceName.used.index].characteristics.color,
+    );
+
+    // External trace
+    result[externalDisplay] = traceRender(
+      color: traces[vm.TraceName.external.index].characteristics.color,
+    );
+
+    // Raster layer trace
+    result[layerDisplay] = traceRender(
+      color: traces[vm.TraceName.rasterLayer.index].characteristics.color,
+      dashed: true,
+    );
+
+    // Raster picture trace
+    result[pictureDisplay] = traceRender(
+      color: traces[vm.TraceName.rasterPicture.index].characteristics.color,
+      dashed: true,
+    );
+
+    return result;
+  }
+
+  Map<String, Map<String, Object>> androidLegend() {
+    final result = <String, Map<String, Object>>{};
+
+    final traces = androidChartController.traces;
+    // Total trace
+    result[androidTotalDisplay] = traceRender(
+      color: traces[android.TraceName.total.index].characteristics.color,
+      dashed: true,
+    );
+
+    // Other trace
+    result[androidOtherDisplay] = traceRender(
+      color: traces[android.TraceName.other.index].characteristics.color,
+    );
+
+    // Native heap trace
+    result[androidNativeDisplay] = traceRender(
+      color: traces[android.TraceName.nativeHeap.index].characteristics.color,
+    );
+
+    // Graphics trace
+    result[androidGraphicsDisplay] = traceRender(
+      color: traces[android.TraceName.graphics.index].characteristics.color,
+    );
+
+    // Code trace
+    result[androidCodeDisplay] = traceRender(
+      color: traces[android.TraceName.code.index].characteristics.color,
+    );
+
+    // Java heap trace
+    result[androidJavaDisplay] = traceRender(
+      color: traces[android.TraceName.javaHeap.index].characteristics.color,
+    );
+
+    // Stack trace
+    result[androidStackDisplay] = traceRender(
+      color: traces[android.TraceName.stack.index].characteristics.color,
+    );
+
+    return result;
+  }
+
+  Widget legendRow({
+    MapEntry<String, Map<String, Object>> entry1,
+    MapEntry<String, Map<String, Object>> entry2,
+  }) {
+    final legendEntry = Theme.of(context).colorScheme.legendTextStyle;
 
     List<Widget> legendPart(
       String name,
-      String image, [
+      Widget widget, [
       double leftEdge = 5.0,
     ]) {
       final rightSide = <Widget>[];
-      if (name != null && image != null) {
+      if (name != null && widget != null) {
         rightSide.addAll([
           Expanded(
             child: Container(
@@ -723,17 +798,46 @@ class MemoryBodyState extends State<MemoryBody>
           const PaddedDivider(
             padding: EdgeInsets.only(left: denseRowSpacing),
           ),
-          Image(image: AssetImage(image)),
+          widget,
         ]);
       }
 
       return rightSide;
     }
 
+    Widget legendSymbol(Map<String, Object> dataToDisplay) {
+      final image = dataToDisplay.containsKey(renderImage)
+          ? dataToDisplay[renderImage] as String
+          : null;
+      final color = dataToDisplay.containsKey(renderLine)
+          ? dataToDisplay[renderLine] as Color
+          : null;
+      final dashedLine = dataToDisplay.containsKey(renderDashed)
+          ? dataToDisplay[renderDashed]
+          : false;
+
+      Widget traceColor;
+      if (color != null) {
+        if (dashedLine) {
+          traceColor = createDashWidget(color);
+        } else {
+          traceColor = createSolidLine(color);
+        }
+      } else {
+        traceColor =
+            image == null ? const SizedBox() : Image(image: AssetImage(image));
+      }
+
+      return traceColor;
+    }
+
     final rowChildren = <Widget>[];
-    rowChildren.addAll(legendPart(name1, image1));
-    if (name2 != null && image2 != null) {
-      rowChildren.addAll(legendPart(name2, image2, 20.0));
+
+    rowChildren.addAll(legendPart(entry1.key, legendSymbol(entry1.value)));
+    if (entry2 != null) {
+      rowChildren.addAll(
+        legendPart(entry2.key, legendSymbol(entry2.value), 20.0),
+      );
     }
 
     return Expanded(
@@ -747,9 +851,49 @@ class MemoryBodyState extends State<MemoryBody>
     );
   }
 
+  static const totalDashWidth = 15.0;
+  static const dashHeight = 2.0;
+  static const dashWidth = 4.0;
+  static const spaceBetweenDash = 3.0;
+
+  Widget createDashWidget(Color color) {
+    return Container(
+      padding: const EdgeInsets.only(right: 20),
+      child: CustomPaint(
+        painter: DashedLine(
+          totalDashWidth,
+          color,
+          dashHeight,
+          dashWidth,
+          spaceBetweenDash,
+        ),
+        foregroundPainter: DashedLine(
+          totalDashWidth,
+          color,
+          dashHeight,
+          dashWidth,
+          spaceBetweenDash,
+        ),
+      ),
+    );
+  }
+
+  Widget createSolidLine(Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 1.0),
+      child: Container(
+        height: 6,
+        width: 20,
+        color: color,
+      ),
+    );
+  }
+
   Widget hoverRow({
     String name,
     String image,
+    Color colorPatch,
+    bool dashed = false,
     bool bold = true,
     bool hasNumeric = false,
     bool hasUnit = false,
@@ -761,11 +905,13 @@ class MemoryBodyState extends State<MemoryBody>
     final hoverSmallEntry =
         Theme.of(context).colorScheme.hoverSmallValueTextStyle;
 
-    List<Widget> hoverPart(
-      String name,
-      String image, [
+    List<Widget> hoverPartImageLine(
+      String name, {
+      String image,
+      Color colorPatch,
+      bool dashed = false,
       double leftEdge = 5.0,
-    ]) {
+    }) {
       String displayName = name;
       // Empty string overflows, default value space.
       String displayValue = ' ';
@@ -782,12 +928,29 @@ class MemoryBodyState extends State<MemoryBody>
         displayValue = name.substring(startOfNumber + 1);
       }
 
-      return [
-        image == null
+      Widget traceColor;
+      if (colorPatch != null) {
+        if (dashed) {
+          traceColor = createDashWidget(colorPatch);
+        } else {
+          traceColor = createSolidLine(colorPatch);
+        }
+      } else {
+        traceColor = image == null
             ? const SizedBox()
             : scaleImage
-                ? Image(image: AssetImage(image), width: 20, height: 10)
-                : Image(image: AssetImage(image)),
+                ? Image(
+                    image: AssetImage(image),
+                    width: 20,
+                    height: 10,
+                  )
+                : Image(
+                    image: AssetImage(image),
+                  );
+      }
+
+      return [
+        traceColor,
         const PaddedDivider(
           padding: EdgeInsets.only(left: denseRowSpacing),
         ),
@@ -797,7 +960,14 @@ class MemoryBodyState extends State<MemoryBody>
     }
 
     final rowChildren = <Widget>[];
-    rowChildren.addAll(hoverPart(name, image, leftPadding));
+
+    rowChildren.addAll(hoverPartImageLine(
+      name,
+      image: image,
+      colorPatch: colorPatch,
+      dashed: dashed,
+      leftEdge: leftPadding,
+    ));
     return Container(
         padding: const EdgeInsets.fromLTRB(5, 0, 0, 2),
         child: Row(
@@ -805,34 +975,21 @@ class MemoryBodyState extends State<MemoryBody>
         ));
   }
 
-  /// Display name is either '1 Event' or 'n Events'
-  static const eventDisplayName = ' Event';
-  static const eventsDisplayName = ' Events';
-
   List<Widget> displayExtensionEventsInHover(ChartsValues chartsValues) {
     final widgets = <Widget>[];
-    final eventsDisplayed = <String, String>{};
 
-    if (chartsValues.hasExtensionEvents) {
-      final eventLength = chartsValues.extensionEventsLength;
-      if (eventLength > 0) {
-        final displayKey = '$eventLength'
-            '${eventLength == 1 ? eventDisplayName : eventsDisplayName}';
-        eventsDisplayed[displayKey] =
-            eventLength == 1 ? eventLegend : eventsLegend;
-      }
-    }
+    final eventsDisplayed = chartsValues.extensionEventsToDisplay;
 
     for (var entry in eventsDisplayed.entries) {
       if (entry.key.endsWith(eventsDisplayName)) {
         widgets.add(Container(
-          height: 120,
+          height: hoverEventsHeight,
           child: ListView(
             shrinkWrap: true,
             primary: false,
             children: [
               listItem(
-                events: chartsValues.extensionEvents,
+                allEvents: chartsValues.extensionEvents,
                 title: entry.key,
                 icon: Icons.dashboard,
               ),
@@ -843,7 +1000,8 @@ class MemoryBodyState extends State<MemoryBody>
         widgets.add(hoverRow(name: entry.key, image: entry.value));
 
         /// Pull out the event name, and custom values.
-        final output = displayEvent(null, chartsValues.extensionEvents.first);
+        final output =
+            displayEvent(null, chartsValues.extensionEvents.first).trim();
         widgets.add(hoverRow(name: output, bold: false, leftPadding: 0.0));
       }
     }
@@ -853,30 +1011,11 @@ class MemoryBodyState extends State<MemoryBody>
   List<Widget> displayEventsInHover(ChartsValues chartsValues) {
     final results = <Widget>[];
 
-    final eventsDisplayed = <String, String>{};
-
-    if (chartsValues.hasSnapshot) {
-      eventsDisplayed['Snapshot'] = snapshotManualLegend;
-    } else if (chartsValues.hasAutoSnapshot) {
-      eventsDisplayed['Auto Snapshot'] = snapshotAutoLegend;
-    } else if (chartsValues.hasMonitorStart) {
-      eventsDisplayed['Monitor Start'] = monitorLegend;
-    } else if (chartsValues.hasMonitorReset) {
-      eventsDisplayed['Monitor Reset'] = resetLegend;
-    }
-
-    if (chartsValues.hasGc) {
-      eventsDisplayed['GC'] = gcVMLegend;
-    }
-
-    if (chartsValues.hasManualGc) {
-      eventsDisplayed['User GC'] = gcManualLegend;
-    }
+    final colorScheme = Theme.of(context).colorScheme;
+    final eventsDisplayed = chartsValues.eventsToDisplay(colorScheme.isLight);
 
     for (var entry in eventsDisplayed.entries) {
-      Widget widget;
-
-      widget = hoverRow(name: entry.key, image: entry.value);
+      final widget = hoverRow(name: ' ${entry.key}', image: entry.value);
       results.add(widget);
     }
 
@@ -953,14 +1092,14 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Widget listItem({
-    List<Map<String, Object>> events,
+    List<Map<String, Object>> allEvents,
     int index,
     String title,
     IconData icon,
   }) {
     final widgets = <Widget>[];
     var index = 1;
-    for (var event in events) {
+    for (var event in allEvents) {
       final output = displayEvent(index, event);
       widgets.add(cardWidget(output));
       index++;
@@ -981,9 +1120,9 @@ class MemoryBodyState extends State<MemoryBody>
           leading: Container(
             padding: const EdgeInsets.fromLTRB(5, 4, 0, 0),
             child: Image(
-              image: events.length > 1
-                  ? const AssetImage(eventsLegend)
-                  : const AssetImage(eventLegend),
+              image: allEvents.length > 1
+                  ? const AssetImage(events.eventsLegend)
+                  : const AssetImage(events.eventLegend),
             ),
           ),
           backgroundColor: collapsedColor,
@@ -1021,51 +1160,31 @@ class MemoryBodyState extends State<MemoryBody>
     );
   }
 
-  String formatNumeric(num number) => controller.unitDisplayed.value
-      ? prettyPrintBytes(
-          number,
-          kbFractionDigits: 1,
-          mbFractionDigits: 2,
-          includeUnit: true,
-          roundingPoint: 0.7,
-        )
-      : nf.format(number);
-
-  List<Widget> displayVmDataInHover(ChartsValues chartsValues) {
+  List<Widget> _dataToDisplay(
+    Map<String, Map<String, Object>> dataToDisplay, {
+    Widget firstWidget,
+  }) {
     final results = <Widget>[];
 
-    final vmDataDisplayed = <String, String>{};
+    if (firstWidget != null) results.add(firstWidget);
 
-    final data = chartsValues.vmData;
+    for (var entry in dataToDisplay.entries) {
+      final image = entry.value.keys.contains(renderImage)
+          ? entry.value[renderImage] as String
+          : null;
+      final color = entry.value.keys.contains(renderLine)
+          ? entry.value[renderLine] as Color
+          : null;
+      final dashedLine = entry.value.keys.contains(renderDashed)
+          ? entry.value[renderDashed]
+          : false;
 
-    final rssValueDisplay = formatNumeric(data[rssJsonName]);
-    vmDataDisplayed['${MemoryScreen.rssDisplay} $rssValueDisplay'] = rssLegend;
-
-    final capacityValueDisplay = formatNumeric(data[capacityJsonName]);
-    vmDataDisplayed['${MemoryScreen.allocatedDisplay} $capacityValueDisplay'] =
-        allocatedLegend;
-
-    final usedValueDisplay = formatNumeric(data[usedJsonName]);
-    vmDataDisplayed['${MemoryScreen.usedDisplay} $usedValueDisplay'] =
-        usedLegend;
-
-    final externalValueDisplay = formatNumeric(data[externalJsonName]);
-    vmDataDisplayed['${MemoryScreen.externalDisplay} $externalValueDisplay'] =
-        externalLegend;
-
-    final layerValueDisplay = formatNumeric(data[rasterLayerJsonName]);
-    vmDataDisplayed['${MemoryScreen.layerDisplay} $layerValueDisplay'] =
-        rasterLayerLegend;
-
-    final pictureValueDisplay = formatNumeric(data[rasterPictureJsonName]);
-    vmDataDisplayed['${MemoryScreen.pictureDisplay} $pictureValueDisplay'] =
-        rasterPictureLegend;
-
-    for (var entry in vmDataDisplayed.entries) {
       results.add(
         hoverRow(
           name: entry.key,
-          image: entry.value,
+          colorPatch: color,
+          dashed: dashedLine,
+          image: image,
           hasNumeric: true,
           hasUnit: controller.unitDisplayed.value,
           scaleImage: true,
@@ -1076,64 +1195,41 @@ class MemoryBodyState extends State<MemoryBody>
     return results;
   }
 
+  List<Widget> displayVmDataInHover(ChartsValues chartsValues) =>
+      _dataToDisplay(
+        chartsValues.displayVmDataToDisplay(vmChartController.traces),
+      );
+
   List<Widget> displayAndroidDataInHover(ChartsValues chartsValues) {
-    const totalDisplay = 'Total';
-    const otherDisplay = 'Other';
-    const codeDisplay = 'Code';
-    const nativeDisplay = 'Native';
-    const javaDisplay = 'Java';
-    const stackDisplay = 'Stack';
-    const graphicsDisplay = 'Graphics';
+    const dividerLineVerticalSpace = 2.0;
+    const dividerLineHorizontalSpace = 20.0;
+    const totalDividerLineHorizontalSpace = dividerLineHorizontalSpace * 2;
 
-    final results = <Widget>[];
+    if (!controller.isAndroidChartVisible) return [];
 
-    if (controller.isAndroidChartVisible) {
-      final androidDataDisplayed = <String, String>{};
+    final androidDataDisplayed =
+        chartsValues.androidDataToDisplay(androidChartController.traces);
 
-      final data = chartsValues.androidData;
+    // Separator between Android data.
+    // TODO(terry): Why Center widget doesn't work (parent width is bigger/centered too far right).
+    //              Is it centering on a too wide Overlay?
+    const width = MemoryBodyState.hoverWidth -
+        totalDividerLineHorizontalSpace -
+        DashedLine.defaultDashWidth;
+    final dashedColor = Colors.grey.shade600;
 
-      final totalValueDisplay = formatNumeric(data[adbTotalJsonName]);
-      androidDataDisplayed['$totalDisplay $totalValueDisplay'] =
-          androidTotalLegend;
-
-      final otherValueDisplay = formatNumeric(data[adbOtherJsonName]);
-      androidDataDisplayed['$otherDisplay $otherValueDisplay'] =
-          androidOtherLegend;
-
-      final codeValueDisplay = formatNumeric(data[adbCodeJsonName]);
-      androidDataDisplayed['$codeDisplay $codeValueDisplay'] =
-          androidCodeLegend;
-
-      final nativeValueDisplay = formatNumeric(data[adbNativeHeapJsonName]);
-      androidDataDisplayed['$nativeDisplay $nativeValueDisplay'] =
-          androidNativeLegend;
-
-      final javaValueDisplay = formatNumeric(data[adbJavaHeapJsonName]);
-      androidDataDisplayed['$javaDisplay $javaValueDisplay'] =
-          androidJavaLegend;
-
-      final stackValueDisplay = formatNumeric(data[adbStackJsonName]);
-      androidDataDisplayed['$stackDisplay $stackValueDisplay'] =
-          androidStackLegend;
-
-      final graphicsValueDisplay = formatNumeric(data[adbGraphicsJsonName]);
-      androidDataDisplayed['$graphicsDisplay $graphicsValueDisplay'] =
-          androidGraphicsLegend;
-
-      for (var entry in androidDataDisplayed.entries) {
-        results.add(
-          hoverRow(
-            name: entry.key,
-            image: entry.value,
-            hasNumeric: true,
-            hasUnit: controller.unitDisplayed.value,
-            scaleImage: true,
-          ),
-        );
-      }
-    }
-
-    return results;
+    return _dataToDisplay(
+      androidDataDisplayed,
+      firstWidget: Align(
+        alignment: Alignment.topLeft,
+        child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: dividerLineVerticalSpace,
+              horizontal: dividerLineHorizontalSpace,
+            ),
+            child: CustomPaint(painter: DashedLine(width, dashedColor))),
+      ),
+    );
   }
 
   void showHover(
@@ -1226,13 +1322,63 @@ class MemoryBodyState extends State<MemoryBody>
     }
   }
 
+  /// Padding for each title in the legend.
+  static const _legendTitlePadding = EdgeInsets.fromLTRB(5, 0, 0, 4);
+
   void showLegend(BuildContext context) {
     final RenderBox box = legendKey.currentContext.findRenderObject();
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final legendHeading = colorScheme.hoverTextStyle;
 
     // Global position.
     final position = box.localToGlobal(Offset.zero);
 
-    final legendHeading = Theme.of(context).textTheme.subtitle2;
+    final legendRows = <Widget>[];
+
+    final events = eventLegend(colorScheme.isLight);
+    legendRows.add(Container(
+      padding: _legendTitlePadding,
+      child: Text('Events Legend', style: legendHeading),
+    ));
+
+    var iterator = events.entries.iterator;
+    while (iterator.moveNext()) {
+      final leftEntry = iterator.current;
+      final rightEntry = iterator.moveNext() ? iterator.current : null;
+      legendRows.add(legendRow(entry1: leftEntry, entry2: rightEntry));
+    }
+
+    final vms = vmLegend();
+    legendRows.add(
+      Container(
+        padding: _legendTitlePadding,
+        child: Text('Memory Legend', style: legendHeading),
+      ),
+    );
+
+    iterator = vms.entries.iterator;
+    while (iterator.moveNext()) {
+      final legendEntry = iterator.current;
+      legendRows.add(legendRow(entry1: legendEntry));
+    }
+
+    if (controller.isAndroidChartVisible) {
+      final androids = androidLegend();
+      legendRows.add(
+        Container(
+          padding: _legendTitlePadding,
+          child: Text('Android Legend', style: legendHeading),
+        ),
+      );
+
+      iterator = androids.entries.iterator;
+      while (iterator.moveNext()) {
+        final legendEntry = iterator.current;
+        legendRows.add(legendRow(entry1: legendEntry));
+      }
+    }
+
     final OverlayState overlayState = Overlay.of(context);
     legendOverlayEntry ??= OverlayEntry(
       builder: (context) => Positioned(
@@ -1244,69 +1390,14 @@ class MemoryBodyState extends State<MemoryBody>
         child: Container(
           padding: const EdgeInsets.fromLTRB(0, 5, 5, 8),
           decoration: BoxDecoration(
-            color: Colors.black,
+            color: colorScheme.defaultBackgroundColor,
             border: Border.all(color: Colors.yellow),
             borderRadius: BorderRadius.circular(10.0),
           ),
           width: legendWidth,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
-                child: Text('Events Legend', style: legendHeading),
-              ),
-              legendRow(
-                name1: 'Snapshot',
-                image1: snapshotManualLegend,
-                name2: 'Auto',
-                image2: snapshotAutoLegend,
-              ),
-              legendRow(
-                name1: 'Monitor',
-                image1: monitorLegend,
-                name2: 'Reset',
-                image2: resetLegend,
-              ),
-              legendRow(
-                name1: 'GC VM',
-                image1: gcVMLegend,
-                name2: 'Manual',
-                image2: gcManualLegend,
-              ),
-              Container(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
-                child: Text('Memory Legend', style: legendHeading),
-              ),
-              legendRow(
-                  name1: MemoryScreen.allocatedDisplay,
-                  image1: allocatedLegend),
-              legendRow(name1: MemoryScreen.usedDisplay, image1: usedLegend),
-              legendRow(
-                  name1: MemoryScreen.externalDisplay, image1: externalLegend),
-              legendRow(name1: MemoryScreen.rssDisplay, image1: rssLegend),
-              if (controller.isAndroidChartVisible)
-                const Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 9)),
-              if (controller.isAndroidChartVisible)
-                Container(
-                  padding: const EdgeInsets.fromLTRB(5, 0, 0, 4),
-                  child: Text('Android Legend', style: legendHeading),
-                ),
-              if (controller.isAndroidChartVisible)
-                legendRow(name1: 'Total', image1: androidTotalLegend),
-              if (controller.isAndroidChartVisible)
-                legendRow(name1: 'Other', image1: androidOtherLegend),
-              if (controller.isAndroidChartVisible)
-                legendRow(name1: 'Code', image1: androidCodeLegend),
-              if (controller.isAndroidChartVisible)
-                legendRow(name1: 'Native', image1: androidNativeLegend),
-              if (controller.isAndroidChartVisible)
-                legendRow(name1: 'Java', image1: androidJavaLegend),
-              if (controller.isAndroidChartVisible)
-                legendRow(name1: 'Stack', image1: androidStackLegend),
-              if (controller.isAndroidChartVisible)
-                legendRow(name1: 'Graphics', image1: androidGraphicsLegend),
-            ],
+            children: legendRows,
           ),
         ),
       ),
@@ -1361,191 +1452,46 @@ class MemoryBodyState extends State<MemoryBody>
   }
 }
 
-/// Event types handled for hover card.
-const devToolsEvent = 'DevTools.Event';
-const imageSizesForFrameEvent = 'Flutter.ImageSizesForFrame';
-const displaySizeInBytesData = 'displaySizeInBytes';
-const decodedSizeInBytesData = 'decodedSizeInBytes';
-
-const String eventName = 'name';
-const String eventData = 'data';
-const String customEvent = 'custom';
-const String customEventName = 'name';
-const String customEventData = 'data';
-
-const String indexPayloadJson = 'index';
-const String timestampPayloadJson = 'timestamp';
-const String prettyTimestampPayloadJson = 'prettyTimestamp';
-const String eventPayloadJson = 'event';
-const String vmPayloadJson = 'vm';
-const String androidPayloadJson = 'android';
-
-/// VM Data
-const String rssJsonName = 'rss';
-const String capacityJsonName = 'capacity';
-const String usedJsonName = 'used';
-const String externalJsonName = 'external';
-const String rasterPictureJsonName = 'rasterLayer';
-const String rasterLayerJsonName = 'rasterPicture';
-
-/// Android data
-const String adbTotalJsonName = 'total';
-const String adbOtherJsonName = 'other';
-const String adbCodeJsonName = 'code';
-const String adbNativeHeapJsonName = 'nativeHeap';
-const String adbJavaHeapJsonName = 'javaHeap';
-const String adbStackJsonName = 'stack';
-const String adbGraphicsJsonName = 'graphics';
-
-/// Events data
-const String snapshotJsonName = 'snapshot';
-const String autoSnapshotJsonName = 'autoSnapshot';
-const String monitorStartJsonName = 'monitorStart';
-const String monitorResetJsonName = 'monitorReset';
-const String extensionEventsJsonName = 'extensionEvents';
-const String manualGCJsonName = 'manualGC';
-const String gcJsonName = 'gc';
-
-/// Retrieve all data values of a given index (timestamp) of the collected data.
-class ChartsValues {
-  ChartsValues(this.controller, this.index, this.timestamp) {
-    _fetch();
+/// Draw a dashed line on the canvas.
+class DashedLine extends CustomPainter {
+  DashedLine(
+    this._totalWidth, [
+    Color color,
+    this._dashHeight = defaultDashHeight,
+    this._dashWidth = defaultDashWidth,
+    this._dashSpace = defaultDashSpace,
+  ]) {
+    _color = color == null ? (Colors.grey.shade500) : color;
   }
 
-  final MemoryController controller;
+  static const defaultDashHeight = 1.0;
+  static const defaultDashWidth = 5.0;
+  static const defaultDashSpace = 5.0;
 
-  final int index;
+  final double _dashHeight;
+  final double _dashWidth;
+  final double _dashSpace;
 
-  final int timestamp;
+  double _totalWidth;
+  Color _color;
 
-  final _event = <String, Object>{};
+  @override
+  void paint(Canvas canvas, Size size) {
+    double startX = 0;
+    final paint = Paint()
+      ..color = _color
+      ..strokeWidth = _dashHeight;
 
-  final _extensionEvents = <Map<String, Object>>[];
-
-  Map<String, Object> get vmData => _vm;
-
-  final _vm = <String, Object>{};
-
-  Map<String, Object> get androidData => _android;
-
-  final _android = <String, Object>{};
-
-  Map<String, Object> toJson() {
-    return {
-      indexPayloadJson: index,
-      timestampPayloadJson: timestamp,
-      prettyTimestampPayloadJson: prettyTimestamp(timestamp),
-      eventPayloadJson: _event,
-      vmPayloadJson: _vm,
-      androidPayloadJson: _android,
-    };
-  }
-
-  int get eventCount =>
-      _event.entries.length -
-      (extensionEventsLength > 0 ? 1 : 0) +
-      (hasGc ? 1 : 0);
-
-  bool get hasSnapshot => _event.containsKey(snapshotJsonName);
-
-  bool get hasAutoSnapshot => _event.containsKey(autoSnapshotJsonName);
-
-  bool get hasMonitorStart => _event.containsKey(monitorStartJsonName);
-
-  bool get hasMonitorReset => _event.containsKey(monitorResetJsonName);
-
-  bool get hasExtensionEvents => _event.containsKey(extensionEventsJsonName);
-
-  bool get hasManualGc => _event.containsKey(manualGCJsonName);
-
-  bool get hasGc => _vm[gcJsonName];
-
-  int get extensionEventsLength =>
-      hasExtensionEvents ? extensionEvents.length : 0;
-
-  List<Map<String, Object>> get extensionEvents {
-    if (_extensionEvents.isEmpty) {
-      _extensionEvents.addAll(_event[extensionEventsJsonName]);
-    }
-    return _extensionEvents;
-  }
-
-  void _fetch() {
-    _event.clear();
-    _vm.clear();
-    _android.clear();
-
-    _fetchEventData(_event);
-    _fetchVMData(controller.memoryTimeline.data[index], _vm);
-    _fetchAndroidData(
-      controller.memoryTimeline.data[index].adbMemoryInfo,
-      _android,
-    );
-  }
-
-  void _fetchEventData(Map<String, Object> results) {
-    // Use the detailed extension events data stored in the memoryTimeline.
-    final eventInfo = controller.memoryTimeline.data[index].memoryEventInfo;
-
-    if (eventInfo.isEmpty) return;
-
-    if (eventInfo.isEventGC) results[manualGCJsonName] = true;
-    if (eventInfo.isEventSnapshot) results[snapshotJsonName] = true;
-    if (eventInfo.isEventSnapshotAuto) results[autoSnapshotJsonName] = true;
-    if (eventInfo.isEventAllocationAccumulator) {
-      if (eventInfo.allocationAccumulator.isStart) {
-        results[monitorStartJsonName] = true;
-      }
-      if (eventInfo.allocationAccumulator.isReset) {
-        results[monitorResetJsonName] = true;
-      }
-    }
-
-    if (eventInfo.hasExtensionEvents) {
-      final events = <Map<String, Object>>[];
-      for (ExtensionEvent event in eventInfo.extensionEvents.theEvents) {
-        if (event.customEventName != null) {
-          events.add(
-            {
-              eventName: event.eventKind,
-              customEvent: {
-                customEventName: event.customEventName,
-                customEventData: event.data,
-              },
-            },
-          );
-        } else {
-          events.add({eventName: event.eventKind, eventData: event.data});
-        }
-      }
-      if (events.isNotEmpty) {
-        results[extensionEventsJsonName] = events;
-      }
+    while (_totalWidth >= 0) {
+      canvas.drawLine(Offset(startX, 0), Offset(startX + _dashWidth, 0), paint);
+      final space = _dashSpace + _dashWidth;
+      startX += space;
+      _totalWidth -= space;
     }
   }
 
-  void _fetchVMData(HeapSample heapSample, Map<String, Object> results) {
-    results[rssJsonName] = heapSample.rss;
-    results[capacityJsonName] = heapSample.capacity;
-    results[usedJsonName] = heapSample.used;
-    results[externalJsonName] = heapSample.external;
-    results[gcJsonName] = heapSample.isGC;
-    results[rasterPictureJsonName] = heapSample.rasterCache.pictureBytes;
-    results[rasterLayerJsonName] = heapSample.rasterCache.layerBytes;
-  }
-
-  void _fetchAndroidData(
-    AdbMemoryInfo androidData,
-    Map<String, Object> results,
-  ) {
-    results[adbTotalJsonName] = androidData.total;
-    results[adbOtherJsonName] = androidData.other;
-    results[adbCodeJsonName] = androidData.code;
-    results[adbNativeHeapJsonName] = androidData.nativeHeap;
-    results[adbJavaHeapJsonName] = androidData.javaHeap;
-    results[adbStackJsonName] = androidData.stack;
-    results[adbGraphicsJsonName] = androidData.graphics;
-  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
 class MemoryConfigurationsDialog extends StatelessWidget {

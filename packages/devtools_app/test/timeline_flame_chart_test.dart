@@ -107,7 +107,7 @@ void main() {
       final controller = PerformanceController();
       await pumpTimelineBody(tester, controller);
       expect(controller.data.frames.length, equals(1));
-      await controller.selectFrame(controller.data.frames.first);
+      await controller.toggleSelectedFrame(controller.data.frames.first);
       await tester.pumpAndSettle();
 
       expect(find.byType(TimelineFlameChart), findsOneWidget);

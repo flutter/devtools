@@ -590,12 +590,14 @@ class DevToolsTooltip extends StatelessWidget {
   const DevToolsTooltip({
     @required this.tooltip,
     @required this.child,
-    this.preferBelow = true,
+    this.preferBelow = false,
+    this.padding,
   });
 
   final String tooltip;
   final Widget child;
   final bool preferBelow;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
@@ -603,6 +605,7 @@ class DevToolsTooltip extends StatelessWidget {
       message: tooltip,
       waitDuration: tooltipWait,
       preferBelow: preferBelow,
+      padding: padding,
       child: child,
     );
   }
@@ -924,14 +927,16 @@ class RoundedOutlinedBorder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).focusColor),
-        borderRadius: BorderRadius.circular(defaultBorderRadius),
-      ),
+      decoration: roundedBorderDecoration(context),
       child: child,
     );
   }
 }
+
+BoxDecoration roundedBorderDecoration(BuildContext context) => BoxDecoration(
+      border: Border.all(color: Theme.of(context).focusColor),
+      borderRadius: BorderRadius.circular(defaultBorderRadius),
+    );
 
 class LeftBorder extends StatelessWidget {
   const LeftBorder({this.child});
@@ -1249,4 +1254,12 @@ class FormattedJson extends StatelessWidget {
       style: Theme.of(context).fixedFontStyle,
     );
   }
+}
+
+class Link {
+  const Link({this.display, this.url});
+
+  final String display;
+
+  final String url;
 }

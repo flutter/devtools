@@ -127,6 +127,9 @@ class DebuggerController extends DisposableController
   /// history).
   void _showScriptLocation(ScriptLocation scriptLocation) {
     _currentScriptRef.value = scriptLocation?.scriptRef;
+    // We want to notify regardless of the previous scriptLocation, temporarily
+    // set to null to ensure that happens.
+    _scriptLocation.value = null;
     _scriptLocation.value = scriptLocation;
   }
 

@@ -7,13 +7,16 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
+import '../dialogs.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
+import '../globals.dart';
 import '../theme.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
@@ -152,7 +155,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
   }
 
   void _updateScrollPosition({bool animate = true}) {
-    if (widget.controller.scriptLocation.value.scriptRef != scriptRef) {
+    if (widget.controller.scriptLocation.value?.scriptRef != scriptRef) {
       return;
     }
 
@@ -274,6 +277,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
             style: theme.fixedFontStyle,
             child: Expanded(
               child: Scrollbar(
+                controller: textController,
                 child: ValueListenableBuilder<StackFrameAndSourcePosition>(
                   valueListenable: widget.controller.selectedStackFrame,
                   builder: (context, frame, _) {
@@ -349,21 +353,15 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                 ),
               ),
               const SizedBox(width: denseSpacing),
-              PopupMenuButton<ScriptRef>(
+              ScriptPopupMenu(widget.controller),
+              const SizedBox(width: denseSpacing),
+              ScriptHistoryPopupMenu(
                 itemBuilder: _buildScriptMenuFromHistory,
-                enabled: scriptsHistory.hasScripts,
                 onSelected: (scriptRef) {
                   widget.controller
                       .showScriptLocation(ScriptLocation(scriptRef));
                 },
-                offset: const Offset(
-                  actionsIconSize + denseSpacing,
-                  buttonMinWidth + denseSpacing,
-                ),
-                child: const Icon(
-                  Icons.keyboard_arrow_down,
-                  size: actionsIconSize,
-                ),
+                enabled: scriptsHistory.hasScripts,
               ),
               const SizedBox(width: denseSpacing),
             ],
@@ -569,7 +567,7 @@ class LineItem extends StatefulWidget {
   }) : super(key: key);
 
   static const _hoverDelay = Duration(milliseconds: 500);
-  static const _hoverWidth = 250.0;
+  static const _hoverWidth = 400.0;
 
   final TextSpan lineContents;
   final StackFrameAndSourcePosition pausedFrame;
@@ -723,4 +721,156 @@ class _LineItemState extends State<LineItem> {
           maxLines: 1,
         ),
       );
+}
+
+class ScriptPopupMenu extends StatelessWidget {
+  const ScriptPopupMenu(this._controller);
+
+  final DebuggerController _controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<ScriptPopupMenuOption>(
+      onSelected: (option) => option.onSelected(context, _controller),
+      itemBuilder: (_) => [
+        for (final menuOption in defaultScriptPopupMenuOptions)
+          menuOption.build(context),
+        for (final extensionMenuOption in devToolsExtensionPoints
+            .buildExtraDebuggerScriptPopupMenuOptions())
+          extensionMenuOption.build(context),
+      ],
+      child: const Icon(
+        Icons.more_vert,
+        size: actionsIconSize,
+      ),
+    );
+  }
+}
+
+class ScriptHistoryPopupMenu extends StatelessWidget {
+  const ScriptHistoryPopupMenu({
+    @required this.itemBuilder,
+    @required this.onSelected,
+    @required this.enabled,
+  });
+
+  final PopupMenuItemBuilder<ScriptRef> itemBuilder;
+
+  final void Function(ScriptRef) onSelected;
+
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<ScriptRef>(
+      itemBuilder: itemBuilder,
+      tooltip: 'Select recent script',
+      enabled: enabled,
+      onSelected: onSelected,
+      offset: const Offset(
+        actionsIconSize + denseSpacing,
+        buttonMinWidth + denseSpacing,
+      ),
+      child: const Icon(
+        Icons.history,
+        size: actionsIconSize,
+      ),
+    );
+  }
+}
+
+class ScriptPopupMenuOption {
+  const ScriptPopupMenuOption({
+    @required this.label,
+    @required this.onSelected,
+    this.icon,
+  });
+
+  final String label;
+
+  final void Function(BuildContext, DebuggerController) onSelected;
+
+  final IconData icon;
+
+  PopupMenuItem<ScriptPopupMenuOption> build(BuildContext context) {
+    return PopupMenuItem<ScriptPopupMenuOption>(
+      value: this,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: Theme.of(context).regularTextStyle),
+          if (icon != null)
+            Icon(
+              icon,
+              size: actionsIconSize,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+final defaultScriptPopupMenuOptions = [copyScriptNameOption, goToLineOption];
+
+final copyScriptNameOption = ScriptPopupMenuOption(
+  label: 'Copy filename',
+  icon: Icons.content_copy,
+  onSelected: (_, controller) => Clipboard.setData(
+    ClipboardData(text: controller.scriptLocation.value?.scriptRef?.uri),
+  ),
+);
+
+void showGoToLineDialog(BuildContext context, DebuggerController controller) {
+  showDialog(
+    context: context,
+    builder: (context) => GoToLineDialog(controller),
+  );
+}
+
+const goToLineOption = ScriptPopupMenuOption(
+  label: 'Go to line number',
+  icon: Icons.list,
+  onSelected: showGoToLineDialog,
+);
+
+class GoToLineDialog extends StatelessWidget {
+  const GoToLineDialog(this._debuggerController);
+
+  final DebuggerController _debuggerController;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsDialog(
+      title: dialogTitleText(Theme.of(context), 'Go To'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            autofocus: true,
+            onSubmitted: (value) {
+              if (value.isNotEmpty) {
+                Navigator.of(context, rootNavigator: true).pop('dialog');
+                final line = int.parse(value);
+                _debuggerController.showScriptLocation(
+                  ScriptLocation(
+                    _debuggerController.scriptLocation.value.scriptRef,
+                    location: SourcePosition(line: line, column: 0),
+                  ),
+                );
+              }
+            },
+            decoration: const InputDecoration(labelText: 'Line Number'),
+            keyboardType: TextInputType.number,
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly
+            ],
+          )
+        ],
+      ),
+      actions: const [
+        DialogCancelButton(),
+      ],
+    );
+  }
 }
