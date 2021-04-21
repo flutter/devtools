@@ -38,11 +38,3 @@ class _Tester extends WidgetController {
 }
 
 final tester = _Tester();
-
-Future<T> $await<T>(Future<T> future, String id) async {
-  try {
-    return await future;
-  } finally {
-    postEvent('future_completed', {'id': id});
-  }
-}
