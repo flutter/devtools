@@ -780,15 +780,21 @@ const _k3 = Key('child 3');
 const _w1 = Text('content1', key: _k1);
 const _w2 = Text('content2', key: _k2);
 const _w3 = Text('content3', key: _k3);
-const _mediumSplitter = SizedBox(height: 20, width: 20);
-const _largeSplitter = SizedBox(height: 40, width: 40);
+const _mediumSplitter = PreferredSize(
+  preferredSize: Size(20, 20),
+  child: SizedBox(height: 20, width: 20),
+);
+const _largeSplitter = PreferredSize(
+  preferredSize: Size(40, 40),
+  child: SizedBox(height: 40, width: 40),
+);
 
 Split buildSplit(
   Axis axis, {
   @required List<double> initialFractions,
   List<Widget> children,
   List<double> minSizes,
-  List<SizedBox> splitters,
+  List<PreferredSizeWidget> splitters,
 }) {
   children ??= const [_w1, _w2];
   return Split(

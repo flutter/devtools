@@ -67,7 +67,7 @@ class Split extends StatefulWidget {
   /// Splitter widgets to divide [children].
   ///
   /// If this is null, a default splitter will be used to divide [children].
-  final List<SizedBox> splitters;
+  final List<PreferredSizeWidget> splitters;
 
   /// The key passed to the divider between children[index] and
   /// children[index + 1].
@@ -288,7 +288,9 @@ class _SplitState extends State<Split> {
     } else {
       var totalSize = 0.0;
       for (var splitter in widget.splitters) {
-        totalSize += isHorizontal ? splitter.width : splitter.height;
+        totalSize += isHorizontal
+            ? splitter.preferredSize.width
+            : splitter.preferredSize.height;
       }
       return totalSize;
     }

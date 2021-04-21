@@ -650,49 +650,66 @@ class ToolbarAction extends StatelessWidget {
 /// on the right-hand side.
 ///
 /// This is typically used as a title for a logical area of the screen.
-// TODO(devoncarew): Refactor this into an 'AreaPaneHeader' widget.
-// TODO(peterdjlee): Consider passing in a list of widgets for content instead of String title.
-SizedBox areaPaneHeader(
-  BuildContext context, {
-  @required String title,
-  bool needsTopBorder = true,
-  bool needsBottomBorder = true,
-  bool needsLeftBorder = false,
-  List<Widget> actions = const [],
-  double rightPadding = densePadding,
-  bool tall = false,
-}) {
-  final theme = Theme.of(context);
-  return SizedBox(
-    height:
-        tall ? areaPaneHeaderHeight + 2 * densePadding : areaPaneHeaderHeight,
-    child: Container(
-      decoration: BoxDecoration(
-        border: Border(
-          top: needsTopBorder ? defaultBorderSide(theme) : BorderSide.none,
-          bottom:
-              needsBottomBorder ? defaultBorderSide(theme) : BorderSide.none,
-          left: needsLeftBorder ? defaultBorderSide(theme) : BorderSide.none,
-        ),
-        color: titleSolidBackgroundColor(theme),
-      ),
-      padding: EdgeInsets.only(left: defaultSpacing, right: rightPadding),
-      alignment: Alignment.centerLeft,
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.subtitle2,
-            ),
+class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
+  const AreaPaneHeader({
+    Key key,
+    @required this.title,
+    this.needsTopBorder = true,
+    this.needsBottomBorder = true,
+    this.needsLeftBorder = false,
+    this.actions = const [],
+    this.rightPadding = densePadding,
+    this.tall = false,
+  }) : super(key: key);
+
+  final Widget title;
+  final bool needsTopBorder;
+  final bool needsBottomBorder;
+  final bool needsLeftBorder;
+  final List<Widget> actions;
+  final double rightPadding;
+  final bool tall;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SizedBox.fromSize(
+      size: preferredSize,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: needsTopBorder ? defaultBorderSide(theme) : BorderSide.none,
+            bottom:
+                needsBottomBorder ? defaultBorderSide(theme) : BorderSide.none,
+            left: needsLeftBorder ? defaultBorderSide(theme) : BorderSide.none,
           ),
-          ...actions,
-        ],
+          color: titleSolidBackgroundColor(theme),
+        ),
+        padding: EdgeInsets.only(left: defaultSpacing, right: rightPadding),
+        alignment: Alignment.centerLeft,
+        child: Row(
+          children: [
+            Expanded(
+              child: DefaultTextStyle(
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.subtitle2,
+                child: title,
+              ),
+            ),
+            ...actions,
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
+
+  @override
+  Size get preferredSize {
+    return Size.fromHeight(
+      tall ? areaPaneHeaderHeight + 2 * densePadding : areaPaneHeaderHeight,
+    );
+  }
 }
 
 BorderSide defaultBorderSide(ThemeData theme) {

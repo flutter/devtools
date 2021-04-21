@@ -62,9 +62,8 @@ class _DebuggerConsoleState extends State<DebuggerConsole> {
         children: [
           Expanded(
             child: Console(
-              title: areaPaneHeader(
-                context,
-                title: 'Console',
+              title: AreaPaneHeader(
+                title: const Text('Console'),
                 needsTopBorder: false,
                 actions: [
                   CopyToClipboardControl(

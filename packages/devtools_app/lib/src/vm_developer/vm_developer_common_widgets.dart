@@ -56,9 +56,8 @@ class VMInfoList extends StatelessWidget {
     final theme = Theme.of(context);
     return Column(
       children: [
-        areaPaneHeader(
-          context,
-          title: title,
+        AreaPaneHeader(
+          title: Text(title),
           needsTopBorder: false,
         ),
         if (rowKeyValues != null)
