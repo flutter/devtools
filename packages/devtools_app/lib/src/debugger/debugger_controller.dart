@@ -155,6 +155,8 @@ class DebuggerController extends DisposableController
     return cachedScript;
   }
 
+  /// Parses the current script into executable lines and prepares the script
+  /// for syntax highlighting.
   Future<void> _parseCurrentScript() async {
     // Return early if the current script has not changed.
     if (_currentParsedScript.value?.script?.id == _currentScriptRef.value.id)
