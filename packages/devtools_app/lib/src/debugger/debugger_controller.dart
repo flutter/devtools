@@ -139,7 +139,7 @@ class DebuggerController extends DisposableController
   void _showScriptLocation(ScriptLocation scriptLocation) {
     _currentScriptRef.value = scriptLocation?.scriptRef;
 
-    parseCurrentScript();
+    _parseCurrentScript();
 
     // We want to notify regardless of the previous scriptLocation, temporarily
     // set to null to ensure that happens.
@@ -155,7 +155,7 @@ class DebuggerController extends DisposableController
     return cachedScript;
   }
 
-  Future<void> parseCurrentScript() async {
+  Future<void> _parseCurrentScript() async {
     // Return early if the current script has not changed.
     if (_currentParsedScript.value?.script?.id == _currentScriptRef.value.id)
       return;

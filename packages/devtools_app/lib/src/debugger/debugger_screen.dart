@@ -270,6 +270,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   }
 }
 
+// TODO(kenz): consider breaking out the key binding logic out into a separate
+// file so it is easy to find.
 final LogicalKeySet focusLibraryFilterKeySet = LogicalKeySet(
   HostPlatform.instance.isMacOS
       ? LogicalKeyboardKey.meta
