@@ -449,6 +449,26 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       offlineMode = true;
     });
   }
+
+  /// Returns the width of the scaffold title, tabs and default icons.
+  double _wideWidth(String title, DevToolsScaffold widget) {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: title,
+        style: Theme.of(context).textTheme.headline6,
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    // Approximate size of the title. Add [defaultSpacing] to account for
+    // title's leading padding.
+    double wideWidth = painter.width + defaultSpacing;
+    for (var tab in widget.tabs) {
+      wideWidth += tab.approximateWidth();
+    }
+    wideWidth +=
+        (widget.actions?.length ?? 0) * DevToolsScaffold.actionWidgetSize;
+    return wideWidth;
+  }
 }
 
 class SimpleScreen extends Screen {
@@ -462,20 +482,4 @@ class SimpleScreen extends Screen {
   Widget build(BuildContext context) {
     return child;
   }
-}
-
-/// Returns the width of the scaffold title, tabs and default icons.
-double _wideWidth(String title, DevToolsScaffold widget) {
-  final painter = TextPainter(
-    text: TextSpan(
-      text: title,
-    ),
-    textDirection: TextDirection.ltr,
-  )..layout();
-  // Approximate size of title and default icons.
-  double wideWidth = painter.width + 300;
-  for (var tab in widget.tabs) {
-    wideWidth += tab.approximateWidth();
-  }
-  return wideWidth;
 }
