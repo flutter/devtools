@@ -68,6 +68,8 @@ void main() {
       when(debuggerController.exceptionPauseMode)
           .thenReturn(ValueNotifier('Unhandled'));
       when(debuggerController.variables).thenReturn(ValueNotifier([]));
+      when(debuggerController.currentParsedScript)
+          .thenReturn(ValueNotifier<ParsedScript>(null));
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
