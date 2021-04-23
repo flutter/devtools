@@ -55,6 +55,19 @@ class SourcePosition {
   String toString() => '$line:$column';
 }
 
+class SourceToken {
+  SourceToken({@required this.position, @required this.length});
+
+  final SourcePosition position;
+
+  final int length;
+
+  @override
+  String toString() {
+    return '$position-${position.column + length}';
+  }
+}
+
 /// A tuple of a breakpoint and a source position.
 abstract class BreakpointAndSourcePosition
     implements Comparable<BreakpointAndSourcePosition> {

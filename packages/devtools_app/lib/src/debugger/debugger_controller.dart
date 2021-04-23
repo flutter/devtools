@@ -13,11 +13,14 @@ import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose.dart';
+import '../config_specific/logger/logger.dart';
 import '../core/message_bus.dart';
 import '../globals.dart';
+import '../ui/search.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
 import 'debugger_model.dart';
+import 'syntax_highlighter.dart';
 
 // TODO(devoncarew): Add some delayed resume value notifiers (to be used to
 // help debounce stepping operations).
@@ -60,7 +63,7 @@ class VariableConsoleLine extends ConsoleLine {
 
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with AutoDisposeControllerMixin, SearchControllerMixin<SourceToken> {
   // `initialSwitchToIsolate` can be set to false for tests to skip the logic
   // in `switchToIsolate`.
   DebuggerController({bool initialSwitchToIsolate = true}) {
@@ -108,6 +111,15 @@ class DebuggerController extends DisposableController
 
   ValueListenable<ScriptRef> get currentScriptRef => _currentScriptRef;
 
+  @visibleForTesting
+  final parsedScript = ValueNotifier<ParsedScript>(null);
+
+  ValueListenable<ParsedScript> get currentParsedScript => parsedScript;
+
+  final _showSearchInFileField = ValueNotifier<bool>(false);
+
+  ValueListenable<bool> get showSearchInFileField => _showSearchInFileField;
+
   final _scriptLocation = ValueNotifier<ScriptLocation>(null);
 
   ValueListenable<ScriptLocation> get scriptLocation => _scriptLocation;
@@ -127,10 +139,53 @@ class DebuggerController extends DisposableController
   /// history).
   void _showScriptLocation(ScriptLocation scriptLocation) {
     _currentScriptRef.value = scriptLocation?.scriptRef;
+
+    _parseCurrentScript();
+
     // We want to notify regardless of the previous scriptLocation, temporarily
     // set to null to ensure that happens.
     _scriptLocation.value = null;
     _scriptLocation.value = scriptLocation;
+  }
+
+  Future<Script> getScriptForRef(ScriptRef ref) async {
+    final cachedScript = getScriptCached(ref);
+    if (cachedScript == null && ref != null) {
+      return await getScript(ref);
+    }
+    return cachedScript;
+  }
+
+  /// Parses the current script into executable lines and prepares the script
+  /// for syntax highlighting.
+  Future<void> _parseCurrentScript() async {
+    // Return early if the current script has not changed.
+    if (parsedScript.value?.script?.id == _currentScriptRef.value.id) return;
+
+    final scriptRef = _currentScriptRef.value;
+    final script = await getScriptForRef(scriptRef);
+
+    // Create a new SyntaxHighlighter with the script's source in preparation
+    // for building the code view.
+    final highlighter = SyntaxHighlighter(source: script?.source ?? '');
+
+    // Gather the data to display breakable lines.
+    var executableLines = <int>{};
+
+    if (script != null) {
+      try {
+        final positions = await getBreakablePositions(script);
+        executableLines = Set.from(positions.map((p) => p.line));
+      } catch (e) {
+        // Ignore - not supported for all vm service implementations.
+        log('$e');
+      }
+    }
+    parsedScript.value = ParsedScript(
+      script: script,
+      highlighter: highlighter,
+      executableLines: executableLines,
+    );
   }
 
   // A cached map of uris to ScriptRefs.
@@ -1057,6 +1112,37 @@ class DebuggerController extends DisposableController
 
     return positions;
   }
+
+  void toggleSearchInFileVisibility(bool visible) {
+    _showSearchInFileField.value = visible;
+    if (!visible) {
+      resetSearch();
+    }
+  }
+
+  @override
+  List<SourceToken> matchesForSearch(String search) {
+    if (search == null || search.isEmpty || parsedScript.value == null) {
+      return [];
+    }
+    final matches = <SourceToken>[];
+    final caseInsensitiveSearch = search.toLowerCase();
+
+    final currentScript = parsedScript.value;
+    for (int i = 0; i < currentScript.lines.length; i++) {
+      final line = currentScript.lines[i].toLowerCase();
+      final matchesForLine = caseInsensitiveSearch.allMatches(line);
+      if (matchesForLine.isNotEmpty) {
+        matches.addAll(matchesForLine.map(
+          (m) => SourceToken(
+            position: SourcePosition(line: i, column: m.start),
+            length: m.end - m.start,
+          ),
+        ));
+      }
+    }
+    return matches;
+  }
 }
 
 class ScriptCache {
@@ -1231,4 +1317,23 @@ class _StackInfo {
 
   final List<StackFrameAndSourcePosition> frames;
   final bool truncated;
+}
+
+class ParsedScript {
+  ParsedScript({
+    @required this.script,
+    @required this.highlighter,
+    @required this.executableLines,
+  })  : assert(script != null),
+        lines = script.source.split('\n').toList();
+
+  final Script script;
+
+  final SyntaxHighlighter highlighter;
+
+  final Set<int> executableLines;
+
+  final List<String> lines;
+
+  int get lineCount => lines.length;
 }

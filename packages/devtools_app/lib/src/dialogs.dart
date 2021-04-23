@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'common_widgets.dart';
 import 'theme.dart';
 
-const _dialogDefaultContext = 'dialog';
+const dialogDefaultContext = 'dialog';
 
 Text dialogTitleText(ThemeData theme, String text) {
   return Text(text, style: theme.textTheme.headline6);
@@ -85,7 +85,7 @@ class DialogCancelButton extends StatelessWidget {
     return DialogTextButton(
       onPressed: () {
         if (cancelAction != null) cancelAction();
-        Navigator.of(context).pop(_dialogDefaultContext);
+        Navigator.of(context).pop(dialogDefaultContext);
       },
       child: const Text('CANCEL'),
     );
@@ -103,7 +103,7 @@ class DialogApplyButton extends StatelessWidget {
     return DialogTextButton(
       onPressed: () {
         if (onPressed != null) onPressed();
-        Navigator.of(context).pop(_dialogDefaultContext);
+        Navigator.of(context).pop(dialogDefaultContext);
       },
       child: const Text('APPLY'),
     );

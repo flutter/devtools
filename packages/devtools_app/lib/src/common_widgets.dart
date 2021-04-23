@@ -873,6 +873,10 @@ Widget clearInputButton(VoidCallback onPressed) {
   return inputDecorationSuffixButton(Icons.clear, onPressed);
 }
 
+Widget closeSearchDropdownButton(VoidCallback onPressed) {
+  return inputDecorationSuffixButton(Icons.close, onPressed);
+}
+
 Widget inputDecorationSuffixButton(IconData icon, VoidCallback onPressed) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: densePadding),
