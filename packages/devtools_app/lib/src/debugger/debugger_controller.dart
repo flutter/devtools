@@ -111,9 +111,10 @@ class DebuggerController extends DisposableController
 
   ValueListenable<ScriptRef> get currentScriptRef => _currentScriptRef;
 
-  final _currentParsedScript = ValueNotifier<ParsedScript>(null);
+  @visibleForTesting
+  final parsedScript = ValueNotifier<ParsedScript>(null);
 
-  ValueListenable<ParsedScript> get currentParsedScript => _currentParsedScript;
+  ValueListenable<ParsedScript> get currentParsedScript => parsedScript;
 
   final _showSearchInFileField = ValueNotifier<bool>(false);
 
@@ -159,8 +160,7 @@ class DebuggerController extends DisposableController
   /// for syntax highlighting.
   Future<void> _parseCurrentScript() async {
     // Return early if the current script has not changed.
-    if (_currentParsedScript.value?.script?.id == _currentScriptRef.value.id)
-      return;
+    if (parsedScript.value?.script?.id == _currentScriptRef.value.id) return;
 
     final scriptRef = _currentScriptRef.value;
     final script = await getScriptForRef(scriptRef);
@@ -168,7 +168,6 @@ class DebuggerController extends DisposableController
     // Create a new SyntaxHighlighter with the script's source in preparation
     // for building the code view.
     final highlighter = SyntaxHighlighter(source: script?.source ?? '');
-    final lineCount = script.source?.split('\n')?.length ?? 0;
 
     // Gather the data to display breakable lines.
     var executableLines = <int>{};
@@ -182,10 +181,9 @@ class DebuggerController extends DisposableController
         log('$e');
       }
     }
-    _currentParsedScript.value = ParsedScript(
+    parsedScript.value = ParsedScript(
       script: script,
       highlighter: highlighter,
-      lineCount: lineCount,
       executableLines: executableLines,
     );
   }
@@ -1124,13 +1122,13 @@ class DebuggerController extends DisposableController
 
   @override
   List<SourceToken> matchesForSearch(String search) {
-    if (search == null || search.isEmpty || currentParsedScript == null) {
+    if (search == null || search.isEmpty || parsedScript.value == null) {
       return [];
     }
     final matches = <SourceToken>[];
     final caseInsensitiveSearch = search.toLowerCase();
 
-    final currentScript = _currentParsedScript.value;
+    final currentScript = parsedScript.value;
     for (int i = 0; i < currentScript.lines.length; i++) {
       final line = currentScript.lines[i].toLowerCase();
       final matchesForLine = caseInsensitiveSearch.allMatches(line);
@@ -1326,7 +1324,6 @@ class ParsedScript {
     @required this.script,
     @required this.highlighter,
     @required this.executableLines,
-    @required this.lineCount,
   })  : assert(script != null),
         lines = script.source.split('\n').toList();
 
@@ -1336,7 +1333,7 @@ class ParsedScript {
 
   final Set<int> executableLines;
 
-  final int lineCount;
-
   final List<String> lines;
+
+  int get lineCount => lines.length;
 }

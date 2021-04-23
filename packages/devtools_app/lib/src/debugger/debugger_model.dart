@@ -61,6 +61,11 @@ class SourceToken {
   final SourcePosition position;
 
   final int length;
+
+  @override
+  String toString() {
+    return '$position-${position.column + length}';
+  }
 }
 
 /// A tuple of a breakpoint and a source position.
