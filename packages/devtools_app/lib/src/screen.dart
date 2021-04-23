@@ -106,7 +106,7 @@ abstract class Screen {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    return painter.width + defaultIconSize + denseSpacing * 2.0;
+    return painter.width + denseSpacing + defaultIconSize + defaultSpacing * 2;
   }
 
   /// Builds the tab to show for this screen in the [DevToolsScaffold]'s main
