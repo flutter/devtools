@@ -640,7 +640,7 @@ class LineItem extends StatefulWidget {
     this.activeSearchMatch,
   }) : super(key: key);
 
-  static const _hoverDelay = Duration(milliseconds: 500);
+  static const _hoverDelay = Duration(milliseconds: 50);
   static const _hoverWidth = 400.0;
 
   final TextSpan lineContents;
@@ -664,10 +664,13 @@ class _LineItemState extends State<LineItem> {
 
   DebuggerController _debuggerController;
 
+  String _previousHoverWord = '';
+
   void _onHoverExit() {
     _showTimer?.cancel();
     _removeTimer = Timer(LineItem._hoverDelay, () {
       _hoverCard?.maybeRemove();
+      _previousHoverWord = '';
     });
   }
 
@@ -676,11 +679,13 @@ class _LineItemState extends State<LineItem> {
     _removeTimer?.cancel();
     if (!_debuggerController.isPaused.value) return;
     _showTimer = Timer(LineItem._hoverDelay, () async {
-      _hoverCard?.remove();
       final word = wordForHover(
         event.localPosition.dx,
         widget.lineContents,
       );
+      if (word == _previousHoverWord) return;
+      _previousHoverWord = word;
+      _hoverCard?.remove();
       if (word != '') {
         try {
           final response = await _debuggerController.evalAtCurrentFrame(word);
