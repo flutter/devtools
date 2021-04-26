@@ -168,6 +168,72 @@ void main() {
       expect(data[8].name, equals('Qux'));
     });
 
+    testWidgets('sorts data by column and secondary column',
+        (WidgetTester tester) async {
+      final numberColumn = _NumberColumn();
+      final table = FlatTable<TestData>(
+        columns: [
+          flatNameColumn,
+          numberColumn,
+        ],
+        data: [
+          TestData('Foo', 0),
+          TestData('Bar', 1),
+          TestData('Baz', 2),
+          TestData('Qux', 3),
+          TestData('Snap', 4),
+          TestData('Crackle', 4),
+          TestData('Pop', 4),
+          TestData('Bang', 4),
+          TestData('Qux', 5),
+        ],
+        onItemSelected: noop,
+        keyFactory: (d) => Key(d.name),
+        sortColumn: numberColumn,
+        sortDirection: SortDirection.ascending,
+        secondarySortColumn: flatNameColumn,
+      );
+      await tester.pumpWidget(wrap(table));
+      final FlatTableState state = tester.state(find.byWidget(table));
+      final data = state.data;
+      expect(data[0].name, equals('Foo'));
+      expect(data[1].name, equals('Bar'));
+      expect(data[2].name, equals('Baz'));
+      expect(data[3].name, equals('Qux'));
+      expect(data[4].name, equals('Bang'));
+      expect(data[5].name, equals('Crackle'));
+      expect(data[6].name, equals('Pop'));
+      expect(data[7].name, equals('Snap'));
+      expect(data[8].name, equals('Qux'));
+
+      // Reverse the sort direction.
+      await tester.tap(find.text('Number'));
+      await tester.pumpAndSettle();
+
+      expect(data[8].name, equals('Foo'));
+      expect(data[7].name, equals('Bar'));
+      expect(data[6].name, equals('Baz'));
+      expect(data[5].name, equals('Qux'));
+      expect(data[4].name, equals('Bang'));
+      expect(data[3].name, equals('Crackle'));
+      expect(data[2].name, equals('Pop'));
+      expect(data[1].name, equals('Snap'));
+      expect(data[0].name, equals('Qux'));
+
+      // Change the sort column.
+      await tester.tap(find.text('FlatName'));
+      await tester.pumpAndSettle();
+      expect(data[0].name, equals('Bang'));
+      expect(data[1].name, equals('Bar'));
+      expect(data[2].name, equals('Baz'));
+      expect(data[3].name, equals('Crackle'));
+      expect(data[4].name, equals('Foo'));
+      expect(data[5].name, equals('Pop'));
+      expect(data[6].name, equals('Qux'));
+      expect(data[7].name, equals('Qux'));
+      expect(data[8].name, equals('Snap'));
+    });
+
     testWidgets('displays with many columns', (WidgetTester tester) async {
       final table = FlatTable<TestData>(
         columns: [
