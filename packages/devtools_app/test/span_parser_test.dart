@@ -173,6 +173,10 @@ const openCodeBlock = '''
 /// ```dart
 ///
 /// This should not cause parsing to fail.
+
+void main() {
+  // But scope should end when parent scope is closed.
+}
 ''';
 
 void spanTester({
@@ -468,6 +472,8 @@ void main() {
 
     test('handles dartdoc', () {
       final spans = SpanParser.parse(grammar, dartdoc);
+
+      // Covers block of lines starting with '///'
       spanTester(
         span: spans[0],
         scopes: ['comment.block.documentation.dart'],
@@ -476,6 +482,7 @@ void main() {
         length: 92,
       );
 
+      // [Foo]
       spanTester(
         span: spans[1],
         scopes: [
@@ -487,6 +494,7 @@ void main() {
         length: 5,
       );
 
+      // Whitespace after ```
       spanTester(
         span: spans[2],
         scopes: [
@@ -495,7 +503,31 @@ void main() {
         ],
         line: 2,
         column: 8,
-        length: 24,
+        length: 1,
+      );
+
+      // Foo.test(bar);
+      spanTester(
+        span: spans[3],
+        scopes: [
+          'comment.block.documentation.dart',
+          'variable.other.source.dart',
+        ],
+        line: 3,
+        column: 4,
+        length: 16,
+      );
+
+      // Whitespace after ```
+      spanTester(
+        span: spans[4],
+        scopes: [
+          'comment.block.documentation.dart',
+          'variable.other.source.dart',
+        ],
+        line: 4,
+        column: 4,
+        length: 1,
       );
     });
 
@@ -506,7 +538,7 @@ void main() {
     // the last line that matched the 'while' condition.
     test("handles 'while' rules", () {
       final spans = SpanParser.parse(grammar, whileRuleApplication);
-      expect(spans.length, 2);
+      expect(spans.length, 4);
 
       // /// multiline
       spanTester(
@@ -526,7 +558,29 @@ void main() {
         ],
         line: 2,
         column: 8,
-        length: 13,
+        length: 1,
+      );
+
+      spanTester(
+        span: spans[2],
+        scopes: [
+          'comment.block.documentation.dart',
+          'variable.other.source.dart',
+        ],
+        line: 3,
+        column: 4,
+        length: 5,
+      );
+
+      spanTester(
+        span: spans[3],
+        scopes: [
+          'comment.block.documentation.dart',
+          'variable.other.source.dart',
+        ],
+        line: 4,
+        column: 4,
+        length: 1,
       );
     });
 
@@ -1325,7 +1379,9 @@ void main() {
 
     test('handles malformed input', () {
       final spans = SpanParser.parse(grammar, openCodeBlock);
-      expect(spans.length, 2);
+      expect(spans.length, 7);
+
+      // Represents the span covering all lines starting with '///'
       spanTester(
         span: spans[0],
         scopes: ['comment.block.documentation.dart'],
@@ -1333,6 +1389,8 @@ void main() {
         column: 1,
         length: 91,
       );
+
+      // Immediately following '```dart'
       spanTester(
         span: spans[1],
         scopes: [
@@ -1341,7 +1399,64 @@ void main() {
         ],
         line: 2,
         column: 12,
-        length: 48,
+        length: 1,
+      );
+
+      // Whitespace after 3rd '///' line.
+      spanTester(
+        span: spans[2],
+        scopes: [
+          'comment.block.documentation.dart',
+          'variable.other.source.dart',
+        ],
+        line: 3,
+        column: 4,
+        length: 1,
+      );
+
+      // 'This should not cause parsing to fail.'
+      spanTester(
+        span: spans[3],
+        scopes: [
+          'comment.block.documentation.dart',
+          'variable.other.source.dart',
+        ],
+        line: 4,
+        column: 4,
+        length: 40,
+      );
+
+      // void
+      spanTester(
+        span: spans[4],
+        scopes: [
+          'storage.type.primitive.dart',
+        ],
+        line: 6,
+        column: 1,
+        length: 4,
+      );
+
+      // main
+      spanTester(
+        span: spans[5],
+        scopes: [
+          'entity.name.function.dart',
+        ],
+        line: 6,
+        column: 6,
+        length: 4,
+      );
+
+      // '// But scope should end when parent scope is closed.'
+      spanTester(
+        span: spans[6],
+        scopes: [
+          'comment.line.double-slash.dart',
+        ],
+        line: 7,
+        column: 3,
+        length: 52,
       );
     });
   });
