@@ -178,8 +178,8 @@ void main() {
         ],
         data: [
           TestData('Foo', 0),
-          TestData('Bar', 1),
-          TestData('Baz', 2),
+          TestData('1 Bar', 1),
+          TestData('# Baz', 2),
           TestData('Qux', 3),
           TestData('Snap', 4),
           TestData('Crackle', 4),
@@ -197,8 +197,8 @@ void main() {
       final FlatTableState state = tester.state(find.byWidget(table));
       final data = state.data;
       expect(data[0].name, equals('Foo'));
-      expect(data[1].name, equals('Bar'));
-      expect(data[2].name, equals('Baz'));
+      expect(data[1].name, equals('1 Bar'));
+      expect(data[2].name, equals('# Baz'));
       expect(data[3].name, equals('Qux'));
       expect(data[4].name, equals('Bang'));
       expect(data[5].name, equals('Crackle'));
@@ -211,8 +211,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(data[8].name, equals('Foo'));
-      expect(data[7].name, equals('Bar'));
-      expect(data[6].name, equals('Baz'));
+      expect(data[7].name, equals('1 Bar'));
+      expect(data[6].name, equals('# Baz'));
       expect(data[5].name, equals('Qux'));
       expect(data[4].name, equals('Bang'));
       expect(data[3].name, equals('Crackle'));
@@ -223,9 +223,9 @@ void main() {
       // Change the sort column.
       await tester.tap(find.text('FlatName'));
       await tester.pumpAndSettle();
-      expect(data[0].name, equals('Bang'));
-      expect(data[1].name, equals('Bar'));
-      expect(data[2].name, equals('Baz'));
+      expect(data[0].name, equals('# Baz'));
+      expect(data[1].name, equals('1 Bar'));
+      expect(data[2].name, equals('Bang'));
       expect(data[3].name, equals('Crackle'));
       expect(data[4].name, equals('Foo'));
       expect(data[5].name, equals('Pop'));

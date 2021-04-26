@@ -421,10 +421,16 @@ class MessageColumn extends ColumnData<LogData>
     final String valueB = getValue(b);
     // Matches frame descriptions (e.g. '#12  11.4ms ')
     final regex = RegExp(r'#(\d+)\s+\d+.\d+ms\s*');
-    if (valueA.startsWith(regex) && valueB.startsWith(regex)) {
+    final valueAIsFrameLog = valueA.startsWith(regex);
+    final valueBIsFrameLog = valueB.startsWith(regex);
+    if (valueAIsFrameLog && valueBIsFrameLog) {
       final frameNumberA = regex.firstMatch(valueA)[1];
       final frameNumberB = regex.firstMatch(valueB)[1];
       return int.parse(frameNumberA).compareTo(int.parse(frameNumberB));
+    } else if (valueAIsFrameLog && !valueBIsFrameLog) {
+      return -1;
+    } else if (!valueAIsFrameLog && valueBIsFrameLog) {
+      return 1;
     }
     return valueA.compareTo(valueB);
   }
