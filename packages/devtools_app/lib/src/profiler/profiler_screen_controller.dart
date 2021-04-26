@@ -36,6 +36,16 @@ class ProfilerScreenController with CpuProfilerControllerProviderMixin {
     );
   }
 
+  Future<void> loadAllSamples() async {
+    cpuProfilerController.reset();
+    await cpuProfilerController.pullAndProcessProfile(
+      startMicros: 0,
+      // Using [maxJsInt] as [extentMicros] for the getCpuProfile requests will
+      // give us all cpu samples we have available
+      extentMicros: maxJsInt,
+    );
+  }
+
   /// Exports the current profiler data to a .json file.
   ///
   /// This method returns the name of the file that was downloaded.

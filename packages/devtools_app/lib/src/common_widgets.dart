@@ -174,12 +174,13 @@ class ClearButton extends IconLabelButton {
 class RefreshButton extends IconLabelButton {
   const RefreshButton({
     Key key,
+    String label = 'Refresh',
     double includeTextWidth,
     @required VoidCallback onPressed,
   }) : super(
           key: key,
           icon: Icons.refresh,
-          label: 'Refresh',
+          label: label,
           includeTextWidth: includeTextWidth,
           onPressed: onPressed,
         );
