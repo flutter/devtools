@@ -312,6 +312,33 @@ void main() {
         });
       });
     });
+
+    group('MessageColumn', () {
+      MessageColumn column;
+
+      setUp(() {
+        column = MessageColumn();
+      });
+
+      test('compare sorts logs correctly', () {
+        final a = LogData('test', 'Hello world', 1);
+        final b = LogData('test', 'Test test test', 1);
+        expect(column.compare(a, b), equals(-1));
+      });
+
+      test('compare special cases sorting for frame logs', () {
+        final a = LogData('flutter.frame', '#9  3.6ms ', 1);
+        final b = LogData('flutter.frame', '#10  3.6ms ', 1);
+        expect(column.compare(a, b), equals(-1));
+
+        // The number of spaces between the frame number and duration as well
+        // as after the duration can be inconsistent. Verify that the regexp
+        // still works.
+        final c = LogData('flutter.frame', '#10 3.6ms', 1);
+        final d = LogData('flutter.frame', '#9  3.6ms ', 1);
+        expect(column.compare(c, d), equals(1));
+      });
+    });
   });
 }
 

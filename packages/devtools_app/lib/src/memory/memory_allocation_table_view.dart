@@ -215,10 +215,7 @@ class AllocationTableViewState extends State<AllocationTableView>
           controller.toggleAllocationTracking(ref, !ref.isStacktraced),
       sortColumn: controller.sortedMonitorColumn,
       sortDirection: controller.sortedMonitorDirection,
-      onSortChanged: (
-        column,
-        direction,
-      ) {
+      onSortChanged: (column, direction, {secondarySortColumn}) {
         controller.sortedMonitorColumn = column;
         controller.sortedMonitorDirection = direction;
       },
