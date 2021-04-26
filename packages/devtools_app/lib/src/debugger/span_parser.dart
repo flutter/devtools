@@ -91,14 +91,13 @@ class ScopeSpan {
         _start = start,
         _end = end;
 
-  ScopeSpan.copy(
-      {ScopeSpan span,
-      List<String> scopes,
-      int start,
-      int end,
-      int line,
-      int column})
-      : _start = start ?? span._start,
+  ScopeSpan.copy({
+    List<String> scopes,
+    int start,
+    int end,
+    int line,
+    int column,
+  })  : _start = start ?? span._start,
         _end = end ?? span._end,
         line = line ?? span.line,
         column = column ?? span.column,
@@ -152,7 +151,14 @@ class ScopeSpan {
     );
 
     // Start with a copy of the original span
-    ScopeSpan current = ScopeSpan.copy(span: this);
+    ScopeSpan current = ScopeSpan.copy(
+      scopes: scopes.toList(),
+      start: _start,
+      end: _end,
+      line: line,
+      column: column,
+    );
+
     while (!splitScanner.isDone) {
       if (splitScanner.matches(cond)) {
         // Update the end position for this span as it's been fully processed.
@@ -164,8 +170,9 @@ class ScopeSpan {
 
         // Create a new span based on the current position.
         current = ScopeSpan.copy(
-          span: this,
+          scopes: scopes.toList(),
           start: splitScanner.position,
+          end: -1, // Updated later.
           // Lines and columns are 0-based.
           line: splitScanner.line + 1,
           column: splitScanner.column + 1,
