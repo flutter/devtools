@@ -92,16 +92,13 @@ class ScopeSpan {
         _end = end;
 
   ScopeSpan.copy({
-    List<String> scopes,
+    this.scopes,
     int start,
     int end,
-    int line,
-    int column,
-  })  : _start = start ?? span._start,
-        _end = end ?? span._end,
-        line = line ?? span.line,
-        column = column ?? span.column,
-        scopes = scopes ?? span.scopes.toList();
+    this.line,
+    this.column,
+  })  : _start = start,
+        _end = end;
 
   /// Adds [matcher.name] to the scope stack, if non-null. This scope will be
   /// included in each [ScopeSpan] created within [callback].
