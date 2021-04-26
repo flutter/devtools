@@ -1506,9 +1506,8 @@ int _compareData<T>(
   SortDirection direction, {
   ColumnData secondarySortColumn,
 }) {
-  var compare = column.compare(a, b) * _compareFactor(direction);
-  if (compare == 0 && secondarySortColumn != null) {
-    compare = secondarySortColumn.compare(a, b) * _compareFactor(direction);
-  }
-  return compare;
+  final compare = column.compare(a, b) * _compareFactor(direction);
+  if (compare != 0 || secondarySortColumn == null) return compare;
+
+  return secondarySortColumn.compare(a, b) * _compareFactor(direction);
 }

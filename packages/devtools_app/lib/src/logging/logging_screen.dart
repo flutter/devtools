@@ -420,10 +420,10 @@ class MessageColumn extends ColumnData<LogData>
     final String valueA = getValue(a);
     final String valueB = getValue(b);
     // Matches frame descriptions (e.g. '#12  11.4ms ')
-    final regex = RegExp(r'#\d+\s+\d+.\d+ms\s*');
+    final regex = RegExp(r'#(\d+)\s+\d+.\d+ms\s*');
     if (valueA.startsWith(regex) && valueB.startsWith(regex)) {
-      final frameNumberA = valueA.substring(1, valueA.indexOf(' '));
-      final frameNumberB = valueB.substring(1, valueB.indexOf(' '));
+      final frameNumberA = regex.firstMatch(valueA)[1];
+      final frameNumberB = regex.firstMatch(valueB)[1];
       return int.parse(frameNumberA).compareTo(int.parse(frameNumberB));
     }
     return valueA.compareTo(valueB);

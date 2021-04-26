@@ -337,6 +337,10 @@ void main() {
         final c = LogData('flutter.frame', '#10 3.6ms', 1);
         final d = LogData('flutter.frame', '#9  3.6ms ', 1);
         expect(column.compare(c, d), equals(1));
+
+        final e = LogData('flutter.frame', '#10  3.6ms ', 1);
+        final f = LogData('flutter.frame', '#9foo  3.6ms ', 1);
+        expect(column.compare(e, f), equals(-1));
       });
     });
   });
