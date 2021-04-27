@@ -219,7 +219,12 @@ class ServiceConnectionManager {
 
     _connectedState.value = const ConnectedState(true);
 
-    await _isolateManager._initIsolates(vm.isolates);
+    final isolates = [
+      ...vm.isolates,
+      if (preferences.vmDeveloperModeEnabled.value) ...vm.systemIsolates,
+    ];
+
+    await _isolateManager.init(isolates);
 
     final streamIds = [
       EventStreams.kDebug,
@@ -440,6 +445,24 @@ class IsolateManager extends Disposer {
 
   final _mainIsolate = ValueNotifier<IsolateRef>(null);
   ValueListenable<IsolateRef> get mainIsolate => _mainIsolate;
+
+  Future<void> init(List<IsolateRef> isolates) async {
+    // Re-initialize isolates when VM developer mode is enabled/disabled to
+    // display/hide system isolates.
+    addAutoDisposeListener(preferences.vmDeveloperModeEnabled, () async {
+      final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
+      final vm = await serviceManager.service.getVM();
+      final isolates = [
+        ...vm.isolates,
+        if (vmDeveloperModeEnabled) ...vm.systemIsolates,
+      ];
+      if (selectedIsolate.isSystemIsolate && !vmDeveloperModeEnabled) {
+        selectIsolate(_isolates.first.id);
+      }
+      await _initIsolates(isolates);
+    });
+    await _initIsolates(isolates);
+  }
 
   /// Return a unique, monotonically increasing number for this Isolate.
   int isolateIndex(IsolateRef isolateRef) {

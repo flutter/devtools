@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:codicon/codicon.dart';
+import 'package:devtools_app/src/globals.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/services.dart';
@@ -107,6 +108,13 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   }
 
   Future<void> _toggleBreakpoint(ScriptRef script, int line) async {
+    // The VM doesn't support debugging for system isolates and will crash on
+    // a failed assert in debug mode. Disable the toggle breakpoint
+    // functionality for system isolates.
+    if (serviceManager.isolateManager.selectedIsolate.isSystemIsolate) {
+      return;
+    }
+
     final bp = controller.breakpointsWithLocation.value.firstWhere((bp) {
       return bp.scriptRef == script && bp.line == line;
     }, orElse: () => null);
