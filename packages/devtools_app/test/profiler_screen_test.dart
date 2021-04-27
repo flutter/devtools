@@ -67,7 +67,7 @@ void main() {
       expect(find.text('CPU Profiler'), findsOneWidget);
     });
 
-    const windowSize = Size(1000.0, 1000.0);
+    const windowSize = Size(1500.0, 1000.0);
 
     testWidgetsWithWindowSize(
       'builds proper content for recording state',
