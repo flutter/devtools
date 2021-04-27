@@ -91,6 +91,15 @@ class ScopeSpan {
         _start = start,
         _end = end;
 
+  ScopeSpan.copy({
+    this.scopes,
+    int start,
+    int end,
+    this.line,
+    this.column,
+  })  : _start = start,
+        _end = end;
+
   /// Adds [matcher.name] to the scope stack, if non-null. This scope will be
   /// included in each [ScopeSpan] created within [callback].
   static List<ScopeSpan> applyScope(
@@ -123,6 +132,60 @@ class ScopeSpan {
   final List<String> scopes;
 
   bool contains(int token) => (_start <= token) && (token < _end);
+
+  /// Splits the current [ScopeSpan] into multiple spans separated by [cond].
+  /// This is useful for post-processing the results from a rule with a while
+  /// condition as formatting should not be applied to the characters that
+  /// match the while condition.
+  List<ScopeSpan> split(LineScanner scanner, RegExp cond) {
+    final splitSpans = <ScopeSpan>[];
+
+    // Create a temporary scanner, copying [0, _end] to ensure that line/column
+    // information is consistent with the original scanner.
+    final splitScanner = LineScanner(
+      scanner.substring(0, _end),
+      position: _start,
+    );
+
+    // Start with a copy of the original span
+    ScopeSpan current = ScopeSpan.copy(
+      scopes: scopes.toList(),
+      start: _start,
+      end: _end,
+      line: line,
+      column: column,
+    );
+
+    while (!splitScanner.isDone) {
+      if (splitScanner.matches(cond)) {
+        // Update the end position for this span as it's been fully processed.
+        current._end = splitScanner.position;
+        splitSpans.add(current);
+
+        // Move the scanner position past the matched condition.
+        splitScanner.scan(cond);
+
+        // Create a new span based on the current position.
+        current = ScopeSpan.copy(
+          scopes: scopes.toList(),
+          start: splitScanner.position,
+          end: -1, // Updated later.
+          // Lines and columns are 0-based.
+          line: splitScanner.line + 1,
+          column: splitScanner.column + 1,
+        );
+      } else {
+        // Move scanner position forward.
+        splitScanner.readChar();
+      }
+    }
+    // Finish processing the last span, which will always have the same end
+    // position as the span we're splitting.
+    current._end = _end;
+    splitSpans.add(current);
+
+    return splitSpans;
+  }
 
   @override
   String toString() {
@@ -468,17 +531,41 @@ class _MultilineMatcher extends _Matcher {
         }
         return results;
       } else if (whileCond != null) {
+        // Find the range of the string that is matched by the while condition.
+        final start = scanner.position;
+        _skipLine(scanner);
+        while (!scanner.isDone && scanner.scan(whileCond)) {
+          _skipLine(scanner);
+        }
+        final end = scanner.position;
+
+        // Create a temporary scanner to ensure that rules that don't find an
+        // end match don't try and match all the way to the end of the file.
+        final contentScanner = LineScanner(
+          scanner.substring(0, end),
+          position: start,
+        );
+
+        final contentResults = <ScopeSpan>[];
         // Finish scanning the line matched by `begin`.
-        results.addAll(_scanToEndOfLine(grammar, scanner));
+        contentResults.addAll(_scanToEndOfLine(grammar, contentScanner));
 
         // Process each line until the `while` condition fails.
-        while (!scanner.isDone && scanner.scan(whileCond)) {
-          results.addAll(_scanToEndOfLine(grammar, scanner));
+        while (!contentScanner.isDone && contentScanner.scan(whileCond)) {
+          contentResults.addAll(_scanToEndOfLine(grammar, contentScanner));
         }
+
+        // Split the results on the while condition to ensure that formatting
+        // isn't applied to characters matching the loop condition (e.g.,
+        // comment blocks with inline code samples shouldn't apply inline code
+        // formatting to the leading '///').
+        results.addAll(contentResults.expand(
+          (e) => e.split(scanner, whileCond),
+        ));
 
         if (beginSpans.isNotEmpty) {
           assert(beginSpans.length == 1);
-          beginSpans.first._end = scanner.position;
+          beginSpans.first._end = end;
         }
         return results;
       } else {
@@ -486,6 +573,10 @@ class _MultilineMatcher extends _Matcher {
             "One of 'end' or 'while' must be provided for rule: $name");
       }
     });
+  }
+
+  void _skipLine(LineScanner scanner) {
+    scanner.scan(RegExp('.*\n'));
   }
 
   @override

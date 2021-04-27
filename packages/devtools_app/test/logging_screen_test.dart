@@ -312,6 +312,53 @@ void main() {
         });
       });
     });
+
+    group('MessageColumn', () {
+      MessageColumn column;
+
+      setUp(() {
+        column = MessageColumn();
+      });
+
+      test('compare sorts logs correctly', () {
+        final a = LogData('test', 'Hello world', 1);
+        final b = LogData('test', 'Test test test', 1);
+        expect(column.compare(a, b), equals(-1));
+      });
+
+      test('compare special cases sorting for frame logs', () {
+        final a = LogData('flutter.frame', '#9  3.6ms ', 1);
+        final b = LogData('flutter.frame', '#10  3.6ms ', 1);
+        expect(column.compare(a, b), equals(-1));
+
+        // The number of spaces between the frame number and duration as well
+        // as after the duration can be inconsistent. Verify that the regexp
+        // still works.
+        final c = LogData('flutter.frame', '#10 3.6ms', 1);
+        final d = LogData('flutter.frame', '#9  3.6ms ', 1);
+        expect(column.compare(c, d), equals(1));
+
+        final e = LogData('flutter.frame', '#10  3.6ms ', 1);
+        final f = LogData('flutter.frame', '#9foo  3.6ms ', 1);
+        expect(column.compare(e, f), equals(-1));
+
+        final l1 = LogData('flutter.frame', '#2  3.6ms ', 1);
+        final l2 = LogData('flutter.frame', '#2NOTAMATCH  3.6ms ', 1);
+        final l3 = LogData('flutter.frame', '#10  3.6ms ', 1);
+        final l4 = LogData('flutter.frame', '#10NOTAMATCH  3.6ms ', 1);
+        final l5 = LogData('flutter.frame', '#11  3.6ms ', 1);
+        final l6 = LogData('flutter.frame', '#11NOTAMATCH  3.6ms ', 1);
+        final list = [l1, l2, l3, l4, l5, l6];
+        list.sort(column.compare);
+
+        expect(list[0], equals(l1));
+        expect(list[1], equals(l3));
+        expect(list[2], equals(l5));
+        expect(list[3], equals(l4));
+        expect(list[4], equals(l6));
+        expect(list[5], equals(l2));
+      });
+    });
   });
 }
 
