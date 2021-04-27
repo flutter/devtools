@@ -695,8 +695,11 @@ class DebuggerController extends DisposableController
     // initially.
     if (await serviceManager.connectedApp.isDartWebApp) {
       _populateFrameInfo(
-          [await _createStackFrameWithLocation(pauseEvent.topFrame)],
-          truncated: true);
+        [
+          await _createStackFrameWithLocation(pauseEvent.topFrame),
+        ],
+        truncated: true,
+      );
       unawaited(_getFullStack());
       return;
     }
