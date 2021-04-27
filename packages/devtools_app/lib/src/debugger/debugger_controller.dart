@@ -693,7 +693,7 @@ class DebuggerController extends DisposableController
     // Collecting frames for Dart web applications can be slow. At the potential
     // cost of a flicker in the stack view, display only the top frame
     // initially.
-    if (await serviceManager.connectedApp.isDartWebApp || true) {
+    if (await serviceManager.connectedApp.isDartWebApp) {
       _populateFrameInfo(
           [await _createStackFrameWithLocation(pauseEvent.topFrame)],
           truncated: true);
