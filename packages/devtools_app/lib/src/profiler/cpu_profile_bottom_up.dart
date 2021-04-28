@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../globals.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../utils.dart';

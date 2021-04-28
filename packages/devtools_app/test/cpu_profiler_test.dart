@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_bottom_up.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_call_tree.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_controller.dart';
@@ -10,30 +9,22 @@ import 'package:devtools_app/src/profiler/cpu_profile_flame_chart.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_transformer.dart';
 import 'package:devtools_app/src/profiler/cpu_profiler.dart';
-import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
-import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
 void main() {
   CpuProfiler cpuProfiler;
   CpuProfileData cpuProfileData;
   CpuProfilerController controller;
-  FakeServiceManager fakeServiceManager;
 
   setUp(() async {
     final transformer = CpuProfileTransformer();
     controller = CpuProfilerController();
     cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson);
     await transformer.processData(cpuProfileData);
-
-    fakeServiceManager = FakeServiceManager();
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-    when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(true);
   });
 
   group('Cpu Profiler', () {
