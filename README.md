@@ -1,4 +1,4 @@
-# Dart DevTools (preview)
+# Dart DevTools
 
 [![Build Status](https://github.com/flutter/devtools/workflows/devtools/badge.svg)](https://github.com/flutter/devtools/actions)
 
