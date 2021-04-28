@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/preferences.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/vm_service_wrapper.dart';
 
@@ -101,7 +102,10 @@ class FlutterTestEnvironment {
       await _flutter.run(runConfig: _runConfig);
 
       _service = _flutter.vmService;
+            final preferencesController = PreferencesController();
+      await preferencesController.init();
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
+      setGlobal(PreferencesController, preferencesController);
       await serviceManager.vmServiceOpened(
         _service,
         onClosed: Completer().future,

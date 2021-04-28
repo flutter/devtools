@@ -152,22 +152,36 @@ class StatusLine extends StatelessWidget {
 
         String isolateName(IsolateRef ref) {
           final name = ref.name;
-          return 'Isolate $name #${isolateManager.isolateIndex(ref)}';
+          return '$name #${isolateManager.isolateIndex(ref)}';
         }
 
-        return DropdownButtonHideUnderline(
-          child: DropdownButton<IsolateRef>(
-            value: snapshot.data,
-            onChanged: (IsolateRef ref) {
-              isolateManager.selectIsolate(ref?.id);
-            },
-            isDense: true,
-            items: isolates.map((IsolateRef ref) {
-              return DropdownMenuItem<IsolateRef>(
-                value: ref,
-                child: Text(isolateName(ref), style: textTheme.bodyText2),
-              );
-            }).toList(),
+        return DevToolsTooltip(
+          tooltip: 'Selected Isolate',
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<IsolateRef>(
+              value: snapshot.data,
+              onChanged: (IsolateRef ref) {
+                isolateManager.selectIsolate(ref?.id);
+              },
+              isDense: true,
+              items: isolates.map((IsolateRef ref) {
+                return DropdownMenuItem<IsolateRef>(
+                  value: ref,
+                  child: Row(
+                    children: [
+                      ref.isSystemIsolate
+                          ? const Icon(Icons.settings_applications)
+                          : const Icon(Icons.call_split),
+                      const SizedBox(width: denseSpacing),
+                      Text(
+                        isolateName(ref),
+                        style: textTheme.bodyText2,
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
           ),
         );
       },

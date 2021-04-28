@@ -250,6 +250,7 @@ class DebuggerController extends DisposableController
   ValueListenable<List<ConsoleLine>> get stdio => _stdio;
 
   IsolateRef isolateRef;
+  bool get isSystemIsolate => isolateRef?.isSystemIsolate ?? false;
 
   /// Clears the contents of stdio.
   void clearStdio() {
@@ -1339,7 +1340,7 @@ class ParsedScript {
     @required this.highlighter,
     @required this.executableLines,
   })  : assert(script != null),
-        lines = script.source.split('\n').toList();
+        lines = (script.source?.split('\n') ?? const []).toList();
 
   final Script script;
 

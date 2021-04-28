@@ -194,42 +194,44 @@ class _CodeViewState extends State<CodeView>
 
     // Ensure the syntax highlighter has been initialized.
     // TODO(bkonyi): process source for highlighting on a separate thread.
-    if (parsedScript.script.source.length < 500000 &&
-        parsedScript.highlighter != null) {
-      final highlighted = parsedScript.highlighter.highlight(context);
+    if (parsedScript.script.source != null) {
+      if (parsedScript.script.source.length < 500000 &&
+          parsedScript.highlighter != null) {
+        final highlighted = parsedScript.highlighter.highlight(context);
 
-      // Look for [TextSpan]s which only contain '\n' to manually break the
-      // output from the syntax highlighter into individual lines.
-      var currentLine = <TextSpan>[];
-      highlighted.visitChildren((span) {
-        currentLine.add(span);
-        if (span.toPlainText() == '\n') {
-          lines.add(
-            TextSpan(
-              style: theme.fixedFontStyle,
-              children: currentLine,
-            ),
-          );
-          currentLine = <TextSpan>[];
-        }
-        return true;
-      });
-      lines.add(
-        TextSpan(
-          style: theme.fixedFontStyle,
-          children: currentLine,
-        ),
-      );
-    } else {
-      lines.addAll(
-        [
-          for (final line in parsedScript.script.source.split('\n'))
-            TextSpan(
-              style: theme.fixedFontStyle,
-              text: line,
-            ),
-        ],
-      );
+        // Look for [TextSpan]s which only contain '\n' to manually break the
+        // output from the syntax highlighter into individual lines.
+        var currentLine = <TextSpan>[];
+        highlighted.visitChildren((span) {
+          currentLine.add(span);
+          if (span.toPlainText() == '\n') {
+            lines.add(
+              TextSpan(
+                style: theme.fixedFontStyle,
+                children: currentLine,
+              ),
+            );
+            currentLine = <TextSpan>[];
+          }
+          return true;
+        });
+        lines.add(
+          TextSpan(
+            style: theme.fixedFontStyle,
+            children: currentLine,
+          ),
+        );
+      } else {
+        lines.addAll(
+          [
+            for (final line in parsedScript.script.source.split('\n'))
+              TextSpan(
+                style: theme.fixedFontStyle,
+                text: line,
+              ),
+          ],
+        );
+      }
     }
 
     // Apply the log change-of-base formula, then add 16dp padding for every
@@ -245,62 +247,75 @@ class _CodeViewState extends State<CodeView>
       child: Column(
         children: [
           buildCodeviewTitle(theme),
-          DefaultTextStyle(
-            style: theme.fixedFontStyle,
-            child: Expanded(
-              child: Scrollbar(
-                controller: textController,
-                child: ValueListenableBuilder<StackFrameAndSourcePosition>(
-                  valueListenable: widget.controller.selectedStackFrame,
-                  builder: (context, frame, _) {
-                    final pausedFrame = frame == null
-                        ? null
-                        : (frame.scriptRef == scriptRef ? frame : null);
+          if (lines.isNotEmpty)
+            DefaultTextStyle(
+              style: theme.fixedFontStyle,
+              child: Expanded(
+                child: Scrollbar(
+                  controller: textController,
+                  child: ValueListenableBuilder<StackFrameAndSourcePosition>(
+                    valueListenable: widget.controller.selectedStackFrame,
+                    builder: (context, frame, _) {
+                      final pausedFrame = frame == null
+                          ? null
+                          : (frame.scriptRef == scriptRef ? frame : null);
 
-                    return Row(
-                      children: [
-                        ValueListenableBuilder<
-                            List<BreakpointAndSourcePosition>>(
-                          valueListenable:
-                              widget.controller.breakpointsWithLocation,
-                          builder: (context, breakpoints, _) {
-                            return Gutter(
-                              gutterWidth: gutterWidth,
-                              scrollController: gutterController,
-                              lineCount: lines.length,
-                              pausedFrame: pausedFrame,
-                              breakpoints: breakpoints
-                                  .where((bp) => bp.scriptRef == scriptRef)
-                                  .toList(),
-                              executableLines: parsedScript.executableLines,
-                              onPressed: _onPressed,
-                            );
-                          },
-                        ),
-                        const SizedBox(width: denseSpacing),
-                        Expanded(
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              return Lines(
-                                constraints: constraints,
-                                scrollController: textController,
-                                lines: lines,
+                      return Row(
+                        children: [
+                          ValueListenableBuilder<
+                              List<BreakpointAndSourcePosition>>(
+                            valueListenable:
+                                widget.controller.breakpointsWithLocation,
+                            builder: (context, breakpoints, _) {
+                              return Gutter(
+                                gutterWidth: gutterWidth,
+                                scrollController: gutterController,
+                                lineCount: lines.length,
                                 pausedFrame: pausedFrame,
-                                searchMatchesNotifier:
-                                    widget.controller.searchMatches,
-                                activeSearchMatchNotifier:
-                                    widget.controller.activeSearchMatch,
+                                breakpoints: breakpoints
+                                    .where((bp) => bp.scriptRef == scriptRef)
+                                    .toList(),
+                                executableLines: parsedScript.executableLines,
+                                onPressed: _onPressed,
+                                // Disable dots for possible breakpoint locations.
+                                allowInteraction:
+                                    !widget.controller.isSystemIsolate,
                               );
                             },
                           ),
-                        ),
-                      ],
-                    );
-                  },
+                          const SizedBox(width: denseSpacing),
+                          Expanded(
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                return Lines(
+                                  constraints: constraints,
+                                  scrollController: textController,
+                                  lines: lines,
+                                  pausedFrame: pausedFrame,
+                                  searchMatchesNotifier:
+                                      widget.controller.searchMatches,
+                                  activeSearchMatchNotifier:
+                                      widget.controller.activeSearchMatch,
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            )
+          else
+            Expanded(
+              child: Center(
+                child: Text(
+                  'No source available',
+                  style: theme.textTheme.subtitle1,
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -418,6 +433,7 @@ class Gutter extends StatelessWidget {
     @required this.breakpoints,
     @required this.executableLines,
     @required this.onPressed,
+    @required this.allowInteraction,
   });
 
   final double gutterWidth;
@@ -427,6 +443,7 @@ class Gutter extends StatelessWidget {
   final List<BreakpointAndSourcePosition> breakpoints;
   final Set<int> executableLines;
   final IntCallback onPressed;
+  final bool allowInteraction;
 
   @override
   Widget build(BuildContext context) {
@@ -447,6 +464,7 @@ class Gutter extends StatelessWidget {
             isBreakpoint: bpLineSet.contains(lineNum),
             isExecutable: executableLines.contains(lineNum),
             isPausedHere: pausedFrame?.line == lineNum,
+            allowInteraction: allowInteraction,
           );
         },
       ),
@@ -462,6 +480,7 @@ class GutterItem extends StatelessWidget {
     @required this.isExecutable,
     @required this.isPausedHere,
     @required this.onPressed,
+    @required this.allowInteraction,
   }) : super(key: key);
 
   final int lineNumber;
@@ -469,6 +488,8 @@ class GutterItem extends StatelessWidget {
   final bool isBreakpoint;
 
   final bool isExecutable;
+
+  final bool allowInteraction;
 
   /// Whether the execution point is currently paused here.
   final bool isPausedHere;
@@ -489,6 +510,9 @@ class GutterItem extends StatelessWidget {
 
     return InkWell(
       onTap: onPressed,
+      // Force usage of default mouse pointer when gutter interaction is
+      // disabled.
+      mouseCursor: allowInteraction ? null : SystemMouseCursors.basic,
       child: Container(
         height: CodeView.rowHeight,
         padding: const EdgeInsets.only(right: 4.0),
@@ -496,7 +520,7 @@ class GutterItem extends StatelessWidget {
           alignment: AlignmentDirectional.centerStart,
           fit: StackFit.expand,
           children: [
-            if (isExecutable || isBreakpoint)
+            if (allowInteraction && (isExecutable || isBreakpoint))
               Align(
                 alignment: Alignment.centerLeft,
                 child: SizedBox(
