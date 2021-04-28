@@ -20,10 +20,7 @@ class CpuBottomUpTable extends StatelessWidget {
       TotalTimeColumn(titleTooltip: totalTimeTooltip),
       startingSortColumn,
       treeColumn,
-      // TODO(kenz): add source column for flutter apps once
-      // https://github.com/dart-lang/sdk/issues/37553 is fixed.
-      if (!offlineMode && serviceManager.connectedApp.isDartCliAppNow)
-        SourceColumn(),
+      SourceColumn(),
     ]);
     return CpuBottomUpTable._(
       key,

@@ -20,10 +20,7 @@ class CpuCallTreeTable extends StatelessWidget {
       startingSortColumn,
       SelfTimeColumn(titleTooltip: selfTimeTooltip),
       treeColumn,
-      // TODO(kenz): add source column for flutter apps once
-      // https://github.com/dart-lang/sdk/issues/37553 is fixed.
-      if (!offlineMode && serviceManager.connectedApp.isDartCliAppNow)
-        SourceColumn(),
+      SourceColumn(),
     ]);
     return CpuCallTreeTable._(
       key,
