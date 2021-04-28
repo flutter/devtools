@@ -250,7 +250,7 @@ class DebuggerController extends DisposableController
   ValueListenable<List<ConsoleLine>> get stdio => _stdio;
 
   IsolateRef isolateRef;
-  bool get isSystemIsolate => isolateRef.isSystemIsolate;
+  bool get isSystemIsolate => isolateRef?.isSystemIsolate ?? false;
 
   /// Clears the contents of stdio.
   void clearStdio() {
