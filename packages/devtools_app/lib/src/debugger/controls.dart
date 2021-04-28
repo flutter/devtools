@@ -39,7 +39,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
     final isPaused = controller.isPaused.value;
     final resuming = controller.resuming.value;
     final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
-    final isSystemIsolate = controller.isolateRef.isSystemIsolate;
+    final isSystemIsolate = controller.isSystemIsolate;
     final canStep = isPaused && !resuming && hasStackFrames && !isSystemIsolate;
     return SizedBox(
       height: defaultButtonHeight,
@@ -61,7 +61,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
     @required bool isPaused,
     @required bool resuming,
   }) {
-    final isSystemIsolate = controller.isolateRef.isSystemIsolate;
+    final isSystemIsolate = controller.isSystemIsolate;
     return RoundedOutlinedBorder(
       child: Row(
         children: [
@@ -151,7 +151,7 @@ class BreakOnExceptionsControl extends StatelessWidget {
         return RoundedDropDownButton<ExceptionMode>(
           value: ExceptionMode.from(modeId),
           // Cannot set exception pause mode for system isolates.
-          onChanged: controller.isolateRef.isSystemIsolate
+          onChanged: controller.isSystemIsolate
               ? null
               : (ExceptionMode mode) {
                   controller.setExceptionPauseMode(mode.id);
