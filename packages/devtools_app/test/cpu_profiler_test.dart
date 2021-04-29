@@ -14,7 +14,6 @@ import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
 import 'support/mocks.dart';
 import 'support/wrappers.dart';
@@ -23,7 +22,6 @@ void main() {
   CpuProfiler cpuProfiler;
   CpuProfileData cpuProfileData;
   CpuProfilerController controller;
-  FakeServiceManager fakeServiceManager;
 
   setUp(() async {
     final transformer = CpuProfileTransformer();
@@ -31,9 +29,7 @@ void main() {
     cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson);
     await transformer.processData(cpuProfileData);
 
-    fakeServiceManager = FakeServiceManager();
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-    when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(true);
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
   });
 
   group('Cpu Profiler', () {

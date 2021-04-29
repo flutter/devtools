@@ -1066,6 +1066,9 @@ class FlameChartNode<T> {
           : const SizedBox(),
     );
     if (hovered || !selectable) {
+      // TODO(kenz): generate the tooltip from the data class so we can do some
+      // more intelligent things like showing the source path for a node in the
+      // cpu flame chart.
       return Tooltip(
         key: key,
         message: tooltip,
