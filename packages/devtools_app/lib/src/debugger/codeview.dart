@@ -18,6 +18,7 @@ import '../config_specific/logger/logger.dart';
 import '../dialogs.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import '../globals.dart';
+import '../history_viewport.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
@@ -243,81 +244,93 @@ class _CodeViewState extends State<CodeView>
 
     _updateScrollPosition(animate: false);
 
-    return OutlineDecoration(
-      child: Column(
-        children: [
-          buildCodeviewTitle(theme),
-          if (lines.isNotEmpty)
-            DefaultTextStyle(
-              style: theme.fixedFontStyle,
-              child: Expanded(
-                child: Scrollbar(
-                  controller: textController,
-                  child: ValueListenableBuilder<StackFrameAndSourcePosition>(
-                    valueListenable: widget.controller.selectedStackFrame,
-                    builder: (context, frame, _) {
-                      final pausedFrame = frame == null
-                          ? null
-                          : (frame.scriptRef == scriptRef ? frame : null);
+    return HistoryViewport(
+      history: widget.controller.scriptsHistory,
+      generateTitle: (script) => script.uri,
+      buildControls: (context) {
+        return [
+          ScriptPopupMenu(widget.controller),
+          ScriptHistoryPopupMenu(
+            itemBuilder: _buildScriptMenuFromHistory,
+            onSelected: (scriptRef) {
+              widget.controller.showScriptLocation(ScriptLocation(scriptRef));
+            },
+            enabled: widget.controller.scriptsHistory.hasScripts,
+          ),
+        ];
+      },
+      buildContents: (context, script) {
+        if (lines.isNotEmpty) {
+          return DefaultTextStyle(
+            style: theme.fixedFontStyle,
+            child: Expanded(
+              child: Scrollbar(
+                controller: textController,
+                child: ValueListenableBuilder<StackFrameAndSourcePosition>(
+                  valueListenable: widget.controller.selectedStackFrame,
+                  builder: (context, frame, _) {
+                    final pausedFrame = frame == null
+                        ? null
+                        : (frame.scriptRef == scriptRef ? frame : null);
 
-                      return Row(
-                        children: [
-                          ValueListenableBuilder<
-                              List<BreakpointAndSourcePosition>>(
-                            valueListenable:
-                                widget.controller.breakpointsWithLocation,
-                            builder: (context, breakpoints, _) {
-                              return Gutter(
-                                gutterWidth: gutterWidth,
-                                scrollController: gutterController,
-                                lineCount: lines.length,
+                    return Row(
+                      children: [
+                        ValueListenableBuilder<
+                            List<BreakpointAndSourcePosition>>(
+                          valueListenable:
+                              widget.controller.breakpointsWithLocation,
+                          builder: (context, breakpoints, _) {
+                            return Gutter(
+                              gutterWidth: gutterWidth,
+                              scrollController: gutterController,
+                              lineCount: lines.length,
+                              pausedFrame: pausedFrame,
+                              breakpoints: breakpoints
+                                  .where((bp) => bp.scriptRef == scriptRef)
+                                  .toList(),
+                              executableLines: parsedScript.executableLines,
+                              onPressed: _onPressed,
+                              // Disable dots for possible breakpoint locations.
+                              allowInteraction:
+                                  !widget.controller.isSystemIsolate,
+                            );
+                          },
+                        ),
+                        const SizedBox(width: denseSpacing),
+                        Expanded(
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              return Lines(
+                                constraints: constraints,
+                                scrollController: textController,
+                                lines: lines,
                                 pausedFrame: pausedFrame,
-                                breakpoints: breakpoints
-                                    .where((bp) => bp.scriptRef == scriptRef)
-                                    .toList(),
-                                executableLines: parsedScript.executableLines,
-                                onPressed: _onPressed,
-                                // Disable dots for possible breakpoint locations.
-                                allowInteraction:
-                                    !widget.controller.isSystemIsolate,
+                                searchMatchesNotifier:
+                                    widget.controller.searchMatches,
+                                activeSearchMatchNotifier:
+                                    widget.controller.activeSearchMatch,
                               );
                             },
                           ),
-                          const SizedBox(width: denseSpacing),
-                          Expanded(
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                return Lines(
-                                  constraints: constraints,
-                                  scrollController: textController,
-                                  lines: lines,
-                                  pausedFrame: pausedFrame,
-                                  searchMatchesNotifier:
-                                      widget.controller.searchMatches,
-                                  activeSearchMatchNotifier:
-                                      widget.controller.activeSearchMatch,
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ),
-            )
-          else
-            Expanded(
-              child: Center(
-                child: Text(
-                  'No source available',
-                  style: theme.textTheme.subtitle1,
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
-        ],
-      ),
+          );
+        } else {
+          return Expanded(
+            child: Center(
+              child: Text(
+                'No source available',
+                style: theme.textTheme.subtitle1,
+              ),
+            ),
+          );
+        }
+      },
     );
   }
 
@@ -341,52 +354,6 @@ class _CodeViewState extends State<CodeView>
           onClose: () => widget.controller.toggleSearchInFileVisibility(false),
         ),
       ),
-    );
-  }
-
-  Widget buildCodeviewTitle(ThemeData theme) {
-    return ValueListenableBuilder(
-      valueListenable: widget.controller.scriptsHistory,
-      builder: (context, scriptsHistory, _) {
-        return debuggerSectionTitle(
-          theme,
-          child: Row(
-            children: [
-              ToolbarAction(
-                icon: Icons.chevron_left,
-                onPressed:
-                    scriptsHistory.hasPrevious ? scriptsHistory.moveBack : null,
-              ),
-              ToolbarAction(
-                icon: Icons.chevron_right,
-                onPressed:
-                    scriptsHistory.hasNext ? scriptsHistory.moveForward : null,
-              ),
-              const SizedBox(width: denseSpacing),
-              const VerticalDivider(thickness: 1.0),
-              const SizedBox(width: defaultSpacing),
-              Expanded(
-                child: Text(
-                  scriptRef?.uri ?? ' ',
-                  style: theme.textTheme.subtitle2,
-                ),
-              ),
-              const SizedBox(width: denseSpacing),
-              ScriptPopupMenu(widget.controller),
-              const SizedBox(width: denseSpacing),
-              ScriptHistoryPopupMenu(
-                itemBuilder: _buildScriptMenuFromHistory,
-                onSelected: (scriptRef) {
-                  widget.controller
-                      .showScriptLocation(ScriptLocation(scriptRef));
-                },
-                enabled: scriptsHistory.hasScripts,
-              ),
-              const SizedBox(width: denseSpacing),
-            ],
-          ),
-        );
-      },
     );
   }
 
