@@ -19,7 +19,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   static CpuProfileData baseStateCpuProfileData = CpuProfileData.empty();
 
   /// Notifies that new cpu profile data is available.
-  ValueListenable get dataNotifier => _dataNotifier;
+  ValueListenable<CpuProfileData> get dataNotifier => _dataNotifier;
   final _dataNotifier = ValueNotifier<CpuProfileData>(baseStateCpuProfileData);
 
   /// Notifies that CPU profile data is currently being processed.
@@ -96,6 +96,9 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     for (final frame in currentStackFrames) {
       if (frame.name.caseInsensitiveContains(search)) {
         matches.add(frame);
+        frame.isSearchMatch = true;
+      } else {
+        frame.isSearchMatch = false;
       }
     }
     return matches;

@@ -1,9 +1,10 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../http/http_request_data.dart';
+import '../ui/search.dart';
 import '../utils.dart';
 
-abstract class NetworkRequest {
+abstract class NetworkRequest with SearchableDataMixin {
   NetworkRequest(this._timelineMicrosBase);
 
   final int _timelineMicrosBase;

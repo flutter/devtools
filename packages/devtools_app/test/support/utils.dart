@@ -7,6 +7,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:devtools_app/src/charts/treemap.dart';
+import 'package:devtools_app/src/ui/search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -252,3 +253,16 @@ Future<void> loadFonts() async {
 ///
 /// E.g. `find.byType(typeOf<MyTypeWithAGeneric<String>>());`
 Type typeOf<T>() => T;
+
+void verifyIsSearchMatch(
+  List<SearchableDataMixin> data,
+  List<SearchableDataMixin> matches,
+) {
+  for (final request in data) {
+    if (matches.contains(request)) {
+      expect(request.isSearchMatch, isTrue);
+    } else {
+      expect(request.isSearchMatch, isFalse);
+    }
+  }
+}

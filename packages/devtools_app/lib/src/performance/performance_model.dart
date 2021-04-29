@@ -10,6 +10,7 @@ import '../profiler/cpu_profile_model.dart';
 import '../service_manager.dart';
 import '../trace_event.dart';
 import '../trees.dart';
+import '../ui/search.dart';
 import '../utils.dart';
 import 'performance_utils.dart';
 import 'timeline_event_processor.dart';
@@ -511,7 +512,8 @@ class FlutterFrame {
   }
 }
 
-abstract class TimelineEvent extends TreeNode<TimelineEvent> {
+abstract class TimelineEvent extends TreeNode<TimelineEvent>
+    with SearchableDataMixin, SearchableTreeDataMixin<TimelineEvent> {
   TimelineEvent(TraceEventWrapper firstTraceEvent)
       : traceEvents = [firstTraceEvent],
         type = firstTraceEvent.event.type {
@@ -567,6 +569,9 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent> {
   bool get isWellFormedDeep => _isWellFormedDeep(this);
 
   int get threadId => traceEvents.first.event.threadId;
+
+  @override
+  String get tooltip => '$name - ${msText(time.duration)}';
 
   bool _isWellFormedDeep(TimelineEvent event) {
     return !subtreeHasNodeWithCondition((e) => !e.isWellFormed);

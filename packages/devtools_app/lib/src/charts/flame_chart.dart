@@ -40,7 +40,7 @@ abstract class FlameChart<T, V> extends StatefulWidget {
     @required this.containerWidth,
     @required this.containerHeight,
     @required this.selectionNotifier,
-    @required this.onSelected,
+    @required this.onDataSelected,
     this.searchMatchesNotifier,
     this.activeSearchMatchNotifier,
     this.startInset = sideInset,
@@ -77,7 +77,7 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 
   final ValueListenable<V> activeSearchMatchNotifier;
 
-  final void Function(V data) onSelected;
+  final void Function(V data) onDataSelected;
 
   double get startingContentWidth => containerWidth - startInset - endInset;
 }
@@ -86,7 +86,8 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 // performance improvements. Optionally we could also do something clever with
 // grouping nodes that are close together until they are zoomed in (quad tree
 // like implementation).
-abstract class FlameChartState<T extends FlameChart, V> extends State<T>
+abstract class FlameChartState<T extends FlameChart,
+        V extends SearchableTreeDataMixin<V>> extends State<T>
     with AutoDisposeMixin, FlameChartColorMixin, TickerProviderStateMixin {
   int get rowOffsetForTopPadding => 2;
 
@@ -575,7 +576,8 @@ abstract class FlameChartState<T extends FlameChart, V> extends State<T>
   double startXForData(V data);
 }
 
-class ScrollingFlameChartRow<V> extends StatefulWidget {
+class ScrollingFlameChartRow<V extends SearchableTreeDataMixin<V>>
+    extends StatefulWidget {
   const ScrollingFlameChartRow({
     @required this.linkedScrollControllerGroup,
     @required this.nodes,
@@ -614,8 +616,8 @@ class ScrollingFlameChartRow<V> extends StatefulWidget {
       ScrollingFlameChartRowState<V>();
 }
 
-class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
-    with AutoDisposeMixin, SearchableMixin<V> {
+class ScrollingFlameChartRowState<V extends SearchableTreeDataMixin<V>>
+    extends State<ScrollingFlameChartRow> with AutoDisposeMixin {
   ScrollController scrollController;
 
   _ScrollingFlameChartRowExtentDelegate extentDelegate;
@@ -623,7 +625,7 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
   /// Convenience getter for widget.nodes.
   List<FlameChartNode<V>> get nodes => widget.nodes;
 
-  List<V> get nodeData => nodes.map((node) => node.data).toList();
+  List<V> _nodeData;
 
   V selected;
 
@@ -644,11 +646,13 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
       chartWidth: widget.width,
     );
 
+    _initNodeDataList();
+
     selected = widget.selectionNotifier.value;
     addAutoDisposeListener(widget.selectionNotifier, () {
-      final containsPreviousSelected = nodeData.contains(selected);
+      final containsPreviousSelected = _nodeData.contains(selected);
       final containsNewSelected =
-          nodeData.contains(widget.selectionNotifier.value);
+          _nodeData.contains(widget.selectionNotifier.value);
       selected = widget.selectionNotifier.value;
       // We only want to rebuild the row if it contains the previous or new
       // selected node.
@@ -658,46 +662,20 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
     });
 
     if (widget.searchMatchesNotifier != null) {
-      searchMatches = widget.searchMatchesNotifier.value;
-      addAutoDisposeListener(widget.searchMatchesNotifier, () {
-        final previousSearchMatchesInRow =
-            searchMatches.where((match) => nodeData.contains(match)).toList();
-        final newSearchMatchesInRow = widget.searchMatchesNotifier.value
-            .where((match) => nodeData.contains(match))
-            .toList();
-        searchMatches = widget.searchMatchesNotifier.value;
-
-        // We only want to rebuild the row if it contains the search matches in
-        // the row have changed.
-        // TODO(kenz): should we check for unordered equality here? Are there
-        // performance repercussions for doing so?
-        if (!collectionEquals(
-            previousSearchMatchesInRow, newSearchMatchesInRow)) {
-          setState(() {});
-        }
-      });
+      addAutoDisposeListener(widget.searchMatchesNotifier);
     }
 
     if (widget.activeSearchMatchNotifier != null) {
-      activeSearchMatch = widget.activeSearchMatchNotifier.value;
-      addAutoDisposeListener(widget.activeSearchMatchNotifier, () {
-        final containsPreviousActiveSearchMatch =
-            nodeData.contains(activeSearchMatch);
-        final containsNewActiveSearchMatch =
-            nodeData.contains(widget.activeSearchMatchNotifier.value);
-        activeSearchMatch = widget.activeSearchMatchNotifier.value;
-        // We only want to rebuild the row if it contains the previous or new
-        // active search match.
-        if (containsPreviousActiveSearchMatch || containsNewActiveSearchMatch) {
-          setState(() {});
-        }
-      });
+      addAutoDisposeListener(widget.activeSearchMatchNotifier);
     }
   }
 
   @override
   void didUpdateWidget(ScrollingFlameChartRow oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.nodes != widget.nodes) {
+      _initNodeDataList();
+    }
     if (oldWidget.nodes != widget.nodes ||
         oldWidget.zoom != widget.zoom ||
         oldWidget.width != widget.width ||
@@ -721,6 +699,10 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
     super.dispose();
     scrollController.dispose();
     _resetHovered();
+  }
+
+  void _initNodeDataList() {
+    _nodeData = nodes.map((node) => node.data).toList();
   }
 
   @override
@@ -783,8 +765,8 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
       child: node.buildWidget(
         selected: node.data == selected,
         hovered: node.data == hovered,
-        searchMatch: searchMatches?.contains(node.data) ?? false,
-        activeSearchMatch: activeSearchMatch == node.data,
+        searchMatch: node.data.isSearchMatch,
+        activeSearchMatch: node.data.isActiveSearchMatch,
         zoom: FlameChartUtils.zoomForNode(node, widget.zoom),
       ),
     );
@@ -814,7 +796,7 @@ class ScrollingFlameChartRowState<V> extends State<ScrollingFlameChartRow>
   }
 
   @visibleForTesting
-  FlameChartNode binarySearchForNode(double x) {
+  FlameChartNode<V> binarySearchForNode(double x) {
     int min = 0;
     int max = nodes.length;
     while (min < max) {
@@ -960,7 +942,7 @@ class FlameChartSection {
   final int endRow;
 }
 
-class FlameChartRow<T> {
+class FlameChartRow<T extends SearchableTreeDataMixin<T>> {
   FlameChartRow(this.index);
 
   final List<FlameChartNode<T>> nodes = [];
@@ -983,11 +965,10 @@ class FlameChartRow<T> {
 
 // TODO(kenz): consider de-coupling this API from the dual background color
 // scheme.
-class FlameChartNode<T> {
+class FlameChartNode<T extends SearchableTreeDataMixin<T>> {
   FlameChartNode({
     this.key,
     @required this.text,
-    @required this.tooltip,
     @required this.rect,
     @required this.backgroundColor,
     @required this.textColor,
@@ -1007,7 +988,6 @@ class FlameChartNode<T> {
   final Key key;
   final Rect rect;
   final String text;
-  final String tooltip;
   final Color backgroundColor;
   final Color textColor;
   final T data;
@@ -1057,21 +1037,19 @@ class FlameChartNode<T> {
               textAlign: TextAlign.left,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                  color: _textColor(
-                selected: selected,
-                searchMatch: searchMatch,
-                activeSearchMatch: activeSearchMatch,
-              )),
+                color: _textColor(
+                  selected: selected,
+                  searchMatch: searchMatch,
+                  activeSearchMatch: activeSearchMatch,
+                ),
+              ),
             )
           : const SizedBox(),
     );
     if (hovered || !selectable) {
-      // TODO(kenz): generate the tooltip from the data class so we can do some
-      // more intelligent things like showing the source path for a node in the
-      // cpu flame chart.
       return Tooltip(
         key: key,
-        message: tooltip,
+        message: data.tooltip,
         preferBelow: false,
         waitDuration: tooltipWait,
         child: node,

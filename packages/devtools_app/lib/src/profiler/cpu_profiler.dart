@@ -208,7 +208,7 @@ class _CpuProfilerState extends State<CpuProfiler>
           selectionNotifier: widget.controller.selectedCpuStackFrameNotifier,
           searchMatchesNotifier: widget.controller.searchMatches,
           activeSearchMatchNotifier: widget.controller.activeSearchMatch,
-          onSelected: (sf) => widget.controller.selectCpuStackFrame(sf),
+          onDataSelected: (sf) => widget.controller.selectCpuStackFrame(sf),
         );
       },
     );

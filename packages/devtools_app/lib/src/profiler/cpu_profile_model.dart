@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import '../trace_event.dart';
 import '../trees.dart';
+import '../ui/search.dart';
 import '../utils.dart';
 
 /// Data model for DevTools CPU profile.
@@ -156,7 +157,8 @@ class CpuProfileMetaData {
   final TimeRange time;
 }
 
-class CpuStackFrame extends TreeNode<CpuStackFrame> {
+class CpuStackFrame extends TreeNode<CpuStackFrame>
+    with SearchableDataMixin, SearchableTreeDataMixin<CpuStackFrame> {
   CpuStackFrame({
     @required this.id,
     @required this.name,
@@ -208,6 +210,10 @@ class CpuStackFrame extends TreeNode<CpuStackFrame> {
               .round());
 
   Duration _selfTime;
+
+  @override
+  String get tooltip =>
+      '$name - ${msText(totalTime)}${url != null ? ' - $url' : ''}';
 
   /// Returns the number of cpu samples this stack frame is a part of.
   ///

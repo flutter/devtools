@@ -155,6 +155,25 @@ void main() {
       expect(controller.matchesForSearch('YEAR').length, equals(5));
     });
 
+    test('matchesForSearch sets isSearchMatch property', () async {
+      // The number of valid requests recorded in the test data.
+      const numRequests = 16;
+
+      final requestsNotifier = controller.requests;
+      // Refresh network data and ensure requests are populated.
+      await controller.networkService.refreshNetworkData();
+      final profile = requestsNotifier.value;
+      expect(profile.requests.length, numRequests);
+
+      var matches = controller.matchesForSearch('year=2019');
+      expect(matches.length, equals(5));
+      verifyIsSearchMatch(profile.requests, matches);
+
+      matches = controller.matchesForSearch('IPv6');
+      expect(matches.length, equals(2));
+      verifyIsSearchMatch(profile.requests, matches);
+    });
+
     test('filterData', () async {
       // The number of valid requests recorded in the test data.
       const numRequests = 16;

@@ -630,6 +630,11 @@ class LoggingController extends DisposableController
           (log.details != null &&
               log.details.toLowerCase().contains(caseInsensitiveSearch))) {
         matches.add(log);
+        // TODO(kenz): use the value of this property in the logs table to
+        // improve performance. This will require some refactoring of FlatTable.
+        log.isSearchMatch = true;
+      } else {
+        log.isSearchMatch = false;
       }
     }
     return matches;
@@ -764,7 +769,7 @@ String _valueAsString(InstanceRef ref) {
 /// case, this log entry will have a non-null `detailsComputer` field. After the
 /// data is calculated, the log entry will be modified to contain the calculated
 /// `details` data.
-class LogData {
+class LogData with SearchableDataMixin {
   LogData(
     this.kind,
     this._details,

@@ -9,6 +9,7 @@ import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:test/test.dart';
 
 import 'support/mocks.dart';
+import 'support/utils.dart';
 
 void main() {
   group('CpuProfileController', () {
@@ -74,6 +75,38 @@ void main() {
 
       await controller.clear();
       expect(controller.selectedCpuStackFrameNotifier.value, isNull);
+    });
+
+    test('matchesForSearch', () async {
+      // [startMicros] and [extentMicros] are arbitrary for testing.
+      await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
+      expect(
+          controller.dataNotifier.value.stackFrames.values.length, equals(17));
+
+      expect(controller.matchesForSearch(null).length, equals(0));
+      expect(controller.matchesForSearch('').length, equals(0));
+      expect(controller.matchesForSearch('render').length, equals(9));
+      expect(controller.matchesForSearch('THREAD').length, equals(2));
+      expect(controller.matchesForSearch('paint').length, equals(7));
+    });
+
+    test('matchesForSearch sets isSearchMatch property', () async {
+      // [startMicros] and [extentMicros] are arbitrary for testing.
+      await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
+      expect(
+          controller.dataNotifier.value.stackFrames.values.length, equals(17));
+
+      var matches = controller.matchesForSearch('render');
+      verifyIsSearchMatch(
+        controller.dataNotifier.value.stackFrames.values.toList(),
+        matches,
+      );
+
+      matches = controller.matchesForSearch('THREAD');
+      verifyIsSearchMatch(
+        controller.dataNotifier.value.stackFrames.values.toList(),
+        matches,
+      );
     });
 
     test('reset', () async {
