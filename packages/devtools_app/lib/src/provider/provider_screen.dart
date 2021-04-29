@@ -78,9 +78,9 @@ class ProviderScreenBody extends ConsumerWidget {
         children: [
           OutlineDecoration(
             child: Column(
-              children: [
-                areaPaneHeader(context, title: 'Providers'),
-                const Expanded(
+              children: const [
+                AreaPaneHeader(title: Text('Providers')),
+                Expanded(
                   child: ProviderList(),
                 ),
               ],
@@ -90,9 +90,8 @@ class ProviderScreenBody extends ConsumerWidget {
             child: Column(
               children: [
                 if (selectedProviderId != null) ...[
-                  areaPaneHeader(
-                    context,
-                    title: watch(_selectedProviderNode)?.type ?? '',
+                  AreaPaneHeader(
+                    title: Text(watch(_selectedProviderNode)?.type ?? ''),
                   ),
                   Expanded(
                     child: InstanceViewer(
@@ -100,7 +99,7 @@ class ProviderScreenBody extends ConsumerWidget {
                     ),
                   )
                 ] else
-                  areaPaneHeader(context, title: '[No provider selected]'),
+                  const AreaPaneHeader(title: Text('[No provider selected]')),
               ],
             ),
           )
