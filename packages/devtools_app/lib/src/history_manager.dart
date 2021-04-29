@@ -22,7 +22,7 @@ class HistoryManager<T> extends ChangeNotifier
   }
 
   /// Return the next historical item on the stack.
-  /// 
+  ///
   /// Throws [StateError] if there's no next item available.
   T moveForward() {
     if (!hasNext) throw StateError('no next history item');
@@ -35,7 +35,7 @@ class HistoryManager<T> extends ChangeNotifier
   }
 
   /// Return the previous historical item on the stack.
-  /// 
+  ///
   /// Throws [StateError] if there's no previous item available.
   T moveBack() {
     if (!hasPrevious) throw StateError('no previous history item');
@@ -48,10 +48,10 @@ class HistoryManager<T> extends ChangeNotifier
   }
 
   /// Remove and return the most recent historical item on the stack.
-  /// 
+  ///
   /// If [current] is the last item on the stack when this method is called,
   /// [current] will be updated to return the new last item.
-  /// 
+  ///
   /// Throws [StateError] if there's no historical items.
   T pop() {
     if (_history.isEmpty) throw StateError('no history available');
@@ -76,7 +76,7 @@ class HistoryManager<T> extends ChangeNotifier
   }
 
   /// The currently selected historical item.
-  /// 
+  ///
   /// Returns null if there is no historical items.
   T get current {
     return _history.isEmpty ? null : _history[_historyIndex];
