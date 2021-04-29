@@ -4,7 +4,7 @@ import '../http/http_request_data.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 
-abstract class NetworkRequest with SearchableDataMixin {
+abstract class NetworkRequest with DataSearchStateMixin {
   NetworkRequest(this._timelineMicrosBase);
 
   final int _timelineMicrosBase;

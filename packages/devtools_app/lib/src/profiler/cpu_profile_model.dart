@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
+import '../charts/flame_chart.dart';
 import '../trace_event.dart';
 import '../trees.dart';
 import '../ui/search.dart';
@@ -158,7 +159,10 @@ class CpuProfileMetaData {
 }
 
 class CpuStackFrame extends TreeNode<CpuStackFrame>
-    with SearchableDataMixin, SearchableTreeDataMixin<CpuStackFrame> {
+    with
+        DataSearchStateMixin,
+        TreeDataSearchStateMixin<CpuStackFrame>,
+        FlameChartDataMixin {
   CpuStackFrame({
     @required this.id,
     @required this.name,
@@ -212,8 +216,11 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   Duration _selfTime;
 
   @override
-  String get tooltip =>
-      '$name - ${msText(totalTime)}${url != null ? ' - $url' : ''}';
+  String get tooltip => [
+        name,
+        msText(totalTime),
+        if (url != null) url,
+      ].join(' - ');
 
   /// Returns the number of cpu samples this stack frame is a part of.
   ///

@@ -15,7 +15,7 @@ import '../utils.dart';
 /// Top 10 matches to display in auto-complete overlay.
 const topMatchesLimit = 10;
 
-mixin SearchControllerMixin<T extends SearchableDataMixin> {
+mixin SearchControllerMixin<T extends DataSearchStateMixin> {
   final _searchNotifier = ValueNotifier<String>('');
 
   /// Notify that the search has changed.
@@ -458,13 +458,12 @@ class SearchNavigationControls extends StatelessWidget {
   }
 }
 
-mixin SearchableDataMixin {
+mixin DataSearchStateMixin {
   bool isSearchMatch = false;
   bool isActiveSearchMatch = false;
-  String get tooltip => '';
 }
 
 // This mixin is used to get around the type system where a type `T` needs to
 // both extend `TreeNode<T>` and mixin `SearchableDataMixin`.
-mixin SearchableTreeDataMixin<T extends TreeNode<T>>
-    on TreeNode<T>, SearchableDataMixin {}
+mixin TreeDataSearchStateMixin<T extends TreeNode<T>>
+    on TreeNode<T>, DataSearchStateMixin {}

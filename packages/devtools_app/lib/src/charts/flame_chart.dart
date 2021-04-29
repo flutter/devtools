@@ -17,6 +17,7 @@ import '../dialogs.dart';
 import '../extent_delegate_list.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import '../theme.dart';
+import '../trees.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
 import '../utils.dart';
@@ -87,7 +88,7 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 // grouping nodes that are close together until they are zoomed in (quad tree
 // like implementation).
 abstract class FlameChartState<T extends FlameChart,
-        V extends SearchableTreeDataMixin<V>> extends State<T>
+        V extends FlameChartDataMixin<V>> extends State<T>
     with AutoDisposeMixin, FlameChartColorMixin, TickerProviderStateMixin {
   int get rowOffsetForTopPadding => 2;
 
@@ -576,7 +577,7 @@ abstract class FlameChartState<T extends FlameChart,
   double startXForData(V data);
 }
 
-class ScrollingFlameChartRow<V extends SearchableTreeDataMixin<V>>
+class ScrollingFlameChartRow<V extends FlameChartDataMixin<V>>
     extends StatefulWidget {
   const ScrollingFlameChartRow({
     @required this.linkedScrollControllerGroup,
@@ -616,7 +617,7 @@ class ScrollingFlameChartRow<V extends SearchableTreeDataMixin<V>>
       ScrollingFlameChartRowState<V>();
 }
 
-class ScrollingFlameChartRowState<V extends SearchableTreeDataMixin<V>>
+class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
     extends State<ScrollingFlameChartRow> with AutoDisposeMixin {
   ScrollController scrollController;
 
@@ -942,7 +943,7 @@ class FlameChartSection {
   final int endRow;
 }
 
-class FlameChartRow<T extends SearchableTreeDataMixin<T>> {
+class FlameChartRow<T extends FlameChartDataMixin<T>> {
   FlameChartRow(this.index);
 
   final List<FlameChartNode<T>> nodes = [];
@@ -963,9 +964,14 @@ class FlameChartRow<T extends SearchableTreeDataMixin<T>> {
   }
 }
 
+mixin FlameChartDataMixin<T extends TreeNode<T>>
+    on TreeDataSearchStateMixin<T> {
+  String get tooltip;
+}
+
 // TODO(kenz): consider de-coupling this API from the dual background color
 // scheme.
-class FlameChartNode<T extends SearchableTreeDataMixin<T>> {
+class FlameChartNode<T extends FlameChartDataMixin<T>> {
   FlameChartNode({
     this.key,
     @required this.text,

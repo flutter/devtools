@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
+import '../charts/flame_chart.dart';
 import '../profiler/cpu_profile_model.dart';
 import '../service_manager.dart';
 import '../trace_event.dart';
@@ -513,7 +514,10 @@ class FlutterFrame {
 }
 
 abstract class TimelineEvent extends TreeNode<TimelineEvent>
-    with SearchableDataMixin, SearchableTreeDataMixin<TimelineEvent> {
+    with
+        DataSearchStateMixin,
+        TreeDataSearchStateMixin<TimelineEvent>,
+        FlameChartDataMixin {
   TimelineEvent(TraceEventWrapper firstTraceEvent)
       : traceEvents = [firstTraceEvent],
         type = firstTraceEvent.event.type {

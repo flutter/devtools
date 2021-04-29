@@ -769,7 +769,7 @@ String _valueAsString(InstanceRef ref) {
 /// case, this log entry will have a non-null `detailsComputer` field. After the
 /// data is calculated, the log entry will be modified to contain the calculated
 /// `details` data.
-class LogData with SearchableDataMixin {
+class LogData with DataSearchStateMixin {
   LogData(
     this.kind,
     this._details,

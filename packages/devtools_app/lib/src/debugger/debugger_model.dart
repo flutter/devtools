@@ -56,7 +56,7 @@ class SourcePosition {
   String toString() => '$line:$column';
 }
 
-class SourceToken with SearchableDataMixin {
+class SourceToken with DataSearchStateMixin {
   SourceToken({@required this.position, @required this.length});
 
   final SourcePosition position;
