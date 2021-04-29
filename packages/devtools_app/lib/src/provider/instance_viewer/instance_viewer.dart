@@ -463,7 +463,7 @@ class _EditableFieldState extends State<_EditableField> {
   final textFieldFocusNode = FocusNode();
   var isHovering = false;
 
-  final _isAlive = IsAlive();
+  final _isAlive = Disposable();
 
   @override
   void dispose() {

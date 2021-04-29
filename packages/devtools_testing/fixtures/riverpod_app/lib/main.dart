@@ -38,7 +38,7 @@ class MyApp extends ConsumerWidget {
             children: [
               const Text('You clicked this many times on the button:'),
               Text(
-                watch(counterProvider.state).toString(),
+                watch(counterProvider).toString(),
                 style: Theme.of(context).textTheme.headline4,
               ),
             ],

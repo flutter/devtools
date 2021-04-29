@@ -8,7 +8,7 @@ import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dar
 import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:devtools_app/src/eval_on_dart_library.dart';
-import 'package:devtools_app/src/provider/provider_list.dart';
+import 'package:devtools_app/src/provider/provider_nodes.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
@@ -17,13 +17,13 @@ import '../support/flutter_test_environment.dart';
 
 Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
   EvalOnDartLibrary evalOnDartLibrary;
-  IsAlive isAlive;
+  Disposable isAlive;
 
   setUp(() async {
     await env.setupEnvironment();
     await serviceManager.service.allFuturesCompleted;
 
-    isAlive = IsAlive();
+    isAlive = Disposable();
     evalOnDartLibrary = EvalOnDartLibrary(
       [
         'package:provider_app/main.dart',
@@ -40,16 +40,11 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
   });
 
   group('Provider controllers', () {
-    test('providerIdsProvider', () async {
+    test('rawSortedProviderNodesProvider', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      final sub = container.listen(providerIdsProvider.last);
-
-      await expectLater(
-        sub.read(),
-        completion(['0']),
-      );
+      final sub = container.listen(rawSortedProviderNodesProvider.future);
 
       await evalOnDartLibrary.asyncEval(
         'await tester.tap(find.byKey(Key("add"))).then((_) => tester.pump())',
@@ -58,49 +53,14 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
 
       await expectLater(
         sub.read(),
-        completion(['0', '1']),
-      );
-
-      await evalOnDartLibrary.asyncEval(
-        'await tester.tap(find.byKey(Key("remove"))).then((_) => tester.pump())',
-        isAlive: isAlive,
-      );
-
-      await expectLater(
-        sub.read(),
-        completion(['0']),
-      );
-    }, timeout: const Timeout.factor(8));
-
-    test('providerNodeProvider', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      final sub0 = container.listen(providerNodeProvider('0').last);
-
-      await evalOnDartLibrary.asyncEval(
-        'await tester.tap(find.byKey(Key("add"))).then((_) => tester.pump())',
-        isAlive: isAlive,
-      );
-
-      await expectLater(
-        sub0.read(),
-        completion(
+        completion([
           isA<ProviderNode>()
               .having((e) => e.id, 'id', '0')
               .having((e) => e.type, 'type', 'ChangeNotifierProvider<Counter>'),
-        ),
-      );
-
-      final sub1 = container.listen(providerNodeProvider('1').last);
-
-      await expectLater(
-        sub1.read(),
-        completion(
           isA<ProviderNode>()
               .having((e) => e.id, 'id', '1')
               .having((e) => e.type, 'type', 'Provider<int>'),
-        ),
+        ]),
       );
     }, timeout: const Timeout.factor(8));
 
@@ -648,7 +608,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
       );
 
       // wait for the list of providers to be obtained
-      await container.listen(providerIdsProvider.last).read();
+      await container.listen(rawSortedProviderNodesProvider.future).read();
 
       final countSub = container.listen(rawInstanceProvider(countPath).future);
 

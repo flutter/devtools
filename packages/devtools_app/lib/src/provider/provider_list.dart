@@ -2,19 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:meta/meta.dart';
-import 'package:vm_service/vm_service.dart';
 
-import '../common_widgets.dart';
-import '../globals.dart';
 import '../inspector/inspector_tree.dart';
 import '../theme.dart';
-import './instance_viewer/eval.dart';
-import './instance_viewer/instance_providers.dart';
+import 'provider_nodes.dart';
 
 const _tilePadding = EdgeInsets.only(
   left: defaultSpacing,
@@ -23,109 +16,36 @@ const _tilePadding = EdgeInsets.only(
   bottom: densePadding,
 );
 
-@immutable
-class ProviderNode {
-  const ProviderNode({
-    @required this.id,
-    @required this.type,
-  });
+final AutoDisposeStateNotifierProvider<StateController<String>, String>
+    selectedProviderIdProvider =
+    AutoDisposeStateNotifierProvider<StateController<String>, String>((ref) {
+  final controller = StateController<String>(null);
+  final providerIdsNotifier = ref.watch(sortedProviderNodesProvider.notifier);
 
-  final String id;
-  final String type;
-}
+  // TODO(rrousselGit): refactor to `ref.listen` when available
+  ref.onDispose(
+    providerIdsNotifier.addListener((asyncValue) {
+      final nodes = asyncValue.data?.value;
+      if (nodes == null) return;
 
-final _providerListChanged = AutoDisposeStreamProvider<void>((ref) {
-  return serviceManager.service.onExtensionEvent.where((event) {
-    return event.extensionKind == 'provider:provider_list_changed';
-  });
-});
+      if (controller.state == null) {
+        if (nodes.isNotEmpty) controller.state = nodes.first.id;
+        return;
+      }
 
-final providerIdsProvider =
-    AutoDisposeStreamProvider<List<String>>((ref) async* {
-  // cause the list of providers to be re-evaluated when notified of a change
-  ref.watch(_providerListChanged);
+      if (nodes.isEmpty) {
+        controller.state = null;
+      }
 
-  final isAlive = IsAlive();
-  ref.onDispose(isAlive.dispose);
-
-  final eval = ref.watch(providerEvalProvider);
-
-  final providerIdRefs = await eval.evalInstance(
-    'ProviderBinding.debugInstance.providerDetails.keys.toList()',
-    isAlive: isAlive,
+      /// The previously selected provider was unmounted
+      else if (!nodes.any((node) => node.id == controller.state)) {
+        controller.state = nodes.first.id;
+      }
+    }),
   );
 
-  final providerIdInstances = await Future.wait([
-    for (final idRef in providerIdRefs.elements.cast<InstanceRef>())
-      eval.getInstance(idRef, isAlive)
-  ]);
-
-  yield [
-    for (final idInstance in providerIdInstances) idInstance.valueAsString,
-  ];
-});
-
-final providerNodeProvider =
-    AutoDisposeStreamProviderFamily<ProviderNode, String>((ref, id) async* {
-  final isAlive = IsAlive();
-  ref.onDispose(isAlive.dispose);
-
-  final eval = ref.watch(providerEvalProvider);
-
-  final providerNodeInstance = await eval.evalInstance(
-    "ProviderBinding.debugInstance.providerDetails['$id']",
-    isAlive: isAlive,
-  );
-
-  Future<Instance> getFieldWithName(String name) {
-    return eval.getInstance(
-      providerNodeInstance.fields.firstWhere((e) => e.decl.name == name).value
-          as InstanceRef,
-      isAlive,
-    );
-  }
-
-  final type = await getFieldWithName('type');
-
-  yield ProviderNode(
-    id: id,
-    type: type.valueAsString,
-  );
-});
-
-final _providerIdProvider = ScopedProvider<String>(null);
-
-final _isSelectedProvider = ScopedProvider<bool>((watch) {
-  return watch(selectedProviderIdProvider).state == watch(_providerIdProvider);
-});
-
-final AutoDisposeStateProvider<String> selectedProviderIdProvider =
-    AutoDisposeStateProvider<String>((ref) {
-  final providerIdsStream = ref.watch(providerIdsProvider.stream);
-
-  StreamSubscription<void> sub;
-  sub = providerIdsStream.listen((ids) {
-    final controller = ref.read(selectedProviderIdProvider);
-
-    if (controller.state == null) {
-      if (ids.isNotEmpty) controller.state = ids.first;
-      return;
-    }
-
-    if (ids.isEmpty) {
-      controller.state = null;
-    } else if (!ids.contains(controller.state)) {
-      controller.state = ids.first;
-    }
-  }, onError: (err) {
-    // nothing to do here, but passing onError prevents tests from failing when
-    // testing scenarios where providerIdsStream emits an error
-  });
-
-  ref.onDispose(sub.cancel);
-
-  return null;
-});
+  return controller;
+}, name: 'selectedProviderIdProvider');
 
 class ProviderList extends StatefulWidget {
   const ProviderList({Key key}) : super(key: key);
@@ -147,30 +67,27 @@ class _ProviderListState extends State<ProviderList> {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, watch, child) {
-        final state = watch(providerIdsProvider);
+        final nodes = watch(sortedProviderNodesProvider);
 
-        return state.when(
+        return nodes.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, stack) => const Padding(
             padding: _tilePadding,
             child: Text('<unknown error>'),
           ),
-          data: (providerNodes) {
+          data: (nodes) {
             return Scrollbar(
               controller: scrollController,
               isAlwaysShown: true,
               child: ListView.builder(
                 primary: false,
                 controller: scrollController,
-                itemCount: providerNodes.length,
+                itemCount: nodes.length,
                 itemBuilder: (context, index) {
-                  return ProviderScope(
-                    key: Key('provider-${providerNodes[index]}'),
-                    overrides: [
-                      _providerIdProvider
-                          .overrideWithValue(providerNodes[index])
-                    ],
-                    child: const ProviderNodeItem(),
+                  final node = nodes[index];
+                  return ProviderNodeItem(
+                    key: Key('provider-${node.id}'),
+                    node: node,
                   );
                 },
               ),
@@ -183,14 +100,16 @@ class _ProviderListState extends State<ProviderList> {
 }
 
 class ProviderNodeItem extends ConsumerWidget {
-  const ProviderNodeItem({Key key}) : super(key: key);
+  const ProviderNodeItem({
+    Key key,
+    @required this.node,
+  }) : super(key: key);
+
+  final ProviderNode node;
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
-    final providerId = watch(_providerIdProvider);
-    final state = watch(providerNodeProvider(providerId));
-
-    final isSelected = watch(_isSelectedProvider);
+    final isSelected = watch(selectedProviderIdProvider) == node.id;
 
     final colorScheme = Theme.of(context).colorScheme;
     final backgroundColor =
@@ -198,15 +117,13 @@ class ProviderNodeItem extends ConsumerWidget {
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => context.read(selectedProviderIdProvider).state = providerId,
+      onTap: () {
+        context.read(selectedProviderIdProvider.notifier).state = node.id;
+      },
       child: Container(
         color: backgroundColor,
         padding: _tilePadding,
-        child: state.when(
-          loading: () => const CenteredCircularProgressIndicator(),
-          error: (err, stack) => Text('<Failed to load> $err\n\n$stack'),
-          data: (node) => Text('${node.type}()'),
-        ),
+        child: Text('${node.type}()'),
       ),
     );
   }

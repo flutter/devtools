@@ -14,11 +14,12 @@ import './instance_viewer/instance_details.dart';
 import './instance_viewer/instance_providers.dart';
 import './instance_viewer/instance_viewer.dart';
 import 'provider_list.dart';
+import 'provider_nodes.dart';
 
 final _hasErrorProvider = Provider.autoDispose<bool>((ref) {
-  if (ref.watch(providerIdsProvider) is AsyncError) return true;
+  if (ref.watch(sortedProviderNodesProvider) is AsyncError) return true;
 
-  final selectedProviderId = ref.watch(selectedProviderIdProvider).state;
+  final selectedProviderId = ref.watch(selectedProviderIdProvider);
 
   if (selectedProviderId == null) return false;
 
@@ -29,6 +30,15 @@ final _hasErrorProvider = Provider.autoDispose<bool>((ref) {
   return instance is AsyncError;
 });
 
+final _selectedProviderNode = AutoDisposeProvider<ProviderNode>((ref) {
+  final selectedId = ref.watch(selectedProviderIdProvider);
+
+  return ref.watch(sortedProviderNodesProvider).data?.value?.firstWhere(
+        (node) => node.id == selectedId,
+        orElse: () => null,
+      );
+});
+
 class ProviderScreen extends Screen {
   const ProviderScreen()
       : super.conditional(
@@ -36,7 +46,7 @@ class ProviderScreen extends Screen {
           requiresLibrary: 'package:provider/',
           title: 'Provider',
           requiresDebugBuild: true,
-          icon: Icons.palette,
+          icon: Icons.attach_file,
         );
 
   static const id = 'provider';
@@ -55,7 +65,7 @@ class ProviderScreenBody extends ConsumerWidget {
     final splitAxis = Split.axisFor(context, 0.85);
 
     // A provider will automatically be selected as soon as one is detected
-    final selectedProviderId = watch(selectedProviderIdProvider).state;
+    final selectedProviderId = watch(selectedProviderIdProvider);
 
     return ProviderListener<bool>(
       provider: _hasErrorProvider,
@@ -82,11 +92,7 @@ class ProviderScreenBody extends ConsumerWidget {
                 if (selectedProviderId != null) ...[
                   areaPaneHeader(
                     context,
-                    title: watch(providerNodeProvider(selectedProviderId))
-                            .data
-                            ?.value
-                            ?.type ??
-                        '',
+                    title: watch(_selectedProviderNode)?.type ?? '',
                   ),
                   Expanded(
                     child: InstanceViewer(

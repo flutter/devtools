@@ -12,6 +12,7 @@ import 'package:vm_service/vm_service.dart' hide SentinelException;
 import '../../eval_on_dart_library.dart';
 import '../../globals.dart';
 import '../../utils.dart';
+import '../provider_debounce.dart';
 import 'eval.dart';
 import 'instance_details.dart';
 import 'result.dart';
@@ -19,7 +20,7 @@ import 'result.dart';
 Future<InstanceRef> _resolveInstanceRefForPath(
   InstancePath path, {
   @required AutoDisposeProviderReference ref,
-  @required IsAlive isAlive,
+  @required Disposable isAlive,
   @required InstanceDetails parent,
 }) async {
   if (path.pathToProperty.isEmpty) {
@@ -109,7 +110,7 @@ Future<void> _mutate(
   String newValueExpression, {
   @required InstancePath path,
   @required AutoDisposeProviderReference ref,
-  @required IsAlive isAlive,
+  @required Disposable isAlive,
   @required InstanceDetails parent,
 }) async {
   await parent.maybeMap(
@@ -178,7 +179,7 @@ Future<InstanceDetails> _resolveParent(
 Future<EnumInstance> _tryParseEnum(
   Instance instance, {
   @required EvalOnDartLibrary eval,
-  @required IsAlive isAlive,
+  @required Disposable isAlive,
   @required String instanceRefId,
   @required Setter setter,
 }) async {
@@ -221,7 +222,7 @@ Future<EnumInstance> _tryParseEnum(
 Setter _parseSetter({
   @required InstancePath path,
   @required ProviderReference ref,
-  @required IsAlive isAlive,
+  @required Disposable isAlive,
   @required InstanceDetails parent,
 }) {
   if (parent == null) return null;
@@ -266,7 +267,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
         (ref, path) async {
   final eval = ref.watch(evalProvider);
 
-  final isAlive = IsAlive();
+  final isAlive = Disposable();
   ref.onDispose(isAlive.dispose);
 
   final parent = await _resolveParent(ref, path);
@@ -380,49 +381,13 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
   }
 });
 
-final _instanceCacheProvider = AutoDisposeStateNotifierProviderFamily<
-    StateController<AsyncValue<InstanceDetails>>, InstancePath>((ref, path) {
-  final controller = StateController<AsyncValue<InstanceDetails>>(
-    // It is safe to use `read` here because the provider is immediately listened after
-    ref.read(rawInstanceProvider(path)),
-  );
-
-  Timer timer;
-  ref.onDispose(() => timer?.cancel());
-
-  // TODO(rrousselGit): refactor to use `ref.listen` when available
-  final sub = ref.container.listen<AsyncValue<InstanceDetails>>(
-    rawInstanceProvider(path),
-    mayHaveChanged: (sub) => Future(sub.flush),
-    didChange: (sub) {
-      timer?.cancel();
-
-      sub.read().map(
-            data: (instance) => controller.state = instance,
-            error: (instance) => controller.state = instance,
-            loading: (instance) {
-              timer = Timer(const Duration(seconds: 1), () {
-                controller.state = instance;
-              });
-            },
-          );
-    },
-  );
-
-  ref.onDispose(sub.close);
-
-  return controller;
-});
-
 /// [rawInstanceProvider] but the loading state is debounced for one second.
 ///
 /// This avoids flickers when a state is refreshed
 final instanceProvider =
-    AutoDisposeProviderFamily<AsyncValue<InstanceDetails>, InstancePath>(
-        (ref, path) {
-  // Hide the StateController as it is an implementation detail
-  return ref.watch(_instanceCacheProvider(path).state);
-});
+    familyAsyncDebounce<AsyncValue<InstanceDetails>, InstancePath>(
+  rawInstanceProvider,
+);
 
 final _packageNameExp = RegExp(
   r'package:(.+?)/',
@@ -437,7 +402,7 @@ Future<List<ObjectField>> _parseFields(
   EvalOnDartLibrary eval,
   Instance instance,
   Class classInstance, {
-  @required IsAlive isAlive,
+  @required Disposable isAlive,
   @required String appName,
 }) async {
   final fields = instance.fields.map((field) async {
@@ -466,13 +431,3 @@ final _providerChanged =
         event.extensionData.data['id'] == id;
   });
 });
-
-class IsAlive implements Disposable {
-  @override
-  bool disposed = false;
-
-  @override
-  void dispose() {
-    disposed = true;
-  }
-}
