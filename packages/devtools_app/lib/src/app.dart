@@ -37,6 +37,7 @@ import 'performance/performance_controller.dart';
 import 'performance/performance_screen.dart';
 import 'profiler/profiler_screen.dart';
 import 'profiler/profiler_screen_controller.dart';
+import 'provider/provider_screen.dart';
 import 'routing.dart';
 import 'scaffold.dart';
 import 'screen.dart';
@@ -611,6 +612,10 @@ List<DevToolsScreen> get defaultScreens {
     DevToolsScreen<VMDeveloperToolsController>(
       VMDeveloperToolsScreen(controller: vmDeveloperToolsController),
       controller: vmDeveloperToolsController,
+    ),
+    DevToolsScreen<void>(
+      const ProviderScreen(),
+      createController: () {},
     ),
 // Uncomment to see a sample implementation of a conditional screen.
 //      DevToolsScreen<ExampleController>(
