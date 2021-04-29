@@ -375,11 +375,13 @@ void main() {
 }
 
 extension on ProviderContainer {
+  // TODO(rrousselGit) remove this utility when riverpod v0.15.0 is released
   Future<void> pumpAndSettle({
     List<ProviderBase> exclude = const [],
   }) async {
     bool hasDirtyProvider() {
       return debugProviderElements
+          // ignore: invalid_use_of_protected_member
           .any((e) => e.dirty && !exclude.contains(e.provider));
     }
 
