@@ -26,7 +26,8 @@ const String timeline = 'timeline';
 // Main bar UX actions:
 const String hotReload = 'hotReload';
 const String hotRestart = 'hotRestart';
-const String feedback = 'feedback';
+const String feedbackLink = 'feedback';
+const String feedbackButton = 'feedbackButton';
 
 // Common UX actions:
 const String pause = 'pause'; // Memory, Timeline, Debugger

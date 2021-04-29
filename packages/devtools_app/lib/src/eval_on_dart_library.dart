@@ -118,8 +118,16 @@ class EvalOnDartLibrary {
     String expression, {
     @required Disposable isAlive,
     Map<String, String> scope,
+    bool shouldLogError = true,
   }) {
-    return addRequest(isAlive, () => _eval(expression, scope: scope));
+    return addRequest(
+      isAlive,
+      () => _eval(
+        expression,
+        scope: scope,
+        shouldLogError: shouldLogError,
+      ),
+    );
   }
 
   Future<LibraryRef> _waitForLibraryRef() async {
@@ -137,6 +145,7 @@ class EvalOnDartLibrary {
   Future<InstanceRef> _eval(
     String expression, {
     @required Map<String, String> scope,
+    bool shouldLogError = true,
   }) async {
     if (_disposed) return null;
 
@@ -158,7 +167,9 @@ class EvalOnDartLibrary {
       }
       return result;
     } catch (e, stack) {
-      _handleError('$e - $expression', stack);
+      if (shouldLogError) {
+        _handleError('$e - $expression', stack);
+      }
     }
     return null;
   }

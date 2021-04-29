@@ -53,6 +53,7 @@ class FlatTable<T> extends StatefulWidget {
     @required this.onItemSelected,
     @required this.sortColumn,
     @required this.sortDirection,
+    this.secondarySortColumn,
     this.onSortChanged,
     this.searchMatchesNotifier,
     this.activeSearchMatchNotifier,
@@ -79,7 +80,13 @@ class FlatTable<T> extends StatefulWidget {
 
   final SortDirection sortDirection;
 
-  final Function(ColumnData<T> column, SortDirection direction) onSortChanged;
+  final ColumnData<T> secondarySortColumn;
+
+  final Function(
+    ColumnData<T> column,
+    SortDirection direction, {
+    ColumnData<T> secondarySortColumn,
+  }) onSortChanged;
 
   final ValueListenable<List<T>> searchMatchesNotifier;
 
@@ -116,7 +123,11 @@ class FlatTableState<T> extends State<FlatTable<T>>
 
   void _initData() {
     data = List.from(widget.data);
-    sortData(widget.sortColumn, widget.sortDirection);
+    sortData(
+      widget.sortColumn,
+      widget.sortDirection,
+      secondarySortColumn: widget.secondarySortColumn,
+    );
   }
 
   @visibleForTesting
@@ -217,6 +228,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
           rowBuilder: _buildRow,
           sortColumn: widget.sortColumn,
           sortDirection: widget.sortDirection,
+          secondarySortColumn: widget.secondarySortColumn,
           onSortChanged: _sortDataAndUpdate,
           activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
         );
@@ -250,18 +262,38 @@ class FlatTableState<T> extends State<FlatTable<T>>
     );
   }
 
-  void _sortDataAndUpdate(ColumnData column, SortDirection direction) {
+  void _sortDataAndUpdate(
+    ColumnData column,
+    SortDirection direction, {
+    ColumnData secondarySortColumn,
+  }) {
     setState(() {
-      sortData(column, direction);
+      sortData(column, direction, secondarySortColumn: secondarySortColumn);
       if (widget.onSortChanged != null) {
-        widget.onSortChanged(column, direction);
+        widget.onSortChanged(
+          column,
+          direction,
+          secondarySortColumn: secondarySortColumn,
+        );
       }
     });
   }
 
   @override
-  void sortData(ColumnData column, SortDirection direction) {
-    data.sort((T a, T b) => _compareData<T>(a, b, column, direction));
+  void sortData(
+    ColumnData column,
+    SortDirection direction, {
+    ColumnData secondarySortColumn,
+  }) {
+    data.sort(
+      (T a, T b) => _compareData<T>(
+        a,
+        b,
+        column,
+        direction,
+        secondarySortColumn: secondarySortColumn,
+      ),
+    );
   }
 }
 
@@ -307,6 +339,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     @required this.keyFactory,
     @required this.sortColumn,
     @required this.sortDirection,
+    this.secondarySortColumn,
     this.selectionNotifier,
     this.autoExpandRoots = false,
   })  : assert(columns.contains(treeColumn)),
@@ -331,6 +364,8 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   final ColumnData<T> sortColumn;
 
   final SortDirection sortDirection;
+
+  final ColumnData<T> secondarySortColumn;
 
   final ValueNotifier<Selection<T>> selectionNotifier;
 
@@ -412,7 +447,11 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       return root;
     });
     dataRoots = List.from(widget.dataRoots);
-    sortData(widget.sortColumn, widget.sortDirection);
+    sortData(
+      widget.sortColumn,
+      widget.sortDirection,
+      secondarySortColumn: widget.secondarySortColumn,
+    );
 
     selectionNotifier =
         widget.selectionNotifier ?? ValueNotifier<Selection<T>>(Selection<T>());
@@ -528,6 +567,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       columnWidths: columnWidths,
       rowBuilder: _buildRow,
       sortColumn: widget.sortColumn,
+      secondarySortColumn: widget.secondarySortColumn,
       sortDirection: widget.sortDirection,
       onSortChanged: _sortDataAndUpdate,
       focusNode: _focusNode,
@@ -565,8 +605,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
                 ? null
                 : [for (var child in animatingChildren) rowForNode(child)],
         onExpansionCompleted: _onItemsAnimated,
-        // TODO(https://github.com/flutter/devtools/issues/1361): alternate table
-        // row colors, even when the table has collapsed rows.
       );
     }
 
@@ -576,8 +614,18 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   @override
-  void sortData(ColumnData column, SortDirection direction) {
-    final sortFunction = (T a, T b) => _compareData<T>(a, b, column, direction);
+  void sortData(
+    ColumnData column,
+    SortDirection direction, {
+    ColumnData secondarySortColumn,
+  }) {
+    final sortFunction = (T a, T b) => _compareData<T>(
+          a,
+          b,
+          column,
+          direction,
+          secondarySortColumn: secondarySortColumn,
+        );
     void _sort(T dataObject) {
       dataObject.children
         ..sort(sortFunction)
@@ -712,8 +760,12 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     });
   }
 
-  void _sortDataAndUpdate(ColumnData column, SortDirection direction) {
-    sortData(column, direction);
+  void _sortDataAndUpdate(
+    ColumnData column,
+    SortDirection direction, {
+    ColumnData secondarySortColumn,
+  }) {
+    sortData(column, direction, secondarySortColumn: secondarySortColumn);
     _updateItems();
   }
 }
@@ -730,6 +782,7 @@ class _Table<T> extends StatefulWidget {
     @required this.sortColumn,
     @required this.sortDirection,
     @required this.onSortChanged,
+    this.secondarySortColumn,
     this.focusNode,
     this.handleKeyEvent,
     this.autoScrollContent = false,
@@ -745,7 +798,12 @@ class _Table<T> extends StatefulWidget {
   final IndexedScrollableWidgetBuilder rowBuilder;
   final ColumnData<T> sortColumn;
   final SortDirection sortDirection;
-  final Function(ColumnData<T> column, SortDirection direction) onSortChanged;
+  final ColumnData<T> secondarySortColumn;
+  final Function(
+    ColumnData<T> column,
+    SortDirection direction, {
+    ColumnData<T> secondarySortColumn,
+  }) onSortChanged;
   final FocusNode focusNode;
   final TableKeyEventHandler handleKeyEvent;
   final ValueNotifier<Selection<T>> selectionNotifier;
@@ -922,6 +980,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
               columnWidths: widget.columnWidths,
               sortColumn: sortColumn,
               sortDirection: sortDirection,
+              secondarySortColumn: widget.secondarySortColumn,
               onSortChanged: _sortData,
             ),
             Expanded(
@@ -956,10 +1015,18 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     });
   }
 
-  void _sortData(ColumnData column, SortDirection direction) {
+  void _sortData(
+    ColumnData<T> column,
+    SortDirection direction, {
+    ColumnData<T> secondarySortColumn,
+  }) {
     sortDirection = direction;
     sortColumn = column;
-    widget.onSortChanged(column, direction);
+    widget.onSortChanged(
+      column,
+      direction,
+      secondarySortColumn: secondarySortColumn,
+    );
   }
 }
 
@@ -1003,6 +1070,7 @@ class TableRow<T> extends StatefulWidget {
     this.activeSearchMatchNotifier,
   })  : sortColumn = null,
         sortDirection = null,
+        secondarySortColumn = null,
         onSortChanged = null,
         super(key: key);
 
@@ -1016,6 +1084,7 @@ class TableRow<T> extends StatefulWidget {
     @required this.sortColumn,
     @required this.sortDirection,
     @required this.onSortChanged,
+    this.secondarySortColumn,
     this.onPressed,
   })  : node = null,
         isExpanded = false,
@@ -1074,7 +1143,13 @@ class TableRow<T> extends StatefulWidget {
 
   final SortDirection sortDirection;
 
-  final Function(ColumnData<T> column, SortDirection direction) onSortChanged;
+  final ColumnData<T> secondarySortColumn;
+
+  final Function(
+    ColumnData<T> column,
+    SortDirection direction, {
+    ColumnData<T> secondarySortColumn,
+  }) onSortChanged;
 
   final ValueListenable<List<T>> searchMatchesNotifier;
 
@@ -1273,7 +1348,10 @@ class _TableRowState<T> extends State<TableRow<T>>
 
         content = InkWell(
           canRequestFocus: false,
-          onTap: () => _handleSortChange(column),
+          onTap: () => _handleSortChange(
+            column,
+            secondarySortColumn: widget.secondarySortColumn,
+          ),
           child: Row(
             mainAxisAlignment: _mainAxisAlignmentFor(column),
             children: [
@@ -1394,7 +1472,10 @@ class _TableRowState<T> extends State<TableRow<T>>
   @override
   bool shouldShow() => widget.isShown;
 
-  void _handleSortChange(ColumnData<T> columnData) {
+  void _handleSortChange(
+    ColumnData<T> columnData, {
+    ColumnData<T> secondarySortColumn,
+  }) {
     SortDirection direction;
     if (columnData.title == widget.sortColumn.title) {
       direction = widget.sortDirection.reverse();
@@ -1403,7 +1484,11 @@ class _TableRowState<T> extends State<TableRow<T>>
     } else {
       direction = SortDirection.ascending;
     }
-    widget.onSortChanged(columnData, direction);
+    widget.onSortChanged(
+      columnData,
+      direction,
+      secondarySortColumn: secondarySortColumn,
+    );
   }
 }
 
@@ -1414,6 +1499,15 @@ abstract class SortableTable<T> {
 int _compareFactor(SortDirection direction) =>
     direction == SortDirection.ascending ? 1 : -1;
 
-int _compareData<T>(T a, T b, ColumnData column, SortDirection direction) {
-  return column.compare(a, b) * _compareFactor(direction);
+int _compareData<T>(
+  T a,
+  T b,
+  ColumnData column,
+  SortDirection direction, {
+  ColumnData secondarySortColumn,
+}) {
+  final compare = column.compare(a, b) * _compareFactor(direction);
+  if (compare != 0 || secondarySortColumn == null) return compare;
+
+  return secondarySortColumn.compare(a, b) * _compareFactor(direction);
 }

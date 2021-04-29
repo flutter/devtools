@@ -18,7 +18,10 @@ class FlexSplitColumn extends StatelessWidget {
         assert(children.length == initialFractions.length),
         _children = buildChildrenWithFirstHeader(children, headers),
         _initialFractions = modifyInitialFractionsToIncludeFirstHeader(
-            initialFractions, headers, totalHeight),
+          initialFractions,
+          headers,
+          totalHeight,
+        ),
         _minSizes = modifyMinSizesToIncludeFirstHeader(minSizes, headers),
         super(key: key) {
     if (minSizes != null) {
@@ -43,7 +46,7 @@ class FlexSplitColumn extends StatelessWidget {
   /// creators of [FlexSplitColumn] can be unaware of the under-the-hood
   /// calculations necessary to achieve the UI requirements specified by
   /// [initialFractions] and [minSizes].
-  final List<SizedBox> headers;
+  final List<PreferredSizeWidget> headers;
 
   /// The children that will be laid out below each corresponding header in
   /// [headers].
@@ -71,7 +74,7 @@ class FlexSplitColumn extends StatelessWidget {
   @visibleForTesting
   static List<Widget> buildChildrenWithFirstHeader(
     List<Widget> children,
-    List<SizedBox> headers,
+    List<PreferredSizeWidget> headers,
   ) {
     return [
       Column(
@@ -87,20 +90,21 @@ class FlexSplitColumn extends StatelessWidget {
   @visibleForTesting
   static List<double> modifyInitialFractionsToIncludeFirstHeader(
     List<double> initialFractions,
-    List<SizedBox> headers,
+    List<PreferredSizeWidget> headers,
     double totalHeight,
   ) {
     var totalHeaderHeight = 0.0;
     for (var header in headers) {
-      totalHeaderHeight += header.height;
+      totalHeaderHeight += header.preferredSize.height;
     }
     final intendedContentHeight = totalHeight - totalHeaderHeight;
     final intendedChildHeights = List<double>.generate(initialFractions.length,
         (i) => intendedContentHeight * initialFractions[i]);
-    final trueContentHeight = intendedContentHeight + headers[0].height;
+    final trueContentHeight =
+        intendedContentHeight + headers[0].preferredSize.height;
     return List<double>.generate(initialFractions.length, (i) {
       if (i == 0) {
-        return (intendedChildHeights[i] + headers[0].height) /
+        return (intendedChildHeights[i] + headers[0].preferredSize.height) /
             trueContentHeight;
       }
       return intendedChildHeights[i] / trueContentHeight;
@@ -110,10 +114,10 @@ class FlexSplitColumn extends StatelessWidget {
   @visibleForTesting
   static List<double> modifyMinSizesToIncludeFirstHeader(
     List<double> minSizes,
-    List<SizedBox> headers,
+    List<PreferredSizeWidget> headers,
   ) {
     return [
-      minSizes[0] + headers[0].height,
+      minSizes[0] + headers[0].preferredSize.height,
       ...minSizes.sublist(1),
     ];
   }

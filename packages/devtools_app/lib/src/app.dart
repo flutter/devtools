@@ -170,6 +170,7 @@ class DevToolsAppState extends State<DevToolsApp> {
         analyticsProvider: widget.analyticsProvider,
         actions: [
           OpenSettingsAction(),
+          ReportFeedbackButton(),
           OpenAboutAction(),
         ],
       );
@@ -218,6 +219,7 @@ class DevToolsAppState extends State<DevToolsApp> {
                     HotRestartButton(),
                   ],
                   OpenSettingsAction(),
+                  ReportFeedbackButton(),
                   OpenAboutAction(),
                 ],
               ),
@@ -256,6 +258,7 @@ class DevToolsAppState extends State<DevToolsApp> {
           ideTheme: ideTheme,
           actions: [
             OpenSettingsAction(),
+            ReportFeedbackButton(),
             OpenAboutAction(),
           ],
         );
@@ -432,6 +435,31 @@ class OpenSettingsAction extends StatelessWidget {
   }
 }
 
+class ReportFeedbackButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTooltip(
+      tooltip: 'Report feedback',
+      child: InkWell(
+        onTap: () async {
+          ga.select(devToolsMain, feedbackButton);
+          await launchUrl(
+              devToolsExtensionPoints.issueTrackerLink().url, context);
+        },
+        child: Container(
+          width: DevToolsScaffold.actionWidgetSize,
+          height: DevToolsScaffold.actionWidgetSize,
+          alignment: Alignment.center,
+          child: const Icon(
+            Icons.bug_report,
+            size: actionsIconSize,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class DevToolsAboutDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -470,7 +498,7 @@ class DevToolsAboutDialog extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: () async {
-        ga.select(devToolsMain, feedback);
+        ga.select(devToolsMain, feedbackLink);
         await launchUrl(reportIssuesLink.url, context);
       },
       child: Text(reportIssuesLink.display, style: linkTextStyle(colorScheme)),

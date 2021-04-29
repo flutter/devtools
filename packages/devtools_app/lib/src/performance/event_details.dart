@@ -38,10 +38,9 @@ class EventDetails extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          areaPaneHeader(
-            context,
+          AreaPaneHeader(
             needsTopBorder: false,
-            title: _generateHeaderText(selectedEvent),
+            title: Text(_generateHeaderText(selectedEvent)),
           ),
           Expanded(
             child: selectedEvent != null

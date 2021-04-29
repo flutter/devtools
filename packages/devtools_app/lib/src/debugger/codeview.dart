@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,6 +19,8 @@ import '../dialogs.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import '../globals.dart';
 import '../theme.dart';
+import '../ui/colors.dart';
+import '../ui/search.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
 import 'breakpoints.dart';
@@ -25,8 +28,10 @@ import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'hover.dart';
-import 'syntax_highlighter.dart';
 import 'variables.dart';
+
+final debuggerCodeViewSearchKey =
+    GlobalKey(debugLabel: 'DebuggerCodeViewSearchKey');
 
 // TODO(kenz): consider moving lines / pausedPositions calculations to the
 // controller.
@@ -35,6 +40,7 @@ class CodeView extends StatefulWidget {
     Key key,
     this.controller,
     this.scriptRef,
+    this.parsedScript,
     this.onSelected,
   }) : super(key: key);
 
@@ -43,6 +49,7 @@ class CodeView extends StatefulWidget {
 
   final DebuggerController controller;
   final ScriptRef scriptRef;
+  final ParsedScript parsedScript;
 
   final void Function(ScriptRef scriptRef, int line) onSelected;
 
@@ -50,56 +57,30 @@ class CodeView extends StatefulWidget {
   _CodeViewState createState() => _CodeViewState();
 }
 
-class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
-  Script script;
-  int lineCount = 0;
-  Set<int> executableLines = {};
+class _CodeViewState extends State<CodeView>
+    with AutoDisposeMixin, SearchFieldMixin<CodeView> {
+  static const searchFieldRightPadding = 75.0;
 
   LinkedScrollControllerGroup verticalController;
   ScrollController gutterController;
   ScrollController textController;
-  SyntaxHighlighter highlighter;
 
   ScriptRef get scriptRef => widget.scriptRef;
+
+  ParsedScript get parsedScript => widget.parsedScript;
 
   @override
   void initState() {
     super.initState();
 
-    _initScriptInfo();
     verticalController = LinkedScrollControllerGroup();
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();
 
     addAutoDisposeListener(
-        widget.controller.scriptLocation, _handleScriptLocationChanged);
-  }
-
-  void _parseScriptLines() {
-    // Create a new SyntaxHighlighter with the script's source in preparation
-    // for building the code view.
-    highlighter = SyntaxHighlighter(source: script?.source ?? '');
-    lineCount = script.source?.split('\n')?.length ?? 0;
-
-    // Gather the data to display breakable lines.
-    executableLines = {};
-
-    if (script != null) {
-      final scriptId = script.id;
-
-      widget.controller
-          .getBreakablePositions(script)
-          .then((List<SourcePosition> positions) {
-        if (mounted && scriptId == scriptRef?.id) {
-          setState(() {
-            executableLines = Set.from(positions.map((p) => p.line));
-          });
-        }
-      }).catchError((e, st) {
-        // Ignore - not supported for all vm service implementations.
-        log('$e\n$st');
-      });
-    }
+      widget.controller.scriptLocation,
+      _handleScriptLocationChanged,
+    );
   }
 
   @override
@@ -112,10 +93,6 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       addAutoDisposeListener(
           widget.controller.scriptLocation, _handleScriptLocationChanged);
     }
-
-    if (widget.scriptRef != oldWidget.scriptRef) {
-      _initScriptInfo();
-    }
   }
 
   @override
@@ -125,27 +102,6 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     widget.controller.scriptLocation
         .removeListener(_handleScriptLocationChanged);
     super.dispose();
-  }
-
-  void _initScriptInfo() {
-    script = widget.controller.getScriptCached(scriptRef);
-
-    if (script == null) {
-      if (scriptRef != null) {
-        final scriptId = scriptRef.id;
-        widget.controller.getScript(scriptRef).then((script) {
-          if (mounted && scriptId == scriptRef.id) {
-            setState(() {
-              this.script = script;
-
-              _parseScriptLines();
-            });
-          }
-        });
-      }
-    } else {
-      _parseScriptLines();
-    }
   }
 
   void _handleScriptLocationChanged() {
@@ -175,7 +131,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
 
     // TODO(devoncarew): Adjust this so we don't scroll if we're already in the
     // middle third of the screen.
-    if (lineCount * CodeView.rowHeight > extent) {
+    if (parsedScript.lineCount * CodeView.rowHeight > extent) {
       // Scroll to the middle of the screen.
       final lineIndex = location.line - 1;
       final scrollPosition =
@@ -209,11 +165,26 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       );
     }
 
-    if (script == null) {
+    if (parsedScript == null) {
       return const CenteredCircularProgressIndicator();
     }
 
-    return buildCodeArea(context);
+    return ValueListenableBuilder(
+      valueListenable: widget.controller.showSearchInFileField,
+      builder: (context, showSearch, _) {
+        return Stack(
+          children: [
+            buildCodeArea(context),
+            if (showSearch)
+              Positioned(
+                top: denseSpacing,
+                right: searchFieldRightPadding,
+                child: buildSearchInFileField(),
+              ),
+          ],
+        );
+      },
+    );
   }
 
   Widget buildCodeArea(BuildContext context) {
@@ -223,41 +194,44 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
 
     // Ensure the syntax highlighter has been initialized.
     // TODO(bkonyi): process source for highlighting on a separate thread.
-    if (script.source.length < 500000 && highlighter != null) {
-      final highlighted = highlighter.highlight(context);
+    if (parsedScript.script.source != null) {
+      if (parsedScript.script.source.length < 500000 &&
+          parsedScript.highlighter != null) {
+        final highlighted = parsedScript.highlighter.highlight(context);
 
-      // Look for [TextSpan]s which only contain '\n' to manually break the
-      // output from the syntax highlighter into individual lines.
-      var currentLine = <TextSpan>[];
-      highlighted.visitChildren((span) {
-        currentLine.add(span);
-        if (span.toPlainText() == '\n') {
-          lines.add(
-            TextSpan(
-              style: theme.fixedFontStyle,
-              children: currentLine,
-            ),
-          );
-          currentLine = <TextSpan>[];
-        }
-        return true;
-      });
-      lines.add(
-        TextSpan(
-          style: theme.fixedFontStyle,
-          children: currentLine,
-        ),
-      );
-    } else {
-      lines.addAll(
-        [
-          for (final line in script.source.split('\n'))
-            TextSpan(
-              style: theme.fixedFontStyle,
-              text: line,
-            ),
-        ],
-      );
+        // Look for [TextSpan]s which only contain '\n' to manually break the
+        // output from the syntax highlighter into individual lines.
+        var currentLine = <TextSpan>[];
+        highlighted.visitChildren((span) {
+          currentLine.add(span);
+          if (span.toPlainText() == '\n') {
+            lines.add(
+              TextSpan(
+                style: theme.fixedFontStyle,
+                children: currentLine,
+              ),
+            );
+            currentLine = <TextSpan>[];
+          }
+          return true;
+        });
+        lines.add(
+          TextSpan(
+            style: theme.fixedFontStyle,
+            children: currentLine,
+          ),
+        );
+      } else {
+        lines.addAll(
+          [
+            for (final line in parsedScript.script.source.split('\n'))
+              TextSpan(
+                style: theme.fixedFontStyle,
+                text: line,
+              ),
+          ],
+        );
+      }
     }
 
     // Apply the log change-of-base formula, then add 16dp padding for every
@@ -273,54 +247,99 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       child: Column(
         children: [
           buildCodeviewTitle(theme),
-          DefaultTextStyle(
-            style: theme.fixedFontStyle,
-            child: Expanded(
-              child: Scrollbar(
-                controller: textController,
-                child: ValueListenableBuilder<StackFrameAndSourcePosition>(
-                  valueListenable: widget.controller.selectedStackFrame,
-                  builder: (context, frame, _) {
-                    final pausedFrame = frame == null
-                        ? null
-                        : (frame.scriptRef == scriptRef ? frame : null);
+          if (lines.isNotEmpty)
+            DefaultTextStyle(
+              style: theme.fixedFontStyle,
+              child: Expanded(
+                child: Scrollbar(
+                  controller: textController,
+                  child: ValueListenableBuilder<StackFrameAndSourcePosition>(
+                    valueListenable: widget.controller.selectedStackFrame,
+                    builder: (context, frame, _) {
+                      final pausedFrame = frame == null
+                          ? null
+                          : (frame.scriptRef == scriptRef ? frame : null);
 
-                    return Row(
-                      children: [
-                        ValueListenableBuilder<
-                            List<BreakpointAndSourcePosition>>(
-                          valueListenable:
-                              widget.controller.breakpointsWithLocation,
-                          builder: (context, breakpoints, _) {
-                            return Gutter(
-                              gutterWidth: gutterWidth,
-                              scrollController: gutterController,
-                              lineCount: lines.length,
-                              pausedFrame: pausedFrame,
-                              breakpoints: breakpoints
-                                  .where((bp) => bp.scriptRef == scriptRef)
-                                  .toList(),
-                              executableLines: executableLines,
-                              onPressed: _onPressed,
-                            );
-                          },
-                        ),
-                        const SizedBox(width: denseSpacing),
-                        Expanded(
-                          child: Lines(
-                            scrollController: textController,
-                            lines: lines,
-                            pausedFrame: pausedFrame,
+                      return Row(
+                        children: [
+                          ValueListenableBuilder<
+                              List<BreakpointAndSourcePosition>>(
+                            valueListenable:
+                                widget.controller.breakpointsWithLocation,
+                            builder: (context, breakpoints, _) {
+                              return Gutter(
+                                gutterWidth: gutterWidth,
+                                scrollController: gutterController,
+                                lineCount: lines.length,
+                                pausedFrame: pausedFrame,
+                                breakpoints: breakpoints
+                                    .where((bp) => bp.scriptRef == scriptRef)
+                                    .toList(),
+                                executableLines: parsedScript.executableLines,
+                                onPressed: _onPressed,
+                                // Disable dots for possible breakpoint locations.
+                                allowInteraction:
+                                    !widget.controller.isSystemIsolate,
+                              );
+                            },
                           ),
-                        ),
-                      ],
-                    );
-                  },
+                          const SizedBox(width: denseSpacing),
+                          Expanded(
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                return Lines(
+                                  constraints: constraints,
+                                  scrollController: textController,
+                                  lines: lines,
+                                  pausedFrame: pausedFrame,
+                                  searchMatchesNotifier:
+                                      widget.controller.searchMatches,
+                                  activeSearchMatchNotifier:
+                                      widget.controller.activeSearchMatch,
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            )
+          else
+            Expanded(
+              child: Center(
+                child: Text(
+                  'No source available',
+                  style: theme.textTheme.subtitle1,
                 ),
               ),
             ),
-          ),
         ],
+      ),
+    );
+  }
+
+  Widget buildSearchInFileField() {
+    return Card(
+      elevation: defaultElevation,
+      color: Theme.of(context).scaffoldBackgroundColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(defaultBorderRadius),
+      ),
+      child: Container(
+        width: wideSearchTextWidth,
+        height: defaultTextFieldHeight + 2 * denseSpacing,
+        padding: const EdgeInsets.all(denseSpacing),
+        child: buildSearchField(
+          controller: widget.controller,
+          searchFieldKey: debuggerCodeViewSearchKey,
+          searchFieldEnabled: parsedScript != null,
+          shouldRequestFocus: true,
+          supportsNavigation: true,
+          onClose: () => widget.controller.toggleSearchInFileVisibility(false),
+        ),
       ),
     );
   }
@@ -414,6 +433,7 @@ class Gutter extends StatelessWidget {
     @required this.breakpoints,
     @required this.executableLines,
     @required this.onPressed,
+    @required this.allowInteraction,
   });
 
   final double gutterWidth;
@@ -423,6 +443,7 @@ class Gutter extends StatelessWidget {
   final List<BreakpointAndSourcePosition> breakpoints;
   final Set<int> executableLines;
   final IntCallback onPressed;
+  final bool allowInteraction;
 
   @override
   Widget build(BuildContext context) {
@@ -443,6 +464,7 @@ class Gutter extends StatelessWidget {
             isBreakpoint: bpLineSet.contains(lineNum),
             isExecutable: executableLines.contains(lineNum),
             isPausedHere: pausedFrame?.line == lineNum,
+            allowInteraction: allowInteraction,
           );
         },
       ),
@@ -458,6 +480,7 @@ class GutterItem extends StatelessWidget {
     @required this.isExecutable,
     @required this.isPausedHere,
     @required this.onPressed,
+    @required this.allowInteraction,
   }) : super(key: key);
 
   final int lineNumber;
@@ -465,6 +488,8 @@ class GutterItem extends StatelessWidget {
   final bool isBreakpoint;
 
   final bool isExecutable;
+
+  final bool allowInteraction;
 
   /// Whether the execution point is currently paused here.
   final bool isPausedHere;
@@ -485,6 +510,9 @@ class GutterItem extends StatelessWidget {
 
     return InkWell(
       onTap: onPressed,
+      // Force usage of default mouse pointer when gutter interaction is
+      // disabled.
+      mouseCursor: allowInteraction ? null : SystemMouseCursors.basic,
       child: Container(
         height: CodeView.rowHeight,
         padding: const EdgeInsets.only(right: 4.0),
@@ -492,7 +520,7 @@ class GutterItem extends StatelessWidget {
           alignment: AlignmentDirectional.centerStart,
           fit: StackFit.expand,
           children: [
-            if (isExecutable || isBreakpoint)
+            if (allowInteraction && (isExecutable || isBreakpoint))
               Align(
                 alignment: Alignment.centerLeft,
                 child: SizedBox(
@@ -528,34 +556,102 @@ class GutterItem extends StatelessWidget {
   }
 }
 
-class Lines extends StatelessWidget {
+class Lines extends StatefulWidget {
   const Lines({
     Key key,
+    @required this.constraints,
     @required this.scrollController,
     @required this.lines,
     @required this.pausedFrame,
+    @required this.searchMatchesNotifier,
+    @required this.activeSearchMatchNotifier,
   }) : super(key: key);
 
+  final BoxConstraints constraints;
   final ScrollController scrollController;
   final List<TextSpan> lines;
   final StackFrameAndSourcePosition pausedFrame;
+  final ValueListenable<List<SourceToken>> searchMatchesNotifier;
+  final ValueListenable<SourceToken> activeSearchMatchNotifier;
+
+  @override
+  _LinesState createState() => _LinesState();
+}
+
+class _LinesState extends State<Lines> with AutoDisposeMixin {
+  List<SourceToken> searchMatches;
+
+  SourceToken activeSearch;
+
+  @override
+  void initState() {
+    super.initState();
+
+    cancel();
+    searchMatches = widget.searchMatchesNotifier.value;
+    addAutoDisposeListener(widget.searchMatchesNotifier, () {
+      setState(() {
+        searchMatches = widget.searchMatchesNotifier.value;
+      });
+    });
+
+    activeSearch = widget.activeSearchMatchNotifier.value;
+    addAutoDisposeListener(widget.activeSearchMatchNotifier, () {
+      setState(() {
+        activeSearch = widget.activeSearchMatchNotifier.value;
+      });
+
+      if (activeSearch != null) {
+        final isOutOfViewTop = activeSearch.position.line * CodeView.rowHeight <
+            widget.scrollController.offset + CodeView.rowHeight;
+        final isOutOfViewBottom =
+            activeSearch.position.line * CodeView.rowHeight >
+                widget.scrollController.offset +
+                    widget.constraints.maxHeight -
+                    CodeView.rowHeight;
+
+        if (isOutOfViewTop || isOutOfViewBottom) {
+          // Scroll this search token to the middle of the view.
+          final targetOffset = math.max(
+            activeSearch.position.line * CodeView.rowHeight -
+                widget.constraints.maxHeight / 2,
+            0.0,
+          );
+          widget.scrollController.animateTo(
+            targetOffset,
+            duration: defaultDuration,
+            curve: defaultCurve,
+          );
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final pausedLine = pausedFrame?.line;
+    final pausedLine = widget.pausedFrame?.line;
 
     return ListView.builder(
-      controller: scrollController,
+      controller: widget.scrollController,
       itemExtent: CodeView.rowHeight,
-      itemCount: lines.length,
+      itemCount: widget.lines.length,
       itemBuilder: (context, index) {
         final lineNum = index + 1;
         return LineItem(
-          lineContents: lines[index],
-          pausedFrame: pausedLine == lineNum ? pausedFrame : null,
+          lineContents: widget.lines[index],
+          pausedFrame: pausedLine == lineNum ? widget.pausedFrame : null,
+          searchMatches: searchMatchesForLine(index),
+          activeSearchMatch:
+              activeSearch?.position?.line == index ? activeSearch : null,
         );
       },
     );
+  }
+
+  List<SourceToken> searchMatchesForLine(int index) {
+    return searchMatches
+        .where((searchToken) => searchToken.position.line == index)
+        .toList();
   }
 }
 
@@ -564,13 +660,17 @@ class LineItem extends StatefulWidget {
     Key key,
     @required this.lineContents,
     this.pausedFrame,
+    this.searchMatches,
+    this.activeSearchMatch,
   }) : super(key: key);
 
-  static const _hoverDelay = Duration(milliseconds: 500);
+  static const _hoverDelay = Duration(milliseconds: 50);
   static const _hoverWidth = 400.0;
 
   final TextSpan lineContents;
   final StackFrameAndSourcePosition pausedFrame;
+  final List<SourceToken> searchMatches;
+  final SourceToken activeSearchMatch;
 
   @override
   _LineItemState createState() => _LineItemState();
@@ -588,10 +688,13 @@ class _LineItemState extends State<LineItem> {
 
   DebuggerController _debuggerController;
 
+  String _previousHoverWord = '';
+
   void _onHoverExit() {
     _showTimer?.cancel();
     _removeTimer = Timer(LineItem._hoverDelay, () {
       _hoverCard?.maybeRemove();
+      _previousHoverWord = '';
     });
   }
 
@@ -600,11 +703,13 @@ class _LineItemState extends State<LineItem> {
     _removeTimer?.cancel();
     if (!_debuggerController.isPaused.value) return;
     _showTimer = Timer(LineItem._hoverDelay, () async {
-      _hoverCard?.remove();
       final word = wordForHover(
         event.localPosition.dx,
         widget.lineContents,
       );
+      if (word == _previousHoverWord) return;
+      _previousHoverWord = word;
+      _hoverCard?.remove();
       if (word != '') {
         try {
           final response = await _debuggerController.evalAtCurrentFrame(word);
@@ -712,11 +817,127 @@ class _LineItemState extends State<LineItem> {
     );
   }
 
+  TextSpan searchAwareLineContents() {
+    final activeSearchAwareContents =
+        _activeSearchAwareLineContents(widget.lineContents.children);
+    final allSearchAwareContents =
+        _searchMatchAwareLineContents(activeSearchAwareContents);
+    return TextSpan(
+      children: allSearchAwareContents,
+      style: widget.lineContents.style,
+    );
+  }
+
+  List<TextSpan> _contentsWithMatch(
+    List<TextSpan> startingContents,
+    SourceToken match,
+    Color matchColor,
+  ) {
+    final contentsWithMatch = <TextSpan>[];
+    var startColumnForSpan = 0;
+    for (final span in startingContents) {
+      final spanText = span.toPlainText();
+      final startColumnForMatch = match.position.column;
+      if (startColumnForSpan <= startColumnForMatch &&
+          startColumnForSpan + spanText.length > startColumnForMatch) {
+        // The active search is part of this [span].
+        final matchStartInSpan = startColumnForMatch - startColumnForSpan;
+        final matchEndInSpan = matchStartInSpan + match.length;
+
+        // Add the part of [span] that occurs before the search match.
+        contentsWithMatch.add(
+          TextSpan(
+            text: spanText.substring(0, matchStartInSpan),
+            style: span.style,
+          ),
+        );
+
+        final matchStyle =
+            (span.style ?? DefaultTextStyle.of(context).style).copyWith(
+          color: Colors.black,
+          backgroundColor: matchColor,
+        );
+
+        if (matchEndInSpan <= spanText.length) {
+          final matchText =
+              spanText.substring(matchStartInSpan, matchEndInSpan);
+          final trailingText = spanText.substring(matchEndInSpan);
+          // Add the match and any part of [span] that occurs after the search
+          // match.
+          contentsWithMatch.addAll([
+            TextSpan(
+              text: matchText,
+              style: matchStyle,
+            ),
+            if (trailingText.isNotEmpty)
+              TextSpan(
+                text: spanText.substring(matchEndInSpan),
+                style: span.style,
+              ),
+          ]);
+        } else {
+          // In this case, the active search match exists across multiple spans,
+          // so we need to add the part of the match that is in this [span] and
+          // continue looking for the remaining part of the match in the spans
+          // to follow.
+          contentsWithMatch.add(
+            TextSpan(
+              text: spanText.substring(matchStartInSpan),
+              style: matchStyle,
+            ),
+          );
+          final remainingMatchLength =
+              match.length - (spanText.length - matchStartInSpan);
+          match = SourceToken(
+            position: SourcePosition(
+              line: match.position.line,
+              column: startColumnForMatch + match.length - remainingMatchLength,
+            ),
+            length: remainingMatchLength,
+          );
+        }
+      } else {
+        contentsWithMatch.add(span);
+      }
+      startColumnForSpan += spanText.length;
+    }
+    return contentsWithMatch;
+  }
+
+  List<TextSpan> _activeSearchAwareLineContents(
+    List<TextSpan> startingContents,
+  ) {
+    if (widget.activeSearchMatch == null) return startingContents;
+    return _contentsWithMatch(
+      startingContents,
+      widget.activeSearchMatch,
+      activeSearchMatchColor,
+    );
+  }
+
+  List<TextSpan> _searchMatchAwareLineContents(
+    List<TextSpan> startingContents,
+  ) {
+    if (widget.searchMatches.isEmpty) return startingContents;
+    final searchMatchesToFind = List<SourceToken>.from(widget.searchMatches)
+      ..remove(widget.activeSearchMatch);
+
+    var contentsWithMatch = startingContents;
+    for (final match in searchMatchesToFind) {
+      contentsWithMatch = _contentsWithMatch(
+        contentsWithMatch,
+        match,
+        searchMatchColor,
+      );
+    }
+    return contentsWithMatch;
+  }
+
   Widget _hoverableLine() => MouseRegion(
         onExit: (_) => _onHoverExit(),
         onHover: (e) => _onHover(e, context),
         child: SelectableText.rich(
-          widget.lineContents,
+          searchAwareLineContents(),
           scrollPhysics: const NeverScrollableScrollPhysics(),
           maxLines: 1,
         ),
@@ -850,7 +1071,7 @@ class GoToLineDialog extends StatelessWidget {
             autofocus: true,
             onSubmitted: (value) {
               if (value.isNotEmpty) {
-                Navigator.of(context, rootNavigator: true).pop('dialog');
+                Navigator.of(context).pop(dialogDefaultContext);
                 final line = int.parse(value);
                 _debuggerController.showScriptLocation(
                   ScriptLocation(

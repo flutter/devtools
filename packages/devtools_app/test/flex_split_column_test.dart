@@ -15,10 +15,22 @@ void main() {
     const children = [SizedBox(), SizedBox(), SizedBox(), SizedBox()];
     const firstHeaderKey = Key('first header');
     const headers = [
-      SizedBox(height: 50.0, key: firstHeaderKey),
-      SizedBox(height: 50.0),
-      SizedBox(height: 50.0),
-      SizedBox(height: 50.0),
+      PreferredSize(
+        preferredSize: Size.fromHeight(50),
+        child: SizedBox(height: 50.0, key: firstHeaderKey),
+      ),
+      PreferredSize(
+        preferredSize: Size.fromHeight(50),
+        child: SizedBox(height: 50.0),
+      ),
+      PreferredSize(
+        preferredSize: Size.fromHeight(50),
+        child: SizedBox(height: 50.0),
+      ),
+      PreferredSize(
+        preferredSize: Size.fromHeight(50),
+        child: SizedBox(height: 50.0),
+      ),
     ];
     const initialFractions = [0.25, 0.25, 0.25, 0.25];
     const minSizes = [10.0, 10.0, 10.0, 10.0];

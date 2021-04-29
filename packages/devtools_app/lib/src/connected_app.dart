@@ -70,7 +70,13 @@ class ConnectedApp {
 
     // If eval works we're not a profile build.
     final io = EvalOnDartLibrary(['dart:io'], serviceManager.service);
-    final value = await io.eval('Platform.isAndroid', isAlive: null);
+    // Do not log the error if this eval fails - we expect it to fail for a
+    // profile build.
+    final value = await io.eval(
+      'Platform.isAndroid',
+      isAlive: null,
+      shouldLogError: false,
+    );
     return !(value?.kind == 'Bool');
 
     // TODO(terry): Disabled below code, it will hang if flutter run --start-paused

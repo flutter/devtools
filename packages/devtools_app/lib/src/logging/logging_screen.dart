@@ -166,7 +166,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
       children: [
         OutlineDecoration(
           child: LogsTable(
-            data: controller.filteredData.value,
+            data: filteredLogs,
             onItemSelected: controller.selectLog,
             selectionNotifier: controller.selectedLog,
             searchMatchesNotifier: controller.searchMatches,
@@ -213,7 +213,7 @@ class LogsTable extends StatelessWidget {
 
   final ColumnData<LogData> when = _WhenColumn();
   final ColumnData<LogData> kind = _KindColumn();
-  final ColumnData<LogData> message = _MessageColumn();
+  final ColumnData<LogData> message = MessageColumn();
 
   List<ColumnData<LogData>> get columns => [when, kind, message];
 
@@ -227,6 +227,7 @@ class LogsTable extends StatelessWidget {
       onItemSelected: onItemSelected,
       selectionNotifier: selectionNotifier,
       sortColumn: when,
+      secondarySortColumn: message,
       sortDirection: SortDirection.ascending,
       searchMatchesNotifier: searchMatchesNotifier,
       activeSearchMatchNotifier: activeSearchMatchNotifier,
@@ -307,9 +308,8 @@ class _LogDetailsState extends State<LogDetails>
 
     return OutlineDecoration(
       child: ConsoleFrame(
-        title: areaPaneHeader(
-          context,
-          title: 'Details',
+        title: AreaPaneHeader(
+          title: const Text('Details'),
           needsTopBorder: false,
           actions: [
             CopyToClipboardControl(
@@ -403,9 +403,10 @@ class _KindColumn extends ColumnData<LogData>
   }
 }
 
-class _MessageColumn extends ColumnData<LogData>
+@visibleForTesting
+class MessageColumn extends ColumnData<LogData>
     implements ColumnRenderer<LogData> {
-  _MessageColumn() : super.wide('Message');
+  MessageColumn() : super.wide('Message');
 
   @override
   bool get supportsSorting => false;
@@ -413,6 +414,26 @@ class _MessageColumn extends ColumnData<LogData>
   @override
   String getValue(LogData dataObject) =>
       dataObject.summary ?? dataObject.details;
+
+  @override
+  int compare(LogData a, LogData b) {
+    final String valueA = getValue(a);
+    final String valueB = getValue(b);
+    // Matches frame descriptions (e.g. '#12  11.4ms ')
+    final regex = RegExp(r'#(\d+)\s+\d+.\d+ms\s*');
+    final valueAIsFrameLog = valueA.startsWith(regex);
+    final valueBIsFrameLog = valueB.startsWith(regex);
+    if (valueAIsFrameLog && valueBIsFrameLog) {
+      final frameNumberA = regex.firstMatch(valueA)[1];
+      final frameNumberB = regex.firstMatch(valueB)[1];
+      return int.parse(frameNumberA).compareTo(int.parse(frameNumberB));
+    } else if (valueAIsFrameLog && !valueBIsFrameLog) {
+      return -1;
+    } else if (!valueAIsFrameLog && valueBIsFrameLog) {
+      return 1;
+    }
+    return valueA.compareTo(valueB);
+  }
 
   @override
   Widget build(

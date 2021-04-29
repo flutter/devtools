@@ -288,9 +288,8 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
     return OutlineDecoration(
       child: Column(
         children: [
-          areaPaneHeader(
-            context,
-            title: _generateSingleFileHeaderText(),
+          AreaPaneHeader(
+            title: Text(_generateSingleFileHeaderText()),
             needsTopBorder: false,
           ),
           Expanded(
@@ -443,9 +442,8 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
     return OutlineDecoration(
       child: Column(
         children: [
-          areaPaneHeader(
-            context,
-            title: _generateDualFileHeaderText(),
+          AreaPaneHeader(
+            title: Text(_generateDualFileHeaderText()),
             needsTopBorder: false,
           ),
           Expanded(
