@@ -9,12 +9,13 @@ import 'package:flutter/widgets.dart';
 
 import '../common_widgets.dart';
 import '../theme.dart';
+import '../trees.dart';
 import '../utils.dart';
 
 /// Top 10 matches to display in auto-complete overlay.
 const topMatchesLimit = 10;
 
-mixin SearchControllerMixin<T> {
+mixin SearchControllerMixin<T extends DataSearchStateMixin> {
   final _searchNotifier = ValueNotifier<String>('');
 
   /// Notify that the search has changed.
@@ -79,7 +80,9 @@ mixin SearchControllerMixin<T> {
       return;
     }
     assert(activeMatchIndex < searchMatches.value.length);
-    _activeSearchMatch.value = searchMatches.value[activeMatchIndex];
+    _activeSearchMatch.value?.isActiveSearchMatch = false;
+    _activeSearchMatch.value = searchMatches.value[activeMatchIndex]
+      ..isActiveSearchMatch = true;
   }
 
   List<T> matchesForSearch(String search) => [];
@@ -454,3 +457,13 @@ class SearchNavigationControls extends StatelessWidget {
     );
   }
 }
+
+mixin DataSearchStateMixin {
+  bool isSearchMatch = false;
+  bool isActiveSearchMatch = false;
+}
+
+// This mixin is used to get around the type system where a type `T` needs to
+// both extend `TreeNode<T>` and mixin `SearchableDataMixin`.
+mixin TreeDataSearchStateMixin<T extends TreeNode<T>>
+    on TreeNode<T>, DataSearchStateMixin {}

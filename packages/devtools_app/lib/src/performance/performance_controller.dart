@@ -442,6 +442,9 @@ class PerformanceController
       breadthFirstTraversal<TimelineEvent>(event, action: (TimelineEvent e) {
         if (e.name.caseInsensitiveContains(search)) {
           matches.add(e);
+          e.isSearchMatch = true;
+        } else {
+          e.isSearchMatch = false;
         }
       });
     }

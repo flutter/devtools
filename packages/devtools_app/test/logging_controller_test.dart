@@ -14,6 +14,7 @@ import 'package:test/test.dart';
 
 import 'inspector_screen_test.dart';
 import 'support/mocks.dart';
+import 'support/utils.dart';
 
 void main() {
   group('LoggingController', () {
@@ -96,6 +97,23 @@ void main() {
 
       // Search with incorrect case.
       expect(controller.matchesForSearch('STDOUT').length, equals(3));
+    });
+
+    test('matchesForSearch sets isSearchMatch property', () {
+      addStdoutData('abc');
+      addStdoutData('def');
+      addStdoutData('abc ghi');
+      addGcData('gc1');
+      addGcData('gc2');
+
+      expect(controller.filteredData.value, hasLength(5));
+      var matches = controller.matchesForSearch('abc');
+      expect(matches.length, equals(2));
+      verifyIsSearchMatch(controller.filteredData.value, matches);
+
+      matches = controller.matchesForSearch('gc');
+      expect(matches.length, equals(2));
+      verifyIsSearchMatch(controller.filteredData.value, matches);
     });
 
     test('filterData', () {

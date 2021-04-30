@@ -88,7 +88,7 @@ class _TimelineFlameChartContainerState
             selectionNotifier: controller.selectedTimelineEvent,
             searchMatchesNotifier: controller.searchMatches,
             activeSearchMatchNotifier: controller.activeSearchMatch,
-            onSelection: (e) => controller.selectTimelineEvent(e),
+            onDataSelected: (e) => controller.selectTimelineEvent(e),
           );
         },
       );
@@ -156,7 +156,7 @@ class TimelineFlameChart extends FlameChart<PerformanceData, TimelineEvent> {
     @required ValueListenable<TimelineEvent> selectionNotifier,
     @required ValueListenable<List<TimelineEvent>> searchMatchesNotifier,
     @required ValueListenable<TimelineEvent> activeSearchMatchNotifier,
-    @required Function(TimelineEvent event) onSelection,
+    @required Function(TimelineEvent event) onDataSelected,
   }) : super(
           data,
           time: data.time,
@@ -166,7 +166,7 @@ class TimelineFlameChart extends FlameChart<PerformanceData, TimelineEvent> {
           selectionNotifier: selectionNotifier,
           searchMatchesNotifier: searchMatchesNotifier,
           activeSearchMatchNotifier: activeSearchMatchNotifier,
-          onSelected: onSelection,
+          onDataSelected: onDataSelected,
         );
 
   static double _calculateStartInset(PerformanceData data) {
@@ -456,12 +456,11 @@ class TimelineFlameChartState
       final node = FlameChartNode<TimelineEvent>(
         key: Key('${event.name} ${event.traceEvents.first.id}'),
         text: event.name,
-        tooltip: '${event.name} - ${msText(event.time.duration)}',
         rect: Rect.fromLTRB(left, flameChartNodeTop, right, rowHeight),
         backgroundColor: backgroundColor,
         textColor: textColor,
         data: event,
-        onSelected: (dynamic event) => widget.onSelected(event),
+        onSelected: (dynamic event) => widget.onDataSelected(event),
         sectionIndex: section,
       );
       chartNodesByEvent[event] = node;

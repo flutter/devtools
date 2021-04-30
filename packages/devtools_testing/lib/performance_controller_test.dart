@@ -8,6 +8,7 @@
 @TestOn('vm')
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_model.dart';
+import 'package:devtools_app/src/ui/search.dart';
 import 'package:test/test.dart';
 
 import 'support/flutter_test_environment.dart';
@@ -155,6 +156,22 @@ Future<void> runPerformanceControllerTests(FlutterTestEnvironment env) async {
 
       await env.tearDownEnvironment();
     });
+
+    test('matchesForSearch sets isSearchMatch property', () async {
+      await env.setupEnvironment();
+
+      await performanceController.clearData(clearVmTimeline: false);
+      performanceController.addTimelineEvent(goldenUiTimelineEvent);
+      var matches = performanceController.matchesForSearch('frame');
+      expect(matches.length, equals(4));
+      verifyIsSearchMatch(performanceController.data.timelineEvents, matches);
+
+      matches = performanceController.matchesForSearch('begin');
+      expect(matches.length, equals(2));
+      verifyIsSearchMatch(performanceController.data.timelineEvents, matches);
+
+      await env.tearDownEnvironment();
+    });
   });
 }
 
@@ -165,4 +182,20 @@ bool isPerformanceDataEqual(PerformanceData a, PerformanceData b) {
       a.selectedEvent.name == b.selectedEvent.name &&
       a.selectedEvent.time == b.selectedEvent.time &&
       a.cpuProfileData == b.cpuProfileData;
+}
+
+// TODO(kenz): this is copied from devtools_app/test/support/utils.dart. We
+// should re-evaluate the purpose of the devtools_testing package and move some
+// of these tests back into the main devtools_app package if possible.
+void verifyIsSearchMatch(
+    List<DataSearchStateMixin> data,
+    List<DataSearchStateMixin> matches,
+    ) {
+  for (final request in data) {
+    if (matches.contains(request)) {
+      expect(request.isSearchMatch, isTrue);
+    } else {
+      expect(request.isSearchMatch, isFalse);
+    }
+  }
 }
