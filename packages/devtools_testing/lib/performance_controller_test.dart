@@ -188,8 +188,8 @@ bool isPerformanceDataEqual(PerformanceData a, PerformanceData b) {
 // should re-evaluate the purpose of the devtools_testing package and move some
 // of these tests back into the main devtools_app package if possible.
 void verifyIsSearchMatch(
-    List<SearchableDataMixin> data,
-    List<SearchableDataMixin> matches,
+    List<DataSearchStateMixin> data,
+    List<DataSearchStateMixin> matches,
     ) {
   for (final request in data) {
     if (matches.contains(request)) {
