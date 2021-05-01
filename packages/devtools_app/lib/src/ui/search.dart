@@ -619,25 +619,6 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
       text: controller.searchTextFieldValue.text,
     );
 
-    final textFieldDecoration = decoration == null
-        ? InputDecoration(
-            contentPadding: const EdgeInsets.all(denseSpacing),
-            focusedBorder: OutlineInputBorder(
-              borderSide: searchFocusBorderColor,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderSide: searchFocusBorderColor,
-            ),
-            labelStyle: TextStyle(color: searchColor),
-            border: const OutlineInputBorder(),
-            labelText: 'Search',
-            suffix: _buildSearchFieldSuffix(
-              controller,
-              supportsNavigation: supportsNavigation,
-            ),
-          )
-        : decoration;
-
     final searchField = TextField(
       key: searchFieldKey,
       autofocus: true,
@@ -668,7 +649,24 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
       // Guarantee that the TextField on all platforms renders in the same
       // color for border, label text, and cursor. Primarly, so golden screen
       // snapshots will compare with the exact color.
-      decoration: textFieldDecoration,
+      // Guarantee that the TextField on all platforms renders in the same
+      // color for border, label text, and cursor. Primarly, so golden screen
+      // snapshots will compare with the exact color.
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.all(denseSpacing),
+        focusedBorder: OutlineInputBorder(borderSide: searchFocusBorderColor),
+        enabledBorder: OutlineInputBorder(borderSide: searchFocusBorderColor),
+        labelStyle: TextStyle(color: searchColor),
+        border: const OutlineInputBorder(),
+        labelText: 'Search',
+        suffix: (supportsNavigation || onClose != null)
+            ? _buildSearchFieldSuffix(
+                controller,
+                supportsNavigation: supportsNavigation,
+                onClose: onClose,
+              )
+            : null,
+      ),
       cursorColor: searchColor,
     );
 
