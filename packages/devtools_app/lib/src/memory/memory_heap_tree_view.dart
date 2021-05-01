@@ -243,18 +243,17 @@ class HeapTreeViewState extends State<HeapTree>
     });
 
     addAutoDisposeListener(controller.searchNotifier, () {
-      setState(() {
-        controller.closeAutoCompleteOverlay();
-        controller.currentDefaultIndex = 0;
-      });
+      controller.closeAutoCompleteOverlay();
+      controller.currentDefaultIndex = 0;
     });
 
     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
       SnapshotFilterState.gaActionForSnapshotFilterDialog();
-      setState(controller.autoCompleteOverlaySetState(
+      controller.handleAutoCompleteOverlay(
         context: context,
         searchFieldKey: memorySearchFieldKey,
-      ));
+        onTap: selectTheMatch,
+      );
     });
 
     addAutoDisposeListener(controller.monitorAllocationsNotifier, () {
@@ -975,6 +974,7 @@ class HeapTreeViewState extends State<HeapTree>
           shouldRequestFocus: _isSearchable,
           onSelection: selectTheMatch,
           onHighlightDropdown: highlightDropdown,
+          supportClearField: true,
         ),
       );
 
@@ -1236,10 +1236,30 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
   }
 
   void _handleSearch() {
-    if (_trySelectItem()) {
-      setState(() {
-        controller.closeAutoCompleteOverlay();
-      });
+    final searchingValue = controller.search;
+    if (searchingValue.isNotEmpty) {
+      if (controller.selectTheSearch) {
+        // Found an exact match.
+        selectItemInTree(searchingValue);
+        controller.selectTheSearch = false;
+        controller.resetSearch();
+        return;
+      }
+
+      // No exact match, return the list of possible matches.
+      controller.clearSearchAutoComplete();
+
+      final matches = _snapshotMatches(searchingValue);
+
+      // Remove duplicates and sort the matches.
+      final normalizedMatches = matches.toSet().toList()..sort();
+      // Use the top 10 matches:
+      controller.searchAutoComplete.value = normalizedMatches.sublist(
+          0,
+          min(
+            topMatchesLimit,
+            normalizedMatches.length,
+          ));
     }
   }
 
@@ -1288,36 +1308,6 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
     matches.addAll(externalMatches);
     matches.addAll(filteredMatches);
     return matches;
-  }
-
-  bool _trySelectItem() {
-    final searchingValue = controller.search;
-    if (searchingValue.isNotEmpty) {
-      if (controller.selectTheSearch) {
-        // Found an exact match.
-        selectItemInTree(searchingValue);
-        controller.selectTheSearch = false;
-        controller.resetSearch();
-        return true;
-      }
-
-      // No exact match, return the list of possible matches.
-      controller.clearSearchAutoComplete();
-
-      final matches = _snapshotMatches(searchingValue);
-
-      // Remove duplicates and sort the matches.
-      final normalizedMatches = matches.toSet().toList()..sort();
-      // Use the top 10 matches:
-      controller.searchAutoComplete.value = normalizedMatches.sublist(
-          0,
-          min(
-            topMatchesLimit,
-            normalizedMatches.length,
-          ));
-    }
-
-    return false;
   }
 
   List<String> _maybeAddMatch(Reference reference, String search) {

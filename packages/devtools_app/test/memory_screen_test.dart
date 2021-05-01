@@ -101,6 +101,13 @@ void main() {
   const windowSize = Size(2225.0, 1000.0);
 
   group('MemoryScreen', () {
+    void useHardCodedMonitorTimestamp() {
+      // Hard-code a date/time so the golden master check is consistent.
+      // April 29, 2021 @ 20:28:33.888
+      controller.lastMonitorTimestamp.value =
+          DateTime(2021, 4, 29, 20, 28, 33, 888);
+    }
+
     setUp(() async {
       await ensureInspectorDependencies();
       fakeServiceManager = FakeServiceManager();
@@ -549,6 +556,9 @@ void main() {
       expect(classDetails.instancesCurrent, 55);
       expect(classDetails.instancesDelta, 0);
 
+      // Use a consistent date/time for monitor timestamp so the goldens PNG match.
+      useHardCodedMonitorTimestamp();
+
       // Screenshot should display left-side tree table fully expanded and the monitor
       // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
       // all allocations in a flat table, no items checked (tracked), search should
@@ -565,6 +575,9 @@ void main() {
         controller.trackAllocations.values.join(','),
         classesToTrack.join(','),
       );
+
+      // Use a consistent date/time for monitor timestamp so the goldens PNG match.
+      useHardCodedMonitorTimestamp();
 
       // Screenshot should display left-side tree table fully expanded and the monitor
       // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
@@ -585,6 +598,9 @@ void main() {
       // Validate only one class is tracked now.
       expect(controller.trackAllocations.length, 1);
       expect(controller.trackAllocations.values.single, classesToTrack.last);
+
+      // Use a consistent date/time for monitor timestamp so the goldens PNG match.
+      useHardCodedMonitorTimestamp();
 
       // Screenshot should display left-side tree table fully expanded and the monitor
       // allocation leaf node 'Monitor <timestamp>' selected. The right-side displaying
@@ -658,6 +674,7 @@ void main() {
       final autoCompletes2 = [
         'AnotherClass',
         'LastClass',
+        'TClass'
       ];
       final autoCompletes2AsString = autoCompletes2.join(',');
 
@@ -666,12 +683,12 @@ void main() {
       expect(autoCompletesDisplayed, hasLength(autoCompletes2.length));
       expect(autoCompletesDisplayed.join(','), autoCompletes2AsString);
       await downArrow(
-          autoCompletes2.indexOf('LastClass')); // LastClass hilighted.
+          autoCompletes2.indexOf('LastClass')); // TClass hilighted.
 
       await simulateKeyDownEvent(LogicalKeyboardKey.enter);
       choosenAutoComplete =
           controller.allocationsFieldsTable.activeSearchMatchNotifier.value;
-      expect(choosenAutoComplete.classRef.name, autoCompletes2.last);
+      expect(choosenAutoComplete.classRef.name, autoCompletes2[1]);
 
       // Test for 1 item found in auto-complete.
       await tester.enterText(searchField, 'Z');
@@ -686,28 +703,29 @@ void main() {
       expect(choosenAutoComplete.classRef.name, 'ZClass'); // ZClass selected.
 
       // Test for 4 items found in auto-complete.
-      final autoCompletes4 = [
+      final autoCompletes5 = [
         'AnotherClass',
+        'NClass',
         'OneClass',
         'OneMoreClass',
         'SecondClass',
       ];
-      final autoCompletes4AsString = autoCompletes4.join(',');
+      final autoCompletes4AsString = autoCompletes5.join(',');
 
       await tester.enterText(searchField, 'n');
       autoCompletesDisplayed = controller.searchAutoComplete.value;
-      expect(autoCompletesDisplayed, hasLength(autoCompletes4.length));
+      expect(autoCompletesDisplayed, hasLength(autoCompletes5.length));
       expect(autoCompletesDisplayed.join(','), autoCompletes4AsString);
 
       expect(
         controller.currentDefaultIndex,
-        autoCompletes4.indexOf('AnotherClass'),
+        autoCompletes5.indexOf('AnotherClass'),
       ); // AnotherClass hilighted.
 
       // Cycle around hilighting each entry.
 
-      // OneClass hilighted.
-      await downArrow(autoCompletes4.indexOf('OneClass'));
+      // NClass hilighted.
+      await downArrow(autoCompletes5.indexOf('NClass'));
 
       // Show's auto-complete dropdown with the 2nd item highlighted.
       await checkGolden(
@@ -715,8 +733,8 @@ void main() {
         key: searchAutoCompleteKey,
       );
 
-      // OneMoreClass hilighted.
-      await downArrow(autoCompletes4.indexOf('OneMoreClass'));
+      // OneClass hilighted.
+      await downArrow(autoCompletes5.indexOf('OneClass'));
 
       // Show's auto-complete dropdown with the 3rd item highlighted.
       await checkGolden(
@@ -724,8 +742,11 @@ void main() {
         key: searchAutoCompleteKey,
       );
 
+      // OneMoreClass hilighted.
+      await downArrow(autoCompletes5.indexOf('OneMoreClass'));
+
       // SecondClass hilighted.
-      await downArrow(autoCompletes4.indexOf('SecondClass'));
+      await downArrow(autoCompletes5.indexOf('SecondClass'));
 
       // Show's auto-complete dropdown with the 4th item highlighted.
       await checkGolden(
@@ -734,7 +755,7 @@ void main() {
       );
 
       // AnotherClass hilighted.
-      await downArrow(autoCompletes4.indexOf('AnotherClass'));
+      await downArrow(autoCompletes5.indexOf('AnotherClass'));
 
       // Show's auto-complete dropdown with the last item highlighted.
       await checkGolden(
@@ -742,8 +763,8 @@ void main() {
         key: searchAutoCompleteKey,
       );
 
-      // OneClass hilighted.
-      await downArrow(autoCompletes4.indexOf('OneClass'));
+      // NClass hilighted.
+      await downArrow(autoCompletes5.indexOf('NClass'));
 
       // Show's auto-complete dropdown with the 2nd item highlighted.
       await checkGolden(
@@ -757,7 +778,7 @@ void main() {
       choosenAutoComplete =
           controller.allocationsFieldsTable.activeSearchMatchNotifier.value;
       // OneClass selected.
-      expect(choosenAutoComplete.classRef.name, autoCompletes4[1]);
+      expect(choosenAutoComplete.classRef.name, autoCompletes5[1]);
     });
   });
 }

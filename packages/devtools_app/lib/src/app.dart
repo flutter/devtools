@@ -20,6 +20,7 @@ import 'config_specific/server/server.dart';
 import 'debugger/debugger_controller.dart';
 import 'debugger/debugger_screen.dart';
 import 'dialogs.dart';
+import 'example/conditional_screen.dart'; 
 import 'framework/framework_core.dart';
 import 'globals.dart';
 import 'initializer.dart';
@@ -47,6 +48,18 @@ import 'ui/service_extension_widgets.dart';
 import 'utils.dart';
 import 'vm_developer/vm_developer_tools_controller.dart';
 import 'vm_developer/vm_developer_tools_screen.dart';
+
+// Assign to true to use a sample implementation of a conditional screen.
+// WARNING: Do not check in this file with enableExample set to true.
+const enableSampleScreen = false;
+
+final sampleConditionScreen = enableSampleScreen
+    ? DevToolsScreen<ExampleController>(
+        const ExampleConditionalScreen(),
+        createController: () => ExampleController(),
+        supportsOffline: true,
+      )
+    : null;
 
 // Disabled until VM developer mode functionality is added.
 const showVmDeveloperMode = false;
@@ -574,7 +587,7 @@ class SettingsDialog extends StatelessWidget {
 /// be shown or hidden based on the [Screen.conditionalLibrary] provided.
 List<DevToolsScreen> get defaultScreens {
   final vmDeveloperToolsController = VMDeveloperToolsController();
-  return <DevToolsScreen>[
+  final screen = <DevToolsScreen>[
     DevToolsScreen<InspectorSettingsController>(
       const InspectorScreen(),
       createController: () => InspectorSettingsController(),
@@ -613,15 +626,10 @@ List<DevToolsScreen> get defaultScreens {
       VMDeveloperToolsScreen(controller: vmDeveloperToolsController),
       controller: vmDeveloperToolsController,
     ),
-    DevToolsScreen<void>(
-      const ProviderScreen(),
-      createController: () {},
-    ),
-// Uncomment to see a sample implementation of a conditional screen.
-//      DevToolsScreen<ExampleController>(
-//        const ExampleConditionalScreen(),
-//        createController: () => ExampleController(),
-//        supportsOffline: true,
-//      ),
   ];
+
+  // Show the sample DevTools screen.
+  if (enableSampleScreen) screen.add(sampleConditionScreen);
+
+  return screen;
 }

@@ -122,37 +122,6 @@ class AllocationTableViewState extends State<AllocationTableView>
   }
 
   void _handleSearch() {
-    if (_trySelectItem()) {
-      setState(() {
-        controller.closeAutoCompleteOverlay();
-      });
-    }
-  }
-
-  /// Search the allocation data for a match (auto-complete).
-  List<String> _allocationMatches(String searchingValue) {
-    final matches = <String>[];
-
-    // Matches that start with searchingValue, most relevant.
-    final startMatches = <String>[];
-
-    // TODO(terry): Consider matches using the starts and the containing are added
-    //              at end using addAll().  Also, should not build large list just
-    //              up to max needed.
-    for (var allocation in controller.monitorAllocations) {
-      final knownName = allocation.classRef.name;
-      if (knownName.startsWith(searchingValue)) {
-        startMatches.add(knownName);
-      } else if (knownName.contains(searchingValue.toLowerCase())) {
-        matches.add(knownName);
-      }
-    }
-
-    matches.insertAll(0, startMatches);
-    return matches;
-  }
-
-  bool _trySelectItem() {
     final searchingValue = controller.search;
     if (searchingValue.isNotEmpty) {
       if (controller.selectTheSearch) {
@@ -160,7 +129,7 @@ class AllocationTableViewState extends State<AllocationTableView>
         controller.selectItemInAllocationTable(searchingValue);
         controller.selectTheSearch = false;
         controller.resetSearch();
-        return true;
+        return;
       }
 
       // No exact match, return the list of possible matches.
@@ -176,8 +145,33 @@ class AllocationTableViewState extends State<AllocationTableView>
         min(topMatchesLimit, sortedAllocationMatches.length),
       );
     }
+  }
 
-    return false;
+  /// Search the allocation data for a match (auto-complete).
+  List<String> _allocationMatches(String searchingValue) {
+    final matches = <String>[];
+
+    final lcSearchingValue = searchingValue.toLowerCase();
+
+    // Matches that start with searchingValue, most relevant.
+    final startMatches = <String>[];
+
+    // TODO(terry): Consider matches using the starts and the containing are added
+    //              at end using addAll().  Also, should not build large list just
+    //              up to max needed.
+    for (var allocation in controller.monitorAllocations) {
+      final knownName = allocation.classRef.name;
+      if (knownName.startsWith(searchingValue)) {
+        startMatches.add(knownName);
+      } else if (knownName.contains(searchingValue)) {
+        startMatches.add(knownName);
+      } else if (knownName.toLowerCase().contains(lcSearchingValue)) {
+        matches.add(knownName);
+      }
+    }
+
+    matches.insertAll(0, startMatches);
+    return matches;
   }
 
   @override
