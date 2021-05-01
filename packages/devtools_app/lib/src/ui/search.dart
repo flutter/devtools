@@ -507,9 +507,11 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
       // by the drop-down.
       if (event.logicalKey.keyId == downArrowKeyId ||
           event.logicalKey.keyId == upArrowKeyId) {
-        return true;
+        return KeyEventResult.handled;
       }
-      return false;
+
+      // Continue propagating event.
+      return KeyEventResult.ignored;
     };
 
     return RawKeyboardListener(

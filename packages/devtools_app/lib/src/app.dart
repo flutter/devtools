@@ -38,7 +38,6 @@ import 'performance/performance_controller.dart';
 import 'performance/performance_screen.dart';
 import 'profiler/profiler_screen.dart';
 import 'profiler/profiler_screen_controller.dart';
-import 'provider/provider_screen.dart';
 import 'routing.dart';
 import 'scaffold.dart';
 import 'screen.dart';
