@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:flutter/material.dart' as flutter;
+
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/connected_app.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
@@ -529,6 +531,10 @@ class MockBannerMessagesController extends Mock
     implements BannerMessagesController {}
 
 class MockLoggingController extends Mock implements LoggingController {
+  @override
+  flutter.TextEditingValue searchTextFieldValue =
+      const flutter.TextEditingValue();
+
   @override
   ValueListenable<LogData> get selectedLog => _selectedLog;
 
