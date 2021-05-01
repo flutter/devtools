@@ -671,24 +671,19 @@ void main() {
       expect(choosenAutoComplete.classRef.name, 'IClass'); // IClass selected.
 
       // Test for 2 items found in auto-complete.
-      final autoCompletes2 = [
-        'AnotherClass',
-        'LastClass',
-        'TClass'
-      ];
-      final autoCompletes2AsString = autoCompletes2.join(',');
+      final autoCompletes3 = ['AnotherClass', 'LastClass', 'TClass'];
+      final autoCompletes3AsString = autoCompletes3.join(',');
 
       await tester.enterText(searchField, 't');
       autoCompletesDisplayed = controller.searchAutoComplete.value;
-      expect(autoCompletesDisplayed, hasLength(autoCompletes2.length));
-      expect(autoCompletesDisplayed.join(','), autoCompletes2AsString);
-      await downArrow(
-          autoCompletes2.indexOf('LastClass')); // TClass hilighted.
+      expect(autoCompletesDisplayed, hasLength(autoCompletes3.length));
+      expect(autoCompletesDisplayed.join(','), autoCompletes3AsString);
+      await downArrow(autoCompletes3.indexOf('LastClass')); // TClass hilighted.
 
       await simulateKeyDownEvent(LogicalKeyboardKey.enter);
       choosenAutoComplete =
           controller.allocationsFieldsTable.activeSearchMatchNotifier.value;
-      expect(choosenAutoComplete.classRef.name, autoCompletes2[1]);
+      expect(choosenAutoComplete.classRef.name, autoCompletes3[1]);
 
       // Test for 1 item found in auto-complete.
       await tester.enterText(searchField, 'Z');
