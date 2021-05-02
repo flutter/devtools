@@ -253,7 +253,7 @@ const searchAutoCompleteKeyName = 'SearchAutoComplete';
 @visibleForTesting
 final searchAutoCompleteKey = GlobalKey(debugLabel: searchAutoCompleteKeyName);
 
-/// Computes parts the active editing parts of auto-complete.
+/// Parts of active editing for auto-complete.
 class EditingParts {
   EditingParts({
     this.activeWord,
@@ -273,6 +273,8 @@ class EditingParts {
   bool get isField => leftSide.endsWith('.');
 }
 
+/// Parsing characters looking for valid names e.g.,
+///    [ _ | a..z | A..Z ] [ _ | a..z | A..Z | 0..9 ]+
 const asciiSpace = 32;
 const ascii0 = 48;
 const ascii9 = 57;
@@ -466,14 +468,25 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   TextEditingController searchTextFieldController;
   FocusNode rawKeyboardFocusNode;
 
-  final downArrowKeyId = LogicalKeyboardKey.arrowDown.keyId;
-  final upArrowKeyId = LogicalKeyboardKey.arrowUp.keyId;
-
   Function(String selection) _onSelection;
 
   void callOnSelection(String foundMatch) {
     _onSelection(foundMatch);
   }
+
+  /// Platform independent (Mac or Linux).
+  final arrowDown =
+      LogicalKeyboardKey.arrowDown.keyId & LogicalKeyboardKey.valueMask;
+  final arrowUp =
+      LogicalKeyboardKey.arrowUp.keyId & LogicalKeyboardKey.valueMask;
+  final enter = LogicalKeyboardKey.enter.keyId & LogicalKeyboardKey.valueMask;
+  final escape = LogicalKeyboardKey.escape.keyId & LogicalKeyboardKey.valueMask;
+  final tab = LogicalKeyboardKey.tab.keyId & LogicalKeyboardKey.valueMask;
+
+  /// Work around Mac Desktop bug returning physical keycode instead of logical
+  /// keyId for the RawKeyEvent's data.logical keyId keys ENTER and TAB.
+  final enterMac = PhysicalKeyboardKey.enter.usbHidUsage;
+  final tabMac = PhysicalKeyboardKey.tab.usbHidUsage;
 
   /// Hookup up TextField (search field) to the auto-complete overlay
   /// pop-up.
@@ -505,8 +518,8 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     rawKeyboardFocusNode.onKey = (FocusNode node, RawKeyEvent event) {
       // Don't propagate the up/down arrow to the TextField it is handled
       // by the drop-down.
-      if (event.logicalKey.keyId == downArrowKeyId ||
-          event.logicalKey.keyId == upArrowKeyId) {
+      final key = event.data.logicalKey.keyId & LogicalKeyboardKey.valueMask;
+      if (key == arrowDown || key == arrowUp) {
         return KeyEventResult.handled;
       }
 
@@ -517,10 +530,11 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     return RawKeyboardListener(
       focusNode: rawKeyboardFocusNode,
       onKey: (RawKeyEvent event) {
-        final keyId = event.logicalKey.keyId;
-
         if (event is RawKeyDownEvent) {
-          if (keyId == LogicalKeyboardKey.escape.keyId) {
+          final key =
+              event.data.logicalKey.keyId & LogicalKeyboardKey.valueMask;
+
+          if (key == escape) {
             // TODO(kenz): Enable this once we find a way around the navigation
             // this causes. This triggers a "back" navigation.
             // ESCAPE key pressed clear search TextField.c
@@ -530,9 +544,11 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
               // If pop-up closed ESCAPE will clean the TextField.
               clearSearchField(controller, force: true);
             }
-          } else if (keyId == LogicalKeyboardKey.enter.keyId ||
-              keyId == LogicalKeyboardKey.tab.keyId) {
-            // ENTER pressed.
+          } else if (key == enter ||
+              key == tab ||
+              key == enterMac ||
+              key == tabMac) {
+            // Enter / Tab pressed.
             String foundExact;
 
             // What the user has typed in so far.
@@ -559,8 +575,8 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
               controller.search = foundExact;
               onSelection(foundExact);
             }
-          } else if (keyId == downArrowKeyId || keyId == upArrowKeyId) {
-            onHighlightDropdown(keyId == downArrowKeyId);
+          } else if (key == arrowDown || key == arrowUp) {
+            onHighlightDropdown(key == arrowDown);
           }
         }
       },

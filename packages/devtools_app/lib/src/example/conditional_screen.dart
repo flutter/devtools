@@ -94,27 +94,34 @@ class _ExampleConditionalScreenBodyState
   ]) {
     final knownScope = isField
         ? [
+            'add',
+            'addOne',
+            'addOnly',
+            'addAll',
             'plot',
             'xName',
             'yName',
             'traces',
             'clear',
             'addData',
+            'rect',
+            'top',
+            'left',
+            'bottom',
+            'right',
+            'length',
           ]
         : [
+            'application',
+            'appBar',
             'foo',
             'clear',
             'foobar',
             'reset',
-            'add',
-            'addOne',
-            'addOnly',
-            'addAll',
             'index',
             'indexes',
             'length',
             'rebuild',
-            'react',
             'myApplication',
             'myWidget',
             'myAppBar',
@@ -125,6 +132,7 @@ class _ExampleConditionalScreenBodyState
             'data',
             'name',
             'names',
+            'myList',
           ];
 
     final matchingNames = knownScope.where((element) {
