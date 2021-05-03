@@ -620,7 +620,7 @@ List<DevToolsScreen> get defaultScreens {
     ),
     DevToolsScreen<void>(const ProviderScreen(), createController: () {}),
     // Show the sample DevTools screen.
-    if (debugEnableSampleScreen)
+    if (debugEnableSampleScreen && (kDebugMode || kProfileMode))
       DevToolsScreen<ExampleController>(
         const ExampleConditionalScreen(),
         createController: () => ExampleController(),
