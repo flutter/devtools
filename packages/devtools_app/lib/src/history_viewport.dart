@@ -44,11 +44,10 @@ class HistoryViewport<T> extends StatelessWidget {
         children: [
           _buildTitle(context, theme),
           ValueListenableBuilder(
-            valueListenable: history.current,
-            builder: (context, current, _) {
-              return buildContents(context, current);
-            }
-          ),
+              valueListenable: history.current,
+              builder: (context, current, _) {
+                return buildContents(context, current);
+              }),
         ],
       ),
     );
