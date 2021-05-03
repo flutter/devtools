@@ -1222,7 +1222,7 @@ class ScriptsHistory extends HistoryManager<ScriptRef> {
   bool get hasScripts => _openedScripts.isNotEmpty;
 
   void pushEntry(ScriptRef ref) {
-    if (ref == current) return;
+    if (ref == current.value) return;
 
     while (hasNext) {
       pop();
@@ -1233,9 +1233,6 @@ class ScriptsHistory extends HistoryManager<ScriptRef> {
 
     push(ref);
   }
-
-  @override
-  ScriptsHistory get value => this;
 
   Iterable<ScriptRef> get openedScripts => _openedScripts.toList().reversed;
 }
