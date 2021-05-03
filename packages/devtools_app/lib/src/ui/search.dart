@@ -394,7 +394,6 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     String editing,
     TextSelection selection, {
     bool handleFields = false,
-    bool computeSubExpression = false,
   }) {
     String activeWord;
     String leftSide;
