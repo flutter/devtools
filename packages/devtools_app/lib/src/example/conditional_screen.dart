@@ -3,18 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../auto_dispose.dart';
-import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../globals.dart';
 import '../screen.dart';
-import '../theme.dart';
-import '../ui/search.dart';
 
 /// This is an example implementation of a conditional screen that supports
 /// offline mode and uses a provided controller [ExampleController].
@@ -46,22 +41,14 @@ class _ExampleConditionalScreenBody extends StatefulWidget {
       _ExampleConditionalScreenBodyState();
 }
 
-/// Evaluation TextField Key
-final evalFieldKey = GlobalKey(debugLabel: 'evalTextFieldKey');
-
 class _ExampleConditionalScreenBodyState
     extends State<_ExampleConditionalScreenBody>
-    with
-        OfflineScreenMixin<_ExampleConditionalScreenBody, String>,
-        AutoDisposeMixin,
-        SearchFieldMixin<_ExampleConditionalScreenBody>,
-        TickerProviderStateMixin {
+    with OfflineScreenMixin<_ExampleConditionalScreenBody, String> {
   ExampleController controller;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
     final newController = Provider.of<ExampleController>(context);
     if (newController == controller) return;
     controller = newController;
@@ -72,164 +59,6 @@ class _ExampleConditionalScreenBodyState
         loadOfflineData(json['title']);
       }
     }
-
-    addAutoDisposeListener(controller.searchNotifier, () {
-      controller.handleAutoCompleteOverlay(
-        context: context,
-        searchFieldKey: evalFieldKey,
-        onTap: selectTheMatch,
-        bottom: false,
-        maxWidth: false,
-      );
-    });
-
-    addAutoDisposeListener(controller.selectTheSearchNotifier, _handleSearch);
-
-    addAutoDisposeListener(controller.searchNotifier, _handleSearch);
-  }
-
-  List<String> _nameScopeMatches(
-    String searchingValue, [
-    bool isField = false,
-  ]) {
-    final knownScope = isField
-        ? [
-            'add',
-            'addOne',
-            'addOnly',
-            'addAll',
-            'plot',
-            'xName',
-            'yName',
-            'traces',
-            'clear',
-            'addData',
-            'rect',
-            'top',
-            'left',
-            'bottom',
-            'right',
-            'length',
-          ]
-        : [
-            'application',
-            'appBar',
-            'foo',
-            'clear',
-            'foobar',
-            'reset',
-            'index',
-            'indexes',
-            'length',
-            'rebuild',
-            'myApplication',
-            'myWidget',
-            'myAppBar',
-            'myList',
-            'myChart',
-            'controller',
-            'chart',
-            'data',
-            'name',
-            'names',
-            'myList',
-          ];
-
-    final matchingNames = knownScope.where((element) {
-      final matchName = matchSearch(element, searchingValue);
-      return matchName != null;
-    });
-
-    return matchingNames.toList();
-  }
-
-  void _handleSearch() {
-    final searchingValue = controller.search;
-
-    // Field of left-side searched word
-    if (!controller.isField) {
-      controller.isField = searchingValue.endsWith('.');
-    }
-
-    if (searchingValue.isNotEmpty) {
-      if (controller.selectTheSearch) {
-        // Found an exact match.
-        controller.resetSearch();
-        return;
-      }
-
-      // No exact match, return the list of possible matches.
-      controller.clearSearchAutoComplete();
-
-      // Find word in TextField to try and match (word breaks).
-      final textFieldEditingValue = searchTextFieldController.value;
-      final selection = textFieldEditingValue.selection;
-
-      final parts = AutoCompleteSearchControllerMixin.activeEdtingParts(
-        searchingValue,
-        selection,
-        handleFields: controller.isField,
-      );
-
-      // Only show pop-up if there's a real variable name or field.
-      if (parts.activeWord.isEmpty && !parts.isField) return;
-
-      final matches = _nameScopeMatches(parts.activeWord, parts.isField);
-
-      // Remove duplicates and sort the matches.
-      final normalizedMatches = matches.toSet().toList()..sort();
-      // Use the top 10 matches:
-      controller.searchAutoComplete.value = normalizedMatches.sublist(
-        0,
-        min(topMatchesLimit, normalizedMatches.length),
-      );
-    }
-  }
-
-  /// Replace the current activeWord (partial name) with the selected item from
-  /// the auto-complete list [newMatch].
-  void replaceWord(String newMatch) {
-    final textFieldEditingValue = searchTextFieldController.value;
-    final editingValue = textFieldEditingValue.text;
-    final selection = textFieldEditingValue.selection;
-
-    final parts = AutoCompleteSearchControllerMixin.activeEdtingParts(
-      editingValue,
-      selection,
-      handleFields: controller.isField,
-    );
-
-    // Add the newly selected auto-complete value.
-    final newValue = '${parts.leftSide}$newMatch${parts.rightSide}';
-
-    // Update the value and caret position of the auto-completed word.
-    controller.searchTextFieldValue = TextEditingValue(
-      text: newValue,
-      selection: TextSelection.fromPosition(
-        // Update the caret position to just beyond the newly picked
-        // auto-complete item.
-        TextPosition(offset: parts.leftSide.length + newMatch.length),
-      ),
-    );
-  }
-
-  /// Return null if no match, otherwise string.
-  String matchSearch(String knownName, String matchString) {
-    final name = knownName.toLowerCase();
-    if (name.contains(matchString.toLowerCase())) {
-      return name;
-    }
-    return null;
-  }
-
-  @override
-  void dispose() {
-    // Clean up the TextFieldController and FocusNode.
-    searchTextFieldController.dispose();
-    searchFieldFocusNode.dispose();
-    rawKeyboardFocusNode.dispose();
-
-    super.dispose();
   }
 
   @override
@@ -240,34 +69,6 @@ class _ExampleConditionalScreenBodyState
         return Center(child: Text(value));
       },
     );
-
-    // TODO(terry): Should be in theme
-    const evalBorder = BorderSide(color: Colors.white, width: 2);
-
-    final evaluator = Column(children: [
-      const Expanded(
-        child: Placeholder(
-          fallbackWidth: 300,
-          fallbackHeight: 500,
-          color: Colors.yellow,
-        ),
-      ),
-      buildAutoCompleteSearchField(
-        controller: controller,
-        searchFieldKey: evalFieldKey,
-        searchFieldEnabled: true,
-        shouldRequestFocus: true,
-        onSelection: selectTheMatch,
-        decoration: const InputDecoration(
-          contentPadding: EdgeInsets.all(denseSpacing),
-          border: OutlineInputBorder(),
-          focusedBorder: OutlineInputBorder(borderSide: evalBorder),
-          enabledBorder: OutlineInputBorder(borderSide: evalBorder),
-          labelText: 'Eval',
-        ),
-        tracking: true,
-      ),
-    ]);
 
     // We put these two items in a stack because the screen's UI needs to be
     // built before offline data is processed in order to initialize listeners
@@ -281,22 +82,8 @@ class _ExampleConditionalScreenBodyState
             color: Colors.grey[50],
             child: const CenteredCircularProgressIndicator(),
           ),
-        evaluator,
       ],
     );
-  }
-
-  /// Match, found,  select it and process via ValueNotifiers.
-  void selectTheMatch(String foundName) {
-    setState(() {
-      replaceWord(foundName);
-
-      // We're done with the selected auto-complete item.
-      controller.selectTheSearch = false;
-      controller.isField = false;
-
-      controller.closeAutoCompleteOverlay();
-    });
   }
 
   @override
@@ -312,11 +99,7 @@ class _ExampleConditionalScreenBodyState
   }
 }
 
-class ExampleController extends DisposableController
-    with
-        AutoDisposeControllerMixin,
-        SearchControllerMixin,
-        AutoCompleteSearchControllerMixin {
+class ExampleController {
   final ValueNotifier<String> title = ValueNotifier('Example screen');
 
   FutureOr<void> processOfflineData(String offlineData) {
