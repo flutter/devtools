@@ -82,9 +82,9 @@ class DebuggerController extends DisposableController
     autoDispose(_service.onStderrEvent.listen(_handleStderrEvent));
 
     _scriptHistoryListener = () {
-      _showScriptLocation(ScriptLocation(scriptsHistory.current));
+      _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
     };
-    scriptsHistory.addListener(_scriptHistoryListener);
+    scriptsHistory.current.addListener(_scriptHistoryListener);
   }
 
   VmServiceWrapper get _service => serviceManager.service;
@@ -131,9 +131,9 @@ class DebuggerController extends DisposableController
 
     // Update the scripts history (and make sure we don't react to the
     // subsequent event).
-    scriptsHistory.removeListener(_scriptHistoryListener);
+    scriptsHistory.current.removeListener(_scriptHistoryListener);
     scriptsHistory.pushEntry(scriptLocation.scriptRef);
-    scriptsHistory.addListener(_scriptHistoryListener);
+    scriptsHistory.current.addListener(_scriptHistoryListener);
   }
 
   /// Show the given script location (without updating the script navigation

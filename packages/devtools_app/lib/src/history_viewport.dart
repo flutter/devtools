@@ -18,8 +18,8 @@ import 'theme.dart';
 /// [buildContents] is invoked with the currently selected historical data
 /// when building the contents of the viewport.
 ///
-/// If [buildControls] is provided, the returned [List<Widget>] will be
-/// inserted at the end of the viewport title bar.
+/// If [controls] is provided, each [Widget] will be inserted with padding
+/// at the end of the viewport title bar.
 ///
 /// If [generateTitle] is provided, the title string will be set to the
 /// returned value. If not provided, the title will be empty.
@@ -27,13 +27,13 @@ class HistoryViewport<T> extends StatelessWidget {
   const HistoryViewport({
     @required this.history,
     @required this.buildContents,
-    this.buildControls,
+    this.controls,
     this.generateTitle,
   });
 
   final HistoryManager<T> history;
   final String Function(T) generateTitle;
-  final List<Widget> Function(BuildContext) buildControls;
+  final List<Widget> controls;
   final Widget Function(BuildContext, T) buildContents;
 
   @override
@@ -43,7 +43,12 @@ class HistoryViewport<T> extends StatelessWidget {
       child: Column(
         children: [
           _buildTitle(context, theme),
-          buildContents(context, history.current),
+          ValueListenableBuilder(
+            valueListenable: history.current,
+            builder: (context, current, _) {
+              return buildContents(context, current);
+            }
+          ),
         ],
       ),
     );
@@ -51,7 +56,7 @@ class HistoryViewport<T> extends StatelessWidget {
 
   Widget _buildTitle(BuildContext context, ThemeData theme) {
     return ValueListenableBuilder(
-      valueListenable: history,
+      valueListenable: history.current,
       builder: (context, history, _) {
         return debuggerSectionTitle(
           theme,
@@ -74,9 +79,9 @@ class HistoryViewport<T> extends StatelessWidget {
                   style: theme.textTheme.subtitle2,
                 ),
               ),
-              if (buildControls != null) ...[
+              if (controls != null) ...[
                 const SizedBox(width: denseSpacing),
-                for (final widget in buildControls(context)) ...[
+                for (final widget in controls) ...[
                   widget,
                   const SizedBox(width: denseSpacing),
                 ],

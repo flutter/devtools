@@ -247,18 +247,16 @@ class _CodeViewState extends State<CodeView>
     return HistoryViewport(
       history: widget.controller.scriptsHistory,
       generateTitle: (script) => script.uri,
-      buildControls: (context) {
-        return [
-          ScriptPopupMenu(widget.controller),
-          ScriptHistoryPopupMenu(
-            itemBuilder: _buildScriptMenuFromHistory,
-            onSelected: (scriptRef) {
-              widget.controller.showScriptLocation(ScriptLocation(scriptRef));
-            },
-            enabled: widget.controller.scriptsHistory.hasScripts,
-          ),
-        ];
-      },
+      controls: [
+        ScriptPopupMenu(widget.controller),
+        ScriptHistoryPopupMenu(
+          itemBuilder: _buildScriptMenuFromHistory,
+          onSelected: (scriptRef) {
+            widget.controller.showScriptLocation(ScriptLocation(scriptRef));
+          },
+          enabled: widget.controller.scriptsHistory.hasScripts,
+        ),
+      ],
       buildContents: (context, script) {
         if (lines.isNotEmpty) {
           return DefaultTextStyle(

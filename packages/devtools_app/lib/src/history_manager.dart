@@ -5,8 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-class HistoryManager<T> extends ChangeNotifier
-    implements ValueListenable<HistoryManager<T>> {
+class HistoryManager<T> {
+  final _current = ValueNotifier<T>(null);
   final _history = <T>[];
   int _historyIndex = -1;
 
@@ -28,10 +28,8 @@ class HistoryManager<T> extends ChangeNotifier
     if (!hasNext) throw StateError('no next history item');
 
     _historyIndex++;
-
-    notifyListeners();
-
-    return current;
+    _current.value = _history[_historyIndex];
+    return _current.value;
   }
 
   /// Return the previous historical item on the stack.
@@ -41,10 +39,8 @@ class HistoryManager<T> extends ChangeNotifier
     if (!hasPrevious) throw StateError('no previous history item');
 
     _historyIndex--;
-
-    notifyListeners();
-
-    return current;
+    _current.value = _history[_historyIndex];
+    return _current.value;
   }
 
   /// Remove and return the most recent historical item on the stack.
@@ -62,7 +58,7 @@ class HistoryManager<T> extends ChangeNotifier
     // last element on the stack and notify the listeners.
     if (_history.length == _historyIndex) {
       --_historyIndex;
-      notifyListeners();
+      _current.value = _history[_historyIndex];
     }
     return value;
   }
@@ -72,16 +68,11 @@ class HistoryManager<T> extends ChangeNotifier
   void push(T value) {
     _history.add(value);
     _historyIndex = _history.length - 1;
-    notifyListeners();
+    _current.value = _history[_historyIndex];
   }
 
   /// The currently selected historical item.
   ///
   /// Returns null if there is no historical items.
-  T get current {
-    return _history.isEmpty ? null : _history[_historyIndex];
-  }
-
-  @override
-  HistoryManager<T> get value => this;
+  ValueListenable<T> get current => _current;
 }
