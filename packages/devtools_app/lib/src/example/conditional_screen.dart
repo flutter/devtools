@@ -206,8 +206,9 @@ class _ExampleConditionalScreenBodyState
     controller.searchTextFieldValue = TextEditingValue(
       text: newValue,
       selection: TextSelection.fromPosition(
-        // Update the caret position.
-        TextPosition(offset: parts.leftSide.length - 1 + newMatch.length),
+        // Update the caret position to just beyond the newly picked
+        // auto-complete item.
+        TextPosition(offset: parts.leftSide.length + newMatch.length),
       ),
     );
   }

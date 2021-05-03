@@ -259,7 +259,6 @@ class EditingParts {
     this.activeWord,
     this.leftSide,
     this.rightSide,
-    this.subExpression,
   });
 
   final String activeWord;
@@ -267,8 +266,6 @@ class EditingParts {
   final String leftSide;
 
   final String rightSide;
-
-  final String subExpression;
 
   bool get isField => leftSide.endsWith('.');
 }
@@ -373,21 +370,26 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   ///
   /// Returns the parts of the editing area e.g.,
   ///
-  ///                                    activeWord
-  ///                                        ↓
-  ///                                       ┌╴┐
+  ///                                        caret
+  ///                                          ↓
   ///         addOne.yName + 1000 + myChart.tra┃
-  ///         |____________________|__________|↑
-  ///                    ↑              ↑    caret
-  ///                 leftSide       subExpr
+  ///         |_____________________________|_|
+  ///                    ↑                   ↑
+  ///                 leftSide           activeWord
   ///
-  /// activeWord is .tra
-  ///
-  /// activeWord
-  /// subExpression (quasi) - backwards from caret until non-variable character
-  ///                         (_ or alphaNumeric) or non-period or non-space encountered
-  /// leftSide
-  /// rightSide
+  /// activeWord  is "tra"
+  /// leftSide    is "addOne.yName + 1000 + myChart."
+  /// rightSide   is "". RightSide isNotEmpty if caret is not
+  ///             at the end the end TxtField value. If the
+  ///             caret is within the text e.g.,
+  /// 
+  ///                            caret
+  ///                              ↓
+  ///                 controller.cl┃ + 1000 + myChart.tra
+  /// 
+  /// activeWord  is "cl"
+  /// leftSide    is "controller."
+  /// rightSide   is " + 1000 + myChart.tra"
   static EditingParts activeEdtingParts(
     String editing,
     TextSelection selection, {
@@ -395,7 +397,6 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     bool computeSubExpression = false,
   }) {
     String activeWord;
-    String subExpression; // TODO(terry): Not computed does Gary need this?
     String leftSide;
     String rightSide;
 
@@ -441,16 +442,11 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
       }
 
       leftSide = selectionValue.substring(0, lastSpaceIndex);
-      rightSide = selectionValue.substring(startSelection);
-
-      if (computeSubExpression) {
-        // TODO(terry): If needed?
-      }
+      rightSide = editing.substring(startSelection);
     }
 
     return EditingParts(
       activeWord: activeWord,
-      subExpression: subExpression,
       leftSide: leftSide,
       rightSide: rightSide,
     );
@@ -635,7 +631,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
 
     searchTextFieldController = TextEditingController(
       text: controller.searchTextFieldValue.text,
-    );
+    )..selection = controller.searchTextFieldValue.selection;
 
     final searchField = TextField(
       key: searchFieldKey,
