@@ -60,7 +60,7 @@ TextStyle primaryColor(TextStyle style, BuildContext context) {
   return style.copyWith(
     color: (theme.brightness == Brightness.light)
         ? theme.primaryColor
-        : theme.accentColor,
+        : theme.colorScheme.secondary,
     fontWeight: FontWeight.w400,
   );
 }
