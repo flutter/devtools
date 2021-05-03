@@ -579,7 +579,7 @@ class SettingsDialog extends StatelessWidget {
 /// be shown or hidden based on the [Screen.conditionalLibrary] provided.
 List<DevToolsScreen> get defaultScreens {
   final vmDeveloperToolsController = VMDeveloperToolsController();
-  final screen = <DevToolsScreen>[
+  return <DevToolsScreen>[
     DevToolsScreen<InspectorSettingsController>(
       const InspectorScreen(),
       createController: () => InspectorSettingsController(),
@@ -627,6 +627,4 @@ List<DevToolsScreen> get defaultScreens {
         supportsOffline: true,
       ),
   ];
-
-  return screen;
 }
