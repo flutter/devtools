@@ -38,6 +38,7 @@ import 'performance/performance_controller.dart';
 import 'performance/performance_screen.dart';
 import 'profiler/profiler_screen.dart';
 import 'profiler/profiler_screen_controller.dart';
+import 'provider/provider_screen.dart';
 import 'routing.dart';
 import 'scaffold.dart';
 import 'screen.dart';
@@ -49,16 +50,8 @@ import 'vm_developer/vm_developer_tools_controller.dart';
 import 'vm_developer/vm_developer_tools_screen.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
-// WARNING: Do not check in this file with enableExample set to true.
-const enableSampleScreen = false;
-
-final sampleConditionScreen = enableSampleScreen
-    ? DevToolsScreen<ExampleController>(
-        const ExampleConditionalScreen(),
-        createController: () => ExampleController(),
-        supportsOffline: true,
-      )
-    : null;
+// WARNING: Do not check in this file if debugEnableSampleScreen is true.
+const debugEnableSampleScreen = false;
 
 // Disabled until VM developer mode functionality is added.
 const showVmDeveloperMode = false;
@@ -625,10 +618,15 @@ List<DevToolsScreen> get defaultScreens {
       VMDeveloperToolsScreen(controller: vmDeveloperToolsController),
       controller: vmDeveloperToolsController,
     ),
+    DevToolsScreen<void>(const ProviderScreen(), createController: () {}),
+    // Show the sample DevTools screen.
+    if (debugEnableSampleScreen)
+      DevToolsScreen<ExampleController>(
+        const ExampleConditionalScreen(),
+        createController: () => ExampleController(),
+        supportsOffline: true,
+      ),
   ];
-
-  // Show the sample DevTools screen.
-  if (enableSampleScreen) screen.add(sampleConditionScreen);
 
   return screen;
 }

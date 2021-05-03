@@ -124,7 +124,7 @@ class AutoComplete extends StatefulWidget {
 
   final AutoCompleteSearchControllerMixin controller;
   final GlobalKey searchFieldKey;
-  final Function(String selection) onTap;
+  final SelectAutoComplete onTap;
   final bool isBottom;
   final bool isMaxWidth;
 
@@ -318,7 +318,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   OverlayEntry createAutoCompleteOverlay({
     @required BuildContext context,
     @required GlobalKey searchFieldKey,
-    @required Function(String selection) onTap,
+    @required SelectAutoComplete onTap,
     bool bottom = true,
     bool maxWidth = true,
   }) {
@@ -346,7 +346,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   void handleAutoCompleteOverlay({
     @required BuildContext context,
     @required GlobalKey searchFieldKey,
-    @required Function(String selection) onTap,
+    @required SelectAutoComplete onTap,
     bool bottom = true,
     bool maxWidth = true,
   }) {
@@ -458,12 +458,21 @@ mixin SearchableMixin<T> {
   T activeSearchMatch;
 }
 
+/// Callback when item in the drop-down list is selected.
+typedef SelectAutoComplete = Function(String selection);
+
+/// Callback to handle highlighting item in the drop-down list.
+typedef HighlightAutoComplete = Function(
+  AutoCompleteSearchControllerMixin controller,
+  bool directionDown,
+);
+
 mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   FocusNode searchFieldFocusNode;
   TextEditingController searchTextFieldController;
   FocusNode rawKeyboardFocusNode;
 
-  Function(String selection) _onSelection;
+  SelectAutoComplete _onSelection;
 
   void callOnSelection(String foundMatch) {
     _onSelection(foundMatch);
@@ -490,7 +499,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   /// [searchFieldKey]
   /// [searchFieldEnabled]
   /// [onSelection]
-  /// [onHilightDropdown]
+  /// [onHilightDropdown] use to override default highlghter.
   /// [decoration]
   /// [tracking] if true displays pop-up to the right of the TextField's caret.
   /// [supportClearField] if true clear TextField content if pop-up not visible. If
@@ -500,13 +509,15 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     @required GlobalKey searchFieldKey,
     @required bool searchFieldEnabled,
     @required bool shouldRequestFocus,
-    @required Function(String selection) onSelection,
-    @required Function(bool directionDown) onHighlightDropdown,
+    @required SelectAutoComplete onSelection,
+    HighlightAutoComplete onHighlightDropdown,
     InputDecoration decoration,
     bool tracking = false,
     bool supportClearField = false,
   }) {
     _onSelection = onSelection;
+
+    onHighlightDropdown ??= _highlightDropdown;
 
     rawKeyboardFocusNode = FocusNode();
 
@@ -571,7 +582,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
               onSelection(foundExact);
             }
           } else if (key == arrowDown || key == arrowUp) {
-            onHighlightDropdown(key == arrowDown);
+            onHighlightDropdown(controller, key == arrowDown);
           }
         }
       },
@@ -585,6 +596,35 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
         tracking: tracking,
       ),
     );
+  }
+
+  void _highlightDropdown(
+    AutoCompleteSearchControllerMixin controller,
+    bool directionDown,
+  ) {
+    final numItems = controller.searchAutoComplete.value.length - 1;
+    var indexToSelect = controller.currentDefaultIndex;
+    if (directionDown) {
+      // Select next item in auto-complete overlay.
+      ++indexToSelect;
+      if (indexToSelect > numItems) {
+        // Greater than max go back to top list item.
+        indexToSelect = 0;
+      }
+    } else {
+      // Select previous item item in auto-complete overlay.
+      --indexToSelect;
+      if (indexToSelect < 0) {
+        // Less than first go back to bottom list item.
+        indexToSelect = numItems;
+      }
+    }
+
+    controller.currentDefaultIndex = indexToSelect;
+
+    // Cause the auto-complete list to update, list is small 10 items max.
+    controller.searchAutoComplete.value =
+        controller.searchAutoComplete.value.toList();
   }
 
   Widget buildSearchField({

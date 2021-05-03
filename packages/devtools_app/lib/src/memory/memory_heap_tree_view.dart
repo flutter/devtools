@@ -912,32 +912,6 @@ class HeapTreeViewState extends State<HeapTree>
     controller.monitorAllocations = currentAllocations;
   }
 
-  void highlightDropdown(bool directionDown) {
-    final numItems = controller.searchAutoComplete.value.length - 1;
-    var indexToSelect = controller.currentDefaultIndex;
-    if (directionDown) {
-      // Select next item in auto-complete overlay.
-      ++indexToSelect;
-      if (indexToSelect > numItems) {
-        // Greater than max go back to top list item.
-        indexToSelect = 0;
-      }
-    } else {
-      // Select previous item item in auto-complete overlay.
-      --indexToSelect;
-      if (indexToSelect < 0) {
-        // Less than first go back to bottom list item.
-        indexToSelect = numItems;
-      }
-    }
-
-    controller.currentDefaultIndex = indexToSelect;
-
-    // Cause the auto-complete list to update, list is small 10 items max.
-    controller.searchAutoComplete.value =
-        controller.searchAutoComplete.value.toList();
-  }
-
   /// Match, found,  select it and process via ValueNotifiers.
   void selectTheMatch(String foundName) {
     MemoryScreen.gaAction(name: memorySearchFieldKeyName);
@@ -973,7 +947,6 @@ class HeapTreeViewState extends State<HeapTree>
           searchFieldEnabled: _isSearchable,
           shouldRequestFocus: _isSearchable,
           onSelection: selectTheMatch,
-          onHighlightDropdown: highlightDropdown,
           supportClearField: true,
         ),
       );
