@@ -15,7 +15,7 @@ import 'theme.dart';
 ///
 /// [history] is the [HistoryManger] that contains the data to be displayed.
 ///
-/// [buildContents] is invoked with the currently selected historical data
+/// [contentBuilder] is invoked with the currently selected historical data
 /// when building the contents of the viewport.
 ///
 /// If [controls] is provided, each [Widget] will be inserted with padding
@@ -26,7 +26,7 @@ import 'theme.dart';
 class HistoryViewport<T> extends StatelessWidget {
   const HistoryViewport({
     @required this.history,
-    @required this.buildContents,
+    @required this.contentBuilder,
     this.controls,
     this.generateTitle,
   });
@@ -34,61 +34,59 @@ class HistoryViewport<T> extends StatelessWidget {
   final HistoryManager<T> history;
   final String Function(T) generateTitle;
   final List<Widget> controls;
-  final Widget Function(BuildContext, T) buildContents;
+  final Widget Function(BuildContext, T) contentBuilder;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return OutlineDecoration(
-      child: Column(
-        children: [
-          _buildTitle(context, theme),
-          ValueListenableBuilder(
-              valueListenable: history.current,
-              builder: (context, current, _) {
-                return buildContents(context, current);
-              }),
-        ],
+      child: ValueListenableBuilder(
+        valueListenable: history.current,
+        builder: (context, current, _) {
+          return Column(
+            children: [
+              _buildTitle(context, theme),
+              contentBuilder(context, current),
+            ],
+          );
+        },
       ),
     );
   }
 
   Widget _buildTitle(BuildContext context, ThemeData theme) {
-    return ValueListenableBuilder(
-      valueListenable: history.current,
-      builder: (context, history, _) {
-        return debuggerSectionTitle(
-          theme,
-          child: Row(
-            children: [
-              ToolbarAction(
-                icon: Icons.chevron_left,
-                onPressed: history.hasPrevious ? history.moveBack : null,
-              ),
-              ToolbarAction(
-                icon: Icons.chevron_right,
-                onPressed: history.hasNext ? history.moveForward : null,
-              ),
-              const SizedBox(width: denseSpacing),
-              const VerticalDivider(thickness: 1.0),
-              const SizedBox(width: defaultSpacing),
-              Expanded(
-                child: Text(
-                  generateTitle == null ? '  ' : generateTitle(history.current),
-                  style: theme.textTheme.subtitle2,
-                ),
-              ),
-              if (controls != null) ...[
-                const SizedBox(width: denseSpacing),
-                for (final widget in controls) ...[
-                  widget,
-                  const SizedBox(width: denseSpacing),
-                ],
-              ],
-            ],
+    return debuggerSectionTitle(
+      theme,
+      child: Row(
+        children: [
+          ToolbarAction(
+            icon: Icons.chevron_left,
+            onPressed: history.hasPrevious ? history.moveBack : null,
           ),
-        );
-      },
+          ToolbarAction(
+            icon: Icons.chevron_right,
+            onPressed: history.hasNext ? history.moveForward : null,
+          ),
+          const SizedBox(width: denseSpacing),
+          const VerticalDivider(thickness: 1.0),
+          const SizedBox(width: defaultSpacing),
+          Expanded(
+            child: Text(
+              generateTitle == null
+                  ? '  '
+                  : generateTitle(history.current.value),
+              style: theme.textTheme.subtitle2,
+            ),
+          ),
+          if (controls != null) ...[
+            const SizedBox(width: denseSpacing),
+            for (final widget in controls) ...[
+              widget,
+              const SizedBox(width: denseSpacing),
+            ],
+          ],
+        ],
+      ),
     );
   }
 }

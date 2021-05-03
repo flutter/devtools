@@ -257,7 +257,7 @@ class _CodeViewState extends State<CodeView>
           enabled: widget.controller.scriptsHistory.hasScripts,
         ),
       ],
-      buildContents: (context, script) {
+      contentBuilder: (context, script) {
         if (lines.isNotEmpty) {
           return DefaultTextStyle(
             style: theme.fixedFontStyle,
