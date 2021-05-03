@@ -382,11 +382,11 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   /// rightSide   is "". RightSide isNotEmpty if caret is not
   ///             at the end the end TxtField value. If the
   ///             caret is within the text e.g.,
-  /// 
+  ///
   ///                            caret
   ///                              ↓
   ///                 controller.cl┃ + 1000 + myChart.tra
-  /// 
+  ///
   /// activeWord  is "cl"
   /// leftSide    is "controller."
   /// rightSide   is " + 1000 + myChart.tra"
