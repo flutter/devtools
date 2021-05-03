@@ -73,7 +73,7 @@ void main() {
     test('initial values', () {
       expect(history.hasNext, false);
       expect(history.hasPrevious, false);
-      expect(history.currentScript, isNull);
+      expect(history.current.value, isNull);
       expect(history.hasScripts, false);
     });
 
@@ -84,19 +84,19 @@ void main() {
 
       expect(history.hasNext, false);
       expect(history.hasPrevious, true);
-      expect(history.currentScript, ref3);
+      expect(history.current.value, ref3);
 
       history.moveBack();
 
       expect(history.hasNext, true);
       expect(history.hasPrevious, true);
-      expect(history.currentScript, ref2);
+      expect(history.current.value, ref2);
 
       history.moveBack();
 
       expect(history.hasNext, true);
       expect(history.hasPrevious, false);
-      expect(history.currentScript, ref1);
+      expect(history.current.value, ref1);
     });
 
     test('moveBack', () {
@@ -105,19 +105,19 @@ void main() {
 
       expect(history.hasNext, false);
       expect(history.hasPrevious, true);
-      expect(history.currentScript, ref2);
+      expect(history.current.value, ref2);
 
       history.moveBack();
 
       expect(history.hasNext, true);
       expect(history.hasPrevious, false);
-      expect(history.currentScript, ref1);
+      expect(history.current.value, ref1);
 
       history.moveForward();
 
       expect(history.hasNext, false);
       expect(history.hasPrevious, true);
-      expect(history.currentScript, ref2);
+      expect(history.current.value, ref2);
     });
 
     test('openedScripts', () {
@@ -138,26 +138,26 @@ void main() {
       history.pushEntry(ref1);
       history.pushEntry(ref2);
 
-      expect(history.currentScript, ref2);
+      expect(history.current.value, ref2);
       history.moveBack();
-      expect(history.currentScript, ref1);
+      expect(history.current.value, ref1);
       history.moveBack();
-      expect(history.currentScript, ref2);
+      expect(history.current.value, ref2);
       history.moveBack();
-      expect(history.currentScript, ref1);
+      expect(history.current.value, ref1);
     });
 
     test('pushEntry removes next entries', () {
       history.pushEntry(ref1);
       history.pushEntry(ref2);
 
-      expect(history.currentScript, ref2);
+      expect(history.current.value, ref2);
       expect(history.hasNext, isFalse);
       history.moveBack();
-      expect(history.currentScript, ref1);
+      expect(history.current.value, ref1);
       expect(history.hasNext, isTrue);
       history.pushEntry(ref3);
-      expect(history.currentScript, ref3);
+      expect(history.current.value, ref3);
       expect(history.hasNext, isFalse);
     });
   });
