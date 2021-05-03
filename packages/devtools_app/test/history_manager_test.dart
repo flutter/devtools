@@ -21,7 +21,7 @@ void main() {
     test('initial values', () {
       expect(history.hasNext, false);
       expect(history.hasPrevious, false);
-      expect(history.current, isNull);
+      expect(history.current.value, isNull);
     });
 
     test('moveBack', () {
@@ -31,19 +31,19 @@ void main() {
 
       expect(history.hasNext, false);
       expect(history.hasPrevious, true);
-      expect(history.current, ref3);
+      expect(history.current.value, ref3);
 
       history.moveBack();
 
       expect(history.hasNext, true);
       expect(history.hasPrevious, true);
-      expect(history.current, ref2);
+      expect(history.current.value, ref2);
 
       history.moveBack();
 
       expect(history.hasNext, true);
       expect(history.hasPrevious, false);
-      expect(history.current, ref1);
+      expect(history.current.value, ref1);
     });
 
     test('moveForward', () {
@@ -52,19 +52,19 @@ void main() {
 
       expect(history.hasNext, false);
       expect(history.hasPrevious, true);
-      expect(history.current, ref2);
+      expect(history.current.value, ref2);
 
       history.moveBack();
 
       expect(history.hasNext, true);
       expect(history.hasPrevious, false);
-      expect(history.current, ref1);
+      expect(history.current.value, ref1);
 
       history.moveForward();
 
       expect(history.hasNext, false);
       expect(history.hasPrevious, true);
-      expect(history.current, ref2);
+      expect(history.current.value, ref2);
     });
 
     test('ref can be in history twice', () {
@@ -73,13 +73,13 @@ void main() {
       history.push(ref1);
       history.push(ref2);
 
-      expect(history.current, ref2);
+      expect(history.current.value, ref2);
       history.moveBack();
-      expect(history.current, ref1);
+      expect(history.current.value, ref1);
       history.moveBack();
-      expect(history.current, ref2);
+      expect(history.current.value, ref2);
       history.moveBack();
-      expect(history.current, ref1);
+      expect(history.current.value, ref1);
     });
   });
 }
