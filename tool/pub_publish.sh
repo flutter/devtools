@@ -12,18 +12,30 @@ flutter pub publish --force
 
 popd
 pushd packages/devtools_server
-flutter pub publish --force
+if ! flutter pub publish --force; then
+    echo "flutter pub publish devtools_server failed."
+    exit -1
+fi
 
 popd
 pushd packages/devtools_testing
-flutter pub publish --force
+if ! flutter pub publish --force; then
+    echo "flutter pub publish devtools_testing failed."
+    exit -1
+fi
 
 popd
 pushd packages/devtools_app
-flutter pub publish --force
+if ! flutter pub publish --force; then
+    echo "flutter pub publish devtools_app failed."
+    exit -1
+fi
 
 popd
 pushd packages/devtools
-flutter pub publish --force
+if ! flutter pub publish --force; then
+    echo "flutter pub publish devtools failed."
+    exit -1
+fi
 
 popd
