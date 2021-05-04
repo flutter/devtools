@@ -63,9 +63,6 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     with
         AutoDisposeMixin,
         OfflineScreenMixin<ProfilerScreenBody, CpuProfileData> {
-  static const _primaryControlsMinIncludeTextWidth = 600.0;
-  static const _secondaryControlsMinIncludeTextWidth = 1100.0;
-
   ProfilerScreenController controller;
 
   bool recording = false;
@@ -139,7 +136,11 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
   Widget _buildProfilerScreenBody(ProfilerScreenController controller) {
     final profilerScreen = Column(
       children: [
-        if (!offlineMode) _buildProfilerControls(),
+        if (!offlineMode)
+          ProfilerScreenControls(
+            controller: controller,
+            recording: recording,
+          ),
         const SizedBox(height: denseRowSpacing),
         Expanded(
           child: ValueListenableBuilder<CpuProfileData>(
@@ -177,17 +178,72 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     );
   }
 
-  Widget _buildProfilerControls() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildPrimaryStateControls(),
-        _buildSecondaryControls(),
-      ],
+  Widget _buildRecordingInfo() {
+    return RecordingInfo(
+      instructionsKey: ProfilerScreen.recordingInstructionsKey,
+      recordingStatusKey: ProfilerScreen.recordingStatusKey,
+      recording: recording,
+      processing: processing,
+      progressValue: processingProgress,
+      recordedObject: 'CPU samples',
     );
   }
 
-  Widget _buildPrimaryStateControls() {
+  @override
+  FutureOr<void> processOfflineData(CpuProfileData offlineData) async {
+    await controller.cpuProfilerController.transformer.processData(offlineData);
+    controller.cpuProfilerController.loadData(offlineData);
+  }
+
+  @override
+  bool shouldLoadOfflineData() {
+    return offlineMode &&
+        offlineDataJson.isNotEmpty &&
+        offlineDataJson[ProfilerScreen.id] != null;
+  }
+}
+
+class ProfilerScreenControls extends StatelessWidget {
+  const ProfilerScreenControls({
+    @required this.controller,
+    @required this.recording,
+  });
+
+  final ProfilerScreenController controller;
+
+  final bool recording;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _PrimaryControls(
+          controller: controller,
+          recording: recording,
+        ),
+        _SecondaryControls(
+          controller: controller,
+        ),
+      ],
+    );
+  }
+}
+
+class _PrimaryControls extends StatelessWidget {
+  const _PrimaryControls({
+    @required this.controller,
+    @required this.recording,
+  });
+
+  static const _primaryControlsMinIncludeTextWidth = 600.0;
+
+  final ProfilerScreenController controller;
+
+  final bool recording;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
         RecordButton(
@@ -209,8 +265,17 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
       ],
     );
   }
+}
 
-  Widget _buildSecondaryControls() {
+class _SecondaryControls extends StatelessWidget {
+  const _SecondaryControls({@required this.controller});
+
+  static const _secondaryControlsMinIncludeTextWidth = 1100.0;
+
+  final ProfilerScreenController controller;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -219,7 +284,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
         ExportButton(
           onPressed: controller.cpuProfileData != null &&
                   !controller.cpuProfileData.isEmpty
-              ? _exportPerformance
+              ? () => _exportPerformance(context)
               : null,
           includeTextWidth: _secondaryControlsMinIncludeTextWidth,
         ),
@@ -227,36 +292,12 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     );
   }
 
-  Widget _buildRecordingInfo() {
-    return RecordingInfo(
-      instructionsKey: ProfilerScreen.recordingInstructionsKey,
-      recordingStatusKey: ProfilerScreen.recordingStatusKey,
-      recording: recording,
-      processing: processing,
-      progressValue: processingProgress,
-      recordedObject: 'CPU samples',
-    );
-  }
-
-  void _exportPerformance() {
+  void _exportPerformance(BuildContext context) {
     final exportedFile = controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the
     // download always successful?
     // TODO(peterdjlee): find a way to push the notification logic into the
     // export controller.
     Notifications.of(context).push(successfulExportMessage(exportedFile));
-  }
-
-  @override
-  FutureOr<void> processOfflineData(CpuProfileData offlineData) async {
-    await controller.cpuProfilerController.transformer.processData(offlineData);
-    controller.cpuProfilerController.loadOfflineData(offlineData);
-  }
-
-  @override
-  bool shouldLoadOfflineData() {
-    return offlineMode &&
-        offlineDataJson.isNotEmpty &&
-        offlineDataJson[ProfilerScreen.id] != null;
   }
 }

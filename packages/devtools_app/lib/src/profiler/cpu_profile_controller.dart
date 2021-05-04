@@ -104,7 +104,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     return matches;
   }
 
-  void loadOfflineData(CpuProfileData data) {
+  void loadData(CpuProfileData data) {
     assert(data.processed);
     _dataNotifier.value = data;
   }
