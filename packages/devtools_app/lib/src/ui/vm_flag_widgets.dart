@@ -14,24 +14,18 @@ import '../profiler/profile_granularity.dart';
 /// DropdownButton that controls the value of the 'profile_period' vm flag.
 ///
 /// This flag controls the rate at which the vm samples the CPU call stack.
-class ProfileGranularityDropdown extends StatefulWidget {
-  const ProfileGranularityDropdown(this.screenId);
+class ProfileGranularityDropdown extends StatelessWidget {
+  ProfileGranularityDropdown(this.screenId)
+      : profilerService = CpuProfilerService();
 
   final String screenId;
 
-  @override
-  ProfileGranularityDropdownState createState() =>
-      ProfileGranularityDropdownState();
+  final CpuProfilerService profilerService;
 
   /// The key to identify the dropdown button.
   @visibleForTesting
   static const Key dropdownKey =
       Key('ProfileGranularityDropdown DropdownButton');
-}
-
-class ProfileGranularityDropdownState
-    extends State<ProfileGranularityDropdown> {
-  final profilerService = CpuProfilerService();
 
   @override
   Widget build(BuildContext context) {
@@ -46,18 +40,19 @@ class ProfileGranularityDropdownState
             ProfileGranularityExtension.fromValue(flag.valueAsString).value;
         // Set the vm flag value to the [safeValue] if we get to this state.
         if (safeValue != flag.valueAsString) {
-          _onProfileGranularityChanged(safeValue, context);
+          _onProfileGranularityChanged(safeValue);
         }
 
         final bannerMessageController =
             Provider.of<BannerMessagesController>(context);
         if (safeValue == highProfilePeriod) {
           bannerMessageController.addMessage(
-              HighProfileGranularityMessage(widget.screenId).build(context));
+            HighProfileGranularityMessage(screenId).build(context),
+          );
         } else {
           bannerMessageController.removeMessageByKey(
-            HighProfileGranularityMessage(widget.screenId).key,
-            widget.screenId,
+            HighProfileGranularityMessage(screenId).key,
+            screenId,
           );
         }
         return RoundedDropDownButton<String>(
@@ -70,7 +65,7 @@ class ProfileGranularityDropdownState
             _buildMenuItem(ProfileGranularity.medium),
             _buildMenuItem(ProfileGranularity.high),
           ],
-          onChanged: (value) => _onProfileGranularityChanged(value, context),
+          onChanged: _onProfileGranularityChanged,
         );
       },
     );
@@ -83,10 +78,7 @@ class ProfileGranularityDropdownState
     );
   }
 
-  Future<void> _onProfileGranularityChanged(
-    String newValue,
-    BuildContext context,
-  ) async {
+  Future<void> _onProfileGranularityChanged(String newValue) async {
     await profilerService.setProfilePeriod(newValue);
   }
 }

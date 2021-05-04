@@ -279,7 +279,7 @@ class _SecondaryControls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        const ProfileGranularityDropdown(ProfilerScreen.id),
+        ProfileGranularityDropdown(ProfilerScreen.id),
         const SizedBox(width: defaultSpacing),
         ExportButton(
           onPressed: controller.cpuProfileData != null &&

@@ -229,7 +229,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        const ProfileGranularityDropdown(PerformanceScreen.id),
+        ProfileGranularityDropdown(PerformanceScreen.id),
         const SizedBox(width: defaultSpacing),
         if (!serviceManager.connectedApp.isDartCliAppNow)
           ServiceExtensionButtonGroup(

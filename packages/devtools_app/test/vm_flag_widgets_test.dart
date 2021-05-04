@@ -28,7 +28,7 @@ void main() {
     setUp(() {
       fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      dropdown = const ProfileGranularityDropdown(ProfilerScreen.id);
+      dropdown = ProfileGranularityDropdown(ProfilerScreen.id);
     });
 
     Future<void> pumpDropdown(WidgetTester tester) async {
