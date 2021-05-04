@@ -5,7 +5,8 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+// TODO(terry): Disable package.
+//import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
 
@@ -14,6 +15,8 @@ import '../../globals.dart';
 import '../../utils.dart';
 import '../provider_debounce.dart';
 import 'eval.dart';
+// TODO(terry): Used fake interface until 3rd party freezed_annotation fixed.
+import 'fake_freezed_annotation.dart';
 import 'instance_details.dart';
 import 'result.dart';
 
