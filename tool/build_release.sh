@@ -14,11 +14,11 @@ set -ex #echo on
 # (https://github.com/flutter/flutter/issues/74936), or to read this from a manifest 
 # provided (https://github.com/flutter/flutter/issues/74934).
 function download_canvaskit() {
-  local canvaskit_url=https://unpkg.com/canvaskit-wasm@0.25.1/bin
+  local canvaskit_url=https://unpkg.com/canvaskit-wasm@0.25.1/bin/
 
   local flutter_bin=$(which flutter)
   local canvaskit_dart_file=$(dirname $flutter_bin)/cache/flutter_web_sdk/lib/_engine/engine/canvaskit/initialization.dart
-  if ! grep -q "defaultValue: \'$canvaskit_url" "$canvaskit_dart_file"; then
+  if ! grep -q "defaultValue: '$canvaskit_url'" "$canvaskit_dart_file"; then
     echo "CanvasKit $canvaskit_url does not match local web engine copy. Please update before continuing."
     exit -1
   fi
