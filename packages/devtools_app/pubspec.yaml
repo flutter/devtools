@@ -39,7 +39,6 @@ dependencies:
   flutter_riverpod: ^0.14.0+3
   flutter_web_plugins:
     sdk: flutter
-  freezed_annotation: ^0.14.1
   http: ^0.13.0
   image: ^3.0.2
   intl: '>=0.16.1 <0.18.0'
