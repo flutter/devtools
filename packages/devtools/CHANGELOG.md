@@ -1,3 +1,7 @@
+## 2.2.1
+* Temporarily disable the provider screen. [#2970](https://github.com/flutter/devtools/pull/2970)
+* Refactor CPU profiler screen controls into their own widgets [#2969](https://github.com/flutter/devtools/pull/2969)
+
 ## 2.2.0
 * Add richer auto-complete for use in an expression evaluator. [#2962](https://github.com/flutter/devtools/pull/2962)
 * Refactor Debugger history view into HistoryViewport widget [#2957](https://github.com/flutter/devtools/pull/2957)
