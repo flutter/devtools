@@ -4,9 +4,12 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
+import 'package:vm_service/vm_service.dart';
 
+import '../globals.dart';
 import '../ui/search.dart';
 import '../utils.dart';
+import '../vm_flags.dart' as vm_flags;
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
 import 'cpu_profile_transformer.dart';
@@ -31,12 +34,14 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
       _selectedCpuStackFrameNotifier;
   final _selectedCpuStackFrameNotifier = ValueNotifier<CpuStackFrame>(null);
 
-  final service = CpuProfilerService();
-
   final transformer = CpuProfileTransformer();
 
   /// Notifies that the vm profiler flag has changed.
-  ValueListenable get profilerFlagNotifier => service.profilerFlagNotifier;
+  ValueNotifier<Flag> get profilerFlagNotifier =>
+      serviceManager.vmFlagManager.flag(vm_flags.profiler);
+
+  ValueNotifier<Flag> get profileGranularityFlagNotifier =>
+      serviceManager.vmFlagManager.flag(vm_flags.profilePeriod);
 
   /// Whether the profiler is enabled.
   ///
@@ -47,7 +52,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
       profilerFlagNotifier.value.valueAsString == 'true';
 
   Future<dynamic> enableCpuProfiler() {
-    return service.enableCpuProfiler();
+    return serviceManager.service.enableCpuProfiler();
   }
 
   Future<void> pullAndProcessProfile({
@@ -66,7 +71,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     _dataNotifier.value = null;
     // TODO(kenz): add a cancel button to the processing UI in case pulling a
     // large payload from the vm service takes a long time.
-    cpuProfileData = await service.getCpuProfile(
+    cpuProfileData = await serviceManager.service.getCpuProfile(
       startMicros: startMicros,
       extentMicros: extentMicros,
     );
@@ -117,7 +122,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
 
   Future<void> clear() async {
     reset();
-    await service.clearCpuSamples();
+    await serviceManager.service.clearSamples();
   }
 
   void reset() {

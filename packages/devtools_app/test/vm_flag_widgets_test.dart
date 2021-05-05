@@ -25,10 +25,15 @@ void main() {
     ProfileGranularityDropdown dropdown;
     BuildContext buildContext;
 
-    setUp(() {
+    setUp(() async {
       fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      dropdown = const ProfileGranularityDropdown(ProfilerScreen.id);
+      await fakeServiceManager.flagsInitialized.future;
+      dropdown = ProfileGranularityDropdown(
+        screenId: ProfilerScreen.id,
+        profileGranularityFlagNotifier:
+            fakeServiceManager.vmFlagManager.flag(vm_flags.profilePeriod),
+      );
     });
 
     Future<void> pumpDropdown(WidgetTester tester) async {

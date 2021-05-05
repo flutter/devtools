@@ -167,7 +167,7 @@ class ServiceConnectionManager {
     // race conditions where managers cannot listen for events soon enough.
     isolateManager.vmServiceOpened(service);
     serviceExtensionManager.vmServiceOpened(service, connectedApp);
-    vmFlagManager.vmServiceOpened(service);
+    await vmFlagManager.vmServiceOpened(service);
     // This needs to be called last in the above group of `vmServiceOpened`
     // calls.
     errorBadgeManager.vmServiceOpened(service);
@@ -1178,7 +1178,7 @@ class VmFlagManager extends Disposer {
     return _flagNotifiers.containsKey(name) ? _flagNotifiers[name] : null;
   }
 
-  void _initFlags() async {
+  Future<void> _initFlags() async {
     final flagList = await service.getFlagList();
     _flags.value = flagList;
     if (flagList == null) return;
@@ -1206,11 +1206,11 @@ class VmFlagManager extends Disposer {
     }
   }
 
-  void vmServiceOpened(VmServiceWrapper service) {
+  Future<void> vmServiceOpened(VmServiceWrapper service) async {
     cancel();
     _service = service;
     // Upon setting the vm service, get initial values for vm flags.
-    _initFlags();
+    await _initFlags();
 
     autoDispose(service.onVMEvent.listen(handleVmEvent));
   }

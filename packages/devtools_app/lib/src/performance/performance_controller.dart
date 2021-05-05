@@ -48,8 +48,6 @@ class PerformanceController
 
   final _exportController = ExportController();
 
-  final _cpuProfilerService = CpuProfilerService();
-
   /// The currently selected timeline event.
   ValueListenable<TimelineEvent> get selectedTimelineEvent =>
       _selectedTimelineEventNotifier;
@@ -147,7 +145,7 @@ class PerformanceController
         await serviceManager.connectedApp.isProfileBuild;
 
     unawaited(allowedError(
-      _cpuProfilerService.setProfilePeriod(mediumProfilePeriod),
+      serviceManager.service.setProfilePeriod(mediumProfilePeriod),
       logError: false,
     ));
     await setTimelineStreams([
