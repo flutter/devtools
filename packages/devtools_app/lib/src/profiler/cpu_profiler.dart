@@ -1,6 +1,8 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import '../auto_dispose_mixin.dart';
@@ -102,7 +104,6 @@ class _CpuProfilerState extends State<CpuProfiler>
         SizedBox(
           height: defaultButtonHeight,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TabBar(
                 labelColor: textTheme.bodyText1.color,
@@ -110,6 +111,9 @@ class _CpuProfilerState extends State<CpuProfiler>
                 controller: _tabController,
                 tabs: CpuProfiler.tabs,
               ),
+              const Spacer(),
+              UserTagDropdown(widget.controller),
+              const SizedBox(width: defaultSpacing),
               // TODO(kenz): support search for call tree and bottom up tabs as
               // well. This will require implementing search for tree tables.
               if (currentTab.key == CpuProfiler.flameChartTab &&
@@ -122,6 +126,9 @@ class _CpuProfilerState extends State<CpuProfiler>
                 ),
               if (currentTab.key != CpuProfiler.flameChartTab)
                 Row(children: [
+                  // TODO(kenz): add a switch to order samples by user tag here
+                  // instead of using the filter control. This will allow users
+                  // to see all the tags side by side in the tree tables.
                   ExpandAllButton(
                     key: CpuProfiler.expandButtonKey,
                     onPressed: () {
@@ -253,3 +260,4 @@ class CpuProfilerDisabled extends StatelessWidget {
     );
   }
 }
+
