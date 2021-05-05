@@ -15,12 +15,14 @@ import '../profiler/profile_granularity.dart';
 ///
 /// This flag controls the rate at which the vm samples the CPU call stack.
 class ProfileGranularityDropdown extends StatelessWidget {
-  ProfileGranularityDropdown(this.screenId)
-      : profilerService = CpuProfilerService();
+  const ProfileGranularityDropdown({
+    @required this.screenId,
+    @required this.profileGranularityFlagNotifier,
+  });
 
   final String screenId;
 
-  final CpuProfilerService profilerService;
+  final ValueNotifier<Flag> profileGranularityFlagNotifier;
 
   /// The key to identify the dropdown button.
   @visibleForTesting
@@ -30,7 +32,7 @@ class ProfileGranularityDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Flag>(
-      valueListenable: profilerService.profileGranularityFlagNotifier,
+      valueListenable: profileGranularityFlagNotifier,
       builder: (context, flag, _) {
         // Use [ProfileGranularityExtension.fromValue] here so we can
         // guarantee that the value corresponds to one of the items in the
@@ -79,6 +81,6 @@ class ProfileGranularityDropdown extends StatelessWidget {
   }
 
   Future<void> _onProfileGranularityChanged(String newValue) async {
-    await profilerService.setProfilePeriod(newValue);
+    await CpuProfilerService.setProfilePeriod(newValue);
   }
 }

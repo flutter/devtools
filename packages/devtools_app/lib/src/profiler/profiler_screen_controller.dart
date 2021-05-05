@@ -16,7 +16,8 @@ class ProfilerScreenController with CpuProfilerControllerProviderMixin {
   CpuProfileData get cpuProfileData => cpuProfilerController.dataNotifier.value;
 
   /// Notifies that a CPU profile is currently being recorded.
-  ValueListenable get recordingNotifier => _recordingNotifier;
+  ValueListenable<bool> get recordingNotifier => _recordingNotifier;
+
   final _recordingNotifier = ValueNotifier<bool>(false);
 
   final int _profileStartMicros = 0;
