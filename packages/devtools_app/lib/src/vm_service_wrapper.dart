@@ -316,6 +316,10 @@ class VmServiceWrapper implements VmService {
           'ts': sample.timestamp,
           'cat': 'Dart',
           CpuProfileData.stackFrameIdKey: '$isolateId-${tree.frameId}',
+          'args': {
+            if (sample.userTag != null) 'userTag': sample.userTag,
+            if (sample.vmTag != null) 'vmTag': sample.vmTag,
+          },
         });
       }
       return CpuProfileData.parse(traceObject);
