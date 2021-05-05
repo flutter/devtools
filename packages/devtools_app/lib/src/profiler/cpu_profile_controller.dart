@@ -52,7 +52,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
       profilerFlagNotifier.value.valueAsString == 'true';
 
   Future<dynamic> enableCpuProfiler() {
-    return CpuProfilerService.enableCpuProfiler();
+    return serviceManager.service.enableCpuProfiler();
   }
 
   Future<void> pullAndProcessProfile({
@@ -71,7 +71,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     _dataNotifier.value = null;
     // TODO(kenz): add a cancel button to the processing UI in case pulling a
     // large payload from the vm service takes a long time.
-    cpuProfileData = await CpuProfilerService.getCpuProfile(
+    cpuProfileData = await serviceManager.service.getCpuProfile(
       startMicros: startMicros,
       extentMicros: extentMicros,
     );
@@ -122,7 +122,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
 
   Future<void> clear() async {
     reset();
-    await CpuProfilerService.clearCpuSamples();
+    await serviceManager.service.clearSamples();
   }
 
   void reset() {

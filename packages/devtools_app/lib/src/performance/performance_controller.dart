@@ -145,7 +145,7 @@ class PerformanceController
         await serviceManager.connectedApp.isProfileBuild;
 
     unawaited(allowedError(
-      CpuProfilerService.setProfilePeriod(mediumProfilePeriod),
+      serviceManager.service.setProfilePeriod(mediumProfilePeriod),
       logError: false,
     ));
     await setTimelineStreams([

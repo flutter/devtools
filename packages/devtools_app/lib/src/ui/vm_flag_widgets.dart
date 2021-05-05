@@ -8,6 +8,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../banner_messages.dart';
 import '../common_widgets.dart';
+import '../globals.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/profile_granularity.dart';
 
@@ -81,6 +82,6 @@ class ProfileGranularityDropdown extends StatelessWidget {
   }
 
   Future<void> _onProfileGranularityChanged(String newValue) async {
-    await CpuProfilerService.setProfilePeriod(newValue);
+    await serviceManager.service.setProfilePeriod(newValue);
   }
 }

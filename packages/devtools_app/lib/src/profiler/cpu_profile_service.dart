@@ -7,11 +7,12 @@ import 'package:meta/meta.dart';
 
 import '../globals.dart';
 import '../vm_flags.dart' as vm_flags;
+import '../vm_service_wrapper.dart';
 import 'cpu_profile_model.dart';
 
 /// Manages interactions between the Cpu Profiler and the VmService.
-abstract class CpuProfilerService {
-  static Future<CpuProfileData> getCpuProfile({
+extension CpuProfilerExtension on VmServiceWrapper {
+  Future<CpuProfileData> getCpuProfile({
     @required int startMicros,
     @required int extentMicros,
   }) async {
@@ -22,16 +23,16 @@ abstract class CpuProfilerService {
     );
   }
 
-  static Future clearCpuSamples() {
+  Future clearSamples() {
     return serviceManager.service
         .clearCpuSamples(serviceManager.isolateManager.selectedIsolate.id);
   }
 
-  static Future<dynamic> setProfilePeriod(String value) {
+  Future<dynamic> setProfilePeriod(String value) {
     return serviceManager.service.setFlag(vm_flags.profilePeriod, value);
   }
 
-  static Future<dynamic> enableCpuProfiler() async {
+  Future<dynamic> enableCpuProfiler() async {
     return await serviceManager.service.setFlag(vm_flags.profiler, 'true');
   }
 }
