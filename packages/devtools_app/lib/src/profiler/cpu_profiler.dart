@@ -261,3 +261,72 @@ class CpuProfilerDisabled extends StatelessWidget {
   }
 }
 
+
+/// DropdownButton that controls the value of
+/// [ProfilerScreenController.userTagFilter].
+class UserTagDropdown extends StatelessWidget {
+  const UserTagDropdown(this.controller);
+
+  final CpuProfilerController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    const filterByTag = 'Filter by tag:';
+    // This needs to rebuild whenever there is new CPU profile data because the
+    // user tags will change with the data.
+    return ValueListenableBuilder<CpuProfileData>(
+      valueListenable: controller.dataNotifier,
+      builder: (context, cpuProfileData, _) {
+        return ValueListenableBuilder<String>(
+          valueListenable: controller.userTagFilter,
+          builder: (context, userTag, _) {
+            final userTags = controller.userTags ?? [];
+            final tooltip = userTags.isNotEmpty
+                ? 'Filter the CPU profile by the given UserTag'
+                : 'No UserTags found for this CPU profile';
+            return DevToolsTooltip(
+              tooltip: tooltip,
+              child: RoundedDropDownButton<String>(
+                isDense: true,
+                style: Theme.of(context).textTheme.bodyText2,
+                value: userTag,
+                items: [
+                  _buildMenuItem(
+                    display:
+                        '$filterByTag ${CpuProfilerController.userTagNone}',
+                    value: CpuProfilerController.userTagNone,
+                  ),
+                  // We don't want to show the 'Default' tag if it is the only
+                  // tag available. The 'none' tag above is equivalent in this
+                  // case.
+                  if (!(userTags.length == 1 &&
+                      userTags.first == UserTag.defaultTag.label))
+                    for (final tag in userTags)
+                      _buildMenuItem(
+                        display: '$filterByTag $tag',
+                        value: tag,
+                      ),
+                ],
+                onChanged: userTags.isNotEmpty ? _onUserTagChanged : null,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  DropdownMenuItem _buildMenuItem({
+    @required String display,
+    @required String value,
+  }) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(display),
+    );
+  }
+
+  void _onUserTagChanged(String newTag) {
+    controller.loadDataWithTag(newTag);
+  }
+}
