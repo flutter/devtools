@@ -775,7 +775,7 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
 
   void _handleMouseHover(PointerHoverEvent event) {
     final hoverNodeData =
-        binarySearchForNode(event.localPosition.dx - scrollController.offset)
+        binarySearchForNode(event.localPosition.dx + scrollController.offset)
             ?.data;
 
     if (hoverNodeData != hovered) {
