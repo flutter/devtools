@@ -46,6 +46,23 @@ class CpuProfileTransformer {
     _stackFrameKeys = cpuProfileData?.stackFramesJson?.keys?.toList() ?? [];
     _stackFrameValues = cpuProfileData?.stackFramesJson?.values?.toList() ?? [];
 
+    // Initialize all stack frames before we start to for the tree.
+    for (int i = 0; i < _stackFramesCount; i++) {
+      final k = _stackFrameKeys[i];
+      final v = _stackFrameValues[i];
+      final stackFrame = CpuStackFrame(
+        id: k,
+        name: getSimpleStackFrameName(v[CpuProfileData.nameKey]),
+        category: v[CpuProfileData.categoryKey],
+        // If the user is on a version of Flutter where resolvedUrl is not
+        // included in the response, this will be null. If the frame is a native
+        // frame, the this will be the empty string.
+        url: v[CpuProfileData.resolvedUrlKey] ?? '',
+        profileMetaData: cpuProfileData.profileMetaData,
+      );
+      cpuProfileData.stackFrames[stackFrame.id] = stackFrame;
+    }
+
     // At minimum, process the data in 4 batches to smooth the appearance of
     // the progress indicator.
     final quarterBatchSize = (_stackFramesCount / 4).round();
@@ -68,7 +85,7 @@ class CpuProfileTransformer {
       }
     }
 
-    _setExclusiveSampleCounts(cpuProfileData);
+    _setExclusiveSampleCountsAndTags(cpuProfileData);
     cpuProfileData.processed = true;
 
     // TODO(kenz): investigate why this assert is firing again.
@@ -91,21 +108,9 @@ class CpuProfileTransformer {
     for (int i = _stackFramesProcessed; i < batchEnd; i++) {
       final k = _stackFrameKeys[i];
       final v = _stackFrameValues[i];
-      final stackFrame = CpuStackFrame(
-        id: k,
-        name: getSimpleStackFrameName(v[CpuProfileData.nameKey]),
-        category: v[CpuProfileData.categoryKey],
-        // If the user is on a version of Flutter where resolvedUrl is not
-        // included in the response, this will be null. If the frame is a native
-        // frame, the this will be the empty string.
-        url: v[CpuProfileData.resolvedUrlKey] ?? '',
-        profileMetaData: cpuProfileData.profileMetaData,
-      );
-      _processStackFrame(
-        stackFrame,
-        cpuProfileData.stackFrames[v[CpuProfileData.parentIdKey]],
-        cpuProfileData,
-      );
+      final stackFrame = cpuProfileData.stackFrames[k];
+      final parent = cpuProfileData.stackFrames[v[CpuProfileData.parentIdKey]];
+      _processStackFrame(stackFrame, parent, cpuProfileData);
       _stackFramesProcessed++;
     }
   }
@@ -115,8 +120,6 @@ class CpuProfileTransformer {
     CpuStackFrame parent,
     CpuProfileData cpuProfileData,
   ) {
-    cpuProfileData.stackFrames[stackFrame.id] = stackFrame;
-
     if (parent == null) {
       // [stackFrame] is the root of a new cpu sample. Add it as a child of
       // [cpuProfile].
@@ -126,7 +129,7 @@ class CpuProfileTransformer {
     }
   }
 
-  void _setExclusiveSampleCounts(CpuProfileData cpuProfileData) {
+  void _setExclusiveSampleCountsAndTags(CpuProfileData cpuProfileData) {
     for (Map<String, dynamic> traceEvent in cpuProfileData.stackTraceEvents) {
       final leafId = traceEvent[CpuProfileData.stackFrameIdKey];
       assert(
@@ -136,7 +139,12 @@ class CpuProfileTransformer {
         'you must export the timeline immediately after the AssertionError is '
         'thrown.',
       );
-      cpuProfileData.stackFrames[leafId]?.exclusiveSampleCount++;
+      final stackFrame = cpuProfileData.stackFrames[leafId];
+      stackFrame?.exclusiveSampleCount++;
+      final userTag = (traceEvent['args'] ?? {})['userTag'];
+      if (userTag != null) {
+        stackFrame.incrementTag(userTag);
+      }
     }
   }
 

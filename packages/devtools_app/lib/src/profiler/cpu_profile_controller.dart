@@ -15,6 +15,8 @@ import 'cpu_profile_service.dart';
 import 'cpu_profile_transformer.dart';
 
 class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
+  static const userTagNone = 'none';
+
   /// Data for the initial value and reset value of [_dataNotifier].
   ///
   /// When this data is the value of [_dataNotifier], the CPU profiler is in a
@@ -33,6 +35,14 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   ValueListenable get selectedCpuStackFrameNotifier =>
       _selectedCpuStackFrameNotifier;
   final _selectedCpuStackFrameNotifier = ValueNotifier<CpuStackFrame>(null);
+
+  /// Notifies that a user tag filter is set on the CPU profile flame chart.
+  ValueListenable<String> get userTagFilter => _userTagFilter;
+  final _userTagFilter = ValueNotifier<String>(userTagNone);
+
+  final _dataByTag = <String, CpuProfileData>{};
+
+  Iterable<String> get userTags => _dataByTag[userTagNone]?.userTags ?? [];
 
   int selectedProfilerTabIndex = 0;
 
@@ -85,6 +95,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     try {
       await transformer.processData(cpuProfileData, processId: processId);
       _dataNotifier.value = cpuProfileData;
+      _dataByTag[userTagNone] = cpuProfileData;
       refreshSearchMatches();
       _processingNotifier.value = false;
     } on AssertionError catch (_) {
@@ -115,9 +126,32 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     return matches;
   }
 
-  void loadData(CpuProfileData data) {
+  void loadProcessedData(CpuProfileData data) {
     assert(data.processed);
     _dataNotifier.value = data;
+    _dataByTag[userTagNone] = data;
+  }
+
+  Future<void> loadDataWithTag(String tag) async {
+    _userTagFilter.value = tag;
+
+    _dataNotifier.value = null;
+    _processingNotifier.value = true;
+
+    _dataNotifier.value = await processDataForTag(tag);
+    _processingNotifier.value = false;
+  }
+
+  Future<CpuProfileData> processDataForTag(String tag) async {
+    final fullData = _dataByTag[userTagNone];
+    final data = _dataByTag.putIfAbsent(
+      tag,
+      () => fullData.dataForUserTag(tag),
+    );
+    if (!data.processed) {
+      await transformer.processData(data);
+    }
+    return data;
   }
 
   void selectCpuStackFrame(CpuStackFrame stackFrame) {
@@ -134,6 +168,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   void reset() {
     _selectedCpuStackFrameNotifier.value = null;
     _dataNotifier.value = baseStateCpuProfileData;
+    _dataByTag.clear();
     _processingNotifier.value = false;
     transformer.reset();
     resetSearch();

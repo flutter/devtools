@@ -42,8 +42,6 @@ class CpuProfiler extends StatefulWidget {
 
   final bool standaloneProfiler;
 
-  static const Key expandButtonKey = Key('CpuProfiler - Expand Button');
-  static const Key collapseButtonKey = Key('CpuProfiler - Collapse Button');
   static const Key dataProcessingKey = Key('CpuProfiler - data is processing');
 
   // When content of the selected tab from thee tab controller has this key,
@@ -102,7 +100,8 @@ class _CpuProfilerState extends State<CpuProfiler>
     final currentTab = CpuProfiler.tabs[_tabController.index];
     final hasData =
         widget.data != CpuProfilerController.baseStateCpuProfileData &&
-            widget.data != null;
+            widget.data != null &&
+            !widget.data.isEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,47 +117,49 @@ class _CpuProfilerState extends State<CpuProfiler>
                 tabs: CpuProfiler.tabs,
               ),
               const Spacer(),
-              UserTagDropdown(widget.controller),
-              const SizedBox(width: defaultSpacing),
-              // TODO(kenz): support search for call tree and bottom up tabs as
-              // well. This will require implementing search for tree tables.
-              if (currentTab.key == CpuProfiler.flameChartTab &&
-                  widget.searchFieldKey != null)
-                Row(
-                  children: [
-                    _buildSearchField(hasData),
-                    FlameChartHelpButton(),
-                  ],
-                ),
-              if (currentTab.key != CpuProfiler.flameChartTab)
-                Row(children: [
-                  // TODO(kenz): add a switch to order samples by user tag here
-                  // instead of using the filter control. This will allow users
-                  // to see all the tags side by side in the tree tables.
-                  ExpandAllButton(
-                    key: CpuProfiler.expandButtonKey,
-                    onPressed: () {
-                      _performOnDataRoots(
-                        (root) => root.expandCascading(),
-                        currentTab,
-                      );
-                    },
+              if (hasData) ...[
+                UserTagDropdown(widget.controller),
+                const SizedBox(width: defaultSpacing),
+                // TODO(kenz): support search for call tree and bottom up tabs as
+                // well. This will require implementing search for tree tables.
+                if (currentTab.key == CpuProfiler.flameChartTab)
+                  Row(
+                    children: [
+                      if (widget.searchFieldKey != null)
+                        _buildSearchField(hasData),
+                      FlameChartHelpButton(),
+                    ],
                   ),
-                  const SizedBox(width: denseSpacing),
-                  CollapseAllButton(
-                    key: CpuProfiler.collapseButtonKey,
-                    onPressed: () {
-                      _performOnDataRoots(
-                        (root) => root.collapseCascading(),
-                        currentTab,
-                      );
-                    },
+                if (currentTab.key != CpuProfiler.flameChartTab)
+                  Row(
+                    children: [
+                      // TODO(kenz): add a switch to order samples by user tag here
+                      // instead of using the filter control. This will allow users
+                      // to see all the tags side by side in the tree tables.
+                      ExpandAllButton(
+                        onPressed: () {
+                          _performOnDataRoots(
+                            (root) => root.expandCascading(),
+                            currentTab,
+                          );
+                        },
+                      ),
+                      const SizedBox(width: denseSpacing),
+                      CollapseAllButton(
+                        onPressed: () {
+                          _performOnDataRoots(
+                            (root) => root.collapseCascading(),
+                            currentTab,
+                          );
+                        },
+                      ),
+                      // The standaloneProfiler does not need padding because it is
+                      // not wrapped in a bordered container.
+                      if (!widget.standaloneProfiler)
+                        const SizedBox(width: denseSpacing),
+                    ],
                   ),
-                  // The standaloneProfiler does not need padding because it is
-                  // not wrapped in a bordered container.
-                  if (!widget.standaloneProfiler)
-                    const SizedBox(width: denseSpacing),
-                ]),
+              ],
             ],
           ),
         ),
