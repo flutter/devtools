@@ -16,7 +16,6 @@ import '../../eval_on_dart_library.dart';
 import '../../inspector/inspector_text_styles.dart';
 import '../../sliver_iterable_child_delegate.dart';
 import '../../theme.dart';
-import '../../utils.dart';
 import 'instance_details.dart';
 import 'instance_providers.dart';
 
