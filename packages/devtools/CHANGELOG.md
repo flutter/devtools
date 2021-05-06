@@ -1,3 +1,6 @@
+## 2.2.2
+* Throw RPCError when invoking `getSourceReport` in profile mode [#2986](https://github.com/flutter/devtools/pull/2986)
+
 ## 2.2.1
 * Temporarily disable the provider screen. [#2970](https://github.com/flutter/devtools/pull/2970)
 * Refactor CPU profiler screen controls into their own widgets [#2969](https://github.com/flutter/devtools/pull/2969)
