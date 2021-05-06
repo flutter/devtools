@@ -15,6 +15,10 @@ import 'cpu_profile_service.dart';
 import 'cpu_profile_transformer.dart';
 
 class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
+  /// Tag to represent when no user tag filters are applied.
+  ///
+  /// The word 'none' is not a magic word - just a user-friendly name to convey
+  /// the message that no filters are applied.
   static const userTagNone = 'none';
 
   /// Data for the initial value and reset value of [_dataNotifier].
@@ -138,8 +142,16 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     _dataNotifier.value = null;
     _processingNotifier.value = true;
 
-    _dataNotifier.value = await processDataForTag(tag);
-    _processingNotifier.value = false;
+    try {
+      assert(false);
+      _dataNotifier.value = await processDataForTag(tag);
+    } catch (e) {
+      // In the event of an error, reset the data to the original CPU profile.
+      _dataNotifier.value = _dataByTag[userTagNone];
+      throw Exception('Error loading data with tag "$tag": ${e.toString()}');
+    } finally {
+      _processingNotifier.value = false;
+    }
   }
 
   Future<CpuProfileData> processDataForTag(String tag) async {

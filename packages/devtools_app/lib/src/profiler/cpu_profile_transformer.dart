@@ -143,7 +143,7 @@ class CpuProfileTransformer {
       stackFrame?.exclusiveSampleCount++;
       final userTag = (traceEvent['args'] ?? {})['userTag'];
       if (userTag != null) {
-        stackFrame.incrementTag(userTag);
+        stackFrame.incrementTagSampleCount(userTag);
       }
     }
   }

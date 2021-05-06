@@ -253,13 +253,13 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// can be part of multiple samples.
   final _userTagSampleCount = <String, int>{};
 
-  void incrementTag(String userTag, {int increment = 1}) {
+  void incrementTagSampleCount(String userTag, {int increment = 1}) {
     assert(userTag != null);
     final currentCount = _userTagSampleCount.putIfAbsent(userTag, () => 0);
     _userTagSampleCount[userTag] = currentCount + increment;
 
     if (parent != null) {
-      parent.incrementTag(userTag);
+      parent.incrementTagSampleCount(userTag);
     }
   }
 
@@ -328,7 +328,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       ..inclusiveSampleCount =
           resetInclusiveSampleCount ? null : inclusiveSampleCount;
     for (final entry in _userTagSampleCount.entries) {
-      copy.incrementTag(entry.key, increment: entry.value);
+      copy.incrementTagSampleCount(entry.key, increment: entry.value);
     }
     return copy;
   }

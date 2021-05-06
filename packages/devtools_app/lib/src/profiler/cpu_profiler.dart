@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../auto_dispose_mixin.dart';
 import '../charts/flame_chart.dart';
 import '../common_widgets.dart';
+import '../notifications.dart';
 import '../theme.dart';
 import '../ui/search.dart';
 import 'cpu_profile_bottom_up.dart';
@@ -268,7 +269,6 @@ class CpuProfilerDisabled extends StatelessWidget {
   }
 }
 
-
 /// DropdownButton that controls the value of
 /// [ProfilerScreenController.userTagFilter].
 class UserTagDropdown extends StatelessWidget {
@@ -314,7 +314,9 @@ class UserTagDropdown extends StatelessWidget {
                         value: tag,
                       ),
                 ],
-                onChanged: userTags.isNotEmpty ? _onUserTagChanged : null,
+                onChanged: userTags.isNotEmpty
+                    ? (String tag) => _onUserTagChanged(tag, context)
+                    : null,
               ),
             );
           },
@@ -333,7 +335,11 @@ class UserTagDropdown extends StatelessWidget {
     );
   }
 
-  void _onUserTagChanged(String newTag) {
-    controller.loadDataWithTag(newTag);
+  void _onUserTagChanged(String newTag, BuildContext context) async {
+    try {
+      await controller.loadDataWithTag(newTag);
+    } catch (e) {
+      Notifications.of(context).push(e.toString());
+    }
   }
 }

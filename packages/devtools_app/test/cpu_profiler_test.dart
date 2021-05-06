@@ -199,7 +199,7 @@ void main() {
       }
     });
 
-    group('User tag filters', () {
+    group('UserTag filters', () {
       ProfilerScreenController controller;
 
       setUp(() async {
