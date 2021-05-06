@@ -143,7 +143,6 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     _processingNotifier.value = true;
 
     try {
-      assert(false);
       _dataNotifier.value = await processDataForTag(tag);
     } catch (e) {
       // In the event of an error, reset the data to the original CPU profile.

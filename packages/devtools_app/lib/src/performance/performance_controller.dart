@@ -418,8 +418,9 @@ class PerformanceController
     }
 
     if (offlinePerformanceData.cpuProfileData != null) {
-      cpuProfilerController
-          .loadProcessedData(offlinePerformanceData.cpuProfileData);
+      cpuProfilerController.loadProcessedData(
+        offlinePerformanceData.cpuProfileData,
+      );
     }
   }
 
