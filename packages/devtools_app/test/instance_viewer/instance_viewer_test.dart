@@ -8,6 +8,7 @@ import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dar
 import 'package:devtools_app/src/provider/instance_viewer/instance_viewer.dart';
 import 'package:devtools_app/src/provider/instance_viewer/result.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -31,7 +32,7 @@ final emptyObjectInstance = AsyncValue.data(
 );
 
 final object2Instance = AsyncValue.data(
-  InstanceDetails.object(
+  ObjectInstance(
     [
       ObjectField(
         name: 'first',
@@ -100,7 +101,7 @@ final trueInstance = AsyncValue.data(
 );
 
 final int42Instance = AsyncValue.data(
-  InstanceDetails.number('42', instanceRefId: '42', setter: null),
+  NumInstance('42', instanceRefId: '42', setter: null),
 );
 
 final enumValueInstance = AsyncValue.data(
@@ -116,6 +117,81 @@ void main() {
   setUpAll(() => loadFonts());
 
   group('InstanceViewer', () {
+    testWidgets('field editing flow', (tester) async {
+      const objPath = InstancePath.fromInstanceId('obj');
+      final propertyPath = objPath.pathForChild(
+        const PathToProperty.objectProperty(
+          name: 'first',
+          ownerUri: '',
+          ownerName: '',
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            rawInstanceProvider(objPath).overrideWithValue(
+              AsyncValue.data(
+                ObjectInstance(
+                  [
+                    ObjectField(
+                      name: 'first',
+                      isFinal: false,
+                      ownerName: '',
+                      ownerUri: '',
+                      eval: FakeEvalOnDartLibrary(),
+                      ref: Result.error(Error()),
+                      isDefinedByDependency: false,
+                    ),
+                  ],
+                  hash: 0,
+                  instanceRefId: 'object',
+                  setter: null,
+                  evalForInstance: FakeEvalOnDartLibrary(),
+                  type: 'MyClass',
+                ),
+              ),
+            ),
+            rawInstanceProvider(propertyPath).overrideWithValue(
+              AsyncValue.data(
+                InstanceDetails.number(
+                  '0',
+                  instanceRefId: '0',
+                  setter: (value) async {},
+                ),
+              ),
+            ),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: InstanceViewer(rootPath: objPath),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(ValueKey(propertyPath)));
+
+      await tester.pump();
+
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('../goldens/instance_viewer/edit.png'),
+      );
+
+      // can press esc to unfocus active node
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+
+      await tester.pump();
+
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('../goldens/instance_viewer/edit_esc.png'),
+      );
+    });
+
     testWidgets('renders <loading> while an instance is fetched',
         (tester) async {
       await tester.pumpWidget(
