@@ -281,6 +281,8 @@ class UserTagDropdown extends StatelessWidget {
     const filterByTag = 'Filter by tag:';
     // This needs to rebuild whenever there is new CPU profile data because the
     // user tags will change with the data.
+    // TODO(kenz): remove the nested ValueListenableBuilders
+    // https://github.com/flutter/devtools/issues/2989.
     return ValueListenableBuilder<CpuProfileData>(
       valueListenable: controller.dataNotifier,
       builder: (context, cpuProfileData, _) {
