@@ -79,9 +79,15 @@ class _CpuProfilerState extends State<CpuProfiler>
   void initState() {
     super.initState();
 
-    _tabController =
-        TabController(length: CpuProfiler.tabs.length, vsync: this);
-    addAutoDisposeListener(_tabController);
+    _tabController = TabController(
+      length: CpuProfiler.tabs.length,
+      vsync: this,
+    )..index = widget.controller.selectedProfilerTabIndex;
+    addAutoDisposeListener(_tabController, () {
+      setState(() {
+        widget.controller.changeSelectedProfilerTab(_tabController.index);
+      });
+    });
   }
 
   @override

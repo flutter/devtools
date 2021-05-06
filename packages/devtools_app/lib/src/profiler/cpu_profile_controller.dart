@@ -34,6 +34,12 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
       _selectedCpuStackFrameNotifier;
   final _selectedCpuStackFrameNotifier = ValueNotifier<CpuStackFrame>(null);
 
+  int selectedProfilerTabIndex = 0;
+
+  void changeSelectedProfilerTab(int index) {
+    selectedProfilerTabIndex = index;
+  }
+
   final transformer = CpuProfileTransformer();
 
   /// Notifies that the vm profiler flag has changed.
