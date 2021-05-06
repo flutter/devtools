@@ -192,7 +192,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
   @override
   FutureOr<void> processOfflineData(CpuProfileData offlineData) async {
     await controller.cpuProfilerController.transformer.processData(offlineData);
-    controller.cpuProfilerController.loadData(offlineData);
+    controller.cpuProfilerController.loadProcessedData(offlineData);
   }
 
   @override

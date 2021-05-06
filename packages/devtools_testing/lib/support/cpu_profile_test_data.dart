@@ -29,6 +29,119 @@ final Map<String, dynamic> emptyCpuProfileDataJson = {
   'traceEvents': [],
 };
 
+final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
+  'type': '_CpuProfileTimeline',
+  'samplePeriod': 50,
+  'sampleCount': 5,
+  'stackDepth': 128,
+  'timeOriginMicros': 0,
+  'timeExtentMicros': 250,
+  'stackFrames': {
+    '140357727781376-1': {
+      'category': 'Dart',
+      'name': 'Frame1',
+      'resolvedUrl': '',
+    },
+    '140357727781376-2': {
+      'category': 'Dart',
+      'name': 'Frame2',
+      'parent': '140357727781376-1',
+      'resolvedUrl': '',
+    },
+    '140357727781376-3': {
+      'category': 'Dart',
+      'name': 'Frame3',
+      'parent': '140357727781376-2',
+      'resolvedUrl': '',
+    },
+    '140357727781376-4': {
+      'category': 'Dart',
+      'name': 'Frame4',
+      'parent': '140357727781376-2',
+      'resolvedUrl': '',
+    },
+    '140357727781376-5': {
+      'category': 'Dart',
+      'name': 'Frame5',
+      'parent': '140357727781376-1',
+      'resolvedUrl': '',
+    },
+    '140357727781376-6': {
+      'category': 'Dart',
+      'name': 'Frame6',
+      'parent': '140357727781376-5',
+      'resolvedUrl': '',
+    },
+  },
+  'traceEvents': [
+    {
+      'ph': 'P',
+      'name': '',
+      'pid': 77616,
+      'tid': 42247,
+      'ts': 50,
+      'cat': 'Dart',
+      'args': {
+        'mode': 'basic',
+        'userTag': 'userTagA',
+      },
+      'sf': '140357727781376-3'
+    },
+    {
+      'ph': 'P',
+      'name': '',
+      'pid': 77616,
+      'tid': 42247,
+      'ts': 100,
+      'cat': 'Dart',
+      'args': {
+        'mode': 'basic',
+        'userTag': 'userTagB',
+      },
+      'sf': '140357727781376-4'
+    },
+    {
+      'ph': 'P',
+      'name': '',
+      'pid': 77616,
+      'tid': 42247,
+      'ts': 150,
+      'cat': 'Dart',
+      'args': {
+        'mode': 'basic',
+        'userTag': 'userTagA',
+      },
+      'sf': '140357727781376-5'
+    },
+    {
+      'ph': 'P',
+      'name': '',
+      'pid': 77616,
+      'tid': 42247,
+      'ts': 200,
+      'cat': 'Dart',
+      'args': {
+        'mode': 'basic',
+        'userTag': 'userTagC',
+      },
+      'sf': '140357727781376-5'
+    },
+    {
+      'ph': 'P',
+      'name': '',
+      'pid': 77616,
+      'tid': 42247,
+      'ts': 250,
+      'cat': 'Dart',
+      'args': {
+        'mode': 'basic',
+        'userTag': 'userTagC',
+      },
+      'sf': '140357727781376-6'
+    },
+  ],
+};
+
 const goldenCpuProfileString = '''
   all - children: 2 - excl: 0 - incl: 8
     thread_start - children: 1 - excl: 0 - incl: 2
