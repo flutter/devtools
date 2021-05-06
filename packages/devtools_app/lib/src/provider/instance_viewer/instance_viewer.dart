@@ -9,12 +9,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../eval_on_dart_library.dart';
 import '../../inspector/inspector_text_styles.dart';
 import '../../sliver_iterable_child_delegate.dart';
 import '../../theme.dart';
+import '../../utils.dart';
 import 'instance_details.dart';
 import 'instance_providers.dart';
 
@@ -137,6 +139,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
         final isExpanded = watch(isExpandedProvider(path));
         yield _buildHeader(
           instance,
+          path: path,
           isExpanded: isExpanded,
           disableExpand: disableExpand,
         );
@@ -172,10 +175,12 @@ class _InstanceViewerState extends State<InstanceViewer> {
 
   Widget _buildHeader(
     InstanceDetails instance, {
+    @required InstancePath path,
     StateController<bool> isExpanded,
     bool disableExpand = false,
   }) {
     return _Expandable(
+      key: ValueKey(path),
       isExpandable: !disableExpand && instance.isExpandable,
       isExpanded: isExpanded,
       title: instance.map(
@@ -279,7 +284,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
         path: path.pathForChild(PathToProperty.mapKey(ref: key.instanceRefId)),
       );
 
-      final keyHeader = _buildHeader(key, disableExpand: true);
+      final keyHeader = _buildHeader(key, disableExpand: true, path: path);
 
       var isFirstItem = true;
       for (final child in value) {
@@ -496,7 +501,7 @@ class _EditableFieldState extends State<_EditableField> {
         }
       },
       decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(horizontal: densePadding),
+        contentPadding: const EdgeInsets.all(densePadding),
         isDense: true,
         border: OutlineInputBorder(
           borderRadius: const BorderRadius.all(Radius.circular(5)),
@@ -524,6 +529,7 @@ class _EditableFieldState extends State<_EditableField> {
             ),
           ),
         GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: () {
             focusNode.requestFocus();
             textFieldFocusNode.requestFocus();
@@ -533,7 +539,11 @@ class _EditableFieldState extends State<_EditableField> {
               extentOffset: widget.initialEditString.length,
             );
           },
-          child: widget.child,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            heightFactor: 1,
+            child: widget.child,
+          ),
         ),
       ],
     );
@@ -545,6 +555,13 @@ class _EditableFieldState extends State<_EditableField> {
 
         return Focus(
           focusNode: focusNode,
+          onKey: (node, key) {
+            if (key.data.physicalKey == PhysicalKeyboardKey.escape) {
+              focusNode.unfocus();
+              return KeyEventResult.handled;
+            }
+            return KeyEventResult.ignored;
+          },
           child: MouseRegion(
             onEnter: (_) => setState(() => isHovering = true),
             onExit: (_) => setState(() => isHovering = false),
