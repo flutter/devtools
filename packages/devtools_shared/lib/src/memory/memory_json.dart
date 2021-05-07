@@ -51,7 +51,7 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
     _payloadVersion = payloadVersion;
 
     // Any problem return (data is empty).
-    if (!isMatchedVersion || !isMemoryPayload!) return;
+    if (!isMatchedVersion || !isMemoryPayload) return;
 
     final List dynamicList = samplesPayload['$jsonDataField'];
     for (var index = 0; index < dynamicList.length; index++) {
@@ -60,18 +60,18 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
     }
   }
 
-  int? _payloadVersion;
+  late final int _payloadVersion;
 
-  int? get payloadVersion => _payloadVersion;
+  int get payloadVersion => _payloadVersion;
 
   /// Imported JSON data loaded and converted, if necessary, to the latest version.
   bool get isMatchedVersion => _payloadVersion == version;
 
-  bool? _memoryPayload;
+  late final bool _memoryPayload;
 
   /// JSON payload field "dart<T>DevToolsScreen" has a value of "memory" e.g.,
   ///   "dartDevToolsScreen": "memory"
-  bool? get isMemoryPayload => _memoryPayload;
+  bool get isMemoryPayload => _memoryPayload;
 
   /// If data is empty check isMatchedVersion and isMemoryPayload to ensure the
   /// JSON file loaded is a memory file.
