@@ -214,7 +214,7 @@ class EventSample {
         allocationAccumulator = null;
 
   factory EventSample.fromJson(Map<String, dynamic> json) => EventSample(
-      json['timestamp'] as int?,
+      json['timestamp'] as int,
       (json['gcEvent'] as bool?) ?? false,
       (json['snapshotEvent'] as bool?) ?? false,
       (json['snapshotAutoEvent'] as bool?) ?? false,
@@ -259,7 +259,7 @@ class EventSample {
   /// Version of EventSample JSON payload.
   static const version = 1;
 
-  final int? timestamp;
+  final int timestamp;
 
   final bool isEventGC;
 
