@@ -22,12 +22,12 @@ class HeapSample {
   );
 
   factory HeapSample.fromJson(Map<String, dynamic> json) => HeapSample(
-        json['timestamp'] as int,
-        json['rss'] as int,
-        json['capacity'] as int,
-        json['used'] as int,
-        json['external'] as int,
-        json['gc'] as bool,
+        json['timestamp'] as int?,
+        json['rss'] as int?,
+        json['capacity'] as int?,
+        json['used'] as int?,
+        json['external'] as int?,
+        json['gc'] as bool?,
         AdbMemoryInfo.fromJson(json['adb_memoryInfo']),
         EventSample.fromJson(json['memory_eventInfo']),
         RasterCache.fromJson(json['raster_cache']),
@@ -48,37 +48,37 @@ class HeapSample {
   /// Version of HeapSample JSON payload.
   static const version = 1;
 
-  final int timestamp;
+  final int? timestamp;
 
-  final int rss;
+  final int? rss;
 
-  final int capacity;
+  final int? capacity;
 
-  final int used;
+  final int? used;
 
-  final int external;
+  final int? external;
 
-  final bool isGC;
+  final bool? isGC;
 
-  EventSample _memoryEventInfo;
+  EventSample? _memoryEventInfo;
 
-  AdbMemoryInfo _adbMemoryInfo;
+  AdbMemoryInfo? _adbMemoryInfo;
 
-  RasterCache _rasterCache;
+  RasterCache? _rasterCache;
 
   AdbMemoryInfo get adbMemoryInfo {
     _adbMemoryInfo ??= AdbMemoryInfo.empty();
-    return _adbMemoryInfo;
+    return _adbMemoryInfo!;
   }
 
   EventSample get memoryEventInfo {
     _memoryEventInfo ??= EventSample.empty();
-    return _memoryEventInfo;
+    return _memoryEventInfo!;
   }
 
   RasterCache get rasterCache {
     _rasterCache ??= RasterCache.empty();
-    return _rasterCache;
+    return _rasterCache!;
   }
 
   @override

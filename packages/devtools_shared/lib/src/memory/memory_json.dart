@@ -25,11 +25,11 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
   /// List of HeapSample.
   MemoryJson.decode(
     String payloadName, {
-    String argJsonString,
-    Map<String, dynamic> argDecodedMap,
-  }) {
+    String? argJsonString,
+    Map<String, dynamic>? argDecodedMap,
+  }) : assert(argJsonString != null || argDecodedMap != null) {
     final Map<String, dynamic> decodedMap =
-        argDecodedMap == null ? jsonDecode(argJsonString) : argDecodedMap;
+        argDecodedMap == null ? jsonDecode(argJsonString!) : argDecodedMap;
     final Map<String, dynamic> samplesPayload = decodedMap['$payloadName'];
 
     final payloadVersion = samplesPayload['$jsonVersionField'];
@@ -40,7 +40,8 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
       // TODO(terry): Notify user the file is being converted.
       // TODO(terry): Consider moving config_specific/logger/ into shared to
       //              use logger instead of print.
-      print('WARNING: Unable to convert JSON memory file payload version=$payloadVersion.');
+      print(
+          'WARNING: Unable to convert JSON memory file payload version=$payloadVersion.');
       // TODO(terry): After conversion update payloadVersion to version;
     }
 
@@ -48,27 +49,27 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
     _payloadVersion = payloadVersion;
 
     // Any problem return (data is empty).
-    if (!isMatchedVersion || !isMemoryPayload) return;
+    if (!isMatchedVersion || !isMemoryPayload!) return;
 
     final List dynamicList = samplesPayload['$jsonDataField'];
     for (var index = 0; index < dynamicList.length; index++) {
-      final sample = fromJson(dynamicList[index]);
+      final T sample = fromJson(dynamicList[index]);
       data.add(sample);
     }
   }
 
-  int _payloadVersion;
+  int? _payloadVersion;
 
-  int get payloadVersion => _payloadVersion;
+  int? get payloadVersion => _payloadVersion;
 
   /// Imported JSON data loaded and converted, if necessary, to the latest version.
   bool get isMatchedVersion => _payloadVersion == version;
 
-  bool _memoryPayload;
+  bool? _memoryPayload;
 
   /// JSON payload field "dart<T>DevToolsScreen" has a value of "memory" e.g.,
   ///   "dartDevToolsScreen": "memory"
-  bool get isMemoryPayload => _memoryPayload;
+  bool? get isMemoryPayload => _memoryPayload;
 
   /// If data is empty check isMatchedVersion and isMemoryPayload to ensure the
   /// JSON file loaded is a memory file.
@@ -91,8 +92,8 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
   /// Given a JSON string representing an array of HeapSample, decode to a
   /// List of HeapSample.
   SamplesMemoryJson.decode({
-    String argJsonString,
-    Map<String, dynamic> argDecodedMap,
+    String? argJsonString,
+    Map<String, dynamic>? argDecodedMap,
   }) : super.decode(
           _jsonMemoryPayloadField,
           argJsonString: argJsonString,
@@ -231,8 +232,8 @@ class AllocationMemoryJson extends MemoryJson<ClassHeapDetailStats> {
   /// Given a JSON string representing an array of HeapSample, decode to a
   /// List of HeapSample.
   AllocationMemoryJson.decode({
-    String argJsonString,
-    Map<String, dynamic> argDecodedMap,
+    String? argJsonString,
+    Map<String, dynamic>? argDecodedMap,
   }) : super.decode(
           _jsonAllocationPayloadField,
           argJsonString: argJsonString,
