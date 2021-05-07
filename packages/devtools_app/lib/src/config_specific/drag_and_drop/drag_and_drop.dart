@@ -80,9 +80,9 @@ abstract class DragAndDropManager {
           // Activate the new state and deactivate the previously active state.
           if (newActiveState != null) {
             final previousActiveState = activeState;
-            previousActiveState?.activate(false);
+            previousActiveState?.setIsActive(false);
             activeState = newActiveState;
-            activeState.activate(true);
+            activeState.setIsActive(true);
             return;
           }
         }
@@ -164,7 +164,7 @@ class DragAndDropState extends State<DragAndDrop> {
     _dragEnd();
   }
 
-  void activate(bool active) {
+  void setIsActive(bool active) {
     _isActive = active;
     if (!_isActive) {
       _dragEnd();
