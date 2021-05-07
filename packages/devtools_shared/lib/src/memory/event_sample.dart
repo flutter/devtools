@@ -215,9 +215,9 @@ class EventSample {
 
   factory EventSample.fromJson(Map<String, dynamic> json) => EventSample(
       json['timestamp'] as int?,
-      json['gcEvent'] as bool?,
-      json['snapshotEvent'] as bool?,
-      json['snapshotAutoEvent'] as bool?,
+      (json['gcEvent'] as bool?) ?? false,
+      (json['snapshotEvent'] as bool?) ?? false,
+      (json['snapshotAutoEvent'] as bool?) ?? false,
       json['allocationAccumulatorEvent'] != null
           ? AllocationAccumulator.fromJson(json['allocationAccumulatorEvent'])
           : null,
@@ -261,11 +261,11 @@ class EventSample {
 
   final int? timestamp;
 
-  final bool? isEventGC;
+  final bool isEventGC;
 
-  final bool? isEventSnapshot;
+  final bool isEventSnapshot;
 
-  final bool? isEventSnapshotAuto;
+  final bool isEventSnapshotAuto;
 
   bool get isEventAllocationAccumulator => allocationAccumulator != null;
 
