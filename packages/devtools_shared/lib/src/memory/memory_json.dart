@@ -25,13 +25,11 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
   /// List of HeapSample.
   MemoryJson.decode(
     String payloadName, {
-    String? argJsonString,
+    required String argJsonString,
     Map<String, dynamic>? argDecodedMap,
-  }) : assert(argJsonString != null || argDecodedMap != null) {
-    // TODO(terry): see if we can make `argJsonString` and `argDecodedMap`
-    // required args.
+  }) {
     final Map<String, dynamic> decodedMap =
-        argDecodedMap == null ? jsonDecode(argJsonString!) : argDecodedMap;
+        argDecodedMap == null ? jsonDecode(argJsonString) : argDecodedMap;
     final Map<String, dynamic> samplesPayload = decodedMap['$payloadName'];
 
     final payloadVersion = samplesPayload['$jsonVersionField'];
@@ -94,7 +92,7 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
   /// Given a JSON string representing an array of HeapSample, decode to a
   /// List of HeapSample.
   SamplesMemoryJson.decode({
-    String? argJsonString,
+    required String argJsonString,
     Map<String, dynamic>? argDecodedMap,
   }) : super.decode(
           _jsonMemoryPayloadField,
@@ -234,7 +232,7 @@ class AllocationMemoryJson extends MemoryJson<ClassHeapDetailStats> {
   /// Given a JSON string representing an array of HeapSample, decode to a
   /// List of HeapSample.
   AllocationMemoryJson.decode({
-    String? argJsonString,
+    required String argJsonString,
     Map<String, dynamic>? argDecodedMap,
   }) : super.decode(
           _jsonAllocationPayloadField,
