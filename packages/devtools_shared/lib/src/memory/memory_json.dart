@@ -28,6 +28,8 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
     String? argJsonString,
     Map<String, dynamic>? argDecodedMap,
   }) : assert(argJsonString != null || argDecodedMap != null) {
+    // TODO(terry): see if we can make `argJsonString` and `argDecodedMap`
+    // required args.
     final Map<String, dynamic> decodedMap =
         argDecodedMap == null ? jsonDecode(argJsonString!) : argDecodedMap;
     final Map<String, dynamic> samplesPayload = decodedMap['$payloadName'];
@@ -53,7 +55,7 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
 
     final List dynamicList = samplesPayload['$jsonDataField'];
     for (var index = 0; index < dynamicList.length; index++) {
-      final T sample = fromJson(dynamicList[index]);
+      final sample = fromJson(dynamicList[index]);
       data.add(sample);
     }
   }
