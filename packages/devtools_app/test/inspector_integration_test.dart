@@ -6,14 +6,12 @@ import 'dart:io';
 
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/inspector_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-
+import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_testing/support/flutter_test_driver.dart'
     show FlutterRunConfiguration;
 import 'package:devtools_testing/support/flutter_test_environment.dart';
-
-import 'package:devtools_app/src/inspector/inspector_service.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'support/utils.dart';
 import 'support/wrappers.dart';
