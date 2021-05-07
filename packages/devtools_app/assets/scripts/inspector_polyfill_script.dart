@@ -50,7 +50,6 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
 import 'dart:typed_data';
-
 import 'dart:ui' as ui
     show
         ClipOp,
@@ -68,7 +67,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:vector_math/vector_math_64.dart';
 import 'package:flutter/src/widgets/app.dart';
 import 'package:flutter/src/widgets/basic.dart';
 import 'package:flutter/src/widgets/binding.dart';
@@ -76,6 +74,7 @@ import 'package:flutter/src/widgets/debug.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/gesture_detector.dart';
 import 'package:flutter/src/widgets/widget_inspector.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 // This extension method is simply a hack to make a private member defined on
 // WidgetInspectorService show up as in scope as far as the analysis server is

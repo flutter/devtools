@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:flutter/material.dart' as flutter;
-
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/connected_app.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
@@ -29,6 +27,7 @@ import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' as flutter;
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 

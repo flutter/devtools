@@ -11,11 +11,11 @@ import 'package:devtools_app/src/inspector/inspector_screen.dart';
 import 'package:devtools_app/src/logging/logging_screen.dart';
 import 'package:devtools_app/src/memory/memory_screen.dart';
 import 'package:devtools_app/src/network/network_screen.dart';
-import 'package:devtools_app/src/profiler/profiler_screen.dart';
+import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/preferences.dart';
+import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/vm_developer/vm_developer_tools_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 

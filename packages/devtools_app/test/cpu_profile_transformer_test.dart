@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_transformer.dart';
-import 'package:test/test.dart';
-
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('CpuProfileTransformer', () {

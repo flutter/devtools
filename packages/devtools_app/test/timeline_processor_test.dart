@@ -7,8 +7,8 @@ import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/performance/timeline_event_processor.dart';
 import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_testing/support/test_utils.dart';
 import 'package:devtools_testing/support/performance_test_data.dart';
+import 'package:devtools_testing/support/test_utils.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 

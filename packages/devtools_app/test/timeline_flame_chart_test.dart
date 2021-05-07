@@ -6,10 +6,10 @@ import 'dart:io';
 
 import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
-import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/performance/performance_screen.dart';
+import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_testing/support/performance_test_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

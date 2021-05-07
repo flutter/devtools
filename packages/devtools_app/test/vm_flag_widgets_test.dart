@@ -5,8 +5,8 @@
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/profiler/profile_granularity.dart';
+import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/theme.dart';
 import 'package:devtools_app/src/ui/vm_flag_widgets.dart';
