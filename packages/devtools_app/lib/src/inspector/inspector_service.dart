@@ -13,7 +13,6 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -105,6 +104,14 @@ class InspectorService extends DisposableController
     final inspectorLibrary = EvalOnDartLibrary(
       inspectorLibraryUriCandidates,
       vmService,
+      // TODO(jacobr): evaluate whether inOrderRequests is really required.
+      // The out of order request issues seen may have been isolated to Java
+      // where requests could truly be out of order due to multiple threads.
+      // It appears that enforcing in-order requests has significant negative
+      // consequences that out-weigh the benefits of being able to cancel
+      // requests from object groups that have been disposed before the requests
+      // were issued.
+      oneRequestAtATime: true,
     );
 
     final libraryRef = await inspectorLibrary.libraryRef.catchError(
@@ -541,7 +548,7 @@ class InspectorService extends DisposableController
 
     final r = await vmService.callServiceExtension(
       callMethodName,
-      isolateId: inspectorLibrary.isolateId,
+      isolateId: inspectorLibrary.isolateRef.id,
       args: args,
     );
     final json = r.json;
@@ -727,7 +734,7 @@ class ObjectGroup implements Disposable {
     return inspectorLibrary.addRequest(this, () async {
       final r = await inspectorService.vmService.callServiceExtension(
         extension,
-        isolateId: inspectorService.inspectorLibrary.isolateId,
+        isolateId: inspectorService.inspectorLibrary.isolateRef.id,
         args: args,
       );
       if (disposed) return null;
