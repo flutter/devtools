@@ -260,11 +260,8 @@ class _InstanceViewerState extends State<InstanceViewer> {
           hash: instance.hash,
           startToken: '(',
           endToken: ')',
-          meta: instance.fields.isEmpty
-              ? null
-              : instance.fields.length == 1
-                  ? '1 element'
-                  : '${instance.fields.length} elements',
+          // Never show the number of elements when using custom objects
+          meta: null,
         ),
       ),
     );
@@ -323,10 +320,25 @@ class _InstanceViewerState extends State<InstanceViewer> {
         path: path.pathForChild(PathToProperty.listIndex(index)),
       );
 
+      bool isFirst = true;
+
       for (final child in children) {
+        Widget rowItem = child;
+
+        // Add the item index only on the first line of the element
+        if (isFirst) {
+          isFirst = false;
+          rowItem = Row(
+            children: [
+              Text('[$index]: '),
+              Expanded(child: rowItem),
+            ],
+          );
+        }
+
         yield Padding(
           padding: const EdgeInsets.only(left: defaultSpacing),
-          child: child,
+          child: rowItem,
         );
       }
     }
