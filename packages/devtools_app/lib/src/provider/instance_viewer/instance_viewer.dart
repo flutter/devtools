@@ -258,8 +258,8 @@ class _InstanceViewerState extends State<InstanceViewer> {
         object: (instance) => _ObjectHeader(
           type: instance.type,
           hash: instance.hash,
-          startToken: '(',
-          endToken: ')',
+          startToken: '',
+          endToken: '',
           // Never show the number of elements when using custom objects
           meta: null,
         ),
