@@ -294,9 +294,9 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
       await env.setupEnvironment();
 
       final service = serviceManager.service;
-      final _flutterIsolateId =
-          serviceManager.isolateManager.mainIsolate.value.id;
-      expect(_flutterIsolateId, isNotNull);
+      final _flutterIsolateRef =
+          serviceManager.isolateManager.mainIsolate.value;
+      expect(_flutterIsolateRef.id, isNotNull);
 
       /// Helper method to call an extension on the test device and verify that
       /// the device reflects the new extension state.
@@ -324,7 +324,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
         // Enable service extension on test device.
         await service.callServiceExtension(
           extensionDescription.extension,
-          isolateId: _flutterIsolateId,
+          isolateId: _flutterIsolateRef.id,
           args: args,
         );
 
@@ -346,7 +346,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
           'package:flutter_web/src/rendering/debug.dart',
         ],
         service,
-        isolateId: _flutterIsolateId,
+        isolateRef: _flutterIsolateRef,
       );
 
       await _enableExtensionOnTestDevice(
@@ -366,7 +366,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
           'package:flutter_web/src/foundation/platform.dart',
         ],
         service,
-        isolateId: _flutterIsolateId,
+        isolateRef: _flutterIsolateRef,
       );
       await _enableExtensionOnTestDevice(
         stringExtensionDescription,
@@ -391,7 +391,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
           'package:flutter_web/src/scheduler/binding.dart',
         ],
         service,
-        isolateId: _flutterIsolateId,
+        isolateRef: _flutterIsolateRef,
       );
       await _enableExtensionOnTestDevice(
         numericExtensionDescription,
