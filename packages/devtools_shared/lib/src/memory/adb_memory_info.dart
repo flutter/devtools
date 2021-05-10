@@ -29,7 +29,7 @@ class AdbMemoryInfo {
         json[graphicsKey] as int,
         json[otherKey] as int,
         json[systemKey] as int,
-        json[totalKey],
+        json[totalKey] as int,
       );
 
   /// Use when converting data received from the service extension, directly from
@@ -38,6 +38,7 @@ class AdbMemoryInfo {
   factory AdbMemoryInfo.fromJsonInKB(
     Map<String, dynamic> json,
   ) {
+    final int realTime = json[realTimeKey];
     int javaHeap = json[javaHeapKey];
     int nativeHeap = json[nativeHeapKey];
     int code = json[codeKey];
@@ -58,7 +59,7 @@ class AdbMemoryInfo {
     total *= 1024;
 
     return AdbMemoryInfo(
-      json[realTimeKey] as int,
+      realTime,
       javaHeap,
       nativeHeap,
       code,

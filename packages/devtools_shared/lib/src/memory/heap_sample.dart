@@ -16,22 +16,35 @@ class HeapSample {
     this.used,
     this.external,
     this.isGC,
-    this._adbMemoryInfo,
-    this._memoryEventInfo,
-    this._rasterCache,
-  );
+    AdbMemoryInfo? adbMemoryInfo,
+    EventSample? memoryEventInfo,
+    RasterCache? rasterCache,
+  )   : adbMemoryInfo = adbMemoryInfo ?? AdbMemoryInfo.empty(),
+        memoryEventInfo = memoryEventInfo ?? EventSample.empty(),
+        rasterCache = rasterCache ?? RasterCache.empty();
 
-  factory HeapSample.fromJson(Map<String, dynamic> json) => HeapSample(
-        json['timestamp'] as int,
-        json['rss'] as int,
-        json['capacity'] as int,
-        json['used'] as int,
-        json['external'] as int,
-        json['gc'] as bool,
-        AdbMemoryInfo.fromJson(json['adb_memoryInfo']),
-        EventSample.fromJson(json['memory_eventInfo']),
-        RasterCache.fromJson(json['raster_cache']),
-      );
+  factory HeapSample.fromJson(Map<String, dynamic> json) {
+    final adbMemoryInfo = json['adb_memoryInfo'];
+    final memoryEventInfo = json['memory_eventInfo'];
+    final rasterCache = json['raster_cache'];
+    return HeapSample(
+      json['timestamp'] as int,
+      json['rss'] as int,
+      json['capacity'] as int,
+      json['used'] as int,
+      json['external'] as int,
+      json['gc'] as bool,
+      adbMemoryInfo != null
+          ? AdbMemoryInfo.fromJson(adbMemoryInfo)
+          : AdbMemoryInfo.empty(),
+      memoryEventInfo != null
+          ? EventSample.fromJson(memoryEventInfo)
+          : EventSample.empty(),
+      rasterCache != null
+          ? RasterCache.fromJson(rasterCache)
+          : RasterCache.empty(),
+    );
+  }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'timestamp': timestamp,
@@ -60,26 +73,11 @@ class HeapSample {
 
   final bool isGC;
 
-  EventSample _memoryEventInfo;
+  EventSample memoryEventInfo;
 
-  AdbMemoryInfo _adbMemoryInfo;
+  AdbMemoryInfo adbMemoryInfo;
 
-  RasterCache _rasterCache;
-
-  AdbMemoryInfo get adbMemoryInfo {
-    _adbMemoryInfo ??= AdbMemoryInfo.empty();
-    return _adbMemoryInfo;
-  }
-
-  EventSample get memoryEventInfo {
-    _memoryEventInfo ??= EventSample.empty();
-    return _memoryEventInfo;
-  }
-
-  RasterCache get rasterCache {
-    _rasterCache ??= RasterCache.empty();
-    return _rasterCache;
-  }
+  RasterCache rasterCache;
 
   @override
   String toString() => '[HeapSample timestamp: $timestamp, '

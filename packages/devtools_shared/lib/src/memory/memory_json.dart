@@ -25,8 +25,8 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
   /// List of HeapSample.
   MemoryJson.decode(
     String payloadName, {
-    String argJsonString,
-    Map<String, dynamic> argDecodedMap,
+    required String argJsonString,
+    Map<String, dynamic>? argDecodedMap,
   }) {
     final Map<String, dynamic> decodedMap =
         argDecodedMap == null ? jsonDecode(argJsonString) : argDecodedMap;
@@ -40,7 +40,8 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
       // TODO(terry): Notify user the file is being converted.
       // TODO(terry): Consider moving config_specific/logger/ into shared to
       //              use logger instead of print.
-      print('WARNING: Unable to convert JSON memory file payload version=$payloadVersion.');
+      print(
+          'WARNING: Unable to convert JSON memory file payload version=$payloadVersion.');
       // TODO(terry): After conversion update payloadVersion to version;
     }
 
@@ -57,14 +58,14 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
     }
   }
 
-  int _payloadVersion;
+  late final int _payloadVersion;
 
   int get payloadVersion => _payloadVersion;
 
   /// Imported JSON data loaded and converted, if necessary, to the latest version.
   bool get isMatchedVersion => _payloadVersion == version;
 
-  bool _memoryPayload;
+  late final bool _memoryPayload;
 
   /// JSON payload field "dart<T>DevToolsScreen" has a value of "memory" e.g.,
   ///   "dartDevToolsScreen": "memory"
@@ -91,8 +92,8 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
   /// Given a JSON string representing an array of HeapSample, decode to a
   /// List of HeapSample.
   SamplesMemoryJson.decode({
-    String argJsonString,
-    Map<String, dynamic> argDecodedMap,
+    required String argJsonString,
+    Map<String, dynamic>? argDecodedMap,
   }) : super.decode(
           _jsonMemoryPayloadField,
           argJsonString: argJsonString,
@@ -231,8 +232,8 @@ class AllocationMemoryJson extends MemoryJson<ClassHeapDetailStats> {
   /// Given a JSON string representing an array of HeapSample, decode to a
   /// List of HeapSample.
   AllocationMemoryJson.decode({
-    String argJsonString,
-    Map<String, dynamic> argDecodedMap,
+    required String argJsonString,
+    Map<String, dynamic>? argDecodedMap,
   }) : super.decode(
           _jsonAllocationPayloadField,
           argJsonString: argJsonString,
