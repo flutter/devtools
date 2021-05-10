@@ -104,7 +104,7 @@ class InspectorService extends DisposableController
     final inspectorLibrary = EvalOnDartLibrary(
       inspectorLibraryUriCandidates,
       vmService,
-      // TODO(jacobr): evaluate whether inOrderRequests is really required.
+      // TODO(jacobr): evaluate whether oneRequestAtATime is really required.
       // The out of order request issues seen may have been isolated to Java
       // where requests could truly be out of order due to multiple threads.
       // It appears that enforcing in-order requests has significant negative
