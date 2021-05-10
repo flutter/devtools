@@ -30,35 +30,42 @@ class EvalOnDartLibrary {
   EvalOnDartLibrary(
     Iterable<String> candidateLibraryNames,
     this.service, {
-    String isolateId,
+    IsolateRef isolateRef,
+    this.oneRequestAtATime = false,
   })  : _candidateLibraryNames = Set.from(candidateLibraryNames),
         _clientId = (Random.secure().nextDouble() * 10000).toInt() {
     _libraryRef = Completer<LibraryRef>();
 
     // For evals in tests, we will pass the isolateId into the constructor.
-    if (isolateId != null) {
-      _init(isolateId, false);
+    if (isolateRef != null) {
+      _init(isolateRef);
     } else {
-      selectedIsolateStreamSubscription = serviceManager.isolateManager
-          .getSelectedIsolate((IsolateRef isolate) {
-        final String id = isolate?.id;
-        _initializeComplete = null;
-        _init(id, isolate == null);
-      });
+      selectedIsolateStreamSubscription =
+          serviceManager.isolateManager.getSelectedIsolate(_init);
     }
   }
 
-  Future<void> _init(String isolateId, bool isIsolateNull) async {
-    await _initializeComplete;
+  void _init(IsolateRef isolateRef) {
+    if (_isolateRef == isolateRef) return;
 
+    _currentRequestId++;
+    _isolateRef = isolateRef;
     if (_libraryRef.isCompleted) {
-      _libraryRef = Completer<LibraryRef>();
+      _libraryRef = Completer();
     }
 
-    if (!isIsolateNull) {
-      _initializeComplete = _initialize(isolateId);
+    if (isolateRef != null) {
+      _initialize(isolateRef, _currentRequestId);
     }
   }
+
+  /// Whether to wait for one request to complete before issuing another
+  /// request.
+  ///
+  /// This makes it possible to cancel requests and provides clear ordering
+  /// guarantees but significantly hurts performance particularly when the
+  /// VM Service and DevTools are not running on the same machine.
+  final bool oneRequestAtATime;
 
   /// An ID unique to this instance, so that [asyncEval] keeps working even if
   /// the devtool is opened on multiple tabs at the same time.
@@ -76,11 +83,12 @@ class EvalOnDartLibrary {
 
   final Set<String> _candidateLibraryNames;
   final VmServiceWrapper service;
-  Future<void> _initializeComplete;
   StreamSubscription selectedIsolateStreamSubscription;
 
-  String get isolateId => _isolateId;
-  String _isolateId;
+  IsolateRef get isolateRef => _isolateRef;
+  IsolateRef _isolateRef;
+
+  int _currentRequestId = 0;
 
   Completer<LibraryRef> _libraryRef;
   Future<LibraryRef> get libraryRef => _libraryRef.future;
@@ -90,13 +98,23 @@ class EvalOnDartLibrary {
   Isolate get isolate => _isolate;
   Isolate _isolate;
 
-  Future<void> _initialize(String isolateId) async {
-    _isolateId = isolateId;
+  Future<void> _initialize(IsolateRef isolateRef, int requestId) async {
+    if (_currentRequestId != requestId) {
+      // The initialize request is obsolete.
+      return;
+    }
 
+    assert(isolateRef != null);
     try {
-      final Isolate isolate = await service.getIsolate(_isolateId);
+      final Isolate isolate =
+          await serviceManager.isolateManager.getIsolateCached(isolateRef);
+      if (_currentRequestId != requestId) {
+        // The initialize request is obsolete.
+        return;
+      }
       _isolate = isolate;
-      if (isolate == null || _libraryRef.isCompleted) {
+      if (isolate == null) {
+        _libraryRef.completeError(LibraryNotFound([]));
         // Nothing to do here.
         return;
       }
@@ -132,8 +150,9 @@ class EvalOnDartLibrary {
 
   Future<LibraryRef> _waitForLibraryRef() async {
     while (true) {
+      final id = _currentRequestId;
       final libraryRef = await _libraryRef.future;
-      if (_libraryRef.isCompleted) {
+      if (_libraryRef.isCompleted && _currentRequestId == id) {
         // Avoid race condition where a new isolate loaded
         // while we were waiting for the library ref.
         // TODO(jacobr): checking the isolateRef matches the isolateRef when the method started.
@@ -153,7 +172,7 @@ class EvalOnDartLibrary {
       final libraryRef = await _waitForLibraryRef();
       if (libraryRef == null) return null;
       final result = await service.evaluate(
-        _isolateId,
+        _isolateRef.id,
         libraryRef.id,
         expression,
         scope: scope,
@@ -377,7 +396,7 @@ class EvalOnDartLibrary {
         final libraryRef = await _waitForLibraryRef();
 
         return await service.evaluate(
-          isolateId,
+          isolateRef.id,
           libraryRef.id,
           expression,
           scope: scope,
@@ -423,7 +442,9 @@ class EvalOnDartLibrary {
   }
 
   /// Public so that other related classes such as InspectorService can ensure
-  /// their requests are in a consistent order with existing requests. This
+  /// their requests are in a consistent order with existing requests.
+  ///
+  /// When [oneRequestAtATime] is true, using this method
   /// eliminates otherwise surprising timing bugs, such as if a request to
   /// dispose an InspectorService.ObjectGroup was issued after a request to read
   /// properties from an object in a group, but the request to dispose the
@@ -442,6 +463,9 @@ class EvalOnDartLibrary {
   Future<T> addRequest<T>(Disposable isAlive, Future<T> request()) async {
     if (isAlive != null && isAlive.disposed) return null;
 
+    if (!oneRequestAtATime) {
+      return request();
+    }
     // Future that completes when the request has finished.
     final Completer<T> response = Completer();
     // This is an optimization to avoid sending stale requests across the wire.
@@ -498,7 +522,7 @@ class EvalOnDartLibrary {
   }) {
     return addRequest<T>(isAlive, () async {
       final T value = await service.getObject(
-        _isolateId,
+        _isolateRef.id,
         instance.id,
         offset: offset,
         count: count,
@@ -508,7 +532,7 @@ class EvalOnDartLibrary {
   }
 
   Future<String> retrieveFullValueAsString(InstanceRef stringRef) {
-    return service.retrieveFullStringValue(_isolateId, stringRef);
+    return service.retrieveFullStringValue(_isolateRef.id, stringRef);
   }
 }
 

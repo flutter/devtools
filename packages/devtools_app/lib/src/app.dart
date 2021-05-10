@@ -38,8 +38,7 @@ import 'performance/performance_controller.dart';
 import 'performance/performance_screen.dart';
 import 'profiler/profiler_screen.dart';
 import 'profiler/profiler_screen_controller.dart';
-// TODO(terry): Temporarily disable provider screen.
-//import 'provider/provider_screen.dart';
+import 'provider/provider_screen.dart';
 import 'routing.dart';
 import 'scaffold.dart';
 import 'screen.dart';
@@ -619,9 +618,7 @@ List<DevToolsScreen> get defaultScreens {
       VMDeveloperToolsScreen(controller: vmDeveloperToolsController),
       controller: vmDeveloperToolsController,
     ),
-    // TODO(terry): Disable Provider screen for now - freezed_annotation dep
-    //              as well as performance issues.
-    //DevToolsScreen<void>(const ProviderScreen(), createController: () {}),
+    DevToolsScreen<void>(const ProviderScreen(), createController: () {}),
     // Show the sample DevTools screen.
     if (debugEnableSampleScreen && (kDebugMode || kProfileMode))
       DevToolsScreen<ExampleController>(
