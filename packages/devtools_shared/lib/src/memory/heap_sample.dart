@@ -16,10 +16,12 @@ class HeapSample {
     this.used,
     this.external,
     this.isGC,
-    this.adbMemoryInfo,
-    this.memoryEventInfo,
-    this.rasterCache,
-  );
+    AdbMemoryInfo? adbMemoryInfo,
+    EventSample? memoryEventInfo,
+    RasterCache? rasterCache,
+  )   : adbMemoryInfo = adbMemoryInfo ?? AdbMemoryInfo.empty(),
+        memoryEventInfo = memoryEventInfo ?? EventSample.empty(),
+        rasterCache = rasterCache ?? RasterCache.empty();
 
   factory HeapSample.fromJson(Map<String, dynamic> json) {
     final adbMemoryInfo = json['adb_memoryInfo'];
