@@ -37,7 +37,7 @@ Future<InstanceRef> _resolveInstanceRefForPath(
         ref.watch(_providerChanged(path.providerId));
 
         return eval.safeEval(
-          'ProviderBinding.debugInstance.providerDetails["${path.providerId}"]!.value',
+          'ProviderBinding.debugInstance.providerDetails["${path.providerId}"]?.value',
           isAlive: isAlive,
         );
       },

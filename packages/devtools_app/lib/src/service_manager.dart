@@ -414,7 +414,7 @@ class ServiceConnectionManager {
 }
 
 class IsolateManager extends Disposer {
-  List<IsolateRef> _isolates = <IsolateRef>[];
+  Map<IsolateRef, Future<Isolate>> _isolates = {};
   IsolateRef _selectedIsolate;
   VmServiceWrapper _service;
 
@@ -432,7 +432,8 @@ class IsolateManager extends Disposer {
 
   List<LibraryRef> selectedIsolateLibraries;
 
-  List<IsolateRef> get isolates => List<IsolateRef>.unmodifiable(_isolates);
+  List<IsolateRef> get isolates =>
+      List<IsolateRef>.unmodifiable(_isolates.keys);
 
   IsolateRef get selectedIsolate => _selectedIsolate;
 
@@ -457,7 +458,7 @@ class IsolateManager extends Disposer {
         if (vmDeveloperModeEnabled) ...vm.systemIsolates,
       ];
       if (selectedIsolate.isSystemIsolate && !vmDeveloperModeEnabled) {
-        selectIsolate(_isolates.first.id);
+        selectIsolate(_isolates.keys.first.id);
       }
       await _initIsolates(isolates);
     });
@@ -473,15 +474,15 @@ class IsolateManager extends Disposer {
   }
 
   void selectIsolate(String isolateRefId) {
-    final IsolateRef ref = _isolates.firstWhere(
+    final IsolateRef ref = _isolates.keys.firstWhere(
         (IsolateRef ref) => ref.id == isolateRefId,
         orElse: () => null);
     _setSelectedIsolate(ref);
   }
 
   Future<void> _initIsolates(List<IsolateRef> isolates) async {
-    _isolates = isolates;
-    _isolates.forEach(isolateIndex);
+    _isolates = _buildIsolateMap(isolates);
+    _isolates.keys.forEach(isolateIndex);
 
     // It is critical that the _serviceExtensionManager is already listening
     // for events indicating that new extension rpcs are registered before this
@@ -502,7 +503,7 @@ class IsolateManager extends Disposer {
 
     if (event.kind == EventKind.kIsolateStart &&
         !event.isolate.isSystemIsolate) {
-      _isolates.add(event.isolate);
+      _isolates.putIfAbsent(event.isolate, () => null);
       isolateIndex(event.isolate);
       _isolateCreatedController.add(event.isolate);
       // TODO(jacobr): we assume the first isolate started is the main isolate
@@ -519,13 +520,13 @@ class IsolateManager extends Disposer {
         await _setSelectedIsolate(event.isolate);
       }
     } else if (event.kind == EventKind.kIsolateExit) {
-      _isolates.remove(event.isolate);
+      unawaited(_isolates.remove(event.isolate));
       _isolateExitedController.add(event.isolate);
       if (_mainIsolate.value == event.isolate) {
         _mainIsolate.value = null;
       }
       if (_selectedIsolate == event.isolate) {
-        _selectedIsolate = _isolates.isEmpty ? null : _isolates.first;
+        _selectedIsolate = _isolates.isEmpty ? null : _isolates.keys.first;
         if (_selectedIsolate == null) {
           selectedIsolateAvailable = Completer();
         }
@@ -592,8 +593,8 @@ class IsolateManager extends Disposer {
       } on SentinelException {
         if (_selectedIsolate == ref) {
           _selectedIsolate = null;
-          if (_isolates.isNotEmpty && _isolates.first != ref) {
-            await _setSelectedIsolate(_isolates.first);
+          if (_isolates.isNotEmpty && _isolates.keys.first != ref) {
+            await _setSelectedIsolate(_isolates.keys.first);
           }
         }
         return;
@@ -630,6 +631,18 @@ class IsolateManager extends Disposer {
     autoDispose(service.onIsolateEvent.listen(_handleIsolateEvent));
     // We don't yet known the main isolate.
     _mainIsolate.value = null;
+  }
+
+  Future<Isolate> getIsolateCached(IsolateRef isolateRef) {
+    return _isolates[isolateRef] ??= _service.getIsolate(isolateRef.id);
+  }
+
+  Map<IsolateRef, Future<Isolate>> _buildIsolateMap(List<IsolateRef> isolates) {
+    final map = <IsolateRef, Future<Isolate>>{};
+    for (var isolate in isolates) {
+      map[isolate] = null;
+    }
+    return map;
   }
 }
 
