@@ -143,19 +143,25 @@ class HttpResponseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget child;
     // We shouldn't try and display an image response view when using the
     // timeline profiler since it's possible for response body data to get
     // dropped.
     if (data is DartIOHttpRequestData && data.contentType.contains('image')) {
-      return SingleChildScrollView(
-        child: ImageResponseView(data),
+      child = ImageResponseView(data);
+    } else {
+      child = FormattedJson(
+        formattedString: data.responseBody,
       );
     }
-    return SingleChildScrollView(
-      child: SelectableText(
-        data.responseBody,
-        style: Theme.of(context).fixedFontStyle,
-      ),
+    // TODO(kenz): use a collapsible json tree for the response
+    // https://github.com/flutter/devtools/issues/2952.
+    // TODO(bkonyi): add syntax highlighting to these responses
+    // https://github.com/flutter/devtools/issues/2604. We may be able to use
+    // the new tree widget used in the Provider page.
+    return Padding(
+      padding: const EdgeInsets.all(denseSpacing),
+      child: SingleChildScrollView(child: child),
     );
   }
 }
