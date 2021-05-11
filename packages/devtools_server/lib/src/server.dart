@@ -54,7 +54,7 @@ ClientManager clients;
 ///
 /// For more information on `handler`, see [serveDevTools].
 // Note: this method is used in google3 as well as by DevTools' main method.
-Future<void> serveDevToolsWithArgs(
+Future<HttpServer> serveDevToolsWithArgs(
   List<String> arguments, {
   shelf.Handler handler,
 }) async {
@@ -66,13 +66,13 @@ Future<void> serveDevToolsWithArgs(
     print(e.message);
     print('');
     _printUsage(verbose);
-    return;
+    return null;
   }
 
   return await _serveDevToolsWithArgs(args, verbose, handler: handler);
 }
 
-Future<void> _serveDevToolsWithArgs(
+Future<HttpServer> _serveDevToolsWithArgs(
   ArgResults args,
   bool verbose, {
   shelf.Handler handler,
@@ -99,7 +99,7 @@ Future<void> _serveDevToolsWithArgs(
     print('Dart DevTools version ${await _getVersion()}');
     print('');
     _printUsage(verbose);
-    return;
+    return null;
   }
 
   // Prefer getting the VM URI from the rest args; fall back on the 'vm-url'
@@ -719,7 +719,12 @@ Future<void> _handleDevToolsLaunch(
   if (_isValidVmServiceUri(vmServiceUri)) {
     try {
       final result = await launchDevTools(
-          params, vmServiceUri, devToolsUrl, headlessMode, machineMode);
+        params,
+        vmServiceUri,
+        devToolsUrl,
+        headlessMode,
+        machineMode,
+      );
       printOutput(
         'DevTools launched',
         {'id': id, 'result': result},

@@ -1,3 +1,7 @@
+// Copyright 2021 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -9,8 +13,7 @@ class LocalFileSystem {
   static String _userHomeDir() {
     final String envKey =
         Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-    final String value = Platform.environment[envKey];
-    return value == null ? '.' : value;
+    return Platform.environment[envKey] ?? '.';
   }
 
   /// Returns the path to the DevTools storage directory.

@@ -24,7 +24,7 @@ class ClientManager {
 
   /// Whether to immediately request notification permissions when a client connects.
   /// Otherwise permission will be requested only with the first notification.
-  final bool requestNotificationPermissions;
+  final bool /*!*/ requestNotificationPermissions;
   final List<DevToolsClient> _clients = [];
 
   List<DevToolsClient> get allClients => _clients.toList();
@@ -100,12 +100,12 @@ class DevToolsClient {
           _respond(request);
           return;
         case 'getPreferenceValue':
-          final String key = request['params']['key'];
+          final String /*!*/ key = request['params']['key'];
           final dynamic value = ServerApi.devToolsPreferences.properties[key];
           _respondWithResult(request, value);
           return;
         case 'setPreferenceValue':
-          final String key = request['params']['key'];
+          final String /*!*/ key = request['params']['key'];
           final dynamic value = request['params']['value'];
           ServerApi.devToolsPreferences.properties[key] = value;
           _respond(request);
@@ -118,7 +118,7 @@ class DevToolsClient {
     }
   }
 
-  Future<void> connectToVmService(Uri uri, bool notifyUser) async {
+  Future<void> connectToVmService(Uri /*!*/ uri, bool notifyUser) async {
     _send({
       'method': 'connectToVm',
       'params': {
@@ -140,7 +140,7 @@ class DevToolsClient {
     });
   }
 
-  Future<void> showPage(String pageId) async {
+  Future<void> showPage(String /*!*/ pageId) async {
     _send({
       'method': 'showPage',
       'params': {'page': pageId}
@@ -154,7 +154,7 @@ class DevToolsClient {
   }
 
   void _respond(Map<String, dynamic> request) {
-    final String id = request['id'];
+    final String /*!*/ id = request['id'];
     _send({
       'id': id,
     });
