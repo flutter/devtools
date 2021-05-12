@@ -11,6 +11,7 @@ import 'package:provider/single_child_widget.dart';
 
 // ignore: unused_import, allows the tests to use functions from tester.dart
 import 'tester.dart';
+import 'mixin.dart';
 
 void main() {
   runApp(MyApp());
@@ -80,7 +81,7 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class Counter extends ChangeNotifier {
+class Counter with ChangeNotifier, Mixin {
   int _count = 0;
   int get count => _count;
 

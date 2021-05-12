@@ -41,6 +41,41 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
   });
 
   group('Provider controllers', () {
+    test('can mutate private properties from mixins', () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final sub = container.listen(
+        rawInstanceProvider(
+          const InstancePath.fromProviderId('0').pathForChild(
+            const PathToProperty.objectProperty(
+              name: '_privateMixinProperty',
+              ownerUri: 'package:provider_app/mixin.dart',
+              ownerName: 'Mixin',
+            ),
+          ),
+        ).future,
+      );
+
+      var instance = await sub.read();
+
+      expect(
+        instance,
+        isA<NumInstance>().having((e) => e.displayString, 'displayString', '0'),
+      );
+
+      await instance.setter('42');
+
+      // read the instance again since it should have changed
+      instance = await sub.read();
+
+      expect(
+        instance,
+        isA<NumInstance>()
+            .having((e) => e.displayString, 'displayString', '42'),
+      );
+    });
+
     test('rawSortedProviderNodesProvider', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
@@ -217,6 +252,8 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                     isA<ObjectField>()
                         .having((e) => e.ownerName, 'ownerName', 'Counter')
                         .having((e) => e.name, 'name', '_count')
+                        .having((e) => e.ownerUri, 'ownerUri',
+                            'package:provider_app/main.dart')
                         .having((e) => e.isFinal, 'isFinal', false)
                         .having((e) => e.isPrivate, 'isPrivate', true)
                         .having((e) => e.isDefinedByDependency,
@@ -225,10 +262,21 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                         .having(
                             (e) => e.ownerName, 'ownerName', 'ChangeNotifier')
                         .having((e) => e.name, 'name', '_listeners')
+                        .having((e) => e.ownerUri, 'ownerUri',
+                            'package:flutter/src/foundation/change_notifier.dart')
                         .having((e) => e.isFinal, 'isFinal', false)
                         .having((e) => e.isPrivate, 'isPrivate', true)
                         .having((e) => e.isDefinedByDependency,
                             'isDefinedByDependency', true),
+                    isA<ObjectField>()
+                        .having((e) => e.ownerName, 'ownerName', 'Mixin')
+                        .having((e) => e.name, 'name', '_privateMixinProperty')
+                        .having((e) => e.ownerUri, 'ownerUri',
+                            'package:provider_app/mixin.dart')
+                        .having((e) => e.isFinal, 'isFinal', false)
+                        .having((e) => e.isPrivate, 'isPrivate', true)
+                        .having((e) => e.isDefinedByDependency,
+                            'isDefinedByDependency', false),
                   ]),
                 ),
           ),
