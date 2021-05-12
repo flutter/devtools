@@ -70,7 +70,9 @@ class ProviderScreenBody extends ConsumerWidget {
 
     // A provider will automatically be selected as soon as one is detected
     final selectedProviderId = watch(selectedProviderIdProvider);
-
+    final detailsTitleText = selectedProviderId != null
+        ? watch(_selectedProviderNode)?.type ?? ''
+        : '[No provider selected]';
     return ProviderListener<bool>(
       provider: _hasErrorProvider,
       onChange: (context, hasError) {
@@ -96,38 +98,36 @@ class ProviderScreenBody extends ConsumerWidget {
           OutlineDecoration(
             child: Column(
               children: [
-                if (selectedProviderId != null) ...[
-                  AreaPaneHeader(
-                    needsTopBorder: false,
-                    title: Text(watch(_selectedProviderNode)?.type ?? ''),
-                    actions: [
-                      _DevtoolTheme(
-                        child: ToggleButtons(
-                          isSelected: [watch(_showInternals).state],
-                          onPressed: (_) {
-                            final showInternals = context.read(_showInternals);
-                            showInternals.state = !showInternals.state;
-                          },
-                          children: const <Widget>[
-                            _ToggleImageIconLabel(
-                              icon: Icon(Icons.fingerprint),
-                              text: 'Show internals',
-                              tooltipMessage:
-                                  'Show private properties inherited from SDKs/packages',
-                            )
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
+                AreaPaneHeader(
+                  needsTopBorder: false,
+                  title: Text(detailsTitleText),
+                  actions: [
+                    _DevtoolTheme(
+                      child: ToggleButtons(
+                        isSelected: [watch(_showInternals).state],
+                        onPressed: (_) {
+                          final showInternals = context.read(_showInternals);
+                          showInternals.state = !showInternals.state;
+                        },
+                        children: const <Widget>[
+                          _ToggleImageIconLabel(
+                            icon: Icon(Icons.fingerprint),
+                            text: 'Show internals',
+                            tooltipMessage:
+                                'Show private properties inherited from SDKs/packages',
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+                if (selectedProviderId != null)
                   Expanded(
                     child: InstanceViewer(
                       rootPath: InstancePath.fromProviderId(selectedProviderId),
                       showInternalProperties: watch(_showInternals).state,
                     ),
                   )
-                ] else
-                  const AreaPaneHeader(title: Text('[No provider selected]')),
               ],
             ),
           )

@@ -5,7 +5,6 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../eval_on_dart_library.dart';
-import '../globals.dart';
 import 'instance_viewer/eval.dart';
 import 'provider_debounce.dart';
 
@@ -20,21 +19,25 @@ class ProviderNode {
   final String type;
 }
 
-final _providerListChanged = AutoDisposeStreamProvider<void>((ref) {
-  return serviceManager.service.onExtensionEvent.where((event) {
+final _providerListChanged = AutoDisposeStreamProvider<void>((ref) async* {
+  final service = await ref.watch(serviceProvider.last);
+
+  yield* service.onExtensionEvent.where((event) {
     return event.extensionKind == 'provider:provider_list_changed';
   });
 });
 
 final _rawProviderIdsProvider =
     AutoDisposeFutureProvider<List<String>>((ref) async {
+  // recompute the list of providers on hot-restart
+  ref.watch(hotRestartEventProvider);
   // cause the list of providers to be re-evaluated when notified of a change
   ref.watch(_providerListChanged);
 
   final isAlive = Disposable();
   ref.onDispose(isAlive.dispose);
 
-  final eval = ref.watch(providerEvalProvider);
+  final eval = await ref.watch(providerEvalProvider.future);
 
   final providerIdRefs = await eval.evalInstance(
     'ProviderBinding.debugInstance.providerDetails.keys.toList()',
@@ -53,10 +56,13 @@ final _rawProviderIdsProvider =
 
 final _rawProviderNodeProvider =
     AutoDisposeFutureProviderFamily<ProviderNode, String>((ref, id) async {
+  // recompute the providers informations on hot-restart
+  ref.watch(hotRestartEventProvider);
+
   final isAlive = Disposable();
   ref.onDispose(isAlive.dispose);
 
-  final eval = ref.watch(providerEvalProvider);
+  final eval = await ref.watch(providerEvalProvider.future);
 
   final providerNodeInstance = await eval.evalInstance(
     "ProviderBinding.debugInstance.providerDetails['$id']",
