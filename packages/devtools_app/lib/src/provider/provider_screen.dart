@@ -66,7 +66,9 @@ class ProviderScreenBody extends ConsumerWidget {
 
     // A provider will automatically be selected as soon as one is detected
     final selectedProviderId = watch(selectedProviderIdProvider);
-
+    final detailsTitleText = selectedProviderId != null
+        ? watch(_selectedProviderNode)?.type ?? ''
+        : '[No provider selected]';
     return ProviderListener<bool>(
       provider: _hasErrorProvider,
       onChange: (context, hasError) {
@@ -79,7 +81,10 @@ class ProviderScreenBody extends ConsumerWidget {
           OutlineDecoration(
             child: Column(
               children: const [
-                AreaPaneHeader(title: Text('Providers')),
+                AreaPaneHeader(
+                  title: Text('Providers'),
+                  needsTopBorder: false,
+                ),
                 Expanded(
                   child: ProviderList(),
                 ),
@@ -89,17 +94,16 @@ class ProviderScreenBody extends ConsumerWidget {
           OutlineDecoration(
             child: Column(
               children: [
-                if (selectedProviderId != null) ...[
-                  AreaPaneHeader(
-                    title: Text(watch(_selectedProviderNode)?.type ?? ''),
-                  ),
+                AreaPaneHeader(
+                  title: Text(detailsTitleText),
+                  needsTopBorder: false,
+                ),
+                if (selectedProviderId != null)
                   Expanded(
                     child: InstanceViewer(
                       rootPath: InstancePath.fromProviderId(selectedProviderId),
                     ),
                   )
-                ] else
-                  const AreaPaneHeader(title: Text('[No provider selected]')),
               ],
             ),
           )
