@@ -383,8 +383,9 @@ void main() {
           child: const MaterialApp(
             home: Scaffold(
               body: InstanceViewer(
-                  showInternalProperties: true,
-                  rootPath: InstancePath.fromInstanceId('0')),
+                showInternalProperties: true,
+                rootPath: InstancePath.fromInstanceId('0'),
+              ),
             ),
           ),
         ),

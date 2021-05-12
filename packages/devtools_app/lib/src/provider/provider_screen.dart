@@ -17,6 +17,8 @@ import './instance_viewer/instance_viewer.dart';
 import 'provider_list.dart';
 import 'provider_nodes.dart';
 
+const stateInspectorSettingsTitle = 'State inspector configurations';
+
 final _hasErrorProvider = Provider.autoDispose<bool>((ref) {
   if (ref.watch(sortedProviderNodesProvider) is AsyncError) return true;
 
@@ -108,7 +110,7 @@ class ProviderScreenBody extends ConsumerWidget {
                           builder: (_) => _StateInspectorSettingsDialog(),
                         );
                       },
-                      tooltip: 'State inspector configurations',
+                      tooltip: stateInspectorSettingsTitle,
                     ),
                   ],
                 ),
@@ -144,7 +146,7 @@ class _StateInspectorSettingsDialog extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return DevToolsDialog(
-      title: dialogTitleText(theme, 'State inspector configurations'),
+      title: dialogTitleText(theme, stateInspectorSettingsTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
