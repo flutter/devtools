@@ -9,9 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
+import 'mixin.dart';
 // ignore: unused_import, allows the tests to use functions from tester.dart
 import 'tester.dart';
-import 'mixin.dart';
 
 void main() {
   runApp(MyApp());
