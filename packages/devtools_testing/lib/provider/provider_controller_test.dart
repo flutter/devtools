@@ -278,14 +278,14 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                         .having((e) => e.isFinal, 'isFinal', true)
                         .having((e) => e.isPrivate, 'isPrivate', false)
                         .having((e) => e.isDefinedByDependency,
-                            'isDefinedByDependency', true),
+                            'isDefinedByDependency', false),
                     isA<ObjectField>()
                         .having((e) => e.ownerName, 'ownerName', 'Counter')
                         .having((e) => e.name, 'name', '_count')
                         .having((e) => e.isFinal, 'isFinal', false)
                         .having((e) => e.isPrivate, 'isPrivate', true)
                         .having((e) => e.isDefinedByDependency,
-                            'isDefinedByDependency', true),
+                            'isDefinedByDependency', false),
                     isA<ObjectField>()
                         .having(
                             (e) => e.ownerName, 'ownerName', 'ChangeNotifier')
@@ -293,7 +293,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                         .having((e) => e.isFinal, 'isFinal', false)
                         .having((e) => e.isPrivate, 'isPrivate', true)
                         .having((e) => e.isDefinedByDependency,
-                            'isDefinedByDependency', false),
+                            'isDefinedByDependency', true),
                   ]),
                 ),
           ),
@@ -309,79 +309,79 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'enumeration')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'finalVar')
                 .having((e) => e.isFinal, 'isFinal', true)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'float')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'integer')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'lateWithInitializer')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'list')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'map')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'nill')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'plainInstance')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'string')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'uninitializedLate')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', '_getterAndSetter')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', true)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
           ]),
         );
 
@@ -461,7 +461,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                 .having((e) => e.isFinal, 'isFinal', true)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true)
+                    false)
           ]).having((e) => e.setter, 'setter', isNotNull),
         );
 
@@ -502,7 +502,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                   .having((e) => e.isFinal, 'isFinal', true)
                   .having((e) => e.isPrivate, 'isPrivate', false)
                   .having((e) => e.isDefinedByDependency,
-                      'isDefinedByDependency', true)
+                      'isDefinedByDependency', false)
             ]),
             isA<NullInstance>()
           ]),
