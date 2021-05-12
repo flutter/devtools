@@ -11,7 +11,7 @@ environment:
 
 dependencies:
   devtools_app: 2.2.2
-  devtools_shared: 2.2.2
+  devtools_shared: 2.2.2-nullsafety.0
   flutter:
     sdk: flutter
   flutter_riverpod: ^0.14.0+3
