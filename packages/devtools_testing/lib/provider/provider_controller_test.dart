@@ -341,7 +341,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                         .having((e) => e.isFinal, 'isFinal', false)
                         .having((e) => e.isPrivate, 'isPrivate', true)
                         .having((e) => e.isDefinedByDependency,
-                            'isDefinedByDependency', false),
+                            'isDefinedByDependency', true),
                   ]),
                 ),
           ),
