@@ -424,7 +424,7 @@ Future<List<ObjectField>> _parseFields(
       ownerName: owner.name,
       ownerUri: owner.library.uri,
       eval: await ref.watch(libraryEvalProvider(owner.library.uri).future),
-      isDefinedByDependency: ownerPackageName == appName,
+      isDefinedByDependency: ownerPackageName != appName,
     );
   }).toList();
 
