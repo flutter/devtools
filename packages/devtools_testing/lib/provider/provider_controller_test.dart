@@ -4,15 +4,17 @@
 
 // ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member, non_constant_identifier_names
 
-import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
-import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:devtools_app/src/eval_on_dart_library.dart';
-import 'package:devtools_app/src/provider/provider_nodes.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
+
+import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
+import 'package:devtools_app/src/provider/provider_nodes.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
 
+import '../support/flutter_test_driver.dart';
 import '../support/flutter_test_environment.dart';
 
 Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
@@ -20,7 +22,9 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
   Disposable isAlive;
 
   setUp(() async {
-    await env.setupEnvironment();
+    await env.setupEnvironment(
+      config: const FlutterRunConfiguration(withDebugger: true),
+    );
     await serviceManager.service.allFuturesCompleted;
 
     isAlive = Disposable();
@@ -38,6 +42,68 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
     evalOnDartLibrary.dispose();
     await env.tearDownEnvironment(force: true);
   });
+
+  test('refreshes everything on hot-reload', () async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    final providersSub =
+        container.listen(rawSortedProviderNodesProvider.future);
+    final countSub = container.listen(
+      rawInstanceProvider(
+        const InstancePath.fromProviderId('0').pathForChild(
+          const PathToProperty.objectProperty(
+            name: '_count',
+            ownerUri: 'package:provider_app/main.dart',
+            ownerName: 'Counter',
+          ),
+        ),
+      ).future,
+    );
+
+    await evalOnDartLibrary.asyncEval(
+      'await tester.tap(find.byKey(Key("add"))).then((_) => tester.pump())',
+      isAlive: isAlive,
+    );
+    await evalOnDartLibrary.asyncEval(
+      'await tester.tap(find.byKey(Key("increment"))).then((_) => tester.pump())',
+      isAlive: isAlive,
+    );
+
+    expect(
+      await providersSub.read(),
+      [
+        isA<ProviderNode>()
+            .having((e) => e.type, 'type', 'ChangeNotifierProvider<Counter>'),
+        isA<ProviderNode>().having((e) => e.type, 'type', 'Provider<int>'),
+      ],
+    );
+    expect(
+      await countSub.read(),
+      isA<NumInstance>().having((e) => e.displayString, 'displayString', '1'),
+    );
+
+    await env.flutter.hotRestart();
+
+    final evalOnDartLibrary2 = EvalOnDartLibrary(
+      [
+        'package:provider_app/main.dart',
+        'package:provider_app/tester.dart',
+      ],
+      env.service,
+    );
+    addTearDown(evalOnDartLibrary2.dispose);
+
+    expect(await providersSub.read(), [
+      isA<ProviderNode>()
+          .having((e) => e.type, 'type', 'ChangeNotifierProvider<Counter>'),
+    ]);
+    expect(
+      await countSub.read(),
+      isA<NumInstance>().having((e) => e.displayString, 'displayString', '0'),
+    );
+    // TODO(rrousselGit) unskip test once hot-restart works properly (https://github.com/flutter/devtools/issues/3007)
+  }, timeout: const Timeout.factor(8), skip: true);
 
   group('Provider controllers', () {
     test('rawSortedProviderNodesProvider', () async {
