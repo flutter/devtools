@@ -102,7 +102,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
       await countSub.read(),
       isA<NumInstance>().having((e) => e.displayString, 'displayString', '0'),
     );
-    // TODO(rrousselGit) unskip test once hot-restart works properly
+    // TODO(rrousselGit) unskip test once hot-restart works properly (https://github.com/flutter/devtools/issues/3007)
   }, timeout: const Timeout.factor(8), skip: true);
 
   group('Provider controllers', () {
