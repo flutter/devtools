@@ -149,20 +149,18 @@ class _StateInspectorSettingsDialog extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Tooltip(
-            message: 'Show private properties inherited from SDKs/packages',
-            waitDuration: tooltipWait,
-            child: InkWell(
-              onTap: () => _toggleShowInternals(context),
-              child: Row(
-                children: [
-                  Checkbox(
-                    value: watch(_showInternals).state,
-                    onChanged: (_) => _toggleShowInternals(context),
-                  ),
-                  const Text('Show internals'),
-                ],
-              ),
+          InkWell(
+            onTap: () => _toggleShowInternals(context),
+            child: Row(
+              children: [
+                Checkbox(
+                  value: watch(_showInternals).state,
+                  onChanged: (_) => _toggleShowInternals(context),
+                ),
+                const Text(
+                  'Show private properties inherited from SDKs/packages',
+                ),
+              ],
             ),
           )
         ],
