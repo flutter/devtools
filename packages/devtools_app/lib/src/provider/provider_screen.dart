@@ -8,10 +8,9 @@ import 'package:provider/provider.dart' as provider show Provider;
 
 import '../banner_messages.dart';
 import '../common_widgets.dart';
+import '../dialogs.dart';
 import '../screen.dart';
 import '../split.dart';
-import '../theme.dart';
-import '../ui/label.dart';
 import './instance_viewer/instance_details.dart';
 import './instance_viewer/instance_providers.dart';
 import './instance_viewer/instance_viewer.dart';
@@ -102,23 +101,15 @@ class ProviderScreenBody extends ConsumerWidget {
                   needsTopBorder: false,
                   title: Text(detailsTitleText),
                   actions: [
-                    _DevtoolTheme(
-                      child: ToggleButtons(
-                        isSelected: [watch(_showInternals).state],
-                        onPressed: (_) {
-                          final showInternals = context.read(_showInternals);
-                          showInternals.state = !showInternals.state;
-                        },
-                        children: const <Widget>[
-                          _ToggleImageIconLabel(
-                            icon: Icon(Icons.fingerprint),
-                            text: 'Show internals',
-                            tooltipMessage:
-                                'Show private properties inherited from SDKs/packages',
-                          )
-                        ],
-                      ),
-                    )
+                    SettingsOutlinedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => _StateInspectorSettingsDialog(),
+                        );
+                      },
+                      tooltip: 'State inspector configurations',
+                    ),
                   ],
                 ),
                 if (selectedProviderId != null)
@@ -147,57 +138,43 @@ void showProviderErrorBanner(BuildContext context) {
   );
 }
 
-class _DevtoolTheme extends StatelessWidget {
-  const _DevtoolTheme({Key key, @required this.child}) : super(key: key);
-
-  final Widget child;
-
+class _StateInspectorSettingsDialog extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ScopedReader watch) {
     final theme = Theme.of(context);
 
-    return Theme(
-      data: ThemeData(
-        tooltipTheme: const TooltipThemeData(
-          showDuration: tooltipWait,
-          preferBelow: false,
-        ),
-        toggleButtonsTheme: ToggleButtonsThemeData(
-          // TODO(kenz): ensure border radius is set correctly for single child
-          // groups once https://github.com/flutter/flutter/issues/73725 is fixed.
-          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-          color: theme.colorScheme.contrastForeground,
-          textStyle: theme.textTheme.bodyText1,
-          constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
-        ),
+    return DevToolsDialog(
+      title: dialogTitleText(theme, 'State inspector configurations'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Tooltip(
+            message: 'Show private properties inherited from SDKs/packages',
+            waitDuration: tooltipWait,
+            child: InkWell(
+              onTap: () => _toggleShowInternals(context),
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: watch(_showInternals).state,
+                    onChanged: (_) => _toggleShowInternals(context),
+                  ),
+                  const Text('Show internals'),
+                ],
+              ),
+            ),
+          )
+        ],
       ),
-      child: child,
+      actions: [
+        DialogCloseButton(),
+      ],
     );
   }
-}
 
-class _ToggleImageIconLabel extends StatelessWidget {
-  const _ToggleImageIconLabel({
-    Key key,
-    @required this.icon,
-    @required this.text,
-    @required this.tooltipMessage,
-  }) : super(key: key);
-  final Widget icon;
-  final String text;
-  final String tooltipMessage;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltipMessage,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-        child: ImageIconLabel(
-          icon,
-          text,
-        ),
-      ),
-    );
+  void _toggleShowInternals(BuildContext context) {
+    final showInternals = context.read(_showInternals);
+    showInternals.state = !showInternals.state;
   }
 }
