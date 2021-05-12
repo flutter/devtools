@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:sse/server/sse_handler.dart';
 
 import 'server_api.dart';
@@ -24,7 +25,7 @@ class ClientManager {
 
   /// Whether to immediately request notification permissions when a client connects.
   /// Otherwise permission will be requested only with the first notification.
-  final bool /*!*/ requestNotificationPermissions;
+  final bool requestNotificationPermissions;
   final List<DevToolsClient> _clients = [];
 
   List<DevToolsClient> get allClients => _clients.toList();
@@ -44,23 +45,21 @@ class ClientManager {
   /// a VM service that we can reuse (for example if a user stopped debugging
   /// and it disconnected, then started debugging again, we want to reuse
   /// the open DevTools window).
-  DevToolsClient findReusableClient() {
-    return _clients.firstWhere(
+  DevToolsClient? findReusableClient() {
+    return _clients.firstWhereOrNull(
       (c) => !c.hasConnection && !c.embedded,
-      orElse: () => null,
     );
   }
 
   /// Finds a client that may already be connected to this VM Service.
-  DevToolsClient findExistingConnectedReusableClient(Uri vmServiceUri) {
+  DevToolsClient? findExistingConnectedReusableClient(Uri vmServiceUri) {
     // Checking the whole URI will fail if DevTools converted it from HTTP to
     // WS, so just check the host, port and first segment of path (token).
-    return _clients.firstWhere(
+    return _clients.firstWhereOrNull(
       (c) =>
           c.hasConnection &&
           !c.embedded &&
-          _areSameVmServices(c.vmServiceUri, vmServiceUri),
-      orElse: () => null,
+          _areSameVmServices(c.vmServiceUri!, vmServiceUri),
     );
   }
 
@@ -100,12 +99,12 @@ class DevToolsClient {
           _respond(request);
           return;
         case 'getPreferenceValue':
-          final String /*!*/ key = request['params']['key'];
+          final String key = request['params']['key'];
           final dynamic value = ServerApi.devToolsPreferences.properties[key];
           _respondWithResult(request, value);
           return;
         case 'setPreferenceValue':
-          final String /*!*/ key = request['params']['key'];
+          final String key = request['params']['key'];
           final dynamic value = request['params']['value'];
           ServerApi.devToolsPreferences.properties[key] = value;
           _respond(request);
@@ -118,7 +117,7 @@ class DevToolsClient {
     }
   }
 
-  Future<void> connectToVmService(Uri /*!*/ uri, bool notifyUser) async {
+  Future<void> connectToVmService(Uri uri, bool notifyUser) async {
     _send({
       'method': 'connectToVm',
       'params': {
@@ -140,7 +139,7 @@ class DevToolsClient {
     });
   }
 
-  Future<void> showPage(String /*!*/ pageId) async {
+  Future<void> showPage(String pageId) async {
     _send({
       'method': 'showPage',
       'params': {'page': pageId}
@@ -154,7 +153,7 @@ class DevToolsClient {
   }
 
   void _respond(Map<String, dynamic> request) {
-    final String /*!*/ id = request['id'];
+    final String id = request['id'];
     _send({
       'id': id,
     });
@@ -171,12 +170,12 @@ class DevToolsClient {
 
   final SseConnection _connection;
 
-  Uri _vmServiceUri;
-  Uri get vmServiceUri => _vmServiceUri;
+  Uri? _vmServiceUri;
+  Uri? get vmServiceUri => _vmServiceUri;
   bool get hasConnection => _vmServiceUri != null;
 
-  String _currentPage;
-  String get currentPage => _currentPage;
+  String? _currentPage;
+  String? get currentPage => _currentPage;
 
   bool _embedded = false;
   bool get embedded => _embedded;

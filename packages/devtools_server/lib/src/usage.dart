@@ -16,7 +16,7 @@ class FlutterUsage {
     _analytics = AnalyticsIO('', settingsName, '');
   }
 
-  /*late*/ Analytics _analytics;
+  late Analytics _analytics;
 
   /// Does the .flutter store exist?
   static bool get doesStoreExist {
@@ -54,9 +54,9 @@ class DevToolsUsage {
   /// It is a requirement that the API apiSetActiveSurvey must be called before
   /// calling any survey method on DevToolsUsage (addSurvey, rewriteActiveSurvey,
   /// surveyShownCount, incrementSurveyShownCount, or surveyActionTaken).
-  String /*?*/ _activeSurvey;
+  String? _activeSurvey;
 
-  /*late*/ IOPersistentProperties properties;
+  late IOPersistentProperties properties;
 
   static const _surveyActionTaken = 'surveyActionTaken';
   static const _surveyShownCount = 'surveyShownCount';
@@ -92,22 +92,22 @@ class DevToolsUsage {
     rewriteActiveSurvey(false, 0);
   }
 
-  String /*?*/ get activeSurvey => _activeSurvey;
+  String? get activeSurvey => _activeSurvey;
 
-  set activeSurvey(String /*?*/ surveyName) {
+  set activeSurvey(String? surveyName) {
     assert(surveyName != null);
     _activeSurvey = surveyName;
 
-    if (!surveyNameExists(activeSurvey /*!*/)) {
+    if (!surveyNameExists(activeSurvey!)) {
       // Create the survey if property is non-existent in ~/.devtools
-      _addSurvey(activeSurvey /*!*/);
+      _addSurvey(activeSurvey!);
     }
   }
 
   /// Need to rewrite the entire survey structure for property to be persisted.
   void rewriteActiveSurvey(bool actionTaken, int shownCount) {
     assert(activeSurvey != null);
-    properties[activeSurvey] = {
+    properties[activeSurvey!] = {
       _surveyActionTaken: actionTaken,
       _surveyShownCount: shownCount,
     };
@@ -115,28 +115,28 @@ class DevToolsUsage {
 
   int get surveyShownCount {
     assert(activeSurvey != null);
-    final prop = properties[activeSurvey];
+    final prop = properties[activeSurvey!];
     if (prop[_surveyShownCount] == null) {
       rewriteActiveSurvey(prop[_surveyActionTaken], 0);
     }
-    return properties[activeSurvey][_surveyShownCount];
+    return properties[activeSurvey!][_surveyShownCount];
   }
 
   void incrementSurveyShownCount() {
     assert(activeSurvey != null);
     surveyShownCount; // Ensure surveyShownCount has been initialized.
-    final prop = properties[activeSurvey];
+    final prop = properties[activeSurvey!];
     rewriteActiveSurvey(prop[_surveyActionTaken], prop[_surveyShownCount] + 1);
   }
 
   bool get surveyActionTaken {
     assert(activeSurvey != null);
-    return properties[activeSurvey][_surveyActionTaken] == true;
+    return properties[activeSurvey!][_surveyActionTaken] == true;
   }
 
   set surveyActionTaken(bool value) {
     assert(activeSurvey != null);
-    final prop = properties[activeSurvey];
+    final prop = properties[activeSurvey!];
     rewriteActiveSurvey(value, prop[_surveyShownCount]);
   }
 }
@@ -161,11 +161,11 @@ const JsonEncoder _jsonEncoder = JsonEncoder.withIndent('  ');
 class IOPersistentProperties extends PersistentProperties {
   IOPersistentProperties(
     String name, {
-    String /*?*/ documentDirPath,
+    String? documentDirPath,
   }) : super(name) {
     final String fileName = name.replaceAll(' ', '_');
     documentDirPath ??= LocalFileSystem.devToolsDir();
-    _file = File(path.join(documentDirPath, fileName));
+    _file = File(path.join(documentDirPath!, fileName));
     if (!_file.existsSync()) {
       _file.createSync(recursive: true);
     }
@@ -180,15 +180,15 @@ class IOPersistentProperties extends PersistentProperties {
     syncSettings();
   }
 
-  /*late*/ File _file;
+  late File _file;
 
-  /*late*/ Map _map;
-
-  @override
-  dynamic operator [](String /*?*/ key) => _map[key];
+  late Map _map;
 
   @override
-  void operator []=(String /*?*/ key, dynamic value) {
+  dynamic operator [](String key) => _map[key];
+
+  @override
+  void operator []=(String key, dynamic value) {
     if (value == null && !_map.containsKey(key)) return;
     if (_map[key] == value) return;
 

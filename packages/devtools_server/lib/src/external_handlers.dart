@@ -27,28 +27,32 @@ import 'server_api.dart';
 /// DevTools project.
 Future<shelf.Handler> defaultHandler(
   ClientManager clients, {
-  String customDevToolsPath,
+  String? customDevToolsPath,
   bool debugMode = false,
 }) async {
-  String buildDir = customDevToolsPath;
+  String? buildDir = customDevToolsPath;
   if (buildDir == null) {
     final resourceUri = await Isolate.resolvePackageUri(
-        Uri(scheme: 'package', path: 'devtools/devtools.dart'));
+      Uri(
+        scheme: 'package',
+        path: 'devtools/devtools.dart',
+      ),
+    );
 
     final packageDir = path.dirname(path.dirname(resourceUri.toFilePath()));
     buildDir = path.join(packageDir, 'build');
   }
 
   // Default static handler for all non-package requests.
-  Handler buildDirHandler;
+  Handler? buildDirHandler;
   if (!debugMode) {
     buildDirHandler = createStaticHandler(
-      buildDir,
+      buildDir!,
       defaultDocument: 'index.html',
     );
   }
 
-  Handler debugProxyHandler;
+  Handler? debugProxyHandler;
   if (debugMode) {
     // Start up a flutter run -d web-server instance.
     const webPort = 9101;
@@ -102,9 +106,9 @@ Future<shelf.Handler> defaultHandler(
     }
 
     if (debugMode) {
-      return debugProxyHandler(request);
+      return debugProxyHandler!(request);
     } else {
-      return buildDirHandler(request);
+      return buildDirHandler!(request);
     }
   };
 

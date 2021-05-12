@@ -16,8 +16,8 @@ environment:
   sdk: '>=2.3.0 <3.0.0'
 
 dependencies:
-  devtools_server: 2.2.2
-  devtools_shared: 2.2.2
+  devtools_server: 2.2.2-nullsafety.0
+  devtools_shared: 2.2.2-nullsafety.0
   http: ^0.13.0
 
 dependency_overrides:
