@@ -117,6 +117,99 @@ void main() {
   setUpAll(() => loadFonts());
 
   group('InstanceViewer', () {
+    testWidgets(
+        'showInternalProperties: false hides private properties from dependencies',
+        (tester) async {
+      const objPath = InstancePath.fromInstanceId('obj');
+
+      InstancePath pathForProperty(String name) {
+        return objPath.pathForChild(
+          PathToProperty.objectProperty(
+            name: name,
+            ownerUri: '',
+            ownerName: '',
+          ),
+        );
+      }
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            rawInstanceProvider(objPath).overrideWithValue(
+              AsyncValue.data(
+                ObjectInstance(
+                  [
+                    ObjectField(
+                      name: 'first',
+                      isFinal: false,
+                      ownerName: '',
+                      ownerUri: '',
+                      eval: FakeEvalOnDartLibrary(),
+                      ref: Result.error(Error()),
+                      isDefinedByDependency: true,
+                    ),
+                    ObjectField(
+                      name: '_second',
+                      isFinal: false,
+                      ownerName: '',
+                      ownerUri: '',
+                      eval: FakeEvalOnDartLibrary(),
+                      ref: Result.error(Error()),
+                      isDefinedByDependency: true,
+                    ),
+                    ObjectField(
+                      name: 'third',
+                      isFinal: false,
+                      ownerName: '',
+                      ownerUri: '',
+                      eval: FakeEvalOnDartLibrary(),
+                      ref: Result.error(Error()),
+                      isDefinedByDependency: false,
+                    ),
+                    ObjectField(
+                      name: '_forth',
+                      isFinal: false,
+                      ownerName: '',
+                      ownerUri: '',
+                      eval: FakeEvalOnDartLibrary(),
+                      ref: Result.error(Error()),
+                      isDefinedByDependency: false,
+                    ),
+                  ],
+                  hash: 0,
+                  instanceRefId: 'object',
+                  setter: null,
+                  evalForInstance: FakeEvalOnDartLibrary(),
+                  type: 'MyClass',
+                ),
+              ),
+            ),
+            rawInstanceProvider(pathForProperty('first'))
+                .overrideWithValue(int42Instance),
+            rawInstanceProvider(pathForProperty('_second'))
+                .overrideWithValue(int42Instance),
+            rawInstanceProvider(pathForProperty('third'))
+                .overrideWithValue(int42Instance),
+            rawInstanceProvider(pathForProperty('_forth'))
+                .overrideWithValue(int42Instance),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: InstanceViewer(
+                showInternalProperties: false,
+                rootPath: objPath,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('show_internal_properties.png'),
+      );
+    });
+
     testWidgets('field editing flow', (tester) async {
       const objPath = InstancePath.fromInstanceId('obj');
       final propertyPath = objPath.pathForChild(
@@ -164,7 +257,10 @@ void main() {
           ],
           child: const MaterialApp(
             home: Scaffold(
-              body: InstanceViewer(rootPath: objPath),
+              body: InstanceViewer(
+                showInternalProperties: true,
+                rootPath: objPath,
+              ),
             ),
           ),
         ),
@@ -202,7 +298,10 @@ void main() {
           ],
           child: const MaterialApp(
             home: Scaffold(
-              body: InstanceViewer(rootPath: InstancePath.fromInstanceId('0')),
+              body: InstanceViewer(
+                showInternalProperties: true,
+                rootPath: InstancePath.fromInstanceId('0'),
+              ),
             ),
           ),
         ),
@@ -230,7 +329,10 @@ void main() {
           container: container,
           child: const MaterialApp(
             home: Scaffold(
-              body: InstanceViewer(rootPath: InstancePath.fromInstanceId('0')),
+              body: InstanceViewer(
+                showInternalProperties: true,
+                rootPath: InstancePath.fromInstanceId('0'),
+              ),
             ),
           ),
         ),
@@ -280,7 +382,9 @@ void main() {
           container: container,
           child: const MaterialApp(
             home: Scaffold(
-              body: InstanceViewer(rootPath: InstancePath.fromInstanceId('0')),
+              body: InstanceViewer(
+                  showInternalProperties: true,
+                  rootPath: InstancePath.fromInstanceId('0')),
             ),
           ),
         ),
@@ -327,7 +431,10 @@ void main() {
           container: container,
           child: const MaterialApp(
             home: Scaffold(
-              body: InstanceViewer(rootPath: InstancePath.fromInstanceId('0')),
+              body: InstanceViewer(
+                showInternalProperties: true,
+                rootPath: InstancePath.fromInstanceId('0'),
+              ),
             ),
           ),
         ),
@@ -373,6 +480,7 @@ void main() {
           child: const MaterialApp(
             home: Scaffold(
               body: InstanceViewer(
+                showInternalProperties: true,
                 rootPath: InstancePath.fromInstanceId('enum'),
               ),
             ),
@@ -401,6 +509,7 @@ void main() {
           child: const MaterialApp(
             home: Scaffold(
               body: InstanceViewer(
+                showInternalProperties: true,
                 rootPath: InstancePath.fromInstanceId('null'),
               ),
             ),
@@ -429,6 +538,7 @@ void main() {
           child: const MaterialApp(
             home: Scaffold(
               body: InstanceViewer(
+                showInternalProperties: true,
                 rootPath: InstancePath.fromInstanceId('bool'),
               ),
             ),
@@ -457,6 +567,7 @@ void main() {
           child: const MaterialApp(
             home: Scaffold(
               body: InstanceViewer(
+                showInternalProperties: true,
                 rootPath: InstancePath.fromInstanceId('string'),
               ),
             ),
@@ -485,6 +596,7 @@ void main() {
           child: const MaterialApp(
             home: Scaffold(
               body: InstanceViewer(
+                showInternalProperties: true,
                 rootPath: InstancePath.fromInstanceId('num'),
               ),
             ),
@@ -536,6 +648,7 @@ void main() {
           child: const MaterialApp(
             home: Scaffold(
               body: InstanceViewer(
+                showInternalProperties: true,
                 rootPath: InstancePath.fromInstanceId('map'),
               ),
             ),
@@ -621,6 +734,7 @@ void main() {
           child: const MaterialApp(
             home: Scaffold(
               body: InstanceViewer(
+                showInternalProperties: true,
                 rootPath: InstancePath.fromInstanceId('object'),
               ),
             ),
@@ -696,6 +810,7 @@ void main() {
           child: const MaterialApp(
             home: Scaffold(
               body: InstanceViewer(
+                showInternalProperties: true,
                 rootPath: InstancePath.fromInstanceId('list'),
               ),
             ),
@@ -739,6 +854,7 @@ void main() {
           child: const MaterialApp(
             home: Scaffold(
               body: InstanceViewer(
+                showInternalProperties: true,
                 rootPath: InstancePath.fromInstanceId('list2'),
               ),
             ),

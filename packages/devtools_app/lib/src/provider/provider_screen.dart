@@ -10,6 +10,8 @@ import '../banner_messages.dart';
 import '../common_widgets.dart';
 import '../screen.dart';
 import '../split.dart';
+import '../theme.dart';
+import '../ui/label.dart';
 import './instance_viewer/instance_details.dart';
 import './instance_viewer/instance_providers.dart';
 import './instance_viewer/instance_viewer.dart';
@@ -38,6 +40,8 @@ final _selectedProviderNode = AutoDisposeProvider<ProviderNode>((ref) {
         orElse: () => null,
       );
 });
+
+final _showInternals = StateProvider<bool>((ref) => false);
 
 class ProviderScreen extends Screen {
   const ProviderScreen()
@@ -79,7 +83,10 @@ class ProviderScreenBody extends ConsumerWidget {
           OutlineDecoration(
             child: Column(
               children: const [
-                AreaPaneHeader(title: Text('Providers')),
+                AreaPaneHeader(
+                  needsTopBorder: false,
+                  title: Text('Providers'),
+                ),
                 Expanded(
                   child: ProviderList(),
                 ),
@@ -91,11 +98,32 @@ class ProviderScreenBody extends ConsumerWidget {
               children: [
                 if (selectedProviderId != null) ...[
                   AreaPaneHeader(
+                    needsTopBorder: false,
                     title: Text(watch(_selectedProviderNode)?.type ?? ''),
+                    actions: [
+                      _DevtoolTheme(
+                        child: ToggleButtons(
+                          isSelected: [watch(_showInternals).state],
+                          onPressed: (_) {
+                            final showInternals = context.read(_showInternals);
+                            showInternals.state = !showInternals.state;
+                          },
+                          children: const <Widget>[
+                            _ToggleImageIconLabel(
+                              icon: Icon(Icons.fingerprint),
+                              text: 'Show internals',
+                              tooltipMessage:
+                                  'Show private properties inherited from SDKs/packages',
+                            )
+                          ],
+                        ),
+                      )
+                    ],
                   ),
                   Expanded(
                     child: InstanceViewer(
                       rootPath: InstancePath.fromProviderId(selectedProviderId),
+                      showInternalProperties: watch(_showInternals).state,
                     ),
                   )
                 ] else
@@ -117,4 +145,59 @@ void showProviderErrorBanner(BuildContext context) {
     const ProviderUnknownErrorBanner(screenId: ProviderScreen.id)
         .build(context),
   );
+}
+
+class _DevtoolTheme extends StatelessWidget {
+  const _DevtoolTheme({Key key, @required this.child}) : super(key: key);
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Theme(
+      data: ThemeData(
+        tooltipTheme: const TooltipThemeData(
+          showDuration: tooltipWait,
+          preferBelow: false,
+        ),
+        toggleButtonsTheme: ToggleButtonsThemeData(
+          // TODO(kenz): ensure border radius is set correctly for single child
+          // groups once https://github.com/flutter/flutter/issues/73725 is fixed.
+          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+          color: theme.colorScheme.contrastForeground,
+          textStyle: theme.textTheme.bodyText1,
+          constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _ToggleImageIconLabel extends StatelessWidget {
+  const _ToggleImageIconLabel({
+    Key key,
+    @required this.icon,
+    @required this.text,
+    @required this.tooltipMessage,
+  }) : super(key: key);
+  final Widget icon;
+  final String text;
+  final String tooltipMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltipMessage,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+        child: ImageIconLabel(
+          icon,
+          text,
+        ),
+      ),
+    );
+  }
 }
