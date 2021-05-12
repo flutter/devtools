@@ -108,7 +108,7 @@ class ProviderScreenBody extends ConsumerWidget {
                           builder: (_) => _StateInspectorSettingsDialog(),
                         );
                       },
-                      tooltip: 'State inspector configurations',
+                      tooltip: _StateInspectorSettingsDialog.title,
                     ),
                   ],
                 ),
@@ -139,30 +139,30 @@ void showProviderErrorBanner(BuildContext context) {
 }
 
 class _StateInspectorSettingsDialog extends ConsumerWidget {
+  static const title = 'State inspector configurations';
+
   @override
   Widget build(BuildContext context, ScopedReader watch) {
     final theme = Theme.of(context);
 
     return DevToolsDialog(
-      title: dialogTitleText(theme, 'State inspector configurations'),
+      title: dialogTitleText(theme, title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Tooltip(
-            message: 'Show private properties inherited from SDKs/packages',
-            waitDuration: tooltipWait,
-            child: InkWell(
-              onTap: () => _toggleShowInternals(context),
-              child: Row(
-                children: [
-                  Checkbox(
-                    value: watch(_showInternals).state,
-                    onChanged: (_) => _toggleShowInternals(context),
-                  ),
-                  const Text('Show internals'),
-                ],
-              ),
+          InkWell(
+            onTap: () => _toggleShowInternals(context),
+            child: Row(
+              children: [
+                Checkbox(
+                  value: watch(_showInternals).state,
+                  onChanged: (_) => _toggleShowInternals(context),
+                ),
+                const Text(
+                  'Show private properties inherited from SDKs/packages',
+                ),
+              ],
             ),
           )
         ],
