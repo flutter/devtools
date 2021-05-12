@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // TODO(terry): Disable package.
 //import 'package:freezed_annotation/freezed_annotation.dart';
@@ -30,8 +31,8 @@ Future<InstanceRef> _resolveInstanceRefForPath(
     // root of the provider tree
 
     return path.map(
-      fromProviderId: (path) {
-        final eval = ref.watch(providerEvalProvider);
+      fromProviderId: (path) async {
+        final eval = await ref.watch(providerEvalProvider.future);
         // cause the instances to be re-evaluated when the devtool is notified
         // that a provider changed
         ref.watch(_providerChanged(path.providerId));
@@ -41,10 +42,10 @@ Future<InstanceRef> _resolveInstanceRefForPath(
           isAlive: isAlive,
         );
       },
-      fromInstanceId: (path) {
+      fromInstanceId: (path) async {
         if (path.instanceId == null) return null;
 
-        final eval = ref.watch(evalProvider);
+        final eval = await ref.watch(evalProvider.future);
         return eval.safeEval(
           'value',
           isAlive: isAlive,
@@ -54,7 +55,7 @@ Future<InstanceRef> _resolveInstanceRefForPath(
     );
   }
 
-  final eval = ref.watch(evalProvider);
+  final eval = await ref.watch(evalProvider.future);
 
   return parent.maybeMap(
     // TODO: support sets
@@ -117,9 +118,10 @@ Future<void> _mutate(
   @required InstanceDetails parent,
 }) async {
   await parent.maybeMap(
-    list: (parent) {
-      final eval = ref.watch(evalProvider);
+    list: (parent) async {
+      final eval = await ref.watch(evalProvider.future);
       final indexPath = path.pathToProperty.last as ListIndexPath;
+
       return eval.safeEval(
         'parent[${indexPath.index}] = $newValueExpression',
         isAlive: isAlive,
@@ -128,8 +130,8 @@ Future<void> _mutate(
         },
       );
     },
-    map: (parent) {
-      final eval = ref.watch(evalProvider);
+    map: (parent) async {
+      final eval = await ref.watch(evalProvider.future);
       final keyPath = path.pathToProperty.last as MapKeyPath;
       final keyRefVar = keyPath.ref == null ? 'null' : 'key';
 
@@ -268,7 +270,9 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
     rawInstanceProvider =
     AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>(
         (ref, path) async {
-  final eval = ref.watch(evalProvider);
+  ref.watch(hotRestartEventProvider);
+
+  final eval = await ref.watch(evalProvider.future);
 
   final isAlive = Disposable();
   ref.onDispose(isAlive.dispose);
@@ -360,7 +364,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
 
       final classInstance = await eval.getClass(instance.classRef, isAlive);
       final evalForInstance =
-          ref.watch(libraryEvalProvider(classInstance.library.uri));
+          ref.watch(libraryEvalProvider(classInstance.library.uri).future);
 
       final appName = tryParsePackageName(eval.isolate.rootLib.uri);
 
@@ -378,7 +382,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
         hash: await eval.getHashCode(instance, isAlive: isAlive),
         type: instance.classRef.name,
         instanceRefId: instanceRef.id,
-        evalForInstance: evalForInstance,
+        evalForInstance: await evalForInstance,
         setter: setter,
       );
   }
@@ -431,7 +435,7 @@ Future<List<ObjectField>> _parseFields(
       ref: parseSentinel<InstanceRef>(field.value),
       ownerName: ownerName,
       ownerUri: ownerUri,
-      eval: ref.watch(libraryEvalProvider(ownerUri)),
+      eval: await ref.watch(libraryEvalProvider(owner.library.uri).future),
       isDefinedByDependency: ownerPackageName != appName,
     );
   }).toList();
@@ -440,8 +444,10 @@ Future<List<ObjectField>> _parseFields(
 }
 
 final _providerChanged =
-    AutoDisposeStreamProviderFamily<void, String>((ref, id) {
-  return serviceManager.service.onExtensionEvent.where((event) {
+    AutoDisposeStreamProviderFamily<void, String>((ref, id) async* {
+  final service = await ref.watch(serviceProvider.last);
+
+  yield* service.onExtensionEvent.where((event) {
     return event.extensionKind == 'provider:provider_changed' &&
         event.extensionData.data['id'] == id;
   });
