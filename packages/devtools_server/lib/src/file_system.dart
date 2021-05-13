@@ -13,7 +13,7 @@ class LocalFileSystem {
   static String _userHomeDir() {
     final String envKey =
         Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-    return Platform.environment[envKey];
+    return Platform.environment[envKey] ?? '.';
   }
 
   /// Returns the path to the DevTools storage directory.

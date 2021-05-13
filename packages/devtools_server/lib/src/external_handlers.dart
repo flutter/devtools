@@ -39,7 +39,7 @@ Future<shelf.Handler> defaultHandler(
       ),
     );
 
-    final packageDir = path.dirname(path.dirname(resourceUri.toFilePath()));
+    final packageDir = path.dirname(path.dirname(resourceUri!.toFilePath()));
     buildDir = path.join(packageDir, 'build');
   }
 
@@ -47,7 +47,7 @@ Future<shelf.Handler> defaultHandler(
   Handler? buildDirHandler;
   if (!debugMode) {
     buildDirHandler = createStaticHandler(
-      buildDir!,
+      buildDir,
       defaultDocument: 'index.html',
     );
   }

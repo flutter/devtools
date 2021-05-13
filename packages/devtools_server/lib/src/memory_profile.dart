@@ -64,7 +64,6 @@ class MemoryProfile {
           .add(e.method!);
     }
 
-
     if (e.kind == EventKind.kServiceUnregistered) {
       final serviceName = e.service!;
       _registeredMethodsForService.remove(serviceName);
@@ -73,7 +72,7 @@ class MemoryProfile {
 
   late IsolateRef _selectedIsolate;
 
-  Future<Response? > getAdbMemoryInfo() async {
+  Future<Response?> getAdbMemoryInfo() async {
     return await callService(
       registrations.flutterMemory.service,
       isolateId: _selectedIsolate.id,
@@ -81,7 +80,7 @@ class MemoryProfile {
   }
 
   /// Call a service that is registered by exactly one client.
-  Future<Response? > callService(
+  Future<Response?> callService(
     String name, {
     String? isolateId,
     Map<String, dynamic>? args,
@@ -99,8 +98,7 @@ class MemoryProfile {
 
   Map<String, List<String>?> get registeredMethodsForService =>
       _registeredMethodsForService;
-  final _registeredMethodsForService =
-  <String, List<String>?>{};
+  final _registeredMethodsForService = <String, List<String>?>{};
 
   static const Duration updateDelay = Duration(milliseconds: 500);
 
@@ -111,8 +109,7 @@ class MemoryProfile {
   /// Polled VM current RSS.
   late int processRss;
 
-  final Map<String, List<HeapSpace >> isolateHeaps =
-      <String, List<HeapSpace>>{};
+  final Map<String, List<HeapSpace>> isolateHeaps = <String, List<HeapSpace>>{};
 
   final List<HeapSample> samples = <HeapSample>[];
 
@@ -166,7 +163,7 @@ class MemoryProfile {
         // TODO(terry): Seem to sometimes get a sentinel not sure how? VM issue?
         // Unhandled Exception: type 'Sentinel' is not a subtype of type 'FutureOr<Isolate>'
         print('Error [MEMORY_PROTOCOL]: $e');
-        return Future<Isolate?>.value(null);
+        return Future<Isolate?>.value();
       }
     }));
 
@@ -202,7 +199,7 @@ class MemoryProfile {
   }
 
   /// Poll ADB meminfo
-  Future<AdbMemoryInfo? > _fetchAdbInfo() async {
+  Future<AdbMemoryInfo?> _fetchAdbInfo() async {
     final adbMemInfo = await getAdbMemoryInfo();
     if (adbMemInfo?.json != null) {
       return AdbMemoryInfo.fromJsonInKB(adbMemInfo!.json!);
@@ -212,8 +209,7 @@ class MemoryProfile {
 
   /// Poll Fultter engine's Raster Cache metrics.
   /// @returns engine's rasterCache estimates or null.
-  Future<RasterCache? > _fetchRasterCacheInfo(
-      IsolateRef selectedIsolate) async {
+  Future<RasterCache?> _fetchRasterCacheInfo(IsolateRef selectedIsolate) async {
     final response = await getRasterCacheMetrics(selectedIsolate);
     return RasterCache.parse(response?.json);
   }
@@ -251,8 +247,7 @@ class MemoryProfile {
   /// Call to returns JSON payload 'EstimateRasterCacheMemory' with two entries:
   ///   layerBytes - layer raster cache entries in bytes
   ///   pictureBytes - picture raster cache entries in bytes
-  Future<Response? > getRasterCacheMetrics(
-      IsolateRef selectedIsolate) async {
+  Future<Response?> getRasterCacheMetrics(IsolateRef selectedIsolate) async {
     final viewId = await getFlutterViewId(selectedIsolate);
 
     return await callService(

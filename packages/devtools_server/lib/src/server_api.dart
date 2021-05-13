@@ -31,12 +31,11 @@ class ServerApi {
     ServerApi? api,
   ]) {
     api ??= ServerApi();
-    final _api = api!;
     switch (request.url.path) {
       // ----- Flutter Tool GA store. -----
       case apiGetFlutterGAEnabled:
         // Is Analytics collection enabled?
-        return _api.getCompleted(
+        return api.getCompleted(
           request,
           json.encode(FlutterUsage.doesStoreExist ? _usage!.enabled : ''),
         );
@@ -44,11 +43,11 @@ class ServerApi {
         // Flutter Tool GA clientId - ONLY get Flutter's clientId if enabled is
         // true.
         return (FlutterUsage.doesStoreExist)
-            ? _api.getCompleted(
+            ? api.getCompleted(
                 request,
                 json.encode(_usage!.enabled ? _usage!.clientId : ''),
               )
-            : _api.getCompleted(
+            : api.getCompleted(
                 request,
                 json.encode(''),
               );
@@ -57,24 +56,24 @@ class ServerApi {
 
       case apiResetDevTools:
         _devToolsUsage.reset();
-        return _api.getCompleted(request, json.encode(true));
+        return api.getCompleted(request, json.encode(true));
       case apiGetDevToolsFirstRun:
         // Has DevTools been run first time? To bring up welcome screen.
-        return _api.getCompleted(
+        return api.getCompleted(
           request,
           json.encode(_devToolsUsage.isFirstRun),
         );
       case apiGetDevToolsEnabled:
         // Is DevTools Analytics collection enabled?
-        return _api.getCompleted(request, json.encode(_devToolsUsage.enabled));
+        return api.getCompleted(request, json.encode(_devToolsUsage.enabled));
       case apiSetDevToolsEnabled:
         // Enable or disable DevTools analytics collection.
         final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(devToolsEnabledPropertyName)) {
           _devToolsUsage.enabled =
-              json.decode(queryParams[devToolsEnabledPropertyName]);
+              json.decode(queryParams[devToolsEnabledPropertyName]!);
         }
-        return _api.setCompleted(request, json.encode(_devToolsUsage.enabled));
+        return api.setCompleted(request, json.encode(_devToolsUsage.enabled));
 
       // ----- DevTools survey store. -----
 
@@ -88,22 +87,22 @@ class ServerApi {
         final queryParams = request.requestedUri.queryParameters;
         if (queryParams.keys.length == 1 &&
             queryParams.containsKey(activeSurveyName)) {
-          final String theSurveyName = queryParams[activeSurveyName];
+          final String theSurveyName = queryParams[activeSurveyName]!;
 
           // Set the current activeSurvey.
           _devToolsUsage.activeSurvey = theSurveyName;
           result = true;
         }
 
-        return _api.getCompleted(request, json.encode(result));
+        return api.getCompleted(request, json.encode(result));
       case apiGetSurveyActionTaken:
         // Request setActiveSurvey has not been requested.
         if (_devToolsUsage.activeSurvey == null) {
-          return _api.badRequest('$errorNoActiveSurvey '
+          return api.badRequest('$errorNoActiveSurvey '
               '- $apiGetSurveyActionTaken');
         }
         // SurveyActionTaken has the survey been acted upon (taken or dismissed)
-        return _api.getCompleted(
+        return api.getCompleted(
           request,
           json.encode(_devToolsUsage.surveyActionTaken),
         );
@@ -113,7 +112,7 @@ class ServerApi {
       case apiSetSurveyActionTaken:
         // Request setActiveSurvey has not been requested.
         if (_devToolsUsage.activeSurvey == null) {
-          return _api.badRequest('$errorNoActiveSurvey '
+          return api.badRequest('$errorNoActiveSurvey '
               '- $apiSetSurveyActionTaken');
         }
         // Set the SurveyActionTaken.
@@ -121,63 +120,63 @@ class ServerApi {
         final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(surveyActionTakenPropertyName)) {
           _devToolsUsage.surveyActionTaken =
-              json.decode(queryParams[surveyActionTakenPropertyName]);
+              json.decode(queryParams[surveyActionTakenPropertyName]!);
         }
-        return _api.setCompleted(
+        return api.setCompleted(
           request,
           json.encode(_devToolsUsage.surveyActionTaken),
         );
       case apiGetSurveyShownCount:
         // Request setActiveSurvey has not been requested.
         if (_devToolsUsage.activeSurvey == null) {
-          return _api.badRequest('$errorNoActiveSurvey '
+          return api.badRequest('$errorNoActiveSurvey '
               '- $apiGetSurveyShownCount');
         }
         // SurveyShownCount how many times have we asked to take survey.
-        return _api.getCompleted(
+        return api.getCompleted(
           request,
           json.encode(_devToolsUsage.surveyShownCount),
         );
       case apiIncrementSurveyShownCount:
         // Request setActiveSurvey has not been requested.
         if (_devToolsUsage.activeSurvey == null) {
-          return _api.badRequest('$errorNoActiveSurvey '
+          return api.badRequest('$errorNoActiveSurvey '
               '- $apiIncrementSurveyShownCount');
         }
         // Increment the SurveyShownCount, we've asked about the survey.
         _devToolsUsage.incrementSurveyShownCount();
-        return _api.getCompleted(
+        return api.getCompleted(
           request,
           json.encode(_devToolsUsage.surveyShownCount),
         );
       case apiGetBaseAppSizeFile:
         final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(baseAppSizeFilePropertyName)) {
-          final filePath = queryParams[baseAppSizeFilePropertyName];
+          final filePath = queryParams[baseAppSizeFilePropertyName]!;
           final fileJson = LocalFileSystem.devToolsFileAsJson(filePath);
           if (fileJson == null) {
-            return _api.badRequest('No JSON file available at $filePath.');
+            return api.badRequest('No JSON file available at $filePath.');
           }
-          return _api.getCompleted(request, fileJson);
+          return api.getCompleted(request, fileJson);
         }
-        return _api.badRequest('Request for base app size file does not '
+        return api.badRequest('Request for base app size file does not '
             'contain a query parameter with the expected key: '
             '$baseAppSizeFilePropertyName');
       case apiGetTestAppSizeFile:
         final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(testAppSizeFilePropertyName)) {
-          final filePath = queryParams[testAppSizeFilePropertyName];
+          final filePath = queryParams[testAppSizeFilePropertyName]!;
           final fileJson = LocalFileSystem.devToolsFileAsJson(filePath);
           if (fileJson == null) {
-            return _api.badRequest('No JSON file available at $filePath.');
+            return api.badRequest('No JSON file available at $filePath.');
           }
-          return _api.getCompleted(request, fileJson);
+          return api.getCompleted(request, fileJson);
         }
-        return _api.badRequest('Request for test app size file does not '
+        return api.badRequest('Request for test app size file does not '
             'contain a query parameter with the expected key: '
             '$testAppSizeFilePropertyName');
       default:
-        return _api.notImplemented(request);
+        return api.notImplemented(request);
     }
   }
 

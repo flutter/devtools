@@ -85,24 +85,14 @@ Future<HttpServer?> _serveDevToolsWithArgs(
   final bool enableNotifications = args[argEnableNotifications];
   final bool allowEmbedding = args[argAllowEmbedding];
 
-  late int port;
-  try {
-    port = args[argPort] != null ? int.tryParse(args[argPort]) : 0;
-  } catch (_) {
-    port = 0;
-  }
+  final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
 
   final bool headlessMode = args[argHeadlessMode];
   final bool debugMode = args[argDebugMode];
 
-  late int numPortsToTry;
-  try {
-    numPortsToTry = args[argTryPorts] != null
-        ? int.tryParse(args[argTryPorts])
-        : defaultTryPorts;
-  } catch (_) {
-    numPortsToTry = defaultTryPorts;
-  }
+  final numPortsToTry = args[argTryPorts] != null
+      ? int.tryParse(args[argTryPorts]) ?? 0
+      : defaultTryPorts;
 
   final bool verboseMode = args[argVerbose];
   final String? hostname = args[argHost];
@@ -231,17 +221,16 @@ Future<HttpServer?> serveDevTools({
   }
 
   final _server = server!;
-    if (allowEmbedding) {
-      _server.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
-    }
+  if (allowEmbedding) {
+    _server.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
+  }
 
-    // Ensure browsers don't cache older versions of the app.
+  // Ensure browsers don't cache older versions of the app.
   _server.defaultResponseHeaders
-        .add(HttpHeaders.cacheControlHeader, 'max-age=900');
-    shelf.serveRequests(_server, handler);
+      .add(HttpHeaders.cacheControlHeader, 'max-age=900');
+  shelf.serveRequests(_server, handler);
 
-    final devToolsUrl = 'http://${_server.address.host}:${_server.port}';
-
+  final devToolsUrl = 'http://${_server.address.host}:${_server.port}';
 
   if (launchBrowser) {
     if (serviceProtocolUri != null) {
@@ -276,8 +265,8 @@ Future<HttpServer?> serveDevTools({
       await Chrome.start([url]);
     } catch (e) {
       print('Unable to launch Chrome: $e\n');
-    }}
-
+    }
+  }
 
   if (enableStdinCommands) {
     String message = 'Serving DevTools at $devToolsUrl.\n'
@@ -700,7 +689,7 @@ Future<void> _handleVmRegister(
 
   if (_isValidVmServiceUri(uri)) {
     await registerLaunchDevToolsService(
-      uri,
+      uri!,
       id,
       devToolsUrl,
       machineMode,
@@ -738,7 +727,7 @@ Future<void> _handleDevToolsLaunch(
   }
 
   // params['vmServiceUri'] should contain a vm service uri.
-  final vmServiceUri = Uri.tryParse(params['vmServiceUri']);
+  final vmServiceUri = Uri.tryParse(params['vmServiceUri'])!;
 
   if (_isValidVmServiceUri(vmServiceUri)) {
     try {
@@ -1055,11 +1044,11 @@ Future<VmService?> _connectToVmService(Uri theUri) async {
 }
 
 Future<String> _getVersion() async {
-  final Uri resourceUri = await Isolate.resolvePackageUri(
+  final Uri? resourceUri = await Isolate.resolvePackageUri(
     Uri(scheme: 'package', path: 'devtools/devtools.dart'),
   );
   final String packageDir =
-      path.dirname(path.dirname(resourceUri.toFilePath()));
+      path.dirname(path.dirname(resourceUri!.toFilePath()));
   final File pubspecFile = File(path.join(packageDir, 'pubspec.yaml'));
   final String? versionLine =
       pubspecFile.readAsLinesSync().firstWhereOrNull((String line) {

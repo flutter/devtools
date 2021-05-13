@@ -165,7 +165,7 @@ class IOPersistentProperties extends PersistentProperties {
   }) : super(name) {
     final String fileName = name.replaceAll(' ', '_');
     documentDirPath ??= LocalFileSystem.devToolsDir();
-    _file = File(path.join(documentDirPath!, fileName));
+    _file = File(path.join(documentDirPath, fileName));
     if (!_file.existsSync()) {
       _file.createSync(recursive: true);
     }
