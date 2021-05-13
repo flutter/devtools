@@ -1,3 +1,6 @@
+## 2.2.3
+* Enable the provider screen [#2998](https://github.com/flutter/devtools/pull/2998) [#3010](https://github.com/flutter/devtools/pull/3010) [#3006](https://github.com/flutter/devtools/pull/23006) [#2992](https://github.com/flutter/devtools/pull/2992)
+* Support filtering CPU profiles by UserTags [#2988](https://github.com/flutter/devtools/pull/2988)
 ## 2.2.2
 * Throw RPCError when invoking `getSourceReport` in profile mode [#2986](https://github.com/flutter/devtools/pull/2986)
 
