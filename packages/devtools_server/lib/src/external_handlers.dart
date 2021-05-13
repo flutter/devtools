@@ -30,18 +30,7 @@ Future<shelf.Handler> defaultHandler(
   String? customDevToolsPath,
   bool debugMode = false,
 }) async {
-  String? buildDir = customDevToolsPath;
-  if (buildDir == null) {
-    final resourceUri = await Isolate.resolvePackageUri(
-      Uri(
-        scheme: 'package',
-        path: 'devtools/devtools.dart',
-      ),
-    );
-
-    final packageDir = path.dirname(path.dirname(resourceUri!.toFilePath()));
-    buildDir = path.join(packageDir, 'build');
-  }
+  final buildDir = customDevToolsPath ?? await _resolveBuildDir();
 
   // Default static handler for all non-package requests.
   Handler? buildDirHandler;
@@ -113,4 +102,16 @@ Future<shelf.Handler> defaultHandler(
   };
 
   return handler;
+}
+
+Future<String> _resolveBuildDir() async {
+  final resourceUri = await Isolate.resolvePackageUri(
+    Uri(
+      scheme: 'package',
+      path: 'devtools/devtools.dart',
+    ),
+  );
+
+  final packageDir = path.dirname(path.dirname(resourceUri!.toFilePath()));
+  return path.join(packageDir, 'build');
 }

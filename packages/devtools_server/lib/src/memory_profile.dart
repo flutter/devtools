@@ -60,7 +60,7 @@ class MemoryProfile {
     if (e.kind == EventKind.kServiceRegistered) {
       final serviceName = e.service!;
       _registeredMethodsForService
-          .putIfAbsent(serviceName, () => [])!
+          .putIfAbsent(serviceName, () => [])
           .add(e.method!);
     }
 
@@ -96,9 +96,9 @@ class MemoryProfile {
     );
   }
 
-  Map<String, List<String>?> get registeredMethodsForService =>
+  Map<String, List<String>> get registeredMethodsForService =>
       _registeredMethodsForService;
-  final _registeredMethodsForService = <String, List<String>?>{};
+  final _registeredMethodsForService = <String, List<String>>{};
 
   static const Duration updateDelay = Duration(milliseconds: 500);
 
