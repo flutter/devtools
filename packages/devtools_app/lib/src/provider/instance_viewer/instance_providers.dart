@@ -415,16 +415,28 @@ Future<List<ObjectField>> _parseFields(
   final fields = instance.fields.map((field) async {
     final owner = await eval.getClass(field.decl.owner, isAlive);
 
-    final ownerPackageName = tryParsePackageName(owner.library.uri);
+    String ownerUri;
+    String ownerName;
+    if (owner.mixin == null) {
+      ownerUri = owner.library.uri;
+      ownerName = owner.name;
+    } else {
+      final mixinClass = await eval.getClass(owner.mixin.typeClass, isAlive);
+
+      ownerUri = mixinClass.library.uri;
+      ownerName = mixinClass.name;
+    }
+
+    final ownerPackageName = tryParsePackageName(ownerUri);
 
     return ObjectField(
       name: field.decl.name,
       isFinal: field.decl.isFinal,
       ref: parseSentinel<InstanceRef>(field.value),
-      ownerName: owner.name,
-      ownerUri: owner.library.uri,
+      ownerName: ownerName,
+      ownerUri: ownerUri,
       eval: await ref.watch(libraryEvalProvider(owner.library.uri).future),
-      isDefinedByDependency: ownerPackageName == appName,
+      isDefinedByDependency: ownerPackageName != appName,
     );
   }).toList();
 

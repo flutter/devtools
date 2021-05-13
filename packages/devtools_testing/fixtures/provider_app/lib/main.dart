@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
+import 'mixin.dart';
 // ignore: unused_import, allows the tests to use functions from tester.dart
 import 'tester.dart';
 
@@ -80,7 +81,7 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class Counter extends ChangeNotifier {
+class Counter with ChangeNotifier, Mixin {
   int _count = 0;
   int get count => _count;
 

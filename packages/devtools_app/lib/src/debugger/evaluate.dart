@@ -2,16 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../auto_dispose_mixin.dart';
 import '../notifications.dart';
+import '../theme.dart';
+import '../ui/search.dart';
 import 'debugger_controller.dart';
-
-// TODO(devoncarew): We'll want some kind of code completion w/ eval.
-// TODO(devoncarew): We should insert eval result objects into the console as
-// expandable objects.
 
 class ExpressionEvalField extends StatefulWidget {
   const ExpressionEvalField({
@@ -24,17 +25,68 @@ class ExpressionEvalField extends StatefulWidget {
   _ExpressionEvalFieldState createState() => _ExpressionEvalFieldState();
 }
 
-class _ExpressionEvalFieldState extends State<ExpressionEvalField> {
-  TextEditingController textController;
-  FocusNode textFocus;
+class _ExpressionEvalFieldState extends State<ExpressionEvalField>
+    with SearchFieldMixin, AutoDisposeMixin {
+  AutoCompleteController _autoCompleteController;
   int historyPosition = -1;
+
+  final evalTextFieldKey = GlobalKey(debugLabel: 'evalTextFieldKey');
 
   @override
   void initState() {
     super.initState();
 
-    textController = TextEditingController();
-    textFocus = FocusNode();
+    _autoCompleteController = AutoCompleteController();
+
+    addAutoDisposeListener(_autoCompleteController.searchNotifier, () {
+      _autoCompleteController.handleAutoCompleteOverlay(
+        context: context,
+        searchFieldKey: evalTextFieldKey,
+        onTap: _onSelection,
+        bottom: false,
+        maxWidth: false,
+      );
+    });
+    addAutoDisposeListener(
+        _autoCompleteController.selectTheSearchNotifier, _handleSearch);
+    addAutoDisposeListener(
+        _autoCompleteController.searchNotifier, _handleSearch);
+  }
+
+  void _handleSearch() async {
+    final searchingValue = _autoCompleteController.search;
+    final isField = searchingValue.endsWith('.');
+
+    if (searchingValue.isNotEmpty) {
+      if (_autoCompleteController.selectTheSearch) {
+        _autoCompleteController.resetSearch();
+        return;
+      }
+
+      // No exact match, return the list of possible matches.
+      _autoCompleteController.clearSearchAutoComplete();
+
+      // Find word in TextField to try and match (word breaks).
+      final textFieldEditingValue = searchTextFieldController.value;
+      final selection = textFieldEditingValue.selection;
+
+      final parts = AutoCompleteSearchControllerMixin.activeEdtingParts(
+        searchingValue,
+        selection,
+        handleFields: isField,
+      );
+
+      // Only show pop-up if there's a real variable name or field.
+      if (parts.activeWord.isEmpty && !parts.isField) return;
+
+      final matches = await autoCompleteResultsFor(parts, widget.controller);
+      _autoCompleteController.searchAutoComplete.value = matches.sublist(
+        0,
+        min(defaultTopMatchesLimit, matches.length),
+      );
+    } else {
+      _autoCompleteController.closeAutoCompleteOverlay();
+    }
   }
 
   @override
@@ -61,15 +113,28 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField> {
                 } else if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
                   _historyNavDown();
                   return KeyEventResult.handled;
+                } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+                  _handleExpressionEval();
+                  return KeyEventResult.handled;
                 }
 
                 return KeyEventResult.ignored;
               },
-              child: TextField(
-                onSubmitted: (value) => _handleExpressionEval(context, value),
-                focusNode: textFocus,
-                decoration: null,
-                controller: textController,
+              child: buildAutoCompleteSearchField(
+                controller: _autoCompleteController,
+                searchFieldKey: evalTextFieldKey,
+                searchFieldEnabled: true,
+                shouldRequestFocus: false,
+                supportClearField: true,
+                onSelection: _onSelection,
+                tracking: true,
+                decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.all(denseSpacing),
+                  border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(borderSide: evalBorder),
+                  enabledBorder: OutlineInputBorder(borderSide: evalBorder),
+                  labelText: 'Eval',
+                ),
               ),
             ),
           ),
@@ -78,11 +143,47 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField> {
     );
   }
 
-  void _handleExpressionEval(
-    BuildContext context,
-    String expressionText,
-  ) async {
-    textFocus.requestFocus();
+  void _onSelection(String word) {
+    setState(() {
+      _replaceActiveWord(word);
+      _autoCompleteController.selectTheSearch = false;
+      _autoCompleteController.closeAutoCompleteOverlay();
+    });
+  }
+
+  /// Replace the current activeWord (partial name) with the selected item from
+  /// the auto-complete list.
+  void _replaceActiveWord(String word) {
+    final textFieldEditingValue = searchTextFieldController.value;
+    final editingValue = textFieldEditingValue.text;
+    final selection = textFieldEditingValue.selection;
+
+    final parts = AutoCompleteSearchControllerMixin.activeEdtingParts(
+      editingValue,
+      selection,
+      handleFields: _autoCompleteController.search.endsWith('.'),
+    );
+
+    // Add the newly selected auto-complete value.
+    final newValue = '${parts.leftSide}$word${parts.rightSide}';
+
+    // Update the value and caret position of the auto-completed word.
+    searchTextFieldController.value = TextEditingValue(
+      text: newValue,
+      selection: TextSelection.fromPosition(
+        // Update the caret position to just beyond the newly picked
+        // auto-complete item.
+        TextPosition(offset: parts.leftSide.length + word.length),
+      ),
+    );
+  }
+
+  void _handleExpressionEval() async {
+    final expressionText = searchTextFieldController.value.text.trim();
+    updateSearchField(_autoCompleteController, '', 0);
+    clearSearchField(_autoCompleteController, force: true);
+
+    if (expressionText.isEmpty) return;
 
     // Don't try to eval if we're not paused.
     if (!widget.controller.isPaused.value) {
@@ -91,14 +192,11 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField> {
       return;
     }
 
-    expressionText = expressionText.trim();
-
     widget.controller.appendStdio('> $expressionText\n');
     setState(() {
       historyPosition = -1;
       widget.controller.evalHistory.pushEvalHistory(expressionText);
     });
-    textController.clear();
 
     try {
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
@@ -135,8 +233,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField> {
 
   @override
   void dispose() {
-    textFocus.dispose();
-    textController.dispose();
+    _autoCompleteController.dispose();
     super.dispose();
   }
 
@@ -150,7 +247,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField> {
       evalHistory.navigateUp();
 
       final text = evalHistory.currentText;
-      textController.value = TextEditingValue(
+      searchTextFieldController.value = TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: text.length),
       );
@@ -167,10 +264,99 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField> {
       evalHistory.navigateDown();
 
       final text = evalHistory.currentText ?? '';
-      textController.value = TextEditingValue(
+      searchTextFieldController.value = TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: text.length),
       );
     });
   }
+}
+
+Future<List<String>> autoCompleteResultsFor(
+  EditingParts parts,
+  DebuggerController controller,
+) async {
+  final result = <String>{};
+  if (!parts.isField) {
+    result.addAll(
+        controller.variables.value.map((variable) => variable.boundVar.name));
+  } else {
+    var left = parts.leftSide.split(' ').last;
+    // Removing trailing `.`.
+    left = left.substring(0, left.length - 1);
+    try {
+      final response = await controller.evalAtCurrentFrame(left);
+      if (response is InstanceRef) {
+        final Instance instance = await controller.getObject(response);
+        result.addAll(
+          await _autoCompleteMembersFor(
+            instance.classRef,
+            controller,
+          ),
+        );
+        // TODO(grouma) - This shouldn't be necessary but package:dwds does
+        // not properly provide superclass information.
+        result.addAll(instance.fields.map((field) => field.decl.name));
+      }
+    } catch (_) {}
+  }
+  return result.where((name) => name.startsWith(parts.activeWord)).toList()
+    ..sort();
+}
+
+Future<Set<String>> _autoCompleteMembersFor(
+  ClassRef classRef,
+  DebuggerController controller,
+) async {
+  final result = <String>{};
+  if (classRef != null) {
+    final Class clazz = await controller.getObject(classRef);
+    result.addAll(clazz.fields.map((field) => field.name));
+    result.addAll(clazz.functions
+        .where((funcRef) => _validFunction(funcRef, clazz))
+        // The VM shows setters as `<member>=`.
+        .map((funcRef) => funcRef.name.replaceAll('=', '')));
+    result.addAll(await _autoCompleteMembersFor(clazz.superClass, controller));
+    result.removeWhere((member) => !_isAccessible(member, clazz, controller));
+  }
+  return result;
+}
+
+bool _validFunction(FuncRef funcRef, Class clazz) {
+  return !funcRef.isStatic &&
+      !_isContructor(funcRef, clazz) &&
+      !_isOperator(funcRef);
+}
+
+bool _isOperator(FuncRef funcRef) => [
+      '==',
+      '+',
+      '-',
+      '*',
+      '/',
+      '&',
+      '~',
+      '|',
+      '>',
+      '<',
+      '>=',
+      '<=',
+      '>>',
+      '<<',
+      '>>>',
+      '^',
+      '%',
+      '~/',
+      'uniary-',
+    ].contains(funcRef.name);
+
+bool _isContructor(FuncRef funcRef, Class clazz) =>
+    funcRef.name == clazz.name || funcRef.name.startsWith('${clazz.name}.');
+
+bool _isAccessible(String member, Class clazz, DebuggerController controller) {
+  final frame = controller.selectedStackFrame.value?.frame ??
+      controller.stackFramesWithLocation.value.first.frame;
+  final currentScript = frame.location.script;
+  return !member.startsWith('_') ||
+      currentScript.id == clazz.location?.script?.id;
 }
