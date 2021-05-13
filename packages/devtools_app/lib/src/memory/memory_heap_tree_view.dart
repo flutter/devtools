@@ -278,12 +278,6 @@ class HeapTreeViewState extends State<HeapTree>
 
   @override
   void dispose() {
-    // Clean up the TextFieldController and FocusNode.
-    searchTextFieldController.dispose();
-    searchFieldFocusNode.dispose();
-
-    rawKeyboardFocusNode.dispose();
-
     _animation.dispose();
 
     super.dispose();

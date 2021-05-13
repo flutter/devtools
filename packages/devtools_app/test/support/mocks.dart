@@ -27,7 +27,6 @@ import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' as flutter;
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -537,10 +536,6 @@ class MockBannerMessagesController extends Mock
     implements BannerMessagesController {}
 
 class MockLoggingController extends Mock implements LoggingController {
-  @override
-  flutter.TextEditingValue searchTextFieldValue =
-      const flutter.TextEditingValue();
-
   @override
   ValueListenable<LogData> get selectedLog => _selectedLog;
 
