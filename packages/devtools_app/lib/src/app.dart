@@ -610,6 +610,7 @@ List<DevToolsScreen> get defaultScreens {
       const LoggingScreen(),
       createController: () => LoggingController(),
     ),
+    DevToolsScreen<void>(const ProviderScreen(), createController: () {}),
     DevToolsScreen<AppSizeController>(
       const AppSizeScreen(),
       createController: () => AppSizeController(),
@@ -618,7 +619,6 @@ List<DevToolsScreen> get defaultScreens {
       VMDeveloperToolsScreen(controller: vmDeveloperToolsController),
       controller: vmDeveloperToolsController,
     ),
-    DevToolsScreen<void>(const ProviderScreen(), createController: () {}),
     // Show the sample DevTools screen.
     if (debugEnableSampleScreen && (kDebugMode || kProfileMode))
       DevToolsScreen<ExampleController>(
