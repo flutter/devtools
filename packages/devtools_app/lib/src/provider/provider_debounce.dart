@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'instance_viewer/eval.dart';
+
 // TODO(rrousselGit) remove once the next Riverpod update is released
 AutoDisposeStateNotifierProviderFamily<StateController<Listened>, Listened, Id>
     familyAsyncDebounce<Listened extends AsyncValue, Id>(
@@ -13,6 +15,9 @@ AutoDisposeStateNotifierProviderFamily<StateController<Listened>, Listened, Id>
   return AutoDisposeStateNotifierProviderFamily<StateController<Listened>,
       Listened, Id>(
     (ref, id) {
+      ref.watch(hotRestartEventProvider);
+      bool listening = true;
+
       final controller = StateController<Listened>(
         // It is safe to use `read` here because the provider is immediately listened after
         ref.read(family(id)),
@@ -26,7 +31,7 @@ AutoDisposeStateNotifierProviderFamily<StateController<Listened>, Listened, Id>
         family(id),
         mayHaveChanged: (sub) {
           return Future.microtask(() {
-            if (ref.mounted) sub.flush();
+            if (ref.mounted && listening) sub.flush();
           });
         },
         didChange: (sub) {
@@ -46,8 +51,10 @@ AutoDisposeStateNotifierProviderFamily<StateController<Listened>, Listened, Id>
         },
       );
 
-      ref.onDispose(sub.close);
-
+      ref.onDispose(() {
+        sub.close();
+        listening = false;
+      });
       return controller;
     },
     // ignore: invalid_use_of_protected_member
@@ -66,6 +73,9 @@ AutoDisposeStateNotifierProvider<StateController<Listened>, Listened>
 }) {
   return AutoDisposeStateNotifierProvider<StateController<Listened>, Listened>(
     (ref) {
+      ref.watch(hotRestartEventProvider);
+      bool listening = true;
+
       final controller = StateController<Listened>(
         // It is safe to use `read` here because the provider is immediately listened after
         ref.read(provider),
@@ -79,7 +89,7 @@ AutoDisposeStateNotifierProvider<StateController<Listened>, Listened>
         provider,
         mayHaveChanged: (sub) {
           return Future.microtask(() {
-            if (ref.mounted) sub.flush();
+            if (ref.mounted && listening) sub.flush();
           });
         },
         didChange: (sub) {
@@ -103,7 +113,10 @@ AutoDisposeStateNotifierProvider<StateController<Listened>, Listened>
         },
       );
 
-      ref.onDispose(sub.close);
+      ref.onDispose(() {
+        sub.close();
+        listening = false;
+      });
 
       return controller;
     },

@@ -8,6 +8,7 @@ import 'package:provider/provider.dart' as provider show Provider;
 
 import '../banner_messages.dart';
 import '../common_widgets.dart';
+import '../dialogs.dart';
 import '../screen.dart';
 import '../split.dart';
 import './instance_viewer/instance_details.dart';
@@ -39,6 +40,8 @@ final _selectedProviderNode = AutoDisposeProvider<ProviderNode>((ref) {
       );
 });
 
+final _showInternals = StateProvider<bool>((ref) => false);
+
 class ProviderScreen extends Screen {
   const ProviderScreen()
       : super.conditional(
@@ -66,7 +69,9 @@ class ProviderScreenBody extends ConsumerWidget {
 
     // A provider will automatically be selected as soon as one is detected
     final selectedProviderId = watch(selectedProviderIdProvider);
-
+    final detailsTitleText = selectedProviderId != null
+        ? watch(_selectedProviderNode)?.type ?? ''
+        : '[No provider selected]';
     return ProviderListener<bool>(
       provider: _hasErrorProvider,
       onChange: (context, hasError) {
@@ -79,7 +84,10 @@ class ProviderScreenBody extends ConsumerWidget {
           OutlineDecoration(
             child: Column(
               children: const [
-                AreaPaneHeader(title: Text('Providers')),
+                AreaPaneHeader(
+                  needsTopBorder: false,
+                  title: Text('Providers'),
+                ),
                 Expanded(
                   child: ProviderList(),
                 ),
@@ -89,17 +97,28 @@ class ProviderScreenBody extends ConsumerWidget {
           OutlineDecoration(
             child: Column(
               children: [
-                if (selectedProviderId != null) ...[
-                  AreaPaneHeader(
-                    title: Text(watch(_selectedProviderNode)?.type ?? ''),
-                  ),
+                AreaPaneHeader(
+                  needsTopBorder: false,
+                  title: Text(detailsTitleText),
+                  actions: [
+                    SettingsOutlinedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => _StateInspectorSettingsDialog(),
+                        );
+                      },
+                      tooltip: _StateInspectorSettingsDialog.title,
+                    ),
+                  ],
+                ),
+                if (selectedProviderId != null)
                   Expanded(
                     child: InstanceViewer(
                       rootPath: InstancePath.fromProviderId(selectedProviderId),
+                      showInternalProperties: watch(_showInternals).state,
                     ),
                   )
-                ] else
-                  const AreaPaneHeader(title: Text('[No provider selected]')),
               ],
             ),
           )
@@ -117,4 +136,45 @@ void showProviderErrorBanner(BuildContext context) {
     const ProviderUnknownErrorBanner(screenId: ProviderScreen.id)
         .build(context),
   );
+}
+
+class _StateInspectorSettingsDialog extends ConsumerWidget {
+  static const title = 'State inspector configurations';
+
+  @override
+  Widget build(BuildContext context, ScopedReader watch) {
+    final theme = Theme.of(context);
+
+    return DevToolsDialog(
+      title: dialogTitleText(theme, title),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () => _toggleShowInternals(context),
+            child: Row(
+              children: [
+                Checkbox(
+                  value: watch(_showInternals).state,
+                  onChanged: (_) => _toggleShowInternals(context),
+                ),
+                const Text(
+                  'Show private properties inherited from SDKs/packages',
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+      actions: [
+        DialogCloseButton(),
+      ],
+    );
+  }
+
+  void _toggleShowInternals(BuildContext context) {
+    final showInternals = context.read(_showInternals);
+    showInternals.state = !showInternals.state;
+  }
 }

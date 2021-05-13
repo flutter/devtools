@@ -96,9 +96,11 @@ class InstanceViewer extends StatefulWidget {
   const InstanceViewer({
     Key key,
     this.rootPath,
+    @required this.showInternalProperties,
   }) : super(key: key);
 
   final InstancePath rootPath;
+  final bool showInternalProperties;
 
   @override
   _InstanceViewerState createState() => _InstanceViewerState();
@@ -351,6 +353,13 @@ class _InstanceViewerState extends State<InstanceViewer> {
     @required InstancePath path,
   }) sync* {
     for (final field in instance.fields) {
+      if (!widget.showInternalProperties &&
+          field.isDefinedByDependency &&
+          field.isPrivate) {
+        // Hide private properties from classes defined by dependencies
+        continue;
+      }
+
       final children = _buildListViewItems(
         context,
         watch,

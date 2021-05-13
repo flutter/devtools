@@ -96,6 +96,16 @@ git checkout .gitignore
 git checkout packages/*/pubspec.yaml
 ```
 
+Update the version of DevTools referenced by
+https://github.com/flutter/flutter/blob/8c4538618f81a42e45cdb03c6a204f6e7bcf81b3/dev/devicelab/lib/tasks/perf_tests.dart#L1448
+
+with a CL like
+https://github.com/flutter/flutter/pull/81869
+
+to avoid the issue described by https://github.com/flutter/flutter/issues/81552
+Once DevTools is deployed as part of the Dart SDK we should be able to eliminate this step.
+
+
 #### Create the tag for this release and push to the remote repository.
 This script will automatically determine the version from the `packages/devtools/pubspec.yaml` so there
 is no need to manually enter the version.

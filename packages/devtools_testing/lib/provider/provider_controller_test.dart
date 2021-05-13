@@ -4,15 +4,17 @@
 
 // ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member, non_constant_identifier_names
 
-import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
-import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:devtools_app/src/eval_on_dart_library.dart';
-import 'package:devtools_app/src/provider/provider_nodes.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
+
+import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
+import 'package:devtools_app/src/provider/provider_nodes.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
 
+import '../support/flutter_test_driver.dart';
 import '../support/flutter_test_environment.dart';
 
 Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
@@ -20,7 +22,9 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
   Disposable isAlive;
 
   setUp(() async {
-    await env.setupEnvironment();
+    await env.setupEnvironment(
+      config: const FlutterRunConfiguration(withDebugger: true),
+    );
     await serviceManager.service.allFuturesCompleted;
 
     isAlive = Disposable();
@@ -39,7 +43,104 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
     await env.tearDownEnvironment(force: true);
   });
 
+  test('refreshes everything on hot-reload', () async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    final providersSub =
+        container.listen(rawSortedProviderNodesProvider.future);
+    final countSub = container.listen(
+      rawInstanceProvider(
+        const InstancePath.fromProviderId('0').pathForChild(
+          const PathToProperty.objectProperty(
+            name: '_count',
+            ownerUri: 'package:provider_app/main.dart',
+            ownerName: 'Counter',
+          ),
+        ),
+      ).future,
+    );
+
+    await evalOnDartLibrary.asyncEval(
+      'await tester.tap(find.byKey(Key("add"))).then((_) => tester.pump())',
+      isAlive: isAlive,
+    );
+    await evalOnDartLibrary.asyncEval(
+      'await tester.tap(find.byKey(Key("increment"))).then((_) => tester.pump())',
+      isAlive: isAlive,
+    );
+
+    expect(
+      await providersSub.read(),
+      [
+        isA<ProviderNode>()
+            .having((e) => e.type, 'type', 'ChangeNotifierProvider<Counter>'),
+        isA<ProviderNode>().having((e) => e.type, 'type', 'Provider<int>'),
+      ],
+    );
+    expect(
+      await countSub.read(),
+      isA<NumInstance>().having((e) => e.displayString, 'displayString', '1'),
+    );
+
+    await env.flutter.hotRestart();
+
+    final evalOnDartLibrary2 = EvalOnDartLibrary(
+      [
+        'package:provider_app/main.dart',
+        'package:provider_app/tester.dart',
+      ],
+      env.service,
+    );
+    addTearDown(evalOnDartLibrary2.dispose);
+
+    expect(await providersSub.read(), [
+      isA<ProviderNode>()
+          .having((e) => e.type, 'type', 'ChangeNotifierProvider<Counter>'),
+    ]);
+    expect(
+      await countSub.read(),
+      isA<NumInstance>().having((e) => e.displayString, 'displayString', '0'),
+    );
+    // TODO(rrousselGit) unskip test once hot-restart works properly (https://github.com/flutter/devtools/issues/3007)
+  }, timeout: const Timeout.factor(8), skip: true);
+
   group('Provider controllers', () {
+    test('can mutate private properties from mixins', () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final sub = container.listen(
+        rawInstanceProvider(
+          const InstancePath.fromProviderId('0').pathForChild(
+            const PathToProperty.objectProperty(
+              name: '_privateMixinProperty',
+              ownerUri: 'package:provider_app/mixin.dart',
+              ownerName: 'Mixin',
+            ),
+          ),
+        ).future,
+      );
+
+      var instance = await sub.read();
+
+      expect(
+        instance,
+        isA<NumInstance>().having((e) => e.displayString, 'displayString', '0'),
+      );
+
+      await instance.setter('42');
+
+      // read the instance again since it should have changed
+      instance = await sub.read();
+
+      expect(
+        instance,
+        isA<NumInstance>()
+            .having((e) => e.displayString, 'displayString', '42'),
+      );
+    });
+
     test('rawSortedProviderNodesProvider', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
@@ -212,22 +313,35 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                         .having((e) => e.isFinal, 'isFinal', true)
                         .having((e) => e.isPrivate, 'isPrivate', false)
                         .having((e) => e.isDefinedByDependency,
-                            'isDefinedByDependency', true),
+                            'isDefinedByDependency', false),
                     isA<ObjectField>()
                         .having((e) => e.ownerName, 'ownerName', 'Counter')
                         .having((e) => e.name, 'name', '_count')
-                        .having((e) => e.isFinal, 'isFinal', false)
-                        .having((e) => e.isPrivate, 'isPrivate', true)
-                        .having((e) => e.isDefinedByDependency,
-                            'isDefinedByDependency', true),
-                    isA<ObjectField>()
-                        .having(
-                            (e) => e.ownerName, 'ownerName', 'ChangeNotifier')
-                        .having((e) => e.name, 'name', '_listeners')
+                        .having((e) => e.ownerUri, 'ownerUri',
+                            'package:provider_app/main.dart')
                         .having((e) => e.isFinal, 'isFinal', false)
                         .having((e) => e.isPrivate, 'isPrivate', true)
                         .having((e) => e.isDefinedByDependency,
                             'isDefinedByDependency', false),
+                    isA<ObjectField>()
+                        .having(
+                            (e) => e.ownerName, 'ownerName', 'ChangeNotifier')
+                        .having((e) => e.name, 'name', '_listeners')
+                        .having((e) => e.ownerUri, 'ownerUri',
+                            'package:flutter/src/foundation/change_notifier.dart')
+                        .having((e) => e.isFinal, 'isFinal', false)
+                        .having((e) => e.isPrivate, 'isPrivate', true)
+                        .having((e) => e.isDefinedByDependency,
+                            'isDefinedByDependency', true),
+                    isA<ObjectField>()
+                        .having((e) => e.ownerName, 'ownerName', 'Mixin')
+                        .having((e) => e.name, 'name', '_privateMixinProperty')
+                        .having((e) => e.ownerUri, 'ownerUri',
+                            'package:provider_app/mixin.dart')
+                        .having((e) => e.isFinal, 'isFinal', false)
+                        .having((e) => e.isPrivate, 'isPrivate', true)
+                        .having((e) => e.isDefinedByDependency,
+                            'isDefinedByDependency', true),
                   ]),
                 ),
           ),
@@ -243,79 +357,79 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'enumeration')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'finalVar')
                 .having((e) => e.isFinal, 'isFinal', true)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'float')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'integer')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'lateWithInitializer')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'list')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'map')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'nill')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'plainInstance')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'string')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', 'uninitializedLate')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
             isA<ObjectField>()
                 .having((e) => e.name, 'name', '_getterAndSetter')
                 .having((e) => e.isFinal, 'isFinal', false)
                 .having((e) => e.isPrivate, 'isPrivate', true)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true),
+                    false),
           ]),
         );
 
@@ -395,7 +509,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                 .having((e) => e.isFinal, 'isFinal', true)
                 .having((e) => e.isPrivate, 'isPrivate', false)
                 .having((e) => e.isDefinedByDependency, 'isDefinedByDependency',
-                    true)
+                    false)
           ]).having((e) => e.setter, 'setter', isNotNull),
         );
 
@@ -436,7 +550,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                   .having((e) => e.isFinal, 'isFinal', true)
                   .having((e) => e.isPrivate, 'isPrivate', false)
                   .having((e) => e.isDefinedByDependency,
-                      'isDefinedByDependency', true)
+                      'isDefinedByDependency', false)
             ]),
             isA<NullInstance>()
           ]),
