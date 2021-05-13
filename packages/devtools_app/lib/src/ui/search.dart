@@ -10,6 +10,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import '../auto_dispose.dart';
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../theme.dart';
@@ -25,8 +26,6 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
 
   /// Notify that the search has changed.
   ValueListenable get searchNotifier => _searchNotifier;
-
-  bool get isField => search.endsWith('.');
 
   /// Last X position of caret in search field, used for pop-up position.
   double xPosition = 0.0;
@@ -844,3 +843,6 @@ mixin DataSearchStateMixin {
 // both extend `TreeNode<T>` and mixin `SearchableDataMixin`.
 mixin TreeDataSearchStateMixin<T extends TreeNode<T>>
     on TreeNode<T>, DataSearchStateMixin {}
+
+class AutoCompleteController extends DisposableController
+    with SearchControllerMixin, AutoCompleteSearchControllerMixin {}

@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../auto_dispose.dart';
 import '../auto_dispose_mixin.dart';
 import '../notifications.dart';
 import '../theme.dart';
@@ -26,12 +25,9 @@ class ExpressionEvalField extends StatefulWidget {
   _ExpressionEvalFieldState createState() => _ExpressionEvalFieldState();
 }
 
-class _AutoCompleteController extends DisposableController
-    with SearchControllerMixin, AutoCompleteSearchControllerMixin {}
-
 class _ExpressionEvalFieldState extends State<ExpressionEvalField>
     with SearchFieldMixin, AutoDisposeMixin {
-  _AutoCompleteController _autoCompleteController;
+  AutoCompleteController _autoCompleteController;
   int historyPosition = -1;
 
   final evalTextFieldKey = GlobalKey(debugLabel: 'evalTextFieldKey');
@@ -40,7 +36,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
   void initState() {
     super.initState();
 
-    _autoCompleteController = _AutoCompleteController();
+    _autoCompleteController = AutoCompleteController();
 
     addAutoDisposeListener(_autoCompleteController.searchNotifier, () {
       _autoCompleteController.handleAutoCompleteOverlay(
@@ -165,7 +161,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
     final parts = AutoCompleteSearchControllerMixin.activeEdtingParts(
       editingValue,
       selection,
-      handleFields: _autoCompleteController.isField,
+      handleFields: _autoCompleteController.search.endsWith('.'),
     );
 
     // Add the newly selected auto-complete value.
@@ -308,9 +304,11 @@ Future<List<String>> autoCompleteResultsFor(
     ..sort();
 }
 
-Future<List<String>> _autoCompleteMembersFor(
-    ClassRef classRef, DebuggerController controller) async {
-  final result = <String>[];
+Future<Set<String>> _autoCompleteMembersFor(
+  ClassRef classRef,
+  DebuggerController controller,
+) async {
+  final result = <String>{};
   if (classRef != null) {
     final Class clazz = await controller.getObject(classRef);
     result.addAll(clazz.fields.map((field) => field.name));
@@ -359,6 +357,6 @@ bool _isAccessible(String member, Class clazz, DebuggerController controller) {
   final frame = controller.selectedStackFrame.value?.frame ??
       controller.stackFramesWithLocation.value.first.frame;
   final currentScript = frame.location.script;
-  return !(member.startsWith('_') &&
-      currentScript.id != clazz.location?.script?.id);
+  return !member.startsWith('_') ||
+      currentScript.id == clazz.location?.script?.id;
 }
