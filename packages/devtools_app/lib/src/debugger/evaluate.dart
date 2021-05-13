@@ -41,11 +41,6 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
     super.initState();
 
     _autoCompleteController = _AutoCompleteController();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
 
     addAutoDisposeListener(_autoCompleteController.searchNotifier, () {
       _autoCompleteController.handleAutoCompleteOverlay(
@@ -89,12 +84,9 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
       if (parts.activeWord.isEmpty && !parts.isField) return;
 
       final matches = await autoCompleteResultsFor(parts, widget.controller);
-
-      final normalizedMatches = matches.toSet().toList()..sort();
-      _autoCompleteController.searchAutoComplete.value =
-          normalizedMatches.sublist(
+      _autoCompleteController.searchAutoComplete.value = matches.sublist(
         0,
-        min(defaultTopMatchesLimit, normalizedMatches.length),
+        min(defaultTopMatchesLimit, matches.length),
       );
     } else {
       _autoCompleteController.closeAutoCompleteOverlay();
@@ -290,14 +282,13 @@ Future<List<String>> autoCompleteResultsFor(
 ) async {
   final result = <String>{};
   if (!parts.isField) {
-    result.addAll(controller.variables.value
-        .map((variable) => variable.boundVar.name)
-        .where((name) => name.startsWith(parts.activeWord)));
+    result.addAll(
+        controller.variables.value.map((variable) => variable.boundVar.name));
   } else {
+    var left = parts.leftSide.split(' ').last;
+    // Removing trailing `.`.
+    left = left.substring(0, left.length - 1);
     try {
-      var left = parts.leftSide.split(' ').last;
-      // Removing trailing `.`.
-      left = left.substring(0, left.length - 1);
       final response = await controller.evalAtCurrentFrame(left);
       if (response is InstanceRef) {
         final Instance instance = await controller.getObject(response);
@@ -310,11 +301,11 @@ Future<List<String>> autoCompleteResultsFor(
         // TODO(grouma) - This shouldn't be necessary but package:dwds does
         // not properly provide superclass information.
         result.addAll(instance.fields.map((field) => field.decl.name));
-        result.removeWhere((prop) => !prop.startsWith(parts.activeWord));
       }
     } catch (_) {}
   }
-  return result.toList();
+  return result.where((name) => name.startsWith(parts.activeWord)).toList()
+    ..sort();
 }
 
 Future<List<String>> _autoCompleteMembersFor(
@@ -336,8 +327,30 @@ Future<List<String>> _autoCompleteMembersFor(
 bool _validFunction(FuncRef funcRef, Class clazz) {
   return !funcRef.isStatic &&
       !_isContructor(funcRef, clazz) &&
-      funcRef.name != '==';
+      !_isOperator(funcRef);
 }
+
+bool _isOperator(FuncRef funcRef) => [
+      '==',
+      '+',
+      '-',
+      '*',
+      '/',
+      '&',
+      '~',
+      '|',
+      '>',
+      '<',
+      '>=',
+      '<=',
+      '>>',
+      '<<',
+      '>>>',
+      '^',
+      '%',
+      '~/',
+      'uniary-',
+    ].contains(funcRef.name);
 
 bool _isContructor(FuncRef funcRef, Class clazz) =>
     funcRef.name == clazz.name || funcRef.name.startsWith('${clazz.name}.');

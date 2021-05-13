@@ -115,6 +115,20 @@ void main() {
                 isConst: false,
                 id: '',
               ),
+              FuncRef(
+                name: '>=',
+                owner: null,
+                isStatic: true,
+                isConst: false,
+                id: '',
+              ),
+              FuncRef(
+                name: '==',
+                owner: null,
+                isStatic: true,
+                isConst: false,
+                id: '',
+              ),
             ],
             id: '',
             interfaces: [],
@@ -177,7 +191,7 @@ void main() {
               rightSide: '',
             ),
             debuggerController),
-        equals(['field1', 'field2', 'func1', 'func2', 'fieldBound1']));
+        equals(['field1', 'field2', 'fieldBound1', 'func1', 'func2']));
     expect(
         await autoCompleteResultsFor(
             EditingParts(
