@@ -21,7 +21,6 @@ import '../theme.dart';
 import '../ui/icons.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
-
 import 'memory_android_chart.dart' as android;
 import 'memory_charts.dart';
 import 'memory_controller.dart';
@@ -606,7 +605,7 @@ class MemoryBodyState extends State<MemoryBody>
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
           onPressed: _openSettingsDialog,
-          tooltip: 'Memory Configuration',
+          label: 'Memory Configuration',
         ),
       ],
     );
