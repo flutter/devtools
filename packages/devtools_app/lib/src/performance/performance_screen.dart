@@ -250,7 +250,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         const SizedBox(width: defaultSpacing),
         SettingsOutlinedButton(
           onPressed: _openSettingsDialog,
-          tooltip: 'Performance Settings',
+          label: 'Performance Settings',
         ),
       ],
     );

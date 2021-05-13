@@ -254,30 +254,24 @@ class StopRecordingButton extends StatelessWidget {
 class SettingsOutlinedButton extends StatelessWidget {
   const SettingsOutlinedButton({
     @required this.onPressed,
-    @required this.tooltip,
+    @required this.label,
   });
 
   final VoidCallback onPressed;
 
-  final String tooltip;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      // TODO(kenz): this height should be unnecessary once
-      // https://github.com/flutter/flutter/issues/79894 is fixed.
-      height: defaultButtonHeight,
-      width: defaultButtonHeight, // This will result in a square button.
-      child: DevToolsTooltip(
-        tooltip: tooltip,
-        child: OutlinedButton(
-          onPressed: onPressed,
-          child: const Icon(
-            Icons.settings,
-            size: defaultIconSize,
-          ),
-        ),
-      ),
+    return IconLabelButton(
+      onPressed: onPressed,
+      icon: Icons.settings,
+      label: label,
+      // TODO(jacobr): consider a more conservative min-width. To minimize the
+      // impact on the existing UI and deal with the fact that some of the
+      // existing label names are fairly verbose, we set a width that will
+      // never be hit.
+      includeTextWidth: 20000,
     );
   }
 }
