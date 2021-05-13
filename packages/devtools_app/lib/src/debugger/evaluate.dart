@@ -15,9 +15,6 @@ import '../theme.dart';
 import '../ui/search.dart';
 import 'debugger_controller.dart';
 
-// TODO(devoncarew): We should insert eval result objects into the console as
-// expandable objects.
-
 class ExpressionEvalField extends StatefulWidget {
   const ExpressionEvalField({
     this.controller,
@@ -91,7 +88,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
       // Only show pop-up if there's a real variable name or field.
       if (parts.activeWord.isEmpty && !parts.isField) return;
 
-      final matches = await _matchesFor(parts);
+      final matches = await autoCompleteResultsFor(parts, widget.controller);
 
       final normalizedMatches = matches.toSet().toList()..sort();
       _autoCompleteController.searchAutoComplete.value =
@@ -102,69 +99,6 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
     } else {
       _autoCompleteController.closeAutoCompleteOverlay();
     }
-  }
-
-  Future<List<String>> _matchesFor(EditingParts parts) async {
-    final result = <String>{};
-    if (!parts.isField) {
-      for (var variable in widget.controller.variables.value) {
-        if (variable.boundVar.name.startsWith(parts.activeWord)) {
-          result.add(variable.boundVar.name);
-        }
-      }
-    } else {
-      try {
-        var left = parts.leftSide.split(' ').last;
-        // Removing trailing `.`.
-        left = left.substring(0, left.length - 1);
-
-        // Response is either a ErrorRef, InstanceRef, or Sentinel.
-        final response = await widget.controller.evalAtCurrentFrame(left);
-
-        // Display the response to the user.
-        if (response is InstanceRef) {
-          final Instance instance = await widget.controller.getObject(response);
-          result.addAll(await _autoCompleteProperties(instance.classRef));
-          // TODO(grouma) - This shouldn't be necessary but package:dwds does
-          // not properly provide superclass information.
-          result.addAll(instance.fields.map((field) => field.decl.name));
-          result.removeWhere((prop) => !prop.startsWith(parts.activeWord));
-        }
-      } catch (_) {}
-    }
-    return result.toList();
-  }
-
-  Future<List<String>> _autoCompleteProperties(ClassRef classRef) async {
-    final result = <String>[];
-    if (classRef != null) {
-      final Class clazz = await widget.controller.getObject(classRef);
-      result.addAll(clazz.fields.map((field) => field.name));
-      result.addAll(clazz.functions
-          .where((funcRef) => _validFunction(funcRef, clazz))
-          // The VM shows setters as `<member>=`.
-          .map((funcRef) => funcRef.name.replaceAll('=', '')));
-      result.addAll(await _autoCompleteProperties(clazz.superClass));
-      result.removeWhere((member) => !_isAccessible(member, clazz));
-    }
-    return result;
-  }
-
-  bool _validFunction(FuncRef funcRef, Class clazz) {
-    return !funcRef.isStatic &&
-        !_isContructor(funcRef, clazz) &&
-        funcRef.name != '==';
-  }
-
-  bool _isContructor(FuncRef funcRef, Class clazz) =>
-      funcRef.name == clazz.name || funcRef.name.startsWith('${clazz.name}.');
-
-  bool _isAccessible(String member, Class clazz) {
-    final frame = widget.controller.selectedStackFrame.value?.frame ??
-        widget.controller.stackFramesWithLocation.value.first.frame;
-    final currentScript = frame.location.script;
-    return !(member.startsWith('_') &&
-        currentScript.id != clazz.location?.script?.id);
   }
 
   @override
@@ -348,4 +282,70 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
       );
     });
   }
+}
+
+Future<List<String>> autoCompleteResultsFor(
+  EditingParts parts,
+  DebuggerController controller,
+) async {
+  final result = <String>{};
+  if (!parts.isField) {
+    result.addAll(controller.variables.value
+        .map((variable) => variable.boundVar.name)
+        .where((name) => name.startsWith(parts.activeWord)));
+  } else {
+    try {
+      var left = parts.leftSide.split(' ').last;
+      // Removing trailing `.`.
+      left = left.substring(0, left.length - 1);
+      final response = await controller.evalAtCurrentFrame(left);
+      if (response is InstanceRef) {
+        final Instance instance = await controller.getObject(response);
+        result.addAll(
+          await _autoCompleteMembersFor(
+            instance.classRef,
+            controller,
+          ),
+        );
+        // TODO(grouma) - This shouldn't be necessary but package:dwds does
+        // not properly provide superclass information.
+        result.addAll(instance.fields.map((field) => field.decl.name));
+        result.removeWhere((prop) => !prop.startsWith(parts.activeWord));
+      }
+    } catch (_) {}
+  }
+  return result.toList();
+}
+
+Future<List<String>> _autoCompleteMembersFor(
+    ClassRef classRef, DebuggerController controller) async {
+  final result = <String>[];
+  if (classRef != null) {
+    final Class clazz = await controller.getObject(classRef);
+    result.addAll(clazz.fields.map((field) => field.name));
+    result.addAll(clazz.functions
+        .where((funcRef) => _validFunction(funcRef, clazz))
+        // The VM shows setters as `<member>=`.
+        .map((funcRef) => funcRef.name.replaceAll('=', '')));
+    result.addAll(await _autoCompleteMembersFor(clazz.superClass, controller));
+    result.removeWhere((member) => !_isAccessible(member, clazz, controller));
+  }
+  return result;
+}
+
+bool _validFunction(FuncRef funcRef, Class clazz) {
+  return !funcRef.isStatic &&
+      !_isContructor(funcRef, clazz) &&
+      funcRef.name != '==';
+}
+
+bool _isContructor(FuncRef funcRef, Class clazz) =>
+    funcRef.name == clazz.name || funcRef.name.startsWith('${clazz.name}.');
+
+bool _isAccessible(String member, Class clazz, DebuggerController controller) {
+  final frame = controller.selectedStackFrame.value?.frame ??
+      controller.stackFramesWithLocation.value.first.frame;
+  final currentScript = frame.location.script;
+  return !(member.startsWith('_') &&
+      currentScript.id != clazz.location?.script?.id);
 }
