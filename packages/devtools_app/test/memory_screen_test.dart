@@ -625,7 +625,7 @@ void main() {
         await simulateKeyDownEvent(downArrow
             ? LogicalKeyboardKey.arrowDown
             : LogicalKeyboardKey.arrowUp);
-// TODO(terry): Need to fix disabled for roll post eval changes. 
+// TODO(terry): Need to fix disabled for roll post eval changes.
 //        expect(controller.currentDefaultIndex, hilightedIndex);
       }
 
