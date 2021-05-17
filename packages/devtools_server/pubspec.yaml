@@ -1,7 +1,7 @@
 name: devtools_server
 description: A server that supports Dart DevTools.
 
-# Note: this version should only be updated by running tools/update_version.sh
+# Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of packages from packages/devtools.
 version: 2.2.2
 

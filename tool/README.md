@@ -21,9 +21,9 @@ git checkout -b release_0_0_15
 
 ```
 
-## Update the release number by running files:
+## Update the version number by running:
 
-./tool/update_version.sh 0.0.15
+dart ./tool/update_version.dart 0.0.15
 
 Verify that this script updated the pubspecs under packages/
 and updated all references to those packages. These packages always have their

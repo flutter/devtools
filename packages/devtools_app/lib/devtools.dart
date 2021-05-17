@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 /// The DevTools application version
-// This version should only be updated by running tools/update_version.sh
+// This version should only be updated by running tools/update_version.dart
 // that updates all versions for DevTools.
-// Note: a regexp in tools/update_version.sh matches the following line so
-// if you change it you must also modify tools/update_version.sh.
+// Note: a regexp in tools/update_version.dart matches the following line so
+// if you change it you must also modify tools/update_version.dart.
 const String version = '2.2.2';
