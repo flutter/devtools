@@ -7,9 +7,6 @@
 // We could instead remove the annotations, but that would make the process of
 // updating the generated files tedious.
 
-export 'package:collection/collection.dart';
-export 'package:meta/meta.dart';
-
 const nullable = Object();
 const freezed = Object();
 
