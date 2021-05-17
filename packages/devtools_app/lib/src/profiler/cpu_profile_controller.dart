@@ -117,10 +117,12 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   @override
   List<CpuStackFrame> matchesForSearch(String search) {
     if (search?.isEmpty ?? true) return [];
+    final regexSearch = RegExp(search, caseSensitive: false);
     final matches = <CpuStackFrame>[];
     final currentStackFrames = _dataNotifier.value.stackFrames.values;
     for (final frame in currentStackFrames) {
-      if (frame.name.caseInsensitiveContains(search)) {
+      if (frame.name.caseInsensitiveContains(regexSearch) ||
+          frame.url.caseInsensitiveContains(regexSearch)) {
         matches.add(frame);
         frame.isSearchMatch = true;
       } else {
