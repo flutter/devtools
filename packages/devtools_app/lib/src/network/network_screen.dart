@@ -343,7 +343,9 @@ class UriColumn extends ColumnData<NetworkRequest>
       child: SelectableText(
         value,
         maxLines: 1,
-        style: const TextStyle(overflow: TextOverflow.ellipsis),
+        // TODO(kenz): add overflow after flutter 2.3.0 is stable. It was
+        // added in commit 65388ee2eeaf0d2cf087eaa4a325e3689020c46a.
+        // style: const TextStyle(overflow: TextOverflow.ellipsis),
       ),
     );
   }
