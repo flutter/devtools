@@ -252,7 +252,7 @@ final subProfileStackFrames = {
     'name': 'RendererBinding.drawFrame',
     'parent': '140357727781376-4',
     'resolvedUrl':
-        'path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+        'path/to/flutter/packages/flutter/lib/src/rendering/binding.dart',
   },
   '140357727781376-6': {
     'category': 'Dart',
@@ -266,7 +266,7 @@ final subProfileStackFrames = {
     'name': 'PaintingContext.paintChild',
     'parent': '140357727781376-6',
     'resolvedUrl':
-        'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+        'path/to/flutter/packages/flutter/lib/src/painting/context.dart',
   },
   '140357727781376-8': {
     'category': 'Dart',
