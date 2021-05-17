@@ -84,11 +84,23 @@ void main() {
       expect(
           controller.dataNotifier.value.stackFrames.values.length, equals(17));
 
+      // Match on name.
       expect(controller.matchesForSearch(null).length, equals(0));
       expect(controller.matchesForSearch('').length, equals(0));
       expect(controller.matchesForSearch('render').length, equals(9));
+      expect(controller.matchesForSearch('RenderObject').length, equals(3));
       expect(controller.matchesForSearch('THREAD').length, equals(2));
       expect(controller.matchesForSearch('paint').length, equals(7));
+
+      // Match on url.
+      expect(controller.matchesForSearch('rendering/').length, equals(9));
+      expect(controller.matchesForSearch('proxy_box.dart').length, equals(2));
+      expect(controller.matchesForSearch('dartlang-sdk').length, equals(1));
+
+      // Match with RegExp.
+      expect(
+          controller.matchesForSearch('rendering/.*\.dart').length, equals(9));
+      expect(controller.matchesForSearch('RENDER.*\.paint').length, equals(6));
     });
 
     test('matchesForSearch sets isSearchMatch property', () async {

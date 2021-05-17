@@ -1029,11 +1029,20 @@ final _lowercaseLookup = <String, String>{};
 // TODO(kenz): replace other uses of toLowerCase() for string matching with
 // this extension method.
 extension StringExtension on String {
-  bool caseInsensitiveContains(String str) {
-    final lowerCase = _lowercaseLookup.putIfAbsent(this, () => toLowerCase());
-    final strLowerCase =
-        _lowercaseLookup.putIfAbsent(str, () => str.toLowerCase());
-    return lowerCase.contains(strLowerCase);
+  bool caseInsensitiveContains(Pattern pattern) {
+    if (pattern is RegExp) {
+      assert(pattern.isCaseSensitive == false);
+      return contains(pattern);
+    } else if (pattern is String) {
+      final lowerCase = _lowercaseLookup.putIfAbsent(this, () => toLowerCase());
+      final strLowerCase =
+          _lowercaseLookup.putIfAbsent(pattern, () => pattern.toLowerCase());
+      return lowerCase.contains(strLowerCase);
+    }
+    throw Exception(
+      'Unhandled pattern type ${pattern.runtimeType} from '
+      '`caseInsensitiveContains`',
+    );
   }
 
   /// Whether [query] is a case insensitive "fuzzy match" for this String.
