@@ -340,10 +340,10 @@ class UriColumn extends ColumnData<NetworkRequest>
     return Tooltip(
       message: value,
       waitDuration: tooltipWait,
-      child: Text(
+      child: SelectableText(
         value,
         maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(overflow: TextOverflow.ellipsis),
       ),
     );
   }

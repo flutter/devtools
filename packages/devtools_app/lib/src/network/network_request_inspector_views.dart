@@ -65,7 +65,7 @@ class HttpRequestHeadersView extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          SelectableText(
             '$key: ',
             style: Theme.of(context).textTheme.subtitle2,
           ),
@@ -228,14 +228,16 @@ class ImageResponseView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          SelectableText(
             '$key: ',
             style: Theme.of(context).textTheme.subtitle2,
           ),
           Expanded(
-            child: Text(
+            child: SelectableText(
               value,
-              overflow: TextOverflow.ellipsis,
+              // TODO(kenz): use top level overflow parameter if
+              // https://github.com/flutter/flutter/issues/82722 is fixed.
+              style: const TextStyle(overflow: TextOverflow.ellipsis),
             ),
           ),
         ],
@@ -275,7 +277,7 @@ class HttpRequestCookiesView extends StatelessWidget {
     );
   }
 
-  DataCell _buildCell(String value) => DataCell(Text(value ?? '--'));
+  DataCell _buildCell(String value) => DataCell(SelectableText(value ?? '--'));
 
   DataCell _buildIconCell(IconData icon) =>
       DataCell(Icon(icon, size: defaultIconSize));
@@ -295,10 +297,13 @@ class HttpRequestCookiesView extends StatelessWidget {
     }) {
       return DataColumn(
         label: Expanded(
-          child: Text(
+          child: SelectableText(
             title ?? '--',
-            style: theme.textTheme.subtitle1,
-            overflow: TextOverflow.fade,
+            // TODO(kenz): use top level overflow parameter if
+            // https://github.com/flutter/flutter/issues/82722 is fixed.
+            style: theme.textTheme.subtitle1.copyWith(
+              overflow: TextOverflow.fade,
+            ),
           ),
         ),
         numeric: numeric,
@@ -652,7 +657,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
       children: [
         Container(
           width: _keyWidth,
-          child: Text(
+          child: SelectableText(
             title != null ? '$title: ' : '',
             style: Theme.of(context).textTheme.subtitle2,
           ),
