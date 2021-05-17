@@ -151,14 +151,14 @@ class MemoryProfile {
   }
 
   Future<void> _pollMemory() async {
-    assert(service != null);
-    final VM vm = await service!.getVM();
+    final service = this.service!;
+    final VM vm = await service.getVM();
 
     // TODO(terry): Need to handle a possible Sentinel being returned.
     final List<Isolate?> isolates =
         await Future.wait(vm.isolates!.map((IsolateRef ref) async {
       try {
-        return await service!.getIsolate(ref.id!);
+        return await service.getIsolate(ref.id!);
       } catch (e) {
         // TODO(terry): Seem to sometimes get a sentinel not sure how? VM issue?
         // Unhandled Exception: type 'Sentinel' is not a subtype of type 'FutureOr<Isolate>'
@@ -217,10 +217,10 @@ class MemoryProfile {
   /// @returns view id of selected isolate's 'FlutterView'.
   /// @throws Exception if no 'FlutterView'.
   Future<String?> getFlutterViewId(IsolateRef selectedIsolate) async {
-    final flutterViewListResponse = await (callService(
+    final flutterViewListResponse = await callService(
       registrations.flutterListViews,
       isolateId: selectedIsolate.id,
-    ) as FutureOr<Response>);
+    ) as Response;
     final List<dynamic> views =
         flutterViewListResponse.json!['views'].cast<Map<String, dynamic>>();
 
@@ -252,9 +252,7 @@ class MemoryProfile {
 
     return await callService(
       registrations.flutterEngineRasterCache,
-      args: <String, String?>{
-        'viewId': viewId,
-      },
+      args: {'viewId': viewId},
       isolateId: selectedIsolate.id,
     );
   }
@@ -266,8 +264,7 @@ class MemoryProfile {
 
     for (Isolate? isolate in isolates) {
       if (isolate != null) {
-        final List<HeapSpace?> heaps = getHeaps(isolate).toList();
-        isolateHeaps[isolate.id!] = heaps as List<HeapSpace>;
+        isolateHeaps[isolate.id!] = getHeaps(isolate);
       }
     }
 
@@ -323,9 +320,16 @@ class MemoryProfile {
     _jsonFile.writeSample(sample);
   }
 
-  static Iterable<HeapSpace?> getHeaps(Isolate isolate) {
+  static List<HeapSpace> getHeaps(Isolate isolate) {
     final Map<String, dynamic> heaps = isolate.json!['_heaps'];
-    return heaps.values.map((dynamic json) => HeapSpace.parse(json));
+    final heapList = <HeapSpace>[];
+    for (final heapJson in heaps.values) {
+      final heap = HeapSpace.parse(heapJson);
+      if (heap != null) {
+        heapList.add(heap);
+      }
+    }
+    return heapList;
   }
 }
 
