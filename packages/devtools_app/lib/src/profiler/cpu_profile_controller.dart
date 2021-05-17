@@ -120,7 +120,8 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     final matches = <CpuStackFrame>[];
     final currentStackFrames = _dataNotifier.value.stackFrames.values;
     for (final frame in currentStackFrames) {
-      if (frame.name.caseInsensitiveContains(search)) {
+      if (frame.name.caseInsensitiveContains(search) ||
+          frame.url.caseInsensitiveContains(search)) {
         matches.add(frame);
         frame.isSearchMatch = true;
       } else {
