@@ -5,12 +5,12 @@ import 'dart:io';
 
 void main(List<String> args) async {
   final pubspecs = [
-    File('packages/devtools/pubspec.yaml'),
-    File('packages/devtools_app/pubspec.yaml'),
-    File('packages/devtools_server/pubspec.yaml'),
-    File('packages/devtools_shared/pubspec.yaml'),
-    File('packages/devtools_testing/pubspec.yaml'),
-  ];
+    'packages/devtools/pubspec.yaml',
+    'packages/devtools_app/pubspec.yaml',
+    'packages/devtools_server/pubspec.yaml',
+    'packages/devtools_shared/pubspec.yaml',
+    'packages/devtools_testing/pubspec.yaml',
+  ].map((path) => File(path)).toList();
 
   final version = args.isNotEmpty
       ? args.first
