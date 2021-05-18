@@ -250,10 +250,13 @@ class AnsiUp {
             }
           }
           if (modeCmd == '2' && index + 2 < sgrCmds.length) {
-            final r = int.tryParse(sgrCmds[index++], radix: 10)!;
-            final g = int.tryParse(sgrCmds[index++], radix: 10)!;
-            final b = int.tryParse(sgrCmds[index++], radix: 10)!;
-            if ((r >= 0 && r <= 255) &&
+            final r = int.tryParse(sgrCmds[index++], radix: 10);
+            final g = int.tryParse(sgrCmds[index++], radix: 10);
+            final b = int.tryParse(sgrCmds[index++], radix: 10);
+            if (r != null &&
+                g != null &&
+                b != null &&
+                (r >= 0 && r <= 255) &&
                 (g >= 0 && g <= 255) &&
                 (b >= 0 && b <= 255)) {
               final c = AnsiUpColor(rgb: [r, g, b], className: 'truecolor');
@@ -347,9 +350,11 @@ class StyledText {
     if (fgColor == null && bgColor == null && !bold) {
       return '';
     }
+    final _bgColor = bgColor;
+    final _fgColor = fgColor;
     return <String>[
-      if (bgColor != null) 'background-color: ${_colorToCss(bgColor!)}',
-      if (fgColor != null) 'color: ${_colorToCss(fgColor!)}',
+      if (_bgColor != null) 'background-color: ${_colorToCss(_bgColor)}',
+      if (_fgColor != null) 'color: ${_colorToCss(_fgColor)}',
       if (bold) 'font-weight: bold',
     ].join(';');
   }
