@@ -4,8 +4,8 @@
 
 class RegisteredServiceDescription {
   const RegisteredServiceDescription._({
-    /*required*/ required this.service,
-    /*required*/ required this.title,
+    required this.service,
+    required this.title,
     this.icon,
   });
 
