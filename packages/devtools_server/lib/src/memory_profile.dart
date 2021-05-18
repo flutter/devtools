@@ -89,7 +89,7 @@ class MemoryProfile {
     if (registered.isEmpty) {
       throw Exception('There are no registered methods for service "$name"');
     }
-    return service!.callServiceExtension(
+    return service!.callMethod(
       registered.first,
       isolateId: isolateId,
       args: args,
@@ -217,10 +217,10 @@ class MemoryProfile {
   /// @returns view id of selected isolate's 'FlutterView'.
   /// @throws Exception if no 'FlutterView'.
   Future<String?> getFlutterViewId(IsolateRef selectedIsolate) async {
-    final flutterViewListResponse = await callService(
+    final flutterViewListResponse = await service!.callServiceExtension(
       registrations.flutterListViews,
       isolateId: selectedIsolate.id,
-    ) as Response;
+    );
     final List<dynamic> views =
         flutterViewListResponse.json!['views'].cast<Map<String, dynamic>>();
 
