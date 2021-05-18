@@ -6,43 +6,43 @@
 /// codes.
 
 class AnsiUp {
-  AnsiUp() {
+  AnsiUp()
+      : bold = false,
+        ansiColors = [
+          [
+            AnsiUpColor(rgb: [0, 0, 0], className: 'ansi-black'),
+            AnsiUpColor(rgb: [187, 0, 0], className: 'ansi-red'),
+            AnsiUpColor(rgb: [0, 187, 0], className: 'ansi-green'),
+            AnsiUpColor(rgb: [187, 187, 0], className: 'ansi-yellow'),
+            AnsiUpColor(rgb: [0, 0, 187], className: 'ansi-blue'),
+            AnsiUpColor(rgb: [187, 0, 187], className: 'ansi-magenta'),
+            AnsiUpColor(rgb: [0, 187, 187], className: 'ansi-cyan'),
+            AnsiUpColor(rgb: [255, 255, 255], className: 'ansi-white'),
+          ],
+          [
+            AnsiUpColor(rgb: [85, 85, 85], className: 'ansi-bright-black'),
+            AnsiUpColor(rgb: [255, 85, 85], className: 'ansi-bright-red'),
+            AnsiUpColor(rgb: [0, 255, 0], className: 'ansi-bright-green'),
+            AnsiUpColor(rgb: [255, 255, 85], className: 'ansi-bright-yellow'),
+            AnsiUpColor(rgb: [85, 85, 255], className: 'ansi-bright-blue'),
+            AnsiUpColor(rgb: [255, 85, 255], className: 'ansi-bright-magenta'),
+            AnsiUpColor(rgb: [85, 255, 255], className: 'ansi-bright-cyan'),
+            AnsiUpColor(rgb: [255, 255, 255], className: 'ansi-bright-white'),
+          ]
+        ],
+        palette256 = [] {
     _setupPalettes();
-    bold = false;
   }
 
-  String _text;
+  late String _text;
   bool bold;
   List<List<AnsiUpColor>> ansiColors;
   List<AnsiUpColor> palette256;
-  AnsiUpColor fg;
-  AnsiUpColor bg;
-  RegExp _csiRegex;
+  AnsiUpColor? fg;
+  AnsiUpColor? bg;
+  RegExp? _csiRegex;
 
   void _setupPalettes() {
-    ansiColors = [
-      [
-        AnsiUpColor(rgb: [0, 0, 0], className: 'ansi-black'),
-        AnsiUpColor(rgb: [187, 0, 0], className: 'ansi-red'),
-        AnsiUpColor(rgb: [0, 187, 0], className: 'ansi-green'),
-        AnsiUpColor(rgb: [187, 187, 0], className: 'ansi-yellow'),
-        AnsiUpColor(rgb: [0, 0, 187], className: 'ansi-blue'),
-        AnsiUpColor(rgb: [187, 0, 187], className: 'ansi-magenta'),
-        AnsiUpColor(rgb: [0, 187, 187], className: 'ansi-cyan'),
-        AnsiUpColor(rgb: [255, 255, 255], className: 'ansi-white'),
-      ],
-      [
-        AnsiUpColor(rgb: [85, 85, 85], className: 'ansi-bright-black'),
-        AnsiUpColor(rgb: [255, 85, 85], className: 'ansi-bright-red'),
-        AnsiUpColor(rgb: [0, 255, 0], className: 'ansi-bright-green'),
-        AnsiUpColor(rgb: [255, 255, 85], className: 'ansi-bright-yellow'),
-        AnsiUpColor(rgb: [85, 85, 255], className: 'ansi-bright-blue'),
-        AnsiUpColor(rgb: [255, 85, 255], className: 'ansi-bright-magenta'),
-        AnsiUpColor(rgb: [85, 255, 255], className: 'ansi-bright-cyan'),
-        AnsiUpColor(rgb: [255, 255, 255], className: 'ansi-bright-white'),
-      ]
-    ];
-    palette256 = [];
     ansiColors.forEach(palette256.addAll);
     final levels = [0, 95, 135, 175, 215, 255];
     for (var r = 0; r < 6; ++r) {
@@ -60,8 +60,8 @@ class AnsiUp {
     }
   }
 
-  TextPacket _getNextPacket() {
-    final pkt = TextPacket(kind: PacketKind.EOS, text: '', url: '');
+  _TextPacket _getNextPacket() {
+    final pkt = _TextPacket(kind: PacketKind.EOS);
     final len = _text.length;
     if (len == 0) {
       return pkt;
@@ -92,7 +92,7 @@ class AnsiUp {
         return pkt;
       }
       if (nextChar == '[') {
-        _csiRegex ??= cleanAndConvertToRegex('\n                        '
+        _csiRegex ??= _cleanAndConvertToRegex('\n                        '
             '^                           # beginning of line'
             '\n                                                    #'
             '\n                                                    '
@@ -120,7 +120,7 @@ class AnsiUp {
             '\n                          '
             '([\\x00-\\x1f:])              # anything illegal'
             '\n                        )\n                    ');
-        final match = _csiRegex.firstMatch(_text);
+        final match = _csiRegex!.firstMatch(_text);
         if (match == null) {
           pkt.kind = PacketKind.Incomplete;
           return pkt;
@@ -138,8 +138,11 @@ class AnsiUp {
         } else {
           pkt.kind = PacketKind.SGR;
         }
-        pkt.text = match.groupCount > 2 ? match.group(2) : null;
-        final rpos = match.group(0).length;
+        final text = match.groupCount > 2 ? match.group(2) : null;
+        if (text != null) {
+          pkt.text = text;
+        }
+        final rpos = match.group(0)!.length;
         _text = _text.substring(rpos);
         return pkt;
       }
@@ -207,7 +210,7 @@ class AnsiUp {
     return pkt;
   }
 
-  void _processAnsi(TextPacket textPacket) {
+  void _processAnsi(_TextPacket textPacket) {
     final sgrCmds = textPacket.text.split(';');
     int index = 0;
     while (index < sgrCmds.length) {
@@ -237,7 +240,7 @@ class AnsiUp {
           final isForeground = num == 38;
           final modeCmd = sgrCmds[index++];
           if (modeCmd == '5' && index < sgrCmds.length) {
-            final paletteIndex = int.tryParse(sgrCmds[index++], radix: 10);
+            final paletteIndex = int.tryParse(sgrCmds[index++], radix: 10)!;
             if (paletteIndex >= 0 && paletteIndex <= 255) {
               if (isForeground) {
                 fg = palette256[paletteIndex];
@@ -250,7 +253,10 @@ class AnsiUp {
             final r = int.tryParse(sgrCmds[index++], radix: 10);
             final g = int.tryParse(sgrCmds[index++], radix: 10);
             final b = int.tryParse(sgrCmds[index++], radix: 10);
-            if ((r >= 0 && r <= 255) &&
+            if (r != null &&
+                g != null &&
+                b != null &&
+                (r >= 0 && r <= 255) &&
                 (g >= 0 && g <= 255) &&
                 (b >= 0 && b <= 255)) {
               final c = AnsiUpColor(rgb: [r, g, b], className: 'truecolor');
@@ -266,16 +272,16 @@ class AnsiUp {
     }
   }
 
-  TextWithAttr _withState(TextPacket packet) {
-    return TextWithAttr(bold: bold, fg: fg, bg: bg, text: packet.text);
+  _TextWithAttr _withState(_TextPacket packet) {
+    return _TextWithAttr(bold: bold, fg: fg, bg: bg, text: packet.text);
   }
 }
 
-class TextWithAttr {
-  TextWithAttr({this.fg, this.bg, this.bold, this.text});
+class _TextWithAttr {
+  _TextWithAttr({this.fg, this.bg, this.bold = false, this.text = ''});
 
-  final AnsiUpColor fg;
-  final AnsiUpColor bg;
+  final AnsiUpColor? fg;
+  final AnsiUpColor? bg;
   final bool bold;
   final String text;
 }
@@ -283,8 +289,8 @@ class TextWithAttr {
 class AnsiUpColor {
   AnsiUpColor({this.rgb, this.className});
 
-  final List<int> rgb;
-  final String className;
+  final List<int>? rgb;
+  final String? className;
 }
 
 enum PacketKind {
@@ -297,8 +303,8 @@ enum PacketKind {
   OSCURL,
 }
 
-class TextPacket {
-  TextPacket({this.kind, this.text, this.url});
+class _TextPacket {
+  _TextPacket({required this.kind, this.text = '', this.url = ''});
 
   PacketKind kind;
   String text;
@@ -309,7 +315,7 @@ String _colorToCss(List/*<int>*/ rgb) => 'rgb(${rgb.join(',')})';
 
 // Removes comments and spaces/newlines from a regex string that were present
 // for readability.
-RegExp cleanAndConvertToRegex(String regexText) {
+RegExp _cleanAndConvertToRegex(String regexText) {
   final RegExp spacesAndComments =
       RegExp(r'^\s+|\s+\n|\s*#[\s\S]*?\n|\n', multiLine: true);
   return RegExp(regexText.replaceAll(spacesAndComments, ''));
@@ -322,21 +328,21 @@ class StyledText {
     this.fgColor,
     this.bgColor,
     this.bold = false,
-    this.url,
+    this.url = '',
   });
 
-  factory StyledText.from(TextWithAttr fragment) {
+  factory StyledText.from(_TextWithAttr fragment) {
     return StyledText(
       fragment.text,
-      fgColor: fragment?.fg?.rgb?.toList(),
-      bgColor: fragment?.bg?.rgb?.toList(),
+      fgColor: fragment.fg?.rgb?.toList(),
+      bgColor: fragment.bg?.rgb?.toList(),
       bold: fragment.bold == true,
     );
   }
 
   final String text;
-  final List<int> fgColor;
-  final List<int> bgColor;
+  final List<int>? fgColor;
+  final List<int>? bgColor;
   final bool bold;
   final String url;
 
@@ -344,9 +350,11 @@ class StyledText {
     if (fgColor == null && bgColor == null && !bold) {
       return '';
     }
+    final _bgColor = bgColor;
+    final _fgColor = fgColor;
     return <String>[
-      if (bgColor != null) 'background-color: ${_colorToCss(bgColor)}',
-      if (fgColor != null) 'color: ${_colorToCss(fgColor)}',
+      if (_bgColor != null) 'background-color: ${_colorToCss(_bgColor)}',
+      if (_fgColor != null) 'color: ${_colorToCss(_fgColor)}',
       if (bold) 'font-weight: bold',
     ].join(';');
   }
@@ -357,7 +365,9 @@ class StyledText {
 /// An instance of ansiUp is passed in to maintain text styling state across
 /// multiple invocations of this method.
 Iterable<StyledText> decodeAnsiColorEscapeCodes(
-    String text, AnsiUp ansiUp) sync* {
+  String text,
+  AnsiUp ansiUp,
+) sync* {
   ansiUp._text = text;
   while (true) {
     final packet = ansiUp._getNextPacket();
