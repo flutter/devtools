@@ -89,7 +89,7 @@ class MemoryProfile {
     if (registered.isEmpty) {
       throw Exception('There are no registered methods for service "$name"');
     }
-    return service!.callMethod(
+    return service!.callServiceExtension(
       registered.first,
       isolateId: isolateId,
       args: args,
