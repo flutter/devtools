@@ -250,7 +250,7 @@ class MemoryProfile {
   Future<Response?> getRasterCacheMetrics(IsolateRef selectedIsolate) async {
     final viewId = await getFlutterViewId(selectedIsolate);
 
-    return await callService(
+    return await service!.callServiceExtension(
       registrations.flutterEngineRasterCache,
       args: {'viewId': viewId},
       isolateId: selectedIsolate.id,
