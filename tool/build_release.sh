@@ -8,7 +8,7 @@ set -ex #echo on
 
 # This avoids requiring an internet connection for CanvasKit at runtime.
 # This URL should be updated to keep in sync with the version from the engine.
-# See https://github.com/flutter/engine/blob/353efcdf3c0ec0ecf0275d55e4a22329397f899f/lib/web_ui/lib/src/engine/canvaskit/initialization.dart#L51-L79,
+# See https://github.com/flutter/engine/blob/master/lib/web_ui/lib/src/engine/canvaskit/initialization.dart#L50-L78,
 # but compare with the code in master for getting the current version.
 # A better solution would be to either upstream this functionality into the flutter_tools,
 # (https://github.com/flutter/flutter/issues/74936), or to read this from a manifest 

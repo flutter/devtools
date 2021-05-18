@@ -15,14 +15,14 @@ class MemoryProfile {
   MemoryProfile(this.service, String profileFilename, this._verboseMode) {
     onConnectionClosed.listen(_handleConnectionStop);
 
-    service.onEvent('Service').listen(handleServiceEvent);
+    service!.onEvent('Service').listen(handleServiceEvent);
 
     _jsonFile = MemoryJsonFile.create(profileFilename);
 
     _hookUpEvents();
   }
 
-  MemoryJsonFile _jsonFile;
+  late MemoryJsonFile _jsonFile;
 
   final bool _verboseMode;
 
@@ -42,7 +42,7 @@ class MemoryProfile {
 
     await Future.wait(streamIds.map((String id) async {
       try {
-        await service.streamListen(id);
+        await service!.streamListen(id);
       } catch (e) {
         if (id.endsWith('Logging')) {
           // Don't complain about '_Logging' or 'Logging' events (new VMs don't
@@ -58,21 +58,21 @@ class MemoryProfile {
 
   void handleServiceEvent(Event e) {
     if (e.kind == EventKind.kServiceRegistered) {
-      final serviceName = e.service;
+      final serviceName = e.service!;
       _registeredMethodsForService
           .putIfAbsent(serviceName, () => [])
-          .add(e.method);
+          .add(e.method!);
     }
 
     if (e.kind == EventKind.kServiceUnregistered) {
-      final serviceName = e.service;
+      final serviceName = e.service!;
       _registeredMethodsForService.remove(serviceName);
     }
   }
 
-  IsolateRef _selectedIsolate;
+  late IsolateRef _selectedIsolate;
 
-  Future<Response> getAdbMemoryInfo() async {
+  Future<Response?> getAdbMemoryInfo() async {
     return await callService(
       registrations.flutterMemory.service,
       isolateId: _selectedIsolate.id,
@@ -80,16 +80,16 @@ class MemoryProfile {
   }
 
   /// Call a service that is registered by exactly one client.
-  Future<Response> callService(
+  Future<Response?> callService(
     String name, {
-    String isolateId,
-    Map args,
+    String? isolateId,
+    Map<String, dynamic>? args,
   }) async {
     final registered = _registeredMethodsForService[name] ?? const [];
     if (registered.isEmpty) {
       throw Exception('There are no registered methods for service "$name"');
     }
-    return service.callMethod(
+    return service!.callMethod(
       registered.first,
       isolateId: isolateId,
       args: args,
@@ -98,28 +98,28 @@ class MemoryProfile {
 
   Map<String, List<String>> get registeredMethodsForService =>
       _registeredMethodsForService;
-  final Map<String, List<String>> _registeredMethodsForService = {};
+  final _registeredMethodsForService = <String, List<String>>{};
 
   static const Duration updateDelay = Duration(milliseconds: 500);
 
-  VmService service;
+  VmService? service;
 
-  Timer _pollingTimer;
+  late Timer _pollingTimer;
 
   /// Polled VM current RSS.
-  int processRss;
+  late int processRss;
 
   final Map<String, List<HeapSpace>> isolateHeaps = <String, List<HeapSpace>>{};
 
   final List<HeapSample> samples = <HeapSample>[];
 
-  AdbMemoryInfo adbMemoryInfo;
+  AdbMemoryInfo? adbMemoryInfo;
 
-  EventSample eventSample;
+  late EventSample eventSample;
 
-  RasterCache rasterCache;
+  RasterCache? rasterCache;
 
-  int heapMax;
+  late int heapMax;
 
   Stream<void> get onConnectionClosed => _connectionClosedController.stream;
   final _connectionClosedController = StreamController<void>.broadcast();
@@ -131,44 +131,45 @@ class MemoryProfile {
   // TODO(terry): Investigate moving code from this point through end of class to devtools_shared.
   void startPolling() {
     _pollingTimer = Timer(updateDelay, _pollMemory);
-    service.onGCEvent.listen(_handleGCEvent);
+    service!.onGCEvent.listen(_handleGCEvent);
   }
 
   void _handleGCEvent(Event event) {
     //final bool ignore = event.json['reason'] == 'compact';
-
+    final json = event.json!;
     final List<HeapSpace> heaps = <HeapSpace>[
-      HeapSpace.parse(event.json['new']),
-      HeapSpace.parse(event.json['old'])
+      HeapSpace.parse(json['new'])!,
+      HeapSpace.parse(json['old'])!
     ];
-    _updateGCEvent(event.isolate.id, heaps);
+    _updateGCEvent(event.isolate!.id!, heaps);
     // TODO(terry): expose when GC occured as markers in memory timeline.
   }
 
   void stopPolling() {
-    _pollingTimer?.cancel();
+    _pollingTimer.cancel();
     service = null;
   }
 
   Future<void> _pollMemory() async {
+    final service = this.service!;
     final VM vm = await service.getVM();
 
     // TODO(terry): Need to handle a possible Sentinel being returned.
-    final List<Isolate> isolates =
-        await Future.wait(vm.isolates.map((IsolateRef ref) async {
+    final List<Isolate?> isolates =
+        await Future.wait(vm.isolates!.map((IsolateRef ref) async {
       try {
-        return await service.getIsolate(ref.id);
+        return await service.getIsolate(ref.id!);
       } catch (e) {
         // TODO(terry): Seem to sometimes get a sentinel not sure how? VM issue?
         // Unhandled Exception: type 'Sentinel' is not a subtype of type 'FutureOr<Isolate>'
         print('Error [MEMORY_PROTOCOL]: $e');
-        return null;
+        return Future<Isolate?>.value();
       }
     }));
 
     // Polls for current Android meminfo using:
     //    > adb shell dumpsys meminfo -d <package_name>
-    final isolate = isolates[0];
+    final isolate = isolates[0]!;
     _selectedIsolate = IsolateRef(
       id: isolate.id,
       name: isolate.name,
@@ -176,9 +177,7 @@ class MemoryProfile {
       isSystemIsolate: isolate.isSystemIsolate,
     );
 
-    if (hasConnection &&
-        vm.operatingSystem == 'android' &&
-        _selectedIsolate != null) {
+    if (hasConnection && vm.operatingSystem == 'android') {
       // Poll ADB meminfo
       adbMemoryInfo = await _fetchAdbInfo();
     } else {
@@ -200,28 +199,30 @@ class MemoryProfile {
   }
 
   /// Poll ADB meminfo
-  Future<AdbMemoryInfo> _fetchAdbInfo() async => AdbMemoryInfo.fromJsonInKB(
-        (await getAdbMemoryInfo()).json,
-      );
+  Future<AdbMemoryInfo?> _fetchAdbInfo() async {
+    final adbMemInfo = await getAdbMemoryInfo();
+    if (adbMemInfo?.json != null) {
+      return AdbMemoryInfo.fromJsonInKB(adbMemInfo!.json!);
+    }
+    return null;
+  }
 
   /// Poll Fultter engine's Raster Cache metrics.
   /// @returns engine's rasterCache estimates or null.
-  Future<RasterCache> _fetchRasterCacheInfo(IsolateRef selectedIsolate) async {
+  Future<RasterCache?> _fetchRasterCacheInfo(IsolateRef selectedIsolate) async {
     final response = await getRasterCacheMetrics(selectedIsolate);
-    if (response == null) return null;
-    final rasterCache = RasterCache.parse(response.json);
-    return rasterCache;
+    return RasterCache.parse(response?.json);
   }
 
   /// @returns view id of selected isolate's 'FlutterView'.
   /// @throws Exception if no 'FlutterView'.
-  Future<String> getFlutterViewId(IsolateRef selectedIsolate) async {
+  Future<String?> getFlutterViewId(IsolateRef selectedIsolate) async {
     final flutterViewListResponse = await callService(
       registrations.flutterListViews,
       isolateId: selectedIsolate.id,
-    );
+    ) as Response;
     final List<dynamic> views =
-        flutterViewListResponse.json['views'].cast<Map<String, dynamic>>();
+        flutterViewListResponse.json!['views'].cast<Map<String, dynamic>>();
 
     // Each isolate should only have one FlutterView.
     final flutterView = views.firstWhere(
@@ -236,7 +237,8 @@ class MemoryProfile {
       throw Exception(message);
     }
 
-    return flutterView['id'];
+    final String flutterViewId = flutterView['id']!;
+    return flutterViewId;
   }
 
   /// Flutter engine returns estimate how much memory is used by layer/picture raster
@@ -245,27 +247,24 @@ class MemoryProfile {
   /// Call to returns JSON payload 'EstimateRasterCacheMemory' with two entries:
   ///   layerBytes - layer raster cache entries in bytes
   ///   pictureBytes - picture raster cache entries in bytes
-  Future<Response> getRasterCacheMetrics(IsolateRef selectedIsolate) async {
+  Future<Response?> getRasterCacheMetrics(IsolateRef selectedIsolate) async {
     final viewId = await getFlutterViewId(selectedIsolate);
 
     return await callService(
       registrations.flutterEngineRasterCache,
-      args: <String, String>{
-        'viewId': viewId,
-      },
+      args: {'viewId': viewId},
       isolateId: selectedIsolate.id,
     );
   }
 
-  void _update(VM vm, List<Isolate> isolates) {
-    processRss = vm.json['_currentRSS'];
+  void _update(VM vm, List<Isolate?> isolates) {
+    processRss = vm.json!['_currentRSS'];
 
     isolateHeaps.clear();
 
-    for (Isolate isolate in isolates) {
+    for (Isolate? isolate in isolates) {
       if (isolate != null) {
-        final List<HeapSpace> heaps = getHeaps(isolate).toList();
-        isolateHeaps[isolate.id] = heaps;
+        isolateHeaps[isolate.id!] = getHeaps(isolate);
       }
     }
 
@@ -284,14 +283,14 @@ class MemoryProfile {
     int capacity = 0;
     int external = 0;
     for (List<HeapSpace> heaps in isolateHeaps.values) {
-      used += heaps.fold<int>(0, (i, heap) => i + heap.used);
-      capacity += heaps.fold<int>(0, (i, heap) => i + heap.capacity);
-      external += heaps.fold<int>(0, (i, heap) => i + heap.external);
+      used += heaps.fold<int>(0, (i, heap) => i + heap.used!);
+      capacity += heaps.fold<int>(0, (i, heap) => i + heap.capacity!);
+      external += heaps.fold<int>(0, (i, heap) => i + heap.external!);
 
       capacity += external;
 
       total +=
-          heaps.fold<int>(0, (i, heap) => i + heap.capacity + heap.external);
+          heaps.fold<int>(0, (i, heap) => i + heap.capacity! + heap.external!);
     }
 
     heapMax = total;
@@ -315,18 +314,22 @@ class MemoryProfile {
           mFormat.format(DateTime.fromMillisecondsSinceEpoch(time));
 
       print(' Collected Sample: [$timeCollected] capacity=$capacity, '
-          'ADB MemoryInfo total=${adbMemoryInfo.total}${fromGC ? ' [GC]' : ''}');
+          'ADB MemoryInfo total=${adbMemoryInfo!.total}${fromGC ? ' [GC]' : ''}');
     }
 
     _jsonFile.writeSample(sample);
   }
 
-  static Iterable<HeapSpace> getHeaps(Isolate isolate) {
-    if (isolate != null) {
-      final Map<String, dynamic> heaps = isolate.json['_heaps'];
-      return heaps.values.map((dynamic json) => HeapSpace.parse(json));
+  static List<HeapSpace> getHeaps(Isolate isolate) {
+    final Map<String, dynamic> heaps = isolate.json!['_heaps'];
+    final heapList = <HeapSpace>[];
+    for (final heapJson in heaps.values) {
+      final heap = HeapSpace.parse(heapJson);
+      if (heap != null) {
+        heapList.add(heap);
+      }
     }
-    return const Iterable.empty();
+    return heapList;
   }
 }
 
@@ -336,8 +339,8 @@ class MemoryJsonFile {
   }
 
   final String _absoluteFileName;
-  io.File _fs;
-  io.RandomAccessFile _raFile;
+  late io.File _fs;
+  late io.RandomAccessFile _raFile;
   bool _multipleSamples = false;
 
   void _open() {
@@ -348,7 +351,6 @@ class MemoryJsonFile {
   }
 
   void _populateJsonHeader() {
-    assert(_raFile != null);
     final payload = '${SamplesMemoryJson.header}${MemoryJson.trailer}';
     _raFile.writeStringSync(payload);
     _raFile.flushSync();

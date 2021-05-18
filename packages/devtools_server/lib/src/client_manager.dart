@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:sse/server/sse_handler.dart';
 
 import 'server_api.dart';
@@ -44,23 +45,21 @@ class ClientManager {
   /// a VM service that we can reuse (for example if a user stopped debugging
   /// and it disconnected, then started debugging again, we want to reuse
   /// the open DevTools window).
-  DevToolsClient findReusableClient() {
-    return _clients.firstWhere(
+  DevToolsClient? findReusableClient() {
+    return _clients.firstWhereOrNull(
       (c) => !c.hasConnection && !c.embedded,
-      orElse: () => null,
     );
   }
 
   /// Finds a client that may already be connected to this VM Service.
-  DevToolsClient findExistingConnectedReusableClient(Uri vmServiceUri) {
+  DevToolsClient? findExistingConnectedReusableClient(Uri vmServiceUri) {
     // Checking the whole URI will fail if DevTools converted it from HTTP to
     // WS, so just check the host, port and first segment of path (token).
-    return _clients.firstWhere(
+    return _clients.firstWhereOrNull(
       (c) =>
           c.hasConnection &&
           !c.embedded &&
-          _areSameVmServices(c.vmServiceUri, vmServiceUri),
-      orElse: () => null,
+          _areSameVmServices(c.vmServiceUri!, vmServiceUri),
     );
   }
 
@@ -171,12 +170,12 @@ class DevToolsClient {
 
   final SseConnection _connection;
 
-  Uri _vmServiceUri;
-  Uri get vmServiceUri => _vmServiceUri;
+  Uri? _vmServiceUri;
+  Uri? get vmServiceUri => _vmServiceUri;
   bool get hasConnection => _vmServiceUri != null;
 
-  String _currentPage;
-  String get currentPage => _currentPage;
+  String? _currentPage;
+  String? get currentPage => _currentPage;
 
   bool _embedded = false;
   bool get embedded => _embedded;
