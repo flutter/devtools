@@ -130,8 +130,8 @@ void writeVersionToChangelog(File changelog, String version) {
     return;
   }
   changelog.writeAsString([
-    '$versionString\n',
-    'TODO: update changelog',
+    '$versionString',
+    'TODO: update changelog\n',
     ...lines,
   ].joinWithNewLine());
 }
