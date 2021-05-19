@@ -7,6 +7,7 @@
 # TODO(jacobr): use a consistent version solve across all packages like
 # flutter does. https://github.com/flutter/devtools/issues/2240
 
+echo "Running pub upgrade on all packages"
 pushd packages
 
 pushd devtools
@@ -25,5 +26,5 @@ pushd devtools_shared
 flutter pub upgrade
 popd
 
-
 popd
+echo "Done running pub upgrade"
