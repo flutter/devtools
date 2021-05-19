@@ -216,7 +216,7 @@ class MemoryProfile {
   /// @returns view id of selected isolate's 'FlutterView'.
   /// @throws Exception if no 'FlutterView'.
   Future<String> getFlutterViewId(IsolateRef selectedIsolate) async {
-    final flutterViewListResponse = await callService(
+    final flutterViewListResponse = await service.callServiceExtension(
       registrations.flutterListViews,
       isolateId: selectedIsolate.id,
     );
@@ -248,7 +248,7 @@ class MemoryProfile {
   Future<Response> getRasterCacheMetrics(IsolateRef selectedIsolate) async {
     final viewId = await getFlutterViewId(selectedIsolate);
 
-    return await callService(
+    return await service.callServiceExtension(
       registrations.flutterEngineRasterCache,
       args: <String, String>{
         'viewId': viewId,
