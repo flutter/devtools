@@ -1,3 +1,6 @@
+## 2.2.4
+* Fix bug in devtools_server by calling proper vm service API [#3040](https://github.com/flutter/devtools/pull/3040)
+
 ## 2.2.3
 * Enable the provider screen [#2998](https://github.com/flutter/devtools/pull/2998) [#3010](https://github.com/flutter/devtools/pull/3010) [#3006](https://github.com/flutter/devtools/pull/23006) [#2992](https://github.com/flutter/devtools/pull/2992)
 * Support filtering CPU profiles by UserTags [#2988](https://github.com/flutter/devtools/pull/2988)
