@@ -217,10 +217,10 @@ class MemoryProfile {
   /// @returns view id of selected isolate's 'FlutterView'.
   /// @throws Exception if no 'FlutterView'.
   Future<String?> getFlutterViewId(IsolateRef selectedIsolate) async {
-    final flutterViewListResponse = await callService(
+    final flutterViewListResponse = await service!.callServiceExtension(
       registrations.flutterListViews,
       isolateId: selectedIsolate.id,
-    ) as Response;
+    );
     final List<dynamic> views =
         flutterViewListResponse.json!['views'].cast<Map<String, dynamic>>();
 
@@ -250,7 +250,7 @@ class MemoryProfile {
   Future<Response?> getRasterCacheMetrics(IsolateRef selectedIsolate) async {
     final viewId = await getFlutterViewId(selectedIsolate);
 
-    return await callService(
+    return await service!.callServiceExtension(
       registrations.flutterEngineRasterCache,
       args: {'viewId': viewId},
       isolateId: selectedIsolate.id,
