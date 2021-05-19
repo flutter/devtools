@@ -107,7 +107,7 @@ class MemoryProfile {
   late Timer _pollingTimer;
 
   /// Polled VM current RSS.
-  late int processRss;
+  int? processRss;
 
   final Map<String, List<HeapSpace>> isolateHeaps = <String, List<HeapSpace>>{};
 
@@ -298,7 +298,7 @@ class MemoryProfile {
     final time = DateTime.now().millisecondsSinceEpoch;
     final sample = HeapSample(
       time,
-      processRss,
+      processRss ?? -1,
       capacity,
       used,
       external,
