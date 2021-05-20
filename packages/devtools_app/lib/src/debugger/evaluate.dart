@@ -296,7 +296,8 @@ Future<List<String>> autoCompleteResultsFor(
         );
         // TODO(grouma) - This shouldn't be necessary but package:dwds does
         // not properly provide superclass information.
-        result.addAll(instance.fields.map((field) => field.decl.name));
+        result.addAll(instance.fields.map((field) => field.decl.name).where(
+            (member) => !_isAccessible(member, instance.classRef, controller)));
       }
     } catch (_) {}
   }
@@ -310,14 +311,17 @@ Future<Set<String>> _autoCompleteMembersFor(
 ) async {
   final result = <String>{};
   if (classRef != null) {
-    final Class clazz = await controller.getObject(classRef);
-    result.addAll(clazz.fields.map((field) => field.name));
-    result.addAll(clazz.functions
-        .where((funcRef) => _validFunction(funcRef, clazz))
-        // The VM shows setters as `<member>=`.
-        .map((funcRef) => funcRef.name.replaceAll('=', '')));
-    result.addAll(await _autoCompleteMembersFor(clazz.superClass, controller));
-    result.removeWhere((member) => !_isAccessible(member, clazz, controller));
+    try {
+      final Class clazz = await controller.getObject(classRef);
+      result.addAll(clazz.fields.map((field) => field.name));
+      result.addAll(clazz.functions
+          .where((funcRef) => _validFunction(funcRef, clazz))
+          // The VM shows setters as `<member>=`.
+          .map((funcRef) => funcRef.name.replaceAll('=', '')));
+      result
+          .addAll(await _autoCompleteMembersFor(clazz.superClass, controller));
+      result.removeWhere((member) => !_isAccessible(member, clazz, controller));
+    } catch (_) {}
   }
   return result;
 }
