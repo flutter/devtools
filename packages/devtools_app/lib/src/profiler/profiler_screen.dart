@@ -279,6 +279,11 @@ class _SecondaryControls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
+        RefreshButton(
+          label: 'Load all CPU samples',
+          onPressed: controller.loadAllSamples,
+        ),
+        const SizedBox(width: defaultSpacing),
         ProfileGranularityDropdown(
           screenId: ProfilerScreen.id,
           profileGranularityFlagNotifier:
