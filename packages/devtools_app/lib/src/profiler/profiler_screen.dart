@@ -279,7 +279,7 @@ class _SecondaryControls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        RefrshButton(
+        RefreshButton(
           label: 'Load all CPU samples',
           onPressed: controller.loadAllSamples,
         ),
