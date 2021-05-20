@@ -580,6 +580,12 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
             return KeyEventResult.handled;
           }
         }
+
+        // We don't support tabs in the search input. Swallow to prevent a
+        // change of focus.
+        if (key == tab || key == tabMac) {
+          return KeyEventResult.handled;
+        }
       }
 
       return KeyEventResult.ignored;
