@@ -235,7 +235,7 @@ class _PrimaryControls extends StatelessWidget {
     @required this.controller,
     @required this.recording,
   });
-  
+
   static const _primaryControlsMinIncludeTextWidth = 600.0;
 
   final ProfilerScreenController controller;
