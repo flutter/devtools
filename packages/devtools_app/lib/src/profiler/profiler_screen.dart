@@ -289,7 +289,6 @@ class _SecondaryControls extends StatelessWidget {
           profileGranularityFlagNotifier:
               controller.cpuProfilerController.profileGranularityFlagNotifier,
         ),
-
         const SizedBox(width: defaultSpacing),
         ExportButton(
           onPressed: controller.cpuProfileData != null &&
