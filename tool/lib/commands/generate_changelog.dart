@@ -6,9 +6,8 @@ import 'dart:async';
 import 'dart:convert' show jsonDecode;
 import 'dart:io';
 
-import 'package:http/http.dart' as http;
-
 import 'package:args/command_runner.dart';
+import 'package:http/http.dart' as http;
 
 import '../model.dart';
 

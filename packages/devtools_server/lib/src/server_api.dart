@@ -28,7 +28,7 @@ class ServerApi {
   /// To override an API call, pass in a subclass of [ServerApi].
   static FutureOr<shelf.Response> handle(
     shelf.Request request, [
-    ServerApi api,
+    ServerApi? api,
   ]) {
     api ??= ServerApi();
     switch (request.url.path) {
@@ -37,7 +37,7 @@ class ServerApi {
         // Is Analytics collection enabled?
         return api.getCompleted(
           request,
-          json.encode(FlutterUsage.doesStoreExist ? _usage.enabled : null),
+          json.encode(FlutterUsage.doesStoreExist ? _usage!.enabled : ''),
         );
       case apiGetFlutterGAClientId:
         // Flutter Tool GA clientId - ONLY get Flutter's clientId if enabled is
@@ -45,11 +45,11 @@ class ServerApi {
         return (FlutterUsage.doesStoreExist)
             ? api.getCompleted(
                 request,
-                json.encode(_usage.enabled ? _usage.clientId : null),
+                json.encode(_usage!.enabled ? _usage!.clientId : ''),
               )
             : api.getCompleted(
                 request,
-                json.encode(null),
+                json.encode(''),
               );
 
       // ----- DevTools GA store. -----
@@ -71,7 +71,7 @@ class ServerApi {
         final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(devToolsEnabledPropertyName)) {
           _devToolsUsage.enabled =
-              json.decode(queryParams[devToolsEnabledPropertyName]);
+              json.decode(queryParams[devToolsEnabledPropertyName]!);
         }
         return api.setCompleted(request, json.encode(_devToolsUsage.enabled));
 
@@ -87,7 +87,7 @@ class ServerApi {
         final queryParams = request.requestedUri.queryParameters;
         if (queryParams.keys.length == 1 &&
             queryParams.containsKey(activeSurveyName)) {
-          final String theSurveyName = queryParams[activeSurveyName];
+          final String theSurveyName = queryParams[activeSurveyName]!;
 
           // Set the current activeSurvey.
           _devToolsUsage.activeSurvey = theSurveyName;
@@ -120,7 +120,7 @@ class ServerApi {
         final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(surveyActionTakenPropertyName)) {
           _devToolsUsage.surveyActionTaken =
-              json.decode(queryParams[surveyActionTakenPropertyName]);
+              json.decode(queryParams[surveyActionTakenPropertyName]!);
         }
         return api.setCompleted(
           request,
@@ -152,7 +152,7 @@ class ServerApi {
       case apiGetBaseAppSizeFile:
         final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(baseAppSizeFilePropertyName)) {
-          final filePath = queryParams[baseAppSizeFilePropertyName];
+          final filePath = queryParams[baseAppSizeFilePropertyName]!;
           final fileJson = LocalFileSystem.devToolsFileAsJson(filePath);
           if (fileJson == null) {
             return api.badRequest('No JSON file available at $filePath.');
@@ -165,7 +165,7 @@ class ServerApi {
       case apiGetTestAppSizeFile:
         final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(testAppSizeFilePropertyName)) {
-          final filePath = queryParams[testAppSizeFilePropertyName];
+          final filePath = queryParams[testAppSizeFilePropertyName]!;
           final fileJson = LocalFileSystem.devToolsFileAsJson(filePath);
           if (fileJson == null) {
             return api.badRequest('No JSON file available at $filePath.');
@@ -183,7 +183,7 @@ class ServerApi {
   // Accessing Flutter usage file e.g., ~/.flutter.
   // NOTE: Only access the file if it exists otherwise Flutter Tool hasn't yet
   //       been run.
-  static final FlutterUsage _usage =
+  static final FlutterUsage? _usage =
       FlutterUsage.doesStoreExist ? FlutterUsage() : null;
 
   // Accessing DevTools usage file e.g., ~/.devtools
@@ -210,7 +210,7 @@ class ServerApi {
   /// setActiveSurvey not called.
   ///
   /// This is a 400 Bad Request response.
-  FutureOr<shelf.Response> badRequest([String logError]) {
+  FutureOr<shelf.Response> badRequest([String? logError]) {
     if (logError != null) print(logError);
     return shelf.Response(HttpStatus.badRequest);
   }

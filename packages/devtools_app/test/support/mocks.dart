@@ -37,10 +37,17 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     this.availableServices = const [],
     this.availableLibraries = const [],
   }) : service = service ?? createFakeService() {
-    _flagManager.vmServiceOpened(this.service);
+    initFlagManager();
 
     when(errorBadgeManager.erroredItemsForPage(any)).thenReturn(
         FixedValueListenable(LinkedHashMap<String, DevToolsError>()));
+  }
+
+  Completer<void> flagsInitialized = Completer();
+
+  Future<void> initFlagManager() async {
+    await _flagManager.vmServiceOpened(service);
+    flagsInitialized.complete();
   }
 
   static FakeVmService createFakeService({

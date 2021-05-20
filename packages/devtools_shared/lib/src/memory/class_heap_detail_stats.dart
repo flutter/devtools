@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 /// Entries for each class statistics
 class ClassHeapDetailStats {
   ClassHeapDetailStats(
     this.classRef, {
-    @required int bytes,
+    required int bytes,
     int deltaBytes = 0,
-    @required int instances,
+    required int instances,
     int deltaInstances = 0,
     bool traceAllocations = false,
   })  : bytesCurrent = bytes,

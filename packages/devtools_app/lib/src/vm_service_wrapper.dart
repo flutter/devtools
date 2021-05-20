@@ -8,6 +8,7 @@ import 'package:dds/vm_service_extensions.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'globals.dart';
 import 'profiler/cpu_profile_model.dart';
 import 'version.dart';
 
@@ -316,6 +317,10 @@ class VmServiceWrapper implements VmService {
           'ts': sample.timestamp,
           'cat': 'Dart',
           CpuProfileData.stackFrameIdKey: '$isolateId-${tree.frameId}',
+          'args': {
+            if (sample.userTag != null) 'userTag': sample.userTag,
+            if (sample.vmTag != null) 'vmTag': sample.vmTag,
+          },
         });
       }
       return CpuProfileData.parse(traceObject);
@@ -409,7 +414,17 @@ class VmServiceWrapper implements VmService {
     int tokenPos,
     int endTokenPos,
     bool forceCompile,
-  }) {
+  }) async {
+    // Workaround for https://github.com/flutter/devtools/issues/2981.
+    // TODO(bkonyi): remove after Flutter stable is on Dart SDK > 2.12.
+    if (await serviceManager.connectedApp.isProfileBuild) {
+      const kFeatureDisabled = 100;
+      throw RPCError(
+        'getSourceReport',
+        kFeatureDisabled,
+        'disabled in AOT mode and PRODUCT.',
+      );
+    }
     return trackFuture(
         'getSourceReport',
         _vmService.getSourceReport(

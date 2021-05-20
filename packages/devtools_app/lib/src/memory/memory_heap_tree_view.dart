@@ -243,18 +243,17 @@ class HeapTreeViewState extends State<HeapTree>
     });
 
     addAutoDisposeListener(controller.searchNotifier, () {
-      setState(() {
-        controller.closeAutoCompleteOverlay();
-        controller.currentDefaultIndex = 0;
-      });
+      controller.closeAutoCompleteOverlay();
+      controller.currentDefaultIndex = 0;
     });
 
     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
       SnapshotFilterState.gaActionForSnapshotFilterDialog();
-      setState(controller.autoCompleteOverlaySetState(
+      controller.handleAutoCompleteOverlay(
         context: context,
         searchFieldKey: memorySearchFieldKey,
-      ));
+        onTap: selectTheMatch,
+      );
     });
 
     addAutoDisposeListener(controller.monitorAllocationsNotifier, () {
@@ -279,12 +278,6 @@ class HeapTreeViewState extends State<HeapTree>
 
   @override
   void dispose() {
-    // Clean up the TextFieldController and FocusNode.
-    searchTextFieldController.dispose();
-    searchFieldFocusNode.dispose();
-
-    rawKeyboardFocusNode.dispose();
-
     _animation.dispose();
 
     super.dispose();
@@ -913,32 +906,6 @@ class HeapTreeViewState extends State<HeapTree>
     controller.monitorAllocations = currentAllocations;
   }
 
-  void highlightDropdown(bool directionDown) {
-    final numItems = controller.searchAutoComplete.value.length - 1;
-    var indexToSelect = controller.currentDefaultIndex;
-    if (directionDown) {
-      // Select next item in auto-complete overlay.
-      ++indexToSelect;
-      if (indexToSelect > numItems) {
-        // Greater than max go back to top list item.
-        indexToSelect = 0;
-      }
-    } else {
-      // Select previous item item in auto-complete overlay.
-      --indexToSelect;
-      if (indexToSelect < 0) {
-        // Less than first go back to bottom list item.
-        indexToSelect = numItems;
-      }
-    }
-
-    controller.currentDefaultIndex = indexToSelect;
-
-    // Cause the auto-complete list to update, list is small 10 items max.
-    controller.searchAutoComplete.value =
-        controller.searchAutoComplete.value.toList();
-  }
-
   /// Match, found,  select it and process via ValueNotifiers.
   void selectTheMatch(String foundName) {
     MemoryScreen.gaAction(name: memorySearchFieldKeyName);
@@ -974,7 +941,7 @@ class HeapTreeViewState extends State<HeapTree>
           searchFieldEnabled: _isSearchable,
           shouldRequestFocus: _isSearchable,
           onSelection: selectTheMatch,
-          onHighlightDropdown: highlightDropdown,
+          supportClearField: true,
         ),
       );
 
@@ -1236,10 +1203,30 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
   }
 
   void _handleSearch() {
-    if (_trySelectItem()) {
-      setState(() {
-        controller.closeAutoCompleteOverlay();
-      });
+    final searchingValue = controller.search;
+    if (searchingValue.isNotEmpty) {
+      if (controller.selectTheSearch) {
+        // Found an exact match.
+        selectItemInTree(searchingValue);
+        controller.selectTheSearch = false;
+        controller.resetSearch();
+        return;
+      }
+
+      // No exact match, return the list of possible matches.
+      controller.clearSearchAutoComplete();
+
+      final matches = _snapshotMatches(searchingValue);
+
+      // Remove duplicates and sort the matches.
+      final normalizedMatches = matches.toSet().toList()..sort();
+      // Use the top 10 matches:
+      controller.searchAutoComplete.value = normalizedMatches.sublist(
+          0,
+          min(
+            topMatchesLimit,
+            normalizedMatches.length,
+          ));
     }
   }
 
@@ -1288,36 +1275,6 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
     matches.addAll(externalMatches);
     matches.addAll(filteredMatches);
     return matches;
-  }
-
-  bool _trySelectItem() {
-    final searchingValue = controller.search;
-    if (searchingValue.isNotEmpty) {
-      if (controller.selectTheSearch) {
-        // Found an exact match.
-        selectItemInTree(searchingValue);
-        controller.selectTheSearch = false;
-        controller.resetSearch();
-        return true;
-      }
-
-      // No exact match, return the list of possible matches.
-      controller.clearSearchAutoComplete();
-
-      final matches = _snapshotMatches(searchingValue);
-
-      // Remove duplicates and sort the matches.
-      final normalizedMatches = matches.toSet().toList()..sort();
-      // Use the top 10 matches:
-      controller.searchAutoComplete.value = normalizedMatches.sublist(
-          0,
-          min(
-            topMatchesLimit,
-            normalizedMatches.length,
-          ));
-    }
-
-    return false;
   }
 
   List<String> _maybeAddMatch(Reference reference, String search) {

@@ -27,20 +27,13 @@ import 'server_api.dart';
 /// DevTools project.
 Future<shelf.Handler> defaultHandler(
   ClientManager clients, {
-  String customDevToolsPath,
+  String? customDevToolsPath,
   bool debugMode = false,
 }) async {
-  String buildDir = customDevToolsPath;
-  if (buildDir == null) {
-    final resourceUri = await Isolate.resolvePackageUri(
-        Uri(scheme: 'package', path: 'devtools/devtools.dart'));
-
-    final packageDir = path.dirname(path.dirname(resourceUri.toFilePath()));
-    buildDir = path.join(packageDir, 'build');
-  }
+  final buildDir = customDevToolsPath ?? await _resolveBuildDir();
 
   // Default static handler for all non-package requests.
-  Handler buildDirHandler;
+  Handler? buildDirHandler;
   if (!debugMode) {
     buildDirHandler = createStaticHandler(
       buildDir,
@@ -48,7 +41,7 @@ Future<shelf.Handler> defaultHandler(
     );
   }
 
-  Handler debugProxyHandler;
+  Handler? debugProxyHandler;
   if (debugMode) {
     // Start up a flutter run -d web-server instance.
     const webPort = 9101;
@@ -102,11 +95,23 @@ Future<shelf.Handler> defaultHandler(
     }
 
     if (debugMode) {
-      return debugProxyHandler(request);
+      return debugProxyHandler!(request);
     } else {
-      return buildDirHandler(request);
+      return buildDirHandler!(request);
     }
   };
 
   return handler;
+}
+
+Future<String> _resolveBuildDir() async {
+  final resourceUri = await Isolate.resolvePackageUri(
+    Uri(
+      scheme: 'package',
+      path: 'devtools/devtools.dart',
+    ),
+  );
+
+  final packageDir = path.dirname(path.dirname(resourceUri!.toFilePath()));
+  return path.join(packageDir, 'build');
 }

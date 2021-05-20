@@ -192,7 +192,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
   @override
   FutureOr<void> processOfflineData(CpuProfileData offlineData) async {
     await controller.cpuProfilerController.transformer.processData(offlineData);
-    controller.cpuProfilerController.loadOfflineData(offlineData);
+    controller.cpuProfilerController.loadProcessedData(offlineData);
   }
 
   @override
@@ -235,10 +235,13 @@ class _PrimaryControls extends StatelessWidget {
     @required this.controller,
     @required this.recording,
   });
+  
   static const _primaryControlsMinIncludeTextWidth = 600.0;
+
   final ProfilerScreenController controller;
 
   final bool recording;
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -266,7 +269,9 @@ class _PrimaryControls extends StatelessWidget {
 
 class _SecondaryControls extends StatelessWidget {
   const _SecondaryControls({@required this.controller});
+
   static const _secondaryControlsMinIncludeTextWidth = 1100.0;
+
   final ProfilerScreenController controller;
 
   @override
@@ -274,12 +279,17 @@ class _SecondaryControls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        RefreshButton(
+        RefrshButton(
           label: 'Load all CPU samples',
           onPressed: controller.loadAllSamples,
         ),
         const SizedBox(width: defaultSpacing),
-        const ProfileGranularityDropdown(ProfilerScreen.id),
+        ProfileGranularityDropdown(
+          screenId: ProfilerScreen.id,
+          profileGranularityFlagNotifier:
+              controller.cpuProfilerController.profileGranularityFlagNotifier,
+        ),
+
         const SizedBox(width: defaultSpacing),
         ExportButton(
           onPressed: controller.cpuProfileData != null &&

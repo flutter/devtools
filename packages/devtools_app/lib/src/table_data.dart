@@ -372,6 +372,7 @@ abstract class ColumnData<T> {
   /// Get the cell's display value from the given [dataObject].
   String getDisplayValue(T dataObject) => getValue(dataObject).toString();
 
+  // TODO(kenz): this isn't hooked up to the table elements. Do this.
   /// Get the cell's tooltip value from the given [dataObject].
   String getTooltip(T dataObject) => getDisplayValue(dataObject);
 

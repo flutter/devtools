@@ -1,3 +1,5 @@
+## 2.3.0
+- Migrate to null safety.
 ## 0.2.3
 - Coordinated release with DevTools 0.2.3.
 ## 0.2.2

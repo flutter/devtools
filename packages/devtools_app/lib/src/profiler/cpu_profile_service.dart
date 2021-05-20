@@ -4,14 +4,14 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
 import '../vm_flags.dart' as vm_flags;
+import '../vm_service_wrapper.dart';
 import 'cpu_profile_model.dart';
 
 /// Manages interactions between the Cpu Profiler and the VmService.
-class CpuProfilerService {
+extension CpuProfilerExtension on VmServiceWrapper {
   Future<CpuProfileData> getCpuProfile({
     @required int startMicros,
     @required int extentMicros,
@@ -23,14 +23,7 @@ class CpuProfilerService {
     );
   }
 
-  /// Notifies that the vm profiler flag has changed.
-  ValueNotifier<Flag> get profilerFlagNotifier =>
-      serviceManager.vmFlagManager.flag(vm_flags.profiler);
-
-  ValueNotifier<Flag> get profileGranularityFlagNotifier =>
-      serviceManager.vmFlagManager.flag(vm_flags.profilePeriod);
-
-  Future clearCpuSamples() {
+  Future clearSamples() {
     return serviceManager.service
         .clearCpuSamples(serviceManager.isolateManager.selectedIsolate.id);
   }

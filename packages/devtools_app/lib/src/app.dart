@@ -20,6 +20,7 @@ import 'config_specific/server/server.dart';
 import 'debugger/debugger_controller.dart';
 import 'debugger/debugger_screen.dart';
 import 'dialogs.dart';
+import 'example/conditional_screen.dart';
 import 'framework/framework_core.dart';
 import 'globals.dart';
 import 'initializer.dart';
@@ -37,6 +38,7 @@ import 'performance/performance_controller.dart';
 import 'performance/performance_screen.dart';
 import 'profiler/profiler_screen.dart';
 import 'profiler/profiler_screen_controller.dart';
+import 'provider/provider_screen.dart';
 import 'routing.dart';
 import 'scaffold.dart';
 import 'screen.dart';
@@ -46,6 +48,10 @@ import 'ui/service_extension_widgets.dart';
 import 'utils.dart';
 import 'vm_developer/vm_developer_tools_controller.dart';
 import 'vm_developer/vm_developer_tools_screen.dart';
+
+// Assign to true to use a sample implementation of a conditional screen.
+// WARNING: Do not check in this file if debugEnableSampleScreen is true.
+const debugEnableSampleScreen = false;
 
 // Disabled until VM developer mode functionality is added.
 const showVmDeveloperMode = false;
@@ -604,6 +610,7 @@ List<DevToolsScreen> get defaultScreens {
       const LoggingScreen(),
       createController: () => LoggingController(),
     ),
+    DevToolsScreen<void>(const ProviderScreen(), createController: () {}),
     DevToolsScreen<AppSizeController>(
       const AppSizeScreen(),
       createController: () => AppSizeController(),
@@ -612,11 +619,12 @@ List<DevToolsScreen> get defaultScreens {
       VMDeveloperToolsScreen(controller: vmDeveloperToolsController),
       controller: vmDeveloperToolsController,
     ),
-// Uncomment to see a sample implementation of a conditional screen.
-//      DevToolsScreen<ExampleController>(
-//        const ExampleConditionalScreen(),
-//        createController: () => ExampleController(),
-//        supportsOffline: true,
-//      ),
+    // Show the sample DevTools screen.
+    if (debugEnableSampleScreen && (kDebugMode || kProfileMode))
+      DevToolsScreen<ExampleController>(
+        const ExampleConditionalScreen(),
+        createController: () => ExampleController(),
+        supportsOffline: true,
+      ),
   ];
 }

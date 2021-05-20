@@ -13,24 +13,24 @@ class HeapSpace {
         time = json['time'],
         used = json['used'];
 
-  static HeapSpace parse(Map<String, dynamic> json) =>
+  static HeapSpace? parse(Map<String, dynamic>? json) =>
       json == null ? null : HeapSpace._fromJson(json);
 
   final Map<String, dynamic> json;
 
-  final double avgCollectionPeriodMillis;
+  final double? avgCollectionPeriodMillis;
 
-  final int capacity;
+  final int? capacity;
 
-  final int collections;
+  final int? collections;
 
-  final int external;
+  final int? external;
 
-  final String name;
+  final String? name;
 
-  final double time;
+  final double? time;
 
-  final int used;
+  final int? used;
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};

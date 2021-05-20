@@ -16,6 +16,7 @@ import '../common_widgets.dart';
 import '../config_specific/host_platform/host_platform.dart';
 import '../dialogs.dart';
 import '../flex_split_column.dart';
+import '../globals.dart';
 import '../listenable.dart';
 import '../screen.dart';
 import '../split.dart';
@@ -107,6 +108,13 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   }
 
   Future<void> _toggleBreakpoint(ScriptRef script, int line) async {
+    // The VM doesn't support debugging for system isolates and will crash on
+    // a failed assert in debug mode. Disable the toggle breakpoint
+    // functionality for system isolates.
+    if (serviceManager.isolateManager.selectedIsolate.isSystemIsolate) {
+      return;
+    }
+
     final bp = controller.breakpointsWithLocation.value.firstWhere((bp) {
       return bp.scriptRef == script && bp.line == line;
     }, orElse: () => null);

@@ -367,6 +367,12 @@ class NetworkController
     for (final request in currentRequests) {
       if (request.uri.toLowerCase().contains(caseInsensitiveSearch)) {
         matches.add(request);
+        // TODO(kenz): use the value of this property in the network requests
+        // table to improve performance. This will require some refactoring of
+        // FlatTable.
+        request.isSearchMatch = true;
+      } else {
+        request.isSearchMatch = false;
       }
     }
     return matches;

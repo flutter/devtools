@@ -229,7 +229,11 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        const ProfileGranularityDropdown(PerformanceScreen.id),
+        ProfileGranularityDropdown(
+          screenId: PerformanceScreen.id,
+          profileGranularityFlagNotifier:
+              controller.cpuProfilerController.profileGranularityFlagNotifier,
+        ),
         const SizedBox(width: defaultSpacing),
         if (!serviceManager.connectedApp.isDartCliAppNow)
           ServiceExtensionButtonGroup(
@@ -246,7 +250,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         const SizedBox(width: defaultSpacing),
         SettingsOutlinedButton(
           onPressed: _openSettingsDialog,
-          tooltip: 'Performance Settings',
+          label: 'Performance Settings',
         ),
       ],
     );

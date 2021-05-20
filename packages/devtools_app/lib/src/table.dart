@@ -810,7 +810,7 @@ class _Table<T> extends StatefulWidget {
   final ValueListenable<T> activeSearchMatchNotifier;
 
   /// The width to assume for columns that don't specify a width.
-  static const defaultColumnWidth = 1000.0;
+  static const defaultColumnWidth = 500.0;
 
   int get numSpacers => max(0, columns.length - 1);
 

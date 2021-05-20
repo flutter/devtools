@@ -1089,6 +1089,33 @@ void main() {
         expect(str.caseInsensitiveFuzzyMatch('gello'), isFalse);
         expect(str.caseInsensitiveFuzzyMatch('files'), isFalse);
       });
+
+      test('caseInsensitiveContains', () {
+        const str = 'This is a test string with a path/to/uri';
+        expect(str.caseInsensitiveContains('test'), isTrue);
+        expect(str.caseInsensitiveContains('with a PATH/'), isTrue);
+        expect(str.caseInsensitiveContains('THIS IS A'), isTrue);
+        expect(str.caseInsensitiveContains('not a match'), isFalse);
+        expect(str.caseInsensitiveContains('test bool'), isFalse);
+        expect(
+          str.caseInsensitiveContains(RegExp('is.*path', caseSensitive: false)),
+          isTrue,
+        );
+        expect(
+          () => str.caseInsensitiveContains(RegExp('is.*path')),
+          throwsAssertionError,
+        );
+        expect(
+          str.caseInsensitiveContains(
+              RegExp('THIS IS.*TO/uri', caseSensitive: false)),
+          isTrue,
+        );
+        expect(
+          str.caseInsensitiveContains(
+              RegExp('this.*does not match', caseSensitive: false)),
+          isFalse,
+        );
+      });
     });
   });
 }

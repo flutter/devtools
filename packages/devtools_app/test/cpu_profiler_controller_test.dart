@@ -4,11 +4,13 @@
 
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_controller.dart';
+import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:test/test.dart';
 
 import 'support/mocks.dart';
+import 'support/utils.dart';
 
 void main() {
   group('CpuProfileController', () {
@@ -74,6 +76,116 @@ void main() {
 
       await controller.clear();
       expect(controller.selectedCpuStackFrameNotifier.value, isNull);
+    });
+
+    test('matchesForSearch', () async {
+      // [startMicros] and [extentMicros] are arbitrary for testing.
+      await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
+      expect(
+          controller.dataNotifier.value.stackFrames.values.length, equals(17));
+
+      // Match on name.
+      expect(controller.matchesForSearch(null).length, equals(0));
+      expect(controller.matchesForSearch('').length, equals(0));
+      expect(controller.matchesForSearch('render').length, equals(9));
+      expect(controller.matchesForSearch('RenderObject').length, equals(3));
+      expect(controller.matchesForSearch('THREAD').length, equals(2));
+      expect(controller.matchesForSearch('paint').length, equals(7));
+
+      // Match on url.
+      expect(controller.matchesForSearch('rendering/').length, equals(9));
+      expect(controller.matchesForSearch('proxy_box.dart').length, equals(2));
+      expect(controller.matchesForSearch('dartlang-sdk').length, equals(1));
+
+      // Match with RegExp.
+      expect(
+          controller.matchesForSearch('rendering/.*\.dart').length, equals(9));
+      expect(controller.matchesForSearch('RENDER.*\.paint').length, equals(6));
+    });
+
+    test('matchesForSearch sets isSearchMatch property', () async {
+      // [startMicros] and [extentMicros] are arbitrary for testing.
+      await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
+      expect(
+          controller.dataNotifier.value.stackFrames.values.length, equals(17));
+
+      var matches = controller.matchesForSearch('render');
+      verifyIsSearchMatch(
+        controller.dataNotifier.value.stackFrames.values.toList(),
+        matches,
+      );
+
+      matches = controller.matchesForSearch('THREAD');
+      verifyIsSearchMatch(
+        controller.dataNotifier.value.stackFrames.values.toList(),
+        matches,
+      );
+    });
+
+    test('processDataForTag', () async {
+      final cpuProfileDataWithTags =
+          CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
+      await controller.transformer.processData(cpuProfileDataWithTags);
+      controller.loadProcessedData(cpuProfileDataWithTags);
+
+      expect(
+          controller.dataNotifier.value.cpuProfileRoot.profileMetaData.time
+              .duration.inMicroseconds,
+          equals(250));
+      expect(
+        controller.dataNotifier.value.cpuProfileRoot.toStringDeep(),
+        equals(
+          '''
+  all - children: 1 - excl: 0 - incl: 5
+    Frame1 - children: 2 - excl: 0 - incl: 5
+      Frame2 - children: 2 - excl: 0 - incl: 2
+        Frame3 - children: 0 - excl: 1 - incl: 1
+        Frame4 - children: 0 - excl: 1 - incl: 1
+      Frame5 - children: 1 - excl: 2 - incl: 3
+        Frame6 - children: 0 - excl: 1 - incl: 1
+''',
+        ),
+      );
+
+      await controller.loadDataWithTag('userTagA');
+      expect(
+        controller.dataNotifier.value.cpuProfileRoot.toStringDeep(),
+        equals(
+          '''
+  all - children: 1 - excl: 0 - incl: 2
+    Frame1 - children: 2 - excl: 0 - incl: 2
+      Frame2 - children: 1 - excl: 0 - incl: 1
+        Frame3 - children: 0 - excl: 1 - incl: 1
+      Frame5 - children: 0 - excl: 1 - incl: 1
+''',
+        ),
+      );
+
+      await controller.loadDataWithTag('userTagB');
+      expect(
+        controller.dataNotifier.value.cpuProfileRoot.toStringDeep(),
+        equals(
+          '''
+  all - children: 1 - excl: 0 - incl: 1
+    Frame1 - children: 1 - excl: 0 - incl: 1
+      Frame2 - children: 1 - excl: 0 - incl: 1
+        Frame4 - children: 0 - excl: 1 - incl: 1
+''',
+        ),
+      );
+
+      await controller.loadDataWithTag('userTagC');
+      expect(
+        controller.dataNotifier.value.cpuProfileRoot.toStringDeep(),
+        equals(
+          '''
+  all - children: 1 - excl: 0 - incl: 2
+    Frame1 - children: 1 - excl: 0 - incl: 2
+      Frame5 - children: 1 - excl: 1 - incl: 2
+        Frame6 - children: 0 - excl: 1 - incl: 1
+''',
+        ),
+      );
     });
 
     test('reset', () async {

@@ -60,7 +60,7 @@ TextStyle primaryColor(TextStyle style, BuildContext context) {
   return style.copyWith(
     color: (theme.brightness == Brightness.light)
         ? theme.primaryColor
-        : theme.accentColor,
+        : theme.colorScheme.secondary,
     fontWeight: FontWeight.w400,
   );
 }
@@ -255,30 +255,24 @@ class StopRecordingButton extends StatelessWidget {
 class SettingsOutlinedButton extends StatelessWidget {
   const SettingsOutlinedButton({
     @required this.onPressed,
-    @required this.tooltip,
+    @required this.label,
   });
 
   final VoidCallback onPressed;
 
-  final String tooltip;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      // TODO(kenz): this height should be unnecessary once
-      // https://github.com/flutter/flutter/issues/79894 is fixed.
-      height: defaultButtonHeight,
-      width: defaultButtonHeight, // This will result in a square button.
-      child: DevToolsTooltip(
-        tooltip: tooltip,
-        child: OutlinedButton(
-          onPressed: onPressed,
-          child: const Icon(
-            Icons.settings,
-            size: defaultIconSize,
-          ),
-        ),
-      ),
+    return IconLabelButton(
+      onPressed: onPressed,
+      icon: Icons.settings,
+      label: label,
+      // TODO(jacobr): consider a more conservative min-width. To minimize the
+      // impact on the existing UI and deal with the fact that some of the
+      // existing label names are fairly verbose, we set a width that will
+      // never be hit.
+      includeTextWidth: 20000,
     );
   }
 }
@@ -1261,18 +1255,20 @@ class _BreadcrumbPainter extends CustomPainter {
 }
 
 class FormattedJson extends StatelessWidget {
-  const FormattedJson({@required this.json});
+  const FormattedJson({this.json, this.formattedString})
+      : assert((json == null) != (formattedString == null));
 
   static const encoder = JsonEncoder.withIndent('  ');
 
   final Map<String, dynamic> json;
 
+  final String formattedString;
+
   @override
   Widget build(BuildContext context) {
     // TODO(kenz): we could consider using a prettier format like YAML.
-    final formattedArgs = encoder.convert(json);
-    return Text(
-      formattedArgs,
+    return SelectableText(
+      json != null ? encoder.convert(json) : formattedString,
       style: Theme.of(context).fixedFontStyle,
     );
   }

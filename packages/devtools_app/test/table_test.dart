@@ -744,7 +744,7 @@ void main() {
       await tester.pumpWidget(wrap(table));
       final TreeTableState state = tester.state(find.byWidget(table));
       expect(state.columnWidths[0], equals(400));
-      expect(state.columnWidths[1], equals(1000));
+      expect(state.columnWidths[1], equals(500));
       final tree = state.dataRoots[0];
       expect(tree.children[0].name, equals('Bar'));
       expect(tree.children[0].children[0].name, equals('Baz'));

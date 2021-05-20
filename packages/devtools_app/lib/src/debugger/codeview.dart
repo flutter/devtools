@@ -18,6 +18,7 @@ import '../config_specific/logger/logger.dart';
 import '../dialogs.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import '../globals.dart';
+import '../history_viewport.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
@@ -194,42 +195,44 @@ class _CodeViewState extends State<CodeView>
 
     // Ensure the syntax highlighter has been initialized.
     // TODO(bkonyi): process source for highlighting on a separate thread.
-    if (parsedScript.script.source.length < 500000 &&
-        parsedScript.highlighter != null) {
-      final highlighted = parsedScript.highlighter.highlight(context);
+    if (parsedScript.script.source != null) {
+      if (parsedScript.script.source.length < 500000 &&
+          parsedScript.highlighter != null) {
+        final highlighted = parsedScript.highlighter.highlight(context);
 
-      // Look for [TextSpan]s which only contain '\n' to manually break the
-      // output from the syntax highlighter into individual lines.
-      var currentLine = <TextSpan>[];
-      highlighted.visitChildren((span) {
-        currentLine.add(span);
-        if (span.toPlainText() == '\n') {
-          lines.add(
-            TextSpan(
-              style: theme.fixedFontStyle,
-              children: currentLine,
-            ),
-          );
-          currentLine = <TextSpan>[];
-        }
-        return true;
-      });
-      lines.add(
-        TextSpan(
-          style: theme.fixedFontStyle,
-          children: currentLine,
-        ),
-      );
-    } else {
-      lines.addAll(
-        [
-          for (final line in parsedScript.script.source.split('\n'))
-            TextSpan(
-              style: theme.fixedFontStyle,
-              text: line,
-            ),
-        ],
-      );
+        // Look for [TextSpan]s which only contain '\n' to manually break the
+        // output from the syntax highlighter into individual lines.
+        var currentLine = <TextSpan>[];
+        highlighted.visitChildren((span) {
+          currentLine.add(span);
+          if (span.toPlainText() == '\n') {
+            lines.add(
+              TextSpan(
+                style: theme.fixedFontStyle,
+                children: currentLine,
+              ),
+            );
+            currentLine = <TextSpan>[];
+          }
+          return true;
+        });
+        lines.add(
+          TextSpan(
+            style: theme.fixedFontStyle,
+            children: currentLine,
+          ),
+        );
+      } else {
+        lines.addAll(
+          [
+            for (final line in parsedScript.script.source.split('\n'))
+              TextSpan(
+                style: theme.fixedFontStyle,
+                text: line,
+              ),
+          ],
+        );
+      }
     }
 
     // Apply the log change-of-base formula, then add 16dp padding for every
@@ -241,11 +244,22 @@ class _CodeViewState extends State<CodeView>
 
     _updateScrollPosition(animate: false);
 
-    return OutlineDecoration(
-      child: Column(
-        children: [
-          buildCodeviewTitle(theme),
-          DefaultTextStyle(
+    return HistoryViewport(
+      history: widget.controller.scriptsHistory,
+      generateTitle: (script) => script.uri,
+      controls: [
+        ScriptPopupMenu(widget.controller),
+        ScriptHistoryPopupMenu(
+          itemBuilder: _buildScriptMenuFromHistory,
+          onSelected: (scriptRef) {
+            widget.controller.showScriptLocation(ScriptLocation(scriptRef));
+          },
+          enabled: widget.controller.scriptsHistory.hasScripts,
+        ),
+      ],
+      contentBuilder: (context, script) {
+        if (lines.isNotEmpty) {
+          return DefaultTextStyle(
             style: theme.fixedFontStyle,
             child: Expanded(
               child: Scrollbar(
@@ -274,6 +288,9 @@ class _CodeViewState extends State<CodeView>
                                   .toList(),
                               executableLines: parsedScript.executableLines,
                               onPressed: _onPressed,
+                              // Disable dots for possible breakpoint locations.
+                              allowInteraction:
+                                  !widget.controller.isSystemIsolate,
                             );
                           },
                         ),
@@ -300,9 +317,18 @@ class _CodeViewState extends State<CodeView>
                 ),
               ),
             ),
-          ),
-        ],
-      ),
+          );
+        } else {
+          return Expanded(
+            child: Center(
+              child: Text(
+                'No source available',
+                style: theme.textTheme.subtitle1,
+              ),
+            ),
+          );
+        }
+      },
     );
   }
 
@@ -326,52 +352,6 @@ class _CodeViewState extends State<CodeView>
           onClose: () => widget.controller.toggleSearchInFileVisibility(false),
         ),
       ),
-    );
-  }
-
-  Widget buildCodeviewTitle(ThemeData theme) {
-    return ValueListenableBuilder(
-      valueListenable: widget.controller.scriptsHistory,
-      builder: (context, scriptsHistory, _) {
-        return debuggerSectionTitle(
-          theme,
-          child: Row(
-            children: [
-              ToolbarAction(
-                icon: Icons.chevron_left,
-                onPressed:
-                    scriptsHistory.hasPrevious ? scriptsHistory.moveBack : null,
-              ),
-              ToolbarAction(
-                icon: Icons.chevron_right,
-                onPressed:
-                    scriptsHistory.hasNext ? scriptsHistory.moveForward : null,
-              ),
-              const SizedBox(width: denseSpacing),
-              const VerticalDivider(thickness: 1.0),
-              const SizedBox(width: defaultSpacing),
-              Expanded(
-                child: Text(
-                  scriptRef?.uri ?? ' ',
-                  style: theme.textTheme.subtitle2,
-                ),
-              ),
-              const SizedBox(width: denseSpacing),
-              ScriptPopupMenu(widget.controller),
-              const SizedBox(width: denseSpacing),
-              ScriptHistoryPopupMenu(
-                itemBuilder: _buildScriptMenuFromHistory,
-                onSelected: (scriptRef) {
-                  widget.controller
-                      .showScriptLocation(ScriptLocation(scriptRef));
-                },
-                enabled: scriptsHistory.hasScripts,
-              ),
-              const SizedBox(width: denseSpacing),
-            ],
-          ),
-        );
-      },
     );
   }
 
@@ -418,6 +398,7 @@ class Gutter extends StatelessWidget {
     @required this.breakpoints,
     @required this.executableLines,
     @required this.onPressed,
+    @required this.allowInteraction,
   });
 
   final double gutterWidth;
@@ -427,6 +408,7 @@ class Gutter extends StatelessWidget {
   final List<BreakpointAndSourcePosition> breakpoints;
   final Set<int> executableLines;
   final IntCallback onPressed;
+  final bool allowInteraction;
 
   @override
   Widget build(BuildContext context) {
@@ -447,6 +429,7 @@ class Gutter extends StatelessWidget {
             isBreakpoint: bpLineSet.contains(lineNum),
             isExecutable: executableLines.contains(lineNum),
             isPausedHere: pausedFrame?.line == lineNum,
+            allowInteraction: allowInteraction,
           );
         },
       ),
@@ -462,6 +445,7 @@ class GutterItem extends StatelessWidget {
     @required this.isExecutable,
     @required this.isPausedHere,
     @required this.onPressed,
+    @required this.allowInteraction,
   }) : super(key: key);
 
   final int lineNumber;
@@ -469,6 +453,8 @@ class GutterItem extends StatelessWidget {
   final bool isBreakpoint;
 
   final bool isExecutable;
+
+  final bool allowInteraction;
 
   /// Whether the execution point is currently paused here.
   final bool isPausedHere;
@@ -489,6 +475,9 @@ class GutterItem extends StatelessWidget {
 
     return InkWell(
       onTap: onPressed,
+      // Force usage of default mouse pointer when gutter interaction is
+      // disabled.
+      mouseCursor: allowInteraction ? null : SystemMouseCursors.basic,
       child: Container(
         height: CodeView.rowHeight,
         padding: const EdgeInsets.only(right: 4.0),
@@ -496,7 +485,7 @@ class GutterItem extends StatelessWidget {
           alignment: AlignmentDirectional.centerStart,
           fit: StackFit.expand,
           children: [
-            if (isExecutable || isBreakpoint)
+            if (allowInteraction && (isExecutable || isBreakpoint))
               Align(
                 alignment: Alignment.centerLeft,
                 child: SizedBox(

@@ -39,7 +39,8 @@ class _DebuggingControlsState extends State<DebuggingControls>
     final isPaused = controller.isPaused.value;
     final resuming = controller.resuming.value;
     final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
-    final canStep = isPaused && !resuming && hasStackFrames;
+    final isSystemIsolate = controller.isSystemIsolate;
+    final canStep = isPaused && !resuming && hasStackFrames && !isSystemIsolate;
     return SizedBox(
       height: defaultButtonHeight,
       child: Row(
@@ -60,6 +61,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
     @required bool isPaused,
     @required bool resuming,
   }) {
+    final isSystemIsolate = controller.isSystemIsolate;
     return RoundedOutlinedBorder(
       child: Row(
         children: [
@@ -67,13 +69,18 @@ class _DebuggingControlsState extends State<DebuggingControls>
             title: 'Pause',
             icon: Codicons.debugPause,
             autofocus: true,
-            onPressed: isPaused ? null : controller.pause,
+            // Disable when paused or selected isolate is a system isolate.
+            onPressed: (isPaused || isSystemIsolate) ? null : controller.pause,
           ),
           LeftBorder(
             child: DebuggerButton(
               title: 'Resume',
               icon: Codicons.debugContinue,
-              onPressed: (isPaused && !resuming) ? controller.resume : null,
+              // Enable while paused + not resuming and selected isolate is not
+              // a system isolate.
+              onPressed: ((isPaused && !resuming) && !isSystemIsolate)
+                  ? controller.resume
+                  : null,
             ),
           ),
         ],
@@ -143,9 +150,12 @@ class BreakOnExceptionsControl extends StatelessWidget {
       builder: (BuildContext context, String modeId, _) {
         return RoundedDropDownButton<ExceptionMode>(
           value: ExceptionMode.from(modeId),
-          onChanged: (ExceptionMode mode) {
-            controller.setExceptionPauseMode(mode.id);
-          },
+          // Cannot set exception pause mode for system isolates.
+          onChanged: controller.isSystemIsolate
+              ? null
+              : (ExceptionMode mode) {
+                  controller.setExceptionPauseMode(mode.id);
+                },
           isDense: true,
           items: [
             for (var mode in ExceptionMode.modes)

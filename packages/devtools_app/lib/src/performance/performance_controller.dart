@@ -48,8 +48,6 @@ class PerformanceController
 
   final _exportController = ExportController();
 
-  final _cpuProfilerService = CpuProfilerService();
-
   /// The currently selected timeline event.
   ValueListenable<TimelineEvent> get selectedTimelineEvent =>
       _selectedTimelineEventNotifier;
@@ -147,7 +145,7 @@ class PerformanceController
         await serviceManager.connectedApp.isProfileBuild;
 
     unawaited(allowedError(
-      _cpuProfilerService.setProfilePeriod(mediumProfilePeriod),
+      serviceManager.service.setProfilePeriod(mediumProfilePeriod),
       logError: false,
     ));
     await setTimelineStreams([
@@ -420,8 +418,9 @@ class PerformanceController
     }
 
     if (offlinePerformanceData.cpuProfileData != null) {
-      cpuProfilerController
-          .loadOfflineData(offlinePerformanceData.cpuProfileData);
+      cpuProfilerController.loadProcessedData(
+        offlinePerformanceData.cpuProfileData,
+      );
     }
   }
 
@@ -442,6 +441,9 @@ class PerformanceController
       breadthFirstTraversal<TimelineEvent>(event, action: (TimelineEvent e) {
         if (e.name.caseInsensitiveContains(search)) {
           matches.add(e);
+          e.isSearchMatch = true;
+        } else {
+          e.isSearchMatch = false;
         }
       });
     }

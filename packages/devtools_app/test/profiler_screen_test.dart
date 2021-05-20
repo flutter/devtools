@@ -4,9 +4,9 @@
 
 import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
-import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/profiler/cpu_profiler.dart';
+import 'package:devtools_app/src/profiler/profiler_screen.dart';
+import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/vm_flag_widgets.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
@@ -67,7 +67,8 @@ void main() {
       expect(find.text('CPU Profiler'), findsOneWidget);
     });
 
-    const windowSize = Size(1500.0, 1000.0);
+
+    const windowSize = Size(2000.0, 1000.0);
 
     testWidgetsWithWindowSize(
       'builds proper content for recording state',

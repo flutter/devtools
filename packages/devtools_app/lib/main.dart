@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'src/analytics/stub_provider.dart'
     if (dart.library.html) 'src/analytics/remote_provider.dart';
@@ -14,6 +15,7 @@ import 'src/extension_points/extensions_base.dart';
 import 'src/extension_points/extensions_external.dart';
 import 'src/globals.dart';
 import 'src/preferences.dart';
+import 'src/provider/riverpod_error_logger_observer.dart';
 
 void main() async {
   final ideTheme = getIdeTheme();
@@ -35,6 +37,9 @@ void main() async {
 
   // Now run the app.
   runApp(
-    DevToolsApp(defaultScreens, ideTheme, await analyticsProvider),
+    ProviderScope(
+      observers: const [ErrorLoggerObserver()],
+      child: DevToolsApp(defaultScreens, ideTheme, await analyticsProvider),
+    ),
   );
 }

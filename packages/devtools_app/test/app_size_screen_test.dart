@@ -4,11 +4,11 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/app_size/app_size_screen.dart';
 import 'package:devtools_app/src/app_size/app_size_controller.dart';
+import 'package:devtools_app/src/app_size/app_size_screen.dart';
 import 'package:devtools_app/src/app_size/app_size_table.dart';
-import 'package:devtools_app/src/file_import.dart';
 import 'package:devtools_app/src/common_widgets.dart';
+import 'package:devtools_app/src/file_import.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/notifications.dart';
 import 'package:devtools_app/src/service_manager.dart';
