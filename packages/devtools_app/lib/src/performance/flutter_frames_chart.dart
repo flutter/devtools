@@ -268,21 +268,22 @@ class FlutterFramesChartItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final bool janky = frame.isJanky(displayRefreshRate);
+    final bool uiJanky = frame.isUiJanky(displayRefreshRate);
+    final bool rasterJanky = frame.isRasterJanky(displayRefreshRate);
     // TODO(kenz): add some indicator when a frame is so janky that it exceeds the
     // available axis space.
     final ui = Container(
       key: Key('frame ${frame.id} - ui'),
       width: defaultFrameWidth / 2,
       height: (frame.uiDurationMs / msPerPx).clamp(0.0, availableChartHeight),
-      color: janky ? uiJankColor : mainUiColor,
+      color: uiJanky ? uiJankColor : mainUiColor,
     );
     final raster = Container(
       key: Key('frame ${frame.id} - raster'),
       width: defaultFrameWidth / 2,
       height:
           (frame.rasterDurationMs / msPerPx).clamp(0.0, availableChartHeight),
-      color: janky ? rasterJankColor : mainRasterColor,
+      color: rasterJanky ? rasterJankColor : mainRasterColor,
     );
     return Stack(
       children: [

@@ -71,6 +71,30 @@ final jankyFrame = FlutterFrame('jankyFrame')
   ..eventFlows[1] = (goldenRasterTimelineEvent.deepCopy()
     ..time = (TimeRange()
       ..start = const Duration(milliseconds: 68)
+      ..end = const Duration(milliseconds: 88)));
+
+final jankyFrameUiOnly = FlutterFrame('jankyFrameUiOnly')
+// ignore: invalid_use_of_visible_for_testing_member
+  ..eventFlows[0] = (goldenUiTimelineEvent.deepCopy()
+    ..time = (TimeRange()
+      ..start = const Duration(milliseconds: 50)
+      ..end = const Duration(milliseconds: 70)))
+// ignore: invalid_use_of_visible_for_testing_member
+  ..eventFlows[1] = (goldenRasterTimelineEvent.deepCopy()
+    ..time = (TimeRange()
+      ..start = const Duration(milliseconds: 68)
+      ..end = const Duration(milliseconds: 75)));
+
+final jankyFrameRasterOnly = FlutterFrame('jankyFrameRasterOnly')
+// ignore: invalid_use_of_visible_for_testing_member
+  ..eventFlows[0] = (goldenUiTimelineEvent.deepCopy()
+    ..time = (TimeRange()
+      ..start = const Duration(milliseconds: 50)
+      ..end = const Duration(milliseconds: 60)))
+// ignore: invalid_use_of_visible_for_testing_member
+  ..eventFlows[1] = (goldenRasterTimelineEvent.deepCopy()
+    ..time = (TimeRange()
+      ..start = const Duration(milliseconds: 50)
       ..end = const Duration(milliseconds: 75)));
 
 // Mark: UI golden data.

@@ -501,9 +501,19 @@ class FlutterFrame {
   }
 
   bool isJanky(double displayRefreshRate) {
-    final targetMsPerFrame = 1 / displayRefreshRate * 1000;
-    return uiDurationMs > targetMsPerFrame ||
-        rasterDurationMs > targetMsPerFrame;
+    return isUiJanky(displayRefreshRate) || isRasterJanky(displayRefreshRate);
+  }
+
+  bool isUiJanky(double displayRefreshRate) {
+    return uiDurationMs > _targetMsPerFrame(displayRefreshRate);
+  }
+
+  bool isRasterJanky(double displayRefreshRate) {
+    return rasterDurationMs > _targetMsPerFrame(displayRefreshRate);
+  }
+
+  double _targetMsPerFrame(double displayRefreshRate) {
+    return 1 / displayRefreshRate * 1000;
   }
 
   @override

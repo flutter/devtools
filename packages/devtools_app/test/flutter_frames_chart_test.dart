@@ -58,6 +58,35 @@ void main() {
               as Container;
       expect(raster.color, equals(rasterJankColor));
     });
+
+    testWidgets('builds with janky frame ui only', (WidgetTester tester) async {
+      await pumpChart(tester, frames: [jankyFrameUiOnly]);
+      expect(find.byKey(FlutterFramesChart.chartLegendKey), findsOneWidget);
+      expect(find.byType(FlutterFramesChartItem), findsOneWidget);
+      final ui =
+          tester.widget(find.byKey(const Key('frame jankyFrameUiOnly - ui')))
+              as Container;
+      expect(ui.color, equals(uiJankColor));
+      final raster = tester
+              .widget(find.byKey(const Key('frame jankyFrameUiOnly - raster')))
+          as Container;
+      expect(raster.color, equals(mainRasterColor));
+    });
+
+    testWidgets('builds with janky frame raster only',
+        (WidgetTester tester) async {
+      await pumpChart(tester, frames: [jankyFrameRasterOnly]);
+      expect(find.byKey(FlutterFramesChart.chartLegendKey), findsOneWidget);
+      expect(find.byType(FlutterFramesChartItem), findsOneWidget);
+      final ui = tester
+              .widget(find.byKey(const Key('frame jankyFrameRasterOnly - ui')))
+          as Container;
+      expect(ui.color, equals(mainUiColor));
+      final raster = tester.widget(
+              find.byKey(const Key('frame jankyFrameRasterOnly - raster')))
+          as Container;
+      expect(raster.color, equals(rasterJankColor));
+    });
   });
 
   group('FlutterFramesChartItem', () {
