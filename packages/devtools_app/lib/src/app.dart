@@ -64,12 +64,10 @@ bool isExternalBuild = true;
 class DevToolsApp extends StatefulWidget {
   const DevToolsApp(
     this.screens,
-    this.ideTheme,
     this.analyticsProvider,
   );
 
   final List<DevToolsScreen> screens;
-  final IdeTheme ideTheme;
   final AnalyticsProvider analyticsProvider;
 
   @override
@@ -84,8 +82,6 @@ class DevToolsApp extends StatefulWidget {
 // navigate the full app.
 class DevToolsAppState extends State<DevToolsApp> {
   List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
-
-  IdeTheme get ideTheme => widget.ideTheme;
 
   bool get isDarkThemeEnabled => _isDarkThemeEnabled;
   bool _isDarkThemeEnabled;
