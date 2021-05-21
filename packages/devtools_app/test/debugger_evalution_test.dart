@@ -163,6 +163,18 @@ void main() {
               ),
               value: null,
             ),
+            BoundField(
+              decl: FieldRef(
+                name: '_privateFieldBound',
+                owner: null,
+                declaredType: null,
+                isConst: false,
+                isFinal: false,
+                isStatic: false,
+                id: '',
+              ),
+              value: null,
+            ),
           ],
           identityHashCode: null,
           kind: '',

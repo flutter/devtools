@@ -296,8 +296,10 @@ Future<List<String>> autoCompleteResultsFor(
         );
         // TODO(grouma) - This shouldn't be necessary but package:dwds does
         // not properly provide superclass information.
-        result.addAll(instance.fields.map((field) => field.decl.name).where(
-            (member) => !_isAccessible(member, instance.classRef, controller)));
+        final clazz = await controller.getObject(instance.classRef);
+        result.addAll(instance.fields
+            .map((field) => field.decl.name)
+            .where((member) => _isAccessible(member, clazz, controller)));
       }
     } catch (_) {}
   }
