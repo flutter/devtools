@@ -1,3 +1,6 @@
+## 2.2.5
+* Migrate devtools to null safety
+
 ## 2.2.4
 * Fix bug in devtools_server by calling proper vm service API [#3040](https://github.com/flutter/devtools/pull/3040)
 

@@ -13,7 +13,7 @@ version: 2.2.4
 homepage: https://github.com/flutter/devtools
 
 environment:
-  sdk: '>=2.3.0 <3.0.0'
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   devtools_server: 2.3.0
