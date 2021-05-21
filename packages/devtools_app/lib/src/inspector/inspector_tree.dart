@@ -11,6 +11,7 @@
 /// and will help simplify porting this code to work with Hummingbird.
 library inspector_tree;
 
+import 'package:devtools_app/src/globals.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
@@ -42,8 +43,8 @@ extension InspectorColorScheme on ColorScheme {
 const double iconPadding = 5.0;
 const double chartLineStrokeWidth = 1.0;
 const double columnWidth = 16.0;
-const double verticalPadding = 10.0;
-const double rowHeight = 24.0;
+double get verticalPadding => 10.0 * ideTheme.fontSizeFactor();
+double get rowHeight => 24.0 * ideTheme.fontSizeFactor();
 
 /// This class could be refactored out to be a reasonable generic collapsible
 /// tree ui node class but we choose to instead make it widget inspector

@@ -16,15 +16,22 @@ const contrastForegroundWhite = _contrastForegroundWhite;
 ThemeData themeFor({
   @required bool isDarkTheme,
   @required IdeTheme ideTheme,
+  ThemeData theme,
 }) {
+  ThemeData colorTheme;
   // If the theme specifies a background color, use it to infer a theme.
   if (isValidDarkColor(ideTheme?.backgroundColor)) {
-    return _darkTheme(ideTheme);
+    colorTheme = _darkTheme(ideTheme);
   } else if (isValidLightColor(ideTheme?.backgroundColor)) {
-    return _lightTheme(ideTheme);
+    colorTheme = _lightTheme(ideTheme);
+  } else {
+    colorTheme = isDarkTheme ? _darkTheme(ideTheme) : _lightTheme(ideTheme);
   }
 
-  return isDarkTheme ? _darkTheme(ideTheme) : _lightTheme(ideTheme);
+  return colorTheme.copyWith(
+    primaryTextTheme: theme.primaryTextTheme.merge(colorTheme.primaryTextTheme).apply(fontSizeFactor: ideTheme.fontSizeFactor()),
+    textTheme: theme.textTheme.merge(colorTheme.textTheme).apply(fontSizeFactor: ideTheme.fontSizeFactor()),
+  );
 }
 
 ThemeData _darkTheme(IdeTheme ideTheme) {

@@ -34,6 +34,7 @@ void main() async {
 
   // Set the extension points global.
   setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+  setGlobal(IdeTheme, ideTheme);
 
   // Now run the app.
   runApp(

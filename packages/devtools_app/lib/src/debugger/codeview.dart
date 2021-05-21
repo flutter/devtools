@@ -45,8 +45,8 @@ class CodeView extends StatefulWidget {
     this.onSelected,
   }) : super(key: key);
 
-  static const rowHeight = 20.0;
-  static const assumedCharacterWidth = 16.0;
+  static double get rowHeight => 20.0 * ideTheme.fontSizeFactor();
+  static double get assumedCharacterWidth => 16.0 * ideTheme.fontSizeFactor();
 
   final DebuggerController controller;
   final ScriptRef scriptRef;

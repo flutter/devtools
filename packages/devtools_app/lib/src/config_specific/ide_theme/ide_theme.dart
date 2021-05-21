@@ -15,4 +15,8 @@ class IdeTheme {
   Color backgroundColor;
   Color foregroundColor;
   double fontSize;
+
+  double fontSizeFactor() {
+    return fontSize != null ? fontSize / 14.0 : 1.0;
+  }
 }
