@@ -440,7 +440,10 @@ CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
     CurvedAnimation(curve: defaultCurve, parent: parent);
 
 Color titleSolidBackgroundColor(ThemeData theme) {
-  return theme.canvasColor.darken(0.2);
+  return theme.colorScheme.isLight
+      // This matches the color for alternating row background colors in tables.
+      ? theme.colorScheme.defaultBackgroundColor.darken()
+      : theme.canvasColor.darken(0.2);
 }
 
 const chartFontSizeSmall = 12.0;
