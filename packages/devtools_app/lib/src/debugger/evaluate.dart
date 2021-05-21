@@ -131,8 +131,10 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
                 decoration: const InputDecoration(
                   contentPadding: EdgeInsets.all(denseSpacing),
                   border: OutlineInputBorder(),
-                  focusedBorder: OutlineInputBorder(borderSide: evalBorder),
-                  enabledBorder: OutlineInputBorder(borderSide: evalBorder),
+                  focusedBorder:
+                      OutlineInputBorder(borderSide: BorderSide.none),
+                  enabledBorder:
+                      OutlineInputBorder(borderSide: BorderSide.none),
                   labelText: 'Eval',
                 ),
               ),
