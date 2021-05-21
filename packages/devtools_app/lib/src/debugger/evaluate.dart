@@ -296,7 +296,7 @@ Future<List<String>> autoCompleteResultsFor(
         );
         // TODO(grouma) - This shouldn't be necessary but package:dwds does
         // not properly provide superclass information.
-        final clazz = await controller.getObject(instance.classRef);
+        final clazz = await classFor(instance.classRef, controller);
         result.addAll(instance.fields
             .map((field) => field.decl.name)
             .where((member) => _isAccessible(member, clazz, controller)));
@@ -312,20 +312,27 @@ Future<Set<String>> _autoCompleteMembersFor(
   DebuggerController controller,
 ) async {
   final result = <String>{};
-  if (classRef != null) {
-    try {
-      final Class clazz = await controller.getObject(classRef);
-      result.addAll(clazz.fields.map((field) => field.name));
-      result.addAll(clazz.functions
-          .where((funcRef) => _validFunction(funcRef, clazz))
-          // The VM shows setters as `<member>=`.
-          .map((funcRef) => funcRef.name.replaceAll('=', '')));
-      result
-          .addAll(await _autoCompleteMembersFor(clazz.superClass, controller));
-      result.removeWhere((member) => !_isAccessible(member, clazz, controller));
-    } catch (_) {}
+  final clazz = await classFor(classRef, controller);
+  if (clazz != null) {
+    result.addAll(clazz.fields.map((field) => field.name));
+    result.addAll(clazz.functions
+        .where((funcRef) => _validFunction(funcRef, clazz))
+        // The VM shows setters as `<member>=`.
+        .map((funcRef) => funcRef.name.replaceAll('=', '')));
+    result.addAll(await _autoCompleteMembersFor(clazz.superClass, controller));
+    result.removeWhere((member) => !_isAccessible(member, clazz, controller));
   }
   return result;
+}
+
+/// Returns the class for the provided [ClassRef].
+///
+/// May return null.
+Future<Class> classFor(ClassRef classRef, DebuggerController controller) async {
+  try {
+    return await controller.getObject(classRef);
+  } catch (_) {}
+  return null;
 }
 
 bool _validFunction(FuncRef funcRef, Class clazz) {
@@ -364,5 +371,5 @@ bool _isAccessible(String member, Class clazz, DebuggerController controller) {
       controller.stackFramesWithLocation.value.first.frame;
   final currentScript = frame.location.script;
   return !member.startsWith('_') ||
-      currentScript.id == clazz.location?.script?.id;
+      currentScript.id == clazz?.location?.script?.id;
 }
