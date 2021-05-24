@@ -12,11 +12,9 @@ export 'ide_theme_stub.dart'
 class IdeTheme {
   IdeTheme({this.backgroundColor, this.foregroundColor, this.fontSize});
 
-  Color backgroundColor;
-  Color foregroundColor;
-  double fontSize;
+  final Color backgroundColor;
+  final Color foregroundColor;
+  final double fontSize;
 
-  double fontSizeFactor() {
-    return fontSize != null ? fontSize / 14.0 : 1.0;
-  }
+  double get fontSizeFactor => fontSize != null ? fontSize / 14.0 : 1.0;
 }
