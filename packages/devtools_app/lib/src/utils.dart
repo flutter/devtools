@@ -18,6 +18,7 @@ import 'package:url_launcher/url_launcher.dart' as url_launcher;
 import 'package:vm_service/vm_service.dart';
 
 import 'config_specific/logger/logger.dart' as logger;
+import 'globals.dart';
 import 'notifications.dart';
 
 /// Public properties first, then sort alphabetically
@@ -1271,4 +1272,8 @@ class ImmutableList<T> with ListMixin<T> implements List<T> {
   void shuffle([Random random]) {
     throw Exception('Cannot modify the content of ImmutableList');
   }
+}
+
+double scaleByFontFactor(double original) {
+  return (original * ideTheme.fontSizeFactor).roundToDouble();
 }

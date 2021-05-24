@@ -15,7 +15,6 @@ import 'analytics/provider.dart';
 import 'app_size/app_size_controller.dart';
 import 'app_size/app_size_screen.dart';
 import 'common_widgets.dart';
-import 'config_specific/ide_theme/ide_theme.dart';
 import 'config_specific/server/server.dart';
 import 'debugger/debugger_controller.dart';
 import 'debugger/debugger_screen.dart';
@@ -64,12 +63,10 @@ bool isExternalBuild = true;
 class DevToolsApp extends StatefulWidget {
   const DevToolsApp(
     this.screens,
-    this.ideTheme,
     this.analyticsProvider,
   );
 
   final List<DevToolsScreen> screens;
-  final IdeTheme ideTheme;
   final AnalyticsProvider analyticsProvider;
 
   @override
@@ -84,8 +81,6 @@ class DevToolsApp extends StatefulWidget {
 // navigate the full app.
 class DevToolsAppState extends State<DevToolsApp> {
   List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
-
-  IdeTheme get ideTheme => widget.ideTheme;
 
   bool get isDarkThemeEnabled => _isDarkThemeEnabled;
   bool _isDarkThemeEnabled;
@@ -296,7 +291,11 @@ class DevToolsAppState extends State<DevToolsApp> {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      theme: themeFor(isDarkTheme: isDarkThemeEnabled, ideTheme: ideTheme),
+      theme: themeFor(
+        isDarkTheme: isDarkThemeEnabled,
+        ideTheme: ideTheme,
+        theme: Theme.of(context),
+      ),
       builder: (context, child) => Notifications(child: child),
       routerDelegate: DevToolsRouterDelegate(_getPage),
       routeInformationParser: DevToolsRouteInformationParser(),
