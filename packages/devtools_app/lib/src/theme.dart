@@ -355,6 +355,9 @@ extension ThemeDataExtension on ThemeData {
   TextStyle get subtleFixedFontStyle {
     return fixedFontStyle.copyWith(color: unselectedWidgetColor);
   }
+
+  TextStyle get devToolsTitleStyle =>
+      textTheme.headline6.copyWith(color: Colors.white);
 }
 
 TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
