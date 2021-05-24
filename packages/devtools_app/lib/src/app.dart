@@ -294,7 +294,8 @@ class DevToolsAppState extends State<DevToolsApp> {
       theme: themeFor(
           isDarkTheme: isDarkThemeEnabled,
           ideTheme: ideTheme,
-          theme: Theme.of(context)),
+          theme: Theme.of(context),
+      ),
       builder: (context, child) => Notifications(child: child),
       routerDelegate: DevToolsRouterDelegate(_getPage),
       routeInformationParser: DevToolsRouteInformationParser(),
