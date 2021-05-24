@@ -224,6 +224,10 @@ extension DevToolsColorScheme on ColorScheme {
   // this in places where we do not have access to the context.
   Color get defaultBackgroundColor =>
       isLight ? Colors.grey[50] : Colors.grey[850];
+  Color get alternatingBackgroundColor => isLight
+      ? defaultBackgroundColor.darken()
+      : defaultBackgroundColor.brighten();
+
   Color get chartAccentColor =>
       isLight ? const Color(0xFFCCCCCC) : const Color(0xFF585858);
   Color get chartTextColor => isLight ? Colors.black : Colors.white;
@@ -359,8 +363,7 @@ extension ThemeDataExtension on ThemeData {
       textTheme.headline6.copyWith(color: Colors.white);
 
   Color get titleSolidBackgroundColor => colorScheme.isLight
-      // This matches the color for alternating row background colors in tables.
-      ? colorScheme.defaultBackgroundColor.darken()
+      ? colorScheme.alternatingBackgroundColor
       : canvasColor.darken(0.2);
 }
 
