@@ -224,6 +224,10 @@ extension DevToolsColorScheme on ColorScheme {
   // this in places where we do not have access to the context.
   Color get defaultBackgroundColor =>
       isLight ? Colors.grey[50] : Colors.grey[850];
+  Color get alternatingBackgroundColor => isLight
+      ? defaultBackgroundColor.darken()
+      : defaultBackgroundColor.brighten();
+
   Color get chartAccentColor =>
       isLight ? const Color(0xFFCCCCCC) : const Color(0xFF585858);
   Color get chartTextColor => isLight ? Colors.black : Colors.white;
@@ -352,12 +356,15 @@ extension ThemeDataExtension on ThemeData {
   TextStyle get fixedFontStyle =>
       textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
 
-  TextStyle get subtleFixedFontStyle {
-    return fixedFontStyle.copyWith(color: unselectedWidgetColor);
-  }
+  TextStyle get subtleFixedFontStyle =>
+      fixedFontStyle.copyWith(color: unselectedWidgetColor);
 
   TextStyle get devToolsTitleStyle =>
       textTheme.headline6.copyWith(color: Colors.white);
+
+  Color get titleSolidBackgroundColor => colorScheme.isLight
+      ? colorScheme.alternatingBackgroundColor
+      : canvasColor.darken(0.2);
 }
 
 TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
@@ -439,10 +446,6 @@ const defaultCurve = Curves.easeInOutCubic;
 /// This is the standard curve for animations in DevTools.
 CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
     CurvedAnimation(curve: defaultCurve, parent: parent);
-
-Color titleSolidBackgroundColor(ThemeData theme) {
-  return theme.canvasColor.darken(0.2);
-}
 
 const chartFontSizeSmall = 12.0;
 

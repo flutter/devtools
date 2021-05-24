@@ -678,7 +678,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
                 needsBottomBorder ? defaultBorderSide(theme) : BorderSide.none,
             left: needsLeftBorder ? defaultBorderSide(theme) : BorderSide.none,
           ),
-          color: titleSolidBackgroundColor(theme),
+          color: theme.titleSolidBackgroundColor,
         ),
         padding: EdgeInsets.only(left: defaultSpacing, right: rightPadding),
         alignment: Alignment.centerLeft,
@@ -1107,16 +1107,9 @@ extension ColorExtension on Color {
 
 /// Gets an alternating color to use for indexed UI elements.
 Color alternatingColorForIndex(int index, ColorScheme colorScheme) {
-  final color = colorScheme.defaultBackgroundColor;
-  return _colorForIndex(color, index, colorScheme);
-}
-
-Color _colorForIndex(Color color, int index, ColorScheme colorScheme) {
-  if (index % 2 == 1) {
-    return color;
-  } else {
-    return colorScheme.isLight ? color.darken() : color.brighten();
-  }
+  return index % 2 == 1
+      ? colorScheme.defaultBackgroundColor
+      : colorScheme.alternatingBackgroundColor;
 }
 
 class BreadcrumbNavigator extends StatelessWidget {

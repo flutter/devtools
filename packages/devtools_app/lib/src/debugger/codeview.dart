@@ -418,7 +418,7 @@ class Gutter extends StatelessWidget {
       width: gutterWidth,
       decoration: BoxDecoration(
         border: Border(right: defaultBorderSide(theme)),
-        color: titleSolidBackgroundColor(theme),
+        color: Theme.of(context).titleSolidBackgroundColor,
       ),
       child: ListView.builder(
         controller: scrollController,

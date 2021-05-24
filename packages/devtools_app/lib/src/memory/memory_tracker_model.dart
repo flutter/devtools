@@ -208,7 +208,7 @@ class TreeTracker {
     final callstackLength = stackTrace.length;
     assert(sources.length == callstackLength);
 
-    final titleBackground = titleSolidBackgroundColor(Theme.of(context));
+    final titleBackground = Theme.of(context).titleSolidBackgroundColor;
 
     return Column(
       children: [
