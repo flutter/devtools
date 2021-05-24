@@ -355,6 +355,9 @@ extension ThemeDataExtension on ThemeData {
   TextStyle get subtleFixedFontStyle {
     return fixedFontStyle.copyWith(color: unselectedWidgetColor);
   }
+
+  TextStyle get devToolsTitleStyle =>
+      textTheme.headline6.copyWith(color: Colors.white);
 }
 
 TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
@@ -365,8 +368,6 @@ TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
 const wideSearchTextWidth = 400.0;
 const defaultSearchTextWidth = 200.0;
 const defaultTextFieldHeight = 32.0;
-
-const evalBorder = BorderSide(color: Colors.white, width: 2);
 
 /// Default color of cursor and color used by search's TextField.
 /// Guarantee that the Search TextField on all platforms renders in the same
