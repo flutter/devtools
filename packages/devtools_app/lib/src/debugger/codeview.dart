@@ -413,10 +413,13 @@ class Gutter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bpLineSet = Set.from(breakpoints.map((bp) => bp.line));
-
+    final theme = Theme.of(context);
     return Container(
       width: gutterWidth,
-      color: titleSolidBackgroundColor(Theme.of(context)),
+      decoration: BoxDecoration(
+        border: Border(right: defaultBorderSide(theme)),
+        color: titleSolidBackgroundColor(theme),
+      ),
       child: ListView.builder(
         controller: scrollController,
         itemExtent: CodeView.rowHeight,
