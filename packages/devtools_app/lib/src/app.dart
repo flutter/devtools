@@ -291,7 +291,10 @@ class DevToolsAppState extends State<DevToolsApp> {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      theme: themeFor(isDarkTheme: isDarkThemeEnabled, ideTheme: ideTheme, theme: Theme.of(context)),
+      theme: themeFor(
+          isDarkTheme: isDarkThemeEnabled,
+          ideTheme: ideTheme,
+          theme: Theme.of(context)),
       builder: (context, child) => Notifications(child: child),
       routerDelegate: DevToolsRouterDelegate(_getPage),
       routeInformationParser: DevToolsRouteInformationParser(),
