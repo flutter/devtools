@@ -398,9 +398,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       automaticallyImplyLeading: false,
       title: Text(
         title,
-        style: Theme.of(context).textTheme.headline6.copyWith(
-              color: Colors.white,
-            ),
+        style: Theme.of(context).devToolsTitleStyle,
       ),
       centerTitle: false,
       toolbarHeight: defaultToolbarHeight,
