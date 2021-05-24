@@ -11,12 +11,12 @@
 /// and will help simplify porting this code to work with Hummingbird.
 library inspector_tree;
 
-import 'package:devtools_app/src/globals.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import '../config_specific/logger/logger.dart';
+import '../globals.dart';
 import '../theme.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';

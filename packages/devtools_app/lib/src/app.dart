@@ -15,7 +15,6 @@ import 'analytics/provider.dart';
 import 'app_size/app_size_controller.dart';
 import 'app_size/app_size_screen.dart';
 import 'common_widgets.dart';
-import 'config_specific/ide_theme/ide_theme.dart';
 import 'config_specific/server/server.dart';
 import 'debugger/debugger_controller.dart';
 import 'debugger/debugger_screen.dart';
