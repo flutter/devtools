@@ -9,7 +9,6 @@ import 'dart:math';
 
 import 'package:ansi_up/ansi_up.dart';
 import 'package:collection/collection.dart';
-import 'package:devtools_app/src/globals.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,8 +17,8 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 import 'package:vm_service/vm_service.dart';
 
-import 'config_specific/ide_theme/ide_theme.dart';
 import 'config_specific/logger/logger.dart' as logger;
+import 'globals.dart';
 import 'notifications.dart';
 
 /// Public properties first, then sort alphabetically
