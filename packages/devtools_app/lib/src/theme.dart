@@ -352,12 +352,16 @@ extension ThemeDataExtension on ThemeData {
   TextStyle get fixedFontStyle =>
       textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
 
-  TextStyle get subtleFixedFontStyle {
-    return fixedFontStyle.copyWith(color: unselectedWidgetColor);
-  }
+  TextStyle get subtleFixedFontStyle =>
+      fixedFontStyle.copyWith(color: unselectedWidgetColor);
 
   TextStyle get devToolsTitleStyle =>
       textTheme.headline6.copyWith(color: Colors.white);
+
+  Color get titleSolidBackgroundColor => colorScheme.isLight
+      // This matches the color for alternating row background colors in tables.
+      ? colorScheme.defaultBackgroundColor.darken()
+      : canvasColor.darken(0.2);
 }
 
 TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
@@ -439,13 +443,6 @@ const defaultCurve = Curves.easeInOutCubic;
 /// This is the standard curve for animations in DevTools.
 CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
     CurvedAnimation(curve: defaultCurve, parent: parent);
-
-Color titleSolidBackgroundColor(ThemeData theme) {
-  return theme.colorScheme.isLight
-      // This matches the color for alternating row background colors in tables.
-      ? theme.colorScheme.defaultBackgroundColor.darken()
-      : theme.canvasColor.darken(0.2);
-}
 
 const chartFontSizeSmall = 12.0;
 

@@ -129,7 +129,7 @@ class _CallGraphViewState extends State<CallGraphView> {
                 Container(
                   height: constraints.maxHeight,
                   width: densePadding,
-                  color: titleSolidBackgroundColor(Theme.of(context)),
+                  color: Theme.of(context).titleSolidBackgroundColor,
                 ),
                 Flexible(
                   child: _buildToTable(),

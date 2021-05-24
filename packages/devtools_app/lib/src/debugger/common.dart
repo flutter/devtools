@@ -19,7 +19,7 @@ Container debuggerSectionTitle(ThemeData theme, {String text, Widget child}) {
       border: Border(
         bottom: BorderSide(color: theme.focusColor),
       ),
-      color: titleSolidBackgroundColor(theme),
+      color: theme.titleSolidBackgroundColor,
     ),
     padding: const EdgeInsets.only(left: defaultSpacing),
     alignment: Alignment.centerLeft,

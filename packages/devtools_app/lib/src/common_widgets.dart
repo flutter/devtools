@@ -678,7 +678,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
                 needsBottomBorder ? defaultBorderSide(theme) : BorderSide.none,
             left: needsLeftBorder ? defaultBorderSide(theme) : BorderSide.none,
           ),
-          color: titleSolidBackgroundColor(theme),
+          color: theme.titleSolidBackgroundColor,
         ),
         padding: EdgeInsets.only(left: defaultSpacing, right: rightPadding),
         alignment: Alignment.centerLeft,
