@@ -52,14 +52,14 @@ const String messageLoopFlushTasks = 'MessageLoop::FlushTasks';
 const String pipelineItem = 'PipelineItem';
 
 /// Processor for composing a recorded list of trace events into a timeline of
-/// [AsyncTimelineEvent]s, [SyncTimelineEvent]s, and [FlutterFrame]s.
-class TimelineEventProcessor {
-  TimelineEventProcessor(this.timelineController);
+/// [LegacyAsyncTimelineEvent]s, [LegacySyncTimelineEvent]s, and [LegacyFlutterFrame]s.
+class LegacyTimelineEventProcessor {
+  LegacyTimelineEventProcessor(this.timelineController);
 
   /// Number of traceEvents we will process in each batch.
   static const _defaultBatchSize = 2000;
 
-  final PerformanceController timelineController;
+  final LegacyPerformanceController timelineController;
 
   /// Notifies with the current progress value of processing Timeline data.
   ///
@@ -71,7 +71,7 @@ class TimelineEventProcessor {
 
   /// Async timeline events we have processed, mapped to their respective async
   /// ids.
-  final _asyncEventsById = <String, AsyncTimelineEvent>{};
+  final _asyncEventsById = <String, LegacyAsyncTimelineEvent>{};
 
   /// The current timeline event nodes for duration events.
   ///
@@ -79,7 +79,7 @@ class TimelineEventProcessor {
   /// a timeline event on a single thread will be formed and completed before
   /// another timeline event on the same thread begins.
   @visibleForTesting
-  final currentDurationEventNodes = <int, SyncTimelineEvent>{};
+  final currentDurationEventNodes = <int, LegacySyncTimelineEvent>{};
 
   /// The previously handled DurationEnd events for each thread.
   ///
@@ -94,7 +94,7 @@ class TimelineEventProcessor {
   /// Once frames have a start and end time, we will remove them from this Map
   /// and add them to the timeline.
   @visibleForTesting
-  final pendingFrames = <String, FlutterFrame>{};
+  final pendingFrames = <String, LegacyFlutterFrame>{};
 
   /// Pending root duration complete event that has not yet been added to the
   /// timeline.
@@ -106,7 +106,7 @@ class TimelineEventProcessor {
   /// the timeline. Once we have processed events beyond a DC event's end
   /// timestamp, we know that the DC event has no more unprocessed children.
   /// This is guaranteed because we process the events in timestamp order.
-  SyncTimelineEvent _pendingRootCompleteEvent;
+  LegacySyncTimelineEvent _pendingRootCompleteEvent;
 
   // TODO(kenz): Remove the [uiThreadId] and [rasterThreadId] once ui/raster
   //  distinction changes and frame ids are available in the engine.
@@ -280,7 +280,7 @@ class TimelineEventProcessor {
   }
 
   void _addAsyncEvent(TraceEventWrapper eventWrapper) {
-    final timelineEvent = AsyncTimelineEvent(eventWrapper);
+    final timelineEvent = LegacyAsyncTimelineEvent(eventWrapper);
     if (eventWrapper.event.phase == TraceEvent.asyncInstantPhase) {
       timelineEvent.time.end = timelineEvent.time.start;
     }
@@ -330,7 +330,8 @@ class TimelineEventProcessor {
   }
 
   void _endAsyncEvent(TraceEventWrapper eventWrapper) {
-    final AsyncTimelineEvent root = _asyncEventsById[eventWrapper.event.id];
+    final LegacyAsyncTimelineEvent root =
+        _asyncEventsById[eventWrapper.event.id];
     if (root == null) {
       // Since we process trace events in timestamp order, we can guarantee that
       // we have not already processed the matching begin event. Discard the end
@@ -342,7 +343,7 @@ class TimelineEventProcessor {
 
   void _handleDurationBeginEvent(TraceEventWrapper eventWrapper) {
     final current = currentDurationEventNodes[eventWrapper.event.threadId];
-    final timelineEvent = SyncTimelineEvent(eventWrapper);
+    final timelineEvent = LegacySyncTimelineEvent(eventWrapper);
     if (current != null) {
       current.addChild(timelineEvent);
     }
@@ -351,7 +352,7 @@ class TimelineEventProcessor {
 
   void _handleDurationEndEvent(TraceEventWrapper eventWrapper) {
     final TraceEvent event = eventWrapper.event;
-    SyncTimelineEvent current = currentDurationEventNodes[event.threadId];
+    LegacySyncTimelineEvent current = currentDurationEventNodes[event.threadId];
 
     if (current == null) return;
 
@@ -464,14 +465,14 @@ class TimelineEventProcessor {
 
   void _handleDurationCompleteEvent(TraceEventWrapper eventWrapper) {
     final event = eventWrapper.event;
-    final timelineEvent = SyncTimelineEvent(eventWrapper)
+    final timelineEvent = LegacySyncTimelineEvent(eventWrapper)
       ..time.end =
           Duration(microseconds: event.timestampMicros + event.duration);
 
     final current = currentDurationEventNodes[event.threadId];
     if (current != null) {
       if (current.subtreeHasNodeWithCondition(
-          (TimelineEvent event) => collectionEquals(
+          (LegacyTimelineEvent event) => collectionEquals(
                 event.beginTraceEventJson,
                 timelineEvent.beginTraceEventJson,
               ))) {
@@ -528,7 +529,7 @@ class TimelineEventProcessor {
   }
 
   /// Add event to an available frame in [pendingFrames] if we can.
-  void _maybeAddFlutterFrameEvent(SyncTimelineEvent event) {
+  void _maybeAddFlutterFrameEvent(LegacySyncTimelineEvent event) {
     if (!(event.isUiEventFlow &&
             event.traceEvents.first.event.threadId == uiThreadId) &&
         !(event.isRasterEventFlow &&
@@ -541,11 +542,11 @@ class TimelineEventProcessor {
     final frames = pendingFrames.values
         .where((frame) => frame.pipelineItemTime.start != null)
         .toList()
-          ..sort((FlutterFrame a, FlutterFrame b) {
+          ..sort((LegacyFlutterFrame a, LegacyFlutterFrame b) {
             return a.pipelineItemTime.start.inMicroseconds
                 .compareTo(b.pipelineItemTime.start.inMicroseconds);
           });
-    for (FlutterFrame frame in frames) {
+    for (LegacyFlutterFrame frame in frames) {
       final eventAdded = _maybeAddEventToFrame(event, frame);
       if (eventAdded) {
         break;
@@ -555,7 +556,8 @@ class TimelineEventProcessor {
 
   /// Attempts to add [event] to [frame], and returns a bool indicating whether
   /// the attempt was successful.
-  bool _maybeAddEventToFrame(SyncTimelineEvent event, FlutterFrame frame) {
+  bool _maybeAddEventToFrame(
+      LegacySyncTimelineEvent event, LegacyFlutterFrame frame) {
     // Ensure the frame does not already have an event of this type and that
     // the event fits within the frame's time boundaries.
     if (frame.eventFlows[event.type.index] != null ||
@@ -572,7 +574,7 @@ class TimelineEventProcessor {
 
   // The [rasterEventFlow] should always start after the [uiEventFlow].
   @visibleForTesting
-  bool satisfiesUiRasterOrder(SyncTimelineEvent e, FlutterFrame f) {
+  bool satisfiesUiRasterOrder(LegacySyncTimelineEvent e, LegacyFlutterFrame f) {
     if (e.isUiEventFlow && f.rasterEventFlow != null) {
       return e.time.start.inMicroseconds <
           f.rasterEventFlow.time.start.inMicroseconds;
@@ -585,7 +587,7 @@ class TimelineEventProcessor {
     return true;
   }
 
-  void _maybeAddCompletedFrame(FlutterFrame frame) {
+  void _maybeAddCompletedFrame(LegacyFlutterFrame frame) {
     assert(pendingFrames.containsKey(frame.id));
     if (frame.isReadyForTimeline) {
       timelineController.addFrame(frame);
@@ -593,9 +595,9 @@ class TimelineEventProcessor {
     }
   }
 
-  FlutterFrame _frameFromEvent(TraceEvent event) {
+  LegacyFlutterFrame _frameFromEvent(TraceEvent event) {
     final id = _frameId(event);
-    return pendingFrames.putIfAbsent(id, () => FlutterFrame(id));
+    return pendingFrames.putIfAbsent(id, () => LegacyFlutterFrame(id));
   }
 
   String _frameId(TraceEvent event) {

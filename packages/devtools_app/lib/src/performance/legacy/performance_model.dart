@@ -21,15 +21,15 @@ import '../../utils.dart';
 import 'performance_utils.dart';
 import 'timeline_event_processor.dart';
 
-class PerformanceData {
-  PerformanceData({
+class LegacyPerformanceData {
+  LegacyPerformanceData({
     List<Map<String, dynamic>> traceEvents,
-    List<FlutterFrame> frames,
+    List<LegacyFlutterFrame> frames,
     this.selectedFrame,
     this.selectedEvent,
     this.cpuProfileData,
     double displayRefreshRate,
-    List<TimelineEvent> timelineEvents,
+    List<LegacyTimelineEvent> timelineEvents,
   })  : traceEvents = traceEvents ?? [],
         frames = frames ?? [],
         displayRefreshRate = displayRefreshRate ?? defaultRefreshRate,
@@ -55,9 +55,9 @@ class PerformanceData {
 
   static const selectedFrameIdKey = 'selectedFrameId';
 
-  final List<TimelineEvent> timelineEvents;
+  final List<LegacyTimelineEvent> timelineEvents;
 
-  final SplayTreeMap<String, TimelineEventGroup> eventGroups =
+  final SplayTreeMap<String, LegacyTimelineEventGroup> eventGroups =
       SplayTreeMap(eventGroupComparator);
 
   /// List that will store trace events in the order we process them.
@@ -69,16 +69,16 @@ class PerformanceData {
 
   bool get isEmpty => traceEvents.isEmpty;
 
-  TimelineEvent selectedEvent;
+  LegacyTimelineEvent selectedEvent;
 
   CpuProfileData cpuProfileData;
 
   double displayRefreshRate;
 
   /// All frames currently visible in the timeline.
-  List<FlutterFrame> frames = [];
+  List<LegacyFlutterFrame> frames = [];
 
-  FlutterFrame selectedFrame;
+  LegacyFlutterFrame selectedFrame;
 
   String get selectedFrameId => selectedFrame?.id;
 
@@ -92,14 +92,15 @@ class PerformanceData {
   int _endTimestampMicros = -1;
 
   void initializeEventGroups(Map<int, String> threadNamesById) {
-    for (TimelineEvent event in timelineEvents) {
-      eventGroups.putIfAbsent(computeEventGroupKey(event, threadNamesById),
-          () => TimelineEventGroup())
+    for (LegacyTimelineEvent event in timelineEvents) {
+      eventGroups.putIfAbsent(
+          legacyComputeEventGroupKey(event, threadNamesById),
+          () => LegacyTimelineEventGroup())
         ..addEventAtCalculatedRow(event);
     }
   }
 
-  void addTimelineEvent(TimelineEvent event) {
+  void addTimelineEvent(LegacyTimelineEvent event) {
     assert(event.isWellFormedDeep);
     timelineEvents.add(event);
     _endTimestampMicros = math.max(_endTimestampMicros, event.maxEndMicros);
@@ -153,7 +154,7 @@ class PerformanceData {
 }
 
 // TODO(kenz): add tests for this class.
-class TimelineEventGroup {
+class LegacyTimelineEventGroup {
   /// At each index in the list, this stores row data for the row at index.
   ///
   /// We store data by row within the group in order to display events with
@@ -162,7 +163,7 @@ class TimelineEventGroup {
   /// events on a new flame chart row.
   ///
   /// If we have events A, B, C, and D, where all belong in a single
-  /// [TimelineEventGroup] but some overlap, the UI will look
+  /// [LegacyTimelineEventGroup] but some overlap, the UI will look
   /// like this:
   ///
   ///    [timeline_event_A]    [timeline_event_C]    <-- row 0
@@ -175,26 +176,27 @@ class TimelineEventGroup {
   ///   [timeline_event_B],
   ///   [timeline_event_D],
   /// ]
-  final rows = <TimelineRowData>[];
+  final rows = <LegacyTimelineRowData>[];
 
-  final rowIndexForEvent = <TimelineEvent, int>{};
+  final rowIndexForEvent = <LegacyTimelineEvent, int>{};
 
   int earliestTimestampMicros;
 
   int latestTimestampMicros;
 
-  List<TimelineEvent> get sortedEventRoots =>
-      _sortedEventRoots ??= List<TimelineEvent>.from(rowIndexForEvent.keys)
+  List<LegacyTimelineEvent> get sortedEventRoots => _sortedEventRoots ??=
+      List<LegacyTimelineEvent>.from(rowIndexForEvent.keys)
           .where((event) => event.isRoot)
           .toList()
             ..sort((a, b) => a.time.start.inMicroseconds
                 .compareTo(b.time.start.inMicroseconds));
-  List<TimelineEvent> _sortedEventRoots;
+  List<LegacyTimelineEvent> _sortedEventRoots;
 
   int get displayDepth => rows.length;
 
   // TODO(kenz): prevent guideline "elbows" from overlapping other events.
-  void addEventAtCalculatedRow(TimelineEvent event, {int displayRow = 0}) {
+  void addEventAtCalculatedRow(LegacyTimelineEvent event,
+      {int displayRow = 0}) {
     final currentLargestRowIndex = rows.length;
     while (displayRow < currentLargestRowIndex) {
       // Ensure that [event] and its children do not overlap with events at all
@@ -211,7 +213,7 @@ class TimelineEventGroup {
   }
 
   bool _eventFitsAtDisplayRow(
-    TimelineEvent event,
+    LegacyTimelineEvent event,
     int displayRow,
     int currentLargestRowIndex,
   ) {
@@ -238,10 +240,10 @@ class TimelineEventGroup {
     return true;
   }
 
-  void _addEventAtDisplayRow(TimelineEvent event, {@required int row}) {
+  void _addEventAtDisplayRow(LegacyTimelineEvent event, {@required int row}) {
     if (row + event.displayDepth >= rows.length) {
       for (int i = rows.length; i < row + event.displayDepth; i++) {
-        rows.add(TimelineRowData());
+        rows.add(LegacyTimelineRowData());
       }
     }
 
@@ -267,10 +269,10 @@ class TimelineEventGroup {
   }
 }
 
-class TimelineRowData {
+class LegacyTimelineRowData {
   /// Timeline events that will be displayed in this row in a visualization of a
-  /// [TimelineEventGroup].
-  final List<TimelineEvent> events = [];
+  /// [LegacyTimelineEventGroup].
+  final List<LegacyTimelineEvent> events = [];
 
   /// The last event for this row, where last means the event has the latest end
   /// time in the row.
@@ -278,16 +280,16 @@ class TimelineRowData {
   /// The most recently added event for the row is not guaranteed to be the last
   /// event for the row, which is why we cannot just call [events.last] to get
   /// [lastEvent].
-  TimelineEvent lastEvent;
+  LegacyTimelineEvent lastEvent;
 }
 
-class OfflinePerformanceData extends PerformanceData {
-  OfflinePerformanceData._({
+class LegacyOfflinePerformanceData extends LegacyPerformanceData {
+  LegacyOfflinePerformanceData._({
     List<Map<String, dynamic>> traceEvents,
-    List<FlutterFrame> frames,
-    FlutterFrame selectedFrame,
+    List<LegacyFlutterFrame> frames,
+    LegacyFlutterFrame selectedFrame,
     String selectedFrameId,
-    TimelineEvent selectedEvent,
+    LegacyTimelineEvent selectedEvent,
     double displayRefreshRate,
     CpuProfileData cpuProfileData,
   })  : _selectedFrameId = selectedFrameId,
@@ -300,30 +302,32 @@ class OfflinePerformanceData extends PerformanceData {
           cpuProfileData: cpuProfileData,
         );
 
-  static OfflinePerformanceData parse(Map<String, dynamic> json) {
+  static LegacyOfflinePerformanceData parse(Map<String, dynamic> json) {
     final List<dynamic> traceEvents =
-        (json[PerformanceData.traceEventsKey] ?? [])
+        (json[LegacyPerformanceData.traceEventsKey] ?? [])
             .cast<Map<String, dynamic>>();
 
     final Map<String, dynamic> cpuProfileJson =
-        json[PerformanceData.cpuProfileKey] ?? {};
+        json[LegacyPerformanceData.cpuProfileKey] ?? {};
     final CpuProfileData cpuProfileData =
         cpuProfileJson.isNotEmpty ? CpuProfileData.parse(cpuProfileJson) : null;
 
-    final String selectedFrameId = json[PerformanceData.selectedFrameIdKey];
+    final String selectedFrameId =
+        json[LegacyPerformanceData.selectedFrameIdKey];
 
     final Map<String, dynamic> selectedEventJson =
-        json[PerformanceData.selectedEventKey] ?? {};
-    final OfflineTimelineEvent selectedEvent = selectedEventJson.isNotEmpty
-        ? OfflineTimelineEvent(
-            (selectedEventJson[TimelineEvent.firstTraceKey] ?? {})
-                .cast<String, dynamic>())
-        : null;
+        json[LegacyPerformanceData.selectedEventKey] ?? {};
+    final LegacyOfflineTimelineEvent selectedEvent =
+        selectedEventJson.isNotEmpty
+            ? LegacyOfflineTimelineEvent(
+                (selectedEventJson[LegacyTimelineEvent.firstTraceKey] ?? {})
+                    .cast<String, dynamic>())
+            : null;
 
     final displayRefreshRate =
-        json[PerformanceData.displayRefreshRateKey] ?? defaultRefreshRate;
+        json[LegacyPerformanceData.displayRefreshRateKey] ?? defaultRefreshRate;
 
-    return OfflinePerformanceData._(
+    return LegacyOfflinePerformanceData._(
       traceEvents: traceEvents,
       selectedFrameId: selectedFrameId,
       selectedEvent: selectedEvent,
@@ -336,15 +340,15 @@ class OfflinePerformanceData extends PerformanceData {
   String get selectedFrameId => _selectedFrameId;
   final String _selectedFrameId;
 
-  /// Creates a new instance of [OfflinePerformanceData] with references to the
+  /// Creates a new instance of [LegacyOfflinePerformanceData] with references to the
   /// same objects contained in this instance.
   ///
   /// This is not a deep copy. We are not modifying the before-mentioned
   /// objects, only pointing our reference variables at different objects.
   /// Therefore, we do not need to store a copy of all these objects (and the
   /// objects they contain) in memory.
-  OfflinePerformanceData shallowClone() {
-    return OfflinePerformanceData._(
+  LegacyOfflinePerformanceData shallowClone() {
+    return LegacyOfflinePerformanceData._(
       traceEvents: traceEvents,
       frames: frames,
       selectedFrame: selectedFrame,
@@ -356,7 +360,7 @@ class OfflinePerformanceData extends PerformanceData {
   }
 }
 
-/// Wrapper class for [TimelineEvent] that only includes information we need for
+/// Wrapper class for [LegacyTimelineEvent] that only includes information we need for
 /// importing and exporting snapshots.
 ///
 /// * name
@@ -366,8 +370,8 @@ class OfflinePerformanceData extends PerformanceData {
 ///
 /// We extend TimelineEvent so that our CPU profiler code requiring a selected
 /// timeline event will work as it does when we are not loading from offline.
-class OfflineTimelineEvent extends TimelineEvent {
-  OfflineTimelineEvent(Map<String, dynamic> firstTrace)
+class LegacyOfflineTimelineEvent extends LegacyTimelineEvent {
+  LegacyOfflineTimelineEvent(Map<String, dynamic> firstTrace)
       : super(TraceEventWrapper(
           TraceEvent(firstTrace),
           0, // 0 is an arbitrary value for [TraceEventWrapper.timeReceived].
@@ -388,7 +392,7 @@ class OfflineTimelineEvent extends TimelineEvent {
   // snapshots.
 
   @override
-  bool couldBeParentOf(TimelineEvent e) {
+  bool couldBeParentOf(LegacyTimelineEvent e) {
     throw UnimplementedError('This method should never be called for an '
         'instance of OfflineTimelineEvent');
   }
@@ -399,29 +403,31 @@ class OfflineTimelineEvent extends TimelineEvent {
           'instance of OfflineTimelineEvent');
 
   @override
-  List<List<TimelineEvent>> _calculateDisplayRows() =>
+  List<List<LegacyTimelineEvent>> _calculateDisplayRows() =>
       throw UnimplementedError('This method should never be called for an '
           'instance of OfflineTimelineEvent');
 }
 
 /// Data describing a single Flutter frame.
 ///
-/// Each [FlutterFrame] should have 2 distinct pieces of data:
+/// Each [LegacyFlutterFrame] should have 2 distinct pieces of data:
 /// * [uiEventFlow] : flow of events showing the UI work for the frame.
 /// * [rasterEventFlow] : flow of events showing the Raster work for the frame.
-class FlutterFrame {
-  FlutterFrame(this.id);
+class LegacyFlutterFrame {
+  LegacyFlutterFrame(this.id);
 
   final String id;
 
   /// Event flows for the UI and Raster work for the frame.
-  final List<SyncTimelineEvent> eventFlows = List.generate(2, (_) => null);
+  final List<LegacySyncTimelineEvent> eventFlows =
+      List.generate(2, (_) => null);
 
   /// Flow of events describing the UI work for the frame.
-  SyncTimelineEvent get uiEventFlow => eventFlows[TimelineEventType.ui.index];
+  LegacySyncTimelineEvent get uiEventFlow =>
+      eventFlows[TimelineEventType.ui.index];
 
   /// Flow of events describing the Raster work for the frame.
-  SyncTimelineEvent get rasterEventFlow =>
+  LegacySyncTimelineEvent get rasterEventFlow =>
       eventFlows[TimelineEventType.raster.index];
 
   /// Whether the frame is ready for the timeline.
@@ -464,7 +470,7 @@ class FlutterFrame {
 
   CpuProfileData cpuProfileData;
 
-  void setEventFlow(SyncTimelineEvent event, {TimelineEventType type}) {
+  void setEventFlow(LegacySyncTimelineEvent event, {TimelineEventType type}) {
     type ??= event?.type;
     if (type == TimelineEventType.ui) {
       time.start = event?.time?.start;
@@ -496,7 +502,7 @@ class FlutterFrame {
     event?.frameId = id;
   }
 
-  TimelineEvent findTimelineEvent(TimelineEvent event) {
+  LegacyTimelineEvent findTimelineEvent(LegacyTimelineEvent event) {
     if (event.type == TimelineEventType.ui ||
         event.type == TimelineEventType.raster) {
       return eventFlows[event.type.index].firstChildWithCondition(
@@ -528,12 +534,12 @@ class FlutterFrame {
   }
 }
 
-abstract class TimelineEvent extends TreeNode<TimelineEvent>
+abstract class LegacyTimelineEvent extends TreeNode<LegacyTimelineEvent>
     with
         DataSearchStateMixin,
-        TreeDataSearchStateMixin<TimelineEvent>,
+        TreeDataSearchStateMixin<LegacyTimelineEvent>,
         FlameChartDataMixin {
-  TimelineEvent(TraceEventWrapper firstTraceEvent)
+  LegacyTimelineEvent(TraceEventWrapper firstTraceEvent)
       : traceEvents = [firstTraceEvent],
         type = firstTraceEvent.event.type {
     time.start = Duration(microseconds: firstTraceEvent.event.timestampMicros);
@@ -545,7 +551,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   static const eventStartTimeKey = 'startMicros';
   static const eventDurationKey = 'durationMicros';
 
-  /// Trace events associated with this [TimelineEvent].
+  /// Trace events associated with this [LegacyTimelineEvent].
   ///
   /// There will either be one entry in the list (for DurationComplete events)
   /// or two (one for the associated DurationBegin event and one for the
@@ -592,7 +598,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   @override
   String get tooltip => '$name - ${msText(time.duration)}';
 
-  bool _isWellFormedDeep(TimelineEvent event) {
+  bool _isWellFormedDeep(LegacyTimelineEvent event) {
     return !subtreeHasNodeWithCondition((e) => !e.isWellFormed);
   }
 
@@ -604,7 +610,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 
   /// Whether [this] event could be the parent of [e] based on criteria such as
   /// timestamps and event ids.
-  bool couldBeParentOf(TimelineEvent e);
+  bool couldBeParentOf(LegacyTimelineEvent e);
 
   /// Tracks the start row for the lowest visual child in the display for this
   /// TimelineEvent.
@@ -612,16 +618,16 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 
   /// The child that is nearest the bottom of the visualization for this
   /// TimelineEvent.
-  TimelineEvent get lowestDisplayChild => _lowestDisplayChild;
-  TimelineEvent _lowestDisplayChild;
+  LegacyTimelineEvent get lowestDisplayChild => _lowestDisplayChild;
+  LegacyTimelineEvent _lowestDisplayChild;
 
   int get displayDepth => displayRows.length;
 
-  List<List<TimelineEvent>> _displayRows;
-  List<List<TimelineEvent>> get displayRows =>
+  List<List<LegacyTimelineEvent>> _displayRows;
+  List<List<LegacyTimelineEvent>> get displayRows =>
       _displayRows ??= _calculateDisplayRows();
 
-  List<List<TimelineEvent>> _calculateDisplayRows();
+  List<List<LegacyTimelineEvent>> _calculateDisplayRows();
 
   void _expandDisplayRows(int newRowLength) {
     _displayRows ??= [];
@@ -631,7 +637,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
     }
   }
 
-  void _mergeChildDisplayRows(int mergeStartLevel, TimelineEvent child) {
+  void _mergeChildDisplayRows(int mergeStartLevel, LegacyTimelineEvent child) {
     assert(
       mergeStartLevel <= _displayRows.length,
       'mergeStartLevel $mergeStartLevel is greater than _displayRows.length'
@@ -654,7 +660,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   }
 
   void maybeRemoveDuplicate() {
-    void _maybeRemoveDuplicate({@required TimelineEvent parent}) {
+    void _maybeRemoveDuplicate({@required LegacyTimelineEvent parent}) {
       if (parent.children.length == 1 &&
           // [parent]'s DurationBegin trace is equal to that of its only child.
           collectionEquals(
@@ -680,16 +686,17 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
     }
   }
 
-  void removeChild(TimelineEvent childToRemove) {
+  void removeChild(LegacyTimelineEvent childToRemove) {
     assert(children.contains(childToRemove));
-    final List<TimelineEvent> newChildren = List.from(childToRemove.children);
+    final List<LegacyTimelineEvent> newChildren =
+        List.from(childToRemove.children);
     newChildren.forEach(_addChild);
     children.remove(childToRemove);
   }
 
   @override
-  void addChild(TimelineEvent child) {
-    void _putChildInTree(TimelineEvent root) {
+  void addChild(LegacyTimelineEvent child) {
+    void _putChildInTree(LegacyTimelineEvent root) {
       // [root] is a leaf. Add child here.
       if (root.children.isEmpty) {
         root._addChild(child);
@@ -701,7 +708,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
       // If [child] is the parent of some or all of the members in [_children],
       // those members will need to be reordered in the tree.
       final childrenToReorder = [];
-      for (TimelineEvent otherChild in _children) {
+      for (LegacyTimelineEvent otherChild in _children) {
         if (child.couldBeParentOf(otherChild)) {
           childrenToReorder.add(otherChild);
         }
@@ -710,7 +717,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
       if (childrenToReorder.isNotEmpty) {
         root._addChild(child);
 
-        for (TimelineEvent otherChild in childrenToReorder) {
+        for (LegacyTimelineEvent otherChild in childrenToReorder) {
           // Link [otherChild] with its correct parent [child].
           child._addChild(otherChild);
 
@@ -724,7 +731,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
       // children in [_children] share a timestamp, they both could be the
       // parent of [child]. We reverse [_children] so that we will pick the last
       // received candidate as the new parent of [child].
-      for (TimelineEvent otherChild in _children.reversed) {
+      for (LegacyTimelineEvent otherChild in _children.reversed) {
         if (otherChild.couldBeParentOf(child)) {
           // Recurse on [otherChild]'s subtree.
           _putChildInTree(otherChild);
@@ -740,7 +747,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
     _putChildInTree(this);
   }
 
-  void _addChild(TimelineEvent child) {
+  void _addChild(LegacyTimelineEvent child) {
     assert(!children.contains(child));
     children.add(child);
     child.parent = this;
@@ -748,7 +755,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 
   void format(StringBuffer buf, String indent) {
     buf.writeln('$indent$name $time');
-    for (TimelineEvent child in children) {
+    for (LegacyTimelineEvent child in children) {
       child.format(buf, '  $indent');
     }
   }
@@ -759,7 +766,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 
   void writeTraceToBuffer(StringBuffer buf) {
     buf.writeln(beginTraceEventJson);
-    for (TimelineEvent child in children) {
+    for (LegacyTimelineEvent child in children) {
       child.writeTraceToBuffer(buf);
     }
     if (endTraceEventJson != null) {
@@ -779,13 +786,13 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   }
 
   @visibleForTesting
-  TimelineEvent deepCopy() {
+  LegacyTimelineEvent deepCopy() {
     final copy = isAsyncEvent
-        ? AsyncTimelineEvent(traceEvents.first)
-        : SyncTimelineEvent(traceEvents.first);
+        ? LegacyAsyncTimelineEvent(traceEvents.first)
+        : LegacySyncTimelineEvent(traceEvents.first);
     copy.time.end = time.end;
     copy.parent = parent;
-    for (TimelineEvent child in children) {
+    for (LegacyTimelineEvent child in children) {
       copy._addChild(child.deepCopy());
     }
     return copy;
@@ -800,20 +807,21 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   }
 }
 
-class SyncTimelineEvent extends TimelineEvent {
-  SyncTimelineEvent(TraceEventWrapper firstTraceEvent) : super(firstTraceEvent);
+class LegacySyncTimelineEvent extends LegacyTimelineEvent {
+  LegacySyncTimelineEvent(TraceEventWrapper firstTraceEvent)
+      : super(firstTraceEvent);
 
   bool get isUiEventFlow => subtreeHasNodeWithCondition(
-      (TimelineEvent event) => event.name.contains(uiEventName));
+      (LegacyTimelineEvent event) => event.name.contains(uiEventName));
 
   bool get isRasterEventFlow => subtreeHasNodeWithCondition(
-      (TimelineEvent event) => event.name.contains('PipelineConsume'));
+      (LegacyTimelineEvent event) => event.name.contains('PipelineConsume'));
 
   @override
   int get maxEndMicros => time.end.inMicroseconds;
 
   @override
-  List<List<TimelineEvent>> _calculateDisplayRows() {
+  List<List<LegacyTimelineEvent>> _calculateDisplayRows() {
     assert(_displayRows == null);
     _expandDisplayRows(depth);
 
@@ -825,7 +833,7 @@ class SyncTimelineEvent extends TimelineEvent {
   }
 
   @override
-  bool couldBeParentOf(TimelineEvent e) {
+  bool couldBeParentOf(LegacyTimelineEvent e) {
     final startTime = time.start.inMicroseconds;
     final endTime = time.end?.inMicroseconds;
     final eStartTime = e.time.start.inMicroseconds;
@@ -853,8 +861,8 @@ class SyncTimelineEvent extends TimelineEvent {
 
 // TODO(kenz): calculate and store async guidelines here instead of in the UI
 // code.
-class AsyncTimelineEvent extends TimelineEvent {
-  AsyncTimelineEvent(TraceEventWrapper firstTraceEvent)
+class LegacyAsyncTimelineEvent extends LegacyTimelineEvent {
+  LegacyAsyncTimelineEvent(TraceEventWrapper firstTraceEvent)
       : asyncId = firstTraceEvent.event.id,
         parentId = firstTraceEvent.event.args[parentIdKey],
         super(firstTraceEvent) {
@@ -879,14 +887,14 @@ class AsyncTimelineEvent extends TimelineEvent {
       return time.end.inMicroseconds;
     }
     var maxEnd = time.end.inMicroseconds;
-    for (AsyncTimelineEvent child in children) {
+    for (LegacyAsyncTimelineEvent child in children) {
       maxEnd = math.max(maxEnd, child._calculateMaxEndMicros());
     }
     return _maxEndMicros = maxEnd;
   }
 
   @override
-  List<List<TimelineEvent>> _calculateDisplayRows() {
+  List<List<LegacyTimelineEvent>> _calculateDisplayRows() {
     assert(_displayRows == null);
     _expandDisplayRows(1);
 
@@ -895,7 +903,7 @@ class AsyncTimelineEvent extends TimelineEvent {
 
     const mainChildRow = currentRow + 1;
     for (int i = 0; i < children.length; i++) {
-      final AsyncTimelineEvent child = children[i];
+      final LegacyAsyncTimelineEvent child = children[i];
       if (i == 0 ||
           _eventFitsAtDisplayRow(child, mainChildRow, _displayRows.length)) {
         _mergeChildDisplayRows(mainChildRow, child);
@@ -909,7 +917,7 @@ class AsyncTimelineEvent extends TimelineEvent {
   }
 
   bool _eventFitsAtDisplayRow(
-    AsyncTimelineEvent event,
+    LegacyAsyncTimelineEvent event,
     int displayRow,
     int currentLargestRowIndex,
   ) {
@@ -948,8 +956,8 @@ class AsyncTimelineEvent extends TimelineEvent {
   }
 
   @override
-  void addChild(TimelineEvent child) {
-    final AsyncTimelineEvent _child = child;
+  void addChild(LegacyTimelineEvent child) {
+    final LegacyAsyncTimelineEvent _child = child;
     // Short circuit if we are using an explicit parentId.
     if (_child.parentId != null &&
         _child.parentId == traceEvents.first.event.id) {
@@ -960,8 +968,8 @@ class AsyncTimelineEvent extends TimelineEvent {
   }
 
   @override
-  bool couldBeParentOf(TimelineEvent e) {
-    final AsyncTimelineEvent asyncEvent = e;
+  bool couldBeParentOf(LegacyTimelineEvent e) {
+    final LegacyAsyncTimelineEvent asyncEvent = e;
 
     // If [asyncEvent] has an explicit parentId, use that as the truth.
     if (asyncEvent.parentId != null) return asyncId == asyncEvent.parentId;
@@ -1017,7 +1025,7 @@ class AsyncTimelineEvent extends TimelineEvent {
       return true;
     }
 
-    for (AsyncTimelineEvent child in children) {
+    for (LegacyAsyncTimelineEvent child in children) {
       final added = child.endAsyncEvent(eventWrapper);
       if (added) return true;
     }
