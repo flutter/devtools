@@ -29,11 +29,13 @@ ThemeData themeFor({
   }
 
   return colorTheme.copyWith(
-    primaryTextTheme: (theme != null ? theme.primaryTextTheme
-        .merge(colorTheme.primaryTextTheme) : colorTheme.primaryTextTheme)
+    primaryTextTheme: (theme != null
+            ? theme.primaryTextTheme.merge(colorTheme.primaryTextTheme)
+            : colorTheme.primaryTextTheme)
         .apply(fontSizeFactor: ideTheme.fontSizeFactor),
-    textTheme: (theme != null ? theme.textTheme
-        .merge(colorTheme.textTheme) : colorTheme.textTheme)
+    textTheme: (theme != null
+            ? theme.textTheme.merge(colorTheme.textTheme)
+            : colorTheme.textTheme)
         .apply(fontSizeFactor: ideTheme.fontSizeFactor),
   );
 }
