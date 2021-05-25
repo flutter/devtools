@@ -1,3 +1,14 @@
+## 2.2.5
+* Use font size from IDE theme [#3054](https://github.com/flutter/devtools/pull/3054)
+* Lighten the area pane header color for light theme [#3051](https://github.com/flutter/devtools/pull/3051)
+* Make a copy of performance page files under performance/legacy [#3055](https://github.com/flutter/devtools/pull/3055)
+* Fix title color for light theme. [#3048](https://github.com/flutter/devtools/pull/3048)
+* Cleanup some UI in the debugger page [#3052](https://github.com/flutter/devtools/pull/3052)
+* Fix flutter frame coloring to reflect which part of the frame is janky. [#3049](https://github.com/flutter/devtools/pull/3049)
+* Handle getObject issues during autocomplete [#3046](https://github.com/flutter/devtools/pull/3046)
+* Improve eval autocomplete [#3045](https://github.com/flutter/devtools/pull/3045)
+* Add "Load all CPU samples" button to the CPU profiler [#2943](https://github.com/flutter/devtools/pull/2943)
+
 ## 2.2.4
 * Fix bug in devtools_server by calling proper vm service API [#3040](https://github.com/flutter/devtools/pull/3040)
 
