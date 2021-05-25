@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'config_specific/ide_theme/ide_theme.dart';
 import 'core/message_bus.dart';
 import 'extension_points/extensions_base.dart';
 import 'framework_controller.dart';
@@ -34,6 +35,8 @@ PreferencesController get preferences => globals[PreferencesController];
 
 DevToolsExtensionPoints get devToolsExtensionPoints =>
     globals[DevToolsExtensionPoints];
+
+IdeTheme get ideTheme => globals[IdeTheme];
 
 void setGlobal(Type clazz, dynamic instance) {
   globals[clazz] = instance;

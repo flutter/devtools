@@ -18,8 +18,6 @@ import 'src/preferences.dart';
 import 'src/provider/riverpod_error_logger_observer.dart';
 
 void main() async {
-  final ideTheme = getIdeTheme();
-
   // Initialize the framework before we do anything else, otherwise the
   // StorageController won't be initialized and preferences won't be loaded.
   await initializeFramework();
@@ -34,12 +32,13 @@ void main() async {
 
   // Set the extension points global.
   setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+  setGlobal(IdeTheme, getIdeTheme());
 
   // Now run the app.
   runApp(
     ProviderScope(
       observers: const [ErrorLoggerObserver()],
-      child: DevToolsApp(defaultScreens, ideTheme, await analyticsProvider),
+      child: DevToolsApp(defaultScreens, await analyticsProvider),
     ),
   );
 }

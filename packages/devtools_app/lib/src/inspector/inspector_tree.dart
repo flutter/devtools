@@ -17,6 +17,7 @@ import 'package:meta/meta.dart';
 
 import '../config_specific/logger/logger.dart';
 import '../theme.dart';
+import '../utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
 
@@ -42,8 +43,8 @@ extension InspectorColorScheme on ColorScheme {
 const double iconPadding = 5.0;
 const double chartLineStrokeWidth = 1.0;
 const double columnWidth = 16.0;
-const double verticalPadding = 10.0;
-const double rowHeight = 24.0;
+double get verticalPadding => scaleByFontFactor(10.0);
+double get rowHeight => scaleByFontFactor(24.0);
 
 /// This class could be refactored out to be a reasonable generic collapsible
 /// tree ui node class but we choose to instead make it widget inspector
