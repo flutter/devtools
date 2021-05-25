@@ -27,9 +27,9 @@ import '../../trace_event.dart';
 import '../../trees.dart';
 import '../../ui/search.dart';
 import '../../utils.dart';
-import '../performance_screen.dart';
 import '../timeline_streams.dart';
 import 'performance_model.dart';
+import 'performance_screen.dart';
 import 'timeline_event_processor.dart';
 
 /// This class contains the business logic for [performance_screen.dart].
@@ -276,7 +276,7 @@ class LegacyPerformanceController
       for (final frame in _flutterFrames.value) {
         if (frame.isJanky(_displayRefreshRate.value)) {
           serviceManager.errorBadgeManager
-              .incrementBadgeCount(PerformanceScreen.id);
+              .incrementBadgeCount(LegacyPerformanceScreen.id);
         }
       }
     }
@@ -439,7 +439,7 @@ class LegacyPerformanceController
   /// This method returns the name of the file that was downloaded.
   String exportData() {
     final encodedData =
-        _exportController.encode(PerformanceScreen.id, data.json);
+        _exportController.encode(LegacyPerformanceScreen.id, data.json);
     return _exportController.downloadFile(encodedData);
   }
 
@@ -509,7 +509,7 @@ class LegacyPerformanceController
     _selectedTimelineEventNotifier.value = null;
     _selectedFrameNotifier.value = null;
     _processing.value = false;
-    serviceManager.errorBadgeManager.clearErrors(PerformanceScreen.id);
+    serviceManager.errorBadgeManager.clearErrors(LegacyPerformanceScreen.id);
   }
 
   void recordTrace(Map<String, dynamic> trace) {

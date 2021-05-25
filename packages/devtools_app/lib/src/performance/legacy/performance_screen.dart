@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+    if (dart.library.html) '../../analytics/analytics.dart' as ga;
 import '../../auto_dispose_mixin.dart';
 import '../../banner_messages.dart';
 import '../../common_widgets.dart';
@@ -55,7 +55,7 @@ class LegacyPerformanceScreen extends Screen {
           icon: Octicons.pulse,
         );
 
-  static const id = 'performance';
+  static const id = 'legacy-performance';
 
   static bool _shouldShowForFlutterVersion(FlutterVersion currentVersion) {
     // TODO(kenz): once https://github.com/flutter/flutter/commit/78a96b09d64dc2a520e5b269d5cea1b9dde27d3f
