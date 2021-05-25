@@ -100,7 +100,8 @@ abstract class ExportController {
       activeScreenIdKey: activeScreenId,
       devToolsVersionKey: version,
       if (serviceManager.connectedApp.flutterVersionNow != null)
-        flutterVersionKey: serviceManager.connectedApp.flutterVersionNow,
+        flutterVersionKey:
+            serviceManager.connectedApp.flutterVersionNow.version,
     };
     // This is a workaround to guarantee that DevTools exports are compatible
     // with other trace viewers (catapult, perfetto, chrome://tracing), which
