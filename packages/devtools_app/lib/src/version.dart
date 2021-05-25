@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
+import 'utils.dart';
+
 class FlutterVersion extends SemanticVersion {
   FlutterVersion._({
     @required this.version,
@@ -89,7 +91,7 @@ class FlutterVersion extends SemanticVersion {
       );
 }
 
-class SemanticVersion implements Comparable {
+class SemanticVersion with CompareMixin {
   SemanticVersion({this.major = 0, this.minor = 0, this.patch = 0});
 
   int major;
@@ -100,22 +102,6 @@ class SemanticVersion implements Comparable {
 
   bool isSupported({@required SemanticVersion supportedVersion}) =>
       compareTo(supportedVersion) >= 0;
-
-  bool operator <(other) {
-    return compareTo(other) < 0;
-  }
-
-  bool operator >(other) {
-    return compareTo(other) > 0;
-  }
-
-  bool operator <=(other) {
-    return compareTo(other) <= 0;
-  }
-
-  bool operator >=(other) {
-    return compareTo(other) >= 0;
-  }
 
   @override
   int compareTo(other) {

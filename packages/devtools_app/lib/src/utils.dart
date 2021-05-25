@@ -1272,3 +1272,21 @@ class ImmutableList<T> with ListMixin<T> implements List<T> {
     throw Exception('Cannot modify the content of ImmutableList');
   }
 }
+
+mixin CompareMixin implements Comparable {
+  bool operator <(other) {
+    return compareTo(other) < 0;
+  }
+
+  bool operator >(other) {
+    return compareTo(other) > 0;
+  }
+
+  bool operator <=(other) {
+    return compareTo(other) <= 0;
+  }
+
+  bool operator >=(other) {
+    return compareTo(other) >= 0;
+  }
+}
