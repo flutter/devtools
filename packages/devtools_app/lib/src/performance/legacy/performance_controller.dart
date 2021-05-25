@@ -145,27 +145,29 @@ class LegacyPerformanceController
   }
 
   Future<void> _initHelper() async {
-    await serviceManager.onServiceAvailable;
+    if (!offlineMode) {
+      await serviceManager.onServiceAvailable;
 
-    // Default to true for profile builds only.
-    _badgeTabForJankyFrames.value =
-        await serviceManager.connectedApp.isProfileBuild;
+      // Default to true for profile builds only.
+      _badgeTabForJankyFrames.value =
+          await serviceManager.connectedApp.isProfileBuild;
 
-    unawaited(allowedError(
-      serviceManager.service.setProfilePeriod(mediumProfilePeriod),
-      logError: false,
-    ));
-    await setTimelineStreams([
-      dartTimelineStream,
-      embedderTimelineStream,
-      gcTimelineStream,
-    ]);
-    await toggleHttpRequestLogging(true);
+      unawaited(allowedError(
+        serviceManager.service.setProfilePeriod(mediumProfilePeriod),
+        logError: false,
+      ));
+      await setTimelineStreams([
+        dartTimelineStream,
+        embedderTimelineStream,
+        gcTimelineStream,
+      ]);
+      await toggleHttpRequestLogging(true);
 
-    // Initialize displayRefreshRate.
-    _displayRefreshRate.value =
-        await serviceManager.queryDisplayRefreshRate ?? defaultRefreshRate;
-    data?.displayRefreshRate = _displayRefreshRate.value;
+      // Initialize displayRefreshRate.
+      _displayRefreshRate.value =
+          await serviceManager.queryDisplayRefreshRate ?? defaultRefreshRate;
+      data?.displayRefreshRate = _displayRefreshRate.value;
+    }
   }
 
   Future<void> selectTimelineEvent(LegacyTimelineEvent event) async {

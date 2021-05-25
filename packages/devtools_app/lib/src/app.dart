@@ -34,6 +34,8 @@ import 'memory/memory_screen.dart';
 import 'network/network_controller.dart';
 import 'network/network_screen.dart';
 import 'notifications.dart';
+import 'performance/legacy/performance_controller.dart';
+import 'performance/legacy/performance_screen.dart';
 import 'performance/performance_controller.dart';
 import 'performance/performance_screen.dart';
 import 'profiler/profiler_screen.dart';
@@ -583,6 +585,11 @@ List<DevToolsScreen> get defaultScreens {
     DevToolsScreen<InspectorSettingsController>(
       const InspectorScreen(),
       createController: () => InspectorSettingsController(),
+    ),
+    DevToolsScreen<LegacyPerformanceController>(
+      const LegacyPerformanceScreen(),
+      createController: () => LegacyPerformanceController(),
+      supportsOffline: true,
     ),
     DevToolsScreen<PerformanceController>(
       const PerformanceScreen(),

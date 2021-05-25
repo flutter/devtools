@@ -11,11 +11,13 @@ import 'package:devtools_app/src/inspector/inspector_screen.dart';
 import 'package:devtools_app/src/logging/logging_screen.dart';
 import 'package:devtools_app/src/memory/memory_screen.dart';
 import 'package:devtools_app/src/network/network_screen.dart';
+import 'package:devtools_app/src/performance/legacy/performance_screen.dart';
 import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/preferences.dart';
 import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/version.dart';
 import 'package:devtools_app/src/vm_developer/vm_developer_tools_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -38,6 +40,7 @@ void main() {
       bool web = false,
       bool flutter = false,
       bool debugMode = true,
+      SemanticVersion flutterVersion,
     }) {
       mockIsDartVmApp(fakeServiceManager.connectedApp, !web);
       if (web) {
@@ -49,9 +52,15 @@ void main() {
             .add('package:flutter/src/widgets/binding.dart');
       }
       mockIsDebugFlutterApp(
-          fakeServiceManager.connectedApp, flutter && debugMode);
+        fakeServiceManager.connectedApp,
+        flutter && debugMode,
+      );
       mockIsProfileFlutterApp(
-          fakeServiceManager.connectedApp, flutter && !debugMode);
+        fakeServiceManager.connectedApp,
+        flutter && !debugMode,
+      );
+      flutterVersion ??= SemanticVersion(major: 2, minor: 3, patch: 1);
+      mockFlutterVersion(fakeServiceManager.connectedApp, flutterVersion);
     }
 
     testWidgets('are correct for Dart CLI app', (WidgetTester tester) async {
@@ -61,6 +70,7 @@ void main() {
           visibleScreenTypes,
           equals([
             // InspectorScreen,
+            // LegacyPerformanceScreen,
             PerformanceScreen,
             ProfilerScreen,
             MemoryScreen,
@@ -79,7 +89,8 @@ void main() {
           visibleScreenTypes,
           equals([
             // InspectorScreen,
-            // TimelineScreen,
+            // LegacyPerformanceScreen,
+            // PerformanceScreen,
             // ProfilerScreen,
             // MemoryScreen,
             DebuggerScreen,
@@ -98,6 +109,7 @@ void main() {
           visibleScreenTypes,
           equals([
             InspectorScreen,
+            // LegacyPerformanceScreen,
             PerformanceScreen,
             ProfilerScreen,
             MemoryScreen,
@@ -117,6 +129,7 @@ void main() {
           visibleScreenTypes,
           equals([
             // InspectorScreen,
+            // LegacyPerformanceScreen,
             PerformanceScreen,
             ProfilerScreen,
             MemoryScreen,
@@ -136,13 +149,37 @@ void main() {
           visibleScreenTypes,
           equals([
             InspectorScreen,
-            // TimelineScreen,
+            // LegacyPerformanceScreen,
+            // PerformanceScreen,
             // ProfilerScreen,
             // MemoryScreen,
             DebuggerScreen,
             // NetworkScreen,
             LoggingScreen,
             // AppSizeScreen,
+            // VMDeveloperToolsScreen,
+          ]));
+    });
+
+    testWidgets('are correct for Flutter app on old Flutter version',
+        (WidgetTester tester) async {
+      setupMockValues(
+        flutter: true,
+        flutterVersion: SemanticVersion(major: 2, minor: 3),
+      );
+
+      expect(
+          visibleScreenTypes,
+          equals([
+            InspectorScreen,
+            LegacyPerformanceScreen,
+            // PerformanceScreen,
+            ProfilerScreen,
+            MemoryScreen,
+            DebuggerScreen,
+            NetworkScreen,
+            LoggingScreen,
+            AppSizeScreen,
             // VMDeveloperToolsScreen,
           ]));
     });
@@ -155,6 +192,7 @@ void main() {
           visibleScreenTypes,
           equals([
             // InspectorScreen,
+            LegacyPerformanceScreen, // Works offline, so appears regardless of web flag
             PerformanceScreen, // Works offline, so appears regardless of web flag
             ProfilerScreen, // Works offline, so appears regardless of web flag
             // MemoryScreen,
@@ -175,6 +213,7 @@ void main() {
           visibleScreenTypes,
           equals([
             // InspectorScreen,
+            // LegacyPerformanceScreen,
             PerformanceScreen,
             ProfilerScreen,
             MemoryScreen,

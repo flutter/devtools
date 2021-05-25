@@ -101,6 +101,22 @@ class SemanticVersion implements Comparable {
   bool isSupported({@required SemanticVersion supportedVersion}) =>
       compareTo(supportedVersion) >= 0;
 
+  bool operator <(other) {
+    return compareTo(other) < 0;
+  }
+
+  bool operator >(other) {
+    return compareTo(other) > 0;
+  }
+
+  bool operator <=(other) {
+    return compareTo(other) <= 0;
+  }
+
+  bool operator >=(other) {
+    return compareTo(other) >= 0;
+  }
+
   @override
   int compareTo(other) {
     if (major == other.major && minor == other.minor && patch == other.patch) {
@@ -112,5 +128,14 @@ class SemanticVersion implements Comparable {
       return 1;
     }
     return -1;
+  }
+
+  @override
+  String toString() {
+    return [
+      if (major != null) major,
+      if (minor != null) minor,
+      if (patch != null) patch,
+    ].join('.');
   }
 }

@@ -2,30 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(kenz): delete this legacy implementation after
+// https://github.com/flutter/flutter/commit/78a96b09d64dc2a520e5b269d5cea1b9dde27d3f
+// hits flutter stable.
+
 import 'dart:async';
 
+import 'package:devtools_app/src/connected_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/analytics_stub.dart'
+import '../../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
-import '../auto_dispose_mixin.dart';
-import '../banner_messages.dart';
-import '../common_widgets.dart';
-import '../config_specific/import_export/import_export.dart';
-import '../dialogs.dart';
-import '../globals.dart';
-import '../notifications.dart';
-import '../screen.dart';
-import '../service_extensions.dart';
-import '../split.dart';
-import '../theme.dart';
-import '../ui/icons.dart';
-import '../ui/service_extension_widgets.dart';
-import '../ui/utils.dart';
-import '../ui/vm_flag_widgets.dart';
-import '../version.dart';
+import '../../auto_dispose_mixin.dart';
+import '../../banner_messages.dart';
+import '../../common_widgets.dart';
+import '../../config_specific/import_export/import_export.dart';
+import '../../dialogs.dart';
+import '../../globals.dart';
+import '../../notifications.dart';
+import '../../screen.dart';
+import '../../service_extensions.dart';
+import '../../split.dart';
+import '../../theme.dart';
+import '../../ui/icons.dart';
+import '../../ui/service_extension_widgets.dart';
+import '../../ui/utils.dart';
+import '../../ui/vm_flag_widgets.dart';
+import '../../version.dart';
 import 'event_details.dart';
 import 'flutter_frames_chart.dart';
 import 'performance_controller.dart';
@@ -35,10 +40,14 @@ import 'timeline_flame_chart.dart';
 // TODO(kenz): handle small screen widths better by using Wrap instead of Row
 // where applicable.
 
-class PerformanceScreen extends Screen {
-  const PerformanceScreen()
+class LegacyPerformanceScreen extends Screen {
+  const LegacyPerformanceScreen()
       : super.conditional(
           id: id,
+          // Only show this screen for flutter apps, where we can conditionally
+          // show this screen or [PerformanceScreen] based on the current
+          // flutter version.
+          requiresLibrary: flutterLibraryUri,
           requiresDartVm: true,
           worksOffline: true,
           shouldShowForFlutterVersion: _shouldShowForFlutterVersion,
@@ -54,31 +63,34 @@ class PerformanceScreen extends Screen {
     // here. We may have to add functionality to [SemanticVersion] to support
     // versions beyond the patch number (e.g.  2.3.0-12.1.pre).
     return currentVersion != null &&
-        currentVersion >= SemanticVersion(major: 2, minor: 3, patch: 1);
+        currentVersion < SemanticVersion(major: 2, minor: 3, patch: 1);
   }
 
   @override
   String get docPageId => id;
 
   @override
-  Widget build(BuildContext context) => const PerformanceScreenBody();
+  Widget build(BuildContext context) => const LegacyPerformanceScreenBody();
 }
 
-class PerformanceScreenBody extends StatefulWidget {
-  const PerformanceScreenBody();
+class LegacyPerformanceScreenBody extends StatefulWidget {
+  const LegacyPerformanceScreenBody();
 
   @override
-  PerformanceScreenBodyState createState() => PerformanceScreenBodyState();
+  LegacyPerformanceScreenBodyState createState() =>
+      LegacyPerformanceScreenBodyState();
 }
 
-class PerformanceScreenBodyState extends State<PerformanceScreenBody>
+class LegacyPerformanceScreenBodyState
+    extends State<LegacyPerformanceScreenBody>
     with
         AutoDisposeMixin,
-        OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData> {
+        OfflineScreenMixin<LegacyPerformanceScreenBody,
+            LegacyOfflinePerformanceData> {
   static const _primaryControlsMinIncludeTextWidth = 725.0;
   static const _secondaryControlsMinIncludeTextWidth = 1100.0;
 
-  PerformanceController controller;
+  LegacyPerformanceController controller;
 
   bool processing = false;
 
@@ -87,15 +99,15 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   @override
   void initState() {
     super.initState();
-    ga.screen(PerformanceScreen.id);
+    ga.screen(LegacyPerformanceScreen.id);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
+    maybePushDebugModePerformanceMessage(context, LegacyPerformanceScreen.id);
 
-    final newController = Provider.of<PerformanceController>(context);
+    final newController = Provider.of<LegacyPerformanceController>(context);
     if (newController == controller) return;
     controller = newController;
 
@@ -130,12 +142,13 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
       // require a top level field named "traceEvents". See how timeline data is
       // encoded in [ExportController.encode].
       final timelineJson =
-          Map<String, dynamic>.from(offlineDataJson[PerformanceScreen.id])
+          Map<String, dynamic>.from(offlineDataJson[LegacyPerformanceScreen.id])
             ..addAll({
-              PerformanceData.traceEventsKey:
-                  offlineDataJson[PerformanceData.traceEventsKey]
+              LegacyPerformanceData.traceEventsKey:
+                  offlineDataJson[LegacyPerformanceData.traceEventsKey]
             });
-      final offlinePerformanceData = OfflinePerformanceData.parse(timelineJson);
+      final offlinePerformanceData =
+          LegacyOfflinePerformanceData.parse(timelineJson);
       if (!offlinePerformanceData.isEmpty) {
         loadOfflineData(offlinePerformanceData);
       }
@@ -159,7 +172,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             builder: (context, frames, _) => ValueListenableBuilder(
               valueListenable: controller.displayRefreshRate,
               builder: (context, displayRefreshRate, _) {
-                return FlutterFramesChart(
+                return LegacyFlutterFramesChart(
                   frames,
                   displayRefreshRate,
                 );
@@ -171,7 +184,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             axis: Axis.vertical,
             initialFractions: const [0.6, 0.4],
             children: [
-              TimelineFlameChartContainer(
+              LegacyTimelineFlameChartContainer(
                 processing: processing,
                 processingProgress: processingProgress,
               ),
@@ -241,7 +254,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         ProfileGranularityDropdown(
-          screenId: PerformanceScreen.id,
+          screenId: LegacyPerformanceScreen.id,
           profileGranularityFlagNotifier:
               controller.cpuProfilerController.profileGranularityFlagNotifier,
         ),
@@ -270,7 +283,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   void _openSettingsDialog() {
     showDialog(
       context: context,
-      builder: (context) => PerformanceSettingsDialog(controller),
+      builder: (context) => LegacyPerformanceSettingsDialog(controller),
     );
   }
 
@@ -293,7 +306,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   }
 
   @override
-  FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
+  FutureOr<void> processOfflineData(
+      LegacyOfflinePerformanceData offlineData) async {
     await controller.processOfflineData(offlineData);
   }
 
@@ -301,15 +315,15 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   bool shouldLoadOfflineData() {
     return offlineMode &&
         offlineDataJson.isNotEmpty &&
-        offlineDataJson[PerformanceScreen.id] != null &&
-        offlineDataJson[PerformanceData.traceEventsKey] != null;
+        offlineDataJson[LegacyPerformanceScreen.id] != null &&
+        offlineDataJson[LegacyPerformanceData.traceEventsKey] != null;
   }
 }
 
-class PerformanceSettingsDialog extends StatelessWidget {
-  const PerformanceSettingsDialog(this.controller);
+class LegacyPerformanceSettingsDialog extends StatelessWidget {
+  const LegacyPerformanceSettingsDialog(this.controller);
 
-  final PerformanceController controller;
+  final LegacyPerformanceController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -435,15 +449,15 @@ class PerformanceSettingsDialog extends StatelessWidget {
   List<Widget> _additionalFlutterSettings(ThemeData theme) {
     return [
       ...dialogSubHeader(theme, 'Additional Settings'),
-      _BadgeJankyFramesSetting(controller),
+      _LegacyBadgeJankyFramesSetting(controller),
     ];
   }
 }
 
-class _BadgeJankyFramesSetting extends StatelessWidget {
-  const _BadgeJankyFramesSetting(this.controller);
+class _LegacyBadgeJankyFramesSetting extends StatelessWidget {
+  const _LegacyBadgeJankyFramesSetting(this.controller);
 
-  final PerformanceController controller;
+  final LegacyPerformanceController controller;
 
   @override
   Widget build(BuildContext context) {
