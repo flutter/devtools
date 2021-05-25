@@ -799,6 +799,15 @@ void mockIsProfileFlutterApp(MockConnectedApp connectedApp,
   when(connectedApp.isProfileBuildNow).thenReturn(isProfileFlutterApp);
 }
 
+void mockFlutterVersion(
+  MockConnectedApp connectedApp,
+  SemanticVersion version,
+) {
+  when(connectedApp.flutterVersionNow).thenReturn(FlutterVersion.parse({
+    'frameworkVersion': '$version',
+  }));
+}
+
 void mockIsDartVmApp(MockConnectedApp connectedApp, [isDartVmApp = true]) {
   when(connectedApp.isRunningOnDartVM).thenReturn(isDartVmApp);
 }

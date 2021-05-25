@@ -19,26 +19,27 @@ import '../../utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 
-class FlutterFramesChart extends StatefulWidget {
-  const FlutterFramesChart(
+class LegacyFlutterFramesChart extends StatefulWidget {
+  const LegacyFlutterFramesChart(
     this.frames,
     this.displayRefreshRate,
   );
 
   static const chartLegendKey = Key('Flutter frames chart legend');
 
-  final List<FlutterFrame> frames;
+  final List<LegacyFlutterFrame> frames;
 
   final double displayRefreshRate;
 
   @override
-  _FlutterFramesChartState createState() => _FlutterFramesChartState();
+  _LegacyFlutterFramesChartState createState() =>
+      _LegacyFlutterFramesChartState();
 }
 
-class _FlutterFramesChartState extends State<FlutterFramesChart>
+class _LegacyFlutterFramesChartState extends State<LegacyFlutterFramesChart>
     with AutoDisposeMixin {
   static const defaultFrameWidthWithPadding =
-      FlutterFramesChartItem.defaultFrameWidth + densePadding * 2;
+      LegacyFlutterFramesChartItem.defaultFrameWidth + densePadding * 2;
 
   static const yAxisUnitsSpace = 48.0;
 
@@ -46,11 +47,11 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   static const outlineBorderWidth = 1.0;
 
-  PerformanceController _controller;
+  LegacyPerformanceController _controller;
 
   ScrollController scrollController;
 
-  FlutterFrame _selectedFrame;
+  LegacyFlutterFrame _selectedFrame;
 
   double horizontalScrollOffset = 0.0;
 
@@ -76,7 +77,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newController = Provider.of<PerformanceController>(context);
+    final newController = Provider.of<LegacyPerformanceController>(context);
     if (newController == _controller) return;
     _controller = newController;
 
@@ -89,7 +90,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   }
 
   @override
-  void didUpdateWidget(FlutterFramesChart oldWidget) {
+  void didUpdateWidget(LegacyFlutterFramesChart oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (scrollController.hasClients && scrollController.atScrollBottom) {
       scrollController.autoScrollToBottom();
@@ -153,7 +154,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           ),
         );
         final chartAxisPainter = CustomPaint(
-          painter: ChartAxisPainter(
+          painter: LegacyChartAxisPainter(
             constraints: constraints,
             displayRefreshRate: widget.displayRefreshRate,
             msPerPx: msPerPx,
@@ -161,7 +162,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           ),
         );
         final fpsLinePainter = CustomPaint(
-          painter: FPSLinePainter(
+          painter: LegacyFPSLinePainter(
             constraints: constraints,
             displayRefreshRate: widget.displayRefreshRate,
             msPerPx: msPerPx,
@@ -182,10 +183,10 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     );
   }
 
-  Widget _buildFrame(FlutterFrame frame) {
+  Widget _buildFrame(LegacyFlutterFrame frame) {
     return InkWell(
       onTap: () => _controller.toggleSelectedFrame(frame),
-      child: FlutterFramesChartItem(
+      child: LegacyFlutterFramesChartItem(
         frame: frame,
         selected: frame == _selectedFrame,
         msPerPx: msPerPx,
@@ -197,7 +198,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   Widget _buildChartLegend() {
     return Column(
-      key: FlutterFramesChart.chartLegendKey,
+      key: LegacyFlutterFramesChart.chartLegendKey,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _legendItem('Frame Time (UI)', mainUiColor),
@@ -242,8 +243,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   }
 }
 
-class FlutterFramesChartItem extends StatelessWidget {
-  const FlutterFramesChartItem({
+class LegacyFlutterFramesChartItem extends StatelessWidget {
+  const LegacyFlutterFramesChartItem({
     @required this.frame,
     @required this.selected,
     @required this.msPerPx,
@@ -258,7 +259,7 @@ class FlutterFramesChartItem extends StatelessWidget {
   static const selectedFrameIndicatorKey =
       Key('flutter frames chart - selected frame indicator');
 
-  final FlutterFrame frame;
+  final LegacyFlutterFrame frame;
 
   final bool selected;
 
@@ -323,14 +324,14 @@ class FlutterFramesChartItem extends StatelessWidget {
     );
   }
 
-  String _tooltipText(FlutterFrame frame) {
+  String _tooltipText(LegacyFlutterFrame frame) {
     return 'UI: ${msText(frame.uiEventFlow.time.duration)}\n'
         'Raster: ${msText(frame.rasterEventFlow.time.duration)}';
   }
 }
 
-class ChartAxisPainter extends CustomPainter {
-  ChartAxisPainter({
+class LegacyChartAxisPainter extends CustomPainter {
+  LegacyChartAxisPainter({
     @required this.constraints,
     @required this.displayRefreshRate,
     @required this.msPerPx,
@@ -353,9 +354,9 @@ class ChartAxisPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // The absolute coordinates of the chart's visible area.
     final chartArea = Rect.fromLTWH(
-      _FlutterFramesChartState.yAxisUnitsSpace,
+      _LegacyFlutterFramesChartState.yAxisUnitsSpace,
       0.0,
-      constraints.maxWidth - _FlutterFramesChartState.yAxisUnitsSpace,
+      constraints.maxWidth - _LegacyFlutterFramesChartState.yAxisUnitsSpace,
       constraints.maxHeight - defaultScrollBarOffset,
     );
 
@@ -433,7 +434,7 @@ class ChartAxisPainter extends CustomPainter {
     textPainter.paint(
       canvas,
       Offset(
-        _FlutterFramesChartState.yAxisUnitsSpace -
+        _LegacyFlutterFramesChartState.yAxisUnitsSpace -
             yAxisTickWidth / 2 -
             densePadding - // Padding between y axis tick and label
             textPainter.width,
@@ -446,13 +447,13 @@ class ChartAxisPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(ChartAxisPainter oldDelegate) {
+  bool shouldRepaint(LegacyChartAxisPainter oldDelegate) {
     return themeData.isDarkTheme != oldDelegate.themeData.isDarkTheme;
   }
 }
 
-class FPSLinePainter extends CustomPainter {
-  FPSLinePainter({
+class LegacyFPSLinePainter extends CustomPainter {
+  LegacyFPSLinePainter({
     @required this.constraints,
     @required this.displayRefreshRate,
     @required this.msPerPx,
@@ -475,9 +476,9 @@ class FPSLinePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // The absolute coordinates of the chart's visible area.
     final chartArea = Rect.fromLTWH(
-      _FlutterFramesChartState.yAxisUnitsSpace,
+      _LegacyFlutterFramesChartState.yAxisUnitsSpace,
       0.0,
-      constraints.maxWidth - _FlutterFramesChartState.yAxisUnitsSpace,
+      constraints.maxWidth - _LegacyFlutterFramesChartState.yAxisUnitsSpace,
       constraints.maxHeight - defaultScrollBarOffset,
     );
 
@@ -513,7 +514,7 @@ class FPSLinePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(FPSLinePainter oldDelegate) {
+  bool shouldRepaint(LegacyFPSLinePainter oldDelegate) {
     return themeData.isDarkTheme != oldDelegate.themeData.isDarkTheme;
   }
 }

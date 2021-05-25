@@ -1277,3 +1277,21 @@ class ImmutableList<T> with ListMixin<T> implements List<T> {
 double scaleByFontFactor(double original) {
   return (original * ideTheme.fontSizeFactor).roundToDouble();
 }
+
+mixin CompareMixin implements Comparable {
+  bool operator <(other) {
+    return compareTo(other) < 0;
+  }
+
+  bool operator >(other) {
+    return compareTo(other) > 0;
+  }
+
+  bool operator <=(other) {
+    return compareTo(other) <= 0;
+  }
+
+  bool operator >=(other) {
+    return compareTo(other) >= 0;
+  }
+}

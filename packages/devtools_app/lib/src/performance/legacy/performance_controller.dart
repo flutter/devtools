@@ -27,44 +27,46 @@ import '../../trace_event.dart';
 import '../../trees.dart';
 import '../../ui/search.dart';
 import '../../utils.dart';
-import '../performance_screen.dart';
 import '../timeline_streams.dart';
 import 'performance_model.dart';
+import 'performance_screen.dart';
 import 'timeline_event_processor.dart';
 
 /// This class contains the business logic for [performance_screen.dart].
 ///
 /// The controller manages the timeline data model and communicates with the
 /// view to give and receive data updates. It also manages data processing via
-/// [TimelineEventProcessor] and [CpuProfileTransformer].
+/// [LegacyTimelineEventProcessor] and [CpuProfileTransformer].
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
-class PerformanceController
+class LegacyPerformanceController
     with
         CpuProfilerControllerProviderMixin,
-        SearchControllerMixin<TimelineEvent>
+        SearchControllerMixin<LegacyTimelineEvent>
     implements DisposableController {
-  PerformanceController() {
-    processor = TimelineEventProcessor(this);
+  LegacyPerformanceController() {
+    processor = LegacyTimelineEventProcessor(this);
     _init();
   }
 
   final _exportController = ExportController();
 
   /// The currently selected timeline event.
-  ValueListenable<TimelineEvent> get selectedTimelineEvent =>
+  ValueListenable<LegacyTimelineEvent> get selectedTimelineEvent =>
       _selectedTimelineEventNotifier;
-  final _selectedTimelineEventNotifier = ValueNotifier<TimelineEvent>(null);
+  final _selectedTimelineEventNotifier =
+      ValueNotifier<LegacyTimelineEvent>(null);
 
   /// The currently selected timeline frame.
-  ValueListenable<FlutterFrame> get selectedFrame => _selectedFrameNotifier;
-  final _selectedFrameNotifier = ValueNotifier<FlutterFrame>(null);
+  ValueListenable<LegacyFlutterFrame> get selectedFrame =>
+      _selectedFrameNotifier;
+  final _selectedFrameNotifier = ValueNotifier<LegacyFlutterFrame>(null);
 
   /// The flutter frames in the current timeline.
-  ValueListenable<List<FlutterFrame>> get flutterFrames => _flutterFrames;
-  final _flutterFrames = ValueNotifier<List<FlutterFrame>>([]);
+  ValueListenable<List<LegacyFlutterFrame>> get flutterFrames => _flutterFrames;
+  final _flutterFrames = ValueNotifier<List<LegacyFlutterFrame>>([]);
 
   /// Whether an empty timeline recording was just recorded.
   ValueListenable<bool> get emptyTimeline => _emptyTimeline;
@@ -115,7 +117,7 @@ class PerformanceController
   /// data from the imported file). If any modifications are made while the data
   /// is displayed (e.g. change in selected timeline event, selected frame,
   /// etc.), those changes will be tracked here.
-  PerformanceData data;
+  LegacyPerformanceData data;
 
   /// Timeline data loaded via import.
   ///
@@ -126,9 +128,9 @@ class PerformanceController
   /// will start as a copy of offlineTimelineData in this case, and will track
   /// any data modifications that occur while the data is displayed (e.g. change
   /// in selected timeline event, selected frame, etc.).
-  PerformanceData offlinePerformanceData;
+  LegacyPerformanceData offlinePerformanceData;
 
-  TimelineEventProcessor processor;
+  LegacyTimelineEventProcessor processor;
 
   /// Trace events in the current timeline.
   ///
@@ -143,30 +145,32 @@ class PerformanceController
   }
 
   Future<void> _initHelper() async {
-    await serviceManager.onServiceAvailable;
+    if (!offlineMode) {
+      await serviceManager.onServiceAvailable;
 
-    // Default to true for profile builds only.
-    _badgeTabForJankyFrames.value =
-        await serviceManager.connectedApp.isProfileBuild;
+      // Default to true for profile builds only.
+      _badgeTabForJankyFrames.value =
+          await serviceManager.connectedApp.isProfileBuild;
 
-    unawaited(allowedError(
-      serviceManager.service.setProfilePeriod(mediumProfilePeriod),
-      logError: false,
-    ));
-    await setTimelineStreams([
-      dartTimelineStream,
-      embedderTimelineStream,
-      gcTimelineStream,
-    ]);
-    await toggleHttpRequestLogging(true);
+      unawaited(allowedError(
+        serviceManager.service.setProfilePeriod(mediumProfilePeriod),
+        logError: false,
+      ));
+      await setTimelineStreams([
+        dartTimelineStream,
+        embedderTimelineStream,
+        gcTimelineStream,
+      ]);
+      await toggleHttpRequestLogging(true);
 
-    // Initialize displayRefreshRate.
-    _displayRefreshRate.value =
-        await serviceManager.queryDisplayRefreshRate ?? defaultRefreshRate;
-    data?.displayRefreshRate = _displayRefreshRate.value;
+      // Initialize displayRefreshRate.
+      _displayRefreshRate.value =
+          await serviceManager.queryDisplayRefreshRate ?? defaultRefreshRate;
+      data?.displayRefreshRate = _displayRefreshRate.value;
+    }
   }
 
-  Future<void> selectTimelineEvent(TimelineEvent event) async {
+  Future<void> selectTimelineEvent(LegacyTimelineEvent event) async {
     if (event == null || data.selectedEvent == event) return;
 
     data.selectedEvent = event;
@@ -196,7 +200,7 @@ class PerformanceController
   ValueListenable<double> get displayRefreshRate => _displayRefreshRate;
   final _displayRefreshRate = ValueNotifier<double>(defaultRefreshRate);
 
-  Future<void> toggleSelectedFrame(FlutterFrame frame) async {
+  Future<void> toggleSelectedFrame(LegacyFlutterFrame frame) async {
     if (frame == null || data == null) {
       return;
     }
@@ -227,16 +231,16 @@ class PerformanceController
     }
   }
 
-  void addFrame(FlutterFrame frame) {
+  void addFrame(LegacyFlutterFrame frame) {
     data.frames.add(frame);
   }
 
   Future<void> refreshData() async {
     await clearData(clearVmTimeline: false);
     data = serviceManager.connectedApp.isFlutterAppNow
-        ? PerformanceData(
+        ? LegacyPerformanceData(
             displayRefreshRate: await serviceManager.queryDisplayRefreshRate)
-        : PerformanceData();
+        : LegacyPerformanceData();
 
     _emptyTimeline.value = false;
     _refreshing.value = true;
@@ -272,7 +276,7 @@ class PerformanceController
       for (final frame in _flutterFrames.value) {
         if (frame.isJanky(_displayRefreshRate.value)) {
           serviceManager.errorBadgeManager
-              .incrementBadgeCount(PerformanceScreen.id);
+              .incrementBadgeCount(LegacyPerformanceScreen.id);
         }
       }
     }
@@ -334,7 +338,7 @@ class PerformanceController
     );
   }
 
-  void addTimelineEvent(TimelineEvent event) {
+  void addTimelineEvent(LegacyTimelineEvent event) {
     data.addTimelineEvent(event);
   }
 
@@ -346,7 +350,8 @@ class PerformanceController
     }
   }
 
-  FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
+  FutureOr<void> processOfflineData(
+      LegacyOfflinePerformanceData offlineData) async {
     await clearData();
     final traceEvents = [
       for (var trace in offlineData.traceEvents)
@@ -434,16 +439,17 @@ class PerformanceController
   /// This method returns the name of the file that was downloaded.
   String exportData() {
     final encodedData =
-        _exportController.encode(PerformanceScreen.id, data.json);
+        _exportController.encode(LegacyPerformanceScreen.id, data.json);
     return _exportController.downloadFile(encodedData);
   }
 
   @override
-  List<TimelineEvent> matchesForSearch(String search) {
+  List<LegacyTimelineEvent> matchesForSearch(String search) {
     if (search?.isEmpty ?? true) return [];
-    final matches = <TimelineEvent>[];
+    final matches = <LegacyTimelineEvent>[];
     for (final event in data.timelineEvents) {
-      breadthFirstTraversal<TimelineEvent>(event, action: (TimelineEvent e) {
+      breadthFirstTraversal<LegacyTimelineEvent>(event,
+          action: (LegacyTimelineEvent e) {
         if (e.name.caseInsensitiveContains(search)) {
           matches.add(e);
           e.isSearchMatch = true;
@@ -503,14 +509,14 @@ class PerformanceController
     _selectedTimelineEventNotifier.value = null;
     _selectedFrameNotifier.value = null;
     _processing.value = false;
-    serviceManager.errorBadgeManager.clearErrors(PerformanceScreen.id);
+    serviceManager.errorBadgeManager.clearErrors(LegacyPerformanceScreen.id);
   }
 
   void recordTrace(Map<String, dynamic> trace) {
     data?.traceEvents?.add(trace);
   }
 
-  void recordTraceForTimelineEvent(TimelineEvent event) {
+  void recordTraceForTimelineEvent(LegacyTimelineEvent event) {
     recordTrace(event.beginTraceEventJson);
     event.children.forEach(recordTraceForTimelineEvent);
     if (event.endTraceEventJson != null) {

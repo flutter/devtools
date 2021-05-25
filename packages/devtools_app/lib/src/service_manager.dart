@@ -94,7 +94,9 @@ class ServiceConnectionManager {
   String sdkVersion;
 
   bool get hasConnection =>
-      service != null && connectedApp != null && connectedApp.appTypeKnown;
+      service != null &&
+      connectedApp != null &&
+      connectedApp.connectedAppInitialized;
 
   ValueListenable<ConnectedState> get connectedState => _connectedState;
 

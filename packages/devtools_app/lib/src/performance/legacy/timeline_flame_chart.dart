@@ -29,10 +29,11 @@ import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'performance_utils.dart';
 
-final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
+final legacyTimelineSearchFieldKey =
+    GlobalKey(debugLabel: 'LegacyTimelineSearchFieldKey');
 
-class TimelineFlameChartContainer extends StatefulWidget {
-  const TimelineFlameChartContainer({
+class LegacyTimelineFlameChartContainer extends StatefulWidget {
+  const LegacyTimelineFlameChartContainer({
     @required this.processing,
     @required this.processingProgress,
   });
@@ -45,20 +46,20 @@ class TimelineFlameChartContainer extends StatefulWidget {
   final double processingProgress;
 
   @override
-  _TimelineFlameChartContainerState createState() =>
-      _TimelineFlameChartContainerState();
+  _LegacyTimelineFlameChartContainerState createState() =>
+      _LegacyTimelineFlameChartContainerState();
 }
 
-class _TimelineFlameChartContainerState
-    extends State<TimelineFlameChartContainer>
-    with AutoDisposeMixin, SearchFieldMixin<TimelineFlameChartContainer> {
-  PerformanceController controller;
+class _LegacyTimelineFlameChartContainerState
+    extends State<LegacyTimelineFlameChartContainer>
+    with AutoDisposeMixin, SearchFieldMixin<LegacyTimelineFlameChartContainer> {
+  LegacyPerformanceController controller;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final newController = Provider.of<PerformanceController>(context);
+    final newController = Provider.of<LegacyPerformanceController>(context);
     if (newController == controller) return;
     controller = newController;
   }
@@ -74,7 +75,7 @@ class _TimelineFlameChartContainerState
         builder: (context, emptyRecording, _) {
           return emptyRecording
               ? Center(
-                  key: TimelineFlameChartContainer.emptyTimelineKey,
+                  key: LegacyTimelineFlameChartContainer.emptyTimelineKey,
                   child: Text(
                     'No timeline events',
                     style: Theme.of(context).subtleTextStyle,
@@ -86,7 +87,7 @@ class _TimelineFlameChartContainerState
     } else {
       content = LayoutBuilder(
         builder: (context, constraints) {
-          return TimelineFlameChart(
+          return LegacyTimelineFlameChart(
             controller.data,
             width: constraints.maxWidth,
             height: constraints.maxHeight,
@@ -132,7 +133,7 @@ class _TimelineFlameChartContainerState
       height: defaultTextFieldHeight,
       child: buildSearchField(
         controller: controller,
-        searchFieldKey: timelineSearchFieldKey,
+        searchFieldKey: legacyTimelineSearchFieldKey,
         searchFieldEnabled: searchFieldEnabled,
         shouldRequestFocus: false,
         supportsNavigation: true,
@@ -153,15 +154,16 @@ class _TimelineFlameChartContainerState
 
 // TODO(kenz): make flame chart sections collapsible.
 
-class TimelineFlameChart extends FlameChart<PerformanceData, TimelineEvent> {
-  TimelineFlameChart(
-    PerformanceData data, {
+class LegacyTimelineFlameChart
+    extends FlameChart<LegacyPerformanceData, LegacyTimelineEvent> {
+  LegacyTimelineFlameChart(
+    LegacyPerformanceData data, {
     @required double width,
     @required double height,
-    @required ValueListenable<TimelineEvent> selectionNotifier,
-    @required ValueListenable<List<TimelineEvent>> searchMatchesNotifier,
-    @required ValueListenable<TimelineEvent> activeSearchMatchNotifier,
-    @required Function(TimelineEvent event) onDataSelected,
+    @required ValueListenable<LegacyTimelineEvent> selectionNotifier,
+    @required ValueListenable<List<LegacyTimelineEvent>> searchMatchesNotifier,
+    @required ValueListenable<LegacyTimelineEvent> activeSearchMatchNotifier,
+    @required Function(LegacyTimelineEvent event) onDataSelected,
   }) : super(
           data,
           time: data.time,
@@ -174,7 +176,7 @@ class TimelineFlameChart extends FlameChart<PerformanceData, TimelineEvent> {
           onDataSelected: onDataSelected,
         );
 
-  static double _calculateStartInset(PerformanceData data) {
+  static double _calculateStartInset(LegacyPerformanceData data) {
     const spaceFor0msText = 55.0;
     const maxStartInset = 300.0;
     var maxMeasuredWidth = 0.0;
@@ -197,16 +199,17 @@ class TimelineFlameChart extends FlameChart<PerformanceData, TimelineEvent> {
   static const int rowOffsetForTopPadding = 3;
 
   @override
-  TimelineFlameChartState createState() => TimelineFlameChartState();
+  LegacyTimelineFlameChartState createState() =>
+      LegacyTimelineFlameChartState();
 }
 
-class TimelineFlameChartState
-    extends FlameChartState<TimelineFlameChart, TimelineEvent> {
-  /// Stores the [FlameChartNode] for each [TimelineEvent] in the chart.
+class LegacyTimelineFlameChartState
+    extends FlameChartState<LegacyTimelineFlameChart, LegacyTimelineEvent> {
+  /// Stores the [FlameChartNode] for each [LegacyTimelineEvent] in the chart.
   ///
   /// We need to be able to look up a [FlameChartNode] based on its
-  /// corresponding [TimelineEvent] when we traverse the event tree.
-  final chartNodesByEvent = <TimelineEvent, FlameChartNode>{};
+  /// corresponding [LegacyTimelineEvent] when we traverse the event tree.
+  final chartNodesByEvent = <LegacyTimelineEvent, FlameChartNode>{};
 
   /// Async guideline segments drawn in the direction of the x-axis.
   final horizontalGuidelines = <HorizontalLineSegment>[];
@@ -218,9 +221,9 @@ class TimelineFlameChartState
 
   int widestRow = -1;
 
-  PerformanceController _performanceController;
+  LegacyPerformanceController _performanceController;
 
-  FlutterFrame _selectedFrame;
+  LegacyFlutterFrame _selectedFrame;
 
   ScrollController _groupLabelScrollController;
 
@@ -229,7 +232,8 @@ class TimelineFlameChartState
   ScrollController _nextInGroupButtonsScrollController;
 
   @override
-  int get rowOffsetForTopPadding => TimelineFlameChart.rowOffsetForTopPadding;
+  int get rowOffsetForTopPadding =>
+      LegacyTimelineFlameChart.rowOffsetForTopPadding;
 
   @override
   void initState() {
@@ -243,7 +247,7 @@ class TimelineFlameChartState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newController = Provider.of<PerformanceController>(context);
+    final newController = Provider.of<LegacyPerformanceController>(context);
     if (newController == _performanceController) return;
     _performanceController = newController;
 
@@ -254,7 +258,7 @@ class TimelineFlameChartState
   }
 
   @override
-  bool isDataVerticallyInView(TimelineEvent data) {
+  bool isDataVerticallyInView(LegacyTimelineEvent data) {
     final eventTopY = topYForData(data);
     final verticalScrollOffset = verticalControllerGroup.offset;
     return eventTopY > verticalScrollOffset &&
@@ -263,7 +267,7 @@ class TimelineFlameChartState
   }
 
   @override
-  bool isDataHorizontallyInView(TimelineEvent data) {
+  bool isDataHorizontallyInView(LegacyTimelineEvent data) {
     return (visibleTimeRange.contains(data.time.start) &&
             visibleTimeRange.contains(data.time.end)) ||
         (data.time.start <= visibleTimeRange.start &&
@@ -271,8 +275,8 @@ class TimelineFlameChartState
   }
 
   @override
-  double topYForData(TimelineEvent data) {
-    final eventGroup = widget.data.eventGroups[computeEventGroupKey(
+  double topYForData(LegacyTimelineEvent data) {
+    final eventGroup = widget.data.eventGroups[legacyComputeEventGroupKey(
       data,
       _performanceController.threadNamesById,
     )];
@@ -283,7 +287,7 @@ class TimelineFlameChartState
   }
 
   @override
-  double startXForData(TimelineEvent data) {
+  double startXForData(LegacyTimelineEvent data) {
     final timeMicros = data.time.start.inMicroseconds;
     // Horizontally scroll to the frame.
     final relativeStartTime = timeMicros - startTimeOffset;
@@ -291,8 +295,8 @@ class TimelineFlameChartState
     return contentWidthWithZoom * ratio;
   }
 
-  int _indexOfFirstEventInView(TimelineEventGroup group) {
-    final boundEvent = SyncTimelineEvent(
+  int _indexOfFirstEventInView(LegacyTimelineEventGroup group) {
+    final boundEvent = LegacySyncTimelineEvent(
       TraceEventWrapper(
         TraceEvent({'ts': visibleTimeRange.start.inMicroseconds})
           ..type = TimelineEventType.unknown,
@@ -302,12 +306,12 @@ class TimelineFlameChartState
     return lowerBound(
       group.sortedEventRoots,
       boundEvent,
-      compare: (TimelineEvent a, TimelineEvent b) =>
+      compare: (LegacyTimelineEvent a, LegacyTimelineEvent b) =>
           a.time.start.compareTo(b.time.start),
     );
   }
 
-  Future<void> _viewPreviousEventInGroup(TimelineEventGroup group) async {
+  Future<void> _viewPreviousEventInGroup(LegacyTimelineEventGroup group) async {
     final firstInViewIndex = _indexOfFirstEventInView(group);
     if (firstInViewIndex > 0) {
       final event = group.sortedEventRoots[firstInViewIndex - 1];
@@ -329,8 +333,8 @@ class TimelineFlameChartState
     );
   }
 
-  Future<void> _viewNextEventInGroup(TimelineEventGroup group) async {
-    final boundEvent = SyncTimelineEvent(
+  Future<void> _viewNextEventInGroup(LegacyTimelineEventGroup group) async {
+    final boundEvent = LegacySyncTimelineEvent(
       TraceEventWrapper(
         TraceEvent({'ts': visibleTimeRange.end.inMicroseconds})
           ..type = TimelineEventType.unknown,
@@ -342,11 +346,11 @@ class TimelineFlameChartState
     final firstOutOfViewIndex = lowerBound(
       group.sortedEventRoots,
       boundEvent,
-      compare: (TimelineEvent a, TimelineEvent b) =>
+      compare: (LegacyTimelineEvent a, LegacyTimelineEvent b) =>
           a.time.end.compareTo(b.time.end),
     );
 
-    TimelineEvent zoomTo;
+    LegacyTimelineEvent zoomTo;
     // If there are no events in this group that occur after the visible time
     // range, and the first event in the visible time range is the first event
     // in the group, zoom to this event. This covers the case where a user is
@@ -412,20 +416,20 @@ class TimelineFlameChartState
   void initFlameChartElements() {
     super.initFlameChartElements();
 
-    double leftForEvent(TimelineEvent event) {
+    double leftForEvent(LegacyTimelineEvent event) {
       return (event.time.start.inMicroseconds - startTimeOffset) *
               startingPxPerMicro +
           widget.startInset;
     }
 
-    double rightForEvent(TimelineEvent event) {
+    double rightForEvent(LegacyTimelineEvent event) {
       return (event.time.end.inMicroseconds - startTimeOffset) *
               startingPxPerMicro +
           widget.startInset;
     }
 
     double maxRight = -1;
-    void createChartNode(TimelineEvent event, int row, int section) {
+    void createChartNode(LegacyTimelineEvent event, int row, int section) {
       // TODO(kenz): we should do something more clever here by inferring the
       // missing start/end time based on ancestors/children. Skip for now.
       if (!event.isWellFormed) return;
@@ -458,7 +462,7 @@ class TimelineFlameChartState
         textColor = Colors.black;
       }
 
-      final node = FlameChartNode<TimelineEvent>(
+      final node = FlameChartNode<LegacyTimelineEvent>(
         key: Key('${event.name} ${event.traceEvents.first.id}'),
         text: event.name,
         rect: Rect.fromLTRB(left, flameChartNodeTop, right, rowHeight),
@@ -478,7 +482,7 @@ class TimelineFlameChartState
     int currentSectionIndex = 0;
     double yOffset = rowOffsetForTopPadding * sectionSpacing;
     for (String groupName in widget.data.eventGroups.keys) {
-      final TimelineEventGroup group = widget.data.eventGroups[groupName];
+      final LegacyTimelineEventGroup group = widget.data.eventGroups[groupName];
       // Expand rows to fit nodes in [group].
       assert(rows.length == currentRowIndex);
       expandRows(rows.length + group.displaySize);
@@ -523,7 +527,7 @@ class TimelineFlameChartState
     final zoom = zoomController.value;
     return [
       CustomPaint(
-        painter: AsyncGuidelinePainter(
+        painter: LegacyAsyncGuidelinePainter(
           zoom: zoom,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
@@ -548,7 +552,7 @@ class TimelineFlameChartState
         ),
       ),
       CustomPaint(
-        painter: SelectedFrameBracketPainter(
+        painter: LegacySelectedFrameBracketPainter(
           _selectedFrame,
           zoom: zoom,
           constraints: constraints,
@@ -581,7 +585,7 @@ class TimelineFlameChartState
       if (i == 0) {
         // Add spacing to account for timestamps at top of chart.
         topSpacer +=
-            sectionSpacing * TimelineFlameChart.rowOffsetForTopPadding -
+            sectionSpacing * LegacyTimelineFlameChart.rowOffsetForTopPadding -
                 rowHeight;
       }
       if (i == eventGroups.length - 1) {
@@ -642,7 +646,7 @@ class TimelineFlameChartState
     Widget buildNavigatorButton(int index, {@required bool isNext}) {
       // Add spacing to account for timestamps at top of chart.
       final topSpacer = index == 0
-          ? sectionSpacing * TimelineFlameChart.rowOffsetForTopPadding -
+          ? sectionSpacing * LegacyTimelineFlameChart.rowOffsetForTopPadding -
               rowHeight
           : 0.0;
       // Add spacing to account for bottom row of padding.
@@ -662,7 +666,7 @@ class TimelineFlameChartState
         backgroundColor.blue,
         0.85,
       );
-      return NavigateInThreadInButton(
+      return LegacyNavigateInThreadInButton(
         group: group,
         isNext: isNext,
         topSpacer: topSpacer,
@@ -707,12 +711,12 @@ class TimelineFlameChartState
     ];
   }
 
-  bool _shouldEnablePrevInThreadButton(TimelineEventGroup group) {
+  bool _shouldEnablePrevInThreadButton(LegacyTimelineEventGroup group) {
     return horizontalControllerGroup.hasAttachedControllers &&
         group.earliestTimestampMicros < visibleTimeRange.start.inMicroseconds;
   }
 
-  bool _shouldEnableNextInThreadButton(TimelineEventGroup group) {
+  bool _shouldEnableNextInThreadButton(LegacyTimelineEventGroup group) {
     final firstEventInView = _indexOfFirstEventInView(group);
     final noEventsAfterVisibleTimeRange =
         horizontalControllerGroup.hasAttachedControllers &&
@@ -732,8 +736,8 @@ class TimelineFlameChartState
     horizontalGuidelines.clear();
     for (var row in rows) {
       for (var node in row.nodes) {
-        if (node.data is AsyncTimelineEvent) {
-          final event = node.data as AsyncTimelineEvent;
+        if (node.data is LegacyAsyncTimelineEvent) {
+          final event = node.data as LegacyAsyncTimelineEvent;
           bool allChildrenAreAsyncInstantEvents = true;
           for (var child in event.children) {
             if (!child.isAsyncInstantEvent) {
@@ -750,7 +754,7 @@ class TimelineFlameChartState
           // Vertical guideline that will connect [node] with its children
           // nodes. The line will end at [node]'s last child.
           final verticalGuidelineX =
-              node.rect.left + TimelineFlameChart.asyncGuidelineOffset;
+              node.rect.left + LegacyTimelineFlameChart.asyncGuidelineOffset;
           final verticalGuidelineStartY =
               _calculateVerticalGuidelineStartY(event);
           final verticalGuidelineEndY =
@@ -764,7 +768,7 @@ class TimelineFlameChartState
           // an instant event, since it is guaranteed to be connected to
           // the main vertical we just created.
           final firstChild = event.children
-              .firstWhere((TimelineEvent e) => !e.isAsyncInstantEvent);
+              .firstWhere((LegacyTimelineEvent e) => !e.isAsyncInstantEvent);
           final horizontalGuidelineEndX =
               chartNodesByEvent[firstChild].rect.left;
           final horizontalGuidelineY =
@@ -828,7 +832,7 @@ class TimelineFlameChartState
               // Look back until we find the first sibling in this row that is
               // not an instant event (if present).
               while (previousSibling != null &&
-                  (previousSibling.data as AsyncTimelineEvent)
+                  (previousSibling.data as LegacyAsyncTimelineEvent)
                       .isAsyncInstantEvent) {
                 previousSibling = previousSiblingInRow(previousSibling);
               }
@@ -853,12 +857,12 @@ class TimelineFlameChartState
     horizontalGuidelines.sort();
   }
 
-  int _spacerRowsBeforeEvent(TimelineEvent event) {
+  int _spacerRowsBeforeEvent(LegacyTimelineEvent event) {
     // Add 1 to account for the first spacer row before section 0 begins.
     return chartNodesByEvent[event].sectionIndex + rowOffsetForTopPadding;
   }
 
-  double _calculateVerticalGuidelineStartY(TimelineEvent event) {
+  double _calculateVerticalGuidelineStartY(LegacyTimelineEvent event) {
     final spacerRowsBeforeEvent = _spacerRowsBeforeEvent(event);
     return spacerRowsBeforeEvent * sectionSpacing +
         (chartNodesByEvent[event].row.index - spacerRowsBeforeEvent) *
@@ -866,7 +870,7 @@ class TimelineFlameChartState
         rowHeight;
   }
 
-  double _calculateHorizontalGuidelineY(TimelineEvent event) {
+  double _calculateHorizontalGuidelineY(LegacyTimelineEvent event) {
     final spacerRowsBeforeEvent = _spacerRowsBeforeEvent(event);
     return spacerRowsBeforeEvent * sectionSpacing +
         (chartNodesByEvent[event].row.index - spacerRowsBeforeEvent) *
@@ -875,8 +879,8 @@ class TimelineFlameChartState
   }
 }
 
-class AsyncGuidelinePainter extends FlameChartPainter {
-  AsyncGuidelinePainter({
+class LegacyAsyncGuidelinePainter extends FlameChartPainter {
+  LegacyAsyncGuidelinePainter({
     @required double zoom,
     @required BoxConstraints constraints,
     @required double verticalScrollOffset,
@@ -952,7 +956,7 @@ class AsyncGuidelinePainter extends FlameChartPainter {
       // [FullTimelineFlameChart.asyncGuidelineOffset] into account when
       // calculating [zoomedLine] because these units of space should not scale.
       final unzoomableOffsetLineStart =
-          TimelineFlameChart.asyncGuidelineOffset + chartStartInset;
+          LegacyTimelineFlameChart.asyncGuidelineOffset + chartStartInset;
 
       LineSegment zoomedLine;
       if (line is VerticalLineSegment) {
@@ -1009,8 +1013,8 @@ class AsyncGuidelinePainter extends FlameChartPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
 
-class SelectedFrameBracketPainter extends FlameChartPainter {
-  SelectedFrameBracketPainter(
+class LegacySelectedFrameBracketPainter extends FlameChartPainter {
+  LegacySelectedFrameBracketPainter(
     this.selectedFrame, {
     @required double zoom,
     @required BoxConstraints constraints,
@@ -1035,13 +1039,13 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
   static const bracketCurveWidth = 8.0;
   static const bracketVerticalPadding = 8.0;
 
-  final FlutterFrame selectedFrame;
+  final LegacyFlutterFrame selectedFrame;
 
   final int startTimeOffsetMicros;
 
   final double startingPxPerMicro;
 
-  final double Function(TimelineEvent) yForEvent;
+  final double Function(LegacyTimelineEvent) yForEvent;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1066,7 +1070,7 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
   void _paintBrackets(
     Canvas canvas,
     Paint paint, {
-    @required TimelineEvent event,
+    @required LegacyTimelineEvent event,
   }) {
     final visible = visibleRect;
     final startMicros = event.time.start.inMicroseconds - startTimeOffsetMicros;
@@ -1158,12 +1162,12 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
   }
 
   @override
-  bool shouldRepaint(SelectedFrameBracketPainter oldDelegate) =>
+  bool shouldRepaint(LegacySelectedFrameBracketPainter oldDelegate) =>
       this != oldDelegate;
 
   @override
   bool operator ==(Object other) {
-    return other is SelectedFrameBracketPainter &&
+    return other is LegacySelectedFrameBracketPainter &&
         selectedFrame == other.selectedFrame &&
         zoom == other.zoom &&
         constraints == other.constraints &&
@@ -1183,8 +1187,8 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
       );
 }
 
-class NavigateInThreadInButton extends StatefulWidget {
-  const NavigateInThreadInButton({
+class LegacyNavigateInThreadInButton extends StatefulWidget {
+  const LegacyNavigateInThreadInButton({
     @required this.group,
     @required this.isNext,
     @required this.topSpacer,
@@ -1196,7 +1200,7 @@ class NavigateInThreadInButton extends StatefulWidget {
     @required this.horizontalController,
   });
 
-  final TimelineEventGroup group;
+  final LegacyTimelineEventGroup group;
 
   final bool isNext;
 
@@ -1210,19 +1214,19 @@ class NavigateInThreadInButton extends StatefulWidget {
 
   final VoidCallback onPressed;
 
-  final bool Function(TimelineEventGroup) shouldEnableButton;
+  final bool Function(LegacyTimelineEventGroup) shouldEnableButton;
 
   final LinkedScrollControllerGroup horizontalController;
 
   static const topPaddingForMediumGroups = 20.0;
 
   @override
-  _NavigateInThreadInButtonState createState() =>
-      _NavigateInThreadInButtonState();
+  _LegacyNavigateInThreadInButtonState createState() =>
+      _LegacyNavigateInThreadInButtonState();
 }
 
-class _NavigateInThreadInButtonState extends State<NavigateInThreadInButton>
-    with AutoDisposeMixin {
+class _LegacyNavigateInThreadInButtonState
+    extends State<LegacyNavigateInThreadInButton> with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
@@ -1236,7 +1240,7 @@ class _NavigateInThreadInButtonState extends State<NavigateInThreadInButton>
   Widget build(BuildContext context) {
     final useSmallButton = !widget.isNext && widget.group.displayDepth <= 1;
     final topPadding = !widget.isNext && widget.group.displayDepth == 2
-        ? NavigateInThreadInButton.topPaddingForMediumGroups
+        ? LegacyNavigateInThreadInButton.topPaddingForMediumGroups
         : 0.0;
     return Container(
       margin: EdgeInsets.only(
@@ -1252,7 +1256,7 @@ class _NavigateInThreadInButtonState extends State<NavigateInThreadInButton>
       height: widget.group.displaySizePx,
       width: widget.threadButtonContainerWidth,
       alignment: useSmallButton ? Alignment.bottomCenter : Alignment.center,
-      child: ThreadNavigatorButton(
+      child: LegacyThreadNavigatorButton(
         useSmallButton: useSmallButton,
         backgroundColor: widget.backgroundColor,
         tooltip:
@@ -1265,8 +1269,8 @@ class _NavigateInThreadInButtonState extends State<NavigateInThreadInButton>
   }
 }
 
-class ThreadNavigatorButton extends StatelessWidget {
-  const ThreadNavigatorButton({
+class LegacyThreadNavigatorButton extends StatelessWidget {
+  const LegacyThreadNavigatorButton({
     @required this.useSmallButton,
     @required this.backgroundColor,
     @required this.tooltip,
@@ -1308,7 +1312,7 @@ class ThreadNavigatorButton extends StatelessWidget {
   }
 }
 
-extension TimelineEventGroupDisplayExtension on TimelineEventGroup {
+extension LegacyTimelineEventGroupDisplayExtension on LegacyTimelineEventGroup {
   int get displaySize => rows.length + FlameChart.rowOffsetForSectionSpacer;
 
   double get displaySizePx =>

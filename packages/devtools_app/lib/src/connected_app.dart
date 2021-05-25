@@ -4,9 +4,11 @@
 
 import 'dart:async';
 
+import 'config_specific/logger/logger.dart' as logger;
 import 'eval_on_dart_library.dart';
 import 'globals.dart';
 import 'title.dart';
+import 'version.dart';
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const dartHtmlLibraryUri = 'dart:html';
@@ -14,8 +16,11 @@ const dartHtmlLibraryUri = 'dart:html';
 class ConnectedApp {
   ConnectedApp();
 
-  bool get appTypeKnown =>
-      _isFlutterApp != null && _isProfileBuild != null && _isDartWebApp != null;
+  bool get connectedAppInitialized =>
+      _isFlutterApp != null &&
+      (_isFlutterApp == false || _flutterVersion != null) &&
+      _isProfileBuild != null &&
+      _isDartWebApp != null;
 
   // TODO(kenz): investigate if we can use `libraryUriAvailableNow` instead.
   Future<bool> get isFlutterApp async => _isFlutterApp ??=
@@ -27,6 +32,10 @@ class ConnectedApp {
   }
 
   bool _isFlutterApp;
+
+  FlutterVersion get flutterVersionNow => _flutterVersion;
+
+  FlutterVersion _flutterVersion;
 
   Future<bool> get isProfileBuild async {
     _isProfileBuild ??= await _connectedToProfileBuild();
@@ -100,6 +109,17 @@ class ConnectedApp {
 
   Future<void> initializeValues() async {
     await Future.wait([isFlutterApp, isProfileBuild, isDartWebApp]);
+    if (isFlutterAppNow) {
+      try {
+        final response = await serviceManager.flutterVersion;
+        _flutterVersion = FlutterVersion.parse(response.json);
+      } catch (e) {
+        logger.log(
+          'Failed to fetch flutter version from '
+          '`ConnectedApp.initializeValues`: $e',
+        );
+      }
+    }
     generateDevToolsTitle();
   }
 }

@@ -12,6 +12,7 @@ import 'globals.dart';
 import 'listenable.dart';
 import 'scaffold.dart';
 import 'theme.dart';
+import 'version.dart';
 
 /// Defines a page shown in the DevTools [TabBar].
 @immutable
@@ -26,6 +27,7 @@ abstract class Screen {
     this.requiresDebugBuild = false,
     this.requiresVmDeveloperMode = false,
     this.worksOffline = false,
+    this.shouldShowForFlutterVersion,
   });
 
   const Screen.conditional({
@@ -35,6 +37,7 @@ abstract class Screen {
     bool requiresDebugBuild = false,
     bool requiresVmDeveloperMode = false,
     bool worksOffline = false,
+    bool Function(FlutterVersion currentVersion) shouldShowForFlutterVersion,
     String title,
     IconData icon,
     Key tabKey,
@@ -45,6 +48,7 @@ abstract class Screen {
           requiresDebugBuild: requiresDebugBuild,
           requiresVmDeveloperMode: requiresVmDeveloperMode,
           worksOffline: worksOffline,
+          shouldShowForFlutterVersion: shouldShowForFlutterVersion,
           title: title,
           icon: icon,
           tabKey: tabKey,
@@ -82,6 +86,11 @@ abstract class Screen {
 
   /// Whether this screen works offline and should show in offline mode even if conditions are not met.
   final bool worksOffline;
+
+  /// A callback that will determine whether or not this screen should be
+  /// available for a given flutter version.
+  final bool Function(FlutterVersion currentFlutterVersion)
+      shouldShowForFlutterVersion;
 
   /// Whether this screen should display the isolate selector in the status
   /// line.
@@ -219,6 +228,14 @@ bool shouldShowScreen(Screen screen) {
   }
   if (screen.requiresVmDeveloperMode) {
     if (!preferences.vmDeveloperModeEnabled.value) {
+      return false;
+    }
+  }
+  if (screen.shouldShowForFlutterVersion != null) {
+    if (!serviceManager.isServiceAvailable ||
+        (serviceManager.connectedApp.isFlutterAppNow &&
+            !screen.shouldShowForFlutterVersion(
+                serviceManager.connectedApp.flutterVersionNow))) {
       return false;
     }
   }

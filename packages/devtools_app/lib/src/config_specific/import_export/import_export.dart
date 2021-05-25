@@ -17,6 +17,7 @@ import '_export_stub.dart'
 const devToolsSnapshotKey = 'devToolsSnapshot';
 const activeScreenIdKey = 'activeScreenId';
 const devToolsVersionKey = 'devtoolsVersion';
+const flutterVersionKey = 'flutterVersion';
 const nonDevToolsFileMessage = 'The imported file is not a Dart DevTools file.'
     ' At this time, DevTools only supports importing files that were originally'
     ' exported from DevTools.';
@@ -98,6 +99,8 @@ abstract class ExportController {
       devToolsSnapshotKey: true,
       activeScreenIdKey: activeScreenId,
       devToolsVersionKey: version,
+      if (serviceManager.connectedApp.flutterVersionNow != null)
+        flutterVersionKey: serviceManager.connectedApp.flutterVersionNow,
     };
     // This is a workaround to guarantee that DevTools exports are compatible
     // with other trace viewers (catapult, perfetto, chrome://tracing), which

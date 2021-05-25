@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
+import 'utils.dart';
+
 class FlutterVersion extends SemanticVersion {
   FlutterVersion._({
     @required this.version,
@@ -89,7 +91,7 @@ class FlutterVersion extends SemanticVersion {
       );
 }
 
-class SemanticVersion implements Comparable {
+class SemanticVersion with CompareMixin {
   SemanticVersion({this.major = 0, this.minor = 0, this.patch = 0});
 
   int major;
@@ -112,5 +114,14 @@ class SemanticVersion implements Comparable {
       return 1;
     }
     return -1;
+  }
+
+  @override
+  String toString() {
+    return [
+      if (major != null) major,
+      if (minor != null) minor,
+      if (patch != null) patch,
+    ].join('.');
   }
 }

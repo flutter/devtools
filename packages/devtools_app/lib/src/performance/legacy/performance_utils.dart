@@ -8,8 +8,8 @@
 
 import 'performance_model.dart';
 
-String computeEventGroupKey(
-  TimelineEvent event,
+String legacyComputeEventGroupKey(
+  LegacyTimelineEvent event,
   Map<int, String> threadNamesById,
 ) {
   if (event.groupKey != null) {
@@ -17,12 +17,12 @@ String computeEventGroupKey(
   } else if (event.isAsyncEvent) {
     return event.root.name;
   } else if (event.isUiEvent) {
-    return PerformanceData.uiKey;
+    return LegacyPerformanceData.uiKey;
   } else if (event.isRasterEvent) {
-    return PerformanceData.rasterKey;
+    return LegacyPerformanceData.rasterKey;
   } else if (threadNamesById[event.threadId] != null) {
     return threadNamesById[event.threadId];
   } else {
-    return PerformanceData.unknownKey;
+    return LegacyPerformanceData.unknownKey;
   }
 }
