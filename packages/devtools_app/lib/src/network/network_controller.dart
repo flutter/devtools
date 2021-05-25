@@ -382,11 +382,10 @@ class NetworkController
   void filterData(QueryFilter filter) {
     serviceManager.errorBadgeManager.clearErrors(NetworkScreen.id);
     if (filter == null) {
-      final requests = List<NetworkRequest>.from(_requests.value.requests);
-      requests.forEach(_checkForError);
+      _requests.value.requests.forEach(_checkForError);
       filteredData
         ..clear()
-        ..addAll(requests);
+        ..addAll(_requests.value.requests);
     } else {
       filteredData
         ..clear()
