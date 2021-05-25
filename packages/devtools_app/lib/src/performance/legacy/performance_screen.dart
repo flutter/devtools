@@ -67,7 +67,7 @@ class LegacyPerformanceScreen extends Screen {
   }
 
   @override
-  String get docPageId => id;
+  String get docPageId => 'performance';
 
   @override
   Widget build(BuildContext context) => const LegacyPerformanceScreenBody();
