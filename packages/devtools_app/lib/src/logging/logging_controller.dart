@@ -643,33 +643,38 @@ class LoggingController extends DisposableController
   @override
   void filterData(QueryFilter filter) {
     if (filter == null) {
-      filteredData.value = List.from(data);
+      filteredData
+        ..clear()
+        ..addAll(data);
     } else {
-      filteredData.value = data.where((log) {
-        final kindArg = filter.filterArguments[kindFilterId];
-        if (kindArg != null && !kindArg.matchesValue(log.kind.toLowerCase())) {
-          return false;
-        }
-
-        if (filter.substrings.isNotEmpty) {
-          for (final substring in filter.substrings) {
-            final caseInsensitiveSubstring = substring.toLowerCase();
-            final matchesKind = log.kind != null &&
-                log.kind.toLowerCase().contains(caseInsensitiveSubstring);
-            if (matchesKind) return true;
-
-            final matchesSummary = log.summary != null &&
-                log.summary.toLowerCase().contains(caseInsensitiveSubstring);
-            if (matchesSummary) return true;
-
-            final matchesDetails = log.details != null &&
-                log.summary.toLowerCase().contains(caseInsensitiveSubstring);
-            if (matchesDetails) return true;
+      filteredData
+        ..clear()
+        ..addAll(data.where((log) {
+          final kindArg = filter.filterArguments[kindFilterId];
+          if (kindArg != null &&
+              !kindArg.matchesValue(log.kind.toLowerCase())) {
+            return false;
           }
-          return false;
-        }
-        return true;
-      }).toList();
+
+          if (filter.substrings.isNotEmpty) {
+            for (final substring in filter.substrings) {
+              final caseInsensitiveSubstring = substring.toLowerCase();
+              final matchesKind = log.kind != null &&
+                  log.kind.toLowerCase().contains(caseInsensitiveSubstring);
+              if (matchesKind) return true;
+
+              final matchesSummary = log.summary != null &&
+                  log.summary.toLowerCase().contains(caseInsensitiveSubstring);
+              if (matchesSummary) return true;
+
+              final matchesDetails = log.details != null &&
+                  log.summary.toLowerCase().contains(caseInsensitiveSubstring);
+              if (matchesDetails) return true;
+            }
+            return false;
+          }
+          return true;
+        }));
     }
     activeFilter.value = filter;
   }
