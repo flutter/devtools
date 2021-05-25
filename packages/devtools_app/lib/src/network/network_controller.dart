@@ -430,7 +430,7 @@ class NetworkController
           }
           _checkForError(r);
           return true;
-        }));
+        }).toList());
     }
     activeFilter.value = filter;
   }

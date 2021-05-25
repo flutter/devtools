@@ -674,7 +674,7 @@ class LoggingController extends DisposableController
             return false;
           }
           return true;
-        }));
+        }).toList());
     }
     activeFilter.value = filter;
   }
