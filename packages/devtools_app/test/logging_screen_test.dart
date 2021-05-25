@@ -14,6 +14,7 @@ import 'package:devtools_app/src/logging/logging_screen.dart';
 import 'package:devtools_app/src/service_extensions.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/service_extension_widgets.dart';
+import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -46,7 +47,7 @@ void main() {
           .thenReturn(ValueNotifier<List<LogData>>([]));
       when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
       when(mockLoggingController.filteredData)
-          .thenReturn(ValueNotifier<List<LogData>>([]));
+          .thenReturn(ListValueNotifier<LogData>([]));
 
       fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp.isFlutterWebAppNow)
@@ -121,7 +122,7 @@ void main() {
       setUp(() {
         when(mockLoggingController.data).thenReturn(fakeLogData);
         when(mockLoggingController.filteredData)
-            .thenReturn(ValueNotifier<List<LogData>>(fakeLogData));
+            .thenReturn(ListValueNotifier<LogData>(fakeLogData));
       });
 
       testWidgetsWithWindowSize('shows log items', windowSize,

@@ -382,51 +382,54 @@ class NetworkController
   void filterData(QueryFilter filter) {
     serviceManager.errorBadgeManager.clearErrors(NetworkScreen.id);
     if (filter == null) {
-      final requests = List<NetworkRequest>.from(_requests.value.requests);
-      requests.forEach(_checkForError);
-      filteredData.value = requests;
+      _requests.value.requests.forEach(_checkForError);
+      filteredData
+        ..clear()
+        ..addAll(_requests.value.requests);
     } else {
-      filteredData.value = _requests.value.requests.where((NetworkRequest r) {
-        final methodArg = filter.filterArguments[methodFilterId];
-        if (methodArg != null &&
-            !methodArg.matchesValue(r.method.toLowerCase())) {
-          return false;
-        }
-
-        final statusArg = filter.filterArguments[statusFilterId];
-        if (statusArg != null &&
-            !statusArg.matchesValue(r.status?.toLowerCase())) {
-          return false;
-        }
-
-        final typeArg = filter.filterArguments[typeFilterId];
-        if (typeArg != null && !typeArg.matchesValue(r.type.toLowerCase())) {
-          return false;
-        }
-
-        if (filter.substrings.isNotEmpty) {
-          for (final substring in filter.substrings) {
-            final caseInsensitiveSubstring = substring.toLowerCase();
-            bool matches(String stringToMatch) {
-              if (stringToMatch
-                  .toLowerCase()
-                  .contains(caseInsensitiveSubstring)) {
-                _checkForError(r);
-                return true;
-              }
-              return false;
-            }
-
-            if (matches(r.uri)) return true;
-            if (matches(r.method)) return true;
-            if (matches(r.status ?? '')) return true;
-            if (matches(r.type)) return true;
+      filteredData
+        ..clear()
+        ..addAll(_requests.value.requests.where((NetworkRequest r) {
+          final methodArg = filter.filterArguments[methodFilterId];
+          if (methodArg != null &&
+              !methodArg.matchesValue(r.method.toLowerCase())) {
+            return false;
           }
-          return false;
-        }
-        _checkForError(r);
-        return true;
-      }).toList();
+
+          final statusArg = filter.filterArguments[statusFilterId];
+          if (statusArg != null &&
+              !statusArg.matchesValue(r.status?.toLowerCase())) {
+            return false;
+          }
+
+          final typeArg = filter.filterArguments[typeFilterId];
+          if (typeArg != null && !typeArg.matchesValue(r.type.toLowerCase())) {
+            return false;
+          }
+
+          if (filter.substrings.isNotEmpty) {
+            for (final substring in filter.substrings) {
+              final caseInsensitiveSubstring = substring.toLowerCase();
+              bool matches(String stringToMatch) {
+                if (stringToMatch
+                    .toLowerCase()
+                    .contains(caseInsensitiveSubstring)) {
+                  _checkForError(r);
+                  return true;
+                }
+                return false;
+              }
+
+              if (matches(r.uri)) return true;
+              if (matches(r.method)) return true;
+              if (matches(r.status ?? '')) return true;
+              if (matches(r.type)) return true;
+            }
+            return false;
+          }
+          _checkForError(r);
+          return true;
+        }).toList());
     }
     activeFilter.value = filter;
   }
