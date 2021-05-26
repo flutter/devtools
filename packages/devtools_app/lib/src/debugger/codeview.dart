@@ -690,10 +690,15 @@ class _LineItemState extends State<LineItem> {
           if (_hasMouseExited) return;
           _hoverCard?.remove();
           _hoverCard = HoverCard(
-            contents: Material(
-              child: ExpandableVariable(
-                debuggerController: _debuggerController,
-                variable: ValueNotifier(variable),
+            contents: SingleChildScrollView(
+              child: Container(
+                constraints: const BoxConstraints(maxHeight: 250.0),
+                child: Material(
+                  child: ExpandableVariable(
+                    debuggerController: _debuggerController,
+                    variable: ValueNotifier(variable),
+                  ),
+                ),
               ),
             ),
             event: event,
