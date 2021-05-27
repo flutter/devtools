@@ -389,6 +389,8 @@ const wideSearchTextWidth = 400.0;
 const defaultSearchTextWidth = 200.0;
 const defaultTextFieldHeight = 32.0;
 
+const maxHoverCardHeight = 250.0;
+
 /// Default color of cursor and color used by search's TextField.
 /// Guarantee that the Search TextField on all platforms renders in the same
 /// color for border, label text, and cursor. Primarly, so golden screen
