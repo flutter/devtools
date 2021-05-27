@@ -78,7 +78,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     ga.screen(InspectorScreen.id);
     autoDispose(
         serviceManager.onConnectionAvailable.listen(_handleConnectionStart));
-    if (serviceManager.hasConnection) {
+    if (serviceManager.connectedAppInitialized) {
       _handleConnectionStart(serviceManager.service);
     }
     autoDispose(

@@ -165,7 +165,7 @@ class LoggingController extends DisposableController
   LoggingController({this.inspectorService}) {
     autoDispose(
         serviceManager.onConnectionAvailable.listen(_handleConnectionStart));
-    if (serviceManager.hasConnection) {
+    if (serviceManager.connectedAppInitialized) {
       _handleConnectionStart(serviceManager.service);
     }
     autoDispose(

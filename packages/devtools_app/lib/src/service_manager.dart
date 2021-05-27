@@ -93,10 +93,10 @@ class ServiceConnectionManager {
   VM vm;
   String sdkVersion;
 
-  bool get hasConnection =>
-      service != null &&
-      connectedApp != null &&
-      connectedApp.connectedAppInitialized;
+  bool get hasConnection => service != null && connectedApp != null;
+
+  bool get connectedAppInitialized =>
+      hasConnection && connectedApp.connectedAppInitialized;
 
   ValueListenable<ConnectedState> get connectedState => _connectedState;
 

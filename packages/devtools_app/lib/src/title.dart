@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'globals.dart';
 
 void generateDevToolsTitle() {
-  if (!serviceManager.hasConnection) {
+  if (!serviceManager.connectedAppInitialized) {
     _devToolsTitle.value = 'DevTools for Flutter & Dart';
     return;
   }
