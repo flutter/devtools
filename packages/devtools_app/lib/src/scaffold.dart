@@ -330,7 +330,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                       controller: _tabController,
                       children: tabBodies,
                     ),
-                    if (serviceManager.hasConnection &&
+                    if (serviceManager.connectedAppInitialized &&
                         !offlineMode &&
                         _currentScreen.screenId != DebuggerScreen.id)
                       Container(

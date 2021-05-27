@@ -99,7 +99,7 @@ class InspectorService extends DisposableController
 
   static Future<InspectorService> create(VmService vmService) async {
     assert(_inspectorDependenciesLoaded);
-    assert(serviceManager.hasConnection);
+    assert(serviceManager.connectedAppInitialized);
     assert(serviceManager.service != null);
     final inspectorLibrary = EvalOnDartLibrary(
       inspectorLibraryUriCandidates,

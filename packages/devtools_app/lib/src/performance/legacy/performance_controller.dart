@@ -496,7 +496,7 @@ class LegacyPerformanceController
   /// to clear the data stored by the controller, but do not want to clear the
   /// data currently stored by the VM.
   Future<void> clearData({bool clearVmTimeline = true}) async {
-    if (clearVmTimeline && serviceManager.hasConnection) {
+    if (clearVmTimeline && serviceManager.connectedAppInitialized) {
       await serviceManager.service.clearVMTimeline();
     }
     allTraceEvents.clear();

@@ -896,7 +896,7 @@ class MemoryController extends DisposableController
       serviceManager.onConnectionAvailable
           .listen((_) => _handleConnectionStart(serviceManager)),
     );
-    if (serviceManager.hasConnection) {
+    if (serviceManager.connectedAppInitialized) {
       _handleConnectionStart(serviceManager);
     }
     autoDispose(
