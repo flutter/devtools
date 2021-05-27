@@ -4,9 +4,12 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import 'config_specific/logger/logger.dart' as logger;
 import 'eval_on_dart_library.dart';
 import 'globals.dart';
+import 'service_registrations.dart' as registrations;
 import 'title.dart';
 import 'version.dart';
 
@@ -33,9 +36,16 @@ class ConnectedApp {
 
   bool _isFlutterApp;
 
-  FlutterVersion get flutterVersionNow => _flutterVersion;
+  FlutterVersion get flutterVersionNow {
+    assert(isFlutterNativeAppNow);
+    return _flutterVersion;
+  }
 
   FlutterVersion _flutterVersion;
+
+  final _flutterVersionCompleter = Completer<FlutterVersion>();
+
+  static const _flutterVersionTimeout = Duration(seconds: 3);
 
   Future<bool> get isProfileBuild async {
     _isProfileBuild ??= await _connectedToProfileBuild();
@@ -61,6 +71,8 @@ class ConnectedApp {
   bool _isDartWebApp;
 
   bool get isFlutterWebAppNow => isFlutterAppNow && isDartWebAppNow;
+
+  bool get isFlutterNativeAppNow => isFlutterAppNow && !isDartWebAppNow;
 
   bool get isDebugFlutterAppNow => isFlutterAppNow && !isProfileBuildNow;
 
@@ -109,16 +121,33 @@ class ConnectedApp {
 
   Future<void> initializeValues() async {
     await Future.wait([isFlutterApp, isProfileBuild, isDartWebApp]);
-    if (isFlutterAppNow) {
-      try {
-        final response = await serviceManager.flutterVersion;
-        _flutterVersion = FlutterVersion.parse(response.json);
-      } catch (e) {
-        logger.log(
-          'Failed to fetch flutter version from '
-          '`ConnectedApp.initializeValues`: $e',
-        );
-      }
+
+    // No need to check the flutter version for Flutter web apps, as the
+    // performance tools that consume [flutterVersionNow] are not available for
+    // flutter web apps.
+    if (isFlutterNativeAppNow) {
+      final flutterVersionServiceListenable = serviceManager
+          .registeredServiceListenable(registrations.flutterVersion.service);
+      VoidCallback listener;
+      flutterVersionServiceListenable.addListener(listener = () async {
+        final registered = flutterVersionServiceListenable.value;
+        if (registered) {
+          _flutterVersionCompleter.complete(
+              FlutterVersion.parse((await serviceManager.flutterVersion).json));
+        }
+      });
+
+      _flutterVersion = await _flutterVersionCompleter.future.timeout(
+        _flutterVersionTimeout,
+        onTimeout: () {
+          logger.log(
+            'Timed out trying to fetch flutter version from '
+            '`ConnectedApp.initializeValues`.',
+          );
+          return Future<FlutterVersion>.value();
+        },
+      );
+      flutterVersionServiceListenable.removeListener(listener);
     }
     generateDevToolsTitle();
   }
