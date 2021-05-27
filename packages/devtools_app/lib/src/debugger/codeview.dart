@@ -633,6 +633,7 @@ class LineItem extends StatefulWidget {
   }) : super(key: key);
 
   static const _hoverDelay = Duration(milliseconds: 150);
+  static const _removeDelay = Duration(milliseconds: 50);
   static const _hoverWidth = 400.0;
 
   final TextSpan lineContents;
@@ -662,7 +663,7 @@ class _LineItemState extends State<LineItem> {
   void _onHoverExit() {
     _showTimer?.cancel();
     _hasMouseExited = true;
-    _removeTimer = Timer(LineItem._hoverDelay, () {
+    _removeTimer = Timer(LineItem._removeDelay, () {
       _hoverCard?.maybeRemove();
       _previousHoverWord = '';
     });
@@ -692,7 +693,8 @@ class _LineItemState extends State<LineItem> {
           _hoverCard = HoverCard(
             contents: SingleChildScrollView(
               child: Container(
-                constraints: const BoxConstraints(maxHeight: 250.0),
+                constraints:
+                    const BoxConstraints(maxHeight: maxHoverCardHeight),
                 child: Material(
                   child: ExpandableVariable(
                     debuggerController: _debuggerController,
