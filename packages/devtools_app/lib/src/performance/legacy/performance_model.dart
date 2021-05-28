@@ -383,7 +383,7 @@ class LegacyOfflineTimelineEvent extends LegacyTimelineEvent {
         (t) =>
             t.toString() ==
             firstTrace[TraceEvent.argsKey][TraceEvent.typeKey].toString(),
-        orElse: () => TimelineEventType.unknown);
+        orElse: () => TimelineEventType.other);
   }
 
   // The following methods should never be called on an instance of
@@ -487,7 +487,7 @@ class LegacyFlutterFrame {
       // because the UI events are not present in the available timeline
       // events, or 2) the [uiEventFlow] has started but not completed yet. In
       // the event that 2) is true, do not set the frame end time here because
-      // the end time for this frame will be set to the the end time for
+      // the end time for this frame will be set to the end time for
       // [uiEventFlow] once it finishes.
       if (uiEventFlow != null) {
         time.end = Duration(

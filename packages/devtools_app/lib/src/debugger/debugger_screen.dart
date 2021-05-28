@@ -240,7 +240,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             const AreaPaneHeader(title: Text(variablesTitle)),
             AreaPaneHeader(
               title: const Text(breakpointsTitle),
-              actions: [
+              rightActions: [
                 _breakpointsRightChild(),
               ],
               rightPadding: 0.0,

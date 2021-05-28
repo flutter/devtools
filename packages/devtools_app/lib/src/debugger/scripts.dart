@@ -80,7 +80,7 @@ class ScriptPickerState extends State<ScriptPicker> {
           AreaPaneHeader(
             title: const Text('Libraries'),
             needsTopBorder: false,
-            actions: [
+            rightActions: [
               CountBadge(
                 filteredItems: _filteredItems,
                 items: _items,

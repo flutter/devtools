@@ -65,7 +65,7 @@ class _DebuggerConsoleState extends State<DebuggerConsole> {
               title: AreaPaneHeader(
                 title: const Text('Console'),
                 needsTopBorder: false,
-                actions: [
+                rightActions: [
                   CopyToClipboardControl(
                     dataProvider: disabled ? null : () => _lines.join('\n'),
                     successMessage:

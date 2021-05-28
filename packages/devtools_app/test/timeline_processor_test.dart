@@ -293,7 +293,7 @@ void main() {
       );
       expect(
         processor.inferEventType(unknownEventBeginTrace.event),
-        equals(TimelineEventType.unknown),
+        equals(TimelineEventType.other),
       );
     });
   });

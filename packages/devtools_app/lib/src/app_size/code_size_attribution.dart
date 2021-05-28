@@ -53,7 +53,7 @@ class _CallGraphWithDominatorsState extends State<CallGraphWithDominators> {
           needsTopBorder: false,
           needsBottomBorder: false,
           needsLeftBorder: true,
-          actions: [
+          rightActions: [
             const Text('Show call graph'),
             Switch(
               value: showCallGraph,

@@ -105,7 +105,10 @@ class _TimelineFlameChartContainerState
             tall: true,
             needsTopBorder: false,
             rightPadding: 0.0,
-            actions: [
+            leftActions: [
+              _buildRefreshTimelineEventsButton(),
+            ],
+            rightActions: [
               _buildSearchField(searchFieldEnabled),
               FlameChartHelpButton(),
             ],
@@ -117,6 +120,26 @@ class _TimelineFlameChartContainerState
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRefreshTimelineEventsButton() {
+    return DevToolsTooltip(
+      tooltip: 'Refresh timeline events',
+      child: TextButton(
+        onPressed: controller.processAvailableEvents,
+        // onPressed: staleData
+        //     ? controller.timelineController.processAvailableEvents
+        //     : null,
+        child: Container(
+          height: defaultButtonHeight,
+          width: defaultButtonHeight,
+          child: const Icon(
+            Icons.refresh,
+            size: defaultIconSize,
+          ),
+        ),
       ),
     );
   }
@@ -290,7 +313,7 @@ class TimelineFlameChartState
     final boundEvent = SyncTimelineEvent(
       TraceEventWrapper(
         TraceEvent({'ts': visibleTimeRange.start.inMicroseconds})
-          ..type = TimelineEventType.unknown,
+          ..type = TimelineEventType.other,
         0, // This is arbitrary
       ),
     )..time = visibleTimeRange;
@@ -328,7 +351,7 @@ class TimelineFlameChartState
     final boundEvent = SyncTimelineEvent(
       TraceEventWrapper(
         TraceEvent({'ts': visibleTimeRange.end.inMicroseconds})
-          ..type = TimelineEventType.unknown,
+          ..type = TimelineEventType.other,
         0, // This is arbitrary
       ),
     )..time = (TimeRange()
@@ -395,10 +418,27 @@ class TimelineFlameChartState
 
     if (_selectedFrame != null) {
       // Zoom and scroll to the frame's UI event.
+      TimeRange time;
+      TimelineEvent event;
+      if (_selectedFrame.uiEventFlow == null &&
+          _selectedFrame.rasterEventFlow == null) {
+        Notifications.of(context)
+            .push('No timeline events available for the selected frame');
+        return;
+      } else if (_selectedFrame.uiEventFlow == null) {
+        time = _selectedFrame.rasterEventFlow.time;
+        event = _selectedFrame.rasterEventFlow;
+      } else if (_selectedFrame.rasterEventFlow == null) {
+        time = _selectedFrame.uiEventFlow.time;
+        event = _selectedFrame.uiEventFlow;
+      } else {
+        time = _selectedFrame.timeFromEventFlows;
+        event = _selectedFrame.uiEventFlow;
+      }
       await zoomAndScrollToData(
-        startMicros: selectedFrame.time.start.inMicroseconds,
-        durationMicros: selectedFrame.time.duration.inMicroseconds,
-        data: selectedFrame.uiEventFlow,
+        startMicros: time.start.inMicroseconds,
+        durationMicros: time.duration.inMicroseconds,
+        data: event,
       );
     }
   }
@@ -542,24 +582,24 @@ class TimelineFlameChartState
           colorScheme: colorScheme,
         ),
       ),
-      CustomPaint(
-        painter: SelectedFrameBracketPainter(
-          _selectedFrame,
-          zoom: zoom,
-          constraints: constraints,
-          verticalScrollOffset: verticalScrollOffset,
-          horizontalScrollOffset: horizontalScrollOffset,
-          chartStartInset: widget.startInset,
-          startTimeOffsetMicros: startTimeOffset,
-          startingPxPerMicro: startingPxPerMicro,
-          // Subtract [rowHeight] because [_calculateVerticalGuidelineStartY]
-          // returns the Y value at the bottom of the flame chart node, and we
-          // want the Y value at the top of the node.
-          yForEvent: (event) =>
-              _calculateVerticalGuidelineStartY(event) - rowHeight,
-          colorScheme: colorScheme,
-        ),
-      ),
+      // CustomPaint(
+      //   painter: SelectedFrameBracketPainter(
+      //     _selectedFrame,
+      //     zoom: zoom,
+      //     constraints: constraints,
+      //     verticalScrollOffset: verticalScrollOffset,
+      //     horizontalScrollOffset: horizontalScrollOffset,
+      //     chartStartInset: widget.startInset,
+      //     startTimeOffsetMicros: startTimeOffset,
+      //     startingPxPerMicro: startingPxPerMicro,
+      //     // Subtract [rowHeight] because [_calculateVerticalGuidelineStartY]
+      //     // returns the Y value at the bottom of the flame chart node, and we
+      //     // want the Y value at the top of the node.
+      //     yForEvent: (event) =>
+      //         _calculateVerticalGuidelineStartY(event) - rowHeight,
+      //     colorScheme: colorScheme,
+      //   ),
+      // ),
       _buildSectionLabels(constraints: constraints),
       ..._buildEventThreadNavigationButtons(constraints: constraints),
     ];

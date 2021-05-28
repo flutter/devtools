@@ -4,6 +4,7 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 
 import '../charts/flame_chart.dart';
@@ -75,7 +76,7 @@ class PerformanceData {
 
   FlutterFrame selectedFrame;
 
-  String get selectedFrameId => selectedFrame?.id;
+  int get selectedFrameId => selectedFrame?.id;
 
   TimeRange time = TimeRange();
 
@@ -86,8 +87,12 @@ class PerformanceData {
   int get endTimestampMicros => _endTimestampMicros;
   int _endTimestampMicros = -1;
 
-  void initializeEventGroups(Map<int, String> threadNamesById) {
-    for (TimelineEvent event in timelineEvents) {
+  void initializeEventGroups(
+    Map<int, String> threadNamesById, {
+    int startIndex = 0,
+  }) {
+    for (int i = startIndex; i < timelineEvents.length; i++) {
+      final event = timelineEvents[i];
       eventGroups.putIfAbsent(computeEventGroupKey(event, threadNamesById),
           () => TimelineEventGroup())
         ..addEventAtCalculatedRow(event);
@@ -281,7 +286,7 @@ class OfflinePerformanceData extends PerformanceData {
     List<Map<String, dynamic>> traceEvents,
     List<FlutterFrame> frames,
     FlutterFrame selectedFrame,
-    String selectedFrameId,
+    int selectedFrameId,
     TimelineEvent selectedEvent,
     double displayRefreshRate,
     CpuProfileData cpuProfileData,
@@ -305,7 +310,7 @@ class OfflinePerformanceData extends PerformanceData {
     final CpuProfileData cpuProfileData =
         cpuProfileJson.isNotEmpty ? CpuProfileData.parse(cpuProfileJson) : null;
 
-    final String selectedFrameId = json[PerformanceData.selectedFrameIdKey];
+    final int selectedFrameId = json[PerformanceData.selectedFrameIdKey];
 
     final Map<String, dynamic> selectedEventJson =
         json[PerformanceData.selectedEventKey] ?? {};
@@ -328,8 +333,8 @@ class OfflinePerformanceData extends PerformanceData {
   }
 
   @override
-  String get selectedFrameId => _selectedFrameId;
-  final String _selectedFrameId;
+  int get selectedFrameId => _selectedFrameId;
+  final int _selectedFrameId;
 
   /// Creates a new instance of [OfflinePerformanceData] with references to the
   /// same objects contained in this instance.
@@ -374,7 +379,7 @@ class OfflineTimelineEvent extends TimelineEvent {
         (t) =>
             t.toString() ==
             firstTrace[TraceEvent.argsKey][TraceEvent.typeKey].toString(),
-        orElse: () => TimelineEventType.unknown);
+        orElse: () => TimelineEventType.other);
   }
 
   // The following methods should never be called on an instance of
@@ -405,9 +410,69 @@ class OfflineTimelineEvent extends TimelineEvent {
 /// * [uiEventFlow] : flow of events showing the UI work for the frame.
 /// * [rasterEventFlow] : flow of events showing the Raster work for the frame.
 class FlutterFrame {
-  FlutterFrame(this.id);
+  FlutterFrame._({
+    this.id,
+    this.timeFromFrameTiming,
+    this.buildTime,
+    this.rasterTime,
+    this.vsyncOverheadTime,
+  });
 
-  final String id;
+  factory FlutterFrame.parse(Map<String, dynamic> json) {
+    final timeStart = Duration(microseconds: json[startTimeKey]);
+    final timeEnd = timeStart + Duration(microseconds: json[elapsedKey]);
+    final frameTime = TimeRange()
+      ..start = timeStart
+      ..end = timeEnd;
+    return FlutterFrame._(
+      id: json[numberKey],
+      timeFromFrameTiming: frameTime,
+      buildTime: Duration(microseconds: json[buildKey]),
+      rasterTime: Duration(microseconds: json[rasterKey]),
+      vsyncOverheadTime: Duration(microseconds: json[vsyncOverheadKey]),
+    );
+  }
+
+  static const numberKey = 'number';
+
+  static const buildKey = 'build';
+
+  static const rasterKey = 'raster';
+
+  static const vsyncOverheadKey = 'vsyncOverhead';
+
+  static const startTimeKey = 'startTime';
+
+  static const elapsedKey = 'elapsed';
+
+  /// Id for this Flutter frame, originally created in the Flutter engine.
+  final int id;
+
+  /// The time range of the Flutter frame based on the FrameTiming API from
+  /// which the data was parsed.
+  ///
+  /// This will not match the timestamps on the VM timeline. For activities
+  /// involving the VM timeline, use [timeFromEventFlows] instead.
+  final TimeRange timeFromFrameTiming;
+
+  /// The time range of the Flutter frame based on the frames [eventFlows]:
+  /// [uiEventFlow] and [rasterEventFlow].
+  ///
+  /// This time range should be used for activities related to timeline events,
+  /// like scrolling a frame's timeline events into view, for example.
+  final TimeRange timeFromEventFlows = TimeRange();
+
+  /// Build time for this Flutter frame based on data from the FrameTiming API
+  /// sent over the extension stream as 'Flutter.Frame' events.
+  final Duration buildTime;
+
+  /// Raster time for this Flutter frame based on data from the FrameTiming API
+  /// sent over the extension stream as 'Flutter.Frame' events.
+  final Duration rasterTime;
+
+  /// Vsync overhead time for this Flutter frame based on data from the
+  /// FrameTiming API sent over the extension stream as 'Flutter.Frame' events.
+  final Duration vsyncOverheadTime;
 
   /// Event flows for the UI and Raster work for the frame.
   final List<SyncTimelineEvent> eventFlows = List.generate(2, (_) => null);
@@ -419,54 +484,40 @@ class FlutterFrame {
   SyncTimelineEvent get rasterEventFlow =>
       eventFlows[TimelineEventType.raster.index];
 
-  /// Whether the frame is ready for the timeline.
-  ///
-  /// A frame is ready once it has both required event flows as well as
-  /// [_pipelineItemStartTime] and [_pipelineItemEndTime].
-  bool get isReadyForTimeline {
-    return uiEventFlow != null &&
-        rasterEventFlow != null &&
-        pipelineItemTime.start?.inMicroseconds != null &&
-        pipelineItemTime.end?.inMicroseconds != null;
-  }
-
-  // Stores frame start time, end time, and duration.
-  final time = TimeRange();
-
-  /// Pipeline item time range in micros.
-  ///
-  /// This stores the start and end times for the pipeline item event for this
-  /// frame. We use this value to determine whether a TimelineEvent fits within
-  /// the frame's time boundaries.
-  final pipelineItemTime = TimeRange(singleAssignment: false);
-
-  TraceEvent pipelineItemStartTrace;
-
-  TraceEvent pipelineItemEndTrace;
-
-  bool get isWellFormed =>
-      pipelineItemTime.start?.inMicroseconds != null &&
-      pipelineItemTime.end?.inMicroseconds != null;
-
-  int get uiDuration => uiEventFlow?.time?.duration?.inMicroseconds;
-
-  double get uiDurationMs => uiDuration != null ? uiDuration / 1000 : null;
-
-  int get rasterDuration => rasterEventFlow?.time?.duration?.inMicroseconds;
-
-  double get rasterDurationMs =>
-      rasterDuration != null ? rasterDuration / 1000 : null;
+  // /// Whether the frame is ready for the timeline.
+  // ///
+  // /// A frame is ready once it has both required event flows as well as
+  // /// [_pipelineItemStartTime] and [_pipelineItemEndTime].
+  // bool get isReadyForTimeline {
+  //   return uiEventFlow != null &&
+  //       rasterEventFlow != null &&
+  //       pipelineItemTime.start?.inMicroseconds != null &&
+  //       pipelineItemTime.end?.inMicroseconds != null;
+  // }
+  //
+  // /// Pipeline item time range in micros.
+  // ///
+  // /// This stores the start and end times for the pipeline item event for this
+  // /// frame. We use this value to determine whether a TimelineEvent fits within
+  // /// the frame's time boundaries.
+  // final pipelineItemTime = TimeRange(singleAssignment: false);
+  //
+  // TraceEvent pipelineItemStartTrace;
+  //
+  // TraceEvent pipelineItemEndTrace;
+  //
+  bool get isWellFormed => uiEventFlow != null && rasterEventFlow != null;
 
   CpuProfileData cpuProfileData;
 
   void setEventFlow(SyncTimelineEvent event, {TimelineEventType type}) {
     type ??= event?.type;
     if (type == TimelineEventType.ui) {
-      time.start = event?.time?.start;
+      timeFromEventFlows.start = event?.time?.start;
       // If [rasterEventFlow] has already completed, set the end time for this
       // frame to [event]'s end time.
       if (rasterEventFlow != null) {
-        time.end = event?.time?.end;
+        timeFromEventFlows.end = event?.time?.end;
       }
     }
     if (type == TimelineEventType.raster) {
@@ -476,10 +527,10 @@ class FlutterFrame {
       // because the UI events are not present in the available timeline
       // events, or 2) the [uiEventFlow] has started but not completed yet. In
       // the event that 2) is true, do not set the frame end time here because
-      // the end time for this frame will be set to the the end time for
+      // the end time for this frame will be set to the end time for
       // [uiEventFlow] once it finishes.
       if (uiEventFlow != null) {
-        time.end = Duration(
+        timeFromEventFlows.end = Duration(
           microseconds: math.max(
             uiEventFlow.time.end.inMicroseconds,
             event?.time?.end?.inMicroseconds ?? 0,
@@ -505,20 +556,29 @@ class FlutterFrame {
   }
 
   bool isUiJanky(double displayRefreshRate) {
-    return uiDurationMs > _targetMsPerFrame(displayRefreshRate);
+    return buildTime.inMilliseconds > _targetMsPerFrame(displayRefreshRate);
   }
 
   bool isRasterJanky(double displayRefreshRate) {
-    return rasterDurationMs > _targetMsPerFrame(displayRefreshRate);
+    return rasterTime.inMilliseconds > _targetMsPerFrame(displayRefreshRate);
   }
 
   double _targetMsPerFrame(double displayRefreshRate) {
     return 1 / displayRefreshRate * 1000;
   }
 
+  Map<String, dynamic> get json => {
+        numberKey: id,
+        startTimeKey: timeFromFrameTiming.start.inMicroseconds,
+        elapsedKey: timeFromFrameTiming.duration.inMicroseconds,
+        buildKey: buildTime.inMicroseconds,
+        rasterKey: rasterTime.inMicroseconds,
+        vsyncOverheadKey: vsyncOverheadTime.inMicroseconds,
+      };
+
   @override
   String toString() {
-    return 'Frame $id - $time, ui: ${uiEventFlow.time}, '
+    return 'Frame $id - $timeFromFrameTiming, ui: ${uiEventFlow.time}, '
         'raster: ${rasterEventFlow.time}';
   }
 }
@@ -551,11 +611,11 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 
   TimeRange time = TimeRange();
 
-  String get frameId => _frameId ?? root._frameId;
+  int get frameId => _frameId ?? root._frameId;
 
-  String _frameId;
+  int _frameId;
 
-  set frameId(String id) => _frameId = id;
+  set frameId(int id) => _frameId = id;
 
   String get name => traceEvents.first.event.name;
 
@@ -798,11 +858,37 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 class SyncTimelineEvent extends TimelineEvent {
   SyncTimelineEvent(TraceEventWrapper firstTraceEvent) : super(firstTraceEvent);
 
-  bool get isUiEventFlow => subtreeHasNodeWithCondition(
-      (TimelineEvent event) => event.name.contains(uiEventName));
+  bool get isUiEventFlow => uiFrameNumber != null;
 
-  bool get isRasterEventFlow => subtreeHasNodeWithCondition(
-      (TimelineEvent event) => event.name.contains('PipelineConsume'));
+  bool get isRasterEventFlow => rasterFrameNumber != null;
+
+  int get uiFrameNumber {
+    final animatorBeginFrameEvent = firstChildWithCondition(
+        (TimelineEvent event) => event.name.contains(uiEventName));
+    if (animatorBeginFrameEvent != null) {
+      try {
+        return int.parse(animatorBeginFrameEvent
+            .traceEvents.first.event.args[TraceEvent.frameNumberArg]);
+      } catch (_) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  int get rasterFrameNumber {
+    final gpuRasterizerDrawEvent = firstChildWithCondition(
+        (TimelineEvent event) => event.name.contains(rasterEventName));
+    if (gpuRasterizerDrawEvent != null) {
+      try {
+        return int.parse(gpuRasterizerDrawEvent
+            .traceEvents.first.event.args[TraceEvent.frameNumberArg]);
+      } catch (_) {
+        return null;
+      }
+    }
+    return null;
+  }
 
   @override
   int get maxEndMicros => time.end.inMicroseconds;

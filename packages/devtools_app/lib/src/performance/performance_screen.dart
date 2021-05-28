@@ -41,7 +41,7 @@ class PerformanceScreen extends Screen {
           id: id,
           requiresDartVm: true,
           worksOffline: true,
-          shouldShowForFlutterVersion: _shouldShowForFlutterVersion,
+          // shouldShowForFlutterVersion: _shouldShowForFlutterVersion,
           title: 'Performance',
           icon: Octicons.pulse,
         );
@@ -119,9 +119,9 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
     // Refresh data on page load if data is null. On subsequent tab changes,
     // this should not be called.
-    if (controller.data == null && !offlineMode) {
-      controller.refreshData();
-    }
+    // if (controller.data == null && !offlineMode) {
+    //   controller.refreshData();
+    // }
 
     // Load offline timeline data if available.
     if (shouldLoadOfflineData()) {
@@ -215,20 +215,23 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
   Widget _buildPrimaryStateControls() {
     return ValueListenableBuilder(
-      valueListenable: controller.refreshing,
-      builder: (context, refreshing, _) {
+      valueListenable: controller.recordingFrames,
+      builder: (context, recording, _) {
         return Row(
           children: [
-            RefreshButton(
+            PauseButton(
               includeTextWidth: _primaryControlsMinIncludeTextWidth,
-              onPressed:
-                  (refreshing || processing) ? null : _refreshPerformanceData,
+              onPressed: recording ? _pauseFrameRecording : null,
+            ),
+            const SizedBox(width: denseSpacing),
+            ResumeButton(
+              includeTextWidth: _primaryControlsMinIncludeTextWidth,
+              onPressed: recording ? null : _resumeFrameRecording,
             ),
             const SizedBox(width: defaultSpacing),
             ClearButton(
               includeTextWidth: _primaryControlsMinIncludeTextWidth,
-              onPressed:
-                  (refreshing || processing) ? null : _clearPerformanceData,
+              onPressed: processing ? null : _clearPerformanceData,
             ),
           ],
         );
@@ -274,8 +277,12 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     );
   }
 
-  Future<void> _refreshPerformanceData() async {
-    await controller.refreshData();
+  void _pauseFrameRecording() {
+    controller.toggleRecordingFrames(false);
+  }
+
+  void _resumeFrameRecording() {
+    controller.toggleRecordingFrames(true);
   }
 
   Future<void> _clearPerformanceData() async {

@@ -111,7 +111,7 @@ class _LegacyTimelineFlameChartContainerState
             tall: true,
             needsTopBorder: false,
             rightPadding: 0.0,
-            actions: [
+            rightActions: [
               _buildSearchField(searchFieldEnabled),
               FlameChartHelpButton(),
             ],
@@ -299,7 +299,7 @@ class LegacyTimelineFlameChartState
     final boundEvent = LegacySyncTimelineEvent(
       TraceEventWrapper(
         TraceEvent({'ts': visibleTimeRange.start.inMicroseconds})
-          ..type = TimelineEventType.unknown,
+          ..type = TimelineEventType.other,
         0, // This is arbitrary
       ),
     )..time = visibleTimeRange;
@@ -337,7 +337,7 @@ class LegacyTimelineFlameChartState
     final boundEvent = LegacySyncTimelineEvent(
       TraceEventWrapper(
         TraceEvent({'ts': visibleTimeRange.end.inMicroseconds})
-          ..type = TimelineEventType.unknown,
+          ..type = TimelineEventType.other,
         0, // This is arbitrary
       ),
     )..time = (TimeRange()

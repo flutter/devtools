@@ -631,7 +631,7 @@ class LegacyTimelineEventProcessor {
     } else if (event.threadId == rasterThreadId) {
       return TimelineEventType.raster;
     } else {
-      return TimelineEventType.unknown;
+      return TimelineEventType.other;
     }
   }
 }

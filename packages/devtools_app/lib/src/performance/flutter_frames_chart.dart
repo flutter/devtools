@@ -77,6 +77,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     _controller = newController;
 
     cancel();
+    _selectedFrame = _controller.selectedFrame.value;
     addAutoDisposeListener(_controller.selectedFrame, () {
       setState(() {
         _selectedFrame = _controller.selectedFrame.value;
@@ -226,7 +227,10 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           sum +
           math.max(
             1000 / widget.displayRefreshRate,
-            math.max(frame.uiDurationMs, frame.rasterDurationMs),
+            math.max(
+              frame.buildTime.inMilliseconds,
+              frame.rasterTime.inMilliseconds,
+            ),
           ),
     );
     final avgFrameTime = sumFrameTimesMs / widget.frames.length;
@@ -270,19 +274,22 @@ class FlutterFramesChartItem extends StatelessWidget {
 
     final bool uiJanky = frame.isUiJanky(displayRefreshRate);
     final bool rasterJanky = frame.isRasterJanky(displayRefreshRate);
+    final bool timelineEventsAvailable =
+        frame.uiEventFlow != null || frame.rasterEventFlow != null;
     // TODO(kenz): add some indicator when a frame is so janky that it exceeds the
     // available axis space.
     final ui = Container(
       key: Key('frame ${frame.id} - ui'),
       width: defaultFrameWidth / 2,
-      height: (frame.uiDurationMs / msPerPx).clamp(0.0, availableChartHeight),
+      height: (frame.buildTime.inMilliseconds / msPerPx)
+          .clamp(0.0, availableChartHeight),
       color: uiJanky ? uiJankColor : mainUiColor,
     );
     final raster = Container(
       key: Key('frame ${frame.id} - raster'),
       width: defaultFrameWidth / 2,
-      height:
-          (frame.rasterDurationMs / msPerPx).clamp(0.0, availableChartHeight),
+      height: (frame.rasterTime.inMilliseconds / msPerPx)
+          .clamp(0.0, availableChartHeight),
       color: rasterJanky ? rasterJankColor : mainRasterColor,
     );
     return Stack(
@@ -320,8 +327,8 @@ class FlutterFramesChartItem extends StatelessWidget {
   }
 
   String _tooltipText(FlutterFrame frame) {
-    return 'UI: ${msText(frame.uiEventFlow.time.duration)}\n'
-        'Raster: ${msText(frame.rasterEventFlow.time.duration)}';
+    return 'UI: ${msText(frame.buildTime)}\n'
+        'Raster: ${msText(frame.rasterTime)}';
   }
 }
 
