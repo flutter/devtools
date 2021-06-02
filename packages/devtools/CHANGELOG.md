@@ -1,3 +1,27 @@
+## 2.3.2
+* Hover fixes [3065](https://github.com/flutter/devtools/pull/3065)
+* Fix a bug with app initialization [3067](https://github.com/flutter/devtools/pull/3067)
+* Stop checking flutter version for connected app in flutter web apps [3066](https://github.com/flutter/devtools/pull/3066)
+* Fix bug with adding flutter version to exports [3060](https://github.com/flutter/devtools/pull/3060)
+* Show LegacyPerformanceScreen or PerformanceScreen based on the current flutter version [3056](https://github.com/flutter/devtools/pull/3056)
+* Use font size from IDE theme [3054](https://github.com/flutter/devtools/pull/3054)
+* Lighten the area pane header color for light theme [3051](https://github.com/flutter/devtools/pull/3051)
+* Fix title color for light theme. [3048](https://github.com/flutter/devtools/pull/3048)
+* Polish UI in the debugger page [3052](https://github.com/flutter/devtools/pull/3052)
+* Fix flutter frame coloring to reflect which part of the frame is janky. [3049](https://github.com/flutter/devtools/pull/3049)
+* Handle getObject issues during autocomplete [3046](https://github.com/flutter/devtools/pull/3046)
+* Improve eval autocomplete [3045](https://github.com/flutter/devtools/pull/3045)
+* Add "Load all CPU samples" button to the CPU profiler [2943](https://github.com/flutter/devtools/pull/2943)
+* Migrate ansi_up to null safety [3027](https://github.com/flutter/devtools/pull/3027)
+* Migrate devtools_server to null safety [3009](https://github.com/flutter/devtools/pull/3009)
+* Migrate package:codicon to null safety. [3026](https://github.com/flutter/devtools/pull/3026)
+* Use selectable text everywhere in Network page [3036](https://github.com/flutter/devtools/pull/3036)
+* CPU profiler search: support regexp and match on stack frame urls [3035](https://github.com/flutter/devtools/pull/3035)
+* Eval Console Autocomplete [3013](https://github.com/flutter/devtools/pull/3013)
+* Rank skia shader events first in the performance page timeline [#3083](https://github.com/flutter/devtools/pull/#083)
+* Support multi-line eval output [#3086](https://github.com/flutter/devtools/pull/3086)
+* Update vm_service dependency. [#3082](https://github.com/flutter/devtools/pull/3082)
+
 ## 2.2.4
 * Fix bug in devtools_server by calling proper vm service API [#3040](https://github.com/flutter/devtools/pull/3040)
 

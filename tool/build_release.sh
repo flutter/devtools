@@ -65,5 +65,5 @@ mv build/web ../devtools/build
 popd
 
 pushd packages/devtools
-pub get
+flutter pub get
 popd
