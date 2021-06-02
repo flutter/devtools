@@ -7,9 +7,9 @@ import 'dart:convert';
 import '../../../devtools.dart';
 import '../../globals.dart';
 import '../../notifications.dart';
+import '../../performance/legacy/performance_screen.dart';
 import '../../performance/performance_model.dart';
 import '../../performance/performance_screen.dart';
-import '../../performance/legacy/performance_screen.dart';
 import '../../utils.dart';
 import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
