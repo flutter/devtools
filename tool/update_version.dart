@@ -18,11 +18,6 @@ void main(List<String> args) async {
       ? args.first
       : incrementVersion(versionFromPubspecFile(pubspecs.first));
 
-  if (version == null) {
-    print('Something went wrong. Could not resolve version number.');
-    return;
-  }
-
   print('Updating pubspecs to version $version...');
   for (final pubspec in pubspecs) {
     writeVersionToPubspec(pubspec, version);
@@ -44,7 +39,7 @@ void main(List<String> args) async {
 }
 
 String incrementVersion(String oldVersion) {
-  final semVer = RegExp('[0-9]+\.[0-9]\.[0-9]+').firstMatch(oldVersion)[0];
+  final semVer = RegExp('[0-9]+\.[0-9]\.[0-9]+').firstMatch(oldVersion)![0]!;
 
   const devTag = '-dev';
   final isDevVersion = oldVersion.contains(devTag);
@@ -55,7 +50,7 @@ String incrementVersion(String oldVersion) {
   final parts = semVer.split('.');
 
   // Versions should have the form x.y.z
-  if (parts.length != 3) return null;
+  assert (parts.length == 3);
 
   final patch = int.parse(parts.last);
   final nextPatch = patch + 1;
@@ -69,7 +64,7 @@ String versionFromPubspecFile(File pubspec) {
       return line.substring(pubspecVersionPrefix.length).trim();
     }
   }
-  return null;
+  throw Exception('Unable to find version in $pubspec');
 }
 
 void writeVersionToPubspec(File pubspec, String version) {
@@ -80,7 +75,7 @@ void writeVersionToPubspec(File pubspec, String version) {
   for (var line in lines) {
     if (line.startsWith(sectionRegExp)) {
       // This is a top level section of the pubspec.
-      currentSection = sectionRegExp.firstMatch(line)[0];
+      currentSection = sectionRegExp.firstMatch(line)![0]!;
     }
     if (editablePubspecSections.contains(currentSection)) {
       if (line.startsWith(pubspecVersionPrefix)) {
