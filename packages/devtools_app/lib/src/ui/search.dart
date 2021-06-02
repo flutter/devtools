@@ -195,8 +195,12 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
       final matchedName = searchAutoComplete.value[index];
       autoCompleteTiles.add(
         ListTile(
+          minVerticalPadding: 0,
           dense: true,
-          title: Text(matchedName),
+          title: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(matchedName),
+          ),
           tileColor: controller.currentDefaultIndex == index
               ? colorScheme.autoCompleteHighlightColor
               : colorScheme.defaultBackgroundColor,
@@ -237,6 +241,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
             padding: EdgeInsets.zero,
             shrinkWrap: true,
             children: autoCompleteTiles,
+            itemExtent: tileEntryHeight,
           ),
         ),
       ),
