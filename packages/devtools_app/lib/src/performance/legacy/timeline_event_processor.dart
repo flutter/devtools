@@ -332,9 +332,6 @@ class LegacyTimelineEventProcessor {
   void _endAsyncEvent(TraceEventWrapper eventWrapper) {
     final LegacyAsyncTimelineEvent root =
         _asyncEventsById[eventWrapper.event.id];
-    if (eventWrapper.event.id == "3") {
-      print('found it');
-    }
     if (root == null) {
       // Since we process trace events in timestamp order, we can guarantee that
       // we have not already processed the matching begin event. Discard the end
