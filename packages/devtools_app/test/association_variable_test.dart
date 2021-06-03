@@ -13,6 +13,12 @@ import 'package:vm_service/vm_service.dart';
 
 import 'support/mocks.dart';
 
+final libraryRef = LibraryRef(
+  name: 'some library',
+  uri: 'package:foo/foo.dart',
+  id: 'lib-id-1',
+);
+
 void main() {
   ServiceConnectionManager manager;
   DebuggerController debuggerController;
@@ -150,7 +156,7 @@ void main() {
       associations: [
         MapAssociation(
           key: InstanceRef(
-            classRef: ClassRef(id: 'a', name: 'Foo'),
+            classRef: ClassRef(id: 'a', name: 'Foo', library: libraryRef),
             id: '4',
             kind: InstanceKind.kPlainInstance,
             identityHashCode: null,

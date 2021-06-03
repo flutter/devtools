@@ -3,7 +3,7 @@ description: A server that supports Dart DevTools.
 
 # Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of packages from packages/devtools.
-version: 2.3.0
+version: 2.3.1
 
 homepage: https://github.com/flutter/devtools
 
@@ -22,7 +22,7 @@ dependencies:
   shelf_static: ^1.0.0
   http_multi_server: ^3.0.0
   usage: ^4.0.0
-  vm_service: ^6.2.0
+  vm_service: ^7.1.0
   collection: ^1.15.0-nullsafety.4
 
 dependency_overrides:
