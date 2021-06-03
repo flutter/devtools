@@ -448,8 +448,10 @@ class ReportFeedbackButton extends StatelessWidget {
       tooltip: 'Report feedback',
       child: InkWell(
         onTap: () async {
-          ga.select(analytics_constants.devToolsMain,
-              analytics_constants.feedbackButton);
+          ga.select(
+            analytics_constants.devToolsMain,
+            analytics_constants.feedbackButton,
+          );
           await launchUrl(
               devToolsExtensionPoints.issueTrackerLink().url, context);
         },
@@ -506,7 +508,9 @@ class DevToolsAboutDialog extends StatelessWidget {
     return InkWell(
       onTap: () async {
         ga.select(
-            analytics_constants.devToolsMain, analytics_constants.feedbackLink);
+          analytics_constants.devToolsMain,
+          analytics_constants.feedbackLink,
+        );
         await launchUrl(reportIssuesLink.url, context);
       },
       child: Text(reportIssuesLink.display, style: linkTextStyle(colorScheme)),
