@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import '../devtools.dart' as devtools;
 import 'analytics/analytics_stub.dart'
     if (dart.library.html) 'analytics/analytics.dart' as ga;
-import 'analytics/constants.dart';
+import 'analytics/constants.dart' as analytics_constants;
 import 'analytics/provider.dart';
 import 'app_size/app_size_controller.dart';
 import 'app_size/app_size_screen.dart';
@@ -448,7 +448,10 @@ class ReportFeedbackButton extends StatelessWidget {
       tooltip: 'Report feedback',
       child: InkWell(
         onTap: () async {
-          ga.select(devToolsMain, feedbackButton);
+          ga.select(
+            analytics_constants.devToolsMain,
+            analytics_constants.feedbackButton,
+          );
           await launchUrl(
               devToolsExtensionPoints.issueTrackerLink().url, context);
         },
@@ -504,7 +507,10 @@ class DevToolsAboutDialog extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: () async {
-        ga.select(devToolsMain, feedbackLink);
+        ga.select(
+          analytics_constants.devToolsMain,
+          analytics_constants.feedbackLink,
+        );
         await launchUrl(reportIssuesLink.url, context);
       },
       child: Text(reportIssuesLink.display, style: linkTextStyle(colorScheme)),

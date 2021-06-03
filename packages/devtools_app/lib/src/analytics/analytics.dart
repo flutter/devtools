@@ -22,7 +22,7 @@ import '../config_specific/url/url.dart';
 import '../globals.dart';
 import '../ui/gtags.dart';
 import '../version.dart';
-import 'constants.dart';
+import 'constants.dart' as analytics_constants;
 
 // Dimensions1 AppType values:
 const String appTypeFlutter = 'flutter';
@@ -200,7 +200,7 @@ void screen(
   GTag.event(
     screenName,
     GtagEventDevTools(
-      event_category: screenViewEvent,
+      event_category: analytics_constants.screenViewEvent,
       value: value,
       user_app: userAppType,
       user_build: userBuildType,
@@ -222,7 +222,7 @@ void select(
   GTag.event(
     screenName,
     GtagEventDevTools(
-      event_category: selectEvent,
+      event_category: analytics_constants.selectEvent,
       event_label: selectedItem,
       value: value,
       user_app: userAppType,
@@ -247,7 +247,7 @@ void selectFrame(
   GTag.event(
     screenName,
     GtagEventDevTools(
-      event_category: selectEvent,
+      event_category: analytics_constants.selectEvent,
       event_label: selectedItem,
       raster_duration: rasterDuration,
       ui_duration: uiDuration,
