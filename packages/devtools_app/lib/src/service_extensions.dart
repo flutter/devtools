@@ -7,7 +7,7 @@ library service_extensions;
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
-import 'analytics/constants.dart' as ga;
+import 'analytics/constants.dart' as analytics_constants;
 import 'theme.dart';
 import 'ui/icons.dart';
 
@@ -90,8 +90,8 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Hide Debug Banner',
   disabledTooltip: 'Show Debug Banner',
-  gaScreenName: ga.inspector,
-  gaItem: ga.debugBanner,
+  gaScreenName: analytics_constants.inspector,
+  gaItem: analytics_constants.debugBanner,
 );
 
 final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
@@ -102,8 +102,8 @@ final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Disable Invert Oversized Images',
   disabledTooltip: 'Enable Invert Oversized Images',
-  gaScreenName: ga.inspector,
-  gaItem: ga.debugBanner,
+  gaScreenName: analytics_constants.inspector,
+  gaItem: analytics_constants.debugBanner,
 );
 
 final debugPaint = ToggleableServiceExtensionDescription<bool>._(
@@ -114,8 +114,8 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Hide Debug Paint',
   disabledTooltip: 'Show Debug Paint',
-  gaScreenName: ga.inspector,
-  gaItem: ga.debugPaint,
+  gaScreenName: analytics_constants.inspector,
+  gaItem: analytics_constants.debugPaint,
 );
 
 final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
@@ -126,8 +126,8 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Hide Paint Baselines',
   disabledTooltip: 'Show Paint Baselines',
-  gaScreenName: ga.inspector,
-  gaItem: ga.paintBaseline,
+  gaScreenName: analytics_constants.inspector,
+  gaItem: analytics_constants.paintBaseline,
 );
 
 final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
@@ -138,8 +138,8 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Hide Performance Overlay',
   disabledTooltip: 'Show Performance Overlay',
-  gaScreenName: ga.inspector,
-  gaItem: ga.performanceOverlay,
+  gaScreenName: analytics_constants.inspector,
+  gaItem: analytics_constants.performanceOverlay,
 );
 
 final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
@@ -150,8 +150,8 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Disable tracking widget builds',
   disabledTooltip: 'Enable tracking widget builds',
-  gaScreenName: ga.performance,
-  gaItem: ga.trackRebuilds,
+  gaScreenName: analytics_constants.performance,
+  gaItem: analytics_constants.trackRebuilds,
 );
 
 final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
@@ -162,8 +162,8 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Hide Repaint Rainbow',
   disabledTooltip: 'Show Repaint Rainbow',
-  gaScreenName: ga.inspector,
-  gaItem: ga.repaintRainbow,
+  gaScreenName: analytics_constants.inspector,
+  gaItem: analytics_constants.repaintRainbow,
 );
 
 final slowAnimations = ToggleableServiceExtensionDescription<num>._(
@@ -174,8 +174,8 @@ final slowAnimations = ToggleableServiceExtensionDescription<num>._(
   disabledValue: 1.0,
   enabledTooltip: 'Disable Slow Animations',
   disabledTooltip: 'Enable Slow Animations',
-  gaScreenName: ga.inspector,
-  gaItem: ga.slowAnimation,
+  gaScreenName: analytics_constants.inspector,
+  gaItem: analytics_constants.slowAnimation,
 );
 
 final togglePlatformMode = ServiceExtensionDescription<String>(
@@ -191,8 +191,8 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
     'Platform: Linux'
   ],
   tooltips: ['Override Target Platform'],
-  gaScreenName: ga.inspector,
-  gaItem: ga.togglePlatform,
+  gaScreenName: analytics_constants.inspector,
+  gaItem: analytics_constants.togglePlatform,
 );
 
 final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
@@ -232,8 +232,8 @@ final toggleOnDeviceWidgetInspector =
   disabledValue: false,
   enabledTooltip: 'Disable select widget mode',
   disabledTooltip: 'Enable select widget mode',
-  gaScreenName: ga.inspector,
-  gaItem: ga.showOnDeviceInspector,
+  gaScreenName: analytics_constants.inspector,
+  gaItem: analytics_constants.showOnDeviceInspector,
 );
 
 /// Toggle whether interacting with the device selects widgets or triggers
@@ -246,8 +246,8 @@ final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Exit select widget mode',
   disabledTooltip: 'Enter select widget mode',
-  gaScreenName: ga.inspector,
-  gaItem: ga.selectWidgetMode,
+  gaScreenName: analytics_constants.inspector,
+  gaItem: analytics_constants.selectWidgetMode,
 );
 
 /// Toggle whether the inspector on-device overlay is enabled.
@@ -263,8 +263,8 @@ final enableOnDeviceInspector = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Exit on-device inspector',
   disabledTooltip: 'Enter on-device inspector',
-  gaScreenName: ga.inspector,
-  gaItem: ga.enableOnDeviceInspector,
+  gaScreenName: analytics_constants.inspector,
+  gaItem: analytics_constants.enableOnDeviceInspector,
 );
 
 final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
@@ -275,8 +275,8 @@ final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   enabledTooltip: 'Disable structured errors for Flutter framework issues',
   disabledTooltip: 'Show structured errors for Flutter framework issues',
-  gaScreenName: ga.logging,
-  gaItem: ga.structuredErrors,
+  gaScreenName: analytics_constants.logging,
+  gaItem: analytics_constants.structuredErrors,
 );
 
 // This extension should never be displayed as a button so does not need a
