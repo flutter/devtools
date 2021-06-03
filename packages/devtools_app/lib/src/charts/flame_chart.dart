@@ -309,7 +309,7 @@ abstract class FlameChartState<T extends FlameChart,
           if (index >= rowOffsetForTopPadding && nodes.isEmpty) {
             // If this is a spacer row, we should use the background color of
             // the previous row with nodes.
-            for (int i = index; i > rowOffsetForTopPadding; i--) {
+            for (int i = index; i >= rowOffsetForTopPadding; i--) {
               // Look back until we find the first non-empty row.
               if (rows[i].nodes.isNotEmpty) {
                 rowBackgroundColor = alternatingColorForIndex(
