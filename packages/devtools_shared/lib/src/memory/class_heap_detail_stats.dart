@@ -22,9 +22,14 @@ class ClassHeapDetailStats {
   factory ClassHeapDetailStats.fromJson(Map<String, dynamic> json) {
     final classId = json['class']['id'];
     final className = json['class']['name'];
+    final library = json['class']['library'];
 
     return ClassHeapDetailStats(
-      ClassRef(id: classId, name: className),
+      ClassRef(
+        id: classId,
+        name: className,
+        library: LibraryRef.parse(library),
+      ),
       bytes: json['bytesCurrent'] as int,
       deltaBytes: json['bytesDelta'] as int,
       instances: json['instancesCurrent'] as int,
