@@ -4,6 +4,8 @@
 
 // TODO(devoncarew): Upstream this class to the service protocol library.
 
+import 'package:flutter/foundation.dart';
+
 /// A single timeline event.
 class TraceEvent {
   /// Creates a timeline event given JSON-encoded event data.
@@ -92,13 +94,8 @@ class TraceEvent {
   /// Arbitrary data attached to the event.
   final Map<String, dynamic> args;
 
-  String get asyncUID {
-    if (scope == null) {
-      return '$category:$id';
-    } else {
-      return '$category:$scope:$id';
-    }
-  }
+  String get asyncUID =>
+      generateAsyncUID(id: id, category: category, scope: scope);
 
   TimelineEventType _type;
 
@@ -138,6 +135,14 @@ class TraceEventWrapper implements Comparable<TraceEventWrapper> {
         event.timestampMicros.compareTo(other.event.timestampMicros);
     return compare != 0 ? compare : id.compareTo(other.id);
   }
+}
+
+String generateAsyncUID({
+  @required String id,
+  @required String category,
+  String scope,
+}) {
+  return [category, if (scope != null) scope, id].join(':');
 }
 
 enum TimelineEventType {
