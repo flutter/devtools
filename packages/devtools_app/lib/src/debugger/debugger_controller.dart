@@ -89,8 +89,21 @@ class DebuggerController extends DisposableController
 
   VmServiceWrapper get _service => serviceManager.service;
 
-  Map<ObjRef, Future<Set<String>>> autocompleteCache = {};
-  Map<ObjRef, Future<Set<String>>> autocompleteInclusiveCache = {};
+  /// Cache of autocomplete matches to show for a library when that library is
+  /// imported.
+  ///
+  /// This cache includes autocompletes from libraries exported by the library
+  /// but does not include autocompletes for libraries imported by this library.
+
+  Map<LibraryRef, Future<Set<String>>> libraryMemberAutocompleteCache = {};
+
+  /// Cache of autocomplete matches for a library for code written within that
+  /// library.
+  ///
+  /// This cache includes autocompletes from all libraries imported and exported
+  /// by the library as well as all private autocompletes for the library.
+  Map<LibraryRef, Future<Set<String>>>
+      libraryMemberAndImportsAutocompleteCache = {};
 
   final ScriptCache _scriptCache = ScriptCache();
 
@@ -190,6 +203,33 @@ class DebuggerController extends DisposableController
       highlighter: highlighter,
       executableLines: executableLines,
     );
+  }
+
+  /// Find the owner library for a ClassRef, FuncRef, or LibraryRef.
+  ///
+  /// If Dart had union types, ref would be type ClassRef | FuncRef | LibraryRef
+  Future<LibraryRef> findOwnerLibrary(Object ref) async {
+    if (ref is LibraryRef) {
+      return ref;
+    }
+    if (ref is ClassRef) {
+      final clazz = await classFor(ref);
+      return clazz?.library;
+    }
+    if (ref is FuncRef) {
+      return findOwnerLibrary(ref.owner);
+    }
+    return null;
+  }
+
+  /// Returns the class for the provided [ClassRef].
+  ///
+  /// May return null.
+  Future<Class> classFor(ClassRef classRef) async {
+    try {
+      return await getObject(classRef);
+    } catch (_) {}
+    return null;
   }
 
   // A cached map of uris to ScriptRefs.
@@ -781,8 +821,8 @@ class DebuggerController extends DisposableController
   }
 
   void _clearAutocompleteCaches() {
-    autocompleteCache.clear();
-    autocompleteInclusiveCache.clear();
+    libraryMemberAutocompleteCache.clear();
+    libraryMemberAndImportsAutocompleteCache.clear();
   }
 
   /// Get the populated [Obj] object, given an [ObjRef].

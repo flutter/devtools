@@ -12,6 +12,7 @@ import '../auto_dispose_mixin.dart';
 import '../notifications.dart';
 import '../theme.dart';
 import '../ui/search.dart';
+import '../utils.dart';
 import 'debugger_controller.dart';
 
 class ExpressionEvalField extends StatefulWidget {
@@ -64,7 +65,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
       }
 
       // We avoid clearing the list of possible matches here even though the
-      // current matches may probably out of data as that results in flicker
+      // current matches may be out of date as clearing results in flicker
       // as Flutter will render a frame before the new matches are available.
 
       // Find word in TextField to try and match (word breaks).
@@ -284,22 +285,6 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
   }
 }
 
-// If Dart had union types, ref would be type ClassRef | FuncRef | LibraryRef
-Future<LibraryRef> findOwnerLibrary(
-    Object ref, DebuggerController controller) async {
-  if (ref is LibraryRef) {
-    return ref;
-  }
-  if (ref is ClassRef) {
-    final clazz = await classFor(ref, controller);
-    return clazz?.library;
-  }
-  if (ref is FuncRef) {
-    return findOwnerLibrary(ref.owner, controller);
-  }
-  return null;
-}
-
 Future<List<String>> autoCompleteResultsFor(
   EditingParts parts,
   DebuggerController controller,
@@ -310,9 +295,15 @@ Future<List<String>> autoCompleteResultsFor(
     result.addAll(variables.map((variable) => variable.boundVar.name));
 
     final thisVariable = variables.firstWhere(
-        (variable) => variable.boundVar.name == 'this',
-        orElse: () => null);
+      (variable) => variable.boundVar.name == 'this',
+      orElse: () => null,
+    );
     if (thisVariable != null) {
+      // If a variable named `this` is in scope, we should provide autocompletes
+      // for all static and instance members of that class as they are in scope
+      // in Dart. For example, if you evaluate `foo()` that will be equivalent
+      // to `this.foo()` if foo is an instance member and `ThisClass.foo() if
+      // foo is a static member.
       final thisValue = thisVariable.boundVar.value;
       if (thisValue is InstanceRef) {
         await _addAllInstanceMembersToAutocompleteList(
@@ -320,21 +311,23 @@ Future<List<String>> autoCompleteResultsFor(
           thisValue,
           controller,
         );
+        result.addAll(await _autoCompleteMembersFor(
+          thisValue.classRef,
+          controller,
+          staticContext: true,
+        ));
       }
     }
     final frame = controller.frameForEval;
     if (frame != null) {
       final function = frame.function;
       if (function != null) {
-        final libraryRef = await findOwnerLibrary(function, controller);
+        final libraryRef = await controller.findOwnerLibrary(function);
         if (libraryRef != null) {
-          controller.autocompleteInclusiveCache.clear();
-          controller.autocompleteCache.clear();
           result.addAll(await libraryMemberAndImportsAutocompletes(
               libraryRef, controller));
         }
       }
-      // TODO(jacobr): consider
     }
   } else {
     var left = parts.leftSide.split(' ').last;
@@ -346,7 +339,8 @@ Future<List<String>> autoCompleteResultsFor(
         if (response.typeClass != null) {
           // Assume we want static members for a type class not members of the
           // Type object. This is reasonable as Type objects are rarely useful
-          // in dart.
+          // in Dart and we will end up with accidental Type objects if the user
+          // writes `SomeClass.` in the evaluate window.
           result.addAll(await _autoCompleteMembersFor(
             response.typeClass,
             controller,
@@ -373,13 +367,19 @@ Future<List<String>> autoCompleteResultsFor(
 bool debugIncludeExports = true;
 
 Future<Set<String>> libraryMemberAndImportsAutocompletes(
-    LibraryRef libraryRef, DebuggerController controller) {
-  return controller.autocompleteInclusiveCache.putIfAbsent(libraryRef,
-      () => _libraryMemberAndImportsAutocompletes(libraryRef, controller));
+  LibraryRef libraryRef,
+  DebuggerController controller,
+) {
+  return controller.libraryMemberAndImportsAutocompleteCache.putIfAbsent(
+    libraryRef,
+    () => _libraryMemberAndImportsAutocompletes(libraryRef, controller),
+  );
 }
 
 Future<Set<String>> _libraryMemberAndImportsAutocompletes(
-    LibraryRef libraryRef, DebuggerController controller) async {
+  LibraryRef libraryRef,
+  DebuggerController controller,
+) async {
   final result = <String>{};
   try {
     final futures = <Future<Set<String>>>[];
@@ -415,8 +415,10 @@ Future<Set<String>> libraryMemberAutocompletes(
   LibraryRef libraryRef, {
   @required bool includePrivates,
 }) async {
-  var result = await controller.autocompleteCache.putIfAbsent(
-      libraryRef, () => _libraryMemberAutocompletes(controller, libraryRef));
+  var result = await controller.libraryMemberAutocompleteCache.putIfAbsent(
+    libraryRef,
+    () => _libraryMemberAutocompletes(controller, libraryRef),
+  );
   if (!includePrivates) {
     result = result.where((name) => !isPrivate(name)).toSet();
   }
@@ -473,7 +475,7 @@ Future<void> _addAllInstanceMembersToAutocompleteList(
   );
   // TODO(grouma) - This shouldn't be necessary but package:dwds does
   // not properly provide superclass information.
-  final clazz = await classFor(instance.classRef, controller);
+  final clazz = await controller.classFor(instance.classRef);
   result.addAll(instance.fields
       .where((field) => !field.decl.isStatic)
       .map((field) => field.decl.name)
@@ -493,7 +495,7 @@ Future<Set<String>> _autoCompleteMembersFor(
   // is _isAccessible depends on the current source location so makes caching
   // difficult.
   final result = <String>{};
-  final clazz = await classFor(classRef, controller);
+  final clazz = await controller.classFor(classRef);
   if (clazz != null) {
     result.addAll(clazz.fields
         .where((f) => f.isStatic == staticContext)
@@ -513,16 +515,6 @@ Future<Set<String>> _autoCompleteMembersFor(
     result.removeWhere((member) => !_isAccessible(member, clazz, controller));
   }
   return result;
-}
-
-/// Returns the class for the provided [ClassRef].
-///
-/// May return null.
-Future<Class> classFor(ClassRef classRef, DebuggerController controller) async {
-  try {
-    return await controller.getObject(classRef);
-  } catch (_) {}
-  return null;
 }
 
 bool _validFunction(FuncRef funcRef, Class clazz) {
@@ -561,5 +553,3 @@ bool _isAccessible(String member, Class clazz, DebuggerController controller) {
   final currentScript = frame.location.script;
   return !isPrivate(member) || currentScript.id == clazz?.location?.script?.id;
 }
-
-bool isPrivate(String member) => member.startsWith('_');

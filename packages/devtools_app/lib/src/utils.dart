@@ -21,10 +21,12 @@ import 'config_specific/logger/logger.dart' as logger;
 import 'globals.dart';
 import 'notifications.dart';
 
+bool isPrivate(String member) => member.startsWith('_');
+
 /// Public properties first, then sort alphabetically
 int sortFieldsByName(String a, String b) {
-  final isAPrivate = a.startsWith('_');
-  final isBPrivate = b.startsWith('_');
+  final isAPrivate = isPrivate(a);
+  final isBPrivate = isPrivate(b);
 
   if (isAPrivate && !isBPrivate) {
     return 1;
