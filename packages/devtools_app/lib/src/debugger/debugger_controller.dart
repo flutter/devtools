@@ -213,6 +213,10 @@ class DebuggerController extends DisposableController
       return ref;
     }
     if (ref is ClassRef) {
+      if (ref.library != null) {
+        return ref.library;
+      }
+      // Fallback for older VMService versions.
       final clazz = await classFor(ref);
       return clazz?.library;
     }

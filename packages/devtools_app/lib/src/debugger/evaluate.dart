@@ -500,11 +500,19 @@ Future<Set<String>> _autoCompleteMembersFor(
     result.addAll(clazz.fields
         .where((f) => f.isStatic == staticContext)
         .map((field) => field.name));
-    result.addAll(clazz.functions
-        .where((funcRef) =>
-            _validFunction(funcRef, clazz) && funcRef.isStatic == staticContext)
+    for (var funcRef in clazz.functions) {
+      if (_validFunction(funcRef, clazz, staticContext)) {
+        final isConstructor = _isConstructor(funcRef, clazz);
         // The VM shows setters as `<member>=`.
-        .map((funcRef) => funcRef.name.replaceAll('=', '')));
+        var name = funcRef.name.replaceAll('=', '');
+        if (isConstructor) {
+          assert(name.startsWith(clazz.name));
+          if (name.length <= clazz.name.length + 1) continue;
+          name = name.substring(clazz.name.length + 1);
+        }
+        result.add(name);
+      }
+    }
     if (!staticContext) {
       result.addAll(await _autoCompleteMembersFor(
         clazz.superClass,
@@ -517,9 +525,10 @@ Future<Set<String>> _autoCompleteMembersFor(
   return result;
 }
 
-bool _validFunction(FuncRef funcRef, Class clazz) {
-  return !funcRef.isStatic &&
-      !_isConstructor(funcRef, clazz) &&
+bool _validFunction(FuncRef funcRef, Class clazz, bool staticContext) {
+  // TODO(jacobr): we should include named constructors in static contexts.
+  return ((_isConstructor(funcRef, clazz) || funcRef.isStatic) ==
+          staticContext) &&
       !_isOperator(funcRef);
 }
 
