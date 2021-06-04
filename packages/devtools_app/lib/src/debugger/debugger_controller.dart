@@ -89,6 +89,9 @@ class DebuggerController extends DisposableController
 
   VmServiceWrapper get _service => serviceManager.service;
 
+  Map<ObjRef, Future<Set<String>>> autocompleteCache = {};
+  Map<ObjRef, Future<Set<String>>> autocompleteInclusiveCache = {};
+
   final ScriptCache _scriptCache = ScriptCache();
 
   final ScriptsHistory scriptsHistory = ScriptsHistory();
@@ -202,6 +205,10 @@ class DebuggerController extends DisposableController
 
   ValueListenable<StackFrameAndSourcePosition> get selectedStackFrame =>
       _selectedStackFrame;
+
+  Frame get frameForEval =>
+      _selectedStackFrame.value?.frame ??
+      _stackFramesWithLocation.value.first.frame;
 
   final _variables = ValueNotifier<List<Variable>>([]);
 
@@ -594,6 +601,7 @@ class DebuggerController extends DisposableController
     // ignore: unused_local_variable
     final status = reloadEvent.status;
 
+    _clearAutocompleteCaches();
     // Refresh the list of scripts.
     final scriptRefs = await _retrieveAndSortScripts(isolateRef);
     for (var scriptRef in scriptRefs) {
@@ -769,6 +777,12 @@ class DebuggerController extends DisposableController
     _breakPositionsMap.clear();
     _stdio.value = [];
     _uriToScriptMap.clear();
+    _clearAutocompleteCaches();
+  }
+
+  void _clearAutocompleteCaches() {
+    autocompleteCache.clear();
+    autocompleteInclusiveCache.clear();
   }
 
   /// Get the populated [Obj] object, given an [ObjRef].
