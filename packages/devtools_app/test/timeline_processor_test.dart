@@ -9,8 +9,8 @@ import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_testing/support/performance_test_data.dart';
 import 'package:devtools_testing/support/test_utils.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 
 void main() {
   final originalGoldenUiEvent = goldenUiTimelineEvent.deepCopy();

@@ -9,7 +9,7 @@
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/ui/search.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'support/flutter_test_environment.dart';
 import 'support/performance_test_data.dart';
@@ -188,9 +188,9 @@ bool isPerformanceDataEqual(PerformanceData a, PerformanceData b) {
 // should re-evaluate the purpose of the devtools_testing package and move some
 // of these tests back into the main devtools_app package if possible.
 void verifyIsSearchMatch(
-    List<DataSearchStateMixin> data,
-    List<DataSearchStateMixin> matches,
-    ) {
+  List<DataSearchStateMixin> data,
+  List<DataSearchStateMixin> matches,
+) {
   for (final request in data) {
     if (matches.contains(request)) {
       expect(request.isSearchMatch, isTrue);

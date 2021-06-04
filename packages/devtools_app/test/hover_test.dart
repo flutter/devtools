@@ -4,7 +4,7 @@
 
 import 'package:devtools_app/src/debugger/hover.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 const _textSpan = TextSpan(children: [
   TextSpan(text: 'hello', style: TextStyle(fontWeight: FontWeight.bold)),

@@ -276,13 +276,10 @@ class LoggingController extends DisposableController
     autoDispose(
         service.onExtensionEventWithHistory.listen(_handleExtensionEvent));
 
-    if (inspectorService == null) {
-      await ensureInspectorServiceDependencies();
-
-      inspectorService = await InspectorService.create(service).catchError(
-          (e) => null,
-          test: (e) => e is FlutterInspectorLibraryNotFound);
-    }
+    inspectorService ??= await InspectorService.create(service).catchError(
+      (e) => null,
+      test: (e) => e is FlutterInspectorLibraryNotFound,
+    );
 
     if (inspectorService != null) {
       objectGroup = inspectorService.createObjectGroup('console-group');

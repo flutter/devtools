@@ -7,7 +7,7 @@ import 'package:devtools_testing/service_manager_test.dart';
 import 'package:devtools_testing/support/flutter_test_driver.dart'
     show FlutterRunConfiguration;
 import 'package:devtools_testing/support/flutter_test_environment.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() async {
   final FlutterTestEnvironment env = FlutterTestEnvironment(

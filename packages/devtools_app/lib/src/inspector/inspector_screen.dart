@@ -271,7 +271,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
     try {
       // Init the inspector service, or return null.
-      await ensureInspectorServiceDependencies();
       inspectorService =
           await InspectorService.create(service).catchError((e) => null);
     } finally {

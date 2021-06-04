@@ -9,8 +9,7 @@ import 'dart:async';
 
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
-import 'package:flutter_test/flutter_test.dart' show equalsIgnoringHashCodes;
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'matchers/matchers.dart';
 import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
@@ -18,10 +17,6 @@ import 'support/flutter_test_environment.dart';
 
 Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
   InspectorService inspectorService;
-
-  env.afterNewSetup = () async {
-    await ensureInspectorServiceDependencies();
-  };
 
   env.afterEverySetup = () async {
     inspectorService = await InspectorService.create(env.service);
@@ -446,7 +441,7 @@ Future<void> runInspectorServiceTests(FlutterTestEnvironment env) async {
 
       // TODO(jacobr): add tests verifying that we can stop the running device
       // without the InspectorService spewing a bunch of errors.
-    }, timeout: const Timeout.factor(8));
+    });
   } catch (e, s) {
     print(s);
   }

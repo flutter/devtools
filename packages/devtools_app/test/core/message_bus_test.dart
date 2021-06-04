@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/core/message_bus.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   defineTests();

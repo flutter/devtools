@@ -976,12 +976,13 @@ class VmServiceWrapper implements VmService {
   Future<Breakpoint> setBreakpointState(
       String isolateId, String breakpointId, bool enable) {
     return trackFuture(
-        'setBreakpointState',
-        _vmService.setBreakpointState(
-          isolateId,
-          breakpointId,
-          enable,
-        ),);
+      'setBreakpointState',
+      _vmService.setBreakpointState(
+        isolateId,
+        breakpointId,
+        enable,
+      ),
+    );
   }
 
   @override

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/history_manager.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
