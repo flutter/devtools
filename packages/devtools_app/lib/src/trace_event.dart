@@ -142,11 +142,7 @@ String generateAsyncUID({
   @required String category,
   String scope,
 }) {
-  if (scope == null) {
-    return '$category:$id';
-  } else {
-    return '$category:$scope:$id';
-  }
+  return [category, if (scope != null) scope, id].join(':');
 }
 
 enum TimelineEventType {

@@ -18,7 +18,8 @@ import '../../trace_event.dart';
 import '../../trees.dart';
 import '../../ui/search.dart';
 import '../../utils.dart';
-import 'performance_utils.dart';
+import '../performance_utils.dart';
+import 'performance_utils.dart' as legacy_utils;
 import 'timeline_event_processor.dart';
 
 class LegacyPerformanceData {
@@ -58,7 +59,7 @@ class LegacyPerformanceData {
   final List<LegacyTimelineEvent> timelineEvents;
 
   final SplayTreeMap<String, LegacyTimelineEventGroup> eventGroups =
-      SplayTreeMap(eventGroupComparator);
+      SplayTreeMap(PerformanceUtils.eventGroupComparator);
 
   /// List that will store trace events in the order we process them.
   ///
@@ -94,7 +95,7 @@ class LegacyPerformanceData {
   void initializeEventGroups(Map<int, String> threadNamesById) {
     for (LegacyTimelineEvent event in timelineEvents) {
       eventGroups.putIfAbsent(
-          legacyComputeEventGroupKey(event, threadNamesById),
+          legacy_utils.legacyComputeEventGroupKey(event, threadNamesById),
           () => LegacyTimelineEventGroup())
         ..addEventAtCalculatedRow(event);
     }
@@ -120,36 +121,6 @@ class LegacyPerformanceData {
     _endTimestampMicros = -1;
     frames.clear();
     selectedFrame = null;
-  }
-
-  // TODO(kenz): simplify this comparator if possible.
-  @visibleForTesting
-  static int eventGroupComparator(String a, String b) {
-    if (a == b) return 0;
-
-    // TODO(kenz): Once https://github.com/flutter/flutter/issues/83835 is
-    // addressed, match on the group key that all skia.shader events will have.
-    // Order shader buckets first.
-    if (a.toLowerCase().contains('shade')) return -1;
-    if (b.toLowerCase().contains('shade')) return 1;
-
-    // Order Unknown buckets last. Unknown buckets will be of the form "Unknown"
-    // or "Unknown (12345)".
-    if (a.contains(unknownKey) && b.contains(unknownKey)) return a.compareTo(b);
-    if (a.contains(unknownKey)) return 1;
-    if (b.contains(unknownKey)) return -1;
-
-    // Order the Raster event bucket after the UI event bucket.
-    if ((a == uiKey && b == rasterKey) || (a == rasterKey && b == uiKey)) {
-      return -1 * a.compareTo(b);
-    }
-
-    // Order non-UI and non-raster buckets after the UI / Raster buckets.
-    if (a == uiKey || a == rasterKey) return -1;
-    if (b == uiKey || b == rasterKey) return 1;
-
-    // Alphabetize all other buckets.
-    return a.compareTo(b);
   }
 
   Map<String, dynamic> get json => {

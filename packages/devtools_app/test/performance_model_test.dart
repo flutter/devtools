@@ -121,15 +121,6 @@ void main() {
       );
       expect(performanceData.eventGroups['A'].rows[0].events.length, equals(1));
     });
-
-    test('event bucket compare', () {
-      expect(PerformanceData.eventGroupComparator('UI', 'Raster'), equals(-1));
-      expect(PerformanceData.eventGroupComparator('Raster', 'UI'), equals(1));
-      expect(PerformanceData.eventGroupComparator('UI', 'UI'), equals(0));
-      expect(PerformanceData.eventGroupComparator('UI', 'Async'), equals(-1));
-      expect(PerformanceData.eventGroupComparator('A', 'B'), equals(-1));
-      expect(PerformanceData.eventGroupComparator('Z', 'Unknown'), equals(-1));
-    });
   });
 
   group('OfflinePerformanceData', () {

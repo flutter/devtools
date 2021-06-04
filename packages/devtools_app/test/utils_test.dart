@@ -1117,6 +1117,15 @@ void main() {
         );
       });
     });
+
+    group('BoolExtension', () {
+      test('boolCompare', () {
+        expect(true.boolCompare(true), equals(0));
+        expect(false.boolCompare(false), equals(0));
+        expect(true.boolCompare(false), equals(-1));
+        expect(false.boolCompare(true), equals(1));
+      });
+    });
   });
 }
 
