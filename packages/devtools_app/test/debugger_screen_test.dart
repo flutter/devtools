@@ -240,6 +240,7 @@ void main() {
             scriptUri: 'package:test/script.dart',
             line: 10,
           ),
+          enabled: true,
         )
       ];
 
@@ -606,6 +607,12 @@ String _ansiCodesOutput() {
   return sb.toString();
 }
 
+final libraryRef = LibraryRef(
+  name: 'some library',
+  uri: 'package:foo/foo.dart',
+  id: 'lib-id-1',
+);
+
 final testVariables = [
   Variable.create(BoundVariable(
     name: 'Root 1',
@@ -615,6 +622,7 @@ final testVariables = [
       classRef: ClassRef(
         name: '_GrowableList',
         id: 'ref2',
+        library: libraryRef,
       ),
       length: 2,
       identityHashCode: null,
@@ -629,7 +637,7 @@ final testVariables = [
         value: InstanceRef(
           id: 'ref3',
           kind: InstanceKind.kInt,
-          classRef: ClassRef(name: 'Integer', id: 'ref4'),
+          classRef: ClassRef(name: 'Integer', id: 'ref4', library: libraryRef),
           valueAsString: '3',
           valueAsStringIsTruncated: false,
           identityHashCode: null,
@@ -643,7 +651,7 @@ final testVariables = [
         value: InstanceRef(
           id: 'ref5',
           kind: InstanceKind.kInt,
-          classRef: ClassRef(name: 'Integer', id: 'ref6'),
+          classRef: ClassRef(name: 'Integer', id: 'ref6', library: libraryRef),
           valueAsString: '4',
           valueAsStringIsTruncated: false,
           identityHashCode: null,
@@ -658,7 +666,8 @@ final testVariables = [
     value: InstanceRef(
       id: 'ref7',
       kind: InstanceKind.kMap,
-      classRef: ClassRef(name: '_InternalLinkedHashmap', id: 'ref8'),
+      classRef: ClassRef(
+          name: '_InternalLinkedHashmap', id: 'ref8', library: libraryRef),
       length: 2,
       identityHashCode: null,
     ),
@@ -672,7 +681,7 @@ final testVariables = [
         value: InstanceRef(
           id: 'ref9',
           kind: InstanceKind.kDouble,
-          classRef: ClassRef(name: 'Double', id: 'ref10'),
+          classRef: ClassRef(name: 'Double', id: 'ref10', library: libraryRef),
           valueAsString: '1.0',
           valueAsStringIsTruncated: false,
           identityHashCode: null,
@@ -686,7 +695,7 @@ final testVariables = [
         value: InstanceRef(
           id: 'ref11',
           kind: InstanceKind.kDouble,
-          classRef: ClassRef(name: 'Double', id: 'ref12'),
+          classRef: ClassRef(name: 'Double', id: 'ref12', library: libraryRef),
           valueAsString: '1.1',
           valueAsStringIsTruncated: false,
           identityHashCode: null,
@@ -701,7 +710,7 @@ final testVariables = [
     value: InstanceRef(
       id: 'ref13',
       kind: InstanceKind.kString,
-      classRef: ClassRef(name: 'String', id: 'ref14'),
+      classRef: ClassRef(name: 'String', id: 'ref14', library: libraryRef),
       valueAsString: 'test str',
       valueAsStringIsTruncated: true,
       identityHashCode: null,
@@ -715,7 +724,7 @@ final testVariables = [
     value: InstanceRef(
       id: 'ref15',
       kind: InstanceKind.kBool,
-      classRef: ClassRef(name: 'Boolean', id: 'ref16'),
+      classRef: ClassRef(name: 'Boolean', id: 'ref16', library: libraryRef),
       valueAsString: 'true',
       valueAsStringIsTruncated: false,
       identityHashCode: null,

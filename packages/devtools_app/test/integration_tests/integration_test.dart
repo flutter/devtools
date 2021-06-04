@@ -6,7 +6,7 @@
 import 'dart:io';
 
 import 'package:devtools_testing/support/file_utils.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'app.dart';
 import 'debugger.dart';
@@ -38,5 +38,5 @@ void main() {
       // Temporarily skip tests. See https://github.com/flutter/devtools/issues/1343.
       group('debugging', debuggingTests, skip: true);
     }
-  }, timeout: const Timeout.factor(8));
+  });
 }

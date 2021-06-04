@@ -1,8 +1,8 @@
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/vm_service_wrapper.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'support/mocks.dart';

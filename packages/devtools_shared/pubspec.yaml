@@ -3,7 +3,7 @@ description: Package of shared structures between devtools_app and devtools_serv
 
 # Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of packages from packages/devtools.
-version: 2.3.0
+version: 2.3.1
 
 homepage: https://github.com/flutter/devtools
 
@@ -11,4 +11,4 @@ environment:
   sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
-  vm_service: ^6.2.0
+  vm_service: ^7.1.0

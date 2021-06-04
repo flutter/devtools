@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 /// Finds the path to a given package.
 ///

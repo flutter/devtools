@@ -4,7 +4,7 @@
 
 import 'package:devtools_app/src/performance/performance_utils.dart';
 import 'package:devtools_testing/support/performance_test_data.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('PerformanceUtils', () {

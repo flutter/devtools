@@ -6,7 +6,7 @@ import 'package:devtools_app/src/eval_on_dart_library.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_testing/support/flutter_test_driver.dart';
 import 'package:devtools_testing/support/flutter_test_environment.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
@@ -116,5 +116,5 @@ void main() {
         expect(error.valueAsString, 'foo');
       });
     });
-  }, timeout: const Timeout.factor(8));
+  });
 }
