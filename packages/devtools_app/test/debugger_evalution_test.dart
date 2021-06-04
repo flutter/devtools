@@ -6,11 +6,17 @@ import 'package:devtools_app/src/debugger/debugger_model.dart';
 import 'package:devtools_app/src/debugger/evaluate.dart';
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'support/mocks.dart';
+
+final libraryRef = LibraryRef(
+  name: 'some library',
+  uri: 'package:foo/foo.dart',
+  id: 'lib-id-1',
+);
 
 void main() {
   MockDebuggerController debuggerController;
@@ -148,7 +154,7 @@ void main() {
       }
       if (obj is InstanceRef) {
         return Instance(
-          classRef: ClassRef(id: '', name: 'FooClass'),
+          classRef: ClassRef(id: '', name: 'FooClass', library: libraryRef),
           id: '',
           fields: [
             BoundField(

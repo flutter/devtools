@@ -5,7 +5,7 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/utils.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'support/network_test_data.dart';
 

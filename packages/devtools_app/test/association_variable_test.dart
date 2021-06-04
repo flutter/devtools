@@ -6,12 +6,18 @@ import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/debugger/debugger_model.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'support/mocks.dart';
+
+final libraryRef = LibraryRef(
+  name: 'some library',
+  uri: 'package:foo/foo.dart',
+  id: 'lib-id-1',
+);
 
 void main() {
   ServiceConnectionManager manager;
@@ -150,7 +156,7 @@ void main() {
       associations: [
         MapAssociation(
           key: InstanceRef(
-            classRef: ClassRef(id: 'a', name: 'Foo'),
+            classRef: ClassRef(id: 'a', name: 'Foo', library: libraryRef),
             id: '4',
             kind: InstanceKind.kPlainInstance,
             identityHashCode: null,

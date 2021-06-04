@@ -10,7 +10,7 @@ import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/filter.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'inspector_screen_test.dart';
 import 'support/mocks.dart';

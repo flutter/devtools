@@ -973,6 +973,19 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
+  Future<Breakpoint> setBreakpointState(
+      String isolateId, String breakpointId, bool enable) {
+    return trackFuture(
+      'setBreakpointState',
+      _vmService.setBreakpointState(
+        isolateId,
+        breakpointId,
+        enable,
+      ),
+    );
+  }
+
+  @override
   Future<ProtocolList> getSupportedProtocols() async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 35))) {

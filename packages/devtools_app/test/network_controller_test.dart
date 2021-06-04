@@ -10,7 +10,7 @@ import 'package:devtools_app/src/network/network_model.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/filter.dart';
 import 'package:devtools_app/src/version.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'support/mocks.dart';

@@ -7,9 +7,13 @@ import 'package:devtools_testing/performance_controller_test.dart';
 import 'package:devtools_testing/support/flutter_test_driver.dart'
     show FlutterRunConfiguration;
 import 'package:devtools_testing/support/flutter_test_environment.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'support/utils.dart';
 
 void main() async {
+  initializeLiveTestWidgetsFlutterBindingWithAssets();
+
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );

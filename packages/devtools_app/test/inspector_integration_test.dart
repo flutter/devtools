@@ -32,10 +32,6 @@ void main() async {
 
   InspectorService inspectorService;
 
-  env.afterNewSetup = () async {
-    await ensureInspectorServiceDependencies();
-  };
-
   env.afterEverySetup = () async {
     inspectorService = await InspectorService.create(env.service);
     if (env.reuseTestEnvironment) {
