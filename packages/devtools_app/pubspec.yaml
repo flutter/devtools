@@ -58,8 +58,7 @@ dependencies:
 
 dev_dependencies:
   build_runner: ^2.0.4
-  devtools:
-    path: ../devtools
+  devtools: 2.2.4
   devtools_testing: 2.2.4
   flutter_test:
     sdk: flutter
