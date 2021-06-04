@@ -71,6 +71,9 @@ class LegacyTimelineEventProcessor {
 
   /// Async timeline events we have processed, mapped to their respective async
   /// ids.
+  ///
+  /// The id keys should be of the form <category>:<scope>:<id> or
+  /// <category>:<id> if scope is null. See [TraceEvent.asyncUID].
   final _asyncEventsById = <String, LegacyAsyncTimelineEvent>{};
 
   /// The current timeline event nodes for duration events.
@@ -286,17 +289,16 @@ class LegacyTimelineEventProcessor {
     }
 
     // If parentId is specified, use it to define the async tree structure.
-    final parentId = timelineEvent.parentId;
-    if (parentId != null) {
-      final parent = _asyncEventsById[parentId];
+    if (timelineEvent.hasExplicitParent) {
+      final parent = _asyncEventsById[timelineEvent.parentAsyncUID];
       if (parent != null) {
         parent.addChild(timelineEvent);
       }
-      _asyncEventsById[eventWrapper.event.id] = timelineEvent;
+      _asyncEventsById[eventWrapper.event.asyncUID] = timelineEvent;
       return;
     }
 
-    final currentEventWithId = _asyncEventsById[eventWrapper.event.id];
+    final currentEventWithId = _asyncEventsById[eventWrapper.event.asyncUID];
 
     // If we already have a timeline event with the same async id as
     // [timelineEvent] (e.g. [currentEventWithId]), then [timelineEvent] is
@@ -307,7 +309,7 @@ class LegacyTimelineEventProcessor {
         // [currentEventWithId]. Since [currentEventWithId] is well formed, add
         // it to the timeline.
         timelineController.addTimelineEvent(currentEventWithId);
-        _asyncEventsById[eventWrapper.event.id] = timelineEvent;
+        _asyncEventsById[eventWrapper.event.asyncUID] = timelineEvent;
       } else {
         if (currentEventWithId.isWellFormed) {
           // Since parent id was not explicitly passed in the event args and
@@ -325,13 +327,13 @@ class LegacyTimelineEventProcessor {
         }
       }
     } else {
-      _asyncEventsById[eventWrapper.event.id] = timelineEvent;
+      _asyncEventsById[eventWrapper.event.asyncUID] = timelineEvent;
     }
   }
 
   void _endAsyncEvent(TraceEventWrapper eventWrapper) {
     final LegacyAsyncTimelineEvent root =
-        _asyncEventsById[eventWrapper.event.id];
+        _asyncEventsById[eventWrapper.event.asyncUID];
     if (root == null) {
       // Since we process trace events in timestamp order, we can guarantee that
       // we have not already processed the matching begin event. Discard the end

@@ -290,7 +290,8 @@ class TimelineFlameChartState
 
   @override
   double topYForData(TimelineEvent data) {
-    final eventGroup = widget.data.eventGroups[computeEventGroupKey(
+    final eventGroup =
+        widget.data.eventGroups[PerformanceUtils.computeEventGroupKey(
       data,
       _performanceController.threadNamesById,
     )];

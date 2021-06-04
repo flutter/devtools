@@ -54,7 +54,7 @@ class PerformanceData {
   final List<TimelineEvent> timelineEvents;
 
   final SplayTreeMap<String, TimelineEventGroup> eventGroups =
-      SplayTreeMap(eventGroupComparator);
+      SplayTreeMap(PerformanceUtils.eventGroupComparator);
 
   /// List that will store trace events in the order we process them.
   ///
@@ -93,7 +93,8 @@ class PerformanceData {
   }) {
     for (int i = startIndex; i < timelineEvents.length; i++) {
       final event = timelineEvents[i];
-      eventGroups.putIfAbsent(computeEventGroupKey(event, threadNamesById),
+      eventGroups.putIfAbsent(
+          PerformanceUtils.computeEventGroupKey(event, threadNamesById),
           () => TimelineEventGroup())
         ..addEventAtCalculatedRow(event);
     }
@@ -119,28 +120,6 @@ class PerformanceData {
     _endTimestampMicros = -1;
     frames.clear();
     selectedFrame = null;
-  }
-
-  // TODO(kenz): simplify this comparator if possible.
-  @visibleForTesting
-  static int eventGroupComparator(String a, String b) {
-    if (a == b) return 0;
-
-    // Order Unknown buckets last.
-    if (a == unknownKey) return 1;
-    if (b == unknownKey) return -1;
-
-    // Order the Raster event bucket after the UI event bucket.
-    if ((a == uiKey && b == rasterKey) || (a == rasterKey && b == uiKey)) {
-      return -1 * a.compareTo(b);
-    }
-
-    // Order non-UI and non-raster buckets after the UI / Raster buckets.
-    if (a == uiKey || a == rasterKey) return -1;
-    if (b == uiKey || b == rasterKey) return 1;
-
-    // Alphabetize all other buckets.
-    return a.compareTo(b);
   }
 
   Map<String, dynamic> get json => {
@@ -936,20 +915,32 @@ class SyncTimelineEvent extends TimelineEvent {
 // code.
 class AsyncTimelineEvent extends TimelineEvent {
   AsyncTimelineEvent(TraceEventWrapper firstTraceEvent)
-      : asyncId = firstTraceEvent.event.id,
-        parentId = firstTraceEvent.event.args[parentIdKey],
+      : _parentId = firstTraceEvent.event.args[parentIdKey],
         super(firstTraceEvent) {
     type = TimelineEventType.async;
   }
 
   static const parentIdKey = 'parentId';
 
-  final String asyncId;
+  String get asyncId => traceEvents.first.event.id;
+
+  String get asyncUID => traceEvents.first.event.asyncUID;
+
+  bool get hasExplicitParent => _parentId != null;
 
   /// Unique id for this async event's parent event.
   ///
   /// This field is not guaranteed to be non-null.
-  final String parentId;
+  final String _parentId;
+
+  /// Async UID id for this async event's parent, including information about
+  /// the event's category.
+  ///
+  /// This format matches [TraceEvent.asyncUID].
+  String get parentAsyncUID => generateAsyncUID(
+        id: _parentId,
+        category: traceEvents.first.event.category,
+      );
 
   int _maxEndMicros;
   @override
@@ -1032,8 +1023,8 @@ class AsyncTimelineEvent extends TimelineEvent {
   void addChild(TimelineEvent child) {
     final AsyncTimelineEvent _child = child;
     // Short circuit if we are using an explicit parentId.
-    if (_child.parentId != null &&
-        _child.parentId == traceEvents.first.event.id) {
+    if (_child.hasExplicitParent &&
+        _child.parentAsyncUID == traceEvents.first.event.asyncUID) {
       _addChild(child);
     } else {
       super.addChild(child);
@@ -1045,11 +1036,13 @@ class AsyncTimelineEvent extends TimelineEvent {
     final AsyncTimelineEvent asyncEvent = e;
 
     // If [asyncEvent] has an explicit parentId, use that as the truth.
-    if (asyncEvent.parentId != null) return asyncId == asyncEvent.parentId;
+    if (asyncEvent.hasExplicitParent) {
+      return asyncUID == asyncEvent.parentAsyncUID;
+    }
 
     // Without an explicit parentId, two events must share an asyncId to be
     // part of the same event tree.
-    if (asyncId != asyncEvent.asyncId) return false;
+    if (asyncUID != asyncEvent.asyncUID) return false;
 
     // When two events share an asyncId, determine parent / child relationships
     // based on timestamps.
@@ -1085,8 +1078,8 @@ class AsyncTimelineEvent extends TimelineEvent {
   /// The return value will be used to stop the recursion early.
   bool endAsyncEvent(TraceEventWrapper eventWrapper) {
     assert(
-      parentId != null || asyncId == eventWrapper.event.id,
-      'asyncId = $asyncId, but endEventId = ${eventWrapper.event.id}',
+      hasExplicitParent || asyncUID == eventWrapper.event.asyncUID,
+      'asyncUID = $asyncUID, but endEventId = ${eventWrapper.event.asyncUID}',
     );
     if (endTraceEventJson != null) {
       // This event has already ended and [eventWrapper] is a duplicate trace

@@ -1295,3 +1295,11 @@ mixin CompareMixin implements Comparable {
     return compareTo(other) >= 0;
   }
 }
+
+extension BoolExtension on bool {
+  int boolCompare(bool other) {
+    if ((this && other) || (!this && !other)) return 0;
+    if (other) return 1;
+    return -1;
+  }
+}
