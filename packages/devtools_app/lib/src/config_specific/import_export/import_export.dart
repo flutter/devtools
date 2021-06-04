@@ -7,6 +7,7 @@ import 'dart:convert';
 import '../../../devtools.dart';
 import '../../globals.dart';
 import '../../notifications.dart';
+import '../../performance/legacy/performance_screen.dart';
 import '../../performance/performance_model.dart';
 import '../../performance/performance_screen.dart';
 import '../../utils.dart';
@@ -106,7 +107,8 @@ abstract class ExportController {
     // This is a workaround to guarantee that DevTools exports are compatible
     // with other trace viewers (catapult, perfetto, chrome://tracing), which
     // require a top level field named "traceEvents".
-    if (activeScreenId == PerformanceScreen.id) {
+    if (activeScreenId == PerformanceScreen.id ||
+        activeScreenId == LegacyPerformanceScreen.id) {
       final traceEvents = List<Map<String, dynamic>>.from(
           contents[PerformanceData.traceEventsKey]);
       _contents[PerformanceData.traceEventsKey] = traceEvents;
