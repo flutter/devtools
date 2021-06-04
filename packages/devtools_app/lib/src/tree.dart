@@ -14,7 +14,7 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
     this.dataDisplayProvider,
     this.onItemPressed,
     this.shrinkWrap = false,
-    this.itemExtent = defaultListItemHeight,
+    this.itemExtent,
     this.onTraverse,
   });
 
