@@ -316,7 +316,8 @@ Future<Set<String>> _autoCompleteMembersFor(
   final result = <String>{};
   final clazz = await classFor(classRef, controller);
   if (clazz != null) {
-    result.addAll(clazz.fields.map((field) => field.name));
+    result.addAll(
+        clazz.fields.where((f) => !f.isStatic).map((field) => field.name));
     result.addAll(clazz.functions
         .where((funcRef) => _validFunction(funcRef, clazz))
         // The VM shows setters as `<member>=`.
