@@ -89,6 +89,22 @@ class DebuggerController extends DisposableController
 
   VmServiceWrapper get _service => serviceManager.service;
 
+  /// Cache of autocomplete matches to show for a library when that library is
+  /// imported.
+  ///
+  /// This cache includes autocompletes from libraries exported by the library
+  /// but does not include autocompletes for libraries imported by this library.
+
+  Map<LibraryRef, Future<Set<String>>> libraryMemberAutocompleteCache = {};
+
+  /// Cache of autocomplete matches for a library for code written within that
+  /// library.
+  ///
+  /// This cache includes autocompletes from all libraries imported and exported
+  /// by the library as well as all private autocompletes for the library.
+  Map<LibraryRef, Future<Set<String>>>
+      libraryMemberAndImportsAutocompleteCache = {};
+
   final ScriptCache _scriptCache = ScriptCache();
 
   final ScriptsHistory scriptsHistory = ScriptsHistory();
@@ -189,6 +205,37 @@ class DebuggerController extends DisposableController
     );
   }
 
+  /// Find the owner library for a ClassRef, FuncRef, or LibraryRef.
+  ///
+  /// If Dart had union types, ref would be type ClassRef | FuncRef | LibraryRef
+  Future<LibraryRef> findOwnerLibrary(Object ref) async {
+    if (ref is LibraryRef) {
+      return ref;
+    }
+    if (ref is ClassRef) {
+      if (ref.library != null) {
+        return ref.library;
+      }
+      // Fallback for older VMService versions.
+      final clazz = await classFor(ref);
+      return clazz?.library;
+    }
+    if (ref is FuncRef) {
+      return findOwnerLibrary(ref.owner);
+    }
+    return null;
+  }
+
+  /// Returns the class for the provided [ClassRef].
+  ///
+  /// May return null.
+  Future<Class> classFor(ClassRef classRef) async {
+    try {
+      return await getObject(classRef);
+    } catch (_) {}
+    return null;
+  }
+
   // A cached map of uris to ScriptRefs.
   final Map<String, ScriptRef> _uriToScriptMap = {};
 
@@ -202,6 +249,10 @@ class DebuggerController extends DisposableController
 
   ValueListenable<StackFrameAndSourcePosition> get selectedStackFrame =>
       _selectedStackFrame;
+
+  Frame get frameForEval =>
+      _selectedStackFrame.value?.frame ??
+      _stackFramesWithLocation.value.first.frame;
 
   final _variables = ValueNotifier<List<Variable>>([]);
 
@@ -594,6 +645,7 @@ class DebuggerController extends DisposableController
     // ignore: unused_local_variable
     final status = reloadEvent.status;
 
+    _clearAutocompleteCaches();
     // Refresh the list of scripts.
     final scriptRefs = await _retrieveAndSortScripts(isolateRef);
     for (var scriptRef in scriptRefs) {
@@ -769,6 +821,12 @@ class DebuggerController extends DisposableController
     _breakPositionsMap.clear();
     _stdio.value = [];
     _uriToScriptMap.clear();
+    _clearAutocompleteCaches();
+  }
+
+  void _clearAutocompleteCaches() {
+    libraryMemberAutocompleteCache.clear();
+    libraryMemberAndImportsAutocompleteCache.clear();
   }
 
   /// Get the populated [Obj] object, given an [ObjRef].

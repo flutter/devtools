@@ -31,6 +31,7 @@ class EvalOnDartLibrary {
     Iterable<String> candidateLibraryNames,
     this.service, {
     IsolateRef isolateRef,
+    this.disableBreakpoints = true,
     this.oneRequestAtATime = false,
   })  : _candidateLibraryNames = Set.from(candidateLibraryNames),
         _clientId = (Random.secure().nextDouble() * 10000).toInt() {
@@ -66,6 +67,9 @@ class EvalOnDartLibrary {
   /// guarantees but significantly hurts performance particularly when the
   /// VM Service and DevTools are not running on the same machine.
   final bool oneRequestAtATime;
+
+  /// Whether to disable breakpoints triggered while evaluating expressions.
+  final bool disableBreakpoints;
 
   /// An ID unique to this instance, so that [asyncEval] keeps working even if
   /// the devtool is opened on multiple tabs at the same time.
@@ -176,7 +180,7 @@ class EvalOnDartLibrary {
         libraryRef.id,
         expression,
         scope: scope,
-        disableBreakpoints: true,
+        disableBreakpoints: disableBreakpoints,
       );
       if (result is Sentinel) {
         return null;
@@ -400,6 +404,7 @@ class EvalOnDartLibrary {
           libraryRef.id,
           expression,
           scope: scope,
+          disableBreakpoints: disableBreakpoints,
         );
       });
 
