@@ -266,6 +266,64 @@ void main() {
         },
         timeout: const Timeout.factor(8),
       );
+
+      test(
+        'returns no operators for int',
+        () async {
+          await runMethodAndWaitForPause(
+              'AnotherClass().pauseWithScopedVariablesMethod()');
+          expect(
+            await autoCompleteResultsFor(
+              EditingParts(
+                activeWord: '',
+                leftSide: '7.',
+                rightSide: '',
+              ),
+              debuggerController,
+            ),
+            equals(
+              [
+                'hashCode',
+                'bitLength',
+                'toString',
+                'remainder',
+                'abs',
+                'sign',
+                'isEven',
+                'isOdd',
+                'isNaN',
+                'isNegative',
+                'isInfinite',
+                'isFinite',
+                'toUnsigned',
+                'toSigned',
+                'compareTo',
+                'round',
+                'floor',
+                'ceil',
+                'truncate',
+                'roundToDouble',
+                'floorToDouble',
+                'ceilToDouble',
+                'truncateToDouble',
+                'clamp',
+                'toInt',
+                'toDouble',
+                'toStringAsFixed',
+                'toStringAsExponential',
+                'toStringAsPrecision',
+                'toRadixString',
+                'modPow',
+                'modInverse',
+                'gcd',
+                'noSuchMethod',
+                'runtimeType'
+              ],
+            ),
+          );
+        },
+        timeout: const Timeout.factor(8),
+      );
     },
   );
 }
