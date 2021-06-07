@@ -22,6 +22,10 @@ class FooClass {
   static void staticMethod() {}
   void func1() {}
   void func2() {}
+
+  int operator [](int index) {
+    return 7;
+  }
 }
 
 // ignore: unused_element

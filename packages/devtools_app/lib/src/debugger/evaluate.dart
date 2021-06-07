@@ -551,7 +551,7 @@ bool _isOperator(FuncRef funcRef) => [
       '^',
       '%',
       '~/',
-      'uniary-',
+      'unary-',
     ].contains(funcRef.name);
 
 bool _isConstructor(FuncRef funcRef, Class clazz) =>
