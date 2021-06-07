@@ -6,7 +6,7 @@ description: Web-based performance tooling for Dart and Flutter.
 # When publishing new versions of this package be sure to publish a new version
 # of package:devtools as well. package:devtools contains a compiled snapshot of
 # this package.
-version: 2.2.4
+version: 2.3.2
 
 homepage: https://github.com/flutter/devtools
 
@@ -27,7 +27,7 @@ dependencies:
   codicon: ^0.0.3
   collection: ^1.15.0-nnbd
   dds: ^2.0.1
-  devtools_shared: 2.3.0
+  devtools_shared: 2.3.2
   file: ^6.0.0
   file_selector: ^0.8.0
   file_selector_linux: ^0.0.2
@@ -58,8 +58,8 @@ dependencies:
 
 dev_dependencies:
   build_runner: ^2.0.4
-  devtools: 2.2.4
-  devtools_testing: 2.2.4
+  devtools: 2.3.2
+  devtools_testing: 2.3.2
   flutter_test:
     sdk: flutter
   mockito: ^5.0.9
