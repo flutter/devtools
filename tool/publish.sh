@@ -17,7 +17,7 @@ perl -pi -e 's/packages\/codicon\/font\/codicon.ttf/fonts\/codicon.ttf/g' packag
 tool/build_release.sh
 
 pushd packages/devtools
-pub get
+flutter pub get
 perl -pi -e "s/^build\/\$/\# build\//g" .gitignore
 popd
 
