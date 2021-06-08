@@ -41,7 +41,7 @@ void setupErrorHandling(Future Function() appStartCallback) {
 }
 
 void _reportError(Object error, StackTrace stack) {
-  final String terseStackTrace = stack_trace.Trace.from(stack).terse.toString();
+  final terseStackTrace = stack_trace.Trace.from(stack).terse.toString();
 
   log('$error', LogLevel.error);
 
