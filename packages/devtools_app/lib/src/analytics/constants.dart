@@ -7,9 +7,6 @@
 const String screenViewEvent = 'screen'; // Active screen (tab selected).
 const String selectEvent = 'select'; // User selected something.
 
-// TODO(devoncarew): Add exception reporting - #3079.
-//const String exceptionEvent = 'exception'; // Any Dart exception in DevTools
-
 // DevTools GA screenNames:
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
