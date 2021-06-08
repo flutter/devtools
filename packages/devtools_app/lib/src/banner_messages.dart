@@ -266,9 +266,9 @@ class ProviderUnknownErrorBanner {
       textSpans: const [
         TextSpan(
           text: '''
-The devtool failed to connect with package:provider.
+DevTools failed to connect with package:provider.
 
-This could be caused by an outdated version of package:provider. Make sure that you are using a version >=5.0.0.''',
+This could be caused by an older version of package:provider; please make sure that you are using version >=5.0.0.''',
           style: TextStyle(color: _BannerError.foreground),
         ),
       ],

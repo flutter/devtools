@@ -178,7 +178,7 @@ ValueListenable<bool> get gaEnabledNotifier => _gaEnabledNotifier;
 bool gaEnabled() => _gaEnabledNotifier.value;
 
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
-/// '~\.devtools'.
+/// '~/.devtools'.
 Future<bool> isAnalyticsEnabled() async {
   _gaEnabledNotifier.value = await server.isAnalyticsEnabled();
   return _gaEnabledNotifier.value;
@@ -265,10 +265,10 @@ void selectFrame(
 
 String _lastGaError;
 
-void error(
-  String errorMessage,
-  bool fatal,
-) {
+void reportError(
+  String errorMessage, {
+  bool fatal = false,
+}) {
   // Don't keep recording same last error.
   if (_lastGaError == errorMessage) return;
   _lastGaError = errorMessage;
@@ -447,6 +447,7 @@ void computeFlutterClientId() async {
 }
 
 int _stillWaiting = 0;
+
 void waitForDimensionsComputed(String screenName) {
   Timer(const Duration(milliseconds: 100), () async {
     if (_analyticsComputed) {
