@@ -274,8 +274,16 @@ class FlutterFramesChartItem extends StatelessWidget {
 
     final bool uiJanky = frame.isUiJanky(displayRefreshRate);
     final bool rasterJanky = frame.isRasterJanky(displayRefreshRate);
-    final bool timelineEventsAvailable =
-        frame.uiEventFlow != null || frame.rasterEventFlow != null;
+
+    var uiColor = uiJanky ? uiJankColor : mainUiColor;
+    if (frame.uiEventFlow == null) {
+      uiColor = uiColor.darken(.5);
+    }
+    var rasterColor = rasterJanky ? rasterJankColor : mainRasterColor;
+    if (frame.rasterEventFlow == null) {
+      rasterColor = rasterColor.darken(.50);
+    }
+
     // TODO(kenz): add some indicator when a frame is so janky that it exceeds the
     // available axis space.
     final ui = Container(
@@ -283,14 +291,14 @@ class FlutterFramesChartItem extends StatelessWidget {
       width: defaultFrameWidth / 2,
       height: (frame.buildTime.inMilliseconds / msPerPx)
           .clamp(0.0, availableChartHeight),
-      color: uiJanky ? uiJankColor : mainUiColor,
+      color: uiColor,
     );
     final raster = Container(
       key: Key('frame ${frame.id} - raster'),
       width: defaultFrameWidth / 2,
       height: (frame.rasterTime.inMilliseconds / msPerPx)
           .clamp(0.0, availableChartHeight),
-      color: rasterJanky ? rasterJankColor : mainRasterColor,
+      color: rasterColor,
     );
     return Stack(
       children: [
@@ -327,8 +335,13 @@ class FlutterFramesChartItem extends StatelessWidget {
   }
 
   String _tooltipText(FlutterFrame frame) {
-    return 'UI: ${msText(frame.buildTime)}\n'
-        'Raster: ${msText(frame.rasterTime)}';
+    final bool missingTimelineEvents =
+        frame.uiEventFlow == null || frame.rasterEventFlow == null;
+    return [
+      'UI: ${msText(frame.buildTime)}\nRaster: ${msText(frame.rasterTime)}',
+      if (missingTimelineEvents)
+        '\n\nWarning: missing trace events for this frame.'
+    ].join();
   }
 }
 

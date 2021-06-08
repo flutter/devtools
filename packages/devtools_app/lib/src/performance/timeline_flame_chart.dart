@@ -63,20 +63,15 @@ class _TimelineFlameChartContainerState
     Widget content;
     final timelineEmpty = (controller.data?.isEmpty ?? true) ||
         controller.data.eventGroups.isEmpty;
-    if (widget.processing || timelineEmpty) {
-      content = ValueListenableBuilder<bool>(
-        valueListenable: controller.emptyTimeline,
-        builder: (context, emptyRecording, _) {
-          return emptyRecording
-              ? Center(
-                  key: TimelineFlameChartContainer.emptyTimelineKey,
-                  child: Text(
-                    'No timeline events',
-                    style: Theme.of(context).subtleTextStyle,
-                  ),
-                )
-              : _buildProcessingInfo();
-        },
+    if (widget.processing) {
+      content = _buildProcessingInfo();
+    } else if (timelineEmpty) {
+      content = Center(
+        key: TimelineFlameChartContainer.emptyTimelineKey,
+        child: Text(
+          'No timeline events',
+          style: Theme.of(context).subtleTextStyle,
+        ),
       );
     } else {
       content = LayoutBuilder(
@@ -251,6 +246,7 @@ class TimelineFlameChartState
 
   @override
   void initState() {
+    print('init state timeline flame chart');
     super.initState();
     _groupLabelScrollController = verticalControllerGroup.addAndGet();
     _previousInGroupButtonsScrollController =
@@ -264,6 +260,13 @@ class TimelineFlameChartState
     final newController = Provider.of<PerformanceController>(context);
     if (newController == _performanceController) return;
     _performanceController = newController;
+
+    // If there is already a selected frame, handle setting that data and
+    // positioning/zooming the flame chart accordingly.
+    _selectedFrame = _performanceController.selectedFrame.value;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _centerSelectedFrame();
+    });
 
     addAutoDisposeListener(
       _performanceController.selectedFrame,
@@ -407,16 +410,19 @@ class TimelineFlameChartState
   }
 
   void _handleSelectedFrame() async {
+    print('handling selected frame timeline flame chart');
     final selectedFrame = _performanceController.selectedFrame.value;
     if (selectedFrame == _selectedFrame) return;
 
     setState(() {
       _selectedFrame = selectedFrame;
     });
+    await _centerSelectedFrame();
+  }
 
+  Future<void> _centerSelectedFrame() async {
     // TODO(kenz): consider using jumpTo for some of these animations to
     // improve performance.
-
     if (_selectedFrame != null) {
       // Zoom and scroll to the frame's UI event.
       TimeRange time;
@@ -583,24 +589,24 @@ class TimelineFlameChartState
           colorScheme: colorScheme,
         ),
       ),
-      // CustomPaint(
-      //   painter: SelectedFrameBracketPainter(
-      //     _selectedFrame,
-      //     zoom: zoom,
-      //     constraints: constraints,
-      //     verticalScrollOffset: verticalScrollOffset,
-      //     horizontalScrollOffset: horizontalScrollOffset,
-      //     chartStartInset: widget.startInset,
-      //     startTimeOffsetMicros: startTimeOffset,
-      //     startingPxPerMicro: startingPxPerMicro,
-      //     // Subtract [rowHeight] because [_calculateVerticalGuidelineStartY]
-      //     // returns the Y value at the bottom of the flame chart node, and we
-      //     // want the Y value at the top of the node.
-      //     yForEvent: (event) =>
-      //         _calculateVerticalGuidelineStartY(event) - rowHeight,
-      //     colorScheme: colorScheme,
-      //   ),
-      // ),
+      CustomPaint(
+        painter: SelectedFrameBracketPainter(
+          _selectedFrame,
+          zoom: zoom,
+          constraints: constraints,
+          verticalScrollOffset: verticalScrollOffset,
+          horizontalScrollOffset: horizontalScrollOffset,
+          chartStartInset: widget.startInset,
+          startTimeOffsetMicros: startTimeOffset,
+          startingPxPerMicro: startingPxPerMicro,
+          // Subtract [rowHeight] because [_calculateVerticalGuidelineStartY]
+          // returns the Y value at the bottom of the flame chart node, and we
+          // want the Y value at the top of the node.
+          yForEvent: (event) =>
+              _calculateVerticalGuidelineStartY(event) - rowHeight,
+          colorScheme: colorScheme,
+        ),
+      ),
       _buildSectionLabels(constraints: constraints),
       ..._buildEventThreadNavigationButtons(constraints: constraints),
     ];
@@ -1081,7 +1087,11 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (selectedFrame == null) return;
+    if (selectedFrame == null ||
+        (selectedFrame.uiEventFlow == null &&
+            selectedFrame.rasterEventFlow == null)) {
+      return;
+    }
 
     canvas.clipRect(Rect.fromLTWH(
       0.0,
@@ -1095,8 +1105,12 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 
-    _paintBrackets(canvas, paint, event: selectedFrame.uiEventFlow);
-    _paintBrackets(canvas, paint, event: selectedFrame.rasterEventFlow);
+    if (selectedFrame.uiEventFlow != null) {
+      _paintBrackets(canvas, paint, event: selectedFrame.uiEventFlow);
+    }
+    if (selectedFrame.rasterEventFlow != null) {
+      _paintBrackets(canvas, paint, event: selectedFrame.rasterEventFlow);
+    }
   }
 
   void _paintBrackets(

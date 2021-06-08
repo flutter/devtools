@@ -49,6 +49,8 @@ class PerformanceData {
 
   static const displayRefreshRateKey = 'displayRefreshRate';
 
+  static const flutterFramesKey = 'flutterFrames';
+
   static const selectedFrameIdKey = 'selectedFrameId';
 
   final List<TimelineEvent> timelineEvents;
@@ -124,6 +126,7 @@ class PerformanceData {
 
   Map<String, dynamic> get json => {
         selectedFrameIdKey: selectedFrame?.id,
+        flutterFramesKey: frames.map((frame) => frame.json).toList(),
         displayRefreshRateKey: displayRefreshRate,
         traceEventsKey: traceEvents,
         cpuProfileKey: cpuProfileData?.json ?? {},
@@ -291,6 +294,14 @@ class OfflinePerformanceData extends PerformanceData {
 
     final int selectedFrameId = json[PerformanceData.selectedFrameIdKey];
 
+    final List<Map<String, dynamic>> framesJson =
+        (json[PerformanceData.flutterFramesKey] as List<dynamic>)
+            .map((f) => f as Map<String, dynamic>)
+            .toList();
+    final frames = framesJson
+        .map((Map<String, dynamic> f) => FlutterFrame.parse(f))
+        .toList();
+
     final Map<String, dynamic> selectedEventJson =
         json[PerformanceData.selectedEventKey] ?? {};
     final OfflineTimelineEvent selectedEvent = selectedEventJson.isNotEmpty
@@ -305,6 +316,7 @@ class OfflinePerformanceData extends PerformanceData {
     return OfflinePerformanceData._(
       traceEvents: traceEvents,
       selectedFrameId: selectedFrameId,
+      frames: frames,
       selectedEvent: selectedEvent,
       displayRefreshRate: displayRefreshRate.toDouble(),
       cpuProfileData: cpuProfileData,

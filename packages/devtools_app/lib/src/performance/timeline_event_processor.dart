@@ -106,6 +106,10 @@ class TimelineEventProcessor {
 
   int rasterThreadId;
 
+  /// Process the given trace events to create [TimelineEvent]s.
+  ///
+  /// [traceEvents] must be sorted in increasing timestamp order before calling
+  /// this method.
   Future<void> processTimeline(
     List<TraceEventWrapper> traceEvents, {
     bool resetAfterProcessing = true,
@@ -289,13 +293,14 @@ class TimelineEventProcessor {
         timelineController.addTimelineEvent(currentEventWithId);
         _asyncEventsById[eventWrapper.event.asyncUID] = timelineEvent;
       } else {
-        if (currentEventWithId.isWellFormed) {
-          // Since parent id was not explicitly passed in the event args and
-          // since we process events in timestamp order, if [currentEventWithId]
-          // is well formed, [timelineEvent] cannot be a child of
-          // [currentEventWithId]. This is an illegal id collision that we need
-          // to handle gracefully, so throw this event away.
-          // Bug tracking collisions:
+        if (eventWrapper.event.phase != TraceEvent.asyncInstantPhase &&
+            currentEventWithId.isWellFormed) {
+          // Since this is not an async instant event and the parent id was not
+          // explicitly passed in the event args, and since we process events in
+          // timestamp order, if [currentEventWithId] is well formed,
+          // [timelineEvent] cannot be a child of [currentEventWithId]. This is
+          // an illegal id collision that we need to handle gracefully, so throw
+          // this event away. Bug tracking collisions:
           // https://github.com/flutter/flutter/issues/47019.
           log('Id collision on id ${eventWrapper.event.id}', LogLevel.warning);
         } else {
@@ -471,10 +476,10 @@ class TimelineEventProcessor {
   }
 
   void reset() {
-    _asyncEventsById.clear();
-    currentDurationEventNodes.clear();
-    _previousDurationEndEvents.clear();
-    _pendingRootCompleteEvent = null;
+    // _asyncEventsById.clear();
+    // currentDurationEventNodes.clear();
+    // _previousDurationEndEvents.clear();
+    // _pendingRootCompleteEvent = null;
     _traceEventsProcessed = 0;
     _progressNotifier.value = 0.0;
   }
