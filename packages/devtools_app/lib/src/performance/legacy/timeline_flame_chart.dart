@@ -408,6 +408,7 @@ class LegacyTimelineFlameChartState
         startMicros: selectedFrame.time.start.inMicroseconds,
         durationMicros: selectedFrame.time.duration.inMicroseconds,
         data: selectedFrame.uiEventFlow,
+        jumpZoom: true,
       );
     }
   }
@@ -524,11 +525,10 @@ class LegacyTimelineFlameChartState
     BuildContext buildContext,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
-    final zoom = zoomController.value;
     return [
       CustomPaint(
         painter: LegacyAsyncGuidelinePainter(
-          zoom: zoom,
+          zoom: currentZoom,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,
@@ -540,7 +540,7 @@ class LegacyTimelineFlameChartState
       ),
       CustomPaint(
         painter: TimelineGridPainter(
-          zoom: zoom,
+          zoom: currentZoom,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,
@@ -554,7 +554,7 @@ class LegacyTimelineFlameChartState
       CustomPaint(
         painter: LegacySelectedFrameBracketPainter(
           _selectedFrame,
-          zoom: zoom,
+          zoom: currentZoom,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,
