@@ -433,8 +433,8 @@ abstract class FlameChartState<T extends FlameChart,
 
   void _handleZoomControllerValueUpdate() {
     final previousZoom = currentZoom;
-    currentZoom = zoomController.value;
-    if (previousZoom == currentZoom) return;
+    final newZoom = zoomController.value;
+    if (previousZoom == newZoom) return;
 
 
     // Store current scroll values for re-calculating scroll location on zoom.
@@ -446,9 +446,7 @@ abstract class FlameChartState<T extends FlameChart,
 
     // Calculate the new horizontal scroll position.
     final newScrollOffset = fixedX >= 0
-        ? fixedX * currentZoom / previousZoom +
-            widget.startInset -
-            safeMouseHoverX
+        ? fixedX * newZoom / previousZoom + widget.startInset - safeMouseHoverX
         // We are in the fixed portion of the window - no need to transform.
         : lastScrollOffset;
 
