@@ -400,6 +400,7 @@ class TimelineFlameChartState
         startMicros: selectedFrame.time.start.inMicroseconds,
         durationMicros: selectedFrame.time.duration.inMicroseconds,
         data: selectedFrame.uiEventFlow,
+        jumpZoom: true,
       );
     }
   }
@@ -516,11 +517,10 @@ class TimelineFlameChartState
     BuildContext buildContext,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
-    final zoom = zoomController.value;
     return [
       CustomPaint(
         painter: AsyncGuidelinePainter(
-          zoom: zoom,
+          zoom: currentZoom,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,
@@ -532,7 +532,7 @@ class TimelineFlameChartState
       ),
       CustomPaint(
         painter: TimelineGridPainter(
-          zoom: zoom,
+          zoom: currentZoom,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,
@@ -546,7 +546,7 @@ class TimelineFlameChartState
       CustomPaint(
         painter: SelectedFrameBracketPainter(
           _selectedFrame,
-          zoom: zoom,
+          zoom: currentZoom,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,

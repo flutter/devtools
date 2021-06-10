@@ -212,6 +212,7 @@ class LegacyPerformanceController
       return;
     }
 
+    print(frame.time);
     data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
 

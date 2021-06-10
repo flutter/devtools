@@ -83,18 +83,25 @@ class LinkedScrollControllerGroup {
     @required Curve curve,
     @required Duration duration,
   }) async {
-    final animations = <Future<void>>[];
-    for (final controller in _attachedControllers) {
-      animations
-          .add(controller.animateTo(offset, duration: duration, curve: curve));
+    // All scroll controllers are already linked with their peers, so we only
+    // need to interact with one controller to mirror the interaction with all
+    // other controllers.
+    if (_attachedControllers.isNotEmpty) {
+      await _attachedControllers.first.animateTo(
+        offset,
+        duration: duration,
+        curve: curve,
+      );
     }
-    return Future.wait<void>(animations).then<void>((List<void> _) => null);
   }
 
   /// Jumps the scroll position of all linked controllers to [value].
   void jumpTo(double value) {
-    for (final controller in _attachedControllers) {
-      controller.jumpTo(value);
+    // All scroll controllers are already linked with their peers, so we only
+    // need to interact with one controller to mirror the interaction with all
+    // other controllers.
+    if (_attachedControllers.isNotEmpty) {
+      _attachedControllers.first.jumpTo(value);
     }
   }
 
