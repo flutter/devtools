@@ -56,7 +56,7 @@ void _sendKeyPressToParent(KeyboardEvent event) {
   // Check we have a connection and we appear to be embedded somewhere expected
   // because we can't use targetOrigin in postMessage as only the scheme is fixed
   // for VS Code (vscode-webview://[some guid]).
-  if (!serviceManager.hasConnection) return;
+  if (serviceManager == null || !serviceManager.hasConnection) return;
   if (!window.navigator.userAgent.contains('Electron')) return;
 
   final data = {
