@@ -436,7 +436,6 @@ abstract class FlameChartState<T extends FlameChart,
     final newZoom = zoomController.value;
     if (previousZoom == newZoom) return;
 
-
     // Store current scroll values for re-calculating scroll location on zoom.
     final lastScrollOffset = horizontalControllerGroup.offset;
 
