@@ -15,6 +15,7 @@ import '../config_specific/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';
 import '../file_import.dart';
+import '../globals.dart';
 import '../notifications.dart';
 import '../screen.dart';
 import '../split.dart';
@@ -163,7 +164,14 @@ class _AppSizeBodyState extends State<AppSizeBody>
   @override
   Widget build(BuildContext context) {
     if (preLoadingData) {
-      return const CenteredCircularProgressIndicator();
+      return Center(
+        child: Column(
+          children: [
+            Text(devToolsExtensionPoints.loadingAppSizeDataMessage()),
+            const CircularProgressIndicator(),
+          ],
+        ),
+      );
     }
     final currentTab = tabs[_tabController.index];
     return Column(

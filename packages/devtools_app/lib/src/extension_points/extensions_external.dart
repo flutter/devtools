@@ -16,4 +16,9 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
     const githubLink = 'github.com/flutter/devtools/issues';
     return const Link(display: githubLink, url: 'https://$githubLink');
   }
+
+  @override
+  String loadingAppSizeDataMessage() {
+    return 'Loading app size data. Please wait.';
+  }
 }
