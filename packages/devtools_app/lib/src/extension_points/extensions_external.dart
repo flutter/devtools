@@ -19,6 +19,6 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
 
   @override
   String loadingAppSizeDataMessage() {
-    return 'Loading app size data. Please wait.';
+    return 'Loading app size data. Please wait...';
   }
 }

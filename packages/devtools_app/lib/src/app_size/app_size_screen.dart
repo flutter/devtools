@@ -166,8 +166,14 @@ class _AppSizeBodyState extends State<AppSizeBody>
     if (preLoadingData) {
       return Center(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(devToolsExtensionPoints.loadingAppSizeDataMessage()),
+            Text(
+              devToolsExtensionPoints.loadingAppSizeDataMessage(),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: defaultSpacing),
             const CircularProgressIndicator(),
           ],
         ),
@@ -298,6 +304,7 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
         children: [
           AreaPaneHeader(
             title: Text(_generateSingleFileHeaderText()),
+            maxLines: 2,
             needsTopBorder: false,
           ),
           Expanded(
@@ -452,6 +459,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
         children: [
           AreaPaneHeader(
             title: Text(_generateDualFileHeaderText()),
+            maxLines: 2,
             needsTopBorder: false,
           ),
           Expanded(

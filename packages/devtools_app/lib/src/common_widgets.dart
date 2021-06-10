@@ -649,6 +649,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   const AreaPaneHeader({
     Key key,
     @required this.title,
+    this.maxLines = 1,
     this.needsTopBorder = true,
     this.needsBottomBorder = true,
     this.needsLeftBorder = false,
@@ -658,6 +659,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   }) : super(key: key);
 
   final Widget title;
+  final int maxLines;
   final bool needsTopBorder;
   final bool needsBottomBorder;
   final bool needsLeftBorder;
@@ -686,7 +688,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
           children: [
             Expanded(
               child: DefaultTextStyle(
-                maxLines: 1,
+                maxLines: maxLines,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.subtitle2,
                 child: title,
