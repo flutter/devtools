@@ -1289,8 +1289,8 @@ Future<T> whenValueNonNull<T>(ValueListenable<T> listenable) {
     final value = listenable.value;
     if (value != null) {
       completer.complete(value);
+      listenable.removeListener(listener);
     }
-    listenable.removeListener(listener);
   }
 
   listenable.addListener(listener);
