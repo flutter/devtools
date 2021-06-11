@@ -469,6 +469,9 @@ class _InspectorTreeState extends State<InspectorTree>
                       itemExtent: rowHeight,
                       childrenDelegate: SliverChildBuilderDelegate(
                         (context, index) {
+                          if (index == controller.numRows) {
+                            return SizedBox(height: rowHeight);
+                          }
                           final InspectorTreeRow row =
                               controller.root?.getRow(index);
                           final inspectorRef =
@@ -485,7 +488,7 @@ class _InspectorTreeState extends State<InspectorTree>
                                 : null,
                           );
                         },
-                        childCount: controller.numRows,
+                        childCount: controller.numRows + 1,
                       ),
                       controller: _scrollControllerY,
                     ),
