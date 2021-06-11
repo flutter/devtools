@@ -103,6 +103,7 @@ class _FilterDialogState extends State<FilterDialog> {
     return Container(
       height: defaultTextFieldHeight,
       child: TextField(
+        autofocus: true,
         controller: queryTextFieldController,
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.all(denseSpacing),

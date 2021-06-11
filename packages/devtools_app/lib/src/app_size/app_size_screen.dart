@@ -15,6 +15,7 @@ import '../config_specific/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';
 import '../file_import.dart';
+import '../globals.dart';
 import '../notifications.dart';
 import '../screen.dart';
 import '../split.dart';
@@ -163,7 +164,20 @@ class _AppSizeBodyState extends State<AppSizeBody>
   @override
   Widget build(BuildContext context) {
     if (preLoadingData) {
-      return const CenteredCircularProgressIndicator();
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              devToolsExtensionPoints.loadingAppSizeDataMessage(),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: defaultSpacing),
+            const CircularProgressIndicator(),
+          ],
+        ),
+      );
     }
     final currentTab = tabs[_tabController.index];
     return Column(
@@ -290,6 +304,7 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
         children: [
           AreaPaneHeader(
             title: Text(_generateSingleFileHeaderText()),
+            maxLines: 2,
             needsTopBorder: false,
           ),
           Expanded(
@@ -444,6 +459,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
         children: [
           AreaPaneHeader(
             title: Text(_generateDualFileHeaderText()),
+            maxLines: 2,
             needsTopBorder: false,
           ),
           Expanded(

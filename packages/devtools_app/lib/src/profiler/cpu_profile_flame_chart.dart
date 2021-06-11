@@ -86,11 +86,10 @@ class _CpuProfileFlameChartState
     BuildContext buildContext,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
-    final zoom = zoomController.value;
     return [
       CustomPaint(
         painter: TimelineGridPainter(
-          zoom: zoom,
+          zoom: currentZoom,
           constraints: constraints,
           verticalScrollOffset: verticalScrollOffset,
           horizontalScrollOffset: horizontalScrollOffset,
@@ -129,7 +128,7 @@ class _CpuProfileFlameChartState
   @override
   double startXForData(CpuStackFrame data) {
     final x = stackFrameLefts[data.id] - widget.startInset;
-    return x * zoomController.value;
+    return x * currentZoom;
   }
 
   double startingLeftForStackFrame(CpuStackFrame stackFrame) {

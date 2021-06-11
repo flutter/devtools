@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import '../theme.dart';
+import '../utils.dart';
 
 class CustomIcon extends StatelessWidget {
   const CustomIcon({
@@ -74,7 +75,6 @@ class CustomIconMaker {
       return null;
     }
 
-    final bool isPrivate = name.startsWith('_');
     while (name.isNotEmpty && !isAlphabetic(name.codeUnitAt(0))) {
       name = name.substring(1);
     }
@@ -85,7 +85,7 @@ class CustomIconMaker {
 
     return getCustomIcon(
       name,
-      kind: isPrivate ? IconKind.method : IconKind.classIcon,
+      kind: isPrivate(name) ? IconKind.method : IconKind.classIcon,
     );
   }
 

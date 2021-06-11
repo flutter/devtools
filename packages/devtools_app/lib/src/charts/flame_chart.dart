@@ -115,9 +115,10 @@ abstract class FlameChartState<T extends FlameChart,
   ScrollController _flameChartScrollController;
 
   /// Animation controller for animating flame chart zoom changes.
+  @visibleForTesting
   AnimationController zoomController;
 
-  double previousZoom = FlameChart.minZoomLevel;
+  double currentZoom = FlameChart.minZoomLevel;
 
   double horizontalScrollOffset = FlameChart.minScrollOffset;
 
@@ -129,16 +130,15 @@ abstract class FlameChartState<T extends FlameChart,
   // Zooming in via WASD controls will zoom the view in by 50% on each zoom. For
   // example, if the zoom level is 2.0, zooming by one unit would increase the
   // level to 3.0 (e.g. 2 + (2 * 0.5) = 3).
-  double get keyboardZoomInUnit => zoomController.value * 0.5;
+  double get keyboardZoomInUnit => currentZoom * 0.5;
 
   // Zooming out via WASD controls will zoom the view out to the previous zoom
   // level. For example, if the zoom level is 3.0, zooming out by one unit would
   // decrease the level to 2.0 (e.g. 3 - 3 * 1/3 = 2). See [wasdZoomInUnit]
   // for an explanation of how we previously zoomed from level 2.0 to level 3.0.
-  double get keyboardZoomOutUnit => zoomController.value * 1 / 3;
+  double get keyboardZoomOutUnit => currentZoom * 1 / 3;
 
-  double get contentWidthWithZoom =>
-      widget.startingContentWidth * zoomController.value;
+  double get contentWidthWithZoom => widget.startingContentWidth * currentZoom;
 
   double get widthWithZoom =>
       contentWidthWithZoom + widget.startInset + widget.endInset;
@@ -149,12 +149,12 @@ abstract class FlameChartState<T extends FlameChart,
         ? startTimeOffset
         : startTimeOffset +
             (horizontalScrollOffset - widget.startInset) /
-                zoomController.value /
+                currentZoom /
                 startingPxPerMicro;
 
     final endMicros = startTimeOffset +
         (horizontalScrollOffset - widget.startInset + widget.containerWidth) /
-            zoomController.value /
+            currentZoom /
             startingPxPerMicro;
 
     return TimeRange()
@@ -248,7 +248,6 @@ abstract class FlameChartState<T extends FlameChart,
       initFlameChartElements();
       horizontalControllerGroup.resetScroll();
       verticalControllerGroup.resetScroll();
-      previousZoom = FlameChart.minZoomLevel;
       zoomController.reset();
       verticalExtentDelegate.recompute();
     }
@@ -335,7 +334,7 @@ abstract class FlameChartState<T extends FlameChart,
             activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
             onTapUp: focusNode.requestFocus,
             backgroundColor: rowBackgroundColor,
-            zoom: zoomController.value,
+            zoom: currentZoom,
           );
         },
         childCount: rows.length,
@@ -378,12 +377,12 @@ abstract class FlameChartState<T extends FlameChart,
       if (keyLabel == 'w') {
         zoomTo(math.min(
           maxZoomLevel,
-          zoomController.value + keyboardZoomInUnit,
+          currentZoom + keyboardZoomInUnit,
         ));
       } else if (keyLabel == 's') {
         zoomTo(math.max(
           FlameChart.minZoomLevel,
-          zoomController.value - keyboardZoomOutUnit,
+          currentZoom - keyboardZoomOutUnit,
         ));
       } else if (keyLabel == 'a') {
         scrollToX(horizontalControllerGroup.offset - keyboardScrollUnit);
@@ -411,7 +410,6 @@ abstract class FlameChartState<T extends FlameChart,
             -FlameChart.maxScrollWheelDelta,
             FlameChart.maxScrollWheelDelta,
           );
-          final currentZoom = zoomController.value;
           // TODO(kenz): if https://github.com/flutter/flutter/issues/52762 is,
           // resolved, consider adjusting the multiplier based on the scroll device
           // kind (mouse or track pad).
@@ -434,27 +432,25 @@ abstract class FlameChartState<T extends FlameChart,
   }
 
   void _handleZoomControllerValueUpdate() {
+    final previousZoom = currentZoom;
+    final newZoom = zoomController.value;
+    if (previousZoom == newZoom) return;
+
+    // Store current scroll values for re-calculating scroll location on zoom.
+    final lastScrollOffset = horizontalControllerGroup.offset;
+
+    final safeMouseHoverX = mouseHoverX ?? widget.containerWidth / 2;
+    // Position in the zoomable coordinate space that we want to keep fixed.
+    final fixedX = safeMouseHoverX + lastScrollOffset - widget.startInset;
+
+    // Calculate the new horizontal scroll position.
+    final newScrollOffset = fixedX >= 0
+        ? fixedX * newZoom / previousZoom + widget.startInset - safeMouseHoverX
+        // We are in the fixed portion of the window - no need to transform.
+        : lastScrollOffset;
+
     setState(() {
-      final currentZoom = zoomController.value;
-      if (currentZoom == previousZoom) return;
-
-      // Store current scroll values for re-calculating scroll location on zoom.
-      final lastScrollOffset = horizontalControllerGroup.offset;
-
-      final safeMouseHoverX = mouseHoverX ?? widget.containerWidth / 2;
-      // Position in the zoomable coordinate space that we want to keep fixed.
-      final fixedX = safeMouseHoverX + lastScrollOffset - widget.startInset;
-
-      // Calculate the new horizontal scroll position.
-      final newScrollOffset = fixedX >= 0
-          ? fixedX * currentZoom / previousZoom +
-              widget.startInset -
-              safeMouseHoverX
-          // We are in the fixed portion of the window - no need to transform.
-          : lastScrollOffset;
-
-      previousZoom = currentZoom;
-
+      currentZoom = zoomController.value;
       // TODO(kenz): consult with Flutter team to see if there is a better place
       // to call this that guarantees the scroll controller offsets will be
       // updated for the new zoom level and layout size
@@ -530,27 +526,24 @@ abstract class FlameChartState<T extends FlameChart,
     @required int startMicros,
     @required int durationMicros,
     @required V data,
-    bool scrollHorizontally = true,
     bool scrollVertically = true,
     bool jumpZoom = false,
   }) async {
-    await Future.wait([
-      zoomToTimeRange(
-        startMicros: startMicros,
-        durationMicros: durationMicros,
-        jump: jumpZoom,
-      ),
-      if (scrollVertically) scrollVerticallyToData(data),
-    ]);
-    // Call this in a post frame callback so that the horizontal scroll
-    // controllers have had time to update their scroll extents. Otherwise, we
-    // can hit a race where are trying to scroll to an offset that is beyond
-    // what the scroll controller thinks its max scroll extent is.
-    if (scrollHorizontally) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await scrollHorizontallyToData(data);
-      });
-    }
+    await zoomToTimeRange(
+      startMicros: startMicros,
+      durationMicros: durationMicros,
+      jump: jumpZoom,
+    );
+    // Call these in a post frame callback so that the scroll controllers have
+    // had time to update their scroll extents. Otherwise, we can hit a race
+    // where are trying to scroll to an offset that is beyond what the scroll
+    // controller thinks its max scroll extent is.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.wait([
+        scrollHorizontallyToData(data),
+        if (scrollVertically) scrollVerticallyToData(data),
+      ]);
+    });
   }
 
   Future<void> zoomToTimeRange({
@@ -875,7 +868,7 @@ class FlameChartUtils {
     // the issue described in the bug where the scroll extent is smaller than
     // where we want to `jumpTo`. Smaller values were experimented with but the
     // issue still persisted, so we are using a very large number.
-    if (index == nodes.length - 1) return 10000000.0;
+    if (index == nodes.length - 1) return 1000000000000.0;
     final node = nodes[index];
     final nextNode = index == nodes.length - 1 ? null : nodes[index + 1];
     final nodeZoom = zoomForNode(node, chartZoom);

@@ -1,6 +1,6 @@
 ## What is this?
 
-This is a server that supports [Dart DevTools](https://pub.dartlang.org/packages/devtools).
+This is a server that supports [Dart DevTools](https://pub.dev/packages/devtools).
 This package contains shared code for performing functions with DevTools, for example, launching it.
 
 ## Terms and Privacy

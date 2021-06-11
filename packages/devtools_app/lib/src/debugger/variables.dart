@@ -146,7 +146,6 @@ Widget displayProvider(
         ],
       ),
       onTap: onTap,
-      maxLines: 1,
     ),
   );
 }

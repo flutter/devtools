@@ -2,236 +2,328 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/debugger/debugger_model.dart';
+import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/debugger/evaluate.dart';
+import 'package:devtools_app/src/eval_on_dart_library.dart';
+import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/ui/search.dart';
-import 'package:flutter/widgets.dart';
+import 'package:devtools_testing/support/flutter_test_driver.dart';
+import 'package:devtools_testing/support/flutter_test_environment.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart';
+import 'package:pedantic/pedantic.dart';
 
-import 'support/mocks.dart';
-
-final libraryRef = LibraryRef(
-  name: 'some library',
-  uri: 'package:foo/foo.dart',
-  id: 'lib-id-1',
-);
+import 'support/utils.dart';
 
 void main() {
-  MockDebuggerController debuggerController;
+  final FlutterTestEnvironment env = FlutterTestEnvironment(
+    const FlutterRunConfiguration(withDebugger: true),
+  );
 
+  Disposable isAlive;
+  DebuggerController debuggerController;
+  EvalOnDartLibrary eval;
   setUp(() async {
-    debuggerController = MockDebuggerController();
-
-    when(debuggerController.selectedStackFrame).thenReturn(
-      ValueNotifier(
-        StackFrameAndSourcePosition(
-          Frame(
-            index: 0,
-            location: SourceLocation(
-                script: ScriptRef(id: 'some-script-loc', uri: ''), tokenPos: 0),
-          ),
-        ),
-      ),
-    );
-    when(debuggerController.variables).thenReturn(
-      ValueNotifier(
-        [
-          Variable.create(
-            BoundVariable(
-              name: 'foo',
-              value: null,
-              declarationTokenPos: 0,
-              scopeStartTokenPos: 0,
-              scopeEndTokenPos: 0,
-            ),
-          ),
-          Variable.create(
-            BoundVariable(
-              name: 'foobar',
-              value: null,
-              declarationTokenPos: 0,
-              scopeStartTokenPos: 0,
-              scopeEndTokenPos: 0,
-            ),
-          ),
-          Variable.create(
-            BoundVariable(
-              name: 'bar',
-              value: null,
-              declarationTokenPos: 0,
-              scopeStartTokenPos: 0,
-              scopeEndTokenPos: 0,
-            ),
-          ),
-          Variable.create(
-            BoundVariable(
-              name: 'baz',
-              value: null,
-              declarationTokenPos: 0,
-              scopeStartTokenPos: 0,
-              scopeEndTokenPos: 0,
-            ),
-          ),
-        ],
-      ),
-    );
-    when(debuggerController.evalAtCurrentFrame(any)).thenAnswer(
-      (_) async =>
-          InstanceRef(kind: '', identityHashCode: 0, classRef: null, id: ''),
-    );
-    when(debuggerController.getObject(any)).thenAnswer((inv) async {
-      final obj = inv.positionalArguments.first;
-      if (obj is ClassRef) {
-        return Class(
-          fields: [
-            FieldRef(
-              name: 'field1',
-              owner: null,
-              declaredType: null,
-              isConst: false,
-              isFinal: false,
-              isStatic: false,
-              id: '',
-            ),
-            FieldRef(
-              name: 'field2',
-              owner: null,
-              declaredType: null,
-              isConst: false,
-              isFinal: false,
-              isStatic: false,
-              id: '',
-            ),
-          ],
-          functions: [
-            FuncRef(
-              name: 'func1',
-              owner: null,
-              isStatic: false,
-              isConst: false,
-              id: '',
-            ),
-            FuncRef(
-              name: 'func2',
-              owner: null,
-              isStatic: false,
-              isConst: false,
-              id: '',
-            ),
-            FuncRef(
-              name: 'funcStatic',
-              owner: null,
-              isStatic: true,
-              isConst: false,
-              id: '',
-            ),
-            FuncRef(
-              name: '>=',
-              owner: null,
-              isStatic: true,
-              isConst: false,
-              id: '',
-            ),
-            FuncRef(
-              name: '==',
-              owner: null,
-              isStatic: true,
-              isConst: false,
-              id: '',
-            ),
-          ],
-          id: '',
-          interfaces: [],
-          isAbstract: null,
-          isConst: null,
-          library: null,
-          name: 'FooClass',
-          subclasses: [],
-          traceAllocations: null,
-        );
-      }
-      if (obj is InstanceRef) {
-        return Instance(
-          classRef: ClassRef(id: '', name: 'FooClass', library: libraryRef),
-          id: '',
-          fields: [
-            BoundField(
-              decl: FieldRef(
-                name: 'fieldBound1',
-                owner: null,
-                declaredType: null,
-                isConst: false,
-                isFinal: false,
-                isStatic: false,
-                id: '',
-              ),
-              value: null,
-            ),
-            BoundField(
-              decl: FieldRef(
-                name: '_privateFieldBound',
-                owner: null,
-                declaredType: null,
-                isConst: false,
-                isFinal: false,
-                isStatic: false,
-                id: '',
-              ),
-              value: null,
-            ),
-          ],
-          identityHashCode: null,
-          kind: '',
-        );
-      }
-      return null;
-    });
-  });
-  test('returns scoped variables when EditingParts is not a field', () async {
-    expect(
-        await autoCompleteResultsFor(
-          EditingParts(
-            activeWord: 'foo',
-            leftSide: '',
-            rightSide: '',
-          ),
-          debuggerController,
-        ),
-        equals(['foo', 'foobar']));
-    expect(
-        await autoCompleteResultsFor(
-          EditingParts(
-            activeWord: 'b',
-            leftSide: '',
-            rightSide: '',
-          ),
-          debuggerController,
-        ),
-        equals(['bar', 'baz']));
+    isAlive = Disposable();
+    await env.setupEnvironment();
+    debuggerController = DebuggerController();
+    eval = EvalOnDartLibrary(
+        ['package:flutter_app/src/autocomplete.dart'], serviceManager.service,
+        disableBreakpoints: false);
   });
 
-  test('returns filtered members when EditingParts is a field ', () async {
-    expect(
-        await autoCompleteResultsFor(
-          EditingParts(
-            activeWord: 'f',
-            leftSide: 'foo.',
-            rightSide: '',
-          ),
-          debuggerController,
-        ),
-        equals(['field1', 'field2', 'fieldBound1', 'func1', 'func2']));
-    expect(
-        await autoCompleteResultsFor(
-          EditingParts(
-            activeWord: 'fu',
-            leftSide: 'foo.',
-            rightSide: '',
-          ),
-          debuggerController,
-        ),
-        equals(['func1', 'func2']));
+  tearDown(() async {
+    await debuggerController.resume();
+    isAlive.dispose();
+    debuggerController.dispose();
+    await env.tearDownEnvironment();
   });
+
+  tearDownAll(() async {
+    await env.tearDownEnvironment(force: true);
+  });
+
+  Future<void> runMethodAndWaitForPause(String method) async {
+    unawaited(eval.eval(method, isAlive: isAlive));
+
+    await whenMatches(debuggerController.selectedStackFrame, (f) => f != null);
+  }
+
+  group(
+    'EvalOnDartLibrary',
+    () {
+      test(
+        'returns scoped variables when EditingParts is not a field',
+        () async {
+          await runMethodAndWaitForPause(
+              'AnotherClass().pauseWithScopedVariablesMethod()');
+          expect(
+            await autoCompleteResultsFor(
+              EditingParts(
+                activeWord: 'foo',
+                leftSide: '',
+                rightSide: '',
+              ),
+              debuggerController,
+            ),
+            equals(['foo', 'foobar']),
+          );
+          expect(
+            await autoCompleteResultsFor(
+              EditingParts(
+                activeWord: 'b',
+                leftSide: '',
+                rightSide: '',
+              ),
+              debuggerController,
+            ),
+            equals(['bar', 'baz']),
+          );
+        },
+        timeout: const Timeout.factor(8),
+      );
+
+      test(
+        'returns filtered members when EditingParts is a field ',
+        () async {
+          await runMethodAndWaitForPause(
+              'AnotherClass().pauseWithScopedVariablesMethod()');
+          expect(
+              await autoCompleteResultsFor(
+                EditingParts(
+                  activeWord: 'f',
+                  leftSide: 'foo.',
+                  rightSide: '',
+                ),
+                debuggerController,
+              ),
+              equals(['field1', 'field2', 'func1', 'func2']));
+          expect(
+              await autoCompleteResultsFor(
+                EditingParts(
+                  activeWord: 'fu',
+                  leftSide: 'foo.',
+                  rightSide: '',
+                ),
+                debuggerController,
+              ),
+              equals(['func1', 'func2']));
+        },
+        timeout: const Timeout.factor(8),
+      );
+
+      test(
+        'returns filtered members when EditingParts is a class name ',
+        () async {
+          await runMethodAndWaitForPause(
+              'AnotherClass().pauseWithScopedVariablesMethod()');
+          expect(
+            await autoCompleteResultsFor(
+              EditingParts(
+                activeWord: '',
+                leftSide: 'FooClass.',
+                rightSide: '',
+              ),
+              debuggerController,
+            ),
+            equals([
+              'staticField1',
+              'staticField2',
+              'namedConstructor',
+              'factory1',
+              'staticMethod'
+            ]),
+          );
+          expect(
+            await autoCompleteResultsFor(
+              EditingParts(
+                activeWord: 'fa',
+                leftSide: 'FooClass.',
+                rightSide: '',
+              ),
+              debuggerController,
+            ),
+            equals(['factory1']),
+          );
+        },
+        timeout: const Timeout.factor(8),
+      );
+      test(
+        'returns privates only from library',
+        () async {
+          await runMethodAndWaitForPause(
+              'AnotherClass().pauseWithScopedVariablesMethod()');
+          expect(
+            await autoCompleteResultsFor(
+              EditingParts(
+                activeWord: '_',
+                leftSide: '',
+                rightSide: '',
+              ),
+              debuggerController,
+            ),
+            equals([
+              '_privateField2',
+              '_privateField1',
+              '_PrivateClass',
+            ]),
+          );
+        },
+        timeout: const Timeout.factor(8),
+      );
+      test(
+        'returns exported members from import',
+        () async {
+          await runMethodAndWaitForPause(
+              'AnotherClass().pauseWithScopedVariablesMethod()');
+          expect(
+            await autoCompleteResultsFor(
+              EditingParts(
+                activeWord: 'exportedField',
+                leftSide: '',
+                rightSide: '',
+              ),
+              debuggerController,
+            ),
+            equals([
+              'exportedField',
+            ]),
+          );
+
+          expect(
+            await autoCompleteResultsFor(
+              EditingParts(
+                activeWord: 'ExportedClass',
+                leftSide: '',
+                rightSide: '',
+              ),
+              debuggerController,
+            ),
+            equals([
+              'ExportedClass',
+            ]),
+          );
+
+          // Privates are not exported
+          expect(
+            await autoCompleteResultsFor(
+              EditingParts(
+                activeWord: '_privateExportedField',
+                leftSide: '',
+                rightSide: '',
+              ),
+              debuggerController,
+            ),
+            equals([]),
+          );
+
+          expect(
+            await autoCompleteResultsFor(
+              EditingParts(
+                activeWord: '_PrivateExportedClass',
+                leftSide: '',
+                rightSide: '',
+              ),
+              debuggerController,
+            ),
+            equals([]),
+          );
+        },
+        timeout: const Timeout.factor(8),
+      );
+
+      test(
+        'returns prefixes of libraries imported',
+        () async {
+          await runMethodAndWaitForPause(
+              'AnotherClass().pauseWithScopedVariablesMethod()');
+          expect(
+            await autoCompleteResultsFor(
+              EditingParts(
+                activeWord: 'developer',
+                leftSide: '',
+                rightSide: '',
+              ),
+              debuggerController,
+            ),
+            equals([
+              'developer',
+            ]),
+          );
+
+          expect(
+            await autoCompleteResultsFor(
+              EditingParts(
+                activeWord: 'math',
+                leftSide: '',
+                rightSide: '',
+              ),
+              debuggerController,
+            ),
+            equals([
+              'math',
+            ]),
+          );
+        },
+        timeout: const Timeout.factor(8),
+      );
+
+      test(
+        'returns no operators for int',
+        () async {
+          await runMethodAndWaitForPause(
+              'AnotherClass().pauseWithScopedVariablesMethod()');
+          expect(
+            await autoCompleteResultsFor(
+              EditingParts(
+                activeWord: '',
+                leftSide: '7.',
+                rightSide: '',
+              ),
+              debuggerController,
+            ),
+            equals(
+              [
+                'hashCode',
+                'bitLength',
+                'toString',
+                'remainder',
+                'abs',
+                'sign',
+                'isEven',
+                'isOdd',
+                'isNaN',
+                'isNegative',
+                'isInfinite',
+                'isFinite',
+                'toUnsigned',
+                'toSigned',
+                'compareTo',
+                'round',
+                'floor',
+                'ceil',
+                'truncate',
+                'roundToDouble',
+                'floorToDouble',
+                'ceilToDouble',
+                'truncateToDouble',
+                'clamp',
+                'toInt',
+                'toDouble',
+                'toStringAsFixed',
+                'toStringAsExponential',
+                'toStringAsPrecision',
+                'toRadixString',
+                'modPow',
+                'modInverse',
+                'gcd',
+                'noSuchMethod',
+                'runtimeType'
+              ],
+            ),
+          );
+        },
+        timeout: const Timeout.factor(8),
+      );
+    },
+  );
 }

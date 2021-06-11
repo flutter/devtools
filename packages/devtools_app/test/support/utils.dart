@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:devtools_app/src/charts/treemap.dart';
 import 'package:devtools_app/src/ui/search.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -37,6 +39,22 @@ Future<void> addListenerScope({
   await callback();
   expect(listenerCalled, true);
   listenable.removeListener(listenerWrapped);
+}
+
+/// Returns a future that completes when a listenable has a value that satisfies
+/// [condition].
+Future<T> whenMatches<T>(ValueListenable<T> listenable, bool condition(T)) {
+  final completer = Completer<T>();
+  void listener() {
+    if (condition(listenable.value)) {
+      completer.complete(listenable.value);
+      listenable.removeListener(listener);
+    }
+  }
+
+  listenable.addListener(listener);
+  listener();
+  return completer.future;
 }
 
 /// Creates an instance of [Timeline] which contains recorded HTTP events.

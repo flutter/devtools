@@ -1061,7 +1061,10 @@ class GoToLineDialog extends StatelessWidget {
                 );
               }
             },
-            decoration: const InputDecoration(labelText: 'Line Number'),
+            decoration: InputDecoration(
+              labelText: 'Line Number',
+              contentPadding: EdgeInsets.all(scaleByFontFactor(5.0)),
+            ),
             keyboardType: TextInputType.number,
             inputFormatters: <TextInputFormatter>[
               FilteringTextInputFormatter.digitsOnly

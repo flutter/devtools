@@ -19,6 +19,7 @@ import 'package:vm_service/vm_service.dart';
 import '../auto_dispose.dart';
 import '../eval_on_dart_library.dart';
 import '../globals.dart';
+import '../utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service_polyfill.dart';
 
@@ -254,10 +255,16 @@ class InspectorService extends DisposableController
       final isolate = inspectorLibrary.isolate;
       for (var libraryRef in isolate.libraries) {
         if (isLocalUri(libraryRef.uri)) {
-          final Library library = await inspectorLibrary.service
-              .getObject(isolate.id, libraryRef.id);
-          for (var classRef in library.classes) {
-            localClasses[classRef.name] = classRef;
+          try {
+            final Library library = await inspectorLibrary.service
+                .getObject(isolate.id, libraryRef.id);
+            for (var classRef in library.classes) {
+              localClasses[classRef.name] = classRef;
+            }
+          } catch (e) {
+            // Workaround until https://github.com/flutter/devtools/issues/3110
+            // is fixed.
+            assert(serviceManager.connectedApp.isDartWebAppNow);
           }
         }
       }
@@ -1115,7 +1122,7 @@ class ObjectGroup implements Disposable {
     final Map<String, InstanceRef> properties = {};
     for (FieldRef field in clazz.fields) {
       final String name = field.name;
-      if (name.startsWith('_')) {
+      if (isPrivate(name)) {
         // Needed to filter out _deleted_enum_sentinel synthetic property.
         // If showing enum values is useful we could special case
         // just the _deleted_enum_sentinel property name.

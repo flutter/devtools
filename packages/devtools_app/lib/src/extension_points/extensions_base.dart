@@ -9,4 +9,6 @@ abstract class DevToolsExtensionPoints {
   List<ScriptPopupMenuOption> buildExtraDebuggerScriptPopupMenuOptions();
 
   Link issueTrackerLink();
+
+  String loadingAppSizeDataMessage();
 }

@@ -5,6 +5,7 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart';
+import '../utils.dart';
 import 'memory_controller.dart';
 
 // TODO(terry): Ask Ben, what is a class name of ::?
@@ -332,8 +333,7 @@ class HeapGraph {
     groupByClass.removeWhere((className, instances) {
       final remove =
           (controller.filterZeroInstances.value && instances.isEmpty) ||
-              (controller.filterPrivateClasses.value &&
-                  className.startsWith('_')) ||
+              (controller.filterPrivateClasses.value && isPrivate(className)) ||
               className == internalClassName;
       if (remove) {
         filteredElements.putIfAbsent(className, () => instances);
@@ -355,8 +355,7 @@ class HeapGraph {
       classes.removeWhere((actual) {
         final result = (controller.filterZeroInstances.value &&
                 actual.getInstances(this).isEmpty) ||
-            (controller.filterPrivateClasses.value &&
-                actual.name.startsWith('_')) ||
+            (controller.filterPrivateClasses.value && isPrivate(actual.name)) ||
             actual.name == internalClassName;
         return result;
       });

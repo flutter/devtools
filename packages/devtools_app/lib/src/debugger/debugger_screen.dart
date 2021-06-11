@@ -451,14 +451,20 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
 
   bool paused;
 
+  double controlHeight;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     controller = Provider.of<DebuggerController>(context);
     paused = controller.isPaused.value;
+    controlHeight = paused ? defaultButtonHeight : 0.0;
     addAutoDisposeListener(controller.isPaused, () {
       setState(() {
         paused = controller.isPaused.value;
+        if (paused) {
+          controlHeight = defaultButtonHeight;
+        }
       });
     });
   }
@@ -468,9 +474,16 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
     return AnimatedOpacity(
       opacity: paused ? 1.0 : 0.0,
       duration: longDuration,
+      onEnd: () {
+        if (!paused) {
+          setState(() {
+            controlHeight = 0.0;
+          });
+        }
+      },
       child: Container(
         color: devtoolsWarning,
-        height: defaultButtonHeight,
+        height: controlHeight,
         child: OutlinedRowGroup(
           // Default focus color for the light theme - since the background
           // color of the controls [devtoolsWarning] is the same for both

@@ -26,6 +26,11 @@ void selectFrame(
   int uiDuration,
 ]) {}
 
+void reportError(
+  String errorMessage, {
+  bool fatal = false,
+}) {}
+
 Future<void> setupDimensions() async {}
 
 Future<void> setupUserApplicationDimensions() async {}
