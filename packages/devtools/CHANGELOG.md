@@ -1,3 +1,6 @@
+## 2.3.3
+* Fix inspector on flutter web. [#3112](https://github.com/flutter/devtools/pull/3112)
+
 ## 2.3.2
 * Hover fixes [3065](https://github.com/flutter/devtools/pull/3065)
 * Fix a bug with app initialization [3067](https://github.com/flutter/devtools/pull/3067)
