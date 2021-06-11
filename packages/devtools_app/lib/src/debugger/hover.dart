@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import '../eval_on_dart_library.dart';
 import '../theme.dart';
 import '../ui/utils.dart';
 
@@ -72,6 +76,18 @@ int _hoverIndexFor(double dx, TextSpan line) {
 const _hoverCardBorderWidth = 2.0;
 const _hoverYOffset = 10;
 
+class HoverCardData {
+  HoverCardData({
+    @required this.title,
+    @required this.contents,
+    this.width = HoverCardTip.defaultHoverWidth,
+  });
+
+  final String title;
+  final Widget contents;
+  final double width;
+}
+
 /// A card to display content while hovering over a widget.
 ///
 /// This widget will automatically remove itself after the mouse has entered
@@ -94,7 +110,7 @@ class HoverCard {
 
     _overlayEntry = OverlayEntry(builder: (context) {
       return Positioned(
-        left: position.dx - (width / 2.0),
+        left: math.max(0, position.dx - (width / 2.0)),
         top: position.dy + _hoverYOffset,
         child: MouseRegion(
           onExit: (_) {
@@ -156,5 +172,86 @@ class HoverCard {
   void remove() {
     if (!_isRemoved) _overlayEntry.remove();
     _isRemoved = true;
+  }
+}
+
+class HoverCardTip extends StatefulWidget {
+  const HoverCardTip({
+    @required this.enabled,
+    @required this.onHover,
+    @required this.child,
+    this.disposable,
+  });
+
+  static const _hoverDelay = Duration(milliseconds: 500);
+  static const defaultHoverWidth = 450.0;
+
+  final bool Function() enabled;
+  final Future<HoverCardData> Function(PointerHoverEvent event) onHover;
+  final Widget child;
+
+  /// Disposable object to be disposed when the group is closed.
+  final Disposable disposable;
+
+  @override
+  _HoverCardTipState createState() => _HoverCardTipState();
+}
+
+class _HoverCardTipState extends State<HoverCardTip> {
+  /// A timer that shows a [HoverCard] with an evaluation result when completed.
+  Timer _showTimer;
+
+  /// A timer that removes a [HoverCard] when completed.
+  Timer _removeTimer;
+
+  /// Displays the evaluation result of a source code item.
+  HoverCard _hoverCard;
+
+  void _onHoverExit() {
+    _showTimer?.cancel();
+    _removeTimer = Timer(HoverCardTip._hoverDelay, () {
+      _hoverCard?.maybeRemove();
+    });
+  }
+
+  void _onHover(PointerHoverEvent event) {
+    _showTimer?.cancel();
+    _showTimer = null;
+    _removeTimer?.cancel();
+    _removeTimer = null;
+
+    if (!widget.enabled()) return;
+    _showTimer = Timer(HoverCardTip._hoverDelay, () async {
+      _hoverCard?.remove();
+      _hoverCard = null;
+      final hoverCardData = await widget.onHover(event);
+      if (hoverCardData != null) {
+        _hoverCard = HoverCard(
+          context: context,
+          event: event,
+          title: hoverCardData.title,
+          contents: hoverCardData.contents,
+          width: hoverCardData.width,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _showTimer?.cancel();
+    _removeTimer?.cancel();
+    _hoverCard?.remove();
+    widget.disposable?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onExit: (_) => _onHoverExit(),
+      onHover: _onHover,
+      child: widget.child,
+    );
   }
 }
