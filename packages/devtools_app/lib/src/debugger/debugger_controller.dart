@@ -177,7 +177,7 @@ class DebuggerController extends DisposableController
   /// for syntax highlighting.
   Future<void> _parseCurrentScript() async {
     // Return early if the current script has not changed.
-    if (parsedScript.value?.script?.id == _currentScriptRef.value.id) return;
+    if (parsedScript.value?.script?.id == _currentScriptRef?.value?.id) return;
 
     final scriptRef = _currentScriptRef.value;
     final script = await getScriptForRef(scriptRef);

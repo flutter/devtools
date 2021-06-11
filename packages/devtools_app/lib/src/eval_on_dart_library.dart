@@ -141,12 +141,46 @@ class EvalOnDartLibrary {
     @required Disposable isAlive,
     Map<String, String> scope,
     bool shouldLogError = true,
-  }) {
-    return addRequest(
+  }) async {
+    if ((scope?.isNotEmpty ?? false) &&
+        serviceManager.connectedApp.isDartWebAppNow) {
+      final result = await eval(
+        '(${scope.keys.join(',')}) => $expression',
+        isAlive: isAlive,
+        shouldLogError: shouldLogError,
+      );
+      if (result == null || isAlive.disposed) return null;
+      return await invoke(
+        result,
+        'call',
+        scope.values.toList(),
+        isAlive: isAlive,
+        shouldLogError: shouldLogError,
+      );
+    }
+    return await addRequest(
       isAlive,
       () => _eval(
         expression,
         scope: scope,
+        shouldLogError: shouldLogError,
+      ),
+    );
+  }
+
+  Future<InstanceRef> invoke(
+    InstanceRef instanceRef,
+    String name,
+    List<String> argRefs, {
+    @required Disposable isAlive,
+    bool shouldLogError = true,
+  }) {
+    return addRequest(
+      isAlive,
+      () => _invoke(
+        instanceRef,
+        name,
+        argRefs,
         shouldLogError: shouldLogError,
       ),
     );
@@ -192,6 +226,39 @@ class EvalOnDartLibrary {
     } catch (e, stack) {
       if (shouldLogError) {
         _handleError('$e - $expression', stack);
+      }
+    }
+    return null;
+  }
+
+  Future<InstanceRef> _invoke(
+    InstanceRef instanceRef,
+    String name,
+    List<String> argRefs, {
+    bool shouldLogError = true,
+  }) async {
+    if (_disposed) return null;
+
+    try {
+      final libraryRef = await _waitForLibraryRef();
+      if (libraryRef == null) return null;
+      final result = await service.invoke(
+        _isolateRef.id,
+        instanceRef.id,
+        name,
+        argRefs,
+        disableBreakpoints: disableBreakpoints,
+      );
+      if (result is Sentinel) {
+        return null;
+      }
+      if (result is ErrorRef) {
+        throw result;
+      }
+      return result;
+    } catch (e, stack) {
+      if (shouldLogError) {
+        _handleError('$e - $name', stack);
       }
     }
     return null;
