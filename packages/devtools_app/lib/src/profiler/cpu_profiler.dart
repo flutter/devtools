@@ -16,7 +16,6 @@ import 'cpu_profile_call_tree.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_flame_chart.dart';
 import 'cpu_profile_model.dart';
-import 'cpu_profile_transformer.dart';
 
 // TODO(kenz): provide useful UI upon selecting a CPU stack frame.
 
@@ -26,10 +25,8 @@ class CpuProfiler extends StatefulWidget {
     @required this.controller,
     this.searchFieldKey,
     this.standaloneProfiler = true,
-  })  : callTreeRoots = data != null ? [data.cpuProfileRoot.deepCopy()] : [],
-        bottomUpRoots = data != null
-            ? BottomUpProfileTransformer.processData(data.cpuProfileRoot)
-            : [];
+  })  : callTreeRoots = data?.callTreeRoots ?? [],
+        bottomUpRoots = data?.bottomUpRoots ?? [];
 
   final CpuProfileData data;
 

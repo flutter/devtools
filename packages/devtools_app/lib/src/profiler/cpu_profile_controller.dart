@@ -96,6 +96,24 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
       extentMicros: extentMicros,
     );
 
+    await _transformAndSetData(cpuProfileData);
+  }
+
+  Future<void> generateSubProfile(
+    CpuProfileData superProfile,
+    TimeRange subTimeRange, {
+    String processId,
+  }) async {
+    _processingNotifier.value = true;
+    _dataNotifier.value = null;
+    final subProfile = CpuProfileData.subProfile(superProfile, subTimeRange);
+    await _transformAndSetData(subProfile);
+  }
+
+  Future<void> _transformAndSetData(
+    CpuProfileData cpuProfileData, {
+    String processId,
+  }) async {
     try {
       await transformer.processData(cpuProfileData, processId: processId);
       _dataNotifier.value = cpuProfileData;

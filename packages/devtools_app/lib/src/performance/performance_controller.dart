@@ -61,6 +61,8 @@ class PerformanceController
   ValueListenable<List<FlutterFrame>> get flutterFrames => _flutterFrames;
   final _flutterFrames = ValueNotifier<List<FlutterFrame>>([]);
 
+  final _flutterFramesById = <String, FlutterFrame>{};
+
   /// Whether an empty timeline recording was just recorded.
   ValueListenable<bool> get emptyTimeline => _emptyTimeline;
   final _emptyTimeline = ValueNotifier<bool>(false);
@@ -161,31 +163,39 @@ class PerformanceController
     data?.displayRefreshRate = _displayRefreshRate.value;
   }
 
-  Future<void> selectTimelineEvent(TimelineEvent event) async {
+  Future<void> selectTimelineEvent(
+    TimelineEvent event, {
+    bool pullCpuProfile = true,
+  }) async {
     if (event == null || data.selectedEvent == event) return;
 
     data.selectedEvent = event;
     _selectedTimelineEventNotifier.value = event;
 
-    cpuProfilerController.reset();
-
-    // Fetch a profile if not in offline mode and if the profiler is enabled.
-    if ((!offlineMode || offlinePerformanceData == null) &&
-        cpuProfilerController.profilerEnabled) {
-      await getCpuProfileForSelectedEvent();
+    if (pullCpuProfile && event.isUiEvent) {
+      if (event.frameId != null) {
+        final frameProfile = _flutterFramesById[event.frameId]?.cpuProfileData;
+        if (frameProfile != null) {
+          cpuProfilerController.reset();
+          await cpuProfilerController.generateSubProfile(
+            frameProfile,
+            event.time,
+            processId: 'subProfile for ${event.name} from ${event.frameId}',
+          );
+          data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+        }
+      } else if ((!offlineMode || offlinePerformanceData == null) &&
+          cpuProfilerController.profilerEnabled) {
+        // Fetch a profile if not in offline mode and if the profiler is enabled
+        cpuProfilerController.reset();
+        await cpuProfilerController.pullAndProcessProfile(
+          startMicros: event.time.start.inMicroseconds,
+          extentMicros: event.time.duration.inMicroseconds,
+          processId: '${event.traceEvents.first.id}',
+        );
+        data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+      }
     }
-  }
-
-  Future<void> getCpuProfileForSelectedEvent() async {
-    final selectedEvent = data.selectedEvent;
-    if (!selectedEvent.isUiEvent) return;
-
-    await cpuProfilerController.pullAndProcessProfile(
-      startMicros: selectedEvent.time.start.inMicroseconds,
-      extentMicros: selectedEvent.time.duration.inMicroseconds,
-      processId: '${selectedEvent.traceEvents.first.id}',
-    );
-    data.cpuProfileData = cpuProfilerController.dataNotifier.value;
   }
 
   ValueListenable<double> get displayRefreshRate => _displayRefreshRate;
@@ -206,9 +216,28 @@ class PerformanceController
     data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
 
-    await selectTimelineEvent(frame.uiEventFlow);
+    // We do not need to pull the CPU profile because we will pull the profile
+    // for the entire frame. The order of selecting the timeline event and
+    // pulling the CPU profile for the frame (directly below) matters here.
+    // If the selected timeline event is null, the event details section will
+    // not show the progress bar while we are processing the CPU profile.
+    await selectTimelineEvent(frame.uiEventFlow, pullCpuProfile: false);
 
-    if (debugTimeline && frame != null) {
+    if (frame.cpuProfileData == null) {
+      cpuProfilerController.reset();
+      await cpuProfilerController.pullAndProcessProfile(
+        startMicros: frame.time.start.inMicroseconds,
+        extentMicros: frame.time.duration.inMicroseconds,
+        processId: 'Flutter frame ${frame.id}',
+      );
+      frame.cpuProfileData = cpuProfilerController.dataNotifier.value;
+      data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+    } else {
+      data.cpuProfileData = frame.cpuProfileData;
+      cpuProfilerController.loadProcessedData(frame.cpuProfileData);
+    }
+
+    if (debugTimeline) {
       final buf = StringBuffer();
       buf.writeln('UI timeline event for frame ${frame.id}:');
       frame.uiEventFlow.format(buf, '  ');
@@ -224,6 +253,7 @@ class PerformanceController
 
   void addFrame(FlutterFrame frame) {
     data.frames.add(frame);
+    _flutterFramesById.putIfAbsent(frame.id, () => frame);
   }
 
   Future<void> refreshData() async {
@@ -495,6 +525,7 @@ class PerformanceController
     processor?.reset();
     _emptyTimeline.value = true;
     _flutterFrames.value = [];
+    _flutterFramesById.clear();
     _selectedTimelineEventNotifier.value = null;
     _selectedFrameNotifier.value = null;
     _processing.value = false;

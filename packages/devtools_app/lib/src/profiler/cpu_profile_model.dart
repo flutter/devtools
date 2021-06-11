@@ -11,6 +11,7 @@ import '../trace_event.dart';
 import '../trees.dart';
 import '../ui/search.dart';
 import '../utils.dart';
+import 'cpu_profile_transformer.dart';
 
 /// Data model for DevTools CPU profile.
 class CpuProfileData {
@@ -107,6 +108,21 @@ class CpuProfileData {
 
   /// Marks whether this data has already been processed.
   bool processed = false;
+
+  List<CpuStackFrame> get callTreeRoots {
+    if (!processed) return <CpuStackFrame>[];
+    return _callTreeRoots ??= [_cpuProfileRoot.deepCopy()];
+  }
+
+  List<CpuStackFrame> _callTreeRoots;
+
+  List<CpuStackFrame> get bottomUpRoots {
+    if (!processed) return <CpuStackFrame>[];
+    return _bottomUpRoots ??=
+        BottomUpProfileTransformer.processData(_cpuProfileRoot);
+  }
+
+  List<CpuStackFrame> _bottomUpRoots;
 
   final Map<String, dynamic> stackFramesJson;
 
