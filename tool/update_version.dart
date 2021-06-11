@@ -50,7 +50,7 @@ String incrementVersion(String oldVersion) {
   final parts = semVer.split('.');
 
   // Versions should have the form x.y.z
-  assert (parts.length == 3);
+  assert(parts.length == 3);
 
   final patch = int.parse(parts.last);
   final nextPatch = patch + 1;
