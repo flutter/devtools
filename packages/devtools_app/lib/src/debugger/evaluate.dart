@@ -532,7 +532,7 @@ bool _validFunction(FuncRef funcRef, Class clazz, bool staticContext) {
       !_isOperator(funcRef);
 }
 
-bool _isOperator(FuncRef funcRef) => [
+bool _isOperator(FuncRef funcRef) => const {
       '==',
       '+',
       '-',
@@ -552,7 +552,7 @@ bool _isOperator(FuncRef funcRef) => [
       '%',
       '~/',
       'unary-',
-    ].contains(funcRef.name);
+    }.contains(funcRef.name);
 
 bool _isConstructor(FuncRef funcRef, Class clazz) =>
     funcRef.name == clazz.name || funcRef.name.startsWith('${clazz.name}.');
