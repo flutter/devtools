@@ -255,10 +255,16 @@ class InspectorService extends DisposableController
       final isolate = inspectorLibrary.isolate;
       for (var libraryRef in isolate.libraries) {
         if (isLocalUri(libraryRef.uri)) {
-          final Library library = await inspectorLibrary.service
-              .getObject(isolate.id, libraryRef.id);
-          for (var classRef in library.classes) {
-            localClasses[classRef.name] = classRef;
+          try {
+            final Library library = await inspectorLibrary.service
+                .getObject(isolate.id, libraryRef.id);
+            for (var classRef in library.classes) {
+              localClasses[classRef.name] = classRef;
+            }
+          } catch (e) {
+            // Workaround until https://github.com/flutter/devtools/issues/3110
+            // is fixed.
+            assert(serviceManager.connectedApp.isDartWebAppNow);
           }
         }
       }
