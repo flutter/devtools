@@ -274,7 +274,15 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (rawValues == null) {
       return null;
     }
-    return rawValues.toList();
+    return List<String>.from(rawValues);
+  }
+
+  List<bool> get primitiveValues {
+    final List<Object> rawValues = json['primitiveValues'];
+    if (rawValues == null) {
+      return null;
+    }
+    return List<bool>.from(rawValues);
   }
 
   bool get hasValues => json.containsKey('values');
@@ -706,6 +714,8 @@ class InspectorSourceLocation {
   }
 }
 
+// TODO(jacobr): rename this class or merge with SourcePosition class in
+// debugger_model.dart
 class SourcePosition {
   const SourcePosition({this.file, this.line, this.column});
 
