@@ -21,7 +21,9 @@ class ConnectedApp {
 
   bool get connectedAppInitialized =>
       _isFlutterApp != null &&
-      (_isFlutterApp == false || _flutterVersion != null) &&
+      (_isFlutterApp == false ||
+          _isDartWebApp == true ||
+          _flutterVersion != null) &&
       _isProfileBuild != null &&
       _isDartWebApp != null;
 
