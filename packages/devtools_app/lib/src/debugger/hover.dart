@@ -80,7 +80,7 @@ class HoverCardData {
   HoverCardData({
     @required this.title,
     @required this.contents,
-    this.width = HoverCardTip.defaultHoverWidth,
+    this.width = HoverCardTooltip.defaultHoverWidth,
   });
 
   final String title;
@@ -175,8 +175,9 @@ class HoverCard {
   }
 }
 
-class HoverCardTip extends StatefulWidget {
-  const HoverCardTip({
+/// A hover card based tooltip.
+class HoverCardTooltip extends StatefulWidget {
+  const HoverCardTooltip({
     @required this.enabled,
     @required this.onHover,
     @required this.child,
@@ -186,18 +187,22 @@ class HoverCardTip extends StatefulWidget {
   static const _hoverDelay = Duration(milliseconds: 500);
   static const defaultHoverWidth = 450.0;
 
+  /// Whether the tooltip is currently enabled.
   final bool Function() enabled;
+
+  /// Data to display when hovering over a particular point.
   final Future<HoverCardData> Function(PointerHoverEvent event) onHover;
+
   final Widget child;
 
   /// Disposable object to be disposed when the group is closed.
   final Disposable disposable;
 
   @override
-  _HoverCardTipState createState() => _HoverCardTipState();
+  _HoverCardTooltipState createState() => _HoverCardTooltipState();
 }
 
-class _HoverCardTipState extends State<HoverCardTip> {
+class _HoverCardTooltipState extends State<HoverCardTooltip> {
   /// A timer that shows a [HoverCard] with an evaluation result when completed.
   Timer _showTimer;
 
@@ -209,7 +214,7 @@ class _HoverCardTipState extends State<HoverCardTip> {
 
   void _onHoverExit() {
     _showTimer?.cancel();
-    _removeTimer = Timer(HoverCardTip._hoverDelay, () {
+    _removeTimer = Timer(HoverCardTooltip._hoverDelay, () {
       _hoverCard?.maybeRemove();
     });
   }
@@ -221,7 +226,7 @@ class _HoverCardTipState extends State<HoverCardTip> {
     _removeTimer = null;
 
     if (!widget.enabled()) return;
-    _showTimer = Timer(HoverCardTip._hoverDelay, () async {
+    _showTimer = Timer(HoverCardTooltip._hoverDelay, () async {
       _hoverCard?.remove();
       _hoverCard = null;
       final hoverCardData = await widget.onHover(event);
