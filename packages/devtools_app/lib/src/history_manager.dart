@@ -17,7 +17,6 @@ class HistoryManager<T> {
 
   void clear() {
     _history.clear();
-    _historyIndex = null;
     _historyIndex = -1;
     _current.value = null;
   }
