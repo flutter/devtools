@@ -97,7 +97,8 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
       if (selectedNode.isFlex) {
         highlighted = newProperties;
       } else {
-        final idx = selectedNode.parent.childrenNow.indexOf(selectedNode);
+        final idx =
+            selectedNode?.parent?.childrenNow?.indexOf(selectedNode) ?? -1;
         if (newProperties == null || newProperties.children == null) return;
         if (idx != -1) highlighted = newProperties.children[idx];
       }
