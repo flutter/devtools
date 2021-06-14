@@ -172,7 +172,7 @@ class PerformanceController
 
     if (event.isUiEvent && updateProfiler) {
       final storedProfile =
-          cpuProfilerController.cpuProfileStore.storedProfile(event.time);
+          cpuProfilerController.cpuProfileStore.lookupProfile(event.time);
       if (storedProfile != null) {
         await cpuProfilerController.processAndSetData(
           storedProfile,
@@ -219,7 +219,7 @@ class PerformanceController
     await selectTimelineEvent(frame.uiEventFlow, updateProfiler: false);
 
     final storedProfileForFrame =
-        cpuProfilerController.cpuProfileStore.storedProfile(frame.time);
+        cpuProfilerController.cpuProfileStore.lookupProfile(frame.time);
     if (storedProfileForFrame == null) {
       cpuProfilerController.reset();
       await cpuProfilerController.pullAndProcessProfile(

@@ -100,7 +100,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     );
 
     await processAndSetData(cpuProfileData);
-    cpuProfileStore.storeProfile(
+    cpuProfileStore.addProfile(
       TimeRange()
         ..start = Duration(microseconds: startMicros)
         ..end = Duration(microseconds: startMicros + extentMicros),

@@ -425,34 +425,41 @@ int stackFrameIdCompare(String a, String b) {
 }
 
 class CpuProfileStore {
-  final _store = <TimeRange, CpuProfileData>{};
+  final _profiles = <TimeRange, CpuProfileData>{};
 
-  CpuProfileData storedProfile(TimeRange time) {
+  /// Lookup a profile from the cache [_profiles] for the given range [time].
+  ///
+  /// If [_profiles] contains a CPU profile for a time range that encompasses
+  /// [time], a sub profile will be generated, cached in [_profiles] and then
+  /// returned. This method will return null if no profiles are cached for
+  /// [time] or if a sub profile cannot be generated for [time].
+  CpuProfileData lookupProfile(TimeRange time) {
     // If we have a profile for a time range encompassing [time], then we can
     // generate and cache the profile for [time] without needing to pull data
     // from the vm service.
     _maybeGenerateSubProfile(time);
-    return _store[time];
+    return _profiles[time];
   }
 
-  void storeProfile(TimeRange time, CpuProfileData profile) {
-    _store[time] = profile;
+  void addProfile(TimeRange time, CpuProfileData profile) {
+    _profiles[time] = profile;
   }
 
   void _maybeGenerateSubProfile(TimeRange time) {
-    if (_store.containsKey(time)) return;
+    if (_profiles.containsKey(time)) return;
     final encompassingTimeRange = _encompassingTimeRange(time);
     if (encompassingTimeRange != null) {
-      final encompassingProfile = _store[encompassingTimeRange];
+      final encompassingProfile = _profiles[encompassingTimeRange];
+
       final subProfile = CpuProfileData.subProfile(encompassingProfile, time);
-      _store[time] = subProfile;
+      _profiles[time] = subProfile;
     }
   }
 
   TimeRange _encompassingTimeRange(TimeRange time) {
     int shortestDurationMicros = maxJsInt;
     TimeRange encompassingTimeRange;
-    for (final t in _store.keys) {
+    for (final t in _profiles.keys) {
       // We want to find the shortest encompassing time range for [time].
       if (t.containsRange(time) &&
           t.duration.inMicroseconds < shortestDurationMicros) {
@@ -464,6 +471,6 @@ class CpuProfileStore {
   }
 
   void clear() {
-    _store.clear();
+    _profiles.clear();
   }
 }
