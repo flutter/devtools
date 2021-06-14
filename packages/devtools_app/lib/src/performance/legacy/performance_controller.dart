@@ -197,10 +197,6 @@ class LegacyPerformanceController
           extentMicros: event.time.duration.inMicroseconds,
           processId: '${event.traceEvents.first.id}',
         );
-        cpuProfilerController.cpuProfileStore.storeProfile(
-          event.time,
-          cpuProfilerController.dataNotifier.value,
-        );
         data.cpuProfileData = cpuProfilerController.dataNotifier.value;
       }
     }
