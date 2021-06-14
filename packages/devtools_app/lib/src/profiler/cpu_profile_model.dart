@@ -11,6 +11,7 @@ import '../trace_event.dart';
 import '../trees.dart';
 import '../ui/search.dart';
 import '../utils.dart';
+import 'cpu_profile_transformer.dart';
 
 /// Data model for DevTools CPU profile.
 class CpuProfileData {
@@ -107,6 +108,21 @@ class CpuProfileData {
 
   /// Marks whether this data has already been processed.
   bool processed = false;
+
+  List<CpuStackFrame> get callTreeRoots {
+    if (!processed) return <CpuStackFrame>[];
+    return _callTreeRoots ??= [_cpuProfileRoot.deepCopy()];
+  }
+
+  List<CpuStackFrame> _callTreeRoots;
+
+  List<CpuStackFrame> get bottomUpRoots {
+    if (!processed) return <CpuStackFrame>[];
+    return _bottomUpRoots ??=
+        BottomUpProfileTransformer.processData(_cpuProfileRoot);
+  }
+
+  List<CpuStackFrame> _bottomUpRoots;
 
   final Map<String, dynamic> stackFramesJson;
 
@@ -405,5 +421,56 @@ int stackFrameIdCompare(String a, String b) {
       error += 'ids [$a, $b]';
     }
     throw error;
+  }
+}
+
+class CpuProfileStore {
+  final _profiles = <TimeRange, CpuProfileData>{};
+
+  /// Lookup a profile from the cache [_profiles] for the given range [time].
+  ///
+  /// If [_profiles] contains a CPU profile for a time range that encompasses
+  /// [time], a sub profile will be generated, cached in [_profiles] and then
+  /// returned. This method will return null if no profiles are cached for
+  /// [time] or if a sub profile cannot be generated for [time].
+  CpuProfileData lookupProfile(TimeRange time) {
+    // If we have a profile for a time range encompassing [time], then we can
+    // generate and cache the profile for [time] without needing to pull data
+    // from the vm service.
+    _maybeGenerateSubProfile(time);
+    return _profiles[time];
+  }
+
+  void addProfile(TimeRange time, CpuProfileData profile) {
+    _profiles[time] = profile;
+  }
+
+  void _maybeGenerateSubProfile(TimeRange time) {
+    if (_profiles.containsKey(time)) return;
+    final encompassingTimeRange = _encompassingTimeRange(time);
+    if (encompassingTimeRange != null) {
+      final encompassingProfile = _profiles[encompassingTimeRange];
+
+      final subProfile = CpuProfileData.subProfile(encompassingProfile, time);
+      _profiles[time] = subProfile;
+    }
+  }
+
+  TimeRange _encompassingTimeRange(TimeRange time) {
+    int shortestDurationMicros = maxJsInt;
+    TimeRange encompassingTimeRange;
+    for (final t in _profiles.keys) {
+      // We want to find the shortest encompassing time range for [time].
+      if (t.containsRange(time) &&
+          t.duration.inMicroseconds < shortestDurationMicros) {
+        shortestDurationMicros = t.duration.inMicroseconds;
+        encompassingTimeRange = t;
+      }
+    }
+    return encompassingTimeRange;
+  }
+
+  void clear() {
+    _profiles.clear();
   }
 }
