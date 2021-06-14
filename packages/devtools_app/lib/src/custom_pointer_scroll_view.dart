@@ -655,10 +655,13 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
       );
     }
 
-    // TODO: https://github.com/flutter/devtools/issues/2858
-    // ignore: deprecated_member_use
-    return _configuration.buildViewportChrome(
-        context, result, widget.axisDirection);
+    // In contrast to scrollable.dart, _configuration.buildScrollbar is not
+    // called since scrollbars are added manually where needed.
+    return _configuration.buildOverscrollIndicator(
+        context,
+        result,
+        ScrollableDetails(
+            controller: widget.controller, direction: axisDirection));
   }
 
   @override
