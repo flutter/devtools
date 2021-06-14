@@ -587,7 +587,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
           cachedProperties.add(
               RemoteDiagnosticsNode(element, inspectorService, true, parent));
         }
-        trackPropertiesMatchingParameters(cachedProperties);
       }
     }
     return cachedProperties;
@@ -595,71 +594,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   Future<List<RemoteDiagnosticsNode>> getProperties(
       ObjectGroup objectGroup) async {
-    return trackPropertiesMatchingParameters(
-        await objectGroup.getProperties(dartDiagnosticRef));
-  }
-
-  List<RemoteDiagnosticsNode> trackPropertiesMatchingParameters(
-      List<RemoteDiagnosticsNode> nodes) {
-    // Map locations to property nodes where available.
-    final List<InspectorSourceLocation> parameterLocations =
-        creationLocation?.getParameterLocations();
-    if (parameterLocations != null) {
-      final Map<String, InspectorSourceLocation> names = {};
-      for (InspectorSourceLocation location in parameterLocations) {
-        final String name = location.getName();
-        if (name != null) {
-          names[name] = location;
-        }
-      }
-      for (RemoteDiagnosticsNode node in nodes) {
-        node.parent = this;
-        final String name = node.name;
-        if (name != null) {
-          final InspectorSourceLocation parameterLocation = names[name];
-          if (parameterLocation != null) {
-            node.creationLocation = parameterLocation;
-          }
-        }
-      }
-    }
-    return nodes;
-  }
-
-  Future<String> get propertyDoc {
-    propertyDocFuture ??= _createPropertyDocFuture();
-    return propertyDocFuture;
-  }
-
-  Future<String> _createPropertyDocFuture() async {
-    // TODO(jacobr): We need access to the analyzer to support this feature.
-    /*
-    if (parent != null) {
-      DartVmServiceValue vmValue = inspectorService.toDartVmServiceValueForSourceLocation(parent.getValueRef());
-      if (vmValue == null) {
-       return null;
-      }
-      return inspectorService.getPropertyLocation(vmValue.getInstanceRef(), getName())
-          .thenApplyAsync((XSourcePosition sourcePosition) -> {
-      if (sourcePosition != null) {
-      final VirtualFile file = sourcePosition.getFile();
-      final int offset = sourcePosition.getOffset();
-
-      final Project project = getProject(file);
-      if (project != null) {
-      final List<HoverInformation> hovers =
-      DartAnalysisServerService.getInstance(project).analysis_getHover(file, offset);
-      if (!hovers.isEmpty()) {
-      return hovers.get(0).getDartdoc();
-      }
-      }
-      }
-      return 'Unable to find property source';
-      });
-      });
-    }
-*/
-    return Future.value('Unable to find property source');
+    return await objectGroup.getProperties(dartDiagnosticRef);
   }
 
   Widget get icon {
@@ -768,18 +703,6 @@ class InspectorSourceLocation {
       return null;
     }
     return SourcePosition(file: file, line: line - 1, column: column - 1);
-  }
-
-  List<InspectorSourceLocation> getParameterLocations() {
-    if (json.containsKey('parameterLocations')) {
-      final List<Object> parametersJson = json['parameterLocations'];
-      final List<InspectorSourceLocation> ret = [];
-      for (int i = 0; i < parametersJson.length; ++i) {
-        ret.add(InspectorSourceLocation(parametersJson[i], this));
-      }
-      return ret;
-    }
-    return null;
   }
 }
 
