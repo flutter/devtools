@@ -423,3 +423,47 @@ int stackFrameIdCompare(String a, String b) {
     throw error;
   }
 }
+
+class CpuProfileStore {
+  final _store = <TimeRange, CpuProfileData>{};
+
+  CpuProfileData storedProfile(TimeRange time) {
+    // If we have a profile for a time range encompassing [time], then we can
+    // generate and cache the profile for [time] without needing to pull data
+    // from the vm service.
+    _maybeGenerateSubProfile(time);
+    return _store[time];
+  }
+
+  void storeProfile(TimeRange time, CpuProfileData profile) {
+    _store[time] = profile;
+  }
+
+  void _maybeGenerateSubProfile(TimeRange time) {
+    if (_store.containsKey(time)) return;
+    final encompassingTimeRange = _encompassingTimeRange(time);
+    if (encompassingTimeRange != null) {
+      final encompassingProfile = _store[encompassingTimeRange];
+      final subProfile = CpuProfileData.subProfile(encompassingProfile, time);
+      _store[time] = subProfile;
+    }
+  }
+
+  TimeRange _encompassingTimeRange(TimeRange time) {
+    int shortestDurationMicros = maxJsInt;
+    TimeRange encompassingTimeRange;
+    for (final t in _store.keys) {
+      // We want to find the shortest encompassing time range for [time].
+      if (t.containsRange(time) &&
+          t.duration.inMicroseconds < shortestDurationMicros) {
+        shortestDurationMicros = t.duration.inMicroseconds;
+        encompassingTimeRange = t;
+      }
+    }
+    return encompassingTimeRange;
+  }
+
+  void clear() {
+    _store.clear();
+  }
+}

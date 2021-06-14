@@ -27,6 +27,9 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   /// base state where recording instructions should be shown.
   static CpuProfileData baseStateCpuProfileData = CpuProfileData.empty();
 
+  /// Store of cached CPU profiles.
+  final cpuProfileStore = CpuProfileStore();
+
   /// Notifies that new cpu profile data is available.
   ValueListenable<CpuProfileData> get dataNotifier => _dataNotifier;
   final _dataNotifier = ValueNotifier<CpuProfileData>(baseStateCpuProfileData);
@@ -96,24 +99,21 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
       extentMicros: extentMicros,
     );
 
-    await _transformAndSetData(cpuProfileData);
+    await processAndSetData(cpuProfileData);
+    cpuProfileStore.storeProfile(
+      TimeRange()
+        ..start = Duration(microseconds: startMicros)
+        ..end = Duration(microseconds: startMicros + extentMicros),
+      _dataNotifier.value,
+    );
   }
 
-  Future<void> generateSubProfile(
-    CpuProfileData superProfile,
-    TimeRange subTimeRange, {
+  Future<void> processAndSetData(
+    CpuProfileData cpuProfileData, {
     String processId,
   }) async {
     _processingNotifier.value = true;
     _dataNotifier.value = null;
-    final subProfile = CpuProfileData.subProfile(superProfile, subTimeRange);
-    await _transformAndSetData(subProfile);
-  }
-
-  Future<void> _transformAndSetData(
-    CpuProfileData cpuProfileData, {
-    String processId,
-  }) async {
     try {
       await transformer.processData(cpuProfileData, processId: processId);
       _dataNotifier.value = cpuProfileData;
@@ -193,6 +193,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
 
   Future<void> clear() async {
     reset();
+    cpuProfileStore.clear();
     await serviceManager.service.clearSamples();
   }
 

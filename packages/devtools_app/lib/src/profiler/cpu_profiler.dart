@@ -313,9 +313,11 @@ class UserTagDropdown extends StatelessWidget {
                         value: tag,
                       ),
                 ],
-                onChanged: userTags.isNotEmpty
-                    ? (String tag) => _onUserTagChanged(tag, context)
-                    : null,
+                onChanged: userTags.isEmpty ||
+                        (userTags.length == 1 &&
+                            userTags.first == UserTag.defaultTag.label)
+                    ? null
+                    : (String tag) => _onUserTagChanged(tag, context),
               ),
             );
           },

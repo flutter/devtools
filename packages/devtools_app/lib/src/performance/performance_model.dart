@@ -436,8 +436,6 @@ class FlutterFrame {
   double get rasterDurationMs =>
       rasterDuration != null ? rasterDuration / 1000 : null;
 
-  CpuProfileData cpuProfileData;
-
   void setEventFlow(SyncTimelineEvent event, {TimelineEventType type}) {
     type ??= event?.type;
     if (type == TimelineEventType.ui) {

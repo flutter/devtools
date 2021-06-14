@@ -61,8 +61,6 @@ class PerformanceController
   ValueListenable<List<FlutterFrame>> get flutterFrames => _flutterFrames;
   final _flutterFrames = ValueNotifier<List<FlutterFrame>>([]);
 
-  final _flutterFramesById = <String, FlutterFrame>{};
-
   /// Whether an empty timeline recording was just recorded.
   ValueListenable<bool> get emptyTimeline => _emptyTimeline;
   final _emptyTimeline = ValueNotifier<bool>(false);
@@ -165,25 +163,22 @@ class PerformanceController
 
   Future<void> selectTimelineEvent(
     TimelineEvent event, {
-    bool pullCpuProfile = true,
+    bool updateProfiler = true,
   }) async {
     if (event == null || data.selectedEvent == event) return;
 
     data.selectedEvent = event;
     _selectedTimelineEventNotifier.value = event;
 
-    if (pullCpuProfile && event.isUiEvent) {
-      if (event.frameId != null) {
-        final frameProfile = _flutterFramesById[event.frameId]?.cpuProfileData;
-        if (frameProfile != null) {
-          cpuProfilerController.reset();
-          await cpuProfilerController.generateSubProfile(
-            frameProfile,
-            event.time,
-            processId: 'subProfile for ${event.name} from ${event.frameId}',
-          );
-          data.cpuProfileData = cpuProfilerController.dataNotifier.value;
-        }
+    if (event.isUiEvent && updateProfiler) {
+      final storedProfile =
+          cpuProfilerController.cpuProfileStore.storedProfile(event.time);
+      if (storedProfile != null) {
+        await cpuProfilerController.processAndSetData(
+          storedProfile,
+          processId: 'Stored profile for ${event.time}',
+        );
+        data.cpuProfileData = cpuProfilerController.dataNotifier.value;
       } else if ((!offlineMode || offlinePerformanceData == null) &&
           cpuProfilerController.profilerEnabled) {
         // Fetch a profile if not in offline mode and if the profiler is enabled
@@ -192,6 +187,10 @@ class PerformanceController
           startMicros: event.time.start.inMicroseconds,
           extentMicros: event.time.duration.inMicroseconds,
           processId: '${event.traceEvents.first.id}',
+        );
+        cpuProfilerController.cpuProfileStore.storeProfile(
+          event.time,
+          cpuProfilerController.dataNotifier.value,
         );
         data.cpuProfileData = cpuProfilerController.dataNotifier.value;
       }
@@ -221,20 +220,21 @@ class PerformanceController
     // pulling the CPU profile for the frame (directly below) matters here.
     // If the selected timeline event is null, the event details section will
     // not show the progress bar while we are processing the CPU profile.
-    await selectTimelineEvent(frame.uiEventFlow, pullCpuProfile: false);
+    await selectTimelineEvent(frame.uiEventFlow, updateProfiler: false);
 
-    if (frame.cpuProfileData == null) {
+    final storedProfileForFrame =
+        cpuProfilerController.cpuProfileStore.storedProfile(frame.time);
+    if (storedProfileForFrame == null) {
       cpuProfilerController.reset();
       await cpuProfilerController.pullAndProcessProfile(
         startMicros: frame.time.start.inMicroseconds,
         extentMicros: frame.time.duration.inMicroseconds,
         processId: 'Flutter frame ${frame.id}',
       );
-      frame.cpuProfileData = cpuProfilerController.dataNotifier.value;
       data.cpuProfileData = cpuProfilerController.dataNotifier.value;
     } else {
-      data.cpuProfileData = frame.cpuProfileData;
-      cpuProfilerController.loadProcessedData(frame.cpuProfileData);
+      data.cpuProfileData = storedProfileForFrame;
+      cpuProfilerController.loadProcessedData(storedProfileForFrame);
     }
 
     if (debugTimeline) {
@@ -253,7 +253,6 @@ class PerformanceController
 
   void addFrame(FlutterFrame frame) {
     data.frames.add(frame);
-    _flutterFramesById.putIfAbsent(frame.id, () => frame);
   }
 
   Future<void> refreshData() async {
@@ -525,7 +524,6 @@ class PerformanceController
     processor?.reset();
     _emptyTimeline.value = true;
     _flutterFrames.value = [];
-    _flutterFramesById.clear();
     _selectedTimelineEventNotifier.value = null;
     _selectedFrameNotifier.value = null;
     _processing.value = false;
