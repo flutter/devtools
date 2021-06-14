@@ -226,7 +226,10 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           sum +
           math.max(
             1000 / widget.displayRefreshRate,
-            math.max(frame.uiDurationMs, frame.rasterDurationMs),
+            math.max(
+              frame.uiDuration.inMilliseconds,
+              frame.rasterDuration.inMilliseconds,
+            ),
           ),
     );
     final avgFrameTime = sumFrameTimesMs / widget.frames.length;
@@ -275,14 +278,15 @@ class FlutterFramesChartItem extends StatelessWidget {
     final ui = Container(
       key: Key('frame ${frame.id} - ui'),
       width: defaultFrameWidth / 2,
-      height: (frame.uiDurationMs / msPerPx).clamp(0.0, availableChartHeight),
+      height: (frame.uiDuration.inMilliseconds / msPerPx)
+          .clamp(0.0, availableChartHeight),
       color: uiJanky ? uiJankColor : mainUiColor,
     );
     final raster = Container(
       key: Key('frame ${frame.id} - raster'),
       width: defaultFrameWidth / 2,
-      height:
-          (frame.rasterDurationMs / msPerPx).clamp(0.0, availableChartHeight),
+      height: (frame.rasterDuration.inMilliseconds / msPerPx)
+          .clamp(0.0, availableChartHeight),
       color: rasterJanky ? rasterJankColor : mainRasterColor,
     );
     return Stack(
@@ -315,13 +319,23 @@ class FlutterFramesChartItem extends StatelessWidget {
             color: defaultSelectionColor,
             height: selectedIndicatorHeight,
           ),
+        if (frame.hasShaderTime)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(Icons.warning_amber_rounded),
+            ],
+          ),
       ],
     );
   }
 
   String _tooltipText(FlutterFrame frame) {
-    return 'UI: ${msText(frame.uiEventFlow.time.duration)}\n'
-        'Raster: ${msText(frame.rasterEventFlow.time.duration)}';
+    return [
+      'UI: ${msText(frame.uiEventFlow.time.duration)}',
+      'Raster: ${msText(frame.rasterEventFlow.time.duration)}',
+      if (frame.hasShaderTime) 'Skia.Shaders: ${msText(frame.shaderDuration)}',
+    ].join('\n');
   }
 }
 

@@ -127,6 +127,8 @@ class TraceEventWrapper implements Comparable<TraceEventWrapper> {
 
   bool processed = false;
 
+  bool get isShaderEvent => event.args['devtoolsTag'] == 'shaders';
+
   @override
   int compareTo(TraceEventWrapper other) {
     // Order events based on their timestamps. If the events share a timestamp,
