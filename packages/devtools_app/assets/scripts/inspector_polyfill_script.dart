@@ -74,7 +74,6 @@ import 'package:flutter/src/widgets/debug.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/gesture_detector.dart';
 import 'package:flutter/src/widgets/widget_inspector.dart';
-// ignore: depend_on_referenced_packages
 import 'package:vector_math/vector_math_64.dart';
 
 // This extension method is simply a hack to make a private member defined on
