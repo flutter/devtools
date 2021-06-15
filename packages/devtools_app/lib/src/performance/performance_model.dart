@@ -427,14 +427,34 @@ class FlutterFrame {
       pipelineItemTime.start?.inMicroseconds != null &&
       pipelineItemTime.end?.inMicroseconds != null;
 
-  int get uiDuration => uiEventFlow?.time?.duration?.inMicroseconds;
+  Duration get uiDuration => uiEventFlow?.time?.duration;
 
-  double get uiDurationMs => uiDuration != null ? uiDuration / 1000 : null;
+  Duration get rasterDuration => rasterEventFlow?.time?.duration;
 
-  int get rasterDuration => rasterEventFlow?.time?.duration?.inMicroseconds;
+  Duration get shaderDuration {
+    if (_shaderTime != null) return _shaderTime;
+    int sumShaderMicros = 0;
+    // TODO(kenz): add a helper class for performing efficient time interval
+    // union computation. This code is currently broken if there were non-shader
+    // events interleaved with shader events. The time reported would be
+    // inaccurately large.
+    breadthFirstTraversal<TimelineEvent>(
+      rasterEventFlow,
+      action: (TimelineEvent event) {
+        // Shader events with a shader event parent should not be included in the
+        // sum because the parent event will encompass the time of [event].
+        if (event.isShaderEvent &&
+            (event.parent == null || !event.parent.isShaderEvent)) {
+          sumShaderMicros += event.time.duration.inMicroseconds;
+        }
+      },
+    );
+    return _shaderTime = Duration(microseconds: sumShaderMicros);
+  }
 
-  double get rasterDurationMs =>
-      rasterDuration != null ? rasterDuration / 1000 : null;
+  Duration _shaderTime;
+
+  bool get hasShaderTime => shaderDuration != Duration.zero;
 
   void setEventFlow(SyncTimelineEvent event, {TimelineEventType type}) {
     type ??= event?.type;
@@ -482,11 +502,12 @@ class FlutterFrame {
   }
 
   bool isUiJanky(double displayRefreshRate) {
-    return uiDurationMs > _targetMsPerFrame(displayRefreshRate);
+    return uiDuration.inMilliseconds > _targetMsPerFrame(displayRefreshRate);
   }
 
   bool isRasterJanky(double displayRefreshRate) {
-    return rasterDurationMs > _targetMsPerFrame(displayRefreshRate);
+    return rasterDuration.inMilliseconds >
+        _targetMsPerFrame(displayRefreshRate);
   }
 
   double _targetMsPerFrame(double displayRefreshRate) {
@@ -554,6 +575,9 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 
   bool get isGCEvent =>
       traceEvents.first.event.category == TraceEvent.gcCategory;
+
+  bool get isShaderEvent =>
+      traceEvents.first.isShaderEvent || traceEvents.last.isShaderEvent;
 
   bool get isWellFormed => time.start != null && time.end != null;
 

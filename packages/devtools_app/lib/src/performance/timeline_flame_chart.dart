@@ -435,7 +435,9 @@ class TimelineFlameChartState
       }
 
       Color backgroundColor;
-      if (event.isAsyncEvent) {
+      if (event.isShaderEvent) {
+        backgroundColor = shaderCompilationColor;
+      } else if (event.isAsyncEvent) {
         backgroundColor = nextAsyncColor(row);
       } else if (event.isGCEvent) {
         // TODO(kenz): should we have a different color palette for GC events?
