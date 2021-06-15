@@ -224,6 +224,7 @@ class ProfilerScreenControls extends StatelessWidget {
         ),
         _SecondaryControls(
           controller: controller,
+          recording: recording,
         ),
       ],
     );
@@ -268,11 +269,16 @@ class _PrimaryControls extends StatelessWidget {
 }
 
 class _SecondaryControls extends StatelessWidget {
-  const _SecondaryControls({@required this.controller});
+  const _SecondaryControls({
+    @required this.controller,
+    @required this.recording,
+  });
 
   static const _secondaryControlsMinIncludeTextWidth = 1100.0;
 
   final ProfilerScreenController controller;
+
+  final bool recording;
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +287,7 @@ class _SecondaryControls extends StatelessWidget {
       children: [
         RefreshButton(
           label: 'Load all CPU samples',
-          onPressed: controller.loadAllSamples,
+          onPressed: !recording ? controller.loadAllSamples : null,
         ),
         const SizedBox(width: defaultSpacing),
         ProfileGranularityDropdown(
@@ -291,7 +297,8 @@ class _SecondaryControls extends StatelessWidget {
         ),
         const SizedBox(width: defaultSpacing),
         ExportButton(
-          onPressed: controller.cpuProfileData != null &&
+          onPressed: !recording &&
+                  controller.cpuProfileData != null &&
                   !controller.cpuProfileData.isEmpty
               ? () => _exportPerformance(context)
               : null,
