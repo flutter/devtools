@@ -59,7 +59,7 @@ const unknownColorPalette = [
 
 const uiJankColor = Color(0xFFF5846B);
 const rasterJankColor = Color(0xFFC3595A);
-const shaderCompilationColor = Colors.amber;
+const shaderCompilationColor = Color(0xFF77102F);
 
 const treemapIncreaseColor = Color(0xFF3FB549);
 const treemapDecreaseColor = Color(0xFF77102F);

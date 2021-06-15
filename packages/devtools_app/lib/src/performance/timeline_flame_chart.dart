@@ -436,7 +436,7 @@ class TimelineFlameChartState
 
       Color backgroundColor;
       if (event.isShaderEvent) {
-        backgroundColor = rasterJankColor;
+        backgroundColor = shaderCompilationColor;
       } else if (event.isAsyncEvent) {
         backgroundColor = nextAsyncColor(row);
       } else if (event.isGCEvent) {

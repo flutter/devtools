@@ -311,7 +311,7 @@ class FlutterFramesChartItem extends StatelessWidget {
           width: defaultFrameWidth / 2,
           height: (frame.shaderDuration.inMilliseconds / msPerPx)
               .clamp(0.0, availableChartHeight * shaderToRasterRatio),
-          color: Colors.amber,
+          color: shaderCompilationColor,
         ),
     ]);
     return Stack(
