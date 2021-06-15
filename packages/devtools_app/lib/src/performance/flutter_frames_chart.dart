@@ -5,14 +5,14 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
 import '../common_widgets.dart';
+import '../globals.dart';
+import '../scaffold.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../utils.dart';
