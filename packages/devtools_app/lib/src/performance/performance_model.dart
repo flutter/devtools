@@ -434,6 +434,10 @@ class FlutterFrame {
   Duration get shaderDuration {
     if (_shaderTime != null) return _shaderTime;
     int sumShaderMicros = 0;
+    // TODO(kenz): add a helper class for performing efficient time interval
+    // union computation. This code is currently broken if there were non-shader
+    // events interleaved with shader events. The time reported would be
+    // inaccurately large.
     breadthFirstTraversal<TimelineEvent>(
       rasterEventFlow,
       action: (TimelineEvent event) {

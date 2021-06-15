@@ -257,6 +257,10 @@ class FlutterFramesChartItem extends StatelessWidget {
   static const selectedFrameIndicatorKey =
       Key('flutter frames chart - selected frame indicator');
 
+  // TODO(kenz): instead of hard coding 4, factor in the display refresh rate to
+  // calculate 1/4 of the target frame time.
+  static const shaderTimeThreshold = Duration(milliseconds: 4);
+
   final FlutterFrame frame;
 
   final bool selected;
@@ -273,6 +277,10 @@ class FlutterFramesChartItem extends StatelessWidget {
 
     final bool uiJanky = frame.isUiJanky(displayRefreshRate);
     final bool rasterJanky = frame.isRasterJanky(displayRefreshRate);
+    final bool hasShaderJank = frame.hasShaderTime &&
+        rasterJanky &&
+        frame.shaderDuration > shaderTimeThreshold;
+
     // TODO(kenz): add some indicator when a frame is so janky that it exceeds the
     // available axis space.
     final ui = Container(
@@ -293,7 +301,7 @@ class FlutterFramesChartItem extends StatelessWidget {
       children: [
         // TODO(kenz): make tooltip to persist if the frame is selected.
         DevToolsTooltip(
-          tooltip: _tooltipText(frame),
+          tooltip: _tooltipText(frame, hasShaderJank),
           padding: const EdgeInsets.all(denseSpacing),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: densePadding),
@@ -319,7 +327,7 @@ class FlutterFramesChartItem extends StatelessWidget {
             color: defaultSelectionColor,
             height: selectedIndicatorHeight,
           ),
-        if (frame.hasShaderTime)
+        if (hasShaderJank)
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
@@ -330,11 +338,11 @@ class FlutterFramesChartItem extends StatelessWidget {
     );
   }
 
-  String _tooltipText(FlutterFrame frame) {
+  String _tooltipText(FlutterFrame frame, bool hasShaderJank) {
     return [
       'UI: ${msText(frame.uiEventFlow.time.duration)}',
       'Raster: ${msText(frame.rasterEventFlow.time.duration)}',
-      if (frame.hasShaderTime) 'Skia.Shaders: ${msText(frame.shaderDuration)}',
+      if (hasShaderJank) ...['Skia.Shaders: ${msText(frame.shaderDuration)}'],
     ].join('\n');
   }
 }
