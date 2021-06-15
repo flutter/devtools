@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -201,6 +202,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         _legendItem('Frame Time (Raster)', mainRasterColor),
         const SizedBox(height: denseRowSpacing),
         _legendItem('Jank (slow frame)', uiJankColor),
+        const SizedBox(height: denseRowSpacing),
+        _legendItem('Shader Compilation', shaderCompilationColor),
       ],
     );
   }
@@ -290,13 +293,27 @@ class FlutterFramesChartItem extends StatelessWidget {
           .clamp(0.0, availableChartHeight),
       color: uiJanky ? uiJankColor : mainUiColor,
     );
-    final raster = Container(
-      key: Key('frame ${frame.id} - raster'),
-      width: defaultFrameWidth / 2,
-      height: (frame.rasterDuration.inMilliseconds / msPerPx)
-          .clamp(0.0, availableChartHeight),
-      color: rasterJanky ? rasterJankColor : mainRasterColor,
-    );
+    final shaderToRasterRatio = frame.shaderDuration.inMilliseconds /
+        frame.rasterDuration.inMilliseconds;
+    final raster = Column(children: [
+      Container(
+        key: Key('frame ${frame.id} - raster'),
+        width: defaultFrameWidth / 2,
+        height: ((frame.rasterDuration.inMilliseconds -
+                    frame.shaderDuration.inMilliseconds) /
+                msPerPx)
+            .clamp(0.0, availableChartHeight * (1 - shaderToRasterRatio)),
+        color: rasterJanky ? rasterJankColor : mainRasterColor,
+      ),
+      if (frame.hasShaderTime)
+        Container(
+          key: Key('frame ${frame.id} - shaders'),
+          width: defaultFrameWidth / 2,
+          height: (frame.shaderDuration.inMilliseconds / msPerPx)
+              .clamp(0.0, availableChartHeight * shaderToRasterRatio),
+          color: Colors.amber,
+        ),
+    ]);
     return Stack(
       children: [
         // TODO(kenz): make tooltip to persist if the frame is selected.
@@ -331,19 +348,69 @@ class FlutterFramesChartItem extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
-              Icon(Icons.warning_amber_rounded),
+              ShaderJankWarningIcon(),
             ],
           ),
       ],
     );
   }
 
+  // TODO(kenz): make this a rich tooltip that can support a clickable link to
+  // shader compilation jank docs.
   String _tooltipText(FlutterFrame frame, bool hasShaderJank) {
     return [
       'UI: ${msText(frame.uiEventFlow.time.duration)}',
       'Raster: ${msText(frame.rasterEventFlow.time.duration)}',
-      if (hasShaderJank) ...['Skia.Shaders: ${msText(frame.shaderDuration)}'],
+      if (hasShaderJank) 'Shader Compilation: ${msText(frame.shaderDuration)}'
     ].join('\n');
+  }
+}
+
+class ShaderJankWarningIcon extends StatefulWidget {
+  const ShaderJankWarningIcon({Key key}) : super(key: key);
+
+  @override
+  State<ShaderJankWarningIcon> createState() => _ShaderJankWarningIconState();
+}
+
+class _ShaderJankWarningIconState extends State<ShaderJankWarningIcon> {
+  Timer timer;
+
+  bool showFirst;
+
+  @override
+  void initState() {
+    super.initState();
+    showFirst = true;
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        showFirst = !showFirst;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedCrossFade(
+      duration: const Duration(seconds: 1),
+      firstChild: _warningIcon(),
+      secondChild: _warningIcon(color: Colors.amber),
+      crossFadeState:
+          showFirst ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+    );
+  }
+
+  Widget _warningIcon({Color color}) {
+    return Icon(
+      Icons.warning_amber_rounded,
+      color: color,
+    );
   }
 }
 
