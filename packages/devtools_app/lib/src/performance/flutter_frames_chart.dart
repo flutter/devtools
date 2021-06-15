@@ -9,12 +9,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../banner_messages.dart';
 import '../common_widgets.dart';
+import '../globals.dart';
+import '../scaffold.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
+import 'performance_screen.dart';
 
 class FlutterFramesChart extends StatefulWidget {
   const FlutterFramesChart(
@@ -83,6 +87,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         _selectedFrame = _controller.selectedFrame.value;
       });
     });
+
+    _maybeShowShaderJankMessage();
   }
 
   @override
@@ -90,6 +96,29 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     super.didUpdateWidget(oldWidget);
     if (scrollController.hasClients && scrollController.atScrollBottom) {
       scrollController.autoScrollToBottom();
+    }
+
+    if (!collectionEquals(oldWidget.frames, widget.frames)) {
+      _maybeShowShaderJankMessage();
+    }
+  }
+
+  void _maybeShowShaderJankMessage() {
+    final shaderJankFrames = widget.frames
+        .where((frame) => frame.hasShaderJank(widget.displayRefreshRate))
+        .toList();
+    if (shaderJankFrames.isNotEmpty) {
+      final Duration shaderJankDuration = shaderJankFrames.fold(
+        Duration.zero,
+        (prev, frame) => prev + frame.shaderDuration,
+      );
+      Provider.of<BannerMessagesController>(context).addMessage(
+        ShaderJankMessage(
+          offlineMode ? SimpleScreen.id : PerformanceScreen.id,
+          jankyFramesCount: shaderJankFrames.length,
+          jankDuration: shaderJankDuration,
+        ).build(context),
+      );
     }
   }
 
@@ -260,10 +289,6 @@ class FlutterFramesChartItem extends StatelessWidget {
   static const selectedFrameIndicatorKey =
       Key('flutter frames chart - selected frame indicator');
 
-  // TODO(kenz): instead of hard coding 4, factor in the display refresh rate to
-  // calculate 1/4 of the target frame time.
-  static const shaderTimeThreshold = Duration(milliseconds: 4);
-
   final FlutterFrame frame;
 
   final bool selected;
@@ -280,9 +305,7 @@ class FlutterFramesChartItem extends StatelessWidget {
 
     final bool uiJanky = frame.isUiJanky(displayRefreshRate);
     final bool rasterJanky = frame.isRasterJanky(displayRefreshRate);
-    final bool hasShaderJank = frame.hasShaderTime &&
-        rasterJanky &&
-        frame.shaderDuration > shaderTimeThreshold;
+    final bool hasShaderJank = frame.hasShaderJank(displayRefreshRate);
 
     // TODO(kenz): add some indicator when a frame is so janky that it exceeds the
     // available axis space.
@@ -355,8 +378,6 @@ class FlutterFramesChartItem extends StatelessWidget {
     );
   }
 
-  // TODO(kenz): make this a rich tooltip that can support a clickable link to
-  // shader compilation jank docs.
   String _tooltipText(FlutterFrame frame, bool hasShaderJank) {
     return [
       'UI: ${msText(frame.uiEventFlow.time.duration)}',

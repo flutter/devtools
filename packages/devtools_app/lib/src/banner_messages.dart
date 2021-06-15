@@ -19,6 +19,9 @@ const _runInProfileModeDocsUrl =
 const _profileGranularityDocsUrl =
     'https://flutter.dev/docs/development/tools/devtools/performance#profile-granularity';
 
+const preCompileShadersDocsUrl =
+    'https://flutter.dev/docs/perf/rendering/shader#how-to-use-sksl-warmup';
+
 class BannerMessagesController {
   final _messages = <String, ValueNotifier<List<BannerMessage>>>{};
   final _dismissedMessageKeys = <Key>{};
@@ -272,6 +275,51 @@ This could be caused by an older version of package:provider; please make sure t
           style: TextStyle(color: _BannerError.foreground),
         ),
       ],
+    );
+  }
+}
+
+class ShaderJankMessage {
+  const ShaderJankMessage(
+    this.screenId, {
+    @required this.jankyFramesCount,
+    @required this.jankDuration,
+  });
+
+  final String screenId;
+
+  final int jankyFramesCount;
+
+  final Duration jankDuration;
+
+  Widget build(BuildContext context) {
+    return _BannerError(
+      key: Key('ShaderJankMessage - $screenId'),
+      textSpans: [
+        TextSpan(
+          text: '''
+Shader compilation jank detected. $jankyFramesCount ${pluralize('frame', jankyFramesCount)} janked with a total of ${msText(jankDuration)} spent in shader compilation.
+
+To pre-compile shaders, see the instructions at ''',
+          style: const TextStyle(color: _BannerError.foreground),
+        ),
+        TextSpan(
+          text: preCompileShadersDocsUrl,
+          style: const TextStyle(
+            decoration: TextDecoration.underline,
+            color: _BannerError.linkColor,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () async {
+              await launchUrl(preCompileShadersDocsUrl, context);
+            },
+        ),
+        const TextSpan(
+          text: '.',
+          style: TextStyle(color: _BannerError.foreground),
+        ),
+      ],
+      screenId: screenId,
     );
   }
 }
