@@ -58,12 +58,17 @@ class LegacyPerformanceScreen extends Screen {
   static const id = 'legacy-performance';
 
   static bool _shouldShowForFlutterVersion(FlutterVersion currentVersion) {
-    // TODO(kenz): once https://github.com/flutter/flutter/commit/78a96b09d64dc2a520e5b269d5cea1b9dde27d3f
-    // makes it into flutter dev channel, track the version number and use that
-    // here. We may have to add functionality to [SemanticVersion] to support
-    // versions beyond the patch number (e.g.  2.3.0-12.1.pre).
     return currentVersion != null &&
-        currentVersion < SemanticVersion(major: 2, minor: 3, patch: 1);
+        currentVersion <
+            SemanticVersion(
+              major: 2,
+              minor: 3,
+              // Specifying patch makes the version number more readable.
+              // ignore: avoid_redundant_argument_values
+              patch: 0,
+              preReleaseMajor: 16,
+              preReleaseMinor: 0,
+            );
   }
 
   @override
