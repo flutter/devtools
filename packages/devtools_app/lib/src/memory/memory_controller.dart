@@ -800,7 +800,8 @@ class MemoryController extends DisposableController
 
   ValueListenable<String> get groupingByNotifier => groupingBy;
 
-  String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
+  String get _isolateId =>
+      serviceManager.isolateManager.selectedIsolate.value.id;
 
   final StreamController<MemoryTracker> _memoryTrackerController =
       StreamController<MemoryTracker>.broadcast();
@@ -885,10 +886,9 @@ class MemoryController extends DisposableController
   }
 
   Future<void> startTimeline() async {
-    autoDispose(
-      serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
-        _handleIsolateChanged();
-      }),
+    addAutoDisposeListener(
+      serviceManager.isolateManager.selectedIsolate,
+      _handleIsolateChanged,
     );
 
     autoDispose(
@@ -904,8 +904,8 @@ class MemoryController extends DisposableController
   }
 
   Future<HeapSnapshotGraph> snapshotMemory() async {
-    return await serviceManager?.service
-        ?.getHeapSnapshotGraph(serviceManager?.isolateManager?.selectedIsolate);
+    return await serviceManager?.service?.getHeapSnapshotGraph(
+        serviceManager?.isolateManager?.selectedIsolate?.value);
   }
 
   final _monitorAllocationsNotifier = ValueNotifier<int>(0);

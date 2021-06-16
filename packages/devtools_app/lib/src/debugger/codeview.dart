@@ -685,9 +685,13 @@ class _LineItemState extends State<LineItem> {
       if (word != '') {
         try {
           final response = await _debuggerController.evalAtCurrentFrame(word);
+          final isolateRef = _debuggerController.isolateRef;
           if (response is! InstanceRef) return;
-          final variable = Variable.fromRef(response);
-          await _debuggerController.buildVariablesTree(variable);
+          final variable = Variable.fromRef(
+            value: response,
+            isolateRef: isolateRef,
+          );
+          await buildVariablesTree(variable);
           if (_hasMouseExited) return;
           _hoverCard?.remove();
           _hoverCard = HoverCard(

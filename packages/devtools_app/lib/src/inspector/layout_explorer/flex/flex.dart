@@ -210,7 +210,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               changedProperties =
                   properties.copyWith(crossAxisAlignment: newSelection);
             }
-            final service = await properties.node.inspectorService;
+            final service = properties.node.inspectorService;
             final valueRef = properties.node.valueRef;
             markAsDirty();
             await service.invokeSetFlexProperties(
@@ -532,7 +532,7 @@ class FlexChildVisualizer extends StatelessWidget {
 
   void onChangeFlexFactor(int newFlexFactor) async {
     final node = properties.node;
-    final inspectorService = await node.inspectorService;
+    final inspectorService = node.inspectorService;
     state.markAsDirty();
     await inspectorService.invokeSetFlexFactor(
       node.valueRef,
@@ -542,7 +542,7 @@ class FlexChildVisualizer extends StatelessWidget {
 
   void onChangeFlexFit(FlexFit newFlexFit) async {
     final node = properties.node;
-    final inspectorService = await node.inspectorService;
+    final inspectorService = node.inspectorService;
     state.markAsDirty();
     await inspectorService.invokeSetFlexFit(
       node.valueRef,

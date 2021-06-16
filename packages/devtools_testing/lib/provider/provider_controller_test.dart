@@ -7,7 +7,6 @@
 import 'package:devtools_app/src/eval_on_dart_library.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
-
 import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/provider/provider_nodes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,10 +28,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
 
     isAlive = Disposable();
     evalOnDartLibrary = EvalOnDartLibrary(
-      [
-        'package:provider_app/main.dart',
-        'package:provider_app/tester.dart',
-      ],
+      'package:provider_app/main.dart',
       env.service,
     );
   });
@@ -86,10 +82,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
     await env.flutter.hotRestart();
 
     final evalOnDartLibrary2 = EvalOnDartLibrary(
-      [
-        'package:provider_app/main.dart',
-        'package:provider_app/tester.dart',
-      ],
+      'package:provider_app/main.dart',
       env.service,
     );
     addTearDown(evalOnDartLibrary2.dispose);

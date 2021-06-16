@@ -98,7 +98,8 @@ class MemoryTracker {
     }
 
     final isolateMemory = <IsolateRef, MemoryUsage>{};
-    for (IsolateRef isolateRef in serviceManager.isolateManager.isolates) {
+    for (IsolateRef isolateRef
+        in serviceManager.isolateManager.isolates.value) {
       if (await memoryController.isIsolateLive(isolateRef.id)) {
         isolateMemory[isolateRef] = await service.getMemoryUsage(isolateRef.id);
       }
