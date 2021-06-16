@@ -529,7 +529,7 @@ ArgParser _createArgsParser(bool verbose) {
     );
 
   if (verbose) {
-    parser.addSeparator('App size options;');
+    parser.addSeparator('App size options:');
   }
 
   parser
