@@ -33,7 +33,7 @@ void main() async {
   InspectorService inspectorService;
 
   env.afterEverySetup = () async {
-    inspectorService = await InspectorService.create(env.service);
+    inspectorService = InspectorService();
     if (env.reuseTestEnvironment) {
       // Ensure the previous test did not set the selection on the device.
       // TODO(jacobr): add a proper method to WidgetInspectorService that does

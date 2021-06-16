@@ -17,15 +17,15 @@ extension CpuProfilerExtension on VmServiceWrapper {
     @required int extentMicros,
   }) async {
     return await serviceManager.service.getCpuProfileTimeline(
-      serviceManager.isolateManager.selectedIsolate.id,
+      serviceManager.isolateManager.selectedIsolate.value.id,
       startMicros,
       extentMicros,
     );
   }
 
   Future clearSamples() {
-    return serviceManager.service
-        .clearCpuSamples(serviceManager.isolateManager.selectedIsolate.id);
+    return serviceManager.service.clearCpuSamples(
+        serviceManager.isolateManager.selectedIsolate.value.id);
   }
 
   Future<dynamic> setProfilePeriod(String value) {

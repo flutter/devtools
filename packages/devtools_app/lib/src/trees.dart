@@ -19,6 +19,9 @@ class TreeNode<T extends TreeNode<T>> {
 
   final List<T> children = [];
 
+  // TODO(jacobr) should impact depth.
+  bool indentChildren = true;
+
   /// Index in [parent.children].
   int index = -1;
 
@@ -27,6 +30,7 @@ class TreeNode<T extends TreeNode<T>> {
   /// We assume that TreeNodes are not modified after the first time [depth] is
   /// accessed. We would need to clear the cache before accessing, otherwise.
   int get depth {
+    // TODO(jacobr): this seems unsafe.
     if (_depth != 0) {
       return _depth;
     }
