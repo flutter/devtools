@@ -15,6 +15,7 @@ void main() {
 
     test('has value', () {
       expect(controller.darkModeTheme.value, isNotNull);
+      expect(controller.denseModeEnabled.value, isNotNull);
     });
 
     test('toggleDarkModeTheme', () {
@@ -42,6 +43,20 @@ void main() {
           .toggleVmDeveloperMode(!controller.vmDeveloperModeEnabled.value);
       expect(valueChanged, isTrue);
       expect(controller.vmDeveloperModeEnabled.value, isNot(originalValue));
+    });
+
+    test('toggleDenseMode', () {
+      bool valueChanged = false;
+      final originalValue = controller.denseModeEnabled.value;
+
+      controller.denseModeEnabled.addListener(() {
+        valueChanged = true;
+      });
+
+      controller
+          .toggleDenseMode(!controller.denseModeEnabled.value);
+      expect(valueChanged, isTrue);
+      expect(controller.denseModeEnabled.value, isNot(originalValue));
     });
   });
 }

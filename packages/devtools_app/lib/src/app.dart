@@ -90,6 +90,9 @@ class DevToolsAppState extends State<DevToolsApp> {
   bool get vmDeveloperModeEnabled => _vmDeveloperModeEnabled;
   bool _vmDeveloperModeEnabled;
 
+  bool get denseModeEnabled => _denseModeEnabled;
+  bool _denseModeEnabled;
+
   @override
   void initState() {
     super.initState();
@@ -113,6 +116,13 @@ class DevToolsAppState extends State<DevToolsApp> {
     preferences.vmDeveloperModeEnabled.addListener(() {
       setState(() {
         _vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
+      });
+    });
+
+    _denseModeEnabled = preferences.denseModeEnabled.value;
+    preferences.denseModeEnabled.addListener(() {
+      setState(() {
+        _denseModeEnabled = preferences.denseModeEnabled.value;
       });
     });
   }
@@ -546,6 +556,11 @@ class SettingsDialog extends StatelessWidget {
             label: const Text('Enable VM developer mode'),
             listenable: preferences.vmDeveloperModeEnabled,
             toggle: preferences.toggleVmDeveloperMode,
+          ),
+          _buildOption(
+            label: const Text('Use dense mode'),
+            listenable: preferences.denseModeEnabled,
+            toggle: preferences.toggleDenseMode,
           ),
         ],
       ),
