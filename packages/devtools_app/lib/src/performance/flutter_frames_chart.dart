@@ -378,6 +378,8 @@ class FlutterFramesChartItem extends StatelessWidget {
     );
   }
 
+  // TODO(kenz): Support a rich tooltip
+  // https://github.com/flutter/devtools/issues/3139
   String _tooltipText(FlutterFrame frame, bool hasShaderJank) {
     return [
       'UI: ${msText(frame.uiEventFlow.time.duration)}',
