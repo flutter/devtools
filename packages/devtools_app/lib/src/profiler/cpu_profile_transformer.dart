@@ -48,6 +48,9 @@ class CpuProfileTransformer {
 
     // Initialize all stack frames before we start to for the tree.
     for (int i = 0; i < _stackFramesCount; i++) {
+      if (processId != _activeProcessId) {
+        throw ProcessCancelledException();
+      }
       final k = _stackFrameKeys[i];
       final v = _stackFrameValues[i];
       final stackFrame = CpuStackFrame(
@@ -73,13 +76,14 @@ class CpuProfileTransformer {
 
     // Use batch processing to maintain a responsive UI.
     while (_stackFramesProcessed < _stackFramesCount) {
-      _processBatch(batchSize, cpuProfileData);
+      _processBatch(batchSize, cpuProfileData, processId);
       _progressNotifier.value = _stackFramesProcessed / _stackFramesCount;
 
       // Await a small delay to give the UI thread a chance to update the
       // progress indicator. Use a longer delay than the default (0) so that the
       // progress indicator will look smoother.
       await delayForBatchProcessing(micros: 5000);
+
       if (processId != _activeProcessId) {
         throw ProcessCancelledException();
       }
@@ -102,10 +106,17 @@ class CpuProfileTransformer {
     reset();
   }
 
-  void _processBatch(int batchSize, CpuProfileData cpuProfileData) {
+  void _processBatch(
+    int batchSize,
+    CpuProfileData cpuProfileData,
+    String processId,
+  ) {
     final batchEnd =
         math.min(_stackFramesProcessed + batchSize, _stackFramesCount);
     for (int i = _stackFramesProcessed; i < batchEnd; i++) {
+      if (processId != _activeProcessId) {
+        throw ProcessCancelledException();
+      }
       final key = _stackFrameKeys[i];
       final value = _stackFrameValues[i];
       final stackFrame = cpuProfileData.stackFrames[key];

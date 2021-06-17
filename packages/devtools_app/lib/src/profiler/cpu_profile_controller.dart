@@ -72,7 +72,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   /// use this getter. Otherwise, clients subscribing to change notifications,
   /// should listen to [profilerFlagNotifier].
   bool get profilerEnabled =>
-      profilerFlagNotifier.value.valueAsString == 'true';
+      offlineMode ? true : profilerFlagNotifier.value.valueAsString == 'true';
 
   Future<dynamic> enableCpuProfiler() {
     return serviceManager.service.enableCpuProfiler();
@@ -99,7 +99,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
       extentMicros: extentMicros,
     );
 
-    await processAndSetData(cpuProfileData);
+    await processAndSetData(cpuProfileData, processId: processId);
     cpuProfileStore.addProfile(
       TimeRange()
         ..start = Duration(microseconds: startMicros)
