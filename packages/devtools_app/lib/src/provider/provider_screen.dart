@@ -11,9 +11,9 @@ import '../common_widgets.dart';
 import '../dialogs.dart';
 import '../screen.dart';
 import '../split.dart';
-import './instance_viewer/instance_details.dart';
-import './instance_viewer/instance_providers.dart';
-import './instance_viewer/instance_viewer.dart';
+import 'instance_viewer/instance_details.dart';
+import 'instance_viewer/instance_providers.dart';
+import 'instance_viewer/instance_viewer.dart';
 import 'provider_list.dart';
 import 'provider_nodes.dart';
 
