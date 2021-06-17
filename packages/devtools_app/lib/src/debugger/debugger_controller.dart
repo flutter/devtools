@@ -455,6 +455,10 @@ class DebuggerController extends DisposableController
       _service.removeBreakpoint(isolateRef.id, breakpoint.id);
 
   Future<void> toggleBreakpoint(ScriptRef script, int line) async {
+    if (serviceManager.isolateManager.selectedIsolate.value == null) {
+      // Can't toggle breakpoints if we don't have an isolate.
+      return;
+    }
     // The VM doesn't support debugging for system isolates and will crash on
     // a failed assert in debug mode. Disable the toggle breakpoint
     // functionality for system isolates.

@@ -638,7 +638,7 @@ class Variable extends TreeNode<Variable> {
     return value is InstanceRef && value.valueAsString == null;
   }
 
-  InstanceRef get value => ref.instanceRef;
+  InstanceRef get value => ref?.instanceRef;
 
   // TODO(kenz): add custom display for lists with more than 100 elements
   String get displayValue {
@@ -648,6 +648,8 @@ class Variable extends TreeNode<Variable> {
     final value = this.value;
 
     String valueStr;
+
+    if (value == null) return null;
 
     if (value is InstanceRef) {
       if (value.valueAsString == null) {

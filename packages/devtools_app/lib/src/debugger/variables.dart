@@ -140,7 +140,7 @@ Widget displayProvider(
       onTap: onTap,
     );
   }
-  final diagnostic = variable.ref.diagnostic;
+  final diagnostic = variable.ref?.diagnostic;
   if (diagnostic != null) {
     return DiagnosticsNodeDescription(
       diagnostic,
