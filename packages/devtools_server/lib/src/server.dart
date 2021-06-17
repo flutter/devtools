@@ -532,6 +532,8 @@ ArgParser _createArgsParser(bool verbose) {
     parser.addSeparator('App size options:');
   }
 
+  // TODO(devoncarew): --appSizeBase and --appSizeTest should be renamed to
+  // something like --app-size-base and --app-size-test; #3146.
   parser
     ..addOption(
       argAppSizeBase,
