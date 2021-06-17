@@ -17,14 +17,13 @@ class FlutterVersion extends SemanticVersion {
     @required this.engineRevision,
     @required this.dartSdkVersion,
   }) {
+    // Flutter versions are expected in the format '2.3.1-16.1-pre', so we split
+    // on the dash char to separate the main semantic version from the pre
+    // release version.
     final splitOnDash = version.split('-');
+    assert(splitOnDash.length <= 2);
 
     final semVersion = splitOnDash.first;
-
-    // Flutter versions can come in as '1.10.7-pre.42', so we strip out any
-    // characters that are not digits. We do not currently have a need to know
-    // more version parts than major, minor, and patch. If this changes, we can
-    // add support for the extra values.
     final _versionParts = semVersion.split('.');
     major =
         _versionParts.isNotEmpty ? int.tryParse(_versionParts.first) ?? 0 : 0;
