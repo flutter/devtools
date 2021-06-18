@@ -224,7 +224,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   Widget _expandCollapseButtons() {
     if (!_expandCollapseSupported) return null;
 
-    const minIncludeTextWidth = 650.0;
+    const minIncludeTextWidth = 900.0;
     var buttonStyle = Theme.of(context).outlinedButtonTheme.style;
     if (!includeText(context, minIncludeTextWidth)) {
       buttonStyle = buttonStyle.copyWith(
@@ -247,7 +247,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               child: ImageIconLabel(
                 createImageIcon('icons/inspector/expand_property@2x.png'),
                 'Expand all',
-                minIncludeTextWidth: 650,
+                minIncludeTextWidth: minIncludeTextWidth,
               ),
             ),
           ),
