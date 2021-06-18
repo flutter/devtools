@@ -1256,6 +1256,14 @@ double scaleByFontFactor(double original) {
   return (original * (ideTheme?.fontSizeFactor ?? 1.0)).roundToDouble();
 }
 
+bool isDense() {
+  return preferences.denseModeEnabled.value || isEmbedded();
+}
+
+bool isEmbedded() {
+  return ideTheme?.embed != null;
+}
+
 mixin CompareMixin implements Comparable {
   bool operator <(other) {
     return compareTo(other) < 0;

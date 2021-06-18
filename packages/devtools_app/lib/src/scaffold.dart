@@ -28,6 +28,7 @@ import 'screen.dart';
 import 'status_line.dart';
 import 'theme.dart';
 import 'title.dart';
+import 'utils.dart';
 
 /// Scaffolding for a screen and navigation in the DevTools App.
 ///
@@ -73,8 +74,8 @@ class DevToolsScaffold extends StatefulWidget {
   // Note: when changing this value, also update `flameChartContainerOffset`
   // from flame_chart.dart.
   /// The border around the content in the DevTools UI.
-  static const EdgeInsets appPadding =
-      EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0);
+  static EdgeInsets appPadding = isEmbedded() ? const EdgeInsets.fromLTRB(2.0, 2.0, 2.0, 1.0) :
+      const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0);
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;
@@ -425,7 +426,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   }
 
   Widget _buildStatusLine() {
-    const appPadding = DevToolsScaffold.appPadding;
+    final appPadding = DevToolsScaffold.appPadding;
 
     return Container(
       height: 48.0,

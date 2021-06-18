@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 
 import '../auto_dispose_mixin.dart';
 import '../theme.dart';
+import '../utils.dart';
 import 'inspector_controller.dart';
 import 'layout_explorer/layout_explorer.dart';
 
@@ -79,7 +80,7 @@ class _InspectorDetailsTabControllerState
         SizedBox(
           // Add [denseSpacing] to add slight padding around the expand /
           // collapse buttons.
-          height: defaultButtonHeight + denseSpacing,
+          height: defaultButtonHeight + (isDense() ? denseModeDenseSpacing : denseSpacing),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[

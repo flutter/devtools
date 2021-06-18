@@ -21,7 +21,9 @@ import '../screen.dart';
 import '../service_extensions.dart' as extensions;
 import '../split.dart';
 import '../theme.dart';
+import '../utils.dart';
 import '../ui/icons.dart';
+import '../ui/label.dart';
 import '../ui/service_extension_widgets.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
@@ -222,28 +224,42 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   Widget _expandCollapseButtons() {
     if (!_expandCollapseSupported) return null;
 
+    const minIncludeTextWidth = 650.0;
+    var buttonStyle = Theme.of(context).outlinedButtonTheme.style;
+    if (!includeText(context, minIncludeTextWidth)) {
+      buttonStyle = buttonStyle.copyWith(
+        padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
+          return EdgeInsets.zero;
+        }),
+      );
+    }
+
     return Align(
       alignment: Alignment.centerRight,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Flexible(
+          SizedBox(
             child: OutlinedButton(
+              style: buttonStyle,
               onPressed: enableButtons ? _onExpandClick : null,
-              child: const Text(
+              child: ImageIconLabel(
+                createImageIcon('icons/inspector/expand_property@2x.png'),
                 'Expand all',
-                overflow: TextOverflow.ellipsis,
+                minIncludeTextWidth: 650,
               ),
             ),
           ),
-          const SizedBox(width: denseSpacing),
-          Flexible(
+          SizedBox(width: isDense() ? denseModeDenseSpacing : denseSpacing),
+          SizedBox(
             child: OutlinedButton(
+              style: buttonStyle,
               onPressed: enableButtons ? _onResetClick : null,
-              child: const Text(
+              child: ImageIconLabel(
+                createImageIcon('icons/inspector/collapse_property@2x.png'),
                 'Collapse to selected',
-                overflow: TextOverflow.ellipsis,
+                minIncludeTextWidth: minIncludeTextWidth,
               ),
             ),
           )

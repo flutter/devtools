@@ -5,10 +5,13 @@
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import '../utils.dart';
 
 TextStyle unimportant(ColorScheme colorScheme) => TextStyle(
     color: colorScheme.isLight ? Colors.grey.shade500 : Colors.grey.shade600);
-const regular = TextStyle();
+final regular = TextStyle(
+  fontSize: isDense() ? denseFontSize : defaultFontSize,
+);
 TextStyle warning(ColorScheme colorScheme) => TextStyle(
     color:
         colorScheme.isLight ? Colors.orange.shade900 : Colors.orange.shade400);
