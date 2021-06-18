@@ -510,6 +510,13 @@ class FlutterFrame {
         _targetMsPerFrame(displayRefreshRate);
   }
 
+  bool hasShaderJank(double displayRefreshRate) {
+    final quarterFrame = (_targetMsPerFrame(displayRefreshRate) / 4).round();
+    return isRasterJanky(displayRefreshRate) &&
+        hasShaderTime &&
+        shaderDuration > Duration(milliseconds: quarterFrame);
+  }
+
   double _targetMsPerFrame(double displayRefreshRate) {
     return 1 / displayRefreshRate * 1000;
   }

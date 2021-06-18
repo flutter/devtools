@@ -34,6 +34,7 @@ class ProfilerScreenController with CpuProfilerControllerProviderMixin {
       // Using [maxJsInt] as [extentMicros] for the getCpuProfile requests will
       // give us all cpu samples we have available
       extentMicros: maxJsInt,
+      processId: 'Profile $_profileStartMicros',
     );
   }
 
@@ -44,6 +45,7 @@ class ProfilerScreenController with CpuProfilerControllerProviderMixin {
       // Using [maxJsInt] as [extentMicros] for the getCpuProfile requests will
       // give us all cpu samples we have available
       extentMicros: maxJsInt,
+      processId: 'Load all samples',
     );
   }
 
