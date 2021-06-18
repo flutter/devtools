@@ -244,8 +244,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
             child: OutlinedButton(
               style: buttonStyle,
               onPressed: enableButtons ? _onExpandClick : null,
-              child: ImageIconLabel(
-                createImageIcon('icons/inspector/expand_property@2x.png'),
+              child: const ImageIconLabel(
+                Icon(Icons.unfold_more),
                 'Expand all',
                 minIncludeTextWidth: minIncludeTextWidth,
               ),
@@ -256,8 +256,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
             child: OutlinedButton(
               style: buttonStyle,
               onPressed: enableButtons ? _onResetClick : null,
-              child: ImageIconLabel(
-                createImageIcon('icons/inspector/collapse_property@2x.png'),
+              child: const ImageIconLabel(
+                Icon(Icons.unfold_less),
                 'Collapse to selected',
                 minIncludeTextWidth: minIncludeTextWidth,
               ),
