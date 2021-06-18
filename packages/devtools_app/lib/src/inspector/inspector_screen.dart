@@ -198,24 +198,17 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   List<Widget> getServiceExtensionWidgets() {
     return [
       ServiceExtensionButtonGroup(
-        minIncludeTextWidth: 1050,
-        extensions: [extensions.slowAnimations],
-      ),
-      const SizedBox(width: denseSpacing),
-      ServiceExtensionButtonGroup(
-        minIncludeTextWidth: 1050,
-        extensions: [extensions.debugPaint, extensions.debugPaintBaselines],
-      ),
-      const SizedBox(width: denseSpacing),
-      ServiceExtensionButtonGroup(
-        minIncludeTextWidth: 1250,
+        minIncludeTextWidth: 1350,
         extensions: [
+          extensions.slowAnimations,
+          extensions.debugPaint,
+          extensions.debugPaintBaselines,
           extensions.repaintRainbow,
-          extensions.invertOversizedImages,
+          extensions.invertOversizedImages
         ],
       ),
       // TODO(jacobr): implement TogglePlatformSelector.
-      //  TogglePlatformSelector().selector
+      //  TogglePlatformSelector().selector*/
     ];
   }
 
