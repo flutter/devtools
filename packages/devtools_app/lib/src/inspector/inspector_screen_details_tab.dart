@@ -80,7 +80,8 @@ class _InspectorDetailsTabControllerState
         SizedBox(
           // Add [denseSpacing] to add slight padding around the expand /
           // collapse buttons.
-          height: defaultButtonHeight + (isDense() ? denseModeDenseSpacing : denseSpacing),
+          height: defaultButtonHeight +
+              (isDense() ? denseModeDenseSpacing : denseSpacing),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[

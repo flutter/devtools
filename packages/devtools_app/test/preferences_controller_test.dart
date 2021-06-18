@@ -53,8 +53,7 @@ void main() {
         valueChanged = true;
       });
 
-      controller
-          .toggleDenseMode(!controller.denseModeEnabled.value);
+      controller.toggleDenseMode(!controller.denseModeEnabled.value);
       expect(valueChanged, isTrue);
       expect(controller.denseModeEnabled.value, isNot(originalValue));
     });
