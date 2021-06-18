@@ -174,7 +174,6 @@ const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
 const defaultDialogWidth = 700.0;
 
 const defaultFontSize = 14.0;
-const denseFontSize = 13.0;
 
 /// Branded grey color.
 ///

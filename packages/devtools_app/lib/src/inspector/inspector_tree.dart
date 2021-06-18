@@ -44,7 +44,7 @@ const double iconPadding = 5.0;
 const double chartLineStrokeWidth = 1.0;
 double get columnWidth => isDense() ? 12 : 16.0;
 double get verticalPadding => scaleByFontFactor(10.0);
-double get rowHeight => scaleByFontFactor(isDense() ? 18.0 : 24.0);
+double get rowHeight => scaleByFontFactor(isDense() ? 20.0 : 24.0);
 
 /// This class could be refactored out to be a reasonable generic collapsible
 /// tree ui node class but we choose to instead make it widget inspector
