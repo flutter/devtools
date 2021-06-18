@@ -58,7 +58,7 @@ class MaterialIconLabel extends StatelessWidget {
         // TODO(jacobr): animate showing and hiding the text.
         if (includeText(context, includeTextWidth))
           Padding(
-            padding: const EdgeInsets.only(left: denseModeDenseSpacing),
+            padding: const EdgeInsets.only(left: denseSpacing),
             child: Text(label),
           ),
       ],
