@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
-import '../utils.dart';
 
 /// Label including an image icon and optional text.
 class ImageIconLabel extends StatelessWidget {
