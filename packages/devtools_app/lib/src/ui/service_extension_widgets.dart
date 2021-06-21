@@ -130,23 +130,16 @@ class _ServiceExtensionButtonGroupState
 
   Widget _buildExtension(ExtensionState extensionState) {
     final description = extensionState.description;
-    final padding =
-        isDense() && !includeText(context, widget.minIncludeTextWidth)
-            ? 0.0
-            : defaultSpacing;
     return Tooltip(
       message: extensionState.isSelected
           ? description.enabledTooltip
           : description.disabledTooltip,
       waitDuration: tooltipWait,
       preferBelow: false,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: padding),
-        child: ImageIconLabel(
-          description.icon,
-          description.description,
-          minIncludeTextWidth: widget.minIncludeTextWidth,
-        ),
+      child: ImageIconLabel(
+        description.icon,
+        description.description,
+        minIncludeTextWidth: widget.minIncludeTextWidth,
       ),
     );
   }
