@@ -229,7 +229,7 @@ class LegacyPerformanceController
 
     final storedProfileForFrame =
         cpuProfilerController.cpuProfileStore.lookupProfile(frame.time);
-    if (storedProfileForFrame == null) {
+    if (storedProfileForFrame == null && !offlineMode) {
       cpuProfilerController.reset();
       await cpuProfilerController.pullAndProcessProfile(
         startMicros: frame.time.start.inMicroseconds,
