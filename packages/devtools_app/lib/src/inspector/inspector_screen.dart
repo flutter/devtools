@@ -132,7 +132,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                 );
               },
             ),
-            SizedBox(width: isDense() ? denseModeDenseSpacing : denseSpacing),
+            const SizedBox(width: denseSpacing),
             IconLabelButton(
               onPressed: _refreshInspector,
               icon: Icons.refresh,
@@ -225,10 +225,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     if (!_expandCollapseSupported) return null;
 
     const minIncludeTextWidth = 900.0;
-    final buttonStyle = denseAwareOutlinedButtonStyle(
-      context,
-      minIncludeTextWidth,
-    );
 
     return Align(
       alignment: Alignment.centerRight,
@@ -237,26 +233,20 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            child: OutlinedButton(
-              style: buttonStyle,
+            child: IconLabelButton(
+              icon: Icons.unfold_more,
               onPressed: enableButtons ? _onExpandClick : null,
-              child: const ImageIconLabel(
-                Icon(Icons.unfold_more),
-                'Expand all',
-                minIncludeTextWidth: minIncludeTextWidth,
-              ),
+              label: 'Expand all',
+              includeTextWidth: minIncludeTextWidth,
             ),
           ),
-          SizedBox(width: isDense() ? denseModeDenseSpacing : denseSpacing),
+          const SizedBox(width: denseSpacing),
           SizedBox(
-            child: OutlinedButton(
-              style: buttonStyle,
+            child: IconLabelButton(
+              icon: Icons.unfold_less,
               onPressed: enableButtons ? _onResetClick : null,
-              child: const ImageIconLabel(
-                Icon(Icons.unfold_less),
-                'Collapse to selected',
-                minIncludeTextWidth: minIncludeTextWidth,
-              ),
+              label: 'Collapse to selected',
+              includeTextWidth: minIncludeTextWidth,
             ),
           )
         ],

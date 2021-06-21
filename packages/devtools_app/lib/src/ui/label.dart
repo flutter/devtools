@@ -64,4 +64,3 @@ class MaterialIconLabel extends StatelessWidget {
     );
   }
 }
-
