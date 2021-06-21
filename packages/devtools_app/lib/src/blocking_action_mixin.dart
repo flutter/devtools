@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 /// Provides functionality to track actionInProgress state while executing long
@@ -19,17 +21,37 @@ mixin BlockingActionMixin<T extends StatefulWidget> on State<T> {
   bool get actionInProgress => _actionInProgress;
   bool _actionInProgress = false;
 
-  void blockWhileInProgress(Future callback()) async {
+  final _disposed = Completer<bool>();
+
+  /// Sets actionInProgress to true until the [callback] completes or this
+  /// State object is disposed.
+  ///
+  /// The future returned by this method completes when either the future
+  /// returned by the callback completes or the State object is disposed.
+  Future<void> blockWhileInProgress(Future callback()) async {
     setState(() {
       _actionInProgress = true;
     });
     try {
-      // TODO(jacobr): handle actions that timeout gracefully.
-      await callback();
+      // If we await a callback that does not complete until after this object
+      // is disposed, we will leak State objects.
+      await Future.any([callback(), _disposed.future]);
     } finally {
-      setState(() {
-        _actionInProgress = false;
-      });
+      if (_disposed.isCompleted) {
+        // Calling setState after dispose will trigger a spurious exception.
+        assert(!_actionInProgress);
+      } else {
+        setState(() {
+          _actionInProgress = false;
+        });
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    _actionInProgress = false;
+    _disposed.complete(true);
+    super.dispose();
   }
 }

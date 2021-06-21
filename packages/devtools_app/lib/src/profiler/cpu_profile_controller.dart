@@ -27,6 +27,9 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   /// base state where recording instructions should be shown.
   static CpuProfileData baseStateCpuProfileData = CpuProfileData.empty();
 
+  /// Store of cached CPU profiles.
+  final cpuProfileStore = CpuProfileStore();
+
   /// Notifies that new cpu profile data is available.
   ValueListenable<CpuProfileData> get dataNotifier => _dataNotifier;
   final _dataNotifier = ValueNotifier<CpuProfileData>(baseStateCpuProfileData);
@@ -69,7 +72,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   /// use this getter. Otherwise, clients subscribing to change notifications,
   /// should listen to [profilerFlagNotifier].
   bool get profilerEnabled =>
-      profilerFlagNotifier.value.valueAsString == 'true';
+      offlineMode ? true : profilerFlagNotifier.value.valueAsString == 'true';
 
   Future<dynamic> enableCpuProfiler() {
     return serviceManager.service.enableCpuProfiler();
@@ -96,6 +99,21 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
       extentMicros: extentMicros,
     );
 
+    await processAndSetData(cpuProfileData, processId: processId);
+    cpuProfileStore.addProfile(
+      TimeRange()
+        ..start = Duration(microseconds: startMicros)
+        ..end = Duration(microseconds: startMicros + extentMicros),
+      _dataNotifier.value,
+    );
+  }
+
+  Future<void> processAndSetData(
+    CpuProfileData cpuProfileData, {
+    String processId,
+  }) async {
+    _processingNotifier.value = true;
+    _dataNotifier.value = null;
     try {
       await transformer.processData(cpuProfileData, processId: processId);
       _dataNotifier.value = cpuProfileData;
@@ -175,6 +193,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
 
   Future<void> clear() async {
     reset();
+    cpuProfileStore.clear();
     await serviceManager.service.clearSamples();
   }
 

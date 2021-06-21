@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'blocking_action_mixin.dart';
 import 'common_widgets.dart';
 import 'config_specific/import_export/import_export.dart';
 import 'file_import.dart';
@@ -16,7 +17,6 @@ import 'routing.dart';
 import 'theme.dart';
 import 'ui/label.dart';
 import 'url_utils.dart';
-import 'utils.dart';
 
 /// The landing screen when starting Dart DevTools without being connected to an
 /// app.
@@ -29,7 +29,8 @@ class LandingScreenBody extends StatefulWidget {
   State<LandingScreenBody> createState() => _LandingScreenBodyState();
 }
 
-class _LandingScreenBodyState extends State<LandingScreenBody> {
+class _LandingScreenBodyState extends State<LandingScreenBody>
+    with BlockingActionMixin {
   TextEditingController connectDialogController;
 
   @override
@@ -160,8 +161,6 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
   }
 
   Widget _buildConnectInput() {
-    final CallbackDwell connectDebounce = CallbackDwell(_connect);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -170,7 +169,7 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
             SizedBox(
               width: 350.0,
               child: TextField(
-                onSubmitted: (str) => connectDebounce.invoke(),
+                onSubmitted: actionInProgress ? null : (str) => _connect,
                 autofocus: true,
                 decoration: const InputDecoration(
                   isDense: true,
@@ -187,7 +186,7 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
             const SizedBox(width: defaultSpacing),
             ElevatedButton(
               child: const Text('Connect'),
-              onPressed: connectDebounce.invoke,
+              onPressed: actionInProgress ? null : _connect,
             ),
           ],
         ),
@@ -204,6 +203,11 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
   }
 
   Future<void> _connect() async {
+    assert(!actionInProgress);
+    await blockWhileInProgress(_connectHelper);
+  }
+
+  Future<void> _connectHelper() async {
     if (connectDialogController.text?.isEmpty ?? true) {
       Notifications.of(context).push(
         'Please enter a VM Service URL.',
@@ -212,23 +216,30 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
     }
 
     final uri = normalizeVmServiceUri(connectDialogController.text);
+    // Cache the routerDelegate and notifications providers before the async
+    // gap as the landing screen may not be displayed by the time the async gap
+    // is complete but we still want to show notifications and change the route.
+    // TODO(jacobr): better understand why this is the case. It is  bit counter
+    // intuitive that we don't want to just cancel the route change or
+    // notification if we are already on a different screen.
+    final routerDelegate = DevToolsRouterDelegate.of(context);
+    final notifications = Notifications.of(context);
     final connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
       errorReporter: (message, error) {
-        Notifications.of(context).push('$message $error');
+        notifications.push('$message $error');
       },
     );
     if (connected) {
       final connectedUri = serviceManager.service.connectedUri;
-      DevToolsRouterDelegate.of(context)
-          .updateArgsIfNotCurrent({'uri': '$connectedUri'});
+      routerDelegate.updateArgsIfNotCurrent({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
-      Notifications.of(context).push(
+      notifications.push(
         'Successfully connected to $shortUri.',
       );
     } else if (uri == null) {
-      Notifications.of(context).push(
+      notifications.push(
         'Failed to connect to the VM Service at "${connectDialogController.text}".\n'
         'The link was not valid.',
       );

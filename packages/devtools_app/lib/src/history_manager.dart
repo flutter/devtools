@@ -15,6 +15,12 @@ class HistoryManager<T> {
   final _history = <T>[];
   int _historyIndex = -1;
 
+  void clear() {
+    _history.clear();
+    _historyIndex = -1;
+    _current.value = null;
+  }
+
   /// Returns true if there is a previous historical item available on the
   /// stack.
   bool get hasPrevious {

@@ -160,47 +160,78 @@ void main() {
       expect(end - start, lessThan(400));
     });
 
-    test('timeRange', () {
-      final timeRange = TimeRange();
+    group('TimeRange', () {
+      test('toString', () {
+        final timeRange = TimeRange();
 
-      expect(timeRange.toString(), equals('[null μs - null μs]'));
+        expect(timeRange.toString(), equals('[null μs - null μs]'));
 
-      timeRange
-        ..start = const Duration(microseconds: 1000)
-        ..end = const Duration(microseconds: 8000);
+        timeRange
+          ..start = const Duration(microseconds: 1000)
+          ..end = const Duration(microseconds: 8000);
 
-      expect(timeRange.duration.inMicroseconds, equals(7000));
-      expect(timeRange.toString(), equals('[1000 μs - 8000 μs]'));
-      expect(
-        timeRange.toString(unit: TimeUnit.milliseconds),
-        equals('[1 ms - 8 ms]'),
-      );
+        expect(timeRange.duration.inMicroseconds, equals(7000));
+        expect(timeRange.toString(), equals('[1000 μs - 8000 μs]'));
+        expect(
+          timeRange.toString(unit: TimeUnit.milliseconds),
+          equals('[1 ms - 8 ms]'),
+        );
+      });
 
-      final t = TimeRange()
-        ..start = const Duration(milliseconds: 100)
-        ..end = const Duration(milliseconds: 200);
-      final overlapBeginning = TimeRange()
-        ..start = const Duration(milliseconds: 50)
-        ..end = const Duration(milliseconds: 150);
-      final overlapMiddle = TimeRange()
-        ..start = const Duration(milliseconds: 125)
-        ..end = const Duration(milliseconds: 175);
-      final overlapEnd = TimeRange()
-        ..start = const Duration(milliseconds: 150)
-        ..end = const Duration(milliseconds: 250);
-      final overlapAll = TimeRange()
-        ..start = const Duration(milliseconds: 50)
-        ..end = const Duration(milliseconds: 250);
-      final noOverlap = TimeRange()
-        ..start = const Duration(milliseconds: 300)
-        ..end = const Duration(milliseconds: 400);
+      test('overlaps', () {
+        final t = TimeRange()
+          ..start = const Duration(milliseconds: 100)
+          ..end = const Duration(milliseconds: 200);
+        final overlapBeginning = TimeRange()
+          ..start = const Duration(milliseconds: 50)
+          ..end = const Duration(milliseconds: 150);
+        final overlapMiddle = TimeRange()
+          ..start = const Duration(milliseconds: 125)
+          ..end = const Duration(milliseconds: 175);
+        final overlapEnd = TimeRange()
+          ..start = const Duration(milliseconds: 150)
+          ..end = const Duration(milliseconds: 250);
+        final overlapAll = TimeRange()
+          ..start = const Duration(milliseconds: 50)
+          ..end = const Duration(milliseconds: 250);
+        final noOverlap = TimeRange()
+          ..start = const Duration(milliseconds: 300)
+          ..end = const Duration(milliseconds: 400);
 
-      expect(t.overlaps(t), isTrue);
-      expect(t.overlaps(overlapBeginning), isTrue);
-      expect(t.overlaps(overlapMiddle), isTrue);
-      expect(t.overlaps(overlapEnd), isTrue);
-      expect(t.overlaps(overlapAll), isTrue);
-      expect(t.overlaps(noOverlap), isFalse);
+        expect(t.overlaps(t), isTrue);
+        expect(t.overlaps(overlapBeginning), isTrue);
+        expect(t.overlaps(overlapMiddle), isTrue);
+        expect(t.overlaps(overlapEnd), isTrue);
+        expect(t.overlaps(overlapAll), isTrue);
+        expect(t.overlaps(noOverlap), isFalse);
+      });
+
+      test('containsRange', () {
+        final t = TimeRange()
+          ..start = const Duration(milliseconds: 100)
+          ..end = const Duration(milliseconds: 200);
+        final containsStart = TimeRange()
+          ..start = const Duration(milliseconds: 50)
+          ..end = const Duration(milliseconds: 150);
+        final containsStartAndEnd = TimeRange()
+          ..start = const Duration(milliseconds: 125)
+          ..end = const Duration(milliseconds: 175);
+        final containsEnd = TimeRange()
+          ..start = const Duration(milliseconds: 150)
+          ..end = const Duration(milliseconds: 250);
+        final invertedContains = TimeRange()
+          ..start = const Duration(milliseconds: 50)
+          ..end = const Duration(milliseconds: 250);
+        final containsNeither = TimeRange()
+          ..start = const Duration(milliseconds: 300)
+          ..end = const Duration(milliseconds: 400);
+
+        expect(t.containsRange(containsStart), isFalse);
+        expect(t.containsRange(containsStartAndEnd), isTrue);
+        expect(t.containsRange(containsEnd), isFalse);
+        expect(t.containsRange(invertedContains), isFalse);
+        expect(t.containsRange(containsNeither), isFalse);
+      });
     });
 
     test('formatDateTime', () {

@@ -555,6 +555,8 @@ class TimeRange {
 
   bool contains(Duration target) => target >= start && target <= end;
 
+  bool containsRange(TimeRange t) => contains(t.start) && contains(t.end);
+
   set end(Duration value) {
     if (singleAssignment) {
       assert(_end == null);
@@ -763,30 +765,6 @@ const defaultEpsilon = 1 / 1000;
 
 bool equalsWithinEpsilon(double a, double b) {
   return (a - b).abs() < defaultEpsilon;
-}
-
-/// Have a quiet period after a callback to ensure that rapid invocations of a
-/// callback only result in one call.
-class CallbackDwell {
-  CallbackDwell(
-    this.callback, {
-    this.dwell = const Duration(milliseconds: 250),
-  });
-
-  final VoidCallback callback;
-  final Duration dwell;
-
-  Timer _timer;
-
-  void invoke() {
-    if (_timer == null) {
-      _timer = Timer(dwell, () {
-        _timer = null;
-      });
-
-      callback();
-    }
-  }
 }
 
 /// A dev time class to help trace DevTools application events.
@@ -1304,4 +1282,19 @@ extension BoolExtension on bool {
     if (other) return 1;
     return -1;
   }
+}
+
+Future<T> whenValueNonNull<T>(ValueListenable<T> listenable) {
+  if (listenable.value != null) return Future.value(listenable.value);
+  final completer = Completer<T>();
+  void listener() {
+    final value = listenable.value;
+    if (value != null) {
+      completer.complete(value);
+      listenable.removeListener(listener);
+    }
+  }
+
+  listenable.addListener(listener);
+  return completer.future;
 }

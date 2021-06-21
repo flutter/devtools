@@ -499,7 +499,30 @@ class FlutterFrame {
   //
   bool get isWellFormed => uiEventFlow != null && rasterEventFlow != null;
 
-  CpuProfileData cpuProfileData;
+  Duration get shaderDuration {
+    if (_shaderTime != null) return _shaderTime;
+    int sumShaderMicros = 0;
+    // TODO(kenz): add a helper class for performing efficient time interval
+    // union computation. This code is currently broken if there were non-shader
+    // events interleaved with shader events. The time reported would be
+    // inaccurately large.
+    breadthFirstTraversal<TimelineEvent>(
+      rasterEventFlow,
+      action: (TimelineEvent event) {
+        // Shader events with a shader event parent should not be included in the
+        // sum because the parent event will encompass the time of [event].
+        if (event.isShaderEvent &&
+            (event.parent == null || !event.parent.isShaderEvent)) {
+          sumShaderMicros += event.time.duration.inMicroseconds;
+        }
+      },
+    );
+    return _shaderTime = Duration(microseconds: sumShaderMicros);
+  }
+
+  Duration _shaderTime;
+
+  bool get hasShaderTime => shaderDuration != Duration.zero;
 
   void setEventFlow(SyncTimelineEvent event, {TimelineEventType type}) {
     type ??= event?.type;
@@ -552,6 +575,13 @@ class FlutterFrame {
 
   bool isRasterJanky(double displayRefreshRate) {
     return rasterTime.inMilliseconds > _targetMsPerFrame(displayRefreshRate);
+  }
+
+  bool hasShaderJank(double displayRefreshRate) {
+    final quarterFrame = (_targetMsPerFrame(displayRefreshRate) / 4).round();
+    return isRasterJanky(displayRefreshRate) &&
+        hasShaderTime &&
+        shaderDuration > Duration(milliseconds: quarterFrame);
   }
 
   double _targetMsPerFrame(double displayRefreshRate) {
@@ -628,6 +658,9 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 
   bool get isGCEvent =>
       traceEvents.first.event.category == TraceEvent.gcCategory;
+
+  bool get isShaderEvent =>
+      traceEvents.first.isShaderEvent || traceEvents.last.isShaderEvent;
 
   bool get isWellFormed => time.start != null && time.end != null;
 

@@ -2,18 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../banner_messages.dart';
 import '../common_widgets.dart';
+import '../globals.dart';
+import '../scaffold.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
+import 'performance_screen.dart';
 
 class FlutterFramesChart extends StatefulWidget {
   const FlutterFramesChart(
@@ -83,6 +88,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         _selectedFrame = _controller.selectedFrame.value;
       });
     });
+
+    _maybeShowShaderJankMessage();
   }
 
   @override
@@ -90,6 +97,29 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     super.didUpdateWidget(oldWidget);
     if (scrollController.hasClients && scrollController.atScrollBottom) {
       scrollController.autoScrollToBottom();
+    }
+
+    if (!collectionEquals(oldWidget.frames, widget.frames)) {
+      _maybeShowShaderJankMessage();
+    }
+  }
+
+  void _maybeShowShaderJankMessage() {
+    final shaderJankFrames = widget.frames
+        .where((frame) => frame.hasShaderJank(widget.displayRefreshRate))
+        .toList();
+    if (shaderJankFrames.isNotEmpty) {
+      final Duration shaderJankDuration = shaderJankFrames.fold(
+        Duration.zero,
+        (prev, frame) => prev + frame.shaderDuration,
+      );
+      Provider.of<BannerMessagesController>(context).addMessage(
+        ShaderJankMessage(
+          offlineMode ? SimpleScreen.id : PerformanceScreen.id,
+          jankyFramesCount: shaderJankFrames.length,
+          jankDuration: shaderJankDuration,
+        ).build(context),
+      );
     }
   }
 
@@ -202,6 +232,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         _legendItem('Frame Time (Raster)', mainRasterColor),
         const SizedBox(height: denseRowSpacing),
         _legendItem('Jank (slow frame)', uiJankColor),
+        const SizedBox(height: denseRowSpacing),
+        _legendItem('Shader Compilation', shaderCompilationColor),
       ],
     );
   }
@@ -274,6 +306,7 @@ class FlutterFramesChartItem extends StatelessWidget {
 
     final bool uiJanky = frame.isUiJanky(displayRefreshRate);
     final bool rasterJanky = frame.isRasterJanky(displayRefreshRate);
+    final bool hasShaderJank = frame.hasShaderJank(displayRefreshRate);
 
     var uiColor = uiJanky ? uiJankColor : mainUiColor;
     if (frame.uiEventFlow == null) {
@@ -293,18 +326,37 @@ class FlutterFramesChartItem extends StatelessWidget {
           .clamp(0.0, availableChartHeight),
       color: uiColor,
     );
-    final raster = Container(
-      key: Key('frame ${frame.id} - raster'),
-      width: defaultFrameWidth / 2,
-      height: (frame.rasterTime.inMilliseconds / msPerPx)
-          .clamp(0.0, availableChartHeight),
-      color: rasterColor,
+
+    final shaderToRasterRatio =
+        frame.shaderDuration.inMilliseconds / frame.rasterTime.inMilliseconds;
+
+    final raster = Column(
+      children: [
+        Container(
+          key: Key('frame ${frame.id} - raster'),
+          width: defaultFrameWidth / 2,
+          height: ((frame.rasterTime.inMilliseconds -
+                      frame.shaderDuration.inMilliseconds) /
+                  msPerPx)
+              .clamp(0.0, availableChartHeight * (1 - shaderToRasterRatio)),
+          color: rasterColor,
+        ),
+        if (frame.hasShaderTime)
+          Container(
+            key: Key('frame ${frame.id} - shaders'),
+            width: defaultFrameWidth / 2,
+            height: (frame.shaderDuration.inMilliseconds / msPerPx)
+                .clamp(0.0, availableChartHeight * shaderToRasterRatio),
+            color: shaderCompilationColor,
+          ),
+      ],
     );
+
     return Stack(
       children: [
         // TODO(kenz): make tooltip to persist if the frame is selected.
         DevToolsTooltip(
-          tooltip: _tooltipText(frame),
+          tooltip: _tooltipText(frame, hasShaderJank),
           padding: const EdgeInsets.all(denseSpacing),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: densePadding),
@@ -330,18 +382,77 @@ class FlutterFramesChartItem extends StatelessWidget {
             color: defaultSelectionColor,
             height: selectedIndicatorHeight,
           ),
+        if (hasShaderJank)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              ShaderJankWarningIcon(),
+            ],
+          ),
       ],
     );
   }
 
-  String _tooltipText(FlutterFrame frame) {
+  // TODO(kenz): Support a rich tooltip
+  // https://github.com/flutter/devtools/issues/3139
+  String _tooltipText(FlutterFrame frame, bool hasShaderJank) {
     final bool missingTimelineEvents =
         frame.uiEventFlow == null || frame.rasterEventFlow == null;
     return [
-      'UI: ${msText(frame.buildTime)}\nRaster: ${msText(frame.rasterTime)}',
+      'UI: ${msText(frame.uiEventFlow.time.duration)}',
+      'Raster: ${msText(frame.rasterEventFlow.time.duration)}',
+      if (hasShaderJank) 'Shader Compilation: ${msText(frame.shaderDuration)}',
       if (missingTimelineEvents)
         '\n\nWarning: missing trace events for this frame.'
-    ].join();
+    ].join('\n');
+  }
+}
+
+class ShaderJankWarningIcon extends StatefulWidget {
+  const ShaderJankWarningIcon({Key key}) : super(key: key);
+
+  @override
+  State<ShaderJankWarningIcon> createState() => _ShaderJankWarningIconState();
+}
+
+class _ShaderJankWarningIconState extends State<ShaderJankWarningIcon> {
+  Timer timer;
+
+  bool showFirst;
+
+  @override
+  void initState() {
+    super.initState();
+    showFirst = true;
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        showFirst = !showFirst;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedCrossFade(
+      duration: const Duration(seconds: 1),
+      firstChild: _warningIcon(),
+      secondChild: _warningIcon(color: Colors.amber),
+      crossFadeState:
+          showFirst ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+    );
+  }
+
+  Widget _warningIcon({Color color}) {
+    return Icon(
+      Icons.warning_amber_rounded,
+      color: color,
+    );
   }
 }
 

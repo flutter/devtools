@@ -259,7 +259,10 @@ class PerformanceController extends DisposableController
     print('done processing available events');
   }
 
-  Future<void> selectTimelineEvent(TimelineEvent event) async {
+  Future<void> selectTimelineEvent(
+    TimelineEvent event, {
+    bool updateProfiler = true,
+  }) async {
     if (event == null || data.selectedEvent == event) return;
 
     data.selectedEvent = event;
@@ -269,25 +272,27 @@ class PerformanceController extends DisposableController
       print(event.traceEvents.first.event.args[TraceEvent.frameNumberArg]);
     }
 
-    cpuProfilerController.reset();
-
-    // Fetch a profile if not in offline mode and if the profiler is enabled.
-    if ((!offlineMode || offlinePerformanceData == null) &&
-        cpuProfilerController.profilerEnabled) {
-      await getCpuProfileForSelectedEvent();
+    if (event.isUiEvent && updateProfiler) {
+      final storedProfile =
+          cpuProfilerController.cpuProfileStore.lookupProfile(event.time);
+      if (storedProfile != null) {
+        await cpuProfilerController.processAndSetData(
+          storedProfile,
+          processId: 'Stored profile for ${event.time}',
+        );
+        data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+      } else if ((!offlineMode || offlinePerformanceData == null) &&
+          cpuProfilerController.profilerEnabled) {
+        // Fetch a profile if not in offline mode and if the profiler is enabled
+        cpuProfilerController.reset();
+        await cpuProfilerController.pullAndProcessProfile(
+          startMicros: event.time.start.inMicroseconds,
+          extentMicros: event.time.duration.inMicroseconds,
+          processId: '${event.traceEvents.first.id}',
+        );
+        data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+      }
     }
-  }
-
-  Future<void> getCpuProfileForSelectedEvent() async {
-    final selectedEvent = data.selectedEvent;
-    if (!selectedEvent.isUiEvent) return;
-
-    await cpuProfilerController.pullAndProcessProfile(
-      startMicros: selectedEvent.time.start.inMicroseconds,
-      extentMicros: selectedEvent.time.duration.inMicroseconds,
-      processId: '${selectedEvent.traceEvents.first.id}',
-    );
-    data.cpuProfileData = cpuProfilerController.dataNotifier.value;
   }
 
   ValueListenable<double> get displayRefreshRate => _displayRefreshRate;
@@ -324,11 +329,29 @@ class PerformanceController extends DisposableController
 
     print('frame ${frame.id}');
 
-    // TODO(kenz): get profile for frame and cache here
+    // We do not need to pull the CPU profile because we will pull the profile
+    // for the entire frame. The order of selecting the timeline event and
+    // pulling the CPU profile for the frame (directly below) matters here.
+    // If the selected timeline event is null, the event details section will
+    // not show the progress bar while we are processing the CPU profile.
+    await selectTimelineEvent(frame.uiEventFlow, updateProfiler: false);
 
-    await selectTimelineEvent(frame.uiEventFlow);
+    final storedProfileForFrame = cpuProfilerController.cpuProfileStore
+        .lookupProfile(frame.timeFromEventFlows);
+    if (storedProfileForFrame == null) {
+      cpuProfilerController.reset();
+      await cpuProfilerController.pullAndProcessProfile(
+        startMicros: frame.timeFromEventFlows.start.inMicroseconds,
+        extentMicros: frame.timeFromEventFlows.duration.inMicroseconds,
+        processId: 'Flutter frame ${frame.id}',
+      );
+      data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+    } else {
+      data.cpuProfileData = storedProfileForFrame;
+      cpuProfilerController.loadProcessedData(storedProfileForFrame);
+    }
 
-    if (debugTimeline && frame != null) {
+    if (debugTimeline) {
       final buf = StringBuffer();
       buf.writeln('UI timeline event for frame ${frame.id}:');
       frame.uiEventFlow.format(buf, '  ');

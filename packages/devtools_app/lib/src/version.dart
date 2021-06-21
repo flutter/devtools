@@ -17,18 +17,33 @@ class FlutterVersion extends SemanticVersion {
     @required this.engineRevision,
     @required this.dartSdkVersion,
   }) {
-    // Flutter versions can come in as '1.10.7-pre.42', so we strip out any
-    // characters that are not digits. We do not currently have a need to know
-    // more version parts than major, minor, and patch. If this changes, we can
-    // add support for the extra values.
-    final _versionParts = version
-        .split('.')
-        .map((part) => RegExp(r'\d+').stringMatch(part) ?? '0')
-        .toList();
+    // Flutter versions are expected in the format '2.3.1-16.1-pre', so we split
+    // on the dash char to separate the main semantic version from the pre
+    // release version.
+    final splitOnDash = version.split('-');
+    assert(splitOnDash.length <= 2);
+
+    final semVersion = splitOnDash.first;
+    final _versionParts = semVersion.split('.');
     major =
         _versionParts.isNotEmpty ? int.tryParse(_versionParts.first) ?? 0 : 0;
     minor = _versionParts.length > 1 ? int.tryParse(_versionParts[1]) ?? 0 : 0;
     patch = _versionParts.length > 2 ? int.tryParse(_versionParts[2]) ?? 0 : 0;
+
+    if (splitOnDash.length == 2) {
+      final preRelease = splitOnDash.last;
+      final preReleaseParts = preRelease
+          .split('.')
+          .map((part) => RegExp(r'\d+').stringMatch(part) ?? '')
+          .toList()
+            ..removeWhere((part) => part.isEmpty);
+      preReleaseMajor = preReleaseParts.isNotEmpty
+          ? int.tryParse(preReleaseParts.first) ?? 0
+          : 0;
+      preReleaseMinor = preReleaseParts.length > 1
+          ? int.tryParse(preReleaseParts[1]) ?? 0
+          : 0;
+    }
   }
 
   factory FlutterVersion.parse(Map<String, dynamic> json) {
@@ -92,7 +107,13 @@ class FlutterVersion extends SemanticVersion {
 }
 
 class SemanticVersion with CompareMixin {
-  SemanticVersion({this.major = 0, this.minor = 0, this.patch = 0});
+  SemanticVersion({
+    this.major = 0,
+    this.minor = 0,
+    this.patch = 0,
+    this.preReleaseMajor,
+    this.preReleaseMinor,
+  });
 
   int major;
 
@@ -100,12 +121,22 @@ class SemanticVersion with CompareMixin {
 
   int patch;
 
+  int preReleaseMajor;
+
+  int preReleaseMinor;
+
+  bool get isPreRelease => preReleaseMajor != null || preReleaseMinor != null;
+
   bool isSupported({@required SemanticVersion supportedVersion}) =>
       compareTo(supportedVersion) >= 0;
 
   @override
   int compareTo(other) {
-    if (major == other.major && minor == other.minor && patch == other.patch) {
+    if (major == other.major &&
+        minor == other.minor &&
+        patch == other.patch &&
+        preReleaseMajor == other.preReleaseMajor &&
+        preReleaseMinor == other.preReleaseMinor) {
       return 0;
     }
     if (major > other.major ||
@@ -113,15 +144,32 @@ class SemanticVersion with CompareMixin {
         (major == other.major && minor == other.minor && patch > other.patch)) {
       return 1;
     }
+    if (major == other.major && minor == other.minor && patch == other.patch) {
+      if (isPreRelease != other.isPreRelease) {
+        return isPreRelease ? 1 : -1;
+      }
+      if (preReleaseMajor > other.preReleaseMajor ||
+          (preReleaseMajor == other.preReleaseMajor &&
+              (preReleaseMinor ?? 0) > (other.preReleaseMinor ?? 0))) {
+        return 1;
+      }
+    }
+
     return -1;
   }
 
   @override
   String toString() {
+    final semVer = [major, minor, patch].join('.');
+
     return [
-      if (major != null) major,
-      if (minor != null) minor,
-      if (patch != null) patch,
-    ].join('.');
+      semVer,
+      if (preReleaseMajor != null || preReleaseMinor != null)
+        [
+          if (preReleaseMajor != null) preReleaseMajor,
+          if (preReleaseMajor == null && preReleaseMinor != null) '0',
+          if (preReleaseMinor != null) preReleaseMinor,
+        ].join('.'),
+    ].join('-');
   }
 }

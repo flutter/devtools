@@ -202,7 +202,10 @@ class DevToolsAppState extends State<DevToolsApp> {
             if (tabs.isEmpty) {
               return DevToolsScaffold.withChild(
                 child: CenteredMessage(
-                    'The "$page" screen is not available for this application.'),
+                  page != null
+                      ? 'The "$page" screen is not available for this application.'
+                      : 'No tabs available for this application.',
+                ),
                 ideTheme: ideTheme,
                 analyticsProvider: widget.analyticsProvider,
               );
