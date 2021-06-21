@@ -121,7 +121,9 @@ class IconLabelButton extends StatelessWidget {
     // https://github.com/flutter/flutter/issues/79894 is fixed.
     return SizedBox(
       height: defaultButtonHeight,
+      width: !includeText(context, includeTextWidth) ? buttonMinWidth : null,
       child: OutlinedButton(
+        style: denseAwareOutlinedButtonStyle(context, includeTextWidth),
         onPressed: onPressed,
         child: iconLabel,
       ),

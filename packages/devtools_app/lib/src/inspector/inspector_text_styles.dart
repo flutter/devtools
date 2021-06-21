@@ -8,7 +8,11 @@ import '../theme.dart';
 
 TextStyle unimportant(ColorScheme colorScheme) => TextStyle(
     color: colorScheme.isLight ? Colors.grey.shade500 : Colors.grey.shade600);
-const regular = TextStyle();
+const regular = TextStyle(
+  // The font size when not specified seems to be 14, but specify here since we
+  // are scaling based on this font size in [IdeTheme].
+  fontSize: defaultFontSize,
+);
 TextStyle warning(ColorScheme colorScheme) => TextStyle(
     color:
         colorScheme.isLight ? Colors.orange.shade900 : Colors.orange.shade400);

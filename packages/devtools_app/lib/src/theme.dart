@@ -148,6 +148,7 @@ const actionsIconSize = 20.0;
 
 const defaultSpacing = 16.0;
 const denseSpacing = 8.0;
+const denseModeDenseSpacing = 2.0;
 const denseRowSpacing = 6.0;
 
 const defaultBorderRadius = 4.0;
@@ -170,6 +171,8 @@ const defaultScrollBarOffset = 10.0;
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
 
 const defaultDialogWidth = 700.0;
+
+const defaultFontSize = 14.0;
 
 /// Branded grey color.
 ///
@@ -465,3 +468,23 @@ CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
 const chartFontSizeSmall = 12.0;
 
 const lightSelection = Color(0xFFD4D7DA);
+
+bool includeText(BuildContext context, double includeTextWidth) {
+  return includeTextWidth == null ||
+      MediaQuery.of(context).size.width > includeTextWidth;
+}
+
+ButtonStyle denseAwareOutlinedButtonStyle(
+  BuildContext context,
+  double includeTextWidth,
+) {
+  var buttonStyle = Theme.of(context).outlinedButtonTheme.style;
+  if (!includeText(context, includeTextWidth)) {
+    buttonStyle = buttonStyle.copyWith(
+      padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
+        return EdgeInsets.zero;
+      }),
+    );
+  }
+  return buttonStyle;
+}
