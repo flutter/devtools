@@ -128,7 +128,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                         ? extensions.toggleSelectWidgetMode
                         : extensions.toggleOnDeviceWidgetInspector
                   ],
-                  minIncludeTextWidth: 650,
+                  minIncludeTextWidth: 900,
                 );
               },
             ),
@@ -137,7 +137,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               onPressed: _refreshInspector,
               icon: Icons.refresh,
               label: 'Refresh Tree',
-              includeTextWidth: 750,
+              includeTextWidth: 900,
             ),
             const Spacer(),
             Row(children: getServiceExtensionWidgets()),
