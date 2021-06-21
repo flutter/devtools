@@ -12,7 +12,7 @@ import 'vm_service_wrapper.dart';
 class PreferencesController {
   final ValueNotifier<bool> _darkModeTheme = ValueNotifier(true);
   final ValueNotifier<bool> _vmDeveloperMode = ValueNotifier(false);
-  final ValueNotifier<bool> _denseMode = ValueNotifier(true);
+  final ValueNotifier<bool> _denseMode = ValueNotifier(false);
 
   ValueListenable<bool> get darkModeTheme => _darkModeTheme;
   ValueListenable<bool> get vmDeveloperModeEnabled => _vmDeveloperMode;

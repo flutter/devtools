@@ -987,6 +987,7 @@ class DevToolsFile<T> {
     @required this.lastModifiedTime,
     @required this.data,
   });
+
   final String path;
 
   final DateTime lastModifiedTime;
@@ -1257,7 +1258,8 @@ double scaleByFontFactor(double original) {
 }
 
 bool isDense() {
-  return preferences.denseModeEnabled.value || isEmbedded();
+  return preferences != null && preferences.denseModeEnabled.value ||
+      isEmbedded();
 }
 
 bool isEmbedded() {
