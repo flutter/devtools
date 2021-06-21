@@ -136,10 +136,17 @@ class _ServiceExtensionButtonGroupState
           : description.disabledTooltip,
       waitDuration: tooltipWait,
       preferBelow: false,
-      child: ImageIconLabel(
-        description.icon,
-        description.description,
-        minIncludeTextWidth: widget.minIncludeTextWidth,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: includeText(context, widget.minIncludeTextWidth)
+              ? defaultSpacing
+              : 0.0,
+        ),
+        child: ImageIconLabel(
+          description.icon,
+          description.description,
+          minIncludeTextWidth: widget.minIncludeTextWidth,
+        ),
       ),
     );
   }

@@ -71,6 +71,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   static const summaryTreeKey = Key('Summary Tree');
   static const detailsTreeKey = Key('Details Tree');
+  static const includeTextWidth = 900.0;
 
   @override
   void initState() {
@@ -126,7 +127,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                         ? extensions.toggleSelectWidgetMode
                         : extensions.toggleOnDeviceWidgetInspector
                   ],
-                  minIncludeTextWidth: 900,
+                  minIncludeTextWidth: includeTextWidth,
                 );
               },
             ),
@@ -135,7 +136,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               onPressed: _refreshInspector,
               icon: Icons.refresh,
               label: 'Refresh Tree',
-              includeTextWidth: 900,
+              includeTextWidth: includeTextWidth,
             ),
             const Spacer(),
             Row(children: getServiceExtensionWidgets()),
@@ -222,8 +223,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   Widget _expandCollapseButtons() {
     if (!_expandCollapseSupported) return null;
 
-    const minIncludeTextWidth = 900.0;
-
     return Align(
       alignment: Alignment.centerRight,
       child: Row(
@@ -235,7 +234,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               icon: Icons.unfold_more,
               onPressed: enableButtons ? _onExpandClick : null,
               label: 'Expand all',
-              includeTextWidth: minIncludeTextWidth,
+              includeTextWidth: includeTextWidth,
             ),
           ),
           const SizedBox(width: denseSpacing),
@@ -244,7 +243,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               icon: Icons.unfold_less,
               onPressed: enableButtons ? _onResetClick : null,
               label: 'Collapse to selected',
-              includeTextWidth: minIncludeTextWidth,
+              includeTextWidth: includeTextWidth,
             ),
           )
         ],
