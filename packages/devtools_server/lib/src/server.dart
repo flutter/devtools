@@ -39,7 +39,6 @@ const argMachine = 'machine';
 const argHost = 'host';
 const argPort = 'port';
 const argProfileMemory = 'record-memory-profile';
-const argProfileMemoryOld = 'profile-memory';
 const argTryPorts = 'try-ports';
 const argVerbose = 'verbose';
 const launchDevToolsService = 'launchDevTools';
@@ -119,8 +118,6 @@ Future<HttpServer?> _serveDevToolsWithArgs(
   String? profileFilename;
   if (args.wasParsed(argProfileMemory)) {
     profileFilename = args[argProfileMemory];
-  } else if (args.wasParsed(argProfileMemoryOld)) {
-    profileFilename = args[argProfileMemoryOld];
   }
   if (profileFilename != null && !path.isAbsolute(profileFilename)) {
     profileFilename = path.absolute(profileFilename);
@@ -498,7 +495,6 @@ ArgParser _createArgsParser(bool verbose) {
     )
     ..addOption(
       argHost,
-      //defaultsTo: 'localhost',
       valueHelp: 'host',
       help: 'Hostname to serve DevTools on (defaults to localhost).',
     )
@@ -514,18 +510,15 @@ ArgParser _createArgsParser(bool verbose) {
       help:
           'Launches DevTools in a browser immediately at start.\n(defaults to on unless in --machine mode)',
     )
-// TODO: Remove this - prefer that clients use the rest arg.
-    ..addOption(
-      argVmUri,
-      defaultsTo: '',
-      help: 'VM Service protocol URI.',
-      hide: true,
-    )
     ..addFlag(
       argMachine,
       negatable: false,
       help: 'Sets output format to JSON for consumption in tools.',
-    )
+    );
+
+  parser.addSeparator('Memory profiling options:');
+
+  parser
     ..addOption(
       argProfileMemory,
       valueHelp: 'file',
@@ -533,27 +526,32 @@ ArgParser _createArgsParser(bool verbose) {
       help:
           'Start devtools headlessly and write memory profiling samples to the '
           'indicated file.',
-    )
-// TODO: Remove this after a release or two.
-    ..addOption(
-      argProfileMemoryOld,
-      defaultsTo: 'memory_samples.json',
-      hide: true,
-    )
+    );
+
+  if (verbose) {
+    parser.addSeparator('App size options:');
+  }
+
+  // TODO(devoncarew): --appSizeBase and --appSizeTest should be renamed to
+  // something like --app-size-base and --app-size-test; #3146.
+  parser
     ..addOption(
       argAppSizeBase,
       valueHelp: 'appSizeBase',
       help: 'Path to the base app size file used for app size debugging.',
-      hide: true,
+      hide: !verbose,
     )
     ..addOption(
       argAppSizeTest,
       valueHelp: 'appSizeTest',
-      help: 'Path to the test app size file used for app size debugging. This '
-          'file should only be specified if a base app size file (appSizeBase) '
-          'is also specified.',
-      hide: true,
+      help: 'Path to the test app size file used for app size debugging.\nThis '
+          'file should only be specified if --$argAppSizeBase is also specified.',
+      hide: !verbose,
     );
+
+  if (verbose) {
+    parser.addSeparator('Advanced options:');
+  }
 
   // Args to show for verbose mode.
   parser
@@ -586,7 +584,17 @@ ArgParser _createArgsParser(bool verbose) {
       hide: !verbose,
     );
 
-  // Hidden args.
+  // Deprecated and hidden args.
+  // TODO: Remove this - prefer that clients use the rest arg.
+  parser
+    ..addOption(
+      argVmUri,
+      defaultsTo: '',
+      help: 'VM Service protocol URI.',
+      hide: true,
+    );
+
+  // Development only args.
   parser
     ..addFlag(
       argDebugMode,
