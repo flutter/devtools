@@ -229,13 +229,15 @@ class LegacyPerformanceController
 
     final storedProfileForFrame =
         cpuProfilerController.cpuProfileStore.lookupProfile(frame.time);
-    if (storedProfileForFrame == null && !offlineMode) {
+    if (storedProfileForFrame == null) {
       cpuProfilerController.reset();
-      await cpuProfilerController.pullAndProcessProfile(
-        startMicros: frame.time.start.inMicroseconds,
-        extentMicros: frame.time.duration.inMicroseconds,
-        processId: 'Flutter frame ${frame.id}',
-      );
+      if (!offlineMode) {
+        await cpuProfilerController.pullAndProcessProfile(
+          startMicros: frame.time.start.inMicroseconds,
+          extentMicros: frame.time.duration.inMicroseconds,
+          processId: 'Flutter frame ${frame.id}',
+        );
+      }
       data.cpuProfileData = cpuProfilerController.dataNotifier.value;
     } else {
       data.cpuProfileData = storedProfileForFrame;
