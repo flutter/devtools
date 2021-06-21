@@ -224,7 +224,7 @@ class LegacyPerformanceController
     // for the entire frame. The order of selecting the timeline event and
     // pulling the CPU profile for the frame (directly below) matters here.
     // If the selected timeline event is null, the event details section will
-    // not show the progress bar while we are processing the CPU profile.
+    // not show the progress bar while we are processing the CPU profile
     await selectTimelineEvent(frame.uiEventFlow, updateProfiler: false);
 
     final storedProfileForFrame =
