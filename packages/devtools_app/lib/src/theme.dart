@@ -79,7 +79,6 @@ ThemeData _baseTheme({
   @required Color selectedRowColor,
 }) {
   return theme.copyWith(
-    // iconTheme: IconTheme(data: IconThemeData()),
     primaryColor: primaryColor,
     indicatorColor: indicatorColor,
     selectedRowColor: selectedRowColor,
@@ -149,7 +148,7 @@ const actionsIconSize = 20.0;
 
 const defaultSpacing = 16.0;
 const denseSpacing = 8.0;
-const denseModeDenseSpacing = 0.0;
+const denseModeDenseSpacing = 2.0;
 const denseRowSpacing = 6.0;
 
 const defaultBorderRadius = 4.0;

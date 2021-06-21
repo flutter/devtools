@@ -546,6 +546,11 @@ class SettingsDialog extends StatelessWidget {
             listenable: preferences.darkModeTheme,
             toggle: preferences.toggleDarkModeTheme,
           ),
+          _buildOption(
+            label: const Text('Use dense mode'),
+            listenable: preferences.denseModeEnabled,
+            toggle: preferences.toggleDenseMode,
+          ),
           if (isExternalBuild && isDevToolsServerAvailable)
             _buildOption(
               label: const Text('Enable analytics'),
@@ -556,11 +561,6 @@ class SettingsDialog extends StatelessWidget {
             label: const Text('Enable VM developer mode'),
             listenable: preferences.vmDeveloperModeEnabled,
             toggle: preferences.toggleVmDeveloperMode,
-          ),
-          _buildOption(
-            label: const Text('Use dense mode'),
-            listenable: preferences.denseModeEnabled,
-            toggle: preferences.toggleDenseMode,
           ),
         ],
       ),

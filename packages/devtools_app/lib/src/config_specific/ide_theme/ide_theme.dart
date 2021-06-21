@@ -11,8 +11,12 @@ export 'ide_theme_stub.dart'
 
 /// IDE-supplied theming.
 class IdeTheme {
-  IdeTheme(
-      {this.backgroundColor, this.foregroundColor, this.fontSize, this.embed});
+  IdeTheme({
+    this.backgroundColor,
+    this.foregroundColor,
+    this.fontSize,
+    this.embed,
+  });
 
   final Color backgroundColor;
   final Color foregroundColor;
