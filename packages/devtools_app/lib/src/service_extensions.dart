@@ -108,8 +108,8 @@ final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
 
 final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaint',
-  description: 'Debug Paint',
-  icon: createImageIcon('icons/debug_paint@2x.png'),
+  description: 'Show Guidelines',
+  icon: createImageIcon('icons/show_guidelines.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Hide Debug Paint',
@@ -120,8 +120,8 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>._(
 
 final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaintBaselinesEnabled',
-  description: 'Paint Baselines',
-  icon: createImageIcon('icons/inspector/textArea@2x.png'),
+  description: 'Show Baselines',
+  icon: createImageIcon('icons/show_baselines.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Hide Paint Baselines',
@@ -156,8 +156,8 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
 
 final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.repaintRainbow',
-  description: 'Repaint Rainbow',
-  icon: createImageIcon('icons/repaint_rainbow@2x.png'),
+  description: 'Highlight Repaints',
+  icon: createImageIcon('icons/highlight_repaints.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Hide Repaint Rainbow',
@@ -169,7 +169,7 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
 final slowAnimations = ToggleableServiceExtensionDescription<num>._(
   extension: 'ext.flutter.timeDilation',
   description: 'Slow Animations',
-  icon: createImageIcon('icons/history@2x.png'),
+  icon: createImageIcon('icons/slow_animations.png'),
   enabledValue: 5.0,
   disabledValue: 1.0,
   enabledTooltip: 'Disable Slow Animations',
@@ -227,7 +227,7 @@ final toggleOnDeviceWidgetInspector =
   // versions of package:flutter it makes sense to describe this extension as
   // toggling widget select mode as it is the only way to toggle that mode.
   description: 'Select Widget Mode',
-  icon: createImageIcon('icons/general/locate@2x.png'),
+  icon: createImageIcon('icons/select_widget.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Disable select widget mode',
@@ -241,7 +241,7 @@ final toggleOnDeviceWidgetInspector =
 final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.selectMode',
   description: 'Select widget mode',
-  icon: createImageIcon('icons/general/locate@2x.png'),
+  icon: createImageIcon('icons/select_widget.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Exit select widget mode',
