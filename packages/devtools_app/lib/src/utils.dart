@@ -989,6 +989,7 @@ class DevToolsFile<T> {
     @required this.lastModifiedTime,
     @required this.data,
   });
+
   final String path;
 
   final DateTime lastModifiedTime;
@@ -1256,6 +1257,15 @@ class ImmutableList<T> with ListMixin<T> implements List<T> {
 
 double scaleByFontFactor(double original) {
   return (original * (ideTheme?.fontSizeFactor ?? 1.0)).roundToDouble();
+}
+
+bool isDense() {
+  return preferences != null && preferences.denseModeEnabled.value ||
+      isEmbedded();
+}
+
+bool isEmbedded() {
+  return ideTheme?.embed != null;
 }
 
 mixin CompareMixin implements Comparable {

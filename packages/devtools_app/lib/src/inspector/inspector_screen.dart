@@ -71,6 +71,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   static const summaryTreeKey = Key('Summary Tree');
   static const detailsTreeKey = Key('Details Tree');
+  static const includeTextWidth = 900.0;
 
   @override
   void initState() {
@@ -126,7 +127,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                         ? extensions.toggleSelectWidgetMode
                         : extensions.toggleOnDeviceWidgetInspector
                   ],
-                  minIncludeTextWidth: 650,
+                  minIncludeTextWidth: includeTextWidth,
                 );
               },
             ),
@@ -135,7 +136,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               onPressed: _refreshInspector,
               icon: Icons.refresh,
               label: 'Refresh Tree',
-              includeTextWidth: 750,
+              includeTextWidth: includeTextWidth,
             ),
             const Spacer(),
             Row(children: getServiceExtensionWidgets()),
@@ -228,23 +229,21 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         mainAxisAlignment: MainAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Flexible(
-            child: OutlinedButton(
+          SizedBox(
+            child: IconLabelButton(
+              icon: Icons.unfold_more,
               onPressed: enableButtons ? _onExpandClick : null,
-              child: const Text(
-                'Expand all',
-                overflow: TextOverflow.ellipsis,
-              ),
+              label: 'Expand all',
+              includeTextWidth: includeTextWidth,
             ),
           ),
           const SizedBox(width: denseSpacing),
-          Flexible(
-            child: OutlinedButton(
+          SizedBox(
+            child: IconLabelButton(
+              icon: Icons.unfold_less,
               onPressed: enableButtons ? _onResetClick : null,
-              child: const Text(
-                'Collapse to selected',
-                overflow: TextOverflow.ellipsis,
-              ),
+              label: 'Collapse to selected',
+              includeTextWidth: includeTextWidth,
             ),
           )
         ],
