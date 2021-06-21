@@ -132,7 +132,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                 );
               },
             ),
-            const SizedBox(width: denseSpacing),
+            SizedBox(width: isDense() ? denseModeDenseSpacing : denseSpacing),
             IconLabelButton(
               onPressed: _refreshInspector,
               icon: Icons.refresh,
@@ -225,14 +225,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     if (!_expandCollapseSupported) return null;
 
     const minIncludeTextWidth = 900.0;
-    var buttonStyle = Theme.of(context).outlinedButtonTheme.style;
-    if (!includeText(context, minIncludeTextWidth)) {
-      buttonStyle = buttonStyle.copyWith(
-        padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
-          return EdgeInsets.zero;
-        }),
-      );
-    }
+    final buttonStyle = denseAwareOutlinedButtonStyle(
+      context,
+      minIncludeTextWidth,
+    );
 
     return Align(
       alignment: Alignment.centerRight,

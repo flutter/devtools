@@ -117,20 +117,12 @@ class IconLabelButton extends StatelessWidget {
         child: iconLabel,
       );
     }
-    var buttonStyle = Theme.of(context).outlinedButtonTheme.style;
-    if (!includeText(context, includeTextWidth)) {
-      buttonStyle = buttonStyle.copyWith(
-        padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
-          return EdgeInsets.zero;
-        }),
-      );
-    }
     // TODO(kenz): this SizedBox wrapper should be unnecessary once
     // https://github.com/flutter/flutter/issues/79894 is fixed.
     return SizedBox(
       height: defaultButtonHeight,
       child: OutlinedButton(
-        style: buttonStyle,
+        style: denseAwareOutlinedButtonStyle(context, includeTextWidth),
         onPressed: onPressed,
         child: iconLabel,
       ),

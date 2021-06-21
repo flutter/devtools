@@ -65,7 +65,3 @@ class MaterialIconLabel extends StatelessWidget {
   }
 }
 
-bool includeText(BuildContext context, double includeTextWidth) {
-  return includeTextWidth == null ||
-      MediaQuery.of(context).size.width > includeTextWidth;
-}

@@ -468,3 +468,23 @@ CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
 const chartFontSizeSmall = 12.0;
 
 const lightSelection = Color(0xFFD4D7DA);
+
+bool includeText(BuildContext context, double includeTextWidth) {
+  return includeTextWidth == null ||
+      MediaQuery.of(context).size.width > includeTextWidth;
+}
+
+ButtonStyle denseAwareOutlinedButtonStyle(
+  BuildContext context,
+  double includeTextWidth,
+) {
+  var buttonStyle = Theme.of(context).outlinedButtonTheme.style;
+  if (!includeText(context, includeTextWidth)) {
+    buttonStyle = buttonStyle.copyWith(
+      padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
+        return EdgeInsets.zero;
+      }),
+    );
+  }
+  return buttonStyle;
+}
