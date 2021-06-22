@@ -134,81 +134,172 @@ class EventSummary extends StatelessWidget {
 
   TraceEvent get firstTraceEvent => event.traceEvents.first.event;
 
-  // TODO(kenz): make this view more dense.
   @override
   Widget build(BuildContext context) {
     return ListView(
+      padding: const EdgeInsets.symmetric(vertical: denseSpacing),
       children: [
-        ListTile(
-          title: const Text('Time'),
-          subtitle: Text('${event.time.start.inMicroseconds} μs —  '
-              '${event.time.end.inMicroseconds} μs'),
+        // Wrap with horizontal padding so that these items align with the
+        // expanding data items. Adding horizontal padding to the entire list
+        // affects the hover boundary for the clickable expanding tiles.
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+          child: _buildDataItem(
+            context: context,
+            title: 'Time',
+            inlineValue: msText(event.time.duration),
+            child: SelectableText(
+              '[${event.time.start.inMicroseconds} μs —  '
+              '${event.time.end.inMicroseconds} μs]',
+              style: Theme.of(context).subtleFixedFontStyle,
+            ),
+          ),
         ),
-        ListTile(
-          title: const Text('Thread id'),
-          subtitle: Text('${firstTraceEvent.threadId}'),
+        // Wrap with horizontal padding so that these items align with the
+        // expanding data items. Adding horizontal padding to the entire list
+        // affects the hover boundary for the clickable expanding tiles.
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+          child: Row(
+            children: [
+              Flexible(
+                fit: FlexFit.tight,
+                child: _buildDataItem(
+                  context: context,
+                  title: 'Category',
+                  inlineValue: '${firstTraceEvent.category}',
+                ),
+              ),
+              if (event.isAsyncEvent)
+                Flexible(
+                  fit: FlexFit.tight,
+                  child: _asyncIdTile(context),
+                ),
+              Flexible(
+                fit: FlexFit.tight,
+                child: _buildDataItem(
+                  context: context,
+                  title: 'Thread id',
+                  inlineValue: '${firstTraceEvent.threadId}',
+                ),
+              ),
+              Flexible(
+                fit: FlexFit.tight,
+                child: _buildDataItem(
+                  context: context,
+                  title: 'Process id',
+                  inlineValue: '${firstTraceEvent.processId}',
+                ),
+              ),
+            ],
+          ),
         ),
-        ListTile(
-          title: const Text('Process id'),
-          subtitle: Text('${firstTraceEvent.processId}'),
-        ),
-        ListTile(
-          title: const Text('Category'),
-          subtitle: Text(firstTraceEvent.category),
-        ),
-        if (event.isAsyncEvent) _asyncIdTile(),
-        if (_connectedEvents.isNotEmpty) _buildConnectedEvents(),
-        if (_eventArgs.isNotEmpty) _buildArguments(),
+        if (_connectedEvents.isNotEmpty) _buildConnectedEvents(context),
+        if (_eventArgs.isNotEmpty) _buildArguments(context),
       ],
     );
   }
 
-  Widget _asyncIdTile() {
+  Widget _asyncIdTile(BuildContext context) {
     String asyncId;
     if (event is OfflineTimelineEvent) {
       asyncId = event.traceEvents.first.event.id;
     } else {
       asyncId = (event as AsyncTimelineEvent).asyncId;
     }
-    return ListTile(
-      title: const Text('Async id'),
-      subtitle: Text(asyncId),
+    return _buildDataItem(
+      context: context,
+      title: 'Async id',
+      inlineValue: asyncId,
     );
   }
 
-  Widget _buildConnectedEvents() {
-    return ExpansionTile(
-      title: const Text('Connected events'),
+  Widget _buildConnectedEvents(BuildContext context) {
+    return _buildExpandingDataItem(
+      context: context,
+      title: 'Connected events',
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (var e in _connectedEvents) _buildConnectedEvent(e),
-          ],
-        ),
+        for (var e in _connectedEvents) _buildConnectedEvent(context, e),
       ],
     );
   }
 
-  Widget _buildConnectedEvent(TimelineEvent e) {
+  Widget _buildConnectedEvent(BuildContext context, TimelineEvent e) {
     final eventArgs = {
       'startTime': msText(e.time.start - event.time.start),
       'args': e.traceEvents.first.event.args,
     };
-    return ListTile(
-      title: Text(e.name),
-      subtitle: FormattedJson(json: eventArgs),
+    return _buildDataItem(
+      context: context,
+      title: e.name,
+      child: FormattedJson(
+        json: eventArgs,
+        useSubtleStyle: true,
+      ),
     );
   }
 
-  Widget _buildArguments() {
-    return ExpansionTile(
-      title: const Text('Arguments'),
+  Widget _buildArguments(BuildContext context) {
+    return _buildExpandingDataItem(
+      context: context,
+      title: 'Arguments',
       children: [
-        ListTile(
-          subtitle: FormattedJson(json: _eventArgs),
+        FormattedJson(
+          json: _eventArgs,
+          useSubtleStyle: true,
         ),
       ],
+    );
+  }
+
+  Widget _buildDataItem({
+    @required BuildContext context,
+    @required String title,
+    String inlineValue,
+    Widget child,
+  }) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: denseSpacing),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SelectableText.rich(
+            TextSpan(
+              text: '$title${inlineValue != null ? ':  ' : ''}',
+              style: theme.textTheme.subtitle2,
+              children: [
+                if (inlineValue != null)
+                  TextSpan(
+                    text: inlineValue,
+                    style: theme.subtleFixedFontStyle,
+                  ),
+              ],
+            ),
+          ),
+          if (child != null) ...[
+            const SizedBox(height: densePadding),
+            child,
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpandingDataItem({
+    @required BuildContext context,
+    @required String title,
+    @required List<Widget> children,
+  }) {
+    return ExpansionTile(
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.subtitle2,
+      ),
+      childrenPadding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+      expandedAlignment: Alignment.topLeft,
+      children: children,
     );
   }
 }

@@ -30,9 +30,11 @@ class CpuProfiler extends StatefulWidget {
         bottomUpRoots = data?.bottomUpRoots ?? [],
         tabs = [
           if (summaryView != null) const Tab(key: summaryTab, text: 'Summary'),
-          const Tab(key: bottomUpTab, text: 'Bottom Up'),
-          const Tab(key: callTreeTab, text: 'Call Tree'),
-          const Tab(key: flameChartTab, text: 'CPU Flame Chart'),
+          if (data != null && !data.isEmpty) ...const [
+            Tab(key: bottomUpTab, text: 'Bottom Up'),
+            Tab(key: callTreeTab, text: 'Call Tree'),
+            Tab(key: flameChartTab, text: 'CPU Flame Chart'),
+          ],
         ];
 
   final CpuProfileData data;
@@ -60,8 +62,6 @@ class CpuProfiler extends StatefulWidget {
   static const Key bottomUpTab = Key('cpu profile bottom up tab');
   static const Key summaryTab = Key('cpu profile summary tab');
 
-  static const emptyCpuProfile = 'No CPU profile data';
-
   @override
   _CpuProfilerState createState() => _CpuProfilerState();
 }
@@ -70,7 +70,7 @@ class CpuProfiler extends StatefulWidget {
 // data. The state is being destroyed with every new cpu profile - investigate.
 class _CpuProfilerState extends State<CpuProfiler>
     with
-        SingleTickerProviderStateMixin,
+        TickerProviderStateMixin,
         AutoDisposeMixin,
         SearchFieldMixin<CpuProfiler> {
   TabController _tabController;
@@ -78,28 +78,51 @@ class _CpuProfilerState extends State<CpuProfiler>
   @override
   void initState() {
     super.initState();
+    _initTabController();
+  }
 
-    _tabController = TabController(
-      length: widget.tabs.length,
-      vsync: this,
-    )..index = widget.controller.selectedProfilerTabIndex;
-    addAutoDisposeListener(_tabController, () {
-      setState(() {
-        widget.controller.changeSelectedProfilerTab(_tabController.index);
-      });
-    });
+  @override
+  void didUpdateWidget(CpuProfiler oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.tabs.length != oldWidget.tabs.length) {
+      _initTabController();
+    }
   }
 
   @override
   void dispose() {
-    super.dispose();
+    _tabController?.removeListener(_onTabChanged);
     _tabController.dispose();
+    super.dispose();
+  }
+
+  void _initTabController() {
+    _tabController?.removeListener(_onTabChanged);
+    _tabController?.dispose();
+    _tabController = TabController(
+      length: widget.tabs.length,
+      vsync: this,
+    );
+
+    if (widget.controller.selectedProfilerTabIndex >= _tabController.length) {
+      widget.controller.changeSelectedProfilerTab(0);
+    }
+    _tabController
+      ..index = widget.controller.selectedProfilerTabIndex
+      ..addListener(_onTabChanged);
+  }
+
+  void _onTabChanged() {
+    setState(() {
+      widget.controller.changeSelectedProfilerTab(_tabController.index);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final currentTab = widget.tabs[_tabController.index];
+    final currentTab =
+        widget.tabs.isNotEmpty ? widget.tabs[_tabController.index] : null;
     final hasData =
         widget.data != CpuProfilerController.baseStateCpuProfileData &&
             widget.data != null &&
@@ -202,15 +225,6 @@ class _CpuProfilerState extends State<CpuProfiler>
     }
   }
 
-  Widget _buildEmptyDataView() {
-    return Center(
-      child: Text(
-        CpuProfiler.emptyCpuProfile,
-        style: Theme.of(context).subtleTextStyle,
-      ),
-    );
-  }
-
   List<Widget> _buildProfilerViews() {
     final bottomUp = CpuBottomUpTable(widget.bottomUpRoots);
     final callTree = CpuCallTreeTable(widget.callTreeRoots);
@@ -231,9 +245,11 @@ class _CpuProfilerState extends State<CpuProfiler>
     // TODO(kenz): make this order configurable.
     return [
       if (widget.summaryView != null) widget.summaryView,
-      widget.data.isEmpty ? _buildEmptyDataView() : bottomUp,
-      widget.data.isEmpty ? _buildEmptyDataView() : callTree,
-      widget.data.isEmpty ? _buildEmptyDataView() : cpuFlameChart,
+      if (!widget.data.isEmpty) ...[
+        bottomUp,
+        callTree,
+        cpuFlameChart,
+      ],
     ];
   }
 

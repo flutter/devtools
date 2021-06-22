@@ -1252,8 +1252,11 @@ class _BreadcrumbPainter extends CustomPainter {
 }
 
 class FormattedJson extends StatelessWidget {
-  const FormattedJson({this.json, this.formattedString})
-      : assert((json == null) != (formattedString == null));
+  const FormattedJson({
+    this.json,
+    this.formattedString,
+    this.useSubtleStyle = false,
+  }) : assert((json == null) != (formattedString == null));
 
   static const encoder = JsonEncoder.withIndent('  ');
 
@@ -1261,12 +1264,15 @@ class FormattedJson extends StatelessWidget {
 
   final String formattedString;
 
+  final bool useSubtleStyle;
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     // TODO(kenz): we could consider using a prettier format like YAML.
     return SelectableText(
       json != null ? encoder.convert(json) : formattedString,
-      style: Theme.of(context).fixedFontStyle,
+      style: useSubtleStyle ? theme.subtleFixedFontStyle : theme.fixedFontStyle,
     );
   }
 }
