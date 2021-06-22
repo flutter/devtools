@@ -89,6 +89,7 @@ class EventDetails extends StatelessWidget {
         return CpuProfiler(
           data: cpuProfileData,
           controller: cpuProfilerController,
+          summaryView: EventSummary(selectedEvent),
         );
       },
     );
@@ -133,6 +134,7 @@ class EventSummary extends StatelessWidget {
 
   TraceEvent get firstTraceEvent => event.traceEvents.first.event;
 
+  // TODO(kenz): make this view more dense.
   @override
   Widget build(BuildContext context) {
     return ListView(

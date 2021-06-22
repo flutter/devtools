@@ -25,8 +25,15 @@ class CpuProfiler extends StatefulWidget {
     @required this.controller,
     this.searchFieldKey,
     this.standaloneProfiler = true,
+    this.summaryView,
   })  : callTreeRoots = data?.callTreeRoots ?? [],
-        bottomUpRoots = data?.bottomUpRoots ?? [];
+        bottomUpRoots = data?.bottomUpRoots ?? [],
+        tabs = [
+          if (summaryView != null) const Tab(key: summaryTab, text: 'Summary'),
+          const Tab(key: bottomUpTab, text: 'Bottom Up'),
+          const Tab(key: callTreeTab, text: 'Call Tree'),
+          const Tab(key: flameChartTab, text: 'CPU Flame Chart'),
+        ];
 
   final CpuProfileData data;
 
@@ -40,21 +47,18 @@ class CpuProfiler extends StatefulWidget {
 
   final bool standaloneProfiler;
 
+  final Widget summaryView;
+
+  final List<Tab> tabs;
+
   static const Key dataProcessingKey = Key('CpuProfiler - data is processing');
 
-  // When content of the selected tab from thee tab controller has this key,
+  // When content of the selected tab from the tab controller has this key,
   // we will not show the expand/collapse buttons.
   static const Key flameChartTab = Key('cpu profile flame chart tab');
   static const Key callTreeTab = Key('cpu profile call tree tab');
   static const Key bottomUpTab = Key('cpu profile bottom up tab');
-
-  // TODO(kenz): the summary tab should be available for UI events in the
-  // timeline.
-  static const tabs = [
-    Tab(key: bottomUpTab, text: 'Bottom Up'),
-    Tab(key: callTreeTab, text: 'Call Tree'),
-    Tab(key: flameChartTab, text: 'CPU Flame Chart'),
-  ];
+  static const Key summaryTab = Key('cpu profile summary tab');
 
   static const emptyCpuProfile = 'No CPU profile data';
 
@@ -76,7 +80,7 @@ class _CpuProfilerState extends State<CpuProfiler>
     super.initState();
 
     _tabController = TabController(
-      length: CpuProfiler.tabs.length,
+      length: widget.tabs.length,
       vsync: this,
     )..index = widget.controller.selectedProfilerTabIndex;
     addAutoDisposeListener(_tabController, () {
@@ -95,7 +99,7 @@ class _CpuProfilerState extends State<CpuProfiler>
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final currentTab = CpuProfiler.tabs[_tabController.index];
+    final currentTab = widget.tabs[_tabController.index];
     final hasData =
         widget.data != CpuProfilerController.baseStateCpuProfileData &&
             widget.data != null &&
@@ -112,11 +116,12 @@ class _CpuProfilerState extends State<CpuProfiler>
                 labelColor: textTheme.bodyText1.color,
                 isScrollable: true,
                 controller: _tabController,
-                tabs: CpuProfiler.tabs,
+                tabs: widget.tabs,
               ),
               const Spacer(),
               if (hasData) ...[
-                UserTagDropdown(widget.controller),
+                if (currentTab.key != CpuProfiler.summaryTab)
+                  UserTagDropdown(widget.controller),
                 const SizedBox(width: defaultSpacing),
                 // TODO(kenz): support search for call tree and bottom up tabs as
                 // well. This will require implementing search for tree tables.
@@ -128,7 +133,8 @@ class _CpuProfilerState extends State<CpuProfiler>
                       FlameChartHelpButton(),
                     ],
                   ),
-                if (currentTab.key != CpuProfiler.flameChartTab)
+                if (currentTab.key != CpuProfiler.flameChartTab &&
+                    currentTab.key != CpuProfiler.summaryTab)
                   Row(
                     children: [
                       // TODO(kenz): add a switch to order samples by user tag here
@@ -184,13 +190,11 @@ class _CpuProfilerState extends State<CpuProfiler>
 
   Widget _buildCpuProfileDataView() {
     if (widget.data != null) {
-      return widget.data.isEmpty
-          ? _buildEmptyDataView()
-          : TabBarView(
-              physics: defaultTabBarViewPhysics,
-              controller: _tabController,
-              children: _buildProfilerViews(),
-            );
+      return TabBarView(
+        physics: defaultTabBarViewPhysics,
+        controller: _tabController,
+        children: _buildProfilerViews(),
+      );
     } else {
       // If [data] is null, CPU profile data is being processed, so return a
       // placeholder.
@@ -225,7 +229,12 @@ class _CpuProfilerState extends State<CpuProfiler>
       },
     );
     // TODO(kenz): make this order configurable.
-    return [bottomUp, callTree, cpuFlameChart];
+    return [
+      if (widget.summaryView != null) widget.summaryView,
+      widget.data.isEmpty ? _buildEmptyDataView() : bottomUp,
+      widget.data.isEmpty ? _buildEmptyDataView() : callTree,
+      widget.data.isEmpty ? _buildEmptyDataView() : cpuFlameChart,
+    ];
   }
 
   void _performOnDataRoots(

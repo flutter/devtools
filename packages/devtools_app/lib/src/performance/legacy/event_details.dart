@@ -93,6 +93,7 @@ class EventDetails extends StatelessWidget {
         return CpuProfiler(
           data: cpuProfileData,
           controller: cpuProfilerController,
+          summaryView: EventSummary(selectedEvent),
         );
       },
     );
