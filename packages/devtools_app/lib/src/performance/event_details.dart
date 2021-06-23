@@ -144,8 +144,7 @@ class EventSummary extends StatelessWidget {
         // affects the hover boundary for the clickable expanding tiles.
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-          child: _buildDataItem(
-            context: context,
+          child: EventMetaData(
             title: 'Time',
             inlineValue: msText(event.time.duration),
             child: SelectableText(
@@ -164,8 +163,7 @@ class EventSummary extends StatelessWidget {
             children: [
               Flexible(
                 fit: FlexFit.tight,
-                child: _buildDataItem(
-                  context: context,
+                child: EventMetaData(
                   title: 'Category',
                   inlineValue: '${firstTraceEvent.category}',
                 ),
@@ -177,16 +175,14 @@ class EventSummary extends StatelessWidget {
                 ),
               Flexible(
                 fit: FlexFit.tight,
-                child: _buildDataItem(
-                  context: context,
+                child: EventMetaData(
                   title: 'Thread id',
                   inlineValue: '${firstTraceEvent.threadId}',
                 ),
               ),
               Flexible(
                 fit: FlexFit.tight,
-                child: _buildDataItem(
-                  context: context,
+                child: EventMetaData(
                   title: 'Process id',
                   inlineValue: '${firstTraceEvent.processId}',
                 ),
@@ -207,16 +203,14 @@ class EventSummary extends StatelessWidget {
     } else {
       asyncId = (event as AsyncTimelineEvent).asyncId;
     }
-    return _buildDataItem(
-      context: context,
+    return EventMetaData(
       title: 'Async id',
       inlineValue: asyncId,
     );
   }
 
   Widget _buildConnectedEvents(BuildContext context) {
-    return _buildExpandingDataItem(
-      context: context,
+    return ExpandingEventMetaData(
       title: 'Connected events',
       children: [
         for (var e in _connectedEvents) _buildConnectedEvent(context, e),
@@ -229,8 +223,7 @@ class EventSummary extends StatelessWidget {
       'startTime': msText(e.time.start - event.time.start),
       'args': e.traceEvents.first.event.args,
     };
-    return _buildDataItem(
-      context: context,
+    return EventMetaData(
       title: e.name,
       child: FormattedJson(
         json: eventArgs,
@@ -240,8 +233,7 @@ class EventSummary extends StatelessWidget {
   }
 
   Widget _buildArguments(BuildContext context) {
-    return _buildExpandingDataItem(
-      context: context,
+    return ExpandingEventMetaData(
       title: 'Arguments',
       children: [
         FormattedJson(
@@ -251,13 +243,25 @@ class EventSummary extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _buildDataItem({
-    @required BuildContext context,
-    @required String title,
-    String inlineValue,
-    Widget child,
-  }) {
+class EventMetaData extends StatelessWidget {
+  const EventMetaData({
+    Key key,
+    @required this.title,
+    this.inlineValue,
+    this.child,
+  })  : assert(inlineValue != null || child != null),
+        super(key: key);
+
+  final String title;
+
+  final String inlineValue;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: denseSpacing),
@@ -286,12 +290,21 @@ class EventSummary extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildExpandingDataItem({
-    @required BuildContext context,
-    @required String title,
-    @required List<Widget> children,
-  }) {
+class ExpandingEventMetaData extends StatelessWidget {
+  const ExpandingEventMetaData({
+    Key key,
+    @required this.title,
+    @required this.children,
+  }) : super(key: key);
+
+  final String title;
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
     return ExpansionTile(
       title: Text(
         title,
