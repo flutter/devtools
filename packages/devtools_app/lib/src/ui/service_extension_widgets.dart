@@ -115,7 +115,7 @@ class _ServiceExtensionButtonGroupState
         // TODO(kenz): ensure border radius is set correctly for single child
         // groups once https://github.com/flutter/flutter/issues/73725 is fixed.
         borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-        color: theme.colorScheme.contrastForeground,
+        color: theme.colorScheme.toggleButtonsTitle,
         textStyle: theme.textTheme.bodyText1,
         constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
         children: <Widget>[

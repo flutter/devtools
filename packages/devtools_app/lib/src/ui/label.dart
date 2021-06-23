@@ -43,6 +43,7 @@ class MaterialIconLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     // TODO(jacobr): display the label as a tooltip for the icon particularly
     // when the text is not shown.
     return Row(
@@ -58,7 +59,10 @@ class MaterialIconLabel extends StatelessWidget {
         if (_showLabelText(context, includeTextWidth))
           Padding(
             padding: const EdgeInsets.only(left: denseSpacing),
-            child: Text(label),
+            child: Text(
+              label,
+              style: TextStyle(color: theme.colorScheme.toggleButtonsTitle),
+            ),
           ),
       ],
     );

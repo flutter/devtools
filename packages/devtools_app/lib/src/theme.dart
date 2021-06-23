@@ -203,6 +203,7 @@ const devtoolsWarning = Color(0xFFFDFAD5);
 
 extension DevToolsColorScheme on ColorScheme {
   bool get isLight => brightness == Brightness.light;
+
   bool get isDark => brightness == Brightness.dark;
 
   // Commonly used themed colors.
@@ -219,6 +220,9 @@ extension DevToolsColorScheme on ColorScheme {
   Color get contrastForeground =>
       isLight ? Colors.black : _contrastForegroundWhite;
 
+  Color get toggleButtonsTitle =>
+      isLight ? Colors.black : const Color(0xFFAEAEB1);
+
   Color get grey => isLight
       ? const Color.fromARGB(255, 128, 128, 128)
       : const Color.fromARGB(255, 128, 128, 128);
@@ -233,38 +237,51 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get devtoolsLink =>
       isLight ? const Color(0xFF1976D2) : Colors.lightBlueAccent;
+
   // TODO(jacobr): replace this with Theme.of(context).scaffoldBackgroundColor, but we use
   // this in places where we do not have access to the context.
   Color get defaultBackgroundColor =>
       isLight ? Colors.grey[50] : Colors.grey[850];
+
   Color get alternatingBackgroundColor => isLight
       ? defaultBackgroundColor.darken()
       : defaultBackgroundColor.brighten();
 
   Color get chartAccentColor =>
       isLight ? const Color(0xFFCCCCCC) : const Color(0xFF585858);
+
   Color get chartTextColor => isLight ? Colors.black : Colors.white;
+
   Color get chartSubtleColor =>
       isLight ? const Color(0xFF999999) : const Color(0xFF8A8A8A);
+
   Color get toggleButtonBackgroundColor =>
       isLight ? const Color(0xFFE0EEFA) : const Color(0xFF2E3C48);
+
   // [toggleButtonForegroundColor] is the same for light and dark theme.
   Color get toggleButtonForegroundColor => const Color(0xFF2196F3);
 
   Color get functionSyntaxColor =>
       isLight ? const Color(0xFF795E26) : const Color(0xFFDCDCAA);
+
   Color get declarationsSyntaxColor =>
       isLight ? const Color(0xFF267f99) : const Color(0xFF4EC9B0);
+
   Color get modifierSyntaxColor =>
       isLight ? const Color(0xFF0000FF) : const Color(0xFF569CD6);
+
   Color get controlFlowSyntaxColor =>
       isLight ? const Color(0xFFAF00DB) : const Color(0xFFC586C0);
+
   Color get variableSyntaxColor =>
       isLight ? const Color(0xFF001080) : const Color(0xFF9CDCFE);
+
   Color get commentSyntaxColor =>
       isLight ? const Color(0xFF008000) : const Color(0xFF6A9955);
+
   Color get stringSyntaxColor =>
       isLight ? const Color(0xFFB20001) : const Color(0xFFD88E73);
+
   Color get numericConstantSyntaxColor =>
       isLight ? const Color(0xFF098658) : const Color(0xFFB5CEA8);
 
@@ -329,6 +346,7 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get expandedTopContentColor =>
       isLight ? Colors.grey[50] : Colors.grey[850];
+
   Color get expandedBottomContentColor =>
       isLight ? Colors.grey[200] : Colors.grey[800];
 
