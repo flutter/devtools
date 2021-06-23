@@ -34,10 +34,10 @@ class PackagesGetCommand extends Command {
     }
 
     final log = Logger.standard();
-    final repo = DevToolsRepo.getInstance();
+    final repo = DevToolsRepo.getInstance()!;
     final packages = repo.getPackages();
 
-    final upgrade = argResults['upgrade'];
+    final upgrade = argResults!['upgrade'];
     final command = upgrade ? 'upgrade' : 'get';
 
     log.stdout('Running flutter pub $command...');

@@ -19,7 +19,7 @@ class DevToolsRepo {
   ///
   /// This can fail and return null if the current working directory is not
   /// contained within a git checkout of DevTools.
-  static DevToolsRepo getInstance() {
+  static DevToolsRepo? getInstance() {
     final repoPath = _findRepoRoot(Directory.current);
     return repoPath == null ? null : DevToolsRepo._create(repoPath);
   }
@@ -41,7 +41,7 @@ class DevToolsRepo {
     return result;
   }
 
-  static String _findRepoRoot(Directory dir) {
+  static String? _findRepoRoot(Directory dir) {
     // Look for README.md, packages, tool.
     if (_fileExists(dir, 'README.md') &&
         _dirExists(dir, 'packages') &&
@@ -61,8 +61,7 @@ class DevToolsRepo {
       result.add(Package._(this, dir.path));
     }
 
-    for (FileSystemEntity entity
-        in dir.listSync(recursive: false, followLinks: false)) {
+    for (FileSystemEntity entity in dir.listSync(followLinks: false)) {
       final name = path.basename(entity.path);
       if (entity is Directory && !name.startsWith('.') && name != 'build') {
         _collectPackages(entity, result);
@@ -81,7 +80,7 @@ class FlutterSdk {
   /// Return the Flutter SDK.
   ///
   /// This can return null if the Flutter SDK can't be found.
-  static FlutterSdk getSdk() {
+  static FlutterSdk? getSdk() {
     // Look for it relative to the current Dart process.
     final dartVmPath = Platform.resolvedExecutable;
     final pathSegments = path.split(dartVmPath);
@@ -148,8 +147,7 @@ class Package {
   }
 
   void _collectDartFiles(Directory dir, List<String> result) {
-    for (FileSystemEntity entity
-        in dir.listSync(recursive: false, followLinks: false)) {
+    for (FileSystemEntity entity in dir.listSync(followLinks: false)) {
       final name = path.basename(entity.path);
       if (entity is Directory && !name.startsWith('.') && name != 'build') {
         _collectDartFiles(entity, result);
