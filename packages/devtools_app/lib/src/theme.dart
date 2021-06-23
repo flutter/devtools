@@ -221,7 +221,7 @@ extension DevToolsColorScheme on ColorScheme {
       isLight ? Colors.black : _contrastForegroundWhite;
 
   Color get serviceExtensionButtonsTitle =>
-      isLight ? Colors.black : const Color(0xFFAEAEB1);
+      isLight ? const Color(0xFF464646) : const Color(0xFFAEAEB1);
 
   Color get grey => isLight
       ? const Color.fromARGB(255, 128, 128, 128)

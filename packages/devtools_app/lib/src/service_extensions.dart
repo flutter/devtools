@@ -97,7 +97,7 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
 final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.invertOversizedImages',
   description: 'Invert Oversized Images',
-  icon: const Icon(Icons.image, size: actionsIconSize),
+  icon: createImageIcon('icons/invert_oversized_images.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Disable Invert Oversized Images',
