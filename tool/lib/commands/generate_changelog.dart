@@ -67,16 +67,16 @@ class GenerateChangelogCommand extends Command {
   Future run() async {
     final repo = DevToolsRepo.getInstance();
     final devtoolsVersionFile =
-    await File('${repo.repoPath}/packages/devtools_app/lib/devtools.dart')
-        .readAsString();
+        await File('${repo.repoPath}/packages/devtools_app/lib/devtools.dart')
+            .readAsString();
     const versionDeclarationPrefix = 'const String version = \'';
     final versionDeclaration =
-    devtoolsVersionFile.indexOf(versionDeclarationPrefix);
+        devtoolsVersionFile.indexOf(versionDeclarationPrefix);
     final versionEnd = devtoolsVersionFile.indexOf('\';');
     final version = devtoolsVersionFile.substring(
         versionDeclaration + versionDeclarationPrefix.length, versionEnd);
     final List tags = jsonDecode((await http.get(
-        Uri.https('${auth}api.github.com', '/repos/flutter/devtools/tags')))
+            Uri.https('${auth}api.github.com', '/repos/flutter/devtools/tags')))
         .body);
 
     print('Current Devtools version is $version.  Retrieving the tagged commit '
@@ -91,11 +91,11 @@ class GenerateChangelogCommand extends Command {
       }
       final tagVersion = getVersion(nameOf(tag));
       final closestTagVersion =
-      closestTag == null ? null : getVersion(nameOf(closestTag));
+          closestTag == null ? null : getVersion(nameOf(closestTag));
       // TODO(djshuckerow): The script does not process dev versioning, so
       // ignore if the version file reports a dev version.
       final versionFileVersion =
-      isDevBuild(version) ? null : getVersion(version);
+          isDevBuild(version) ? null : getVersion(version);
       if ((versionFileVersion == null || tagVersion < versionFileVersion) &&
           (closestTagVersion == null || tagVersion > closestTagVersion)) {
         closestTag = tag;
@@ -140,9 +140,9 @@ class GenerateChangelogCommand extends Command {
         'inserted to any files other than changelog.');
     final versionDate = DateTime.now().toIso8601String().split('T').first;
     final changelogFile =
-    File('${repo.repoPath}/packages/devtools/CHANGELOG.md');
+        File('${repo.repoPath}/packages/devtools/CHANGELOG.md');
     final output = '## $nextVersionNumber '
-        '$versionDate\n' +
+            '$versionDate\n' +
         changes.join('\n') +
         '\n\n';
     await changelogFile.writeAsString(
