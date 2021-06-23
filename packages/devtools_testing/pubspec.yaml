@@ -2,7 +2,7 @@ name: devtools_testing
 description: Package of shared testing code for Dart DevTools.
 # Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of packages from packages/devtools.
-version: 2.3.2
+version: 2.3.3-dev.1
 
 homepage: https://github.com/flutter/devtools
 
@@ -10,8 +10,8 @@ environment:
   sdk: '>=2.3.0 <3.0.0'
 
 dependencies:
-  devtools_app: 2.3.2
-  devtools_shared: 2.3.2
+  devtools_app: 2.3.3-dev.1
+  devtools_shared: 2.3.3-dev.1
   flutter:
     sdk: flutter
   flutter_riverpod: ^0.14.0+3
