@@ -63,7 +63,7 @@ class GenerateChangelogCommand extends Command {
 
   @override
   Future run() async {
-    final repo = DevToolsRepo.getInstance();
+    final repo = DevToolsRepo.getInstance()!;
     final devtoolsVersionFile =
         await File('${repo.repoPath}/packages/devtools_app/lib/devtools.dart')
             .readAsString();
@@ -73,39 +73,44 @@ class GenerateChangelogCommand extends Command {
     final versionEnd = devtoolsVersionFile.indexOf('\';');
     final version = devtoolsVersionFile.substring(
         versionDeclaration + versionDeclarationPrefix.length, versionEnd);
-    final List tags = jsonDecode((await http.get(
-            Uri.https('${auth}api.github.com', '/repos/flutter/devtools/tags')))
-        .body);
+    final tags = (jsonDecode((await http.get(Uri.https(
+                '${auth}api.github.com', '/repos/flutter/devtools/tags')))
+            .body) as List)
+        .cast<Map<String, dynamic>>();
 
     print('Current Devtools version is $version.  Retrieving the tagged commit '
         'with the closest version number to this version.');
+
     bool isDevBuild(String tagName) => tagName.split('-').length > 1;
-    String nameOf(tag) => tag['name'];
-    var closestTag = tags.skipWhile((tag) => isDevBuild(nameOf(tag))).first;
+
+    String? nameOf(Map tag) => tag['name'];
+
+    var closestTag = tags.skipWhile((tag) => isDevBuild(nameOf(tag)!)).first;
+
     for (var tag in tags) {
-      if (isDevBuild(nameOf(tag))) {
+      if (isDevBuild(nameOf(tag)!)) {
         // This was a dev build.
         continue;
       }
-      final tagVersion = getVersion(nameOf(tag));
-      final closestTagVersion =
-          closestTag == null ? null : getVersion(nameOf(closestTag));
+      final tagVersion = getVersion(nameOf(tag)!);
+      final closestTagVersion = getVersion(nameOf(closestTag)!);
       // TODO(djshuckerow): The script does not process dev versioning, so
       // ignore if the version file reports a dev version.
       final versionFileVersion =
           isDevBuild(version) ? null : getVersion(version);
       if ((versionFileVersion == null || tagVersion < versionFileVersion) &&
-          (closestTagVersion == null || tagVersion > closestTagVersion)) {
+          tagVersion > closestTagVersion) {
         closestTag = tag;
       }
     }
 
-    print('Getting the date of the tagged commit for ${closestTag["name"]}.');
+    final commitInfo = closestTag['commit'] as Map<String, dynamic>;
+    print('Getting the date of the tagged commit for ${closestTag['name']}.');
     final taggedCommit = jsonDecode((await http.get(Uri.https(
       '${auth}api.github.com',
-      '/repos/flutter/devtools/commits/${closestTag["commit"]["sha"]}',
+      '/repos/flutter/devtools/commits/${commitInfo['sha']}',
     )))
-        .body);
+        .body) as Map<String, dynamic>;
 
     final commitDate = taggedCommit['commit']['author']['date'];
     print('getting commits since $commitDate');
@@ -129,7 +134,7 @@ class GenerateChangelogCommand extends Command {
 
     print('Incrementing version number');
     // TODO(djshuckerow): Support overriding the nextVersionNumber with a flag.
-    String nextVersionNumber = nameOf(closestTag).replaceFirst('v', '');
+    String nextVersionNumber = nameOf(closestTag)!.replaceFirst('v', '');
     final List parts = nextVersionNumber.split('.');
     parts[2] = '${int.parse(parts[2]) + 1}';
     nextVersionNumber = parts.join('.');
