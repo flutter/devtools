@@ -49,7 +49,6 @@ void main() {
       );
       await tester.pumpWidget(wrap(cpuProfiler));
       expect(find.byType(TabBar), findsOneWidget);
-      expect(find.text(CpuProfiler.emptyCpuProfile), findsNothing);
       expect(find.byKey(CpuProfiler.dataProcessingKey), findsOneWidget);
       expect(find.byType(CpuProfileFlameChart), findsNothing);
       expect(find.byType(CpuCallTreeTable), findsNothing);
@@ -59,6 +58,10 @@ void main() {
       expect(find.byType(CollapseAllButton), findsNothing);
       expect(find.byType(FlameChartHelpButton), findsNothing);
       expect(find.byKey(searchFieldKey), findsNothing);
+      expect(find.byKey(CpuProfiler.flameChartTab), findsNothing);
+      expect(find.byKey(CpuProfiler.callTreeTab), findsNothing);
+      expect(find.byKey(CpuProfiler.bottomUpTab), findsNothing);
+      expect(find.byKey(CpuProfiler.summaryTab), findsNothing);
     });
 
     testWidgetsWithWindowSize('builds for empty cpuProfileData', windowSize,
@@ -71,7 +74,6 @@ void main() {
       );
       await tester.pumpWidget(wrap(cpuProfiler));
       expect(find.byType(TabBar), findsOneWidget);
-      expect(find.text(CpuProfiler.emptyCpuProfile), findsOneWidget);
       expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
       expect(find.byType(CpuProfileFlameChart), findsNothing);
       expect(find.byType(CpuCallTreeTable), findsNothing);
@@ -81,6 +83,39 @@ void main() {
       expect(find.byType(CollapseAllButton), findsNothing);
       expect(find.byType(FlameChartHelpButton), findsNothing);
       expect(find.byKey(searchFieldKey), findsNothing);
+      expect(find.byKey(CpuProfiler.flameChartTab), findsNothing);
+      expect(find.byKey(CpuProfiler.callTreeTab), findsNothing);
+      expect(find.byKey(CpuProfiler.bottomUpTab), findsNothing);
+      expect(find.byKey(CpuProfiler.summaryTab), findsNothing);
+    });
+
+    testWidgetsWithWindowSize(
+        'builds for empty cpuProfileData with summary view', windowSize,
+        (WidgetTester tester) async {
+      cpuProfileData = CpuProfileData.parse(emptyCpuProfileDataJson);
+      const summaryViewKey = Key('test summary view');
+      cpuProfiler = CpuProfiler(
+        data: cpuProfileData,
+        controller: controller,
+        searchFieldKey: searchFieldKey,
+        summaryView: const SizedBox(key: summaryViewKey),
+      );
+      await tester.pumpWidget(wrap(cpuProfiler));
+      expect(find.byType(TabBar), findsOneWidget);
+      expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
+      expect(find.byType(CpuProfileFlameChart), findsNothing);
+      expect(find.byType(CpuCallTreeTable), findsNothing);
+      expect(find.byType(CpuBottomUpTable), findsNothing);
+      expect(find.byType(UserTagDropdown), findsNothing);
+      expect(find.byType(ExpandAllButton), findsNothing);
+      expect(find.byType(CollapseAllButton), findsNothing);
+      expect(find.byType(FlameChartHelpButton), findsNothing);
+      expect(find.byKey(searchFieldKey), findsNothing);
+      expect(find.byKey(CpuProfiler.flameChartTab), findsNothing);
+      expect(find.byKey(CpuProfiler.callTreeTab), findsNothing);
+      expect(find.byKey(CpuProfiler.bottomUpTab), findsNothing);
+      expect(find.byKey(CpuProfiler.summaryTab), findsOneWidget);
+      expect(find.byKey(summaryViewKey), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('builds for valid cpuProfileData', windowSize,
@@ -92,7 +127,6 @@ void main() {
       );
       await tester.pumpWidget(wrap(cpuProfiler));
       expect(find.byType(TabBar), findsOneWidget);
-      expect(find.text(CpuProfiler.emptyCpuProfile), findsNothing);
       expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
       expect(find.byType(CpuBottomUpTable), findsOneWidget);
       expect(find.byType(UserTagDropdown), findsOneWidget);
@@ -100,6 +134,35 @@ void main() {
       expect(find.byType(CollapseAllButton), findsOneWidget);
       expect(find.byType(FlameChartHelpButton), findsNothing);
       expect(find.byKey(searchFieldKey), findsNothing);
+      expect(find.byKey(CpuProfiler.flameChartTab), findsOneWidget);
+      expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
+      expect(find.byKey(CpuProfiler.bottomUpTab), findsOneWidget);
+      expect(find.byKey(CpuProfiler.summaryTab), findsNothing);
+    });
+
+    testWidgetsWithWindowSize(
+        'builds for valid cpuProfileData with summaryView', windowSize,
+        (WidgetTester tester) async {
+      const summaryViewKey = Key('test summary view');
+      cpuProfiler = CpuProfiler(
+        data: cpuProfileData,
+        controller: controller,
+        searchFieldKey: searchFieldKey,
+        summaryView: const SizedBox(key: summaryViewKey),
+      );
+      await tester.pumpWidget(wrap(cpuProfiler));
+      expect(find.byType(TabBar), findsOneWidget);
+      expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
+      expect(find.byKey(summaryViewKey), findsOneWidget);
+      expect(find.byType(UserTagDropdown), findsNothing);
+      expect(find.byType(ExpandAllButton), findsNothing);
+      expect(find.byType(CollapseAllButton), findsNothing);
+      expect(find.byType(FlameChartHelpButton), findsNothing);
+      expect(find.byKey(searchFieldKey), findsNothing);
+      expect(find.byKey(CpuProfiler.flameChartTab), findsOneWidget);
+      expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
+      expect(find.byKey(CpuProfiler.bottomUpTab), findsOneWidget);
+      expect(find.byKey(CpuProfiler.summaryTab), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('switches tabs', windowSize,
@@ -111,7 +174,6 @@ void main() {
       );
       await tester.pumpWidget(wrap(cpuProfiler));
       expect(find.byType(TabBar), findsOneWidget);
-      expect(find.text(CpuProfiler.emptyCpuProfile), findsNothing);
       expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
       expect(find.byType(CpuProfileFlameChart), findsNothing);
       expect(find.byType(CpuCallTreeTable), findsNothing);
