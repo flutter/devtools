@@ -61,7 +61,7 @@ class MaterialIconLabel extends StatelessWidget {
             padding: const EdgeInsets.only(left: denseSpacing),
             child: Text(
               label,
-              style: TextStyle(color: theme.colorScheme.toggleButtonsTitle),
+              style: TextStyle(color: theme.colorScheme.serviceExtensionButtonsTitle),
             ),
           ),
       ],

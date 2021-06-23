@@ -220,7 +220,7 @@ extension DevToolsColorScheme on ColorScheme {
   Color get contrastForeground =>
       isLight ? Colors.black : _contrastForegroundWhite;
 
-  Color get toggleButtonsTitle =>
+  Color get serviceExtensionButtonsTitle =>
       isLight ? Colors.black : const Color(0xFFAEAEB1);
 
   Color get grey => isLight
