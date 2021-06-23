@@ -40,6 +40,14 @@ String getSimplePackageUrl(String url) {
 Uri normalizeVmServiceUri(String value) {
   value = value.trim();
 
+  // Clean up urls that have a devtools server's prefix, aka:
+  // http://127.0.0.1:9101?uri=http%3A%2F%2F127.0.0.1%3A56142%2FHOwgrxalK00%3D%2F
+  const uriParamToken = '?uri=';
+  if (value.contains(uriParamToken)) {
+    value =
+        value.substring(value.indexOf(uriParamToken) + uriParamToken.length);
+  }
+
   // Cleanup encoded urls likely copied from the uri of an existing running
   // DevTools app.
   if (value.contains('%3A%2F%2F')) {
