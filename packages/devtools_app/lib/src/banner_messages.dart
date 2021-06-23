@@ -150,14 +150,24 @@ class BannerMessage extends StatelessWidget {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   headerText,
                   style: Theme.of(context)
                       .textTheme
-                      .headline6
+                      .bodyText1
                       .copyWith(color: foregroundColor),
                 ),
+                const SizedBox(width: defaultSpacing),
+                Expanded(
+                  child: RichText(
+                    text: TextSpan(
+                      children: textSpans,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: defaultSpacing),
                 CircularIconButton(
                   icon: Icons.close,
                   backgroundColor: backgroundColor,
@@ -169,12 +179,6 @@ class BannerMessage extends StatelessWidget {
                       .removeMessage(this, dismiss: true),
                 ),
               ],
-            ),
-            const SizedBox(height: defaultSpacing),
-            RichText(
-              text: TextSpan(
-                children: textSpans,
-              ),
             ),
           ],
         ),
