@@ -43,7 +43,7 @@ class FrameworkCore {
       return true;
     }
 
-    final Uri uri = explicitUri ?? _getUriFromQuerystring(url);
+    final Uri uri = explicitUri ?? _getUriFromQueryString(url);
     if (uri != null) {
       final finishedCompleter = Completer<void>();
 
@@ -72,8 +72,8 @@ class FrameworkCore {
   }
 
   /// Gets a VM Service URI from the querystring (in preference from the 'uri'
-  /// value, but otherwise from 'port').
-  static Uri _getUriFromQuerystring(String location) {
+  /// value, but otherwise from 'port' and 'token').
+  static Uri _getUriFromQueryString(String location) {
     if (location == null) {
       return null;
     }
@@ -99,11 +99,16 @@ class FrameworkCore {
       }
     }
 
-    // Otherwise try the legacy port option. Here we assume ws:/localhost and
-    // do not support tokens.
+    // Otherwise try 'port', 'token', and 'host'.
     final port = int.tryParse(queryParams['port'] ?? '');
+    final token = queryParams['token'];
+    final host = queryParams['host'] ?? 'localhost';
     if (port != null) {
-      return Uri.parse('ws://localhost:$port/ws');
+      if (token == null) {
+        return Uri.parse('ws://$host:$port/ws');
+      } else {
+        return Uri.parse('ws://$host:$port/$token/ws');
+      }
     }
 
     return null;
