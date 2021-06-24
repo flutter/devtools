@@ -82,6 +82,15 @@ void main() {
         );
       });
 
+      test('handles prefixed devtools server uris', () {
+        expect(
+          normalizeVmServiceUri(
+            'http://127.0.0.1:9101?uri=http%3A%2F%2F127.0.0.1%3A56142%2FHOwgrxalK00%3D%2F',
+          ).toString(),
+          equals('http://127.0.0.1:56142/HOwgrxalK00=/'),
+        );
+      });
+
       test('Returns null when given a non-absolute url', () {
         expect(normalizeVmServiceUri('my/page'), null);
       });
