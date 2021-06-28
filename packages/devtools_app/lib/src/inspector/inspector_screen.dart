@@ -136,6 +136,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               onPressed: _refreshInspector,
               icon: Icons.refresh,
               label: 'Refresh Tree',
+              color: Theme.of(context).colorScheme.serviceExtensionButtonsTitle,
               includeTextWidth: includeTextWidth,
             ),
             const Spacer(),
@@ -205,11 +206,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           extensions.debugPaint,
           extensions.debugPaintBaselines,
           extensions.repaintRainbow,
-          extensions.invertOversizedImages
+          extensions.invertOversizedImages,
         ],
       ),
       // TODO(jacobr): implement TogglePlatformSelector.
-      //  TogglePlatformSelector().selector*/
+      //  TogglePlatformSelector().selector
     ];
   }
 

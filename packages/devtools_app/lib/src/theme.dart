@@ -226,6 +226,11 @@ extension DevToolsColorScheme on ColorScheme {
   Color get serviceExtensionButtonsTitle =>
       isLight ? const Color(0xFF464646) : const Color(0xFFAEAEB1);
 
+  Color get serviceExtensionButtonsTitleSelected =>
+      isLight ? Colors.white : const Color(0xFF464646);
+
+  Color get serviceExtensionButtonsFillSelected => devtoolsBlue[400];
+
   Color get grey => isLight
       ? const Color.fromARGB(255, 128, 128, 128)
       : const Color.fromARGB(255, 128, 128, 128);

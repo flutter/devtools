@@ -33,17 +33,18 @@ class MaterialIconLabel extends StatelessWidget {
     @required this.label,
     this.iconData,
     this.imageIcon,
+    this.color,
     this.includeTextWidth,
   }) : assert((iconData == null) != (imageIcon == null));
 
   final IconData iconData;
   final Image imageIcon;
+  final Color color;
   final String label;
   final double includeTextWidth;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     // TODO(jacobr): display the label as a tooltip for the icon particularly
     // when the text is not shown.
     return Row(
@@ -53,6 +54,7 @@ class MaterialIconLabel extends StatelessWidget {
             ? Icon(
                 iconData,
                 size: defaultIconSize,
+                color: color,
               )
             : imageIcon,
         // TODO(jacobr): animate showing and hiding the text.
@@ -61,7 +63,7 @@ class MaterialIconLabel extends StatelessWidget {
             padding: const EdgeInsets.only(left: denseSpacing),
             child: Text(
               label,
-              style: TextStyle(color: theme.colorScheme.serviceExtensionButtonsTitle),
+              style: TextStyle(color: color),
             ),
           ),
       ],
