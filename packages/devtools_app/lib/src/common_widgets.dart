@@ -1030,8 +1030,8 @@ class CircularIconButton extends StatelessWidget {
       elevation: 0.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       constraints: const BoxConstraints.tightFor(
-        width: 24.0,
-        height: 24.0,
+        width: actionsIconSize,
+        height: actionsIconSize,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20.0),

@@ -1,3 +1,6 @@
+## 2.3.3-dev.1
+* Surface shader time per frame in the Performance page [3125](https://github.com/flutter/devtools/pull/3125)
+
 ## 2.3.2
 * Hover fixes [3065](https://github.com/flutter/devtools/pull/3065)
 * Fix a bug with app initialization [3067](https://github.com/flutter/devtools/pull/3067)
