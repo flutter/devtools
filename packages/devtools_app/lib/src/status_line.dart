@@ -137,10 +137,10 @@ class StatusLine extends StatelessWidget {
 
     return ValueListenableBuilder(
       valueListenable: isolateManager.isolates,
-      builder: (context, isolates, child) {
+      builder: (context, isolates, _) {
         return ValueListenableBuilder(
           valueListenable: isolateManager.selectedIsolate,
-          builder: (context, isolateRef, child) {
+          builder: (context, isolateRef, _) {
             final isolates = isolateManager.isolates;
 
             String isolateName(IsolateRef ref) {

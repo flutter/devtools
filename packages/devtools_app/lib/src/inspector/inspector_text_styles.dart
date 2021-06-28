@@ -26,8 +26,8 @@ TextStyle link(ColorScheme colorScheme) => TextStyle(
       decoration: TextDecoration.underline,
     );
 
-const TextStyle regularBold = TextStyle(fontWeight: FontWeight.w700);
-const TextStyle regularItalic = TextStyle(fontStyle: FontStyle.italic);
+const regularBold = TextStyle(fontWeight: FontWeight.w700);
+const regularItalic = TextStyle(fontStyle: FontStyle.italic);
 TextStyle unimportantItalic(ColorScheme colorScheme) =>
     unimportant(colorScheme).merge(const TextStyle(
       fontStyle: FontStyle.italic,

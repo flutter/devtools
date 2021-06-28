@@ -73,12 +73,19 @@ class DevToolsScaffold extends StatefulWidget {
   /// The size that all actions on this widget are expected to have.
   static const double actionWidgetSize = 48.0;
 
+  /// The border around the content in the DevTools UI.
+  static EdgeInsets get appPadding => EdgeInsets.fromLTRB(
+        horizontalPadding.left,
+        isDense() ? 2.0 : 16.0,
+        horizontalPadding.right,
+        0.0,
+      );
+
   // Note: when changing this value, also update `flameChartContainerOffset`
   // from flame_chart.dart.
-  /// The border around the content in the DevTools UI.
-  static EdgeInsets get appPadding => isEmbedded()
-      ? const EdgeInsets.fromLTRB(2.0, 2.0, 2.0, 0.0)
-      : const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0);
+  /// Horizontal padding around the content in the DevTools UI.
+  static EdgeInsets get horizontalPadding =>
+      EdgeInsets.symmetric(horizontal: isDense() ? 2.0 : 16.0);
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;
@@ -350,7 +357,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                         axis: Axis.vertical,
                         children: [
                           content,
-                          const DebuggerConsole(),
+                          Padding(
+                            padding: DevToolsScaffold.horizontalPadding,
+                            child: const DebuggerConsole(),
+                          ),
                         ],
                         initialFractions: const [0.8, 0.2],
                       )

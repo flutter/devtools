@@ -69,6 +69,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   InspectorController inspectorController;
   InspectorTreeControllerFlutter summaryTreeController;
   InspectorTreeControllerFlutter detailsTreeController;
+  DebuggerController _debuggerController;
   bool displayedWidgetTrackingNotice = false;
 
   bool get enableButtons => actionInProgress == false;
@@ -106,15 +107,19 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _debuggerController = Provider.of<DebuggerController>(context);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final debuggerController =
-        Provider.of<DebuggerController>(context, listen: false);
-    final summaryTree = _buildSummaryTreeColumn(debuggerController);
+    final summaryTree = _buildSummaryTreeColumn(_debuggerController);
 
     final detailsTree = InspectorTree(
       key: detailsTreeKey,
       controller: detailsTreeController,
-      debuggerController: debuggerController,
+      debuggerController: _debuggerController,
     );
 
     final splitAxis = Split.axisFor(context, 0.85);
@@ -277,8 +282,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 
   void _handleConnectionStart(VmService service) async {
-    summaryTreeController = null;
-    detailsTreeController = null;
+    setState(() {
+      summaryTreeController = null;
+      detailsTreeController = null;
+    });
 
     final inspectorService = serviceManager.inspectorService;
 

@@ -199,7 +199,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
 
     if (expressionText.isEmpty) return;
 
-    // Don't try to eval if we're not paused.
+    // Only try to eval if we are paused.
     if (!serviceManager
         .isolateManager.mainIsolateDebuggerState.isPaused.value) {
       Notifications.of(context)
@@ -241,8 +241,9 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
 
   void _emitToConsole(String text) {
     serviceManager.consoleService.appendStdio(
-        '  ${text.replaceAll('\n', '\n  ')}\n',
-        forceScrollIntoView: true);
+      '  ${text.replaceAll('\n', '\n  ')}\n',
+      forceScrollIntoView: true,
+    );
   }
 
   void _emitRefToConsole(

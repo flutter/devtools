@@ -19,15 +19,18 @@ import '../trees.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 
-/// Whether to include properties and children surfaced through
-/// Diagnosticable objects as part of the generic Debugger view of an object.
+/// Whether to include properties surfaced through Diagnosticable objects as
+/// part of the generic Debugger view of an object.
 bool includeDiagnosticPropertiesInDebugger = true;
 
-/// Set to false as it is hard to avoid confusing overlap between the children
-/// visible under fields for typical objects and we don't have a great way of
-/// clarifying that these are children from the Diagnostic view of the object
-/// which might be different from children on fields for the Inspector summary
-/// tree case which has a filtered view of children.
+/// Whether to include children surfaced through Diagnosticable objects as part
+/// of the generic Debugger view of an object.
+///
+/// It is safer to set to false as it is hard to avoid confusing overlap between
+/// the children visible under fields for typical objects and we don't have a
+/// way of clarifying that these are children from the Diagnostic view of the
+/// object which might be different from children on fields for the Inspector
+/// summary tree case which has a filtered view of children.
 bool includeDiagnosticChildren = false;
 
 /// A generic [InstanceRef] using either format used by the [InspectorService]
@@ -201,8 +204,10 @@ class _BreakpointAndSourcePositionResolved extends BreakpointAndSourcePosition {
 class _BreakpointAndSourcePositionUnresolved
     extends BreakpointAndSourcePosition {
   _BreakpointAndSourcePositionUnresolved(
-      Breakpoint breakpoint, SourcePosition sourcePosition, this.location)
-      : super._(breakpoint, sourcePosition);
+    Breakpoint breakpoint,
+    SourcePosition sourcePosition,
+    this.location,
+  ) : super._(breakpoint, sourcePosition);
 
   final UnresolvedSourceLocation location;
 
@@ -243,8 +248,11 @@ class StackFrameAndSourcePosition {
   int get column => position?.column;
 }
 
-Future<void> addExpandableChildren(Variable variable, List<Variable> children,
-    {bool expandAll = false}) async {
+Future<void> addExpandableChildren(
+  Variable variable,
+  List<Variable> children, {
+  bool expandAll = false,
+}) async {
   final tasks = <Future>[];
   for (var child in children) {
     if (expandAll) {
@@ -340,9 +348,9 @@ Future<void> buildVariablesTree(
     final ObjectGroup service = diagnostic.inspectorService;
     final diagnosticChildren = await diagnostic.children;
     if (diagnosticChildren?.isNotEmpty ?? false) {
-      final childrenNode =
-          Variable.text(diagnosticChildren.length > 1 ? 'children' : 'child');
-      // childrenNode.expand();
+      final childrenNode = Variable.text(
+        pluralize('child', diagnosticChildren.length, plural: 'children'),
+      );
       variable.addChild(childrenNode);
 
       await addExpandableChildren(
@@ -405,8 +413,11 @@ Future<void> buildVariablesTree(
   variable.treeInitializeComplete = true;
 }
 
-Future<Variable> _buildVariable(RemoteDiagnosticsNode diagnostic,
-    ObjectGroup inspectorService, IsolateRef isolateRef) async {
+Future<Variable> _buildVariable(
+  RemoteDiagnosticsNode diagnostic,
+  ObjectGroup inspectorService,
+  IsolateRef isolateRef,
+) async {
   final instanceRef =
       await inspectorService.toObservatoryInstanceRef(diagnostic.valueRef);
   return Variable.fromRef(
@@ -469,7 +480,9 @@ List<Variable> _createVariablesForAssociations(
 /// This method does not currently support [Uint64List] or
 /// [Int64List].
 List<Variable> _createVariablesForBytes(
-    Instance instance, IsolateRef isolateRef) {
+  Instance instance,
+  IsolateRef isolateRef,
+) {
   final bytes = base64.decode(instance.bytes);
   final variables = <Variable>[];
   List<dynamic> result;
@@ -539,7 +552,9 @@ List<Variable> _createVariablesForBytes(
 }
 
 List<Variable> _createVariablesForElements(
-    Instance instance, IsolateRef isolateRef) {
+  Instance instance,
+  IsolateRef isolateRef,
+) {
   final variables = <Variable>[];
   for (int i = 0; i < instance.elements.length; i++) {
     variables.add(
@@ -554,8 +569,10 @@ List<Variable> _createVariablesForElements(
 }
 
 List<Variable> _createVariablesForFields(
-    Instance instance, IsolateRef isolateRef,
-    {Set<String> existingNames}) {
+  Instance instance,
+  IsolateRef isolateRef, {
+  Set<String> existingNames,
+}) {
   final variables = <Variable>[];
   for (var field in instance.fields) {
     final name = field.decl.name;

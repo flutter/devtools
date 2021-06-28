@@ -234,7 +234,7 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
   }
 }
 
-// The highest level toolbar widget, built directly by buildToolbar.
+/// The highest level toolbar widget, built directly by buildToolbar.
 class _TextSelectionControlsToolbar extends StatefulWidget {
   const _TextSelectionControlsToolbar({
     Key key,
@@ -328,16 +328,16 @@ class _TextSelectionControlsToolbarState
 
     // Calculate the positioning of the menu. It is placed above the selection
     // if there is enough room, or otherwise below.
-    final TextSelectionPoint startTextSelectionPoint = widget.endpoints[0];
-    final TextSelectionPoint endTextSelectionPoint =
+    final startTextSelectionPoint = widget.endpoints[0];
+    final endTextSelectionPoint =
         widget.endpoints.length > 1 ? widget.endpoints[1] : widget.endpoints[0];
-    final Offset anchorAbove = Offset(
+    final anchorAbove = Offset(
         widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
         widget.globalEditableRegion.top +
             startTextSelectionPoint.point.dy -
             widget.textLineHeight -
             _kToolbarContentDistance);
-    final Offset anchorBelow = Offset(
+    final anchorBelow = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
       widget.globalEditableRegion.top +
           endTextSelectionPoint.point.dy +
@@ -348,10 +348,8 @@ class _TextSelectionControlsToolbarState
     // known. A button's position in the menu can slightly affect its
     // appearance.
     assert(debugCheckHasMaterialLocalizations(context));
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
-    final List<_TextSelectionToolbarItemData> itemDatas =
-        <_TextSelectionToolbarItemData>[
+    final localizations = MaterialLocalizations.of(context);
+    final itemDatas = <_TextSelectionToolbarItemData>[
       if (widget.handleInspect != null)
         _TextSelectionToolbarItemData(
           label: 'Inspect',
@@ -403,7 +401,7 @@ class _TextSelectionControlsToolbarState
   }
 }
 
-// The label and callback for the available default text selection menu buttons.
+/// The label and callback for the available default text selection menu buttons.
 class _TextSelectionToolbarItemData {
   const _TextSelectionToolbarItemData({
     @required this.label,

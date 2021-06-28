@@ -77,9 +77,13 @@ class InspectorController extends DisposableController
     this.onExpandCollapseSupported,
     this.onLayoutExplorerSupported,
   })  : _treeGroups = InspectorObjectGroupManager(
-            serviceManager.inspectorService, 'tree'),
+          serviceManager.inspectorService,
+          'tree',
+        ),
         _selectionGroups = InspectorObjectGroupManager(
-            serviceManager.inspectorService, 'selection') {
+          serviceManager.inspectorService,
+          'selection',
+        ) {
     _refreshRateLimiter = RateLimiter(refreshFramesPerSecond, refresh);
 
     assert(inspectorTree != null);

@@ -35,7 +35,7 @@ class EvalOnDartLibrary extends DisposableController
     ValueListenable<IsolateRef> isolate,
     this.disableBreakpoints = true,
     this.oneRequestAtATime = false,
-  }) : _clientId = (Random.secure().nextDouble() * 10000).toInt() {
+  }) : _clientId = Random().nextInt(1000000000) {
     _libraryRef = Completer<LibraryRef>();
 
     // For evals in tests, we will pass the isolateId into the constructor.

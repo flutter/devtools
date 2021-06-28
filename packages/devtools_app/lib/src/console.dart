@@ -8,9 +8,9 @@ import 'package:provider/provider.dart';
 
 import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
+import 'console_service.dart';
 import 'debugger/debugger_controller.dart';
 import 'debugger/variables.dart';
-import 'service_manager.dart';
 import 'theme.dart';
 import 'utils.dart';
 
@@ -129,6 +129,8 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
   bool _considerScrollAtBottom = true;
   double _lastScrollOffset = 0.0;
 
+  DebuggerController _debuggerController;
+
   @override
   void initState() {
     super.initState();
@@ -188,10 +190,14 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _debuggerController = Provider.of<DebuggerController>(context);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final debuggerController =
-        Provider.of<DebuggerController>(context, listen: false);
 
     if (_scrollToBottom) {
       _scrollToBottom = false;
@@ -218,7 +224,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
         physics: const ClampingScrollPhysics(
           parent: RangeMaintainingScrollPhysics(),
         ),
-        separatorBuilder: (context, index) {
+        separatorBuilder: (_, __) {
           return const Divider();
         },
         itemBuilder: (context, index) {
@@ -237,7 +243,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
           } else if (line is VariableConsoleLine) {
             return ExpandableVariable(
               variable: ValueNotifier(line.variable),
-              debuggerController: debuggerController,
+              debuggerController: _debuggerController,
             );
           } else {
             assert(false,

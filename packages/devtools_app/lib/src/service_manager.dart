@@ -16,11 +16,10 @@ import 'analytics/analytics_stub.dart'
 import 'auto_dispose.dart';
 import 'config_specific/logger/logger.dart';
 import 'connected_app.dart';
+import 'console_service.dart';
 import 'core/message_bus.dart';
-import 'debugger/debugger_model.dart';
 import 'error_badge_manager.dart';
 import 'globals.dart';
-import 'inspector/diagnostics_node.dart';
 import 'inspector/inspector_service.dart';
 import 'logging/vm_service_logger.dart';
 import 'service_extensions.dart' as extensions;
@@ -342,7 +341,7 @@ class ServiceConnectionManager {
     serviceTrafficLogger?.dispose();
 
     isolateManager._handleVmServiceClosed();
-    consoleService._handleVmServiceClosed();
+    consoleService.handleVmServiceClosed();
     setDeviceBusy(false);
 
     _connectedState.value = connectionState;
@@ -477,250 +476,6 @@ class ServiceConnectionManager {
   }
 }
 
-/// A line in the console.
-///
-/// TODO(jacobr): support console lines that are structured error messages as
-/// well.
-class ConsoleLine {
-  factory ConsoleLine.text(
-    String text, {
-    bool forceScrollIntoView = false,
-  }) =>
-      TextConsoleLine(
-        text,
-        forceScrollIntoView: forceScrollIntoView,
-      );
-
-  factory ConsoleLine.variable(
-    Variable variable, {
-    bool forceScrollIntoView = false,
-  }) =>
-      VariableConsoleLine(
-        variable,
-        forceScrollIntoView: forceScrollIntoView,
-      );
-
-  ConsoleLine._(this.forceScrollIntoView);
-
-  // Whether this console line should be scrolled into view when it is added.
-  final bool forceScrollIntoView;
-}
-
-class TextConsoleLine extends ConsoleLine {
-  TextConsoleLine(this.text, {bool forceScrollIntoView = false})
-      : super._(forceScrollIntoView);
-  final String text;
-
-  @override
-  String toString() {
-    return text;
-  }
-}
-
-class VariableConsoleLine extends ConsoleLine {
-  VariableConsoleLine(this.variable, {bool forceScrollIntoView = false})
-      : super._(
-          forceScrollIntoView,
-        );
-  final Variable variable;
-
-  @override
-  String toString() {
-    return variable.toString();
-  }
-}
-
-/// Source of truth for the state of the Console including both events from the
-/// VM and events emitted from other UI.
-class ConsoleService extends Disposer {
-  void appendInstanceRef({
-    String name,
-    @required InstanceRef value,
-    @required RemoteDiagnosticsNode diagnostic,
-    @required IsolateRef isolateRef,
-    bool forceScrollIntoView = false,
-    bool expandAll = false,
-  }) async {
-    _stdioTrailingNewline = false;
-    // TODO(jacobr): this is O(n) in the number of lines. Use a custom ValueListenable that notifies on list appends instead.
-    final variable = Variable.fromRef(
-      name: name,
-      value: value,
-      diagnostic: diagnostic,
-      isolateRef: isolateRef,
-    );
-    // TODO(jacobr): fix out of order issues by tracking raw order.
-    await buildVariablesTree(variable, expandAll: expandAll);
-    if (expandAll) {
-      variable.expandCascading();
-    }
-    final lines = _stdio.value.toList();
-    lines.add(ConsoleLine.variable(
-      variable,
-      forceScrollIntoView: forceScrollIntoView,
-    ));
-    _stdio.value = lines;
-  }
-
-  final _stdio = ValueNotifier<List<ConsoleLine>>([]);
-  bool _stdioTrailingNewline = false;
-
-  ObjectGroup get objectGroup {
-    final inspectorService = serviceManager.inspectorService;
-    if (_objectGroup?.inspectorService == inspectorService) {
-      return _objectGroup;
-    }
-    _objectGroup?.dispose();
-    _objectGroup = inspectorService?.createObjectGroup('console');
-    return _objectGroup;
-  }
-
-  ObjectGroup _objectGroup;
-
-  /// Clears the contents of stdio.
-  void clearStdio() {
-    if (_stdio.value?.isNotEmpty ?? false) {
-      _stdio.value = [];
-    }
-  }
-
-  /// Append to the stdout / stderr buffer.
-  void appendStdio(
-    String text, {
-    bool forceScrollIntoView = false,
-  }) {
-    const int kMaxLogItemsLowerBound = 5000;
-    const int kMaxLogItemsUpperBound = 5500;
-
-    // Parse out the new lines and append to the end of the existing lines.
-
-    // TODO(jacobr): this is O(n) in the number of lines. Use a custom ValueListenable that notiifies on list appends instead.
-    var lines = _stdio.value.toList();
-    final newLines = text.split('\n');
-
-    var last = lines.safeLast;
-    if (lines.isNotEmpty && !_stdioTrailingNewline && last is TextConsoleLine) {
-      lines.last = ConsoleLine.text('${last.text}${newLines.first}');
-      if (newLines.length > 1) {
-        lines.addAll(newLines.sublist(1).map((text) => ConsoleLine.text(text)));
-      }
-    } else {
-      lines.addAll(newLines.map((text) => ConsoleLine.text(text)));
-    }
-
-    _stdioTrailingNewline = text.endsWith('\n');
-
-    // Don't report trailing blank lines.
-    last = lines.safeLast;
-    if (lines.isNotEmpty && (last is TextConsoleLine && last.text.isEmpty)) {
-      lines = lines.sublist(0, lines.length - 1);
-    }
-
-    // For performance reasons, we drop older lines in batches, so the lines
-    // will grow to kMaxLogItemsUpperBound then truncate to
-    // kMaxLogItemsLowerBound.
-    if (lines.length > kMaxLogItemsUpperBound) {
-      lines = lines.sublist(lines.length - kMaxLogItemsLowerBound);
-    }
-
-    _stdio.value = lines;
-  }
-
-  /// Return the stdout and stderr emitted from the application.
-  ///
-  /// Note that this output might be truncated after significant output.
-  ValueListenable<List<ConsoleLine>> get stdio => _stdio;
-
-  void _handleStdoutEvent(Event event) {
-    final String text = decodeBase64(event.bytes);
-    appendStdio(text);
-  }
-
-  void _handleStderrEvent(Event event) {
-    final String text = decodeBase64(event.bytes);
-    // TODO(devoncarew): Change to reporting stdio along with information about
-    // whether the event was stdout or stderr.
-    appendStdio(text);
-  }
-
-  void vmServiceOpened(VmServiceWrapper service) {
-    cancel();
-    autoDispose(service.onDebugEvent.listen(_handleDebugEvent));
-    // TODO(jacobr): listen with event history here.
-    autoDispose(service.onStdoutEventWithHistory.listen(_handleStdoutEvent));
-    // TODO(jacobr): do we want to listen with event history here?
-    autoDispose(service.onStderrEventWithHistory.listen(_handleStderrEvent));
-    autoDispose(
-        service.onExtensionEventWithHistory.listen(_handleExtensionEvent));
-    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      clearStdio();
-    });
-  }
-
-  void _handleExtensionEvent(Event e) async {
-    if (e.extensionKind == 'Flutter.Error' ||
-        e.extensionKind == 'Flutter.Print') {
-      final inspectorService = serviceManager.inspectorService;
-      if (inspectorService == null) {
-        // The app isn't a debug build.
-        return;
-      }
-      // TODO(jacobr): events are may be out of order. Use unique ids to ensure
-      // consistent order of regular print statements and structured messages.
-      appendInstanceRef(
-        value: null,
-        diagnostic: RemoteDiagnosticsNode(
-          e.extensionData.data,
-          objectGroup,
-          false,
-          null,
-        ),
-        isolateRef: objectGroup.inspectorService.isolateRef,
-        expandAll: true,
-      );
-    }
-  }
-
-  void _handleVmServiceClosed() {
-    cancel();
-  }
-
-  void _handleDebugEvent(Event event) async {
-    // TODO(jacobr): keep events in order by tracking the original time and
-    // sorting.
-    if (event.kind == EventKind.kInspect) {
-      final inspector = objectGroup;
-      if (inspector != null &&
-          event.isolate == inspector.inspectorService.isolateRef) {
-        try {
-          if (await inspector.isInspectable(GenericInstanceRef(
-              isolateRef: event.isolate, instanceRef: event.inspectee))) {
-            // This object will trigger the widget inspector so let the widget
-            // inspector decide whether it wants to log it to the console or
-            // not.
-            // TODO(jacobr): if the widget inspector stops using the inspect
-            // event to trigger changing inspector selection, remove this
-            // case. Without this logic, we could double log objects to the
-            // console after clicking in the inspector as clicking in the
-            // inspector directly triggers an object to be logged and clicking
-            // in the inspector leads the device to emit an inspect event back
-            // to other clients.
-            return;
-          }
-        } catch (e) {
-          // Fail gracefully. TODO(jacobr) verify the error was only Sentinel
-          // returned getting the inspector ref.
-        }
-      }
-      appendInstanceRef(
-        value: event.inspectee,
-        isolateRef: event.isolate,
-        diagnostic: null,
-      );
-    }
-  }
-}
-
 class IsolateState {
   IsolateState(this.isolateRef);
 
@@ -755,7 +510,7 @@ class IsolateState {
 }
 
 class IsolateManager extends Disposer {
-  final Map<IsolateRef, IsolateState> _isolateStates = {};
+  final _isolateStates = <IsolateRef, IsolateState>{};
   VmServiceWrapper _service;
 
   final StreamController<IsolateRef> _isolateCreatedController =
@@ -772,8 +527,8 @@ class IsolateManager extends Disposer {
 
   List<LibraryRef> selectedIsolateLibraries;
 
-  ValueNotifier<List<IsolateRef>> get isolates => _isolates;
-  final _isolates = ValueNotifier(const <IsolateRef>[]);
+  ValueListenable<List<IsolateRef>> get isolates => _isolates;
+  final _isolates = ListValueNotifier(const <IsolateRef>[]);
 
   Stream<IsolateRef> get onIsolateCreated => _isolateCreatedController.stream;
 
@@ -824,15 +579,10 @@ class IsolateManager extends Disposer {
     _setSelectedIsolate(isolateRef);
   }
 
-  void _updateIsolatesList() {
-    _isolates.value = List<IsolateRef>.unmodifiable(_isolateStates.keys);
-  }
-
   Future<void> _initIsolates(List<IsolateRef> isolates) async {
     _clearIsolateStates();
 
     isolates.forEach(_registerIsolate);
-    _updateIsolatesList();
 
     // It is critical that the _serviceExtensionManager is already listening
     // for events indicating that new extension rpcs are registered before this
@@ -844,7 +594,9 @@ class IsolateManager extends Disposer {
   }
 
   void _registerIsolate(IsolateRef isolateRef) {
+    assert(!_isolateStates.containsKey(isolateRef));
     _isolateStates[isolateRef] = IsolateState(isolateRef);
+    _isolates.add(isolateRef);
     isolateIndex(isolateRef);
     _loadIsolateState(isolateRef);
   }
@@ -867,7 +619,6 @@ class IsolateManager extends Disposer {
     if (event.kind == EventKind.kIsolateStart &&
         !event.isolate.isSystemIsolate) {
       _registerIsolate(event.isolate);
-      _updateIsolatesList();
       _isolateCreatedController.add(event.isolate);
       // TODO(jacobr): we assume the first isolate started is the main isolate
       // but that may not always be a safe assumption.
@@ -884,7 +635,7 @@ class IsolateManager extends Disposer {
       }
     } else if (event.kind == EventKind.kIsolateExit) {
       _isolateStates.remove(event.isolate)?.dispose();
-      _updateIsolatesList();
+      _isolates.remove(event.isolate);
       _isolateExitedController.add(event.isolate);
       if (_mainIsolate.value == event.isolate) {
         _mainIsolate.value = null;
@@ -981,7 +732,6 @@ class IsolateManager extends Disposer {
     _setSelectedIsolate(null);
     _isolateIndexMap.clear();
     _clearIsolateStates();
-    _updateIsolatesList();
     _mainIsolate.value = null;
   }
 
@@ -990,6 +740,7 @@ class IsolateManager extends Disposer {
       isolateState.dispose();
     }
     _isolateStates.clear();
+    _isolates.clear();
   }
 
   void vmServiceOpened(VmServiceWrapper service) {

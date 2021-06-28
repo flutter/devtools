@@ -791,7 +791,8 @@ class ObjectGroup implements Disposable {
   }
 
   Future<InstanceRef> toObservatoryInstanceRef(
-      InspectorInstanceRef inspectorInstanceRef) async {
+    InspectorInstanceRef inspectorInstanceRef,
+  ) async {
     if (inspectorInstanceRef == null || inspectorInstanceRef.id == null) {
       return null;
     }
@@ -852,11 +853,17 @@ class ObjectGroup implements Disposable {
     final instanceRef = await instanceRefFuture;
     if (disposed || instanceRefFuture == null) return [];
     return parseDiagnosticsNodesHelper(
-        await instanceRefToJson(instanceRef), parent, isProperty);
+      await instanceRefToJson(instanceRef),
+      parent,
+      isProperty,
+    );
   }
 
   List<RemoteDiagnosticsNode> parseDiagnosticsNodesHelper(
-      List<Object> jsonObject, RemoteDiagnosticsNode parent, bool isProperty) {
+    List<Object> jsonObject,
+    RemoteDiagnosticsNode parent,
+    bool isProperty,
+  ) {
     if (disposed || jsonObject == null) return const [];
     final List<RemoteDiagnosticsNode> nodes = [];
     for (Map<String, Object> element in jsonObject) {
@@ -866,9 +873,10 @@ class ObjectGroup implements Disposable {
   }
 
   Future<List<RemoteDiagnosticsNode>> parseDiagnosticsNodesDaemon(
-      FutureOr<Object> jsonFuture,
-      RemoteDiagnosticsNode parent,
-      bool isProperty) async {
+    FutureOr<Object> jsonFuture,
+    RemoteDiagnosticsNode parent,
+    bool isProperty,
+  ) async {
     if (disposed || jsonFuture == null) return const [];
 
     return parseDiagnosticsNodesHelper(await jsonFuture, parent, isProperty);
@@ -1128,7 +1136,9 @@ class ObjectGroup implements Disposable {
   }
 
   Future<bool> handleSetSelectionObservatory(
-      Future<InstanceRef> setSelectionResult, bool uiAlreadyUpdated) async {
+    Future<InstanceRef> setSelectionResult,
+    bool uiAlreadyUpdated,
+  ) async {
     // TODO(jacobr): we need to cancel if another inspect request comes in while we are trying this one.
     if (disposed) return true;
     final instanceRef = await setSelectionResult;
@@ -1147,7 +1157,9 @@ class ObjectGroup implements Disposable {
   }
 
   Future<bool> handleSetSelectionDaemon(
-      Future<Object> setSelectionResult, bool uiAlreadyUpdated) async {
+    Future<Object> setSelectionResult,
+    bool uiAlreadyUpdated,
+  ) async {
     if (disposed) return false;
     // TODO(jacobr): we need to cancel if another inspect request comes in while we are trying this one.
     final json = await setSelectionResult;
