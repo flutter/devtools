@@ -68,9 +68,22 @@ class _TimelineFlameChartContainerState
     } else if (timelineEmpty) {
       content = Center(
         key: TimelineFlameChartContainer.emptyTimelineKey,
-        child: Text(
-          'No timeline events',
-          style: Theme.of(context).subtleTextStyle,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'No timeline events. Try clicking the refresh button ',
+              style: Theme.of(context).subtleTextStyle,
+            ),
+            const Icon(
+              Icons.refresh,
+              size: defaultIconSize,
+            ),
+            Text(
+              ' to load more data.',
+              style: Theme.of(context).subtleTextStyle,
+            ),
+          ],
         ),
       );
     } else {
@@ -101,7 +114,9 @@ class _TimelineFlameChartContainerState
             needsTopBorder: false,
             rightPadding: 0.0,
             leftActions: [
-              _buildRefreshTimelineEventsButton(),
+              _RefreshTimelineEventsButton(
+                controller: controller,
+              ),
             ],
             rightActions: [
               _buildSearchField(searchFieldEnabled),
@@ -115,26 +130,6 @@ class _TimelineFlameChartContainerState
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildRefreshTimelineEventsButton() {
-    return DevToolsTooltip(
-      tooltip: 'Refresh timeline events',
-      child: TextButton(
-        onPressed: controller.processAvailableEvents,
-        // onPressed: staleData
-        //     ? controller.timelineController.processAvailableEvents
-        //     : null,
-        child: Container(
-          height: defaultButtonHeight,
-          width: defaultButtonHeight,
-          child: const Icon(
-            Icons.refresh,
-            size: defaultIconSize,
-          ),
-        ),
       ),
     );
   }
@@ -157,6 +152,33 @@ class _TimelineFlameChartContainerState
     return ProcessingInfo(
       progressValue: widget.processingProgress,
       processedObject: 'timeline trace',
+    );
+  }
+}
+
+class _RefreshTimelineEventsButton extends StatelessWidget {
+  const _RefreshTimelineEventsButton({
+    Key key,
+    @required this.controller,
+  }) : super(key: key);
+
+  final PerformanceController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTooltip(
+      tooltip: 'Refresh timeline events',
+      child: TextButton(
+        onPressed: controller.processAvailableEvents,
+        child: Container(
+          height: defaultButtonHeight,
+          width: defaultButtonHeight,
+          child: const Icon(
+            Icons.refresh,
+            size: defaultIconSize,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -246,7 +268,6 @@ class TimelineFlameChartState
 
   @override
   void initState() {
-    print('init state timeline flame chart');
     super.initState();
     _groupLabelScrollController = verticalControllerGroup.addAndGet();
     _previousInGroupButtonsScrollController =
@@ -410,7 +431,6 @@ class TimelineFlameChartState
   }
 
   void _handleSelectedFrame() async {
-    print('handling selected frame timeline flame chart');
     final selectedFrame = _performanceController.selectedFrame.value;
     if (selectedFrame == _selectedFrame) return;
 
@@ -429,6 +449,7 @@ class TimelineFlameChartState
       TimelineEvent event;
       if (_selectedFrame.uiEventFlow == null &&
           _selectedFrame.rasterEventFlow == null) {
+        // TODO(kenz): should we zoom to the latest available frame?
         Notifications.of(context)
             .push('No timeline events available for the selected frame');
         return;
@@ -1089,9 +1110,8 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (selectedFrame == null ||
-        (selectedFrame.uiEventFlow == null &&
-            selectedFrame.rasterEventFlow == null)) {
+    if (selectedFrame?.uiEventFlow == null &&
+        selectedFrame?.rasterEventFlow == null) {
       return;
     }
 

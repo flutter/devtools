@@ -475,28 +475,6 @@ class FlutterFrame {
   SyncTimelineEvent get rasterEventFlow =>
       eventFlows[TimelineEventType.raster.index];
 
-  // /// Whether the frame is ready for the timeline.
-  // ///
-  // /// A frame is ready once it has both required event flows as well as
-  // /// [_pipelineItemStartTime] and [_pipelineItemEndTime].
-  // bool get isReadyForTimeline {
-  //   return uiEventFlow != null &&
-  //       rasterEventFlow != null &&
-  //       pipelineItemTime.start?.inMicroseconds != null &&
-  //       pipelineItemTime.end?.inMicroseconds != null;
-  // }
-  //
-  // /// Pipeline item time range in micros.
-  // ///
-  // /// This stores the start and end times for the pipeline item event for this
-  // /// frame. We use this value to determine whether a TimelineEvent fits within
-  // /// the frame's time boundaries.
-  // final pipelineItemTime = TimeRange(singleAssignment: false);
-  //
-  // TraceEvent pipelineItemStartTrace;
-  //
-  // TraceEvent pipelineItemEndTrace;
-  //
   bool get isWellFormed => uiEventFlow != null && rasterEventFlow != null;
 
   Duration get shaderDuration {

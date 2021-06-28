@@ -124,9 +124,9 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
     // Refresh data on page load if data is null. On subsequent tab changes,
     // this should not be called.
-    // if (controller.data == null && !offlineMode) {
-    //   controller.refreshData();
-    // }
+    if (controller.data == null && !offlineMode) {
+      controller.processAvailableEvents();
+    }
 
     // Load offline timeline data if available.
     if (shouldLoadOfflineData()) {

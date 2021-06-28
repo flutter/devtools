@@ -185,7 +185,6 @@ class TimelineEventProcessor {
     timelineController.data.timelineEvents.sort((a, b) =>
         a.time.start.inMicroseconds.compareTo(b.time.start.inMicroseconds));
     if (timelineController.data.timelineEvents.isNotEmpty) {
-      // Only set the start time if we do not already have
       timelineController.data.time = TimeRange()
         // We process trace events in timestamp order, so we can ensure the first
         // trace event has the earliest starting timestamp.
