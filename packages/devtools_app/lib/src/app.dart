@@ -609,11 +609,11 @@ List<DevToolsScreen> get defaultScreens {
       const InspectorScreen(),
       createController: () => InspectorSettingsController(),
     ),
-    // DevToolsScreen<LegacyPerformanceController>(
-    //   const LegacyPerformanceScreen(),
-    //   createController: () => LegacyPerformanceController(),
-    //   supportsOffline: true,
-    // ),
+    DevToolsScreen<LegacyPerformanceController>(
+      const LegacyPerformanceScreen(),
+      createController: () => LegacyPerformanceController(),
+      supportsOffline: true,
+    ),
     DevToolsScreen<PerformanceController>(
       const PerformanceScreen(),
       createController: () => PerformanceController(),

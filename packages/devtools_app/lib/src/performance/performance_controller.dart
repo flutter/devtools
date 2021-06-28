@@ -132,7 +132,9 @@ class PerformanceController extends DisposableController
   /// This list is cleared and repopulated each time "Refresh" is clicked.
   List<TraceEventWrapper> allTraceEvents = [];
 
-  int nextTraceIndexToProcess;
+  int nextTraceIndexToProcess = 0;
+
+  int nextTimelineEventIndexToProcess = 0;
 
   // /// Trace events that have been collected but have not yet been processed into
   // /// timeline events [timelineEvents].
@@ -288,7 +290,7 @@ class PerformanceController extends DisposableController
         await cpuProfilerController.pullAndProcessProfile(
           startMicros: event.time.start.inMicroseconds,
           extentMicros: event.time.duration.inMicroseconds,
-          processId: '${event.traceEvents.first.id}',
+          processId: '${event.traceEvents.first.wrapperId}',
         );
         data.cpuProfileData = cpuProfilerController.dataNotifier.value;
       }
@@ -340,13 +342,21 @@ class PerformanceController extends DisposableController
         .lookupProfile(frame.timeFromEventFlows);
     if (storedProfileForFrame == null) {
       cpuProfilerController.reset();
-      await cpuProfilerController.pullAndProcessProfile(
-        startMicros: frame.timeFromEventFlows.start.inMicroseconds,
-        extentMicros: frame.timeFromEventFlows.duration.inMicroseconds,
-        processId: 'Flutter frame ${frame.id}',
-      );
+      if (!offlineMode && frame.timeFromEventFlows.isWellFormed) {
+        await cpuProfilerController.pullAndProcessProfile(
+          startMicros: frame.timeFromEventFlows.start.inMicroseconds,
+          extentMicros: frame.timeFromEventFlows.duration.inMicroseconds,
+          processId: 'Flutter frame ${frame.id}',
+        );
+      }
       data.cpuProfileData = cpuProfilerController.dataNotifier.value;
     } else {
+      if (!storedProfileForFrame.processed) {
+        await cpuProfilerController.transformer.processData(
+          storedProfileForFrame,
+          processId: 'Flutter frame ${frame.id} - stored profile ',
+        );
+      }
       data.cpuProfileData = storedProfileForFrame;
       cpuProfilerController.loadProcessedData(storedProfileForFrame);
     }
@@ -584,13 +594,15 @@ class PerformanceController extends DisposableController
   }
 
   FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) async {
+    final traceEventCount = traceEvents.length;
     await processor
         .processTimeline(traceEvents.sublist(nextTraceIndexToProcess));
-    nextTraceIndexToProcess = traceEvents.length;
+    nextTraceIndexToProcess = traceEventCount;
     data.initializeEventGroups(
       threadNamesById,
-      startIndex: nextTraceIndexToProcess,
+      startIndex: nextTimelineEventIndexToProcess,
     );
+    nextTimelineEventIndexToProcess = data.timelineEvents.length;
   }
 
   FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
@@ -752,6 +764,7 @@ class PerformanceController extends DisposableController
     _flutterFrames.clear();
     _timelineEvents.value = <TimelineEvent>[];
     nextTraceIndexToProcess = 0;
+    nextTimelineEventIndexToProcess = 0;
     unassignedFlutterFrameEvents.clear();
     unassignedFlutterFrames.clear();
     _firstWellFormedFrameMicros = null;

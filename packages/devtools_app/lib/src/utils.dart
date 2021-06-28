@@ -546,6 +546,9 @@ class TimeRange {
     if (singleAssignment) {
       assert(_start == null);
     }
+    if (_end != null) {
+      assert(value <= _end);
+    }
     _start = value;
   }
 
@@ -553,20 +556,25 @@ class TimeRange {
 
   Duration _end;
 
-  bool contains(Duration target) => target >= start && target <= end;
-
-  bool containsRange(TimeRange t) => contains(t.start) && contains(t.end);
-
   set end(Duration value) {
     if (singleAssignment) {
       assert(_end == null);
+    }
+    if (_start != null) {
+      assert(value >= _start);
     }
     _end = value;
   }
 
   Duration get duration => end - start;
 
+  bool contains(Duration target) => start <= target && end >= target;
+
+  bool containsRange(TimeRange t) => start <= t.start && end >= t.end;
+
   bool overlaps(TimeRange t) => t.end > start && t.start < end;
+
+  bool get isWellFormed => _start != null && _end != null;
 
   @override
   String toString({TimeUnit unit}) {
@@ -1308,3 +1316,5 @@ Future<T> whenValueNonNull<T>(ValueListenable<T> listenable) {
   listenable.addListener(listener);
   return completer.future;
 }
+
+const connectToNewAppText = 'Connect to a new app';

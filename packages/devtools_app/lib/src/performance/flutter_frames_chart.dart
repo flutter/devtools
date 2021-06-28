@@ -20,6 +20,9 @@ import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
 
+// Turn this flag on to see when flutter frames are linked with timeline events.
+bool debugFrames = false;
+
 class FlutterFramesChart extends StatefulWidget {
   const FlutterFramesChart(
     this.frames,
@@ -309,12 +312,17 @@ class FlutterFramesChartItem extends StatelessWidget {
     final bool hasShaderJank = frame.hasShaderJank(displayRefreshRate);
 
     var uiColor = uiJanky ? uiJankColor : mainUiColor;
-    if (frame.uiEventFlow == null) {
-      uiColor = uiColor.darken(.5);
-    }
     var rasterColor = rasterJanky ? rasterJankColor : mainRasterColor;
-    if (frame.rasterEventFlow == null) {
-      rasterColor = rasterColor.darken(.50);
+    var shaderColor = shaderCompilationColor;
+
+    if (debugFrames) {
+      if (frame.uiEventFlow == null) {
+        uiColor = uiColor.darken(.5);
+      }
+      if (frame.rasterEventFlow == null) {
+        rasterColor = rasterColor.darken(.50);
+        shaderColor = shaderColor.darken(.50);
+      }
     }
 
     // TODO(kenz): add some indicator when a frame is so janky that it exceeds the
@@ -347,7 +355,7 @@ class FlutterFramesChartItem extends StatelessWidget {
             width: defaultFrameWidth / 2,
             height: (frame.shaderDuration.inMilliseconds / msPerPx)
                 .clamp(0.0, availableChartHeight * shaderToRasterRatio),
-            color: shaderCompilationColor,
+            color: shaderColor,
           ),
       ],
     );
@@ -396,14 +404,10 @@ class FlutterFramesChartItem extends StatelessWidget {
   // TODO(kenz): Support a rich tooltip
   // https://github.com/flutter/devtools/issues/3139
   String _tooltipText(FlutterFrame frame, bool hasShaderJank) {
-    final bool missingTimelineEvents =
-        frame.uiEventFlow == null || frame.rasterEventFlow == null;
     return [
-      'UI: ${msText(frame.uiEventFlow.time.duration)}',
-      'Raster: ${msText(frame.rasterEventFlow.time.duration)}',
+      'UI: ${msText(frame.buildTime)}',
+      'Raster: ${msText(frame.rasterTime)}',
       if (hasShaderJank) 'Shader Compilation: ${msText(frame.shaderDuration)}',
-      if (missingTimelineEvents)
-        '\n\nWarning: missing trace events for this frame.'
     ].join('\n');
   }
 }

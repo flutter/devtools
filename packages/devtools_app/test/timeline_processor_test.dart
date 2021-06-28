@@ -45,92 +45,12 @@ void main() {
         );
     });
 
-    test('creates one new frame per id', () async {
-      await processor.processTimeline(
-        [frameStartEvent, frameEndEvent],
-        resetAfterProcessing: false,
-      );
-      expect(processor.pendingFrames.length, equals(1));
-      expect(processor.pendingFrames.containsKey('PipelineItem-f1'), isTrue);
-    });
-
     test('duration trace events form timeline event tree', () async {
       await processor.processTimeline(goldenUiTraceEvents);
 
       final processedUiEvent =
           processor.timelineController.data.timelineEvents.first;
       expect(processedUiEvent.toString(), equals(goldenUiString));
-    });
-
-    test('frame events satisfy ui gpu order', () {
-      const frameStartTime = 2000;
-      const frameEndTime = 8000;
-      FlutterFrame frame = FlutterFrame('frameId')
-        ..pipelineItemTime.start = const Duration(microseconds: frameStartTime)
-        ..pipelineItemTime.end = const Duration(microseconds: frameEndTime);
-
-      // Satisfies UI / GPU order.
-      final uiEvent = goldenUiTimelineEvent.deepCopy()
-        ..time = (TimeRange()
-          ..start = const Duration(microseconds: 5000)
-          ..end = const Duration(microseconds: 6000));
-      final rasterEvent = goldenRasterTimelineEvent.deepCopy()
-        ..time = (TimeRange()
-          ..start = const Duration(microseconds: 4000)
-          ..end = const Duration(microseconds: 8000));
-
-      expect(processor.satisfiesUiRasterOrder(uiEvent, frame), isTrue);
-      expect(processor.satisfiesUiRasterOrder(rasterEvent, frame), isTrue);
-
-      frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
-      expect(processor.satisfiesUiRasterOrder(rasterEvent, frame), isFalse);
-
-      frame = FlutterFrame('frameId')
-        ..pipelineItemTime.start = const Duration(microseconds: frameStartTime)
-        ..pipelineItemTime.end = const Duration(microseconds: frameEndTime);
-
-      frame
-        ..setEventFlow(null, type: TimelineEventType.ui)
-        ..setEventFlow(rasterEvent, type: TimelineEventType.raster);
-      expect(processor.satisfiesUiRasterOrder(uiEvent, frame), isFalse);
-    });
-
-    test(
-        'UI event flow sets end frame time if it completes after raster event flow',
-        () {
-      final uiEvent = goldenUiTimelineEvent.deepCopy()
-        ..time = (TimeRange()
-          ..start = const Duration(microseconds: 5000)
-          ..end = const Duration(microseconds: 8000));
-      final rasterEvent = goldenRasterTimelineEvent.deepCopy()
-        ..time = (TimeRange()
-          ..start = const Duration(microseconds: 6000)
-          ..end = const Duration(microseconds: 7000));
-
-      final frame = FlutterFrame('frameId');
-      frame.setEventFlow(rasterEvent, type: TimelineEventType.raster);
-      expect(frame.time.start, isNull);
-      expect(frame.time.end, isNull);
-
-      frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
-      expect(frame.time.start, equals(const Duration(microseconds: 5000)));
-      expect(frame.time.end, equals(const Duration(microseconds: 8000)));
-    });
-
-    test('frame completed', () async {
-      await processor.processTimeline([
-        frameStartEvent,
-        ...goldenUiTraceEvents,
-        ...goldenRasterTraceEvents,
-        frameEndEvent,
-      ]);
-      expect(processor.pendingFrames.length, equals(0));
-      expect(processor.timelineController.data.frames.length, equals(1));
-
-      final frame = processor.timelineController.data.frames.first;
-      expect(frame.uiEventFlow.toString(), equals(goldenUiString));
-      expect(frame.rasterEventFlow.toString(), equals(goldenRasterString));
-      expect(frame.isReadyForTimeline, isTrue);
     });
 
     test('handles trace event duplicates', () async {

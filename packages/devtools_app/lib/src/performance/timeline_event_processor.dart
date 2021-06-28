@@ -114,8 +114,7 @@ class TimelineEventProcessor {
     List<TraceEventWrapper> traceEvents, {
     bool resetAfterProcessing = true,
   }) async {
-    // Reset the processor before processing.
-    reset();
+    resetProcessingData();
 
 // Uncomment this code for testing the timeline.
 //    traceEvents = simpleTraceEvents['traceEvents']
@@ -476,10 +475,14 @@ class TimelineEventProcessor {
   }
 
   void reset() {
-    // _asyncEventsById.clear();
-    // currentDurationEventNodes.clear();
-    // _previousDurationEndEvents.clear();
-    // _pendingRootCompleteEvent = null;
+    _asyncEventsById.clear();
+    currentDurationEventNodes.clear();
+    _previousDurationEndEvents.clear();
+    _pendingRootCompleteEvent = null;
+    resetProcessingData();
+  }
+
+  void resetProcessingData() {
     _traceEventsProcessed = 0;
     _progressNotifier.value = 0.0;
   }

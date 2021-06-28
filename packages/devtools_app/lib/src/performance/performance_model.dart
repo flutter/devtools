@@ -501,6 +501,7 @@ class FlutterFrame {
 
   Duration get shaderDuration {
     if (_shaderTime != null) return _shaderTime;
+    if (rasterEventFlow == null) return Duration.zero;
     int sumShaderMicros = 0;
     // TODO(kenz): add a helper class for performing efficient time interval
     // union computation. This code is currently broken if there were non-shader
@@ -522,7 +523,8 @@ class FlutterFrame {
 
   Duration _shaderTime;
 
-  bool get hasShaderTime => shaderDuration != Duration.zero;
+  bool get hasShaderTime =>
+      rasterEventFlow != null && shaderDuration != Duration.zero;
 
   void setEventFlow(SyncTimelineEvent event, {TimelineEventType type}) {
     type ??= event?.type;
@@ -627,6 +629,15 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   /// or two (one for the associated DurationBegin event and one for the
   /// associated DurationEnd event).
   final List<TraceEventWrapper> traceEvents;
+
+  /// Trace event wrapper id for this timeline event.
+  ///
+  /// We will lookup this data multiple times for a single event when forming
+  /// event trees, so we cache this to improve the performance and reduce the
+  /// number of calls to [List.first].
+  int get traceWrapperId => _traceWrapperId ??= traceEvents.first.wrapperId;
+
+  int _traceWrapperId;
 
   TimelineEventType type;
 
@@ -931,14 +942,17 @@ class SyncTimelineEvent extends TimelineEvent {
 
   @override
   bool couldBeParentOf(TimelineEvent e) {
+    // TODO(kenz): consider caching start and end times in the [TimeRange] class
+    // since these can be looked up many times for a single [TimeRange] object.
     final startTime = time.start.inMicroseconds;
     final endTime = time.end?.inMicroseconds;
     final eStartTime = e.time.start.inMicroseconds;
     final eEndTime = e.time.end?.inMicroseconds;
+    final eFirstTraceId = e.traceWrapperId;
 
     if (endTime != null && eEndTime != null) {
       if (startTime == eStartTime && endTime == eEndTime) {
-        return traceEvents.first.id < e.traceEvents.first.id;
+        return traceWrapperId < eFirstTraceId;
       }
       return startTime <= eStartTime && endTime >= eEndTime;
     } else if (endTime != null) {
@@ -949,7 +963,7 @@ class SyncTimelineEvent extends TimelineEvent {
       // not be the parent of [e].
       return startTime <= eStartTime && endTime > eStartTime;
     } else if (startTime == eStartTime) {
-      return traceEvents.first.id < e.traceEvents.first.id;
+      return traceWrapperId < eFirstTraceId;
     } else {
       return startTime < eStartTime;
     }

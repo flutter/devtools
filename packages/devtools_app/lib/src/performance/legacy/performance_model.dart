@@ -535,6 +535,15 @@ abstract class LegacyTimelineEvent extends TreeNode<LegacyTimelineEvent>
   /// associated DurationEnd event).
   final List<TraceEventWrapper> traceEvents;
 
+  /// Trace event wrapper id for this timeline event.
+  ///
+  /// We will lookup this data multiple times for a single event when forming
+  /// event trees, so we cache this to improve the performance and reduce the
+  /// number of calls to [List.first].
+  int get traceWrapperId => _traceWrapperId ??= traceEvents.first.wrapperId;
+
+  int _traceWrapperId;
+
   TimelineEventType type;
 
   TimeRange time = TimeRange();
@@ -811,14 +820,17 @@ class LegacySyncTimelineEvent extends LegacyTimelineEvent {
 
   @override
   bool couldBeParentOf(LegacyTimelineEvent e) {
+    // TODO(kenz): consider caching start and end times in the [TimeRange] class
+    // since these can be looked up many times for a single [TimeRange] object.
     final startTime = time.start.inMicroseconds;
     final endTime = time.end?.inMicroseconds;
     final eStartTime = e.time.start.inMicroseconds;
     final eEndTime = e.time.end?.inMicroseconds;
+    final eFirstTraceId = e.traceWrapperId;
 
     if (endTime != null && eEndTime != null) {
       if (startTime == eStartTime && endTime == eEndTime) {
-        return traceEvents.first.id < e.traceEvents.first.id;
+        return traceWrapperId < eFirstTraceId;
       }
       return startTime <= eStartTime && endTime >= eEndTime;
     } else if (endTime != null) {
@@ -829,7 +841,7 @@ class LegacySyncTimelineEvent extends LegacyTimelineEvent {
       // not be the parent of [e].
       return startTime <= eStartTime && endTime > eStartTime;
     } else if (startTime == eStartTime) {
-      return traceEvents.first.id < e.traceEvents.first.id;
+      return traceWrapperId < eFirstTraceId;
     } else {
       return startTime < eStartTime;
     }

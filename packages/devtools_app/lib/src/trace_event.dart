@@ -118,12 +118,12 @@ int _traceEventWrapperId = 0;
 
 class TraceEventWrapper implements Comparable<TraceEventWrapper> {
   TraceEventWrapper(this.event, this.timeReceived)
-      : id = _traceEventWrapperId++;
+      : wrapperId = _traceEventWrapperId++;
   final TraceEvent event;
 
   final num timeReceived;
 
-  final int id;
+  final int wrapperId;
 
   Map<String, dynamic> get json => event.json;
 
@@ -137,7 +137,7 @@ class TraceEventWrapper implements Comparable<TraceEventWrapper> {
     // order them in the order we received them.
     final compare = (event.timestampMicros ?? 0)
         .compareTo(other.event.timestampMicros ?? 0);
-    return compare != 0 ? compare : id.compareTo(other.id);
+    return compare != 0 ? compare : wrapperId.compareTo(other.wrapperId);
   }
 }
 

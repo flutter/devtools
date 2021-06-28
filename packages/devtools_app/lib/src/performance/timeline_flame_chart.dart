@@ -504,7 +504,7 @@ class TimelineFlameChartState
       }
 
       final node = FlameChartNode<TimelineEvent>(
-        key: Key('${event.name} ${event.traceEvents.first.id}'),
+        key: Key('${event.name} ${event.traceEvents.first.wrapperId}'),
         text: event.name,
         rect: Rect.fromLTRB(left, flameChartNodeTop, right, rowHeight),
         backgroundColor: backgroundColor,

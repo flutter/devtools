@@ -41,7 +41,7 @@ class PerformanceScreen extends Screen {
           id: id,
           requiresDartVm: true,
           worksOffline: true,
-          // shouldShowForFlutterVersion: _shouldShowForFlutterVersion,
+          shouldShowForFlutterVersion: _shouldShowForFlutterVersion,
           title: 'Performance',
           icon: Octicons.pulse,
         );
@@ -174,7 +174,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         Expanded(
           child: Split(
             axis: Axis.vertical,
-            initialFractions: const [0.6, 0.4],
+            initialFractions: const [0.7, 0.3],
             children: [
               TimelineFlameChartContainer(
                 processing: processing,
