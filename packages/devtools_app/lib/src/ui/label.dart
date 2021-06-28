@@ -18,7 +18,7 @@ class ImageIconLabel extends StatelessWidget {
       children: [
         icon,
         // TODO(jacobr): animate showing and hiding the text.
-        if (_showLabelText(context, minIncludeTextWidth))
+        if (includeText(context, minIncludeTextWidth))
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text(text),
@@ -56,7 +56,7 @@ class MaterialIconLabel extends StatelessWidget {
               )
             : imageIcon,
         // TODO(jacobr): animate showing and hiding the text.
-        if (_showLabelText(context, includeTextWidth))
+        if (includeText(context, includeTextWidth))
           Padding(
             padding: const EdgeInsets.only(left: denseSpacing),
             child: Text(
@@ -67,9 +67,4 @@ class MaterialIconLabel extends StatelessWidget {
       ],
     );
   }
-}
-
-bool _showLabelText(BuildContext context, double includeTextWidth) {
-  return includeTextWidth == null ||
-      MediaQuery.of(context).size.width > includeTextWidth;
 }

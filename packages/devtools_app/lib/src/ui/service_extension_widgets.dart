@@ -139,7 +139,11 @@ class _ServiceExtensionButtonGroupState
       waitDuration: tooltipWait,
       preferBelow: false,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+        padding: EdgeInsets.symmetric(
+          horizontal: includeText(context, widget.minIncludeTextWidth)
+              ? defaultSpacing
+              : 0.0,
+        ),
         child: ImageIconLabel(
           description.icon,
           description.description,

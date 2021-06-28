@@ -224,18 +224,20 @@ class LegacyPerformanceController
     // for the entire frame. The order of selecting the timeline event and
     // pulling the CPU profile for the frame (directly below) matters here.
     // If the selected timeline event is null, the event details section will
-    // not show the progress bar while we are processing the CPU profile.
+    // not show the progress bar while we are processing the CPU profile
     await selectTimelineEvent(frame.uiEventFlow, updateProfiler: false);
 
     final storedProfileForFrame =
         cpuProfilerController.cpuProfileStore.lookupProfile(frame.time);
     if (storedProfileForFrame == null) {
       cpuProfilerController.reset();
-      await cpuProfilerController.pullAndProcessProfile(
-        startMicros: frame.time.start.inMicroseconds,
-        extentMicros: frame.time.duration.inMicroseconds,
-        processId: 'Flutter frame ${frame.id}',
-      );
+      if (!offlineMode) {
+        await cpuProfilerController.pullAndProcessProfile(
+          startMicros: frame.time.start.inMicroseconds,
+          extentMicros: frame.time.duration.inMicroseconds,
+          processId: 'Flutter frame ${frame.id}',
+        );
+      }
       data.cpuProfileData = cpuProfilerController.dataNotifier.value;
     } else {
       data.cpuProfileData = storedProfileForFrame;
