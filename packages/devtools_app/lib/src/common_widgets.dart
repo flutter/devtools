@@ -89,6 +89,7 @@ class IconLabelButton extends StatelessWidget {
     @required this.icon,
     @required this.label,
     @required this.onPressed,
+    this.color,
     this.includeTextWidth,
     this.elevatedButton = false,
   }) : super(key: key);
@@ -101,6 +102,8 @@ class IconLabelButton extends StatelessWidget {
 
   final VoidCallback onPressed;
 
+  final Color color;
+
   /// Whether this icon label button should use an elevated button style.
   final bool elevatedButton;
 
@@ -110,6 +113,7 @@ class IconLabelButton extends StatelessWidget {
       label: label,
       iconData: icon,
       includeTextWidth: includeTextWidth,
+      color: color,
     );
     if (elevatedButton) {
       return ElevatedButton(

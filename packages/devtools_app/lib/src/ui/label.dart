@@ -33,11 +33,13 @@ class MaterialIconLabel extends StatelessWidget {
     @required this.label,
     this.iconData,
     this.imageIcon,
+    this.color,
     this.includeTextWidth,
   }) : assert((iconData == null) != (imageIcon == null));
 
   final IconData iconData;
   final Image imageIcon;
+  final Color color;
   final String label;
   final double includeTextWidth;
 
@@ -52,13 +54,17 @@ class MaterialIconLabel extends StatelessWidget {
             ? Icon(
                 iconData,
                 size: defaultIconSize,
+                color: color,
               )
             : imageIcon,
         // TODO(jacobr): animate showing and hiding the text.
         if (includeText(context, includeTextWidth))
           Padding(
             padding: const EdgeInsets.only(left: denseSpacing),
-            child: Text(label),
+            child: Text(
+              label,
+              style: TextStyle(color: color),
+            ),
           ),
       ],
     );
