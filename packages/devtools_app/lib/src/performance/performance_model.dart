@@ -295,7 +295,7 @@ class OfflinePerformanceData extends PerformanceData {
     final int selectedFrameId = json[PerformanceData.selectedFrameIdKey];
 
     final List<Map<String, dynamic>> framesJson =
-        (json[PerformanceData.flutterFramesKey] as List<dynamic>)
+        ((json[PerformanceData.flutterFramesKey] ?? []) as List<Object>)
             .map((f) => f as Map<String, dynamic>)
             .toList();
     final frames = framesJson
@@ -446,12 +446,13 @@ class FlutterFrame {
   /// involving the VM timeline, use [timeFromEventFlows] instead.
   final TimeRange timeFromFrameTiming;
 
-  /// The time range of the Flutter frame based on the frames [eventFlows]:
-  /// [uiEventFlow] and [rasterEventFlow].
+  /// The time range of the Flutter frame based on the frame's
+  /// [timelineEventData], which contains timing information from the VM's
+  /// timeline events.
   ///
   /// This time range should be used for activities related to timeline events,
   /// like scrolling a frame's timeline events into view, for example.
-  final TimeRange timeFromEventFlows = TimeRange();
+  TimeRange get timeFromEventFlows => timelineEventData.time;
 
   /// Build time for this Flutter frame based on data from the FrameTiming API
   /// sent over the extension stream as 'Flutter.Frame' events.
@@ -465,28 +466,21 @@ class FlutterFrame {
   /// FrameTiming API sent over the extension stream as 'Flutter.Frame' events.
   final Duration vsyncOverheadTime;
 
-  /// Event flows for the UI and Raster work for the frame.
-  final List<SyncTimelineEvent> eventFlows = List.generate(2, (_) => null);
+  /// Timeline event data for this [FlutterFrame].
+  final FrameTimelineEventData timelineEventData = FrameTimelineEventData();
 
-  /// Flow of events describing the UI work for the frame.
-  SyncTimelineEvent get uiEventFlow => eventFlows[TimelineEventType.ui.index];
-
-  /// Flow of events describing the Raster work for the frame.
-  SyncTimelineEvent get rasterEventFlow =>
-      eventFlows[TimelineEventType.raster.index];
-
-  bool get isWellFormed => uiEventFlow != null && rasterEventFlow != null;
+  bool get isWellFormed => timelineEventData.wellFormed;
 
   Duration get shaderDuration {
     if (_shaderTime != null) return _shaderTime;
-    if (rasterEventFlow == null) return Duration.zero;
+    if (timelineEventData.rasterEvent == null) return Duration.zero;
     int sumShaderMicros = 0;
     // TODO(kenz): add a helper class for performing efficient time interval
     // union computation. This code is currently broken if there were non-shader
     // events interleaved with shader events. The time reported would be
     // inaccurately large.
     breadthFirstTraversal<TimelineEvent>(
-      rasterEventFlow,
+      timelineEventData.rasterEvent,
       action: (TimelineEvent event) {
         // Shader events with a shader event parent should not be included in the
         // sum because the parent event will encompass the time of [event].
@@ -502,47 +496,18 @@ class FlutterFrame {
   Duration _shaderTime;
 
   bool get hasShaderTime =>
-      rasterEventFlow != null && shaderDuration != Duration.zero;
+      timelineEventData.rasterEvent != null && shaderDuration != Duration.zero;
 
   void setEventFlow(SyncTimelineEvent event, {TimelineEventType type}) {
     type ??= event?.type;
-    if (type == TimelineEventType.ui) {
-      timeFromEventFlows.start = event?.time?.start;
-      // If [rasterEventFlow] has already completed, set the end time for this
-      // frame to [event]'s end time.
-      if (rasterEventFlow != null) {
-        timeFromEventFlows.end = event?.time?.end;
-      }
-    }
-    if (type == TimelineEventType.raster) {
-      // If [uiEventFlow] is null, that means that this raster event flow
-      // completed before the ui event flow did for this frame. This means one
-      // of two things: 1) there will never be a [uiEventFlow] for this frame
-      // because the UI events are not present in the available timeline
-      // events, or 2) the [uiEventFlow] has started but not completed yet. In
-      // the event that 2) is true, do not set the frame end time here because
-      // the end time for this frame will be set to the end time for
-      // [uiEventFlow] once it finishes.
-      if (uiEventFlow != null) {
-        timeFromEventFlows.end = Duration(
-          microseconds: math.max(
-            uiEventFlow.time.end.inMicroseconds,
-            event?.time?.end?.inMicroseconds ?? 0,
-          ),
-        );
-      }
-    }
-    eventFlows[type.index] = event;
+    timelineEventData.setEventFlow(event: event, type: type);
     event?.frameId = id;
   }
 
   TimelineEvent findTimelineEvent(TimelineEvent event) {
-    if (event.type == TimelineEventType.ui ||
-        event.type == TimelineEventType.raster) {
-      return eventFlows[event.type.index].firstChildWithCondition(
-          (e) => e.name == event.name && e.time == event.time);
-    }
-    return null;
+    final frameTimelineEvent = timelineEventData.eventByType(event.type);
+    return frameTimelineEvent?.firstChildWithCondition(
+        (e) => e.name == event.name && e.time == event.time);
   }
 
   bool isJanky(double displayRefreshRate) {
@@ -579,8 +544,66 @@ class FlutterFrame {
 
   @override
   String toString() {
-    return 'Frame $id - $timeFromFrameTiming, ui: ${uiEventFlow.time}, '
-        'raster: ${rasterEventFlow.time}';
+    return 'Frame $id - $timeFromFrameTiming, '
+        'ui: ${timelineEventData.uiEvent.time}, '
+        'raster: ${timelineEventData.rasterEvent.time}';
+  }
+}
+
+class FrameTimelineEventData {
+  /// Events describing the UI work for a [FlutterFrame].
+  SyncTimelineEvent get uiEvent => _eventFlows[TimelineEventType.ui.index];
+
+  /// Events describing the Raster work for a [FlutterFrame].
+  SyncTimelineEvent get rasterEvent =>
+      _eventFlows[TimelineEventType.raster.index];
+
+  final List<SyncTimelineEvent> _eventFlows = List.generate(2, (_) => null);
+
+  bool get wellFormed => uiEvent != null && rasterEvent != null;
+
+  final time = TimeRange();
+
+  void setEventFlow({
+    @required SyncTimelineEvent event,
+    @required TimelineEventType type,
+    bool setTimeData = true,
+  }) {
+    if (type == null) return;
+    _eventFlows[type.index] = event;
+    if (setTimeData) {
+      if (type == TimelineEventType.ui) {
+        time.start = event?.time?.start;
+        // If [rasterEventFlow] has already completed, set the end time for this
+        // frame to [event]'s end time.
+        if (rasterEvent != null) {
+          time.end = event?.time?.end;
+        }
+      } else if (type == TimelineEventType.raster) {
+        // If [uiEventFlow] is null, that means that this raster event flow
+        // completed before the ui event flow did for this frame. This means one
+        // of two things: 1) there will never be a [uiEventFlow] for this frame
+        // because the UI events are not present in the available timeline
+        // events, or 2) the [uiEventFlow] has started but not completed yet. In
+        // the event that 2) is true, do not set the frame end time here because
+        // the end time for this frame will be set to the end time for
+        // [uiEventFlow] once it finishes.
+        if (uiEvent != null) {
+          time.end = Duration(
+            microseconds: math.max(
+              uiEvent.time.end.inMicroseconds,
+              event?.time?.end?.inMicroseconds ?? 0,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  TimelineEvent eventByType(TimelineEventType type) {
+    if (type == TimelineEventType.ui) return uiEvent;
+    if (type == TimelineEventType.raster) return rasterEvent;
+    return null;
   }
 }
 
@@ -847,11 +870,24 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   }
 
   @visibleForTesting
-  TimelineEvent deepCopy() {
+  TimelineEvent shallowCopy() {
     final copy = isAsyncEvent
         ? AsyncTimelineEvent(traceEvents.first)
         : SyncTimelineEvent(traceEvents.first);
-    copy.time.end = time.end;
+    for (int i = 1; i < traceEvents.length; i++) {
+      copy.traceEvents.add(traceEvents[i]);
+    }
+    copy
+      ..type = type
+      ..time = (TimeRange()
+        ..start = time.start
+        ..end = time.end);
+    return copy;
+  }
+
+  @visibleForTesting
+  TimelineEvent deepCopy() {
+    final copy = shallowCopy();
     copy.parent = parent;
     for (TimelineEvent child in children) {
       copy._addChild(child.deepCopy());
@@ -876,6 +912,7 @@ class SyncTimelineEvent extends TimelineEvent {
   bool get isRasterEventFlow => rasterFrameNumber != null;
 
   int get uiFrameNumber {
+    if (_uiFrameNumber != null) return _uiFrameNumber;
     final animatorBeginFrameEvent = firstChildWithCondition(
         (TimelineEvent event) => event.name.contains(uiEventName));
     if (animatorBeginFrameEvent != null) {
@@ -889,7 +926,10 @@ class SyncTimelineEvent extends TimelineEvent {
     return null;
   }
 
+  int _uiFrameNumber;
+
   int get rasterFrameNumber {
+    if (_rasterFrameNumber != null) return _rasterFrameNumber;
     final gpuRasterizerDrawEvent = firstChildWithCondition(
         (TimelineEvent event) => event.name.contains(rasterEventName));
     if (gpuRasterizerDrawEvent != null) {
@@ -902,6 +942,8 @@ class SyncTimelineEvent extends TimelineEvent {
     }
     return null;
   }
+
+  int _rasterFrameNumber;
 
   @override
   int get maxEndMicros => time.end.inMicroseconds;

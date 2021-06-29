@@ -547,7 +547,10 @@ class TimeRange {
       assert(_start == null);
     }
     if (_end != null) {
-      assert(value <= _end);
+      assert(
+        value <= _end,
+        '$value is not less than or equal to end time $_end',
+      );
     }
     _start = value;
   }
@@ -561,7 +564,10 @@ class TimeRange {
       assert(_end == null);
     }
     if (_start != null) {
-      assert(value >= _start);
+      assert(
+        value >= _start,
+        '$value is not greater than or equal to start time $_start',
+      );
     }
     _end = value;
   }

@@ -316,10 +316,10 @@ class FlutterFramesChartItem extends StatelessWidget {
     var shaderColor = shaderCompilationColor;
 
     if (debugFrames) {
-      if (frame.uiEventFlow == null) {
+      if (frame.timelineEventData.uiEvent == null) {
         uiColor = uiColor.darken(.5);
       }
-      if (frame.rasterEventFlow == null) {
+      if (frame.timelineEventData.rasterEvent == null) {
         rasterColor = rasterColor.darken(.50);
         shaderColor = shaderColor.darken(.50);
       }

@@ -445,23 +445,13 @@ class TimelineFlameChartState
     // improve performance.
     if (_selectedFrame != null) {
       // Zoom and scroll to the frame's UI event.
-      TimeRange time;
-      TimelineEvent event;
-      if (_selectedFrame.uiEventFlow == null &&
-          _selectedFrame.rasterEventFlow == null) {
+      final time = _selectedFrame.timeToCenterFrame();
+      final event = _selectedFrame.eventToCenterFrame();
+      if (time == null || event == null) {
         // TODO(kenz): should we zoom to the latest available frame?
         Notifications.of(context)
             .push('No timeline events available for the selected frame');
         return;
-      } else if (_selectedFrame.uiEventFlow == null) {
-        time = _selectedFrame.rasterEventFlow.time;
-        event = _selectedFrame.rasterEventFlow;
-      } else if (_selectedFrame.rasterEventFlow == null) {
-        time = _selectedFrame.uiEventFlow.time;
-        event = _selectedFrame.uiEventFlow;
-      } else {
-        time = _selectedFrame.timeFromEventFlows;
-        event = _selectedFrame.uiEventFlow;
       }
       await zoomAndScrollToData(
         startMicros: time.start.inMicroseconds,
@@ -1110,8 +1100,8 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (selectedFrame?.uiEventFlow == null &&
-        selectedFrame?.rasterEventFlow == null) {
+    if (selectedFrame?.timelineEventData?.uiEvent == null &&
+        selectedFrame?.timelineEventData?.rasterEvent == null) {
       return;
     }
 
@@ -1127,11 +1117,19 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 
-    if (selectedFrame.uiEventFlow != null) {
-      _paintBrackets(canvas, paint, event: selectedFrame.uiEventFlow);
+    if (selectedFrame.timelineEventData.uiEvent != null) {
+      _paintBrackets(
+        canvas,
+        paint,
+        event: selectedFrame.timelineEventData.uiEvent,
+      );
     }
-    if (selectedFrame.rasterEventFlow != null) {
-      _paintBrackets(canvas, paint, event: selectedFrame.rasterEventFlow);
+    if (selectedFrame.timelineEventData.rasterEvent != null) {
+      _paintBrackets(
+        canvas,
+        paint,
+        event: selectedFrame.timelineEventData.rasterEvent,
+      );
     }
   }
 
@@ -1386,4 +1384,30 @@ extension TimelineEventGroupDisplayExtension on TimelineEventGroup {
   double get displaySizePx =>
       rows.length * rowHeightWithPadding +
       FlameChart.rowOffsetForSectionSpacer * sectionSpacing;
+}
+
+extension FlutterFrameExtension on FlutterFrame {
+  TimelineEvent eventToCenterFrame() {
+    if (timelineEventData.uiEvent == null &&
+        timelineEventData.rasterEvent == null) {
+      return null;
+    } else if (timelineEventData.uiEvent != null) {
+      return timelineEventData.uiEvent;
+    } else {
+      return timelineEventData.rasterEvent;
+    }
+  }
+
+  TimeRange timeToCenterFrame() {
+    if (timelineEventData.uiEvent == null &&
+        timelineEventData.rasterEvent == null) {
+      return null;
+    } else if (timelineEventData.uiEvent != null) {
+      return timelineEventData.uiEvent.time;
+    } else if (timelineEventData.rasterEvent != null) {
+      return timelineEventData.rasterEvent.time;
+    } else {
+      return timeFromEventFlows;
+    }
+  }
 }

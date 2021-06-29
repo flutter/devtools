@@ -110,10 +110,7 @@ class TimelineEventProcessor {
   ///
   /// [traceEvents] must be sorted in increasing timestamp order before calling
   /// this method.
-  Future<void> processTimeline(
-    List<TraceEventWrapper> traceEvents, {
-    bool resetAfterProcessing = true,
-  }) async {
+  Future<void> processTimeline(List<TraceEventWrapper> traceEvents) async {
     resetProcessingData();
 
 // Uncomment this code for testing the timeline.
@@ -204,9 +201,7 @@ class TimelineEventProcessor {
         ..end = Duration.zero;
     }
 
-    if (resetAfterProcessing) {
-      reset();
-    }
+    resetProcessingData();
   }
 
   void _processBatch(int batchSize, List<TraceEventWrapper> traceEvents) {

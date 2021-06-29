@@ -124,18 +124,11 @@ class PerformanceController extends DisposableController
   List<TraceEventWrapper> allTraceEvents = [];
 
   /// The tracking index for the first unprocessed trace event collected.
-  int nextTraceIndexToProcess = 0;
+  int _nextTraceIndexToProcess = 0;
 
   /// The tracking index for the first unprocessed [TimelineEvent] that needs to
   /// be processed and added to the timeline events flame chart.
-  int nextTimelineEventIndexToProcess = 0;
-
-  /// Timeline events that have been processed.
-  ///
-  /// This may not include all of the trace events that have been collected.
-  /// Some may be unprocessed and sitting in [unprocessedTraceEvents].
-  ValueListenable<List<TimelineEvent>> get timelineEvents => _timelineEvents;
-  final _timelineEvents = ValueNotifier<List<TimelineEvent>>(<TimelineEvent>[]);
+  int _nextTimelineEventIndexToProcess = 0;
 
   /// Whether flutter frames are currently being recorded.
   ValueListenable<bool> get recordingFrames => _recordingFrames;
@@ -151,14 +144,14 @@ class PerformanceController extends DisposableController
   /// These timeline events are keyed by the [FlutterFrame] ID specified in the
   /// event arguments, which matches the ID for the corresponding
   /// [FlutterFrame].
-  final unassignedFlutterFrameEvents = <int, List<TimelineEvent>>{};
+  final _unassignedFlutterFrameEvents = <int, FrameTimelineEventData>{};
 
   /// The collection of Flutter frames that have not yet been linked to their
   /// respective [TimelineEvent]s for the UI and Raster thread.
   ///
   /// These [FlutterFrame]s are keyed by the Flutter frame ID that matches the
   /// frame id in the corresponding [TimelineEvent]s.
-  final unassignedFlutterFrames = <int, FlutterFrame>{};
+  final _unassignedFlutterFrames = <int, FlutterFrame>{};
 
   Future<void> _initialized;
   Future<void> get initialized => _initialized;
@@ -233,8 +226,7 @@ class PerformanceController extends DisposableController
                 ),
               )
               .toList();
-          final List<TraceEventWrapper> wrappedTraceEvents =
-              traceEvents.cast<TraceEventWrapper>();
+          final wrappedTraceEvents = traceEvents.cast<TraceEventWrapper>();
           eventBatch.addAll(wrappedTraceEvents);
         }
         allTraceEvents.addAll(eventBatch);
@@ -243,6 +235,7 @@ class PerformanceController extends DisposableController
   }
 
   FutureOr<void> processAvailableEvents() async {
+    assert(!_processing.value);
     _processing.value = true;
     await processTraceEvents(allTraceEvents);
     _processing.value = false;
@@ -313,7 +306,10 @@ class PerformanceController extends DisposableController
     // pulling the CPU profile for the frame (directly below) matters here.
     // If the selected timeline event is null, the event details section will
     // not show the progress bar while we are processing the CPU profile.
-    await selectTimelineEvent(frame.uiEventFlow, updateProfiler: false);
+    await selectTimelineEvent(
+      frame.timelineEventData.uiEvent,
+      updateProfiler: false,
+    );
 
     final storedProfileForFrame = cpuProfilerController.cpuProfileStore
         .lookupProfile(frame.timeFromEventFlows);
@@ -341,13 +337,13 @@ class PerformanceController extends DisposableController
     if (debugTimeline) {
       final buf = StringBuffer();
       buf.writeln('UI timeline event for frame ${frame.id}:');
-      frame.uiEventFlow.format(buf, '  ');
+      frame.timelineEventData.uiEvent.format(buf, '  ');
       buf.writeln('\nUI trace for frame ${frame.id}');
-      frame.uiEventFlow.writeTraceToBuffer(buf);
+      frame.timelineEventData.uiEvent.writeTraceToBuffer(buf);
       buf.writeln('\Raster timeline event frame ${frame.id}:');
-      frame.rasterEventFlow.format(buf, '  ');
+      frame.timelineEventData.rasterEvent.format(buf, '  ');
       buf.writeln('\nRaster trace for frame ${frame.id}');
-      frame.rasterEventFlow.writeTraceToBuffer(buf);
+      frame.timelineEventData.rasterEvent.writeTraceToBuffer(buf);
       log(buf.toString());
     }
   }
@@ -379,25 +375,21 @@ class PerformanceController extends DisposableController
   }
 
   void assignEventsToFrame(FlutterFrame frame) {
-    if (unassignedFlutterFrameEvents.containsKey(frame.id)) {
+    if (_unassignedFlutterFrameEvents.containsKey(frame.id)) {
       _maybeAddUnassignedEventsToFrame(frame);
     }
     if (frame.isWellFormed) {
       _updateFirstWellFormedFrameMicros(frame);
     } else {
-      unassignedFlutterFrames[frame.id] = frame;
+      _unassignedFlutterFrames[frame.id] = frame;
     }
   }
 
   void _maybeAddUnassignedEventsToFrame(FlutterFrame frame) {
     _maybeAddUnassignedEventToFrame(frame, TimelineEventType.ui);
     _maybeAddUnassignedEventToFrame(frame, TimelineEventType.raster);
-    if (unassignedFlutterFrameEvents[frame.id][TimelineEventType.ui.index] ==
-            null &&
-        unassignedFlutterFrameEvents[frame.id]
-                [TimelineEventType.raster.index] ==
-            null) {
-      unassignedFlutterFrameEvents.remove(frame.id);
+    if (frame.isWellFormed) {
+      _unassignedFlutterFrameEvents.remove(frame.id);
     }
   }
 
@@ -405,10 +397,9 @@ class PerformanceController extends DisposableController
     FlutterFrame frame,
     TimelineEventType type,
   ) {
-    final event = unassignedFlutterFrameEvents[frame.id][type.index];
+    final event = _unassignedFlutterFrameEvents[frame.id].eventByType(type);
     if (event != null) {
       frame.setEventFlow(event, type: type);
-      unassignedFlutterFrameEvents[frame.id][type.index] = null;
     }
   }
 
@@ -418,20 +409,24 @@ class PerformanceController extends DisposableController
     TimelineEventType type,
   ) {
     if (frameNumber != null) {
-      if (unassignedFlutterFrames.containsKey(frameNumber)) {
-        final frame = unassignedFlutterFrames[frameNumber];
+      if (_unassignedFlutterFrames.containsKey(frameNumber)) {
+        final frame = _unassignedFlutterFrames[frameNumber];
         frame.setEventFlow(event, type: type);
         if (frame.isWellFormed) {
-          unassignedFlutterFrames.remove(frameNumber);
+          _unassignedFlutterFrames.remove(frameNumber);
           _updateFirstWellFormedFrameMicros(frame);
         }
       } else {
         final unassignedEventsForFrame =
-            unassignedFlutterFrameEvents.putIfAbsent(
+            _unassignedFlutterFrameEvents.putIfAbsent(
           frameNumber,
-          () => List.generate(2, (_) => null),
+          () => FrameTimelineEventData(),
         );
-        unassignedEventsForFrame[event.type.index] = event;
+        unassignedEventsForFrame.setEventFlow(
+          event: event,
+          type: event.type,
+          setTimeData: false,
+        );
       }
     }
   }
@@ -454,7 +449,7 @@ class PerformanceController extends DisposableController
 
   void toggleRecordingFrames(bool recording) {
     _recordingFrames.value = recording;
-    if (_recordingFrames.value) {
+    if (recording) {
       _addPendingFlutterFrames();
     }
   }
@@ -517,8 +512,6 @@ class PerformanceController extends DisposableController
 
   void addTimelineEvent(TimelineEvent event) {
     data.addTimelineEvent(event);
-    _timelineEvents.value.add(event);
-
     if (event is SyncTimelineEvent) {
       if (!offlineMode &&
           serviceManager.hasConnection &&
@@ -541,13 +534,13 @@ class PerformanceController extends DisposableController
   FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) async {
     final traceEventCount = traceEvents.length;
     await processor
-        .processTimeline(traceEvents.sublist(nextTraceIndexToProcess));
-    nextTraceIndexToProcess = traceEventCount;
+        .processTimeline(traceEvents.sublist(_nextTraceIndexToProcess));
+    _nextTraceIndexToProcess = traceEventCount;
     data.initializeEventGroups(
       threadNamesById,
-      startIndex: nextTimelineEventIndexToProcess,
+      startIndex: _nextTimelineEventIndexToProcess,
     );
-    nextTimelineEventIndexToProcess = data.timelineEvents.length;
+    _nextTimelineEventIndexToProcess = data.timelineEvents.length;
   }
 
   FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
@@ -648,7 +641,7 @@ class PerformanceController extends DisposableController
   List<TimelineEvent> matchesForSearch(String search) {
     if (search?.isEmpty ?? true) return [];
     final matches = <TimelineEvent>[];
-    final events = List.from(_timelineEvents.value);
+    final events = List<TimelineEvent>.from(data.timelineEvents);
     for (final event in events) {
       breadthFirstTraversal<TimelineEvent>(event, action: (TimelineEvent e) {
         if (e.name.caseInsensitiveContains(search)) {
@@ -706,11 +699,10 @@ class PerformanceController extends DisposableController
     data?.clear();
     processor?.reset();
     _flutterFrames.clear();
-    _timelineEvents.value = <TimelineEvent>[];
-    nextTraceIndexToProcess = 0;
-    nextTimelineEventIndexToProcess = 0;
-    unassignedFlutterFrameEvents.clear();
-    unassignedFlutterFrames.clear();
+    _nextTraceIndexToProcess = 0;
+    _nextTimelineEventIndexToProcess = 0;
+    _unassignedFlutterFrameEvents.clear();
+    _unassignedFlutterFrames.clear();
     _firstWellFormedFrameMicros = null;
     _selectedTimelineEventNotifier.value = null;
     _selectedFrameNotifier.value = null;
