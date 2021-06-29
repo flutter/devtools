@@ -56,6 +56,8 @@ dependencies:
   vm_service: ^7.1.0
   vm_snapshot_analysis: ^0.6.0
   web_socket_channel: ^2.1.0
+  flutter_bloc: ^7.0.0
+  equatable: ^2.0.0
 
 dev_dependencies:
   build_runner: ^2.0.4
