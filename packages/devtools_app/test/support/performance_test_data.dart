@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: implementation_imports
 import 'dart:convert';
 
 import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_app/src/utils.dart';
-
-import 'cpu_profile_test_data.dart';
-import 'test_utils.dart';
+import 'package:devtools_testing/support/cpu_profile_test_data.dart';
+import 'package:devtools_testing/support/test_utils.dart';
 
 const testUiThreadId = 1;
 const testRasterThreadId = 2;
@@ -62,36 +60,30 @@ final testFrame1 = FlutterFrame('id_1')
   ..setEventFlow(goldenRasterTimelineEvent);
 
 final jankyFrame = FlutterFrame('jankyFrame')
-  // ignore: invalid_use_of_visible_for_testing_member
   ..eventFlows[0] = (goldenUiTimelineEvent.deepCopy()
     ..time = (TimeRange()
       ..start = const Duration(milliseconds: 50)
       ..end = const Duration(milliseconds: 70)))
-  // ignore: invalid_use_of_visible_for_testing_member
   ..eventFlows[1] = (goldenRasterTimelineEvent.deepCopy()
     ..time = (TimeRange()
       ..start = const Duration(milliseconds: 68)
       ..end = const Duration(milliseconds: 88)));
 
 final jankyFrameUiOnly = FlutterFrame('jankyFrameUiOnly')
-// ignore: invalid_use_of_visible_for_testing_member
   ..eventFlows[0] = (goldenUiTimelineEvent.deepCopy()
     ..time = (TimeRange()
       ..start = const Duration(milliseconds: 50)
       ..end = const Duration(milliseconds: 70)))
-// ignore: invalid_use_of_visible_for_testing_member
   ..eventFlows[1] = (goldenRasterTimelineEvent.deepCopy()
     ..time = (TimeRange()
       ..start = const Duration(milliseconds: 68)
       ..end = const Duration(milliseconds: 75)));
 
 final jankyFrameRasterOnly = FlutterFrame('jankyFrameRasterOnly')
-// ignore: invalid_use_of_visible_for_testing_member
   ..eventFlows[0] = (goldenUiTimelineEvent.deepCopy()
     ..time = (TimeRange()
       ..start = const Duration(milliseconds: 50)
       ..end = const Duration(milliseconds: 60)))
-// ignore: invalid_use_of_visible_for_testing_member
   ..eventFlows[1] = (goldenRasterTimelineEvent.deepCopy()
     ..time = (TimeRange()
       ..start = const Duration(milliseconds: 50)
