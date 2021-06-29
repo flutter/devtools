@@ -6,9 +6,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:shelf/shelf.dart' as shelf;
 
+import '../devtools_api.dart';
 import 'file_system.dart';
 import 'usage.dart';
 

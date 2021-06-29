@@ -11,6 +11,7 @@ import 'dart:isolate';
 import 'package:args/args.dart';
 import 'package:browser_launcher/browser_launcher.dart';
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:devtools_shared/devtools_server.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:path/path.dart' as path;
@@ -21,9 +22,7 @@ import 'package:vm_service/vm_service.dart' hide Isolate;
 
 import 'client_manager.dart';
 import 'external_handlers.dart';
-import 'file_system.dart';
 import 'memory_profile.dart';
-import 'usage.dart';
 
 const protocolVersion = '1.1.0';
 const argHelp = 'help';
@@ -622,7 +621,7 @@ File? _devToolsBackup;
 
 bool backupAndCreateDevToolsStore() {
   assert(_devToolsBackup == null);
-  final devToolsStore = File(_devToolsStoreLocation());
+  final devToolsStore = File(LocalFileSystem.devToolsStoreLocation());
   if (devToolsStore.existsSync()) {
     _devToolsBackup = devToolsStore
         .copySync('${LocalFileSystem.devToolsDir()}/.devtools_backup_test');
@@ -636,7 +635,8 @@ String? restoreDevToolsStore() {
   if (_devToolsBackup != null) {
     // Read the current ~/.devtools file
     LocalFileSystem.maybeMoveLegacyDevToolsStore();
-    final devToolsStore = File(_devToolsStoreLocation());
+
+    final devToolsStore = File(LocalFileSystem.devToolsStoreLocation());
     final content = devToolsStore.readAsStringSync();
 
     // Delete the temporary ~/.devtools file
@@ -644,7 +644,7 @@ String? restoreDevToolsStore() {
     if (_devToolsBackup!.existsSync()) {
       // Restore the backup ~/.devtools file we created in
       // backupAndCreateDevToolsStore.
-      _devToolsBackup!.copySync(_devToolsStoreLocation());
+      _devToolsBackup!.copySync(LocalFileSystem.devToolsStoreLocation());
       _devToolsBackup!.deleteSync();
       _devToolsBackup = null;
     }
@@ -652,10 +652,6 @@ String? restoreDevToolsStore() {
   }
 
   return null;
-}
-
-String _devToolsStoreLocation() {
-  return path.join(LocalFileSystem.devToolsDir(), DevToolsUsage.storeName);
 }
 
 Future<void> _hookupMemoryProfiling(
