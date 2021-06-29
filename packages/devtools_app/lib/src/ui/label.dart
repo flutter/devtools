@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import 'icons.dart';
 
 /// Label including an image icon and optional text.
 class ImageIconLabel extends StatelessWidget {
@@ -38,7 +39,7 @@ class MaterialIconLabel extends StatelessWidget {
   }) : assert((iconData == null) != (imageIcon == null));
 
   final IconData iconData;
-  final Image imageIcon;
+  final ThemedImageIcon imageIcon;
   final Color color;
   final String label;
   final double includeTextWidth;

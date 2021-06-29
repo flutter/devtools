@@ -30,7 +30,7 @@ class CustomIcon extends StatelessWidget {
   final String text;
   final bool isAbstract;
 
-  Image get baseIcon => kind.icon;
+  AssetImageIcon get baseIcon => kind.icon;
 
   @override
   Widget build(BuildContext context) {
@@ -109,39 +109,39 @@ class CustomIconMaker {
 }
 
 class IconKind {
-  const IconKind(this.name, this.icon, [Image abstractIcon])
+  const IconKind(this.name, this.icon, [AssetImageIcon abstractIcon])
       : abstractIcon = abstractIcon ?? icon;
 
-  static IconKind classIcon = IconKind(
+  static IconKind classIcon = const IconKind(
     'class',
-    createImageIcon('icons/custom/class.png'),
-    createImageIcon('icons/custom/class_abstract.png'),
+    AssetImageIcon(url: 'icons/custom/class.png'),
+    AssetImageIcon(url: 'icons/custom/class_abstract.png'),
   );
-  static IconKind field = IconKind(
+  static IconKind field = const IconKind(
     'fields',
-    createImageIcon('icons/custom/fields.png'),
+    AssetImageIcon(url: 'icons/custom/fields.png'),
   );
-  static IconKind interface = IconKind(
+  static IconKind interface = const IconKind(
     'interface',
-    createImageIcon('icons/custom/interface.png'),
+    AssetImageIcon(url: 'icons/custom/interface.png'),
   );
-  static IconKind method = IconKind(
+  static IconKind method = const IconKind(
     'method',
-    createImageIcon('icons/custom/method.png'),
-    createImageIcon('icons/custom/method_abstract.png'),
+    AssetImageIcon(url: 'icons/custom/method.png'),
+    AssetImageIcon(url: 'icons/custom/method_abstract.png'),
   );
-  static IconKind property = IconKind(
+  static IconKind property = const IconKind(
     'property',
-    createImageIcon('icons/custom/property.png'),
+    AssetImageIcon(url: 'icons/custom/property.png'),
   );
-  static IconKind info = IconKind(
+  static IconKind info = const IconKind(
     'info',
-    createImageIcon('icons/custom/info.png'),
+    AssetImageIcon(url: 'icons/custom/info.png'),
   );
 
   final String name;
-  final Image icon;
-  final Image abstractIcon;
+  final AssetImageIcon icon;
+  final AssetImageIcon abstractIcon;
 }
 
 class ColorIcon extends StatelessWidget {
@@ -243,12 +243,24 @@ class FlutterMaterialIcons {
   }
 }
 
-Image createImageIcon(String url, {double size = defaultIconSize}) {
-  return Image(
-    image: AssetImage(url),
-    height: size,
-    width: size,
-  );
+class AssetImageIcon extends StatelessWidget {
+  const AssetImageIcon(
+      {@required this.url,
+      this.height = defaultIconSize,
+      this.width = defaultIconSize});
+
+  final String url;
+  final double height;
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image(
+      image: AssetImage(url),
+      height: height,
+      width: width,
+    );
+  }
 }
 
 class ThemedImageIcon extends StatelessWidget {
