@@ -26,7 +26,7 @@ const hotReload = RegisteredServiceDescription._(
   service: 'reloadSources',
   title: 'Hot Reload',
   icon: AssetImageIcon(
-    url: 'icons/hot-reload-white@2x.png',
+    asset: 'icons/hot-reload-white@2x.png',
     height: actionsIconSize,
     width: actionsIconSize,
   ),

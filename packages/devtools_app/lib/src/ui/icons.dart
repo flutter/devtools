@@ -114,29 +114,29 @@ class IconKind {
 
   static IconKind classIcon = const IconKind(
     'class',
-    AssetImageIcon(url: 'icons/custom/class.png'),
-    AssetImageIcon(url: 'icons/custom/class_abstract.png'),
+    AssetImageIcon(asset: 'icons/custom/class.png'),
+    AssetImageIcon(asset: 'icons/custom/class_abstract.png'),
   );
   static IconKind field = const IconKind(
     'fields',
-    AssetImageIcon(url: 'icons/custom/fields.png'),
+    AssetImageIcon(asset: 'icons/custom/fields.png'),
   );
   static IconKind interface = const IconKind(
     'interface',
-    AssetImageIcon(url: 'icons/custom/interface.png'),
+    AssetImageIcon(asset: 'icons/custom/interface.png'),
   );
   static IconKind method = const IconKind(
     'method',
-    AssetImageIcon(url: 'icons/custom/method.png'),
-    AssetImageIcon(url: 'icons/custom/method_abstract.png'),
+    AssetImageIcon(asset: 'icons/custom/method.png'),
+    AssetImageIcon(asset: 'icons/custom/method_abstract.png'),
   );
   static IconKind property = const IconKind(
     'property',
-    AssetImageIcon(url: 'icons/custom/property.png'),
+    AssetImageIcon(asset: 'icons/custom/property.png'),
   );
   static IconKind info = const IconKind(
     'info',
-    AssetImageIcon(url: 'icons/custom/info.png'),
+    AssetImageIcon(asset: 'icons/custom/info.png'),
   );
 
   final String name;
@@ -244,19 +244,20 @@ class FlutterMaterialIcons {
 }
 
 class AssetImageIcon extends StatelessWidget {
-  const AssetImageIcon(
-      {@required this.url,
-      this.height = defaultIconSize,
-      this.width = defaultIconSize});
+  const AssetImageIcon({
+    @required this.asset,
+    this.height = defaultIconSize,
+    this.width = defaultIconSize,
+  });
 
-  final String url;
+  final String asset;
   final double height;
   final double width;
 
   @override
   Widget build(BuildContext context) {
     return Image(
-      image: AssetImage(url),
+      image: AssetImage(asset),
       height: height,
       width: width,
     );

@@ -12,19 +12,19 @@ class Category {
 
   static Category accessibility = const Category(
     'Accessibility',
-    AssetImageIcon(url: 'icons/inspector/balloonInformation.png'),
+    AssetImageIcon(asset: 'icons/inspector/balloonInformation.png'),
   );
   static Category animationAndMotion = const Category(
     'Animation and Motion',
-    AssetImageIcon(url: 'icons/inspector/resume.png'),
+    AssetImageIcon(asset: 'icons/inspector/resume.png'),
   );
   static Category assetsImagesAndIcons = const Category(
     'Assets, Images, and Icons',
-    AssetImageIcon(url: 'icons/inspector/any_type.png'),
+    AssetImageIcon(asset: 'icons/inspector/any_type.png'),
   );
   static Category asyncCategory = const Category(
     'Async',
-    AssetImageIcon(url: 'icons/inspector/threads.png'),
+    AssetImageIcon(asset: 'icons/inspector/threads.png'),
   );
   static const Category basics = Category(
     'Basics',
@@ -36,27 +36,27 @@ class Category {
   );
   static Category input = const Category(
     'Input',
-    AssetImageIcon(url: 'icons/inspector/renderer.png'),
+    AssetImageIcon(asset: 'icons/inspector/renderer.png'),
   );
   static Category paintingAndEffects = const Category(
     'Painting and effects',
-    AssetImageIcon(url: 'icons/inspector/colors.png'),
+    AssetImageIcon(asset: 'icons/inspector/colors.png'),
   );
   static Category scrolling = const Category(
     'Scrolling',
-    AssetImageIcon(url: 'icons/inspector/scrollbar.png'),
+    AssetImageIcon(asset: 'icons/inspector/scrollbar.png'),
   );
   static Category stack = const Category(
     'Stack',
-    AssetImageIcon(url: 'icons/inspector/value.png'),
+    AssetImageIcon(asset: 'icons/inspector/value.png'),
   );
   static Category styling = const Category(
     'Styling',
-    AssetImageIcon(url: 'icons/inspector/atrule.png'),
+    AssetImageIcon(asset: 'icons/inspector/atrule.png'),
   );
   static Category text = const Category(
     'Text',
-    AssetImageIcon(url: 'icons/inspector/textArea.png'),
+    AssetImageIcon(asset: 'icons/inspector/textArea.png'),
   );
 
   static List<Category> values = [
