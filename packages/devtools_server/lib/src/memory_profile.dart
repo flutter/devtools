@@ -9,7 +9,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:vm_service/vm_service.dart';
 
-import 'memory_service_registrations.dart' as service_registrations;
+import 'service_registrations.dart' as service_registrations;
 
 class MemoryProfile {
   MemoryProfile(this.service, String profileFilename, this._verboseMode) {
