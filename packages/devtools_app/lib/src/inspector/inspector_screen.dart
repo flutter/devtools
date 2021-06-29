@@ -72,6 +72,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   static const summaryTreeKey = Key('Summary Tree');
   static const detailsTreeKey = Key('Details Tree');
   static const includeTextWidth = 900.0;
+  static const includeRefreshTreeWidth = 1200.0;
 
   @override
   void initState() {
@@ -137,7 +138,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               icon: Icons.refresh,
               label: 'Refresh Tree',
               color: Theme.of(context).colorScheme.serviceExtensionButtonsTitle,
-              includeTextWidth: includeTextWidth,
+              includeTextWidth: includeRefreshTreeWidth,
             ),
             const Spacer(),
             Row(children: getServiceExtensionWidgets()),
@@ -200,7 +201,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   List<Widget> getServiceExtensionWidgets() {
     return [
       ServiceExtensionButtonGroup(
-        minIncludeTextWidth: 1350,
+        minIncludeTextWidth: 1150,
         extensions: [
           extensions.slowAnimations,
           extensions.debugPaint,
