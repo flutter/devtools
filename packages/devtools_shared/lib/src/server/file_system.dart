@@ -21,20 +21,24 @@ class LocalFileSystem {
     return path.join(_userHomeDir(), '.flutter-devtools');
   }
 
-  /// Moves the .devtools file to ~/.flutter-devtools/.devtools if the .devtools file
-  /// exists in the user's home directory.
+  /// Moves the .devtools file to ~/.flutter-devtools/.devtools if the .devtools
+  /// file exists in the user's home directory.
   static void maybeMoveLegacyDevToolsStore() {
     final file = File(path.join(_userHomeDir(), DevToolsUsage.storeName));
     if (file.existsSync()) {
       ensureDevToolsDirectory();
-      file.copySync(path.join(devToolsDir(), DevToolsUsage.storeName));
+      file.copySync(devToolsStoreLocation());
       file.deleteSync();
     }
   }
 
+  static String devToolsStoreLocation() {
+    return path.join(devToolsDir(), DevToolsUsage.storeName);
+  }
+
   /// Creates the ~/.flutter-devtools directory if it does not already exist.
   static void ensureDevToolsDirectory() {
-    Directory('${LocalFileSystem.devToolsDir()}').createSync();
+    Directory('${devToolsDir()}').createSync();
   }
 
   /// Returns a DevTools file from the given path.
@@ -46,6 +50,7 @@ class LocalFileSystem {
       // outside of the ~/.flutter-devtools/ directory.
       return null;
     }
+
     ensureDevToolsDirectory();
     final file = File(path.join(devToolsDir(), pathFromDevToolsDir));
     if (!file.existsSync()) {
@@ -72,7 +77,7 @@ class LocalFileSystem {
 
   /// Whether the flutter store file exists.
   static bool flutterStoreExists() {
-    final flutterStore = File('${_userHomeDir()}/.flutter');
+    final flutterStore = File(path.join(_userHomeDir(), '.flutter'));
     return flutterStore.existsSync();
   }
 }
