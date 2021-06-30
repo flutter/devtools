@@ -74,7 +74,7 @@ class DevToolsScaffold extends StatefulWidget {
   // Note: when changing this value, also update `flameChartContainerOffset`
   // from flame_chart.dart.
   /// The border around the content in the DevTools UI.
-  static EdgeInsets appPadding = isEmbedded()
+  EdgeInsets get appPadding => isEmbedded()
       ? const EdgeInsets.fromLTRB(2.0, 2.0, 2.0, 1.0)
       : const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0);
 
@@ -295,7 +295,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           // TODO(kenz): this padding creates a flash when dragging and dropping
           // into the app size screen because it creates space that is outside
           // of the [DragAndDropEventAbsorber] widget. Fix this.
-          padding: DevToolsScaffold.appPadding,
+          padding: widget.appPadding,
           alignment: Alignment.topLeft,
           child: FocusScope(
             child: AnalyticsPrompt(
@@ -427,7 +427,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   }
 
   Widget _buildStatusLine() {
-    final appPadding = DevToolsScaffold.appPadding;
+    final appPadding = widget.appPadding;
 
     return Container(
       height: 48.0,
