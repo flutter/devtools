@@ -1265,7 +1265,7 @@ bool isDense() {
 }
 
 bool isEmbedded() {
-  return ideTheme?.embed != null;
+  return ideTheme?.embed ?? false;
 }
 
 mixin CompareMixin implements Comparable {
