@@ -9,7 +9,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:vm_service/vm_service.dart';
 
-import 'service_registrations.dart' as registrations;
+import 'service_registrations.dart' as service_registrations;
 
 class MemoryProfile {
   MemoryProfile(this.service, String profileFilename, this._verboseMode) {
@@ -74,7 +74,7 @@ class MemoryProfile {
 
   Future<Response?> getAdbMemoryInfo() async {
     return await callService(
-      registrations.flutterMemory.service,
+      service_registrations.flutterMemory.service,
       isolateId: _selectedIsolate.id,
     );
   }
@@ -218,7 +218,7 @@ class MemoryProfile {
   /// @throws Exception if no 'FlutterView'.
   Future<String?> getFlutterViewId(IsolateRef selectedIsolate) async {
     final flutterViewListResponse = await service!.callServiceExtension(
-      registrations.flutterListViews,
+      service_registrations.flutterListViews,
       isolateId: selectedIsolate.id,
     );
     final List<dynamic> views =
@@ -251,7 +251,7 @@ class MemoryProfile {
     final viewId = await getFlutterViewId(selectedIsolate);
 
     return await service!.callServiceExtension(
-      registrations.flutterEngineRasterCache,
+      service_registrations.flutterEngineRasterCache,
       args: {'viewId': viewId},
       isolateId: selectedIsolate.id,
     );

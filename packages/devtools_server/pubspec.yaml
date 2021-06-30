@@ -21,9 +21,8 @@ dependencies:
   shelf_proxy: ^1.0.0
   shelf_static: ^1.0.0
   http_multi_server: ^3.0.0
-  usage: ^4.0.0
   vm_service: ^7.1.0
-  collection: ^1.15.0-nullsafety.4
+  collection: ^1.15.0
 
 dependency_overrides:
 # The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.

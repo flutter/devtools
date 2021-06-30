@@ -5,9 +5,8 @@
 import 'dart:convert';
 
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:devtools_shared/devtools_server.dart';
 import 'package:sse/server/sse_handler.dart';
-
-import 'server_api.dart';
 
 const _verbose = false;
 
@@ -171,12 +170,16 @@ class DevToolsClient {
   final SseConnection _connection;
 
   Uri? _vmServiceUri;
+
   Uri? get vmServiceUri => _vmServiceUri;
+
   bool get hasConnection => _vmServiceUri != null;
 
   String? _currentPage;
+
   String? get currentPage => _currentPage;
 
   bool _embedded = false;
+
   bool get embedded => _embedded;
 }

@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:devtools_shared/devtools_server.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf.dart';
@@ -15,7 +16,6 @@ import 'package:shelf_static/shelf_static.dart';
 import 'package:sse/server/sse_handler.dart';
 
 import 'client_manager.dart';
-import 'server_api.dart';
 
 // DO NOT IMPORT THIS FILE into any files other than `devtools_server.dart`.
 // This file is overwritten for internal DevTools builds, so any file depending
