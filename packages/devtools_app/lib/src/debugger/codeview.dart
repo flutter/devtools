@@ -690,7 +690,7 @@ class _LineItemState extends State<LineItem> {
           await _debuggerController.buildVariablesTree(variable);
           if (_hasMouseExited) return;
           _hoverCard?.remove();
-          _hoverCard = HoverCard(
+          _hoverCard = HoverCard.fromHoverEvent(
             contents: SingleChildScrollView(
               child: Container(
                 constraints:
