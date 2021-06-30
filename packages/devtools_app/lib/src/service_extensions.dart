@@ -99,7 +99,7 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   gaItem: analytics_constants.debugBanner,
 );
 
-final highlightOversizedImages = ToggleableServiceExtensionDescription<bool>._(
+final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.invertOversizedImages',
   description: 'Highlight Oversized Images',
   disabledIcon: const ThemedImageIcon(
@@ -118,7 +118,7 @@ final highlightOversizedImages = ToggleableServiceExtensionDescription<bool>._(
   gaItem: analytics_constants.debugBanner,
 );
 
-final debugShowGuidelines = ToggleableServiceExtensionDescription<bool>._(
+final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaint',
   description: 'Show Guidelines',
   disabledIcon: const ThemedImageIcon(
@@ -137,7 +137,7 @@ final debugShowGuidelines = ToggleableServiceExtensionDescription<bool>._(
   gaItem: analytics_constants.debugPaint,
 );
 
-final debugShowBaselines = ToggleableServiceExtensionDescription<bool>._(
+final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaintBaselinesEnabled',
   description: 'Show Baselines',
   disabledIcon: const ThemedImageIcon(
@@ -184,7 +184,7 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   gaItem: analytics_constants.trackRebuilds,
 );
 
-final highlightRepaints = ToggleableServiceExtensionDescription<bool>._(
+final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.repaintRainbow',
   description: 'Highlight Repaints',
   disabledIcon: const ThemedImageIcon(
@@ -345,9 +345,9 @@ final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
 const String didSendFirstFrameEvent = 'ext.flutter.didSendFirstFrameEvent';
 
 final List<ServiceExtensionDescription> _extensionDescriptions = [
-  debugShowGuidelines,
-  debugShowBaselines,
-  highlightRepaints,
+  debugPaint,
+  debugPaintBaselines,
+  repaintRainbow,
   performanceOverlay,
   debugAllowBanner,
   profileWidgetBuilds,
@@ -359,7 +359,7 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   structuredErrors,
   httpEnableTimelineLogging,
   socketProfiling,
-  highlightOversizedImages,
+  invertOversizedImages,
 ];
 
 final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =
@@ -379,9 +379,9 @@ final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =
 /// extension set.
 final Set<String> _unsafeBeforeFirstFrameFlutterExtensions =
     <ServiceExtensionDescription>[
-  debugShowGuidelines,
-  debugShowBaselines,
-  highlightRepaints,
+  debugPaint,
+  debugPaintBaselines,
+  repaintRainbow,
   performanceOverlay,
   debugAllowBanner,
   toggleOnDeviceWidgetInspector,

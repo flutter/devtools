@@ -204,10 +204,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         minIncludeTextWidth: 1150,
         extensions: [
           extensions.slowAnimations,
-          extensions.debugShowGuidelines,
-          extensions.debugShowBaselines,
-          extensions.highlightRepaints,
-          extensions.highlightOversizedImages,
+          extensions.debugPaint,
+          extensions.debugPaintBaselines,
+          extensions.repaintRainbow,
+          extensions.invertOversizedImages,
         ],
       ),
       // TODO(jacobr): implement TogglePlatformSelector.
