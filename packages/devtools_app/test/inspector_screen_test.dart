@@ -47,14 +47,14 @@ void main() {
         extensions.toggleSelectWidgetMode.extension: true,
         extensions.enableOnDeviceInspector.extension: true,
         extensions.toggleOnDeviceWidgetInspector.extension: true,
-        extensions.debugPaint.extension: false,
+        extensions.debugShowGuidelines.extension: false,
       };
       fakeExtensionManager
         ..fakeAddServiceExtension(
             extensions.toggleOnDeviceWidgetInspector.extension)
         ..fakeAddServiceExtension(extensions.toggleSelectWidgetMode.extension)
         ..fakeAddServiceExtension(extensions.enableOnDeviceInspector.extension)
-        ..fakeAddServiceExtension(extensions.debugPaint.extension)
+        ..fakeAddServiceExtension(extensions.debugShowGuidelines.extension)
         ..fakeFrame();
     }
 
@@ -62,7 +62,7 @@ void main() {
       fakeExtensionManager.extensionValueOnDevice = {
         extensions.toggleOnDeviceWidgetInspector.extension: true,
         extensions.toggleSelectWidgetMode.extension: false,
-        extensions.debugPaint.extension: false,
+        extensions.debugShowGuidelines.extension: false,
       };
       // Don't actually send any events to the client indicating that service
       // extensions are avaiable.
@@ -93,7 +93,7 @@ void main() {
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InspectorScreenBody), findsOneWidget);
       expect(find.text('Refresh Tree'), findsOneWidget);
-      expect(find.text(extensions.debugPaint.description), findsOneWidget);
+      expect(find.text(extensions.debugShowGuidelines.description), findsOneWidget);
       // Make sure there is not an overflow if the window is narrow.
       // TODO(jacobr): determine why there are overflows in the test environment
       // but not on the actual device for this cae.
@@ -108,7 +108,7 @@ void main() {
       mockExtensions();
       expect(
         fakeExtensionManager
-            .extensionValueOnDevice[extensions.debugPaint.extension],
+            .extensionValueOnDevice[extensions.debugShowGuidelines.extension],
         isFalse,
       );
       expect(
@@ -131,7 +131,7 @@ void main() {
         find.text(extensions.toggleSelectWidgetMode.description),
         findsOneWidget,
       );
-      expect(find.text(extensions.debugPaint.description), findsOneWidget);
+      expect(find.text(extensions.debugShowGuidelines.description), findsOneWidget);
       await tester.pump();
       await tester
           .tap(find.text(extensions.toggleSelectWidgetMode.description));
@@ -143,7 +143,7 @@ void main() {
       // Verify the the other service extension's state hasn't changed.
       expect(
         fakeExtensionManager
-            .extensionValueOnDevice[extensions.debugPaint.extension],
+            .extensionValueOnDevice[extensions.debugShowGuidelines.extension],
         isFalse,
       );
 
@@ -155,10 +155,10 @@ void main() {
         isTrue,
       );
 
-      await tester.tap(find.text(extensions.debugPaint.description));
+      await tester.tap(find.text(extensions.debugShowGuidelines.description));
       expect(
         fakeExtensionManager
-            .extensionValueOnDevice[extensions.debugPaint.extension],
+            .extensionValueOnDevice[extensions.debugShowGuidelines.extension],
         isTrue,
       );
     });
@@ -169,7 +169,7 @@ void main() {
       mockNoExtensionsAvailable();
       expect(
         fakeExtensionManager
-            .extensionValueOnDevice[extensions.debugPaint.extension],
+            .extensionValueOnDevice[extensions.debugShowGuidelines.extension],
         isFalse,
       );
       expect(
@@ -183,7 +183,7 @@ void main() {
       expect(find.byType(InspectorScreenBody), findsOneWidget);
       expect(find.text(extensions.toggleOnDeviceWidgetInspector.description),
           findsOneWidget);
-      expect(find.text(extensions.debugPaint.description), findsOneWidget);
+      expect(find.text(extensions.debugShowGuidelines.description), findsOneWidget);
       await tester.pump();
 
       await tester

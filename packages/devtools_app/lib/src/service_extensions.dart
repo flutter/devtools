@@ -99,9 +99,9 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   gaItem: analytics_constants.debugBanner,
 );
 
-final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
+final highlightOversizedImages = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.invertOversizedImages',
-  description: 'Invert Oversized Images',
+  description: 'Highlight Oversized Images',
   disabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/images-dgrey.png',
     darkModeAsset: 'icons/images-lgrey.png',
@@ -112,13 +112,13 @@ final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Disable Invert Oversized Images',
-  disabledTooltip: 'Enable Invert Oversized Images',
+  enabledTooltip: 'Disable Highlight Oversized Images',
+  disabledTooltip: 'Enable Highlight Oversized Images',
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.debugBanner,
 );
 
-final debugPaint = ToggleableServiceExtensionDescription<bool>._(
+final debugShowGuidelines = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaint',
   description: 'Show Guidelines',
   disabledIcon: const ThemedImageIcon(
@@ -131,13 +131,13 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Hide Debug Paint',
-  disabledTooltip: 'Show Debug Paint',
+  enabledTooltip: 'Hide Guidelines',
+  disabledTooltip: 'Show Guidelines',
   gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.debugPaint,
+  gaItem: analytics_constants.showGuideline,
 );
 
-final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
+final debugShowBaselines = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaintBaselinesEnabled',
   description: 'Show Baselines',
   disabledIcon: const ThemedImageIcon(
@@ -150,10 +150,10 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Hide Paint Baselines',
-  disabledTooltip: 'Show Paint Baselines',
+  enabledTooltip: 'Hide Baselines',
+  disabledTooltip: 'Show Baselines',
   gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.paintBaseline,
+  gaItem: analytics_constants.showBaseline,
 );
 
 final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
@@ -184,7 +184,7 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   gaItem: analytics_constants.trackRebuilds,
 );
 
-final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
+final highlightRepaints = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.repaintRainbow',
   description: 'Highlight Repaints',
   disabledIcon: const ThemedImageIcon(
@@ -197,10 +197,10 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Hide Repaint Rainbow',
-  disabledTooltip: 'Show Repaint Rainbow',
+  enabledTooltip: 'Hide Highlight Repaints',
+  disabledTooltip: 'Show Highlight Repaints',
   gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.repaintRainbow,
+  gaItem: analytics_constants.highlightRepaint,
 );
 
 final slowAnimations = ToggleableServiceExtensionDescription<num>._(
@@ -345,9 +345,9 @@ final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
 const String didSendFirstFrameEvent = 'ext.flutter.didSendFirstFrameEvent';
 
 final List<ServiceExtensionDescription> _extensionDescriptions = [
-  debugPaint,
-  debugPaintBaselines,
-  repaintRainbow,
+  debugShowGuidelines,
+  debugShowBaselines,
+  highlightRepaints,
   performanceOverlay,
   debugAllowBanner,
   profileWidgetBuilds,
@@ -359,7 +359,7 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   structuredErrors,
   httpEnableTimelineLogging,
   socketProfiling,
-  invertOversizedImages,
+  highlightOversizedImages,
 ];
 
 final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =
@@ -379,9 +379,9 @@ final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =
 /// extension set.
 final Set<String> _unsafeBeforeFirstFrameFlutterExtensions =
     <ServiceExtensionDescription>[
-  debugPaint,
-  debugPaintBaselines,
-  repaintRainbow,
+  debugShowGuidelines,
+  debugShowBaselines,
+  highlightRepaints,
   performanceOverlay,
   debugAllowBanner,
   toggleOnDeviceWidgetInspector,

@@ -24,10 +24,10 @@ const String feedbackButton = 'feedbackButton';
 // Inspector UX actions:
 const String refresh = 'refresh';
 const String performanceOverlay = 'performanceOverlay';
-const String debugPaint = 'debugPaint';
-const String paintBaseline = 'paintBaseline';
+const String showGuideline = 'showGuideline';
+const String showBaseline = 'showBaseline';
 const String slowAnimation = 'slowAnimation';
-const String repaintRainbow = 'repaintRainbow';
+const String highlightRepaint = 'highlightRepaint';
 const String debugBanner = 'debugBanner';
 const String trackRebuilds = 'trackRebuilds';
 const String togglePlatform = 'togglePlatform';

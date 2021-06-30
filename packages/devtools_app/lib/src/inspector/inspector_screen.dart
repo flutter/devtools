@@ -72,7 +72,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   static const summaryTreeKey = Key('Summary Tree');
   static const detailsTreeKey = Key('Details Tree');
   static const includeTextWidth = 900.0;
-  static const includeRefreshTreeWidth = 1200.0;
+  static const includeRefreshTreeWidth = 1225.0;
 
   @override
   void initState() {
@@ -204,10 +204,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         minIncludeTextWidth: 1150,
         extensions: [
           extensions.slowAnimations,
-          extensions.debugPaint,
-          extensions.debugPaintBaselines,
-          extensions.repaintRainbow,
-          extensions.invertOversizedImages,
+          extensions.debugShowGuidelines,
+          extensions.debugShowBaselines,
+          extensions.highlightRepaints,
+          extensions.highlightOversizedImages,
         ],
       ),
       // TODO(jacobr): implement TogglePlatformSelector.
