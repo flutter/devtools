@@ -1,3 +1,6 @@
+## 2.4.0-dev.1
+TODO: update changelog for 2.4.0 release
+
 ## 2.3.3-dev.1
 * Surface shader time per frame in the Performance page [3125](https://github.com/flutter/devtools/pull/3125)
 
