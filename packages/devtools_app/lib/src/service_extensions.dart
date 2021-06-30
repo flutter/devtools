@@ -134,7 +134,7 @@ final debugShowGuidelines = ToggleableServiceExtensionDescription<bool>._(
   enabledTooltip: 'Hide Guidelines',
   disabledTooltip: 'Show Guidelines',
   gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.showGuideline,
+  gaItem: analytics_constants.debugPaint,
 );
 
 final debugShowBaselines = ToggleableServiceExtensionDescription<bool>._(
@@ -153,7 +153,7 @@ final debugShowBaselines = ToggleableServiceExtensionDescription<bool>._(
   enabledTooltip: 'Hide Baselines',
   disabledTooltip: 'Show Baselines',
   gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.showBaseline,
+  gaItem: analytics_constants.paintBaseline,
 );
 
 final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
@@ -200,7 +200,7 @@ final highlightRepaints = ToggleableServiceExtensionDescription<bool>._(
   enabledTooltip: 'Hide Highlight Repaints',
   disabledTooltip: 'Show Highlight Repaints',
   gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.highlightRepaint,
+  gaItem: analytics_constants.repaintRainbow,
 );
 
 final slowAnimations = ToggleableServiceExtensionDescription<num>._(
