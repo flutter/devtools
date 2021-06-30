@@ -93,7 +93,8 @@ void main() {
       await tester.pumpWidget(wrap(Builder(builder: screen.build)));
       expect(find.byType(InspectorScreenBody), findsOneWidget);
       expect(find.text('Refresh Tree'), findsOneWidget);
-      expect(find.text(extensions.debugShowGuidelines.description), findsOneWidget);
+      expect(find.text(extensions.debugShowGuidelines.description),
+          findsOneWidget);
       // Make sure there is not an overflow if the window is narrow.
       // TODO(jacobr): determine why there are overflows in the test environment
       // but not on the actual device for this cae.
@@ -131,7 +132,8 @@ void main() {
         find.text(extensions.toggleSelectWidgetMode.description),
         findsOneWidget,
       );
-      expect(find.text(extensions.debugShowGuidelines.description), findsOneWidget);
+      expect(find.text(extensions.debugShowGuidelines.description),
+          findsOneWidget);
       await tester.pump();
       await tester
           .tap(find.text(extensions.toggleSelectWidgetMode.description));
@@ -183,7 +185,8 @@ void main() {
       expect(find.byType(InspectorScreenBody), findsOneWidget);
       expect(find.text(extensions.toggleOnDeviceWidgetInspector.description),
           findsOneWidget);
-      expect(find.text(extensions.debugShowGuidelines.description), findsOneWidget);
+      expect(find.text(extensions.debugShowGuidelines.description),
+          findsOneWidget);
       await tester.pump();
 
       await tester
