@@ -1,5 +1,4 @@
 ## 2.4.0
-* Prep for 2.4.0-dev.1 release for testing [#3179](https://github.com/flutter/devtools/pull/3179)
 * Fix isEmbedded bug [#3177](https://github.com/flutter/devtools/pull/3177)
 * Move performance tests out of package:devtools_testing [#3173](https://github.com/flutter/devtools/pull/3173)
 * Refactor devtools_server to minimize transitive deps [#3164](https://github.com/flutter/devtools/pull/3164)
