@@ -14,8 +14,8 @@ import 'ui/icons.dart';
 class ToggleableServiceExtensionDescription<T>
     extends ServiceExtensionDescription {
   ToggleableServiceExtensionDescription._({
-    Widget disabledIcon,
     Widget enabledIcon,
+    Widget disabledIcon,
     @required String extension,
     @required String description,
     @required T enabledValue,
@@ -28,8 +28,8 @@ class ToggleableServiceExtensionDescription<T>
   }) : super(
           extension: extension,
           description: description,
-          disabledIcon: disabledIcon,
           enabledIcon: enabledIcon,
+          disabledIcon: disabledIcon,
           values: [enabledValue, disabledValue],
           tooltips: [enabledTooltip, disabledTooltip],
           gaScreenName: gaScreenName,
@@ -52,8 +52,8 @@ class ToggleableServiceExtensionDescription<T>
 
 class ServiceExtensionDescription<T> {
   ServiceExtensionDescription({
-    this.disabledIcon,
     this.enabledIcon,
+    this.disabledIcon,
     List<String> displayValues,
     @required this.extension,
     @required this.description,
@@ -69,9 +69,9 @@ class ServiceExtensionDescription<T> {
 
   final String description;
 
-  final Widget disabledIcon;
-
   final Widget enabledIcon;
+
+  final Widget disabledIcon;
 
   final List<T> values;
 
@@ -89,8 +89,8 @@ class ServiceExtensionDescription<T> {
 final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugAllowBanner',
   description: 'Debug Banner',
-  disabledIcon: const AssetImageIcon(asset: 'icons/debug_banner@2x.png'),
   enabledIcon: const AssetImageIcon(asset: 'icons/debug_banner@2x.png'),
+  disabledIcon: const AssetImageIcon(asset: 'icons/debug_banner@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Hide Debug Banner',
@@ -102,16 +102,17 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
 final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.invertOversizedImages',
   description: 'Highlight Oversized Images',
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/images-dgrey.png',
-    darkModeAsset: 'icons/images-lgrey.png',
-  ),
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/images-white.png',
     darkModeAsset: 'icons/images-dgrey.png',
   ),
+  disabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/images-dgrey.png',
+    darkModeAsset: 'icons/images-lgrey.png',
+  ),
   enabledValue: true,
   disabledValue: false,
+  //TODO: Add Rich Tooltips https://github.com/flutter/devtools/issues/3180
   enabledTooltip: 'Disable Highlight Oversized Images',
   disabledTooltip: 'Enable Highlight Oversized Images',
   gaScreenName: analytics_constants.inspector,
@@ -121,16 +122,17 @@ final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
 final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaint',
   description: 'Show Guidelines',
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/guidelines-dgrey.png',
-    darkModeAsset: 'icons/guidelines-lgrey.png',
-  ),
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/guidelines-white.png',
     darkModeAsset: 'icons/guidelines-dgrey.png',
   ),
+  disabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/guidelines-dgrey.png',
+    darkModeAsset: 'icons/guidelines-lgrey.png',
+  ),
   enabledValue: true,
   disabledValue: false,
+  //TODO: Add Rich Tooltips https://github.com/flutter/devtools/issues/3180
   enabledTooltip: 'Hide Guidelines',
   disabledTooltip: 'Show Guidelines',
   gaScreenName: analytics_constants.inspector,
@@ -140,16 +142,17 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>._(
 final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaintBaselinesEnabled',
   description: 'Show Baselines',
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/baselines-dgrey.png',
-    darkModeAsset: 'icons/baselines-lgrey.png',
-  ),
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/baselines-white.png',
     darkModeAsset: 'icons/baselines-dgrey.png',
   ),
+  disabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/baselines-dgrey.png',
+    darkModeAsset: 'icons/baselines-lgrey.png',
+  ),
   enabledValue: true,
   disabledValue: false,
+  //TODO: Add Rich Tooltips https://github.com/flutter/devtools/issues/3180
   enabledTooltip: 'Hide Baselines',
   disabledTooltip: 'Show Baselines',
   gaScreenName: analytics_constants.inspector,
@@ -159,9 +162,9 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
 final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.showPerformanceOverlay',
   description: 'Performance Overlay',
-  disabledIcon:
-      const AssetImageIcon(asset: 'icons/general/performance_overlay@2x.png'),
   enabledIcon:
+      const AssetImageIcon(asset: 'icons/general/performance_overlay@2x.png'),
+  disabledIcon:
       const AssetImageIcon(asset: 'icons/general/performance_overlay@2x.png'),
   enabledValue: true,
   disabledValue: false,
@@ -174,8 +177,8 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
 final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.profileWidgetBuilds',
   description: 'Track Widget Builds',
-  disabledIcon: const AssetImageIcon(asset: 'icons/widget_tree@2x.png'),
   enabledIcon: const AssetImageIcon(asset: 'icons/widget_tree@2x.png'),
+  disabledIcon: const AssetImageIcon(asset: 'icons/widget_tree@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Disable tracking widget builds',
@@ -187,16 +190,17 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
 final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.repaintRainbow',
   description: 'Highlight Repaints',
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/repaints-dgrey.png',
-    darkModeAsset: 'icons/repaints-lgrey.png',
-  ),
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/repaints-white.png',
     darkModeAsset: 'icons/repaints-dgrey.png',
   ),
+  disabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/repaints-dgrey.png',
+    darkModeAsset: 'icons/repaints-lgrey.png',
+  ),
   enabledValue: true,
   disabledValue: false,
+  //TODO: Add Rich Tooltips https://github.com/flutter/devtools/issues/3180
   enabledTooltip: 'Hide Highlight Repaints',
   disabledTooltip: 'Show Highlight Repaints',
   gaScreenName: analytics_constants.inspector,
@@ -206,16 +210,17 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
 final slowAnimations = ToggleableServiceExtensionDescription<num>._(
   extension: 'ext.flutter.timeDilation',
   description: 'Slow Animations',
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/slow-dgrey.png',
-    darkModeAsset: 'icons/slow-lgrey.png',
-  ),
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/slow-white.png',
     darkModeAsset: 'icons/slow-dgrey.png',
   ),
+  disabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/slow-dgrey.png',
+    darkModeAsset: 'icons/slow-lgrey.png',
+  ),
   enabledValue: 5.0,
   disabledValue: 1.0,
+  //TODO: Add Rich Tooltips https://github.com/flutter/devtools/issues/3180
   enabledTooltip: 'Disable Slow Animations',
   disabledTooltip: 'Enable Slow Animations',
   gaScreenName: analytics_constants.inspector,
@@ -225,8 +230,8 @@ final slowAnimations = ToggleableServiceExtensionDescription<num>._(
 final togglePlatformMode = ServiceExtensionDescription<String>(
   extension: 'ext.flutter.platformOverride',
   description: 'Override target platform',
-  disabledIcon: const AssetImageIcon(asset: 'icons/phone@2x.png'),
   enabledIcon: const AssetImageIcon(asset: 'icons/phone@2x.png'),
+  disabledIcon: const AssetImageIcon(asset: 'icons/phone@2x.png'),
   values: ['iOS', 'android', 'fuchsia', 'macOS', 'linux'],
   displayValues: [
     'Platform: iOS',
@@ -272,13 +277,13 @@ final toggleOnDeviceWidgetInspector =
   // versions of package:flutter it makes sense to describe this extension as
   // toggling widget select mode as it is the only way to toggle that mode.
   description: 'Select Widget Mode',
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/widget-select-dgrey.png',
-    darkModeAsset: 'icons/widget-select-lgrey.png',
-  ),
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/widget-select-white.png',
     darkModeAsset: 'icons/widget-select-dgrey.png',
+  ),
+  disabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/widget-select-dgrey.png',
+    darkModeAsset: 'icons/widget-select-lgrey.png',
   ),
   enabledValue: true,
   disabledValue: false,
@@ -293,13 +298,13 @@ final toggleOnDeviceWidgetInspector =
 final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.selectMode',
   description: 'Select widget mode',
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/widget-select-dgrey.png',
-    darkModeAsset: 'icons/widget-select-lgrey.png',
-  ),
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/widget-select-white.png',
     darkModeAsset: 'icons/widget-select-dgrey.png',
+  ),
+  disabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/widget-select-dgrey.png',
+    darkModeAsset: 'icons/widget-select-lgrey.png',
   ),
   enabledValue: true,
   disabledValue: false,
@@ -317,8 +322,8 @@ final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
 final enableOnDeviceInspector = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.enable',
   description: 'Enable on-device inspector',
-  disabledIcon: const AssetImageIcon(asset: 'icons/general/locate@2x.png'),
   enabledIcon: const AssetImageIcon(asset: 'icons/general/locate@2x.png'),
+  disabledIcon: const AssetImageIcon(asset: 'icons/general/locate@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Exit on-device inspector',
@@ -330,8 +335,8 @@ final enableOnDeviceInspector = ToggleableServiceExtensionDescription<bool>._(
 final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.structuredErrors',
   description: 'Show structured errors',
-  disabledIcon: const AssetImageIcon(asset: 'icons/perf/RedExcl@2x.png'),
   enabledIcon: const AssetImageIcon(asset: 'icons/perf/RedExcl@2x.png'),
+  disabledIcon: const AssetImageIcon(asset: 'icons/perf/RedExcl@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Disable structured errors for Flutter framework issues',
