@@ -14,7 +14,7 @@ import 'ui/icons.dart';
 class ToggleableServiceExtensionDescription<T>
     extends ServiceExtensionDescription {
   ToggleableServiceExtensionDescription._({
-    Widget enabledIcon,
+    @required Widget enabledIcon,
     Widget disabledIcon,
     @required String extension,
     @required String description,
@@ -29,7 +29,7 @@ class ToggleableServiceExtensionDescription<T>
           extension: extension,
           description: description,
           enabledIcon: enabledIcon,
-          disabledIcon: disabledIcon,
+          disabledIcon: disabledIcon ?? enabledIcon,
           values: [enabledValue, disabledValue],
           tooltips: [enabledTooltip, disabledTooltip],
           gaScreenName: gaScreenName,
@@ -52,8 +52,8 @@ class ToggleableServiceExtensionDescription<T>
 
 class ServiceExtensionDescription<T> {
   ServiceExtensionDescription({
-    this.enabledIcon,
-    this.disabledIcon,
+    @required this.enabledIcon,
+    disabledIcon,
     List<String> displayValues,
     @required this.extension,
     @required this.description,
@@ -62,8 +62,9 @@ class ServiceExtensionDescription<T> {
     @required this.gaScreenName,
     @required this.gaItem,
     this.shouldCallOnAllIsolates = false,
-  }) : displayValues =
-            displayValues ?? values.map((v) => v.toString()).toList();
+  })  : displayValues =
+            displayValues ?? values.map((v) => v.toString()).toList(),
+        disabledIcon = disabledIcon ?? enabledIcon;
 
   final String extension;
 
@@ -90,7 +91,6 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugAllowBanner',
   description: 'Debug Banner',
   enabledIcon: const AssetImageIcon(asset: 'icons/debug_banner@2x.png'),
-  disabledIcon: const AssetImageIcon(asset: 'icons/debug_banner@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Hide Debug Banner',
@@ -164,8 +164,6 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   description: 'Performance Overlay',
   enabledIcon:
       const AssetImageIcon(asset: 'icons/general/performance_overlay@2x.png'),
-  disabledIcon:
-      const AssetImageIcon(asset: 'icons/general/performance_overlay@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Hide Performance Overlay',
@@ -178,7 +176,6 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.profileWidgetBuilds',
   description: 'Track Widget Builds',
   enabledIcon: const AssetImageIcon(asset: 'icons/widget_tree@2x.png'),
-  disabledIcon: const AssetImageIcon(asset: 'icons/widget_tree@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Disable tracking widget builds',
@@ -231,7 +228,6 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
   extension: 'ext.flutter.platformOverride',
   description: 'Override target platform',
   enabledIcon: const AssetImageIcon(asset: 'icons/phone@2x.png'),
-  disabledIcon: const AssetImageIcon(asset: 'icons/phone@2x.png'),
   values: ['iOS', 'android', 'fuchsia', 'macOS', 'linux'],
   displayValues: [
     'Platform: iOS',
@@ -248,6 +244,7 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
 final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.dart.io.httpEnableTimelineLogging',
   description: 'Whether HTTP timeline logging is enabled',
+  enabledIcon: const Placeholder(),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'HTTP timeline logging enabled',
@@ -260,6 +257,7 @@ final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
 final socketProfiling = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.dart.io.socketProfilingEnabled',
   description: 'Whether socket profiling is enabled',
+  enabledIcon: const Placeholder(),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Socket profiling enabled',
@@ -323,7 +321,6 @@ final enableOnDeviceInspector = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.enable',
   description: 'Enable on-device inspector',
   enabledIcon: const AssetImageIcon(asset: 'icons/general/locate@2x.png'),
-  disabledIcon: const AssetImageIcon(asset: 'icons/general/locate@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Exit on-device inspector',
@@ -336,7 +333,6 @@ final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.structuredErrors',
   description: 'Show structured errors',
   enabledIcon: const AssetImageIcon(asset: 'icons/perf/RedExcl@2x.png'),
-  disabledIcon: const AssetImageIcon(asset: 'icons/perf/RedExcl@2x.png'),
   enabledValue: true,
   disabledValue: false,
   enabledTooltip: 'Disable structured errors for Flutter framework issues',
