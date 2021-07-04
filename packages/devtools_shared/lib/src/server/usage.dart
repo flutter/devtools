@@ -36,6 +36,7 @@ class FlutterUsage {
 class DevToolsUsage {
   DevToolsUsage() {
     LocalFileSystem.maybeMoveLegacyDevToolsStore();
+
     properties = IOPersistentProperties(
       storeName,
       documentDirPath: LocalFileSystem.devToolsDir(),
