@@ -1077,6 +1077,51 @@ Map<String, String> devToolsQueryParams(String url) {
   return uri.queryParameters;
 }
 
+/// Gets a VM Service URI from a query string.
+///
+/// We read from the 'uri' value if it exists; otherwise we create a uri from
+/// the from 'port' and 'token' values.
+Uri getServiceUriFromQueryString(String location) {
+  if (location == null) {
+    return null;
+  }
+
+  final queryParams = Uri.parse(location).queryParameters;
+
+  // First try to use uri.
+  if (queryParams['uri'] != null) {
+    final uri = Uri.tryParse(queryParams['uri']);
+
+    // Lots of things are considered valid URIs (including empty strings
+    // and single letters) since they can be relative, so we need to do some
+    // extra checks.
+    if (uri != null &&
+        uri.isAbsolute &&
+        (uri.isScheme('ws') ||
+            uri.isScheme('wss') ||
+            uri.isScheme('http') ||
+            uri.isScheme('https') ||
+            uri.isScheme('sse') ||
+            uri.isScheme('sses'))) {
+      return uri;
+    }
+  }
+
+  // Otherwise try 'port', 'token', and 'host'.
+  final port = int.tryParse(queryParams['port'] ?? '');
+  final token = queryParams['token'];
+  final host = queryParams['host'] ?? 'localhost';
+  if (port != null) {
+    if (token == null) {
+      return Uri.parse('ws://$host:$port/ws');
+    } else {
+      return Uri.parse('ws://$host:$port/$token/ws');
+    }
+  }
+
+  return null;
+}
+
 /// Helper function to return the name of a key. If widget has a key
 /// use the key's name to record the select e.g.,
 ///   ga.select(MemoryScreen.id, ga.keyName(MemoryScreen.gcButtonKey));
