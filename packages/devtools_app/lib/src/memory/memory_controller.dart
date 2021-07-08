@@ -1057,25 +1057,6 @@ class MemoryController extends DisposableController
   //              When line # and package mapping exist ability to navigate
   //              to line number of the source file when clicked is needed.
   static const packageName = '/packages/';
-  String displayAsPackage(String sourceName) {
-    final packagesIndex = sourceName.indexOf(packageName);
-    // See issue https://github.com/dart-lang/sdk/issues/45530
-    final restToMatchStartIndex = packagesIndex + packageName.length;
-    if (packagesIndex >= 0) {
-      final activeLibraries =
-          serviceManager.isolateManager.selectedIsolateLibraries;
-      final match = activeLibraries.firstWhere(
-        (element) {
-          final toMatch = sourceName.substring(restToMatchStartIndex);
-          return element.uri.endsWith(toMatch);
-        },
-        orElse: () => null,
-      );
-      return match == null ? sourceName : match.name;
-    }
-
-    return sourceName;
-  }
 
   Future<List<InstanceSummary>> getInstances(
     String classRef,

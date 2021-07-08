@@ -994,16 +994,16 @@ void main() {
         expect(notifier.value, equals([]));
       });
 
-      test('notifies on sublist with start only', () {
+      test('notifies on trim to sublist with start only', () {
         setUpWithInitialValue([1, 2, 3]);
-        notifier.sublist(1);
+        notifier.trimToSublist(1);
         expect(didNotify, isTrue);
         expect(notifier.value, equals([2, 3]));
       });
 
-      test('notifies on sublist', () {
+      test('notifies on trim to sublist', () {
         setUpWithInitialValue([1, 2, 3]);
-        notifier.sublist(1, 2);
+        notifier.trimToSublist(1, 2);
         expect(didNotify, isTrue);
         expect(notifier.value, equals([2]));
       });

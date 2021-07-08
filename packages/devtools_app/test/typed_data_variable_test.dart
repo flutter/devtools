@@ -521,5 +521,5 @@ Matcher matchesVariable({
       'boundVar',
       const TypeMatcher<Variable>()
           .having((v) => v.name, 'name', equals(name))
-          .having((v) => v.ref.instanceRef, 'value', equals(value)));
+          .having((v) => v.ref.value, 'value', equals(value)));
 }

@@ -337,8 +337,9 @@ class InspectorService extends DisposableController
   /// Daemon API calls won't execute until after the current frame is done
   /// rendering.
   bool get useDaemonApi {
-    return !serviceManager
-        .isolateManager.mainIsolateDebuggerState.isPaused.value;
+    return !(serviceManager
+            .isolateManager.mainIsolateDebuggerState?.isPaused?.value ??
+        false);
   }
 
   ObjectGroup createObjectGroup(String debugName) {
@@ -541,7 +542,10 @@ class ObjectGroup implements Disposable {
   /// attempt carefully cancel futures.
   @override
   Future<void> dispose() {
-    final disposeComplete = invokeVoidServiceMethod('disposeGroup', groupName);
+    // No need to dispose the group if the isolate is already gone.
+    final disposeComplete = inspectorService.isolateRef != null
+        ? invokeVoidServiceMethod('disposeGroup', groupName)
+        : Future.value();
     disposed = true;
     return disposeComplete;
   }

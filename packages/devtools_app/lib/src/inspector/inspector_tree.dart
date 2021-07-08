@@ -11,6 +11,8 @@
 /// and will help simplify porting this code to work with Hummingbird.
 library inspector_tree;
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
@@ -512,7 +514,7 @@ abstract class InspectorTreeController {
 
   int get numRows => root != null ? root.subtreeSize : 0;
 
-  int getRowIndex(double y) => (y - verticalPadding) ~/ rowHeight;
+  int getRowIndex(double y) => math.max(0, (y - verticalPadding) ~/ rowHeight);
 
   InspectorTreeRow getRowForNode(InspectorTreeNode node) {
     return getCachedRow(root.getRowIndex(node));

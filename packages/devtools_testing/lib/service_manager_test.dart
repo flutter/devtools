@@ -38,7 +38,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
         expect(serviceManager.isolateManager, isNotNull);
         expect(serviceManager.serviceExtensionManager, isNotNull);
         expect(serviceManager.vmFlagManager, isNotNull);
-        expect(serviceManager.isolateManager.isolates, isNotEmpty);
+        expect(serviceManager.isolateManager.isolates.value, isNotEmpty);
         expect(serviceManager.vmFlagManager.flags.value, isNotNull);
 
         if (serviceManager.isolateManager.selectedIsolate == null) {

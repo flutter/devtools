@@ -212,12 +212,12 @@ class DebuggerController extends DisposableController
         // Ignore - not supported for all vm service implementations.
         log('$e');
       }
+      parsedScript.value = ParsedScript(
+        script: script,
+        highlighter: highlighter,
+        executableLines: executableLines,
+      );
     }
-    parsedScript.value = ParsedScript(
-      script: script,
-      highlighter: highlighter,
-      executableLines: executableLines,
-    );
   }
 
   /// Find the owner library for a ClassRef, FuncRef, or LibraryRef.
@@ -329,11 +329,19 @@ class DebuggerController extends DisposableController
     }
 
     final isolate = await _service.getIsolate(isolateRef.id);
+    if (isolate.id != isolateRef?.id) {
+      // Current request is obsolete.
+      return;
+    }
 
     if (isolate.pauseEvent != null &&
         isolate.pauseEvent.kind != EventKind.kResume) {
       _lastEvent = isolate.pauseEvent;
       await _pause(true, pauseEvent: isolate.pauseEvent);
+    }
+    if (isolate.id != isolateRef?.id) {
+      // Current request is obsolete.
+      return;
     }
 
     _breakpoints.value = isolate.breakpoints;
@@ -343,12 +351,20 @@ class DebuggerController extends DisposableController
       // ignore: unawaited_futures
       Future.wait(_breakpoints.value.map(_createBreakpointWithLocation))
           .then((list) {
+        if (isolate.id != isolateRef?.id) {
+          // Current request is obsolete.
+          return;
+        }
         _breakpointsWithLocation.value = list.toList()..sort();
       });
     }
 
     _exceptionPauseMode.value = isolate.exceptionPauseMode;
 
+    if (isolate.id != isolateRef?.id) {
+      // Current request is obsolete.
+      return;
+    }
     await _populateScripts(isolate);
   }
 
@@ -597,6 +613,7 @@ class DebuggerController extends DisposableController
   }
 
   Future<List<ScriptRef>> _retrieveAndSortScripts(IsolateRef ref) async {
+    assert(isolateRef != null);
     final scriptList = await _service.getScripts(isolateRef.id);
     // We filter out non-unique ScriptRefs here (dart-lang/sdk/issues/41661).
     final scriptRefs = Set.of(scriptList.scripts).toList();
@@ -825,6 +842,7 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
+    assert(isolate != null);
     final scriptRefs = await _retrieveAndSortScripts(isolateRef);
     _sortedScripts.value = scriptRefs;
 

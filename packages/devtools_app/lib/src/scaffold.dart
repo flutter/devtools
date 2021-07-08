@@ -74,9 +74,9 @@ class DevToolsScaffold extends StatefulWidget {
   static const double actionWidgetSize = 48.0;
 
   /// The border around the content in the DevTools UI.
-  static EdgeInsets get appPadding => EdgeInsets.fromLTRB(
+  EdgeInsets get appPadding => EdgeInsets.fromLTRB(
         horizontalPadding.left,
-        isDense() ? 2.0 : 16.0,
+        isEmbedded() ? 2.0 : 16.0,
         horizontalPadding.right,
         0.0,
       );
@@ -85,7 +85,7 @@ class DevToolsScaffold extends StatefulWidget {
   // from flame_chart.dart.
   /// Horizontal padding around the content in the DevTools UI.
   static EdgeInsets get horizontalPadding =>
-      EdgeInsets.symmetric(horizontal: isDense() ? 2.0 : 16.0);
+      EdgeInsets.symmetric(horizontal: isEmbedded() ? 2.0 : 16.0);
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;

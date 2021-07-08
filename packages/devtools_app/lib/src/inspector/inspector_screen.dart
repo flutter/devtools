@@ -70,7 +70,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   InspectorTreeControllerFlutter summaryTreeController;
   InspectorTreeControllerFlutter detailsTreeController;
   DebuggerController _debuggerController;
-  bool displayedWidgetTrackingNotice = false;
 
   bool get enableButtons => actionInProgress == false;
 
@@ -309,23 +308,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // Clear any existing badge/errors for older errors that were collected.
       serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
       inspectorController.filterErrors();
-
-      // TODO(jacobr): move this notice display to once a day.
-      if (!displayedWidgetTrackingNotice) {
-        // ignore: unawaited_futures
-        inspectorService.isWidgetCreationTracked().then((bool value) {
-          if (value) {
-            return;
-          }
-
-          displayedWidgetTrackingNotice = true;
-          // TODO(jacobr): implement showMessage.
-          // framework.showMessage(
-          //  message: trackWidgetCreationWarning,
-          //  screenId: inspectorScreenId,
-          //);
-        });
-      }
     });
   }
 

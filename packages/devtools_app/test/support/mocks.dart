@@ -7,6 +7,7 @@ import 'dart:collection';
 
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/connected_app.dart';
+import 'package:devtools_app/src/console_service.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/error_badge_manager.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
@@ -87,6 +88,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final ConnectedApp connectedApp = MockConnectedApp();
 
   @override
+  final ConsoleService consoleService = ConsoleService();
+
+  @override
   Stream<VmServiceWrapper> get onConnectionClosed => const Stream.empty();
 
   @override
@@ -108,7 +112,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final ErrorBadgeManager errorBadgeManager = MockErrorBadgeManager();
 
   @override
-  final InspectorService inspectorService = MockInspectorService();
+  final InspectorService inspectorService = FakeInspectorService();
 
   @override
   VM get vm => _mockVM;
@@ -517,6 +521,9 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Stream<Event> get onDebugEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onIsolateEvent => const Stream.empty();
 }
 
 class FakeIsolateManager extends Fake implements IsolateManager {
@@ -524,6 +531,11 @@ class FakeIsolateManager extends Fake implements IsolateManager {
   ValueListenable<IsolateRef> get selectedIsolate => _selectedIsolate;
   final _selectedIsolate =
       ValueNotifier(IsolateRef.parse({'id': 'fake_isolate_id'}));
+
+  @override
+  ValueListenable<IsolateRef> get mainIsolate => _mainIsolate;
+  final _mainIsolate =
+      ValueNotifier(IsolateRef.parse({'id': 'fake_main_isolate_id'}));
 
   @override
   ValueNotifier<List<IsolateRef>> get isolates {
@@ -540,6 +552,8 @@ class MockVmService extends Mock implements VmServiceWrapper {}
 class MockIsolate extends Mock implements Isolate {}
 
 class MockConnectedApp extends Mock implements ConnectedApp {}
+
+class FakeConnectedApp extends Mock implements ConnectedApp {}
 
 class MockBannerMessagesController extends Mock
     implements BannerMessagesController {}
@@ -568,7 +582,35 @@ class MockTimelineController extends Mock implements PerformanceController {}
 class MockProfilerScreenController extends Mock
     implements ProfilerScreenController {}
 
-class MockDebuggerController extends Mock implements DebuggerController {}
+class MockDebuggerController extends Mock implements DebuggerController {
+  MockDebuggerController();
+
+  factory MockDebuggerController.withDefaults() {
+    final debuggerController = MockDebuggerController();
+    when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
+    when(debuggerController.resuming).thenReturn(ValueNotifier(false));
+    when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
+    when(debuggerController.isSystemIsolate).thenReturn(false);
+    when(debuggerController.breakpointsWithLocation)
+        .thenReturn(ValueNotifier([]));
+    when(debuggerController.librariesVisible).thenReturn(ValueNotifier(false));
+    when(debuggerController.currentScriptRef).thenReturn(ValueNotifier(null));
+    when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
+    when(debuggerController.selectedBreakpoint).thenReturn(ValueNotifier(null));
+    when(debuggerController.stackFramesWithLocation)
+        .thenReturn(ValueNotifier([]));
+    when(debuggerController.selectedStackFrame).thenReturn(ValueNotifier(null));
+    when(debuggerController.hasTruncatedFrames)
+        .thenReturn(ValueNotifier(false));
+    when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
+    when(debuggerController.exceptionPauseMode)
+        .thenReturn(ValueNotifier('Unhandled'));
+    when(debuggerController.variables).thenReturn(ValueNotifier([]));
+    when(debuggerController.currentParsedScript)
+        .thenReturn(ValueNotifier<ParsedScript>(null));
+    return debuggerController;
+  }
+}
 
 class MockVM extends Mock implements VM {}
 
@@ -794,18 +836,21 @@ void mockIsFlutterApp(MockConnectedApp connectedApp, [isFlutterApp = true]) {
   when(connectedApp.isFlutterAppNow).thenReturn(isFlutterApp);
   when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(isFlutterApp));
   when(connectedApp.isDebugFlutterAppNow).thenReturn(true);
+  when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
 void mockIsDebugFlutterApp(MockConnectedApp connectedApp,
     [isDebugFlutterApp = true]) {
   when(connectedApp.isDebugFlutterAppNow).thenReturn(isDebugFlutterApp);
   when(connectedApp.isProfileBuildNow).thenReturn(!isDebugFlutterApp);
+  when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
 void mockIsProfileFlutterApp(MockConnectedApp connectedApp,
     [isProfileFlutterApp = true]) {
   when(connectedApp.isDebugFlutterAppNow).thenReturn(!isProfileFlutterApp);
   when(connectedApp.isProfileBuildNow).thenReturn(isProfileFlutterApp);
+  when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
 void mockFlutterVersion(
@@ -815,8 +860,10 @@ void mockFlutterVersion(
   when(connectedApp.flutterVersionNow).thenReturn(FlutterVersion.parse({
     'frameworkVersion': '$version',
   }));
+  when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
 void mockIsDartVmApp(MockConnectedApp connectedApp, [isDartVmApp = true]) {
   when(connectedApp.isRunningOnDartVM).thenReturn(isDartVmApp);
+  when(connectedApp.connectedAppInitialized).thenReturn(true);
 }

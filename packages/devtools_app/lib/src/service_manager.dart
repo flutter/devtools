@@ -462,8 +462,10 @@ class ServiceConnectionManager {
 
   bool libraryUriAvailableNow(String uri) {
     assert(_serviceAvailable.isCompleted);
-    assert(serviceManager.isolateManager.selectedIsolate.value != null);
-    return isolateManager.selectedIsolateLibraries
+    assert(serviceManager.isolateManager.mainIsolate.value != null);
+    final isolate = isolateManager.mainIsolateDebuggerState.isolateNow;
+    assert(isolate != null);
+    return isolate.libraries
         .map((ref) => ref.uri)
         .toList()
         .any((u) => u.startsWith(uri));
@@ -471,7 +473,7 @@ class ServiceConnectionManager {
 
   Future<bool> libraryUriAvailable(String uri) async {
     assert(_serviceAvailable.isCompleted);
-    await whenValueNonNull(isolateManager.selectedIsolate);
+    await whenValueNonNull(isolateManager.mainIsolate);
     return libraryUriAvailableNow(uri);
   }
 }
@@ -485,10 +487,14 @@ class IsolateState {
   Future<Isolate> get isolate => _isolate.future;
   Completer<Isolate> _isolate = Completer();
 
+  Isolate get isolateNow => _isolateNow;
+  Isolate _isolateNow;
+
   /// Paused is null until we know whether the isolate is paused or not.
   final _isPaused = ValueNotifier<bool>(null);
 
   void onIsolateLoaded(Isolate isolate) {
+    _isolateNow = isolate;
     _isolate.complete(isolate);
     if (_isPaused.value == null) {
       if (isolate.pauseEvent != null &&
@@ -501,6 +507,7 @@ class IsolateState {
   }
 
   void dispose() {
+    _isolateNow = null;
     if (!_isolate.isCompleted) {
       _isolate.complete(null);
     } else {
@@ -520,12 +527,9 @@ class IsolateManager extends Disposer {
 
   ValueListenable<IsolateRef> get selectedIsolate => _selectedIsolate;
   final _selectedIsolate = ValueNotifier<IsolateRef>(null);
-  IsolateRef _pendingSelectedIsolate;
 
   int _lastIsolateIndex = 0;
   final Map<String, int> _isolateIndexMap = {};
-
-  List<LibraryRef> selectedIsolateLibraries;
 
   ValueListenable<List<IsolateRef>> get isolates => _isolates;
   final _isolates = ListValueNotifier(const <IsolateRef>[]);
@@ -624,14 +628,14 @@ class IsolateManager extends Disposer {
       // but that may not always be a safe assumption.
       _mainIsolate.value ??= event.isolate;
 
-      if (_selectedIsolate == null) {
-        await _setSelectedIsolate(event.isolate);
+      if (_selectedIsolate.value == null) {
+        _setSelectedIsolate(event.isolate);
       }
     } else if (event.kind == EventKind.kServiceExtensionAdded) {
       // Check to see if there is a new isolate.
-      if (_selectedIsolate == null &&
+      if (_selectedIsolate.value == null &&
           extensions.isFlutterExtension(event.extensionRPC)) {
-        await _setSelectedIsolate(event.isolate);
+        _setSelectedIsolate(event.isolate);
       }
     } else if (event.kind == EventKind.kIsolateExit) {
       _isolateStates.remove(event.isolate)?.dispose();
@@ -663,7 +667,7 @@ class IsolateManager extends Disposer {
     final mainIsolate = await _computeMainIsolate();
     if (service != _service) return;
     _mainIsolate.value = mainIsolate;
-    await _setSelectedIsolate(_mainIsolate.value);
+    _setSelectedIsolate(_mainIsolate.value);
   }
 
   Future<IsolateRef> _computeMainIsolate() async {
@@ -692,40 +696,12 @@ class IsolateManager extends Disposer {
     return ref ?? _isolateStates.keys.first;
   }
 
-  Future<void> _setSelectedIsolate(IsolateRef ref) async {
-    if (_pendingSelectedIsolate == ref) {
-      return;
-    }
-
-    _pendingSelectedIsolate = ref;
-    // Store the library uris for the selected isolate.
-    if (ref == null) {
-      selectedIsolateLibraries = [];
-    } else {
-      try {
-        final Isolate isolate = await _service.getIsolate(ref.id);
-        if (_pendingSelectedIsolate != ref) return;
-
-        selectedIsolateLibraries = isolate.libraries;
-      } on SentinelException {
-        if (_pendingSelectedIsolate != ref) return;
-
-        _selectedIsolate.value = null;
-        final firstExistingIsolate = _isolateStates.keys.safeFirst;
-        if (firstExistingIsolate != ref) {
-          await _setSelectedIsolate(firstExistingIsolate);
-        }
-        return;
-      }
-    }
-
-    if (_pendingSelectedIsolate != ref) return;
+  void _setSelectedIsolate(IsolateRef ref) {
     _selectedIsolate.value = ref;
   }
 
   void _handleVmServiceClosed() {
     cancel();
-    _pendingSelectedIsolate = null;
     _selectedIsolate.value = null;
     _service = null;
     _lastIsolateIndex = 0;
@@ -744,7 +720,6 @@ class IsolateManager extends Disposer {
   }
 
   void vmServiceOpened(VmServiceWrapper service) {
-    _pendingSelectedIsolate = null;
     _selectedIsolate.value = null;
 
     cancel();

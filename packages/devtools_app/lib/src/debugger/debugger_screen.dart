@@ -37,6 +37,7 @@ class DebuggerScreen extends Screen {
           requiresDebugBuild: true,
           title: 'Debugger',
           icon: Octicons.bug,
+          showFloatingDebuggerControls: false,
         );
 
   static const id = 'debugger';

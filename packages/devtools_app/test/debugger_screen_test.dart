@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:ansicolor/ansicolor.dart';
-import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/debugger/console.dart';
 import 'package:devtools_app/src/debugger/controls.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
@@ -25,6 +24,9 @@ void main() {
   DebuggerScreen screen;
   FakeServiceManager fakeServiceManager;
   MockDebuggerController debuggerController;
+  fakeServiceManager = FakeServiceManager();
+  when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+  setGlobal(ServiceConnectionManager, fakeServiceManager);
 
   group('DebuggerScreen', () {
     Future<void> pumpDebuggerScreen(
@@ -35,40 +37,21 @@ void main() {
       ));
     }
 
-    setUp(() async {
-      fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+    Future<void> pumpConsole(
+        WidgetTester tester, DebuggerController controller) async {
+      await tester.pumpWidget(wrapWithControllers(
+        const DebuggerConsole(),
+        debugger: controller,
+      ));
+    }
+
+    setUp(() {
       when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
           .thenReturn(ValueNotifier<int>(0));
 
       screen = const DebuggerScreen();
 
-      debuggerController = MockDebuggerController();
-      when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
-      when(debuggerController.resuming).thenReturn(ValueNotifier(false));
-      when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
-      when(debuggerController.isSystemIsolate).thenReturn(false);
-      when(debuggerController.breakpointsWithLocation)
-          .thenReturn(ValueNotifier([]));
-      when(debuggerController.librariesVisible)
-          .thenReturn(ValueNotifier(false));
-      when(debuggerController.currentScriptRef).thenReturn(ValueNotifier(null));
-      when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
-      when(debuggerController.selectedBreakpoint)
-          .thenReturn(ValueNotifier(null));
-      when(debuggerController.stackFramesWithLocation)
-          .thenReturn(ValueNotifier([]));
-      when(debuggerController.selectedStackFrame)
-          .thenReturn(ValueNotifier(null));
-      when(debuggerController.hasTruncatedFrames)
-          .thenReturn(ValueNotifier(false));
-      when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
-      when(debuggerController.exceptionPauseMode)
-          .thenReturn(ValueNotifier('Unhandled'));
-      when(debuggerController.variables).thenReturn(ValueNotifier([]));
-      when(debuggerController.currentParsedScript)
-          .thenReturn(ValueNotifier<ParsedScript>(null));
+      debuggerController = MockDebuggerController.withDefaults();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -79,7 +62,7 @@ void main() {
     testWidgets('has Console / stdio area', (WidgetTester tester) async {
       serviceManager.consoleService.appendStdio('test stdio');
 
-      await pumpDebuggerScreen(tester, debuggerController);
+      await pumpConsole(tester, debuggerController);
 
       expect(find.text('Console'), findsOneWidget);
 
@@ -91,7 +74,7 @@ void main() {
         (WidgetTester tester) async {
       serviceManager.consoleService.appendStdio(_ansiCodesOutput());
 
-      await pumpDebuggerScreen(tester, debuggerController);
+      await pumpConsole(tester, debuggerController);
 
       final finder =
           find.selectableText('Ansi color codes processed for console');
@@ -113,26 +96,12 @@ void main() {
     });
 
     group('ConsoleControls', () {
-      testWidgets('Console Controls are rendered disabled when stdio is empty',
-          (WidgetTester tester) async {
-        await pumpDebuggerScreen(tester, debuggerController);
-
-        expect(find.byKey(DebuggerConsole.clearStdioButtonKey), findsOneWidget);
-        expect(find.byKey(DebuggerConsole.copyToClipboardButtonKey),
-            findsOneWidget);
-
-        final clearStdioElement =
-            find.byKey(DebuggerConsole.clearStdioButtonKey).evaluate().first;
-        final clearStdioButton = clearStdioElement.widget as ToolbarAction;
-        expect(clearStdioButton.onPressed, isNull);
-      });
-
       testWidgets('Tapping the Console Clear button clears stdio.',
           (WidgetTester tester) async {
         serviceManager.consoleService.clearStdio();
         serviceManager.consoleService.appendStdio(_ansiCodesOutput());
 
-        await pumpDebuggerScreen(tester, debuggerController);
+        await pumpConsole(tester, debuggerController);
 
         final clearButton = find.byKey(DebuggerConsole.clearStdioButtonKey);
         expect(clearButton, findsOneWidget);
@@ -185,7 +154,7 @@ void main() {
             (WidgetTester tester) async {
           _appendStdioLines();
 
-          await pumpDebuggerScreen(tester, debuggerController);
+          await pumpConsole(tester, debuggerController);
 
           final copyButton =
               find.byKey(DebuggerConsole.copyToClipboardButtonKey);

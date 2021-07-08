@@ -36,21 +36,32 @@ bool includeDiagnosticChildren = false;
 /// A generic [InstanceRef] using either format used by the [InspectorService]
 /// or Dart VM.
 ///
-/// Either one or both of [instanceRef] and [diagnostic] may be provided. The
+/// Either one or both of [value] and [diagnostic] may be provided. The
 /// `valueRef` getter on the [diagnostic] should refer to the same object as
 /// [instanceRef] although using the [InspectorInstanceRef] scheme.
 /// A [RemoteDiagnosticsNode] is used rather than an [InspectorInstanceRef] as
 /// the additional data provided by [RemoteDiagnosticsNode] is helpful to
 /// correctly display the object and [RemoteDiagnosticsNode] includes a
-/// reference to an [InspectorInstanceRef].
+/// reference to an [InspectorInstanceRef]. [value] must be an ObjectRef,
+/// Sentinel, or primitive type.
 class GenericInstanceRef {
   GenericInstanceRef({
     @required this.isolateRef,
-    this.instanceRef,
+    this.value,
     this.diagnostic,
-  });
+  }) : assert(value == null ||
+            value is ObjRef ||
+            value is Sentinel ||
+            value is num ||
+            value is String ||
+            value is bool ||
+            value is Int32x4 ||
+            value is Float32x4 ||
+            value is Float64x2);
 
-  final InstanceRef instanceRef;
+  final Object value;
+
+  InstanceRef get instanceRef => value is InstanceRef ? value : null;
 
   /// If both [diagnostic] and [instanceRef] are provided, [diagnostic.valueRef]
   /// must reference the same underlying object just using the
@@ -377,8 +388,9 @@ Future<void> buildVariablesTree(
         // This is an approximation of eval('instanceRef is DiagnosticsNode')
         // TODO(jacobr): cache the full class hierarchy so we can cheaply check
         // instanceRef is DiagnosticsNode without having to do an eval.
-        if (instanceRef.classRef.name == 'DiagnosticableTreeNode' ||
-            instanceRef.classRef.name == 'DiagnosticsProperty') {
+        if (instanceRef != null &&
+            (instanceRef.classRef.name == 'DiagnosticableTreeNode' ||
+                instanceRef.classRef.name == 'DiagnosticsProperty')) {
           // The user is expecting to see the object the DiagnosticsNode is
           // describing not the DiagnosticsNode itself.
           try {
@@ -390,7 +402,7 @@ Future<void> buildVariablesTree(
             // TODO(jacobr): add the Diagnostics properties as well?
             child._ref = GenericInstanceRef(
               isolateRef: isolateRef,
-              instanceRef: valueInstanceRef,
+              value: valueInstanceRef,
             );
           } catch (e) {
             if (e is! SentinelException) {
@@ -420,7 +432,7 @@ Future<Variable> _buildVariable(
 ) async {
   final instanceRef =
       await inspectorService.toObservatoryInstanceRef(diagnostic.valueRef);
-  return Variable.fromRef(
+  return Variable.fromValue(
     name: diagnostic.name,
     value: instanceRef,
     diagnostic: diagnostic,
@@ -456,12 +468,12 @@ List<Variable> _createVariablesForAssociations(
     if (association.key is! InstanceRef) {
       continue;
     }
-    final key = Variable.fromRef(
+    final key = Variable.fromValue(
       name: '[key]',
       value: association.key,
       isolateRef: isolateRef,
     );
-    final value = Variable.fromRef(
+    final value = Variable.fromValue(
       name: '[value]',
       value: association.value,
       isolateRef: isolateRef,
@@ -541,7 +553,7 @@ List<Variable> _createVariablesForBytes(
 
   for (int i = 0; i < result.length; i++) {
     variables.add(
-      Variable.fromRef(
+      Variable.fromValue(
         name: '[$i]',
         value: result[i],
         isolateRef: isolateRef,
@@ -558,7 +570,7 @@ List<Variable> _createVariablesForElements(
   final variables = <Variable>[];
   for (int i = 0; i < instance.elements.length; i++) {
     variables.add(
-      Variable.fromRef(
+      Variable.fromValue(
         name: '[$i]',
         value: instance.elements[i],
         isolateRef: isolateRef,
@@ -578,7 +590,7 @@ List<Variable> _createVariablesForFields(
     final name = field.decl.name;
     if (existingNames != null && existingNames.contains(name)) continue;
     variables.add(
-      Variable.fromRef(
+      Variable.fromValue(
         name: name,
         value: field.value,
         isolateRef: isolateRef,
@@ -597,9 +609,14 @@ class Variable extends TreeNode<Variable> {
     indentChildren = ref?.diagnostic?.style != DiagnosticsTreeStyle.flat;
   }
 
-  factory Variable.fromRef({
+  /// Creates a variable from a value that must be an InstanceRef or a primitive
+  /// type.
+  ///
+  /// [value] should typically be an [InstanceRef] but can also be a [Sentinel]
+  /// [ObjRef] or primitive type such as num or String.
+  factory Variable.fromValue({
     String name = '',
-    @required InstanceRef value,
+    @required Object value,
     RemoteDiagnosticsNode diagnostic,
     @required IsolateRef isolateRef,
   }) {
@@ -608,7 +625,7 @@ class Variable extends TreeNode<Variable> {
       GenericInstanceRef(
         isolateRef: isolateRef,
         diagnostic: diagnostic,
-        instanceRef: value,
+        value: value,
       ),
       null,
     );
@@ -623,7 +640,7 @@ class Variable extends TreeNode<Variable> {
       variable.name,
       GenericInstanceRef(
         isolateRef: isolateRef,
-        instanceRef: value is InstanceRef ? value : null,
+        value: value,
       ),
       null,
     );
@@ -650,12 +667,12 @@ class Variable extends TreeNode<Variable> {
     if (diagnostic != null &&
         ((diagnostic.inlineProperties?.isNotEmpty ?? false) ||
             diagnostic.hasChildren)) return true;
-    final value = ref.instanceRef;
     // TODO(jacobr): do something smarter to avoid expandable variable flicker.
-    return value is InstanceRef && value.valueAsString == null;
+    final instanceRef = ref.instanceRef;
+    return instanceRef != null ? instanceRef.valueAsString == null : false;
   }
 
-  InstanceRef get value => ref?.instanceRef;
+  Object get value => ref?.value;
 
   // TODO(kenz): add custom display for lists with more than 100 elements
   String get displayValue {

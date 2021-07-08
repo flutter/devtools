@@ -240,7 +240,6 @@ class InspectorController extends DisposableController
       return;
     }
     visibleToUser = visible;
-    details?.setVisibleToUser(visible);
 
     if (visibleToUser) {
       if (parent == null) {
@@ -325,7 +324,6 @@ class InspectorController extends DisposableController
     subtreeRoot = null;
 
     inspectorTree?.root = inspectorTree?.createNode();
-    details?.shutdownTree(isolateStopped);
     programaticSelectionChangeInProgress = false;
     valueToInspectorTreeNode?.clear();
   }
@@ -340,9 +338,12 @@ class InspectorController extends DisposableController
   Future<void> onForceRefresh() async {
     assert(!_disposed);
     if (!visibleToUser || _disposed) {
-      return Future.value();
+      return;
     }
     await recomputeTreeRoot(null, null, false);
+    if (_disposed) {
+      return;
+    }
 
     filterErrors();
 
@@ -389,6 +390,7 @@ class InspectorController extends DisposableController
 
     if (flutterAppFrameReady) {
       _rootDirectories = await inspectorService.inferPubRootDirectoryIfNeeded();
+      if (_disposed) return;
       // We need to start by querying the inspector service to find out the
       // current state of the UI.
 
@@ -400,6 +402,7 @@ class InspectorController extends DisposableController
           firstFrame: true, inspectorRef: inspectorRef);
     } else {
       final ready = await inspectorService.isWidgetTreeReady();
+      if (_disposed) return;
       flutterAppFrameReady = ready;
       if (isActive && ready) {
         await maybeLoadUI();
@@ -423,7 +426,7 @@ class InspectorController extends DisposableController
       final node = await (detailsSubtree
           ? group.getDetailsSubtree(subtreeRoot, subtreeDepth: subtreeDepth)
           : group.getRoot(treeType));
-      if (node == null || group.disposed) {
+      if (node == null || group.disposed || _disposed) {
         return;
       }
       // TODO(jacobr): as a performance optimization we should check if the
@@ -619,6 +622,7 @@ class InspectorController extends DisposableController
         InspectorInstanceRef(inspectorRef),
         false,
       );
+      if (_disposed) return;
     }
     final pendingSelectionFuture = group.getSelection(
       selectedDiagnostic,
@@ -632,12 +636,12 @@ class InspectorController extends DisposableController
 
     try {
       final RemoteDiagnosticsNode newSelection = await pendingSelectionFuture;
-      if (group.disposed) return;
+      if (_disposed || group.disposed) return;
       RemoteDiagnosticsNode detailsSelection;
 
       if (pendingDetailsFuture != null) {
         detailsSelection = await pendingDetailsFuture;
-        if (group.disposed) return;
+        if (_disposed || group.disposed) return;
       }
 
       if (!firstFrame &&
@@ -786,6 +790,7 @@ class InspectorController extends DisposableController
       final isolateRef = inspectorService.isolateRef;
       final instanceRef = await node.diagnostic.inspectorService
           ?.toObservatoryInstanceRef(valueRef);
+      if (_disposed) return;
 
       if (instanceRef != null) {
         serviceManager.consoleService.appendInstanceRef(
@@ -953,6 +958,7 @@ class InspectorController extends DisposableController
       if (registered) {
         final flutterVersion =
             FlutterVersion.parse((await serviceManager.flutterVersion).json);
+        if (_disposed) return;
         if (flutterVersion.isSupported(supportedVersion: version)) {
           callback();
         }

@@ -75,7 +75,7 @@ class ConsoleService extends Disposer {
     bool expandAll = false,
   }) async {
     _stdioTrailingNewline = false;
-    final variable = Variable.fromRef(
+    final variable = Variable.fromValue(
       name: name,
       value: value,
       diagnostic: diagnostic,
@@ -145,14 +145,14 @@ class ConsoleService extends Disposer {
     last = _stdio.value.safeLast;
     if (_stdio.value.isNotEmpty &&
         (last is TextConsoleLine && last.text.isEmpty)) {
-      _stdio.sublist(0, _stdio.value.length - 1);
+      _stdio.trimToSublist(0, _stdio.value.length - 1);
     }
 
     // For performance reasons, we drop older lines in batches, so the lines
     // will grow to kMaxLogItemsUpperBound then truncate to
     // kMaxLogItemsLowerBound.
     if (_stdio.value.length > kMaxLogItemsUpperBound) {
-      _stdio.sublist(stdio.value.length - kMaxLogItemsLowerBound);
+      _stdio.trimToSublist(stdio.value.length - kMaxLogItemsLowerBound);
     }
   }
 
@@ -221,8 +221,12 @@ class ConsoleService extends Disposer {
       if (inspector != null &&
           event.isolate == inspector.inspectorService.isolateRef) {
         try {
-          if (await inspector.isInspectable(GenericInstanceRef(
-              isolateRef: event.isolate, instanceRef: event.inspectee))) {
+          if (await inspector.isInspectable(
+            GenericInstanceRef(
+              isolateRef: event.isolate,
+              value: event.inspectee,
+            ),
+          )) {
             // This object will trigger the widget inspector so let the widget
             // inspector decide whether it wants to log it to the console or
             // not.

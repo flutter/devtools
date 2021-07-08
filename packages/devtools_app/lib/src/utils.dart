@@ -1142,7 +1142,7 @@ class ListValueNotifier<T> extends ChangeNotifier
   }
 
   /// Adds elements to the list and notifies listeners.
-  void addAll(List<T> elements) {
+  void addAll(Iterable<T> elements) {
     _rawList.addAll(elements);
     _listChanged();
   }
@@ -1160,7 +1160,7 @@ class ListValueNotifier<T> extends ChangeNotifier
   /// The `start` and `end` positions must satisfy the relations
   /// 0 ≤ `start` ≤ `end` ≤ [length]
   /// If `end` is equal to `start`, then the returned list is empty.
-  void sublist(int start, [int end]) {
+  void trimToSublist(int start, [int end]) {
     // TODO(jacobr): use a more sophisticated data structure such as
     // https://en.wikipedia.org/wiki/Rope_(data_structure) to make the
     // implementation of this method more efficient.

@@ -111,7 +111,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         final group =
             serviceManager.inspectorService.createObjectGroup('hover');
         final value = await group.toObservatoryInstanceRef(diagnostic.valueRef);
-        final variable = Variable.fromRef(
+        final variable = Variable.fromValue(
           value: value,
           isolateRef: serviceManager.inspectorService.isolateRef,
           diagnostic: diagnostic,
