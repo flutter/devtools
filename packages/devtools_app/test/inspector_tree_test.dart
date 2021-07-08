@@ -16,11 +16,9 @@ import 'support/wrappers.dart';
 
 void main() {
   FakeServiceManager fakeServiceManager;
-  FakeServiceExtensionManager fakeExtensionManager;
   group('InspectorTreeController', () {
     setUp(() {
       fakeServiceManager = FakeServiceManager();
-      fakeExtensionManager = fakeServiceManager.serviceExtensionManager;
       when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
       when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
 
