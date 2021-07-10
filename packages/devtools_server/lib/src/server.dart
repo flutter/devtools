@@ -572,7 +572,6 @@ ArgParser _createArgsParser(bool verbose) {
     )
     ..addFlag(
       argAllowEmbedding,
-      negatable: true,
       help: 'Allow embedding DevTools inside an iframe.',
       hide: !verbose,
     )
