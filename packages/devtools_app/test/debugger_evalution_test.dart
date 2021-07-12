@@ -27,7 +27,7 @@ void main() {
     await env.setupEnvironment();
     debuggerController = DebuggerController();
     eval = EvalOnDartLibrary(
-        ['package:flutter_app/src/autocomplete.dart'], serviceManager.service,
+        'package:flutter_app/src/autocomplete.dart', serviceManager.service,
         disableBreakpoints: false);
   });
 

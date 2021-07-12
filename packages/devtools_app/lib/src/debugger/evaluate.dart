@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../globals.dart';
 import '../notifications.dart';
 import '../theme.dart';
 import '../ui/search.dart';
@@ -17,7 +18,7 @@ import 'debugger_controller.dart';
 
 class ExpressionEvalField extends StatefulWidget {
   const ExpressionEvalField({
-    this.controller,
+    @required this.controller,
   });
 
   final DebuggerController controller;
@@ -198,14 +199,15 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
 
     if (expressionText.isEmpty) return;
 
-    // Don't try to eval if we're not paused.
-    if (!widget.controller.isPaused.value) {
+    // Only try to eval if we are paused.
+    if (!serviceManager
+        .isolateManager.mainIsolateDebuggerState.isPaused.value) {
       Notifications.of(context)
           .push('Application must be paused to support expression evaluation.');
       return;
     }
 
-    widget.controller.appendStdio('> $expressionText\n');
+    serviceManager.consoleService.appendStdio('> $expressionText\n');
     setState(() {
       historyPosition = -1;
       widget.controller.evalHistory.pushEvalHistory(expressionText);
@@ -213,12 +215,13 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
 
     try {
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
+      final isolateRef = widget.controller.isolateRef;
       final response =
           await widget.controller.evalAtCurrentFrame(expressionText);
 
       // Display the response to the user.
       if (response is InstanceRef) {
-        _emitRefToConsole(response);
+        _emitRefToConsole(response, isolateRef);
       } else {
         var value = response.toString();
 
@@ -237,11 +240,22 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
   }
 
   void _emitToConsole(String text) {
-    widget.controller.appendStdio('  ${text.replaceAll('\n', '\n  ')}\n');
+    serviceManager.consoleService.appendStdio(
+      '  ${text.replaceAll('\n', '\n  ')}\n',
+      forceScrollIntoView: true,
+    );
   }
 
-  void _emitRefToConsole(InstanceRef ref) {
-    widget.controller.appendInstanceRef(ref);
+  void _emitRefToConsole(
+    InstanceRef ref,
+    IsolateRef isolate,
+  ) {
+    serviceManager.consoleService.appendInstanceRef(
+      value: ref,
+      diagnostic: null,
+      isolateRef: isolate,
+      forceScrollIntoView: true,
+    );
   }
 
   @override
@@ -292,10 +306,10 @@ Future<List<String>> autoCompleteResultsFor(
   final result = <String>{};
   if (!parts.isField) {
     final variables = controller.variables.value;
-    result.addAll(variables.map((variable) => variable.boundVar.name));
+    result.addAll(variables.map((variable) => variable.name));
 
     final thisVariable = variables.firstWhere(
-      (variable) => variable.boundVar.name == 'this',
+      (variable) => variable.name == 'this',
       orElse: () => null,
     );
     if (thisVariable != null) {
@@ -304,7 +318,7 @@ Future<List<String>> autoCompleteResultsFor(
       // in Dart. For example, if you evaluate `foo()` that will be equivalent
       // to `this.foo()` if foo is an instance member and `ThisClass.foo() if
       // foo is a static member.
-      final thisValue = thisVariable.boundVar.value;
+      final thisValue = thisVariable.value;
       if (thisValue is InstanceRef) {
         await _addAllInstanceMembersToAutocompleteList(
           result,

@@ -165,6 +165,7 @@ void main() {
               DebuggerScreen.id,
               debuggerScreenKey,
               tabKey: debuggerTabKey,
+              showFloatingDebuggerControls: false,
             ),
             screen2,
           ],
@@ -213,12 +214,17 @@ void main() {
 }
 
 class _TestScreen extends Screen {
-  const _TestScreen(this.name, this.key, {Key tabKey})
-      : super(
+  const _TestScreen(
+    this.name,
+    this.key, {
+    bool showFloatingDebuggerControls = true,
+    Key tabKey,
+  }) : super(
           name,
           title: name,
           icon: Icons.computer,
           tabKey: tabKey,
+          showFloatingDebuggerControls: showFloatingDebuggerControls,
         );
 
   final String name;

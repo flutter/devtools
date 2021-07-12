@@ -16,7 +16,6 @@ import '../common_widgets.dart';
 import '../config_specific/host_platform/host_platform.dart';
 import '../dialogs.dart';
 import '../flex_split_column.dart';
-import '../globals.dart';
 import '../listenable.dart';
 import '../screen.dart';
 import '../split.dart';
@@ -25,7 +24,6 @@ import '../ui/icons.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
-import 'console.dart';
 import 'controls.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
@@ -39,9 +37,13 @@ class DebuggerScreen extends Screen {
           requiresDebugBuild: true,
           title: 'Debugger',
           icon: Octicons.bug,
+          showFloatingDebuggerControls: false,
         );
 
   static const id = 'debugger';
+
+  @override
+  bool showConsole(bool embed) => true;
 
   @override
   String get docPageId => screenId;
@@ -107,29 +109,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     }
   }
 
-  Future<void> _toggleBreakpoint(ScriptRef script, int line) async {
-    // The VM doesn't support debugging for system isolates and will crash on
-    // a failed assert in debug mode. Disable the toggle breakpoint
-    // functionality for system isolates.
-    if (serviceManager.isolateManager.selectedIsolate.isSystemIsolate) {
-      return;
-    }
-
-    final bp = controller.breakpointsWithLocation.value.firstWhere((bp) {
-      return bp.scriptRef == script && bp.line == line;
-    }, orElse: () => null);
-
-    if (bp != null) {
-      await controller.removeBreakpoint(bp.breakpoint);
-    } else {
-      try {
-        await controller.addBreakpoint(script.id, line);
-      } catch (_) {
-        // ignore errors setting breakpoints
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final codeView = ValueListenableBuilder(
@@ -143,7 +122,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               controller: controller,
               scriptRef: scriptRef,
               parsedScript: parsedScript,
-              onSelected: _toggleBreakpoint,
+              onSelected: controller.toggleBreakpoint,
             );
           },
         );
@@ -208,14 +187,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                 const DebuggingControls(),
                 const SizedBox(height: denseRowSpacing),
                 Expanded(
-                  child: Split(
-                    axis: Axis.vertical,
-                    initialFractions: const [0.72, 0.28],
-                    children: [
-                      codeArea,
-                      DebuggerConsole(controller: controller),
-                    ],
-                  ),
+                  child: codeArea,
                 ),
               ],
             ),

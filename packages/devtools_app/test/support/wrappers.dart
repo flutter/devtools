@@ -91,6 +91,7 @@ Widget wrapWithNotifications(Widget child) {
 Widget wrapWithInspectorControllers(Widget widget) {
   return wrapWithControllers(
     widget,
+    debugger: DebuggerController(),
     // TODO(jacobr): add inspector controllers.
   );
 }
