@@ -19,6 +19,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose.dart';
@@ -68,7 +69,6 @@ class InspectorController extends DisposableController
     with AutoDisposeControllerMixin
     implements InspectorServiceClient {
   InspectorController({
-    @required this.inspectorService,
     @required this.inspectorTree,
     InspectorTreeController detailsTree,
     @required this.treeType,
@@ -76,9 +76,14 @@ class InspectorController extends DisposableController
     this.isSummaryTree = true,
     this.onExpandCollapseSupported,
     this.onLayoutExplorerSupported,
-  })  : _treeGroups = InspectorObjectGroupManager(inspectorService, 'tree'),
-        _selectionGroups =
-            InspectorObjectGroupManager(inspectorService, 'selection') {
+  })  : _treeGroups = InspectorObjectGroupManager(
+          serviceManager.inspectorService,
+          'tree',
+        ),
+        _selectionGroups = InspectorObjectGroupManager(
+          serviceManager.inspectorService,
+          'selection',
+        ) {
     _refreshRateLimiter = RateLimiter(refreshFramesPerSecond, refresh);
 
     assert(inspectorTree != null);
@@ -93,7 +98,6 @@ class InspectorController extends DisposableController
     );
     if (isSummaryTree) {
       details = InspectorController(
-        inspectorService: inspectorService,
         inspectorTree: detailsTree,
         treeType: treeType,
         parent: this,
@@ -103,19 +107,16 @@ class InspectorController extends DisposableController
       details = null;
     }
 
-    flutterIsolateSubscription = serviceManager.isolateManager
-        .getSelectedIsolate((IsolateRef flutterIsolate) {
-      // TODO(jacobr): listen for real isolate stopped events.
-      // Only send an isolate stopped event if there was a previous isolate or
-      // the isolate has actually changed.
-      if (_activeIsolate != null && _activeIsolate != flutterIsolate) {
-        onIsolateStopped();
-      }
-      _activeIsolate = flutterIsolate;
-    });
-
     _checkForExpandCollapseSupport();
     _checkForLayoutExplorerSupport();
+
+    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
+      final isolate = serviceManager.isolateManager.mainIsolate.value;
+      if (isolate != _mainIsolate) {
+        onIsolateStopped();
+      }
+      _mainIsolate = isolate;
+    });
 
     // This logic only needs to be run once so run it in the outermost
     // controller.
@@ -133,6 +134,8 @@ class InspectorController extends DisposableController
       });
     }
   }
+
+  IsolateRef _mainIsolate;
 
   ValueListenable<bool> get _supportsToggleSelectWidgetMode =>
       serviceManager.serviceExtensionManager
@@ -173,11 +176,6 @@ class InspectorController extends DisposableController
 
   InspectorTreeController inspectorTree;
   final FlutterTreeType treeType;
-
-  final InspectorService inspectorService;
-
-  StreamSubscription<IsolateRef> flutterIsolateSubscription;
-  IsolateRef _activeIsolate;
 
   bool _disposed = false;
 
@@ -242,7 +240,6 @@ class InspectorController extends DisposableController
       return;
     }
     visibleToUser = visible;
-    details?.setVisibleToUser(visible);
 
     if (visibleToUser) {
       if (parent == null) {
@@ -327,7 +324,6 @@ class InspectorController extends DisposableController
     subtreeRoot = null;
 
     inspectorTree?.root = inspectorTree?.createNode();
-    details?.shutdownTree(isolateStopped);
     programaticSelectionChangeInProgress = false;
     valueToInspectorTreeNode?.clear();
   }
@@ -342,9 +338,12 @@ class InspectorController extends DisposableController
   Future<void> onForceRefresh() async {
     assert(!_disposed);
     if (!visibleToUser || _disposed) {
-      return Future.value();
+      return;
     }
     await recomputeTreeRoot(null, null, false);
+    if (_disposed) {
+      return;
+    }
 
     filterErrors();
 
@@ -374,6 +373,8 @@ class InspectorController extends DisposableController
     maybeLoadUI();
   }
 
+  InspectorService get inspectorService => serviceManager.inspectorService;
+
   List<String> get rootDirectories =>
       _rootDirectories ?? parent.rootDirectories;
   List<String> _rootDirectories;
@@ -389,6 +390,7 @@ class InspectorController extends DisposableController
 
     if (flutterAppFrameReady) {
       _rootDirectories = await inspectorService.inferPubRootDirectoryIfNeeded();
+      if (_disposed) return;
       // We need to start by querying the inspector service to find out the
       // current state of the UI.
 
@@ -400,6 +402,7 @@ class InspectorController extends DisposableController
           firstFrame: true, inspectorRef: inspectorRef);
     } else {
       final ready = await inspectorService.isWidgetTreeReady();
+      if (_disposed) return;
       flutterAppFrameReady = ready;
       if (isActive && ready) {
         await maybeLoadUI();
@@ -423,7 +426,7 @@ class InspectorController extends DisposableController
       final node = await (detailsSubtree
           ? group.getDetailsSubtree(subtreeRoot, subtreeDepth: subtreeDepth)
           : group.getRoot(treeType));
-      if (node == null || group.disposed) {
+      if (node == null || group.disposed || _disposed) {
         return;
       }
       // TODO(jacobr): as a performance optimization we should check if the
@@ -619,6 +622,7 @@ class InspectorController extends DisposableController
         InspectorInstanceRef(inspectorRef),
         false,
       );
+      if (_disposed) return;
     }
     final pendingSelectionFuture = group.getSelection(
       selectedDiagnostic,
@@ -632,12 +636,12 @@ class InspectorController extends DisposableController
 
     try {
       final RemoteDiagnosticsNode newSelection = await pendingSelectionFuture;
-      if (group.disposed) return;
+      if (_disposed || group.disposed) return;
       RemoteDiagnosticsNode detailsSelection;
 
       if (pendingDetailsFuture != null) {
         detailsSelection = await pendingDetailsFuture;
-        if (group.disposed) return;
+        if (_disposed || group.disposed) return;
       }
 
       if (!firstFrame &&
@@ -780,6 +784,25 @@ class InspectorController extends DisposableController
     inspectorTree.maybePopulateChildren(node);
   }
 
+  Future<void> _addNodeToConsole(InspectorTreeNode node) async {
+    final valueRef = node.diagnostic.valueRef;
+    if (valueRef != null) {
+      final isolateRef = inspectorService.isolateRef;
+      final instanceRef = await node.diagnostic.inspectorService
+          ?.toObservatoryInstanceRef(valueRef);
+      if (_disposed) return;
+
+      if (instanceRef != null) {
+        serviceManager.consoleService.appendInstanceRef(
+          value: instanceRef,
+          diagnostic: node.diagnostic,
+          isolateRef: isolateRef,
+          forceScrollIntoView: true,
+        );
+      }
+    }
+  }
+
   void selectionChanged() {
     if (visibleToUser == false) {
       return;
@@ -794,6 +817,7 @@ class InspectorController extends DisposableController
     }
     if (node != null) {
       setSelectedNode(node);
+      unawaited(_addNodeToConsole(node));
 
       // Don't reroot if the selected value is already visible in the details tree.
       final bool maybeReroot = isSummaryTree &&
@@ -874,7 +898,6 @@ class InspectorController extends DisposableController
   void dispose() {
     assert(!_disposed);
     _disposed = true;
-    flutterIsolateSubscription.cancel();
     if (inspectorService != null) {
       shutdownTree(false);
     }
@@ -935,6 +958,7 @@ class InspectorController extends DisposableController
       if (registered) {
         final flutterVersion =
             FlutterVersion.parse((await serviceManager.flutterVersion).json);
+        if (_disposed) return;
         if (flutterVersion.isSupported(supportedVersion: version)) {
           callback();
         }

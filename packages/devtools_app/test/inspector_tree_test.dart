@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
@@ -35,7 +36,11 @@ void main() {
           onNodeAdded: (_, __) {},
           onClientActiveChange: (_) {},
         );
-      await tester.pumpWidget(wrap(InspectorTree(controller: controller)));
+      final debuggerController = DebuggerController();
+      await tester.pumpWidget(wrap(InspectorTree(
+        controller: controller,
+        debuggerController: debuggerController,
+      )));
 
       expect(controller.getRow(const Offset(0, -100.0)), isNull);
       expect(controller.getRowOffset(-1), equals(0));
@@ -44,9 +49,12 @@ void main() {
       expect(controller.getRowOffset(0), equals(0));
 
       controller.root = InspectorTreeNode()..appendChild(InspectorTreeNode());
-      await tester.pumpWidget(wrap(InspectorTree(controller: controller)));
+      await tester.pumpWidget(wrap(InspectorTree(
+        controller: controller,
+        debuggerController: debuggerController,
+      )));
 
-      expect(controller.getRow(const Offset(0, -20)), isNull);
+      expect(controller.getRow(const Offset(0, -20)).index, 0);
       expect(controller.getRowOffset(-1), equals(0));
       expect(controller.getRow(const Offset(0, 0.0)), isNotNull);
       expect(controller.getRowOffset(0), equals(0));

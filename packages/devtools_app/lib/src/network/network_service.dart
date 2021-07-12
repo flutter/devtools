@@ -44,7 +44,7 @@ class NetworkService {
     Timeline timeline;
     if (await serviceManager.service.isDartIoVersionSupported(
       supportedVersion: SemanticVersion(major: 1, minor: 6),
-      isolateId: serviceManager.isolateManager.selectedIsolate.id,
+      isolateId: serviceManager.isolateManager.selectedIsolate.value.id,
     )) {
       httpRequests = await _refreshHttpProfile();
     } else {

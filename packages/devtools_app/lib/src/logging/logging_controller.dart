@@ -162,7 +162,7 @@ class LoggingController extends DisposableController
         SearchControllerMixin<LogData>,
         FilterControllerMixin<LogData>,
         AutoDisposeControllerMixin {
-  LoggingController({this.inspectorService}) {
+  LoggingController() {
     autoDispose(
         serviceManager.onConnectionAvailable.listen(_handleConnectionStart));
     if (serviceManager.connectedAppInitialized) {
@@ -189,10 +189,6 @@ class LoggingController extends DisposableController
   ///
   /// See also [statusText].
   Stream get onLogStatusChanged => _logStatusController.stream;
-
-  /// This is specifiable in the constructor for testing.
-  @visibleForTesting
-  InspectorService inspectorService;
 
   List<LogData> data = <LogData>[];
 
@@ -222,8 +218,7 @@ class LoggingController extends DisposableController
     }
   }
 
-  /// ObjectGroup for Flutter (null for non-Flutter apps).
-  ObjectGroup objectGroup;
+  ObjectGroup get objectGroup => serviceManager.consoleService.objectGroup;
 
   String get statusText {
     final int totalCount = data.length;
@@ -275,15 +270,6 @@ class LoggingController extends DisposableController
     // Log Flutter extension events.
     autoDispose(
         service.onExtensionEventWithHistory.listen(_handleExtensionEvent));
-
-    inspectorService ??= await InspectorService.create(service).catchError(
-      (e) => null,
-      test: (e) => e is FlutterInspectorLibraryNotFound,
-    );
-
-    if (inspectorService != null) {
-      objectGroup = inspectorService.createObjectGroup('console-group');
-    }
   }
 
   void _handleExtensionEvent(Event e) async {

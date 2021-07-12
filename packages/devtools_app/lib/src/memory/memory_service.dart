@@ -12,7 +12,7 @@ import '../globals.dart';
 // TODO(terry): because of dart:js usage.  Look at abstracting errors to a log
 // TODO(terry): and fatal errors are eventually sent to analytics.
 
-String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
+String get _isolateId => serviceManager.isolateManager.selectedIsolate.value.id;
 
 Future<InstanceRef> evaluate(String objectRef, String expression) async {
   final dynamic result =
