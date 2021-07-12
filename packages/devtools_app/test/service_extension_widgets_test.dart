@@ -70,7 +70,7 @@ void main() {
       expect(find.byWidget(button), findsOneWidget);
       await tester.pumpAndSettle();
       expect(reloads, 0);
-      await tester.tap(find.byWidget(button));
+      await tester.tap(find.byWidget(button), warnIfMissed: false);
       await tester.pumpAndSettle();
       expect(reloads, 0);
     });
@@ -117,7 +117,7 @@ void main() {
       expect(find.byWidget(button), findsOneWidget);
       await tester.pumpAndSettle();
       expect(restarts, 0);
-      await tester.tap(find.byWidget(button));
+      await tester.tap(find.byWidget(button), warnIfMissed: false);
       await tester.pumpAndSettle();
       expect(restarts, 0);
     });
