@@ -6,10 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../common_widgets.dart';
 import '../console.dart';
 import '../console_service.dart';
 import '../globals.dart';
+import '../utils.dart';
 import 'debugger_controller.dart';
 import 'evaluate.dart';
 
@@ -30,34 +30,21 @@ class DebuggerConsole extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlineDecoration(
-      child: Column(
-        children: [
-          Expanded(
-            child: Console(
-              title: AreaPaneHeader(
-                title: const Text('Console'),
-                needsTopBorder: false,
-                rightActions: [
-                  CopyToClipboardControl(
-                    dataProvider: () => stdio.value?.join('\n') ?? '',
-                    buttonKey: DebuggerConsole.copyToClipboardButtonKey,
-                  ),
-                  DeleteControl(
-                    buttonKey: DebuggerConsole.clearStdioButtonKey,
-                    tooltip: 'Clear console output',
-                    onPressed: () => serviceManager.consoleService.clearStdio(),
-                  ),
-                ],
+    return Column(
+      children: [
+        Expanded(
+          child: Console(
+            lines: stdio,
+            footer: SizedBox(
+              height: scaleByFontFactor(18.0),
+              child: ExpressionEvalField(
+                controller:
+                    Provider.of<DebuggerController>(context, listen: false),
               ),
-              lines: stdio,
             ),
           ),
-          ExpressionEvalField(
-            controller: Provider.of<DebuggerController>(context, listen: false),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

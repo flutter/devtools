@@ -19,6 +19,7 @@ import 'common_widgets.dart';
 import 'config_specific/drag_and_drop/drag_and_drop.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
 import 'config_specific/import_export/import_export.dart';
+import 'console.dart';
 import 'debugger/console.dart';
 import 'debugger/debugger_screen.dart';
 import 'framework_controller.dart';
@@ -78,7 +79,7 @@ class DevToolsScaffold extends StatefulWidget {
         horizontalPadding.left,
         isEmbedded() ? 2.0 : 16.0,
         horizontalPadding.right,
-        0.0,
+        isEmbedded() ? 0.0 : 8.0,
       );
 
   // Note: when changing this value, also update `flameChartContainerOffset`
@@ -361,6 +362,28 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                             padding: DevToolsScaffold.horizontalPadding,
                             child: const DebuggerConsole(),
                           ),
+                        ],
+                        splitters: [
+                          AreaPaneHeader(
+                            title: const Text('Console'),
+                            needsTopBorder: false,
+                            rightActions: [
+                              CopyToClipboardControl(
+                                dataProvider: () =>
+                                    serviceManager.consoleService.stdio.value
+                                        ?.join('\n') ??
+                                    '',
+                                buttonKey:
+                                    DebuggerConsole.copyToClipboardButtonKey,
+                              ),
+                              DeleteControl(
+                                buttonKey: DebuggerConsole.clearStdioButtonKey,
+                                tooltip: 'Clear console output',
+                                onPressed: () =>
+                                    serviceManager.consoleService.clearStdio(),
+                              ),
+                            ],
+                          )
                         ],
                         initialFractions: const [0.8, 0.2],
                       )

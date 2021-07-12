@@ -103,57 +103,45 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    return Row(
+      children: [
+        const Text('>'),
+        const SizedBox(width: 8.0),
+        Expanded(
+          child: Focus(
+            onKey: (_, RawKeyEvent event) {
+              if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
+                _historyNavUp();
+                return KeyEventResult.handled;
+              } else if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
+                _historyNavDown();
+                return KeyEventResult.handled;
+              } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+                _handleExpressionEval();
+                return KeyEventResult.handled;
+              }
 
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: theme.focusColor),
-        ),
-      ),
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          const Text('>'),
-          const SizedBox(width: 8.0),
-          Expanded(
-            child: Focus(
-              onKey: (_, RawKeyEvent event) {
-                if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
-                  _historyNavUp();
-                  return KeyEventResult.handled;
-                } else if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
-                  _historyNavDown();
-                  return KeyEventResult.handled;
-                } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
-                  _handleExpressionEval();
-                  return KeyEventResult.handled;
-                }
-
-                return KeyEventResult.ignored;
-              },
-              child: buildAutoCompleteSearchField(
-                controller: _autoCompleteController,
-                searchFieldKey: evalTextFieldKey,
-                searchFieldEnabled: true,
-                shouldRequestFocus: false,
-                supportClearField: true,
-                onSelection: _onSelection,
-                tracking: true,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(denseSpacing),
-                  border: OutlineInputBorder(),
-                  focusedBorder:
-                      OutlineInputBorder(borderSide: BorderSide.none),
-                  enabledBorder:
-                      OutlineInputBorder(borderSide: BorderSide.none),
-                  labelText: 'Eval',
-                ),
+              return KeyEventResult.ignored;
+            },
+            child: buildAutoCompleteSearchField(
+              controller: _autoCompleteController,
+              searchFieldKey: evalTextFieldKey,
+              searchFieldEnabled: true,
+              shouldRequestFocus: false,
+              supportClearField: true,
+              onSelection: _onSelection,
+              tracking: true,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.all(denseSpacing),
+                border: OutlineInputBorder(),
+                focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
+                labelText: 'Eval',
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
