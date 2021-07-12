@@ -150,6 +150,8 @@ elif [ "$BOT" = "integration_ddc" ]; then
     # We need to run integration tests with -j1 to run with no concurrency.
     flutter test -j1 test/integration_tests/
 
+    flutter test -j1 test/integration/
+
 elif [ "$BOT" = "integration_dart2js" ]; then
 
     flutter pub get
