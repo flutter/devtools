@@ -72,13 +72,17 @@ Future<void> main() async {
 
         try {
           final workingDirectory = Directory.current.path;
+          // This command matches the command used by
+          // packages:flutter_tools/lib/src/drive/drive_service.dart
+          // If you change this command, make sure you also update
+          // package:flutter_tools.
           final Process process = await Process.start(
             'dart',
             [
               '../devtools/bin/devtools.dart',
               '--vm-uri',
               '$vmUri',
-              '--profile-memory',
+              '--record-memory-profile',
               '${ParseStdout.jsonFilename}',
               '--verbose',
             ],

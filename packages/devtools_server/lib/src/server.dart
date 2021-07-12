@@ -81,7 +81,8 @@ Future<HttpServer?> _serveDevToolsWithArgs(
   final bool launchBrowser =
       args.wasParsed(argLaunchBrowser) ? args[argLaunchBrowser] : !machineMode;
   final bool enableNotifications = args[argEnableNotifications];
-  final bool allowEmbedding = args[argAllowEmbedding];
+  final bool allowEmbedding =
+      args.wasParsed(argAllowEmbedding) ? args[argAllowEmbedding] : true;
 
   final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
 
@@ -571,7 +572,6 @@ ArgParser _createArgsParser(bool verbose) {
     )
     ..addFlag(
       argAllowEmbedding,
-      negatable: false,
       help: 'Allow embedding DevTools inside an iframe.',
       hide: !verbose,
     )

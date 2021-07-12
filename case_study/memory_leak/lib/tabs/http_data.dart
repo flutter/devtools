@@ -87,6 +87,7 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48.0),
           child: Theme(
+            // ignore: deprecated_member_use
             data: Theme.of(context).copyWith(accentColor: Colors.white),
             child: Container(
               child: Text(
