@@ -26,6 +26,8 @@ void main() {
   FakeServiceManager fakeServiceManager;
   MockDebuggerController debuggerController;
 
+  const windowSize = Size(4000.0, 4000.0);
+
   group('DebuggerScreen', () {
     Future<void> pumpDebuggerScreen(
         WidgetTester tester, DebuggerController controller) async {
@@ -78,7 +80,8 @@ void main() {
       expect(find.text('Debugger'), findsOneWidget);
     });
 
-    testWidgets('has Console / stdio area', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('has Console / stdio area', windowSize,
+        (WidgetTester tester) async {
       when(debuggerController.stdio)
           .thenReturn(ValueNotifier([ConsoleLine.text('test stdio')]));
 
@@ -90,7 +93,8 @@ void main() {
       expect(find.selectableText('test stdio'), findsOneWidget);
     });
 
-    testWidgets('Console area shows processed ansi text',
+    testWidgetsWithWindowSize(
+        'Console area shows processed ansi text', windowSize,
         (WidgetTester tester) async {
       when(debuggerController.stdio)
           .thenReturn(ValueNotifier([ConsoleLine.text(_ansiCodesOutput())]));
@@ -117,8 +121,9 @@ void main() {
     });
 
     group('ConsoleControls', () {
-      testWidgets('Console Controls are rendered disabled when stdio is empty',
-          (WidgetTester tester) async {
+      testWidgetsWithWindowSize(
+          'Console Controls are rendered disabled when stdio is empty',
+          windowSize, (WidgetTester tester) async {
         when(debuggerController.stdio).thenReturn(ValueNotifier([]));
 
         await pumpDebuggerScreen(tester, debuggerController);
@@ -133,7 +138,8 @@ void main() {
         expect(clearStdioButton.onPressed, isNull);
       });
 
-      testWidgets('Tapping the Console Clear button clears stdio.',
+      testWidgetsWithWindowSize(
+          'Tapping the Console Clear button clears stdio.', windowSize,
           (WidgetTester tester) async {
         when(debuggerController.stdio)
             .thenReturn(ValueNotifier([ConsoleLine.text(_ansiCodesOutput())]));
@@ -180,9 +186,9 @@ void main() {
           SystemChannels.platform.setMockMethodCallHandler(null);
         });
 
-        testWidgets(
+        testWidgetsWithWindowSize(
             'Tapping the Copy to Clipboard button attempts to copy stdio to clipboard.',
-            (WidgetTester tester) async {
+            windowSize, (WidgetTester tester) async {
           when(debuggerController.stdio).thenReturn(ValueNotifier(_stdio));
 
           await pumpDebuggerScreen(tester, debuggerController);
@@ -200,7 +206,8 @@ void main() {
       });
     });
 
-    testWidgets('Libraries hidden', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('Libraries hidden', windowSize,
+        (WidgetTester tester) async {
       final scripts = [
         ScriptRef(uri: 'package:/test/script.dart', id: 'test-script')
       ];
@@ -211,10 +218,11 @@ void main() {
       when(debuggerController.librariesVisible)
           .thenReturn(ValueNotifier(false));
       await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('Libraries'), findsNothing);
+      expect(find.text('Libraries'), findsOneWidget);
     });
 
-    testWidgets('Libraries visible', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('Libraries visible', windowSize,
+        (WidgetTester tester) async {
       final scripts = [
         ScriptRef(uri: 'package:test/script.dart', id: 'test-script')
       ];
@@ -224,13 +232,15 @@ void main() {
       // Libraries view is shown
       when(debuggerController.librariesVisible).thenReturn(ValueNotifier(true));
       await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('Libraries'), findsOneWidget);
+      // One for the button and one for the title of the Libraries view.
+      expect(find.text('Libraries'), findsNWidgets(2));
 
       // test for items in the libraries tree
       expect(find.text(scripts.first.uri.split('/').first), findsOneWidget);
     });
 
-    testWidgets('Breakpoints show items', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('Breakpoints show items', windowSize,
+        (WidgetTester tester) async {
       final breakpoints = [
         Breakpoint(
           breakpointNumber: 1,
@@ -273,8 +283,7 @@ void main() {
       );
     });
 
-    testWidgetsWithWindowSize(
-        'Call Stack shows items', const Size(1000.0, 4000.0),
+    testWidgetsWithWindowSize('Call Stack shows items', windowSize,
         (WidgetTester tester) async {
       final stackFrames = [
         Frame(
@@ -455,7 +464,8 @@ void main() {
       };
     }
 
-    testWidgets('debugger controls running', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('debugger controls running', windowSize,
+        (WidgetTester tester) async {
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
         debugger: debuggerController,
@@ -474,7 +484,8 @@ void main() {
       expect(resume.onPressed, isNull);
     });
 
-    testWidgets('debugger controls paused', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('debugger controls paused', windowSize,
+        (WidgetTester tester) async {
       when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
       when(debuggerController.stackFramesWithLocation)
           .thenReturn(ValueNotifier([
@@ -515,7 +526,8 @@ void main() {
       expect(resume.onPressed, isNotNull);
     });
 
-    testWidgets('debugger controls break on exceptions',
+    testWidgetsWithWindowSize(
+        'debugger controls break on exceptions', windowSize,
         (WidgetTester tester) async {
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
