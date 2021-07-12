@@ -163,12 +163,7 @@ class PerformanceController extends DisposableController
   Future<void> _initHelper() async {
     if (!offlineMode) {
       await serviceManager.onServiceAvailable;
-
-      data = serviceManager.connectedApp.isFlutterAppNow
-          ? PerformanceData(
-              displayRefreshRate: await serviceManager.queryDisplayRefreshRate,
-            )
-          : PerformanceData();
+      await _initData();
 
       // Default to true for profile builds only.
       _badgeTabForJankyFrames.value =
@@ -234,7 +229,18 @@ class PerformanceController extends DisposableController
     }
   }
 
+  Future<void> _initData() async {
+    data = serviceManager.connectedApp.isFlutterAppNow
+        ? PerformanceData(
+            displayRefreshRate: await serviceManager.queryDisplayRefreshRate,
+          )
+        : PerformanceData();
+  }
+
   FutureOr<void> processAvailableEvents() async {
+    if (data == null) {
+      await _initData();
+    }
     assert(!_processing.value);
     _processing.value = true;
     await processTraceEvents(allTraceEvents);
@@ -408,7 +414,7 @@ class PerformanceController extends DisposableController
     TimelineEvent event,
     TimelineEventType type,
   ) {
-    if (frameNumber != null) {
+    if (frameNumber != null && (event.isUiEvent || event.isRasterEvent)) {
       if (_unassignedFlutterFrames.containsKey(frameNumber)) {
         final frame = _unassignedFlutterFrames[frameNumber];
         frame.setEventFlow(event, type: type);
@@ -712,14 +718,6 @@ class PerformanceController extends DisposableController
 
   void recordTrace(Map<String, dynamic> trace) {
     data?.traceEvents?.add(trace);
-  }
-
-  void recordTraceForTimelineEvent(TimelineEvent event) {
-    recordTrace(event.beginTraceEventJson);
-    event.children.forEach(recordTraceForTimelineEvent);
-    if (event.endTraceEventJson != null) {
-      recordTrace(event.endTraceEventJson);
-    }
   }
 
   @override

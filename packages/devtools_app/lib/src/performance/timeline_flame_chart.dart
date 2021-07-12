@@ -114,7 +114,7 @@ class _TimelineFlameChartContainerState
             needsTopBorder: false,
             rightPadding: 0.0,
             leftActions: [
-              _RefreshTimelineEventsButton(
+              RefreshTimelineEventsButton(
                 controller: controller,
               ),
             ],
@@ -156,8 +156,8 @@ class _TimelineFlameChartContainerState
   }
 }
 
-class _RefreshTimelineEventsButton extends StatelessWidget {
-  const _RefreshTimelineEventsButton({
+class RefreshTimelineEventsButton extends StatelessWidget {
+  const RefreshTimelineEventsButton({
     Key key,
     @required this.controller,
   }) : super(key: key);

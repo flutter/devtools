@@ -35,37 +35,6 @@ void main() async {
       await env.tearDownEnvironment(force: true);
     });
 
-    test('recordTraceForTimelineEvent', () async {
-      await env.setupEnvironment();
-
-      expect(performanceController.data.traceEvents, isEmpty);
-      performanceController.recordTraceForTimelineEvent(goldenUiTimelineEvent);
-      expect(
-        performanceController.data.traceEvents,
-        equals([
-          vsyncTrace.json,
-          animatorBeginFrameTrace.json,
-          frameworkWorkloadTrace.json,
-          engineBeginFrameTrace.json,
-          frameTrace.json,
-          animateTrace.json,
-          layoutTrace.json,
-          buildTrace.json,
-          compositingBitsTrace.json,
-          paintTrace.json,
-          compositingTrace.json,
-          semanticsTrace.json,
-          finalizeTreeTrace.json,
-          endEngineBeginFrameTrace.json,
-          endFrameworkWorkloadTrace.json,
-          endAnimatorBeginFrameTrace.json,
-          endVsyncTrace.json,
-        ]),
-      );
-
-      await env.tearDownEnvironment();
-    });
-
     test('processOfflineData', () async {
       await env.setupEnvironment();
 
@@ -97,6 +66,13 @@ void main() async {
     test('frame selection', () async {
       await env.setupEnvironment();
 
+      testFrame0
+        ..setEventFlow(goldenUiTimelineEvent)
+        ..setEventFlow(goldenRasterTimelineEvent);
+      final frame1UiEvent = goldenUiTimelineEvent.deepCopy();
+      final frame1RasterEvent = goldenRasterTimelineEvent.deepCopy();
+      testFrame1..setEventFlow(frame1UiEvent)..setEventFlow(frame1RasterEvent);
+
       // Select a frame.
       expect(performanceController.data.selectedFrame, isNull);
       await performanceController.toggleSelectedFrame(testFrame0);
@@ -124,7 +100,7 @@ void main() async {
       );
       expect(
         performanceController.data.selectedEvent,
-        equals(goldenUiTimelineEvent),
+        equals(frame1UiEvent),
       );
       expect(performanceController.data.cpuProfileData, isNotNull);
 
