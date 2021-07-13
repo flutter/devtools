@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
@@ -137,52 +135,47 @@ class StatusLine extends StatelessWidget {
   Widget buildIsolateSelector(BuildContext context, TextTheme textTheme) {
     final IsolateManager isolateManager = serviceManager.isolateManager;
 
-    // Listen to all isolate existence changes.
-    final Stream changeStream = combineStreams(
-      isolateManager.onSelectedIsolateChanged,
-      isolateManager.onIsolateCreated,
-      isolateManager.onIsolateExited,
-    );
+    return ValueListenableBuilder(
+      valueListenable: isolateManager.isolates,
+      builder: (context, isolates, _) {
+        return ValueListenableBuilder(
+          valueListenable: isolateManager.selectedIsolate,
+          builder: (context, isolateRef, _) {
+            final isolates = isolateManager.isolates;
 
-    return StreamBuilder<IsolateRef>(
-      initialData: isolateManager.selectedIsolate,
-      stream: changeStream.map((event) => isolateManager.selectedIsolate),
-      builder: (BuildContext context, AsyncSnapshot<IsolateRef> snapshot) {
-        final List<IsolateRef> isolates = isolateManager.isolates;
+            String isolateName(IsolateRef ref) {
+              final name = ref.name;
+              return '$name #${isolateManager.isolateIndex(ref)}';
+            }
 
-        String isolateName(IsolateRef ref) {
-          final name = ref.name;
-          return '$name #${isolateManager.isolateIndex(ref)}';
-        }
-
-        return DevToolsTooltip(
-          tooltip: 'Selected Isolate',
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<IsolateRef>(
-              value: snapshot.data,
-              onChanged: (IsolateRef ref) {
-                isolateManager.selectIsolate(ref?.id);
-              },
-              isDense: true,
-              items: isolates.map((IsolateRef ref) {
-                return DropdownMenuItem<IsolateRef>(
-                  value: ref,
-                  child: Row(
-                    children: [
-                      ref.isSystemIsolate
-                          ? const Icon(Icons.settings_applications)
-                          : const Icon(Icons.call_split),
-                      const SizedBox(width: denseSpacing),
-                      Text(
-                        isolateName(ref),
-                        style: textTheme.bodyText2,
+            return DevToolsTooltip(
+              tooltip: 'Selected Isolate',
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<IsolateRef>(
+                  value: isolateRef,
+                  onChanged: isolateManager.selectIsolate,
+                  isDense: true,
+                  items: isolates.value.map((IsolateRef ref) {
+                    return DropdownMenuItem<IsolateRef>(
+                      value: ref,
+                      child: Row(
+                        children: [
+                          ref.isSystemIsolate
+                              ? const Icon(Icons.settings_applications)
+                              : const Icon(Icons.call_split),
+                          const SizedBox(width: denseSpacing),
+                          Text(
+                            isolateName(ref),
+                            style: textTheme.bodyText2,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            );
+          },
         );
       },
     );

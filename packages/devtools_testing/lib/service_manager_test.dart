@@ -13,6 +13,7 @@ import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/service_registrations.dart' as registrations;
+import 'package:devtools_app/src/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -37,12 +38,11 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
         expect(serviceManager.isolateManager, isNotNull);
         expect(serviceManager.serviceExtensionManager, isNotNull);
         expect(serviceManager.vmFlagManager, isNotNull);
-        expect(serviceManager.isolateManager.isolates, isNotEmpty);
+        expect(serviceManager.isolateManager.isolates.value, isNotEmpty);
         expect(serviceManager.vmFlagManager.flags.value, isNotNull);
 
         if (serviceManager.isolateManager.selectedIsolate == null) {
-          await serviceManager.isolateManager.onSelectedIsolateChanged
-              .firstWhere((ref) => ref != null);
+          await whenValueNonNull(serviceManager.isolateManager.selectedIsolate);
         }
 
         await env.tearDownEnvironment();
@@ -53,7 +53,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
 
         await expectLater(
           serviceManager.service.addBreakpoint(
-              serviceManager.isolateManager.selectedIsolate.id,
+              serviceManager.isolateManager.selectedIsolate.value.id,
               'fake-script-id',
               1),
           throwsA(const TypeMatcher<RPCError>()
@@ -70,10 +70,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
         final extensionName = extensions.debugPaint.extension;
         const evalExpression = 'debugPaintSizeEnabled';
         final library = EvalOnDartLibrary(
-          [
-            'package:flutter/src/rendering/debug.dart',
-            'package:flutter_web/src/rendering/debug.dart',
-          ],
+          'package:flutter/src/rendering/debug.dart',
           env.service,
         );
 
@@ -105,10 +102,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
         await _serviceExtensionAvailable(extensionName);
         const evalExpression = 'defaultTargetPlatform.toString()';
         final library = EvalOnDartLibrary(
-          [
-            'package:flutter_web/src/foundation/platform.dart',
-            'package:flutter/src/foundation/platform.dart',
-          ],
+          'package:flutter/src/foundation/platform.dart',
           env.service,
         );
 
@@ -150,10 +144,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
           await _serviceExtensionAvailable(extensionName);
           const evalExpression = 'timeDilation';
           final library = EvalOnDartLibrary(
-            [
-              'package:flutter_web/src/scheduler/binding.dart',
-              'package:flutter/src/scheduler/binding.dart',
-            ],
+            'package:flutter/src/scheduler/binding.dart',
             env.service,
           );
 
@@ -189,7 +180,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
 
           await serviceManager.callService(
             registrations.hotReload.service,
-            isolateId: serviceManager.isolateManager.selectedIsolate.id,
+            isolateId: serviceManager.isolateManager.mainIsolate.value.id,
           );
 
           await env.tearDownEnvironment();
@@ -309,9 +300,6 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
       await env.setupEnvironment();
 
       final service = serviceManager.service;
-      final _flutterIsolateRef =
-          serviceManager.isolateManager.mainIsolate.value;
-      expect(_flutterIsolateRef.id, isNotNull);
 
       /// Helper method to call an extension on the test device and verify that
       /// the device reflects the new extension state.
@@ -339,7 +327,7 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
         // Enable service extension on test device.
         await service.callServiceExtension(
           extensionDescription.extension,
-          isolateId: _flutterIsolateRef.id,
+          isolateId: serviceManager.isolateManager.mainIsolate.value.id,
           args: args,
         );
 
@@ -356,12 +344,9 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
       final boolArgs = {'enabled': true};
       const boolEvalExpression = 'debugPaintSizeEnabled';
       final boolLibrary = EvalOnDartLibrary(
-        [
-          'package:flutter/src/rendering/debug.dart',
-          'package:flutter_web/src/rendering/debug.dart',
-        ],
+        'package:flutter/src/rendering/debug.dart',
         service,
-        isolateRef: _flutterIsolateRef,
+        isolate: serviceManager.isolateManager.mainIsolate,
       );
 
       await _enableExtensionOnTestDevice(
@@ -376,12 +361,9 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
       final stringArgs = {'value': stringExtensionDescription.values[0]};
       const stringEvalExpression = 'defaultTargetPlatform.toString()';
       final stringLibrary = EvalOnDartLibrary(
-        [
-          'package:flutter/src/foundation/platform.dart',
-          'package:flutter_web/src/foundation/platform.dart',
-        ],
+        'package:flutter/src/foundation/platform.dart',
         service,
-        isolateRef: _flutterIsolateRef,
+        isolate: serviceManager.isolateManager.mainIsolate,
       );
       await _enableExtensionOnTestDevice(
         stringExtensionDescription,
@@ -401,12 +383,9 @@ Future<void> runServiceManagerTests(FlutterTestEnvironment env) async {
       };
       const numericEvalExpression = 'timeDilation';
       final numericLibrary = EvalOnDartLibrary(
-        [
-          'package:flutter/src/scheduler/binding.dart',
-          'package:flutter_web/src/scheduler/binding.dart',
-        ],
+        'package:flutter/src/scheduler/binding.dart',
         service,
-        isolateRef: _flutterIsolateRef,
+        isolate: serviceManager.isolateManager.mainIsolate,
       );
       await _enableExtensionOnTestDevice(
         numericExtensionDescription,

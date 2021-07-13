@@ -403,6 +403,26 @@ void main() {
       );
     });
 
+    test('getServiceUriFromQueryString', () {
+      expect(
+        getServiceUriFromQueryString(
+                'http://localhost:123/?uri=http://localhost:456')
+            .toString(),
+        equals('http://localhost:456'),
+      );
+      expect(
+        getServiceUriFromQueryString('http://localhost:123/?port=789')
+            .toString(),
+        equals('ws://localhost:789/ws'),
+      );
+      expect(
+        getServiceUriFromQueryString(
+                'http://localhost:123/?port=789&token=kjy78')
+            .toString(),
+        equals('ws://localhost:789/kjy78/ws'),
+      );
+    });
+
     group('pluralize', () {
       test('zero', () {
         expect(pluralize('cat', 0), 'cats');
@@ -992,6 +1012,41 @@ void main() {
         notifier.clear();
         expect(didNotify, isTrue);
         expect(notifier.value, equals([]));
+      });
+
+      test('notifies on trim to sublist with start only', () {
+        setUpWithInitialValue([1, 2, 3]);
+        notifier.trimToSublist(1);
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([2, 3]));
+      });
+
+      test('notifies on trim to sublist', () {
+        setUpWithInitialValue([1, 2, 3]);
+        notifier.trimToSublist(1, 2);
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([2]));
+      });
+
+      test('notifies on last', () {
+        setUpWithInitialValue([1, 2, 3]);
+        notifier.last = 4;
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([1, 2, 4]));
+      });
+
+      test('notifies on remove', () {
+        setUpWithInitialValue([1, 2, 3]);
+        notifier.remove(2);
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([1, 3]));
+      });
+
+      test('does not notify on remove of missing element', () {
+        setUpWithInitialValue([1, 2, 3]);
+        notifier.remove(0);
+        expect(didNotify, isFalse);
+        expect(notifier.value, equals([1, 2, 3]));
       });
     });
 

@@ -102,7 +102,7 @@ class FlutterTestEnvironment {
       await _flutter.run(runConfig: _runConfig);
 
       _service = _flutter.vmService;
-            final preferencesController = PreferencesController();
+      final preferencesController = PreferencesController();
       await preferencesController.init();
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
       setGlobal(PreferencesController, preferencesController);

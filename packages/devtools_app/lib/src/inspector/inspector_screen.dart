@@ -6,6 +6,7 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../analytics/analytics_stub.dart'
@@ -15,6 +16,7 @@ import '../auto_dispose_mixin.dart';
 import '../blocking_action_mixin.dart';
 import '../common_widgets.dart';
 import '../connected_app.dart';
+import '../debugger/debugger_controller.dart';
 import '../error_badge_manager.dart';
 import '../globals.dart';
 import '../screen.dart';
@@ -40,6 +42,11 @@ class InspectorScreen extends Screen {
 
   static const id = 'inspector';
 
+  // There is not enough room to safely show the console in the embed view of
+  // the DevTools and IDEs have their own consoles.
+  @override
+  bool showConsole(bool embed) => !embed;
+
   @override
   String get docPageId => screenId;
 
@@ -58,16 +65,13 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     with BlockingActionMixin, AutoDisposeMixin {
   bool _expandCollapseSupported = false;
   bool _layoutExplorerSupported = false;
-  bool connectionInProgress = false;
-  InspectorService inspectorService;
 
   InspectorController inspectorController;
   InspectorTreeControllerFlutter summaryTreeController;
   InspectorTreeControllerFlutter detailsTreeController;
-  bool displayedWidgetTrackingNotice = false;
+  DebuggerController _debuggerController;
 
-  bool get enableButtons =>
-      actionInProgress == false && connectionInProgress == false;
+  bool get enableButtons => actionInProgress == false;
 
   static const summaryTreeKey = Key('Summary Tree');
   static const detailsTreeKey = Key('Details Tree');
@@ -79,6 +83,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   void initState() {
     super.initState();
     ga.screen(InspectorScreen.id);
+
     autoDispose(
         serviceManager.onConnectionAvailable.listen(_handleConnectionStart));
     if (serviceManager.connectedAppInitialized) {
@@ -90,7 +95,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   @override
   void dispose() {
-    inspectorService?.dispose();
     inspectorController?.dispose();
     super.dispose();
   }
@@ -104,15 +108,35 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _debuggerController = Provider.of<DebuggerController>(context);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final summaryTree = _buildSummaryTreeColumn();
+    final summaryTree = _buildSummaryTreeColumn(_debuggerController);
 
     final detailsTree = InspectorTree(
       key: detailsTreeKey,
       controller: detailsTreeController,
+      debuggerController: _debuggerController,
     );
 
     final splitAxis = Split.axisFor(context, 0.85);
+    final widgetTrees = Split(
+      axis: splitAxis,
+      initialFractions: const [0.33, 0.67],
+      children: [
+        summaryTree,
+        InspectorDetailsTabController(
+          detailsTree: detailsTree,
+          controller: inspectorController,
+          actionButtons: _expandCollapseButtons(),
+          layoutExplorerSupported: _layoutExplorerSupported,
+        ),
+      ],
+    );
     return Column(
       children: <Widget>[
         Row(
@@ -147,57 +171,50 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         ),
         const SizedBox(height: denseRowSpacing),
         Expanded(
-          child: Split(
-            axis: splitAxis,
-            initialFractions: const [0.33, 0.67],
-            children: [
-              summaryTree,
-              InspectorDetailsTabController(
-                detailsTree: detailsTree,
-                controller: inspectorController,
-                actionButtons: _expandCollapseButtons(),
-                layoutExplorerSupported: _layoutExplorerSupported,
-              ),
-            ],
-          ),
+          child: widgetTrees,
         ),
       ],
     );
   }
 
-  Widget _buildSummaryTreeColumn() => OutlineDecoration(
-        child: ValueListenableBuilder(
-          valueListenable: serviceManager.errorBadgeManager
-              .erroredItemsForPage(InspectorScreen.id),
-          builder: (_, LinkedHashMap<String, DevToolsError> errors, __) {
-            final inspectableErrors = errors.map(
-                (key, value) => MapEntry(key, value as InspectableWidgetError));
-            return Stack(
-              children: [
-                InspectorTree(
-                  key: summaryTreeKey,
-                  controller: summaryTreeController,
-                  isSummaryTree: true,
-                  widgetErrors: inspectableErrors,
-                ),
-                if (errors.isNotEmpty && inspectorController != null)
-                  ValueListenableBuilder(
-                    valueListenable: inspectorController.selectedErrorIndex,
-                    builder: (_, selectedErrorIndex, __) => Positioned(
-                      top: 0,
-                      right: 0,
-                      child: ErrorNavigator(
-                        errors: inspectableErrors,
-                        errorIndex: selectedErrorIndex,
-                        onSelectError: inspectorController.selectErrorByIndex,
-                      ),
+  Widget _buildSummaryTreeColumn(
+    DebuggerController debuggerController,
+  ) {
+    return OutlineDecoration(
+      child: ValueListenableBuilder(
+        valueListenable: serviceManager.errorBadgeManager
+            .erroredItemsForPage(InspectorScreen.id),
+        builder: (_, LinkedHashMap<String, DevToolsError> errors, __) {
+          final inspectableErrors = errors.map(
+              (key, value) => MapEntry(key, value as InspectableWidgetError));
+          return Stack(
+            children: [
+              InspectorTree(
+                key: summaryTreeKey,
+                controller: summaryTreeController,
+                isSummaryTree: true,
+                widgetErrors: inspectableErrors,
+                debuggerController: debuggerController,
+              ),
+              if (errors.isNotEmpty && inspectorController != null)
+                ValueListenableBuilder(
+                  valueListenable: inspectorController.selectedErrorIndex,
+                  builder: (_, selectedErrorIndex, __) => Positioned(
+                    top: 0,
+                    right: 0,
+                    child: ErrorNavigator(
+                      errors: inspectableErrors,
+                      errorIndex: selectedErrorIndex,
+                      onSelectError: inspectorController.selectErrorByIndex,
                     ),
-                  )
-              ],
-            );
-          },
-        ),
-      );
+                  ),
+                )
+            ],
+          );
+        },
+      ),
+    );
+  }
 
   List<Widget> getServiceExtensionWidgets() {
     return [
@@ -261,20 +278,14 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   void _handleConnectionStart(VmService service) async {
     setState(() {
-      connectionInProgress = true;
+      summaryTreeController = null;
+      detailsTreeController = null;
     });
 
-    try {
-      // Init the inspector service, or return null.
-      inspectorService =
-          await InspectorService.create(service).catchError((e) => null);
-    } finally {
-      setState(() {
-        connectionInProgress = false;
-      });
-    }
+    final inspectorService = serviceManager.inspectorService;
 
     if (inspectorService == null) {
+      // The app must not be a Flutter app.
       return;
     }
 
@@ -285,7 +296,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       inspectorController = InspectorController(
         inspectorTree: summaryTreeController,
         detailsTree: detailsTreeController,
-        inspectorService: inspectorService,
         treeType: FlutterTreeType.widget,
         onExpandCollapseSupported: _onExpandCollapseSupported,
         onLayoutExplorerSupported: _onLayoutExplorerSupported,
@@ -294,23 +304,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // Clear any existing badge/errors for older errors that were collected.
       serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
       inspectorController.filterErrors();
-
-      // TODO(jacobr): move this notice display to once a day.
-      if (!displayedWidgetTrackingNotice) {
-        // ignore: unawaited_futures
-        inspectorService.isWidgetCreationTracked().then((bool value) {
-          if (value) {
-            return;
-          }
-
-          displayedWidgetTrackingNotice = true;
-          // TODO(jacobr): implement showMessage.
-          // framework.showMessage(
-          //  message: trackWidgetCreationWarning,
-          //  screenId: inspectorScreenId,
-          //);
-        });
-      }
     });
   }
 

@@ -19,6 +19,9 @@ class TreeNode<T extends TreeNode<T>> {
 
   final List<T> children = [];
 
+  // TODO(jacobr) should impact depth.
+  bool indentChildren = true;
+
   /// Index in [parent.children].
   int index = -1;
 

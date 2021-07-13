@@ -230,6 +230,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
       _hoverCard?.remove();
       _hoverCard = null;
       final hoverCardData = await widget.onHover(event);
+      if (!mounted) return;
       if (hoverCardData != null) {
         _hoverCard = HoverCard(
           context: context,

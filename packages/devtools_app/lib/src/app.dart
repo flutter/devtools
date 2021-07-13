@@ -14,6 +14,7 @@ import 'analytics/constants.dart' as analytics_constants;
 import 'analytics/provider.dart';
 import 'app_size/app_size_controller.dart';
 import 'app_size/app_size_screen.dart';
+import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
 import 'config_specific/server/server.dart';
 import 'debugger/debugger_controller.dart';
@@ -81,7 +82,7 @@ class DevToolsApp extends StatefulWidget {
 /// flutter route parameters.
 // TODO(https://github.com/flutter/devtools/issues/1146): Introduce tests that
 // navigate the full app.
-class DevToolsAppState extends State<DevToolsApp> {
+class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
 
   bool get isDarkThemeEnabled => _isDarkThemeEnabled;
@@ -99,7 +100,7 @@ class DevToolsAppState extends State<DevToolsApp> {
 
     ga.setupDimensions();
 
-    serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
+    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       setState(() {
         _clearCachedRoutes();
       });

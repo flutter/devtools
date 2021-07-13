@@ -13,8 +13,6 @@ import 'support/mocks.dart';
 
 void main() {
   group('stdio', () {
-    DebuggerController debuggerController;
-
     setUp(() {
       final service = MockVmService();
       when(service.onDebugEvent).thenAnswer((_) {
@@ -34,28 +32,29 @@ void main() {
       });
       final manager = FakeServiceManager(service: service);
       setGlobal(ServiceConnectionManager, manager);
-      debuggerController = DebuggerController(initialSwitchToIsolate: false);
     });
 
     test('ignores trailing new lines', () {
-      debuggerController.appendStdio('1\n');
-      expect(debuggerController.stdio.value.length, 1);
+      serviceManager.consoleService.appendStdio('1\n');
+      expect(serviceManager.consoleService.stdio.value.length, 1);
     });
 
     test('has an item for each line', () {
-      debuggerController.appendStdio('1\n');
-      debuggerController.appendStdio('2\n');
-      debuggerController.appendStdio('3\n');
-      debuggerController.appendStdio('4\n');
-      expect(debuggerController.stdio.value.length, 4);
+      serviceManager.consoleService
+        ..appendStdio('1\n')
+        ..appendStdio('2\n')
+        ..appendStdio('3\n')
+        ..appendStdio('4\n');
+      expect(serviceManager.consoleService.stdio.value.length, 4);
     });
 
     test('preserves additional newlines', () {
-      debuggerController.appendStdio('1\n\n');
-      debuggerController.appendStdio('2\n\n');
-      debuggerController.appendStdio('3\n\n');
-      debuggerController.appendStdio('4\n\n');
-      expect(debuggerController.stdio.value.length, 8);
+      serviceManager.consoleService
+        ..appendStdio('1\n\n')
+        ..appendStdio('2\n\n')
+        ..appendStdio('3\n\n')
+        ..appendStdio('4\n\n');
+      expect(serviceManager.consoleService.stdio.value.length, 8);
     });
   });
 

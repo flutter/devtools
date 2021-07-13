@@ -1077,6 +1077,51 @@ Map<String, String> devToolsQueryParams(String url) {
   return uri.queryParameters;
 }
 
+/// Gets a VM Service URI from a query string.
+///
+/// We read from the 'uri' value if it exists; otherwise we create a uri from
+/// the from 'port' and 'token' values.
+Uri getServiceUriFromQueryString(String location) {
+  if (location == null) {
+    return null;
+  }
+
+  final queryParams = Uri.parse(location).queryParameters;
+
+  // First try to use uri.
+  if (queryParams['uri'] != null) {
+    final uri = Uri.tryParse(queryParams['uri']);
+
+    // Lots of things are considered valid URIs (including empty strings
+    // and single letters) since they can be relative, so we need to do some
+    // extra checks.
+    if (uri != null &&
+        uri.isAbsolute &&
+        (uri.isScheme('ws') ||
+            uri.isScheme('wss') ||
+            uri.isScheme('http') ||
+            uri.isScheme('https') ||
+            uri.isScheme('sse') ||
+            uri.isScheme('sses'))) {
+      return uri;
+    }
+  }
+
+  // Otherwise try 'port', 'token', and 'host'.
+  final port = int.tryParse(queryParams['port'] ?? '');
+  final token = queryParams['token'];
+  final host = queryParams['host'] ?? 'localhost';
+  if (port != null) {
+    if (token == null) {
+      return Uri.parse('ws://$host:$port/ws');
+    } else {
+      return Uri.parse('ws://$host:$port/$token/ws');
+    }
+  }
+
+  return null;
+}
+
 /// Helper function to return the name of a key. If widget has a key
 /// use the key's name to record the select e.g.,
 ///   ga.select(MemoryScreen.id, ga.keyName(MemoryScreen.gcButtonKey));
@@ -1121,25 +1166,63 @@ class ListValueNotifier<T> extends ChangeNotifier
   @override
   List<T> get value => _currentList;
 
-  /// Adds an element to the list and notifies listeners.
-  void add(T element) {
-    _rawList.add(element);
+  void _listChanged() {
     _currentList = ImmutableList(_rawList);
     notifyListeners();
   }
 
+  set last(T value) {
+    // TODO(jacobr): use a more sophisticated data structure such as
+    // https://en.wikipedia.org/wiki/Rope_(data_structure) to make last more
+    // efficient.
+    _rawList = _rawList.toList();
+    _rawList.last = value;
+    _listChanged();
+  }
+
+  /// Adds an element to the list and notifies listeners.
+  void add(T element) {
+    _rawList.add(element);
+    _listChanged();
+  }
+
   /// Adds elements to the list and notifies listeners.
-  void addAll(List<T> elements) {
+  void addAll(Iterable<T> elements) {
     _rawList.addAll(elements);
-    _currentList = ImmutableList(_rawList);
-    notifyListeners();
+    _listChanged();
   }
 
   /// Clears the list and notifies listeners.
   void clear() {
     _rawList = [];
-    _currentList = ImmutableList(_rawList);
-    notifyListeners();
+    _listChanged();
+  }
+
+  /// Truncates to just the elements between [start] and [end].
+  ///
+  /// If [end] is omitted, it defaults to the [length] of this list.
+  ///
+  /// The `start` and `end` positions must satisfy the relations
+  /// 0 ≤ `start` ≤ `end` ≤ [length]
+  /// If `end` is equal to `start`, then the returned list is empty.
+  void trimToSublist(int start, [int end]) {
+    // TODO(jacobr): use a more sophisticated data structure such as
+    // https://en.wikipedia.org/wiki/Rope_(data_structure) to make the
+    // implementation of this method more efficient.
+    _rawList = _rawList.sublist(start, end);
+    _listChanged();
+  }
+
+  /// Removes the first occurrence of [value] from this list.
+  ///
+  /// Runtime is O(n).
+  bool remove(T value) {
+    final index = _rawList.indexOf(value);
+    if (index == -1) return false;
+    _rawList = _rawList.toList();
+    _rawList.removeAt(index);
+    _listChanged();
+    return true;
   }
 }
 

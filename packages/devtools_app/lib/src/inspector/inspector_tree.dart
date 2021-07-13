@@ -11,6 +11,8 @@
 /// and will help simplify porting this code to work with Hummingbird.
 library inspector_tree;
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
@@ -297,7 +299,7 @@ class InspectorTreeConfig {
     @required this.summaryTree,
     @required this.treeType,
     @required this.onNodeAdded,
-    this.onClientActiveChange,
+    @required this.onClientActiveChange,
     this.onSelectionChange,
     this.onExpand,
     this.onHover,
@@ -364,7 +366,7 @@ abstract class InspectorTreeController {
   // TODO: we should add a listener instead that clears the cache when the
   // root is marked as dirty.
   void _maybeClearCache() {
-    if (root.isDirty) {
+    if (root != null && root.isDirty) {
       cachedRows.clear();
       root.isDirty = false;
       lastContentWidth = null;
@@ -372,11 +374,13 @@ abstract class InspectorTreeController {
   }
 
   InspectorTreeRow getCachedRow(int index) {
+    if (index < 0) return null;
+
     _maybeClearCache();
     while (cachedRows.length <= index) {
       cachedRows.add(null);
     }
-    cachedRows[index] ??= root.getRow(index);
+    cachedRows[index] ??= root?.getRow(index);
     return cachedRows[index];
   }
 
@@ -510,7 +514,7 @@ abstract class InspectorTreeController {
 
   int get numRows => root != null ? root.subtreeSize : 0;
 
-  int getRowIndex(double y) => (y - verticalPadding) ~/ rowHeight;
+  int getRowIndex(double y) => math.max(0, (y - verticalPadding) ~/ rowHeight);
 
   InspectorTreeRow getRowForNode(InspectorTreeNode node) {
     return getCachedRow(root.getRowIndex(node));
