@@ -14,6 +14,7 @@ import 'notifications.dart';
 import 'routing.dart';
 import 'theme.dart';
 import 'url_utils.dart';
+import 'utils.dart';
 
 /// Widget that requires business logic to be loaded before building its
 /// [builder].
@@ -158,7 +159,7 @@ class _InitializerState extends State<Initializer>
                       DevToolsRouterDelegate.of(context)
                           .navigate(homePageId, {'uri': null});
                     },
-                    child: const Text('Connect to Another App'))
+                    child: const Text(connectToNewAppText))
               else
                 Text(
                   'Run a new debug session to reconnect',

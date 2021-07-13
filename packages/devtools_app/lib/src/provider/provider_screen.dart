@@ -100,7 +100,7 @@ class ProviderScreenBody extends ConsumerWidget {
                 AreaPaneHeader(
                   needsTopBorder: false,
                   title: Text(detailsTitleText),
-                  actions: [
+                  rightActions: [
                     SettingsOutlinedButton(
                       onPressed: () {
                         showDialog(

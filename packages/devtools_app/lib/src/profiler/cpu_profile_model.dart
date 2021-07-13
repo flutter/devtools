@@ -198,8 +198,10 @@ class CpuProfileData {
         samplePeriodKey: profileMetaData.samplePeriod,
         sampleCountKey: profileMetaData.sampleCount,
         stackDepthKey: profileMetaData.stackDepth,
-        timeOriginKey: profileMetaData.time.start.inMicroseconds,
-        timeExtentKey: profileMetaData.time.duration.inMicroseconds,
+        if (profileMetaData?.time?.start != null)
+          timeOriginKey: profileMetaData.time.start.inMicroseconds,
+        if (profileMetaData?.time?.duration != null)
+          timeExtentKey: profileMetaData.time.duration.inMicroseconds,
         stackFramesKey: stackFramesJson,
         traceEventsKey: stackTraceEvents,
       };
@@ -434,6 +436,8 @@ class CpuProfileStore {
   /// returned. This method will return null if no profiles are cached for
   /// [time] or if a sub profile cannot be generated for [time].
   CpuProfileData lookupProfile(TimeRange time) {
+    if (!time.isWellFormed) return null;
+
     // If we have a profile for a time range encompassing [time], then we can
     // generate and cache the profile for [time] without needing to pull data
     // from the vm service.

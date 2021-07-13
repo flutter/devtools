@@ -526,14 +526,13 @@ class BulletSpacer extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    TextTheme textTheme;
+    TextStyle textStyle;
     if (useAccentColor) {
-      textTheme = theme.appBarTheme.textTheme ?? theme.primaryTextTheme;
+      textStyle = theme.appBarTheme.toolbarTextStyle ??
+          theme.primaryTextTheme.bodyText2;
     } else {
-      textTheme = theme.textTheme;
+      textStyle = theme.textTheme.bodyText2;
     }
-
-    final textStyle = textTheme.bodyText2;
     final mutedColor = textStyle?.color?.withAlpha(0x90);
 
     return Container(
@@ -655,7 +654,8 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
     this.needsTopBorder = true,
     this.needsBottomBorder = true,
     this.needsLeftBorder = false,
-    this.actions = const [],
+    this.leftActions = const [],
+    this.rightActions = const [],
     this.rightPadding = densePadding,
     this.tall = false,
   }) : super(key: key);
@@ -665,7 +665,8 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool needsTopBorder;
   final bool needsBottomBorder;
   final bool needsLeftBorder;
-  final List<Widget> actions;
+  final List<Widget> leftActions;
+  final List<Widget> rightActions;
   final double rightPadding;
   final bool tall;
 
@@ -688,15 +689,16 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
         alignment: Alignment.centerLeft,
         child: Row(
           children: [
-            Expanded(
-              child: DefaultTextStyle(
-                maxLines: maxLines,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.subtitle2,
-                child: title,
-              ),
+            DefaultTextStyle(
+              maxLines: maxLines,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.subtitle2,
+              child: title,
             ),
-            ...actions,
+            ...leftActions,
+            if (leftActions.isNotEmpty && rightActions.isNotEmpty)
+              const Spacer(),
+            ...rightActions,
           ],
         ),
       ),

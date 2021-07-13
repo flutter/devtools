@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:devtools_app/src/core/message_bus.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/notifications.dart';
 import 'package:devtools_app/src/service_extensions.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/service_registrations.dart';
@@ -183,10 +182,6 @@ void main() {
       expect(toggle.value, false, reason: 'The extension is disabled.');
     });
   });
-}
-
-Widget wrapWithNotifications(Widget child) {
-  return Notifications(child: child);
 }
 
 void registerServiceExtension(

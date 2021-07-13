@@ -22,6 +22,8 @@ import 'support/wrappers.dart';
 
 void main() {
   FakeServiceManager fakeServiceManager;
+  PerformanceController controller;
+
   group('TimelineFlameChartContent', () {
     void _setUpServiceManagerWithTimeline(
       Map<String, dynamic> timelineJson,
@@ -33,6 +35,8 @@ void main() {
       );
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+      when(fakeServiceManager.connectedApp.isProfileBuild)
+          .thenAnswer((_) => Future.value(true));
       when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
           .thenReturn(false);
@@ -46,15 +50,23 @@ void main() {
     });
 
     Future<void> pumpTimelineBody(
-      WidgetTester tester,
-      PerformanceController controller,
-    ) async {
+      WidgetTester tester, {
+      PerformanceController performanceController,
+      bool runAsync = false,
+    }) async {
+      controller = performanceController ?? PerformanceController();
+
+      if (runAsync) {
+        // Await a small delay to allow the PerformanceController to complete
+        // initialization.
+        await Future.delayed(const Duration(seconds: 1));
+      }
+
       await tester.pumpWidget(wrapWithControllers(
         const PerformanceScreenBody(),
         performance: controller,
       ));
-      // Delay to ensure the timeline has started.
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
     }
 
     const windowSize = Size(2225.0, 1000.0);
@@ -62,9 +74,10 @@ void main() {
     testWidgetsWithWindowSize('builds header content', windowSize,
         (WidgetTester tester) async {
       _setUpServiceManagerWithTimeline({});
-      await pumpTimelineBody(tester, PerformanceController());
+      await pumpTimelineBody(tester);
       await tester.pumpAndSettle();
       expect(find.text('Timeline Events'), findsOneWidget);
+      expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
       expect(find.byKey(timelineSearchFieldKey), findsOneWidget);
       expect(find.byType(FlameChartHelpButton), findsOneWidget);
     });
@@ -72,7 +85,7 @@ void main() {
     testWidgetsWithWindowSize('can show help dialog', windowSize,
         (WidgetTester tester) async {
       _setUpServiceManagerWithTimeline({});
-      await pumpTimelineBody(tester, PerformanceController());
+      await pumpTimelineBody(tester);
       await tester.pumpAndSettle();
 
       final helpButtonFinder = find.byType(FlameChartHelpButton);
@@ -84,39 +97,42 @@ void main() {
 
     testWidgetsWithWindowSize('builds flame chart with data', windowSize,
         (WidgetTester tester) async {
-      await pumpTimelineBody(tester, PerformanceController());
-      await tester.pumpAndSettle();
-      expect(find.byType(TimelineFlameChart), findsOneWidget);
-      expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
-          findsNothing);
+      await tester.runAsync(() async {
+        await pumpTimelineBody(tester, runAsync: true);
+        expect(find.byType(TimelineFlameChart), findsOneWidget);
+        expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+            findsNothing);
+      });
     });
 
     testWidgetsWithWindowSize('builds flame chart with no data', windowSize,
         (WidgetTester tester) async {
-      _setUpServiceManagerWithTimeline({});
-      await pumpTimelineBody(tester, PerformanceController());
-      await tester.pumpAndSettle();
-      expect(find.byType(TimelineFlameChart), findsNothing);
-      expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
-          findsOneWidget);
+      await tester.runAsync(() async {
+        _setUpServiceManagerWithTimeline({});
+        await pumpTimelineBody(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(find.byType(TimelineFlameChart), findsNothing);
+        expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+            findsOneWidget);
+      });
     });
 
     testWidgetsWithWindowSize(
         'builds flame chart with selected frame', windowSize,
         (WidgetTester tester) async {
-      final controller = PerformanceController();
-      await pumpTimelineBody(tester, controller);
-      expect(controller.data.frames.length, equals(1));
-      await controller.toggleSelectedFrame(controller.data.frames.first);
-      await tester.pumpAndSettle();
-
+      await tester.runAsync(() async {
+        await pumpTimelineBody(tester, runAsync: true);
+        controller.addFrame(testFrame0);
+        expect(controller.data.frames.length, equals(1));
+        await controller.toggleSelectedFrame(controller.data.frames.first);
+        await tester.pumpAndSettle();
+      });
       expect(find.byType(TimelineFlameChart), findsOneWidget);
       await expectLater(
         find.byType(TimelineFlameChart),
         matchesGoldenFile(
             'goldens/timeline_flame_chart_with_selected_frame.png'),
       );
-
       // Await delay for golden comparison.
       await tester.pumpAndSettle(const Duration(seconds: 2));
     }, skip: kIsWeb || !Platform.isMacOS);

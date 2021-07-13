@@ -232,6 +232,46 @@ void main() {
         expect(t.containsRange(invertedContains), isFalse);
         expect(t.containsRange(containsNeither), isFalse);
       });
+
+      test('start setter throws exception when single assignment is true', () {
+        expect(() {
+          final t = TimeRange()..start = Duration.zero;
+          t.start = Duration.zero;
+        }, throwsAssertionError);
+      });
+
+      test('start setter throws exception when value is after end', () {
+        expect(() {
+          final t = TimeRange()..end = const Duration(seconds: 1);
+          t.start = const Duration(seconds: 2);
+        }, throwsAssertionError);
+      });
+
+      test('end setter throws exception when single assignment is true', () {
+        expect(() {
+          final t = TimeRange()..end = Duration.zero;
+          t.end = Duration.zero;
+        }, throwsAssertionError);
+      });
+
+      test('end setter throws exception when value is before start', () {
+        expect(() {
+          final t = TimeRange()..start = const Duration(seconds: 1);
+          t.end = Duration.zero;
+        }, throwsAssertionError);
+      });
+
+      test('isWellFormed', () {
+        expect(
+          (TimeRange()
+                ..start = Duration.zero
+                ..end = Duration.zero)
+              .isWellFormed,
+          isTrue,
+        );
+        expect((TimeRange()..end = Duration.zero).isWellFormed, isFalse);
+        expect((TimeRange()..start = Duration.zero).isWellFormed, isFalse);
+      });
     });
 
     test('formatDateTime', () {

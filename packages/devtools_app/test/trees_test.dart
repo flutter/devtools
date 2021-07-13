@@ -21,6 +21,7 @@ void main() {
 
     test('root', () {
       expect(treeNode2.root, equals(treeNode0));
+      expect(treeNode6.root, equals(treeNode0));
     });
 
     test('level', () {

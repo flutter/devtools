@@ -195,7 +195,7 @@ class LegacyPerformanceController
         await cpuProfilerController.pullAndProcessProfile(
           startMicros: event.time.start.inMicroseconds,
           extentMicros: event.time.duration.inMicroseconds,
-          processId: '${event.traceEvents.first.id}',
+          processId: '${event.traceEvents.first.wrapperId}',
         );
         data.cpuProfileData = cpuProfilerController.dataNotifier.value;
       }
@@ -240,6 +240,12 @@ class LegacyPerformanceController
       }
       data.cpuProfileData = cpuProfilerController.dataNotifier.value;
     } else {
+      if (!storedProfileForFrame.processed) {
+        await cpuProfilerController.transformer.processData(
+          storedProfileForFrame,
+          processId: 'Flutter frame ${frame.id} - stored profile ',
+        );
+      }
       data.cpuProfileData = storedProfileForFrame;
       cpuProfilerController.loadProcessedData(storedProfileForFrame);
     }
