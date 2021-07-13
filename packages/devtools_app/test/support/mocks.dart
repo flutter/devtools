@@ -524,7 +524,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Stream<Event> get onTimelineEvent => const Stream.empty();
-  
+
   @override
   Stream<Event> get onIsolateEvent => const Stream.empty();
 }

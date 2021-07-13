@@ -65,7 +65,6 @@ void main() {
         (WidgetTester tester) async {
       serviceManager.consoleService.appendStdio('test stdio');
 
-
       await pumpConsole(tester, debuggerController);
 
       expect(find.text('Console'), findsOneWidget);
