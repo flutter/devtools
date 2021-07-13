@@ -13,7 +13,6 @@ import '../auto_dispose_mixin.dart';
 import '../split.dart';
 import '../table.dart';
 import '../table_data.dart';
-import '../theme.dart';
 import '../ui/icons.dart';
 import '../ui/search.dart';
 import '../utils.dart';
@@ -22,24 +21,19 @@ import 'memory_controller.dart';
 import 'memory_tracker_model.dart';
 
 // Track Image.
-Image trackImage(BuildContext context) {
-  final themeData = Theme.of(context);
+ThemedImageIcon trackImage(BuildContext context) {
   // TODO(terry): Match shape in event pane.
-  return createImageIcon(
-    themeData.isDarkTheme
-        ? 'icons/memory/communities_white.png'
-        : 'icons/memory/communities_black.png',
+  return const ThemedImageIcon(
+    darkModeAsset: 'icons/memory/communities_white.png',
+    lightModeAsset: 'icons/memory/communities_black.png',
   );
 }
 
-Image resetImage(BuildContext context) {
-  final themeData = Theme.of(context);
-
-  return createImageIcon(
-    // TODO(terry): Match shape in event pane.
-    themeData.isDarkTheme
-        ? 'icons/memory/reset_icon_white.png'
-        : 'icons/memory/reset_icon_black.png',
+ThemedImageIcon resetImage(BuildContext context) {
+// TODO(terry): Match shape in event pane.
+  return const ThemedImageIcon(
+    darkModeAsset: 'icons/memory/reset_icon_white.png',
+    lightModeAsset: 'icons/memory/reset_icon_black.png',
   );
 }
 

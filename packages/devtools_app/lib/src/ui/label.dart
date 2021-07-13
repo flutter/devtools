@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import 'icons.dart';
 
 /// Label including an image icon and optional text.
 class ImageIconLabel extends StatelessWidget {
@@ -33,11 +34,13 @@ class MaterialIconLabel extends StatelessWidget {
     @required this.label,
     this.iconData,
     this.imageIcon,
+    this.color,
     this.includeTextWidth,
   }) : assert((iconData == null) != (imageIcon == null));
 
   final IconData iconData;
-  final Image imageIcon;
+  final ThemedImageIcon imageIcon;
+  final Color color;
   final String label;
   final double includeTextWidth;
 
@@ -52,13 +55,17 @@ class MaterialIconLabel extends StatelessWidget {
             ? Icon(
                 iconData,
                 size: defaultIconSize,
+                color: color,
               )
             : imageIcon,
         // TODO(jacobr): animate showing and hiding the text.
         if (includeText(context, includeTextWidth))
           Padding(
             padding: const EdgeInsets.only(left: denseSpacing),
-            child: Text(label),
+            child: Text(
+              label,
+              style: TextStyle(color: color),
+            ),
           ),
       ],
     );

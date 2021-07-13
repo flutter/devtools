@@ -22,12 +22,13 @@ class RegisteredServiceDescription {
 /// Hot reload service registered by Flutter Tools.
 ///
 /// We call this service to perform hot reload.
-final hotReload = RegisteredServiceDescription._(
+const hotReload = RegisteredServiceDescription._(
   service: 'reloadSources',
   title: 'Hot Reload',
-  icon: createImageIcon(
-    'icons/hot-reload-white@2x.png',
-    size: actionsIconSize,
+  icon: AssetImageIcon(
+    asset: 'icons/hot-reload-white@2x.png',
+    height: actionsIconSize,
+    width: actionsIconSize,
   ),
 );
 

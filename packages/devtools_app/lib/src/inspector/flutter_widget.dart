@@ -4,29 +4,27 @@
 
 library flutter_widget;
 
-import 'package:flutter/material.dart';
-
 import '../ui/icons.dart';
 import '../utils.dart';
 
 class Category {
   const Category(this.label, this.icon);
 
-  static Category accessibility = Category(
+  static Category accessibility = const Category(
     'Accessibility',
-    createImageIcon('icons/inspector/balloonInformation.png'),
+    AssetImageIcon(asset: 'icons/inspector/balloonInformation.png'),
   );
-  static Category animationAndMotion = Category(
+  static Category animationAndMotion = const Category(
     'Animation and Motion',
-    createImageIcon('icons/inspector/resume.png'),
+    AssetImageIcon(asset: 'icons/inspector/resume.png'),
   );
-  static Category assetsImagesAndIcons = Category(
+  static Category assetsImagesAndIcons = const Category(
     'Assets, Images, and Icons',
-    createImageIcon('icons/inspector/any_type.png'),
+    AssetImageIcon(asset: 'icons/inspector/any_type.png'),
   );
-  static Category asyncCategory = Category(
+  static Category asyncCategory = const Category(
     'Async',
-    createImageIcon('icons/inspector/threads.png'),
+    AssetImageIcon(asset: 'icons/inspector/threads.png'),
   );
   static const Category basics = Category(
     'Basics',
@@ -36,29 +34,29 @@ class Category {
     'Cupertino (iOS-style widgets)',
     null, // TODO(jacobr): add an icon.
   );
-  static Category input = Category(
+  static Category input = const Category(
     'Input',
-    createImageIcon('icons/inspector/renderer.png'),
+    AssetImageIcon(asset: 'icons/inspector/renderer.png'),
   );
-  static Category paintingAndEffects = Category(
+  static Category paintingAndEffects = const Category(
     'Painting and effects',
-    createImageIcon('icons/inspector/colors.png'),
+    AssetImageIcon(asset: 'icons/inspector/colors.png'),
   );
-  static Category scrolling = Category(
+  static Category scrolling = const Category(
     'Scrolling',
-    createImageIcon('icons/inspector/scrollbar.png'),
+    AssetImageIcon(asset: 'icons/inspector/scrollbar.png'),
   );
-  static Category stack = Category(
+  static Category stack = const Category(
     'Stack',
-    createImageIcon('icons/inspector/value.png'),
+    AssetImageIcon(asset: 'icons/inspector/value.png'),
   );
-  static Category styling = Category(
+  static Category styling = const Category(
     'Styling',
-    createImageIcon('icons/inspector/atrule.png'),
+    AssetImageIcon(asset: 'icons/inspector/atrule.png'),
   );
-  static Category text = Category(
+  static Category text = const Category(
     'Text',
-    createImageIcon('icons/inspector/textArea.png'),
+    AssetImageIcon(asset: 'icons/inspector/textArea.png'),
   );
 
   static List<Category> values = [
@@ -77,7 +75,7 @@ class Category {
   ];
 
   final String label;
-  final Image icon;
+  final AssetImageIcon icon;
 
   static Map<String, Category> _categories;
 
@@ -96,9 +94,9 @@ class FlutterWidget {
   FlutterWidget(this.json) : icon = initIcon(json);
 
   final Map<String, Object> json;
-  final Image icon;
+  final AssetImageIcon icon;
 
-  static Image initIcon(Map<String, Object> json) {
+  static AssetImageIcon initIcon(Map<String, Object> json) {
     final List<Object> categories = json['categories'];
     if (categories != null) {
       // TODO(pq): consider priority over first match.
