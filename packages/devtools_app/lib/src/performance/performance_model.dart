@@ -548,6 +548,10 @@ class FlutterFrame {
         'ui: ${timelineEventData.uiEvent.time}, '
         'raster: ${timelineEventData.rasterEvent.time}';
   }
+
+  FlutterFrame shallowCopy() {
+    return FlutterFrame.parse(json);
+  }
 }
 
 class FrameTimelineEventData {

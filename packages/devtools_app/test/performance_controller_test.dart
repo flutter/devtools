@@ -66,12 +66,14 @@ void main() async {
     test('frame selection', () async {
       await env.setupEnvironment();
 
-      testFrame0
+      testFrame0.shallowCopy()
         ..setEventFlow(goldenUiTimelineEvent)
         ..setEventFlow(goldenRasterTimelineEvent);
       final frame1UiEvent = goldenUiTimelineEvent.deepCopy();
       final frame1RasterEvent = goldenRasterTimelineEvent.deepCopy();
-      testFrame1..setEventFlow(frame1UiEvent)..setEventFlow(frame1RasterEvent);
+      testFrame1.shallowCopy()
+        ..setEventFlow(frame1UiEvent)
+        ..setEventFlow(frame1RasterEvent);
 
       // Select a frame.
       expect(performanceController.data.selectedFrame, isNull);
