@@ -12,7 +12,6 @@ on:
 
 env:
   CHANNEL: dev
-  TRAVIS_OS_NAME: linux
 
 jobs:
 
@@ -23,11 +22,10 @@ jobs:
       fail-fast: false
       matrix:
         channel:
-          - master
+          - 2.3.0-24.1.pre
           - dev
           - beta
-          # TODO: The stable channel currently fails.
-          # - stable
+          - stable
     steps:
       - name: git clone
         uses: actions/checkout@v2

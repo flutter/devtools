@@ -8,7 +8,7 @@
 set -ex
 
 # TODO: Also support windows on github actions.
-if [[ $TRAVIS_OS_NAME == "windows" ]]; then
+if [[ $RUNNER_OS == "Windows" ]]; then
     echo Installing Google Chrome Stable...
     # Install Chrome via Chocolatey while `addons: chrome` doesn't seem to work on Windows yet
     # https://travis-ci.community/t/installing-google-chrome-stable-but-i-cant-find-it-anywhere/2118
@@ -19,7 +19,7 @@ fi
 # script to call the correct one based on the OS.
 function flutter {
     # TODO: Also support windows on github actions.
-    if [[ $TRAVIS_OS_NAME == "windows" ]]; then
+    if [[ $RUNNER_OS == "Windows" ]]; then
         command flutter.bat "$@"
     else
         command flutter "$@"
@@ -27,15 +27,13 @@ function flutter {
 }
 
 # Get Flutter.
-if [ "$CHANNEL" = "stable" ]; then
-    echo "Cloning stable Flutter branch"
-    git clone https://github.com/flutter/flutter.git --branch stable ./flutter
+echo "Cloning the Flutter $CHANNEL branch"
+git clone https://github.com/flutter/flutter.git --branch $CHANNEL ./flutter
 
+if [ "$CHANNEL" = "stable" ]; then
     # Set the suffix so we use stable goldens.
     export DEVTOOLS_GOLDENS_SUFFIX="_stable"
 else
-    echo "Cloning the Flutter $CHANNEL branch"
-    git clone https://github.com/flutter/flutter.git --branch $CHANNEL ./flutter
     # Set the suffix so we use the non-stable goldens
     export DEVTOOLS_GOLDENS_SUFFIX=""
 fi
