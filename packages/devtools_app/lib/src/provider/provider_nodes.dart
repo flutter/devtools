@@ -49,9 +49,13 @@ final _rawProviderIdsProvider =
       eval.getInstance(idRef, isAlive)
   ]);
 
-  return [
-    for (final idInstance in providerIdInstances) idInstance.valueAsString,
-  ];
+  final ret = <String>[];
+  for (final idInstance in providerIdInstances) {
+    if (idInstance != null) {
+      ret.add(idInstance.valueAsString);
+    }
+  }
+  return ret;
 }, name: '_rawProviderIdsProvider');
 
 final _rawProviderNodeProvider =

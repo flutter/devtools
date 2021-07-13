@@ -294,6 +294,12 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
 
   final instance = await eval.getInstance(instanceRef, isAlive);
 
+  if (instance == null) {
+    // TODO(jacobr): we might want to surface this as unavailable rather than
+    // null.
+    return InstanceDetails.nill(setter: setter);
+  }
+
   switch (instance.kind) {
     case InstanceKind.kNull:
       return InstanceDetails.nill(setter: setter);
@@ -360,6 +366,9 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
       if (enumDetails != null) return enumDetails;
 
       final classInstance = await eval.getClass(instance.classRef, isAlive);
+      if (classInstance == null) {
+        return InstanceDetails.nill(setter: setter);
+      }
       final evalForInstance =
           ref.watch(libraryEvalProvider(classInstance.library.uri).future);
 
