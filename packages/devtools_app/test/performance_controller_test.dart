@@ -66,21 +66,21 @@ void main() async {
     test('frame selection', () async {
       await env.setupEnvironment();
 
-      testFrame0.shallowCopy()
+      final frame0 = testFrame0.shallowCopy()
         ..setEventFlow(goldenUiTimelineEvent)
         ..setEventFlow(goldenRasterTimelineEvent);
       final frame1UiEvent = goldenUiTimelineEvent.deepCopy();
       final frame1RasterEvent = goldenRasterTimelineEvent.deepCopy();
-      testFrame1.shallowCopy()
+      final frame1 = testFrame1.shallowCopy()
         ..setEventFlow(frame1UiEvent)
         ..setEventFlow(frame1RasterEvent);
 
       // Select a frame.
       expect(performanceController.data.selectedFrame, isNull);
-      await performanceController.toggleSelectedFrame(testFrame0);
+      await performanceController.toggleSelectedFrame(frame0);
       expect(
         performanceController.data.selectedFrame,
-        equals(testFrame0),
+        equals(frame0),
       );
       // Verify main UI event for the frame is selected automatically.
       expect(
@@ -95,10 +95,10 @@ void main() async {
           equals(animatorBeginFrameEvent));
 
       // Select a different frame.
-      await performanceController.toggleSelectedFrame(testFrame1);
+      await performanceController.toggleSelectedFrame(frame1);
       expect(
         performanceController.data.selectedFrame,
-        equals(testFrame1),
+        equals(frame1),
       );
       expect(
         performanceController.data.selectedEvent,
