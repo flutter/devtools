@@ -17,6 +17,7 @@ analyzer:
 linter:
   rules:
     # Added on top of the flutter/flutter lints:
+    - depend_on_referenced_packages
     - prefer_generic_function_type_aliases
 
     # From flutter/flutter:
