@@ -76,6 +76,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   static const summaryTreeKey = Key('Summary Tree');
   static const detailsTreeKey = Key('Details Tree');
   static const includeTextWidth = 900.0;
+  static const includeRefreshTreeWidth = 1225.0;
+  static const serviceExtensionButtonsIncludeTextWidth = 1150.0;
 
   @override
   void initState() {
@@ -160,7 +162,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               onPressed: _refreshInspector,
               icon: Icons.refresh,
               label: 'Refresh Tree',
-              includeTextWidth: includeTextWidth,
+              color: Theme.of(context).colorScheme.serviceExtensionButtonsTitle,
+              includeTextWidth: includeRefreshTreeWidth,
             ),
             const Spacer(),
             Row(children: getServiceExtensionWidgets()),
@@ -216,18 +219,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   List<Widget> getServiceExtensionWidgets() {
     return [
       ServiceExtensionButtonGroup(
-        minIncludeTextWidth: 1050,
-        extensions: [extensions.slowAnimations],
-      ),
-      const SizedBox(width: denseSpacing),
-      ServiceExtensionButtonGroup(
-        minIncludeTextWidth: 1050,
-        extensions: [extensions.debugPaint, extensions.debugPaintBaselines],
-      ),
-      const SizedBox(width: denseSpacing),
-      ServiceExtensionButtonGroup(
-        minIncludeTextWidth: 1250,
+        minIncludeTextWidth: serviceExtensionButtonsIncludeTextWidth,
         extensions: [
+          extensions.slowAnimations,
+          extensions.debugPaint,
+          extensions.debugPaintBaselines,
           extensions.repaintRainbow,
           extensions.invertOversizedImages,
         ],
