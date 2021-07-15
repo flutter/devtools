@@ -169,8 +169,8 @@ class TimelineEventGroup {
       _sortedEventRoots ??= List<TimelineEvent>.from(rowIndexForEvent.keys)
           .where((event) => event.isRoot)
           .toList()
-        ..sort((a, b) =>
-            a.time.start.inMicroseconds.compareTo(b.time.start.inMicroseconds));
+            ..sort((a, b) => a.time.start.inMicroseconds
+                .compareTo(b.time.start.inMicroseconds));
   List<TimelineEvent> _sortedEventRoots;
 
   int get displayDepth => rows.length;
