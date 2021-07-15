@@ -158,7 +158,7 @@ void main() async {
       expect(performanceController.matchesForSearch(null), isEmpty);
       expect(performanceController.matchesForSearch(''), isEmpty);
 
-      await performanceController.clearData(clearVmTimeline: false);
+      await performanceController.clearData();
       expect(performanceController.data.timelineEvents, isEmpty);
       expect(performanceController.matchesForSearch('test'), isEmpty);
 

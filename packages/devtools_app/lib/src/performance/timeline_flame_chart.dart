@@ -1399,15 +1399,15 @@ extension FlutterFrameExtension on FlutterFrame {
   }
 
   TimeRange timeToCenterFrame() {
-    if (timelineEventData.uiEvent == null &&
-        timelineEventData.rasterEvent == null) {
-      return null;
+    if (timelineEventData.uiEvent != null &&
+        timelineEventData.rasterEvent != null) {
+      return timeFromEventFlows;
     } else if (timelineEventData.uiEvent != null) {
       return timelineEventData.uiEvent.time;
     } else if (timelineEventData.rasterEvent != null) {
       return timelineEventData.rasterEvent.time;
     } else {
-      return timeFromEventFlows;
+      return null;
     }
   }
 }

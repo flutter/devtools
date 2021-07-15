@@ -122,12 +122,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
     addAutoDisposeListener(controller.selectedFrame);
 
-    // Refresh data on page load if data is null. On subsequent tab changes,
-    // this should not be called.
-    if (controller.data == null && !offlineMode) {
-      controller.processAvailableEvents();
-    }
-
     // Load offline timeline data if available.
     if (shouldLoadOfflineData()) {
       // This is a workaround to guarantee that DevTools exports are compatible

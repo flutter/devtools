@@ -1077,6 +1077,17 @@ extension ListExtension<T> on List<T> {
       ]
     ];
   }
+
+  Iterable<T> whereFromIndex(bool test(T element), {int startIndex = 0}) {
+    final whereList = <T>[];
+    for (int i = startIndex; i < length; i++) {
+      final element = this[i];
+      if (test(element)) {
+        whereList.add(element);
+      }
+    }
+    return whereList;
+  }
 }
 
 Map<String, String> devToolsQueryParams(String url) {

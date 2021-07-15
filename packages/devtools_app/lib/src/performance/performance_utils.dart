@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../config_specific/logger/logger.dart';
 import '../utils.dart';
 import 'performance_model.dart';
 
@@ -67,5 +68,15 @@ class PerformanceUtils {
 
     // Alphabetize all other buckets.
     return a.compareTo(b);
+  }
+}
+
+const debugTraceEventDuplicates = false;
+
+/// Helper method to log important events when debugging issues related to trace
+/// event duplicates (for example https://github.com/dart-lang/sdk/issues/46605).
+void debugTraceEventLog(String debugLog) {
+  if (debugTraceEventDuplicates) {
+    log(debugLog);
   }
 }

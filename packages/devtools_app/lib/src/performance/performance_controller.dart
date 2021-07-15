@@ -25,6 +25,7 @@ import '../ui/search.dart';
 import '../utils.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
+import 'performance_utils.dart';
 import 'timeline_event_processor.dart';
 import 'timeline_streams.dart';
 
@@ -153,6 +154,10 @@ class PerformanceController extends DisposableController
   /// frame id in the corresponding [TimelineEvent]s.
   final _unassignedFlutterFrames = <int, FlutterFrame>{};
 
+  Timer _pollingTimer;
+
+  int _nextPollStartMicros = 0;
+
   Future<void> _initialized;
   Future<void> get initialized => _initialized;
 
@@ -195,37 +200,19 @@ class PerformanceController extends DisposableController
       }));
 
       // Load available timeline events.
-      final timeline = await serviceManager.service.getVMTimeline();
-      primeThreadIds(timeline);
-      for (final event in timeline.traceEvents) {
-        final eventWrapper = TraceEventWrapper(
-          TraceEvent(event.json),
-          DateTime.now().millisecondsSinceEpoch,
-        );
-        allTraceEvents.add(eventWrapper);
-      }
+      await _pullTraceEventsFromVmTimeline(shouldPrimeThreadIds: true);
 
       _processing.value = true;
       await processTraceEvents(allTraceEvents);
       _processing.value = false;
 
-      // Listen for new timeline events.
-      autoDispose(serviceManager.service.onTimelineEvent.listen((event) {
-        final eventBatch = <TraceEventWrapper>[];
-        if (event.json['kind'] == 'TimelineEvents') {
-          final List<dynamic> traceEvents = event.json['timelineEvents']
-              .map(
-                (e) => TraceEventWrapper(
-                  TraceEvent(e),
-                  DateTime.now().millisecondsSinceEpoch,
-                ),
-              )
-              .toList();
-          final wrappedTraceEvents = traceEvents.cast<TraceEventWrapper>();
-          eventBatch.addAll(wrappedTraceEvents);
-        }
-        allTraceEvents.addAll(eventBatch);
-      }));
+      // Poll for new timeline events.
+      // We are polling here instead of listening to the timeline event stream
+      // because the event stream is sending out of order and duplicate events.
+      // See https://github.com/dart-lang/sdk/issues/46605.
+      _pollingTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
+        await _pullTraceEventsFromVmTimeline();
+      });
     }
   }
 
@@ -237,10 +224,33 @@ class PerformanceController extends DisposableController
         : PerformanceData();
   }
 
-  FutureOr<void> processAvailableEvents() async {
-    if (data == null) {
-      await _initData();
+  Future<void> _pullTraceEventsFromVmTimeline({
+    bool shouldPrimeThreadIds = false,
+  }) async {
+    final currentVmTime = await serviceManager.service.getVMTimelineMicros();
+    debugTraceEventLog(
+      'pulling trace events from '
+      '[$_nextPollStartMicros - ${currentVmTime.timestamp}]',
+    );
+    final timeline = await serviceManager.service.getVMTimeline(
+      timeOriginMicros: _nextPollStartMicros,
+      timeExtentMicros: currentVmTime.timestamp - _nextPollStartMicros,
+    );
+    _nextPollStartMicros = currentVmTime.timestamp + 1;
+
+    // TODO(kenz): move this priming logic into the loop below.
+    if (shouldPrimeThreadIds) primeThreadIds(timeline);
+    for (final event in timeline.traceEvents) {
+      final eventWrapper = TraceEventWrapper(
+        TraceEvent(event.json),
+        DateTime.now().millisecondsSinceEpoch,
+      );
+      allTraceEvents.add(eventWrapper);
+      debugTraceEventLog(eventWrapper.event.json.toString());
     }
+  }
+
+  FutureOr<void> processAvailableEvents() async {
     assert(!_processing.value);
     _processing.value = true;
     await processTraceEvents(allTraceEvents);
@@ -537,14 +547,41 @@ class PerformanceController extends DisposableController
     }
   }
 
-  FutureOr<void> processTraceEvents(List<TraceEventWrapper> traceEvents) async {
+  FutureOr<void> processTraceEvents(
+    List<TraceEventWrapper> traceEvents, {
+    int startIndex = 0,
+  }) async {
+    if (data == null) {
+      await _initData();
+    }
     final traceEventCount = traceEvents.length;
-    await processor
-        .processTimeline(traceEvents.sublist(_nextTraceIndexToProcess));
+
+    debugTraceEventLog(
+      'processing traceEvents at startIndex '
+      '$_nextTraceIndexToProcess',
+    );
+    await processor.processTraceEvents(
+      traceEvents,
+      startIndex: _nextTraceIndexToProcess,
+    );
+    debugTraceEventLog(
+      'after processing traceEvents at startIndex $_nextTraceIndexToProcess, '
+      'and now _nextTraceIndexToProcess = $traceEventCount',
+    );
     _nextTraceIndexToProcess = traceEventCount;
+
+    debugTraceEventLog(
+      'initializing event groups at startIndex '
+      '$_nextTimelineEventIndexToProcess',
+    );
     data.initializeEventGroups(
       threadNamesById,
       startIndex: _nextTimelineEventIndexToProcess,
+    );
+    debugTraceEventLog(
+      'after initializing event groups at startIndex '
+      '$_nextTimelineEventIndexToProcess and now '
+      '_nextTimelineEventIndexToProcess = ${data.timelineEvents.length}',
     );
     _nextTimelineEventIndexToProcess = data.timelineEvents.length;
   }
@@ -690,13 +727,10 @@ class PerformanceController extends DisposableController
     stream.toggle(newValue);
   }
 
-  /// Clears the timeline data currently stored by the controller.
-  ///
-  /// [clearVmTimeline] defaults to true, but should be set to false if you want
-  /// to clear the data stored by the controller, but do not want to clear the
-  /// data currently stored by the VM.
-  Future<void> clearData({bool clearVmTimeline = true}) async {
-    if (clearVmTimeline && serviceManager.connectedAppInitialized) {
+  /// Clears the timeline data currently stored by the controller as well the
+  /// VM timeline if a connected app is present.
+  Future<void> clearData() async {
+    if (serviceManager.connectedAppInitialized) {
       await serviceManager.service.clearVMTimeline();
     }
     allTraceEvents.clear();
@@ -722,6 +756,7 @@ class PerformanceController extends DisposableController
 
   @override
   void dispose() {
+    _pollingTimer.cancel();
     cpuProfilerController.dispose();
     super.dispose();
   }

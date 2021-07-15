@@ -47,7 +47,7 @@ void main() {
     });
 
     test('duration trace events form timeline event tree', () async {
-      await processor.processTimeline(goldenUiTraceEvents);
+      await processor.processTraceEvents(goldenUiTraceEvents);
 
       final processedUiEvent =
           processor.timelineController.data.timelineEvents.first;
@@ -65,7 +65,7 @@ void main() {
       var traceEvents = List.of(goldenUiTraceEvents);
       traceEvents.insert(1, goldenUiTraceEvents[1]);
 
-      await processor.processTimeline(traceEvents);
+      await processor.processTraceEvents(traceEvents);
       expect(
           processor.timelineController.data.timelineEvents.length, equals(1));
       expect(
@@ -86,7 +86,7 @@ void main() {
       traceEvents.insert(goldenUiTraceEvents.length - 2,
           goldenUiTraceEvents[goldenUiTraceEvents.length - 2]);
 
-      await processor.processTimeline(traceEvents);
+      await processor.processTraceEvents(traceEvents);
       expect(
           processor.timelineController.data.timelineEvents.length, equals(1));
       expect(
@@ -133,7 +133,7 @@ void main() {
       traceEvents.insert(2, goldenUiTraceEvents[0]);
       traceEvents.insert(3, goldenUiTraceEvents[1]);
 
-      await processor.processTimeline(traceEvents);
+      await processor.processTraceEvents(traceEvents);
       expect(
         processor.currentDurationEventNodes[TimelineEventType.ui.index],
         isNull,
@@ -150,7 +150,7 @@ void main() {
         processor.timelineController.data.timelineEvents,
         isEmpty,
       );
-      await processor.processTimeline(traceEvents);
+      await processor.processTraceEvents(traceEvents);
       expect(
         processor.timelineController.data.timelineEvents.length,
         equals(4),
@@ -178,7 +178,7 @@ void main() {
         processor.timelineController.data.timelineEvents,
         isEmpty,
       );
-      await processor.processTimeline(durationEventsWithDuplicateTraces);
+      await processor.processTraceEvents(durationEventsWithDuplicateTraces);
       // If the processor is not handling duplicates properly, this value would
       // be 0.
       expect(
@@ -192,7 +192,8 @@ void main() {
         () async {
       // This test should complete without throwing an assert from
       // `AsyncTimelineEvent.endAsyncEvent`.
-      await processor.processTimeline(asyncEventsWithChildrenWithDifferentIds);
+      await processor
+          .processTraceEvents(asyncEventsWithChildrenWithDifferentIds);
     });
 
     test('inferEventType', () {

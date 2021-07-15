@@ -13,6 +13,7 @@ import '../utils.dart';
 //import '../simple_trace_example.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
+import 'performance_utils.dart';
 
 // For documentation, see the Chrome "Trace Event Format" document:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU.
@@ -43,6 +44,10 @@ const String rasterEventName = 'GPURasterizer::Draw';
 const String uiEventName = 'Animator::BeginFrame';
 
 const String messageLoopFlushTasks = 'MessageLoop::FlushTasks';
+
+const String vsyncSchedulingOverhead = 'VsyncSchedulingOverhead';
+
+const String sceneDisplayLag = 'SceneDisplayLag';
 
 // For Flutter apps, PipelineItem flow events signal frame start and end events.
 const String pipelineItem = 'PipelineItem';
@@ -106,11 +111,16 @@ class TimelineEventProcessor {
 
   int rasterThreadId;
 
+  final _lastProcessedTimestampByThreadId = <int, int>{};
+
   /// Process the given trace events to create [TimelineEvent]s.
   ///
   /// [traceEvents] must be sorted in increasing timestamp order before calling
   /// this method.
-  Future<void> processTimeline(List<TraceEventWrapper> traceEvents) async {
+  Future<void> processTraceEvents(
+    List<TraceEventWrapper> traceEvents, {
+    int startIndex = 0,
+  }) async {
     resetProcessingData();
 
 // Uncomment this code for testing the timeline.
@@ -122,31 +132,57 @@ class TimelineEventProcessor {
 //        .toList();
     const sixteenHoursMicros = 57600000000;
     int firstTimestampMicros;
-    final _traceEvents = (traceEvents.where((event) {
-      // Throw out 'MessageLoop::FlushTasks' events. A single
-      // 'MessageLoop::FlushTasks' event can parent multiple Flutter frame event
-      // sequences and complicates the frame detection logic.
-      final isMessageLoopFlushTasks =
-          event.event.name.contains(messageLoopFlushTasks);
-      // Throw out timeline events that do not have a timestamp
-      // (e.g. thread_name events) as well as events from before we started
-      // recording.
-      final ts = event.event.timestampMicros;
-      final shouldProcess = ts != null && !isMessageLoopFlushTasks;
+    final _traceEvents = (traceEvents.whereFromIndex(
+      (event) {
+        debugTraceEventLog(
+            'attempting to process ${event.event.json.toString()}');
 
-      // TODO(kenz): remove this code once
-      // https://github.com/flutter/flutter/issues/76875 is resolved. We are
-      // getting extreme outlier events with timestamps ~1 day after the
-      // expected time range. Using sixteen hours as a threshold is arbitrary,
-      // but should catch the outliers without triggering false positives.
-      if (shouldProcess) {
-        firstTimestampMicros ??= ts;
-        if ((ts - firstTimestampMicros).abs() > sixteenHoursMicros) {
-          return false;
+        // Throw these events away. See https://github.com/flutter/flutter/issues/76875.
+        final isVsyncSchedulingOverhead =
+            event.event.name.contains(vsyncSchedulingOverhead);
+        final isSceneDisplayLag = event.event.name.contains(sceneDisplayLag);
+
+        // Throw out timeline events that do not have a timestamp
+        // (e.g. thread_name events).
+        final ts = event.event.timestampMicros;
+        final shouldProcess =
+            ts != null && !isVsyncSchedulingOverhead && !isSceneDisplayLag;
+
+        // TODO(kenz): remove this code once
+        // https://github.com/flutter/flutter/issues/76875 is resolved. We are
+        // getting extreme outlier events with timestamps ~1 day after the
+        // expected time range. Using sixteen hours as a threshold is arbitrary,
+        // but should catch the outliers without triggering false positives.
+        if (shouldProcess) {
+          firstTimestampMicros ??= ts;
+          // TODO(kenz): sixteen hours may be too much. If the timeline clock
+          // and the clock that 'VsyncSchedulingOverhead' and 'SceneDisplayLag'
+          // are using are closer than sixteen hours apart, spurious events will
+          // sneak in. See https://github.com/flutter/flutter/issues/76875.
+          if ((ts - firstTimestampMicros).abs() > sixteenHoursMicros) {
+            return false;
+          }
+
+          final lastTsForThread = _lastProcessedTimestampByThreadId.putIfAbsent(
+            event.event.threadId,
+            () => event.event.timestampMicros,
+          );
+          if (event.event.timestampMicros < lastTsForThread) {
+            debugTraceEventLog(
+              'skipping ${event.event.json.toString()} - '
+              'lastTsForThread = $lastTsForThread',
+            );
+            // Skipping out of order events.
+            // See https://github.com/dart-lang/sdk/issues/46605
+            return false;
+          }
+          _lastProcessedTimestampByThreadId[event.event.threadId] =
+              event.event.timestampMicros;
         }
-      }
-      return shouldProcess;
-    }).toList())
+        return shouldProcess;
+      },
+      startIndex: startIndex,
+    ).toList())
       // Events need to be in increasing timestamp order.
       ..sort()
       ..map((event) => event.event.json)
@@ -168,6 +204,7 @@ class TimelineEventProcessor {
       await delayForBatchProcessing();
     }
 
+    final idsToRemove = <String>[];
     for (var rootEvent in _asyncEventsById.values.where((e) => e.isRoot)) {
       // Do not add incomplete async trees to the timeline.
       // TODO(kenz): infer missing end times based on other end times in the
@@ -175,7 +212,9 @@ class TimelineEventProcessor {
       if (!rootEvent.isWellFormedDeep) continue;
 
       timelineController.addTimelineEvent(rootEvent);
+      idsToRemove.add(rootEvent.asyncUID);
     }
+    idsToRemove.forEach(_asyncEventsById.remove);
 
     _addPendingCompleteRootToTimeline(force: true);
 
@@ -236,7 +275,10 @@ class TimelineEventProcessor {
         case TraceEvent.durationCompletePhase:
           _handleDurationCompleteEvent(eventWrapper);
           break;
+        // TODO(kenz): add support for instant events
+        // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lenwiilchoxp
         // TODO(kenz): add support for flows.
+        // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.4qqub5rv9ybk
         default:
           break;
       }
