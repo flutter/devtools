@@ -86,7 +86,7 @@ if [ "$BOT" = "main" ]; then
     # Provision our packages.
     flutter pub get
 
-    if [ "$CHANNEL" != "master" ]; then
+    if [ "$CHANNEL" = "master" ]; then
         # Verify that dart format has been run.
         echo "Checking formatting..."
         # Here, we use the dart instance from the flutter sdk.
