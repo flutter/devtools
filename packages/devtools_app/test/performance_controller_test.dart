@@ -178,7 +178,7 @@ void main() async {
     test('matchesForSearch sets isSearchMatch property', () async {
       await env.setupEnvironment();
 
-      await performanceController.clearData(clearVmTimeline: false);
+      await performanceController.clearData();
       performanceController.addTimelineEvent(goldenUiTimelineEvent);
       var matches = performanceController.matchesForSearch('frame');
       expect(matches.length, equals(4));
