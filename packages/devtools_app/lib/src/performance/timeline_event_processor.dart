@@ -540,10 +540,10 @@ class TimelineEventProcessor {
     final frames = pendingFrames.values
         .where((frame) => frame.pipelineItemTime.start != null)
         .toList()
-          ..sort((FlutterFrame a, FlutterFrame b) {
-            return a.pipelineItemTime.start.inMicroseconds
-                .compareTo(b.pipelineItemTime.start.inMicroseconds);
-          });
+      ..sort((FlutterFrame a, FlutterFrame b) {
+        return a.pipelineItemTime.start.inMicroseconds
+            .compareTo(b.pipelineItemTime.start.inMicroseconds);
+      });
     for (FlutterFrame frame in frames) {
       final eventAdded = _maybeAddEventToFrame(event, frame);
       if (eventAdded) {
