@@ -131,18 +131,20 @@ void main() {
     testWidgetsWithWindowSize(
         'can pause and resume frame recording', windowSize,
         (WidgetTester tester) async {
-      await pumpPerformanceScreen(tester);
-      await tester.pumpAndSettle();
-      expect(find.byType(PauseButton), findsOneWidget);
-      expect(find.byType(ResumeButton), findsOneWidget);
+      await tester.runAsync(() async {
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(find.byType(PauseButton), findsOneWidget);
+        expect(find.byType(ResumeButton), findsOneWidget);
 
-      expect(controller.recordingFrames.value, isTrue);
-      await tester.tap(find.byType(PauseButton));
-      await tester.pumpAndSettle();
-      expect(controller.recordingFrames.value, isFalse);
-      await tester.tap(find.byType(ResumeButton));
-      await tester.pumpAndSettle();
-      expect(controller.recordingFrames.value, isTrue);
+        expect(controller.recordingFrames.value, isTrue);
+        await tester.tap(find.byType(PauseButton));
+        await tester.pumpAndSettle();
+        expect(controller.recordingFrames.value, isFalse);
+        await tester.tap(find.byType(ResumeButton));
+        await tester.pumpAndSettle();
+        expect(controller.recordingFrames.value, isTrue);
+      });
     });
 
     testWidgetsWithWindowSize('clears timeline on clear', windowSize,
