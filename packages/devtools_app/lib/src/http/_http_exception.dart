@@ -11,7 +11,9 @@ class HttpException {
 
   @override
   String toString() {
-    final b = StringBuffer()..write('HttpException: ')..write(message);
+    final b = StringBuffer()
+      ..write('HttpException: ')
+      ..write(message);
     if (uri != null) {
       b.write(', uri = $uri');
     }

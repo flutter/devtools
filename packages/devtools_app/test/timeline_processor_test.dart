@@ -74,6 +74,7 @@ void main() {
       );
 
       await processor.timelineController.clearData();
+      processor.reset();
 
       // Duplicate duration end event.
       // VSYNC
@@ -95,6 +96,7 @@ void main() {
       );
 
       await processor.timelineController.clearData();
+      processor.reset();
 
       // Unrecoverable state resets event tracking.
       // VSYNC
@@ -145,7 +147,7 @@ void main() {
         ...asyncTraceEvents,
         ...goldenUiTraceEvents,
         ...goldenRasterTraceEvents,
-      ];
+      ]..sort();
       expect(
         processor.timelineController.data.timelineEvents,
         isEmpty,

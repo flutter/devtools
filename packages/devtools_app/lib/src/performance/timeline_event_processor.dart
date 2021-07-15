@@ -167,7 +167,11 @@ class TimelineEventProcessor {
             event.event.threadId,
             () => event.event.timestampMicros,
           );
-          if (event.event.timestampMicros < lastTsForThread) {
+
+          // Exclude Complete events here because the timestamps of complete
+          // events can be in any order (https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lpfof2aylapb)
+          if (ts < lastTsForThread &&
+              event.event.phase != TraceEvent.durationCompletePhase) {
             debugTraceEventLog(
               'skipping ${event.event.json.toString()} - '
               'lastTsForThread = $lastTsForThread',
@@ -515,6 +519,7 @@ class TimelineEventProcessor {
     currentDurationEventNodes.clear();
     _previousDurationEndEvents.clear();
     _pendingRootCompleteEvent = null;
+    _lastProcessedTimestampByThreadId.clear();
     resetProcessingData();
   }
 
