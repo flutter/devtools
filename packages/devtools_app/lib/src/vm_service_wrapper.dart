@@ -690,6 +690,9 @@ class VmServiceWrapper implements VmService {
   Stream<Event> get onDebugEvent => _vmService.onDebugEvent;
 
   @override
+  Stream<Event> get onProfilerEvent => _vmService.onProfilerEvent;
+
+  @override
   Stream<Event> onEvent(String streamName) => _vmService.onEvent(streamName);
 
   @override
