@@ -38,7 +38,7 @@ class DebuggerConsole extends StatelessWidget {
               title: AreaPaneHeader(
                 title: const Text('Console'),
                 needsTopBorder: false,
-                actions: [
+                rightActions: [
                   CopyToClipboardControl(
                     dataProvider: () => stdio.value?.join('\n') ?? '',
                     buttonKey: DebuggerConsole.copyToClipboardButtonKey,

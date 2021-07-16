@@ -546,6 +546,12 @@ class TimeRange {
     if (singleAssignment) {
       assert(_start == null);
     }
+    if (_end != null) {
+      assert(
+        value <= _end,
+        '$value is not less than or equal to end time $_end',
+      );
+    }
     _start = value;
   }
 
@@ -553,20 +559,28 @@ class TimeRange {
 
   Duration _end;
 
-  bool contains(Duration target) => target >= start && target <= end;
-
-  bool containsRange(TimeRange t) => contains(t.start) && contains(t.end);
-
   set end(Duration value) {
     if (singleAssignment) {
       assert(_end == null);
+    }
+    if (_start != null) {
+      assert(
+        value >= _start,
+        '$value is not greater than or equal to start time $_start',
+      );
     }
     _end = value;
   }
 
   Duration get duration => end - start;
 
+  bool contains(Duration target) => start <= target && end >= target;
+
+  bool containsRange(TimeRange t) => start <= t.start && end >= t.end;
+
   bool overlaps(TimeRange t) => t.end > start && t.start < end;
+
+  bool get isWellFormed => _start != null && _end != null;
 
   @override
   String toString({TimeUnit unit}) {
@@ -1063,6 +1077,17 @@ extension ListExtension<T> on List<T> {
       ]
     ];
   }
+
+  Iterable<T> whereFromIndex(bool test(T element), {int startIndex = 0}) {
+    final whereList = <T>[];
+    for (int i = startIndex; i < length; i++) {
+      final element = this[i];
+      if (test(element)) {
+        whereList.add(element);
+      }
+    }
+    return whereList;
+  }
 }
 
 Map<String, String> devToolsQueryParams(String url) {
@@ -1391,3 +1416,5 @@ Future<T> whenValueNonNull<T>(ValueListenable<T> listenable) {
   listenable.addListener(listener);
   return completer.future;
 }
+
+const connectToNewAppText = 'Connect to a new app';

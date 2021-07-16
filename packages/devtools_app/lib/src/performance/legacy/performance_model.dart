@@ -362,7 +362,7 @@ class LegacyOfflineTimelineEvent extends LegacyTimelineEvent {
         (t) =>
             t.toString() ==
             firstTrace[TraceEvent.argsKey][TraceEvent.typeKey].toString(),
-        orElse: () => TimelineEventType.unknown);
+        orElse: () => TimelineEventType.other);
   }
 
   // The following methods should never be called on an instance of
@@ -385,12 +385,6 @@ class LegacyOfflineTimelineEvent extends LegacyTimelineEvent {
   List<List<LegacyTimelineEvent>> _calculateDisplayRows() =>
       throw UnimplementedError('This method should never be called for an '
           'instance of OfflineTimelineEvent');
-
-  @override
-  LegacyTimelineEvent shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
-  }
 }
 
 /// Data describing a single Flutter frame.
@@ -470,7 +464,7 @@ class LegacyFlutterFrame {
       // because the UI events are not present in the available timeline
       // events, or 2) the [uiEventFlow] has started but not completed yet. In
       // the event that 2) is true, do not set the frame end time here because
-      // the end time for this frame will be set to the the end time for
+      // the end time for this frame will be set to the end time for
       // [uiEventFlow] once it finishes.
       if (uiEventFlow != null) {
         time.end = Duration(
@@ -540,6 +534,15 @@ abstract class LegacyTimelineEvent extends TreeNode<LegacyTimelineEvent>
   /// or two (one for the associated DurationBegin event and one for the
   /// associated DurationEnd event).
   final List<TraceEventWrapper> traceEvents;
+
+  /// Trace event wrapper id for this timeline event.
+  ///
+  /// We will lookup this data multiple times for a single event when forming
+  /// event trees, so we cache this to improve the performance and reduce the
+  /// number of calls to [List.first].
+  int get traceWrapperId => _traceWrapperId ??= traceEvents.first.wrapperId;
+
+  int _traceWrapperId;
 
   TimelineEventType type;
 
@@ -768,12 +771,25 @@ abstract class LegacyTimelineEvent extends TreeNode<LegacyTimelineEvent>
     return {firstTraceKey: modifiedTrace};
   }
 
-  @visibleForTesting
-  LegacyTimelineEvent deepCopy() {
+  @override
+  LegacyTimelineEvent shallowCopy() {
     final copy = isAsyncEvent
         ? LegacyAsyncTimelineEvent(traceEvents.first)
         : LegacySyncTimelineEvent(traceEvents.first);
-    copy.time.end = time.end;
+    for (int i = 1; i < traceEvents.length; i++) {
+      copy.traceEvents.add(traceEvents[i]);
+    }
+    copy
+      ..type = type
+      ..time = (TimeRange()
+        ..start = time.start
+        ..end = time.end);
+    return copy;
+  }
+
+  @visibleForTesting
+  LegacyTimelineEvent deepCopy() {
+    final copy = shallowCopy();
     copy.parent = parent;
     for (LegacyTimelineEvent child in children) {
       copy._addChild(child.deepCopy());
@@ -817,14 +833,17 @@ class LegacySyncTimelineEvent extends LegacyTimelineEvent {
 
   @override
   bool couldBeParentOf(LegacyTimelineEvent e) {
+    // TODO(kenz): consider caching start and end times in the [TimeRange] class
+    // since these can be looked up many times for a single [TimeRange] object.
     final startTime = time.start.inMicroseconds;
     final endTime = time.end?.inMicroseconds;
     final eStartTime = e.time.start.inMicroseconds;
     final eEndTime = e.time.end?.inMicroseconds;
+    final eFirstTraceId = e.traceWrapperId;
 
     if (endTime != null && eEndTime != null) {
       if (startTime == eStartTime && endTime == eEndTime) {
-        return traceEvents.first.id < e.traceEvents.first.id;
+        return traceWrapperId < eFirstTraceId;
       }
       return startTime <= eStartTime && endTime >= eEndTime;
     } else if (endTime != null) {
@@ -835,16 +854,10 @@ class LegacySyncTimelineEvent extends LegacyTimelineEvent {
       // not be the parent of [e].
       return startTime <= eStartTime && endTime > eStartTime;
     } else if (startTime == eStartTime) {
-      return traceEvents.first.id < e.traceEvents.first.id;
+      return traceWrapperId < eFirstTraceId;
     } else {
       return startTime < eStartTime;
     }
-  }
-
-  @override
-  LegacySyncTimelineEvent shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
   }
 }
 
@@ -1033,11 +1046,5 @@ class LegacyAsyncTimelineEvent extends LegacyTimelineEvent {
       if (added) return true;
     }
     return false;
-  }
-
-  @override
-  LegacyAsyncTimelineEvent shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
   }
 }

@@ -75,11 +75,17 @@ Widget wrapWithControllers(
     if (appSize != null) Provider<AppSizeController>.value(value: appSize),
   ];
   return wrap(
-    MultiProvider(
-      providers: _providers,
-      child: widget,
+    wrapWithNotifications(
+      MultiProvider(
+        providers: _providers,
+        child: widget,
+      ),
     ),
   );
+}
+
+Widget wrapWithNotifications(Widget child) {
+  return Notifications(child: child);
 }
 
 Widget wrapWithInspectorControllers(Widget widget) {

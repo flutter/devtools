@@ -97,7 +97,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   Stream<VmServiceWrapper> get onConnectionAvailable => Stream.value(service);
 
   @override
-  Future<double> get queryDisplayRefreshRate async => 60;
+  Future<double> get queryDisplayRefreshRate => Future.value(60.0);
 
   @override
   bool hasConnection;
@@ -521,6 +521,9 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Stream<Event> get onDebugEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onTimelineEvent => const Stream.empty();
 
   @override
   Stream<Event> get onIsolateEvent => const Stream.empty();

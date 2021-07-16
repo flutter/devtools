@@ -82,6 +82,7 @@ class _LegacyFlutterFramesChartState extends State<LegacyFlutterFramesChart>
     _controller = newController;
 
     cancel();
+    _selectedFrame = _controller.selectedFrame.value;
     addAutoDisposeListener(_controller.selectedFrame, () {
       setState(() {
         _selectedFrame = _controller.selectedFrame.value;

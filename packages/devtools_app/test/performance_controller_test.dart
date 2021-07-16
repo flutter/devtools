@@ -4,9 +4,12 @@
 
 @TestOn('vm')
 
+import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_model.dart';
+import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_app/src/ui/search.dart';
+import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_testing/support/flutter_test_driver.dart'
     show FlutterRunConfiguration;
 import 'package:devtools_testing/support/flutter_test_environment.dart';
@@ -33,40 +36,9 @@ void main() async {
       await env.tearDownEnvironment(force: true);
     });
 
-    test('recordTraceForTimelineEvent', () async {
-      await env.setupEnvironment();
-
-      expect(performanceController.data.traceEvents, isEmpty);
-      performanceController.recordTraceForTimelineEvent(goldenUiTimelineEvent);
-      expect(
-        performanceController.data.traceEvents,
-        equals([
-          vsyncTrace.json,
-          animatorBeginFrameTrace.json,
-          frameworkWorkloadTrace.json,
-          engineBeginFrameTrace.json,
-          frameTrace.json,
-          animateTrace.json,
-          layoutTrace.json,
-          buildTrace.json,
-          compositingBitsTrace.json,
-          paintTrace.json,
-          compositingTrace.json,
-          semanticsTrace.json,
-          finalizeTreeTrace.json,
-          endEngineBeginFrameTrace.json,
-          endFrameworkWorkloadTrace.json,
-          endAnimatorBeginFrameTrace.json,
-          endVsyncTrace.json,
-        ]),
-      );
-
-      await env.tearDownEnvironment();
-    });
-
     test('processOfflineData', () async {
       await env.setupEnvironment();
-
+      offlineMode = true;
       final offlineTimelineData =
           OfflinePerformanceData.parse(offlinePerformanceDataJson);
       await performanceController.processOfflineData(offlineTimelineData);
@@ -95,12 +67,21 @@ void main() async {
     test('frame selection', () async {
       await env.setupEnvironment();
 
+      final frame0 = testFrame0.shallowCopy()
+        ..setEventFlow(goldenUiTimelineEvent)
+        ..setEventFlow(goldenRasterTimelineEvent);
+      final frame1UiEvent = goldenUiTimelineEvent.deepCopy();
+      final frame1RasterEvent = goldenRasterTimelineEvent.deepCopy();
+      final frame1 = testFrame1.shallowCopy()
+        ..setEventFlow(frame1UiEvent)
+        ..setEventFlow(frame1RasterEvent);
+
       // Select a frame.
       expect(performanceController.data.selectedFrame, isNull);
-      await performanceController.toggleSelectedFrame(testFrame0);
+      await performanceController.toggleSelectedFrame(frame0);
       expect(
         performanceController.data.selectedFrame,
-        equals(testFrame0),
+        equals(frame0),
       );
       // Verify main UI event for the frame is selected automatically.
       expect(
@@ -115,22 +96,54 @@ void main() async {
           equals(animatorBeginFrameEvent));
 
       // Select a different frame.
-      await performanceController.toggleSelectedFrame(testFrame1);
+      await performanceController.toggleSelectedFrame(frame1);
       expect(
         performanceController.data.selectedFrame,
-        equals(testFrame1),
+        equals(frame1),
       );
       expect(
         performanceController.data.selectedEvent,
-        equals(goldenUiTimelineEvent),
+        equals(frame1UiEvent),
       );
       expect(performanceController.data.cpuProfileData, isNotNull);
 
       await env.tearDownEnvironment();
     });
 
+    test(
+        'UI event flow sets frame.timeFromEventFlows end time if it completes after raster event flow',
+        () {
+      final uiEvent = goldenUiTimelineEvent.deepCopy()
+        ..time = (TimeRange()
+          ..start = const Duration(microseconds: 5000)
+          ..end = const Duration(microseconds: 8000));
+      final rasterEvent = goldenRasterTimelineEvent.deepCopy()
+        ..time = (TimeRange()
+          ..start = const Duration(microseconds: 6000)
+          ..end = const Duration(microseconds: 7000));
+
+      final frame = FlutterFrame.parse({
+        'number': 1,
+        'startTime': 100,
+        'elapsed': 200,
+        'build': 40,
+        'raster': 50,
+        'vsyncOverhead': 10,
+      });
+      frame.setEventFlow(rasterEvent, type: TimelineEventType.raster);
+      expect(frame.timeFromEventFlows.start, isNull);
+      expect(frame.timeFromEventFlows.end, isNull);
+
+      frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
+      expect(frame.timeFromEventFlows.start,
+          equals(const Duration(microseconds: 5000)));
+      expect(frame.timeFromEventFlows.end,
+          equals(const Duration(microseconds: 8000)));
+    });
+
     test('add frame', () async {
       await env.setupEnvironment();
+      await performanceController.clearData();
       expect(performanceController.data.frames, isEmpty);
       performanceController.addFrame(testFrame1);
       expect(
@@ -147,7 +160,7 @@ void main() async {
       expect(performanceController.matchesForSearch(null), isEmpty);
       expect(performanceController.matchesForSearch(''), isEmpty);
 
-      await performanceController.clearData(clearVmTimeline: false);
+      await performanceController.clearData();
       expect(performanceController.data.timelineEvents, isEmpty);
       expect(performanceController.matchesForSearch('test'), isEmpty);
 
@@ -167,7 +180,7 @@ void main() async {
     test('matchesForSearch sets isSearchMatch property', () async {
       await env.setupEnvironment();
 
-      await performanceController.clearData(clearVmTimeline: false);
+      await performanceController.clearData();
       performanceController.addTimelineEvent(goldenUiTimelineEvent);
       var matches = performanceController.matchesForSearch('frame');
       expect(matches.length, equals(4));

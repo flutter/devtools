@@ -20,6 +20,9 @@ import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
 
+// Turn this flag on to see when flutter frames are linked with timeline events.
+bool debugFrames = false;
+
 class FlutterFramesChart extends StatefulWidget {
   const FlutterFramesChart(
     this.frames,
@@ -82,6 +85,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     _controller = newController;
 
     cancel();
+    _selectedFrame = _controller.selectedFrame.value;
     addAutoDisposeListener(_controller.selectedFrame, () {
       setState(() {
         _selectedFrame = _controller.selectedFrame.value;
@@ -259,8 +263,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           math.max(
             1000 / widget.displayRefreshRate,
             math.max(
-              frame.uiDuration.inMilliseconds,
-              frame.rasterDuration.inMilliseconds,
+              frame.buildTime.inMilliseconds,
+              frame.rasterTime.inMilliseconds,
             ),
           ),
     );
@@ -307,36 +311,55 @@ class FlutterFramesChartItem extends StatelessWidget {
     final bool rasterJanky = frame.isRasterJanky(displayRefreshRate);
     final bool hasShaderJank = frame.hasShaderJank(displayRefreshRate);
 
+    var uiColor = uiJanky ? uiJankColor : mainUiColor;
+    var rasterColor = rasterJanky ? rasterJankColor : mainRasterColor;
+    var shaderColor = shaderCompilationColor;
+
+    if (debugFrames) {
+      if (frame.timelineEventData.uiEvent == null) {
+        uiColor = uiColor.darken(.5);
+      }
+      if (frame.timelineEventData.rasterEvent == null) {
+        rasterColor = rasterColor.darken(.5);
+        shaderColor = shaderColor.darken(.5);
+      }
+    }
+
     // TODO(kenz): add some indicator when a frame is so janky that it exceeds the
     // available axis space.
     final ui = Container(
       key: Key('frame ${frame.id} - ui'),
       width: defaultFrameWidth / 2,
-      height: (frame.uiDuration.inMilliseconds / msPerPx)
+      height: (frame.buildTime.inMilliseconds / msPerPx)
           .clamp(0.0, availableChartHeight),
-      color: uiJanky ? uiJankColor : mainUiColor,
+      color: uiColor,
     );
-    final shaderToRasterRatio = frame.shaderDuration.inMilliseconds /
-        frame.rasterDuration.inMilliseconds;
-    final raster = Column(children: [
-      Container(
-        key: Key('frame ${frame.id} - raster'),
-        width: defaultFrameWidth / 2,
-        height: ((frame.rasterDuration.inMilliseconds -
-                    frame.shaderDuration.inMilliseconds) /
-                msPerPx)
-            .clamp(0.0, availableChartHeight * (1 - shaderToRasterRatio)),
-        color: rasterJanky ? rasterJankColor : mainRasterColor,
-      ),
-      if (frame.hasShaderTime)
+
+    final shaderToRasterRatio =
+        frame.shaderDuration.inMilliseconds / frame.rasterTime.inMilliseconds;
+
+    final raster = Column(
+      children: [
         Container(
-          key: Key('frame ${frame.id} - shaders'),
+          key: Key('frame ${frame.id} - raster'),
           width: defaultFrameWidth / 2,
-          height: (frame.shaderDuration.inMilliseconds / msPerPx)
-              .clamp(0.0, availableChartHeight * shaderToRasterRatio),
-          color: shaderCompilationColor,
+          height: ((frame.rasterTime.inMilliseconds -
+                      frame.shaderDuration.inMilliseconds) /
+                  msPerPx)
+              .clamp(0.0, availableChartHeight * (1 - shaderToRasterRatio)),
+          color: rasterColor,
         ),
-    ]);
+        if (frame.hasShaderTime)
+          Container(
+            key: Key('frame ${frame.id} - shaders'),
+            width: defaultFrameWidth / 2,
+            height: (frame.shaderDuration.inMilliseconds / msPerPx)
+                .clamp(0.0, availableChartHeight * shaderToRasterRatio),
+            color: shaderColor,
+          ),
+      ],
+    );
+
     return Stack(
       children: [
         // TODO(kenz): make tooltip to persist if the frame is selected.
@@ -382,9 +405,9 @@ class FlutterFramesChartItem extends StatelessWidget {
   // https://github.com/flutter/devtools/issues/3139
   String _tooltipText(FlutterFrame frame, bool hasShaderJank) {
     return [
-      'UI: ${msText(frame.uiEventFlow.time.duration)}',
-      'Raster: ${msText(frame.rasterEventFlow.time.duration)}',
-      if (hasShaderJank) 'Shader Compilation: ${msText(frame.shaderDuration)}'
+      'UI: ${msText(frame.buildTime)}',
+      'Raster: ${msText(frame.rasterTime)}',
+      if (hasShaderJank) 'Shader Compilation: ${msText(frame.shaderDuration)}',
     ].join('\n');
   }
 }

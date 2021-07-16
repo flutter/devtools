@@ -6,7 +6,6 @@ import 'dart:convert';
 
 import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/trace_event.dart';
-import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:devtools_testing/support/test_utils.dart';
 
@@ -51,43 +50,72 @@ final frameEndEvent = testTraceEventWrapper({
   'args': {}
 });
 
-final testFrame0 = FlutterFrame('id_0')
+final testFrame0 = FlutterFrame.parse({
+  'number': 0,
+  'startTime': 10000,
+  'elapsed': 20000,
+  'build': 10000,
+  'raster': 12000,
+  'vsyncOverhead': 10,
+});
+
+final testFrame1 = FlutterFrame.parse({
+  'number': 1,
+  'startTime': 40000,
+  'elapsed': 20000,
+  'build': 16000,
+  'raster': 16000,
+  'vsyncOverhead': 1000,
+});
+
+final jankyFrame = FlutterFrame.parse({
+  'number': 2,
+  'startTime': 10000,
+  'elapsed': 20000,
+  'build': 18000,
+  'raster': 18000,
+  'vsyncOverhead': 1000,
+});
+
+final jankyFrameUiOnly = FlutterFrame.parse({
+  'number': 3,
+  'startTime': 10000,
+  'elapsed': 20000,
+  'build': 18000,
+  'raster': 5000,
+  'vsyncOverhead': 1000,
+});
+
+final jankyFrameRasterOnly = FlutterFrame.parse({
+  'number': 4,
+  'startTime': 10000,
+  'elapsed': 20000,
+  'build': 5000,
+  'raster': 18000,
+  'vsyncOverhead': 10,
+});
+
+final testFrameWithShaderJank = FlutterFrame.parse({
+  'number': 5,
+  'startTime': 10000,
+  'elapsed': 200000,
+  'build': 50000,
+  'raster': 70000,
+  'vsyncOverhead': 10,
+})
   ..setEventFlow(goldenUiTimelineEvent)
-  ..setEventFlow(goldenRasterTimelineEvent);
+  ..setEventFlow(rasterTimelineEventWithShaderJank);
 
-final testFrame1 = FlutterFrame('id_1')
+final testFrameWithSubtleShaderJank = FlutterFrame.parse({
+  'number': 6,
+  'startTime': 10000,
+  'elapsed': 200000,
+  'build': 50000,
+  'raster': 70000,
+  'vsyncOverhead': 10,
+})
   ..setEventFlow(goldenUiTimelineEvent)
-  ..setEventFlow(goldenRasterTimelineEvent);
-
-final jankyFrame = FlutterFrame('jankyFrame')
-  ..eventFlows[0] = (goldenUiTimelineEvent.deepCopy()
-    ..time = (TimeRange()
-      ..start = const Duration(milliseconds: 50)
-      ..end = const Duration(milliseconds: 70)))
-  ..eventFlows[1] = (goldenRasterTimelineEvent.deepCopy()
-    ..time = (TimeRange()
-      ..start = const Duration(milliseconds: 68)
-      ..end = const Duration(milliseconds: 88)));
-
-final jankyFrameUiOnly = FlutterFrame('jankyFrameUiOnly')
-  ..eventFlows[0] = (goldenUiTimelineEvent.deepCopy()
-    ..time = (TimeRange()
-      ..start = const Duration(milliseconds: 50)
-      ..end = const Duration(milliseconds: 70)))
-  ..eventFlows[1] = (goldenRasterTimelineEvent.deepCopy()
-    ..time = (TimeRange()
-      ..start = const Duration(milliseconds: 68)
-      ..end = const Duration(milliseconds: 75)));
-
-final jankyFrameRasterOnly = FlutterFrame('jankyFrameRasterOnly')
-  ..eventFlows[0] = (goldenUiTimelineEvent.deepCopy()
-    ..time = (TimeRange()
-      ..start = const Duration(milliseconds: 50)
-      ..end = const Duration(milliseconds: 60)))
-  ..eventFlows[1] = (goldenRasterTimelineEvent.deepCopy()
-    ..time = (TimeRange()
-      ..start = const Duration(milliseconds: 50)
-      ..end = const Duration(milliseconds: 75)));
+  ..setEventFlow(rasterTimelineEventWithSubtleShaderJank);
 
 // Mark: UI golden data.
 // None of the following data should be modified. If you have a need to modify
@@ -279,7 +307,7 @@ final animatorBeginFrameTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 193938741077,
   'ph': 'B',
-  'args': {}
+  'args': {'frame_number': '1'}
 });
 final frameworkWorkloadTrace = testTraceEventWrapper({
   'name': 'Framework Workload',
@@ -462,6 +490,7 @@ final gpuRasterizerDrawTrace = testTraceEventWrapper({
   'ph': 'B',
   'args': {
     'isolateId': 'id_001',
+    'frame_number': '1',
   }
 });
 final pipelineConsumeTrace = testTraceEventWrapper({
@@ -488,6 +517,56 @@ final endGpuRasterizerDrawTrace = testTraceEventWrapper({
   'tid': testRasterThreadId,
   'pid': 94955,
   'ts': 193938770147,
+  'ph': 'E',
+  'args': {}
+});
+
+final rasterTimelineEventWithShaderJank =
+    testSyncTimelineEvent(gpuRasterizerDrawWithShaderJankTrace)
+      ..type = TimelineEventType.raster
+      ..addEndEvent(endGpuRasterizerDrawWithShaderJankTrace);
+final gpuRasterizerDrawWithShaderJankTrace = testTraceEventWrapper({
+  'name': 'GPURasterizer::Draw',
+  'cat': 'Embedder',
+  'tid': testRasterThreadId,
+  'pid': 94955,
+  'ts': 193938740000,
+  'ph': 'B',
+  'args': {
+    'devtoolsTag': 'shaders',
+  }
+});
+final endGpuRasterizerDrawWithShaderJankTrace = testTraceEventWrapper({
+  'name': 'GPURasterizer::Draw',
+  'cat': 'Embedder',
+  'tid': testRasterThreadId,
+  'pid': 94955,
+  'ts': 193938790000,
+  'ph': 'E',
+  'args': {}
+});
+
+final rasterTimelineEventWithSubtleShaderJank =
+    testSyncTimelineEvent(gpuRasterizerDrawWithSubtleShaderJankTrace)
+      ..type = TimelineEventType.raster
+      ..addEndEvent(endGpuRasterizerDrawWithSubtleShaderJankTrace);
+final gpuRasterizerDrawWithSubtleShaderJankTrace = testTraceEventWrapper({
+  'name': 'GPURasterizer::Draw',
+  'cat': 'Embedder',
+  'tid': testRasterThreadId,
+  'pid': 94955,
+  'ts': 173938740000,
+  'ph': 'B',
+  'args': {
+    'devtoolsTag': 'shaders',
+  }
+});
+final endGpuRasterizerDrawWithSubtleShaderJankTrace = testTraceEventWrapper({
+  'name': 'GPURasterizer::Draw',
+  'cat': 'Embedder',
+  'tid': testRasterThreadId,
+  'pid': 94955,
+  'ts': 173938744000,
   'ph': 'E',
   'args': {}
 });
@@ -1004,7 +1083,7 @@ final goldenTraceEventsJson = List<Map<String, dynamic>>.from(
 final offlinePerformanceDataJson = {
   PerformanceData.traceEventsKey: goldenTraceEventsJson,
   PerformanceData.cpuProfileKey: goldenCpuProfileDataJson,
-  PerformanceData.selectedFrameIdKey: 'PipelineItem-1',
+  PerformanceData.selectedFrameIdKey: 1,
   PerformanceData.selectedEventKey: vsyncEvent.json,
   PerformanceData.displayRefreshRateKey: 120.0,
 };
@@ -1139,17 +1218,17 @@ final testTimelineJson = {
   'traceEvents': [
     {
       'name': 'thread_name',
+      'ph': 'M',
       'tid': testUiThreadId,
       'args': {'name': '1.ui'},
     },
     {
       'name': 'thread_name',
+      'ph': 'M',
       'tid': testRasterThreadId,
       'args': {'name': '1.raster'},
     },
-    frameStartEvent.json,
     ...goldenTraceEventsJson,
-    frameEndEvent.json,
   ],
   'timeOriginMicros': 193938741076,
   'timeExtentMicros': 193938770147 - 193938741076,

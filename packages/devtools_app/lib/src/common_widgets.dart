@@ -659,7 +659,8 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
     this.needsTopBorder = true,
     this.needsBottomBorder = true,
     this.needsLeftBorder = false,
-    this.actions = const [],
+    this.leftActions = const [],
+    this.rightActions = const [],
     this.rightPadding = densePadding,
     this.tall = false,
   }) : super(key: key);
@@ -669,7 +670,8 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool needsTopBorder;
   final bool needsBottomBorder;
   final bool needsLeftBorder;
-  final List<Widget> actions;
+  final List<Widget> leftActions;
+  final List<Widget> rightActions;
   final double rightPadding;
   final bool tall;
 
@@ -692,15 +694,16 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
         alignment: Alignment.centerLeft,
         child: Row(
           children: [
-            Expanded(
-              child: DefaultTextStyle(
-                maxLines: maxLines,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.subtitle2,
-                child: title,
-              ),
+            DefaultTextStyle(
+              maxLines: maxLines,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.subtitle2,
+              child: title,
             ),
-            ...actions,
+            ...leftActions,
+            if (leftActions.isNotEmpty && rightActions.isNotEmpty)
+              const Spacer(),
+            ...rightActions,
           ],
         ),
       ),

@@ -47,23 +47,8 @@ abstract class TreeNode<T extends TreeNode<T>> {
     if (_root != null) {
       return _root;
     }
-
-    // Store nodes we have visited so we can cache the root value for each one
-    // once we find the root.
-    final visited = {this};
-
-    T root = this;
-    while (root.parent != null) {
-      visited.add(root);
-      root = root.parent;
-    }
-
-    // Set [_root] for all nodes we visited.
-    for (T node in visited) {
-      node._root = root;
-    }
-
-    return root;
+    if (parent == null) return _root = this;
+    return _root = parent.root;
   }
 
   T _root;
@@ -73,13 +58,8 @@ abstract class TreeNode<T extends TreeNode<T>> {
     if (_level != null) {
       return _level;
     }
-    int level = 0;
-    T current = this;
-    while (current.parent != null) {
-      current = current.parent;
-      level++;
-    }
-    return _level = level;
+    if (parent == null) return _level = 0;
+    return _level = 1 + parent.level;
   }
 
   int _level;
