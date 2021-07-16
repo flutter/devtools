@@ -4,6 +4,7 @@
 
 @TestOn('vm')
 
+import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/trace_event.dart';
@@ -37,7 +38,7 @@ void main() async {
 
     test('processOfflineData', () async {
       await env.setupEnvironment();
-
+      offlineMode = true;
       final offlineTimelineData =
           OfflinePerformanceData.parse(offlinePerformanceDataJson);
       await performanceController.processOfflineData(offlineTimelineData);

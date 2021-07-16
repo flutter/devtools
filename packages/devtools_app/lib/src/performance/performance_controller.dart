@@ -219,7 +219,7 @@ class PerformanceController extends DisposableController
       // We are polling here instead of listening to the timeline event stream
       // because the event stream is sending out of order and duplicate events.
       // See https://github.com/dart-lang/sdk/issues/46605.
-      _pollingTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
+      _pollingTimer = Timer.periodic(const Duration(seconds: 1), (_) {
         _timelinePollingRateLimiter.scheduleRequest();
       });
     }
@@ -775,8 +775,8 @@ class PerformanceController extends DisposableController
 
   @override
   void dispose() {
-    _pollingTimer.cancel();
-    _timelinePollingRateLimiter.dispose();
+    _pollingTimer?.cancel();
+    _timelinePollingRateLimiter?.dispose();
     cpuProfilerController.dispose();
     super.dispose();
   }
