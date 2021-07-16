@@ -158,6 +158,8 @@ class PerformanceController extends DisposableController
 
   int _nextPollStartMicros = 0;
 
+  static const timelinePollingRateLimit = 5.0;
+
   Future<void> _initialized;
   Future<void> get initialized => _initialized;
 
@@ -211,7 +213,10 @@ class PerformanceController extends DisposableController
       // because the event stream is sending out of order and duplicate events.
       // See https://github.com/dart-lang/sdk/issues/46605.
       _pollingTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
-        await _pullTraceEventsFromVmTimeline();
+        RateLimiter(
+          timelinePollingRateLimit,
+          () async => await _pullTraceEventsFromVmTimeline(),
+        );
       });
     }
   }
@@ -228,9 +233,11 @@ class PerformanceController extends DisposableController
     bool shouldPrimeThreadIds = false,
   }) async {
     final currentVmTime = await serviceManager.service.getVMTimelineMicros();
-    debugTraceEventLog(
-      'pulling trace events from '
-      '[$_nextPollStartMicros - ${currentVmTime.timestamp}]',
+    debugTraceEventCallback(
+      () => log(
+        'pulling trace events from '
+        '[$_nextPollStartMicros - ${currentVmTime.timestamp}]',
+      ),
     );
     final timeline = await serviceManager.service.getVMTimeline(
       timeOriginMicros: _nextPollStartMicros,
@@ -246,7 +253,7 @@ class PerformanceController extends DisposableController
         DateTime.now().millisecondsSinceEpoch,
       );
       allTraceEvents.add(eventWrapper);
-      debugTraceEventLog(eventWrapper.event.json.toString());
+      debugTraceEventCallback(() => log(eventWrapper.event.json));
     }
   }
 
@@ -556,32 +563,40 @@ class PerformanceController extends DisposableController
     }
     final traceEventCount = traceEvents.length;
 
-    debugTraceEventLog(
-      'processing traceEvents at startIndex '
-      '$_nextTraceIndexToProcess',
+    debugTraceEventCallback(
+      () => log(
+        'processing traceEvents at startIndex '
+        '$_nextTraceIndexToProcess',
+      ),
     );
     await processor.processTraceEvents(
       traceEvents,
       startIndex: _nextTraceIndexToProcess,
     );
-    debugTraceEventLog(
-      'after processing traceEvents at startIndex $_nextTraceIndexToProcess, '
-      'and now _nextTraceIndexToProcess = $traceEventCount',
+    debugTraceEventCallback(
+      () => log(
+        'after processing traceEvents at startIndex $_nextTraceIndexToProcess, '
+        'and now _nextTraceIndexToProcess = $traceEventCount',
+      ),
     );
     _nextTraceIndexToProcess = traceEventCount;
 
-    debugTraceEventLog(
-      'initializing event groups at startIndex '
-      '$_nextTimelineEventIndexToProcess',
+    debugTraceEventCallback(
+      () => log(
+        'initializing event groups at startIndex '
+        '$_nextTimelineEventIndexToProcess',
+      ),
     );
     data.initializeEventGroups(
       threadNamesById,
       startIndex: _nextTimelineEventIndexToProcess,
     );
-    debugTraceEventLog(
-      'after initializing event groups at startIndex '
-      '$_nextTimelineEventIndexToProcess and now '
-      '_nextTimelineEventIndexToProcess = ${data.timelineEvents.length}',
+    debugTraceEventCallback(
+      () => log(
+        'after initializing event groups at startIndex '
+        '$_nextTimelineEventIndexToProcess and now '
+        '_nextTimelineEventIndexToProcess = ${data.timelineEvents.length}',
+      ),
     );
     _nextTimelineEventIndexToProcess = data.timelineEvents.length;
   }

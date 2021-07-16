@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../config_specific/logger/logger.dart';
+import 'package:flutter/foundation.dart';
+
 import '../utils.dart';
 import 'performance_model.dart';
 
@@ -73,10 +74,10 @@ class PerformanceUtils {
 
 const debugTraceEventDuplicates = false;
 
-/// Helper method to log important events when debugging issues related to trace
+/// Helper method to call a callback only when debugging issues related to trace
 /// event duplicates (for example https://github.com/dart-lang/sdk/issues/46605).
-void debugTraceEventLog(String debugLog) {
+void debugTraceEventCallback(VoidCallback callback) {
   if (debugTraceEventDuplicates) {
-    log(debugLog);
+    callback();
   }
 }

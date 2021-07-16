@@ -134,8 +134,9 @@ class TimelineEventProcessor {
     int firstTimestampMicros;
     final _traceEvents = (traceEvents.whereFromIndex(
       (event) {
-        debugTraceEventLog(
-            'attempting to process ${event.event.json.toString()}');
+        debugTraceEventCallback(
+          () => log('attempting to process ${event.event.json.toString()}'),
+        );
 
         // Throw these events away. See https://github.com/flutter/flutter/issues/76875.
         final isVsyncSchedulingOverhead =
@@ -172,9 +173,11 @@ class TimelineEventProcessor {
           // events can be in any order (https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lpfof2aylapb)
           if (ts < lastTsForThread &&
               event.event.phase != TraceEvent.durationCompletePhase) {
-            debugTraceEventLog(
-              'skipping ${event.event.json.toString()} - '
-              'lastTsForThread = $lastTsForThread',
+            debugTraceEventCallback(
+              () => log(
+                'skipping ${event.event.json.toString()} - '
+                'lastTsForThread = $lastTsForThread',
+              ),
             );
             // Skipping out of order events.
             // See https://github.com/dart-lang/sdk/issues/46605
