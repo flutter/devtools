@@ -1011,9 +1011,8 @@ class TestData extends TreeNode<TestData> {
 
   @override
   TestData shallowCopy() {
-    throw UnimplementedError('This method is not implemented for an instance of'
-        'TestData. Implement this method if you need to call'
-        '`TestData.shallowCopy`.');
+    throw UnimplementedError('This method is not implemented. Implement if you '
+        'need to call `shallowCopy` on an instance of this class.');
   }
 }
 

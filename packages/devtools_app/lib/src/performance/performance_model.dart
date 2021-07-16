@@ -379,9 +379,8 @@ class OfflineTimelineEvent extends TimelineEvent {
 
   @override
   OfflineTimelineEvent shallowCopy() {
-    throw UnimplementedError('This method is not implemented for an instance of'
-        'OfflineTimelineEvent. Implement this method if you need to call'
-        '`OfflineTimelineEvent.shallowCopy`.');
+    throw UnimplementedError('This method is not implemented. Implement if you '
+        'need to call `shallowCopy` on an instance of this class.');
   }
 }
 
@@ -862,9 +861,8 @@ class SyncTimelineEvent extends TimelineEvent {
 
   @override
   SyncTimelineEvent shallowCopy() {
-    throw UnimplementedError('This method is not implemented for an instance of'
-        'SyncTimelineEvent. Implement this method if you need to call'
-        '`SyncTimelineEvent.shallowCopy`.');
+    throw UnimplementedError('This method is not implemented. Implement if you '
+        'need to call `shallowCopy` on an instance of this class.');
   }
 }
 
@@ -1057,8 +1055,7 @@ class AsyncTimelineEvent extends TimelineEvent {
 
   @override
   AsyncTimelineEvent shallowCopy() {
-    throw UnimplementedError('This method is not implemented for an instance of'
-        'AsyncTimelineEvent. Implement this method if you need to call'
-        '`AsyncTimelineEvent.shallowCopy`.');
+    throw UnimplementedError('This method is not implemented. Implement if you '
+        'need to call `shallowCopy` on an instance of this class.');
   }
 }

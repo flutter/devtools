@@ -29,8 +29,8 @@ class Tracker extends TreeNode<Tracker> {
 
   @override
   Tracker shallowCopy() {
-    throw UnimplementedError('This method is not implemented for an instance of'
-        'Tracker. Implement this method if you need to call `Tracker.shallowCopy`.');
+    throw UnimplementedError('This method is not implemented. Implement if you '
+        'need to call `shallowCopy` on an instance of this class.');
   }
 }
 

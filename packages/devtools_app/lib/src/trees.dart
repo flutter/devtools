@@ -238,12 +238,12 @@ abstract class TreeNode<T extends TreeNode<T>> {
   TreeNode<T> shallowCopy();
 
   /// Filters a tree starting at this node and returns a list of new roots after
-  /// filtering.
+  /// filtering, where all nodes in the new tree(s) meet the condition `filter`.
   ///
   /// If the root [this] should be included in the filtered results, the list
   /// will contain one node. If the root [this] should not be included in the
   /// filtered results, the list may contain one or more nodes.
-  List<T> filterTree(bool filter(T node)) {
+  List<T> filterWhere(bool filter(T node)) {
     List<T> walkAndCopy(T node) {
       if (filter(node)) {
         final copy = node.shallowCopy();

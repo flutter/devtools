@@ -788,9 +788,8 @@ class Variable extends TreeNode<Variable> {
 
   @override
   Variable shallowCopy() {
-    throw UnimplementedError('This method is not implemented for an instance of'
-        'Variable. Implement this method if you need to call '
-        '`Variable.shallowCopy`.');
+    throw UnimplementedError('This method is not implemented. Implement if you '
+        'need to call `shallowCopy` on an instance of this class.');
   }
 }
 
@@ -864,9 +863,8 @@ class FileNode extends TreeNode<FileNode> {
 
   @override
   FileNode shallowCopy() {
-    throw UnimplementedError('This method is not implemented for an instance of'
-        'FileNode. Implement this method if you need to call '
-        '`FileNode.shallowCopy`.');
+    throw UnimplementedError('This method is not implemented. Implement if you '
+        'need to call `shallowCopy` on an instance of this class.');
   }
 
   @override

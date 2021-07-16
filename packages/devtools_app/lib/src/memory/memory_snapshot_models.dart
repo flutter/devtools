@@ -276,9 +276,8 @@ class Reference extends TreeNode<Reference> {
 
   @override
   Reference shallowCopy() {
-    throw UnimplementedError('This method is not implemented for an instance of'
-        'Reference. Implement this method if you need to call'
-        '`Reference.shallowCopy`.');
+    throw UnimplementedError('This method is not implemented. Implement if you '
+        'need to call `shallowCopy` on an instance of this class.');
   }
 }
 
@@ -353,9 +352,8 @@ class AnalysisField extends TreeNode<AnalysisField> {
 
   @override
   AnalysisField shallowCopy() {
-    throw UnimplementedError('This method is not implemented for an instance of'
-        'AnalysisField. Implement this method if you need to call'
-        '`AnalysisField.shallowCopy`.');
+    throw UnimplementedError('This method is not implemented. Implement if you '
+        'need to call `shallowCopy` on an instance of this class.');
   }
 }
 
@@ -609,9 +607,8 @@ class FieldReference extends TreeNode<FieldReference> {
 
   @override
   FieldReference shallowCopy() {
-    throw UnimplementedError('This method is not implemented for an instance of'
-        'FieldReference. Implement this method if you need to call'
-        '`FieldReference.shallowCopy`.');
+    throw UnimplementedError('This method is not implemented. Implement if you '
+        'need to call `shallowCopy` on an instance of this class.');
   }
 }
 

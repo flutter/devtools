@@ -146,7 +146,7 @@ void main() {
 
     test('filterTree', () {
       final filteredTreeRoots =
-          testTreeNode.filterTree((node) => node.id.isEven);
+          testTreeNode.filterWhere((node) => node.id.isEven);
       expect(filteredTreeRoots.length, equals(1));
       final filteredTree = filteredTreeRoots.first;
       expect(filteredTree.toString(), equals('''
@@ -160,7 +160,7 @@ void main() {
 
     test('filterTree when root should be filtered out', () {
       final filteredTreeRoots =
-          testTreeNode.filterTree((node) => node.id.isOdd);
+          testTreeNode.filterWhere((node) => node.id.isOdd);
       expect(filteredTreeRoots.length, equals(2));
       final firstRoot = filteredTreeRoots.first;
       final lastRoot = filteredTreeRoots.last;
@@ -177,12 +177,14 @@ void main() {
     });
 
     test('filterTree when zero nodes match', () {
-      final filteredTreeRoots = testTreeNode.filterTree((node) => node.id > 10);
+      final filteredTreeRoots =
+          testTreeNode.filterWhere((node) => node.id > 10);
       expect(filteredTreeRoots, isEmpty);
     });
 
     test('filterTree when all nodes match', () {
-      final filteredTreeRoots = testTreeNode.filterTree((node) => node.id < 10);
+      final filteredTreeRoots =
+          testTreeNode.filterWhere((node) => node.id < 10);
       expect(filteredTreeRoots.length, equals(1));
       final filteredTree = filteredTreeRoots.first;
       expect(filteredTree.toString(), equals('''
@@ -240,7 +242,7 @@ class TestTreeNode extends TreeNode<TestTreeNode> {
   String toString() {
     final buf = StringBuffer();
     void writeNode(TestTreeNode node) {
-      final indent = [for (int i = 0; i < node.level; i++) '  '].join();
+      final indent = '  ' * node.level;
       buf.writeln('$indent${node.id}');
       node.children.forEach(writeNode);
     }
