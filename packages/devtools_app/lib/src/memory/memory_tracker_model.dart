@@ -26,6 +26,12 @@ class Tracker extends TreeNode<Tracker> {
 
   /// Used for both class name and call stack entry value.
   final String name;
+
+  @override
+  Tracker shallowCopy() {
+    throw UnimplementedError('This method is not implemented. Implement if you '
+        'need to call `shallowCopy` on an instance of this class.');
+  }
 }
 
 class TrackerClass extends Tracker {

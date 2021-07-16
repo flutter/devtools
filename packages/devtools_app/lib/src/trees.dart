@@ -14,7 +14,7 @@ import 'dart:math';
 // ui/trees.dart, which houses generic tree types vs the base classes in this
 // file.
 
-class TreeNode<T extends TreeNode<T>> {
+abstract class TreeNode<T extends TreeNode<T>> {
   T parent;
 
   final List<T> children = [];
@@ -213,6 +213,29 @@ class TreeNode<T extends TreeNode<T>> {
       }
     }
     return currentNode;
+  }
+
+  TreeNode<T> shallowCopy();
+
+  /// Filters a tree starting at this node and returns a list of new roots after
+  /// filtering, where all nodes in the new tree(s) meet the condition `filter`.
+  ///
+  /// If the root [this] should be included in the filtered results, the list
+  /// will contain one node. If the root [this] should not be included in the
+  /// filtered results, the list may contain one or more nodes.
+  List<T> filterWhere(bool filter(T node)) {
+    List<T> walkAndCopy(T node) {
+      if (filter(node)) {
+        final copy = node.shallowCopy();
+        for (final child in node.children) {
+          copy.addAllChildren(walkAndCopy(child));
+        }
+        return [copy];
+      }
+      return [for (final child in node.children) ...walkAndCopy(child)];
+    }
+
+    return walkAndCopy(this);
   }
 }
 

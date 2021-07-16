@@ -1008,6 +1008,12 @@ class TestData extends TreeNode<TestData> {
 
   @override
   String toString() => '$name - $number';
+
+  @override
+  TestData shallowCopy() {
+    throw UnimplementedError('This method is not implemented. Implement if you '
+        'need to call `shallowCopy` on an instance of this class.');
+  }
 }
 
 class _NameColumn extends TreeColumnData<TestData> {

@@ -334,6 +334,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     return _inclusiveSampleCount;
   }
 
+  @override
   CpuStackFrame shallowCopy({bool resetInclusiveSampleCount = false}) {
     final copy = CpuStackFrame(
       id: id,
