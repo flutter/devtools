@@ -212,14 +212,14 @@ class PerformanceController extends DisposableController
 
       _timelinePollingRateLimiter = RateLimiter(
         timelinePollingRateLimit,
-        () async => await _pullTraceEventsFromVmTimeline(),
+        _pullTraceEventsFromVmTimeline,
       );
 
       // Poll for new timeline events.
       // We are polling here instead of listening to the timeline event stream
       // because the event stream is sending out of order and duplicate events.
       // See https://github.com/dart-lang/sdk/issues/46605.
-      _pollingTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
+      _pollingTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
         _timelinePollingRateLimiter.scheduleRequest();
       });
     }
