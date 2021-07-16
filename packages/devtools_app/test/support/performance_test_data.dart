@@ -76,14 +76,6 @@ final jankyFrame = FlutterFrame.parse({
   'raster': 18000,
   'vsyncOverhead': 1000,
 });
-// ..eventFlows[0] = (goldenUiTimelineEvent.deepCopy()
-//   ..time = (TimeRange()
-//     ..start = const Duration(milliseconds: 50)
-//     ..end = const Duration(milliseconds: 70)))
-// ..eventFlows[1] = (goldenRasterTimelineEvent.deepCopy()
-//   ..time = (TimeRange()
-//     ..start = const Duration(milliseconds: 68)
-//     ..end = const Duration(milliseconds: 88)));
 
 final jankyFrameUiOnly = FlutterFrame.parse({
   'number': 3,
@@ -93,14 +85,6 @@ final jankyFrameUiOnly = FlutterFrame.parse({
   'raster': 5000,
   'vsyncOverhead': 1000,
 });
-// ..eventFlows[0] = (goldenUiTimelineEvent.deepCopy()
-//   ..time = (TimeRange()
-//     ..start = const Duration(milliseconds: 50)
-//     ..end = const Duration(milliseconds: 70)))
-// ..eventFlows[1] = (goldenRasterTimelineEvent.deepCopy()
-//   ..time = (TimeRange()
-//     ..start = const Duration(milliseconds: 68)
-//     ..end = const Duration(milliseconds: 75)));
 
 final jankyFrameRasterOnly = FlutterFrame.parse({
   'number': 4,
@@ -110,14 +94,6 @@ final jankyFrameRasterOnly = FlutterFrame.parse({
   'raster': 18000,
   'vsyncOverhead': 10,
 });
-// ..eventFlows[0] = (goldenUiTimelineEvent.deepCopy()
-//   ..time = (TimeRange()
-//     ..start = const Duration(milliseconds: 50)
-//     ..end = const Duration(milliseconds: 60)))
-// ..eventFlows[1] = (goldenRasterTimelineEvent.deepCopy()
-//   ..time = (TimeRange()
-//     ..start = const Duration(milliseconds: 50)
-//     ..end = const Duration(milliseconds: 75)));
 
 final testFrameWithShaderJank = FlutterFrame.parse({
   'number': 5,

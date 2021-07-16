@@ -73,26 +73,30 @@ void main() {
 
     testWidgetsWithWindowSize('builds header content', windowSize,
         (WidgetTester tester) async {
-      _setUpServiceManagerWithTimeline({});
-      await pumpTimelineBody(tester);
-      await tester.pumpAndSettle();
-      expect(find.text('Timeline Events'), findsOneWidget);
-      expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
-      expect(find.byKey(timelineSearchFieldKey), findsOneWidget);
-      expect(find.byType(FlameChartHelpButton), findsOneWidget);
+      await tester.runAsync(() async {
+        _setUpServiceManagerWithTimeline({});
+        await pumpTimelineBody(tester);
+        await tester.pumpAndSettle();
+        expect(find.text('Timeline Events'), findsOneWidget);
+        expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
+        expect(find.byKey(timelineSearchFieldKey), findsOneWidget);
+        expect(find.byType(FlameChartHelpButton), findsOneWidget);
+      });
     });
 
     testWidgetsWithWindowSize('can show help dialog', windowSize,
         (WidgetTester tester) async {
-      _setUpServiceManagerWithTimeline({});
-      await pumpTimelineBody(tester);
-      await tester.pumpAndSettle();
+      await tester.runAsync(() async {
+        _setUpServiceManagerWithTimeline({});
+        await pumpTimelineBody(tester);
+        await tester.pumpAndSettle();
 
-      final helpButtonFinder = find.byType(FlameChartHelpButton);
-      expect(helpButtonFinder, findsOneWidget);
-      await tester.tap(helpButtonFinder);
-      await tester.pumpAndSettle();
-      expect(find.text('Flame Chart Help'), findsOneWidget);
+        final helpButtonFinder = find.byType(FlameChartHelpButton);
+        expect(helpButtonFinder, findsOneWidget);
+        await tester.tap(helpButtonFinder);
+        await tester.pumpAndSettle();
+        expect(find.text('Flame Chart Help'), findsOneWidget);
+      });
     });
 
     testWidgetsWithWindowSize('builds flame chart with data', windowSize,
@@ -122,7 +126,10 @@ void main() {
         (WidgetTester tester) async {
       await tester.runAsync(() async {
         await pumpTimelineBody(tester, runAsync: true);
-        controller.addFrame(testFrame0);
+        controller
+          ..addFrame(testFrame1.shallowCopy())
+          ..addTimelineEvent(goldenUiTimelineEvent)
+          ..addTimelineEvent(goldenRasterTimelineEvent);
         expect(controller.data.frames.length, equals(1));
         await controller.toggleSelectedFrame(controller.data.frames.first);
         await tester.pumpAndSettle();
