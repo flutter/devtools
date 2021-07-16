@@ -785,6 +785,13 @@ class Variable extends TreeNode<Variable> {
   }
 
   bool _isInspectable;
+
+  @override
+  Variable shallowCopy() {
+    throw UnimplementedError('This method is not implemented for an instance of'
+        'Variable. Implement this method if you need to call '
+        '`Variable.shallowCopy`.');
+  }
 }
 
 /// A node in a tree of scripts.
@@ -853,6 +860,13 @@ class FileNode extends TreeNode<FileNode> {
     for (var child in children) {
       child._trimChildrenAsMapEntries();
     }
+  }
+
+  @override
+  FileNode shallowCopy() {
+    throw UnimplementedError('This method is not implemented for an instance of'
+        'FileNode. Implement this method if you need to call '
+        '`FileNode.shallowCopy`.');
   }
 
   @override

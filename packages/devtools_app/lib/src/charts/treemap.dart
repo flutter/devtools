@@ -685,6 +685,13 @@ class TreemapNode extends TreeNode<TreemapNode> {
   String toString() {
     return '{name: $name, size: $byteSize}';
   }
+
+  @override
+  TreemapNode shallowCopy() {
+    throw UnimplementedError('This method is not implemented for an instance of'
+        'TreemapNode. Implement this method if you need to call'
+        '`TreemapNode.shallowCopy`.');
+  }
 }
 
 class PositionedCell extends Positioned {

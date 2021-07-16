@@ -273,6 +273,13 @@ class Reference extends TreeNode<Reference> {
 
     super.leaf();
   }
+
+  @override
+  Reference shallowCopy() {
+    throw UnimplementedError('This method is not implemented for an instance of'
+        'Reference. Implement this method if you need to call'
+        '`Reference.shallowCopy`.');
+  }
 }
 
 /// Container of all snapshot analyses processed.
@@ -343,6 +350,13 @@ class AnalysisField extends TreeNode<AnalysisField> {
 
   final String name;
   final String value;
+
+  @override
+  AnalysisField shallowCopy() {
+    throw UnimplementedError('This method is not implemented for an instance of'
+        'AnalysisField. Implement this method if you need to call'
+        '`AnalysisField.shallowCopy`.');
+  }
 }
 
 /// Snapshot being analyzed.
@@ -591,6 +605,13 @@ class FieldReference extends TreeNode<FieldReference> {
       onExpand(this);
     }
     super.expand();
+  }
+
+  @override
+  FieldReference shallowCopy() {
+    throw UnimplementedError('This method is not implemented for an instance of'
+        'FieldReference. Implement this method if you need to call'
+        '`FieldReference.shallowCopy`.');
   }
 }
 

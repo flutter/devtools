@@ -304,4 +304,11 @@ class DominatorTreeNode extends TreeNode<DominatorTreeNode> {
   }
 
   final CallGraphNode callGraphNode;
+
+  @override
+  DominatorTreeNode shallowCopy() {
+    throw UnimplementedError('This method is not implemented for an instance of'
+        'DominatorTreeNode. Implement this method if you need to call'
+        '`DominatorTreeNode.shallowCopy`.');
+  }
 }

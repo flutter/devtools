@@ -376,6 +376,13 @@ class OfflineTimelineEvent extends TimelineEvent {
   List<List<TimelineEvent>> _calculateDisplayRows() =>
       throw UnimplementedError('This method should never be called for an '
           'instance of OfflineTimelineEvent');
+
+  @override
+  OfflineTimelineEvent shallowCopy() {
+    throw UnimplementedError('This method is not implemented for an instance of'
+        'OfflineTimelineEvent. Implement this method if you need to call'
+        '`OfflineTimelineEvent.shallowCopy`.');
+  }
 }
 
 /// Data describing a single Flutter frame.
@@ -852,6 +859,13 @@ class SyncTimelineEvent extends TimelineEvent {
       return startTime < eStartTime;
     }
   }
+
+  @override
+  SyncTimelineEvent shallowCopy() {
+    throw UnimplementedError('This method is not implemented for an instance of'
+        'SyncTimelineEvent. Implement this method if you need to call'
+        '`SyncTimelineEvent.shallowCopy`.');
+  }
 }
 
 // TODO(kenz): calculate and store async guidelines here instead of in the UI
@@ -1039,5 +1053,12 @@ class AsyncTimelineEvent extends TimelineEvent {
       if (added) return true;
     }
     return false;
+  }
+
+  @override
+  AsyncTimelineEvent shallowCopy() {
+    throw UnimplementedError('This method is not implemented for an instance of'
+        'AsyncTimelineEvent. Implement this method if you need to call'
+        '`AsyncTimelineEvent.shallowCopy`.');
   }
 }
