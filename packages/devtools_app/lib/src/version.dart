@@ -36,7 +36,7 @@ class FlutterVersion extends SemanticVersion {
           .split('.')
           .map((part) => RegExp(r'\d+').stringMatch(part) ?? '')
           .toList()
-            ..removeWhere((part) => part.isEmpty);
+        ..removeWhere((part) => part.isEmpty);
       preReleaseMajor = preReleaseParts.isNotEmpty
           ? int.tryParse(preReleaseParts.first) ?? 0
           : 0;

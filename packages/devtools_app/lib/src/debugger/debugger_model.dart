@@ -479,7 +479,9 @@ List<Variable> _createVariablesForAssociations(
       isolateRef: isolateRef,
     );
     variables.add(
-      Variable.text('[Entry $i]')..addChild(key)..addChild(value),
+      Variable.text('[Entry $i]')
+        ..addChild(key)
+        ..addChild(value),
     );
   }
   return variables;
