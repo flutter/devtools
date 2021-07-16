@@ -551,8 +551,8 @@ class FlutterFrame {
   @override
   String toString() {
     return 'Frame $id - $timeFromFrameTiming, '
-        'ui: ${timelineEventData.uiEvent.time}, '
-        'raster: ${timelineEventData.rasterEvent.time}';
+        'ui: ${timelineEventData.uiEvent?.time}, '
+        'raster: ${timelineEventData.rasterEvent?.time}';
   }
 
   FlutterFrame shallowCopy() {
@@ -998,12 +998,6 @@ class SyncTimelineEvent extends TimelineEvent {
       return startTime < eStartTime;
     }
   }
-
-  @override
-  SyncTimelineEvent shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
-  }
 }
 
 // TODO(kenz): calculate and store async guidelines here instead of in the UI
@@ -1191,11 +1185,5 @@ class AsyncTimelineEvent extends TimelineEvent {
       if (added) return true;
     }
     return false;
-  }
-
-  @override
-  AsyncTimelineEvent shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
   }
 }

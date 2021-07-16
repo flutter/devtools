@@ -385,12 +385,6 @@ class LegacyOfflineTimelineEvent extends LegacyTimelineEvent {
   List<List<LegacyTimelineEvent>> _calculateDisplayRows() =>
       throw UnimplementedError('This method should never be called for an '
           'instance of OfflineTimelineEvent');
-
-  @override
-  LegacyTimelineEvent shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
-  }
 }
 
 /// Data describing a single Flutter frame.
@@ -777,12 +771,25 @@ abstract class LegacyTimelineEvent extends TreeNode<LegacyTimelineEvent>
     return {firstTraceKey: modifiedTrace};
   }
 
-  @visibleForTesting
-  LegacyTimelineEvent deepCopy() {
+  @override
+  LegacyTimelineEvent shallowCopy() {
     final copy = isAsyncEvent
         ? LegacyAsyncTimelineEvent(traceEvents.first)
         : LegacySyncTimelineEvent(traceEvents.first);
-    copy.time.end = time.end;
+    for (int i = 1; i < traceEvents.length; i++) {
+      copy.traceEvents.add(traceEvents[i]);
+    }
+    copy
+      ..type = type
+      ..time = (TimeRange()
+        ..start = time.start
+        ..end = time.end);
+    return copy;
+  }
+
+  @visibleForTesting
+  LegacyTimelineEvent deepCopy() {
+    final copy = shallowCopy();
     copy.parent = parent;
     for (LegacyTimelineEvent child in children) {
       copy._addChild(child.deepCopy());
@@ -851,12 +858,6 @@ class LegacySyncTimelineEvent extends LegacyTimelineEvent {
     } else {
       return startTime < eStartTime;
     }
-  }
-
-  @override
-  LegacySyncTimelineEvent shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
   }
 }
 
@@ -1045,11 +1046,5 @@ class LegacyAsyncTimelineEvent extends LegacyTimelineEvent {
       if (added) return true;
     }
     return false;
-  }
-
-  @override
-  LegacyAsyncTimelineEvent shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
   }
 }

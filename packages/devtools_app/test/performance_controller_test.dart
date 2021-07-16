@@ -142,6 +142,7 @@ void main() async {
 
     test('add frame', () async {
       await env.setupEnvironment();
+      await performanceController.clearData();
       expect(performanceController.data.frames, isEmpty);
       performanceController.addFrame(testFrame1);
       expect(
