@@ -385,6 +385,12 @@ class LegacyOfflineTimelineEvent extends LegacyTimelineEvent {
   List<List<LegacyTimelineEvent>> _calculateDisplayRows() =>
       throw UnimplementedError('This method should never be called for an '
           'instance of OfflineTimelineEvent');
+
+  @override
+  LegacyTimelineEvent shallowCopy() {
+    throw UnimplementedError('This method is not implemented. Implement if you '
+        'need to call `shallowCopy` on an instance of this class.');
+  }
 }
 
 /// Data describing a single Flutter frame.
@@ -834,6 +840,12 @@ class LegacySyncTimelineEvent extends LegacyTimelineEvent {
       return startTime < eStartTime;
     }
   }
+
+  @override
+  LegacySyncTimelineEvent shallowCopy() {
+    throw UnimplementedError('This method is not implemented. Implement if you '
+        'need to call `shallowCopy` on an instance of this class.');
+  }
 }
 
 // TODO(kenz): calculate and store async guidelines here instead of in the UI
@@ -1021,5 +1033,11 @@ class LegacyAsyncTimelineEvent extends LegacyTimelineEvent {
       if (added) return true;
     }
     return false;
+  }
+
+  @override
+  LegacyAsyncTimelineEvent shallowCopy() {
+    throw UnimplementedError('This method is not implemented. Implement if you '
+        'need to call `shallowCopy` on an instance of this class.');
   }
 }
