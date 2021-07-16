@@ -879,7 +879,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
     return {firstTraceKey: modifiedTrace};
   }
 
-  @visibleForTesting
+  @override
   TimelineEvent shallowCopy() {
     final copy = isAsyncEvent
         ? AsyncTimelineEvent(traceEvents.first)
