@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/debugger/hover.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../core/message_bus.dart';
+import '../debugger/hover.dart';
 import '../globals.dart';
 import '../notifications.dart';
 import '../scaffold.dart';
@@ -134,30 +136,36 @@ class _ServiceExtensionButtonGroupState
   Widget _buildExtension(ExtensionState extensionState) {
     final description = extensionState.description;
 
-    final contents = Container(
-      height: 32.0,
-      padding: EdgeInsets.symmetric(
-        horizontal: includeText(context, widget.minIncludeTextWidth)
-            ? defaultSpacing
-            : 0.0,
-      ),
-      child: ImageIconLabel(
-        description.icon,
-        description.description,
-        minIncludeTextWidth: widget.minIncludeTextWidth,
+    return ServiceExtensionTooltip(
+      description: description,
+      child: Container(
+        height: 32.0,
+        padding: EdgeInsets.symmetric(
+          horizontal: includeText(context, widget.minIncludeTextWidth)
+              ? defaultSpacing
+              : 0.0,
+        ),
+        child: ImageIconLabel(
+          extensionState.isSelected
+              ? description.enabledIcon
+              : description.disabledIcon,
+          description.description,
+          minIncludeTextWidth: widget.minIncludeTextWidth,
+        ),
       ),
     );
-
-    return description.tooltipBuilder(extensionState.isSelected, contents);
   }
 
   void _onPressed(int index) {
     final extensionState = _extensionStates[index];
     if (extensionState.isAvailable) {
       setState(() {
+        ga.select(
+          extensionState.description.gaScreenName,
+          extensionState.description.gaItem,
+        );
+
         final wasSelected = extensionState.isSelected;
-        // TODO(jacobr): support analytics.
-        // ga.select(extensionDescription.gaScreenName, extensionDescription.gaItem);
 
         serviceManager.serviceExtensionManager.setServiceExtensionState(
           extensionState.description.extension,
@@ -361,9 +369,9 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
 
   @override
   Widget build(BuildContext context) {
-    return widget.service.tooltipBuilder(
-      value,
-      InkWell(
+    return ServiceExtensionTooltip(
+      description: widget.service,
+      child: InkWell(
         onTap: _onClick,
         child: Row(
           children: <Widget>[
@@ -463,39 +471,67 @@ mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
   }
 }
 
-class BasicTooltip extends StatelessWidget {
-  const BasicTooltip({
+class ServiceExtensionTooltip extends StatelessWidget {
+  const ServiceExtensionTooltip({
     Key key,
-    @required this.message,
+    @required this.description,
     @required this.child,
   }) : super(key: key);
 
-  final String message;
+  final ToggleableServiceExtensionDescription description;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
+    if (description.tooltipUrl != null) {
+      return ServiceExtensionRichTooltip(
+        description: description,
+        child: child,
+      );
+    }
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final focusColor = Theme.of(context).focusColor;
+
     return Tooltip(
-      message: message,
+      message: description.tooltip,
       waitDuration: tooltipWait,
-      preferBelow: false,
+      preferBelow: true,
       child: child,
+      decoration: BoxDecoration(
+        color: colorScheme.defaultBackgroundColor,
+        border: Border.all(
+          color: focusColor,
+          width: hoverCardBorderWidth,
+        ),
+        borderRadius: BorderRadius.circular(defaultBorderRadius),
+      ),
+      textStyle: DefaultTextStyle.of(context).style,
     );
   }
 }
 
 /// Rich tooltip with a description and "more info" link
-class RichTooltip extends StatelessWidget {
-  const RichTooltip({
+class ServiceExtensionRichTooltip extends StatelessWidget {
+  const ServiceExtensionRichTooltip({
     Key key,
-    @required this.message,
-    @required this.url,
+    @required this.description,
     @required this.child,
   }) : super(key: key);
 
-  final String message;
-  final String url;
+  final ToggleableServiceExtensionDescription description;
   final Widget child;
+
+  static const double _tooltipWidth = 300.0;
+
+  void _onLinkTap(BuildContext context) {
+    launchUrl(description.tooltipUrl, context);
+
+    ga.select(
+      description.gaScreenName,
+      description.gaItemTooltipLink,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -507,23 +543,34 @@ class RichTooltip extends StatelessWidget {
   }
 
   Future<HoverCardData> _buildCardData(BuildContext context) {
+    if (description.tooltipUrl == null) {
+      return Future.value(
+        HoverCardData(
+          position: HoverCardPosition.element,
+          contents: Material(
+            child: Text(description.tooltip),
+          ),
+        ),
+      );
+    }
+
     return Future.value(
       HoverCardData(
         position: HoverCardPosition.element,
-        width: 300,
+        width: _tooltipWidth,
         contents: Material(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(message),
+              Text(description.tooltip),
               Align(
                 alignment: Alignment.bottomRight,
                 child: InkWell(
-                  onTap: () => launchUrl(url, context),
+                  onTap: () => _onLinkTap(context),
                   borderRadius: BorderRadius.circular(defaultBorderRadius),
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(denseSpacing),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -532,8 +579,8 @@ class RichTooltip extends StatelessWidget {
                           'More info',
                           style: linkTextStyle(Theme.of(context).colorScheme),
                         ),
-                        const SizedBox(width: 3),
-                        const Icon(Icons.launch, size: 12)
+                        const SizedBox(width: densePadding),
+                        const Icon(Icons.launch, size: tooltipIconSize)
                       ],
                     ),
                   ),

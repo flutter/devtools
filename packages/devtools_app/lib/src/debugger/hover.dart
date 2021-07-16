@@ -73,7 +73,6 @@ int _hoverIndexFor(double dx, TextSpan line) {
   return hoverIndex;
 }
 
-const _hoverCardBorderWidth = 2.0;
 const _hoverYOffset = 10.0;
 
 /// Minimum distance from the side of screen to show tooltip
@@ -138,7 +137,7 @@ class HoverCard {
               color: colorScheme.defaultBackgroundColor,
               border: Border.all(
                 color: focusColor,
-                width: _hoverCardBorderWidth,
+                width: hoverCardBorderWidth,
               ),
               borderRadius: BorderRadius.circular(defaultBorderRadius),
             ),
@@ -147,7 +146,7 @@ class HoverCard {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (title != null) ...[
-                  SizedBox(
+                  Container(
                     width: width,
                     child: Text(
                       title,
