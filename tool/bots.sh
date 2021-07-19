@@ -28,7 +28,7 @@ function flutter {
 
 # Get Flutter.
 echo "Cloning the Flutter $CHANNEL branch"
-git clone https://github.com/flutter/flutter.git --branch $CHANNEL ./flutter
+git clone https://github.com/flutter/flutter.git --branch $CHANNEL ./flutter-sdk
 
 if [ "$CHANNEL" = "stable" ]; then
     # Set the suffix so we use stable goldens.
@@ -42,12 +42,12 @@ fi
 # devtools repo. We don't use the dart script from flutter/bin as that script
 # can and does print 'Waiting for another flutter command...' at inopportune
 # times.
-export PATH=`pwd`/flutter/bin/cache/dart-sdk/bin:`pwd`/flutter/bin:`pwd`/bin:$PATH
+export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`/bin:$PATH
 
 flutter config --no-analytics
 flutter doctor
 
-# We should be using dart from ../flutter/bin/cache/dart-sdk/dart.
+# We should be using dart from ../flutter-sdk/bin/cache/dart-sdk/dart.
 echo "which flutter: " `which flutter`
 echo "which dart: " `which dart`
 

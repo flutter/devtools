@@ -22,6 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         channel:
+          # When updating this version, also update the version in flutter-version.txt.
           - 2.3.0-24.1.pre
           - dev
           - beta

@@ -11,7 +11,7 @@ set -ex #echo on
 # See https://github.com/flutter/engine/blob/master/lib/web_ui/lib/src/engine/canvaskit/initialization.dart#L50-L78,
 # but compare with the code in master for getting the current version.
 # A better solution would be to either upstream this functionality into the flutter_tools,
-# (https://github.com/flutter/flutter/issues/74936), or to read this from a manifest 
+# (https://github.com/flutter/flutter/issues/70101), or to read this from a manifest 
 # provided (https://github.com/flutter/flutter/issues/74934).
 function download_canvaskit() {
   local canvaskit_url=https://unpkg.com/canvaskit-wasm@0.28.1/bin/
