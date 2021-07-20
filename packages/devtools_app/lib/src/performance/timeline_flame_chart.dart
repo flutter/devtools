@@ -453,10 +453,8 @@ class TimelineFlameChartState
                 _performanceController.firstWellFormedFrameMicros) {
           Notifications.of(context).push(
             'No timeline events available for the selected frame. Timeline '
-            'events for this frame occurred too long ago and fell out of the '
-            'Dart VM Timeline buffer before DevTools could access them. To '
-            'avoid this problem in the future, open the DevTools Performance '
-            'page sooner.',
+            'events occurred too long ago before DevTools could access them. '
+            'To avoid this, open the DevTools Performance page sooner.',
           );
           return;
         }
