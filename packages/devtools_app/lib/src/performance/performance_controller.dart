@@ -160,6 +160,8 @@ class PerformanceController extends DisposableController
 
   static const timelinePollingRateLimit = 5.0;
 
+  static const timelinePollingInterval = Duration(seconds: 1);
+
   RateLimiter _timelinePollingRateLimiter;
 
   Future<void> _initialized;
@@ -219,7 +221,7 @@ class PerformanceController extends DisposableController
       // We are polling here instead of listening to the timeline event stream
       // because the event stream is sending out of order and duplicate events.
       // See https://github.com/dart-lang/sdk/issues/46605.
-      _pollingTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _pollingTimer = Timer.periodic(timelinePollingInterval, (_) {
         _timelinePollingRateLimiter.scheduleRequest();
       });
     }
@@ -316,13 +318,24 @@ class PerformanceController extends DisposableController
     }
 
     if (!frame.isWellFormed &&
-        (_firstWellFormedFrameMicros == null ||
+        (firstWellFormedFrameMicros == null ||
             frame.timeFromFrameTiming.start.inMicroseconds >=
-                _firstWellFormedFrameMicros)) {
+                firstWellFormedFrameMicros)) {
       // Only try to pull timeline events for frames that are after the first
       // well formed frame. Timeline events that occurred before this frame will
       // have already fallen out of the buffer.
       await processAvailableEvents();
+    }
+
+    // If the frame is still not well formed after processing all available
+    // events, wait a short delay and try to process events again after the
+    // VM has been polled one more time.
+    if (!frame.isWellFormed) {
+      _processing.value = true;
+      await Future.delayed(timelinePollingInterval, () async {
+        await processTraceEvents(allTraceEvents);
+        _processing.value = false;
+      });
     }
 
     data.selectedFrame = frame;
@@ -391,12 +404,12 @@ class PerformanceController extends DisposableController
 
   /// Timestamp in micros of the first well formed frame, or in other words,
   /// the first frame for which we have timeline event data.
-  int _firstWellFormedFrameMicros;
+  int firstWellFormedFrameMicros;
 
   void _updateFirstWellFormedFrameMicros(FlutterFrame frame) {
     assert(frame.isWellFormed);
-    _firstWellFormedFrameMicros = math.min(
-      _firstWellFormedFrameMicros ?? maxJsInt,
+    firstWellFormedFrameMicros = math.min(
+      firstWellFormedFrameMicros ?? maxJsInt,
       frame.timeFromFrameTiming.start.inMicroseconds,
     );
   }
@@ -762,7 +775,7 @@ class PerformanceController extends DisposableController
     _nextTimelineEventIndexToProcess = 0;
     _unassignedFlutterFrameEvents.clear();
     _unassignedFlutterFrames.clear();
-    _firstWellFormedFrameMicros = null;
+    firstWellFormedFrameMicros = null;
     _selectedTimelineEventNotifier.value = null;
     _selectedFrameNotifier.value = null;
     _processing.value = false;
