@@ -305,10 +305,17 @@ class PerformanceController extends DisposableController
   ValueListenable<double> get displayRefreshRate => _displayRefreshRate;
   final _displayRefreshRate = ValueNotifier<double>(defaultRefreshRate);
 
+  /// Tracks the current frame undergoing selection so that we can equality
+  /// check after async operations and bail out early if another frame has been
+  /// selected during awaits.
+  FlutterFrame _currentFrameBeingSelected;
+
   Future<void> toggleSelectedFrame(FlutterFrame frame) async {
     if (frame == null || data == null) {
       return;
     }
+
+    _currentFrameBeingSelected = frame;
 
     // Unselect [frame] if is already selected.
     if (data.selectedFrame == frame) {
@@ -328,16 +335,22 @@ class PerformanceController extends DisposableController
       await processAvailableEvents();
     }
 
+    if (_currentFrameBeingSelected != frame) return;
+
     // If the frame is still not well formed after processing all available
     // events, wait a short delay and try to process events again after the
     // VM has been polled one more time.
     if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
+      assert(!_processing.value);
       _processing.value = true;
       await Future.delayed(timelinePollingInterval, () async {
+        if (_currentFrameBeingSelected != frame) return;
         await processTraceEvents(allTraceEvents);
         _processing.value = false;
       });
     }
+
+    if (_currentFrameBeingSelected != frame) return;
 
     data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
@@ -352,6 +365,8 @@ class PerformanceController extends DisposableController
       updateProfiler: false,
     );
 
+    if (_currentFrameBeingSelected != frame) return;
+
     final storedProfileForFrame = cpuProfilerController.cpuProfileStore
         .lookupProfile(frame.timeFromEventFlows);
     if (storedProfileForFrame == null) {
@@ -363,6 +378,7 @@ class PerformanceController extends DisposableController
           processId: 'Flutter frame ${frame.id}',
         );
       }
+      if (_currentFrameBeingSelected != frame) return;
       data.cpuProfileData = cpuProfilerController.dataNotifier.value;
     } else {
       if (!storedProfileForFrame.processed) {
@@ -371,6 +387,7 @@ class PerformanceController extends DisposableController
           processId: 'Flutter frame ${frame.id} - stored profile ',
         );
       }
+      if (_currentFrameBeingSelected != frame) return;
       data.cpuProfileData = storedProfileForFrame;
       cpuProfilerController.loadProcessedData(storedProfileForFrame);
     }
