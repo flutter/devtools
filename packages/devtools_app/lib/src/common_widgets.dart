@@ -701,8 +701,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
               child: title,
             ),
             ...leftActions,
-            if (leftActions.isNotEmpty && rightActions.isNotEmpty)
-              const Spacer(),
+            if (rightActions.isNotEmpty) const Spacer(),
             ...rightActions,
           ],
         ),

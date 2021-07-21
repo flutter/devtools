@@ -236,7 +236,6 @@ class DebugModePerformanceMessage {
         const TextSpan(
           text: '''
 You are running your app in debug mode. Debug mode performance is not indicative of release performance.
-
 Relaunch your application with the '--profile' argument, or ''',
           style: TextStyle(color: _BannerError.foreground),
         ),
@@ -378,7 +377,6 @@ class DebugModeMemoryMessage {
         const TextSpan(
           text: '''
 You are running your app in debug mode. Absolute memory usage may be higher in a debug build than in a release build.
-
 For the most accurate absolute memory stats, relaunch your application with the '--profile' argument, or ''',
           style: TextStyle(color: _BannerWarning.foreground),
         ),
