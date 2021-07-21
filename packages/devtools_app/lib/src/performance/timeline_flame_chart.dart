@@ -448,6 +448,16 @@ class TimelineFlameChartState
       final time = _selectedFrame.timeToCenterFrame();
       final event = _selectedFrame.eventToCenterFrame();
       if (time == null || event == null) {
+        if (_performanceController.firstWellFormedFrameMicros != null &&
+            _selectedFrame.timeFromFrameTiming.start.inMicroseconds <
+                _performanceController.firstWellFormedFrameMicros) {
+          Notifications.of(context).push(
+            'No timeline events available for the selected frame. Timeline '
+            'events occurred too long ago before DevTools could access them. '
+            'To avoid this, open the DevTools Performance page sooner.',
+          );
+          return;
+        }
         // TODO(kenz): should we zoom to the latest available frame?
         Notifications.of(context)
             .push('No timeline events available for the selected frame');
