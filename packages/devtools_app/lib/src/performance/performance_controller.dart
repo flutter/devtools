@@ -317,10 +317,11 @@ class PerformanceController extends DisposableController
       return;
     }
 
-    if (!frame.isWellFormed &&
-        (firstWellFormedFrameMicros == null ||
-            frame.timeFromFrameTiming.start.inMicroseconds >=
-                firstWellFormedFrameMicros)) {
+    final bool frameBeforeFirstWellFormedFrame =
+        firstWellFormedFrameMicros == null ||
+            frame.timeFromFrameTiming.start.inMicroseconds <
+                firstWellFormedFrameMicros;
+    if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
       // Only try to pull timeline events for frames that are after the first
       // well formed frame. Timeline events that occurred before this frame will
       // have already fallen out of the buffer.
@@ -330,7 +331,7 @@ class PerformanceController extends DisposableController
     // If the frame is still not well formed after processing all available
     // events, wait a short delay and try to process events again after the
     // VM has been polled one more time.
-    if (!frame.isWellFormed) {
+    if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
       _processing.value = true;
       await Future.delayed(timelinePollingInterval, () async {
         await processTraceEvents(allTraceEvents);
