@@ -325,7 +325,7 @@ class PerformanceController extends DisposableController
     }
 
     final bool frameBeforeFirstWellFormedFrame =
-        firstWellFormedFrameMicros == null ||
+        firstWellFormedFrameMicros != null &&
             frame.timeFromFrameTiming.start.inMicroseconds <
                 firstWellFormedFrameMicros;
     if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
