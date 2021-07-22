@@ -84,7 +84,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   @override
   void initState() {
     super.initState();
-    _libraryFilterFocusNode = FocusNode();
+    _libraryFilterFocusNode = FocusNode(debugLabel: 'library-filter');
     ga.screen(DebuggerScreen.id);
   }
 
