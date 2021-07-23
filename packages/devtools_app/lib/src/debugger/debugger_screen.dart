@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:codicon/codicon.dart';
+import 'package:devtools_app/src/vm_developer/object_tree_controller.dart';
+import 'package:devtools_app/src/vm_developer/object_tree_selector.dart';
+import 'package:devtools_app/src/vm_service_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/services.dart';
@@ -79,12 +82,22 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   static const breakpointsTitle = 'Breakpoints';
 
   DebuggerController controller;
+  ObjectTreeController objectSelectorController = ObjectTreeController();
   FocusNode _libraryFilterFocusNode;
 
   @override
   void initState() {
+    print('initState');
     super.initState();
     _libraryFilterFocusNode = FocusNode(debugLabel: 'library-filter');
+    objectSelectorController.selected.addListener(() {
+      // TODO(bkonyi):
+      final node = objectSelectorController.selected.value;
+      if (node == null || node.script == null) return;
+      controller.showScriptLocation(ScriptLocation(node.script));
+    });
+
+    objectSelectorController.initialize();
     ga.screen(DebuggerScreen.id);
   }
 
@@ -142,7 +155,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             initialFractions: const [0.70, 0.30],
             children: [
               codeView,
-              ValueListenableBuilder(
+              /*ValueListenableBuilder(
                 valueListenable: controller.sortedScripts,
                 builder: (context, scripts, _) {
                   return ScriptPicker(
@@ -153,7 +166,13 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                     libraryFilterFocusNode: _libraryFilterFocusNode,
                   );
                 },
-              ),
+              ),*/
+              Provider.value(
+                value: objectSelectorController,
+                child: ObjectTreePicker(
+                  libraryFilterFocusNode: _libraryFilterFocusNode,
+                ),
+              )
             ],
           );
         } else {
@@ -405,7 +424,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     final fileName = ' at ' + frame.location.script.uri.split('/').last;
     final script = await widget.controller.getScript(frame.location.script);
     final pos =
-        widget.controller.calculatePosition(script, frame.location.tokenPos);
+        SourcePosition.calculatePosition(script, frame.location.tokenPos);
 
     return 'paused$reason$fileName $pos';
   }

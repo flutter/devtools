@@ -24,6 +24,7 @@ import '../ui/colors.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
+import '../vm_service_utils.dart';
 import 'breakpoints.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
@@ -40,6 +41,9 @@ class CodeView extends StatefulWidget {
   const CodeView({
     Key key,
     this.controller,
+    this.centerScrollingPosition = true,
+    this.showHistory = true,
+    this.initialPosition,
     this.scriptRef,
     this.parsedScript,
     this.onSelected,
@@ -55,6 +59,9 @@ class CodeView extends StatefulWidget {
   static double get assumedCharacterWidth => scaleByFontFactor(16.0);
 
   final DebuggerController controller;
+  final bool showHistory;
+  final bool centerScrollingPosition;
+  final ScriptLocation initialPosition;
   final ScriptRef scriptRef;
   final ParsedScript parsedScript;
 
@@ -85,6 +92,13 @@ class _CodeViewState extends State<CodeView>
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();
     horizontalController = ScrollController();
+
+    if (widget.initialPosition != null) {
+      final location = widget.initialPosition.location;
+      final lineIndex = location.line - 1;
+      final scrollPosition = lineIndex * CodeView.rowHeight;
+      verticalController.jumpTo(scrollPosition);
+    }
 
     addAutoDisposeListener(
       widget.controller.scriptLocation,
@@ -144,8 +158,10 @@ class _CodeViewState extends State<CodeView>
     if (parsedScript.lineCount * CodeView.rowHeight > extent) {
       // Scroll to the middle of the screen.
       final lineIndex = location.line - 1;
-      final scrollPosition =
-          lineIndex * CodeView.rowHeight - (extent - CodeView.rowHeight) / 2;
+      final scrollPosition = lineIndex * CodeView.rowHeight -
+          (widget.centerScrollingPosition
+              ? ((extent - CodeView.rowHeight) / 2)
+              : 0);
       if (animate) {
         verticalController.animateTo(
           scrollPosition,
@@ -255,16 +271,18 @@ class _CodeViewState extends State<CodeView>
 
     return HistoryViewport(
       history: widget.controller.scriptsHistory,
+      historyEnabled: widget.showHistory,
       generateTitle: (script) => script.uri,
       controls: [
         ScriptPopupMenu(widget.controller),
-        ScriptHistoryPopupMenu(
-          itemBuilder: _buildScriptMenuFromHistory,
-          onSelected: (scriptRef) {
-            widget.controller.showScriptLocation(ScriptLocation(scriptRef));
-          },
-          enabled: widget.controller.scriptsHistory.hasScripts,
-        ),
+        if (widget.showHistory)
+          ScriptHistoryPopupMenu(
+            itemBuilder: _buildScriptMenuFromHistory,
+            onSelected: (scriptRef) {
+              widget.controller.showScriptLocation(ScriptLocation(scriptRef));
+            },
+            enabled: widget.controller.scriptsHistory.hasScripts,
+          ),
       ],
       contentBuilder: (context, script) {
         if (lines.isNotEmpty) {
@@ -394,6 +412,52 @@ class _CodeViewState extends State<CodeView>
           onClose: () => widget.controller.toggleSearchInFileVisibility(false),
         ),
       ),
+    );
+  }
+
+  Widget buildCodeviewTitle(ThemeData theme) {
+    return ValueListenableBuilder(
+      valueListenable: widget.controller.scriptsHistory.current,
+      builder: (context, scriptsHistory, _) {
+        return debuggerSectionTitle(
+          theme,
+          child: Row(
+            children: [
+              ToolbarAction(
+                icon: Icons.chevron_left,
+                onPressed:
+                    scriptsHistory.hasPrevious ? scriptsHistory.moveBack : null,
+              ),
+              ToolbarAction(
+                icon: Icons.chevron_right,
+                onPressed:
+                    scriptsHistory.hasNext ? scriptsHistory.moveForward : null,
+              ),
+              const SizedBox(width: denseSpacing),
+              const VerticalDivider(thickness: 1.0),
+              const SizedBox(width: defaultSpacing),
+              Expanded(
+                child: Text(
+                  scriptRef?.uri ?? ' ',
+                  style: theme.textTheme.subtitle2,
+                ),
+              ),
+              const SizedBox(width: denseSpacing),
+              ScriptPopupMenu(widget.controller),
+              const SizedBox(width: denseSpacing),
+              ScriptHistoryPopupMenu(
+                itemBuilder: _buildScriptMenuFromHistory,
+                onSelected: (scriptRef) {
+                  widget.controller
+                      .showScriptLocation(ScriptLocation(scriptRef));
+                },
+                enabled: scriptsHistory.hasScripts,
+              ),
+              const SizedBox(width: denseSpacing),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -620,7 +684,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
 
         if (isOutOfViewTop || isOutOfViewBottom) {
           // Scroll this search token to the middle of the view.
-          final targetOffset = math.max(
+          final targetOffset = math.max<double>(
             activeSearch.position.line * CodeView.rowHeight - widget.height / 2,
             0.0,
           );

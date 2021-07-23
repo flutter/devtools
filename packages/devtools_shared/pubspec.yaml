@@ -15,3 +15,7 @@ dependencies:
   shelf: ^1.1.0
   usage: ^4.0.0
   vm_service: ^7.1.0
+
+dependency_overrides:
+  vm_service: 
+   path: ../../../dart-sdk/sdk/pkg/vm_service

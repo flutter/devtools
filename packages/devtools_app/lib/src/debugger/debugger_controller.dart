@@ -18,6 +18,7 @@ import '../history_manager.dart';
 import '../service_manager.dart';
 import '../ui/search.dart';
 import '../utils.dart';
+import '../vm_service_utils.dart';
 import '../vm_service_wrapper.dart';
 import 'debugger_model.dart';
 import 'syntax_highlighter.dart';
@@ -859,25 +860,12 @@ class DebuggerController extends DisposableController
     _populateScriptAndShowLocation(mainScriptRef);
   }
 
-  SourcePosition calculatePosition(Script script, int tokenPos) {
-    final List<List<int>> table = script.tokenPosTable;
-    if (table == null) {
-      return null;
-    }
-
-    return SourcePosition(
-      line: script.getLineNumberFromTokenPos(tokenPos),
-      column: script.getColumnNumberFromTokenPos(tokenPos),
-      tokenPos: tokenPos,
-    );
-  }
-
   Future<BreakpointAndSourcePosition> _createBreakpointWithLocation(
       Breakpoint breakpoint) async {
     if (breakpoint.resolved) {
       final bp = BreakpointAndSourcePosition.create(breakpoint);
       return getScript(bp.scriptRef).then((Script script) {
-        final pos = calculatePosition(script, bp.tokenPos);
+        final pos = SourcePosition.calculatePosition(script, bp.tokenPos);
         return BreakpointAndSourcePosition.create(breakpoint, pos);
       });
     } else {
@@ -894,7 +882,8 @@ class DebuggerController extends DisposableController
     }
 
     final script = await getScript(location.script);
-    final position = calculatePosition(script, location.tokenPos);
+    final position =
+        SourcePosition.calculatePosition(script, location.tokenPos);
     return StackFrameAndSourcePosition(frame, position: position);
   }
 
@@ -999,7 +988,7 @@ class DebuggerController extends DisposableController
     for (SourceReportRange range in report.ranges) {
       if (range.possibleBreakpoints != null) {
         for (int tokenPos in range.possibleBreakpoints) {
-          positions.add(calculatePosition(script, tokenPos));
+          positions.add(SourcePosition.calculatePosition(script, tokenPos));
         }
       }
     }
@@ -1098,7 +1087,7 @@ class ScriptsHistory extends HistoryManager<ScriptRef> {
   bool get hasScripts => _openedScripts.isNotEmpty;
 
   void pushEntry(ScriptRef ref) {
-    if (ref == current.value) return;
+    if (ref == current) return;
 
     while (hasNext) {
       pop();
@@ -1109,6 +1098,9 @@ class ScriptsHistory extends HistoryManager<ScriptRef> {
 
     push(ref);
   }
+
+  @override
+  ScriptsHistory get value => this;
 
   Iterable<ScriptRef> get openedScripts => _openedScripts.toList().reversed;
 }
