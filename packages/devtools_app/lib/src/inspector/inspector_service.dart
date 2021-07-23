@@ -38,6 +38,8 @@ class RegistrableServiceExtension {
   static const setFlexFactor = RegistrableServiceExtension('setFlexFactor');
   static const setFlexProperties =
       RegistrableServiceExtension('setFlexProperties');
+  static const getRootWidgetSummaryTreeWithPreviews =
+      RegistrableServiceExtension('getRootWidgetSummaryTreeWithPreviews');
 
   static const getPubRootDirectories =
       RegistrableServiceExtension('getPubRootDirectories');
@@ -974,7 +976,10 @@ class ObjectGroup implements Disposable {
   }
 
   Future<RemoteDiagnosticsNode> getRootWidget() {
-    return invokeServiceMethodReturningNode('getRootWidgetSummaryTree');
+    return parseDiagnosticsNodeDaemon(invokeServiceExtensionMethod(
+      RegistrableServiceExtension.getRootWidgetSummaryTreeWithPreviews,
+      {'groupName': groupName},
+    ));
   }
 
   Future<RemoteDiagnosticsNode> getRootWidgetFullTree() {
