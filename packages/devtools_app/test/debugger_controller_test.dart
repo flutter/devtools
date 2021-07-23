@@ -72,7 +72,11 @@ void main() {
     test('initial values', () {
       expect(history.hasNext, false);
       expect(history.hasPrevious, false);
+<<<<<<< Updated upstream
       expect(history.current.value, isNull);
+=======
+      expect(history.current, isNull);
+>>>>>>> Stashed changes
       expect(history.hasScripts, false);
     });
 
@@ -83,40 +87,64 @@ void main() {
 
       expect(history.hasNext, false);
       expect(history.hasPrevious, true);
+<<<<<<< Updated upstream
       expect(history.current.value, ref3);
+=======
+      expect(history.current, ref3);
+>>>>>>> Stashed changes
 
       history.moveBack();
 
       expect(history.hasNext, true);
       expect(history.hasPrevious, true);
+<<<<<<< Updated upstream
       expect(history.current.value, ref2);
+=======
+      expect(history.current, ref2);
+>>>>>>> Stashed changes
 
       history.moveBack();
 
       expect(history.hasNext, true);
       expect(history.hasPrevious, false);
+<<<<<<< Updated upstream
       expect(history.current.value, ref1);
+=======
+      expect(history.current, ref1);
+>>>>>>> Stashed changes
     });
 
-    test('moveBack', () {
+    test('moveForward', () {
       history.pushEntry(ref1);
       history.pushEntry(ref2);
 
       expect(history.hasNext, false);
       expect(history.hasPrevious, true);
+<<<<<<< Updated upstream
       expect(history.current.value, ref2);
+=======
+      expect(history.current, ref2);
+>>>>>>> Stashed changes
 
       history.moveBack();
 
       expect(history.hasNext, true);
       expect(history.hasPrevious, false);
+<<<<<<< Updated upstream
       expect(history.current.value, ref1);
+=======
+      expect(history.current, ref1);
+>>>>>>> Stashed changes
 
       history.moveForward();
 
       expect(history.hasNext, false);
       expect(history.hasPrevious, true);
+<<<<<<< Updated upstream
       expect(history.current.value, ref2);
+=======
+      expect(history.current, ref2);
+>>>>>>> Stashed changes
     });
 
     test('openedScripts', () {
@@ -137,6 +165,7 @@ void main() {
       history.pushEntry(ref1);
       history.pushEntry(ref2);
 
+<<<<<<< Updated upstream
       expect(history.current.value, ref2);
       history.moveBack();
       expect(history.current.value, ref1);
@@ -144,12 +173,22 @@ void main() {
       expect(history.current.value, ref2);
       history.moveBack();
       expect(history.current.value, ref1);
+=======
+      expect(history.current, ref2);
+      history.moveBack();
+      expect(history.current, ref1);
+      history.moveBack();
+      expect(history.current, ref2);
+      history.moveBack();
+      expect(history.current, ref1);
+>>>>>>> Stashed changes
     });
 
     test('pushEntry removes next entries', () {
       history.pushEntry(ref1);
       history.pushEntry(ref2);
 
+<<<<<<< Updated upstream
       expect(history.current.value, ref2);
       expect(history.hasNext, isFalse);
       history.moveBack();
@@ -157,6 +196,15 @@ void main() {
       expect(history.hasNext, isTrue);
       history.pushEntry(ref3);
       expect(history.current.value, ref3);
+=======
+      expect(history.current, ref2);
+      expect(history.hasNext, isFalse);
+      history.moveBack();
+      expect(history.current, ref1);
+      expect(history.hasNext, isTrue);
+      history.pushEntry(ref3);
+      expect(history.current, ref3);
+>>>>>>> Stashed changes
       expect(history.hasNext, isFalse);
     });
   });

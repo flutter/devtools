@@ -14,6 +14,7 @@ import 'package:vm_service/vm_service.dart';
 import '../enum_utils.dart';
 import '../ui/icons.dart';
 import '../utils.dart';
+import '../vm_service_utils.dart';
 import 'inspector_service.dart';
 
 final diagnosticLevelUtils = EnumUtils<DiagnosticLevel>(DiagnosticLevel.values);
@@ -717,14 +718,4 @@ class InspectorSourceLocation {
     }
     return SourcePosition(file: file, line: line - 1, column: column - 1);
   }
-}
-
-// TODO(jacobr): rename this class or merge with SourcePosition class in
-// debugger_model.dart
-class SourcePosition {
-  const SourcePosition({this.file, this.line, this.column});
-
-  final String file;
-  final int line;
-  final int column;
 }

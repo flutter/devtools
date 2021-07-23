@@ -131,3 +131,5 @@ dependency_overrides:
     path: ../devtools_testing #OVERRIDE_FOR_DEVELOPMENT
   devtools:  #OVERRIDE_FOR_DEVELOPMENT
     path: ../devtools  #OVERRIDE_FOR_DEVELOPMENT
+  vm_service:
+    path: ../../../dart-sdk/sdk/pkg/vm_service

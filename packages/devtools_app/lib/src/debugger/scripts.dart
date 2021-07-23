@@ -10,6 +10,7 @@ import '../config_specific/host_platform/host_platform.dart';
 import '../theme.dart';
 import '../tree.dart';
 import '../utils.dart';
+import '../vm_service_utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'debugger_screen.dart';
@@ -213,8 +214,7 @@ class ScriptPickerState extends State<ScriptPicker> {
       final obj = await widget.controller.getObject(ref);
       final location = (obj as Class).location;
       final script = await widget.controller.getScript(location.script);
-      final pos =
-          widget.controller.calculatePosition(script, location.tokenPos);
+      final pos = SourcePosition.calculatePosition(script, location.tokenPos);
 
       widget.onSelected(ScriptLocation(script, location: pos));
     } else {
