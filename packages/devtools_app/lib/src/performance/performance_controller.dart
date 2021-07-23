@@ -26,6 +26,7 @@ import '../utils.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
 import 'performance_utils.dart';
+import 'rebuild_counts.dart';
 import 'timeline_event_processor.dart';
 import 'timeline_streams.dart';
 
@@ -154,6 +155,8 @@ class PerformanceController extends DisposableController
   /// frame id in the corresponding [TimelineEvent]s.
   final _unassignedFlutterFrames = <int, FlutterFrame>{};
 
+  final RebuildCountModel rebuildCountModel = RebuildCountModel();
+
   Timer _pollingTimer;
 
   int _nextPollStartMicros = 0;
@@ -165,6 +168,7 @@ class PerformanceController extends DisposableController
   RateLimiter _timelinePollingRateLimiter;
 
   Future<void> _initialized;
+
   Future<void> get initialized => _initialized;
 
   Future<void> _init() {
@@ -202,6 +206,13 @@ class PerformanceController extends DisposableController
         if (event.extensionKind == 'Flutter.Frame') {
           final frame = FlutterFrame.parse(event.extensionData.data);
           addFrame(frame);
+        }
+      }));
+
+      // Listen for Flutter.RebuiltWidgets events.
+      autoDispose(serviceManager.service.onExtensionEvent.listen((event) {
+        if (event.extensionKind == 'Flutter.RebuiltWidgets') {
+          rebuildCountModel.processRebuildEvent(event.extensionData.data);
         }
       }));
 

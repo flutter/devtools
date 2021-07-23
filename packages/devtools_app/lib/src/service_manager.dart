@@ -484,6 +484,7 @@ class IsolateState {
   ValueListenable<bool> get isPaused => _isPaused;
 
   final IsolateRef isolateRef;
+
   Future<Isolate> get isolate => _isolate.future;
   Completer<Isolate> _isolate = Completer();
 
@@ -539,6 +540,7 @@ class IsolateManager extends Disposer {
   Stream<IsolateRef> get onIsolateExited => _isolateExitedController.stream;
 
   final _mainIsolate = ValueNotifier<IsolateRef>(null);
+
   ValueListenable<IsolateRef> get mainIsolate => _mainIsolate;
 
   Future<void> init(List<IsolateRef> isolates) async {
@@ -773,6 +775,7 @@ class ServiceExtensionManager extends Disposer {
 
   bool get _firstFrameEventReceived => _firstFrameReceived.isCompleted;
   Completer<void> _firstFrameReceived = Completer();
+
   Future<void> get firstFrameReceived => _firstFrameReceived.future;
 
   final _serviceExtensionAvailable = <String, ValueNotifier<bool>>{};
@@ -1088,8 +1091,8 @@ class ServiceExtensionManager extends Disposer {
           );
         }
 
-        if (extensions
-            .serviceExtensionsAllowlist[name].shouldCallOnAllIsolates) {
+        final description = extensions.serviceExtensionsAllowlist[name];
+        if (description?.shouldCallOnAllIsolates ?? false) {
           // TODO(jacobr): be more robust instead of just assuming that if the
           // service extension is available on one isolate it is available on
           // all. For example, some isolates may still be initializing so may

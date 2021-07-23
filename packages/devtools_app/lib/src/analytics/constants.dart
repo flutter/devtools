@@ -37,3 +37,4 @@ const String showOnDeviceInspector = 'showInspector';
 
 // Logging UX actions:
 const String structuredErrors = 'structuredErrors';
+const String trackRebuildWidgets = 'trackRebuildWidgets';

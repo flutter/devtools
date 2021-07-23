@@ -341,6 +341,18 @@ final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
   gaItem: analytics_constants.structuredErrors,
 );
 
+final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.inspector.trackRebuildDirtyWidgets',
+  description: 'Show Rebuild Counts',
+  enabledIcon: const AssetImageIcon(asset: 'icons/widget_tree@2x.png'),
+  enabledValue: true,
+  disabledValue: false,
+  enabledTooltip: 'Show widget rebuild counts since the last reload',
+  disabledTooltip: 'Show widget rebuild counts since the last reload',
+  gaScreenName: analytics_constants.inspector,
+  gaItem: analytics_constants.trackRebuildWidgets,
+);
+
 // This extension should never be displayed as a button so does not need a
 // ServiceExtensionDescription object.
 const String didSendFirstFrameEvent = 'ext.flutter.didSendFirstFrameEvent';
@@ -361,6 +373,7 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   httpEnableTimelineLogging,
   socketProfiling,
   invertOversizedImages,
+  trackRebuildWidgets
 ];
 
 final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =
