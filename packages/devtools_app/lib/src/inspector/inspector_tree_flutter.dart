@@ -669,7 +669,6 @@ class InspectorRowContent extends StatelessWidget {
                 },
                 child: Container(
                   height: rowHeight,
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: DiagnosticsNodeDescription(
                     node.diagnostic,
                     isSelected: row.isSelected,
