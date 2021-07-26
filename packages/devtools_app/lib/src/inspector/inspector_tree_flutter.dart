@@ -230,7 +230,7 @@ class _InspectorTreeState extends State<InspectorTree>
     if (isSummaryTree) {
       constraintDisplayController = longAnimationController(this);
     }
-    _focusNode = FocusNode();
+    _focusNode = FocusNode(debugLabel: 'inspector-tree');
     _bindToController();
   }
 
