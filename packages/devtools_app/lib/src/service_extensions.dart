@@ -9,6 +9,9 @@ import 'package:meta/meta.dart';
 
 import 'analytics/constants.dart' as analytics_constants;
 import 'ui/icons.dart';
+import 'ui/service_extension_widgets.dart';
+
+typedef TooltipBuilder = Widget Function(bool isSelected, Widget child);
 
 // Each service extension needs to be added to [_extensionDescriptions].
 class ToggleableServiceExtensionDescription<T>
@@ -20,8 +23,7 @@ class ToggleableServiceExtensionDescription<T>
     @required String description,
     @required T enabledValue,
     @required T disabledValue,
-    @required String enabledTooltip,
-    @required String disabledTooltip,
+    @required TooltipBuilder tooltipBuilder,
     @required String gaScreenName,
     @required String gaItem,
     bool shouldCallOnAllIsolates = false,
@@ -31,7 +33,7 @@ class ToggleableServiceExtensionDescription<T>
           enabledIcon: enabledIcon,
           disabledIcon: disabledIcon ?? enabledIcon,
           values: [enabledValue, disabledValue],
-          tooltips: [enabledTooltip, disabledTooltip],
+          tooltipBuilder: tooltipBuilder,
           gaScreenName: gaScreenName,
           gaItem: gaItem,
           shouldCallOnAllIsolates: shouldCallOnAllIsolates,
@@ -44,10 +46,6 @@ class ToggleableServiceExtensionDescription<T>
   T get enabledValue => values[enabledValueIndex];
 
   T get disabledValue => values[disabledValueIndex];
-
-  String get enabledTooltip => tooltips[enabledValueIndex];
-
-  String get disabledTooltip => tooltips[disabledValueIndex];
 }
 
 class ServiceExtensionDescription<T> {
@@ -58,7 +56,7 @@ class ServiceExtensionDescription<T> {
     @required this.extension,
     @required this.description,
     @required this.values,
-    @required this.tooltips,
+    @required this.tooltipBuilder,
     @required this.gaScreenName,
     @required this.gaItem,
     this.shouldCallOnAllIsolates = false,
@@ -78,13 +76,13 @@ class ServiceExtensionDescription<T> {
 
   final List<String> displayValues;
 
-  final List<String> tooltips;
-
   final String gaScreenName; // Analytics screen (screen name where item lives).
 
   final String gaItem; // Analytics item name (toggleable item's name).
 
   final bool shouldCallOnAllIsolates;
+
+  final TooltipBuilder tooltipBuilder;
 }
 
 final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
@@ -93,10 +91,14 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   enabledIcon: const AssetImageIcon(asset: 'icons/debug_banner@2x.png'),
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Hide Debug Banner',
-  disabledTooltip: 'Show Debug Banner',
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.debugBanner,
+  tooltipBuilder: (bool isSelected, Widget child) {
+    return BasicTooltip(
+      message: isSelected ? 'Hide Debug Banner' : 'Show Debug Banner',
+      child: child,
+    );
+  },
 );
 
 final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
@@ -112,11 +114,18 @@ final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  //TODO: Add Rich Tooltips https://github.com/flutter/devtools/issues/3180
-  enabledTooltip: 'Disable Highlight Oversized Images',
-  disabledTooltip: 'Enable Highlight Oversized Images',
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.debugBanner,
+  tooltipBuilder: (bool isSelected, Widget child) {
+    return RichTooltip(
+      message:
+          'Highlights images that are using too much memory by inverting colors and flipping them.',
+      // TODO: Correct URL
+      url:
+          'https://flutter.dev/docs/development/tools/devtools/inspector#debugging-layout-issues-visually',
+      child: child,
+    );
+  },
 );
 
 final debugPaint = ToggleableServiceExtensionDescription<bool>._(
@@ -132,11 +141,17 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  //TODO: Add Rich Tooltips https://github.com/flutter/devtools/issues/3180
-  enabledTooltip: 'Hide Guidelines',
-  disabledTooltip: 'Show Guidelines',
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.debugPaint,
+  tooltipBuilder: (bool isSelected, Widget child) {
+    return RichTooltip(
+      message: 'Overlay guidelines to assist with fixing layout issues.',
+      // TODO: Correct URL
+      url:
+          'https://flutter.dev/docs/development/tools/devtools/inspector#debugging-layout-issues-visually',
+      child: child,
+    );
+  },
 );
 
 final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
@@ -152,11 +167,18 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  //TODO: Add Rich Tooltips https://github.com/flutter/devtools/issues/3180
-  enabledTooltip: 'Hide Baselines',
-  disabledTooltip: 'Show Baselines',
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.paintBaseline,
+  tooltipBuilder: (bool isSelected, Widget child) {
+    return RichTooltip(
+      message:
+          'Show baselines, which are used for aligning text. Can be useful for checking if text is aligned.',
+      // TODO: Correct URL
+      url:
+          'https://flutter.dev/docs/development/tools/devtools/inspector#debugging-layout-issues-visually',
+      child: child,
+    );
+  },
 );
 
 final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
@@ -166,10 +188,15 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
       const AssetImageIcon(asset: 'icons/general/performance_overlay@2x.png'),
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Hide Performance Overlay',
-  disabledTooltip: 'Show Performance Overlay',
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.performanceOverlay,
+  tooltipBuilder: (bool isSelected, Widget child) {
+    return BasicTooltip(
+      message:
+          isSelected ? 'Hide Performance Overlay' : 'Show Performance Overlay',
+      child: child,
+    );
+  },
 );
 
 final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
@@ -178,10 +205,16 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   enabledIcon: const AssetImageIcon(asset: 'icons/widget_tree@2x.png'),
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Disable tracking widget builds',
-  disabledTooltip: 'Enable tracking widget builds',
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.trackRebuilds,
+  tooltipBuilder: (bool isSelected, Widget child) {
+    return BasicTooltip(
+      message: isSelected
+          ? 'Disable tracking widget builds'
+          : 'Enable tracking widget builds',
+      child: child,
+    );
+  },
 );
 
 final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
@@ -197,11 +230,18 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  //TODO: Add Rich Tooltips https://github.com/flutter/devtools/issues/3180
-  enabledTooltip: 'Hide Highlight Repaints',
-  disabledTooltip: 'Show Highlight Repaints',
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.repaintRainbow,
+  tooltipBuilder: (bool isSelected, Widget child) {
+    return RichTooltip(
+      message:
+          'Show borders that change color when elements repaint. Useful for finding unnecessary repaints.',
+      // TODO: Correct URL
+      url:
+          'https://flutter.dev/docs/development/tools/devtools/inspector#debugging-layout-issues-visually',
+      child: child,
+    );
+  },
 );
 
 final slowAnimations = ToggleableServiceExtensionDescription<num>._(
@@ -217,11 +257,17 @@ final slowAnimations = ToggleableServiceExtensionDescription<num>._(
   ),
   enabledValue: 5.0,
   disabledValue: 1.0,
-  //TODO: Add Rich Tooltips https://github.com/flutter/devtools/issues/3180
-  enabledTooltip: 'Disable Slow Animations',
-  disabledTooltip: 'Enable Slow Animations',
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.slowAnimation,
+  tooltipBuilder: (bool isSelected, Widget child) {
+    return RichTooltip(
+      message: 'Run animations 5 times slower to help fine-tune them.',
+      // TODO: Correct URL
+      url:
+          'https://flutter.dev/docs/development/tools/devtools/inspector#debugging-layout-issues-visually',
+      child: child,
+    );
+  },
 );
 
 final togglePlatformMode = ServiceExtensionDescription<String>(
@@ -236,9 +282,14 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
     'Platform: MacOS',
     'Platform: Linux'
   ],
-  tooltips: ['Override Target Platform'],
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.togglePlatform,
+  tooltipBuilder: (bool isSelected, Widget child) {
+    return BasicTooltip(
+      message: 'Override Target Platform',
+      child: child,
+    );
+  },
 );
 
 final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
@@ -247,11 +298,17 @@ final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
   enabledIcon: const Placeholder(),
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'HTTP timeline logging enabled',
-  disabledTooltip: 'HTTP timeline logging disabled',
   gaScreenName: null,
   gaItem: null,
   shouldCallOnAllIsolates: true,
+  tooltipBuilder: (bool isSelected, Widget child) {
+    return BasicTooltip(
+      message: isSelected
+          ? 'HTTP timeline logging enabled'
+          : 'HTTP timeline logging disabled',
+      child: child,
+    );
+  },
 );
 
 final socketProfiling = ToggleableServiceExtensionDescription<bool>._(
@@ -260,11 +317,16 @@ final socketProfiling = ToggleableServiceExtensionDescription<bool>._(
   enabledIcon: const Placeholder(),
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Socket profiling enabled',
-  disabledTooltip: 'Socket profiling disabled',
   gaScreenName: null,
   gaItem: null,
   shouldCallOnAllIsolates: true,
+  tooltipBuilder: (bool isSelected, Widget child) {
+    return BasicTooltip(
+      message:
+          isSelected ? 'Socket profiling enabled' : 'Socket profiling disabled',
+      child: child,
+    );
+  },
 );
 
 // Legacy extension to show the inspector and enable inspector select mode.
@@ -285,10 +347,16 @@ final toggleOnDeviceWidgetInspector =
   ),
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Disable select widget mode',
-  disabledTooltip: 'Enable select widget mode',
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.showOnDeviceInspector,
+  tooltipBuilder: (bool isSelected, Widget child) {
+    return BasicTooltip(
+      message: isSelected
+          ? 'Disable select widget mode'
+          : 'Enable select widget mode',
+      child: child,
+    );
+  },
 );
 
 /// Toggle whether interacting with the device selects widgets or triggers
@@ -306,10 +374,15 @@ final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Exit select widget mode',
-  disabledTooltip: 'Enter select widget mode',
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.selectWidgetMode,
+  tooltipBuilder: (bool isSelected, Widget child) {
+    return BasicTooltip(
+      message:
+          isSelected ? 'Exit select widget mode' : 'Enter select widget mode',
+      child: child,
+    );
+  },
 );
 
 /// Toggle whether the inspector on-device overlay is enabled.
@@ -323,10 +396,15 @@ final enableOnDeviceInspector = ToggleableServiceExtensionDescription<bool>._(
   enabledIcon: const AssetImageIcon(asset: 'icons/general/locate@2x.png'),
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Exit on-device inspector',
-  disabledTooltip: 'Enter on-device inspector',
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.enableOnDeviceInspector,
+  tooltipBuilder: (bool isSelected, Widget child) {
+    return BasicTooltip(
+      message:
+          isSelected ? 'Exit on-device inspector' : 'Enter on-device inspector',
+      child: child,
+    );
+  },
 );
 
 final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
@@ -335,10 +413,16 @@ final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
   enabledIcon: const AssetImageIcon(asset: 'icons/perf/RedExcl@2x.png'),
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Disable structured errors for Flutter framework issues',
-  disabledTooltip: 'Show structured errors for Flutter framework issues',
   gaScreenName: analytics_constants.logging,
   gaItem: analytics_constants.structuredErrors,
+  tooltipBuilder: (bool isSelected, Widget child) {
+    return BasicTooltip(
+      message: isSelected
+          ? 'Disable structured errors for Flutter framework issues'
+          : 'Show structured errors for Flutter framework issues',
+      child: child,
+    );
+  },
 );
 
 final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>._(

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/debugger/hover.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -132,27 +133,22 @@ class _ServiceExtensionButtonGroupState
 
   Widget _buildExtension(ExtensionState extensionState) {
     final description = extensionState.description;
-    return Tooltip(
-      message: extensionState.isSelected
-          ? description.enabledTooltip
-          : description.disabledTooltip,
-      waitDuration: tooltipWait,
-      preferBelow: false,
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: includeText(context, widget.minIncludeTextWidth)
-              ? defaultSpacing
-              : 0.0,
-        ),
-        child: ImageIconLabel(
-          extensionState.isSelected
-              ? description.enabledIcon
-              : description.disabledIcon,
-          description.description,
-          minIncludeTextWidth: widget.minIncludeTextWidth,
-        ),
+
+    final contents = Container(
+      height: 32.0,
+      padding: EdgeInsets.symmetric(
+        horizontal: includeText(context, widget.minIncludeTextWidth)
+            ? defaultSpacing
+            : 0.0,
+      ),
+      child: ImageIconLabel(
+        description.icon,
+        description.description,
+        minIncludeTextWidth: widget.minIncludeTextWidth,
       ),
     );
+
+    return description.tooltipBuilder(extensionState.isSelected, contents);
   }
 
   void _onPressed(int index) {
@@ -365,12 +361,9 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: value
-          ? widget.service.enabledTooltip
-          : widget.service.disabledTooltip,
-      waitDuration: tooltipWait,
-      child: InkWell(
+    return widget.service.tooltipBuilder(
+      value,
+      InkWell(
         onTap: _onClick,
         child: Row(
           children: <Widget>[
@@ -467,6 +460,90 @@ mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
         });
       }
     }
+  }
+}
+
+class BasicTooltip extends StatelessWidget {
+  const BasicTooltip({
+    Key key,
+    @required this.message,
+    @required this.child,
+  }) : super(key: key);
+
+  final String message;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: message,
+      waitDuration: tooltipWait,
+      preferBelow: false,
+      child: child,
+    );
+  }
+}
+
+/// Rich tooltip with a description and "more info" link
+class RichTooltip extends StatelessWidget {
+  const RichTooltip({
+    Key key,
+    @required this.message,
+    @required this.url,
+    @required this.child,
+  }) : super(key: key);
+
+  final String message;
+  final String url;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return HoverCardTooltip(
+      enabled: () => true,
+      onHover: (_) => _buildCardData(context),
+      child: child,
+    );
+  }
+
+  Future<HoverCardData> _buildCardData(BuildContext context) {
+    return Future.value(
+      HoverCardData(
+        position: HoverCardPosition.element,
+        width: 300,
+        contents: Material(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(message),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: InkWell(
+                  onTap: () => launchUrl(url, context),
+                  borderRadius: BorderRadius.circular(defaultBorderRadius),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          'More info',
+                          style: linkTextStyle(Theme.of(context).colorScheme),
+                        ),
+                        const SizedBox(width: 3),
+                        const Icon(Icons.launch, size: 12)
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
