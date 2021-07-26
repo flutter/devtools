@@ -117,9 +117,8 @@ final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
   gaItem: analytics_constants.debugBanner,
   tooltip:
       'Highlight images that are using too much memory by inverting colors and flipping them.',
-  // TODO: Correct URL
   tooltipUrl:
-      'https://flutter.dev/docs/development/tools/devtools/inspector#debugging-layout-issues-visually',
+      'https://flutter.dev/docs/development/tools/devtools/inspector#highlight-oversized-images',
 );
 
 final debugPaint = ToggleableServiceExtensionDescription<bool>._(
@@ -138,9 +137,8 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.debugPaint,
   tooltip: 'Overlay guidelines to assist with fixing layout issues.',
-  // TODO: Correct URL
   tooltipUrl:
-      'https://flutter.dev/docs/development/tools/devtools/inspector#debugging-layout-issues-visually',
+      'https://flutter.dev/docs/development/tools/devtools/inspector#show-guidelines',
 );
 
 final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
@@ -159,10 +157,9 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.paintBaseline,
   tooltip:
-      'Show baselines, which are used for aligning text. Can be useful for checking if text is aligned.',
-  // TODO: Correct URL
+      'Show baselines, which are used to position text. Can be useful for checking if text is aligned.',
   tooltipUrl:
-      'https://flutter.dev/docs/development/tools/devtools/inspector#debugging-layout-issues-visually',
+      'https://flutter.dev/docs/development/tools/devtools/inspector#show-baselines',
 );
 
 final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
@@ -188,7 +185,6 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.trackRebuilds,
   tooltip: 'Adds an event to the timeline for every Widget built.',
-  // TODO: URL?
 );
 
 final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
@@ -207,9 +203,9 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.repaintRainbow,
   tooltip:
-      'Show borders which change color when elements repaint. Useful for finding unnecessary repaints.',
+      'Show borders that change color when elements repaint. Useful for finding unnecessary repaints.',
   tooltipUrl:
-      'https://flutter.dev/docs/development/tools/devtools/inspector#debugging-layout-issues-visually',
+      'https://flutter.dev/docs/development/tools/devtools/inspector#highlight-repaints',
 );
 
 final slowAnimations = ToggleableServiceExtensionDescription<num>._(
@@ -229,7 +225,7 @@ final slowAnimations = ToggleableServiceExtensionDescription<num>._(
   gaItem: analytics_constants.slowAnimation,
   tooltip: 'Run animations 5 times slower to help fine-tune them.',
   tooltipUrl:
-      'https://flutter.dev/docs/development/tools/devtools/inspector#debugging-layout-issues-visually',
+      'https://flutter.dev/docs/development/tools/devtools/inspector#slow-animations',
 );
 
 final togglePlatformMode = ServiceExtensionDescription<String>(
@@ -247,7 +243,6 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.togglePlatform,
   tooltip: 'Override Target Platform',
-  // TODO: URL?
 );
 
 final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
@@ -260,7 +255,6 @@ final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
   gaItem: null,
   shouldCallOnAllIsolates: true,
   tooltip: 'Toggle HTTP timeline logging',
-  // TODO: URL?
 );
 
 final socketProfiling = ToggleableServiceExtensionDescription<bool>._(
@@ -273,7 +267,6 @@ final socketProfiling = ToggleableServiceExtensionDescription<bool>._(
   gaItem: null,
   shouldCallOnAllIsolates: true,
   tooltip: 'Toggle socket profiling',
-  // TODO: URL?
 );
 
 // Legacy extension to show the inspector and enable inspector select mode.
@@ -297,7 +290,6 @@ final toggleOnDeviceWidgetInspector =
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.showOnDeviceInspector,
   tooltip: 'Toggle select widget mode',
-  // TODO: URL?
 );
 
 /// Toggle whether interacting with the device selects widgets or triggers
@@ -318,7 +310,6 @@ final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.selectWidgetMode,
   tooltip: 'Toggle select widget mode',
-  // TODO: URL?
 );
 
 /// Toggle whether the inspector on-device overlay is enabled.
@@ -335,7 +326,6 @@ final enableOnDeviceInspector = ToggleableServiceExtensionDescription<bool>._(
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.enableOnDeviceInspector,
   tooltip: 'Toggle on-device inspector',
-  // TODO: URL?
 );
 
 final structuredErrors = ToggleableServiceExtensionDescription<bool>._(

@@ -543,16 +543,8 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
   }
 
   Future<HoverCardData> _buildCardData(BuildContext context) {
-    if (description.tooltipUrl == null) {
-      return Future.value(
-        HoverCardData(
-          position: HoverCardPosition.element,
-          contents: Material(
-            child: Text(description.tooltip),
-          ),
-        ),
-      );
-    }
+    final textColor =
+        Theme.of(context).colorScheme.serviceExtensionButtonsTitle;
 
     return Future.value(
       HoverCardData(
@@ -563,7 +555,10 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(description.tooltip),
+              Text(
+                description.tooltip,
+                style: TextStyle(color: textColor),
+              ),
               Align(
                 alignment: Alignment.bottomRight,
                 child: InkWell(
@@ -580,7 +575,11 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
                           style: linkTextStyle(Theme.of(context).colorScheme),
                         ),
                         const SizedBox(width: densePadding),
-                        const Icon(Icons.launch, size: tooltipIconSize)
+                        Icon(
+                          Icons.launch,
+                          size: tooltipIconSize,
+                          color: textColor,
+                        )
                       ],
                     ),
                   ),
