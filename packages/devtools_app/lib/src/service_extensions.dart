@@ -373,7 +373,7 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   httpEnableTimelineLogging,
   socketProfiling,
   invertOversizedImages,
-  trackRebuildWidgets
+  trackRebuildWidgets,
 ];
 
 final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =

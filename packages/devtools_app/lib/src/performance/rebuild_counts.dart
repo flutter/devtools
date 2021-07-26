@@ -5,6 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
+import '../utils.dart';
+
+// An example of a widget rebuild count event:
+
 // {
 //   "startTime": 2352949,
 //   "events": [1, 1, 2, 1, ...],
@@ -23,9 +27,9 @@ import 'package:path/path.dart' as path;
 // }
 
 class RebuildCountModel {
-  final Map<int, RebuildLocation> _locationMap = {};
+  final Map<int, RebuildLocation> _locationMap = <int, RebuildLocation>{};
 
-  final _locations = PropertyValueNotifier<List<RebuildLocation>>([]);
+  final _locations = ListValueNotifier<RebuildLocation>(<RebuildLocation>[]);
 
   ValueListenable<List<RebuildLocation>> get locations => _locations;
 
@@ -36,15 +40,15 @@ class RebuildCountModel {
           (json['locations'] as Map).cast<String, dynamic>();
 
       for (final String file in fileLocationsMap.keys) {
-        final Map<String, List<dynamic>> entries =
+        final entries =
             (fileLocationsMap[file] as Map).cast<String, List<dynamic>>();
 
-        final List<int> ids = entries['ids'].cast<int>();
-        final List<int> lines = entries['lines'].cast<int>();
-        final List<int> columns = entries['columns'].cast<int>();
-        final List<String> names = entries['names'].cast<String>();
+        final ids = entries['ids'].cast<int>();
+        final lines = entries['lines'].cast<int>();
+        final columns = entries['columns'].cast<int>();
+        final names = entries['names'].cast<String>();
 
-        for (int i = 0; i < ids.length; i++) {
+        for (var i = 0; i < ids.length; i++) {
           final location = RebuildLocation(
             id: ids[i],
             path: file,
@@ -61,7 +65,7 @@ class RebuildCountModel {
       final fileLocationsMap =
           (json['newLocations'] as Map).cast<String, dynamic>();
 
-      for (final String file in fileLocationsMap.keys) {
+      for (final file in fileLocationsMap.keys) {
         final List<int> entries = (fileLocationsMap[file] as List).cast<int>();
 
         final shortName = path.posix.split(file).last;
@@ -101,7 +105,7 @@ class RebuildCountModel {
     // TODO(devoncarew): We need to call this when we see a hot reload or restart.
 
     _locationMap.clear();
-    _locations.value = <RebuildLocation>[];
+    _locations.clear();
   }
 
   void clearCurrentCounts() {
@@ -124,13 +128,4 @@ class RebuildLocation {
   final String name;
 
   int buildCount = 0;
-}
-
-class PropertyValueNotifier<T> extends ValueNotifier<T> {
-  PropertyValueNotifier(T value) : super(value);
-
-  @override
-  void notifyListeners() {
-    super.notifyListeners();
-  }
 }

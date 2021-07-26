@@ -201,17 +201,13 @@ class PerformanceController extends DisposableController
       data?.displayRefreshRate = _displayRefreshRate.value;
 
       // Listen for Flutter.Frame events with frame timing data.
+      // Listen for Flutter.RebuiltWidgets events.
       autoDispose(
           serviceManager.service.onExtensionEventWithHistory.listen((event) {
         if (event.extensionKind == 'Flutter.Frame') {
           final frame = FlutterFrame.parse(event.extensionData.data);
           addFrame(frame);
-        }
-      }));
-
-      // Listen for Flutter.RebuiltWidgets events.
-      autoDispose(serviceManager.service.onExtensionEvent.listen((event) {
-        if (event.extensionKind == 'Flutter.RebuiltWidgets') {
+        } else if (event.extensionKind == 'Flutter.RebuiltWidgets') {
           rebuildCountModel.processRebuildEvent(event.extensionData.data);
         }
       }));

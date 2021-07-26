@@ -539,9 +539,8 @@ class IsolateManager extends Disposer {
 
   Stream<IsolateRef> get onIsolateExited => _isolateExitedController.stream;
 
-  final _mainIsolate = ValueNotifier<IsolateRef>(null);
-
   ValueListenable<IsolateRef> get mainIsolate => _mainIsolate;
+  final _mainIsolate = ValueNotifier<IsolateRef>(null);
 
   Future<void> init(List<IsolateRef> isolates) async {
     // Re-initialize isolates when VM developer mode is enabled/disabled to
@@ -773,10 +772,10 @@ class ServiceExtensionManager extends Disposer {
 
   final ValueListenable<IsolateRef> _mainIsolate;
 
-  bool get _firstFrameEventReceived => _firstFrameReceived.isCompleted;
+  Future<void> get firstFrameReceived => _firstFrameReceived.future;
   Completer<void> _firstFrameReceived = Completer();
 
-  Future<void> get firstFrameReceived => _firstFrameReceived.future;
+  bool get _firstFrameEventReceived => _firstFrameReceived.isCompleted;
 
   final _serviceExtensionAvailable = <String, ValueNotifier<bool>>{};
 
