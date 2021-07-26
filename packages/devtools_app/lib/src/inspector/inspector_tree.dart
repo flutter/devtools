@@ -44,7 +44,7 @@ extension InspectorColorScheme on ColorScheme {
 
 const double iconPadding = 4.0;
 const double chartLineStrokeWidth = 1.0;
-const double columnWidth = 16.0;
+double get columnWidth => isDense() ? 12 : 16.0;
 double get verticalPadding => scaleByFontFactor(10.0);
 double get rowHeight => scaleByFontFactor(isDense() ? 20.0 : 24.0);
 
@@ -218,7 +218,7 @@ class InspectorTreeNode {
           ticks: ticks,
           depth: depth,
           lineToParent:
-          !node.isProperty && index != 0 && node.parent.showLinesToChildren,
+              !node.isProperty && index != 0 && node.parent.showLinesToChildren,
         );
       }
       assert(index > current);
@@ -451,7 +451,7 @@ abstract class InspectorTreeController {
 
     selection = root
         .getRow(
-        (root.getRowIndex(selection) + indexOffset).clamp(0, numRows - 1))
+            (root.getRowIndex(selection) + indexOffset).clamp(0, numRows - 1))
         ?.node;
   }
 
@@ -572,11 +572,11 @@ abstract class InspectorTreeController {
   }
 
   InspectorTreeNode setupInspectorTreeNode(
-      InspectorTreeNode node,
-      RemoteDiagnosticsNode diagnosticsNode, {
-        @required bool expandChildren,
-        @required bool expandProperties,
-      }) {
+    InspectorTreeNode node,
+    RemoteDiagnosticsNode diagnosticsNode, {
+    @required bool expandChildren,
+    @required bool expandProperties,
+  }) {
     assert(expandChildren != null);
     assert(expandProperties != null);
     node.diagnostic = diagnosticsNode;
@@ -588,7 +588,7 @@ abstract class InspectorTreeController {
         diagnosticsNode.inlineProperties.isNotEmpty) {
       if (diagnosticsNode.childrenReady || !diagnosticsNode.hasChildren) {
         final bool styleIsMultiline =
-        expandPropertiesByDefault(diagnosticsNode.style);
+            expandPropertiesByDefault(diagnosticsNode.style);
         setupChildren(
           diagnosticsNode,
           node,
@@ -605,12 +605,12 @@ abstract class InspectorTreeController {
   }
 
   void setupChildren(
-      RemoteDiagnosticsNode parent,
-      InspectorTreeNode treeNode,
-      List<RemoteDiagnosticsNode> children, {
-        @required bool expandChildren,
-        @required bool expandProperties,
-      }) {
+    RemoteDiagnosticsNode parent,
+    InspectorTreeNode treeNode,
+    List<RemoteDiagnosticsNode> children, {
+    @required bool expandChildren,
+    @required bool expandProperties,
+  }) {
     assert(expandChildren != null);
     assert(expandProperties != null);
     treeNode.isExpanded = expandChildren;
@@ -692,7 +692,7 @@ mixin InspectorTreeFixedRowHeightController on InspectorTreeController {
       if (row != null) {
         final rowRect = getBoundingBox(row);
         targetRect =
-        targetRect == null ? rowRect : targetRect.expandToInclude(rowRect);
+            targetRect == null ? rowRect : targetRect.expandToInclude(rowRect);
       }
     }
 

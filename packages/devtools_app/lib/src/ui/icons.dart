@@ -55,8 +55,11 @@ class CustomIcon extends StatelessWidget {
 class CustomIconMaker {
   final Map<String, Widget> iconCache = {};
 
-  Widget getCustomIcon(String fromText,
-      {IconKind kind, bool isAbstract = false}) {
+  Widget getCustomIcon(
+    String fromText, {
+    IconKind kind,
+    bool isAbstract = false,
+  }) {
     kind ??= IconKind.classIcon;
     if (fromText?.isEmpty != false) {
       return null;
@@ -300,6 +303,8 @@ class WidgetIcons {
     return _iconMap[_stripBrackets(widgetType)];
   }
 
+  // Strips the brackets of the widget
+  // Expected input for example: AnimatedBuilder<String> => AnimatedBuilder
   static String _stripBrackets(String widgetType) {
     final bracketIndex = widgetType.indexOf('<');
     if (bracketIndex == -1) {
