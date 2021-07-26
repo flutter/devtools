@@ -57,7 +57,7 @@ class RebuildCountModel {
             name: names[i],
           );
           _locationMap[ids[i]] = location;
-          _locations.value.add(location);
+          _locations.add(location);
         }
       }
     } else if (json.containsKey('newLocations')) {
@@ -82,7 +82,7 @@ class RebuildCountModel {
             name: '$shortName:$line',
           );
           _locationMap[id] = location;
-          _locations.value.add(location);
+          _locations.add(location);
         }
       }
     }
