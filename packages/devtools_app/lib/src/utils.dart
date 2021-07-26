@@ -1191,6 +1191,11 @@ class ListValueNotifier<T> extends ChangeNotifier
   @override
   List<T> get value => _currentList;
 
+  @override
+  void notifyListeners() {
+    super.notifyListeners();
+  }
+
   void _listChanged() {
     _currentList = ImmutableList(_rawList);
     notifyListeners();
@@ -1219,7 +1224,7 @@ class ListValueNotifier<T> extends ChangeNotifier
 
   /// Clears the list and notifies listeners.
   void clear() {
-    _rawList = [];
+    _rawList = <T>[];
     _listChanged();
   }
 

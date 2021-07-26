@@ -248,10 +248,16 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
               controller.cpuProfilerController.profileGranularityFlagNotifier,
         ),
         const SizedBox(width: defaultSpacing),
-        if (!serviceManager.connectedApp.isDartCliAppNow)
+        if (serviceManager.connectedApp.isFlutterAppNow)
           ServiceExtensionButtonGroup(
             minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
-            extensions: [performanceOverlay, profileWidgetBuilds],
+            extensions: [
+              performanceOverlay,
+              profileWidgetBuilds,
+              // TODO(devoncarew): Enable this once we have a UI displaying the
+              // values.
+              //trackRebuildWidgets,
+            ],
           ),
         // TODO(kenz): hide or disable button if http timeline logging is not
         // available.
