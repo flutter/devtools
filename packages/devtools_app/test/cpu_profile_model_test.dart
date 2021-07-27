@@ -12,11 +12,9 @@ void main() {
 
     test('init from parse', () {
       expect(
-        cpuProfileData.stackFramesJson,
-        equals(goldenCpuProfileStackFrames),
-      );
+          cpuProfileData.stackFramesJson, equals(goldenCpuProfileStackFrames));
       expect(
-        cpuProfileData.stackTraceEvents,
+        cpuProfileData.cpuSamples.map((sample) => sample.json),
         equals(goldenCpuProfileTraceEvents),
       );
       expect(cpuProfileData.profileMetaData.sampleCount, equals(8));
@@ -43,7 +41,7 @@ void main() {
         equals(subProfileStackFrames),
       );
       expect(
-        subProfile.stackTraceEvents,
+        subProfile.cpuSamples.map((sample) => sample.json),
         equals(subProfileTraceEvents),
       );
       expect(subProfile.profileMetaData.sampleCount, equals(3));
@@ -102,7 +100,8 @@ void main() {
     test('shallowCopy', () {
       expect(stackFrameD.children.length, equals(2));
       expect(stackFrameD.parent, equals(stackFrameB));
-      CpuStackFrame copy = stackFrameD.shallowCopy();
+      CpuStackFrame copy =
+          stackFrameD.shallowCopy(resetInclusiveSampleCount: false);
       expect(copy.children, isEmpty);
       expect(copy.parent, isNull);
       expect(
@@ -116,7 +115,7 @@ void main() {
 
       expect(stackFrameD.children.length, equals(2));
       expect(stackFrameD.parent, equals(stackFrameB));
-      copy = stackFrameD.shallowCopy(resetInclusiveSampleCount: true);
+      copy = stackFrameD.shallowCopy();
       expect(copy.children, isEmpty);
       expect(copy.parent, isNull);
       expect(
