@@ -43,9 +43,9 @@ class CpuProfileTransformer {
 
     _activeProcessId = processId;
     _stackFramesCount = cpuProfileData?.stackFrames?.length ?? 0;
-    _stackFrameKeys = cpuProfileData?.stackFrames?.keys ?? <String>[];
+    _stackFrameKeys = cpuProfileData?.stackFrames?.keys?.toList() ?? <String>[];
     _stackFrameValues =
-        cpuProfileData?.stackFrames?.values ?? <CpuStackFrame>[];
+        cpuProfileData?.stackFrames?.values?.toList() ?? <CpuStackFrame>[];
 
     // At minimum, process the data in 4 batches to smooth the appearance of
     // the progress indicator.

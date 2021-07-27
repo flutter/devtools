@@ -138,7 +138,9 @@ class CpuProfileData {
       var currentStackFrame = originalData.stackFrames[currentId];
 
       while (currentStackFrame != null) {
-        stackFramesForTag[currentId] = currentStackFrame;
+        stackFramesForTag[currentId] = currentStackFrame.shallowCopy(
+          copySampleCountsAndTags: false,
+        );
         final parentId = currentStackFrame.parentId;
         final parentStackFrameJson =
             parentId != null ? originalData.stackFrames[parentId] : null;
@@ -400,21 +402,34 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   }
 
   @override
-  CpuStackFrame shallowCopy({bool resetInclusiveSampleCount = true}) {
+  CpuStackFrame shallowCopy({
+    String id,
+    String name,
+    String verboseName,
+    String category,
+    String url,
+    String parentId,
+    CpuProfileMetaData profileMetaData,
+    bool copySampleCountsAndTags = true,
+    bool resetInclusiveSampleCount = true,
+  }) {
     final copy = CpuStackFrame(
-      id: id,
-      name: name,
-      verboseName: verboseName,
-      category: category,
-      url: url,
-      parentId: parentId,
-      profileMetaData: profileMetaData,
-    )
-      ..exclusiveSampleCount = exclusiveSampleCount
-      ..inclusiveSampleCount =
-          resetInclusiveSampleCount ? null : inclusiveSampleCount;
-    for (final entry in _userTagSampleCount.entries) {
-      copy.incrementTagSampleCount(entry.key, increment: entry.value);
+      id: id ?? this.id,
+      name: name ?? this.name,
+      verboseName: verboseName ?? this.verboseName,
+      category: category ?? this.category,
+      url: url ?? this.url,
+      parentId: parentId ?? this.parentId,
+      profileMetaData: profileMetaData ?? this.profileMetaData,
+    );
+    if (copySampleCountsAndTags) {
+      copy
+        ..exclusiveSampleCount = exclusiveSampleCount
+        ..inclusiveSampleCount =
+            resetInclusiveSampleCount ? null : inclusiveSampleCount;
+      for (final entry in _userTagSampleCount.entries) {
+        copy.incrementTagSampleCount(entry.key, increment: entry.value);
+      }
     }
     return copy;
   }
