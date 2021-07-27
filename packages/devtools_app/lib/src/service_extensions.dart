@@ -165,8 +165,14 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
 final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.showPerformanceOverlay',
   description: 'Performance Overlay',
-  enabledIcon:
-      const AssetImageIcon(asset: 'icons/general/performance_overlay@2x.png'),
+  enabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/performance-white.png',
+    darkModeAsset: 'icons/performance-dgrey.png',
+  ),
+  disabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/performance-dgrey.png',
+    darkModeAsset: 'icons/performance-lgrey.png',
+  ),
   enabledValue: true,
   disabledValue: false,
   gaScreenName: analytics_constants.inspector,
@@ -179,7 +185,14 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
 final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.profileWidgetBuilds',
   description: 'Track Widget Builds',
-  enabledIcon: const AssetImageIcon(asset: 'icons/widget_tree@2x.png'),
+  enabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/trackwidget-white.png',
+    darkModeAsset: 'icons/trackwidget-dgrey.png',
+  ),
+  disabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/trackwidget-dgrey.png',
+    darkModeAsset: 'icons/trackwidget-lgrey.png',
+  ),
   enabledValue: true,
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
