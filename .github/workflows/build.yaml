@@ -22,7 +22,7 @@ env:
 jobs:
 
   main:
-    name: main (${{ env.CHANNEL }})
+    name: main ($CHANNEL)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
