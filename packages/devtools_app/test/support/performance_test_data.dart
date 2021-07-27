@@ -6,8 +6,8 @@ import 'dart:convert';
 
 import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/trace_event.dart';
-import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:devtools_testing/support/test_utils.dart';
+import 'cpu_profile_test_data.dart';
 
 const testUiThreadId = 1;
 const testRasterThreadId = 2;

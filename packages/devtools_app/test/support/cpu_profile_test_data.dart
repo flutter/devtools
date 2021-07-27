@@ -196,8 +196,7 @@ final Map<String, dynamic> goldenCpuProfileStackFrames =
           'category': 'Dart',
           'name': '_RenderCustomMultiChildLayoutBox.defaultPaint',
           'parent': '140357727781376-13',
-          'resolvedUrl':
-              'path/to/flutter/packages/flutter/lib/src/rendering/box.dart',
+          'resolvedUrl': 'org-dartlang-sdk:///flutter/lib/ui/binding.dart',
         },
         '140357727781376-15': {
           'category': 'Dart',
@@ -258,8 +257,7 @@ final subProfileStackFrames = {
     'category': 'Dart',
     'name': '_RenderProxyBox.paint',
     'parent': '140357727781376-3',
-    'resolvedUrl':
-        'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart',
+    'resolvedUrl': 'org-dartlang-sdk:///flutter/lib/ui/binding.dart',
   },
   '140357727781376-7': {
     'category': 'Dart',
@@ -294,6 +292,183 @@ final subProfileStackFrames = {
         'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
   },
 };
+
+final filteredStackFrames = {
+  '140357727781376-1': {
+    'category': 'Dart',
+    'name': 'thread_start',
+    'resolvedUrl': '',
+  },
+  '140357727781376-2': {
+    'category': 'Dart',
+    'name': '_pthread_start',
+    'parent': '140357727781376-1',
+    'resolvedUrl': '',
+  },
+  '140357727781376-4': {
+    'category': 'Dart',
+    'name': '_WidgetsFlutterBinding.draw',
+    'parent': '140357727781376-2',
+    'resolvedUrl':
+        'file:///path/to/flutter/packages/flutter/lib/src/scheduler/binding.dart',
+  },
+  '140357727781376-5': {
+    'category': 'Dart',
+    'name': 'RendererBinding.drawFrame',
+    'parent': '140357727781376-4',
+    'resolvedUrl':
+        'path/to/flutter/packages/flutter/lib/src/rendering/binding.dart',
+  },
+  '140357727781376-7': {
+    'category': 'Dart',
+    'name': 'PaintingContext.paintChild',
+    'parent': '140357727781376-2',
+    'resolvedUrl':
+        'path/to/flutter/packages/flutter/lib/src/painting/context.dart',
+  },
+  '140357727781376-8': {
+    'category': 'Dart',
+    'name': '_SyncBlock.finish',
+    'parent': '140357727781376-7',
+    'resolvedUrl': '',
+  },
+  '140357727781376-9': {
+    'category': 'Dart',
+    'name': '[Truncated]',
+    'resolvedUrl': '',
+  },
+  '140357727781376-10': {
+    'category': 'Dart',
+    'name': 'RenderObject._getSemanticsForParent.<closure>',
+    'parent': '140357727781376-9',
+    'resolvedUrl':
+        'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+  },
+  '140357727781376-11': {
+    'category': 'Dart',
+    'name': 'RenderObject._getSemanticsForParent',
+    'parent': '140357727781376-10',
+    'resolvedUrl':
+        'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+  },
+  '140357727781376-12': {
+    'category': 'Dart',
+    'name': 'RenderPhysicalModel.paint',
+    'parent': '140357727781376-9',
+    'resolvedUrl':
+        'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart',
+  },
+  '140357727781376-13': {
+    'category': 'Dart',
+    'name': 'RenderCustomMultiChildLayoutBox.paint',
+    'parent': '140357727781376-12',
+    'resolvedUrl':
+        'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
+  },
+  '140357727781376-15': {
+    'category': 'Dart',
+    'name': 'RenderObject._paintWithContext',
+    'parent': '140357727781376-13',
+    'resolvedUrl':
+        'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+  },
+  '140357727781376-16': {
+    'category': 'Dart',
+    'name': 'RenderStack.paintStack',
+    'parent': '140357727781376-13',
+    'resolvedUrl':
+        'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
+  },
+  '140357727781376-17': {
+    'category': '[Stub] OneArgCheckInlineCache',
+    'name': '_WidgetsFlutterBinding&BindingBase&Gesture._invokeFrameCallback',
+    'parent': '140357727781376-16',
+    'resolvedUrl': '',
+  }
+};
+
+final filteredCpuSampleTraceEvents = [
+  {
+    'ph': 'P',
+    'name': '',
+    'pid': 77616,
+    'tid': 42247,
+    'ts': 47377796685,
+    'cat': 'Dart',
+    'args': {'mode': 'basic'},
+    'sf': '140357727781376-5'
+  },
+  {
+    'ph': 'P',
+    'name': '',
+    'pid': 77616,
+    'tid': 42247,
+    'ts': 47377797975,
+    'cat': 'Dart',
+    'args': {'mode': 'basic'},
+    'sf': '140357727781376-8'
+  },
+  {
+    'ph': 'P',
+    'name': '',
+    'pid': 77616,
+    'tid': 42247,
+    'ts': 47377799063,
+    'cat': 'Dart',
+    'args': {'mode': 'basic'},
+    'sf': '140357727781376-11'
+  },
+  {
+    'ph': 'P',
+    'name': '',
+    'pid': 77616,
+    'tid': 42247,
+    'ts': 47377800363,
+    'cat': 'Dart',
+    'args': {'mode': 'basic'},
+    'sf': '140357727781376-13'
+  },
+  {
+    'ph': 'P',
+    'name': '',
+    'pid': 77616,
+    'tid': 42247,
+    'ts': 47377800463,
+    'cat': 'Dart',
+    'args': {'mode': 'basic'},
+    'sf': '140357727781376-13'
+  },
+  {
+    'ph': 'P',
+    'name': '',
+    'pid': 77616,
+    'tid': 42247,
+    'ts': 47377800563,
+    'cat': 'Dart',
+    'args': {'mode': 'basic'},
+    'sf': '140357727781376-13'
+  },
+  {
+    'ph': 'P',
+    'name': '',
+    'pid': 77616,
+    'tid': 42247,
+    'ts': 47377800663,
+    'cat': 'Dart',
+    'args': {'mode': 'basic'},
+    'sf': '140357727781376-15'
+  },
+  {
+    'ph': 'P',
+    'name': '',
+    'pid': 77616,
+    'tid': 42247,
+    'ts': 47377800763,
+    'cat': 'Dart',
+    'args': {'mode': 'basic'},
+    'sf': '140357727781376-17'
+  }
+];
 
 final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
     List.from(subProfileTraceEvents)
@@ -464,78 +639,98 @@ final CpuProfileMetaData profileMetaData = CpuProfileMetaData(
 final CpuStackFrame stackFrameA = CpuStackFrame(
   id: 'id_0',
   name: 'A',
+  verboseName: 'A',
   category: 'Dart',
   url: '',
+  parentId: null,
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 0;
 
 final CpuStackFrame stackFrameB = CpuStackFrame(
   id: 'id_1',
   name: 'B',
+  verboseName: 'B',
   category: 'Dart',
   url: 'org-dartlang-sdk:///third_party/dart/sdk/lib/async/zone.dart',
+  parentId: 'id_0',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 0;
 
 final CpuStackFrame stackFrameC = CpuStackFrame(
   id: 'id_2',
   name: 'C',
+  verboseName: 'C',
   category: 'Dart',
   url: 'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+  parentId: 'id_1',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 2;
 final CpuStackFrame stackFrameD = CpuStackFrame(
   id: 'id_3',
   name: 'D',
+  verboseName: 'D',
   category: 'Dart',
   url: 'url',
+  parentId: 'id_1',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 2;
 
 final CpuStackFrame stackFrameE = CpuStackFrame(
   id: 'id_4',
   name: 'E',
+  verboseName: 'E',
   category: 'Dart',
   url: 'url',
+  parentId: 'id_3',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 1;
 final CpuStackFrame stackFrameF = CpuStackFrame(
   id: 'id_5',
   name: 'F',
+  verboseName: 'F',
   category: 'Dart',
   url: 'url',
+  parentId: 'id_4',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 0;
 
 final CpuStackFrame stackFrameF2 = CpuStackFrame(
   id: 'id_6',
   name: 'F',
+  verboseName: 'F',
   category: 'Dart',
   url: 'url',
+  parentId: 'id_3',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 3;
 
 final CpuStackFrame stackFrameC2 = CpuStackFrame(
   id: 'id_7',
   name: 'C',
+  verboseName: 'C',
   category: 'Dart',
   url: 'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+  parentId: 'id_5',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 1;
 
 final CpuStackFrame stackFrameC3 = CpuStackFrame(
   id: 'id_8',
   name: 'C',
+  verboseName: 'C',
   category: 'Dart',
   url: 'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+  parentId: 'id_6',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 1;
 
 final CpuStackFrame stackFrameG = CpuStackFrame(
   id: 'id_9',
   name: 'G',
+  verboseName: 'G',
   category: 'Dart',
   url: 'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+  parentId: 'id_0',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 1;
 
@@ -633,7 +828,9 @@ final CpuProfileMetaData zeroProfileMetaData = CpuProfileMetaData(
 final CpuStackFrame zeroStackFrame = CpuStackFrame(
   id: 'id_0',
   name: 'A',
+  verboseName: 'A',
   category: 'Dart',
   url: '',
+  parentId: null,
   profileMetaData: zeroProfileMetaData,
 )..exclusiveSampleCount = 0;

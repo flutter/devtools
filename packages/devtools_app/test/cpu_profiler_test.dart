@@ -15,10 +15,10 @@ import 'package:devtools_app/src/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/cpu_profile_test_data.dart';
 import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
