@@ -14,7 +14,8 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   const TreeView({
     this.dataRoots,
     this.dataDisplayProvider,
-    this.onItemPressed,
+    this.onItemSelected,
+    this.onItemExpanded,
     this.shrinkWrap = false,
     this.itemExtent,
     this.onTraverse,
@@ -32,7 +33,14 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
 
   final Widget Function(T, VoidCallback) dataDisplayProvider;
 
-  final FutureOr<void> Function(T) onItemPressed;
+  /// Invoked when a tree node is selected. If [onItemExpanded] is not
+  /// provided, this method will also be called when the expand button is
+  /// tapped.
+  final FutureOr<void> Function(T) onItemSelected;
+
+  /// If provided, this method will be called when the expand button is tapped.
+  /// Otherwise, [onItemSelected] will be invoked, if provided.
+  final FutureOr<void> Function(T) onItemExpanded;
 
   final double itemExtent;
 
@@ -79,20 +87,33 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
           item,
           buildDisplay: (onPressed) =>
               widget.dataDisplayProvider(item, onPressed),
-          onItemPressed: _onItemPressed,
+          onItemSelected: _onItemSelected,
+          onItemExpanded: _onItemExpanded,
         );
       },
     );
   }
 
   // TODO(kenz): animate expansions and collapses.
-  void _onItemPressed(T item) async {
+  void _onItemSelected(T item) async {
     // Order of execution matters for the below calls.
+    if (widget.onItemExpanded == null && item.isExpandable) {
+      item.toggleExpansion();
+    }
+    if (widget.onItemSelected != null) {
+      await widget.onItemSelected(item);
+    }
+    _updateItems();
+  }
+
+  void _onItemExpanded(T item) async {
     if (item.isExpandable) {
       item.toggleExpansion();
     }
-    if (widget.onItemPressed != null) {
-      await widget.onItemPressed(item);
+    if (widget.onItemExpanded != null) {
+      await widget.onItemExpanded(item);
+    } else if (widget.onItemSelected != null) {
+      await widget.onItemSelected(item);
     }
     _updateItems();
   }
@@ -108,13 +129,14 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
 }
 
 class TreeViewItem<T extends TreeNode<T>> extends StatefulWidget {
-  const TreeViewItem(this.data, {this.buildDisplay, this.onItemPressed});
+  const TreeViewItem(this.data, {this.buildDisplay, this.onItemExpanded, this.onItemSelected});
 
   final T data;
 
   final Widget Function(VoidCallback onPressed) buildDisplay;
 
-  final void Function(T) onItemPressed;
+  final void Function(T) onItemSelected;
+  final void Function(T) onItemExpanded;
 
   @override
   _TreeViewItemState<T> createState() => _TreeViewItemState<T>();
@@ -134,7 +156,7 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
           children: [
             widget.data.isExpandable
                 ? InkWell(
-                    onTap: _onPressed,
+                    onTap: _onExpanded ?? _onSelected,
                     child: RotationTransition(
                       turns: expandArrowAnimation,
                       child: const Icon(
@@ -144,7 +166,7 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
                     ),
                   )
                 : const SizedBox(width: defaultIconSize),
-            Expanded(child: widget.buildDisplay(_onPressed)),
+            Expanded(child: widget.buildDisplay(_onSelected)),
           ],
         ),
       ),
@@ -164,8 +186,16 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
     return dataObject.level * defaultSpacing;
   }
 
-  void _onPressed() {
-    widget.onItemPressed(widget.data);
+  void _onExpanded() {
+    if (widget.onItemExpanded == null) {
+      return;
+    }
+    widget.onItemExpanded(widget.data);
+    setExpanded(widget.data.isExpanded);
+  }
+
+  void _onSelected() {
+    widget.onItemSelected(widget.data);
     setExpanded(widget.data.isExpanded);
   }
 }

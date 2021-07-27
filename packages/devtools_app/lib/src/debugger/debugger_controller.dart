@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
-import 'package:devtools_app/src/vm_developer/object_tree_controller.dart';
+import 'package:devtools_app/src/debugger/program_explorer_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:pedantic/pedantic.dart';
@@ -157,8 +157,6 @@ class DebuggerController extends DisposableController
   final _scriptLocation = ValueNotifier<ScriptLocation>(null);
 
   ValueListenable<ScriptLocation> get scriptLocation => _scriptLocation;
-
-  final objectTreeController = ObjectTreeController();
 
   /// Jump to the given ScriptRef and optional SourcePosition.
   void showScriptLocation(
@@ -618,7 +616,6 @@ class DebuggerController extends DisposableController
 
   void _handleIsolateEvent(Event event) {
     if (event.isolate.id != isolateRef?.id) return;
-
     switch (event.kind) {
       case EventKind.kIsolateReload:
         _updateAfterIsolateReload(event);
