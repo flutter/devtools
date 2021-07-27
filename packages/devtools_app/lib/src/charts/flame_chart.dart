@@ -100,7 +100,7 @@ abstract class FlameChartState<T extends FlameChart,
 
   final List<FlameChartSection> sections = [];
 
-  final focusNode = FocusNode();
+  final focusNode = FocusNode(debugLabel: 'flame-chart');
 
   bool _altKeyPressed = false;
 
