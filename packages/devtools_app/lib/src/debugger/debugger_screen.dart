@@ -21,8 +21,8 @@ import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
 import '../ui/icons.dart';
-import '../vm_developer/object_tree_controller.dart';
-import '../vm_developer/object_tree_selector.dart';
+import 'program_explorer_controller.dart';
+import 'program_explorer.dart';
 import '../vm_service_utils.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
@@ -137,7 +137,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     );
 
     final codeArea = Provider(
-      create: (context) => ObjectTreeController()..initialize(),
+      create: (context) => ProgramExplorerController()..initialize(),
       child: ValueListenableBuilder(
         valueListenable: controller.librariesVisible,
         builder: (context, visible, _) {
@@ -151,7 +151,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               initialFractions: const [0.70, 0.30],
               children: [
                 codeView,
-                ObjectTreePicker(
+                ProgramExplorer(
                   libraryFilterFocusNode: _libraryFilterFocusNode,
                   onSelected: _onLocationSelected,
                 )

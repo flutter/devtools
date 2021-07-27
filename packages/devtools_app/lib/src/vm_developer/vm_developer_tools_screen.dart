@@ -10,8 +10,6 @@ import '../auto_dispose_mixin.dart';
 import '../screen.dart';
 import '../theme.dart';
 import 'isolate_statistics_view.dart';
-//import 'test_view.dart';
-import 'test_view.dart';
 import 'vm_developer_tools_controller.dart';
 import 'vm_statistics_view.dart';
 
@@ -67,7 +65,7 @@ class VMDeveloperToolsScreenBody extends StatefulWidget {
   static const List<VMDeveloperView> views = [
     VMStatisticsView(),
     IsolateStatisticsView(),
-    TestView(),
+    //TestView(),
   ];
 
   @override
