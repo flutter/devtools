@@ -129,7 +129,7 @@ class PerformanceData {
         flutterFramesKey: frames.map((frame) => frame.json).toList(),
         displayRefreshRateKey: displayRefreshRate,
         traceEventsKey: traceEvents,
-        cpuProfileKey: cpuProfileData?.json ?? {},
+        cpuProfileKey: cpuProfileData?.toJson ?? {},
         selectedEventKey: selectedEvent?.json ?? {},
       };
 }

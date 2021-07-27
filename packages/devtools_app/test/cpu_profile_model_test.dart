@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/cpu_profile_test_data.dart';
 
 void main() {
   group('CpuProfileData', () {
@@ -12,11 +12,9 @@ void main() {
 
     test('init from parse', () {
       expect(
-        cpuProfileData.stackFramesJson,
-        equals(goldenCpuProfileStackFrames),
-      );
+          cpuProfileData.stackFramesJson, equals(goldenCpuProfileStackFrames));
       expect(
-        cpuProfileData.stackTraceEvents,
+        cpuProfileData.cpuSamples.map((sample) => sample.json),
         equals(goldenCpuProfileTraceEvents),
       );
       expect(cpuProfileData.profileMetaData.sampleCount, equals(8));
@@ -43,7 +41,7 @@ void main() {
         equals(subProfileStackFrames),
       );
       expect(
-        subProfile.stackTraceEvents,
+        subProfile.cpuSamples.map((sample) => sample.json),
         equals(subProfileTraceEvents),
       );
       expect(subProfile.profileMetaData.sampleCount, equals(3));
@@ -54,7 +52,7 @@ void main() {
     });
 
     test('to json', () {
-      expect(cpuProfileData.json, equals(goldenCpuProfileDataJson));
+      expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
     });
 
     test('stackFrameIdCompare', () {
@@ -102,7 +100,8 @@ void main() {
     test('shallowCopy', () {
       expect(stackFrameD.children.length, equals(2));
       expect(stackFrameD.parent, equals(stackFrameB));
-      CpuStackFrame copy = stackFrameD.shallowCopy();
+      CpuStackFrame copy =
+          stackFrameD.shallowCopy(resetInclusiveSampleCount: false);
       expect(copy.children, isEmpty);
       expect(copy.parent, isNull);
       expect(
@@ -116,7 +115,7 @@ void main() {
 
       expect(stackFrameD.children.length, equals(2));
       expect(stackFrameD.parent, equals(stackFrameB));
-      copy = stackFrameD.shallowCopy(resetInclusiveSampleCount: true);
+      copy = stackFrameD.shallowCopy();
       expect(copy.children, isEmpty);
       expect(copy.parent, isNull);
       expect(

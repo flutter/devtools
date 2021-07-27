@@ -177,7 +177,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     final fullData = _dataByTag[userTagNone];
     final data = _dataByTag.putIfAbsent(
       tag,
-      () => fullData.dataForUserTag(tag),
+      () => CpuProfileData.fromUserTag(fullData, tag),
     );
     if (!data.processed) {
       await transformer.processData(data);
