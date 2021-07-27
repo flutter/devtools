@@ -203,7 +203,8 @@ void main() {
         equals({TimelineEvent.firstTraceKey: expectedFirstTraceJson}),
       );
       expect(offlineData.displayRefreshRate, equals(120));
-      expect(offlineData.cpuProfileData.json, equals(goldenCpuProfileDataJson));
+      expect(
+          offlineData.cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
     });
 
     test('shallowClone', () {

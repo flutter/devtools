@@ -52,7 +52,7 @@ void main() {
     });
 
     test('to json', () {
-      expect(cpuProfileData.json, equals(goldenCpuProfileDataJson));
+      expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
     });
 
     test('stackFrameIdCompare', () {

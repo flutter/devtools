@@ -225,7 +225,7 @@ class CpuProfileData {
 
   CpuStackFrame selectedStackFrame;
 
-  Map<String, dynamic> get json => {
+  Map<String, Object> get toJson => {
         'type': '_CpuProfileTimeline',
         samplePeriodKey: profileMetaData.samplePeriod,
         sampleCountKey: profileMetaData.sampleCount,
@@ -244,7 +244,7 @@ class CpuProfileData {
   Map<String, dynamic> get stackFramesJson {
     final framesJson = <String, dynamic>{};
     for (final sf in stackFrames.values) {
-      framesJson.addAll(sf.json);
+      framesJson.addAll(sf.toJson);
     }
     return framesJson;
   }
@@ -461,7 +461,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     }
   }
 
-  Map<String, dynamic> get json => {
+  Map<String, Object> get toJson => {
         id: {
           CpuProfileData.nameKey: verboseName,
           CpuProfileData.categoryKey: category,
