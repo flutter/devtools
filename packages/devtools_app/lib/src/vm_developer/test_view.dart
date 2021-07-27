@@ -92,8 +92,7 @@ class _DartObjectInspectorState extends State<DartObjectInspector>
           axis: Axis.horizontal,
           initialFractions: const [0.3, 0.7],
           children: [
-            ObjectTreePicker(
-            ),
+            ObjectTreePicker(),
             HistoryViewport<VMServiceObjectNode>(
               history: DartObjectInspector.history,
               generateTitle: _titleBuilder,
@@ -520,8 +519,6 @@ class _ServiceObjectInspectorState extends State<ServiceObjectInspector>
             return CodeView(
               controller: controller,
               parsedScript: parsedScript,
-              showHistory: false,
-              centerScrollingPosition: false,
               scriptRef: parsedScript.script,
             );
           },

@@ -4,20 +4,21 @@ import 'package:vm_service/vm_service.dart';
 
 import '../common_widgets.dart';
 import '../config_specific/host_platform/host_platform.dart';
+import '../debugger/debugger_controller.dart';
+import '../debugger/debugger_model.dart';
 import '../debugger/debugger_screen.dart';
-import '../globals.dart';
 import '../theme.dart';
 import '../tree.dart';
 import '../trees.dart';
 import '../utils.dart';
-import '../version.dart';
+import '../vm_service_utils.dart';
 import 'object_tree_controller.dart';
 
 const containerIcon = Icons.folder;
 const libraryIcon = Icons.insert_chart;
 const listItemHeight = 40.0;
 
-const bool displayLibraryExplorer = true;
+const bool displayLibraryExplorer = false;
 
 /// A node in a tree of VM service objects.
 ///
@@ -129,7 +130,6 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     final dir = parts.join('/');
 
     if (parts.isNotEmpty) {
-      //print('name: $name selectable: ${lib != null}');
       // Root nodes shouldn't be selectable unless they're a library node.
       node = node._getCreateChild(dir, null, isSelectable: false);
     }
@@ -200,7 +200,6 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     final classNodes = <VMServiceObjectNode>[];
     final functionNodes = <VMServiceObjectNode>[];
     final variableNodes = <VMServiceObjectNode>[];
-    final otherNodes = <VMServiceObjectNode>[];
 
     for (final child in children) {
       switch (child.object.runtimeType) {
@@ -223,8 +222,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
           variableNodes.add(child);
           break;
         default:
-          print('OTHER!');
-          otherNodes.add(child);
+          throw StateError('Unexpected type: ${child.object.runtimeType}');
       }
       child._sortEntriesByType();
     }
@@ -259,7 +257,6 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       ...classNodes,
       ...functionNodes,
       ...variableNodes,
-      ...otherNodes,
     ]);
   }
 
@@ -285,14 +282,94 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   }
 }
 
+class _ObjectTreePickerHeader extends StatelessWidget {
+  const _ObjectTreePickerHeader({
+    this.controller,
+    this.libraryFilterFocusNode,
+    this.filterController,
+  });
+
+  final ObjectTreeController controller;
+  final FocusNode libraryFilterFocusNode;
+  final TextEditingController filterController;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isMacOS = HostPlatform.instance.isMacOS;
+
+    return Column(
+      children: [
+        AreaPaneHeader(
+          title: const Text('Program Explorer'),
+          needsTopBorder: false,
+          rightActions: [
+            ValueListenableBuilder(
+              valueListenable: controller.filteredObjectCount,
+              builder: (context, filteredCount, _) {
+                return ValueListenableBuilder(
+                  valueListenable: controller.objectCount,
+                  builder: (context, count, _) {
+                    return CountBadge(
+                      filteredItemsLength: filteredCount,
+                      itemsLength: count,
+                    );
+                  },
+                );
+              },
+            ),
+            /*IconButton(
+            iconSize: 18,
+            icon: const Icon(Icons.refresh),
+            onPressed: () =>
+                controller.refresh().then((_) => null //setState(() {}),
+                    ),
+          )*/
+          ],
+        ),
+        Container(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: theme.focusColor),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(denseSpacing),
+            child: SizedBox(
+              height: defaultTextFieldHeight,
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText:
+                      // TODO(bkonyi): move focusLibraryFilterKeySet into a common file.
+                      'Filter (${focusLibraryFilterKeySet.describeKeys(isMacOS: isMacOS)})',
+                  border: const OutlineInputBorder(),
+                ),
+                controller: filterController,
+                onChanged: (_) {
+                  final filterText = filterController.text.trim().toLowerCase();
+                  controller.updateVisibleNodes(filterText);
+                },
+                style: theme.textTheme.bodyText2,
+                focusNode: libraryFilterFocusNode,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// Picker that takes a list of scripts and allows filtering and selection of
 /// items.
 class ObjectTreePicker extends StatefulWidget {
   const ObjectTreePicker({
     Key key,
+    this.onSelected,
     this.libraryFilterFocusNode,
   }) : super(key: key);
 
+  final void Function(ScriptLocation) onSelected;
   final FocusNode libraryFilterFocusNode;
 
   @override
@@ -303,154 +380,103 @@ class ObjectTreePickerState extends State<ObjectTreePicker> {
   // TODO(devoncarew): How to retain the filter text state?
   final _filterController = TextEditingController();
   ObjectTreeController controller;
+  DebuggerController debugController;
 
   final _maxAutoExpandChildCount = 20;
-  final _shouldFilterExpando = Expando<bool>('shouldFilter');
-
-  int _filteredCount = 0;
-  List<VMServiceLibraryContents> _filteredItems;
-  List<VMServiceObjectNode> _rootObjectNodes;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    debugController = Provider.of<DebuggerController>(context);
     controller = Provider.of<ObjectTreeController>(context);
-    // Set the initial nodes
-    controller.initialized.then((_) => updateFilter());
-    //controller.initialize();
   }
 
   @override
   void didUpdateWidget(ObjectTreePicker oldWidget) {
     super.didUpdateWidget(oldWidget);
+    debugController = Provider.of<DebuggerController>(context);
     controller = Provider.of<ObjectTreeController>(context);
-    controller.initialized.then((_) => updateFilter());
-    //controller.initialize();
-  }
-
-  void updateFilter() {
-    setState(_updateFiltered);
   }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<ObjectTreeController>(context);
-
-    return FutureBuilder(
-      future: controller.initialized,
-      builder: (context, snapshot) {
-        return ValueListenableBuilder(
+    return ValueListenableBuilder<bool>(
+      valueListenable: controller.initializationListenable,
+      builder: (context, initialized, _) {
+        return ValueListenableBuilder<VMServiceObjectNode>(
           valueListenable: controller.selected,
           builder: (context, value, _) {
-            final theme = Theme.of(context);
-            final isMacOS = HostPlatform.instance.isMacOS;
-            final isLoading = _filteredItems == null;
-            if (!isLoading &&
-                controller.programStructure.isNotEmpty &&
-                _rootObjectNodes == null) {
-              // Re-calculate the tree of scripts if necessary.
-              _rootObjectNodes = VMServiceObjectNode.createRootsFrom(
-                _filteredItems,
-                _shouldFilterExpando,
-              );
-
-              int libCount = 0;
-              int classCount = 0;
-              int fieldCount = 0;
-              int scriptCount = 0;
-              int functionCount = 0;
-              _filteredCount = _rootObjectNodes.fold(0, (prev, e) {
-                int count = 0;
-                breadthFirstTraversal<VMServiceObjectNode>(e, action: (e) {
-                  if (e.object is LibraryRef) libCount++;
-                  if (e.object is FuncRef) functionCount++;
-                  if (e.object is ClassRef) classCount++;
-                  if (e.object is FieldRef) fieldCount++;
-                  if (e.object is ScriptRef) scriptCount++;
-                  if (e.isSelectable) {
-                    count++;
-                  }
-                });
-                return prev + count;
-              });
-              print(
-                  'Tree Count: libs: $libCount classes: $classCount fields: $fieldCount scripts: $scriptCount functions: $functionCount total: ${libCount + classCount + fieldCount + scriptCount + functionCount} count: $_filteredCount');
-            }
             return OutlineDecoration(
               child: Column(
                 children: [
-                  AreaPaneHeader(
-                    title: const Text('Program Explorer'),
-                    needsTopBorder: false,
-                    rightActions: [
-                      ValueListenableBuilder(
-                          valueListenable: controller.objectCount,
-                          builder: (context, count, _) {
-                            return CountBadge(
-                              filteredItemsLength: _filteredCount,
-                              //filteredItemsLength: DartObjectInspector.controller.topLevelObjectCount,
-                              itemsLength: count,
-                            );
-                          }),
-                      IconButton(
-                        iconSize: 18,
-                        icon: const Icon(Icons.refresh),
-                        onPressed: () => controller.refresh().then(
-                              (_) => setState(() {}),
-                            ),
-                      )
-                    ],
+                  _ObjectTreePickerHeader(
+                    controller: controller,
+                    filterController: _filterController,
+                    libraryFilterFocusNode: widget.libraryFilterFocusNode,
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: theme.focusColor),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(denseSpacing),
-                      child: SizedBox(
-                        height: defaultTextFieldHeight,
-                        child: TextField(
-                          decoration: InputDecoration(
-                            labelText:
-                                // TODO(bkonyi): move focusLibraryFilterKeySet into a common file.
-                                'Filter (${focusLibraryFilterKeySet.describeKeys(isMacOS: isMacOS)})',
-                            border: const OutlineInputBorder(),
-                          ),
-                          controller: _filterController,
-                          onChanged: (value) => updateFilter(),
-                          style: Theme.of(context).textTheme.bodyText2,
-                          focusNode: widget.libraryFilterFocusNode,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (isLoading)
+                  if (!initialized)
                     const Expanded(
                       child: CenteredCircularProgressIndicator(),
                     )
                   else
                     Expanded(
-                      child: TreeView<VMServiceObjectNode>(
-                        onTraverse: (node) {
-                          // Auto expand children when there are minimal search results.
-                          if (_filterController.text.isNotEmpty &&
-                              node.children.length <=
-                                  _maxAutoExpandChildCount &&
-                              node.object is! ClassRef) {
-                            node.expand();
-                          }
-                        },
-                        itemExtent: listItemHeight,
-                        dataRoots: _rootObjectNodes,
-                        onItemPressed: (node) async {
-                          if (node.object != null && node.object is! Obj) {
-                            await controller.populateNode(node);
-                          }
-                        },
-                        dataDisplayProvider: (item, onTap) {
-                          return _displayProvider(context, item, onTap);
+                      child: ValueListenableBuilder<List<VMServiceObjectNode>>(
+                        valueListenable: controller.rootObjectNodes,
+                        builder: (context, nodes, _) {
+                          return TreeView<VMServiceObjectNode>(
+                            onTraverse: (node) {
+                              // Auto expand children when there are minimal search results.
+                              if (_filterController.text.isNotEmpty &&
+                                  node.children.length <=
+                                      _maxAutoExpandChildCount &&
+                                  node.object is! ClassRef) {
+                                node.expand();
+                              }
+                            },
+                            itemExtent: listItemHeight,
+                            dataRoots: nodes,
+                            onItemPressed: (node) async {
+                              if (!node.isSelectable) {
+                                return;
+                              }
+                              if (node.object != null && node.object is! Obj) {
+                                await controller.populateNode(node);
+                              }
+                              if (widget.onSelected != null) {
+                                ScriptRef script = node.script;
+                                int tokenPos = 0;
+                                if ((node.object == null &&
+                                        node.script != null) ||
+                                    node.object is ScriptRef) {
+                                  script = node.script;
+                                } else if (node.object is! ScriptRef &&
+                                    node.object is! LibraryRef) {
+                                  // TODO(bkonyi): this can be null (see dart:cli-patch)
+                                  final location =
+                                      (node.object as dynamic).location;
+                                  tokenPos = location.tokenPos;
+                                  script = location.script;
+                                }
+
+                                script =
+                                    await debugController.getScript(script);
+                                widget.onSelected(
+                                  ScriptLocation(
+                                    script,
+                                    location: tokenPos == 0
+                                        ? null
+                                        : SourcePosition.calculatePosition(
+                                            script,
+                                            tokenPos,
+                                          ),
+                                  ),
+                                );
+                              }
+                            },
+                            dataDisplayProvider: (item, onTap) {
+                              return _displayProvider(context, item, onTap);
+                            },
+                          );
                         },
                       ),
                     ),
@@ -638,65 +664,9 @@ class ObjectTreePickerState extends State<ObjectTreePicker> {
     );
   }
 
-  void _updateFiltered() {
-    final filterText = _filterController.text.trim().toLowerCase();
-
-    print('Updating filter!');
-    // TODO(bkonyi): allow for filtering on fields, classes, and functions.
-
-    for (final ref in controller.programStructure) {
-      bool includeLib = false;
-      if (ref.lib.uri.caseInsensitiveFuzzyMatch(filterText)) {
-        includeLib = true;
-      }
-
-      for (final script in ref.lib.scripts) {
-        _shouldFilterExpando[script] = false;
-        if (script.uri.caseInsensitiveFuzzyMatch(filterText)) {
-          _shouldFilterExpando[script] = true;
-        }
-      }
-
-      for (final clazz in ref.classes) {
-        _shouldFilterExpando[clazz] = false;
-        if (clazz.name.caseInsensitiveFuzzyMatch(filterText)) {
-          includeLib = true;
-          _shouldFilterExpando[clazz] = true;
-        }
-      }
-
-      for (final function in ref.functions) {
-        _shouldFilterExpando[function] = false;
-        if (function.name.caseInsensitiveFuzzyMatch(filterText)) {
-          includeLib = true;
-          _shouldFilterExpando[function] = true;
-        }
-      }
-
-      for (final field in ref.fields) {
-        _shouldFilterExpando[field] = false;
-        if (field.name.caseInsensitiveFuzzyMatch(filterText)) {
-          includeLib = true;
-          _shouldFilterExpando[field] = true;
-        }
-      }
-      _shouldFilterExpando[ref.lib] = includeLib;
-    }
-    _filteredItems = controller.programStructure
-        .where((ref) => _shouldFilterExpando[ref.lib])
-        .toList();
-
-    // Remove the cached value here; it'll be re-computed the next time we need
-    // it.
-    _rootObjectNodes = null;
-  }
-
-  Future<void> _handleSelected(Function onTap, VMServiceObjectNode node) async {
+  void _handleSelected(Function onTap, VMServiceObjectNode node) {
     onTap();
     controller.selectNode(node);
-    setState(() {
-      // Refresh selection.
-    });
   }
 }
 

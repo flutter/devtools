@@ -18,4 +18,4 @@ dependencies:
 
 dependency_overrides:
   vm_service: 
-   path: ../../../dart-sdk/sdk/pkg/vm_service
+   path: ../../../sdk/pkg/vm_service
