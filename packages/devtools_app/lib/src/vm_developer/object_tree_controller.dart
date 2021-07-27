@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
+import '../trees.dart';
+import '../utils.dart';
 import '../version.dart';
 import 'object_tree_selector.dart';
 
@@ -81,8 +83,15 @@ class ObjectTreeController {
   ValueListenable<int> get objectCount => _objectCount;
   final _objectCount = ValueNotifier<int>(0);
 
+  ValueListenable<int> get filteredObjectCount => _filteredObjectCount;
+  final _filteredObjectCount = ValueNotifier<int>(0);
+
   ValueListenable<VMServiceObjectNode> get selected => _selected;
   final _selected = ValueNotifier<VMServiceObjectNode>(null);
+
+  ValueListenable<List<VMServiceObjectNode>> get rootObjectNodes =>
+      _rootObjectNodes;
+  final _rootObjectNodes = ValueNotifier<List<VMServiceObjectNode>>([]);
 
   // Cache of object IDs to their containing library to allow for easier
   // refreshing of library content, particularly for scripts.
@@ -90,10 +99,13 @@ class ObjectTreeController {
 
   IsolateRef _isolate;
 
-  Future<void> get initialized => _completer.future;
-
+  ValueListenable<bool> get initializationListenable =>
+      _initializationListenable;
+  final _initializationListenable = ValueNotifier<bool>(false);
   bool _initializing = false;
-  var _completer = Completer<void>();
+
+  final _shouldFilterExpando = Expando<bool>('shouldFilter');
+  List<VMServiceLibraryContents> _filteredItems;
 
   static bool _isSyntheticAccessor(FuncRef function, List<FieldRef> fields) {
     if (serviceManager.service.isProtocolVersionSupportedNow(
@@ -113,71 +125,59 @@ class ObjectTreeController {
   }
 
   /// Initializes the program structure.
-  Future<void> initialize() {
-    if (!_initializing) {
-      _initializing = true;
-      Future.wait(
-        serviceManager
-            .isolateManager.mainIsolateDebuggerState.isolateNow.libraries
-            .map(
-          (lib) => VMServiceLibraryContents.getLibraryContents(lib),
-        ),
-      ).then((libraries) {
-        _isolate = serviceManager.isolateManager.selectedIsolate.value;
-
-        int count = 0;
-        int libs = 0;
-        int classes = 0;
-        int fields = 0;
-        int scripts = 0;
-        int functions = 0;
-
-        void mapIdsToLibrary(LibraryRef lib, Iterable<ObjRef> objs) {
-          for (final e in objs) {
-            _objectIdToLibrary[e.id] = lib;
-            count++;
-          }
-        }
-
-        for (final libContents in libraries) {
-          final lib = libContents.lib;
-          mapIdsToLibrary(lib, lib.scripts);
-          mapIdsToLibrary(lib, libContents.classes);
-          mapIdsToLibrary(lib, libContents.fields);
-          // Filter out synthetic getters/setters
-          final filteredFunctions = libContents.functions.where(
-            (e) => !_isSyntheticAccessor(e, libContents.fields),
-          );
-          libContents.functions.clear();
-          libContents.functions.addAll(filteredFunctions);
-          mapIdsToLibrary(lib, libContents.functions);
-
-          libs++;
-          classes += libContents.classes.length;
-          fields += libContents.fields.length;
-          functions += libContents.functions.length;
-          scripts += lib.scripts.length;
-        }
-
-        _objectCount.value += count;
-        final total = libs + classes + fields + scripts + functions;
-        print(
-            'libs: $libs classes: $classes fields: $fields scripts: $scripts functions: $functions total: $total');
-        programStructure.addAll(libraries.cast<VMServiceLibraryContents>());
-        _completer.complete();
-      });
+  Future<void> initialize() async {
+    if (_initializing) {
+      return;
     }
-    return _completer.future;
+    _initializing = true;
+    final libraries = await Future.wait(
+      serviceManager
+          .isolateManager.mainIsolateDebuggerState.isolateNow.libraries
+          .map(
+        (lib) => VMServiceLibraryContents.getLibraryContents(lib),
+      ),
+    );
+    _isolate = serviceManager.isolateManager.selectedIsolate.value;
+
+    int count = 0;
+
+    void mapIdsToLibrary(LibraryRef lib, Iterable<ObjRef> objs) {
+      for (final e in objs) {
+        _objectIdToLibrary[e.id] = lib;
+        count++;
+      }
+    }
+
+    for (final libContents in libraries) {
+      final lib = libContents.lib;
+      mapIdsToLibrary(lib, lib.scripts);
+      mapIdsToLibrary(lib, libContents.classes);
+      mapIdsToLibrary(lib, libContents.fields);
+      // Filter out synthetic getters/setters
+      final filteredFunctions = libContents.functions.where(
+        (e) => !_isSyntheticAccessor(e, libContents.fields),
+      );
+      libContents.functions.clear();
+      libContents.functions.addAll(filteredFunctions);
+      mapIdsToLibrary(lib, libContents.functions);
+    }
+
+    _objectCount.value += count;
+    programStructure.addAll(libraries.cast<VMServiceLibraryContents>());
+
+    // Build the initial tree.
+    updateVisibleNodes();
+    _initializationListenable.value = true;
   }
 
+/*
   Future<void> refresh() {
-    _completer = Completer<void>();
     _objectIdToLibrary.clear();
     _selected.value = null;
     programStructure.clear();
     return initialize();
   }
-
+*/
   void selectNode(VMServiceObjectNode node) {
     if (!node.isSelectable) {
       return;
@@ -187,6 +187,72 @@ class ObjectTreeController {
       _selected.value?.isSelected = false;
       _selected.value = node;
     }
+  }
+
+  /// Rebuilds the tree nodes, only creating nodes for objects that match
+  /// [filterText].
+  void updateVisibleNodes([String filterText = '']) {
+    for (final ref in programStructure) {
+      bool includeLib = false;
+      if (ref.lib.uri.caseInsensitiveFuzzyMatch(filterText)) {
+        includeLib = true;
+      }
+
+      for (final script in ref.lib.scripts) {
+        _shouldFilterExpando[script] = false;
+        if (script.uri.caseInsensitiveFuzzyMatch(filterText)) {
+          _shouldFilterExpando[script] = true;
+        }
+      }
+
+      for (final clazz in ref.classes) {
+        _shouldFilterExpando[clazz] = false;
+        if (clazz.name.caseInsensitiveFuzzyMatch(filterText)) {
+          includeLib = true;
+          _shouldFilterExpando[clazz] = true;
+        }
+      }
+
+      for (final function in ref.functions) {
+        _shouldFilterExpando[function] = false;
+        if (function.name.caseInsensitiveFuzzyMatch(filterText)) {
+          includeLib = true;
+          _shouldFilterExpando[function] = true;
+        }
+      }
+
+      for (final field in ref.fields) {
+        _shouldFilterExpando[field] = false;
+        if (field.name.caseInsensitiveFuzzyMatch(filterText)) {
+          includeLib = true;
+          _shouldFilterExpando[field] = true;
+        }
+      }
+      _shouldFilterExpando[ref.lib] = includeLib;
+    }
+    _filteredItems =
+        programStructure.where((ref) => _shouldFilterExpando[ref.lib]).toList();
+
+    // Remove the cached value here; it'll be re-computed the next time we need
+    // it.
+    _rootObjectNodes.value = VMServiceObjectNode.createRootsFrom(
+      _filteredItems,
+      _shouldFilterExpando,
+    );
+    _updateFilteredObjectCount();
+  }
+
+  /// Iterates over the tree and counts the number of selectable nodes.
+  void _updateFilteredObjectCount() {
+    _filteredObjectCount.value = rootObjectNodes.value.fold(0, (prev, e) {
+      int count = 0;
+      breadthFirstTraversal<VMServiceObjectNode>(e, action: (e) {
+        if (e.isSelectable) {
+          count++;
+        }
+      });
+      return prev + count;
+    });
   }
 
   /// Updates `node` with a fully populated VM service [Obj].
@@ -287,5 +353,9 @@ class ObjectTreeController {
 
     // Sets the contents of the node to contain the full object.
     node.updateObject(updatedObj);
+
+    // We might have expanded a Class and added new entries to the tree. Make
+    // sure we account for these new nodes to the filtered object count.
+    _updateFilteredObjectCount();
   }
 }

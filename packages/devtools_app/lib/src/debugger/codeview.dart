@@ -41,8 +41,6 @@ class CodeView extends StatefulWidget {
   const CodeView({
     Key key,
     this.controller,
-    this.centerScrollingPosition = true,
-    this.showHistory = true,
     this.initialPosition,
     this.scriptRef,
     this.parsedScript,
@@ -53,8 +51,6 @@ class CodeView extends StatefulWidget {
   static double get assumedCharacterWidth => scaleByFontFactor(16.0);
 
   final DebuggerController controller;
-  final bool showHistory;
-  final bool centerScrollingPosition;
   final ScriptLocation initialPosition;
   final ScriptRef scriptRef;
   final ParsedScript parsedScript;
@@ -130,14 +126,24 @@ class _CodeViewState extends State<CodeView>
       return;
     }
 
-    final location = widget.controller.scriptLocation.value?.location;
-    if (location?.line == null) {
-      return;
-    }
-
     if (!verticalController.hasAttachedControllers) {
       // TODO(devoncarew): I'm uncertain why this occurs.
       log('LinkedScrollControllerGroup has no attached controllers');
+      return;
+    }
+
+    final location = widget.controller.scriptLocation.value?.location;
+    if (location?.line == null) {
+      // Default to scrolling to the top of the script.
+      if (animate) {
+        verticalController.animateTo(
+          0,
+          duration: longDuration,
+          curve: defaultCurve,
+        );
+      } else {
+        verticalController.jumpTo(0);
+      }
       return;
     }
 
@@ -150,7 +156,7 @@ class _CodeViewState extends State<CodeView>
       // Scroll to the middle of the screen.
       final lineIndex = location.line - 1;
       final scrollPosition = lineIndex * CodeView.rowHeight -
-          (widget.centerScrollingPosition
+          (widget.controller.centerScrollLocation
               ? ((extent - CodeView.rowHeight) / 2)
               : 0);
       if (animate) {
@@ -262,18 +268,16 @@ class _CodeViewState extends State<CodeView>
 
     return HistoryViewport(
       history: widget.controller.scriptsHistory,
-      historyEnabled: widget.showHistory,
       generateTitle: (script) => script.uri,
       controls: [
         ScriptPopupMenu(widget.controller),
-        if (widget.showHistory)
-          ScriptHistoryPopupMenu(
-            itemBuilder: _buildScriptMenuFromHistory,
-            onSelected: (scriptRef) {
-              widget.controller.showScriptLocation(ScriptLocation(scriptRef));
-            },
-            enabled: widget.controller.scriptsHistory.hasScripts,
-          ),
+        ScriptHistoryPopupMenu(
+          itemBuilder: _buildScriptMenuFromHistory,
+          onSelected: (scriptRef) {
+            widget.controller.showScriptLocation(ScriptLocation(scriptRef));
+          },
+          enabled: widget.controller.scriptsHistory.hasScripts,
+        ),
       ],
       contentBuilder: (context, script) {
         if (lines.isNotEmpty) {

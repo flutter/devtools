@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:codicon/codicon.dart';
-import 'package:devtools_app/src/vm_developer/object_tree_controller.dart';
-import 'package:devtools_app/src/vm_developer/object_tree_selector.dart';
-import 'package:devtools_app/src/vm_service_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/services.dart';
@@ -24,13 +21,15 @@ import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
 import '../ui/icons.dart';
+import '../vm_developer/object_tree_controller.dart';
+import '../vm_developer/object_tree_selector.dart';
+import '../vm_service_utils.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
 import 'controls.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
-import 'scripts.dart';
 import 'variables.dart';
 
 class DebuggerScreen extends Screen {
@@ -82,22 +81,14 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   static const breakpointsTitle = 'Breakpoints';
 
   DebuggerController controller;
-  ObjectTreeController objectSelectorController = ObjectTreeController();
+  //ObjectTreeController objectSelectorController = ObjectTreeController();
   FocusNode _libraryFilterFocusNode;
 
   @override
   void initState() {
-    print('initState');
     super.initState();
     _libraryFilterFocusNode = FocusNode();
-    objectSelectorController.selected.addListener(() {
-      // TODO(bkonyi):
-      final node = objectSelectorController.selected.value;
-      if (node == null || node.script == null) return;
-      controller.showScriptLocation(ScriptLocation(node.script));
-    });
 
-    objectSelectorController.initialize();
     ga.screen(DebuggerScreen.id);
   }
 
@@ -118,7 +109,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   void _onLocationSelected(ScriptLocation location) {
     if (location != null) {
-      controller.showScriptLocation(location);
+      controller.showScriptLocation(
+        location,
+        centerLocation: location.location == null,
+      );
     }
   }
 
@@ -142,43 +136,32 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       },
     );
 
-    final codeArea = ValueListenableBuilder(
-      valueListenable: controller.librariesVisible,
-      builder: (context, visible, _) {
-        if (visible) {
-          // Focus the filter text field when the ScriptPicker opens.
-          _libraryFilterFocusNode.requestFocus();
+    final codeArea = Provider(
+      create: (context) => ObjectTreeController()..initialize(),
+      child: ValueListenableBuilder(
+        valueListenable: controller.librariesVisible,
+        builder: (context, visible, _) {
+          if (visible) {
+            // Focus the filter text field when the ScriptPicker opens.
+            _libraryFilterFocusNode.requestFocus();
 
-          // TODO(devoncarew): Animate this opening and closing.
-          return Split(
-            axis: Axis.horizontal,
-            initialFractions: const [0.70, 0.30],
-            children: [
-              codeView,
-              /*ValueListenableBuilder(
-                valueListenable: controller.sortedScripts,
-                builder: (context, scripts, _) {
-                  return ScriptPicker(
-                    key: DebuggerScreenBody.scriptViewKey,
-                    controller: controller,
-                    scripts: scripts,
-                    onSelected: _onLocationSelected,
-                    libraryFilterFocusNode: _libraryFilterFocusNode,
-                  );
-                },
-              ),*/
-              Provider.value(
-                value: objectSelectorController,
-                child: ObjectTreePicker(
+            // TODO(devoncarew): Animate this opening and closing.
+            return Split(
+              axis: Axis.horizontal,
+              initialFractions: const [0.70, 0.30],
+              children: [
+                codeView,
+                ObjectTreePicker(
                   libraryFilterFocusNode: _libraryFilterFocusNode,
-                ),
-              )
-            ],
-          );
-        } else {
-          return codeView;
-        }
-      },
+                  onSelected: _onLocationSelected,
+                )
+              ],
+            );
+          } else {
+            return codeView;
+          }
+        },
+      ),
     );
 
     return Shortcuts(

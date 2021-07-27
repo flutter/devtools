@@ -87,10 +87,10 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
 
   // TODO(kenz): animate expansions and collapses.
   void _onItemPressed(T item) async {
-    if (!item.isExpandable) return;
-
     // Order of execution matters for the below calls.
-    item.toggleExpansion();
+    if (item.isExpandable) {
+      item.toggleExpansion();
+    }
     if (widget.onItemPressed != null) {
       await widget.onItemPressed(item);
     }
@@ -127,7 +127,8 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
     return Padding(
       padding: EdgeInsets.only(left: nodeIndent(widget.data)),
       child: Container(
-        color: widget.data.isSelected ? Theme.of(context).selectedRowColor : null,
+        color:
+            widget.data.isSelected ? Theme.of(context).selectedRowColor : null,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
+import 'package:devtools_app/src/vm_developer/object_tree_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:pedantic/pedantic.dart';
@@ -157,9 +158,14 @@ class DebuggerController extends DisposableController
 
   ValueListenable<ScriptLocation> get scriptLocation => _scriptLocation;
 
+  final objectTreeController = ObjectTreeController();
+
   /// Jump to the given ScriptRef and optional SourcePosition.
-  void showScriptLocation(ScriptLocation scriptLocation) {
-    _showScriptLocation(scriptLocation);
+  void showScriptLocation(
+    ScriptLocation scriptLocation, {
+    bool centerLocation = true,
+  }) {
+    _showScriptLocation(scriptLocation, centerLocation: centerLocation);
 
     // Update the scripts history (and make sure we don't react to the
     // subsequent event).
@@ -170,7 +176,11 @@ class DebuggerController extends DisposableController
 
   /// Show the given script location (without updating the script navigation
   /// history).
-  void _showScriptLocation(ScriptLocation scriptLocation) {
+  void _showScriptLocation(
+    ScriptLocation scriptLocation, {
+    bool centerLocation = true,
+  }) {
+    _centerScrollLocation = centerLocation;
     _currentScriptRef.value = scriptLocation?.scriptRef;
 
     _parseCurrentScript();
@@ -278,6 +288,9 @@ class DebuggerController extends DisposableController
 
   /// Return the sorted list of ScriptRefs active in the current isolate.
   ValueListenable<List<ScriptRef>> get sortedScripts => _sortedScripts;
+
+  bool get centerScrollLocation => _centerScrollLocation;
+  bool _centerScrollLocation = true;
 
   final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
 
@@ -1087,7 +1100,7 @@ class ScriptsHistory extends HistoryManager<ScriptRef> {
   bool get hasScripts => _openedScripts.isNotEmpty;
 
   void pushEntry(ScriptRef ref) {
-    if (ref == current) return;
+    if (ref == current.value) return;
 
     while (hasNext) {
       pop();
@@ -1098,9 +1111,6 @@ class ScriptsHistory extends HistoryManager<ScriptRef> {
 
     push(ref);
   }
-
-  @override
-  ScriptsHistory get value => this;
 
   Iterable<ScriptRef> get openedScripts => _openedScripts.toList().reversed;
 }
