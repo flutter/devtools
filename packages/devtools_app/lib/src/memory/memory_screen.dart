@@ -336,7 +336,7 @@ class MemoryBodyState extends State<MemoryBody>
 
     // TODO(terry): Can Flutter's focus system be used instead of listening to keyboard?
     return RawKeyboardListener(
-      focusNode: FocusNode(),
+      focusNode: FocusNode(debugLabel: 'memory'),
       onKey: (RawKeyEvent event) {
         if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
           hideHover();

@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'globals.dart';
-import 'profiler/cpu_profile_model.dart';
+import 'profiler/cpu_profile_model.dart' hide CpuSample;
 import 'version.dart';
 
 class VmServiceWrapper implements VmService {

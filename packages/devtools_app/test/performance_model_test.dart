@@ -8,10 +8,10 @@ import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:devtools_testing/support/test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/cpu_profile_test_data.dart';
 import 'support/performance_test_data.dart';
 
 void main() {
@@ -203,7 +203,8 @@ void main() {
         equals({TimelineEvent.firstTraceKey: expectedFirstTraceJson}),
       );
       expect(offlineData.displayRefreshRate, equals(120));
-      expect(offlineData.cpuProfileData.json, equals(goldenCpuProfileDataJson));
+      expect(
+          offlineData.cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
     });
 
     test('shallowClone', () {

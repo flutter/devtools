@@ -54,7 +54,7 @@ class ProfilerScreenController with CpuProfilerControllerProviderMixin {
   /// This method returns the name of the file that was downloaded.
   String exportData() {
     final encodedData =
-        _exportController.encode(ProfilerScreen.id, cpuProfileData.json);
+        _exportController.encode(ProfilerScreen.id, cpuProfileData.toJson);
     return _exportController.downloadFile(encodedData);
   }
 

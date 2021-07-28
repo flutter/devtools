@@ -127,7 +127,7 @@ class LegacyPerformanceData {
         selectedFrameIdKey: selectedFrame?.id,
         displayRefreshRateKey: displayRefreshRate,
         traceEventsKey: traceEvents,
-        cpuProfileKey: cpuProfileData?.json ?? {},
+        cpuProfileKey: cpuProfileData?.toJson ?? {},
         selectedEventKey: selectedEvent?.json ?? {},
       };
 }
