@@ -8,7 +8,6 @@ import '../globals.dart';
 import '../trees.dart';
 import '../version.dart';
 
-
 class VMServiceLibraryContents {
   const VMServiceLibraryContents({
     this.lib,

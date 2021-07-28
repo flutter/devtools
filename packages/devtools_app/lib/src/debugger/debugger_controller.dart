@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
-import 'package:devtools_app/src/debugger/program_explorer_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:pedantic/pedantic.dart';
