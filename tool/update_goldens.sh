@@ -4,6 +4,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# TODO(devoncarew): Ensure that goldens are always run on the
+# flutter-version.txt SDK version.
+
 echo "Checking flutter version..."
 if flutter --version | tee /dev/tty | grep -q 'channel stable'; then
   export DEVTOOLS_GOLDENS_SUFFIX="_stable"
