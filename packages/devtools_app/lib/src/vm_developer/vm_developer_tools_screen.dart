@@ -65,7 +65,6 @@ class VMDeveloperToolsScreenBody extends StatefulWidget {
   static const List<VMDeveloperView> views = [
     VMStatisticsView(),
     IsolateStatisticsView(),
-    //TestView(),
   ];
 
   @override
