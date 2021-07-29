@@ -21,15 +21,14 @@ import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
 import '../ui/icons.dart';
-import 'program_explorer_controller.dart';
-import 'program_explorer.dart';
-import '../vm_service_utils.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
 import 'controls.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
+import 'program_explorer.dart';
+import 'program_explorer_controller.dart';
 import 'variables.dart';
 
 class DebuggerScreen extends Screen {
