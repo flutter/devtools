@@ -13,6 +13,7 @@ import '../../diagnostics_node.dart';
 import '../../inspector_data_models.dart';
 import 'overflow_indicator_painter.dart';
 import 'theme.dart';
+import 'widgets_theme.dart';
 
 /// A widget for positioning sized widgets that follows layout as follows:
 ///      | top    |
@@ -142,7 +143,10 @@ class WidgetVisualizer extends StatelessWidget {
 
   final OverflowSide overflowSide;
 
-  static const overflowIndicatorSize = 20.0;
+  static const _overflowIndicatorSize = 20.0;
+  static const _borderUnselectedWidth = 1.0;
+  static const _borderSelectedWidth = 3.0;
+  static const _selectedPadding = 4.0;
 
   bool get drawOverflow => overflowSide != null;
 
@@ -151,81 +155,94 @@ class WidgetVisualizer extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final properties = layoutProperties;
-    Color borderColor = regularWidgetColor;
-    if (properties is FlexLayoutProperties) {
-      borderColor =
-          properties?.direction == Axis.horizontal ? rowColor : columnColor;
-    }
-    if (isSelected) {
-      borderColor = selectedWidgetColor;
-    }
-    return Container(
-      child: Stack(
-        children: [
-          if (drawOverflow)
-            Positioned.fill(
-              child: CustomPaint(
-                painter: OverflowIndicatorPainter(
-                  overflowSide,
-                  overflowIndicatorSize,
-                ),
-              ),
-            ),
-          Container(
-            margin: EdgeInsets.only(
-              right: overflowSide == OverflowSide.right
-                  ? overflowIndicatorSize
-                  : 0.0,
-              bottom: overflowSide == OverflowSide.bottom
-                  ? overflowIndicatorSize
-                  : 0.0,
-            ),
-            color: isSelected ? colorScheme.backgroundColorSelected : null,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Flexible(
-                        child: Container(
-                          constraints: BoxConstraints(
-                              maxWidth: largeTitle
-                                  ? defaultMaxRenderWidth
-                                  : minRenderWidth *
-                                      widgetTitleMaxWidthPercentage),
-                          child: Center(
-                            child: Text(
-                              title,
-                              style:
-                                  TextStyle(color: colorScheme.widgetNameColor),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          decoration: BoxDecoration(color: borderColor),
-                          padding: const EdgeInsets.all(4.0),
-                        ),
-                      ),
-                      if (hint != null) Flexible(child: hint),
-                    ],
+    final borderColor = WidgetTheme.fromName(properties.node.description).color;
+    final boxAdjust = isSelected ? _selectedPadding : 0.0;
+
+    return LayoutBuilder(builder: (context, constraints) {
+      return OverflowBox(
+        minWidth: constraints.minWidth + boxAdjust,
+        maxWidth: constraints.maxWidth + boxAdjust,
+        maxHeight: constraints.maxHeight + boxAdjust,
+        minHeight: constraints.minHeight + boxAdjust,
+        child: Container(
+          child: Stack(
+            children: [
+              if (drawOverflow)
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: OverflowIndicatorPainter(
+                      overflowSide,
+                      _overflowIndicatorSize,
+                    ),
                   ),
                 ),
-                if (child != null) Expanded(child: child),
-              ],
-            ),
+              Container(
+                margin: EdgeInsets.only(
+                  right: overflowSide == OverflowSide.right
+                      ? _overflowIndicatorSize
+                      : 0.0,
+                  bottom: overflowSide == OverflowSide.bottom
+                      ? _overflowIndicatorSize
+                      : 0.0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                            child: Container(
+                              constraints: BoxConstraints(
+                                  maxWidth: largeTitle
+                                      ? defaultMaxRenderWidth
+                                      : minRenderWidth *
+                                          widgetTitleMaxWidthPercentage),
+                              child: Center(
+                                child: Text(
+                                  title,
+                                  style: TextStyle(
+                                      color: colorScheme.widgetNameColor),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              decoration: BoxDecoration(color: borderColor),
+                              padding: const EdgeInsets.all(4.0),
+                            ),
+                          ),
+                          if (hint != null) Flexible(child: hint),
+                        ],
+                      ),
+                    ),
+                    if (child != null) Expanded(child: child),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: borderColor,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: borderColor,
+              width: isSelected ? _borderSelectedWidth : _borderUnselectedWidth,
+            ),
+            color: isSelected
+                ? theme.canvasColor.brighten()
+                : theme.canvasColor.darken(),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(.5),
+                      blurRadius: 20,
+                    ),
+                  ]
+                : null,
+          ),
         ),
-        color: theme.canvasColor.darken(),
-      ),
-    );
+      );
+    });
   }
 }
 

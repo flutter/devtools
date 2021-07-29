@@ -16,8 +16,8 @@ library icons;
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
+import '../inspector/layout_explorer/ui/widgets_theme.dart';
 import '../theme.dart';
-import '../utils.dart';
 
 class CustomIcon extends StatelessWidget {
   const CustomIcon({
@@ -52,6 +52,38 @@ class CustomIcon extends StatelessWidget {
   }
 }
 
+/// An icon with one character
+class CircleIcon extends StatelessWidget {
+  const CircleIcon({
+    @required this.text,
+    @required this.color,
+  });
+
+  /// Text to display. Should be one character.
+  final String text;
+
+  /// Background circle color.
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 15,
+      height: 15,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 9, color: Color(0xFF231F20)),
+      ),
+    );
+  }
+}
+
 class CustomIconMaker {
   final Map<String, Widget> iconCache = {};
 
@@ -63,13 +95,6 @@ class CustomIconMaker {
     kind ??= IconKind.classIcon;
     if (fromText?.isEmpty != false) {
       return null;
-    }
-
-    final asset = WidgetIcons.getAssetName(fromText);
-    if (asset != null) {
-      return iconCache.putIfAbsent(fromText, () {
-        return AssetImageIcon(asset: asset);
-      });
     }
 
     final String text = fromText[0].toUpperCase();
@@ -92,10 +117,17 @@ class CustomIconMaker {
       return null;
     }
 
-    return getCustomIcon(
-      name,
-      kind: isPrivate(name) ? IconKind.method : IconKind.classIcon,
-    );
+    final widgetTheme = WidgetTheme.fromName(name);
+    if (widgetTheme.iconAsset != null) {
+      return iconCache.putIfAbsent(name, () {
+        return AssetImageIcon(asset: widgetTheme.iconAsset);
+      });
+    }
+
+    final text = name[0].toUpperCase();
+    return iconCache.putIfAbsent(name, () {
+      return CircleIcon(text: text, color: widgetTheme.color);
+    });
   }
 
   Widget fromInfo(String name) {
@@ -292,113 +324,6 @@ class ThemedImageIcon extends StatelessWidget {
       width: defaultIconSize,
     );
   }
-}
-
-class WidgetIcons {
-  static String getAssetName(String widgetType) {
-    if (widgetType == null) {
-      return null;
-    }
-
-    return _iconMap[_stripBrackets(widgetType)];
-  }
-
-  // Strips the brackets of the widget
-  // Expected input for example: AnimatedBuilder<String> => AnimatedBuilder
-  static String _stripBrackets(String widgetType) {
-    final bracketIndex = widgetType.indexOf('<');
-    if (bracketIndex == -1) {
-      return widgetType;
-    }
-
-    return widgetType.substring(0, bracketIndex);
-  }
-
-  static const Map<String, String> _iconMap = {
-    'RenderObjectToWidgetAdapter': root,
-    'Text': text,
-    'Icon': icon,
-    'Image': icon,
-    'FloatingActionButton': floatingActionButton,
-    'Checkbox': checkbox,
-    'Radio': radio,
-    'Switch': toggle,
-    'AnimatedAlign': animated,
-    'AnimatedBuilder': animated,
-    'AnimatedContainer': animated,
-    'AnimatedCrossFade': animated,
-    'AnimatedDefaultTextStyle': animated,
-    'AnimatedListState': animated,
-    'AnimatedModalBarrier': animated,
-    'AnimatedOpacity': animated,
-    'AnimatedPhysicalModel': animated,
-    'AnimatedPositioned': animated,
-    'AnimatedSize': animated,
-    'AnimatedWidget': animated,
-    'AnimatedWidgetBaseState': animated,
-    'DecoratedBoxTransition': transition,
-    'FadeTransition': transition,
-    'PositionedTransition': transition,
-    'RotationTransition': transition,
-    'ScaleTransition': transition,
-    'SizeTransition': transition,
-    'SlideTransition': transition,
-    'Hero': hero,
-    'Container': container,
-    'Center': center,
-    'Row': row,
-    'Column': column,
-    'Padding': padding,
-    'Scaffold': scaffold,
-    'SizedBox': sizedBox,
-    'ConstrainedBox': sizedBox,
-    'Expanded': sizedBox,
-    'Flex': sizedBox,
-    'Align': align,
-    'Positioned': align,
-    'SingleChildScrollView': scroll,
-    'Scrollable': scroll,
-    'Stack': stack,
-    'InkWell': inkWell,
-    'GestureDetector': gesture,
-    'TextButton': textButton,
-    'RaisedButton': textButton,
-    'OutlinedButton': outlinedButton,
-    'GridView': gridView,
-    'ListView': listView,
-  };
-
-  static const String root = 'icons/inspector/widget_icons/root.png';
-  static const String text = 'icons/inspector/widget_icons/text.png';
-  static const String icon = 'icons/inspector/widget_icons/icon.png';
-  static const String image = 'icons/inspector/widget_icons/image.png';
-  static const String floatingActionButton =
-      'icons/inspector/widget_icons/floatingab.png';
-  static const String checkbox = 'icons/inspector/widget_icons/checkbox.png';
-  static const String radio = 'icons/inspector/widget_icons/radio.png';
-  static const String toggle = 'icons/inspector/widget_icons/toggle.png';
-  static const String animated = 'icons/inspector/widget_icons/animated.png';
-  static const String transition =
-      'icons/inspector/widget_icons/transition.png';
-  static const String hero = 'icons/inspector/widget_icons/hero.png';
-  static const String container = 'icons/inspector/widget_icons/container.png';
-  static const String center = 'icons/inspector/widget_icons/center.png';
-  static const String row = 'icons/inspector/widget_icons/row.png';
-  static const String column = 'icons/inspector/widget_icons/column.png';
-  static const String padding = 'icons/inspector/widget_icons/padding.png';
-  static const String scaffold = 'icons/inspector/widget_icons/scaffold.png';
-  static const String sizedBox = 'icons/inspector/widget_icons/sizedbox.png';
-  static const String align = 'icons/inspector/widget_icons/align.png';
-  static const String scroll = 'icons/inspector/widget_icons/scroll.png';
-  static const String stack = 'icons/inspector/widget_icons/stack.png';
-  static const String inkWell = 'icons/inspector/widget_icons/inkwell.png';
-  static const String gesture = 'icons/inspector/widget_icons/gesture.png';
-  static const String textButton =
-      'icons/inspector/widget_icons/textButton.png';
-  static const String outlinedButton =
-      'icons/inspector/widget_icons/outlinedbutton.png';
-  static const String gridView = 'icons/inspector/widget_icons/gridview.png';
-  static const String listView = 'icons/inspector/widget_icons/listView.png';
 }
 
 class Octicons {

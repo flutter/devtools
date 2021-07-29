@@ -36,8 +36,8 @@ typedef TreeEventCallback = void Function(InspectorTreeNode node);
 // TODO(jacobr): merge this scheme with other color schemes in DevTools.
 extension InspectorColorScheme on ColorScheme {
   Color get selectedRowBackgroundColor => isLight
-      ? const Color.fromARGB(255, 202, 191, 69)
-      : const Color.fromARGB(255, 99, 101, 103);
+      ? const Color.fromARGB(255, 220, 220, 220)
+      : const Color.fromARGB(255, 73, 73, 73);
   Color get hoverColor =>
       isLight ? Colors.yellowAccent : const Color.fromARGB(255, 70, 73, 76);
 }
