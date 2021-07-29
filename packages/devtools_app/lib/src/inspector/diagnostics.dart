@@ -89,8 +89,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
     final textPreview = diagnostic.json['textPreview'];
     if (textPreview is String) {
+      final preview = textPreview.replaceAll('\n', ' ');
       yield TextSpan(
-        text: ': "$textPreview"',
+        text: ': "$preview"',
         style: textStyle.merge(inspector_text_styles.unimportant(colorScheme)),
       );
     }
