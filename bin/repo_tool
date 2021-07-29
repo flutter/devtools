@@ -10,4 +10,4 @@ if [[ "$REPO_DIR/tool/pubspec.yaml" -nt "$REPO_DIR/tool/.packages" ]]; then
   (cd $REPO_DIR/tool; flutter pub get)
 fi
 
-dart $REPO_DIR/tool/bin/repo_tool.dart "$@"
+$REPO_DIR/flutter-sdk/bin/dart $REPO_DIR/tool/bin/repo_tool.dart "$@"

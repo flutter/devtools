@@ -883,6 +883,7 @@ class FileNode extends TreeNode<FileNode> {
   }
 }
 
+// ignore: avoid_classes_with_only_static_members
 class ScriptRefUtils {
   static String fileName(ScriptRef scriptRef) =>
       Uri.parse(scriptRef.uri).path.split('/').last;

@@ -42,8 +42,8 @@ class AnalyzeCommand extends Command {
       final progress = log.progress('  ${p.relativePath}');
 
       final process = await Process.start(
-        sdk.flutterToolPath,
-        ['--no-color', 'analyze'],
+        sdk.dartToolPath,
+        ['analyze', '--fatal-infos'],
         workingDirectory: p.packagePath,
       );
       final Stream<List<int>> stdout = process.stdout;
