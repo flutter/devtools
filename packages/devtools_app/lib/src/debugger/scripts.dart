@@ -10,7 +10,6 @@ import '../config_specific/host_platform/host_platform.dart';
 import '../theme.dart';
 import '../tree.dart';
 import '../utils.dart';
-import '../vm_service_utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'debugger_screen.dart';

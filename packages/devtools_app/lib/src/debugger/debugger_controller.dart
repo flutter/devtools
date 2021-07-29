@@ -18,7 +18,6 @@ import '../history_manager.dart';
 import '../service_manager.dart';
 import '../ui/search.dart';
 import '../utils.dart';
-import '../vm_service_utils.dart';
 import '../vm_service_wrapper.dart';
 import 'debugger_model.dart';
 import 'syntax_highlighter.dart';

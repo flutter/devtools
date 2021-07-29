@@ -13,12 +13,11 @@ import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart';
 import '../globals.dart';
-import '../inspector/diagnostics_node.dart' hide SourcePosition;
+import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
 import '../trees.dart';
 import '../ui/search.dart';
 import '../utils.dart';
-import '../vm_service_utils.dart';
 
 /// Whether to include properties surfaced through Diagnosticable objects as
 /// part of the generic Debugger view of an object.
@@ -93,6 +92,43 @@ class ScriptLocation {
 
   @override
   String toString() => '${scriptRef.uri} $location';
+}
+
+class SourcePosition {
+  const SourcePosition(
+      {@required this.line, @required this.column, this.file, this.tokenPos});
+
+  factory SourcePosition.calculatePosition(Script script, int tokenPos) {
+    final List<List<int>> table = script.tokenPosTable;
+    if (table == null) {
+      return null;
+    }
+
+    return SourcePosition(
+      line: script.getLineNumberFromTokenPos(tokenPos),
+      column: script.getColumnNumberFromTokenPos(tokenPos),
+      tokenPos: tokenPos,
+    );
+  }
+
+  final String file;
+  final int line;
+  final int column;
+  final int tokenPos;
+
+  @override
+  bool operator ==(other) {
+    return other is SourcePosition &&
+        other.line == line &&
+        other.column == column &&
+        other.tokenPos == tokenPos;
+  }
+
+  @override
+  int get hashCode => (line << 7) ^ column;
+
+  @override
+  String toString() => '$line:$column';
 }
 
 class SourceToken with DataSearchStateMixin {
@@ -866,8 +902,12 @@ class ScriptRefUtils {
   static String fileName(ScriptRef scriptRef) =>
       Uri.parse(scriptRef.uri).path.split('/').last;
 
-  static List<String> splitDirectoryPartsString(String path) {
-    final uri = Uri.parse(path);
+  /// Return the Uri for the given ScriptRef split into path segments.
+  ///
+  /// This is useful for converting a flat list of scripts into a directory tree
+  /// structure.
+  static List<String> splitDirectoryParts(ScriptRef scriptRef) {
+    final uri = Uri.parse(scriptRef.uri);
     final scheme = uri.scheme;
     var parts = uri.path.split('/');
 
@@ -904,11 +944,4 @@ class ScriptRefUtils {
       return parts;
     }
   }
-
-  /// Return the Uri for the given ScriptRef split into path segments.
-  ///
-  /// This is useful for converting a flat list of scripts into a directory tree
-  /// structure.
-  static List<String> splitDirectoryParts(ScriptRef scriptRef) => splitDirectoryPartsString(scriptRef.uri);
-
 }

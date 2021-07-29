@@ -21,7 +21,6 @@ import '../debugger/debugger_model.dart';
 import '../eval_on_dart_library.dart';
 import '../globals.dart';
 import '../utils.dart';
-import '../vm_service_utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service_polyfill.dart';
 
