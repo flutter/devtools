@@ -19,6 +19,7 @@ import '../vm_service_wrapper.dart';
 
 typedef ErrorReporter = void Function(String title, dynamic error);
 
+// ignore: avoid_classes_with_only_static_members
 class FrameworkCore {
   static void initGlobals() {
     setGlobal(ServiceConnectionManager, ServiceConnectionManager());

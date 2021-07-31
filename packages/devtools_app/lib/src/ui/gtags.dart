@@ -21,6 +21,7 @@ external void _gTagCommandName(String command, String name, [dynamic params]);
 @JS('isGaInitialized')
 external bool isGaInitialized();
 
+// ignore: avoid_classes_with_only_static_members
 class GTag {
   static const String _event = 'event';
   static const String _exception = 'exception';
@@ -53,10 +54,14 @@ class GtagEvent {
   });
 
   external String get event_category;
+
   external String get event_label;
+
   external String get send_to;
+
   external int get value; // Positive number.
   external bool get non_interaction;
+
   external dynamic get custom_map; // Custom metrics
 }
 
