@@ -21,6 +21,9 @@ import '../shared/table_data.dart';
 import '../shared/utils.dart';
 import '../shared/version.dart';
 import '../ui/search.dart';
+//import '../utils.dart';
+//import '../version.dart';
+import 'memory_diffing.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
@@ -278,6 +281,45 @@ class MemoryController extends DisposableController
 
   Snapshot get lastSnapshot => snapshots.safeLast;
 
+  ValueListenable get diffRunning => _diffRunning;
+
+  final _diffRunning = ValueNotifier<bool>(false);
+
+  bool get isDiffRunning => _diffRunning.value;
+
+  void toggleDiffRunning(bool value) {
+    _diffRunning.value = value;
+  }
+
+  final diffSnapshots = <SnapshotDiffing>[];
+
+  /// Returns a list of the two snapshots to diff first is the previous snapshot
+  /// and last is the current snapshot.
+  List<Snapshot> findSnapshotsToDiff() {
+    final snapshotsToDiff = <Snapshot>[];
+
+    if (!isDiffRunning) {
+      // Diff the two snapshots.
+      final previousSnapshotIndex = snapshots.length - 2;
+      if (previousSnapshotIndex >= 0) {
+        final previousSnapshot = snapshots[previousSnapshotIndex];
+        snapshotsToDiff.addAll([previousSnapshot, lastSnapshot]);
+      }
+    }
+
+    return snapshotsToDiff;
+  }
+
+  /// Have these two snapshots been diff'ed?
+  bool hasSnapshot(Snapshot snapshot1, Snapshot snapshot2) {
+    for (var index = 0; index < diffSnapshots.length; index++) {
+      final diffSnapshot = diffSnapshots[index];
+      return diffSnapshot.snapshot1 == snapshot1 &&
+          diffSnapshot.snapshot2 == snapshot2;
+    }
+    return false;
+  }
+
   /// Root nodes names that contains nodes of either libraries or classes depending on
   /// group by library or group by class.
   static const libraryRootNode = '___LIBRARY___';
@@ -289,6 +331,9 @@ class MemoryController extends DisposableController
 
   static String formattedTimestamp(DateTime timestamp) =>
       timestamp != null ? DateFormat('MMM dd HH:mm:ss').format(timestamp) : '';
+
+  static String formattedShortTimestamp(DateTime timestamp) =>
+      timestamp != null ? DateFormat('hh:mm:ss').format(timestamp) : '';
 
   /// Stored value is pretty timestamp when the snapshot was done.
   final _selectedSnapshotNotifier = ValueNotifier<DateTime>(null);
@@ -1259,6 +1304,92 @@ class MemoryController extends DisposableController
     }
   }
 
+  void createDiffEnteries(Reference parent) {
+    for (final diffSnapshot in diffSnapshots) {
+      final diffSnapshotMatch = parent.children.firstWhere(
+        (element) {
+          var result = false;
+          if (element is DiffSnapshotReference) {
+            final DiffSnapshotReference node = element;
+            result = node.snapshot1 == diffSnapshot.snapshot1 &&
+                node.snapshot2 == diffSnapshot.snapshot2;
+          }
+
+          return result;
+        },
+        orElse: () => null,
+      );
+
+      if (diffSnapshotMatch == null) {
+        // New diff add it.
+        final diffSnapshotNode = DiffSnapshotReference(
+          diffSnapshot.snapshot1,
+          diffSnapshot.snapshot2,
+        );
+        parent.addChild(diffSnapshotNode);
+
+        final theDiffTree = buildDiffLibrary(diffSnapshot);
+        for (var index = 0; index < theDiffTree.length; index++) {
+          final libraryRef = theDiffTree[index];
+          diffSnapshotNode.addChild(libraryRef);
+        }
+        return;
+      }
+    }
+  }
+
+  static String formatDiffClassInfo(int totalNew, int totalDelete) =>
+      '+$totalNew(-$totalDelete)';
+
+  List<LibraryReference> buildDiffLibrary(SnapshotDiffing diffSnapshot) {
+    final result = <String, LibraryReference>{};
+
+    diffSnapshot.diffComputations.forEach((
+      HeapGraphClassLive key,
+      ListComputation<HeapGraphElementLive> value,
+    ) {
+      final libraryName = HeapGraph.normalizeLibraryName(key.origin);
+
+      final newOnes = value.newOnes;
+      final deletedOnes = value.deletedOnes;
+
+      if (newOnes.isNotEmpty || deletedOnes.isNotEmpty) {
+        final totalClassNew = newOnes.isNotEmpty ? newOnes.length : 0;
+        final totalClassDelete =
+            deletedOnes.isNotEmpty ? deletedOnes.length : 0;
+
+        LibraryReference libRef;
+
+        if (!result.containsKey(libraryName)) {
+          libRef = LibraryReference(this, key.libraryUri.toString(), {key});
+          result[libraryName] = libRef;
+        } else {
+          libRef = result[libraryName];
+        }
+
+        if (key.name.contains('ImageInfo')) {
+          print("STOP");
+        }
+        monitorClass(
+          className: key.name,
+          message: 'computeAllLibraries',
+        );
+        final classRef = ClassDiffReference(
+          this,
+          key,
+          diffData: DiffData(key, value),
+          // Describe new/deleted objects e.g., +## (-##)
+          diffClassInfo: formatDiffClassInfo(totalClassNew, totalClassDelete),
+        );
+        classRef.addChild(Reference.empty);
+
+        libRef.addChild(classRef);
+      }
+    });
+
+    return result.values.toList();
+  }
+
   final _treeChangedNotifier = ValueNotifier<bool>(false);
 
   ValueListenable<bool> get treeChangedNotifier => _treeChangedNotifier;
@@ -1295,6 +1426,19 @@ class MemoryController extends DisposableController
     }
 
     createSnapshotEntries(topNode);
+
+    var diffsRoot = topNode.children.firstWhere(
+      (reference) => reference is DiffsReference,
+      orElse: () => null,
+    );
+
+    if (snapshots.isNotEmpty && diffsRoot == null && diffSnapshots.isNotEmpty) {
+      // Create Diff entry.
+      diffsRoot = DiffsReference();
+      topNode.addChild(diffsRoot);
+    }
+
+    createDiffEnteries(diffsRoot);
 
     return topNode;
   }

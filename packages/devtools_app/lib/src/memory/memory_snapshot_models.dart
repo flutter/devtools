@@ -5,7 +5,11 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/trees.dart';
+import '../core/message_bus.dart';
+import '../globals.dart';
+//import '../trees.dart';
 import 'memory_controller.dart';
+import 'memory_diffing.dart';
 import 'memory_graph_model.dart';
 
 /// Consolidated list of libraries.  External is the external heap
@@ -26,12 +30,14 @@ class Reference extends TreeNode<Reference> {
     bool argIsAllocation = false,
     bool argIsAllocations = false,
     bool argIsAnalysis = false,
+    bool argIsDiff = false,
     bool argIsSnapshot = false,
     bool argIsLibrary = false,
     bool argIsExternals = false,
     bool argIsExternal = false,
     bool argIsFiltered = false,
     bool argIsClass = false,
+    bool argIsDiffClass = false,
     bool argIsObject = false,
     Function argOnExpand,
     Function argOnLeaf,
@@ -43,11 +49,13 @@ class Reference extends TreeNode<Reference> {
       isAllocation: argIsAllocation,
       isAllocations: argIsAllocations,
       isAnalysis: argIsAnalysis,
+      isDiff: argIsDiff,
       isSnapshot: argIsSnapshot,
       isLibrary: argIsLibrary,
       isExternals: argIsExternals,
       isFiltered: argIsFiltered,
       isClass: argIsClass,
+      isDiffClass: argIsDiffClass,
       isObject: argIsObject,
       onExpand: argOnExpand,
       onLeaf: argOnLeaf,
@@ -61,12 +69,14 @@ class Reference extends TreeNode<Reference> {
     this.isAllocation = false,
     this.isAllocations = false,
     this.isAnalysis = false,
+    this.isDiff = false,
     this.isSnapshot = false,
     this.isLibrary = false,
     this.isExternals = false,
     this.isExternal = false,
     this.isFiltered = false,
     this.isClass = false,
+    this.isDiffClass = false,
     this.isObject = false,
     this.onExpand,
     this.onLeaf,
@@ -111,6 +121,19 @@ class Reference extends TreeNode<Reference> {
           onLeaf: onLeaf,
         );
 
+  Reference.diff(
+    MemoryController controller,
+    String name, {
+    Function onExpand,
+    Function onLeaf,
+  }) : this._internal(
+          controller: controller,
+          name: name,
+          isDiff: true,
+          onExpand: onExpand,
+          onLeaf: onLeaf,
+        );
+
   Reference.snapshot(
     MemoryController controller,
     String name, {
@@ -147,6 +170,22 @@ class Reference extends TreeNode<Reference> {
           actualClass: actualClass,
           name: actualClass.name,
           isClass: true,
+          onExpand: onExpand,
+          onLeaf: onLeaf,
+        );
+
+  Reference.aDiffClass(
+    MemoryController controller,
+    HeapGraphClassLive actualClass, {
+    Function onExpand,
+    Function onLeaf,
+    // Describe new/deleted objects e.g., +##(-##)
+    String diffClassInfo,
+  }) : this._internal(
+          controller: controller,
+          actualClass: actualClass,
+          name: '${actualClass.name} $diffClassInfo',
+          isDiffClass: true,
           onExpand: onExpand,
           onLeaf: onLeaf,
         );
@@ -219,6 +258,8 @@ class Reference extends TreeNode<Reference> {
 
   final bool isAnalysis;
 
+  final bool isDiff;
+
   final bool isSnapshot;
 
   final bool isLibrary;
@@ -233,6 +274,8 @@ class Reference extends TreeNode<Reference> {
   final bool isFiltered;
 
   final bool isClass;
+
+  final bool isDiffClass;
 
   final bool isObject;
 
@@ -357,6 +400,53 @@ class AnalysisField extends TreeNode<AnalysisField> {
   }
 }
 
+/// Container of a snapshot diff processed.
+class DiffsReference extends Reference {
+  DiffsReference() : super.diff(null, 'Diffs');
+}
+
+/// Analysis data.
+class DiffReference extends Reference {
+  DiffReference(
+    String name, {
+    this.countNote,
+    this.sizeNote,
+  }) : super.diff(null, name);
+
+  int countNote;
+  int sizeNote;
+}
+
+/// Snapshot being analyzed.
+class DiffSnapshotReference extends Reference {
+  DiffSnapshotReference(
+    this.snapshot1,
+    this.snapshot2,
+  ) : super.diff(
+          null,
+          '${MemoryController.formattedShortTimestamp(snapshot1.collectedTimestamp)}   Δ   '
+          '${MemoryController.formattedShortTimestamp(snapshot2.collectedTimestamp)}',
+        );
+
+  Snapshot snapshot1;
+  Snapshot snapshot2;
+
+  int countNote;
+  int sizeNote;
+}
+
+/// Diff data.
+class Diff extends Reference {
+  Diff(String name)
+      : super.diff(
+          null,
+          name,
+        );
+
+  int countNote;
+  int sizeNote;
+}
+
 /// Snapshot being analyzed.
 class SnapshotReference extends Reference {
   SnapshotReference(this.snapshot)
@@ -460,15 +550,22 @@ void computeInstanceForClassReference(
       reference.children.first.isEmptyReference) {
     reference.children.clear();
 
-    final classReference = reference as ClassReference;
+    List<HeapGraphElementLive> instances;
 
-    final instances =
-        classReference.actualClass.getInstances(controller.heapGraph);
+    final isClass = reference.isClass;
+    if (isClass) {
+      final classReference = reference as ClassReference;
+      instances = classReference.actualClass.getInstances(controller.heapGraph);
+    } else {
+      assert(reference.isDiffClass, 'Unexpected Reference.');
+      final classDiffReference = reference as ClassDiffReference;
+      instances = classDiffReference.instances;
+    }
 
     for (var index = 0; index < instances.length; index++) {
       final instance = instances[index];
-      final objectRef = ObjectReference(controller, index, instance);
-      classReference.addChild(objectRef);
+      final objectRef = ObjectReference(controller, index, instance, isClass);
+      reference.addChild(objectRef);
     }
   }
 }
@@ -476,8 +573,10 @@ void computeInstanceForClassReference(
 class ClassReference extends Reference {
   ClassReference(
     MemoryController controller,
-    HeapGraphClassLive actualClass,
-  ) : super.aClass(
+    HeapGraphClassLive actualClass, {
+    // Diff stats (new/delete) appended to class name e.g., +## (-##)
+    String diffClassInfo,
+  }) : super.aClass(
           controller,
           actualClass,
           onExpand: (reference) {
@@ -490,12 +589,45 @@ class ClassReference extends Reference {
       actualClass.getInstances(controller.heapGraph);
 }
 
+class DiffData {
+  DiffData(this.classLive, this.diffComputation);
+
+  HeapGraphClassLive classLive;
+  ListComputation<HeapGraphElementLive> diffComputation;
+}
+
+class ClassDiffReference extends Reference {
+  ClassDiffReference(
+    MemoryController controller,
+    HeapGraphClassLive actualClass, {
+    this.diffData,
+    // Count new/deleted objects e.g., +## (-##) appended to class name.
+    String diffClassInfo,
+  }) : super.aDiffClass(
+          controller,
+          actualClass,
+          diffClassInfo: diffClassInfo,
+          onExpand: (reference) {
+            // Insure the children have been computed.
+            computeInstanceForClassReference(controller, reference);
+          },
+        );
+
+  List<HeapGraphElementLive> get instances => diffData.diffComputation.newOnes;
+
+  DiffData diffData;
+}
+
 class ObjectReference extends Reference {
   ObjectReference(
     MemoryController controller,
     int index,
-    this.instance,
-  ) : super.object(controller, 'Instance $index');
+    this.instance, [
+    bool isClassReference = true,
+  ]) : super.object(
+          controller,
+          '${!isClassReference ? "New " : ""}Instance $index',
+        );
 
   final HeapGraphElementLive instance;
 }
@@ -506,11 +638,7 @@ class ExternalObjectReference extends ObjectReference {
     int index,
     HeapGraphElementLive instance,
     this.externalSize,
-  ) : super(
-          controller,
-          index,
-          instance,
-        );
+  ) : super(controller, index, instance);
 
   final int externalSize;
 }

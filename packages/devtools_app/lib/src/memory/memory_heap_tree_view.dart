@@ -26,6 +26,7 @@ import '../ui/tab.dart';
 import 'memory_allocation_table_view.dart';
 import 'memory_analyzer.dart';
 import 'memory_controller.dart';
+import 'memory_diffing.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_heap_treemap.dart';
@@ -134,6 +135,24 @@ class HeapTreeViewState extends State<HeapTree>
         SearchFieldMixin<HeapTree>,
         TickerProviderStateMixin {
   @visibleForTesting
+
+  static const snapshotButtonKey = Key('Snapshot Button');
+  @visibleForTesting
+  static const groupByClassButtonKey = Key('Group By Class Button');
+  @visibleForTesting
+  static const groupByLibraryButtonKey = Key('Group By Library Button');
+  @visibleForTesting
+  static const diffKey = Key('Snapshot Diff Button');
+  @visibleForTesting
+  static const collapseAllButtonKey = Key('Collapse All Button');
+  @visibleForTesting
+  static const expandAllButtonKey = Key('Expand All Button');
+  @visibleForTesting
+  static const allocationMonitorKey = Key('Allocation Monitor Start Button');
+  @visibleForTesting
+  static const allocationMonitorResetKey = Key('Accumulators Reset Button');
+  @visibleForTesting
+
   static const searchButtonKey = Key('Snapshot Search');
   @visibleForTesting
   static const filterButtonKey = Key('Snapshot Filter');
@@ -264,6 +283,8 @@ class HeapTreeViewState extends State<HeapTree>
     });
 
     addAutoDisposeListener(controller.lastMonitorTimestamp);
+
+    addAutoDisposeListener(controller.diffRunning);
   }
 
   @override
@@ -383,6 +404,16 @@ class HeapTreeViewState extends State<HeapTree>
                             ? 'Done'
                             : '...',
           ),
+        ],
+      );
+    } else if (controller.isDiffRunning) {
+      snapshotDisplay = Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: 50.0),
+          snapshotDisplay = const CircularProgressIndicator(),
+          const SizedBox(height: denseSpacing),
+          const Text('Diffing...'),
         ],
       );
     } else if (controller.snapshotByLibraryData != null) {
@@ -562,6 +593,39 @@ class HeapTreeViewState extends State<HeapTree>
     );
   }
 
+  bool enableDiffButton() {
+    if (controller.snapshots.length > 1 && !controller.isDiffRunning) {
+      final snapshots = controller.findSnapshotsToDiff();
+      if (snapshots.isNotEmpty) {
+        for (var index = 0; index < controller.diffSnapshots.length; index++) {
+          // Diff between these two snapshots already exists, 'Diff' button should
+          // be disabled.
+          if (controller.diffSnapshots[index].snapshot1 == snapshots.first &&
+              controller.diffSnapshots[index].snapshot2 == snapshots.last) {
+            return false;
+          }
+        }
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  SnapshotDiffing _diffSnapshots(
+    Snapshot previousSnapshot,
+    Snapshot currentSnapshot,
+  ) {
+    // Diff the two snapshots.
+    final diffing =
+        SnapshotDiffing(controller, previousSnapshot, currentSnapshot);
+
+    // TODO(terry): Make this asynchronous or use FutureBuilder.
+    diffing.computeDiffForSnapShots();
+
+    return diffing;
+  }
+
   Widget _buildSnapshotControls(TextTheme textTheme) {
     return SizedBox(
       height: defaultButtonHeight,
@@ -596,6 +660,38 @@ class HeapTreeViewState extends State<HeapTree>
           if (!treeMapVisible) ...[
             const SizedBox(width: defaultSpacing),
             _groupByDropdown(textTheme),
+            const SizedBox(width: defaultSpacing),
+            DevToolsTooltip(
+              tooltip: 'Diff 2 Snapshots',
+              child: OutlinedButton(
+                key: diffKey,
+                onPressed: enableDiffButton()
+                    ? () async {
+                        MemoryScreen.gaAction(key: diffKey);
+
+                        // Find the last two snapshots to diff.
+                        final snapshots = controller.findSnapshotsToDiff();
+                        if (snapshots.isNotEmpty) {
+                          controller.toggleDiffRunning(true);
+
+                          // Diff the two snapshots.
+                          // TODO(terry): Make this asynchronous?
+                          final diffSnapshot = _diffSnapshots(
+                            snapshots.first,
+                            snapshots.last,
+                          );
+                          controller.diffSnapshots.add(diffSnapshot);
+
+                          controller.toggleDiffRunning(false);
+                        }
+                      }
+                    : null,
+                child: MaterialIconLabel(
+                  label: 'Diff',
+                  imageIcon: diffImage(context),
+                ),
+              ),
+            ),
             const SizedBox(width: defaultSpacing),
             // TODO(terry): Mechanism to handle expand/collapse on both tables
             // objects/fields. Maybe notion in table?
@@ -1460,6 +1556,22 @@ class _LibraryRefColumn extends TreeColumnData<Reference> {
     } else {
       value = dataObject.name;
     }
+
+    // TODO(terry): Should NOT be width of class name (string length) but the pixel width
+    //              of the rendered text (font, etc.).
+    if (dataObject is ClassDiffReference && value.length > 25) {
+      final ClassDiffReference classDiff = dataObject;
+      final totalNew = classDiff.diffData.diffComputation.newOnes.length;
+      final totalDelete = classDiff.diffData.diffComputation.deletedOnes.length;
+      final newDiff = MemoryController.formatDiffClassInfo(totalNew, totalDelete);
+
+      // TODO(terry): Need to build this with relationship to the Table's Text overflow
+      //              that displays the ellipsis. Need to use the column width to measure the
+      //              real Text rendered width (Table needs to do this too).
+      // Truncate and add ellipsis to the end of the class name.
+      return '${classDiff.actualClass.name.substring(0, 25 - newDiff.length)}… $newDiff';
+    }
+
     return value;
   }
 
@@ -1526,6 +1638,9 @@ class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
     if (ref.isClass) {
       final ClassReference classRef = ref;
       count = _computeClassInstances(classRef.actualClass);
+    } else if (ref.isDiffClass) {
+      final ClassDiffReference classDiffRef = ref;
+      count = _computeClassInstances(classDiffRef.actualClass);
     } else if (ref.isLibrary) {
       // Return number of classes.
       final LibraryReference libraryReference = ref;
@@ -1680,7 +1795,9 @@ class _ShallowSizeColumn extends ColumnData<Reference> {
 */
     if ((dataObject.isAnalysis ||
             dataObject.isAllocations ||
-            dataObject.isAllocation) &&
+            dataObject.isAllocation ||
+            dataObject.isDiff ||
+            dataObject.isDiffClass) &&
         value is! int) return '';
 
     return NumberFormat.compact().format(value);

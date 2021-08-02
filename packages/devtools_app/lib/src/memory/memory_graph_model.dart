@@ -125,7 +125,6 @@ HeapGraph convertHeapGraph(
       List<HeapGraphClassLive>.filled(graph.classes.length, null);
   for (int i = 0; i < graph.classes.length; i++) {
     final HeapSnapshotClass c = graph.classes[i];
-
     final className = c.name;
     // Remember builtin classes classId e.g., bool, String (_OneByteString), etc.
     // The classId is the index into the graph.classes list.
@@ -161,6 +160,7 @@ HeapGraph convertHeapGraph(
   // Associate each object with a Class.
   for (int i = 0; i < graph.objects.length; i++) {
     final HeapSnapshotObject o = graph.objects[i];
+
     final HeapGraphElementLive converted = elements[i];
 
     // New style snapshot class index is zero based.
@@ -281,7 +281,7 @@ class HeapGraph {
   /// of the path e.g., dart:core, package:flutter, etc. Hopefully,
   /// this is not too chunky but better than no normalization.  Also,
   /// the empty library is returned as src e.g., lib/src
-  String normalizeLibraryName(HeapSnapshotClass theClass) {
+  static String normalizeLibraryName(HeapSnapshotClass theClass) {
     final uri = theClass.libraryUri;
     final scheme = uri.scheme;
 
@@ -416,6 +416,8 @@ class HeapGraphElementLive extends HeapGraphElement {
 
   final HeapSnapshotObject origin;
   HeapGraphClass theClass;
+
+  int get snapshotHashCode => origin.identityHashCode;
 
   @override
   bool get isSentinel => false;
