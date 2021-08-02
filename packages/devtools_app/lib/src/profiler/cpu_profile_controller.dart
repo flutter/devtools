@@ -55,27 +55,34 @@ class CpuProfilerController
 
   Iterable<String> get userTags => _dataByTag[userTagNone]?.userTags ?? [];
 
-  final toggleFilters = [
-    ToggleFilter<CpuStackFrame>(
-      name: 'Hide Native code',
-      includeCallback: (stackFrame) => stackFrame.url.isNotEmpty,
-    ),
-    ToggleFilter<CpuStackFrame>(
-      name: 'Hide core Dart libraries',
-      includeCallback: (stackFrame) =>
-          !stackFrame.url.contains('org-dartlang-sdk'),
-    ),
-    if (serviceManager.connectedApp?.isFlutterAppNow ?? true)
-      // TODO(kenz): should we also hide flutter engine frames as part of this
-      // filter? We don't have a url to go off of but we could check for a
-      // stack frame name containing 'flutter::'
-      ToggleFilter<CpuStackFrame>(
-        name: 'Hide core Flutter libraries',
-        includeCallback: (stackFrame) =>
-            !(stackFrame.url.contains('packages/flutter/') ||
-                stackFrame.url.contains('package:flutter/')),
-      ),
-  ];
+  /// The toggle filters available for the CPU profiler.
+  ///
+  /// This is a getter so that `serviceManager` is initialized by the time we
+  /// access this list.
+  // TODO(kenz): make this lazy once we migrate to null safety.
+  List<ToggleFilter> get toggleFilters => _toggleFilters ??= [
+        ToggleFilter<CpuStackFrame>(
+          name: 'Hide Native code',
+          includeCallback: (stackFrame) => stackFrame.url.isNotEmpty,
+        ),
+        ToggleFilter<CpuStackFrame>(
+          name: 'Hide core Dart libraries',
+          includeCallback: (stackFrame) =>
+              !stackFrame.url.contains('org-dartlang-sdk'),
+        ),
+        if (serviceManager.connectedApp?.isFlutterAppNow ?? true)
+          // TODO(kenz): should we also hide flutter engine frames as part of this
+          // filter? We don't have a url to go off of but we could check for a
+          // stack frame name containing 'flutter::'
+          ToggleFilter<CpuStackFrame>(
+            name: 'Hide core Flutter libraries',
+            includeCallback: (stackFrame) =>
+                !(stackFrame.url.contains('packages/flutter/') ||
+                    stackFrame.url.contains('package:flutter/')),
+          ),
+      ];
+
+  List<ToggleFilter> _toggleFilters;
 
   int selectedProfilerTabIndex = 0;
 
