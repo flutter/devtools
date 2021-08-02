@@ -188,6 +188,10 @@ abstract class HttpRequestData extends NetworkRequest {
   /// The response headers for the HTTP request.
   Map<String, dynamic> get responseHeaders;
 
+  /// UTF-8 Decoded request body
+  String get requestBody;
+
+  /// UTF-8 Decoded response body
   String get responseBody;
 
   /// Merges the information from another [HttpRequestData] into this instance.
@@ -272,6 +276,11 @@ class TimelineHttpRequestData extends HttpRequestData {
 
   final TraceEvent _startEvent;
   TraceEvent _endEvent;
+
+  /// For timeline event, HTTP request/response body logging is disabled.
+  /// see https://dart-review.googlesource.com/c/sdk/+/189881 
+  @override
+  final String requestBody = null;
 
   @override
   final String responseBody;
@@ -619,6 +628,25 @@ class DartIOHttpRequestData extends HttpRequestData {
   }
 
   String _responseBody;
+
+  @override
+  String get requestBody {
+    if (_request is! HttpProfileRequest) {
+      return null;
+    }
+    final fullRequest = _request as HttpProfileRequest;
+    try {
+      if (!_request.isResponseComplete) return null;
+      if (_request.method != 'POST') return null;
+      if (_requestBody != null) return _requestBody;
+      _requestBody = utf8.decode(fullRequest.requestBody);
+      return _requestBody;
+    } on FormatException {
+      return '<binary data>';
+    }
+  }
+
+  String _requestBody;
 
   void _recalculateInstantEventTimes() {
     int lastTime = _request.startTime;
