@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.10
-
 import 'dart:async';
 import 'dart:convert' show jsonDecode;
 import 'dart:io';
@@ -65,7 +63,7 @@ class GenerateChangelogCommand extends Command {
 
   @override
   Future run() async {
-    final repo = DevToolsRepo.getInstance();
+    final repo = DevToolsRepo.getInstance()!;
     final devtoolsVersionFile =
         await File('${repo.repoPath}/packages/devtools_app/lib/devtools.dart')
             .readAsString();
