@@ -244,13 +244,9 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
       context: context,
       builder: (context) => FilterDialog(
         controller: _networkController,
-        onApplyFilter: (query) => _networkController.filterData(
-          QueryFilter.parse(
-            query,
-            _networkController.filterArgs,
-          ),
-        ),
+        onApplyFilter: _networkController.filterData,
         queryInstructions: NetworkScreenBody.filterQueryInstructions,
+        queryFilterArguments: _networkController.filterArgs,
       ),
     );
   }

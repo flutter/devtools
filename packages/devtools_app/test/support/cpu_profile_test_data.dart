@@ -40,6 +40,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
     '140357727781376-1': {
       'category': 'Dart',
       'name': 'Frame1',
+      'parent': 'cpuProfileRoot',
       'resolvedUrl': '',
     },
     '140357727781376-2': {
@@ -225,6 +226,7 @@ final subProfileStackFrames = {
   '140357727781376-1': {
     'category': 'Dart',
     'name': 'thread_start',
+    'parent': 'cpuProfileRoot',
     'resolvedUrl': '',
   },
   '140357727781376-2': {
@@ -275,6 +277,7 @@ final subProfileStackFrames = {
   '140357727781376-9': {
     'category': 'Dart',
     'name': '[Truncated]',
+    'parent': 'cpuProfileRoot',
     'resolvedUrl': '',
   },
   '140357727781376-10': {
@@ -297,6 +300,7 @@ final filteredStackFrames = {
   '140357727781376-1': {
     'category': 'Dart',
     'name': 'thread_start',
+    'parent': 'cpuProfileRoot',
     'resolvedUrl': '',
   },
   '140357727781376-2': {
@@ -335,6 +339,7 @@ final filteredStackFrames = {
   '140357727781376-9': {
     'category': 'Dart',
     'name': '[Truncated]',
+    'parent': 'cpuProfileRoot',
     'resolvedUrl': '',
   },
   '140357727781376-10': {
@@ -571,6 +576,7 @@ final responseWithMissingLeafFrame = {
     '140357727781376-1': {
       'category': 'Dart',
       'name': 'thread_start',
+      'parent': 'cpuProfileRoot',
       'resolvedUrl': '',
     },
     '140357727781376-2': {

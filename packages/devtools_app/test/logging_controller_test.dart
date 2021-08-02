@@ -122,40 +122,47 @@ void main() {
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(5));
 
-      controller.filterData(QueryFilter.parse('abc', controller.filterArgs));
+      controller.filterData(
+          Filter(queryFilter: QueryFilter.parse('abc', controller.filterArgs)));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller.filterData(QueryFilter.parse('def', controller.filterArgs));
+      controller.filterData(
+          Filter(queryFilter: QueryFilter.parse('def', controller.filterArgs)));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(1));
 
-      controller.filterData(
-          QueryFilter.parse('k:stdout abc def', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter:
+              QueryFilter.parse('k:stdout abc def', controller.filterArgs)));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(3));
 
-      controller
-          .filterData(QueryFilter.parse('kind:gc', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse('kind:gc', controller.filterArgs)));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller
-          .filterData(QueryFilter.parse('k:stdout abc', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter:
+              QueryFilter.parse('k:stdout abc', controller.filterArgs)));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller.filterData(QueryFilter.parse('-k:gc', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse('-k:gc', controller.filterArgs)));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(3));
 
-      controller
-          .filterData(QueryFilter.parse('-k:gc,stdout', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter:
+              QueryFilter.parse('-k:gc,stdout', controller.filterArgs)));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(0));
 
-      controller.filterData(QueryFilter.parse(
-          'k:gc,stdout,stdin,flutter.frame', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse(
+              'k:gc,stdout,stdin,flutter.frame', controller.filterArgs)));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(5));
 

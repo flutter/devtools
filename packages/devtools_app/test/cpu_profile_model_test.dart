@@ -51,6 +51,26 @@ void main() {
       );
     });
 
+    test('filterFrom', () {
+      final filteredProfile = CpuProfileData.filterFrom(
+        cpuProfileData,
+        (stackFrame) => !stackFrame.url.contains('org-dartlang-sdk'),
+      );
+      expect(
+        filteredProfile.stackFramesJson,
+        equals(filteredStackFrames),
+      );
+      expect(
+        filteredProfile.cpuSamples.map((sample) => sample.json),
+        equals(filteredCpuSampleTraceEvents),
+      );
+      expect(filteredProfile.profileMetaData.sampleCount, equals(8));
+      expect(
+        filteredProfile.profileMetaData.samplePeriod,
+        equals(cpuProfileData.profileMetaData.samplePeriod),
+      );
+    });
+
     test('to json', () {
       expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
     });

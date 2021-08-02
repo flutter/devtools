@@ -59,7 +59,7 @@ class CpuProfileData {
         // included in the response, this will be null. If the frame is a native
         // frame, the this will be the empty string.
         url: stackFrameJson[resolvedUrlKey] ?? '',
-        parentId: stackFrameJson[parentIdKey],
+        parentId: stackFrameJson[parentIdKey] ?? rootId,
         profileMetaData: profileMetaData,
       );
       stackFrames[stackFrame.id] = stackFrame;
@@ -100,8 +100,9 @@ class CpuProfileData {
 
       // Add leaf frame's ancestors.
       String parentId = leafFrame.parentId;
-      while (parentId != null) {
+      while (parentId != null && parentId != rootId) {
         final parentFrame = superProfile.stackFrames[parentId];
+        assert(parentFrame != null);
         subStackFrames[parentId] = parentFrame;
         parentId = parentFrame.parentId;
       }
@@ -169,6 +170,92 @@ class CpuProfileData {
       stackFrames: stackFramesForTag,
       cpuSamples: samplesForTag,
       profileMetaData: metaData,
+    );
+  }
+
+  factory CpuProfileData.filterFrom(
+    CpuProfileData originalData,
+    bool Function(CpuStackFrame) includeFilter,
+  ) {
+    final filteredCpuSamples = <CpuSample>[];
+    void includeSampleOrWalkUp(
+      CpuSample sample,
+      Map<String, Object> sampleJson,
+      CpuStackFrame stackFrame,
+    ) {
+      if (includeFilter(stackFrame)) {
+        // Modify the name value for this sample trace event to reflect the
+        // leaf most node for the filtered sample.
+        sampleJson[stackFrameIdKey] = stackFrame.id;
+        filteredCpuSamples.add(
+          CpuSample(
+            leafId: stackFrame.id,
+            userTag: sample.userTag,
+            traceJson: sampleJson,
+          ),
+        );
+      } else if (stackFrame.parentId != CpuProfileData.rootId) {
+        final parent = originalData.stackFrames[stackFrame.parentId];
+        assert(parent != null);
+        includeSampleOrWalkUp(sample, sampleJson, parent);
+      }
+    }
+
+    for (final sample in originalData.cpuSamples) {
+      final sampleJson = Map<String, Object>.from(sample.json);
+      final leafStackFrame = originalData.stackFrames[sample.leafId];
+      includeSampleOrWalkUp(sample, sampleJson, leafStackFrame);
+    }
+
+    // Use a SplayTreeMap so that map iteration will be in sorted key order.
+    final SplayTreeMap<String, CpuStackFrame> filteredStackFrames =
+        SplayTreeMap(stackFrameIdCompare);
+
+    String filteredParentStackFrameId(CpuStackFrame candidateParentFrame) {
+      if (candidateParentFrame == null) return null;
+
+      if (includeFilter(candidateParentFrame)) {
+        return candidateParentFrame.id;
+      } else if (candidateParentFrame.parentId != CpuProfileData.rootId) {
+        final parent = originalData.stackFrames[candidateParentFrame.parentId];
+        assert(parent != null);
+        return filteredParentStackFrameId(parent);
+      }
+      return null;
+    }
+
+    void walkAndFilter(CpuStackFrame stackFrame) {
+      if (includeFilter(stackFrame)) {
+        final parent = originalData.stackFrames[stackFrame.parentId];
+        final filteredParentId = filteredParentStackFrameId(parent);
+        filteredStackFrames[stackFrame.id] = stackFrame.shallowCopy(
+          copySampleCountsAndTags: false,
+          parentId: filteredParentId,
+        );
+        if (filteredParentId != null) {
+          walkAndFilter(originalData.stackFrames[filteredParentId]);
+        }
+      } else if (stackFrame.parentId != CpuProfileData.rootId) {
+        final parent = originalData.stackFrames[stackFrame.parentId];
+        assert(parent != null);
+        walkAndFilter(parent);
+      }
+    }
+
+    for (final sample in filteredCpuSamples) {
+      final leafStackFrame = originalData.stackFrames[sample.leafId];
+      walkAndFilter(leafStackFrame);
+    }
+
+    return CpuProfileData._(
+      stackFrames: filteredStackFrames,
+      cpuSamples: filteredCpuSamples,
+      profileMetaData: CpuProfileMetaData(
+        sampleCount: filteredCpuSamples.length,
+        samplePeriod: originalData.profileMetaData.samplePeriod,
+        stackDepth: originalData.profileMetaData.stackDepth,
+        time: originalData.profileMetaData.time,
+      ),
     );
   }
 
@@ -495,6 +582,14 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
 
 @visibleForTesting
 int stackFrameIdCompare(String a, String b) {
+  // Order the root first.
+  if (a == CpuProfileData.rootId) {
+    return -1;
+  }
+  if (b == CpuProfileData.rootId) {
+    return 1;
+  }
+
   // Stack frame ids are structured as 140225212960768-24 (iOS) or -784070656-24
   // (Android). We need to compare the number after the last dash to maintain
   // the correct order.
