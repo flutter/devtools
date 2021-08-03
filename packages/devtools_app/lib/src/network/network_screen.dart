@@ -159,54 +159,32 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   /// Builds the row of buttons that control the Network profiler (e.g., record,
   /// pause, etc.)
   Widget _buildProfilerControls() {
-    const double includeTextWidth = 600;
     final hasRequests = filteredRequests.isNotEmpty;
-    return ValueListenableBuilder(
-      valueListenable: _networkController.recordingNotifier,
-      builder: (context, recording, _) {
-        return Row(
-          children: [
-            PauseButton(
-              includeTextWidth: includeTextWidth,
-              onPressed: recording
-                  ? () => _networkController.togglePolling(false)
-                  : null,
-            ),
-            const SizedBox(width: denseSpacing),
-            ResumeButton(
-              includeTextWidth: includeTextWidth,
-              onPressed: recording
-                  ? null
-                  : () => _networkController.togglePolling(true),
-            ),
-            const SizedBox(width: denseSpacing),
-            ClearButton(
-              onPressed: () {
-                _networkController.clear();
-              },
-            ),
-            const Expanded(child: SizedBox()),
-            // TODO(kenz): fix focus issue when state is refreshed
-            Container(
-              width: wideSearchTextWidth,
-              height: defaultTextFieldHeight,
-              child: buildSearchField(
-                controller: _networkController,
-                searchFieldKey: networkSearchFieldKey,
-                searchFieldEnabled: hasRequests,
-                shouldRequestFocus: false,
-                supportsNavigation: true,
-              ),
-            ),
-            const SizedBox(width: denseSpacing),
-            FilterButton(
-              onPressed: _showFilterDialog,
-              isFilterActive:
-                  filteredRequests.length != requests.requests.length,
-            ),
-          ],
-        );
-      },
+    return Row(
+      children: [
+        _NetworkProfilerControls(
+          controller: _networkController,
+        ),
+        const SizedBox(width: defaultSpacing),
+        const Expanded(child: SizedBox()),
+        // TODO(kenz): fix focus issue when state is refreshed
+        Container(
+          width: wideSearchTextWidth,
+          height: defaultTextFieldHeight,
+          child: buildSearchField(
+            controller: _networkController,
+            searchFieldKey: networkSearchFieldKey,
+            searchFieldEnabled: hasRequests,
+            shouldRequestFocus: false,
+            supportsNavigation: true,
+          ),
+        ),
+        const SizedBox(width: denseSpacing),
+        FilterButton(
+          onPressed: _showFilterDialog,
+          isFilterActive: filteredRequests.length != requests.requests.length,
+        ),
+      ],
     );
   }
 
@@ -263,6 +241,52 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
         const SizedBox(height: denseRowSpacing),
         _buildProfilerBody(),
       ],
+    );
+  }
+}
+
+/// The row of controls that control the Network profiler (e.g., record, pause,
+/// clear).
+class _NetworkProfilerControls extends StatelessWidget {
+  const _NetworkProfilerControls({
+    Key key,
+    @required this.controller,
+  }) : super(key: key);
+
+  static const _includeTextWidth = 810.0;
+
+  final NetworkController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller.recordingNotifier,
+      builder: (context, recording, _) {
+        return Row(
+          children: [
+            PauseButton(
+              includeTextWidth: _includeTextWidth,
+              tooltip: 'Pause recording network traffic',
+              onPressed:
+                  recording ? () => controller.togglePolling(false) : null,
+            ),
+            const SizedBox(width: denseSpacing),
+            ResumeButton(
+              includeTextWidth: _includeTextWidth,
+              tooltip: 'Resume recording network traffic',
+              onPressed:
+                  recording ? null : () => controller.togglePolling(true),
+            ),
+            const SizedBox(width: denseSpacing),
+            ClearButton(
+              includeTextWidth: _includeTextWidth,
+              onPressed: () {
+                controller.clear();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
