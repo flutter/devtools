@@ -22,6 +22,7 @@ part of http;
  * Utility functions for working with dates with HTTP specific date
  * formats.
  */
+// ignore: avoid_classes_with_only_static_members
 class HttpDate {
   // From RFC-2616 section "3.3.1 Full Date",
   // http://tools.ietf.org/html/rfc2616#section-3.3.1
