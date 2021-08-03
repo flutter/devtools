@@ -358,8 +358,7 @@ final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>._(
   enabledIcon: const AssetImageIcon(asset: 'icons/widget_tree@2x.png'),
   enabledValue: true,
   disabledValue: false,
-  enabledTooltip: 'Show widget rebuild counts since the last reload',
-  disabledTooltip: 'Show widget rebuild counts since the last reload',
+  tooltip: 'Show widget rebuild counts since the last reload',
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.trackRebuildWidgets,
 );
