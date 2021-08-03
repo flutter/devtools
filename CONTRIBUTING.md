@@ -29,7 +29,6 @@ From a separate terminal, start running a flutter app to connect to DevTools:
 - Commit work to your branch: `git commit -m “description”`
 - Push to your branch: `git push origin myBranch`
 - Navigate to the Pull Requests tab in the main [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull request from your local branch to DevTools master. Create a pull request.
-- Ping your PR link to whomever you want to review it
 
 ### Keeping your fork in-sync
 
