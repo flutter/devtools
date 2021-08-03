@@ -12,15 +12,32 @@ file.
 
 ## Development prep
 
-- `git clone https://github.com/flutter/devtools`
-- `cd devtools/packages/devtools_app`
-- `flutter pub upgrade`
+1. If you haven't already, follow the [instructions](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) to generate a new SSH key and connect to Github with SSH
+2. Click the "Fork" button to fork `https://github.com/flutter/devtools` into your own Github account
+3. Navigate to the local directory you want your repo to live in, and clone your fork using SSH: `git clone git@github.com:<your_github_name>/devtools.git`
+4. Change into your DevTools directory: `cd devtools`
+5. Set the upstream to keep your fork in sync with the main DevTools repo: `git remote add upstream git@github.com:flutter/devtools.git`
+6. Check that everything is set up correctly with `git remote -v`. The origin should be set to `git@github.com:<your_github_name>/devtools.git` and upsteam should be set to `git remote add upstream git@github.com:flutter/devtools.git`.
+7. Finally, update to the newest version of the package with `cd packages/devtools_app` and `flutter pub upgrade`
 
 From a separate terminal, start running a flutter app to connect to DevTools:
 - `git clone https://github.com/flutter/gallery.git` (this is an existing application with many examples of Flutter widgets)
 - `cd gallery`
 - ensure the iOS Simulator is open (or a physical device is connected)
 - `flutter run`
+
+## Workflow for making changes
+
+- Create a branch from your cloned repo: `git checkout -b myBranch`
+- Commit work to your branch: `git commit -m “description”`
+- Push to your branch: `git push origin myBranch`
+- Navigate to the Pull Requests tab in the main [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull request from your local branch to DevTools master. Create a pull request.
+- Ping your PR link to whomever you want to review it
+
+### Keeping your fork in-sync
+
+- Fetch branches/commits from the upstream DevTools: `git fetch upstream`
+- From your local branch, merge in the upstream master branch: `git merge upstream/master`
 
 ## Development
 
