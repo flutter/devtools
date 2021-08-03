@@ -206,6 +206,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         _PrimaryControls(
           controller: controller,
           processing: processing,
+          onClear: () => setState(() {}),
         ),
         const SizedBox(width: defaultSpacing),
         _SecondaryControls(controller: controller),
@@ -232,6 +233,7 @@ class _PrimaryControls extends StatelessWidget {
     Key key,
     @required this.controller,
     @required this.processing,
+    this.onClear,
   }) : super(key: key);
 
   static const _primaryControlsMinIncludeTextWidth = 760.0;
@@ -239,6 +241,8 @@ class _PrimaryControls extends StatelessWidget {
   final PerformanceController controller;
 
   final bool processing;
+
+  final VoidCallback onClear;
 
   @override
   Widget build(BuildContext context) {
@@ -277,6 +281,9 @@ class _PrimaryControls extends StatelessWidget {
 
   Future<void> _clearPerformanceData() async {
     await controller.clearData();
+    if (onClear != null) {
+      onClear();
+    }
   }
 }
 
