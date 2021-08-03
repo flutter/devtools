@@ -82,6 +82,7 @@ flutter:
     - icons/general/
     - icons/gutter/
     - icons/inspector/
+    - icons/inspector/widget_icons/
     - icons/memory/
     - icons/perf/
 
