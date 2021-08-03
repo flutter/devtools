@@ -158,91 +158,94 @@ class WidgetVisualizer extends StatelessWidget {
     final borderColor = WidgetTheme.fromName(properties.node.description).color;
     final boxAdjust = isSelected ? _selectedPadding : 0.0;
 
-    return LayoutBuilder(builder: (context, constraints) {
-      return OverflowBox(
-        minWidth: constraints.minWidth + boxAdjust,
-        maxWidth: constraints.maxWidth + boxAdjust,
-        maxHeight: constraints.maxHeight + boxAdjust,
-        minHeight: constraints.minHeight + boxAdjust,
-        child: Container(
-          child: Stack(
-            children: [
-              if (drawOverflow)
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: OverflowIndicatorPainter(
-                      overflowSide,
-                      _overflowIndicatorSize,
-                    ),
-                  ),
-                ),
-              Container(
-                margin: EdgeInsets.only(
-                  right: overflowSide == OverflowSide.right
-                      ? _overflowIndicatorSize
-                      : 0.0,
-                  bottom: overflowSide == OverflowSide.bottom
-                      ? _overflowIndicatorSize
-                      : 0.0,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                            child: Container(
-                              constraints: BoxConstraints(
-                                  maxWidth: largeTitle
-                                      ? defaultMaxRenderWidth
-                                      : minRenderWidth *
-                                          widgetTitleMaxWidthPercentage),
-                              child: Center(
-                                child: Text(
-                                  title,
-                                  style: TextStyle(
-                                      color: colorScheme.widgetNameColor),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              decoration: BoxDecoration(color: borderColor),
-                              padding: const EdgeInsets.all(4.0),
-                            ),
-                          ),
-                          if (hint != null) Flexible(child: hint),
-                        ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return OverflowBox(
+          minWidth: constraints.minWidth + boxAdjust,
+          maxWidth: constraints.maxWidth + boxAdjust,
+          maxHeight: constraints.maxHeight + boxAdjust,
+          minHeight: constraints.minHeight + boxAdjust,
+          child: Container(
+            child: Stack(
+              children: [
+                if (drawOverflow)
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: OverflowIndicatorPainter(
+                        overflowSide,
+                        _overflowIndicatorSize,
                       ),
                     ),
-                    if (child != null) Expanded(child: child),
-                  ],
+                  ),
+                Container(
+                  margin: EdgeInsets.only(
+                    right: overflowSide == OverflowSide.right
+                        ? _overflowIndicatorSize
+                        : 0.0,
+                    bottom: overflowSide == OverflowSide.bottom
+                        ? _overflowIndicatorSize
+                        : 0.0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Container(
+                                constraints: BoxConstraints(
+                                    maxWidth: largeTitle
+                                        ? defaultMaxRenderWidth
+                                        : minRenderWidth *
+                                            widgetTitleMaxWidthPercentage),
+                                child: Center(
+                                  child: Text(
+                                    title,
+                                    style: TextStyle(
+                                        color: colorScheme.widgetNameColor),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                decoration: BoxDecoration(color: borderColor),
+                                padding: const EdgeInsets.all(4.0),
+                              ),
+                            ),
+                            if (hint != null) Flexible(child: hint),
+                          ],
+                        ),
+                      ),
+                      if (child != null) Expanded(child: child),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: borderColor,
-              width: isSelected ? _borderSelectedWidth : _borderUnselectedWidth,
+              ],
             ),
-            color: isSelected
-                ? theme.canvasColor.brighten()
-                : theme.canvasColor.darken(),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(.5),
-                      blurRadius: 20,
-                    ),
-                  ]
-                : null,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: borderColor,
+                width:
+                    isSelected ? _borderSelectedWidth : _borderUnselectedWidth,
+              ),
+              color: isSelected
+                  ? theme.canvasColor.brighten()
+                  : theme.canvasColor.darken(),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(.5),
+                        blurRadius: 20,
+                      ),
+                    ]
+                  : null,
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 }
 

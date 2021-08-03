@@ -1,3 +1,7 @@
+// Copyright 2021 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 
 class WidgetTheme {
@@ -17,8 +21,9 @@ class WidgetTheme {
     return themeMap[_stripBrackets(widgetType)] ?? const WidgetTheme();
   }
 
-  /// Strips the brackets of the widget
-  /// For example: `AnimatedBuilder<String>` -> `AnimatedBuilder`
+  /// Strips the brackets off the widget name.
+  ///
+  /// For example: `AnimatedBuilder<String>` -> `AnimatedBuilder`.
   static String _stripBrackets(String widgetType) {
     final bracketIndex = widgetType.indexOf('<');
     if (bracketIndex == -1) {
@@ -56,6 +61,15 @@ class WidgetTheme {
   static const tabTheme = WidgetTheme(iconAsset: WidgetIcons.tab);
   static const scrollTheme = WidgetTheme(iconAsset: WidgetIcons.scroll);
   static const highLevelTheme = WidgetTheme(color: highLevelWidgetColor);
+  static const listTheme = WidgetTheme(iconAsset: WidgetIcons.listView);
+  static const expandTheme = WidgetTheme(iconAsset: WidgetIcons.expand);
+  static const alignTheme = WidgetTheme(iconAsset: WidgetIcons.align);
+  static const gestureTheme = WidgetTheme(iconAsset: WidgetIcons.gesture);
+  static const textButtonTheme = WidgetTheme(iconAsset: WidgetIcons.textButton);
+  static const toggleTheme = WidgetTheme(
+    iconAsset: WidgetIcons.toggle,
+    color: contentWidgetColor,
+  );
 
   static const Map<String, WidgetTheme> themeMap = {
     // High-level
@@ -113,9 +127,9 @@ class WidgetTheme {
     'Scrollbar': scrollTheme,
     'ScrollConfiguration': scrollTheme,
     'GridView': WidgetTheme(iconAsset: WidgetIcons.gridView),
-    'ListView': WidgetTheme(iconAsset: WidgetIcons.listView),
-    'ReorderableListView': WidgetTheme(iconAsset: WidgetIcons.listView),
-    'NestedScrollView': WidgetTheme(iconAsset: WidgetIcons.listView),
+    'ListView': listTheme,
+    'ReorderableListView': listTheme,
+    'NestedScrollView': listTheme,
 
     // Input
     'Checkbox': WidgetTheme(
@@ -126,14 +140,8 @@ class WidgetTheme {
       iconAsset: WidgetIcons.radio,
       color: contentWidgetColor,
     ),
-    'Switch': WidgetTheme(
-      iconAsset: WidgetIcons.toggle,
-      color: contentWidgetColor,
-    ),
-    'CupertinoSwitch': WidgetTheme(
-      iconAsset: WidgetIcons.toggle,
-      color: contentWidgetColor,
-    ),
+    'Switch': toggleTheme,
+    'CupertinoSwitch': toggleTheme,
 
     // Layout
     'Container': WidgetTheme(iconAsset: WidgetIcons.container),
@@ -142,12 +150,12 @@ class WidgetTheme {
     'Column': WidgetTheme(iconAsset: WidgetIcons.column),
     'Padding': WidgetTheme(iconAsset: WidgetIcons.padding),
     'SizedBox': WidgetTheme(iconAsset: WidgetIcons.sizedBox),
-    'ConstrainedBox': WidgetTheme(iconAsset: WidgetIcons.constrainedbox),
-    'Align': WidgetTheme(iconAsset: WidgetIcons.align),
-    'Positioned': WidgetTheme(iconAsset: WidgetIcons.align),
+    'ConstrainedBox': WidgetTheme(iconAsset: WidgetIcons.constrainedBox),
+    'Align': alignTheme,
+    'Positioned': alignTheme,
+    'Expanded': expandTheme,
+    'Flexible': expandTheme,
     'Stack': WidgetTheme(iconAsset: WidgetIcons.stack),
-    'Expanded': WidgetTheme(iconAsset: WidgetIcons.expand),
-    'Flexible': WidgetTheme(iconAsset: WidgetIcons.expand),
     'Wrap': WidgetTheme(iconAsset: WidgetIcons.wrap),
 
     // Buttons
@@ -156,11 +164,11 @@ class WidgetTheme {
       color: contentWidgetColor,
     ),
     'InkWell': WidgetTheme(iconAsset: WidgetIcons.inkWell),
-    'GestureDetector': WidgetTheme(iconAsset: WidgetIcons.gesture),
-    'RawGestureDetector': WidgetTheme(iconAsset: WidgetIcons.gesture),
-    'TextButton': WidgetTheme(iconAsset: WidgetIcons.textButton),
-    'CupertinoButton': WidgetTheme(iconAsset: WidgetIcons.textButton),
-    'ElevatedButton': WidgetTheme(iconAsset: WidgetIcons.textButton),
+    'GestureDetector': gestureTheme,
+    'RawGestureDetector': gestureTheme,
+    'TextButton': textButtonTheme,
+    'CupertinoButton': textButtonTheme,
+    'ElevatedButton': textButtonTheme,
     'OutlinedButton': WidgetTheme(iconAsset: WidgetIcons.outlinedButton),
 
     // Tabs
@@ -173,7 +181,8 @@ class WidgetTheme {
 
     // Other
     'Scaffold': WidgetTheme(iconAsset: WidgetIcons.scaffold),
-    'CircularProgressIndicator': WidgetTheme(iconAsset: WidgetIcons.expand),
+    'CircularProgressIndicator':
+        WidgetTheme(iconAsset: WidgetIcons.circularProgress),
     'Card': WidgetTheme(iconAsset: WidgetIcons.card),
     'Divider': WidgetTheme(iconAsset: WidgetIcons.divider),
     'AlertDialog': WidgetTheme(iconAsset: WidgetIcons.alertDialog),
@@ -225,7 +234,7 @@ class WidgetIcons {
       'icons/inspector/widget_icons/circleAvatar.png';
   static const String circularProgress =
       'icons/inspector/widget_icons/circularprogress.png';
-  static const String constrainedbox =
+  static const String constrainedBox =
       'icons/inspector/widget_icons/constrainedbox.png';
   static const String divider = 'icons/inspector/widget_icons/divider.png';
   static const String drawer = 'icons/inspector/widget_icons/drawer.png';
