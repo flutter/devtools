@@ -92,6 +92,7 @@ class IconLabelButton extends StatelessWidget {
     this.color,
     this.includeTextWidth,
     this.elevatedButton = false,
+    this.tooltip,
   }) : super(key: key);
 
   final IconData icon;
@@ -107,6 +108,8 @@ class IconLabelButton extends StatelessWidget {
   /// Whether this icon label button should use an elevated button style.
   final bool elevatedButton;
 
+  final String tooltip;
+
   @override
   Widget build(BuildContext context) {
     final iconLabel = MaterialIconLabel(
@@ -116,20 +119,26 @@ class IconLabelButton extends StatelessWidget {
       color: color,
     );
     if (elevatedButton) {
-      return ElevatedButton(
-        onPressed: onPressed,
-        child: iconLabel,
+      return maybeWrapWithTooltip(
+        tooltip,
+        ElevatedButton(
+          onPressed: onPressed,
+          child: iconLabel,
+        ),
       );
     }
     // TODO(kenz): this SizedBox wrapper should be unnecessary once
     // https://github.com/flutter/flutter/issues/79894 is fixed.
-    return SizedBox(
-      height: defaultButtonHeight,
-      width: !includeText(context, includeTextWidth) ? buttonMinWidth : null,
-      child: OutlinedButton(
-        style: denseAwareOutlinedButtonStyle(context, includeTextWidth),
-        onPressed: onPressed,
-        child: iconLabel,
+    return maybeWrapWithTooltip(
+      tooltip,
+      SizedBox(
+        height: defaultButtonHeight,
+        width: !includeText(context, includeTextWidth) ? buttonMinWidth : null,
+        child: OutlinedButton(
+          style: denseAwareOutlinedButtonStyle(context, includeTextWidth),
+          onPressed: onPressed,
+          child: iconLabel,
+        ),
       ),
     );
   }
@@ -139,11 +148,13 @@ class PauseButton extends IconLabelButton {
   const PauseButton({
     Key key,
     double includeTextWidth,
+    String tooltip = 'Pause',
     @required VoidCallback onPressed,
   }) : super(
           key: key,
           icon: Icons.pause,
           label: 'Pause',
+          tooltip: tooltip,
           includeTextWidth: includeTextWidth,
           onPressed: onPressed,
         );
@@ -153,11 +164,13 @@ class ResumeButton extends IconLabelButton {
   const ResumeButton({
     Key key,
     double includeTextWidth,
+    String tooltip = 'Resume',
     @required VoidCallback onPressed,
   }) : super(
           key: key,
           icon: Icons.play_arrow,
           label: 'Resume',
+          tooltip: tooltip,
           includeTextWidth: includeTextWidth,
           onPressed: onPressed,
         );
@@ -167,11 +180,13 @@ class ClearButton extends IconLabelButton {
   const ClearButton({
     Key key,
     double includeTextWidth,
+    String tooltip = 'Clear',
     @required VoidCallback onPressed,
   }) : super(
           key: key,
           icon: Icons.block,
           label: 'Clear',
+          tooltip: tooltip,
           includeTextWidth: includeTextWidth,
           onPressed: onPressed,
         );
@@ -182,12 +197,14 @@ class RefreshButton extends IconLabelButton {
     Key key,
     String label = 'Refresh',
     double includeTextWidth,
+    String tooltip,
     @required VoidCallback onPressed,
   }) : super(
           key: key,
           icon: Icons.refresh,
           label: label,
           includeTextWidth: includeTextWidth,
+          tooltip: tooltip,
           onPressed: onPressed,
         );
 }
@@ -199,32 +216,22 @@ class RefreshButton extends IconLabelButton {
 ///    omitted.
 /// * `labelOverride`: Optional alternative text to use for the button.
 /// * `onPressed`: The callback to be called upon pressing the button.
-class RecordButton extends StatelessWidget {
+class RecordButton extends IconLabelButton {
   const RecordButton({
     Key key,
-    @required this.recording,
-    this.includeTextWidth,
-    this.labelOverride,
-    @required this.onPressed,
-  }) : super(key: key);
-
-  final bool recording;
-
-  final double includeTextWidth;
-
-  final String labelOverride;
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconLabelButton(
-      onPressed: recording ? null : onPressed,
-      icon: Icons.fiber_manual_record,
-      label: labelOverride ?? 'Record',
-      includeTextWidth: includeTextWidth,
-    );
-  }
+    @required bool recording,
+    @required VoidCallback onPressed,
+    double includeTextWidth,
+    String labelOverride,
+    String tooltip = 'Start recording',
+  }) : super(
+          key: key,
+          onPressed: recording ? null : onPressed,
+          icon: Icons.fiber_manual_record,
+          label: labelOverride ?? 'Record',
+          tooltip: tooltip,
+          includeTextWidth: includeTextWidth,
+        );
 }
 
 /// Button to stop recording data.
@@ -233,54 +240,39 @@ class RecordButton extends StatelessWidget {
 /// * `includeTextWidth`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
-class StopRecordingButton extends StatelessWidget {
+class StopRecordingButton extends IconLabelButton {
   const StopRecordingButton({
     Key key,
-    @required this.recording,
-    this.includeTextWidth,
-    @required this.onPressed,
-  }) : super(key: key);
-
-  final bool recording;
-
-  final double includeTextWidth;
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconLabelButton(
-      onPressed: !recording ? null : onPressed,
-      icon: Icons.stop,
-      label: 'Stop',
-      includeTextWidth: includeTextWidth,
-    );
-  }
+    @required bool recording,
+    @required VoidCallback onPressed,
+    double includeTextWidth,
+    String tooltip = 'Stop recording',
+  }) : super(
+          key: key,
+          onPressed: !recording ? null : onPressed,
+          icon: Icons.stop,
+          label: 'Stop',
+          tooltip: tooltip,
+          includeTextWidth: includeTextWidth,
+        );
 }
 
-class SettingsOutlinedButton extends StatelessWidget {
+class SettingsOutlinedButton extends IconLabelButton {
   const SettingsOutlinedButton({
-    @required this.onPressed,
-    @required this.label,
-  });
-
-  final VoidCallback onPressed;
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconLabelButton(
-      onPressed: onPressed,
-      icon: Icons.settings,
-      label: label,
-      // TODO(jacobr): consider a more conservative min-width. To minimize the
-      // impact on the existing UI and deal with the fact that some of the
-      // existing label names are fairly verbose, we set a width that will
-      // never be hit.
-      includeTextWidth: 20000,
-    );
-  }
+    @required VoidCallback onPressed,
+    @required String label,
+    String tooltip,
+  }) : super(
+          onPressed: onPressed,
+          icon: Icons.settings,
+          label: label,
+          tooltip: tooltip,
+          // TODO(jacobr): consider a more conservative min-width. To minimize the
+          // impact on the existing UI and deal with the fact that some of the
+          // existing label names are fairly verbose, we set a width that will
+          // never be hit.
+          includeTextWidth: 20000,
+        );
 }
 
 class HelpButton extends StatelessWidget {
@@ -499,22 +491,14 @@ class ProcessingInfo extends StatelessWidget {
 /// setState(() {
 ///   offlineMode = false;
 /// }
-class ExitOfflineButton extends StatelessWidget {
-  const ExitOfflineButton({@required this.onPressed});
-
-  final FutureOr<void> Function() onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton(
-      key: const Key('exit offline button'),
-      onPressed: onPressed,
-      child: const MaterialIconLabel(
-        label: 'Exit offline mode',
-        iconData: Icons.clear,
-      ),
-    );
-  }
+class ExitOfflineButton extends IconLabelButton {
+  const ExitOfflineButton({@required VoidCallback onPressed})
+      : super(
+          key: const Key('exit offline button'),
+          onPressed: onPressed,
+          label: 'Exit offline mode',
+          icon: Icons.clear,
+        );
 }
 
 /// Display a single bullet character in order to act as a stylized spacer
@@ -762,26 +746,20 @@ class ToggleButton extends StatelessWidget {
 /// * `includeTextWidth`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
-class ExportButton extends StatelessWidget {
+class ExportButton extends IconLabelButton {
   const ExportButton({
     Key key,
-    @required this.includeTextWidth,
-    @required this.onPressed,
-  }) : super(key: key);
-
-  final double includeTextWidth;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconLabelButton(
-      key: key,
-      onPressed: onPressed,
-      icon: Icons.file_download,
-      label: 'Export',
-      includeTextWidth: includeTextWidth,
-    );
-  }
+    @required VoidCallback onPressed,
+    @required double includeTextWidth,
+    String tooltip = 'Export data',
+  }) : super(
+          key: key,
+          onPressed: onPressed,
+          icon: Icons.file_download,
+          label: 'Export',
+          tooltip: tooltip,
+          includeTextWidth: includeTextWidth,
+        );
 }
 
 class FilterButton extends StatelessWidget {
@@ -1289,4 +1267,14 @@ class Link {
   final String display;
 
   final String url;
+}
+
+Widget maybeWrapWithTooltip(String tooltip, Widget child) {
+  if (tooltip != null) {
+    return DevToolsTooltip(
+      tooltip: tooltip,
+      child: child,
+    );
+  }
+  return child;
 }

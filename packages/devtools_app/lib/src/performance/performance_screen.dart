@@ -80,9 +80,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     with
         AutoDisposeMixin,
         OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData> {
-  static const _primaryControlsMinIncludeTextWidth = 725.0;
-  static const _secondaryControlsMinIncludeTextWidth = 1100.0;
-
   PerformanceController controller;
 
   bool processing = false;
@@ -206,13 +203,45 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildPrimaryStateControls(),
-        _buildSecondaryControls(),
+        _PrimaryControls(
+          controller: controller,
+          processing: processing,
+        ),
+        const SizedBox(width: defaultSpacing),
+        _SecondaryControls(controller: controller),
       ],
     );
   }
 
-  Widget _buildPrimaryStateControls() {
+  @override
+  FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
+    await controller.processOfflineData(offlineData);
+  }
+
+  @override
+  bool shouldLoadOfflineData() {
+    return offlineMode &&
+        offlineDataJson.isNotEmpty &&
+        offlineDataJson[PerformanceScreen.id] != null &&
+        offlineDataJson[PerformanceData.traceEventsKey] != null;
+  }
+}
+
+class _PrimaryControls extends StatelessWidget {
+  const _PrimaryControls({
+    Key key,
+    @required this.controller,
+    @required this.processing,
+  }) : super(key: key);
+
+  static const _primaryControlsMinIncludeTextWidth = 760.0;
+
+  final PerformanceController controller;
+
+  final bool processing;
+
+  @override
+  Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: controller.recordingFrames,
       builder: (context, recording, _) {
@@ -227,7 +256,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
               includeTextWidth: _primaryControlsMinIncludeTextWidth,
               onPressed: recording ? null : _resumeFrameRecording,
             ),
-            const SizedBox(width: defaultSpacing),
+            const SizedBox(width: denseSpacing),
             ClearButton(
               includeTextWidth: _primaryControlsMinIncludeTextWidth,
               onPressed: processing ? null : _clearPerformanceData,
@@ -238,7 +267,31 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     );
   }
 
-  Widget _buildSecondaryControls() {
+  void _pauseFrameRecording() {
+    controller.toggleRecordingFrames(false);
+  }
+
+  void _resumeFrameRecording() {
+    controller.toggleRecordingFrames(true);
+  }
+
+  Future<void> _clearPerformanceData() async {
+    await controller.clearData();
+  }
+}
+
+class _SecondaryControls extends StatelessWidget {
+  const _SecondaryControls({
+    Key key,
+    @required this.controller,
+  }) : super(key: key);
+
+  static const _secondaryControlsMinIncludeTextWidth = 1125.0;
+
+  final PerformanceController controller;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -259,43 +312,21 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
               //trackRebuildWidgets,
             ],
           ),
-        // TODO(kenz): hide or disable button if http timeline logging is not
-        // available.
         const SizedBox(width: defaultSpacing),
         ExportButton(
-          onPressed: _exportPerformanceData,
+          onPressed: () => _exportPerformanceData(context),
           includeTextWidth: _secondaryControlsMinIncludeTextWidth,
         ),
         const SizedBox(width: defaultSpacing),
         SettingsOutlinedButton(
-          onPressed: _openSettingsDialog,
+          onPressed: () => _openSettingsDialog(context),
           label: 'Performance Settings',
         ),
       ],
     );
   }
 
-  void _openSettingsDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => PerformanceSettingsDialog(controller),
-    );
-  }
-
-  void _pauseFrameRecording() {
-    controller.toggleRecordingFrames(false);
-  }
-
-  void _resumeFrameRecording() {
-    controller.toggleRecordingFrames(true);
-  }
-
-  Future<void> _clearPerformanceData() async {
-    await controller.clearData();
-    setState(() {});
-  }
-
-  void _exportPerformanceData() {
+  void _exportPerformanceData(BuildContext context) {
     final exportedFile = controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the
     // download always successful?
@@ -304,17 +335,11 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     Notifications.of(context).push(successfulExportMessage(exportedFile));
   }
 
-  @override
-  FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
-    await controller.processOfflineData(offlineData);
-  }
-
-  @override
-  bool shouldLoadOfflineData() {
-    return offlineMode &&
-        offlineDataJson.isNotEmpty &&
-        offlineDataJson[PerformanceScreen.id] != null &&
-        offlineDataJson[PerformanceData.traceEventsKey] != null;
+  void _openSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => PerformanceSettingsDialog(controller),
+    );
   }
 }
 
