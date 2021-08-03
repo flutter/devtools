@@ -13,12 +13,9 @@ file.
 ## Development prep
 
 1. If you haven't already, follow the [instructions](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) to generate a new SSH key and connect to Github with SSH
-2. Click the "Fork" button to fork `https://github.com/flutter/devtools` into your own Github account
-3. Navigate to the local directory you want your repo to live in, and clone your fork using SSH: `git clone git@github.com:<your_github_name>/devtools.git`
-4. Change into your DevTools directory: `cd devtools`
-5. Set the upstream to keep your fork in sync with the main DevTools repo: `git remote add upstream git@github.com:flutter/devtools.git`
-6. Check that everything is set up correctly with `git remote -v`. The origin should be set to `git@github.com:<your_github_name>/devtools.git` and upsteam should be set to `git remote add upstream git@github.com:flutter/devtools.git`.
-7. Finally, update to the newest version of the package with `cd packages/devtools_app` and `flutter pub upgrade`
+2. Follow the [instructions](https://docs.github.com/en/get-started/quickstart/fork-a-repo) to fork the DevTools repo to your own Github account, and clone using SSH
+3. Make sure to [configure Git to keep your fork in sync](https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-original-repository) with the main DevTools repo
+4. Finally, update to the newest version of the package with `cd packages/devtools_app` and `flutter pub upgrade`
 
 From a separate terminal, start running a flutter app to connect to DevTools:
 - `git clone https://github.com/flutter/gallery.git` (this is an existing application with many examples of Flutter widgets)
