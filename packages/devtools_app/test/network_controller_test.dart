@@ -279,4 +279,156 @@ void main() {
       expect(controller.filteredData.value, hasLength(1));
     });
   });
+
+  group('NetworkController - dartIOVersion 1.6', () {
+    NetworkController controller;
+    FakeServiceManager fakeServiceManager;
+    SocketProfile socketProfile;
+    HttpProfile httpProfile;
+
+    setUp(() async {
+      socketProfile = loadSocketProfile();
+      httpProfile = loadHttpProfile();
+      fakeServiceManager = FakeServiceManager(
+        service: FakeServiceManager.createFakeService(
+          socketProfile: socketProfile,
+          httpProfile: httpProfile,
+        ),
+      );
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      // Enables getHttpProfile support.
+      final fakeVmService = fakeServiceManager.service as FakeVmService;
+      fakeVmService.dartIoVersion = SemanticVersion(major: 1, minor: 6);
+      //fakeVmService.httpE
+      // Disables HTTP timeline logging
+      fakeVmService.httpEnableTimelineLoggingResult = false;
+      controller = NetworkController();
+    });
+
+    test('initialize recording state', () async {
+      expect(controller.isPolling, false);
+
+      // Fake service pretends HTTP timeline logging and socket profiling are
+      // always enabled.
+      await controller.startRecording();
+      expect(controller.isPolling, true);
+      controller.stopRecording();
+    });
+
+    test('process network data', () async {
+      await controller.startRecording();
+      final requestsNotifier = controller.requests;
+      NetworkRequests profile = requestsNotifier.value;
+      // Check profile is initially empty.
+      expect(profile.requests.isEmpty, true);
+      expect(profile.outstandingHttpRequests.isEmpty, true);
+
+      // The number of valid requests recorded in the test data.
+      const numSockets = 2;
+      const numHttpProfile = 4;
+      const numRequests = numSockets + numHttpProfile;
+
+      // Refresh network data and ensure requests are populated.
+      await controller.networkService.refreshNetworkData();
+      profile = requestsNotifier.value;
+      expect(profile.requests.length, numRequests);
+
+      expect(profile.outstandingHttpRequests.isEmpty, true);
+      controller.stopRecording();
+    });
+
+    test('Check GET response body', () async {
+      await controller.startRecording();
+      final requestsNotifier = controller.requests;
+      NetworkRequests profile = requestsNotifier.value;
+      // Check profile is initially empty.
+      expect(profile.requests.isEmpty, true);
+
+      // Refresh network data and ensure requests are populated.
+      await controller.networkService.refreshNetworkData();
+      profile = requestsNotifier.value;
+      
+      final List<HttpRequestData> httpRequests = profile.requests
+          .whereType<HttpRequestData>()
+          .cast<HttpRequestData>()
+          .where((request) => request.method == 'GET')
+          .toList();
+
+      expect(httpRequests.length, 1);
+      expect(httpRequests.first.responseBody, isNotEmpty);
+      expect(httpRequests.first.requestBody, isNull);
+      controller.stopRecording();
+    });
+
+    test('Check POST request and response bodies', () async {
+      await controller.startRecording();
+      final requestsNotifier = controller.requests;
+      NetworkRequests profile = requestsNotifier.value;
+      // Check profile is initially empty.
+      expect(profile.requests.isEmpty, true);
+
+      // Refresh network data and ensure requests are populated.
+      await controller.networkService.refreshNetworkData();
+      profile = requestsNotifier.value;
+      
+      final List<HttpRequestData> httpRequests = profile.requests
+          .whereType<HttpRequestData>()
+          .cast<HttpRequestData>()
+          .where((request) => request.method == 'POST')
+          .toList();
+
+      expect(httpRequests.length, 1);
+      expect(httpRequests.first.responseBody, isNotEmpty);
+      expect(httpRequests.first.requestBody, isNotEmpty);
+      controller.stopRecording();
+    });
+
+    test('Check PUT request and response bodies', () async {
+      await controller.startRecording();
+      final requestsNotifier = controller.requests;
+      NetworkRequests profile = requestsNotifier.value;
+      // Check profile is initially empty.
+      expect(profile.requests.isEmpty, true);
+
+      // Refresh network data and ensure requests are populated.
+      await controller.networkService.refreshNetworkData();
+      profile = requestsNotifier.value;
+      
+      final List<HttpRequestData> httpRequests = profile.requests
+          .whereType<HttpRequestData>()
+          .cast<HttpRequestData>()
+          .where((request) => request.method == 'PUT')
+          .toList();
+
+      expect(httpRequests.length, 1);
+      expect(httpRequests.first.responseBody, isNotEmpty);
+      expect(httpRequests.first.requestBody, isNotEmpty);
+      controller.stopRecording();
+    });
+
+    test('Check PATCH request and response bodies', () async {
+      await controller.startRecording();
+      final requestsNotifier = controller.requests;
+      NetworkRequests profile = requestsNotifier.value;
+      // Check profile is initially empty.
+      expect(profile.requests.isEmpty, true);
+
+      // Refresh network data and ensure requests are populated.
+      await controller.networkService.refreshNetworkData();
+      profile = requestsNotifier.value;
+      
+      final List<HttpRequestData> httpRequests = profile.requests
+          .whereType<HttpRequestData>()
+          .cast<HttpRequestData>()
+          .where((request) => request.method == 'PATCH')
+          .toList();
+
+      expect(httpRequests.length, 1);
+      expect(httpRequests.first.responseBody, isNotEmpty);
+      expect(httpRequests.first.requestBody, isNotEmpty);
+      controller.stopRecording();
+    });
+
+
+  });
 }

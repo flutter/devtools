@@ -282,6 +282,9 @@ class TimelineHttpRequestData extends HttpRequestData {
   @override
   final String requestBody = null;
 
+  // TODO(kenz): https://github.com/flutter/devtools/issues/3244
+  // Cleanup `TimelineHttpRequestData` and tests in order to allow for :
+  // 'final String responseBody = null'
   @override
   final String responseBody;
 
@@ -637,7 +640,8 @@ class DartIOHttpRequestData extends HttpRequestData {
     final fullRequest = _request as HttpProfileRequest;
     try {
       if (!_request.isResponseComplete) return null;
-      if (_request.method != 'POST') return null;
+      final acceptedMethods = {'POST', 'PUT', 'PATCH'};
+      if (!acceptedMethods.contains(_request.method)) return null;
       if (_requestBody != null) return _requestBody;
       _requestBody = utf8.decode(fullRequest.requestBody);
       return _requestBody;
