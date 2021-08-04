@@ -14,6 +14,7 @@ analyzer:
     - build/**
     - '**.freezed.dart'
     - flutter-sdk/
+    - test/fixtures/provider_app
 
 linter:
   rules:
