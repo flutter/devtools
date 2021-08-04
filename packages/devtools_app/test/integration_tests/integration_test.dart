@@ -5,9 +5,9 @@
 @TestOn('vm')
 import 'dart:io';
 
-import '../support/file_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/file_utils.dart';
 import 'app.dart';
 import 'debugger.dart';
 import 'integration.dart';
