@@ -7,11 +7,11 @@ import 'package:devtools_app/src/debugger/evaluate.dart';
 import 'package:devtools_app/src/eval_on_dart_library.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/ui/search.dart';
-import 'package:devtools_testing/support/flutter_test_driver.dart';
-import 'package:devtools_testing/support/flutter_test_environment.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pedantic/pedantic.dart';
 
+import 'support/flutter_test_driver.dart';
+import 'support/flutter_test_environment.dart';
 import 'support/utils.dart';
 
 void main() {

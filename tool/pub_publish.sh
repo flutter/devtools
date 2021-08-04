@@ -18,13 +18,6 @@ if ! flutter pub publish --force; then
 fi
 
 popd
-pushd packages/devtools_testing
-if ! flutter pub publish --force; then
-    echo "flutter pub publish devtools_testing failed."
-    exit -1
-fi
-
-popd
 pushd packages/devtools_app
 if ! flutter pub publish --force; then
     echo "flutter pub publish devtools_app failed."
