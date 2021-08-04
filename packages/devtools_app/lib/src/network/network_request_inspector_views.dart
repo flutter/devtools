@@ -136,6 +136,24 @@ class HttpRequestHeadersView extends StatelessWidget {
   }
 }
 
+class HttpRequestView extends StatelessWidget {
+  const HttpRequestView(this.data);
+
+  final HttpRequestData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(denseSpacing),
+      child: SingleChildScrollView(
+        child: FormattedJson(
+          formattedString: data.requestBody,
+        ),
+      ),
+    );
+  }
+}
+
 class HttpResponseView extends StatelessWidget {
   const HttpResponseView(this.data);
 

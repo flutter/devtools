@@ -75,6 +75,18 @@ SocketProfile loadSocketProfile() {
   ]);
 }
 
+HttpProfile loadHttpProfile() {
+  return HttpProfile(
+    requests: [
+      HttpProfileRequest.parse(httpGetJson),
+      HttpProfileRequest.parse(httpPostJson),
+      HttpProfileRequest.parse(httpPutJson),
+      HttpProfileRequest.parse(httpPatchJson),
+    ],
+    timestamp: 0,
+  );
+}
+
 Future<TreemapNode> loadSnapshotJsonAsTree(String snapshotJson) async {
   final treemapTestData = jsonDecode(snapshotJson);
 
