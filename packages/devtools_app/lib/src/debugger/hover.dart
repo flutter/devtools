@@ -73,19 +73,32 @@ int _hoverIndexFor(double dx, TextSpan line) {
   return hoverIndex;
 }
 
-const _hoverCardBorderWidth = 2.0;
-const _hoverYOffset = 10;
+const _hoverYOffset = 10.0;
+
+/// Minimum distance from the side of screen to show tooltip
+const _hoverMargin = 16.0;
+
+/// Defines how a [HoverCardTooltip] is positioned
+enum HoverCardPosition {
+  /// Aligns the tooltip below the cursor
+  cursor,
+
+  /// Aligns the tooltip to the element it's wrapped in
+  element,
+}
 
 class HoverCardData {
   HoverCardData({
-    @required this.title,
+    this.title,
     @required this.contents,
     this.width = HoverCardTooltip.defaultHoverWidth,
+    this.position = HoverCardPosition.cursor,
   });
 
   final String title;
   final Widget contents;
   final double width;
+  final HoverCardPosition position;
 }
 
 /// A card to display content while hovering over a widget.
@@ -97,21 +110,20 @@ class HoverCardData {
 class HoverCard {
   HoverCard({
     @required BuildContext context,
-    @required PointerHoverEvent event,
-    @required String title,
     @required Widget contents,
     @required double width,
+    @required Offset position,
+    String title,
   }) {
     final overlayState = Overlay.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final focusColor = Theme.of(context).focusColor;
     final hoverHeading = colorScheme.hoverTitleTextStyle;
-    final position = event.position;
 
     _overlayEntry = OverlayEntry(builder: (context) {
       return Positioned(
-        left: math.max(0, position.dx - (width / 2.0)),
-        top: position.dy + _hoverYOffset,
+        left: position.dx,
+        top: position.dy,
         child: MouseRegion(
           onExit: (_) {
             remove();
@@ -125,7 +137,7 @@ class HoverCard {
               color: colorScheme.defaultBackgroundColor,
               border: Border.all(
                 color: focusColor,
-                width: _hoverCardBorderWidth,
+                width: hoverCardBorderWidth,
               ),
               borderRadius: BorderRadius.circular(defaultBorderRadius),
             ),
@@ -133,16 +145,18 @@ class HoverCard {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  width: width,
-                  child: Text(
-                    title,
-                    overflow: TextOverflow.ellipsis,
-                    style: hoverHeading,
-                    textAlign: TextAlign.center,
+                if (title != null) ...[
+                  Container(
+                    width: width,
+                    child: Text(
+                      title,
+                      overflow: TextOverflow.ellipsis,
+                      style: hoverHeading,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                ),
-                Divider(color: colorScheme.hoverTextStyle.color),
+                  Divider(color: colorScheme.hoverTextStyle.color),
+                ],
                 contents,
               ],
             ),
@@ -152,6 +166,23 @@ class HoverCard {
     });
     overlayState.insert(_overlayEntry);
   }
+
+  HoverCard.fromHoverEvent({
+    @required BuildContext context,
+    @required PointerHoverEvent event,
+    @required Widget contents,
+    @required double width,
+    String title,
+  }) : this(
+          context: context,
+          contents: contents,
+          width: width,
+          position: Offset(
+            math.max(0, event.position.dx - (width / 2.0)),
+            event.position.dy + _hoverYOffset,
+          ),
+          title: title,
+        );
 
   OverlayEntry _overlayEntry;
 
@@ -232,15 +263,44 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
       final hoverCardData = await widget.onHover(event);
       if (!mounted) return;
       if (hoverCardData != null) {
-        _hoverCard = HoverCard(
-          context: context,
-          event: event,
-          title: hoverCardData.title,
-          contents: hoverCardData.contents,
-          width: hoverCardData.width,
-        );
+        if (hoverCardData.position == HoverCardPosition.cursor) {
+          _hoverCard = HoverCard.fromHoverEvent(
+            context: context,
+            title: hoverCardData.title,
+            contents: hoverCardData.contents,
+            width: hoverCardData.width,
+            event: event,
+          );
+        } else {
+          _hoverCard = HoverCard(
+            context: context,
+            title: hoverCardData.title,
+            contents: hoverCardData.contents,
+            width: hoverCardData.width,
+            position: _calculateTooltipPosition(hoverCardData.width),
+          );
+        }
       }
     });
+  }
+
+  Offset _calculateTooltipPosition(double width) {
+    final overlayBox =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+    final box = context.findRenderObject() as RenderBox;
+
+    final maxX = overlayBox.size.width - _hoverMargin - width;
+    final maxY = overlayBox.size.height - _hoverMargin;
+
+    final offset = box.localToGlobal(
+      box.size.bottomCenter(Offset.zero).translate(-width / 2, _hoverYOffset),
+      ancestor: overlayBox,
+    );
+
+    return Offset(
+      offset.dx.clamp(_hoverMargin, maxX),
+      offset.dy.clamp(_hoverMargin, maxY),
+    );
   }
 
   @override

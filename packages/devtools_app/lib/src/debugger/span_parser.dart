@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:string_scanner/string_scanner.dart';
 
+// ignore: avoid_classes_with_only_static_members
 abstract class SpanParser {
   /// Takes a TextMate [Grammar] and a [String] and outputs a list of
   /// [ScopeSpan]s corresponding to the parsed input.

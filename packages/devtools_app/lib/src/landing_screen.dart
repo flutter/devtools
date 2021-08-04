@@ -169,7 +169,7 @@ class _LandingScreenBodyState extends State<LandingScreenBody>
             SizedBox(
               width: 350.0,
               child: TextField(
-                onSubmitted: actionInProgress ? null : (str) => _connect,
+                onSubmitted: actionInProgress ? null : (str) => _connect(),
                 autofocus: true,
                 decoration: const InputDecoration(
                   isDense: true,

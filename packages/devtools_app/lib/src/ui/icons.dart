@@ -16,8 +16,8 @@ library icons;
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
+import '../inspector/layout_explorer/ui/widgets_theme.dart';
 import '../theme.dart';
-import '../utils.dart';
 
 class CustomIcon extends StatelessWidget {
   const CustomIcon({
@@ -52,11 +52,46 @@ class CustomIcon extends StatelessWidget {
   }
 }
 
-class CustomIconMaker {
-  final Map<String, CustomIcon> iconCache = {};
+/// An icon with one character
+class CircleIcon extends StatelessWidget {
+  const CircleIcon({
+    @required this.text,
+    @required this.color,
+  });
 
-  CustomIcon getCustomIcon(String fromText,
-      {IconKind kind, bool isAbstract = false}) {
+  /// Text to display. Should be one character.
+  final String text;
+
+  /// Background circle color.
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 15,
+      height: 15,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 9, color: Color(0xFF231F20)),
+      ),
+    );
+  }
+}
+
+class CustomIconMaker {
+  final Map<String, Widget> iconCache = {};
+
+  Widget getCustomIcon(
+    String fromText, {
+    IconKind kind,
+    bool isAbstract = false,
+  }) {
     kind ??= IconKind.classIcon;
     if (fromText?.isEmpty != false) {
       return null;
@@ -64,13 +99,12 @@ class CustomIconMaker {
 
     final String text = fromText[0].toUpperCase();
     final String mapKey = '${text}_${kind.name}_$isAbstract';
-
     return iconCache.putIfAbsent(mapKey, () {
       return CustomIcon(kind: kind, text: text, isAbstract: isAbstract);
     });
   }
 
-  CustomIcon fromWidgetName(String name) {
+  Widget fromWidgetName(String name) {
     if (name == null) {
       return null;
     }
@@ -83,13 +117,20 @@ class CustomIconMaker {
       return null;
     }
 
-    return getCustomIcon(
-      name,
-      kind: isPrivate(name) ? IconKind.method : IconKind.classIcon,
-    );
+    final widgetTheme = WidgetTheme.fromName(name);
+    if (widgetTheme.iconAsset != null) {
+      return iconCache.putIfAbsent(name, () {
+        return AssetImageIcon(asset: widgetTheme.iconAsset);
+      });
+    }
+
+    final text = name[0].toUpperCase();
+    return iconCache.putIfAbsent(name, () {
+      return CircleIcon(text: text, color: widgetTheme.color);
+    });
   }
 
-  CustomIcon fromInfo(String name) {
+  Widget fromInfo(String name) {
     if (name == null) {
       return null;
     }

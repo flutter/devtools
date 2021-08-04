@@ -82,8 +82,18 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         return;
       }
     }
+
     if (description?.isNotEmpty == true) {
       yield TextSpan(text: description, style: textStyle);
+    }
+
+    final textPreview = diagnostic.json['textPreview'];
+    if (textPreview is String) {
+      final preview = textPreview.replaceAll('\n', ' ');
+      yield TextSpan(
+        text: ': "$preview"',
+        style: textStyle.merge(inspector_text_styles.unimportant(colorScheme)),
+      );
     }
   }
 
