@@ -528,8 +528,6 @@ final Map<String, dynamic> httpGetJson = {
   'responseBody': httpGetResponseBodyData,
 };
 
-
-
 final httpPostRequest = HttpProfileRequest.parse(httpPostJson);
 final httpPost = DartIOHttpRequestData(0, httpPostRequest);
 final Map<String, dynamic> httpPostJson = {
@@ -674,8 +672,6 @@ final httpPutRequestBodyData = [
   ...[32, 32, 32, 125, 10, 32, 32, 32, 32],
 ];
 final httpPutResponseBodyData = [123, 10, 32, 32, 34, 105, 100, 34, 58, 32, 49, 48, 49, 10, 125];
-
-
 
 final httpPatchRequest = HttpProfileRequest.parse(httpPatchJson);
 final httpPatch = DartIOHttpRequestData(0, httpPatchRequest);

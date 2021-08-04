@@ -299,7 +299,6 @@ void main() {
       // Enables getHttpProfile support.
       final fakeVmService = fakeServiceManager.service as FakeVmService;
       fakeVmService.dartIoVersion = SemanticVersion(major: 1, minor: 6);
-      //fakeVmService.httpE
       // Disables HTTP timeline logging
       fakeVmService.httpEnableTimelineLoggingResult = false;
       controller = NetworkController();
@@ -428,7 +427,5 @@ void main() {
       expect(httpRequests.first.requestBody, isNotEmpty);
       controller.stopRecording();
     });
-
-
   });
 }
