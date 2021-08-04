@@ -41,6 +41,13 @@ Add the release number and date followed by the features or changes e.g.,
 * Added a great feature ...
 ```
 
+Ue the tool generate-changelog to automatically update the CHANGELOG.md file e.g.,
+
+```shell
+> cd devtools
+> dart tool/bin/repo_tool.dart generate-changelog
+```
+
 ## Push the local branch
 
 ```shell
@@ -66,7 +73,16 @@ git checkout master
 git pull upstream master
 ```
 
+### 
+
+The build release script checks if your local Flutter matches the version expected.  To switch your Flutter version to the expect Flutter build run
+
+```shell
+./tool/update_flutter_sdk.sh
+``` 
+
 ### Prep to publish
+
 ```shell
 ./tool/publish.sh
 ``` 
