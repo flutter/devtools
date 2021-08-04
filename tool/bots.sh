@@ -95,7 +95,8 @@ if [ "$BOT" = "main" ]; then
     repo_tool repo-check
 
     # Analyze the source.
-    dart analyze --fatal-infos
+    dart analyze --fatal-infos lib
+    dart analyze --fatal-infos lib
 
     # Ensure we can build the app.
     flutter pub run build_runner build -o web:build --release
