@@ -14,7 +14,9 @@ analyzer:
     - build/**
     - '**.freezed.dart'
     - flutter-sdk/
+    # TODO(kenz): remove these once devtools_app is migrated to null safety
     - test/fixtures/provider_app
+    - test/fixtures/riverpod_app
 
 linter:
   rules:
