@@ -69,15 +69,6 @@ flutter pub get
 flutter build web \
   --pwa-strategy=none \
   --profile \
-  --dart-define=FLUTTER_WEB_USE_EXPERIMENTAL_CANVAS_TEXT=true \
-  --dart-define=FLUTTER_WEB_CANVASKIT_URL=assets/canvaskit/ \
-  --no-tree-shake-icons
-
-cp build/web/main.dart.js build/web/main_fallback.dart.js
-
-flutter build web \
-  --pwa-strategy=none \
-  --profile \
   --dart-define=FLUTTER_WEB_USE_SKIA=true \
   --dart-define=FLUTTER_WEB_CANVASKIT_URL=assets/canvaskit/ \
   --no-tree-shake-icons
