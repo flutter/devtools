@@ -26,7 +26,7 @@ FlutterRunTestDriver defaultFlutterRunDriver(Directory appDir) =>
 class FlutterTestEnvironment {
   FlutterTestEnvironment(
     this._runConfig, {
-    this.testAppDirectory = '../fixtures/flutter_app',
+    this.testAppDirectory = 'test/fixtures/flutter_app',
     FlutterDriverFactory flutterDriverFactory,
   }) : _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver;
 
@@ -37,7 +37,7 @@ class FlutterTestEnvironment {
   VmServiceWrapper _service;
   VmServiceWrapper get service => _service;
 
-  /// Path relative to the `devtools_app/test/support` dir for the test fixture.
+  /// Path relative to the `devtools_app` dir for the test fixture.
   final String testAppDirectory;
 
   /// A factory method which can return a [FlutterRunTestDriver] for a test

@@ -11,7 +11,7 @@ import 'provider_controller_test.dart';
 void main() async {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
-    testAppDirectory: 'fixtures/provider_app',
+    testAppDirectory: 'test/fixtures/provider_app',
   );
 
   await runProviderControllerTests(env);

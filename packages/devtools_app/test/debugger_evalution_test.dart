@@ -7,6 +7,7 @@ import 'package:devtools_app/src/debugger/evaluate.dart';
 import 'package:devtools_app/src/eval_on_dart_library.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/ui/search.dart';
+import 'package:devtools_app/src/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pedantic/pedantic.dart';
 
@@ -153,19 +154,23 @@ void main() {
           await runMethodAndWaitForPause(
               'AnotherClass().pauseWithScopedVariablesMethod()');
           expect(
-            await autoCompleteResultsFor(
-              EditingParts(
-                activeWord: '_',
-                leftSide: '',
-                rightSide: '',
+            collectionEquals(
+              await autoCompleteResultsFor(
+                EditingParts(
+                  activeWord: '_',
+                  leftSide: '',
+                  rightSide: '',
+                ),
+                debuggerController,
               ),
-              debuggerController,
+              [
+                '_privateField2',
+                '_privateField1',
+                '_PrivateClass',
+              ],
+              ordered: false,
             ),
-            equals([
-              '_privateField2',
-              '_privateField1',
-              '_PrivateClass',
-            ]),
+            isTrue,
           );
         },
         timeout: const Timeout.factor(8),
