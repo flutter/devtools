@@ -68,6 +68,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    # general assets
     - assets/
     - assets/img/
     - assets/img/layout_explorer/
@@ -75,6 +76,12 @@ flutter:
     - assets/img/layout_explorer/main_axis_alignment/
     - assets/img/legend/
     - assets/scripts/inspector_polyfill_script.dart
+    # canvaskit assets
+    - assets/canvaskit/canvaskit.js
+    - assets/canvaskit/canvaskit.wasm
+    - assets/canvaskit/profiling/canvaskit.js
+    - assets/canvaskit/profiling/canvaskit.wasm
+    # icon assets
     - icons/
     - icons/actions/
     - icons/custom/

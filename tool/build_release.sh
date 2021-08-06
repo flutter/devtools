@@ -26,45 +26,16 @@ fi
 # echo on
 set -ex
 
-# This avoids requiring an internet connection for CanvasKit at runtime.
-# This URL should be updated to keep in sync with the version from the engine.
-# See https://github.com/flutter/engine/blob/master/lib/web_ui/lib/src/engine/canvaskit/initialization.dart#L50-L78,
-# but compare with the code in master for getting the current version.
-# A better solution would be to either upstream this functionality into the flutter_tools,
-# (https://github.com/flutter/flutter/issues/70101), or to read this from a manifest 
-# provided (https://github.com/flutter/flutter/issues/74934).
-function download_canvaskit() {
-  local canvaskit_url=https://unpkg.com/canvaskit-wasm@0.28.1/bin/
-
-  flutter precache --web
-
-  local flutter_bin=$(which flutter)
-  local canvaskit_dart_file=$(dirname $flutter_bin)/cache/flutter_web_sdk/lib/_engine/engine/canvaskit/initialization.dart
-  if ! grep -q "defaultValue: '$canvaskit_url'" "$canvaskit_dart_file"; then
-    echo "CanvasKit $canvaskit_url does not match local web engine copy. Please update before continuing."
-    exit -1
-  fi
-
-  mkdir -p build/web/assets/canvaskit/profiling
-
-  curl $canvaskit_url/canvaskit.js -o build/web/assets/canvaskit/canvaskit.js
-  curl $canvaskit_url/canvaskit.wasm -o build/web/assets/canvaskit/canvaskit.wasm
-  curl $canvaskit_url/profiling/canvaskit.js -o build/web/assets/canvaskit/profiling/canvaskit.js
-  curl $canvaskit_url/profiling/canvaskit.wasm -o build/web/assets/canvaskit/profiling/canvaskit.wasm
-}
-
 pushd packages/devtools_app
 
 rm -rf build
 rm -rf ../devtools/build
 
-download_canvaskit
-
 flutter pub get
 
-# Build a profile build rather than a release build to avoid minification
-# as code size doesn't matter very much for us as minification makes some
-# crashes harder to debug. For example, https://github.com/flutter/devtools/issues/2125
+# Build a profile build rather than a release build to avoid minification; code
+# size doesn't matter very much for us esp. as minification makes some crashes
+# harder to debug. For example, https://github.com/flutter/devtools/issues/2125.
 
 flutter build web \
   --pwa-strategy=none \
