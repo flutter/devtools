@@ -298,15 +298,22 @@ class _CodeViewState extends State<CodeView>
                         Expanded(
                           child: LayoutBuilder(
                             builder: (context, constraints) {
-                              return Lines(
-                                constraints: constraints,
-                                scrollController: textController,
-                                lines: lines,
-                                pausedFrame: pausedFrame,
-                                searchMatchesNotifier:
-                                    widget.controller.searchMatches,
-                                activeSearchMatchNotifier:
-                                    widget.controller.activeSearchMatch,
+                              return Scrollbar(
+                                isAlwaysShown: true,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Lines(
+                                    // Elliott: Maybe this is the problem? ConstrainedBox widget should be direct child?
+                                    constraints: constraints,
+                                    scrollController: textController,
+                                    lines: lines,
+                                    pausedFrame: pausedFrame,
+                                    searchMatchesNotifier:
+                                        widget.controller.searchMatches,
+                                    activeSearchMatchNotifier:
+                                        widget.controller.activeSearchMatch,
+                                  ),
+                                ),
                               );
                             },
                           ),
@@ -599,7 +606,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     final pausedLine = widget.pausedFrame?.line;
 
-    return ListView.builder(
+    final list = ListView.builder(
       controller: widget.scrollController,
       itemExtent: CodeView.rowHeight,
       itemCount: widget.lines.length,
@@ -613,6 +620,15 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
               activeSearch?.position?.line == index ? activeSearch : null,
         );
       },
+    );
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+          maxHeight: widget.constraints.maxHeight,
+          minHeight: widget.constraints.minHeight,
+          minWidth: 2000,
+          maxWidth: 2000),
+      child: list,
     );
   }
 
