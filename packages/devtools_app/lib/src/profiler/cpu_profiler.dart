@@ -305,7 +305,6 @@ class CpuProfileFilterDialog extends StatelessWidget {
       includeQueryFilter: false,
       dialogWidth: _filterDialogWidth,
       controller: controller,
-      onApplyFilter: controller.filterData,
       onCancel: restoreOldValues,
       toggleFilters: controller.toggleFilters,
     );

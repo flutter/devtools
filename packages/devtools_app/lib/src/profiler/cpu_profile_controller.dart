@@ -60,7 +60,7 @@ class CpuProfilerController
   /// This is a getter so that `serviceManager` is initialized by the time we
   /// access this list.
   // TODO(kenz): make this lazy once we migrate to null safety.
-  List<ToggleFilter> get toggleFilters => _toggleFilters ??= [
+  List<ToggleFilter<CpuStackFrame>> get toggleFilters => _toggleFilters ??= [
         ToggleFilter<CpuStackFrame>(
           name: 'Hide Native code',
           includeCallback: (stackFrame) => stackFrame.url.isNotEmpty,
@@ -68,7 +68,7 @@ class CpuProfilerController
         ToggleFilter<CpuStackFrame>(
           name: 'Hide core Dart libraries',
           includeCallback: (stackFrame) =>
-              !stackFrame.url.contains('org-dartlang-sdk'),
+              !stackFrame.url.startsWith('org-dartlang-sdk:'),
         ),
         if (serviceManager.connectedApp?.isFlutterAppNow ?? true)
           // TODO(kenz): should we also hide flutter engine frames as part of this
@@ -82,7 +82,7 @@ class CpuProfilerController
           ),
       ];
 
-  List<ToggleFilter> _toggleFilters;
+  List<ToggleFilter<CpuStackFrame>> _toggleFilters;
 
   int selectedProfilerTabIndex = 0;
 
@@ -257,7 +257,7 @@ class CpuProfilerController
   ///
   /// We use this to prevent multiple filter calls from processing data at the
   /// same time.
-  int filterIdentifier = 0;
+  int _filterIdentifier = 0;
 
   @override
   void filterData(Filter<CpuStackFrame> filter) {
@@ -277,10 +277,10 @@ class CpuProfilerController
         CpuProfileData.filterFrom(originalData, filterCallback);
     processAndSetData(
       filteredData,
-      processId: 'filter $filterIdentifier',
+      processId: 'filter $_filterIdentifier',
       storeAsUserTagNone: false,
     );
-    filterIdentifier++;
+    _filterIdentifier++;
   }
 }
 

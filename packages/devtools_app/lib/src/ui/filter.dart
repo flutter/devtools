@@ -27,7 +27,6 @@ mixin FilterControllerMixin<T> {
 class FilterDialog<FilterControllerMixin, T> extends StatefulWidget {
   const FilterDialog({
     @required this.controller,
-    @required this.onApplyFilter,
     this.onCancel,
     this.includeQueryFilter = true,
     this.queryInstructions,
@@ -38,8 +37,6 @@ class FilterDialog<FilterControllerMixin, T> extends StatefulWidget {
             (queryInstructions != null && queryFilterArguments != null));
 
   final FilterControllerMixin controller;
-
-  final void Function(Filter<T> filter) onApplyFilter;
 
   final VoidCallback onCancel;
 
@@ -101,7 +98,7 @@ class _FilterDialogState<T> extends State<FilterDialog> with AutoDisposeMixin {
       ),
       actions: [
         DialogApplyButton(
-          onPressed: () => widget.onApplyFilter(
+          onPressed: () => widget.controller.filterData(
             Filter<T>(
               queryFilter: widget.includeQueryFilter
                   ? QueryFilter.parse(queryTextFieldController.value.text,
