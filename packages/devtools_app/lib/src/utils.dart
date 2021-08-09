@@ -38,7 +38,12 @@ int sortFieldsByName(String a, String b) {
   return a.compareTo(b);
 }
 
-bool collectionEquals(e1, e2) => const DeepCollectionEquality().equals(e1, e2);
+bool collectionEquals(e1, e2, {bool ordered = true}) {
+  if (ordered) {
+    return const DeepCollectionEquality().equals(e1, e2);
+  }
+  return const DeepCollectionEquality.unordered().equals(e1, e2);
+}
 
 const String loremIpsum = '''
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus dolor quis rhoncus feugiat. Ut imperdiet

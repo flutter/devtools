@@ -60,8 +60,7 @@ Future<T> whenMatches<T>(ValueListenable<T> listenable, bool condition(T)) {
 /// Creates an instance of [Timeline] which contains recorded HTTP events.
 Future<Timeline> loadNetworkProfileTimeline() async {
   // TODO(bkonyi): pull this JSON data into a .dart file.
-  const testDataPath =
-      '../devtools_testing/lib/support/http_request_timeline_test_data.json';
+  const testDataPath = 'test/support/http_request_timeline_test_data.json';
   final httpTestData = jsonDecode(
     await File(testDataPath).readAsString(),
   );

@@ -221,7 +221,7 @@ class WidgetIcons {
   static const String inkWell = 'icons/inspector/widget_icons/inkwell.png';
   static const String gesture = 'icons/inspector/widget_icons/gesture.png';
   static const String textButton =
-      'icons/inspector/widget_icons/textButton.png';
+      'icons/inspector/widget_icons/textbutton.png';
   static const String outlinedButton =
       'icons/inspector/widget_icons/outlinedbutton.png';
   static const String gridView = 'icons/inspector/widget_icons/gridview.png';
@@ -231,7 +231,7 @@ class WidgetIcons {
       'icons/inspector/widget_icons/alertdialog.png';
   static const String card = 'icons/inspector/widget_icons/card.png';
   static const String circleAvatar =
-      'icons/inspector/widget_icons/circleAvatar.png';
+      'icons/inspector/widget_icons/circleavatar.png';
   static const String circularProgress =
       'icons/inspector/widget_icons/circularprogress.png';
   static const String constrainedBox =
