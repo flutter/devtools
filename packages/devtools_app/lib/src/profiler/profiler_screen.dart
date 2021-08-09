@@ -222,6 +222,7 @@ class ProfilerScreenControls extends StatelessWidget {
           controller: controller,
           recording: recording,
         ),
+        const SizedBox(width: defaultSpacing),
         _SecondaryControls(
           controller: controller,
           recording: recording,
@@ -237,7 +238,7 @@ class _PrimaryControls extends StatelessWidget {
     @required this.recording,
   });
 
-  static const _primaryControlsMinIncludeTextWidth = 600.0;
+  static const _primaryControlsMinIncludeTextWidth = 880.0;
 
   final ProfilerScreenController controller;
 
@@ -258,7 +259,7 @@ class _PrimaryControls extends StatelessWidget {
           includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: controller.stopRecording,
         ),
-        const SizedBox(width: defaultSpacing),
+        const SizedBox(width: denseSpacing),
         ClearButton(
           includeTextWidth: _primaryControlsMinIncludeTextWidth,
           onPressed: recording ? null : controller.clear,
@@ -274,7 +275,9 @@ class _SecondaryControls extends StatelessWidget {
     @required this.recording,
   });
 
-  static const _secondaryControlsMinIncludeTextWidth = 1100.0;
+  static const _secondaryControlsMinIncludeTextWidth = 880.0;
+
+  static const _loadAllCpuSamplesMinIncludeTextWidth = 660.0;
 
   final ProfilerScreenController controller;
 
@@ -287,15 +290,17 @@ class _SecondaryControls extends StatelessWidget {
       children: [
         RefreshButton(
           label: 'Load all CPU samples',
+          tooltip: 'Load all available CPU samples from the profiler',
+          includeTextWidth: _loadAllCpuSamplesMinIncludeTextWidth,
           onPressed: !recording ? controller.loadAllSamples : null,
         ),
-        const SizedBox(width: defaultSpacing),
+        const SizedBox(width: denseSpacing),
         ProfileGranularityDropdown(
           screenId: ProfilerScreen.id,
           profileGranularityFlagNotifier:
               controller.cpuProfilerController.profileGranularityFlagNotifier,
         ),
-        const SizedBox(width: defaultSpacing),
+        const SizedBox(width: denseSpacing),
         ExportButton(
           onPressed: !recording &&
                   controller.cpuProfileData != null &&

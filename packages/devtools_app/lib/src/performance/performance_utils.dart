@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import '../utils.dart';
 import 'performance_model.dart';
 
+// ignore: avoid_classes_with_only_static_members
 class PerformanceUtils {
   static String computeEventGroupKey(
     TimelineEvent event,

@@ -20,6 +20,7 @@ import '../ui/layout_explorer_widget.dart';
 import '../ui/theme.dart';
 import '../ui/utils.dart';
 import '../ui/widget_constraints.dart';
+import '../ui/widgets_theme.dart';
 
 class BoxLayoutExplorerWidget extends LayoutExplorerWidget {
   const BoxLayoutExplorerWidget(
@@ -215,7 +216,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
           height: constraints.maxHeight,
           decoration: BoxDecoration(
             border: Border.all(
-              color: regularWidgetColor,
+              color: WidgetTheme.fromName(properties.node.description).color,
             ),
           ),
           child: Stack(

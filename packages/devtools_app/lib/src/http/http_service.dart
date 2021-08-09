@@ -5,6 +5,7 @@
 import '../globals.dart';
 import '../utils.dart';
 
+// ignore: avoid_classes_with_only_static_members
 class HttpService {
   /// Enables or disables HTTP logging for all isolates.
   static Future<void> toggleHttpRequestLogging(bool state) async {

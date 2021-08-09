@@ -124,6 +124,8 @@ class FlutterSdk {
 
   String get flutterToolPath => path.join(sdkPath, 'bin', 'flutter');
 
+  String get dartToolPath => path.join(sdkPath, 'bin', 'dart');
+
   String get dartSdkPath => path.join(sdkPath, 'bin', 'cache', 'dart-sdk');
 
   String get pubToolPath => path.join(dartSdkPath, 'bin', 'pub');

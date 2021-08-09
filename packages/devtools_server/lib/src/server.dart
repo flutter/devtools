@@ -189,7 +189,6 @@ Future<HttpServer?> serveDevTools({
 
   clients = ClientManager(enableNotifications);
 
-  // ignore:dead_code
   handler ??= await defaultHandler(
     clients,
     customDevToolsPath: customDevToolsPath,

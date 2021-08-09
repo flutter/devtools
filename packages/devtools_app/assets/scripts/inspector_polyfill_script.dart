@@ -111,6 +111,41 @@ String addServiceExtensions() {
     throw 'Enum value $name not found';
   }
 
+  /// This is identical to Flutter's getRootWidgetSummaryTree service extension,
+  /// but with the added properties.
+  Future<Map<String, dynamic>> getRootWidgetSummaryTreeWithPreviews(
+      Map<String, String> parameters) {
+    final instance = WidgetInspectorService.instance;
+    final groupName = parameters['groupName'];
+
+    final result = instance._nodeToJson(
+      WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(),
+      InspectorSerializationDelegate(
+        groupName: groupName,
+        subtreeDepth: 1000000,
+        summaryTree: true,
+        service: instance,
+        addAdditionalPropertiesCallback: (DiagnosticsNode node, delegate) {
+          final additionalJson = <String, Object>{};
+
+          final value = node.value;
+          if (value is Element) {
+            final renderObject = value.renderObject;
+            if (renderObject is RenderParagraph) {
+              additionalJson['textPreview'] = renderObject.text.toPlainText();
+            }
+          }
+
+          return additionalJson;
+        },
+      ),
+    );
+
+    return Future.value(<String, dynamic>{
+      'result': result,
+    });
+  }
+
   Future<Map<String, dynamic>> getLayoutExplorerNode(
       Map<String, String> parameters) {
     final id = parameters['id'];
@@ -317,6 +352,11 @@ String addServiceExtensions() {
   registerHelper('setFlexFactor', setFlexFactor);
   registerHelper('setFlexProperties', setFlexProperties);
   registerHelper('getPubRootDirectories', getPubRootDirectories);
+  registerHelper(
+    'getRootWidgetSummaryTreeWithPreviews',
+    getRootWidgetSummaryTreeWithPreviews,
+  );
+
   return WidgetInspectorService.instance._safeJsonEncode(failures);
   // INSPECTOR_POLYFILL_SCRIPT_END
 }

@@ -453,17 +453,29 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
         );
 
         final childrenRenderWidgets = <Widget>[];
+        Widget selectedWidget;
         for (var i = 0; i < widget.children.length; i++) {
           final child = widget.children[i];
           final isSelected = widget.highlighted == child;
 
-          childrenRenderWidgets.add(FlexChildVisualizer(
+          final visualizer = FlexChildVisualizer(
             key: isSelected ? selectedChildKey : null,
             state: widget.state,
             layoutProperties: child,
             isSelected: isSelected,
             renderProperties: renderProperties[i],
-          ));
+          );
+
+          if (isSelected) {
+            selectedWidget = visualizer;
+          } else {
+            childrenRenderWidgets.add(visualizer);
+          }
+        }
+
+        // Selected widget needs to be last to draw its border over other children
+        if (selectedWidget != null) {
+          childrenRenderWidgets.add(selectedWidget);
         }
 
         final freeSpacesWidgets = [
@@ -679,7 +691,7 @@ class FlexChildVisualizer extends StatelessWidget {
     return Positioned(
       top: renderOffset.dy,
       left: renderOffset.dx,
-      child: InkWell(
+      child: GestureDetector(
         onTap: () => state.onTap(properties),
         onDoubleTap: () => state.onDoubleTap(properties),
         onLongPress: () => state.onDoubleTap(properties),

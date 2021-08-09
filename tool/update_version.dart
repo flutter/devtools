@@ -1,3 +1,7 @@
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -11,7 +15,6 @@ void main(List<String> args) async {
     'packages/devtools_app/pubspec.yaml',
     'packages/devtools_server/pubspec.yaml',
     'packages/devtools_shared/pubspec.yaml',
-    'packages/devtools_testing/pubspec.yaml',
   ].map((path) => File(path)).toList();
 
   final version = args.isNotEmpty
@@ -148,7 +151,6 @@ const devToolsDependencyPrefixes = [
   'devtools_app: ',
   'devtools_server: ',
   'devtools_shared: ',
-  'devtools_testing: ',
 ];
 
 extension JoinExtension on List<String> {

@@ -6,7 +6,7 @@ environment:
 
 dependencies:
   args: ^2.0.0
-  cli_util: ^0.3.0
+  cli_util: ^0.3.3
   http: ^0.13.3
   lints: any
   path: ^1.8.0

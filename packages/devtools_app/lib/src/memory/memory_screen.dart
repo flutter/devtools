@@ -587,11 +587,9 @@ class MemoryBodyState extends State<MemoryBody>
                 ],
               )
             : const SizedBox(),
-        IconLabelButton(
+        ExportButton(
           key: MemoryScreen.exportButtonKey,
           onPressed: controller.offline ? null : _exportToFile,
-          icon: Icons.file_download,
-          label: 'Export',
           includeTextWidth: _primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
@@ -600,6 +598,7 @@ class MemoryBodyState extends State<MemoryBody>
           onPressed: controller.toggleLegendVisibility,
           icon: legendOverlayEntry == null ? Icons.storage : Icons.close,
           label: 'Legend',
+          tooltip: 'Legend',
           includeTextWidth: _primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),

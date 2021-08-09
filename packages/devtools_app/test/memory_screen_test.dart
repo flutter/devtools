@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-
 import 'dart:ui';
 
 import 'package:devtools_app/src/globals.dart';
@@ -14,8 +13,6 @@ import 'package:devtools_app/src/memory/memory_vm_chart.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:devtools_testing/support/memory_test_allocation_data.dart';
-import 'package:devtools_testing/support/memory_test_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,6 +20,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'support/memory_test_allocation_data.dart';
+import 'support/memory_test_data.dart';
 import 'support/mocks.dart';
 import 'support/utils.dart';
 import 'support/wrappers.dart';

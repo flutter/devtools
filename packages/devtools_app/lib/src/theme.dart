@@ -146,6 +146,7 @@ const buttonMinWidth = 36.0;
 
 const defaultIconSize = 16.0;
 const actionsIconSize = 20.0;
+const tooltipIconSize = 12.0;
 
 const defaultSpacing = 16.0;
 const denseSpacing = 8.0;
@@ -417,6 +418,7 @@ const defaultSearchTextWidth = 200.0;
 const defaultTextFieldHeight = 32.0;
 
 const maxHoverCardHeight = 250.0;
+const hoverCardBorderWidth = 2.0;
 
 /// Default color of cursor and color used by search's TextField.
 /// Guarantee that the Search TextField on all platforms renders in the same

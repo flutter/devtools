@@ -3,18 +3,16 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_testing/support/flutter_test_driver.dart'
-    show FlutterRunConfiguration;
-import 'package:devtools_testing/support/flutter_test_environment.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'support/flutter_test_environment.dart';
 import 'support/performance_test_data.dart';
 import 'support/utils.dart';
 
@@ -204,9 +202,6 @@ bool isPerformanceDataEqual(PerformanceData a, PerformanceData b) {
       a.cpuProfileData == b.cpuProfileData;
 }
 
-// TODO(kenz): this is copied from devtools_app/test/support/utils.dart. We
-// should re-evaluate the purpose of the devtools_testing package and move some
-// of these tests back into the main devtools_app package if possible.
 void verifyIsSearchMatch(
   List<DataSearchStateMixin> data,
   List<DataSearchStateMixin> matches,
