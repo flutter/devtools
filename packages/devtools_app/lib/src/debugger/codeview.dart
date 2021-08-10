@@ -65,6 +65,7 @@ class _CodeViewState extends State<CodeView>
   LinkedScrollControllerGroup verticalController;
   ScrollController gutterController;
   ScrollController textController;
+  ScrollController horizontalController;
 
   ScriptRef get scriptRef => widget.scriptRef;
 
@@ -77,6 +78,8 @@ class _CodeViewState extends State<CodeView>
     verticalController = LinkedScrollControllerGroup();
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();
+    horizontalController = ScrollController();
+    horizontalController.addListener(horizontalScrollListener);
 
     addAutoDisposeListener(
       widget.controller.scriptLocation,
@@ -100,6 +103,7 @@ class _CodeViewState extends State<CodeView>
   void dispose() {
     gutterController.dispose();
     textController.dispose();
+    horizontalController.dispose();
     widget.controller.scriptLocation
         .removeListener(_handleScriptLocationChanged);
     super.dispose();
@@ -186,6 +190,11 @@ class _CodeViewState extends State<CodeView>
         );
       },
     );
+  }
+
+  horizontalScrollListener() {
+    ScrollPosition position = horizontalController.position;
+    print(position);
   }
 
   Widget buildCodeArea(BuildContext context) {
@@ -300,8 +309,10 @@ class _CodeViewState extends State<CodeView>
                             builder: (context, constraints) {
                               return Scrollbar(
                                 isAlwaysShown: true,
+                                controller: horizontalController,
                                 child: SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
+                                  controller: horizontalController,
                                   child: Lines(
                                     // Elliott: Maybe this is the problem? ConstrainedBox widget should be direct child?
                                     constraints: constraints,
@@ -624,10 +635,11 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
 
     return ConstrainedBox(
       constraints: BoxConstraints(
-          maxHeight: widget.constraints.maxHeight,
-          minHeight: widget.constraints.minHeight,
-          minWidth: 2000,
-          maxWidth: 2000),
+        maxHeight: widget.constraints.maxHeight,
+        minHeight: widget.constraints.minHeight,
+        minWidth: 2000,
+        maxWidth: 2000,
+      ),
       child: list,
     );
   }
