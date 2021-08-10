@@ -9,11 +9,9 @@
 /// "package:uris" we'd like to have. This will be problematic for a use case
 /// such as "packages/my_package/src/utils/packages/flutter/".
 String getSimplePackageUrl(String url) {
-  const newPackagePrefix = 'package:';
-  const originalPackagePrefix = 'packages/';
-
-  const flutterPrefix = 'packages/flutter/';
-  final flutterPrefixIndex = url.indexOf(flutterPrefix);
+  const newFlutterPackagePrefix = 'package:flutter/';
+  const originalFlutterPackagePrefix = 'packages/flutter/lib/src/';
+  final flutterPrefixIndex = url.indexOf(originalFlutterPackagePrefix);
 
   const newDartPrefix = 'dart:';
   const originalDartPrefix = 'org-dartlang-sdk:///third_party/dart/sdk/lib/';
@@ -24,8 +22,8 @@ String getSimplePackageUrl(String url) {
   final dartUiPrefixIndex = url.indexOf(originalDartUiPrefix);
 
   if (flutterPrefixIndex != -1) {
-    return newPackagePrefix +
-        url.substring(flutterPrefixIndex + originalPackagePrefix.length);
+    return newFlutterPackagePrefix +
+        url.substring(flutterPrefixIndex + originalFlutterPackagePrefix.length);
   } else if (dartPrefixIndex != -1) {
     return newDartPrefix +
         url.substring(dartPrefixIndex + originalDartPrefix.length);

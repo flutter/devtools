@@ -12,11 +12,11 @@ void main() {
       expect(getSimplePackageUrl(dartSdkUrl), equals('dart:async/zone.dart'));
       expect(
         getSimplePackageUrl(flutterUrl),
-        equals('package:flutter/lib/src/widgets/binding.dart'),
+        equals('package:flutter/widgets/binding.dart'),
       );
       expect(
         getSimplePackageUrl(flutterUrlFromNonFlutterDir),
-        equals('package:flutter/lib/src/widgets/binding.dart'),
+        equals('package:flutter/widgets/binding.dart'),
       );
       expect(
         getSimplePackageUrl('org-dartlang-sdk:///flutter/lib/ui/hooks.dart'),
