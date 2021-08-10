@@ -79,7 +79,6 @@ class _CodeViewState extends State<CodeView>
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();
     horizontalController = ScrollController();
-    horizontalController.addListener(horizontalScrollListener);
 
     addAutoDisposeListener(
       widget.controller.scriptLocation,
@@ -190,11 +189,6 @@ class _CodeViewState extends State<CodeView>
         );
       },
     );
-  }
-
-  horizontalScrollListener() {
-    ScrollPosition position = horizontalController.position;
-    print(position);
   }
 
   Widget buildCodeArea(BuildContext context) {
@@ -320,7 +314,6 @@ class _CodeViewState extends State<CodeView>
                                   scrollDirection: Axis.horizontal,
                                   controller: horizontalController,
                                   child: Lines(
-                                    // Elliott: Maybe this is the problem? ConstrainedBox widget should be direct child?
                                     constraints: constraints,
                                     scrollController: textController,
                                     lines: lines,
@@ -623,22 +616,6 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     final pausedLine = widget.pausedFrame?.line;
 
-    final list = ListView.builder(
-      controller: widget.scrollController,
-      itemExtent: CodeView.rowHeight,
-      itemCount: widget.lines.length,
-      itemBuilder: (context, index) {
-        final lineNum = index + 1;
-        return LineItem(
-          lineContents: widget.lines[index],
-          pausedFrame: pausedLine == lineNum ? widget.pausedFrame : null,
-          searchMatches: searchMatchesForLine(index),
-          activeSearchMatch:
-              activeSearch?.position?.line == index ? activeSearch : null,
-        );
-      },
-    );
-
     return ConstrainedBox(
       constraints: BoxConstraints(
         maxHeight: widget.constraints.maxHeight,
@@ -646,7 +623,21 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
         minWidth: 2000,
         maxWidth: 2000,
       ),
-      child: list,
+      child: ListView.builder(
+        controller: widget.scrollController,
+        itemExtent: CodeView.rowHeight,
+        itemCount: widget.lines.length,
+        itemBuilder: (context, index) {
+          final lineNum = index + 1;
+          return LineItem(
+            lineContents: widget.lines[index],
+            pausedFrame: pausedLine == lineNum ? widget.pausedFrame : null,
+            searchMatches: searchMatchesForLine(index),
+            activeSearchMatch:
+                activeSearch?.position?.line == index ? activeSearch : null,
+          );
+        },
+      ),
     );
   }
 
