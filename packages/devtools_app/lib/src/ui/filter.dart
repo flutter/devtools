@@ -155,7 +155,7 @@ class _FilterDialogState<T> extends State<FilterDialog> with AutoDisposeMixin {
   void _resetFilters() {
     queryTextFieldController.clear();
     for (final toggleFilter in widget.toggleFilters) {
-      toggleFilter.enabled.value = false;
+      toggleFilter.enabled.value = toggleFilter.enabledByDefault;
     }
   }
 }
@@ -202,7 +202,7 @@ class ToggleFilter<T> {
     @required this.name,
     @required this.includeCallback,
     this.tooltip,
-    bool enabledByDefault = false,
+    this.enabledByDefault = false,
   }) : enabled = ValueNotifier<bool>(enabledByDefault);
 
   final String name;
@@ -210,6 +210,8 @@ class ToggleFilter<T> {
   final bool Function(T element) includeCallback;
 
   final String tooltip;
+
+  final bool enabledByDefault;
 
   final ValueNotifier<bool> enabled;
 }

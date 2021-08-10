@@ -59,11 +59,12 @@ class CpuProfilerController
   ///
   /// This is a getter so that `serviceManager` is initialized by the time we
   /// access this list.
-  // TODO(kenz): make this lazy once we migrate to null safety.
+  // TODO(kenz): make this late once we migrate to null safety.
   List<ToggleFilter<CpuStackFrame>> get toggleFilters => _toggleFilters ??= [
         ToggleFilter<CpuStackFrame>(
           name: 'Hide Native code',
           includeCallback: (stackFrame) => stackFrame.processedUrl.isNotEmpty,
+          enabledByDefault: true,
         ),
         ToggleFilter<CpuStackFrame>(
           name: 'Hide core Dart libraries',
@@ -71,13 +72,12 @@ class CpuProfilerController
               !stackFrame.processedUrl.startsWith('dart:'),
         ),
         if (serviceManager.connectedApp?.isFlutterAppNow ?? true)
-          // TODO(kenz): should we also hide flutter engine frames as part of this
-          // filter? We don't have a url to go off of but we could check for a
-          // stack frame name containing 'flutter::'
           ToggleFilter<CpuStackFrame>(
             name: 'Hide core Flutter libraries',
             includeCallback: (stackFrame) =>
-                !stackFrame.processedUrl.startsWith('package:flutter/'),
+                !(stackFrame.processedUrl.startsWith('package:flutter/') ||
+                    stackFrame.name.startsWith('flutter::') ||
+                    stackFrame.processedUrl.startsWith('dart:ui')),
           ),
       ];
 
