@@ -266,13 +266,12 @@ class _CodeViewState extends State<CodeView>
             style: theme.fixedFontStyle,
             child: Expanded(
               child: Scrollbar(
-                isAlwaysShown: true,
                 controller: textController,
-                // Set the notification depth to skip the first nested
-                // SingleChildScrollView (horizontal) and instead listen for
-                // notifications from the ListView (vertical):
+                // Only listen for vertical scroll notifications (ignore those
+                // from the nested horizontal SingleChildScrollView):
                 notificationPredicate: (ScrollNotification notification) =>
-                    notification.depth == 1,
+                    notification.metrics.axisDirection == AxisDirection.up ||
+                    notification.metrics.axisDirection == AxisDirection.down,
                 child: ValueListenableBuilder<StackFrameAndSourcePosition>(
                   valueListenable: widget.controller.selectedStackFrame,
                   builder: (context, frame, _) {
