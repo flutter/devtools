@@ -190,67 +190,75 @@ void main() {
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(numRequests));
 
-      controller
-          .filterData(QueryFilter.parse('127.0.0.1', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse('127.0.0.1', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(14));
 
-      controller.filterData(QueryFilter.parse('', controller.filterArgs));
+      controller.filterData(
+          Filter(queryFilter: QueryFilter.parse('', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(numRequests));
 
-      controller
-          .filterData(QueryFilter.parse('method:put', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse('method:put', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller.filterData(QueryFilter.parse('m:head', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse('m:head', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller
-          .filterData(QueryFilter.parse('-method:put', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter:
+              QueryFilter.parse('-method:put', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(14));
 
-      controller
-          .filterData(QueryFilter.parse('status:Error', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter:
+              QueryFilter.parse('status:Error', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(7));
 
-      controller.filterData(QueryFilter.parse('s:101', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse('s:101', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller
-          .filterData(QueryFilter.parse('-s:Error', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse('-s:Error', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(9));
 
-      controller
-          .filterData(QueryFilter.parse('type:http', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse('type:http', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(7));
 
-      controller.filterData(QueryFilter.parse('t:ws', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse('t:ws', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller.filterData(QueryFilter.parse('-t:ws', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse('-t:ws', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(14));
 
-      controller.filterData(QueryFilter.parse('-', controller.filterArgs));
+      controller.filterData(
+          Filter(queryFilter: QueryFilter.parse('-', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(0));
 
-      controller
-          .filterData(QueryFilter.parse('nonsense', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse('nonsense', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(0));
 
-      controller
-          .filterData(QueryFilter.parse('-nonsense', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse('-nonsense', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(0));
 
@@ -258,23 +266,26 @@ void main() {
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(numRequests));
 
-      controller
-          .filterData(QueryFilter.parse('-t:ws,http', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse('-t:ws,http', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(7));
 
-      controller.filterData(
-          QueryFilter.parse('-t:ws,http method:put', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse(
+              '-t:ws,http method:put', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(1));
 
-      controller.filterData(
-          QueryFilter.parse('-status:error method:get', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse(
+              '-status:error method:get', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(3));
 
-      controller.filterData(QueryFilter.parse(
-          '-status:error method:get t:txt', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse(
+              '-status:error method:get t:txt', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(1));
     });

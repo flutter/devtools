@@ -1,5 +1,4 @@
 import '../table_data.dart';
-import '../url_utils.dart';
 import '../utils.dart';
 import 'cpu_profile_model.dart';
 
@@ -34,6 +33,9 @@ class SelfTimeColumn extends ColumnData<CpuStackFrame> {
     return '${msText(dataObject.selfTime, fractionDigits: 2)} '
         '(${percent2(dataObject.selfTimeRatio)})';
   }
+
+  @override
+  String getTooltip(CpuStackFrame dataObject) => '';
 }
 
 class TotalTimeColumn extends ColumnData<CpuStackFrame> {
@@ -65,6 +67,9 @@ class TotalTimeColumn extends ColumnData<CpuStackFrame> {
     return '${msText(dataObject.totalTime, fractionDigits: 2)} '
         '(${percent2(dataObject.totalTimeRatio)})';
   }
+
+  @override
+  String getTooltip(CpuStackFrame dataObject) => '';
 }
 
 class MethodNameColumn extends TreeColumnData<CpuStackFrame> {
@@ -95,15 +100,15 @@ class SourceColumn extends ColumnData<CpuStackFrame> {
   SourceColumn() : super.wide('Source', alignment: ColumnAlignment.right);
 
   @override
-  dynamic getValue(CpuStackFrame dataObject) => dataObject.url;
+  dynamic getValue(CpuStackFrame dataObject) => dataObject.processedUrl;
 
   @override
   String getDisplayValue(CpuStackFrame dataObject) {
-    return getSimplePackageUrl(dataObject.url);
+    return dataObject.processedUrl;
   }
 
   @override
-  String getTooltip(CpuStackFrame dataObject) => dataObject.url;
+  String getTooltip(CpuStackFrame dataObject) => dataObject.processedUrl;
 
   @override
   bool get supportsSorting => true;

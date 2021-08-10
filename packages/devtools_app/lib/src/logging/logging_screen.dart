@@ -183,13 +183,8 @@ class _LoggingScreenState extends State<LoggingScreenBody>
       context: context,
       builder: (context) => FilterDialog(
         controller: controller,
-        onApplyFilter: (query) => controller.filterData(
-          QueryFilter.parse(
-            query,
-            controller.filterArgs,
-          ),
-        ),
         queryInstructions: LoggingScreenBody.filterQueryInstructions,
+        queryFilterArguments: controller.filterArgs,
       ),
     );
   }

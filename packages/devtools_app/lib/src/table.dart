@@ -1397,6 +1397,15 @@ class _TableRowState<T> extends State<TableRow<T>>
           maxLines: 1,
         );
 
+        final tooltip = column.getTooltip(node);
+        if (tooltip != null && tooltip is String && tooltip.isNotEmpty) {
+          content = DevToolsTooltip(
+            tooltip: tooltip,
+            waitDuration: tooltipWaitLong,
+            child: content,
+          );
+        }
+
         if (column == widget.expandableColumn) {
           final expandIndicator = widget.isExpandable
               ? RotationTransition(

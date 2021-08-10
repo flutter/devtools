@@ -10,6 +10,7 @@ import '../charts/flame_chart.dart';
 import '../common_widgets.dart';
 import '../notifications.dart';
 import '../theme.dart';
+import '../ui/filter.dart';
 import '../ui/search.dart';
 import 'cpu_profile_bottom_up.dart';
 import 'cpu_profile_call_tree.dart';
@@ -143,6 +144,15 @@ class _CpuProfilerState extends State<CpuProfiler>
               ),
               const Spacer(),
               if (hasData) ...[
+                FilterButton(
+                  onPressed: _showFilterDialog,
+                  isFilterActive: widget.controller.toggleFilters.firstWhere(
+                        (filter) => filter.enabled.value,
+                        orElse: () => null,
+                      ) !=
+                      null,
+                ),
+                const SizedBox(width: denseSpacing),
                 if (currentTab.key != CpuProfiler.summaryTab)
                   UserTagDropdown(widget.controller),
                 const SizedBox(width: defaultSpacing),
@@ -194,6 +204,15 @@ class _CpuProfilerState extends State<CpuProfiler>
           child: _buildCpuProfileDataView(),
         ),
       ],
+    );
+  }
+
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => CpuProfileFilterDialog(
+        controller: widget.controller,
+      ),
     );
   }
 
@@ -263,6 +282,39 @@ class _CpuProfilerState extends State<CpuProfiler>
     setState(() {
       roots.forEach(callback);
     });
+  }
+}
+
+class CpuProfileFilterDialog extends StatelessWidget {
+  CpuProfileFilterDialog({
+    @required this.controller,
+    Key key,
+  })  : oldToggleFilterValues = List.generate(controller.toggleFilters.length,
+            (index) => controller.toggleFilters[index].enabled.value),
+        super(key: key);
+
+  static const double _filterDialogWidth = 400.0;
+
+  final CpuProfilerController controller;
+
+  final List<bool> oldToggleFilterValues;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilterDialog<CpuProfilerController, CpuStackFrame>(
+      includeQueryFilter: false,
+      dialogWidth: _filterDialogWidth,
+      controller: controller,
+      onCancel: restoreOldValues,
+      toggleFilters: controller.toggleFilters,
+    );
+  }
+
+  void restoreOldValues() {
+    for (var i = 0; i < controller.toggleFilters.length; i++) {
+      final filter = controller.toggleFilters[i];
+      filter.enabled.value = oldToggleFilterValues[i];
+    }
   }
 }
 
