@@ -1377,6 +1377,13 @@ double scaleByFontFactor(double original) {
   return (original * (ideTheme?.fontSizeFactor ?? 1.0)).roundToDouble();
 }
 
+double scaleByFontFactorForFontWidth(double original) {
+  // This is a conservative estimate, most fonts have a width/height ratio of
+  // ~0.5.
+  const approximateWidthHeightRatio = 0.6;
+  return scaleByFontFactor(original) * approximateWidthHeightRatio;
+}
+
 bool isDense() {
   return preferences != null && preferences.denseModeEnabled.value ||
       isEmbedded();

@@ -46,7 +46,9 @@ class CodeView extends StatefulWidget {
   }) : super(key: key);
 
   static double get rowHeight => scaleByFontFactor(20.0);
-  static double get assumedCharacterWidth => scaleByFontFactor(16.0);
+  static double get assumedGutterCharacterWidth => scaleByFontFactor(16.0);
+  static double get assumedCodeCharacterWidth =>
+      scaleByFontFactorForFontWidth(14.0);
 
   final DebuggerController controller;
   final ScriptRef scriptRef;
@@ -240,8 +242,8 @@ class _CodeViewState extends State<CodeView>
 
     // Apply the log change-of-base formula, then add 16dp padding for every
     // digit in the maximum number of lines.
-    final gutterWidth = CodeView.assumedCharacterWidth * 1.5 +
-        CodeView.assumedCharacterWidth *
+    final gutterWidth = CodeView.assumedGutterCharacterWidth * 1.5 +
+        CodeView.assumedGutterCharacterWidth *
             (defaultEpsilon + math.log(math.max(lines.length, 100)) / math.ln10)
                 .truncateToDouble();
 
@@ -306,14 +308,31 @@ class _CodeViewState extends State<CodeView>
                         Expanded(
                           child: LayoutBuilder(
                             builder: (context, constraints) {
+                              final num longestLineLength = lines.fold(
+                                  0,
+                                  (longestLength, line) => math.max(
+                                      longestLength,
+                                      line.toPlainText().length));
+                              final fileWidth =
+                                  CodeView.assumedCodeCharacterWidth *
+                                      longestLineLength;
+                              final boxWidth = math.max(
+                                  constraints.minWidth, constraints.maxWidth);
+                              final width = math.max(fileWidth, boxWidth);
+
                               return Scrollbar(
-                                isAlwaysShown: true,
+                                isAlwaysShown: fileWidth > boxWidth,
                                 controller: horizontalController,
                                 child: SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
                                   controller: horizontalController,
                                   child: Lines(
-                                    constraints: constraints,
+                                    constraints: BoxConstraints(
+                                      maxHeight: constraints.maxHeight,
+                                      minHeight: constraints.minHeight,
+                                      minWidth: width,
+                                      maxWidth: width,
+                                    ),
                                     scrollController: textController,
                                     lines: lines,
                                     pausedFrame: pausedFrame,
@@ -616,12 +635,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
     final pausedLine = widget.pausedFrame?.line;
 
     return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: widget.constraints.maxHeight,
-        minHeight: widget.constraints.minHeight,
-        minWidth: 2000,
-        maxWidth: 2000,
-      ),
+      constraints: widget.constraints,
       child: ListView.builder(
         controller: widget.scrollController,
         itemExtent: CodeView.rowHeight,
