@@ -63,12 +63,12 @@ class CpuProfilerController
   List<ToggleFilter<CpuStackFrame>> get toggleFilters => _toggleFilters ??= [
         ToggleFilter<CpuStackFrame>(
           name: 'Hide Native code',
-          includeCallback: (stackFrame) => stackFrame.url.isNotEmpty,
+          includeCallback: (stackFrame) => stackFrame.processedUrl.isNotEmpty,
         ),
         ToggleFilter<CpuStackFrame>(
           name: 'Hide core Dart libraries',
           includeCallback: (stackFrame) =>
-              !stackFrame.url.startsWith('org-dartlang-sdk:'),
+              !stackFrame.processedUrl.startsWith('dart:'),
         ),
         if (serviceManager.connectedApp?.isFlutterAppNow ?? true)
           // TODO(kenz): should we also hide flutter engine frames as part of this
@@ -77,8 +77,7 @@ class CpuProfilerController
           ToggleFilter<CpuStackFrame>(
             name: 'Hide core Flutter libraries',
             includeCallback: (stackFrame) =>
-                !(stackFrame.url.contains('packages/flutter/') ||
-                    stackFrame.url.contains('package:flutter/')),
+                !stackFrame.processedUrl.startsWith('package:flutter/'),
           ),
       ];
 
@@ -180,7 +179,7 @@ class CpuProfilerController
     final currentStackFrames = _dataNotifier.value.stackFrames.values;
     for (final frame in currentStackFrames) {
       if (frame.name.caseInsensitiveContains(regexSearch) ||
-          frame.url.caseInsensitiveContains(regexSearch)) {
+          frame.processedUrl.caseInsensitiveContains(regexSearch)) {
         matches.add(frame);
         frame.isSearchMatch = true;
       } else {

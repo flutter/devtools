@@ -13,16 +13,25 @@ String getSimplePackageUrl(String url) {
   const originalPackagePrefix = 'packages/';
 
   const flutterPrefix = 'packages/flutter/';
-  const flutterWebPrefix = 'packages/flutter_web/';
   final flutterPrefixIndex = url.indexOf(flutterPrefix);
-  final flutterWebPrefixIndex = url.indexOf(flutterWebPrefix);
+
+  const newDartPrefix = 'dart:';
+  const originalDartPrefix = 'org-dartlang-sdk:///third_party/dart/sdk/lib/';
+  final dartPrefixIndex = url.indexOf(originalDartPrefix);
+
+  const newDartUiPrefix = 'dart:ui';
+  const originalDartUiPrefix = 'org-dartlang-sdk:///flutter/lib/ui';
+  final dartUiPrefixIndex = url.indexOf(originalDartUiPrefix);
 
   if (flutterPrefixIndex != -1) {
     return newPackagePrefix +
         url.substring(flutterPrefixIndex + originalPackagePrefix.length);
-  } else if (flutterWebPrefixIndex != -1) {
-    return newPackagePrefix +
-        url.substring(flutterWebPrefixIndex + originalPackagePrefix.length);
+  } else if (dartPrefixIndex != -1) {
+    return newDartPrefix +
+        url.substring(dartPrefixIndex + originalDartPrefix.length);
+  } else if (dartUiPrefixIndex != -1) {
+    return newDartUiPrefix +
+        url.substring(dartUiPrefixIndex + originalDartUiPrefix.length);
   }
   return url;
 }
