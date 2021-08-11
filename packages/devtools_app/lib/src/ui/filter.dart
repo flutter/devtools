@@ -1,44 +1,60 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../dialogs.dart';
 import '../theme.dart';
 import '../utils.dart';
 import 'label.dart';
+import 'utils.dart';
 
+// TODO(kenz): consider breaking this up flat data filtering and tree data
+// filtering.
 mixin FilterControllerMixin<T> {
   final filteredData = ListValueNotifier<T>([]);
 
-  final activeFilter = ValueNotifier<QueryFilter>(null);
+  final activeFilter = ValueNotifier<Filter<T>>(null);
 
-  Map<String, FilterArgument> get filterArgs;
-
-  void filterData(QueryFilter filter);
+  void filterData(Filter<T> filter);
 
   void resetFilter() {
+    // TODO(kenz): should we reset the activeFilter before setting to null?
     activeFilter.value = null;
   }
 }
 
-class FilterDialog<FilterControllerMixin> extends StatefulWidget {
+class FilterDialog<FilterControllerMixin, T> extends StatefulWidget {
   const FilterDialog({
     @required this.controller,
-    @required this.onApplyFilter,
-    @required this.queryInstructions,
-  });
+    this.onCancel,
+    this.includeQueryFilter = true,
+    this.queryInstructions,
+    this.queryFilterArguments,
+    this.toggleFilters,
+    this.dialogWidth = defaultDialogWidth,
+  }) : assert(!includeQueryFilter ||
+            (queryInstructions != null && queryFilterArguments != null));
 
   final FilterControllerMixin controller;
 
-  final void Function(String query) onApplyFilter;
+  final VoidCallback onCancel;
 
   final String queryInstructions;
 
+  final Map<String, QueryFilterArgument> queryFilterArguments;
+
+  final List<ToggleFilter<T>> toggleFilters;
+
+  final bool includeQueryFilter;
+
+  final double dialogWidth;
+
   @override
-  _FilterDialogState createState() => _FilterDialogState();
+  _FilterDialogState<T> createState() => _FilterDialogState<T>();
 }
 
-class _FilterDialogState extends State<FilterDialog> {
+class _FilterDialogState<T> extends State<FilterDialog> with AutoDisposeMixin {
   TextEditingController queryTextFieldController;
 
   @override
@@ -62,23 +78,37 @@ class _FilterDialogState extends State<FilterDialog> {
         padding: const EdgeInsets.symmetric(
           horizontal: defaultSpacing,
         ),
-        width: defaultDialogWidth,
+        width: widget.dialogWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildQueryTextField(),
-            const SizedBox(height: defaultSpacing),
-            _buildQueryInstructions(),
+            if (widget.includeQueryFilter) ...[
+              _buildQueryTextField(),
+              const SizedBox(height: defaultSpacing),
+              _buildQueryInstructions(),
+              const SizedBox(height: defaultSpacing),
+            ],
+            if (widget.toggleFilters != null)
+              for (final toggleFilter in widget.toggleFilters) ...[
+                ToggleFilterElement(filter: toggleFilter),
+              ],
           ],
         ),
       ),
       actions: [
         DialogApplyButton(
-          onPressed: () =>
-              widget.onApplyFilter(queryTextFieldController.value.text),
+          onPressed: () => widget.controller.filterData(
+            Filter<T>(
+              queryFilter: widget.includeQueryFilter
+                  ? QueryFilter.parse(queryTextFieldController.value.text,
+                      widget.queryFilterArguments)
+                  : null,
+              toggleFilters: widget.toggleFilters,
+            ),
+          ),
         ),
-        const DialogCancelButton(),
+        DialogCancelButton(cancelAction: widget.onCancel),
       ],
     );
   }
@@ -89,7 +119,7 @@ class _FilterDialogState extends State<FilterDialog> {
       children: [
         dialogTitleText(Theme.of(context), 'Filters'),
         TextButton(
-          onPressed: queryTextFieldController.clear,
+          onPressed: _resetFilters,
           child: const MaterialIconLabel(
             label: 'Reset to default',
             iconData: Icons.replay,
@@ -121,15 +151,79 @@ class _FilterDialogState extends State<FilterDialog> {
       style: Theme.of(context).subtleTextStyle,
     );
   }
+
+  void _resetFilters() {
+    queryTextFieldController.clear();
+    for (final toggleFilter in widget.toggleFilters) {
+      toggleFilter.enabled.value = toggleFilter.enabledByDefault;
+    }
+  }
+}
+
+class ToggleFilterElement extends StatelessWidget {
+  const ToggleFilterElement({Key key, @required this.filter}) : super(key: key);
+
+  final ToggleFilter filter;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget content = InkWell(
+      onTap: () => filter.enabled.value = !filter.enabled.value,
+      child: Row(
+        children: [
+          NotifierCheckbox(notifier: filter.enabled),
+          Text(filter.name),
+        ],
+      ),
+    );
+    if (filter.tooltip != null) {
+      content = DevToolsTooltip(
+        tooltip: filter.tooltip,
+        child: content,
+      );
+    }
+    return content;
+  }
+}
+
+class Filter<T> {
+  const Filter({
+    this.queryFilter,
+    this.toggleFilters = const [],
+  });
+
+  final QueryFilter queryFilter;
+
+  final List<ToggleFilter<T>> toggleFilters;
+}
+
+class ToggleFilter<T> {
+  ToggleFilter({
+    @required this.name,
+    @required this.includeCallback,
+    this.tooltip,
+    this.enabledByDefault = false,
+  }) : enabled = ValueNotifier<bool>(enabledByDefault);
+
+  final String name;
+
+  final bool Function(T element) includeCallback;
+
+  final String tooltip;
+
+  final bool enabledByDefault;
+
+  final ValueNotifier<bool> enabled;
 }
 
 class QueryFilter<T> {
   QueryFilter({
-    this.filterArguments,
+    @required this.filterArguments,
     this.substrings = const [],
   });
 
-  factory QueryFilter.parse(String query, Map<String, FilterArgument> args) {
+  factory QueryFilter.parse(
+      String query, Map<String, QueryFilterArgument> args) {
     // Reset all argument values before generating a new QueryFilter.
     for (final arg in args.values) {
       arg.reset();
@@ -144,8 +238,9 @@ class QueryFilter<T> {
         if (value != '') {
           for (var arg in args.values) {
             if (arg.matchesKey(part)) {
-              arg.isNegative = part.startsWith(FilterArgument.negativePrefix);
-              arg.values = value.split(FilterArgument.valueSeparator);
+              arg.isNegative =
+                  part.startsWith(QueryFilterArgument.negativePrefix);
+              arg.values = value.split(QueryFilterArgument.valueSeparator);
             }
           }
         }
@@ -156,7 +251,7 @@ class QueryFilter<T> {
     return QueryFilter(filterArguments: args, substrings: substrings);
   }
 
-  final Map<String, FilterArgument> filterArguments;
+  final Map<String, QueryFilterArgument> filterArguments;
 
   final List<String> substrings;
 
@@ -166,8 +261,8 @@ class QueryFilter<T> {
       ].join(' ').trim();
 }
 
-class FilterArgument {
-  FilterArgument({
+class QueryFilterArgument {
+  QueryFilterArgument({
     @required this.keys,
     this.values = const [],
     this.isNegative = false,
@@ -194,14 +289,17 @@ class FilterArgument {
     return false;
   }
 
-  bool matchesValue(String dataValue) {
+  bool matchesValue(String dataValue, {bool substringMatch = false}) {
     // If there are no specified filter values, consider [dataValue] to match
     // this filter.
     if (values.isEmpty) return true;
 
     var matches = false;
     for (final value in values) {
-      matches = dataValue == value.toLowerCase();
+      final lowerCaseFilterValue = value.toLowerCase();
+      matches = substringMatch
+          ? dataValue.contains(lowerCaseFilterValue)
+          : dataValue == lowerCaseFilterValue;
       if (matches) break;
     }
     return isNegative ? !matches : matches;

@@ -10,6 +10,7 @@ import '../charts/flame_chart.dart';
 import '../trace_event.dart';
 import '../trees.dart';
 import '../ui/search.dart';
+import '../url_utils.dart';
 import '../utils.dart';
 import 'cpu_profile_transformer.dart';
 
@@ -25,7 +26,7 @@ class CpuProfileData {
       name: rootName,
       verboseName: rootName,
       category: 'Dart',
-      url: '',
+      rawUrl: '',
       profileMetaData: profileMetaData,
       parentId: null,
     );
@@ -58,8 +59,8 @@ class CpuProfileData {
         // If the user is on a version of Flutter where resolvedUrl is not
         // included in the response, this will be null. If the frame is a native
         // frame, the this will be the empty string.
-        url: stackFrameJson[resolvedUrlKey] ?? '',
-        parentId: stackFrameJson[parentIdKey],
+        rawUrl: stackFrameJson[resolvedUrlKey] ?? '',
+        parentId: stackFrameJson[parentIdKey] ?? rootId,
         profileMetaData: profileMetaData,
       );
       stackFrames[stackFrame.id] = stackFrame;
@@ -92,6 +93,8 @@ class CpuProfileData {
         .toList();
 
     // Use a SplayTreeMap so that map iteration will be in sorted key order.
+    // This keeps the visualization of the profile as consistent as possible
+    // when applying filters.
     final SplayTreeMap<String, CpuStackFrame> subStackFrames =
         SplayTreeMap(stackFrameIdCompare);
     for (final sample in subSamples) {
@@ -100,8 +103,9 @@ class CpuProfileData {
 
       // Add leaf frame's ancestors.
       String parentId = leafFrame.parentId;
-      while (parentId != null) {
+      while (parentId != null && parentId != rootId) {
         final parentFrame = superProfile.stackFrames[parentId];
+        assert(parentFrame != null);
         subStackFrames[parentId] = parentFrame;
         parentId = parentFrame.parentId;
       }
@@ -130,6 +134,8 @@ class CpuProfileData {
     assert(samplesForTag.isNotEmpty);
 
     // Use a SplayTreeMap so that map iteration will be in sorted key order.
+    // This keeps the visualization of the profile as consistent as possible
+    // when applying filters.
     final SplayTreeMap<String, CpuStackFrame> stackFramesForTag =
         SplayTreeMap(stackFrameIdCompare);
 
@@ -169,6 +175,91 @@ class CpuProfileData {
       stackFrames: stackFramesForTag,
       cpuSamples: samplesForTag,
       profileMetaData: metaData,
+    );
+  }
+
+  factory CpuProfileData.filterFrom(
+    CpuProfileData originalData,
+    bool Function(CpuStackFrame) includeFilter,
+  ) {
+    final filteredCpuSamples = <CpuSample>[];
+    void includeSampleOrWalkUp(
+      CpuSample sample,
+      Map<String, Object> sampleJson,
+      CpuStackFrame stackFrame,
+    ) {
+      if (includeFilter(stackFrame)) {
+        filteredCpuSamples.add(
+          CpuSample(
+            leafId: stackFrame.id,
+            userTag: sample.userTag,
+            traceJson: sampleJson,
+          ),
+        );
+      } else if (stackFrame.parentId != CpuProfileData.rootId) {
+        final parent = originalData.stackFrames[stackFrame.parentId];
+        assert(parent != null);
+        includeSampleOrWalkUp(sample, sampleJson, parent);
+      }
+    }
+
+    for (final sample in originalData.cpuSamples) {
+      final sampleJson = Map<String, Object>.from(sample.json);
+      final leafStackFrame = originalData.stackFrames[sample.leafId];
+      includeSampleOrWalkUp(sample, sampleJson, leafStackFrame);
+    }
+
+    // Use a SplayTreeMap so that map iteration will be in sorted key order.
+    // This keeps the visualization of the profile as consistent as possible
+    // when applying filters.
+    final SplayTreeMap<String, CpuStackFrame> filteredStackFrames =
+        SplayTreeMap(stackFrameIdCompare);
+
+    String filteredParentStackFrameId(CpuStackFrame candidateParentFrame) {
+      if (candidateParentFrame == null) return null;
+
+      if (includeFilter(candidateParentFrame)) {
+        return candidateParentFrame.id;
+      } else if (candidateParentFrame.parentId != CpuProfileData.rootId) {
+        final parent = originalData.stackFrames[candidateParentFrame.parentId];
+        assert(parent != null);
+        return filteredParentStackFrameId(parent);
+      }
+      return null;
+    }
+
+    void walkAndFilter(CpuStackFrame stackFrame) {
+      if (includeFilter(stackFrame)) {
+        final parent = originalData.stackFrames[stackFrame.parentId];
+        final filteredParentId = filteredParentStackFrameId(parent);
+        filteredStackFrames[stackFrame.id] = stackFrame.shallowCopy(
+          copySampleCountsAndTags: false,
+          parentId: filteredParentId,
+        );
+        if (filteredParentId != null) {
+          walkAndFilter(originalData.stackFrames[filteredParentId]);
+        }
+      } else if (stackFrame.parentId != CpuProfileData.rootId) {
+        final parent = originalData.stackFrames[stackFrame.parentId];
+        assert(parent != null);
+        walkAndFilter(parent);
+      }
+    }
+
+    for (final sample in filteredCpuSamples) {
+      final leafStackFrame = originalData.stackFrames[sample.leafId];
+      walkAndFilter(leafStackFrame);
+    }
+
+    return CpuProfileData._(
+      stackFrames: filteredStackFrames,
+      cpuSamples: filteredCpuSamples,
+      profileMetaData: CpuProfileMetaData(
+        sampleCount: filteredCpuSamples.length,
+        samplePeriod: originalData.profileMetaData.samplePeriod,
+        stackDepth: originalData.profileMetaData.stackDepth,
+        time: originalData.profileMetaData.time,
+      ),
     );
   }
 
@@ -235,7 +326,7 @@ class CpuProfileData {
         if (profileMetaData?.time?.duration != null)
           timeExtentKey: profileMetaData.time.duration.inMicroseconds,
         stackFramesKey: stackFramesJson,
-        traceEventsKey: cpuSamples.map((sample) => sample.json).toList(),
+        traceEventsKey: cpuSamples.map((sample) => sample.toJson).toList(),
       };
 
   bool get isEmpty => profileMetaData.sampleCount == 0;
@@ -293,12 +384,22 @@ class CpuSample extends TraceEvent {
     final userTag = traceJson[TraceEvent.argsKey] != null
         ? traceJson[TraceEvent.argsKey][CpuProfileData.userTagKey]
         : null;
-    return CpuSample(leafId: leafId, userTag: userTag, traceJson: traceJson);
+    return CpuSample(
+      leafId: leafId,
+      userTag: userTag,
+      traceJson: traceJson,
+    );
   }
 
   final String leafId;
 
   final String userTag;
+
+  Map<String, Object> get toJson {
+    // [leafId] is the source of truth for the leaf id of this sample.
+    super.json[CpuProfileData.stackFrameIdKey] = leafId;
+    return super.json;
+  }
 }
 
 class CpuStackFrame extends TreeNode<CpuStackFrame>
@@ -311,10 +412,11 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     @required this.name,
     @required this.verboseName,
     @required this.category,
-    @required this.url,
+    @required this.rawUrl,
     @required this.parentId,
     @required this.profileMetaData,
-  });
+  })  : processedUrl = getSimplePackageUrl(rawUrl),
+        assert(rawUrl != null);
 
   final String id;
 
@@ -324,7 +426,9 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
 
   final String category;
 
-  final String url;
+  final String rawUrl;
+
+  final String processedUrl;
 
   final String parentId;
 
@@ -386,7 +490,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   String get tooltip => [
         name,
         msText(totalTime),
-        if (url != null) url,
+        if (processedUrl.isNotEmpty) processedUrl,
       ].join(' - ');
 
   /// Returns the number of cpu samples this stack frame is a part of.
@@ -418,7 +522,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       name: name ?? this.name,
       verboseName: verboseName ?? this.verboseName,
       category: category ?? this.category,
-      url: url ?? this.url,
+      rawUrl: url ?? rawUrl,
       parentId: parentId ?? this.parentId,
       profileMetaData: profileMetaData ?? this.profileMetaData,
     );
@@ -450,7 +554,9 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// Two stack frames are said to be matching if they share the following
   /// properties.
   bool matches(CpuStackFrame other) =>
-      name == other.name && url == other.url && category == other.category;
+      name == other.name &&
+      rawUrl == other.rawUrl &&
+      category == other.category;
 
   void _format(StringBuffer buf, String indent) {
     buf.writeln('$indent$name - children: ${children.length} - excl: '
@@ -465,7 +571,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
         id: {
           CpuProfileData.nameKey: verboseName,
           CpuProfileData.categoryKey: category,
-          CpuProfileData.resolvedUrlKey: url,
+          CpuProfileData.resolvedUrlKey: rawUrl,
           if (parentId != null) CpuProfileData.parentIdKey: parentId,
         }
       };
@@ -495,6 +601,17 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
 
 @visibleForTesting
 int stackFrameIdCompare(String a, String b) {
+  if (a == b) {
+    return 0;
+  }
+  // Order the root first.
+  if (a == CpuProfileData.rootId) {
+    return -1;
+  }
+  if (b == CpuProfileData.rootId) {
+    return 1;
+  }
+
   // Stack frame ids are structured as 140225212960768-24 (iOS) or -784070656-24
   // (Android). We need to compare the number after the last dash to maintain
   // the correct order.

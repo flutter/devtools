@@ -95,7 +95,7 @@ void main() {
       // Match on url.
       expect(controller.matchesForSearch('rendering/').length, equals(7));
       expect(controller.matchesForSearch('proxy_box.dart').length, equals(1));
-      expect(controller.matchesForSearch('dartlang-sdk').length, equals(3));
+      expect(controller.matchesForSearch('dart:').length, equals(3));
 
       // Match with RegExp.
       expect(

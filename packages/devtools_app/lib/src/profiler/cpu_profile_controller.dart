@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
+import '../ui/filter.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import '../vm_flags.dart' as vm_flags;
@@ -14,7 +15,10 @@ import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
 import 'cpu_profile_transformer.dart';
 
-class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
+class CpuProfilerController
+    with
+        SearchControllerMixin<CpuStackFrame>,
+        FilterControllerMixin<CpuStackFrame> {
   /// Tag to represent when no user tag filters are applied.
   ///
   /// The word 'none' is not a magic word - just a user-friendly name to convey
@@ -50,6 +54,34 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   final _dataByTag = <String, CpuProfileData>{};
 
   Iterable<String> get userTags => _dataByTag[userTagNone]?.userTags ?? [];
+
+  /// The toggle filters available for the CPU profiler.
+  ///
+  /// This is a getter so that `serviceManager` is initialized by the time we
+  /// access this list.
+  // TODO(kenz): make this late once we migrate to null safety.
+  List<ToggleFilter<CpuStackFrame>> get toggleFilters => _toggleFilters ??= [
+        ToggleFilter<CpuStackFrame>(
+          name: 'Hide Native code',
+          includeCallback: (stackFrame) => stackFrame.processedUrl.isNotEmpty,
+          enabledByDefault: true,
+        ),
+        ToggleFilter<CpuStackFrame>(
+          name: 'Hide core Dart libraries',
+          includeCallback: (stackFrame) =>
+              !stackFrame.processedUrl.startsWith('dart:'),
+        ),
+        if (serviceManager.connectedApp?.isFlutterAppNow ?? true)
+          ToggleFilter<CpuStackFrame>(
+            name: 'Hide core Flutter libraries',
+            includeCallback: (stackFrame) =>
+                !(stackFrame.processedUrl.startsWith('package:flutter/') ||
+                    stackFrame.name.startsWith('flutter::') ||
+                    stackFrame.processedUrl.startsWith('dart:ui')),
+          ),
+      ];
+
+  List<ToggleFilter<CpuStackFrame>> _toggleFilters;
 
   int selectedProfilerTabIndex = 0;
 
@@ -108,16 +140,23 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     );
   }
 
+  /// Processes [cpuProfileData] and sets the data for the controller.
+  ///
+  /// If `storeAsUserTagNone` is true, the processed data will be stored as the
+  /// original data, where no user tag filter has been applied.
   Future<void> processAndSetData(
     CpuProfileData cpuProfileData, {
     String processId,
+    bool storeAsUserTagNone = true,
   }) async {
     _processingNotifier.value = true;
     _dataNotifier.value = null;
     try {
       await transformer.processData(cpuProfileData, processId: processId);
       _dataNotifier.value = cpuProfileData;
-      _dataByTag[userTagNone] = cpuProfileData;
+      if (storeAsUserTagNone) {
+        _dataByTag[userTagNone] = cpuProfileData;
+      }
       refreshSearchMatches();
       _processingNotifier.value = false;
     } on AssertionError catch (_) {
@@ -140,7 +179,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     final currentStackFrames = _dataNotifier.value.stackFrames.values;
     for (final frame in currentStackFrames) {
       if (frame.name.caseInsensitiveContains(regexSearch) ||
-          frame.url.caseInsensitiveContains(regexSearch)) {
+          frame.processedUrl.caseInsensitiveContains(regexSearch)) {
         matches.add(frame);
         frame.isSearchMatch = true;
       } else {
@@ -211,6 +250,36 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     _selectedCpuStackFrameNotifier.dispose();
     _processingNotifier.dispose();
     transformer.dispose();
+  }
+
+  /// Tracks the identifier for the attempt to filter the data.
+  ///
+  /// We use this to prevent multiple filter calls from processing data at the
+  /// same time.
+  int _filterIdentifier = 0;
+
+  @override
+  void filterData(Filter<CpuStackFrame> filter) {
+    final filterCallback = (CpuStackFrame stackFrame) {
+      var shouldInclude = true;
+      for (final toggleFilter in filter.toggleFilters) {
+        if (toggleFilter.enabled.value) {
+          shouldInclude =
+              shouldInclude && toggleFilter.includeCallback(stackFrame);
+          if (!shouldInclude) return false;
+        }
+      }
+      return shouldInclude;
+    };
+    final originalData = _dataByTag[userTagNone];
+    final filteredData =
+        CpuProfileData.filterFrom(originalData, filterCallback);
+    processAndSetData(
+      filteredData,
+      processId: 'filter $_filterIdentifier',
+      storeAsUserTagNone: false,
+    );
+    _filterIdentifier++;
   }
 }
 

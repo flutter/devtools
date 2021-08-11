@@ -175,12 +175,9 @@ class LoggingController extends DisposableController
 
   static const kindFilterId = 'logging-kind-filter';
 
-  final _filterArgs = {
-    kindFilterId: FilterArgument(keys: ['kind', 'k']),
+  final filterArgs = {
+    kindFilterId: QueryFilterArgument(keys: ['kind', 'k']),
   };
-
-  @override
-  Map<String, FilterArgument> get filterArgs => _filterArgs;
 
   final StreamController<String> _logStatusController =
       StreamController.broadcast();
@@ -624,8 +621,8 @@ class LoggingController extends DisposableController
   }
 
   @override
-  void filterData(QueryFilter filter) {
-    if (filter == null) {
+  void filterData(Filter<LogData> filter) {
+    if (filter?.queryFilter == null) {
       filteredData
         ..clear()
         ..addAll(data);
@@ -633,14 +630,14 @@ class LoggingController extends DisposableController
       filteredData
         ..clear()
         ..addAll(data.where((log) {
-          final kindArg = filter.filterArguments[kindFilterId];
+          final kindArg = filter.queryFilter.filterArguments[kindFilterId];
           if (kindArg != null &&
               !kindArg.matchesValue(log.kind.toLowerCase())) {
             return false;
           }
 
-          if (filter.substrings.isNotEmpty) {
-            for (final substring in filter.substrings) {
+          if (filter.queryFilter.substrings.isNotEmpty) {
+            for (final substring in filter.queryFilter.substrings) {
               final caseInsensitiveSubstring = substring.toLowerCase();
               final matchesKind = log.kind != null &&
                   log.kind.toLowerCase().contains(caseInsensitiveSubstring);
