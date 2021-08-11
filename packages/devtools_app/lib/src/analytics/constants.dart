@@ -44,3 +44,10 @@ const String landingScreen = 'landing';
 const String connectToApp = 'connectToApp';
 const String importFile = 'importFile';
 const String openAppSizeTool = 'openAppSizeTool';
+
+// Settings actions:
+const String settingsDialog = 'settings';
+const String darkTheme = 'darkTheme';
+const String denseMode = 'denseMode';
+const String analytics = 'analytics';
+const String vmDeveloperMode = 'vm-developer-mode';
