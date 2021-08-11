@@ -546,30 +546,26 @@ class SettingsDialog extends StatelessWidget {
             label: const Text('Use a dark theme'),
             listenable: preferences.darkModeTheme,
             toggle: preferences.toggleDarkModeTheme,
-            gaEnabledTag: analytics_constants.darkThemeEnable,
-            gaDisabledTag: analytics_constants.darkThemeDisable,
+            gaItem: analytics_constants.darkTheme,
           ),
           CheckboxSetting(
             label: const Text('Use dense mode'),
             listenable: preferences.denseModeEnabled,
             toggle: preferences.toggleDenseMode,
-            gaEnabledTag: analytics_constants.denseModeEnable,
-            gaDisabledTag: analytics_constants.denseModeDisable,
+            gaItem: analytics_constants.denseMode,
           ),
           if (isExternalBuild && isDevToolsServerAvailable)
             CheckboxSetting(
               label: const Text('Enable analytics'),
               listenable: ga.gaEnabledNotifier,
               toggle: ga.setAnalyticsEnabled,
-              gaEnabledTag: analytics_constants.analyticsEnable,
-              gaDisabledTag: analytics_constants.analyticsDisable,
+              gaItem: analytics_constants.analytics,
             ),
           CheckboxSetting(
             label: const Text('Enable VM developer mode'),
             listenable: preferences.vmDeveloperModeEnabled,
             toggle: preferences.toggleVmDeveloperMode,
-            gaEnabledTag: analytics_constants.vmDeveloperModeEnable,
-            gaDisabledTag: analytics_constants.vmDeveloperModeDisable,
+            gaItem: analytics_constants.vmDeveloperMode,
           ),
         ],
       ),
@@ -586,8 +582,7 @@ class CheckboxSetting extends StatelessWidget {
     @required this.label,
     @required this.listenable,
     @required this.toggle,
-    @required this.gaEnabledTag,
-    @required this.gaDisabledTag,
+    @required this.gaItem,
   }) : super(key: key);
 
   final Text label;
@@ -596,9 +591,7 @@ class CheckboxSetting extends StatelessWidget {
 
   final Function(bool) toggle;
 
-  final String gaEnabledTag;
-
-  final String gaDisabledTag;
+  final String gaItem;
 
   @override
   Widget build(BuildContext context) {
@@ -621,7 +614,7 @@ class CheckboxSetting extends StatelessWidget {
   void toggleSetting(bool newValue) {
     ga.select(
       analytics_constants.settingsDialog,
-      newValue ? gaEnabledTag : gaDisabledTag,
+      '$gaItem-${newValue ? 'enabled' : 'disabled'}',
     );
     toggle(newValue);
   }

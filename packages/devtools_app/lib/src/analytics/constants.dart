@@ -47,11 +47,7 @@ const String openAppSizeTool = 'openAppSizeTool';
 
 // Settings actions:
 const String settingsDialog = 'settings';
-const String darkThemeEnable = 'darkTheme-enable';
-const String darkThemeDisable = 'darkTheme-disable';
-const String denseModeEnable = 'denseMode-enable';
-const String denseModeDisable = 'denseMode-disable';
-const String analyticsEnable = 'analytics-enable';
-const String analyticsDisable = 'analytics-disable';
-const String vmDeveloperModeEnable = 'vm-developer-mode-enable';
-const String vmDeveloperModeDisable = 'vm-developer-mode-disable';
+const String darkTheme = 'darkTheme';
+const String denseMode = 'denseMode';
+const String analytics = 'analytics';
+const String vmDeveloperMode = 'vm-developer-mode';
