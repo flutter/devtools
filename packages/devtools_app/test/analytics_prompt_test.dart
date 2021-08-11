@@ -42,6 +42,8 @@ class FakeProvider implements AnalyticsProvider {
   void setUpAnalytics() {}
 }
 
+const windowSize = Size(2000.0, 1000.0);
+
 void main() {
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
@@ -49,7 +51,8 @@ void main() {
 
   group('AnalyticsPrompt', () {
     group('with gtags enabled', () {
-      testWidgets('displays prompt if provider indicates to do so',
+      testWidgetsWithWindowSize(
+          'displays prompt if provider indicates to do so', windowSize,
           (WidgetTester tester) async {
         final prompt = AnalyticsPrompt(
           provider: FakeProvider(gtagsEnabled: true, prompt: true),
@@ -61,7 +64,8 @@ void main() {
             find.text('Send usage statistics for DevTools?'), findsOneWidget);
       });
 
-      testWidgets('does not display prompt without first run',
+      testWidgetsWithWindowSize(
+          'does not display prompt without first run', windowSize,
           (WidgetTester tester) async {
         final prompt = AnalyticsPrompt(
           provider: FakeProvider(gtagsEnabled: true),
@@ -72,7 +76,8 @@ void main() {
         expect(find.text('Send usage statistics for DevTools?'), findsNothing);
       });
 
-      testWidgets('displays the child', (WidgetTester tester) async {
+      testWidgetsWithWindowSize('displays the child', windowSize,
+          (WidgetTester tester) async {
         final prompt = AnalyticsPrompt(
           provider: FakeProvider(),
           child: const Text('Child Text'),
@@ -84,7 +89,8 @@ void main() {
     });
 
     group('without gtags enabled', () {
-      testWidgets('does not display prompt', (WidgetTester tester) async {
+      testWidgetsWithWindowSize('does not display prompt', windowSize,
+          (WidgetTester tester) async {
         final prompt = AnalyticsPrompt(
           provider: FakeProvider(),
           child: const Text('Child Text'),
@@ -94,7 +100,8 @@ void main() {
         expect(find.text('Send usage statistics for DevTools?'), findsNothing);
       });
 
-      testWidgets('displays the child', (WidgetTester tester) async {
+      testWidgetsWithWindowSize('displays the child', windowSize,
+          (WidgetTester tester) async {
         final prompt = AnalyticsPrompt(
           provider: FakeProvider(),
           child: const Text('Child Text'),

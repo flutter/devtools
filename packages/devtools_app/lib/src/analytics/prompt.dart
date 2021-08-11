@@ -26,16 +26,15 @@ class AnalyticsPrompt extends StatefulWidget {
 }
 
 class _AnalyticsPromptState extends State<AnalyticsPrompt> {
-  Widget _child;
-  AnalyticsProvider _provider;
+  Widget get _child => widget.child;
+
+  AnalyticsProvider get _provider => widget.provider;
 
   bool _isVisible = false;
 
   @override
   void initState() {
     super.initState();
-    _provider = widget.provider;
-    _child = widget.child;
     if (_provider.isGtagsEnabled) {
       if (_provider.shouldPrompt) {
         // Enable the analytics and give the user the option to opt out via the
