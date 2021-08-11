@@ -542,26 +542,34 @@ class SettingsDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildOption(
+          CheckboxSetting(
             label: const Text('Use a dark theme'),
             listenable: preferences.darkModeTheme,
             toggle: preferences.toggleDarkModeTheme,
+            gaEnabledTag: analytics_constants.darkThemeEnable,
+            gaDisabledTag: analytics_constants.darkThemeDisable,
           ),
-          _buildOption(
+          CheckboxSetting(
             label: const Text('Use dense mode'),
             listenable: preferences.denseModeEnabled,
             toggle: preferences.toggleDenseMode,
+            gaEnabledTag: analytics_constants.denseModeEnable,
+            gaDisabledTag: analytics_constants.denseModeDisable,
           ),
           if (isExternalBuild && isDevToolsServerAvailable)
-            _buildOption(
+            CheckboxSetting(
               label: const Text('Enable analytics'),
               listenable: ga.gaEnabledNotifier,
               toggle: ga.setAnalyticsEnabled,
+              gaEnabledTag: analytics_constants.analyticsEnable,
+              gaDisabledTag: analytics_constants.analyticsDisable,
             ),
-          _buildOption(
+          CheckboxSetting(
             label: const Text('Enable VM developer mode'),
             listenable: preferences.vmDeveloperModeEnabled,
             toggle: preferences.toggleVmDeveloperMode,
+            gaEnabledTag: analytics_constants.vmDeveloperModeEnable,
+            gaDisabledTag: analytics_constants.vmDeveloperModeDisable,
           ),
         ],
       ),
@@ -570,29 +578,52 @@ class SettingsDialog extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _buildOption({
-    Text label,
-    ValueListenable<bool> listenable,
-    Function(bool) toggle,
-  }) {
+class CheckboxSetting extends StatelessWidget {
+  const CheckboxSetting({
+    Key key,
+    @required this.label,
+    @required this.listenable,
+    @required this.toggle,
+    @required this.gaEnabledTag,
+    @required this.gaDisabledTag,
+  }) : super(key: key);
+
+  final Text label;
+
+  final ValueListenable<bool> listenable;
+
+  final Function(bool) toggle;
+
+  final String gaEnabledTag;
+
+  final String gaDisabledTag;
+
+  @override
+  Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => toggle(!listenable.value),
+      onTap: () => toggleSetting(!listenable.value),
       child: Row(
         children: [
           ValueListenableBuilder<bool>(
             valueListenable: listenable,
             builder: (context, value, _) {
-              return Checkbox(
-                value: value,
-                onChanged: toggle,
-              );
+              return Checkbox(value: value, onChanged: toggleSetting);
             },
           ),
           label,
         ],
       ),
     );
+  }
+
+  void toggleSetting(bool newValue) {
+    ga.select(
+      analytics_constants.settingsDialog,
+      newValue ? gaEnabledTag : gaDisabledTag,
+    );
+    toggle(newValue);
   }
 }
 
