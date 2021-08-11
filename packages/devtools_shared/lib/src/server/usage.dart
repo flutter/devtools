@@ -63,26 +63,44 @@ class DevToolsUsage {
   static const _surveyShownCount = 'surveyShownCount';
 
   void reset() {
+    // TODO(kenz): remove this in ~6 months. The `firstRun` property has been
+    // replaced by `firstDevToolsRun`. This is to force all users to answer the
+    // analytics dialog again. The 'enabled' property has been replaced by
+    // 'analyticsEnabled' for better naming.
     properties.remove('firstRun');
-    properties['enabled'] = false;
+    properties.remove('enabled');
+
+    properties.remove('firstDevToolsRun');
+    properties['analyticsEnabled'] = false;
   }
 
   bool get isFirstRun {
-    properties['firstRun'] = properties['firstRun'] == null;
-    return properties['firstRun'];
+    // TODO(kenz): remove this in ~6 months. The `firstRun` property has been
+    // replaced by `isFirstRun`. This is to force all users to answer the
+    // analytics dialog again.
+    properties.remove('firstRun');
+
+    properties['isFirstRun'] = properties['isFirstRun'] == null;
+    return properties['isFirstRun'];
   }
 
-  bool get enabled {
-    if (properties['enabled'] == null) {
-      properties['enabled'] = false;
+  bool get analyticsEnabled {
+    // TODO(kenz): remove this in ~6 months. The `enabled` property has been
+    // replaced by `analyticsEnabled` for better naming.
+    if (properties['enabled'] != null) {
+      properties['analyticsEnabled'] = properties['enabled'];
+      properties.remove('enabled');
     }
 
-    return properties['enabled'];
+    if (properties['analyticsEnabled'] == null) {
+      properties['analyticsEnabled'] = false;
+    }
+    return properties['analyticsEnabled'];
   }
 
-  set enabled(bool value) {
-    properties['enabled'] = value;
-    return properties['enabled'];
+  set analyticsEnabled(bool value) {
+    properties['analyticsEnabled'] = value;
+    return properties['analyticsEnabled'];
   }
 
   bool surveyNameExists(String surveyName) => properties[surveyName] != null;

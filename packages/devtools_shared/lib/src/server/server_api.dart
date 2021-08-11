@@ -58,22 +58,24 @@ class ServerApi {
         _devToolsUsage.reset();
         return api.getCompleted(request, json.encode(true));
       case apiGetDevToolsFirstRun:
-        // Has DevTools been run first time? To bring up welcome screen.
+        // Has DevTools been run first time? To bring up analytics dialog.
         return api.getCompleted(
           request,
           json.encode(_devToolsUsage.isFirstRun),
         );
       case apiGetDevToolsEnabled:
         // Is DevTools Analytics collection enabled?
-        return api.getCompleted(request, json.encode(_devToolsUsage.enabled));
+        return api.getCompleted(
+            request, json.encode(_devToolsUsage.analyticsEnabled));
       case apiSetDevToolsEnabled:
         // Enable or disable DevTools analytics collection.
         final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(devToolsEnabledPropertyName)) {
-          _devToolsUsage.enabled =
+          _devToolsUsage.analyticsEnabled =
               json.decode(queryParams[devToolsEnabledPropertyName]!);
         }
-        return api.setCompleted(request, json.encode(_devToolsUsage.enabled));
+        return api.setCompleted(
+            request, json.encode(_devToolsUsage.analyticsEnabled));
 
       // ----- DevTools survey store. -----
 
@@ -186,7 +188,7 @@ class ServerApi {
   static final FlutterUsage? _usage =
       FlutterUsage.doesStoreExist ? FlutterUsage() : null;
 
-  // Accessing DevTools usage file e.g., ~/.devtools
+  // Accessing DevTools usage file e.g., ~/.flutter-devtools/.devtools
   static final DevToolsUsage _devToolsUsage = DevToolsUsage();
 
   static DevToolsUsage get devToolsPreferences => _devToolsUsage;
