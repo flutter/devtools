@@ -38,3 +38,9 @@ const String showOnDeviceInspector = 'showInspector';
 // Logging UX actions:
 const String structuredErrors = 'structuredErrors';
 const String trackRebuildWidgets = 'trackRebuildWidgets';
+
+// Landing screen UX actions:
+const String landingScreen = 'landing';
+const String connectToApp = 'connectToApp';
+const String importFile = 'importFile';
+const String openAppSizeTool = 'openAppSizeTool';
