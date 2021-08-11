@@ -5,6 +5,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import '../common_widgets.dart';
 import '../theme.dart';
 import '../utils.dart';
 import 'provider.dart';
@@ -21,15 +22,13 @@ class AnalyticsPrompt extends StatefulWidget {
   final AnalyticsProvider provider;
 
   @override
-  State<AnalyticsPrompt> createState() =>
-      _AnalyticsPromptState(provider, child);
+  State<AnalyticsPrompt> createState() => _AnalyticsPromptState();
 }
 
 class _AnalyticsPromptState extends State<AnalyticsPrompt> {
-  _AnalyticsPromptState(this._provider, this._child);
+  Widget get _child => widget.child;
 
-  final Widget _child;
-  final AnalyticsProvider _provider;
+  AnalyticsProvider get _provider => widget.provider;
 
   bool _isVisible = false;
 
@@ -38,31 +37,52 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
     super.initState();
     if (_provider.isGtagsEnabled) {
       if (_provider.shouldPrompt) {
+        // Enable the analytics and give the user the option to opt out via the
+        // prompt.
+        _provider.setAllowAnalytics();
         _isVisible = true;
-      } else if (_provider.isEnabled) {
-        _provider.setUpAnalytics();
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (_isVisible)
           Card(
-            margin: const EdgeInsets.only(bottom: denseRowSpacing),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(defaultBorderRadius),
+              side: BorderSide(
+                color: theme.focusColor,
+              ),
+            ),
+            color: theme.canvasColor,
+            margin: const EdgeInsets.only(bottom: denseSpacing),
             child: Padding(
               padding: const EdgeInsets.all(defaultSpacing),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Send usage statistics for DevTools?',
-                    style: textTheme.headline5,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Send usage statistics for DevTools?',
+                        style: textTheme.headline5,
+                      ),
+                      CircularIconButton(
+                        icon: Icons.close,
+                        onPressed: _onPromptClosed,
+                        backgroundColor: theme.canvasColor,
+                        foregroundColor: theme.colorScheme.contrastForeground,
+                      ),
+                    ],
                   ),
                   const Padding(
                     padding: EdgeInsets.only(top: defaultSpacing),
@@ -87,11 +107,11 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
             text: 'DevTools reports feature usage statistics and basic '
                 'crash reports to Google in order to help Google improve '
                 'the tool over time. See Google\'s ',
-            style: textTheme.bodyText1,
+            style: textTheme.subtitle1,
           ),
           TextSpan(
             text: 'privacy policy',
-            style: const TextStyle(color: Color(0xFF54C1EF)),
+            style: textTheme.subtitle1.copyWith(color: const Color(0xFF54C1EF)),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
                 launchUrl(
@@ -102,7 +122,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
           ),
           TextSpan(
             text: '.',
-            style: textTheme.bodyText1,
+            style: textTheme.subtitle1,
           ),
         ],
       ),
@@ -137,5 +157,11 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
         ),
       ],
     );
+  }
+
+  void _onPromptClosed() {
+    setState(() {
+      _isVisible = false;
+    });
   }
 }

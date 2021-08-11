@@ -178,14 +178,14 @@ ValueListenable<bool> get gaEnabledNotifier => _gaEnabledNotifier;
 bool gaEnabled() => _gaEnabledNotifier.value;
 
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
-/// '~/.devtools'.
+/// '~/.flutter-devtools/.devtools'.
 Future<bool> isAnalyticsEnabled() async {
   _gaEnabledNotifier.value = await server.isAnalyticsEnabled();
   return _gaEnabledNotifier.value;
 }
 
 /// Set the DevTools property 'enabled' (GA enabled) stored in the file
-/// '~/.devtools'.
+/// '~/flutter-devtools/.devtools'.
 Future<void> setAnalyticsEnabled([bool value = true]) async {
   final didSet = await server.setAnalyticsEnabled(value);
   if (didSet) {
