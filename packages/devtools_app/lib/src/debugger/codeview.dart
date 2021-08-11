@@ -34,6 +34,9 @@ import 'variables.dart';
 final debuggerCodeViewSearchKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewSearchKey');
 
+// This is a conservative estimate, most fonts have a width/height ratio of ~0.5.
+const approximateFontWidthHeightRatio = 0.6;
+
 // TODO(kenz): consider moving lines / pausedPositions calculations to the
 // controller.
 class CodeView extends StatefulWidget {
@@ -46,9 +49,10 @@ class CodeView extends StatefulWidget {
   }) : super(key: key);
 
   static double get rowHeight => scaleByFontFactor(20.0);
+  // TODO(elliette) Scale gutter character width by the font width/height ratio:
   static double get assumedGutterCharacterWidth => scaleByFontFactor(16.0);
   static double get assumedCodeCharacterWidth =>
-      scaleByFontFactorForFontWidth(14.0);
+      scaleByFontFactor(14.0) * approximateFontWidthHeightRatio;
 
   final DebuggerController controller;
   final ScriptRef scriptRef;
@@ -318,7 +322,6 @@ class _CodeViewState extends State<CodeView>
                                       longestLineLength;
                               final boxWidth = math.max(
                                   constraints.minWidth, constraints.maxWidth);
-                              final width = math.max(fileWidth, boxWidth);
 
                               return Scrollbar(
                                 isAlwaysShown: fileWidth > boxWidth,
@@ -330,8 +333,8 @@ class _CodeViewState extends State<CodeView>
                                     constraints: BoxConstraints(
                                       maxHeight: constraints.maxHeight,
                                       minHeight: constraints.minHeight,
-                                      minWidth: width,
-                                      maxWidth: width,
+                                      minWidth: math.max(fileWidth, boxWidth),
+                                      maxWidth: math.max(fileWidth, boxWidth),
                                     ),
                                     scrollController: textController,
                                     lines: lines,
