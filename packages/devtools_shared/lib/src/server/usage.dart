@@ -63,9 +63,10 @@ class DevToolsUsage {
   static const _surveyShownCount = 'surveyShownCount';
 
   void reset() {
-    // TODO(kenz): remove this in ~6 months. The `firstRun` property has been
-    // replaced by `firstDevToolsRun`. This is to force all users to answer the
-    // analytics dialog again. The 'enabled' property has been replaced by
+    // TODO(kenz): remove this in Feb 2022. See
+    // https://github.com/flutter/devtools/issues/3264. The `firstRun` property
+    // has been replaced by `isFirstRun`. This is to force all users to answer
+    // the analytics dialog again. The 'enabled' property has been replaced by
     // 'analyticsEnabled' for better naming.
     properties.remove('firstRun');
     properties.remove('enabled');
@@ -75,9 +76,10 @@ class DevToolsUsage {
   }
 
   bool get isFirstRun {
-    // TODO(kenz): remove this in ~6 months. The `firstRun` property has been
-    // replaced by `isFirstRun`. This is to force all users to answer the
-    // analytics dialog again.
+    // TODO(kenz): remove this in Feb 2022. See
+    // https://github.com/flutter/devtools/issues/3264.The `firstRun` property
+    // has been replaced by `isFirstRun`. This is to force all users to answer
+    // the analytics dialog again.
     properties.remove('firstRun');
 
     properties['isFirstRun'] = properties['isFirstRun'] == null;
@@ -85,8 +87,9 @@ class DevToolsUsage {
   }
 
   bool get analyticsEnabled {
-    // TODO(kenz): remove this in ~6 months. The `enabled` property has been
-    // replaced by `analyticsEnabled` for better naming.
+    // TODO(kenz): remove this in Feb 2022. See
+    // https://github.com/flutter/devtools/issues/3264. The `enabled` property
+    // has been replaced by `analyticsEnabled` for better naming.
     if (properties['enabled'] != null) {
       properties['analyticsEnabled'] = properties['enabled'];
       properties.remove('enabled');
