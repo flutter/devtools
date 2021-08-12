@@ -89,7 +89,12 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   void initState() {
     super.initState();
     ga.screen(LoggingScreen.id);
-    delegate = LoggingTableDelegate(verticalScrollingController);
+    delegate = LoggingTableDelegate(
+      controller: verticalScrollingController,
+      onRowSelected: (int row) {
+        print(row);
+      }
+    );
   }
 
   @override
