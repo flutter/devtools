@@ -319,8 +319,6 @@ class _CodeViewState extends State<CodeView>
                                   0,
                                   (widestWidth, line) => math.max(widestWidth,
                                       CodeView.calculateLineWidth(line)));
-                              final boxWidth = math.max(
-                                  constraints.minWidth, constraints.maxWidth);
 
                               return Scrollbar(
                                 isAlwaysShown: true,
@@ -332,8 +330,8 @@ class _CodeViewState extends State<CodeView>
                                     constraints: BoxConstraints(
                                       maxHeight: constraints.maxHeight,
                                       minHeight: constraints.minHeight,
-                                      minWidth: math.max(fileWidth, boxWidth),
-                                      maxWidth: math.max(fileWidth, boxWidth),
+                                      minWidth: fileWidth,
+                                      maxWidth: fileWidth,
                                     ),
                                     scrollController: textController,
                                     lines: lines,
