@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
 import '../charts/chart_controller.dart';
@@ -31,7 +32,7 @@ import 'memory_vm_chart.dart' as vm;
 /// Width of application when memory buttons loose their text.
 const _primaryControlsMinVerboseWidth = 1100.0;
 
-final legendKey = GlobalKey(debugLabel: MemoryScreen.legendKeyName);
+final legendKey = GlobalKey(debugLabel: 'Legend Button');
 
 class MemoryScreen extends Screen {
   const MemoryScreen()
@@ -50,58 +51,18 @@ class MemoryScreen extends Screen {
 
   static const id = 'memory';
 
-  static const legendKeyName = 'Legend Button';
   static const hoverKeyName = 'Chart Hover';
 
   // TODO(kenz): clean up these keys. We should remove them if we are only using
   // for testing and can avoid them.
 
   @visibleForTesting
-  static const pauseButtonKey = Key('Pause Button');
-  @visibleForTesting
-  static const resumeButtonKey = Key('Resume Button');
-  @visibleForTesting
-  static const clearButtonKey = Key('Clear Button');
-  @visibleForTesting
-  static const intervalDropdownKey = Key('ChartInterval Dropdown');
-
-  @visibleForTesting
   static const sourcesDropdownKey = Key('Sources Dropdown');
+
   @visibleForTesting
   static const sourcesKey = Key('Sources');
-  @visibleForTesting
-  static const exportButtonKey = Key('Export Button');
-  @visibleForTesting
-  static const gcButtonKey = Key('GC Button');
-  @visibleForTesting
-  static const legendButtonkey = Key(legendKeyName);
-
-  @visibleForTesting
-  static const settingsButtonKey = Key('Memory Configuration');
-
-  @visibleForTesting
-  static const eventChartKey = Key('EventPane');
-  @visibleForTesting
-  static const vmChartKey = Key('VMChart');
-  @visibleForTesting
-  static const androidChartKey = Key('AndroidChart');
-
-  @visibleForTesting
-  static const androidChartButtonKey = Key('Android Memory');
 
   static const memorySourceMenuItemPrefix = 'Source: ';
-
-  static void gaAction({Key key, String name}) {
-    final recordName = key != null ? keyName(key) : name;
-    assert(recordName != null);
-    ga.select(MemoryScreen.id, recordName);
-  }
-
-  // Define here because exportButtonKey is @visibleForTesting and
-  // and can't be ref'd outside of file.
-  static void gaActionForExport() {
-    gaAction(key: exportButtonKey);
-  }
 
   @override
   String get docPageId => id;
@@ -196,7 +157,11 @@ class MemoryBodyState extends State<MemoryBody>
     addAutoDisposeListener(controller.legendVisibleNotifier, () {
       setState(() {
         if (controller.isLegendVisible) {
-          MemoryScreen.gaAction(key: MemoryScreen.legendButtonkey);
+          ga.select(
+            analytics_constants.memory,
+            analytics_constants.memoryLegend,
+          );
+
           showLegend(context);
         } else {
           hideLegend();
@@ -207,7 +172,10 @@ class MemoryBodyState extends State<MemoryBody>
     addAutoDisposeListener(controller.androidChartVisibleNotifier, () {
       setState(() {
         if (controller.androidChartVisibleNotifier.value) {
-          MemoryScreen.gaAction(key: MemoryScreen.androidChartButtonKey);
+          ga.select(
+            analytics_constants.memory,
+            analytics_constants.androidChart,
+          );
         }
         if (controller.isLegendVisible) {
           // Recompute the legend with the new traces now visible.
@@ -357,24 +325,15 @@ class MemoryBodyState extends State<MemoryBody>
           const SizedBox(height: denseRowSpacing),
           SizedBox(
             height: 70,
-            child: events.MemoryEventsPane(
-              eventChartController,
-              key: MemoryScreen.eventChartKey,
-            ),
+            child: events.MemoryEventsPane(eventChartController),
           ),
           SizedBox(
-            child: vm.MemoryVMChart(
-              vmChartController,
-              key: MemoryScreen.vmChartKey,
-            ),
+            child: vm.MemoryVMChart(vmChartController),
           ),
           controller.isAndroidChartVisible
               ? SizedBox(
                   height: defaultChartHeight,
-                  child: android.MemoryAndroidChart(
-                    androidChartController,
-                    key: MemoryScreen.androidChartKey,
-                  ),
+                  child: android.MemoryAndroidChart(androidChartController),
                 )
               : const SizedBox(),
           const SizedBox(width: defaultSpacing),
@@ -436,13 +395,15 @@ class MemoryBodyState extends State<MemoryBody>
     ).toList();
 
     return RoundedDropDownButton<String>(
-      key: MemoryScreen.intervalDropdownKey,
       isDense: true,
       style: textTheme.bodyText2,
       value: displayDuration(controller.displayInterval),
       onChanged: (String newValue) {
         setState(() {
-          MemoryScreen.gaAction(key: MemoryScreen.intervalDropdownKey);
+          ga.select(
+            analytics_constants.memory,
+            '${analytics_constants.memoryDisplayInterval}-$newValue',
+          );
           controller.displayInterval = chartInterval(newValue);
           final duration = chartDuration(controller.displayInterval);
 
@@ -489,7 +450,10 @@ class MemoryBodyState extends State<MemoryBody>
       value: controller.memorySource,
       onChanged: (String newValue) {
         setState(() {
-          MemoryScreen.gaAction(key: MemoryScreen.sourcesDropdownKey);
+          ga.select(
+            analytics_constants.memory,
+            analytics_constants.sourcesDropDown,
+          );
           controller.memorySource = newValue;
         });
       },
@@ -525,19 +489,16 @@ class MemoryBodyState extends State<MemoryBody>
           mainAxisSize: MainAxisSize.min,
           children: [
             PauseButton(
-              key: MemoryScreen.pauseButtonKey,
               includeTextWidth: _primaryControlsMinVerboseWidth,
-              onPressed: paused ? null : controller.pauseLiveFeed,
+              onPressed: paused ? null : _onPause,
             ),
             const SizedBox(width: denseSpacing),
             ResumeButton(
-              key: MemoryScreen.resumeButtonKey,
               includeTextWidth: _primaryControlsMinVerboseWidth,
-              onPressed: paused ? controller.resumeLiveFeed : null,
+              onPressed: paused ? _onResume : null,
             ),
             const SizedBox(width: defaultSpacing),
             ClearButton(
-              key: MemoryScreen.clearButtonKey,
               // TODO(terry): Button needs to be Delete for offline data.
               onPressed: controller.memorySource == MemoryController.liveFeed
                   ? _clearTimeline
@@ -554,9 +515,8 @@ class MemoryBodyState extends State<MemoryBody>
 
   Widget createToggleAdbMemoryButton() {
     return IconLabelButton(
-      key: MemoryScreen.androidChartButtonKey,
       icon: controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
-      label: keyName(MemoryScreen.androidChartButtonKey),
+      label: 'Android Memory',
       onPressed:
           isAndroidCollection ? controller.toggleAndroidChartVisibility : null,
       includeTextWidth: 900,
@@ -577,7 +537,6 @@ class MemoryBodyState extends State<MemoryBody>
             ? Row(
                 children: [
                   IconLabelButton(
-                    key: MemoryScreen.gcButtonKey,
                     onPressed: controller.isGcing ? null : _gc,
                     icon: Icons.delete,
                     label: 'GC',
@@ -588,7 +547,6 @@ class MemoryBodyState extends State<MemoryBody>
               )
             : const SizedBox(),
         ExportButton(
-          key: MemoryScreen.exportButtonKey,
           onPressed: controller.offline ? null : _exportToFile,
           includeTextWidth: _primaryControlsMinVerboseWidth,
         ),
@@ -1411,8 +1369,18 @@ class MemoryBodyState extends State<MemoryBody>
 
   /// Callbacks for button actions:
 
+  void _onPause() {
+    ga.select(analytics_constants.memory, analytics_constants.pause);
+    controller.pauseLiveFeed();
+  }
+
+  void _onResume() {
+    ga.select(analytics_constants.memory, analytics_constants.resume);
+    controller.resumeLiveFeed();
+  }
+
   void _clearTimeline() {
-    MemoryScreen.gaAction(key: MemoryScreen.clearButtonKey);
+    ga.select(analytics_constants.memory, analytics_constants.clear);
 
     controller.memoryTimeline.reset();
 
@@ -1438,7 +1406,7 @@ class MemoryBodyState extends State<MemoryBody>
 
   Future<void> _gc() async {
     try {
-      MemoryScreen.gaAction(key: MemoryScreen.gcButtonKey);
+      ga.select(analytics_constants.memory, analytics_constants.gc);
 
       controller.memoryTimeline.addGCEvent();
 
