@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:table/table.dart';
 
 import '../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
@@ -15,15 +14,12 @@ import '../common_widgets.dart';
 import '../console.dart';
 import '../screen.dart';
 import '../split.dart';
-import '../table.dart';
-import '../table_data.dart';
 import '../theme.dart';
-import '../ui/colors.dart';
 import '../ui/filter.dart';
 import '../ui/icons.dart';
 import '../ui/search.dart';
 import '../ui/service_extension_widgets.dart';
-import '../utils.dart';
+import 'delegate.dart';
 import 'logging_controller.dart';
 
 final loggingSearchFieldKey = GlobalKey(debugLabel: 'LoggingSearchFieldKey');
@@ -86,17 +82,20 @@ class _LoggingScreenState extends State<LoggingScreenBody>
 
   LoggingController controller;
 
-  List<LogData> filteredLogs;
+  final ScrollController verticalScrollingController = ScrollController();
+  LoggingTableDelegate delegate;
 
   @override
   void initState() {
     super.initState();
     ga.screen(LoggingScreen.id);
+    delegate = LoggingTableDelegate(verticalScrollingController);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    delegate.themeData = Theme.of(context);
 
     final newController = Provider.of<LoggingController>(context);
     if (newController == controller) return;
@@ -104,10 +103,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
 
     cancel();
 
-    filteredLogs = controller.filteredData.value;
+    delegate.logs = controller.filteredData.value;
     addAutoDisposeListener(controller.filteredData, () {
       setState(() {
-        filteredLogs = controller.filteredData.value;
+        delegate.logs = controller.filteredData.value;
       });
     });
 
@@ -117,6 +116,12 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         selected = controller.selectedLog.value;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    verticalScrollingController.dispose();
+    super.dispose();
   }
 
   @override
@@ -153,7 +158,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         const SizedBox(width: denseSpacing),
         FilterButton(
           onPressed: _showFilterDialog,
-          isFilterActive: filteredLogs.length != controller.data.length,
+          isFilterActive: delegate.logs.length != controller.data.length,
         ),
       ],
     );
@@ -165,13 +170,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
       initialFractions: const [0.72, 0.28],
       children: [
         OutlineDecoration(
-          child: LogsTable(
-            data: filteredLogs,
-            onItemSelected: controller.selectLog,
-            selectionNotifier: controller.selectedLog,
-            searchMatchesNotifier: controller.searchMatches,
-            activeSearchMatchNotifier: controller.activeSearchMatch,
-          ),
+          child: RawTableScrollView(
+            verticalController: verticalScrollingController,
+            delegate: delegate,
+          )
         ),
         LogDetails(log: selected),
       ],
@@ -186,46 +188,6 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         queryInstructions: LoggingScreenBody.filterQueryInstructions,
         queryFilterArguments: controller.filterArgs,
       ),
-    );
-  }
-}
-
-class LogsTable extends StatelessWidget {
-  LogsTable({
-    Key key,
-    @required this.data,
-    @required this.onItemSelected,
-    @required this.selectionNotifier,
-    @required this.searchMatchesNotifier,
-    @required this.activeSearchMatchNotifier,
-  }) : super(key: key);
-
-  final List<LogData> data;
-  final ItemCallback<LogData> onItemSelected;
-  final ValueListenable<LogData> selectionNotifier;
-  final ValueListenable<List<LogData>> searchMatchesNotifier;
-  final ValueListenable<LogData> activeSearchMatchNotifier;
-
-  final ColumnData<LogData> when = _WhenColumn();
-  final ColumnData<LogData> kind = _KindColumn();
-  final ColumnData<LogData> message = MessageColumn();
-
-  List<ColumnData<LogData>> get columns => [when, kind, message];
-
-  @override
-  Widget build(BuildContext context) {
-    return FlatTable<LogData>(
-      columns: columns,
-      data: data,
-      autoScrollContent: true,
-      keyFactory: (LogData data) => ValueKey<LogData>(data),
-      onItemSelected: onItemSelected,
-      selectionNotifier: selectionNotifier,
-      sortColumn: when,
-      secondarySortColumn: message,
-      sortDirection: SortDirection.ascending,
-      searchMatchesNotifier: searchMatchesNotifier,
-      activeSearchMatchNotifier: activeSearchMatchNotifier,
     );
   }
 }
@@ -326,164 +288,5 @@ class _LogDetailsState extends State<LogDetails>
         ),
       ),
     );
-  }
-}
-
-class _WhenColumn extends ColumnData<LogData> {
-  _WhenColumn()
-      : super(
-          'When',
-          fixedWidthPx: 120,
-        );
-
-  @override
-  bool get supportsSorting => false;
-
-  @override
-  String getValue(LogData dataObject) => dataObject.timestamp == null
-      ? ''
-      : timeFormat
-          .format(DateTime.fromMillisecondsSinceEpoch(dataObject.timestamp));
-}
-
-class _KindColumn extends ColumnData<LogData>
-    implements ColumnRenderer<LogData> {
-  _KindColumn()
-      : super(
-          'Kind',
-          fixedWidthPx: 155,
-        );
-
-  @override
-  bool get supportsSorting => false;
-
-  @override
-  String getValue(LogData dataObject) => dataObject.kind;
-
-  @override
-  Widget build(
-    BuildContext context,
-    LogData item, {
-    bool isRowSelected = false,
-  }) {
-    final String kind = item.kind;
-
-    Color color = const Color.fromARGB(0xff, 0x61, 0x61, 0x61);
-
-    if (kind == 'stderr' || item.isError || kind == 'flutter.error') {
-      color = const Color.fromARGB(0xff, 0xF4, 0x43, 0x36);
-    } else if (kind == 'stdout') {
-      color = const Color.fromARGB(0xff, 0x78, 0x90, 0x9C);
-    } else if (kind.startsWith('flutter')) {
-      color = const Color.fromARGB(0xff, 0x00, 0x91, 0xea);
-    } else if (kind == 'gc') {
-      color = const Color.fromARGB(0xff, 0x42, 0x42, 0x42);
-    }
-
-    // Use a font color that contrasts with the colored backgrounds.
-    final textStyle = Theme.of(context).fixedFontStyle;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 3.0),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(3.0),
-      ),
-      child: Text(
-        kind,
-        overflow: TextOverflow.ellipsis,
-        style: textStyle,
-      ),
-    );
-  }
-}
-
-@visibleForTesting
-class MessageColumn extends ColumnData<LogData>
-    implements ColumnRenderer<LogData> {
-  MessageColumn() : super.wide('Message');
-
-  @override
-  bool get supportsSorting => false;
-
-  @override
-  String getValue(LogData dataObject) =>
-      dataObject.summary ?? dataObject.details;
-
-  @override
-  int compare(LogData a, LogData b) {
-    final String valueA = getValue(a);
-    final String valueB = getValue(b);
-    // Matches frame descriptions (e.g. '#12  11.4ms ')
-    final regex = RegExp(r'#(\d+)\s+\d+.\d+ms\s*');
-    final valueAIsFrameLog = valueA.startsWith(regex);
-    final valueBIsFrameLog = valueB.startsWith(regex);
-    if (valueAIsFrameLog && valueBIsFrameLog) {
-      final frameNumberA = regex.firstMatch(valueA)[1];
-      final frameNumberB = regex.firstMatch(valueB)[1];
-      return int.parse(frameNumberA).compareTo(int.parse(frameNumberB));
-    } else if (valueAIsFrameLog && !valueBIsFrameLog) {
-      return -1;
-    } else if (!valueAIsFrameLog && valueBIsFrameLog) {
-      return 1;
-    }
-    return valueA.compareTo(valueB);
-  }
-
-  @override
-  Widget build(
-    BuildContext context,
-    LogData data, {
-    bool isRowSelected = false,
-  }) {
-    TextStyle textStyle = Theme.of(context).fixedFontStyle;
-    if (isRowSelected) {
-      textStyle = textStyle.copyWith(color: defaultSelectionForegroundColor);
-    }
-
-    if (data.kind == 'flutter.frame') {
-      const Color color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
-      final Text text = Text(
-        getDisplayValue(data),
-        overflow: TextOverflow.ellipsis,
-        style: textStyle,
-      );
-
-      double frameLength = 0.0;
-      try {
-        final int micros = jsonDecode(data.details)['elapsed'];
-        frameLength = micros * 3.0 / 1000.0;
-      } catch (e) {
-        // ignore
-      }
-
-      return Row(
-        children: <Widget>[
-          text,
-          Flexible(
-            child: Container(
-              height: 12.0,
-              width: frameLength,
-              decoration: const BoxDecoration(color: color),
-            ),
-          ),
-        ],
-      );
-    } else if (data.kind == 'stdout') {
-      return RichText(
-        text: TextSpan(
-          children: processAnsiTerminalCodes(
-            // TODO(helin24): Recompute summary length considering ansi codes.
-            //  The current summary is generally the first 200 chars of details.
-            getDisplayValue(data),
-            textStyle,
-          ),
-        ),
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
-      );
-    } else {
-      return null;
-    }
   }
 }
