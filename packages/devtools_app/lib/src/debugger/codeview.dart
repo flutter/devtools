@@ -326,20 +326,19 @@ class _CodeViewState extends State<CodeView>
                                 child: SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
                                   controller: horizontalController,
-                                  child: Lines(
-                                    constraints: BoxConstraints(
-                                      maxHeight: constraints.maxHeight,
-                                      minHeight: constraints.minHeight,
-                                      minWidth: fileWidth,
-                                      maxWidth: fileWidth,
+                                  child: SizedBox(
+                                    height: constraints.maxHeight,
+                                    width: fileWidth,
+                                    child: Lines(
+                                      height: constraints.maxHeight,
+                                      scrollController: textController,
+                                      lines: lines,
+                                      pausedFrame: pausedFrame,
+                                      searchMatchesNotifier:
+                                          widget.controller.searchMatches,
+                                      activeSearchMatchNotifier:
+                                          widget.controller.activeSearchMatch,
                                     ),
-                                    scrollController: textController,
-                                    lines: lines,
-                                    pausedFrame: pausedFrame,
-                                    searchMatchesNotifier:
-                                        widget.controller.searchMatches,
-                                    activeSearchMatchNotifier:
-                                        widget.controller.activeSearchMatch,
                                   ),
                                 ),
                               );
@@ -562,7 +561,7 @@ class GutterItem extends StatelessWidget {
 class Lines extends StatefulWidget {
   const Lines({
     Key key,
-    @required this.constraints,
+    @required this.height,
     @required this.scrollController,
     @required this.lines,
     @required this.pausedFrame,
@@ -570,7 +569,7 @@ class Lines extends StatefulWidget {
     @required this.activeSearchMatchNotifier,
   }) : super(key: key);
 
-  final BoxConstraints constraints;
+  final num height;
   final ScrollController scrollController;
   final List<TextSpan> lines;
   final StackFrameAndSourcePosition pausedFrame;
@@ -607,17 +606,14 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
       if (activeSearch != null) {
         final isOutOfViewTop = activeSearch.position.line * CodeView.rowHeight <
             widget.scrollController.offset + CodeView.rowHeight;
-        final isOutOfViewBottom =
-            activeSearch.position.line * CodeView.rowHeight >
-                widget.scrollController.offset +
-                    widget.constraints.maxHeight -
-                    CodeView.rowHeight;
+        final isOutOfViewBottom = activeSearch.position.line *
+                CodeView.rowHeight >
+            widget.scrollController.offset + widget.height - CodeView.rowHeight;
 
         if (isOutOfViewTop || isOutOfViewBottom) {
           // Scroll this search token to the middle of the view.
           final targetOffset = math.max(
-            activeSearch.position.line * CodeView.rowHeight -
-                widget.constraints.maxHeight / 2,
+            activeSearch.position.line * CodeView.rowHeight - widget.height / 2,
             0.0,
           );
           widget.scrollController.animateTo(
@@ -634,23 +630,20 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     final pausedLine = widget.pausedFrame?.line;
 
-    return ConstrainedBox(
-      constraints: widget.constraints,
-      child: ListView.builder(
-        controller: widget.scrollController,
-        itemExtent: CodeView.rowHeight,
-        itemCount: widget.lines.length,
-        itemBuilder: (context, index) {
-          final lineNum = index + 1;
-          return LineItem(
-            lineContents: widget.lines[index],
-            pausedFrame: pausedLine == lineNum ? widget.pausedFrame : null,
-            searchMatches: searchMatchesForLine(index),
-            activeSearchMatch:
-                activeSearch?.position?.line == index ? activeSearch : null,
-          );
-        },
-      ),
+    return ListView.builder(
+      controller: widget.scrollController,
+      itemExtent: CodeView.rowHeight,
+      itemCount: widget.lines.length,
+      itemBuilder: (context, index) {
+        final lineNum = index + 1;
+        return LineItem(
+          lineContents: widget.lines[index],
+          pausedFrame: pausedLine == lineNum ? widget.pausedFrame : null,
+          searchMatches: searchMatchesForLine(index),
+          activeSearchMatch:
+              activeSearch?.position?.line == index ? activeSearch : null,
+        );
+      },
     );
   }
 
