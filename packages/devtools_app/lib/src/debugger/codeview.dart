@@ -34,9 +34,6 @@ import 'variables.dart';
 final debuggerCodeViewSearchKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewSearchKey');
 
-// This is a conservative estimate, most fonts have a width/height ratio of ~0.5.
-const approximateFontWidthHeightRatio = 0.6;
-
 // TODO(kenz): consider moving lines / pausedPositions calculations to the
 // controller.
 class CodeView extends StatefulWidget {
@@ -49,10 +46,17 @@ class CodeView extends StatefulWidget {
   }) : super(key: key);
 
   static double get rowHeight => scaleByFontFactor(20.0);
-  // TODO(elliette) Scale gutter character width by the font width/height ratio:
   static double get assumedGutterCharacterWidth => scaleByFontFactor(16.0);
-  static double get assumedCodeCharacterWidth =>
-      scaleByFontFactor(14.0) * approximateFontWidthHeightRatio;
+
+  static num calculateLineWidth(textSpan) {
+    final textPainter = TextPainter(
+      text: textSpan,
+      textAlign: TextAlign.left,
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    return textPainter.width;
+  }
 
   final DebuggerController controller;
   final ScriptRef scriptRef;
@@ -276,8 +280,7 @@ class _CodeViewState extends State<CodeView>
                 // Only listen for vertical scroll notifications (ignore those
                 // from the nested horizontal SingleChildScrollView):
                 notificationPredicate: (ScrollNotification notification) =>
-                    notification.metrics.axisDirection == AxisDirection.up ||
-                    notification.metrics.axisDirection == AxisDirection.down,
+                    notification.depth == 1,
                 child: ValueListenableBuilder<StackFrameAndSourcePosition>(
                   valueListenable: widget.controller.selectedStackFrame,
                   builder: (context, frame, _) {
@@ -312,14 +315,10 @@ class _CodeViewState extends State<CodeView>
                         Expanded(
                           child: LayoutBuilder(
                             builder: (context, constraints) {
-                              final num longestLineLength = lines.fold(
+                              final num fileWidth = lines.fold(
                                   0,
-                                  (longestLength, line) => math.max(
-                                      longestLength,
-                                      line.toPlainText().length));
-                              final fileWidth =
-                                  CodeView.assumedCodeCharacterWidth *
-                                      longestLineLength;
+                                  (widestWidth, line) => math.max(widestWidth,
+                                      CodeView.calculateLineWidth(line)));
                               final boxWidth = math.max(
                                   constraints.minWidth, constraints.maxWidth);
 
