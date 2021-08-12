@@ -46,7 +46,7 @@ class CodeView extends StatefulWidget {
   }) : super(key: key);
 
   static double get rowHeight => scaleByFontFactor(20.0);
-  static double get assumedGutterCharacterWidth => scaleByFontFactor(16.0);
+  static double get assumedCharacterWidth => scaleByFontFactor(16.0);
 
   static num calculateLineWidth(textSpan) {
     final textPainter = TextPainter(
@@ -250,8 +250,8 @@ class _CodeViewState extends State<CodeView>
 
     // Apply the log change-of-base formula, then add 16dp padding for every
     // digit in the maximum number of lines.
-    final gutterWidth = CodeView.assumedGutterCharacterWidth * 1.5 +
-        CodeView.assumedGutterCharacterWidth *
+    final gutterWidth = CodeView.assumedCharacterWidth * 1.5 +
+        CodeView.assumedCharacterWidth *
             (defaultEpsilon + math.log(math.max(lines.length, 100)) / math.ln10)
                 .truncateToDouble();
 
