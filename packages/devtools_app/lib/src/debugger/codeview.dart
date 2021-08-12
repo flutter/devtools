@@ -324,7 +324,7 @@ class _CodeViewState extends State<CodeView>
                                   constraints.minWidth, constraints.maxWidth);
 
                               return Scrollbar(
-                                isAlwaysShown: fileWidth > boxWidth,
+                                isAlwaysShown: true,
                                 controller: horizontalController,
                                 child: SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
