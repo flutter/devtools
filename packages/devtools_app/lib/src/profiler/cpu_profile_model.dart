@@ -21,12 +21,13 @@ class CpuProfileData {
     @required this.cpuSamples,
     @required this.profileMetaData,
   }) {
-    _cpuProfileRoot = CpuStackFrame(
+    _cpuProfileRoot = CpuStackFrame._(
       id: rootId,
       name: rootName,
       verboseName: rootName,
       category: 'Dart',
       rawUrl: '',
+      processedUrl: '',
       profileMetaData: profileMetaData,
       parentId: null,
     );
@@ -407,16 +408,38 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
         DataSearchStateMixin,
         TreeDataSearchStateMixin<CpuStackFrame>,
         FlameChartDataMixin {
-  CpuStackFrame({
+  factory CpuStackFrame({
+    @required String id,
+    @required String name,
+    @required String verboseName,
+    @required String category,
+    @required String rawUrl,
+    @required String parentId,
+    @required CpuProfileMetaData profileMetaData,
+  }) {
+    assert(rawUrl != null);
+    return CpuStackFrame._(
+      id: id,
+      name: name,
+      verboseName: verboseName,
+      category: category,
+      rawUrl: rawUrl,
+      processedUrl: getSimplePackageUrl(rawUrl),
+      parentId: parentId,
+      profileMetaData: profileMetaData,
+    );
+  }
+
+  CpuStackFrame._({
     @required this.id,
     @required this.name,
     @required this.verboseName,
     @required this.category,
     @required this.rawUrl,
+    @required this.processedUrl,
     @required this.parentId,
     @required this.profileMetaData,
-  })  : processedUrl = getSimplePackageUrl(rawUrl),
-        assert(rawUrl != null);
+  });
 
   final String id;
 
@@ -433,6 +456,22 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   final String parentId;
 
   final CpuProfileMetaData profileMetaData;
+
+  bool get isNative =>
+      _isNative ??= id != CpuProfileData.rootId && processedUrl.isEmpty;
+
+  bool _isNative;
+
+  bool get isDartCore => _isDartCore ??= processedUrl.startsWith('dart:');
+
+  bool _isDartCore;
+
+  bool get isFlutterCore =>
+      _isFlutterCore ??= processedUrl.startsWith('package:flutter/') ||
+          name.startsWith('flutter::') ||
+          processedUrl.startsWith('dart:ui');
+
+  bool _isFlutterCore;
 
   Iterable<String> get userTags => _userTagSampleCount.keys;
 
@@ -517,12 +556,13 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     bool copySampleCountsAndTags = true,
     bool resetInclusiveSampleCount = true,
   }) {
-    final copy = CpuStackFrame(
+    final copy = CpuStackFrame._(
       id: id ?? this.id,
       name: name ?? this.name,
       verboseName: verboseName ?? this.verboseName,
       category: category ?? this.category,
       rawUrl: url ?? rawUrl,
+      processedUrl: url != null ? getSimplePackageUrl(url) : processedUrl,
       parentId: parentId ?? this.parentId,
       profileMetaData: profileMetaData ?? this.profileMetaData,
     );
