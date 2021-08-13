@@ -57,7 +57,10 @@ dependencies:
   vm_snapshot_analysis: ^0.6.0
   web_socket_channel: ^2.1.0
   table:
-    path: /Users/goderbauer/dev/scratchpad/table
+    git:
+      url: https://github.com/goderbauer/scratchpad.git
+      ref: e2da7660523da0a32fd0ab56f51f015fe0c9c823
+      path: table
 
 dev_dependencies:
   build_runner: ^2.0.4
