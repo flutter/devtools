@@ -41,6 +41,10 @@ canvaskit_url=https://unpkg.com/canvaskit-wasm@0.28.1/bin/
 
 flutter_bin=$(which flutter)
 canvaskit_dart_file=$(dirname $flutter_bin)/cache/flutter_web_sdk/lib/_engine/engine/canvaskit/initialization.dart
+
+echo "engine canvaskit version:"
+grep "'https://unpkg.com/canvaskit-wasm" "$canvaskit_dart_file"
+
 if ! grep -q "defaultValue: '$canvaskit_url'" "$canvaskit_dart_file"; then
   echo "CanvasKit $canvaskit_url does not match local web engine copy. Please update before continuing."
   exit -1
