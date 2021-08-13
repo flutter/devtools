@@ -98,6 +98,9 @@ class LoggingTableDelegate extends RawTableDelegate {
     return null;
   }
 
+  static const double defaultRowHeight = 32.0;
+  static const double headerRowHeight = 36.0;
+
   @override
   RawTableBand buildRowSpec(int row) {
     if (row == 0) {
@@ -105,7 +108,7 @@ class LoggingTableDelegate extends RawTableDelegate {
         backgroundDecoration: RawTableBandDecoration(
           color: themeData.titleSolidBackgroundColor,
         ),
-        extent: const FixedRawTableBandExtent(36.0),
+        extent: const FixedRawTableBandExtent(headerRowHeight),
       );
     }
 
@@ -115,7 +118,7 @@ class LoggingTableDelegate extends RawTableDelegate {
       backgroundDecoration: RawTableBandDecoration(
         color: _rowColor(row),
       ),
-      extent: const FixedRawTableBandExtent(32.0),
+      extent: const FixedRawTableBandExtent(defaultRowHeight),
       cursor: SystemMouseCursors.click,
       onEnter: (_) {
         _hovered = row;
@@ -220,6 +223,20 @@ class LoggingTableDelegate extends RawTableDelegate {
     }
     _activeSearchMatch = value;
     notifyListeners();
+    // scroll it into view, if necessary.
+    // TODO(goderbauer): There should be an easier API to just scroll a row into view.
+    final int index = logs.indexOf(value);
+    if (index != -1) {
+      final double expectedScrollOffset = index * defaultRowHeight;
+      final bool isInView = expectedScrollOffset > controller.offset && expectedScrollOffset + defaultRowHeight < controller.offset + controller.position.extentInside - headerRowHeight;
+      if (!isInView) {
+        controller.animateTo(
+          expectedScrollOffset,
+          duration: defaultDuration,
+          curve: defaultCurve,
+        );
+      }
+    }
   }
 
   List<LogData> get searchMatches => _searchMatches;
