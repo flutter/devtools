@@ -63,21 +63,17 @@ class CpuProfilerController
   List<ToggleFilter<CpuStackFrame>> get toggleFilters => _toggleFilters ??= [
         ToggleFilter<CpuStackFrame>(
           name: 'Hide Native code',
-          includeCallback: (stackFrame) => stackFrame.processedUrl.isNotEmpty,
+          includeCallback: (stackFrame) => !stackFrame.isNative,
           enabledByDefault: true,
         ),
         ToggleFilter<CpuStackFrame>(
           name: 'Hide core Dart libraries',
-          includeCallback: (stackFrame) =>
-              !stackFrame.processedUrl.startsWith('dart:'),
+          includeCallback: (stackFrame) => !stackFrame.isDartCore,
         ),
         if (serviceManager.connectedApp?.isFlutterAppNow ?? true)
           ToggleFilter<CpuStackFrame>(
             name: 'Hide core Flutter libraries',
-            includeCallback: (stackFrame) =>
-                !(stackFrame.processedUrl.startsWith('package:flutter/') ||
-                    stackFrame.name.startsWith('flutter::') ||
-                    stackFrame.processedUrl.startsWith('dart:ui')),
+            includeCallback: (stackFrame) => !stackFrame.isFlutterCore,
           ),
       ];
 
