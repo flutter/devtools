@@ -441,6 +441,18 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     @required this.profileMetaData,
   });
 
+  /// Prefix for packages from the core Dart libraries.
+  static const dartPackagePrefix = 'dart:';
+
+  /// Prefix for packages from the core Flutter libraries.
+  static const flutterPackagePrefix = 'package:flutter/';
+
+  /// The Flutter namespace in C++ that is part of the Flutter Engine code.
+  static const flutterEnginePrefix = 'flutter::';
+
+  /// dart:ui is the library for the Dart part of the Flutter Engine code.
+  static const dartUiPrefix = 'dart:ui';
+
   final String id;
 
   final String name;
@@ -462,14 +474,15 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
 
   bool _isNative;
 
-  bool get isDartCore => _isDartCore ??= processedUrl.startsWith('dart:');
+  bool get isDartCore =>
+      _isDartCore ??= processedUrl.startsWith(dartPackagePrefix);
 
   bool _isDartCore;
 
   bool get isFlutterCore =>
-      _isFlutterCore ??= processedUrl.startsWith('package:flutter/') ||
-          name.startsWith('flutter::') ||
-          processedUrl.startsWith('dart:ui');
+      _isFlutterCore ??= processedUrl.startsWith(flutterPackagePrefix) ||
+          name.startsWith(flutterEnginePrefix) ||
+          processedUrl.startsWith(dartUiPrefix);
 
   bool _isFlutterCore;
 
