@@ -48,16 +48,6 @@ class CodeView extends StatefulWidget {
   static double get rowHeight => scaleByFontFactor(20.0);
   static double get assumedCharacterWidth => scaleByFontFactor(16.0);
 
-  static num calculateLineWidth(textSpan) {
-    final textPainter = TextPainter(
-      text: textSpan,
-      textAlign: TextAlign.left,
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    return textPainter.width;
-  }
-
   final DebuggerController controller;
   final ScriptRef scriptRef;
   final ParsedScript parsedScript;
@@ -315,10 +305,19 @@ class _CodeViewState extends State<CodeView>
                         Expanded(
                           child: LayoutBuilder(
                             builder: (context, constraints) {
-                              final num fileWidth = lines.fold(
-                                  0,
-                                  (widestWidth, line) => math.max(widestWidth,
-                                      CodeView.calculateLineWidth(line)));
+                              // Find the longest line to measure file width:
+                              int longestLength = 0;
+                              TextSpan longestLine;
+                              for (var line in lines) {
+                                final int currentLength =
+                                    line.toPlainText().length;
+                                if (currentLength > longestLength) {
+                                  longestLength = currentLength;
+                                  longestLine = line;
+                                }
+                              }
+                              final double fileWidth =
+                                  calculateTextSpanWidth(longestLine);
 
                               return Scrollbar(
                                 isAlwaysShown: true,
@@ -569,7 +568,7 @@ class Lines extends StatefulWidget {
     @required this.activeSearchMatchNotifier,
   }) : super(key: key);
 
-  final num height;
+  final double height;
   final ScrollController scrollController;
   final List<TextSpan> lines;
   final StackFrameAndSourcePosition pausedFrame;

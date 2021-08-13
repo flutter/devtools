@@ -111,6 +111,17 @@ TextSpan truncateTextSpan(TextSpan span, int length) {
   return truncateHelper(span);
 }
 
+/// Returns a [double] representing the width in pixels of the [span].
+double calculateTextSpanWidth(TextSpan span) {
+  final textPainter = TextPainter(
+    text: span,
+    textAlign: TextAlign.left,
+    textDirection: TextDirection.ltr,
+  )..layout();
+
+  return textPainter.width;
+}
+
 /// Scrollbar that is offset by the amount specified by an [offsetController].
 ///
 /// This makes it possible to create a [ListView] with both vertical and
