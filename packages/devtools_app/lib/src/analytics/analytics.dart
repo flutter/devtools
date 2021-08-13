@@ -442,7 +442,7 @@ void computeDevToolsQueryParams() {
   }
 }
 
-void computeFlutterClientId() async {
+Future<void> computeFlutterClientId() async {
   flutterClientId = await server.flutterGAClientID();
 }
 
@@ -475,12 +475,12 @@ void setupAndGaScreen(String screenName) async {
   }
 }
 
-void setupDimensions() {
+Future<void> setupDimensions() async {
   if (isGtagsEnabled() && !_analyticsComputed && !_computingDimensions) {
     _computingDimensions = true;
     computeDevToolsCustomGTagsData();
     computeDevToolsQueryParams();
-    computeFlutterClientId();
+    await computeFlutterClientId();
     _analyticsComputed = true;
   }
 }

@@ -216,14 +216,16 @@ class ToggleFilter<T> {
   final ValueNotifier<bool> enabled;
 }
 
-class QueryFilter<T> {
+class QueryFilter {
   QueryFilter({
     @required this.filterArguments,
     this.substrings = const [],
   });
 
   factory QueryFilter.parse(
-      String query, Map<String, QueryFilterArgument> args) {
+    String query,
+    Map<String, QueryFilterArgument> args,
+  ) {
     // Reset all argument values before generating a new QueryFilter.
     for (final arg in args.values) {
       arg.reset();

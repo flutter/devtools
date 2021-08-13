@@ -4,14 +4,22 @@
 
 // Type of events (event_category):
 
+import '../inspector/inspector_screen.dart';
+import '../logging/logging_screen.dart';
+import '../memory/memory_screen.dart';
+import '../performance/performance_screen.dart';
+
 const String screenViewEvent = 'screen'; // Active screen (tab selected).
 const String selectEvent = 'select'; // User selected something.
 
 // DevTools GA screenNames:
-const String inspector = 'inspector';
-const String performance = 'performance';
-const String memory = 'memory';
-const String logging = 'logging';
+// These screen ids must match the `screenId` for each respective subclass of
+// [Screen]. This is to ensure that the analytics for documentation links match
+// the screen id for other analytics on the same screen.
+const String inspector = InspectorScreen.id;
+const String performance = PerformanceScreen.id;
+const String memory = MemoryScreen.id;
+const String logging = LoggingScreen.id;
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
 const String devToolsMain = 'main';
@@ -77,3 +85,4 @@ const String clear = 'clear';
 const String export = 'export';
 const String expandAll = 'expandAll';
 const String collapseAll = 'collapseAll';
+const String documentationLink = 'documentationLink';
