@@ -12,7 +12,6 @@ import '../flutter_widgets/linked_scroll_controller.dart';
 import '../theme.dart';
 import '../ui/utils.dart';
 import 'memory_controller.dart';
-import 'memory_screen.dart';
 import 'memory_snapshot_models.dart';
 
 /// First two libraries are special e.g., dart:* and package:flutter*
@@ -131,15 +130,6 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
   bool oldFilterLibraryNoInstancesValue;
 
   final oldFilteredLibraries = <String, bool>{};
-
-  @visibleForTesting
-  static const snapshotFilterDialogKey = Key('SnapshotFilterDialog');
-
-  // Define here because exportButtonKey is @visibleForTesting and
-  // and can't be ref'd outside of file.
-  static void gaActionForSnapshotFilterDialog() {
-    MemoryScreen.gaAction(key: snapshotFilterDialogKey);
-  }
 
   @override
   void initState() {

@@ -10,6 +10,9 @@ import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose.dart';
 import '../config_specific/file/file.dart';
 import '../config_specific/logger/logger.dart';
@@ -23,7 +26,6 @@ import '../version.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
-import 'memory_screen.dart';
 import 'memory_service.dart';
 import 'memory_snapshot_models.dart';
 import 'memory_timeline.dart';
@@ -1474,7 +1476,7 @@ class MemoryLog {
 
   /// Persist the the live memory data to a JSON file in the /tmp directory.
   List<String> exportMemory() {
-    MemoryScreen.gaActionForExport();
+    ga.select(analytics_constants.memory, analytics_constants.export);
 
     final liveData = controller.memoryTimeline.liveData;
 
