@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:table/table.dart';
+import 'package:table/raw.dart';
 
 import '../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
@@ -183,7 +183,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
       children: [
         OutlineDecoration(
           child: Material(
-            child: RawTableScrollView(
+            child: RawTableView(
               verticalController: verticalScrollingController,
               delegate: delegate,
             ),

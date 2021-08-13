@@ -4,9 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:table/band.dart';
-import 'package:table/band_decoration.dart';
-import 'package:table/table.dart';
+import 'package:table/raw.dart';
 
 import '../common_widgets.dart';
 import '../theme.dart';

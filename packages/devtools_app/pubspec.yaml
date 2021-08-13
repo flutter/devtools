@@ -59,7 +59,7 @@ dependencies:
   table:
     git:
       url: https://github.com/goderbauer/scratchpad.git
-      ref: e2da7660523da0a32fd0ab56f51f015fe0c9c823
+      ref: dc6db33a15e508cfeec810fc81eeb3d20dd1b03a
       path: table
 
 dev_dependencies:
