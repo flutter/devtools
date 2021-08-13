@@ -10,6 +10,7 @@ import 'package:table/table.dart';
 
 import '../common_widgets.dart';
 import '../theme.dart';
+import '../ui/colors.dart';
 import '../utils.dart';
 import 'logging_controller.dart';
 
@@ -110,17 +111,9 @@ class LoggingTableDelegate extends RawTableDelegate {
 
     // TODO(goderbauer): How to do the ink splash?
     // TODO(goderbauer): Animate the transition to hover color?
-    final bool isSelected = selected == logs[row -1];
-    Color color = isSelected
-        ? _themeData.selectedRowColor
-        : alternatingColorForIndex(row - 1, themeData.colorScheme);
-    if (_hovered == row) {
-      color = color.brighten(0.2);
-    }
-
     return RawTableBand(
       backgroundDecoration: RawTableBandDecoration(
-        color: color,
+        color: _rowColor(row),
       ),
       extent: const FixedRawTableBandExtent(32.0),
       cursor: SystemMouseCursors.click,
@@ -143,6 +136,24 @@ class LoggingTableDelegate extends RawTableDelegate {
         ),
       },
     );
+  }
+
+  Color _rowColor(int row) {
+    final LogData rowData = logs[row -1];
+    final bool isSelected = selected == rowData;
+    Color color = isSelected ? _themeData.selectedRowColor : alternatingColorForIndex(row - 1, themeData.colorScheme);
+    if (_hovered == row) {
+      color = color.brighten(0.2);
+    }
+    if (searchMatches?.contains(rowData) ?? false) {
+      color = Color.alphaBlend(
+        activeSearchMatch == rowData
+          ? activeSearchMatchColorOpaque
+          : searchMatchColorOpaque,
+        color,
+      );
+    }
+    return color;
   }
 
   int _hovered;
@@ -198,6 +209,26 @@ class LoggingTableDelegate extends RawTableDelegate {
       return;
     }
     _selected = value;
+    notifyListeners();
+  }
+
+  LogData get activeSearchMatch => _activeSearchMatch;
+  LogData _activeSearchMatch;
+  set activeSearchMatch(LogData value) {
+    if (_activeSearchMatch == value) {
+      return;
+    }
+    _activeSearchMatch = value;
+    notifyListeners();
+  }
+
+  List<LogData> get searchMatches => _searchMatches;
+  List<LogData> _searchMatches;
+  set searchMatches(List<LogData> value) {
+    if (_searchMatches == value) {
+      return;
+    }
+    _searchMatches = value;
     notifyListeners();
   }
 

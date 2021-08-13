@@ -116,9 +116,17 @@ class _LoggingScreenState extends State<LoggingScreenBody>
 
     delegate.selected = controller.selectedLog.value;
     addAutoDisposeListener(controller.selectedLog, () {
-      setState(() {
-        delegate.selected = controller.selectedLog.value;
-      });
+      delegate.selected = controller.selectedLog.value;
+    });
+
+    delegate.searchMatches = controller.searchMatches.value;
+    addAutoDisposeListener(controller.searchMatches, () {
+      delegate.searchMatches =  controller.searchMatches.value;
+    });
+
+    delegate.activeSearchMatch = controller.activeSearchMatch.value;
+    addAutoDisposeListener(controller.activeSearchMatch, () {
+      delegate.activeSearchMatch = controller.activeSearchMatch.value;
     });
   }
 
@@ -141,6 +149,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
 
   Widget _buildLoggingControls() {
     final hasData = controller.filteredData.value.isNotEmpty;
+    print('hasData: $hasData');
     return Row(
       children: [
         ClearButton(onPressed: controller.clear),
