@@ -25,7 +25,7 @@ let _gtagsEnabled = _gtagsValue == null || _gtagsValue == 'enabled';
 let _gtagsDisabled = _gtagsValue == 'disabled';
 
 function gtagsEnabled() {
-  return _gtagsEnabled
+  return _gtagsEnabled;
 }
 
 function gtagsReset() {
@@ -44,18 +44,18 @@ function initializeGA() {
     gtag('config', GA_DEVTOOLS_PROPERTY, {
       'custom_map': {
         // Custom dimensions:
-        dimension1: 'user_app',
-        dimension2: 'user_build',
-        dimension3: 'user_platform',
-        dimension4: 'devtools_platform',
-        dimension5: 'devtools_chrome',
-        dimension6: 'devtools_version',
-        dimension7: 'ide_launched',
-        dimension8: 'flutter_client_id',
+        'dimension1': 'user_app',
+        'dimension2': 'user_build',
+        'dimension3': 'user_platform',
+        'dimension4': 'devtools_platform',
+        'dimension5': 'devtools_chrome',
+        'dimension6': 'devtools_version',
+        'dimension7': 'ide_launched',
+        'dimension8': 'flutter_client_id',
 
         // Custom metrics:
-        metric1: 'gpu_duration',
-        metric2: 'ui_duration',
+        'metric1': 'raster_duration',
+        'metric2': 'ui_duration',
       }
     });
 
