@@ -223,7 +223,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   void _showFilterDialog() {
     showDialog(
       context: context,
-      builder: (context) => FilterDialog(
+      builder: (context) => FilterDialog<NetworkController, NetworkRequest>(
         controller: _networkController,
         queryInstructions: NetworkScreenBody.filterQueryInstructions,
         queryFilterArguments: _networkController.filterArgs,
