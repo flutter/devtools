@@ -51,13 +51,27 @@ class LoggingTableDelegate extends RawTableDelegate {
     }
     assert(child != null);
 
-    return Align(
+    child = Align(
       alignment: Alignment.centerLeft,
       child: Padding(
         padding: _columnPadding[column],
         child: child,
       ),
     );
+
+    if (row == 0) {
+      child = Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: () {
+            // TODO: implement sorting here; does that even make sense for this table?
+          },
+          child: child,
+        ),
+      );
+    }
+
+    return child;
   }
 
   @override
@@ -94,14 +108,30 @@ class LoggingTableDelegate extends RawTableDelegate {
       );
     }
 
+    // TODO(goderbauer): How to do the ink splash?
+    // TODO(goderbauer): Animate the transition to hover color?
+    final bool isSelected = selected == logs[row -1];
+    Color color = isSelected
+        ? _themeData.selectedRowColor
+        : alternatingColorForIndex(row - 1, themeData.colorScheme);
+    if (_hovered == row) {
+      color = color.brighten(0.2);
+    }
+
     return RawTableBand(
       backgroundDecoration: RawTableBandDecoration(
-        color: alternatingColorForIndex(
-          row - 1,
-          themeData.colorScheme,
-        ),
+        color: color,
       ),
       extent: const FixedRawTableBandExtent(32.0),
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) {
+        _hovered = row;
+        notifyListeners();
+      },
+      onExit: (_) {
+        _hovered = null;
+        notifyListeners();
+      },
       recognizerFactories: {
         TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
           () => TapGestureRecognizer(),
@@ -114,6 +144,8 @@ class LoggingTableDelegate extends RawTableDelegate {
       },
     );
   }
+
+  int _hovered;
 
   @override
   int get numberOfColumns => 3;
@@ -159,12 +191,22 @@ class LoggingTableDelegate extends RawTableDelegate {
     notifyListeners();
   }
 
+  LogData get selected => _selected;
+  LogData _selected;
+  set selected(LogData value) {
+    if (value == _selected) {
+      return;
+    }
+    _selected = value;
+    notifyListeners();
+  }
+
   @override
   bool shouldRebuild(RawTableDelegate oldDelegate) => true;
 }
 
 class _WhenCell extends StatelessWidget {
-  const _WhenCell({Key key, this.item}) : super(key: key);
+  const _WhenCell({Key key, @required this.item}) : super(key: key);
 
   final LogData item;
 
@@ -184,7 +226,7 @@ class _WhenCell extends StatelessWidget {
 
 
 class _KindCell extends StatelessWidget {
-  const _KindCell({Key key, this.item}) : super(key: key);
+  const _KindCell({Key key, @required this.item}) : super(key: key);
 
   final LogData item;
 
@@ -223,7 +265,7 @@ class _KindCell extends StatelessWidget {
 }
 
 class _MessageCell extends StatelessWidget {
-  const _MessageCell({Key key, this.item}) : super(key: key);
+  const _MessageCell({Key key, @required this.item}) : super(key: key);
 
   final LogData item;
 
@@ -231,9 +273,6 @@ class _MessageCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final String displayValue =  item.summary ?? item.details;
     final TextStyle textStyle = Theme.of(context).fixedFontStyle;
-    // if (isRowSelected) {
-    //   textStyle = textStyle.copyWith(color: defaultSelectionForegroundColor);
-    // }
 
     if (item.kind == 'flutter.frame') {
       const Color color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);

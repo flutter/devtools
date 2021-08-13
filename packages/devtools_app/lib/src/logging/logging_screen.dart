@@ -78,7 +78,6 @@ Example queries:
 
 class _LoggingScreenState extends State<LoggingScreenBody>
     with AutoDisposeMixin, SearchFieldMixin<LoggingScreenBody> {
-  LogData selected;
 
   LoggingController controller;
 
@@ -92,7 +91,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     delegate = LoggingTableDelegate(
       controller: verticalScrollingController,
       onRowSelected: (int row) {
-        print(row);
+        controller.selectLog(delegate.logs[row]);
       }
     );
   }
@@ -115,10 +114,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
       });
     });
 
-    selected = controller.selectedLog.value;
+    delegate.selected = controller.selectedLog.value;
     addAutoDisposeListener(controller.selectedLog, () {
       setState(() {
-        selected = controller.selectedLog.value;
+        delegate.selected = controller.selectedLog.value;
       });
     });
   }
@@ -175,12 +174,14 @@ class _LoggingScreenState extends State<LoggingScreenBody>
       initialFractions: const [0.72, 0.28],
       children: [
         OutlineDecoration(
-          child: RawTableScrollView(
-            verticalController: verticalScrollingController,
-            delegate: delegate,
+          child: Material(
+            child: RawTableScrollView(
+              verticalController: verticalScrollingController,
+              delegate: delegate,
+            ),
           )
         ),
-        LogDetails(log: selected),
+        LogDetails(log: delegate.selected),
       ],
     );
   }

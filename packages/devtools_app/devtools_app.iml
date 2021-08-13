@@ -9,6 +9,18 @@
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/flutter_error_app/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/flutter_error_app/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/flutter_error_app/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/riverpod_app/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/riverpod_app/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/riverpod_app/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/provider_app/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/provider_app/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/provider_app/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/flutter_app/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/flutter_app/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/flutter_app/.dart_tool" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart SDK" level="project" />
