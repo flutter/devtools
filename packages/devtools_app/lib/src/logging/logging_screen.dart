@@ -149,7 +149,6 @@ class _LoggingScreenState extends State<LoggingScreenBody>
 
   Widget _buildLoggingControls() {
     final hasData = controller.filteredData.value.isNotEmpty;
-    print('hasData: $hasData');
     return Row(
       children: [
         ClearButton(onPressed: controller.clear),
