@@ -91,6 +91,36 @@ void main() {
   });
 
   group('CpuStackFrame', () {
+    test('isNative', () {
+      expect(stackFrameA.isNative, isTrue);
+      expect(stackFrameB.isNative, isFalse);
+      expect(stackFrameC.isNative, isFalse);
+      expect(
+        CpuStackFrame(
+          id: CpuProfileData.rootId,
+          name: CpuProfileData.rootName,
+          verboseName: 'all',
+          category: 'Dart',
+          rawUrl: '',
+          parentId: null,
+          profileMetaData: profileMetaData,
+        ).isNative,
+        isFalse,
+      );
+    });
+
+    test('isDartCore', () {
+      expect(stackFrameA.isDartCore, isFalse);
+      expect(stackFrameB.isDartCore, isTrue);
+      expect(stackFrameC.isDartCore, isFalse);
+    });
+
+    test('isFlutterCore', () {
+      expect(stackFrameA.isFlutterCore, isFalse);
+      expect(stackFrameB.isFlutterCore, isFalse);
+      expect(stackFrameC.isFlutterCore, isTrue);
+    });
+
     test('sampleCount', () {
       expect(testStackFrame.inclusiveSampleCount, equals(10));
     });
