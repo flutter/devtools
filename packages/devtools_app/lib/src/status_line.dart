@@ -7,6 +7,9 @@ import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../devtools.dart' as devtools;
+import 'analytics/analytics_stub.dart'
+    if (dart.library.html) 'analytics/analytics.dart' as ga;
+import 'analytics/constants.dart' as analytics_constants;
 import 'common_widgets.dart';
 import 'device_dialog.dart';
 import 'globals.dart';
@@ -114,6 +117,10 @@ class StatusLine extends StatelessWidget {
       return InkWell(
         onTap: () async {
           final url = 'https://flutter.dev/devtools/$docPageId';
+          ga.select(
+            currentScreen.screenId,
+            analytics_constants.documentationLink,
+          );
           await launchUrl(url, context);
         },
         child: Text(
