@@ -470,7 +470,7 @@ final httpGetRequest = HttpProfileRequest.parse(httpGetJson);
 final httpGet = DartIOHttpRequestData(0, httpGetRequest);
 final Map<String, dynamic> httpGetJson = {
   'type': 'HttpProfileRequest',
-  'id': 31,
+  'id': 1,
   'isolateId': 'isolates/2013291945734727',
   'method': 'GET',
   'uri': 'https://jsonplaceholder.typicode.com/albums/1',
@@ -484,7 +484,7 @@ final Map<String, dynamic> httpGetJson = {
       {'timestamp': 6327091650, 'event': 'Content Download'}
     ],
     'headers': {
-      'content-length': [0],
+      'content-length': ['0'],
     },
     'connectionInfo': {
       'localPort': 45648,
@@ -532,7 +532,7 @@ final httpPostRequest = HttpProfileRequest.parse(httpPostJson);
 final httpPost = DartIOHttpRequestData(0, httpPostRequest);
 final Map<String, dynamic> httpPostJson = {
   'type': 'HttpProfileRequest',
-  'id': 1,
+  'id': 2,
   'isolateId': 'isolates/979700762893215',
   'method': 'POST',
   'uri': 'https://jsonplaceholder.typicode.com/posts',
@@ -687,7 +687,7 @@ final httpPutRequest = HttpProfileRequest.parse(httpPutJson);
 final httpPut = DartIOHttpRequestData(0, httpPutRequest);
 final Map<String, dynamic> httpPutJson = {
   'type': 'HttpProfileRequest',
-  'id': 1,
+  'id': 3,
   'isolateId': 'isolates/4447876918484683',
   'method': 'PUT',
   'uri': 'https://jsonplaceholder.typicode.com/posts/1',
@@ -841,7 +841,7 @@ final httpPatchRequest = HttpProfileRequest.parse(httpPatchJson);
 final httpPatch = DartIOHttpRequestData(0, httpPatchRequest);
 final Map<String, dynamic> httpPatchJson = {
   'type': 'HttpProfileRequest',
-  'id': 9,
+  'id': 4,
   'isolateId': 'isolates/4447876918484683',
   'method': 'PATCH',
   'uri': 'https://jsonplaceholder.typicode.com/posts/1',
@@ -1046,3 +1046,19 @@ final httpPatchResponseBodyData = [
   ],
   ...[32, 32, 32, 125, 10, 32, 32, 32, 32],
 ];
+
+final httpGetWithErrorRequest = HttpProfileRequest.parse(httpGetWithErrorJson);
+final httpGetWithError = DartIOHttpRequestData(0, httpGetWithErrorRequest);
+final Map<String, dynamic> httpGetWithErrorJson = {
+  'type': '@HttpProfileRequest',
+  'id': 5,
+  'isolateId': 'isolates/1939772779732043',
+  'method': 'GET',
+  'uri': 'https://www.examplez.com/1',
+  'startTime': 5385227316,
+  'endTime': 5387256813,
+  'request': {
+    'events': [],
+    'error': 'HandshakeException: Connection terminated during handshake',
+  },
+};

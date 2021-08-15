@@ -43,28 +43,24 @@ Future<void> clearTimeouts(WidgetTester tester) async {
 }
 
 void main() {
-  FakeServiceManager fakeServiceManager;
-  SocketProfile socketProfile;
-  HttpProfile httpProfile;
-
   const windowSize = Size(1599.0, 1000.0);
 
-  setUpAll(() async {
-    socketProfile = loadSocketProfile();
-    httpProfile = loadHttpProfile();
-  });
-
   group('Network Profiler', () {
+    FakeServiceManager fakeServiceManager;
+    Timeline timeline;
+    SocketProfile socketProfile;
+
     setUp(() async {
+      timeline = await loadNetworkProfileTimeline();
+      socketProfile = loadSocketProfile();
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(
+          timelineData: timeline,
           socketProfile: socketProfile,
-          httpProfile: httpProfile,
         ),
       );
       (fakeServiceManager.service as FakeVmService)
-        ..httpEnableTimelineLoggingResult = false
-        ..dartIoVersion = SemanticVersion(major: 1, minor: 6);
+          .httpEnableTimelineLoggingResult = false;
       setGlobal(ServiceConnectionManager, fakeServiceManager);
     });
 
@@ -103,22 +99,8 @@ void main() {
       expect(find.byType(Split), findsOneWidget);
 
       // Advance the clock to populate the network requests table.
-      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 1));
       expect(find.byType(CircularProgressIndicator), findsNothing);
-
-      expect(controller.requests.value.requests, isNotEmpty);
-    }
-
-    // We should see the list of requests and the inspector, but have no
-    // selected request.
-    void expectNoSelection() {
-      expect(find.byType(NetworkRequestsTable), findsOneWidget);
-      expect(find.byType(NetworkRequestInspector), findsOneWidget);
-      expect(
-        find.byKey(NetworkRequestInspector.noRequestSelectedKey),
-        findsOneWidget,
-      );
-      expect(controller.selectedRequest.value, isNull);
     }
 
     testWidgetsWithWindowSize('builds proper content for state', windowSize,
@@ -127,6 +109,17 @@ void main() {
       await pumpNetworkScreen(tester);
 
       await loadRequestsAndCheck(tester);
+
+      // We should see the list of requests and the inspector, but have no
+      // selected request.
+      void expectNoSelection() {
+        expect(find.byType(NetworkRequestsTable), findsOneWidget);
+        expect(find.byType(NetworkRequestInspector), findsOneWidget);
+        expect(
+          find.byKey(NetworkRequestInspector.noRequestSelectedKey),
+          findsOneWidget,
+        );
+      }
 
       expectNoSelection();
 
@@ -266,32 +259,6 @@ void main() {
       await tester.pump();
 
       await clearTimeouts(tester);
-    });
-
-    // Regression test for https://github.com/flutter/devtools/issues/3286.
-    testWidgetsWithWindowSize('can select by clicking on url', windowSize,
-        (WidgetTester tester) async {
-      // Load the network profiler screen.
-      controller = NetworkController();
-      await pumpNetworkScreen(tester);
-
-      // Populate the screen with requests.
-      await loadRequestsAndCheck(tester);
-
-      expectNoSelection();
-
-      final textElement = tester
-          .element(find.text('https://jsonplaceholder.typicode.com/albums/1'));
-      final selectableTextWidget =
-          textElement.findAncestorWidgetOfExactType<SelectableText>();
-      await tester.tap(find.byWidget(selectableTextWidget));
-      await tester.pumpAndSettle();
-
-      expect(controller.selectedRequest.value, isNotNull);
-      expect(
-        find.byKey(NetworkRequestInspector.noRequestSelectedKey),
-        findsNothing,
-      );
     });
 
     testWidgetsWithWindowSize('clear results', windowSize,
@@ -464,6 +431,245 @@ void main() {
       expect(find.text('Last write time: '), findsOneWidget);
       expect(
           find.text(formatDateTime(data.lastWriteTimestamp)), findsOneWidget);
+    });
+  });
+
+  group('Network Profiler - Dart IO 1.6', () {
+    FakeServiceManager fakeServiceManager;
+    SocketProfile socketProfile;
+    HttpProfile httpProfile;
+
+    setUp(() async {
+      httpProfile = loadHttpProfile();
+      socketProfile = loadSocketProfile();
+      fakeServiceManager = FakeServiceManager(
+        service: FakeServiceManager.createFakeService(
+          httpProfile: httpProfile,
+          socketProfile: socketProfile,
+        ),
+      );
+      final fakeVmService = fakeServiceManager.service as FakeVmService;
+      fakeVmService.dartIoVersion = SemanticVersion(major: 1, minor: 6);
+      fakeVmService.httpEnableTimelineLoggingResult = false;
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
+    });
+
+    testWidgetsWithWindowSize('starts and stops', windowSize, (
+      WidgetTester tester,
+    ) async {
+      controller = NetworkController();
+
+      // Ensure we're not recording initially.
+      expect(controller.isPolling, false);
+      expect(controller.recordingNotifier.value, false);
+
+      await pumpNetworkScreen(tester);
+      await tester.pumpAndSettle();
+
+      // Check that we're polling.
+      expect(controller.isPolling, true);
+      expect(controller.recordingNotifier.value, true);
+
+      // Pause recording.
+      expect(find.byType(PauseButton), findsOneWidget);
+      await tester.tap(find.byType(PauseButton));
+      await tester.pumpAndSettle();
+
+      // Check that we've stopped polling.
+      expect(controller.isPolling, false);
+      expect(controller.recordingNotifier.value, false);
+
+      await clearTimeouts(tester);
+    });
+
+    Future<void> loadRequestsAndCheck(WidgetTester tester) async {
+      expect(find.byType(ResumeButton), findsOneWidget);
+      expect(find.byType(PauseButton), findsOneWidget);
+      expect(find.byType(ClearButton), findsOneWidget);
+      expect(find.byType(Split), findsOneWidget);
+
+      // Advance the clock to populate the network requests table.
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+    }
+
+    testWidgetsWithWindowSize('builds proper content for state', windowSize,
+        (WidgetTester tester) async {
+      controller = NetworkController();
+      await pumpNetworkScreen(tester);
+
+      // await loadRequestsAndCheck(tester);
+      await controller.networkService.refreshNetworkData();
+
+      // We should see the list of requests and the inspector, but have no
+      // selected request.
+      void expectNoSelection() {
+        expect(find.byType(NetworkRequestsTable), findsOneWidget);
+        expect(find.byType(NetworkRequestInspector), findsOneWidget);
+        expect(
+          find.byKey(NetworkRequestInspector.noRequestSelectedKey),
+          findsOneWidget,
+        );
+      }
+
+      expectNoSelection();
+
+      Future<void> validateHeadersTab(HttpRequestData data) async {
+        // Switch to headers tab.
+        await tester.tap(find.byKey(NetworkRequestInspector.headersTabKey));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(NetworkRequestOverviewView), findsNothing);
+        expect(find.byType(HttpRequestHeadersView), findsOneWidget);
+        expect(find.byType(HttpResponseView), findsNothing);
+        expect(find.byType(HttpRequestCookiesView), findsNothing);
+
+        // TODO(kenz): move the headers tab validation into its own testing
+        // group (see NetworkRequestOverviewView test group).
+
+        // There should be three tiles: general, response headers, and request
+        // headers.
+        expect(find.byType(ExpansionTile), findsNWidgets(3));
+
+        // Check contents of general.
+        final ExpansionTile generalTile =
+            tester.widget(find.byKey(HttpRequestHeadersView.generalKey));
+
+        final numGeneralEntries = data.general.length;
+        expect(generalTile.children.length, numGeneralEntries);
+
+        // Check contents of request headers.
+        final ExpansionTile requestsTile =
+            tester.widget(find.byKey(HttpRequestHeadersView.requestHeadersKey));
+        final numRequestHeaders = data.requestHeaders?.length ?? 0;
+        expect(requestsTile.children.length, numRequestHeaders);
+
+        // Check contents of response headers.
+        final ExpansionTile responsesTile = tester
+            .widget(find.byKey(HttpRequestHeadersView.responseHeadersKey));
+        final numResponseHeaders = data.responseHeaders?.length ?? 0;
+        expect(responsesTile.children.length, numResponseHeaders);
+      }
+
+      Future<void> validateResponseTab(HttpRequestData data) async {
+        if (data.responseBody != null) {
+          // Switch to response tab.
+          await tester.tap(find.byKey(NetworkRequestInspector.responseTabKey));
+          await tester.pumpAndSettle();
+
+          expect(find.byType(NetworkRequestOverviewView), findsNothing);
+          expect(find.byType(HttpRequestHeadersView), findsNothing);
+          expect(find.byType(HttpResponseView), findsOneWidget);
+          expect(find.byType(HttpRequestCookiesView), findsNothing);
+        }
+      }
+
+      Future<void> validateOverviewTab(NetworkRequest data) async {
+        // Switch to overview tab.
+        await tester.tap(find.byKey(NetworkRequestInspector.overviewTabKey));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(NetworkRequestOverviewView), findsOneWidget);
+        expect(find.byType(HttpRequestHeadersView), findsNothing);
+        expect(find.byType(HttpResponseView), findsNothing);
+        expect(find.byType(HttpRequestCookiesView), findsNothing);
+      }
+
+      Future<void> validateCookiesTab(HttpRequestData data) async {
+        final httpRequest = controller.selectedRequest.value as HttpRequestData;
+        final hasCookies = httpRequest.hasCookies;
+
+        if (hasCookies) {
+          // Switch to cookies tab.
+          await tester.tap(find.byKey(NetworkRequestInspector.cookiesTabKey));
+          await tester.pumpAndSettle();
+
+          expect(find.byType(NetworkRequestOverviewView), findsNothing);
+          expect(find.byType(HttpRequestHeadersView), findsNothing);
+          expect(find.byType(HttpResponseView), findsNothing);
+          expect(find.byType(HttpRequestCookiesView), findsOneWidget);
+
+          // TODO(kenz): move the cookie tab validation into its own testing
+          // group (see NetworkRequestOverviewView test group).
+
+          // Checks the contents of a cookies table to ensure it's well formed.
+          void validateCookieTable(List<Cookie> cookies, Key key) {
+            expect(
+              find.byKey(key),
+              findsOneWidget,
+            );
+            final cookieCount = cookies.length;
+            final DataTable cookiesTable = tester.widget(
+              find.byKey(key),
+            );
+            expect(cookiesTable.rows.length, cookieCount);
+          }
+
+          // Check the request cookies table.
+          if (data.requestCookies.isNotEmpty) {
+            validateCookieTable(
+              data.requestCookies,
+              HttpRequestCookiesView.requestCookiesKey,
+            );
+          }
+
+          // Check the response cookies table.
+          if (data.responseCookies.isNotEmpty) {
+            validateCookieTable(
+              data.responseCookies,
+              HttpRequestCookiesView.responseCookiesKey,
+            );
+          }
+        } else {
+          // The cookies tab shouldn't be displayed if there are no cookies
+          // associated with the request.
+          expect(
+              find.byKey(NetworkRequestInspector.cookiesTabKey), findsNothing);
+        }
+      }
+
+      for (final request in controller.requests.value.requests) {
+        controller.selectRequest(request);
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(NetworkRequestInspector.noRequestSelectedKey),
+          findsNothing,
+        );
+
+        final selection = controller.selectedRequest.value;
+        print('selected request : ${selection.uri}');
+        if (selection is HttpRequestData) {
+          await validateHeadersTab(selection);
+          await validateResponseTab(selection);
+          await validateCookiesTab(selection);
+        }
+        await validateOverviewTab(selection);
+      }
+
+      // Pause recording.
+      await tester.tap(find.byType(PauseButton));
+      await tester.pump();
+
+      await clearTimeouts(tester);
+    });
+
+    testWidgetsWithWindowSize('clear results', windowSize,
+        (WidgetTester tester) async {
+      // Load the network profiler screen.
+      controller = NetworkController();
+      await pumpNetworkScreen(tester);
+
+      // Populate the screen with requests.
+      await loadRequestsAndCheck(tester);
+
+      // Pause the profiler.
+      await tester.tap(find.byType(PauseButton));
+      await tester.pumpAndSettle();
+
+      // Clear the results.
+      await tester.tap(find.byType(ClearButton));
+      // Wait to ensure all the timers have been cancelled.
+      await tester.pumpAndSettle(const Duration(seconds: 2));
     });
   });
 }

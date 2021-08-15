@@ -4,10 +4,17 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/network/network_controller.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_app/src/version.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vm_service/vm_service.dart';
 
+import 'support/mocks.dart';
 import 'support/network_test_data.dart';
+import 'support/utils.dart';
 
 void main() {
   group('NetworkRequest', () {
@@ -375,6 +382,347 @@ void main() {
       expect(testSocket2.hashCode, equals(1));
       expect(testSocket1 == testSocket2, isFalse);
       expect(testSocket1 == testSocket3, isTrue);
+    });
+  });
+
+  group('DartIOHttpRequestData', () {
+    // DartIOHttpRequestData.getFullRequestData relies on a call to serviceManager to
+    // retrieve request details. 
+
+    NetworkController controller;
+    FakeServiceManager fakeServiceManager;
+    SocketProfile socketProfile;
+    HttpProfile httpProfile;
+
+    setUp(() async {
+      socketProfile = loadSocketProfile();
+      httpProfile = loadHttpProfile();
+      fakeServiceManager = FakeServiceManager(
+        service: FakeServiceManager.createFakeService(
+          socketProfile: socketProfile,
+          httpProfile: httpProfile,
+        ),
+      );
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      // Enables getHttpProfile support.
+      final fakeVmService = fakeServiceManager.service as FakeVmService;
+      fakeVmService.dartIoVersion = SemanticVersion(major: 1, minor: 6);
+      fakeVmService.httpEnableTimelineLoggingResult = false;
+      controller = NetworkController();
+      await controller.startRecording();
+    });
+
+    test('method returns correct value', () {
+      expect(httpGet.method, 'GET');
+      expect(httpGetWithError.method, 'GET');
+      expect(httpPost.method, 'POST');
+      expect(httpPut.method, 'PUT');
+      expect(httpPatch.method, 'PATCH');
+    });
+
+    test('uri returns correct value', () {
+      expect(httpGet.uri, 'https://jsonplaceholder.typicode.com/albums/1');
+      expect(httpGetWithError.uri, 'https://www.examplez.com/1');
+      expect(httpPost.uri, 'https://jsonplaceholder.typicode.com/posts');
+      expect(httpPut.uri, 'https://jsonplaceholder.typicode.com/posts/1');
+      expect(httpPatch.uri, 'https://jsonplaceholder.typicode.com/posts/1');
+    });
+
+    test('contentType returns correct value', () {
+      expect(httpGet.contentType, '[application/json; charset=utf-8]');
+      expect(httpGetWithError.contentType, isNull);
+      expect(httpPost.contentType, '[application/json; charset=utf-8]');
+      expect(httpPut.contentType, '[application/json; charset=utf-8]');
+      expect(httpPatch.contentType, '[application/json; charset=utf-8]');
+    });
+
+    test('type returns correct value', () {
+      expect(httpGet.type, 'json');
+      expect(httpGetWithError.type, 'http');
+      expect(httpPost.type, 'json');
+      expect(httpPut.type, 'json');
+      expect(httpPatch.type, 'json');
+    });
+
+    test('duration returns correct value', () {
+      expect(httpGet.duration.inMicroseconds, 6327091628 - 6326279935);
+      expect(httpGetWithError.duration.inMicroseconds, 5387256813 - 5385227316);
+      expect(httpPost.duration.inMicroseconds, 2401000670 - 2399492629);
+      expect(httpPut.duration.inMicroseconds, 1206609144 - 1205283313);
+      expect(httpPatch.duration.inMicroseconds, 1911420918 - 1910177192);
+    });
+
+    test('startTimestamp returns correct value', () {
+      // Test these values in UTC to avoid timezone differences with the bots.
+      expect(formatDateTime(httpGet.startTimestamp.toUtc()), '1:45:26.279 AM');
+      expect(formatDateTime(httpGetWithError.startTimestamp.toUtc()), '1:29:45.227 AM');
+      expect(formatDateTime(httpPost.startTimestamp.toUtc()), '12:39:59.492 AM');
+      expect(formatDateTime(httpPut.startTimestamp.toUtc()), '12:20:05.283 AM');
+      expect(formatDateTime(httpPatch.startTimestamp.toUtc()), '12:31:50.177 AM');
+    });
+
+    test('endTimestamp returns correct value', () {
+      // Test these values in UTC to avoid timezone differences with the bots.
+      expect(formatDateTime(httpGet.endTimestamp.toUtc()), '1:45:27.091 AM');
+      expect(formatDateTime(httpGetWithError.endTimestamp.toUtc()), '1:29:47.256 AM');
+      expect(formatDateTime(httpPost.endTimestamp.toUtc()), '12:40:01.000 AM');
+      expect(formatDateTime(httpPut.endTimestamp.toUtc()), '12:20:06.609 AM');
+      expect(formatDateTime(httpPatch.endTimestamp.toUtc()), '12:31:51.420 AM');
+    });
+
+    test('status returns correct value', () {
+      expect(httpGet.status, '200');
+      expect(httpGetEventWithError.status, 'Error');
+      expect(httpPost.status, '201');
+      expect(httpPut.status, '200');
+      expect(httpPatch.status, '200');
+    });
+
+    test('port returns correct value', () {
+      expect(httpGet.port, 45648);
+      expect(httpGetWithError.port, isNull);
+      expect(httpPost.port, 55972);
+      expect(httpPut.port, 43684);
+      expect(httpPatch.port, 43864);
+    });
+
+    test('durationDisplay returns correct value', () {
+      expect(httpGet.durationDisplay, 'Duration: 811.7 ms');
+      expect(httpGetWithError.durationDisplay, 'Duration: 2029.5 ms');
+      expect(httpPost.durationDisplay, 'Duration: 1508.0 ms');
+      expect(httpPut.durationDisplay, 'Duration: 1325.8 ms');
+      expect(httpPatch.durationDisplay, 'Duration: 1243.7 ms');
+    });
+
+    test('isValid returns correct value', () {
+      expect(httpGet.isValid, isTrue);
+      expect(httpGetWithError.isValid, isTrue);
+      expect(httpPost.isValid, isTrue);
+      expect(httpPut.isValid, isTrue);
+      expect(httpPatch.isValid, isTrue);
+    });
+
+    test('general returns correct value', () {
+      expect(
+        collectionEquals(httpGet.general, {
+          'method': 'GET',
+          'uri': 'https://jsonplaceholder.typicode.com/albums/1',
+          'connectionInfo': {
+            'localPort': 45648,
+            'remoteAddress': '2606:4700:3033::ac43:bdd9',
+            'remotePort': 443,
+          },
+          'contentLength': 0,
+          'compressionState': 'HttpClientResponseCompressionState.decompressed',
+          'isRedirect': false,
+          'persistentConnection': true,
+          'reasonPhrase': 'OK',
+          'redirects': [],
+          'statusCode': 200,
+        }),
+        isTrue,
+      );
+      expect(
+        collectionEquals(httpGetWithError.general, {
+          'method': 'GET',
+          'uri': 'https://www.examplez.com/1',
+        }),
+        isTrue,
+      );
+      expect(
+        collectionEquals(httpPost.general, {
+          'method': 'POST',
+          'uri': 'https://jsonplaceholder.typicode.com/posts',
+          'connectionInfo': {
+            'localPort': 55972,
+            'remoteAddress': '2606:4700:3033::ac43:bdd9',
+            'remotePort': 443,
+          },
+          'contentLength': -1,
+          'compressionState': 'HttpClientResponseCompressionState.notCompressed',
+          'isRedirect': false,
+          'persistentConnection': true,
+          'reasonPhrase': 'Created',
+          'redirects': [],
+          'statusCode': 201,
+        }),
+        isTrue,
+      );      
+      expect(
+        collectionEquals(httpPut.general, {
+          'method': 'PUT',
+          'uri': 'https://jsonplaceholder.typicode.com/posts/1',
+          'connectionInfo': {
+            'localPort': 43684,
+            'remoteAddress': '2606:4700:3033::ac43:bdd9',
+            'remotePort': 443,
+          },
+          'contentLength': -1,
+          'compressionState': 'HttpClientResponseCompressionState.notCompressed',
+          'isRedirect': false,
+          'persistentConnection': true,
+          'reasonPhrase': 'OK',
+          'redirects': [],
+          'statusCode': 200,
+        }),
+        isTrue,
+      ); 
+      expect(
+        collectionEquals(httpPatch.general, {
+          'method': 'PATCH',
+          'uri': 'https://jsonplaceholder.typicode.com/posts/1',
+          'connectionInfo': {
+            'localPort': 43864,
+            'remoteAddress': '2606:4700:3033::ac43:bdd9',
+            'remotePort': 443,
+          },
+          'contentLength': -1,
+          'compressionState': 'HttpClientResponseCompressionState.decompressed',
+          'isRedirect': false,
+          'persistentConnection': true,
+          'reasonPhrase': 'OK',
+          'redirects': [],
+          'statusCode': 200,
+        }),
+        isTrue,
+      );
+    });
+
+    test('inProgress returns correct value', () {
+      expect(httpGet.inProgress, false);
+      expect(httpGetWithError.inProgress, false);
+      expect(httpPost.inProgress, false);
+      expect(httpPut.inProgress, false);
+      expect(httpPatch.inProgress, false);
+    });
+
+    test('requestHeaders returns correct value', () {
+      expect(
+        collectionEquals(httpGet.requestHeaders, {
+          'content-length': ['0'],
+        }),
+        isTrue,
+      );      
+      expect(httpGetWithError.requestHeaders, isNull);
+      expect(
+        collectionEquals(httpPost.requestHeaders, {
+          'transfer-encoding': [],
+        }),
+        isTrue,
+      );      
+      expect(
+        collectionEquals(httpPut.requestHeaders, {
+          'transfer-encoding': [],
+        }),
+        isTrue,
+      );      
+      expect(
+        collectionEquals(httpPatch.requestHeaders, {
+          'transfer-encoding': [],
+        }),
+        isTrue,
+      );      
+    });
+
+    test('responseHeaders returns correct value', () {
+      expect(
+        collectionEquals(httpGet.responseHeaders, {
+          'content-encoding': ['gzip'],
+          'pragma': ['no-cache'],
+          'connection': ['keep-alive'],
+          'cache-control': ['max-age=43200'],
+          'content-type': ['application/json; charset=utf-8'],
+        }),
+        isTrue,
+      );      
+      expect(httpGetWithError.responseHeaders, isNull);
+      expect(
+        collectionEquals(httpPost.responseHeaders, {
+          'date': ['Wed, 04 Aug 2021 07:57:26 GMT'],
+          'location': ['http://jsonplaceholder.typicode.com/posts/101'],
+          'content-length': [15],
+          'connection': ['keep-alive'],
+          'cache-control': ['no-cache'],
+          'content-type': ['application/json; charset=utf-8'],
+          'x-powered-by': ['Express'],
+          'expires': [-1],
+        }),
+        isTrue,
+      );
+      expect(
+        collectionEquals(httpPut.responseHeaders, {
+          'connection': ['keep-alive'],
+          'cache-control': ['no-cache'],
+          'date': ['Wed, 04 Aug 2021 08:57:24 GMT'],
+          'content-type': ['application/json; charset=utf-8'],
+          'pragma': ['no-cache'],
+          'access-control-allow-credentials': [true],
+          'content-length': [13],
+          'expires': [-1],
+        }),
+        isTrue,
+      );
+      expect(
+        collectionEquals(httpPatch.responseHeaders, {
+          'connection': ['keep-alive'],
+          'cache-control': ['no-cache'],
+          'transfer-encoding': ['chunked'],
+          'date': ['Wed, 04 Aug 2021 09:09:09 GMT'],
+          'content-encoding': ['gzip'],
+          'content-type': ['application/json; charset=utf-8'],
+          'pragma': ['no-cache'],
+          'expires': [-1],
+        }),
+        isTrue,
+      );
+    });
+
+    test('requestCookies returns correct value', () {
+      expect(httpGet.requestCookies, isEmpty);
+      expect(httpGetWithError.requestCookies, isEmpty);
+      expect(httpPost.requestCookies, isEmpty);
+      expect(httpPut.requestCookies, isEmpty);
+      expect(httpPatch.requestCookies, isEmpty);
+    });
+
+    test('responseCookies returns correct value', () {
+      expect(httpGet.responseCookies, isEmpty);
+      expect(httpGetWithError.responseCookies, isEmpty);
+      expect(httpPost.responseCookies, isEmpty);
+      expect(httpPut.responseCookies, isEmpty);
+      expect(httpPatch.responseCookies, isEmpty);
+    });
+
+    test('hasCookies returns correct value', () {
+      expect(httpGet.hasCookies, isFalse);
+      expect(httpGetWithError.hasCookies, isFalse);
+      expect(httpPost.hasCookies, isFalse);
+      expect(httpPut.hasCookies, isFalse);
+      expect(httpPatch.hasCookies, isFalse);
+    });
+
+    test('requestBody returns correct value', () {
+      expect(httpGet.requestBody, isNull);
+      expect(httpGetWithError.requestBody, isNull);
+      expect(httpPost.requestBody, utf8.decode(httpPostRequestBodyData));
+      expect(httpPut.requestBody, utf8.decode(httpPutRequestBodyData));
+      expect(httpPatch.requestBody, utf8.decode(httpPatchRequestBodyData));
+    });
+    
+    test('responseBody returns correct value', () {
+      expect(httpGet.responseBody, utf8.decode(httpGetResponseBodyData));
+      expect(httpGetWithError.responseBody, isNull);
+      expect(httpPost.responseBody, utf8.decode(httpPostResponseBodyData));
+      expect(httpPut.responseBody, utf8.decode(httpPutResponseBodyData));
+      expect(httpPatch.responseBody, utf8.decode(httpPatchResponseBodyData));
+    });
+
+    test('didFail returns correct value', () {
+      expect(httpGet.didFail, false);
+      expect(httpGetWithError.didFail, true);
+      expect(httpPost.didFail, false);
+      expect(httpPut.didFail, false);
+      expect(httpPatch.didFail, false);
     });
   });
 }

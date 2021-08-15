@@ -7,8 +7,12 @@ import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/network/network_model.dart';
 import 'package:devtools_app/src/network/network_screen.dart';
+import 'package:devtools_app/src/version.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vm_service/vm_service.dart';
 
+import 'support/mocks.dart';
+import 'support/network_test_data.dart';
 import 'support/utils.dart';
 
 void main() {
@@ -123,4 +127,97 @@ void main() {
       expect(column.getDisplayValue(request), contains(':25:34.126'));
     });
   });
+
+  group('NetworkScreen NetworkRequestsTable - Dart IO 1.6', () {
+    NetworkController controller;
+    FakeServiceManager fakeServiceManager;
+    SocketProfile socketProfile;
+    HttpProfile httpProfile;
+    List<NetworkRequest> requests;
+
+    setUpAll(() async {
+      httpProfile = loadHttpProfile();
+      socketProfile = loadSocketProfile();
+      fakeServiceManager = FakeServiceManager(
+        service: FakeServiceManager.createFakeService(
+          httpProfile: httpProfile,
+          socketProfile: socketProfile,
+        ),
+      );
+      // Create a fakeVmService because DartIOHttpRequestData.getFullRequestData needs one
+      final fakeVmService = fakeServiceManager.service as FakeVmService;
+      fakeVmService.dartIoVersion = SemanticVersion(major: 1, minor: 6);
+      fakeVmService.httpEnableTimelineLoggingResult = false;
+
+      // Bypass controller recording so timelineMicroOffset is not time dependant
+      controller = NetworkController();
+      final networkRequests = controller.processNetworkTrafficHelper(
+        null,
+        socketProfile.sockets,
+        httpProfile.requests,
+        0,
+        currentValues: [],
+        invalidRequests: [],
+        outstandingRequestsMap: {},
+      );
+      requests = networkRequests.requests;
+    });
+
+    DartIOHttpRequestData _findRequestById(int id) {
+      return requests
+        .whereType<DartIOHttpRequestData>()
+        .cast<DartIOHttpRequestData>()
+        .firstWhere((request) => request.id == id);
+    }
+
+    test('UriColumn', () {
+      final column = UriColumn();
+      for(final request in requests) {
+        expect(column.getDisplayValue(request), request.uri.toString());
+      }
+    });
+
+    test('MethodColumn', () {
+      final column = MethodColumn();
+      for(final request in requests) {
+        expect(column.getDisplayValue(request), request.method);
+      }
+    });
+
+    test('StatusColumn for http request', () {
+      final column = StatusColumn();
+      final getRequest = _findRequestById(1);
+
+      expect(column.getDisplayValue(getRequest), httpGet.status);
+
+      // TODO(bleroux): add a pending request in test data
+      // expect(column.getDisplayValue(request), '--');
+    });
+
+    test('TypeColumn for http request', () {
+      final column = TypeColumn();
+      final getRequest = _findRequestById(1);
+
+      expect(column.getDisplayValue(getRequest), 'json');
+    });
+
+    test('DurationColumn for http request', () {
+      final column = DurationColumn();
+      final getRequest = _findRequestById(1);
+
+      expect(column.getDisplayValue(getRequest), '811 ms');
+
+      // TODO(bleroux): add a pending request in test data
+      // expect(column.getDisplayValue(request), 'Pending');
+    });
+
+    test('TimestampColumn', () {
+      final column = TimestampColumn();
+      final getRequest = _findRequestById(1);
+      print(httpGet.startTimestamp.toUtc());
+      print(getRequest.startTimestamp.toUtc());
+
+      //expect(column.getDisplayValue(getRequest), contains(':26:36.330'));
+    });
+  }); 
 }

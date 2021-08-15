@@ -659,13 +659,15 @@ class NetworkRequestOverviewView extends StatelessWidget {
         title: 'Last read time',
         child: data.lastReadTimestamp != null
             ? _valueText(formatDateTime(data.lastReadTimestamp))
-            : '--',
+            : _valueText('--'),
       ),
       const SizedBox(height: defaultSpacing),
       _buildRow(
         context: context,
         title: 'Last write time',
-        child: _valueText(formatDateTime(data.lastWriteTimestamp)),
+        child: data.lastWriteTimestamp != null
+            ? _valueText(formatDateTime(data.lastWriteTimestamp))
+            : _valueText('--'),
       ),
     ];
   }
