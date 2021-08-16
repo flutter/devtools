@@ -11,13 +11,13 @@ import 'analytics/analytics_stub.dart'
     if (dart.library.html) 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as analytics_constants;
 import 'common_widgets.dart';
+import 'config_specific/launch_url/launch_url.dart';
 import 'device_dialog.dart';
 import 'globals.dart';
 import 'info/info_controller.dart';
 import 'screen.dart';
 import 'service_manager.dart';
 import 'theme.dart';
-import 'utils.dart';
 
 const statusLineHeight = 24.0;
 

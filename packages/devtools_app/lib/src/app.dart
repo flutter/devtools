@@ -16,6 +16,7 @@ import 'app_size/app_size_controller.dart';
 import 'app_size/app_size_screen.dart';
 import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
+import 'config_specific/launch_url/launch_url.dart';
 import 'config_specific/server/server.dart';
 import 'debugger/debugger_controller.dart';
 import 'debugger/debugger_screen.dart';
@@ -47,7 +48,6 @@ import 'screen.dart';
 import 'snapshot_screen.dart';
 import 'theme.dart';
 import 'ui/service_extension_widgets.dart';
-import 'utils.dart';
 import 'vm_developer/vm_developer_tools_controller.dart';
 import 'vm_developer/vm_developer_tools_screen.dart';
 
