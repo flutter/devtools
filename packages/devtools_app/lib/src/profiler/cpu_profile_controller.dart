@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../globals.dart';
 import '../ui/filter.dart';
 import '../ui/search.dart';
@@ -19,6 +24,8 @@ class CpuProfilerController
     with
         SearchControllerMixin<CpuStackFrame>,
         FilterControllerMixin<CpuStackFrame> {
+  CpuProfilerController({this.analyticsScreenId});
+
   /// Tag to represent when no user tag filters are applied.
   ///
   /// The word 'none' is not a magic word - just a user-friendly name to convey
@@ -30,6 +37,9 @@ class CpuProfilerController
   /// When this data is the value of [_dataNotifier], the CPU profiler is in a
   /// base state where recording instructions should be shown.
   static CpuProfileData baseStateCpuProfileData = CpuProfileData.empty();
+
+  /// The analytics screen id for which this controller is active.
+  final String analyticsScreenId;
 
   /// Store of cached CPU profiles.
   final cpuProfileStore = CpuProfileStore();
@@ -106,6 +116,10 @@ class CpuProfilerController
     return serviceManager.service.enableCpuProfiler();
   }
 
+  String activelyTimedProcessId;
+
+  int activelyTimedProcessStartMicros;
+
   Future<void> pullAndProcessProfile({
     @required int startMicros,
     @required int extentMicros,
@@ -114,6 +128,11 @@ class CpuProfilerController
     if (!profilerEnabled) return;
     assert(_dataNotifier.value != null);
     assert(!_processingNotifier.value);
+
+    if (analyticsScreenId != null) {
+      activelyTimedProcessId = processId;
+      activelyTimedProcessStartMicros = DateTime.now().microsecondsSinceEpoch;
+    }
 
     _processingNotifier.value = true;
 
@@ -155,6 +174,21 @@ class CpuProfilerController
       }
       refreshSearchMatches();
       _processingNotifier.value = false;
+
+      if (analyticsScreenId != null && activelyTimedProcessId == processId) {
+        assert(activelyTimedProcessStartMicros != null);
+        final duration = Duration(
+          microseconds: DateTime.now().microsecondsSinceEpoch -
+              activelyTimedProcessStartMicros,
+        );
+        ga.timing(
+          analyticsScreenId,
+          analytics_constants.cpuProfileProcessingTime,
+          duration: duration,
+          cpuSampleCount: cpuProfileData.profileMetaData.sampleCount,
+          cpuStackDepth: cpuProfileData.profileMetaData.stackDepth,
+        );
+      }
     } on AssertionError catch (_) {
       _dataNotifier.value = cpuProfileData;
       _processingNotifier.value = false;
@@ -277,8 +311,4 @@ class CpuProfilerController
     );
     _filterIdentifier++;
   }
-}
-
-mixin CpuProfilerControllerProviderMixin {
-  final cpuProfilerController = CpuProfilerController();
 }

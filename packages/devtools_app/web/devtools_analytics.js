@@ -54,8 +54,11 @@ function initializeGA() {
         'dimension8': 'flutter_client_id',
 
         // Custom metrics:
-        'metric1': 'raster_duration',
-        'metric2': 'ui_duration',
+        'metric1': 'raster_duration_micros',
+        'metric2': 'ui_duration_micros',
+        'metric3': 'shader_compilation_duration_micros',
+        'metric4': 'cpu_sample_count',
+        'metric5': 'cpu_stack_depth',
       }
     });
 

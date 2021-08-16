@@ -8,6 +8,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
 import '../common_widgets.dart';
@@ -214,7 +217,21 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   Widget _buildFrame(FlutterFrame frame) {
     return InkWell(
-      onTap: () => _controller.toggleSelectedFrame(frame),
+      onTap: () {
+        if (frame != _controller.selectedFrame.value) {
+          // TODO(kenz): the shader time could be missing here if a frame is
+          // selected before timeline events are associated with the
+          // FlutterFrame. If this is the case, process the analytics call once
+          // the frame's timeline events are available.
+          ga.selectFrame(
+            analytics_constants.performance,
+            uiDuration: frame.buildTime,
+            rasterDuration: frame.rasterTime,
+            shaderCompilationDuration: frame.shaderDuration,
+          );
+        }
+        _controller.toggleSelectedFrame(frame);
+      },
       child: FlutterFramesChartItem(
         frame: frame,
         selected: frame == _selectedFrame,

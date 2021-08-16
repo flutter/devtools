@@ -8,6 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose.dart';
 import '../config_specific/import_export/import_export.dart';
 import '../config_specific/logger/allowed_error.dart';
@@ -40,14 +43,14 @@ import 'timeline_streams.dart';
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
 class PerformanceController extends DisposableController
-    with
-        CpuProfilerControllerProviderMixin,
-        SearchControllerMixin<TimelineEvent>,
-        AutoDisposeControllerMixin {
+    with SearchControllerMixin<TimelineEvent>, AutoDisposeControllerMixin {
   PerformanceController() {
     processor = TimelineEventProcessor(this);
     _init();
   }
+
+  final cpuProfilerController =
+      CpuProfilerController(analyticsScreenId: analytics_constants.performance);
 
   final _exportController = ExportController();
 
@@ -596,6 +599,8 @@ class PerformanceController extends DisposableController
     }
   }
 
+  int activelyTimedProcessStartMicros;
+
   FutureOr<void> processTraceEvents(
     List<TraceEventWrapper> traceEvents, {
     int startIndex = 0,
@@ -611,6 +616,10 @@ class PerformanceController extends DisposableController
         '$_nextTraceIndexToProcess',
       ),
     );
+
+    final processingTraceCount = traceEventCount - _nextTraceIndexToProcess;
+    activelyTimedProcessStartMicros = DateTime.now().microsecondsSinceEpoch;
+
     await processor.processTraceEvents(
       traceEvents,
       startIndex: _nextTraceIndexToProcess,
@@ -641,6 +650,18 @@ class PerformanceController extends DisposableController
       ),
     );
     _nextTimelineEventIndexToProcess = data.timelineEvents.length;
+
+    assert(activelyTimedProcessStartMicros != null);
+    final processingDuration = Duration(
+      microseconds: DateTime.now().microsecondsSinceEpoch -
+          activelyTimedProcessStartMicros,
+    );
+    ga.timing(
+      analytics_constants.performance,
+      analytics_constants.traceEventProcessingTime,
+      duration: processingDuration,
+      traceEventCount: processingTraceCount,
+    );
   }
 
   FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {

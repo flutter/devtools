@@ -86,8 +86,12 @@ class GtagEventDevTools extends GtagEvent {
     String ide_launched, // dimension7 Devtools launched (CLI, VSCode, Android)
     String flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
 
-    int raster_duration,
-    int ui_duration,
+    int raster_duration_micros,
+    int ui_duration_micros,
+    int shader_compilation_duration_micros,
+    int cpu_sample_count,
+    int cpu_stack_depth,
+    int trace_event_count,
   });
 
   @override
@@ -126,9 +130,17 @@ class GtagEventDevTools extends GtagEvent {
   external String get flutter_client_id;
 
   // Custom metrics:
-  external int get raster_duration;
+  external int get raster_duration_micros;
 
-  external int get ui_duration;
+  external int get ui_duration_micros;
+
+  external int get shader_compilation_duration_micros;
+
+  external int get cpu_sample_count;
+
+  external int get cpu_stack_depth;
+
+  external int get trace_event_count;
 }
 
 @JS()
@@ -214,6 +226,35 @@ void screen(
   );
 }
 
+void timing(
+  String screenName,
+  String timedOperation, {
+  @required Duration duration,
+  int cpuSampleCount,
+  int cpuStackDepth,
+  int traceEventCount,
+}) {
+  GTag.event(
+    screenName,
+    GtagEventDevTools(
+      event_category: analytics_constants.timingEvent,
+      event_label: timedOperation,
+      value: duration.inMicroseconds,
+      user_app: userAppType,
+      user_build: userBuildType,
+      user_platform: userPlatformType,
+      devtools_platform: devtoolsPlatformType,
+      devtools_chrome: devtoolsChrome,
+      devtools_version: devtoolsVersion,
+      ide_launched: ideLaunched,
+      flutter_client_id: flutterClientId,
+      cpu_sample_count: cpuSampleCount,
+      cpu_stack_depth: cpuStackDepth,
+      trace_event_count: traceEventCount,
+    ),
+  );
+}
+
 void select(
   String screenName,
   String selectedItem, [
@@ -239,18 +280,20 @@ void select(
 
 // Used only for Timeline Frame selection.
 void selectFrame(
-  String screenName,
-  String selectedItem, [
-  int rasterDuration, // Custom metric
-  int uiDuration, // Custom metric
-]) {
+  String screenName, {
+  @required Duration rasterDuration, // Custom metric
+  @required Duration uiDuration, // Custom metric
+  Duration shaderCompilationDuration, // Custom metric
+}) {
   GTag.event(
     screenName,
     GtagEventDevTools(
       event_category: analytics_constants.selectEvent,
-      event_label: selectedItem,
-      raster_duration: rasterDuration,
-      ui_duration: uiDuration,
+      event_label: analytics_constants.selectFlutterFrame,
+      raster_duration_micros: rasterDuration?.inMicroseconds,
+      ui_duration_micros: uiDuration?.inMicroseconds,
+      shader_compilation_duration_micros:
+          shaderCompilationDuration?.inMicroseconds,
       user_app: userAppType,
       user_build: userBuildType,
       user_platform: userPlatformType,

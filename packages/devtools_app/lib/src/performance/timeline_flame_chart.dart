@@ -9,6 +9,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../charts/flame_chart.dart';
 import '../common_widgets.dart';
@@ -22,6 +25,7 @@ import '../ui/search.dart';
 import '../utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
+import 'performance_screen.dart';
 import 'performance_utils.dart';
 
 final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
@@ -114,13 +118,14 @@ class _TimelineFlameChartContainerState
             needsTopBorder: false,
             rightPadding: 0.0,
             leftActions: [
-              RefreshTimelineEventsButton(
-                controller: controller,
-              ),
+              RefreshTimelineEventsButton(controller: controller),
             ],
             rightActions: [
               _buildSearchField(searchFieldEnabled),
-              FlameChartHelpButton(),
+              const FlameChartHelpButton(
+                screenId: PerformanceScreen.id,
+                analyticsAction: analytics_constants.timelineFlameChartHelp,
+              ),
             ],
           ),
           Expanded(
@@ -169,7 +174,13 @@ class RefreshTimelineEventsButton extends StatelessWidget {
     return DevToolsTooltip(
       tooltip: 'Refresh timeline events',
       child: TextButton(
-        onPressed: controller.processAvailableEvents,
+        onPressed: () {
+          ga.select(
+            analytics_constants.performance,
+            analytics_constants.refreshTimelineEvents,
+          );
+          controller.processAvailableEvents();
+        },
         child: Container(
           height: defaultButtonHeight,
           width: defaultButtonHeight,

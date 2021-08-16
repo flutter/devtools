@@ -13,6 +13,15 @@ void screen(
   int value = 0,
 ]) {}
 
+void timing(
+  String screenName,
+  String timedOperation, {
+  @required Duration duration,
+  int cpuSampleCount,
+  int cpuStackDepth,
+  int traceEventCount,
+}) {}
+
 void select(
   String screenName,
   String selectedItem, [
@@ -20,11 +29,11 @@ void select(
 ]) {}
 
 void selectFrame(
-  String screenName,
-  String selectedItem, [
-  int rasterDuration,
-  int uiDuration,
-]) {}
+  String screenName, {
+  @required Duration rasterDuration, // Custom metric
+  @required Duration uiDuration, // Custom metric
+  Duration shaderCompilationDuration, // Custom metric
+}) {}
 
 void reportError(
   String errorMessage, {

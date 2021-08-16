@@ -39,6 +39,18 @@ extension ProfileGranularityExtension on ProfileGranularity {
     }
   }
 
+  String get displayShort {
+    switch (this) {
+      case ProfileGranularity.low:
+        return 'Low';
+      case ProfileGranularity.medium:
+        return 'Medium';
+      case ProfileGranularity.high:
+      default:
+        return 'High';
+    }
+  }
+
   String get value {
     switch (this) {
       case ProfileGranularity.low:

@@ -11,6 +11,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../dialogs.dart';
@@ -1396,13 +1398,25 @@ class TimelineGridPainter extends FlameChartPainter {
 }
 
 class FlameChartHelpButton extends StatelessWidget {
+  const FlameChartHelpButton({
+    @required this.screenId,
+    @required this.analyticsAction,
+  });
+
+  final String screenId;
+
+  final String analyticsAction;
+
   @override
   Widget build(BuildContext context) {
     return HelpButton(
-      onPressed: () => showDialog(
-        context: context,
-        builder: (context) => _FlameChartHelpDialog(),
-      ),
+      onPressed: () {
+        ga.select(screenId, analyticsAction);
+        showDialog(
+          context: context,
+          builder: (context) => _FlameChartHelpDialog(),
+        );
+      },
     );
   }
 }

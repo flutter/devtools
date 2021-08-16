@@ -8,9 +8,11 @@ import '../inspector/inspector_screen.dart';
 import '../logging/logging_screen.dart';
 import '../memory/memory_screen.dart';
 import '../performance/performance_screen.dart';
+import '../profiler/profiler_screen.dart';
 
 const String screenViewEvent = 'screen'; // Active screen (tab selected).
 const String selectEvent = 'select'; // User selected something.
+const String timingEvent = 'timing'; // Timed operation.
 
 // DevTools GA screenNames:
 // These screen ids must match the `screenId` for each respective subclass of
@@ -18,6 +20,7 @@ const String selectEvent = 'select'; // User selected something.
 // the screen id for other analytics on the same screen.
 const String inspector = InspectorScreen.id;
 const String performance = PerformanceScreen.id;
+const String cpuProfiler = ProfilerScreen.id;
 const String memory = MemoryScreen.id;
 const String logging = LoggingScreen.id;
 
@@ -43,6 +46,18 @@ const String togglePlatform = 'togglePlatform';
 const String selectWidgetMode = 'selectWidgetMode';
 const String enableOnDeviceInspector = 'enableOnDeviceInspector';
 const String showOnDeviceInspector = 'showInspector';
+
+// Performance UX actions:
+const refreshTimelineEvents = 'refreshTimelineEvents';
+const timelineFlameChartHelp = 'timelineFlameChartHelp';
+const selectFlutterFrame = 'selectFlutterFrame';
+const traceEventProcessingTime = 'traceEventProcessingTime';
+
+// CPU profiler UX actions:
+const profileGranularityPrefix = 'profileGranularity';
+const loadAllCpuSamples = 'loadAllCpuSamples';
+const cpuProfileFlameChartHelp = 'cpuProfileFlameChartHelp';
+const cpuProfileProcessingTime = 'cpuProfileProcessingTime';
 
 // Memory UX actions:
 const String gc = 'gc';
@@ -82,6 +97,8 @@ const String vmDeveloperMode = 'vmDeveloperMode';
 const String pause = 'pause';
 const String resume = 'resume';
 const String clear = 'clear';
+const String record = 'record';
+const String stop = 'stop';
 const String export = 'export';
 const String expandAll = 'expandAll';
 const String collapseAll = 'collapseAll';
