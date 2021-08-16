@@ -55,11 +55,12 @@ late ClientManager clients;
 Future<HttpServer?> serveDevToolsWithArgs(
   List<String> arguments, {
   shelf.Handler? handler,
+  String? customDevToolsPath,
 }) async {
   ArgResults args;
   final verbose = arguments.contains('-v') || arguments.contains('--verbose');
   try {
-    args = _createArgsParser(verbose).parse(arguments);
+    args = configureArgsParser(ArgParser(), verbose).parse(arguments);
   } on FormatException catch (e) {
     print(e.message);
     print('');
@@ -67,13 +68,19 @@ Future<HttpServer?> serveDevToolsWithArgs(
     return null;
   }
 
-  return await _serveDevToolsWithArgs(args, verbose, handler: handler);
+  return await _serveDevToolsWithArgs(
+    args,
+    verbose,
+    handler: handler,
+    customDevToolsPath: customDevToolsPath,
+  );
 }
 
 Future<HttpServer?> _serveDevToolsWithArgs(
   ArgResults args,
   bool verbose, {
   shelf.Handler? handler,
+  String? customDevToolsPath,
 }) async {
   final help = args[argHelp];
   final bool machineMode = args[argMachine];
@@ -133,6 +140,7 @@ Future<HttpServer?> _serveDevToolsWithArgs(
     headlessMode: headlessMode,
     numPortsToTry: numPortsToTry,
     handler: handler,
+    customDevToolsPath: customDevToolsPath,
     serviceProtocolUri: serviceProtocolUri,
     profileFilename: profileFilename,
     verboseMode: verboseMode,
@@ -476,16 +484,19 @@ Future<HttpServer?> serveDevTools({
   return server;
 }
 
-ArgParser _createArgsParser(bool verbose) {
-  final parser = ArgParser();
-
-  parser
-    ..addFlag(
+ArgParser configureArgsParser(ArgParser parser, bool verbose) {
+  // 'help' will already be defined if we have an ArgParser from a Command
+  // subclass.
+  if (!parser.options.containsKey('help')) {
+    parser.addFlag(
       argHelp,
       negatable: false,
       abbr: 'h',
       help: 'Prints help output.',
-    )
+    );
+  }
+
+  parser
     ..addFlag(
       argVerbose,
       negatable: false,
@@ -610,7 +621,7 @@ void _printUsage(bool verbose) {
   print('Open a DevTools instance in a browser and optionally connect to an '
       'existing application.');
   print('');
-  print(_createArgsParser(verbose).usage);
+  print(configureArgsParser(ArgParser(), verbose).usage);
 }
 
 // Only used for testing DevToolsUsage (used by survey).
