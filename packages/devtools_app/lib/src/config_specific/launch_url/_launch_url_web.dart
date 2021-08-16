@@ -4,8 +4,12 @@
 
 import 'dart:html';
 
-final isVSCodeEmbedded = window.navigator.userAgent.contains('Electron');
-
 void launchUrlVSCode(String url) {
-  window.parent?.postMessage({'command': 'launchUrl', 'data': url}, '*');
+  window.parent?.postMessage(
+    {
+      'command': 'launchUrl',
+      'data': {'url': url}
+    },
+    '*',
+  );
 }

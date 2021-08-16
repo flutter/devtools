@@ -10,11 +10,14 @@ import '_launch_url_stub.dart'
     if (dart.library.io) '_launch_url_desktop.dart';
 
 Future<void> launchUrl(String url, BuildContext context) async {
-  if (isVSCodeEmbedded) {
-    launchUrlVSCode(url);
-  } else if (await url_launcher.canLaunch(url)) {
+  if (await url_launcher.canLaunch(url)) {
     await url_launcher.launch(url);
   } else {
     Notifications.of(context).push('Unable to open $url.');
   }
+
+  // When embedded in VSCode, url_launcher will silently fail, so we send a
+  // command to DartCode to launch the URL. This will do nothing when not
+  // embedded in VSCode.
+  launchUrlVSCode(url);
 }
