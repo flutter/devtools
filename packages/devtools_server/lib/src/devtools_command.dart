@@ -7,13 +7,20 @@ import 'package:args/command_runner.dart';
 import '../devtools_server.dart';
 import 'server.dart';
 
+const commandDescription =
+    'Open DevTools (optionally connecting to an existing application).';
+
 class DevToolsCommand extends Command<int> {
   DevToolsCommand({
     this.customDevToolsPath,
     bool verbose = false,
+    this.hidden = false,
   }) {
     configureArgsParser(argParser, verbose);
   }
+
+  @override
+  final bool hidden;
 
   final String? customDevToolsPath;
 
@@ -21,8 +28,7 @@ class DevToolsCommand extends Command<int> {
   String get name => 'devtools';
 
   @override
-  String get description =>
-      'Open a DevTools instance in a browser and optionally connect to an existing application.';
+  String get description => commandDescription;
 
   @override
   String get invocation => '${super.invocation} [service protocol uri]';

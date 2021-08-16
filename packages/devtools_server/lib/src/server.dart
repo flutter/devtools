@@ -21,6 +21,7 @@ import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart' hide Isolate;
 
 import 'client_manager.dart';
+import 'devtools_command.dart';
 import 'external_handlers.dart';
 import 'memory_profile.dart';
 
@@ -618,8 +619,7 @@ ArgParser configureArgsParser(ArgParser parser, bool verbose) {
 void _printUsage(bool verbose) {
   print('usage: devtools <options> [service protocol uri]');
   print('');
-  print('Open a DevTools instance in a browser and optionally connect to an '
-      'existing application.');
+  print(commandDescription);
   print('');
   print(configureArgsParser(ArgParser(), verbose).usage);
 }
