@@ -37,6 +37,9 @@ class NetworkScreen extends Screen {
   static const id = 'network';
 
   @override
+  String get docPageId => screenId;
+
+  @override
   Widget build(BuildContext context) => const NetworkScreenBody();
 
   @override
@@ -220,7 +223,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   void _showFilterDialog() {
     showDialog(
       context: context,
-      builder: (context) => FilterDialog(
+      builder: (context) => FilterDialog<NetworkController, NetworkRequest>(
         controller: _networkController,
         queryInstructions: NetworkScreenBody.filterQueryInstructions,
         queryFilterArguments: _networkController.filterArgs,

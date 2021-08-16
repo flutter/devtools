@@ -10,6 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart' as logger;
@@ -18,7 +21,6 @@ import '../split.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';
-import '../ui/label.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import 'memory_allocation_table_view.dart';
@@ -28,7 +30,6 @@ import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_heap_treemap.dart';
 import 'memory_instance_tree_view.dart';
-import 'memory_screen.dart';
 import 'memory_snapshot_models.dart';
 
 const memorySearchFieldKeyName = 'MemorySearchFieldKey';
@@ -133,20 +134,6 @@ class HeapTreeViewState extends State<HeapTree>
         SearchFieldMixin<HeapTree>,
         TickerProviderStateMixin {
   @visibleForTesting
-  static const snapshotButtonKey = Key('Snapshot Button');
-  @visibleForTesting
-  static const groupByClassButtonKey = Key('Group By Class Button');
-  @visibleForTesting
-  static const groupByLibraryButtonKey = Key('Group By Library Button');
-  @visibleForTesting
-  static const collapseAllButtonKey = Key('Collapse All Button');
-  @visibleForTesting
-  static const expandAllButtonKey = Key('Expand All Button');
-  @visibleForTesting
-  static const allocationMonitorKey = Key('Allocation Monitor Start Button');
-  @visibleForTesting
-  static const allocationMonitorResetKey = Key('Accumulators Reset Button');
-  @visibleForTesting
   static const searchButtonKey = Key('Snapshot Search');
   @visibleForTesting
   static const filterButtonKey = Key('Snapshot Filter');
@@ -248,7 +235,10 @@ class HeapTreeViewState extends State<HeapTree>
     });
 
     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
-      SnapshotFilterState.gaActionForSnapshotFilterDialog();
+      ga.select(
+        analytics_constants.memory,
+        analytics_constants.snapshotFilterDialog,
+      );
       controller.handleAutoCompleteOverlay(
         context: context,
         searchFieldKey: memorySearchFieldKey,
@@ -555,7 +545,10 @@ class HeapTreeViewState extends State<HeapTree>
         onChanged: (String newValue) {
           setState(
             () {
-              MemoryScreen.gaAction(name: '${keyName(groupByKey)} $newValue');
+              ga.select(
+                analytics_constants.memory,
+                '${analytics_constants.groupByPrefix}$newValue',
+              );
               controller.selectedLeaf = null;
               controller.groupingBy.value = newValue;
               if (controller.snapshots.isNotEmpty) {
@@ -574,16 +567,11 @@ class HeapTreeViewState extends State<HeapTree>
       height: defaultButtonHeight,
       child: Row(
         children: [
-          DevToolsTooltip(
+          IconLabelButton(
             tooltip: 'Take a memory profile snapshot',
-            child: OutlinedButton(
-              key: snapshotButtonKey,
-              onPressed: _isSnapshotRunning ? null : _takeHeapSnapshot,
-              child: const MaterialIconLabel(
-                label: 'Take Heap Snapshot',
-                iconData: Icons.camera,
-              ),
-            ),
+            icon: Icons.camera,
+            label: 'Take Heap Snapshot',
+            onPressed: _isSnapshotRunning ? null : _takeHeapSnapshot,
           ),
           const SizedBox(width: defaultSpacing),
           Row(
@@ -594,6 +582,11 @@ class HeapTreeViewState extends State<HeapTree>
                 value: treeMapVisible,
                 onChanged: controller.snapshotByLibraryData != null
                     ? (value) {
+                        ga.select(
+                          analytics_constants.memory,
+                          '${analytics_constants.treemapToggle}-'
+                          '${value ? 'show' : 'hide'}',
+                        );
                         controller.toggleTreeMapVisible(value);
                       }
                     : null,
@@ -607,9 +600,11 @@ class HeapTreeViewState extends State<HeapTree>
             // TODO(terry): Mechanism to handle expand/collapse on both tables
             // objects/fields. Maybe notion in table?
             ExpandAllButton(
-              key: expandAllButtonKey,
               onPressed: () {
-                MemoryScreen.gaAction(key: expandAllButtonKey);
+                ga.select(
+                  analytics_constants.memory,
+                  analytics_constants.expandAll,
+                );
                 if (snapshotDisplay is MemoryHeapTable) {
                   controller.groupByTreeTable.dataRoots.every((element) {
                     element.expandCascading();
@@ -622,9 +617,11 @@ class HeapTreeViewState extends State<HeapTree>
             ),
             const SizedBox(width: denseSpacing),
             CollapseAllButton(
-              key: collapseAllButtonKey,
               onPressed: () {
-                MemoryScreen.gaAction(key: collapseAllButtonKey);
+                ga.select(
+                  analytics_constants.memory,
+                  analytics_constants.collapseAll,
+                );
                 if (snapshotDisplay is MemoryHeapTable) {
                   controller.groupByTreeTable.dataRoots.every((element) {
                     element.collapseCascading();
@@ -717,34 +714,30 @@ class HeapTreeViewState extends State<HeapTree>
 
     return Row(
       children: [
-        DevToolsTooltip(
+        IconLabelButton(
           tooltip: 'Collect Allocation Statistics',
-          child: OutlinedButton(
-            key: allocationMonitorKey,
-            onPressed: () async {
-              MemoryScreen.gaAction(key: allocationMonitorKey);
-              await _allocationStart();
-            },
-            child: MaterialIconLabel(
-              label: 'Track',
-              imageIcon: trackImage(context),
-            ),
-          ),
+          imageIcon: trackImage(context),
+          label: 'Track',
+          onPressed: () async {
+            ga.select(
+              analytics_constants.memory,
+              analytics_constants.trackAllocations,
+            );
+            await _allocationStart();
+          },
         ),
         const SizedBox(width: denseSpacing),
-        DevToolsTooltip(
+        IconLabelButton(
           tooltip: 'Reset all accumulators',
-          child: OutlinedButton(
-            key: allocationMonitorResetKey,
-            onPressed: () async {
-              MemoryScreen.gaAction(key: allocationMonitorResetKey);
-              await _allocationReset();
-            },
-            child: MaterialIconLabel(
-              label: 'Reset',
-              imageIcon: resetImage(context),
-            ),
-          ),
+          imageIcon: resetImage(context),
+          label: 'Reset',
+          onPressed: () async {
+            ga.select(
+              analytics_constants.memory,
+              analytics_constants.resetAllocationAccumulators,
+            );
+            await _allocationReset();
+          },
         ),
         const Spacer(),
         updateCircle,
@@ -908,7 +901,11 @@ class HeapTreeViewState extends State<HeapTree>
 
   /// Match, found,  select it and process via ValueNotifiers.
   void selectTheMatch(String foundName) {
-    MemoryScreen.gaAction(name: memorySearchFieldKeyName);
+    ga.select(
+      analytics_constants.memory,
+      analytics_constants.autoCompleteSearchSelect,
+    );
+
     setState(() {
       if (tabController.index == allocationsTabIndex) {
         controller.selectItemInAllocationTable(foundName);
@@ -963,7 +960,10 @@ class HeapTreeViewState extends State<HeapTree>
   // TODO: Much of the logic for _takeHeapSnapshot() might want to move into the
   // controller.
   void _takeHeapSnapshot({bool userGenerated = true}) async {
-    MemoryScreen.gaAction(key: snapshotButtonKey);
+    ga.select(
+      analytics_constants.memory,
+      analytics_constants.takeSnapshot,
+    );
 
     // VmService not available (disconnected/crashed).
     if (serviceManager.service == null) return;
@@ -1054,7 +1054,10 @@ class HeapTreeViewState extends State<HeapTree>
   }
 
   void _filter() {
-    MemoryScreen.gaAction(name: 'SnapshotFilterDialog');
+    ga.select(
+      analytics_constants.memory,
+      analytics_constants.snapshotFilterDialog,
+    );
     // TODO(terry): Remove barrierDismissble and make clicking outside
     //              dialog same as cancel.
     // Dialog isn't dismissed by clicking outside the dialog (modal).
