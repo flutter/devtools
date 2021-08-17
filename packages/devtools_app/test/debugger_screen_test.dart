@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:ansicolor/ansicolor.dart';
+import 'package:devtools_app/src/debugger/codeview.dart';
 import 'package:devtools_app/src/debugger/console.dart';
 import 'package:devtools_app/src/debugger/controls.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
@@ -206,10 +207,13 @@ void main() {
           (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, debuggerController);
 
+        debuggerController.showScriptLocation(ScriptLocation(mockScriptRef,
+            location: SourcePosition(line: 50, column: 50)));
+        await tester.pumpAndSettle();
+
         expect(find.byType(Scrollbar), findsNWidgets(2));
         expect(horizontalScrollbarFinder, findsOneWidget);
         expect(verticalScrollbarFinder, findsOneWidget);
-
         await expectLater(
           find.byKey(DebuggerScreenBody.codeViewKey),
           matchesGoldenFile('goldens/codeview_scrollbars.png'),
