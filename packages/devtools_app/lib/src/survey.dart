@@ -5,6 +5,7 @@ import 'package:http/http.dart';
 
 import 'analytics/analytics_stub.dart'
     if (dart.library.html) 'analytics/analytics.dart' as ga;
+import 'config_specific/launch_url/launch_url.dart';
 import 'config_specific/logger/logger.dart';
 import 'config_specific/server/server.dart' as server;
 import 'notifications.dart';

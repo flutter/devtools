@@ -5,8 +5,10 @@
 @TestOn('vm')
 import 'dart:ui';
 
+import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart';
+import 'package:devtools_app/src/memory/memory_events_pane.dart';
 import 'package:devtools_app/src/memory/memory_heap_tree_view.dart';
 import 'package:devtools_app/src/memory/memory_screen.dart';
 import 'package:devtools_app/src/memory/memory_vm_chart.dart';
@@ -137,14 +139,14 @@ void main() {
       expect(controller.offline, isFalse);
 
       // Verify Memory, Memory Source, and Memory Sources content.
-      expect(find.byKey(MemoryScreen.pauseButtonKey), findsOneWidget);
-      expect(find.byKey(MemoryScreen.resumeButtonKey), findsOneWidget);
+      expect(find.text('Pause'), findsOneWidget);
+      expect(find.text('Resume'), findsOneWidget);
 
       expect(controller.memorySource, MemoryController.liveFeed);
 
       controller.isAdvancedSettingsVisible == false
-          ? expect(find.byKey(MemoryScreen.gcButtonKey), findsNothing)
-          : expect(find.byKey(MemoryScreen.gcButtonKey), findsOneWidget);
+          ? expect(find.text('GC'), findsNothing)
+          : expect(find.text('GC'), findsOneWidget);
 
       expect(find.byType(MemoryVMChart), findsOneWidget);
 
@@ -182,8 +184,8 @@ void main() {
       expect(controller.offline, isTrue);
 
       // Verify default event pane and vm chart exists.
-      expect(find.byKey(MemoryScreen.eventChartKey), findsOneWidget);
-      expect(find.byKey(MemoryScreen.vmChartKey), findsOneWidget);
+      expect(find.byType(MemoryEventsPane), findsOneWidget);
+      expect(find.byType(MemoryVMChart), findsOneWidget);
 
       expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
       expect(controller.memoryTimeline.offlineData.isEmpty, isFalse);
@@ -220,7 +222,7 @@ void main() {
       */
 
       await expectLater(
-        find.byKey(MemoryScreen.vmChartKey),
+        find.byType(MemoryVMChart),
         matchesGoldenFile('goldens/memory_hover_card.png'),
       );
 
@@ -238,7 +240,7 @@ void main() {
       final previousMemoryLogs = controller.memoryLog.offlineFiles();
 
       // Export memory to a memory log file.
-      await tester.tap(find.byKey(MemoryScreen.exportButtonKey));
+      await tester.tap(find.byType(ExportButton));
       await tester.pump();
 
       expect(controller.offline, isFalse);
@@ -293,7 +295,9 @@ void main() {
         (WidgetTester tester) async {
       await pumpMemoryScreen(tester);
 
-      expect(find.byKey(HeapTreeViewState.snapshotButtonKey), findsOneWidget);
+      final heapSnapShotFinder = find.text('Take Heap Snapshot');
+
+      expect(heapSnapShotFinder, findsOneWidget);
 
       // Load canned data.
       _setUpServiceManagerForMemory();
@@ -301,8 +305,8 @@ void main() {
       expect(controller.offline, isTrue);
 
       // Verify default event pane and vm chart exists.
-      expect(find.byKey(MemoryScreen.eventChartKey), findsOneWidget);
-      expect(find.byKey(MemoryScreen.vmChartKey), findsOneWidget);
+      expect(find.byType(MemoryEventsPane), findsOneWidget);
+      expect(find.byType(MemoryVMChart), findsOneWidget);
 
       expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
       expect(controller.memoryTimeline.offlineData.isEmpty, isFalse);
@@ -368,11 +372,12 @@ void main() {
       // TODO(terry): Simulate sample run of liveData filling up?
 
       // Take a snapshot
-      await tester.tap(find.byKey(HeapTreeViewState.snapshotButtonKey));
+      await tester.tap(heapSnapShotFinder);
       await tester.pump();
 
-      final snapshotButton = tester.widget<OutlinedButton>(
-          find.byKey(HeapTreeViewState.snapshotButtonKey));
+      final snapshotIconLabel = tester.element(heapSnapShotFinder);
+      final snapshotButton =
+          snapshotIconLabel.findAncestorWidgetOfExactType<OutlinedButton>();
 
       expect(snapshotButton.enabled, isFalse);
       await tester.pumpAndSettle(const Duration(seconds: 3));
@@ -383,23 +388,23 @@ void main() {
       );
 
       await expectLater(
-        find.byKey(MemoryScreen.vmChartKey),
+        find.byType(MemoryVMChart),
         matchesGoldenFile('goldens/memory_heap_tree.png'),
       );
 
       // Await delay for golden comparison.
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
-      expect(find.byKey(MemoryScreen.androidChartButtonKey), findsOneWidget);
+      expect(find.text('Android Memory'), findsOneWidget);
 
       // Bring up the Android chart.
-      await tester.tap(find.byKey(MemoryScreen.androidChartButtonKey));
+      await tester.tap(find.text('Android Memory'));
       await tester.pump();
 
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       await expectLater(
-        find.byKey(MemoryScreen.vmChartKey),
+        find.byType(MemoryVMChart),
         matchesGoldenFile('goldens/memory_heap_android.png'),
       );
 
@@ -506,14 +511,10 @@ void main() {
 
       await pumpAndSettleTwoSeconds();
 
-      expect(
-          find.byKey(HeapTreeViewState.allocationMonitorKey), findsOneWidget);
-      expect(
-        find.byKey(HeapTreeViewState.allocationMonitorResetKey),
-        findsOneWidget,
-      );
+      expect(find.text('Track'), findsOneWidget);
+      expect(find.text('Reset'), findsOneWidget);
 
-      await tester.tap(find.byKey(HeapTreeViewState.allocationMonitorKey));
+      await tester.tap(find.text('Track'));
 
       await pumpAndSettleTwoSeconds();
 

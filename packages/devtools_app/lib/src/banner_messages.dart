@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'common_widgets.dart';
+import 'config_specific/launch_url/launch_url.dart';
 import 'globals.dart';
 import 'screen.dart';
 import 'theme.dart';

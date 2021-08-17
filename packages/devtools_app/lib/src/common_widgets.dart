@@ -11,6 +11,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'scaffold.dart';
 import 'theme.dart';
+import 'ui/icons.dart';
 import 'ui/label.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
@@ -85,16 +86,20 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
 class IconLabelButton extends StatelessWidget {
   const IconLabelButton({
     Key key,
-    @required this.icon,
+    this.icon,
+    this.imageIcon,
     @required this.label,
     @required this.onPressed,
     this.color,
     this.includeTextWidth,
     this.elevatedButton = false,
     this.tooltip,
-  }) : super(key: key);
+  })  : assert((icon == null) != (imageIcon == null)),
+        super(key: key);
 
   final IconData icon;
+
+  final ThemedImageIcon imageIcon;
 
   final String label;
 
@@ -114,6 +119,7 @@ class IconLabelButton extends StatelessWidget {
     final iconLabel = MaterialIconLabel(
       label: label,
       iconData: icon,
+      imageIcon: imageIcon,
       includeTextWidth: includeTextWidth,
       color: color,
     );
