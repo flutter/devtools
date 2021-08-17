@@ -6,8 +6,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../common_widgets.dart';
+import '../config_specific/launch_url/launch_url.dart';
 import '../theme.dart';
-import '../utils.dart';
 import 'provider.dart';
 
 /// Conditionally displays a prompt to request permission for collection of
