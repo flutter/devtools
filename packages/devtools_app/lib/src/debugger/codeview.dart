@@ -45,6 +45,12 @@ class CodeView extends StatefulWidget {
     this.onSelected,
   }) : super(key: key);
 
+  static const debuggerCodeViewHorizontalScrollbarKey =
+      Key('debuggerCodeViewHorizontalScrollbarKey');
+
+  static const debuggerCodeViewVerticalScrollbarKey =
+      Key('debuggerCodeViewVerticalScrollbarKey');
+
   static double get rowHeight => scaleByFontFactor(20.0);
   static double get assumedCharacterWidth => scaleByFontFactor(16.0);
 
@@ -266,6 +272,7 @@ class _CodeViewState extends State<CodeView>
             style: theme.fixedFontStyle,
             child: Expanded(
               child: Scrollbar(
+                key: CodeView.debuggerCodeViewVerticalScrollbarKey,
                 controller: textController,
                 // Only listen for vertical scroll notifications (ignore those
                 // from the nested horizontal SingleChildScrollView):
@@ -320,6 +327,8 @@ class _CodeViewState extends State<CodeView>
                                   calculateTextSpanWidth(longestLine);
 
                               return Scrollbar(
+                                key: CodeView
+                                    .debuggerCodeViewHorizontalScrollbarKey,
                                 isAlwaysShown: true,
                                 controller: horizontalController,
                                 child: SingleChildScrollView(

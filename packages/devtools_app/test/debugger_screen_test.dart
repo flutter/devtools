@@ -10,6 +10,7 @@ import 'package:devtools_app/src/debugger/debugger_model.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,6 +30,7 @@ void main() {
   setGlobal(ServiceConnectionManager, fakeServiceManager);
 
   const windowSize = Size(4000.0, 4000.0);
+  const narrowWindowSize = Size(1000.0, 1000.0);
 
   group('DebuggerScreen', () {
     Future<void> pumpDebuggerScreen(
@@ -171,6 +173,48 @@ void main() {
 
           expect(_clipboardContents, equals(_expected));
         });
+      });
+    });
+
+    group('Codeview', () {
+      final horizontalScrollbarFinder = find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is Scrollbar &&
+              widget.key ==
+                  const Key('debuggerCodeViewHorizontalScrollbarKey'));
+
+      final verticalScrollbarFinder = find.byWidgetPredicate((Widget widget) =>
+          widget is Scrollbar &&
+          widget.key == const Key('debuggerCodeViewVerticalScrollbarKey'));
+
+      setUp(() {
+        final scriptsHistory = ScriptsHistory();
+        scriptsHistory.pushEntry(mockScript);
+        when(debuggerController.currentScriptRef)
+            .thenReturn(ValueNotifier(mockScriptRef));
+        when(debuggerController.currentParsedScript)
+            .thenReturn(ValueNotifier(mockParsedScript));
+        when(debuggerController.showSearchInFileField)
+            .thenReturn(ValueNotifier(false));
+        when(debuggerController.scriptsHistory).thenReturn(scriptsHistory);
+        when(debuggerController.searchMatches).thenReturn(ValueNotifier([]));
+        when(debuggerController.activeSearchMatch)
+            .thenReturn(ValueNotifier(null));
+      });
+
+      testWidgetsWithWindowSize(
+          'has a horizontal and a vertical scrollbar', narrowWindowSize,
+          (WidgetTester tester) async {
+        await pumpDebuggerScreen(tester, debuggerController);
+
+        expect(find.byType(Scrollbar), findsNWidgets(2));
+        expect(horizontalScrollbarFinder, findsOneWidget);
+        expect(verticalScrollbarFinder, findsOneWidget);
+
+        await expectLater(
+          find.byKey(DebuggerScreenBody.codeViewKey),
+          matchesGoldenFile('goldens/codeview_scrollbars.png'),
+        );
       });
     });
 
