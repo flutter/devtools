@@ -10,7 +10,6 @@ import 'package:devtools_app/src/debugger/debugger_model.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,7 +29,7 @@ void main() {
   setGlobal(ServiceConnectionManager, fakeServiceManager);
 
   const windowSize = Size(4000.0, 4000.0);
-  const narrowWindowSize = Size(1000.0, 1000.0);
+  const smallWindowSize = Size(1000.0, 1000.0);
 
   group('DebuggerScreen', () {
     Future<void> pumpDebuggerScreen(
@@ -203,7 +202,7 @@ void main() {
       });
 
       testWidgetsWithWindowSize(
-          'has a horizontal and a vertical scrollbar', narrowWindowSize,
+          'has a horizontal and a vertical scrollbar', smallWindowSize,
           (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, debuggerController);
 

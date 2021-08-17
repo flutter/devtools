@@ -861,9 +861,9 @@ class FakeServiceExtensionManager extends Fake
 Future<void> ensureInspectorDependencies() async {
   assert(
     !kIsWeb,
-    'Attempted to resolve a package path from web code.\\n'
+    'Attempted to resolve a package path from web code.\n'
     'Package path resolution uses dart:io, which is not available in web.'
-    '\\n'
+    '\n'
     "To fix this, mark the failing test as @TestOn('vm')",
   );
 }
@@ -904,6 +904,7 @@ void mockIsDartVmApp(MockConnectedApp connectedApp, [isDartVmApp = true]) {
   when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
+// ignore: prefer_single_quotes
 final Grammar mockGrammar = Grammar.fromJson(jsonDecode("""
 {
   "name": "Dart",
