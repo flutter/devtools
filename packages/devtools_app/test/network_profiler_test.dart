@@ -15,6 +15,7 @@ import 'package:devtools_app/src/network/network_screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_app/src/version.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -43,26 +44,27 @@ Future<void> clearTimeouts(WidgetTester tester) async {
 
 void main() {
   FakeServiceManager fakeServiceManager;
-  Timeline timeline;
   SocketProfile socketProfile;
+  HttpProfile httpProfile;
 
   const windowSize = Size(1599.0, 1000.0);
 
   setUpAll(() async {
-    timeline = await loadNetworkProfileTimeline();
     socketProfile = loadSocketProfile();
+    httpProfile = loadHttpProfile();
   });
 
   group('Network Profiler', () {
     setUp(() async {
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(
-          timelineData: timeline,
           socketProfile: socketProfile,
+          httpProfile: httpProfile,
         ),
       );
       (fakeServiceManager.service as FakeVmService)
-          .httpEnableTimelineLoggingResult = false;
+        ..httpEnableTimelineLoggingResult = false
+        ..dartIoVersion = SemanticVersion(major: 1, minor: 6);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
     });
 
@@ -101,8 +103,22 @@ void main() {
       expect(find.byType(Split), findsOneWidget);
 
       // Advance the clock to populate the network requests table.
-      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 2));
       expect(find.byType(CircularProgressIndicator), findsNothing);
+
+      expect(controller.requests.value.requests, isNotEmpty);
+    }
+
+    // We should see the list of requests and the inspector, but have no
+    // selected request.
+    void expectNoSelection() {
+      expect(find.byType(NetworkRequestsTable), findsOneWidget);
+      expect(find.byType(NetworkRequestInspector), findsOneWidget);
+      expect(
+        find.byKey(NetworkRequestInspector.noRequestSelectedKey),
+        findsOneWidget,
+      );
+      expect(controller.selectedRequest.value, isNull);
     }
 
     testWidgetsWithWindowSize('builds proper content for state', windowSize,
@@ -111,17 +127,6 @@ void main() {
       await pumpNetworkScreen(tester);
 
       await loadRequestsAndCheck(tester);
-
-      // We should see the list of requests and the inspector, but have no
-      // selected request.
-      void expectNoSelection() {
-        expect(find.byType(NetworkRequestsTable), findsOneWidget);
-        expect(find.byType(NetworkRequestInspector), findsOneWidget);
-        expect(
-          find.byKey(NetworkRequestInspector.noRequestSelectedKey),
-          findsOneWidget,
-        );
-      }
 
       expectNoSelection();
 
@@ -261,6 +266,32 @@ void main() {
       await tester.pump();
 
       await clearTimeouts(tester);
+    });
+
+    // Regression test for https://github.com/flutter/devtools/issues/3286.
+    testWidgetsWithWindowSize('can select by clicking on url', windowSize,
+        (WidgetTester tester) async {
+      // Load the network profiler screen.
+      controller = NetworkController();
+      await pumpNetworkScreen(tester);
+
+      // Populate the screen with requests.
+      await loadRequestsAndCheck(tester);
+
+      expectNoSelection();
+
+      final textElement = tester
+          .element(find.text('https://jsonplaceholder.typicode.com/albums/1'));
+      final selectableTextWidget =
+          textElement.findAncestorWidgetOfExactType<SelectableText>();
+      await tester.tap(find.byWidget(selectableTextWidget));
+      await tester.pumpAndSettle();
+
+      expect(controller.selectedRequest.value, isNotNull);
+      expect(
+        find.byKey(NetworkRequestInspector.noRequestSelectedKey),
+        findsNothing,
+      );
     });
 
     testWidgetsWithWindowSize('clear results', windowSize,

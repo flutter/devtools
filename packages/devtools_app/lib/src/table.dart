@@ -1037,7 +1037,12 @@ abstract class ColumnRenderer<T> {
   ///
   /// This method can return `null` to indicate that the default rendering
   /// should be used instead.
-  Widget build(BuildContext context, T data, {bool isRowSelected = false});
+  Widget build(
+    BuildContext context,
+    T data, {
+    bool isRowSelected = false,
+    VoidCallback onPressed,
+  });
 }
 
 /// Callback for when a specific item in a table is selected.
@@ -1215,7 +1220,8 @@ class _TableRowState<T> extends State<TableRow<T>>
 
   @override
   Widget build(BuildContext context) {
-    final row = tableRowFor(context);
+    final onPressed = () => widget.onPressed(widget.node);
+    final row = tableRowFor(context, onPressed: onPressed);
 
     final box = SizedBox(
       height: widget.node == null ? areaPaneHeaderHeight : defaultRowHeight,
@@ -1334,7 +1340,7 @@ class _TableRowState<T> extends State<TableRow<T>>
   }
 
   /// Presents the content of this row.
-  Widget tableRowFor(BuildContext context) {
+  Widget tableRowFor(BuildContext context, {VoidCallback onPressed}) {
     Widget columnFor(ColumnData<T> column, double columnWidth) {
       Widget content;
       final node = widget.node;
@@ -1388,6 +1394,7 @@ class _TableRowState<T> extends State<TableRow<T>>
             context,
             node,
             isRowSelected: widget.isSelected,
+            onPressed: onPressed,
           );
         }
         content ??= Text(

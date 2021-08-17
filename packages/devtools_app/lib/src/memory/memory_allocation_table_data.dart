@@ -43,6 +43,7 @@ class FieldTrack extends ColumnData<ClassHeapDetailStats>
     BuildContext context,
     ClassHeapDetailStats item, {
     bool isRowSelected = false,
+    VoidCallback onPressed,
   }) {
     final controller = Provider.of<MemoryController>(context);
 
