@@ -19,6 +19,7 @@ import '../vm_flags.dart' as vm_flags;
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
 import 'cpu_profile_transformer.dart';
+import 'profiler_screen.dart';
 
 class CpuProfilerController
     with
@@ -116,10 +117,6 @@ class CpuProfilerController
     return serviceManager.service.enableCpuProfiler();
   }
 
-  String activelyTimedProcessId;
-
-  int activelyTimedProcessStartMicros;
-
   Future<void> pullAndProcessProfile({
     @required int startMicros,
     @required int extentMicros,
@@ -129,30 +126,48 @@ class CpuProfilerController
     assert(_dataNotifier.value != null);
     assert(!_processingNotifier.value);
 
-    if (analyticsScreenId != null) {
-      activelyTimedProcessId = processId;
-      activelyTimedProcessStartMicros = DateTime.now().microsecondsSinceEpoch;
-    }
-
     _processingNotifier.value = true;
 
     var cpuProfileData = baseStateCpuProfileData;
 
     _dataNotifier.value = null;
-    // TODO(kenz): add a cancel button to the processing UI in case pulling a
-    // large payload from the vm service takes a long time.
-    cpuProfileData = await serviceManager.service.getCpuProfile(
-      startMicros: startMicros,
-      extentMicros: extentMicros,
-    );
 
-    await processAndSetData(cpuProfileData, processId: processId);
-    cpuProfileStore.addProfile(
-      TimeRange()
-        ..start = Duration(microseconds: startMicros)
-        ..end = Duration(microseconds: startMicros + extentMicros),
-      _dataNotifier.value,
-    );
+    Future<void> pullAndProcessHelper() async {
+      // TODO(kenz): add a cancel button to the processing UI in case pulling a
+      // large payload from the vm service takes a long time.
+      cpuProfileData = await serviceManager.service.getCpuProfile(
+        startMicros: startMicros,
+        extentMicros: extentMicros,
+      );
+      await processAndSetData(cpuProfileData, processId: processId);
+      cpuProfileStore.addProfile(
+        TimeRange()
+          ..start = Duration(microseconds: startMicros)
+          ..end = Duration(microseconds: startMicros + extentMicros),
+        _dataNotifier.value,
+      );
+    }
+
+    if (analyticsScreenId != null) {
+      // Pull and process cpu profile data [pullAndProcessHelper] and time the
+      // operation for analytics.
+      await ga.timeAsync(
+        analyticsScreenId,
+        analytics_constants.cpuProfileProcessingTime,
+        asyncOperation: pullAndProcessHelper,
+        screenMetrics: ProfilerScreenMetrics(
+          cpuSampleCount: cpuProfileData.profileMetaData.sampleCount,
+          cpuStackDepth: cpuProfileData.profileMetaData.stackDepth,
+        ),
+      );
+    } else {
+      try {
+        await pullAndProcessHelper();
+      } on ProcessCancelledException catch (_) {
+        // Do nothing because the attempt to process data has been cancelled in
+        // favor of a new one.
+      }
+    }
   }
 
   /// Processes [cpuProfileData] and sets the data for the controller.
@@ -174,30 +189,12 @@ class CpuProfilerController
       }
       refreshSearchMatches();
       _processingNotifier.value = false;
-
-      if (analyticsScreenId != null && activelyTimedProcessId == processId) {
-        assert(activelyTimedProcessStartMicros != null);
-        final duration = Duration(
-          microseconds: DateTime.now().microsecondsSinceEpoch -
-              activelyTimedProcessStartMicros,
-        );
-        ga.timing(
-          analyticsScreenId,
-          analytics_constants.cpuProfileProcessingTime,
-          duration: duration,
-          cpuSampleCount: cpuProfileData.profileMetaData.sampleCount,
-          cpuStackDepth: cpuProfileData.profileMetaData.stackDepth,
-        );
-      }
     } on AssertionError catch (_) {
       _dataNotifier.value = cpuProfileData;
       _processingNotifier.value = false;
       // Rethrow after setting notifiers so that cpu profile data is included
       // in the timeline export.
       rethrow;
-    } on ProcessCancelledException catch (_) {
-      // Do nothing because the attempt to process data has been cancelled in
-      // favor of a new one.
     }
   }
 

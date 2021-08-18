@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
+import '../analytics/analytics_common.dart';
 import '../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
@@ -356,4 +357,11 @@ class _SecondaryControls extends StatelessWidget {
     // export controller.
     Notifications.of(context).push(successfulExportMessage(exportedFile));
   }
+}
+
+class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
+  ProfilerScreenMetrics({this.cpuSampleCount, this.cpuStackDepth});
+
+  final int cpuSampleCount;
+  final int cpuStackDepth;
 }

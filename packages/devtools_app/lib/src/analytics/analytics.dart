@@ -20,8 +20,11 @@ import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';
 import '../globals.dart';
+import '../performance/performance_screen.dart';
+import '../profiler/profiler_screen.dart';
 import '../ui/gtags.dart';
 import '../version.dart';
+import 'analytics_common.dart';
 import 'constants.dart' as analytics_constants;
 
 // Dimensions1 AppType values:
@@ -86,13 +89,68 @@ class GtagEventDevTools extends GtagEvent {
     String ide_launched, // dimension7 Devtools launched (CLI, VSCode, Android)
     String flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
 
-    int raster_duration_micros,
+    // Performance screen metrics. See [PerformanceScreenMetrics].
     int ui_duration_micros,
+    int raster_duration_micros,
     int shader_compilation_duration_micros,
+    int trace_event_count,
+    // Profiler screen metrics. See [ProfilerScreenMetrics].
     int cpu_sample_count,
     int cpu_stack_depth,
-    int trace_event_count,
   });
+
+  factory GtagEventDevTools.withScreenMetrics({
+    String event_category,
+    String event_label,
+    String send_to,
+    int value,
+    bool non_interaction,
+    dynamic custom_map,
+    String user_app,
+    String user_build,
+    String user_platform,
+    String devtools_platform,
+    String devtools_chrome,
+    String devtools_version,
+    String ide_launched,
+    String flutter_client_id,
+    ScreenAnalyticsMetrics screenMetrics,
+  }) {
+    return GtagEventDevTools(
+      event_category: event_category,
+      event_label: event_label,
+      send_to: send_to,
+      non_interaction: non_interaction,
+      value: value,
+      user_app: userAppType,
+      user_build: userBuildType,
+      user_platform: userPlatformType,
+      devtools_platform: devtoolsPlatformType,
+      devtools_chrome: devtoolsChrome,
+      devtools_version: devtoolsVersion,
+      ide_launched: ideLaunched,
+      flutter_client_id: flutterClientId,
+      ui_duration_micros: screenMetrics is PerformanceScreenMetrics
+          ? screenMetrics.uiDuration?.inMicroseconds
+          : null,
+      raster_duration_micros: screenMetrics is PerformanceScreenMetrics
+          ? screenMetrics.rasterDuration?.inMicroseconds
+          : null,
+      shader_compilation_duration_micros:
+          screenMetrics is PerformanceScreenMetrics
+              ? screenMetrics.shaderCompilationDuration?.inMicroseconds
+              : null,
+      trace_event_count: screenMetrics is PerformanceScreenMetrics
+          ? screenMetrics.traceEventCount
+          : null,
+      cpu_sample_count: screenMetrics is ProfilerScreenMetrics
+          ? screenMetrics.cpuSampleCount
+          : null,
+      cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
+          ? screenMetrics.cpuStackDepth
+          : null,
+    );
+  }
 
   @override
   external String get event_category;
@@ -130,17 +188,17 @@ class GtagEventDevTools extends GtagEvent {
   external String get flutter_client_id;
 
   // Custom metrics:
-  external int get raster_duration_micros;
-
   external int get ui_duration_micros;
 
+  external int get raster_duration_micros;
+
   external int get shader_compilation_duration_micros;
+
+  external int get trace_event_count;
 
   external int get cpu_sample_count;
 
   external int get cpu_stack_depth;
-
-  external int get trace_event_count;
 }
 
 @JS()
@@ -226,20 +284,76 @@ void screen(
   );
 }
 
-void timing(
+void timeSync(
   String screenName,
   String timedOperation, {
-  @required Duration duration,
-  int cpuSampleCount,
-  int cpuStackDepth,
-  int traceEventCount,
+  @required void Function() syncOperation,
+  ScreenAnalyticsMetrics screenMetrics,
+}) {
+  final startTime = DateTime.now();
+  try {
+    syncOperation();
+  } catch (e, st) {
+    // Do not send the timing analytic to GA if the operation failed.
+    log(
+      'Could not time sync operation "$timedOperation" '
+      'because an exception was thrown:\n$e\n$st',
+      LogLevel.warning,
+    );
+    return;
+  }
+  final endTime = DateTime.now();
+  final durationMicros =
+      endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch;
+  _timing(
+    screenName,
+    timedOperation,
+    durationMicros: durationMicros,
+    screenMetrics: screenMetrics,
+  );
+}
+
+Future<void> timeAsync(
+  String screenName,
+  String timedOperation, {
+  @required Future<void> Function() asyncOperation,
+  ScreenAnalyticsMetrics screenMetrics,
+}) async {
+  final startTime = DateTime.now();
+  try {
+    await asyncOperation();
+  } catch (e, st) {
+    // Do not send the timing analytic to GA if the operation failed.
+    log(
+      'Could not time async operation "$timedOperation" '
+      'because an exception was thrown:\n$e\n$st',
+      LogLevel.warning,
+    );
+    return;
+  }
+  final endTime = DateTime.now();
+  final durationMicros =
+      endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch;
+  _timing(
+    screenName,
+    timedOperation,
+    durationMicros: durationMicros,
+    screenMetrics: screenMetrics,
+  );
+}
+
+void _timing(
+  String screenName,
+  String timedOperation, {
+  @required int durationMicros,
+  ScreenAnalyticsMetrics screenMetrics,
 }) {
   GTag.event(
     screenName,
-    GtagEventDevTools(
+    GtagEventDevTools.withScreenMetrics(
       event_category: analytics_constants.timingEvent,
       event_label: timedOperation,
-      value: duration.inMicroseconds,
+      value: durationMicros,
       user_app: userAppType,
       user_build: userBuildType,
       user_platform: userPlatformType,
@@ -248,21 +362,20 @@ void timing(
       devtools_version: devtoolsVersion,
       ide_launched: ideLaunched,
       flutter_client_id: flutterClientId,
-      cpu_sample_count: cpuSampleCount,
-      cpu_stack_depth: cpuStackDepth,
-      trace_event_count: traceEventCount,
+      screenMetrics: screenMetrics,
     ),
   );
 }
 
 void select(
   String screenName,
-  String selectedItem, [
+  String selectedItem, {
   int value = 0,
-]) {
+  ScreenAnalyticsMetrics screenMetrics,
+}) {
   GTag.event(
     screenName,
-    GtagEventDevTools(
+    GtagEventDevTools.withScreenMetrics(
       event_category: analytics_constants.selectEvent,
       event_label: selectedItem,
       value: value,
@@ -274,34 +387,7 @@ void select(
       devtools_version: devtoolsVersion,
       ide_launched: ideLaunched,
       flutter_client_id: flutterClientId,
-    ),
-  );
-}
-
-// Used only for Timeline Frame selection.
-void selectFrame(
-  String screenName, {
-  @required Duration rasterDuration, // Custom metric
-  @required Duration uiDuration, // Custom metric
-  Duration shaderCompilationDuration, // Custom metric
-}) {
-  GTag.event(
-    screenName,
-    GtagEventDevTools(
-      event_category: analytics_constants.selectEvent,
-      event_label: analytics_constants.selectFlutterFrame,
-      raster_duration_micros: rasterDuration?.inMicroseconds,
-      ui_duration_micros: uiDuration?.inMicroseconds,
-      shader_compilation_duration_micros:
-          shaderCompilationDuration?.inMicroseconds,
-      user_app: userAppType,
-      user_build: userBuildType,
-      user_platform: userPlatformType,
-      devtools_platform: devtoolsPlatformType,
-      devtools_chrome: devtoolsChrome,
-      devtools_version: devtoolsVersion,
-      ide_launched: ideLaunched,
-      flutter_client_id: flutterClientId,
+      screenMetrics: screenMetrics,
     ),
   );
 }

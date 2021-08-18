@@ -599,8 +599,6 @@ class PerformanceController extends DisposableController
     }
   }
 
-  int activelyTimedProcessStartMicros;
-
   FutureOr<void> processTraceEvents(
     List<TraceEventWrapper> traceEvents, {
     int startIndex = 0,
@@ -618,49 +616,49 @@ class PerformanceController extends DisposableController
     );
 
     final processingTraceCount = traceEventCount - _nextTraceIndexToProcess;
-    activelyTimedProcessStartMicros = DateTime.now().microsecondsSinceEpoch;
 
-    await processor.processTraceEvents(
-      traceEvents,
-      startIndex: _nextTraceIndexToProcess,
-    );
-    debugTraceEventCallback(
-      () => log(
-        'after processing traceEvents at startIndex $_nextTraceIndexToProcess, '
-        'and now _nextTraceIndexToProcess = $traceEventCount',
-      ),
-    );
-    _nextTraceIndexToProcess = traceEventCount;
+    Future<void> processTraceEventsHelper() async {
+      await processor.processTraceEvents(
+        traceEvents,
+        startIndex: _nextTraceIndexToProcess,
+      );
+      debugTraceEventCallback(
+        () => log(
+          'after processing traceEvents at startIndex $_nextTraceIndexToProcess, '
+          'and now _nextTraceIndexToProcess = $traceEventCount',
+        ),
+      );
+      _nextTraceIndexToProcess = traceEventCount;
 
-    debugTraceEventCallback(
-      () => log(
-        'initializing event groups at startIndex '
-        '$_nextTimelineEventIndexToProcess',
-      ),
-    );
-    data.initializeEventGroups(
-      threadNamesById,
-      startIndex: _nextTimelineEventIndexToProcess,
-    );
-    debugTraceEventCallback(
-      () => log(
-        'after initializing event groups at startIndex '
-        '$_nextTimelineEventIndexToProcess and now '
-        '_nextTimelineEventIndexToProcess = ${data.timelineEvents.length}',
-      ),
-    );
-    _nextTimelineEventIndexToProcess = data.timelineEvents.length;
+      debugTraceEventCallback(
+        () => log(
+          'initializing event groups at startIndex '
+          '$_nextTimelineEventIndexToProcess',
+        ),
+      );
+      data.initializeEventGroups(
+        threadNamesById,
+        startIndex: _nextTimelineEventIndexToProcess,
+      );
+      debugTraceEventCallback(
+        () => log(
+          'after initializing event groups at startIndex '
+          '$_nextTimelineEventIndexToProcess and now '
+          '_nextTimelineEventIndexToProcess = ${data.timelineEvents.length}',
+        ),
+      );
+      _nextTimelineEventIndexToProcess = data.timelineEvents.length;
+    }
 
-    assert(activelyTimedProcessStartMicros != null);
-    final processingDuration = Duration(
-      microseconds: DateTime.now().microsecondsSinceEpoch -
-          activelyTimedProcessStartMicros,
-    );
-    ga.timing(
+    // Process trace events [processTraceEventsHelper] and time the operation
+    // for analytics.
+    await ga.timeAsync(
       analytics_constants.performance,
       analytics_constants.traceEventProcessingTime,
-      duration: processingDuration,
-      traceEventCount: processingTraceCount,
+      asyncOperation: processTraceEventsHelper,
+      screenMetrics: PerformanceScreenMetrics(
+        traceEventCount: processingTraceCount,
+      ),
     );
   }
 

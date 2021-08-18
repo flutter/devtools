@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../analytics/analytics_common.dart';
 import '../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
@@ -509,4 +510,18 @@ class _BadgeJankyFramesSetting extends StatelessWidget {
       ],
     );
   }
+}
+
+class PerformanceScreenMetrics extends ScreenAnalyticsMetrics {
+  PerformanceScreenMetrics({
+    this.uiDuration,
+    this.rasterDuration,
+    this.shaderCompilationDuration,
+    this.traceEventCount,
+  });
+
+  final Duration uiDuration;
+  final Duration rasterDuration;
+  final Duration shaderCompilationDuration;
+  final int traceEventCount;
 }

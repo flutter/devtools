@@ -223,11 +223,14 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           // selected before timeline events are associated with the
           // FlutterFrame. If this is the case, process the analytics call once
           // the frame's timeline events are available.
-          ga.selectFrame(
+          ga.select(
             analytics_constants.performance,
-            uiDuration: frame.buildTime,
-            rasterDuration: frame.rasterTime,
-            shaderCompilationDuration: frame.shaderDuration,
+            analytics_constants.selectFlutterFrame,
+            screenMetrics: PerformanceScreenMetrics(
+              uiDuration: frame.buildTime,
+              rasterDuration: frame.rasterTime,
+              shaderCompilationDuration: frame.shaderDuration,
+            ),
           );
         }
         _controller.toggleSelectedFrame(frame);
