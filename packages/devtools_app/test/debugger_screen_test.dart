@@ -177,16 +177,6 @@ void main() {
     });
 
     group('Codeview', () {
-      final horizontalScrollbarFinder = find.byWidgetPredicate(
-          (Widget widget) =>
-              widget is Scrollbar &&
-              widget.key ==
-                  const Key('debuggerCodeViewHorizontalScrollbarKey'));
-
-      final verticalScrollbarFinder = find.byWidgetPredicate((Widget widget) =>
-          widget is Scrollbar &&
-          widget.key == const Key('debuggerCodeViewVerticalScrollbarKey'));
-
       setUp(() {
         final scriptsHistory = ScriptsHistory();
         scriptsHistory.pushEntry(mockScript);
@@ -207,13 +197,18 @@ void main() {
           (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, debuggerController);
 
+        // TODO(elliette): https://github.com/flutter/flutter/pull/88152 fixes
+        // this so that forcing a scroll event is no longer necessary. Remove
+        // once the change is in the stable release.
         debuggerController.showScriptLocation(ScriptLocation(mockScriptRef,
             location: SourcePosition(line: 50, column: 50)));
         await tester.pumpAndSettle();
 
         expect(find.byType(Scrollbar), findsNWidgets(2));
-        expect(horizontalScrollbarFinder, findsOneWidget);
-        expect(verticalScrollbarFinder, findsOneWidget);
+        expect(find.byKey(const Key('debuggerCodeViewVerticalScrollbarKey')),
+            findsOneWidget);
+        expect(find.byKey(const Key('debuggerCodeViewHorizontalScrollbarKey')),
+            findsOneWidget);
         await expectLater(
           find.byKey(DebuggerScreenBody.codeViewKey),
           matchesGoldenFile('goldens/codeview_scrollbars.png'),
