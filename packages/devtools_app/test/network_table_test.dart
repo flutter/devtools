@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/network/network_model.dart';
 import 'package:devtools_app/src/network/network_screen.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/version.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -148,6 +150,7 @@ void main() {
       final fakeVmService = fakeServiceManager.service as FakeVmService;
       fakeVmService.dartIoVersion = SemanticVersion(major: 1, minor: 6);
       fakeVmService.httpEnableTimelineLoggingResult = false;
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
 
       // Bypass controller recording so timelineMicroOffset is not time dependant
       controller = NetworkController();
@@ -165,21 +168,21 @@ void main() {
 
     DartIOHttpRequestData _findRequestById(int id) {
       return requests
-        .whereType<DartIOHttpRequestData>()
-        .cast<DartIOHttpRequestData>()
-        .firstWhere((request) => request.id == id);
+          .whereType<DartIOHttpRequestData>()
+          .cast<DartIOHttpRequestData>()
+          .firstWhere((request) => request.id == id);
     }
 
     test('UriColumn', () {
       final column = UriColumn();
-      for(final request in requests) {
+      for (final request in requests) {
         expect(column.getDisplayValue(request), request.uri.toString());
       }
     });
 
     test('MethodColumn', () {
       final column = MethodColumn();
-      for(final request in requests) {
+      for (final request in requests) {
         expect(column.getDisplayValue(request), request.method);
       }
     });
@@ -217,7 +220,9 @@ void main() {
       print(httpGet.startTimestamp.toUtc());
       print(getRequest.startTimestamp.toUtc());
 
-      //expect(column.getDisplayValue(getRequest), contains(':26:36.330'));
+      // The hours field may be unreliable since it depends on the timezone the
+      // test is running in.
+      expect(column.getDisplayValue(getRequest), contains(':45:26.279'));
     });
-  }); 
+  });
 }

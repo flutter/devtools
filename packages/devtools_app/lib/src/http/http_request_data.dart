@@ -507,7 +507,7 @@ class DartIOHttpRequestData extends HttpRequestData {
 
   bool get _hasError => _request.request != null && _request.request.hasError;
 
-  int get _endTime =>  _hasError ? _request.endTime : _request.response.endTime;
+  int get _endTime => _hasError ? _request.endTime : _request.response.endTime;
 
   @override
   Duration get duration {
@@ -553,7 +553,7 @@ class DartIOHttpRequestData extends HttpRequestData {
   /// True if the HTTP request hasn't completed yet, determined by the lack of
   /// an end event.
   @override
-  bool get inProgress => 
+  bool get inProgress =>
       _hasError ? !_request.isRequestComplete : !_request.isResponseComplete;
 
   /// All instant events logged to the timeline for this HTTP request.
@@ -573,12 +573,12 @@ class DartIOHttpRequestData extends HttpRequestData {
 
   /// A list of all cookies contained within the request headers.
   @override
-  List<Cookie> get requestCookies => 
+  List<Cookie> get requestCookies =>
       _hasError ? [] : HttpRequestData._parseCookies(_request.request?.cookies);
 
   /// The request headers for the HTTP request.
   @override
-  Map<String, dynamic> get requestHeaders => 
+  Map<String, dynamic> get requestHeaders =>
       _hasError ? null : _request.request?.headers;
 
   /// A list of all cookies contained within the response headers.
@@ -603,24 +603,14 @@ class DartIOHttpRequestData extends HttpRequestData {
         timelineMicrosecondsSinceEpoch(_endTime),
       );
 
-  // @override
-  // DateTime get startTimestamp => DateTime.fromMicrosecondsSinceEpoch(
-  //       timelineMicrosecondsSinceEpoch(_request.startTime),
-  //     );
-
   @override
-  DateTime get startTimestamp {
-    print("!!! ${_request.startTime}");
-    return DateTime.fromMicrosecondsSinceEpoch(
+  DateTime get startTimestamp => DateTime.fromMicrosecondsSinceEpoch(
         timelineMicrosecondsSinceEpoch(_request.startTime),
       );
-  } 
-
-
 
   @override
-  String get status => 
-      _hasError ?  'Error' : _request.response?.statusCode?.toString();
+  String get status =>
+      _hasError ? 'Error' : _request.response?.statusCode?.toString();
 
   @override
   String get uri => _request.uri.toString();
