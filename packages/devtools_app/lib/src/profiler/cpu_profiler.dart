@@ -5,6 +5,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../charts/flame_chart.dart';
 import '../common_widgets.dart';
@@ -153,9 +154,10 @@ class _CpuProfilerState extends State<CpuProfiler>
                       null,
                 ),
                 const SizedBox(width: denseSpacing),
-                if (currentTab.key != CpuProfiler.summaryTab)
+                if (currentTab.key != CpuProfiler.summaryTab) ...[
                   UserTagDropdown(widget.controller),
-                const SizedBox(width: defaultSpacing),
+                  const SizedBox(width: denseSpacing),
+                ],
                 // TODO(kenz): support search for call tree and bottom up tabs as
                 // well. This will require implementing search for tree tables.
                 if (currentTab.key == CpuProfiler.flameChartTab)
@@ -163,7 +165,13 @@ class _CpuProfilerState extends State<CpuProfiler>
                     children: [
                       if (widget.searchFieldKey != null)
                         _buildSearchField(hasData),
-                      FlameChartHelpButton(),
+                      FlameChartHelpButton(
+                        screenId: widget.standaloneProfiler
+                            ? analytics_constants.cpuProfiler
+                            : analytics_constants.performance,
+                        analyticsAction:
+                            analytics_constants.cpuProfileFlameChartHelp,
+                      ),
                     ],
                   ),
                 if (currentTab.key != CpuProfiler.flameChartTab &&

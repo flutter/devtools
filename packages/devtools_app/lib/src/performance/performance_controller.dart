@@ -8,6 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose.dart';
 import '../config_specific/import_export/import_export.dart';
 import '../config_specific/logger/allowed_error.dart';
@@ -40,14 +43,14 @@ import 'timeline_streams.dart';
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
 class PerformanceController extends DisposableController
-    with
-        CpuProfilerControllerProviderMixin,
-        SearchControllerMixin<TimelineEvent>,
-        AutoDisposeControllerMixin {
+    with SearchControllerMixin<TimelineEvent>, AutoDisposeControllerMixin {
   PerformanceController() {
     processor = TimelineEventProcessor(this);
     _init();
   }
+
+  final cpuProfilerController =
+      CpuProfilerController(analyticsScreenId: analytics_constants.performance);
 
   final _exportController = ExportController();
 
@@ -611,36 +614,52 @@ class PerformanceController extends DisposableController
         '$_nextTraceIndexToProcess',
       ),
     );
-    await processor.processTraceEvents(
-      traceEvents,
-      startIndex: _nextTraceIndexToProcess,
-    );
-    debugTraceEventCallback(
-      () => log(
-        'after processing traceEvents at startIndex $_nextTraceIndexToProcess, '
-        'and now _nextTraceIndexToProcess = $traceEventCount',
-      ),
-    );
-    _nextTraceIndexToProcess = traceEventCount;
 
-    debugTraceEventCallback(
-      () => log(
-        'initializing event groups at startIndex '
-        '$_nextTimelineEventIndexToProcess',
+    final processingTraceCount = traceEventCount - _nextTraceIndexToProcess;
+
+    Future<void> processTraceEventsHelper() async {
+      await processor.processTraceEvents(
+        traceEvents,
+        startIndex: _nextTraceIndexToProcess,
+      );
+      debugTraceEventCallback(
+        () => log(
+          'after processing traceEvents at startIndex $_nextTraceIndexToProcess, '
+          'and now _nextTraceIndexToProcess = $traceEventCount',
+        ),
+      );
+      _nextTraceIndexToProcess = traceEventCount;
+
+      debugTraceEventCallback(
+        () => log(
+          'initializing event groups at startIndex '
+          '$_nextTimelineEventIndexToProcess',
+        ),
+      );
+      data.initializeEventGroups(
+        threadNamesById,
+        startIndex: _nextTimelineEventIndexToProcess,
+      );
+      debugTraceEventCallback(
+        () => log(
+          'after initializing event groups at startIndex '
+          '$_nextTimelineEventIndexToProcess and now '
+          '_nextTimelineEventIndexToProcess = ${data.timelineEvents.length}',
+        ),
+      );
+      _nextTimelineEventIndexToProcess = data.timelineEvents.length;
+    }
+
+    // Process trace events [processTraceEventsHelper] and time the operation
+    // for analytics.
+    await ga.timeAsync(
+      analytics_constants.performance,
+      analytics_constants.traceEventProcessingTime,
+      asyncOperation: processTraceEventsHelper,
+      screenMetrics: PerformanceScreenMetrics(
+        traceEventCount: processingTraceCount,
       ),
     );
-    data.initializeEventGroups(
-      threadNamesById,
-      startIndex: _nextTimelineEventIndexToProcess,
-    );
-    debugTraceEventCallback(
-      () => log(
-        'after initializing event groups at startIndex '
-        '$_nextTimelineEventIndexToProcess and now '
-        '_nextTimelineEventIndexToProcess = ${data.timelineEvents.length}',
-      ),
-    );
-    _nextTimelineEventIndexToProcess = data.timelineEvents.length;
   }
 
   FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {

@@ -14,6 +14,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../analytics/constants.dart' as analytics_constants;
 import '../../auto_dispose_mixin.dart';
 import '../../charts/flame_chart.dart';
 import '../../common_widgets.dart';
@@ -25,6 +26,7 @@ import '../../trace_event.dart';
 import '../../ui/colors.dart';
 import '../../ui/search.dart';
 import '../../utils.dart';
+import '../performance_screen.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'performance_utils.dart';
@@ -113,7 +115,10 @@ class _LegacyTimelineFlameChartContainerState
             rightPadding: 0.0,
             rightActions: [
               _buildSearchField(searchFieldEnabled),
-              FlameChartHelpButton(),
+              const FlameChartHelpButton(
+                screenId: PerformanceScreen.id,
+                analyticsAction: analytics_constants.timelineFlameChartHelp,
+              ),
             ],
           ),
           Expanded(

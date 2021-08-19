@@ -175,7 +175,7 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.inspector,
+  gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.performanceOverlay,
   tooltip: 'Overlay a performance chart on your app.',
   tooltipUrl:

@@ -1419,3 +1419,7 @@ Future<T> whenValueNonNull<T>(ValueListenable<T> listenable) {
 }
 
 const connectToNewAppText = 'Connect to a new app';
+
+/// Exception thrown when a request to process data has been cancelled in
+/// favor of a new request.
+class ProcessCancelledException implements Exception {}

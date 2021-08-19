@@ -4,13 +4,17 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../analytics/constants.dart' as analytics_constants;
 import '../config_specific/import_export/import_export.dart';
 import '../utils.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
 import 'profiler_screen.dart';
 
-class ProfilerScreenController with CpuProfilerControllerProviderMixin {
+class ProfilerScreenController {
+  final cpuProfilerController =
+      CpuProfilerController(analyticsScreenId: analytics_constants.cpuProfiler);
+
   final _exportController = ExportController();
 
   CpuProfileData get cpuProfileData => cpuProfilerController.dataNotifier.value;

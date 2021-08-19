@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../globals.dart';
 import '../ui/filter.dart';
 import '../ui/search.dart';
@@ -14,11 +19,14 @@ import '../vm_flags.dart' as vm_flags;
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
 import 'cpu_profile_transformer.dart';
+import 'profiler_screen.dart';
 
 class CpuProfilerController
     with
         SearchControllerMixin<CpuStackFrame>,
         FilterControllerMixin<CpuStackFrame> {
+  CpuProfilerController({this.analyticsScreenId});
+
   /// Tag to represent when no user tag filters are applied.
   ///
   /// The word 'none' is not a magic word - just a user-friendly name to convey
@@ -30,6 +38,9 @@ class CpuProfilerController
   /// When this data is the value of [_dataNotifier], the CPU profiler is in a
   /// base state where recording instructions should be shown.
   static CpuProfileData baseStateCpuProfileData = CpuProfileData.empty();
+
+  /// The analytics screen id for which this controller is active.
+  final String analyticsScreenId;
 
   /// Store of cached CPU profiles.
   final cpuProfileStore = CpuProfileStore();
@@ -120,20 +131,43 @@ class CpuProfilerController
     var cpuProfileData = baseStateCpuProfileData;
 
     _dataNotifier.value = null;
-    // TODO(kenz): add a cancel button to the processing UI in case pulling a
-    // large payload from the vm service takes a long time.
-    cpuProfileData = await serviceManager.service.getCpuProfile(
-      startMicros: startMicros,
-      extentMicros: extentMicros,
-    );
 
-    await processAndSetData(cpuProfileData, processId: processId);
-    cpuProfileStore.addProfile(
-      TimeRange()
-        ..start = Duration(microseconds: startMicros)
-        ..end = Duration(microseconds: startMicros + extentMicros),
-      _dataNotifier.value,
-    );
+    Future<void> pullAndProcessHelper() async {
+      // TODO(kenz): add a cancel button to the processing UI in case pulling a
+      // large payload from the vm service takes a long time.
+      cpuProfileData = await serviceManager.service.getCpuProfile(
+        startMicros: startMicros,
+        extentMicros: extentMicros,
+      );
+      await processAndSetData(cpuProfileData, processId: processId);
+      cpuProfileStore.addProfile(
+        TimeRange()
+          ..start = Duration(microseconds: startMicros)
+          ..end = Duration(microseconds: startMicros + extentMicros),
+        _dataNotifier.value,
+      );
+    }
+
+    if (analyticsScreenId != null) {
+      // Pull and process cpu profile data [pullAndProcessHelper] and time the
+      // operation for analytics.
+      await ga.timeAsync(
+        analyticsScreenId,
+        analytics_constants.cpuProfileProcessingTime,
+        asyncOperation: pullAndProcessHelper,
+        screenMetrics: ProfilerScreenMetrics(
+          cpuSampleCount: cpuProfileData.profileMetaData.sampleCount,
+          cpuStackDepth: cpuProfileData.profileMetaData.stackDepth,
+        ),
+      );
+    } else {
+      try {
+        await pullAndProcessHelper();
+      } on ProcessCancelledException catch (_) {
+        // Do nothing because the attempt to process data has been cancelled in
+        // favor of a new one.
+      }
+    }
   }
 
   /// Processes [cpuProfileData] and sets the data for the controller.
@@ -161,9 +195,6 @@ class CpuProfilerController
       // Rethrow after setting notifiers so that cpu profile data is included
       // in the timeline export.
       rethrow;
-    } on ProcessCancelledException catch (_) {
-      // Do nothing because the attempt to process data has been cancelled in
-      // favor of a new one.
     }
   }
 
@@ -277,8 +308,4 @@ class CpuProfilerController
     );
     _filterIdentifier++;
   }
-}
-
-mixin CpuProfilerControllerProviderMixin {
-  final cpuProfilerController = CpuProfilerController();
 }
