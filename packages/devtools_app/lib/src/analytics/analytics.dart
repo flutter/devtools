@@ -72,6 +72,9 @@ external void initializeGA();
 @JS()
 @anonymous
 class GtagEventDevTools extends GtagEvent {
+  // TODO(kenz): try to make this accept a JSON map of extra parameters rather
+  // than a fixed list of fields. See
+  // https://github.com/flutter/devtools/pull/3281#discussion_r692376353.
   external factory GtagEventDevTools({
     String event_category,
     String event_label, // Event e.g., gaScreenViewEvent, gaSelectEvent, etc.
