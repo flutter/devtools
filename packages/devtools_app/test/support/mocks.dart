@@ -203,8 +203,8 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     this._httpProfile,
     this._memoryData,
     this._allocationData,
-  ) : _startingSockets = _socketProfile?.sockets ?? [], 
-      _startingRequests = _httpProfile?.requests ?? [];
+  )   : _startingSockets = _socketProfile?.sockets ?? [],
+        _startingRequests = _httpProfile?.requests ?? [];
 
   /// Specifies the return value of `httpEnableTimelineLogging`.
   bool httpEnableTimelineLoggingResult = true;
@@ -448,26 +448,31 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     _socketProfile = SocketProfile(sockets: _startingSockets);
   }
 
-
   @override
   Future<bool> isHttpProfilingAvailable(String isolateId) => Future.value(true);
 
   @override
-  Future<HttpProfileRequest> getHttpProfileRequest(String isolateId, int id) async {
+  Future<HttpProfileRequest> getHttpProfileRequest(
+    String isolateId,
+    int id,
+  ) async {
     final httpProfile = await getHttpProfile(isolateId);
     return Future.value(
-      httpProfile.requests.firstWhere((request) => request.id == id, orElse: () => null)
+      httpProfile.requests
+          .firstWhere((request) => request.id == id, orElse: () => null),
     );
   }
 
   @override
   Future<HttpProfile> getHttpProfile(String isolateId, {int updatedSince}) {
-    return Future.value(_httpProfile ?? HttpProfile(requests: [], timestamp: 0));
+    return Future.value(
+      _httpProfile ?? HttpProfile(requests: [], timestamp: 0),
+    );
   }
 
   @override
   Future<Success> clearHttpProfile(String isolateId) {
-    _httpProfile.requests.clear();
+    _httpProfile?.requests?.clear();
     return Future.value(Success());
   }
 

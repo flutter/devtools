@@ -328,9 +328,8 @@ class NetworkController
     return enabled;
   }
 
-  /// Clears the previously collected HTTP timeline events, clears the socket
-  /// profile from the vm, and resets the last refresh timestamp to the current
-  /// time.
+  /// Clears the HTTP profile and socket profile from the vm, and resets the
+  /// last refresh timestamp to the current time.
   Future<void> clear() async {
     await _networkService.clearData();
     _requests.value = NetworkRequests();
