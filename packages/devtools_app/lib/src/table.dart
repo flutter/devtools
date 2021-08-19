@@ -1220,8 +1220,10 @@ class _TableRowState<T> extends State<TableRow<T>>
 
   @override
   Widget build(BuildContext context) {
-    final onPressed = () => widget.onPressed(widget.node);
-    final row = tableRowFor(context, onPressed: onPressed);
+    final row = tableRowFor(
+      context,
+      onPressed: () => widget.onPressed(widget.node),
+    );
 
     final box = SizedBox(
       height: widget.node == null ? areaPaneHeaderHeight : defaultRowHeight,
