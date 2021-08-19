@@ -365,6 +365,7 @@ class _KindColumn extends ColumnData<LogData>
     BuildContext context,
     LogData item, {
     bool isRowSelected = false,
+    VoidCallback onPressed,
   }) {
     final String kind = item.kind;
 
@@ -435,6 +436,7 @@ class MessageColumn extends ColumnData<LogData>
     BuildContext context,
     LogData data, {
     bool isRowSelected = false,
+    VoidCallback onPressed,
   }) {
     TextStyle textStyle = Theme.of(context).fixedFontStyle;
     if (isRowSelected) {
