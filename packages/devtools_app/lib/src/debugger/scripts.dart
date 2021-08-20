@@ -16,7 +16,7 @@ import 'debugger_screen.dart';
 
 const containerIcon = Icons.folder;
 const libraryIcon = Icons.insert_chart;
-const listItemHeight = 40.0;
+double get listItemHeight => scaleByFontFactor(40.0);
 
 /// Picker that takes a list of scripts and allows filtering and selection of
 /// items.

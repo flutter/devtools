@@ -18,6 +18,7 @@ import 'package:meta/meta.dart';
 
 import '../inspector/layout_explorer/ui/widgets_theme.dart';
 import '../theme.dart';
+import '../utils.dart';
 
 class CustomIcon extends StatelessWidget {
   const CustomIcon({
@@ -44,7 +45,10 @@ class CustomIcon extends StatelessWidget {
           Text(
             text,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 9, color: Color(0xFF231F20)),
+            style: TextStyle(
+              fontSize: scaleByFontFactor(9.0),
+              color: const Color(0xFF231F20),
+            ),
           ),
         ],
       ),
@@ -68,8 +72,8 @@ class CircleIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 15,
-      height: 15,
+      width: defaultIconSize - 1,
+      height: defaultIconSize - 1,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: color,
@@ -78,7 +82,8 @@ class CircleIcon extends StatelessWidget {
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 9, color: Color(0xFF231F20)),
+        style: TextStyle(
+            fontSize: scaleByFontFactor(9.0), color: const Color(0xFF231F20)),
       ),
     );
   }
@@ -195,7 +200,7 @@ class ColorIcon extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return CustomPaint(
       painter: _ColorIconPainter(color, colorScheme),
-      size: const Size(defaultIconSize, defaultIconSize),
+      size: Size(defaultIconSize, defaultIconSize),
     );
   }
 }
@@ -287,13 +292,17 @@ class FlutterMaterialIcons {
 class AssetImageIcon extends StatelessWidget {
   const AssetImageIcon({
     @required this.asset,
-    this.height = defaultIconSize,
-    this.width = defaultIconSize,
-  });
+    double height,
+    double width,
+  })  : _width = width,
+        _height = height;
 
   final String asset;
-  final double height;
-  final double width;
+  final double _height;
+  final double _width;
+
+  double get width => _width ?? defaultIconSize;
+  double get height => _height ?? defaultIconSize;
 
   @override
   Widget build(BuildContext context) {
@@ -301,6 +310,7 @@ class AssetImageIcon extends StatelessWidget {
       image: AssetImage(asset),
       height: height,
       width: width,
+      fit: BoxFit.fill,
     );
   }
 }

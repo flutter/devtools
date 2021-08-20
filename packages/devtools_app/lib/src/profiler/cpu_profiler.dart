@@ -15,6 +15,7 @@ import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/filter.dart';
 import '../ui/search.dart';
+import '../ui/tab.dart';
 import 'cpu_profile_bottom_up.dart';
 import 'cpu_profile_call_tree.dart';
 import 'cpu_profile_controller.dart';
@@ -33,11 +34,12 @@ class CpuProfiler extends StatefulWidget {
   })  : callTreeRoots = data?.callTreeRoots ?? [],
         bottomUpRoots = data?.bottomUpRoots ?? [],
         tabs = [
-          if (summaryView != null) const Tab(key: summaryTab, text: 'Summary'),
-          if (data != null && !data.isEmpty) ...const [
-            Tab(key: bottomUpTab, text: 'Bottom Up'),
-            Tab(key: callTreeTab, text: 'Call Tree'),
-            Tab(key: flameChartTab, text: 'CPU Flame Chart'),
+          if (summaryView != null)
+            DevToolsTab(key: summaryTab, text: 'Summary'),
+          if (data != null && !data.isEmpty) ...[
+            DevToolsTab(key: bottomUpTab, text: 'Bottom Up'),
+            DevToolsTab(key: callTreeTab, text: 'Call Tree'),
+            DevToolsTab(key: flameChartTab, text: 'CPU Flame Chart'),
           ],
         ];
 
@@ -55,11 +57,11 @@ class CpuProfiler extends StatefulWidget {
 
   final Widget summaryView;
 
-  final List<Tab> tabs;
+  final List<DevToolsTab> tabs;
 
   static const Key dataProcessingKey = Key('CpuProfiler - data is processing');
 
-  // When content of the selected tab from the tab controller has this key,
+  // When content of the selected DevToolsTab from the tab controller has this key,
   // we will not show the expand/collapse buttons.
   static const Key flameChartTab = Key('cpu profile flame chart tab');
   static const Key callTreeTab = Key('cpu profile call tree tab');

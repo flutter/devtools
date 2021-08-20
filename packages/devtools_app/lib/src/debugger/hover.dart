@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import '../eval_on_dart_library.dart';
 import '../theme.dart';
 import '../ui/utils.dart';
+import '../utils.dart';
 
 /// Regex for valid Dart identifiers.
 final _identifier = RegExp(r'^[a-zA-Z0-9]|_|\$');
@@ -91,9 +92,9 @@ class HoverCardData {
   HoverCardData({
     this.title,
     @required this.contents,
-    this.width = HoverCardTooltip.defaultHoverWidth,
+    double width,
     this.position = HoverCardPosition.cursor,
-  });
+  }) : width = width ?? HoverCardTooltip.defaultHoverWidth;
 
   final String title;
   final Widget contents;
@@ -216,7 +217,7 @@ class HoverCardTooltip extends StatefulWidget {
   });
 
   static const _hoverDelay = Duration(milliseconds: 500);
-  static const defaultHoverWidth = 450.0;
+  static double get defaultHoverWidth => scaleByFontFactor(450.0);
 
   /// Whether the tooltip is currently enabled.
   final bool Function() enabled;

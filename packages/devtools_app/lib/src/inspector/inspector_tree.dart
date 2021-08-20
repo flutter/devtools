@@ -44,7 +44,7 @@ extension InspectorColorScheme on ColorScheme {
 
 const double iconPadding = 4.0;
 const double chartLineStrokeWidth = 1.0;
-double get columnWidth => isDense() ? 12 : 16.0;
+double get columnWidth => scaleByFontFactor(isDense() ? 12.0 : 16.0);
 double get verticalPadding => scaleByFontFactor(10.0);
 double get rowHeight => scaleByFontFactor(isDense() ? 20.0 : 24.0);
 

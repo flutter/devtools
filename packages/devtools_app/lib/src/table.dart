@@ -24,7 +24,7 @@ import 'utils.dart';
 ///
 /// When rows in the table expand or collapse, they will animate between a
 /// height of 0 and a height of [defaultRowHeight].
-const defaultRowHeight = 32.0;
+double get defaultRowHeight => scaleByFontFactor(32.0);
 
 typedef IndexedScrollableWidgetBuilder = Widget Function(
   BuildContext,
@@ -1427,7 +1427,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                     size: defaultIconSize,
                   ),
                 )
-              : const SizedBox(width: defaultIconSize, height: defaultIconSize);
+              : SizedBox(width: defaultIconSize, height: defaultIconSize);
           content = Row(
             mainAxisSize: MainAxisSize.min,
             children: [

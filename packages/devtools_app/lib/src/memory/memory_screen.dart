@@ -20,6 +20,7 @@ import '../notifications.dart';
 import '../screen.dart';
 import '../theme.dart';
 import '../ui/icons.dart';
+import '../ui/tab.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
 import 'memory_android_chart.dart' as android;
@@ -74,9 +75,9 @@ class MemoryScreen extends Screen {
 class MemoryBody extends StatefulWidget {
   const MemoryBody();
 
-  static const List<Tab> memoryTabs = [
-    Tab(text: 'Analysis'),
-    Tab(text: 'Allocations'),
+  static final List<Tab> memoryTabs = [
+    DevToolsTab(text: 'Analysis'),
+    DevToolsTab(text: 'Allocations'),
   ];
 
   @override
@@ -324,7 +325,7 @@ class MemoryBodyState extends State<MemoryBody>
           ),
           const SizedBox(height: denseRowSpacing),
           SizedBox(
-            height: 70,
+            height: scaleByFontFactor(70),
             child: events.MemoryEventsPane(eventChartController),
           ),
           SizedBox(
@@ -489,12 +490,12 @@ class MemoryBodyState extends State<MemoryBody>
           mainAxisSize: MainAxisSize.min,
           children: [
             PauseButton(
-              includeTextWidth: _primaryControlsMinVerboseWidth,
+              unscaledIncludeTextWidth: _primaryControlsMinVerboseWidth,
               onPressed: paused ? null : _onPause,
             ),
             const SizedBox(width: denseSpacing),
             ResumeButton(
-              includeTextWidth: _primaryControlsMinVerboseWidth,
+              unscaledIncludeTextWidth: _primaryControlsMinVerboseWidth,
               onPressed: paused ? _onResume : null,
             ),
             const SizedBox(width: defaultSpacing),
@@ -503,7 +504,7 @@ class MemoryBodyState extends State<MemoryBody>
               onPressed: controller.memorySource == MemoryController.liveFeed
                   ? _clearTimeline
                   : null,
-              includeTextWidth: _primaryControlsMinVerboseWidth,
+              unscaledIncludeTextWidth: _primaryControlsMinVerboseWidth,
             ),
             const SizedBox(width: defaultSpacing),
             _intervalDropdown(textTheme),
@@ -519,7 +520,7 @@ class MemoryBodyState extends State<MemoryBody>
       label: 'Android Memory',
       onPressed:
           isAndroidCollection ? controller.toggleAndroidChartVisibility : null,
-      includeTextWidth: 900,
+      unscaledIncludeTextWidth: 900,
     );
   }
 
@@ -540,7 +541,7 @@ class MemoryBodyState extends State<MemoryBody>
                     onPressed: controller.isGcing ? null : _gc,
                     icon: Icons.delete,
                     label: 'GC',
-                    includeTextWidth: _primaryControlsMinVerboseWidth,
+                    unscaledIncludeTextWidth: _primaryControlsMinVerboseWidth,
                   ),
                   const SizedBox(width: denseSpacing),
                 ],
@@ -548,7 +549,7 @@ class MemoryBodyState extends State<MemoryBody>
             : const SizedBox(),
         ExportButton(
           onPressed: controller.offline ? null : _exportToFile,
-          includeTextWidth: _primaryControlsMinVerboseWidth,
+          unscaledIncludeTextWidth: _primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
         IconLabelButton(
@@ -557,7 +558,7 @@ class MemoryBodyState extends State<MemoryBody>
           icon: legendOverlayEntry == null ? Icons.storage : Icons.close,
           label: 'Legend',
           tooltip: 'Legend',
-          includeTextWidth: _primaryControlsMinVerboseWidth,
+          unscaledIncludeTextWidth: _primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
@@ -587,26 +588,26 @@ class MemoryBodyState extends State<MemoryBody>
 
   static const legendXOffset = 20;
   static const legendYOffset = 7.0;
-  static const legendWidth = 200.0;
-  static const legendTextWidth = 55.0;
-  static const legendHeight1Chart = 200.0;
-  static const legendHeight2Charts = 323.0;
+  static double get legendWidth => scaleByFontFactor(200.0);
+  static double get legendTextWidth => scaleByFontFactor(55.0);
+  static double get legendHeight1Chart => scaleByFontFactor(200.0);
+  static double get legendHeight2Charts => scaleByFontFactor(323.0);
 
   final hoverKey = GlobalKey(debugLabel: MemoryScreen.hoverKeyName);
   static const hoverXOffset = 10;
   static const hoverYOffset = 0.0;
-  static const hoverWidth = 225.0;
+  static double get hoverWidth => scaleByFontFactor(225.0);
   static const hover_card_border_width = 2.0;
 
   // TODO(terry): Compute below heights dynamically.
-  static const hoverHeightMinimum = 42.0;
-  static const hoverItemHeight = 18.0;
+  static double get hoverHeightMinimum => scaleByFontFactor(42.0);
+  static double get hoverItemHeight => scaleByFontFactor(18.0);
 
   // One extension event to display (4 lines).
-  static const hoverOneEventsHeight = 82.0;
+  static double get hoverOneEventsHeight => scaleByFontFactor(82.0);
 
   // Many extension events to display.
-  static const hoverEventsHeight = 120.0;
+  static double get hoverEventsHeight => scaleByFontFactor(120.0);
 
   static double computeHoverHeight(
     int eventsCount,
@@ -1169,7 +1170,7 @@ class MemoryBodyState extends State<MemoryBody>
     // Separator between Android data.
     // TODO(terry): Why Center widget doesn't work (parent width is bigger/centered too far right).
     //              Is it centering on a too wide Overlay?
-    const width = MemoryBodyState.hoverWidth -
+    final width = MemoryBodyState.hoverWidth -
         totalDividerLineHorizontalSpace -
         DashedLine.defaultDashWidth;
     final dashedColor = Colors.grey.shade600;

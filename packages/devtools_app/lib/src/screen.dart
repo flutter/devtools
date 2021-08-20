@@ -12,6 +12,7 @@ import 'globals.dart';
 import 'listenable.dart';
 import 'scaffold.dart';
 import 'theme.dart';
+import 'ui/tab.dart';
 import 'version.dart';
 
 /// Defines a page shown in the DevTools [TabBar].
@@ -120,10 +121,11 @@ abstract class Screen {
 
   int get badgeCount => 0;
 
-  double approximateWidth() {
+  double approximateWidth(TextTheme textTheme) {
     final painter = TextPainter(
       text: TextSpan(
         text: title,
+        style: textTheme.bodyText1,
       ),
       textDirection: TextDirection.ltr,
     )..layout();
@@ -140,7 +142,7 @@ abstract class Screen {
       valueListenable:
           serviceManager.errorBadgeManager.errorCountNotifier(screenId),
       builder: (context, count, _) {
-        final tab = Tab(
+        final tab = DevToolsTab(
           key: tabKey,
           child: Row(
             children: <Widget>[
@@ -158,8 +160,7 @@ abstract class Screen {
           // size for the [BadgePainter]
           final painter = TextPainter(
             text: TextSpan(
-              text: title,
-            ),
+                text: title, style: Theme.of(context).regularTextStyle),
             textDirection: TextDirection.ltr,
           )..layout();
           final titleWidth = painter.width;

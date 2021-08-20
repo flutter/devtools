@@ -254,17 +254,17 @@ class _PrimaryControls extends StatelessWidget {
         return Row(
           children: [
             PauseButton(
-              includeTextWidth: _primaryControlsMinIncludeTextWidth,
+              unscaledIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
               onPressed: recording ? _pauseFrameRecording : null,
             ),
             const SizedBox(width: denseSpacing),
             ResumeButton(
-              includeTextWidth: _primaryControlsMinIncludeTextWidth,
+              unscaledIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
               onPressed: recording ? null : _resumeFrameRecording,
             ),
             const SizedBox(width: denseSpacing),
             ClearButton(
-              includeTextWidth: _primaryControlsMinIncludeTextWidth,
+              unscaledIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
               onPressed: processing ? null : _clearPerformanceData,
             ),
           ],
@@ -315,7 +315,7 @@ class _SecondaryControls extends StatelessWidget {
         const SizedBox(width: defaultSpacing),
         if (serviceManager.connectedApp.isFlutterAppNow)
           ServiceExtensionButtonGroup(
-            minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+            unscaledIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
             extensions: [
               performanceOverlay,
               profileWidgetBuilds,
@@ -327,7 +327,7 @@ class _SecondaryControls extends StatelessWidget {
         const SizedBox(width: defaultSpacing),
         ExportButton(
           onPressed: () => _exportPerformanceData(context),
-          includeTextWidth: _secondaryControlsMinIncludeTextWidth,
+          unscaledIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
         ),
         const SizedBox(width: defaultSpacing),
         SettingsOutlinedButton(

@@ -25,16 +25,17 @@ mixin FilterControllerMixin<T> {
 }
 
 class FilterDialog<FilterControllerMixin, T> extends StatefulWidget {
-  const FilterDialog({
+  FilterDialog({
     @required this.controller,
     this.onCancel,
     this.includeQueryFilter = true,
     this.queryInstructions,
     this.queryFilterArguments,
     this.toggleFilters,
-    this.dialogWidth = defaultDialogWidth,
-  }) : assert(!includeQueryFilter ||
-            (queryInstructions != null && queryFilterArguments != null));
+    double dialogWidth,
+  })  : assert(!includeQueryFilter ||
+            (queryInstructions != null && queryFilterArguments != null)),
+        dialogWidth = dialogWidth ?? defaultDialogWidth;
 
   final FilterControllerMixin controller;
 

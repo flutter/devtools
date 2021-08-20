@@ -20,6 +20,7 @@ import 'routing.dart';
 import 'theme.dart';
 import 'ui/label.dart';
 import 'url_utils.dart';
+import 'utils.dart';
 
 /// The landing screen when starting Dart DevTools without being connected to an
 /// app.
@@ -126,7 +127,7 @@ class _ConnectDialogState extends State<ConnectDialog>
         Row(
           children: [
             SizedBox(
-              width: 350.0,
+              width: scaleByFontFactor(350.0),
               child: TextField(
                 onSubmitted: actionInProgress ? null : (str) => _connect(),
                 autofocus: true,

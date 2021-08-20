@@ -26,9 +26,16 @@ import '../ui/utils.dart';
 import '../utils.dart';
 
 const double rowPadding = 2.0;
-const double rowHeight = 25.0;
-const double rowHeightWithPadding = rowHeight + rowPadding;
-const double sectionSpacing = 16.0;
+// Flame chart rows contain text so are not readable if they do not scale with
+// the font factor.
+double get rowHeight => scaleByFontFactor(25.0);
+double get rowHeightWithPadding => rowHeight + rowPadding;
+
+// This spacing needs to be scaled by the font factor otherwise section
+// labels will not have enough room. Typically spacing values should not depend
+// on the font size scale factor. TODO(jacobr): clean up the section spacing so
+// it is not used in a case where it is not really spacing.
+double get sectionSpacing => scaleByFontFactor(16.0);
 const double sideInset = 70.0;
 const double sideInsetSmall = 60.0;
 

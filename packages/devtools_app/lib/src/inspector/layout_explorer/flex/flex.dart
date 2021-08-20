@@ -125,7 +125,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     return RotatedBox(
       quarterTurns: axis == Axis.vertical ? 3 : 0,
       child: Container(
-        constraints: const BoxConstraints(
+        constraints: BoxConstraints(
           maxWidth: dropdownMaxSize,
           maxHeight: dropdownMaxSize,
         ),
@@ -246,7 +246,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     final flexDescription = Align(
       alignment: Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.only(
+        margin: EdgeInsets.only(
           top: mainAxisArrowIndicatorSize,
           left: crossAxisArrowIndicatorSize + margin,
         ),
@@ -285,7 +285,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     final verticalAxisDescription = Align(
       alignment: Alignment.bottomLeft,
       child: Container(
-        margin: const EdgeInsets.only(top: mainAxisArrowIndicatorSize + margin),
+        margin: EdgeInsets.only(top: mainAxisArrowIndicatorSize + margin),
         width: crossAxisArrowIndicatorSize,
         child: Column(
           children: [
@@ -322,8 +322,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     final horizontalAxisDescription = Align(
       alignment: Alignment.topRight,
       child: Container(
-        margin:
-            const EdgeInsets.only(left: crossAxisArrowIndicatorSize + margin),
+        margin: EdgeInsets.only(left: crossAxisArrowIndicatorSize + margin),
         height: mainAxisArrowIndicatorSize,
         child: Row(
           children: [

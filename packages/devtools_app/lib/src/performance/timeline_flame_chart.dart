@@ -80,7 +80,7 @@ class _TimelineFlameChartContainerState
               'No timeline events. Try clicking the refresh button ',
               style: Theme.of(context).subtleTextStyle,
             ),
-            const Icon(
+            Icon(
               Icons.refresh,
               size: defaultIconSize,
             ),
@@ -185,7 +185,7 @@ class RefreshTimelineEventsButton extends StatelessWidget {
         child: Container(
           height: defaultButtonHeight,
           width: defaultButtonHeight,
-          child: const Icon(
+          child: Icon(
             Icons.refresh,
             size: defaultIconSize,
           ),
@@ -705,7 +705,7 @@ class TimelineFlameChartState
   List<Widget> _buildEventThreadNavigationButtons({
     @required BoxConstraints constraints,
   }) {
-    const threadButtonContainerWidth = buttonMinWidth + defaultSpacing;
+    final threadButtonContainerWidth = buttonMinWidth + defaultSpacing;
     final eventGroups = _performanceController.data.eventGroups;
 
     Widget buildNavigatorButton(int index, {@required bool isNext}) {

@@ -31,11 +31,11 @@ import 'label.dart';
 /// have to.
 class ServiceExtensionButtonGroup extends StatefulWidget {
   const ServiceExtensionButtonGroup({
-    this.minIncludeTextWidth,
+    this.unscaledIncludeTextWidth,
     @required this.extensions,
   });
 
-  final double minIncludeTextWidth;
+  final double unscaledIncludeTextWidth;
   final List<ToggleableServiceExtensionDescription> extensions;
 
   @override
@@ -123,7 +123,8 @@ class _ServiceExtensionButtonGroupState
         selectedColor: theme.colorScheme.serviceExtensionButtonsTitleSelected,
         fillColor: theme.colorScheme.serviceExtensionButtonsFillSelected,
         textStyle: theme.textTheme.bodyText1,
-        constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+        constraints: BoxConstraints(
+            minWidth: defaultButtonHeight, minHeight: defaultButtonHeight),
         children: <Widget>[
           for (var extensionState in _extensionStates)
             _buildExtension(extensionState)
@@ -140,9 +141,9 @@ class _ServiceExtensionButtonGroupState
     return ServiceExtensionTooltip(
       description: description,
       child: Container(
-        height: 32.0,
+        height: defaultButtonHeight,
         padding: EdgeInsets.symmetric(
-          horizontal: includeText(context, widget.minIncludeTextWidth)
+          horizontal: includeText(context, widget.unscaledIncludeTextWidth)
               ? defaultSpacing
               : 0.0,
         ),
@@ -151,7 +152,7 @@ class _ServiceExtensionButtonGroupState
               ? description.enabledIcon
               : description.disabledIcon,
           description.description,
-          minIncludeTextWidth: widget.minIncludeTextWidth,
+          unscaledMinIncludeTextWidth: widget.unscaledIncludeTextWidth,
         ),
       ),
     );
@@ -299,7 +300,7 @@ class _RegisteredServiceExtensionButtonState
     return InkWell(
       onTap: () => invokeAndCatchErrors(widget.action),
       child: Container(
-        constraints: const BoxConstraints.tightFor(
+        constraints: BoxConstraints.tightFor(
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
         ),

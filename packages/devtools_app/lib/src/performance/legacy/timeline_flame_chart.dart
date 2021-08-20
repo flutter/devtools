@@ -638,7 +638,7 @@ class LegacyTimelineFlameChartState
   List<Widget> _buildEventThreadNavigationButtons({
     @required BoxConstraints constraints,
   }) {
-    const threadButtonContainerWidth = buttonMinWidth + defaultSpacing;
+    final threadButtonContainerWidth = buttonMinWidth + defaultSpacing;
     final eventGroups = _performanceController.data.eventGroups;
 
     Widget buildNavigatorButton(int index, {@required bool isNext}) {
