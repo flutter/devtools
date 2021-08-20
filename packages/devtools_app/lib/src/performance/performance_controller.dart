@@ -334,33 +334,35 @@ class PerformanceController extends DisposableController
       return;
     }
 
-    final bool frameBeforeFirstWellFormedFrame =
-        firstWellFormedFrameMicros != null &&
-            frame.timeFromFrameTiming.start.inMicroseconds <
-                firstWellFormedFrameMicros;
-    if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
-      // Only try to pull timeline events for frames that are after the first
-      // well formed frame. Timeline events that occurred before this frame will
-      // have already fallen out of the buffer.
-      await processAvailableEvents();
+    if (!offlineMode) {
+      final bool frameBeforeFirstWellFormedFrame =
+          firstWellFormedFrameMicros != null &&
+              frame.timeFromFrameTiming.start.inMicroseconds <
+                  firstWellFormedFrameMicros;
+      if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
+        // Only try to pull timeline events for frames that are after the first
+        // well formed frame. Timeline events that occurred before this frame will
+        // have already fallen out of the buffer.
+        await processAvailableEvents();
+      }
+
+      if (_currentFrameBeingSelected != frame) return;
+
+      // If the frame is still not well formed after processing all available
+      // events, wait a short delay and try to process events again after the
+      // VM has been polled one more time.
+      if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
+        assert(!_processing.value);
+        _processing.value = true;
+        await Future.delayed(timelinePollingInterval, () async {
+          if (_currentFrameBeingSelected != frame) return;
+          await processTraceEvents(allTraceEvents);
+          _processing.value = false;
+        });
+      }
+
+      if (_currentFrameBeingSelected != frame) return;
     }
-
-    if (_currentFrameBeingSelected != frame) return;
-
-    // If the frame is still not well formed after processing all available
-    // events, wait a short delay and try to process events again after the
-    // VM has been polled one more time.
-    if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
-      assert(!_processing.value);
-      _processing.value = true;
-      await Future.delayed(timelinePollingInterval, () async {
-        if (_currentFrameBeingSelected != frame) return;
-        await processTraceEvents(allTraceEvents);
-        _processing.value = false;
-      });
-    }
-
-    if (_currentFrameBeingSelected != frame) return;
 
     data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
@@ -417,7 +419,7 @@ class PerformanceController extends DisposableController
   }
 
   void addFrame(FlutterFrame frame) {
-    assignEventsToFrame(frame);
+    _assignEventsToFrame(frame);
     if (_recordingFrames.value) {
       if (_pendingFlutterFrames.isNotEmpty) {
         _addPendingFlutterFrames();
@@ -442,7 +444,7 @@ class PerformanceController extends DisposableController
     );
   }
 
-  void assignEventsToFrame(FlutterFrame frame) {
+  void _assignEventsToFrame(FlutterFrame frame) {
     if (_unassignedFlutterFrameEvents.containsKey(frame.id)) {
       _maybeAddUnassignedEventsToFrame(frame);
     }
@@ -691,7 +693,7 @@ class PerformanceController extends DisposableController
           .processData(offlinePerformanceData.cpuProfileData);
     }
 
-    offlinePerformanceData.frames.forEach(assignEventsToFrame);
+    offlinePerformanceData.frames.forEach(_assignEventsToFrame);
 
     // Set offline data.
     setOfflineData();
