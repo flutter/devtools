@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../console.dart';
 import '../console_service.dart';
 import '../globals.dart';
+import '../theme.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
 import 'evaluate.dart';
@@ -36,7 +37,7 @@ class DebuggerConsole extends StatelessWidget {
           child: Console(
             lines: stdio,
             footer: SizedBox(
-              height: scaleByFontFactor(18.0),
+              height: consoleLineHeight,
               child: ExpressionEvalField(
                 controller:
                     Provider.of<DebuggerController>(context, listen: false),
