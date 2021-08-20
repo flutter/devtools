@@ -310,17 +310,21 @@ void main() {
     });
 
     test('uiFrameNumber', () {
-      expect(goldenUiTimelineEvent.uiFrameNumber, equals(1));
-      expect(goldenUiTimelineEvent.rasterFrameNumber, isNull);
-      expect(animatorBeginFrameEvent.uiFrameNumber, equals(1));
-      expect(animatorBeginFrameEvent.rasterFrameNumber, isNull);
+      expect(goldenUiTimelineEvent.uiFrameEvents.length, equals(1));
+      expect(goldenUiTimelineEvent.uiFrameEvents.first.frameNumberFromArgs, equals(1));
+      expect(goldenUiTimelineEvent.rasterFrameEvents, isEmpty);
+      expect(animatorBeginFrameEvent.uiFrameEvents.length, equals(1));
+      expect(animatorBeginFrameEvent.uiFrameEvents.first.frameNumberFromArgs, equals(1));
+      expect(animatorBeginFrameEvent.rasterFrameEvents, isEmpty);
     });
 
     test('rasterFrameNumber', () {
-      expect(goldenRasterTimelineEvent.uiFrameNumber, isNull);
-      expect(goldenRasterTimelineEvent.rasterFrameNumber, equals(1));
-      expect(gpuRasterizerDrawEvent.uiFrameNumber, isNull);
-      expect(gpuRasterizerDrawEvent.rasterFrameNumber, equals(1));
+      expect(goldenRasterTimelineEvent.uiFrameEvents, isEmpty);
+      expect(goldenRasterTimelineEvent.rasterFrameEvents.length, equals(1));
+      expect(goldenRasterTimelineEvent.rasterFrameEvents.first.frameNumberFromArgs, equals(1));
+      expect(gpuRasterizerDrawEvent.uiFrameEvents, isEmpty);
+      expect(gpuRasterizerDrawEvent.rasterFrameEvents.length, equals(1));
+      expect(gpuRasterizerDrawEvent.rasterFrameEvents.first.frameNumberFromArgs, equals(1));
     });
   });
 
