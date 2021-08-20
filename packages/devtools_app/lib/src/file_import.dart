@@ -182,7 +182,9 @@ class _FileImportContainerState extends State<FileImportContainer> {
   Future<void> _importFile() async {
     final importedFile =
         await importFileFromPicker(acceptedTypes: widget.extensions);
-    _handleImportedFile(importedFile);
+    if (importedFile != null) {
+      _handleImportedFile(importedFile);
+    }
   }
 
   void _clearFile() {
@@ -216,6 +218,8 @@ Future<DevToolsJsonFile> importFileFromPicker({
 }) async {
   final acceptedTypeGroups = [XTypeGroup(extensions: acceptedTypes)];
   final file = await openFile(acceptedTypeGroups: acceptedTypeGroups);
+  if (file == null) return null;
+
   final data = jsonDecode(await file.readAsString());
   final lastModifiedTime = await file.lastModified();
   // TODO(kenz): this will need to be modified if we need to support other file
