@@ -917,43 +917,34 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 class SyncTimelineEvent extends TimelineEvent {
   SyncTimelineEvent(TraceEventWrapper firstTraceEvent) : super(firstTraceEvent);
 
-  bool get isUiEventFlow => uiFrameNumber != null;
-
-  bool get isRasterEventFlow => rasterFrameNumber != null;
-
-  int get uiFrameNumber {
-    if (_uiFrameNumber != null) return _uiFrameNumber;
-    final animatorBeginFrameEvent = firstChildWithCondition(
-        (TimelineEvent event) => event.name.contains(uiEventName));
-    if (animatorBeginFrameEvent != null) {
-      try {
-        return int.parse(animatorBeginFrameEvent
-            .traceEvents.first.event.args[TraceEvent.frameNumberArg]);
-      } catch (_) {
-        return null;
-      }
-    }
-    return null;
+  int get frameNumberFromArgs {
+    final frameNumber = traceEvents.first.event.args[TraceEvent.frameNumberArg];
+    return frameNumber != null ? int.tryParse(frameNumber) : null;
   }
 
-  int _uiFrameNumber;
-
-  int get rasterFrameNumber {
-    if (_rasterFrameNumber != null) return _rasterFrameNumber;
-    final gpuRasterizerDrawEvent = firstChildWithCondition(
-        (TimelineEvent event) => event.name.contains(rasterEventName));
-    if (gpuRasterizerDrawEvent != null) {
-      try {
-        return int.parse(gpuRasterizerDrawEvent
-            .traceEvents.first.event.args[TraceEvent.frameNumberArg]);
-      } catch (_) {
-        return null;
-      }
-    }
-    return null;
+  List<SyncTimelineEvent> get uiFrameEvents {
+    if (_uiFrameEvents != null) return _uiFrameEvents;
+    _uiFrameEvents = nodesInTreeWithCondition((TimelineEvent event) {
+      return event.name.contains(uiEventName) &&
+          event.traceEvents.first.event.args
+              .containsKey(TraceEvent.frameNumberArg);
+    }).cast<SyncTimelineEvent>();
+    return _uiFrameEvents;
   }
 
-  int _rasterFrameNumber;
+  List<SyncTimelineEvent> _uiFrameEvents;
+
+  List<SyncTimelineEvent> get rasterFrameEvents {
+    if (_rasterFrameEvents != null) return _rasterFrameEvents;
+    _rasterFrameEvents = nodesInTreeWithCondition((TimelineEvent event) {
+      return event.name.contains(rasterEventName) &&
+          event.traceEvents.first.event.args
+              .containsKey(TraceEvent.frameNumberArg);
+    }).cast<SyncTimelineEvent>();
+    return _rasterFrameEvents;
+  }
+
+  List<SyncTimelineEvent> _rasterFrameEvents;
 
   @override
   int get maxEndMicros => time.end.inMicroseconds;

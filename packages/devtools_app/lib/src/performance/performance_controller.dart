@@ -588,16 +588,21 @@ class PerformanceController extends DisposableController
           !serviceManager.connectedApp.isFlutterAppNow) {
         return;
       }
-      _maybeAddEventToUnassignedFrame(
-        event.uiFrameNumber,
-        event,
-        TimelineEventType.ui,
-      );
-      _maybeAddEventToUnassignedFrame(
-        event.rasterFrameNumber,
-        event,
-        TimelineEventType.raster,
-      );
+
+      for (final frameEvent in event.uiFrameEvents) {
+        _maybeAddEventToUnassignedFrame(
+          frameEvent.frameNumberFromArgs,
+          frameEvent,
+          TimelineEventType.ui,
+        );
+      }
+      for (final frameEvent in event.rasterFrameEvents) {
+        _maybeAddEventToUnassignedFrame(
+          frameEvent.frameNumberFromArgs,
+          frameEvent,
+          TimelineEventType.raster,
+        );
+      }
     }
   }
 

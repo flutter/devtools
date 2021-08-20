@@ -139,6 +139,21 @@ abstract class TreeNode<T extends TreeNode<T>> {
     );
   }
 
+  /// Returns a flat list of nodes in the tree that meet `condition`, including
+  /// this node itself.
+  List<T> nodesInTreeWithCondition(bool condition(T node)) {
+    final nodes = <T>[];
+    breadthFirstTraversal<T>(
+      this,
+      action: (node) {
+        if (condition(node)) {
+          nodes.add(node);
+        }
+      },
+    );
+    return nodes;
+  }
+
   /// Locates the first sub-node in the tree at level [level].
   ///
   /// [level] is relative to the subtree root [this].
