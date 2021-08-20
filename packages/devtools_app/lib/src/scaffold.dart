@@ -19,7 +19,6 @@ import 'common_widgets.dart';
 import 'config_specific/drag_and_drop/drag_and_drop.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
 import 'config_specific/import_export/import_export.dart';
-import 'console.dart';
 import 'debugger/console.dart';
 import 'debugger/debugger_screen.dart';
 import 'framework_controller.dart';
@@ -364,26 +363,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                           ),
                         ],
                         splitters: [
-                          AreaPaneHeader(
-                            title: const Text('Console'),
-                            needsTopBorder: false,
-                            rightActions: [
-                              CopyToClipboardControl(
-                                dataProvider: () =>
-                                    serviceManager.consoleService.stdio.value
-                                        ?.join('\n') ??
-                                    '',
-                                buttonKey:
-                                    DebuggerConsole.copyToClipboardButtonKey,
-                              ),
-                              DeleteControl(
-                                buttonKey: DebuggerConsole.clearStdioButtonKey,
-                                tooltip: 'Clear console output',
-                                onPressed: () =>
-                                    serviceManager.consoleService.clearStdio(),
-                              ),
-                            ],
-                          )
+                          DebuggerConsole.buildHeader(),
                         ],
                         initialFractions: const [0.8, 0.2],
                       )

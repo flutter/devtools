@@ -42,7 +42,12 @@ void main() {
     Future<void> pumpConsole(
         WidgetTester tester, DebuggerController controller) async {
       await tester.pumpWidget(wrapWithControllers(
-        const DebuggerConsole(),
+        Row(
+          children: [
+            Flexible(child: DebuggerConsole.buildHeader()),
+            const Expanded(child: DebuggerConsole()),
+          ],
+        ),
         debugger: controller,
       ));
     }

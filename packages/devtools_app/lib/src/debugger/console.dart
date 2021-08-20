@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../common_widgets.dart';
 import '../console.dart';
 import '../console_service.dart';
 import '../globals.dart';
@@ -43,6 +44,25 @@ class DebuggerConsole extends StatelessWidget {
               ),
             ),
           ),
+        ),
+      ],
+    );
+  }
+
+  static PreferredSizeWidget buildHeader() {
+    return AreaPaneHeader(
+      title: const Text('Console'),
+      needsTopBorder: false,
+      rightActions: [
+        CopyToClipboardControl(
+          dataProvider: () =>
+              serviceManager.consoleService.stdio.value?.join('\n') ?? '',
+          buttonKey: DebuggerConsole.copyToClipboardButtonKey,
+        ),
+        DeleteControl(
+          buttonKey: DebuggerConsole.clearStdioButtonKey,
+          tooltip: 'Clear console output',
+          onPressed: () => serviceManager.consoleService.clearStdio(),
         ),
       ],
     );
