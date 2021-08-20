@@ -77,6 +77,21 @@ class NetworkService {
     return requests;
   }
 
+  Future<void> _clearHttpProfile() async {
+    assert(serviceManager.service != null);
+    if (serviceManager.service == null) return;
+
+    await serviceManager.service.forEachIsolate((isolate) async {
+      final future = serviceManager.service.clearHttpProfile(isolate.id);
+      // The above call won't complete immediately if the isolate is paused, so
+      // give up waiting after 500ms. However, the call will complete eventually
+      // if the isolate is eventually resumed.
+      // TODO(jacobr): detect whether the isolate is paused using the vm
+      // service and handle this case gracefully rather than timing out.
+      await timeout(future, 500);
+    });
+  }
+
   Future<List<SocketStatistic>> _refreshSockets() async {
     assert(serviceManager.service != null);
     if (serviceManager.service == null) return [];
@@ -133,5 +148,6 @@ class NetworkService {
   Future<void> clearData() async {
     await updateLastRefreshTime();
     await _clearSocketProfile();
+    await _clearHttpProfile();
   }
 }

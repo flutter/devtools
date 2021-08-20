@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../banner_messages.dart';
 import '../common_widgets.dart';
 import '../globals.dart';
@@ -82,6 +85,11 @@ class ProfileGranularityDropdown extends StatelessWidget {
   }
 
   Future<void> _onProfileGranularityChanged(String newValue) async {
+    ga.select(
+      screenId,
+      '${analytics_constants.profileGranularityPrefix}'
+      '${ProfileGranularityExtension.fromValue(newValue).displayShort}',
+    );
     await serviceManager.service.setProfilePeriod(newValue);
   }
 }

@@ -111,8 +111,6 @@ class TimelineEventProcessor {
 
   int rasterThreadId;
 
-  final _lastProcessedTimestampByThreadId = <int, int>{};
-
   /// Process the given trace events to create [TimelineEvent]s.
   ///
   /// [traceEvents] must be sorted in increasing timestamp order before calling
@@ -130,71 +128,22 @@ class TimelineEventProcessor {
 //        .map((e) => TraceEventWrapper(
 //            TraceEvent(e), DateTime.now().microsecondsSinceEpoch))
 //        .toList();
-    const sixteenHoursMicros = 57600000000;
-    int firstTimestampMicros;
-    final _traceEvents = (traceEvents.whereFromIndex(
+
+    final _traceEvents = (traceEvents.sublist(startIndex)
+          // Events need to be in increasing timestamp order.
+          ..sort())
+        .where(
       (event) {
         debugTraceEventCallback(
           () => log('attempting to process ${event.event.json.toString()}'),
         );
-
-        // Throw these events away. See https://github.com/flutter/flutter/issues/76875.
-        final isVsyncSchedulingOverhead =
-            event.event.name.contains(vsyncSchedulingOverhead);
-        final isSceneDisplayLag = event.event.name.contains(sceneDisplayLag);
-
-        // Throw out timeline events that do not have a timestamp
-        // (e.g. thread_name events).
-        final ts = event.event.timestampMicros;
-        final shouldProcess =
-            ts != null && !isVsyncSchedulingOverhead && !isSceneDisplayLag;
-
-        // TODO(kenz): remove this code once
-        // https://github.com/flutter/flutter/issues/76875 is resolved. We are
-        // getting extreme outlier events with timestamps ~1 day after the
-        // expected time range. Using sixteen hours as a threshold is arbitrary,
-        // but should catch the outliers without triggering false positives.
-        if (shouldProcess) {
-          firstTimestampMicros ??= ts;
-          // TODO(kenz): sixteen hours may be too much. If the timeline clock
-          // and the clock that 'VsyncSchedulingOverhead' and 'SceneDisplayLag'
-          // are using are closer than sixteen hours apart, spurious events will
-          // sneak in. See https://github.com/flutter/flutter/issues/76875.
-          if ((ts - firstTimestampMicros).abs() > sixteenHoursMicros) {
-            return false;
-          }
-
-          final lastTsForThread = _lastProcessedTimestampByThreadId.putIfAbsent(
-            event.event.threadId,
-            () => event.event.timestampMicros,
-          );
-
-          // Exclude Complete events here because the timestamps of complete
-          // events can be in any order (https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lpfof2aylapb)
-          if (ts < lastTsForThread &&
-              event.event.phase != TraceEvent.durationCompletePhase) {
-            debugTraceEventCallback(
-              () => log(
-                'skipping ${event.event.json.toString()} - '
-                'lastTsForThread = $lastTsForThread',
-              ),
-            );
-            // Skipping out of order events.
-            // See https://github.com/dart-lang/sdk/issues/46605
-            return false;
-          }
-          _lastProcessedTimestampByThreadId[event.event.threadId] =
-              event.event.timestampMicros;
-        }
-        return shouldProcess;
+        return event.event.timestampMicros != null;
       },
-      startIndex: startIndex,
-    ).toList())
-      // Events need to be in increasing timestamp order.
-      ..sort()
-      ..map((event) => event.event.json)
-          .toList()
-          .forEach(timelineController.recordTrace);
+    ).toList();
+
+    for (final trace in _traceEvents) {
+      timelineController.recordTrace(trace.event.json);
+    }
 
     // At minimum, process the data in 4 batches to smooth the appearance of
     // the progress indicator.
@@ -522,7 +471,6 @@ class TimelineEventProcessor {
     currentDurationEventNodes.clear();
     _previousDurationEndEvents.clear();
     _pendingRootCompleteEvent = null;
-    _lastProcessedTimestampByThreadId.clear();
     resetProcessingData();
   }
 

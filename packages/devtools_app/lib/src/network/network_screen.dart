@@ -356,19 +356,18 @@ class UriColumn extends ColumnData<NetworkRequest>
     BuildContext context,
     NetworkRequest data, {
     bool isRowSelected = false,
+    VoidCallback onPressed,
   }) {
     final value = getDisplayValue(data);
 
-    return Tooltip(
-      message: value,
-      waitDuration: tooltipWait,
-      child: SelectableText(
-        value,
-        maxLines: 1,
-        // TODO(kenz): add overflow after flutter 2.3.0 is stable. It was
-        // added in commit 65388ee2eeaf0d2cf087eaa4a325e3689020c46a.
-        // style: const TextStyle(overflow: TextOverflow.ellipsis),
-      ),
+    return SelectableText(
+      value,
+      maxLines: 1,
+      style: const TextStyle(overflow: TextOverflow.ellipsis),
+      // [onPressed] needs to be passed along to [SelectableText] so that a
+      // click on the text will still trigger the [onPressed] action for the
+      // row.
+      onTap: onPressed,
     );
   }
 }
@@ -402,6 +401,7 @@ class StatusColumn extends ColumnData<NetworkRequest>
     BuildContext context,
     NetworkRequest data, {
     bool isRowSelected = false,
+    VoidCallback onPressed,
   }) {
     final theme = Theme.of(context);
     return Text(

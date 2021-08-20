@@ -4,6 +4,9 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../utils.dart';
+import 'analytics_common.dart';
+
 ValueNotifier<bool> gaEnabledNotifier;
 
 Future<void> setAnalyticsEnabled([bool value = true]) async {}
@@ -13,18 +16,42 @@ void screen(
   int value = 0,
 ]) {}
 
+void timeSync(
+  String screenName,
+  String timedOperation, {
+  @required void Function() syncOperation,
+  ScreenAnalyticsMetrics screenMetrics,
+}) {
+  // Execute the operation here so that the desktop app still functions without
+  // the real analytics call.
+  try {
+    syncOperation();
+  } on ProcessCancelledException catch (_) {
+    // Do nothing for instances of [ProcessCancelledException].
+  }
+}
+
+Future<void> timeAsync(
+  String screenName,
+  String timedOperation, {
+  @required Future<void> Function() asyncOperation,
+  ScreenAnalyticsMetrics screenMetrics,
+}) async {
+  // Execute the operation here so that the desktop app still functions without
+  // the real analytics call.
+  try {
+    await asyncOperation();
+  } on ProcessCancelledException catch (_) {
+    // Do nothing for instances of [ProcessCancelledException].
+  }
+}
+
 void select(
   String screenName,
-  String selectedItem, [
+  String selectedItem, {
   int value = 0,
-]) {}
-
-void selectFrame(
-  String screenName,
-  String selectedItem, [
-  int rasterDuration,
-  int uiDuration,
-]) {}
+  ScreenAnalyticsMetrics screenMetrics,
+}) {}
 
 void reportError(
   String errorMessage, {

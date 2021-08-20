@@ -258,7 +258,3 @@ void mergeProfileRoots(List<CpuStackFrame> roots) {
     root.index = roots.indexOf(root);
   }
 }
-
-/// Exception thrown when a request to process data has been cancelled in
-/// favor of a new request.
-class ProcessCancelledException implements Exception {}

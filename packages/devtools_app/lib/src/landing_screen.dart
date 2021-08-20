@@ -247,8 +247,10 @@ class ImportFileInstructions extends StatelessWidget {
     final importedFile = await importFileFromPicker(
       acceptedTypes: ['json'],
     );
-    Provider.of<ImportController>(context, listen: false)
-        .importData(importedFile);
+    if (importedFile != null) {
+      Provider.of<ImportController>(context, listen: false)
+          .importData(importedFile);
+    }
   }
 }
 

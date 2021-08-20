@@ -8,8 +8,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../analytics/analytics_common.dart';
 import '../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
 import '../common_widgets.dart';
@@ -272,14 +274,17 @@ class _PrimaryControls extends StatelessWidget {
   }
 
   void _pauseFrameRecording() {
+    ga.select(analytics_constants.performance, analytics_constants.pause);
     controller.toggleRecordingFrames(false);
   }
 
   void _resumeFrameRecording() {
+    ga.select(analytics_constants.performance, analytics_constants.resume);
     controller.toggleRecordingFrames(true);
   }
 
   Future<void> _clearPerformanceData() async {
+    ga.select(analytics_constants.performance, analytics_constants.clear);
     await controller.clearData();
     if (onClear != null) {
       onClear();
@@ -334,6 +339,7 @@ class _SecondaryControls extends StatelessWidget {
   }
 
   void _exportPerformanceData(BuildContext context) {
+    ga.select(analytics_constants.performance, analytics_constants.export);
     final exportedFile = controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the
     // download always successful?
@@ -504,4 +510,18 @@ class _BadgeJankyFramesSetting extends StatelessWidget {
       ],
     );
   }
+}
+
+class PerformanceScreenMetrics extends ScreenAnalyticsMetrics {
+  PerformanceScreenMetrics({
+    this.uiDuration,
+    this.rasterDuration,
+    this.shaderCompilationDuration,
+    this.traceEventCount,
+  });
+
+  final Duration uiDuration;
+  final Duration rasterDuration;
+  final Duration shaderCompilationDuration;
+  final int traceEventCount;
 }

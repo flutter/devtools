@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../../analytics/constants.dart' as analytics_constants;
 import '../../auto_dispose.dart';
 import '../../config_specific/import_export/import_export.dart';
 import '../../config_specific/logger/allowed_error.dart';
@@ -42,14 +43,15 @@ import 'timeline_event_processor.dart';
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
 class LegacyPerformanceController
-    with
-        CpuProfilerControllerProviderMixin,
-        SearchControllerMixin<LegacyTimelineEvent>
+    with SearchControllerMixin<LegacyTimelineEvent>
     implements DisposableController {
   LegacyPerformanceController() {
     processor = LegacyTimelineEventProcessor(this);
     _init();
   }
+
+  final cpuProfilerController =
+      CpuProfilerController(analyticsScreenId: analytics_constants.performance);
 
   final _exportController = ExportController();
 

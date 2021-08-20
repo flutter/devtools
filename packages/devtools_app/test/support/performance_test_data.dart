@@ -1095,7 +1095,7 @@ final transformLayerStart1 = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testRasterThreadId,
   'pid': 22283,
-  'ts': 118039651669,
+  'ts': 193938741750,
   'tts': 733287,
   'ph': 'B',
   'args': {}
@@ -1105,7 +1105,7 @@ final transformLayerStart2 = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testRasterThreadId,
   'pid': 22283,
-  'ts': 118039651869,
+  'ts': 193938741850,
   'tts': 733289,
   'ph': 'B',
   'args': {}
@@ -1115,7 +1115,7 @@ final transformLayerEnd2 = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testRasterThreadId,
   'pid': 22283,
-  'ts': 118039679673,
+  'ts': 193938770000,
   'tts': 733656,
   'ph': 'E',
   'args': {}
@@ -1125,7 +1125,7 @@ final transformLayerEnd1 = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testRasterThreadId,
   'pid': 22283,
-  'ts': 118039679673,
+  'ts': 193938770000,
   'tts': 733656,
   'ph': 'E',
   'args': {}

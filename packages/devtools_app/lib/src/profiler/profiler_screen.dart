@@ -8,8 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
+import '../analytics/analytics_common.dart';
 import '../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
 import '../common_widgets.dart';
@@ -251,18 +253,38 @@ class _PrimaryControls extends StatelessWidget {
         RecordButton(
           recording: recording,
           includeTextWidth: _primaryControlsMinIncludeTextWidth,
-          onPressed: controller.startRecording,
+          onPressed: () {
+            ga.select(
+              analytics_constants.cpuProfiler,
+              analytics_constants.record,
+            );
+            controller.startRecording();
+          },
         ),
         const SizedBox(width: denseSpacing),
         StopRecordingButton(
           recording: recording,
           includeTextWidth: _primaryControlsMinIncludeTextWidth,
-          onPressed: controller.stopRecording,
+          onPressed: () {
+            ga.select(
+              analytics_constants.cpuProfiler,
+              analytics_constants.stop,
+            );
+            controller.stopRecording();
+          },
         ),
         const SizedBox(width: denseSpacing),
         ClearButton(
           includeTextWidth: _primaryControlsMinIncludeTextWidth,
-          onPressed: recording ? null : controller.clear,
+          onPressed: recording
+              ? null
+              : () {
+                  ga.select(
+                    analytics_constants.cpuProfiler,
+                    analytics_constants.clear,
+                  );
+                  controller.clear();
+                },
         ),
       ],
     );
@@ -292,7 +314,15 @@ class _SecondaryControls extends StatelessWidget {
           label: 'Load all CPU samples',
           tooltip: 'Load all available CPU samples from the profiler',
           includeTextWidth: _loadAllCpuSamplesMinIncludeTextWidth,
-          onPressed: !recording ? controller.loadAllSamples : null,
+          onPressed: !recording
+              ? () {
+                  ga.select(
+                    analytics_constants.cpuProfiler,
+                    analytics_constants.loadAllCpuSamples,
+                  );
+                  controller.loadAllSamples();
+                }
+              : null,
         ),
         const SizedBox(width: denseSpacing),
         ProfileGranularityDropdown(
@@ -305,7 +335,13 @@ class _SecondaryControls extends StatelessWidget {
           onPressed: !recording &&
                   controller.cpuProfileData != null &&
                   !controller.cpuProfileData.isEmpty
-              ? () => _exportPerformance(context)
+              ? () {
+                  ga.select(
+                    analytics_constants.cpuProfiler,
+                    analytics_constants.export,
+                  );
+                  _exportPerformance(context);
+                }
               : null,
           includeTextWidth: _secondaryControlsMinIncludeTextWidth,
         ),
@@ -321,4 +357,11 @@ class _SecondaryControls extends StatelessWidget {
     // export controller.
     Notifications.of(context).push(successfulExportMessage(exportedFile));
   }
+}
+
+class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
+  ProfilerScreenMetrics({this.cpuSampleCount, this.cpuStackDepth});
+
+  final int cpuSampleCount;
+  final int cpuStackDepth;
 }

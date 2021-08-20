@@ -8,6 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../analytics/analytics_stub.dart'
+    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose.dart';
 import '../config_specific/import_export/import_export.dart';
 import '../config_specific/logger/allowed_error.dart';
@@ -40,14 +43,14 @@ import 'timeline_streams.dart';
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
 class PerformanceController extends DisposableController
-    with
-        CpuProfilerControllerProviderMixin,
-        SearchControllerMixin<TimelineEvent>,
-        AutoDisposeControllerMixin {
+    with SearchControllerMixin<TimelineEvent>, AutoDisposeControllerMixin {
   PerformanceController() {
     processor = TimelineEventProcessor(this);
     _init();
   }
+
+  final cpuProfilerController =
+      CpuProfilerController(analyticsScreenId: analytics_constants.performance);
 
   final _exportController = ExportController();
 
@@ -331,33 +334,35 @@ class PerformanceController extends DisposableController
       return;
     }
 
-    final bool frameBeforeFirstWellFormedFrame =
-        firstWellFormedFrameMicros != null &&
-            frame.timeFromFrameTiming.start.inMicroseconds <
-                firstWellFormedFrameMicros;
-    if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
-      // Only try to pull timeline events for frames that are after the first
-      // well formed frame. Timeline events that occurred before this frame will
-      // have already fallen out of the buffer.
-      await processAvailableEvents();
+    if (!offlineMode) {
+      final bool frameBeforeFirstWellFormedFrame =
+          firstWellFormedFrameMicros != null &&
+              frame.timeFromFrameTiming.start.inMicroseconds <
+                  firstWellFormedFrameMicros;
+      if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
+        // Only try to pull timeline events for frames that are after the first
+        // well formed frame. Timeline events that occurred before this frame will
+        // have already fallen out of the buffer.
+        await processAvailableEvents();
+      }
+
+      if (_currentFrameBeingSelected != frame) return;
+
+      // If the frame is still not well formed after processing all available
+      // events, wait a short delay and try to process events again after the
+      // VM has been polled one more time.
+      if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
+        assert(!_processing.value);
+        _processing.value = true;
+        await Future.delayed(timelinePollingInterval, () async {
+          if (_currentFrameBeingSelected != frame) return;
+          await processTraceEvents(allTraceEvents);
+          _processing.value = false;
+        });
+      }
+
+      if (_currentFrameBeingSelected != frame) return;
     }
-
-    if (_currentFrameBeingSelected != frame) return;
-
-    // If the frame is still not well formed after processing all available
-    // events, wait a short delay and try to process events again after the
-    // VM has been polled one more time.
-    if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
-      assert(!_processing.value);
-      _processing.value = true;
-      await Future.delayed(timelinePollingInterval, () async {
-        if (_currentFrameBeingSelected != frame) return;
-        await processTraceEvents(allTraceEvents);
-        _processing.value = false;
-      });
-    }
-
-    if (_currentFrameBeingSelected != frame) return;
 
     data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
@@ -414,7 +419,7 @@ class PerformanceController extends DisposableController
   }
 
   void addFrame(FlutterFrame frame) {
-    assignEventsToFrame(frame);
+    _assignEventsToFrame(frame);
     if (_recordingFrames.value) {
       if (_pendingFlutterFrames.isNotEmpty) {
         _addPendingFlutterFrames();
@@ -439,7 +444,7 @@ class PerformanceController extends DisposableController
     );
   }
 
-  void assignEventsToFrame(FlutterFrame frame) {
+  void _assignEventsToFrame(FlutterFrame frame) {
     if (_unassignedFlutterFrameEvents.containsKey(frame.id)) {
       _maybeAddUnassignedEventsToFrame(frame);
     }
@@ -611,36 +616,52 @@ class PerformanceController extends DisposableController
         '$_nextTraceIndexToProcess',
       ),
     );
-    await processor.processTraceEvents(
-      traceEvents,
-      startIndex: _nextTraceIndexToProcess,
-    );
-    debugTraceEventCallback(
-      () => log(
-        'after processing traceEvents at startIndex $_nextTraceIndexToProcess, '
-        'and now _nextTraceIndexToProcess = $traceEventCount',
-      ),
-    );
-    _nextTraceIndexToProcess = traceEventCount;
 
-    debugTraceEventCallback(
-      () => log(
-        'initializing event groups at startIndex '
-        '$_nextTimelineEventIndexToProcess',
+    final processingTraceCount = traceEventCount - _nextTraceIndexToProcess;
+
+    Future<void> processTraceEventsHelper() async {
+      await processor.processTraceEvents(
+        traceEvents,
+        startIndex: _nextTraceIndexToProcess,
+      );
+      debugTraceEventCallback(
+        () => log(
+          'after processing traceEvents at startIndex $_nextTraceIndexToProcess, '
+          'and now _nextTraceIndexToProcess = $traceEventCount',
+        ),
+      );
+      _nextTraceIndexToProcess = traceEventCount;
+
+      debugTraceEventCallback(
+        () => log(
+          'initializing event groups at startIndex '
+          '$_nextTimelineEventIndexToProcess',
+        ),
+      );
+      data.initializeEventGroups(
+        threadNamesById,
+        startIndex: _nextTimelineEventIndexToProcess,
+      );
+      debugTraceEventCallback(
+        () => log(
+          'after initializing event groups at startIndex '
+          '$_nextTimelineEventIndexToProcess and now '
+          '_nextTimelineEventIndexToProcess = ${data.timelineEvents.length}',
+        ),
+      );
+      _nextTimelineEventIndexToProcess = data.timelineEvents.length;
+    }
+
+    // Process trace events [processTraceEventsHelper] and time the operation
+    // for analytics.
+    await ga.timeAsync(
+      analytics_constants.performance,
+      analytics_constants.traceEventProcessingTime,
+      asyncOperation: processTraceEventsHelper,
+      screenMetrics: PerformanceScreenMetrics(
+        traceEventCount: processingTraceCount,
       ),
     );
-    data.initializeEventGroups(
-      threadNamesById,
-      startIndex: _nextTimelineEventIndexToProcess,
-    );
-    debugTraceEventCallback(
-      () => log(
-        'after initializing event groups at startIndex '
-        '$_nextTimelineEventIndexToProcess and now '
-        '_nextTimelineEventIndexToProcess = ${data.timelineEvents.length}',
-      ),
-    );
-    _nextTimelineEventIndexToProcess = data.timelineEvents.length;
   }
 
   FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
@@ -672,7 +693,7 @@ class PerformanceController extends DisposableController
           .processData(offlinePerformanceData.cpuProfileData);
     }
 
-    offlinePerformanceData.frames.forEach(assignEventsToFrame);
+    offlinePerformanceData.frames.forEach(_assignEventsToFrame);
 
     // Set offline data.
     setOfflineData();
