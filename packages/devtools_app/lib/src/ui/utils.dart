@@ -111,7 +111,7 @@ TextSpan truncateTextSpan(TextSpan span, int length) {
   return truncateHelper(span);
 }
 
-/// Returns a [double] representing the width in pixels of the [span].
+/// Returns the width in pixels of the [span].
 double calculateTextSpanWidth(TextSpan span) {
   final textPainter = TextPainter(
     text: span,
