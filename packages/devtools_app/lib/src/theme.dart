@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'common_widgets.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
+import 'utils.dart';
 
 const _contrastForegroundWhite = Color.fromARGB(255, 240, 240, 240);
 
@@ -175,6 +176,8 @@ const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
 const defaultDialogWidth = 700.0;
 
 const defaultFontSize = 14.0;
+
+double get consoleLineHeight => scaleByFontFactor(18.0);
 
 /// Branded grey color.
 ///

@@ -25,9 +25,11 @@ class Console extends StatelessWidget {
     this.controls,
     @required this.lines,
     this.title,
+    this.footer,
   }) : super();
 
   final Widget title;
+  final Widget footer;
   final List<Widget> controls;
   final ValueListenable<List<ConsoleLine>> lines;
 
@@ -39,7 +41,7 @@ class Console extends StatelessWidget {
     return ConsoleFrame(
       controls: controls,
       title: title,
-      child: _ConsoleOutput(lines: lines),
+      child: _ConsoleOutput(lines: lines, footer: footer),
     );
   }
 }
@@ -108,9 +110,12 @@ class _ConsoleOutput extends StatefulWidget {
   const _ConsoleOutput({
     Key key,
     @required this.lines,
+    this.footer,
   }) : super(key: key);
 
   final ValueListenable<List<ConsoleLine>> lines;
+
+  final Widget footer;
 
   @override
   _ConsoleOutputState createState() => _ConsoleOutputState();
@@ -218,7 +223,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
       key: _scrollBarKey,
       child: ListView.separated(
         padding: const EdgeInsets.all(denseSpacing),
-        itemCount: _currentLines.length,
+        itemCount: _currentLines.length + (widget.footer != null ? 1 : 0),
         controller: _scroll,
         // Scroll physics to try to keep content within view and avoid bouncing.
         physics: const ClampingScrollPhysics(
@@ -228,6 +233,9 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
           return const Divider();
         },
         itemBuilder: (context, index) {
+          if (index == _currentLines.length && widget.footer != null) {
+            return widget.footer;
+          }
           final line = _currentLines[index];
           if (line is TextConsoleLine) {
             return SelectableText.rich(

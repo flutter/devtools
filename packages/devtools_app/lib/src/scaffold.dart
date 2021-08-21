@@ -76,9 +76,9 @@ class DevToolsScaffold extends StatefulWidget {
   /// The border around the content in the DevTools UI.
   EdgeInsets get appPadding => EdgeInsets.fromLTRB(
         horizontalPadding.left,
-        isEmbedded() ? 2.0 : 16.0,
+        isEmbedded() ? 2.0 : defaultSpacing,
         horizontalPadding.right,
-        0.0,
+        isEmbedded() ? 0.0 : denseSpacing,
       );
 
   // Note: when changing this value, also update `flameChartContainerOffset`
@@ -361,6 +361,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                             padding: DevToolsScaffold.horizontalPadding,
                             child: const DebuggerConsole(),
                           ),
+                        ],
+                        splitters: [
+                          DebuggerConsole.buildHeader(),
                         ],
                         initialFractions: const [0.8, 0.2],
                       )
