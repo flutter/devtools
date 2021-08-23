@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/src/debugger/console.dart';
 import 'package:devtools_app/src/debugger/controls.dart';
@@ -212,7 +214,7 @@ void main() {
           find.byKey(DebuggerScreenBody.codeViewKey),
           matchesGoldenFile('goldens/codeview_scrollbars.png'),
         );
-      });
+      }, skip: !Platform.isMacOS);
     });
 
     testWidgetsWithWindowSize('Libraries hidden', windowSize,
