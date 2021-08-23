@@ -78,7 +78,9 @@ class WidgetTheme {
       color: highLevelWidgetColor,
     ),
     'CupertinoApp': highLevelTheme,
-    'MaterialApp': highLevelTheme,
+    'MaterialApp': WidgetTheme(
+      iconAsset: WidgetIcons.materialApp,
+    ),
     'WidgetsApp': highLevelTheme,
 
     // Text
@@ -175,7 +177,8 @@ class WidgetTheme {
     'Tab': tabTheme,
     'TabBar': tabTheme,
     'TabBarView': tabTheme,
-    'BottomNavigationBar': tabTheme,
+    'BottomNavigationBar':
+        WidgetTheme(iconAsset: WidgetIcons.bottomNavigationBar),
     'CupertinoTabScaffold': tabTheme,
     'CupertinoTabView': tabTheme,
 
@@ -191,6 +194,7 @@ class WidgetTheme {
     'Drawer': WidgetTheme(iconAsset: WidgetIcons.drawer),
     'PageView': WidgetTheme(iconAsset: WidgetIcons.pageView),
     'Material': WidgetTheme(iconAsset: WidgetIcons.material),
+    'AppBar': WidgetTheme(iconAsset: WidgetIcons.appBar),
   };
 }
 
@@ -244,4 +248,9 @@ class WidgetIcons {
   static const String tab = 'icons/inspector/widget_icons/tab.png';
   static const String wrap = 'icons/inspector/widget_icons/wrap.png';
   static const String pageView = 'icons/inspector/widget_icons/pageView.png';
+  static const String appBar = 'icons/inspector/widget_icons/appbar.png';
+  static const String materialApp =
+      'icons/inspector/widget_icons/materialapp.png';
+  static const String bottomNavigationBar =
+      'icons/inspector/widget_icons/bottomnavigationbar.png';
 }
