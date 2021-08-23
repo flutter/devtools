@@ -145,16 +145,16 @@ class _CpuProfilerState extends State<CpuProfiler>
               ),
               const Spacer(),
               if (hasData) ...[
-                FilterButton(
-                  onPressed: _showFilterDialog,
-                  isFilterActive: widget.controller.toggleFilters.firstWhere(
-                        (filter) => filter.enabled.value,
-                        orElse: () => null,
-                      ) !=
-                      null,
-                ),
-                const SizedBox(width: denseSpacing),
                 if (currentTab.key != CpuProfiler.summaryTab) ...[
+                  FilterButton(
+                    onPressed: _showFilterDialog,
+                    isFilterActive: widget.controller.toggleFilters.firstWhere(
+                          (filter) => filter.enabled.value,
+                          orElse: () => null,
+                        ) !=
+                        null,
+                  ),
+                  const SizedBox(width: denseSpacing),
                   UserTagDropdown(widget.controller),
                   const SizedBox(width: denseSpacing),
                 ],
