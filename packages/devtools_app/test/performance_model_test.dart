@@ -309,22 +309,25 @@ void main() {
       expect(frame.children.last.name, equals(layoutEvent.name));
     });
 
-    test('uiFrameNumber', () {
-      expect(goldenUiTimelineEvent.uiFrameEvents.length, equals(1));
-      expect(goldenUiTimelineEvent.uiFrameEvents.first.frameNumberFromArgs, equals(1));
-      expect(goldenUiTimelineEvent.rasterFrameEvents, isEmpty);
-      expect(animatorBeginFrameEvent.uiFrameEvents.length, equals(1));
-      expect(animatorBeginFrameEvent.uiFrameEvents.first.frameNumberFromArgs, equals(1));
-      expect(animatorBeginFrameEvent.rasterFrameEvents, isEmpty);
+    test('frameNumberFromArgs', () {
+      expect(goldenUiTimelineEvent.frameNumberFromArgs, isNull);
+      expect(vsyncEvent.frameNumberFromArgs, isNull);
+      expect(animatorBeginFrameEvent.frameNumberFromArgs, equals(1));
+      expect(frameworkWorkloadEvent.frameNumberFromArgs, isNull);
+      expect(gpuRasterizerDrawEvent.frameNumberFromArgs, equals(1));
+      expect(pipelineConsumeEvent.frameNumberFromArgs, isNull);
     });
 
-    test('rasterFrameNumber', () {
-      expect(goldenRasterTimelineEvent.uiFrameEvents, isEmpty);
-      expect(goldenRasterTimelineEvent.rasterFrameEvents.length, equals(1));
-      expect(goldenRasterTimelineEvent.rasterFrameEvents.first.frameNumberFromArgs, equals(1));
-      expect(gpuRasterizerDrawEvent.uiFrameEvents, isEmpty);
-      expect(gpuRasterizerDrawEvent.rasterFrameEvents.length, equals(1));
-      expect(gpuRasterizerDrawEvent.rasterFrameEvents.first.frameNumberFromArgs, equals(1));
+    test('isUiFrameIdentifier', () {
+      expect(goldenUiTimelineEvent.isUiFrameIdentifier, isFalse);
+      expect(vsyncEvent.isUiFrameIdentifier, isFalse);
+      expect(animatorBeginFrameEvent.isUiFrameIdentifier, isTrue);
+      expect(frameworkWorkloadEvent.isUiFrameIdentifier, isFalse);
+    });
+
+    test('isRasterFrameIdentifier', () {
+      expect(gpuRasterizerDrawEvent.isRasterFrameIdentifier, isTrue);
+      expect(pipelineConsumeEvent.isRasterFrameIdentifier, isFalse);
     });
   });
 

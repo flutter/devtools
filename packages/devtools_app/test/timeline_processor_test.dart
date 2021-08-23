@@ -175,6 +175,34 @@ void main() {
       );
     });
 
+    test('tracks flutter frame identifier events', () async {
+      final traceEvents = [
+        ...goldenUiTraceEvents,
+        ...goldenRasterTraceEvents,
+      ]..sort();
+
+      await processor.processTraceEvents(traceEvents);
+      expect(
+        processor.performanceController.data.timelineEvents.length,
+        equals(2),
+      );
+      expect(
+        processor.performanceController.data.timelineEvents[0].toString(),
+        equals(goldenUiString),
+      );
+      expect(
+        processor.performanceController.data.timelineEvents[1].toString(),
+        equals(goldenRasterString),
+      );
+
+      final uiEvent = processor.performanceController.data.timelineEvents[0] as SyncTimelineEvent;
+      final rasterEvent = processor.performanceController.data.timelineEvents[1] as SyncTimelineEvent;
+      expect(uiEvent.uiFrameEvents.length, equals(1));
+      expect(uiEvent.rasterFrameEvents, isEmpty);
+      expect(rasterEvent.uiFrameEvents, isEmpty);
+      expect(rasterEvent.rasterFrameEvents.length, equals(1));
+    });
+
     test('processes trace with duplicate events', () async {
       expect(
         processor.performanceController.data.timelineEvents,

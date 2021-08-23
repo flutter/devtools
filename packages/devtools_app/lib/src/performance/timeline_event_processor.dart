@@ -324,11 +324,11 @@ class TimelineEventProcessor {
       current.addChild(timelineEvent);
     }
 
-    if (timelineEvent.isUiFrameEvent) {
+    if (timelineEvent.isUiFrameIdentifier) {
       (timelineEvent.root as SyncTimelineEvent)
           .uiFrameEvents
           .add(timelineEvent);
-    } else if (timelineEvent.isRasterFrameEvent) {
+    } else if (timelineEvent.isRasterFrameIdentifier) {
       (timelineEvent.root as SyncTimelineEvent)
           .rasterFrameEvents
           .add(timelineEvent);
