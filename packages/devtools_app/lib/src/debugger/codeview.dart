@@ -45,6 +45,12 @@ class CodeView extends StatefulWidget {
     this.onSelected,
   }) : super(key: key);
 
+  static const debuggerCodeViewHorizontalScrollbarKey =
+      Key('debuggerCodeViewHorizontalScrollbarKey');
+
+  static const debuggerCodeViewVerticalScrollbarKey =
+      Key('debuggerCodeViewVerticalScrollbarKey');
+
   static double get rowHeight => scaleByFontFactor(20.0);
   static double get assumedCharacterWidth => scaleByFontFactor(16.0);
 
@@ -65,6 +71,7 @@ class _CodeViewState extends State<CodeView>
   LinkedScrollControllerGroup verticalController;
   ScrollController gutterController;
   ScrollController textController;
+  ScrollController horizontalController;
 
   ScriptRef get scriptRef => widget.scriptRef;
 
@@ -77,6 +84,7 @@ class _CodeViewState extends State<CodeView>
     verticalController = LinkedScrollControllerGroup();
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();
+    horizontalController = ScrollController();
 
     addAutoDisposeListener(
       widget.controller.scriptLocation,
@@ -100,6 +108,7 @@ class _CodeViewState extends State<CodeView>
   void dispose() {
     gutterController.dispose();
     textController.dispose();
+    horizontalController.dispose();
     widget.controller.scriptLocation
         .removeListener(_handleScriptLocationChanged);
     super.dispose();
@@ -263,7 +272,12 @@ class _CodeViewState extends State<CodeView>
             style: theme.fixedFontStyle,
             child: Expanded(
               child: Scrollbar(
+                key: CodeView.debuggerCodeViewVerticalScrollbarKey,
                 controller: textController,
+                // Only listen for vertical scroll notifications (ignore those
+                // from the nested horizontal SingleChildScrollView):
+                notificationPredicate: (ScrollNotification notification) =>
+                    notification.depth == 1,
                 child: ValueListenableBuilder<StackFrameAndSourcePosition>(
                   valueListenable: widget.controller.selectedStackFrame,
                   builder: (context, frame, _) {
@@ -298,15 +312,43 @@ class _CodeViewState extends State<CodeView>
                         Expanded(
                           child: LayoutBuilder(
                             builder: (context, constraints) {
-                              return Lines(
-                                constraints: constraints,
-                                scrollController: textController,
-                                lines: lines,
-                                pausedFrame: pausedFrame,
-                                searchMatchesNotifier:
-                                    widget.controller.searchMatches,
-                                activeSearchMatchNotifier:
-                                    widget.controller.activeSearchMatch,
+                              // Find the longest line to measure file width:
+                              int longestLength = 0;
+                              TextSpan longestLine;
+                              for (var line in lines) {
+                                final int currentLength =
+                                    line.toPlainText().length;
+                                if (currentLength > longestLength) {
+                                  longestLength = currentLength;
+                                  longestLine = line;
+                                }
+                              }
+                              final double fileWidth =
+                                  calculateTextSpanWidth(longestLine);
+
+                              return Scrollbar(
+                                key: CodeView
+                                    .debuggerCodeViewHorizontalScrollbarKey,
+                                isAlwaysShown: true,
+                                controller: horizontalController,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  controller: horizontalController,
+                                  child: SizedBox(
+                                    height: constraints.maxHeight,
+                                    width: fileWidth,
+                                    child: Lines(
+                                      height: constraints.maxHeight,
+                                      scrollController: textController,
+                                      lines: lines,
+                                      pausedFrame: pausedFrame,
+                                      searchMatchesNotifier:
+                                          widget.controller.searchMatches,
+                                      activeSearchMatchNotifier:
+                                          widget.controller.activeSearchMatch,
+                                    ),
+                                  ),
+                                ),
                               );
                             },
                           ),
@@ -527,7 +569,7 @@ class GutterItem extends StatelessWidget {
 class Lines extends StatefulWidget {
   const Lines({
     Key key,
-    @required this.constraints,
+    @required this.height,
     @required this.scrollController,
     @required this.lines,
     @required this.pausedFrame,
@@ -535,7 +577,7 @@ class Lines extends StatefulWidget {
     @required this.activeSearchMatchNotifier,
   }) : super(key: key);
 
-  final BoxConstraints constraints;
+  final double height;
   final ScrollController scrollController;
   final List<TextSpan> lines;
   final StackFrameAndSourcePosition pausedFrame;
@@ -572,17 +614,14 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
       if (activeSearch != null) {
         final isOutOfViewTop = activeSearch.position.line * CodeView.rowHeight <
             widget.scrollController.offset + CodeView.rowHeight;
-        final isOutOfViewBottom =
-            activeSearch.position.line * CodeView.rowHeight >
-                widget.scrollController.offset +
-                    widget.constraints.maxHeight -
-                    CodeView.rowHeight;
+        final isOutOfViewBottom = activeSearch.position.line *
+                CodeView.rowHeight >
+            widget.scrollController.offset + widget.height - CodeView.rowHeight;
 
         if (isOutOfViewTop || isOutOfViewBottom) {
           // Scroll this search token to the middle of the view.
           final targetOffset = math.max(
-            activeSearch.position.line * CodeView.rowHeight -
-                widget.constraints.maxHeight / 2,
+            activeSearch.position.line * CodeView.rowHeight - widget.height / 2,
             0.0,
           );
           widget.scrollController.animateTo(
