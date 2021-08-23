@@ -151,6 +151,8 @@ class GtagEventDevTools extends GtagEvent {
   external int get cpu_stack_depth;
 }
 
+// This cannot be a factory constructor in the [GtagEventDevTools] class due to
+// https://github.com/dart-lang/sdk/issues/46967.
 GtagEventDevTools gtagEventWithScreenMetrics({
   String event_category,
   String event_label,
