@@ -216,7 +216,8 @@ class PerformanceController extends DisposableController
       }));
 
       autoDispose(serviceManager.onConnectionClosed.listen((_) {
-        dispose();
+        _pollingTimer?.cancel();
+        _timelinePollingRateLimiter?.dispose();
       }));
 
       // Load available timeline events.
