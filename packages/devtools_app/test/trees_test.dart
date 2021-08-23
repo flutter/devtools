@@ -145,46 +145,6 @@ void main() {
       expect(treeNode3.lastChildNodeAtLevel(3), isNull);
     });
 
-    test('nodesInTreeWithCondition', () {
-      expect(
-        testTreeNode.nodesInTreeWithCondition((node) => node.id.isEven),
-        equals([
-          treeNode0,
-          treeNode2,
-          treeNode4,
-          treeNode6,
-          treeNode8,
-        ]),
-      );
-      expect(
-        testTreeNode.nodesInTreeWithCondition((node) => node.id.isOdd),
-        equals([
-          treeNode1,
-          treeNode3,
-          treeNode5,
-          treeNode7,
-          treeNode9,
-        ]),
-      );
-      expect(
-        treeNode3.nodesInTreeWithCondition((node) => node.id.isEven),
-        equals([
-          treeNode4,
-          treeNode6,
-          treeNode8,
-        ]),
-      );
-      expect(
-        treeNode3.nodesInTreeWithCondition((node) => node.id.isOdd),
-        equals([
-          treeNode3,
-          treeNode5,
-          treeNode7,
-          treeNode9,
-        ]),
-      );
-    });
-
     test('filterTree', () {
       final filteredTreeRoots =
           testTreeNode.filterWhere((node) => node.id.isEven);

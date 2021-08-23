@@ -922,29 +922,17 @@ class SyncTimelineEvent extends TimelineEvent {
     return frameNumber != null ? int.tryParse(frameNumber) : null;
   }
 
-  List<SyncTimelineEvent> get uiFrameEvents {
-    if (_uiFrameEvents != null) return _uiFrameEvents;
-    _uiFrameEvents = nodesInTreeWithCondition((TimelineEvent event) {
-      return event.name.contains(uiEventName) &&
-          event.traceEvents.first.event.args
+  bool get isUiFrameEvent => name.contains(uiEventName) &&
+          traceEvents.first.event.args
               .containsKey(TraceEvent.frameNumberArg);
-    }).cast<SyncTimelineEvent>();
-    return _uiFrameEvents;
-  }
 
-  List<SyncTimelineEvent> _uiFrameEvents;
+  bool get isRasterFrameEvent => name.contains(rasterEventName) &&
+      traceEvents.first.event.args
+          .containsKey(TraceEvent.frameNumberArg);
 
-  List<SyncTimelineEvent> get rasterFrameEvents {
-    if (_rasterFrameEvents != null) return _rasterFrameEvents;
-    _rasterFrameEvents = nodesInTreeWithCondition((TimelineEvent event) {
-      return event.name.contains(rasterEventName) &&
-          event.traceEvents.first.event.args
-              .containsKey(TraceEvent.frameNumberArg);
-    }).cast<SyncTimelineEvent>();
-    return _rasterFrameEvents;
-  }
+  final uiFrameEvents = <SyncTimelineEvent>[];
 
-  List<SyncTimelineEvent> _rasterFrameEvents;
+  final rasterFrameEvents = <SyncTimelineEvent>[];
 
   @override
   int get maxEndMicros => time.end.inMicroseconds;

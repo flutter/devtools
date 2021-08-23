@@ -55,12 +55,12 @@ const String pipelineItem = 'PipelineItem';
 /// Processor for composing a recorded list of trace events into a timeline of
 /// [AsyncTimelineEvent]s, [SyncTimelineEvent]s, and [FlutterFrame]s.
 class TimelineEventProcessor {
-  TimelineEventProcessor(this.timelineController);
+  TimelineEventProcessor(this.performanceController);
 
   /// Number of traceEvents we will process in each batch.
   static const _defaultBatchSize = 2000;
 
-  final PerformanceController timelineController;
+  final PerformanceController performanceController;
 
   /// Notifies with the current progress value of processing Timeline data.
   ///
@@ -142,7 +142,7 @@ class TimelineEventProcessor {
     ).toList();
 
     for (final trace in _traceEvents) {
-      timelineController.recordTrace(trace.event.json);
+      performanceController.recordTrace(trace.event.json);
     }
 
     // At minimum, process the data in 4 batches to smooth the appearance of
@@ -167,21 +167,21 @@ class TimelineEventProcessor {
       // async event tree. Add these "repaired" events to the timeline.
       if (!rootEvent.isWellFormedDeep) continue;
 
-      timelineController.addTimelineEvent(rootEvent);
+      performanceController.addTimelineEvent(rootEvent);
       idsToRemove.add(rootEvent.asyncUID);
     }
     idsToRemove.forEach(_asyncEventsById.remove);
 
     _addPendingCompleteRootToTimeline(force: true);
 
-    timelineController.data.timelineEvents.sort((a, b) =>
+    performanceController.data.timelineEvents.sort((a, b) =>
         a.time.start.inMicroseconds.compareTo(b.time.start.inMicroseconds));
-    if (timelineController.data.timelineEvents.isNotEmpty) {
-      timelineController.data.time = TimeRange()
+    if (performanceController.data.timelineEvents.isNotEmpty) {
+      performanceController.data.time = TimeRange()
         // We process trace events in timestamp order, so we can ensure the first
         // trace event has the earliest starting timestamp.
         ..start = Duration(
-            microseconds: timelineController
+            microseconds: performanceController
                 .data.timelineEvents.first.time.start.inMicroseconds)
         // We cannot guarantee that the last trace event is the latest timestamp
         // in the timeline. DurationComplete events' timestamps refer to their
@@ -189,9 +189,9 @@ class TimelineEventProcessor {
         // via the "dur" field. For this reason, we use the cached value stored in
         // [timelineController.fullTimeline].
         ..end =
-            Duration(microseconds: timelineController.data.endTimestampMicros);
+            Duration(microseconds: performanceController.data.endTimestampMicros);
     } else {
-      timelineController.data.time = TimeRange()
+      performanceController.data.time = TimeRange()
         ..start = Duration.zero
         ..end = Duration.zero;
     }
@@ -250,7 +250,7 @@ class TimelineEventProcessor {
         (force ||
             currentProcessingTime >
                 _pendingRootCompleteEvent.time.end.inMicroseconds)) {
-      timelineController.addTimelineEvent(_pendingRootCompleteEvent);
+      performanceController.addTimelineEvent(_pendingRootCompleteEvent);
       _pendingRootCompleteEvent = null;
     }
   }
@@ -281,7 +281,7 @@ class TimelineEventProcessor {
         // [timelineEvent] is a new root with the same id as
         // [currentEventWithId]. Since [currentEventWithId] is well formed, add
         // it to the timeline.
-        timelineController.addTimelineEvent(currentEventWithId);
+        performanceController.addTimelineEvent(currentEventWithId);
         _asyncEventsById[eventWrapper.event.asyncUID] = timelineEvent;
       } else {
         if (eventWrapper.event.phase != TraceEvent.asyncInstantPhase &&
@@ -323,6 +323,17 @@ class TimelineEventProcessor {
     if (current != null) {
       current.addChild(timelineEvent);
     }
+
+    if (timelineEvent.isUiFrameEvent) {
+      (timelineEvent.root as SyncTimelineEvent)
+          .uiFrameEvents
+          .add(timelineEvent);
+    } else if (timelineEvent.isRasterFrameEvent) {
+      (timelineEvent.root as SyncTimelineEvent)
+          .rasterFrameEvents
+          .add(timelineEvent);
+    }
+
     currentDurationEventNodes[eventWrapper.event.threadId] = timelineEvent;
   }
 
@@ -433,7 +444,7 @@ class TimelineEventProcessor {
         debugFrameTracking.writeln('Trying to add event after DurationEnd:');
         current.format(debugFrameTracking, '   ');
       }
-      timelineController.addTimelineEvent(current);
+      performanceController.addTimelineEvent(current);
     }
   }
 
