@@ -215,6 +215,11 @@ class PerformanceController extends DisposableController
         }
       }));
 
+      autoDispose(serviceManager.onConnectionClosed.listen((_) {
+        _pollingTimer?.cancel();
+        _timelinePollingRateLimiter?.dispose();
+      }));
+
       // Load available timeline events.
       await _pullTraceEventsFromVmTimeline(shouldPrimeThreadIds: true);
 
