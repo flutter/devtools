@@ -591,14 +591,14 @@ class PerformanceController extends DisposableController
 
       for (final frameEvent in event.uiFrameEvents) {
         _maybeAddEventToUnassignedFrame(
-          frameEvent.frameNumberFromArgs,
+          frameEvent.flutterFrameNumber,
           frameEvent,
           TimelineEventType.ui,
         );
       }
       for (final frameEvent in event.rasterFrameEvents) {
         _maybeAddEventToUnassignedFrame(
-          frameEvent.frameNumberFromArgs,
+          frameEvent.flutterFrameNumber,
           frameEvent,
           TimelineEventType.raster,
         );

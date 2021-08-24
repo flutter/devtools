@@ -310,12 +310,12 @@ void main() {
     });
 
     test('frameNumberFromArgs', () {
-      expect(goldenUiTimelineEvent.frameNumberFromArgs, isNull);
-      expect(vsyncEvent.frameNumberFromArgs, isNull);
-      expect(animatorBeginFrameEvent.frameNumberFromArgs, equals(1));
-      expect(frameworkWorkloadEvent.frameNumberFromArgs, isNull);
-      expect(gpuRasterizerDrawEvent.frameNumberFromArgs, equals(1));
-      expect(pipelineConsumeEvent.frameNumberFromArgs, isNull);
+      expect(goldenUiTimelineEvent.flutterFrameNumber, isNull);
+      expect(vsyncEvent.flutterFrameNumber, isNull);
+      expect(animatorBeginFrameEvent.flutterFrameNumber, equals(1));
+      expect(frameworkWorkloadEvent.flutterFrameNumber, isNull);
+      expect(gpuRasterizerDrawEvent.flutterFrameNumber, equals(1));
+      expect(pipelineConsumeEvent.flutterFrameNumber, isNull);
     });
 
     test('isUiFrameIdentifier', () {

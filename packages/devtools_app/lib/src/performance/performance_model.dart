@@ -917,22 +917,32 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 class SyncTimelineEvent extends TimelineEvent {
   SyncTimelineEvent(TraceEventWrapper firstTraceEvent) : super(firstTraceEvent);
 
-  int get frameNumberFromArgs {
+  int get flutterFrameNumber {
+    if (_flutterFrameNumber != null) {
+      return _flutterFrameNumber;
+    }
     final frameNumber = traceEvents.first.event.args[TraceEvent.frameNumberArg];
-    return frameNumber != null ? int.tryParse(frameNumber) : null;
+    return _flutterFrameNumber =
+        frameNumber != null ? int.tryParse(frameNumber) : null;
   }
+
+  int _flutterFrameNumber;
 
   /// Whether this event is contains the flutter frame identifier for the UI
   /// thread in its trace event args.
-  bool get isUiFrameIdentifier => name.contains(uiEventName) &&
-          traceEvents.first.event.args
-              .containsKey(TraceEvent.frameNumberArg);
+  bool get isUiFrameIdentifier => _isUiFrameIdentifier ??=
+      name.contains(uiEventName) &&
+      traceEvents.first.event.args.containsKey(TraceEvent.frameNumberArg);
+
+  bool _isUiFrameIdentifier;
 
   /// Whether this event is contains the flutter frame identifier for the Raster
   /// thread in its trace event args.
-  bool get isRasterFrameIdentifier => name.contains(rasterEventName) &&
-      traceEvents.first.event.args
-          .containsKey(TraceEvent.frameNumberArg);
+  bool get isRasterFrameIdentifier => _isRasterFrameIdentifier ??=
+      name.contains(rasterEventName) &&
+      traceEvents.first.event.args.containsKey(TraceEvent.frameNumberArg);
+
+  bool _isRasterFrameIdentifier;
 
   final uiFrameEvents = <SyncTimelineEvent>[];
 
