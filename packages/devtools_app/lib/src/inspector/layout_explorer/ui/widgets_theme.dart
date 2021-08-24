@@ -78,9 +78,7 @@ class WidgetTheme {
       color: highLevelWidgetColor,
     ),
     'CupertinoApp': highLevelTheme,
-    'MaterialApp': WidgetTheme(
-      iconAsset: WidgetIcons.materialApp,
-    ),
+    'MaterialApp': WidgetTheme(iconAsset: WidgetIcons.materialApp),
     'WidgetsApp': highLevelTheme,
 
     // Text
