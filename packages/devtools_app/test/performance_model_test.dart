@@ -309,18 +309,25 @@ void main() {
       expect(frame.children.last.name, equals(layoutEvent.name));
     });
 
-    test('uiFrameNumber', () {
-      expect(goldenUiTimelineEvent.uiFrameNumber, equals(1));
-      expect(goldenUiTimelineEvent.rasterFrameNumber, isNull);
-      expect(animatorBeginFrameEvent.uiFrameNumber, equals(1));
-      expect(animatorBeginFrameEvent.rasterFrameNumber, isNull);
+    test('frameNumberFromArgs', () {
+      expect(goldenUiTimelineEvent.flutterFrameNumber, isNull);
+      expect(vsyncEvent.flutterFrameNumber, isNull);
+      expect(animatorBeginFrameEvent.flutterFrameNumber, equals(1));
+      expect(frameworkWorkloadEvent.flutterFrameNumber, isNull);
+      expect(gpuRasterizerDrawEvent.flutterFrameNumber, equals(1));
+      expect(pipelineConsumeEvent.flutterFrameNumber, isNull);
     });
 
-    test('rasterFrameNumber', () {
-      expect(goldenRasterTimelineEvent.uiFrameNumber, isNull);
-      expect(goldenRasterTimelineEvent.rasterFrameNumber, equals(1));
-      expect(gpuRasterizerDrawEvent.uiFrameNumber, isNull);
-      expect(gpuRasterizerDrawEvent.rasterFrameNumber, equals(1));
+    test('isUiFrameIdentifier', () {
+      expect(goldenUiTimelineEvent.isUiFrameIdentifier, isFalse);
+      expect(vsyncEvent.isUiFrameIdentifier, isFalse);
+      expect(animatorBeginFrameEvent.isUiFrameIdentifier, isTrue);
+      expect(frameworkWorkloadEvent.isUiFrameIdentifier, isFalse);
+    });
+
+    test('isRasterFrameIdentifier', () {
+      expect(gpuRasterizerDrawEvent.isRasterFrameIdentifier, isTrue);
+      expect(pipelineConsumeEvent.isRasterFrameIdentifier, isFalse);
     });
   });
 

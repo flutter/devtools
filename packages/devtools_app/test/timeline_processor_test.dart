@@ -50,7 +50,7 @@ void main() {
       await processor.processTraceEvents(goldenUiTraceEvents);
 
       final processedUiEvent =
-          processor.timelineController.data.timelineEvents.first;
+          processor.performanceController.data.timelineEvents.first;
       expect(processedUiEvent.toString(), equals(goldenUiString));
     });
 
@@ -67,13 +67,13 @@ void main() {
 
       await processor.processTraceEvents(traceEvents);
       expect(
-          processor.timelineController.data.timelineEvents.length, equals(1));
+          processor.performanceController.data.timelineEvents.length, equals(1));
       expect(
-        processor.timelineController.data.timelineEvents.first.toString(),
+        processor.performanceController.data.timelineEvents.first.toString(),
         equals(goldenUiString),
       );
 
-      await processor.timelineController.clearData();
+      await processor.performanceController.clearData();
       processor.reset();
 
       // Duplicate duration end event.
@@ -89,13 +89,13 @@ void main() {
 
       await processor.processTraceEvents(traceEvents);
       expect(
-          processor.timelineController.data.timelineEvents.length, equals(1));
+          processor.performanceController.data.timelineEvents.length, equals(1));
       expect(
-        processor.timelineController.data.timelineEvents.first.toString(),
+        processor.performanceController.data.timelineEvents.first.toString(),
         equals(goldenUiString),
       );
 
-      await processor.timelineController.clearData();
+      await processor.performanceController.clearData();
       processor.reset();
 
       // Unrecoverable state resets event tracking.
@@ -149,42 +149,70 @@ void main() {
         ...goldenRasterTraceEvents,
       ]..sort();
       expect(
-        processor.timelineController.data.timelineEvents,
+        processor.performanceController.data.timelineEvents,
         isEmpty,
       );
       await processor.processTraceEvents(traceEvents);
       expect(
-        processor.timelineController.data.timelineEvents.length,
+        processor.performanceController.data.timelineEvents.length,
         equals(4),
       );
       expect(
-        processor.timelineController.data.timelineEvents[0].toString(),
+        processor.performanceController.data.timelineEvents[0].toString(),
         equals(goldenAsyncString),
       );
       expect(
-        processor.timelineController.data.timelineEvents[1].toString(),
+        processor.performanceController.data.timelineEvents[1].toString(),
         equals('  D [193937061035 μs - 193938741076 μs]\n'),
       );
       expect(
-        processor.timelineController.data.timelineEvents[2].toString(),
+        processor.performanceController.data.timelineEvents[2].toString(),
         equals(goldenUiString),
       );
       expect(
-        processor.timelineController.data.timelineEvents[3].toString(),
+        processor.performanceController.data.timelineEvents[3].toString(),
         equals(goldenRasterString),
       );
     });
 
+    test('tracks flutter frame identifier events', () async {
+      final traceEvents = [
+        ...goldenUiTraceEvents,
+        ...goldenRasterTraceEvents,
+      ]..sort();
+
+      await processor.processTraceEvents(traceEvents);
+      expect(
+        processor.performanceController.data.timelineEvents.length,
+        equals(2),
+      );
+      expect(
+        processor.performanceController.data.timelineEvents[0].toString(),
+        equals(goldenUiString),
+      );
+      expect(
+        processor.performanceController.data.timelineEvents[1].toString(),
+        equals(goldenRasterString),
+      );
+
+      final uiEvent = processor.performanceController.data.timelineEvents[0] as SyncTimelineEvent;
+      final rasterEvent = processor.performanceController.data.timelineEvents[1] as SyncTimelineEvent;
+      expect(uiEvent.uiFrameEvents.length, equals(1));
+      expect(uiEvent.rasterFrameEvents, isEmpty);
+      expect(rasterEvent.uiFrameEvents, isEmpty);
+      expect(rasterEvent.rasterFrameEvents.length, equals(1));
+    });
+
     test('processes trace with duplicate events', () async {
       expect(
-        processor.timelineController.data.timelineEvents,
+        processor.performanceController.data.timelineEvents,
         isEmpty,
       );
       await processor.processTraceEvents(durationEventsWithDuplicateTraces);
       // If the processor is not handling duplicates properly, this value would
       // be 0.
       expect(
-        processor.timelineController.data.timelineEvents.length,
+        processor.performanceController.data.timelineEvents.length,
         equals(1),
       );
     });

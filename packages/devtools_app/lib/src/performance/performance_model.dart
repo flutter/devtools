@@ -917,43 +917,36 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 class SyncTimelineEvent extends TimelineEvent {
   SyncTimelineEvent(TraceEventWrapper firstTraceEvent) : super(firstTraceEvent);
 
-  bool get isUiEventFlow => uiFrameNumber != null;
-
-  bool get isRasterEventFlow => rasterFrameNumber != null;
-
-  int get uiFrameNumber {
-    if (_uiFrameNumber != null) return _uiFrameNumber;
-    final animatorBeginFrameEvent = firstChildWithCondition(
-        (TimelineEvent event) => event.name.contains(uiEventName));
-    if (animatorBeginFrameEvent != null) {
-      try {
-        return int.parse(animatorBeginFrameEvent
-            .traceEvents.first.event.args[TraceEvent.frameNumberArg]);
-      } catch (_) {
-        return null;
-      }
+  int get flutterFrameNumber {
+    if (_flutterFrameNumber != null) {
+      return _flutterFrameNumber;
     }
-    return null;
+    final frameNumber = traceEvents.first.event.args[TraceEvent.frameNumberArg];
+    return _flutterFrameNumber =
+        frameNumber != null ? int.tryParse(frameNumber) : null;
   }
 
-  int _uiFrameNumber;
+  int _flutterFrameNumber;
 
-  int get rasterFrameNumber {
-    if (_rasterFrameNumber != null) return _rasterFrameNumber;
-    final gpuRasterizerDrawEvent = firstChildWithCondition(
-        (TimelineEvent event) => event.name.contains(rasterEventName));
-    if (gpuRasterizerDrawEvent != null) {
-      try {
-        return int.parse(gpuRasterizerDrawEvent
-            .traceEvents.first.event.args[TraceEvent.frameNumberArg]);
-      } catch (_) {
-        return null;
-      }
-    }
-    return null;
-  }
+  /// Whether this event is contains the flutter frame identifier for the UI
+  /// thread in its trace event args.
+  bool get isUiFrameIdentifier => _isUiFrameIdentifier ??=
+      name == uiEventName &&
+      traceEvents.first.event.args.containsKey(TraceEvent.frameNumberArg);
 
-  int _rasterFrameNumber;
+  bool _isUiFrameIdentifier;
+
+  /// Whether this event is contains the flutter frame identifier for the Raster
+  /// thread in its trace event args.
+  bool get isRasterFrameIdentifier => _isRasterFrameIdentifier ??=
+      name == rasterEventName &&
+      traceEvents.first.event.args.containsKey(TraceEvent.frameNumberArg);
+
+  bool _isRasterFrameIdentifier;
+
+  final uiFrameEvents = <SyncTimelineEvent>[];
+
+  final rasterFrameEvents = <SyncTimelineEvent>[];
 
   @override
   int get maxEndMicros => time.end.inMicroseconds;
