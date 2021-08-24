@@ -102,59 +102,6 @@ class GtagEventDevTools extends GtagEvent {
     int cpu_stack_depth,
   });
 
-  factory GtagEventDevTools.withScreenMetrics({
-    String event_category,
-    String event_label,
-    String send_to,
-    int value,
-    bool non_interaction,
-    dynamic custom_map,
-    String user_app,
-    String user_build,
-    String user_platform,
-    String devtools_platform,
-    String devtools_chrome,
-    String devtools_version,
-    String ide_launched,
-    String flutter_client_id,
-    ScreenAnalyticsMetrics screenMetrics,
-  }) {
-    return GtagEventDevTools(
-      event_category: event_category,
-      event_label: event_label,
-      send_to: send_to,
-      non_interaction: non_interaction,
-      value: value,
-      user_app: userAppType,
-      user_build: userBuildType,
-      user_platform: userPlatformType,
-      devtools_platform: devtoolsPlatformType,
-      devtools_chrome: devtoolsChrome,
-      devtools_version: devtoolsVersion,
-      ide_launched: ideLaunched,
-      flutter_client_id: flutterClientId,
-      ui_duration_micros: screenMetrics is PerformanceScreenMetrics
-          ? screenMetrics.uiDuration?.inMicroseconds
-          : null,
-      raster_duration_micros: screenMetrics is PerformanceScreenMetrics
-          ? screenMetrics.rasterDuration?.inMicroseconds
-          : null,
-      shader_compilation_duration_micros:
-          screenMetrics is PerformanceScreenMetrics
-              ? screenMetrics.shaderCompilationDuration?.inMicroseconds
-              : null,
-      trace_event_count: screenMetrics is PerformanceScreenMetrics
-          ? screenMetrics.traceEventCount
-          : null,
-      cpu_sample_count: screenMetrics is ProfilerScreenMetrics
-          ? screenMetrics.cpuSampleCount
-          : null,
-      cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
-          ? screenMetrics.cpuStackDepth
-          : null,
-    );
-  }
-
   @override
   external String get event_category;
 
@@ -202,6 +149,61 @@ class GtagEventDevTools extends GtagEvent {
   external int get cpu_sample_count;
 
   external int get cpu_stack_depth;
+}
+
+// This cannot be a factory constructor in the [GtagEventDevTools] class due to
+// https://github.com/dart-lang/sdk/issues/46967.
+GtagEventDevTools gtagEventWithScreenMetrics({
+  String event_category,
+  String event_label,
+  String send_to,
+  int value,
+  bool non_interaction,
+  dynamic custom_map,
+  String user_app,
+  String user_build,
+  String user_platform,
+  String devtools_platform,
+  String devtools_chrome,
+  String devtools_version,
+  String ide_launched,
+  String flutter_client_id,
+  ScreenAnalyticsMetrics screenMetrics,
+}) {
+  return GtagEventDevTools(
+    event_category: event_category,
+    event_label: event_label,
+    send_to: send_to,
+    non_interaction: non_interaction,
+    value: value,
+    user_app: userAppType,
+    user_build: userBuildType,
+    user_platform: userPlatformType,
+    devtools_platform: devtoolsPlatformType,
+    devtools_chrome: devtoolsChrome,
+    devtools_version: devtoolsVersion,
+    ide_launched: ideLaunched,
+    flutter_client_id: flutterClientId,
+    ui_duration_micros: screenMetrics is PerformanceScreenMetrics
+        ? screenMetrics.uiDuration?.inMicroseconds
+        : null,
+    raster_duration_micros: screenMetrics is PerformanceScreenMetrics
+        ? screenMetrics.rasterDuration?.inMicroseconds
+        : null,
+    shader_compilation_duration_micros:
+        screenMetrics is PerformanceScreenMetrics
+            ? screenMetrics.shaderCompilationDuration?.inMicroseconds
+            : null,
+    trace_event_count: screenMetrics is PerformanceScreenMetrics
+        ? screenMetrics.traceEventCount
+        : null,
+    cpu_sample_count: screenMetrics is ProfilerScreenMetrics
+        ? screenMetrics.cpuSampleCount
+        : null,
+    cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
+        ? screenMetrics.cpuStackDepth
+        : null,
+  );
 }
 
 @JS()
@@ -353,7 +355,7 @@ void _timing(
 }) {
   GTag.event(
     screenName,
-    GtagEventDevTools.withScreenMetrics(
+    gtagEventWithScreenMetrics(
       event_category: analytics_constants.timingEvent,
       event_label: timedOperation,
       value: durationMicros,
@@ -378,7 +380,7 @@ void select(
 }) {
   GTag.event(
     screenName,
-    GtagEventDevTools.withScreenMetrics(
+    gtagEventWithScreenMetrics(
       event_category: analytics_constants.selectEvent,
       event_label: selectedItem,
       value: value,
