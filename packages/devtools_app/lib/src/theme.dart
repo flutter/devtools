@@ -180,6 +180,8 @@ double get defaultFontSize => scaleByFontFactor(unscaledDefaultFontSize);
 
 double get consoleLineHeight => scaleByFontFactor(18.0);
 
+const chartTextFontSize = 10.0;
+
 /// Branded grey color.
 ///
 /// Source: https://drive.google.com/open?id=1QBhMJqXyRt-CpRsHR6yw2LAfQtiNat4g

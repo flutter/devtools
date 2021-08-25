@@ -605,7 +605,7 @@ class ChartPainter extends CustomPainter {
       //              should have PaintCharacteristics.
       style: TextStyle(
         color: Colors.grey[600],
-        fontSize: 10,
+        fontSize: chartTextFontSize,
       ),
       text: textValue,
     );
