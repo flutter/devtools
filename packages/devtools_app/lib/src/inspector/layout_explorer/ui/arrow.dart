@@ -35,26 +35,28 @@ class ArrowWrapper extends StatelessWidget {
     this.child,
     @required ArrowType type,
     this.arrowColor = defaultArrowColor,
-    this.arrowHeadSize = defaultIconSize,
+    // ignore: always_require_non_null_named_parameters
+    double arrowHeadSize,
     this.arrowStrokeWidth = defaultArrowStrokeWidth,
     this.childMarginFromArrow = defaultDistanceToArrow,
   })  : assert(type != null),
         assert(arrowColor != null),
-        assert(arrowHeadSize != null && arrowHeadSize > 0.0),
-        assert(arrowStrokeWidth != null && arrowHeadSize > 0.0),
+        assert(arrowStrokeWidth != null),
         assert(childMarginFromArrow != null && childMarginFromArrow > 0.0),
         direction = axis(type),
         isBidirectional = false,
         startArrowType = type,
         endArrowType = type,
+        arrowHeadSize = arrowHeadSize ?? defaultIconSize,
         super(key: key);
 
-  const ArrowWrapper.bidirectional({
+  ArrowWrapper.bidirectional({
     Key key,
     this.child,
     @required this.direction,
     this.arrowColor = defaultArrowColor,
-    this.arrowHeadSize = defaultIconSize,
+    // ignore: always_require_non_null_named_parameters
+    double arrowHeadSize,
     this.arrowStrokeWidth = defaultArrowStrokeWidth,
     this.childMarginFromArrow = defaultDistanceToArrow,
   })  : assert(direction != null),
@@ -67,6 +69,7 @@ class ArrowWrapper extends StatelessWidget {
             direction == Axis.horizontal ? ArrowType.left : ArrowType.up,
         endArrowType =
             direction == Axis.horizontal ? ArrowType.right : ArrowType.down,
+        arrowHeadSize = arrowHeadSize ?? defaultIconSize,
         super(key: key);
 
   final Color arrowColor;
@@ -143,7 +146,8 @@ class ArrowWrapper extends StatelessWidget {
 class ArrowWidget extends StatelessWidget {
   ArrowWidget({
     this.color = defaultArrowColor,
-    this.headSize = defaultIconSize,
+    // ignore: always_require_non_null_named_parameters
+    double headSize,
     Key key,
     this.shouldDrawHead = true,
     this.strokeWidth = defaultArrowStrokeWidth,
@@ -160,6 +164,7 @@ class ArrowWidget extends StatelessWidget {
           type: type,
           shouldDrawHead: shouldDrawHead,
         ),
+        headSize = headSize ?? defaultIconSize,
         super(key: key);
 
   final Color color;
@@ -186,7 +191,8 @@ class ArrowWidget extends StatelessWidget {
 
 class _ArrowPainter extends CustomPainter {
   _ArrowPainter({
-    this.headSize = defaultIconSize,
+    // ignore: always_require_non_null_named_parameters
+    double headSize,
     this.strokeWidth = defaultArrowStrokeWidth,
     this.color = defaultArrowColor,
     this.shouldDrawHead = true,
@@ -197,7 +203,8 @@ class _ArrowPainter extends CustomPainter {
         assert(type != null),
         assert(shouldDrawHead != null),
         // the height of an equilateral triangle
-        headHeight = 0.5 * sqrt(3) * headSize;
+        headSize = headSize ?? defaultIconSize,
+        headHeight = 0.5 * sqrt(3) * (headSize ?? defaultIconSize);
 
   final Color color;
   final double headSize;

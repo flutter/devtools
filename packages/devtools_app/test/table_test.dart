@@ -1078,7 +1078,7 @@ class _WideMinWidthColumn extends ColumnData<TestData> {
   _WideMinWidthColumn()
       : super.wide(
           'Wide MinWidth Column',
-          minWidthPx: 100.0,
+          minWidthPx: scaleByFontFactor(100.0),
         );
 
   @override
@@ -1090,7 +1090,7 @@ class _VeryWideMinWidthColumn extends ColumnData<TestData> {
   _VeryWideMinWidthColumn()
       : super.wide(
           'Very Wide MinWidth Column',
-          minWidthPx: 160.0,
+          minWidthPx: scaleByFontFactor(160.0),
         );
 
   @override

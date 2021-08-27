@@ -21,6 +21,7 @@ import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
 import '../ui/icons.dart';
+import '../ui/tab.dart';
 import '../utils.dart';
 import 'app_size_controller.dart';
 import 'app_size_table.dart';
@@ -81,10 +82,11 @@ class AppSizeBody extends StatefulWidget {
 
 class _AppSizeBodyState extends State<AppSizeBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  static const diffTab = Tab(text: 'Diff', key: AppSizeScreen.diffTabKey);
-  static const analysisTab =
-      Tab(text: 'Analysis', key: AppSizeScreen.analysisTabKey);
-  static const tabs = [analysisTab, diffTab];
+  static final diffTab =
+      DevToolsTab(text: 'Diff', key: AppSizeScreen.diffTabKey);
+  static final analysisTab =
+      DevToolsTab(text: 'Analysis', key: AppSizeScreen.analysisTabKey);
+  static final tabs = [analysisTab, diffTab];
 
   AppSizeController controller;
 

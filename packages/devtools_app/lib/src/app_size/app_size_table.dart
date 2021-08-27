@@ -81,7 +81,7 @@ class _SizeColumn extends ColumnData<TreemapNode> {
       : super(
           'Size',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: 100.0,
+          fixedWidthPx: scaleByFontFactor(100.0),
         );
 
   @override
@@ -112,7 +112,7 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
       : super(
           '% of Total Size',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: 100.0,
+          fixedWidthPx: scaleByFontFactor(100.0),
         );
 
   final int totalSize;
@@ -189,7 +189,7 @@ class _DiffColumn extends ColumnData<TreemapNode> {
       : super(
           'Change',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: 100.0,
+          fixedWidthPx: scaleByFontFactor(100.0),
         );
 
   // Ensure sort by absolute size.

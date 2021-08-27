@@ -96,21 +96,21 @@ ThemeData _baseTheme({
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         primary: theme.colorScheme.contrastForeground,
-        minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
-        fixedSize: const Size.fromHeight(defaultButtonHeight),
+        minimumSize: Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         primary: theme.colorScheme.contrastForeground,
-        minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
-        fixedSize: const Size.fromHeight(defaultButtonHeight),
+        minimumSize: Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
-        fixedSize: const Size.fromHeight(defaultButtonHeight),
+        minimumSize: Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
     ),
   );
@@ -138,16 +138,16 @@ bool isValidLightColor(Color color) {
   return color.computeLuminance() >= 1 - _lightDarkLuminanceThreshold;
 }
 
-const defaultToolbarHeight = 32.0;
+double get defaultToolbarHeight => scaleByFontFactor(32.0);
 
-const defaultButtonHeight = 32.0;
-const smallButtonHeight = 20.0;
+double get defaultButtonHeight => scaleByFontFactor(32.0);
+double get smallButtonHeight => scaleByFontFactor(20.0);
 
-const buttonMinWidth = 36.0;
+double get buttonMinWidth => scaleByFontFactor(36.0);
 
-const defaultIconSize = 16.0;
-const actionsIconSize = 20.0;
-const tooltipIconSize = 12.0;
+double get defaultIconSize => scaleByFontFactor(16.0);
+double get actionsIconSize => scaleByFontFactor(20.0);
+double get tooltipIconSize => scaleByFontFactor(12.0);
 
 const defaultSpacing = 16.0;
 const denseSpacing = 8.0;
@@ -160,24 +160,30 @@ const defaultElevation = 4.0;
 const borderPadding = 2.0;
 const densePadding = 4.0;
 
-const smallProgressSize = 12.0;
+double get smallProgressSize => scaleByFontFactor(12.0);
 
-const defaultListItemHeight = 28.0;
+double get defaultListItemHeight => scaleByFontFactor(28.0);
 
-const defaultChartHeight = 150.0;
+// TODO(jacobr) define a more sophisticated formula for chart height.
+// The chart height does need to increase somewhat to leave room for the legend
+// and tick marks but does not need to scale linearly with the font factor.
+double get defaultChartHeight => scaleByFontFactor(150.0);
 
 /// Width of all settings dialogs.
-const dialogSettingsWidth = 700.0;
+double get dialogSettingsWidth => scaleByFontFactor(700.0);
 
 const defaultScrollBarOffset = 10.0;
 
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
 
-const defaultDialogWidth = 700.0;
+double get defaultDialogWidth => scaleByFontFactor(700.0);
 
-const defaultFontSize = 14.0;
+const unscaledDefaultFontSize = 14.0;
+double get defaultFontSize => scaleByFontFactor(unscaledDefaultFontSize);
 
 double get consoleLineHeight => scaleByFontFactor(18.0);
+
+const chartTextFontSize = 10.0;
 
 /// Branded grey color.
 ///
@@ -310,7 +316,7 @@ extension DevToolsColorScheme on ColorScheme {
   TextStyle get hoverTitleTextStyle => TextStyle(
         color: defaultForeground,
         fontWeight: FontWeight.normal,
-        fontSize: 15,
+        fontSize: scaleByFontFactor(15.0),
         decoration: TextDecoration.none,
       );
 
@@ -318,7 +324,7 @@ extension DevToolsColorScheme on ColorScheme {
   TextStyle get hoverTextStyle => TextStyle(
         color: defaultForeground,
         fontWeight: FontWeight.normal,
-        fontSize: 11.5,
+        fontSize: scaleByFontFactor(11.5),
         decoration: TextDecoration.none,
       );
 
@@ -326,7 +332,7 @@ extension DevToolsColorScheme on ColorScheme {
   TextStyle get hoverValueTextStyle => TextStyle(
         color: contrastForeground,
         fontWeight: FontWeight.normal,
-        fontSize: 11.5,
+        fontSize: scaleByFontFactor(11.5),
         decoration: TextDecoration.none,
       );
 
@@ -334,7 +340,7 @@ extension DevToolsColorScheme on ColorScheme {
   TextStyle get hoverSmallValueTextStyle => TextStyle(
         color: defaultForeground,
         fontWeight: FontWeight.normal,
-        fontSize: 10,
+        fontSize: scaleByFontFactor(10.0),
         decoration: TextDecoration.none,
       );
 
@@ -342,7 +348,7 @@ extension DevToolsColorScheme on ColorScheme {
   TextStyle get italicTextStyle => TextStyle(
         color: defaultForeground,
         fontWeight: FontWeight.normal,
-        fontSize: 14,
+        fontSize: scaleByFontFactor(14.0),
         fontStyle: FontStyle.italic,
         decoration: TextDecoration.none,
       );
@@ -351,7 +357,7 @@ extension DevToolsColorScheme on ColorScheme {
   TextStyle get legendTextStyle => TextStyle(
         color: defaultForeground,
         fontWeight: FontWeight.normal,
-        fontSize: 10,
+        fontSize: scaleByFontFactor(10.0),
         decoration: TextDecoration.none,
       );
 
@@ -374,14 +380,14 @@ extension DevToolsColorScheme on ColorScheme {
   TextStyle get stackTraceCall => TextStyle(
         color: defaultForeground,
         fontWeight: FontWeight.normal,
-        fontSize: 12.0,
+        fontSize: scaleByFontFactor(12.0),
       );
 
   /// TextStyle for source file displayed in callstack.
   TextStyle get stackTraceSource => TextStyle(
         color: defaultForeground,
         fontWeight: FontWeight.w100,
-        fontSize: 12,
+        fontSize: scaleByFontFactor(12.0),
       );
 }
 
@@ -390,12 +396,20 @@ extension ThemeDataExtension on ThemeData {
   /// Returns whether we are currently using a dark theme.
   bool get isDarkTheme => brightness == Brightness.dark;
 
-  TextStyle get regularTextStyle => TextStyle(color: textTheme.bodyText2.color);
+  TextStyle get regularTextStyle => TextStyle(
+        color: textTheme.bodyText2.color,
+        fontSize: defaultFontSize,
+      );
 
-  TextStyle get subtleTextStyle => TextStyle(color: unselectedWidgetColor);
+  TextStyle get subtleTextStyle => TextStyle(
+        color: unselectedWidgetColor,
+        fontSize: defaultFontSize,
+      );
 
-  TextStyle get selectedTextStyle =>
-      TextStyle(color: textSelectionTheme.selectionColor);
+  TextStyle get selectedTextStyle => TextStyle(
+        color: textSelectionTheme.selectionColor,
+        fontSize: defaultFontSize,
+      );
 
   TextStyle get fixedFontStyle =>
       textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
@@ -413,14 +427,15 @@ extension ThemeDataExtension on ThemeData {
   TextStyle get linkTextStyle => TextStyle(
         color: colorScheme.devtoolsLink,
         decoration: TextDecoration.underline,
+      fontSize: defaultFontSize,
       );
 }
 
 const wideSearchTextWidth = 400.0;
 const defaultSearchTextWidth = 200.0;
-const defaultTextFieldHeight = 32.0;
+double get defaultTextFieldHeight => scaleByFontFactor(32.0);
 
-const maxHoverCardHeight = 250.0;
+double get maxHoverCardHeight => scaleByFontFactor(250.0);
 const hoverCardBorderWidth = 2.0;
 
 /// Default color of cursor and color used by search's TextField.
@@ -498,17 +513,19 @@ const chartFontSizeSmall = 12.0;
 
 const lightSelection = Color(0xFFD4D7DA);
 
-bool includeText(BuildContext context, double includeTextWidth) {
-  return includeTextWidth == null ||
-      MediaQuery.of(context).size.width > includeTextWidth;
+bool includeText(
+    BuildContext context, double minScreenWidthForTextBeforeScaling) {
+  return minScreenWidthForTextBeforeScaling == null ||
+      MediaQuery.of(context).size.width >
+          scaleByFontFactor(minScreenWidthForTextBeforeScaling);
 }
 
 ButtonStyle denseAwareOutlinedButtonStyle(
   BuildContext context,
-  double includeTextWidth,
+  double minScreenWidthForTextBeforeScaling,
 ) {
   var buttonStyle = Theme.of(context).outlinedButtonTheme.style;
-  if (!includeText(context, includeTextWidth)) {
+  if (!includeText(context, minScreenWidthForTextBeforeScaling)) {
     buttonStyle = buttonStyle.copyWith(
       padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
         return EdgeInsets.zero;

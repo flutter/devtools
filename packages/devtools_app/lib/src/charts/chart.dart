@@ -600,14 +600,13 @@ class ChartPainter extends CustomPainter {
   }
 
   TextPainter createText(String textValue, double scale) {
-    const TextStyle(
-      color: Colors.black,
-      fontSize: 30,
-    );
     final span = TextSpan(
       // TODO(terry): All text in a chart is grey. A chart like a Trace
       //              should have PaintCharacteristics.
-      style: TextStyle(color: Colors.grey[600], fontSize: 10),
+      style: TextStyle(
+        color: Colors.grey[600],
+        fontSize: chartTextFontSize,
+      ),
       text: textValue,
     );
     final tp = TextPainter(

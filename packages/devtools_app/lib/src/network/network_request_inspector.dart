@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../common_widgets.dart';
 import '../http/http_request_data.dart';
 import '../theme.dart';
+import '../ui/tab.dart';
 import 'network_model.dart';
 import 'network_request_inspector_views.dart';
 
@@ -15,7 +16,7 @@ class NetworkRequestInspector extends StatelessWidget {
   const NetworkRequestInspector(this.data);
 
   static const _overviewTabTitle = 'Overview';
-  static const _headersTabTitle = 'Headers';  
+  static const _headersTabTitle = 'Headers';
   static const _requestTabTitle = 'Request';
   static const _responseTabTitle = 'Response';
   static const _cookiesTabTitle = 'Cookies';
@@ -36,7 +37,7 @@ class NetworkRequestInspector extends StatelessWidget {
   final NetworkRequest data;
 
   Widget _buildTab(String tabName) {
-    return Tab(
+    return DevToolsTab(
       key: ValueKey<String>(tabName),
       child: Text(
         tabName,

@@ -477,7 +477,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               tooltip: 'Resume',
               child: TextButton(
                 onPressed: controller.resume,
-                child: const Icon(
+                child: Icon(
                   Codicons.debugContinue,
                   color: Colors.green,
                   size: defaultIconSize,
@@ -488,7 +488,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               tooltip: 'Step over',
               child: TextButton(
                 onPressed: controller.stepOver,
-                child: const Icon(
+                child: Icon(
                   Codicons.debugStepOver,
                   color: Colors.black,
                   size: defaultIconSize,

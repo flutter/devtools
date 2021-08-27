@@ -357,7 +357,7 @@ void main() {
       // Refresh network data and ensure requests are populated.
       await controller.networkService.refreshNetworkData();
       profile = requestsNotifier.value;
-      
+
       final List<HttpRequestData> httpRequests = profile.requests
           .whereType<HttpRequestData>()
           .cast<HttpRequestData>()
@@ -380,7 +380,7 @@ void main() {
       // Refresh network data and ensure requests are populated.
       await controller.networkService.refreshNetworkData();
       profile = requestsNotifier.value;
-      
+
       final List<HttpRequestData> httpRequests = profile.requests
           .whereType<HttpRequestData>()
           .cast<HttpRequestData>()
@@ -403,7 +403,7 @@ void main() {
       // Refresh network data and ensure requests are populated.
       await controller.networkService.refreshNetworkData();
       profile = requestsNotifier.value;
-      
+
       final List<HttpRequestData> httpRequests = profile.requests
           .whereType<HttpRequestData>()
           .cast<HttpRequestData>()
@@ -426,7 +426,7 @@ void main() {
       // Refresh network data and ensure requests are populated.
       await controller.networkService.refreshNetworkData();
       profile = requestsNotifier.value;
-      
+
       final List<HttpRequestData> httpRequests = profile.requests
           .whereType<HttpRequestData>()
           .cast<HttpRequestData>()

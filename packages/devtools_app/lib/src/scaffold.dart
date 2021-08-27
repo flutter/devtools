@@ -71,7 +71,7 @@ class DevToolsScaffold extends StatefulWidget {
   static const Key fullWidthKey = Key('Full-width Scaffold');
 
   /// The size that all actions on this widget are expected to have.
-  static const double actionWidgetSize = 48.0;
+  static double get actionWidgetSize => scaleByFontFactor(48.0);
 
   /// The border around the content in the DevTools UI.
   EdgeInsets get appPadding => EdgeInsets.fromLTRB(
@@ -400,8 +400,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         tabs: [for (var screen in widget.tabs) screen.buildTab(context)],
       );
       preferredSize = isNarrow
-          ? const Size.fromHeight(defaultToolbarHeight + 40.0)
-          : const Size.fromHeight(defaultToolbarHeight);
+          ? Size.fromHeight(
+              defaultToolbarHeight + scaleByFontFactor(36.0) + 4.0)
+          : Size.fromHeight(defaultToolbarHeight);
       final alignment = isNarrow ? Alignment.bottomLeft : Alignment.centerRight;
 
       final rightAdjust = isNarrow ? 0.0 : BulletSpacer.width;
@@ -416,7 +417,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         alignment: alignment,
         child: Padding(
           padding: EdgeInsets.only(
-            top: isNarrow ? 40.0 : 4.0,
+            top: isNarrow ? scaleByFontFactor(36.0) + 4.0 : 4.0,
             right: rightPadding,
           ),
           child: tabBar,
@@ -457,7 +458,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     final appPadding = widget.appPadding;
 
     return Container(
-      height: 48.0,
+      height: scaleByFontFactor(24.0) +
+          widget.appPadding.top +
+          widget.appPadding.bottom,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -483,10 +486,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   /// Returns the width of the scaffold title, tabs and default icons.
   double _wideWidth(String title, DevToolsScaffold widget) {
+    final textTheme = Theme.of(context).textTheme;
     final painter = TextPainter(
       text: TextSpan(
         text: title,
-        style: Theme.of(context).textTheme.headline6,
+        style: textTheme.headline6,
       ),
       textDirection: TextDirection.ltr,
     )..layout();
@@ -494,10 +498,13 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     // title's leading padding.
     double wideWidth = painter.width + defaultSpacing;
     for (var tab in widget.tabs) {
-      wideWidth += tab.approximateWidth();
+      wideWidth += tab.approximateWidth(textTheme);
     }
-    wideWidth +=
-        (widget.actions?.length ?? 0) * DevToolsScaffold.actionWidgetSize;
+    final actionsLength = widget.actions?.length ?? 0;
+    if (actionsLength > 0) {
+      wideWidth += actionsLength * DevToolsScaffold.actionWidgetSize +
+          BulletSpacer.width;
+    }
     return wideWidth;
   }
 }

@@ -18,8 +18,9 @@ import 'info/info_controller.dart';
 import 'screen.dart';
 import 'service_manager.dart';
 import 'theme.dart';
+import 'utils.dart';
 
-const statusLineHeight = 24.0;
+double get statusLineHeight => scaleByFontFactor(24.0);
 
 /// The status line widget displayed at the bottom of DevTools.
 ///
@@ -240,7 +241,7 @@ class StatusLine extends StatelessWidget {
                   },
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.info_outline,
                         size: actionsIconSize,
                       ),

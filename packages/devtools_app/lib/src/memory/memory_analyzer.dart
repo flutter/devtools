@@ -590,7 +590,7 @@ class _AnalysisFieldValueColumn extends ColumnData<AnalysisField> {
   _AnalysisFieldValueColumn()
       : super(
           'Value',
-          fixedWidthPx: 350.0,
+          fixedWidthPx: scaleByFontFactor(350.0),
         );
 
   @override

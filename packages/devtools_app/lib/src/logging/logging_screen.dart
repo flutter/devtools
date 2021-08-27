@@ -333,7 +333,7 @@ class _WhenColumn extends ColumnData<LogData> {
   _WhenColumn()
       : super(
           'When',
-          fixedWidthPx: 120,
+          fixedWidthPx: scaleByFontFactor(120),
         );
 
   @override
@@ -351,7 +351,7 @@ class _KindColumn extends ColumnData<LogData>
   _KindColumn()
       : super(
           'Kind',
-          fixedWidthPx: 155,
+          fixedWidthPx: scaleByFontFactor(155),
         );
 
   @override

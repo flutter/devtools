@@ -22,7 +22,7 @@ class RegisteredServiceDescription {
 /// Hot reload service registered by Flutter Tools.
 ///
 /// We call this service to perform hot reload.
-const hotReload = RegisteredServiceDescription._(
+final hotReload = RegisteredServiceDescription._(
   service: 'reloadSources',
   title: 'Hot Reload',
   icon: AssetImageIcon(
@@ -35,7 +35,7 @@ const hotReload = RegisteredServiceDescription._(
 /// Hot restart service registered by Flutter Tools.
 ///
 /// We call this service to perform a hot restart.
-const hotRestart = RegisteredServiceDescription._(
+final hotRestart = RegisteredServiceDescription._(
   service: 'hotRestart',
   title: 'Hot Restart',
   icon: Icon(

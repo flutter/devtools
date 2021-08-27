@@ -419,7 +419,7 @@ class OpenAboutAction extends StatelessWidget {
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
-          child: const Icon(
+          child: Icon(
             Icons.help_outline,
             size: actionsIconSize,
           ),
@@ -445,7 +445,7 @@ class OpenSettingsAction extends StatelessWidget {
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
-          child: const Icon(
+          child: Icon(
             Icons.settings,
             size: actionsIconSize,
           ),
@@ -473,7 +473,7 @@ class ReportFeedbackButton extends StatelessWidget {
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
-          child: const Icon(
+          child: Icon(
             Icons.bug_report,
             size: actionsIconSize,
           ),
