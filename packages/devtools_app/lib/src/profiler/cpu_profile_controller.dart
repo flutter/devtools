@@ -178,6 +178,8 @@ class CpuProfilerController
     CpuProfileData cpuProfileData, {
     String processId,
     bool storeAsUserTagNone = true,
+    bool shouldApplyFilters = true,
+    bool shouldRefreshSearchMatches = true,
   }) async {
     _processingNotifier.value = true;
     _dataNotifier.value = null;
@@ -187,7 +189,12 @@ class CpuProfilerController
       if (storeAsUserTagNone) {
         _dataByTag[userTagNone] = cpuProfileData;
       }
-      refreshSearchMatches();
+      if (shouldApplyFilters) {
+        filterData(Filter(toggleFilters: toggleFilters));
+      }
+      if (shouldRefreshSearchMatches) {
+        refreshSearchMatches();
+      }
       _processingNotifier.value = false;
     } on AssertionError catch (_) {
       _dataNotifier.value = cpuProfileData;
@@ -305,6 +312,7 @@ class CpuProfilerController
       filteredData,
       processId: 'filter $_filterIdentifier',
       storeAsUserTagNone: false,
+      shouldApplyFilters: false,
     );
     _filterIdentifier++;
   }
