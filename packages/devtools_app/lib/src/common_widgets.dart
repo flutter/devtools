@@ -1285,3 +1285,50 @@ Widget maybeWrapWithTooltip(String tooltip, Widget child) {
   }
   return child;
 }
+
+class Legend extends StatelessWidget {
+  const Legend({Key key, @required this.entries}) : super(key: key);
+
+  static const legendSquareSize = 16.0;
+
+  final List<LegendEntry> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    final legendItems = <Widget>[];
+    for (var i = 0; i < entries.length; i++) {
+      final entry = entries[i];
+      legendItems.add(_legendItem(entry.description, entry.color));
+      if (i != entries.length - 1) {
+        legendItems.add(const SizedBox(height: denseRowSpacing));
+      }
+    }
+    return Column(
+      key: key,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: legendItems,
+    );
+  }
+
+  Widget _legendItem(String description, Color color) {
+    return Row(
+      children: [
+        Container(
+          height: legendSquareSize,
+          width: legendSquareSize,
+          color: color,
+        ),
+        const SizedBox(width: denseSpacing),
+        Text(description),
+      ],
+    );
+  }
+}
+
+class LegendEntry {
+  const LegendEntry(this.description, this.color);
+
+  final String description;
+
+  final Color color;
+}

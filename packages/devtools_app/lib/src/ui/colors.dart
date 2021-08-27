@@ -66,3 +66,8 @@ const treemapDecreaseColor = Color(0xFF77102F);
 
 const tableIncreaseColor = Color(0xFF73BF43);
 const tableDecreaseColor = Color(0xFFEE284F);
+
+const dartCoreColor = mainRasterColor;
+const flutterCoreColor = Color(0xFF027DFD);
+const nativeCodeColor = Color(0xFF9E9E9E);
+const cpuFlameChartNodeColor = Color(0xFFB8EAFE);

@@ -49,8 +49,6 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   static const yAxisUnitsSpace = 48.0;
 
-  static const legendSquareSize = 16.0;
-
   static const outlineBorderWidth = 1.0;
 
   PerformanceController _controller;
@@ -154,7 +152,15 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildChartLegend(),
+                const Legend(
+                  key: FlutterFramesChart.chartLegendKey,
+                  entries: [
+                    LegendEntry('Frame Time (UI)', mainUiColor),
+                    LegendEntry('Frame Time (Raster)', mainRasterColor),
+                    LegendEntry('Jank (slow frame)', uiJankColor),
+                    LegendEntry('Shader Compilation', shaderCompilationColor),
+                  ],
+                ),
                 if (widget.frames.isNotEmpty) _buildAverageFps(),
               ],
             ),
@@ -242,36 +248,6 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         availableChartHeight: availableChartHeight - 2 * outlineBorderWidth,
         displayRefreshRate: widget.displayRefreshRate,
       ),
-    );
-  }
-
-  Widget _buildChartLegend() {
-    return Column(
-      key: FlutterFramesChart.chartLegendKey,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _legendItem('Frame Time (UI)', mainUiColor),
-        const SizedBox(height: denseRowSpacing),
-        _legendItem('Frame Time (Raster)', mainRasterColor),
-        const SizedBox(height: denseRowSpacing),
-        _legendItem('Jank (slow frame)', uiJankColor),
-        const SizedBox(height: denseRowSpacing),
-        _legendItem('Shader Compilation', shaderCompilationColor),
-      ],
-    );
-  }
-
-  Widget _legendItem(String description, Color color) {
-    return Row(
-      children: [
-        Container(
-          height: legendSquareSize,
-          width: legendSquareSize,
-          color: color,
-        ),
-        const SizedBox(width: denseSpacing),
-        Text(description),
-      ],
     );
   }
 

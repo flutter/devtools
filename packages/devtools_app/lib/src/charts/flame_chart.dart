@@ -1401,11 +1401,14 @@ class FlameChartHelpButton extends StatelessWidget {
   const FlameChartHelpButton({
     @required this.screenId,
     @required this.analyticsAction,
+    this.additionalInfo = const <Widget>[],
   });
 
   final String screenId;
 
   final String analyticsAction;
+
+  final List<Widget> additionalInfo;
 
   @override
   Widget build(BuildContext context) {
@@ -1414,7 +1417,9 @@ class FlameChartHelpButton extends StatelessWidget {
         ga.select(screenId, analyticsAction);
         showDialog(
           context: context,
-          builder: (context) => _FlameChartHelpDialog(),
+          builder: (context) => _FlameChartHelpDialog(
+            additionalInfo: additionalInfo,
+          ),
         );
       },
     );
@@ -1422,6 +1427,10 @@ class FlameChartHelpButton extends StatelessWidget {
 }
 
 class _FlameChartHelpDialog extends StatelessWidget {
+  const _FlameChartHelpDialog({this.additionalInfo = const <Widget>[]});
+
+  final List<Widget> additionalInfo;
+
   /// A fixed width for the first column in the help dialog to ensure that the
   /// subsections are aligned.
   static const firstColumnWidth = 190.0;
@@ -1441,6 +1450,8 @@ class _FlameChartHelpDialog extends StatelessWidget {
           const SizedBox(height: denseSpacing),
           ...dialogSubHeader(theme, 'Zoom'),
           _buildZoomInstructions(theme),
+          if (additionalInfo.isNotEmpty) const SizedBox(height: denseSpacing),
+          ...additionalInfo,
         ],
       ),
       actions: [

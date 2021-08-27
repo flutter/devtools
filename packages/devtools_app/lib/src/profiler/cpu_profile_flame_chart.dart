@@ -42,8 +42,6 @@ class _CpuProfileFlameChartState
     extends FlameChartState<CpuProfileFlameChart, CpuStackFrame> {
   static const stackFramePadding = 1;
 
-  int _colorOffset = 0;
-
   final Map<String, double> stackFrameLefts = {};
 
   @override
@@ -65,7 +63,11 @@ class _CpuProfileFlameChartState
         text: stackFrame.name,
         rect: Rect.fromLTWH(left, flameChartNodeTop, width, rowHeight),
         backgroundColor: backgroundColor,
-        textColor: Colors.black,
+        textColor: (stackFrame.isNative ||
+                stackFrame.isDartCore ||
+                stackFrame.isFlutterCore)
+            ? Colors.white
+            : Colors.black,
         data: stackFrame,
         onSelected: (CpuStackFrame frame) => widget.onDataSelected(frame),
       )..sectionIndex = 0;
@@ -158,8 +160,9 @@ class _CpuProfileFlameChartState
   // TODO(kenz): base colors on categories (Widget, Render, Layer, User code,
   // etc.)
   Color _colorForStackFrame(CpuStackFrame stackFrame) {
-    final color = uiColorPalette[_colorOffset % uiColorPalette.length];
-    _colorOffset++;
-    return color;
+    if (stackFrame.isNative) return nativeCodeColor;
+    if (stackFrame.isDartCore) return dartCoreColor;
+    if (stackFrame.isFlutterCore) return flutterCoreColor;
+    return cpuFlameChartNodeColor;
   }
 }

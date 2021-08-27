@@ -469,8 +469,9 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
 
   final CpuProfileMetaData profileMetaData;
 
-  bool get isNative =>
-      _isNative ??= id != CpuProfileData.rootId && processedUrl.isEmpty;
+  bool get isNative => _isNative ??= id != CpuProfileData.rootId &&
+      processedUrl.isEmpty &&
+      !name.startsWith(flutterEnginePrefix);
 
   bool _isNative;
 
