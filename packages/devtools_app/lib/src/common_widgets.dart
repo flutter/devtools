@@ -1304,7 +1304,6 @@ class Legend extends StatelessWidget {
       }
     }
     return Column(
-      key: key,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: legendItems,
     );
