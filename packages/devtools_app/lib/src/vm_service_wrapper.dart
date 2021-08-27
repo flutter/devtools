@@ -39,6 +39,7 @@ class VmServiceWrapper implements VmService {
   Version _protocolVersion;
   Version _dartIoVersion;
   Version _ddsVersion;
+  final _isolatesCache = <String, Isolate>{};
 
   Future<void> initServiceVersions() async {
     // Note: We cannot init [_dartIoVersion] here because it requires an
@@ -370,8 +371,14 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Isolate> getIsolate(String isolateId) {
-    return trackFuture('getIsolate', _vmService.getIsolate(isolateId));
+  Future<Isolate> getIsolate(String isolateId) async {
+    if (_isolatesCache.containsKey(isolateId)) {
+      return Future.value(_isolatesCache[isolateId]);
+    }
+    final isolate =
+        await trackFuture('getIsolate', _vmService.getIsolate(isolateId));
+    _isolatesCache[isolateId] = isolate;
+    return isolate;
   }
 
   @override
