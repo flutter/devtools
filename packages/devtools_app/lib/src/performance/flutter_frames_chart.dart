@@ -152,13 +152,16 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Legend(
+                Legend(
                   key: FlutterFramesChart.chartLegendKey,
                   entries: [
-                    LegendEntry('Frame Time (UI)', mainUiColor),
-                    LegendEntry('Frame Time (Raster)', mainRasterColor),
-                    LegendEntry('Jank (slow frame)', uiJankColor),
-                    LegendEntry('Shader Compilation', shaderCompilationColor),
+                    const LegendEntry('Frame Time (UI)', mainUiColor),
+                    const LegendEntry('Frame Time (Raster)', mainRasterColor),
+                    const LegendEntry('Jank (slow frame)', uiJankColor),
+                    LegendEntry(
+                      'Shader Compilation',
+                      shaderCompilationColor.background,
+                    ),
                   ],
                 ),
                 if (widget.frames.isNotEmpty) _buildAverageFps(),
@@ -309,7 +312,7 @@ class FlutterFramesChartItem extends StatelessWidget {
 
     var uiColor = uiJanky ? uiJankColor : mainUiColor;
     var rasterColor = rasterJanky ? rasterJankColor : mainRasterColor;
-    var shaderColor = shaderCompilationColor;
+    var shaderColor = shaderCompilationColor.background;
 
     if (debugFrames) {
       if (frame.timelineEventData.uiEvent == null) {

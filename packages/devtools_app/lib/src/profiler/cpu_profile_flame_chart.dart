@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../charts/flame_chart.dart';
 import '../ui/colors.dart';
+import '../ui/utils.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
 
@@ -56,18 +57,13 @@ class _CpuProfileFlameChartState
           widget.startingContentWidth * stackFrame.totalTimeRatio -
               stackFramePadding;
       final left = startingLeftForStackFrame(stackFrame);
-      final backgroundColor = _colorForStackFrame(stackFrame);
+      final colorPair = _colorPairForStackFrame(stackFrame);
 
       final node = FlameChartNode<CpuStackFrame>(
         key: Key('${stackFrame.id}'),
         text: stackFrame.name,
         rect: Rect.fromLTWH(left, flameChartNodeTop, width, rowHeight),
-        backgroundColor: backgroundColor,
-        textColor: (stackFrame.isNative ||
-                stackFrame.isDartCore ||
-                stackFrame.isFlutterCore)
-            ? Colors.white
-            : Colors.black,
+        colorPair: colorPair,
         data: stackFrame,
         onSelected: (CpuStackFrame frame) => widget.onDataSelected(frame),
       )..sectionIndex = 0;
@@ -159,7 +155,7 @@ class _CpuProfileFlameChartState
 
   // TODO(kenz): base colors on categories (Widget, Render, Layer, User code,
   // etc.)
-  Color _colorForStackFrame(CpuStackFrame stackFrame) {
+  ColorPair _colorPairForStackFrame(CpuStackFrame stackFrame) {
     if (stackFrame.isNative) return nativeCodeColor;
     if (stackFrame.isDartCore) return dartCoreColor;
     if (stackFrame.isFlutterCore) return flutterCoreColor;

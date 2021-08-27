@@ -219,3 +219,11 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
     );
   }
 }
+
+class ColorPair {
+  const ColorPair({@required this.background, @required this.foreground});
+
+  final Color foreground;
+
+  final Color background;
+}

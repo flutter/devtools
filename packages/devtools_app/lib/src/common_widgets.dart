@@ -13,6 +13,7 @@ import 'scaffold.dart';
 import 'theme.dart';
 import 'ui/icons.dart';
 import 'ui/label.dart';
+import 'utils.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 const tooltipWaitLong = Duration(milliseconds: 1000);
@@ -1295,14 +1296,10 @@ class Legend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final legendItems = <Widget>[];
-    for (var i = 0; i < entries.length; i++) {
-      final entry = entries[i];
-      legendItems.add(_legendItem(entry.description, entry.color));
-      if (i != entries.length - 1) {
-        legendItems.add(const SizedBox(height: denseRowSpacing));
-      }
-    }
+    final legendItems = entries
+        .map((entry) => _legendItem(entry.description, entry.color))
+        .toList()
+        .joinWith(const SizedBox(height: denseRowSpacing));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: legendItems,

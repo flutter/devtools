@@ -175,13 +175,23 @@ class _CpuProfilerState extends State<CpuProfiler>
                             analytics_constants.cpuProfileFlameChartHelp,
                         additionalInfo: [
                           ...dialogSubHeader(Theme.of(context), 'Legend'),
-                          const Legend(
+                          Legend(
                             entries: [
-                              LegendEntry('Native code', nativeCodeColor),
-                              LegendEntry('Dart core libraries', dartCoreColor),
                               LegendEntry(
-                                'Flutter libraries',
-                                flutterCoreColor,
+                                'App code (code from your app and imported packages)',
+                                cpuFlameChartNodeColor.background,
+                              ),
+                              LegendEntry(
+                                'Native code (code from the native runtime - Android, iOS, etc.)',
+                                nativeCodeColor.background,
+                              ),
+                              LegendEntry(
+                                'Dart core libraries (code from the Dart SDK)',
+                                dartCoreColor.background,
+                              ),
+                              LegendEntry(
+                                'Flutter Framework (code from the Flutter SDK)',
+                                flutterCoreColor.background,
                               ),
                             ],
                           ),

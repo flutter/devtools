@@ -22,6 +22,7 @@ import '../theme.dart';
 import '../trace_event.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
+import '../ui/utils.dart';
 import '../utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
@@ -512,35 +513,27 @@ class TimelineFlameChartState
         widestRow = row;
       }
 
-      Color backgroundColor;
+      ColorPair colorPair;
       if (event.isShaderEvent) {
-        backgroundColor = shaderCompilationColor;
+        colorPair = shaderCompilationColor;
       } else if (event.isAsyncEvent) {
-        backgroundColor = nextAsyncColor(row);
+        colorPair = nextAsyncColor(row);
       } else if (event.isGCEvent) {
         // TODO(kenz): should we have a different color palette for GC events?
-        backgroundColor = nextUnknownColor(row);
+        colorPair = nextUnknownColor(row);
       } else if (event.isUiEvent) {
-        backgroundColor = nextUiColor(row);
+        colorPair = nextUiColor(row);
       } else if (event.isRasterEvent) {
-        backgroundColor = nextRasterColor(row);
+        colorPair = nextRasterColor(row);
       } else {
-        backgroundColor = nextUnknownColor(row);
-      }
-
-      Color textColor;
-      if (event.isRasterEvent) {
-        textColor = contrastForegroundWhite;
-      } else {
-        textColor = Colors.black;
+        colorPair = nextUnknownColor(row);
       }
 
       final node = FlameChartNode<TimelineEvent>(
         key: Key('${event.name} ${event.traceEvents.first.wrapperId}'),
         text: event.name,
         rect: Rect.fromLTRB(left, flameChartNodeTop, right, rowHeight),
-        backgroundColor: backgroundColor,
-        textColor: textColor,
+        colorPair: colorPair,
         data: event,
         onSelected: (dynamic event) => widget.onDataSelected(event),
         sectionIndex: section,
