@@ -573,7 +573,7 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
                       children: [
                         Text(
                           'More info',
-                          style: linkTextStyle(Theme.of(context).colorScheme),
+                          style: Theme.of(context).linkTextStyle,
                         ),
                         const SizedBox(width: densePadding),
                         Icon(

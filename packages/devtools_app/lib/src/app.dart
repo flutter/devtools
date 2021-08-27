@@ -518,7 +518,6 @@ class DevToolsAboutDialog extends StatelessWidget {
 
   Widget _createFeedbackLink(BuildContext context) {
     final reportIssuesLink = devToolsExtensionPoints.issueTrackerLink();
-    final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: () async {
         ga.select(
@@ -527,7 +526,10 @@ class DevToolsAboutDialog extends StatelessWidget {
         );
         await launchUrl(reportIssuesLink.url, context);
       },
-      child: Text(reportIssuesLink.display, style: linkTextStyle(colorScheme)),
+      child: Text(
+        reportIssuesLink.display,
+        style: Theme.of(context).linkTextStyle,
+      ),
     );
   }
 }

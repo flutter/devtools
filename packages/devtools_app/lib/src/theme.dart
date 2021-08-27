@@ -409,12 +409,12 @@ extension ThemeDataExtension on ThemeData {
   Color get titleSolidBackgroundColor => colorScheme.isLight
       ? colorScheme.alternatingBackgroundColor
       : canvasColor.darken(0.2);
-}
 
-TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
-      color: colorScheme.devtoolsLink,
-      decoration: TextDecoration.underline,
-    );
+  TextStyle get linkTextStyle => TextStyle(
+        color: colorScheme.devtoolsLink,
+        decoration: TextDecoration.underline,
+      );
+}
 
 const wideSearchTextWidth = 400.0;
 const defaultSearchTextWidth = 200.0;

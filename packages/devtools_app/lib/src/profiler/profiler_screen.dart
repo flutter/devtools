@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
@@ -16,6 +17,7 @@ import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
 import '../common_widgets.dart';
 import '../config_specific/import_export/import_export.dart';
+import '../config_specific/launch_url/launch_url.dart';
 import '../globals.dart';
 import '../notifications.dart';
 import '../screen.dart';
@@ -29,6 +31,9 @@ import 'profiler_screen_controller.dart';
 
 final profilerScreenSearchFieldKey =
     GlobalKey(debugLabel: 'ProfilerScreenSearchFieldKey');
+
+const iosProfilerWorkaround =
+    'https://github.com/flutter/flutter/issues/88466#issuecomment-905830680';
 
 class ProfilerScreen extends Screen {
   const ProfilerScreen()
@@ -152,6 +157,36 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
                       CpuProfilerController.baseStateCpuProfileData ||
                   cpuProfileData == null) {
                 return _buildRecordingInfo();
+              }
+              if (cpuProfileData.isEmpty) {
+                // TODO(kenz): remove the note about profiling on iOS after
+                // https://github.com/flutter/flutter/issues/88466 is fixed.
+                return Center(
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      text: 'No CPU samples recorded.',
+                      children: serviceManager.vm.operatingSystem == 'ios'
+                          ? [
+                              const TextSpan(
+                                text: '''
+\n\nIf you are attempting to profile on a real iOS device, you may be hitting a known issue. Try using this ''',
+                              ),
+                              TextSpan(
+                                text: 'workaround',
+                                style: Theme.of(context).linkTextStyle,
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () async {
+                                    await launchUrl(
+                                        iosProfilerWorkaround, context);
+                                  },
+                              ),
+                              const TextSpan(text: '.'),
+                            ]
+                          : [],
+                    ),
+                  ),
+                );
               }
               return CpuProfiler(
                 data: cpuProfileData,
