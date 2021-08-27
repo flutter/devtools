@@ -95,6 +95,7 @@ void main() {
       expect(stackFrameA.isNative, isTrue);
       expect(stackFrameB.isNative, isFalse);
       expect(stackFrameC.isNative, isFalse);
+      expect(flutterEngineStackFrame.isNative, isFalse);
       expect(
         CpuStackFrame(
           id: CpuProfileData.rootId,
@@ -119,6 +120,7 @@ void main() {
       expect(stackFrameA.isFlutterCore, isFalse);
       expect(stackFrameB.isFlutterCore, isFalse);
       expect(stackFrameC.isFlutterCore, isTrue);
+      expect(flutterEngineStackFrame.isFlutterCore, isTrue);
     });
 
     test('sampleCount', () {

@@ -9,8 +9,10 @@ import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../charts/flame_chart.dart';
 import '../common_widgets.dart';
+import '../dialogs.dart';
 import '../notifications.dart';
 import '../theme.dart';
+import '../ui/colors.dart';
 import '../ui/filter.dart';
 import '../ui/search.dart';
 import 'cpu_profile_bottom_up.dart';
@@ -171,6 +173,29 @@ class _CpuProfilerState extends State<CpuProfiler>
                             : analytics_constants.performance,
                         analyticsAction:
                             analytics_constants.cpuProfileFlameChartHelp,
+                        additionalInfo: [
+                          ...dialogSubHeader(Theme.of(context), 'Legend'),
+                          Legend(
+                            entries: [
+                              LegendEntry(
+                                'App code (code from your app and imported packages)',
+                                cpuFlameChartNodeColor.background,
+                              ),
+                              LegendEntry(
+                                'Native code (code from the native runtime - Android, iOS, etc.)',
+                                nativeCodeColor.background,
+                              ),
+                              LegendEntry(
+                                'Dart core libraries (code from the Dart SDK)',
+                                dartCoreColor.background,
+                              ),
+                              LegendEntry(
+                                'Flutter Framework (code from the Flutter SDK)',
+                                flutterCoreColor.background,
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ],
                   ),

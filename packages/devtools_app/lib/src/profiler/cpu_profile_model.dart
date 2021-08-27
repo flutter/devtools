@@ -469,8 +469,9 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
 
   final CpuProfileMetaData profileMetaData;
 
-  bool get isNative =>
-      _isNative ??= id != CpuProfileData.rootId && processedUrl.isEmpty;
+  bool get isNative => _isNative ??= id != CpuProfileData.rootId &&
+      processedUrl.isEmpty &&
+      !name.startsWith(flutterEnginePrefix);
 
   bool _isNative;
 
@@ -539,11 +540,22 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   Duration _selfTime;
 
   @override
-  String get tooltip => [
-        name,
-        msText(totalTime),
-        if (processedUrl.isNotEmpty) processedUrl,
-      ].join(' - ');
+  String get tooltip {
+    var prefix = '';
+    if (isNative) {
+      prefix = '[Native]';
+    } else if (isDartCore) {
+      prefix = '[Dart]';
+    } else if (isFlutterCore) {
+      prefix = '[Flutter]';
+    }
+    final nameWithPrefix = [prefix, name].join(' ');
+    return [
+      nameWithPrefix,
+      msText(totalTime),
+      if (processedUrl.isNotEmpty) processedUrl,
+    ].join(' - ');
+  }
 
   /// Returns the number of cpu samples this stack frame is a part of.
   ///

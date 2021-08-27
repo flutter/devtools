@@ -13,6 +13,7 @@ import 'scaffold.dart';
 import 'theme.dart';
 import 'ui/icons.dart';
 import 'ui/label.dart';
+import 'utils.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 const tooltipWaitLong = Duration(milliseconds: 1000);
@@ -1284,4 +1285,46 @@ Widget maybeWrapWithTooltip(String tooltip, Widget child) {
     );
   }
   return child;
+}
+
+class Legend extends StatelessWidget {
+  const Legend({Key key, @required this.entries}) : super(key: key);
+
+  static const legendSquareSize = 16.0;
+
+  final List<LegendEntry> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    final legendItems = entries
+        .map((entry) => _legendItem(entry.description, entry.color))
+        .toList()
+        .joinWith(const SizedBox(height: denseRowSpacing));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: legendItems,
+    );
+  }
+
+  Widget _legendItem(String description, Color color) {
+    return Row(
+      children: [
+        Container(
+          height: legendSquareSize,
+          width: legendSquareSize,
+          color: color,
+        ),
+        const SizedBox(width: denseSpacing),
+        Text(description),
+      ],
+    );
+  }
+}
+
+class LegendEntry {
+  const LegendEntry(this.description, this.color);
+
+  final String description;
+
+  final Color color;
 }

@@ -22,6 +22,7 @@ import '../theme.dart';
 import '../trees.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
+import '../ui/utils.dart';
 import '../utils.dart';
 
 const double rowPadding = 2.0;
@@ -972,8 +973,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     this.key,
     @required this.text,
     @required this.rect,
-    @required this.backgroundColor,
-    @required this.textColor,
+    @required this.colorPair,
     @required this.data,
     @required this.onSelected,
     this.selectable = true,
@@ -990,8 +990,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
   final Key key;
   final Rect rect;
   final String text;
-  final Color backgroundColor;
-  final Color textColor;
+  final ColorPair colorPair;
   final T data;
   final void Function(T) onSelected;
   final bool selectable;
@@ -1069,7 +1068,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     if (selected) return defaultSelectionColor;
     if (activeSearchMatch) return activeSearchMatchColor;
     if (searchMatch) return searchMatchColor;
-    return backgroundColor;
+    return colorPair.background;
   }
 
   Color _textColor({
@@ -1078,7 +1077,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     @required bool activeSearchMatch,
   }) {
     if (selected || searchMatch || activeSearchMatch) return _darkTextColor;
-    return textColor;
+    return colorPair.foreground;
   }
 
   Rect zoomedRect(double zoom, double chartStartInset) {
@@ -1098,19 +1097,19 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
 }
 
 mixin FlameChartColorMixin {
-  Color nextUiColor(int row) {
+  ColorPair nextUiColor(int row) {
     return uiColorPalette[row % uiColorPalette.length];
   }
 
-  Color nextRasterColor(int row) {
+  ColorPair nextRasterColor(int row) {
     return rasterColorPalette[row % rasterColorPalette.length];
   }
 
-  Color nextAsyncColor(int row) {
+  ColorPair nextAsyncColor(int row) {
     return asyncColorPalette[row % asyncColorPalette.length];
   }
 
-  Color nextUnknownColor(int row) {
+  ColorPair nextUnknownColor(int row) {
     return unknownColorPalette[row % unknownColorPalette.length];
   }
 }
@@ -1401,11 +1400,14 @@ class FlameChartHelpButton extends StatelessWidget {
   const FlameChartHelpButton({
     @required this.screenId,
     @required this.analyticsAction,
+    this.additionalInfo = const <Widget>[],
   });
 
   final String screenId;
 
   final String analyticsAction;
+
+  final List<Widget> additionalInfo;
 
   @override
   Widget build(BuildContext context) {
@@ -1414,7 +1416,9 @@ class FlameChartHelpButton extends StatelessWidget {
         ga.select(screenId, analyticsAction);
         showDialog(
           context: context,
-          builder: (context) => _FlameChartHelpDialog(),
+          builder: (context) => _FlameChartHelpDialog(
+            additionalInfo: additionalInfo,
+          ),
         );
       },
     );
@@ -1422,6 +1426,10 @@ class FlameChartHelpButton extends StatelessWidget {
 }
 
 class _FlameChartHelpDialog extends StatelessWidget {
+  const _FlameChartHelpDialog({this.additionalInfo = const <Widget>[]});
+
+  final List<Widget> additionalInfo;
+
   /// A fixed width for the first column in the help dialog to ensure that the
   /// subsections are aligned.
   static const firstColumnWidth = 190.0;
@@ -1441,6 +1449,8 @@ class _FlameChartHelpDialog extends StatelessWidget {
           const SizedBox(height: denseSpacing),
           ...dialogSubHeader(theme, 'Zoom'),
           _buildZoomInstructions(theme),
+          if (additionalInfo.isNotEmpty) const SizedBox(height: denseSpacing),
+          ...additionalInfo,
         ],
       ),
       actions: [
