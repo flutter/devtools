@@ -75,7 +75,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   static const summaryTreeKey = Key('Summary Tree');
   static const detailsTreeKey = Key('Details Tree');
-  static const unscaledIncludeTextWidth = 900.0;
+  static const minScreenWidthForTextBeforeScaling = 900.0;
   static const unscaledIncludeRefreshTreeWidth = 1255.0;
   static const serviceExtensionButtonsIncludeTextWidth = 1160.0;
 
@@ -153,7 +153,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                         ? extensions.toggleSelectWidgetMode
                         : extensions.toggleOnDeviceWidgetInspector
                   ],
-                  unscaledIncludeTextWidth: unscaledIncludeTextWidth,
+                  minScreenWidthForTextBeforeScaling:
+                      minScreenWidthForTextBeforeScaling,
                 );
               },
             ),
@@ -163,7 +164,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               icon: Icons.refresh,
               label: 'Refresh Tree',
               color: Theme.of(context).colorScheme.serviceExtensionButtonsTitle,
-              unscaledIncludeTextWidth: unscaledIncludeRefreshTreeWidth,
+              minScreenWidthForTextBeforeScaling:
+                  unscaledIncludeRefreshTreeWidth,
             ),
             const Spacer(),
             Row(children: getServiceExtensionWidgets()),
@@ -219,7 +221,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   List<Widget> getServiceExtensionWidgets() {
     return [
       ServiceExtensionButtonGroup(
-        unscaledIncludeTextWidth: serviceExtensionButtonsIncludeTextWidth,
+        minScreenWidthForTextBeforeScaling:
+            serviceExtensionButtonsIncludeTextWidth,
         extensions: [
           extensions.slowAnimations,
           extensions.debugPaint,
@@ -247,7 +250,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               icon: Icons.unfold_more,
               onPressed: enableButtons ? _onExpandClick : null,
               label: 'Expand all',
-              unscaledIncludeTextWidth: unscaledIncludeTextWidth,
+              minScreenWidthForTextBeforeScaling:
+                  minScreenWidthForTextBeforeScaling,
             ),
           ),
           const SizedBox(width: denseSpacing),
@@ -256,7 +260,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               icon: Icons.unfold_less,
               onPressed: enableButtons ? _onResetClick : null,
               label: 'Collapse to selected',
-              unscaledIncludeTextWidth: unscaledIncludeTextWidth,
+              minScreenWidthForTextBeforeScaling:
+                  minScreenWidthForTextBeforeScaling,
             ),
           )
         ],

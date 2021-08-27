@@ -31,11 +31,11 @@ import 'label.dart';
 /// have to.
 class ServiceExtensionButtonGroup extends StatefulWidget {
   const ServiceExtensionButtonGroup({
-    this.unscaledIncludeTextWidth,
+    this.minScreenWidthForTextBeforeScaling,
     @required this.extensions,
   });
 
-  final double unscaledIncludeTextWidth;
+  final double minScreenWidthForTextBeforeScaling;
   final List<ToggleableServiceExtensionDescription> extensions;
 
   @override
@@ -124,7 +124,9 @@ class _ServiceExtensionButtonGroupState
         fillColor: theme.colorScheme.serviceExtensionButtonsFillSelected,
         textStyle: theme.textTheme.bodyText1,
         constraints: BoxConstraints(
-            minWidth: defaultButtonHeight, minHeight: defaultButtonHeight),
+          minWidth: defaultButtonHeight,
+          minHeight: defaultButtonHeight,
+        ),
         children: <Widget>[
           for (var extensionState in _extensionStates)
             _buildExtension(extensionState)
@@ -143,16 +145,18 @@ class _ServiceExtensionButtonGroupState
       child: Container(
         height: defaultButtonHeight,
         padding: EdgeInsets.symmetric(
-          horizontal: includeText(context, widget.unscaledIncludeTextWidth)
-              ? defaultSpacing
-              : 0.0,
+          horizontal:
+              includeText(context, widget.minScreenWidthForTextBeforeScaling)
+                  ? defaultSpacing
+                  : 0.0,
         ),
         child: ImageIconLabel(
           extensionState.isSelected
               ? description.enabledIcon
               : description.disabledIcon,
           description.description,
-          unscaledMinIncludeTextWidth: widget.unscaledIncludeTextWidth,
+          unscaledMinIncludeTextWidth:
+              widget.minScreenWidthForTextBeforeScaling,
         ),
       ),
     );

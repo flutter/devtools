@@ -238,13 +238,15 @@ class LegacyPerformanceScreenBodyState
         return Row(
           children: [
             RefreshButton(
-              unscaledIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
+              minScreenWidthForTextBeforeScaling:
+                  _primaryControlsMinIncludeTextWidth,
               onPressed:
                   (refreshing || processing) ? null : _refreshPerformanceData,
             ),
             const SizedBox(width: defaultSpacing),
             ClearButton(
-              unscaledIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
+              minScreenWidthForTextBeforeScaling:
+                  _primaryControlsMinIncludeTextWidth,
               onPressed:
                   (refreshing || processing) ? null : _clearPerformanceData,
             ),
@@ -266,7 +268,8 @@ class LegacyPerformanceScreenBodyState
         const SizedBox(width: defaultSpacing),
         if (!serviceManager.connectedApp.isDartCliAppNow)
           ServiceExtensionButtonGroup(
-            unscaledIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+            minScreenWidthForTextBeforeScaling:
+                _secondaryControlsMinIncludeTextWidth,
             extensions: [performanceOverlay, profileWidgetBuilds],
           ),
         // TODO(kenz): hide or disable button if http timeline logging is not
@@ -274,7 +277,8 @@ class LegacyPerformanceScreenBodyState
         const SizedBox(width: defaultSpacing),
         ExportButton(
           onPressed: _exportPerformanceData,
-          unscaledIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+          minScreenWidthForTextBeforeScaling:
+              _secondaryControlsMinIncludeTextWidth,
         ),
         const SizedBox(width: defaultSpacing),
         SettingsOutlinedButton(

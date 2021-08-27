@@ -66,8 +66,8 @@ void main() {
       traceEvents.insert(1, goldenUiTraceEvents[1]);
 
       await processor.processTraceEvents(traceEvents);
-      expect(
-          processor.performanceController.data.timelineEvents.length, equals(1));
+      expect(processor.performanceController.data.timelineEvents.length,
+          equals(1));
       expect(
         processor.performanceController.data.timelineEvents.first.toString(),
         equals(goldenUiString),
@@ -88,8 +88,8 @@ void main() {
           goldenUiTraceEvents[goldenUiTraceEvents.length - 2]);
 
       await processor.processTraceEvents(traceEvents);
-      expect(
-          processor.performanceController.data.timelineEvents.length, equals(1));
+      expect(processor.performanceController.data.timelineEvents.length,
+          equals(1));
       expect(
         processor.performanceController.data.timelineEvents.first.toString(),
         equals(goldenUiString),
@@ -195,8 +195,10 @@ void main() {
         equals(goldenRasterString),
       );
 
-      final uiEvent = processor.performanceController.data.timelineEvents[0] as SyncTimelineEvent;
-      final rasterEvent = processor.performanceController.data.timelineEvents[1] as SyncTimelineEvent;
+      final uiEvent = processor.performanceController.data.timelineEvents[0]
+          as SyncTimelineEvent;
+      final rasterEvent = processor.performanceController.data.timelineEvents[1]
+          as SyncTimelineEvent;
       expect(uiEvent.uiFrameEvents.length, equals(1));
       expect(uiEvent.rasterFrameEvents, isEmpty);
       expect(rasterEvent.uiFrameEvents, isEmpty);

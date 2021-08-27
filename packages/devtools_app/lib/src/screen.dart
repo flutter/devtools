@@ -160,7 +160,9 @@ abstract class Screen {
           // size for the [BadgePainter]
           final painter = TextPainter(
             text: TextSpan(
-                text: title, style: Theme.of(context).regularTextStyle),
+              text: title,
+              style: Theme.of(context).regularTextStyle,
+            ),
             textDirection: TextDirection.ltr,
           )..layout();
           final titleWidth = painter.width;

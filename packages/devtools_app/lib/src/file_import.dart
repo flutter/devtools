@@ -99,8 +99,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
   }
 
   Widget _buildImportFileRow() {
-    // TODO(jacobr): why is this 37.0 instead of a more standard height?
-    final rowHeight = scaleByFontFactor(137.0);
+    final rowHeight = defaultButtonHeight;
     final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,

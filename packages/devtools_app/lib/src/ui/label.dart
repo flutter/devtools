@@ -5,8 +5,11 @@ import 'icons.dart';
 
 /// Label including an image icon and optional text.
 class ImageIconLabel extends StatelessWidget {
-  const ImageIconLabel(this.icon, this.text,
-      {this.unscaledMinIncludeTextWidth});
+  const ImageIconLabel(
+    this.icon,
+    this.text, {
+    this.unscaledMinIncludeTextWidth,
+  });
 
   final Widget icon;
   final String text;

@@ -164,6 +164,9 @@ double get smallProgressSize => scaleByFontFactor(12.0);
 
 double get defaultListItemHeight => scaleByFontFactor(28.0);
 
+// TODO(jacobr) define a more sophisticated formula for chart height.
+// The chart height does need to increase somewhat to leave room for the legend
+// and tick marks but does not need to scale linearly with the font factor.
 double get defaultChartHeight => scaleByFontFactor(150.0);
 
 /// Width of all settings dialogs.
@@ -510,18 +513,19 @@ const chartFontSizeSmall = 12.0;
 
 const lightSelection = Color(0xFFD4D7DA);
 
-bool includeText(BuildContext context, double unscaledIncludeTextWidth) {
-  return unscaledIncludeTextWidth == null ||
+bool includeText(
+    BuildContext context, double minScreenWidthForTextBeforeScaling) {
+  return minScreenWidthForTextBeforeScaling == null ||
       MediaQuery.of(context).size.width >
-          scaleByFontFactor(unscaledIncludeTextWidth);
+          scaleByFontFactor(minScreenWidthForTextBeforeScaling);
 }
 
 ButtonStyle denseAwareOutlinedButtonStyle(
   BuildContext context,
-  double unscaledIncludeTextWidth,
+  double minScreenWidthForTextBeforeScaling,
 ) {
   var buttonStyle = Theme.of(context).outlinedButtonTheme.style;
-  if (!includeText(context, unscaledIncludeTextWidth)) {
+  if (!includeText(context, minScreenWidthForTextBeforeScaling)) {
     buttonStyle = buttonStyle.copyWith(
       padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
         return EdgeInsets.zero;

@@ -188,8 +188,8 @@ class TimelineEventProcessor {
         // starting timestamp, but their end time is derived from the same trace
         // via the "dur" field. For this reason, we use the cached value stored in
         // [timelineController.fullTimeline].
-        ..end =
-            Duration(microseconds: performanceController.data.endTimestampMicros);
+        ..end = Duration(
+            microseconds: performanceController.data.endTimestampMicros);
     } else {
       performanceController.data.time = TimeRange()
         ..start = Duration.zero

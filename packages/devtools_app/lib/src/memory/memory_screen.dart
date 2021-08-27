@@ -490,12 +490,14 @@ class MemoryBodyState extends State<MemoryBody>
           mainAxisSize: MainAxisSize.min,
           children: [
             PauseButton(
-              unscaledIncludeTextWidth: _primaryControlsMinVerboseWidth,
+              minScreenWidthForTextBeforeScaling:
+                  _primaryControlsMinVerboseWidth,
               onPressed: paused ? null : _onPause,
             ),
             const SizedBox(width: denseSpacing),
             ResumeButton(
-              unscaledIncludeTextWidth: _primaryControlsMinVerboseWidth,
+              minScreenWidthForTextBeforeScaling:
+                  _primaryControlsMinVerboseWidth,
               onPressed: paused ? _onResume : null,
             ),
             const SizedBox(width: defaultSpacing),
@@ -504,7 +506,8 @@ class MemoryBodyState extends State<MemoryBody>
               onPressed: controller.memorySource == MemoryController.liveFeed
                   ? _clearTimeline
                   : null,
-              unscaledIncludeTextWidth: _primaryControlsMinVerboseWidth,
+              minScreenWidthForTextBeforeScaling:
+                  _primaryControlsMinVerboseWidth,
             ),
             const SizedBox(width: defaultSpacing),
             _intervalDropdown(textTheme),
@@ -520,7 +523,7 @@ class MemoryBodyState extends State<MemoryBody>
       label: 'Android Memory',
       onPressed:
           isAndroidCollection ? controller.toggleAndroidChartVisibility : null,
-      unscaledIncludeTextWidth: 900,
+      minScreenWidthForTextBeforeScaling: 900,
     );
   }
 
@@ -541,7 +544,8 @@ class MemoryBodyState extends State<MemoryBody>
                     onPressed: controller.isGcing ? null : _gc,
                     icon: Icons.delete,
                     label: 'GC',
-                    unscaledIncludeTextWidth: _primaryControlsMinVerboseWidth,
+                    minScreenWidthForTextBeforeScaling:
+                        _primaryControlsMinVerboseWidth,
                   ),
                   const SizedBox(width: denseSpacing),
                 ],
@@ -549,7 +553,7 @@ class MemoryBodyState extends State<MemoryBody>
             : const SizedBox(),
         ExportButton(
           onPressed: controller.offline ? null : _exportToFile,
-          unscaledIncludeTextWidth: _primaryControlsMinVerboseWidth,
+          minScreenWidthForTextBeforeScaling: _primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
         IconLabelButton(
@@ -558,7 +562,7 @@ class MemoryBodyState extends State<MemoryBody>
           icon: legendOverlayEntry == null ? Icons.storage : Icons.close,
           label: 'Legend',
           tooltip: 'Legend',
-          unscaledIncludeTextWidth: _primaryControlsMinVerboseWidth,
+          minScreenWidthForTextBeforeScaling: _primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(

@@ -287,7 +287,8 @@ class _PrimaryControls extends StatelessWidget {
       children: [
         RecordButton(
           recording: recording,
-          unscaledIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
+          minScreenWidthForTextBeforeScaling:
+              _primaryControlsMinIncludeTextWidth,
           onPressed: () {
             ga.select(
               analytics_constants.cpuProfiler,
@@ -299,7 +300,8 @@ class _PrimaryControls extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         StopRecordingButton(
           recording: recording,
-          unscaledIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
+          minScreenWidthForTextBeforeScaling:
+              _primaryControlsMinIncludeTextWidth,
           onPressed: () {
             ga.select(
               analytics_constants.cpuProfiler,
@@ -310,7 +312,8 @@ class _PrimaryControls extends StatelessWidget {
         ),
         const SizedBox(width: denseSpacing),
         ClearButton(
-          unscaledIncludeTextWidth: _primaryControlsMinIncludeTextWidth,
+          minScreenWidthForTextBeforeScaling:
+              _primaryControlsMinIncludeTextWidth,
           onPressed: recording
               ? null
               : () {
@@ -348,7 +351,8 @@ class _SecondaryControls extends StatelessWidget {
         RefreshButton(
           label: 'Load all CPU samples',
           tooltip: 'Load all available CPU samples from the profiler',
-          unscaledIncludeTextWidth: _loadAllCpuSamplesMinIncludeTextWidth,
+          minScreenWidthForTextBeforeScaling:
+              _loadAllCpuSamplesMinIncludeTextWidth,
           onPressed: !recording
               ? () {
                   ga.select(
@@ -378,7 +382,8 @@ class _SecondaryControls extends StatelessWidget {
                   _exportPerformance(context);
                 }
               : null,
-          unscaledIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+          minScreenWidthForTextBeforeScaling:
+              _secondaryControlsMinIncludeTextWidth,
         ),
       ],
     );

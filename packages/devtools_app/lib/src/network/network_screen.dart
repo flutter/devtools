@@ -263,21 +263,21 @@ class _NetworkProfilerControls extends StatelessWidget {
         return Row(
           children: [
             PauseButton(
-              unscaledIncludeTextWidth: _includeTextWidth,
+              minScreenWidthForTextBeforeScaling: _includeTextWidth,
               tooltip: 'Pause recording network traffic',
               onPressed:
                   recording ? () => controller.togglePolling(false) : null,
             ),
             const SizedBox(width: denseSpacing),
             ResumeButton(
-              unscaledIncludeTextWidth: _includeTextWidth,
+              minScreenWidthForTextBeforeScaling: _includeTextWidth,
               tooltip: 'Resume recording network traffic',
               onPressed:
                   recording ? null : () => controller.togglePolling(true),
             ),
             const SizedBox(width: denseSpacing),
             ClearButton(
-              unscaledIncludeTextWidth: _includeTextWidth,
+              minScreenWidthForTextBeforeScaling: _includeTextWidth,
               onPressed: () {
                 controller.clear();
               },
@@ -384,9 +384,11 @@ class MethodColumn extends ColumnData<NetworkRequest> {
 class StatusColumn extends ColumnData<NetworkRequest>
     implements ColumnRenderer<NetworkRequest> {
   StatusColumn()
-      : super('Status',
-            alignment: ColumnAlignment.right,
-            fixedWidthPx: scaleByFontFactor(62));
+      : super(
+          'Status',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: scaleByFontFactor(62),
+        );
 
   @override
   dynamic getValue(NetworkRequest dataObject) {
@@ -417,9 +419,11 @@ class StatusColumn extends ColumnData<NetworkRequest>
 
 class TypeColumn extends ColumnData<NetworkRequest> {
   TypeColumn()
-      : super('Type',
-            alignment: ColumnAlignment.right,
-            fixedWidthPx: scaleByFontFactor(62));
+      : super(
+          'Type',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: scaleByFontFactor(62),
+        );
 
   @override
   dynamic getValue(NetworkRequest dataObject) {
@@ -434,9 +438,11 @@ class TypeColumn extends ColumnData<NetworkRequest> {
 
 class DurationColumn extends ColumnData<NetworkRequest> {
   DurationColumn()
-      : super('Duration',
-            alignment: ColumnAlignment.right,
-            fixedWidthPx: scaleByFontFactor(80));
+      : super(
+          'Duration',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: scaleByFontFactor(80),
+        );
 
   @override
   dynamic getValue(NetworkRequest dataObject) {
@@ -457,9 +463,11 @@ class DurationColumn extends ColumnData<NetworkRequest> {
 
 class TimestampColumn extends ColumnData<NetworkRequest> {
   TimestampColumn()
-      : super('Timestamp',
-            alignment: ColumnAlignment.right,
-            fixedWidthPx: scaleByFontFactor(135));
+      : super(
+          'Timestamp',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: scaleByFontFactor(135),
+        );
 
   @override
   dynamic getValue(NetworkRequest dataObject) {
