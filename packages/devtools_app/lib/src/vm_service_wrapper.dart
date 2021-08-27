@@ -372,13 +372,16 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Isolate> getIsolate(String isolateId) async {
-    if (_isolatesCache.containsKey(isolateId)) {
-      return Future.value(_isolatesCache[isolateId]);
-    }
-    final isolate =
+    return _isolatesCache[isolateId] ??=
         await trackFuture('getIsolate', _vmService.getIsolate(isolateId));
-    _isolatesCache[isolateId] = isolate;
-    return isolate;
+
+    // if (_isolatesCache.containsKey(isolateId)) {
+    //   return Future.value(_isolatesCache[isolateId]);
+    // }
+    // final isolate =
+    //     await trackFuture('getIsolate', _vmService.getIsolate(isolateId));
+    // _isolatesCache[isolateId] = isolate;
+    // return isolate;
   }
 
   @override
@@ -647,8 +650,10 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Version> getVersion() =>
-      trackFuture('getVersion', _vmService.getVersion());
+  Future<Version> getVersion() async {
+    return _protocolVersion ??=
+        await trackFuture('getVersion', _vmService.getVersion());
+  }
 
   Future<Version> getDartIOVersion(String isolateId) =>
       trackFuture('_getDartIOVersion', _vmService.getDartIOVersion(isolateId));
