@@ -374,14 +374,6 @@ class VmServiceWrapper implements VmService {
   Future<Isolate> getIsolate(String isolateId) async {
     return _isolatesCache[isolateId] ??=
         await trackFuture('getIsolate', _vmService.getIsolate(isolateId));
-
-    // if (_isolatesCache.containsKey(isolateId)) {
-    //   return Future.value(_isolatesCache[isolateId]);
-    // }
-    // final isolate =
-    //     await trackFuture('getIsolate', _vmService.getIsolate(isolateId));
-    // _isolatesCache[isolateId] = isolate;
-    // return isolate;
   }
 
   @override
