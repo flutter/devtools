@@ -32,5 +32,5 @@ final LogicalKeySet openFileKeySet = LogicalKeySet(
   HostPlatform.instance.isMacOS
       ? LogicalKeyboardKey.meta
       : LogicalKeyboardKey.control,
-  LogicalKeyboardKey.keyP,
+  LogicalKeyboardKey.keyO,
 );
