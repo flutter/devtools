@@ -16,6 +16,10 @@ mixin FilterControllerMixin<T> {
 
   final activeFilter = ValueNotifier<Filter<T>>(null);
 
+  // TODO(kenz): refactor this so that `filterData` returns the filtered data
+  // and does not have side effects other than filtering data. Add a
+  // `onFilterApplied` method here that can be overridden to apply those
+  // screen-specific side effects of filtering.
   void filterData(Filter<T> filter);
 
   void resetFilter() {

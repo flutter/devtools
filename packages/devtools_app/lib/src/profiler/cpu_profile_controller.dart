@@ -179,22 +179,23 @@ class CpuProfilerController
     String processId,
     bool storeAsUserTagNone = true,
     bool shouldApplyFilters = true,
-    bool shouldRefreshSearchMatches = true,
   }) async {
     _processingNotifier.value = true;
     _dataNotifier.value = null;
     try {
       await transformer.processData(cpuProfileData, processId: processId);
-      _dataNotifier.value = cpuProfileData;
       if (storeAsUserTagNone) {
         _dataByTag[userTagNone] = cpuProfileData;
       }
       if (shouldApplyFilters) {
-        filterData(Filter(toggleFilters: toggleFilters));
+        cpuProfileData = _filterData(
+          cpuProfileData,
+          Filter(toggleFilters: toggleFilters),
+        );
+        await transformer.processData(cpuProfileData, processId: processId);
       }
-      if (shouldRefreshSearchMatches) {
-        refreshSearchMatches();
-      }
+      _dataNotifier.value = cpuProfileData;
+      refreshSearchMatches();
       _processingNotifier.value = false;
     } on AssertionError catch (_) {
       _dataNotifier.value = cpuProfileData;
@@ -294,6 +295,21 @@ class CpuProfilerController
 
   @override
   void filterData(Filter<CpuStackFrame> filter) {
+    final originalData = _dataByTag[userTagNone];
+    final filteredData = _filterData(originalData, filter);
+    processAndSetData(
+      filteredData,
+      processId: 'filter $_filterIdentifier',
+      storeAsUserTagNone: false,
+      shouldApplyFilters: false,
+    );
+    _filterIdentifier++;
+  }
+
+  CpuProfileData _filterData(
+    CpuProfileData originalData,
+    Filter<CpuStackFrame> filter,
+  ) {
     final filterCallback = (CpuStackFrame stackFrame) {
       var shouldInclude = true;
       for (final toggleFilter in filter.toggleFilters) {
@@ -305,15 +321,6 @@ class CpuProfilerController
       }
       return shouldInclude;
     };
-    final originalData = _dataByTag[userTagNone];
-    final filteredData =
-        CpuProfileData.filterFrom(originalData, filterCallback);
-    processAndSetData(
-      filteredData,
-      processId: 'filter $_filterIdentifier',
-      storeAsUserTagNone: false,
-      shouldApplyFilters: false,
-    );
-    _filterIdentifier++;
+    return CpuProfileData.filterFrom(originalData, filterCallback);
   }
 }
