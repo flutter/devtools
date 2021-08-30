@@ -499,9 +499,8 @@ class ServiceExtensionTooltip extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final focusColor = Theme.of(context).focusColor;
 
-    return Tooltip(
-      message: description.tooltip,
-      waitDuration: tooltipWait,
+    return DevToolsTooltip(
+      tooltip: description.tooltip,
       preferBelow: true,
       child: child,
       decoration: BoxDecoration(

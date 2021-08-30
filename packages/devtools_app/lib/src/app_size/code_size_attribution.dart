@@ -179,9 +179,8 @@ class _CallGraphViewState extends State<CallGraphView> {
           padding: EdgeInsets.symmetric(horizontal: densePadding),
           child: Icon(Icons.arrow_forward),
         ),
-        Tooltip(
-          waitDuration: tooltipWait,
-          message: selectedNode.data.toString(),
+        DevToolsTooltip(
+          tooltip: selectedNode.data.toString(),
           child: Container(
             padding: const EdgeInsets.all(densePadding),
             child: Text(
