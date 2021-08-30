@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../theme.dart';
 
 /// Stateful Checkbox Widget class using a [ValueNotifier].
 ///
@@ -226,4 +227,40 @@ class ColorPair {
   final Color foreground;
 
   final Color background;
+}
+
+class ThemedColorPair {
+  const ThemedColorPair({@required this.background, @required this.foreground});
+
+  factory ThemedColorPair.from(ColorPair colorPair) {
+    return ThemedColorPair(
+      foreground: ThemedColor.fromSingle(colorPair.foreground),
+      background: ThemedColor.fromSingle(colorPair.background),
+    );
+  }
+
+  final ThemedColor foreground;
+
+  final ThemedColor background;
+}
+
+/// A theme-dependent color.
+///
+/// When possible, themed colors should be specified in an extension on
+/// [ColorScheme] using the [ColorScheme.isLight] getter. However, this class
+/// may be used when access to the [BuildContext] is not available at the time
+/// the color needs to be specified.
+class ThemedColor {
+  const ThemedColor({this.light, this.dark});
+
+  factory ThemedColor.fromSingle(Color color) =>
+      ThemedColor(light: color, dark: color);
+
+  final Color light;
+
+  final Color dark;
+
+  Color colorFor(BuildContext context) {
+    return Theme.of(context).colorScheme.isLight ? light : dark;
+  }
 }

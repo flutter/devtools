@@ -181,19 +181,19 @@ class _CpuProfilerState extends State<CpuProfiler>
                             entries: [
                               LegendEntry(
                                 'App code (code from your app and imported packages)',
-                                cpuFlameChartNodeColor.background,
+                                appCodeColor.background.colorFor(context),
                               ),
                               LegendEntry(
                                 'Native code (code from the native runtime - Android, iOS, etc.)',
-                                nativeCodeColor.background,
+                                nativeCodeColor.background.colorFor(context),
                               ),
                               LegendEntry(
                                 'Dart core libraries (code from the Dart SDK)',
-                                dartCoreColor.background,
+                                dartCoreColor.background.colorFor(context),
                               ),
                               LegendEntry(
                                 'Flutter Framework (code from the Flutter SDK)',
-                                flutterCoreColor.background,
+                                flutterCoreColor.background.colorFor(context),
                               ),
                             ],
                           ),
