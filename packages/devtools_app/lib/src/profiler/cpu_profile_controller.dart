@@ -62,9 +62,10 @@ class CpuProfilerController
   ValueListenable<String> get userTagFilter => _userTagFilter;
   final _userTagFilter = ValueNotifier<String>(userTagNone);
 
-  final _dataByTag = <String, CpuProfileData>{};
+  @visibleForTesting
+  final dataByTag = <String, CpuProfileData>{};
 
-  Iterable<String> get userTags => _dataByTag[userTagNone]?.userTags ?? [];
+  Iterable<String> get userTags => dataByTag[userTagNone]?.userTags ?? [];
 
   /// The toggle filters available for the CPU profiler.
   ///
@@ -185,7 +186,7 @@ class CpuProfilerController
     try {
       await transformer.processData(cpuProfileData, processId: processId);
       if (storeAsUserTagNone) {
-        _dataByTag[userTagNone] = cpuProfileData;
+        dataByTag[userTagNone] = cpuProfileData;
       }
       if (shouldApplyFilters) {
         cpuProfileData = _filterData(
@@ -227,7 +228,7 @@ class CpuProfilerController
   void loadProcessedData(CpuProfileData data) {
     assert(data.processed);
     _dataNotifier.value = data;
-    _dataByTag[userTagNone] = data;
+    dataByTag[userTagNone] = data;
   }
 
   Future<void> loadDataWithTag(String tag) async {
@@ -240,7 +241,7 @@ class CpuProfilerController
       _dataNotifier.value = await processDataForTag(tag);
     } catch (e) {
       // In the event of an error, reset the data to the original CPU profile.
-      _dataNotifier.value = _dataByTag[userTagNone];
+      _dataNotifier.value = dataByTag[userTagNone];
       throw Exception('Error loading data with tag "$tag": ${e.toString()}');
     } finally {
       _processingNotifier.value = false;
@@ -248,8 +249,8 @@ class CpuProfilerController
   }
 
   Future<CpuProfileData> processDataForTag(String tag) async {
-    final fullData = _dataByTag[userTagNone];
-    final data = _dataByTag.putIfAbsent(
+    final fullData = dataByTag[userTagNone];
+    final data = dataByTag.putIfAbsent(
       tag,
       () => CpuProfileData.fromUserTag(fullData, tag),
     );
@@ -274,7 +275,7 @@ class CpuProfilerController
   void reset() {
     _selectedCpuStackFrameNotifier.value = null;
     _dataNotifier.value = baseStateCpuProfileData;
-    _dataByTag.clear();
+    dataByTag.clear();
     _processingNotifier.value = false;
     transformer.reset();
     resetSearch();
@@ -295,7 +296,7 @@ class CpuProfilerController
 
   @override
   void filterData(Filter<CpuStackFrame> filter) {
-    final originalData = _dataByTag[userTagNone];
+    final originalData = dataByTag[userTagNone];
     final filteredData = _filterData(originalData, filter);
     processAndSetData(
       filteredData,
