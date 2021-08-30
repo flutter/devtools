@@ -40,12 +40,14 @@ const debugLogServiceProtocolEvents = false;
 
 const defaultRefreshRate = 60.0;
 
+typedef IsolateF = Future<Isolate> Function(String isolateId);
+
 // TODO(jacobr): refactor all of these apis to be in terms of ValueListenable
 // instead of Streams.
 class ServiceConnectionManager {
   ServiceConnectionManager() {
-    _serviceExtensionManager =
-        ServiceExtensionManager(isolateManager.mainIsolate);
+    _serviceExtensionManager = ServiceExtensionManager(
+        isolateManager.mainIsolate, isolateManager.getIsolateCachedById);
   }
 
   final StreamController<VmServiceWrapper> _connectionAvailableController =
@@ -542,6 +544,8 @@ class IsolateManager extends Disposer {
   ValueListenable<IsolateRef> get mainIsolate => _mainIsolate;
   final _mainIsolate = ValueNotifier<IsolateRef>(null);
 
+  final _isolatesCache = <String, Isolate>{};
+
   Future<void> init(List<IsolateRef> isolates) async {
     // Re-initialize isolates when VM developer mode is enabled/disabled to
     // display/hide system isolates.
@@ -608,7 +612,7 @@ class IsolateManager extends Disposer {
 
   void _loadIsolateState(IsolateRef isolateRef) {
     final service = _service;
-    _service.getIsolate(isolateRef.id).then((Isolate isolate) {
+    getIsolateCachedById(isolateRef.id).then((Isolate isolate) {
       if (service != _service) return;
       final state = _isolateStates[isolateRef];
       if (state != null) {
@@ -738,6 +742,10 @@ class IsolateManager extends Disposer {
     return isolateState.isolate;
   }
 
+  Future<Isolate> getIsolateCachedById(String isolateId) async {
+    return _isolatesCache[isolateId] ??= await _service.getIsolate(isolateId);
+  }
+
   void _handleDebugEvent(Event event) {
     final isolate = event.isolate;
     final isolateState = _isolateStates[isolate];
@@ -764,13 +772,15 @@ class IsolateManager extends Disposer {
 
 /// Manager that handles tracking the service extension for the main isolate.
 class ServiceExtensionManager extends Disposer {
-  ServiceExtensionManager(this._mainIsolate);
+  ServiceExtensionManager(this._mainIsolate, this._getIsolateCached);
 
   VmServiceWrapper _service;
 
   bool _checkForFirstFrameStarted = false;
 
   final ValueListenable<IsolateRef> _mainIsolate;
+
+  final IsolateF _getIsolateCached;
 
   Future<void> get firstFrameReceived => _firstFrameReceived.future;
   Completer<void> _firstFrameReceived = Completer();
@@ -911,7 +921,7 @@ class ServiceExtensionManager extends Disposer {
     _checkForFirstFrameStarted = false;
 
     final isolateRef = _mainIsolate.value;
-    final Isolate isolate = await _service.getIsolate(isolateRef.id);
+    final Isolate isolate = await _getIsolateCached(isolateRef.id);
     if (isolateRef != _mainIsolate.value) {
       // Isolate has changed again.
       return;
@@ -1047,7 +1057,7 @@ class ServiceExtensionManager extends Disposer {
 
     if (isolateRef != _mainIsolate.value) return;
 
-    final Isolate isolate = await _service.getIsolate(isolateRef.id);
+    final Isolate isolate = await _getIsolateCached(isolateRef.id);
     if (isolateRef != _mainIsolate.value) return;
 
     // Do not try to restore Dart IO extensions for a paused isolate.
@@ -1132,7 +1142,7 @@ class ServiceExtensionManager extends Disposer {
     }
 
     if (mainIsolate == null) return;
-    final Isolate isolate = await _service.getIsolate(mainIsolate.id);
+    final Isolate isolate = await _getIsolateCached(mainIsolate.id);
     if (_mainIsolate.value != mainIsolate) return;
 
     // Do not try to call Dart IO extensions for a paused isolate.
