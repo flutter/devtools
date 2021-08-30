@@ -58,6 +58,24 @@ void main() {
       );
     });
 
+    test('loads filtered data by default', () async {
+      // [startMicros] and [extentMicros] are arbitrary for testing.
+      await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
+      final originalData =
+          controller.dataByTag[CpuProfilerController.userTagNone];
+      final filteredData = controller.dataNotifier.value;
+      expect(originalData.stackFrames.values.length, equals(17));
+      expect(filteredData.stackFrames.values.length, equals(12));
+
+      // The native frame filter is applied by default.
+      final originalNativeFrames =
+          originalData.stackFrames.values.where((sf) => sf.isNative).toList();
+      final filteredNativeFrames =
+          filteredData.stackFrames.values.where((sf) => sf.isNative).toList();
+      expect(originalNativeFrames.length, equals(5));
+      expect(filteredNativeFrames, isEmpty);
+    });
+
     test('selectCpuStackFrame', () async {
       expect(
         controller.dataNotifier.value.selectedStackFrame,
@@ -79,6 +97,11 @@ void main() {
     });
 
     test('matchesForSearch', () async {
+      // Disable all filtering by default for this sake of this test.
+      for (final filter in controller.toggleFilters) {
+        filter.enabled.value = false;
+      }
+
       // [startMicros] and [extentMicros] are arbitrary for testing.
       await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
       expect(
@@ -104,6 +127,11 @@ void main() {
     });
 
     test('matchesForSearch sets isSearchMatch property', () async {
+      // Disable all filtering by default for this sake of this test.
+      for (final filter in controller.toggleFilters) {
+        filter.enabled.value = false;
+      }
+
       // [startMicros] and [extentMicros] are arbitrary for testing.
       await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
       expect(

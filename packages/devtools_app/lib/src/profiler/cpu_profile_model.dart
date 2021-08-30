@@ -476,7 +476,8 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   bool _isNative;
 
   bool get isDartCore =>
-      _isDartCore ??= processedUrl.startsWith(dartPackagePrefix);
+      _isDartCore ??= processedUrl.startsWith(dartPackagePrefix) &&
+          !processedUrl.startsWith(dartUiPrefix);
 
   bool _isDartCore;
 
