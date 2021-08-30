@@ -317,6 +317,9 @@ class ServiceConnectionManager {
     }
 
     _connectionAvailableController.add(service);
+
+    // Clear the isolates cache:
+    isolateManager.clearIsolateIdCache();
   }
 
   void manuallyDisconnect() {
@@ -744,6 +747,10 @@ class IsolateManager extends Disposer {
 
   Future<Isolate> getIsolateCachedById(String isolateId) async {
     return _isolatesCache[isolateId] ??= await _service.getIsolate(isolateId);
+  }
+
+  void clearIsolateIdCache() {
+    _isolatesCache.clear();
   }
 
   void _handleDebugEvent(Event event) {
