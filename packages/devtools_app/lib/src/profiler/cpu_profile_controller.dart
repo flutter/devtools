@@ -140,7 +140,12 @@ class CpuProfilerController
         startMicros: startMicros,
         extentMicros: extentMicros,
       );
-      await processAndSetData(cpuProfileData, processId: processId);
+      await processAndSetData(
+        cpuProfileData,
+        processId: processId,
+        storeAsUserTagNone: true,
+        shouldApplyFilters: true,
+      );
       cpuProfileStore.addProfile(
         TimeRange()
           ..start = Duration(microseconds: startMicros)
@@ -177,9 +182,9 @@ class CpuProfilerController
   /// original data, where no user tag filter has been applied.
   Future<void> processAndSetData(
     CpuProfileData cpuProfileData, {
-    String processId,
-    bool storeAsUserTagNone = true,
-    bool shouldApplyFilters = true,
+    @required String processId,
+    @required bool storeAsUserTagNone,
+    @required bool shouldApplyFilters,
   }) async {
     _processingNotifier.value = true;
     _dataNotifier.value = null;
