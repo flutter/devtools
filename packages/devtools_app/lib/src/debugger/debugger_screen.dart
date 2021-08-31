@@ -79,12 +79,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   static const breakpointsTitle = 'Breakpoints';
 
   DebuggerController controller;
-  FocusNode _libraryFilterFocusNode;
 
   @override
   void initState() {
     super.initState();
-    _libraryFilterFocusNode = FocusNode(debugLabel: 'library-filter');
     ga.screen(DebuggerScreen.id);
   }
 
@@ -99,7 +97,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   @override
   void dispose() {
-    _libraryFilterFocusNode.dispose();
     super.dispose();
   }
 
@@ -133,9 +130,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       valueListenable: controller.librariesVisible,
       builder: (context, visible, _) {
         if (visible) {
-          // Focus the filter text field when the ScriptPicker opens.
-          _libraryFilterFocusNode.requestFocus();
-
           // TODO(devoncarew): Animate this opening and closing.
           return Split(
             axis: Axis.horizontal,
@@ -150,7 +144,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                     controller: controller,
                     scripts: scripts,
                     onSelected: _onLocationSelected,
-                    libraryFilterFocusNode: _libraryFilterFocusNode,
                   );
                 },
               ),
@@ -164,15 +157,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
     return Shortcuts(
       shortcuts: <LogicalKeySet, Intent>{
-        focusLibraryFilterKeySet:
-            FocusLibraryFilterIntent(_libraryFilterFocusNode, controller),
         goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
         searchInFileKeySet: SearchInFileIntent(controller),
         escapeKeySet: EscapeIntent(context, controller),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
-          FocusLibraryFilterIntent: FocusLibraryFilterAction(),
           GoToLineNumberIntent: GoToLineNumberAction(),
           SearchInFileIntent: SearchInFileAction(),
           EscapeIntent: EscapeAction(),
@@ -250,13 +240,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
 // TODO(kenz): consider breaking out the key binding logic out into a separate
 // file so it is easy to find.
-final LogicalKeySet focusLibraryFilterKeySet = LogicalKeySet(
-  HostPlatform.instance.isMacOS
-      ? LogicalKeyboardKey.meta
-      : LogicalKeyboardKey.control,
-  LogicalKeyboardKey.keyP,
-);
-
 final LogicalKeySet goToLineNumberKeySet = LogicalKeySet(
   HostPlatform.instance.isMacOS
       ? LogicalKeyboardKey.meta
@@ -274,24 +257,6 @@ final LogicalKeySet searchInFileKeySet = LogicalKeySet(
 final LogicalKeySet escapeKeySet = LogicalKeySet(
   LogicalKeyboardKey.escape,
 );
-
-class FocusLibraryFilterIntent extends Intent {
-  const FocusLibraryFilterIntent(
-    this.focusNode,
-    this.debuggerController,
-  )   : assert(debuggerController != null),
-        assert(focusNode != null);
-
-  final FocusNode focusNode;
-  final DebuggerController debuggerController;
-}
-
-class FocusLibraryFilterAction extends Action<FocusLibraryFilterIntent> {
-  @override
-  void invoke(FocusLibraryFilterIntent intent) {
-    intent.debuggerController.toggleLibrariesVisible();
-  }
-}
 
 class GoToLineNumberIntent extends Intent {
   const GoToLineNumberIntent(this._context, this._controller);
