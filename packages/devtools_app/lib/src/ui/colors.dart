@@ -77,15 +77,12 @@ const treemapDecreaseColor = Color(0xFF77102F);
 const tableIncreaseColor = Color(0xFF73BF43);
 const tableDecreaseColor = Color(0xFFEE284F);
 
-const appCodeColor = ThemedColorPair(
-  background: ThemedColor(
-    light: Color(0xFFFCAD70),
+final appCodeColor = ThemedColorPair(
+  background: const ThemedColor(
+    light: Color(0xFFFA7B17),
     dark: Color(0xFFFCAD70),
   ),
-  foreground: ThemedColor(
-    light: Color(0xFF202124),
-    dark: Color(0xFF202124),
-  ),
+  foreground: ThemedColor.fromSingle(Color(0xFF202124)),
 );
 
 const nativeCodeColor = ThemedColorPair(
