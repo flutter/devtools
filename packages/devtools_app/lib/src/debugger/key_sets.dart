@@ -28,6 +28,7 @@ final LogicalKeySet escapeKeySet = LogicalKeySet(
   LogicalKeyboardKey.escape,
 );
 
+// TODO(elliette): Change to cmd/ctrl + P once focus library filter is removed.
 final LogicalKeySet openFileKeySet = LogicalKeySet(
   HostPlatform.instance.isMacOS
       ? LogicalKeyboardKey.meta
