@@ -1,3 +1,9 @@
+## 2.6.0
+TODO: update changelog
+
+## 2.6.2
+TODO: update changelog
+
 ## 2.5.0
 * Fix some render overflow errors and cleanup [#3246](https://github.com/flutter/devtools/pull/3246)
 * Update the contributing documentation [#3245](https://github.com/flutter/devtools/pull/3245)

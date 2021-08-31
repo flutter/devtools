@@ -302,7 +302,16 @@ class _RegisteredServiceExtensionButtonState
     if (_hidden) return const SizedBox();
 
     return InkWell(
-      onTap: () => invokeAndCatchErrors(widget.action),
+      onTap: () => invokeAndCatchErrors(() async {
+        if (widget.serviceDescription.gaScreenName != null &&
+            widget.serviceDescription.gaItem != null) {
+          ga.select(
+            widget.serviceDescription.gaScreenName,
+            widget.serviceDescription.gaItem,
+          );
+        }
+        await widget.action();
+      }),
       child: Container(
         constraints: BoxConstraints.tightFor(
           width: DevToolsScaffold.actionWidgetSize,

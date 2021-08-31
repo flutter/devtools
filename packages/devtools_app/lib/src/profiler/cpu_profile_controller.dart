@@ -161,7 +161,7 @@ class CpuProfilerController
         analyticsScreenId,
         analytics_constants.cpuProfileProcessingTime,
         asyncOperation: pullAndProcessHelper,
-        screenMetrics: ProfilerScreenMetrics(
+        screenMetricsProvider: () => ProfilerScreenMetrics(
           cpuSampleCount: cpuProfileData.profileMetaData.sampleCount,
           cpuStackDepth: cpuProfileData.profileMetaData.stackDepth,
         ),

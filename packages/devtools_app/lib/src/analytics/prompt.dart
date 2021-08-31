@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../common_widgets.dart';
 import '../config_specific/launch_url/launch_url.dart';
@@ -11,37 +12,37 @@ import '../theme.dart';
 import 'provider.dart';
 
 /// Conditionally displays a prompt to request permission for collection of
-/// usage analytics.
+/// usage analytics and manages initializing GTags analytics.
 class AnalyticsPrompt extends StatefulWidget {
-  const AnalyticsPrompt({
-    @required this.provider,
-    @required this.child,
-  });
+  const AnalyticsPrompt({@required this.child});
 
   final Widget child;
-  final AnalyticsProvider provider;
 
   @override
   State<AnalyticsPrompt> createState() => _AnalyticsPromptState();
 }
 
 class _AnalyticsPromptState extends State<AnalyticsPrompt> {
-  Widget get _child => widget.child;
-
-  AnalyticsProvider get _provider => widget.provider;
+  AnalyticsProvider _provider;
 
   bool _isVisible = false;
 
   @override
-  void initState() {
-    super.initState();
-    if (_provider.isGtagsEnabled) {
-      if (_provider.shouldPrompt) {
-        // Enable the analytics and give the user the option to opt out via the
-        // prompt.
-        _provider.setAllowAnalytics();
-        _isVisible = true;
-      }
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final newAnalyticsProvider = Provider.of<AnalyticsProvider>(context);
+    if (newAnalyticsProvider == _provider) return;
+    _provider = newAnalyticsProvider;
+
+    if (_provider.shouldPrompt.value) {
+      // Enable the analytics and give the user the option to opt out via the
+      // prompt.
+      _provider.enableAnalytics();
+      _isVisible = true;
+    }
+    if (_provider.analyticsEnabled.value) {
+      _provider.setUpAnalytics();
     }
   }
 
@@ -94,7 +95,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
               ),
             ),
           ),
-        Expanded(child: _child),
+        Expanded(child: widget.child),
       ],
     );
   }
@@ -135,7 +136,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
       children: [
         ElevatedButton(
           onPressed: () {
-            _provider.setDontAllowAnalytics();
+            _provider.disableAnalytics();
             setState(() {
               _isVisible = false;
             });
@@ -148,7 +149,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
         ),
         ElevatedButton(
           onPressed: () {
-            _provider.setAllowAnalytics();
+            _provider.enableAnalytics();
             setState(() {
               _isVisible = false;
             });

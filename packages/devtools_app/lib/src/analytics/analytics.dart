@@ -12,7 +12,6 @@ import 'dart:html';
 
 import 'package:flutter/foundation.dart';
 import 'package:js/js.dart';
-import 'package:js/js_util.dart';
 
 import '../../devtools.dart' as devtools show version;
 import '../app.dart';
@@ -56,15 +55,6 @@ const String devToolsChromeOS = 'CrOS'; // Chrome OS
 // Dimension7 ideLaunched
 const String ideLaunchedQuery = 'ide'; // '&ide=' query parameter
 const String ideLaunchedCLI = 'CLI'; // Command Line Interface
-
-@JS('gtagsEnabled')
-external bool Function() get _isGtagsEnabled;
-
-bool isGtagsEnabled() => _isGtagsEnabled?.call() ?? false;
-
-/// Is the query parameter &gtags= set to reset?
-@JS('gtagsReset')
-external bool isGtagsReset();
 
 @JS('initializeGA')
 external void initializeGA();
@@ -245,27 +235,17 @@ class GtagExceptionDevTools extends GtagException {
   external String get flutter_client_id;
 }
 
-ValueNotifier<bool> _gaEnabledNotifier = ValueNotifier(false);
-
-ValueListenable<bool> get gaEnabledNotifier => _gaEnabledNotifier;
-
-// Exposed function to JS via allowInterop.
-bool gaEnabled() => _gaEnabledNotifier.value;
-
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
 /// '~/.flutter-devtools/.devtools'.
 Future<bool> isAnalyticsEnabled() async {
-  _gaEnabledNotifier.value = await server.isAnalyticsEnabled();
-  return _gaEnabledNotifier.value;
+  print('in analytics isAnalyticsEnabled');
+  return await server.isAnalyticsEnabled();
 }
 
 /// Set the DevTools property 'enabled' (GA enabled) stored in the file
 /// '~/flutter-devtools/.devtools'.
-Future<void> setAnalyticsEnabled([bool value = true]) async {
-  final didSet = await server.setAnalyticsEnabled(value);
-  if (didSet) {
-    _gaEnabledNotifier.value = value;
-  }
+Future<bool> setAnalyticsEnabled(bool value) async {
+  return await server.setAnalyticsEnabled(value);
 }
 
 void screen(
@@ -277,6 +257,7 @@ void screen(
     GtagEventDevTools(
       event_category: analytics_constants.screenViewEvent,
       value: value,
+      send_to: gaDevToolsPropertyId(),
       user_app: userAppType,
       user_build: userBuildType,
       user_platform: userPlatformType,
@@ -293,7 +274,7 @@ void timeSync(
   String screenName,
   String timedOperation, {
   @required void Function() syncOperation,
-  ScreenAnalyticsMetrics screenMetrics,
+  ScreenAnalyticsMetrics Function() screenMetricsProvider,
 }) {
   final startTime = DateTime.now();
   try {
@@ -314,7 +295,8 @@ void timeSync(
     screenName,
     timedOperation,
     durationMicros: durationMicros,
-    screenMetrics: screenMetrics,
+    screenMetrics:
+        screenMetricsProvider != null ? screenMetricsProvider() : null,
   );
 }
 
@@ -322,7 +304,7 @@ Future<void> timeAsync(
   String screenName,
   String timedOperation, {
   @required Future<void> Function() asyncOperation,
-  ScreenAnalyticsMetrics screenMetrics,
+  ScreenAnalyticsMetrics Function() screenMetricsProvider,
 }) async {
   final startTime = DateTime.now();
   try {
@@ -343,7 +325,8 @@ Future<void> timeAsync(
     screenName,
     timedOperation,
     durationMicros: durationMicros,
-    screenMetrics: screenMetrics,
+    screenMetrics:
+        screenMetricsProvider != null ? screenMetricsProvider() : null,
   );
 }
 
@@ -359,6 +342,7 @@ void _timing(
       event_category: analytics_constants.timingEvent,
       event_label: timedOperation,
       value: durationMicros,
+      send_to: gaDevToolsPropertyId(),
       user_app: userAppType,
       user_build: userBuildType,
       user_platform: userPlatformType,
@@ -376,14 +360,16 @@ void select(
   String screenName,
   String selectedItem, {
   int value = 0,
-  ScreenAnalyticsMetrics screenMetrics,
+  ScreenAnalyticsMetrics Function() screenMetricsProvider,
 }) {
+  print('in ga select');
   GTag.event(
     screenName,
     gtagEventWithScreenMetrics(
       event_category: analytics_constants.selectEvent,
       event_label: selectedItem,
       value: value,
+      send_to: gaDevToolsPropertyId(),
       user_app: userAppType,
       user_build: userBuildType,
       user_platform: userPlatformType,
@@ -392,7 +378,8 @@ void select(
       devtools_version: devtoolsVersion,
       ide_launched: ideLaunched,
       flutter_client_id: flutterClientId,
-      screenMetrics: screenMetrics,
+      screenMetrics:
+          screenMetricsProvider != null ? screenMetricsProvider() : null,
     ),
   );
 }
@@ -518,24 +505,18 @@ Future<void> computeUserApplicationCustomGTagData() async {
   _analyticsComputed = true;
 }
 
-void exposeGaDevToolsEnabledToJs() {
-  setProperty(window, 'gaDevToolsEnabled', allowInterop(gaEnabled));
-}
-
 @JS('getDevToolsPropertyID')
-external String devToolsProperty();
+external String gaDevToolsPropertyId();
 
 @JS('hookupListenerForGA')
 external void jsHookupListenerForGA();
 
-Future<bool> get isAnalyticsAllowed async => await isAnalyticsEnabled();
-
-void setAllowAnalytics() {
-  setAnalyticsEnabled();
+Future<bool> enableAnalytics() async {
+  return await setAnalyticsEnabled(true);
 }
 
-void setDontAllowAnalytics() {
-  setAnalyticsEnabled(false);
+Future<bool> disableAnalytics() async {
+  return await setAnalyticsEnabled(false);
 }
 
 /// Computes the DevTools application. Fills in the devtoolsPlatformType and
@@ -599,18 +580,16 @@ void waitForDimensionsComputed(String screenName) {
 // Loading screen from a hash code, can't collect GA (if enabled) until we have
 // all the dimension data.
 void setupAndGaScreen(String screenName) async {
-  if (isGtagsEnabled()) {
-    if (!_analyticsComputed) {
-      _stillWaiting++;
-      waitForDimensionsComputed(screenName);
-    } else {
-      screen(screenName);
-    }
+  if (!_analyticsComputed) {
+    _stillWaiting++;
+    waitForDimensionsComputed(screenName);
+  } else {
+    screen(screenName);
   }
 }
 
 Future<void> setupDimensions() async {
-  if (isGtagsEnabled() && !_analyticsComputed && !_computingDimensions) {
+  if (!_analyticsComputed && !_computingDimensions) {
     _computingDimensions = true;
     computeDevToolsCustomGTagsData();
     computeDevToolsQueryParams();

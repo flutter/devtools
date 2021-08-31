@@ -670,7 +670,7 @@ class PerformanceController extends DisposableController
       analytics_constants.performance,
       analytics_constants.traceEventProcessingTime,
       asyncOperation: processTraceEventsHelper,
-      screenMetrics: PerformanceScreenMetrics(
+      screenMetricsProvider: () => PerformanceScreenMetrics(
         traceEventCount: processingTraceCount,
       ),
     );

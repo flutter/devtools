@@ -4,74 +4,65 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import '../config_specific/server/server.dart' as server;
 import 'analytics.dart' as analytics;
 import 'provider.dart';
 
 class _RemoteAnalyticsProvider implements AnalyticsProvider {
   _RemoteAnalyticsProvider(
-    this._isEnabled,
-    this._isFirstRun,
-    this._isGtagsEnabled,
-  );
+    bool enabled,
+    bool firstRun,
+  )   : _analyticsEnabled = ValueNotifier<bool>(enabled),
+        _shouldPrompt = ValueNotifier<bool>(firstRun && !enabled);
 
   @override
-  bool get isEnabled => _isEnabled;
-  final bool _isEnabled;
+  ValueListenable<bool> get analyticsEnabled => _analyticsEnabled;
+  final ValueNotifier<bool> _analyticsEnabled;
 
   @override
-  bool get shouldPrompt => _isFirstRun;
-  final bool _isFirstRun;
+  ValueListenable<bool> get shouldPrompt => _shouldPrompt;
+  final ValueNotifier<bool> _shouldPrompt;
+
+  bool analyticsInitialized = false;
 
   @override
-  bool get isGtagsEnabled => _isGtagsEnabled;
-  final bool _isGtagsEnabled;
-
-  @override
-  void setAllowAnalytics() {
-    setUpAnalytics();
-    analytics.setAllowAnalytics();
+  Future<void> enableAnalytics() async {
+    _analyticsEnabled.value = await analytics.enableAnalytics();
   }
 
   @override
-  void setDontAllowAnalytics() {
-    analytics.setDontAllowAnalytics();
+  Future<void> disableAnalytics() async {
+    _analyticsEnabled.value = await analytics.disableAnalytics();
+    _shouldPrompt.value = false;
   }
 
   @override
   void setUpAnalytics() {
-    if (!_isGtagsEnabled) return;
+    if (analyticsInitialized) return;
     analytics.initializeGA();
     analytics.jsHookupListenerForGA();
+    analyticsInitialized = true;
   }
 }
 
 Future<AnalyticsProvider> get analyticsProvider async {
   if (_providerCompleter != null) return _providerCompleter.future;
   _providerCompleter = Completer<AnalyticsProvider>();
-  var isEnabled = false;
-  var isFirstRun = false;
-  var isGtagsEnabled = false;
+  var enabled = false;
+  var firstRun = false;
   try {
-    analytics.exposeGaDevToolsEnabledToJs();
-    if (analytics.isGtagsReset()) {
-      await server.resetDevToolsFile();
-    }
     if (await analytics.isAnalyticsEnabled()) {
-      isEnabled = true;
+      enabled = true;
     }
     if (await server.isFirstRun()) {
-      isFirstRun = true;
+      firstRun = true;
     }
-    isGtagsEnabled = analytics.isGtagsEnabled();
   } catch (_) {
     // Ignore issues if analytics could not be initialized.
   }
-  _providerCompleter.complete(_RemoteAnalyticsProvider(
-    isEnabled,
-    isFirstRun,
-    isGtagsEnabled,
-  ));
+  _providerCompleter.complete(_RemoteAnalyticsProvider(enabled, firstRun));
   return _providerCompleter.future;
 }
 

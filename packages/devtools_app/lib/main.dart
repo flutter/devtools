@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'src/analytics/stub_provider.dart'
+import 'src/analytics/provider.dart'
     if (dart.library.html) 'src/analytics/remote_provider.dart';
 import 'src/app.dart';
 import 'src/app_error_handling.dart';

@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:devtools_app/src/analytics/stub_provider.dart';
+import 'package:devtools_app/src/analytics/provider.dart';
 import 'package:devtools_app/src/app.dart';
 import 'package:devtools_app/src/framework/framework_core.dart';
 import 'package:devtools_app/src/preferences.dart';

@@ -235,7 +235,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           ga.select(
             analytics_constants.performance,
             analytics_constants.selectFlutterFrame,
-            screenMetrics: PerformanceScreenMetrics(
+            screenMetricsProvider: () => PerformanceScreenMetrics(
               uiDuration: frame.buildTime,
               rasterDuration: frame.rasterTime,
               shaderCompilationDuration: frame.shaderDuration,

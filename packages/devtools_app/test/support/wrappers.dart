@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/analytics/provider.dart';
 import 'package:devtools_app/src/app_size/app_size_controller.dart';
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
@@ -46,6 +47,17 @@ Widget wrap(Widget widget) {
       _testNavigatorKey,
     ),
     routeInformationParser: DevToolsRouteInformationParser(),
+  );
+}
+
+Widget wrapWithAnalyticsProvider(
+  Widget widget, {
+  AnalyticsProvider provider,
+}) {
+  provider ??= AnalyticsProvider();
+  return Provider<AnalyticsProvider>.value(
+    value: provider,
+    child: widget,
   );
 }
 

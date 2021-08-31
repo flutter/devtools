@@ -28,7 +28,18 @@ import 'utils.dart';
 /// We need to use this screen to get a guarantee that the app has a Dart VM
 /// available as well as to provide access to other functionality that does not
 /// require a connected Dart application.
-class LandingScreenBody extends StatelessWidget {
+class LandingScreenBody extends StatefulWidget {
+  @override
+  State<LandingScreenBody> createState() => _LandingScreenBodyState();
+}
+
+class _LandingScreenBodyState extends State<LandingScreenBody> {
+  @override
+  void initState() {
+    super.initState();
+    ga.screen(analytics_constants.landingScreen);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scrollbar(
