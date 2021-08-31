@@ -82,7 +82,7 @@ final appCodeColor = ThemedColorPair(
     light: Color(0xFFFA7B17),
     dark: Color(0xFFFCAD70),
   ),
-  foreground: ThemedColor.fromSingle(Color(0xFF202124)),
+  foreground: ThemedColor.fromSingle(const Color(0xFF202124)),
 );
 
 const nativeCodeColor = ThemedColorPair(
