@@ -165,7 +165,9 @@ class HttpResponseView extends StatelessWidget {
     // We shouldn't try and display an image response view when using the
     // timeline profiler since it's possible for response body data to get
     // dropped.
-    if (data is DartIOHttpRequestData && data.contentType.contains('image')) {
+    if (data is DartIOHttpRequestData &&
+        data.contentType != null &&
+        data.contentType.contains('image')) {
       child = ImageResponseView(data);
     } else {
       child = FormattedJson(
