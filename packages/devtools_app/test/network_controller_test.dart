@@ -335,7 +335,7 @@ void main() {
 
       // The number of valid requests recorded in the test data.
       const numSockets = 2;
-      const numHttpProfile = 5;
+      const numHttpProfile = 6;
       const numRequests = numSockets + numHttpProfile;
 
       const httpMethods = <String>{
