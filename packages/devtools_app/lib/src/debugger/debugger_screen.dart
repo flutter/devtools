@@ -250,7 +250,7 @@ class GoToLineNumberAction extends Action<GoToLineNumberIntent> {
   }
 }
 
-class FileIntent extends Intent {
+class SearchInFileIntent extends Intent {
   const SearchInFileIntent(this._controller);
 
   final DebuggerController _controller;
