@@ -217,8 +217,6 @@ void main() {
     test('TimestampColumn', () {
       final column = TimestampColumn();
       final getRequest = _findRequestById(1);
-      print(httpGet.startTimestamp.toUtc());
-      print(getRequest.startTimestamp.toUtc());
 
       // The hours field may be unreliable since it depends on the timezone the
       // test is running in.
