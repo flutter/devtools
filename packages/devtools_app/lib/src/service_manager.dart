@@ -11,8 +11,7 @@ import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import 'analytics/analytics_stub.dart'
-    if (dart.library.html) 'analytics/analytics.dart' as ga;
+import 'analytics/analytics.dart' as ga;
 import 'auto_dispose.dart';
 import 'config_specific/logger/logger.dart';
 import 'connected_app.dart';
