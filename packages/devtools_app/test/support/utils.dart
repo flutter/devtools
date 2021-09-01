@@ -82,6 +82,7 @@ HttpProfile loadHttpProfile() {
       HttpProfileRequest.parse(httpPostJson),
       HttpProfileRequest.parse(httpPutJson),
       HttpProfileRequest.parse(httpPatchJson),
+      HttpProfileRequest.parse(httpWsHandshakeJson),
     ],
     timestamp: 0,
   );

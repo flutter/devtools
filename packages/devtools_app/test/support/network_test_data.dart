@@ -777,7 +777,7 @@ final httpWsHandshakeRequest = HttpProfileRequest.parse(httpWsHandshakeJson);
 final httpWsHandshake = DartIOHttpRequestData(0, httpWsHandshakeRequest);
 final Map<String, dynamic> httpWsHandshakeJson = {
   'type': 'HttpProfileRequest',
-  'id': 16,
+  'id': 6,
   'isolateId': 'isolates/1350291957483171',
   'method': 'GET',
   'uri': 'http://localhost:8080',
@@ -833,4 +833,4 @@ final Map<String, dynamic> httpWsHandshakeJson = {
   },
   'requestBody': [],
   'responseBody': [],
-}
+};

@@ -387,7 +387,7 @@ void main() {
 
   group('DartIOHttpRequestData', () {
     // DartIOHttpRequestData.getFullRequestData relies on a call to serviceManager to
-    // retrieve request details. 
+    // retrieve request details.
 
     NetworkController controller;
     FakeServiceManager fakeServiceManager;
@@ -418,6 +418,7 @@ void main() {
       expect(httpPost.method, 'POST');
       expect(httpPut.method, 'PUT');
       expect(httpPatch.method, 'PATCH');
+      expect(httpWsHandshake.method, equals('GET'));
     });
 
     test('uri returns correct value', () {
@@ -426,6 +427,7 @@ void main() {
       expect(httpPost.uri, 'https://jsonplaceholder.typicode.com/posts');
       expect(httpPut.uri, 'https://jsonplaceholder.typicode.com/posts/1');
       expect(httpPatch.uri, 'https://jsonplaceholder.typicode.com/posts/1');
+      expect(httpWsHandshake.uri, 'http://localhost:8080');
     });
 
     test('contentType returns correct value', () {
@@ -434,6 +436,7 @@ void main() {
       expect(httpPost.contentType, '[application/json; charset=utf-8]');
       expect(httpPut.contentType, '[application/json; charset=utf-8]');
       expect(httpPatch.contentType, '[application/json; charset=utf-8]');
+      expect(httpWsHandshake.contentType, isNull);
     });
 
     test('type returns correct value', () {
@@ -442,6 +445,7 @@ void main() {
       expect(httpPost.type, 'json');
       expect(httpPut.type, 'json');
       expect(httpPatch.type, 'json');
+      expect(httpWsHandshake.type, 'http');
     });
 
     test('duration returns correct value', () {
@@ -450,24 +454,63 @@ void main() {
       expect(httpPost.duration.inMicroseconds, 2401000670 - 2399492629);
       expect(httpPut.duration.inMicroseconds, 1206609144 - 1205283313);
       expect(httpPatch.duration.inMicroseconds, 1911420918 - 1910177192);
+      expect(httpWsHandshake.duration.inMicroseconds, 8140263470 - 8140222102);
     });
 
     test('startTimestamp returns correct value', () {
       // Test these values in UTC to avoid timezone differences with the bots.
-      expect(formatDateTime(httpGet.startTimestamp.toUtc()), '1:45:26.279 AM');
-      expect(formatDateTime(httpGetWithError.startTimestamp.toUtc()), '1:29:45.227 AM');
-      expect(formatDateTime(httpPost.startTimestamp.toUtc()), '12:39:59.492 AM');
-      expect(formatDateTime(httpPut.startTimestamp.toUtc()), '12:20:05.283 AM');
-      expect(formatDateTime(httpPatch.startTimestamp.toUtc()), '12:31:50.177 AM');
+      expect(
+        formatDateTime(httpGet.startTimestamp.toUtc()),
+        '1:45:26.279 AM',
+      );
+      expect(
+        formatDateTime(httpGetWithError.startTimestamp.toUtc()),
+        '1:29:45.227 AM',
+      );
+      expect(
+        formatDateTime(httpPost.startTimestamp.toUtc()),
+        '12:39:59.492 AM',
+      );
+      expect(
+        formatDateTime(httpPut.startTimestamp.toUtc()),
+        '12:20:05.283 AM',
+      );
+      expect(
+        formatDateTime(httpPatch.startTimestamp.toUtc()),
+        '12:31:50.177 AM',
+      );
+      expect(
+        formatDateTime(httpWsHandshake.startTimestamp.toUtc()),
+        '2:15:40.222 AM',
+      );
     });
 
     test('endTimestamp returns correct value', () {
       // Test these values in UTC to avoid timezone differences with the bots.
-      expect(formatDateTime(httpGet.endTimestamp.toUtc()), '1:45:27.091 AM');
-      expect(formatDateTime(httpGetWithError.endTimestamp.toUtc()), '1:29:47.256 AM');
-      expect(formatDateTime(httpPost.endTimestamp.toUtc()), '12:40:01.000 AM');
-      expect(formatDateTime(httpPut.endTimestamp.toUtc()), '12:20:06.609 AM');
-      expect(formatDateTime(httpPatch.endTimestamp.toUtc()), '12:31:51.420 AM');
+      expect(
+        formatDateTime(httpGet.endTimestamp.toUtc()),
+        '1:45:27.091 AM',
+      );
+      expect(
+        formatDateTime(httpGetWithError.endTimestamp.toUtc()),
+        '1:29:47.256 AM',
+      );
+      expect(
+        formatDateTime(httpPost.endTimestamp.toUtc()),
+        '12:40:01.000 AM',
+      );
+      expect(
+        formatDateTime(httpPut.endTimestamp.toUtc()),
+        '12:20:06.609 AM',
+      );
+      expect(
+        formatDateTime(httpPatch.endTimestamp.toUtc()),
+        '12:31:51.420 AM',
+      );
+      expect(
+        formatDateTime(httpWsHandshake.endTimestamp.toUtc()),
+        '2:15:40.263 AM',
+      );
     });
 
     test('status returns correct value', () {
@@ -476,6 +519,7 @@ void main() {
       expect(httpPost.status, '201');
       expect(httpPut.status, '200');
       expect(httpPatch.status, '200');
+      expect(httpWsHandshake.status, '101');
     });
 
     test('port returns correct value', () {
@@ -484,6 +528,7 @@ void main() {
       expect(httpPost.port, 55972);
       expect(httpPut.port, 43684);
       expect(httpPatch.port, 43864);
+      expect(httpWsHandshake.port, 56744);
     });
 
     test('durationDisplay returns correct value', () {
@@ -492,6 +537,7 @@ void main() {
       expect(httpPost.durationDisplay, 'Duration: 1508.0 ms');
       expect(httpPut.durationDisplay, 'Duration: 1325.8 ms');
       expect(httpPatch.durationDisplay, 'Duration: 1243.7 ms');
+      expect(httpWsHandshake.durationDisplay, 'Duration: 41.4 ms');
     });
 
     test('isValid returns correct value', () {
@@ -500,6 +546,7 @@ void main() {
       expect(httpPost.isValid, isTrue);
       expect(httpPut.isValid, isTrue);
       expect(httpPatch.isValid, isTrue);
+      expect(httpWsHandshake.isValid, isTrue);
     });
 
     test('general returns correct value', () {
@@ -539,7 +586,8 @@ void main() {
             'remotePort': 443,
           },
           'contentLength': -1,
-          'compressionState': 'HttpClientResponseCompressionState.notCompressed',
+          'compressionState':
+              'HttpClientResponseCompressionState.notCompressed',
           'isRedirect': false,
           'persistentConnection': true,
           'reasonPhrase': 'Created',
@@ -547,7 +595,7 @@ void main() {
           'statusCode': 201,
         }),
         isTrue,
-      );      
+      );
       expect(
         collectionEquals(httpPut.general, {
           'method': 'PUT',
@@ -558,7 +606,8 @@ void main() {
             'remotePort': 443,
           },
           'contentLength': -1,
-          'compressionState': 'HttpClientResponseCompressionState.notCompressed',
+          'compressionState':
+              'HttpClientResponseCompressionState.notCompressed',
           'isRedirect': false,
           'persistentConnection': true,
           'reasonPhrase': 'OK',
@@ -566,7 +615,7 @@ void main() {
           'statusCode': 200,
         }),
         isTrue,
-      ); 
+      );
       expect(
         collectionEquals(httpPatch.general, {
           'method': 'PATCH',
@@ -586,6 +635,26 @@ void main() {
         }),
         isTrue,
       );
+      expect(
+        collectionEquals(httpWsHandshake.general, {
+          'method': 'GET',
+          'uri': 'http://localhost:8080',
+          'connectionInfo': {
+            'localPort': 56744,
+            'remoteAddress': '127.0.0.1',
+            'remotePort': 8080,
+          },
+          'contentLength': 0,
+          'compressionState':
+              'HttpClientResponseCompressionState.notCompressed',
+          'isRedirect': false,
+          'persistentConnection': true,
+          'reasonPhrase': 'Switching Protocols',
+          'redirects': [],
+          'statusCode': 101,
+        }),
+        isTrue,
+      );
     });
 
     test('inProgress returns correct value', () {
@@ -594,6 +663,7 @@ void main() {
       expect(httpPost.inProgress, false);
       expect(httpPut.inProgress, false);
       expect(httpPatch.inProgress, false);
+      expect(httpWsHandshake.inProgress, false);
     });
 
     test('requestHeaders returns correct value', () {
@@ -602,26 +672,32 @@ void main() {
           'content-length': ['0'],
         }),
         isTrue,
-      );      
+      );
       expect(httpGetWithError.requestHeaders, isNull);
       expect(
         collectionEquals(httpPost.requestHeaders, {
           'transfer-encoding': [],
         }),
         isTrue,
-      );      
+      );
       expect(
         collectionEquals(httpPut.requestHeaders, {
           'transfer-encoding': [],
         }),
         isTrue,
-      );      
+      );
       expect(
         collectionEquals(httpPatch.requestHeaders, {
           'transfer-encoding': [],
         }),
         isTrue,
-      );      
+      );
+      expect(
+        collectionEquals(httpWsHandshake.requestHeaders, {
+          'content-length': ['0'],
+        }),
+        isTrue,
+      );
     });
 
     test('responseHeaders returns correct value', () {
@@ -634,7 +710,7 @@ void main() {
           'content-type': ['application/json; charset=utf-8'],
         }),
         isTrue,
-      );      
+      );
       expect(httpGetWithError.responseHeaders, isNull);
       expect(
         collectionEquals(httpPost.responseHeaders, {
@@ -675,6 +751,16 @@ void main() {
         }),
         isTrue,
       );
+      expect(
+        collectionEquals(httpWsHandshake.responseHeaders, {
+          'connection': ['Upgrade'],
+          'upgrade': ['websocket'],
+          'content-length': [0],
+          'sec-websocket-version': [13],
+          'sec-websocket-accept': ['JF5SBCGrfyYAoLKzvj6A0ZVpk6c='],
+        }),
+        isTrue,
+      );
     });
 
     test('requestCookies returns correct value', () {
@@ -683,6 +769,7 @@ void main() {
       expect(httpPost.requestCookies, isEmpty);
       expect(httpPut.requestCookies, isEmpty);
       expect(httpPatch.requestCookies, isEmpty);
+      expect(httpWsHandshake.requestCookies, isEmpty);
     });
 
     test('responseCookies returns correct value', () {
@@ -691,6 +778,7 @@ void main() {
       expect(httpPost.responseCookies, isEmpty);
       expect(httpPut.responseCookies, isEmpty);
       expect(httpPatch.responseCookies, isEmpty);
+      expect(httpWsHandshake.responseCookies, isEmpty);
     });
 
     test('hasCookies returns correct value', () {
@@ -699,6 +787,7 @@ void main() {
       expect(httpPost.hasCookies, isFalse);
       expect(httpPut.hasCookies, isFalse);
       expect(httpPatch.hasCookies, isFalse);
+      expect(httpWsHandshake.hasCookies, isFalse);
     });
 
     test('requestBody returns correct value', () {
@@ -707,14 +796,16 @@ void main() {
       expect(httpPost.requestBody, utf8.decode(httpPostRequestBodyData));
       expect(httpPut.requestBody, utf8.decode(httpPutRequestBodyData));
       expect(httpPatch.requestBody, utf8.decode(httpPatchRequestBodyData));
+      expect(httpWsHandshake.requestBody, isNull);
     });
-    
+
     test('responseBody returns correct value', () {
       expect(httpGet.responseBody, utf8.decode(httpGetResponseBodyData));
       expect(httpGetWithError.responseBody, isNull);
       expect(httpPost.responseBody, utf8.decode(httpPostResponseBodyData));
       expect(httpPut.responseBody, utf8.decode(httpPutResponseBodyData));
       expect(httpPatch.responseBody, utf8.decode(httpPatchResponseBodyData));
+      expect(httpWsHandshake.responseBody, isEmpty);
     });
 
     test('didFail returns correct value', () {
@@ -723,6 +814,7 @@ void main() {
       expect(httpPost.didFail, false);
       expect(httpPut.didFail, false);
       expect(httpPatch.didFail, false);
+      expect(httpWsHandshake.didFail, false);
     });
   });
 }
