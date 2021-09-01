@@ -184,10 +184,11 @@ class GenerateChangelogCommand extends Command {
     message = message.split('\n').first;
     message = message.substring(0, 1).toUpperCase() +
         message.substring(1, message.length);
-    const prPrefix = ' (#';
-    final periodNumberIndex = message.lastIndexOf('.$prPrefix');
+    const prPrefix = '(#';
+    final periodNumberIndex = message.lastIndexOf('. $prPrefix');
     if (periodNumberIndex != -1) {
-      message = message.replaceFirst('.$prPrefix', prPrefix, periodNumberIndex);
+      message =
+          message.replaceFirst('. $prPrefix', prPrefix, periodNumberIndex);
     }
     final prIndex = message.indexOf(prPrefix);
     final endPrIndexExclusive = message.lastIndexOf(')');
@@ -195,7 +196,7 @@ class GenerateChangelogCommand extends Command {
       prIndex + prPrefix.length,
       endPrIndexExclusive,
     );
-    return message.substring(0, prIndex) +
+    return message.substring(0, prIndex).trim() +
         ' [#$pr](https://github.com/flutter/devtools/pull/$pr)';
   }
 
