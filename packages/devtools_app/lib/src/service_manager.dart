@@ -272,7 +272,7 @@ class ServiceConnectionManager {
       serviceStreamName,
     ];
 
-    await Future.wait(streamIds.map((String id) async {
+    unawaited(Future.wait(streamIds.map((String id) async {
       try {
         await service.streamListen(id);
       } catch (e) {
@@ -286,7 +286,7 @@ class ServiceConnectionManager {
           );
         }
       }
-    }));
+    })));
     if (service != this.service) {
       // A different service has been opened.
       return;
