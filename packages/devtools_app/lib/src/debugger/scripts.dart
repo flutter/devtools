@@ -12,7 +12,7 @@ import '../tree.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
-import 'debugger_screen.dart';
+import 'key_sets.dart';
 
 const containerIcon = Icons.folder;
 const libraryIcon = Icons.insert_chart;

@@ -8,8 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose.dart';
 import '../config_specific/import_export/import_export.dart';
@@ -670,7 +669,7 @@ class PerformanceController extends DisposableController
       analytics_constants.performance,
       analytics_constants.traceEventProcessingTime,
       asyncOperation: processTraceEventsHelper,
-      screenMetrics: PerformanceScreenMetrics(
+      screenMetricsProvider: () => PerformanceScreenMetrics(
         traceEventCount: processingTraceCount,
       ),
     );
