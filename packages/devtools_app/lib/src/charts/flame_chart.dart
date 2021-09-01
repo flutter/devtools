@@ -735,42 +735,24 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
             scrollDirection: Axis.horizontal,
             extentDelegate: extentDelegate,
             childrenDelegate: SliverChildBuilderDelegate(
-              (context, index) => _buildFlameChartNode(index),
+              (context, index) {
+                final node = nodes[index];
+                return FlameChartNodeWidget(
+                  index: index,
+                  nodes: nodes,
+                  zoom: widget.zoom,
+                  startInset: widget.startInset,
+                  chartWidth: widget.width,
+                  selected: node.data == selected,
+                  hovered: node.data == hovered,
+                );
+              },
               childCount: nodes.length,
               addRepaintBoundaries: false,
               addAutomaticKeepAlives: false,
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildFlameChartNode(int index) {
-    final node = nodes[index];
-    return Padding(
-      padding: EdgeInsets.only(
-        left: FlameChartUtils.leftPaddingForNode(
-          index,
-          nodes,
-          chartZoom: widget.zoom,
-          chartStartInset: widget.startInset,
-        ),
-        right: FlameChartUtils.rightPaddingForNode(
-          index,
-          nodes,
-          chartZoom: widget.zoom,
-          chartStartInset: widget.startInset,
-          chartWidth: widget.width,
-        ),
-        bottom: rowPadding,
-      ),
-      child: node.buildWidget(
-        selected: node.data == selected,
-        hovered: node.data == hovered,
-        searchMatch: node.data.isSearchMatch,
-        activeSearchMatch: node.data.isActiveSearchMatch,
-        zoom: FlameChartUtils.zoomForNode(node, widget.zoom),
       ),
     );
   }
@@ -821,6 +803,64 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
 
   void _resetHovered() {
     hovered = null;
+  }
+}
+
+class FlameChartNodeWidget extends StatelessWidget {
+  const FlameChartNodeWidget({
+    Key key,
+    @required this.index,
+    @required this.nodes,
+    @required this.zoom,
+    @required this.startInset,
+    @required this.chartWidth,
+    @required this.selected,
+    @required this.hovered,
+  }) : super(key: key);
+
+  final int index;
+
+  final List<FlameChartNode> nodes;
+
+  final double zoom;
+
+  final double startInset;
+
+  final double chartWidth;
+
+  final bool selected;
+
+  final bool hovered;
+
+  @override
+  Widget build(BuildContext context) {
+    final node = nodes[index];
+    return Padding(
+      padding: EdgeInsets.only(
+        left: FlameChartUtils.leftPaddingForNode(
+          index,
+          nodes,
+          chartZoom: zoom,
+          chartStartInset: startInset,
+        ),
+        right: FlameChartUtils.rightPaddingForNode(
+          index,
+          nodes,
+          chartZoom: zoom,
+          chartStartInset: startInset,
+          chartWidth: chartWidth,
+        ),
+        bottom: rowPadding,
+      ),
+      child: node.buildWidget(
+        selected: selected,
+        hovered: hovered,
+        searchMatch: node.data.isSearchMatch,
+        activeSearchMatch: node.data.isActiveSearchMatch,
+        zoom: FlameChartUtils.zoomForNode(node, zoom),
+        colorScheme: Theme.of(context).colorScheme,
+      ),
+    );
   }
 }
 
@@ -996,7 +1036,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
   final Key key;
   final Rect rect;
   final String text;
-  final ColorPair colorPair;
+  final ThemedColorPair colorPair;
   final T data;
   final void Function(T) onSelected;
   final bool selectable;
@@ -1011,6 +1051,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     @required bool searchMatch,
     @required bool activeSearchMatch,
     @required double zoom,
+    @required ColorScheme colorScheme,
   }) {
     // This math.max call prevents using a rect with negative width for
     // small events that have padding.
@@ -1037,6 +1078,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
         selected: selected,
         searchMatch: searchMatch,
         activeSearchMatch: activeSearchMatch,
+        colorScheme: colorScheme,
       ),
       child: zoomedWidth >= _minWidthForText
           ? Text(
@@ -1048,6 +1090,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
                   selected: selected,
                   searchMatch: searchMatch,
                   activeSearchMatch: activeSearchMatch,
+                  colorScheme: colorScheme,
                 ),
               ),
             )
@@ -1070,20 +1113,22 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     @required bool selected,
     @required bool searchMatch,
     @required bool activeSearchMatch,
+    @required ColorScheme colorScheme,
   }) {
     if (selected) return defaultSelectionColor;
     if (activeSearchMatch) return activeSearchMatchColor;
     if (searchMatch) return searchMatchColor;
-    return colorPair.background;
+    return colorPair.background.colorFor(colorScheme);
   }
 
   Color _textColor({
     @required bool selected,
     @required bool searchMatch,
     @required bool activeSearchMatch,
+    @required ColorScheme colorScheme,
   }) {
     if (selected || searchMatch || activeSearchMatch) return _darkTextColor;
-    return colorPair.foreground;
+    return colorPair.foreground.colorFor(colorScheme);
   }
 
   Rect zoomedRect(double zoom, double chartStartInset) {
