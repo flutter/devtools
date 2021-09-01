@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/analytics/analytics_controller.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/framework_controller.dart';
 import 'package:devtools_app/src/globals.dart';
@@ -39,7 +40,7 @@ void main() {
     });
 
     Widget wrapScaffold(Widget child) {
-      return wrap(wrapWithAnalyticsProvider(child));
+      return wrap(wrapWithAnalytics(child));
     }
 
     testWidgetsWithWindowSize(
@@ -131,14 +132,13 @@ void main() {
           .thenReturn(ValueNotifier<bool>(false));
 
       await tester.pumpWidget(
-        wrapWithAnalyticsProvider(
-          wrapWithControllers(
-            const DevToolsScaffold(
-              tabs: [screen1, screen2],
-              ideTheme: null,
-            ),
-            debugger: mockDebuggerController,
+        wrapWithControllers(
+          const DevToolsScaffold(
+            tabs: [screen1, screen2],
+            ideTheme: null,
           ),
+          debugger: mockDebuggerController,
+          analytics: AnalyticsController(),
         ),
       );
       expect(find.byKey(k1), findsOneWidget);
@@ -160,22 +160,21 @@ void main() {
       const debuggerScreenKey = Key('debugger screen');
       const debuggerTabKey = Key('debugger tab');
       await tester.pumpWidget(
-        wrapWithAnalyticsProvider(
-          wrapWithControllers(
-            const DevToolsScaffold(
-              tabs: [
-                _TestScreen(
-                  DebuggerScreen.id,
-                  debuggerScreenKey,
-                  tabKey: debuggerTabKey,
-                  showFloatingDebuggerControls: false,
-                ),
-                screen2,
-              ],
-              ideTheme: null,
-            ),
-            debugger: mockDebuggerController,
+        wrapWithControllers(
+          const DevToolsScaffold(
+            tabs: [
+              _TestScreen(
+                DebuggerScreen.id,
+                debuggerScreenKey,
+                tabKey: debuggerTabKey,
+                showFloatingDebuggerControls: false,
+              ),
+              screen2,
+            ],
+            ideTheme: null,
           ),
+          debugger: mockDebuggerController,
+          analytics: AnalyticsController(),
         ),
       );
       expect(find.byKey(debuggerScreenKey), findsOneWidget);

@@ -8,10 +8,9 @@ import 'package:pedantic/pedantic.dart';
 import 'package:provider/provider.dart';
 
 import '../devtools.dart' as devtools;
-import 'analytics/analytics_stub.dart'
-    if (dart.library.html) 'analytics/analytics.dart' as ga;
+import 'analytics/analytics.dart' as ga;
+import 'analytics/analytics_controller.dart';
 import 'analytics/constants.dart' as analytics_constants;
-import 'analytics/provider.dart';
 import 'app_size/app_size_controller.dart';
 import 'app_size/app_size_screen.dart';
 import 'auto_dispose_mixin.dart';
@@ -66,11 +65,11 @@ bool isExternalBuild = true;
 class DevToolsApp extends StatefulWidget {
   const DevToolsApp(
     this.screens,
-    this.analyticsProvider,
+    this.analyticsController,
   );
 
   final List<DevToolsScreen> screens;
-  final AnalyticsProvider analyticsProvider;
+  final AnalyticsController analyticsController;
 
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
@@ -306,8 +305,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         ideTheme: ideTheme,
         theme: Theme.of(context),
       ),
-      builder: (context, child) => Provider<AnalyticsProvider>.value(
-        value: widget.analyticsProvider,
+      builder: (context, child) => Provider<AnalyticsController>.value(
+        value: widget.analyticsController,
         child: Notifications(child: child),
       ),
       routerDelegate: DevToolsRouterDelegate(_getPage),
@@ -535,7 +534,7 @@ class DevToolsAboutDialog extends StatelessWidget {
 class SettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final analyticsProvider = Provider.of<AnalyticsProvider>(context);
+    final analyticsController = Provider.of<AnalyticsController>(context);
     return DevToolsDialog(
       title: dialogTitleText(Theme.of(context), 'Settings'),
       content: Column(
@@ -557,8 +556,8 @@ class SettingsDialog extends StatelessWidget {
           if (isExternalBuild && isDevToolsServerAvailable)
             CheckboxSetting(
               label: const Text('Enable analytics'),
-              listenable: analyticsProvider.analyticsEnabled,
-              toggle: ga.setAnalyticsEnabled,
+              listenable: analyticsController.analyticsEnabled,
+              toggle: analyticsController.toggleAnalyticsEnabled,
               gaItem: analytics_constants.analytics,
             ),
           CheckboxSetting(

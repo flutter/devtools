@@ -10,7 +10,6 @@ function gtag() {
 
 // InitializeGA with our dimensions. Both the name and order (dimension #) should match the those in gtags.dart
 function initializeGA() {
-  console.log('initializing ga from inside devtools_analytics.js');
   gtag('js', new Date());
   gtag('config', GA_DEVTOOLS_PROPERTY, {
     'custom_map': {
@@ -36,10 +35,8 @@ function initializeGA() {
 function hookupListenerForGA() {
   // Record when DevTools browser tab is selected (visible), not selected (hidden) or browser minimized.
   document.addEventListener('visibilitychange', function (e) {
-    if (window.gaDevToolsEnabled()) {
-      gtag('event', document.visibilityState, {
-        event_category: 'application',
-      });
-    }
+    gtag('event', document.visibilityState, {
+      event_category: 'application',
+    });
   });
 }
