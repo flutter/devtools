@@ -8,8 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
@@ -235,7 +234,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           ga.select(
             analytics_constants.performance,
             analytics_constants.selectFlutterFrame,
-            screenMetrics: PerformanceScreenMetrics(
+            screenMetricsProvider: () => PerformanceScreenMetrics(
               uiDuration: frame.buildTime,
               rasterDuration: frame.rasterTime,
               shaderCompilationDuration: frame.shaderDuration,
