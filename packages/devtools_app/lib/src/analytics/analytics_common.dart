@@ -5,6 +5,8 @@
 // Code in this file should be able to be imported by both dart:html and
 // dart:io dependent libraries.
 
+import 'package:flutter/foundation.dart';
+
 /// Base class for all screen metrics classes.
 ///
 /// Create a subclass of this class to store custom metrics for a screen. All
@@ -23,3 +25,13 @@
 /// Then, add your fields to the `GtagEventDevTools.withScreenMetrics` factory
 /// constructor.
 abstract class ScreenAnalyticsMetrics {}
+
+@protected
+abstract class AnalyticsControllerBase {
+  final ValueListenable<bool> analyticsEnabled = ValueNotifier<bool>(false);
+  final ValueListenable<bool> shouldPrompt = ValueNotifier<bool>(false);
+  bool get analyticsInitialized => false;
+  Future<void> toggleAnalyticsEnabled(bool enable) async {}
+  void setUpAnalytics() {}
+  void hidePrompt() {}
+}

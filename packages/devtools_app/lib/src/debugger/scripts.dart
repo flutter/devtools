@@ -11,6 +11,7 @@ import '../tree.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
+import 'key_sets.dart';
 
 const containerIcon = Icons.folder;
 const libraryIcon = Icons.insert_chart;
@@ -88,10 +89,8 @@ class ScriptPickerState extends State<ScriptPicker> {
     FileNode node,
     VoidCallback onTap,
   ) {
-    return Tooltip(
-      waitDuration: tooltipWait,
-      preferBelow: false,
-      message: node.name,
+    return DevToolsTooltip(
+      tooltip: node.name,
       child: Material(
         child: InkWell(
           onTap: () {

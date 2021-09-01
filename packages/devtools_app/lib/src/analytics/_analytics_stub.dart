@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../utils.dart';
 import 'analytics_common.dart';
 
-ValueNotifier<bool> gaEnabledNotifier;
+Future<void> setAnalyticsEnabled(bool value) async {}
 
-Future<void> setAnalyticsEnabled([bool value = true]) async {}
+FutureOr<bool> isAnalyticsEnabled() => false;
 
 void screen(
   String screenName, [
@@ -20,7 +22,7 @@ void timeSync(
   String screenName,
   String timedOperation, {
   @required void Function() syncOperation,
-  ScreenAnalyticsMetrics screenMetrics,
+  ScreenAnalyticsMetrics Function() screenMetricsProvider,
 }) {
   // Execute the operation here so that the desktop app still functions without
   // the real analytics call.
@@ -35,7 +37,7 @@ Future<void> timeAsync(
   String screenName,
   String timedOperation, {
   @required Future<void> Function() asyncOperation,
-  ScreenAnalyticsMetrics screenMetrics,
+  ScreenAnalyticsMetrics Function() screenMetricsProvider,
 }) async {
   // Execute the operation here so that the desktop app still functions without
   // the real analytics call.
@@ -50,7 +52,7 @@ void select(
   String screenName,
   String selectedItem, {
   int value = 0,
-  ScreenAnalyticsMetrics screenMetrics,
+  ScreenAnalyticsMetrics Function() screenMetricsProvider,
 }) {}
 
 void reportError(

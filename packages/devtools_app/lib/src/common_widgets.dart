@@ -587,18 +587,23 @@ class Badge extends StatelessWidget {
 /// common delay before the tooltip is shown.
 class DevToolsTooltip extends StatelessWidget {
   const DevToolsTooltip({
+    Key key,
     @required this.tooltip,
     @required this.child,
     this.waitDuration = tooltipWait,
     this.preferBelow = false,
     this.padding,
-  });
+    this.decoration,
+    this.textStyle,
+  }) : super(key: key);
 
   final String tooltip;
   final Widget child;
   final Duration waitDuration;
   final bool preferBelow;
   final EdgeInsetsGeometry padding;
+  final Decoration decoration;
+  final TextStyle textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -607,6 +612,12 @@ class DevToolsTooltip extends StatelessWidget {
       waitDuration: waitDuration,
       preferBelow: preferBelow,
       padding: padding,
+      textStyle: textStyle ??
+          TextStyle(
+            color: Theme.of(context).colorScheme.tooltipTextColor,
+            fontSize: defaultFontSize,
+          ),
+      decoration: decoration,
       child: child,
     );
   }
@@ -639,9 +650,8 @@ class ToolbarAction extends StatelessWidget {
 
     return tooltip == null
         ? button
-        : Tooltip(
-            message: tooltip,
-            waitDuration: tooltipWait,
+        : DevToolsTooltip(
+            tooltip: tooltip,
             child: button,
           );
   }
@@ -741,10 +751,8 @@ class ToggleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: selected ? enabledTooltip : disabledTooltip,
-      waitDuration: tooltipWait,
-      preferBelow: false,
+    return DevToolsTooltip(
+      tooltip: selected ? enabledTooltip : disabledTooltip,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
         child: MaterialIconLabel(
@@ -880,7 +888,7 @@ Widget closeSearchDropdownButton(VoidCallback onPressed) {
 Widget inputDecorationSuffixButton(IconData icon, VoidCallback onPressed) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: densePadding),
-    width: 24.0,
+    width: defaultIconSize + denseSpacing,
     child: IconButton(
       padding: const EdgeInsets.all(0.0),
       onPressed: onPressed,
@@ -1299,7 +1307,7 @@ Widget maybeWrapWithTooltip(String tooltip, Widget child) {
 class Legend extends StatelessWidget {
   const Legend({Key key, @required this.entries}) : super(key: key);
 
-  static const legendSquareSize = 16.0;
+  double get legendSquareSize => scaleByFontFactor(16.0);
 
   final List<LegendEntry> entries;
 
