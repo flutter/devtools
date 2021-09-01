@@ -126,7 +126,9 @@ class _CpuProfilerState extends State<CpuProfiler>
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     final currentTab =
         widget.tabs.isNotEmpty ? widget.tabs[_tabController.index] : null;
     final hasData =
@@ -181,19 +183,21 @@ class _CpuProfilerState extends State<CpuProfiler>
                             entries: [
                               LegendEntry(
                                 'App code (code from your app and imported packages)',
-                                appCodeColor.background.colorFor(context),
+                                appCodeColor.background.colorFor(colorScheme),
                               ),
                               LegendEntry(
                                 'Native code (code from the native runtime - Android, iOS, etc.)',
-                                nativeCodeColor.background.colorFor(context),
+                                nativeCodeColor.background
+                                    .colorFor(colorScheme),
                               ),
                               LegendEntry(
                                 'Dart core libraries (code from the Dart SDK)',
-                                dartCoreColor.background.colorFor(context),
+                                dartCoreColor.background.colorFor(colorScheme),
                               ),
                               LegendEntry(
                                 'Flutter Framework (code from the Flutter SDK)',
-                                flutterCoreColor.background.colorFor(context),
+                                flutterCoreColor.background
+                                    .colorFor(colorScheme),
                               ),
                             ],
                           ),

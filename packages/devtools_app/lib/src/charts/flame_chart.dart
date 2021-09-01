@@ -854,12 +854,12 @@ class FlameChartNodeWidget extends StatelessWidget {
         bottom: rowPadding,
       ),
       child: node.buildWidget(
-        context,
         selected: selected,
         hovered: hovered,
         searchMatch: node.data.isSearchMatch,
         activeSearchMatch: node.data.isActiveSearchMatch,
         zoom: FlameChartUtils.zoomForNode(node, zoom),
+        colorScheme: Theme.of(context).colorScheme,
       ),
     );
   }
@@ -1046,13 +1046,13 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
 
   int sectionIndex;
 
-  Widget buildWidget(
-    BuildContext context, {
+  Widget buildWidget({
     @required bool selected,
     @required bool hovered,
     @required bool searchMatch,
     @required bool activeSearchMatch,
     @required double zoom,
+    @required ColorScheme colorScheme,
   }) {
     // This math.max call prevents using a rect with negative width for
     // small events that have padding.
@@ -1076,10 +1076,10 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
       alignment: Alignment.centerLeft,
       color: _backgroundColor(
-        context,
         selected: selected,
         searchMatch: searchMatch,
         activeSearchMatch: activeSearchMatch,
+        colorScheme: colorScheme,
       ),
       child: zoomedWidth >= _minWidthForText
           ? Text(
@@ -1088,10 +1088,10 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: _textColor(
-                  context,
                   selected: selected,
                   searchMatch: searchMatch,
                   activeSearchMatch: activeSearchMatch,
+                  colorScheme: colorScheme,
                 ),
               ),
             )
@@ -1110,26 +1110,26 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     }
   }
 
-  Color _backgroundColor(
-    BuildContext context, {
+  Color _backgroundColor({
     @required bool selected,
     @required bool searchMatch,
     @required bool activeSearchMatch,
+    @required ColorScheme colorScheme,
   }) {
     if (selected) return defaultSelectionColor;
     if (activeSearchMatch) return activeSearchMatchColor;
     if (searchMatch) return searchMatchColor;
-    return colorPair.background.colorFor(context);
+    return colorPair.background.colorFor(colorScheme);
   }
 
-  Color _textColor(
-    BuildContext context, {
+  Color _textColor({
     @required bool selected,
     @required bool searchMatch,
     @required bool activeSearchMatch,
+    @required ColorScheme colorScheme,
   }) {
     if (selected || searchMatch || activeSearchMatch) return _darkTextColor;
-    return colorPair.foreground.colorFor(context);
+    return colorPair.foreground.colorFor(colorScheme);
   }
 
   Rect zoomedRect(double zoom, double chartStartInset) {

@@ -253,14 +253,15 @@ class ThemedColorPair {
 class ThemedColor {
   const ThemedColor({this.light, this.dark});
 
-  factory ThemedColor.fromSingle(Color color) =>
-      ThemedColor(light: color, dark: color);
+  const ThemedColor.fromSingle(Color color)
+      : light = color,
+        dark = color;
 
   final Color light;
 
   final Color dark;
 
-  Color colorFor(BuildContext context) {
-    return Theme.of(context).colorScheme.isLight ? light : dark;
+  Color colorFor(ColorScheme colorScheme) {
+    return colorScheme.isLight ? light : dark;
   }
 }

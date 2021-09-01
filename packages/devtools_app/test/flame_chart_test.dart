@@ -299,12 +299,12 @@ void main() {
           builder: (context) => Directionality(
             textDirection: TextDirection.ltr,
             child: node.buildWidget(
-              context,
               selected: selected,
               searchMatch: false,
               activeSearchMatch: false,
               hovered: hovered,
               zoom: zoom,
+              colorScheme: Theme.of(context).colorScheme,
             ),
           ),
         ),
@@ -325,12 +325,12 @@ void main() {
             OverlayEntry(
               builder: (BuildContext context) {
                 return testNode.buildWidget(
-                  context,
                   selected: _selected,
                   searchMatch: false,
                   activeSearchMatch: false,
                   hovered: _hovered,
                   zoom: defaultZoom,
+                  colorScheme: Theme.of(context).colorScheme,
                 );
               },
             ),
