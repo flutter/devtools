@@ -6,122 +6,72 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../common_widgets.dart';
-import '../config_specific/host_platform/host_platform.dart';
 import '../theme.dart';
 import '../tree.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
-import 'key_sets.dart';
 
 const containerIcon = Icons.folder;
 const libraryIcon = Icons.insert_chart;
 double get listItemHeight => scaleByFontFactor(40.0);
 
-/// Picker that takes a list of scripts and allows filtering and selection of
-/// items.
+/// Picker that takes a list of scripts and allows selection of items.
 class ScriptPicker extends StatefulWidget {
   const ScriptPicker({
     Key key,
     @required this.controller,
     @required this.scripts,
     @required this.onSelected,
-    this.libraryFilterFocusNode,
   }) : super(key: key);
 
   final DebuggerController controller;
   final List<ScriptRef> scripts;
   final void Function(ScriptLocation scriptRef) onSelected;
-  final FocusNode libraryFilterFocusNode;
 
   @override
   ScriptPickerState createState() => ScriptPickerState();
 }
 
 class ScriptPickerState extends State<ScriptPicker> {
-  // TODO(devoncarew): How to retain the filter text state?
-  final _filterController = TextEditingController();
-
-  final _maxAutoExpandChildCount = 3;
 
   List<ObjRef> _items = [];
-  List<ObjRef> _filteredItems = [];
   List<FileNode> _rootScriptNodes;
 
   @override
   void initState() {
     super.initState();
 
-    _updateFiltered();
+    _updateScripts();
   }
 
   @override
   void didUpdateWidget(ScriptPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    updateFilter();
+    updateScripts();
   }
 
-  void updateFilter() {
-    setState(_updateFiltered);
+  void updateScripts() {
+    setState(_updateScripts);
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isMacOS = HostPlatform.instance.isMacOS;
-
     // Re-calculate the tree of scripts if necessary.
-    _rootScriptNodes ??= FileNode.createRootsFrom(_filteredItems);
+    _rootScriptNodes ??= FileNode.createRootsFrom(_items);
 
     return OutlineDecoration(
       child: Column(
         children: [
-          AreaPaneHeader(
-            title: const Text('Libraries'),
+          const AreaPaneHeader(
+            title: Text('Libraries'),
             needsTopBorder: false,
-            rightActions: [
-              CountBadge(
-                filteredItems: _filteredItems,
-                items: _items,
-              ),
-            ],
-          ),
-          Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: theme.focusColor),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(denseSpacing),
-              child: SizedBox(
-                height: defaultTextFieldHeight,
-                child: TextField(
-                  decoration: InputDecoration(
-                    labelText:
-                        'Filter (${focusLibraryFilterKeySet.describeKeys(isMacOS: isMacOS)})',
-                    border: const OutlineInputBorder(),
-                  ),
-                  controller: _filterController,
-                  onChanged: (value) => updateFilter(),
-                  style: Theme.of(context).textTheme.bodyText2,
-                  focusNode: widget.libraryFilterFocusNode,
-                ),
-              ),
-            ),
           ),
           if (_isLoading) const CenteredCircularProgressIndicator(),
           if (!_isLoading)
             Expanded(
               child: TreeView<FileNode>(
-                onTraverse: (node) {
-                  // Auto expand children when there are minimal search results.
-                  if (_filterController.text.isNotEmpty &&
-                      node.children.length <= _maxAutoExpandChildCount) {
-                    node.expand();
-                  }
-                },
                 itemExtent: listItemHeight,
                 dataRoots: _rootScriptNodes,
                 dataDisplayProvider: (item, onTap) =>
@@ -191,14 +141,9 @@ class ScriptPickerState extends State<ScriptPicker> {
 
   bool get _isLoading => widget.scripts.isEmpty;
 
-  void _updateFiltered() {
-    final filterText = _filterController.text.trim().toLowerCase();
-
+  void _updateScripts() {
     _items = widget.scripts;
-    _filteredItems = widget.scripts
-        .where((ref) => ref.uri.caseInsensitiveFuzzyMatch(filterText))
-        .toList();
-
+    
     // Remove the cached value here; it'll be re-computed the next time we need
     // it.
     _rootScriptNodes = null;
@@ -217,26 +162,6 @@ class ScriptPickerState extends State<ScriptPicker> {
       widget.onSelected(ScriptLocation(script, location: pos));
     } else {
       assert(false, 'unexpected object reference: ${ref.type}');
-    }
-  }
-}
-
-class CountBadge extends StatelessWidget {
-  const CountBadge({
-    @required this.filteredItems,
-    @required this.items,
-  });
-
-  final List<ObjRef> filteredItems;
-  final List<ObjRef> items;
-
-  @override
-  Widget build(BuildContext context) {
-    if (filteredItems.length == items.length) {
-      return Badge('${nf.format(items.length)}');
-    } else {
-      return Badge('${nf.format(filteredItems.length)} of '
-          '${nf.format(items.length)}');
     }
   }
 }
