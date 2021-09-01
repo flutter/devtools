@@ -5,8 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/launch_url/launch_url.dart';
@@ -302,7 +301,16 @@ class _RegisteredServiceExtensionButtonState
     if (_hidden) return const SizedBox();
 
     return InkWell(
-      onTap: () => invokeAndCatchErrors(widget.action),
+      onTap: () => invokeAndCatchErrors(() async {
+        if (widget.serviceDescription.gaScreenName != null &&
+            widget.serviceDescription.gaItem != null) {
+          ga.select(
+            widget.serviceDescription.gaScreenName,
+            widget.serviceDescription.gaItem,
+          );
+        }
+        await widget.action();
+      }),
       child: Container(
         constraints: BoxConstraints.tightFor(
           width: DevToolsScaffold.actionWidgetSize,

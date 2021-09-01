@@ -9,8 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../charts/flame_chart.dart';
@@ -533,7 +532,7 @@ class TimelineFlameChartState
         key: Key('${event.name} ${event.traceEvents.first.wrapperId}'),
         text: event.name,
         rect: Rect.fromLTRB(left, flameChartNodeTop, right, rowHeight),
-        colorPair: colorPair,
+        colorPair: ThemedColorPair.from(colorPair),
         data: event,
         onSelected: (dynamic event) => widget.onDataSelected(event),
         sectionIndex: section,
