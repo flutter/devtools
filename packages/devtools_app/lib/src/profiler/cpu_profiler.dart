@@ -16,6 +16,7 @@ import '../ui/colors.dart';
 import '../ui/filter.dart';
 import '../ui/search.dart';
 import '../ui/tab.dart';
+import '../utils.dart';
 import 'cpu_profile_bottom_up.dart';
 import 'cpu_profile_call_tree.dart';
 import 'cpu_profile_controller.dart';
@@ -332,7 +333,7 @@ class CpuProfileFilterDialog extends StatelessWidget {
             (index) => controller.toggleFilters[index].enabled.value),
         super(key: key);
 
-  static const double _filterDialogWidth = 400.0;
+  double get _filterDialogWidth => scaleByFontFactor(400.0);
 
   final CpuProfilerController controller;
 

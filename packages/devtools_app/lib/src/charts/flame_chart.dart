@@ -38,6 +38,8 @@ double get sectionSpacing => scaleByFontFactor(16.0);
 const double sideInset = 70.0;
 const double sideInsetSmall = 60.0;
 
+double get baseTimelineGridIntervalPx => scaleByFontFactor(150.0);
+
 // TODO(kenz): add some indication that we are scrolled out of the relevant area
 // so that users don't get lost in the extra pixels at the end of the chart.
 
@@ -181,7 +183,7 @@ abstract class FlameChartState<T extends FlameChart,
   double get maxZoomLevel {
     // The max zoom level is hit when 1 microsecond is the width of each grid
     // interval (this may bottom out at 2 micros per interval due to rounding).
-    return TimelineGridPainter.baseGridIntervalPx *
+    return baseTimelineGridIntervalPx *
         widget.time.duration.inMicroseconds /
         widget.startingContentWidth;
   }
@@ -1097,11 +1099,9 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
           : const SizedBox(),
     );
     if (hovered || !selectable) {
-      return Tooltip(
+      return DevToolsTooltip(
         key: key,
-        message: data.tooltip,
-        preferBelow: false,
-        waitDuration: tooltipWait,
+        tooltip: data.tooltip,
         child: node,
       );
     } else {
@@ -1314,7 +1314,6 @@ class TimelineGridPainter extends FlameChartPainter {
           colorScheme: colorScheme,
         );
 
-  static const baseGridIntervalPx = 150.0;
   static const timestampOffset = 6.0;
 
   final double chartEndInset;
@@ -1372,7 +1371,10 @@ class TimelineGridPainter extends FlameChartPainter {
     final textPainter = TextPainter(
       text: TextSpan(
         text: timestampText,
-        style: TextStyle(color: colorScheme.chartTextColor),
+        style: TextStyle(
+          color: colorScheme.chartTextColor,
+          fontSize: defaultFontSize,
+        ),
       ),
       textAlign: TextAlign.right,
       textDirection: TextDirection.ltr,
@@ -1399,7 +1401,7 @@ class TimelineGridPainter extends FlameChartPainter {
     final log2ZoomLevel = log2(zoom);
 
     final gridZoomFactor = math.pow(2, log2ZoomLevel);
-    final gridIntervalPx = baseGridIntervalPx / gridZoomFactor;
+    final gridIntervalPx = baseTimelineGridIntervalPx / gridZoomFactor;
 
     /// The physical pixel width of the grid interval at [zoom].
     return gridIntervalPx * zoom;
@@ -1483,7 +1485,7 @@ class _FlameChartHelpDialog extends StatelessWidget {
 
   /// A fixed width for the first column in the help dialog to ensure that the
   /// subsections are aligned.
-  static const firstColumnWidth = 190.0;
+  double get firstColumnWidth => scaleByFontFactor(190.0);
 
   @override
   Widget build(BuildContext context) {

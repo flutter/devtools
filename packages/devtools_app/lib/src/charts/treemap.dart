@@ -380,13 +380,12 @@ class _TreemapState extends State<Treemap> {
           // instead of creating widgets to improve performance.
 
           final tooltipMessage = hoveredNode?.displayText() ?? '';
-          return Tooltip(
+          return DevToolsTooltip(
             // A key is required to force a rebuild of the tooltips for each cell.
             // Use tooltipMessage as the key to prevent rebuilds within a cell.
             key: Key(tooltipMessage),
-            message: tooltipMessage,
+            tooltip: tooltipMessage,
             waitDuration: tooltipWaitLong,
-            preferBelow: false,
             child: MouseRegion(
               onHover: (event) => _onHover(event, positionedChildren),
               cursor: SystemMouseCursors.click,
@@ -541,10 +540,9 @@ class _TreemapState extends State<Treemap> {
   /// The default value for newRoot is [widget.rootNode].
   Widget buildSelectable({@required Widget child, TreemapNode newRoot}) {
     newRoot ??= widget.rootNode;
-    return Tooltip(
-      message: widget.rootNode.displayText(),
+    return DevToolsTooltip(
+      tooltip: widget.rootNode.displayText(),
       waitDuration: tooltipWaitLong,
-      preferBelow: false,
       child: InkWell(
         onTap: () {
           widget.onRootChangedCallback(newRoot);

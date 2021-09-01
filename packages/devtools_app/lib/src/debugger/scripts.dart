@@ -138,10 +138,8 @@ class ScriptPickerState extends State<ScriptPicker> {
     FileNode node,
     VoidCallback onTap,
   ) {
-    return Tooltip(
-      waitDuration: tooltipWait,
-      preferBelow: false,
-      message: node.name,
+    return DevToolsTooltip(
+      tooltip: node.name,
       child: Material(
         child: InkWell(
           onTap: () {
