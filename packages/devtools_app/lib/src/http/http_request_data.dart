@@ -502,13 +502,20 @@ class DartIOHttpRequestData extends HttpRequestData {
         .then((updated) => _request = updated);
   }
 
+  @visibleForTesting
+  int get id => _request.id;
+
+  bool get _hasError => _request.request?.hasError ?? false;
+
+  int get _endTime => _hasError ? _request.endTime : _request.response.endTime;
+
   @override
   Duration get duration {
     if (inProgress || !isValid) return null;
     // Timestamps are in microseconds
     final range = TimeRange()
       ..start = Duration(microseconds: _request.startTime)
-      ..end = Duration(microseconds: _request.response.endTime);
+      ..end = Duration(microseconds: _endTime);
     return range.duration;
   }
 
@@ -525,8 +532,10 @@ class DartIOHttpRequestData extends HttpRequestData {
     return {
       'method': _request.method,
       'uri': _request.uri.toString(),
-      'connectionInfo': _request.request.connectionInfo,
-      'contentLength': _request.request.contentLength,
+      if (!didFail) ...{
+        'connectionInfo': _request.request.connectionInfo,
+        'contentLength': _request.request.contentLength,
+      },
       if (_request.response != null) ...{
         'compressionState': _request.response.compressionState,
         'isRedirect': _request.response.isRedirect,
@@ -544,7 +553,8 @@ class DartIOHttpRequestData extends HttpRequestData {
   /// True if the HTTP request hasn't completed yet, determined by the lack of
   /// an end event.
   @override
-  bool get inProgress => !_request.isResponseComplete;
+  bool get inProgress =>
+      _hasError ? !_request.isRequestComplete : !_request.isResponseComplete;
 
   /// All instant events logged to the timeline for this HTTP request.
   @override
@@ -564,11 +574,12 @@ class DartIOHttpRequestData extends HttpRequestData {
   /// A list of all cookies contained within the request headers.
   @override
   List<Cookie> get requestCookies =>
-      HttpRequestData._parseCookies(_request.request?.cookies);
+      _hasError ? [] : HttpRequestData._parseCookies(_request.request?.cookies);
 
   /// The request headers for the HTTP request.
   @override
-  Map<String, dynamic> get requestHeaders => _request.request?.headers;
+  Map<String, dynamic> get requestHeaders =>
+      _hasError ? null : _request.request?.headers;
 
   /// A list of all cookies contained within the response headers.
   @override
@@ -589,7 +600,7 @@ class DartIOHttpRequestData extends HttpRequestData {
 
   @override
   DateTime get endTimestamp => DateTime.fromMicrosecondsSinceEpoch(
-        timelineMicrosecondsSinceEpoch(_request?.response?.endTime),
+        timelineMicrosecondsSinceEpoch(_endTime),
       );
 
   @override
@@ -598,7 +609,8 @@ class DartIOHttpRequestData extends HttpRequestData {
       );
 
   @override
-  String get status => _request.response?.statusCode?.toString();
+  String get status =>
+      _hasError ? 'Error' : _request.response?.statusCode?.toString();
 
   @override
   String get uri => _request.uri.toString();
@@ -613,7 +625,7 @@ class DartIOHttpRequestData extends HttpRequestData {
       if (!_request.isResponseComplete) return null;
       if (_responseBody != null) return _responseBody;
       _responseBody = utf8.decode(fullRequest.responseBody);
-      if (contentType.contains('json')) {
+      if (contentType != null && contentType.contains('json')) {
         _responseBody = FormattedJson.encoder.convert(
           json.decode(_responseBody),
         );
