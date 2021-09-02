@@ -158,12 +158,14 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
         searchInFileKeySet: SearchInFileIntent(controller),
         escapeKeySet: EscapeIntent(context, controller),
+        openFileKeySet: OpenFileIntent(controller),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
           GoToLineNumberIntent: GoToLineNumberAction(),
           SearchInFileIntent: SearchInFileAction(),
           EscapeIntent: EscapeAction(),
+          OpenFileIntent: OpenFileAction(),
         },
         child: Split(
           axis: Axis.horizontal,
@@ -273,8 +275,26 @@ class EscapeIntent extends Intent {
 class EscapeAction extends Action<EscapeIntent> {
   @override
   void invoke(EscapeIntent intent) {
-    Navigator.of(intent._context).pop(dialogDefaultContext);
-    intent._controller.toggleSearchInFileVisibility(false);
+    if (intent._controller.showSearchInFileField.value) {
+      Navigator.of(intent._context).pop(dialogDefaultContext);
+      intent._controller.toggleSearchInFileVisibility(false);
+    }
+    if (intent._controller.showOpenFileModal.value) {
+      intent._controller.toggleOpenFileModal(false);
+    }
+  }
+}
+
+class OpenFileIntent extends Intent {
+  const OpenFileIntent(this._controller);
+
+  final DebuggerController _controller;
+}
+
+class OpenFileAction extends Action<OpenFileIntent> {
+  @override
+  void invoke(OpenFileIntent intent) {
+    intent._controller.toggleOpenFileModal(true);
   }
 }
 
