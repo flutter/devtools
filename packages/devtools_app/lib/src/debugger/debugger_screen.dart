@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:codicon/codicon.dart';
+import 'package:devtools_app/src/call_stack.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/services.dart';
@@ -18,6 +19,7 @@ import '../dialogs.dart';
 import '../flex_split_column.dart';
 import '../globals.dart';
 import '../listenable.dart';
+import '../utils.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
@@ -65,6 +67,8 @@ class DebuggerScreenBody extends StatefulWidget {
 
   static final codeViewKey = GlobalKey(debugLabel: 'codeViewKey');
   static final scriptViewKey = GlobalKey(debugLabel: 'scriptViewKey');
+  static const copyToClipboardButtonKey =
+      Key('debugger_call_stack_copy_to_clipboard_button');
 
   @override
   DebuggerScreenBodyState createState() => DebuggerScreenBodyState();
@@ -226,6 +230,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   }
 
   Widget debuggerPanes() {
+    final numLines = controller.stackFramesWithLocation.value.length;
+    final disabled = numLines == 0;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         return FlexSplitColumn(
@@ -233,8 +240,21 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           initialFractions: const [0.40, 0.40, 0.20],
           minSizes: const [0.0, 0.0, 0.0],
           headers: <PreferredSizeWidget>[
-            const AreaPaneHeader(
-              title: Text(callStackTitle),
+            AreaPaneHeader(
+              title: const Text(callStackTitle),
+              actions: [
+                CopyToClipboardControl(
+                  dataProvider: disabled
+                      ? null
+                      : () => controller.stackFramesWithLocation.value
+                          .map((frame) => _descriptionFor(frame))
+                          .toList()
+                          .join('\n'),
+                  successMessage:
+                      'Copied $numLines ${pluralize('line', numLines)}.',
+                  buttonKey: DebuggerScreenBody.copyToClipboardButtonKey,
+                ),
+              ],
               needsTopBorder: false,
             ),
             const AreaPaneHeader(title: Text(variablesTitle)),
@@ -254,6 +274,26 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         );
       },
     );
+  }
+
+  String _descriptionFor(StackFrameAndSourcePosition frame) {
+    const unoptimized = '[Unoptimized] ';
+    const none = '<none>';
+    const anonymousClosure = '<anonymous closure>';
+    const closure = '<closure>';
+    const asyncBreak = '<async break>';
+
+    if (frame.frame.kind == FrameKind.kAsyncSuspensionMarker) {
+      return asyncBreak;
+    }
+
+    var name = frame.frame.code?.name ?? none;
+    if (name.startsWith(unoptimized)) {
+      name = name.substring(unoptimized.length);
+    }
+    name = name.replaceAll(anonymousClosure, closure);
+    name = name == none ? name : '$name()';
+    return name;
   }
 
   Widget _breakpointsRightChild() {
