@@ -247,7 +247,11 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                   dataProvider: disabled
                       ? null
                       : () => controller.stackFramesWithLocation.value
-                          .map((frame) => _descriptionFor(frame))
+                          .map((frame) {
+                            final asyncMarker = frame.frame.kind ==
+                                FrameKind.kAsyncSuspensionMarker;
+                            return '${_descriptionFor(frame)}${asyncMarker ? null : ' ' + _locationFor(frame)}';
+                          })
                           .toList()
                           .join('\n'),
                   successMessage:
@@ -294,6 +298,15 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     name = name.replaceAll(anonymousClosure, closure);
     name = name == none ? name : '$name()';
     return name;
+  }
+
+  String _locationFor(StackFrameAndSourcePosition frame) {
+    final uri = frame.scriptUri;
+    if (uri == null) {
+      return uri;
+    }
+    final file = uri.split('/').last;
+    return frame.line == null ? file : '$file ${frame.line}';
   }
 
   Widget _breakpointsRightChild() {
