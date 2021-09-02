@@ -230,9 +230,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   }
 
   Widget debuggerPanes() {
-    final numLines = controller.stackFramesWithLocation.value.length;
-    final disabled = numLines == 0;
-
     return LayoutBuilder(
       builder: (context, constraints) {
         return FlexSplitColumn(
@@ -242,23 +239,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           headers: <PreferredSizeWidget>[
             AreaPaneHeader(
               title: const Text(callStackTitle),
-              actions: [
-                CopyToClipboardControl(
-                  dataProvider: disabled
-                      ? null
-                      : () => controller.stackFramesWithLocation.value
-                          .map((frame) {
-                            final asyncMarker = frame.frame.kind ==
-                                FrameKind.kAsyncSuspensionMarker;
-                            return '${_descriptionFor(frame)}${asyncMarker ? null : ' ' + _locationFor(frame)}';
-                          })
-                          .toList()
-                          .join('\n'),
-                  successMessage:
-                      'Copied $numLines ${pluralize('line', numLines)}.',
-                  buttonKey: DebuggerScreenBody.copyToClipboardButtonKey,
-                ),
-              ],
+              actions: [_callStackRightChild()],
               needsTopBorder: false,
             ),
             const AreaPaneHeader(title: Text(variablesTitle)),
@@ -325,6 +306,26 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           ),
         ]);
       },
+    );
+  }
+
+  Widget _callStackRightChild() {
+    final numLines = controller.stackFramesWithLocation.value.length;
+    final disabled = numLines == 0;
+
+    return CopyToClipboardControl(
+      dataProvider: disabled
+          ? null
+          : () => controller.stackFramesWithLocation.value
+              .map((frame) {
+                final asyncMarker =
+                    frame.frame.kind == FrameKind.kAsyncSuspensionMarker;
+                return '${_descriptionFor(frame)}${asyncMarker ? null : ' ' + _locationFor(frame)}';
+              })
+              .toList()
+              .join('\n'),
+      successMessage: 'Copied $numLines ${pluralize('line', numLines)}.',
+      buttonKey: DebuggerScreenBody.copyToClipboardButtonKey,
     );
   }
 }
