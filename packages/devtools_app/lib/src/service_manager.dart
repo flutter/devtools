@@ -39,8 +39,6 @@ const debugLogServiceProtocolEvents = false;
 
 const defaultRefreshRate = 60.0;
 
-typedef IsolateF = Future<Isolate> Function(String isolateId);
-
 // TODO(jacobr): refactor all of these apis to be in terms of ValueListenable
 // instead of Streams.
 class ServiceConnectionManager {
@@ -613,7 +611,7 @@ class IsolateManager extends Disposer {
 
   void _loadIsolateState(IsolateRef isolateRef) {
     final service = _service;
-    getIsolateCachedById(isolateRef.id).then((Isolate isolate) {
+    _service.getIsolate(isolateRef.id).then((Isolate isolate) {
       if (service != _service) return;
       final state = _isolateStates[isolateRef];
       if (state != null) {
