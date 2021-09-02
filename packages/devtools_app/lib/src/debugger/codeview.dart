@@ -1053,7 +1053,11 @@ class ScriptPopupMenuOption {
   }
 }
 
-final defaultScriptPopupMenuOptions = [copyScriptNameOption, goToLineOption];
+final defaultScriptPopupMenuOptions = [
+  copyScriptNameOption,
+  goToLineOption,
+  openFileOption,
+];
 
 final copyScriptNameOption = ScriptPopupMenuOption(
   label: 'Copy filename',
@@ -1075,6 +1079,16 @@ const goToLineOption = ScriptPopupMenuOption(
   icon: Icons.list,
   onSelected: showGoToLineDialog,
 );
+
+void showOpenFileDialog(BuildContext context, DebuggerController controller) {
+  showDialog(
+    context: context,
+    builder: (context) => OpenFileDialog(controller),
+  );
+}
+
+const openFileOption =
+    ScriptPopupMenuOption(label: 'Open file', onSelected: showOpenFileDialog);
 
 class GoToLineDialog extends StatelessWidget {
   const GoToLineDialog(this._debuggerController);
@@ -1114,6 +1128,24 @@ class GoToLineDialog extends StatelessWidget {
           )
         ],
       ),
+      actions: const [
+        DialogCancelButton(),
+      ],
+    );
+  }
+}
+
+class OpenFileDialog extends StatelessWidget {
+  const OpenFileDialog(this._debuggerController);
+
+  final DebuggerController _debuggerController;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsDialog(
+      title: dialogTitleText(Theme.of(context), 'Open file'),
+      includeDivider: false,
+      content: const Text('Dialog!'),
       actions: const [
         DialogCancelButton(),
       ],

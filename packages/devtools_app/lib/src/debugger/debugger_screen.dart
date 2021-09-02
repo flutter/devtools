@@ -158,7 +158,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
         searchInFileKeySet: SearchInFileIntent(controller),
         escapeKeySet: EscapeIntent(context, controller),
-        openFileKeySet: OpenFileIntent(controller),
+        openFileKeySet: OpenFileIntent(context, controller),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
@@ -286,8 +286,9 @@ class EscapeAction extends Action<EscapeIntent> {
 }
 
 class OpenFileIntent extends Intent {
-  const OpenFileIntent(this._controller);
+  const OpenFileIntent(this._context, this._controller);
 
+  final BuildContext _context;
   final DebuggerController _controller;
 }
 
@@ -295,6 +296,8 @@ class OpenFileAction extends Action<OpenFileIntent> {
   @override
   void invoke(OpenFileIntent intent) {
     intent._controller.toggleOpenFileModal(true);
+
+    showOpenFileDialog(intent._context, intent._controller);
   }
 }
 
