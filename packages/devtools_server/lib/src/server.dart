@@ -11,6 +11,7 @@ import 'dart:isolate';
 import 'package:args/args.dart';
 import 'package:browser_launcher/browser_launcher.dart';
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:devtools_shared/devtools_server.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:path/path.dart' as path;
@@ -20,10 +21,9 @@ import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart' hide Isolate;
 
 import 'client_manager.dart';
+import 'devtools_command.dart';
 import 'external_handlers.dart';
-import 'file_system.dart';
 import 'memory_profile.dart';
-import 'usage.dart';
 
 const protocolVersion = '1.1.0';
 const argHelp = 'help';
@@ -39,7 +39,6 @@ const argMachine = 'machine';
 const argHost = 'host';
 const argPort = 'port';
 const argProfileMemory = 'record-memory-profile';
-const argProfileMemoryOld = 'profile-memory';
 const argTryPorts = 'try-ports';
 const argVerbose = 'verbose';
 const launchDevToolsService = 'launchDevTools';
@@ -57,11 +56,12 @@ late ClientManager clients;
 Future<HttpServer?> serveDevToolsWithArgs(
   List<String> arguments, {
   shelf.Handler? handler,
+  String? customDevToolsPath,
 }) async {
   ArgResults args;
   final verbose = arguments.contains('-v') || arguments.contains('--verbose');
   try {
-    args = _createArgsParser(verbose).parse(arguments);
+    args = configureArgsParser(ArgParser(), verbose).parse(arguments);
   } on FormatException catch (e) {
     print(e.message);
     print('');
@@ -69,13 +69,19 @@ Future<HttpServer?> serveDevToolsWithArgs(
     return null;
   }
 
-  return await _serveDevToolsWithArgs(args, verbose, handler: handler);
+  return await _serveDevToolsWithArgs(
+    args,
+    verbose,
+    handler: handler,
+    customDevToolsPath: customDevToolsPath,
+  );
 }
 
 Future<HttpServer?> _serveDevToolsWithArgs(
   ArgResults args,
   bool verbose, {
   shelf.Handler? handler,
+  String? customDevToolsPath,
 }) async {
   final help = args[argHelp];
   final bool machineMode = args[argMachine];
@@ -83,7 +89,8 @@ Future<HttpServer?> _serveDevToolsWithArgs(
   final bool launchBrowser =
       args.wasParsed(argLaunchBrowser) ? args[argLaunchBrowser] : !machineMode;
   final bool enableNotifications = args[argEnableNotifications];
-  final bool allowEmbedding = args[argAllowEmbedding];
+  final bool allowEmbedding =
+      args.wasParsed(argAllowEmbedding) ? args[argAllowEmbedding] : true;
 
   final port = args[argPort] != null ? int.tryParse(args[argPort]) ?? 0 : 0;
 
@@ -119,8 +126,6 @@ Future<HttpServer?> _serveDevToolsWithArgs(
   String? profileFilename;
   if (args.wasParsed(argProfileMemory)) {
     profileFilename = args[argProfileMemory];
-  } else if (args.wasParsed(argProfileMemoryOld)) {
-    profileFilename = args[argProfileMemoryOld];
   }
   if (profileFilename != null && !path.isAbsolute(profileFilename)) {
     profileFilename = path.absolute(profileFilename);
@@ -136,6 +141,7 @@ Future<HttpServer?> _serveDevToolsWithArgs(
     headlessMode: headlessMode,
     numPortsToTry: numPortsToTry,
     handler: handler,
+    customDevToolsPath: customDevToolsPath,
     serviceProtocolUri: serviceProtocolUri,
     profileFilename: profileFilename,
     verboseMode: verboseMode,
@@ -192,7 +198,6 @@ Future<HttpServer?> serveDevTools({
 
   clients = ClientManager(enableNotifications);
 
-  // ignore:dead_code
   handler ??= await defaultHandler(
     clients,
     customDevToolsPath: customDevToolsPath,
@@ -480,16 +485,19 @@ Future<HttpServer?> serveDevTools({
   return server;
 }
 
-ArgParser _createArgsParser(bool verbose) {
-  final parser = ArgParser();
-
-  parser
-    ..addFlag(
+ArgParser configureArgsParser(ArgParser parser, bool verbose) {
+  // 'help' will already be defined if we have an ArgParser from a Command
+  // subclass.
+  if (!parser.options.containsKey('help')) {
+    parser.addFlag(
       argHelp,
       negatable: false,
       abbr: 'h',
       help: 'Prints help output.',
-    )
+    );
+  }
+
+  parser
     ..addFlag(
       argVerbose,
       negatable: false,
@@ -498,7 +506,6 @@ ArgParser _createArgsParser(bool verbose) {
     )
     ..addOption(
       argHost,
-      //defaultsTo: 'localhost',
       valueHelp: 'host',
       help: 'Hostname to serve DevTools on (defaults to localhost).',
     )
@@ -514,18 +521,15 @@ ArgParser _createArgsParser(bool verbose) {
       help:
           'Launches DevTools in a browser immediately at start.\n(defaults to on unless in --machine mode)',
     )
-// TODO: Remove this - prefer that clients use the rest arg.
-    ..addOption(
-      argVmUri,
-      defaultsTo: '',
-      help: 'VM Service protocol URI.',
-      hide: true,
-    )
     ..addFlag(
       argMachine,
       negatable: false,
       help: 'Sets output format to JSON for consumption in tools.',
-    )
+    );
+
+  parser.addSeparator('Memory profiling options:');
+
+  parser
     ..addOption(
       argProfileMemory,
       valueHelp: 'file',
@@ -533,27 +537,32 @@ ArgParser _createArgsParser(bool verbose) {
       help:
           'Start devtools headlessly and write memory profiling samples to the '
           'indicated file.',
-    )
-// TODO: Remove this after a release or two.
-    ..addOption(
-      argProfileMemoryOld,
-      defaultsTo: 'memory_samples.json',
-      hide: true,
-    )
+    );
+
+  if (verbose) {
+    parser.addSeparator('App size options:');
+  }
+
+  // TODO(devoncarew): --appSizeBase and --appSizeTest should be renamed to
+  // something like --app-size-base and --app-size-test; #3146.
+  parser
     ..addOption(
       argAppSizeBase,
       valueHelp: 'appSizeBase',
       help: 'Path to the base app size file used for app size debugging.',
-      hide: true,
+      hide: !verbose,
     )
     ..addOption(
       argAppSizeTest,
       valueHelp: 'appSizeTest',
-      help: 'Path to the test app size file used for app size debugging. This '
-          'file should only be specified if a base app size file (appSizeBase) '
-          'is also specified.',
-      hide: true,
+      help: 'Path to the test app size file used for app size debugging.\nThis '
+          'file should only be specified if --$argAppSizeBase is also specified.',
+      hide: !verbose,
     );
+
+  if (verbose) {
+    parser.addSeparator('Advanced options:');
+  }
 
   // Args to show for verbose mode.
   parser
@@ -574,7 +583,6 @@ ArgParser _createArgsParser(bool verbose) {
     )
     ..addFlag(
       argAllowEmbedding,
-      negatable: false,
       help: 'Allow embedding DevTools inside an iframe.',
       hide: !verbose,
     )
@@ -586,7 +594,17 @@ ArgParser _createArgsParser(bool verbose) {
       hide: !verbose,
     );
 
-  // Hidden args.
+  // Deprecated and hidden args.
+  // TODO: Remove this - prefer that clients use the rest arg.
+  parser
+    ..addOption(
+      argVmUri,
+      defaultsTo: '',
+      help: 'VM Service protocol URI.',
+      hide: true,
+    );
+
+  // Development only args.
   parser
     ..addFlag(
       argDebugMode,
@@ -601,10 +619,9 @@ ArgParser _createArgsParser(bool verbose) {
 void _printUsage(bool verbose) {
   print('usage: devtools <options> [service protocol uri]');
   print('');
-  print('Open a DevTools instance in a browser and optionally connect to an '
-      'existing application.');
+  print(commandDescription);
   print('');
-  print(_createArgsParser(verbose).usage);
+  print(configureArgsParser(ArgParser(), verbose).usage);
 }
 
 // Only used for testing DevToolsUsage (used by survey).
@@ -614,7 +631,7 @@ File? _devToolsBackup;
 
 bool backupAndCreateDevToolsStore() {
   assert(_devToolsBackup == null);
-  final devToolsStore = File(_devToolsStoreLocation());
+  final devToolsStore = File(LocalFileSystem.devToolsStoreLocation());
   if (devToolsStore.existsSync()) {
     _devToolsBackup = devToolsStore
         .copySync('${LocalFileSystem.devToolsDir()}/.devtools_backup_test');
@@ -628,7 +645,8 @@ String? restoreDevToolsStore() {
   if (_devToolsBackup != null) {
     // Read the current ~/.devtools file
     LocalFileSystem.maybeMoveLegacyDevToolsStore();
-    final devToolsStore = File(_devToolsStoreLocation());
+
+    final devToolsStore = File(LocalFileSystem.devToolsStoreLocation());
     final content = devToolsStore.readAsStringSync();
 
     // Delete the temporary ~/.devtools file
@@ -636,7 +654,7 @@ String? restoreDevToolsStore() {
     if (_devToolsBackup!.existsSync()) {
       // Restore the backup ~/.devtools file we created in
       // backupAndCreateDevToolsStore.
-      _devToolsBackup!.copySync(_devToolsStoreLocation());
+      _devToolsBackup!.copySync(LocalFileSystem.devToolsStoreLocation());
       _devToolsBackup!.deleteSync();
       _devToolsBackup = null;
     }
@@ -644,10 +662,6 @@ String? restoreDevToolsStore() {
   }
 
   return null;
-}
-
-String _devToolsStoreLocation() {
-  return path.join(LocalFileSystem.devToolsDir(), DevToolsUsage.storeName);
 }
 
 Future<void> _hookupMemoryProfiling(

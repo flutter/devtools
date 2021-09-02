@@ -477,7 +477,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   @override
   void initState() {
     super.initState();
-    _searchFieldFocusNode = FocusNode();
+    _searchFieldFocusNode = FocusNode(debugLabel: 'search-field');
     searchTextFieldController = TextEditingController();
   }
 
@@ -533,7 +533,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
 
     onHighlightDropdown ??= _highlightDropdown;
 
-    final rawKeyboardFocusNode = FocusNode();
+    final rawKeyboardFocusNode = FocusNode(debugLabel: 'search');
 
     rawKeyboardFocusNode.onKey = (FocusNode node, RawKeyEvent event) {
       if (event is RawKeyDownEvent) {

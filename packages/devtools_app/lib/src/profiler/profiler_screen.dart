@@ -4,16 +4,19 @@
 
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
+import '../analytics/analytics_common.dart';
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
 import '../common_widgets.dart';
 import '../config_specific/import_export/import_export.dart';
+import '../config_specific/launch_url/launch_url.dart';
 import '../globals.dart';
 import '../notifications.dart';
 import '../screen.dart';
@@ -27,6 +30,9 @@ import 'profiler_screen_controller.dart';
 
 final profilerScreenSearchFieldKey =
     GlobalKey(debugLabel: 'ProfilerScreenSearchFieldKey');
+
+const iosProfilerWorkaround =
+    'https://github.com/flutter/flutter/issues/88466#issuecomment-905830680';
 
 class ProfilerScreen extends Screen {
   const ProfilerScreen()
@@ -151,6 +157,36 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
                   cpuProfileData == null) {
                 return _buildRecordingInfo();
               }
+              if (cpuProfileData.isEmpty) {
+                // TODO(kenz): remove the note about profiling on iOS after
+                // https://github.com/flutter/flutter/issues/88466 is fixed.
+                return Center(
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      text: 'No CPU samples recorded.',
+                      children: serviceManager.vm.operatingSystem == 'ios'
+                          ? [
+                              const TextSpan(
+                                text: '''
+\n\nIf you are attempting to profile on a real iOS device, you may be hitting a known issue. Try using this ''',
+                              ),
+                              TextSpan(
+                                text: 'workaround',
+                                style: Theme.of(context).linkTextStyle,
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () async {
+                                    await launchUrl(
+                                        iosProfilerWorkaround, context);
+                                  },
+                              ),
+                              const TextSpan(text: '.'),
+                            ]
+                          : [],
+                    ),
+                  ),
+                );
+              }
               return CpuProfiler(
                 data: cpuProfileData,
                 controller: controller.cpuProfilerController,
@@ -222,8 +258,10 @@ class ProfilerScreenControls extends StatelessWidget {
           controller: controller,
           recording: recording,
         ),
+        const SizedBox(width: defaultSpacing),
         _SecondaryControls(
           controller: controller,
+          recording: recording,
         ),
       ],
     );
@@ -236,7 +274,7 @@ class _PrimaryControls extends StatelessWidget {
     @required this.recording,
   });
 
-  static const _primaryControlsMinIncludeTextWidth = 600.0;
+  static const _primaryControlsMinIncludeTextWidth = 880.0;
 
   final ProfilerScreenController controller;
 
@@ -248,19 +286,42 @@ class _PrimaryControls extends StatelessWidget {
       children: [
         RecordButton(
           recording: recording,
-          includeTextWidth: _primaryControlsMinIncludeTextWidth,
-          onPressed: controller.startRecording,
+          minScreenWidthForTextBeforeScaling:
+              _primaryControlsMinIncludeTextWidth,
+          onPressed: () {
+            ga.select(
+              analytics_constants.cpuProfiler,
+              analytics_constants.record,
+            );
+            controller.startRecording();
+          },
         ),
         const SizedBox(width: denseSpacing),
         StopRecordingButton(
           recording: recording,
-          includeTextWidth: _primaryControlsMinIncludeTextWidth,
-          onPressed: controller.stopRecording,
+          minScreenWidthForTextBeforeScaling:
+              _primaryControlsMinIncludeTextWidth,
+          onPressed: () {
+            ga.select(
+              analytics_constants.cpuProfiler,
+              analytics_constants.stop,
+            );
+            controller.stopRecording();
+          },
         ),
-        const SizedBox(width: defaultSpacing),
+        const SizedBox(width: denseSpacing),
         ClearButton(
-          includeTextWidth: _primaryControlsMinIncludeTextWidth,
-          onPressed: recording ? null : controller.clear,
+          minScreenWidthForTextBeforeScaling:
+              _primaryControlsMinIncludeTextWidth,
+          onPressed: recording
+              ? null
+              : () {
+                  ga.select(
+                    analytics_constants.cpuProfiler,
+                    analytics_constants.clear,
+                  );
+                  controller.clear();
+                },
         ),
       ],
     );
@@ -268,11 +329,18 @@ class _PrimaryControls extends StatelessWidget {
 }
 
 class _SecondaryControls extends StatelessWidget {
-  const _SecondaryControls({@required this.controller});
+  const _SecondaryControls({
+    @required this.controller,
+    @required this.recording,
+  });
 
-  static const _secondaryControlsMinIncludeTextWidth = 1100.0;
+  static const _secondaryControlsMinIncludeTextWidth = 880.0;
+
+  static const _loadAllCpuSamplesMinIncludeTextWidth = 660.0;
 
   final ProfilerScreenController controller;
+
+  final bool recording;
 
   @override
   Widget build(BuildContext context) {
@@ -281,21 +349,40 @@ class _SecondaryControls extends StatelessWidget {
       children: [
         RefreshButton(
           label: 'Load all CPU samples',
-          onPressed: controller.loadAllSamples,
+          tooltip: 'Load all available CPU samples from the profiler',
+          minScreenWidthForTextBeforeScaling:
+              _loadAllCpuSamplesMinIncludeTextWidth,
+          onPressed: !recording
+              ? () {
+                  ga.select(
+                    analytics_constants.cpuProfiler,
+                    analytics_constants.loadAllCpuSamples,
+                  );
+                  controller.loadAllSamples();
+                }
+              : null,
         ),
-        const SizedBox(width: defaultSpacing),
+        const SizedBox(width: denseSpacing),
         ProfileGranularityDropdown(
           screenId: ProfilerScreen.id,
           profileGranularityFlagNotifier:
               controller.cpuProfilerController.profileGranularityFlagNotifier,
         ),
-        const SizedBox(width: defaultSpacing),
+        const SizedBox(width: denseSpacing),
         ExportButton(
-          onPressed: controller.cpuProfileData != null &&
+          onPressed: !recording &&
+                  controller.cpuProfileData != null &&
                   !controller.cpuProfileData.isEmpty
-              ? () => _exportPerformance(context)
+              ? () {
+                  ga.select(
+                    analytics_constants.cpuProfiler,
+                    analytics_constants.export,
+                  );
+                  _exportPerformance(context);
+                }
               : null,
-          includeTextWidth: _secondaryControlsMinIncludeTextWidth,
+          minScreenWidthForTextBeforeScaling:
+              _secondaryControlsMinIncludeTextWidth,
         ),
       ],
     );
@@ -309,4 +396,11 @@ class _SecondaryControls extends StatelessWidget {
     // export controller.
     Notifications.of(context).push(successfulExportMessage(exportedFile));
   }
+}
+
+class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
+  ProfilerScreenMetrics({this.cpuSampleCount, this.cpuStackDepth});
+
+  final int cpuSampleCount;
+  final int cpuStackDepth;
 }

@@ -5,10 +5,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
+import '../config_specific/launch_url/launch_url.dart';
 import '../config_specific/logger/logger.dart';
 import '../core/message_bus.dart';
+import '../debugger/hover.dart';
 import '../globals.dart';
 import '../notifications.dart';
 import '../scaffold.dart';
@@ -27,11 +30,11 @@ import 'label.dart';
 /// have to.
 class ServiceExtensionButtonGroup extends StatefulWidget {
   const ServiceExtensionButtonGroup({
-    this.minIncludeTextWidth,
+    this.minScreenWidthForTextBeforeScaling,
     @required this.extensions,
   });
 
-  final double minIncludeTextWidth;
+  final double minScreenWidthForTextBeforeScaling;
   final List<ToggleableServiceExtensionDescription> extensions;
 
   @override
@@ -115,9 +118,14 @@ class _ServiceExtensionButtonGroupState
         // TODO(kenz): ensure border radius is set correctly for single child
         // groups once https://github.com/flutter/flutter/issues/73725 is fixed.
         borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-        color: theme.colorScheme.contrastForeground,
+        color: theme.colorScheme.serviceExtensionButtonsTitle,
+        selectedColor: theme.colorScheme.serviceExtensionButtonsTitleSelected,
+        fillColor: theme.colorScheme.serviceExtensionButtonsFillSelected,
         textStyle: theme.textTheme.bodyText1,
-        constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+        constraints: BoxConstraints(
+          minWidth: defaultButtonHeight,
+          minHeight: defaultButtonHeight,
+        ),
         children: <Widget>[
           for (var extensionState in _extensionStates)
             _buildExtension(extensionState)
@@ -130,18 +138,24 @@ class _ServiceExtensionButtonGroupState
 
   Widget _buildExtension(ExtensionState extensionState) {
     final description = extensionState.description;
-    return Tooltip(
-      message: extensionState.isSelected
-          ? description.enabledTooltip
-          : description.disabledTooltip,
-      waitDuration: tooltipWait,
-      preferBelow: false,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+
+    return ServiceExtensionTooltip(
+      description: description,
+      child: Container(
+        height: defaultButtonHeight,
+        padding: EdgeInsets.symmetric(
+          horizontal:
+              includeText(context, widget.minScreenWidthForTextBeforeScaling)
+                  ? defaultSpacing
+                  : 0.0,
+        ),
         child: ImageIconLabel(
-          description.icon,
+          extensionState.isSelected
+              ? description.enabledIcon
+              : description.disabledIcon,
           description.description,
-          minIncludeTextWidth: widget.minIncludeTextWidth,
+          unscaledMinIncludeTextWidth:
+              widget.minScreenWidthForTextBeforeScaling,
         ),
       ),
     );
@@ -151,9 +165,12 @@ class _ServiceExtensionButtonGroupState
     final extensionState = _extensionStates[index];
     if (extensionState.isAvailable) {
       setState(() {
+        ga.select(
+          extensionState.description.gaScreenName,
+          extensionState.description.gaItem,
+        );
+
         final wasSelected = extensionState.isSelected;
-        // TODO(jacobr): support analytics.
-        // ga.select(extensionDescription.gaScreenName, extensionDescription.gaItem);
 
         serviceManager.serviceExtensionManager.setServiceExtensionState(
           extensionState.description.extension,
@@ -284,9 +301,18 @@ class _RegisteredServiceExtensionButtonState
     if (_hidden) return const SizedBox();
 
     return InkWell(
-      onTap: () => invokeAndCatchErrors(widget.action),
+      onTap: () => invokeAndCatchErrors(() async {
+        if (widget.serviceDescription.gaScreenName != null &&
+            widget.serviceDescription.gaItem != null) {
+          ga.select(
+            widget.serviceDescription.gaScreenName,
+            widget.serviceDescription.gaItem,
+          );
+        }
+        await widget.action();
+      }),
       child: Container(
-        constraints: const BoxConstraints.tightFor(
+        constraints: BoxConstraints.tightFor(
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
         ),
@@ -357,11 +383,8 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: value
-          ? widget.service.enabledTooltip
-          : widget.service.disabledTooltip,
-      waitDuration: tooltipWait,
+    return ServiceExtensionTooltip(
+      description: widget.service,
       child: InkWell(
         onTap: _onClick,
         child: Row(
@@ -459,6 +482,127 @@ mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
         });
       }
     }
+  }
+}
+
+class ServiceExtensionTooltip extends StatelessWidget {
+  const ServiceExtensionTooltip({
+    Key key,
+    @required this.description,
+    @required this.child,
+  }) : super(key: key);
+
+  final ToggleableServiceExtensionDescription description;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (description.tooltipUrl != null) {
+      return ServiceExtensionRichTooltip(
+        description: description,
+        child: child,
+      );
+    }
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final focusColor = Theme.of(context).focusColor;
+
+    return DevToolsTooltip(
+      tooltip: description.tooltip,
+      preferBelow: true,
+      child: child,
+      decoration: BoxDecoration(
+        color: colorScheme.defaultBackgroundColor,
+        border: Border.all(
+          color: focusColor,
+          width: hoverCardBorderWidth,
+        ),
+        borderRadius: BorderRadius.circular(defaultBorderRadius),
+      ),
+      textStyle: DefaultTextStyle.of(context).style,
+    );
+  }
+}
+
+/// Rich tooltip with a description and "more info" link
+class ServiceExtensionRichTooltip extends StatelessWidget {
+  const ServiceExtensionRichTooltip({
+    Key key,
+    @required this.description,
+    @required this.child,
+  }) : super(key: key);
+
+  final ToggleableServiceExtensionDescription description;
+  final Widget child;
+
+  static const double _tooltipWidth = 300.0;
+
+  void _onLinkTap(BuildContext context) {
+    launchUrl(description.tooltipUrl, context);
+
+    ga.select(
+      description.gaScreenName,
+      description.gaItemTooltipLink,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return HoverCardTooltip(
+      enabled: () => true,
+      onHover: (_) => _buildCardData(context),
+      child: child,
+    );
+  }
+
+  Future<HoverCardData> _buildCardData(BuildContext context) {
+    final textColor =
+        Theme.of(context).colorScheme.serviceExtensionButtonsTitle;
+
+    return Future.value(
+      HoverCardData(
+        position: HoverCardPosition.element,
+        width: _tooltipWidth,
+        contents: Material(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                description.tooltip,
+                style: TextStyle(color: textColor),
+              ),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: InkWell(
+                  onTap: () => _onLinkTap(context),
+                  borderRadius: BorderRadius.circular(defaultBorderRadius),
+                  child: Padding(
+                    padding: const EdgeInsets.all(denseSpacing),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          'More info',
+                          style: Theme.of(context).linkTextStyle,
+                        ),
+                        const SizedBox(width: densePadding),
+                        Icon(
+                          Icons.launch,
+                          size: tooltipIconSize,
+                          color: textColor,
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -6,9 +6,9 @@ import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/cpu_profile_test_data.dart';
 import 'support/mocks.dart';
 import 'support/utils.dart';
 
@@ -58,6 +58,24 @@ void main() {
       );
     });
 
+    test('loads filtered data by default', () async {
+      // [startMicros] and [extentMicros] are arbitrary for testing.
+      await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
+      final originalData =
+          controller.dataByTag[CpuProfilerController.userTagNone];
+      final filteredData = controller.dataNotifier.value;
+      expect(originalData.stackFrames.values.length, equals(17));
+      expect(filteredData.stackFrames.values.length, equals(12));
+
+      // The native frame filter is applied by default.
+      final originalNativeFrames =
+          originalData.stackFrames.values.where((sf) => sf.isNative).toList();
+      final filteredNativeFrames =
+          filteredData.stackFrames.values.where((sf) => sf.isNative).toList();
+      expect(originalNativeFrames.length, equals(5));
+      expect(filteredNativeFrames, isEmpty);
+    });
+
     test('selectCpuStackFrame', () async {
       expect(
         controller.dataNotifier.value.selectedStackFrame,
@@ -79,6 +97,11 @@ void main() {
     });
 
     test('matchesForSearch', () async {
+      // Disable all filtering by default for this sake of this test.
+      for (final filter in controller.toggleFilters) {
+        filter.enabled.value = false;
+      }
+
       // [startMicros] and [extentMicros] are arbitrary for testing.
       await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
       expect(
@@ -93,17 +116,22 @@ void main() {
       expect(controller.matchesForSearch('paint').length, equals(7));
 
       // Match on url.
-      expect(controller.matchesForSearch('rendering/').length, equals(9));
-      expect(controller.matchesForSearch('proxy_box.dart').length, equals(2));
-      expect(controller.matchesForSearch('dartlang-sdk').length, equals(1));
+      expect(controller.matchesForSearch('rendering/').length, equals(7));
+      expect(controller.matchesForSearch('proxy_box.dart').length, equals(1));
+      expect(controller.matchesForSearch('dart:').length, equals(3));
 
       // Match with RegExp.
       expect(
-          controller.matchesForSearch('rendering/.*\.dart').length, equals(9));
+          controller.matchesForSearch('rendering/.*\.dart').length, equals(7));
       expect(controller.matchesForSearch('RENDER.*\.paint').length, equals(6));
     });
 
     test('matchesForSearch sets isSearchMatch property', () async {
+      // Disable all filtering by default for this sake of this test.
+      for (final filter in controller.toggleFilters) {
+        filter.enabled.value = false;
+      }
+
       // [startMicros] and [extentMicros] are arbitrary for testing.
       await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
       expect(

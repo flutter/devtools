@@ -10,31 +10,28 @@ on:
     branches:
       - master
 
+# When updating this version, also update the version in
+# flutter-version.txt.
+#
+# This version should be updated periodically and should generally
+# track the latest Flutter dev release. Dev releases come out ~weekly;
+# the versions can be viewed at https://github.com/flutter/flutter/tags.
 env:
-  CHANNEL: dev
-  TRAVIS_OS_NAME: linux
+  CHANNEL: 2.4.0-4.1.pre
 
 jobs:
 
   main:
-    name: main (${{ matrix.channel }} channel)
+    name: main
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        channel:
-          - master
-          - dev
-          - beta
-          # TODO: The stable channel currently fails.
-          # - stable
     steps:
       - name: git clone
         uses: actions/checkout@v2
       - name: tool/bots.sh
         env:
           BOT: main
-          CHANNEL: ${{ matrix.channel }}
         run: ./tool/bots.sh
 
   packages:

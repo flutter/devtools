@@ -8,7 +8,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:devtools_testing/support/file_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
@@ -16,6 +15,7 @@ import 'package:vm_service/vm_service.dart';
 import '../support/chrome.dart';
 import '../support/cli_test_driver.dart';
 import '../support/devtools_server_driver.dart';
+import '../support/file_utils.dart';
 import '../support/utils.dart';
 import 'integration.dart';
 
@@ -126,7 +126,7 @@ void main() {
     }
   }, timeout: const Timeout.factor(10));
 
-  test('does not allow embedding without flag', () async {
+  test('allows embedding without flag', () async {
     final server = await DevToolsServerDriver.create();
     final httpClient = HttpClient();
     try {
@@ -137,16 +137,16 @@ void main() {
 
       final req = await httpClient.get(host, port, '/');
       final resp = await req.close();
-      expect(resp.headers.value('x-frame-options'), equals('SAMEORIGIN'));
+      expect(resp.headers.value('x-frame-options'), isNull);
     } finally {
       httpClient.close();
       server.kill();
     }
   }, timeout: const Timeout.factor(10));
 
-  test('allows embedding with flag', () async {
+  test('does not allow embedding with flag', () async {
     final server = await DevToolsServerDriver.create(
-        additionalArgs: ['--allow-embedding']);
+        additionalArgs: ['--no-allow-embedding']);
     final httpClient = HttpClient();
     try {
       final startedEvent = await server.stdout
@@ -156,7 +156,7 @@ void main() {
 
       final req = await httpClient.get(host, port, '/');
       final resp = await req.close();
-      expect(resp.headers.value('x-frame-options'), isNull);
+      expect(resp.headers.value('x-frame-options'), equals('SAMEORIGIN'));
     } finally {
       httpClient.close();
       server.kill();

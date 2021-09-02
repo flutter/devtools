@@ -12,8 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../analytics/analytics_stub.dart'
-    if (dart.library.html) '../../analytics/analytics.dart' as ga;
+import '../../analytics/analytics.dart' as ga;
 import '../../auto_dispose_mixin.dart';
 import '../../banner_messages.dart';
 import '../../common_widgets.dart';
@@ -58,12 +57,17 @@ class LegacyPerformanceScreen extends Screen {
   static const id = 'legacy-performance';
 
   static bool _shouldShowForFlutterVersion(FlutterVersion currentVersion) {
-    // TODO(kenz): once https://github.com/flutter/flutter/commit/78a96b09d64dc2a520e5b269d5cea1b9dde27d3f
-    // makes it into flutter dev channel, track the version number and use that
-    // here. We may have to add functionality to [SemanticVersion] to support
-    // versions beyond the patch number (e.g.  2.3.0-12.1.pre).
     return currentVersion != null &&
-        currentVersion < SemanticVersion(major: 2, minor: 3, patch: 1);
+        currentVersion <
+            SemanticVersion(
+              major: 2,
+              minor: 3,
+              // Specifying patch makes the version number more readable.
+              // ignore: avoid_redundant_argument_values
+              patch: 0,
+              preReleaseMajor: 16,
+              preReleaseMinor: 0,
+            );
   }
 
   @override
@@ -233,13 +237,15 @@ class LegacyPerformanceScreenBodyState
         return Row(
           children: [
             RefreshButton(
-              includeTextWidth: _primaryControlsMinIncludeTextWidth,
+              minScreenWidthForTextBeforeScaling:
+                  _primaryControlsMinIncludeTextWidth,
               onPressed:
                   (refreshing || processing) ? null : _refreshPerformanceData,
             ),
             const SizedBox(width: defaultSpacing),
             ClearButton(
-              includeTextWidth: _primaryControlsMinIncludeTextWidth,
+              minScreenWidthForTextBeforeScaling:
+                  _primaryControlsMinIncludeTextWidth,
               onPressed:
                   (refreshing || processing) ? null : _clearPerformanceData,
             ),
@@ -261,7 +267,8 @@ class LegacyPerformanceScreenBodyState
         const SizedBox(width: defaultSpacing),
         if (!serviceManager.connectedApp.isDartCliAppNow)
           ServiceExtensionButtonGroup(
-            minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
+            minScreenWidthForTextBeforeScaling:
+                _secondaryControlsMinIncludeTextWidth,
             extensions: [performanceOverlay, profileWidgetBuilds],
           ),
         // TODO(kenz): hide or disable button if http timeline logging is not
@@ -269,7 +276,8 @@ class LegacyPerformanceScreenBodyState
         const SizedBox(width: defaultSpacing),
         ExportButton(
           onPressed: _exportPerformanceData,
-          includeTextWidth: _secondaryControlsMinIncludeTextWidth,
+          minScreenWidthForTextBeforeScaling:
+              _secondaryControlsMinIncludeTextWidth,
         ),
         const SizedBox(width: defaultSpacing),
         SettingsOutlinedButton(

@@ -42,6 +42,8 @@ class TraceEvent {
 
   static const gcCategory = 'GC';
 
+  static const frameNumberArg = 'frame_number';
+
   /// The original event JSON.
   final Map<String, dynamic> json;
 
@@ -99,7 +101,7 @@ class TraceEvent {
 
   TimelineEventType _type;
 
-  TimelineEventType get type => _type ??= TimelineEventType.unknown;
+  TimelineEventType get type => _type ??= TimelineEventType.other;
 
   set type(TimelineEventType t) => _type = t;
 
@@ -116,24 +118,26 @@ int _traceEventWrapperId = 0;
 
 class TraceEventWrapper implements Comparable<TraceEventWrapper> {
   TraceEventWrapper(this.event, this.timeReceived)
-      : id = _traceEventWrapperId++;
+      : wrapperId = _traceEventWrapperId++;
   final TraceEvent event;
 
   final num timeReceived;
 
-  final int id;
+  final int wrapperId;
 
   Map<String, dynamic> get json => event.json;
 
   bool processed = false;
 
+  bool get isShaderEvent => event.args['devtoolsTag'] == 'shaders';
+
   @override
   int compareTo(TraceEventWrapper other) {
     // Order events based on their timestamps. If the events share a timestamp,
     // order them in the order we received them.
-    final compare =
-        event.timestampMicros.compareTo(other.event.timestampMicros);
-    return compare != 0 ? compare : id.compareTo(other.id);
+    final compare = (event.timestampMicros ?? 0)
+        .compareTo(other.event.timestampMicros ?? 0);
+    return compare != 0 ? compare : wrapperId.compareTo(other.wrapperId);
   }
 }
 
@@ -149,5 +153,5 @@ enum TimelineEventType {
   ui,
   raster,
   async,
-  unknown,
+  other,
 }

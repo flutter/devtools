@@ -11,35 +11,58 @@ import 'package:http/http.dart' as http;
 
 import '../model.dart';
 
+const versionArg = 'version';
+const sinceArg = 'since-tag';
+
 /// Changelog generator.
 ///
 /// Sample usage:
 /// ```
-///     $ dart tool/bin/repo_tool.dart generate-changelog
-///     Current Devtools version is 0.2.3-dev1.  Retrieving the tagged commit with the closest version number to this version.
-///     Getting the date of the tagged commit for v0.2.2.
-///     Getting commits since 2020-02-29T01:14:12Z
-///     Skipping commit marked to be ignored: Update goldens (#1800)
-///     Incrementing version number
-///     Incremented version number for the changelog from v0.2.2 to 0.2.3. Note that this is not inserted to any files other than changelog.
-///     Wrote the following output to /Users/djshuckerow/Code/github.com/DaveShuckerow/devtools/packages/devtools/CHANGELOG.md:
-///     ## 0.2.3 2020-04-15
-///     * Fix timeline for change in Flutter engine thread name (#1821)
-///     * Debugger state management cleanup (#1817)
-///     ...
+///   $dart tool/bin/repo_tool.dart generate-changelog
+///   Retrieving the most recent tag...
+///   Getting the date of the tagged commit for v2.4.0...
+///   Adding entries to the changelog for all commits since 2021-07-08T16:51:57Z...
+///   Skipping commit 9cfec998746f71bc533bd6617ae80f407560a952 because this is the commit of the previous tag
+///   Incrementing version number...
+///   Incremented version number for the changelog from 2.4.0 to 2.5.0. Note that this is not inserted to any files other than changelog.
+///   Wrote the following output to /Users/kenzieschmoll/develop/devtools/packages/devtools/CHANGELOG.md:
+///   ## 2.5.0
+///   * Fix debug buttons layout overflow [#3224](https://github.com/flutter/devtools/pull/3224)
+///   * Make return key submit connect form [#3228](https://github.com/flutter/devtools/pull/3228)
+///   * Minor analysis updates to the repo [#3225](https://github.com/flutter/devtools/pull/3225)
+///   * Always build devtools from a specified, specific sdk version [#3216](https://github.com/flutter/devtools/pull/3216)
+///   ...
 ///
-///     Please note that this script is intended to simplify the changelog writing process, not to completely replace it.
-///     Please review the generated changelog and tune it by hand to make it easily legible.
+///   Please note that this script is intended to simplify the changelog writing process, not to completely replace it.
+///   Please review the generated changelog and tune it by hand to make it easily legible.
 /// ```
 ///
-/// The command will write commits after the last tagged non-dev release
-/// into the changelog file. It will ignore commits with names strictly matching
-/// [ignoredCommitNames].  It will then add 1 to the build version number
-/// (eg 0.2.2 -> 0.2.3) when it determines the next version number.
+/// The command will write commits after the last tagged non-dev / non-dot
+/// release into the changelog file. It will ignore commits with names strictly
+/// matching [lowercaseIgnoredCommitNames].  It will then add 1 to the minor
+/// version number (eg 2.4.2 => 2.5.0).
 ///
-/// If pushing a `-dev` build or using a different version number, you can edit
-/// this by hand.
+/// If `--version` is specified from the command
+/// (e.g. dart tool/bin/repo_tool.dart generate-changelog --version=2.5.2), this
+/// version number will be used for the CHANGELOG entry.
+///
+/// If `--since-tag` is specified from the command
+/// (e.g. dart tool/bin/repo_tool.dart generate-changelog --version=2.5.2), this
+/// tag version will be used as the lower bound for commit history instead of
+/// using the most recent tagged version as the lower bound.
 class GenerateChangelogCommand extends Command {
+  GenerateChangelogCommand() {
+    argParser
+      ..addOption(
+        versionArg,
+        help: 'Specify the target changelog version',
+      )
+      ..addOption(
+        sinceArg,
+        help: 'Specify the name of the tag to mark the lower bound',
+      );
+  }
+
   // You can authorize your access if you run into a github rate limit.
   // Don't check in your passwords or auth tokens.
   static const auth = '';
@@ -48,10 +71,9 @@ class GenerateChangelogCommand extends Command {
   ///
   /// We will only check for exact matches on this, after trimming out the
   /// trailing commit number.
-  static const ignoredCommitNames = [
+  static const lowercaseIgnoredCommitNames = [
     'update goldens',
-    'Update Goldens',
-    'Update goldens'
+    'updated goldens',
   ];
 
   @override
@@ -63,86 +85,91 @@ class GenerateChangelogCommand extends Command {
 
   @override
   Future run() async {
-    final repo = DevToolsRepo.getInstance();
-    final devtoolsVersionFile =
-        await File('${repo.repoPath}/packages/devtools_app/lib/devtools.dart')
-            .readAsString();
-    const versionDeclarationPrefix = 'const String version = \'';
-    final versionDeclaration =
-        devtoolsVersionFile.indexOf(versionDeclarationPrefix);
-    final versionEnd = devtoolsVersionFile.indexOf('\';');
-    final version = devtoolsVersionFile.substring(
-        versionDeclaration + versionDeclarationPrefix.length, versionEnd);
-    final List tags = jsonDecode((await http.get(
-            Uri.https('${auth}api.github.com', '/repos/flutter/devtools/tags')))
-        .body);
+    final repo = DevToolsRepo.getInstance()!;
+    String? nextVersion = argResults?[versionArg];
+    final sinceTag = argResults?[sinceArg];
 
-    print('Current Devtools version is $version.  Retrieving the tagged commit '
-        'with the closest version number to this version.');
-    bool isDevBuild(String tagName) => tagName.split('-').length > 1;
+    final List<Map<String, dynamic>> tags = (jsonDecode((await http.get(
+                Uri.https(
+                    '${auth}api.github.com', '/repos/flutter/devtools/tags')))
+            .body) as List)
+        .cast<Map<String, dynamic>>();
+
+    bool isDevBuild(String tagName) => tagName.contains('dev');
+    bool isCherryPickRelease(String tagName) => tagName.contains('+');
     String nameOf(tag) => tag['name'];
-    var closestTag = tags.skipWhile((tag) => isDevBuild(nameOf(tag))).first;
-    for (var tag in tags) {
-      if (isDevBuild(nameOf(tag))) {
-        // This was a dev build.
-        continue;
-      }
-      final tagVersion = getVersion(nameOf(tag));
-      final closestTagVersion =
-          closestTag == null ? null : getVersion(nameOf(closestTag));
-      // TODO(djshuckerow): The script does not process dev versioning, so
-      // ignore if the version file reports a dev version.
-      final versionFileVersion =
-          isDevBuild(version) ? null : getVersion(version);
-      if ((versionFileVersion == null || tagVersion < versionFileVersion) &&
-          (closestTagVersion == null || tagVersion > closestTagVersion)) {
-        closestTag = tag;
-      }
+
+    Map<String, dynamic>? closestTag;
+    if (sinceTag != null) {
+      print('Attempting to find tag with name $sinceTag, '
+          'as specified by --$sinceArg...');
+      closestTag = tags.firstWhere((tag) => nameOf(tag) == sinceTag);
+    } else {
+      print('Retrieving the most recent tag...');
+      closestTag = tags.skipWhile((tag) {
+        final skip =
+            isDevBuild(nameOf(tag)) || isCherryPickRelease(nameOf(tag));
+        return skip;
+      }).first;
     }
 
-    print('Getting the date of the tagged commit for ${closestTag["name"]}.');
+    final commitInfo = closestTag['commit'] as Map<String, dynamic>;
+    print('Getting the date of the tagged commit for ${closestTag['name']}...');
     final taggedCommit = jsonDecode((await http.get(Uri.https(
       '${auth}api.github.com',
-      '/repos/flutter/devtools/commits/${closestTag["commit"]["sha"]}',
+      '/repos/flutter/devtools/commits/${commitInfo['sha']}',
     )))
         .body);
 
     final commitDate = taggedCommit['commit']['author']['date'];
-    print('getting commits since $commitDate');
+    print(
+        'Adding entries to the changelog for all commits since $commitDate...');
+
+    // TODO(kenz): handle cases where there are more than 100 commits.
     final uri = Uri.https(
       '${auth}api.github.com',
       '/repos/flutter/devtools/commits',
-      {'since': commitDate},
+      {
+        'since': commitDate,
+        'per_page': '100',
+      },
     );
     final commits = jsonDecode((await http.get(uri)).body);
     final changes = <String>[];
     for (var commit in commits) {
-      if (commit['sha'] == taggedCommit['sha']) continue;
+      if (commit['sha'] == taggedCommit['sha']) {
+        print(
+            'Skipping commit ${commit['sha']} because this is the commit of the previous tag');
+        continue;
+      }
       final message = commit['commit']['message'];
       if (_shouldSkip(commit['commit']['message'])) {
         print('Skipping commit marked to be ignored: $message');
         continue;
       }
-      changes.add('* ' + _sanitize(commit['commit']['message']));
-      // TODO(djshuckerow): modify the commit message to link to the commit.
+      final entry = '* ' + _sanitize(commit['commit']['message']);
+      changes.add(entry);
     }
 
-    print('Incrementing version number');
-    // TODO(djshuckerow): Support overriding the nextVersionNumber with a flag.
-    String nextVersionNumber = nameOf(closestTag).replaceFirst('v', '');
-    final List parts = nextVersionNumber.split('.');
-    parts[2] = '${int.parse(parts[2]) + 1}';
-    nextVersionNumber = parts.join('.');
-    print('Incremented version number for the changelog from '
-        '${closestTag["name"]} to $nextVersionNumber. Note that this is not '
-        'inserted to any files other than changelog.');
-    final versionDate = DateTime.now().toIso8601String().split('T').first;
+    if (nextVersion != null) {
+      print('Using specified version $nextVersion...');
+    } else {
+      print('Incrementing version number...');
+      final currentVersion = nameOf(closestTag).replaceFirst('v', '');
+      // Increment the minor version by 1 and reset the patch version to 0
+      // (e.g. 2.4.2 => 2.5.0)
+      final List<String> parts = currentVersion.split('.');
+      parts[1] = '${int.parse(parts[1]) + 1}';
+      parts[2] = '0';
+      nextVersion = parts.join('.');
+      print('Incremented version number for the changelog from '
+          '$currentVersion to $nextVersion. Note that this is not '
+          'inserted to any files other than changelog.');
+    }
+
     final changelogFile =
         File('${repo.repoPath}/packages/devtools/CHANGELOG.md');
-    final output = '## $nextVersionNumber '
-            '$versionDate\n' +
-        changes.join('\n') +
-        '\n\n';
+    final output = '## $nextVersion\n' + changes.join('\n') + '\n\n';
     await changelogFile.writeAsString(
       output + changelogFile.readAsStringSync(),
     );
@@ -155,26 +182,32 @@ class GenerateChangelogCommand extends Command {
 
   String _sanitize(String message) {
     message = message.split('\n').first;
-    final periodNumberIndex = message.lastIndexOf('. (#');
-    if (periodNumberIndex == -1) return message;
-    return message.replaceFirst('. (#', ' (#', periodNumberIndex);
+    message = message.substring(0, 1).toUpperCase() +
+        message.substring(1, message.length);
+    const prPrefix = '(#';
+    final periodNumberIndex = message.lastIndexOf('. $prPrefix');
+    if (periodNumberIndex != -1) {
+      message =
+          message.replaceFirst('. $prPrefix', prPrefix, periodNumberIndex);
+    }
+    final prIndex = message.indexOf(prPrefix);
+    final endPrIndexExclusive = message.lastIndexOf(')');
+    final pr = message.substring(
+      prIndex + prPrefix.length,
+      endPrIndexExclusive,
+    );
+    return message.substring(0, prIndex).trim() +
+        ' [#$pr](https://github.com/flutter/devtools/pull/$pr)';
   }
 
   bool _shouldSkip(String message) {
     message = message.split('\n').first;
     message = message.replaceAll(RegExp('\\(#\\d*\\)'), '').trim();
-    return ignoredCommitNames.contains(message);
+    for (final ignore in lowercaseIgnoredCommitNames) {
+      if (message.toLowerCase().contains(ignore)) {
+        return true;
+      }
+    }
+    return false;
   }
-}
-
-/// Converts versions into a monotonically-increasing integer.
-///
-/// This is used to determine which version is the most recently-pushed
-/// tagged commit. After finding this version, we take all commits pushed
-/// after the tagged commit to release.
-int getVersion(String versionNumber) {
-  final nums = versionNumber.replaceFirst('v', '').split('.');
-  return int.parse(nums[0]) * 1000000 +
-      int.parse(nums[1]) * 1000 +
-      int.parse(nums[2]);
 }

@@ -5,19 +5,15 @@
 import 'package:codicon/codicon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../call_stack.dart';
 import '../common_widgets.dart';
-import '../config_specific/host_platform/host_platform.dart';
 import '../dialogs.dart';
 import '../flex_split_column.dart';
-import '../globals.dart';
 import '../listenable.dart';
 import '../utils.dart';
 import '../screen.dart';
@@ -28,10 +24,10 @@ import '../utils.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
-import 'console.dart';
 import 'controls.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
+import 'key_sets.dart';
 import 'scripts.dart';
 import 'variables.dart';
 
@@ -42,9 +38,13 @@ class DebuggerScreen extends Screen {
           requiresDebugBuild: true,
           title: 'Debugger',
           icon: Octicons.bug,
+          showFloatingDebuggerControls: false,
         );
 
   static const id = 'debugger';
+
+  @override
+  bool showConsole(bool embed) => true;
 
   @override
   String get docPageId => screenId;
@@ -82,12 +82,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   static const breakpointsTitle = 'Breakpoints';
 
   DebuggerController controller;
-  FocusNode _libraryFilterFocusNode;
 
   @override
   void initState() {
     super.initState();
-    _libraryFilterFocusNode = FocusNode();
     ga.screen(DebuggerScreen.id);
   }
 
@@ -102,36 +100,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   @override
   void dispose() {
-    _libraryFilterFocusNode.dispose();
     super.dispose();
   }
 
   void _onLocationSelected(ScriptLocation location) {
     if (location != null) {
       controller.showScriptLocation(location);
-    }
-  }
-
-  Future<void> _toggleBreakpoint(ScriptRef script, int line) async {
-    // The VM doesn't support debugging for system isolates and will crash on
-    // a failed assert in debug mode. Disable the toggle breakpoint
-    // functionality for system isolates.
-    if (serviceManager.isolateManager.selectedIsolate.isSystemIsolate) {
-      return;
-    }
-
-    final bp = controller.breakpointsWithLocation.value.firstWhere((bp) {
-      return bp.scriptRef == script && bp.line == line;
-    }, orElse: () => null);
-
-    if (bp != null) {
-      await controller.removeBreakpoint(bp.breakpoint);
-    } else {
-      try {
-        await controller.addBreakpoint(script.id, line);
-      } catch (_) {
-        // ignore errors setting breakpoints
-      }
     }
   }
 
@@ -148,7 +122,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               controller: controller,
               scriptRef: scriptRef,
               parsedScript: parsedScript,
-              onSelected: _toggleBreakpoint,
+              onSelected: controller.toggleBreakpoint,
             );
           },
         );
@@ -159,9 +133,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       valueListenable: controller.librariesVisible,
       builder: (context, visible, _) {
         if (visible) {
-          // Focus the filter text field when the ScriptPicker opens.
-          _libraryFilterFocusNode.requestFocus();
-
           // TODO(devoncarew): Animate this opening and closing.
           return Split(
             axis: Axis.horizontal,
@@ -176,7 +147,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                     controller: controller,
                     scripts: scripts,
                     onSelected: _onLocationSelected,
-                    libraryFilterFocusNode: _libraryFilterFocusNode,
                   );
                 },
               ),
@@ -190,15 +160,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
     return Shortcuts(
       shortcuts: <LogicalKeySet, Intent>{
-        focusLibraryFilterKeySet:
-            FocusLibraryFilterIntent(_libraryFilterFocusNode, controller),
         goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
         searchInFileKeySet: SearchInFileIntent(controller),
         escapeKeySet: EscapeIntent(context, controller),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
-          FocusLibraryFilterIntent: FocusLibraryFilterAction(),
           GoToLineNumberIntent: GoToLineNumberAction(),
           SearchInFileIntent: SearchInFileAction(),
           EscapeIntent: EscapeAction(),
@@ -213,14 +180,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                 const DebuggingControls(),
                 const SizedBox(height: denseRowSpacing),
                 Expanded(
-                  child: Split(
-                    axis: Axis.vertical,
-                    initialFractions: const [0.72, 0.28],
-                    children: [
-                      codeArea,
-                      DebuggerConsole(controller: controller),
-                    ],
-                  ),
+                  child: codeArea,
                 ),
               ],
             ),
@@ -246,7 +206,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             const AreaPaneHeader(title: Text(variablesTitle)),
             AreaPaneHeader(
               title: const Text(breakpointsTitle),
-              actions: [
+              rightActions: [
                 _breakpointsRightChild(),
               ],
               rightPadding: 0.0,
@@ -328,51 +288,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     }
     final file = uri.split('/').last;
     return frame.line == null ? file : '$file ${frame.line}';
-  }
-}
-
-// TODO(kenz): consider breaking out the key binding logic out into a separate
-// file so it is easy to find.
-final LogicalKeySet focusLibraryFilterKeySet = LogicalKeySet(
-  HostPlatform.instance.isMacOS
-      ? LogicalKeyboardKey.meta
-      : LogicalKeyboardKey.control,
-  LogicalKeyboardKey.keyP,
-);
-
-final LogicalKeySet goToLineNumberKeySet = LogicalKeySet(
-  HostPlatform.instance.isMacOS
-      ? LogicalKeyboardKey.meta
-      : LogicalKeyboardKey.control,
-  LogicalKeyboardKey.keyG,
-);
-
-final LogicalKeySet searchInFileKeySet = LogicalKeySet(
-  HostPlatform.instance.isMacOS
-      ? LogicalKeyboardKey.meta
-      : LogicalKeyboardKey.control,
-  LogicalKeyboardKey.keyF,
-);
-
-final LogicalKeySet escapeKeySet = LogicalKeySet(
-  LogicalKeyboardKey.escape,
-);
-
-class FocusLibraryFilterIntent extends Intent {
-  const FocusLibraryFilterIntent(
-    this.focusNode,
-    this.debuggerController,
-  )   : assert(debuggerController != null),
-        assert(focusNode != null);
-
-  final FocusNode focusNode;
-  final DebuggerController debuggerController;
-}
-
-class FocusLibraryFilterAction extends Action<FocusLibraryFilterIntent> {
-  @override
-  void invoke(FocusLibraryFilterIntent intent) {
-    intent.debuggerController.toggleLibrariesVisible();
   }
 }
 
@@ -560,7 +475,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               tooltip: 'Resume',
               child: TextButton(
                 onPressed: controller.resume,
-                child: const Icon(
+                child: Icon(
                   Codicons.debugContinue,
                   color: Colors.green,
                   size: defaultIconSize,
@@ -571,7 +486,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               tooltip: 'Step over',
               child: TextButton(
                 onPressed: controller.stepOver,
-                child: const Icon(
+                child: Icon(
                   Codicons.debugStepOver,
                   color: Colors.black,
                   size: defaultIconSize,

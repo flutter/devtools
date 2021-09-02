@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../theme.dart';
 
 /// Stateful Checkbox Widget class using a [ValueNotifier].
 ///
@@ -111,6 +112,17 @@ TextSpan truncateTextSpan(TextSpan span, int length) {
   return truncateHelper(span);
 }
 
+/// Returns the width in pixels of the [span].
+double calculateTextSpanWidth(TextSpan span) {
+  final textPainter = TextPainter(
+    text: span,
+    textAlign: TextAlign.left,
+    textDirection: TextDirection.ltr,
+  )..layout();
+
+  return textPainter.width;
+}
+
 /// Scrollbar that is offset by the amount specified by an [offsetController].
 ///
 /// This makes it possible to create a [ListView] with both vertical and
@@ -206,5 +218,50 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
       },
       child: widget.child,
     );
+  }
+}
+
+class ColorPair {
+  const ColorPair({@required this.background, @required this.foreground});
+
+  final Color foreground;
+
+  final Color background;
+}
+
+class ThemedColorPair {
+  const ThemedColorPair({@required this.background, @required this.foreground});
+
+  factory ThemedColorPair.from(ColorPair colorPair) {
+    return ThemedColorPair(
+      foreground: ThemedColor.fromSingle(colorPair.foreground),
+      background: ThemedColor.fromSingle(colorPair.background),
+    );
+  }
+
+  final ThemedColor foreground;
+
+  final ThemedColor background;
+}
+
+/// A theme-dependent color.
+///
+/// When possible, themed colors should be specified in an extension on
+/// [ColorScheme] using the [ColorScheme.isLight] getter. However, this class
+/// may be used when access to the [BuildContext] is not available at the time
+/// the color needs to be specified.
+class ThemedColor {
+  const ThemedColor({this.light, this.dark});
+
+  const ThemedColor.fromSingle(Color color)
+      : light = color,
+        dark = color;
+
+  final Color light;
+
+  final Color dark;
+
+  Color colorFor(ColorScheme colorScheme) {
+    return colorScheme.isLight ? light : dark;
   }
 }

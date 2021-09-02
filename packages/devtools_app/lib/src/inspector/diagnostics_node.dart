@@ -91,7 +91,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Service used to retrieve more detailed information about the value of
   /// the property and its children and properties.
-  final FutureOr<ObjectGroup> inspectorService;
+  final ObjectGroup inspectorService;
 
   /// JSON describing the diagnostic node.
   final Map<String, Object> json;
@@ -274,7 +274,21 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (rawValues == null) {
       return null;
     }
-    return rawValues.toList();
+    return List<String>.from(rawValues);
+  }
+
+  /// Whether each of the values is itself a primitive value.
+  ///
+  /// For example, bool|num|string are primitive values. This is useful as for
+  /// non-primitive values, the user may want to view the value with an
+  /// interactive object debugger view to get more information on what the value
+  /// is.
+  List<bool> get primitiveValues {
+    final List<Object> rawValues = json['primitiveValues'];
+    if (rawValues == null) {
+      return null;
+    }
+    return List<bool>.from(rawValues);
   }
 
   bool get hasValues => json.containsKey('values');
@@ -457,7 +471,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       }
       if (isEnumProperty()) {
         // Populate all the enum property values.
-        return (await inspectorService)?.getEnumPropertyValues(valueRef);
+        return inspectorService?.getEnumPropertyValues(valueRef);
       }
 
       List<String> propertyNames;
@@ -474,8 +488,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
           _valueProperties = Future.value();
           return _valueProperties;
       }
-      _valueProperties = (await inspectorService)
-          ?.getDartObjectProperties(valueRef, propertyNames);
+      _valueProperties =
+          inspectorService?.getDartObjectProperties(valueRef, propertyNames);
     }
     return _valueProperties;
   }
@@ -544,7 +558,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   Future<List<RemoteDiagnosticsNode>> _getChildrenHelper() async {
-    return (await inspectorService)?.getChildren(
+    return inspectorService.getChildren(
       dartDiagnosticRef,
       isSummaryTree,
       this,
@@ -587,7 +601,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
           cachedProperties.add(
               RemoteDiagnosticsNode(element, inspectorService, true, parent));
         }
-        trackPropertiesMatchingParameters(cachedProperties);
       }
     }
     return cachedProperties;
@@ -595,71 +608,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   Future<List<RemoteDiagnosticsNode>> getProperties(
       ObjectGroup objectGroup) async {
-    return trackPropertiesMatchingParameters(
-        await objectGroup.getProperties(dartDiagnosticRef));
-  }
-
-  List<RemoteDiagnosticsNode> trackPropertiesMatchingParameters(
-      List<RemoteDiagnosticsNode> nodes) {
-    // Map locations to property nodes where available.
-    final List<InspectorSourceLocation> parameterLocations =
-        creationLocation?.getParameterLocations();
-    if (parameterLocations != null) {
-      final Map<String, InspectorSourceLocation> names = {};
-      for (InspectorSourceLocation location in parameterLocations) {
-        final String name = location.getName();
-        if (name != null) {
-          names[name] = location;
-        }
-      }
-      for (RemoteDiagnosticsNode node in nodes) {
-        node.parent = this;
-        final String name = node.name;
-        if (name != null) {
-          final InspectorSourceLocation parameterLocation = names[name];
-          if (parameterLocation != null) {
-            node.creationLocation = parameterLocation;
-          }
-        }
-      }
-    }
-    return nodes;
-  }
-
-  Future<String> get propertyDoc {
-    propertyDocFuture ??= _createPropertyDocFuture();
-    return propertyDocFuture;
-  }
-
-  Future<String> _createPropertyDocFuture() async {
-    // TODO(jacobr): We need access to the analyzer to support this feature.
-    /*
-    if (parent != null) {
-      DartVmServiceValue vmValue = inspectorService.toDartVmServiceValueForSourceLocation(parent.getValueRef());
-      if (vmValue == null) {
-       return null;
-      }
-      return inspectorService.getPropertyLocation(vmValue.getInstanceRef(), getName())
-          .thenApplyAsync((XSourcePosition sourcePosition) -> {
-      if (sourcePosition != null) {
-      final VirtualFile file = sourcePosition.getFile();
-      final int offset = sourcePosition.getOffset();
-
-      final Project project = getProject(file);
-      if (project != null) {
-      final List<HoverInformation> hovers =
-      DartAnalysisServerService.getInstance(project).analysis_getHover(file, offset);
-      if (!hovers.isEmpty()) {
-      return hovers.get(0).getDartdoc();
-      }
-      }
-      }
-      return 'Unable to find property source';
-      });
-      });
-    }
-*/
-    return Future.value('Unable to find property source');
+    return await objectGroup.getProperties(dartDiagnosticRef);
   }
 
   Widget get icon {
@@ -729,8 +678,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   Future<void> setSelectionInspector(bool uiAlreadyUpdated) async {
-    await (await inspectorService)
-        ?.setSelectionInspector(valueRef, uiAlreadyUpdated);
+    await inspectorService?.setSelectionInspector(valueRef, uiAlreadyUpdated);
   }
 }
 
@@ -769,20 +717,10 @@ class InspectorSourceLocation {
     }
     return SourcePosition(file: file, line: line - 1, column: column - 1);
   }
-
-  List<InspectorSourceLocation> getParameterLocations() {
-    if (json.containsKey('parameterLocations')) {
-      final List<Object> parametersJson = json['parameterLocations'];
-      final List<InspectorSourceLocation> ret = [];
-      for (int i = 0; i < parametersJson.length; ++i) {
-        ret.add(InspectorSourceLocation(parametersJson[i], this));
-      }
-      return ret;
-    }
-    return null;
-  }
 }
 
+// TODO(jacobr): rename this class or merge with SourcePosition class in
+// debugger_model.dart
 class SourcePosition {
   const SourcePosition({this.file, this.line, this.column});
 

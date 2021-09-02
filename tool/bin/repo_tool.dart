@@ -5,7 +5,7 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:tool/repo_tool.dart';
+import 'package:devtools_repo/repo_tool.dart';
 
 void main(List<String> args) async {
   final runner = DevToolsCommandRunner();

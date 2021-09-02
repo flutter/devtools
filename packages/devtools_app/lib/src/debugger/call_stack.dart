@@ -121,8 +121,8 @@ class _CallStackState extends State<CallStack> {
     if (isAsyncBreak) {
       return result;
     } else {
-      return Tooltip(
-        message: locationDescription == null
+      return DevToolsTooltip(
+        tooltip: locationDescription == null
             ? frameDescription
             : '$frameDescription $locationDescription',
         waitDuration: tooltipWaitLong,

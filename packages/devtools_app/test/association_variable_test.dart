@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/debugger/debugger_model.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
@@ -21,7 +20,6 @@ final libraryRef = LibraryRef(
 
 void main() {
   ServiceConnectionManager manager;
-  DebuggerController debuggerController;
 
   setUp(() {
     final service = MockVmService();
@@ -42,13 +40,6 @@ void main() {
     });
     manager = FakeServiceManager(service: service);
     setGlobal(ServiceConnectionManager, manager);
-    debuggerController = DebuggerController(initialSwitchToIsolate: false)
-      ..isolateRef = IsolateRef(
-        id: '1',
-        number: '2',
-        name: 'main',
-        isSystemIsolate: false,
-      );
   });
 
   test('Creates bound variables for Map with String key and Double value',
@@ -77,30 +68,46 @@ void main() {
       ],
       identityHashCode: null,
     );
-    final variable = Variable.create(BoundVariable(
-      name: 'test',
-      value: instance,
-      declarationTokenPos: null,
-      scopeEndTokenPos: null,
-      scopeStartTokenPos: null,
-    ));
+    final isolateRef = IsolateRef(
+      id: '433',
+      number: '1',
+      name: 'my-isolate',
+      isSystemIsolate: false,
+    );
+    final variable = Variable.create(
+      BoundVariable(
+        name: 'test',
+        value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
+      ),
+      isolateRef,
+    );
     when(manager.service.getObject(any, any)).thenAnswer((_) async {
       return instance;
     });
 
-    await debuggerController.buildVariablesTree(variable);
+    await buildVariablesTree(variable);
 
-    expect(variable.children, [
-      matchesVariable(name: '[Entry 0]', value: ''),
-    ]);
     expect(variable.children.first.children, [
       matchesVariable(name: '[key]', value: '\'Hey\''),
       matchesVariable(name: '[value]', value: '12.34'),
+    ]);
+
+    expect(variable.children, [
+      matchesVariable(name: null, value: '[Entry 0]'),
     ]);
   });
 
   test('Creates bound variables for Map with Int key and Double value',
       () async {
+    final isolateRef = IsolateRef(
+      id: '433',
+      number: '1',
+      name: 'my-isolate',
+      isSystemIsolate: false,
+    );
     final instance = Instance(
       kind: InstanceKind.kMap,
       id: '123',
@@ -125,21 +132,24 @@ void main() {
       ],
       identityHashCode: null,
     );
-    final variable = Variable.create(BoundVariable(
-      name: 'test',
-      value: instance,
-      declarationTokenPos: null,
-      scopeEndTokenPos: null,
-      scopeStartTokenPos: null,
-    ));
+    final variable = Variable.create(
+      BoundVariable(
+        name: 'test',
+        value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
+      ),
+      isolateRef,
+    );
     when(manager.service.getObject(any, any)).thenAnswer((_) async {
       return instance;
     });
 
-    await debuggerController.buildVariablesTree(variable);
+    await buildVariablesTree(variable);
 
     expect(variable.children, [
-      matchesVariable(name: '[Entry 0]', value: ''),
+      matchesVariable(name: null, value: '[Entry 0]'),
     ]);
     expect(variable.children.first.children, [
       matchesVariable(name: '[key]', value: '1'),
@@ -149,6 +159,12 @@ void main() {
 
   test('Creates bound variables for Map with Object key and Double value',
       () async {
+    final isolateRef = IsolateRef(
+      id: '433',
+      number: '1',
+      name: 'my-isolate',
+      isSystemIsolate: false,
+    );
     final instance = Instance(
       kind: InstanceKind.kMap,
       id: '123',
@@ -172,21 +188,24 @@ void main() {
       ],
       identityHashCode: null,
     );
-    final variable = Variable.create(BoundVariable(
-      name: 'test',
-      value: instance,
-      declarationTokenPos: null,
-      scopeEndTokenPos: null,
-      scopeStartTokenPos: null,
-    ));
+    final variable = Variable.create(
+      BoundVariable(
+        name: 'test',
+        value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
+      ),
+      isolateRef,
+    );
     when(manager.service.getObject(any, any)).thenAnswer((_) async {
       return instance;
     });
 
-    await debuggerController.buildVariablesTree(variable);
+    await buildVariablesTree(variable);
 
     expect(variable.children, [
-      matchesVariable(name: '[Entry 0]', value: ''),
+      matchesVariable(name: null, value: '[Entry 0]'),
     ]);
     expect(variable.children.first.children, [
       matchesVariable(name: '[key]', value: 'Foo'),
@@ -206,8 +225,8 @@ Matcher matchesVariable({
         equals(value),
       )
       .having(
-          (v) => v.boundVar,
-          'boundVar',
-          const TypeMatcher<BoundVariable>()
-              .having((bv) => bv.name, 'name', equals(name)));
+        (v) => v.name,
+        'name',
+        equals(name),
+      );
 }

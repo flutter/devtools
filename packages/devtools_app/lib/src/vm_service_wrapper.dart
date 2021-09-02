@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'globals.dart';
-import 'profiler/cpu_profile_model.dart';
+import 'profiler/cpu_profile_model.dart' hide CpuSample;
 import 'version.dart';
 
 class VmServiceWrapper implements VmService {
@@ -414,6 +414,7 @@ class VmServiceWrapper implements VmService {
     int tokenPos,
     int endTokenPos,
     bool forceCompile,
+    bool reportLines,
   }) async {
     // Workaround for https://github.com/flutter/devtools/issues/2981.
     // TODO(bkonyi): remove after Flutter stable is on Dart SDK > 2.12.
@@ -434,6 +435,7 @@ class VmServiceWrapper implements VmService {
           tokenPos: tokenPos,
           endTokenPos: endTokenPos,
           forceCompile: forceCompile,
+          reportLines: reportLines,
         ));
   }
 
@@ -688,6 +690,9 @@ class VmServiceWrapper implements VmService {
 
   @override
   Stream<Event> get onDebugEvent => _vmService.onDebugEvent;
+
+  @override
+  Stream<Event> get onProfilerEvent => _vmService.onProfilerEvent;
 
   @override
   Stream<Event> onEvent(String streamName) => _vmService.onEvent(streamName);

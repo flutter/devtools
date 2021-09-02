@@ -24,7 +24,7 @@ import 'utils.dart';
 ///
 /// When rows in the table expand or collapse, they will animate between a
 /// height of 0 and a height of [defaultRowHeight].
-const defaultRowHeight = 32.0;
+double get defaultRowHeight => scaleByFontFactor(32.0);
 
 typedef IndexedScrollableWidgetBuilder = Widget Function(
   BuildContext,
@@ -398,7 +398,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     rootsExpanded =
         List.generate(dataRoots.length, (index) => dataRoots[index].isExpanded);
     _updateItems();
-    _focusNode = FocusNode();
+    _focusNode = FocusNode(debugLabel: 'table');
   }
 
   void expandParents(T parent) {
@@ -1037,7 +1037,12 @@ abstract class ColumnRenderer<T> {
   ///
   /// This method can return `null` to indicate that the default rendering
   /// should be used instead.
-  Widget build(BuildContext context, T data, {bool isRowSelected = false});
+  Widget build(
+    BuildContext context,
+    T data, {
+    bool isRowSelected = false,
+    VoidCallback onPressed,
+  });
 }
 
 /// Callback for when a specific item in a table is selected.
@@ -1215,7 +1220,10 @@ class _TableRowState<T> extends State<TableRow<T>>
 
   @override
   Widget build(BuildContext context) {
-    final row = tableRowFor(context);
+    final row = tableRowFor(
+      context,
+      onPressed: () => widget.onPressed(widget.node),
+    );
 
     final box = SizedBox(
       height: widget.node == null ? areaPaneHeaderHeight : defaultRowHeight,
@@ -1334,7 +1342,7 @@ class _TableRowState<T> extends State<TableRow<T>>
   }
 
   /// Presents the content of this row.
-  Widget tableRowFor(BuildContext context) {
+  Widget tableRowFor(BuildContext context, {VoidCallback onPressed}) {
     Widget columnFor(ColumnData<T> column, double columnWidth) {
       Widget content;
       final node = widget.node;
@@ -1367,11 +1375,9 @@ class _TableRowState<T> extends State<TableRow<T>>
               // network_profiler_test.dart tests to pass.
               Flexible(
                 child: column.titleTooltip != null
-                    ? Tooltip(
-                        message: column.titleTooltip,
+                    ? DevToolsTooltip(
+                        tooltip: column.titleTooltip,
                         padding: const EdgeInsets.all(denseSpacing),
-                        waitDuration: tooltipWait,
-                        preferBelow: false,
                         child: title,
                       )
                     : title,
@@ -1388,6 +1394,7 @@ class _TableRowState<T> extends State<TableRow<T>>
             context,
             node,
             isRowSelected: widget.isSelected,
+            onPressed: onPressed,
           );
         }
         content ??= Text(
@@ -1396,6 +1403,15 @@ class _TableRowState<T> extends State<TableRow<T>>
           style: contentTextStyle(column),
           maxLines: 1,
         );
+
+        final tooltip = column.getTooltip(node);
+        if (tooltip != null && tooltip is String && tooltip.isNotEmpty) {
+          content = DevToolsTooltip(
+            tooltip: tooltip,
+            waitDuration: tooltipWaitLong,
+            child: content,
+          );
+        }
 
         if (column == widget.expandableColumn) {
           final expandIndicator = widget.isExpandable
@@ -1409,7 +1425,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                     size: defaultIconSize,
                   ),
                 )
-              : const SizedBox(width: defaultIconSize, height: defaultIconSize);
+              : SizedBox(width: defaultIconSize, height: defaultIconSize);
           content = Row(
             mainAxisSize: MainAxisSize.min,
             children: [

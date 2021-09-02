@@ -13,12 +13,12 @@ import '../ui/theme.dart';
 import 'utils.dart';
 
 class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
-  const VisualizeWidthAndHeightWithConstraints({
+  VisualizeWidthAndHeightWithConstraints({
     @required this.properties,
-    this.arrowHeadSize = defaultIconSize,
+    double arrowHeadSize,
     @required this.child,
     this.warnIfUnconstrained = true,
-  });
+  }) : arrowHeadSize = arrowHeadSize ?? defaultIconSize;
 
   final Widget child;
   final LayoutProperties properties;
@@ -29,8 +29,8 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
   Widget build(BuildContext context) {
     final showChildrenWidthsSum =
         properties is FlexLayoutProperties && properties.isOverflowWidth;
-    const bottomHeight = widthAndConstraintIndicatorSize;
-    const rightWidth = heightAndConstraintIndicatorSize;
+    final bottomHeight = widthAndConstraintIndicatorSize;
+    final rightWidth = heightAndConstraintIndicatorSize;
     final colorScheme = Theme.of(context).colorScheme;
 
     final showOverflowHeight =
@@ -66,7 +66,7 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
           colorScheme),
     );
     final right = Container(
-      margin: const EdgeInsets.only(
+      margin: EdgeInsets.only(
         top: margin,
         left: margin,
         bottom: bottomHeight,
@@ -80,7 +80,7 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
             Truncateable(
               truncate: !displayHeightOutsideArrow,
               child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: arrowMargin),
+                margin: EdgeInsets.symmetric(horizontal: arrowMargin),
                 child: ArrowWrapper.bidirectional(
                   arrowColor: heightIndicatorColor,
                   arrowStrokeWidth: arrowStrokeWidth,
@@ -124,7 +124,7 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
       colorScheme,
     );
     final bottom = Container(
-      margin: const EdgeInsets.only(
+      margin: EdgeInsets.only(
         top: margin,
         left: margin,
         right: rightWidth,
@@ -139,7 +139,7 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
             Truncateable(
               truncate: !displayWidthOutsideArrow,
               child: Container(
-                margin: const EdgeInsets.symmetric(vertical: arrowMargin),
+                margin: EdgeInsets.symmetric(vertical: arrowMargin),
                 child: ArrowWrapper.bidirectional(
                   arrowColor: widthIndicatorColor,
                   arrowHeadSize: arrowHeadSize,

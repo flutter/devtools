@@ -12,6 +12,7 @@ import 'globals.dart';
 import 'listenable.dart';
 import 'scaffold.dart';
 import 'theme.dart';
+import 'ui/tab.dart';
 import 'version.dart';
 
 /// Defines a page shown in the DevTools [TabBar].
@@ -28,6 +29,7 @@ abstract class Screen {
     this.requiresVmDeveloperMode = false,
     this.worksOffline = false,
     this.shouldShowForFlutterVersion,
+    this.showFloatingDebuggerControls = true,
   });
 
   const Screen.conditional({
@@ -38,6 +40,7 @@ abstract class Screen {
     bool requiresVmDeveloperMode = false,
     bool worksOffline = false,
     bool Function(FlutterVersion currentVersion) shouldShowForFlutterVersion,
+    bool showFloatingDebuggerControls = true,
     String title,
     IconData icon,
     Key tabKey,
@@ -49,10 +52,20 @@ abstract class Screen {
           requiresVmDeveloperMode: requiresVmDeveloperMode,
           worksOffline: worksOffline,
           shouldShowForFlutterVersion: shouldShowForFlutterVersion,
+          showFloatingDebuggerControls: showFloatingDebuggerControls,
           title: title,
           icon: icon,
           tabKey: tabKey,
         );
+
+  /// Whether to show floating debugger controls if the app is paused.
+  ///
+  /// If your page is negatively impacted by the app being paused you should
+  /// show debugger controls.
+  final bool showFloatingDebuggerControls;
+
+  /// Whether to show the console for this screen.
+  bool showConsole(bool embed) => false;
 
   final String screenId;
 
@@ -108,10 +121,11 @@ abstract class Screen {
 
   int get badgeCount => 0;
 
-  double approximateWidth() {
+  double approximateWidth(TextTheme textTheme) {
     final painter = TextPainter(
       text: TextSpan(
         text: title,
+        style: textTheme.bodyText1,
       ),
       textDirection: TextDirection.ltr,
     )..layout();
@@ -128,7 +142,7 @@ abstract class Screen {
       valueListenable:
           serviceManager.errorBadgeManager.errorCountNotifier(screenId),
       builder: (context, count, _) {
-        final tab = Tab(
+        final tab = DevToolsTab(
           key: tabKey,
           child: Row(
             children: <Widget>[
@@ -147,6 +161,7 @@ abstract class Screen {
           final painter = TextPainter(
             text: TextSpan(
               text: title,
+              style: Theme.of(context).regularTextStyle,
             ),
             textDirection: TextDirection.ltr,
           )..layout();
@@ -207,22 +222,25 @@ bool shouldShowScreen(Screen screen) {
   if (offlineMode) {
     return screen.worksOffline;
   }
+  // No sense in ever showing screens in non-offline mode unless the service
+  // is available. This also avoids odd edge cases where we could show screens
+  // while the ServiceManager is still initializing.
+  if (!serviceManager.isServiceAvailable ||
+      !serviceManager.connectedApp.connectedAppInitialized) return false;
+
   if (screen.requiresLibrary != null) {
-    if (!serviceManager.isServiceAvailable ||
-        !serviceManager.isolateManager.selectedIsolateAvailable.isCompleted ||
+    if (serviceManager.isolateManager.mainIsolate.value == null ||
         !serviceManager.libraryUriAvailableNow(screen.requiresLibrary)) {
       return false;
     }
   }
   if (screen.requiresDartVm) {
-    if (!serviceManager.isServiceAvailable ||
-        !serviceManager.connectedApp.isRunningOnDartVM) {
+    if (!serviceManager.connectedApp.isRunningOnDartVM) {
       return false;
     }
   }
   if (screen.requiresDebugBuild) {
-    if (!serviceManager.isServiceAvailable ||
-        serviceManager.connectedApp.isProfileBuildNow) {
+    if (serviceManager.connectedApp.isProfileBuildNow) {
       return false;
     }
   }
@@ -232,10 +250,9 @@ bool shouldShowScreen(Screen screen) {
     }
   }
   if (screen.shouldShowForFlutterVersion != null) {
-    if (!serviceManager.isServiceAvailable ||
-        (serviceManager.connectedApp.isFlutterAppNow &&
-            !screen.shouldShowForFlutterVersion(
-                serviceManager.connectedApp.flutterVersionNow))) {
+    if (serviceManager.connectedApp.isFlutterAppNow &&
+        !screen.shouldShowForFlutterVersion(
+            serviceManager.connectedApp.flutterVersionNow)) {
       return false;
     }
   }

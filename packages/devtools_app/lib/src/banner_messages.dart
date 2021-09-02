@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'common_widgets.dart';
+import 'config_specific/launch_url/launch_url.dart';
 import 'globals.dart';
 import 'screen.dart';
 import 'theme.dart';
@@ -18,6 +19,9 @@ const _runInProfileModeDocsUrl =
 
 const _profileGranularityDocsUrl =
     'https://flutter.dev/docs/development/tools/devtools/performance#profile-granularity';
+
+const preCompileShadersDocsUrl =
+    'https://flutter.dev/docs/perf/rendering/shader#how-to-use-sksl-warmup';
 
 class BannerMessagesController {
   final _messages = <String, ValueNotifier<List<BannerMessage>>>{};
@@ -147,14 +151,24 @@ class BannerMessage extends StatelessWidget {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   headerText,
                   style: Theme.of(context)
                       .textTheme
-                      .headline6
+                      .bodyText1
                       .copyWith(color: foregroundColor),
                 ),
+                const SizedBox(width: defaultSpacing),
+                Expanded(
+                  child: RichText(
+                    text: TextSpan(
+                      children: textSpans,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: defaultSpacing),
                 CircularIconButton(
                   icon: Icons.close,
                   backgroundColor: backgroundColor,
@@ -166,12 +180,6 @@ class BannerMessage extends StatelessWidget {
                       .removeMessage(this, dismiss: true),
                 ),
               ],
-            ),
-            const SizedBox(height: defaultSpacing),
-            RichText(
-              text: TextSpan(
-                children: textSpans,
-              ),
             ),
           ],
         ),
@@ -226,27 +234,33 @@ class DebugModePerformanceMessage {
     return _BannerError(
       key: Key('DebugModePerformanceMessage - $screenId'),
       textSpans: [
-        const TextSpan(
+        TextSpan(
           text: '''
 You are running your app in debug mode. Debug mode performance is not indicative of release performance.
-
 Relaunch your application with the '--profile' argument, or ''',
-          style: TextStyle(color: _BannerError.foreground),
+          style: TextStyle(
+            color: _BannerError.foreground,
+            fontSize: defaultFontSize,
+          ),
         ),
         TextSpan(
           text: 'relaunch in profile mode from VS Code or IntelliJ',
-          style: const TextStyle(
+          style: TextStyle(
             decoration: TextDecoration.underline,
             color: _BannerError.linkColor,
+            fontSize: defaultFontSize,
           ),
           recognizer: TapGestureRecognizer()
             ..onTap = () async {
               await launchUrl(_runInProfileModeDocsUrl, context);
             },
         ),
-        const TextSpan(
+        TextSpan(
           text: '.',
-          style: TextStyle(color: _BannerError.foreground),
+          style: TextStyle(
+            color: _BannerError.foreground,
+            fontSize: defaultFontSize,
+          ),
         ),
       ],
       screenId: screenId,
@@ -263,15 +277,70 @@ class ProviderUnknownErrorBanner {
     return _BannerError(
       key: Key('ProviderUnknownErrorBanner - $screenId'),
       screenId: screenId,
-      textSpans: const [
+      textSpans: [
         TextSpan(
           text: '''
 DevTools failed to connect with package:provider.
 
 This could be caused by an older version of package:provider; please make sure that you are using version >=5.0.0.''',
-          style: TextStyle(color: _BannerError.foreground),
+          style: TextStyle(
+            color: _BannerError.foreground,
+            fontSize: defaultFontSize,
+          ),
         ),
       ],
+    );
+  }
+}
+
+class ShaderJankMessage {
+  const ShaderJankMessage(
+    this.screenId, {
+    @required this.jankyFramesCount,
+    @required this.jankDuration,
+  });
+
+  final String screenId;
+
+  final int jankyFramesCount;
+
+  final Duration jankDuration;
+
+  Widget build(BuildContext context) {
+    return _BannerError(
+      key: Key('ShaderJankMessage - $screenId'),
+      textSpans: [
+        TextSpan(
+          text: '''
+Shader compilation jank detected. $jankyFramesCount ${pluralize('frame', jankyFramesCount)} janked with a total of ${msText(jankDuration)} spent in shader compilation.
+
+To pre-compile shaders, see the instructions at ''',
+          style: TextStyle(
+            color: _BannerError.foreground,
+            fontSize: defaultFontSize,
+          ),
+        ),
+        TextSpan(
+          text: preCompileShadersDocsUrl,
+          style: TextStyle(
+            decoration: TextDecoration.underline,
+            color: _BannerError.linkColor,
+            fontSize: defaultFontSize,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () async {
+              await launchUrl(preCompileShadersDocsUrl, context);
+            },
+        ),
+        TextSpan(
+          text: '.',
+          style: TextStyle(
+            color: _BannerError.foreground,
+            fontSize: defaultFontSize,
+          ),
+        ),
+      ],
+      screenId: screenId,
     );
   }
 }
@@ -288,25 +357,32 @@ class HighProfileGranularityMessage {
     return _BannerWarning(
       key: key,
       textSpans: [
-        const TextSpan(
+        TextSpan(
           text: '''
 You are opting in to a high CPU sampling rate. This may affect the performance of your application. Please read our ''',
-          style: TextStyle(color: _BannerWarning.foreground),
+          style: TextStyle(
+            color: _BannerWarning.foreground,
+            fontSize: defaultFontSize,
+          ),
         ),
         TextSpan(
           text: 'documentation',
-          style: const TextStyle(
+          style: TextStyle(
             decoration: TextDecoration.underline,
             color: _BannerWarning.linkColor,
+            fontSize: defaultFontSize,
           ),
           recognizer: TapGestureRecognizer()
             ..onTap = () async {
               await launchUrl(_profileGranularityDocsUrl, context);
             },
         ),
-        const TextSpan(
+        TextSpan(
           text: ' to understand the trade-offs associated with this setting.',
-          style: TextStyle(color: _BannerWarning.foreground),
+          style: TextStyle(
+            color: _BannerWarning.foreground,
+            fontSize: defaultFontSize,
+          ),
         ),
       ],
       screenId: screenId,
@@ -323,27 +399,33 @@ class DebugModeMemoryMessage {
     return _BannerWarning(
       key: Key('DebugModeMemoryMessage - $screenId'),
       textSpans: [
-        const TextSpan(
+        TextSpan(
           text: '''
 You are running your app in debug mode. Absolute memory usage may be higher in a debug build than in a release build.
-
 For the most accurate absolute memory stats, relaunch your application with the '--profile' argument, or ''',
-          style: TextStyle(color: _BannerWarning.foreground),
+          style: TextStyle(
+            color: _BannerWarning.foreground,
+            fontSize: defaultFontSize,
+          ),
         ),
         TextSpan(
           text: 'relaunch in profile mode from VS Code or IntelliJ',
-          style: const TextStyle(
+          style: TextStyle(
             decoration: TextDecoration.underline,
             color: _BannerWarning.linkColor,
+            fontSize: defaultFontSize,
           ),
           recognizer: TapGestureRecognizer()
             ..onTap = () async {
               await launchUrl(_runInProfileModeDocsUrl, context);
             },
         ),
-        const TextSpan(
+        TextSpan(
           text: '.',
-          style: TextStyle(color: _BannerWarning.foreground),
+          style: TextStyle(
+            color: _BannerWarning.foreground,
+            fontSize: defaultFontSize,
+          ),
         ),
       ],
       screenId: screenId,

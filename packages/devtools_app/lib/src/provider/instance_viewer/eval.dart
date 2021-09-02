@@ -5,7 +5,9 @@
 /// A few utilities related to evaluating dart code
 library eval;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../eval_on_dart_library.dart';
 import '../../globals.dart';
@@ -35,11 +37,12 @@ final libraryEvalProvider =
     FutureProviderFamily<EvalOnDartLibrary, String>((ref, libraryPath) async {
   final service = await ref.watch(serviceProvider.last);
 
-  final eval = EvalOnDartLibrary([libraryPath], service);
+  final eval = EvalOnDartLibrary(libraryPath, service);
   ref.onDispose(eval.dispose);
   return eval;
 });
 
-final hotRestartEventProvider = AutoDisposeStreamProvider<void>((ref) {
-  return serviceManager.isolateManager.onSelectedIsolateChanged;
+final hotRestartEventProvider =
+    ChangeNotifierProvider<ValueNotifier<IsolateRef>>((ref) {
+  return serviceManager.isolateManager.selectedIsolate;
 });

@@ -6,13 +6,11 @@ import 'dart:io';
 
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/inspector_screen.dart';
-import 'package:devtools_app/src/inspector/inspector_service.dart';
-import 'package:devtools_testing/support/flutter_test_driver.dart'
-    show FlutterRunConfiguration;
-import 'package:devtools_testing/support/flutter_test_environment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'support/flutter_test_environment.dart';
 import 'support/utils.dart';
 import 'support/wrappers.dart';
 
@@ -30,27 +28,20 @@ void main() async {
     const FlutterRunConfiguration(withDebugger: true),
   );
 
-  InspectorService inspectorService;
-
   env.afterEverySetup = () async {
-    inspectorService = await InspectorService.create(env.service);
     if (env.reuseTestEnvironment) {
       // Ensure the previous test did not set the selection on the device.
       // TODO(jacobr): add a proper method to WidgetInspectorService that does
       // this. setSelection currently ignores null selection requests which is
       // a misfeature.
-      await inspectorService.inspectorLibrary.eval(
+
+      await serviceManager.inspectorService.inspectorLibrary.eval(
         'WidgetInspectorService.instance.selection.clear()',
         isAlive: null,
       );
     }
 
-    await inspectorService.inferPubRootDirectoryIfNeeded();
-  };
-
-  env.beforeEveryTearDown = () async {
-    inspectorService?.dispose();
-    inspectorService = null;
+    await serviceManager.inspectorService.inferPubRootDirectoryIfNeeded();
   };
 
   group('screenshot tests', () {
@@ -67,7 +58,7 @@ void main() async {
       const screen = InspectorScreen();
       await tester.pumpWidget(
           wrapWithInspectorControllers(Builder(builder: screen.build)));
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
       final InspectorScreenBodyState state =
           tester.state(find.byType(InspectorScreenBody));
       final controller = state.inspectorController;

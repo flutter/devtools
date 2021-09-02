@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:ansicolor/ansicolor.dart';
-import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/debugger/console.dart';
 import 'package:devtools_app/src/debugger/controls.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
@@ -25,6 +26,12 @@ void main() {
   DebuggerScreen screen;
   FakeServiceManager fakeServiceManager;
   MockDebuggerController debuggerController;
+  fakeServiceManager = FakeServiceManager();
+  when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+  setGlobal(ServiceConnectionManager, fakeServiceManager);
+
+  const windowSize = Size(4000.0, 4000.0);
+  const smallWindowSize = Size(1000.0, 1000.0);
 
   group('DebuggerScreen', () {
     Future<void> pumpDebuggerScreen(
@@ -35,42 +42,26 @@ void main() {
       ));
     }
 
-    setUp(() async {
-      fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+    Future<void> pumpConsole(
+        WidgetTester tester, DebuggerController controller) async {
+      await tester.pumpWidget(wrapWithControllers(
+        Row(
+          children: [
+            Flexible(child: DebuggerConsole.buildHeader()),
+            const Expanded(child: DebuggerConsole()),
+          ],
+        ),
+        debugger: controller,
+      ));
+    }
+
+    setUp(() {
       when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
           .thenReturn(ValueNotifier<int>(0));
 
       screen = const DebuggerScreen();
 
-      debuggerController = MockDebuggerController();
-      when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
-      when(debuggerController.resuming).thenReturn(ValueNotifier(false));
-      when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
-      when(debuggerController.isSystemIsolate).thenReturn(false);
-      when(debuggerController.breakpointsWithLocation)
-          .thenReturn(ValueNotifier([]));
-      when(debuggerController.librariesVisible)
-          .thenReturn(ValueNotifier(false));
-      when(debuggerController.currentScriptRef).thenReturn(ValueNotifier(null));
-      when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
-      when(debuggerController.selectedBreakpoint)
-          .thenReturn(ValueNotifier(null));
-      when(debuggerController.stackFramesWithLocation)
-          .thenReturn(ValueNotifier([]));
-      when(debuggerController.selectedStackFrame)
-          .thenReturn(ValueNotifier(null));
-      when(debuggerController.hasTruncatedFrames)
-          .thenReturn(ValueNotifier(false));
-      when(debuggerController.stdio)
-          .thenReturn(ValueNotifier([ConsoleLine.text('')]));
-      when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
-      when(debuggerController.exceptionPauseMode)
-          .thenReturn(ValueNotifier('Unhandled'));
-      when(debuggerController.variables).thenReturn(ValueNotifier([]));
-      when(debuggerController.currentParsedScript)
-          .thenReturn(ValueNotifier<ParsedScript>(null));
+      debuggerController = MockDebuggerController.withDefaults();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -78,11 +69,11 @@ void main() {
       expect(find.text('Debugger'), findsOneWidget);
     });
 
-    testWidgets('has Console / stdio area', (WidgetTester tester) async {
-      when(debuggerController.stdio)
-          .thenReturn(ValueNotifier([ConsoleLine.text('test stdio')]));
+    testWidgetsWithWindowSize('has Console / stdio area', windowSize,
+        (WidgetTester tester) async {
+      serviceManager.consoleService.appendStdio('test stdio');
 
-      await pumpDebuggerScreen(tester, debuggerController);
+      await pumpConsole(tester, debuggerController);
 
       expect(find.text('Console'), findsOneWidget);
 
@@ -90,12 +81,12 @@ void main() {
       expect(find.selectableText('test stdio'), findsOneWidget);
     });
 
-    testWidgets('Console area shows processed ansi text',
+    testWidgetsWithWindowSize(
+        'Console area shows processed ansi text', windowSize,
         (WidgetTester tester) async {
-      when(debuggerController.stdio)
-          .thenReturn(ValueNotifier([ConsoleLine.text(_ansiCodesOutput())]));
+      serviceManager.consoleService.appendStdio(_ansiCodesOutput());
 
-      await pumpDebuggerScreen(tester, debuggerController);
+      await pumpConsole(tester, debuggerController);
 
       final finder =
           find.selectableText('Ansi color codes processed for console');
@@ -117,42 +108,33 @@ void main() {
     });
 
     group('ConsoleControls', () {
-      testWidgets('Console Controls are rendered disabled when stdio is empty',
+      testWidgetsWithWindowSize(
+          'Tapping the Console Clear button clears stdio.', windowSize,
           (WidgetTester tester) async {
-        when(debuggerController.stdio).thenReturn(ValueNotifier([]));
+        serviceManager.consoleService.clearStdio();
+        serviceManager.consoleService.appendStdio(_ansiCodesOutput());
 
-        await pumpDebuggerScreen(tester, debuggerController);
-
-        expect(find.byKey(DebuggerConsole.clearStdioButtonKey), findsOneWidget);
-        expect(find.byKey(DebuggerConsole.copyToClipboardButtonKey),
-            findsOneWidget);
-
-        final clearStdioElement =
-            find.byKey(DebuggerConsole.clearStdioButtonKey).evaluate().first;
-        final clearStdioButton = clearStdioElement.widget as ToolbarAction;
-        expect(clearStdioButton.onPressed, isNull);
-      });
-
-      testWidgets('Tapping the Console Clear button clears stdio.',
-          (WidgetTester tester) async {
-        when(debuggerController.stdio)
-            .thenReturn(ValueNotifier([ConsoleLine.text(_ansiCodesOutput())]));
-
-        await pumpDebuggerScreen(tester, debuggerController);
+        await pumpConsole(tester, debuggerController);
 
         final clearButton = find.byKey(DebuggerConsole.clearStdioButtonKey);
         expect(clearButton, findsOneWidget);
 
         await tester.tap(clearButton);
 
-        verify(debuggerController.clearStdio());
+        expect(serviceManager.consoleService.stdio.value, isEmpty);
       });
 
+      final _stdio = ['First line', _ansiCodesOutput(), 'Third line'];
+
+      void _appendStdioLines() {
+        for (var line in _stdio) {
+          serviceManager.consoleService.appendStdio('$line\n');
+        }
+      }
+
       group('Clipboard', () {
+        _appendStdioLines();
         var _clipboardContents = '';
-        final _stdio = ['First line', _ansiCodesOutput(), 'Third line']
-            .map((text) => ConsoleLine.text(text))
-            .toList();
         final _expected = _stdio.join('\n');
 
         setUp(() {
@@ -180,12 +162,12 @@ void main() {
           SystemChannels.platform.setMockMethodCallHandler(null);
         });
 
-        testWidgets(
+        testWidgetsWithWindowSize(
             'Tapping the Copy to Clipboard button attempts to copy stdio to clipboard.',
-            (WidgetTester tester) async {
-          when(debuggerController.stdio).thenReturn(ValueNotifier(_stdio));
+            windowSize, (WidgetTester tester) async {
+          _appendStdioLines();
 
-          await pumpDebuggerScreen(tester, debuggerController);
+          await pumpConsole(tester, debuggerController);
 
           final copyButton =
               find.byKey(DebuggerConsole.copyToClipboardButtonKey);
@@ -200,7 +182,48 @@ void main() {
       });
     });
 
-    testWidgets('Libraries hidden', (WidgetTester tester) async {
+    group('Codeview', () {
+      setUp(() {
+        final scriptsHistory = ScriptsHistory();
+        scriptsHistory.pushEntry(mockScript);
+        when(debuggerController.currentScriptRef)
+            .thenReturn(ValueNotifier(mockScriptRef));
+        when(debuggerController.currentParsedScript)
+            .thenReturn(ValueNotifier(mockParsedScript));
+        when(debuggerController.showSearchInFileField)
+            .thenReturn(ValueNotifier(false));
+        when(debuggerController.scriptsHistory).thenReturn(scriptsHistory);
+        when(debuggerController.searchMatches).thenReturn(ValueNotifier([]));
+        when(debuggerController.activeSearchMatch)
+            .thenReturn(ValueNotifier(null));
+      });
+
+      testWidgetsWithWindowSize(
+          'has a horizontal and a vertical scrollbar', smallWindowSize,
+          (WidgetTester tester) async {
+        await pumpDebuggerScreen(tester, debuggerController);
+
+        // TODO(elliette): https://github.com/flutter/flutter/pull/88152 fixes
+        // this so that forcing a scroll event is no longer necessary. Remove
+        // once the change is in the stable release.
+        debuggerController.showScriptLocation(ScriptLocation(mockScriptRef,
+            location: SourcePosition(line: 50, column: 50)));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(Scrollbar), findsNWidgets(2));
+        expect(find.byKey(const Key('debuggerCodeViewVerticalScrollbarKey')),
+            findsOneWidget);
+        expect(find.byKey(const Key('debuggerCodeViewHorizontalScrollbarKey')),
+            findsOneWidget);
+        await expectLater(
+          find.byKey(DebuggerScreenBody.codeViewKey),
+          matchesGoldenFile('goldens/codeview_scrollbars.png'),
+        );
+      }, skip: !Platform.isMacOS);
+    });
+
+    testWidgetsWithWindowSize('Libraries hidden', windowSize,
+        (WidgetTester tester) async {
       final scripts = [
         ScriptRef(uri: 'package:/test/script.dart', id: 'test-script')
       ];
@@ -211,10 +234,11 @@ void main() {
       when(debuggerController.librariesVisible)
           .thenReturn(ValueNotifier(false));
       await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('Libraries'), findsNothing);
+      expect(find.text('Libraries'), findsOneWidget);
     });
 
-    testWidgets('Libraries visible', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('Libraries visible', windowSize,
+        (WidgetTester tester) async {
       final scripts = [
         ScriptRef(uri: 'package:test/script.dart', id: 'test-script')
       ];
@@ -224,13 +248,15 @@ void main() {
       // Libraries view is shown
       when(debuggerController.librariesVisible).thenReturn(ValueNotifier(true));
       await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('Libraries'), findsOneWidget);
+      // One for the button and one for the title of the Libraries view.
+      expect(find.text('Libraries'), findsNWidgets(2));
 
       // test for items in the libraries tree
       expect(find.text(scripts.first.uri.split('/').first), findsOneWidget);
     });
 
-    testWidgets('Breakpoints show items', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('Breakpoints show items', windowSize,
+        (WidgetTester tester) async {
       final breakpoints = [
         Breakpoint(
           breakpointNumber: 1,
@@ -257,7 +283,6 @@ void main() {
           .thenReturn(ValueNotifier(breakpointsWithLocation));
 
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
-      when(debuggerController.stdio).thenReturn(ValueNotifier([]));
       when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
 
       await pumpDebuggerScreen(tester, debuggerController);
@@ -273,8 +298,7 @@ void main() {
       );
     });
 
-    testWidgetsWithWindowSize(
-        'Call Stack shows items', const Size(1000.0, 4000.0),
+    testWidgetsWithWindowSize('Call Stack shows items', windowSize,
         (WidgetTester tester) async {
       final stackFrames = [
         Frame(
@@ -455,7 +479,8 @@ void main() {
       };
     }
 
-    testWidgets('debugger controls running', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('debugger controls running', windowSize,
+        (WidgetTester tester) async {
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
         debugger: debuggerController,
@@ -474,7 +499,8 @@ void main() {
       expect(resume.onPressed, isNull);
     });
 
-    testWidgets('debugger controls paused', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('debugger controls paused', windowSize,
+        (WidgetTester tester) async {
       when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
       when(debuggerController.stackFramesWithLocation)
           .thenReturn(ValueNotifier([
@@ -515,7 +541,8 @@ void main() {
       expect(resume.onPressed, isNotNull);
     });
 
-    testWidgets('debugger controls break on exceptions',
+    testWidgetsWithWindowSize(
+        'debugger controls break on exceptions', windowSize,
         (WidgetTester tester) async {
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
@@ -613,124 +640,157 @@ final libraryRef = LibraryRef(
   id: 'lib-id-1',
 );
 
+final isolateRef = IsolateRef(
+  id: '433',
+  number: '1',
+  name: 'my-isolate',
+  isSystemIsolate: false,
+);
+
 final testVariables = [
-  Variable.create(BoundVariable(
-    name: 'Root 1',
-    value: InstanceRef(
-      id: 'ref1',
-      kind: InstanceKind.kList,
-      classRef: ClassRef(
-        name: '_GrowableList',
-        id: 'ref2',
-        library: libraryRef,
+  Variable.create(
+    BoundVariable(
+      name: 'Root 1',
+      value: InstanceRef(
+        id: 'ref1',
+        kind: InstanceKind.kList,
+        classRef: ClassRef(
+          name: '_GrowableList',
+          id: 'ref2',
+          library: libraryRef,
+        ),
+        length: 2,
+        identityHashCode: null,
       ),
-      length: 2,
-      identityHashCode: null,
+      declarationTokenPos: null,
+      scopeEndTokenPos: null,
+      scopeStartTokenPos: null,
     ),
-    declarationTokenPos: null,
-    scopeEndTokenPos: null,
-    scopeStartTokenPos: null,
-  ))
-    ..addAllChildren([
-      Variable.create(BoundVariable(
-        name: '0',
-        value: InstanceRef(
-          id: 'ref3',
-          kind: InstanceKind.kInt,
-          classRef: ClassRef(name: 'Integer', id: 'ref4', library: libraryRef),
-          valueAsString: '3',
-          valueAsStringIsTruncated: false,
-          identityHashCode: null,
+    isolateRef,
+  )..addAllChildren([
+      Variable.create(
+        BoundVariable(
+          name: '0',
+          value: InstanceRef(
+            id: 'ref3',
+            kind: InstanceKind.kInt,
+            classRef:
+                ClassRef(name: 'Integer', id: 'ref4', library: libraryRef),
+            valueAsString: '3',
+            valueAsStringIsTruncated: false,
+            identityHashCode: null,
+          ),
+          declarationTokenPos: null,
+          scopeEndTokenPos: null,
+          scopeStartTokenPos: null,
         ),
-        declarationTokenPos: null,
-        scopeEndTokenPos: null,
-        scopeStartTokenPos: null,
-      )),
-      Variable.create(BoundVariable(
-        name: '1',
-        value: InstanceRef(
-          id: 'ref5',
-          kind: InstanceKind.kInt,
-          classRef: ClassRef(name: 'Integer', id: 'ref6', library: libraryRef),
-          valueAsString: '4',
-          valueAsStringIsTruncated: false,
-          identityHashCode: null,
+        isolateRef,
+      ),
+      Variable.create(
+        BoundVariable(
+          name: '1',
+          value: InstanceRef(
+            id: 'ref5',
+            kind: InstanceKind.kInt,
+            classRef:
+                ClassRef(name: 'Integer', id: 'ref6', library: libraryRef),
+            valueAsString: '4',
+            valueAsStringIsTruncated: false,
+            identityHashCode: null,
+          ),
+          declarationTokenPos: null,
+          scopeEndTokenPos: null,
+          scopeStartTokenPos: null,
         ),
-        declarationTokenPos: null,
-        scopeEndTokenPos: null,
-        scopeStartTokenPos: null,
-      )),
+        isolateRef,
+      ),
     ]),
-  Variable.create(BoundVariable(
-    name: 'Root 2',
-    value: InstanceRef(
-      id: 'ref7',
-      kind: InstanceKind.kMap,
-      classRef: ClassRef(
-          name: '_InternalLinkedHashmap', id: 'ref8', library: libraryRef),
-      length: 2,
-      identityHashCode: null,
+  Variable.create(
+    BoundVariable(
+      name: 'Root 2',
+      value: InstanceRef(
+        id: 'ref7',
+        kind: InstanceKind.kMap,
+        classRef: ClassRef(
+            name: '_InternalLinkedHashmap', id: 'ref8', library: libraryRef),
+        length: 2,
+        identityHashCode: null,
+      ),
+      declarationTokenPos: null,
+      scopeEndTokenPos: null,
+      scopeStartTokenPos: null,
     ),
-    declarationTokenPos: null,
-    scopeEndTokenPos: null,
-    scopeStartTokenPos: null,
-  ))
-    ..addAllChildren([
-      Variable.create(BoundVariable(
-        name: "['key1']",
-        value: InstanceRef(
-          id: 'ref9',
-          kind: InstanceKind.kDouble,
-          classRef: ClassRef(name: 'Double', id: 'ref10', library: libraryRef),
-          valueAsString: '1.0',
-          valueAsStringIsTruncated: false,
-          identityHashCode: null,
+    isolateRef,
+  )..addAllChildren([
+      Variable.create(
+        BoundVariable(
+          name: "['key1']",
+          value: InstanceRef(
+            id: 'ref9',
+            kind: InstanceKind.kDouble,
+            classRef:
+                ClassRef(name: 'Double', id: 'ref10', library: libraryRef),
+            valueAsString: '1.0',
+            valueAsStringIsTruncated: false,
+            identityHashCode: null,
+          ),
+          declarationTokenPos: null,
+          scopeEndTokenPos: null,
+          scopeStartTokenPos: null,
         ),
-        declarationTokenPos: null,
-        scopeEndTokenPos: null,
-        scopeStartTokenPos: null,
-      )),
-      Variable.create(BoundVariable(
-        name: "['key2']",
-        value: InstanceRef(
-          id: 'ref11',
-          kind: InstanceKind.kDouble,
-          classRef: ClassRef(name: 'Double', id: 'ref12', library: libraryRef),
-          valueAsString: '1.1',
-          valueAsStringIsTruncated: false,
-          identityHashCode: null,
+        isolateRef,
+      ),
+      Variable.create(
+        BoundVariable(
+          name: "['key2']",
+          value: InstanceRef(
+            id: 'ref11',
+            kind: InstanceKind.kDouble,
+            classRef:
+                ClassRef(name: 'Double', id: 'ref12', library: libraryRef),
+            valueAsString: '1.1',
+            valueAsStringIsTruncated: false,
+            identityHashCode: null,
+          ),
+          declarationTokenPos: null,
+          scopeEndTokenPos: null,
+          scopeStartTokenPos: null,
         ),
-        declarationTokenPos: null,
-        scopeEndTokenPos: null,
-        scopeStartTokenPos: null,
-      )),
+        isolateRef,
+      ),
     ]),
-  Variable.create(BoundVariable(
-    name: 'Root 3',
-    value: InstanceRef(
-      id: 'ref13',
-      kind: InstanceKind.kString,
-      classRef: ClassRef(name: 'String', id: 'ref14', library: libraryRef),
-      valueAsString: 'test str',
-      valueAsStringIsTruncated: true,
-      identityHashCode: null,
+  Variable.create(
+    BoundVariable(
+      name: 'Root 3',
+      value: InstanceRef(
+        id: 'ref13',
+        kind: InstanceKind.kString,
+        classRef: ClassRef(name: 'String', id: 'ref14', library: libraryRef),
+        valueAsString: 'test str',
+        valueAsStringIsTruncated: true,
+        identityHashCode: null,
+      ),
+      declarationTokenPos: null,
+      scopeEndTokenPos: null,
+      scopeStartTokenPos: null,
     ),
-    declarationTokenPos: null,
-    scopeEndTokenPos: null,
-    scopeStartTokenPos: null,
-  )),
-  Variable.create(BoundVariable(
-    name: 'Root 4',
-    value: InstanceRef(
-      id: 'ref15',
-      kind: InstanceKind.kBool,
-      classRef: ClassRef(name: 'Boolean', id: 'ref16', library: libraryRef),
-      valueAsString: 'true',
-      valueAsStringIsTruncated: false,
-      identityHashCode: null,
+    isolateRef,
+  ),
+  Variable.create(
+    BoundVariable(
+      name: 'Root 4',
+      value: InstanceRef(
+        id: 'ref15',
+        kind: InstanceKind.kBool,
+        classRef: ClassRef(name: 'Boolean', id: 'ref16', library: libraryRef),
+        valueAsString: 'true',
+        valueAsStringIsTruncated: false,
+        identityHashCode: null,
+      ),
+      declarationTokenPos: null,
+      scopeEndTokenPos: null,
+      scopeStartTokenPos: null,
     ),
-    declarationTokenPos: null,
-    scopeEndTokenPos: null,
-    scopeStartTokenPos: null,
-  )),
+    isolateRef,
+  ),
 ];

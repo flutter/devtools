@@ -33,14 +33,11 @@ class NetworkController
 
   static const typeFilterId = 'network-type-filter';
 
-  final _filterArgs = {
-    methodFilterId: FilterArgument(keys: ['method', 'm']),
-    statusFilterId: FilterArgument(keys: ['status', 's']),
-    typeFilterId: FilterArgument(keys: ['type', 't']),
+  final filterArgs = {
+    methodFilterId: QueryFilterArgument(keys: ['method', 'm']),
+    statusFilterId: QueryFilterArgument(keys: ['status', 's']),
+    typeFilterId: QueryFilterArgument(keys: ['type', 't']),
   };
-
-  @override
-  Map<String, FilterArgument> get filterArgs => _filterArgs;
 
   /// Notifies that new Network requests have been processed.
   ValueListenable<NetworkRequests> get requests => _requests;
@@ -331,9 +328,8 @@ class NetworkController
     return enabled;
   }
 
-  /// Clears the previously collected HTTP timeline events, clears the socket
-  /// profile from the vm, and resets the last refresh timestamp to the current
-  /// time.
+  /// Clears the HTTP profile and socket profile from the vm, and resets the
+  /// last refresh timestamp to the current time.
   Future<void> clear() async {
     await _networkService.clearData();
     _requests.value = NetworkRequests();
@@ -379,9 +375,9 @@ class NetworkController
   }
 
   @override
-  void filterData(QueryFilter filter) {
+  void filterData(Filter<NetworkRequest> filter) {
     serviceManager.errorBadgeManager.clearErrors(NetworkScreen.id);
-    if (filter == null) {
+    if (filter?.queryFilter == null) {
       _requests.value.requests.forEach(_checkForError);
       filteredData
         ..clear()
@@ -390,25 +386,25 @@ class NetworkController
       filteredData
         ..clear()
         ..addAll(_requests.value.requests.where((NetworkRequest r) {
-          final methodArg = filter.filterArguments[methodFilterId];
+          final methodArg = filter.queryFilter.filterArguments[methodFilterId];
           if (methodArg != null &&
               !methodArg.matchesValue(r.method.toLowerCase())) {
             return false;
           }
 
-          final statusArg = filter.filterArguments[statusFilterId];
+          final statusArg = filter.queryFilter.filterArguments[statusFilterId];
           if (statusArg != null &&
               !statusArg.matchesValue(r.status?.toLowerCase())) {
             return false;
           }
 
-          final typeArg = filter.filterArguments[typeFilterId];
+          final typeArg = filter.queryFilter.filterArguments[typeFilterId];
           if (typeArg != null && !typeArg.matchesValue(r.type.toLowerCase())) {
             return false;
           }
 
-          if (filter.substrings.isNotEmpty) {
-            for (final substring in filter.substrings) {
+          if (filter.queryFilter.substrings.isNotEmpty) {
+            for (final substring in filter.queryFilter.substrings) {
               final caseInsensitiveSubstring = substring.toLowerCase();
               bool matches(String stringToMatch) {
                 if (stringToMatch

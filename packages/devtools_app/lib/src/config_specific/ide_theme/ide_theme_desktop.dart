@@ -4,5 +4,8 @@
 
 import 'ide_theme.dart';
 
+/// Change this value to ensure your changes work well with custom font sizes.
+bool debugLargeFontSize = false;
+
 /// Load any IDE-supplied theming.
-IdeTheme getIdeTheme() => null;
+IdeTheme getIdeTheme() => IdeTheme(fontSize: debugLargeFontSize ? 40.0 : null);

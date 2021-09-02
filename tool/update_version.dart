@@ -1,3 +1,7 @@
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -11,12 +15,11 @@ void main(List<String> args) async {
     'packages/devtools_app/pubspec.yaml',
     'packages/devtools_server/pubspec.yaml',
     'packages/devtools_shared/pubspec.yaml',
-    'packages/devtools_testing/pubspec.yaml',
   ].map((path) => File(path)).toList();
 
   final version = args.isNotEmpty
       ? args.first
-      : incrementVersion(versionFromPubspecFile(pubspecs.first));
+      : incrementVersion(versionFromPubspecFile(pubspecs.first)!);
 
   if (version == null) {
     print('Something went wrong. Could not resolve version number.');
@@ -43,8 +46,8 @@ void main(List<String> args) async {
   });
 }
 
-String incrementVersion(String oldVersion) {
-  final semVer = RegExp('[0-9]+\.[0-9]\.[0-9]+').firstMatch(oldVersion)[0];
+String? incrementVersion(String oldVersion) {
+  final semVer = RegExp(r'[0-9]+\.[0-9]\.[0-9]+').firstMatch(oldVersion)![0];
 
   const devTag = '-dev';
   final isDevVersion = oldVersion.contains(devTag);
@@ -52,9 +55,9 @@ String incrementVersion(String oldVersion) {
     return semVer;
   }
 
-  final parts = semVer.split('.');
+  final parts = semVer!.split('.');
 
-  // Versions should have the form x.y.z
+  // Versions should have the form 'x.y.z'.
   if (parts.length != 3) return null;
 
   final patch = int.parse(parts.last);
@@ -62,7 +65,7 @@ String incrementVersion(String oldVersion) {
   return [parts[0], parts[1], nextPatch].join('.');
 }
 
-String versionFromPubspecFile(File pubspec) {
+String? versionFromPubspecFile(File pubspec) {
   final lines = pubspec.readAsLinesSync();
   for (final line in lines) {
     if (line.startsWith(pubspecVersionPrefix)) {
@@ -75,12 +78,12 @@ String versionFromPubspecFile(File pubspec) {
 void writeVersionToPubspec(File pubspec, String version) {
   final lines = pubspec.readAsLinesSync();
   final revisedLines = <String>[];
-  var currentSection = '';
+  String? currentSection = '';
   final sectionRegExp = RegExp('([a-z]|_)+:');
   for (var line in lines) {
     if (line.startsWith(sectionRegExp)) {
       // This is a top level section of the pubspec.
-      currentSection = sectionRegExp.firstMatch(line)[0];
+      currentSection = sectionRegExp.firstMatch(line)![0];
     }
     if (editablePubspecSections.contains(currentSection)) {
       if (line.startsWith(pubspecVersionPrefix)) {
@@ -130,7 +133,7 @@ void writeVersionToChangelog(File changelog, String version) {
     return;
   }
   changelog.writeAsString([
-    '$versionString',
+    versionString,
     'TODO: update changelog\n',
     ...lines,
   ].joinWithNewLine());
@@ -148,7 +151,6 @@ const devToolsDependencyPrefixes = [
   'devtools_app: ',
   'devtools_server: ',
   'devtools_shared: ',
-  'devtools_testing: ',
 ];
 
 extension JoinExtension on List<String> {

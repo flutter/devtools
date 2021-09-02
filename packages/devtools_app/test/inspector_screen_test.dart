@@ -29,6 +29,15 @@ void main() {
   FakeServiceExtensionManager fakeExtensionManager;
   const windowSize = Size(2600.0, 1200.0);
 
+  final debuggerController = MockDebuggerController.withDefaults();
+
+  Widget buildInspectorScreen() {
+    return wrapWithControllers(
+      Builder(builder: screen.build),
+      debugger: debuggerController,
+    );
+  }
+
   group('Inspector Screen', () {
     setUp(() {
       fakeServiceManager = FakeServiceManager();
@@ -70,8 +79,9 @@ void main() {
     }
 
     testWidgets('builds its tab', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(Builder(builder: screen.buildTab)));
-      expect(find.text('Flutter Inspector'), findsOneWidget);
+      await tester.pumpWidget(buildInspectorScreen());
+      await tester.pumpAndSettle();
+      expect(find.byType(InspectorScreenBody), findsOneWidget);
     });
 
     group('Widget Errors', () {
@@ -81,7 +91,7 @@ void main() {
       testWidgetsWithWindowSize(
           'does not render error navigator if no errors', windowSize,
           (WidgetTester tester) async {
-        await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+        await tester.pumpWidget(buildInspectorScreen());
         expect(find.byType(ErrorNavigator), findsNothing);
       });
     });
@@ -90,7 +100,7 @@ void main() {
         (WidgetTester tester) async {
       // Make sure the window is wide enough to display description text.
 
-      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+      await tester.pumpWidget(buildInspectorScreen());
       expect(find.byType(InspectorScreenBody), findsOneWidget);
       expect(find.text('Refresh Tree'), findsOneWidget);
       expect(find.text(extensions.debugPaint.description), findsOneWidget);
@@ -117,7 +127,7 @@ void main() {
         isTrue,
       );
 
-      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+      await tester.pumpWidget(buildInspectorScreen());
 
       expect(
         fakeExtensionManager.extensionValueOnDevice[
@@ -178,7 +188,7 @@ void main() {
         isTrue,
       );
 
-      await tester.pumpWidget(wrap(Builder(builder: screen.build)));
+      await tester.pumpWidget(buildInspectorScreen());
       await tester.pump();
       expect(find.byType(InspectorScreenBody), findsOneWidget);
       expect(find.text(extensions.toggleOnDeviceWidgetInspector.description),
@@ -291,13 +301,44 @@ void main() {
   });
 }
 
-class MockInspectorService extends Mock implements InspectorService {}
+class FakeInspectorService extends Fake implements InspectorService {
+  @override
+  ObjectGroup createObjectGroup(String debugName) {
+    return ObjectGroup(debugName, this);
+  }
+
+  @override
+  Future<bool> isWidgetTreeReady() async {
+    return false;
+  }
+
+  @override
+  Future<List<String>> inferPubRootDirectoryIfNeeded() async {
+    return ['/some/directory'];
+  }
+
+  @override
+  bool get useDaemonApi => true;
+
+  @override
+  final Set<InspectorServiceClient> clients = {};
+
+  @override
+  void addClient(InspectorServiceClient client) {
+    clients.add(client);
+  }
+
+  @override
+  void removeClient(InspectorServiceClient client) {
+    clients.remove(client);
+  }
+}
 
 class MockInspectorTreeController extends Mock
     implements InspectorTreeController {}
 
 class TestInspectorController extends Fake implements InspectorController {
-  InspectorService service = MockInspectorService();
+  InspectorService service = FakeInspectorService();
 
   @override
   ValueListenable<InspectorTreeNode> get selectedNode => _selectedNode;

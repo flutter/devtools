@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'common_widgets.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
+import 'utils.dart';
 
 const _contrastForegroundWhite = Color.fromARGB(255, 240, 240, 240);
 
@@ -85,6 +86,7 @@ ThemeData _baseTheme({
     // Same values for both light and dark themes.
     primaryColorDark: devtoolsBlue[700],
     primaryColorLight: devtoolsBlue[400],
+    // ignore: deprecated_member_use
     accentColor: devtoolsBlue[400],
     backgroundColor: devtoolsGrey[600],
     toggleableActiveColor: devtoolsBlue[400],
@@ -94,21 +96,21 @@ ThemeData _baseTheme({
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         primary: theme.colorScheme.contrastForeground,
-        minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
-        fixedSize: const Size.fromHeight(defaultButtonHeight),
+        minimumSize: Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         primary: theme.colorScheme.contrastForeground,
-        minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
-        fixedSize: const Size.fromHeight(defaultButtonHeight),
+        minimumSize: Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
-        fixedSize: const Size.fromHeight(defaultButtonHeight),
+        minimumSize: Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
     ),
   );
@@ -136,18 +138,20 @@ bool isValidLightColor(Color color) {
   return color.computeLuminance() >= 1 - _lightDarkLuminanceThreshold;
 }
 
-const defaultToolbarHeight = 32.0;
+double get defaultToolbarHeight => scaleByFontFactor(32.0);
 
-const defaultButtonHeight = 32.0;
-const smallButtonHeight = 20.0;
+double get defaultButtonHeight => scaleByFontFactor(32.0);
+double get smallButtonHeight => scaleByFontFactor(20.0);
 
-const buttonMinWidth = 36.0;
+double get buttonMinWidth => scaleByFontFactor(36.0);
 
-const defaultIconSize = 16.0;
-const actionsIconSize = 20.0;
+double get defaultIconSize => scaleByFontFactor(16.0);
+double get actionsIconSize => scaleByFontFactor(20.0);
+double get tooltipIconSize => scaleByFontFactor(12.0);
 
 const defaultSpacing = 16.0;
 const denseSpacing = 8.0;
+const denseModeDenseSpacing = 2.0;
 const denseRowSpacing = 6.0;
 
 const defaultBorderRadius = 4.0;
@@ -156,20 +160,30 @@ const defaultElevation = 4.0;
 const borderPadding = 2.0;
 const densePadding = 4.0;
 
-const smallProgressSize = 12.0;
+double get smallProgressSize => scaleByFontFactor(12.0);
 
-const defaultListItemHeight = 28.0;
+double get defaultListItemHeight => scaleByFontFactor(28.0);
 
-const defaultChartHeight = 150.0;
+// TODO(jacobr) define a more sophisticated formula for chart height.
+// The chart height does need to increase somewhat to leave room for the legend
+// and tick marks but does not need to scale linearly with the font factor.
+double get defaultChartHeight => scaleByFontFactor(150.0);
 
 /// Width of all settings dialogs.
-const dialogSettingsWidth = 700.0;
+double get dialogSettingsWidth => scaleByFontFactor(700.0);
 
 const defaultScrollBarOffset = 10.0;
 
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
 
-const defaultDialogWidth = 700.0;
+double get defaultDialogWidth => scaleByFontFactor(700.0);
+
+const unscaledDefaultFontSize = 14.0;
+double get defaultFontSize => scaleByFontFactor(unscaledDefaultFontSize);
+
+double get consoleLineHeight => scaleByFontFactor(18.0);
+
+const chartTextFontSize = 10.0;
 
 /// Branded grey color.
 ///
@@ -203,6 +217,7 @@ const devtoolsWarning = Color(0xFFFDFAD5);
 
 extension DevToolsColorScheme on ColorScheme {
   bool get isLight => brightness == Brightness.light;
+
   bool get isDark => brightness == Brightness.dark;
 
   // Commonly used themed colors.
@@ -219,6 +234,14 @@ extension DevToolsColorScheme on ColorScheme {
   Color get contrastForeground =>
       isLight ? Colors.black : _contrastForegroundWhite;
 
+  Color get serviceExtensionButtonsTitle =>
+      isLight ? const Color(0xFF464646) : const Color(0xFFAEAEB1);
+
+  Color get serviceExtensionButtonsTitleSelected =>
+      isLight ? Colors.white : const Color(0xFF464646);
+
+  Color get serviceExtensionButtonsFillSelected => devtoolsBlue[400];
+
   Color get grey => isLight
       ? const Color.fromARGB(255, 128, 128, 128)
       : const Color.fromARGB(255, 128, 128, 128);
@@ -233,38 +256,53 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get devtoolsLink =>
       isLight ? const Color(0xFF1976D2) : Colors.lightBlueAccent;
+
   // TODO(jacobr): replace this with Theme.of(context).scaffoldBackgroundColor, but we use
   // this in places where we do not have access to the context.
   Color get defaultBackgroundColor =>
       isLight ? Colors.grey[50] : Colors.grey[850];
+
   Color get alternatingBackgroundColor => isLight
       ? defaultBackgroundColor.darken()
       : defaultBackgroundColor.brighten();
 
   Color get chartAccentColor =>
       isLight ? const Color(0xFFCCCCCC) : const Color(0xFF585858);
+
   Color get chartTextColor => isLight ? Colors.black : Colors.white;
+
   Color get chartSubtleColor =>
       isLight ? const Color(0xFF999999) : const Color(0xFF8A8A8A);
+
+  Color get tooltipTextColor => isLight ? Colors.white : Colors.black;
+
   Color get toggleButtonBackgroundColor =>
       isLight ? const Color(0xFFE0EEFA) : const Color(0xFF2E3C48);
+
   // [toggleButtonForegroundColor] is the same for light and dark theme.
   Color get toggleButtonForegroundColor => const Color(0xFF2196F3);
 
   Color get functionSyntaxColor =>
       isLight ? const Color(0xFF795E26) : const Color(0xFFDCDCAA);
+
   Color get declarationsSyntaxColor =>
       isLight ? const Color(0xFF267f99) : const Color(0xFF4EC9B0);
+
   Color get modifierSyntaxColor =>
       isLight ? const Color(0xFF0000FF) : const Color(0xFF569CD6);
+
   Color get controlFlowSyntaxColor =>
       isLight ? const Color(0xFFAF00DB) : const Color(0xFFC586C0);
+
   Color get variableSyntaxColor =>
       isLight ? const Color(0xFF001080) : const Color(0xFF9CDCFE);
+
   Color get commentSyntaxColor =>
       isLight ? const Color(0xFF008000) : const Color(0xFF6A9955);
+
   Color get stringSyntaxColor =>
       isLight ? const Color(0xFFB20001) : const Color(0xFFD88E73);
+
   Color get numericConstantSyntaxColor =>
       isLight ? const Color(0xFF098658) : const Color(0xFFB5CEA8);
 
@@ -280,7 +318,7 @@ extension DevToolsColorScheme on ColorScheme {
   TextStyle get hoverTitleTextStyle => TextStyle(
         color: defaultForeground,
         fontWeight: FontWeight.normal,
-        fontSize: 15,
+        fontSize: scaleByFontFactor(15.0),
         decoration: TextDecoration.none,
       );
 
@@ -288,7 +326,7 @@ extension DevToolsColorScheme on ColorScheme {
   TextStyle get hoverTextStyle => TextStyle(
         color: defaultForeground,
         fontWeight: FontWeight.normal,
-        fontSize: 11.5,
+        fontSize: scaleByFontFactor(11.5),
         decoration: TextDecoration.none,
       );
 
@@ -296,7 +334,7 @@ extension DevToolsColorScheme on ColorScheme {
   TextStyle get hoverValueTextStyle => TextStyle(
         color: contrastForeground,
         fontWeight: FontWeight.normal,
-        fontSize: 11.5,
+        fontSize: scaleByFontFactor(11.5),
         decoration: TextDecoration.none,
       );
 
@@ -304,7 +342,7 @@ extension DevToolsColorScheme on ColorScheme {
   TextStyle get hoverSmallValueTextStyle => TextStyle(
         color: defaultForeground,
         fontWeight: FontWeight.normal,
-        fontSize: 10,
+        fontSize: scaleByFontFactor(10.0),
         decoration: TextDecoration.none,
       );
 
@@ -312,7 +350,7 @@ extension DevToolsColorScheme on ColorScheme {
   TextStyle get italicTextStyle => TextStyle(
         color: defaultForeground,
         fontWeight: FontWeight.normal,
-        fontSize: 14,
+        fontSize: scaleByFontFactor(14.0),
         fontStyle: FontStyle.italic,
         decoration: TextDecoration.none,
       );
@@ -321,7 +359,7 @@ extension DevToolsColorScheme on ColorScheme {
   TextStyle get legendTextStyle => TextStyle(
         color: defaultForeground,
         fontWeight: FontWeight.normal,
-        fontSize: 10,
+        fontSize: scaleByFontFactor(10.0),
         decoration: TextDecoration.none,
       );
 
@@ -329,6 +367,7 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get expandedTopContentColor =>
       isLight ? Colors.grey[50] : Colors.grey[850];
+
   Color get expandedBottomContentColor =>
       isLight ? Colors.grey[200] : Colors.grey[800];
 
@@ -343,14 +382,14 @@ extension DevToolsColorScheme on ColorScheme {
   TextStyle get stackTraceCall => TextStyle(
         color: defaultForeground,
         fontWeight: FontWeight.normal,
-        fontSize: 12.0,
+        fontSize: scaleByFontFactor(12.0),
       );
 
   /// TextStyle for source file displayed in callstack.
   TextStyle get stackTraceSource => TextStyle(
         color: defaultForeground,
         fontWeight: FontWeight.w100,
-        fontSize: 12,
+        fontSize: scaleByFontFactor(12.0),
       );
 }
 
@@ -359,12 +398,20 @@ extension ThemeDataExtension on ThemeData {
   /// Returns whether we are currently using a dark theme.
   bool get isDarkTheme => brightness == Brightness.dark;
 
-  TextStyle get regularTextStyle => TextStyle(color: textTheme.bodyText2.color);
+  TextStyle get regularTextStyle => TextStyle(
+        color: textTheme.bodyText2.color,
+        fontSize: defaultFontSize,
+      );
 
-  TextStyle get subtleTextStyle => TextStyle(color: unselectedWidgetColor);
+  TextStyle get subtleTextStyle => TextStyle(
+        color: unselectedWidgetColor,
+        fontSize: defaultFontSize,
+      );
 
-  TextStyle get selectedTextStyle =>
-      TextStyle(color: textSelectionTheme.selectionColor);
+  TextStyle get selectedTextStyle => TextStyle(
+        color: textSelectionTheme.selectionColor,
+        fontSize: defaultFontSize,
+      );
 
   TextStyle get fixedFontStyle =>
       textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
@@ -378,18 +425,20 @@ extension ThemeDataExtension on ThemeData {
   Color get titleSolidBackgroundColor => colorScheme.isLight
       ? colorScheme.alternatingBackgroundColor
       : canvasColor.darken(0.2);
-}
 
-TextStyle linkTextStyle(ColorScheme colorScheme) => TextStyle(
-      color: colorScheme.devtoolsLink,
-      decoration: TextDecoration.underline,
-    );
+  TextStyle get linkTextStyle => TextStyle(
+        color: colorScheme.devtoolsLink,
+        decoration: TextDecoration.underline,
+        fontSize: defaultFontSize,
+      );
+}
 
 const wideSearchTextWidth = 400.0;
 const defaultSearchTextWidth = 200.0;
-const defaultTextFieldHeight = 32.0;
+double get defaultTextFieldHeight => scaleByFontFactor(32.0);
 
-const maxHoverCardHeight = 250.0;
+double get maxHoverCardHeight => scaleByFontFactor(250.0);
+const hoverCardBorderWidth = 2.0;
 
 /// Default color of cursor and color used by search's TextField.
 /// Guarantee that the Search TextField on all platforms renders in the same
@@ -462,6 +511,28 @@ const defaultCurve = Curves.easeInOutCubic;
 CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
     CurvedAnimation(curve: defaultCurve, parent: parent);
 
-const chartFontSizeSmall = 12.0;
+double get chartFontSizeSmall => scaleByFontFactor(12.0);
 
 const lightSelection = Color(0xFFD4D7DA);
+
+bool includeText(
+    BuildContext context, double minScreenWidthForTextBeforeScaling) {
+  return minScreenWidthForTextBeforeScaling == null ||
+      MediaQuery.of(context).size.width >
+          scaleByFontFactor(minScreenWidthForTextBeforeScaling);
+}
+
+ButtonStyle denseAwareOutlinedButtonStyle(
+  BuildContext context,
+  double minScreenWidthForTextBeforeScaling,
+) {
+  var buttonStyle = Theme.of(context).outlinedButtonTheme.style;
+  if (!includeText(context, minScreenWidthForTextBeforeScaling)) {
+    buttonStyle = buttonStyle.copyWith(
+      padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
+        return EdgeInsets.zero;
+      }),
+    );
+  }
+  return buttonStyle;
+}

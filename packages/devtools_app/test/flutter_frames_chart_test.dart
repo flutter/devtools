@@ -9,11 +9,12 @@ import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/colors.dart';
-import 'package:devtools_testing/support/performance_test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 import 'support/mocks.dart';
+import 'support/performance_test_data.dart';
 import 'support/wrappers.dart';
 
 void main() {
@@ -31,7 +32,9 @@ void main() {
 
   group('FlutterFramesChart', () {
     setUp(() async {
-      setGlobal(ServiceConnectionManager, FakeServiceManager());
+      final fakeServiceManager = FakeServiceManager();
+      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
     });
 
     testWidgets('builds with no frames', (WidgetTester tester) async {
@@ -50,12 +53,11 @@ void main() {
       await pumpChart(tester, frames: [jankyFrame]);
       expect(find.byKey(FlutterFramesChart.chartLegendKey), findsOneWidget);
       expect(find.byType(FlutterFramesChartItem), findsOneWidget);
-      final ui = tester.widget(find.byKey(const Key('frame jankyFrame - ui')))
-          as Container;
+      final ui =
+          tester.widget(find.byKey(const Key('frame 2 - ui'))) as Container;
       expect(ui.color, equals(uiJankColor));
       final raster =
-          tester.widget(find.byKey(const Key('frame jankyFrame - raster')))
-              as Container;
+          tester.widget(find.byKey(const Key('frame 2 - raster'))) as Container;
       expect(raster.color, equals(rasterJankColor));
     });
 
@@ -64,12 +66,10 @@ void main() {
       expect(find.byKey(FlutterFramesChart.chartLegendKey), findsOneWidget);
       expect(find.byType(FlutterFramesChartItem), findsOneWidget);
       final ui =
-          tester.widget(find.byKey(const Key('frame jankyFrameUiOnly - ui')))
-              as Container;
+          tester.widget(find.byKey(const Key('frame 3 - ui'))) as Container;
       expect(ui.color, equals(uiJankColor));
-      final raster = tester
-              .widget(find.byKey(const Key('frame jankyFrameUiOnly - raster')))
-          as Container;
+      final raster =
+          tester.widget(find.byKey(const Key('frame 3 - raster'))) as Container;
       expect(raster.color, equals(mainRasterColor));
     });
 
@@ -78,14 +78,46 @@ void main() {
       await pumpChart(tester, frames: [jankyFrameRasterOnly]);
       expect(find.byKey(FlutterFramesChart.chartLegendKey), findsOneWidget);
       expect(find.byType(FlutterFramesChartItem), findsOneWidget);
-      final ui = tester
-              .widget(find.byKey(const Key('frame jankyFrameRasterOnly - ui')))
-          as Container;
+      final ui =
+          tester.widget(find.byKey(const Key('frame 4 - ui'))) as Container;
       expect(ui.color, equals(mainUiColor));
-      final raster = tester.widget(
-              find.byKey(const Key('frame jankyFrameRasterOnly - raster')))
-          as Container;
+      final raster =
+          tester.widget(find.byKey(const Key('frame 4 - raster'))) as Container;
       expect(raster.color, equals(rasterJankColor));
+    });
+
+    testWidgets('builds with janky frame with shader jank',
+        (WidgetTester tester) async {
+      await pumpChart(tester, frames: [testFrameWithShaderJank]);
+      expect(find.byKey(FlutterFramesChart.chartLegendKey), findsOneWidget);
+      expect(find.byType(FlutterFramesChartItem), findsOneWidget);
+      final ui =
+          tester.widget(find.byKey(const Key('frame 5 - ui'))) as Container;
+      expect(ui.color, equals(uiJankColor));
+      final raster =
+          tester.widget(find.byKey(const Key('frame 5 - raster'))) as Container;
+      expect(raster.color, equals(rasterJankColor));
+      final shaders = tester.widget(find.byKey(const Key('frame 5 - shaders')))
+          as Container;
+      expect(shaders.color, equals(shaderCompilationColor.background));
+      expect(find.byType(ShaderJankWarningIcon), findsOneWidget);
+    });
+
+    testWidgets('builds with janky frame with subtle shader jank',
+        (WidgetTester tester) async {
+      await pumpChart(tester, frames: [testFrameWithSubtleShaderJank]);
+      expect(find.byKey(FlutterFramesChart.chartLegendKey), findsOneWidget);
+      expect(find.byType(FlutterFramesChartItem), findsOneWidget);
+      final ui =
+          tester.widget(find.byKey(const Key('frame 6 - ui'))) as Container;
+      expect(ui.color, equals(uiJankColor));
+      final raster =
+          tester.widget(find.byKey(const Key('frame 6 - raster'))) as Container;
+      expect(raster.color, equals(rasterJankColor));
+      final shaders = tester.widget(find.byKey(const Key('frame 6 - shaders')))
+          as Container;
+      expect(shaders.color, equals(shaderCompilationColor.background));
+      expect(find.byType(ShaderJankWarningIcon), findsNothing);
     });
   });
 
@@ -102,6 +134,7 @@ void main() {
                 OverlayEntry(
                   builder: (context) {
                     return FlutterFramesChartItem(
+                      controller: MockPerformanceController(),
                       frame: testFrame0,
                       selected: true,
                       msPerPx: 1,

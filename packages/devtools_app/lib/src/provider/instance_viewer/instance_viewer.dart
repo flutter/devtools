@@ -484,8 +484,8 @@ class _EditableField extends StatefulWidget {
 
 class _EditableFieldState extends State<_EditableField> {
   final controller = TextEditingController();
-  final focusNode = FocusNode();
-  final textFieldFocusNode = FocusNode();
+  final focusNode = FocusNode(debugLabel: 'editable-field');
+  final textFieldFocusNode = FocusNode(debugLabel: 'text-field');
   var isHovering = false;
 
   final _isAlive = Disposable();
@@ -626,7 +626,7 @@ class _Expandable extends StatelessWidget {
             builder: (context, angle, _) {
               return Transform.rotate(
                 angle: angle,
-                child: const Icon(
+                child: Icon(
                   Icons.expand_more,
                   size: defaultIconSize,
                 ),

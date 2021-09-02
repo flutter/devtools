@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/cpu_profile_test_data.dart';
 
 void main() {
   group('CpuProfileData', () {
@@ -12,11 +12,9 @@ void main() {
 
     test('init from parse', () {
       expect(
-        cpuProfileData.stackFramesJson,
-        equals(goldenCpuProfileStackFrames),
-      );
+          cpuProfileData.stackFramesJson, equals(goldenCpuProfileStackFrames));
       expect(
-        cpuProfileData.stackTraceEvents,
+        cpuProfileData.cpuSamples.map((sample) => sample.json),
         equals(goldenCpuProfileTraceEvents),
       );
       expect(cpuProfileData.profileMetaData.sampleCount, equals(8));
@@ -43,7 +41,7 @@ void main() {
         equals(subProfileStackFrames),
       );
       expect(
-        subProfile.stackTraceEvents,
+        subProfile.cpuSamples.map((sample) => sample.json),
         equals(subProfileTraceEvents),
       );
       expect(subProfile.profileMetaData.sampleCount, equals(3));
@@ -53,8 +51,28 @@ void main() {
       );
     });
 
+    test('filterFrom', () {
+      final filteredProfile = CpuProfileData.filterFrom(
+        cpuProfileData,
+        (stackFrame) => !stackFrame.processedUrl.startsWith('dart:'),
+      );
+      expect(
+        filteredProfile.stackFramesJson,
+        equals(filteredStackFrames),
+      );
+      expect(
+        filteredProfile.cpuSamples.map((sample) => sample.toJson),
+        equals(filteredCpuSampleTraceEvents),
+      );
+      expect(filteredProfile.profileMetaData.sampleCount, equals(8));
+      expect(
+        filteredProfile.profileMetaData.samplePeriod,
+        equals(cpuProfileData.profileMetaData.samplePeriod),
+      );
+    });
+
     test('to json', () {
-      expect(cpuProfileData.json, equals(goldenCpuProfileDataJson));
+      expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
     });
 
     test('stackFrameIdCompare', () {
@@ -73,6 +91,38 @@ void main() {
   });
 
   group('CpuStackFrame', () {
+    test('isNative', () {
+      expect(stackFrameA.isNative, isTrue);
+      expect(stackFrameB.isNative, isFalse);
+      expect(stackFrameC.isNative, isFalse);
+      expect(flutterEngineStackFrame.isNative, isFalse);
+      expect(
+        CpuStackFrame(
+          id: CpuProfileData.rootId,
+          name: CpuProfileData.rootName,
+          verboseName: 'all',
+          category: 'Dart',
+          rawUrl: '',
+          parentId: null,
+          profileMetaData: profileMetaData,
+        ).isNative,
+        isFalse,
+      );
+    });
+
+    test('isDartCore', () {
+      expect(stackFrameA.isDartCore, isFalse);
+      expect(stackFrameB.isDartCore, isTrue);
+      expect(stackFrameC.isDartCore, isFalse);
+    });
+
+    test('isFlutterCore', () {
+      expect(stackFrameA.isFlutterCore, isFalse);
+      expect(stackFrameB.isFlutterCore, isFalse);
+      expect(stackFrameC.isFlutterCore, isTrue);
+      expect(flutterEngineStackFrame.isFlutterCore, isTrue);
+    });
+
     test('sampleCount', () {
       expect(testStackFrame.inclusiveSampleCount, equals(10));
     });
@@ -102,7 +152,8 @@ void main() {
     test('shallowCopy', () {
       expect(stackFrameD.children.length, equals(2));
       expect(stackFrameD.parent, equals(stackFrameB));
-      CpuStackFrame copy = stackFrameD.shallowCopy();
+      CpuStackFrame copy =
+          stackFrameD.shallowCopy(resetInclusiveSampleCount: false);
       expect(copy.children, isEmpty);
       expect(copy.parent, isNull);
       expect(
@@ -116,7 +167,7 @@ void main() {
 
       expect(stackFrameD.children.length, equals(2));
       expect(stackFrameD.parent, equals(stackFrameB));
-      copy = stackFrameD.shallowCopy(resetInclusiveSampleCount: true);
+      copy = stackFrameD.shallowCopy();
       expect(copy.children, isEmpty);
       expect(copy.parent, isNull);
       expect(

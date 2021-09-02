@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../../analytics/constants.dart' as analytics_constants;
 import '../../auto_dispose.dart';
 import '../../config_specific/import_export/import_export.dart';
 import '../../config_specific/logger/allowed_error.dart';
@@ -42,14 +43,15 @@ import 'timeline_event_processor.dart';
 /// of the complicated logic in this class to run on the VM and will help
 /// simplify porting this code to work with Hummingbird.
 class LegacyPerformanceController
-    with
-        CpuProfilerControllerProviderMixin,
-        SearchControllerMixin<LegacyTimelineEvent>
+    with SearchControllerMixin<LegacyTimelineEvent>
     implements DisposableController {
   LegacyPerformanceController() {
     processor = LegacyTimelineEventProcessor(this);
     _init();
   }
+
+  final cpuProfilerController =
+      CpuProfilerController(analyticsScreenId: analytics_constants.performance);
 
   final _exportController = ExportController();
 
@@ -170,31 +172,38 @@ class LegacyPerformanceController
     }
   }
 
-  Future<void> selectTimelineEvent(LegacyTimelineEvent event) async {
+  Future<void> selectTimelineEvent(
+    LegacyTimelineEvent event, {
+    bool updateProfiler = true,
+  }) async {
     if (event == null || data.selectedEvent == event) return;
 
     data.selectedEvent = event;
     _selectedTimelineEventNotifier.value = event;
 
-    cpuProfilerController.reset();
-
-    // Fetch a profile if not in offline mode and if the profiler is enabled.
-    if ((!offlineMode || offlinePerformanceData == null) &&
-        cpuProfilerController.profilerEnabled) {
-      await getCpuProfileForSelectedEvent();
+    if (event.isUiEvent && updateProfiler) {
+      final storedProfile =
+          cpuProfilerController.cpuProfileStore.lookupProfile(event.time);
+      if (storedProfile != null) {
+        await cpuProfilerController.processAndSetData(
+          storedProfile,
+          processId: 'Stored profile for ${event.time}',
+          storeAsUserTagNone: true,
+          shouldApplyFilters: true,
+        );
+        data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+      } else if ((!offlineMode || offlinePerformanceData == null) &&
+          cpuProfilerController.profilerEnabled) {
+        // Fetch a profile if not in offline mode and if the profiler is enabled
+        cpuProfilerController.reset();
+        await cpuProfilerController.pullAndProcessProfile(
+          startMicros: event.time.start.inMicroseconds,
+          extentMicros: event.time.duration.inMicroseconds,
+          processId: '${event.traceEvents.first.wrapperId}',
+        );
+        data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+      }
     }
-  }
-
-  Future<void> getCpuProfileForSelectedEvent() async {
-    final selectedEvent = data.selectedEvent;
-    if (!selectedEvent.isUiEvent) return;
-
-    await cpuProfilerController.pullAndProcessProfile(
-      startMicros: selectedEvent.time.start.inMicroseconds,
-      extentMicros: selectedEvent.time.duration.inMicroseconds,
-      processId: '${selectedEvent.traceEvents.first.id}',
-    );
-    data.cpuProfileData = cpuProfilerController.dataNotifier.value;
   }
 
   ValueListenable<double> get displayRefreshRate => _displayRefreshRate;
@@ -215,9 +224,37 @@ class LegacyPerformanceController
     data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
 
-    await selectTimelineEvent(frame.uiEventFlow);
+    // We do not need to pull the CPU profile because we will pull the profile
+    // for the entire frame. The order of selecting the timeline event and
+    // pulling the CPU profile for the frame (directly below) matters here.
+    // If the selected timeline event is null, the event details section will
+    // not show the progress bar while we are processing the CPU profile
+    await selectTimelineEvent(frame.uiEventFlow, updateProfiler: false);
 
-    if (debugTimeline && frame != null) {
+    final storedProfileForFrame =
+        cpuProfilerController.cpuProfileStore.lookupProfile(frame.time);
+    if (storedProfileForFrame == null) {
+      cpuProfilerController.reset();
+      if (!offlineMode) {
+        await cpuProfilerController.pullAndProcessProfile(
+          startMicros: frame.time.start.inMicroseconds,
+          extentMicros: frame.time.duration.inMicroseconds,
+          processId: 'Flutter frame ${frame.id}',
+        );
+      }
+      data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+    } else {
+      if (!storedProfileForFrame.processed) {
+        await cpuProfilerController.transformer.processData(
+          storedProfileForFrame,
+          processId: 'Flutter frame ${frame.id} - stored profile ',
+        );
+      }
+      data.cpuProfileData = storedProfileForFrame;
+      cpuProfilerController.loadProcessedData(storedProfileForFrame);
+    }
+
+    if (debugTimeline) {
       final buf = StringBuffer();
       buf.writeln('UI timeline event for frame ${frame.id}:');
       frame.uiEventFlow.format(buf, '  ');
@@ -351,7 +388,8 @@ class LegacyPerformanceController
   }
 
   FutureOr<void> processOfflineData(
-      LegacyOfflinePerformanceData offlineData) async {
+    LegacyOfflinePerformanceData offlineData,
+  ) async {
     await clearData();
     final traceEvents = [
       for (var trace in offlineData.traceEvents)

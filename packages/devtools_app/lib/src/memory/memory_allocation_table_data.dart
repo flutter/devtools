@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 import '../table.dart';
 import '../table_data.dart';
+import '../utils.dart';
 import 'memory_controller.dart';
 
 const defaultNumberFieldWidth = 100.0;
@@ -20,7 +21,7 @@ class FieldTrack extends ColumnData<ClassHeapDetailStats>
       : super(
           'Track',
           titleTooltip: 'Track Class Allocations',
-          fixedWidthPx: 55.0,
+          fixedWidthPx: scaleByFontFactor(55.0),
           alignment: ColumnAlignment.left,
         );
 
@@ -43,6 +44,7 @@ class FieldTrack extends ColumnData<ClassHeapDetailStats>
     BuildContext context,
     ClassHeapDetailStats item, {
     bool isRowSelected = false,
+    VoidCallback onPressed,
   }) {
     final controller = Provider.of<MemoryController>(context);
 
@@ -56,7 +58,7 @@ class FieldTrack extends ColumnData<ClassHeapDetailStats>
 }
 
 class FieldClassName extends ColumnData<ClassHeapDetailStats> {
-  FieldClassName() : super('Class', fixedWidthPx: 200.0);
+  FieldClassName() : super('Class', fixedWidthPx: scaleByFontFactor(200.0));
 
   @override
   String getValue(ClassHeapDetailStats dataObject) => dataObject.classRef.name;
@@ -81,7 +83,7 @@ class FieldInstanceCountColumn extends ColumnData<ClassHeapDetailStats> {
       : super(
           'Instances',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: defaultNumberFieldWidth,
+          fixedWidthPx: scaleByFontFactor(defaultNumberFieldWidth),
         );
 
   @override
@@ -111,7 +113,7 @@ class FieldInstanceDeltaColumn extends ColumnData<ClassHeapDetailStats> {
       : super(
           'Delta',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: defaultNumberFieldWidth,
+          fixedWidthPx: scaleByFontFactor(defaultNumberFieldWidth),
         );
 
   @override
@@ -142,7 +144,7 @@ class FieldSizeColumn extends ColumnData<ClassHeapDetailStats> {
       : super(
           'Bytes',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: defaultNumberFieldWidth,
+          fixedWidthPx: scaleByFontFactor(defaultNumberFieldWidth),
         );
 
   @override
@@ -171,7 +173,7 @@ class FieldSizeDeltaColumn extends ColumnData<ClassHeapDetailStats> {
       : super(
           'Delta',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: defaultNumberFieldWidth,
+          fixedWidthPx: scaleByFontFactor(defaultNumberFieldWidth),
         );
 
   @override

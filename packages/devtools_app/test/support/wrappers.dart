@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/analytics/analytics_controller.dart';
 import 'package:devtools_app/src/app_size/app_size_controller.dart';
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
@@ -49,6 +50,17 @@ Widget wrap(Widget widget) {
   );
 }
 
+Widget wrapWithAnalytics(
+  Widget widget, {
+  AnalyticsController controller,
+}) {
+  controller ??= AnalyticsController();
+  return Provider<AnalyticsController>.value(
+    value: controller,
+    child: widget,
+  );
+}
+
 Widget wrapWithControllers(
   Widget widget, {
   LoggingController logging,
@@ -59,6 +71,7 @@ Widget wrapWithControllers(
   NetworkController network,
   BannerMessagesController bannerMessages,
   AppSizeController appSize,
+  AnalyticsController analytics,
 }) {
   final _providers = [
     Provider<BannerMessagesController>.value(
@@ -73,18 +86,27 @@ Widget wrapWithControllers(
     if (network != null) Provider<NetworkController>.value(value: network),
     if (debugger != null) Provider<DebuggerController>.value(value: debugger),
     if (appSize != null) Provider<AppSizeController>.value(value: appSize),
+    if (analytics != null)
+      Provider<AnalyticsController>.value(value: analytics),
   ];
   return wrap(
-    MultiProvider(
-      providers: _providers,
-      child: widget,
+    wrapWithNotifications(
+      MultiProvider(
+        providers: _providers,
+        child: widget,
+      ),
     ),
   );
+}
+
+Widget wrapWithNotifications(Widget child) {
+  return Notifications(child: child);
 }
 
 Widget wrapWithInspectorControllers(Widget widget) {
   return wrapWithControllers(
     widget,
+    debugger: DebuggerController(),
     // TODO(jacobr): add inspector controllers.
   );
 }

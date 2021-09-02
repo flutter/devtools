@@ -6,13 +6,10 @@ class RegisteredServiceDescription {
   const RegisteredServiceDescription._({
     required this.service,
     required this.title,
-    this.icon,
   });
 
   final String service;
   final String title;
-//  final DevToolsIcon icon;
-  final dynamic icon;
 }
 
 /// Flutter memory service registered by Flutter Tools.
@@ -22,8 +19,6 @@ class RegisteredServiceDescription {
 const flutterMemory = RegisteredServiceDescription._(
   service: 'flutterMemoryInfo',
   title: 'Flutter Memory Info',
-  // TODO(terry): Better icon - icon w/o a Flutter dependency.
-  //  icon: FlutterIcons.snapshot,
 );
 
 const flutterListViews = '_flutter.listViews';

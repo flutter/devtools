@@ -12,13 +12,13 @@ import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/split.dart';
-import 'package:devtools_testing/support/performance_test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'support/mocks.dart';
+import 'support/performance_test_data.dart';
 import 'support/wrappers.dart';
 
 void main() {
@@ -47,14 +47,21 @@ void main() {
   Future<void> pumpPerformanceScreen(
     WidgetTester tester, {
     PerformanceController performanceController,
+    bool runAsync = false,
   }) async {
     await tester.pumpWidget(wrapWithControllers(
       const PerformanceScreenBody(),
       performance: controller =
           performanceController ?? PerformanceController(),
     ));
-    // Delay to ensure the timeline has started.
-    await tester.pumpAndSettle(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    if (runAsync) {
+      // Await a small delay to allow the PerformanceController to complete
+      // initialization.
+      await Future.delayed(const Duration(seconds: 1));
+    }
+
     expect(find.byType(PerformanceScreenBody), findsOneWidget);
   }
 
@@ -77,57 +84,90 @@ void main() {
 
     testWidgetsWithWindowSize('builds initial content', windowSize,
         (WidgetTester tester) async {
-      await pumpPerformanceScreen(tester);
-      await tester.pumpAndSettle();
-      expect(find.byType(FlutterFramesChart), findsOneWidget);
-      expect(find.byType(TimelineFlameChart), findsOneWidget);
-      expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
-          findsNothing);
-      expect(find.byType(EventDetails), findsOneWidget);
-      expect(find.byType(RefreshButton), findsOneWidget);
-      expect(find.byType(ClearButton), findsOneWidget);
+      await tester.runAsync(() async {
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(find.byType(FlutterFramesChart), findsOneWidget);
+        expect(find.byType(TimelineFlameChart), findsOneWidget);
+        expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+            findsNothing);
+        expect(find.byType(EventDetails), findsOneWidget);
+        expect(find.byType(PauseButton), findsOneWidget);
+        expect(find.byType(ResumeButton), findsOneWidget);
+        expect(find.byType(ClearButton), findsOneWidget);
 
-      // Verify the state of the splitter.
-      final splitFinder = find.byType(Split);
-      expect(splitFinder, findsOneWidget);
-      final Split splitter = tester.widget(splitFinder);
-      expect(splitter.initialFractions[0], equals(0.6));
+        // Verify the state of the splitter.
+        final splitFinder = find.byType(Split);
+        expect(splitFinder, findsOneWidget);
+        final Split splitter = tester.widget(splitFinder);
+        expect(splitter.initialFractions[0], equals(0.7));
+      });
+    });
+
+    testWidgetsWithWindowSize(
+        'builds initial content for empty timeline', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        _setUpServiceManagerWithTimeline({});
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(find.byType(FlutterFramesChart), findsOneWidget);
+        expect(find.byType(TimelineFlameChart), findsNothing);
+        expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+            findsOneWidget);
+        expect(find.byType(EventDetails), findsOneWidget);
+        expect(find.byType(PauseButton), findsOneWidget);
+        expect(find.byType(ResumeButton), findsOneWidget);
+        expect(find.byType(ClearButton), findsOneWidget);
+
+        // Verify the state of the splitter.
+        final splitFinder = find.byType(Split);
+        expect(splitFinder, findsOneWidget);
+        final Split splitter = tester.widget(splitFinder);
+        expect(splitter.initialFractions[0], equals(0.7));
+      });
+    });
+
+    testWidgetsWithWindowSize(
+        'can pause and resume frame recording', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(find.byType(PauseButton), findsOneWidget);
+        expect(find.byType(ResumeButton), findsOneWidget);
+
+        expect(controller.recordingFrames.value, isTrue);
+        await tester.tap(find.byType(PauseButton));
+        await tester.pumpAndSettle();
+        expect(controller.recordingFrames.value, isFalse);
+        await tester.tap(find.byType(ResumeButton));
+        await tester.pumpAndSettle();
+        expect(controller.recordingFrames.value, isTrue);
+      });
     });
 
     testWidgetsWithWindowSize('clears timeline on clear', windowSize,
         (WidgetTester tester) async {
-      await pumpPerformanceScreen(tester);
-      await tester.pumpAndSettle();
-      expect(controller.allTraceEvents, isNotEmpty);
-      expect(find.byType(FlutterFramesChart), findsOneWidget);
-      expect(find.byType(TimelineFlameChart), findsOneWidget);
-      expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
-          findsNothing);
-      expect(find.byType(EventDetails), findsOneWidget);
+      await tester.runAsync(() async {
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(controller.allTraceEvents, isNotEmpty);
+        expect(find.byType(FlutterFramesChart), findsOneWidget);
+        expect(find.byType(TimelineFlameChart), findsOneWidget);
+        expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+            findsNothing);
+        expect(find.byType(EventDetails), findsOneWidget);
 
-      await tester.tap(find.byType(ClearButton));
-      await tester.pumpAndSettle();
-      expect(controller.allTraceEvents, isEmpty);
-      expect(find.byType(FlutterFramesChart), findsOneWidget);
-      expect(find.byType(TimelineFlameChart), findsNothing);
-      expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
-          findsOneWidget);
-      expect(find.byType(EventDetails), findsOneWidget);
-    });
-
-    testWidgetsWithWindowSize('refreshes with empty timeline', windowSize,
-        (WidgetTester tester) async {
-      _setUpServiceManagerWithTimeline({});
-      await pumpPerformanceScreen(tester);
-      await tester.pumpAndSettle();
-      expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
-          findsOneWidget);
-
-      // Refresh with empty timeline.
-      await tester.tap(find.byType(RefreshButton));
-      await tester.pump();
-      expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
-          findsOneWidget);
+        await tester.tap(find.byType(ClearButton));
+        await tester.pumpAndSettle();
+        expect(controller.allTraceEvents, isEmpty);
+        expect(find.byType(FlutterFramesChart), findsOneWidget);
+        expect(find.byType(TimelineFlameChart), findsNothing);
+        expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+            findsOneWidget);
+        expect(find.byType(EventDetails), findsOneWidget);
+      });
     });
   });
 }

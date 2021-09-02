@@ -16,6 +16,7 @@ library icons;
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
+import '../inspector/layout_explorer/ui/widgets_theme.dart';
 import '../theme.dart';
 import '../utils.dart';
 
@@ -30,7 +31,7 @@ class CustomIcon extends StatelessWidget {
   final String text;
   final bool isAbstract;
 
-  Image get baseIcon => kind.icon;
+  AssetImageIcon get baseIcon => kind.icon;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +45,10 @@ class CustomIcon extends StatelessWidget {
           Text(
             text,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 9, color: Color(0xFF231F20)),
+            style: TextStyle(
+              fontSize: scaleByFontFactor(9.0),
+              color: const Color(0xFF231F20),
+            ),
           ),
         ],
       ),
@@ -52,11 +56,50 @@ class CustomIcon extends StatelessWidget {
   }
 }
 
-class CustomIconMaker {
-  final Map<String, CustomIcon> iconCache = {};
+/// An icon with one character
+class CircleIcon extends StatelessWidget {
+  const CircleIcon({
+    @required this.text,
+    @required this.color,
+  });
 
-  CustomIcon getCustomIcon(String fromText,
-      {IconKind kind, bool isAbstract = false}) {
+  /// Text to display. Should be one character.
+  final String text;
+
+  /// Background circle color.
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      // Subtract 1 for a little bit of fixed padding
+      // around the icon relative to the default size.
+      // TODO(jacobr): consider switching this to padding.
+      width: defaultIconSize - 1,
+      height: defaultIconSize - 1,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+            fontSize: scaleByFontFactor(9.0), color: const Color(0xFF231F20)),
+      ),
+    );
+  }
+}
+
+class CustomIconMaker {
+  final Map<String, Widget> iconCache = {};
+
+  Widget getCustomIcon(
+    String fromText, {
+    IconKind kind,
+    bool isAbstract = false,
+  }) {
     kind ??= IconKind.classIcon;
     if (fromText?.isEmpty != false) {
       return null;
@@ -64,13 +107,12 @@ class CustomIconMaker {
 
     final String text = fromText[0].toUpperCase();
     final String mapKey = '${text}_${kind.name}_$isAbstract';
-
     return iconCache.putIfAbsent(mapKey, () {
       return CustomIcon(kind: kind, text: text, isAbstract: isAbstract);
     });
   }
 
-  CustomIcon fromWidgetName(String name) {
+  Widget fromWidgetName(String name) {
     if (name == null) {
       return null;
     }
@@ -83,13 +125,20 @@ class CustomIconMaker {
       return null;
     }
 
-    return getCustomIcon(
-      name,
-      kind: isPrivate(name) ? IconKind.method : IconKind.classIcon,
-    );
+    final widgetTheme = WidgetTheme.fromName(name);
+    if (widgetTheme.iconAsset != null) {
+      return iconCache.putIfAbsent(name, () {
+        return AssetImageIcon(asset: widgetTheme.iconAsset);
+      });
+    }
+
+    final text = name[0].toUpperCase();
+    return iconCache.putIfAbsent(name, () {
+      return CircleIcon(text: text, color: widgetTheme.color);
+    });
   }
 
-  CustomIcon fromInfo(String name) {
+  Widget fromInfo(String name) {
     if (name == null) {
       return null;
     }
@@ -109,39 +158,39 @@ class CustomIconMaker {
 }
 
 class IconKind {
-  const IconKind(this.name, this.icon, [Image abstractIcon])
+  const IconKind(this.name, this.icon, [AssetImageIcon abstractIcon])
       : abstractIcon = abstractIcon ?? icon;
 
-  static IconKind classIcon = IconKind(
+  static IconKind classIcon = const IconKind(
     'class',
-    createImageIcon('icons/custom/class.png'),
-    createImageIcon('icons/custom/class_abstract.png'),
+    AssetImageIcon(asset: 'icons/custom/class.png'),
+    AssetImageIcon(asset: 'icons/custom/class_abstract.png'),
   );
-  static IconKind field = IconKind(
+  static IconKind field = const IconKind(
     'fields',
-    createImageIcon('icons/custom/fields.png'),
+    AssetImageIcon(asset: 'icons/custom/fields.png'),
   );
-  static IconKind interface = IconKind(
+  static IconKind interface = const IconKind(
     'interface',
-    createImageIcon('icons/custom/interface.png'),
+    AssetImageIcon(asset: 'icons/custom/interface.png'),
   );
-  static IconKind method = IconKind(
+  static IconKind method = const IconKind(
     'method',
-    createImageIcon('icons/custom/method.png'),
-    createImageIcon('icons/custom/method_abstract.png'),
+    AssetImageIcon(asset: 'icons/custom/method.png'),
+    AssetImageIcon(asset: 'icons/custom/method_abstract.png'),
   );
-  static IconKind property = IconKind(
+  static IconKind property = const IconKind(
     'property',
-    createImageIcon('icons/custom/property.png'),
+    AssetImageIcon(asset: 'icons/custom/property.png'),
   );
-  static IconKind info = IconKind(
+  static IconKind info = const IconKind(
     'info',
-    createImageIcon('icons/custom/info.png'),
+    AssetImageIcon(asset: 'icons/custom/info.png'),
   );
 
   final String name;
-  final Image icon;
-  final Image abstractIcon;
+  final AssetImageIcon icon;
+  final AssetImageIcon abstractIcon;
 }
 
 class ColorIcon extends StatelessWidget {
@@ -154,7 +203,7 @@ class ColorIcon extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return CustomPaint(
       painter: _ColorIconPainter(color, colorScheme),
-      size: const Size(defaultIconSize, defaultIconSize),
+      size: Size(defaultIconSize, defaultIconSize),
     );
   }
 }
@@ -243,12 +292,51 @@ class FlutterMaterialIcons {
   }
 }
 
-Image createImageIcon(String url, {double size = defaultIconSize}) {
-  return Image(
-    image: AssetImage(url),
-    height: size,
-    width: size,
-  );
+class AssetImageIcon extends StatelessWidget {
+  const AssetImageIcon({
+    @required this.asset,
+    double height,
+    double width,
+  })  : _width = width,
+        _height = height;
+
+  final String asset;
+  final double _height;
+  final double _width;
+
+  double get width => _width ?? defaultIconSize;
+  double get height => _height ?? defaultIconSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image(
+      image: AssetImage(asset),
+      height: height,
+      width: width,
+      fit: BoxFit.fill,
+    );
+  }
+}
+
+class ThemedImageIcon extends StatelessWidget {
+  const ThemedImageIcon({
+    @required this.lightModeAsset,
+    @required this.darkModeAsset,
+  });
+
+  final String lightModeAsset;
+  final String darkModeAsset;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Image(
+      image: AssetImage(theme.isDarkTheme ? darkModeAsset : lightModeAsset),
+      height: defaultIconSize,
+      width: defaultIconSize,
+    );
+  }
 }
 
 class Octicons {

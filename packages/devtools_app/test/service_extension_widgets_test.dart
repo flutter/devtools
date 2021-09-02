@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:devtools_app/src/core/message_bus.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/notifications.dart';
 import 'package:devtools_app/src/service_extensions.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/service_registrations.dart';
@@ -71,7 +70,7 @@ void main() {
       expect(find.byWidget(button), findsOneWidget);
       await tester.pumpAndSettle();
       expect(reloads, 0);
-      await tester.tap(find.byWidget(button));
+      await tester.tap(find.byWidget(button), warnIfMissed: false);
       await tester.pumpAndSettle();
       expect(reloads, 0);
     });
@@ -118,7 +117,7 @@ void main() {
       expect(find.byWidget(button), findsOneWidget);
       await tester.pumpAndSettle();
       expect(restarts, 0);
-      await tester.tap(find.byWidget(button));
+      await tester.tap(find.byWidget(button), warnIfMissed: false);
       await tester.pumpAndSettle();
       expect(restarts, 0);
     });
@@ -183,10 +182,6 @@ void main() {
       expect(toggle.value, false, reason: 'The extension is disabled.');
     });
   });
-}
-
-Widget wrapWithNotifications(Widget child) {
-  return Notifications(child: child);
 }
 
 void registerServiceExtension(

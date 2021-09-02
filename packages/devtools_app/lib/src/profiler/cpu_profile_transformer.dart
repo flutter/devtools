@@ -23,9 +23,9 @@ class CpuProfileTransformer {
 
   int _stackFramesCount;
 
-  List<dynamic> _stackFrameKeys;
+  List<String> _stackFrameKeys;
 
-  List<dynamic> _stackFrameValues;
+  List<CpuStackFrame> _stackFrameValues;
 
   int _stackFramesProcessed = 0;
 
@@ -42,26 +42,10 @@ class CpuProfileTransformer {
     reset();
 
     _activeProcessId = processId;
-    _stackFramesCount = cpuProfileData?.stackFramesJson?.length ?? 0;
-    _stackFrameKeys = cpuProfileData?.stackFramesJson?.keys?.toList() ?? [];
-    _stackFrameValues = cpuProfileData?.stackFramesJson?.values?.toList() ?? [];
-
-    // Initialize all stack frames before we start to for the tree.
-    for (int i = 0; i < _stackFramesCount; i++) {
-      final k = _stackFrameKeys[i];
-      final v = _stackFrameValues[i];
-      final stackFrame = CpuStackFrame(
-        id: k,
-        name: getSimpleStackFrameName(v[CpuProfileData.nameKey]),
-        category: v[CpuProfileData.categoryKey],
-        // If the user is on a version of Flutter where resolvedUrl is not
-        // included in the response, this will be null. If the frame is a native
-        // frame, the this will be the empty string.
-        url: v[CpuProfileData.resolvedUrlKey] ?? '',
-        profileMetaData: cpuProfileData.profileMetaData,
-      );
-      cpuProfileData.stackFrames[stackFrame.id] = stackFrame;
-    }
+    _stackFramesCount = cpuProfileData?.stackFrames?.length ?? 0;
+    _stackFrameKeys = cpuProfileData?.stackFrames?.keys?.toList() ?? <String>[];
+    _stackFrameValues =
+        cpuProfileData?.stackFrames?.values?.toList() ?? <CpuStackFrame>[];
 
     // At minimum, process the data in 4 batches to smooth the appearance of
     // the progress indicator.
@@ -73,13 +57,14 @@ class CpuProfileTransformer {
 
     // Use batch processing to maintain a responsive UI.
     while (_stackFramesProcessed < _stackFramesCount) {
-      _processBatch(batchSize, cpuProfileData);
+      _processBatch(batchSize, cpuProfileData, processId);
       _progressNotifier.value = _stackFramesProcessed / _stackFramesCount;
 
       // Await a small delay to give the UI thread a chance to update the
       // progress indicator. Use a longer delay than the default (0) so that the
       // progress indicator will look smoother.
       await delayForBatchProcessing(micros: 5000);
+
       if (processId != _activeProcessId) {
         throw ProcessCancelledException();
       }
@@ -102,15 +87,21 @@ class CpuProfileTransformer {
     reset();
   }
 
-  void _processBatch(int batchSize, CpuProfileData cpuProfileData) {
+  void _processBatch(
+    int batchSize,
+    CpuProfileData cpuProfileData,
+    String processId,
+  ) {
     final batchEnd =
         math.min(_stackFramesProcessed + batchSize, _stackFramesCount);
     for (int i = _stackFramesProcessed; i < batchEnd; i++) {
+      if (processId != _activeProcessId) {
+        throw ProcessCancelledException();
+      }
       final key = _stackFrameKeys[i];
       final value = _stackFrameValues[i];
       final stackFrame = cpuProfileData.stackFrames[key];
-      final parent =
-          cpuProfileData.stackFrames[value[CpuProfileData.parentIdKey]];
+      final parent = cpuProfileData.stackFrames[value.parentId];
       _processStackFrame(stackFrame, parent, cpuProfileData);
       _stackFramesProcessed++;
     }
@@ -131,8 +122,8 @@ class CpuProfileTransformer {
   }
 
   void _setExclusiveSampleCountsAndTags(CpuProfileData cpuProfileData) {
-    for (Map<String, dynamic> traceEvent in cpuProfileData.stackTraceEvents) {
-      final leafId = traceEvent[CpuProfileData.stackFrameIdKey];
+    for (CpuSample sample in cpuProfileData.cpuSamples) {
+      final leafId = sample.leafId;
       assert(
         cpuProfileData.stackFrames[leafId] != null,
         'No StackFrame found for id $leafId. If you see this assertion, please '
@@ -142,7 +133,7 @@ class CpuProfileTransformer {
       );
       final stackFrame = cpuProfileData.stackFrames[leafId];
       stackFrame?.exclusiveSampleCount++;
-      final userTag = (traceEvent['args'] ?? {})['userTag'];
+      final userTag = sample.userTag;
       if (userTag != null) {
         stackFrame.incrementTagSampleCount(userTag);
       }
@@ -162,6 +153,7 @@ class CpuProfileTransformer {
   }
 }
 
+// ignore: avoid_classes_with_only_static_members
 /// Process for converting a [CpuStackFrame] into a bottom-up representation of
 /// the CPU profile.
 class BottomUpProfileTransformer {
@@ -191,7 +183,7 @@ class BottomUpProfileTransformer {
     CpuStackFrame currentBottomUpRoot,
     List<CpuStackFrame> bottomUpRoots,
   ) {
-    final copy = node.shallowCopy(resetInclusiveSampleCount: true);
+    final copy = node.shallowCopy();
 
     if (currentBottomUpRoot != null) {
       copy.addChild(currentBottomUpRoot.deepCopy());
@@ -266,7 +258,3 @@ void mergeProfileRoots(List<CpuStackFrame> roots) {
     root.index = roots.indexOf(root);
   }
 }
-
-/// Exception thrown when a request to process data has been cancelled in
-/// favor of a new request.
-class ProcessCancelledException implements Exception {}

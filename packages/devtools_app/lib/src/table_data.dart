@@ -386,7 +386,7 @@ abstract class ColumnData<T> {
 abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
   TreeColumnData(String title) : super.wide(title);
 
-  static const treeToggleWidth = 14.0;
+  static double get treeToggleWidth => scaleByFontFactor(14.0);
 
   final StreamController<T> nodeExpandedController =
       StreamController<T>.broadcast();

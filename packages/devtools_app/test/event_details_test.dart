@@ -9,12 +9,12 @@ import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
-import 'package:devtools_testing/support/performance_test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 import 'support/mocks.dart';
+import 'support/performance_test_data.dart';
 import 'support/wrappers.dart';
 
 void main() {
@@ -46,7 +46,7 @@ void main() {
       await pumpEventDetails(goldenUiTimelineEvent, tester);
       expect(find.byType(CpuProfiler), findsOneWidget);
       expect(find.byType(CpuProfilerDisabled), findsNothing);
-      expect(find.byType(EventSummary), findsNothing);
+      expect(find.byType(EventSummary), findsOneWidget);
       expect(find.text(EventDetails.noEventSelected), findsNothing);
       expect(find.text(EventDetails.instructions), findsNothing);
     });
@@ -95,9 +95,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(CpuProfiler), findsOneWidget);
-      expect(find.text(CpuProfiler.emptyCpuProfile), findsOneWidget);
       expect(find.byType(CpuProfilerDisabled), findsNothing);
-      expect(find.byType(EventSummary), findsNothing);
+      expect(find.byType(EventSummary), findsOneWidget);
     });
   });
 
@@ -108,11 +107,11 @@ void main() {
       eventSummary = EventSummary(asyncEventWithInstantChildren);
       await tester.pumpWidget(wrap(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
-      expect(find.text('Time'), findsOneWidget);
-      expect(find.text('Thread id'), findsOneWidget);
-      expect(find.text('Process id'), findsOneWidget);
-      expect(find.text('Category'), findsOneWidget);
-      expect(find.text('Async id'), findsOneWidget);
+      expect(find.text('Time:  29.1 ms'), findsOneWidget);
+      expect(find.text('Thread id:  19333'), findsOneWidget);
+      expect(find.text('Process id:  94955'), findsOneWidget);
+      expect(find.text('Category:  Embedder'), findsOneWidget);
+      expect(find.text('Async id:  f1'), findsOneWidget);
       expect(find.text('Connected events'), findsOneWidget);
     });
 
@@ -120,11 +119,11 @@ void main() {
       eventSummary = EventSummary(goldenUiTimelineEvent);
       await tester.pumpWidget(wrap(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
-      expect(find.text('Time'), findsOneWidget);
-      expect(find.text('Thread id'), findsOneWidget);
-      expect(find.text('Process id'), findsOneWidget);
-      expect(find.text('Category'), findsOneWidget);
-      expect(find.text('Async id'), findsNothing);
+      expect(find.text('Time:  1.6 ms'), findsOneWidget);
+      expect(find.text('Thread id:  1'), findsOneWidget);
+      expect(find.text('Process id:  94955'), findsOneWidget);
+      expect(find.text('Category:  Embedder'), findsOneWidget);
+      expect(find.textContaining('Async id'), findsNothing);
       expect(find.text('Connected events'), findsNothing);
     });
 
@@ -132,11 +131,11 @@ void main() {
       eventSummary = EventSummary(goldenRasterTimelineEvent);
       await tester.pumpWidget(wrap(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
-      expect(find.text('Time'), findsOneWidget);
-      expect(find.text('Thread id'), findsOneWidget);
-      expect(find.text('Process id'), findsOneWidget);
-      expect(find.text('Category'), findsOneWidget);
-      expect(find.text('Async id'), findsNothing);
+      expect(find.text('Time:  28.4 ms'), findsOneWidget);
+      expect(find.text('Thread id:  2'), findsOneWidget);
+      expect(find.text('Process id:  94955'), findsOneWidget);
+      expect(find.text('Category:  Embedder'), findsOneWidget);
+      expect(find.textContaining('Async id'), findsNothing);
       expect(find.text('Arguments'), findsOneWidget);
     });
 
@@ -144,11 +143,11 @@ void main() {
       eventSummary = EventSummary(goldenUiTimelineEvent);
       await tester.pumpWidget(wrap(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
-      expect(find.text('Time'), findsOneWidget);
-      expect(find.text('Thread id'), findsOneWidget);
-      expect(find.text('Process id'), findsOneWidget);
-      expect(find.text('Category'), findsOneWidget);
-      expect(find.text('Async id'), findsNothing);
+      expect(find.text('Time:  1.6 ms'), findsOneWidget);
+      expect(find.text('Thread id:  1'), findsOneWidget);
+      expect(find.text('Process id:  94955'), findsOneWidget);
+      expect(find.text('Category:  Embedder'), findsOneWidget);
+      expect(find.textContaining('Async id'), findsNothing);
       expect(find.text('Arguments'), findsNothing);
     });
   });

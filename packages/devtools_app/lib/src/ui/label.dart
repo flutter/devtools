@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import 'icons.dart';
 
 /// Label including an image icon and optional text.
 class ImageIconLabel extends StatelessWidget {
-  const ImageIconLabel(this.icon, this.text, {this.minIncludeTextWidth});
+  const ImageIconLabel(
+    this.icon,
+    this.text, {
+    this.unscaledMinIncludeTextWidth,
+  });
 
   final Widget icon;
   final String text;
-  final double minIncludeTextWidth;
+  final double unscaledMinIncludeTextWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +23,7 @@ class ImageIconLabel extends StatelessWidget {
       children: [
         icon,
         // TODO(jacobr): animate showing and hiding the text.
-        if (_showLabelText(context, minIncludeTextWidth))
+        if (includeText(context, unscaledMinIncludeTextWidth))
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text(text),
@@ -33,13 +38,15 @@ class MaterialIconLabel extends StatelessWidget {
     @required this.label,
     this.iconData,
     this.imageIcon,
-    this.includeTextWidth,
+    this.color,
+    this.unscaleIncludeTextWidth,
   }) : assert((iconData == null) != (imageIcon == null));
 
   final IconData iconData;
-  final Image imageIcon;
+  final ThemedImageIcon imageIcon;
+  final Color color;
   final String label;
-  final double includeTextWidth;
+  final double unscaleIncludeTextWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -52,20 +59,19 @@ class MaterialIconLabel extends StatelessWidget {
             ? Icon(
                 iconData,
                 size: defaultIconSize,
+                color: color,
               )
             : imageIcon,
         // TODO(jacobr): animate showing and hiding the text.
-        if (_showLabelText(context, includeTextWidth))
+        if (includeText(context, unscaleIncludeTextWidth))
           Padding(
             padding: const EdgeInsets.only(left: denseSpacing),
-            child: Text(label),
+            child: Text(
+              label,
+              style: TextStyle(color: color),
+            ),
           ),
       ],
     );
   }
-}
-
-bool _showLabelText(BuildContext context, double includeTextWidth) {
-  return includeTextWidth == null ||
-      MediaQuery.of(context).size.width > includeTextWidth;
 }

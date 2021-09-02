@@ -8,13 +8,14 @@ import 'package:pedantic/pedantic.dart';
 import 'package:provider/provider.dart';
 
 import '../devtools.dart' as devtools;
-import 'analytics/analytics_stub.dart'
-    if (dart.library.html) 'analytics/analytics.dart' as ga;
+import 'analytics/analytics.dart' as ga;
+import 'analytics/analytics_controller.dart';
 import 'analytics/constants.dart' as analytics_constants;
-import 'analytics/provider.dart';
 import 'app_size/app_size_controller.dart';
 import 'app_size/app_size_screen.dart';
+import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
+import 'config_specific/launch_url/launch_url.dart';
 import 'config_specific/server/server.dart';
 import 'debugger/debugger_controller.dart';
 import 'debugger/debugger_screen.dart';
@@ -46,7 +47,6 @@ import 'screen.dart';
 import 'snapshot_screen.dart';
 import 'theme.dart';
 import 'ui/service_extension_widgets.dart';
-import 'utils.dart';
 import 'vm_developer/vm_developer_tools_controller.dart';
 import 'vm_developer/vm_developer_tools_screen.dart';
 
@@ -65,11 +65,11 @@ bool isExternalBuild = true;
 class DevToolsApp extends StatefulWidget {
   const DevToolsApp(
     this.screens,
-    this.analyticsProvider,
+    this.analyticsController,
   );
 
   final List<DevToolsScreen> screens;
-  final AnalyticsProvider analyticsProvider;
+  final AnalyticsController analyticsController;
 
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
@@ -81,7 +81,7 @@ class DevToolsApp extends StatefulWidget {
 /// flutter route parameters.
 // TODO(https://github.com/flutter/devtools/issues/1146): Introduce tests that
 // navigate the full app.
-class DevToolsAppState extends State<DevToolsApp> {
+class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
 
   bool get isDarkThemeEnabled => _isDarkThemeEnabled;
@@ -90,13 +90,16 @@ class DevToolsAppState extends State<DevToolsApp> {
   bool get vmDeveloperModeEnabled => _vmDeveloperModeEnabled;
   bool _vmDeveloperModeEnabled;
 
+  bool get denseModeEnabled => _denseModeEnabled;
+  bool _denseModeEnabled;
+
   @override
   void initState() {
     super.initState();
 
     ga.setupDimensions();
 
-    serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
+    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       setState(() {
         _clearCachedRoutes();
       });
@@ -113,6 +116,13 @@ class DevToolsAppState extends State<DevToolsApp> {
     preferences.vmDeveloperModeEnabled.addListener(() {
       setState(() {
         _vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
+      });
+    });
+
+    _denseModeEnabled = preferences.denseModeEnabled.value;
+    preferences.denseModeEnabled.addListener(() {
+      setState(() {
+        _denseModeEnabled = preferences.denseModeEnabled.value;
       });
     });
   }
@@ -151,7 +161,6 @@ class DevToolsAppState extends State<DevToolsApp> {
         key: const Key('not-found'),
         child: CenteredMessage("'$page' not found."),
         ideTheme: ideTheme,
-        analyticsProvider: widget.analyticsProvider,
       ),
     );
   }
@@ -169,7 +178,6 @@ class DevToolsAppState extends State<DevToolsApp> {
         key: const Key('landing'),
         child: LandingScreenBody(),
         ideTheme: ideTheme,
-        analyticsProvider: widget.analyticsProvider,
         actions: [
           OpenSettingsAction(),
           ReportFeedbackButton(),
@@ -207,7 +215,6 @@ class DevToolsAppState extends State<DevToolsApp> {
                       : 'No tabs available for this application.',
                 ),
                 ideTheme: ideTheme,
-                analyticsProvider: widget.analyticsProvider,
               );
             }
             return _providedControllers(
@@ -216,7 +223,6 @@ class DevToolsAppState extends State<DevToolsApp> {
                 ideTheme: ideTheme,
                 page: page,
                 tabs: tabs,
-                analyticsProvider: widget.analyticsProvider,
                 actions: [
                   // TODO(https://github.com/flutter/devtools/issues/1941)
                   if (serviceManager.connectedApp.isFlutterAppNow) ...[
@@ -245,7 +251,6 @@ class DevToolsAppState extends State<DevToolsApp> {
         final snapshotArgs = SnapshotArguments.fromArgs(args);
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
-          analyticsProvider: widget.analyticsProvider,
           child: _providedControllers(
             offline: true,
             child: SnapshotScreenBody(snapshotArgs, _screens),
@@ -256,7 +261,6 @@ class DevToolsAppState extends State<DevToolsApp> {
       appSizePageId: (_, __, ___) {
         return DevToolsScaffold.withChild(
           key: const Key('appsize'),
-          analyticsProvider: widget.analyticsProvider,
           child: _providedControllers(
             child: const AppSizeBody(),
           ),
@@ -301,7 +305,10 @@ class DevToolsAppState extends State<DevToolsApp> {
         ideTheme: ideTheme,
         theme: Theme.of(context),
       ),
-      builder: (context, child) => Notifications(child: child),
+      builder: (context, child) => Provider<AnalyticsController>.value(
+        value: widget.analyticsController,
+        child: Notifications(child: child),
+      ),
       routerDelegate: DevToolsRouterDelegate(_getPage),
       routeInformationParser: DevToolsRouteInformationParser(),
     );
@@ -408,7 +415,7 @@ class OpenAboutAction extends StatelessWidget {
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
-          child: const Icon(
+          child: Icon(
             Icons.help_outline,
             size: actionsIconSize,
           ),
@@ -434,7 +441,7 @@ class OpenSettingsAction extends StatelessWidget {
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
-          child: const Icon(
+          child: Icon(
             Icons.settings,
             size: actionsIconSize,
           ),
@@ -462,7 +469,7 @@ class ReportFeedbackButton extends StatelessWidget {
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
-          child: const Icon(
+          child: Icon(
             Icons.bug_report,
             size: actionsIconSize,
           ),
@@ -507,7 +514,6 @@ class DevToolsAboutDialog extends StatelessWidget {
 
   Widget _createFeedbackLink(BuildContext context) {
     final reportIssuesLink = devToolsExtensionPoints.issueTrackerLink();
-    final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: () async {
         ga.select(
@@ -516,7 +522,10 @@ class DevToolsAboutDialog extends StatelessWidget {
         );
         await launchUrl(reportIssuesLink.url, context);
       },
-      child: Text(reportIssuesLink.display, style: linkTextStyle(colorScheme)),
+      child: Text(
+        reportIssuesLink.display,
+        style: Theme.of(context).linkTextStyle,
+      ),
     );
   }
 }
@@ -525,27 +534,37 @@ class DevToolsAboutDialog extends StatelessWidget {
 class SettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final analyticsController = Provider.of<AnalyticsController>(context);
     return DevToolsDialog(
       title: dialogTitleText(Theme.of(context), 'Settings'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildOption(
+          CheckboxSetting(
             label: const Text('Use a dark theme'),
             listenable: preferences.darkModeTheme,
             toggle: preferences.toggleDarkModeTheme,
+            gaItem: analytics_constants.darkTheme,
+          ),
+          CheckboxSetting(
+            label: const Text('Use dense mode'),
+            listenable: preferences.denseModeEnabled,
+            toggle: preferences.toggleDenseMode,
+            gaItem: analytics_constants.denseMode,
           ),
           if (isExternalBuild && isDevToolsServerAvailable)
-            _buildOption(
+            CheckboxSetting(
               label: const Text('Enable analytics'),
-              listenable: ga.gaEnabledNotifier,
-              toggle: ga.setAnalyticsEnabled,
+              listenable: analyticsController.analyticsEnabled,
+              toggle: analyticsController.toggleAnalyticsEnabled,
+              gaItem: analytics_constants.analytics,
             ),
-          _buildOption(
+          CheckboxSetting(
             label: const Text('Enable VM developer mode'),
             listenable: preferences.vmDeveloperModeEnabled,
             toggle: preferences.toggleVmDeveloperMode,
+            gaItem: analytics_constants.vmDeveloperMode,
           ),
         ],
       ),
@@ -554,29 +573,49 @@ class SettingsDialog extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _buildOption({
-    Text label,
-    ValueListenable<bool> listenable,
-    Function(bool) toggle,
-  }) {
+class CheckboxSetting extends StatelessWidget {
+  const CheckboxSetting({
+    Key key,
+    @required this.label,
+    @required this.listenable,
+    @required this.toggle,
+    @required this.gaItem,
+  }) : super(key: key);
+
+  final Text label;
+
+  final ValueListenable<bool> listenable;
+
+  final Function(bool) toggle;
+
+  final String gaItem;
+
+  @override
+  Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => toggle(!listenable.value),
+      onTap: () => toggleSetting(!listenable.value),
       child: Row(
         children: [
           ValueListenableBuilder<bool>(
             valueListenable: listenable,
             builder: (context, value, _) {
-              return Checkbox(
-                value: value,
-                onChanged: toggle,
-              );
+              return Checkbox(value: value, onChanged: toggleSetting);
             },
           ),
           label,
         ],
       ),
     );
+  }
+
+  void toggleSetting(bool newValue) {
+    ga.select(
+      analytics_constants.settingsDialog,
+      '$gaItem-${newValue ? 'enabled' : 'disabled'}',
+    );
+    toggle(newValue);
   }
 }
 

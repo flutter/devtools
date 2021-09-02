@@ -19,6 +19,7 @@ IdeTheme getIdeTheme() {
     backgroundColor: _tryParseColor(queryParams['backgroundColor']),
     foregroundColor: _tryParseColor(queryParams['foregroundColor']),
     fontSize: _tryParseDouble(queryParams['fontSize']),
+    embed: queryParams['embed'] == 'true',
   );
 
   // If the environment has provided a background color, set it immediately

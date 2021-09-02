@@ -8,8 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
+import '../analytics/analytics_common.dart';
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
 import '../common_widgets.dart';
@@ -49,12 +50,17 @@ class PerformanceScreen extends Screen {
   static const id = 'performance';
 
   static bool _shouldShowForFlutterVersion(FlutterVersion currentVersion) {
-    // TODO(kenz): once https://github.com/flutter/flutter/commit/78a96b09d64dc2a520e5b269d5cea1b9dde27d3f
-    // makes it into flutter dev channel, track the version number and use that
-    // here. We may have to add functionality to [SemanticVersion] to support
-    // versions beyond the patch number (e.g.  2.3.0-12.1.pre).
     return currentVersion != null &&
-        currentVersion >= SemanticVersion(major: 2, minor: 3, patch: 1);
+        currentVersion >=
+            SemanticVersion(
+              major: 2,
+              minor: 3,
+              // Specifying patch makes the version number more readable.
+              // ignore: avoid_redundant_argument_values
+              patch: 0,
+              preReleaseMajor: 16,
+              preReleaseMinor: 0,
+            );
   }
 
   @override
@@ -75,9 +81,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     with
         AutoDisposeMixin,
         OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData> {
-  static const _primaryControlsMinIncludeTextWidth = 725.0;
-  static const _secondaryControlsMinIncludeTextWidth = 1100.0;
-
   PerformanceController controller;
 
   bool processing = false;
@@ -116,12 +119,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     });
 
     addAutoDisposeListener(controller.selectedFrame);
-
-    // Refresh data on page load if data is null. On subsequent tab changes,
-    // this should not be called.
-    if (controller.data == null && !offlineMode) {
-      controller.refreshData();
-    }
 
     // Load offline timeline data if available.
     if (shouldLoadOfflineData()) {
@@ -169,7 +166,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         Expanded(
           child: Split(
             axis: Axis.vertical,
-            initialFractions: const [0.6, 0.4],
+            initialFractions: const [0.7, 0.3],
             children: [
               TimelineFlameChartContainer(
                 processing: processing,
@@ -207,89 +204,15 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildPrimaryStateControls(),
-        _buildSecondaryControls(),
+        _PrimaryControls(
+          controller: controller,
+          processing: processing,
+          onClear: () => setState(() {}),
+        ),
+        const SizedBox(width: defaultSpacing),
+        _SecondaryControls(controller: controller),
       ],
     );
-  }
-
-  Widget _buildPrimaryStateControls() {
-    return ValueListenableBuilder(
-      valueListenable: controller.refreshing,
-      builder: (context, refreshing, _) {
-        return Row(
-          children: [
-            RefreshButton(
-              includeTextWidth: _primaryControlsMinIncludeTextWidth,
-              onPressed:
-                  (refreshing || processing) ? null : _refreshPerformanceData,
-            ),
-            const SizedBox(width: defaultSpacing),
-            ClearButton(
-              includeTextWidth: _primaryControlsMinIncludeTextWidth,
-              onPressed:
-                  (refreshing || processing) ? null : _clearPerformanceData,
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildSecondaryControls() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        ProfileGranularityDropdown(
-          screenId: PerformanceScreen.id,
-          profileGranularityFlagNotifier:
-              controller.cpuProfilerController.profileGranularityFlagNotifier,
-        ),
-        const SizedBox(width: defaultSpacing),
-        if (!serviceManager.connectedApp.isDartCliAppNow)
-          ServiceExtensionButtonGroup(
-            minIncludeTextWidth: _secondaryControlsMinIncludeTextWidth,
-            extensions: [performanceOverlay, profileWidgetBuilds],
-          ),
-        // TODO(kenz): hide or disable button if http timeline logging is not
-        // available.
-        const SizedBox(width: defaultSpacing),
-        ExportButton(
-          onPressed: _exportPerformanceData,
-          includeTextWidth: _secondaryControlsMinIncludeTextWidth,
-        ),
-        const SizedBox(width: defaultSpacing),
-        SettingsOutlinedButton(
-          onPressed: _openSettingsDialog,
-          label: 'Performance Settings',
-        ),
-      ],
-    );
-  }
-
-  void _openSettingsDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => PerformanceSettingsDialog(controller),
-    );
-  }
-
-  Future<void> _refreshPerformanceData() async {
-    await controller.refreshData();
-  }
-
-  Future<void> _clearPerformanceData() async {
-    await controller.clearData();
-    setState(() {});
-  }
-
-  void _exportPerformanceData() {
-    final exportedFile = controller.exportData();
-    // TODO(kenz): investigate if we need to do any error handling here. Is the
-    // download always successful?
-    // TODO(peterdjlee): find a way to push the notification logic into the
-    // export controller.
-    Notifications.of(context).push(successfulExportMessage(exportedFile));
   }
 
   @override
@@ -303,6 +226,137 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         offlineDataJson.isNotEmpty &&
         offlineDataJson[PerformanceScreen.id] != null &&
         offlineDataJson[PerformanceData.traceEventsKey] != null;
+  }
+}
+
+class _PrimaryControls extends StatelessWidget {
+  const _PrimaryControls({
+    Key key,
+    @required this.controller,
+    @required this.processing,
+    this.onClear,
+  }) : super(key: key);
+
+  static const _primaryControlsMinIncludeTextWidth = 760.0;
+
+  final PerformanceController controller;
+
+  final bool processing;
+
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller.recordingFrames,
+      builder: (context, recording, _) {
+        return Row(
+          children: [
+            PauseButton(
+              minScreenWidthForTextBeforeScaling:
+                  _primaryControlsMinIncludeTextWidth,
+              onPressed: recording ? _pauseFrameRecording : null,
+            ),
+            const SizedBox(width: denseSpacing),
+            ResumeButton(
+              minScreenWidthForTextBeforeScaling:
+                  _primaryControlsMinIncludeTextWidth,
+              onPressed: recording ? null : _resumeFrameRecording,
+            ),
+            const SizedBox(width: denseSpacing),
+            ClearButton(
+              minScreenWidthForTextBeforeScaling:
+                  _primaryControlsMinIncludeTextWidth,
+              onPressed: processing ? null : _clearPerformanceData,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _pauseFrameRecording() {
+    ga.select(analytics_constants.performance, analytics_constants.pause);
+    controller.toggleRecordingFrames(false);
+  }
+
+  void _resumeFrameRecording() {
+    ga.select(analytics_constants.performance, analytics_constants.resume);
+    controller.toggleRecordingFrames(true);
+  }
+
+  Future<void> _clearPerformanceData() async {
+    ga.select(analytics_constants.performance, analytics_constants.clear);
+    await controller.clearData();
+    if (onClear != null) {
+      onClear();
+    }
+  }
+}
+
+class _SecondaryControls extends StatelessWidget {
+  const _SecondaryControls({
+    Key key,
+    @required this.controller,
+  }) : super(key: key);
+
+  static const _secondaryControlsMinIncludeTextWidth = 1125.0;
+
+  final PerformanceController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        ProfileGranularityDropdown(
+          screenId: PerformanceScreen.id,
+          profileGranularityFlagNotifier:
+              controller.cpuProfilerController.profileGranularityFlagNotifier,
+        ),
+        const SizedBox(width: defaultSpacing),
+        if (serviceManager.connectedApp.isFlutterAppNow)
+          ServiceExtensionButtonGroup(
+            minScreenWidthForTextBeforeScaling:
+                _secondaryControlsMinIncludeTextWidth,
+            extensions: [
+              performanceOverlay,
+              profileWidgetBuilds,
+              // TODO(devoncarew): Enable this once we have a UI displaying the
+              // values.
+              //trackRebuildWidgets,
+            ],
+          ),
+        const SizedBox(width: defaultSpacing),
+        ExportButton(
+          onPressed: () => _exportPerformanceData(context),
+          minScreenWidthForTextBeforeScaling:
+              _secondaryControlsMinIncludeTextWidth,
+        ),
+        const SizedBox(width: defaultSpacing),
+        SettingsOutlinedButton(
+          onPressed: () => _openSettingsDialog(context),
+          label: 'Performance Settings',
+        ),
+      ],
+    );
+  }
+
+  void _exportPerformanceData(BuildContext context) {
+    ga.select(analytics_constants.performance, analytics_constants.export);
+    final exportedFile = controller.exportData();
+    // TODO(kenz): investigate if we need to do any error handling here. Is the
+    // download always successful?
+    // TODO(peterdjlee): find a way to push the notification logic into the
+    // export controller.
+    Notifications.of(context).push(successfulExportMessage(exportedFile));
+  }
+
+  void _openSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => PerformanceSettingsDialog(controller),
+    );
   }
 }
 
@@ -460,4 +514,18 @@ class _BadgeJankyFramesSetting extends StatelessWidget {
       ],
     );
   }
+}
+
+class PerformanceScreenMetrics extends ScreenAnalyticsMetrics {
+  PerformanceScreenMetrics({
+    this.uiDuration,
+    this.rasterDuration,
+    this.shaderCompilationDuration,
+    this.traceEventCount,
+  });
+
+  final Duration uiDuration;
+  final Duration rasterDuration;
+  final Duration shaderCompilationDuration;
+  final int traceEventCount;
 }

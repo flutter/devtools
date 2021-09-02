@@ -9,13 +9,15 @@ import 'package:devtools_app/src/profiler/cpu_profile_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_flame_chart.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/ui/colors.dart';
+import 'package:devtools_app/src/ui/utils.dart';
 import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_testing/support/cpu_profile_test_data.dart';
-import 'package:devtools_testing/support/performance_test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'support/cpu_profile_test_data.dart';
+import 'support/performance_test_data.dart';
 
 void main() {
   const defaultZoom = 1.0;
@@ -292,16 +294,21 @@ void main() {
       double zoom = defaultZoom,
     }) async {
       node ??= testNode;
-      await tester.pumpWidget(Directionality(
-        textDirection: TextDirection.ltr,
-        child: node.buildWidget(
-          selected: selected,
-          searchMatch: false,
-          activeSearchMatch: false,
-          hovered: hovered,
-          zoom: zoom,
+      await tester.pumpWidget(
+        Builder(
+          builder: (context) => Directionality(
+            textDirection: TextDirection.ltr,
+            child: node.buildWidget(
+              selected: selected,
+              searchMatch: false,
+              activeSearchMatch: false,
+              hovered: hovered,
+              zoom: zoom,
+              colorScheme: Theme.of(context).colorScheme,
+            ),
+          ),
         ),
-      ));
+      );
     }
 
     Future<void> pumpFlameChartNodeWithOverlay(
@@ -323,6 +330,7 @@ void main() {
                   activeSearchMatch: false,
                   hovered: _hovered,
                   zoom: defaultZoom,
+                  colorScheme: Theme.of(context).colorScheme,
                 );
               },
             ),
@@ -556,9 +564,10 @@ const narrowNodeKey = Key('narrow node');
 final narrowNode = FlameChartNode<TimelineEvent>(
   key: narrowNodeKey,
   text: 'Narrow test node',
-  rect: const Rect.fromLTWH(23.0, 0.0, 21.9, rowHeight),
-  backgroundColor: Colors.blue,
-  textColor: Colors.white,
+  rect: Rect.fromLTWH(23.0, 0.0, 21.9, rowHeight),
+  colorPair: ThemedColorPair.from(
+    const ColorPair(background: Colors.blue, foreground: Colors.white),
+  ),
   data: goldenAsyncTimelineEvent,
   onSelected: (_) {},
 )..sectionIndex = 0;
@@ -568,9 +577,10 @@ final testNode = FlameChartNode<TimelineEvent>(
   key: testNodeKey,
   text: 'Test node 1',
   // 30.0 is the minimum node width for text.
-  rect: const Rect.fromLTWH(70.0, 0.0, 30.0, rowHeight),
-  backgroundColor: Colors.blue,
-  textColor: Colors.white,
+  rect: Rect.fromLTWH(70.0, 0.0, 30.0, rowHeight),
+  colorPair: ThemedColorPair.from(
+    const ColorPair(background: Colors.blue, foreground: Colors.white),
+  ),
   data: goldenAsyncTimelineEvent,
   onSelected: (_) {},
 )..sectionIndex = 0;
@@ -578,9 +588,10 @@ final testNode = FlameChartNode<TimelineEvent>(
 final testNode2 = FlameChartNode<TimelineEvent>(
   key: narrowNodeKey,
   text: 'Test node 2',
-  rect: const Rect.fromLTWH(120.0, 0.0, 50.0, rowHeight),
-  backgroundColor: Colors.blue,
-  textColor: Colors.white,
+  rect: Rect.fromLTWH(120.0, 0.0, 50.0, rowHeight),
+  colorPair: ThemedColorPair.from(
+    const ColorPair(background: Colors.blue, foreground: Colors.white),
+  ),
   data: goldenAsyncTimelineEvent,
   onSelected: (_) {},
 )..sectionIndex = 0;
@@ -588,9 +599,10 @@ final testNode2 = FlameChartNode<TimelineEvent>(
 final testNode3 = FlameChartNode<TimelineEvent>(
   key: narrowNodeKey,
   text: 'Test node 3',
-  rect: const Rect.fromLTWH(180.0, 0.0, 50.0, rowHeight),
-  backgroundColor: Colors.blue,
-  textColor: Colors.white,
+  rect: Rect.fromLTWH(180.0, 0.0, 50.0, rowHeight),
+  colorPair: ThemedColorPair.from(
+    const ColorPair(background: Colors.blue, foreground: Colors.white),
+  ),
   data: goldenAsyncTimelineEvent,
   onSelected: (_) {},
 )..sectionIndex = 0;
@@ -598,9 +610,10 @@ final testNode3 = FlameChartNode<TimelineEvent>(
 final testNode4 = FlameChartNode<TimelineEvent>(
   key: narrowNodeKey,
   text: 'Test node 4',
-  rect: const Rect.fromLTWH(240.0, 0.0, 300.0, rowHeight),
-  backgroundColor: Colors.blue,
-  textColor: Colors.white,
+  rect: Rect.fromLTWH(240.0, 0.0, 300.0, rowHeight),
+  colorPair: ThemedColorPair.from(
+    const ColorPair(background: Colors.blue, foreground: Colors.white),
+  ),
   data: goldenAsyncTimelineEvent,
   onSelected: (_) {},
 )..sectionIndex = 0;
@@ -616,9 +629,10 @@ const noWidthNodeKey = Key('no-width node');
 final negativeWidthNode = FlameChartNode<TimelineEvent>(
   key: noWidthNodeKey,
   text: 'No-width node',
-  rect: const Rect.fromLTWH(1.0, 0.0, -0.1, rowHeight),
-  backgroundColor: Colors.blue,
-  textColor: Colors.white,
+  rect: Rect.fromLTWH(1.0, 0.0, -0.1, rowHeight),
+  colorPair: ThemedColorPair.from(
+    const ColorPair(background: Colors.blue, foreground: Colors.white),
+  ),
   data: goldenAsyncTimelineEvent,
   onSelected: (_) {},
 )..sectionIndex = 0;

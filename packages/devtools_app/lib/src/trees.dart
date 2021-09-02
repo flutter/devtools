@@ -14,10 +14,13 @@ import 'dart:math';
 // ui/trees.dart, which houses generic tree types vs the base classes in this
 // file.
 
-class TreeNode<T extends TreeNode<T>> {
+abstract class TreeNode<T extends TreeNode<T>> {
   T parent;
 
   final List<T> children = [];
+
+  // TODO(jacobr) should impact depth.
+  bool indentChildren = true;
 
   /// Index in [parent.children].
   int index = -1;
@@ -44,23 +47,8 @@ class TreeNode<T extends TreeNode<T>> {
     if (_root != null) {
       return _root;
     }
-
-    // Store nodes we have visited so we can cache the root value for each one
-    // once we find the root.
-    final visited = {this};
-
-    T root = this;
-    while (root.parent != null) {
-      visited.add(root);
-      root = root.parent;
-    }
-
-    // Set [_root] for all nodes we visited.
-    for (T node in visited) {
-      node._root = root;
-    }
-
-    return root;
+    if (parent == null) return _root = this;
+    return _root = parent.root;
   }
 
   T _root;
@@ -70,13 +58,8 @@ class TreeNode<T extends TreeNode<T>> {
     if (_level != null) {
       return _level;
     }
-    int level = 0;
-    T current = this;
-    while (current.parent != null) {
-      current = current.parent;
-      level++;
-    }
-    return _level = level;
+    if (parent == null) return _level = 0;
+    return _level = 1 + parent.level;
   }
 
   int _level;
@@ -230,6 +213,29 @@ class TreeNode<T extends TreeNode<T>> {
       }
     }
     return currentNode;
+  }
+
+  TreeNode<T> shallowCopy();
+
+  /// Filters a tree starting at this node and returns a list of new roots after
+  /// filtering, where all nodes in the new tree(s) meet the condition `filter`.
+  ///
+  /// If the root [this] should be included in the filtered results, the list
+  /// will contain one node. If the root [this] should not be included in the
+  /// filtered results, the list may contain one or more nodes.
+  List<T> filterWhere(bool filter(T node)) {
+    List<T> walkAndCopy(T node) {
+      if (filter(node)) {
+        final copy = node.shallowCopy();
+        for (final child in node.children) {
+          copy.addAllChildren(walkAndCopy(child));
+        }
+        return [copy];
+      }
+      return [for (final child in node.children) ...walkAndCopy(child)];
+    }
+
+    return walkAndCopy(this);
   }
 }
 

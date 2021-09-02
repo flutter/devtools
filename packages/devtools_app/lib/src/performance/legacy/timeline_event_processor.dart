@@ -544,10 +544,10 @@ class LegacyTimelineEventProcessor {
     final frames = pendingFrames.values
         .where((frame) => frame.pipelineItemTime.start != null)
         .toList()
-          ..sort((LegacyFlutterFrame a, LegacyFlutterFrame b) {
-            return a.pipelineItemTime.start.inMicroseconds
-                .compareTo(b.pipelineItemTime.start.inMicroseconds);
-          });
+      ..sort((LegacyFlutterFrame a, LegacyFlutterFrame b) {
+        return a.pipelineItemTime.start.inMicroseconds
+            .compareTo(b.pipelineItemTime.start.inMicroseconds);
+      });
     for (LegacyFlutterFrame frame in frames) {
       final eventAdded = _maybeAddEventToFrame(event, frame);
       if (eventAdded) {
@@ -633,7 +633,7 @@ class LegacyTimelineEventProcessor {
     } else if (event.threadId == rasterThreadId) {
       return TimelineEventType.raster;
     } else {
-      return TimelineEventType.unknown;
+      return TimelineEventType.other;
     }
   }
 }

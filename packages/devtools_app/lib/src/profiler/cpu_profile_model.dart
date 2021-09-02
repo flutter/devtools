@@ -10,40 +10,75 @@ import '../charts/flame_chart.dart';
 import '../trace_event.dart';
 import '../trees.dart';
 import '../ui/search.dart';
+import '../url_utils.dart';
 import '../utils.dart';
+import 'cpu_profile_transformer.dart';
 
 /// Data model for DevTools CPU profile.
 class CpuProfileData {
   CpuProfileData._({
-    @required this.stackFramesJson,
-    @required this.stackTraceEvents,
+    @required this.stackFrames,
+    @required this.cpuSamples,
     @required this.profileMetaData,
   }) {
-    _cpuProfileRoot = CpuStackFrame(
-      id: 'cpuProfile',
-      name: 'all',
+    _cpuProfileRoot = CpuStackFrame._(
+      id: rootId,
+      name: rootName,
+      verboseName: rootName,
       category: 'Dart',
-      url: '',
+      rawUrl: '',
+      processedUrl: '',
       profileMetaData: profileMetaData,
+      parentId: null,
     );
   }
 
   factory CpuProfileData.parse(Map<String, dynamic> json) {
+    final profileMetaData = CpuProfileMetaData(
+      sampleCount: json[sampleCountKey] ?? 0,
+      samplePeriod: json[samplePeriodKey],
+      stackDepth: json[stackDepthKey],
+      time: (json[timeOriginKey] != null && json[timeExtentKey] != null)
+          ? (TimeRange()
+            ..start = Duration(microseconds: json[timeOriginKey])
+            ..end = Duration(
+                microseconds: json[timeOriginKey] + json[timeExtentKey]))
+          : null,
+    );
+
+    // Initialize all stack frames.
+    final stackFrames = <String, CpuStackFrame>{};
+    final stackFramesJson =
+        jsonDecode(jsonEncode(json[stackFramesKey] ?? <String, dynamic>{}));
+    for (final MapEntry<String, dynamic> entry in stackFramesJson.entries) {
+      final stackFrameJson = entry.value;
+      final stackFrame = CpuStackFrame(
+        id: entry.key,
+        name: getSimpleStackFrameName(stackFrameJson[nameKey]),
+        verboseName: stackFrameJson[nameKey],
+        category: stackFrameJson[categoryKey],
+        // If the user is on a version of Flutter where resolvedUrl is not
+        // included in the response, this will be null. If the frame is a native
+        // frame, the this will be the empty string.
+        rawUrl: stackFrameJson[resolvedUrlKey] ?? '',
+        parentId: stackFrameJson[parentIdKey] ?? rootId,
+        profileMetaData: profileMetaData,
+      );
+      stackFrames[stackFrame.id] = stackFrame;
+    }
+
+    // Initialize all CPU samples.
+    final stackTraceEvents =
+        (json[traceEventsKey] ?? []).cast<Map<String, dynamic>>();
+    final samples = stackTraceEvents
+        .map((trace) => CpuSample.parse(trace))
+        .toList()
+        .cast<CpuSample>();
+
     return CpuProfileData._(
-      stackFramesJson: jsonDecode(jsonEncode(json[stackFramesKey] ?? {})),
-      stackTraceEvents:
-          (json[traceEventsKey] ?? []).cast<Map<String, dynamic>>(),
-      profileMetaData: CpuProfileMetaData(
-        sampleCount: json[sampleCountKey] ?? 0,
-        samplePeriod: json[samplePeriodKey],
-        stackDepth: json[stackDepthKey],
-        time: (json[timeOriginKey] != null && json[timeExtentKey] != null)
-            ? (TimeRange()
-              ..start = Duration(microseconds: json[timeOriginKey])
-              ..end = Duration(
-                  microseconds: json[timeOriginKey] + json[timeExtentKey]))
-            : null,
-      ),
+      stackFrames: stackFrames,
+      cpuSamples: samples,
+      profileMetaData: profileMetaData,
     );
   }
 
@@ -51,37 +86,37 @@ class CpuProfileData {
     CpuProfileData superProfile,
     TimeRange subTimeRange,
   ) {
-    // Each trace event in [subTraceEvents] will have the leaf stack frame id
-    // for a cpu sample within [subTimeRange].
-    final subTraceEvents = superProfile.stackTraceEvents
-        .where((trace) => subTimeRange
-            .contains(Duration(microseconds: trace[TraceEvent.timestampKey])))
+    // Each sample in [subSamples] will have the leaf stack
+    // frame id for a cpu sample within [subTimeRange].
+    final subSamples = superProfile.cpuSamples
+        .where((sample) => subTimeRange
+            .contains(Duration(microseconds: sample.timestampMicros)))
         .toList();
 
     // Use a SplayTreeMap so that map iteration will be in sorted key order.
-    final SplayTreeMap<String, Map<String, dynamic>> subStackFramesJson =
+    // This keeps the visualization of the profile as consistent as possible
+    // when applying filters.
+    final SplayTreeMap<String, CpuStackFrame> subStackFrames =
         SplayTreeMap(stackFrameIdCompare);
-    for (Map<String, dynamic> traceEvent in subTraceEvents) {
-      // Add leaf frame.
-      final String leafId = traceEvent[stackFrameIdKey];
-      final Map<String, dynamic> leafFrameJson =
-          superProfile.stackFramesJson[leafId];
-      subStackFramesJson[leafId] = leafFrameJson;
+    for (final sample in subSamples) {
+      final leafFrame = superProfile.stackFrames[sample.leafId];
+      subStackFrames[sample.leafId] = leafFrame;
 
       // Add leaf frame's ancestors.
-      String parentId = leafFrameJson[parentIdKey];
-      while (parentId != null) {
-        final parentFrameJson = superProfile.stackFramesJson[parentId];
-        subStackFramesJson[parentId] = parentFrameJson;
-        parentId = parentFrameJson[parentIdKey];
+      String parentId = leafFrame.parentId;
+      while (parentId != null && parentId != rootId) {
+        final parentFrame = superProfile.stackFrames[parentId];
+        assert(parentFrame != null);
+        subStackFrames[parentId] = parentFrame;
+        parentId = parentFrame.parentId;
       }
     }
 
     return CpuProfileData._(
-      stackFramesJson: subStackFramesJson,
-      stackTraceEvents: subTraceEvents,
+      stackFrames: subStackFrames,
+      cpuSamples: subSamples,
       profileMetaData: CpuProfileMetaData(
-        sampleCount: subTraceEvents.length,
+        sampleCount: subSamples.length,
         samplePeriod: superProfile.profileMetaData.samplePeriod,
         stackDepth: superProfile.profileMetaData.stackDepth,
         time: subTimeRange,
@@ -89,7 +124,151 @@ class CpuProfileData {
     );
   }
 
+  factory CpuProfileData.fromUserTag(CpuProfileData originalData, String tag) {
+    if (!originalData.userTags.contains(tag)) {
+      return CpuProfileData.empty();
+    }
+
+    final samplesForTag = originalData.cpuSamples
+        .where((sample) => sample.userTag == tag)
+        .toList();
+    assert(samplesForTag.isNotEmpty);
+
+    // Use a SplayTreeMap so that map iteration will be in sorted key order.
+    // This keeps the visualization of the profile as consistent as possible
+    // when applying filters.
+    final SplayTreeMap<String, CpuStackFrame> stackFramesForTag =
+        SplayTreeMap(stackFrameIdCompare);
+
+    for (final sample in samplesForTag) {
+      var currentId = sample.leafId;
+      var currentStackFrame = originalData.stackFrames[currentId];
+
+      while (currentStackFrame != null) {
+        stackFramesForTag[currentId] = currentStackFrame.shallowCopy(
+          copySampleCountsAndTags: false,
+        );
+        final parentId = currentStackFrame.parentId;
+        final parentStackFrameJson =
+            parentId != null ? originalData.stackFrames[parentId] : null;
+        currentId = parentId;
+        currentStackFrame = parentStackFrameJson;
+      }
+    }
+
+    final originalTime = originalData.profileMetaData.time.duration;
+    final microsPerSample =
+        originalTime.inMicroseconds / originalData.profileMetaData.sampleCount;
+    final newSampleCount = samplesForTag.length;
+    final metaData = originalData.profileMetaData.copyWith(
+      sampleCount: newSampleCount,
+      // The start time is zero because only `TimeRange.duration` will matter
+      // for this profile data, and the samples included in this data could be
+      // sparse over the original profile's time range, so true start and end
+      // times wouldn't be helpful.
+      time: TimeRange()
+        ..start = const Duration()
+        ..end =
+            Duration(microseconds: (newSampleCount * microsPerSample).round()),
+    );
+
+    return CpuProfileData._(
+      stackFrames: stackFramesForTag,
+      cpuSamples: samplesForTag,
+      profileMetaData: metaData,
+    );
+  }
+
+  factory CpuProfileData.filterFrom(
+    CpuProfileData originalData,
+    bool Function(CpuStackFrame) includeFilter,
+  ) {
+    final filteredCpuSamples = <CpuSample>[];
+    void includeSampleOrWalkUp(
+      CpuSample sample,
+      Map<String, Object> sampleJson,
+      CpuStackFrame stackFrame,
+    ) {
+      if (includeFilter(stackFrame)) {
+        filteredCpuSamples.add(
+          CpuSample(
+            leafId: stackFrame.id,
+            userTag: sample.userTag,
+            traceJson: sampleJson,
+          ),
+        );
+      } else if (stackFrame.parentId != CpuProfileData.rootId) {
+        final parent = originalData.stackFrames[stackFrame.parentId];
+        assert(parent != null);
+        includeSampleOrWalkUp(sample, sampleJson, parent);
+      }
+    }
+
+    for (final sample in originalData.cpuSamples) {
+      final sampleJson = Map<String, Object>.from(sample.json);
+      final leafStackFrame = originalData.stackFrames[sample.leafId];
+      includeSampleOrWalkUp(sample, sampleJson, leafStackFrame);
+    }
+
+    // Use a SplayTreeMap so that map iteration will be in sorted key order.
+    // This keeps the visualization of the profile as consistent as possible
+    // when applying filters.
+    final SplayTreeMap<String, CpuStackFrame> filteredStackFrames =
+        SplayTreeMap(stackFrameIdCompare);
+
+    String filteredParentStackFrameId(CpuStackFrame candidateParentFrame) {
+      if (candidateParentFrame == null) return null;
+
+      if (includeFilter(candidateParentFrame)) {
+        return candidateParentFrame.id;
+      } else if (candidateParentFrame.parentId != CpuProfileData.rootId) {
+        final parent = originalData.stackFrames[candidateParentFrame.parentId];
+        assert(parent != null);
+        return filteredParentStackFrameId(parent);
+      }
+      return null;
+    }
+
+    void walkAndFilter(CpuStackFrame stackFrame) {
+      if (includeFilter(stackFrame)) {
+        final parent = originalData.stackFrames[stackFrame.parentId];
+        final filteredParentId = filteredParentStackFrameId(parent);
+        filteredStackFrames[stackFrame.id] = stackFrame.shallowCopy(
+          copySampleCountsAndTags: false,
+          parentId: filteredParentId,
+        );
+        if (filteredParentId != null) {
+          walkAndFilter(originalData.stackFrames[filteredParentId]);
+        }
+      } else if (stackFrame.parentId != CpuProfileData.rootId) {
+        final parent = originalData.stackFrames[stackFrame.parentId];
+        assert(parent != null);
+        walkAndFilter(parent);
+      }
+    }
+
+    for (final sample in filteredCpuSamples) {
+      final leafStackFrame = originalData.stackFrames[sample.leafId];
+      walkAndFilter(leafStackFrame);
+    }
+
+    return CpuProfileData._(
+      stackFrames: filteredStackFrames,
+      cpuSamples: filteredCpuSamples,
+      profileMetaData: CpuProfileMetaData(
+        sampleCount: filteredCpuSamples.length,
+        samplePeriod: originalData.profileMetaData.samplePeriod,
+        stackDepth: originalData.profileMetaData.stackDepth,
+        time: originalData.profileMetaData.time,
+      ),
+    );
+  }
+
   factory CpuProfileData.empty() => CpuProfileData.parse({});
+
+  static const rootId = 'cpuProfileRoot';
+
+  static const rootName = 'all';
 
   // Key fields from the VM response JSON.
   static const nameKey = 'name';
@@ -104,20 +283,31 @@ class CpuProfileData {
   static const samplePeriodKey = 'samplePeriod';
   static const timeOriginKey = 'timeOriginMicros';
   static const timeExtentKey = 'timeExtentMicros';
+  static const userTagKey = 'userTag';
+
+  final Map<String, CpuStackFrame> stackFrames;
+
+  final List<CpuSample> cpuSamples;
+
+  final CpuProfileMetaData profileMetaData;
 
   /// Marks whether this data has already been processed.
   bool processed = false;
 
-  final Map<String, dynamic> stackFramesJson;
+  List<CpuStackFrame> get callTreeRoots {
+    if (!processed) return <CpuStackFrame>[];
+    return _callTreeRoots ??= [_cpuProfileRoot.deepCopy()];
+  }
 
-  /// Trace events associated with the last stackFrame in each sample (i.e. the
-  /// leaves of the [CpuStackFrame] objects).
-  ///
-  /// The trace event will contain a field 'sf' that contains the id of the leaf
-  /// stack frame.
-  final List<Map<String, dynamic>> stackTraceEvents;
+  List<CpuStackFrame> _callTreeRoots;
 
-  final CpuProfileMetaData profileMetaData;
+  List<CpuStackFrame> get bottomUpRoots {
+    if (!processed) return <CpuStackFrame>[];
+    return _bottomUpRoots ??=
+        BottomUpProfileTransformer.processData(_cpuProfileRoot);
+  }
+
+  List<CpuStackFrame> _bottomUpRoots;
 
   CpuStackFrame get cpuProfileRoot => _cpuProfileRoot;
 
@@ -125,70 +315,31 @@ class CpuProfileData {
 
   CpuStackFrame _cpuProfileRoot;
 
-  Map<String, CpuStackFrame> stackFrames = {};
-
   CpuStackFrame selectedStackFrame;
 
-  CpuProfileData dataForUserTag(String tag) {
-    if (!userTags.contains(tag)) {
-      return CpuProfileData.empty();
-    }
-
-    final stackTraceEventsForTag = stackTraceEvents
-        .where((traceEvent) => (traceEvent['args'] ?? {})['userTag'] == tag)
-        .toList();
-    assert(stackTraceEventsForTag.isNotEmpty);
-
-    final stackFramesForTagJson = <String, dynamic>{};
-    for (final trace in stackTraceEventsForTag) {
-      var currentId = trace[stackFrameIdKey];
-      var currentStackFrameJson = stackFramesJson[currentId];
-
-      while (currentStackFrameJson != null) {
-        stackFramesForTagJson[currentId] = currentStackFrameJson;
-        final parentId = currentStackFrameJson[parentIdKey];
-        final parentStackFrameJson =
-            parentId != null ? stackFramesJson[parentId] : null;
-        currentId = parentId;
-        currentStackFrameJson = parentStackFrameJson;
-      }
-    }
-
-    final originalTime = profileMetaData.time.duration;
-    final microsPerSample =
-        originalTime.inMicroseconds / profileMetaData.sampleCount;
-    final newSampleCount = stackTraceEventsForTag.length;
-    final metaData = profileMetaData.copyWith(
-      sampleCount: stackTraceEventsForTag.length,
-      // The start time is zero because only `TimeRange.duration` will matter
-      // for this profile data, and the samples included in this data could be
-      // sparse over the original profile's time range, so true start and end
-      // times wouldn't be helpful.
-      time: TimeRange()
-        ..start = const Duration()
-        ..end =
-            Duration(microseconds: (newSampleCount * microsPerSample).round()),
-    );
-
-    return CpuProfileData._(
-      stackFramesJson: stackFramesForTagJson,
-      stackTraceEvents: stackTraceEventsForTag,
-      profileMetaData: metaData,
-    );
-  }
-
-  Map<String, dynamic> get json => {
+  Map<String, Object> get toJson => {
         'type': '_CpuProfileTimeline',
         samplePeriodKey: profileMetaData.samplePeriod,
         sampleCountKey: profileMetaData.sampleCount,
         stackDepthKey: profileMetaData.stackDepth,
-        timeOriginKey: profileMetaData.time.start.inMicroseconds,
-        timeExtentKey: profileMetaData.time.duration.inMicroseconds,
+        if (profileMetaData?.time?.start != null)
+          timeOriginKey: profileMetaData.time.start.inMicroseconds,
+        if (profileMetaData?.time?.duration != null)
+          timeExtentKey: profileMetaData.time.duration.inMicroseconds,
         stackFramesKey: stackFramesJson,
-        traceEventsKey: stackTraceEvents,
+        traceEventsKey: cpuSamples.map((sample) => sample.toJson).toList(),
       };
 
   bool get isEmpty => profileMetaData.sampleCount == 0;
+
+  @visibleForTesting
+  Map<String, dynamic> get stackFramesJson {
+    final framesJson = <String, dynamic>{};
+    for (final sf in stackFrames.values) {
+      framesJson.addAll(sf.toJson);
+    }
+    return framesJson;
+  }
 }
 
 class CpuProfileMetaData {
@@ -222,28 +373,120 @@ class CpuProfileMetaData {
   }
 }
 
+class CpuSample extends TraceEvent {
+  CpuSample({
+    @required this.leafId,
+    this.userTag,
+    Map<String, dynamic> traceJson,
+  }) : super(traceJson);
+
+  factory CpuSample.parse(Map<String, dynamic> traceJson) {
+    final leafId = traceJson[CpuProfileData.stackFrameIdKey];
+    final userTag = traceJson[TraceEvent.argsKey] != null
+        ? traceJson[TraceEvent.argsKey][CpuProfileData.userTagKey]
+        : null;
+    return CpuSample(
+      leafId: leafId,
+      userTag: userTag,
+      traceJson: traceJson,
+    );
+  }
+
+  final String leafId;
+
+  final String userTag;
+
+  Map<String, Object> get toJson {
+    // [leafId] is the source of truth for the leaf id of this sample.
+    super.json[CpuProfileData.stackFrameIdKey] = leafId;
+    return super.json;
+  }
+}
+
 class CpuStackFrame extends TreeNode<CpuStackFrame>
     with
         DataSearchStateMixin,
         TreeDataSearchStateMixin<CpuStackFrame>,
         FlameChartDataMixin {
-  CpuStackFrame({
+  factory CpuStackFrame({
+    @required String id,
+    @required String name,
+    @required String verboseName,
+    @required String category,
+    @required String rawUrl,
+    @required String parentId,
+    @required CpuProfileMetaData profileMetaData,
+  }) {
+    assert(rawUrl != null);
+    return CpuStackFrame._(
+      id: id,
+      name: name,
+      verboseName: verboseName,
+      category: category,
+      rawUrl: rawUrl,
+      processedUrl: getSimplePackageUrl(rawUrl),
+      parentId: parentId,
+      profileMetaData: profileMetaData,
+    );
+  }
+
+  CpuStackFrame._({
     @required this.id,
     @required this.name,
+    @required this.verboseName,
     @required this.category,
-    @required this.url,
+    @required this.rawUrl,
+    @required this.processedUrl,
+    @required this.parentId,
     @required this.profileMetaData,
   });
+
+  /// Prefix for packages from the core Dart libraries.
+  static const dartPackagePrefix = 'dart:';
+
+  /// Prefix for packages from the core Flutter libraries.
+  static const flutterPackagePrefix = 'package:flutter/';
+
+  /// The Flutter namespace in C++ that is part of the Flutter Engine code.
+  static const flutterEnginePrefix = 'flutter::';
+
+  /// dart:ui is the library for the Dart part of the Flutter Engine code.
+  static const dartUiPrefix = 'dart:ui';
 
   final String id;
 
   final String name;
 
+  final String verboseName;
+
   final String category;
 
-  final String url;
+  final String rawUrl;
+
+  final String processedUrl;
+
+  final String parentId;
 
   final CpuProfileMetaData profileMetaData;
+
+  bool get isNative => _isNative ??= id != CpuProfileData.rootId &&
+      processedUrl.isEmpty &&
+      !name.startsWith(flutterEnginePrefix);
+
+  bool _isNative;
+
+  bool get isDartCore =>
+      _isDartCore ??= processedUrl.startsWith(dartPackagePrefix) &&
+          !processedUrl.startsWith(dartUiPrefix);
+
+  bool _isDartCore;
+
+  bool get isFlutterCore =>
+      _isFlutterCore ??= processedUrl.startsWith(flutterPackagePrefix) ||
+          name.startsWith(flutterEnginePrefix) ||
+          processedUrl.startsWith(dartUiPrefix);
+
+  bool _isFlutterCore;
 
   Iterable<String> get userTags => _userTagSampleCount.keys;
 
@@ -298,11 +541,22 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   Duration _selfTime;
 
   @override
-  String get tooltip => [
-        name,
-        msText(totalTime),
-        if (url != null) url,
-      ].join(' - ');
+  String get tooltip {
+    var prefix = '';
+    if (isNative) {
+      prefix = '[Native]';
+    } else if (isDartCore) {
+      prefix = '[Dart]';
+    } else if (isFlutterCore) {
+      prefix = '[Flutter]';
+    }
+    final nameWithPrefix = [prefix, name].join(' ');
+    return [
+      nameWithPrefix,
+      msText(totalTime),
+      if (processedUrl.isNotEmpty) processedUrl,
+    ].join(' - ');
+  }
 
   /// Returns the number of cpu samples this stack frame is a part of.
   ///
@@ -316,19 +570,36 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     return _inclusiveSampleCount;
   }
 
-  CpuStackFrame shallowCopy({bool resetInclusiveSampleCount = false}) {
-    final copy = CpuStackFrame(
-      id: id,
-      name: name,
-      category: category,
-      url: url,
-      profileMetaData: profileMetaData,
-    )
-      ..exclusiveSampleCount = exclusiveSampleCount
-      ..inclusiveSampleCount =
-          resetInclusiveSampleCount ? null : inclusiveSampleCount;
-    for (final entry in _userTagSampleCount.entries) {
-      copy.incrementTagSampleCount(entry.key, increment: entry.value);
+  @override
+  CpuStackFrame shallowCopy({
+    String id,
+    String name,
+    String verboseName,
+    String category,
+    String url,
+    String parentId,
+    CpuProfileMetaData profileMetaData,
+    bool copySampleCountsAndTags = true,
+    bool resetInclusiveSampleCount = true,
+  }) {
+    final copy = CpuStackFrame._(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      verboseName: verboseName ?? this.verboseName,
+      category: category ?? this.category,
+      rawUrl: url ?? rawUrl,
+      processedUrl: url != null ? getSimplePackageUrl(url) : processedUrl,
+      parentId: parentId ?? this.parentId,
+      profileMetaData: profileMetaData ?? this.profileMetaData,
+    );
+    if (copySampleCountsAndTags) {
+      copy
+        ..exclusiveSampleCount = exclusiveSampleCount
+        ..inclusiveSampleCount =
+            resetInclusiveSampleCount ? null : inclusiveSampleCount;
+      for (final entry in _userTagSampleCount.entries) {
+        copy.incrementTagSampleCount(entry.key, increment: entry.value);
+      }
     }
     return copy;
   }
@@ -337,7 +608,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   ///
   /// The returned copy stack frame will have a null parent.
   CpuStackFrame deepCopy() {
-    final copy = shallowCopy();
+    final copy = shallowCopy(resetInclusiveSampleCount: false);
     for (CpuStackFrame child in children) {
       copy.addChild(child.deepCopy());
     }
@@ -349,7 +620,9 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// Two stack frames are said to be matching if they share the following
   /// properties.
   bool matches(CpuStackFrame other) =>
-      name == other.name && url == other.url && category == other.category;
+      name == other.name &&
+      rawUrl == other.rawUrl &&
+      category == other.category;
 
   void _format(StringBuffer buf, String indent) {
     buf.writeln('$indent$name - children: ${children.length} - excl: '
@@ -359,6 +632,15 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       child._format(buf, '  $indent');
     }
   }
+
+  Map<String, Object> get toJson => {
+        id: {
+          CpuProfileData.nameKey: verboseName,
+          CpuProfileData.categoryKey: category,
+          CpuProfileData.resolvedUrlKey: rawUrl,
+          if (parentId != null) CpuProfileData.parentIdKey: parentId,
+        }
+      };
 
   @visibleForTesting
   String toStringDeep() {
@@ -385,6 +667,17 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
 
 @visibleForTesting
 int stackFrameIdCompare(String a, String b) {
+  if (a == b) {
+    return 0;
+  }
+  // Order the root first.
+  if (a == CpuProfileData.rootId) {
+    return -1;
+  }
+  if (b == CpuProfileData.rootId) {
+    return 1;
+  }
+
   // Stack frame ids are structured as 140225212960768-24 (iOS) or -784070656-24
   // (Android). We need to compare the number after the last dash to maintain
   // the correct order.
@@ -405,5 +698,58 @@ int stackFrameIdCompare(String a, String b) {
       error += 'ids [$a, $b]';
     }
     throw error;
+  }
+}
+
+class CpuProfileStore {
+  final _profiles = <TimeRange, CpuProfileData>{};
+
+  /// Lookup a profile from the cache [_profiles] for the given range [time].
+  ///
+  /// If [_profiles] contains a CPU profile for a time range that encompasses
+  /// [time], a sub profile will be generated, cached in [_profiles] and then
+  /// returned. This method will return null if no profiles are cached for
+  /// [time] or if a sub profile cannot be generated for [time].
+  CpuProfileData lookupProfile(TimeRange time) {
+    if (!time.isWellFormed) return null;
+
+    // If we have a profile for a time range encompassing [time], then we can
+    // generate and cache the profile for [time] without needing to pull data
+    // from the vm service.
+    _maybeGenerateSubProfile(time);
+    return _profiles[time];
+  }
+
+  void addProfile(TimeRange time, CpuProfileData profile) {
+    _profiles[time] = profile;
+  }
+
+  void _maybeGenerateSubProfile(TimeRange time) {
+    if (_profiles.containsKey(time)) return;
+    final encompassingTimeRange = _encompassingTimeRange(time);
+    if (encompassingTimeRange != null) {
+      final encompassingProfile = _profiles[encompassingTimeRange];
+
+      final subProfile = CpuProfileData.subProfile(encompassingProfile, time);
+      _profiles[time] = subProfile;
+    }
+  }
+
+  TimeRange _encompassingTimeRange(TimeRange time) {
+    int shortestDurationMicros = maxJsInt;
+    TimeRange encompassingTimeRange;
+    for (final t in _profiles.keys) {
+      // We want to find the shortest encompassing time range for [time].
+      if (t.containsRange(time) &&
+          t.duration.inMicroseconds < shortestDurationMicros) {
+        shortestDurationMicros = t.duration.inMicroseconds;
+        encompassingTimeRange = t;
+      }
+    }
+    return encompassingTimeRange;
+  }
+
+  void clear() {
+    _profiles.clear();
   }
 }

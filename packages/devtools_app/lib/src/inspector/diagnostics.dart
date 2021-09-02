@@ -5,6 +5,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../debugger/debugger_controller.dart';
+import '../debugger/debugger_model.dart';
+import '../debugger/hover.dart';
+import '../debugger/variables.dart';
+import '../globals.dart';
+import '../theme.dart';
 import '../ui/icons.dart';
 import '../utils.dart';
 import 'diagnostics_node.dart';
@@ -31,11 +37,17 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.diagnostic, {
     this.isSelected,
     this.errorText,
+    this.multiline = false,
+    this.style,
+    @required this.debuggerController,
   });
 
   final RemoteDiagnosticsNode diagnostic;
   final bool isSelected;
   final String errorText;
+  final bool multiline;
+  final TextStyle style;
+  final DebuggerController debuggerController;
 
   Widget _paddedIcon(Widget icon) {
     return Padding(
@@ -56,7 +68,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         if (match.group(2).isNotEmpty) {
           yield TextSpan(
             text: match.group(2),
-            style: inspector_text_styles.unimportant(colorScheme),
+            style:
+                textStyle.merge(inspector_text_styles.unimportant(colorScheme)),
           );
         }
         return;
@@ -69,26 +82,73 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         return;
       }
     }
+
     if (description?.isNotEmpty == true) {
       yield TextSpan(text: description, style: textStyle);
+    }
+
+    final textPreview = diagnostic.json['textPreview'];
+    if (textPreview is String) {
+      final preview = textPreview.replaceAll('\n', ' ');
+      yield TextSpan(
+        text: ': "$preview"',
+        style: textStyle.merge(inspector_text_styles.unimportant(colorScheme)),
+      );
     }
   }
 
   Widget buildDescription(
     String description,
     TextStyle textStyle,
+    BuildContext context,
     ColorScheme colorScheme, {
     bool isProperty,
   }) {
-    return RichText(
-      overflow: TextOverflow.ellipsis,
-      text: TextSpan(
-        children: _buildDescriptionTextSpans(
-          description,
-          textStyle,
-          colorScheme,
-        ).toList(),
-      ),
+    final textSpan = TextSpan(
+      children: _buildDescriptionTextSpans(
+        description,
+        textStyle,
+        colorScheme,
+      ).toList(),
+    );
+
+    return HoverCardTooltip(
+      enabled: () =>
+          diagnostic != null &&
+          diagnostic.valueRef != null &&
+          diagnostic.inspectorService != null,
+      onHover: (event) async {
+        final group =
+            serviceManager.inspectorService.createObjectGroup('hover');
+        final value = await group.toObservatoryInstanceRef(diagnostic.valueRef);
+        final variable = Variable.fromValue(
+          value: value,
+          isolateRef: serviceManager.inspectorService.isolateRef,
+          diagnostic: diagnostic,
+        );
+        await buildVariablesTree(variable);
+        for (var child in variable.children) {
+          await buildVariablesTree(child);
+        }
+        variable.expand();
+        // TODO(jacobr): should we ensure the hover has not yet been cancelled?
+
+        return HoverCardData(
+          title: diagnostic.toStringShort(),
+          contents: Material(
+            child: ExpandableVariable(
+              debuggerController: debuggerController,
+              variable: ValueNotifier(variable),
+            ),
+          ),
+        );
+      },
+      child: multiline
+          ? SelectableText.rich(textSpan)
+          : RichText(
+              overflow: TextOverflow.ellipsis,
+              text: textSpan,
+            ),
     );
   }
 
@@ -97,7 +157,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     if (diagnostic == null) {
       return const SizedBox();
     }
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final icon = diagnostic.icon;
     final children = <Widget>[];
 
@@ -106,9 +167,12 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     }
     final String name = diagnostic.name;
 
-    TextStyle textStyle = DefaultTextStyle.of(context)
-        .style
-        .merge(textStyleForLevel(diagnostic.level, colorScheme));
+    final defaultStyle = DefaultTextStyle.of(context).style;
+    final baseStyle = style ?? defaultStyle;
+    TextStyle textStyle =
+        baseStyle.merge(textStyleForLevel(diagnostic.level, colorScheme));
+    var descriptionTextStyle = textStyle;
+    // TODO(jacobr): use TextSpans and SelectableText instead of Text.
     if (diagnostic.isProperty) {
       // Display of inline properties.
       final String propertyType = diagnostic.propertyType;
@@ -116,11 +180,14 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
       if (name?.isNotEmpty == true && diagnostic.showName) {
         children.add(Text('$name${diagnostic.separator} ', style: textStyle));
+        // provide some contrast between the name and description if both are
+        // present.
+        descriptionTextStyle =
+            descriptionTextStyle.merge(theme.subtleTextStyle);
       }
 
       if (diagnostic.isCreatedByLocalProject) {
-        textStyle =
-            textStyle.merge(inspector_text_styles.regularBold(colorScheme));
+        textStyle = textStyle.merge(inspector_text_styles.regularBold);
       }
 
       String description = diagnostic.description;
@@ -172,7 +239,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       children.add(Flexible(
         child: buildDescription(
           description,
-          textStyle,
+          descriptionTextStyle,
+          context,
           colorScheme,
           isProperty: true,
         ),
@@ -198,26 +266,26 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         if (diagnostic.showSeparator) {
           children.add(Text(
             diagnostic.separator,
-            style: inspector_text_styles.unimportant(colorScheme),
+            style: textStyle,
           ));
           if (diagnostic.separator != ' ' &&
-              diagnostic.description.isNotEmpty) {
+              (diagnostic.description?.isNotEmpty ?? false)) {
             children.add(Text(
               ' ',
-              style: inspector_text_styles.unimportant(colorScheme),
+              style: textStyle,
             ));
           }
         }
       }
 
       if (!diagnostic.isSummaryTree && diagnostic.isCreatedByLocalProject) {
-        textStyle =
-            textStyle.merge(inspector_text_styles.regularBold(colorScheme));
+        textStyle = textStyle.merge(inspector_text_styles.regularBold);
       }
 
       var diagnosticDescription = buildDescription(
         diagnostic.description,
-        textStyle,
+        descriptionTextStyle,
+        context,
         colorScheme,
         isProperty: false,
       );
@@ -232,12 +300,37 @@ class DiagnosticsNodeDescription extends StatelessWidget {
             _buildErrorText(colorScheme),
           ],
         );
+      } else if (multiline &&
+          diagnostic.hasCreationLocation &&
+          !diagnostic.isProperty) {
+        diagnosticDescription = Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            diagnosticDescription,
+            _buildLocation(),
+          ],
+        );
       }
 
       children.add(Expanded(child: diagnosticDescription));
     }
 
     return Row(mainAxisSize: MainAxisSize.min, children: children);
+  }
+
+  Widget _buildLocation() {
+    final location = diagnostic.creationLocation;
+    return Flexible(
+      child: RichText(
+        textAlign: TextAlign.right,
+        overflow: TextOverflow.ellipsis,
+        text: TextSpan(
+          text:
+              '${location.getFile().split('/').last}:${location.getLine()}:${location.getColumn()}            ',
+          style: inspector_text_styles.regular,
+        ),
+      ),
+    );
   }
 
   Flexible _buildErrorText(ColorScheme colorScheme) {

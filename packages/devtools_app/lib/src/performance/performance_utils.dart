@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import '../utils.dart';
 import 'performance_model.dart';
 
+// ignore: avoid_classes_with_only_static_members
 class PerformanceUtils {
   static String computeEventGroupKey(
     TimelineEvent event,
@@ -67,5 +70,15 @@ class PerformanceUtils {
 
     // Alphabetize all other buckets.
     return a.compareTo(b);
+  }
+}
+
+const debugTraceEventDuplicates = false;
+
+/// Helper method to call a callback only when debugging issues related to trace
+/// event duplicates (for example https://github.com/dart-lang/sdk/issues/46605).
+void debugTraceEventCallback(VoidCallback callback) {
+  if (debugTraceEventDuplicates) {
+    callback();
   }
 }

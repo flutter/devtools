@@ -10,6 +10,8 @@ import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose.dart';
 import '../config_specific/file/file.dart';
 import '../config_specific/logger/logger.dart';
@@ -23,7 +25,6 @@ import '../version.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';
-import 'memory_screen.dart';
 import 'memory_service.dart';
 import 'memory_snapshot_models.dart';
 import 'memory_timeline.dart';
@@ -800,7 +801,8 @@ class MemoryController extends DisposableController
 
   ValueListenable<String> get groupingByNotifier => groupingBy;
 
-  String get _isolateId => serviceManager.isolateManager.selectedIsolate.id;
+  String get _isolateId =>
+      serviceManager.isolateManager.selectedIsolate.value.id;
 
   final StreamController<MemoryTracker> _memoryTrackerController =
       StreamController<MemoryTracker>.broadcast();
@@ -885,10 +887,9 @@ class MemoryController extends DisposableController
   }
 
   Future<void> startTimeline() async {
-    autoDispose(
-      serviceManager.isolateManager.onSelectedIsolateChanged.listen((_) {
-        _handleIsolateChanged();
-      }),
+    addAutoDisposeListener(
+      serviceManager.isolateManager.selectedIsolate,
+      _handleIsolateChanged,
     );
 
     autoDispose(
@@ -904,8 +905,8 @@ class MemoryController extends DisposableController
   }
 
   Future<HeapSnapshotGraph> snapshotMemory() async {
-    return await serviceManager?.service
-        ?.getHeapSnapshotGraph(serviceManager?.isolateManager?.selectedIsolate);
+    return await serviceManager?.service?.getHeapSnapshotGraph(
+        serviceManager?.isolateManager?.selectedIsolate?.value);
   }
 
   final _monitorAllocationsNotifier = ValueNotifier<int>(0);
@@ -1057,25 +1058,6 @@ class MemoryController extends DisposableController
   //              When line # and package mapping exist ability to navigate
   //              to line number of the source file when clicked is needed.
   static const packageName = '/packages/';
-  String displayAsPackage(String sourceName) {
-    final packagesIndex = sourceName.indexOf(packageName);
-    // See issue https://github.com/dart-lang/sdk/issues/45530
-    final restToMatchStartIndex = packagesIndex + packageName.length;
-    if (packagesIndex >= 0) {
-      final activeLibraries =
-          serviceManager.isolateManager.selectedIsolateLibraries;
-      final match = activeLibraries.firstWhere(
-        (element) {
-          final toMatch = sourceName.substring(restToMatchStartIndex);
-          return element.uri.endsWith(toMatch);
-        },
-        orElse: () => null,
-      );
-      return match == null ? sourceName : match.name;
-    }
-
-    return sourceName;
-  }
 
   Future<List<InstanceSummary>> getInstances(
     String classRef,
@@ -1493,7 +1475,7 @@ class MemoryLog {
 
   /// Persist the the live memory data to a JSON file in the /tmp directory.
   List<String> exportMemory() {
-    MemoryScreen.gaActionForExport();
+    ga.select(analytics_constants.memory, analytics_constants.export);
 
     final liveData = controller.memoryTimeline.liveData;
 

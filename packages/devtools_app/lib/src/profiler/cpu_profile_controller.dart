@@ -2,19 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../globals.dart';
+import '../ui/filter.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import '../vm_flags.dart' as vm_flags;
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
 import 'cpu_profile_transformer.dart';
+import 'profiler_screen.dart';
 
-class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
+class CpuProfilerController
+    with
+        SearchControllerMixin<CpuStackFrame>,
+        FilterControllerMixin<CpuStackFrame> {
+  CpuProfilerController({this.analyticsScreenId});
+
   /// Tag to represent when no user tag filters are applied.
   ///
   /// The word 'none' is not a magic word - just a user-friendly name to convey
@@ -26,6 +37,12 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   /// When this data is the value of [_dataNotifier], the CPU profiler is in a
   /// base state where recording instructions should be shown.
   static CpuProfileData baseStateCpuProfileData = CpuProfileData.empty();
+
+  /// The analytics screen id for which this controller is active.
+  final String analyticsScreenId;
+
+  /// Store of cached CPU profiles.
+  final cpuProfileStore = CpuProfileStore();
 
   /// Notifies that new cpu profile data is available.
   ValueListenable<CpuProfileData> get dataNotifier => _dataNotifier;
@@ -44,9 +61,34 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   ValueListenable<String> get userTagFilter => _userTagFilter;
   final _userTagFilter = ValueNotifier<String>(userTagNone);
 
-  final _dataByTag = <String, CpuProfileData>{};
+  @visibleForTesting
+  final dataByTag = <String, CpuProfileData>{};
 
-  Iterable<String> get userTags => _dataByTag[userTagNone]?.userTags ?? [];
+  Iterable<String> get userTags => dataByTag[userTagNone]?.userTags ?? [];
+
+  /// The toggle filters available for the CPU profiler.
+  ///
+  /// This is a getter so that `serviceManager` is initialized by the time we
+  /// access this list.
+  // TODO(kenz): make this late once we migrate to null safety.
+  List<ToggleFilter<CpuStackFrame>> get toggleFilters => _toggleFilters ??= [
+        ToggleFilter<CpuStackFrame>(
+          name: 'Hide Native code',
+          includeCallback: (stackFrame) => !stackFrame.isNative,
+          enabledByDefault: true,
+        ),
+        ToggleFilter<CpuStackFrame>(
+          name: 'Hide core Dart libraries',
+          includeCallback: (stackFrame) => !stackFrame.isDartCore,
+        ),
+        if (serviceManager.connectedApp?.isFlutterAppNow ?? true)
+          ToggleFilter<CpuStackFrame>(
+            name: 'Hide core Flutter libraries',
+            includeCallback: (stackFrame) => !stackFrame.isFlutterCore,
+          ),
+      ];
+
+  List<ToggleFilter<CpuStackFrame>> _toggleFilters;
 
   int selectedProfilerTabIndex = 0;
 
@@ -69,7 +111,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   /// use this getter. Otherwise, clients subscribing to change notifications,
   /// should listen to [profilerFlagNotifier].
   bool get profilerEnabled =>
-      profilerFlagNotifier.value.valueAsString == 'true';
+      offlineMode ? true : profilerFlagNotifier.value.valueAsString == 'true';
 
   Future<dynamic> enableCpuProfiler() {
     return serviceManager.service.enableCpuProfiler();
@@ -89,17 +131,75 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     var cpuProfileData = baseStateCpuProfileData;
 
     _dataNotifier.value = null;
-    // TODO(kenz): add a cancel button to the processing UI in case pulling a
-    // large payload from the vm service takes a long time.
-    cpuProfileData = await serviceManager.service.getCpuProfile(
-      startMicros: startMicros,
-      extentMicros: extentMicros,
-    );
 
+    Future<void> pullAndProcessHelper() async {
+      // TODO(kenz): add a cancel button to the processing UI in case pulling a
+      // large payload from the vm service takes a long time.
+      cpuProfileData = await serviceManager.service.getCpuProfile(
+        startMicros: startMicros,
+        extentMicros: extentMicros,
+      );
+      await processAndSetData(
+        cpuProfileData,
+        processId: processId,
+        storeAsUserTagNone: true,
+        shouldApplyFilters: true,
+      );
+      cpuProfileStore.addProfile(
+        TimeRange()
+          ..start = Duration(microseconds: startMicros)
+          ..end = Duration(microseconds: startMicros + extentMicros),
+        _dataNotifier.value,
+      );
+    }
+
+    if (analyticsScreenId != null) {
+      // Pull and process cpu profile data [pullAndProcessHelper] and time the
+      // operation for analytics.
+      await ga.timeAsync(
+        analyticsScreenId,
+        analytics_constants.cpuProfileProcessingTime,
+        asyncOperation: pullAndProcessHelper,
+        screenMetricsProvider: () => ProfilerScreenMetrics(
+          cpuSampleCount: cpuProfileData.profileMetaData.sampleCount,
+          cpuStackDepth: cpuProfileData.profileMetaData.stackDepth,
+        ),
+      );
+    } else {
+      try {
+        await pullAndProcessHelper();
+      } on ProcessCancelledException catch (_) {
+        // Do nothing because the attempt to process data has been cancelled in
+        // favor of a new one.
+      }
+    }
+  }
+
+  /// Processes [cpuProfileData] and sets the data for the controller.
+  ///
+  /// If `storeAsUserTagNone` is true, the processed data will be stored as the
+  /// original data, where no user tag filter has been applied.
+  Future<void> processAndSetData(
+    CpuProfileData cpuProfileData, {
+    @required String processId,
+    @required bool storeAsUserTagNone,
+    @required bool shouldApplyFilters,
+  }) async {
+    _processingNotifier.value = true;
+    _dataNotifier.value = null;
     try {
       await transformer.processData(cpuProfileData, processId: processId);
+      if (storeAsUserTagNone) {
+        dataByTag[userTagNone] = cpuProfileData;
+      }
+      if (shouldApplyFilters) {
+        cpuProfileData = _filterData(
+          cpuProfileData,
+          Filter(toggleFilters: toggleFilters),
+        );
+        await transformer.processData(cpuProfileData, processId: processId);
+      }
       _dataNotifier.value = cpuProfileData;
-      _dataByTag[userTagNone] = cpuProfileData;
       refreshSearchMatches();
       _processingNotifier.value = false;
     } on AssertionError catch (_) {
@@ -108,9 +208,6 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
       // Rethrow after setting notifiers so that cpu profile data is included
       // in the timeline export.
       rethrow;
-    } on ProcessCancelledException catch (_) {
-      // Do nothing because the attempt to process data has been cancelled in
-      // favor of a new one.
     }
   }
 
@@ -122,7 +219,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     final currentStackFrames = _dataNotifier.value.stackFrames.values;
     for (final frame in currentStackFrames) {
       if (frame.name.caseInsensitiveContains(regexSearch) ||
-          frame.url.caseInsensitiveContains(regexSearch)) {
+          frame.processedUrl.caseInsensitiveContains(regexSearch)) {
         matches.add(frame);
         frame.isSearchMatch = true;
       } else {
@@ -135,7 +232,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   void loadProcessedData(CpuProfileData data) {
     assert(data.processed);
     _dataNotifier.value = data;
-    _dataByTag[userTagNone] = data;
+    dataByTag[userTagNone] = data;
   }
 
   Future<void> loadDataWithTag(String tag) async {
@@ -148,7 +245,7 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
       _dataNotifier.value = await processDataForTag(tag);
     } catch (e) {
       // In the event of an error, reset the data to the original CPU profile.
-      _dataNotifier.value = _dataByTag[userTagNone];
+      _dataNotifier.value = dataByTag[userTagNone];
       throw Exception('Error loading data with tag "$tag": ${e.toString()}');
     } finally {
       _processingNotifier.value = false;
@@ -156,10 +253,10 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
   }
 
   Future<CpuProfileData> processDataForTag(String tag) async {
-    final fullData = _dataByTag[userTagNone];
-    final data = _dataByTag.putIfAbsent(
+    final fullData = dataByTag[userTagNone];
+    final data = dataByTag.putIfAbsent(
       tag,
-      () => fullData.dataForUserTag(tag),
+      () => CpuProfileData.fromUserTag(fullData, tag),
     );
     if (!data.processed) {
       await transformer.processData(data);
@@ -175,13 +272,14 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
 
   Future<void> clear() async {
     reset();
+    cpuProfileStore.clear();
     await serviceManager.service.clearSamples();
   }
 
   void reset() {
     _selectedCpuStackFrameNotifier.value = null;
     _dataNotifier.value = baseStateCpuProfileData;
-    _dataByTag.clear();
+    dataByTag.clear();
     _processingNotifier.value = false;
     transformer.reset();
     resetSearch();
@@ -193,8 +291,41 @@ class CpuProfilerController with SearchControllerMixin<CpuStackFrame> {
     _processingNotifier.dispose();
     transformer.dispose();
   }
-}
 
-mixin CpuProfilerControllerProviderMixin {
-  final cpuProfilerController = CpuProfilerController();
+  /// Tracks the identifier for the attempt to filter the data.
+  ///
+  /// We use this to prevent multiple filter calls from processing data at the
+  /// same time.
+  int _filterIdentifier = 0;
+
+  @override
+  void filterData(Filter<CpuStackFrame> filter) {
+    final originalData = dataByTag[userTagNone];
+    final filteredData = _filterData(originalData, filter);
+    processAndSetData(
+      filteredData,
+      processId: 'filter $_filterIdentifier',
+      storeAsUserTagNone: false,
+      shouldApplyFilters: false,
+    );
+    _filterIdentifier++;
+  }
+
+  CpuProfileData _filterData(
+    CpuProfileData originalData,
+    Filter<CpuStackFrame> filter,
+  ) {
+    final filterCallback = (CpuStackFrame stackFrame) {
+      var shouldInclude = true;
+      for (final toggleFilter in filter.toggleFilters) {
+        if (toggleFilter.enabled.value) {
+          shouldInclude =
+              shouldInclude && toggleFilter.includeCallback(stackFrame);
+          if (!shouldInclude) return false;
+        }
+      }
+      return shouldInclude;
+    };
+    return CpuProfileData.filterFrom(originalData, filterCallback);
+  }
 }

@@ -4,13 +4,17 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../analytics/constants.dart' as analytics_constants;
 import '../config_specific/import_export/import_export.dart';
 import '../utils.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
 import 'profiler_screen.dart';
 
-class ProfilerScreenController with CpuProfilerControllerProviderMixin {
+class ProfilerScreenController {
+  final cpuProfilerController =
+      CpuProfilerController(analyticsScreenId: analytics_constants.cpuProfiler);
+
   final _exportController = ExportController();
 
   CpuProfileData get cpuProfileData => cpuProfilerController.dataNotifier.value;
@@ -34,6 +38,7 @@ class ProfilerScreenController with CpuProfilerControllerProviderMixin {
       // Using [maxJsInt] as [extentMicros] for the getCpuProfile requests will
       // give us all cpu samples we have available
       extentMicros: maxJsInt,
+      processId: 'Profile $_profileStartMicros',
     );
   }
 
@@ -44,6 +49,7 @@ class ProfilerScreenController with CpuProfilerControllerProviderMixin {
       // Using [maxJsInt] as [extentMicros] for the getCpuProfile requests will
       // give us all cpu samples we have available
       extentMicros: maxJsInt,
+      processId: 'Load all samples',
     );
   }
 
@@ -52,7 +58,7 @@ class ProfilerScreenController with CpuProfilerControllerProviderMixin {
   /// This method returns the name of the file that was downloaded.
   String exportData() {
     final encodedData =
-        _exportController.encode(ProfilerScreen.id, cpuProfileData.json);
+        _exportController.encode(ProfilerScreen.id, cpuProfileData.toJson);
     return _exportController.downloadFile(encodedData);
   }
 

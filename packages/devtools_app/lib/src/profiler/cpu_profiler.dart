@@ -5,18 +5,23 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../charts/flame_chart.dart';
 import '../common_widgets.dart';
+import '../dialogs.dart';
 import '../notifications.dart';
 import '../theme.dart';
+import '../ui/colors.dart';
+import '../ui/filter.dart';
 import '../ui/search.dart';
+import '../ui/tab.dart';
+import '../utils.dart';
 import 'cpu_profile_bottom_up.dart';
 import 'cpu_profile_call_tree.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_flame_chart.dart';
 import 'cpu_profile_model.dart';
-import 'cpu_profile_transformer.dart';
 
 // TODO(kenz): provide useful UI upon selecting a CPU stack frame.
 
@@ -26,10 +31,18 @@ class CpuProfiler extends StatefulWidget {
     @required this.controller,
     this.searchFieldKey,
     this.standaloneProfiler = true,
-  })  : callTreeRoots = data != null ? [data.cpuProfileRoot.deepCopy()] : [],
-        bottomUpRoots = data != null
-            ? BottomUpProfileTransformer.processData(data.cpuProfileRoot)
-            : [];
+    this.summaryView,
+  })  : callTreeRoots = data?.callTreeRoots ?? [],
+        bottomUpRoots = data?.bottomUpRoots ?? [],
+        tabs = [
+          if (summaryView != null)
+            DevToolsTab(key: summaryTab, text: 'Summary'),
+          if (data != null && !data.isEmpty) ...[
+            DevToolsTab(key: bottomUpTab, text: 'Bottom Up'),
+            DevToolsTab(key: callTreeTab, text: 'Call Tree'),
+            DevToolsTab(key: flameChartTab, text: 'CPU Flame Chart'),
+          ],
+        ];
 
   final CpuProfileData data;
 
@@ -43,23 +56,18 @@ class CpuProfiler extends StatefulWidget {
 
   final bool standaloneProfiler;
 
+  final Widget summaryView;
+
+  final List<DevToolsTab> tabs;
+
   static const Key dataProcessingKey = Key('CpuProfiler - data is processing');
 
-  // When content of the selected tab from thee tab controller has this key,
+  // When content of the selected DevToolsTab from the tab controller has this key,
   // we will not show the expand/collapse buttons.
   static const Key flameChartTab = Key('cpu profile flame chart tab');
   static const Key callTreeTab = Key('cpu profile call tree tab');
   static const Key bottomUpTab = Key('cpu profile bottom up tab');
-
-  // TODO(kenz): the summary tab should be available for UI events in the
-  // timeline.
-  static const tabs = [
-    Tab(key: bottomUpTab, text: 'Bottom Up'),
-    Tab(key: callTreeTab, text: 'Call Tree'),
-    Tab(key: flameChartTab, text: 'CPU Flame Chart'),
-  ];
-
-  static const emptyCpuProfile = 'No CPU profile data';
+  static const Key summaryTab = Key('cpu profile summary tab');
 
   @override
   _CpuProfilerState createState() => _CpuProfilerState();
@@ -69,7 +77,7 @@ class CpuProfiler extends StatefulWidget {
 // data. The state is being destroyed with every new cpu profile - investigate.
 class _CpuProfilerState extends State<CpuProfiler>
     with
-        SingleTickerProviderStateMixin,
+        TickerProviderStateMixin,
         AutoDisposeMixin,
         SearchFieldMixin<CpuProfiler> {
   TabController _tabController;
@@ -77,28 +85,53 @@ class _CpuProfilerState extends State<CpuProfiler>
   @override
   void initState() {
     super.initState();
+    _initTabController();
+  }
 
-    _tabController = TabController(
-      length: CpuProfiler.tabs.length,
-      vsync: this,
-    )..index = widget.controller.selectedProfilerTabIndex;
-    addAutoDisposeListener(_tabController, () {
-      setState(() {
-        widget.controller.changeSelectedProfilerTab(_tabController.index);
-      });
-    });
+  @override
+  void didUpdateWidget(CpuProfiler oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.tabs.length != oldWidget.tabs.length) {
+      _initTabController();
+    }
   }
 
   @override
   void dispose() {
-    super.dispose();
+    _tabController?.removeListener(_onTabChanged);
     _tabController.dispose();
+    super.dispose();
+  }
+
+  void _initTabController() {
+    _tabController?.removeListener(_onTabChanged);
+    _tabController?.dispose();
+    _tabController = TabController(
+      length: widget.tabs.length,
+      vsync: this,
+    );
+
+    if (widget.controller.selectedProfilerTabIndex >= _tabController.length) {
+      widget.controller.changeSelectedProfilerTab(0);
+    }
+    _tabController
+      ..index = widget.controller.selectedProfilerTabIndex
+      ..addListener(_onTabChanged);
+  }
+
+  void _onTabChanged() {
+    setState(() {
+      widget.controller.changeSelectedProfilerTab(_tabController.index);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final currentTab = CpuProfiler.tabs[_tabController.index];
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+    final currentTab =
+        widget.tabs.isNotEmpty ? widget.tabs[_tabController.index] : null;
     final hasData =
         widget.data != CpuProfilerController.baseStateCpuProfileData &&
             widget.data != null &&
@@ -115,12 +148,23 @@ class _CpuProfilerState extends State<CpuProfiler>
                 labelColor: textTheme.bodyText1.color,
                 isScrollable: true,
                 controller: _tabController,
-                tabs: CpuProfiler.tabs,
+                tabs: widget.tabs,
               ),
               const Spacer(),
               if (hasData) ...[
-                UserTagDropdown(widget.controller),
-                const SizedBox(width: defaultSpacing),
+                if (currentTab.key != CpuProfiler.summaryTab) ...[
+                  FilterButton(
+                    onPressed: _showFilterDialog,
+                    isFilterActive: widget.controller.toggleFilters.firstWhere(
+                          (filter) => filter.enabled.value,
+                          orElse: () => null,
+                        ) !=
+                        null,
+                  ),
+                  const SizedBox(width: denseSpacing),
+                  UserTagDropdown(widget.controller),
+                  const SizedBox(width: denseSpacing),
+                ],
                 // TODO(kenz): support search for call tree and bottom up tabs as
                 // well. This will require implementing search for tree tables.
                 if (currentTab.key == CpuProfiler.flameChartTab)
@@ -128,10 +172,42 @@ class _CpuProfilerState extends State<CpuProfiler>
                     children: [
                       if (widget.searchFieldKey != null)
                         _buildSearchField(hasData),
-                      FlameChartHelpButton(),
+                      FlameChartHelpButton(
+                        screenId: widget.standaloneProfiler
+                            ? analytics_constants.cpuProfiler
+                            : analytics_constants.performance,
+                        analyticsAction:
+                            analytics_constants.cpuProfileFlameChartHelp,
+                        additionalInfo: [
+                          ...dialogSubHeader(Theme.of(context), 'Legend'),
+                          Legend(
+                            entries: [
+                              LegendEntry(
+                                'App code (code from your app and imported packages)',
+                                appCodeColor.background.colorFor(colorScheme),
+                              ),
+                              LegendEntry(
+                                'Native code (code from the native runtime - Android, iOS, etc.)',
+                                nativeCodeColor.background
+                                    .colorFor(colorScheme),
+                              ),
+                              LegendEntry(
+                                'Dart core libraries (code from the Dart SDK)',
+                                dartCoreColor.background.colorFor(colorScheme),
+                              ),
+                              LegendEntry(
+                                'Flutter Framework (code from the Flutter SDK)',
+                                flutterCoreColor.background
+                                    .colorFor(colorScheme),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-                if (currentTab.key != CpuProfiler.flameChartTab)
+                if (currentTab.key != CpuProfiler.flameChartTab &&
+                    currentTab.key != CpuProfiler.summaryTab)
                   Row(
                     children: [
                       // TODO(kenz): add a switch to order samples by user tag here
@@ -171,6 +247,15 @@ class _CpuProfilerState extends State<CpuProfiler>
     );
   }
 
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => CpuProfileFilterDialog(
+        controller: widget.controller,
+      ),
+    );
+  }
+
   Widget _buildSearchField(bool hasData) {
     return Container(
       width: wideSearchTextWidth,
@@ -187,27 +272,16 @@ class _CpuProfilerState extends State<CpuProfiler>
 
   Widget _buildCpuProfileDataView() {
     if (widget.data != null) {
-      return widget.data.isEmpty
-          ? _buildEmptyDataView()
-          : TabBarView(
-              physics: defaultTabBarViewPhysics,
-              controller: _tabController,
-              children: _buildProfilerViews(),
-            );
+      return TabBarView(
+        physics: defaultTabBarViewPhysics,
+        controller: _tabController,
+        children: _buildProfilerViews(),
+      );
     } else {
       // If [data] is null, CPU profile data is being processed, so return a
       // placeholder.
       return const SizedBox(key: CpuProfiler.dataProcessingKey);
     }
-  }
-
-  Widget _buildEmptyDataView() {
-    return Center(
-      child: Text(
-        CpuProfiler.emptyCpuProfile,
-        style: Theme.of(context).subtleTextStyle,
-      ),
-    );
   }
 
   List<Widget> _buildProfilerViews() {
@@ -228,7 +302,14 @@ class _CpuProfilerState extends State<CpuProfiler>
       },
     );
     // TODO(kenz): make this order configurable.
-    return [bottomUp, callTree, cpuFlameChart];
+    return [
+      if (widget.summaryView != null) widget.summaryView,
+      if (!widget.data.isEmpty) ...[
+        bottomUp,
+        callTree,
+        cpuFlameChart,
+      ],
+    ];
   }
 
   void _performOnDataRoots(
@@ -241,6 +322,39 @@ class _CpuProfilerState extends State<CpuProfiler>
     setState(() {
       roots.forEach(callback);
     });
+  }
+}
+
+class CpuProfileFilterDialog extends StatelessWidget {
+  CpuProfileFilterDialog({
+    @required this.controller,
+    Key key,
+  })  : oldToggleFilterValues = List.generate(controller.toggleFilters.length,
+            (index) => controller.toggleFilters[index].enabled.value),
+        super(key: key);
+
+  double get _filterDialogWidth => scaleByFontFactor(400.0);
+
+  final CpuProfilerController controller;
+
+  final List<bool> oldToggleFilterValues;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilterDialog<CpuProfilerController, CpuStackFrame>(
+      includeQueryFilter: false,
+      dialogWidth: _filterDialogWidth,
+      controller: controller,
+      onCancel: restoreOldValues,
+      toggleFilters: controller.toggleFilters,
+    );
+  }
+
+  void restoreOldValues() {
+    for (var i = 0; i < controller.toggleFilters.length; i++) {
+      final filter = controller.toggleFilters[i];
+      filter.enabled.value = oldToggleFilterValues[i];
+    }
   }
 }
 
@@ -316,9 +430,11 @@ class UserTagDropdown extends StatelessWidget {
                         value: tag,
                       ),
                 ],
-                onChanged: userTags.isNotEmpty
-                    ? (String tag) => _onUserTagChanged(tag, context)
-                    : null,
+                onChanged: userTags.isEmpty ||
+                        (userTags.length == 1 &&
+                            userTags.first == UserTag.defaultTag.label)
+                    ? null
+                    : (String tag) => _onUserTagChanged(tag, context),
               ),
             );
           },

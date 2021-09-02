@@ -13,6 +13,7 @@ analyzer:
   exclude:
     - build/**
     - '**.freezed.dart'
+    - flutter-sdk/
 
 linter:
   rules:

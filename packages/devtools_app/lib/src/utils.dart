@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart' as url_launcher;
 import 'package:vm_service/vm_service.dart';
 
 import 'config_specific/logger/logger.dart' as logger;
@@ -38,7 +37,12 @@ int sortFieldsByName(String a, String b) {
   return a.compareTo(b);
 }
 
-bool collectionEquals(e1, e2) => const DeepCollectionEquality().equals(e1, e2);
+bool collectionEquals(e1, e2, {bool ordered = true}) {
+  if (ordered) {
+    return const DeepCollectionEquality().equals(e1, e2);
+  }
+  return const DeepCollectionEquality.unordered().equals(e1, e2);
+}
 
 const String loremIpsum = '''
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus dolor quis rhoncus feugiat. Ut imperdiet
@@ -546,6 +550,12 @@ class TimeRange {
     if (singleAssignment) {
       assert(_start == null);
     }
+    if (_end != null) {
+      assert(
+        value <= _end,
+        '$value is not less than or equal to end time $_end',
+      );
+    }
     _start = value;
   }
 
@@ -553,18 +563,28 @@ class TimeRange {
 
   Duration _end;
 
-  bool contains(Duration target) => target >= start && target <= end;
-
   set end(Duration value) {
     if (singleAssignment) {
       assert(_end == null);
+    }
+    if (_start != null) {
+      assert(
+        value >= _start,
+        '$value is not greater than or equal to start time $_start',
+      );
     }
     _end = value;
   }
 
   Duration get duration => end - start;
 
+  bool contains(Duration target) => start <= target && end >= target;
+
+  bool containsRange(TimeRange t) => start <= t.start && end >= t.end;
+
   bool overlaps(TimeRange t) => t.end > start && t.start < end;
+
+  bool get isWellFormed => _start != null && _end != null;
 
   @override
   String toString({TimeUnit unit}) {
@@ -864,14 +884,6 @@ class MovingAverage {
   }
 }
 
-Future<void> launchUrl(String url, BuildContext context) async {
-  if (await url_launcher.canLaunch(url)) {
-    await url_launcher.launch(url);
-  } else {
-    Notifications.of(context).push('Unable to open $url.');
-  }
-}
-
 /// Attempts to copy a String of `data` to the clipboard.
 ///
 /// Shows a `successMessage` [Notification] on the passed in `context`.
@@ -987,6 +999,7 @@ class DevToolsFile<T> {
     @required this.lastModifiedTime,
     @required this.data,
   });
+
   final String path;
 
   final DateTime lastModifiedTime;
@@ -1060,6 +1073,17 @@ extension ListExtension<T> on List<T> {
       ]
     ];
   }
+
+  Iterable<T> whereFromIndex(bool test(T element), {int startIndex = 0}) {
+    final whereList = <T>[];
+    for (int i = startIndex; i < length; i++) {
+      final element = this[i];
+      if (test(element)) {
+        whereList.add(element);
+      }
+    }
+    return whereList;
+  }
 }
 
 Map<String, String> devToolsQueryParams(String url) {
@@ -1072,6 +1096,51 @@ Map<String, String> devToolsQueryParams(String url) {
   final modifiedUri = url.replaceFirst(RegExp(r'#\/(\w*)[?]'), '?');
   final uri = Uri.parse(modifiedUri);
   return uri.queryParameters;
+}
+
+/// Gets a VM Service URI from a query string.
+///
+/// We read from the 'uri' value if it exists; otherwise we create a uri from
+/// the from 'port' and 'token' values.
+Uri getServiceUriFromQueryString(String location) {
+  if (location == null) {
+    return null;
+  }
+
+  final queryParams = Uri.parse(location).queryParameters;
+
+  // First try to use uri.
+  if (queryParams['uri'] != null) {
+    final uri = Uri.tryParse(queryParams['uri']);
+
+    // Lots of things are considered valid URIs (including empty strings
+    // and single letters) since they can be relative, so we need to do some
+    // extra checks.
+    if (uri != null &&
+        uri.isAbsolute &&
+        (uri.isScheme('ws') ||
+            uri.isScheme('wss') ||
+            uri.isScheme('http') ||
+            uri.isScheme('https') ||
+            uri.isScheme('sse') ||
+            uri.isScheme('sses'))) {
+      return uri;
+    }
+  }
+
+  // Otherwise try 'port', 'token', and 'host'.
+  final port = int.tryParse(queryParams['port'] ?? '');
+  final token = queryParams['token'];
+  final host = queryParams['host'] ?? 'localhost';
+  if (port != null) {
+    if (token == null) {
+      return Uri.parse('ws://$host:$port/ws');
+    } else {
+      return Uri.parse('ws://$host:$port/$token/ws');
+    }
+  }
+
+  return null;
 }
 
 /// Helper function to return the name of a key. If widget has a key
@@ -1118,25 +1187,68 @@ class ListValueNotifier<T> extends ChangeNotifier
   @override
   List<T> get value => _currentList;
 
-  /// Adds an element to the list and notifies listeners.
-  void add(T element) {
-    _rawList.add(element);
+  @override
+  void notifyListeners() {
+    super.notifyListeners();
+  }
+
+  void _listChanged() {
     _currentList = ImmutableList(_rawList);
     notifyListeners();
   }
 
+  set last(T value) {
+    // TODO(jacobr): use a more sophisticated data structure such as
+    // https://en.wikipedia.org/wiki/Rope_(data_structure) to make last more
+    // efficient.
+    _rawList = _rawList.toList();
+    _rawList.last = value;
+    _listChanged();
+  }
+
+  /// Adds an element to the list and notifies listeners.
+  void add(T element) {
+    _rawList.add(element);
+    _listChanged();
+  }
+
   /// Adds elements to the list and notifies listeners.
-  void addAll(List<T> elements) {
+  void addAll(Iterable<T> elements) {
     _rawList.addAll(elements);
-    _currentList = ImmutableList(_rawList);
-    notifyListeners();
+    _listChanged();
   }
 
   /// Clears the list and notifies listeners.
   void clear() {
-    _rawList = [];
-    _currentList = ImmutableList(_rawList);
-    notifyListeners();
+    _rawList = <T>[];
+    _listChanged();
+  }
+
+  /// Truncates to just the elements between [start] and [end].
+  ///
+  /// If [end] is omitted, it defaults to the [length] of this list.
+  ///
+  /// The `start` and `end` positions must satisfy the relations
+  /// 0 ≤ `start` ≤ `end` ≤ [length]
+  /// If `end` is equal to `start`, then the returned list is empty.
+  void trimToSublist(int start, [int end]) {
+    // TODO(jacobr): use a more sophisticated data structure such as
+    // https://en.wikipedia.org/wiki/Rope_(data_structure) to make the
+    // implementation of this method more efficient.
+    _rawList = _rawList.sublist(start, end);
+    _listChanged();
+  }
+
+  /// Removes the first occurrence of [value] from this list.
+  ///
+  /// Runtime is O(n).
+  bool remove(T value) {
+    final index = _rawList.indexOf(value);
+    if (index == -1) return false;
+    _rawList = _rawList.toList();
+    _rawList.removeAt(index);
+    _listChanged();
+    return true;
   }
 }
 
@@ -1256,6 +1368,15 @@ double scaleByFontFactor(double original) {
   return (original * (ideTheme?.fontSizeFactor ?? 1.0)).roundToDouble();
 }
 
+bool isDense() {
+  return preferences != null && preferences.denseModeEnabled.value ||
+      isEmbedded();
+}
+
+bool isEmbedded() {
+  return ideTheme?.embed ?? false;
+}
+
 mixin CompareMixin implements Comparable {
   bool operator <(other) {
     return compareTo(other) < 0;
@@ -1296,3 +1417,9 @@ Future<T> whenValueNonNull<T>(ValueListenable<T> listenable) {
   listenable.addListener(listener);
   return completer.future;
 }
+
+const connectToNewAppText = 'Connect to a new app';
+
+/// Exception thrown when a request to process data has been cancelled in
+/// favor of a new request.
+class ProcessCancelledException implements Exception {}

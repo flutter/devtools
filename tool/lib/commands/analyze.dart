@@ -27,7 +27,7 @@ class AnalyzeCommand extends Command {
     }
 
     final log = Logger.standard();
-    final repo = DevToolsRepo.getInstance();
+    final repo = DevToolsRepo.getInstance()!;
     final packages = repo.getPackages();
 
     log.stdout('Running flutter analyze...');
@@ -42,8 +42,8 @@ class AnalyzeCommand extends Command {
       final progress = log.progress('  ${p.relativePath}');
 
       final process = await Process.start(
-        sdk.flutterToolPath,
-        ['--no-color', 'analyze'],
+        sdk.dartToolPath,
+        ['analyze', '--fatal-infos'],
         workingDirectory: p.packagePath,
       );
       final Stream<List<int>> stdout = process.stdout;

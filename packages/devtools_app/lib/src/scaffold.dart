@@ -11,7 +11,6 @@ import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 import 'analytics/prompt.dart';
-import 'analytics/provider.dart';
 import 'app.dart';
 import 'auto_dispose_mixin.dart';
 import 'banner_messages.dart';
@@ -19,15 +18,18 @@ import 'common_widgets.dart';
 import 'config_specific/drag_and_drop/drag_and_drop.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
 import 'config_specific/import_export/import_export.dart';
+import 'debugger/console.dart';
 import 'debugger/debugger_screen.dart';
 import 'framework_controller.dart';
 import 'globals.dart';
 import 'notifications.dart';
 import 'routing.dart';
 import 'screen.dart';
+import 'split.dart';
 import 'status_line.dart';
 import 'theme.dart';
 import 'title.dart';
+import 'utils.dart';
 
 /// Scaffolding for a screen and navigation in the DevTools App.
 ///
@@ -39,7 +41,6 @@ class DevToolsScaffold extends StatefulWidget {
   const DevToolsScaffold({
     Key key,
     @required this.tabs,
-    @required this.analyticsProvider,
     this.page,
     this.actions,
     this.embed = false,
@@ -51,12 +52,10 @@ class DevToolsScaffold extends StatefulWidget {
     Key key,
     @required Widget child,
     @required IdeTheme ideTheme,
-    @required AnalyticsProvider analyticsProvider,
     List<Widget> actions,
   }) : this(
           key: key,
           tabs: [SimpleScreen(child)],
-          analyticsProvider: analyticsProvider,
           ideTheme: ideTheme,
           actions: actions,
         );
@@ -68,13 +67,21 @@ class DevToolsScaffold extends StatefulWidget {
   static const Key fullWidthKey = Key('Full-width Scaffold');
 
   /// The size that all actions on this widget are expected to have.
-  static const double actionWidgetSize = 48.0;
+  static double get actionWidgetSize => scaleByFontFactor(48.0);
+
+  /// The border around the content in the DevTools UI.
+  EdgeInsets get appPadding => EdgeInsets.fromLTRB(
+        horizontalPadding.left,
+        isEmbedded() ? 2.0 : defaultSpacing,
+        horizontalPadding.right,
+        isEmbedded() ? 0.0 : denseSpacing,
+      );
 
   // Note: when changing this value, also update `flameChartContainerOffset`
   // from flame_chart.dart.
-  /// The border around the content in the DevTools UI.
-  static const EdgeInsets appPadding =
-      EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0);
+  /// Horizontal padding around the content in the DevTools UI.
+  static EdgeInsets get horizontalPadding =>
+      EdgeInsets.symmetric(horizontal: isEmbedded() ? 2.0 : 16.0);
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> tabs;
@@ -92,8 +99,6 @@ class DevToolsScaffold extends StatefulWidget {
   ///
   /// These will generally be [RegisteredServiceExtensionButton]s.
   final List<Widget> actions;
-
-  final AnalyticsProvider analyticsProvider;
 
   @override
   State<StatefulWidget> createState() => DevToolsScaffoldState();
@@ -293,11 +298,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           // TODO(kenz): this padding creates a flash when dragging and dropping
           // into the app size screen because it creates space that is outside
           // of the [DragAndDropEventAbsorber] widget. Fix this.
-          padding: DevToolsScaffold.appPadding,
+          padding: widget.appPadding,
           alignment: Alignment.topLeft,
           child: FocusScope(
             child: AnalyticsPrompt(
-              provider: widget.analyticsProvider,
               child: BannerMessages(
                 screen: screen,
               ),
@@ -306,6 +310,22 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ),
     ];
 
+    final content = Stack(
+      children: [
+        TabBarView(
+          physics: defaultTabBarViewPhysics,
+          controller: _tabController,
+          children: tabBodies,
+        ),
+        if (serviceManager.connectedAppInitialized &&
+            !offlineMode &&
+            _currentScreen.showFloatingDebuggerControls)
+          Container(
+            alignment: Alignment.topCenter,
+            child: FloatingDebuggerControls(),
+          ),
+      ],
+    );
     final theme = Theme.of(context);
     return Provider<BannerMessagesController>(
       create: (_) => BannerMessagesController(),
@@ -323,22 +343,24 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               color: theme.primaryColor,
               child: Scaffold(
                 appBar: widget.embed ? null : _buildAppBar(scaffoldTitle),
-                body: Stack(
-                  children: [
-                    TabBarView(
-                      physics: defaultTabBarViewPhysics,
-                      controller: _tabController,
-                      children: tabBodies,
-                    ),
-                    if (serviceManager.connectedAppInitialized &&
+                body: (serviceManager.connectedAppInitialized &&
                         !offlineMode &&
-                        _currentScreen.screenId != DebuggerScreen.id)
-                      Container(
-                        alignment: Alignment.topCenter,
-                        child: FloatingDebuggerControls(),
-                      ),
-                  ],
-                ),
+                        _currentScreen.showConsole(widget.embed))
+                    ? Split(
+                        axis: Axis.vertical,
+                        children: [
+                          content,
+                          Padding(
+                            padding: DevToolsScaffold.horizontalPadding,
+                            child: const DebuggerConsole(),
+                          ),
+                        ],
+                        splitters: [
+                          DebuggerConsole.buildHeader(),
+                        ],
+                        initialFractions: const [0.8, 0.2],
+                      )
+                    : content,
                 bottomNavigationBar: widget.embed ? null : _buildStatusLine(),
               ),
             ),
@@ -371,8 +393,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         tabs: [for (var screen in widget.tabs) screen.buildTab(context)],
       );
       preferredSize = isNarrow
-          ? const Size.fromHeight(defaultToolbarHeight + 40.0)
-          : const Size.fromHeight(defaultToolbarHeight);
+          ? Size.fromHeight(
+              defaultToolbarHeight + scaleByFontFactor(36.0) + 4.0)
+          : Size.fromHeight(defaultToolbarHeight);
       final alignment = isNarrow ? Alignment.bottomLeft : Alignment.centerRight;
 
       final rightAdjust = isNarrow ? 0.0 : BulletSpacer.width;
@@ -387,7 +410,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         alignment: alignment,
         child: Padding(
           padding: EdgeInsets.only(
-            top: isNarrow ? 40.0 : 4.0,
+            top: isNarrow ? scaleByFontFactor(36.0) + 4.0 : 4.0,
             right: rightPadding,
           ),
           child: tabBar,
@@ -425,10 +448,12 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   }
 
   Widget _buildStatusLine() {
-    const appPadding = DevToolsScaffold.appPadding;
+    final appPadding = widget.appPadding;
 
     return Container(
-      height: 48.0,
+      height: scaleByFontFactor(24.0) +
+          widget.appPadding.top +
+          widget.appPadding.bottom,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -454,10 +479,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   /// Returns the width of the scaffold title, tabs and default icons.
   double _wideWidth(String title, DevToolsScaffold widget) {
+    final textTheme = Theme.of(context).textTheme;
     final painter = TextPainter(
       text: TextSpan(
         text: title,
-        style: Theme.of(context).textTheme.headline6,
+        style: textTheme.headline6,
       ),
       textDirection: TextDirection.ltr,
     )..layout();
@@ -465,16 +491,23 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     // title's leading padding.
     double wideWidth = painter.width + defaultSpacing;
     for (var tab in widget.tabs) {
-      wideWidth += tab.approximateWidth();
+      wideWidth += tab.approximateWidth(textTheme);
     }
-    wideWidth +=
-        (widget.actions?.length ?? 0) * DevToolsScaffold.actionWidgetSize;
+    final actionsLength = widget.actions?.length ?? 0;
+    if (actionsLength > 0) {
+      wideWidth += actionsLength * DevToolsScaffold.actionWidgetSize +
+          BulletSpacer.width;
+    }
     return wideWidth;
   }
 }
 
 class SimpleScreen extends Screen {
-  const SimpleScreen(this.child) : super(id);
+  const SimpleScreen(this.child)
+      : super(
+          id,
+          showFloatingDebuggerControls: false,
+        );
 
   static const id = 'simple';
 

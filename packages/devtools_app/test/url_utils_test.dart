@@ -9,18 +9,18 @@ void main() {
   group('url utils', () {
     test('getSimplePackageUrl', () {
       expect(getSimplePackageUrl(''), equals(''));
-      expect(getSimplePackageUrl(dartSdkUrl), equals(dartSdkUrl));
+      expect(getSimplePackageUrl(dartSdkUrl), equals('dart:async/zone.dart'));
       expect(
         getSimplePackageUrl(flutterUrl),
-        equals('package:flutter/lib/src/widgets/binding.dart'),
+        equals('package:flutter/widgets/binding.dart'),
       );
       expect(
         getSimplePackageUrl(flutterUrlFromNonFlutterDir),
-        equals('package:flutter/lib/src/widgets/binding.dart'),
+        equals('package:flutter/widgets/binding.dart'),
       );
       expect(
-        getSimplePackageUrl(flutterWebUrl),
-        equals('package:flutter_web/lib/src/widgets/binding.dart'),
+        getSimplePackageUrl('org-dartlang-sdk:///flutter/lib/ui/hooks.dart'),
+        equals('dart:ui/hooks.dart'),
       );
     });
 
@@ -82,6 +82,15 @@ void main() {
         );
       });
 
+      test('handles prefixed devtools server uris', () {
+        expect(
+          normalizeVmServiceUri(
+            'http://127.0.0.1:9101?uri=http%3A%2F%2F127.0.0.1%3A56142%2FHOwgrxalK00%3D%2F',
+          ).toString(),
+          equals('http://127.0.0.1:56142/HOwgrxalK00=/'),
+        );
+      });
+
       test('Returns null when given a non-absolute url', () {
         expect(normalizeVmServiceUri('my/page'), null);
       });
@@ -95,5 +104,3 @@ const flutterUrl =
     'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart';
 const flutterUrlFromNonFlutterDir =
     'file:///path/to/non-flutter/packages/flutter/lib/src/widgets/binding.dart';
-const flutterWebUrl =
-    'file:///path/to/flutter/packages/flutter_web/lib/src/widgets/binding.dart';

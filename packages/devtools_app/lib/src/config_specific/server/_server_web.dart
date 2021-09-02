@@ -31,7 +31,7 @@ Future<HttpRequest> _request(String url) async {
 }
 
 /// Request DevTools property value 'firstRun' (GA dialog) stored in the file
-/// '~\.devtools'.
+/// '~/flutter-devtools/.devtools'.
 Future<bool> isFirstRun() async {
   bool firstRun = false;
 
@@ -63,7 +63,7 @@ Future<bool> isAnalyticsEnabled() async {
 }
 
 /// Set the DevTools property 'enabled' (GA enabled) stored in the file
-/// '~/.devtools'.
+/// '~/.flutter-devtools/.devtools'.
 ///
 /// Returns whether the set call was successful.
 Future<bool> setAnalyticsEnabled([bool value = true]) async {
@@ -239,7 +239,7 @@ Future<int> incrementSurveyShownCount() async {
 }
 
 /// Requests all .devtools properties to be reset to their default values in the
-/// file '~/.devtools'.
+/// file '~/.flutter-devtools/.devtools'.
 Future<void> resetDevToolsFile() async {
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiResetDevTools);

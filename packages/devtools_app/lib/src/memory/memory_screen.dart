@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
 import '../charts/chart_controller.dart';
@@ -19,6 +19,7 @@ import '../notifications.dart';
 import '../screen.dart';
 import '../theme.dart';
 import '../ui/icons.dart';
+import '../ui/tab.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
 import 'memory_android_chart.dart' as android;
@@ -31,7 +32,7 @@ import 'memory_vm_chart.dart' as vm;
 /// Width of application when memory buttons loose their text.
 const _primaryControlsMinVerboseWidth = 1100.0;
 
-final legendKey = GlobalKey(debugLabel: MemoryScreen.legendKeyName);
+final legendKey = GlobalKey(debugLabel: 'Legend Button');
 
 class MemoryScreen extends Screen {
   const MemoryScreen()
@@ -50,58 +51,18 @@ class MemoryScreen extends Screen {
 
   static const id = 'memory';
 
-  static const legendKeyName = 'Legend Button';
   static const hoverKeyName = 'Chart Hover';
 
   // TODO(kenz): clean up these keys. We should remove them if we are only using
   // for testing and can avoid them.
 
   @visibleForTesting
-  static const pauseButtonKey = Key('Pause Button');
-  @visibleForTesting
-  static const resumeButtonKey = Key('Resume Button');
-  @visibleForTesting
-  static const clearButtonKey = Key('Clear Button');
-  @visibleForTesting
-  static const intervalDropdownKey = Key('ChartInterval Dropdown');
-
-  @visibleForTesting
   static const sourcesDropdownKey = Key('Sources Dropdown');
+
   @visibleForTesting
   static const sourcesKey = Key('Sources');
-  @visibleForTesting
-  static const exportButtonKey = Key('Export Button');
-  @visibleForTesting
-  static const gcButtonKey = Key('GC Button');
-  @visibleForTesting
-  static const legendButtonkey = Key(legendKeyName);
-
-  @visibleForTesting
-  static const settingsButtonKey = Key('Memory Configuration');
-
-  @visibleForTesting
-  static const eventChartKey = Key('EventPane');
-  @visibleForTesting
-  static const vmChartKey = Key('VMChart');
-  @visibleForTesting
-  static const androidChartKey = Key('AndroidChart');
-
-  @visibleForTesting
-  static const androidChartButtonKey = Key('Android Memory');
 
   static const memorySourceMenuItemPrefix = 'Source: ';
-
-  static void gaAction({Key key, String name}) {
-    final recordName = key != null ? keyName(key) : name;
-    assert(recordName != null);
-    ga.select(MemoryScreen.id, recordName);
-  }
-
-  // Define here because exportButtonKey is @visibleForTesting and
-  // and can't be ref'd outside of file.
-  static void gaActionForExport() {
-    gaAction(key: exportButtonKey);
-  }
 
   @override
   String get docPageId => id;
@@ -113,9 +74,9 @@ class MemoryScreen extends Screen {
 class MemoryBody extends StatefulWidget {
   const MemoryBody();
 
-  static const List<Tab> memoryTabs = [
-    Tab(text: 'Analysis'),
-    Tab(text: 'Allocations'),
+  static final List<Tab> memoryTabs = [
+    DevToolsTab(text: 'Analysis'),
+    DevToolsTab(text: 'Allocations'),
   ];
 
   @override
@@ -196,7 +157,11 @@ class MemoryBodyState extends State<MemoryBody>
     addAutoDisposeListener(controller.legendVisibleNotifier, () {
       setState(() {
         if (controller.isLegendVisible) {
-          MemoryScreen.gaAction(key: MemoryScreen.legendButtonkey);
+          ga.select(
+            analytics_constants.memory,
+            analytics_constants.memoryLegend,
+          );
+
           showLegend(context);
         } else {
           hideLegend();
@@ -207,7 +172,10 @@ class MemoryBodyState extends State<MemoryBody>
     addAutoDisposeListener(controller.androidChartVisibleNotifier, () {
       setState(() {
         if (controller.androidChartVisibleNotifier.value) {
-          MemoryScreen.gaAction(key: MemoryScreen.androidChartButtonKey);
+          ga.select(
+            analytics_constants.memory,
+            analytics_constants.androidChart,
+          );
         }
         if (controller.isLegendVisible) {
           // Recompute the legend with the new traces now visible.
@@ -336,7 +304,7 @@ class MemoryBodyState extends State<MemoryBody>
 
     // TODO(terry): Can Flutter's focus system be used instead of listening to keyboard?
     return RawKeyboardListener(
-      focusNode: FocusNode(),
+      focusNode: FocusNode(debugLabel: 'memory'),
       onKey: (RawKeyEvent event) {
         if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
           hideHover();
@@ -356,25 +324,16 @@ class MemoryBodyState extends State<MemoryBody>
           ),
           const SizedBox(height: denseRowSpacing),
           SizedBox(
-            height: 70,
-            child: events.MemoryEventsPane(
-              eventChartController,
-              key: MemoryScreen.eventChartKey,
-            ),
+            height: scaleByFontFactor(70),
+            child: events.MemoryEventsPane(eventChartController),
           ),
           SizedBox(
-            child: vm.MemoryVMChart(
-              vmChartController,
-              key: MemoryScreen.vmChartKey,
-            ),
+            child: vm.MemoryVMChart(vmChartController),
           ),
           controller.isAndroidChartVisible
               ? SizedBox(
                   height: defaultChartHeight,
-                  child: android.MemoryAndroidChart(
-                    androidChartController,
-                    key: MemoryScreen.androidChartKey,
-                  ),
+                  child: android.MemoryAndroidChart(androidChartController),
                 )
               : const SizedBox(),
           const SizedBox(width: defaultSpacing),
@@ -436,13 +395,15 @@ class MemoryBodyState extends State<MemoryBody>
     ).toList();
 
     return RoundedDropDownButton<String>(
-      key: MemoryScreen.intervalDropdownKey,
       isDense: true,
       style: textTheme.bodyText2,
       value: displayDuration(controller.displayInterval),
       onChanged: (String newValue) {
         setState(() {
-          MemoryScreen.gaAction(key: MemoryScreen.intervalDropdownKey);
+          ga.select(
+            analytics_constants.memory,
+            '${analytics_constants.memoryDisplayInterval}-$newValue',
+          );
           controller.displayInterval = chartInterval(newValue);
           final duration = chartDuration(controller.displayInterval);
 
@@ -489,7 +450,10 @@ class MemoryBodyState extends State<MemoryBody>
       value: controller.memorySource,
       onChanged: (String newValue) {
         setState(() {
-          MemoryScreen.gaAction(key: MemoryScreen.sourcesDropdownKey);
+          ga.select(
+            analytics_constants.memory,
+            analytics_constants.sourcesDropDown,
+          );
           controller.memorySource = newValue;
         });
       },
@@ -525,24 +489,24 @@ class MemoryBodyState extends State<MemoryBody>
           mainAxisSize: MainAxisSize.min,
           children: [
             PauseButton(
-              key: MemoryScreen.pauseButtonKey,
-              includeTextWidth: _primaryControlsMinVerboseWidth,
-              onPressed: paused ? null : controller.pauseLiveFeed,
+              minScreenWidthForTextBeforeScaling:
+                  _primaryControlsMinVerboseWidth,
+              onPressed: paused ? null : _onPause,
             ),
             const SizedBox(width: denseSpacing),
             ResumeButton(
-              key: MemoryScreen.resumeButtonKey,
-              includeTextWidth: _primaryControlsMinVerboseWidth,
-              onPressed: paused ? controller.resumeLiveFeed : null,
+              minScreenWidthForTextBeforeScaling:
+                  _primaryControlsMinVerboseWidth,
+              onPressed: paused ? _onResume : null,
             ),
             const SizedBox(width: defaultSpacing),
             ClearButton(
-              key: MemoryScreen.clearButtonKey,
               // TODO(terry): Button needs to be Delete for offline data.
               onPressed: controller.memorySource == MemoryController.liveFeed
                   ? _clearTimeline
                   : null,
-              includeTextWidth: _primaryControlsMinVerboseWidth,
+              minScreenWidthForTextBeforeScaling:
+                  _primaryControlsMinVerboseWidth,
             ),
             const SizedBox(width: defaultSpacing),
             _intervalDropdown(textTheme),
@@ -554,12 +518,11 @@ class MemoryBodyState extends State<MemoryBody>
 
   Widget createToggleAdbMemoryButton() {
     return IconLabelButton(
-      key: MemoryScreen.androidChartButtonKey,
       icon: controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
-      label: keyName(MemoryScreen.androidChartButtonKey),
+      label: 'Android Memory',
       onPressed:
           isAndroidCollection ? controller.toggleAndroidChartVisibility : null,
-      includeTextWidth: 900,
+      minScreenWidthForTextBeforeScaling: 900,
     );
   }
 
@@ -577,22 +540,19 @@ class MemoryBodyState extends State<MemoryBody>
             ? Row(
                 children: [
                   IconLabelButton(
-                    key: MemoryScreen.gcButtonKey,
                     onPressed: controller.isGcing ? null : _gc,
                     icon: Icons.delete,
                     label: 'GC',
-                    includeTextWidth: _primaryControlsMinVerboseWidth,
+                    minScreenWidthForTextBeforeScaling:
+                        _primaryControlsMinVerboseWidth,
                   ),
                   const SizedBox(width: denseSpacing),
                 ],
               )
             : const SizedBox(),
-        IconLabelButton(
-          key: MemoryScreen.exportButtonKey,
+        ExportButton(
           onPressed: controller.offline ? null : _exportToFile,
-          icon: Icons.file_download,
-          label: 'Export',
-          includeTextWidth: _primaryControlsMinVerboseWidth,
+          minScreenWidthForTextBeforeScaling: _primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
         IconLabelButton(
@@ -600,7 +560,8 @@ class MemoryBodyState extends State<MemoryBody>
           onPressed: controller.toggleLegendVisibility,
           icon: legendOverlayEntry == null ? Icons.storage : Icons.close,
           label: 'Legend',
-          includeTextWidth: _primaryControlsMinVerboseWidth,
+          tooltip: 'Legend',
+          minScreenWidthForTextBeforeScaling: _primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
@@ -630,26 +591,26 @@ class MemoryBodyState extends State<MemoryBody>
 
   static const legendXOffset = 20;
   static const legendYOffset = 7.0;
-  static const legendWidth = 200.0;
-  static const legendTextWidth = 55.0;
-  static const legendHeight1Chart = 200.0;
-  static const legendHeight2Charts = 323.0;
+  static double get legendWidth => scaleByFontFactor(200.0);
+  static double get legendTextWidth => scaleByFontFactor(55.0);
+  static double get legendHeight1Chart => scaleByFontFactor(200.0);
+  static double get legendHeight2Charts => scaleByFontFactor(323.0);
 
   final hoverKey = GlobalKey(debugLabel: MemoryScreen.hoverKeyName);
   static const hoverXOffset = 10;
   static const hoverYOffset = 0.0;
-  static const hoverWidth = 225.0;
+  static double get hoverWidth => scaleByFontFactor(225.0);
   static const hover_card_border_width = 2.0;
 
   // TODO(terry): Compute below heights dynamically.
-  static const hoverHeightMinimum = 42.0;
-  static const hoverItemHeight = 18.0;
+  static double get hoverHeightMinimum => scaleByFontFactor(42.0);
+  static double get hoverItemHeight => scaleByFontFactor(18.0);
 
   // One extension event to display (4 lines).
-  static const hoverOneEventsHeight = 82.0;
+  static double get hoverOneEventsHeight => scaleByFontFactor(82.0);
 
   // Many extension events to display.
-  static const hoverEventsHeight = 120.0;
+  static double get hoverEventsHeight => scaleByFontFactor(120.0);
 
   static double computeHoverHeight(
     int eventsCount,
@@ -1212,7 +1173,7 @@ class MemoryBodyState extends State<MemoryBody>
     // Separator between Android data.
     // TODO(terry): Why Center widget doesn't work (parent width is bigger/centered too far right).
     //              Is it centering on a too wide Overlay?
-    const width = MemoryBodyState.hoverWidth -
+    final width = MemoryBodyState.hoverWidth -
         totalDividerLineHorizontalSpace -
         DashedLine.defaultDashWidth;
     final dashedColor = Colors.grey.shade600;
@@ -1412,8 +1373,18 @@ class MemoryBodyState extends State<MemoryBody>
 
   /// Callbacks for button actions:
 
+  void _onPause() {
+    ga.select(analytics_constants.memory, analytics_constants.pause);
+    controller.pauseLiveFeed();
+  }
+
+  void _onResume() {
+    ga.select(analytics_constants.memory, analytics_constants.resume);
+    controller.resumeLiveFeed();
+  }
+
   void _clearTimeline() {
-    MemoryScreen.gaAction(key: MemoryScreen.clearButtonKey);
+    ga.select(analytics_constants.memory, analytics_constants.clear);
 
     controller.memoryTimeline.reset();
 
@@ -1439,7 +1410,7 @@ class MemoryBodyState extends State<MemoryBody>
 
   Future<void> _gc() async {
     try {
-      MemoryScreen.gaAction(key: MemoryScreen.gcButtonKey);
+      ga.select(analytics_constants.memory, analytics_constants.gc);
 
       controller.memoryTimeline.addGCEvent();
 

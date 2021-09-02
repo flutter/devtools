@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'auto_dispose.dart';
 import 'config_specific/logger/logger.dart';
 import 'globals.dart';
 import 'inspector/inspector_service.dart';
@@ -26,24 +27,21 @@ class Disposable {
   }
 }
 
-class EvalOnDartLibrary {
+class EvalOnDartLibrary extends DisposableController
+    with AutoDisposeControllerMixin {
   EvalOnDartLibrary(
-    Iterable<String> candidateLibraryNames,
+    this.libraryName,
     this.service, {
-    IsolateRef isolateRef,
+    ValueListenable<IsolateRef> isolate,
     this.disableBreakpoints = true,
     this.oneRequestAtATime = false,
-  })  : _candidateLibraryNames = Set.from(candidateLibraryNames),
-        _clientId = (Random.secure().nextDouble() * 10000).toInt() {
+  }) : _clientId = Random().nextInt(1000000000) {
     _libraryRef = Completer<LibraryRef>();
 
     // For evals in tests, we will pass the isolateId into the constructor.
-    if (isolateRef != null) {
-      _init(isolateRef);
-    } else {
-      selectedIsolateStreamSubscription =
-          serviceManager.isolateManager.getSelectedIsolate(_init);
-    }
+    isolate ??= serviceManager.isolateManager.selectedIsolate;
+    addAutoDisposeListener(isolate, () => _init(isolate.value));
+    _init(isolate.value);
   }
 
   void _init(IsolateRef isolateRef) {
@@ -78,16 +76,16 @@ class EvalOnDartLibrary {
   bool get disposed => _disposed;
   bool _disposed = false;
 
+  @override
   void dispose() {
     _dartDeveloperEvalCache?.dispose();
     _widgetInspectorEvalCache?.dispose();
-    selectedIsolateStreamSubscription.cancel();
     _disposed = true;
+    super.dispose();
   }
 
-  final Set<String> _candidateLibraryNames;
+  final String libraryName;
   final VmServiceWrapper service;
-  StreamSubscription selectedIsolateStreamSubscription;
 
   IsolateRef get isolateRef => _isolateRef;
   IsolateRef _isolateRef;
@@ -118,19 +116,19 @@ class EvalOnDartLibrary {
       }
       _isolate = isolate;
       if (isolate == null) {
-        _libraryRef.completeError(LibraryNotFound([]));
+        _libraryRef.completeError(LibraryNotFound(libraryName));
         // Nothing to do here.
         return;
       }
       for (LibraryRef library in isolate.libraries) {
-        if (_candidateLibraryNames.contains(library.uri)) {
+        if (libraryName == library.uri) {
           assert(!_libraryRef.isCompleted);
           _libraryRef.complete(library);
           return;
         }
       }
       assert(!_libraryRef.isCompleted);
-      _libraryRef.completeError(LibraryNotFound(_candidateLibraryNames));
+      _libraryRef.completeError(LibraryNotFound(libraryName));
     } catch (e, stack) {
       _handleError(e, stack);
     }
@@ -337,7 +335,7 @@ class EvalOnDartLibrary {
   EvalOnDartLibrary _dartDeveloperEvalCache;
   EvalOnDartLibrary get _dartDeveloperEval {
     return _dartDeveloperEvalCache ??= EvalOnDartLibrary(
-      const ['dart:developer'],
+      'dart:developer',
       service,
     );
   }
@@ -345,7 +343,7 @@ class EvalOnDartLibrary {
   EvalOnDartLibrary _widgetInspectorEvalCache;
   EvalOnDartLibrary get _widgetInspectorEval {
     return _widgetInspectorEvalCache ??= EvalOnDartLibrary(
-      inspectorLibraryUriCandidates,
+      inspectorLibraryUri,
       service,
     );
   }
@@ -609,11 +607,11 @@ class EvalOnDartLibrary {
 }
 
 class LibraryNotFound implements Exception {
-  LibraryNotFound(this.candidateNames);
+  LibraryNotFound(this.name);
 
-  Iterable<String> candidateNames;
+  final String name;
 
-  String get message => 'Library matchining one of $candidateNames not found';
+  String get message => 'Library matchining $name not found';
 }
 
 class FutureFailedException implements Exception {

@@ -4,11 +4,16 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/connected_app.dart';
+import 'package:devtools_app/src/console_service.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
+import 'package:devtools_app/src/debugger/span_parser.dart';
+import 'package:devtools_app/src/debugger/syntax_highlighter.dart';
 import 'package:devtools_app/src/error_badge_manager.dart';
+import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/listenable.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart'
@@ -25,10 +30,12 @@ import 'package:devtools_app/src/version.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/vm_service_wrapper.dart';
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:devtools_testing/support/cpu_profile_test_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
+
+import '../inspector_screen_test.dart';
+import 'cpu_profile_test_data.dart';
 
 class FakeServiceManager extends Fake implements ServiceConnectionManager {
   FakeServiceManager({
@@ -54,6 +61,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   static FakeVmService createFakeService({
     Timeline timelineData,
     SocketProfile socketProfile,
+    HttpProfile httpProfile,
     SamplesMemoryJson memoryData,
     AllocationMemoryJson allocationData,
   }) =>
@@ -61,6 +69,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
         _flagManager,
         timelineData,
         socketProfile,
+        httpProfile,
         memoryData,
         allocationData,
       );
@@ -84,13 +93,16 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final ConnectedApp connectedApp = MockConnectedApp();
 
   @override
+  final ConsoleService consoleService = ConsoleService();
+
+  @override
   Stream<VmServiceWrapper> get onConnectionClosed => const Stream.empty();
 
   @override
   Stream<VmServiceWrapper> get onConnectionAvailable => Stream.value(service);
 
   @override
-  Future<double> get queryDisplayRefreshRate async => 60;
+  Future<double> get queryDisplayRefreshRate => Future.value(60.0);
 
   @override
   bool hasConnection;
@@ -103,6 +115,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   final ErrorBadgeManager errorBadgeManager = MockErrorBadgeManager();
+
+  @override
+  final InspectorService inspectorService = FakeInspectorService();
 
   @override
   VM get vm => _mockVM;
@@ -188,9 +203,11 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     this._vmFlagManager,
     this._timelineData,
     this._socketProfile,
+    this._httpProfile,
     this._memoryData,
     this._allocationData,
-  ) : _startingSockets = _socketProfile?.sockets ?? [];
+  )   : _startingSockets = _socketProfile?.sockets ?? [],
+        _startingRequests = _httpProfile?.requests ?? [];
 
   /// Specifies the return value of `httpEnableTimelineLogging`.
   bool httpEnableTimelineLoggingResult = true;
@@ -208,6 +225,8 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   final Timeline _timelineData;
   SocketProfile _socketProfile;
   final List<SocketStatistic> _startingSockets;
+  HttpProfile _httpProfile;
+  final List<HttpProfileRequest> _startingRequests;
   final SamplesMemoryJson _memoryData;
   final AllocationMemoryJson _allocationData;
 
@@ -433,6 +452,38 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   }
 
   @override
+  Future<bool> isHttpProfilingAvailable(String isolateId) => Future.value(true);
+
+  @override
+  Future<HttpProfileRequest> getHttpProfileRequest(
+    String isolateId,
+    int id,
+  ) async {
+    final httpProfile = await getHttpProfile(isolateId);
+    return Future.value(
+      httpProfile.requests
+          .firstWhere((request) => request.id == id, orElse: () => null),
+    );
+  }
+
+  @override
+  Future<HttpProfile> getHttpProfile(String isolateId, {int updatedSince}) {
+    return Future.value(
+      _httpProfile ?? HttpProfile(requests: [], timestamp: 0),
+    );
+  }
+
+  @override
+  Future<Success> clearHttpProfile(String isolateId) {
+    _httpProfile?.requests?.clear();
+    return Future.value(Success());
+  }
+
+  void restoreFakeHttpProfileRequests() {
+    _httpProfile = HttpProfile(requests: _startingRequests, timestamp: 0);
+  }
+
+  @override
   Future<CpuProfileData> getCpuProfileTimeline(
     String isolateId,
     int origin,
@@ -443,9 +494,6 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Future<Success> clearCpuSamples(String isolateId) => Future.value(Success());
-
-  @override
-  Future<bool> isHttpProfilingAvailable(String isolateId) => Future.value(true);
 
   @override
   Future<bool> isHttpTimelineLoggingAvailable(String isolateId) =>
@@ -511,21 +559,31 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Stream<Event> get onDebugEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onTimelineEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onIsolateEvent => const Stream.empty();
 }
 
 class FakeIsolateManager extends Fake implements IsolateManager {
   @override
-  IsolateRef get selectedIsolate => IsolateRef.parse({'id': 'fake_isolate_id'});
+  ValueListenable<IsolateRef> get selectedIsolate => _selectedIsolate;
+  final _selectedIsolate =
+      ValueNotifier(IsolateRef.parse({'id': 'fake_isolate_id'}));
 
   @override
-  Stream<IsolateRef> get onSelectedIsolateChanged => const Stream.empty();
+  ValueListenable<IsolateRef> get mainIsolate => _mainIsolate;
+  final _mainIsolate =
+      ValueNotifier(IsolateRef.parse({'id': 'fake_main_isolate_id'}));
 
   @override
-  Completer<bool> get selectedIsolateAvailable =>
-      Completer<bool>()..complete(true);
+  ValueNotifier<List<IsolateRef>> get isolates {
+    return _isolates ??= ValueNotifier([_selectedIsolate.value]);
+  }
 
-  @override
-  List<IsolateRef> get isolates => [];
+  ValueNotifier<List<IsolateRef>> _isolates;
 }
 
 class MockServiceManager extends Mock implements ServiceConnectionManager {}
@@ -535,6 +593,8 @@ class MockVmService extends Mock implements VmServiceWrapper {}
 class MockIsolate extends Mock implements Isolate {}
 
 class MockConnectedApp extends Mock implements ConnectedApp {}
+
+class FakeConnectedApp extends Mock implements ConnectedApp {}
 
 class MockBannerMessagesController extends Mock
     implements BannerMessagesController {}
@@ -558,12 +618,40 @@ class MockMemoryController extends Mock implements MemoryController {}
 class MockFlutterMemoryController extends Mock
     implements flutter_memory.MemoryController {}
 
-class MockTimelineController extends Mock implements PerformanceController {}
+class MockPerformanceController extends Mock implements PerformanceController {}
 
 class MockProfilerScreenController extends Mock
     implements ProfilerScreenController {}
 
-class MockDebuggerController extends Mock implements DebuggerController {}
+class MockDebuggerController extends Mock implements DebuggerController {
+  MockDebuggerController();
+
+  factory MockDebuggerController.withDefaults() {
+    final debuggerController = MockDebuggerController();
+    when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
+    when(debuggerController.resuming).thenReturn(ValueNotifier(false));
+    when(debuggerController.breakpoints).thenReturn(ValueNotifier([]));
+    when(debuggerController.isSystemIsolate).thenReturn(false);
+    when(debuggerController.breakpointsWithLocation)
+        .thenReturn(ValueNotifier([]));
+    when(debuggerController.librariesVisible).thenReturn(ValueNotifier(false));
+    when(debuggerController.currentScriptRef).thenReturn(ValueNotifier(null));
+    when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
+    when(debuggerController.selectedBreakpoint).thenReturn(ValueNotifier(null));
+    when(debuggerController.stackFramesWithLocation)
+        .thenReturn(ValueNotifier([]));
+    when(debuggerController.selectedStackFrame).thenReturn(ValueNotifier(null));
+    when(debuggerController.hasTruncatedFrames)
+        .thenReturn(ValueNotifier(false));
+    when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
+    when(debuggerController.exceptionPauseMode)
+        .thenReturn(ValueNotifier('Unhandled'));
+    when(debuggerController.variables).thenReturn(ValueNotifier([]));
+    when(debuggerController.currentParsedScript)
+        .thenReturn(ValueNotifier<ParsedScript>(null));
+    return debuggerController;
+  }
+}
 
 class MockVM extends Mock implements VM {}
 
@@ -789,18 +877,21 @@ void mockIsFlutterApp(MockConnectedApp connectedApp, [isFlutterApp = true]) {
   when(connectedApp.isFlutterAppNow).thenReturn(isFlutterApp);
   when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(isFlutterApp));
   when(connectedApp.isDebugFlutterAppNow).thenReturn(true);
+  when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
 void mockIsDebugFlutterApp(MockConnectedApp connectedApp,
     [isDebugFlutterApp = true]) {
   when(connectedApp.isDebugFlutterAppNow).thenReturn(isDebugFlutterApp);
   when(connectedApp.isProfileBuildNow).thenReturn(!isDebugFlutterApp);
+  when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
 void mockIsProfileFlutterApp(MockConnectedApp connectedApp,
     [isProfileFlutterApp = true]) {
   when(connectedApp.isDebugFlutterAppNow).thenReturn(!isProfileFlutterApp);
   when(connectedApp.isProfileBuildNow).thenReturn(isProfileFlutterApp);
+  when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
 void mockFlutterVersion(
@@ -810,8 +901,451 @@ void mockFlutterVersion(
   when(connectedApp.flutterVersionNow).thenReturn(FlutterVersion.parse({
     'frameworkVersion': '$version',
   }));
+  when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
 void mockIsDartVmApp(MockConnectedApp connectedApp, [isDartVmApp = true]) {
   when(connectedApp.isRunningOnDartVM).thenReturn(isDartVmApp);
+  when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
+
+// ignore: prefer_single_quotes
+final Grammar mockGrammar = Grammar.fromJson(jsonDecode("""
+{
+  "name": "Dart",
+  "fileTypes": [
+    "dart"
+  ],
+  "scopeName": "source.dart",
+  "patterns": [],
+  "repository": {}
+}
+"""));
+
+final Script mockScript = Script.parse(jsonDecode("""
+{
+  "type": "Script",
+  "class": {
+    "type": "@Class",
+    "fixedId": true,
+    "id": "classes/11",
+    "name": "Script",
+    "library": {
+      "type": "@Instance",
+      "_vmType": "null",
+      "class": {
+        "type": "@Class",
+        "fixedId": true,
+        "id": "classes/148",
+        "name": "Null",
+        "location": {
+          "type": "SourceLocation",
+          "script": {
+            "type": "@Script",
+            "fixedId": true,
+            "id": "libraries/@0150898/scripts/dart%3Acore%2Fnull.dart/0",
+            "uri": "dart:core/null.dart",
+            "_kind": "kernel"
+          },
+          "tokenPos": 925,
+          "endTokenPos": 1165
+        },
+        "library": {
+          "type": "@Library",
+          "fixedId": true,
+          "id": "libraries/@0150898",
+          "name": "dart.core",
+          "uri": "dart:core"
+        }
+      },
+      "kind": "Null",
+      "fixedId": true,
+      "id": "objects/null",
+      "valueAsString": "null"
+    }
+  },
+  "size": 80,
+  "fixedId": true,
+  "id": "libraries/@783137924/scripts/package%3Agallery%2Fmain.dart/17b557e5bc3",
+  "uri": "package:gallery/main.dart",
+  "_kind": "kernel",
+  "_loadTime": 1629226949571,
+  "library": {
+    "type": "@Library",
+    "fixedId": true,
+    "id": "libraries/@783137924",
+    "name": "",
+    "uri": "package:gallery/main.dart"
+  },
+  "lineOffset": 0,
+  "columnOffset": 0,
+  "source": "// Copyright 2019 The Flutter team. All rights reserved.\\n// Use of this source code is governed by a BSD-style license that can be\\n// found in the LICENSE file.\\n\\nimport 'package:flutter/foundation.dart';\\nimport 'package:flutter/material.dart';\\nimport 'package:flutter/scheduler.dart' show timeDilation;\\nimport 'package:flutter_gen/gen_l10n/gallery_localizations.dart';\\nimport 'package:flutter_localized_locales/flutter_localized_locales.dart';\\nimport 'package:gallery/constants.dart';\\nimport 'package:gallery/data/gallery_options.dart';\\nimport 'package:gallery/pages/backdrop.dart';\\nimport 'package:gallery/pages/splash.dart';\\nimport 'package:gallery/routes.dart';\\nimport 'package:gallery/themes/gallery_theme_data.dart';\\nimport 'package:google_fonts/google_fonts.dart';\\n\\nexport 'package:gallery/data/demos.dart' show pumpDeferredLibraries;\\n\\nvoid main() {\\n  GoogleFonts.config.allowRuntimeFetching = false;\\n  runApp(const GalleryApp());\\n}\\n\\nclass GalleryApp extends StatelessWidget {\\n  const GalleryApp({\\n    Key key,\\n    this.initialRoute,\\n    this.isTestMode = false,\\n  }) : super(key: key);\\n\\n  final bool isTestMode;\\n  final String initialRoute;\\n\\n  @override\\n  Widget build(BuildContext context) {\\n    return ModelBinding(\\n      initialModel: GalleryOptions(\\n        themeMode: ThemeMode.system,\\n        textScaleFactor: systemTextScaleFactorOption,\\n        customTextDirection: CustomTextDirection.localeBased,\\n        locale: null,\\n        timeDilation: timeDilation,\\n        platform: defaultTargetPlatform,\\n        isTestMode: isTestMode,\\n      ),\\n      child: Builder(\\n        builder: (context) {\\n          return MaterialApp(\\n            // By default on desktop, scrollbars are applied by the\\n            // ScrollBehavior. This overrides that. All vertical scrollables in\\n            // the gallery need to be audited before enabling this feature,\\n            // see https://github.com/flutter/gallery/issues/523\\n            scrollBehavior:\\n                const MaterialScrollBehavior().copyWith(scrollbars: false),\\n            restorationScopeId: 'rootGallery',\\n            title: 'Flutter Gallery',\\n            debugShowCheckedModeBanner: false,\\n            themeMode: GalleryOptions.of(context).themeMode,\\n            theme: GalleryThemeData.lightThemeData.copyWith(\\n              platform: GalleryOptions.of(context).platform,\\n            ),\\n            darkTheme: GalleryThemeData.darkThemeData.copyWith(\\n              platform: GalleryOptions.of(context).platform,\\n            ),\\n            localizationsDelegates: const [\\n              ...GalleryLocalizations.localizationsDelegates,\\n              LocaleNamesLocalizationsDelegate()\\n            ],\\n            initialRoute: initialRoute,\\n            supportedLocales: GalleryLocalizations.supportedLocales,\\n            locale: GalleryOptions.of(context).locale,\\n            localeResolutionCallback: (locale, supportedLocales) {\\n              deviceLocale = locale;\\n              return locale;\\n            },\\n            onGenerateRoute: RouteConfiguration.onGenerateRoute,\\n          );\\n        },\\n      ),\\n    );\\n  }\\n}\\n\\nclass RootPage extends StatelessWidget {\\n  const RootPage({\\n    Key key,\\n  }) : super(key: key);\\n\\n  @override\\n  Widget build(BuildContext context) {\\n    return const ApplyTextOptions(\\n      child: SplashPage(\\n        child: Backdrop(),\\n      ),\\n    );\\n  }\\n}\\n",
+  "tokenPosTable": [
+    [
+      20,
+      842,
+      1,
+      847,
+      6,
+      851,
+      10,
+      854,
+      13
+    ],
+    [
+      21,
+      870,
+      15,
+      877,
+      22
+    ],
+    [
+      22,
+      909,
+      3,
+      922,
+      16
+    ],
+    [
+      23,
+      937,
+      1
+    ],
+    [
+      25,
+      940,
+      1
+    ],
+    [
+      26,
+      985,
+      3,
+      991,
+      9,
+      1001,
+      19
+    ],
+    [
+      27,
+      1012,
+      9
+    ],
+    [
+      28,
+      1026,
+      10
+    ],
+    [
+      29,
+      1049,
+      10,
+      1062,
+      23
+    ],
+    [
+      30,
+      1076,
+      8,
+      1087,
+      19,
+      1091,
+      23
+    ],
+    [
+      32,
+      1107,
+      14,
+      1117,
+      24
+    ],
+    [
+      33,
+      1134,
+      16,
+      1146,
+      28
+    ],
+    [
+      35,
+      1151,
+      3,
+      1152,
+      4
+    ],
+    [
+      36,
+      1170,
+      10,
+      1175,
+      15,
+      1189,
+      29,
+      1198,
+      38
+    ],
+    [
+      37,
+      1204,
+      5,
+      1211,
+      12
+    ],
+    [
+      38,
+      1245,
+      21
+    ],
+    [
+      39,
+      1290,
+      30
+    ],
+    [
+      40,
+      1323,
+      26
+    ],
+    [
+      41,
+      1401,
+      50
+    ],
+    [
+      43,
+      1458,
+      23
+    ],
+    [
+      44,
+      1490,
+      19
+    ],
+    [
+      45,
+      1533,
+      21
+    ],
+    [
+      47,
+      1567,
+      14
+    ],
+    [
+      48,
+      1593,
+      18,
+      1594,
+      19,
+      1603,
+      28
+    ],
+    [
+      49,
+      1615,
+      11,
+      1622,
+      18
+    ],
+    [
+      55,
+      1974,
+      23,
+      1999,
+      48
+    ],
+    [
+      59,
+      2198,
+      39,
+      2201,
+      42,
+      2210,
+      51
+    ],
+    [
+      60,
+      2257,
+      37,
+      2272,
+      52
+    ],
+    [
+      61,
+      2321,
+      40,
+      2324,
+      43,
+      2333,
+      52
+    ],
+    [
+      63,
+      2398,
+      41,
+      2412,
+      55
+    ],
+    [
+      64,
+      2461,
+      40,
+      2464,
+      43,
+      2473,
+      52
+    ],
+    [
+      66,
+      2534,
+      37
+    ],
+    [
+      70,
+      2694,
+      27
+    ],
+    [
+      71,
+      2759,
+      52
+    ],
+    [
+      72,
+      2812,
+      36,
+      2815,
+      39,
+      2824,
+      48
+    ],
+    [
+      73,
+      2870,
+      39,
+      2871,
+      40,
+      2879,
+      48,
+      2897,
+      66
+    ],
+    [
+      74,
+      2913,
+      15,
+      2928,
+      30
+    ],
+    [
+      75,
+      2950,
+      15,
+      2957,
+      22
+    ],
+    [
+      76,
+      2977,
+      13,
+      2978,
+      14
+    ],
+    [
+      77,
+      3028,
+      49
+    ],
+    [
+      79,
+      3066,
+      9,
+      3067,
+      10
+    ],
+    [
+      82,
+      3087,
+      3
+    ],
+    [
+      83,
+      3089,
+      1
+    ],
+    [
+      85,
+      3092,
+      1
+    ],
+    [
+      86,
+      3135,
+      3,
+      3141,
+      9,
+      3149,
+      17
+    ],
+    [
+      87,
+      3160,
+      9
+    ],
+    [
+      88,
+      3172,
+      8,
+      3183,
+      19,
+      3187,
+      23
+    ],
+    [
+      90,
+      3192,
+      3,
+      3193,
+      4
+    ],
+    [
+      91,
+      3211,
+      10,
+      3216,
+      15,
+      3230,
+      29,
+      3239,
+      38
+    ],
+    [
+      92,
+      3245,
+      5,
+      3258,
+      18
+    ],
+    [
+      97,
+      3346,
+      3
+    ],
+    [
+      98,
+      3348,
+      1
+    ]
+  ]
+}
+"""));
+
+final mockScriptRef = ScriptRef(
+    uri:
+        'libraries/@783137924/scripts/package%3Agallery%2Fmain.dart/17b557e5bc3"',
+    id: 'test-script-long-lines');
+
+final mockParsedScript = ParsedScript(
+    script: mockScript,
+    highlighter: SyntaxHighlighter.withGrammar(
+        grammar: mockGrammar, source: mockScript.source),
+    executableLines: <int>{});

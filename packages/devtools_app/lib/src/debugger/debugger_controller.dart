@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
@@ -17,6 +15,7 @@ import '../config_specific/logger/logger.dart';
 import '../core/message_bus.dart';
 import '../globals.dart';
 import '../history_manager.dart';
+import '../service_manager.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
@@ -29,63 +28,79 @@ import 'syntax_highlighter.dart';
 // Make sure this a checked in with `mute: true`.
 final _log = DebugTimingLogger('debugger', mute: true);
 
-/// A line in the console.
-///
-/// TODO(jacobr): support console lines that are structured error messages as
-/// well.
-class ConsoleLine {
-  factory ConsoleLine.text(String text) => TextConsoleLine(text);
-
-  factory ConsoleLine.variable(Variable variable) =>
-      VariableConsoleLine(variable);
-
-  ConsoleLine._();
-}
-
-class TextConsoleLine extends ConsoleLine {
-  TextConsoleLine(this.text) : super._();
-  final String text;
-
-  @override
-  String toString() {
-    return text;
-  }
-}
-
-class VariableConsoleLine extends ConsoleLine {
-  VariableConsoleLine(this.variable) : super._();
-  final Variable variable;
-
-  @override
-  String toString() {
-    return variable.toString();
-  }
-}
-
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController
     with AutoDisposeControllerMixin, SearchControllerMixin<SourceToken> {
   // `initialSwitchToIsolate` can be set to false for tests to skip the logic
   // in `switchToIsolate`.
-  DebuggerController({bool initialSwitchToIsolate = true}) {
-    if (initialSwitchToIsolate) {
-      switchToIsolate(serviceManager.isolateManager.selectedIsolate);
-    }
-
-    autoDispose(serviceManager.isolateManager.onSelectedIsolateChanged
-        .listen(switchToIsolate));
-    autoDispose(_service.onDebugEvent.listen(_handleDebugEvent));
-    autoDispose(_service.onIsolateEvent.listen(_handleIsolateEvent));
-    // TODO(kenz): do we want to listen with event history here?
-    autoDispose(_service.onStdoutEvent.listen(_handleStdoutEvent));
-    // TODO(kenz): do we want to listen with event history here?
-    autoDispose(_service.onStderrEvent.listen(_handleStderrEvent));
-
+  DebuggerController({this.initialSwitchToIsolate = true}) {
+    autoDispose(serviceManager.onConnectionAvailable
+        .listen(_handleConnectionAvailable));
     _scriptHistoryListener = () {
       _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
     };
     scriptsHistory.current.addListener(_scriptHistoryListener);
+
+    if (_service != null) {
+      initialize();
+    }
   }
+
+  /// Method to call after the vm service shuts down.
+  void onServiceShutdown() {
+    _clearCaches();
+
+    _hasTruncatedFrames.value = false;
+    _getStackOperation?.cancel();
+    _getStackOperation = null;
+    // It would be nice to not clear the script history but it is currently
+    // coupled to ScriptRef objects so that is unsafe.
+    scriptsHistory.clear();
+    _isPaused.value = false;
+    _resuming.value = false;
+    _lastEvent = null;
+    _currentScriptRef.value = null;
+    _scriptLocation.value = null;
+    _uriToScriptMap.clear();
+    _stackFramesWithLocation.value = [];
+    _selectedStackFrame.value = null;
+    _variables.value = [];
+    _sortedScripts.value = [];
+    _breakpoints.value = [];
+    _breakpointsWithLocation.value = [];
+    _selectedBreakpoint.value = null;
+    _librariesVisible.value = false;
+    isolateRef = null;
+  }
+
+  VmServiceWrapper _lastService;
+
+  void _handleConnectionAvailable(VmServiceWrapper service) {
+    if (service == _lastService) return;
+    _lastService = service;
+    onServiceShutdown();
+    if (service != null) {
+      initialize();
+    }
+  }
+
+  void initialize() {
+    if (initialSwitchToIsolate) {
+      assert(serviceManager.isolateManager.selectedIsolate.value != null);
+      switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
+    }
+
+    addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
+      switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
+    });
+    autoDispose(_service.onDebugEvent.listen(_handleDebugEvent));
+    autoDispose(_service.onIsolateEvent.listen(_handleIsolateEvent));
+  }
+
+  final bool initialSwitchToIsolate;
+
+  IsolateState get isolateDebuggerState =>
+      serviceManager.isolateManager.isolateDebuggerState(isolateRef);
 
   VmServiceWrapper get _service => serviceManager.service;
 
@@ -197,12 +212,12 @@ class DebuggerController extends DisposableController
         // Ignore - not supported for all vm service implementations.
         log('$e');
       }
+      parsedScript.value = ParsedScript(
+        script: script,
+        highlighter: highlighter,
+        executableLines: executableLines,
+      );
     }
-    parsedScript.value = ParsedScript(
-      script: script,
-      highlighter: highlighter,
-      executableLines: executableLines,
-    );
   }
 
   /// Find the owner library for a ClassRef, FuncRef, or LibraryRef.
@@ -252,7 +267,7 @@ class DebuggerController extends DisposableController
 
   Frame get frameForEval =>
       _selectedStackFrame.value?.frame ??
-      _stackFramesWithLocation.value.first.frame;
+      _stackFramesWithLocation.value?.safeFirst?.frame;
 
   final _variables = ValueNotifier<List<Variable>>([]);
 
@@ -293,76 +308,13 @@ class DebuggerController extends DisposableController
     _librariesVisible.value = !_librariesVisible.value;
   }
 
-  final _stdio = ValueNotifier<List<ConsoleLine>>([]);
-  bool _stdioTrailingNewline = false;
-
-  /// Return the stdout and stderr emitted from the application.
-  ///
-  /// Note that this output might be truncated after significant output.
-  ValueListenable<List<ConsoleLine>> get stdio => _stdio;
-
   IsolateRef isolateRef;
   bool get isSystemIsolate => isolateRef?.isSystemIsolate ?? false;
-
-  /// Clears the contents of stdio.
-  void clearStdio() {
-    _stdio.value = [];
-  }
-
-  void appendInstanceRef(InstanceRef ref) {
-    _stdioTrailingNewline = false;
-    // TODO(jacobr): this is O(n) in the number of lines. Use a custom ValueListenable that notiifies on list appends instead.
-    final lines = _stdio.value.toList();
-    final variable = Variable.fromRef(ref);
-    buildVariablesTree(variable);
-    lines.add(ConsoleLine.variable(variable));
-    _stdio.value = lines;
-  }
-
-  /// Append to the stdout / stderr buffer.
-  void appendStdio(String text) {
-    const int kMaxLogItemsLowerBound = 5000;
-    const int kMaxLogItemsUpperBound = 5500;
-
-    // Parse out the new lines and append to the end of the existing lines.
-
-    // TODO(jacobr): this is O(n) in the number of lines. Use a custom ValueListenable that notiifies on list appends instead.
-    var lines = _stdio.value.toList();
-    final newLines = text.split('\n');
-
-    var last = lines.safeLast;
-    if (lines.isNotEmpty && !_stdioTrailingNewline && last is TextConsoleLine) {
-      lines.last = ConsoleLine.text('${last.text}${newLines.first}');
-      if (newLines.length > 1) {
-        lines.addAll(newLines.sublist(1).map((text) => ConsoleLine.text(text)));
-      }
-    } else {
-      lines.addAll(newLines.map((text) => ConsoleLine.text(text)));
-    }
-
-    _stdioTrailingNewline = text.endsWith('\n');
-
-    // Don't report trailing blank lines.
-    last = lines.safeLast;
-    if (lines.isNotEmpty && (last is TextConsoleLine && last.text.isEmpty)) {
-      lines = lines.sublist(0, lines.length - 1);
-    }
-
-    // For performance reasons, we drop older lines in batches, so the lines
-    // will grow to kMaxLogItemsUpperBound then truncate to
-    // kMaxLogItemsLowerBound.
-    if (lines.length > kMaxLogItemsUpperBound) {
-      lines = lines.sublist(lines.length - kMaxLogItemsLowerBound);
-    }
-
-    _stdio.value = lines;
-  }
 
   final EvalHistory evalHistory = EvalHistory();
 
   void switchToIsolate(IsolateRef ref) async {
     isolateRef = ref;
-
     _isPaused.value = false;
     await _pause(false);
 
@@ -377,11 +329,19 @@ class DebuggerController extends DisposableController
     }
 
     final isolate = await _service.getIsolate(isolateRef.id);
+    if (isolate.id != isolateRef?.id) {
+      // Current request is obsolete.
+      return;
+    }
 
     if (isolate.pauseEvent != null &&
         isolate.pauseEvent.kind != EventKind.kResume) {
       _lastEvent = isolate.pauseEvent;
       await _pause(true, pauseEvent: isolate.pauseEvent);
+    }
+    if (isolate.id != isolateRef?.id) {
+      // Current request is obsolete.
+      return;
     }
 
     _breakpoints.value = isolate.breakpoints;
@@ -391,12 +351,20 @@ class DebuggerController extends DisposableController
       // ignore: unawaited_futures
       Future.wait(_breakpoints.value.map(_createBreakpointWithLocation))
           .then((list) {
+        if (isolate.id != isolateRef?.id) {
+          // Current request is obsolete.
+          return;
+        }
         _breakpointsWithLocation.value = list.toList()..sort();
       });
     }
 
     _exceptionPauseMode.value = isolate.exceptionPauseMode;
 
+    if (isolate.id != isolateRef?.id) {
+      // Current request is obsolete.
+      return;
+    }
     await _populateScripts(isolate);
   }
 
@@ -502,6 +470,33 @@ class DebuggerController extends DisposableController
   Future<void> removeBreakpoint(Breakpoint breakpoint) =>
       _service.removeBreakpoint(isolateRef.id, breakpoint.id);
 
+  Future<void> toggleBreakpoint(ScriptRef script, int line) async {
+    if (serviceManager.isolateManager.selectedIsolate.value == null) {
+      // Can't toggle breakpoints if we don't have an isolate.
+      return;
+    }
+    // The VM doesn't support debugging for system isolates and will crash on
+    // a failed assert in debug mode. Disable the toggle breakpoint
+    // functionality for system isolates.
+    if (serviceManager.isolateManager.selectedIsolate.value.isSystemIsolate) {
+      return;
+    }
+
+    final bp = breakpointsWithLocation.value.firstWhere((bp) {
+      return bp.scriptRef == script && bp.line == line;
+    }, orElse: () => null);
+
+    if (bp != null) {
+      await removeBreakpoint(bp.breakpoint);
+    } else {
+      try {
+        await addBreakpoint(script.id, line);
+      } catch (_) {
+        // ignore errors setting breakpoints
+      }
+    }
+  }
+
   Future<void> setExceptionPauseMode(String mode) async {
     await _service.setExceptionPauseMode(isolateRef.id, mode);
     _exceptionPauseMode.value = mode;
@@ -584,6 +579,7 @@ class DebuggerController extends DisposableController
         });
 
         break;
+
       case EventKind.kBreakpointRemoved:
         final breakpoint = event.breakpoint;
 
@@ -616,19 +612,8 @@ class DebuggerController extends DisposableController
     }
   }
 
-  void _handleStdoutEvent(Event event) {
-    final String text = decodeBase64(event.bytes);
-    appendStdio(text);
-  }
-
-  void _handleStderrEvent(Event event) {
-    final String text = decodeBase64(event.bytes);
-    // TODO(devoncarew): Change to reporting stdio along with information about
-    // whether the event was stdout or stderr.
-    appendStdio(text);
-  }
-
   Future<List<ScriptRef>> _retrieveAndSortScripts(IsolateRef ref) async {
+    assert(isolateRef != null);
     final scriptList = await _service.getScripts(isolateRef.id);
     // We filter out non-unique ScriptRefs here (dart-lang/sdk/issues/41661).
     final scriptRefs = Set.of(scriptList.scripts).toList();
@@ -733,6 +718,9 @@ class DebuggerController extends DisposableController
   CancelableOperation<_StackInfo> _getStackOperation;
 
   Future<void> _pause(bool paused, {Event pauseEvent}) async {
+    // TODO(jacobr): unify pause support with
+    // serviceManager.isolateManager.selectedIsolateState.isPaused.value;
+    // listening for changes there instead of having separate logic.
     await _getStackOperation?.cancel();
     _isPaused.value = paused;
 
@@ -819,7 +807,6 @@ class DebuggerController extends DisposableController
     _scriptCache.clear();
     _lastEvent = null;
     _breakPositionsMap.clear();
-    _stdio.value = [];
     _uriToScriptMap.clear();
     _clearAutocompleteCaches();
   }
@@ -855,6 +842,7 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
+    assert(isolate != null);
     final scriptRefs = await _retrieveAndSortScripts(isolateRef);
     _sortedScripts.value = scriptRefs;
 
@@ -942,182 +930,12 @@ class DebuggerController extends DisposableController
       return [];
     }
 
-    final variables = frame.vars.map((v) => Variable.create(v)).toList();
+    final variables =
+        frame.vars.map((v) => Variable.create(v, isolateRef)).toList();
     variables
       ..forEach(buildVariablesTree)
-      ..sort((a, b) => sortFieldsByName(a.boundVar.name, b.boundVar.name));
+      ..sort((a, b) => sortFieldsByName(a.name, b.name));
     return variables;
-  }
-
-  /// Builds the tree representation for a [Variable] object by querying data,
-  /// creating child Variable objects, and assigning parent-child relationships.
-  ///
-  /// We call this method as we expand variables in the variable tree, because
-  /// building the tree for all variable data at once is very expensive.
-  Future<void> buildVariablesTree(Variable variable) async {
-    if (!variable.isExpandable ||
-        variable.treeInitialized ||
-        variable.boundVar.value is! InstanceRef) return;
-
-    final InstanceRef instanceRef = variable.boundVar.value;
-    try {
-      final dynamic result = await getObject(instanceRef);
-      if (result is Instance) {
-        if (result.associations != null) {
-          variable.addAllChildren(_createVariablesForAssociations(result));
-        } else if (result.elements != null) {
-          variable.addAllChildren(_createVariablesForElements(result));
-        } else if (result.bytes != null) {
-          variable.addAllChildren(_createVariablesForBytes(result));
-          // Check fields last, as all instanceRefs may have a non-null fields
-          // with no entries.
-        } else if (result.fields != null) {
-          variable.addAllChildren(_createVariablesForFields(result));
-        }
-      }
-    } on SentinelException {
-      // Fail gracefully if calling `getObject` throws a SentinelException.
-    }
-    variable.treeInitialized = true;
-  }
-
-  List<Variable> _createVariablesForAssociations(Instance instance) {
-    final variables = <Variable>[];
-    for (var i = 0; i < instance.associations.length; i++) {
-      final association = instance.associations[i];
-      if (association.key is! InstanceRef) {
-        continue;
-      }
-      final key = BoundVariable(
-        name: '[key]',
-        value: association.key,
-        scopeStartTokenPos: null,
-        scopeEndTokenPos: null,
-        declarationTokenPos: null,
-      );
-      final value = BoundVariable(
-        name: '[value]',
-        value: association.value,
-        scopeStartTokenPos: null,
-        scopeEndTokenPos: null,
-        declarationTokenPos: null,
-      );
-      final variable = Variable.create(
-        BoundVariable(
-          name: '[Entry $i]',
-          value: '',
-          scopeStartTokenPos: null,
-          scopeEndTokenPos: null,
-          declarationTokenPos: null,
-        ),
-      );
-      variable.addChild(Variable.create(key));
-      variable.addChild(Variable.create(value));
-      variables.add(variable);
-    }
-    return variables;
-  }
-
-  /// Decodes the bytes into the correctly sized values based on
-  /// [Instance.kind], falling back to raw bytes if a type is not
-  /// matched.
-  ///
-  /// This method does not currently support [Uint64List] or
-  /// [Int64List].
-  List<Variable> _createVariablesForBytes(Instance instance) {
-    final bytes = base64.decode(instance.bytes);
-    final boundVariables = <BoundVariable>[];
-    List<dynamic> result;
-    switch (instance.kind) {
-      case InstanceKind.kUint8ClampedList:
-      case InstanceKind.kUint8List:
-        result = bytes;
-        break;
-      case InstanceKind.kUint16List:
-        result = Uint16List.view(bytes.buffer);
-        break;
-      case InstanceKind.kUint32List:
-        result = Uint32List.view(bytes.buffer);
-        break;
-      case InstanceKind.kUint64List:
-        // TODO: https://github.com/flutter/devtools/issues/2159
-        if (kIsWeb) {
-          return <Variable>[];
-        }
-        result = Uint64List.view(bytes.buffer);
-        break;
-      case InstanceKind.kInt8List:
-        result = Int8List.view(bytes.buffer);
-        break;
-      case InstanceKind.kInt16List:
-        result = Int16List.view(bytes.buffer);
-        break;
-      case InstanceKind.kInt32List:
-        result = Int32List.view(bytes.buffer);
-        break;
-      case InstanceKind.kInt64List:
-        // TODO: https://github.com/flutter/devtools/issues/2159
-        if (kIsWeb) {
-          return <Variable>[];
-        }
-        result = Int64List.view(bytes.buffer);
-        break;
-      case InstanceKind.kFloat32List:
-        result = Float32List.view(bytes.buffer);
-        break;
-      case InstanceKind.kFloat64List:
-        result = Float64List.view(bytes.buffer);
-        break;
-      case InstanceKind.kInt32x4List:
-        result = Int32x4List.view(bytes.buffer);
-        break;
-      case InstanceKind.kFloat32x4List:
-        result = Float32x4List.view(bytes.buffer);
-        break;
-      case InstanceKind.kFloat64x2List:
-        result = Float64x2List.view(bytes.buffer);
-        break;
-      default:
-        result = bytes;
-    }
-
-    for (int i = 0; i < result.length; i++) {
-      boundVariables.add(BoundVariable(
-        name: '[$i]',
-        value: result[i],
-        scopeStartTokenPos: null,
-        scopeEndTokenPos: null,
-        declarationTokenPos: null,
-      ));
-    }
-    return boundVariables.map((bv) => Variable.create(bv)).toList();
-  }
-
-  List<Variable> _createVariablesForElements(Instance instance) {
-    final boundVariables = <BoundVariable>[];
-    for (int i = 0; i < instance.elements.length; i++) {
-      boundVariables.add(BoundVariable(
-        name: '[$i]',
-        value: instance.elements[i],
-        scopeStartTokenPos: null,
-        scopeEndTokenPos: null,
-        declarationTokenPos: null,
-      ));
-    }
-    return boundVariables.map((bv) => Variable.create(bv)).toList();
-  }
-
-  List<Variable> _createVariablesForFields(Instance instance) {
-    final boundVariables = instance.fields.map((field) {
-      return BoundVariable(
-        name: field.decl.name,
-        value: field.value,
-        scopeStartTokenPos: null,
-        scopeEndTokenPos: null,
-        declarationTokenPos: null,
-      );
-    });
-    return boundVariables.map((bv) => Variable.create(bv)).toList();
   }
 
   List<Frame> _framesForCallStack(

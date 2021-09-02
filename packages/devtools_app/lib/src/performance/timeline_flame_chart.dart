@@ -9,6 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../charts/flame_chart.dart';
 import '../common_widgets.dart';
@@ -19,9 +21,11 @@ import '../theme.dart';
 import '../trace_event.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
+import '../ui/utils.dart';
 import '../utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
+import 'performance_screen.dart';
 import 'performance_utils.dart';
 
 final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
@@ -63,20 +67,28 @@ class _TimelineFlameChartContainerState
     Widget content;
     final timelineEmpty = (controller.data?.isEmpty ?? true) ||
         controller.data.eventGroups.isEmpty;
-    if (widget.processing || timelineEmpty) {
-      content = ValueListenableBuilder<bool>(
-        valueListenable: controller.emptyTimeline,
-        builder: (context, emptyRecording, _) {
-          return emptyRecording
-              ? Center(
-                  key: TimelineFlameChartContainer.emptyTimelineKey,
-                  child: Text(
-                    'No timeline events',
-                    style: Theme.of(context).subtleTextStyle,
-                  ),
-                )
-              : _buildProcessingInfo();
-        },
+    if (widget.processing) {
+      content = _buildProcessingInfo();
+    } else if (timelineEmpty) {
+      content = Center(
+        key: TimelineFlameChartContainer.emptyTimelineKey,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'No timeline events. Try clicking the refresh button ',
+              style: Theme.of(context).subtleTextStyle,
+            ),
+            Icon(
+              Icons.refresh,
+              size: defaultIconSize,
+            ),
+            Text(
+              ' to load more data.',
+              style: Theme.of(context).subtleTextStyle,
+            ),
+          ],
+        ),
       );
     } else {
       content = LayoutBuilder(
@@ -105,9 +117,15 @@ class _TimelineFlameChartContainerState
             tall: true,
             needsTopBorder: false,
             rightPadding: 0.0,
-            actions: [
+            leftActions: [
+              RefreshTimelineEventsButton(controller: controller),
+            ],
+            rightActions: [
               _buildSearchField(searchFieldEnabled),
-              FlameChartHelpButton(),
+              const FlameChartHelpButton(
+                screenId: PerformanceScreen.id,
+                analyticsAction: analytics_constants.timelineFlameChartHelp,
+              ),
             ],
           ),
           Expanded(
@@ -139,6 +157,39 @@ class _TimelineFlameChartContainerState
     return ProcessingInfo(
       progressValue: widget.processingProgress,
       processedObject: 'timeline trace',
+    );
+  }
+}
+
+class RefreshTimelineEventsButton extends StatelessWidget {
+  const RefreshTimelineEventsButton({
+    Key key,
+    @required this.controller,
+  }) : super(key: key);
+
+  final PerformanceController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTooltip(
+      tooltip: 'Refresh timeline events',
+      child: TextButton(
+        onPressed: () {
+          ga.select(
+            analytics_constants.performance,
+            analytics_constants.refreshTimelineEvents,
+          );
+          controller.processAvailableEvents();
+        },
+        child: Container(
+          height: defaultButtonHeight,
+          width: defaultButtonHeight,
+          child: Icon(
+            Icons.refresh,
+            size: defaultIconSize,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -242,6 +293,13 @@ class TimelineFlameChartState
     if (newController == _performanceController) return;
     _performanceController = newController;
 
+    // If there is already a selected frame, handle setting that data and
+    // positioning/zooming the flame chart accordingly.
+    _selectedFrame = _performanceController.selectedFrame.value;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _centerSelectedFrame();
+    });
+
     addAutoDisposeListener(
       _performanceController.selectedFrame,
       _handleSelectedFrame,
@@ -291,7 +349,7 @@ class TimelineFlameChartState
     final boundEvent = SyncTimelineEvent(
       TraceEventWrapper(
         TraceEvent({'ts': visibleTimeRange.start.inMicroseconds})
-          ..type = TimelineEventType.unknown,
+          ..type = TimelineEventType.other,
         0, // This is arbitrary
       ),
     )..time = visibleTimeRange;
@@ -329,7 +387,7 @@ class TimelineFlameChartState
     final boundEvent = SyncTimelineEvent(
       TraceEventWrapper(
         TraceEvent({'ts': visibleTimeRange.end.inMicroseconds})
-          ..type = TimelineEventType.unknown,
+          ..type = TimelineEventType.other,
         0, // This is arbitrary
       ),
     )..time = (TimeRange()
@@ -390,16 +448,36 @@ class TimelineFlameChartState
     setState(() {
       _selectedFrame = selectedFrame;
     });
+    await _centerSelectedFrame();
+  }
 
+  Future<void> _centerSelectedFrame() async {
     // TODO(kenz): consider using jumpTo for some of these animations to
     // improve performance.
-
     if (_selectedFrame != null) {
       // Zoom and scroll to the frame's UI event.
+      final time = _selectedFrame.timeToCenterFrame();
+      final event = _selectedFrame.eventToCenterFrame();
+      if (time == null || event == null) {
+        if (_performanceController.firstWellFormedFrameMicros != null &&
+            _selectedFrame.timeFromFrameTiming.start.inMicroseconds <
+                _performanceController.firstWellFormedFrameMicros) {
+          Notifications.of(context).push(
+            'No timeline events available for the selected frame. Timeline '
+            'events occurred too long ago before DevTools could access them. '
+            'To avoid this, open the DevTools Performance page sooner.',
+          );
+          return;
+        }
+        // TODO(kenz): should we zoom to the latest available frame?
+        Notifications.of(context)
+            .push('No timeline events available for the selected frame');
+        return;
+      }
       await zoomAndScrollToData(
-        startMicros: selectedFrame.time.start.inMicroseconds,
-        durationMicros: selectedFrame.time.duration.inMicroseconds,
-        data: selectedFrame.uiEventFlow,
+        startMicros: time.start.inMicroseconds,
+        durationMicros: time.duration.inMicroseconds,
+        data: event,
         jumpZoom: true,
       );
     }
@@ -434,33 +512,27 @@ class TimelineFlameChartState
         widestRow = row;
       }
 
-      Color backgroundColor;
-      if (event.isAsyncEvent) {
-        backgroundColor = nextAsyncColor(row);
+      ColorPair colorPair;
+      if (event.isShaderEvent) {
+        colorPair = shaderCompilationColor;
+      } else if (event.isAsyncEvent) {
+        colorPair = nextAsyncColor(row);
       } else if (event.isGCEvent) {
         // TODO(kenz): should we have a different color palette for GC events?
-        backgroundColor = nextUnknownColor(row);
+        colorPair = nextUnknownColor(row);
       } else if (event.isUiEvent) {
-        backgroundColor = nextUiColor(row);
+        colorPair = nextUiColor(row);
       } else if (event.isRasterEvent) {
-        backgroundColor = nextRasterColor(row);
+        colorPair = nextRasterColor(row);
       } else {
-        backgroundColor = nextUnknownColor(row);
-      }
-
-      Color textColor;
-      if (event.isRasterEvent) {
-        textColor = contrastForegroundWhite;
-      } else {
-        textColor = Colors.black;
+        colorPair = nextUnknownColor(row);
       }
 
       final node = FlameChartNode<TimelineEvent>(
-        key: Key('${event.name} ${event.traceEvents.first.id}'),
+        key: Key('${event.name} ${event.traceEvents.first.wrapperId}'),
         text: event.name,
         rect: Rect.fromLTRB(left, flameChartNodeTop, right, rowHeight),
-        backgroundColor: backgroundColor,
-        textColor: textColor,
+        colorPair: ThemedColorPair.from(colorPair),
         data: event,
         onSelected: (dynamic event) => widget.onDataSelected(event),
         sectionIndex: section,
@@ -632,7 +704,7 @@ class TimelineFlameChartState
   List<Widget> _buildEventThreadNavigationButtons({
     @required BoxConstraints constraints,
   }) {
-    const threadButtonContainerWidth = buttonMinWidth + defaultSpacing;
+    final threadButtonContainerWidth = buttonMinWidth + defaultSpacing;
     final eventGroups = _performanceController.data.eventGroups;
 
     Widget buildNavigatorButton(int index, {@required bool isNext}) {
@@ -1041,7 +1113,10 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (selectedFrame == null) return;
+    if (selectedFrame?.timelineEventData?.uiEvent == null &&
+        selectedFrame?.timelineEventData?.rasterEvent == null) {
+      return;
+    }
 
     canvas.clipRect(Rect.fromLTWH(
       0.0,
@@ -1055,8 +1130,20 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 
-    _paintBrackets(canvas, paint, event: selectedFrame.uiEventFlow);
-    _paintBrackets(canvas, paint, event: selectedFrame.rasterEventFlow);
+    if (selectedFrame.timelineEventData.uiEvent != null) {
+      _paintBrackets(
+        canvas,
+        paint,
+        event: selectedFrame.timelineEventData.uiEvent,
+      );
+    }
+    if (selectedFrame.timelineEventData.rasterEvent != null) {
+      _paintBrackets(
+        canvas,
+        paint,
+        event: selectedFrame.timelineEventData.rasterEvent,
+      );
+    }
   }
 
   void _paintBrackets(
@@ -1310,4 +1397,30 @@ extension TimelineEventGroupDisplayExtension on TimelineEventGroup {
   double get displaySizePx =>
       rows.length * rowHeightWithPadding +
       FlameChart.rowOffsetForSectionSpacer * sectionSpacing;
+}
+
+extension FlutterFrameExtension on FlutterFrame {
+  TimelineEvent eventToCenterFrame() {
+    if (timelineEventData.uiEvent == null &&
+        timelineEventData.rasterEvent == null) {
+      return null;
+    } else if (timelineEventData.uiEvent != null) {
+      return timelineEventData.uiEvent;
+    } else {
+      return timelineEventData.rasterEvent;
+    }
+  }
+
+  TimeRange timeToCenterFrame() {
+    if (timelineEventData.uiEvent != null &&
+        timelineEventData.rasterEvent != null) {
+      return timeFromEventFlows;
+    } else if (timelineEventData.uiEvent != null) {
+      return timelineEventData.uiEvent.time;
+    } else if (timelineEventData.rasterEvent != null) {
+      return timelineEventData.rasterEvent.time;
+    } else {
+      return null;
+    }
+  }
 }

@@ -53,7 +53,7 @@ class _CallGraphWithDominatorsState extends State<CallGraphWithDominators> {
           needsTopBorder: false,
           needsBottomBorder: false,
           needsLeftBorder: true,
-          actions: [
+          rightActions: [
             const Text('Show call graph'),
             Switch(
               value: showCallGraph,
@@ -179,9 +179,8 @@ class _CallGraphViewState extends State<CallGraphView> {
           padding: EdgeInsets.symmetric(horizontal: densePadding),
           child: Icon(Icons.arrow_forward),
         ),
-        Tooltip(
-          waitDuration: tooltipWait,
-          message: selectedNode.data.toString(),
+        DevToolsTooltip(
+          tooltip: selectedNode.data.toString(),
           child: Container(
             padding: const EdgeInsets.all(densePadding),
             child: Text(
@@ -304,4 +303,10 @@ class DominatorTreeNode extends TreeNode<DominatorTreeNode> {
   }
 
   final CallGraphNode callGraphNode;
+
+  @override
+  DominatorTreeNode shallowCopy() {
+    throw UnimplementedError('This method is not implemented. Implement if you '
+        'need to call `shallowCopy` on an instance of this class.');
+  }
 }

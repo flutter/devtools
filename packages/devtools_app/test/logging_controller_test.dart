@@ -6,13 +6,11 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/filter.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'inspector_screen_test.dart';
 import 'support/mocks.dart';
 import 'support/utils.dart';
 
@@ -44,9 +42,7 @@ void main() {
         FakeServiceManager(),
       );
 
-      final InspectorService inspectorService = MockInspectorService();
-
-      controller = LoggingController(inspectorService: inspectorService);
+      controller = LoggingController();
     });
 
     test('initial state', () {
@@ -126,40 +122,47 @@ void main() {
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(5));
 
-      controller.filterData(QueryFilter.parse('abc', controller.filterArgs));
+      controller.filterData(
+          Filter(queryFilter: QueryFilter.parse('abc', controller.filterArgs)));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller.filterData(QueryFilter.parse('def', controller.filterArgs));
+      controller.filterData(
+          Filter(queryFilter: QueryFilter.parse('def', controller.filterArgs)));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(1));
 
-      controller.filterData(
-          QueryFilter.parse('k:stdout abc def', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter:
+              QueryFilter.parse('k:stdout abc def', controller.filterArgs)));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(3));
 
-      controller
-          .filterData(QueryFilter.parse('kind:gc', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse('kind:gc', controller.filterArgs)));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller
-          .filterData(QueryFilter.parse('k:stdout abc', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter:
+              QueryFilter.parse('k:stdout abc', controller.filterArgs)));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller.filterData(QueryFilter.parse('-k:gc', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse('-k:gc', controller.filterArgs)));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(3));
 
-      controller
-          .filterData(QueryFilter.parse('-k:gc,stdout', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter:
+              QueryFilter.parse('-k:gc,stdout', controller.filterArgs)));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(0));
 
-      controller.filterData(QueryFilter.parse(
-          'k:gc,stdout,stdin,flutter.frame', controller.filterArgs));
+      controller.filterData(Filter(
+          queryFilter: QueryFilter.parse(
+              'k:gc,stdout,stdin,flutter.frame', controller.filterArgs)));
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(5));
 

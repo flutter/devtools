@@ -15,18 +15,21 @@ import '../vm_service_wrapper.dart';
 import 'vm_service_private_extensions.dart';
 
 class IsolateStatisticsViewController extends DisposableController
-    with CpuProfilerControllerProviderMixin {
+    with AutoDisposeControllerMixin {
   IsolateStatisticsViewController() {
     // If the CPU profiler is enabled later, refresh the isolate data to get
     // the tag information.
     cpuProfilerController.profilerFlagNotifier.addListener(
       () => refresh(),
     );
-    serviceManager.isolateManager.onSelectedIsolateChanged.listen((isolate) {
-      switchToIsolate(isolate);
+
+    addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
+      switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
     });
-    switchToIsolate(serviceManager.isolateManager.selectedIsolate);
+    switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
   }
+
+  final cpuProfilerController = CpuProfilerController();
 
   VmServiceWrapper get _service => serviceManager.service;
 

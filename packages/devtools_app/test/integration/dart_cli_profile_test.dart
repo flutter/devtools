@@ -8,19 +8,20 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:devtools_app/src/analytics/stub_provider.dart';
+import 'package:devtools_app/src/analytics/analytics_controller.dart';
 import 'package:devtools_app/src/app.dart';
 import 'package:devtools_app/src/framework/framework_core.dart';
 import 'package:devtools_app/src/preferences.dart';
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:devtools_testing/support/file_utils.dart';
-import 'package:devtools_testing/support/flutter_test_driver.dart';
-import 'package:devtools_testing/support/flutter_test_environment.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart' as intl;
+
+import '../support/file_utils.dart';
+import '../support/flutter_test_driver.dart';
+import '../support/flutter_test_environment.dart';
 
 Future<void> main() async {
   debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
@@ -56,7 +57,7 @@ Future<void> main() async {
         bundle: _DiskAssetBundle(),
         child: DevToolsApp(
           const [],
-          await analyticsProvider,
+          await analyticsController,
         ),
       );
       await tester.pumpWidget(app);
@@ -72,13 +73,17 @@ Future<void> main() async {
 
         try {
           final workingDirectory = Directory.current.path;
+          // This command matches the command used by
+          // packages:flutter_tools/lib/src/drive/drive_service.dart
+          // If you change this command, make sure you also update
+          // package:flutter_tools.
           final Process process = await Process.start(
             'dart',
             [
               '../devtools/bin/devtools.dart',
               '--vm-uri',
               '$vmUri',
-              '--profile-memory',
+              '--record-memory-profile',
               '${ParseStdout.jsonFilename}',
               '--verbose',
             ],

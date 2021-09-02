@@ -7,10 +7,11 @@ import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/performance/timeline_event_processor.dart';
 import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_testing/support/performance_test_data.dart';
-import 'package:devtools_testing/support/test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+
+import 'support/performance_test_data.dart';
+import 'support/test_utils.dart';
 
 void main() {
   final originalGoldenUiEvent = goldenUiTimelineEvent.deepCopy();
@@ -45,92 +46,12 @@ void main() {
         );
     });
 
-    test('creates one new frame per id', () async {
-      await processor.processTimeline(
-        [frameStartEvent, frameEndEvent],
-        resetAfterProcessing: false,
-      );
-      expect(processor.pendingFrames.length, equals(1));
-      expect(processor.pendingFrames.containsKey('PipelineItem-f1'), isTrue);
-    });
-
     test('duration trace events form timeline event tree', () async {
-      await processor.processTimeline(goldenUiTraceEvents);
+      await processor.processTraceEvents(goldenUiTraceEvents);
 
       final processedUiEvent =
-          processor.timelineController.data.timelineEvents.first;
+          processor.performanceController.data.timelineEvents.first;
       expect(processedUiEvent.toString(), equals(goldenUiString));
-    });
-
-    test('frame events satisfy ui gpu order', () {
-      const frameStartTime = 2000;
-      const frameEndTime = 8000;
-      FlutterFrame frame = FlutterFrame('frameId')
-        ..pipelineItemTime.start = const Duration(microseconds: frameStartTime)
-        ..pipelineItemTime.end = const Duration(microseconds: frameEndTime);
-
-      // Satisfies UI / GPU order.
-      final uiEvent = goldenUiTimelineEvent.deepCopy()
-        ..time = (TimeRange()
-          ..start = const Duration(microseconds: 5000)
-          ..end = const Duration(microseconds: 6000));
-      final rasterEvent = goldenRasterTimelineEvent.deepCopy()
-        ..time = (TimeRange()
-          ..start = const Duration(microseconds: 4000)
-          ..end = const Duration(microseconds: 8000));
-
-      expect(processor.satisfiesUiRasterOrder(uiEvent, frame), isTrue);
-      expect(processor.satisfiesUiRasterOrder(rasterEvent, frame), isTrue);
-
-      frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
-      expect(processor.satisfiesUiRasterOrder(rasterEvent, frame), isFalse);
-
-      frame = FlutterFrame('frameId')
-        ..pipelineItemTime.start = const Duration(microseconds: frameStartTime)
-        ..pipelineItemTime.end = const Duration(microseconds: frameEndTime);
-
-      frame
-        ..setEventFlow(null, type: TimelineEventType.ui)
-        ..setEventFlow(rasterEvent, type: TimelineEventType.raster);
-      expect(processor.satisfiesUiRasterOrder(uiEvent, frame), isFalse);
-    });
-
-    test(
-        'UI event flow sets end frame time if it completes after raster event flow',
-        () {
-      final uiEvent = goldenUiTimelineEvent.deepCopy()
-        ..time = (TimeRange()
-          ..start = const Duration(microseconds: 5000)
-          ..end = const Duration(microseconds: 8000));
-      final rasterEvent = goldenRasterTimelineEvent.deepCopy()
-        ..time = (TimeRange()
-          ..start = const Duration(microseconds: 6000)
-          ..end = const Duration(microseconds: 7000));
-
-      final frame = FlutterFrame('frameId');
-      frame.setEventFlow(rasterEvent, type: TimelineEventType.raster);
-      expect(frame.time.start, isNull);
-      expect(frame.time.end, isNull);
-
-      frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
-      expect(frame.time.start, equals(const Duration(microseconds: 5000)));
-      expect(frame.time.end, equals(const Duration(microseconds: 8000)));
-    });
-
-    test('frame completed', () async {
-      await processor.processTimeline([
-        frameStartEvent,
-        ...goldenUiTraceEvents,
-        ...goldenRasterTraceEvents,
-        frameEndEvent,
-      ]);
-      expect(processor.pendingFrames.length, equals(0));
-      expect(processor.timelineController.data.frames.length, equals(1));
-
-      final frame = processor.timelineController.data.frames.first;
-      expect(frame.uiEventFlow.toString(), equals(goldenUiString));
-      expect(frame.rasterEventFlow.toString(), equals(goldenRasterString));
-      expect(frame.isReadyForTimeline, isTrue);
     });
 
     test('handles trace event duplicates', () async {
@@ -144,15 +65,16 @@ void main() {
       var traceEvents = List.of(goldenUiTraceEvents);
       traceEvents.insert(1, goldenUiTraceEvents[1]);
 
-      await processor.processTimeline(traceEvents);
+      await processor.processTraceEvents(traceEvents);
+      expect(processor.performanceController.data.timelineEvents.length,
+          equals(1));
       expect(
-          processor.timelineController.data.timelineEvents.length, equals(1));
-      expect(
-        processor.timelineController.data.timelineEvents.first.toString(),
+        processor.performanceController.data.timelineEvents.first.toString(),
         equals(goldenUiString),
       );
 
-      await processor.timelineController.clearData();
+      await processor.performanceController.clearData();
+      processor.reset();
 
       // Duplicate duration end event.
       // VSYNC
@@ -165,15 +87,16 @@ void main() {
       traceEvents.insert(goldenUiTraceEvents.length - 2,
           goldenUiTraceEvents[goldenUiTraceEvents.length - 2]);
 
-      await processor.processTimeline(traceEvents);
+      await processor.processTraceEvents(traceEvents);
+      expect(processor.performanceController.data.timelineEvents.length,
+          equals(1));
       expect(
-          processor.timelineController.data.timelineEvents.length, equals(1));
-      expect(
-        processor.timelineController.data.timelineEvents.first.toString(),
+        processor.performanceController.data.timelineEvents.first.toString(),
         equals(goldenUiString),
       );
 
-      await processor.timelineController.clearData();
+      await processor.performanceController.clearData();
+      processor.reset();
 
       // Unrecoverable state resets event tracking.
       // VSYNC
@@ -212,7 +135,7 @@ void main() {
       traceEvents.insert(2, goldenUiTraceEvents[0]);
       traceEvents.insert(3, goldenUiTraceEvents[1]);
 
-      await processor.processTimeline(traceEvents);
+      await processor.processTraceEvents(traceEvents);
       expect(
         processor.currentDurationEventNodes[TimelineEventType.ui.index],
         isNull,
@@ -224,44 +147,74 @@ void main() {
         ...asyncTraceEvents,
         ...goldenUiTraceEvents,
         ...goldenRasterTraceEvents,
-      ];
+      ]..sort();
       expect(
-        processor.timelineController.data.timelineEvents,
+        processor.performanceController.data.timelineEvents,
         isEmpty,
       );
-      await processor.processTimeline(traceEvents);
+      await processor.processTraceEvents(traceEvents);
       expect(
-        processor.timelineController.data.timelineEvents.length,
+        processor.performanceController.data.timelineEvents.length,
         equals(4),
       );
       expect(
-        processor.timelineController.data.timelineEvents[0].toString(),
+        processor.performanceController.data.timelineEvents[0].toString(),
         equals(goldenAsyncString),
       );
       expect(
-        processor.timelineController.data.timelineEvents[1].toString(),
+        processor.performanceController.data.timelineEvents[1].toString(),
         equals('  D [193937061035 μs - 193938741076 μs]\n'),
       );
       expect(
-        processor.timelineController.data.timelineEvents[2].toString(),
+        processor.performanceController.data.timelineEvents[2].toString(),
         equals(goldenUiString),
       );
       expect(
-        processor.timelineController.data.timelineEvents[3].toString(),
+        processor.performanceController.data.timelineEvents[3].toString(),
         equals(goldenRasterString),
       );
     });
 
+    test('tracks flutter frame identifier events', () async {
+      final traceEvents = [
+        ...goldenUiTraceEvents,
+        ...goldenRasterTraceEvents,
+      ]..sort();
+
+      await processor.processTraceEvents(traceEvents);
+      expect(
+        processor.performanceController.data.timelineEvents.length,
+        equals(2),
+      );
+      expect(
+        processor.performanceController.data.timelineEvents[0].toString(),
+        equals(goldenUiString),
+      );
+      expect(
+        processor.performanceController.data.timelineEvents[1].toString(),
+        equals(goldenRasterString),
+      );
+
+      final uiEvent = processor.performanceController.data.timelineEvents[0]
+          as SyncTimelineEvent;
+      final rasterEvent = processor.performanceController.data.timelineEvents[1]
+          as SyncTimelineEvent;
+      expect(uiEvent.uiFrameEvents.length, equals(1));
+      expect(uiEvent.rasterFrameEvents, isEmpty);
+      expect(rasterEvent.uiFrameEvents, isEmpty);
+      expect(rasterEvent.rasterFrameEvents.length, equals(1));
+    });
+
     test('processes trace with duplicate events', () async {
       expect(
-        processor.timelineController.data.timelineEvents,
+        processor.performanceController.data.timelineEvents,
         isEmpty,
       );
-      await processor.processTimeline(durationEventsWithDuplicateTraces);
+      await processor.processTraceEvents(durationEventsWithDuplicateTraces);
       // If the processor is not handling duplicates properly, this value would
       // be 0.
       expect(
-        processor.timelineController.data.timelineEvents.length,
+        processor.performanceController.data.timelineEvents.length,
         equals(1),
       );
     });
@@ -271,7 +224,8 @@ void main() {
         () async {
       // This test should complete without throwing an assert from
       // `AsyncTimelineEvent.endAsyncEvent`.
-      await processor.processTimeline(asyncEventsWithChildrenWithDifferentIds);
+      await processor
+          .processTraceEvents(asyncEventsWithChildrenWithDifferentIds);
     });
 
     test('inferEventType', () {
@@ -293,7 +247,7 @@ void main() {
       );
       expect(
         processor.inferEventType(unknownEventBeginTrace.event),
-        equals(TimelineEventType.unknown),
+        equals(TimelineEventType.other),
       );
     });
   });

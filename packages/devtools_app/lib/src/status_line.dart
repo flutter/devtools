@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../devtools.dart' as devtools;
+import 'analytics/analytics.dart' as ga;
+import 'analytics/constants.dart' as analytics_constants;
 import 'common_widgets.dart';
+import 'config_specific/launch_url/launch_url.dart';
 import 'device_dialog.dart';
 import 'globals.dart';
 import 'info/info_controller.dart';
@@ -18,7 +19,7 @@ import 'service_manager.dart';
 import 'theme.dart';
 import 'utils.dart';
 
-const statusLineHeight = 24.0;
+double get statusLineHeight => scaleByFontFactor(24.0);
 
 /// The status line widget displayed at the bottom of DevTools.
 ///
@@ -109,18 +110,20 @@ class StatusLine extends StatelessWidget {
     Screen currentScreen,
     TextTheme textTheme,
   ) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     final String docPageId = currentScreen.docPageId;
     if (docPageId != null) {
       return InkWell(
         onTap: () async {
           final url = 'https://flutter.dev/devtools/$docPageId';
+          ga.select(
+            currentScreen.screenId,
+            analytics_constants.documentationLink,
+          );
           await launchUrl(url, context);
         },
         child: Text(
           'flutter.dev/devtools/$docPageId',
-          style: linkTextStyle(colorScheme),
+          style: Theme.of(context).linkTextStyle,
         ),
       );
     } else {
@@ -137,52 +140,47 @@ class StatusLine extends StatelessWidget {
   Widget buildIsolateSelector(BuildContext context, TextTheme textTheme) {
     final IsolateManager isolateManager = serviceManager.isolateManager;
 
-    // Listen to all isolate existence changes.
-    final Stream changeStream = combineStreams(
-      isolateManager.onSelectedIsolateChanged,
-      isolateManager.onIsolateCreated,
-      isolateManager.onIsolateExited,
-    );
+    return ValueListenableBuilder(
+      valueListenable: isolateManager.isolates,
+      builder: (context, isolates, _) {
+        return ValueListenableBuilder(
+          valueListenable: isolateManager.selectedIsolate,
+          builder: (context, isolateRef, _) {
+            final isolates = isolateManager.isolates;
 
-    return StreamBuilder<IsolateRef>(
-      initialData: isolateManager.selectedIsolate,
-      stream: changeStream.map((event) => isolateManager.selectedIsolate),
-      builder: (BuildContext context, AsyncSnapshot<IsolateRef> snapshot) {
-        final List<IsolateRef> isolates = isolateManager.isolates;
+            String isolateName(IsolateRef ref) {
+              final name = ref.name;
+              return '$name #${isolateManager.isolateIndex(ref)}';
+            }
 
-        String isolateName(IsolateRef ref) {
-          final name = ref.name;
-          return '$name #${isolateManager.isolateIndex(ref)}';
-        }
-
-        return DevToolsTooltip(
-          tooltip: 'Selected Isolate',
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<IsolateRef>(
-              value: snapshot.data,
-              onChanged: (IsolateRef ref) {
-                isolateManager.selectIsolate(ref?.id);
-              },
-              isDense: true,
-              items: isolates.map((IsolateRef ref) {
-                return DropdownMenuItem<IsolateRef>(
-                  value: ref,
-                  child: Row(
-                    children: [
-                      ref.isSystemIsolate
-                          ? const Icon(Icons.settings_applications)
-                          : const Icon(Icons.call_split),
-                      const SizedBox(width: denseSpacing),
-                      Text(
-                        isolateName(ref),
-                        style: textTheme.bodyText2,
+            return DevToolsTooltip(
+              tooltip: 'Selected Isolate',
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<IsolateRef>(
+                  value: isolateRef,
+                  onChanged: isolateManager.selectIsolate,
+                  isDense: true,
+                  items: isolates.value.map((IsolateRef ref) {
+                    return DropdownMenuItem<IsolateRef>(
+                      value: ref,
+                      child: Row(
+                        children: [
+                          ref.isSystemIsolate
+                              ? const Icon(Icons.settings_applications)
+                              : const Icon(Icons.call_split),
+                          const SizedBox(width: denseSpacing),
+                          Text(
+                            isolateName(ref),
+                            style: textTheme.bodyText2,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -242,7 +240,7 @@ class StatusLine extends StatelessWidget {
                   },
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.info_outline,
                         size: actionsIconSize,
                       ),

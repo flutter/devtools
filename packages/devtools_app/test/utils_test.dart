@@ -160,47 +160,118 @@ void main() {
       expect(end - start, lessThan(400));
     });
 
-    test('timeRange', () {
-      final timeRange = TimeRange();
+    group('TimeRange', () {
+      test('toString', () {
+        final timeRange = TimeRange();
 
-      expect(timeRange.toString(), equals('[null μs - null μs]'));
+        expect(timeRange.toString(), equals('[null μs - null μs]'));
 
-      timeRange
-        ..start = const Duration(microseconds: 1000)
-        ..end = const Duration(microseconds: 8000);
+        timeRange
+          ..start = const Duration(microseconds: 1000)
+          ..end = const Duration(microseconds: 8000);
 
-      expect(timeRange.duration.inMicroseconds, equals(7000));
-      expect(timeRange.toString(), equals('[1000 μs - 8000 μs]'));
-      expect(
-        timeRange.toString(unit: TimeUnit.milliseconds),
-        equals('[1 ms - 8 ms]'),
-      );
+        expect(timeRange.duration.inMicroseconds, equals(7000));
+        expect(timeRange.toString(), equals('[1000 μs - 8000 μs]'));
+        expect(
+          timeRange.toString(unit: TimeUnit.milliseconds),
+          equals('[1 ms - 8 ms]'),
+        );
+      });
 
-      final t = TimeRange()
-        ..start = const Duration(milliseconds: 100)
-        ..end = const Duration(milliseconds: 200);
-      final overlapBeginning = TimeRange()
-        ..start = const Duration(milliseconds: 50)
-        ..end = const Duration(milliseconds: 150);
-      final overlapMiddle = TimeRange()
-        ..start = const Duration(milliseconds: 125)
-        ..end = const Duration(milliseconds: 175);
-      final overlapEnd = TimeRange()
-        ..start = const Duration(milliseconds: 150)
-        ..end = const Duration(milliseconds: 250);
-      final overlapAll = TimeRange()
-        ..start = const Duration(milliseconds: 50)
-        ..end = const Duration(milliseconds: 250);
-      final noOverlap = TimeRange()
-        ..start = const Duration(milliseconds: 300)
-        ..end = const Duration(milliseconds: 400);
+      test('overlaps', () {
+        final t = TimeRange()
+          ..start = const Duration(milliseconds: 100)
+          ..end = const Duration(milliseconds: 200);
+        final overlapBeginning = TimeRange()
+          ..start = const Duration(milliseconds: 50)
+          ..end = const Duration(milliseconds: 150);
+        final overlapMiddle = TimeRange()
+          ..start = const Duration(milliseconds: 125)
+          ..end = const Duration(milliseconds: 175);
+        final overlapEnd = TimeRange()
+          ..start = const Duration(milliseconds: 150)
+          ..end = const Duration(milliseconds: 250);
+        final overlapAll = TimeRange()
+          ..start = const Duration(milliseconds: 50)
+          ..end = const Duration(milliseconds: 250);
+        final noOverlap = TimeRange()
+          ..start = const Duration(milliseconds: 300)
+          ..end = const Duration(milliseconds: 400);
 
-      expect(t.overlaps(t), isTrue);
-      expect(t.overlaps(overlapBeginning), isTrue);
-      expect(t.overlaps(overlapMiddle), isTrue);
-      expect(t.overlaps(overlapEnd), isTrue);
-      expect(t.overlaps(overlapAll), isTrue);
-      expect(t.overlaps(noOverlap), isFalse);
+        expect(t.overlaps(t), isTrue);
+        expect(t.overlaps(overlapBeginning), isTrue);
+        expect(t.overlaps(overlapMiddle), isTrue);
+        expect(t.overlaps(overlapEnd), isTrue);
+        expect(t.overlaps(overlapAll), isTrue);
+        expect(t.overlaps(noOverlap), isFalse);
+      });
+
+      test('containsRange', () {
+        final t = TimeRange()
+          ..start = const Duration(milliseconds: 100)
+          ..end = const Duration(milliseconds: 200);
+        final containsStart = TimeRange()
+          ..start = const Duration(milliseconds: 50)
+          ..end = const Duration(milliseconds: 150);
+        final containsStartAndEnd = TimeRange()
+          ..start = const Duration(milliseconds: 125)
+          ..end = const Duration(milliseconds: 175);
+        final containsEnd = TimeRange()
+          ..start = const Duration(milliseconds: 150)
+          ..end = const Duration(milliseconds: 250);
+        final invertedContains = TimeRange()
+          ..start = const Duration(milliseconds: 50)
+          ..end = const Duration(milliseconds: 250);
+        final containsNeither = TimeRange()
+          ..start = const Duration(milliseconds: 300)
+          ..end = const Duration(milliseconds: 400);
+
+        expect(t.containsRange(containsStart), isFalse);
+        expect(t.containsRange(containsStartAndEnd), isTrue);
+        expect(t.containsRange(containsEnd), isFalse);
+        expect(t.containsRange(invertedContains), isFalse);
+        expect(t.containsRange(containsNeither), isFalse);
+      });
+
+      test('start setter throws exception when single assignment is true', () {
+        expect(() {
+          final t = TimeRange()..start = Duration.zero;
+          t.start = Duration.zero;
+        }, throwsAssertionError);
+      });
+
+      test('start setter throws exception when value is after end', () {
+        expect(() {
+          final t = TimeRange()..end = const Duration(seconds: 1);
+          t.start = const Duration(seconds: 2);
+        }, throwsAssertionError);
+      });
+
+      test('end setter throws exception when single assignment is true', () {
+        expect(() {
+          final t = TimeRange()..end = Duration.zero;
+          t.end = Duration.zero;
+        }, throwsAssertionError);
+      });
+
+      test('end setter throws exception when value is before start', () {
+        expect(() {
+          final t = TimeRange()..start = const Duration(seconds: 1);
+          t.end = Duration.zero;
+        }, throwsAssertionError);
+      });
+
+      test('isWellFormed', () {
+        expect(
+          (TimeRange()
+                ..start = Duration.zero
+                ..end = Duration.zero)
+              .isWellFormed,
+          isTrue,
+        );
+        expect((TimeRange()..end = Duration.zero).isWellFormed, isFalse);
+        expect((TimeRange()..start = Duration.zero).isWellFormed, isFalse);
+      });
     });
 
     test('formatDateTime', () {
@@ -369,6 +440,26 @@ void main() {
           'key': 'value.json',
           'key2': '123',
         }),
+      );
+    });
+
+    test('getServiceUriFromQueryString', () {
+      expect(
+        getServiceUriFromQueryString(
+                'http://localhost:123/?uri=http://localhost:456')
+            .toString(),
+        equals('http://localhost:456'),
+      );
+      expect(
+        getServiceUriFromQueryString('http://localhost:123/?port=789')
+            .toString(),
+        equals('ws://localhost:789/ws'),
+      );
+      expect(
+        getServiceUriFromQueryString(
+                'http://localhost:123/?port=789&token=kjy78')
+            .toString(),
+        equals('ws://localhost:789/kjy78/ws'),
       );
     });
 
@@ -961,6 +1052,41 @@ void main() {
         notifier.clear();
         expect(didNotify, isTrue);
         expect(notifier.value, equals([]));
+      });
+
+      test('notifies on trim to sublist with start only', () {
+        setUpWithInitialValue([1, 2, 3]);
+        notifier.trimToSublist(1);
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([2, 3]));
+      });
+
+      test('notifies on trim to sublist', () {
+        setUpWithInitialValue([1, 2, 3]);
+        notifier.trimToSublist(1, 2);
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([2]));
+      });
+
+      test('notifies on last', () {
+        setUpWithInitialValue([1, 2, 3]);
+        notifier.last = 4;
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([1, 2, 4]));
+      });
+
+      test('notifies on remove', () {
+        setUpWithInitialValue([1, 2, 3]);
+        notifier.remove(2);
+        expect(didNotify, isTrue);
+        expect(notifier.value, equals([1, 3]));
+      });
+
+      test('does not notify on remove of missing element', () {
+        setUpWithInitialValue([1, 2, 3]);
+        notifier.remove(0);
+        expect(didNotify, isFalse);
+        expect(notifier.value, equals([1, 2, 3]));
       });
     });
 

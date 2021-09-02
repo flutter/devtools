@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../screen.dart';
@@ -35,6 +34,9 @@ class NetworkScreen extends Screen {
         );
 
   static const id = 'network';
+
+  @override
+  String get docPageId => screenId;
 
   @override
   Widget build(BuildContext context) => const NetworkScreenBody();
@@ -159,54 +161,32 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   /// Builds the row of buttons that control the Network profiler (e.g., record,
   /// pause, etc.)
   Widget _buildProfilerControls() {
-    const double includeTextWidth = 600;
     final hasRequests = filteredRequests.isNotEmpty;
-    return ValueListenableBuilder(
-      valueListenable: _networkController.recordingNotifier,
-      builder: (context, recording, _) {
-        return Row(
-          children: [
-            PauseButton(
-              includeTextWidth: includeTextWidth,
-              onPressed: recording
-                  ? () => _networkController.togglePolling(false)
-                  : null,
-            ),
-            const SizedBox(width: denseSpacing),
-            ResumeButton(
-              includeTextWidth: includeTextWidth,
-              onPressed: recording
-                  ? null
-                  : () => _networkController.togglePolling(true),
-            ),
-            const SizedBox(width: denseSpacing),
-            ClearButton(
-              onPressed: () {
-                _networkController.clear();
-              },
-            ),
-            const Expanded(child: SizedBox()),
-            // TODO(kenz): fix focus issue when state is refreshed
-            Container(
-              width: wideSearchTextWidth,
-              height: defaultTextFieldHeight,
-              child: buildSearchField(
-                controller: _networkController,
-                searchFieldKey: networkSearchFieldKey,
-                searchFieldEnabled: hasRequests,
-                shouldRequestFocus: false,
-                supportsNavigation: true,
-              ),
-            ),
-            const SizedBox(width: denseSpacing),
-            FilterButton(
-              onPressed: _showFilterDialog,
-              isFilterActive:
-                  filteredRequests.length != requests.requests.length,
-            ),
-          ],
-        );
-      },
+    return Row(
+      children: [
+        _NetworkProfilerControls(
+          controller: _networkController,
+        ),
+        const SizedBox(width: defaultSpacing),
+        const Expanded(child: SizedBox()),
+        // TODO(kenz): fix focus issue when state is refreshed
+        Container(
+          width: wideSearchTextWidth,
+          height: defaultTextFieldHeight,
+          child: buildSearchField(
+            controller: _networkController,
+            searchFieldKey: networkSearchFieldKey,
+            searchFieldEnabled: hasRequests,
+            shouldRequestFocus: false,
+            supportsNavigation: true,
+          ),
+        ),
+        const SizedBox(width: denseSpacing),
+        FilterButton(
+          onPressed: _showFilterDialog,
+          isFilterActive: filteredRequests.length != requests.requests.length,
+        ),
+      ],
     );
   }
 
@@ -242,15 +222,10 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   void _showFilterDialog() {
     showDialog(
       context: context,
-      builder: (context) => FilterDialog(
+      builder: (context) => FilterDialog<NetworkController, NetworkRequest>(
         controller: _networkController,
-        onApplyFilter: (query) => _networkController.filterData(
-          QueryFilter.parse(
-            query,
-            _networkController.filterArgs,
-          ),
-        ),
         queryInstructions: NetworkScreenBody.filterQueryInstructions,
+        queryFilterArguments: _networkController.filterArgs,
       ),
     );
   }
@@ -263,6 +238,52 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
         const SizedBox(height: denseRowSpacing),
         _buildProfilerBody(),
       ],
+    );
+  }
+}
+
+/// The row of controls that control the Network profiler (e.g., record, pause,
+/// clear).
+class _NetworkProfilerControls extends StatelessWidget {
+  const _NetworkProfilerControls({
+    Key key,
+    @required this.controller,
+  }) : super(key: key);
+
+  static const _includeTextWidth = 810.0;
+
+  final NetworkController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller.recordingNotifier,
+      builder: (context, recording, _) {
+        return Row(
+          children: [
+            PauseButton(
+              minScreenWidthForTextBeforeScaling: _includeTextWidth,
+              tooltip: 'Pause recording network traffic',
+              onPressed:
+                  recording ? () => controller.togglePolling(false) : null,
+            ),
+            const SizedBox(width: denseSpacing),
+            ResumeButton(
+              minScreenWidthForTextBeforeScaling: _includeTextWidth,
+              tooltip: 'Resume recording network traffic',
+              onPressed:
+                  recording ? null : () => controller.togglePolling(true),
+            ),
+            const SizedBox(width: denseSpacing),
+            ClearButton(
+              minScreenWidthForTextBeforeScaling: _includeTextWidth,
+              onPressed: () {
+                controller.clear();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -321,7 +342,7 @@ class UriColumn extends ColumnData<NetworkRequest>
   UriColumn()
       : super.wide(
           'Uri',
-          minWidthPx: 100,
+          minWidthPx: scaleByFontFactor(100.0),
         );
 
   @override
@@ -334,25 +355,24 @@ class UriColumn extends ColumnData<NetworkRequest>
     BuildContext context,
     NetworkRequest data, {
     bool isRowSelected = false,
+    VoidCallback onPressed,
   }) {
     final value = getDisplayValue(data);
 
-    return Tooltip(
-      message: value,
-      waitDuration: tooltipWait,
-      child: SelectableText(
-        value,
-        maxLines: 1,
-        // TODO(kenz): add overflow after flutter 2.3.0 is stable. It was
-        // added in commit 65388ee2eeaf0d2cf087eaa4a325e3689020c46a.
-        // style: const TextStyle(overflow: TextOverflow.ellipsis),
-      ),
+    return SelectableText(
+      value,
+      maxLines: 1,
+      style: const TextStyle(overflow: TextOverflow.ellipsis),
+      // [onPressed] needs to be passed along to [SelectableText] so that a
+      // click on the text will still trigger the [onPressed] action for the
+      // row.
+      onTap: onPressed,
     );
   }
 }
 
 class MethodColumn extends ColumnData<NetworkRequest> {
-  MethodColumn() : super('Method', fixedWidthPx: 70);
+  MethodColumn() : super('Method', fixedWidthPx: scaleByFontFactor(70));
 
   @override
   dynamic getValue(NetworkRequest dataObject) {
@@ -363,7 +383,11 @@ class MethodColumn extends ColumnData<NetworkRequest> {
 class StatusColumn extends ColumnData<NetworkRequest>
     implements ColumnRenderer<NetworkRequest> {
   StatusColumn()
-      : super('Status', alignment: ColumnAlignment.right, fixedWidthPx: 62);
+      : super(
+          'Status',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: scaleByFontFactor(62),
+        );
 
   @override
   dynamic getValue(NetworkRequest dataObject) {
@@ -380,6 +404,7 @@ class StatusColumn extends ColumnData<NetworkRequest>
     BuildContext context,
     NetworkRequest data, {
     bool isRowSelected = false,
+    VoidCallback onPressed,
   }) {
     final theme = Theme.of(context);
     return Text(
@@ -393,7 +418,11 @@ class StatusColumn extends ColumnData<NetworkRequest>
 
 class TypeColumn extends ColumnData<NetworkRequest> {
   TypeColumn()
-      : super('Type', alignment: ColumnAlignment.right, fixedWidthPx: 62);
+      : super(
+          'Type',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: scaleByFontFactor(62),
+        );
 
   @override
   dynamic getValue(NetworkRequest dataObject) {
@@ -408,7 +437,11 @@ class TypeColumn extends ColumnData<NetworkRequest> {
 
 class DurationColumn extends ColumnData<NetworkRequest> {
   DurationColumn()
-      : super('Duration', alignment: ColumnAlignment.right, fixedWidthPx: 80);
+      : super(
+          'Duration',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: scaleByFontFactor(80),
+        );
 
   @override
   dynamic getValue(NetworkRequest dataObject) {
@@ -429,7 +462,11 @@ class DurationColumn extends ColumnData<NetworkRequest> {
 
 class TimestampColumn extends ColumnData<NetworkRequest> {
   TimestampColumn()
-      : super('Timestamp', alignment: ColumnAlignment.right, fixedWidthPx: 135);
+      : super(
+          'Timestamp',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: scaleByFontFactor(135),
+        );
 
   @override
   dynamic getValue(NetworkRequest dataObject) {

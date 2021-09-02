@@ -8,8 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../console.dart';
@@ -181,15 +180,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   void _showFilterDialog() {
     showDialog(
       context: context,
-      builder: (context) => FilterDialog(
+      builder: (context) => FilterDialog<LoggingController, LogData>(
         controller: controller,
-        onApplyFilter: (query) => controller.filterData(
-          QueryFilter.parse(
-            query,
-            controller.filterArgs,
-          ),
-        ),
         queryInstructions: LoggingScreenBody.filterQueryInstructions,
+        queryFilterArguments: controller.filterArgs,
       ),
     );
   }
@@ -311,7 +305,7 @@ class _LogDetailsState extends State<LogDetails>
         title: AreaPaneHeader(
           title: const Text('Details'),
           needsTopBorder: false,
-          actions: [
+          rightActions: [
             CopyToClipboardControl(
               dataProvider: disabled ? null : () => log?.prettyPrinted,
               buttonKey: LogDetails.copyToClipboardButtonKey,
@@ -338,7 +332,7 @@ class _WhenColumn extends ColumnData<LogData> {
   _WhenColumn()
       : super(
           'When',
-          fixedWidthPx: 120,
+          fixedWidthPx: scaleByFontFactor(120),
         );
 
   @override
@@ -356,7 +350,7 @@ class _KindColumn extends ColumnData<LogData>
   _KindColumn()
       : super(
           'Kind',
-          fixedWidthPx: 155,
+          fixedWidthPx: scaleByFontFactor(155),
         );
 
   @override
@@ -370,6 +364,7 @@ class _KindColumn extends ColumnData<LogData>
     BuildContext context,
     LogData item, {
     bool isRowSelected = false,
+    VoidCallback onPressed,
   }) {
     final String kind = item.kind;
 
@@ -440,6 +435,7 @@ class MessageColumn extends ColumnData<LogData>
     BuildContext context,
     LogData data, {
     bool isRowSelected = false,
+    VoidCallback onPressed,
   }) {
     TextStyle textStyle = Theme.of(context).fixedFontStyle;
     if (isRowSelected) {

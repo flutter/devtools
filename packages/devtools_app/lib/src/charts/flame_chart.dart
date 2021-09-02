@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../dialogs.dart';
@@ -20,14 +21,24 @@ import '../theme.dart';
 import '../trees.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
+import '../ui/utils.dart';
 import '../utils.dart';
 
 const double rowPadding = 2.0;
-const double rowHeight = 25.0;
-const double rowHeightWithPadding = rowHeight + rowPadding;
-const double sectionSpacing = 16.0;
+// Flame chart rows contain text so are not readable if they do not scale with
+// the font factor.
+double get rowHeight => scaleByFontFactor(25.0);
+double get rowHeightWithPadding => rowHeight + rowPadding;
+
+// This spacing needs to be scaled by the font factor otherwise section
+// labels will not have enough room. Typically spacing values should not depend
+// on the font size scale factor. TODO(jacobr): clean up the section spacing so
+// it is not used in a case where it is not really spacing.
+double get sectionSpacing => scaleByFontFactor(16.0);
 const double sideInset = 70.0;
 const double sideInsetSmall = 60.0;
+
+double get baseTimelineGridIntervalPx => scaleByFontFactor(150.0);
 
 // TODO(kenz): add some indication that we are scrolled out of the relevant area
 // so that users don't get lost in the extra pixels at the end of the chart.
@@ -100,7 +111,7 @@ abstract class FlameChartState<T extends FlameChart,
 
   final List<FlameChartSection> sections = [];
 
-  final focusNode = FocusNode();
+  final focusNode = FocusNode(debugLabel: 'flame-chart');
 
   bool _altKeyPressed = false;
 
@@ -172,7 +183,7 @@ abstract class FlameChartState<T extends FlameChart,
   double get maxZoomLevel {
     // The max zoom level is hit when 1 microsecond is the width of each grid
     // interval (this may bottom out at 2 micros per interval due to rounding).
-    return TimelineGridPainter.baseGridIntervalPx *
+    return baseTimelineGridIntervalPx *
         widget.time.duration.inMicroseconds /
         widget.startingContentWidth;
   }
@@ -726,42 +737,24 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
             scrollDirection: Axis.horizontal,
             extentDelegate: extentDelegate,
             childrenDelegate: SliverChildBuilderDelegate(
-              (context, index) => _buildFlameChartNode(index),
+              (context, index) {
+                final node = nodes[index];
+                return FlameChartNodeWidget(
+                  index: index,
+                  nodes: nodes,
+                  zoom: widget.zoom,
+                  startInset: widget.startInset,
+                  chartWidth: widget.width,
+                  selected: node.data == selected,
+                  hovered: node.data == hovered,
+                );
+              },
               childCount: nodes.length,
               addRepaintBoundaries: false,
               addAutomaticKeepAlives: false,
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildFlameChartNode(int index) {
-    final node = nodes[index];
-    return Padding(
-      padding: EdgeInsets.only(
-        left: FlameChartUtils.leftPaddingForNode(
-          index,
-          nodes,
-          chartZoom: widget.zoom,
-          chartStartInset: widget.startInset,
-        ),
-        right: FlameChartUtils.rightPaddingForNode(
-          index,
-          nodes,
-          chartZoom: widget.zoom,
-          chartStartInset: widget.startInset,
-          chartWidth: widget.width,
-        ),
-        bottom: rowPadding,
-      ),
-      child: node.buildWidget(
-        selected: node.data == selected,
-        hovered: node.data == hovered,
-        searchMatch: node.data.isSearchMatch,
-        activeSearchMatch: node.data.isActiveSearchMatch,
-        zoom: FlameChartUtils.zoomForNode(node, widget.zoom),
       ),
     );
   }
@@ -815,6 +808,64 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
   }
 }
 
+class FlameChartNodeWidget extends StatelessWidget {
+  const FlameChartNodeWidget({
+    Key key,
+    @required this.index,
+    @required this.nodes,
+    @required this.zoom,
+    @required this.startInset,
+    @required this.chartWidth,
+    @required this.selected,
+    @required this.hovered,
+  }) : super(key: key);
+
+  final int index;
+
+  final List<FlameChartNode> nodes;
+
+  final double zoom;
+
+  final double startInset;
+
+  final double chartWidth;
+
+  final bool selected;
+
+  final bool hovered;
+
+  @override
+  Widget build(BuildContext context) {
+    final node = nodes[index];
+    return Padding(
+      padding: EdgeInsets.only(
+        left: FlameChartUtils.leftPaddingForNode(
+          index,
+          nodes,
+          chartZoom: zoom,
+          chartStartInset: startInset,
+        ),
+        right: FlameChartUtils.rightPaddingForNode(
+          index,
+          nodes,
+          chartZoom: zoom,
+          chartStartInset: startInset,
+          chartWidth: chartWidth,
+        ),
+        bottom: rowPadding,
+      ),
+      child: node.buildWidget(
+        selected: selected,
+        hovered: hovered,
+        searchMatch: node.data.isSearchMatch,
+        activeSearchMatch: node.data.isActiveSearchMatch,
+        zoom: FlameChartUtils.zoomForNode(node, zoom),
+        colorScheme: Theme.of(context).colorScheme,
+      ),
+    );
+  }
+}
+
 extension NodeListExtension on List<FlameChartNode> {
   List<Range> toPaddedZoomedIntervals({
     @required double zoom,
@@ -834,6 +885,7 @@ extension NodeListExtension on List<FlameChartNode> {
   }
 }
 
+// ignore: avoid_classes_with_only_static_members
 class FlameChartUtils {
   static double leftPaddingForNode(
     int index,
@@ -969,8 +1021,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     this.key,
     @required this.text,
     @required this.rect,
-    @required this.backgroundColor,
-    @required this.textColor,
+    @required this.colorPair,
     @required this.data,
     @required this.onSelected,
     this.selectable = true,
@@ -987,8 +1038,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
   final Key key;
   final Rect rect;
   final String text;
-  final Color backgroundColor;
-  final Color textColor;
+  final ThemedColorPair colorPair;
   final T data;
   final void Function(T) onSelected;
   final bool selectable;
@@ -1003,6 +1053,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     @required bool searchMatch,
     @required bool activeSearchMatch,
     @required double zoom,
+    @required ColorScheme colorScheme,
   }) {
     // This math.max call prevents using a rect with negative width for
     // small events that have padding.
@@ -1029,6 +1080,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
         selected: selected,
         searchMatch: searchMatch,
         activeSearchMatch: activeSearchMatch,
+        colorScheme: colorScheme,
       ),
       child: zoomedWidth >= _minWidthForText
           ? Text(
@@ -1040,17 +1092,16 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
                   selected: selected,
                   searchMatch: searchMatch,
                   activeSearchMatch: activeSearchMatch,
+                  colorScheme: colorScheme,
                 ),
               ),
             )
           : const SizedBox(),
     );
     if (hovered || !selectable) {
-      return Tooltip(
+      return DevToolsTooltip(
         key: key,
-        message: data.tooltip,
-        preferBelow: false,
-        waitDuration: tooltipWait,
+        tooltip: data.tooltip,
         child: node,
       );
     } else {
@@ -1062,20 +1113,22 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     @required bool selected,
     @required bool searchMatch,
     @required bool activeSearchMatch,
+    @required ColorScheme colorScheme,
   }) {
     if (selected) return defaultSelectionColor;
     if (activeSearchMatch) return activeSearchMatchColor;
     if (searchMatch) return searchMatchColor;
-    return backgroundColor;
+    return colorPair.background.colorFor(colorScheme);
   }
 
   Color _textColor({
     @required bool selected,
     @required bool searchMatch,
     @required bool activeSearchMatch,
+    @required ColorScheme colorScheme,
   }) {
     if (selected || searchMatch || activeSearchMatch) return _darkTextColor;
-    return textColor;
+    return colorPair.foreground.colorFor(colorScheme);
   }
 
   Rect zoomedRect(double zoom, double chartStartInset) {
@@ -1095,19 +1148,19 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
 }
 
 mixin FlameChartColorMixin {
-  Color nextUiColor(int row) {
+  ColorPair nextUiColor(int row) {
     return uiColorPalette[row % uiColorPalette.length];
   }
 
-  Color nextRasterColor(int row) {
+  ColorPair nextRasterColor(int row) {
     return rasterColorPalette[row % rasterColorPalette.length];
   }
 
-  Color nextAsyncColor(int row) {
+  ColorPair nextAsyncColor(int row) {
     return asyncColorPalette[row % asyncColorPalette.length];
   }
 
-  Color nextUnknownColor(int row) {
+  ColorPair nextUnknownColor(int row) {
     return unknownColorPalette[row % unknownColorPalette.length];
   }
 }
@@ -1261,7 +1314,6 @@ class TimelineGridPainter extends FlameChartPainter {
           colorScheme: colorScheme,
         );
 
-  static const baseGridIntervalPx = 150.0;
   static const timestampOffset = 6.0;
 
   final double chartEndInset;
@@ -1319,7 +1371,10 @@ class TimelineGridPainter extends FlameChartPainter {
     final textPainter = TextPainter(
       text: TextSpan(
         text: timestampText,
-        style: TextStyle(color: colorScheme.chartTextColor),
+        style: TextStyle(
+          color: colorScheme.chartTextColor,
+          fontSize: defaultFontSize,
+        ),
       ),
       textAlign: TextAlign.right,
       textDirection: TextDirection.ltr,
@@ -1346,7 +1401,7 @@ class TimelineGridPainter extends FlameChartPainter {
     final log2ZoomLevel = log2(zoom);
 
     final gridZoomFactor = math.pow(2, log2ZoomLevel);
-    final gridIntervalPx = baseGridIntervalPx / gridZoomFactor;
+    final gridIntervalPx = baseTimelineGridIntervalPx / gridZoomFactor;
 
     /// The physical pixel width of the grid interval at [zoom].
     return gridIntervalPx * zoom;
@@ -1395,21 +1450,42 @@ class TimelineGridPainter extends FlameChartPainter {
 }
 
 class FlameChartHelpButton extends StatelessWidget {
+  const FlameChartHelpButton({
+    @required this.screenId,
+    @required this.analyticsAction,
+    this.additionalInfo = const <Widget>[],
+  });
+
+  final String screenId;
+
+  final String analyticsAction;
+
+  final List<Widget> additionalInfo;
+
   @override
   Widget build(BuildContext context) {
     return HelpButton(
-      onPressed: () => showDialog(
-        context: context,
-        builder: (context) => _FlameChartHelpDialog(),
-      ),
+      onPressed: () {
+        ga.select(screenId, analyticsAction);
+        showDialog(
+          context: context,
+          builder: (context) => _FlameChartHelpDialog(
+            additionalInfo: additionalInfo,
+          ),
+        );
+      },
     );
   }
 }
 
 class _FlameChartHelpDialog extends StatelessWidget {
+  const _FlameChartHelpDialog({this.additionalInfo = const <Widget>[]});
+
+  final List<Widget> additionalInfo;
+
   /// A fixed width for the first column in the help dialog to ensure that the
   /// subsections are aligned.
-  static const firstColumnWidth = 190.0;
+  double get firstColumnWidth => scaleByFontFactor(190.0);
 
   @override
   Widget build(BuildContext context) {
@@ -1426,6 +1502,8 @@ class _FlameChartHelpDialog extends StatelessWidget {
           const SizedBox(height: denseSpacing),
           ...dialogSubHeader(theme, 'Zoom'),
           _buildZoomInstructions(theme),
+          if (additionalInfo.isNotEmpty) const SizedBox(height: denseSpacing),
+          ...additionalInfo,
         ],
       ),
       actions: [

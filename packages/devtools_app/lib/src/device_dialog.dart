@@ -101,7 +101,7 @@ class DeviceDialog extends StatelessWidget {
         DevToolsRouterDelegate.of(context).navigate(homePageId, {'uri': null});
         Navigator.of(context, rootNavigator: true).pop('dialog');
       },
-      child: Text('Connect to a new app'.toUpperCase()),
+      child: Text(connectToNewAppText.toUpperCase()),
     );
   }
 }
@@ -251,7 +251,7 @@ class _NameColumn extends ColumnData<_DialogFlag> {
   _NameColumn()
       : super(
           'Name',
-          fixedWidthPx: 180,
+          fixedWidthPx: scaleByFontFactor(180),
         );
 
   @override
@@ -259,7 +259,11 @@ class _NameColumn extends ColumnData<_DialogFlag> {
 }
 
 class _DescriptionColumn extends ColumnData<_DialogFlag> {
-  _DescriptionColumn() : super.wide('Description', minWidthPx: 100);
+  _DescriptionColumn()
+      : super.wide(
+          'Description',
+          minWidthPx: scaleByFontFactor(100),
+        );
 
   @override
   String getValue(_DialogFlag dataObject) => dataObject.description;
@@ -272,7 +276,7 @@ class _ValueColumn extends ColumnData<_DialogFlag> {
   _ValueColumn()
       : super(
           'Value',
-          fixedWidthPx: 160,
+          fixedWidthPx: scaleByFontFactor(160),
           alignment: ColumnAlignment.right,
         );
 
