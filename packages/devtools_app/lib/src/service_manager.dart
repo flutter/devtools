@@ -313,9 +313,6 @@ class ServiceConnectionManager {
     }
 
     _connectionAvailableController.add(service);
-
-    // Clear the isolates cache:
-    isolateManager.clearIsolateIdCache();
   }
 
   void manuallyDisconnect() {
@@ -543,8 +540,6 @@ class IsolateManager extends Disposer {
   ValueListenable<IsolateRef> get mainIsolate => _mainIsolate;
   final _mainIsolate = ValueNotifier<IsolateRef>(null);
 
-  final _isolatesCache = <String, Isolate>{};
-
   Future<void> init(List<IsolateRef> isolates) async {
     // Re-initialize isolates when VM developer mode is enabled/disabled to
     // display/hide system isolates.
@@ -739,10 +734,6 @@ class IsolateManager extends Disposer {
     final isolateState =
         _isolateStates.putIfAbsent(isolateRef, () => IsolateState(isolateRef));
     return isolateState.isolate;
-  }
-
-  Future<Isolate> getIsolateCachedById(String isolateId) async {
-    return _isolatesCache[isolateId] ??= await _service.getIsolate(isolateId);
   }
 
   void _handleDebugEvent(Event event) {
