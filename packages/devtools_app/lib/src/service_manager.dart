@@ -745,10 +745,6 @@ class IsolateManager extends Disposer {
     return _isolatesCache[isolateId] ??= await _service.getIsolate(isolateId);
   }
 
-  void clearIsolateIdCache() {
-    _isolatesCache.clear();
-  }
-
   void _handleDebugEvent(Event event) {
     final isolate = event.isolate;
     final isolateState = _isolateStates[isolate];
