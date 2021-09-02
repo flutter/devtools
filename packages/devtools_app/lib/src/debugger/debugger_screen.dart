@@ -240,7 +240,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           headers: <PreferredSizeWidget>[
             AreaPaneHeader(
               title: const Text(callStackTitle),
-              actions: [_callStackRightChild()],
+              rightActions: [_callStackRightChild()],
               needsTopBorder: false,
             ),
             const AreaPaneHeader(title: Text(variablesTitle)),
