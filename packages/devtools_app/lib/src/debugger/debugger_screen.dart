@@ -19,7 +19,6 @@ import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
 import '../ui/icons.dart';
-import '../utils.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
@@ -199,7 +198,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           headers: <PreferredSizeWidget>[
             AreaPaneHeader(
               title: const Text(callStackTitle),
-              rightActions: [_callStackRightChild()],
+              rightActions: [
+                _callStackRightChild(),
+              ],
               needsTopBorder: false,
             ),
             const AreaPaneHeader(title: Text(variablesTitle)),
@@ -241,21 +242,17 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   }
 
   Widget _callStackRightChild() {
-    final numLines = controller.stackFramesWithLocation.value.length;
-    final disabled = numLines == 0;
-
     return CopyToClipboardControl(
-      dataProvider: disabled
-          ? null
-          : () => controller.stackFramesWithLocation.value
+      dataProvider: () =>
+          controller.stackFramesWithLocation.value
               .map((frame) {
                 final asyncMarker =
                     frame.frame.kind == FrameKind.kAsyncSuspensionMarker;
                 return '${_descriptionFor(frame)}${asyncMarker ? null : ' ' + _locationFor(frame)}';
               })
               .toList()
-              .join('\n'),
-      successMessage: 'Copied $numLines ${pluralize('line', numLines)}.',
+              .join('\n') ??
+          '',
       buttonKey: DebuggerScreenBody.copyToClipboardButtonKey,
     );
   }
