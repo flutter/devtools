@@ -278,7 +278,7 @@ class TimelineHttpRequestData extends HttpRequestData {
   TraceEvent _endEvent;
 
   /// For timeline event, HTTP request/response body logging is disabled.
-  /// see https://dart-review.googlesource.com/c/sdk/+/189881 
+  /// see https://dart-review.googlesource.com/c/sdk/+/189881
   @override
   final String requestBody = null;
 

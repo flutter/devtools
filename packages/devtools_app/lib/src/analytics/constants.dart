@@ -26,6 +26,8 @@ const String logging = LoggingScreen.id;
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
 const String devToolsMain = 'main';
+const String hotReload = 'hotReload';
+const String hotRestart = 'hotRestart';
 
 // DevTools UI action selected (clicked).
 

@@ -8,10 +8,9 @@ import 'package:pedantic/pedantic.dart';
 import 'package:provider/provider.dart';
 
 import '../devtools.dart' as devtools;
-import 'analytics/analytics_stub.dart'
-    if (dart.library.html) 'analytics/analytics.dart' as ga;
+import 'analytics/analytics.dart' as ga;
+import 'analytics/analytics_controller.dart';
 import 'analytics/constants.dart' as analytics_constants;
-import 'analytics/provider.dart';
 import 'app_size/app_size_controller.dart';
 import 'app_size/app_size_screen.dart';
 import 'auto_dispose_mixin.dart';
@@ -66,11 +65,11 @@ bool isExternalBuild = true;
 class DevToolsApp extends StatefulWidget {
   const DevToolsApp(
     this.screens,
-    this.analyticsProvider,
+    this.analyticsController,
   );
 
   final List<DevToolsScreen> screens;
-  final AnalyticsProvider analyticsProvider;
+  final AnalyticsController analyticsController;
 
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
@@ -162,7 +161,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         key: const Key('not-found'),
         child: CenteredMessage("'$page' not found."),
         ideTheme: ideTheme,
-        analyticsProvider: widget.analyticsProvider,
       ),
     );
   }
@@ -180,7 +178,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         key: const Key('landing'),
         child: LandingScreenBody(),
         ideTheme: ideTheme,
-        analyticsProvider: widget.analyticsProvider,
         actions: [
           OpenSettingsAction(),
           ReportFeedbackButton(),
@@ -218,7 +215,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                       : 'No tabs available for this application.',
                 ),
                 ideTheme: ideTheme,
-                analyticsProvider: widget.analyticsProvider,
               );
             }
             return _providedControllers(
@@ -227,7 +223,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                 ideTheme: ideTheme,
                 page: page,
                 tabs: tabs,
-                analyticsProvider: widget.analyticsProvider,
                 actions: [
                   // TODO(https://github.com/flutter/devtools/issues/1941)
                   if (serviceManager.connectedApp.isFlutterAppNow) ...[
@@ -256,7 +251,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         final snapshotArgs = SnapshotArguments.fromArgs(args);
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
-          analyticsProvider: widget.analyticsProvider,
           child: _providedControllers(
             offline: true,
             child: SnapshotScreenBody(snapshotArgs, _screens),
@@ -267,7 +261,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       appSizePageId: (_, __, ___) {
         return DevToolsScaffold.withChild(
           key: const Key('appsize'),
-          analyticsProvider: widget.analyticsProvider,
           child: _providedControllers(
             child: const AppSizeBody(),
           ),
@@ -312,7 +305,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         ideTheme: ideTheme,
         theme: Theme.of(context),
       ),
-      builder: (context, child) => Notifications(child: child),
+      builder: (context, child) => Provider<AnalyticsController>.value(
+        value: widget.analyticsController,
+        child: Notifications(child: child),
+      ),
       routerDelegate: DevToolsRouterDelegate(_getPage),
       routeInformationParser: DevToolsRouteInformationParser(),
     );
@@ -419,7 +415,7 @@ class OpenAboutAction extends StatelessWidget {
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
-          child: const Icon(
+          child: Icon(
             Icons.help_outline,
             size: actionsIconSize,
           ),
@@ -445,7 +441,7 @@ class OpenSettingsAction extends StatelessWidget {
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
-          child: const Icon(
+          child: Icon(
             Icons.settings,
             size: actionsIconSize,
           ),
@@ -473,7 +469,7 @@ class ReportFeedbackButton extends StatelessWidget {
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
           alignment: Alignment.center,
-          child: const Icon(
+          child: Icon(
             Icons.bug_report,
             size: actionsIconSize,
           ),
@@ -518,7 +514,6 @@ class DevToolsAboutDialog extends StatelessWidget {
 
   Widget _createFeedbackLink(BuildContext context) {
     final reportIssuesLink = devToolsExtensionPoints.issueTrackerLink();
-    final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: () async {
         ga.select(
@@ -527,7 +522,10 @@ class DevToolsAboutDialog extends StatelessWidget {
         );
         await launchUrl(reportIssuesLink.url, context);
       },
-      child: Text(reportIssuesLink.display, style: linkTextStyle(colorScheme)),
+      child: Text(
+        reportIssuesLink.display,
+        style: Theme.of(context).linkTextStyle,
+      ),
     );
   }
 }
@@ -536,6 +534,7 @@ class DevToolsAboutDialog extends StatelessWidget {
 class SettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final analyticsController = Provider.of<AnalyticsController>(context);
     return DevToolsDialog(
       title: dialogTitleText(Theme.of(context), 'Settings'),
       content: Column(
@@ -557,8 +556,8 @@ class SettingsDialog extends StatelessWidget {
           if (isExternalBuild && isDevToolsServerAvailable)
             CheckboxSetting(
               label: const Text('Enable analytics'),
-              listenable: ga.gaEnabledNotifier,
-              toggle: ga.setAnalyticsEnabled,
+              listenable: analyticsController.analyticsEnabled,
+              toggle: analyticsController.toggleAnalyticsEnabled,
               gaItem: analytics_constants.analytics,
             ),
           CheckboxSetting(

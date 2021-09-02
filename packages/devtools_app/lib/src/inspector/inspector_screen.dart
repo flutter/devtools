@@ -9,8 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../blocking_action_mixin.dart';
@@ -75,8 +74,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   static const summaryTreeKey = Key('Summary Tree');
   static const detailsTreeKey = Key('Details Tree');
-  static const includeTextWidth = 900.0;
-  static const includeRefreshTreeWidth = 1255.0;
+  static const minScreenWidthForTextBeforeScaling = 900.0;
+  static const unscaledIncludeRefreshTreeWidth = 1255.0;
   static const serviceExtensionButtonsIncludeTextWidth = 1160.0;
 
   @override
@@ -153,7 +152,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                         ? extensions.toggleSelectWidgetMode
                         : extensions.toggleOnDeviceWidgetInspector
                   ],
-                  minIncludeTextWidth: includeTextWidth,
+                  minScreenWidthForTextBeforeScaling:
+                      minScreenWidthForTextBeforeScaling,
                 );
               },
             ),
@@ -163,7 +163,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               icon: Icons.refresh,
               label: 'Refresh Tree',
               color: Theme.of(context).colorScheme.serviceExtensionButtonsTitle,
-              includeTextWidth: includeRefreshTreeWidth,
+              minScreenWidthForTextBeforeScaling:
+                  unscaledIncludeRefreshTreeWidth,
             ),
             const Spacer(),
             Row(children: getServiceExtensionWidgets()),
@@ -219,7 +220,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   List<Widget> getServiceExtensionWidgets() {
     return [
       ServiceExtensionButtonGroup(
-        minIncludeTextWidth: serviceExtensionButtonsIncludeTextWidth,
+        minScreenWidthForTextBeforeScaling:
+            serviceExtensionButtonsIncludeTextWidth,
         extensions: [
           extensions.slowAnimations,
           extensions.debugPaint,
@@ -247,7 +249,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               icon: Icons.unfold_more,
               onPressed: enableButtons ? _onExpandClick : null,
               label: 'Expand all',
-              includeTextWidth: includeTextWidth,
+              minScreenWidthForTextBeforeScaling:
+                  minScreenWidthForTextBeforeScaling,
             ),
           ),
           const SizedBox(width: denseSpacing),
@@ -256,7 +259,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               icon: Icons.unfold_less,
               onPressed: enableButtons ? _onResetClick : null,
               label: 'Collapse to selected',
-              includeTextWidth: includeTextWidth,
+              minScreenWidthForTextBeforeScaling:
+                  minScreenWidthForTextBeforeScaling,
             ),
           )
         ],

@@ -188,6 +188,8 @@ class LegacyPerformanceController
         await cpuProfilerController.processAndSetData(
           storedProfile,
           processId: 'Stored profile for ${event.time}',
+          storeAsUserTagNone: true,
+          shouldApplyFilters: true,
         );
         data.cpuProfileData = cpuProfilerController.dataNotifier.value;
       } else if ((!offlineMode || offlinePerformanceData == null) &&

@@ -515,8 +515,8 @@ class GutterItem extends StatelessWidget {
         : theme.primaryColor;
     final subtleColor = theme.unselectedWidgetColor;
 
-    const bpBoxSize = 12.0;
-    const executionPointIndent = 10.0;
+    final bpBoxSize = breakpointRadius * 2;
+    final executionPointIndent = scaleByFontFactor(10.0);
 
     return InkWell(
       onTap: onPressed,
@@ -546,7 +546,7 @@ class GutterItem extends StatelessWidget {
               ),
             Text('$lineNumber', textAlign: TextAlign.end),
             Container(
-              padding: const EdgeInsets.only(left: executionPointIndent),
+              padding: EdgeInsets.only(left: executionPointIndent),
               alignment: Alignment.centerLeft,
               child: AnimatedOpacity(
                 duration: defaultDuration,
@@ -673,7 +673,7 @@ class LineItem extends StatefulWidget {
 
   static const _hoverDelay = Duration(milliseconds: 150);
   static const _removeDelay = Duration(milliseconds: 50);
-  static const _hoverWidth = 400.0;
+  static double get _hoverWidth => scaleByFontFactor(400.0);
 
   final TextSpan lineContents;
   final StackFrameAndSourcePosition pausedFrame;
@@ -736,8 +736,7 @@ class _LineItemState extends State<LineItem> {
           _hoverCard = HoverCard.fromHoverEvent(
             contents: SingleChildScrollView(
               child: Container(
-                constraints:
-                    const BoxConstraints(maxHeight: maxHoverCardHeight),
+                constraints: BoxConstraints(maxHeight: maxHoverCardHeight),
                 child: Material(
                   child: ExpandableVariable(
                     debuggerController: _debuggerController,
@@ -983,7 +982,7 @@ class ScriptPopupMenu extends StatelessWidget {
             .buildExtraDebuggerScriptPopupMenuOptions())
           extensionMenuOption.build(context),
       ],
-      child: const Icon(
+      child: Icon(
         Icons.more_vert,
         size: actionsIconSize,
       ),
@@ -1011,11 +1010,11 @@ class ScriptHistoryPopupMenu extends StatelessWidget {
       tooltip: 'Select recent script',
       enabled: enabled,
       onSelected: onSelected,
-      offset: const Offset(
+      offset: Offset(
         actionsIconSize + denseSpacing,
         buttonMinWidth + denseSpacing,
       ),
-      child: const Icon(
+      child: Icon(
         Icons.history,
         size: actionsIconSize,
       ),

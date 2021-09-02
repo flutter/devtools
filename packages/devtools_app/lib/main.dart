@@ -5,8 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'src/analytics/stub_provider.dart'
-    if (dart.library.html) 'src/analytics/remote_provider.dart';
+import 'src/analytics/analytics_controller.dart';
 import 'src/app.dart';
 import 'src/app_error_handling.dart';
 import 'src/config_specific/framework_initialize/framework_initialize.dart';
@@ -40,7 +39,7 @@ void main() async {
     runApp(
       ProviderScope(
         observers: const [ErrorLoggerObserver()],
-        child: DevToolsApp(defaultScreens, await analyticsProvider),
+        child: DevToolsApp(defaultScreens, await analyticsController),
       ),
     );
   });

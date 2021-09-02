@@ -104,7 +104,7 @@ class _FieldNameColumn extends ColumnData<FieldReference> {
   _FieldNameColumn()
       : super(
           'Name',
-          fixedWidthPx: 150.0,
+          fixedWidthPx: scaleByFontFactor(150.0),
         );
 
   @override
@@ -130,7 +130,7 @@ class _FieldValueColumn extends ColumnData<FieldReference> {
   _FieldValueColumn()
       : super(
           'Value',
-          fixedWidthPx: 350.0,
+          fixedWidthPx: scaleByFontFactor(350.0),
         );
 
   @override

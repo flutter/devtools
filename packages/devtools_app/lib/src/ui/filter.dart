@@ -16,6 +16,10 @@ mixin FilterControllerMixin<T> {
 
   final activeFilter = ValueNotifier<Filter<T>>(null);
 
+  // TODO(kenz): refactor this so that `filterData` returns the filtered data
+  // and does not have side effects other than filtering data. Add a
+  // `onFilterApplied` method here that can be overridden to apply those
+  // screen-specific side effects of filtering.
   void filterData(Filter<T> filter);
 
   void resetFilter() {
@@ -25,16 +29,17 @@ mixin FilterControllerMixin<T> {
 }
 
 class FilterDialog<FilterControllerMixin, T> extends StatefulWidget {
-  const FilterDialog({
+  FilterDialog({
     @required this.controller,
     this.onCancel,
     this.includeQueryFilter = true,
     this.queryInstructions,
     this.queryFilterArguments,
     this.toggleFilters,
-    this.dialogWidth = defaultDialogWidth,
-  }) : assert(!includeQueryFilter ||
-            (queryInstructions != null && queryFilterArguments != null));
+    double dialogWidth,
+  })  : assert(!includeQueryFilter ||
+            (queryInstructions != null && queryFilterArguments != null)),
+        dialogWidth = dialogWidth ?? defaultDialogWidth;
 
   final FilterControllerMixin controller;
 

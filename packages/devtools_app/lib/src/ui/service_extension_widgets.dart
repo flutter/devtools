@@ -5,8 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/launch_url/launch_url.dart';
@@ -31,11 +30,11 @@ import 'label.dart';
 /// have to.
 class ServiceExtensionButtonGroup extends StatefulWidget {
   const ServiceExtensionButtonGroup({
-    this.minIncludeTextWidth,
+    this.minScreenWidthForTextBeforeScaling,
     @required this.extensions,
   });
 
-  final double minIncludeTextWidth;
+  final double minScreenWidthForTextBeforeScaling;
   final List<ToggleableServiceExtensionDescription> extensions;
 
   @override
@@ -123,7 +122,10 @@ class _ServiceExtensionButtonGroupState
         selectedColor: theme.colorScheme.serviceExtensionButtonsTitleSelected,
         fillColor: theme.colorScheme.serviceExtensionButtonsFillSelected,
         textStyle: theme.textTheme.bodyText1,
-        constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+        constraints: BoxConstraints(
+          minWidth: defaultButtonHeight,
+          minHeight: defaultButtonHeight,
+        ),
         children: <Widget>[
           for (var extensionState in _extensionStates)
             _buildExtension(extensionState)
@@ -140,18 +142,20 @@ class _ServiceExtensionButtonGroupState
     return ServiceExtensionTooltip(
       description: description,
       child: Container(
-        height: 32.0,
+        height: defaultButtonHeight,
         padding: EdgeInsets.symmetric(
-          horizontal: includeText(context, widget.minIncludeTextWidth)
-              ? defaultSpacing
-              : 0.0,
+          horizontal:
+              includeText(context, widget.minScreenWidthForTextBeforeScaling)
+                  ? defaultSpacing
+                  : 0.0,
         ),
         child: ImageIconLabel(
           extensionState.isSelected
               ? description.enabledIcon
               : description.disabledIcon,
           description.description,
-          minIncludeTextWidth: widget.minIncludeTextWidth,
+          unscaledMinIncludeTextWidth:
+              widget.minScreenWidthForTextBeforeScaling,
         ),
       ),
     );
@@ -297,9 +301,18 @@ class _RegisteredServiceExtensionButtonState
     if (_hidden) return const SizedBox();
 
     return InkWell(
-      onTap: () => invokeAndCatchErrors(widget.action),
+      onTap: () => invokeAndCatchErrors(() async {
+        if (widget.serviceDescription.gaScreenName != null &&
+            widget.serviceDescription.gaItem != null) {
+          ga.select(
+            widget.serviceDescription.gaScreenName,
+            widget.serviceDescription.gaItem,
+          );
+        }
+        await widget.action();
+      }),
       child: Container(
-        constraints: const BoxConstraints.tightFor(
+        constraints: BoxConstraints.tightFor(
           width: DevToolsScaffold.actionWidgetSize,
           height: DevToolsScaffold.actionWidgetSize,
         ),
@@ -494,9 +507,8 @@ class ServiceExtensionTooltip extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final focusColor = Theme.of(context).focusColor;
 
-    return Tooltip(
-      message: description.tooltip,
-      waitDuration: tooltipWait,
+    return DevToolsTooltip(
+      tooltip: description.tooltip,
       preferBelow: true,
       child: child,
       decoration: BoxDecoration(
@@ -573,7 +585,7 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
                       children: [
                         Text(
                           'More info',
-                          style: linkTextStyle(Theme.of(context).colorScheme),
+                          style: Theme.of(context).linkTextStyle,
                         ),
                         const SizedBox(width: densePadding),
                         Icon(

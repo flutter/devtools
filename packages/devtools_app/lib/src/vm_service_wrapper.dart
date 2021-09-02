@@ -414,6 +414,7 @@ class VmServiceWrapper implements VmService {
     int tokenPos,
     int endTokenPos,
     bool forceCompile,
+    bool reportLines,
   }) async {
     // Workaround for https://github.com/flutter/devtools/issues/2981.
     // TODO(bkonyi): remove after Flutter stable is on Dart SDK > 2.12.
@@ -434,6 +435,7 @@ class VmServiceWrapper implements VmService {
           tokenPos: tokenPos,
           endTokenPos: endTokenPos,
           forceCompile: forceCompile,
+          reportLines: reportLines,
         ));
   }
 

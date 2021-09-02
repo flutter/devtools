@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import 'analytics/constants.dart' as analytics_constants;
 import 'theme.dart';
 import 'ui/icons.dart';
 
@@ -12,17 +13,21 @@ class RegisteredServiceDescription {
     this.service,
     this.title,
     this.icon,
+    this.gaScreenName,
+    this.gaItem,
   });
 
   final String service;
   final String title;
   final Widget icon;
+  final String gaScreenName;
+  final String gaItem;
 }
 
 /// Hot reload service registered by Flutter Tools.
 ///
 /// We call this service to perform hot reload.
-const hotReload = RegisteredServiceDescription._(
+final hotReload = RegisteredServiceDescription._(
   service: 'reloadSources',
   title: 'Hot Reload',
   icon: AssetImageIcon(
@@ -30,18 +35,22 @@ const hotReload = RegisteredServiceDescription._(
     height: actionsIconSize,
     width: actionsIconSize,
   ),
+  gaScreenName: analytics_constants.devToolsMain,
+  gaItem: analytics_constants.hotReload,
 );
 
 /// Hot restart service registered by Flutter Tools.
 ///
 /// We call this service to perform a hot restart.
-const hotRestart = RegisteredServiceDescription._(
+final hotRestart = RegisteredServiceDescription._(
   service: 'hotRestart',
   title: 'Hot Restart',
   icon: Icon(
     Icons.settings_backup_restore,
     size: actionsIconSize,
   ),
+  gaScreenName: analytics_constants.devToolsMain,
+  gaItem: analytics_constants.hotRestart,
 );
 
 /// Flutter version service registered by Flutter Tools.

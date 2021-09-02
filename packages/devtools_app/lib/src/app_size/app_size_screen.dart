@@ -6,8 +6,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
 import '../common_widgets.dart';
@@ -21,6 +20,7 @@ import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
 import '../ui/icons.dart';
+import '../ui/tab.dart';
 import '../utils.dart';
 import 'app_size_controller.dart';
 import 'app_size_table.dart';
@@ -81,10 +81,11 @@ class AppSizeBody extends StatefulWidget {
 
 class _AppSizeBodyState extends State<AppSizeBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  static const diffTab = Tab(text: 'Diff', key: AppSizeScreen.diffTabKey);
-  static const analysisTab =
-      Tab(text: 'Analysis', key: AppSizeScreen.analysisTabKey);
-  static const tabs = [analysisTab, diffTab];
+  static final diffTab =
+      DevToolsTab(text: 'Diff', key: AppSizeScreen.diffTabKey);
+  static final analysisTab =
+      DevToolsTab(text: 'Analysis', key: AppSizeScreen.analysisTabKey);
+  static final tabs = [analysisTab, diffTab];
 
   AppSizeController controller;
 

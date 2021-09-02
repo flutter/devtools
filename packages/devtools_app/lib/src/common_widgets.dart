@@ -13,6 +13,7 @@ import 'scaffold.dart';
 import 'theme.dart';
 import 'ui/icons.dart';
 import 'ui/label.dart';
+import 'utils.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 const tooltipWaitLong = Duration(milliseconds: 1000);
@@ -23,8 +24,7 @@ const debuggerDeviceWidth = 800.0;
 const mediumDeviceWidth = 1000.0;
 
 const defaultDialogRadius = 20.0;
-
-const areaPaneHeaderHeight = 36.0;
+double get areaPaneHeaderHeight => scaleByFontFactor(36.0);
 
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
@@ -81,7 +81,7 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
 /// A button with an icon and a label.
 ///
 /// * `onPressed`: The callback to be called upon pressing the button.
-/// * `includeTextWidth`: The minimum width the button can be before the text is
+/// * `minScreenWidthForTextBeforeScaling`: The minimum width the button can be before the text is
 ///    omitted.
 class IconLabelButton extends StatelessWidget {
   const IconLabelButton({
@@ -91,7 +91,7 @@ class IconLabelButton extends StatelessWidget {
     @required this.label,
     @required this.onPressed,
     this.color,
-    this.includeTextWidth,
+    this.minScreenWidthForTextBeforeScaling,
     this.elevatedButton = false,
     this.tooltip,
   })  : assert((icon == null) != (imageIcon == null)),
@@ -103,7 +103,7 @@ class IconLabelButton extends StatelessWidget {
 
   final String label;
 
-  final double includeTextWidth;
+  final double minScreenWidthForTextBeforeScaling;
 
   final VoidCallback onPressed;
 
@@ -120,7 +120,7 @@ class IconLabelButton extends StatelessWidget {
       label: label,
       iconData: icon,
       imageIcon: imageIcon,
-      includeTextWidth: includeTextWidth,
+      unscaleIncludeTextWidth: minScreenWidthForTextBeforeScaling,
       color: color,
     );
     if (elevatedButton) {
@@ -138,9 +138,12 @@ class IconLabelButton extends StatelessWidget {
       tooltip,
       SizedBox(
         height: defaultButtonHeight,
-        width: !includeText(context, includeTextWidth) ? buttonMinWidth : null,
+        width: !includeText(context, minScreenWidthForTextBeforeScaling)
+            ? buttonMinWidth
+            : null,
         child: OutlinedButton(
-          style: denseAwareOutlinedButtonStyle(context, includeTextWidth),
+          style: denseAwareOutlinedButtonStyle(
+              context, minScreenWidthForTextBeforeScaling),
           onPressed: onPressed,
           child: iconLabel,
         ),
@@ -152,7 +155,7 @@ class IconLabelButton extends StatelessWidget {
 class PauseButton extends IconLabelButton {
   const PauseButton({
     Key key,
-    double includeTextWidth,
+    double minScreenWidthForTextBeforeScaling,
     String tooltip = 'Pause',
     @required VoidCallback onPressed,
   }) : super(
@@ -160,7 +163,8 @@ class PauseButton extends IconLabelButton {
           icon: Icons.pause,
           label: 'Pause',
           tooltip: tooltip,
-          includeTextWidth: includeTextWidth,
+          minScreenWidthForTextBeforeScaling:
+              minScreenWidthForTextBeforeScaling,
           onPressed: onPressed,
         );
 }
@@ -168,7 +172,7 @@ class PauseButton extends IconLabelButton {
 class ResumeButton extends IconLabelButton {
   const ResumeButton({
     Key key,
-    double includeTextWidth,
+    double minScreenWidthForTextBeforeScaling,
     String tooltip = 'Resume',
     @required VoidCallback onPressed,
   }) : super(
@@ -176,7 +180,8 @@ class ResumeButton extends IconLabelButton {
           icon: Icons.play_arrow,
           label: 'Resume',
           tooltip: tooltip,
-          includeTextWidth: includeTextWidth,
+          minScreenWidthForTextBeforeScaling:
+              minScreenWidthForTextBeforeScaling,
           onPressed: onPressed,
         );
 }
@@ -184,7 +189,7 @@ class ResumeButton extends IconLabelButton {
 class ClearButton extends IconLabelButton {
   const ClearButton({
     Key key,
-    double includeTextWidth,
+    double minScreenWidthForTextBeforeScaling,
     String tooltip = 'Clear',
     @required VoidCallback onPressed,
   }) : super(
@@ -192,7 +197,8 @@ class ClearButton extends IconLabelButton {
           icon: Icons.block,
           label: 'Clear',
           tooltip: tooltip,
-          includeTextWidth: includeTextWidth,
+          minScreenWidthForTextBeforeScaling:
+              minScreenWidthForTextBeforeScaling,
           onPressed: onPressed,
         );
 }
@@ -201,14 +207,15 @@ class RefreshButton extends IconLabelButton {
   const RefreshButton({
     Key key,
     String label = 'Refresh',
-    double includeTextWidth,
+    double minScreenWidthForTextBeforeScaling,
     String tooltip,
     @required VoidCallback onPressed,
   }) : super(
           key: key,
           icon: Icons.refresh,
           label: label,
-          includeTextWidth: includeTextWidth,
+          minScreenWidthForTextBeforeScaling:
+              minScreenWidthForTextBeforeScaling,
           tooltip: tooltip,
           onPressed: onPressed,
         );
@@ -217,7 +224,7 @@ class RefreshButton extends IconLabelButton {
 /// Button to start recording data.
 ///
 /// * `recording`: Whether recording is in progress.
-/// * `includeTextWidth`: The minimum width the button can be before the text is
+/// * `minScreenWidthForTextBeforeScaling`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `labelOverride`: Optional alternative text to use for the button.
 /// * `onPressed`: The callback to be called upon pressing the button.
@@ -226,7 +233,7 @@ class RecordButton extends IconLabelButton {
     Key key,
     @required bool recording,
     @required VoidCallback onPressed,
-    double includeTextWidth,
+    double minScreenWidthForTextBeforeScaling,
     String labelOverride,
     String tooltip = 'Start recording',
   }) : super(
@@ -235,14 +242,15 @@ class RecordButton extends IconLabelButton {
           icon: Icons.fiber_manual_record,
           label: labelOverride ?? 'Record',
           tooltip: tooltip,
-          includeTextWidth: includeTextWidth,
+          minScreenWidthForTextBeforeScaling:
+              minScreenWidthForTextBeforeScaling,
         );
 }
 
 /// Button to stop recording data.
 ///
 /// * `recording`: Whether recording is in progress.
-/// * `includeTextWidth`: The minimum width the button can be before the text is
+/// * `minScreenWidthForTextBeforeScaling`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
 class StopRecordingButton extends IconLabelButton {
@@ -250,7 +258,7 @@ class StopRecordingButton extends IconLabelButton {
     Key key,
     @required bool recording,
     @required VoidCallback onPressed,
-    double includeTextWidth,
+    double minScreenWidthForTextBeforeScaling,
     String tooltip = 'Stop recording',
   }) : super(
           key: key,
@@ -258,7 +266,8 @@ class StopRecordingButton extends IconLabelButton {
           icon: Icons.stop,
           label: 'Stop',
           tooltip: tooltip,
-          includeTextWidth: includeTextWidth,
+          minScreenWidthForTextBeforeScaling:
+              minScreenWidthForTextBeforeScaling,
         );
 }
 
@@ -276,7 +285,7 @@ class SettingsOutlinedButton extends IconLabelButton {
           // impact on the existing UI and deal with the fact that some of the
           // existing label names are fairly verbose, we set a width that will
           // never be hit.
-          includeTextWidth: 20000,
+          minScreenWidthForTextBeforeScaling: 20000,
         );
 }
 
@@ -292,7 +301,7 @@ class HelpButton extends StatelessWidget {
       child: Container(
         height: defaultButtonHeight,
         width: defaultButtonHeight,
-        child: const Icon(
+        child: Icon(
           Icons.help_outline,
           size: defaultIconSize,
         ),
@@ -513,7 +522,7 @@ class BulletSpacer extends StatelessWidget {
 
   final bool useAccentColor;
 
-  static const width = DevToolsScaffold.actionWidgetSize / 2;
+  static double get width => DevToolsScaffold.actionWidgetSize / 2;
 
   @override
   Widget build(BuildContext context) {
@@ -578,18 +587,23 @@ class Badge extends StatelessWidget {
 /// common delay before the tooltip is shown.
 class DevToolsTooltip extends StatelessWidget {
   const DevToolsTooltip({
+    Key key,
     @required this.tooltip,
     @required this.child,
     this.waitDuration = tooltipWait,
     this.preferBelow = false,
     this.padding,
-  });
+    this.decoration,
+    this.textStyle,
+  }) : super(key: key);
 
   final String tooltip;
   final Widget child;
   final Duration waitDuration;
   final bool preferBelow;
   final EdgeInsetsGeometry padding;
+  final Decoration decoration;
+  final TextStyle textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -598,6 +612,12 @@ class DevToolsTooltip extends StatelessWidget {
       waitDuration: waitDuration,
       preferBelow: preferBelow,
       padding: padding,
+      textStyle: textStyle ??
+          TextStyle(
+            color: Theme.of(context).colorScheme.tooltipTextColor,
+            fontSize: defaultFontSize,
+          ),
+      decoration: decoration,
       child: child,
     );
   }
@@ -630,9 +650,8 @@ class ToolbarAction extends StatelessWidget {
 
     return tooltip == null
         ? button
-        : Tooltip(
-            message: tooltip,
-            waitDuration: tooltipWait,
+        : DevToolsTooltip(
+            tooltip: tooltip,
             child: button,
           );
   }
@@ -719,7 +738,7 @@ class ToggleButton extends StatelessWidget {
     @required this.text,
     @required this.enabledTooltip,
     @required this.disabledTooltip,
-    @required this.includeTextWidth,
+    @required this.minScreenWidthForTextBeforeScaling,
     @required this.selected,
   });
 
@@ -727,21 +746,19 @@ class ToggleButton extends StatelessWidget {
   final String text;
   final String enabledTooltip;
   final String disabledTooltip;
-  final double includeTextWidth;
+  final double minScreenWidthForTextBeforeScaling;
   final bool selected;
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: selected ? enabledTooltip : disabledTooltip,
-      waitDuration: tooltipWait,
-      preferBelow: false,
+    return DevToolsTooltip(
+      tooltip: selected ? enabledTooltip : disabledTooltip,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
         child: MaterialIconLabel(
           label: text,
           iconData: icon,
-          includeTextWidth: includeTextWidth,
+          unscaleIncludeTextWidth: minScreenWidthForTextBeforeScaling,
         ),
       ),
     );
@@ -750,14 +767,14 @@ class ToggleButton extends StatelessWidget {
 
 /// Button to export data.
 ///
-/// * `includeTextWidth`: The minimum width the button can be before the text is
+/// * `minScreenWidthForTextBeforeScaling`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
 class ExportButton extends IconLabelButton {
   const ExportButton({
     Key key,
     @required VoidCallback onPressed,
-    @required double includeTextWidth,
+    @required double minScreenWidthForTextBeforeScaling,
     String tooltip = 'Export data',
   }) : super(
           key: key,
@@ -765,7 +782,8 @@ class ExportButton extends IconLabelButton {
           icon: Icons.file_download,
           label: 'Export',
           tooltip: tooltip,
-          includeTextWidth: includeTextWidth,
+          minScreenWidthForTextBeforeScaling:
+              minScreenWidthForTextBeforeScaling,
         );
 }
 
@@ -870,7 +888,7 @@ Widget closeSearchDropdownButton(VoidCallback onPressed) {
 Widget inputDecorationSuffixButton(IconData icon, VoidCallback onPressed) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: densePadding),
-    width: 24.0,
+    width: defaultIconSize + denseSpacing,
     child: IconButton(
       padding: const EdgeInsets.all(0.0),
       onPressed: onPressed,
@@ -1018,7 +1036,7 @@ class CircularIconButton extends StatelessWidget {
       hoverColor: Theme.of(context).hoverColor,
       elevation: 0.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      constraints: const BoxConstraints.tightFor(
+      constraints: BoxConstraints.tightFor(
         width: actionsIconSize,
         height: actionsIconSize,
       ),
@@ -1284,4 +1302,46 @@ Widget maybeWrapWithTooltip(String tooltip, Widget child) {
     );
   }
   return child;
+}
+
+class Legend extends StatelessWidget {
+  const Legend({Key key, @required this.entries}) : super(key: key);
+
+  double get legendSquareSize => scaleByFontFactor(16.0);
+
+  final List<LegendEntry> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    final legendItems = entries
+        .map((entry) => _legendItem(entry.description, entry.color))
+        .toList()
+        .joinWith(const SizedBox(height: denseRowSpacing));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: legendItems,
+    );
+  }
+
+  Widget _legendItem(String description, Color color) {
+    return Row(
+      children: [
+        Container(
+          height: legendSquareSize,
+          width: legendSquareSize,
+          color: color,
+        ),
+        const SizedBox(width: denseSpacing),
+        Text(description),
+      ],
+    );
+  }
+}
+
+class LegendEntry {
+  const LegendEntry(this.description, this.color);
+
+  final String description;
+
+  final Color color;
 }

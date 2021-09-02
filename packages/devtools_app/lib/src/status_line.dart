@@ -7,8 +7,7 @@ import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../devtools.dart' as devtools;
-import 'analytics/analytics_stub.dart'
-    if (dart.library.html) 'analytics/analytics.dart' as ga;
+import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as analytics_constants;
 import 'common_widgets.dart';
 import 'config_specific/launch_url/launch_url.dart';
@@ -18,8 +17,9 @@ import 'info/info_controller.dart';
 import 'screen.dart';
 import 'service_manager.dart';
 import 'theme.dart';
+import 'utils.dart';
 
-const statusLineHeight = 24.0;
+double get statusLineHeight => scaleByFontFactor(24.0);
 
 /// The status line widget displayed at the bottom of DevTools.
 ///
@@ -110,8 +110,6 @@ class StatusLine extends StatelessWidget {
     Screen currentScreen,
     TextTheme textTheme,
   ) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     final String docPageId = currentScreen.docPageId;
     if (docPageId != null) {
       return InkWell(
@@ -125,7 +123,7 @@ class StatusLine extends StatelessWidget {
         },
         child: Text(
           'flutter.dev/devtools/$docPageId',
-          style: linkTextStyle(colorScheme),
+          style: Theme.of(context).linkTextStyle,
         ),
       );
     } else {
@@ -242,7 +240,7 @@ class StatusLine extends StatelessWidget {
                   },
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.info_outline,
                         size: actionsIconSize,
                       ),
