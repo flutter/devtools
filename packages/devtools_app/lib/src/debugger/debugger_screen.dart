@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:codicon/codicon.dart';
-import 'package:devtools_app/src/call_stack.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/services.dart';
@@ -13,6 +12,7 @@ import 'package:vm_service/vm_service.dart';
 import '../analytics/analytics_stub.dart'
     if (dart.library.html) '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
+import '../call_stack.dart';
 import '../common_widgets.dart';
 import '../config_specific/host_platform/host_platform.dart';
 import '../dialogs.dart';
