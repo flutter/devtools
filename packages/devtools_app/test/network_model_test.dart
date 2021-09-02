@@ -386,9 +386,6 @@ void main() {
   });
 
   group('DartIOHttpRequestData', () {
-    // DartIOHttpRequestData.getFullRequestData relies on a call to serviceManager to
-    // retrieve request details.
-
     NetworkController controller;
     FakeServiceManager fakeServiceManager;
     SocketProfile socketProfile;
@@ -397,6 +394,8 @@ void main() {
     setUp(() async {
       socketProfile = loadSocketProfile();
       httpProfile = loadHttpProfile();
+      // DartIOHttpRequestData.getFullRequestData relies on a call to serviceManager to
+      // retrieve request details.
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(
           socketProfile: socketProfile,

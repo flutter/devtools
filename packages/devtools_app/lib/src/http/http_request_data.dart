@@ -505,7 +505,7 @@ class DartIOHttpRequestData extends HttpRequestData {
   @visibleForTesting
   int get id => _request.id;
 
-  bool get _hasError => _request.request != null && _request.request.hasError;
+  bool get _hasError => _request.request?.hasError ?? false;
 
   int get _endTime => _hasError ? _request.endTime : _request.response.endTime;
 
