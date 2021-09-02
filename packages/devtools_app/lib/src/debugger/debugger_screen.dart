@@ -19,6 +19,7 @@ import '../dialogs.dart';
 import '../flex_split_column.dart';
 import '../globals.dart';
 import '../listenable.dart';
+import '../utils.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../theme.dart';
