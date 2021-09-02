@@ -4,9 +4,8 @@
 
 import 'dart:async';
 
-import 'analytics_common.dart';
+import 'analytics_controller.dart';
 
-FutureOr<AnalyticsController> get analyticsController => _controller;
-AnalyticsController _controller = AnalyticsController();
-
-class AnalyticsController extends AnalyticsControllerBase {}
+FutureOr<AnalyticsController> get devToolsAnalyticsController => _controller;
+AnalyticsController _controller =
+    AnalyticsController(enabled: false, firstRun: false);
