@@ -261,35 +261,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     );
   }
 
-  String _descriptionFor(StackFrameAndSourcePosition frame) {
-    const unoptimized = '[Unoptimized] ';
-    const none = '<none>';
-    const anonymousClosure = '<anonymous closure>';
-    const closure = '<closure>';
-    const asyncBreak = '<async break>';
-
-    if (frame.frame.kind == FrameKind.kAsyncSuspensionMarker) {
-      return asyncBreak;
-    }
-
-    var name = frame.frame.code?.name ?? none;
-    if (name.startsWith(unoptimized)) {
-      name = name.substring(unoptimized.length);
-    }
-    name = name.replaceAll(anonymousClosure, closure);
-    name = name == none ? name : '$name()';
-    return name;
-  }
-
-  String _locationFor(StackFrameAndSourcePosition frame) {
-    final uri = frame.scriptUri;
-    if (uri == null) {
-      return uri;
-    }
-    final file = uri.split('/').last;
-    return frame.line == null ? file : '$file ${frame.line}';
-  }
-
   Widget _breakpointsRightChild() {
     return ValueListenableBuilder(
       valueListenable: controller.breakpointsWithLocation,
@@ -327,6 +298,35 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       successMessage: 'Copied $numLines ${pluralize('line', numLines)}.',
       buttonKey: DebuggerScreenBody.copyToClipboardButtonKey,
     );
+  }
+
+  String _descriptionFor(StackFrameAndSourcePosition frame) {
+    const unoptimized = '[Unoptimized] ';
+    const none = '<none>';
+    const anonymousClosure = '<anonymous closure>';
+    const closure = '<closure>';
+    const asyncBreak = '<async break>';
+
+    if (frame.frame.kind == FrameKind.kAsyncSuspensionMarker) {
+      return asyncBreak;
+    }
+
+    var name = frame.frame.code?.name ?? none;
+    if (name.startsWith(unoptimized)) {
+      name = name.substring(unoptimized.length);
+    }
+    name = name.replaceAll(anonymousClosure, closure);
+    name = name == none ? name : '$name()';
+    return name;
+  }
+
+  String _locationFor(StackFrameAndSourcePosition frame) {
+    final uri = frame.scriptUri;
+    if (uri == null) {
+      return uri;
+    }
+    final file = uri.split('/').last;
+    return frame.line == null ? file : '$file ${frame.line}';
   }
 }
 
