@@ -28,6 +28,7 @@ import 'breakpoints.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
+import 'file_search.dart';
 import 'hover.dart';
 import 'variables.dart';
 
@@ -1145,7 +1146,7 @@ class OpenFileDialog extends StatelessWidget {
     return DevToolsDialog(
       title: dialogTitleText(Theme.of(context), 'Open file'),
       includeDivider: false,
-      content: const Text('Dialog!'),
+      content: FileSearchField(controller: _debuggerController),
       actions: const [
         DialogCancelButton(),
       ],
