@@ -274,6 +274,8 @@ extension DevToolsColorScheme on ColorScheme {
   Color get chartSubtleColor =>
       isLight ? const Color(0xFF999999) : const Color(0xFF8A8A8A);
 
+  Color get tooltipTextColor => isLight ? Colors.white : Colors.black;
+
   Color get toggleButtonBackgroundColor =>
       isLight ? const Color(0xFFE0EEFA) : const Color(0xFF2E3C48);
 
@@ -427,7 +429,7 @@ extension ThemeDataExtension on ThemeData {
   TextStyle get linkTextStyle => TextStyle(
         color: colorScheme.devtoolsLink,
         decoration: TextDecoration.underline,
-      fontSize: defaultFontSize,
+        fontSize: defaultFontSize,
       );
 }
 
@@ -509,7 +511,7 @@ const defaultCurve = Curves.easeInOutCubic;
 CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
     CurvedAnimation(curve: defaultCurve, parent: parent);
 
-const chartFontSizeSmall = 12.0;
+double get chartFontSizeSmall => scaleByFontFactor(12.0);
 
 const lightSelection = Color(0xFFD4D7DA);
 

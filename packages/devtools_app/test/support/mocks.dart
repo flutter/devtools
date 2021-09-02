@@ -618,7 +618,7 @@ class MockMemoryController extends Mock implements MemoryController {}
 class MockFlutterMemoryController extends Mock
     implements flutter_memory.MemoryController {}
 
-class MockTimelineController extends Mock implements PerformanceController {}
+class MockPerformanceController extends Mock implements PerformanceController {}
 
 class MockProfilerScreenController extends Mock
     implements ProfilerScreenController {}

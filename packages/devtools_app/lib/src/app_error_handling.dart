@@ -8,8 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 
-import 'analytics/analytics_stub.dart'
-    if (dart.library.html) 'analytics/analytics.dart' as analytics;
+import 'analytics/analytics.dart' as ga;
 import 'config_specific/logger/logger.dart';
 
 /// Set up error handling for the app.
@@ -46,5 +45,5 @@ void _reportError(Object error, StackTrace stack) {
 
   log('$error', LogLevel.error);
 
-  analytics.reportError('$error\n$terseStackTrace');
+  ga.reportError('$error\n$terseStackTrace');
 }

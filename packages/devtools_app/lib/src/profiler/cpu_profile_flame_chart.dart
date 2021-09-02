@@ -153,12 +153,10 @@ class _CpuProfileFlameChartState
     return left;
   }
 
-  // TODO(kenz): base colors on categories (Widget, Render, Layer, User code,
-  // etc.)
-  ColorPair _colorPairForStackFrame(CpuStackFrame stackFrame) {
+  ThemedColorPair _colorPairForStackFrame(CpuStackFrame stackFrame) {
     if (stackFrame.isNative) return nativeCodeColor;
     if (stackFrame.isDartCore) return dartCoreColor;
     if (stackFrame.isFlutterCore) return flutterCoreColor;
-    return cpuFlameChartNodeColor;
+    return appCodeColor;
   }
 }
