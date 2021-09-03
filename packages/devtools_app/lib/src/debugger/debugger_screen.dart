@@ -10,7 +10,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
-import '../call_stack.dart';
 import '../common_widgets.dart';
 import '../dialogs.dart';
 import '../flex_split_column.dart';
@@ -66,7 +65,7 @@ class DebuggerScreenBody extends StatefulWidget {
 
   static final codeViewKey = GlobalKey(debugLabel: 'codeViewKey');
   static final scriptViewKey = GlobalKey(debugLabel: 'scriptViewKey');
-  static const copyToClipboardButtonKey =
+  static const callStackCopyButtonKey =
       Key('debugger_call_stack_copy_to_clipboard_button');
 
   @override
@@ -199,7 +198,15 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             AreaPaneHeader(
               title: const Text(callStackTitle),
               rightActions: [
-                _callStackRightChild(),
+                CopyToClipboardControl(
+                  dataProvider: () =>
+                      controller.stackFramesWithLocation.value
+                          .map((frame) => frame.callStackDisplay)
+                          .toList()
+                          .join('\n') ??
+                      '',
+                  buttonKey: DebuggerScreenBody.callStackCopyButtonKey,
+                ),
               ],
               needsTopBorder: false,
             ),
@@ -239,51 +246,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         ]);
       },
     );
-  }
-
-  Widget _callStackRightChild() {
-    return CopyToClipboardControl(
-      dataProvider: () =>
-          controller.stackFramesWithLocation.value
-              .map((frame) {
-                final asyncMarker =
-                    frame.frame.kind == FrameKind.kAsyncSuspensionMarker;
-                return '${_descriptionFor(frame)}${asyncMarker ? null : ' ' + _locationFor(frame)}';
-              })
-              .toList()
-              .join('\n') ??
-          '',
-      buttonKey: DebuggerScreenBody.copyToClipboardButtonKey,
-    );
-  }
-
-  String _descriptionFor(StackFrameAndSourcePosition frame) {
-    const unoptimized = '[Unoptimized] ';
-    const none = '<none>';
-    const anonymousClosure = '<anonymous closure>';
-    const closure = '<closure>';
-    const asyncBreak = '<async break>';
-
-    if (frame.frame.kind == FrameKind.kAsyncSuspensionMarker) {
-      return asyncBreak;
-    }
-
-    var name = frame.frame.code?.name ?? none;
-    if (name.startsWith(unoptimized)) {
-      name = name.substring(unoptimized.length);
-    }
-    name = name.replaceAll(anonymousClosure, closure);
-    name = name == none ? name : '$name()';
-    return name;
-  }
-
-  String _locationFor(StackFrameAndSourcePosition frame) {
-    final uri = frame.scriptUri;
-    if (uri == null) {
-      return uri;
-    }
-    final file = uri.split('/').last;
-    return frame.line == null ? file : '$file ${frame.line}';
   }
 }
 
