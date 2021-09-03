@@ -3,10 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose_mixin.dart';
 import '../ui/search.dart';
+import '../utils.dart';
 import 'debugger_controller.dart';
+import 'debugger_model.dart';
+
+const int numOfMatchesToShow = 5;
 
 class FileSearchField extends StatefulWidget {
   const FileSearchField({
@@ -22,7 +27,7 @@ class FileSearchField extends StatefulWidget {
 class _FileSearchFieldState extends State<FileSearchField>
     with SearchFieldMixin, AutoDisposeMixin {
   AutoCompleteController _autoCompleteController;
-  int historyPosition = -1;
+  final Map<String, ScriptRef> _scriptsCache = {};
 
   final fileSearchFieldKey = GlobalKey(debugLabel: 'fileSearchFieldKey');
 
@@ -47,10 +52,17 @@ class _FileSearchFieldState extends State<FileSearchField>
   }
 
   void _handleSearch() async {
-    final searchingValue = _autoCompleteController.search;
-    print('searching value is $searchingValue');
-    final matches = await autoCompleteResultsFor(widget.controller);
-    _autoCompleteController.searchAutoComplete.value = matches;
+    final query = _autoCompleteController.search;
+    final matches = findMatches(query, widget.controller.sortedScripts.value);
+    matches.forEach(_addScriptRefToCache);
+    _autoCompleteController.searchAutoComplete.value =
+        matches.map((scriptRef) => scriptRef.uri).toList();
+  }
+
+  void _addScriptRefToCache(ScriptRef scriptRef) {
+    if (!_scriptsCache.containsKey(scriptRef.uri)) {
+      _scriptsCache[scriptRef.uri] = scriptRef;
+    }
   }
 
   @override
@@ -81,8 +93,11 @@ class _FileSearchFieldState extends State<FileSearchField>
     );
   }
 
-  void _onSelection(String file) {
-    print('SELECTED $file');
+  void _onSelection(String scriptUri) {
+    print('selecting $scriptUri');
+    final scriptRef = _scriptsCache[scriptUri];
+    widget.controller.showScriptLocation(ScriptLocation(scriptRef));
+    _scriptsCache.clear();
   }
 
   @override
@@ -92,10 +107,29 @@ class _FileSearchFieldState extends State<FileSearchField>
   }
 }
 
-Future<List<String>> autoCompleteResultsFor(
-  DebuggerController controller,
-) async {
-  final results = ['elephant', 'cat', 'dog', 'anteater', 'bird', 'squirrel'];
-  results.shuffle();
-  return Future<List<String>>.value(results);
+List<ScriptRef> findMatches(
+  String query,
+  List<ScriptRef> scriptRefs,
+) {
+  final exactMatches = scriptRefs
+      .where((scriptRef) => scriptRef.uri.caseInsensitiveContains(query))
+      .toList();
+
+  if (exactMatches.length >= numOfMatchesToShow) {
+    return takeTopMatches(exactMatches);
+  }
+
+  final fuzzyMatches = scriptRefs
+      .where((scriptRef) => scriptRef.uri.caseInsensitiveFuzzyMatch(query))
+      .toList();
+
+  return takeTopMatches([...exactMatches, ...fuzzyMatches]);
+}
+
+List<ScriptRef> takeTopMatches(List<ScriptRef> allMatches) {
+  if (allMatches.length <= numOfMatchesToShow) {
+    return allMatches;
+  }
+
+  return allMatches.sublist(0, numOfMatchesToShow);
 }
