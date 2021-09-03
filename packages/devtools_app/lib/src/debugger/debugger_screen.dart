@@ -199,12 +199,16 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               title: const Text(callStackTitle),
               rightActions: [
                 CopyToClipboardControl(
-                  dataProvider: () =>
-                      controller.stackFramesWithLocation.value
-                          .map((frame) => frame.callStackDisplay)
-                          .toList()
-                          .join('\n') ??
-                      '',
+                  dataProvider: () {
+                    final List<String> callStackList = controller
+                        .stackFramesWithLocation.value
+                        .map((frame) => frame.callStackDisplay)
+                        .toList();
+                    for (var i = 0; i < callStackList.length; i++) {
+                      callStackList[i] = '#$i ${callStackList[i]}';
+                    }
+                    return callStackList.join('\n') ?? '';
+                  },
                   buttonKey: DebuggerScreenBody.callStackCopyButtonKey,
                 ),
               ],

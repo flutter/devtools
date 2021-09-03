@@ -260,7 +260,7 @@ class StackFrameAndSourcePosition {
 
   String get callStackDisplay {
     final asyncMarker = frame.kind == FrameKind.kAsyncSuspensionMarker;
-    return '$description${asyncMarker ? null : ' $location'}';
+    return '$description${asyncMarker ? null : ' ($location)'}';
   }
 
   String get description {
@@ -279,7 +279,7 @@ class StackFrameAndSourcePosition {
       name = name.substring(unoptimized.length);
     }
     name = name.replaceAll(anonymousClosure, closure);
-    name = name == none ? name : '$name()';
+    name = name == none ? name : '$name';
     return name;
   }
 
@@ -289,7 +289,7 @@ class StackFrameAndSourcePosition {
       return uri;
     }
     final file = uri.split('/').last;
-    return line == null ? file : '$file $line';
+    return line == null ? file : '$file:$line';
   }
 }
 
