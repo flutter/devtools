@@ -1076,7 +1076,7 @@ void showGoToLineDialog(BuildContext context, DebuggerController controller) {
 }
 
 const goToLineOption = ScriptPopupMenuOption(
-  label: 'Go to line number',
+  label: 'Go to line number (⌘ G)',
   icon: Icons.list,
   onSelected: showGoToLineDialog,
 );
@@ -1088,8 +1088,10 @@ void showOpenFileDialog(BuildContext context, DebuggerController controller) {
   );
 }
 
-const openFileOption =
-    ScriptPopupMenuOption(label: 'Open file', onSelected: showOpenFileDialog);
+const openFileOption = ScriptPopupMenuOption(
+    label: 'Open file (⌘ P)',
+    icon: Icons.folder_open,
+    onSelected: showOpenFileDialog);
 
 class GoToLineDialog extends StatelessWidget {
   const GoToLineDialog(this._debuggerController);
