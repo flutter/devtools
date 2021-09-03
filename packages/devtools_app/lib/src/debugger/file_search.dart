@@ -16,9 +16,11 @@ const int numOfMatchesToShow = 5;
 class FileSearchField extends StatefulWidget {
   const FileSearchField({
     @required this.controller,
+    @required this.handleClose,
   });
 
   final DebuggerController controller;
+  final Function handleClose;
 
   @override
   _FileSearchFieldState createState() => _FileSearchFieldState();
@@ -101,6 +103,7 @@ class _FileSearchFieldState extends State<FileSearchField>
     final scriptRef = _scriptsCache[scriptUri];
     widget.controller.showScriptLocation(ScriptLocation(scriptRef));
     _scriptsCache.clear();
+    widget.handleClose();
   }
 
   @override

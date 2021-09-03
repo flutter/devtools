@@ -1146,7 +1146,9 @@ class OpenFileDialog extends StatelessWidget {
     return DevToolsDialog(
       title: dialogTitleText(Theme.of(context), 'Open file'),
       includeDivider: false,
-      content: FileSearchField(controller: _debuggerController),
+      content: FileSearchField(
+          controller: _debuggerController,
+          handleClose: () => Navigator.of(context).pop(dialogDefaultContext)),
       actions: const [
         DialogCancelButton(),
       ],
