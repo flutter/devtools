@@ -138,7 +138,7 @@ void main() {
             ideTheme: null,
           ),
           debugger: mockDebuggerController,
-          analytics: AnalyticsController(),
+          analytics: AnalyticsController(enabled: false, firstRun: false),
         ),
       );
       expect(find.byKey(k1), findsOneWidget);
@@ -174,7 +174,7 @@ void main() {
             ideTheme: null,
           ),
           debugger: mockDebuggerController,
-          analytics: AnalyticsController(),
+          analytics: AnalyticsController(enabled: false, firstRun: false),
         ),
       );
       expect(find.byKey(debuggerScreenKey), findsOneWidget);

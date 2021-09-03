@@ -81,6 +81,7 @@ class GtagEventDevTools extends GtagEvent {
     String devtools_version, // dimension6 DevTools version #
     String ide_launched, // dimension7 Devtools launched (CLI, VSCode, Android)
     String flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
+    bool is_external_build, // dimension9 External build or google3
 
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int ui_duration_micros,
@@ -127,6 +128,8 @@ class GtagEventDevTools extends GtagEvent {
 
   external String get flutter_client_id;
 
+  external bool get is_external_build;
+
   // Custom metrics:
   external int get ui_duration_micros;
 
@@ -158,6 +161,7 @@ GtagEventDevTools gtagEventWithScreenMetrics({
   String devtools_version,
   String ide_launched,
   String flutter_client_id,
+  bool is_external_build,
   ScreenAnalyticsMetrics screenMetrics,
 }) {
   return GtagEventDevTools(
@@ -174,6 +178,7 @@ GtagEventDevTools gtagEventWithScreenMetrics({
     devtools_version: devtoolsVersion,
     ide_launched: ideLaunched,
     flutter_client_id: flutterClientId,
+    is_external_build: isExternalBuild,
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
         : null,
@@ -265,6 +270,7 @@ void screen(
       devtools_version: devtoolsVersion,
       ide_launched: ideLaunched,
       flutter_client_id: flutterClientId,
+      is_external_build: isExternalBuild,
     ),
   );
 }

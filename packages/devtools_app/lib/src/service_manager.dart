@@ -43,8 +43,7 @@ const defaultRefreshRate = 60.0;
 // instead of Streams.
 class ServiceConnectionManager {
   ServiceConnectionManager() {
-    _serviceExtensionManager =
-        ServiceExtensionManager(isolateManager.mainIsolate);
+    _serviceExtensionManager = ServiceExtensionManager(isolateManager);
   }
 
   final StreamController<VmServiceWrapper> _connectionAvailableController =
@@ -763,13 +762,13 @@ class IsolateManager extends Disposer {
 
 /// Manager that handles tracking the service extension for the main isolate.
 class ServiceExtensionManager extends Disposer {
-  ServiceExtensionManager(this._mainIsolate);
+  ServiceExtensionManager(this._isolateManager);
 
   VmServiceWrapper _service;
 
   bool _checkForFirstFrameStarted = false;
 
-  final ValueListenable<IsolateRef> _mainIsolate;
+  final IsolateManager _isolateManager;
 
   Future<void> get firstFrameReceived => _firstFrameReceived.future;
   Completer<void> _firstFrameReceived = Completer();
@@ -903,31 +902,38 @@ class ServiceExtensionManager extends Disposer {
   }
 
   Future<void> _onMainIsolateChanged() async {
-    if (_mainIsolate.value == null) {
+    if (_isolateManager.mainIsolate.value == null) {
       _mainIsolateClosed();
       return;
     }
     _checkForFirstFrameStarted = false;
 
-    final isolateRef = _mainIsolate.value;
-    final Isolate isolate = await _service.getIsolate(isolateRef.id);
-    if (isolateRef != _mainIsolate.value) {
+    final isolateRef = _isolateManager.mainIsolate.value;
+    final Isolate isolate = await _isolateManager.getIsolateCached(isolateRef);
+
+    await _registerMainIsolate(isolate, isolateRef);
+  }
+
+  Future<void> _registerMainIsolate(
+      Isolate mainIsolate, IsolateRef expectedMainIsolateRef) async {
+    if (expectedMainIsolateRef != _isolateManager.mainIsolate.value) {
       // Isolate has changed again.
       return;
     }
-    if (isolate.extensionRPCs != null) {
+
+    if (mainIsolate.extensionRPCs != null) {
       if (await connectedApp.isFlutterApp) {
-        if (isolateRef != _mainIsolate.value) {
+        if (expectedMainIsolateRef != _isolateManager.mainIsolate.value) {
           // Isolate has changed again.
           return;
         }
         await Future.wait([
-          for (String extension in isolate.extensionRPCs)
+          for (String extension in mainIsolate.extensionRPCs)
             _maybeAddServiceExtension(extension)
         ]);
       } else {
         await Future.wait([
-          for (String extension in isolate.extensionRPCs)
+          for (String extension in mainIsolate.extensionRPCs)
             _addServiceExtension(extension)
         ]);
       }
@@ -935,7 +941,7 @@ class ServiceExtensionManager extends Disposer {
   }
 
   Future<void> _maybeCheckForFirstFlutterFrame() async {
-    final _lastMainIsolate = _mainIsolate.value;
+    final _lastMainIsolate = _isolateManager.mainIsolate.value;
     if (_checkForFirstFrameStarted ||
         _firstFrameEventReceived ||
         _lastMainIsolate == null) return;
@@ -948,7 +954,7 @@ class ServiceExtensionManager extends Disposer {
       extensions.didSendFirstFrameEvent,
       isolateId: _lastMainIsolate.id,
     );
-    if (_lastMainIsolate != _mainIsolate.value) {
+    if (_lastMainIsolate != _isolateManager.mainIsolate.value) {
       // The active isolate has changed since we started querying the first
       // frame.
       return;
@@ -995,7 +1001,7 @@ class ServiceExtensionManager extends Disposer {
   }
 
   Future<void> _restoreExtensionFromDevice(String name) async {
-    final isolateRef = _mainIsolate.value;
+    final isolateRef = _isolateManager.mainIsolate.value;
     if (isolateRef == null) return;
 
     if (!extensions.serviceExtensionsAllowlist.containsKey(name)) {
@@ -1006,14 +1012,14 @@ class ServiceExtensionManager extends Disposer {
 
     Future<void> restore() async {
       // The restore request is obsolete if the isolate has changed.
-      if (isolateRef != _mainIsolate.value) return;
+      if (isolateRef != _isolateManager.mainIsolate.value) return;
       try {
         final response = await _service.callServiceExtension(
           name,
           isolateId: isolateRef.id,
         );
 
-        if (isolateRef != _mainIsolate.value) return;
+        if (isolateRef != _isolateManager.mainIsolate.value) return;
 
         switch (expectedValueType) {
           case bool:
@@ -1044,10 +1050,10 @@ class ServiceExtensionManager extends Disposer {
       }
     }
 
-    if (isolateRef != _mainIsolate.value) return;
+    if (isolateRef != _isolateManager.mainIsolate.value) return;
 
-    final Isolate isolate = await _service.getIsolate(isolateRef.id);
-    if (isolateRef != _mainIsolate.value) return;
+    final Isolate isolate = await _isolateManager.getIsolateCached(isolateRef);
+    if (isolateRef != _isolateManager.mainIsolate.value) return;
 
     // Do not try to restore Dart IO extensions for a paused isolate.
     if (extensions.isDartIoExtension(name) &&
@@ -1075,9 +1081,9 @@ class ServiceExtensionManager extends Disposer {
       return;
     }
 
-    final mainIsolate = _mainIsolate.value;
+    final mainIsolate = _isolateManager.mainIsolate.value;
     Future<void> callExtension() async {
-      if (_mainIsolate.value != mainIsolate) return;
+      if (_isolateManager.mainIsolate.value != mainIsolate) return;
 
       assert(value != null);
       if (value is bool) {
@@ -1131,8 +1137,8 @@ class ServiceExtensionManager extends Disposer {
     }
 
     if (mainIsolate == null) return;
-    final Isolate isolate = await _service.getIsolate(mainIsolate.id);
-    if (_mainIsolate.value != mainIsolate) return;
+    final Isolate isolate = await _isolateManager.getIsolateCached(mainIsolate);
+    if (_isolateManager.mainIsolate.value != mainIsolate) return;
 
     // Do not try to call Dart IO extensions for a paused isolate.
     if (extensions.isDartIoExtension(name) &&
@@ -1247,7 +1253,8 @@ class ServiceExtensionManager extends Disposer {
     );
   }
 
-  void vmServiceOpened(VmServiceWrapper service, ConnectedApp connectedApp) {
+  void vmServiceOpened(
+      VmServiceWrapper service, ConnectedApp connectedApp) async {
     _checkForFirstFrameStarted = false;
     cancel();
     _connectedApp = connectedApp;
@@ -1258,11 +1265,15 @@ class ServiceExtensionManager extends Disposer {
       hasServiceExtension(extensions.didSendFirstFrameEvent),
       _maybeCheckForFirstFlutterFrame,
     );
-    addAutoDisposeListener(_mainIsolate, _onMainIsolateChanged);
+    addAutoDisposeListener(_isolateManager.mainIsolate, _onMainIsolateChanged);
     autoDispose(service.onDebugEvent.listen(_handleDebugEvent));
     autoDispose(service.onIsolateEvent.listen(_handleIsolateEvent));
-    if (_mainIsolate.value != null) {
-      _onMainIsolateChanged();
+    final mainIsolateRef = _isolateManager.mainIsolate.value;
+    if (mainIsolateRef != null) {
+      _checkForFirstFrameStarted = false;
+      final mainIsolate =
+          await _isolateManager.getIsolateCached(mainIsolateRef);
+      await _registerMainIsolate(mainIsolate, mainIsolateRef);
     }
   }
 }

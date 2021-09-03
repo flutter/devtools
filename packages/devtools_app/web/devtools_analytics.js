@@ -22,6 +22,7 @@ function initializeGA() {
       'dimension6': 'devtools_version',
       'dimension7': 'ide_launched',
       'dimension8': 'flutter_client_id',
+      'dimension9': 'is_external_build',
        // Custom metrics:
       'metric1': 'ui_duration_micros',
       'metric2': 'raster_duration_micros',

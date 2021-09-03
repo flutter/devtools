@@ -152,13 +152,14 @@ class NetworkController
   }
 
   void _processHttpProfileRequests({
+    @required int timelineMicrosOffset,
     @required List<HttpProfileRequest> httpRequests,
     @required List<NetworkRequest> currentValues,
     @required Map<String, HttpRequestData> outstandingRequestsMap,
   }) {
     for (final request in httpRequests) {
       final wrapped = DartIOHttpRequestData(
-        _timelineMicrosOffset,
+        timelineMicrosOffset,
         request,
       );
       final id = request.id.toString();
@@ -216,6 +217,7 @@ class NetworkController
       );
     } else {
       _processHttpProfileRequests(
+        timelineMicrosOffset: timelineMicrosOffset,
         httpRequests: httpRequests,
         currentValues: currentValues,
         outstandingRequestsMap: outstandingRequestsMap,
