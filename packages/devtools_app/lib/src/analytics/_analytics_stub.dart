@@ -13,6 +13,14 @@ Future<void> setAnalyticsEnabled(bool value) async {}
 
 FutureOr<bool> isAnalyticsEnabled() => false;
 
+void initializeGA() {}
+
+void jsHookupListenerForGA() {}
+
+Future<void> enableAnalytics() async {}
+
+Future<void> disableAnalytics() async {}
+
 void screen(
   String screenName, [
   int value = 0,
