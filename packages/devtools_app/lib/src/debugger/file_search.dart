@@ -38,25 +38,29 @@ class _FileSearchFieldState extends State<FileSearchField>
     _autoCompleteController = AutoCompleteController();
     _autoCompleteController.currentDefaultIndex = 0;
 
-    addAutoDisposeListener(_autoCompleteController.searchNotifier, () {
-      _autoCompleteController.handleAutoCompleteOverlay(
-        context: context,
-        searchFieldKey: fileSearchFieldKey,
-        onTap: _onSelection,
-      );
-    });
     addAutoDisposeListener(
         _autoCompleteController.selectTheSearchNotifier, _handleSearch);
     addAutoDisposeListener(
         _autoCompleteController.searchNotifier, _handleSearch);
+
+    _autoCompleteController.selectTheSearch = true;
   }
 
-  void _handleSearch() async {
+  void _handleSearch() {
     final query = _autoCompleteController.search;
     final matches = findMatches(query, widget.controller.sortedScripts.value);
     matches.forEach(_addScriptRefToCache);
     _autoCompleteController.searchAutoComplete.value =
         matches.map((scriptRef) => scriptRef.uri).toList();
+    _handleAutoCompleteOverlay();
+  }
+
+  void _handleAutoCompleteOverlay() {
+    _autoCompleteController.handleAutoCompleteOverlay(
+      context: context,
+      searchFieldKey: fileSearchFieldKey,
+      onTap: _onSelection,
+    );
   }
 
   void _addScriptRefToCache(ScriptRef scriptRef) {
@@ -94,7 +98,6 @@ class _FileSearchFieldState extends State<FileSearchField>
   }
 
   void _onSelection(String scriptUri) {
-    print('selecting $scriptUri');
     final scriptRef = _scriptsCache[scriptUri];
     widget.controller.showScriptLocation(ScriptLocation(scriptRef));
     _scriptsCache.clear();
@@ -111,6 +114,10 @@ List<ScriptRef> findMatches(
   String query,
   List<ScriptRef> scriptRefs,
 ) {
+  if (query.isEmpty) {
+    takeTopMatches(scriptRefs);
+  }
+
   final exactMatches = scriptRefs
       .where((scriptRef) => scriptRef.uri.caseInsensitiveContains(query))
       .toList();
@@ -123,7 +130,7 @@ List<ScriptRef> findMatches(
       .where((scriptRef) => scriptRef.uri.caseInsensitiveFuzzyMatch(query))
       .toList();
 
-  return takeTopMatches([...exactMatches, ...fuzzyMatches]);
+  return takeTopMatches([...exactMatches, ...fuzzyMatches, ...scriptRefs]);
 }
 
 List<ScriptRef> takeTopMatches(List<ScriptRef> allMatches) {
