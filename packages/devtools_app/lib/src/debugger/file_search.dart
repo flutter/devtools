@@ -11,7 +11,7 @@ import '../utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 
-const int numOfMatchesToShow = 5;
+const int numOfMatchesToShow = 6;
 
 class FileSearchField extends StatefulWidget {
   const FileSearchField({
