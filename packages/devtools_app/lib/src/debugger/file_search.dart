@@ -91,6 +91,7 @@ class _FileSearchFieldState extends State<FileSearchField>
               searchFieldKey: fileSearchFieldKey,
               searchFieldEnabled: true,
               shouldRequestFocus: true,
+              closeOverlayOnEscape: false,
               onSelection: _onSelection,
             ),
           ),
