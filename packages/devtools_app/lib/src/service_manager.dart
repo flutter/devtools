@@ -313,8 +313,6 @@ class ServiceConnectionManager {
     }
 
     _connectionAvailableController.add(service);
-
-    isolateManager.clearIsolateCache();
   }
 
   void manuallyDisconnect() {
@@ -738,10 +736,6 @@ class IsolateManager extends Disposer {
     return isolateState.isolate;
   }
 
-  void clearIsolateCache() {
-    _clearIsolateStates();
-  }
-
   void _handleDebugEvent(Event event) {
     final isolate = event.isolate;
     final isolateState = _isolateStates[isolate];
@@ -916,13 +910,22 @@ class ServiceExtensionManager extends Disposer {
 
     final isolateRef = _isolateManager.mainIsolate.value;
     final Isolate isolate = await _isolateManager.getIsolateCached(isolateRef);
-    if (isolateRef != _isolateManager.mainIsolate.value) {
+
+    await _registerIsolate(isolate, isolateRef);
+  }
+
+  Future<void> _registerIsolate(Isolate isolate,
+      [IsolateRef previousIsolateRef]) async {
+    if (previousIsolateRef != null &&
+        previousIsolateRef != _isolateManager.mainIsolate.value) {
       // Isolate has changed again.
       return;
     }
+
     if (isolate.extensionRPCs != null) {
       if (await connectedApp.isFlutterApp) {
-        if (isolateRef != _isolateManager.mainIsolate.value) {
+        if (previousIsolateRef != null &&
+            previousIsolateRef != _isolateManager.mainIsolate.value) {
           // Isolate has changed again.
           return;
         }
@@ -1252,7 +1255,8 @@ class ServiceExtensionManager extends Disposer {
     );
   }
 
-  void vmServiceOpened(VmServiceWrapper service, ConnectedApp connectedApp) {
+  void vmServiceOpened(
+      VmServiceWrapper service, ConnectedApp connectedApp) async {
     _checkForFirstFrameStarted = false;
     cancel();
     _connectedApp = connectedApp;
@@ -1267,7 +1271,10 @@ class ServiceExtensionManager extends Disposer {
     autoDispose(service.onDebugEvent.listen(_handleDebugEvent));
     autoDispose(service.onIsolateEvent.listen(_handleIsolateEvent));
     if (_isolateManager.mainIsolate.value != null) {
-      _onMainIsolateChanged();
+      _checkForFirstFrameStarted = false;
+      final isolate = await _isolateManager
+          .getIsolateCached(_isolateManager.mainIsolate.value);
+      await _registerIsolate(isolate);
     }
   }
 }
