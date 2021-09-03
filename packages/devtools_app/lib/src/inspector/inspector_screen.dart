@@ -83,8 +83,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     super.initState();
     ga.screen(InspectorScreen.id);
 
-    autoDispose(
-        serviceManager.onConnectionAvailable.listen(_handleConnectionStart));
+    autoDispose(serviceManager.onConnectionAvailable.listen((service) {
+      setState(() {
+        _handleConnectionStart(service);
+      });
+    }));
     if (serviceManager.connectedAppInitialized) {
       _handleConnectionStart(serviceManager.service);
     }
@@ -281,10 +284,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 
   void _handleConnectionStart(VmService service) async {
-    setState(() {
-      summaryTreeController = null;
-      detailsTreeController = null;
-    });
+    summaryTreeController = null;
+    detailsTreeController = null;
 
     final inspectorService = serviceManager.inspectorService;
 
@@ -293,22 +294,25 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       return;
     }
 
-    setState(() {
-      inspectorController?.dispose();
-      summaryTreeController = InspectorTreeControllerFlutter();
-      detailsTreeController = InspectorTreeControllerFlutter();
-      inspectorController = InspectorController(
-        inspectorTree: summaryTreeController,
-        detailsTree: detailsTreeController,
-        treeType: FlutterTreeType.widget,
-        onExpandCollapseSupported: _onExpandCollapseSupported,
-        onLayoutExplorerSupported: _onLayoutExplorerSupported,
-      );
+    inspectorController?.dispose();
+    summaryTreeController = InspectorTreeControllerFlutter();
+    detailsTreeController = InspectorTreeControllerFlutter();
+    inspectorController = InspectorController(
+      inspectorTree: summaryTreeController,
+      detailsTree: detailsTreeController,
+      treeType: FlutterTreeType.widget,
+      onExpandCollapseSupported: _onExpandCollapseSupported,
+      onLayoutExplorerSupported: _onLayoutExplorerSupported,
+    );
 
-      // Clear any existing badge/errors for older errors that were collected.
+    // Clear any existing badge/errors for older errors that were collected.
+    // Do this in a post frame callback so that we are not trying to clear the
+    // error notifiers for this screen while the framework is already in the
+    // process of building widgets.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
-      inspectorController.filterErrors();
     });
+    inspectorController.filterErrors();
   }
 
   void _handleConnectionStop(dynamic event) {
