@@ -313,6 +313,8 @@ class ServiceConnectionManager {
     }
 
     _connectionAvailableController.add(service);
+
+    isolateManager.clearIsolateCache();
   }
 
   void manuallyDisconnect() {
@@ -734,6 +736,10 @@ class IsolateManager extends Disposer {
     final isolateState =
         _isolateStates.putIfAbsent(isolateRef, () => IsolateState(isolateRef));
     return isolateState.isolate;
+  }
+
+  void clearIsolateCache() {
+    _clearIsolateStates();
   }
 
   void _handleDebugEvent(Event event) {
