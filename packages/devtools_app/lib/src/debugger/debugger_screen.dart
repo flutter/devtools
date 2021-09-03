@@ -275,13 +275,8 @@ class EscapeIntent extends Intent {
 class EscapeAction extends Action<EscapeIntent> {
   @override
   void invoke(EscapeIntent intent) {
-    if (intent._controller.showSearchInFileField.value) {
-      Navigator.of(intent._context).pop(dialogDefaultContext);
-      intent._controller.toggleSearchInFileVisibility(false);
-    }
-    if (intent._controller.showOpenFileModal.value) {
-      intent._controller.toggleOpenFileModal(false);
-    }
+    Navigator.of(intent._context).pop(dialogDefaultContext);
+    intent._controller.toggleSearchInFileVisibility(false);
   }
 }
 
@@ -295,8 +290,6 @@ class OpenFileIntent extends Intent {
 class OpenFileAction extends Action<OpenFileIntent> {
   @override
   void invoke(OpenFileIntent intent) {
-    intent._controller.toggleOpenFileModal(true);
-
     showOpenFileDialog(intent._context, intent._controller);
   }
 }

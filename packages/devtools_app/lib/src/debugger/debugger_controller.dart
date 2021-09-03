@@ -152,10 +152,6 @@ class DebuggerController extends DisposableController
 
   ValueListenable<bool> get showSearchInFileField => _showSearchInFileField;
 
-  final _showOpenFileModal = ValueNotifier<bool>(false);
-
-  ValueListenable<bool> get showOpenFileModal => _showOpenFileModal;
-
   final _scriptLocation = ValueNotifier<ScriptLocation>(null);
 
   ValueListenable<ScriptLocation> get scriptLocation => _scriptLocation;
@@ -1016,11 +1012,6 @@ class DebuggerController extends DisposableController
     if (!visible) {
       resetSearch();
     }
-  }
-
-  void toggleOpenFileModal(bool visible) {
-    _showOpenFileModal.value = visible;
-    print('VISIBILITY IS $visible');
   }
 
   @override
