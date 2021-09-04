@@ -32,6 +32,8 @@ import 'file_search.dart';
 import 'hover.dart';
 import 'variables.dart';
 
+const openFileDialogEnabled = false;
+
 final debuggerCodeViewSearchKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewSearchKey');
 
@@ -1054,11 +1056,16 @@ class ScriptPopupMenuOption {
   }
 }
 
-final defaultScriptPopupMenuOptions = [
-  copyScriptNameOption,
-  goToLineOption,
-  openFileOption,
-];
+final defaultScriptPopupMenuOptions = openFileDialogEnabled
+    ? [
+        copyScriptNameOption,
+        goToLineOption,
+        openFileOption,
+      ]
+    : [
+        copyScriptNameOption,
+        goToLineOption,
+      ];
 
 final copyScriptNameOption = ScriptPopupMenuOption(
   label: 'Copy filename',
@@ -1082,10 +1089,12 @@ const goToLineOption = ScriptPopupMenuOption(
 );
 
 void showOpenFileDialog(BuildContext context, DebuggerController controller) {
-  showDialog(
-    context: context,
-    builder: (context) => OpenFileDialog(controller),
-  );
+  if (openFileDialogEnabled) {
+    showDialog(
+      context: context,
+      builder: (context) => OpenFileDialog(controller),
+    );
+  }
 }
 
 const openFileOption = ScriptPopupMenuOption(
