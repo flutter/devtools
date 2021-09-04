@@ -382,13 +382,13 @@ void main() {
       expect(
         find.byWidgetPredicate((Widget widget) =>
             widget is RichText &&
-            widget.text.toPlainText().contains('testCodeRef() script.dart:0')),
+            widget.text.toPlainText().contains('testCodeRef script.dart:0')),
         findsOneWidget,
       );
 
       // verify that the frame has a tooltip
       expect(
-        find.byTooltip('testCodeRef() script.dart:0'),
+        find.byTooltip('testCodeRef script.dart:0'),
         findsOneWidget,
       );
 
@@ -403,9 +403,7 @@ void main() {
       expect(
         find.byWidgetPredicate((Widget widget) =>
             widget is RichText &&
-            widget.text
-                .toPlainText()
-                .contains('testCodeRef2() script2.dart:2')),
+            widget.text.toPlainText().contains('testCodeRef2 script2.dart:2')),
         findsOneWidget,
       );
       // Stack frame 3
@@ -414,7 +412,7 @@ void main() {
             widget is RichText &&
             widget.text
                 .toPlainText()
-                .contains('testCodeRef3.<closure>() script3.dart:3')),
+                .contains('testCodeRef3.<closure> script3.dart:3')),
         findsOneWidget,
       );
       // Stack frame 4
