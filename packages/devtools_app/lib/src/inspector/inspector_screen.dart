@@ -283,7 +283,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     });
   }
 
-  void _handleConnectionStart(VmService service) async {
+  void _handleConnectionStart(VmService service) {
     summaryTreeController = null;
     detailsTreeController = null;
 
