@@ -1,11 +1,15 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2021 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../common_widgets.dart';
+import '../dialogs.dart';
+import '../theme.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
@@ -16,11 +20,9 @@ const int numOfMatchesToShow = 6;
 class FileSearchField extends StatefulWidget {
   const FileSearchField({
     @required this.controller,
-    @required this.handleClose,
   });
 
   final DebuggerController controller;
-  final Function handleClose;
 
   @override
   _FileSearchFieldState createState() => _FileSearchFieldState();
@@ -29,7 +31,8 @@ class FileSearchField extends StatefulWidget {
 class _FileSearchFieldState extends State<FileSearchField>
     with SearchFieldMixin, AutoDisposeMixin {
   AutoCompleteController _autoCompleteController;
-  final Map<String, ScriptRef> _scriptsCache = {};
+
+  final _scriptsCache = <String, ScriptRef>{};
 
   final fileSearchFieldKey = GlobalKey(debugLabel: 'fileSearchFieldKey');
 
@@ -37,24 +40,26 @@ class _FileSearchFieldState extends State<FileSearchField>
   void initState() {
     super.initState();
 
-    _autoCompleteController = AutoCompleteController();
-    _autoCompleteController.currentDefaultIndex = 0;
+    _autoCompleteController = AutoCompleteController()..currentDefaultIndex = 0;
 
-    addAutoDisposeListener(
-        _autoCompleteController.selectTheSearchNotifier, _handleSearch);
     addAutoDisposeListener(
         _autoCompleteController.searchNotifier, _handleSearch);
+    addAutoDisposeListener(_autoCompleteController.searchAutoCompleteNotifier,
+        _handleAutoCompleteOverlay);
 
-    _autoCompleteController.selectTheSearch = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) => _handleSearch());
   }
 
   void _handleSearch() {
     final query = _autoCompleteController.search;
     final matches = findMatches(query, widget.controller.sortedScripts.value);
-    matches.forEach(_addScriptRefToCache);
-    _autoCompleteController.searchAutoComplete.value =
-        matches.map((scriptRef) => scriptRef.uri).toList();
-    _handleAutoCompleteOverlay();
+    if (matches.isEmpty) {
+      _autoCompleteController.searchAutoComplete.value = ['No files found.'];
+    } else {
+      matches.forEach(_addScriptRefToCache);
+      _autoCompleteController.searchAutoComplete.value =
+          matches.map((scriptRef) => scriptRef.uri).toList();
+    }
   }
 
   void _handleAutoCompleteOverlay() {
@@ -66,9 +71,7 @@ class _FileSearchFieldState extends State<FileSearchField>
   }
 
   void _addScriptRefToCache(ScriptRef scriptRef) {
-    if (!_scriptsCache.containsKey(scriptRef.uri)) {
-      _scriptsCache[scriptRef.uri] = scriptRef;
-    }
+    _scriptsCache.putIfAbsent(scriptRef.uri, () => scriptRef);
   }
 
   @override
@@ -78,24 +81,17 @@ class _FileSearchFieldState extends State<FileSearchField>
     return Container(
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(color: theme.focusColor),
+          top: defaultBorderSide(theme),
         ),
       ),
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          const SizedBox(width: 8.0),
-          Expanded(
-            child: buildAutoCompleteSearchField(
-              controller: _autoCompleteController,
-              searchFieldKey: fileSearchFieldKey,
-              searchFieldEnabled: true,
-              shouldRequestFocus: true,
-              closeOverlayOnEscape: false,
-              onSelection: _onSelection,
-            ),
-          ),
-        ],
+      padding: const EdgeInsets.all(denseSpacing),
+      child: buildAutoCompleteSearchField(
+        controller: _autoCompleteController,
+        searchFieldKey: fileSearchFieldKey,
+        searchFieldEnabled: true,
+        shouldRequestFocus: true,
+        closeOverlayOnEscape: false,
+        onSelection: _onSelection,
       ),
     );
   }
@@ -104,7 +100,7 @@ class _FileSearchFieldState extends State<FileSearchField>
     final scriptRef = _scriptsCache[scriptUri];
     widget.controller.showScriptLocation(ScriptLocation(scriptRef));
     _scriptsCache.clear();
-    widget.handleClose();
+    Navigator.of(context).pop(dialogDefaultContext);
   }
 
   @override
@@ -134,7 +130,7 @@ List<ScriptRef> findMatches(
       .where((scriptRef) => scriptRef.uri.caseInsensitiveFuzzyMatch(query))
       .toList();
 
-  return takeTopMatches([...exactMatches, ...fuzzyMatches, ...scriptRefs]);
+  return takeTopMatches([...exactMatches, ...fuzzyMatches]);
 }
 
 List<ScriptRef> takeTopMatches(List<ScriptRef> allMatches) {

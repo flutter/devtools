@@ -1056,16 +1056,11 @@ class ScriptPopupMenuOption {
   }
 }
 
-final defaultScriptPopupMenuOptions = openFileDialogEnabled
-    ? [
-        copyScriptNameOption,
-        goToLineOption,
-        openFileOption,
-      ]
-    : [
-        copyScriptNameOption,
-        goToLineOption,
-      ];
+final defaultScriptPopupMenuOptions = [
+  copyScriptNameOption,
+  goToLineOption,
+  if (openFileDialogEnabled) openFileOption,
+];
 
 final copyScriptNameOption = ScriptPopupMenuOption(
   label: 'Copy filename',
@@ -1098,9 +1093,10 @@ void showOpenFileDialog(BuildContext context, DebuggerController controller) {
 }
 
 const openFileOption = ScriptPopupMenuOption(
-    label: 'Open file (⌘ P)',
-    icon: Icons.folder_open,
-    onSelected: showOpenFileDialog);
+  label: 'Open file (⌘ P)',
+  icon: Icons.folder_open,
+  onSelected: showOpenFileDialog,
+);
 
 class GoToLineDialog extends StatelessWidget {
   const GoToLineDialog(this._debuggerController);
@@ -1158,13 +1154,13 @@ class OpenFileDialog extends StatelessWidget {
       title: dialogTitleText(Theme.of(context), 'Open file'),
       includeDivider: false,
       content: Container(
-          alignment: Alignment.topCenter,
-          height: 325,
-          width: 500,
-          child: FileSearchField(
-              controller: _debuggerController,
-              handleClose: () =>
-                  Navigator.of(context).pop(dialogDefaultContext))),
+        alignment: Alignment.topCenter,
+        height: 325,
+        width: 500,
+        child: FileSearchField(
+          controller: _debuggerController,
+        ),
+      ),
       actions: const [
         DialogCancelButton(),
       ],
