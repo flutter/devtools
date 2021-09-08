@@ -16,6 +16,7 @@ import '../ui/colors.dart';
 import '../ui/filter.dart';
 import '../ui/search.dart';
 import '../ui/tab.dart';
+import '../utils.dart';
 import 'cpu_profile_bottom_up.dart';
 import 'cpu_profile_call_tree.dart';
 import 'cpu_profile_controller.dart';
@@ -126,7 +127,9 @@ class _CpuProfilerState extends State<CpuProfiler>
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     final currentTab =
         widget.tabs.isNotEmpty ? widget.tabs[_tabController.index] : null;
     final hasData =
@@ -181,19 +184,21 @@ class _CpuProfilerState extends State<CpuProfiler>
                             entries: [
                               LegendEntry(
                                 'App code (code from your app and imported packages)',
-                                cpuFlameChartNodeColor.background,
+                                appCodeColor.background.colorFor(colorScheme),
                               ),
                               LegendEntry(
                                 'Native code (code from the native runtime - Android, iOS, etc.)',
-                                nativeCodeColor.background,
+                                nativeCodeColor.background
+                                    .colorFor(colorScheme),
                               ),
                               LegendEntry(
                                 'Dart core libraries (code from the Dart SDK)',
-                                dartCoreColor.background,
+                                dartCoreColor.background.colorFor(colorScheme),
                               ),
                               LegendEntry(
                                 'Flutter Framework (code from the Flutter SDK)',
-                                flutterCoreColor.background,
+                                flutterCoreColor.background
+                                    .colorFor(colorScheme),
                               ),
                             ],
                           ),
@@ -328,7 +333,7 @@ class CpuProfileFilterDialog extends StatelessWidget {
             (index) => controller.toggleFilters[index].enabled.value),
         super(key: key);
 
-  static const double _filterDialogWidth = 400.0;
+  double get _filterDialogWidth => scaleByFontFactor(400.0);
 
   final CpuProfilerController controller;
 

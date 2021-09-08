@@ -5,15 +5,12 @@
 import 'package:codicon/codicon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
-import '../config_specific/host_platform/host_platform.dart';
 import '../dialogs.dart';
 import '../flex_split_column.dart';
 import '../listenable.dart';
@@ -27,6 +24,7 @@ import 'codeview.dart';
 import 'controls.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
+import 'key_sets.dart';
 import 'scripts.dart';
 import 'variables.dart';
 
@@ -67,6 +65,8 @@ class DebuggerScreenBody extends StatefulWidget {
 
   static final codeViewKey = GlobalKey(debugLabel: 'codeViewKey');
   static final scriptViewKey = GlobalKey(debugLabel: 'scriptViewKey');
+  static const callStackCopyButtonKey =
+      Key('debugger_call_stack_copy_to_clipboard_button');
 
   @override
   DebuggerScreenBodyState createState() => DebuggerScreenBodyState();
@@ -79,12 +79,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   static const breakpointsTitle = 'Breakpoints';
 
   DebuggerController controller;
-  FocusNode _libraryFilterFocusNode;
 
   @override
   void initState() {
     super.initState();
-    _libraryFilterFocusNode = FocusNode(debugLabel: 'library-filter');
     ga.screen(DebuggerScreen.id);
   }
 
@@ -99,7 +97,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   @override
   void dispose() {
-    _libraryFilterFocusNode.dispose();
     super.dispose();
   }
 
@@ -133,9 +130,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       valueListenable: controller.librariesVisible,
       builder: (context, visible, _) {
         if (visible) {
-          // Focus the filter text field when the ScriptPicker opens.
-          _libraryFilterFocusNode.requestFocus();
-
           // TODO(devoncarew): Animate this opening and closing.
           return Split(
             axis: Axis.horizontal,
@@ -150,7 +144,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                     controller: controller,
                     scripts: scripts,
                     onSelected: _onLocationSelected,
-                    libraryFilterFocusNode: _libraryFilterFocusNode,
                   );
                 },
               ),
@@ -164,15 +157,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
     return Shortcuts(
       shortcuts: <LogicalKeySet, Intent>{
-        focusLibraryFilterKeySet:
-            FocusLibraryFilterIntent(_libraryFilterFocusNode, controller),
         goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
         searchInFileKeySet: SearchInFileIntent(controller),
         escapeKeySet: EscapeIntent(context, controller),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
-          FocusLibraryFilterIntent: FocusLibraryFilterAction(),
           GoToLineNumberIntent: GoToLineNumberAction(),
           SearchInFileIntent: SearchInFileAction(),
           EscapeIntent: EscapeAction(),
@@ -205,8 +195,23 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           initialFractions: const [0.40, 0.40, 0.20],
           minSizes: const [0.0, 0.0, 0.0],
           headers: <PreferredSizeWidget>[
-            const AreaPaneHeader(
-              title: Text(callStackTitle),
+            AreaPaneHeader(
+              title: const Text(callStackTitle),
+              rightActions: [
+                CopyToClipboardControl(
+                  dataProvider: () {
+                    final List<String> callStackList = controller
+                        .stackFramesWithLocation.value
+                        .map((frame) => frame.callStackDisplay)
+                        .toList();
+                    for (var i = 0; i < callStackList.length; i++) {
+                      callStackList[i] = '#$i ${callStackList[i]}';
+                    }
+                    return callStackList.join('\n') ?? '';
+                  },
+                  buttonKey: DebuggerScreenBody.callStackCopyButtonKey,
+                ),
+              ],
               needsTopBorder: false,
             ),
             const AreaPaneHeader(title: Text(variablesTitle)),
@@ -245,51 +250,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         ]);
       },
     );
-  }
-}
-
-// TODO(kenz): consider breaking out the key binding logic out into a separate
-// file so it is easy to find.
-final LogicalKeySet focusLibraryFilterKeySet = LogicalKeySet(
-  HostPlatform.instance.isMacOS
-      ? LogicalKeyboardKey.meta
-      : LogicalKeyboardKey.control,
-  LogicalKeyboardKey.keyP,
-);
-
-final LogicalKeySet goToLineNumberKeySet = LogicalKeySet(
-  HostPlatform.instance.isMacOS
-      ? LogicalKeyboardKey.meta
-      : LogicalKeyboardKey.control,
-  LogicalKeyboardKey.keyG,
-);
-
-final LogicalKeySet searchInFileKeySet = LogicalKeySet(
-  HostPlatform.instance.isMacOS
-      ? LogicalKeyboardKey.meta
-      : LogicalKeyboardKey.control,
-  LogicalKeyboardKey.keyF,
-);
-
-final LogicalKeySet escapeKeySet = LogicalKeySet(
-  LogicalKeyboardKey.escape,
-);
-
-class FocusLibraryFilterIntent extends Intent {
-  const FocusLibraryFilterIntent(
-    this.focusNode,
-    this.debuggerController,
-  )   : assert(debuggerController != null),
-        assert(focusNode != null);
-
-  final FocusNode focusNode;
-  final DebuggerController debuggerController;
-}
-
-class FocusLibraryFilterAction extends Action<FocusLibraryFilterIntent> {
-  @override
-  void invoke(FocusLibraryFilterIntent intent) {
-    intent.debuggerController.toggleLibrariesVisible();
   }
 }
 

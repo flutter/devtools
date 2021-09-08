@@ -642,8 +642,10 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Version> getVersion() =>
-      trackFuture('getVersion', _vmService.getVersion());
+  Future<Version> getVersion() async {
+    return _protocolVersion ??=
+        await trackFuture('getVersion', _vmService.getVersion());
+  }
 
   Future<Version> getDartIOVersion(String isolateId) =>
       trackFuture('_getDartIOVersion', _vmService.getDartIOVersion(isolateId));

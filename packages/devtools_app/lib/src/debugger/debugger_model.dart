@@ -257,6 +257,40 @@ class StackFrameAndSourcePosition {
   int get line => position?.line;
 
   int get column => position?.column;
+
+  String get callStackDisplay {
+    final asyncMarker = frame.kind == FrameKind.kAsyncSuspensionMarker;
+    return '$description${asyncMarker ? null : ' ($location)'}';
+  }
+
+  String get description {
+    const unoptimized = '[Unoptimized] ';
+    const none = '<none>';
+    const anonymousClosure = '<anonymous closure>';
+    const closure = '<closure>';
+    const asyncBreak = '<async break>';
+
+    if (frame.kind == FrameKind.kAsyncSuspensionMarker) {
+      return asyncBreak;
+    }
+
+    var name = frame.code?.name ?? none;
+    if (name.startsWith(unoptimized)) {
+      name = name.substring(unoptimized.length);
+    }
+    name = name.replaceAll(anonymousClosure, closure);
+    name = name == none ? name : '$name';
+    return name;
+  }
+
+  String get location {
+    final uri = scriptUri;
+    if (uri == null) {
+      return uri;
+    }
+    final file = uri.split('/').last;
+    return line == null ? file : '$file:$line';
+  }
 }
 
 Future<void> addExpandableChildren(
@@ -479,9 +513,7 @@ List<Variable> _createVariablesForAssociations(
       isolateRef: isolateRef,
     );
     variables.add(
-      Variable.text('[Entry $i]')
-        ..addChild(key)
-        ..addChild(value),
+      Variable.text('[Entry $i]')..addChild(key)..addChild(value),
     );
   }
   return variables;

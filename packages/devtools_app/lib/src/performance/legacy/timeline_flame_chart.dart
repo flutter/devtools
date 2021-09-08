@@ -466,7 +466,7 @@ class LegacyTimelineFlameChartState
         key: Key('${event.name} ${event.traceEvents.first.wrapperId}'),
         text: event.name,
         rect: Rect.fromLTRB(left, flameChartNodeTop, right, rowHeight),
-        colorPair: colorPair,
+        colorPair: ThemedColorPair.from(colorPair),
         data: event,
         onSelected: (dynamic event) => widget.onDataSelected(event),
         sectionIndex: section,

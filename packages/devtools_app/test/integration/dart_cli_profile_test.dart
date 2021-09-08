@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:devtools_app/src/analytics/stub_provider.dart';
+import 'package:devtools_app/src/analytics/analytics_controller.dart';
 import 'package:devtools_app/src/app.dart';
 import 'package:devtools_app/src/framework/framework_core.dart';
 import 'package:devtools_app/src/preferences.dart';
@@ -57,7 +57,7 @@ Future<void> main() async {
         bundle: _DiskAssetBundle(),
         child: DevToolsApp(
           const [],
-          await analyticsProvider,
+          await analyticsController,
         ),
       );
       await tester.pumpWidget(app);
