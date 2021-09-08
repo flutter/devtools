@@ -528,6 +528,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     InputDecoration decoration,
     bool tracking = false,
     bool supportClearField = false,
+    bool closeOverlayOnEscape = true,
   }) {
     _onSelection = onSelection;
 
@@ -539,7 +540,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
       if (event is RawKeyDownEvent) {
         final key = event.data.logicalKey.keyId & LogicalKeyboardKey.valueMask;
 
-        if (key == escape) {
+        if (key == escape && closeOverlayOnEscape) {
           // TODO(kenz): Enable this once we find a way around the navigation
           // this causes. This triggers a "back" navigation.
           // ESCAPE key pressed clear search TextField.c

@@ -28,8 +28,11 @@ import 'breakpoints.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
+import 'file_search.dart';
 import 'hover.dart';
 import 'variables.dart';
+
+const openFileDialogEnabled = false;
 
 final debuggerCodeViewSearchKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewSearchKey');
@@ -1053,7 +1056,11 @@ class ScriptPopupMenuOption {
   }
 }
 
-final defaultScriptPopupMenuOptions = [copyScriptNameOption, goToLineOption];
+final defaultScriptPopupMenuOptions = [
+  copyScriptNameOption,
+  goToLineOption,
+  if (openFileDialogEnabled) openFileOption,
+];
 
 final copyScriptNameOption = ScriptPopupMenuOption(
   label: 'Copy filename',
@@ -1071,9 +1078,24 @@ void showGoToLineDialog(BuildContext context, DebuggerController controller) {
 }
 
 const goToLineOption = ScriptPopupMenuOption(
-  label: 'Go to line number',
+  label: 'Go to line number (⌘ G)',
   icon: Icons.list,
   onSelected: showGoToLineDialog,
+);
+
+void showOpenFileDialog(BuildContext context, DebuggerController controller) {
+  if (openFileDialogEnabled) {
+    showDialog(
+      context: context,
+      builder: (context) => OpenFileDialog(controller),
+    );
+  }
+}
+
+const openFileOption = ScriptPopupMenuOption(
+  label: 'Open file (⌘ P)',
+  icon: Icons.folder_open,
+  onSelected: showOpenFileDialog,
 );
 
 class GoToLineDialog extends StatelessWidget {
@@ -1113,6 +1135,31 @@ class GoToLineDialog extends StatelessWidget {
             ],
           )
         ],
+      ),
+      actions: const [
+        DialogCancelButton(),
+      ],
+    );
+  }
+}
+
+class OpenFileDialog extends StatelessWidget {
+  const OpenFileDialog(this._debuggerController);
+
+  final DebuggerController _debuggerController;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsDialog(
+      title: dialogTitleText(Theme.of(context), 'Open file'),
+      includeDivider: false,
+      content: Container(
+        alignment: Alignment.topCenter,
+        height: 325,
+        width: 500,
+        child: FileSearchField(
+          controller: _debuggerController,
+        ),
       ),
       actions: const [
         DialogCancelButton(),
