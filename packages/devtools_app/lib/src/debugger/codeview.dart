@@ -188,7 +188,6 @@ class _CodeViewState extends State<CodeView>
     }
 
     if (!_shownFirstScript) {
-      print('shown first script');
       // TODO(annagrin): mark end of IPL timing for debugger page load here.
       _shownFirstScript = true;
     }
