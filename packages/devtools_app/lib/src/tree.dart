@@ -129,7 +129,8 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
 }
 
 class TreeViewItem<T extends TreeNode<T>> extends StatefulWidget {
-  const TreeViewItem(this.data, {this.buildDisplay, this.onItemExpanded, this.onItemSelected});
+  const TreeViewItem(this.data,
+      {this.buildDisplay, this.onItemExpanded, this.onItemSelected});
 
   final T data;
 
@@ -160,7 +161,7 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
                     child: RotationTransition(
                       turns: expandArrowAnimation,
                       child: const Icon(
-                        Icons.arrow_drop_down,
+                        Icons.keyboard_arrow_down,
                         size: defaultIconSize,
                       ),
                     ),
@@ -213,6 +214,9 @@ mixin TreeMixin<T extends TreeNode<T>> {
     for (T root in roots) {
       traverse(root, (n) {
         if (onTraverse != null) onTraverse(n);
+        if (!n.shouldShow()) {
+          return false;
+        }
         flatList.add(n);
         return n.isExpanded;
       });

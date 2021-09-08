@@ -95,8 +95,12 @@ class ScriptLocation {
 }
 
 class SourcePosition {
-  const SourcePosition(
-      {@required this.line, @required this.column, this.file, this.tokenPos});
+  const SourcePosition({
+    @required this.line,
+    @required this.column,
+    this.file,
+    this.tokenPos,
+  });
 
   factory SourcePosition.calculatePosition(Script script, int tokenPos) {
     final List<List<int>> table = script.tokenPosTable;

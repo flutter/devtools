@@ -87,6 +87,7 @@ abstract class TreeNode<T extends TreeNode<T>> {
   ///
   /// When using this, consider caching the value. It is O([level]) to compute.
   bool shouldShow() {
+    print('${parent == null}');
     return parent == null || (parent.isExpanded && parent.shouldShow());
   }
 

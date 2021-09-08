@@ -3,93 +3,20 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../common_widgets.dart';
-import '../config_specific/host_platform/host_platform.dart';
+import '../flex_split_column.dart';
 import '../theme.dart';
 import '../tree.dart';
-import '../utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
-import 'debugger_screen.dart';
 import 'program_explorer_controller.dart';
 import 'program_explorer_model.dart';
 
 const containerIcon = Icons.folder;
-const libraryIcon = Icons.insert_chart;
+const libraryIcon = Icons.insert_drive_file;
 const listItemHeight = 40.0;
-
-class _ProgramExplorerHeader extends StatelessWidget {
-  const _ProgramExplorerHeader({
-    this.controller,
-    this.libraryFilterFocusNode,
-    this.filterController,
-  });
-
-  final ProgramExplorerController controller;
-  final FocusNode libraryFilterFocusNode;
-  final TextEditingController filterController;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isMacOS = HostPlatform.instance.isMacOS;
-    final filterKey = focusLibraryFilterKeySet.describeKeys(isMacOS: isMacOS);
-
-    return Column(
-      children: [
-        AreaPaneHeader(
-          title: const Text('Program Explorer'),
-          needsTopBorder: false,
-          rightActions: [
-            ValueListenableBuilder(
-              valueListenable: controller.filteredObjectCount,
-              builder: (context, filteredCount, _) {
-                return ValueListenableBuilder(
-                  valueListenable: controller.objectCount,
-                  builder: (context, count, _) {
-                    return CountBadge(
-                      filteredItemsLength: filteredCount,
-                      itemsLength: count,
-                    );
-                  },
-                );
-              },
-            ),
-          ],
-        ),
-        Container(
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: theme.focusColor),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(denseSpacing),
-            child: SizedBox(
-              height: defaultTextFieldHeight,
-              child: TextField(
-                decoration: InputDecoration(
-                  labelText: 'Filter ($filterKey)',
-                  border: const OutlineInputBorder(),
-                ),
-                controller: filterController,
-                onChanged: (_) {
-                  final filterText = filterController.text.trim().toLowerCase();
-                  controller.updateVisibleNodes(filterText);
-                },
-                style: theme.textTheme.bodyText2,
-                focusNode: libraryFilterFocusNode,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 class _ProgramExplorerRow extends StatelessWidget {
   const _ProgramExplorerRow({
@@ -105,49 +32,36 @@ class _ProgramExplorerRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
-    Color iconColor = colorScheme.functionSyntaxColor;
-    IconData icon = containerIcon;
-    String subtext;
+    String text = node.name;
     String toolTip;
 
     if (node.object is ClassRef) {
       final clazz = node.object as ClassRef;
-      icon = Icons.class_;
-      iconColor = colorScheme.declarationsSyntaxColor;
-      toolTip = 'class ${clazz.name}';
+      toolTip = '${clazz.name}';
       if (clazz.typeParameters != null) {
         toolTip +=
             '<' + clazz.typeParameters.map((e) => e.name).join(', ') + '>';
       }
-      subtext = toolTip;
+      text = toolTip;
     } else if (node.object is Func) {
       final func = node.object as Func;
-      icon = Icons.functions;
-      iconColor = colorScheme.functionSyntaxColor;
       final isInstanceMethod = func.owner is ClassRef;
-      subtext = _buildFunctionTypeText(
+      final subtext = _buildFunctionTypeText(
         func.name,
         func.signature,
         isInstanceMethod: isInstanceMethod,
       );
       toolTip = '${func.name}$subtext';
+      text = toolTip;
     } else if (node.object is Field) {
       final field = node.object as Field;
-      icon = Icons.equalizer;
-      iconColor = colorScheme.variableSyntaxColor;
-      subtext = _buildFieldTypeText(field);
+      final subtext = _buildFieldTypeText(field);
       toolTip = '$subtext ${field.name}';
-    } else if (node.object is ScriptRef || node.script != null) {
-      icon = libraryIcon;
-      iconColor = colorScheme.stringSyntaxColor;
-      if (node.script != null) {
-        subtext = node.script.uri;
-        toolTip = subtext;
-      }
+      text = toolTip;
+    } else if (node.script != null) {
+      toolTip = node.script.uri;
     }
-
     return Tooltip(
       waitDuration: tooltipWait,
       preferBelow: false,
@@ -156,37 +70,19 @@ class _ProgramExplorerRow extends StatelessWidget {
       child: Material(
         type: MaterialType.transparency,
         child: InkWell(
-          onTap: () {
-            onTap();
-            controller.selectNode(node);
-          },
+          onTap: onTap,
           child: Row(
             children: [
-              Icon(
-                icon,
-                size: defaultIconSize,
-                color: iconColor,
+              ProgramStructureIcon(
+                object: node.object,
               ),
               const SizedBox(width: densePadding),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      node.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.fixedFontStyle,
-                    ),
-                    if (subtext != null)
-                      Text(
-                        subtext,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.subtleFixedFontStyle,
-                      ),
-                  ],
+              Flexible(
+                child: Text(
+                  text,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.fixedFontStyle,
                 ),
               ),
             ],
@@ -273,7 +169,7 @@ class _ProgramExplorerRow extends StatelessWidget {
         buffer.write(closingTag);
       }
     }
-    buffer.write(') -> ');
+    buffer.write(') → ');
     if (signature.returnType.name == null) {
       buffer.write(_buildFunctionTypeText('Function', signature.returnType));
     } else {
@@ -284,43 +180,86 @@ class _ProgramExplorerRow extends StatelessWidget {
   }
 }
 
-/// Picker that displays the program's structure, allowing for navigation and
-/// filtering.
-class ProgramExplorer extends StatefulWidget {
-  const ProgramExplorer({
-    Key key,
-    @required this.onSelected,
-    @required this.libraryFilterFocusNode,
-  }) : super(key: key);
+class ProgramStructureIcon extends StatelessWidget {
+  const ProgramStructureIcon({
+    @required this.object,
+  });
 
-  final void Function(ScriptLocation) onSelected;
-  final FocusNode libraryFilterFocusNode;
+  final ObjRef object;
 
   @override
-  ProgramExplorerState createState() => ProgramExplorerState();
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    IconData icon;
+    String character;
+    Color color = colorScheme.functionSyntaxColor;
+    if (object is ClassRef) {
+      character = 'c';
+      color = colorScheme.declarationsSyntaxColor;
+    } else if (object is FuncRef) {
+      character = 'm';
+      color = colorScheme.functionSyntaxColor;
+    } else if (object is FieldRef) {
+      character = 'f';
+      color = colorScheme.variableSyntaxColor;
+    } else if (object is LibraryRef) {
+      icon = Icons.book;
+      color = colorScheme.modifierSyntaxColor;
+    } else if (object is ScriptRef) {
+      icon = libraryIcon;
+      color = colorScheme.stringSyntaxColor;
+    } else {
+      icon = containerIcon;
+    }
+
+    return SizedBox(
+      height: defaultIconSize,
+      width: defaultIconSize,
+      child: Container(
+        width: defaultIconSize,
+        height: defaultIconSize,
+        decoration: icon == null
+            ? BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              )
+            : null,
+        child: icon == null
+            ? Center(
+                child: Text(
+                  character,
+                  style: TextStyle(
+                    fontFamily: theme.fixedFontStyle.fontFamily,
+                    color: theme.colorScheme.defaultBackgroundColor,
+                    fontSize: chartFontSizeSmall,
+                  ),
+                ),
+              )
+            : Icon(
+                icon,
+                size: defaultIconSize,
+                color: color,
+              ),
+      ),
+    );
+  }
 }
 
-class ProgramExplorerState extends State<ProgramExplorer> {
-  // TODO(devoncarew): How to retain the filter text state?
-  final _filterController = TextEditingController();
-  ProgramExplorerController controller;
-  DebuggerController debugController;
-
-  final _maxAutoExpandChildCount = 20;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    debugController = Provider.of<DebuggerController>(context);
-    controller = Provider.of<ProgramExplorerController>(context);
+/// Picker that displays the program's structure, allowing for navigation and
+/// filtering.
+class ProgramExplorer extends StatelessWidget {
+  ProgramExplorer({
+    Key key,
+    @required this.debugController,
+    @required this.onSelected,
+  }) : super(key: key) {
+    controller.initialize();
   }
 
-  @override
-  void didUpdateWidget(ProgramExplorer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    debugController = Provider.of<DebuggerController>(context);
-    controller = Provider.of<ProgramExplorerController>(context);
-  }
+  final controller = ProgramExplorerController();
+  final DebuggerController debugController;
+  final void Function(ScriptLocation) onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -329,51 +268,75 @@ class ProgramExplorerState extends State<ProgramExplorer> {
       builder: (context, initialized, _) {
         Widget body;
         if (!initialized) {
-          body = const Expanded(
-            child: CenteredCircularProgressIndicator(),
-          );
+          body = const CenteredCircularProgressIndicator();
         } else {
-          body = Expanded(
-            child: ValueListenableBuilder<List<VMServiceObjectNode>>(
-              valueListenable: controller.rootObjectNodes,
-              builder: (context, nodes, _) {
-                return TreeView<VMServiceObjectNode>(
-                  onTraverse: (node) {
-                    // Auto expand children when there are minimal search results.
-                    if (_filterController.text.isNotEmpty &&
-                        node.children.length <= _maxAutoExpandChildCount &&
-                        node.object is! ClassRef) {
-                      node.expand();
-                    }
-                  },
-                  itemExtent: listItemHeight,
-                  dataRoots: nodes,
-                  onItemSelected: _onItemSelected,
-                  onItemExpanded: _onItemExpanded,
-                  dataDisplayProvider: (node, onTap) {
-                    return _ProgramExplorerRow(
-                      controller: controller,
-                      node: node,
-                      onTap: onTap,
-                    );
-                  },
-                );
-              },
-            ),
+          body = LayoutBuilder(
+            builder: (context, constraints) {
+              return FlexSplitColumn(
+                totalHeight: constraints.maxHeight,
+                initialFractions: const [0.7, 0.3],
+                minSizes: const [0.0, 0.0],
+                headers: const <PreferredSizeWidget>[
+                  AreaPaneHeader(
+                    title: Text('File Explorer'),
+                    needsTopBorder: false,
+                  ),
+                  AreaPaneHeader(title: Text('Outline')),
+                ],
+                children: [
+                  ValueListenableBuilder<List<VMServiceObjectNode>>(
+                    valueListenable: controller.rootObjectNodes,
+                    builder: (context, nodes, _) {
+                      return TreeView<VMServiceObjectNode>(
+                        itemExtent: 25,
+                        dataRoots: nodes,
+                        onItemSelected: _onItemSelected,
+                        onItemExpanded: _onItemExpanded,
+                        dataDisplayProvider: (node, onTap) {
+                          return _ProgramExplorerRow(
+                            controller: controller,
+                            node: node,
+                            onTap: () {
+                              controller.selectNode(node);
+                              onTap();
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                  // TODO(bkonyi): add outline view.
+                  ValueListenableBuilder<List<VMServiceObjectNode>>(
+                    valueListenable: controller.outlineNodes,
+                    builder: (context, nodes, _) {
+                      if (nodes.isEmpty) {
+                        return const Center(
+                          child: Text('Nothing to inspect'),
+                        );
+                      }
+                      return TreeView<VMServiceObjectNode>(
+                        itemExtent: 28,
+                        dataRoots: nodes,
+                        onItemSelected: _onItemSelected,
+                        onItemExpanded: _onItemExpanded,
+                        dataDisplayProvider: (node, onTap) {
+                          return _ProgramExplorerRow(
+                            controller: controller,
+                            node: node,
+                            onTap: onTap,
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
           );
         }
 
         return OutlineDecoration(
-          child: Column(
-            children: [
-              _ProgramExplorerHeader(
-                controller: controller,
-                filterController: _filterController,
-                libraryFilterFocusNode: widget.libraryFilterFocusNode,
-              ),
-              body,
-            ],
-          ),
+          child: body,
         );
       },
     );
@@ -410,7 +373,7 @@ class ProgramExplorerState extends State<ProgramExplorer> {
     final location = tokenPos == 0
         ? null
         : SourcePosition.calculatePosition(script, tokenPos);
-    widget.onSelected(
+    onSelected(
       ScriptLocation(script, location: location),
     );
   }
@@ -418,29 +381,6 @@ class ProgramExplorerState extends State<ProgramExplorer> {
   void _onItemExpanded(VMServiceObjectNode node) async {
     if (node.object != null && node.object is! Obj) {
       await controller.populateNode(node);
-    }
-  }
-}
-
-class CountBadge extends StatelessWidget {
-  const CountBadge({
-    @required this.filteredItemsLength,
-    @required this.itemsLength,
-  });
-
-  final int filteredItemsLength;
-  final int itemsLength;
-
-  @override
-  Widget build(BuildContext context) {
-    if (itemsLength == 0) {
-      return Container();
-    }
-    if (filteredItemsLength == itemsLength) {
-      return Badge('${nf.format(itemsLength)}');
-    } else {
-      return Badge('${nf.format(filteredItemsLength)} of '
-          '${nf.format(itemsLength)}');
     }
   }
 }

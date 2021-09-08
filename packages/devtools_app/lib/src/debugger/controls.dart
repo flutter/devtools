@@ -124,7 +124,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
           child: Container(
             color: visible ? Theme.of(context).highlightColor : null,
             child: DebuggerButton(
-              title: 'Program Explorer',
+              title: 'Libraries',
               icon: libraryIcon,
               onPressed: controller.toggleLibrariesVisible,
             ),

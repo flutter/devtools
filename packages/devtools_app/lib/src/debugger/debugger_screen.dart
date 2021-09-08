@@ -80,13 +80,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   static const breakpointsTitle = 'Breakpoints';
 
   DebuggerController controller;
-  //ObjectTreeController objectSelectorController = ObjectTreeController();
-  FocusNode _libraryFilterFocusNode;
 
   @override
   void initState() {
     super.initState();
-    _libraryFilterFocusNode = FocusNode(debugLabel: 'library-filter');
     ga.screen(DebuggerScreen.id);
   }
 
@@ -97,12 +94,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
     controller = newController;
-  }
-
-  @override
-  void dispose() {
-    _libraryFilterFocusNode.dispose();
-    super.dispose();
   }
 
   void _onLocationSelected(ScriptLocation location) {
@@ -134,38 +125,30 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       },
     );
 
-    final codeArea = Provider(
-      create: (context) => ProgramExplorerController()..initialize(),
-      child: ValueListenableBuilder(
-        valueListenable: controller.librariesVisible,
-        builder: (context, visible, _) {
-          if (visible) {
-            // Focus the filter text field when the ScriptPicker opens.
-            _libraryFilterFocusNode.requestFocus();
-
-            // TODO(devoncarew): Animate this opening and closing.
-            return Split(
-              axis: Axis.horizontal,
-              initialFractions: const [0.70, 0.30],
-              children: [
-                codeView,
-                ProgramExplorer(
-                  libraryFilterFocusNode: _libraryFilterFocusNode,
-                  onSelected: _onLocationSelected,
-                )
-              ],
-            );
-          } else {
-            return codeView;
-          }
-        },
-      ),
+    final codeArea = ValueListenableBuilder(
+      valueListenable: controller.librariesVisible,
+      builder: (context, visible, _) {
+        if (visible) {
+          // TODO(devoncarew): Animate this opening and closing.
+          return Split(
+            axis: Axis.horizontal,
+            initialFractions: const [0.70, 0.30],
+            children: [
+              codeView,
+              ProgramExplorer(
+                debugController: controller,
+                onSelected: _onLocationSelected,
+              )
+            ],
+          );
+        } else {
+          return codeView;
+        }
+      },
     );
 
     return Shortcuts(
       shortcuts: <LogicalKeySet, Intent>{
-        focusLibraryFilterKeySet:
-            FocusLibraryFilterIntent(_libraryFilterFocusNode, controller),
         goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
         searchInFileKeySet: SearchInFileIntent(controller),
         escapeKeySet: EscapeIntent(context, controller),

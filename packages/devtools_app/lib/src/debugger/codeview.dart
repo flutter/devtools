@@ -90,6 +90,8 @@ class _CodeViewState extends State<CodeView>
 
     if (widget.initialPosition != null) {
       final location = widget.initialPosition.location;
+      // Lines are 1-indexed. Scrolling to line 1 required a scroll position of
+      // 0.
       final lineIndex = location.line - 1;
       final scrollPosition = lineIndex * CodeView.rowHeight;
       verticalController.jumpTo(scrollPosition);
@@ -416,7 +418,7 @@ class _CodeViewState extends State<CodeView>
         ),
       ),
     );
-  } 
+  }
 
   List<PopupMenuEntry<ScriptRef>> _buildScriptMenuFromHistory(
     BuildContext context,

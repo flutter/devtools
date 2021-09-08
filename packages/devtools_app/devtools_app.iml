@@ -9,6 +9,27 @@
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
+      <excludeFolder url="file://$MODULE_DIR$/linux/flutter/ephemeral/.plugin_symlinks/file_selector_linux/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/linux/flutter/ephemeral/.plugin_symlinks/file_selector_linux/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/linux/flutter/ephemeral/.plugin_symlinks/file_selector_linux/build" />
+      <excludeFolder url="file://$MODULE_DIR$/linux/flutter/ephemeral/.plugin_symlinks/url_launcher_linux/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/linux/flutter/ephemeral/.plugin_symlinks/url_launcher_linux/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/linux/flutter/ephemeral/.plugin_symlinks/url_launcher_linux/build" />
+      <excludeFolder url="file://$MODULE_DIR$/linux/flutter/ephemeral/.plugin_symlinks/url_launcher_linux/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/linux/flutter/ephemeral/.plugin_symlinks/url_launcher_linux/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/linux/flutter/ephemeral/.plugin_symlinks/url_launcher_linux/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/flutter_app/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/flutter_app/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/flutter_app/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/flutter_error_app/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/flutter_error_app/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/flutter_error_app/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/provider_app/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/provider_app/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/provider_app/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/riverpod_app/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/riverpod_app/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/fixtures/riverpod_app/build" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart SDK" level="project" />

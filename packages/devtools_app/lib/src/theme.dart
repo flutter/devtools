@@ -403,10 +403,9 @@ extension ThemeDataExtension on ThemeData {
   TextStyle get subtleFixedFontStyle =>
       fixedFontStyle.copyWith(color: unselectedWidgetColor);
 
-  TextStyle get toolTipFixedFontStyle => //colorScheme.isLight ? 
-  fixedFontStyle.copyWith(
-    color: colorScheme.isLight ? Colors.white : Colors.black,
-  );
+  TextStyle get toolTipFixedFontStyle => fixedFontStyle.copyWith(
+        color: colorScheme.isLight ? Colors.white : Colors.black,
+      );
 
   TextStyle get devToolsTitleStyle =>
       textTheme.headline6.copyWith(color: Colors.white);

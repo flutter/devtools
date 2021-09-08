@@ -7,6 +7,7 @@ import 'package:vm_service/vm_service.dart';
 import '../globals.dart';
 import '../trees.dart';
 import '../version.dart';
+import 'program_explorer_controller.dart';
 
 class VMServiceLibraryContents {
   const VMServiceLibraryContents({
@@ -83,11 +84,13 @@ class VMServiceLibraryContents {
 ///   - Function
 class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   VMServiceObjectNode(
+    this.controller,
     this.name,
     this.object, {
     this.isSelectable = true,
   });
 
+  final ProgramExplorerController controller;
   final String name;
   bool isSelectable;
 
@@ -98,37 +101,70 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   bool isSelected = false;
 
   /// This exists to allow for O(1) lookup of children when building the tree.
-  final Map<String, VMServiceObjectNode> _childrenAsMap = {};
+  final _childrenAsMap = <String, VMServiceObjectNode>{};
 
+  @override
+  bool shouldShow() {
+    // TODO: implement shouldShow
+    return true;
+  }
+
+  // TODO(bkonyi): handle empty classes
   @override
   bool get isExpandable => super.isExpandable || object is ClassRef;
 
-  /// Given a flat list of service protocol scripts, return a tree of scripts
-  /// representing the best hierarchical grouping.
-  static List<VMServiceObjectNode> createRootsFrom(
-    List<VMServiceLibraryContents> libs,
-    Expando<bool> shouldFilterExpando,
-  ) {
-    // The name of this node is not exposed to users.
-    final root = VMServiceObjectNode('<root>', ObjRef(id: '0'));
+  List<VMServiceObjectNode> _outline;
+  Future<List<VMServiceObjectNode>> get outline async {
+    if (_outline != null) {
+      return _outline;
+    }
+    final root = VMServiceObjectNode(
+      controller,
+      '<root>',
+      ObjRef(id: '0'),
+    );
 
-    for (var lib in libs) {
-      if (!shouldFilterExpando[lib.lib]) {
-        continue;
-      }
-      for (final script in lib.lib.scripts) {
-        if (!shouldFilterExpando[script]) {
-          continue;
-        }
-        _buildScriptNode(root, script, lib: lib.lib);
+    String uri;
+    Library lib;
+    if (object is Library) {
+      lib = object as Library;
+      uri = lib.uri;
+    } else {
+      // Try to find the library in the tree. If the current node isn't a
+      // library node, it's likely one of its parents are.
+      VMServiceObjectNode libNode = this;
+      while (libNode != null && libNode.object is! Library) {
+        libNode = libNode.parent;
       }
 
-      for (final clazz in lib.classes) {
-        if (!shouldFilterExpando[clazz]) {
-          continue;
-        }
-        final clazzNode = _buildScriptNode(root, clazz.location.script)
-            ._getCreateChild(clazz.name, clazz);
+      // In the case of patch files, the parent nodes won't include a library.
+      // We'll need to search for the library URI that is a prefix of the
+      // script's URI.
+      if (libNode == null) {
+        final service = serviceManager.service;
+        final isolate = serviceManager.isolateManager.selectedIsolate.value;
+        final libRef = serviceManager.isolateManager
+            .isolateDebuggerState(isolate)
+            .isolateNow
+            .libraries
+            .firstWhere(
+              (lib) => script.uri.startsWith(lib.uri),
+            );
+        lib = await service.getObject(isolate.id, libRef.id);
+      } else {
+        lib = libNode.object as Library;
+      }
+      final ScriptRef s = (object is ScriptRef) ? object : script;
+      uri = s.uri;
+    }
+
+    for (final clazz in lib.classes) {
+      if (clazz.location.script.uri == uri) {
+        final clazzNode = VMServiceObjectNode(
+          controller,
+          clazz.name,
+          clazz,
+        );
         if (clazz is Class) {
           for (final function in clazz.functions) {
             clazzNode._getCreateChild(function.name, function);
@@ -137,22 +173,62 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
             clazzNode._getCreateChild(field.name, field);
           }
         }
+        root.addChild(clazzNode);
       }
+    }
 
-      for (final function in lib.functions) {
-        if (!shouldFilterExpando[function]) {
-          continue;
-        }
-        _buildScriptNode(root, function.location.script)
-            ._getCreateChild(function.name, function);
+    for (final function in lib.functions) {
+      if (function.location.script.uri == uri) {
+        final node = VMServiceObjectNode(
+          controller,
+          function.name,
+          function,
+        );
+        await controller.populateNode(node);
+        root.addChild(
+          node,
+        );
       }
+    }
 
-      for (final field in lib.fields) {
-        if (!shouldFilterExpando[field]) {
-          continue;
-        }
-        _buildScriptNode(root, field.location.script)
-            ._getCreateChild(field.name, field);
+    for (final field in lib.variables) {
+      if (field.location.script.uri == uri) {
+        final node = VMServiceObjectNode(
+          controller,
+          field.name,
+          field,
+        );
+        await controller.populateNode(node);
+        root.addChild(
+          VMServiceObjectNode(
+            controller,
+            field.name,
+            field,
+          ),
+        );
+      }
+    }
+
+    // Clear out the _childrenAsMap map.
+    root._trimChildrenAsMapEntries();
+
+    root._sortEntriesByType();
+    _outline = root.children;
+    return _outline;
+  }
+
+  /// Given a flat list of service protocol scripts, return a tree of scripts
+  /// representing the best hierarchical grouping.
+  static List<VMServiceObjectNode> createRootsFrom(
+    ProgramExplorerController controller,
+    List<VMServiceLibraryContents> libs,
+  ) {
+    // The name of this node is not exposed to users.
+    final root = VMServiceObjectNode(controller, '<root>', ObjRef(id: '0'));
+
+    for (var lib in libs) {
+      for (final script in lib.lib.scripts) {
+        _buildScriptNode(root, script, lib: lib.lib);
       }
     }
 
@@ -164,10 +240,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     //   - Classes
     //   - Functions
     //   - Variables
-    for (final child in root.children) {
-      child._sortEntriesByType();
-    }
-    root.children.sort((a, b) => a.name.compareTo(b.name));
+    root._sortEntriesByType();
 
     return root.children;
   }
@@ -178,20 +251,26 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     LibraryRef lib,
   }) {
     final parts = script.uri.split('/');
+    print('building nodes: $parts');
     final name = parts.removeLast();
-    final dir = parts.join('/');
 
-    if (parts.isNotEmpty) {
-      // Root nodes shouldn't be selectable unless they're a library node.
-      node = node._getCreateChild(dir, null, isSelectable: false);
+    for (final part in parts) {
+      // Directory nodes shouldn't be selectable unless they're a library node.
+      node = node._getCreateChild(
+        part,
+        null,
+        isSelectable: false,
+      );
+      print('creating node: $part ${node.object} ${node.script}');
     }
+
     node = node._getCreateChild(name, script);
     if (!node.isSelectable) {
       node.isSelectable = true;
     }
     node.script = script;
 
-    // Is this is a top-level node and a library is specified, this must be a
+    // If this is a top-level node and a library is specified, this must be a
     // library node.
     if (parts.isEmpty && lib != null) {
       node.object = lib;
@@ -216,6 +295,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     bool isSelectable = true,
   }) {
     final child = VMServiceObjectNode(
+      controller,
       name,
       object,
       isSelectable: isSelectable,
@@ -248,43 +328,58 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   }
 
   void _sortEntriesByType() {
+    final folderNodes = <VMServiceObjectNode>[];
+    final libraryNodes = <VMServiceObjectNode>[];
     final scriptNodes = <VMServiceObjectNode>[];
     final classNodes = <VMServiceObjectNode>[];
     final functionNodes = <VMServiceObjectNode>[];
     final variableNodes = <VMServiceObjectNode>[];
 
     for (final child in children) {
-      switch (child.object.runtimeType) {
-        case ScriptRef:
-        case Script:
-        case LibraryRef:
-        case Library:
-          scriptNodes.add(child);
-          break;
-        case ClassRef:
-        case Class:
-          classNodes.add(child);
-          break;
-        case FuncRef:
-        case Func:
-          functionNodes.add(child);
-          break;
-        case FieldRef:
-        case Field:
-          variableNodes.add(child);
-          break;
-        default:
-          throw StateError('Unexpected type: ${child.object.runtimeType}');
+      if (child.object == null && child.script == null) {
+        // Child is a directory node. Treat it as if it were a library/script
+        // for sorting purposes.
+        print('folder: ${child.name}');
+        folderNodes.add(child);
+      } else {
+        switch (child.object.runtimeType) {
+          case ScriptRef:
+          case Script:
+            scriptNodes.add(child);
+            break;
+          case LibraryRef:
+          case Library:
+            libraryNodes.add(child);
+            break;
+          case ClassRef:
+          case Class:
+            classNodes.add(child);
+            break;
+          case FuncRef:
+          case Func:
+            functionNodes.add(child);
+            break;
+          case FieldRef:
+          case Field:
+            variableNodes.add(child);
+            break;
+          default:
+            throw StateError('Unexpected type: ${child.object.runtimeType}');
+        }
       }
       child._sortEntriesByType();
     }
 
+    folderNodes.sort((a, b) {
+      return a.name.compareTo(b.name);
+    });
+
     scriptNodes.sort((a, b) {
-      // Inputs can be either scripts or libraries, both of which always have
-      // uris, so we'll just case as dynamic.
-      final scriptA = a.object as dynamic;
-      final scriptB = b.object as dynamic;
-      return scriptA.uri.compareTo(scriptB.uri);
+      return a.name.compareTo(b.name);
+    });
+
+    libraryNodes.sort((a, b) {
+      return a.name.compareTo(b.name);
     });
 
     classNodes.sort((a, b) {
@@ -307,6 +402,8 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
     children.clear();
     children.addAll([
+      ...libraryNodes,
+      ...folderNodes,
       ...scriptNodes,
       ...classNodes,
       ...functionNodes,
