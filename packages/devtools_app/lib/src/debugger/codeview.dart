@@ -80,9 +80,13 @@ class _CodeViewState extends State<CodeView>
 
   ParsedScript get parsedScript => widget.parsedScript;
 
+  bool _shownFirstScript;
+
   @override
   void initState() {
     super.initState();
+
+    _shownFirstScript = false;
 
     verticalController = LinkedScrollControllerGroup();
     gutterController = verticalController.addAndGet();
@@ -114,6 +118,7 @@ class _CodeViewState extends State<CodeView>
     horizontalController.dispose();
     widget.controller.scriptLocation
         .removeListener(_handleScriptLocationChanged);
+    _shownFirstScript = false;
     super.dispose();
   }
 
@@ -180,6 +185,12 @@ class _CodeViewState extends State<CodeView>
 
     if (parsedScript == null) {
       return const CenteredCircularProgressIndicator();
+    }
+
+    if (!_shownFirstScript) {
+      print('shown first script');
+      // TODO(annagrin): mark end of IPL timing for debugger page load here.
+      _shownFirstScript = true;
     }
 
     return ValueListenableBuilder(
