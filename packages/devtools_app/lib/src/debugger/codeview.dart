@@ -80,13 +80,9 @@ class _CodeViewState extends State<CodeView>
 
   ParsedScript get parsedScript => widget.parsedScript;
 
-  bool _shownFirstScript;
-
   @override
   void initState() {
     super.initState();
-
-    _shownFirstScript = false;
 
     verticalController = LinkedScrollControllerGroup();
     gutterController = verticalController.addAndGet();
@@ -185,11 +181,6 @@ class _CodeViewState extends State<CodeView>
 
     if (parsedScript == null) {
       return const CenteredCircularProgressIndicator();
-    }
-
-    if (!_shownFirstScript) {
-      // TODO(annagrin): mark end of IPL timing for debugger page load here.
-      _shownFirstScript = true;
     }
 
     return ValueListenableBuilder(

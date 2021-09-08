@@ -80,10 +80,13 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   DebuggerController controller;
 
+  bool _shownFirstScript;
+
   @override
   void initState() {
     super.initState();
     ga.screen(DebuggerScreen.id);
+    _shownFirstScript = false;
   }
 
   @override
@@ -97,6 +100,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   @override
   void dispose() {
+    _shownFirstScript = false;
     super.dispose();
   }
 
@@ -114,6 +118,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         return ValueListenableBuilder(
           valueListenable: controller.currentParsedScript,
           builder: (context, parsedScript, _) {
+            if (scriptRef != null &&
+                parsedScript != null &&
+                !_shownFirstScript) {
+              // TODO(annagrin): mark end of IPL timing for debugger page here.
+              _shownFirstScript = true;
+            }
             return CodeView(
               key: DebuggerScreenBody.codeViewKey,
               controller: controller,
