@@ -75,7 +75,7 @@ class DebuggerController extends DisposableController
 
   VmServiceWrapper _lastService;
 
-  void _handleConnectionAvailable(VmServiceWrapper service) async {
+  Future<void> _handleConnectionAvailable(VmServiceWrapper service) async {
     if (service == _lastService) return;
     _lastService = service;
     onServiceShutdown();
