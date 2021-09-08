@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../dialogs.dart';
@@ -86,6 +87,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   void initState() {
     super.initState();
     ga.screen(DebuggerScreen.id);
+    ga.timeStart(DebuggerScreen.id, analytics_constants.pageReady);
     _shownFirstScript = false;
   }
 
@@ -96,12 +98,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
     controller = newController;
-  }
-
-  @override
-  void dispose() {
-    _shownFirstScript = false;
-    super.dispose();
   }
 
   void _onLocationSelected(ScriptLocation location) {
@@ -121,6 +117,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             if (scriptRef != null &&
                 parsedScript != null &&
                 !_shownFirstScript) {
+              ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
               // TODO(annagrin): mark end of IPL timing for debugger page here.
               _shownFirstScript = true;
             }

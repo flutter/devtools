@@ -114,7 +114,6 @@ class _CodeViewState extends State<CodeView>
     horizontalController.dispose();
     widget.controller.scriptLocation
         .removeListener(_handleScriptLocationChanged);
-    _shownFirstScript = false;
     super.dispose();
   }
 
