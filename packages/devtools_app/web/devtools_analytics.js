@@ -8,7 +8,11 @@ function gtag() {
   dataLayer.push(arguments);
 }
 
-// InitializeGA with our dimensions. Both the name and order (dimension #) should match the those in gtags.dart
+// InitializeGA with our dimensions. Both the name and order (dimension #) should match the those in gtags.dart.
+// Note that you will also need add the custom dimension(1) or metric(2) in the Analytics 360 Admin console:
+// [1]: https://analytics.google.com/analytics/web/#/a26406144w199489242p193859628/admin/custom-dimensions/
+// [2]: https://analytics.google.com/analytics/web/#/a26406144w199489242p193859628/admin/custom-metrics/
+// The index number assigned there should match the dimension or metric number assigned in this configuration.
 function initializeGA() {
   gtag('js', new Date());
   gtag('config', GA_DEVTOOLS_PROPERTY, {

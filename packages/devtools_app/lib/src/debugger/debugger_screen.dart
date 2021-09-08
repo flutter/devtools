@@ -65,6 +65,8 @@ class DebuggerScreenBody extends StatefulWidget {
 
   static final codeViewKey = GlobalKey(debugLabel: 'codeViewKey');
   static final scriptViewKey = GlobalKey(debugLabel: 'scriptViewKey');
+  static const callStackCopyButtonKey =
+      Key('debugger_call_stack_copy_to_clipboard_button');
 
   @override
   DebuggerScreenBodyState createState() => DebuggerScreenBodyState();
@@ -195,8 +197,23 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           initialFractions: const [0.40, 0.40, 0.20],
           minSizes: const [0.0, 0.0, 0.0],
           headers: <PreferredSizeWidget>[
-            const AreaPaneHeader(
-              title: Text(callStackTitle),
+            AreaPaneHeader(
+              title: const Text(callStackTitle),
+              rightActions: [
+                CopyToClipboardControl(
+                  dataProvider: () {
+                    final List<String> callStackList = controller
+                        .stackFramesWithLocation.value
+                        .map((frame) => frame.callStackDisplay)
+                        .toList();
+                    for (var i = 0; i < callStackList.length; i++) {
+                      callStackList[i] = '#$i ${callStackList[i]}';
+                    }
+                    return callStackList.join('\n') ?? '';
+                  },
+                  buttonKey: DebuggerScreenBody.callStackCopyButtonKey,
+                ),
+              ],
               needsTopBorder: false,
             ),
             const AreaPaneHeader(title: Text(variablesTitle)),
