@@ -1345,3 +1345,36 @@ class LegendEntry {
 
   final Color color;
 }
+
+/// The type of data provider function used by the CopyToClipboard Control.
+typedef ClipboardDataProvider = String Function();
+
+/// Control that copies `data` to the clipboard.
+///
+/// If it succeeds, it displays a notification with `successMessage`.
+class CopyToClipboardControl extends StatelessWidget {
+  const CopyToClipboardControl({
+    this.dataProvider,
+    this.successMessage = 'Copied to clipboard.',
+    this.tooltip = 'Copy to clipboard',
+    this.buttonKey,
+  });
+
+  final ClipboardDataProvider dataProvider;
+  final String successMessage;
+  final String tooltip;
+  final Key buttonKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final disabled = dataProvider == null;
+    return ToolbarAction(
+      icon: Icons.content_copy,
+      tooltip: tooltip,
+      onPressed: disabled
+          ? null
+          : () => copyToClipboard(dataProvider(), successMessage, context),
+      key: buttonKey,
+    );
+  }
+}
