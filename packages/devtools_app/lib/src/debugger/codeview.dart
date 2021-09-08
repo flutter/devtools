@@ -97,6 +97,13 @@ class _CodeViewState extends State<CodeView>
       verticalController.jumpTo(scrollPosition);
     }
 
+    if (widget.initialPosition != null) {
+      final location = widget.initialPosition.location;
+      final lineIndex = location.line - 1;
+      final scrollPosition = lineIndex * CodeView.rowHeight;
+      verticalController.jumpTo(scrollPosition);
+    }
+
     addAutoDisposeListener(
       widget.controller.scriptLocation,
       _handleScriptLocationChanged,
@@ -293,6 +300,8 @@ class _CodeViewState extends State<CodeView>
         if (lines.isNotEmpty) {
           return DefaultTextStyle(
             style: theme.fixedFontStyle,
+                          child: Container(
+                color: theme.scaffoldBackgroundColor,
             child: Expanded(
               child: Scrollbar(
                 key: CodeView.debuggerCodeViewVerticalScrollbarKey,
@@ -376,12 +385,13 @@ class _CodeViewState extends State<CodeView>
                             },
                           ),
                         ),
-                      ],
-                    );
-                  },
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
+            ),            
           );
         } else {
           return Expanded(
@@ -418,7 +428,7 @@ class _CodeViewState extends State<CodeView>
         ),
       ),
     );
-  }
+  } 
 
   List<PopupMenuEntry<ScriptRef>> _buildScriptMenuFromHistory(
     BuildContext context,
