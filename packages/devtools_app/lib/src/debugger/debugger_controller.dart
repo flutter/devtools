@@ -75,26 +75,36 @@ class DebuggerController extends DisposableController
 
   VmServiceWrapper _lastService;
 
-  void _handleConnectionAvailable(VmServiceWrapper service) {
+  void _handleConnectionAvailable(VmServiceWrapper service) async {
     if (service == _lastService) return;
     _lastService = service;
     onServiceShutdown();
     if (service != null) {
-      initialize();
+      await initialize();
     }
   }
 
-  void initialize() {
+  bool get initialized => _initialized;
+
+  bool _initialized = false;
+
+  Future<void> initialize() async {
     if (initialSwitchToIsolate) {
       assert(serviceManager.isolateManager.selectedIsolate.value != null);
-      switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
+      await switchToIsolate(
+        serviceManager.isolateManager.selectedIsolate.value,
+      );
     }
 
-    addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
-      switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
+    addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate,
+        () async {
+      await switchToIsolate(
+        serviceManager.isolateManager.selectedIsolate.value,
+      );
     });
     autoDispose(_service.onDebugEvent.listen(_handleDebugEvent));
     autoDispose(_service.onIsolateEvent.listen(_handleIsolateEvent));
+    _initialized = true;
   }
 
   final bool initialSwitchToIsolate;
@@ -157,8 +167,8 @@ class DebuggerController extends DisposableController
   ValueListenable<ScriptLocation> get scriptLocation => _scriptLocation;
 
   /// Jump to the given ScriptRef and optional SourcePosition.
-  void showScriptLocation(ScriptLocation scriptLocation) {
-    _showScriptLocation(scriptLocation);
+  Future<void> showScriptLocation(ScriptLocation scriptLocation) async {
+    await _showScriptLocation(scriptLocation);
 
     // Update the scripts history (and make sure we don't react to the
     // subsequent event).
@@ -169,10 +179,10 @@ class DebuggerController extends DisposableController
 
   /// Show the given script location (without updating the script navigation
   /// history).
-  void _showScriptLocation(ScriptLocation scriptLocation) {
+  Future<void> _showScriptLocation(ScriptLocation scriptLocation) async {
     _currentScriptRef.value = scriptLocation?.scriptRef;
 
-    _parseCurrentScript();
+    await _parseCurrentScript();
 
     // We want to notify regardless of the previous scriptLocation, temporarily
     // set to null to ensure that happens.
@@ -313,7 +323,7 @@ class DebuggerController extends DisposableController
 
   final EvalHistory evalHistory = EvalHistory();
 
-  void switchToIsolate(IsolateRef ref) async {
+  Future<void> switchToIsolate(IsolateRef ref) async {
     isolateRef = ref;
     _isPaused.value = false;
     await _pause(false);
@@ -662,7 +672,7 @@ class DebuggerController extends DisposableController
 
       if (newScriptRef != null) {
         // Display the script location.
-        _populateScriptAndShowLocation(newScriptRef);
+        await _populateScriptAndShowLocation(newScriptRef);
       }
     }
   }
@@ -671,9 +681,9 @@ class DebuggerController extends DisposableController
   ///
   /// This method ensures that the source for the script is populated in our
   /// cache, in order to reduce flashing in the editor view.
-  void _populateScriptAndShowLocation(ScriptRef scriptRef) {
-    getScript(scriptRef).then((script) {
-      showScriptLocation(ScriptLocation(scriptRef));
+  Future<void> _populateScriptAndShowLocation(ScriptRef scriptRef) async {
+    await getScript(scriptRef).then((_) async {
+      await showScriptLocation(ScriptLocation(scriptRef));
     });
   }
 
@@ -856,7 +866,7 @@ class DebuggerController extends DisposableController
     }, orElse: () => null);
 
     // Display the script location.
-    _populateScriptAndShowLocation(mainScriptRef);
+    await _populateScriptAndShowLocation(mainScriptRef);
   }
 
   SourcePosition calculatePosition(Script script, int tokenPos) {

@@ -169,7 +169,9 @@ class _CodeViewState extends State<CodeView>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    if (scriptRef == null) {
+    // Only show the 'No script selected' text when the controller has already
+    // been initialized.
+    if (scriptRef == null && widget.controller.initialized) {
       return Center(
         child: Text(
           'No script selected',

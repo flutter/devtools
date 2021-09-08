@@ -206,8 +206,10 @@ void main() {
         // TODO(elliette): https://github.com/flutter/flutter/pull/88152 fixes
         // this so that forcing a scroll event is no longer necessary. Remove
         // once the change is in the stable release.
-        debuggerController.showScriptLocation(ScriptLocation(mockScriptRef,
-            location: SourcePosition(line: 50, column: 50)));
+        await debuggerController.showScriptLocation(ScriptLocation(
+          mockScriptRef,
+          location: SourcePosition(line: 50, column: 50),
+        ));
         await tester.pumpAndSettle();
 
         expect(find.byType(Scrollbar), findsNWidgets(2));
