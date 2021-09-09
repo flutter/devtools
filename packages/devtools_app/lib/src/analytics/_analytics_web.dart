@@ -275,7 +275,7 @@ void screen(
   );
 }
 
-String _timedOperationKeyHelper(String screenName, String timedOperation) {
+String _operationKey(String screenName, String timedOperation) {
   return '$screenName-$timedOperation';
 }
 
@@ -286,7 +286,7 @@ final _timedOperationsInProgress = <String, DateTime>{};
 // end marks.
 void timeStart(String screenName, String timedOperation) {
   final startTime = DateTime.now();
-  final operationKey = _timedOperationKeyHelper(
+  final operationKey = _operationKey(
     screenName,
     timedOperation,
   );
@@ -302,11 +302,12 @@ void timeEnd(
   ScreenAnalyticsMetrics Function() screenMetricsProvider,
 }) {
   final endTime = DateTime.now();
-  final operationKey = _timedOperationKeyHelper(
+  final operationKey = _operationKey(
     screenName,
     timedOperation,
   );
-  final startTime = _timedOperationsInProgress[operationKey];
+  final startTime = _timedOperationsInProgress.remove(operationKey);
+  assert(startTime != null);
   if (startTime == null) {
     log(
       'Could not time operation "$timedOperation" because a) `timeEnd` was '
@@ -325,7 +326,6 @@ void timeEnd(
     screenMetrics:
         screenMetricsProvider != null ? screenMetricsProvider() : null,
   );
-  _timedOperationsInProgress.remove(operationKey);
 }
 
 // Use this when a synchronous operation can be timed in a callback.
