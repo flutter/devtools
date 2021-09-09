@@ -32,8 +32,6 @@ import 'file_search.dart';
 import 'hover.dart';
 import 'variables.dart';
 
-const openFileDialogEnabled = false;
-
 final debuggerCodeViewSearchKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewSearchKey');
 
@@ -172,7 +170,7 @@ class _CodeViewState extends State<CodeView>
     if (scriptRef == null) {
       return Center(
         child: Text(
-          'No script selected',
+          'Open a file: ⌘ P',
           style: theme.textTheme.subtitle1,
         ),
       );
@@ -1059,7 +1057,7 @@ class ScriptPopupMenuOption {
 final defaultScriptPopupMenuOptions = [
   copyScriptNameOption,
   goToLineOption,
-  if (openFileDialogEnabled) openFileOption,
+  openFileOption,
 ];
 
 final copyScriptNameOption = ScriptPopupMenuOption(
@@ -1084,12 +1082,10 @@ const goToLineOption = ScriptPopupMenuOption(
 );
 
 void showOpenFileDialog(BuildContext context, DebuggerController controller) {
-  if (openFileDialogEnabled) {
-    showDialog(
-      context: context,
-      builder: (context) => OpenFileDialog(controller),
-    );
-  }
+  showDialog(
+    context: context,
+    builder: (context) => OpenFileDialog(controller),
+  );
 }
 
 const openFileOption = ScriptPopupMenuOption(
