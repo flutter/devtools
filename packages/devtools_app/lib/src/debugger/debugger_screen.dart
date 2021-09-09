@@ -292,8 +292,14 @@ class EscapeIntent extends Intent {
 class EscapeAction extends Action<EscapeIntent> {
   @override
   void invoke(EscapeIntent intent) {
-    Navigator.of(intent._context).pop(dialogDefaultContext);
-    intent._controller.toggleSearchInFileVisibility(false);
+    if (intent._controller.showSearchInFileField.value) {
+      Navigator.of(intent._context).pop(dialogDefaultContext);
+      intent._controller.toggleSearchInFileVisibility(false);
+    }
+    print('show file opener ${intent._controller.showFileOpener.value}');
+    if (intent._controller.showFileOpener.value) {
+      intent._controller.toggleFileOpener(false);
+    }
   }
 }
 
@@ -307,7 +313,8 @@ class OpenFileIntent extends Intent {
 class OpenFileAction extends Action<OpenFileIntent> {
   @override
   void invoke(OpenFileIntent intent) {
-    showOpenFileDialog(intent._context, intent._controller);
+    intent._controller.toggleFileOpener(true);
+    // showOpenFileDialog(intent._context, intent._controller);
   }
 }
 

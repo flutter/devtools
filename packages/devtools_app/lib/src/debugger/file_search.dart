@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/common_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose_mixin.dart';
-import '../common_widgets.dart';
-import '../dialogs.dart';
-import '../theme.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
+import '../common_widgets.dart';
 
-const int numOfMatchesToShow = 6;
+const int numOfMatchesToShow = 10;
 
 class FileSearchField extends StatefulWidget {
   const FileSearchField({
@@ -77,31 +77,29 @@ class _FileSearchFieldState extends State<FileSearchField>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          top: defaultBorderSide(theme),
-        ),
-      ),
-      padding: const EdgeInsets.all(denseSpacing),
-      child: buildAutoCompleteSearchField(
-        controller: _autoCompleteController,
-        searchFieldKey: fileSearchFieldKey,
-        searchFieldEnabled: true,
-        shouldRequestFocus: true,
-        closeOverlayOnEscape: false,
-        onSelection: _onSelection,
-      ),
+    return buildAutoCompleteSearchField(
+      controller: _autoCompleteController,
+      searchFieldKey: fileSearchFieldKey,
+      searchFieldEnabled: true,
+      shouldRequestFocus: true,
+      keyEventsToPropogate: {LogicalKeyboardKey.escape},
+      onSelection: _onSelection,
+      onClose: _onClose,
     );
   }
 
   void _onSelection(String scriptUri) {
     final scriptRef = _scriptsCache[scriptUri];
     widget.controller.showScriptLocation(ScriptLocation(scriptRef));
+    _onClose();
+  }
+
+  void _onClose() {
+    setState(() {
+      _autoCompleteController.closeAutoCompleteOverlay();
+    });
+    widget.controller.toggleFileOpener(false);
     _scriptsCache.clear();
-    Navigator.of(context).pop(dialogDefaultContext);
   }
 
   @override

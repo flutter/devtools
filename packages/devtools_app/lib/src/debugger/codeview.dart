@@ -32,7 +32,7 @@ import 'file_search.dart';
 import 'hover.dart';
 import 'variables.dart';
 
-const openFileDialogEnabled = false;
+const openFileDialogEnabled = true;
 
 final debuggerCodeViewSearchKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewSearchKey');
@@ -167,6 +167,28 @@ class _CodeViewState extends State<CodeView>
 
   @override
   Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+        valueListenable: widget.controller.showFileOpener,
+        builder: (context, showFileOpener, _) {
+          return Stack(
+            children: [
+              buildCodeviewContent(context),
+              if (showFileOpener)
+                Positioned(
+                  // top: denseSpacing,
+                  left: 110.0,
+                  child: wrapInElevatedCard(
+                    FileSearchField(
+                      controller: widget.controller,
+                    ),
+                  ),
+                ),
+            ],
+          );
+        });
+  }
+
+  Widget buildCodeviewContent(BuildContext context) {
     final theme = Theme.of(context);
 
     if (scriptRef == null) {
@@ -377,7 +399,7 @@ class _CodeViewState extends State<CodeView>
     );
   }
 
-  Widget buildSearchInFileField() {
+  Widget wrapInElevatedCard(Widget widget) {
     return Card(
       elevation: defaultElevation,
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -388,14 +410,20 @@ class _CodeViewState extends State<CodeView>
         width: wideSearchTextWidth,
         height: defaultTextFieldHeight + 2 * denseSpacing,
         padding: const EdgeInsets.all(denseSpacing),
-        child: buildSearchField(
-          controller: widget.controller,
-          searchFieldKey: debuggerCodeViewSearchKey,
-          searchFieldEnabled: parsedScript != null,
-          shouldRequestFocus: true,
-          supportsNavigation: true,
-          onClose: () => widget.controller.toggleSearchInFileVisibility(false),
-        ),
+        child: widget,
+      ),
+    );
+  }
+
+  Widget buildSearchInFileField() {
+    return wrapInElevatedCard(
+      buildSearchField(
+        controller: widget.controller,
+        searchFieldKey: debuggerCodeViewSearchKey,
+        searchFieldEnabled: parsedScript != null,
+        shouldRequestFocus: true,
+        supportsNavigation: true,
+        onClose: () => widget.controller.toggleSearchInFileVisibility(false),
       ),
     );
   }
@@ -1083,19 +1111,14 @@ const goToLineOption = ScriptPopupMenuOption(
   onSelected: showGoToLineDialog,
 );
 
-void showOpenFileDialog(BuildContext context, DebuggerController controller) {
-  if (openFileDialogEnabled) {
-    showDialog(
-      context: context,
-      builder: (context) => OpenFileDialog(controller),
-    );
-  }
+void showFileOpener(BuildContext context, DebuggerController controller) {
+  controller.toggleFileOpener(true);
 }
 
 const openFileOption = ScriptPopupMenuOption(
   label: 'Open file (⌘ P)',
   icon: Icons.folder_open,
-  onSelected: showOpenFileDialog,
+  onSelected: showFileOpener,
 );
 
 class GoToLineDialog extends StatelessWidget {
@@ -1151,15 +1174,17 @@ class OpenFileDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsDialog(
-      title: dialogTitleText(Theme.of(context), 'Open file'),
+      title: FileSearchField(
+        controller: _debuggerController,
+      ),
       includeDivider: false,
-      content: Container(
-        alignment: Alignment.topCenter,
-        height: 325,
+      content: const SizedBox(
+        // alignment: Alignment.topCenter,
+        height: 340,
         width: 500,
-        child: FileSearchField(
-          controller: _debuggerController,
-        ),
+        // child: FileSearchField(
+        //   controller: _debuggerController,
+        // ),
       ),
       actions: const [
         DialogCancelButton(),

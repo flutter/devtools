@@ -518,6 +518,8 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   /// [tracking] if true displays pop-up to the right of the TextField's caret.
   /// [supportClearField] if true clear TextField content if pop-up not visible. If
   /// pop-up is visible close the pop-up on first ESCAPE.
+  /// [keyEventsToPropogate] a set of key events that should be propogated to
+  /// other handlers
   Widget buildAutoCompleteSearchField({
     @required AutoCompleteSearchControllerMixin controller,
     @required GlobalKey searchFieldKey,
@@ -528,7 +530,8 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     InputDecoration decoration,
     bool tracking = false,
     bool supportClearField = false,
-    bool closeOverlayOnEscape = true,
+    Set<LogicalKeyboardKey> keyEventsToPropogate = const {},
+    VoidCallback onClose,
   }) {
     _onSelection = onSelection;
 
@@ -540,7 +543,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
       if (event is RawKeyDownEvent) {
         final key = event.data.logicalKey.keyId & LogicalKeyboardKey.valueMask;
 
-        if (key == escape && closeOverlayOnEscape) {
+        if (key == escape) {
           // TODO(kenz): Enable this once we find a way around the navigation
           // this causes. This triggers a "back" navigation.
           // ESCAPE key pressed clear search TextField.c
@@ -550,7 +553,8 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
             // If pop-up closed ESCAPE will clean the TextField.
             clearSearchField(controller, force: true);
           }
-          return KeyEventResult.handled;
+
+          return _determineKeyEventResult(key, keyEventsToPropogate);
         } else if (controller.autoCompleteOverlay != null) {
           if (key == enter || key == enterMac || key == tab || key == tabMac) {
             // Enter / Tab pressed.
@@ -579,18 +583,18 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
               controller.selectTheSearch = true;
               controller.search = foundExact;
               onSelection(foundExact);
-              return KeyEventResult.handled;
+              return _determineKeyEventResult(key, keyEventsToPropogate);
             }
           } else if (key == arrowDown || key == arrowUp) {
             onHighlightDropdown(controller, key == arrowDown);
-            return KeyEventResult.handled;
+            return _determineKeyEventResult(key, keyEventsToPropogate);
           }
         }
 
         // We don't support tabs in the search input. Swallow to prevent a
         // change of focus.
         if (key == tab || key == tabMac) {
-          return KeyEventResult.handled;
+          _determineKeyEventResult(key, keyEventsToPropogate);
         }
       }
 
@@ -607,8 +611,18 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
         autoCompleteLayerLink: controller.autoCompleteLayerLink,
         decoration: decoration,
         tracking: tracking,
+        onClose: onClose,
       ),
     );
+  }
+
+  KeyEventResult _determineKeyEventResult(
+      int keyEventId, Set<LogicalKeyboardKey> keyEventsToPropogate) {
+    final shouldPropogateKeyEvent = keyEventsToPropogate
+        .any((key) => key.keyId & LogicalKeyboardKey.valueMask == keyEventId);
+    return shouldPropogateKeyEvent
+        ? KeyEventResult.ignored
+        : KeyEventResult.handled;
   }
 
   void _highlightDropdown(
