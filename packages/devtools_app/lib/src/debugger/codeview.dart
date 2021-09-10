@@ -174,7 +174,6 @@ class _CodeViewState extends State<CodeView>
               buildCodeviewContent(context),
               if (showFileOpener)
                 Positioned(
-                  // top: denseSpacing,
                   left: 110.0,
                   child: wrapInElevatedCard(
                     FileSearchField(
@@ -1157,33 +1156,6 @@ class GoToLineDialog extends StatelessWidget {
             ],
           )
         ],
-      ),
-      actions: const [
-        DialogCancelButton(),
-      ],
-    );
-  }
-}
-
-class OpenFileDialog extends StatelessWidget {
-  const OpenFileDialog(this._debuggerController);
-
-  final DebuggerController _debuggerController;
-
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsDialog(
-      title: FileSearchField(
-        controller: _debuggerController,
-      ),
-      includeDivider: false,
-      content: const SizedBox(
-        // alignment: Alignment.topCenter,
-        height: 340,
-        width: 500,
-        // child: FileSearchField(
-        //   controller: _debuggerController,
-        // ),
       ),
       actions: const [
         DialogCancelButton(),

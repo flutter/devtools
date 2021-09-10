@@ -303,7 +303,6 @@ class EscapeAction extends Action<EscapeIntent> {
       Navigator.of(intent._context).pop(dialogDefaultContext);
       intent._controller.toggleSearchInFileVisibility(false);
     }
-    print('show file opener ${intent._controller.showFileOpener.value}');
     if (intent._controller.showFileOpener.value) {
       intent._controller.toggleFileOpener(false);
     }
@@ -321,7 +320,6 @@ class OpenFileAction extends Action<OpenFileIntent> {
   @override
   void invoke(OpenFileIntent intent) {
     intent._controller.toggleFileOpener(true);
-    // showOpenFileDialog(intent._context, intent._controller);
   }
 }
 
