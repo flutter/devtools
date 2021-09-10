@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/common_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +12,6 @@ import '../ui/search.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
-import '../common_widgets.dart';
 
 const int numOfMatchesToShow = 10;
 
