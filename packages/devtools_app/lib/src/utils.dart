@@ -966,7 +966,8 @@ extension LogicalKeySetExtension on LogicalKeySet {
     return sortedKeys.map((key) {
       if (_modifiers.contains(key)) {
         if (isMacOS && key == LogicalKeyboardKey.meta) {
-          // TODO(#3352) Switch back to using ⌘ once supported on web.
+          // TODO(https://github.com/flutter/devtools/issues/3352) Switch back
+          // to using ⌘ once supported on web.
           return kIsWeb ? 'Command-' : '⌘';
         }
         return '${_modifierNames[key]}-';
