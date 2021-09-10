@@ -366,8 +366,10 @@ class ServiceConnectionManager {
     );
   }
 
-  Future<void> sendDwdsEvent(
-      {@required String screen, @required String action}) async {
+  Future<void> sendDwdsEvent({
+    @required String screen,
+    @required String action,
+  }) async {
     if (!kIsWeb) return;
     return await _callServiceExtensionOnMainIsolate(registrations.dwdsSendEvent,
         args: {
@@ -375,7 +377,7 @@ class ServiceConnectionManager {
           'payload': {
             'screen': screen,
             'action': action,
-          }
+          },
         });
   }
 
