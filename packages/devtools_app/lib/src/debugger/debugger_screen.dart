@@ -167,7 +167,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
         searchInFileKeySet: SearchInFileIntent(controller),
         escapeKeySet: EscapeIntent(context, controller),
-        openFileKeySet: OpenFileIntent(context, controller),
+        openFileKeySet: OpenFileIntent(controller),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
@@ -310,9 +310,8 @@ class EscapeAction extends Action<EscapeIntent> {
 }
 
 class OpenFileIntent extends Intent {
-  const OpenFileIntent(this._context, this._controller);
+  const OpenFileIntent(this._controller);
 
-  final BuildContext _context;
   final DebuggerController _controller;
 }
 
