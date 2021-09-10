@@ -30,6 +30,7 @@ import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'file_search.dart';
 import 'hover.dart';
+import 'key_sets.dart';
 import 'variables.dart';
 
 final debuggerCodeViewSearchKey =
@@ -170,7 +171,7 @@ class _CodeViewState extends State<CodeView>
     if (scriptRef == null) {
       return Center(
         child: Text(
-          'Open a file: ⌘ P',
+          'Open a file: $openFileKeySetDescription',
           style: theme.textTheme.subtitle1,
         ),
       );
@@ -1075,8 +1076,8 @@ void showGoToLineDialog(BuildContext context, DebuggerController controller) {
   );
 }
 
-const goToLineOption = ScriptPopupMenuOption(
-  label: 'Go to line number (⌘ G)',
+final goToLineOption = ScriptPopupMenuOption(
+  label: 'Go to line number ($goToLineNumberKeySetDescription)',
   icon: Icons.list,
   onSelected: showGoToLineDialog,
 );
@@ -1088,8 +1089,8 @@ void showOpenFileDialog(BuildContext context, DebuggerController controller) {
   );
 }
 
-const openFileOption = ScriptPopupMenuOption(
-  label: 'Open file (⌘ P)',
+final openFileOption = ScriptPopupMenuOption(
+  label: 'Open file ($openFileKeySetDescription)',
   icon: Icons.folder_open,
   onSelected: showOpenFileDialog,
 );

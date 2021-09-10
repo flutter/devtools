@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../config_specific/host_platform/host_platform.dart';
+import '../utils.dart';
 
 final LogicalKeySet goToLineNumberKeySet = LogicalKeySet(
   HostPlatform.instance.isMacOS
@@ -9,6 +10,9 @@ final LogicalKeySet goToLineNumberKeySet = LogicalKeySet(
       : LogicalKeyboardKey.control,
   LogicalKeyboardKey.keyG,
 );
+
+final String goToLineNumberKeySetDescription =
+    goToLineNumberKeySet.describeKeys(isMacOS: HostPlatform.instance.isMacOS);
 
 final LogicalKeySet searchInFileKeySet = LogicalKeySet(
   HostPlatform.instance.isMacOS
@@ -27,3 +31,6 @@ final LogicalKeySet openFileKeySet = LogicalKeySet(
       : LogicalKeyboardKey.control,
   LogicalKeyboardKey.keyP,
 );
+
+final String openFileKeySetDescription =
+    openFileKeySet.describeKeys(isMacOS: HostPlatform.instance.isMacOS);
