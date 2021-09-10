@@ -275,6 +275,60 @@ void screen(
   );
 }
 
+String _operationKey(String screenName, String timedOperation) {
+  return '$screenName-$timedOperation';
+}
+
+final _timedOperationsInProgress = <String, DateTime>{};
+
+// Use this method coupled with `timeEnd` when an operation cannot be timed in
+// a callback, but rather needs to be timed instead at two disjoint start and
+// end marks.
+void timeStart(String screenName, String timedOperation) {
+  final startTime = DateTime.now();
+  final operationKey = _operationKey(
+    screenName,
+    timedOperation,
+  );
+  _timedOperationsInProgress[operationKey] = startTime;
+}
+
+// Use this method coupled with `timeStart` when an operation cannot be timed in
+// a callback, but rather needs to be timed instead at two disjoint start and
+// end marks.
+void timeEnd(
+  String screenName,
+  String timedOperation, {
+  ScreenAnalyticsMetrics Function() screenMetricsProvider,
+}) {
+  final endTime = DateTime.now();
+  final operationKey = _operationKey(
+    screenName,
+    timedOperation,
+  );
+  final startTime = _timedOperationsInProgress.remove(operationKey);
+  assert(startTime != null);
+  if (startTime == null) {
+    log(
+      'Could not time operation "$timedOperation" because a) `timeEnd` was '
+      'called before `timeStart` or b) the `screenName` and `timedOperation`'
+      'parameters for the `timeStart` and `timeEnd` calls do not match.',
+      LogLevel.warning,
+    );
+    return;
+  }
+  final durationMicros =
+      endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch;
+  _timing(
+    screenName,
+    timedOperation,
+    durationMicros: durationMicros,
+    screenMetrics:
+        screenMetricsProvider != null ? screenMetricsProvider() : null,
+  );
+}
+
+// Use this when a synchronous operation can be timed in a callback.
 void timeSync(
   String screenName,
   String timedOperation, {
@@ -305,6 +359,7 @@ void timeSync(
   );
 }
 
+// Use this when an asynchronous operation can be timed in a callback.
 Future<void> timeAsync(
   String screenName,
   String timedOperation, {

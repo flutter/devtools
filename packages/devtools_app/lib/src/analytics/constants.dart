@@ -105,3 +105,6 @@ const String export = 'export';
 const String expandAll = 'expandAll';
 const String collapseAll = 'collapseAll';
 const String documentationLink = 'documentationLink';
+// This should track the time from `initState` for a screen to the time when
+// the page data has loaded and is ready to interact with.
+const String pageReady = 'pageReady';
