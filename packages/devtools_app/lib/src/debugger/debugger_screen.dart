@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:codicon/codicon.dart';
-import 'package:devtools_app/src/globals.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
@@ -15,6 +14,7 @@ import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../dialogs.dart';
 import '../flex_split_column.dart';
+import '../globals.dart';
 import '../listenable.dart';
 import '../screen.dart';
 import '../split.dart';
