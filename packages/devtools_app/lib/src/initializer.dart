@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'analytics/analytics.dart' as ga;
+import 'analytics/constants.dart' as analytics_constants;
 import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
 import 'framework/framework_core.dart';
@@ -122,6 +124,10 @@ class _InitializerState extends State<Initializer>
       if (!_checkLoaded() &&
           ModalRoute.of(context).isCurrent &&
           currentDisconnectedOverlay == null) {
+        ga.select(
+          analytics_constants.devToolsMain,
+          analytics_constants.appDisconnected,
+        );
         Overlay.of(context).insert(_createDisconnectedOverlay());
 
         addAutoDisposeListener(serviceManager.connectedState, () {
