@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:codicon/codicon.dart';
+import 'package:devtools_app/src/globals.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
@@ -118,7 +119,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                 parsedScript != null &&
                 !_shownFirstScript) {
               ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
-              // TODO(annagrin): mark end of IPL timing for debugger page here.
+              serviceManager.sendDwdsEvent(
+                  screen: DebuggerScreen.id,
+                  action: analytics_constants.screenReady);
               _shownFirstScript = true;
             }
             return CodeView(

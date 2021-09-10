@@ -78,3 +78,6 @@ const displayRefreshRate = '_flutter.getDisplayRefreshRate';
 /// Flutter engine returns estimate how much memory is used by layer/picture raster
 /// cache entries in bytes.
 const flutterEngineEstimateRasterCache = '_flutter.estimateRasterCacheMemory';
+
+/// Dwds listens to events for recording end-to-end analytics.
+const dwdsSendEvent = 'ext.dwds.sendEvent';
