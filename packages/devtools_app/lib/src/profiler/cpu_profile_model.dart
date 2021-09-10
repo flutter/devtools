@@ -4,6 +4,7 @@
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:meta/meta.dart';
 
 import '../charts/flame_chart.dart';
@@ -124,6 +125,10 @@ class CpuProfileData {
     );
   }
 
+  /// Generate a cpu profile from [originalData] where each sample contains the
+  /// userTag [tag].
+  ///
+  /// [originalData] does not need to be [processed] to run this operation.
   factory CpuProfileData.fromUserTag(CpuProfileData originalData, String tag) {
     if (!originalData.userTags.contains(tag)) {
       return CpuProfileData.empty();
@@ -179,6 +184,10 @@ class CpuProfileData {
     );
   }
 
+  /// Generate a cpu profile from [originalData] where each stack frame meets
+  /// the condition specified by [includeFilter].
+  ///
+  /// [originalData] does not need to be [processed] to run this operation.
   factory CpuProfileData.filterFrom(
     CpuProfileData originalData,
     bool Function(CpuStackFrame) includeFilter,
@@ -311,7 +320,18 @@ class CpuProfileData {
 
   CpuStackFrame get cpuProfileRoot => _cpuProfileRoot;
 
-  Iterable<String> get userTags => _cpuProfileRoot.userTags;
+  Iterable<String> get userTags {
+    if (_userTags != null) {
+      return _userTags;
+    }
+    final tags = <String>{};
+    for (final cpuSample in cpuSamples) {
+      tags.add(cpuSample.userTag);
+    }
+    return _userTags = tags;
+  }
+
+  Iterable<String> _userTags;
 
   CpuStackFrame _cpuProfileRoot;
 
@@ -702,43 +722,69 @@ int stackFrameIdCompare(String a, String b) {
 }
 
 class CpuProfileStore {
-  final _profiles = <TimeRange, CpuProfileData>{};
-
-  /// Lookup a profile from the cache [_profiles] for the given range [time].
+  /// Store of CPU profiles keyed by a label.
   ///
-  /// If [_profiles] contains a CPU profile for a time range that encompasses
-  /// [time], a sub profile will be generated, cached in [_profiles] and then
-  /// returned. This method will return null if no profiles are cached for
-  /// [time] or if a sub profile cannot be generated for [time].
-  CpuProfileData lookupProfile(TimeRange time) {
+  /// This label will contain information regarding any toggle filters or user
+  /// tag filters applied to the profile.
+  final _profilesByLabel = <String, CpuProfileData>{};
+
+  /// Store of CPU profiles keyed by a time range.
+  ///
+  /// These time ranges are allowed to overlap.
+  final _profilesByTime = <TimeRange, CpuProfileData>{};
+
+  /// Lookup a profile from either cache: [_profilesByLabel] or
+  /// [_profilesByTime].
+  ///
+  /// Only one of [label] and [time] may be non-null.
+  ///
+  /// If this lookup is based on [label], a cached profile will be returned from
+  /// [_profilesByLabel], or null if one is not available.
+  ///
+  /// If this lookup is based on [time] and [_profilesByTime] contains a CPU
+  /// profile for a time range that encompasses [time], a sub profile will be
+  /// generated, cached in [_profilesByTime] and then returned. This method will
+  /// return null if no profiles are cached for [time] or if a sub profile
+  /// cannot be generated for [time].
+  CpuProfileData lookupProfile({String label, TimeRange time}) {
+    assert((label == null) != (time == null));
+
+    if (label != null) {
+      return _profilesByLabel[label];
+    }
+
     if (!time.isWellFormed) return null;
 
     // If we have a profile for a time range encompassing [time], then we can
     // generate and cache the profile for [time] without needing to pull data
     // from the vm service.
     _maybeGenerateSubProfile(time);
-    return _profiles[time];
+    return _profilesByTime[time];
   }
 
-  void addProfile(TimeRange time, CpuProfileData profile) {
-    _profiles[time] = profile;
+  void storeProfile(CpuProfileData profile, {String label, TimeRange time}) {
+    assert((label == null) != (time == null));
+    if (label != null) {
+      _profilesByLabel[label] = profile;
+    }
+    _profilesByTime[time] = profile;
   }
 
   void _maybeGenerateSubProfile(TimeRange time) {
-    if (_profiles.containsKey(time)) return;
+    if (_profilesByTime.containsKey(time)) return;
     final encompassingTimeRange = _encompassingTimeRange(time);
     if (encompassingTimeRange != null) {
-      final encompassingProfile = _profiles[encompassingTimeRange];
+      final encompassingProfile = _profilesByTime[encompassingTimeRange];
 
       final subProfile = CpuProfileData.subProfile(encompassingProfile, time);
-      _profiles[time] = subProfile;
+      _profilesByTime[time] = subProfile;
     }
   }
 
   TimeRange _encompassingTimeRange(TimeRange time) {
     int shortestDurationMicros = maxJsInt;
     TimeRange encompassingTimeRange;
-    for (final t in _profiles.keys) {
+    for (final t in _profilesByTime.keys) {
       // We want to find the shortest encompassing time range for [time].
       if (t.containsRange(time) &&
           t.duration.inMicroseconds < shortestDurationMicros) {
@@ -750,6 +796,7 @@ class CpuProfileStore {
   }
 
   void clear() {
-    _profiles.clear();
+    _profilesByTime.clear();
+    _profilesByLabel.clear();
   }
 }

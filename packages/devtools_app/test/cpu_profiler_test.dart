@@ -270,7 +270,10 @@ void main() {
         await controller.cpuProfilerController.transformer
             .processData(cpuProfileData);
         // Call this to force the value of `_dataByTag[userTagNone]` to be set.
-        controller.cpuProfilerController.loadProcessedData(cpuProfileData);
+        controller.cpuProfilerController.loadProcessedData(
+          cpuProfileData,
+          storeAsUserTagNone: true,
+        );
       });
 
       testWidgetsWithWindowSize('can filter data by user tag', windowSize,
