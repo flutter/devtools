@@ -28,6 +28,7 @@ const String logging = LoggingScreen.id;
 const String devToolsMain = 'main';
 const String hotReload = 'hotReload';
 const String hotRestart = 'hotRestart';
+const String appDisconnected = 'appDisconnected';
 
 // DevTools UI action selected (clicked).
 
