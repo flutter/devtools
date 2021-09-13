@@ -177,6 +177,11 @@ void main() {
     });
 
     test('processDataForTag', () async {
+      // Disable toggle filters for the purpose of this test.
+      for (final toggleFilter in controller.toggleFilters) {
+        toggleFilter.enabled.value = false;
+      }
+
       final cpuProfileDataWithTags =
           CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
       await controller.transformer.processData(cpuProfileDataWithTags);
@@ -240,6 +245,71 @@ void main() {
     Frame1 - children: 1 - excl: 0 - incl: 2
       Frame5 - children: 1 - excl: 1 - incl: 2
         Frame6 - children: 0 - excl: 1 - incl: 1
+''',
+        ),
+      );
+    });
+
+    test('processDataForTag applies toggle filters by default', () async {
+      expect(controller.toggleFilters[0].enabled.value, isTrue);
+      final cpuProfileDataWithTags =
+          CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
+      await controller.transformer.processData(cpuProfileDataWithTags);
+      controller.loadProcessedData(
+        cpuProfileDataWithTags,
+        storeAsUserTagNone: true,
+      );
+
+      expect(
+          controller.dataNotifier.value.cpuProfileRoot.profileMetaData.time
+              .duration.inMicroseconds,
+          equals(250));
+      expect(
+        controller.dataNotifier.value.cpuProfileRoot.toStringDeep(),
+        equals(
+          '''
+  all - children: 1 - excl: 0 - incl: 5
+    Frame1 - children: 2 - excl: 0 - incl: 5
+      Frame2 - children: 2 - excl: 0 - incl: 2
+        Frame3 - children: 0 - excl: 1 - incl: 1
+        Frame4 - children: 0 - excl: 1 - incl: 1
+      Frame5 - children: 1 - excl: 2 - incl: 3
+        Frame6 - children: 0 - excl: 1 - incl: 1
+''',
+        ),
+      );
+
+      await controller.loadDataWithTag('userTagA');
+      expect(
+        controller.dataNotifier.value.cpuProfileRoot.toStringDeep(),
+        equals(
+          '''
+  all - children: 2 - excl: 0 - incl: 2
+    Frame2 - children: 0 - excl: 1 - incl: 1
+    Frame5 - children: 0 - excl: 1 - incl: 1
+''',
+        ),
+      );
+
+      await controller.loadDataWithTag('userTagB');
+      expect(
+        controller.dataNotifier.value.cpuProfileRoot.toStringDeep(),
+        equals(
+          '''
+  all - children: 1 - excl: 0 - incl: 1
+    Frame2 - children: 0 - excl: 1 - incl: 1
+''',
+        ),
+      );
+
+      await controller.loadDataWithTag('userTagC');
+      expect(
+        controller.dataNotifier.value.cpuProfileRoot.toStringDeep(),
+        equals(
+          '''
+  all - children: 1 - excl: 0 - incl: 2
+    Frame5 - children: 1 - excl: 1 - incl: 2
+      Frame6 - children: 0 - excl: 1 - incl: 1
 ''',
         ),
       );

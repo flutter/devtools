@@ -721,6 +721,10 @@ int stackFrameIdCompare(String a, String b) {
   }
 }
 
+// TODO(kenz): this store could be improved by allowing profiles stored by
+// time range to also have a concept of which filters were applied. This isn't
+// critical as the CPU profiles that are stored by time will be small, so the
+// time that would be saved by only filtering these profiles once is minimal.
 class CpuProfileStore {
   /// Store of CPU profiles keyed by a label.
   ///
@@ -766,6 +770,7 @@ class CpuProfileStore {
     assert((label == null) != (time == null));
     if (label != null) {
       _profilesByLabel[label] = profile;
+      return;
     }
     _profilesByTime[time] = profile;
   }

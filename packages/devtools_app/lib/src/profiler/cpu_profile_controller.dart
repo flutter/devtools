@@ -165,13 +165,6 @@ class CpuProfilerController
         shouldApplyFilters: true,
         shouldRefreshSearchMatches: true,
       );
-      cpuProfileStore.storeProfile(_dataNotifier.value, label: userTagNone);
-      cpuProfileStore.storeProfile(
-        _dataNotifier.value,
-        time: TimeRange()
-          ..start = Duration(microseconds: startMicros)
-          ..end = Duration(microseconds: startMicros + extentMicros),
-      );
     }
 
     if (analyticsScreenId != null) {
@@ -213,6 +206,10 @@ class CpuProfilerController
       await transformer.processData(cpuProfileData, processId: processId);
       if (storeAsUserTagNone) {
         cpuProfileStore.storeProfile(cpuProfileData, label: userTagNone);
+        cpuProfileStore.storeProfile(
+          cpuProfileData,
+          time: cpuProfileData.profileMetaData.time,
+        );
       }
       if (shouldApplyFilters) {
         cpuProfileData = applyToggleFilters(cpuProfileData);
