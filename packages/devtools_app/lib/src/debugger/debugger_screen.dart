@@ -14,6 +14,7 @@ import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../dialogs.dart';
 import '../flex_split_column.dart';
+import '../globals.dart';
 import '../listenable.dart';
 import '../screen.dart';
 import '../split.dart';
@@ -118,7 +119,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                 parsedScript != null &&
                 !_shownFirstScript) {
               ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
-              // TODO(annagrin): mark end of IPL timing for debugger page here.
+              serviceManager.sendDwdsEvent(
+                screen: DebuggerScreen.id,
+                action: analytics_constants.pageReady,
+              );
               _shownFirstScript = true;
             }
             return CodeView(
