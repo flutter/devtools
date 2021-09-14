@@ -366,6 +366,21 @@ class ServiceConnectionManager {
     );
   }
 
+  Future<void> sendDwdsEvent({
+    @required String screen,
+    @required String action,
+  }) async {
+    if (!kIsWeb) return;
+    return await _callServiceExtensionOnMainIsolate(registrations.dwdsSendEvent,
+        args: {
+          'type': 'DevtoolsEvent',
+          'payload': {
+            'screen': screen,
+            'action': action,
+          },
+        });
+  }
+
   Future<Response> _callServiceOnMainIsolate(String name) async {
     final isolate = await whenValueNonNull(isolateManager.mainIsolate);
     return await callService(name, isolateId: isolate.id);

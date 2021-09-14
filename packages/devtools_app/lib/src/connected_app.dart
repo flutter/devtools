@@ -39,8 +39,7 @@ class ConnectedApp {
   bool _isFlutterApp;
 
   FlutterVersion get flutterVersionNow {
-    assert(isFlutterNativeAppNow);
-    return _flutterVersion;
+    return isFlutterNativeAppNow ? _flutterVersion : null;
   }
 
   FlutterVersion _flutterVersion;

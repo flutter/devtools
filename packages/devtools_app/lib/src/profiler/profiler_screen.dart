@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +19,7 @@ import '../common_widgets.dart';
 import '../config_specific/import_export/import_export.dart';
 import '../config_specific/launch_url/launch_url.dart';
 import '../globals.dart';
+import '../listenable.dart';
 import '../notifications.dart';
 import '../screen.dart';
 import '../theme.dart';
@@ -53,6 +55,10 @@ class ProfilerScreen extends Screen {
 
   @override
   String get docPageId => id;
+
+  @override
+  ValueListenable<bool> get showIsolateSelector =>
+      const FixedValueListenable<bool>(true);
 
   @override
   Widget build(BuildContext context) => const ProfilerScreenBody();
@@ -146,6 +152,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
           ProfilerScreenControls(
             controller: controller,
             recording: recording,
+            processing: processing,
           ),
         const SizedBox(height: denseRowSpacing),
         Expanded(
@@ -156,6 +163,26 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
                       CpuProfilerController.baseStateCpuProfileData ||
                   cpuProfileData == null) {
                 return _buildRecordingInfo();
+              }
+              if (cpuProfileData ==
+                  CpuProfilerController.emptyAppStartUpProfile) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text(
+                        'There are no app start up samples available.',
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: denseSpacing),
+                      Text(
+                        'To avoid this, try to open the DevTools CPU profiler '
+                        'sooner after starting your app.',
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                );
               }
               if (cpuProfileData.isEmpty) {
                 // TODO(kenz): remove the note about profiling on iOS after
@@ -228,7 +255,10 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
   @override
   FutureOr<void> processOfflineData(CpuProfileData offlineData) async {
     await controller.cpuProfilerController.transformer.processData(offlineData);
-    controller.cpuProfilerController.loadProcessedData(offlineData);
+    controller.cpuProfilerController.loadProcessedData(
+      offlineData,
+      storeAsUserTagNone: true,
+    );
   }
 
   @override
@@ -243,11 +273,14 @@ class ProfilerScreenControls extends StatelessWidget {
   const ProfilerScreenControls({
     @required this.controller,
     @required this.recording,
+    @required this.processing,
   });
 
   final ProfilerScreenController controller;
 
   final bool recording;
+
+  final bool processing;
 
   @override
   Widget build(BuildContext context) {
@@ -261,7 +294,7 @@ class ProfilerScreenControls extends StatelessWidget {
         const SizedBox(width: defaultSpacing),
         _SecondaryControls(
           controller: controller,
-          recording: recording,
+          profilerBusy: recording || processing,
         ),
       ],
     );
@@ -274,7 +307,7 @@ class _PrimaryControls extends StatelessWidget {
     @required this.recording,
   });
 
-  static const _primaryControlsMinIncludeTextWidth = 880.0;
+  static const _primaryControlsMinIncludeTextWidth = 1050.0;
 
   final ProfilerScreenController controller;
 
@@ -331,34 +364,54 @@ class _PrimaryControls extends StatelessWidget {
 class _SecondaryControls extends StatelessWidget {
   const _SecondaryControls({
     @required this.controller,
-    @required this.recording,
+    @required this.profilerBusy,
   });
 
-  static const _secondaryControlsMinIncludeTextWidth = 880.0;
+  static const _secondaryControlsMinScreenWidthForText = 1050.0;
 
-  static const _loadAllCpuSamplesMinIncludeTextWidth = 660.0;
+  static const _profilingControlsMinScreenWidthForText = 815.0;
 
   final ProfilerScreenController controller;
 
-  final bool recording;
+  final bool profilerBusy;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
+        if (serviceManager.connectedApp.isFlutterNativeAppNow)
+          IconLabelButton(
+            icon: Icons.timer,
+            label: 'Profile app start up',
+            tooltip: 'Load all Dart CPU samples that occurred before \n'
+                'the first Flutter frame was drawn (if available)',
+            tooltipPadding: const EdgeInsets.all(denseSpacing),
+            minScreenWidthForTextBeforeScaling:
+                _profilingControlsMinScreenWidthForText,
+            onPressed: !profilerBusy
+                ? () {
+                    ga.select(
+                      analytics_constants.cpuProfiler,
+                      analytics_constants.profileAppStartUp,
+                    );
+                    controller.cpuProfilerController.loadAppStartUpProfile();
+                  }
+                : null,
+          ),
+        const SizedBox(width: denseSpacing),
         RefreshButton(
           label: 'Load all CPU samples',
           tooltip: 'Load all available CPU samples from the profiler',
           minScreenWidthForTextBeforeScaling:
-              _loadAllCpuSamplesMinIncludeTextWidth,
-          onPressed: !recording
+              _profilingControlsMinScreenWidthForText,
+          onPressed: !profilerBusy
               ? () {
                   ga.select(
                     analytics_constants.cpuProfiler,
                     analytics_constants.loadAllCpuSamples,
                   );
-                  controller.loadAllSamples();
+                  controller.cpuProfilerController.loadAllSamples();
                 }
               : null,
         ),
@@ -370,7 +423,7 @@ class _SecondaryControls extends StatelessWidget {
         ),
         const SizedBox(width: denseSpacing),
         ExportButton(
-          onPressed: !recording &&
+          onPressed: !profilerBusy &&
                   controller.cpuProfileData != null &&
                   !controller.cpuProfileData.isEmpty
               ? () {
@@ -382,7 +435,7 @@ class _SecondaryControls extends StatelessWidget {
                 }
               : null,
           minScreenWidthForTextBeforeScaling:
-              _secondaryControlsMinIncludeTextWidth,
+              _secondaryControlsMinScreenWidthForText,
         ),
       ],
     );
