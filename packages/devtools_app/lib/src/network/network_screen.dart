@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 import '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../screen.dart';
@@ -264,20 +265,38 @@ class _NetworkProfilerControls extends StatelessWidget {
             PauseButton(
               minScreenWidthForTextBeforeScaling: _includeTextWidth,
               tooltip: 'Pause recording network traffic',
-              onPressed:
-                  recording ? () => controller.togglePolling(false) : null,
+              onPressed: recording
+                  ? () {
+                      ga.select(
+                        analytics_constants.network,
+                        analytics_constants.pause,
+                      );
+                      controller.togglePolling(false);
+                    }
+                  : null,
             ),
             const SizedBox(width: denseSpacing),
             ResumeButton(
               minScreenWidthForTextBeforeScaling: _includeTextWidth,
               tooltip: 'Resume recording network traffic',
-              onPressed:
-                  recording ? null : () => controller.togglePolling(true),
+              onPressed: recording
+                  ? null
+                  : () {
+                      ga.select(
+                        analytics_constants.network,
+                        analytics_constants.resume,
+                      );
+                      controller.togglePolling(true);
+                    },
             ),
             const SizedBox(width: denseSpacing),
             ClearButton(
               minScreenWidthForTextBeforeScaling: _includeTextWidth,
               onPressed: () {
+                ga.select(
+                  analytics_constants.network,
+                  analytics_constants.clear,
+                );
                 controller.clear();
               },
             ),

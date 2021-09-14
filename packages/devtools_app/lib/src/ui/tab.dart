@@ -15,6 +15,7 @@ class DevToolsTab extends Tab {
     String text,
     Icon icon,
     EdgeInsets iconMargin = const EdgeInsets.only(bottom: 10.0),
+    this.gaId,
     Widget child,
   })  : assert(text != null || child != null || icon != null),
         assert(text == null || child == null),
@@ -33,4 +34,7 @@ class DevToolsTab extends Tab {
       return _textAndIconTabHeight;
     }
   }
+
+  /// Tab id for google analytics.
+  final String gaId;
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../http/http_request_data.dart';
@@ -38,6 +39,36 @@ abstract class NetworkRequest with DataSearchStateMixin {
 
   @override
   String toString() => '$method $uri';
+
+  @override
+  bool operator ==(other) {
+    return other is NetworkRequest &&
+        runtimeType == other.runtimeType &&
+        startTimestamp == other.startTimestamp &&
+        endTimestamp == other.endTimestamp &&
+        duration == other.duration &&
+        method == other.method &&
+        uri == other.uri &&
+        contentType == other.contentType &&
+        type == other.type &&
+        status == other.status &&
+        port == other.port &&
+        didFail == other.didFail;
+  }
+
+  @override
+  int get hashCode => hashValues(
+        method,
+        uri,
+        contentType,
+        type,
+        status,
+        port,
+        didFail,
+        startTimestamp,
+        endTimestamp,
+        duration,
+      );
 }
 
 class WebSocket extends NetworkRequest {
