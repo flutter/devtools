@@ -37,8 +37,8 @@ class CpuProfilerController
   /// This needs to match the tag set and unset at these locations,
   /// respectively:
   ///
-  /// Flutter Engine - https://github.com/flutter/engine/blob/master/runtime/dart_isolate.cc#L369
-  /// Flutter Framework - https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/widgets/binding.dart#L866
+  /// Flutter Engine - https://github.com/flutter/engine/blob/f52653ba4568b4a40e8624d47773d156740ea9f7/runtime/dart_isolate.cc#L369
+  /// Flutter Framework - https://github.com/flutter/flutter/blob/33f4107cd1029c3847f119e23719f6147dbc39db/packages/flutter/lib/src/widgets/binding.dart#L866
   static const appStartUpUserTag = 'AppStartUp';
 
   /// Data for the initial value and reset value of [_dataNotifier].
@@ -78,12 +78,10 @@ class CpuProfilerController
   final _userTagFilter = ValueNotifier<String>(userTagNone);
 
   Iterable<String> get userTags =>
-      cpuProfileStore.lookupProfile(label: userTagNone)?.userTags ?? [];
+      cpuProfileStore.lookupProfile(label: userTagNone)?.userTags ?? const [];
 
   bool get isToggleFilterActive =>
-      toggleFilters.firstWhere((filter) => filter.enabled.value,
-          orElse: () => null) !=
-      null;
+      toggleFilters.any((filter) => filter.enabled.value);
 
   /// The toggle filters available for the CPU profiler.
   ///
@@ -258,7 +256,7 @@ class CpuProfilerController
     await pullAndProcessProfile(
       startMicros: 0,
       // Using [maxJsInt] as [extentMicros] for the getCpuProfile requests will
-      // give us all cpu samples we have available
+      // give us all cpu samples we have available.
       extentMicros: maxJsInt,
       processId: 'Load all samples',
     );
@@ -302,7 +300,7 @@ class CpuProfilerController
       final cpuProfile = await serviceManager.service.getCpuProfile(
         startMicros: 0,
         // Using [maxJsInt] as [extentMicros] for the getCpuProfile requests will
-        // give us all cpu samples we have available
+        // give us all cpu samples we have available.
         extentMicros: maxJsInt,
       );
       appStartUpProfile = CpuProfileData.fromUserTag(
