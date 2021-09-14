@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +19,7 @@ import '../common_widgets.dart';
 import '../config_specific/import_export/import_export.dart';
 import '../config_specific/launch_url/launch_url.dart';
 import '../globals.dart';
+import '../listenable.dart';
 import '../notifications.dart';
 import '../screen.dart';
 import '../theme.dart';
@@ -53,6 +55,10 @@ class ProfilerScreen extends Screen {
 
   @override
   String get docPageId => id;
+
+  @override
+  ValueListenable<bool> get showIsolateSelector =>
+      const FixedValueListenable<bool>(true);
 
   @override
   Widget build(BuildContext context) => const ProfilerScreenBody();

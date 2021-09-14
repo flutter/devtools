@@ -57,8 +57,15 @@ class CpuProfilerController
   /// The analytics screen id for which this controller is active.
   final String analyticsScreenId;
 
-  /// Store of cached CPU profiles.
-  final cpuProfileStore = CpuProfileStore();
+  /// The store of cached CPU profiles for the currently selected isolate.
+  CpuProfileStore get cpuProfileStore =>
+      _cpuProfileStoreByIsolateId.putIfAbsent(
+        serviceManager.isolateManager.selectedIsolate.value?.id,
+        () => CpuProfileStore(),
+      );
+
+  /// Store of cached CPU profiles for each isolate.
+  final _cpuProfileStoreByIsolateId = <String, CpuProfileStore>{};
 
   /// Notifies that new cpu profile data is available.
   ValueListenable<CpuProfileData> get dataNotifier => _dataNotifier;
@@ -416,9 +423,9 @@ class CpuProfilerController
     await serviceManager.service.clearSamples();
   }
 
-  void reset() {
+  void reset({CpuProfileData data}) {
     _selectedCpuStackFrameNotifier.value = null;
-    _dataNotifier.value = baseStateCpuProfileData;
+    _dataNotifier.value = data ?? baseStateCpuProfileData;
     _processingNotifier.value = false;
     transformer.reset();
     resetSearch();
