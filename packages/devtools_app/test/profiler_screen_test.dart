@@ -21,11 +21,15 @@ void main() {
   ProfilerScreen screen;
   FakeServiceManager fakeServiceManager;
 
+  const windowSize = Size(2000.0, 1000.0);
+
   group('ProfilerScreen', () {
     setUp(() async {
       fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
+          .thenReturn(false);
+      when(fakeServiceManager.connectedApp.isFlutterNativeAppNow)
           .thenReturn(false);
       when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(true);
       when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
@@ -41,6 +45,10 @@ void main() {
       expect(find.byType(RecordButton), findsOneWidget);
       expect(find.byType(StopRecordingButton), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
+      expect(find.text('Load all CPU samples'), findsOneWidget);
+      if (fakeServiceManager.connectedApp.isFlutterNativeAppNow) {
+        expect(find.text('Profile app start up'), findsOneWidget);
+      }
       expect(find.byType(ProfileGranularityDropdown), findsOneWidget);
       expect(
           find.byKey(ProfilerScreen.recordingInstructionsKey), findsOneWidget);
@@ -67,7 +75,24 @@ void main() {
       expect(find.text('CPU Profiler'), findsOneWidget);
     });
 
-    const windowSize = Size(2000.0, 1000.0);
+    testWidgetsWithWindowSize('builds base state for Dart CLI app', windowSize,
+        (WidgetTester tester) async {
+      const perfScreenBody = ProfilerScreenBody();
+      await pumpProfilerScreenBody(tester, perfScreenBody);
+      expect(find.byType(ProfilerScreenBody), findsOneWidget);
+      verifyBaseState(perfScreenBody, tester);
+    });
+
+    testWidgetsWithWindowSize(
+        'builds base state for Flutter native app', windowSize,
+        (WidgetTester tester) async {
+      when(fakeServiceManager.connectedApp.isFlutterNativeAppNow)
+          .thenReturn(true);
+      const perfScreenBody = ProfilerScreenBody();
+      await pumpProfilerScreenBody(tester, perfScreenBody);
+      expect(find.byType(ProfilerScreenBody), findsOneWidget);
+      verifyBaseState(perfScreenBody, tester);
+    });
 
     testWidgetsWithWindowSize(
       'builds proper content for recording state',

@@ -59,6 +59,7 @@ const traceEventProcessingTime = 'traceEventProcessingTime';
 // CPU profiler UX actions:
 const profileGranularityPrefix = 'profileGranularity';
 const loadAllCpuSamples = 'loadAllCpuSamples';
+const profileAppStartUp = 'profileAppStartUp';
 const cpuProfileFlameChartHelp = 'cpuProfileFlameChartHelp';
 const cpuProfileProcessingTime = 'cpuProfileProcessingTime';
 

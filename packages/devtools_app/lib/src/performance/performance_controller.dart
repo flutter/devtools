@@ -295,13 +295,14 @@ class PerformanceController extends DisposableController
 
     if (event.isUiEvent && updateProfiler) {
       final storedProfile =
-          cpuProfilerController.cpuProfileStore.lookupProfile(event.time);
+          cpuProfilerController.cpuProfileStore.lookupProfile(time: event.time);
       if (storedProfile != null) {
         await cpuProfilerController.processAndSetData(
           storedProfile,
           processId: 'Stored profile for ${event.time}',
           storeAsUserTagNone: true,
           shouldApplyFilters: true,
+          shouldRefreshSearchMatches: true,
         );
         data.cpuProfileData = cpuProfilerController.dataNotifier.value;
       } else if ((!offlineMode || offlinePerformanceData == null) &&
@@ -386,7 +387,7 @@ class PerformanceController extends DisposableController
     if (_currentFrameBeingSelected != frame) return;
 
     final storedProfileForFrame = cpuProfilerController.cpuProfileStore
-        .lookupProfile(frame.timeFromEventFlows);
+        .lookupProfile(time: frame.timeFromEventFlows);
     if (storedProfileForFrame == null) {
       cpuProfilerController.reset();
       if (!offlineMode && frame.timeFromEventFlows.isWellFormed) {
@@ -407,7 +408,10 @@ class PerformanceController extends DisposableController
       }
       if (_currentFrameBeingSelected != frame) return;
       data.cpuProfileData = storedProfileForFrame;
-      cpuProfilerController.loadProcessedData(storedProfileForFrame);
+      cpuProfilerController.loadProcessedData(
+        storedProfileForFrame,
+        storeAsUserTagNone: true,
+      );
     }
 
     if (debugTimeline) {
@@ -756,6 +760,7 @@ class PerformanceController extends DisposableController
     if (offlinePerformanceData.cpuProfileData != null) {
       cpuProfilerController.loadProcessedData(
         offlinePerformanceData.cpuProfileData,
+        storeAsUserTagNone: true,
       );
     }
   }
