@@ -113,6 +113,7 @@ class AutoComplete extends StatefulWidget {
     this.controller, {
     @required this.searchFieldKey,
     @required this.onTap,
+    this.autocompleteMatchTileHeight,
     bool bottom = true, // If false placed above.
     bool maxWidth = true,
   })  : isBottom = bottom,
@@ -121,6 +122,7 @@ class AutoComplete extends StatefulWidget {
   final AutoCompleteSearchControllerMixin controller;
   final GlobalKey searchFieldKey;
   final SelectAutoComplete onTap;
+  final double autocompleteMatchTileHeight;
   final bool isBottom;
   final bool isMaxWidth;
 
@@ -139,6 +141,8 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     final onTap = autoComplete.onTap;
     final bottom = autoComplete.isBottom;
     final isMaxWidth = autoComplete.isMaxWidth;
+    final autocompleteMatchTileHeight =
+        autoComplete.autocompleteMatchTileHeight;
 
     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
       controller.handleAutoCompleteOverlay(
@@ -147,6 +151,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         onTap: onTap,
         bottom: bottom,
         maxWidth: isMaxWidth,
+        autocompleteMatchTileHeight: autocompleteMatchTileHeight,
       );
     });
   }
@@ -170,9 +175,8 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
 
     // Approximation but it's pretty accurate. Could consider using a layout builder
     // or maybe build in an overlay (that's isn't visible) to compute.
-    // TODO(https://github.com/flutter/devtools/issues/3075) This approximation
-    // doesn't work for the new file opener, should compute the actual height.
-    final tileEntryHeight = box.size.height;
+    final tileEntryHeight =
+        autoComplete.autocompleteMatchTileHeight ?? box.size.height;
 
     // Compute to global coordinates.
     final offset = box.localToGlobal(Offset.zero);
@@ -324,6 +328,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     @required SelectAutoComplete onTap,
     bool bottom = true,
     bool maxWidth = true,
+    double autocompleteMatchTileHeight,
   }) {
     return OverlayEntry(builder: (context) {
       return AutoComplete(
@@ -332,6 +337,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
         onTap: onTap,
         bottom: bottom,
         maxWidth: maxWidth,
+        autocompleteMatchTileHeight: autocompleteMatchTileHeight,
       );
     });
   }
@@ -352,6 +358,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     @required SelectAutoComplete onTap,
     bool bottom = true,
     bool maxWidth = true,
+    double autocompleteMatchTileHeight,
   }) {
     if (autoCompleteOverlay != null) {
       closeAutoCompleteOverlay();
@@ -363,6 +370,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
       onTap: onTap,
       bottom: bottom,
       maxWidth: maxWidth,
+      autocompleteMatchTileHeight: autocompleteMatchTileHeight,
     );
 
     Overlay.of(context).insert(autoCompleteOverlay);
@@ -529,11 +537,13 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     @required bool shouldRequestFocus,
     @required SelectAutoComplete onSelection,
     HighlightAutoComplete onHighlightDropdown,
+    String label,
     InputDecoration decoration,
     bool tracking = false,
     bool supportClearField = false,
     Set<LogicalKeyboardKey> keyEventsToPropogate = const {},
     VoidCallback onClose,
+    double autocompleteMatchTileHeight,
   }) {
     _onSelection = onSelection;
 
@@ -612,6 +622,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
         shouldRequestFocus: shouldRequestFocus,
         autoCompleteLayerLink: controller.autoCompleteLayerLink,
         decoration: decoration,
+        label: label,
         tracking: tracking,
         onClose: onClose,
       ),
@@ -681,6 +692,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     @required bool searchFieldEnabled,
     @required bool shouldRequestFocus,
     @required LayerLink autoCompleteLayerLink,
+    String label,
     InputDecoration decoration,
     bool supportsNavigation = false,
     VoidCallback onClose,
@@ -740,7 +752,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
                 OutlineInputBorder(borderSide: searchFocusBorderColor),
             labelStyle: TextStyle(color: searchColor),
             border: const OutlineInputBorder(),
-            labelText: 'Search',
+            labelText: label ?? 'Search',
             suffix: (supportsNavigation || onClose != null)
                 ? _buildSearchFieldSuffix(
                     controller,

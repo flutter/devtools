@@ -66,6 +66,7 @@ class _FileSearchFieldState extends State<FileSearchField>
       context: context,
       searchFieldKey: fileSearchFieldKey,
       onTap: _onSelection,
+      autocompleteMatchTileHeight: 50.0,
     );
   }
 
@@ -83,6 +84,7 @@ class _FileSearchFieldState extends State<FileSearchField>
       keyEventsToPropogate: {LogicalKeyboardKey.escape},
       onSelection: _onSelection,
       onClose: _onClose,
+      label: 'Open',
     );
   }
 
