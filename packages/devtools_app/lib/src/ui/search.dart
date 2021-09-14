@@ -326,18 +326,18 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     @required BuildContext context,
     @required GlobalKey searchFieldKey,
     @required SelectAutoComplete onTap,
+    double autocompleteMatchTileHeight,
     bool bottom = true,
     bool maxWidth = true,
-    double autocompleteMatchTileHeight,
   }) {
     return OverlayEntry(builder: (context) {
       return AutoComplete(
         this,
         searchFieldKey: searchFieldKey,
         onTap: onTap,
+        autocompleteMatchTileHeight: autocompleteMatchTileHeight,
         bottom: bottom,
         maxWidth: maxWidth,
-        autocompleteMatchTileHeight: autocompleteMatchTileHeight,
       );
     });
   }
@@ -356,9 +356,9 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     @required BuildContext context,
     @required GlobalKey searchFieldKey,
     @required SelectAutoComplete onTap,
+    double autocompleteMatchTileHeight,
     bool bottom = true,
     bool maxWidth = true,
-    double autocompleteMatchTileHeight,
   }) {
     if (autoCompleteOverlay != null) {
       closeAutoCompleteOverlay();
@@ -368,9 +368,9 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
       context: context,
       searchFieldKey: searchFieldKey,
       onTap: onTap,
+      autocompleteMatchTileHeight: autocompleteMatchTileHeight,
       bottom: bottom,
       maxWidth: maxWidth,
-      autocompleteMatchTileHeight: autocompleteMatchTileHeight,
     );
 
     Overlay.of(context).insert(autoCompleteOverlay);
@@ -537,13 +537,12 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     @required bool shouldRequestFocus,
     @required SelectAutoComplete onSelection,
     HighlightAutoComplete onHighlightDropdown,
-    String label,
     InputDecoration decoration,
+    String label,
     bool tracking = false,
     bool supportClearField = false,
     Set<LogicalKeyboardKey> keyEventsToPropogate = const {},
     VoidCallback onClose,
-    double autocompleteMatchTileHeight,
   }) {
     _onSelection = onSelection;
 
@@ -566,7 +565,10 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
             clearSearchField(controller, force: true);
           }
 
-          return _determineKeyEventResult(key, keyEventsToPropogate);
+          return _determineKeyEventResult(
+            key,
+            keyEventsToPropogate,
+          );
         } else if (controller.autoCompleteOverlay != null) {
           if (key == enter || key == enterMac || key == tab || key == tabMac) {
             // Enter / Tab pressed.
@@ -692,8 +694,8 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     @required bool searchFieldEnabled,
     @required bool shouldRequestFocus,
     @required LayerLink autoCompleteLayerLink,
-    String label,
     InputDecoration decoration,
+    String label,
     bool supportsNavigation = false,
     VoidCallback onClose,
     bool tracking = false,
