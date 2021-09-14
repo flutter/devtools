@@ -94,7 +94,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
 }
 
 class InspectorTreeControllerFlutter extends Object
-    with InspectorTreeController, InspectorTreeFixedRowHeightController {
+    with InspectorTreeControllerBase, InspectorTreeFixedRowHeightController {
   /// Client the controller notifies to trigger changes to the UI.
   final Set<InspectorControllerClient> _clients = {};
 
@@ -192,7 +192,7 @@ class InspectorTree extends StatefulWidget {
     this.widgetErrors,
   }) : super(key: key);
 
-  final InspectorTreeController controller;
+  final InspectorTreeControllerBase controller;
   final DebuggerController debuggerController;
   final bool isSummaryTree;
   final LinkedHashMap<String, InspectableWidgetError> widgetErrors;
@@ -529,7 +529,7 @@ Paint _defaultPaint(ColorScheme colorScheme) => Paint()
 class _RowPainter extends CustomPainter {
   _RowPainter(this.row, this._controller, this.colorScheme);
 
-  final InspectorTreeController _controller;
+  final InspectorTreeControllerBase _controller;
   final InspectorTreeRow row;
   final ColorScheme colorScheme;
 

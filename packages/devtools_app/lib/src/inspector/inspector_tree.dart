@@ -314,7 +314,7 @@ class InspectorTreeConfig {
   final TreeEventCallback onHover;
 }
 
-abstract class InspectorTreeController {
+abstract class InspectorTreeControllerBase {
   // Abstract method defined to avoid a direct Flutter dependency.
   @protected
   void setState(VoidCallback fn);
@@ -678,7 +678,7 @@ abstract class InspectorTreeController {
   }
 }
 
-mixin InspectorTreeFixedRowHeightController on InspectorTreeController {
+mixin InspectorTreeFixedRowHeightController on InspectorTreeControllerBase {
   Rect getBoundingBox(InspectorTreeRow row);
 
   void scrollToRect(Rect targetRect);
