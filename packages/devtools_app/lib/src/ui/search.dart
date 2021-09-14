@@ -170,6 +170,8 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
 
     // Approximation but it's pretty accurate. Could consider using a layout builder
     // or maybe build in an overlay (that's isn't visible) to compute.
+    // TODO(https://github.com/flutter/devtools/issues/3075) This approximation
+    // doesn't work for the new file opener, should compute the actual height.
     final tileEntryHeight = box.size.height;
 
     // Compute to global coordinates.
