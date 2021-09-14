@@ -148,17 +148,17 @@ class DebuggerController extends DisposableController
 
   ValueListenable<ParsedScript> get currentParsedScript => parsedScript;
 
-  final _showSearchInFileField = ValueNotifier<bool>(false);
-
   ValueListenable<bool> get showSearchInFileField => _showSearchInFileField;
 
-  final _scriptLocation = ValueNotifier<ScriptLocation>(null);
+  final _showSearchInFileField = ValueNotifier<bool>(false);
 
   ValueListenable<ScriptLocation> get scriptLocation => _scriptLocation;
 
-  final _showFileOpener = ValueNotifier<bool>(false);
+  final _scriptLocation = ValueNotifier<ScriptLocation>(null);
 
   ValueListenable<bool> get showFileOpener => _showFileOpener;
+
+  final _showFileOpener = ValueNotifier<bool>(false);
 
   /// Jump to the given ScriptRef and optional SourcePosition.
   void showScriptLocation(ScriptLocation scriptLocation) {
@@ -1018,8 +1018,20 @@ class DebuggerController extends DisposableController
     }
   }
 
-  void toggleFileOpener(bool visible) {
+  void toggleFileOpenerVisibility(bool visible) {
     _showFileOpener.value = visible;
+  }
+
+  void hideSearchInFileIfVisible() {
+    if (showSearchInFileField.value) {
+      toggleSearchInFileVisibility(false);
+    }
+  }
+
+  void hideFileOpenerIfVisible() {
+    if (showFileOpener.value) {
+      toggleFileOpenerVisibility(false);
+    }
   }
 
   @override

@@ -12,7 +12,6 @@ import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
-import '../dialogs.dart';
 import '../flex_split_column.dart';
 import '../listenable.dart';
 import '../screen.dart';
@@ -166,7 +165,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       shortcuts: <LogicalKeySet, Intent>{
         goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
         searchInFileKeySet: SearchInFileIntent(controller),
-        escapeKeySet: EscapeIntent(context, controller),
+        escapeKeySet: EscapeIntent(controller),
         openFileKeySet: OpenFileIntent(controller),
       },
       child: Actions(
@@ -273,6 +272,8 @@ class GoToLineNumberAction extends Action<GoToLineNumberIntent> {
   @override
   void invoke(GoToLineNumberIntent intent) {
     showGoToLineDialog(intent._context, intent._controller);
+    intent._controller.hideFileOpenerIfVisible();
+    intent._controller.hideSearchInFileIfVisible();
   }
 }
 
@@ -286,26 +287,21 @@ class SearchInFileAction extends Action<SearchInFileIntent> {
   @override
   void invoke(SearchInFileIntent intent) {
     intent._controller.toggleSearchInFileVisibility(true);
+    intent._controller.hideFileOpenerIfVisible();
   }
 }
 
 class EscapeIntent extends Intent {
-  const EscapeIntent(this._context, this._controller);
+  const EscapeIntent(this._controller);
 
-  final BuildContext _context;
   final DebuggerController _controller;
 }
 
 class EscapeAction extends Action<EscapeIntent> {
   @override
   void invoke(EscapeIntent intent) {
-    if (intent._controller.showSearchInFileField.value) {
-      Navigator.of(intent._context).pop(dialogDefaultContext);
-      intent._controller.toggleSearchInFileVisibility(false);
-    }
-    if (intent._controller.showFileOpener.value) {
-      intent._controller.toggleFileOpener(false);
-    }
+    intent._controller.hideSearchInFileIfVisible();
+    intent._controller.hideFileOpenerIfVisible();
   }
 }
 
@@ -318,7 +314,8 @@ class OpenFileIntent extends Intent {
 class OpenFileAction extends Action<OpenFileIntent> {
   @override
   void invoke(OpenFileIntent intent) {
-    intent._controller.toggleFileOpener(true);
+    intent._controller.toggleFileOpenerVisibility(true);
+    intent._controller.hideSearchInFileIfVisible();
   }
 }
 

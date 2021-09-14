@@ -93,15 +93,14 @@ class _FileSearchFieldState extends State<FileSearchField>
   }
 
   void _onClose() {
-    setState(() {
-      _autoCompleteController.closeAutoCompleteOverlay();
-    });
-    widget.controller.toggleFileOpener(false);
+    _autoCompleteController.closeAutoCompleteOverlay();
+    widget.controller.toggleFileOpenerVisibility(false);
     _scriptsCache.clear();
   }
 
   @override
   void dispose() {
+    _onClose();
     _autoCompleteController.dispose();
     super.dispose();
   }

@@ -68,6 +68,7 @@ class CodeView extends StatefulWidget {
 
 class _CodeViewState extends State<CodeView>
     with AutoDisposeMixin, SearchFieldMixin<CodeView> {
+  static const fileOpenerLeftPadding = 110.0;
   static const searchFieldRightPadding = 75.0;
 
   LinkedScrollControllerGroup verticalController;
@@ -166,55 +167,35 @@ class _CodeViewState extends State<CodeView>
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-        valueListenable: widget.controller.showFileOpener,
-        builder: (context, showFileOpener, _) {
-          return Stack(
-            children: [
-              buildCodeviewContent(context),
-              if (showFileOpener)
-                Positioned(
-                  left: 110.0,
-                  child: wrapInElevatedCard(
-                    FileSearchField(
-                      controller: widget.controller,
-                    ),
-                  ),
-                ),
-            ],
-          );
-        });
-  }
-
-  Widget buildCodeviewContent(BuildContext context) {
-    final theme = Theme.of(context);
-
-    if (scriptRef == null) {
-      return Center(
-        child: Text(
-          'Open a file: $openFileKeySetDescription',
-          style: theme.textTheme.subtitle1,
-        ),
-      );
-    }
-
     if (parsedScript == null) {
       return const CenteredCircularProgressIndicator();
     }
 
     return ValueListenableBuilder(
-      valueListenable: widget.controller.showSearchInFileField,
-      builder: (context, showSearch, _) {
-        return Stack(
-          children: [
-            buildCodeArea(context),
-            if (showSearch)
-              Positioned(
-                top: denseSpacing,
-                right: searchFieldRightPadding,
-                child: buildSearchInFileField(),
-              ),
-          ],
+      valueListenable: widget.controller.showFileOpener,
+      builder: (context, showFileOpener, _) {
+        return ValueListenableBuilder(
+          valueListenable: widget.controller.showSearchInFileField,
+          builder: (context, showSearch, _) {
+            return Stack(
+              children: [
+                scriptRef == null
+                    ? buildEmptyState(context)
+                    : buildCodeArea(context),
+                if (showFileOpener)
+                  Positioned(
+                    left: fileOpenerLeftPadding,
+                    child: buildFileSearchField(),
+                  ),
+                if (showSearch && scriptRef != null)
+                  Positioned(
+                    top: denseSpacing,
+                    right: searchFieldRightPadding,
+                    child: buildSearchInFileField(),
+                  ),
+              ],
+            );
+          },
         );
       },
     );
@@ -413,6 +394,14 @@ class _CodeViewState extends State<CodeView>
     );
   }
 
+  Widget buildFileSearchField() {
+    return wrapInElevatedCard(
+      FileSearchField(
+        controller: widget.controller,
+      ),
+    );
+  }
+
   Widget buildSearchInFileField() {
     return wrapInElevatedCard(
       buildSearchField(
@@ -422,6 +411,17 @@ class _CodeViewState extends State<CodeView>
         shouldRequestFocus: true,
         supportsNavigation: true,
         onClose: () => widget.controller.toggleSearchInFileVisibility(false),
+      ),
+    );
+  }
+
+  Widget buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Text(
+        'Open a file: $openFileKeySetDescription',
+        style: theme.textTheme.subtitle1,
       ),
     );
   }
@@ -1110,7 +1110,7 @@ final goToLineOption = ScriptPopupMenuOption(
 );
 
 void showFileOpener(BuildContext context, DebuggerController controller) {
-  controller.toggleFileOpener(true);
+  controller.toggleFileOpenerVisibility(true);
 }
 
 final openFileOption = ScriptPopupMenuOption(
