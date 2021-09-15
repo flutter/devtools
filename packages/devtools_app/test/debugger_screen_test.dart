@@ -430,7 +430,6 @@ void main() {
         (WidgetTester tester) async {
       when(debuggerController.variables)
           .thenReturn(ValueNotifier(testVariables));
-      // when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('Variables'), findsOneWidget);
 
@@ -459,12 +458,11 @@ void main() {
       );
 
       // Expand list.
-      final collapsedText1 = find.selectableTextContaining('0: 3');
-      final collapsedText2 = find.selectableTextContaining('1: 4');
-      expect(collapsedText1, findsNWidgets(0), reason: 'Selectable text 0: 3');
-      expect(collapsedText2, findsNWidgets(0), reason: 'Selectable text 1: 4');
+      expect(find.selectableTextContaining('0: 3'), findsNothing);
+      expect(find.selectableTextContaining('1: 4'), findsNothing);
+
       await tester.tap(listFinder);
-      await tester.pumpAndSettle(const Duration(milliseconds: 1000));
+      await tester.pump();
       expect(find.selectableTextContaining('0: 3'), findsOneWidget);
       expect(find.selectableTextContaining('1: 4'), findsOneWidget);
 
@@ -472,7 +470,7 @@ void main() {
       expect(mapElement1Finder, findsNothing);
       expect(mapElement2Finder, findsNothing);
       await tester.tap(mapFinder);
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(mapElement1Finder, findsOneWidget);
       expect(mapElement2Finder, findsOneWidget);
     });
@@ -657,6 +655,7 @@ final isolateRef = IsolateRef(
   isSystemIsolate: false,
 );
 
+// List<Variable> get testVariables => [
 final testVariables = [
   Variable.create(
     BoundVariable(
