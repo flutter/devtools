@@ -430,6 +430,7 @@ void main() {
         (WidgetTester tester) async {
       when(debuggerController.variables)
           .thenReturn(ValueNotifier(testVariables));
+      // when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('Variables'), findsOneWidget);
 
@@ -458,10 +459,12 @@ void main() {
       );
 
       // Expand list.
-      expect(find.selectableTextContaining('0: 3'), findsNothing);
-      expect(find.selectableTextContaining('1: 4'), findsNothing);
+      final collapsedText1 = find.selectableTextContaining('0: 3');
+      final collapsedText2 = find.selectableTextContaining('1: 4');
+      expect(collapsedText1, findsNWidgets(0), reason: 'Selectable text 0: 3');
+      expect(collapsedText2, findsNWidgets(0), reason: 'Selectable text 1: 4');
       await tester.tap(listFinder);
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(const Duration(milliseconds: 1000));
       expect(find.selectableTextContaining('0: 3'), findsOneWidget);
       expect(find.selectableTextContaining('1: 4'), findsOneWidget);
 
