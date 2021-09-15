@@ -4,18 +4,17 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose_mixin.dart';
-import '../common_widgets.dart';
-import '../dialogs.dart';
-import '../theme.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 
-const int numOfMatchesToShow = 6;
+const int numOfMatchesToShow = 10;
+const double autocompleteMatchTileHeight = 50.0;
 
 class FileSearchField extends StatefulWidget {
   const FileSearchField({
@@ -68,6 +67,7 @@ class _FileSearchFieldState extends State<FileSearchField>
       context: context,
       searchFieldKey: fileSearchFieldKey,
       onTap: _onSelection,
+      autocompleteMatchTileHeight: autocompleteMatchTileHeight,
     );
   }
 
@@ -77,35 +77,33 @@ class _FileSearchFieldState extends State<FileSearchField>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          top: defaultBorderSide(theme),
-        ),
-      ),
-      padding: const EdgeInsets.all(denseSpacing),
-      child: buildAutoCompleteSearchField(
-        controller: _autoCompleteController,
-        searchFieldKey: fileSearchFieldKey,
-        searchFieldEnabled: true,
-        shouldRequestFocus: true,
-        closeOverlayOnEscape: false,
-        onSelection: _onSelection,
-      ),
+    return buildAutoCompleteSearchField(
+      controller: _autoCompleteController,
+      searchFieldKey: fileSearchFieldKey,
+      searchFieldEnabled: true,
+      shouldRequestFocus: true,
+      keyEventsToPropogate: {LogicalKeyboardKey.escape},
+      onSelection: _onSelection,
+      onClose: _onClose,
+      label: 'Open',
     );
   }
 
   void _onSelection(String scriptUri) {
     final scriptRef = _scriptsCache[scriptUri];
     widget.controller.showScriptLocation(ScriptLocation(scriptRef));
+    _onClose();
+  }
+
+  void _onClose() {
+    _autoCompleteController.closeAutoCompleteOverlay();
+    widget.controller.toggleFileOpenerVisibility(false);
     _scriptsCache.clear();
-    Navigator.of(context).pop(dialogDefaultContext);
   }
 
   @override
   void dispose() {
+    _onClose();
     _autoCompleteController.dispose();
     super.dispose();
   }

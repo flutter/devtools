@@ -192,6 +192,8 @@ void main() {
             .thenReturn(ValueNotifier(mockParsedScript));
         when(debuggerController.showSearchInFileField)
             .thenReturn(ValueNotifier(false));
+        when(debuggerController.showFileOpener)
+            .thenReturn(ValueNotifier(false));
         when(debuggerController.scriptsHistory).thenReturn(scriptsHistory);
         when(debuggerController.searchMatches).thenReturn(ValueNotifier([]));
         when(debuggerController.activeSearchMatch)
@@ -229,6 +231,7 @@ void main() {
       ];
 
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
+      when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
       // Libraries view is hidden
       when(debuggerController.librariesVisible)
@@ -244,6 +247,7 @@ void main() {
       ];
 
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
+      when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
       // Libraries view is shown
       when(debuggerController.librariesVisible).thenReturn(ValueNotifier(true));
@@ -284,6 +288,7 @@ void main() {
 
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
       when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
+      when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
       await pumpDebuggerScreen(tester, debuggerController);
 
@@ -374,6 +379,7 @@ void main() {
       when(debuggerController.stackFramesWithLocation)
           .thenReturn(ValueNotifier(stackFramesWithLocation));
       when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
+      when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
       await pumpDebuggerScreen(tester, debuggerController);
 
       expect(find.text('Call Stack'), findsOneWidget);
@@ -454,8 +460,9 @@ void main() {
       // Expand list.
       expect(find.selectableTextContaining('0: 3'), findsNothing);
       expect(find.selectableTextContaining('1: 4'), findsNothing);
+
       await tester.tap(listFinder);
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(find.selectableTextContaining('0: 3'), findsOneWidget);
       expect(find.selectableTextContaining('1: 4'), findsOneWidget);
 
@@ -463,7 +470,7 @@ void main() {
       expect(mapElement1Finder, findsNothing);
       expect(mapElement2Finder, findsNothing);
       await tester.tap(mapFinder);
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(mapElement1Finder, findsOneWidget);
       expect(mapElement2Finder, findsOneWidget);
     });
@@ -479,6 +486,7 @@ void main() {
 
     testWidgetsWithWindowSize('debugger controls running', windowSize,
         (WidgetTester tester) async {
+      when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
         debugger: debuggerController,
@@ -500,6 +508,7 @@ void main() {
     testWidgetsWithWindowSize('debugger controls paused', windowSize,
         (WidgetTester tester) async {
       when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
+      when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
       when(debuggerController.stackFramesWithLocation)
           .thenReturn(ValueNotifier([
         StackFrameAndSourcePosition(
@@ -542,6 +551,7 @@ void main() {
     testWidgetsWithWindowSize(
         'debugger controls break on exceptions', windowSize,
         (WidgetTester tester) async {
+      when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
       await tester.pumpWidget(wrapWithControllers(
         Builder(builder: screen.build),
         debugger: debuggerController,
