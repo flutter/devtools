@@ -632,7 +632,9 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   }
 
   KeyEventResult _determineKeyEventResult(
-      int keyEventId, Set<LogicalKeyboardKey> keyEventsToPropogate) {
+    int keyEventId,
+    Set<LogicalKeyboardKey> keyEventsToPropogate,
+  ) {
     final shouldPropogateKeyEvent = keyEventsToPropogate
         .any((key) => key.keyId & LogicalKeyboardKey.valueMask == keyEventId);
     return shouldPropogateKeyEvent
