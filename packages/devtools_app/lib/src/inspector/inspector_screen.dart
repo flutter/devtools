@@ -26,7 +26,7 @@ import '../ui/service_extension_widgets.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
 import 'inspector_service.dart';
-import 'inspector_tree_flutter.dart';
+import 'inspector_tree_controller.dart';
 
 class InspectorScreen extends Screen {
   const InspectorScreen()
