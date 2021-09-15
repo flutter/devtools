@@ -276,8 +276,8 @@ class GoToLineNumberAction extends Action<GoToLineNumberIntent> {
   @override
   void invoke(GoToLineNumberIntent intent) {
     showGoToLineDialog(intent._context, intent._controller);
-    intent._controller.hideFileOpenerIfVisible();
-    intent._controller.hideSearchInFileIfVisible();
+    intent._controller.toggleFileOpenerVisibility(false);
+    intent._controller.toggleSearchInFileVisibility(false);
   }
 }
 
@@ -291,7 +291,7 @@ class SearchInFileAction extends Action<SearchInFileIntent> {
   @override
   void invoke(SearchInFileIntent intent) {
     intent._controller.toggleSearchInFileVisibility(true);
-    intent._controller.hideFileOpenerIfVisible();
+    intent._controller.toggleFileOpenerVisibility(false);
   }
 }
 
@@ -304,8 +304,8 @@ class EscapeIntent extends Intent {
 class EscapeAction extends Action<EscapeIntent> {
   @override
   void invoke(EscapeIntent intent) {
-    intent._controller.hideSearchInFileIfVisible();
-    intent._controller.hideFileOpenerIfVisible();
+    intent._controller.toggleSearchInFileVisibility(false);
+    intent._controller.toggleFileOpenerVisibility(false);
   }
 }
 
@@ -319,7 +319,7 @@ class OpenFileAction extends Action<OpenFileIntent> {
   @override
   void invoke(OpenFileIntent intent) {
     intent._controller.toggleFileOpenerVisibility(true);
-    intent._controller.hideSearchInFileIfVisible();
+    intent._controller.toggleSearchInFileVisibility(false);
   }
 }
 

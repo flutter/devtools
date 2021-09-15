@@ -1022,18 +1022,6 @@ class DebuggerController extends DisposableController
     _showFileOpener.value = visible;
   }
 
-  void hideSearchInFileIfVisible() {
-    if (showSearchInFileField.value) {
-      toggleSearchInFileVisibility(false);
-    }
-  }
-
-  void hideFileOpenerIfVisible() {
-    if (showFileOpener.value) {
-      toggleFileOpenerVisibility(false);
-    }
-  }
-
   @override
   List<SourceToken> matchesForSearch(String search) {
     if (search == null || search.isEmpty || parsedScript.value == null) {
