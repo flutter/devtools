@@ -483,7 +483,7 @@ mixin InspectorTreeFixedRowHeightController on InspectorTreeControllerBase {
   }
 }
 
-class InspectorTreeControllerFlutter extends Object
+class InspectorTreeController extends Object
     with InspectorTreeControllerBase, InspectorTreeFixedRowHeightController {
   /// Client the controller notifies to trigger changes to the UI.
   final Set<InspectorControllerClient> _clients = {};
@@ -598,7 +598,7 @@ class _InspectorTreeState extends State<InspectorTree>
         AutomaticKeepAliveClientMixin<InspectorTree>,
         AutoDisposeMixin
     implements InspectorControllerClient {
-  InspectorTreeControllerFlutter get controller => widget.controller;
+  InspectorTreeController get controller => widget.controller;
 
   bool get isSummaryTree => widget.isSummaryTree;
 
@@ -627,7 +627,7 @@ class _InspectorTreeState extends State<InspectorTree>
   @override
   void didUpdateWidget(InspectorTree oldWidget) {
     if (oldWidget.controller != widget.controller) {
-      final InspectorTreeControllerFlutter oldController = oldWidget.controller;
+      final InspectorTreeController oldController = oldWidget.controller;
       oldController?.removeClient(this);
       cancel();
 
@@ -993,7 +993,7 @@ class InspectorRowContent extends StatelessWidget {
   });
 
   final InspectorTreeRow row;
-  final InspectorTreeControllerFlutter controller;
+  final InspectorTreeController controller;
   final DebuggerController debuggerController;
   final VoidCallback onToggle;
   final Animation<double> expandArrowAnimation;

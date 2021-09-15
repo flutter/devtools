@@ -14,9 +14,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'wrappers.dart';
 
 /// Create an `InspectorTreeControllerFlutter` from a single `RemoteDiagnosticsNode`
-InspectorTreeControllerFlutter inspectorTreeControllerFromNode(
+InspectorTreeController inspectorTreeControllerFromNode(
     RemoteDiagnosticsNode node) {
-  final controller = InspectorTreeControllerFlutter()
+  final controller = InspectorTreeController()
     ..config = InspectorTreeConfig(
       summaryTree: false,
       treeType: FlutterTreeType.widget,

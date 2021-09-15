@@ -33,7 +33,7 @@ void main() {
   group('InspectorTreeController', () {
     testWidgets('Row with negative index regression test',
         (WidgetTester tester) async {
-      final controller = InspectorTreeControllerFlutter()
+      final controller = InspectorTreeController()
         ..config = InspectorTreeConfig(
           summaryTree: false,
           treeType: FlutterTreeType.widget,

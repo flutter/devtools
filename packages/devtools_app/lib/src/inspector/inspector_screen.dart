@@ -66,10 +66,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   InspectorController inspectorController;
 
-  InspectorTreeControllerFlutter get summaryTreeController =>
+  InspectorTreeController get summaryTreeController =>
       inspectorController?.inspectorTree;
 
-  InspectorTreeControllerFlutter get detailsTreeController =>
+  InspectorTreeController get detailsTreeController =>
       inspectorController?.details?.inspectorTree;
 
   DebuggerController _debuggerController;
@@ -92,8 +92,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       return;
     }
     inspectorController = InspectorController(
-      inspectorTree: InspectorTreeControllerFlutter(),
-      detailsTree: InspectorTreeControllerFlutter(),
+      inspectorTree: InspectorTreeController(),
+      detailsTree: InspectorTreeController(),
       treeType: FlutterTreeType.widget,
       onExpandCollapseSupported: _onExpandCollapseSupported,
       onLayoutExplorerSupported: _onLayoutExplorerSupported,
