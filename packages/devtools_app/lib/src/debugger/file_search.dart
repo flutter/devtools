@@ -31,6 +31,8 @@ class FileSearchField extends StatefulWidget {
 class _FileSearchFieldState extends State<FileSearchField>
     with SearchFieldMixin, AutoDisposeMixin {
   AutoCompleteController _autoCompleteController;
+  String _query;
+  List<ScriptRef> _matches;
 
   final _scriptsCache = <String, ScriptRef>{};
 
@@ -50,20 +52,33 @@ class _FileSearchFieldState extends State<FileSearchField>
     // Open the autocomplete results immediately before a query is entered:
     SchedulerBinding.instance.addPostFrameCallback((_) => _handleSearch());
 
-    String _query = _autoCompleteController.search;
-    List<ScriptRef> _matches = widget.controller.sortedScripts.value;
+    _query = _autoCompleteController.search;
+    _matches = widget.controller.sortedScripts.value;
   }
 
   void _handleSearch() {
     final query = _autoCompleteController.search;
+
+    if (!query.startsWith(_query)) {
+      setState(() {
+        _matches = widget.controller.sortedScripts.value;
+      });
+    }
+
     final matches = findMatches(query, _matches);
     if (matches.isEmpty) {
       _autoCompleteController.searchAutoComplete.value = ['No files found.'];
     } else {
-      matches.forEach(_addScriptRefToCache);
+      final topMatches = takeTopMatches(matches);
+      topMatches.forEach(_addScriptRefToCache);
       _autoCompleteController.searchAutoComplete.value =
-          matches.map((scriptRef) => scriptRef.uri).toList();
+          topMatches.map((scriptRef) => scriptRef.uri).toList();
     }
+
+    setState(() {
+      _query = query;
+      _matches = matches;
+    });
   }
 
   void _handleAutoCompleteOverlay() {
@@ -118,8 +133,9 @@ List<ScriptRef> findMatches(
   String query,
   List<ScriptRef> scriptRefs,
 ) {
+  print('searching through ${scriptRefs.length} scripts');
   if (query.isEmpty) {
-    takeTopMatches(scriptRefs);
+    return scriptRefs;
   }
 
   final exactMatches = scriptRefs
@@ -127,11 +143,14 @@ List<ScriptRef> findMatches(
       .toList();
 
   if (exactMatches.length >= numOfMatchesToShow) {
-    return takeTopMatches(exactMatches);
+    return exactMatches;
   }
 
   final fuzzyMatches = scriptRefs
-      .where((scriptRef) => scriptRef.uri.caseInsensitiveFuzzyMatch(query))
+      .where((scriptRef) => (
+        print(scriptRef.uri.split('/'));
+        return scriptRef.uri.caseInsensitiveFuzzyMatch(query);
+        ),)
       .toList();
 
   return [...exactMatches, ...fuzzyMatches];

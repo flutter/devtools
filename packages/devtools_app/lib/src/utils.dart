@@ -1050,10 +1050,10 @@ extension StringExtension on String {
     var strIndex = 0;
     while (it.moveNext()) {
       final char = it.current;
-      print('--- char is $char');
+      // print('--- char is $char');
       var foundChar = false;
       for (int i = strIndex; i < lowercase.length; i++) {
-        print('looking at ${lowercase[i]}');
+        // print('looking at ${lowercase[i]}');
         if (lowercase[i] == char) {
           strIndex = i + 1;
           foundChar = true;
