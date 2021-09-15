@@ -170,11 +170,10 @@ extension SelectableTextChecking on CommonFinders {
   }
 
   Finder selectableTextContaining(String text) {
-    final found = find.byWidgetPredicate((widget) =>
+    return find.byWidgetPredicate((widget) =>
         widget is SelectableText &&
         ((widget.data?.contains(text) ?? false) ||
             (widget.textSpan?.toPlainText()?.contains(text) ?? false)));
-    return found;
   }
 }
 

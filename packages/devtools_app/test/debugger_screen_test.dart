@@ -655,7 +655,6 @@ final isolateRef = IsolateRef(
   isSystemIsolate: false,
 );
 
-// List<Variable> get testVariables => [
 final testVariables = [
   Variable.create(
     BoundVariable(
