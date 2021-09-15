@@ -35,6 +35,7 @@ import 'inspector_screen.dart';
 import 'inspector_service.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
+import 'inspector_tree_flutter.dart';
 
 const inspectorRefQueryParam = 'inspectorRef';
 
