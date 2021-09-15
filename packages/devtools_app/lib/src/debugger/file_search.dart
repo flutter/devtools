@@ -49,11 +49,14 @@ class _FileSearchFieldState extends State<FileSearchField>
 
     // Open the autocomplete results immediately before a query is entered:
     SchedulerBinding.instance.addPostFrameCallback((_) => _handleSearch());
+
+    String _query = _autoCompleteController.search;
+    List<ScriptRef> _matches = widget.controller.sortedScripts.value;
   }
 
   void _handleSearch() {
     final query = _autoCompleteController.search;
-    final matches = findMatches(query, widget.controller.sortedScripts.value);
+    final matches = findMatches(query, _matches);
     if (matches.isEmpty) {
       _autoCompleteController.searchAutoComplete.value = ['No files found.'];
     } else {
@@ -131,7 +134,7 @@ List<ScriptRef> findMatches(
       .where((scriptRef) => scriptRef.uri.caseInsensitiveFuzzyMatch(query))
       .toList();
 
-  return takeTopMatches([...exactMatches, ...fuzzyMatches]);
+  return [...exactMatches, ...fuzzyMatches];
 }
 
 List<ScriptRef> takeTopMatches(List<ScriptRef> allMatches) {
