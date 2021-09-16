@@ -71,7 +71,7 @@ class InspectorController extends DisposableController
     implements InspectorServiceClient {
   InspectorController({
     @required this.inspectorTree,
-    InspectorTreeControllerBase detailsTree,
+    InspectorTreeController detailsTree,
     @required this.treeType,
     this.parent,
     this.isSummaryTree = true,
@@ -205,7 +205,7 @@ class InspectorController extends DisposableController
 
   InspectorController details;
 
-  InspectorTreeControllerBase inspectorTree;
+  InspectorTreeController inspectorTree;
   final FlutterTreeType treeType;
 
   bool _disposed = false;

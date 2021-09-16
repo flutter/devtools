@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+library inspector_tree;
+
 import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 
 import '../auto_dispose_mixin.dart';
@@ -94,10 +97,40 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
   bool shouldShow() => widget.node.shouldShow;
 }
 
-abstract class InspectorTreeControllerBase {
-  // Abstract method defined to avoid a direct Flutter dependency.
-  @protected
-  void setState(VoidCallback fn);
+class InspectorTreeController extends Object {
+  /// Clients the controller notifies to trigger changes to the UI.
+  final Set<InspectorControllerClient> _clients = {};
+
+  InspectorTreeNode createNode() => InspectorTreeNode();
+
+  void addClient(InspectorControllerClient value) {
+    final firstClient = _clients.isEmpty;
+    _clients.add(value);
+    if (firstClient) {
+      config.onClientActiveChange(true);
+    }
+  }
+
+  void removeClient(InspectorControllerClient value) {
+    _clients.remove(value);
+    if (_clients.isEmpty) {
+      config.onClientActiveChange(false);
+    }
+  }
+
+  // Method defined to avoid a direct Flutter dependency.
+  void setState(VoidCallback fn) {
+    fn();
+    for (var client in _clients) {
+      client.onChanged();
+    }
+  }
+
+  void requestFocus() {
+    for (var client in _clients) {
+      client.requestFocus();
+    }
+  }
 
   InspectorTreeNode get root => _root;
   InspectorTreeNode _root;
@@ -139,8 +172,6 @@ abstract class InspectorTreeControllerBase {
 
   double lastContentWidth;
 
-  InspectorTreeNode createNode();
-
   final List<InspectorTreeRow> cachedRows = [];
 
   // TODO: we should add a listener instead that clears the cache when the
@@ -177,8 +208,6 @@ abstract class InspectorTreeControllerBase {
       // TODO(jacobr): we could choose to repaint only a portion of the UI
     });
   }
-
-  RemoteDiagnosticsNode currentHoverDiagnostic;
 
   void navigateUp() {
     _navigateHelper(-1);
@@ -306,8 +335,6 @@ abstract class InspectorTreeControllerBase {
     return row < root.subtreeSize ? getCachedRow(row) : null;
   }
 
-  void animateToTargets(List<InspectorTreeNode> targets);
-
   void onExpandRow(InspectorTreeRow row) {
     setState(() {
       row.node.isExpanded = true;
@@ -326,6 +353,66 @@ abstract class InspectorTreeControllerBase {
   void onSelectRow(InspectorTreeRow row) {
     selection = row.node;
     expandPath(row.node);
+  }
+
+  Rect getBoundingBox(InspectorTreeRow row) {
+    // For future reference: the bounding box likely needs to be in terms of
+    // positions after the current animations are complete so that computations
+    // to start animations to show specific widget scroll to where the target
+    // nodes will be displayed rather than where they are currently displayed.
+    return Rect.fromLTWH(
+      getDepthIndent(row.depth),
+      getRowY(row.index),
+      rowWidth,
+      rowHeight,
+    );
+  }
+
+  void scrollToRect(Rect targetRect) {
+    for (var client in _clients) {
+      client.scrollToRect(targetRect);
+    }
+  }
+
+  /// Width each row in the tree should have ignoring its indent.
+  ///
+  /// Content in rows should wrap if it exceeds this width.
+  final double rowWidth = 1200;
+
+  /// Maximum indent of the tree in pixels.
+  double _maxIndent;
+
+  double get maxRowIndent {
+    if (lastContentWidth == null) {
+      double maxIndent = 0;
+      for (int i = 0; i < numRows; i++) {
+        final row = getCachedRow(i);
+        if (row != null) {
+          maxIndent = max(maxIndent, getDepthIndent(row.depth));
+        }
+      }
+      lastContentWidth = maxIndent + maxIndent;
+      _maxIndent = maxIndent;
+    }
+    return _maxIndent;
+  }
+
+  void animateToTargets(List<InspectorTreeNode> targets) {
+    Rect targetRect;
+
+    for (InspectorTreeNode target in targets) {
+      final row = getRowForNode(target);
+      if (row != null) {
+        final rowRect = getBoundingBox(row);
+        targetRect =
+        targetRect == null ? rowRect : targetRect.expandToInclude(rowRect);
+      }
+    }
+
+    if (targetRect == null || targetRect.isEmpty) return;
+
+    targetRect = targetRect.inflate(20.0);
+    scrollToRect(targetRect);
   }
 
   bool expandPropertiesByDefault(DiagnosticsTreeStyle style) {
@@ -458,113 +545,6 @@ abstract class InspectorTreeControllerBase {
   }
 }
 
-mixin InspectorTreeFixedRowHeightController on InspectorTreeControllerBase {
-  Rect getBoundingBox(InspectorTreeRow row);
-
-  void scrollToRect(Rect targetRect);
-
-  @override
-  void animateToTargets(List<InspectorTreeNode> targets) {
-    Rect targetRect;
-
-    for (InspectorTreeNode target in targets) {
-      final row = getRowForNode(target);
-      if (row != null) {
-        final rowRect = getBoundingBox(row);
-        targetRect =
-        targetRect == null ? rowRect : targetRect.expandToInclude(rowRect);
-      }
-    }
-
-    if (targetRect == null || targetRect.isEmpty) return;
-
-    targetRect = targetRect.inflate(20.0);
-    scrollToRect(targetRect);
-  }
-}
-
-class InspectorTreeController extends Object
-    with InspectorTreeControllerBase, InspectorTreeFixedRowHeightController {
-  /// Client the controller notifies to trigger changes to the UI.
-  final Set<InspectorControllerClient> _clients = {};
-
-  void addClient(InspectorControllerClient value) {
-    final firstClient = _clients.isEmpty;
-    _clients.add(value);
-    if (firstClient) {
-      config.onClientActiveChange(true);
-    }
-  }
-
-  void removeClient(InspectorControllerClient value) {
-    _clients.remove(value);
-    if (_clients.isEmpty) {
-      config.onClientActiveChange(false);
-    }
-  }
-
-  @override
-  InspectorTreeNode createNode() => InspectorTreeNode();
-
-  @override
-  Rect getBoundingBox(InspectorTreeRow row) {
-    // For future reference: the bounding box likely needs to be in terms of
-    // positions after the current animations are complete so that computations
-    // to start animations to show specific widget scroll to where the target
-    // nodes will be displayed rather than where they are currently displayed.
-    return Rect.fromLTWH(
-      getDepthIndent(row.depth),
-      getRowY(row.index),
-      rowWidth,
-      rowHeight,
-    );
-  }
-
-  @override
-  void scrollToRect(Rect targetRect) {
-    for (var client in _clients) {
-      client.scrollToRect(targetRect);
-    }
-  }
-
-  @override
-  void setState(VoidCallback fn) {
-    fn();
-    for (var client in _clients) {
-      client.onChanged();
-    }
-  }
-
-  /// Width each row in the tree should have ignoring its indent.
-  ///
-  /// Content in rows should wrap if it exceeds this width.
-  final double rowWidth = 1200;
-
-  /// Maximum indent of the tree in pixels.
-  double _maxIndent;
-
-  double get maxRowIndent {
-    if (lastContentWidth == null) {
-      double maxIndent = 0;
-      for (int i = 0; i < numRows; i++) {
-        final row = getCachedRow(i);
-        if (row != null) {
-          maxIndent = max(maxIndent, getDepthIndent(row.depth));
-        }
-      }
-      lastContentWidth = maxIndent + maxIndent;
-      _maxIndent = maxIndent;
-    }
-    return _maxIndent;
-  }
-
-  void requestFocus() {
-    for (var client in _clients) {
-      client.requestFocus();
-    }
-  }
-}
-
 abstract class InspectorControllerClient {
   void onChanged();
 
@@ -582,7 +562,7 @@ class InspectorTree extends StatefulWidget {
     this.widgetErrors,
   }) : super(key: key);
 
-  final InspectorTreeControllerBase controller;
+  final InspectorTreeController controller;
   final DebuggerController debuggerController;
   final bool isSummaryTree;
   final LinkedHashMap<String, InspectableWidgetError> widgetErrors;
@@ -919,7 +899,7 @@ Paint _defaultPaint(ColorScheme colorScheme) => Paint()
 class _RowPainter extends CustomPainter {
   _RowPainter(this.row, this._controller, this.colorScheme);
 
-  final InspectorTreeControllerBase _controller;
+  final InspectorTreeController _controller;
   final InspectorTreeRow row;
   final ColorScheme colorScheme;
 
