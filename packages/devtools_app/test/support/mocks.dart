@@ -168,6 +168,14 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   }
 
   @override
+  Future<void> sendDwdsEvent({
+    @required String screen,
+    @required String action,
+  }) {
+    return Future.value();
+  }
+
+  @override
   void manuallyDisconnect() {
     changeState(false, manual: true);
   }
