@@ -57,15 +57,16 @@ class _FileSearchFieldState extends State<FileSearchField>
   }
 
   void _handleSearch() {
-    final query = _autoCompleteController.search;
+    final previousQuery = _query;
+    final currentQuery = _autoCompleteController.search;
 
-    if (!query.startsWith(_query)) {
-      setState(() {
-        _matches = widget.controller.sortedScripts.value;
-      });
-    }
+    // If the current query is a continuation of the previous query, then wittle
+    // down the matches. Otherwise search through all scripts:
+    final scripts = currentQuery.startsWith(previousQuery)
+        ? _matches
+        : widget.controller.sortedScripts.value;
 
-    final matches = findMatches(query, _matches);
+    final matches = findMatches(currentQuery, scripts);
     if (matches.isEmpty) {
       _autoCompleteController.searchAutoComplete.value = ['No files found.'];
     } else {
@@ -76,7 +77,7 @@ class _FileSearchFieldState extends State<FileSearchField>
     }
 
     setState(() {
-      _query = query;
+      _query = currentQuery;
       _matches = matches;
     });
   }
@@ -133,7 +134,6 @@ List<ScriptRef> findMatches(
   String query,
   List<ScriptRef> scriptRefs,
 ) {
-  print('searching through ${scriptRefs.length} scripts');
   if (query.isEmpty) {
     return scriptRefs;
   }
@@ -147,10 +147,8 @@ List<ScriptRef> findMatches(
   }
 
   final fuzzyMatches = scriptRefs
-      .where((scriptRef) => (
-        print(scriptRef.uri.split('/'));
-        return scriptRef.uri.caseInsensitiveFuzzyMatch(query);
-        ),)
+      .where((scriptRef) =>
+          scriptRef.uri.split('/').last.caseInsensitiveFuzzyMatch(query))
       .toList();
 
   return [...exactMatches, ...fuzzyMatches];
