@@ -145,8 +145,7 @@ List<ScriptRef> findMatches(
   }
 
   final fuzzyMatches = scriptRefs
-      .where((scriptRef) =>
-          scriptRef.uri.split('/').last.caseInsensitiveFuzzyMatch(query))
+      .where((scriptRef) => scriptRef.uri.caseInsensitiveFuzzyMatch(query))
       .toList();
 
   return [...exactMatches, ...fuzzyMatches];
