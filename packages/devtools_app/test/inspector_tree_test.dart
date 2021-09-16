@@ -6,7 +6,7 @@ import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
-import 'package:devtools_app/src/inspector/inspector_tree_flutter.dart';
+import 'package:devtools_app/src/inspector/inspector_tree_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -33,7 +33,7 @@ void main() {
   group('InspectorTreeController', () {
     testWidgets('Row with negative index regression test',
         (WidgetTester tester) async {
-      final controller = InspectorTreeControllerFlutter()
+      final controller = InspectorTreeController()
         ..config = InspectorTreeConfig(
           summaryTree: false,
           treeType: FlutterTreeType.widget,

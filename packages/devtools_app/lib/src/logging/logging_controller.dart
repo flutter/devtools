@@ -20,6 +20,7 @@ import '../globals.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
 import '../inspector/inspector_tree.dart';
+import '../inspector/inspector_tree_controller.dart';
 import '../ui/filter.dart';
 import '../ui/search.dart';
 import '../utils.dart';
