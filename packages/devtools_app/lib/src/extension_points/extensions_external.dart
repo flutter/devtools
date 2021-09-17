@@ -13,7 +13,7 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
 
   @override
   Link issueTrackerLink() {
-    const githubLink = 'github.com/flutter/devtools/issues';
+    const githubLink = 'github.com/flutter/devtools/issues/new';
     return const Link(display: githubLink, url: 'https://$githubLink');
   }
 
