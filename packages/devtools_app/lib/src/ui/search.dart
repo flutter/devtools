@@ -890,3 +890,17 @@ mixin TreeDataSearchStateMixin<T extends TreeNode<T>>
 
 class AutoCompleteController extends DisposableController
     with SearchControllerMixin, AutoCompleteSearchControllerMixin {}
+
+class AutoCompleteResultSegment {
+  AutoCompleteResultSegment(this.start, this.end);
+
+  final int start;
+  final int end;
+}
+
+class AutoCompleteResult {
+  AutoCompleteResult(this.result, {this.highlightedSegments});
+
+  final String result;
+  final List<AutoCompleteResultSegment> highlightedSegments;
+}
