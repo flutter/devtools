@@ -61,8 +61,8 @@ class _FileSearchFieldState extends State<FileSearchField>
     final previousQuery = _query;
     final currentQuery = widget.autoCompleteController.search;
 
-    // If the current query is a continuation of the previous query, then wittle
-    // down the matches. Otherwise search through all scripts:
+    // If the current query is a continuation of the previous query, then
+    // whittle down the matches. Otherwise search through all scripts:
     final scripts = currentQuery.startsWith(previousQuery)
         ? _matches
         : widget.debuggerController.sortedScripts.value;
