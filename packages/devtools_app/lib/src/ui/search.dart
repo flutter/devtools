@@ -198,7 +198,10 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     final autoCompleteTiles = <ListTile>[];
     final count = min(searchAutoComplete.value.length, totalTiles);
     for (var index = 0; index < count; index++) {
-      final matchedName = searchAutoComplete.value[index];
+      final matchedName = searchAutoComplete.value[index].result;
+      final highlightedSegments =
+          searchAutoComplete.value[index].highlightedSegments;
+      // ELLIOTT - CHANGE HERE.
       autoCompleteTiles.add(
         ListTile(
           minVerticalPadding: 0,
@@ -299,9 +302,9 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     selectTheSearchNotifier.value = v;
   }
 
-  final searchAutoComplete = ValueNotifier<List<String>>([]);
+  final searchAutoComplete = ValueNotifier<List<AutoCompleteResult>>([]);
 
-  ValueListenable<List<String>> get searchAutoCompleteNotifier =>
+  ValueListenable<List<AutoCompleteResult>> get searchAutoCompleteNotifier =>
       searchAutoComplete;
 
   void clearSearchAutoComplete() {

@@ -70,13 +70,15 @@ class _FileSearchFieldState extends State<FileSearchField>
     final matches = findMatches(currentQuery, scripts);
     if (matches.isEmpty) {
       widget.autoCompleteController.searchAutoComplete.value = [
-        'No files found.'
+        AutoCompleteResult('No files found.')
       ];
     } else {
       final topMatches = takeTopMatches(matches);
       topMatches.forEach(_addScriptRefToCache);
-      widget.autoCompleteController.searchAutoComplete.value =
-          topMatches.map((scriptRef) => scriptRef.uri).toList();
+      widget.autoCompleteController.searchAutoComplete.value = topMatches
+          .map((scriptRef) =>
+              createAutoCompleteResult(scriptRef.uri, currentQuery))
+          .toList();
     }
 
     _query = currentQuery;
@@ -160,4 +162,28 @@ List<ScriptRef> takeTopMatches(List<ScriptRef> allMatches) {
   }
 
   return allMatches.sublist(0, numOfMatchesToShow);
+}
+
+AutoCompleteResult createAutoCompleteResult(String match, String query) {
+  final autoCompleteResultSegments = [];
+
+  if (match.contains(query)) {
+    final start = match.indexOf(query);
+    final end = start + query.length;
+    autoCompleteResultSegments.add(AutoCompleteResultSegment(start, end));
+  } else {
+    var queryIndex = 0;
+    for (int matchIndex = 0; matchIndex < match.length; matchIndex++) {
+      if (queryIndex == query.length) break;
+      if (match[matchIndex] == query[queryIndex]) {
+        final start = matchIndex;
+        final end = matchIndex + 1;
+        autoCompleteResultSegments.add(AutoCompleteResultSegment(start, end));
+        queryIndex++;
+      }
+    }
+  }
+
+  return AutoCompleteResult(match,
+      highlightedSegments: autoCompleteResultSegments);
 }
