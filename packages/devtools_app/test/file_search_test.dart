@@ -150,6 +150,15 @@ void main() {
             'animals/insects/caterpillar.dart',
           ]),
           reason: 'Correct search results for "caterpi" query.');
+
+      autoCompleteController.search = 'caterpie';
+      expect(
+          autoCompleteController.searchAutoComplete.value,
+          equals([
+            // No matches message:
+            'No files found.',
+          ]),
+          reason: 'Correct search results for "caterpie" query.');
     });
   });
 }
