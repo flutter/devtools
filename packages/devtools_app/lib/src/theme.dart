@@ -314,6 +314,11 @@ extension DevToolsColorScheme on ColorScheme {
   Color get autoCompleteHighlightColor =>
       isLight ? Colors.grey[300] : Colors.grey[700];
 
+  Color get autoCompleteMatchTextColor => isLight ? Colors.black : Colors.white;
+
+  Color get autoCompleteMatchHighlightedTextColor =>
+      isLight ? Colors.red : Colors.yellow;
+
   // Title of the hover card.
   TextStyle get hoverTitleTextStyle => TextStyle(
         color: defaultForeground,

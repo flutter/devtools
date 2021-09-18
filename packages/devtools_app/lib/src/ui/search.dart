@@ -167,6 +167,16 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     final searchAutoComplete = controller.searchAutoComplete;
 
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final autoCompleteTileRegularTextStyle =
+        Theme.of(context).regularTextStyle.copyWith(
+              color: colorScheme.autoCompleteMatchTextColor,
+              fontWeight: FontWeight.bold,
+            );
+    final autoCompleteTileHighlightedTextStyle =
+        Theme.of(context).regularTextStyle.copyWith(
+              color: colorScheme.autoCompleteMatchHighlightedTextColor,
+              fontWeight: FontWeight.bold,
+            );
 
     // Find the searchField and place overlay below bottom of TextField and
     // make overlay width of TextField. This is also we decide the height of
@@ -198,14 +208,15 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     final autoCompleteTiles = <ListTile>[];
     final count = min(searchAutoComplete.value.length, totalTiles);
     for (var index = 0; index < count; index++) {
-      final matchedName = searchAutoComplete.value[index].result;
-      final highlightedSegments =
-          searchAutoComplete.value[index].highlightedSegments;
-      final tileText = highlightedSegments.length > 0
-          ? highlightResult(searchAutoComplete.value[index])
+      final autoCompleteResult = searchAutoComplete.value[index];
+      final matchedName = autoCompleteResult.text;
+      final tileText = autoCompleteResult.highlightedSegments != null
+          ? highlightMatchText(
+              autoCompleteResult,
+              autoCompleteTileRegularTextStyle,
+              autoCompleteTileHighlightedTextStyle)
           : Text(matchedName);
 
-      // ELLIOTT - CHANGE HERE.
       autoCompleteTiles.add(
         ListTile(
           minVerticalPadding: 0,
@@ -260,6 +271,49 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
       ),
     );
   }
+
+  RichText highlightMatchText(
+    AutoCompleteMatch match,
+    TextStyle regularTextStyle,
+    TextStyle highlightedTextStyle,
+  ) {
+    final text = match.text;
+    final highlightedSegments = match.highlightedSegments;
+    final spans = <TextSpan>[];
+    int previousEndIndex = 0;
+
+    for (final segment in highlightedSegments) {
+      if (previousEndIndex < segment.start) {
+        // Add the unhighlighted segment before the current highlighted segment:
+        final segmentBefore = text.substring(previousEndIndex, segment.start);
+        spans.add(TextSpan(
+          text: segmentBefore,
+          style: regularTextStyle,
+        ));
+      }
+      // Add the current highlighted segment:
+      final highlightedSegment = text.substring(segment.start, segment.end);
+      spans
+          .add(TextSpan(text: highlightedSegment, style: highlightedTextStyle));
+      previousEndIndex = segment.end;
+    }
+    if (previousEndIndex < text.length - 1) {
+      // Add the last unhighlighted segment:
+      final lastSegment = text.substring(previousEndIndex);
+      spans.add(TextSpan(
+        text: lastSegment,
+        style: regularTextStyle,
+      ));
+    }
+
+    return RichText(
+      text: TextSpan(
+        text: spans.first.text,
+        style: spans.first.style,
+        children: spans.sublist(1),
+      ),
+    );
+  }
 }
 
 const searchAutoCompleteKeyName = 'SearchAutoComplete';
@@ -306,9 +360,9 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     selectTheSearchNotifier.value = v;
   }
 
-  final searchAutoComplete = ValueNotifier<List<AutoCompleteResult>>([]);
+  final searchAutoComplete = ValueNotifier<List<AutoCompleteMatch>>([]);
 
-  ValueListenable<List<AutoCompleteResult>> get searchAutoCompleteNotifier =>
+  ValueListenable<List<AutoCompleteMatch>> get searchAutoCompleteNotifier =>
       searchAutoComplete;
 
   void clearSearchAutoComplete() {
@@ -585,18 +639,19 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
             final searchToMatch = controller.search.toLowerCase();
             // Find exact match in autocomplete list - use that as our search value.
             for (final autoEntry in controller.searchAutoComplete.value) {
-              if (searchToMatch == autoEntry.toLowerCase()) {
-                foundExact = autoEntry;
+              if (searchToMatch == autoEntry.text.toLowerCase()) {
+                foundExact = autoEntry.text;
                 break;
               }
             }
             // Nothing found, pick item selected in dropdown.
             final autoCompleteList = controller.searchAutoComplete.value;
             if (foundExact == null ||
-                autoCompleteList[controller.currentDefaultIndex] !=
+                autoCompleteList[controller.currentDefaultIndex].text !=
                     foundExact) {
               if (autoCompleteList.isNotEmpty) {
-                foundExact = autoCompleteList[controller.currentDefaultIndex];
+                foundExact =
+                    autoCompleteList[controller.currentDefaultIndex].text;
               }
             }
 
@@ -898,16 +953,16 @@ mixin TreeDataSearchStateMixin<T extends TreeNode<T>>
 class AutoCompleteController extends DisposableController
     with SearchControllerMixin, AutoCompleteSearchControllerMixin {}
 
-class AutoCompleteResultSegment {
-  AutoCompleteResultSegment(this.start, this.end);
+class AutoCompleteMatchSegment {
+  AutoCompleteMatchSegment(this.start, this.end);
 
   final int start;
   final int end;
 }
 
-class AutoCompleteResult {
-  AutoCompleteResult(this.result, {this.highlightedSegments});
+class AutoCompleteMatch {
+  AutoCompleteMatch(this.text, {this.highlightedSegments});
 
-  final String result;
-  final List<AutoCompleteResultSegment> highlightedSegments;
+  final String text;
+  final List<AutoCompleteMatchSegment> highlightedSegments;
 }

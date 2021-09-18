@@ -70,14 +70,14 @@ class _FileSearchFieldState extends State<FileSearchField>
     final matches = findMatches(currentQuery, scripts);
     if (matches.isEmpty) {
       widget.autoCompleteController.searchAutoComplete.value = [
-        AutoCompleteResult('No files found.')
+        AutoCompleteMatch('No files found.')
       ];
     } else {
       final topMatches = takeTopMatches(matches);
       topMatches.forEach(_addScriptRefToCache);
       widget.autoCompleteController.searchAutoComplete.value = topMatches
           .map((scriptRef) =>
-              createAutoCompleteResult(scriptRef.uri, currentQuery))
+              createAutoCompleteMatch(scriptRef.uri, currentQuery))
           .toList();
     }
 
@@ -164,13 +164,13 @@ List<ScriptRef> takeTopMatches(List<ScriptRef> allMatches) {
   return allMatches.sublist(0, numOfMatchesToShow);
 }
 
-AutoCompleteResult createAutoCompleteResult(String match, String query) {
-  final autoCompleteResultSegments = [];
+AutoCompleteMatch createAutoCompleteMatch(String match, String query) {
+  final autoCompleteResultSegments = <AutoCompleteMatchSegment>[];
 
   if (match.contains(query)) {
     final start = match.indexOf(query);
     final end = start + query.length;
-    autoCompleteResultSegments.add(AutoCompleteResultSegment(start, end));
+    autoCompleteResultSegments.add(AutoCompleteMatchSegment(start, end));
   } else {
     var queryIndex = 0;
     for (int matchIndex = 0; matchIndex < match.length; matchIndex++) {
@@ -178,12 +178,12 @@ AutoCompleteResult createAutoCompleteResult(String match, String query) {
       if (match[matchIndex] == query[queryIndex]) {
         final start = matchIndex;
         final end = matchIndex + 1;
-        autoCompleteResultSegments.add(AutoCompleteResultSegment(start, end));
+        autoCompleteResultSegments.add(AutoCompleteMatchSegment(start, end));
         queryIndex++;
       }
     }
   }
 
-  return AutoCompleteResult(match,
+  return AutoCompleteMatch(match,
       highlightedSegments: autoCompleteResultSegments);
 }
