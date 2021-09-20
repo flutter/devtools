@@ -165,18 +165,11 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     final bottom = autoComplete.isBottom;
     final isMaxWidth = autoComplete.isMaxWidth;
     final searchAutoComplete = controller.searchAutoComplete;
-
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final autoCompleteTileRegularTextStyle =
-        Theme.of(context).regularTextStyle.copyWith(
-              color: colorScheme.autoCompleteMatchTextColor,
-              fontWeight: FontWeight.bold,
-            );
+        Theme.of(context).autoCompleteTileRegularTextStyle;
     final autoCompleteTileHighlightedTextStyle =
-        Theme.of(context).regularTextStyle.copyWith(
-              color: colorScheme.autoCompleteMatchHighlightedTextColor,
-              fontWeight: FontWeight.bold,
-            );
+        Theme.of(context).autoCompleteTileHighlightedTextStyle;
 
     // Find the searchField and place overlay below bottom of TextField and
     // make overlay width of TextField. This is also we decide the height of
@@ -210,12 +203,6 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     for (var index = 0; index < count; index++) {
       final autoCompleteResult = searchAutoComplete.value[index];
       final matchedName = autoCompleteResult.text;
-      final tileText = autoCompleteResult.highlightedSegments != null
-          ? highlightMatchText(
-              autoCompleteResult,
-              autoCompleteTileRegularTextStyle,
-              autoCompleteTileHighlightedTextStyle)
-          : Text(matchedName);
 
       autoCompleteTiles.add(
         ListTile(
@@ -223,7 +210,10 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
           dense: true,
           title: Align(
             alignment: Alignment.centerLeft,
-            child: tileText,
+            child: maybeHighlightMatchText(
+                autoCompleteResult,
+                autoCompleteTileRegularTextStyle,
+                autoCompleteTileHighlightedTextStyle),
           ),
           tileColor: controller.currentDefaultIndex == index
               ? colorScheme.autoCompleteHighlightColor
@@ -272,13 +262,23 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     );
   }
 
-  RichText highlightMatchText(
+  RichText maybeHighlightMatchText(
     AutoCompleteMatch match,
     TextStyle regularTextStyle,
     TextStyle highlightedTextStyle,
   ) {
     final text = match.text;
     final highlightedSegments = match.highlightedSegments;
+
+    if (highlightedSegments == null || highlightedSegments.isEmpty) {
+      return RichText(
+        text: TextSpan(
+          text: text,
+          style: regularTextStyle,
+        ),
+      );
+    }
+
     final spans = <TextSpan>[];
     int previousEndIndex = 0;
 

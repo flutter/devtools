@@ -317,7 +317,7 @@ extension DevToolsColorScheme on ColorScheme {
   Color get autoCompleteMatchTextColor => isLight ? Colors.black : Colors.white;
 
   Color get autoCompleteMatchHighlightedTextColor =>
-      isLight ? Colors.red : Colors.yellow;
+      isLight ? Colors.green[600] : Colors.limeAccent[100];
 
   // Title of the hover card.
   TextStyle get hoverTitleTextStyle => TextStyle(
@@ -435,6 +435,18 @@ extension ThemeDataExtension on ThemeData {
         color: colorScheme.devtoolsLink,
         decoration: TextDecoration.underline,
         fontSize: defaultFontSize,
+      );
+
+  TextStyle get autoCompleteTileRegularTextStyle => fixedFontStyle.copyWith(
+        // fontSize: defaultFontSize,
+        // fontFamily: 'RobotoMono',
+        // fontFamily: textTheme.bodyText2.fontFamily,
+        color: colorScheme.autoCompleteMatchTextColor,
+      );
+
+  TextStyle get autoCompleteTileHighlightedTextStyle => fixedFontStyle.copyWith(
+        color: colorScheme.autoCompleteMatchHighlightedTextColor,
+        fontWeight: FontWeight.w800,
       );
 }
 

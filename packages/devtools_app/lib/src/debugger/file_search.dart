@@ -172,8 +172,11 @@ AutoCompleteMatch createAutoCompleteMatch(String match, String query) {
     final end = start + query.length;
     autoCompleteResultSegments.add(AutoCompleteMatchSegment(start, end));
   } else {
+    final fileName = match.split('/').last;
     var queryIndex = 0;
-    for (int matchIndex = 0; matchIndex < match.length; matchIndex++) {
+    for (int matchIndex = match.indexOf(fileName);
+        matchIndex < match.length;
+        matchIndex++) {
       if (queryIndex == query.length) break;
       if (match[matchIndex] == query[queryIndex]) {
         final start = matchIndex;
