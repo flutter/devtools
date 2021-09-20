@@ -1359,15 +1359,15 @@ final mockParsedScript = ParsedScript(
     executableLines: <int>{});
 
 final mockScriptRefs = [
-  ScriptRef(uri: 'animals/cats/meow.dart', id: 'fake/id/1'),
-  ScriptRef(uri: 'animals/cats/purr.dart', id: 'fake/id/2'),
-  ScriptRef(uri: 'animals/dogs/bark.dart', id: 'fake/id/3'),
-  ScriptRef(uri: 'animals/dogs/growl.dart', id: 'fake/id/4'),
-  ScriptRef(uri: 'animals/insects/caterpillar.dart', id: 'fake/id/5'),
-  ScriptRef(uri: 'animals/insects/cicada.dart', id: 'fake/id/6'),
-  ScriptRef(uri: 'food/catering/party.dart', id: 'fake/id/7'),
-  ScriptRef(uri: 'food/carton/milk.dart', id: 'fake/id/8'),
-  ScriptRef(uri: 'food/milk/carton.dart', id: 'fake/id/9'),
-  ScriptRef(uri: 'travel/adventure/cave_tours_europe.dart', id: 'fake/id/10'),
-  ScriptRef(uri: 'travel/canada/banff.dart', id: 'fake/id/11'),
+  ScriptRef(uri: 'zoo:animals/cats/meow.dart', id: 'fake/id/1'),
+  ScriptRef(uri: 'zoo:animals/cats/purr.dart', id: 'fake/id/2'),
+  ScriptRef(uri: 'zoo:animals/dogs/bark.dart', id: 'fake/id/3'),
+  ScriptRef(uri: 'zoo:animals/dogs/growl.dart', id: 'fake/id/4'),
+  ScriptRef(uri: 'zoo:animals/insects/caterpillar.dart', id: 'fake/id/5'),
+  ScriptRef(uri: 'zoo:animals/insects/cicada.dart', id: 'fake/id/6'),
+  ScriptRef(uri: 'kitchen:food/catering/party.dart', id: 'fake/id/7'),
+  ScriptRef(uri: 'kitchen:food/carton/milk.dart', id: 'fake/id/8'),
+  ScriptRef(uri: 'kitchen:food/milk/carton.dart', id: 'fake/id/9'),
+  ScriptRef(uri: 'travel:adventure/cave_tours_europe.dart', id: 'fake/id/10'),
+  ScriptRef(uri: 'travel:canada/banff.dart', id: 'fake/id/11'),
 ];

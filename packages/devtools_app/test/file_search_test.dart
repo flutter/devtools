@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/debugger/file_search.dart';
-import 'package:devtools_app/src/ui/search.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,15 +13,14 @@ import 'support/wrappers.dart';
 
 void main() {
   final debuggerController = MockDebuggerController.withDefaults();
-  final autoCompleteController = AutoCompleteController();
 
   Widget buildFileSearch() {
     return MaterialApp(
       home: Scaffold(
         body: Card(
           child: FileSearchField(
-              debuggerController: debuggerController,
-              autoCompleteController: autoCompleteController),
+            debuggerController: debuggerController,
+          ),
         ),
       ),
     );
@@ -38,22 +36,25 @@ void main() {
         'Search returns expected files', const Size(1000.0, 4000.0),
         (WidgetTester tester) async {
       await tester.pumpWidget(buildFileSearch());
+      final FileSearchFieldState state =
+          tester.state(find.byType(FileSearchField));
+      final autoCompleteController = state.autoCompleteController;
 
       autoCompleteController.search = '';
       expect(
           autoCompleteController.searchAutoComplete.value,
           equals([
             // Show all results (truncated to 10):
-            'animals/cats/meow.dart',
-            'animals/cats/purr.dart',
-            'animals/dogs/bark.dart',
-            'animals/dogs/growl.dart',
-            'animals/insects/caterpillar.dart',
-            'animals/insects/cicada.dart',
-            'food/catering/party.dart',
-            'food/carton/milk.dart',
-            'food/milk/carton.dart',
-            'travel/adventure/cave_tours_europe.dart',
+            'zoo:animals/cats/meow.dart',
+            'zoo:animals/cats/purr.dart',
+            'zoo:animals/dogs/bark.dart',
+            'zoo:animals/dogs/growl.dart',
+            'zoo:animals/insects/caterpillar.dart',
+            'zoo:animals/insects/cicada.dart',
+            'kitchen:food/catering/party.dart',
+            'kitchen:food/carton/milk.dart',
+            'kitchen:food/milk/carton.dart',
+            'travel:adventure/cave_tours_europe.dart',
           ]),
           reason: 'Correct search results for empty query.');
 
@@ -62,15 +63,15 @@ void main() {
           autoCompleteController.searchAutoComplete.value,
           equals([
             // Exact matches:
-            'animals/cats/meow.dart',
-            'animals/cats/purr.dart',
-            'animals/insects/caterpillar.dart',
-            'animals/insects/cicada.dart',
-            'food/catering/party.dart',
-            'food/carton/milk.dart',
-            'food/milk/carton.dart',
-            'travel/adventure/cave_tours_europe.dart',
-            'travel/canada/banff.dart',
+            'zoo:animals/cats/meow.dart',
+            'zoo:animals/cats/purr.dart',
+            'zoo:animals/insects/caterpillar.dart',
+            'zoo:animals/insects/cicada.dart',
+            'kitchen:food/catering/party.dart',
+            'kitchen:food/carton/milk.dart',
+            'kitchen:food/milk/carton.dart',
+            'travel:adventure/cave_tours_europe.dart',
+            'travel:canada/banff.dart',
           ]),
           reason: 'Correct search results for "c" query.');
 
@@ -79,15 +80,15 @@ void main() {
           autoCompleteController.searchAutoComplete.value,
           equals([
             // Exact matches:
-            'animals/cats/meow.dart',
-            'animals/cats/purr.dart',
-            'animals/insects/caterpillar.dart',
-            'animals/insects/cicada.dart',
-            'food/catering/party.dart',
-            'food/carton/milk.dart',
-            'food/milk/carton.dart',
-            'travel/adventure/cave_tours_europe.dart',
-            'travel/canada/banff.dart',
+            'zoo:animals/cats/meow.dart',
+            'zoo:animals/cats/purr.dart',
+            'zoo:animals/insects/caterpillar.dart',
+            'zoo:animals/insects/cicada.dart',
+            'kitchen:food/catering/party.dart',
+            'kitchen:food/carton/milk.dart',
+            'kitchen:food/milk/carton.dart',
+            'travel:adventure/cave_tours_europe.dart',
+            'travel:canada/banff.dart',
           ]),
           reason: 'Correct search results for "ca" query.');
 
@@ -96,14 +97,14 @@ void main() {
           autoCompleteController.searchAutoComplete.value,
           equals([
             // Exact matches:
-            'animals/cats/meow.dart',
-            'animals/cats/purr.dart',
-            'animals/insects/caterpillar.dart',
-            'food/catering/party.dart',
+            'zoo:animals/cats/meow.dart',
+            'zoo:animals/cats/purr.dart',
+            'zoo:animals/insects/caterpillar.dart',
+            'kitchen:food/catering/party.dart',
             // Fuzzy matches:
-            'animals/insects/cicada.dart',
-            'food/milk/carton.dart',
-            'travel/adventure/cave_tours_europe.dart',
+            'zoo:animals/insects/cicada.dart',
+            'kitchen:food/milk/carton.dart',
+            'travel:adventure/cave_tours_europe.dart',
           ]),
           reason: 'Correct search results for "cat" query.');
 
@@ -112,10 +113,10 @@ void main() {
           autoCompleteController.searchAutoComplete.value,
           equals([
             // Exact matches:
-            'animals/insects/caterpillar.dart',
-            'food/catering/party.dart',
+            'zoo:animals/insects/caterpillar.dart',
+            'kitchen:food/catering/party.dart',
             // Fuzzy matches:
-            'travel/adventure/cave_tours_europe.dart',
+            'travel:adventure/cave_tours_europe.dart',
           ]),
           reason: 'Correct search results for "cate" query.');
 
@@ -124,10 +125,10 @@ void main() {
           autoCompleteController.searchAutoComplete.value,
           equals([
             // Exact matches:
-            'animals/insects/caterpillar.dart',
-            'food/catering/party.dart',
+            'zoo:animals/insects/caterpillar.dart',
+            'kitchen:food/catering/party.dart',
             // Fuzzy matches:
-            'travel/adventure/cave_tours_europe.dart',
+            'travel:adventure/cave_tours_europe.dart',
           ]),
           reason: 'Correct search results for "cater" query.');
 
@@ -136,9 +137,9 @@ void main() {
           autoCompleteController.searchAutoComplete.value,
           equals([
             // Exact matches:
-            'animals/insects/caterpillar.dart',
+            'zoo:animals/insects/caterpillar.dart',
             // Fuzzy matches:
-            'travel/adventure/cave_tours_europe.dart',
+            'travel:adventure/cave_tours_europe.dart',
           ]),
           reason: 'Correct search results for "caterp" query.');
 
@@ -147,7 +148,7 @@ void main() {
           autoCompleteController.searchAutoComplete.value,
           equals([
             // Exact matches:
-            'animals/insects/caterpillar.dart',
+            'zoo:animals/insects/caterpillar.dart',
           ]),
           reason: 'Correct search results for "caterpi" query.');
 
