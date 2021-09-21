@@ -92,6 +92,7 @@ class _FileSearchFieldState extends State<FileSearchField>
   void _onSelection(String scriptUri) {
     final scriptRef = _scriptsCache[scriptUri];
     widget.controller.showScriptLocation(ScriptLocation(scriptRef));
+    widget.controller.explorerController.selectScriptNode(scriptRef);
     _onClose();
   }
 
