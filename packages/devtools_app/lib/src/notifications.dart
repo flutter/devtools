@@ -12,7 +12,7 @@ import 'status_line.dart' as status_line;
 import 'theme.dart';
 import 'utils.dart';
 
-const _notificationHeight = 175.0;
+double get _notificationHeight => scaleByFontFactor(175.0);
 final _notificationWidth = _notificationHeight * goldenRatio;
 
 /// Interface for pushing notifications in the app.
@@ -167,7 +167,7 @@ class NotificationsState extends State<_NotificationsProvider>
       child: Padding(
         // Position the notifications in the lower right of the app window, and
         // high enough up that we don't obscure the status line.
-        padding: const EdgeInsets.only(
+        padding: EdgeInsets.only(
           right: defaultSpacing,
           bottom: status_line.statusLineHeight + defaultSpacing,
         ),
@@ -263,14 +263,14 @@ class _NotificationState extends State<_Notification>
         );
       },
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(denseSpacing),
         child: Card(
           color: theme.snackBarTheme.backgroundColor,
           child: DefaultTextStyle(
             style: theme.snackBarTheme.contentTextStyle ??
                 theme.primaryTextTheme.subtitle1,
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(denseSpacing),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

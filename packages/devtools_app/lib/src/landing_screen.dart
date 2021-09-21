@@ -6,8 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'analytics/analytics_stub.dart'
-    if (dart.library.html) 'analytics/analytics.dart' as ga;
+import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as analytics_constants;
 import 'blocking_action_mixin.dart';
 import 'common_widgets.dart';
@@ -20,6 +19,7 @@ import 'routing.dart';
 import 'theme.dart';
 import 'ui/label.dart';
 import 'url_utils.dart';
+import 'utils.dart';
 
 /// The landing screen when starting Dart DevTools without being connected to an
 /// app.
@@ -27,7 +27,18 @@ import 'url_utils.dart';
 /// We need to use this screen to get a guarantee that the app has a Dart VM
 /// available as well as to provide access to other functionality that does not
 /// require a connected Dart application.
-class LandingScreenBody extends StatelessWidget {
+class LandingScreenBody extends StatefulWidget {
+  @override
+  State<LandingScreenBody> createState() => _LandingScreenBodyState();
+}
+
+class _LandingScreenBodyState extends State<LandingScreenBody> {
+  @override
+  void initState() {
+    super.initState();
+    ga.screen(analytics_constants.landingScreen);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scrollbar(
@@ -126,7 +137,7 @@ class _ConnectDialogState extends State<ConnectDialog>
         Row(
           children: [
             SizedBox(
-              width: 350.0,
+              width: scaleByFontFactor(350.0),
               child: TextField(
                 onSubmitted: actionInProgress ? null : (str) => _connect(),
                 autofocus: true,

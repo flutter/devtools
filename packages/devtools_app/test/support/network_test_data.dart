@@ -470,7 +470,7 @@ final httpGetRequest = HttpProfileRequest.parse(httpGetJson);
 final httpGet = DartIOHttpRequestData(0, httpGetRequest);
 final Map<String, dynamic> httpGetJson = {
   'type': 'HttpProfileRequest',
-  'id': 31,
+  'id': 1,
   'isolateId': 'isolates/2013291945734727',
   'method': 'GET',
   'uri': 'https://jsonplaceholder.typicode.com/albums/1',
@@ -478,13 +478,13 @@ final Map<String, dynamic> httpGetJson = {
   'endTime': 6326808974,
   'request': {
     'events': [
-      {'timestamp': 6326808941, 'event': 'Connection established'}, 
-      {'timestamp': 6326808965, 'event': 'Request sent'}, 
-      {'timestamp': 6327090622, 'event': 'Waiting (TTFB)'}, 
+      {'timestamp': 6326808941, 'event': 'Connection established'},
+      {'timestamp': 6326808965, 'event': 'Request sent'},
+      {'timestamp': 6327090622, 'event': 'Waiting (TTFB)'},
       {'timestamp': 6327091650, 'event': 'Content Download'}
     ],
     'headers': {
-      'content-length': [0],
+      'content-length': ['0'],
     },
     'connectionInfo': {
       'localPort': 45648,
@@ -532,7 +532,7 @@ final httpPostRequest = HttpProfileRequest.parse(httpPostJson);
 final httpPost = DartIOHttpRequestData(0, httpPostRequest);
 final Map<String, dynamic> httpPostJson = {
   'type': 'HttpProfileRequest',
-  'id': 1,
+  'id': 2,
   'isolateId': 'isolates/979700762893215',
   'method': 'POST',
   'uri': 'https://jsonplaceholder.typicode.com/posts',
@@ -540,7 +540,7 @@ final Map<String, dynamic> httpPostJson = {
   'endTime': 2400321715,
   'request': {
     'events': [
-      {'timestamp': 2400314657, 'event': 'Connection established'}, 
+      {'timestamp': 2400314657, 'event': 'Connection established'},
       {'timestamp': 2400320066, 'event': 'Request sent'},
       {'timestamp': 2400994822, 'event': 'Waiting (TTFB)'},
       {'timestamp': 2401000729, 'event': 'Content Download'},
@@ -592,20 +592,22 @@ final Map<String, dynamic> httpPostJson = {
   'requestBody': httpPostRequestBodyData,
   'responseBody': httpPostResponseBodyData,
 };
-
 final httpPostRequestBodyData = [
-  ...[32, 32, 32, 32, 123, 10, 32, 32, 32, 32, 32, 32, 116, 105, 116, 108, 101, 58, 32, 39, 102],
-  ...[111, 111, 39, 44, 10, 32, 32, 32, 32, 32, 32, 98, 111, 100, 121, 58, 32, 39, 98, 97, 114],
-  ...[39, 44, 10, 32, 32, 32, 32, 32, 32, 117, 115, 101, 114, 73, 100, 58, 32, 49, 44, 10, 32],
-  ...[32, 32, 32, 125, 10, 32, 32, 32, 32],
+  ...[32, 32, 32, 32, 123, 10, 32, 32, 32, 32, 32, 32, 116, 105, 116, 108],
+  ...[101, 58, 32, 39, 102, 111, 111, 39, 44, 10, 32, 32, 32, 32, 32, 32],
+  ...[98, 111, 100, 121, 58, 32, 39, 98, 97, 114, 39, 44, 10, 32, 32, 32],
+  ...[32, 32, 32, 117, 115, 101, 114, 73, 100, 58, 32, 49, 44, 10, 32, 32],
+  ...[32, 32, 125, 10, 32, 32, 32, 32],
 ];
-final httpPostResponseBodyData = [123, 10, 32, 32, 34, 105, 100, 34, 58, 32, 49, 48, 49, 10, 125];
+final httpPostResponseBodyData = [
+  ...[123, 10, 32, 32, 34, 105, 100, 34, 58, 32, 49, 48, 49, 10, 125],
+];
 
 final httpPutRequest = HttpProfileRequest.parse(httpPutJson);
 final httpPut = DartIOHttpRequestData(0, httpPutRequest);
 final Map<String, dynamic> httpPutJson = {
   'type': 'HttpProfileRequest',
-  'id': 1,
+  'id': 3,
   'isolateId': 'isolates/4447876918484683',
   'method': 'PUT',
   'uri': 'https://jsonplaceholder.typicode.com/posts/1',
@@ -613,9 +615,9 @@ final Map<String, dynamic> httpPutJson = {
   'endTime': 1205859179,
   'request': {
     'events': [
-      {'timestamp': 1205855316, 'event': 'Connection established'}, 
-      {'timestamp': 1205858323, 'event': 'Request sent'}, 
-      {'timestamp': 1206602445, 'event': 'Waiting (TTFB)'}, 
+      {'timestamp': 1205855316, 'event': 'Connection established'},
+      {'timestamp': 1205858323, 'event': 'Request sent'},
+      {'timestamp': 1206602445, 'event': 'Waiting (TTFB)'},
       {'timestamp': 1206609213, 'event': 'Content Download'},
     ],
     'headers': {
@@ -666,18 +668,21 @@ final Map<String, dynamic> httpPutJson = {
   'responseBody': httpPutResponseBodyData,
 };
 final httpPutRequestBodyData = [
-  ...[32, 32, 32, 32, 123, 10, 32, 32, 32, 32, 32, 32, 116, 105, 116, 108, 101, 58, 32, 39, 102],
-  ...[111, 111, 39, 44, 10, 32, 32, 32, 32, 32, 32, 98, 111, 100, 121, 58, 32, 39, 98, 97, 114],
-  ...[39, 44, 10, 32, 32, 32, 32, 32, 32, 117, 115, 101, 114, 73, 100, 58, 32, 49, 44, 10, 32],
-  ...[32, 32, 32, 125, 10, 32, 32, 32, 32],
+  ...[32, 32, 32, 32, 123, 10, 32, 32, 32, 32, 32, 32, 116, 105, 116, 108],
+  ...[101, 58, 32, 39, 102, 111, 111, 39, 44, 10, 32, 32, 32, 32, 32, 32],
+  ...[98, 111, 100, 121, 58, 32, 39, 98, 97, 114, 39, 44, 10, 32, 32, 32],
+  ...[32, 32, 32, 117, 115, 101, 114, 73, 100, 58, 32, 49, 44, 10, 32, 32],
+  ...[32, 32, 125, 10, 32, 32, 32, 32],
 ];
-final httpPutResponseBodyData = [123, 10, 32, 32, 34, 105, 100, 34, 58, 32, 49, 48, 49, 10, 125];
+final httpPutResponseBodyData = [
+  ...[123, 10, 32, 32, 34, 105, 100, 34, 58, 32, 49, 48, 49, 10, 125],
+];
 
 final httpPatchRequest = HttpProfileRequest.parse(httpPatchJson);
 final httpPatch = DartIOHttpRequestData(0, httpPatchRequest);
 final Map<String, dynamic> httpPatchJson = {
   'type': 'HttpProfileRequest',
-  'id': 9,
+  'id': 4,
   'isolateId': 'isolates/4447876918484683',
   'method': 'PATCH',
   'uri': 'https://jsonplaceholder.typicode.com/posts/1',
@@ -685,9 +690,9 @@ final Map<String, dynamic> httpPatchJson = {
   'endTime': 1910722856,
   'request': {
     'events': [
-      {'timestamp': 1910722654, 'event': 'Connection established'}, 
-      {'timestamp': 1910722783, 'event': 'Request sent'}, 
-      {'timestamp': 1911415225, 'event': 'Waiting (TTFB)'}, 
+      {'timestamp': 1910722654, 'event': 'Connection established'},
+      {'timestamp': 1910722783, 'event': 'Request sent'},
+      {'timestamp': 1911415225, 'event': 'Waiting (TTFB)'},
       {'timestamp': 1911421003, 'event': 'Content Download'},
     ],
     'headers': {
@@ -737,16 +742,94 @@ final Map<String, dynamic> httpPatchJson = {
   'requestBody': httpPatchRequestBodyData,
   'responseBody': httpPatchResponseBodyData,
 };
-
 final httpPatchRequestBodyData = [
-  ...[32, 32, 32, 32, 123, 10, 32, 32, 32, 32, 32, 32, 116, 105, 116, 108, 101, 58, 32, 39, 102],
-  ...[111, 111, 39, 44, 10, 32, 32, 32, 32, 32, 32, 98, 111, 100, 121, 58, 32, 39, 98, 97, 114],
-  ...[39, 44, 10, 32, 32, 32, 32, 32, 32, 117, 115, 101, 114, 73, 100, 58, 32, 49, 44, 10, 32],
-  ...[32, 32, 32, 125, 10, 32, 32, 32, 32],
+  ...[32, 32, 32, 32, 123, 10, 32, 32, 32, 32, 32, 32, 116, 105, 116, 108],
+  ...[101, 58, 32, 39, 102, 111, 111, 39, 44, 10, 32, 32, 32, 32, 32, 32],
+  ...[98, 111, 100, 121, 58, 32, 39, 98, 97, 114, 39, 44, 10, 32, 32, 32],
+  ...[32, 32, 32, 117, 115, 101, 114, 73, 100, 58, 32, 49, 44, 10, 32, 32],
+  ...[32, 32, 125, 10, 32, 32, 32, 32],
 ];
-final httpPatchResponseBodyData = [  
-  ...[32, 32, 32, 32, 123, 10, 32, 32, 32, 32, 32, 32, 116, 105, 116, 108, 101, 58, 32, 39, 102],
-  ...[111, 111, 39, 44, 10, 32, 32, 32, 32, 32, 32, 98, 111, 100, 121, 58, 32, 39, 98, 97, 114],
-  ...[39, 44, 10, 32, 32, 32, 32, 32, 32, 117, 115, 101, 114, 73, 100, 58, 32, 49, 44, 10, 32],
-  ...[32, 32, 32, 125, 10, 32, 32, 32, 32],
+final httpPatchResponseBodyData = [
+  ...[123, 10, 32, 32, 34, 116, 105, 116, 108, 101, 34, 58, 32, 34, 102, 111],
+  ...[111, 34, 44, 10, 32, 32, 34, 98, 111, 100, 121, 34, 58, 32, 34, 98, 97],
+  ...[114, 34, 44, 10, 32, 32, 34, 117, 115, 101, 114, 73, 100, 34, 58, 32, 49],
+  ...[10, 125],
 ];
+
+final httpGetWithErrorRequest = HttpProfileRequest.parse(httpGetWithErrorJson);
+final httpGetWithError = DartIOHttpRequestData(0, httpGetWithErrorRequest);
+final Map<String, dynamic> httpGetWithErrorJson = {
+  'type': '@HttpProfileRequest',
+  'id': 5,
+  'isolateId': 'isolates/1939772779732043',
+  'method': 'GET',
+  'uri': 'https://www.examplez.com/1',
+  'startTime': 5385227316,
+  'endTime': 5387256813,
+  'request': {
+    'events': [],
+    'error': 'HandshakeException: Connection terminated during handshake',
+  },
+};
+
+final httpWsHandshakeRequest = HttpProfileRequest.parse(httpWsHandshakeJson);
+final httpWsHandshake = DartIOHttpRequestData(0, httpWsHandshakeRequest);
+final Map<String, dynamic> httpWsHandshakeJson = {
+  'type': 'HttpProfileRequest',
+  'id': 6,
+  'isolateId': 'isolates/1350291957483171',
+  'method': 'GET',
+  'uri': 'http://localhost:8080',
+  'startTime': 8140222102,
+  'endTime': 8140247377,
+  'request': {
+    'events': [
+      {'timestamp': 8140247076, 'event': 'Connection established'},
+      {'timestamp': 8140247156, 'event': 'Request sent'},
+      {'timestamp': 8140261573, 'event': 'Waiting (TTFB)'}
+    ],
+    'headers': {
+      'content-length': ['0'],
+    },
+    'connectionInfo': {
+      'localPort': 56744,
+      'remoteAddress': '127.0.0.1',
+      'remotePort': 8080,
+    },
+    'contentLength': 0,
+    'cookies': [],
+    'followRedirects': true,
+    'maxRedirects': 5,
+    'method': 'GET',
+    'persistentConnection': true,
+    'uri': 'http://localhost:8080',
+    'filterKey': 'HTTP/client',
+  },
+  'response': {
+    'startTime': 8140262898,
+    'headers': {
+      'connection': ['Upgrade'],
+      'upgrade': ['websocket'],
+      'content-length': [0],
+      'sec-websocket-version': [13],
+      'sec-websocket-accept': ['JF5SBCGrfyYAoLKzvj6A0ZVpk6c='],
+    },
+    'compressionState': 'HttpClientResponseCompressionState.notCompressed',
+    'connectionInfo': {
+      'localPort': 56744,
+      'remoteAddress': '127.0.0.1',
+      'remotePort': 8080,
+    },
+    'contentLength': 0,
+    'cookies': [],
+    'isRedirect': false,
+    'persistentConnection': true,
+    'reasonPhrase': 'Switching Protocols',
+    'redirects': [],
+    'statusCode': 101,
+    'endTime': 8140263470,
+    'error': 'Socket has been detached',
+  },
+  'requestBody': [],
+  'responseBody': [],
+};

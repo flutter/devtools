@@ -8,21 +8,16 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
+import 'package:devtools_app/src/inspector/inspector_tree_controller.dart';
 import 'package:devtools_app/src/ui/icons.dart';
 import 'package:flutter/material.dart';
 
 const double fakeRowWidth = 200.0;
 
-class FakeInspectorTree extends InspectorTreeController
-    with InspectorTreeFixedRowHeightController {
+class FakeInspectorTree extends InspectorTreeController {
   FakeInspectorTree();
 
   final List<Rect> scrollToRequests = [];
-
-  @override
-  InspectorTreeNode createNode() {
-    return InspectorTreeNode();
-  }
 
   @override
   Rect getBoundingBox(InspectorTreeRow row) {

@@ -8,8 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../console.dart';
@@ -333,7 +332,7 @@ class _WhenColumn extends ColumnData<LogData> {
   _WhenColumn()
       : super(
           'When',
-          fixedWidthPx: 120,
+          fixedWidthPx: scaleByFontFactor(120),
         );
 
   @override
@@ -351,7 +350,7 @@ class _KindColumn extends ColumnData<LogData>
   _KindColumn()
       : super(
           'Kind',
-          fixedWidthPx: 155,
+          fixedWidthPx: scaleByFontFactor(155),
         );
 
   @override

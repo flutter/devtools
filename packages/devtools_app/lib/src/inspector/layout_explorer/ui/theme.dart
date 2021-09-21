@@ -5,16 +5,17 @@
 import 'package:flutter/material.dart';
 
 import '../../../theme.dart';
+import '../../../utils.dart';
 
 const margin = 8.0;
 
-const arrowHeadSize = 8.0;
-const arrowMargin = 4.0;
+double get arrowHeadSize => scaleByFontFactor(8.0);
+double get arrowMargin => scaleByFontFactor(4.0);
 const arrowStrokeWidth = 1.5;
 
 /// Hardcoded sizes for scaling the flex children widget properly.
-const minRenderWidth = 250.0;
-const minRenderHeight = 250.0;
+double get minRenderWidth => scaleByFontFactor(250.0);
+double get minRenderHeight => scaleByFontFactor(250.0);
 
 const minPadding = 2.0;
 const overflowTextHorizontalPadding = 8.0;
@@ -22,36 +23,35 @@ const overflowTextHorizontalPadding = 8.0;
 /// The size to shrink a widget by when animating it in.
 const entranceMargin = 50.0;
 
-const defaultMaxRenderWidth = 400.0;
-const defaultMaxRenderHeight = 400.0;
+double get defaultMaxRenderWidth => scaleByFontFactor(400.0);
+double get defaultMaxRenderHeight => scaleByFontFactor(400.0);
 
 const widgetTitleMaxWidthPercentage = 0.75;
 
 /// Hardcoded arrow size respective to its cross axis (because it's unconstrained).
-const heightAndConstraintIndicatorSize = 48.0;
-const widthAndConstraintIndicatorSize = 56.0;
-const mainAxisArrowIndicatorSize = 48.0;
-const crossAxisArrowIndicatorSize = 48.0;
+double get heightAndConstraintIndicatorSize => scaleByFontFactor(48.0);
+double get widthAndConstraintIndicatorSize => scaleByFontFactor(56.0);
+double get mainAxisArrowIndicatorSize => scaleByFontFactor(48.0);
+double get crossAxisArrowIndicatorSize => scaleByFontFactor(48.0);
 
-const heightOnlyIndicatorSize = 72.0;
-const widthOnlyIndicatorSize = 32.0;
+double get heightOnlyIndicatorSize => scaleByFontFactor(72.0);
 
 /// Minimum size to display width/height inside the arrow
-const minWidthToDisplayWidthInsideArrow = 200.0;
-const minHeightToDisplayHeightInsideArrow = 200.0;
+double get minWidthToDisplayWidthInsideArrow => scaleByFontFactor(200.0);
+double get minHeightToDisplayHeightInsideArrow => scaleByFontFactor(200.0);
 
 const largeTextScaleFactor = 1.2;
 const smallTextScaleFactor = 0.8;
 
 /// Height for limiting asset image (selected one in the drop down).
-const axisAlignmentAssetImageHeight = 24.0;
+double get axisAlignmentAssetImageHeight => scaleByFontFactor(24.0);
 
 /// Width for limiting asset image (when drop down menu is open for the vertical).
-const axisAlignmentAssetImageWidth = 96.0;
-const dropdownMaxSize = 220.0;
+double get axisAlignmentAssetImageWidth => scaleByFontFactor(96.0);
+double get dropdownMaxSize => scaleByFontFactor(220.0);
 
-const minHeightToAllowTruncating = 375.0;
-const minWidthToAllowTruncating = 375.0;
+double get minHeightToAllowTruncating => scaleByFontFactor(375.0);
+double get minWidthToAllowTruncating => scaleByFontFactor(375.0);
 
 // Story of Layout colors
 const mainAxisLightColor = Color(0xff2c5daa);

@@ -8,8 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose.dart';
 import '../config_specific/import_export/import_export.dart';
@@ -296,11 +295,14 @@ class PerformanceController extends DisposableController
 
     if (event.isUiEvent && updateProfiler) {
       final storedProfile =
-          cpuProfilerController.cpuProfileStore.lookupProfile(event.time);
+          cpuProfilerController.cpuProfileStore.lookupProfile(time: event.time);
       if (storedProfile != null) {
         await cpuProfilerController.processAndSetData(
           storedProfile,
           processId: 'Stored profile for ${event.time}',
+          storeAsUserTagNone: true,
+          shouldApplyFilters: true,
+          shouldRefreshSearchMatches: true,
         );
         data.cpuProfileData = cpuProfilerController.dataNotifier.value;
       } else if ((!offlineMode || offlinePerformanceData == null) &&
@@ -385,7 +387,7 @@ class PerformanceController extends DisposableController
     if (_currentFrameBeingSelected != frame) return;
 
     final storedProfileForFrame = cpuProfilerController.cpuProfileStore
-        .lookupProfile(frame.timeFromEventFlows);
+        .lookupProfile(time: frame.timeFromEventFlows);
     if (storedProfileForFrame == null) {
       cpuProfilerController.reset();
       if (!offlineMode && frame.timeFromEventFlows.isWellFormed) {
@@ -406,7 +408,10 @@ class PerformanceController extends DisposableController
       }
       if (_currentFrameBeingSelected != frame) return;
       data.cpuProfileData = storedProfileForFrame;
-      cpuProfilerController.loadProcessedData(storedProfileForFrame);
+      cpuProfilerController.loadProcessedData(
+        storedProfileForFrame,
+        storeAsUserTagNone: true,
+      );
     }
 
     if (debugTimeline) {
@@ -668,7 +673,7 @@ class PerformanceController extends DisposableController
       analytics_constants.performance,
       analytics_constants.traceEventProcessingTime,
       asyncOperation: processTraceEventsHelper,
-      screenMetrics: PerformanceScreenMetrics(
+      screenMetricsProvider: () => PerformanceScreenMetrics(
         traceEventCount: processingTraceCount,
       ),
     );
@@ -755,6 +760,7 @@ class PerformanceController extends DisposableController
     if (offlinePerformanceData.cpuProfileData != null) {
       cpuProfilerController.loadProcessedData(
         offlinePerformanceData.cpuProfileData,
+        storeAsUserTagNone: true,
       );
     }
   }

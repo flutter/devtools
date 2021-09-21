@@ -3,6 +3,7 @@
 // in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+
 import '../../theme.dart';
 
 export 'ide_theme_stub.dart'
@@ -24,5 +25,5 @@ class IdeTheme {
   final bool embed;
 
   double get fontSizeFactor =>
-      fontSize != null ? fontSize / defaultFontSize : 1.0;
+      fontSize != null ? fontSize / unscaledDefaultFontSize : 1.0;
 }

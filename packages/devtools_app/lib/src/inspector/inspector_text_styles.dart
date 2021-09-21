@@ -9,7 +9,7 @@ import '../theme.dart';
 TextStyle unimportant(ColorScheme colorScheme) => TextStyle(
     color: colorScheme.isLight ? Colors.grey.shade500 : Colors.grey.shade600);
 
-const regular = TextStyle(
+final TextStyle regular = TextStyle(
   // The font size when not specified seems to be 14, but specify here since we
   // are scaling based on this font size in [IdeTheme].
   fontSize: defaultFontSize,
@@ -26,7 +26,9 @@ TextStyle link(ColorScheme colorScheme) => TextStyle(
       decoration: TextDecoration.underline,
     );
 
-const regularBold = TextStyle(fontWeight: FontWeight.w700);
+const regularBold = TextStyle(
+  fontWeight: FontWeight.w700,
+);
 const regularItalic = TextStyle(fontStyle: FontStyle.italic);
 TextStyle unimportantItalic(ColorScheme colorScheme) =>
     unimportant(colorScheme).merge(const TextStyle(

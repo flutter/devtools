@@ -7,10 +7,8 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../blocking_action_mixin.dart';
@@ -28,7 +26,7 @@ import '../ui/service_extension_widgets.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
 import 'inspector_service.dart';
-import 'inspector_tree_flutter.dart';
+import 'inspector_tree_controller.dart';
 
 class InspectorScreen extends Screen {
   const InspectorScreen()
@@ -67,16 +65,21 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   bool _layoutExplorerSupported = false;
 
   InspectorController inspectorController;
-  InspectorTreeControllerFlutter summaryTreeController;
-  InspectorTreeControllerFlutter detailsTreeController;
+
+  InspectorTreeController get summaryTreeController =>
+      inspectorController?.inspectorTree;
+
+  InspectorTreeController get detailsTreeController =>
+      inspectorController?.details?.inspectorTree;
+
   DebuggerController _debuggerController;
 
   bool get enableButtons => actionInProgress == false;
 
   static const summaryTreeKey = Key('Summary Tree');
   static const detailsTreeKey = Key('Details Tree');
-  static const includeTextWidth = 900.0;
-  static const includeRefreshTreeWidth = 1255.0;
+  static const minScreenWidthForTextBeforeScaling = 900.0;
+  static const unscaledIncludeRefreshTreeWidth = 1255.0;
   static const serviceExtensionButtonsIncludeTextWidth = 1160.0;
 
   @override
@@ -84,19 +87,17 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     super.initState();
     ga.screen(InspectorScreen.id);
 
-    autoDispose(
-        serviceManager.onConnectionAvailable.listen(_handleConnectionStart));
-    if (serviceManager.connectedAppInitialized) {
-      _handleConnectionStart(serviceManager.service);
+    if (serviceManager.inspectorService == null) {
+      // The app must not be a Flutter app.
+      return;
     }
-    autoDispose(
-        serviceManager.onConnectionClosed.listen(_handleConnectionStop));
-  }
-
-  @override
-  void dispose() {
-    inspectorController?.dispose();
-    super.dispose();
+    inspectorController = InspectorController(
+      inspectorTree: InspectorTreeController(),
+      detailsTree: InspectorTreeController(),
+      treeType: FlutterTreeType.widget,
+      onExpandCollapseSupported: _onExpandCollapseSupported,
+      onLayoutExplorerSupported: _onLayoutExplorerSupported,
+    );
   }
 
   void _onExpandClick() {
@@ -153,7 +154,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                         ? extensions.toggleSelectWidgetMode
                         : extensions.toggleOnDeviceWidgetInspector
                   ],
-                  minIncludeTextWidth: includeTextWidth,
+                  minScreenWidthForTextBeforeScaling:
+                      minScreenWidthForTextBeforeScaling,
                 );
               },
             ),
@@ -163,7 +165,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               icon: Icons.refresh,
               label: 'Refresh Tree',
               color: Theme.of(context).colorScheme.serviceExtensionButtonsTitle,
-              includeTextWidth: includeRefreshTreeWidth,
+              minScreenWidthForTextBeforeScaling:
+                  unscaledIncludeRefreshTreeWidth,
             ),
             const Spacer(),
             Row(children: getServiceExtensionWidgets()),
@@ -219,7 +222,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   List<Widget> getServiceExtensionWidgets() {
     return [
       ServiceExtensionButtonGroup(
-        minIncludeTextWidth: serviceExtensionButtonsIncludeTextWidth,
+        minScreenWidthForTextBeforeScaling:
+            serviceExtensionButtonsIncludeTextWidth,
         extensions: [
           extensions.slowAnimations,
           extensions.debugPaint,
@@ -247,7 +251,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               icon: Icons.unfold_more,
               onPressed: enableButtons ? _onExpandClick : null,
               label: 'Expand all',
-              includeTextWidth: includeTextWidth,
+              minScreenWidthForTextBeforeScaling:
+                  minScreenWidthForTextBeforeScaling,
             ),
           ),
           const SizedBox(width: denseSpacing),
@@ -256,7 +261,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               icon: Icons.unfold_less,
               onPressed: enableButtons ? _onResetClick : null,
               label: 'Collapse to selected',
-              includeTextWidth: includeTextWidth,
+              minScreenWidthForTextBeforeScaling:
+                  minScreenWidthForTextBeforeScaling,
             ),
           )
         ],
@@ -273,45 +279,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   void _onLayoutExplorerSupported() {
     setState(() {
       _layoutExplorerSupported = true;
-    });
-  }
-
-  void _handleConnectionStart(VmService service) async {
-    setState(() {
-      summaryTreeController = null;
-      detailsTreeController = null;
-    });
-
-    final inspectorService = serviceManager.inspectorService;
-
-    if (inspectorService == null) {
-      // The app must not be a Flutter app.
-      return;
-    }
-
-    setState(() {
-      inspectorController?.dispose();
-      summaryTreeController = InspectorTreeControllerFlutter();
-      detailsTreeController = InspectorTreeControllerFlutter();
-      inspectorController = InspectorController(
-        inspectorTree: summaryTreeController,
-        detailsTree: detailsTreeController,
-        treeType: FlutterTreeType.widget,
-        onExpandCollapseSupported: _onExpandCollapseSupported,
-        onLayoutExplorerSupported: _onLayoutExplorerSupported,
-      );
-
-      // Clear any existing badge/errors for older errors that were collected.
-      serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
-      inspectorController.filterErrors();
-    });
-  }
-
-  void _handleConnectionStop(dynamic event) {
-    inspectorController?.setActivate(false);
-    inspectorController?.dispose();
-    setState(() {
-      inspectorController = null;
     });
   }
 

@@ -9,8 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../charts/flame_chart.dart';
@@ -22,6 +21,7 @@ import '../theme.dart';
 import '../trace_event.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
+import '../ui/utils.dart';
 import '../utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
@@ -79,7 +79,7 @@ class _TimelineFlameChartContainerState
               'No timeline events. Try clicking the refresh button ',
               style: Theme.of(context).subtleTextStyle,
             ),
-            const Icon(
+            Icon(
               Icons.refresh,
               size: defaultIconSize,
             ),
@@ -184,7 +184,7 @@ class RefreshTimelineEventsButton extends StatelessWidget {
         child: Container(
           height: defaultButtonHeight,
           width: defaultButtonHeight,
-          child: const Icon(
+          child: Icon(
             Icons.refresh,
             size: defaultIconSize,
           ),
@@ -512,35 +512,27 @@ class TimelineFlameChartState
         widestRow = row;
       }
 
-      Color backgroundColor;
+      ColorPair colorPair;
       if (event.isShaderEvent) {
-        backgroundColor = shaderCompilationColor;
+        colorPair = shaderCompilationColor;
       } else if (event.isAsyncEvent) {
-        backgroundColor = nextAsyncColor(row);
+        colorPair = nextAsyncColor(row);
       } else if (event.isGCEvent) {
         // TODO(kenz): should we have a different color palette for GC events?
-        backgroundColor = nextUnknownColor(row);
+        colorPair = nextUnknownColor(row);
       } else if (event.isUiEvent) {
-        backgroundColor = nextUiColor(row);
+        colorPair = nextUiColor(row);
       } else if (event.isRasterEvent) {
-        backgroundColor = nextRasterColor(row);
+        colorPair = nextRasterColor(row);
       } else {
-        backgroundColor = nextUnknownColor(row);
-      }
-
-      Color textColor;
-      if (event.isRasterEvent) {
-        textColor = contrastForegroundWhite;
-      } else {
-        textColor = Colors.black;
+        colorPair = nextUnknownColor(row);
       }
 
       final node = FlameChartNode<TimelineEvent>(
         key: Key('${event.name} ${event.traceEvents.first.wrapperId}'),
         text: event.name,
         rect: Rect.fromLTRB(left, flameChartNodeTop, right, rowHeight),
-        backgroundColor: backgroundColor,
-        textColor: textColor,
+        colorPair: ThemedColorPair.from(colorPair),
         data: event,
         onSelected: (dynamic event) => widget.onDataSelected(event),
         sectionIndex: section,
@@ -712,7 +704,7 @@ class TimelineFlameChartState
   List<Widget> _buildEventThreadNavigationButtons({
     @required BoxConstraints constraints,
   }) {
-    const threadButtonContainerWidth = buttonMinWidth + defaultSpacing;
+    final threadButtonContainerWidth = buttonMinWidth + defaultSpacing;
     final eventGroups = _performanceController.data.eventGroups;
 
     Widget buildNavigatorButton(int index, {@required bool isNext}) {

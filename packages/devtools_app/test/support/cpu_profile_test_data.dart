@@ -47,7 +47,8 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'category': 'Dart',
       'name': 'Frame2',
       'parent': '140357727781376-1',
-      'resolvedUrl': '',
+      'resolvedUrl':
+          'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/compact_hash.dart',
     },
     '140357727781376-3': {
       'category': 'Dart',
@@ -65,13 +66,15 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'category': 'Dart',
       'name': 'Frame5',
       'parent': '140357727781376-1',
-      'resolvedUrl': '',
+      'resolvedUrl':
+          'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/compact_hash.dart',
     },
     '140357727781376-6': {
       'category': 'Dart',
       'name': 'Frame6',
       'parent': '140357727781376-5',
-      'resolvedUrl': '',
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
     },
   },
   'traceEvents': [
@@ -680,7 +683,7 @@ final CpuStackFrame stackFrameD = CpuStackFrame(
   name: 'D',
   verboseName: 'D',
   category: 'Dart',
-  rawUrl: 'url',
+  rawUrl: 'flutter::AnimatorBeginFrame',
   parentId: 'id_1',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 2;
@@ -847,3 +850,13 @@ final CpuStackFrame zeroStackFrame = CpuStackFrame(
   parentId: null,
   profileMetaData: zeroProfileMetaData,
 )..exclusiveSampleCount = 0;
+
+final flutterEngineStackFrame = CpuStackFrame(
+  id: 'id-100',
+  name: 'flutter::AnimatorBeginFrame',
+  verboseName: 'flutter::AnimatorBeginFrame',
+  category: 'Dart',
+  rawUrl: '',
+  parentId: null,
+  profileMetaData: profileMetaData,
+)..exclusiveSampleCount = 1;

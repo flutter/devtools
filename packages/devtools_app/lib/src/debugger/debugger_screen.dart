@@ -5,17 +5,15 @@
 import 'package:codicon/codicon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
-import '../config_specific/host_platform/host_platform.dart';
-import '../dialogs.dart';
 import '../flex_split_column.dart';
+import '../globals.dart';
 import '../listenable.dart';
 import '../screen.dart';
 import '../split.dart';
@@ -28,7 +26,7 @@ import 'controls.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'program_explorer.dart';
-import 'program_explorer_controller.dart';
+import 'key_sets.dart';
 import 'variables.dart';
 
 class DebuggerScreen extends Screen {
@@ -68,6 +66,8 @@ class DebuggerScreenBody extends StatefulWidget {
 
   static final codeViewKey = GlobalKey(debugLabel: 'codeViewKey');
   static final scriptViewKey = GlobalKey(debugLabel: 'scriptViewKey');
+  static const callStackCopyButtonKey =
+      Key('debugger_call_stack_copy_to_clipboard_button');
 
   @override
   DebuggerScreenBodyState createState() => DebuggerScreenBodyState();
@@ -81,10 +81,14 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   DebuggerController controller;
 
+  bool _shownFirstScript;
+
   @override
   void initState() {
     super.initState();
     ga.screen(DebuggerScreen.id);
+    ga.timeStart(DebuggerScreen.id, analytics_constants.pageReady);
+    _shownFirstScript = false;
   }
 
   @override
@@ -113,6 +117,16 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         return ValueListenableBuilder(
           valueListenable: controller.currentParsedScript,
           builder: (context, parsedScript, _) {
+            if (scriptRef != null &&
+                parsedScript != null &&
+                !_shownFirstScript) {
+              ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
+              serviceManager.sendDwdsEvent(
+                screen: DebuggerScreen.id,
+                action: analytics_constants.pageReady,
+              );
+              _shownFirstScript = true;
+            }
             return CodeView(
               key: DebuggerScreenBody.codeViewKey,
               controller: controller,
@@ -151,14 +165,15 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       shortcuts: <LogicalKeySet, Intent>{
         goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
         searchInFileKeySet: SearchInFileIntent(controller),
-        escapeKeySet: EscapeIntent(context, controller),
+        escapeKeySet: EscapeIntent(controller),
+        openFileKeySet: OpenFileIntent(controller),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
-          FocusLibraryFilterIntent: FocusLibraryFilterAction(),
           GoToLineNumberIntent: GoToLineNumberAction(),
           SearchInFileIntent: SearchInFileAction(),
           EscapeIntent: EscapeAction(),
+          OpenFileIntent: OpenFileAction(),
         },
         child: Split(
           axis: Axis.horizontal,
@@ -188,8 +203,23 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           initialFractions: const [0.40, 0.40, 0.20],
           minSizes: const [0.0, 0.0, 0.0],
           headers: <PreferredSizeWidget>[
-            const AreaPaneHeader(
-              title: Text(callStackTitle),
+            AreaPaneHeader(
+              title: const Text(callStackTitle),
+              rightActions: [
+                CopyToClipboardControl(
+                  dataProvider: () {
+                    final List<String> callStackList = controller
+                        .stackFramesWithLocation.value
+                        .map((frame) => frame.callStackDisplay)
+                        .toList();
+                    for (var i = 0; i < callStackList.length; i++) {
+                      callStackList[i] = '#$i ${callStackList[i]}';
+                    }
+                    return callStackList.join('\n') ?? '';
+                  },
+                  buttonKey: DebuggerScreenBody.callStackCopyButtonKey,
+                ),
+              ],
               needsTopBorder: false,
             ),
             const AreaPaneHeader(title: Text(variablesTitle)),
@@ -231,51 +261,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   }
 }
 
-// TODO(kenz): consider breaking out the key binding logic out into a separate
-// file so it is easy to find.
-final LogicalKeySet focusLibraryFilterKeySet = LogicalKeySet(
-  HostPlatform.instance.isMacOS
-      ? LogicalKeyboardKey.meta
-      : LogicalKeyboardKey.control,
-  LogicalKeyboardKey.keyP,
-);
-
-final LogicalKeySet goToLineNumberKeySet = LogicalKeySet(
-  HostPlatform.instance.isMacOS
-      ? LogicalKeyboardKey.meta
-      : LogicalKeyboardKey.control,
-  LogicalKeyboardKey.keyG,
-);
-
-final LogicalKeySet searchInFileKeySet = LogicalKeySet(
-  HostPlatform.instance.isMacOS
-      ? LogicalKeyboardKey.meta
-      : LogicalKeyboardKey.control,
-  LogicalKeyboardKey.keyF,
-);
-
-final LogicalKeySet escapeKeySet = LogicalKeySet(
-  LogicalKeyboardKey.escape,
-);
-
-class FocusLibraryFilterIntent extends Intent {
-  const FocusLibraryFilterIntent(
-    this.focusNode,
-    this.debuggerController,
-  )   : assert(debuggerController != null),
-        assert(focusNode != null);
-
-  final FocusNode focusNode;
-  final DebuggerController debuggerController;
-}
-
-class FocusLibraryFilterAction extends Action<FocusLibraryFilterIntent> {
-  @override
-  void invoke(FocusLibraryFilterIntent intent) {
-    intent.debuggerController.toggleLibrariesVisible();
-  }
-}
-
 class GoToLineNumberIntent extends Intent {
   const GoToLineNumberIntent(this._context, this._controller);
 
@@ -287,6 +272,8 @@ class GoToLineNumberAction extends Action<GoToLineNumberIntent> {
   @override
   void invoke(GoToLineNumberIntent intent) {
     showGoToLineDialog(intent._context, intent._controller);
+    intent._controller.toggleFileOpenerVisibility(false);
+    intent._controller.toggleSearchInFileVisibility(false);
   }
 }
 
@@ -300,20 +287,34 @@ class SearchInFileAction extends Action<SearchInFileIntent> {
   @override
   void invoke(SearchInFileIntent intent) {
     intent._controller.toggleSearchInFileVisibility(true);
+    intent._controller.toggleFileOpenerVisibility(false);
   }
 }
 
 class EscapeIntent extends Intent {
-  const EscapeIntent(this._context, this._controller);
+  const EscapeIntent(this._controller);
 
-  final BuildContext _context;
   final DebuggerController _controller;
 }
 
 class EscapeAction extends Action<EscapeIntent> {
   @override
   void invoke(EscapeIntent intent) {
-    Navigator.of(intent._context).pop(dialogDefaultContext);
+    intent._controller.toggleSearchInFileVisibility(false);
+    intent._controller.toggleFileOpenerVisibility(false);
+  }
+}
+
+class OpenFileIntent extends Intent {
+  const OpenFileIntent(this._controller);
+
+  final DebuggerController _controller;
+}
+
+class OpenFileAction extends Action<OpenFileIntent> {
+  @override
+  void invoke(OpenFileIntent intent) {
+    intent._controller.toggleFileOpenerVisibility(true);
     intent._controller.toggleSearchInFileVisibility(false);
   }
 }
@@ -460,7 +461,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               tooltip: 'Resume',
               child: TextButton(
                 onPressed: controller.resume,
-                child: const Icon(
+                child: Icon(
                   Codicons.debugContinue,
                   color: Colors.green,
                   size: defaultIconSize,
@@ -471,7 +472,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               tooltip: 'Step over',
               child: TextButton(
                 onPressed: controller.stepOver,
-                child: const Icon(
+                child: Icon(
                   Codicons.debugStepOver,
                   color: Colors.black,
                   size: defaultIconSize,

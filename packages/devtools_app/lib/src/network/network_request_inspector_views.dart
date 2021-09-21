@@ -165,7 +165,9 @@ class HttpResponseView extends StatelessWidget {
     // We shouldn't try and display an image response view when using the
     // timeline profiler since it's possible for response body data to get
     // dropped.
-    if (data is DartIOHttpRequestData && data.contentType.contains('image')) {
+    if (data is DartIOHttpRequestData &&
+        data.contentType != null &&
+        data.contentType.contains('image')) {
       child = ImageResponseView(data);
     } else {
       child = FormattedJson(
@@ -536,9 +538,8 @@ class NetworkRequestOverviewView extends StatelessWidget {
         (duration.inMicroseconds / data.duration.inMicroseconds * 100).round();
     return Flexible(
       flex: flex,
-      child: Tooltip(
-        waitDuration: tooltipWait,
-        message: '$label - ${msText(duration)}',
+      child: DevToolsTooltip(
+        tooltip: '$label - ${msText(duration)}',
         child: Container(
           height: _timingGraphHeight,
           color: color,
@@ -659,13 +660,15 @@ class NetworkRequestOverviewView extends StatelessWidget {
         title: 'Last read time',
         child: data.lastReadTimestamp != null
             ? _valueText(formatDateTime(data.lastReadTimestamp))
-            : '--',
+            : _valueText('--'),
       ),
       const SizedBox(height: defaultSpacing),
       _buildRow(
         context: context,
         title: 'Last write time',
-        child: _valueText(formatDateTime(data.lastWriteTimestamp)),
+        child: data.lastWriteTimestamp != null
+            ? _valueText(formatDateTime(data.lastWriteTimestamp))
+            : _valueText('--'),
       ),
     ];
   }

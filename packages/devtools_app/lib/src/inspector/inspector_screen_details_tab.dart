@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 
 import '../auto_dispose_mixin.dart';
 import '../theme.dart';
+import '../ui/tab.dart';
 import '../utils.dart';
 import 'inspector_controller.dart';
 import 'layout_explorer/layout_explorer.dart';
@@ -127,7 +128,7 @@ class _InspectorDetailsTabControllerState
   }
 
   Widget _buildTab(String tabName) {
-    return Tab(
+    return DevToolsTab(
       child: Text(
         tabName,
         overflow: TextOverflow.ellipsis,

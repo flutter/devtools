@@ -12,7 +12,6 @@ import '../common_widgets.dart';
 import '../theme.dart';
 import '../ui/label.dart';
 import 'debugger_controller.dart';
-import 'scripts.dart';
 
 class DebuggingControls extends StatefulWidget {
   const DebuggingControls({Key key}) : super(key: key);
@@ -120,6 +119,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
     return ValueListenableBuilder(
       valueListenable: controller.librariesVisible,
       builder: (context, visible, _) {
+        const libraryIcon = Icons.insert_chart;
         return RoundedOutlinedBorder(
           child: Container(
             color: visible ? Theme.of(context).highlightColor : null,
@@ -238,7 +238,7 @@ class DebuggerButton extends StatelessWidget {
         child: MaterialIconLabel(
           label: title,
           iconData: icon,
-          includeTextWidth: mediumDeviceWidth,
+          unscaleIncludeTextWidth: mediumDeviceWidth,
         ),
       ),
     );

@@ -104,7 +104,7 @@ class _TrackerCountColumn extends ColumnData<Tracker> {
       : super(
           'Count',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: 100.0,
+          fixedWidthPx: scaleByFontFactor(100.0),
         );
 
   @override

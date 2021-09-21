@@ -183,11 +183,14 @@ class LegacyPerformanceController
 
     if (event.isUiEvent && updateProfiler) {
       final storedProfile =
-          cpuProfilerController.cpuProfileStore.lookupProfile(event.time);
+          cpuProfilerController.cpuProfileStore.lookupProfile(time: event.time);
       if (storedProfile != null) {
         await cpuProfilerController.processAndSetData(
           storedProfile,
           processId: 'Stored profile for ${event.time}',
+          storeAsUserTagNone: true,
+          shouldApplyFilters: true,
+          shouldRefreshSearchMatches: true,
         );
         data.cpuProfileData = cpuProfilerController.dataNotifier.value;
       } else if ((!offlineMode || offlinePerformanceData == null) &&
@@ -230,7 +233,7 @@ class LegacyPerformanceController
     await selectTimelineEvent(frame.uiEventFlow, updateProfiler: false);
 
     final storedProfileForFrame =
-        cpuProfilerController.cpuProfileStore.lookupProfile(frame.time);
+        cpuProfilerController.cpuProfileStore.lookupProfile(time: frame.time);
     if (storedProfileForFrame == null) {
       cpuProfilerController.reset();
       if (!offlineMode) {
@@ -249,7 +252,10 @@ class LegacyPerformanceController
         );
       }
       data.cpuProfileData = storedProfileForFrame;
-      cpuProfilerController.loadProcessedData(storedProfileForFrame);
+      cpuProfilerController.loadProcessedData(
+        storedProfileForFrame,
+        storeAsUserTagNone: true,
+      );
     }
 
     if (debugTimeline) {
@@ -466,6 +472,7 @@ class LegacyPerformanceController
     if (offlinePerformanceData.cpuProfileData != null) {
       cpuProfilerController.loadProcessedData(
         offlinePerformanceData.cpuProfileData,
+        storeAsUserTagNone: true,
       );
     }
   }

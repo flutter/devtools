@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../common_widgets.dart';
 import '../../../utils.dart';
 import '../../inspector_data_models.dart';
 import 'arrow.dart';
@@ -36,7 +37,7 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
           ),
         ),
         Container(
-          margin: const EdgeInsets.symmetric(vertical: arrowMargin),
+          margin: EdgeInsets.symmetric(vertical: arrowMargin),
           child: ArrowWrapper.bidirectional(
             arrowColor: widthIndicatorColor,
             direction: Axis.horizontal,
@@ -58,7 +59,7 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
             ),
           ),
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: arrowMargin),
+            margin: EdgeInsets.symmetric(horizontal: arrowMargin),
             child: ArrowWrapper.bidirectional(
               arrowColor: heightIndicatorColor,
               direction: Axis.vertical,
@@ -75,8 +76,8 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
       child: Container(
         width: renderProperties.width,
         height: renderProperties.height,
-        child: Tooltip(
-          message: '$widthDescription\n$heightDescription',
+        child: DevToolsTooltip(
+          tooltip: '$widthDescription\n$heightDescription',
           child: showWidth ? widthWidget : heightWidget,
         ),
       ),
@@ -113,7 +114,7 @@ class PaddingVisualizerWidget extends StatelessWidget {
           ),
         ),
         Container(
-          margin: const EdgeInsets.symmetric(vertical: arrowMargin),
+          margin: EdgeInsets.symmetric(vertical: arrowMargin),
           child: ArrowWrapper.bidirectional(
             arrowColor: widthIndicatorColor,
             direction: Axis.horizontal,
@@ -135,7 +136,7 @@ class PaddingVisualizerWidget extends StatelessWidget {
             ),
           ),
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: arrowMargin),
+            margin: EdgeInsets.symmetric(horizontal: arrowMargin),
             child: ArrowWrapper.bidirectional(
               arrowColor: heightIndicatorColor,
               direction: Axis.vertical,

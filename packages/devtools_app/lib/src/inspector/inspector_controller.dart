@@ -35,6 +35,7 @@ import 'inspector_screen.dart';
 import 'inspector_service.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
+import 'inspector_tree_controller.dart';
 
 const inspectorRefQueryParam = 'inspectorRef';
 
@@ -132,6 +133,36 @@ class InspectorController extends DisposableController
           );
         }
       });
+    }
+
+    autoDispose(
+      serviceManager.onConnectionAvailable.listen(_handleConnectionStart),
+    );
+    if (serviceManager.connectedAppInitialized) {
+      _handleConnectionStart(serviceManager.service);
+    }
+    autoDispose(
+      serviceManager.onConnectionClosed.listen(_handleConnectionStop),
+    );
+  }
+
+  void _handleConnectionStart(VmService service) {
+    // Clear any existing badge/errors for older errors that were collected.
+    // Do this in a post frame callback so that we are not trying to clear the
+    // error notifiers for this screen while the framework is already in the
+    // process of building widgets.
+    // TODO(kenz): When this method is called outside  createState(), this post
+    // frame callback can be removed.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
+    });
+    filterErrors();
+  }
+
+  void _handleConnectionStop(dynamic event) {
+    setActivate(false);
+    if (isSummaryTree) {
+      dispose();
     }
   }
 

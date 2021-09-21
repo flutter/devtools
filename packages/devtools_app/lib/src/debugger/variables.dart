@@ -150,8 +150,8 @@ Widget displayProvider(
       debuggerController: controller,
     );
   }
-  return Tooltip(
-    message: variable.displayValue,
+  return DevToolsTooltip(
+    tooltip: variable.displayValue,
     waitDuration: tooltipWaitLong,
     child: SelectableText.rich(
       TextSpan(

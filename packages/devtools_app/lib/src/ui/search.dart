@@ -113,6 +113,7 @@ class AutoComplete extends StatefulWidget {
     this.controller, {
     @required this.searchFieldKey,
     @required this.onTap,
+    this.autocompleteMatchTileHeight,
     bool bottom = true, // If false placed above.
     bool maxWidth = true,
   })  : isBottom = bottom,
@@ -121,6 +122,7 @@ class AutoComplete extends StatefulWidget {
   final AutoCompleteSearchControllerMixin controller;
   final GlobalKey searchFieldKey;
   final SelectAutoComplete onTap;
+  final double autocompleteMatchTileHeight;
   final bool isBottom;
   final bool isMaxWidth;
 
@@ -139,6 +141,8 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     final onTap = autoComplete.onTap;
     final bottom = autoComplete.isBottom;
     final isMaxWidth = autoComplete.isMaxWidth;
+    final autocompleteMatchTileHeight =
+        autoComplete.autocompleteMatchTileHeight;
 
     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
       controller.handleAutoCompleteOverlay(
@@ -147,6 +151,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         onTap: onTap,
         bottom: bottom,
         maxWidth: isMaxWidth,
+        autocompleteMatchTileHeight: autocompleteMatchTileHeight,
       );
     });
   }
@@ -170,7 +175,8 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
 
     // Approximation but it's pretty accurate. Could consider using a layout builder
     // or maybe build in an overlay (that's isn't visible) to compute.
-    final tileEntryHeight = box.size.height;
+    final tileEntryHeight =
+        autoComplete.autocompleteMatchTileHeight ?? box.size.height;
 
     // Compute to global coordinates.
     final offset = box.localToGlobal(Offset.zero);
@@ -320,6 +326,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     @required BuildContext context,
     @required GlobalKey searchFieldKey,
     @required SelectAutoComplete onTap,
+    double autocompleteMatchTileHeight,
     bool bottom = true,
     bool maxWidth = true,
   }) {
@@ -328,6 +335,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
         this,
         searchFieldKey: searchFieldKey,
         onTap: onTap,
+        autocompleteMatchTileHeight: autocompleteMatchTileHeight,
         bottom: bottom,
         maxWidth: maxWidth,
       );
@@ -348,6 +356,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     @required BuildContext context,
     @required GlobalKey searchFieldKey,
     @required SelectAutoComplete onTap,
+    double autocompleteMatchTileHeight,
     bool bottom = true,
     bool maxWidth = true,
   }) {
@@ -359,6 +368,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
       context: context,
       searchFieldKey: searchFieldKey,
       onTap: onTap,
+      autocompleteMatchTileHeight: autocompleteMatchTileHeight,
       bottom: bottom,
       maxWidth: maxWidth,
     );
@@ -518,6 +528,8 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   /// [tracking] if true displays pop-up to the right of the TextField's caret.
   /// [supportClearField] if true clear TextField content if pop-up not visible. If
   /// pop-up is visible close the pop-up on first ESCAPE.
+  /// [keyEventsToPropogate] a set of key events that should be propogated to
+  /// other handlers
   Widget buildAutoCompleteSearchField({
     @required AutoCompleteSearchControllerMixin controller,
     @required GlobalKey searchFieldKey,
@@ -526,8 +538,11 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     @required SelectAutoComplete onSelection,
     HighlightAutoComplete onHighlightDropdown,
     InputDecoration decoration,
+    String label,
     bool tracking = false,
     bool supportClearField = false,
+    Set<LogicalKeyboardKey> keyEventsToPropogate = const {},
+    VoidCallback onClose,
   }) {
     _onSelection = onSelection;
 
@@ -549,7 +564,11 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
             // If pop-up closed ESCAPE will clean the TextField.
             clearSearchField(controller, force: true);
           }
-          return KeyEventResult.handled;
+
+          return _determineKeyEventResult(
+            key,
+            keyEventsToPropogate,
+          );
         } else if (controller.autoCompleteOverlay != null) {
           if (key == enter || key == enterMac || key == tab || key == tabMac) {
             // Enter / Tab pressed.
@@ -578,18 +597,18 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
               controller.selectTheSearch = true;
               controller.search = foundExact;
               onSelection(foundExact);
-              return KeyEventResult.handled;
+              return _determineKeyEventResult(key, keyEventsToPropogate);
             }
           } else if (key == arrowDown || key == arrowUp) {
             onHighlightDropdown(controller, key == arrowDown);
-            return KeyEventResult.handled;
+            return _determineKeyEventResult(key, keyEventsToPropogate);
           }
         }
 
         // We don't support tabs in the search input. Swallow to prevent a
         // change of focus.
         if (key == tab || key == tabMac) {
-          return KeyEventResult.handled;
+          _determineKeyEventResult(key, keyEventsToPropogate);
         }
       }
 
@@ -605,9 +624,22 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
         shouldRequestFocus: shouldRequestFocus,
         autoCompleteLayerLink: controller.autoCompleteLayerLink,
         decoration: decoration,
+        label: label,
         tracking: tracking,
+        onClose: onClose,
       ),
     );
+  }
+
+  KeyEventResult _determineKeyEventResult(
+    int keyEventId,
+    Set<LogicalKeyboardKey> keyEventsToPropogate,
+  ) {
+    final shouldPropogateKeyEvent = keyEventsToPropogate
+        .any((key) => key.keyId & LogicalKeyboardKey.valueMask == keyEventId);
+    return shouldPropogateKeyEvent
+        ? KeyEventResult.ignored
+        : KeyEventResult.handled;
   }
 
   void _highlightDropdown(
@@ -665,6 +697,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     @required bool shouldRequestFocus,
     @required LayerLink autoCompleteLayerLink,
     InputDecoration decoration,
+    String label,
     bool supportsNavigation = false,
     VoidCallback onClose,
     bool tracking = false,
@@ -723,7 +756,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
                 OutlineInputBorder(borderSide: searchFocusBorderColor),
             labelStyle: TextStyle(color: searchColor),
             border: const OutlineInputBorder(),
-            labelText: 'Search',
+            labelText: label ?? 'Search',
             suffix: (supportsNavigation || onClose != null)
                 ? _buildSearchFieldSuffix(
                     controller,

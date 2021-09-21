@@ -4,98 +4,93 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../common_widgets.dart';
 import '../config_specific/launch_url/launch_url.dart';
 import '../theme.dart';
-import 'provider.dart';
+import 'analytics_controller.dart';
 
 /// Conditionally displays a prompt to request permission for collection of
 /// usage analytics.
 class AnalyticsPrompt extends StatefulWidget {
-  const AnalyticsPrompt({
-    @required this.provider,
-    @required this.child,
-  });
+  const AnalyticsPrompt({@required this.child});
 
   final Widget child;
-  final AnalyticsProvider provider;
 
   @override
   State<AnalyticsPrompt> createState() => _AnalyticsPromptState();
 }
 
 class _AnalyticsPromptState extends State<AnalyticsPrompt> {
-  Widget get _child => widget.child;
-
-  AnalyticsProvider get _provider => widget.provider;
-
-  bool _isVisible = false;
+  AnalyticsController _controller;
 
   @override
-  void initState() {
-    super.initState();
-    if (_provider.isGtagsEnabled) {
-      if (_provider.shouldPrompt) {
-        // Enable the analytics and give the user the option to opt out via the
-        // prompt.
-        _provider.setAllowAnalytics();
-        _isVisible = true;
-      }
-    }
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final newAnalyticsController = Provider.of<AnalyticsController>(context);
+    if (newAnalyticsController == _controller) return;
+    _controller = newAnalyticsController;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (_isVisible)
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(defaultBorderRadius),
-              side: BorderSide(
-                color: theme.focusColor,
-              ),
-            ),
-            color: theme.canvasColor,
-            margin: const EdgeInsets.only(bottom: denseSpacing),
-            child: Padding(
-              padding: const EdgeInsets.all(defaultSpacing),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return ValueListenableBuilder(
+      valueListenable: _controller.shouldPrompt,
+      builder: (context, showPrompt, _) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (showPrompt)
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(defaultBorderRadius),
+                  side: BorderSide(
+                    color: theme.focusColor,
+                  ),
+                ),
+                color: theme.canvasColor,
+                margin: const EdgeInsets.only(bottom: denseSpacing),
+                child: Padding(
+                  padding: const EdgeInsets.all(defaultSpacing),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Send usage statistics for DevTools?',
-                        style: textTheme.headline5,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Send usage statistics for DevTools?',
+                            style: textTheme.headline5,
+                          ),
+                          CircularIconButton(
+                            icon: Icons.close,
+                            onPressed: _controller.hidePrompt,
+                            backgroundColor: theme.canvasColor,
+                            foregroundColor:
+                                theme.colorScheme.contrastForeground,
+                          ),
+                        ],
                       ),
-                      CircularIconButton(
-                        icon: Icons.close,
-                        onPressed: _onPromptClosed,
-                        backgroundColor: theme.canvasColor,
-                        foregroundColor: theme.colorScheme.contrastForeground,
+                      const Padding(
+                        padding: EdgeInsets.only(top: defaultSpacing),
                       ),
+                      _analyticsDescription(textTheme),
+                      const SizedBox(height: denseRowSpacing),
+                      _actionButtons(),
                     ],
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(top: defaultSpacing),
-                  ),
-                  _analyticsDescription(textTheme),
-                  const SizedBox(height: denseRowSpacing),
-                  _actionButtons(),
-                ],
+                ),
               ),
-            ),
-          ),
-        Expanded(child: _child),
-      ],
+            Expanded(child: widget.child),
+          ],
+        );
+      },
     );
   }
 
@@ -135,10 +130,8 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
       children: [
         ElevatedButton(
           onPressed: () {
-            _provider.setDontAllowAnalytics();
-            setState(() {
-              _isVisible = false;
-            });
+            // This will also hide the prompt.
+            _controller.toggleAnalyticsEnabled(false);
           },
           style: ElevatedButton.styleFrom(primary: Colors.grey),
           child: const Text('No thanks.'),
@@ -148,20 +141,13 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
         ),
         ElevatedButton(
           onPressed: () {
-            _provider.setAllowAnalytics();
-            setState(() {
-              _isVisible = false;
-            });
+            _controller
+              ..toggleAnalyticsEnabled(true)
+              ..hidePrompt();
           },
           child: const Text('Sounds good!'),
         ),
       ],
     );
-  }
-
-  void _onPromptClosed() {
-    setState(() {
-      _isVisible = false;
-    });
   }
 }

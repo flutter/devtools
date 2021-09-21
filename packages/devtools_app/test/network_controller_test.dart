@@ -335,107 +335,48 @@ void main() {
 
       // The number of valid requests recorded in the test data.
       const numSockets = 2;
-      const numHttpProfile = 4;
+      const numHttpProfile = 6;
       const numRequests = numSockets + numHttpProfile;
+
+      const httpMethods = <String>{
+        'CONNECT',
+        'DELETE',
+        'GET',
+        'HEAD',
+        'PATCH',
+        'POST',
+        'PUT',
+      };
 
       // Refresh network data and ensure requests are populated.
       await controller.networkService.refreshNetworkData();
       profile = requestsNotifier.value;
       expect(profile.requests.length, numRequests);
-
       expect(profile.outstandingHttpRequests.isEmpty, true);
-      controller.stopRecording();
-    });
-
-    test('Check GET response body', () async {
-      await controller.startRecording();
-      final requestsNotifier = controller.requests;
-      NetworkRequests profile = requestsNotifier.value;
-      // Check profile is initially empty.
-      expect(profile.requests.isEmpty, true);
-
-      // Refresh network data and ensure requests are populated.
-      await controller.networkService.refreshNetworkData();
-      profile = requestsNotifier.value;
-      
       final List<HttpRequestData> httpRequests = profile.requests
           .whereType<HttpRequestData>()
           .cast<HttpRequestData>()
-          .where((request) => request.method == 'GET')
           .toList();
+      for (final request in httpRequests) {
+        expect(request.duration, isNotNull);
+        expect(request.general, isNotNull);
+        expect(request.general.length, greaterThan(0));
+        expect(request.hasCookies, isNotNull);
+        expect(request.inProgress, false);
+        expect(request.instantEvents, isNotNull);
+        expect(httpMethods.contains(request.method), true);
+        expect(request.requestCookies, isNotNull);
+        expect(request.responseCookies, isNotNull);
+        expect(request.startTimestamp, isNotNull);
+        expect(request.status, isNotNull);
+        expect(request.uri, isNotNull);
+      }
 
-      expect(httpRequests.length, 1);
-      expect(httpRequests.first.responseBody, isNotEmpty);
-      expect(httpRequests.first.requestBody, isNull);
-      controller.stopRecording();
-    });
-
-    test('Check POST request and response bodies', () async {
-      await controller.startRecording();
-      final requestsNotifier = controller.requests;
-      NetworkRequests profile = requestsNotifier.value;
-      // Check profile is initially empty.
-      expect(profile.requests.isEmpty, true);
-
-      // Refresh network data and ensure requests are populated.
-      await controller.networkService.refreshNetworkData();
+      // Finally, call `clear()` and ensure the requests have been cleared.
+      await controller.clear();
       profile = requestsNotifier.value;
-      
-      final List<HttpRequestData> httpRequests = profile.requests
-          .whereType<HttpRequestData>()
-          .cast<HttpRequestData>()
-          .where((request) => request.method == 'POST')
-          .toList();
-
-      expect(httpRequests.length, 1);
-      expect(httpRequests.first.responseBody, isNotEmpty);
-      expect(httpRequests.first.requestBody, isNotEmpty);
-      controller.stopRecording();
-    });
-
-    test('Check PUT request and response bodies', () async {
-      await controller.startRecording();
-      final requestsNotifier = controller.requests;
-      NetworkRequests profile = requestsNotifier.value;
-      // Check profile is initially empty.
       expect(profile.requests.isEmpty, true);
-
-      // Refresh network data and ensure requests are populated.
-      await controller.networkService.refreshNetworkData();
-      profile = requestsNotifier.value;
-      
-      final List<HttpRequestData> httpRequests = profile.requests
-          .whereType<HttpRequestData>()
-          .cast<HttpRequestData>()
-          .where((request) => request.method == 'PUT')
-          .toList();
-
-      expect(httpRequests.length, 1);
-      expect(httpRequests.first.responseBody, isNotEmpty);
-      expect(httpRequests.first.requestBody, isNotEmpty);
-      controller.stopRecording();
-    });
-
-    test('Check PATCH request and response bodies', () async {
-      await controller.startRecording();
-      final requestsNotifier = controller.requests;
-      NetworkRequests profile = requestsNotifier.value;
-      // Check profile is initially empty.
-      expect(profile.requests.isEmpty, true);
-
-      // Refresh network data and ensure requests are populated.
-      await controller.networkService.refreshNetworkData();
-      profile = requestsNotifier.value;
-      
-      final List<HttpRequestData> httpRequests = profile.requests
-          .whereType<HttpRequestData>()
-          .cast<HttpRequestData>()
-          .where((request) => request.method == 'PATCH')
-          .toList();
-
-      expect(httpRequests.length, 1);
-      expect(httpRequests.first.responseBody, isNotEmpty);
-      expect(httpRequests.first.requestBody, isNotEmpty);
+      expect(profile.outstandingHttpRequests.isEmpty, true);
       controller.stopRecording();
     });
   });

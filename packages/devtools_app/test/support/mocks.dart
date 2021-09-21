@@ -168,6 +168,14 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   }
 
   @override
+  Future<void> sendDwdsEvent({
+    @required String screen,
+    @required String action,
+  }) {
+    return Future.value();
+  }
+
+  @override
   void manuallyDisconnect() {
     changeState(false, manual: true);
   }
@@ -618,7 +626,7 @@ class MockMemoryController extends Mock implements MemoryController {}
 class MockFlutterMemoryController extends Mock
     implements flutter_memory.MemoryController {}
 
-class MockTimelineController extends Mock implements PerformanceController {}
+class MockPerformanceController extends Mock implements PerformanceController {}
 
 class MockProfilerScreenController extends Mock
     implements ProfilerScreenController {}

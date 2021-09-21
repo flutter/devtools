@@ -9,7 +9,7 @@ class SelfTimeColumn extends ColumnData<CpuStackFrame> {
       : super(
           'Self Time',
           titleTooltip: titleTooltip,
-          fixedWidthPx: _timeColumnWidthPx,
+          fixedWidthPx: scaleByFontFactor(_timeColumnWidthPx),
         );
 
   @override
@@ -43,7 +43,7 @@ class TotalTimeColumn extends ColumnData<CpuStackFrame> {
       : super(
           'Total Time',
           titleTooltip: titleTooltip,
-          fixedWidthPx: _timeColumnWidthPx,
+          fixedWidthPx: scaleByFontFactor(_timeColumnWidthPx),
         );
 
   @override

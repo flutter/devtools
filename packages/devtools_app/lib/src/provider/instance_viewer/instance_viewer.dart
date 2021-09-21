@@ -626,7 +626,7 @@ class _Expandable extends StatelessWidget {
             builder: (context, angle, _) {
               return Transform.rotate(
                 angle: angle,
-                child: const Icon(
+                child: Icon(
                   Icons.expand_more,
                   size: defaultIconSize,
                 ),

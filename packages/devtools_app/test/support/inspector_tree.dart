@@ -5,7 +5,7 @@
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
-import 'package:devtools_app/src/inspector/inspector_tree_flutter.dart';
+import 'package:devtools_app/src/inspector/inspector_tree_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -14,9 +14,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'wrappers.dart';
 
 /// Create an `InspectorTreeControllerFlutter` from a single `RemoteDiagnosticsNode`
-InspectorTreeControllerFlutter inspectorTreeControllerFromNode(
+InspectorTreeController inspectorTreeControllerFromNode(
     RemoteDiagnosticsNode node) {
-  final controller = InspectorTreeControllerFlutter()
+  final controller = InspectorTreeController()
     ..config = InspectorTreeConfig(
       summaryTree: false,
       treeType: FlutterTreeType.widget,

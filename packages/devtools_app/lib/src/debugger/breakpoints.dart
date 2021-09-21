@@ -12,8 +12,8 @@ import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 
-const executableLineRadius = 1.5;
-const breakpointRadius = 6.0;
+double get executableLineRadius => scaleByFontFactor(1.5);
+double get breakpointRadius => scaleByFontFactor(6.0);
 
 class Breakpoints extends StatefulWidget {
   const Breakpoints({Key key}) : super(key: key);

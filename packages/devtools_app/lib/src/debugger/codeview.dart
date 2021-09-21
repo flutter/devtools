@@ -28,7 +28,9 @@ import 'breakpoints.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
+import 'file_search.dart';
 import 'hover.dart';
+import 'key_sets.dart';
 import 'variables.dart';
 
 final debuggerCodeViewSearchKey =
@@ -68,6 +70,7 @@ class CodeView extends StatefulWidget {
 
 class _CodeViewState extends State<CodeView>
     with AutoDisposeMixin, SearchFieldMixin<CodeView> {
+  static const fileOpenerLeftPadding = 110.0;
   static const searchFieldRightPadding = 75.0;
 
   LinkedScrollControllerGroup verticalController;
@@ -194,34 +197,35 @@ class _CodeViewState extends State<CodeView>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    if (scriptRef == null) {
-      return Center(
-        child: Text(
-          'No script selected',
-          style: theme.textTheme.subtitle1,
-        ),
-      );
-    }
-
     if (parsedScript == null) {
       return const CenteredCircularProgressIndicator();
     }
 
     return ValueListenableBuilder(
-      valueListenable: widget.controller.showSearchInFileField,
-      builder: (context, showSearch, _) {
-        return Stack(
-          children: [
-            buildCodeArea(context),
-            if (showSearch)
-              Positioned(
-                top: denseSpacing,
-                right: searchFieldRightPadding,
-                child: buildSearchInFileField(),
-              ),
-          ],
+      valueListenable: widget.controller.showFileOpener,
+      builder: (context, showFileOpener, _) {
+        return ValueListenableBuilder(
+          valueListenable: widget.controller.showSearchInFileField,
+          builder: (context, showSearch, _) {
+            return Stack(
+              children: [
+                scriptRef == null
+                    ? buildEmptyState(context)
+                    : buildCodeArea(context),
+                if (showFileOpener)
+                  Positioned(
+                    left: fileOpenerLeftPadding,
+                    child: buildFileSearchField(),
+                  ),
+                if (showSearch && scriptRef != null)
+                  Positioned(
+                    top: denseSpacing,
+                    right: searchFieldRightPadding,
+                    child: buildSearchInFileField(),
+                  ),
+              ],
+            );
+          },
         );
       },
     );
@@ -405,7 +409,7 @@ class _CodeViewState extends State<CodeView>
     );
   }
 
-  Widget buildSearchInFileField() {
+  Widget wrapInElevatedCard(Widget widget) {
     return Card(
       elevation: defaultElevation,
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -416,14 +420,39 @@ class _CodeViewState extends State<CodeView>
         width: wideSearchTextWidth,
         height: defaultTextFieldHeight + 2 * denseSpacing,
         padding: const EdgeInsets.all(denseSpacing),
-        child: buildSearchField(
-          controller: widget.controller,
-          searchFieldKey: debuggerCodeViewSearchKey,
-          searchFieldEnabled: parsedScript != null,
-          shouldRequestFocus: true,
-          supportsNavigation: true,
-          onClose: () => widget.controller.toggleSearchInFileVisibility(false),
-        ),
+        child: widget,
+      ),
+    );
+  }
+
+  Widget buildFileSearchField() {
+    return wrapInElevatedCard(
+      FileSearchField(
+        controller: widget.controller,
+      ),
+    );
+  }
+
+  Widget buildSearchInFileField() {
+    return wrapInElevatedCard(
+      buildSearchField(
+        controller: widget.controller,
+        searchFieldKey: debuggerCodeViewSearchKey,
+        searchFieldEnabled: parsedScript != null,
+        shouldRequestFocus: true,
+        supportsNavigation: true,
+        onClose: () => widget.controller.toggleSearchInFileVisibility(false),
+      ),
+    );
+  }
+
+  Widget buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Text(
+        'Open a file: $openFileKeySetDescription',
+        style: theme.textTheme.subtitle1,
       ),
     );
   }
@@ -546,8 +575,8 @@ class GutterItem extends StatelessWidget {
         : theme.primaryColor;
     final subtleColor = theme.unselectedWidgetColor;
 
-    const bpBoxSize = 12.0;
-    const executionPointIndent = 10.0;
+    final bpBoxSize = breakpointRadius * 2;
+    final executionPointIndent = scaleByFontFactor(10.0);
 
     return InkWell(
       onTap: onPressed,
@@ -577,7 +606,7 @@ class GutterItem extends StatelessWidget {
               ),
             Text('$lineNumber', textAlign: TextAlign.end),
             Container(
-              padding: const EdgeInsets.only(left: executionPointIndent),
+              padding: EdgeInsets.only(left: executionPointIndent),
               alignment: Alignment.centerLeft,
               child: AnimatedOpacity(
                 duration: defaultDuration,
@@ -704,7 +733,7 @@ class LineItem extends StatefulWidget {
 
   static const _hoverDelay = Duration(milliseconds: 150);
   static const _removeDelay = Duration(milliseconds: 50);
-  static const _hoverWidth = 400.0;
+  static double get _hoverWidth => scaleByFontFactor(400.0);
 
   final TextSpan lineContents;
   final StackFrameAndSourcePosition pausedFrame;
@@ -767,8 +796,7 @@ class _LineItemState extends State<LineItem> {
           _hoverCard = HoverCard.fromHoverEvent(
             contents: SingleChildScrollView(
               child: Container(
-                constraints:
-                    const BoxConstraints(maxHeight: maxHoverCardHeight),
+                constraints: BoxConstraints(maxHeight: maxHoverCardHeight),
                 child: Material(
                   child: ExpandableVariable(
                     debuggerController: _debuggerController,
@@ -1014,7 +1042,7 @@ class ScriptPopupMenu extends StatelessWidget {
             .buildExtraDebuggerScriptPopupMenuOptions())
           extensionMenuOption.build(context),
       ],
-      child: const Icon(
+      child: Icon(
         Icons.more_vert,
         size: actionsIconSize,
       ),
@@ -1042,11 +1070,11 @@ class ScriptHistoryPopupMenu extends StatelessWidget {
       tooltip: 'Select recent script',
       enabled: enabled,
       onSelected: onSelected,
-      offset: const Offset(
+      offset: Offset(
         actionsIconSize + denseSpacing,
         buttonMinWidth + denseSpacing,
       ),
-      child: const Icon(
+      child: Icon(
         Icons.history,
         size: actionsIconSize,
       ),
@@ -1085,7 +1113,11 @@ class ScriptPopupMenuOption {
   }
 }
 
-final defaultScriptPopupMenuOptions = [copyScriptNameOption, goToLineOption];
+final defaultScriptPopupMenuOptions = [
+  copyScriptNameOption,
+  goToLineOption,
+  openFileOption,
+];
 
 final copyScriptNameOption = ScriptPopupMenuOption(
   label: 'Copy filename',
@@ -1102,10 +1134,20 @@ void showGoToLineDialog(BuildContext context, DebuggerController controller) {
   );
 }
 
-const goToLineOption = ScriptPopupMenuOption(
-  label: 'Go to line number',
+final goToLineOption = ScriptPopupMenuOption(
+  label: 'Go to line number ($goToLineNumberKeySetDescription)',
   icon: Icons.list,
   onSelected: showGoToLineDialog,
+);
+
+void showFileOpener(BuildContext context, DebuggerController controller) {
+  controller.toggleFileOpenerVisibility(true);
+}
+
+final openFileOption = ScriptPopupMenuOption(
+  label: 'Open file ($openFileKeySetDescription)',
+  icon: Icons.folder_open,
+  onSelected: showFileOpener,
 );
 
 class GoToLineDialog extends StatelessWidget {

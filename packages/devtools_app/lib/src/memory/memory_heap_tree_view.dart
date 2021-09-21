@@ -10,8 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/analytics_stub.dart'
-    if (dart.library.html) '../analytics/analytics.dart' as ga;
+import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
@@ -22,6 +21,7 @@ import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';
 import '../ui/search.dart';
+import '../ui/tab.dart';
 import '../utils.dart';
 import 'memory_allocation_table_view.dart';
 import 'memory_analyzer.dart';
@@ -146,9 +146,9 @@ class HeapTreeViewState extends State<HeapTree>
   static const int analysisTabIndex = 0;
   static const int allocationsTabIndex = 1;
 
-  static const List<Tab> DartHeapTabs = [
-    Tab(key: dartHeapAnalysisTabKey, text: 'Analysis'),
-    Tab(key: dartHeapAllocationsTabKey, text: 'Allocations'),
+  static final List<Tab> dartHeapTabs = [
+    DevToolsTab(key: dartHeapAnalysisTabKey, text: 'Analysis'),
+    DevToolsTab(key: dartHeapAllocationsTabKey, text: 'Allocations'),
   ];
 
   MemoryController controller;
@@ -182,7 +182,7 @@ class HeapTreeViewState extends State<HeapTree>
   void initState() {
     super.initState();
 
-    tabController = TabController(length: DartHeapTabs.length, vsync: this);
+    tabController = TabController(length: dartHeapTabs.length, vsync: this);
     addAutoDisposeListener(tabController);
 
     _animation = _setupBubbleAnimationController();
@@ -404,7 +404,7 @@ class HeapTreeViewState extends State<HeapTree>
                 labelColor: themeData.textTheme.bodyText1.color,
                 isScrollable: true,
                 controller: tabController,
-                tabs: HeapTreeViewState.DartHeapTabs,
+                tabs: HeapTreeViewState.dartHeapTabs,
               ),
               _buildSearchFilterControls(),
             ],
@@ -1480,7 +1480,7 @@ class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
       : super(
           'Count',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: 75.0,
+          fixedWidthPx: scaleByFontFactor(75.0),
         );
 
   @override
@@ -1578,7 +1578,7 @@ class _ShallowSizeColumn extends ColumnData<Reference> {
       : super(
           'Shallow',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: 100.0,
+          fixedWidthPx: scaleByFontFactor(100.0),
         );
 
   int sizeAllVisibleLibraries(List<Reference> references) {
@@ -1702,7 +1702,7 @@ class _RetainedSizeColumn extends ColumnData<Reference> {
       : super(
           'Retained',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: 100.0,
+          fixedWidthPx: scaleByFontFactor(100.0),
         );
 
   @override
