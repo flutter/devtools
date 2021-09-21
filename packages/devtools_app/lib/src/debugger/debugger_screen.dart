@@ -25,8 +25,8 @@ import 'codeview.dart';
 import 'controls.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
-import 'program_explorer.dart';
 import 'key_sets.dart';
+import 'program_explorer.dart';
 import 'variables.dart';
 
 class DebuggerScreen extends Screen {

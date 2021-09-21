@@ -209,7 +209,7 @@ void main() {
         // this so that forcing a scroll event is no longer necessary. Remove
         // once the change is in the stable release.
         debuggerController.showScriptLocation(ScriptLocation(mockScriptRef,
-            location: SourcePosition(line: 50, column: 50)));
+            location: const SourcePosition(line: 50, column: 50)));
         await tester.pumpAndSettle();
 
         expect(find.byType(Scrollbar), findsNWidgets(2));
@@ -277,7 +277,7 @@ void main() {
       final breakpointsWithLocation = [
         BreakpointAndSourcePosition.create(
           breakpoints.first,
-          SourcePosition(line: 10, column: 1),
+          const SourcePosition(line: 10, column: 1),
         )
       ];
 
@@ -523,7 +523,7 @@ void main() {
             ),
             kind: FrameKind.kRegular,
           ),
-          position: SourcePosition(
+          position: const SourcePosition(
             line: 1,
             column: 10,
           ),
