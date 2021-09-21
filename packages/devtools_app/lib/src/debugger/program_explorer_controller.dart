@@ -59,8 +59,7 @@ class ProgramExplorerController extends DisposableController
 
   /// Initializes the program structure.
   // TODO(bkonyi): reinitialize after hot reload.
-  Future<void> initialize() async {
-    print('initializing');
+  Future<void> initialize([ScriptRef initialScript]) async {
     if (_initializing) {
       return;
     }
@@ -108,11 +107,41 @@ class ProgramExplorerController extends DisposableController
     _programStructure.addAll(libraries);
 
     // Build the initial tree.
-    _rootObjectNodes.value = VMServiceObjectNode.createRootsFrom(
+    final nodes = VMServiceObjectNode.createRootsFrom(
       this,
       _programStructure,
     );
+    if (initialScript != null) {
+      _selectScriptNode(initialScript, nodes);
+    }
+    _rootObjectNodes.value = nodes;
     _initializationListenable.value = true;
+  }
+
+  void selectScriptNode(ScriptRef script) {
+    if (!initialized.value) {
+      return;
+    }
+    _selectScriptNode(script, _rootObjectNodes.value);
+    // Force a rebuild since selecting the node won't do that on its own.
+    _rootObjectNodes.value =
+        List<VMServiceObjectNode>.from(_rootObjectNodes.value);
+  }
+
+  void _selectScriptNode(
+    ScriptRef script,
+    List<VMServiceObjectNode> nodes,
+  ) {
+    for (final node in nodes) {
+      final result = node.firstChildWithCondition(
+        (node) => node.script?.uri == script.uri,
+      );
+      if (result != null) {
+        selectNode(result);
+        result.expandAscending();
+        return;
+      }
+    }
   }
 
   /// Clears controller state and re-initializes.
@@ -136,7 +165,6 @@ class ProgramExplorerController extends DisposableController
       node.isSelected = true;
       _selected?.isSelected = false;
       _selected = node;
-      //await populateNode(_selected);
       _outlineNodes.value = await _selected.outline;
     }
   }

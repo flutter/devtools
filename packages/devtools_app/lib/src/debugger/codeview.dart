@@ -139,7 +139,7 @@ class _CodeViewState extends State<CodeView>
   }
 
   void _updateScrollPosition({bool animate = true}) {
-    if (widget.controller.scriptLocation.value?.scriptRef != scriptRef) {
+    if (widget.controller.scriptLocation.value?.scriptRef?.uri != scriptRef?.uri) {
       return;
     }
 
@@ -292,6 +292,7 @@ class _CodeViewState extends State<CodeView>
           itemBuilder: _buildScriptMenuFromHistory,
           onSelected: (scriptRef) {
             widget.controller.showScriptLocation(ScriptLocation(scriptRef));
+            widget.controller.explorerController.selectScriptNode(scriptRef);
           },
           enabled: widget.controller.scriptsHistory.hasScripts,
         ),
@@ -300,8 +301,6 @@ class _CodeViewState extends State<CodeView>
         if (lines.isNotEmpty) {
           return DefaultTextStyle(
             style: theme.fixedFontStyle,
-                          child: Container(
-                color: theme.scaffoldBackgroundColor,
             child: Expanded(
               child: Scrollbar(
                 key: CodeView.debuggerCodeViewVerticalScrollbarKey,
@@ -385,13 +384,12 @@ class _CodeViewState extends State<CodeView>
                             },
                           ),
                         ),
-                        ],
-                      );
-                    },
-                  ),
+                      ],
+                    );
+                  },
                 ),
               ),
-            ),            
+            ),
           );
         } else {
           return Expanded(
@@ -428,7 +426,7 @@ class _CodeViewState extends State<CodeView>
         ),
       ),
     );
-  } 
+  }
 
   List<PopupMenuEntry<ScriptRef>> _buildScriptMenuFromHistory(
     BuildContext context,

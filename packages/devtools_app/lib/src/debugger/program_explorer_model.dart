@@ -90,6 +90,9 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     this.isSelectable = true,
   });
 
+  static const dartPrefix = 'dart:';
+  static const packagePrefix = 'package:';
+
   final ProgramExplorerController controller;
   final String name;
   bool isSelectable;
@@ -112,6 +115,8 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   // TODO(bkonyi): handle empty classes
   @override
   bool get isExpandable => super.isExpandable || object is ClassRef;
+
+  bool get isDirectory => script == null && object == null;
 
   List<VMServiceObjectNode> _outline;
   Future<List<VMServiceObjectNode>> get outline async {
@@ -235,12 +240,36 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     // Clear out the _childrenAsMap map.
     root._trimChildrenAsMapEntries();
 
+    final processed = root.children
+        .map((e) => e._collapseSingleChildDirectoryNodes())
+        .toList();
+    root.children.clear();
+    root.addAllChildren(processed);
+
     // Sort each subtree to use the following ordering:
     //   - Scripts
     //   - Classes
     //   - Functions
     //   - Variables
     root._sortEntriesByType();
+
+    // Place the root library's parent node at the top of the explorer if it's
+    // part of a package. Otherwise, it's a file path and its directory should
+    // appear near the top of the list anyway.
+    final rootLib =
+        serviceManager.isolateManager.selectedIsolateState.isolateNow.rootLib;
+    if (rootLib.uri.startsWith('package:') ||
+        rootLib.uri.startsWith('google3:')) {
+      final parts = rootLib.uri.split('/')..removeLast();
+      final path = parts.join('/');
+      for (int i = 0; i < root.children.length; ++i) {
+        if (root.children[i].name.startsWith(path)) {
+          final rootLibNode = root.removeChildAtIndex(i);
+          root.addChildAtIndex(rootLibNode, 0);
+          break;
+        }
+      }
+    }
 
     return root.children;
   }
@@ -251,7 +280,6 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     LibraryRef lib,
   }) {
     final parts = script.uri.split('/');
-    print('building nodes: $parts');
     final name = parts.removeLast();
 
     for (final part in parts) {
@@ -261,7 +289,6 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
         null,
         isSelectable: false,
       );
-      print('creating node: $part ${node.object} ${node.script}');
     }
 
     node = node._getCreateChild(name, script);
@@ -305,6 +332,31 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     return child;
   }
 
+  VMServiceObjectNode _collapseSingleChildDirectoryNodes() {
+    if (children.length == 1) {
+      final child = children.first;
+      if (child.isDirectory) {
+        final collapsed = VMServiceObjectNode(
+          controller,
+          '$name/${child.name}',
+          null,
+          isSelectable: false,
+        );
+        collapsed.addAllChildren(child.children);
+        return collapsed._collapseSingleChildDirectoryNodes();
+      }
+      return this;
+    }
+    final updated = children
+        .map(
+          (e) => e._collapseSingleChildDirectoryNodes(),
+        )
+        .toList();
+    children.clear();
+    addAllChildren(updated);
+    return this;
+  }
+
   void updateObject(Obj object) {
     if (this.object is! Class && object is Class) {
       for (final function in object.functions) {
@@ -328,19 +380,26 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   }
 
   void _sortEntriesByType() {
-    final folderNodes = <VMServiceObjectNode>[];
-    final libraryNodes = <VMServiceObjectNode>[];
+    final userDirectoryNodes = <VMServiceObjectNode>[];
+    final userLibraryNodes = <VMServiceObjectNode>[];
     final scriptNodes = <VMServiceObjectNode>[];
     final classNodes = <VMServiceObjectNode>[];
     final functionNodes = <VMServiceObjectNode>[];
     final variableNodes = <VMServiceObjectNode>[];
 
+    final packageAndCoreLibLibraryNodes = <VMServiceObjectNode>[];
+    final packageAndCoreLibDirectoryNodes = <VMServiceObjectNode>[];
+
     for (final child in children) {
       if (child.object == null && child.script == null) {
         // Child is a directory node. Treat it as if it were a library/script
         // for sorting purposes.
-        print('folder: ${child.name}');
-        folderNodes.add(child);
+        if (child.name.startsWith(dartPrefix) ||
+            child.name.startsWith(packagePrefix)) {
+          packageAndCoreLibDirectoryNodes.add(child);
+        } else {
+          userDirectoryNodes.add(child);
+        }
       } else {
         switch (child.object.runtimeType) {
           case ScriptRef:
@@ -349,7 +408,13 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
             break;
           case LibraryRef:
           case Library:
-            libraryNodes.add(child);
+            final obj = child.object as LibraryRef;
+            if (obj.uri.startsWith(dartPrefix) ||
+                obj.uri.startsWith(packagePrefix)) {
+              packageAndCoreLibLibraryNodes.add(child);
+            } else {
+              userLibraryNodes.add(child);
+            }
             break;
           case ClassRef:
           case Class:
@@ -370,7 +435,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       child._sortEntriesByType();
     }
 
-    folderNodes.sort((a, b) {
+    userDirectoryNodes.sort((a, b) {
       return a.name.compareTo(b.name);
     });
 
@@ -378,7 +443,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       return a.name.compareTo(b.name);
     });
 
-    libraryNodes.sort((a, b) {
+    userLibraryNodes.sort((a, b) {
       return a.name.compareTo(b.name);
     });
 
@@ -400,14 +465,27 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       return objA.name.compareTo(objB.name);
     });
 
+    packageAndCoreLibDirectoryNodes.sort((a, b) {
+      return a.name.compareTo(b.name);
+    });
+
+    packageAndCoreLibLibraryNodes.sort((a, b) {
+      return a.name.compareTo(b.name);
+    });
+
     children.clear();
     children.addAll([
-      ...libraryNodes,
-      ...folderNodes,
+      ...userLibraryNodes,
+      ...userDirectoryNodes,
       ...scriptNodes,
       ...classNodes,
       ...functionNodes,
       ...variableNodes,
+      // We treat core libraries and packages as their own category as users
+      // are likely more interested in code within their own project.
+      // TODO(bkonyi): do we need custom google3 heuristics here?
+      ...packageAndCoreLibLibraryNodes,
+      ...packageAndCoreLibDirectoryNodes,
     ]);
   }
 

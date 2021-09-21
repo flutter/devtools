@@ -20,6 +20,7 @@ import '../ui/search.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
 import 'debugger_model.dart';
+import 'program_explorer_controller.dart';
 import 'syntax_highlighter.dart';
 
 // TODO(devoncarew): Add some delayed resume value notifiers (to be used to
@@ -40,6 +41,7 @@ class DebuggerController extends DisposableController
       _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
     };
     scriptsHistory.current.addListener(_scriptHistoryListener);
+    explorerController.initialize(currentScriptRef.value);
 
     if (_service != null) {
       initialize();
@@ -257,6 +259,8 @@ class DebuggerController extends DisposableController
     } catch (_) {}
     return null;
   }
+
+  final explorerController = ProgramExplorerController();
 
   // A cached map of uris to ScriptRefs.
   final Map<String, ScriptRef> _uriToScriptMap = {};

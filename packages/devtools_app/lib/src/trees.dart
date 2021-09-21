@@ -108,6 +108,28 @@ abstract class TreeNode<T extends TreeNode<T>> {
     child.index = children.length - 1;
   }
 
+  void addChildAtIndex(T child, int index) {
+    assert(index <= children.length);
+    if (index == children.length) {
+      addChild(child);
+      return;
+    }
+    children.insert(index, child);
+    child.parent = this;
+    child.index = index;
+    for (int i = 0; i < children.length; ++i) {
+      children[i].index++;
+    }
+  }
+
+  T removeChildAtIndex(int index) {
+    assert(index < children.length);
+    for (int i = index + 1; i < children.length; ++i) {
+      children[i].index--;
+    }
+    return children.removeAt(index);
+  }
+
   void addAllChildren(List<T> children) {
     children.forEach(addChild);
   }
@@ -117,6 +139,12 @@ abstract class TreeNode<T extends TreeNode<T>> {
     breadthFirstTraversal<T>(this, action: (T node) {
       node.expand();
     });
+  }
+
+  /// Expands this node and each parent node recursively.
+  void expandAscending() {
+    expand();
+    parent?.expandAscending();
   }
 
   /// Collapses this node and all of its children (cascading).

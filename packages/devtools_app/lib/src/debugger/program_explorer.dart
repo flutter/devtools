@@ -194,14 +194,18 @@ class ProgramStructureIcon extends StatelessWidget {
     IconData icon;
     String character;
     Color color = colorScheme.functionSyntaxColor;
+    bool isShortCharacter;
     if (object is ClassRef) {
       character = 'c';
+      isShortCharacter = true;
       color = colorScheme.declarationsSyntaxColor;
     } else if (object is FuncRef) {
       character = 'm';
+      isShortCharacter = true;
       color = colorScheme.functionSyntaxColor;
     } else if (object is FieldRef) {
       character = 'f';
+      isShortCharacter = false;
       color = colorScheme.variableSyntaxColor;
     } else if (object is LibraryRef) {
       icon = Icons.book;
@@ -212,6 +216,9 @@ class ProgramStructureIcon extends StatelessWidget {
     } else {
       icon = containerIcon;
     }
+
+    assert((icon == null && character != null && isShortCharacter != null) ||
+        (icon != null && character == null && isShortCharacter == null));
 
     return SizedBox(
       height: defaultIconSize,
@@ -230,9 +237,21 @@ class ProgramStructureIcon extends StatelessWidget {
                 child: Text(
                   character,
                   style: TextStyle(
+                    height: 1,
                     fontFamily: theme.fixedFontStyle.fontFamily,
                     color: theme.colorScheme.defaultBackgroundColor,
                     fontSize: chartFontSizeSmall,
+                  ),
+                  // Required to center the individual character within the
+                  // shape. Since letters like 'm' are shorter than letters
+                  // like 'f', there's padding applied to the top of shorter
+                  // characters in order for everything to align properly.
+                  // Since we're only dealing with individual characters, we
+                  // want to disable this behavior so shorter characters don't
+                  // appear to be slightly below center.
+                  textHeightBehavior: TextHeightBehavior(
+                    applyHeightToFirstAscent: isShortCharacter,
+                    applyHeightToLastDescent: false,
                   ),
                 ),
               )
@@ -253,11 +272,11 @@ class ProgramExplorer extends StatelessWidget {
     Key key,
     @required this.debugController,
     @required this.onSelected,
-  }) : super(key: key) {
-    controller.initialize();
+  }) : controller = debugController.explorerController, super(key: key) {
+    controller.selectScriptNode(debugController.currentScriptRef.value);
   }
 
-  final controller = ProgramExplorerController();
+  final ProgramExplorerController controller;
   final DebuggerController debugController;
   final void Function(ScriptLocation) onSelected;
 
@@ -344,6 +363,7 @@ class ProgramExplorer extends StatelessWidget {
 
   void _onItemSelected(VMServiceObjectNode node) async {
     if (!node.isSelectable) {
+
       node.toggleExpansion();
       return;
     }
