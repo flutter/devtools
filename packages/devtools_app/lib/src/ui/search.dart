@@ -113,7 +113,7 @@ class AutoComplete extends StatefulWidget {
     this.controller, {
     @required this.searchFieldKey,
     @required this.onTap,
-    this.autocompleteMatchTileHeight,
+    this.autoCompleteMatchTileHeight,
     bool bottom = true, // If false placed above.
     bool maxWidth = true,
   })  : isBottom = bottom,
@@ -122,7 +122,7 @@ class AutoComplete extends StatefulWidget {
   final AutoCompleteSearchControllerMixin controller;
   final GlobalKey searchFieldKey;
   final SelectAutoComplete onTap;
-  final double autocompleteMatchTileHeight;
+  final double autoCompleteMatchTileHeight;
   final bool isBottom;
   final bool isMaxWidth;
 
@@ -141,8 +141,8 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     final onTap = autoComplete.onTap;
     final bottom = autoComplete.isBottom;
     final isMaxWidth = autoComplete.isMaxWidth;
-    final autocompleteMatchTileHeight =
-        autoComplete.autocompleteMatchTileHeight;
+    final autoCompleteMatchTileHeight =
+        autoComplete.autoCompleteMatchTileHeight;
 
     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
       controller.handleAutoCompleteOverlay(
@@ -151,7 +151,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         onTap: onTap,
         bottom: bottom,
         maxWidth: isMaxWidth,
-        autocompleteMatchTileHeight: autocompleteMatchTileHeight,
+        autoCompleteMatchTileHeight: autoCompleteMatchTileHeight,
       );
     });
   }
@@ -176,7 +176,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     // Approximation but it's pretty accurate. Could consider using a layout builder
     // or maybe build in an overlay (that's isn't visible) to compute.
     final tileEntryHeight =
-        autoComplete.autocompleteMatchTileHeight ?? box.size.height;
+        autoComplete.autoCompleteMatchTileHeight ?? box.size.height;
 
     // Compute to global coordinates.
     final offset = box.localToGlobal(Offset.zero);
@@ -326,7 +326,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     @required BuildContext context,
     @required GlobalKey searchFieldKey,
     @required SelectAutoComplete onTap,
-    double autocompleteMatchTileHeight,
+    double autoCompleteMatchTileHeight,
     bool bottom = true,
     bool maxWidth = true,
   }) {
@@ -335,7 +335,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
         this,
         searchFieldKey: searchFieldKey,
         onTap: onTap,
-        autocompleteMatchTileHeight: autocompleteMatchTileHeight,
+        autoCompleteMatchTileHeight: autoCompleteMatchTileHeight,
         bottom: bottom,
         maxWidth: maxWidth,
       );
@@ -356,7 +356,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     @required BuildContext context,
     @required GlobalKey searchFieldKey,
     @required SelectAutoComplete onTap,
-    double autocompleteMatchTileHeight,
+    double autoCompleteMatchTileHeight,
     bool bottom = true,
     bool maxWidth = true,
   }) {
@@ -368,7 +368,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
       context: context,
       searchFieldKey: searchFieldKey,
       onTap: onTap,
-      autocompleteMatchTileHeight: autocompleteMatchTileHeight,
+      autoCompleteMatchTileHeight: autoCompleteMatchTileHeight,
       bottom: bottom,
       maxWidth: maxWidth,
     );
