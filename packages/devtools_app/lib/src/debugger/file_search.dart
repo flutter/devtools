@@ -14,7 +14,6 @@ import 'debugger_controller.dart';
 import 'debugger_model.dart';
 
 const int numOfMatchesToShow = 10;
-const double autoCompleteMatchTileHeight = 50.0;
 
 class FileSearchField extends StatefulWidget {
   const FileSearchField({
@@ -67,7 +66,6 @@ class _FileSearchFieldState extends State<FileSearchField>
       context: context,
       searchFieldKey: fileSearchFieldKey,
       onTap: _onSelection,
-      autoCompleteMatchTileHeight: autoCompleteMatchTileHeight,
     );
   }
 

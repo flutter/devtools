@@ -47,7 +47,6 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
         onTap: _onSelection,
         bottom: false,
         maxWidth: false,
-        autoCompleteMatchTileHeight: 50.0,
       );
     });
     addAutoDisposeListener(
