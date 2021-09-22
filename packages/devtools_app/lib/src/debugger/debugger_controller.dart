@@ -20,7 +20,6 @@ import '../ui/search.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
 import 'debugger_model.dart';
-import 'program_explorer_controller.dart';
 import 'syntax_highlighter.dart';
 
 // TODO(devoncarew): Add some delayed resume value notifiers (to be used to
