@@ -530,6 +530,8 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   /// pop-up is visible close the pop-up on first ESCAPE.
   /// [keyEventsToPropogate] a set of key events that should be propogated to
   /// other handlers
+  /// TODO(elliette): Have this return a private _AutoCompleteSearchField widget
+  ///  instead.
   Widget buildAutoCompleteSearchField({
     @required AutoCompleteSearchControllerMixin controller,
     @required GlobalKey searchFieldKey,
