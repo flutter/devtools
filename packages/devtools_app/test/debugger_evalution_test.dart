@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/debugger/evaluate.dart';
+import 'package:devtools_app/src/debugger/program_explorer_controller.dart';
 import 'package:devtools_app/src/eval_on_dart_library.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/ui/search.dart';
@@ -13,6 +14,7 @@ import 'package:pedantic/pedantic.dart';
 
 import 'support/flutter_test_driver.dart';
 import 'support/flutter_test_environment.dart';
+import 'support/mocks.dart';
 import 'support/utils.dart';
 
 void main() {
@@ -26,6 +28,9 @@ void main() {
   setUp(() async {
     isAlive = Disposable();
     await env.setupEnvironment();
+    final mockProgramExplorerController =
+        MockProgramExplorerController.withDefaults();
+    setGlobal(ProgramExplorerController, mockProgramExplorerController);
     debuggerController = DebuggerController();
     eval = EvalOnDartLibrary(
         'package:flutter_app/src/autocomplete.dart', serviceManager.service,
