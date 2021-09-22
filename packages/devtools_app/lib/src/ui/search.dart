@@ -177,10 +177,9 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
                 ))
             .toList();
 
-    const padding = 8.0;
     final tileEntryHeight = tileContents.isEmpty
         ? 0.0
-        : calculateTextSpanHeight(tileContents.first) + padding;
+        : calculateTextSpanHeight(tileContents.first) + denseSpacing;
 
     // Find the searchField and place overlay below bottom of TextField and
     // make overlay width of TextField. This is also we decide the height of
@@ -220,7 +219,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
                 ? colorScheme.autoCompleteHighlightColor
                 : colorScheme.defaultBackgroundColor,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: padding),
+              padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text.rich(
