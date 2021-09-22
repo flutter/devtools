@@ -177,10 +177,10 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
                 ))
             .toList();
 
-    const minTileHeight = 48.0;
+    const padding = 8.0;
     final tileEntryHeight = tileContents.isEmpty
-        ? minTileHeight
-        : max(minTileHeight, calculateTextSpanHeight(tileContents.first));
+        ? 0.0
+        : calculateTextSpanHeight(tileContents.first) + padding;
 
     // Find the searchField and place overlay below bottom of TextField and
     // make overlay width of TextField. This is also we decide the height of
@@ -204,29 +204,32 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         ? searchAutoComplete.value.length
         : (maxAreaForPopup / tileEntryHeight).truncateToDouble();
 
-    final autoCompleteTiles = <ListTile>[];
+    final autoCompleteTiles = <GestureDetector>[];
     final count = min(searchAutoComplete.value.length, totalTiles);
     for (var index = 0; index < count; index++) {
       final textSpan = tileContents[index];
       autoCompleteTiles.add(
-        ListTile(
-          minVerticalPadding: 0,
-          dense: true,
-          title: Align(
-            alignment: Alignment.centerLeft,
-            child: Text.rich(
-              textSpan,
-              maxLines: 1,
-            ),
-          ),
-          tileColor: controller.currentDefaultIndex == index
-              ? colorScheme.autoCompleteHighlightColor
-              : colorScheme.defaultBackgroundColor,
+        GestureDetector(
           onTap: () {
             controller.selectTheSearch = true;
             controller.search = textSpan.text;
             autoComplete.onTap(textSpan.text);
           },
+          child: Container(
+            color: controller.currentDefaultIndex == index
+                ? colorScheme.autoCompleteHighlightColor
+                : colorScheme.defaultBackgroundColor,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: padding),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text.rich(
+                  textSpan,
+                  maxLines: 1,
+                ),
+              ),
+            ),
+          ),
         ),
       );
     }
