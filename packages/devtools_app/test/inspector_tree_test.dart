@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
+import 'package:devtools_app/src/debugger/program_explorer_controller.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
@@ -20,13 +21,17 @@ import 'support/wrappers.dart';
 
 void main() {
   FakeServiceManager fakeServiceManager;
+  MockProgramExplorerController mockProgramExplorerController;
 
   setUp(() {
     fakeServiceManager = FakeServiceManager();
     when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
     when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
 
+    mockProgramExplorerController = MockProgramExplorerController.withDefaults();
+
     setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ProgramExplorerController, mockProgramExplorerController);
     mockIsFlutterApp(serviceManager.connectedApp);
   });
 
