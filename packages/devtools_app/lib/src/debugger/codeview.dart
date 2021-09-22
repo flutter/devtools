@@ -398,7 +398,6 @@ class _CodeViewState extends State<CodeView>
     return wrapInElevatedCard(
       FileSearchField(
         debuggerController: widget.controller,
-        autoCompleteController: AutoCompleteController(),
       ),
     );
   }
