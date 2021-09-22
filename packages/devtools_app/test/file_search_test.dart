@@ -42,55 +42,55 @@ void main() {
 
       autoCompleteController.search = '';
       expect(
-          autoCompleteController.searchAutoComplete.value,
-          equals([
-            // Show all results (truncated to 10):
-            'zoo:animals/cats/meow.dart',
-            'zoo:animals/cats/purr.dart',
-            'zoo:animals/dogs/bark.dart',
-            'zoo:animals/dogs/growl.dart',
-            'zoo:animals/insects/caterpillar.dart',
-            'zoo:animals/insects/cicada.dart',
-            'kitchen:food/catering/party.dart',
-            'kitchen:food/carton/milk.dart',
-            'kitchen:food/milk/carton.dart',
-            'travel:adventure/cave_tours_europe.dart',
-          ]),
-          reason: 'Correct search results for empty query.');
+        autoCompleteController.searchAutoComplete.value,
+        equals([
+          // Show all results (truncated to 10):
+          'zoo:animals/cats/meow.dart',
+          'zoo:animals/cats/purr.dart',
+          'zoo:animals/dogs/bark.dart',
+          'zoo:animals/dogs/growl.dart',
+          'zoo:animals/insects/caterpillar.dart',
+          'zoo:animals/insects/cicada.dart',
+          'kitchen:food/catering/party.dart',
+          'kitchen:food/carton/milk.dart',
+          'kitchen:food/milk/carton.dart',
+          'travel:adventure/cave_tours_europe.dart',
+        ]),
+      );
 
       autoCompleteController.search = 'c';
       expect(
-          autoCompleteController.searchAutoComplete.value,
-          equals([
-            // Exact matches:
-            'zoo:animals/cats/meow.dart',
-            'zoo:animals/cats/purr.dart',
-            'zoo:animals/insects/caterpillar.dart',
-            'zoo:animals/insects/cicada.dart',
-            'kitchen:food/catering/party.dart',
-            'kitchen:food/carton/milk.dart',
-            'kitchen:food/milk/carton.dart',
-            'travel:adventure/cave_tours_europe.dart',
-            'travel:canada/banff.dart',
-          ]),
-          reason: 'Correct search results for "c" query.');
+        autoCompleteController.searchAutoComplete.value,
+        equals([
+          // Exact matches:
+          'zoo:animals/cats/meow.dart',
+          'zoo:animals/cats/purr.dart',
+          'zoo:animals/insects/caterpillar.dart',
+          'zoo:animals/insects/cicada.dart',
+          'kitchen:food/catering/party.dart',
+          'kitchen:food/carton/milk.dart',
+          'kitchen:food/milk/carton.dart',
+          'travel:adventure/cave_tours_europe.dart',
+          'travel:canada/banff.dart',
+        ]),
+      );
 
       autoCompleteController.search = 'ca';
       expect(
-          autoCompleteController.searchAutoComplete.value,
-          equals([
-            // Exact matches:
-            'zoo:animals/cats/meow.dart',
-            'zoo:animals/cats/purr.dart',
-            'zoo:animals/insects/caterpillar.dart',
-            'zoo:animals/insects/cicada.dart',
-            'kitchen:food/catering/party.dart',
-            'kitchen:food/carton/milk.dart',
-            'kitchen:food/milk/carton.dart',
-            'travel:adventure/cave_tours_europe.dart',
-            'travel:canada/banff.dart',
-          ]),
-          reason: 'Correct search results for "ca" query.');
+        autoCompleteController.searchAutoComplete.value,
+        equals([
+          // Exact matches:
+          'zoo:animals/cats/meow.dart',
+          'zoo:animals/cats/purr.dart',
+          'zoo:animals/insects/caterpillar.dart',
+          'zoo:animals/insects/cicada.dart',
+          'kitchen:food/catering/party.dart',
+          'kitchen:food/carton/milk.dart',
+          'kitchen:food/milk/carton.dart',
+          'travel:adventure/cave_tours_europe.dart',
+          'travel:canada/banff.dart',
+        ]),
+      );
 
       autoCompleteController.search = 'cat';
       expect(
@@ -110,27 +110,27 @@ void main() {
 
       autoCompleteController.search = 'cate';
       expect(
-          autoCompleteController.searchAutoComplete.value,
-          equals([
-            // Exact matches:
-            'zoo:animals/insects/caterpillar.dart',
-            'kitchen:food/catering/party.dart',
-            // Fuzzy matches:
-            'travel:adventure/cave_tours_europe.dart',
-          ]),
-          reason: 'Correct search results for "cate" query.');
+        autoCompleteController.searchAutoComplete.value,
+        equals([
+          // Exact matches:
+          'zoo:animals/insects/caterpillar.dart',
+          'kitchen:food/catering/party.dart',
+          // Fuzzy matches:
+          'travel:adventure/cave_tours_europe.dart',
+        ]),
+      );
 
       autoCompleteController.search = 'cater';
       expect(
-          autoCompleteController.searchAutoComplete.value,
-          equals([
-            // Exact matches:
-            'zoo:animals/insects/caterpillar.dart',
-            'kitchen:food/catering/party.dart',
-            // Fuzzy matches:
-            'travel:adventure/cave_tours_europe.dart',
-          ]),
-          reason: 'Correct search results for "cater" query.');
+        autoCompleteController.searchAutoComplete.value,
+        equals([
+          // Exact matches:
+          'zoo:animals/insects/caterpillar.dart',
+          'kitchen:food/catering/party.dart',
+          // Fuzzy matches:
+          'travel:adventure/cave_tours_europe.dart',
+        ]),
+      );
 
       autoCompleteController.search = 'caterp';
       expect(
@@ -145,21 +145,21 @@ void main() {
 
       autoCompleteController.search = 'caterpi';
       expect(
-          autoCompleteController.searchAutoComplete.value,
-          equals([
-            // Exact matches:
-            'zoo:animals/insects/caterpillar.dart',
-          ]),
-          reason: 'Correct search results for "caterpi" query.');
+        autoCompleteController.searchAutoComplete.value,
+        equals([
+          // Exact matches:
+          'zoo:animals/insects/caterpillar.dart',
+        ]),
+      );
 
       autoCompleteController.search = 'caterpie';
       expect(
-          autoCompleteController.searchAutoComplete.value,
-          equals([
-            // No matches message:
-            'No files found.',
-          ]),
-          reason: 'Correct search results for "caterpie" query.');
+        autoCompleteController.searchAutoComplete.value,
+        equals([
+          // No matches message:
+          'No files found.',
+        ]),
+      );
     });
   });
 }
