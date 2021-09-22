@@ -296,7 +296,7 @@ class _CodeViewState extends State<CodeView>
           itemBuilder: _buildScriptMenuFromHistory,
           onSelected: (scriptRef) {
             widget.controller.showScriptLocation(ScriptLocation(scriptRef));
-            widget.controller.explorerController.selectScriptNode(scriptRef);
+            programExplorerController.selectScriptNode(scriptRef);
           },
           enabled: widget.controller.scriptsHistory.hasScripts,
         ),

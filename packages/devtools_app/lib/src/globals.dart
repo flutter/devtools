@@ -4,6 +4,7 @@
 
 import 'config_specific/ide_theme/ide_theme.dart';
 import 'core/message_bus.dart';
+import 'debugger/program_explorer_controller.dart';
 import 'extension_points/extensions_base.dart';
 import 'framework_controller.dart';
 import 'preferences.dart';
@@ -37,6 +38,9 @@ DevToolsExtensionPoints get devToolsExtensionPoints =>
     globals[DevToolsExtensionPoints];
 
 IdeTheme get ideTheme => globals[IdeTheme];
+
+ProgramExplorerController get programExplorerController =>
+    globals[ProgramExplorerController];
 
 void setGlobal(Type clazz, dynamic instance) {
   globals[clazz] = instance;

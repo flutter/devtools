@@ -659,10 +659,6 @@ class MockDebuggerController extends Mock implements DebuggerController {
     when(debuggerController.variables).thenReturn(ValueNotifier([]));
     when(debuggerController.currentParsedScript)
         .thenReturn(ValueNotifier<ParsedScript>(null));
-    final explorerController = MockProgramExplorerController.withDefaults();
-    when(debuggerController.explorerController).thenReturn(
-      explorerController,
-    );
     return debuggerController;
   }
 }

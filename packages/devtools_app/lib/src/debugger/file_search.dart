@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose_mixin.dart';
+import '../globals.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
@@ -92,7 +93,7 @@ class _FileSearchFieldState extends State<FileSearchField>
   void _onSelection(String scriptUri) {
     final scriptRef = _scriptsCache[scriptUri];
     widget.controller.showScriptLocation(ScriptLocation(scriptRef));
-    widget.controller.explorerController.selectScriptNode(scriptRef);
+    programExplorerController.selectScriptNode(scriptRef);
     _onClose();
   }
 

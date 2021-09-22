@@ -41,7 +41,7 @@ class DebuggerController extends DisposableController
       _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
     };
     scriptsHistory.current.addListener(_scriptHistoryListener);
-    explorerController.initialize(currentScriptRef.value);
+    programExplorerController.initialize(currentScriptRef.value);
 
     if (_service != null) {
       initialize();
@@ -263,8 +263,6 @@ class DebuggerController extends DisposableController
     } catch (_) {}
     return null;
   }
-
-  final explorerController = ProgramExplorerController();
 
   // A cached map of uris to ScriptRefs.
   final Map<String, ScriptRef> _uriToScriptMap = {};

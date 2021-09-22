@@ -10,6 +10,7 @@ import 'package:devtools_app/src/debugger/controls.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/debugger/debugger_model.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
+import 'package:devtools_app/src/debugger/program_explorer_controller.dart';
 import 'package:devtools_app/src/debugger/program_explorer_model.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
@@ -27,9 +28,12 @@ void main() {
   DebuggerScreen screen;
   FakeServiceManager fakeServiceManager;
   MockDebuggerController debuggerController;
+  MockProgramExplorerController mockProgramExplorerController;
   fakeServiceManager = FakeServiceManager();
   when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+  mockProgramExplorerController = MockProgramExplorerController.withDefaults();
   setGlobal(ServiceConnectionManager, fakeServiceManager);
+  setGlobal(ProgramExplorerController, mockProgramExplorerController);
 
   const windowSize = Size(4000.0, 4000.0);
   const smallWindowSize = Size(1000.0, 1000.0);
@@ -248,12 +252,11 @@ void main() {
       ];
 
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
-      final explorerController = debuggerController.explorerController;
-      when(explorerController.rootObjectNodes).thenReturn(
+      when(mockProgramExplorerController.rootObjectNodes).thenReturn(
         ValueNotifier(
           [
             VMServiceObjectNode(
-              debuggerController.explorerController,
+              mockProgramExplorerController,
               'package:test',
               null,
             ),

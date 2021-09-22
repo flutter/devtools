@@ -7,6 +7,7 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../common_widgets.dart';
 import '../flex_split_column.dart';
+import '../globals.dart';
 import '../theme.dart';
 import '../tree.dart';
 import 'debugger_controller.dart';
@@ -272,7 +273,7 @@ class ProgramExplorer extends StatelessWidget {
     Key key,
     @required this.debugController,
     @required this.onSelected,
-  }) : controller = debugController.explorerController, super(key: key) {
+  }) : controller = programExplorerController, super(key: key) {
     controller.selectScriptNode(debugController.currentScriptRef.value);
   }
 
