@@ -123,6 +123,17 @@ double calculateTextSpanWidth(TextSpan span) {
   return textPainter.width;
 }
 
+/// Returns the height in pixels of the [span].
+double calculateTextSpanHeight(TextSpan span) {
+  final textPainter = TextPainter(
+    text: span,
+    textAlign: TextAlign.left,
+    textDirection: TextDirection.ltr,
+  )..layout();
+
+  return textPainter.height;
+}
+
 /// Scrollbar that is offset by the amount specified by an [offsetController].
 ///
 /// This makes it possible to create a [ListView] with both vertical and
