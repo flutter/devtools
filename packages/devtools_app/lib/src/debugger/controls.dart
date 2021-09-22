@@ -117,7 +117,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
 
   Widget _librariesButton() {
     return ValueListenableBuilder(
-      valueListenable: controller.librariesVisible,
+      valueListenable: controller.fileExplorerVisible,
       builder: (context, visible, _) {
         const libraryIcon = Icons.insert_chart;
         return RoundedOutlinedBorder(

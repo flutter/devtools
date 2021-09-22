@@ -318,7 +318,7 @@ class DebuggerController extends DisposableController
 
   final _librariesVisible = ValueNotifier(false);
 
-  ValueListenable<bool> get librariesVisible => _librariesVisible;
+  ValueListenable<bool> get fileExplorerVisible => _librariesVisible;
 
   /// Make the 'Libraries' view on the right-hand side of the screen visible or
   /// hidden.

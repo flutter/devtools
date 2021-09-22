@@ -10,6 +10,7 @@ import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/connected_app.dart';
 import 'package:devtools_app/src/console_service.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
+import 'package:devtools_app/src/debugger/program_explorer_controller.dart';
 import 'package:devtools_app/src/debugger/span_parser.dart';
 import 'package:devtools_app/src/debugger/syntax_highlighter.dart';
 import 'package:devtools_app/src/error_badge_manager.dart';
@@ -642,7 +643,8 @@ class MockDebuggerController extends Mock implements DebuggerController {
     when(debuggerController.isSystemIsolate).thenReturn(false);
     when(debuggerController.breakpointsWithLocation)
         .thenReturn(ValueNotifier([]));
-    when(debuggerController.librariesVisible).thenReturn(ValueNotifier(false));
+    when(debuggerController.fileExplorerVisible)
+        .thenReturn(ValueNotifier(false));
     when(debuggerController.currentScriptRef).thenReturn(ValueNotifier(null));
     when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
     when(debuggerController.selectedBreakpoint).thenReturn(ValueNotifier(null));
@@ -657,7 +659,25 @@ class MockDebuggerController extends Mock implements DebuggerController {
     when(debuggerController.variables).thenReturn(ValueNotifier([]));
     when(debuggerController.currentParsedScript)
         .thenReturn(ValueNotifier<ParsedScript>(null));
+    final explorerController = MockProgramExplorerController.withDefaults();
+    when(debuggerController.explorerController).thenReturn(
+      explorerController,
+    );
     return debuggerController;
+  }
+}
+
+class MockProgramExplorerController extends Mock
+    implements ProgramExplorerController {
+  MockProgramExplorerController();
+
+  factory MockProgramExplorerController.withDefaults() {
+    final controller = MockProgramExplorerController();
+    when(controller.initialized).thenReturn(ValueNotifier(true));
+    when(controller.rootObjectNodes).thenReturn(ValueNotifier([]));
+    when(controller.outlineNodes).thenReturn(ValueNotifier([]));
+
+    return controller;
   }
 }
 

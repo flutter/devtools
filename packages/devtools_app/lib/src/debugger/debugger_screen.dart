@@ -140,7 +140,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     );
 
     final codeArea = ValueListenableBuilder(
-      valueListenable: controller.librariesVisible,
+      valueListenable: controller.fileExplorerVisible,
       builder: (context, visible, _) {
         if (visible) {
           // TODO(devoncarew): Animate this opening and closing.

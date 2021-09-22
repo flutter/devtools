@@ -10,6 +10,7 @@ import 'package:devtools_app/src/debugger/controls.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/debugger/debugger_model.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
+import 'package:devtools_app/src/debugger/program_explorer_model.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
@@ -224,7 +225,7 @@ void main() {
       }, skip: !Platform.isMacOS);
     });
 
-    testWidgetsWithWindowSize('Libraries hidden', windowSize,
+    testWidgetsWithWindowSize('File Explorer hidden', windowSize,
         (WidgetTester tester) async {
       final scripts = [
         ScriptRef(uri: 'package:/test/script.dart', id: 'test-script')
@@ -233,27 +234,41 @@ void main() {
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
       when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
-      // Libraries view is hidden
-      when(debuggerController.librariesVisible)
+      // File Explorer view is hidden
+      when(debuggerController.fileExplorerVisible)
           .thenReturn(ValueNotifier(false));
       await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('Libraries'), findsOneWidget);
+      expect(find.text('File Explorer'), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize('Libraries visible', windowSize,
+    testWidgetsWithWindowSize('File Explorer visible', windowSize,
         (WidgetTester tester) async {
       final scripts = [
         ScriptRef(uri: 'package:test/script.dart', id: 'test-script')
       ];
 
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
+      final explorerController = debuggerController.explorerController;
+      when(explorerController.rootObjectNodes).thenReturn(
+        ValueNotifier(
+          [
+            VMServiceObjectNode(
+              debuggerController.explorerController,
+              'package:test',
+              null,
+            ),
+          ],
+        ),
+      );
       when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
-      // Libraries view is shown
-      when(debuggerController.librariesVisible).thenReturn(ValueNotifier(true));
+      // File Explorer view is shown
+      when(debuggerController.fileExplorerVisible)
+          .thenReturn(ValueNotifier(true));
       await pumpDebuggerScreen(tester, debuggerController);
-      // One for the button and one for the title of the Libraries view.
-      expect(find.text('Libraries'), findsNWidgets(2));
+      await pumpDebuggerScreen(tester, debuggerController);
+      // One for the button and one for the title of the File Explorer view.
+      expect(find.text('File Explorer'), findsNWidgets(2));
 
       // test for items in the libraries tree
       expect(find.text(scripts.first.uri.split('/').first), findsOneWidget);
