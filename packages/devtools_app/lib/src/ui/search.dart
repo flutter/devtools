@@ -6,6 +6,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -169,18 +170,28 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
 
     final autoCompleteHighlightedTextStyle = Theme.of(context)
         .regularTextStyle
-        .copyWith(color: colorScheme.autoCompleteHighlightedTextColor);
+        .copyWith(
+            color: colorScheme.autoCompleteHighlightedTextColor,
+            fontWeight: FontWeight.bold);
 
     final tileContents = searchAutoComplete.value == null
-        ? <Text>[]
+        ? <TextSpan>[]
         : searchAutoComplete.value
-            .map((match) => maybeHighlightMatchText(
-                match, autoCompleteTextStyle, autoCompleteHighlightedTextStyle))
+            .map((match) => _maybeHighlightMatchText(
+                  match,
+                  autoCompleteTextStyle,
+                  autoCompleteHighlightedTextStyle,
+                ))
             .toList();
 
     final tileEntryHeight = tileContents.isEmpty
         ? 0.0
-        : calculateTextSpanHeight(tileContents.first.textSpan) + denseSpacing;
+        : calculateTextSpanHeight(tileContents.first) + denseSpacing;
+
+    final tileEntryMaxWidth = tileContents.isEmpty
+        ? 0.0
+        : calculateTextSpanWidth(findLongestTextSpan(tileContents)) +
+            denseSpacing;
 
     // Find the searchField and place overlay below bottom of TextField and
     // make overlay width of TextField. This is also we decide the height of
@@ -207,13 +218,13 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     final autoCompleteTiles = <GestureDetector>[];
     final count = min(searchAutoComplete.value.length, totalTiles);
     for (var index = 0; index < count; index++) {
-      final text = tileContents[index];
+      final textSpan = tileContents[index];
       autoCompleteTiles.add(
         GestureDetector(
           onTap: () {
             controller.selectTheSearch = true;
-            controller.search = text.toString();
-            autoComplete.onTap(text.toString());
+            controller.search = textSpan.text;
+            autoComplete.onTap(textSpan.text);
           },
           child: Container(
             color: controller.currentDefaultIndex == index
@@ -223,7 +234,10 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
               padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: text,
+                child: Text.rich(
+                  textSpan,
+                  maxLines: 1,
+                ),
               ),
             ),
           ),
@@ -242,7 +256,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     return Positioned(
       key: searchAutoCompleteKey,
       width: isMaxWidth
-          ? box.size.width
+          ? max(tileEntryMaxWidth, box.size.width)
           : AutoCompleteSearchControllerMixin.minPopupWidth,
       height: bottom ? null : count * tileEntryHeight,
       child: CompositedTransformFollower(
@@ -263,7 +277,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     );
   }
 
-  Text maybeHighlightMatchText(
+  TextSpan _maybeHighlightMatchText(
     AutoCompleteMatch match,
     TextStyle regularTextStyle,
     TextStyle highlightedTextStyle,
@@ -272,12 +286,10 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     final highlightedSegments = match.highlightedSegments;
 
     if (highlightedSegments == null || highlightedSegments.isEmpty) {
-      return Text.rich(
-          TextSpan(
-            text: text,
-            style: regularTextStyle,
-          ),
-          maxLines: 1);
+      return TextSpan(
+        text: text,
+        style: regularTextStyle,
+      );
     }
 
     final spans = <TextSpan>[];
@@ -307,13 +319,10 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
       ));
     }
 
-    return Text.rich(
-      TextSpan(
-        text: spans.first.text,
-        style: spans.first.style,
-        children: spans.sublist(1),
-      ),
-      maxLines: 1,
+    return TextSpan(
+      text: spans.first.text,
+      style: spans.first.style,
+      children: spans.sublist(1),
     );
   }
 }

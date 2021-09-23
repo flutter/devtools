@@ -134,6 +134,19 @@ double calculateTextSpanHeight(TextSpan span) {
   return textPainter.height;
 }
 
+TextSpan findLongestTextSpan(List<TextSpan> spans) {
+  int longestLength = 0;
+  TextSpan longestSpan;
+  for (final span in spans) {
+    final int currentLength = span.toPlainText().length;
+    if (currentLength > longestLength) {
+      longestLength = currentLength;
+      longestSpan = span;
+    }
+  }
+  return longestSpan;
+}
+
 /// Scrollbar that is offset by the amount specified by an [offsetController].
 ///
 /// This makes it possible to create a [ListView] with both vertical and
