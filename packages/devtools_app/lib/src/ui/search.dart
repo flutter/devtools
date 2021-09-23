@@ -295,9 +295,9 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     int previousEndIndex = 0;
 
     for (final segment in matchedSegments) {
-      if (previousEndIndex < segment.start) {
+      if (previousEndIndex < segment.begin) {
         // Add the unhighlighted segment before the current highlighted segment:
-        final segmentBefore = text.substring(previousEndIndex, segment.start);
+        final segmentBefore = text.substring(previousEndIndex, segment.begin);
         spans.add(
           TextSpan(
             text: segmentBefore,
@@ -306,7 +306,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         );
       }
       // Add the current highlighted segment:
-      final highlightedSegment = text.substring(segment.start, segment.end);
+      final highlightedSegment = text.substring(segment.begin, segment.end);
       spans.add(
         TextSpan(
           text: highlightedSegment,
@@ -969,16 +969,9 @@ mixin TreeDataSearchStateMixin<T extends TreeNode<T>>
 class AutoCompleteController extends DisposableController
     with SearchControllerMixin, AutoCompleteSearchControllerMixin {}
 
-class AutoCompleteMatchSegment {
-  AutoCompleteMatchSegment(this.start, this.end);
-
-  final int start;
-  final int end;
-}
-
 class AutoCompleteMatch {
   AutoCompleteMatch(this.text, {this.matchedSegments});
 
   final String text;
-  final List<AutoCompleteMatchSegment> matchedSegments;
+  final List<Range> matchedSegments;
 }

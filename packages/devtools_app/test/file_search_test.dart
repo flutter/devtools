@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/debugger/file_search.dart';
 import 'package:devtools_app/src/ui/search.dart';
+import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -316,12 +317,12 @@ List<String> getAutoCompleteSegmentValues(List<AutoCompleteMatch> matches) {
       .toList();
 }
 
-String convertSegmentsToString(List<AutoCompleteMatchSegment> segments) {
+String convertSegmentsToString(List<Range> segments) {
   if (segments == null || segments.isEmpty) {
     return '[]';
   }
 
   final stringSegments =
-      segments.map((segment) => '${segment.start}-${segment.end}');
+      segments.map((segment) => '${segment.begin}-${segment.end}');
   return '[${stringSegments.join(', ')}]';
 }

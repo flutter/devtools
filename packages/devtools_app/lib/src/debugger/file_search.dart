@@ -132,11 +132,11 @@ class FileSearchFieldState extends State<FileSearchField>
       return AutoCompleteMatch(match);
     }
 
-    final autoCompleteResultSegments = <AutoCompleteMatchSegment>[];
+    final autoCompleteResultSegments = <Range>[];
     if (match.contains(query)) {
       final start = match.indexOf(query);
       final end = start + query.length;
-      autoCompleteResultSegments.add(AutoCompleteMatchSegment(start, end));
+      autoCompleteResultSegments.add(Range(start, end));
     } else {
       // For fuzzy-matches, only match on the file name:
       final fileName = match.split('/').last;
@@ -148,7 +148,7 @@ class FileSearchFieldState extends State<FileSearchField>
         if (match[matchIndex] == query[queryIndex]) {
           final start = matchIndex;
           final end = matchIndex + 1;
-          autoCompleteResultSegments.add(AutoCompleteMatchSegment(start, end));
+          autoCompleteResultSegments.add(Range(start, end));
           queryIndex++;
         }
       }
