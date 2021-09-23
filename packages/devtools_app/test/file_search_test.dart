@@ -301,7 +301,7 @@ void main() {
       );
 
       autoCompleteController.search = 'caterpie';
-      expect(autoCompleteController.searchAutoComplete.value, isNull);
+      expect(autoCompleteController.searchAutoComplete.value, equals([]));
     });
   });
 }
