@@ -169,11 +169,11 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         .regularTextStyle
         .copyWith(color: colorScheme.autoCompleteTextColor);
 
-    final autoCompleteHighlightedTextStyle = Theme.of(context)
-        .regularTextStyle
-        .copyWith(
-            color: colorScheme.autoCompleteHighlightedTextColor,
-            fontWeight: FontWeight.bold);
+    final autoCompleteHighlightedTextStyle =
+        Theme.of(context).regularTextStyle.copyWith(
+              color: searchColor,
+              fontWeight: FontWeight.bold,
+            );
 
     final tileContents = searchAutoComplete.value
         .map((match) => _maybeHighlightMatchText(
@@ -298,24 +298,32 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
       if (previousEndIndex < segment.start) {
         // Add the unhighlighted segment before the current highlighted segment:
         final segmentBefore = text.substring(previousEndIndex, segment.start);
-        spans.add(TextSpan(
-          text: segmentBefore,
-          style: regularTextStyle,
-        ));
+        spans.add(
+          TextSpan(
+            text: segmentBefore,
+            style: regularTextStyle,
+          ),
+        );
       }
       // Add the current highlighted segment:
       final highlightedSegment = text.substring(segment.start, segment.end);
-      spans
-          .add(TextSpan(text: highlightedSegment, style: highlightedTextStyle));
+      spans.add(
+        TextSpan(
+          text: highlightedSegment,
+          style: highlightedTextStyle,
+        ),
+      );
       previousEndIndex = segment.end;
     }
     if (previousEndIndex < text.length - 1) {
       // Add the last unhighlighted segment:
       final lastSegment = text.substring(previousEndIndex);
-      spans.add(TextSpan(
-        text: lastSegment,
-        style: regularTextStyle,
-      ));
+      spans.add(
+        TextSpan(
+          text: lastSegment,
+          style: regularTextStyle,
+        ),
+      );
     }
 
     return TextSpan(

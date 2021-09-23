@@ -317,7 +317,8 @@ class _CodeViewState extends State<CodeView>
                           child: LayoutBuilder(
                             builder: (context, constraints) {
                               final double fileWidth = calculateTextSpanWidth(
-                                  findLongestTextSpan(lines));
+                                findLongestTextSpan(lines),
+                              );
 
                               return Scrollbar(
                                 key: CodeView

@@ -316,9 +316,6 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get autoCompleteTextColor => isLight ? Colors.black : Colors.white;
 
-  Color get autoCompleteHighlightedTextColor =>
-      isLight ? Colors.teal[700] : Colors.limeAccent[100];
-
   // Title of the hover card.
   TextStyle get hoverTitleTextStyle => TextStyle(
         color: defaultForeground,
