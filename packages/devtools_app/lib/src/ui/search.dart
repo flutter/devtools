@@ -174,15 +174,13 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
             color: colorScheme.autoCompleteHighlightedTextColor,
             fontWeight: FontWeight.bold);
 
-    final tileContents = searchAutoComplete.value == null
-        ? <TextSpan>[]
-        : searchAutoComplete.value
-            .map((match) => _maybeHighlightMatchText(
-                  match,
-                  autoCompleteTextStyle,
-                  autoCompleteHighlightedTextStyle,
-                ))
-            .toList();
+    final tileContents = searchAutoComplete.value
+        .map((match) => _maybeHighlightMatchText(
+              match,
+              autoCompleteTextStyle,
+              autoCompleteHighlightedTextStyle,
+            ))
+        .toList();
 
     final tileEntryHeight = tileContents.isEmpty
         ? 0.0
@@ -283,9 +281,9 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     TextStyle highlightedTextStyle,
   ) {
     final text = match.text;
-    final highlightedSegments = match.highlightedSegments;
+    final matchedSegments = match.matchedSegments;
 
-    if (highlightedSegments == null || highlightedSegments.isEmpty) {
+    if (matchedSegments == null || matchedSegments.isEmpty) {
       return TextSpan(
         text: text,
         style: regularTextStyle,
@@ -295,7 +293,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     final spans = <TextSpan>[];
     int previousEndIndex = 0;
 
-    for (final segment in highlightedSegments) {
+    for (final segment in matchedSegments) {
       if (previousEndIndex < segment.start) {
         // Add the unhighlighted segment before the current highlighted segment:
         final segmentBefore = text.substring(previousEndIndex, segment.start);
@@ -970,8 +968,8 @@ class AutoCompleteMatchSegment {
 }
 
 class AutoCompleteMatch {
-  AutoCompleteMatch(this.text, {this.highlightedSegments});
+  AutoCompleteMatch(this.text, {this.matchedSegments});
 
   final String text;
-  final List<AutoCompleteMatchSegment> highlightedSegments;
+  final List<AutoCompleteMatchSegment> matchedSegments;
 }

@@ -89,9 +89,7 @@ class FileSearchFieldState extends State<FileSearchField>
 
     final matches = _findMatches(currentQuery, scripts);
     if (matches.isEmpty) {
-      autoCompleteController.searchAutoComplete.value = [
-        AutoCompleteMatch('No files found.')
-      ];
+      autoCompleteController.searchAutoComplete.value = [];
     } else {
       final topMatches = _takeTopMatches(matches);
       topMatches.forEach(_addScriptRefToCache);
@@ -130,8 +128,11 @@ class FileSearchFieldState extends State<FileSearchField>
   }
 
   AutoCompleteMatch _createAutoCompleteMatch(String match, String query) {
-    final autoCompleteResultSegments = <AutoCompleteMatchSegment>[];
+    if (query.isEmpty) {
+      return AutoCompleteMatch(match);
+    }
 
+    final autoCompleteResultSegments = <AutoCompleteMatchSegment>[];
     if (match.contains(query)) {
       final start = match.indexOf(query);
       final end = start + query.length;
@@ -153,7 +154,7 @@ class FileSearchFieldState extends State<FileSearchField>
     }
 
     return AutoCompleteMatch(match,
-        highlightedSegments: autoCompleteResultSegments);
+        matchedSegments: autoCompleteResultSegments);
   }
 
   List<ScriptRef> _findMatches(
