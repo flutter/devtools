@@ -162,6 +162,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     final bottom = autoComplete.isBottom;
     final isMaxWidth = autoComplete.isMaxWidth;
     final searchAutoComplete = controller.searchAutoComplete;
+
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     final autoCompleteTextStyle = Theme.of(context)
