@@ -89,12 +89,14 @@ class FileSearchFieldState extends State<FileSearchField>
 
     final matches = _findMatches(currentQuery, scripts);
     if (matches.isEmpty) {
-      autoCompleteController.searchAutoComplete.value = ['No files found.'];
+      autoCompleteController.searchAutoComplete.value = [];
     } else {
       final topMatches = _takeTopMatches(matches);
       topMatches.forEach(_addScriptRefToCache);
-      autoCompleteController.searchAutoComplete.value =
-          topMatches.map((scriptRef) => scriptRef.uri).toList();
+      autoCompleteController.searchAutoComplete.value = topMatches
+          .map((scriptRef) =>
+              _createAutoCompleteMatch(scriptRef.uri, currentQuery))
+          .toList();
     }
 
     _query = currentQuery;
@@ -123,6 +125,39 @@ class FileSearchFieldState extends State<FileSearchField>
     autoCompleteController.closeAutoCompleteOverlay();
     widget.debuggerController.toggleFileOpenerVisibility(false);
     _scriptsCache.clear();
+  }
+
+  AutoCompleteMatch _createAutoCompleteMatch(String match, String query) {
+    if (query.isEmpty) {
+      return AutoCompleteMatch(match);
+    }
+
+    final autoCompleteResultSegments = <Range>[];
+    if (match.contains(query)) {
+      final start = match.indexOf(query);
+      final end = start + query.length;
+      autoCompleteResultSegments.add(Range(start, end));
+    } else {
+      // For fuzzy-matches, only match on the file name:
+      final fileName = match.split('/').last;
+      var queryIndex = 0;
+      for (int matchIndex = match.indexOf(fileName);
+          matchIndex < match.length;
+          matchIndex++) {
+        if (queryIndex == query.length) break;
+        if (match[matchIndex] == query[queryIndex]) {
+          final start = matchIndex;
+          final end = matchIndex + 1;
+          autoCompleteResultSegments.add(Range(start, end));
+          queryIndex++;
+        }
+      }
+    }
+
+    return AutoCompleteMatch(
+      match,
+      matchedSegments: autoCompleteResultSegments,
+    );
   }
 
   List<ScriptRef> _findMatches(

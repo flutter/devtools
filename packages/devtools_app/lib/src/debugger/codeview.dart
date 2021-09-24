@@ -339,19 +339,9 @@ class _CodeViewState extends State<CodeView>
                         Expanded(
                           child: LayoutBuilder(
                             builder: (context, constraints) {
-                              // Find the longest line to measure file width:
-                              int longestLength = 0;
-                              TextSpan longestLine;
-                              for (var line in lines) {
-                                final int currentLength =
-                                    line.toPlainText().length;
-                                if (currentLength > longestLength) {
-                                  longestLength = currentLength;
-                                  longestLine = line;
-                                }
-                              }
-                              final double fileWidth =
-                                  calculateTextSpanWidth(longestLine);
+                              final double fileWidth = calculateTextSpanWidth(
+                                findLongestTextSpan(lines),
+                              );
 
                               return Scrollbar(
                                 key: CodeView

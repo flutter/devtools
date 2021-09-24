@@ -201,6 +201,36 @@ void main() {
     });
   });
 
+  group('findLongestTextSpan', () {
+    test('returns longest span', () {
+      const shortest = TextSpan(text: 'this is a short line of text');
+      const longer = TextSpan(text: 'this is a longer line of text');
+      const longest = TextSpan(text: 'this is an even longer line of text');
+
+      expect(
+          findLongestTextSpan([
+            shortest,
+            longer,
+            longest,
+          ]),
+          equals(longest));
+    });
+
+    test('returns first longest if multiple spans have the same length', () {
+      const shortest = TextSpan(text: 'this is a short line of text');
+      const longest = TextSpan(text: 'this is a longer line of text');
+      const alsoLongest = TextSpan(text: 'this is a ------ line of text');
+
+      expect(
+          findLongestTextSpan([
+            shortest,
+            longest,
+            alsoLongest,
+          ]),
+          equals(longest));
+    });
+  });
+
   testWidgetsWithWindowSize('OffsetScrollbar goldens', const Size(300, 300),
       (WidgetTester tester) async {
     const root = Key('root');
