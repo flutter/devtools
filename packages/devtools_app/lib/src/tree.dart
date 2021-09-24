@@ -129,8 +129,12 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
 }
 
 class TreeViewItem<T extends TreeNode<T>> extends StatefulWidget {
-  const TreeViewItem(this.data,
-      {this.buildDisplay, this.onItemExpanded, this.onItemSelected});
+  const TreeViewItem(
+    this.data, {
+    this.buildDisplay,
+    this.onItemExpanded,
+    this.onItemSelected,
+  });
 
   final T data;
 
@@ -157,7 +161,7 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
           children: [
             widget.data.isExpandable
                 ? InkWell(
-                    onTap: _onExpanded ?? _onSelected,
+                    onTap: _onExpanded,
                     child: RotationTransition(
                       turns: expandArrowAnimation,
                       child: Icon(
@@ -188,15 +192,12 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
   }
 
   void _onExpanded() {
-    if (widget.onItemExpanded == null) {
-      return;
-    }
-    widget.onItemExpanded(widget.data);
+    widget?.onItemExpanded(widget.data);
     setExpanded(widget.data.isExpanded);
   }
 
   void _onSelected() {
-    widget.onItemSelected(widget.data);
+    widget?.onItemSelected(widget.data);
     setExpanded(widget.data.isExpanded);
   }
 }
@@ -214,9 +215,6 @@ mixin TreeMixin<T extends TreeNode<T>> {
     for (T root in roots) {
       traverse(root, (n) {
         if (onTraverse != null) onTraverse(n);
-        if (!n.shouldShow()) {
-          return false;
-        }
         flatList.add(n);
         return n.isExpanded;
       });

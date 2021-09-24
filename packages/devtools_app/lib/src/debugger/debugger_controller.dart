@@ -20,6 +20,7 @@ import '../ui/search.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
 import 'debugger_model.dart';
+import 'program_explorer_controller.dart';
 import 'syntax_highlighter.dart';
 
 // TODO(devoncarew): Add some delayed resume value notifiers (to be used to
@@ -121,6 +122,8 @@ class DebuggerController extends DisposableController
   Map<LibraryRef, Future<Set<String>>>
       libraryMemberAndImportsAutocompleteCache = {};
 
+  final programExplorerController = ProgramExplorerController();
+
   final ScriptCache _scriptCache = ScriptCache();
 
   final ScriptsHistory scriptsHistory = ScriptsHistory();
@@ -181,7 +184,7 @@ class DebuggerController extends DisposableController
     ScriptLocation scriptLocation, {
     bool centerLocation = true,
   }) {
-    _centerScrollLocation = centerLocation;
+    _shouldCenterScrollLocation = centerLocation;
     _currentScriptRef.value = scriptLocation?.scriptRef;
 
     _parseCurrentScript();
@@ -190,6 +193,8 @@ class DebuggerController extends DisposableController
     // set to null to ensure that happens.
     _scriptLocation.value = null;
     _scriptLocation.value = scriptLocation;
+
+    programExplorerController.selectScriptNode(scriptLocation.scriptRef);
   }
 
   Future<Script> getScriptForRef(ScriptRef ref) async {
@@ -290,8 +295,8 @@ class DebuggerController extends DisposableController
   /// Return the sorted list of ScriptRefs active in the current isolate.
   ValueListenable<List<ScriptRef>> get sortedScripts => _sortedScripts;
 
-  bool get centerScrollLocation => _centerScrollLocation;
-  bool _centerScrollLocation = true;
+  bool get shouldCenterScrollLocation => _shouldCenterScrollLocation;
+  bool _shouldCenterScrollLocation = true;
 
   final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
 

@@ -100,13 +100,6 @@ class _CodeViewState extends State<CodeView>
       verticalController.jumpTo(scrollPosition);
     }
 
-    if (widget.initialPosition != null) {
-      final location = widget.initialPosition.location;
-      final lineIndex = location.line - 1;
-      final scrollPosition = lineIndex * CodeView.rowHeight;
-      verticalController.jumpTo(scrollPosition);
-    }
-
     addAutoDisposeListener(
       widget.controller.scriptLocation,
       _handleScriptLocationChanged,
@@ -142,7 +135,8 @@ class _CodeViewState extends State<CodeView>
   }
 
   void _updateScrollPosition({bool animate = true}) {
-    if (widget.controller.scriptLocation.value?.scriptRef?.uri != scriptRef?.uri) {
+    if (widget.controller.scriptLocation.value?.scriptRef?.uri !=
+        scriptRef?.uri) {
       return;
     }
 
@@ -173,10 +167,9 @@ class _CodeViewState extends State<CodeView>
     // TODO(devoncarew): Adjust this so we don't scroll if we're already in the
     // middle third of the screen.
     if (parsedScript.lineCount * CodeView.rowHeight > extent) {
-      // Scroll to the middle of the screen.
       final lineIndex = location.line - 1;
       final scrollPosition = lineIndex * CodeView.rowHeight -
-          (widget.controller.centerScrollLocation
+          (widget.controller.shouldCenterScrollLocation
               ? ((extent - CodeView.rowHeight) / 2)
               : 0);
       if (animate) {
@@ -296,7 +289,6 @@ class _CodeViewState extends State<CodeView>
           itemBuilder: _buildScriptMenuFromHistory,
           onSelected: (scriptRef) {
             widget.controller.showScriptLocation(ScriptLocation(scriptRef));
-            programExplorerController.selectScriptNode(scriptRef);
           },
           enabled: widget.controller.scriptsHistory.hasScripts,
         ),

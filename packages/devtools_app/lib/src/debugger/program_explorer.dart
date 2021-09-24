@@ -7,9 +7,9 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../common_widgets.dart';
 import '../flex_split_column.dart';
-import '../globals.dart';
 import '../theme.dart';
 import '../tree.dart';
+import '../utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
@@ -18,6 +18,8 @@ import 'program_explorer_model.dart';
 const containerIcon = Icons.folder;
 const libraryIcon = Icons.insert_drive_file;
 const listItemHeight = 40.0;
+
+double get _programExplorerRowHeight => scaleByFontFactor(22.0);
 
 class _ProgramExplorerRow extends StatelessWidget {
   const _ProgramExplorerRow({
@@ -35,8 +37,41 @@ class _ProgramExplorerRow extends StatelessWidget {
     final theme = Theme.of(context);
 
     String text = node.name;
-    String toolTip;
+    final toolTip = _tooltipForNode();
 
+    if (node.object is ClassRef ||
+        node.object is Func ||
+        node.object is Field) {
+      text = toolTip;
+    }
+
+    return DevToolsTooltip(
+      tooltip: toolTip ?? node.name,
+      textStyle: theme.toolTipFixedFontStyle,
+      child: InkWell(
+        onTap: onTap,
+        child: Row(
+          children: [
+            ProgramStructureIcon(
+              object: node.object,
+            ),
+            const SizedBox(width: densePadding),
+            Flexible(
+              child: Text(
+                text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.fixedFontStyle,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _tooltipForNode() {
+    String toolTip;
     if (node.object is ClassRef) {
       final clazz = node.object as ClassRef;
       toolTip = '${clazz.name}';
@@ -44,7 +79,6 @@ class _ProgramExplorerRow extends StatelessWidget {
         toolTip +=
             '<' + clazz.typeParameters.map((e) => e.name).join(', ') + '>';
       }
-      text = toolTip;
     } else if (node.object is Func) {
       final func = node.object as Func;
       final isInstanceMethod = func.owner is ClassRef;
@@ -54,43 +88,14 @@ class _ProgramExplorerRow extends StatelessWidget {
         isInstanceMethod: isInstanceMethod,
       );
       toolTip = '${func.name}$subtext';
-      text = toolTip;
     } else if (node.object is Field) {
       final field = node.object as Field;
       final subtext = _buildFieldTypeText(field);
       toolTip = '$subtext ${field.name}';
-      text = toolTip;
     } else if (node.script != null) {
       toolTip = node.script.uri;
     }
-    return Tooltip(
-      waitDuration: tooltipWait,
-      preferBelow: false,
-      message: toolTip ?? node.name,
-      textStyle: theme.toolTipFixedFontStyle,
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          onTap: onTap,
-          child: Row(
-            children: [
-              ProgramStructureIcon(
-                object: node.object,
-              ),
-              const SizedBox(width: densePadding),
-              Flexible(
-                child: Text(
-                  text,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.fixedFontStyle,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    return toolTip;
   }
 
   /// Builds a string representation of a field declaration.
@@ -225,8 +230,6 @@ class ProgramStructureIcon extends StatelessWidget {
       height: defaultIconSize,
       width: defaultIconSize,
       child: Container(
-        width: defaultIconSize,
-        height: defaultIconSize,
         decoration: icon == null
             ? BoxDecoration(
                 color: color,
@@ -266,6 +269,82 @@ class ProgramStructureIcon extends StatelessWidget {
   }
 }
 
+class _FilePicker extends StatelessWidget {
+  const _FilePicker({
+    @required this.controller,
+    @required this.onItemSelected,
+    @required this.onItemExpanded,
+  });
+
+  final ProgramExplorerController controller;
+  final Function(VMServiceObjectNode) onItemSelected;
+  final Function(VMServiceObjectNode) onItemExpanded;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<List<VMServiceObjectNode>>(
+      valueListenable: controller.rootObjectNodes,
+      builder: (context, nodes, _) {
+        return TreeView<VMServiceObjectNode>(
+          itemExtent: _programExplorerRowHeight,
+          dataRoots: nodes,
+          onItemSelected: onItemSelected,
+          onItemExpanded: onItemExpanded,
+          dataDisplayProvider: (node, onTap) {
+            return _ProgramExplorerRow(
+              controller: controller,
+              node: node,
+              onTap: () {
+                controller.selectNode(node);
+                onTap();
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _ProgramOutlineView extends StatelessWidget {
+  const _ProgramOutlineView({
+    @required this.controller,
+    @required this.onItemSelected,
+    @required this.onItemExpanded,
+  });
+
+  final ProgramExplorerController controller;
+  final Function(VMServiceObjectNode) onItemSelected;
+  final Function(VMServiceObjectNode) onItemExpanded;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<List<VMServiceObjectNode>>(
+      valueListenable: controller.outlineNodes,
+      builder: (context, nodes, _) {
+        if (nodes == null || nodes.isEmpty) {
+          return const Center(
+            child: Text('Nothing to inspect'),
+          );
+        }
+        return TreeView<VMServiceObjectNode>(
+          itemExtent: _programExplorerRowHeight,
+          dataRoots: nodes,
+          onItemSelected: onItemSelected,
+          onItemExpanded: onItemExpanded,
+          dataDisplayProvider: (node, onTap) {
+            return _ProgramExplorerRow(
+              controller: controller,
+              node: node,
+              onTap: onTap,
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
 /// Picker that displays the program's structure, allowing for navigation and
 /// filtering.
 class ProgramExplorer extends StatelessWidget {
@@ -273,9 +352,8 @@ class ProgramExplorer extends StatelessWidget {
     Key key,
     @required this.debugController,
     @required this.onSelected,
-  }) : controller = programExplorerController, super(key: key) {
-    controller.selectScriptNode(debugController.currentScriptRef.value);
-  }
+  })  : controller = debugController.programExplorerController,
+        super(key: key);
 
   final ProgramExplorerController controller;
   final DebuggerController debugController;
@@ -304,57 +382,21 @@ class ProgramExplorer extends StatelessWidget {
                   AreaPaneHeader(title: Text('Outline')),
                 ],
                 children: [
-                  ValueListenableBuilder<List<VMServiceObjectNode>>(
-                    valueListenable: controller.rootObjectNodes,
-                    builder: (context, nodes, _) {
-                      return TreeView<VMServiceObjectNode>(
-                        itemExtent: 25,
-                        dataRoots: nodes,
-                        onItemSelected: _onItemSelected,
-                        onItemExpanded: _onItemExpanded,
-                        dataDisplayProvider: (node, onTap) {
-                          return _ProgramExplorerRow(
-                            controller: controller,
-                            node: node,
-                            onTap: () {
-                              controller.selectNode(node);
-                              onTap();
-                            },
-                          );
-                        },
-                      );
-                    },
+                  _FilePicker(
+                    controller: controller,
+                    onItemExpanded: onItemExpanded,
+                    onItemSelected: onItemSelected,
                   ),
-                  // TODO(bkonyi): add outline view.
-                  ValueListenableBuilder<List<VMServiceObjectNode>>(
-                    valueListenable: controller.outlineNodes,
-                    builder: (context, nodes, _) {
-                      if (nodes.isEmpty) {
-                        return const Center(
-                          child: Text('Nothing to inspect'),
-                        );
-                      }
-                      return TreeView<VMServiceObjectNode>(
-                        itemExtent: 28,
-                        dataRoots: nodes,
-                        onItemSelected: _onItemSelected,
-                        onItemExpanded: _onItemExpanded,
-                        dataDisplayProvider: (node, onTap) {
-                          return _ProgramExplorerRow(
-                            controller: controller,
-                            node: node,
-                            onTap: onTap,
-                          );
-                        },
-                      );
-                    },
+                  _ProgramOutlineView(
+                    controller: controller,
+                    onItemExpanded: onItemExpanded,
+                    onItemSelected: onItemSelected,
                   ),
                 ],
               );
             },
           );
         }
-
         return OutlineDecoration(
           child: body,
         );
@@ -362,9 +404,8 @@ class ProgramExplorer extends StatelessWidget {
     );
   }
 
-  void _onItemSelected(VMServiceObjectNode node) async {
+  void onItemSelected(VMServiceObjectNode node) async {
     if (!node.isSelectable) {
-
       node.toggleExpansion();
       return;
     }
@@ -399,7 +440,7 @@ class ProgramExplorer extends StatelessWidget {
     );
   }
 
-  void _onItemExpanded(VMServiceObjectNode node) async {
+  void onItemExpanded(VMServiceObjectNode node) async {
     if (node.object != null && node.object is! Obj) {
       await controller.populateNode(node);
     }

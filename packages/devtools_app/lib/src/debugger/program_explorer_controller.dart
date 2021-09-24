@@ -5,11 +5,11 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose.dart';
 import '../globals.dart';
+import '../utils.dart';
 import 'program_explorer_model.dart';
 
 class ProgramExplorerController extends DisposableController
@@ -17,23 +17,24 @@ class ProgramExplorerController extends DisposableController
   ProgramExplorerController() {
     addAutoDisposeListener(
       serviceManager.isolateManager.selectedIsolate,
-      () => refresh(),
+      refresh,
     );
   }
 
   /// A list of objects containing the contents of each library.
   final _programStructure = <VMServiceLibraryContents>[];
 
-  /// The currently selected node.
+  /// The outline view nodes for the currently selected library.
   ValueListenable<List<VMServiceObjectNode>> get outlineNodes => _outlineNodes;
-  final _outlineNodes = ValueNotifier<List<VMServiceObjectNode>>([]);
+  final _outlineNodes = ListValueNotifier<VMServiceObjectNode>([]);
 
+  /// The currently selected node.
   VMServiceObjectNode _selected;
 
   /// The processed roots of the tree.
   ValueListenable<List<VMServiceObjectNode>> get rootObjectNodes =>
       _rootObjectNodes;
-  final _rootObjectNodes = ValueNotifier<List<VMServiceObjectNode>>([]);
+  final _rootObjectNodes = ListValueNotifier<VMServiceObjectNode>([]);
 
   /// Cache of object IDs to their containing library to allow for easier
   /// refreshing of library content, particularly for scripts.
@@ -42,8 +43,8 @@ class ProgramExplorerController extends DisposableController
   IsolateRef _isolate;
 
   /// Notifies that the controller has finished initializing.
-  ValueListenable<bool> get initialized => _initializationListenable;
-  final _initializationListenable = ValueNotifier<bool>(false);
+  ValueListenable<bool> get initialized => _initialized;
+  final _initialized = ValueNotifier<bool>(false);
   bool _initializing = false;
 
   /// Returns true if [function] is a getter or setter that was not explicitly
@@ -114,8 +115,8 @@ class ProgramExplorerController extends DisposableController
     if (initialScript != null) {
       _selectScriptNode(initialScript, nodes);
     }
-    _rootObjectNodes.value = nodes;
-    _initializationListenable.value = true;
+    _rootObjectNodes.addAll(nodes);
+    _initialized.value = true;
   }
 
   void selectScriptNode(ScriptRef script) {
@@ -123,9 +124,7 @@ class ProgramExplorerController extends DisposableController
       return;
     }
     _selectScriptNode(script, _rootObjectNodes.value);
-    // Force a rebuild since selecting the node won't do that on its own.
-    _rootObjectNodes.value =
-        List<VMServiceObjectNode>.from(_rootObjectNodes.value);
+    _rootObjectNodes.notifyListeners();
   }
 
   void _selectScriptNode(
@@ -148,8 +147,8 @@ class ProgramExplorerController extends DisposableController
   Future<void> refresh() async {
     _objectIdToLibrary.clear();
     _selected = null;
-    _outlineNodes.value = null;
-    _initializationListenable.value = false;
+    _outlineNodes.clear();
+    _initialized.value = false;
     _initializing = false;
     _programStructure.clear();
     return await initialize();
@@ -162,10 +161,12 @@ class ProgramExplorerController extends DisposableController
       return;
     }
     if (_selected != node) {
-      node.isSelected = true;
-      _selected?.isSelected = false;
+      node.select();
+      _selected?.unselect();
       _selected = node;
-      _outlineNodes.value = await _selected.outline;
+      _outlineNodes
+        ..clear()
+        ..addAll(await _selected.outline);
     }
   }
 
@@ -174,14 +175,11 @@ class ProgramExplorerController extends DisposableController
   /// If `node.object` is already an instance of [Obj], this function
   /// immediately returns.
   Future<void> populateNode(VMServiceObjectNode node) async {
-    if (node.object == null) {
+    final object = node.object;
+    if (object == null || object is Obj) {
       return;
     }
     final id = node.object.id;
-    final object = node.object;
-    if (object is Obj) {
-      return;
-    }
     final service = serviceManager.service;
 
     // We don't know if the object ID is still valid. Re-request the library
@@ -232,20 +230,22 @@ class ProgramExplorerController extends DisposableController
           (e) => service.getObject(_isolate.id, e.id),
         ),
       );
-      clazz.fields.clear();
-      clazz.fields.addAll(fields.cast<FieldRef>());
+      clazz.fields
+        ..clear()
+        ..addAll(fields.cast<FieldRef>());
 
       final functions = await Future.wait(
         clazz.functions.map(
           (e) => service.getObject(_isolate.id, e.id).then((e) => e as Func),
         ),
       );
-      clazz.functions.clear();
-      clazz.functions.addAll(
-        functions
-            .where((e) => !_isSyntheticAccessor(e, clazz.fields))
-            .cast<FuncRef>(),
-      );
+      clazz.functions
+        ..clear()
+        ..addAll(
+          functions
+              .where((e) => !_isSyntheticAccessor(e, clazz.fields))
+              .cast<FuncRef>(),
+        );
     } else if (updatedObj is Field) {
       final i = library.fields.indexWhere(
         (f) => f.name == updatedObj.name,

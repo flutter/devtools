@@ -21,17 +21,13 @@ import 'support/wrappers.dart';
 
 void main() {
   FakeServiceManager fakeServiceManager;
-  MockProgramExplorerController mockProgramExplorerController;
 
   setUp(() {
     fakeServiceManager = FakeServiceManager();
     when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
     when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
 
-    mockProgramExplorerController = MockProgramExplorerController.withDefaults();
-
     setGlobal(ServiceConnectionManager, fakeServiceManager);
-    setGlobal(ProgramExplorerController, mockProgramExplorerController);
     mockIsFlutterApp(serviceManager.connectedApp);
   });
 
@@ -45,7 +41,7 @@ void main() {
           onNodeAdded: (_, __) {},
           onClientActiveChange: (_) {},
         );
-      final debuggerController = DebuggerController();
+      final debuggerController = TestDebuggerController();
       await tester.pumpWidget(wrap(InspectorTree(
         controller: controller,
         debuggerController: debuggerController,
@@ -84,7 +80,7 @@ void main() {
       final treeController = inspectorTreeControllerFromNode(diagnosticNode);
       await tester.pumpWidget(wrap(InspectorTree(
         controller: treeController,
-        debuggerController: DebuggerController(),
+        debuggerController: TestDebuggerController(),
       )));
 
       expect(find.richText('Text: "Content"'), findsOneWidget);
@@ -106,7 +102,7 @@ void main() {
       final treeController = inspectorTreeControllerFromNode(diagnosticNode);
       await tester.pumpWidget(wrap(InspectorTree(
         controller: treeController,
-        debuggerController: DebuggerController(),
+        debuggerController: TestDebuggerController(),
       )));
 
       expect(find.richText('Text: "Rich text"'), findsOneWidget);
@@ -124,7 +120,7 @@ void main() {
       await tester.pumpWidget(
         wrap(InspectorTree(
           controller: treeController,
-          debuggerController: DebuggerController(),
+          debuggerController: TestDebuggerController(),
         )),
       );
 

@@ -103,8 +103,7 @@ class SourcePosition {
   });
 
   factory SourcePosition.calculatePosition(Script script, int tokenPos) {
-    final List<List<int>> table = script.tokenPosTable;
-    if (table == null) {
+    if (script.tokenPosTable == null) {
       return null;
     }
 
@@ -531,7 +530,9 @@ List<Variable> _createVariablesForAssociations(
       isolateRef: isolateRef,
     );
     variables.add(
-      Variable.text('[Entry $i]')..addChild(key)..addChild(value),
+      Variable.text('[Entry $i]')
+        ..addChild(key)
+        ..addChild(value),
     );
   }
   return variables;

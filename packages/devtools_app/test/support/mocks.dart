@@ -632,6 +632,16 @@ class MockPerformanceController extends Mock implements PerformanceController {}
 class MockProfilerScreenController extends Mock
     implements ProfilerScreenController {}
 
+class TestDebuggerController extends DebuggerController {
+  TestDebuggerController({bool initialSwitchToIsolate = true})
+      : super(initialSwitchToIsolate: initialSwitchToIsolate);
+
+  @override
+  ProgramExplorerController get programExplorerController =>
+      _explorerController;
+  final _explorerController = MockProgramExplorerController.withDefaults();
+}
+
 class MockDebuggerController extends Mock implements DebuggerController {
   MockDebuggerController();
 
@@ -661,6 +671,10 @@ class MockDebuggerController extends Mock implements DebuggerController {
         .thenReturn(ValueNotifier<ParsedScript>(null));
     return debuggerController;
   }
+
+  @override
+  final programExplorerController =
+      MockProgramExplorerController.withDefaults();
 }
 
 class MockProgramExplorerController extends Mock

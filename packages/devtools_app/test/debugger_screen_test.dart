@@ -28,12 +28,8 @@ void main() {
   DebuggerScreen screen;
   FakeServiceManager fakeServiceManager;
   MockDebuggerController debuggerController;
-  MockProgramExplorerController mockProgramExplorerController;
   fakeServiceManager = FakeServiceManager();
-  when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
-  mockProgramExplorerController = MockProgramExplorerController.withDefaults();
   setGlobal(ServiceConnectionManager, fakeServiceManager);
-  setGlobal(ProgramExplorerController, mockProgramExplorerController);
 
   const windowSize = Size(4000.0, 4000.0);
   const smallWindowSize = Size(1000.0, 1000.0);
@@ -252,11 +248,12 @@ void main() {
       ];
 
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
-      when(mockProgramExplorerController.rootObjectNodes).thenReturn(
+      when(debuggerController.programExplorerController.rootObjectNodes)
+          .thenReturn(
         ValueNotifier(
           [
             VMServiceObjectNode(
-              mockProgramExplorerController,
+              debuggerController.programExplorerController,
               'package:test',
               null,
             ),
@@ -268,7 +265,6 @@ void main() {
       // File Explorer view is shown
       when(debuggerController.fileExplorerVisible)
           .thenReturn(ValueNotifier(true));
-      await pumpDebuggerScreen(tester, debuggerController);
       await pumpDebuggerScreen(tester, debuggerController);
       // One for the button and one for the title of the File Explorer view.
       expect(find.text('File Explorer'), findsNWidgets(2));

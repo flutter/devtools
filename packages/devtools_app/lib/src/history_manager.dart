@@ -53,7 +53,7 @@ class HistoryManager<T> {
   }
 
   /// Return the next value.
-  /// 
+  ///
   /// Returns null if there is no next value.
   T peekNext() => hasNext ? _history[_historyIndex + 1] : null;
 

@@ -28,10 +28,7 @@ void main() {
   setUp(() async {
     isAlive = Disposable();
     await env.setupEnvironment();
-    final mockProgramExplorerController =
-        MockProgramExplorerController.withDefaults();
-    setGlobal(ProgramExplorerController, mockProgramExplorerController);
-    debuggerController = DebuggerController();
+    debuggerController = TestDebuggerController();
     eval = EvalOnDartLibrary(
         'package:flutter_app/src/autocomplete.dart', serviceManager.service,
         disableBreakpoints: false);

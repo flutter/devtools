@@ -23,7 +23,8 @@ class VMServiceLibraryContents {
   final List<FieldRef> fields;
 
   static Future<VMServiceLibraryContents> getLibraryContents(
-      LibraryRef libRef) async {
+    LibraryRef libRef,
+  ) async {
     final isolateId = serviceManager.isolateManager.selectedIsolate.value.id;
     final service = serviceManager.service;
 
@@ -100,15 +101,11 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   ObjRef object;
   ScriptRef script;
 
-  @override
-  bool isSelected = false;
-
   /// This exists to allow for O(1) lookup of children when building the tree.
   final _childrenAsMap = <String, VMServiceObjectNode>{};
 
   @override
   bool shouldShow() {
-    // TODO: implement shouldShow
     return true;
   }
 
@@ -172,10 +169,10 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
         );
         if (clazz is Class) {
           for (final function in clazz.functions) {
-            clazzNode._getCreateChild(function.name, function);
+            clazzNode._lookupOrCreateChild(function.name, function);
           }
           for (final field in clazz.fields) {
-            clazzNode._getCreateChild(field.name, field);
+            clazzNode._lookupOrCreateChild(field.name, field);
           }
         }
         root.addChild(clazzNode);
@@ -265,7 +262,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       for (int i = 0; i < root.children.length; ++i) {
         if (root.children[i].name.startsWith(path)) {
           final rootLibNode = root.removeChildAtIndex(i);
-          root.addChildAtIndex(rootLibNode, 0);
+          root.addChild(rootLibNode, 0);
           break;
         }
       }
@@ -284,14 +281,14 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
     for (final part in parts) {
       // Directory nodes shouldn't be selectable unless they're a library node.
-      node = node._getCreateChild(
+      node = node._lookupOrCreateChild(
         part,
         null,
         isSelectable: false,
       );
     }
 
-    node = node._getCreateChild(name, script);
+    node = node._lookupOrCreateChild(name, script);
     if (!node.isSelectable) {
       node.isSelectable = true;
     }
@@ -305,7 +302,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     return node;
   }
 
-  VMServiceObjectNode _getCreateChild(
+  VMServiceObjectNode _lookupOrCreateChild(
     String name,
     ObjRef object, {
     bool isSelectable = true,
@@ -327,8 +324,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       object,
       isSelectable: isSelectable,
     );
-    child.parent = this;
-    children.add(child);
+    addChild(child);
     return child;
   }
 
@@ -473,20 +469,21 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       return a.name.compareTo(b.name);
     });
 
-    children.clear();
-    children.addAll([
-      ...userLibraryNodes,
-      ...userDirectoryNodes,
-      ...scriptNodes,
-      ...classNodes,
-      ...functionNodes,
-      ...variableNodes,
-      // We treat core libraries and packages as their own category as users
-      // are likely more interested in code within their own project.
-      // TODO(bkonyi): do we need custom google3 heuristics here?
-      ...packageAndCoreLibLibraryNodes,
-      ...packageAndCoreLibDirectoryNodes,
-    ]);
+    children
+      ..clear()
+      ..addAll([
+        ...userLibraryNodes,
+        ...userDirectoryNodes,
+        ...scriptNodes,
+        ...classNodes,
+        ...functionNodes,
+        ...variableNodes,
+        // We treat core libraries and packages as their own category as users
+        // are likely more interested in code within their own project.
+        // TODO(bkonyi): do we need custom google3 heuristics here?
+        ...packageAndCoreLibLibraryNodes,
+        ...packageAndCoreLibDirectoryNodes,
+      ]);
   }
 
   @override

@@ -1266,5 +1266,5 @@ extension VmServicePrivate on VmServiceWrapper {
           'targetId': targetId,
         },
         parser: InstanceRef.parse,
-      );      
+      );
 }

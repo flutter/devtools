@@ -43,7 +43,8 @@ abstract class TreeNode<T extends TreeNode<T>> {
 
   bool get isRoot => parent == null;
 
-  bool get isSelected => false;
+  bool get isSelected => _selected;
+  bool _selected = false;
 
   T get root {
     if (_root != null) {
@@ -80,16 +81,22 @@ abstract class TreeNode<T extends TreeNode<T>> {
     _isExpanded = true;
   }
 
+  void select() {
+    _selected = true;
+  }
+
+  void unselect() {
+    _selected = false;
+  }
+
   // TODO(jacobr): cache the value of whether the node should be shown
   // so that lookups on this class are O(1) invalidating the cache when nodes
   // up the tree are expanded and collapsed.
   /// Whether this node should be shown in the tree.
   ///
   /// When using this, consider caching the value. It is O([level]) to compute.
-  bool shouldShow() {
-    print('${parent == null}');
-    return parent == null || (parent.isExpanded && parent.shouldShow());
-  }
+  bool shouldShow() =>
+      parent == null || (parent.isExpanded && parent.shouldShow());
 
   void collapse() {
     _isExpanded = false;
@@ -102,18 +109,9 @@ abstract class TreeNode<T extends TreeNode<T>> {
   /// Override to handle pressing on a Leaf node.
   void leaf() {}
 
-  void addChild(T child) {
-    children.add(child);
-    child.parent = this;
-    child.index = children.length - 1;
-  }
-
-  void addChildAtIndex(T child, int index) {
+  void addChild(T child, [int index]) {
+    index ??= children.length;
     assert(index <= children.length);
-    if (index == children.length) {
-      addChild(child);
-      return;
-    }
     children.insert(index, child);
     child.parent = this;
     child.index = index;

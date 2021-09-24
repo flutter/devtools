@@ -420,7 +420,7 @@ extension ThemeDataExtension on ThemeData {
       fixedFontStyle.copyWith(color: unselectedWidgetColor);
 
   TextStyle get toolTipFixedFontStyle => fixedFontStyle.copyWith(
-        color: colorScheme.isLight ? Colors.white : Colors.black,
+        color: colorScheme.tooltipTextColor,
       );
 
   TextStyle get devToolsTitleStyle =>

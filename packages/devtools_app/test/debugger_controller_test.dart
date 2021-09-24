@@ -259,10 +259,9 @@ void main() {
     DebuggerController debuggerController;
 
     setUp(() {
-      final mockProgramExplorerController =
-          MockProgramExplorerController.withDefaults();
-      setGlobal(ProgramExplorerController, mockProgramExplorerController);
-      debuggerController = DebuggerController(initialSwitchToIsolate: false);
+      debuggerController = TestDebuggerController(
+        initialSwitchToIsolate: false,
+      );
       debuggerController.parsedScript.value = ParsedScript(
         script: testScript,
         highlighter: null,
