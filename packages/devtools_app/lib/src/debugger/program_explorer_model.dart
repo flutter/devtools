@@ -262,7 +262,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       for (int i = 0; i < root.children.length; ++i) {
         if (root.children[i].name.startsWith(path)) {
           final rootLibNode = root.removeChildAtIndex(i);
-          root.addChild(rootLibNode, 0);
+          root.addChild(rootLibNode, index: 0);
           break;
         }
       }

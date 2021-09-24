@@ -269,8 +269,8 @@ class ProgramStructureIcon extends StatelessWidget {
   }
 }
 
-class _FilePicker extends StatelessWidget {
-  const _FilePicker({
+class _FileExplorer extends StatelessWidget {
+  const _FileExplorer({
     @required this.controller,
     @required this.onItemSelected,
     @required this.onItemExpanded,
@@ -382,7 +382,7 @@ class ProgramExplorer extends StatelessWidget {
                   AreaPaneHeader(title: Text('Outline')),
                 ],
                 children: [
-                  _FilePicker(
+                  _FileExplorer(
                     controller: controller,
                     onItemExpanded: onItemExpanded,
                     onItemSelected: onItemSelected,

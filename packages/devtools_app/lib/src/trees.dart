@@ -109,7 +109,7 @@ abstract class TreeNode<T extends TreeNode<T>> {
   /// Override to handle pressing on a Leaf node.
   void leaf() {}
 
-  void addChild(T child, [int index]) {
+  void addChild(T child, {int index}) {
     index ??= children.length;
     assert(index <= children.length);
     children.insert(index, child);

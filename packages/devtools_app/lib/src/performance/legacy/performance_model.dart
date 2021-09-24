@@ -681,7 +681,7 @@ abstract class LegacyTimelineEvent extends TreeNode<LegacyTimelineEvent>
   }
 
   @override
-  void addChild(LegacyTimelineEvent child, [int index]) {
+  void addChild(LegacyTimelineEvent child, {int index}) {
     assert(index == null);
     void _putChildInTree(LegacyTimelineEvent root) {
       // [root] is a leaf. Add child here.
@@ -971,7 +971,7 @@ class LegacyAsyncTimelineEvent extends LegacyTimelineEvent {
   }
 
   @override
-  void addChild(LegacyTimelineEvent child, [int index]) {
+  void addChild(LegacyTimelineEvent child, {int index}) {
     assert(index == null);
     final LegacyAsyncTimelineEvent _child = child;
     // Short circuit if we are using an explicit parentId.
