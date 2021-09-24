@@ -276,6 +276,14 @@ class VmServiceWrapper implements VmService {
         CpuProfileData.traceEventsKey: [],
       };
 
+      String nameForStackFrame(_CpuProfileTimelineTree current) {
+        final className = current.className;
+        if (className != null) {
+          return '$className.${current.name}';
+        }
+        return current.name;
+      }
+
       void processStackFrame({
         @required _CpuProfileTimelineTree current,
         @required _CpuProfileTimelineTree parent,
@@ -288,7 +296,7 @@ class VmServiceWrapper implements VmService {
           final key = '$isolateId-$id';
           traceObject[CpuProfileData.stackFramesKey][key] = {
             CpuProfileData.categoryKey: 'Dart',
-            CpuProfileData.nameKey: current.name,
+            CpuProfileData.nameKey: nameForStackFrame(current),
             CpuProfileData.resolvedUrlKey: current.resolvedUrl,
             if (parent != null && parent.frameId != 0)
               CpuProfileData.parentIdKey: '$isolateId-${parent.frameId}',
@@ -1178,6 +1186,17 @@ class _CpuProfileTimelineTree {
   int frameId = kNoFrameId;
 
   String get name => samples.functions[index].function.name;
+
+  String get className {
+    final function = samples.functions[index].function;
+    if (function is FuncRef) {
+      final owner = function.owner;
+      if (owner is ClassRef) {
+        return owner.name;
+      }
+    }
+    return null;
+  }
 
   String get resolvedUrl => samples.functions[index].resolvedUrl;
 
