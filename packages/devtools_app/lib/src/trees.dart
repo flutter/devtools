@@ -115,7 +115,7 @@ abstract class TreeNode<T extends TreeNode<T>> {
     children.insert(index, child);
     child.parent = this;
     child.index = index;
-    for (int i = 0; i < children.length; ++i) {
+    for (int i = index + 1; i < children.length; ++i) {
       children[i].index++;
     }
   }

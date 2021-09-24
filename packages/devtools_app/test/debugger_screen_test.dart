@@ -28,6 +28,7 @@ void main() {
   FakeServiceManager fakeServiceManager;
   MockDebuggerController debuggerController;
   fakeServiceManager = FakeServiceManager();
+  when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
   setGlobal(ServiceConnectionManager, fakeServiceManager);
 
   const windowSize = Size(4000.0, 4000.0);
