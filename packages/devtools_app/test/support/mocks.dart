@@ -10,6 +10,7 @@ import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/connected_app.dart';
 import 'package:devtools_app/src/console_service.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
+import 'package:devtools_app/src/debugger/program_explorer_controller.dart';
 import 'package:devtools_app/src/debugger/span_parser.dart';
 import 'package:devtools_app/src/debugger/syntax_highlighter.dart';
 import 'package:devtools_app/src/error_badge_manager.dart';
@@ -631,6 +632,16 @@ class MockPerformanceController extends Mock implements PerformanceController {}
 class MockProfilerScreenController extends Mock
     implements ProfilerScreenController {}
 
+class TestDebuggerController extends DebuggerController {
+  TestDebuggerController({bool initialSwitchToIsolate = true})
+      : super(initialSwitchToIsolate: initialSwitchToIsolate);
+
+  @override
+  ProgramExplorerController get programExplorerController =>
+      _explorerController;
+  final _explorerController = MockProgramExplorerController.withDefaults();
+}
+
 class MockDebuggerController extends Mock implements DebuggerController {
   MockDebuggerController();
 
@@ -642,7 +653,8 @@ class MockDebuggerController extends Mock implements DebuggerController {
     when(debuggerController.isSystemIsolate).thenReturn(false);
     when(debuggerController.breakpointsWithLocation)
         .thenReturn(ValueNotifier([]));
-    when(debuggerController.librariesVisible).thenReturn(ValueNotifier(false));
+    when(debuggerController.fileExplorerVisible)
+        .thenReturn(ValueNotifier(false));
     when(debuggerController.currentScriptRef).thenReturn(ValueNotifier(null));
     when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
     when(debuggerController.selectedBreakpoint).thenReturn(ValueNotifier(null));
@@ -658,6 +670,24 @@ class MockDebuggerController extends Mock implements DebuggerController {
     when(debuggerController.currentParsedScript)
         .thenReturn(ValueNotifier<ParsedScript>(null));
     return debuggerController;
+  }
+
+  @override
+  final programExplorerController =
+      MockProgramExplorerController.withDefaults();
+}
+
+class MockProgramExplorerController extends Mock
+    implements ProgramExplorerController {
+  MockProgramExplorerController();
+
+  factory MockProgramExplorerController.withDefaults() {
+    final controller = MockProgramExplorerController();
+    when(controller.initialized).thenReturn(ValueNotifier(true));
+    when(controller.rootObjectNodes).thenReturn(ValueNotifier([]));
+    when(controller.outlineNodes).thenReturn(ValueNotifier([]));
+
+    return controller;
   }
 }
 

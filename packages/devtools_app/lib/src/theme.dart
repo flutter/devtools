@@ -421,6 +421,10 @@ extension ThemeDataExtension on ThemeData {
   TextStyle get subtleFixedFontStyle =>
       fixedFontStyle.copyWith(color: unselectedWidgetColor);
 
+  TextStyle get toolTipFixedFontStyle => fixedFontStyle.copyWith(
+        color: colorScheme.tooltipTextColor,
+      );
+
   TextStyle get devToolsTitleStyle =>
       textTheme.headline6.copyWith(color: Colors.white);
 
