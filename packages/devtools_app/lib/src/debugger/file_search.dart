@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose_mixin.dart';
-import '../globals.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';

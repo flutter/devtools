@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/debugger/evaluate.dart';
-import 'package:devtools_app/src/debugger/program_explorer_controller.dart';
 import 'package:devtools_app/src/eval_on_dart_library.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/ui/search.dart';

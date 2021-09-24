@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/debugger/program_explorer_controller.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
