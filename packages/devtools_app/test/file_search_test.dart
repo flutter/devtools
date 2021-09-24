@@ -5,7 +5,6 @@
 import 'package:devtools_app/src/debugger/file_search.dart';
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_app/src/utils.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';

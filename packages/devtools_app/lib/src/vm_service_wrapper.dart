@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:dds/vm_service_extensions.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'globals.dart';

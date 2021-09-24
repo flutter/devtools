@@ -12,9 +12,7 @@ import 'package:devtools_app/src/debugger/syntax_highlighter.dart';
 import 'package:devtools_app/src/routing.dart';
 import 'package:devtools_app/src/theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 
 import 'support/wrappers.dart';
 

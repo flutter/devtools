@@ -4,7 +4,6 @@
 
 import 'package:args/command_runner.dart';
 
-import '../devtools_server.dart';
 import 'server.dart';
 
 const commandDescription =

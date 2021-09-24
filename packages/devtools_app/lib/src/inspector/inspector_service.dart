@@ -10,10 +10,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose.dart';

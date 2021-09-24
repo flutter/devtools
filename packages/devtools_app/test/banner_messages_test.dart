@@ -9,7 +9,6 @@ import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/scaffold.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 

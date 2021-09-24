@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 
 import '../config_specific/logger/logger.dart';
 import '../trace_event.dart';

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
-import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
 
 import '../../eval_on_dart_library.dart';

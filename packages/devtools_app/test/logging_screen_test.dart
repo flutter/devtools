@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'dart:async';
-import 'dart:ui';
-
 import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
