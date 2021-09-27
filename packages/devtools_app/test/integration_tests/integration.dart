@@ -12,9 +12,9 @@ import 'package:pedantic/pedantic.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     show ConsoleAPIEvent, RemoteObject;
 
-import 'package:devtools_app/lib/test_helpers/chrome.dart';
-import 'package:devtools_app/lib/test_helpers/cli_test_driver.dart';
-import 'package:devtools_app/lib/test_helpers/utils.dart';
+import 'package:devtools_app/test_helpers/chrome.dart';
+import 'package:devtools_app/test_helpers/cli_test_driver.dart';
+import 'package:devtools_app/test_helpers/utils.dart';
 
 const bool verboseTesting = false;
 

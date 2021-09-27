@@ -19,9 +19,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart' as intl;
 
-import 'package:devtools_app/lib/test_helpers/file_utils.dart';
-import 'package:devtools_app/lib/test_helpers/flutter_test_driver.dart';
-import 'package:devtools_app/lib/test_helpers/flutter_test_environment.dart';
+import 'package:devtools_app/test_helpers/file_utils.dart';
+import 'package:devtools_app/test_helpers/flutter_test_driver.dart';
+import 'package:devtools_app/test_helpers/flutter_test_environment.dart';
 
 Future<void> main() async {
   debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;

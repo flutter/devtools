@@ -6,8 +6,8 @@ import 'package:devtools_app/src/eval_on_dart_library.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:devtools_app/lib/test_helpers/flutter_test_driver.dart';
-import 'package:devtools_app/lib/test_helpers/flutter_test_environment.dart';
+import 'package:devtools_app/test_helpers/flutter_test_driver.dart';
+import 'package:devtools_app/test_helpers/flutter_test_environment.dart';
 
 void main() {
   final FlutterTestEnvironment env = FlutterTestEnvironment(

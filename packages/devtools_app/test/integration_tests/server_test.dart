@@ -12,11 +12,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'package:devtools_app/lib/test_helpers/chrome.dart';
-import 'package:devtools_app/lib/test_helpers/cli_test_driver.dart';
-import 'package:devtools_app/lib/test_helpers/devtools_server_driver.dart';
-import 'package:devtools_app/lib/test_helpers/file_utils.dart';
-import 'package:devtools_app/lib/test_helpers/utils.dart';
+import 'package:devtools_app/test_helpers/chrome.dart';
+import 'package:devtools_app/test_helpers/cli_test_driver.dart';
+import 'package:devtools_app/test_helpers/devtools_server_driver.dart';
+import 'package:devtools_app/test_helpers/file_utils.dart';
+import 'package:devtools_app/test_helpers/utils.dart';
 import 'integration.dart';
 
 CliAppFixture appFixture;

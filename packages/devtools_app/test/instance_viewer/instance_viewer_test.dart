@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:devtools_app/lib/test_helpers/utils.dart';
+import 'package:devtools_app/test_helpers/utils.dart';
 
 final alwaysExpandedOverride =
     isExpandedProvider.overrideWithProvider((ref, param) => true);

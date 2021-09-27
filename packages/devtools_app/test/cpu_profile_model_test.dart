@@ -4,7 +4,7 @@
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:devtools_app/lib/test_helpers/cpu_profile_test_data.dart';
+import 'package:devtools_app/test_helpers/cpu_profile_test_data.dart';
 
 void main() {
   group('CpuProfileData', () {

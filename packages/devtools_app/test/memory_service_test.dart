@@ -9,8 +9,8 @@ import 'package:devtools_app/src/memory/memory_timeline.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:devtools_app/lib/test_helpers/flutter_test_driver.dart' show FlutterRunConfiguration;
-import 'package:devtools_app/lib/test_helpers/flutter_test_environment.dart';
+import 'package:devtools_app/test_helpers/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'package:devtools_app/test_helpers/flutter_test_environment.dart';
 
 MemoryController memoryController;
 

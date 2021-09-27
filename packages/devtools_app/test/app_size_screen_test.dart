@@ -18,13 +18,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import 'package:devtools_app/lib/test_helpers/app_size_test_controller.dart';
-import 'package:devtools_app/lib/test_helpers/app_size_test_data/new_v8.dart';
-import 'package:devtools_app/lib/test_helpers/app_size_test_data/old_v8.dart';
-import 'package:devtools_app/lib/test_helpers/app_size_test_data/sizes.dart';
-import 'package:devtools_app/lib/test_helpers/app_size_test_data/unsupported_file.dart';
-import 'package:devtools_app/lib/test_helpers/mocks.dart';
-import 'package:devtools_app/lib/test_helpers/wrappers.dart';
+import 'package:devtools_app/test_helpers/app_size_test_controller.dart';
+import 'package:devtools_app/test_helpers/app_size_test_data/new_v8.dart';
+import 'package:devtools_app/test_helpers/app_size_test_data/old_v8.dart';
+import 'package:devtools_app/test_helpers/app_size_test_data/sizes.dart';
+import 'package:devtools_app/test_helpers/app_size_test_data/unsupported_file.dart';
+import 'package:devtools_app/test_helpers/mocks.dart';
+import 'package:devtools_app/test_helpers/wrappers.dart';
 
 void main() {
   setUp(() {

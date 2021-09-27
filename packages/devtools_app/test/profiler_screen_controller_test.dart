@@ -6,7 +6,7 @@ import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:devtools_app/lib/test_helpers/mocks.dart';
+import 'package:devtools_app/test_helpers/mocks.dart';
 
 void main() {
   group('ProfilerScreenController', () {

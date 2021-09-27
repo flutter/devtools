@@ -4,8 +4,8 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:devtools_app/lib/test_helpers/cli_test_driver.dart';
-import 'package:devtools_app/lib/test_helpers/utils.dart';
+import 'package:devtools_app/test_helpers/cli_test_driver.dart';
+import 'package:devtools_app/test_helpers/utils.dart';
 import 'integration.dart';
 
 void debuggingTests() {

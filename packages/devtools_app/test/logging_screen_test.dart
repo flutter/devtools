@@ -19,9 +19,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import 'package:devtools_app/lib/test_helpers/mocks.dart';
-import 'package:devtools_app/lib/test_helpers/utils.dart';
-import 'package:devtools_app/lib/test_helpers/wrappers.dart';
+import 'package:devtools_app/test_helpers/mocks.dart';
+import 'package:devtools_app/test_helpers/utils.dart';
+import 'package:devtools_app/test_helpers/wrappers.dart';
 
 void main() {
   LoggingScreen screen;

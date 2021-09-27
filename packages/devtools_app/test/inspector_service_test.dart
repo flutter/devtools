@@ -9,9 +9,9 @@ import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'matchers/matchers.dart';
-import 'package:devtools_app/lib/test_helpers/flutter_test_driver.dart' show FlutterRunConfiguration;
-import 'package:devtools_app/lib/test_helpers/flutter_test_environment.dart';
-import 'package:devtools_app/lib/test_helpers/utils.dart';
+import 'package:devtools_app/test_helpers/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'package:devtools_app/test_helpers/flutter_test_environment.dart';
+import 'package:devtools_app/test_helpers/utils.dart';
 
 void main() async {
   initializeLiveTestWidgetsFlutterBindingWithAssets();

@@ -11,9 +11,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_snapshot_analysis/precompiler_trace.dart';
 import 'package:vm_snapshot_analysis/program_info.dart';
 
-import 'package:devtools_app/lib/test_helpers/app_size_test_data/precompiler_trace.dart';
-import 'package:devtools_app/lib/test_helpers/mocks.dart';
-import 'package:devtools_app/lib/test_helpers/wrappers.dart';
+import 'package:devtools_app/test_helpers/app_size_test_data/precompiler_trace.dart';
+import 'package:devtools_app/test_helpers/mocks.dart';
+import 'package:devtools_app/test_helpers/wrappers.dart';
 
 void main() {
   CallGraph callGraph;

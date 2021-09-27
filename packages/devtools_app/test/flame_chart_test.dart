@@ -16,8 +16,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:devtools_app/lib/test_helpers/cpu_profile_test_data.dart';
-import 'package:devtools_app/lib/test_helpers/performance_test_data.dart';
+import 'package:devtools_app/test_helpers/cpu_profile_test_data.dart';
+import 'package:devtools_app/test_helpers/performance_test_data.dart';
 
 void main() {
   const defaultZoom = 1.0;

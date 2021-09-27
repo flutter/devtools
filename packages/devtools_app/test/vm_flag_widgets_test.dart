@@ -16,8 +16,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'package:devtools_app/lib/test_helpers/mocks.dart';
-import 'package:devtools_app/lib/test_helpers/wrappers.dart';
+import 'package:devtools_app/test_helpers/mocks.dart';
+import 'package:devtools_app/test_helpers/wrappers.dart';
 
 void main() {
   group('Profile Granularity Dropdown', () {
