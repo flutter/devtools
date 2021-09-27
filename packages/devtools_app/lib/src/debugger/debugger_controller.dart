@@ -41,7 +41,12 @@ class DebuggerController extends DisposableController
       _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
     };
     scriptsHistory.current.addListener(_scriptHistoryListener);
-    programExplorerController.initialize(currentScriptRef.value);
+    addAutoDisposeListener(currentScriptRef, () async {
+      if (!programExplorerController.initialized.value) {
+        await programExplorerController.initialize();
+      }
+      programExplorerController.selectScriptNode(currentScriptRef.value);
+    });
 
     if (_service != null) {
       initialize();
@@ -193,8 +198,6 @@ class DebuggerController extends DisposableController
     // set to null to ensure that happens.
     _scriptLocation.value = null;
     _scriptLocation.value = scriptLocation;
-
-    programExplorerController.selectScriptNode(scriptLocation.scriptRef);
   }
 
   Future<Script> getScriptForRef(ScriptRef ref) async {
