@@ -319,24 +319,32 @@ class _ProgramOutlineView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<VMServiceObjectNode>>(
-      valueListenable: controller.outlineNodes,
-      builder: (context, nodes, _) {
-        if (nodes == null || nodes.isEmpty) {
-          return const Center(
-            child: Text('Nothing to inspect'),
-          );
+    return ValueListenableBuilder(
+      valueListenable: controller.isLoadingOutline,
+      builder: (context, isLoadingOutline, _) {
+        if (isLoadingOutline) {
+          return const CenteredCircularProgressIndicator();
         }
-        return TreeView<VMServiceObjectNode>(
-          itemExtent: _programExplorerRowHeight,
-          dataRoots: nodes,
-          onItemSelected: onItemSelected,
-          onItemExpanded: onItemExpanded,
-          dataDisplayProvider: (node, onTap) {
-            return _ProgramExplorerRow(
-              controller: controller,
-              node: node,
-              onTap: onTap,
+        return ValueListenableBuilder<List<VMServiceObjectNode>>(
+          valueListenable: controller.outlineNodes,
+          builder: (context, nodes, _) {
+            if (nodes == null || nodes.isEmpty) {
+              return const Center(
+                child: Text('Nothing to inspect'),
+              );
+            }
+            return TreeView<VMServiceObjectNode>(
+              itemExtent: _programExplorerRowHeight,
+              dataRoots: nodes,
+              onItemSelected: onItemSelected,
+              onItemExpanded: onItemExpanded,
+              dataDisplayProvider: (node, onTap) {
+                return _ProgramExplorerRow(
+                  controller: controller,
+                  node: node,
+                  onTap: onTap,
+                );
+              },
             );
           },
         );
