@@ -118,7 +118,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
       );
       Provider.of<BannerMessagesController>(context).addMessage(
         ShaderJankMessage(
-          offlineMode ? SimpleScreen.id : PerformanceScreen.id,
+          offlineController.offlineMode ? SimpleScreen.id : PerformanceScreen.id,
           jankyFramesCount: shaderJankFrames.length,
           jankDuration: shaderJankDuration,
         ).build(context),

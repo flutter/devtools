@@ -137,8 +137,9 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     final newArgs = {...currentConfiguration.args, ...?argUpdates};
 
     // Ensure we disconnect from any previously connected applications if we do
-    // not have a vm service uri as a query parameter.
-    if (newArgs['uri'] == null) {
+    // not have a vm service uri as a query parameter, unless we are loading an
+    // offline file.
+    if (page != snapshotPageId && newArgs['uri'] == null) {
       serviceManager.manuallyDisconnect();
     }
 

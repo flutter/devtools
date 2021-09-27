@@ -20,7 +20,7 @@ import 'profiler_screen.dart';
 class ProfilerScreenController extends DisposableController
     with AutoDisposeControllerMixin {
   ProfilerScreenController() {
-    if (!offlineMode) {
+    if (!offlineController.offlineMode) {
       allowedError(
         serviceManager.service.setProfilePeriod(mediumProfilePeriod),
         logError: false,

@@ -508,7 +508,7 @@ class ProcessingInfo extends StatelessWidget {
 /// onPressed:
 ///
 /// setState(() {
-///   offlineMode = false;
+///   offlineController.exitOfflineMode();
 /// }
 class ExitOfflineButton extends IconLabelButton {
   const ExitOfflineButton({@required VoidCallback onPressed})

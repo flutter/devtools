@@ -36,7 +36,7 @@ void main() async {
 
     test('processOfflineData', () async {
       await env.setupEnvironment();
-      offlineMode = true;
+      offlineController.enterOfflineMode();
       final offlineTimelineData =
           OfflinePerformanceData.parse(offlinePerformanceDataJson);
       await performanceController.processOfflineData(offlineTimelineData);

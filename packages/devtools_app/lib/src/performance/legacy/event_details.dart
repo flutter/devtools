@@ -66,9 +66,9 @@ class EventDetails extends StatelessWidget {
 
   Widget _buildDetails(LegacyPerformanceController controller) {
     if (selectedEvent.isUiEvent) {
-      // In [offlineMode], we do not need to worry about whether the profiler is
-      // enabled.
-      if (offlineMode) {
+      // In [offlineController.offlineMode], we do not need to worry about
+      // whether the profiler is enabled.
+      if (offlineController.offlineMode) {
         return _buildCpuProfiler(controller.cpuProfilerController);
       }
       return ValueListenableBuilder<Flag>(

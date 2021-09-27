@@ -135,7 +135,7 @@ class LegacyPerformanceScreenBodyState
 
     // Refresh data on page load if data is null. On subsequent tab changes,
     // this should not be called.
-    if (controller.data == null && !offlineMode) {
+    if (controller.data == null && !offlineController.offlineMode) {
       controller.refreshData();
     }
 
@@ -146,10 +146,10 @@ class LegacyPerformanceScreenBodyState
       // require a top level field named "traceEvents". See how timeline data is
       // encoded in [ExportController.encode].
       final timelineJson =
-          Map<String, dynamic>.from(offlineDataJson[LegacyPerformanceScreen.id])
+          Map<String, dynamic>.from(offlineController.offlineDataJson[LegacyPerformanceScreen.id])
             ..addAll({
               LegacyPerformanceData.traceEventsKey:
-                  offlineDataJson[LegacyPerformanceData.traceEventsKey]
+                  offlineController.offlineDataJson[LegacyPerformanceData.traceEventsKey]
             });
       final offlinePerformanceData =
           LegacyOfflinePerformanceData.parse(timelineJson);
@@ -161,16 +161,16 @@ class LegacyPerformanceScreenBodyState
 
   @override
   Widget build(BuildContext context) {
-    final isOfflineFlutterApp = offlineMode &&
+    final isOfflineFlutterApp = offlineController.offlineMode &&
         controller.offlinePerformanceData != null &&
         controller.offlinePerformanceData.frames.isNotEmpty;
 
     final performanceScreen = Column(
       children: [
-        if (!offlineMode) _buildPerformanceControls(),
+        if (!offlineController.offlineMode) _buildPerformanceControls(),
         const SizedBox(height: denseRowSpacing),
         if (isOfflineFlutterApp ||
-            (!offlineMode && serviceManager.connectedApp.isFlutterAppNow))
+            (!offlineController.offlineMode && serviceManager.connectedApp.isFlutterAppNow))
           ValueListenableBuilder(
             valueListenable: controller.flutterFrames,
             builder: (context, frames, _) => ValueListenableBuilder(
@@ -321,10 +321,10 @@ class LegacyPerformanceScreenBodyState
 
   @override
   bool shouldLoadOfflineData() {
-    return offlineMode &&
-        offlineDataJson.isNotEmpty &&
-        offlineDataJson[LegacyPerformanceScreen.id] != null &&
-        offlineDataJson[LegacyPerformanceData.traceEventsKey] != null;
+    return offlineController.offlineMode &&
+        offlineController.offlineDataJson.isNotEmpty &&
+        offlineController.offlineDataJson[LegacyPerformanceScreen.id] != null &&
+        offlineController.offlineDataJson[LegacyPerformanceData.traceEventsKey] != null;
   }
 }
 

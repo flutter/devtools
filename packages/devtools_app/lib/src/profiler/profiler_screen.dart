@@ -124,7 +124,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     // Load offline profiler data if available.
     if (shouldLoadOfflineData()) {
       final profilerJson =
-          Map<String, dynamic>.from(offlineDataJson[ProfilerScreen.id]);
+          Map<String, dynamic>.from(offlineController.offlineDataJson[ProfilerScreen.id]);
       final offlineProfilerData = CpuProfileData.parse(profilerJson);
       if (!offlineProfilerData.isEmpty) {
         loadOfflineData(offlineProfilerData);
@@ -134,7 +134,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    if (offlineMode) return _buildProfilerScreenBody(controller);
+    if (offlineController.offlineMode) return _buildProfilerScreenBody(controller);
     return ValueListenableBuilder<Flag>(
       valueListenable: controller.cpuProfilerController.profilerFlagNotifier,
       builder: (context, profilerFlag, _) {
@@ -148,7 +148,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
   Widget _buildProfilerScreenBody(ProfilerScreenController controller) {
     final profilerScreen = Column(
       children: [
-        if (!offlineMode)
+        if (!offlineController.offlineMode)
           ProfilerScreenControls(
             controller: controller,
             recording: recording,
@@ -263,9 +263,9 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
 
   @override
   bool shouldLoadOfflineData() {
-    return offlineMode &&
-        offlineDataJson.isNotEmpty &&
-        offlineDataJson[ProfilerScreen.id] != null;
+    return offlineController.offlineMode &&
+        offlineController.offlineDataJson.isNotEmpty &&
+        offlineController.offlineDataJson[ProfilerScreen.id] != null;
   }
 }
 

@@ -275,12 +275,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     // screen based on the flutter version of the imported file.
     final args = {'screen': screenId};
     final routerDelegate = DevToolsRouterDelegate.of(context);
-    // If we are already in offline mode, we need to replace the existing page
-    // so clicking Back does not go through all of the old snapshots.
-    if (!offlineMode) {
-      enterOfflineMode();
+    if (!offlineController.offlineMode) {
       routerDelegate.navigate(snapshotPageId, args);
     } else {
+      // If we are already in offline mode, we need to replace the existing page
+      // so clicking Back does not go through all of the old snapshots.
       // Router.neglect will cause the router to ignore this change, so
       // dragging a new export into the browser will not result in a new
       // history entry.
@@ -318,7 +317,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           children: tabBodies,
         ),
         if (serviceManager.connectedAppInitialized &&
-            !offlineMode &&
+            !offlineController.offlineMode &&
             _currentScreen.showFloatingDebuggerControls)
           Container(
             alignment: Alignment.topCenter,
@@ -344,7 +343,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               child: Scaffold(
                 appBar: widget.embed ? null : _buildAppBar(scaffoldTitle),
                 body: (serviceManager.connectedAppInitialized &&
-                        !offlineMode &&
+                        !offlineController.offlineMode &&
                         _currentScreen.showConsole(widget.embed))
                     ? Split(
                         axis: Axis.vertical,
@@ -469,12 +468,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ],
       ),
     );
-  }
-
-  void enterOfflineMode() {
-    setState(() {
-      offlineMode = true;
-    });
   }
 
   /// Returns the width of the scaffold title, tabs and default icons.
