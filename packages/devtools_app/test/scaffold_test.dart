@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/analytics/analytics_controller.dart';
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/framework_controller.dart';
 import 'package:devtools_app/src/globals.dart';
@@ -37,6 +38,7 @@ void main() {
       setGlobal(ServiceConnectionManager, mockServiceManager);
       setGlobal(FrameworkController, FrameworkController());
       setGlobal(SurveyService, SurveyService());
+      setGlobal(OfflineModeController, OfflineModeController());
     });
 
     Widget wrapScaffold(Widget child) {

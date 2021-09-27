@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_model.dart';
@@ -25,6 +26,7 @@ void main() async {
 
   PerformanceController performanceController;
   env.afterNewSetup = () async {
+    setGlobal(OfflineModeController, OfflineModeController());
     performanceController = PerformanceController()..data = PerformanceData();
     await performanceController.initialized;
   };

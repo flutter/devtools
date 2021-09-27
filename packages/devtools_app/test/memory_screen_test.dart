@@ -6,6 +6,7 @@
 import 'dart:ui';
 
 import 'package:devtools_app/src/common_widgets.dart';
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/memory/memory_events_pane.dart';
@@ -111,6 +112,7 @@ void main() {
 
     setUp(() async {
       await ensureInspectorDependencies();
+      setGlobal(OfflineModeController, OfflineModeController());
       fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
