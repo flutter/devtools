@@ -6,7 +6,7 @@ import 'package:devtools_app/src/config_specific/import_export/import_export.dar
 import 'package:devtools_app/src/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'support/wrappers.dart';
+import 'package:devtools_app/lib/test_helpers/wrappers.dart';
 
 void main() async {
   group('ImportControllerTest', () {

@@ -4,8 +4,8 @@
 @TestOn('vm')
 import 'package:flutter_test/flutter_test.dart';
 
-import '../support/flutter_test_driver.dart' show FlutterRunConfiguration;
-import '../support/flutter_test_environment.dart';
+import 'package:devtools_app/lib/test_helpers/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'package:devtools_app/lib/test_helpers/flutter_test_environment.dart';
 import 'provider_controller_test.dart';
 
 void main() async {

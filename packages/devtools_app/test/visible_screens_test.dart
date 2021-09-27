@@ -22,7 +22,7 @@ import 'package:devtools_app/src/version.dart';
 import 'package:devtools_app/src/vm_developer/vm_developer_tools_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'support/mocks.dart';
+import 'package:devtools_app/lib/test_helpers/mocks.dart';
 
 void main() {
   group('visible_screens', () {

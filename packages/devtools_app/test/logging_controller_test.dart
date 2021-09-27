@@ -11,8 +11,8 @@ import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/filter.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'support/mocks.dart';
-import 'support/utils.dart';
+import 'package:devtools_app/lib/test_helpers/mocks.dart';
+import 'package:devtools_app/lib/test_helpers/utils.dart';
 
 void main() {
   group('LoggingController', () {

@@ -10,8 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import 'support/mocks.dart';
-import 'support/wrappers.dart';
+import 'package:devtools_app/lib/test_helpers/mocks.dart';
+import 'package:devtools_app/lib/test_helpers/wrappers.dart';
 
 void main() {
   final debuggerController = MockDebuggerController.withDefaults();

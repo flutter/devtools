@@ -16,7 +16,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 
-import 'support/wrappers.dart';
+import 'package:devtools_app/lib/test_helpers/wrappers.dart';
 
 const modifierSpans = [
   // Start multi-capture spans

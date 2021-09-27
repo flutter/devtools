@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'support/mocks.dart';
+import 'package:devtools_app/lib/test_helpers/mocks.dart';
 
 void main() {
   test('Ensure private RPCs can only be enabled with VM Developer Mode enabled',

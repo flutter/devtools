@@ -11,13 +11,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'support/app_size_test_data/apk_analysis.dart';
-import 'support/app_size_test_data/new_v8.dart';
-import 'support/app_size_test_data/sizes.dart';
-import 'support/app_size_test_data/small_sizes.dart';
-import 'support/mocks.dart';
-import 'support/utils.dart';
-import 'support/wrappers.dart';
+import 'package:devtools_app/lib/test_helpers/app_size_test_data/apk_analysis.dart';
+import 'package:devtools_app/lib/test_helpers/app_size_test_data/new_v8.dart';
+import 'package:devtools_app/lib/test_helpers/app_size_test_data/sizes.dart';
+import 'package:devtools_app/lib/test_helpers/app_size_test_data/small_sizes.dart';
+import 'package:devtools_app/lib/test_helpers/mocks.dart';
+import 'package:devtools_app/lib/test_helpers/utils.dart';
+import 'package:devtools_app/lib/test_helpers/wrappers.dart';
 
 void main() {
   TreemapNode root;

@@ -13,8 +13,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-import 'support/mocks.dart';
-import 'support/wrappers.dart';
+import 'package:devtools_app/lib/test_helpers/mocks.dart';
+import 'package:devtools_app/lib/test_helpers/wrappers.dart';
 
 void main() {
   BannerMessagesController controller;

@@ -11,10 +11,10 @@ import 'package:devtools_app/src/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pedantic/pedantic.dart';
 
-import 'support/flutter_test_driver.dart';
-import 'support/flutter_test_environment.dart';
-import 'support/mocks.dart';
-import 'support/utils.dart';
+import 'package:devtools_app/lib/test_helpers/flutter_test_driver.dart';
+import 'package:devtools_app/lib/test_helpers/flutter_test_environment.dart';
+import 'package:devtools_app/lib/test_helpers/mocks.dart';
+import 'package:devtools_app/lib/test_helpers/utils.dart';
 
 void main() {
   final FlutterTestEnvironment env = FlutterTestEnvironment(

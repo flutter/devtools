@@ -10,9 +10,9 @@ import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'support/cpu_profile_test_data.dart';
-import 'support/performance_test_data.dart';
-import 'support/test_utils.dart';
+import 'package:devtools_app/lib/test_helpers/cpu_profile_test_data.dart';
+import 'package:devtools_app/lib/test_helpers/performance_test_data.dart';
+import 'package:devtools_app/lib/test_helpers/test_utils.dart';
 
 void main() {
   group('PerformanceData', () {

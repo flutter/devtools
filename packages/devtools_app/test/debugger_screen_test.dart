@@ -19,9 +19,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'support/mocks.dart';
-import 'support/utils.dart';
-import 'support/wrappers.dart';
+import 'package:devtools_app/lib/test_helpers/mocks.dart';
+import 'package:devtools_app/lib/test_helpers/utils.dart';
+import 'package:devtools_app/lib/test_helpers/wrappers.dart';
 
 void main() {
   DebuggerScreen screen;

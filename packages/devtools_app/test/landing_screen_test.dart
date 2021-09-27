@@ -8,8 +8,8 @@ import 'package:devtools_app/src/service_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'support/mocks.dart';
-import 'support/wrappers.dart';
+import 'package:devtools_app/lib/test_helpers/mocks.dart';
+import 'package:devtools_app/lib/test_helpers/wrappers.dart';
 
 void main() {
   setUp(() {

@@ -10,9 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'support/memory_test_data.dart';
-import 'support/mocks.dart';
-import 'support/wrappers.dart';
+import 'package:devtools_app/lib/test_helpers/memory_test_data.dart';
+import 'package:devtools_app/lib/test_helpers/mocks.dart';
+import 'package:devtools_app/lib/test_helpers/wrappers.dart';
 
 void main() {
   const windowSize = Size(2225.0, 1000.0);

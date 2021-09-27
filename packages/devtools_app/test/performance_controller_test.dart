@@ -11,10 +11,10 @@ import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
-import 'support/flutter_test_environment.dart';
-import 'support/performance_test_data.dart';
-import 'support/utils.dart';
+import 'package:devtools_app/lib/test_helpers/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'package:devtools_app/lib/test_helpers/flutter_test_environment.dart';
+import 'package:devtools_app/lib/test_helpers/performance_test_data.dart';
+import 'package:devtools_app/lib/test_helpers/utils.dart';
 
 void main() async {
   initializeLiveTestWidgetsFlutterBindingWithAssets();

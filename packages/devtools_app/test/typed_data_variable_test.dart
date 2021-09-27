@@ -14,7 +14,7 @@ import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'support/mocks.dart';
+import 'package:devtools_app/lib/test_helpers/mocks.dart';
 
 final isolateRef = IsolateRef(
   id: '1',

@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../inspector_screen_test.dart';
-import '../../support/wrappers.dart';
+import 'package:devtools_app/lib/test_helpers/wrappers.dart';
 
 // TODO(albertusangga): Re-enable tests in this files
 // https://github.com/flutter/devtools/issues/1403

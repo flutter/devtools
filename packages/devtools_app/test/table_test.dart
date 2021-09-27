@@ -8,8 +8,8 @@ import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'support/mocks.dart';
-import 'support/wrappers.dart';
+import 'package:devtools_app/lib/test_helpers/mocks.dart';
+import 'package:devtools_app/lib/test_helpers/wrappers.dart';
 
 void main() {
   setUp(() {

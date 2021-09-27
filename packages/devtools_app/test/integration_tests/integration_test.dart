@@ -7,7 +7,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import '../support/file_utils.dart';
+import 'package:devtools_app/lib/test_helpers/file_utils.dart';
 import 'app.dart';
 import 'debugger.dart';
 import 'integration.dart';

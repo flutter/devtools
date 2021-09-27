@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import 'support/mocks.dart';
+import 'package:devtools_app/lib/test_helpers/mocks.dart';
 
 void main() {
   group('Initializer', () {

@@ -9,10 +9,10 @@ import 'package:devtools_app/src/inspector/inspector_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
-import 'support/flutter_test_environment.dart';
-import 'support/utils.dart';
-import 'support/wrappers.dart';
+import 'package:devtools_app/lib/test_helpers/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'package:devtools_app/lib/test_helpers/flutter_test_environment.dart';
+import 'package:devtools_app/lib/test_helpers/utils.dart';
+import 'package:devtools_app/lib/test_helpers/wrappers.dart';
 
 // This is a bit conservative to ensure we do not get flakes due to
 // slow interactions with the VM Service. This delay could likely be

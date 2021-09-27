@@ -14,8 +14,8 @@ import 'package:devtools_app/src/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
-import 'support/flutter_test_environment.dart';
+import 'package:devtools_app/lib/test_helpers/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'package:devtools_app/lib/test_helpers/flutter_test_environment.dart';
 
 // Error codes defined by
 // https://www.jsonrpc.org/specification#error_object
