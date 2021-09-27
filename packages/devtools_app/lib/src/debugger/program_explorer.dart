@@ -319,7 +319,8 @@ class _ProgramOutlineView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
+    print(controller.isLoadingOutline);
+    return ValueListenableBuilder<bool>(
       valueListenable: controller.isLoadingOutline,
       builder: (context, isLoadingOutline, _) {
         if (isLoadingOutline) {
