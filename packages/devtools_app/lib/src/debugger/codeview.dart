@@ -278,6 +278,7 @@ class _CodeViewState extends State<CodeView>
               child: Scrollbar(
                 key: CodeView.debuggerCodeViewVerticalScrollbarKey,
                 controller: textController,
+                isAlwaysShown: true,
                 // Only listen for vertical scroll notifications (ignore those
                 // from the nested horizontal SingleChildScrollView):
                 notificationPredicate: (ScrollNotification notification) =>
