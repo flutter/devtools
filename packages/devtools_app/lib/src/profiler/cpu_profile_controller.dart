@@ -134,8 +134,9 @@ class CpuProfilerController
   /// Clients interested in the current value of [profilerFlagNotifier] should
   /// use this getter. Otherwise, clients subscribing to change notifications,
   /// should listen to [profilerFlagNotifier].
-  bool get profilerEnabled =>
-      offlineController.offlineMode ? true : profilerFlagNotifier.value.valueAsString == 'true';
+  bool get profilerEnabled => offlineController.offlineMode.value
+      ? true
+      : profilerFlagNotifier.value.valueAsString == 'true';
 
   Future<dynamic> enableCpuProfiler() {
     return serviceManager.service.enableCpuProfiler();

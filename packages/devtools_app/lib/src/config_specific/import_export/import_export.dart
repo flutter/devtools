@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 import '../../../devtools.dart';
 import '../../connected_app.dart';
 import '../../globals.dart';
@@ -135,9 +137,9 @@ abstract class ExportController {
 }
 
 class OfflineModeController {
-  bool get offlineMode => _offlineMode;
+  ValueListenable<bool> get offlineMode => _offlineMode;
 
-  bool _offlineMode = false;
+  final _offlineMode = ValueNotifier(false);
 
   Map<String, dynamic> offlineDataJson = {};
 
@@ -145,13 +147,19 @@ class OfflineModeController {
   /// offline and online modes.
   ConnectedApp _previousConnectedApp;
 
+  bool shouldLoadOfflineData(String screenId) {
+    return _offlineMode.value &&
+        offlineDataJson.isNotEmpty &&
+        offlineDataJson[screenId] != null;
+  }
+
   void enterOfflineMode() {
     _previousConnectedApp = serviceManager.connectedApp;
-    _offlineMode = true;
+    _offlineMode.value = true;
   }
 
   void exitOfflineMode() {
     serviceManager.connectedApp = _previousConnectedApp;
-    _offlineMode = false;
+    _offlineMode.value = false;
   }
 }

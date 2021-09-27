@@ -178,7 +178,7 @@ class PerformanceController extends DisposableController
   }
 
   Future<void> _initHelper() async {
-    if (!offlineController.offlineMode) {
+    if (!offlineController.offlineMode.value) {
       await serviceManager.onServiceAvailable;
       await _initData();
 
@@ -305,7 +305,8 @@ class PerformanceController extends DisposableController
           shouldRefreshSearchMatches: true,
         );
         data.cpuProfileData = cpuProfilerController.dataNotifier.value;
-      } else if ((!offlineController.offlineMode || offlinePerformanceData == null) &&
+      } else if ((!offlineController.offlineMode.value ||
+              offlinePerformanceData == null) &&
           cpuProfilerController.profilerEnabled) {
         // Fetch a profile if not in offline mode and if the profiler is enabled
         cpuProfilerController.reset();
@@ -341,7 +342,7 @@ class PerformanceController extends DisposableController
       return;
     }
 
-    if (!offlineController.offlineMode) {
+    if (!offlineController.offlineMode.value) {
       final bool frameBeforeFirstWellFormedFrame =
           firstWellFormedFrameMicros != null &&
               frame.timeFromFrameTiming.start.inMicroseconds <
@@ -390,7 +391,8 @@ class PerformanceController extends DisposableController
         .lookupProfile(time: frame.timeFromEventFlows);
     if (storedProfileForFrame == null) {
       cpuProfilerController.reset();
-      if (!offlineController.offlineMode && frame.timeFromEventFlows.isWellFormed) {
+      if (!offlineController.offlineMode.value &&
+          frame.timeFromEventFlows.isWellFormed) {
         await cpuProfilerController.pullAndProcessProfile(
           startMicros: frame.timeFromEventFlows.start.inMicroseconds,
           extentMicros: frame.timeFromEventFlows.duration.inMicroseconds,
@@ -593,7 +595,7 @@ class PerformanceController extends DisposableController
   void addTimelineEvent(TimelineEvent event) {
     data.addTimelineEvent(event);
     if (event is SyncTimelineEvent) {
-      if (!offlineController.offlineMode &&
+      if (!offlineController.offlineMode.value &&
           serviceManager.hasConnection &&
           !serviceManager.connectedApp.isFlutterAppNow) {
         return;

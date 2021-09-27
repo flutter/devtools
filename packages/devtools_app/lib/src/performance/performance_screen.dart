@@ -91,6 +91,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   void initState() {
     super.initState();
     ga.screen(PerformanceScreen.id);
+    addAutoDisposeListener(offlineController.offlineMode);
   }
 
   @override
@@ -126,12 +127,12 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
       // with other trace viewers (catapult, perfetto, chrome://tracing), which
       // require a top level field named "traceEvents". See how timeline data is
       // encoded in [ExportController.encode].
-      final timelineJson =
-          Map<String, dynamic>.from(offlineController.offlineDataJson[PerformanceScreen.id])
-            ..addAll({
-              PerformanceData.traceEventsKey:
-                  offlineController.offlineDataJson[PerformanceData.traceEventsKey]
-            });
+      final timelineJson = Map<String, dynamic>.from(
+          offlineController.offlineDataJson[PerformanceScreen.id])
+        ..addAll({
+          PerformanceData.traceEventsKey:
+              offlineController.offlineDataJson[PerformanceData.traceEventsKey]
+        });
       final offlinePerformanceData = OfflinePerformanceData.parse(timelineJson);
       if (!offlinePerformanceData.isEmpty) {
         loadOfflineData(offlinePerformanceData);
@@ -141,16 +142,17 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    final isOfflineFlutterApp = offlineController.offlineMode &&
+    final isOfflineFlutterApp = offlineController.offlineMode.value &&
         controller.offlinePerformanceData != null &&
         controller.offlinePerformanceData.frames.isNotEmpty;
 
     final performanceScreen = Column(
       children: [
-        if (!offlineController.offlineMode) _buildPerformanceControls(),
+        if (!offlineController.offlineMode.value) _buildPerformanceControls(),
         const SizedBox(height: denseRowSpacing),
         if (isOfflineFlutterApp ||
-            (!offlineController.offlineMode && serviceManager.connectedApp.isFlutterAppNow))
+            (!offlineController.offlineMode.value &&
+                serviceManager.connectedApp.isFlutterAppNow))
           ValueListenableBuilder(
             valueListenable: controller.flutterFrames,
             builder: (context, frames, _) => ValueListenableBuilder(
@@ -222,10 +224,9 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
   @override
   bool shouldLoadOfflineData() {
-    return offlineController.offlineMode &&
-        offlineController.offlineDataJson.isNotEmpty &&
-        offlineController.offlineDataJson[PerformanceScreen.id] != null &&
-        offlineController.offlineDataJson[PerformanceData.traceEventsKey] != null;
+    return offlineController.shouldLoadOfflineData(PerformanceScreen.id) &&
+        offlineController.offlineDataJson[PerformanceData.traceEventsKey] !=
+            null;
   }
 }
 

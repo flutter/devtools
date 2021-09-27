@@ -48,7 +48,13 @@ class EventDetails extends StatelessWidget {
           ),
           Expanded(
             child: selectedEvent != null
-                ? _buildDetails(controller)
+                ? ValueListenableBuilder(
+                    valueListenable: offlineController.offlineMode,
+                    builder: (context, offline, _) => _buildDetails(
+                      controller,
+                      offline,
+                    ),
+                  )
                 : _buildInstructions(theme),
           ),
         ],
@@ -64,11 +70,12 @@ class EventDetails extends StatelessWidget {
         '${selectedEvent.name} (${msText(selectedEvent.time.duration)})';
   }
 
-  Widget _buildDetails(LegacyPerformanceController controller) {
+  Widget _buildDetails(
+      LegacyPerformanceController controller, bool offlineMode) {
     if (selectedEvent.isUiEvent) {
       // In [offlineController.offlineMode], we do not need to worry about
       // whether the profiler is enabled.
-      if (offlineController.offlineMode) {
+      if (offlineMode) {
         return _buildCpuProfiler(controller.cpuProfilerController);
       }
       return ValueListenableBuilder<Flag>(

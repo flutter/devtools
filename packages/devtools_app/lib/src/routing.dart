@@ -147,6 +147,16 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     notifyListeners();
   }
 
+  void navigateHome({bool clearUriParam = false, bool clearScreenParam}) {
+    navigate(
+      homePageId,
+      {
+        if (clearUriParam) 'uri': null,
+        if (clearScreenParam) 'screen': null,
+      },
+    );
+  }
+
   /// Replaces the navigation stack with a new route.
   void _replaceStack(DevToolsRouteConfiguration configuration) {
     routes

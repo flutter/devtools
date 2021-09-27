@@ -129,6 +129,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   void initState() {
     super.initState();
 
+    addAutoDisposeListener(offlineController.offlineMode);
+
     _setupTabController();
 
     _connectVmSubscription =
@@ -275,7 +277,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     // screen based on the flutter version of the imported file.
     final args = {'screen': screenId};
     final routerDelegate = DevToolsRouterDelegate.of(context);
-    if (!offlineController.offlineMode) {
+    if (!offlineController.offlineMode.value) {
       routerDelegate.navigate(snapshotPageId, args);
     } else {
       // If we are already in offline mode, we need to replace the existing page
@@ -317,7 +319,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           children: tabBodies,
         ),
         if (serviceManager.connectedAppInitialized &&
-            !offlineController.offlineMode &&
+            !offlineController.offlineMode.value &&
             _currentScreen.showFloatingDebuggerControls)
           Container(
             alignment: Alignment.topCenter,
@@ -343,7 +345,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               child: Scaffold(
                 appBar: widget.embed ? null : _buildAppBar(scaffoldTitle),
                 body: (serviceManager.connectedAppInitialized &&
-                        !offlineController.offlineMode &&
+                        !offlineController.offlineMode.value &&
                         _currentScreen.showConsole(widget.embed))
                     ? Split(
                         axis: Axis.vertical,

@@ -87,6 +87,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
   void initState() {
     super.initState();
     ga.screen(ProfilerScreen.id);
+    addAutoDisposeListener(offlineController.offlineMode);
   }
 
   @override
@@ -123,8 +124,8 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
 
     // Load offline profiler data if available.
     if (shouldLoadOfflineData()) {
-      final profilerJson =
-          Map<String, dynamic>.from(offlineController.offlineDataJson[ProfilerScreen.id]);
+      final profilerJson = Map<String, dynamic>.from(
+          offlineController.offlineDataJson[ProfilerScreen.id]);
       final offlineProfilerData = CpuProfileData.parse(profilerJson);
       if (!offlineProfilerData.isEmpty) {
         loadOfflineData(offlineProfilerData);
@@ -134,7 +135,8 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    if (offlineController.offlineMode) return _buildProfilerScreenBody(controller);
+    if (offlineController.offlineMode.value)
+      return _buildProfilerScreenBody(controller);
     return ValueListenableBuilder<Flag>(
       valueListenable: controller.cpuProfilerController.profilerFlagNotifier,
       builder: (context, profilerFlag, _) {
@@ -148,7 +150,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
   Widget _buildProfilerScreenBody(ProfilerScreenController controller) {
     final profilerScreen = Column(
       children: [
-        if (!offlineController.offlineMode)
+        if (!offlineController.offlineMode.value)
           ProfilerScreenControls(
             controller: controller,
             recording: recording,
@@ -263,9 +265,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
 
   @override
   bool shouldLoadOfflineData() {
-    return offlineController.offlineMode &&
-        offlineController.offlineDataJson.isNotEmpty &&
-        offlineController.offlineDataJson[ProfilerScreen.id] != null;
+    return offlineController.shouldLoadOfflineData(ProfilerScreen.id);
   }
 }
 

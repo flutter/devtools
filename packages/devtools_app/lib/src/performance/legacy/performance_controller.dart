@@ -147,7 +147,7 @@ class LegacyPerformanceController
   }
 
   Future<void> _initHelper() async {
-    if (!offlineController.offlineMode) {
+    if (!offlineController.offlineMode.value) {
       await serviceManager.onServiceAvailable;
 
       // Default to true for profile builds only.
@@ -193,7 +193,8 @@ class LegacyPerformanceController
           shouldRefreshSearchMatches: true,
         );
         data.cpuProfileData = cpuProfilerController.dataNotifier.value;
-      } else if ((!offlineController.offlineMode || offlinePerformanceData == null) &&
+      } else if ((!offlineController.offlineMode.value ||
+              offlinePerformanceData == null) &&
           cpuProfilerController.profilerEnabled) {
         // Fetch a profile if not in offline mode and if the profiler is enabled
         cpuProfilerController.reset();
@@ -236,7 +237,7 @@ class LegacyPerformanceController
         cpuProfilerController.cpuProfileStore.lookupProfile(time: frame.time);
     if (storedProfileForFrame == null) {
       cpuProfilerController.reset();
-      if (!offlineController.offlineMode) {
+      if (!offlineController.offlineMode.value) {
         await cpuProfilerController.pullAndProcessProfile(
           startMicros: frame.time.start.inMicroseconds,
           extentMicros: frame.time.duration.inMicroseconds,

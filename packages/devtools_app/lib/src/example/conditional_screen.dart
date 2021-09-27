@@ -54,7 +54,8 @@ class _ExampleConditionalScreenBodyState
     controller = newController;
 
     if (shouldLoadOfflineData()) {
-      final json = offlineController.offlineDataJson[ExampleConditionalScreen.id];
+      final json =
+          offlineController.offlineDataJson[ExampleConditionalScreen.id];
       if (json.isNotEmpty) {
         loadOfflineData(json['title']);
       }
@@ -93,9 +94,7 @@ class _ExampleConditionalScreenBodyState
 
   @override
   bool shouldLoadOfflineData() {
-    return offlineController.offlineMode &&
-        offlineController.offlineDataJson.isNotEmpty &&
-        offlineController.offlineDataJson[ExampleConditionalScreen.id] != null;
+    return offlineController.shouldLoadOfflineData(ExampleConditionalScreen.id);
   }
 }
 
