@@ -45,7 +45,9 @@ class DebuggerController extends DisposableController
       if (!programExplorerController.initialized.value) {
         await programExplorerController.initialize();
       }
-      programExplorerController.selectScriptNode(currentScriptRef.value);
+      if (currentScriptRef.value != null) {
+        programExplorerController.selectScriptNode(currentScriptRef.value);
+      }
     });
 
     if (_service != null) {
