@@ -82,6 +82,10 @@ class _CodeViewState extends State<CodeView>
 
   ParsedScript get parsedScript => widget.parsedScript;
 
+  // Used to ensure we don't update the scroll position when expanding or
+  // collapsing the file explorer.
+  ScriptRef _lastScriptRef;
+
   @override
   void initState() {
     super.initState();
@@ -90,6 +94,7 @@ class _CodeViewState extends State<CodeView>
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();
     horizontalController = ScrollController();
+    _lastScriptRef = widget.scriptRef;
 
     if (widget.initialPosition != null) {
       final location = widget.initialPosition.location;
@@ -145,18 +150,22 @@ class _CodeViewState extends State<CodeView>
       log('LinkedScrollControllerGroup has no attached controllers');
       return;
     }
-
     final location = widget.controller.scriptLocation.value?.location;
     if (location?.line == null) {
-      // Default to scrolling to the top of the script.
-      if (animate) {
-        verticalController.animateTo(
-          0,
-          duration: longDuration,
-          curve: defaultCurve,
-        );
-      } else {
-        verticalController.jumpTo(0);
+      // Don't scroll to top if we're just rebuilding the code view for the
+      // same script.
+      if (_lastScriptRef?.uri != scriptRef?.uri) {
+        // Default to scrolling to the top of the script.
+        if (animate) {
+          verticalController.animateTo(
+            0,
+            duration: longDuration,
+            curve: defaultCurve,
+          );
+        } else {
+          verticalController.jumpTo(0);
+        }
+        _lastScriptRef = scriptRef;
       }
       return;
     }
@@ -182,6 +191,7 @@ class _CodeViewState extends State<CodeView>
         verticalController.jumpTo(scrollPosition);
       }
     }
+    _lastScriptRef = scriptRef;
   }
 
   void _onPressed(int line) {
@@ -301,6 +311,7 @@ class _CodeViewState extends State<CodeView>
               child: Scrollbar(
                 key: CodeView.debuggerCodeViewVerticalScrollbarKey,
                 controller: textController,
+                isAlwaysShown: true,
                 // Only listen for vertical scroll notifications (ignore those
                 // from the nested horizontal SingleChildScrollView):
                 notificationPredicate: (ScrollNotification notification) =>

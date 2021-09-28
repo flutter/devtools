@@ -28,6 +28,9 @@ class ProgramExplorerController extends DisposableController
   ValueListenable<List<VMServiceObjectNode>> get outlineNodes => _outlineNodes;
   final _outlineNodes = ListValueNotifier<VMServiceObjectNode>([]);
 
+  ValueListenable<bool> get isLoadingOutline => _isLoadingOutline;
+  final _isLoadingOutline = ValueNotifier<bool>(false);
+
   /// The currently selected node.
   VMServiceObjectNode _selected;
 
@@ -60,7 +63,7 @@ class ProgramExplorerController extends DisposableController
 
   /// Initializes the program structure.
   // TODO(bkonyi): reinitialize after hot reload.
-  Future<void> initialize([ScriptRef initialScript]) async {
+  Future<void> initialize() async {
     if (_initializing) {
       return;
     }
@@ -112,9 +115,6 @@ class ProgramExplorerController extends DisposableController
       this,
       _programStructure,
     );
-    if (initialScript != null) {
-      _selectScriptNode(initialScript, nodes);
-    }
     _rootObjectNodes.addAll(nodes);
     _initialized.value = true;
   }
@@ -147,6 +147,7 @@ class ProgramExplorerController extends DisposableController
   Future<void> refresh() async {
     _objectIdToLibrary.clear();
     _selected = null;
+    _isLoadingOutline.value = true;
     _outlineNodes.clear();
     _initialized.value = false;
     _initializing = false;
@@ -164,9 +165,11 @@ class ProgramExplorerController extends DisposableController
       node.select();
       _selected?.unselect();
       _selected = node;
+      _isLoadingOutline.value = true;
       _outlineNodes
         ..clear()
         ..addAll(await _selected.outline);
+      _isLoadingOutline.value = false;
     }
   }
 
