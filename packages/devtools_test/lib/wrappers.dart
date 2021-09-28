@@ -21,7 +21,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 import 'package:provider/provider.dart';
 
-import '../support/mocks.dart';
+import 'mocks.dart';
 
 /// The RouterDelegate must use the same NavigatorKey when building in order
 /// for widget state to be preserved.

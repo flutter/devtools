@@ -15,13 +15,12 @@ import 'package:devtools_app/src/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/inspector/layout_explorer/layout_explorer.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart' hide Fake;
 import 'package:mockito/mockito.dart';
-
-import 'support/mocks.dart';
-import 'support/wrappers.dart';
 
 void main() {
   const screen = InspectorScreen();

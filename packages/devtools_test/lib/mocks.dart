@@ -35,7 +35,8 @@ import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../inspector_screen_test.dart';
+// TODO(mragonese): Resolve this dependency...
+import '../../devtools_app/test/inspector_screen_test.dart';
 import 'cpu_profile_test_data.dart';
 
 class FakeServiceManager extends Fake implements ServiceConnectionManager {

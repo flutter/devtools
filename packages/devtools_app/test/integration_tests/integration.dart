@@ -7,14 +7,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools_test/chrome.dart';
+import 'package:devtools_test/cli_test_driver.dart';
+import 'package:devtools_test/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     show ConsoleAPIEvent, RemoteObject;
-
-import '../support/chrome.dart';
-import '../support/cli_test_driver.dart';
-import '../support/utils.dart';
 
 const bool verboseTesting = false;
 

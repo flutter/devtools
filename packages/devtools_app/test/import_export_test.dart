@@ -4,9 +4,8 @@
 
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'support/wrappers.dart';
 
 void main() async {
   group('ImportControllerTest', () {
