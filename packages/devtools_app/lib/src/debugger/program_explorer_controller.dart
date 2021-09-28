@@ -69,15 +69,17 @@ class ProgramExplorerController extends DisposableController
     }
     _initializing = true;
     _isolate = serviceManager.isolateManager.selectedIsolate.value;
-    final libraries = await Future.wait(
-      serviceManager.isolateManager
-          .isolateDebuggerState(_isolate)
-          .isolateNow
-          .libraries
-          .map(
-            (lib) => VMServiceLibraryContents.getLibraryContents(lib),
-          ),
-    );
+    final libraries = _isolate != null
+        ? await Future.wait(
+            serviceManager.isolateManager
+                .isolateDebuggerState(_isolate)
+                .isolateNow
+                .libraries
+                .map(
+                  (lib) => VMServiceLibraryContents.getLibraryContents(lib),
+                ),
+          )
+        : <VMServiceLibraryContents>[];
 
     void mapIdsToLibrary(LibraryRef lib, Iterable<ObjRef> objs) {
       for (final e in objs) {
