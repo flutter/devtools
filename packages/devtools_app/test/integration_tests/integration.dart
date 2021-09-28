@@ -20,26 +20,6 @@ const bool verboseTesting = false;
 WebBuildFixture webBuildFixture;
 BrowserManager browserManager;
 
-Future<void> waitFor(
-  Future<bool> condition(), {
-  // TODO(kenz): shorten this as long as it doesn't cause flakes.
-  Duration timeout = const Duration(seconds: 10),
-  String timeoutMessage = 'condition not satisfied',
-  Duration delay = const Duration(milliseconds: 100),
-}) async {
-  final DateTime end = DateTime.now().add(timeout);
-
-  while (!end.isBefore(DateTime.now())) {
-    if (await condition()) {
-      return;
-    }
-
-    await Future.delayed(delay);
-  }
-
-  throw timeoutMessage;
-}
-
 class DevtoolsManager {
   DevtoolsManager(this.tabInstance, this.baseUri);
 

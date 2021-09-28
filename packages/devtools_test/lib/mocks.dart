@@ -14,7 +14,10 @@ import 'package:devtools_app/src/debugger/program_explorer_controller.dart';
 import 'package:devtools_app/src/debugger/span_parser.dart';
 import 'package:devtools_app/src/debugger/syntax_highlighter.dart';
 import 'package:devtools_app/src/error_badge_manager.dart';
+import 'package:devtools_app/src/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
+import 'package:devtools_app/src/inspector/inspector_tree.dart';
+import 'package:devtools_app/src/inspector/inspector_tree_controller.dart';
 import 'package:devtools_app/src/listenable.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart'
@@ -35,9 +38,59 @@ import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-// TODO(mragonese): Resolve this dependency...
-import '../../devtools_app/test/inspector_screen_test.dart';
 import 'cpu_profile_test_data.dart';
+
+class FakeInspectorService extends Fake implements InspectorService {
+  @override
+  ObjectGroup createObjectGroup(String debugName) {
+    return ObjectGroup(debugName, this);
+  }
+
+  @override
+  Future<bool> isWidgetTreeReady() async {
+    return false;
+  }
+
+  @override
+  Future<List<String>> inferPubRootDirectoryIfNeeded() async {
+    return ['/some/directory'];
+  }
+
+  @override
+  bool get useDaemonApi => true;
+
+  @override
+  final Set<InspectorServiceClient> clients = {};
+
+  @override
+  void addClient(InspectorServiceClient client) {
+    clients.add(client);
+  }
+
+  @override
+  void removeClient(InspectorServiceClient client) {
+    clients.remove(client);
+  }
+}
+
+class MockInspectorTreeController extends Mock
+    implements InspectorTreeController {}
+
+class TestInspectorController extends Fake implements InspectorController {
+  InspectorService service = FakeInspectorService();
+
+  @override
+  ValueListenable<InspectorTreeNode> get selectedNode => _selectedNode;
+  final ValueNotifier<InspectorTreeNode> _selectedNode = ValueNotifier(null);
+
+  @override
+  void setSelectedNode(InspectorTreeNode newSelection) {
+    _selectedNode.value = newSelection;
+  }
+
+  @override
+  InspectorService get inspectorService => service;
+}
 
 class FakeServiceManager extends Fake implements ServiceConnectionManager {
   FakeServiceManager({

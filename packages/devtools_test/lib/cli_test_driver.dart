@@ -11,7 +11,7 @@ import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
-import '../../devtools_app/test/integration_tests/integration.dart';
+import 'utils.dart';
 
 class AppFixture {
   AppFixture._(

@@ -6,11 +6,8 @@ import 'dart:convert';
 
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
-import 'package:devtools_app/src/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/inspector/inspector_screen.dart';
-import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
-import 'package:devtools_app/src/inspector/inspector_tree_controller.dart';
 import 'package:devtools_app/src/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/inspector/layout_explorer/layout_explorer.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
@@ -299,56 +296,4 @@ void main() {
     // images. Alternately: support an offline inspector mode and add tests of
     // that mode which would enable faster tests that run as unittests.
   });
-}
-
-class FakeInspectorService extends Fake implements InspectorService {
-  @override
-  ObjectGroup createObjectGroup(String debugName) {
-    return ObjectGroup(debugName, this);
-  }
-
-  @override
-  Future<bool> isWidgetTreeReady() async {
-    return false;
-  }
-
-  @override
-  Future<List<String>> inferPubRootDirectoryIfNeeded() async {
-    return ['/some/directory'];
-  }
-
-  @override
-  bool get useDaemonApi => true;
-
-  @override
-  final Set<InspectorServiceClient> clients = {};
-
-  @override
-  void addClient(InspectorServiceClient client) {
-    clients.add(client);
-  }
-
-  @override
-  void removeClient(InspectorServiceClient client) {
-    clients.remove(client);
-  }
-}
-
-class MockInspectorTreeController extends Mock
-    implements InspectorTreeController {}
-
-class TestInspectorController extends Fake implements InspectorController {
-  InspectorService service = FakeInspectorService();
-
-  @override
-  ValueListenable<InspectorTreeNode> get selectedNode => _selectedNode;
-  final ValueNotifier<InspectorTreeNode> _selectedNode = ValueNotifier(null);
-
-  @override
-  void setSelectedNode(InspectorTreeNode newSelection) {
-    _selectedNode.value = newSelection;
-  }
-
-  @override
-  InspectorService get inspectorService => service;
 }

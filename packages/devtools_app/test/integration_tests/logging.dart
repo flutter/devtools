@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_test/cli_test_driver.dart';
+import 'package:devtools_test/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'integration.dart';
