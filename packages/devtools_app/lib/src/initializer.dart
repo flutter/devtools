@@ -162,8 +162,10 @@ class _InitializerState extends State<Initializer>
                 ElevatedButton(
                     onPressed: () {
                       hideDisconnectedOverlay();
-                      DevToolsRouterDelegate.of(context)
-                          .navigate(homePageId, {'uri': null});
+                      DevToolsRouterDelegate.of(context).navigateHome(
+                        clearUriParam: true,
+                        clearScreenParam: true,
+                      );
                     },
                     child: const Text(connectToNewAppText))
               else

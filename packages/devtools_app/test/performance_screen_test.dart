@@ -4,6 +4,7 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/common_widgets.dart';
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/event_details.dart';
 import 'package:devtools_app/src/performance/flutter_frames_chart.dart';
@@ -71,6 +72,7 @@ void main() {
     setUp(() async {
       await ensureInspectorDependencies();
       _setUpServiceManagerWithTimeline(testTimelineJson);
+      setGlobal(OfflineModeController, OfflineModeController());
       screen = const PerformanceScreen();
     });
 

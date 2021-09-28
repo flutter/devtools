@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/mocks.dart';
 import 'support/wrappers.dart';
 
 void main() async {
@@ -15,6 +18,8 @@ void main() async {
     setUp(() {
       notifications = TestNotifications();
       importController = ImportController(notifications, (_) {});
+      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(ServiceConnectionManager, FakeServiceManager());
     });
 
     test('importData pushes proper notifications', () async {
