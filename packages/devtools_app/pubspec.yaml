@@ -18,6 +18,8 @@ environment:
   flutter: '>=1.10.0'
 
 dependencies:
+  # Temporary workaround for https://github.com/brendan-duncan/archive/issues/165.
+  archive: '>=3.0.0 <=3.1.2'
   ansi_up: ^0.0.2
   #     path: ../../third_party/packages/ansi_up
   # Pin ansicolor to version before pre-NNBD version 1.1.0, should be ^1.0.5
