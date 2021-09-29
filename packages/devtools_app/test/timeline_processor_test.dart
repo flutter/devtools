@@ -7,11 +7,10 @@ import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/performance/timeline_event_processor.dart';
 import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_test/performance_test_data.dart';
+import 'package:devtools_test/test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-
-import 'support/performance_test_data.dart';
-import 'support/test_utils.dart';
 
 void main() {
   final originalGoldenUiEvent = goldenUiTimelineEvent.deepCopy();

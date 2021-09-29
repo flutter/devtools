@@ -200,7 +200,7 @@ class TestCallbackPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(TestCallbackPainter oldPainter) => true;
+  bool shouldRepaint(TestCallbackPainter oldDelegate) => true;
 }
 
 class RenderSizedBox extends RenderBox {

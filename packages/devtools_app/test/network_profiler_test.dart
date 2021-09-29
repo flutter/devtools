@@ -16,14 +16,13 @@ import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_app/src/version.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/network_test_data.dart';
+import 'package:devtools_test/utils.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
-
-import 'support/mocks.dart';
-import 'support/network_test_data.dart';
-import 'support/utils.dart';
-import 'support/wrappers.dart';
 
 NetworkController controller = NetworkController();
 

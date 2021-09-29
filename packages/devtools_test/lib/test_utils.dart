@@ -6,8 +6,7 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/performance/performance_model.dart';
-import 'package:devtools_app/src/trace_event.dart';
+import 'package:devtools_app/devtools_app.dart';
 
 SyncTimelineEvent testSyncTimelineEvent(TraceEventWrapper eventWrapper) =>
     SyncTimelineEvent(eventWrapper);

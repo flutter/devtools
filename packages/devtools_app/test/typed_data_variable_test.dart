@@ -8,13 +8,12 @@ import 'dart:typed_data';
 import 'package:devtools_app/src/debugger/debugger_model.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_test/mocks.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
-
-import 'support/mocks.dart';
 
 final isolateRef = IsolateRef(
   id: '1',

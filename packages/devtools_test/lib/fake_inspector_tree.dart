@@ -7,9 +7,7 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:devtools_app/src/inspector/inspector_tree.dart';
-import 'package:devtools_app/src/inspector/inspector_tree_controller.dart';
-import 'package:devtools_app/src/ui/icons.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter/material.dart';
 
 const double fakeRowWidth = 200.0;
