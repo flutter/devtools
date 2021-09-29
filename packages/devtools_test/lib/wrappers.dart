@@ -2,19 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/analytics/analytics_controller.dart';
-import 'package:devtools_app/src/app_size/app_size_controller.dart';
-import 'package:devtools_app/src/banner_messages.dart';
-import 'package:devtools_app/src/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/logging/logging_controller.dart';
-import 'package:devtools_app/src/memory/memory_controller.dart';
-import 'package:devtools_app/src/network/network_controller.dart';
-import 'package:devtools_app/src/notifications.dart';
-import 'package:devtools_app/src/performance/performance_controller.dart';
-import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
-import 'package:devtools_app/src/routing.dart';
-import 'package:devtools_app/src/theme.dart';
+import 'package:devtools_app/devtools_app.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';

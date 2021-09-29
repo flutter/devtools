@@ -7,8 +7,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:devtools_app/src/charts/treemap.dart';
-import 'package:devtools_app/src/ui/search.dart';
+import 'package:devtools_app/devtools_app.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,7 +60,8 @@ Future<T> whenMatches<T>(ValueListenable<T> listenable, bool condition(T)) {
 /// Creates an instance of [Timeline] which contains recorded HTTP events.
 Future<Timeline> loadNetworkProfileTimeline() async {
   // TODO(bkonyi): pull this JSON data into a .dart file.
-  const testDataPath = 'lib/http_request_timeline_test_data.json';
+  const testDataPath =
+      'packages/devtools_test/lib/http_request_timeline_test_data.json';
   final httpTestData = jsonDecode(
     await File(testDataPath).readAsString(),
   );

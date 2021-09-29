@@ -6,33 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:devtools_app/src/banner_messages.dart';
-import 'package:devtools_app/src/connected_app.dart';
-import 'package:devtools_app/src/console_service.dart';
-import 'package:devtools_app/src/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/debugger/program_explorer_controller.dart';
-import 'package:devtools_app/src/debugger/span_parser.dart';
-import 'package:devtools_app/src/debugger/syntax_highlighter.dart';
-import 'package:devtools_app/src/error_badge_manager.dart';
-import 'package:devtools_app/src/inspector/inspector_controller.dart';
-import 'package:devtools_app/src/inspector/inspector_service.dart';
-import 'package:devtools_app/src/inspector/inspector_tree.dart';
-import 'package:devtools_app/src/inspector/inspector_tree_controller.dart';
-import 'package:devtools_app/src/listenable.dart';
-import 'package:devtools_app/src/logging/logging_controller.dart';
-import 'package:devtools_app/src/memory/memory_controller.dart'
-    as flutter_memory;
-import 'package:devtools_app/src/memory/memory_controller.dart';
-import 'package:devtools_app/src/performance/performance_controller.dart';
-import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
-import 'package:devtools_app/src/profiler/profile_granularity.dart';
-import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
-import 'package:devtools_app/src/service_extensions.dart' as extensions;
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_app/src/version.dart';
-import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
-import 'package:devtools_app/src/vm_service_wrapper.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
@@ -310,13 +284,13 @@ class FakeVmService extends Fake implements VmServiceWrapper {
         modified: false,
       ),
       Flag(
-        name: vm_flags.profiler,
+        name: profiler,
         comment: 'Mock Flag',
         valueAsString: 'true',
         modified: false,
       ),
       Flag(
-        name: vm_flags.profilePeriod,
+        name: profilePeriod,
         comment: 'Mock Flag',
         valueAsString: ProfileGranularity.medium.value,
         modified: false,
@@ -442,6 +416,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
       newValue: value,
       timestamp: 1, // 1 is arbitrary.
     );
+    // ignore: invalid_use_of_visible_for_testing_member
     _vmFlagManager.handleVmEvent(fakeVmFlagUpdateEvent);
     return Future.value(Success());
   }
@@ -679,7 +654,7 @@ class MockErrorBadgeManager extends Mock implements ErrorBadgeManager {}
 class MockMemoryController extends Mock implements MemoryController {}
 
 class MockFlutterMemoryController extends Mock
-    implements flutter_memory.MemoryController {}
+    implements MemoryController {}
 
 class MockPerformanceController extends Mock implements PerformanceController {}
 
@@ -813,12 +788,12 @@ class FakeServiceExtensionManager extends Fake
     final String name,
     String valueFromJson,
   ) async {
-    final extension = extensions.serviceExtensionsAllowlist[name];
+    final extension = serviceExtensionsAllowlist[name];
     if (extension != null) {
       final dynamic value = _getExtensionValueFromJson(name, valueFromJson);
 
       final enabled =
-          extension is extensions.ToggleableServiceExtensionDescription
+          extension is ToggleableServiceExtensionDescription
               ? value == extension.enabledValue
               // For extensions that have more than two states
               // (enabled / disabled), we will always consider them to be
@@ -836,7 +811,7 @@ class FakeServiceExtensionManager extends Fake
 
   dynamic _getExtensionValueFromJson(String name, String valueFromJson) {
     final expectedValueType =
-        extensions.serviceExtensionsAllowlist[name].values.first.runtimeType;
+        serviceExtensionsAllowlist[name].values.first.runtimeType;
     switch (expectedValueType) {
       case bool:
         return valueFromJson == 'true' ? true : false;
@@ -898,13 +873,13 @@ class FakeServiceExtensionManager extends Fake
   }
 
   Future<void> _restoreExtensionFromDevice(String name) async {
-    if (!extensions.serviceExtensionsAllowlist.containsKey(name)) {
+    if (!serviceExtensionsAllowlist.containsKey(name)) {
       return;
     }
-    final extensionDescription = extensions.serviceExtensionsAllowlist[name];
+    final extensionDescription = serviceExtensionsAllowlist[name];
     final value = extensionValueOnDevice[name];
     if (extensionDescription
-        is extensions.ToggleableServiceExtensionDescription) {
+        is ToggleableServiceExtensionDescription) {
       if (value == extensionDescription.enabledValue) {
         await setServiceExtensionState(name, true, value, callExtension: false);
       }
