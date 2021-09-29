@@ -21,3 +21,4 @@ flutter-sdk/
 flutter_export_environment.sh
 Podfile
 Podfile.lock
+packages/devtools_test/.flutter-plugins-dependencies
