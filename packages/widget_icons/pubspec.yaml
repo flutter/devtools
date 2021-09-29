@@ -1,0 +1,23 @@
+name: widget_icons
+description: Icons for Flutter widgets
+version: 0.0.1
+homepage: https://github.com/CodemateLtd/widget_icons
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^1.0.0
+
+flutter:
+  fonts:
+    - family: widget_icons
+      fonts:
+        - asset: fonts/widget_icons.ttf
