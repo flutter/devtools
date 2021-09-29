@@ -1481,7 +1481,7 @@ class MemoryLog {
 
     bool pseudoData = false;
     if (liveData.isEmpty) {
-      // Used to create empty memory log for test.
+      // Used to create empty  memory log for test.
       pseudoData = true;
       liveData.add(HeapSample(
         DateTime.now().millisecondsSinceEpoch,
