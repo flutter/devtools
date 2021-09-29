@@ -18,6 +18,7 @@ import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 
+import 'http_request_timeline_test_data.dart';
 import 'network_test_data.dart';
 
 /// Scoping method which registers `listener` as a listener for `listenable`,
@@ -59,12 +60,7 @@ Future<T> whenMatches<T>(ValueListenable<T> listenable, bool condition(T)) {
 
 /// Creates an instance of [Timeline] which contains recorded HTTP events.
 Future<Timeline> loadNetworkProfileTimeline() async {
-  // TODO(bkonyi): pull this JSON data into a .dart file.
-  const testDataPath =
-      'packages/devtools_test/lib/http_request_timeline_test_data.json';
-  final httpTestData = jsonDecode(
-    await File(testDataPath).readAsString(),
-  );
+  final httpTestData = jsonDecode(httpRequestTimelineTestData);
   return Timeline.parse(httpTestData);
 }
 
