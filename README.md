@@ -4,7 +4,7 @@
 
 ## What is this?
 
-Dart DevTools is a suite of performance tools for Dart and Flutter.
+[Dart & Flutter DevTools](https://flutter.dev/docs/development/tools/devtools/) is a suite of performance tools for Dart and Flutter.
 
 ## Getting started
 

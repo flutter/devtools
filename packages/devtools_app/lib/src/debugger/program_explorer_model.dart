@@ -161,6 +161,10 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     }
 
     for (final clazz in lib.classes) {
+      // Don't surface synthetic classes created by mixin applications.
+      if (clazz.name.contains('&')) {
+        continue;
+      }
       if (clazz.location.script.uri == uri) {
         final clazzNode = VMServiceObjectNode(
           controller,
