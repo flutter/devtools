@@ -7,7 +7,8 @@ import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/memory/memory_protocol.dart';
 import 'package:devtools_app/src/memory/memory_timeline.dart';
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:devtools_test/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'package:devtools_test/flutter_test_driver.dart'
+    show FlutterRunConfiguration;
 import 'package:devtools_test/flutter_test_environment.dart';
 import 'package:flutter_test/flutter_test.dart';
 

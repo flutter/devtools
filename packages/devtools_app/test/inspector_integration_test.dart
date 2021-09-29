@@ -6,7 +6,8 @@ import 'dart:io';
 
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/inspector_screen.dart';
-import 'package:devtools_test/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'package:devtools_test/flutter_test_driver.dart'
+    show FlutterRunConfiguration;
 import 'package:devtools_test/flutter_test_environment.dart';
 import 'package:devtools_test/utils.dart';
 import 'package:devtools_test/wrappers.dart';

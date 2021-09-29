@@ -10,7 +10,8 @@ import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_test/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'package:devtools_test/flutter_test_driver.dart'
+    show FlutterRunConfiguration;
 import 'package:devtools_test/flutter_test_environment.dart';
 import 'package:devtools_test/performance_test_data.dart';
 import 'package:devtools_test/utils.dart';

@@ -296,12 +296,12 @@ void verifyIsSearchMatch(
 }
 
 Future<void> waitFor(
-    Future<bool> condition(), {
-      // TODO(kenz): shorten this as long as it doesn't cause flakes.
-      Duration timeout = const Duration(seconds: 10),
-      String timeoutMessage = 'condition not satisfied',
-      Duration delay = const Duration(milliseconds: 100),
-    }) async {
+  Future<bool> condition(), {
+  // TODO(kenz): shorten this as long as it doesn't cause flakes.
+  Duration timeout = const Duration(seconds: 10),
+  String timeoutMessage = 'condition not satisfied',
+  Duration delay = const Duration(milliseconds: 100),
+}) async {
   final DateTime end = DateTime.now().add(timeout);
 
   while (!end.isBefore(DateTime.now())) {

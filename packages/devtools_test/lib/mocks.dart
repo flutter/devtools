@@ -653,8 +653,7 @@ class MockErrorBadgeManager extends Mock implements ErrorBadgeManager {}
 
 class MockMemoryController extends Mock implements MemoryController {}
 
-class MockFlutterMemoryController extends Mock
-    implements MemoryController {}
+class MockFlutterMemoryController extends Mock implements MemoryController {}
 
 class MockPerformanceController extends Mock implements PerformanceController {}
 
@@ -792,13 +791,12 @@ class FakeServiceExtensionManager extends Fake
     if (extension != null) {
       final dynamic value = _getExtensionValueFromJson(name, valueFromJson);
 
-      final enabled =
-          extension is ToggleableServiceExtensionDescription
-              ? value == extension.enabledValue
-              // For extensions that have more than two states
-              // (enabled / disabled), we will always consider them to be
-              // enabled with the current value.
-              : true;
+      final enabled = extension is ToggleableServiceExtensionDescription
+          ? value == extension.enabledValue
+          // For extensions that have more than two states
+          // (enabled / disabled), we will always consider them to be
+          // enabled with the current value.
+          : true;
 
       await setServiceExtensionState(
         name,
@@ -878,8 +876,7 @@ class FakeServiceExtensionManager extends Fake
     }
     final extensionDescription = serviceExtensionsAllowlist[name];
     final value = extensionValueOnDevice[name];
-    if (extensionDescription
-        is ToggleableServiceExtensionDescription) {
+    if (extensionDescription is ToggleableServiceExtensionDescription) {
       if (value == extensionDescription.enabledValue) {
         await setServiceExtensionState(name, true, value, callExtension: false);
       }

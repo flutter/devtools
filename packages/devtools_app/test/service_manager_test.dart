@@ -11,7 +11,8 @@ import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/service_registrations.dart' as registrations;
 import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_test/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'package:devtools_test/flutter_test_driver.dart'
+    show FlutterRunConfiguration;
 import 'package:devtools_test/flutter_test_environment.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
