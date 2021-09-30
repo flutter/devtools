@@ -316,6 +316,8 @@ extension DevToolsColorScheme on ColorScheme {
   Color get autoCompleteHighlightColor =>
       isLight ? Colors.grey[300] : Colors.grey[700];
 
+  Color get autoCompleteTextColor => isLight ? Colors.black : Colors.white;
+
   // Title of the hover card.
   TextStyle get hoverTitleTextStyle => TextStyle(
         color: defaultForeground,
@@ -420,6 +422,10 @@ extension ThemeDataExtension on ThemeData {
 
   TextStyle get subtleFixedFontStyle =>
       fixedFontStyle.copyWith(color: unselectedWidgetColor);
+
+  TextStyle get toolTipFixedFontStyle => fixedFontStyle.copyWith(
+        color: colorScheme.tooltipTextColor,
+      );
 
   TextStyle get devToolsTitleStyle =>
       textTheme.headline6.copyWith(color: Colors.white);

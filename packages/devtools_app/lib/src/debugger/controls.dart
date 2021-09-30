@@ -12,7 +12,6 @@ import '../common_widgets.dart';
 import '../theme.dart';
 import '../ui/label.dart';
 import 'debugger_controller.dart';
-import 'scripts.dart';
 
 class DebuggingControls extends StatefulWidget {
   const DebuggingControls({Key key}) : super(key: key);
@@ -93,15 +92,15 @@ class _DebuggingControlsState extends State<DebuggingControls>
       child: Row(
         children: [
           DebuggerButton(
-            title: 'Step In',
-            icon: Codicons.debugStepInto,
-            onPressed: canStep ? controller.stepIn : null,
+            title: 'Step Over',
+            icon: Codicons.debugStepOver,
+            onPressed: canStep ? controller.stepOver : null,
           ),
           LeftBorder(
             child: DebuggerButton(
-              title: 'Step Over',
-              icon: Codicons.debugStepOver,
-              onPressed: canStep ? controller.stepOver : null,
+              title: 'Step In',
+              icon: Codicons.debugStepInto,
+              onPressed: canStep ? controller.stepIn : null,
             ),
           ),
           LeftBorder(
@@ -118,13 +117,14 @@ class _DebuggingControlsState extends State<DebuggingControls>
 
   Widget _librariesButton() {
     return ValueListenableBuilder(
-      valueListenable: controller.librariesVisible,
+      valueListenable: controller.fileExplorerVisible,
       builder: (context, visible, _) {
+        const libraryIcon = Icons.insert_chart;
         return RoundedOutlinedBorder(
           child: Container(
             color: visible ? Theme.of(context).highlightColor : null,
             child: DebuggerButton(
-              title: 'Libraries',
+              title: 'File Explorer',
               icon: libraryIcon,
               onPressed: controller.toggleLibrariesVisible,
             ),

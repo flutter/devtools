@@ -2,17 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+library inspector_tree;
+
 import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 
 import '../auto_dispose_mixin.dart';
 import '../collapsible_mixin.dart';
 import '../common_widgets.dart';
+import '../config_specific/logger/logger.dart';
 import '../debugger/debugger_controller.dart';
 import '../error_badge_manager.dart';
 import '../theme.dart';
@@ -93,10 +97,11 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
   bool shouldShow() => widget.node.shouldShow;
 }
 
-class InspectorTreeControllerFlutter extends Object
-    with InspectorTreeController, InspectorTreeFixedRowHeightController {
-  /// Client the controller notifies to trigger changes to the UI.
+class InspectorTreeController extends Object {
+  /// Clients the controller notifies to trigger changes to the UI.
   final Set<InspectorControllerClient> _clients = {};
+
+  InspectorTreeNode createNode() => InspectorTreeNode();
 
   void addClient(InspectorControllerClient value) {
     final firstClient = _clients.isEmpty;
@@ -113,10 +118,243 @@ class InspectorTreeControllerFlutter extends Object
     }
   }
 
-  @override
-  InspectorTreeNode createNode() => InspectorTreeNode();
+  // Method defined to avoid a direct Flutter dependency.
+  void setState(VoidCallback fn) {
+    fn();
+    for (var client in _clients) {
+      client.onChanged();
+    }
+  }
 
-  @override
+  void requestFocus() {
+    for (var client in _clients) {
+      client.requestFocus();
+    }
+  }
+
+  InspectorTreeNode get root => _root;
+  InspectorTreeNode _root;
+  set root(InspectorTreeNode node) {
+    setState(() {
+      _root = node;
+    });
+  }
+
+  RemoteDiagnosticsNode subtreeRoot; // Optional.
+
+  InspectorTreeNode get selection => _selection;
+  InspectorTreeNode _selection;
+
+  InspectorTreeConfig get config => _config;
+  InspectorTreeConfig _config;
+
+  set config(InspectorTreeConfig value) {
+    // Only allow setting config once.
+    assert(_config == null);
+    _config = value;
+  }
+
+  set selection(InspectorTreeNode node) {
+    if (node == _selection) return;
+
+    setState(() {
+      _selection?.selected = false;
+      _selection = node;
+      _selection?.selected = true;
+      if (config.onSelectionChange != null) {
+        config.onSelectionChange();
+      }
+    });
+  }
+
+  InspectorTreeNode get hover => _hover;
+  InspectorTreeNode _hover;
+
+  double lastContentWidth;
+
+  final List<InspectorTreeRow> cachedRows = [];
+
+  // TODO: we should add a listener instead that clears the cache when the
+  // root is marked as dirty.
+  void _maybeClearCache() {
+    if (root != null && root.isDirty) {
+      cachedRows.clear();
+      root.isDirty = false;
+      lastContentWidth = null;
+    }
+  }
+
+  InspectorTreeRow getCachedRow(int index) {
+    if (index < 0) return null;
+
+    _maybeClearCache();
+    while (cachedRows.length <= index) {
+      cachedRows.add(null);
+    }
+    cachedRows[index] ??= root?.getRow(index);
+    return cachedRows[index];
+  }
+
+  double getRowOffset(int index) {
+    return (getCachedRow(index)?.depth ?? 0) * columnWidth;
+  }
+
+  set hover(InspectorTreeNode node) {
+    if (node == _hover) {
+      return;
+    }
+    setState(() {
+      _hover = node;
+      // TODO(jacobr): we could choose to repaint only a portion of the UI
+    });
+  }
+
+  void navigateUp() {
+    _navigateHelper(-1);
+  }
+
+  void navigateDown() {
+    _navigateHelper(1);
+  }
+
+  void navigateLeft() {
+    // This logic is consistent with how IntelliJ handles tree navigation on
+    // on left arrow key press.
+    if (selection == null) {
+      _navigateHelper(-1);
+      return;
+    }
+
+    if (selection.isExpanded) {
+      setState(() {
+        selection.isExpanded = false;
+      });
+      return;
+    }
+    if (selection.parent != null) {
+      selection = selection.parent;
+    }
+  }
+
+  void navigateRight() {
+    // This logic is consistent with how IntelliJ handles tree navigation on
+    // on right arrow key press.
+
+    if (selection == null || selection.isExpanded) {
+      _navigateHelper(1);
+      return;
+    }
+
+    setState(() {
+      selection.isExpanded = true;
+    });
+  }
+
+  void _navigateHelper(int indexOffset) {
+    if (numRows == 0) return;
+
+    if (selection == null) {
+      selection = root;
+      return;
+    }
+
+    selection = root
+        .getRow(
+            (root.getRowIndex(selection) + indexOffset).clamp(0, numRows - 1))
+        ?.node;
+  }
+
+  double get horizontalPadding => 10.0;
+
+  double getDepthIndent(int depth) {
+    return (depth + 1) * columnWidth + horizontalPadding;
+  }
+
+  double getRowY(int index) {
+    return rowHeight * index + verticalPadding;
+  }
+
+  void nodeChanged(InspectorTreeNode node) {
+    if (node == null) return;
+    setState(() {
+      node.isDirty = true;
+    });
+  }
+
+  void removeNodeFromParent(InspectorTreeNode node) {
+    setState(() {
+      node.parent?.removeChild(node);
+    });
+  }
+
+  void appendChild(InspectorTreeNode node, InspectorTreeNode child) {
+    setState(() {
+      node.appendChild(child);
+    });
+  }
+
+  void expandPath(InspectorTreeNode node) {
+    setState(() {
+      _expandPath(node);
+    });
+  }
+
+  void _expandPath(InspectorTreeNode node) {
+    while (node != null) {
+      if (!node.isExpanded) {
+        node.isExpanded = true;
+      }
+      node = node.parent;
+    }
+  }
+
+  void collapseToSelected() {
+    setState(() {
+      _collapseAllNodes(root);
+      if (selection == null) return;
+      _expandPath(selection);
+    });
+  }
+
+  void _collapseAllNodes(InspectorTreeNode root) {
+    root.isExpanded = false;
+    root.children.forEach(_collapseAllNodes);
+  }
+
+  int get numRows => root != null ? root.subtreeSize : 0;
+
+  int getRowIndex(double y) => max(0, (y - verticalPadding) ~/ rowHeight);
+
+  InspectorTreeRow getRowForNode(InspectorTreeNode node) {
+    return getCachedRow(root.getRowIndex(node));
+  }
+
+  InspectorTreeRow getRow(Offset offset) {
+    if (root == null) return null;
+    final int row = getRowIndex(offset.dy);
+    return row < root.subtreeSize ? getCachedRow(row) : null;
+  }
+
+  void onExpandRow(InspectorTreeRow row) {
+    setState(() {
+      row.node.isExpanded = true;
+      if (config.onExpand != null) {
+        config.onExpand(row.node);
+      }
+    });
+  }
+
+  void onCollapseRow(InspectorTreeRow row) {
+    setState(() {
+      row.node.isExpanded = false;
+    });
+  }
+
+  void onSelectRow(InspectorTreeRow row) {
+    selection = row.node;
+    expandPath(row.node);
+  }
+
   Rect getBoundingBox(InspectorTreeRow row) {
     // For future reference: the bounding box likely needs to be in terms of
     // positions after the current animations are complete so that computations
@@ -130,18 +368,9 @@ class InspectorTreeControllerFlutter extends Object
     );
   }
 
-  @override
   void scrollToRect(Rect targetRect) {
     for (var client in _clients) {
       client.scrollToRect(targetRect);
-    }
-  }
-
-  @override
-  void setState(VoidCallback fn) {
-    fn();
-    for (var client in _clients) {
-      client.onChanged();
     }
   }
 
@@ -168,9 +397,150 @@ class InspectorTreeControllerFlutter extends Object
     return _maxIndent;
   }
 
-  void requestFocus() {
-    for (var client in _clients) {
-      client.requestFocus();
+  void animateToTargets(List<InspectorTreeNode> targets) {
+    Rect targetRect;
+
+    for (InspectorTreeNode target in targets) {
+      final row = getRowForNode(target);
+      if (row != null) {
+        final rowRect = getBoundingBox(row);
+        targetRect =
+            targetRect == null ? rowRect : targetRect.expandToInclude(rowRect);
+      }
+    }
+
+    if (targetRect == null || targetRect.isEmpty) return;
+
+    targetRect = targetRect.inflate(20.0);
+    scrollToRect(targetRect);
+  }
+
+  bool expandPropertiesByDefault(DiagnosticsTreeStyle style) {
+    // This code matches the text style defaults for which styles are
+    //  by default and which aren't.
+    switch (style) {
+      case DiagnosticsTreeStyle.none:
+      case DiagnosticsTreeStyle.singleLine:
+      case DiagnosticsTreeStyle.errorProperty:
+        return false;
+
+      case DiagnosticsTreeStyle.sparse:
+      case DiagnosticsTreeStyle.offstage:
+      case DiagnosticsTreeStyle.dense:
+      case DiagnosticsTreeStyle.transition:
+      case DiagnosticsTreeStyle.error:
+      case DiagnosticsTreeStyle.whitespace:
+      case DiagnosticsTreeStyle.flat:
+      case DiagnosticsTreeStyle.shallow:
+      case DiagnosticsTreeStyle.truncateChildren:
+        return true;
+    }
+    return true;
+  }
+
+  InspectorTreeNode setupInspectorTreeNode(
+    InspectorTreeNode node,
+    RemoteDiagnosticsNode diagnosticsNode, {
+    @required bool expandChildren,
+    @required bool expandProperties,
+  }) {
+    assert(expandChildren != null);
+    assert(expandProperties != null);
+    node.diagnostic = diagnosticsNode;
+    if (config.onNodeAdded != null) {
+      config.onNodeAdded(node, diagnosticsNode);
+    }
+
+    if (diagnosticsNode.hasChildren ||
+        diagnosticsNode.inlineProperties.isNotEmpty) {
+      if (diagnosticsNode.childrenReady || !diagnosticsNode.hasChildren) {
+        final bool styleIsMultiline =
+            expandPropertiesByDefault(diagnosticsNode.style);
+        setupChildren(
+          diagnosticsNode,
+          node,
+          node.diagnostic.childrenNow,
+          expandChildren: expandChildren && styleIsMultiline,
+          expandProperties: expandProperties && styleIsMultiline,
+        );
+      } else {
+        node.clearChildren();
+        node.appendChild(createNode());
+      }
+    }
+    return node;
+  }
+
+  void setupChildren(
+    RemoteDiagnosticsNode parent,
+    InspectorTreeNode treeNode,
+    List<RemoteDiagnosticsNode> children, {
+    @required bool expandChildren,
+    @required bool expandProperties,
+  }) {
+    assert(expandChildren != null);
+    assert(expandProperties != null);
+    treeNode.isExpanded = expandChildren;
+    if (treeNode.children.isNotEmpty) {
+      // Only case supported is this is the loading node.
+      assert(treeNode.children.length == 1);
+      removeNodeFromParent(treeNode.children.first);
+    }
+    final inlineProperties = parent.inlineProperties;
+
+    if (inlineProperties != null) {
+      for (RemoteDiagnosticsNode property in inlineProperties) {
+        appendChild(
+          treeNode,
+          setupInspectorTreeNode(
+            createNode(),
+            property,
+            // We are inside a property so only expand children if
+            // expandProperties is true.
+            expandChildren: expandProperties,
+            expandProperties: expandProperties,
+          ),
+        );
+      }
+    }
+    if (children != null) {
+      for (RemoteDiagnosticsNode child in children) {
+        appendChild(
+          treeNode,
+          setupInspectorTreeNode(
+            createNode(),
+            child,
+            expandChildren: expandChildren,
+            expandProperties: expandProperties,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> maybePopulateChildren(InspectorTreeNode treeNode) async {
+    final RemoteDiagnosticsNode diagnostic = treeNode.diagnostic;
+    if (diagnostic != null &&
+        diagnostic.hasChildren &&
+        (treeNode.hasPlaceholderChildren || treeNode.children.isEmpty)) {
+      try {
+        final children = await diagnostic.children;
+        if (treeNode.hasPlaceholderChildren || treeNode.children.isEmpty) {
+          setupChildren(
+            diagnostic,
+            treeNode,
+            children,
+            expandChildren: true,
+            expandProperties: false,
+          );
+          nodeChanged(treeNode);
+          if (treeNode == selection) {
+            expandPath(treeNode);
+          }
+        }
+      } catch (e) {
+        log(e.toString(), LogLevel.error);
+      }
     }
   }
 }
@@ -208,7 +578,7 @@ class _InspectorTreeState extends State<InspectorTree>
         AutomaticKeepAliveClientMixin<InspectorTree>,
         AutoDisposeMixin
     implements InspectorControllerClient {
-  InspectorTreeControllerFlutter get controller => widget.controller;
+  InspectorTreeController get controller => widget.controller;
 
   bool get isSummaryTree => widget.isSummaryTree;
 
@@ -237,7 +607,7 @@ class _InspectorTreeState extends State<InspectorTree>
   @override
   void didUpdateWidget(InspectorTree oldWidget) {
     if (oldWidget.controller != widget.controller) {
-      final InspectorTreeControllerFlutter oldController = oldWidget.controller;
+      final InspectorTreeController oldController = oldWidget.controller;
       oldController?.removeClient(this);
       cancel();
 
@@ -603,7 +973,7 @@ class InspectorRowContent extends StatelessWidget {
   });
 
   final InspectorTreeRow row;
-  final InspectorTreeControllerFlutter controller;
+  final InspectorTreeController controller;
   final DebuggerController debuggerController;
   final VoidCallback onToggle;
   final Animation<double> expandArrowAnimation;

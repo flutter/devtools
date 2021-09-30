@@ -98,7 +98,7 @@ void main() {
       expect(history.current.value, ref1);
     });
 
-    test('moveBack', () {
+    test('moveForward', () {
       history.pushEntry(ref1);
       history.pushEntry(ref2);
 
@@ -258,7 +258,9 @@ void main() {
     DebuggerController debuggerController;
 
     setUp(() {
-      debuggerController = DebuggerController(initialSwitchToIsolate: false);
+      debuggerController = TestDebuggerController(
+        initialSwitchToIsolate: false,
+      );
       debuggerController.parsedScript.value = ParsedScript(
         script: testScript,
         highlighter: null,

@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:devtools_app/src/charts/flame_chart.dart';
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_screen.dart';
@@ -41,6 +42,7 @@ void main() {
       when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
           .thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(OfflineModeController, OfflineModeController());
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
     }

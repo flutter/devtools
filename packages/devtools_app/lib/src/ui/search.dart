@@ -6,6 +6,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -15,6 +16,7 @@ import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
 import '../theme.dart';
 import '../trees.dart';
+import '../ui/utils.dart';
 import '../utils.dart';
 
 /// Top 10 matches to display in auto-complete overlay.
@@ -113,7 +115,6 @@ class AutoComplete extends StatefulWidget {
     this.controller, {
     @required this.searchFieldKey,
     @required this.onTap,
-    this.autocompleteMatchTileHeight,
     bool bottom = true, // If false placed above.
     bool maxWidth = true,
   })  : isBottom = bottom,
@@ -122,7 +123,6 @@ class AutoComplete extends StatefulWidget {
   final AutoCompleteSearchControllerMixin controller;
   final GlobalKey searchFieldKey;
   final SelectAutoComplete onTap;
-  final double autocompleteMatchTileHeight;
   final bool isBottom;
   final bool isMaxWidth;
 
@@ -141,8 +141,6 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     final onTap = autoComplete.onTap;
     final bottom = autoComplete.isBottom;
     final isMaxWidth = autoComplete.isMaxWidth;
-    final autocompleteMatchTileHeight =
-        autoComplete.autocompleteMatchTileHeight;
 
     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
       controller.handleAutoCompleteOverlay(
@@ -151,7 +149,6 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         onTap: onTap,
         bottom: bottom,
         maxWidth: isMaxWidth,
-        autocompleteMatchTileHeight: autocompleteMatchTileHeight,
       );
     });
   }
@@ -168,15 +165,37 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
 
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
+    final autoCompleteTextStyle = Theme.of(context)
+        .regularTextStyle
+        .copyWith(color: colorScheme.autoCompleteTextColor);
+
+    final autoCompleteHighlightedTextStyle =
+        Theme.of(context).regularTextStyle.copyWith(
+              color: searchColor,
+              fontWeight: FontWeight.bold,
+            );
+
+    final tileContents = searchAutoComplete.value
+        .map((match) => _maybeHighlightMatchText(
+              match,
+              autoCompleteTextStyle,
+              autoCompleteHighlightedTextStyle,
+            ))
+        .toList();
+
+    final tileEntryHeight = tileContents.isEmpty
+        ? 0.0
+        : calculateTextSpanHeight(tileContents.first) + denseSpacing;
+
+    final tileEntryMaxWidth = tileContents.isEmpty
+        ? 0.0
+        : calculateTextSpanWidth(findLongestTextSpan(tileContents)) +
+            denseSpacing;
+
     // Find the searchField and place overlay below bottom of TextField and
     // make overlay width of TextField. This is also we decide the height of
     // the ListTile height, position above (if bottom is false).
     final RenderBox box = searchFieldKey.currentContext.findRenderObject();
-
-    // Approximation but it's pretty accurate. Could consider using a layout builder
-    // or maybe build in an overlay (that's isn't visible) to compute.
-    final tileEntryHeight =
-        autoComplete.autocompleteMatchTileHeight ?? box.size.height;
 
     // Compute to global coordinates.
     final offset = box.localToGlobal(Offset.zero);
@@ -195,45 +214,48 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         ? searchAutoComplete.value.length
         : (maxAreaForPopup / tileEntryHeight).truncateToDouble();
 
-    final autoCompleteTiles = <ListTile>[];
+    final autoCompleteTiles = <GestureDetector>[];
     final count = min(searchAutoComplete.value.length, totalTiles);
     for (var index = 0; index < count; index++) {
-      final matchedName = searchAutoComplete.value[index];
+      final textSpan = tileContents[index];
       autoCompleteTiles.add(
-        ListTile(
-          minVerticalPadding: 0,
-          dense: true,
-          title: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(matchedName),
-          ),
-          tileColor: controller.currentDefaultIndex == index
-              ? colorScheme.autoCompleteHighlightColor
-              : colorScheme.defaultBackgroundColor,
+        GestureDetector(
           onTap: () {
             controller.selectTheSearch = true;
-            controller.search = matchedName;
-            autoComplete.onTap(matchedName);
+            controller.search = textSpan.text;
+            autoComplete.onTap(textSpan.text);
           },
+          child: Container(
+            color: controller.currentDefaultIndex == index
+                ? colorScheme.autoCompleteHighlightColor
+                : colorScheme.defaultBackgroundColor,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text.rich(
+                  textSpan,
+                  maxLines: 1,
+                ),
+              ),
+            ),
+          ),
         ),
       );
     }
 
     // Compute the Y position of the popup (auto-complete list). Its bottom
-    // will be positioned at the top of the text field (tileEntryHeight is
-    // also the height of the TextField's render object height). Add 1 includes
+    // will be positioned at the top of the text field. Add 1 includes
     // the TextField border.
-    // TODO(terry): Consider completely computed but a bunch more work this
-    //              currently works for all cases where we use auto-complete.
     final yCoord =
-        bottom ? 0.0 : -((count * tileEntryHeight) + tileEntryHeight + 1);
+        bottom ? 0.0 : -((count * tileEntryHeight) + box.size.height + 1);
 
     final xCoord = controller.xPosition;
 
     return Positioned(
       key: searchAutoCompleteKey,
       width: isMaxWidth
-          ? box.size.width
+          ? max(tileEntryMaxWidth, box.size.width)
           : AutoCompleteSearchControllerMixin.minPopupWidth,
       height: bottom ? null : count * tileEntryHeight,
       child: CompositedTransformFollower(
@@ -251,6 +273,63 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
           ),
         ),
       ),
+    );
+  }
+
+  TextSpan _maybeHighlightMatchText(
+    AutoCompleteMatch match,
+    TextStyle regularTextStyle,
+    TextStyle highlightedTextStyle,
+  ) {
+    final text = match.text;
+    final matchedSegments = match.matchedSegments;
+
+    if (matchedSegments == null || matchedSegments.isEmpty) {
+      return TextSpan(
+        text: text,
+        style: regularTextStyle,
+      );
+    }
+
+    final spans = <TextSpan>[];
+    int previousEndIndex = 0;
+
+    for (final segment in matchedSegments) {
+      if (previousEndIndex < segment.begin) {
+        // Add the unhighlighted segment before the current highlighted segment:
+        final segmentBefore = text.substring(previousEndIndex, segment.begin);
+        spans.add(
+          TextSpan(
+            text: segmentBefore,
+            style: regularTextStyle,
+          ),
+        );
+      }
+      // Add the current highlighted segment:
+      final highlightedSegment = text.substring(segment.begin, segment.end);
+      spans.add(
+        TextSpan(
+          text: highlightedSegment,
+          style: highlightedTextStyle,
+        ),
+      );
+      previousEndIndex = segment.end;
+    }
+    if (previousEndIndex < text.length - 1) {
+      // Add the last unhighlighted segment:
+      final lastSegment = text.substring(previousEndIndex);
+      spans.add(
+        TextSpan(
+          text: lastSegment,
+          style: regularTextStyle,
+        ),
+      );
+    }
+
+    return TextSpan(
+      text: spans.first.text,
+      style: spans.first.style,
+      children: spans.sublist(1),
     );
   }
 }
@@ -299,9 +378,9 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     selectTheSearchNotifier.value = v;
   }
 
-  final searchAutoComplete = ValueNotifier<List<String>>([]);
+  final searchAutoComplete = ValueNotifier<List<AutoCompleteMatch>>([]);
 
-  ValueListenable<List<String>> get searchAutoCompleteNotifier =>
+  ValueListenable<List<AutoCompleteMatch>> get searchAutoCompleteNotifier =>
       searchAutoComplete;
 
   void clearSearchAutoComplete() {
@@ -326,7 +405,6 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     @required BuildContext context,
     @required GlobalKey searchFieldKey,
     @required SelectAutoComplete onTap,
-    double autocompleteMatchTileHeight,
     bool bottom = true,
     bool maxWidth = true,
   }) {
@@ -335,7 +413,6 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
         this,
         searchFieldKey: searchFieldKey,
         onTap: onTap,
-        autocompleteMatchTileHeight: autocompleteMatchTileHeight,
         bottom: bottom,
         maxWidth: maxWidth,
       );
@@ -356,7 +433,6 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     @required BuildContext context,
     @required GlobalKey searchFieldKey,
     @required SelectAutoComplete onTap,
-    double autocompleteMatchTileHeight,
     bool bottom = true,
     bool maxWidth = true,
   }) {
@@ -368,7 +444,6 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
       context: context,
       searchFieldKey: searchFieldKey,
       onTap: onTap,
-      autocompleteMatchTileHeight: autocompleteMatchTileHeight,
       bottom: bottom,
       maxWidth: maxWidth,
     );
@@ -530,6 +605,8 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   /// pop-up is visible close the pop-up on first ESCAPE.
   /// [keyEventsToPropogate] a set of key events that should be propogated to
   /// other handlers
+  /// TODO(elliette): Have this return a private _AutoCompleteSearchField widget
+  ///  instead.
   Widget buildAutoCompleteSearchField({
     @required AutoCompleteSearchControllerMixin controller,
     @required GlobalKey searchFieldKey,
@@ -578,18 +655,19 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
             final searchToMatch = controller.search.toLowerCase();
             // Find exact match in autocomplete list - use that as our search value.
             for (final autoEntry in controller.searchAutoComplete.value) {
-              if (searchToMatch == autoEntry.toLowerCase()) {
-                foundExact = autoEntry;
+              if (searchToMatch == autoEntry.text.toLowerCase()) {
+                foundExact = autoEntry.text;
                 break;
               }
             }
             // Nothing found, pick item selected in dropdown.
             final autoCompleteList = controller.searchAutoComplete.value;
             if (foundExact == null ||
-                autoCompleteList[controller.currentDefaultIndex] !=
+                autoCompleteList[controller.currentDefaultIndex].text !=
                     foundExact) {
               if (autoCompleteList.isNotEmpty) {
-                foundExact = autoCompleteList[controller.currentDefaultIndex];
+                foundExact =
+                    autoCompleteList[controller.currentDefaultIndex].text;
               }
             }
 
@@ -890,3 +968,10 @@ mixin TreeDataSearchStateMixin<T extends TreeNode<T>>
 
 class AutoCompleteController extends DisposableController
     with SearchControllerMixin, AutoCompleteSearchControllerMixin {}
+
+class AutoCompleteMatch {
+  AutoCompleteMatch(this.text, {this.matchedSegments});
+
+  final String text;
+  final List<Range> matchedSegments;
+}

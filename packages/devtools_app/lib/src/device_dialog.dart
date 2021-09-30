@@ -98,7 +98,10 @@ class DeviceDialog extends StatelessWidget {
   Widget _connectToNewAppButton(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
-        DevToolsRouterDelegate.of(context).navigate(homePageId, {'uri': null});
+        DevToolsRouterDelegate.of(context).navigateHome(
+          clearUriParam: true,
+          clearScreenParam: true,
+        );
         Navigator.of(context, rootNavigator: true).pop('dialog');
       },
       child: Text(connectToNewAppText.toUpperCase()),
