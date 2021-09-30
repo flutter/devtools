@@ -130,4 +130,4 @@ dependency_overrides:
   devtools:  #OVERRIDE_FOR_DEVELOPMENT
     path: ../devtools  #OVERRIDE_FOR_DEVELOPMENT
   widget_icons: #OVERRIDE_FOR_DEVELOPMENT
-    path: ../widget_icons  #OVERRIDE_FOR_DEVELOPMENT
+    path: ../../third_party/packages/widget_icons  #OVERRIDE_FOR_DEVELOPMENT
