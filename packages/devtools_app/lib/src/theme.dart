@@ -242,8 +242,6 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get serviceExtensionButtonsFillSelected => devtoolsBlue[400];
 
-  Color get fileLineColColor => isLight ? Colors.black : Colors.white;
-
   Color get grey => isLight
       ? const Color.fromARGB(255, 128, 128, 128)
       : const Color.fromARGB(255, 128, 128, 128);

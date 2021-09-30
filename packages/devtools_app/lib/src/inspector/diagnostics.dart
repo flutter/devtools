@@ -329,7 +329,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           text:
               '${location.getFile().split('/').last}:${location.getLine()}:${location.getColumn()}            ',
           style: inspector_text_styles.regular
-              .copyWith(color: theme.colorScheme.fileLineColColor),
+              .copyWith(color: theme.colorScheme.defaultForeground),
         ),
       ),
     );
