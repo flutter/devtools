@@ -17,7 +17,7 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose.dart';
-import '../debugger/debugger_model.dart';
+import '../debugger/debugger_model.dart' hide SourcePosition;
 import '../eval_on_dart_library.dart';
 import '../globals.dart';
 import '../utils.dart';

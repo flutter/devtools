@@ -12,6 +12,7 @@ import '../common_widgets.dart';
 import '../theme.dart';
 import '../ui/label.dart';
 import 'debugger_controller.dart';
+import 'scripts.dart';
 
 class DebuggingControls extends StatefulWidget {
   const DebuggingControls({Key key}) : super(key: key);
@@ -117,14 +118,13 @@ class _DebuggingControlsState extends State<DebuggingControls>
 
   Widget _librariesButton() {
     return ValueListenableBuilder(
-      valueListenable: controller.fileExplorerVisible,
+      valueListenable: controller.librariesVisible,
       builder: (context, visible, _) {
-        const libraryIcon = Icons.insert_chart;
         return RoundedOutlinedBorder(
           child: Container(
             color: visible ? Theme.of(context).highlightColor : null,
             child: DebuggerButton(
-              title: 'File Explorer',
+              title: 'Libraries',
               icon: libraryIcon,
               onPressed: controller.toggleLibrariesVisible,
             ),

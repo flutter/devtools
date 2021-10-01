@@ -20,7 +20,6 @@ import '../ui/search.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
 import 'debugger_model.dart';
-import 'program_explorer_controller.dart';
 import 'syntax_highlighter.dart';
 
 // TODO(devoncarew): Add some delayed resume value notifiers (to be used to
@@ -41,14 +40,6 @@ class DebuggerController extends DisposableController
       _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
     };
     scriptsHistory.current.addListener(_scriptHistoryListener);
-    addAutoDisposeListener(currentScriptRef, () async {
-      if (!programExplorerController.initialized.value) {
-        await programExplorerController.initialize();
-      }
-      if (currentScriptRef.value != null) {
-        programExplorerController.selectScriptNode(currentScriptRef.value);
-      }
-    });
 
     if (_service != null) {
       initialize();
@@ -129,8 +120,6 @@ class DebuggerController extends DisposableController
   Map<LibraryRef, Future<Set<String>>>
       libraryMemberAndImportsAutocompleteCache = {};
 
-  final programExplorerController = ProgramExplorerController();
-
   final ScriptCache _scriptCache = ScriptCache();
 
   final ScriptsHistory scriptsHistory = ScriptsHistory();
@@ -172,11 +161,8 @@ class DebuggerController extends DisposableController
   final _showFileOpener = ValueNotifier<bool>(false);
 
   /// Jump to the given ScriptRef and optional SourcePosition.
-  void showScriptLocation(
-    ScriptLocation scriptLocation, {
-    bool centerLocation = true,
-  }) {
-    _showScriptLocation(scriptLocation, centerLocation: centerLocation);
+  void showScriptLocation(ScriptLocation scriptLocation) {
+    _showScriptLocation(scriptLocation);
 
     // Update the scripts history (and make sure we don't react to the
     // subsequent event).
@@ -187,11 +173,7 @@ class DebuggerController extends DisposableController
 
   /// Show the given script location (without updating the script navigation
   /// history).
-  void _showScriptLocation(
-    ScriptLocation scriptLocation, {
-    bool centerLocation = true,
-  }) {
-    _shouldCenterScrollLocation = centerLocation;
+  void _showScriptLocation(ScriptLocation scriptLocation) {
     _currentScriptRef.value = scriptLocation?.scriptRef;
 
     _parseCurrentScript();
@@ -300,9 +282,6 @@ class DebuggerController extends DisposableController
   /// Return the sorted list of ScriptRefs active in the current isolate.
   ValueListenable<List<ScriptRef>> get sortedScripts => _sortedScripts;
 
-  bool get shouldCenterScrollLocation => _shouldCenterScrollLocation;
-  bool _shouldCenterScrollLocation = true;
-
   final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
 
   ValueListenable<List<Breakpoint>> get breakpoints => _breakpoints;
@@ -325,7 +304,7 @@ class DebuggerController extends DisposableController
 
   final _librariesVisible = ValueNotifier(false);
 
-  ValueListenable<bool> get fileExplorerVisible => _librariesVisible;
+  ValueListenable<bool> get librariesVisible => _librariesVisible;
 
   /// Make the 'Libraries' view on the right-hand side of the screen visible or
   /// hidden.
@@ -629,6 +608,7 @@ class DebuggerController extends DisposableController
 
   void _handleIsolateEvent(Event event) {
     if (event.isolate.id != isolateRef?.id) return;
+
     switch (event.kind) {
       case EventKind.kIsolateReload:
         _updateAfterIsolateReload(event);
@@ -883,12 +863,25 @@ class DebuggerController extends DisposableController
     _populateScriptAndShowLocation(mainScriptRef);
   }
 
+  SourcePosition calculatePosition(Script script, int tokenPos) {
+    final List<List<int>> table = script.tokenPosTable;
+    if (table == null) {
+      return null;
+    }
+
+    return SourcePosition(
+      line: script.getLineNumberFromTokenPos(tokenPos),
+      column: script.getColumnNumberFromTokenPos(tokenPos),
+      tokenPos: tokenPos,
+    );
+  }
+
   Future<BreakpointAndSourcePosition> _createBreakpointWithLocation(
       Breakpoint breakpoint) async {
     if (breakpoint.resolved) {
       final bp = BreakpointAndSourcePosition.create(breakpoint);
       return getScript(bp.scriptRef).then((Script script) {
-        final pos = SourcePosition.calculatePosition(script, bp.tokenPos);
+        final pos = calculatePosition(script, bp.tokenPos);
         return BreakpointAndSourcePosition.create(breakpoint, pos);
       });
     } else {
@@ -905,8 +898,7 @@ class DebuggerController extends DisposableController
     }
 
     final script = await getScript(location.script);
-    final position =
-        SourcePosition.calculatePosition(script, location.tokenPos);
+    final position = calculatePosition(script, location.tokenPos);
     return StackFrameAndSourcePosition(frame, position: position);
   }
 
@@ -1011,7 +1003,7 @@ class DebuggerController extends DisposableController
     for (SourceReportRange range in report.ranges) {
       if (range.possibleBreakpoints != null) {
         for (int tokenPos in range.possibleBreakpoints) {
-          positions.add(SourcePosition.calculatePosition(script, tokenPos));
+          positions.add(calculatePosition(script, tokenPos));
         }
       }
     }
