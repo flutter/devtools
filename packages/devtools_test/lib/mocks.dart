@@ -671,6 +671,7 @@ class MockDebuggerController extends Mock implements DebuggerController {
     when(debuggerController.isSystemIsolate).thenReturn(false);
     when(debuggerController.breakpointsWithLocation)
         .thenReturn(ValueNotifier([]));
+    when(debuggerController.librariesVisible).thenReturn(ValueNotifier(false));
     when(debuggerController.currentScriptRef).thenReturn(ValueNotifier(null));
     when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
     when(debuggerController.selectedBreakpoint).thenReturn(ValueNotifier(null));
