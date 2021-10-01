@@ -684,6 +684,7 @@ class ObjectGroup implements Disposable {
       return Future.value();
     }
 
+    print('adding request from _callServiceExtension');
     return inspectorLibrary.addRequest(this, () async {
       print('call service extension');
       final r = await serviceManager.service.callServiceExtension(
@@ -713,6 +714,7 @@ class ObjectGroup implements Disposable {
       if (!available) return null;
     }
 
+    print('invokeServiceMethodDaemonParams');
     return await _callServiceExtension(callMethodName, params);
   }
 

@@ -41,10 +41,13 @@ void main() async {
 
       test('track widget creation on', () async {
         await env.setupEnvironment();
-        print('before expect');
-        await expectLater(
-            await inspectorService.isWidgetCreationTracked(), isTrue);
-        print('after expect');
+        print('before expectAsync0');
+        expectAsync0(() async {
+          final isTracked = await inspectorService.isWidgetCreationTracked();
+          expect(isTracked, isTrue);
+          print('end of expectAsync0');
+        });
+        print('after expectAsync0');
       });
 
       test('useDaemonApi', () async {
