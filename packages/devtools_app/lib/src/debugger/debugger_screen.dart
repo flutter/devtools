@@ -26,7 +26,7 @@ import 'controls.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'key_sets.dart';
-import 'program_explorer.dart';
+import 'scripts.dart';
 import 'variables.dart';
 
 class DebuggerScreen extends Screen {
@@ -102,10 +102,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   void _onLocationSelected(ScriptLocation location) {
     if (location != null) {
-      controller.showScriptLocation(
-        location,
-        centerLocation: location.location == null,
-      );
+      controller.showScriptLocation(location);
     }
   }
 
@@ -140,7 +137,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     );
 
     final codeArea = ValueListenableBuilder(
-      valueListenable: controller.fileExplorerVisible,
+      valueListenable: controller.librariesVisible,
       builder: (context, visible, _) {
         if (visible) {
           // TODO(devoncarew): Animate this opening and closing.
@@ -149,10 +146,17 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             initialFractions: const [0.70, 0.30],
             children: [
               codeView,
-              ProgramExplorer(
-                debugController: controller,
-                onSelected: _onLocationSelected,
-              )
+              ValueListenableBuilder(
+                valueListenable: controller.sortedScripts,
+                builder: (context, scripts, _) {
+                  return ScriptPicker(
+                    key: DebuggerScreenBody.scriptViewKey,
+                    controller: controller,
+                    scripts: scripts,
+                    onSelected: _onLocationSelected,
+                  );
+                },
+              ),
             ],
           );
         } else {
@@ -389,7 +393,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     final fileName = ' at ' + frame.location.script.uri.split('/').last;
     final script = await widget.controller.getScript(frame.location.script);
     final pos =
-        SourcePosition.calculatePosition(script, frame.location.tokenPos);
+        widget.controller.calculatePosition(script, frame.location.tokenPos);
 
     return 'paused$reason$fileName $pos';
   }

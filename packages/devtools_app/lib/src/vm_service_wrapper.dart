@@ -1266,24 +1266,4 @@ extension VmServicePrivate on VmServiceWrapper {
         isolateId: isolateId,
         parser: PortList.parse,
       );
-
-  Future<InstanceRef> getReachableSize(String isolateId, String targetId) =>
-      _privateRpcInvoke(
-        'getReachableSize',
-        isolateId: isolateId,
-        args: {
-          'targetId': targetId,
-        },
-        parser: InstanceRef.parse,
-      );
-
-  Future<InstanceRef> getRetainedSize(String isolateId, String targetId) =>
-      _privateRpcInvoke(
-        'getRetainedSize',
-        isolateId: isolateId,
-        args: {
-          'targetId': targetId,
-        },
-        parser: InstanceRef.parse,
-      );
 }

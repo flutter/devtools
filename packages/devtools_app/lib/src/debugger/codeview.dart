@@ -42,7 +42,6 @@ class CodeView extends StatefulWidget {
   const CodeView({
     Key key,
     this.controller,
-    this.initialPosition,
     this.scriptRef,
     this.parsedScript,
     this.onSelected,
@@ -58,7 +57,6 @@ class CodeView extends StatefulWidget {
   static double get assumedCharacterWidth => scaleByFontFactor(16.0);
 
   final DebuggerController controller;
-  final ScriptLocation initialPosition;
   final ScriptRef scriptRef;
   final ParsedScript parsedScript;
 
@@ -90,15 +88,6 @@ class _CodeViewState extends State<CodeView>
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();
     horizontalController = ScrollController();
-
-    if (widget.initialPosition != null) {
-      final location = widget.initialPosition.location;
-      // Lines are 1-indexed. Scrolling to line 1 required a scroll position of
-      // 0.
-      final lineIndex = location.line - 1;
-      final scrollPosition = lineIndex * CodeView.rowHeight;
-      verticalController.jumpTo(scrollPosition);
-    }
 
     addAutoDisposeListener(
       widget.controller.scriptLocation,
@@ -135,8 +124,12 @@ class _CodeViewState extends State<CodeView>
   }
 
   void _updateScrollPosition({bool animate = true}) {
-    if (widget.controller.scriptLocation.value?.scriptRef?.uri !=
-        scriptRef?.uri) {
+    if (widget.controller.scriptLocation.value?.scriptRef != scriptRef) {
+      return;
+    }
+
+    final location = widget.controller.scriptLocation.value?.location;
+    if (location?.line == null) {
       return;
     }
 
@@ -146,32 +139,16 @@ class _CodeViewState extends State<CodeView>
       return;
     }
 
-    final location = widget.controller.scriptLocation.value?.location;
-    if (location?.line == null) {
-      // Default to scrolling to the top of the script.
-      if (animate) {
-        verticalController.animateTo(
-          0,
-          duration: longDuration,
-          curve: defaultCurve,
-        );
-      } else {
-        verticalController.jumpTo(0);
-      }
-      return;
-    }
-
     final position = verticalController.position;
     final extent = position.extentInside;
 
     // TODO(devoncarew): Adjust this so we don't scroll if we're already in the
     // middle third of the screen.
     if (parsedScript.lineCount * CodeView.rowHeight > extent) {
+      // Scroll to the middle of the screen.
       final lineIndex = location.line - 1;
-      final scrollPosition = lineIndex * CodeView.rowHeight -
-          (widget.controller.shouldCenterScrollLocation
-              ? ((extent - CodeView.rowHeight) / 2)
-              : 0);
+      final scrollPosition =
+          lineIndex * CodeView.rowHeight - (extent - CodeView.rowHeight) / 2;
       if (animate) {
         verticalController.animateTo(
           scrollPosition,
@@ -663,7 +640,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
 
         if (isOutOfViewTop || isOutOfViewBottom) {
           // Scroll this search token to the middle of the view.
-          final targetOffset = math.max<double>(
+          final targetOffset = math.max(
             activeSearch.position.line * CodeView.rowHeight - widget.height / 2,
             0.0,
           );

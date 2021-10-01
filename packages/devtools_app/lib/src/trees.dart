@@ -43,9 +43,6 @@ abstract class TreeNode<T extends TreeNode<T>> {
 
   bool get isRoot => parent == null;
 
-  bool get isSelected => _selected;
-  bool _selected = false;
-
   T get root {
     if (_root != null) {
       return _root;
@@ -81,22 +78,15 @@ abstract class TreeNode<T extends TreeNode<T>> {
     _isExpanded = true;
   }
 
-  void select() {
-    _selected = true;
-  }
-
-  void unselect() {
-    _selected = false;
-  }
-
   // TODO(jacobr): cache the value of whether the node should be shown
   // so that lookups on this class are O(1) invalidating the cache when nodes
   // up the tree are expanded and collapsed.
   /// Whether this node should be shown in the tree.
   ///
   /// When using this, consider caching the value. It is O([level]) to compute.
-  bool shouldShow() =>
-      parent == null || (parent.isExpanded && parent.shouldShow());
+  bool shouldShow() {
+    return parent == null || (parent.isExpanded && parent.shouldShow());
+  }
 
   void collapse() {
     _isExpanded = false;
@@ -109,23 +99,10 @@ abstract class TreeNode<T extends TreeNode<T>> {
   /// Override to handle pressing on a Leaf node.
   void leaf() {}
 
-  void addChild(T child, {int index}) {
-    index ??= children.length;
-    assert(index <= children.length);
-    children.insert(index, child);
+  void addChild(T child) {
+    children.add(child);
     child.parent = this;
-    child.index = index;
-    for (int i = index + 1; i < children.length; ++i) {
-      children[i].index++;
-    }
-  }
-
-  T removeChildAtIndex(int index) {
-    assert(index < children.length);
-    for (int i = index + 1; i < children.length; ++i) {
-      children[i].index--;
-    }
-    return children.removeAt(index);
+    child.index = children.length - 1;
   }
 
   void addAllChildren(List<T> children) {
@@ -137,12 +114,6 @@ abstract class TreeNode<T extends TreeNode<T>> {
     breadthFirstTraversal<T>(this, action: (T node) {
       node.expand();
     });
-  }
-
-  /// Expands this node and each parent node recursively.
-  void expandAscending() {
-    expand();
-    parent?.expandAscending();
   }
 
   /// Collapses this node and all of its children (cascading).

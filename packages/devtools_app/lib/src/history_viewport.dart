@@ -29,16 +29,12 @@ class HistoryViewport<T> extends StatelessWidget {
     @required this.contentBuilder,
     this.controls,
     this.generateTitle,
-    this.onChange,
-    this.historyEnabled = true,
   });
 
   final HistoryManager<T> history;
   final String Function(T) generateTitle;
   final List<Widget> controls;
   final Widget Function(BuildContext, T) contentBuilder;
-  final void Function(T, T) onChange;
-  final bool historyEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -63,40 +59,17 @@ class HistoryViewport<T> extends StatelessWidget {
       theme,
       child: Row(
         children: [
-          if (historyEnabled) ...[
-            ToolbarAction(
-              icon: Icons.chevron_left,
-              onPressed: history.hasPrevious
-                  ? () {
-                      history.moveBack();
-                      if (onChange != null) {
-                        onChange(
-                          history.current.value,
-                          history.peekNext(),
-                        );
-                      }
-                    }
-                  : null,
-            ),
-            ToolbarAction(
-              icon: Icons.chevron_right,
-              onPressed: history.hasNext
-                  ? () {
-                      final current = history.current.value;
-                      history.moveForward();
-                      if (onChange != null) {
-                        onChange(
-                          history.current.value,
-                          current,
-                        );
-                      }
-                    }
-                  : null,
-            ),
-            const SizedBox(width: denseSpacing),
-            const VerticalDivider(thickness: 1.0),
-            const SizedBox(width: defaultSpacing),
-          ],
+          ToolbarAction(
+            icon: Icons.chevron_left,
+            onPressed: history.hasPrevious ? history.moveBack : null,
+          ),
+          ToolbarAction(
+            icon: Icons.chevron_right,
+            onPressed: history.hasNext ? history.moveForward : null,
+          ),
+          const SizedBox(width: denseSpacing),
+          const VerticalDivider(thickness: 1.0),
+          const SizedBox(width: defaultSpacing),
           Expanded(
             child: Text(
               generateTitle == null
