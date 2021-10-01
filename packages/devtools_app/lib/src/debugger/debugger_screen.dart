@@ -152,7 +152,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               ProgramExplorer(
                 debugController: controller,
                 onSelected: _onLocationSelected,
-              ),
+              )
             ],
           );
         } else {

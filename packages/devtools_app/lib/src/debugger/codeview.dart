@@ -82,10 +82,6 @@ class _CodeViewState extends State<CodeView>
 
   ParsedScript get parsedScript => widget.parsedScript;
 
-  // Used to ensure we don't update the scroll position when expanding or
-  // collapsing the file explorer.
-  ScriptRef _lastScriptRef;
-
   @override
   void initState() {
     super.initState();
@@ -94,7 +90,6 @@ class _CodeViewState extends State<CodeView>
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();
     horizontalController = ScrollController();
-    _lastScriptRef = widget.scriptRef;
 
     if (widget.initialPosition != null) {
       final location = widget.initialPosition.location;
@@ -150,22 +145,18 @@ class _CodeViewState extends State<CodeView>
       log('LinkedScrollControllerGroup has no attached controllers');
       return;
     }
+
     final location = widget.controller.scriptLocation.value?.location;
     if (location?.line == null) {
-      // Don't scroll to top if we're just rebuilding the code view for the
-      // same script.
-      if (_lastScriptRef?.uri != scriptRef?.uri) {
-        // Default to scrolling to the top of the script.
-        if (animate) {
-          verticalController.animateTo(
-            0,
-            duration: longDuration,
-            curve: defaultCurve,
-          );
-        } else {
-          verticalController.jumpTo(0);
-        }
-        _lastScriptRef = scriptRef;
+      // Default to scrolling to the top of the script.
+      if (animate) {
+        verticalController.animateTo(
+          0,
+          duration: longDuration,
+          curve: defaultCurve,
+        );
+      } else {
+        verticalController.jumpTo(0);
       }
       return;
     }
@@ -191,7 +182,6 @@ class _CodeViewState extends State<CodeView>
         verticalController.jumpTo(scrollPosition);
       }
     }
-    _lastScriptRef = scriptRef;
   }
 
   void _onPressed(int line) {
