@@ -10,7 +10,6 @@ import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_test/flutter_test_driver.dart';
 import 'package:devtools_test/flutter_test_environment.dart';
-import 'package:devtools_test/mocks.dart';
 import 'package:devtools_test/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pedantic/pedantic.dart';
@@ -26,7 +25,7 @@ void main() {
   setUp(() async {
     isAlive = Disposable();
     await env.setupEnvironment();
-    debuggerController = TestDebuggerController();
+    debuggerController = DebuggerController();
     eval = EvalOnDartLibrary(
         'package:flutter_app/src/autocomplete.dart', serviceManager.service,
         disableBreakpoints: false);
