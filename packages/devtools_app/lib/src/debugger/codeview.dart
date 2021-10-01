@@ -70,7 +70,7 @@ class CodeView extends StatefulWidget {
 
 class _CodeViewState extends State<CodeView>
     with AutoDisposeMixin, SearchFieldMixin<CodeView> {
-  static const fileOpenerLeftPadding = 110.0;
+  static const fileOpenerLeftPadding = 100.0;
   static const searchFieldRightPadding = 75.0;
 
   LinkedScrollControllerGroup verticalController;
@@ -402,7 +402,10 @@ class _CodeViewState extends State<CodeView>
     );
   }
 
-  Widget wrapInElevatedCard(Widget widget) {
+  Widget wrapInElevatedCard(
+    Widget widget, {
+    double width = wideSearchTextWidth,
+  }) {
     return Card(
       elevation: defaultElevation,
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -410,7 +413,7 @@ class _CodeViewState extends State<CodeView>
         borderRadius: BorderRadius.circular(defaultBorderRadius),
       ),
       child: Container(
-        width: wideSearchTextWidth,
+        width: width,
         height: defaultTextFieldHeight + 2 * denseSpacing,
         padding: const EdgeInsets.all(denseSpacing),
         child: widget,
@@ -423,6 +426,7 @@ class _CodeViewState extends State<CodeView>
       FileSearchField(
         debuggerController: widget.controller,
       ),
+      width: extraWideSearchTextWidth,
     );
   }
 
