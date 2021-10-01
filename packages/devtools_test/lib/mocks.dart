@@ -714,7 +714,6 @@ class MockProgramExplorerController extends Mock
     when(controller.initialized).thenReturn(ValueNotifier(true));
     when(controller.rootObjectNodes).thenReturn(ValueNotifier([]));
     when(controller.outlineNodes).thenReturn(ValueNotifier([]));
-    when(controller.isLoadingOutline).thenReturn(ValueNotifier(false));
 
     return controller;
   }
