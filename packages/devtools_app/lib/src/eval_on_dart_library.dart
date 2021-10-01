@@ -545,7 +545,9 @@ class EvalOnDartLibrary extends DisposableController
         return;
       }
       try {
+        print('about to call request');
         final Object value = await request();
+        print('after call request');
         if (!_disposed && value is! Sentinel) {
           response.complete(value);
         } else {

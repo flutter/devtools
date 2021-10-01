@@ -325,6 +325,7 @@ class ServiceConnectionManager {
   void vmServiceClosed({
     ConnectedState connectionState = const ConnectedState(false),
   }) {
+    print('vm service closed');
     _serviceAvailable = Completer();
 
     service = null;

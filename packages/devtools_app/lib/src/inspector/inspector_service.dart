@@ -406,6 +406,7 @@ class InspectorService extends DisposableController
 
   void onDebugVmServiceReceived(Event event) {
     if (event.kind == EventKind.kInspect) {
+      print('on debug event - calling notify selection changed');
       // Update the UI in IntelliJ.
       notifySelectionChanged();
     }
@@ -684,6 +685,7 @@ class ObjectGroup implements Disposable {
     }
 
     return inspectorLibrary.addRequest(this, () async {
+      print('call service extension');
       final r = await serviceManager.service.callServiceExtension(
         extension,
         isolateId: inspectorService.inspectorLibrary.isolateRef.id,
@@ -1047,6 +1049,7 @@ class ObjectGroup implements Disposable {
 
     switch (treeType) {
       case FlutterTreeType.widget:
+        print('calling invokeServiceMethodReturningNodeInspectorRef');
         newSelection = await invokeServiceMethodReturningNodeInspectorRef(
             isSummaryTree ? 'getSelectedSummaryWidget' : 'getSelectedWidget',
             previousSelectionRef);
