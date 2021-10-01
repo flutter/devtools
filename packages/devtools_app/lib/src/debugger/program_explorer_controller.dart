@@ -63,7 +63,7 @@ class ProgramExplorerController extends DisposableController
 
   /// Initializes the program structure.
   // TODO(bkonyi): reinitialize after hot reload.
-  Future<void> initialize() async {
+  Future<void> initialize([ScriptRef initialScript]) async {
     if (_initializing) {
       return;
     }
@@ -117,6 +117,9 @@ class ProgramExplorerController extends DisposableController
       this,
       _programStructure,
     );
+    if (initialScript != null) {
+      _selectScriptNode(initialScript, nodes);
+    }
     _rootObjectNodes.addAll(nodes);
     _initialized.value = true;
   }
