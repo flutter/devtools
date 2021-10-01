@@ -4,67 +4,107 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose_mixin.dart';
-import '../common_widgets.dart';
-import '../dialogs.dart';
-import '../theme.dart';
 import '../ui/search.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 
-const int numOfMatchesToShow = 6;
+const int numOfMatchesToShow = 10;
 
 class FileSearchField extends StatefulWidget {
   const FileSearchField({
-    @required this.controller,
+    @required this.debuggerController,
   });
 
-  final DebuggerController controller;
+  final DebuggerController debuggerController;
 
   @override
-  _FileSearchFieldState createState() => _FileSearchFieldState();
+  FileSearchFieldState createState() => FileSearchFieldState();
 }
 
-class _FileSearchFieldState extends State<FileSearchField>
+class FileSearchFieldState extends State<FileSearchField>
     with SearchFieldMixin, AutoDisposeMixin {
-  AutoCompleteController _autoCompleteController;
+  AutoCompleteController autoCompleteController;
 
   final _scriptsCache = <String, ScriptRef>{};
+  final _fileNamesCache = <String, String>{};
 
   final fileSearchFieldKey = GlobalKey(debugLabel: 'fileSearchFieldKey');
+
+  String _query;
+  List<ScriptRef> _matches;
 
   @override
   void initState() {
     super.initState();
 
-    _autoCompleteController = AutoCompleteController()..currentDefaultIndex = 0;
+    autoCompleteController = AutoCompleteController()..currentDefaultIndex = 0;
 
     addAutoDisposeListener(
-        _autoCompleteController.searchNotifier, _handleSearch);
-    addAutoDisposeListener(_autoCompleteController.searchAutoCompleteNotifier,
+        autoCompleteController.searchNotifier, _handleSearch);
+    addAutoDisposeListener(autoCompleteController.searchAutoCompleteNotifier,
         _handleAutoCompleteOverlay);
+
+    _query = autoCompleteController.search;
+    _matches = widget.debuggerController.sortedScripts.value;
 
     // Open the autocomplete results immediately before a query is entered:
     SchedulerBinding.instance.addPostFrameCallback((_) => _handleSearch());
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return buildAutoCompleteSearchField(
+      controller: autoCompleteController,
+      searchFieldKey: fileSearchFieldKey,
+      searchFieldEnabled: true,
+      shouldRequestFocus: true,
+      keyEventsToPropogate: {LogicalKeyboardKey.escape},
+      onSelection: _onSelection,
+      onClose: _onClose,
+      label: 'Open',
+    );
+  }
+
+  @override
+  void dispose() {
+    _onClose();
+    autoCompleteController.dispose();
+    super.dispose();
+  }
+
   void _handleSearch() {
-    final query = _autoCompleteController.search;
-    final matches = findMatches(query, widget.controller.sortedScripts.value);
+    final previousQuery = _query;
+    final currentQuery = autoCompleteController.search;
+
+    // If the current query is a continuation of the previous query, then
+    // filter down the previous matches. Otherwise search through all scripts:
+    final scripts = currentQuery.startsWith(previousQuery)
+        ? _matches
+        : widget.debuggerController.sortedScripts.value;
+
+    final matches = _findMatches(currentQuery, scripts);
     if (matches.isEmpty) {
-      _autoCompleteController.searchAutoComplete.value = ['No files found.'];
+      autoCompleteController.searchAutoComplete.value = [];
     } else {
-      matches.forEach(_addScriptRefToCache);
-      _autoCompleteController.searchAutoComplete.value =
-          matches.map((scriptRef) => scriptRef.uri).toList();
+      final topMatches = _takeTopMatches(matches);
+      topMatches.forEach(_addScriptRefToCache);
+      autoCompleteController.searchAutoComplete.value = topMatches
+          .map((scriptRef) =>
+              _createAutoCompleteMatch(scriptRef.uri, currentQuery))
+          .toList();
     }
+
+    _query = currentQuery;
+    _matches = matches;
   }
 
   void _handleAutoCompleteOverlay() {
-    _autoCompleteController.handleAutoCompleteOverlay(
+    autoCompleteController.handleAutoCompleteOverlay(
       context: context,
       searchFieldKey: fileSearchFieldKey,
       onTap: _onSelection,
@@ -75,69 +115,81 @@ class _FileSearchFieldState extends State<FileSearchField>
     _scriptsCache.putIfAbsent(scriptRef.uri, () => scriptRef);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  void _onSelection(String scriptUri) {
+    final scriptRef = _scriptsCache[scriptUri];
+    widget.debuggerController.showScriptLocation(ScriptLocation(scriptRef));
+    _onClose();
+  }
 
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          top: defaultBorderSide(theme),
-        ),
-      ),
-      padding: const EdgeInsets.all(denseSpacing),
-      child: buildAutoCompleteSearchField(
-        controller: _autoCompleteController,
-        searchFieldKey: fileSearchFieldKey,
-        searchFieldEnabled: true,
-        shouldRequestFocus: true,
-        closeOverlayOnEscape: false,
-        onSelection: _onSelection,
-      ),
+  void _onClose() {
+    autoCompleteController.closeAutoCompleteOverlay();
+    widget.debuggerController.toggleFileOpenerVisibility(false);
+    _scriptsCache.clear();
+  }
+
+  AutoCompleteMatch _createAutoCompleteMatch(String match, String query) {
+    if (query.isEmpty) {
+      return AutoCompleteMatch(match);
+    }
+
+    final autoCompleteResultSegments = <Range>[];
+    if (match.contains(query)) {
+      final start = match.indexOf(query);
+      final end = start + query.length;
+      autoCompleteResultSegments.add(Range(start, end));
+    } else {
+      // For fuzzy-matches, only match on the file name:
+      final fileName = match.split('/').last;
+      var queryIndex = 0;
+      for (int matchIndex = match.indexOf(fileName);
+          matchIndex < match.length;
+          matchIndex++) {
+        if (queryIndex == query.length) break;
+        if (match[matchIndex] == query[queryIndex]) {
+          final start = matchIndex;
+          final end = matchIndex + 1;
+          autoCompleteResultSegments.add(Range(start, end));
+          queryIndex++;
+        }
+      }
+    }
+
+    return AutoCompleteMatch(
+      match,
+      matchedSegments: autoCompleteResultSegments,
     );
   }
 
-  void _onSelection(String scriptUri) {
-    final scriptRef = _scriptsCache[scriptUri];
-    widget.controller.showScriptLocation(ScriptLocation(scriptRef));
-    _scriptsCache.clear();
-    Navigator.of(context).pop(dialogDefaultContext);
+  List<ScriptRef> _findMatches(
+    String query,
+    List<ScriptRef> scriptRefs,
+  ) {
+    if (query.isEmpty) {
+      return scriptRefs;
+    }
+
+    final exactMatches = [];
+    final fuzzyMatches = [];
+
+    for (final scriptRef in scriptRefs) {
+      final fullPath = scriptRef.uri;
+      final fileName =
+          _fileNamesCache[scriptRef.uri] ??= scriptRef.uri.split('/').last;
+      if (fullPath.caseInsensitiveContains(query)) {
+        exactMatches.add(scriptRef);
+      } else if (fileName.caseInsensitiveFuzzyMatch(query)) {
+        fuzzyMatches.add(scriptRef);
+      }
+    }
+
+    return [...exactMatches, ...fuzzyMatches];
   }
 
-  @override
-  void dispose() {
-    _autoCompleteController.dispose();
-    super.dispose();
+  List<ScriptRef> _takeTopMatches(List<ScriptRef> allMatches) {
+    if (allMatches.length <= numOfMatchesToShow) {
+      return allMatches;
+    }
+
+    return allMatches.sublist(0, numOfMatchesToShow);
   }
-}
-
-List<ScriptRef> findMatches(
-  String query,
-  List<ScriptRef> scriptRefs,
-) {
-  if (query.isEmpty) {
-    takeTopMatches(scriptRefs);
-  }
-
-  final exactMatches = scriptRefs
-      .where((scriptRef) => scriptRef.uri.caseInsensitiveContains(query))
-      .toList();
-
-  if (exactMatches.length >= numOfMatchesToShow) {
-    return takeTopMatches(exactMatches);
-  }
-
-  final fuzzyMatches = scriptRefs
-      .where((scriptRef) => scriptRef.uri.caseInsensitiveFuzzyMatch(query))
-      .toList();
-
-  return takeTopMatches([...exactMatches, ...fuzzyMatches]);
-}
-
-List<ScriptRef> takeTopMatches(List<ScriptRef> allMatches) {
-  if (allMatches.length <= numOfMatchesToShow) {
-    return allMatches;
-  }
-
-  return allMatches.sublist(0, numOfMatchesToShow);
 }

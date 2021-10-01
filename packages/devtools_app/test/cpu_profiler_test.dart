@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/common_widgets.dart';
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_bottom_up.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_call_tree.dart';
@@ -15,17 +16,18 @@ import 'package:devtools_app/src/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_test/cpu_profile_test_data.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'support/cpu_profile_test_data.dart';
-import 'support/mocks.dart';
-import 'support/wrappers.dart';
+import 'package:mockito/mockito.dart';
 
 void main() {
   CpuProfiler cpuProfiler;
   CpuProfileData cpuProfileData;
   CpuProfilerController controller;
+  ServiceConnectionManager fakeServiceManager;
 
   setUp(() async {
     final transformer = CpuProfileTransformer();
@@ -33,7 +35,11 @@ void main() {
     cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson);
     await transformer.processData(cpuProfileData);
 
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    fakeServiceManager = FakeServiceManager();
+    when(fakeServiceManager.connectedApp.isFlutterNativeAppNow)
+        .thenReturn(false);
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(OfflineModeController, OfflineModeController());
   });
 
   group('CpuProfiler', () {
@@ -270,7 +276,10 @@ void main() {
         await controller.cpuProfilerController.transformer
             .processData(cpuProfileData);
         // Call this to force the value of `_dataByTag[userTagNone]` to be set.
-        controller.cpuProfilerController.loadProcessedData(cpuProfileData);
+        controller.cpuProfilerController.loadProcessedData(
+          cpuProfileData,
+          storeAsUserTagNone: true,
+        );
       });
 
       testWidgetsWithWindowSize('can filter data by user tag', windowSize,
@@ -290,9 +299,11 @@ void main() {
         expect(find.text('Filter by tag: userTagB'), findsWidgets);
         expect(find.text('Filter by tag: userTagC'), findsWidgets);
 
-        await tester.tap(find.text('CPU Flame Chart'));
+        await tester.tap(find.text('Call Tree'));
         await tester.pumpAndSettle();
-        expect(find.byType(CpuProfileFlameChart), findsOneWidget);
+        expect(find.byType(CpuCallTreeTable), findsOneWidget);
+        await tester.tap(find.text('Expand All'));
+        await tester.pumpAndSettle();
 
         expect(
           controller
@@ -310,14 +321,16 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text('Filter by tag: userTagA').last);
         await tester.pumpAndSettle();
+        await tester.tap(find.text('Expand All'));
+        await tester.pumpAndSettle();
         expect(
           controller
               .cpuProfileData.profileMetaData.time.duration.inMicroseconds,
           equals(100),
         );
-        expect(find.text('Frame1'), findsOneWidget);
+        expect(find.text('Frame1'), findsNothing);
         expect(find.text('Frame2'), findsOneWidget);
-        expect(find.text('Frame3'), findsOneWidget);
+        expect(find.text('Frame3'), findsNothing);
         expect(find.text('Frame4'), findsNothing);
         expect(find.text('Frame5'), findsOneWidget);
         expect(find.text('Frame6'), findsNothing);
@@ -326,15 +339,17 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text('Filter by tag: userTagB').last);
         await tester.pumpAndSettle();
+        await tester.tap(find.text('Expand All'));
+        await tester.pumpAndSettle();
         expect(
           controller
               .cpuProfileData.profileMetaData.time.duration.inMicroseconds,
           equals(50),
         );
-        expect(find.text('Frame1'), findsOneWidget);
+        expect(find.text('Frame1'), findsNothing);
         expect(find.text('Frame2'), findsOneWidget);
         expect(find.text('Frame3'), findsNothing);
-        expect(find.text('Frame4'), findsOneWidget);
+        expect(find.text('Frame4'), findsNothing);
         expect(find.text('Frame5'), findsNothing);
         expect(find.text('Frame6'), findsNothing);
 
@@ -342,12 +357,14 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text('Filter by tag: userTagC').last);
         await tester.pumpAndSettle();
+        await tester.tap(find.text('Expand All'));
+        await tester.pumpAndSettle();
         expect(
           controller
               .cpuProfileData.profileMetaData.time.duration.inMicroseconds,
           equals(100),
         );
-        expect(find.text('Frame1'), findsOneWidget);
+        expect(find.text('Frame1'), findsNothing);
         expect(find.text('Frame2'), findsNothing);
         expect(find.text('Frame3'), findsNothing);
         expect(find.text('Frame4'), findsNothing);

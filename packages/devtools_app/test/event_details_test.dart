@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/event_details.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
@@ -9,13 +10,12 @@ import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/performance_test_data.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-
-import 'support/mocks.dart';
-import 'support/performance_test_data.dart';
-import 'support/wrappers.dart';
 
 void main() {
   const windowSize = Size(2000.0, 1000.0);
@@ -38,6 +38,7 @@ void main() {
     setUp(() {
       final fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(OfflineModeController, OfflineModeController());
       when(serviceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     });
 

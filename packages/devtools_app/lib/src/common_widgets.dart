@@ -94,6 +94,7 @@ class IconLabelButton extends StatelessWidget {
     this.minScreenWidthForTextBeforeScaling,
     this.elevatedButton = false,
     this.tooltip,
+    this.tooltipPadding,
   })  : assert((icon == null) != (imageIcon == null)),
         super(key: key);
 
@@ -114,6 +115,8 @@ class IconLabelButton extends StatelessWidget {
 
   final String tooltip;
 
+  final EdgeInsetsGeometry tooltipPadding;
+
   @override
   Widget build(BuildContext context) {
     final iconLabel = MaterialIconLabel(
@@ -125,8 +128,9 @@ class IconLabelButton extends StatelessWidget {
     );
     if (elevatedButton) {
       return maybeWrapWithTooltip(
-        tooltip,
-        ElevatedButton(
+        tooltip: tooltip,
+        tooltipPadding: tooltipPadding,
+        child: ElevatedButton(
           onPressed: onPressed,
           child: iconLabel,
         ),
@@ -135,8 +139,9 @@ class IconLabelButton extends StatelessWidget {
     // TODO(kenz): this SizedBox wrapper should be unnecessary once
     // https://github.com/flutter/flutter/issues/79894 is fixed.
     return maybeWrapWithTooltip(
-      tooltip,
-      SizedBox(
+      tooltip: tooltip,
+      tooltipPadding: tooltipPadding,
+      child: SizedBox(
         height: defaultButtonHeight,
         width: !includeText(context, minScreenWidthForTextBeforeScaling)
             ? buttonMinWidth
@@ -503,7 +508,7 @@ class ProcessingInfo extends StatelessWidget {
 /// onPressed:
 ///
 /// setState(() {
-///   offlineMode = false;
+///   offlineController.exitOfflineMode();
 /// }
 class ExitOfflineButton extends IconLabelButton {
   const ExitOfflineButton({@required VoidCallback onPressed})
@@ -1294,10 +1299,15 @@ class Link {
   final String url;
 }
 
-Widget maybeWrapWithTooltip(String tooltip, Widget child) {
+Widget maybeWrapWithTooltip({
+  @required String tooltip,
+  EdgeInsetsGeometry tooltipPadding,
+  @required Widget child,
+}) {
   if (tooltip != null) {
     return DevToolsTooltip(
       tooltip: tooltip,
+      padding: tooltipPadding,
       child: child,
     );
   }

@@ -155,11 +155,7 @@ class _CpuProfilerState extends State<CpuProfiler>
                 if (currentTab.key != CpuProfiler.summaryTab) ...[
                   FilterButton(
                     onPressed: _showFilterDialog,
-                    isFilterActive: widget.controller.toggleFilters.firstWhere(
-                          (filter) => filter.enabled.value,
-                          orElse: () => null,
-                        ) !=
-                        null,
+                    isFilterActive: widget.controller.isToggleFilterActive,
                   ),
                   const SizedBox(width: denseSpacing),
                   UserTagDropdown(widget.controller),

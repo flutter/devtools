@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/app.dart';
 import 'package:devtools_app/src/app_size/app_size_screen.dart';
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/framework_controller.dart';
 import 'package:devtools_app/src/globals.dart';
@@ -20,9 +21,8 @@ import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_app/src/version.dart';
 import 'package:devtools_app/src/vm_developer/vm_developer_tools_screen.dart';
+import 'package:devtools_test/mocks.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'support/mocks.dart';
 
 void main() {
   group('visible_screens', () {
@@ -33,6 +33,7 @@ void main() {
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(FrameworkController, FrameworkController());
       setGlobal(PreferencesController, PreferencesController());
+      setGlobal(OfflineModeController, OfflineModeController());
 
       await whenValueNonNull(serviceManager.isolateManager.selectedIsolate);
     });
@@ -186,7 +187,7 @@ void main() {
     });
 
     testWidgets('are correct when offline', (WidgetTester tester) async {
-      offlineMode = true;
+      offlineController.enterOfflineMode();
       setupMockValues(web: true); // Web apps would normally hide
 
       expect(
@@ -203,7 +204,7 @@ void main() {
             // AppSizeScreen,
             // VMDeveloperToolsScreen,
           ]));
-      offlineMode = false;
+      offlineController.exitOfflineMode();
     });
 
     testWidgets('are correct for Dart CLI app with VM developer mode enabled',

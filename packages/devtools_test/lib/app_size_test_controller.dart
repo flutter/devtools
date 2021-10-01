@@ -1,5 +1,4 @@
-import 'package:devtools_app/src/app_size/app_size_controller.dart';
-import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter/widgets.dart';
 
 import 'utils.dart';

@@ -111,7 +111,7 @@ class PerformanceController extends DisposableController
 
   /// Timeline data loaded via import.
   ///
-  /// This is expected to be null when we are not in [offlineMode].
+  /// This is expected to be null when we are not in [offlineController.offlineMode].
   ///
   /// This will contain the original data from the imported file, regardless of
   /// any selection modifications that occur while the data is displayed. [data]
@@ -178,7 +178,7 @@ class PerformanceController extends DisposableController
   }
 
   Future<void> _initHelper() async {
-    if (!offlineMode) {
+    if (!offlineController.offlineMode.value) {
       await serviceManager.onServiceAvailable;
       await _initData();
 
@@ -295,16 +295,18 @@ class PerformanceController extends DisposableController
 
     if (event.isUiEvent && updateProfiler) {
       final storedProfile =
-          cpuProfilerController.cpuProfileStore.lookupProfile(event.time);
+          cpuProfilerController.cpuProfileStore.lookupProfile(time: event.time);
       if (storedProfile != null) {
         await cpuProfilerController.processAndSetData(
           storedProfile,
           processId: 'Stored profile for ${event.time}',
           storeAsUserTagNone: true,
           shouldApplyFilters: true,
+          shouldRefreshSearchMatches: true,
         );
         data.cpuProfileData = cpuProfilerController.dataNotifier.value;
-      } else if ((!offlineMode || offlinePerformanceData == null) &&
+      } else if ((!offlineController.offlineMode.value ||
+              offlinePerformanceData == null) &&
           cpuProfilerController.profilerEnabled) {
         // Fetch a profile if not in offline mode and if the profiler is enabled
         cpuProfilerController.reset();
@@ -340,7 +342,7 @@ class PerformanceController extends DisposableController
       return;
     }
 
-    if (!offlineMode) {
+    if (!offlineController.offlineMode.value) {
       final bool frameBeforeFirstWellFormedFrame =
           firstWellFormedFrameMicros != null &&
               frame.timeFromFrameTiming.start.inMicroseconds <
@@ -386,10 +388,11 @@ class PerformanceController extends DisposableController
     if (_currentFrameBeingSelected != frame) return;
 
     final storedProfileForFrame = cpuProfilerController.cpuProfileStore
-        .lookupProfile(frame.timeFromEventFlows);
+        .lookupProfile(time: frame.timeFromEventFlows);
     if (storedProfileForFrame == null) {
       cpuProfilerController.reset();
-      if (!offlineMode && frame.timeFromEventFlows.isWellFormed) {
+      if (!offlineController.offlineMode.value &&
+          frame.timeFromEventFlows.isWellFormed) {
         await cpuProfilerController.pullAndProcessProfile(
           startMicros: frame.timeFromEventFlows.start.inMicroseconds,
           extentMicros: frame.timeFromEventFlows.duration.inMicroseconds,
@@ -407,7 +410,10 @@ class PerformanceController extends DisposableController
       }
       if (_currentFrameBeingSelected != frame) return;
       data.cpuProfileData = storedProfileForFrame;
-      cpuProfilerController.loadProcessedData(storedProfileForFrame);
+      cpuProfilerController.loadProcessedData(
+        storedProfileForFrame,
+        storeAsUserTagNone: true,
+      );
     }
 
     if (debugTimeline) {
@@ -589,7 +595,7 @@ class PerformanceController extends DisposableController
   void addTimelineEvent(TimelineEvent event) {
     data.addTimelineEvent(event);
     if (event is SyncTimelineEvent) {
-      if (!offlineMode &&
+      if (!offlineController.offlineMode.value &&
           serviceManager.hasConnection &&
           !serviceManager.connectedApp.isFlutterAppNow) {
         return;
@@ -756,6 +762,7 @@ class PerformanceController extends DisposableController
     if (offlinePerformanceData.cpuProfileData != null) {
       cpuProfilerController.loadProcessedData(
         offlinePerformanceData.cpuProfileData,
+        storeAsUserTagNone: true,
       );
     }
   }

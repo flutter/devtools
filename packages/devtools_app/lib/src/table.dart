@@ -309,10 +309,6 @@ class Selection<T> {
   final bool scrollIntoView;
 }
 
-class SelectionNotifier<T> extends ValueNotifier<T> {
-  SelectionNotifier(T) : super(T);
-}
-
 // TODO(https://github.com/flutter/devtools/issues/1657)
 
 /// A table that shows [TreeNode]s.

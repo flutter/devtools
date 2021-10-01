@@ -1224,12 +1224,15 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
       // Remove duplicates and sort the matches.
       final normalizedMatches = matches.toSet().toList()..sort();
       // Use the top 10 matches:
-      controller.searchAutoComplete.value = normalizedMatches.sublist(
-          0,
-          min(
-            topMatchesLimit,
-            normalizedMatches.length,
-          ));
+      controller.searchAutoComplete.value = normalizedMatches
+          .sublist(
+              0,
+              min(
+                topMatchesLimit,
+                normalizedMatches.length,
+              ))
+          .map((match) => AutoCompleteMatch(match))
+          .toList();
     }
   }
 

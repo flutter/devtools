@@ -5,11 +5,10 @@
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/utils.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'support/mocks.dart';
-import 'support/wrappers.dart';
 
 void main() {
   setUp(() {
@@ -198,6 +197,36 @@ void main() {
           '    "b"\n',
         ),
       );
+    });
+  });
+
+  group('findLongestTextSpan', () {
+    test('returns longest span', () {
+      const shortest = TextSpan(text: 'this is a short line of text');
+      const longer = TextSpan(text: 'this is a longer line of text');
+      const longest = TextSpan(text: 'this is an even longer line of text');
+
+      expect(
+          findLongestTextSpan([
+            shortest,
+            longer,
+            longest,
+          ]),
+          equals(longest));
+    });
+
+    test('returns first longest if multiple spans have the same length', () {
+      const shortest = TextSpan(text: 'this is a short line of text');
+      const longest = TextSpan(text: 'this is a longer line of text');
+      const alsoLongest = TextSpan(text: 'this is a ------ line of text');
+
+      expect(
+          findLongestTextSpan([
+            shortest,
+            longest,
+            alsoLongest,
+          ]),
+          equals(longest));
     });
   });
 

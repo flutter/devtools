@@ -4,8 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/performance/performance_model.dart';
-import 'package:devtools_app/src/trace_event.dart';
+import 'package:devtools_app/devtools_app.dart';
 
 import 'cpu_profile_test_data.dart';
 import 'test_utils.dart';

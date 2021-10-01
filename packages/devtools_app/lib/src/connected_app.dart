@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import 'config_specific/import_export/import_export.dart';
 import 'config_specific/logger/logger.dart' as logger;
 import 'eval_on_dart_library.dart';
 import 'globals.dart';
@@ -39,8 +40,7 @@ class ConnectedApp {
   bool _isFlutterApp;
 
   FlutterVersion get flutterVersionNow {
-    assert(isFlutterNativeAppNow);
-    return _flutterVersion;
+    return isFlutterNativeAppNow ? _flutterVersion : null;
   }
 
   FlutterVersion _flutterVersion;
@@ -153,4 +153,35 @@ class ConnectedApp {
     }
     generateDevToolsTitle();
   }
+}
+
+class OfflineConnectedApp extends ConnectedApp {
+  OfflineConnectedApp({
+    this.isFlutterAppNow,
+    this.isProfileBuildNow,
+    this.isDartWebAppNow,
+    this.isRunningOnDartVM,
+  });
+
+  factory OfflineConnectedApp.parse(Map<String, Object> json) {
+    if (json == null) return null;
+    return OfflineConnectedApp(
+      isFlutterAppNow: json[isFlutterAppKey],
+      isProfileBuildNow: json[isProfileBuildKey],
+      isDartWebAppNow: json[isDartWebAppKey],
+      isRunningOnDartVM: json[isRunningOnDartVMKey],
+    );
+  }
+
+  @override
+  final bool isFlutterAppNow;
+
+  @override
+  final bool isProfileBuildNow;
+
+  @override
+  final bool isDartWebAppNow;
+
+  @override
+  final bool isRunningOnDartVM;
 }

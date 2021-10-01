@@ -6,36 +6,65 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:devtools_app/src/banner_messages.dart';
-import 'package:devtools_app/src/connected_app.dart';
-import 'package:devtools_app/src/console_service.dart';
-import 'package:devtools_app/src/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/debugger/span_parser.dart';
-import 'package:devtools_app/src/debugger/syntax_highlighter.dart';
-import 'package:devtools_app/src/error_badge_manager.dart';
-import 'package:devtools_app/src/inspector/inspector_service.dart';
-import 'package:devtools_app/src/listenable.dart';
-import 'package:devtools_app/src/logging/logging_controller.dart';
-import 'package:devtools_app/src/memory/memory_controller.dart'
-    as flutter_memory;
-import 'package:devtools_app/src/memory/memory_controller.dart';
-import 'package:devtools_app/src/performance/performance_controller.dart';
-import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
-import 'package:devtools_app/src/profiler/profile_granularity.dart';
-import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
-import 'package:devtools_app/src/service_extensions.dart' as extensions;
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_app/src/version.dart';
-import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
-import 'package:devtools_app/src/vm_service_wrapper.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../inspector_screen_test.dart';
 import 'cpu_profile_test_data.dart';
+
+class FakeInspectorService extends Fake implements InspectorService {
+  @override
+  ObjectGroup createObjectGroup(String debugName) {
+    return ObjectGroup(debugName, this);
+  }
+
+  @override
+  Future<bool> isWidgetTreeReady() async {
+    return false;
+  }
+
+  @override
+  Future<List<String>> inferPubRootDirectoryIfNeeded() async {
+    return ['/some/directory'];
+  }
+
+  @override
+  bool get useDaemonApi => true;
+
+  @override
+  final Set<InspectorServiceClient> clients = {};
+
+  @override
+  void addClient(InspectorServiceClient client) {
+    clients.add(client);
+  }
+
+  @override
+  void removeClient(InspectorServiceClient client) {
+    clients.remove(client);
+  }
+}
+
+class MockInspectorTreeController extends Mock
+    implements InspectorTreeController {}
+
+class TestInspectorController extends Fake implements InspectorController {
+  InspectorService service = FakeInspectorService();
+
+  @override
+  ValueListenable<InspectorTreeNode> get selectedNode => _selectedNode;
+  final ValueNotifier<InspectorTreeNode> _selectedNode = ValueNotifier(null);
+
+  @override
+  void setSelectedNode(InspectorTreeNode newSelection) {
+    _selectedNode.value = newSelection;
+  }
+
+  @override
+  InspectorService get inspectorService => service;
+}
 
 class FakeServiceManager extends Fake implements ServiceConnectionManager {
   FakeServiceManager({
@@ -90,7 +119,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   bool get isServiceAvailable => hasConnection;
 
   @override
-  final ConnectedApp connectedApp = MockConnectedApp();
+  ConnectedApp connectedApp = MockConnectedApp();
 
   @override
   final ConsoleService consoleService = ConsoleService();
@@ -165,6 +194,14 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
       'frameworkRevisionShort': '74432fa91c',
       'engineRevisionShort': 'ae2222f47e',
     }));
+  }
+
+  @override
+  Future<void> sendDwdsEvent({
+    @required String screen,
+    @required String action,
+  }) {
+    return Future.value();
   }
 
   @override
@@ -247,13 +284,13 @@ class FakeVmService extends Fake implements VmServiceWrapper {
         modified: false,
       ),
       Flag(
-        name: vm_flags.profiler,
+        name: profiler,
         comment: 'Mock Flag',
         valueAsString: 'true',
         modified: false,
       ),
       Flag(
-        name: vm_flags.profilePeriod,
+        name: profilePeriod,
         comment: 'Mock Flag',
         valueAsString: ProfileGranularity.medium.value,
         modified: false,
@@ -379,6 +416,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
       newValue: value,
       timestamp: 1, // 1 is arbitrary.
     );
+    // ignore: invalid_use_of_visible_for_testing_member
     _vmFlagManager.handleVmEvent(fakeVmFlagUpdateEvent);
     return Future.value(Success());
   }
@@ -615,8 +653,7 @@ class MockErrorBadgeManager extends Mock implements ErrorBadgeManager {}
 
 class MockMemoryController extends Mock implements MemoryController {}
 
-class MockFlutterMemoryController extends Mock
-    implements flutter_memory.MemoryController {}
+class MockFlutterMemoryController extends Mock implements MemoryController {}
 
 class MockPerformanceController extends Mock implements PerformanceController {}
 
@@ -720,17 +757,16 @@ class FakeServiceExtensionManager extends Fake
     final String name,
     String valueFromJson,
   ) async {
-    final extension = extensions.serviceExtensionsAllowlist[name];
+    final extension = serviceExtensionsAllowlist[name];
     if (extension != null) {
       final dynamic value = _getExtensionValueFromJson(name, valueFromJson);
 
-      final enabled =
-          extension is extensions.ToggleableServiceExtensionDescription
-              ? value == extension.enabledValue
-              // For extensions that have more than two states
-              // (enabled / disabled), we will always consider them to be
-              // enabled with the current value.
-              : true;
+      final enabled = extension is ToggleableServiceExtensionDescription
+          ? value == extension.enabledValue
+          // For extensions that have more than two states
+          // (enabled / disabled), we will always consider them to be
+          // enabled with the current value.
+          : true;
 
       await setServiceExtensionState(
         name,
@@ -743,7 +779,7 @@ class FakeServiceExtensionManager extends Fake
 
   dynamic _getExtensionValueFromJson(String name, String valueFromJson) {
     final expectedValueType =
-        extensions.serviceExtensionsAllowlist[name].values.first.runtimeType;
+        serviceExtensionsAllowlist[name].values.first.runtimeType;
     switch (expectedValueType) {
       case bool:
         return valueFromJson == 'true' ? true : false;
@@ -805,13 +841,12 @@ class FakeServiceExtensionManager extends Fake
   }
 
   Future<void> _restoreExtensionFromDevice(String name) async {
-    if (!extensions.serviceExtensionsAllowlist.containsKey(name)) {
+    if (!serviceExtensionsAllowlist.containsKey(name)) {
       return;
     }
-    final extensionDescription = extensions.serviceExtensionsAllowlist[name];
+    final extensionDescription = serviceExtensionsAllowlist[name];
     final value = extensionValueOnDevice[name];
-    if (extensionDescription
-        is extensions.ToggleableServiceExtensionDescription) {
+    if (extensionDescription is ToggleableServiceExtensionDescription) {
       if (value == extensionDescription.enabledValue) {
         await setServiceExtensionState(name, true, value, callExtension: false);
       }
@@ -1349,3 +1384,17 @@ final mockParsedScript = ParsedScript(
     highlighter: SyntaxHighlighter.withGrammar(
         grammar: mockGrammar, source: mockScript.source),
     executableLines: <int>{});
+
+final mockScriptRefs = [
+  ScriptRef(uri: 'zoo:animals/cats/meow.dart', id: 'fake/id/1'),
+  ScriptRef(uri: 'zoo:animals/cats/purr.dart', id: 'fake/id/2'),
+  ScriptRef(uri: 'zoo:animals/dogs/bark.dart', id: 'fake/id/3'),
+  ScriptRef(uri: 'zoo:animals/dogs/growl.dart', id: 'fake/id/4'),
+  ScriptRef(uri: 'zoo:animals/insects/caterpillar.dart', id: 'fake/id/5'),
+  ScriptRef(uri: 'zoo:animals/insects/cicada.dart', id: 'fake/id/6'),
+  ScriptRef(uri: 'kitchen:food/catering/party.dart', id: 'fake/id/7'),
+  ScriptRef(uri: 'kitchen:food/carton/milk.dart', id: 'fake/id/8'),
+  ScriptRef(uri: 'kitchen:food/milk/carton.dart', id: 'fake/id/9'),
+  ScriptRef(uri: 'travel:adventure/cave_tours_europe.dart', id: 'fake/id/10'),
+  ScriptRef(uri: 'travel:canada/banff.dart', id: 'fake/id/11'),
+];
