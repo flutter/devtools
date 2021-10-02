@@ -344,6 +344,9 @@ class ServiceConnectionManager {
 
     _connectedState.value = connectionState;
     _connectionClosedController.add(null);
+
+    _inspectorService?.dispose();
+    _inspectorService = null;
   }
 
   /// This can throw an [RPCError].
