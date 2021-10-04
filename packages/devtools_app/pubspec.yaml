@@ -56,6 +56,8 @@ dependencies:
   vm_service: ^7.1.1
   vm_snapshot_analysis: ^0.6.0
   web_socket_channel: ^2.1.0
+  widget_icons:
+    path: ../../third_party/packages/widget_icons
 
 dev_dependencies:
   build_runner: ^2.0.4
@@ -129,5 +131,3 @@ dependency_overrides:
     path: ../devtools_shared #OVERRIDE_FOR_DEVELOPMENT
   devtools:  #OVERRIDE_FOR_DEVELOPMENT
     path: ../devtools  #OVERRIDE_FOR_DEVELOPMENT
-  widget_icons: #OVERRIDE_FOR_DEVELOPMENT
-    path: ../../third_party/packages/widget_icons  #OVERRIDE_FOR_DEVELOPMENT
