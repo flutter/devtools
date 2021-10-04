@@ -30,6 +30,7 @@ void main() async {
   };
 
   env.beforeEveryTearDown = () async {
+    inspectorService?.onIsolateStopped();
     inspectorService?.dispose();
     inspectorService = null;
   };
