@@ -54,7 +54,7 @@ function download_canvaskit() {
     exit -1
   fi
 
-  local canvaskit_url="https://unpkg.com/canvaskit-wasm@$(local_canvaskit_version)/bin/"
+  local canvaskit_url=https://unpkg.com/canvaskit-wasm@$local_canvaskit_version/bin/
 
   mkdir -p build/web/assets/canvaskit/profiling
 
