@@ -27,23 +27,34 @@ fi
 set -ex
 
 # This avoids requiring an internet connection for CanvasKit at runtime.
-# This URL should be updated to keep in sync with the version from the engine.
-# See https://github.com/flutter/engine/blob/master/lib/web_ui/lib/src/engine/canvaskit/initialization.dart#L50-L78,
-# but compare with the code in master for getting the current version.
+# This canvaskit version should be updated to keep in sync with the version from the engine.
+# See https://github.com/flutter/engine/blob/master/lib/web_ui/lib/src/engine/canvaskit/initialization.dart#L65, but
+# note that the version for this script should match the version in the above file for the flutter version specified in
+# flutter-version.txt.
 # A better solution would be to either upstream this functionality into the flutter_tools,
 # (https://github.com/flutter/flutter/issues/70101), or to read this from a manifest 
 # provided (https://github.com/flutter/flutter/issues/74934).
 function download_canvaskit() {
-  local canvaskit_url=https://unpkg.com/canvaskit-wasm@0.28.1/bin/
+  local local_canvaskit_version="0.28.1"
+  local canvaskit_version_prefix="const String canvaskitVersion"
 
   flutter precache --web
 
   local flutter_bin=$(which flutter)
   local canvaskit_dart_file=$(dirname $flutter_bin)/cache/flutter_web_sdk/lib/_engine/engine/canvaskit/initialization.dart
-  if ! grep -q "defaultValue: '$canvaskit_url'" "$canvaskit_dart_file"; then
-    echo "CanvasKit $canvaskit_url does not match local web engine copy. Please update before continuing."
+
+  local canvaskit_version_line="$(grep "$canvaskit_version_prefix" "$canvaskit_dart_file")"
+
+  # Grab the canvaskit semantic version as a substring from this line. Example:
+  # "const String canvaskitVersion = '0.28.1';" -> "0.28.1"
+  local latest_canvaskit_version=${canvaskit_version_line:33:6}
+
+  if [ ! "$local_canvaskit_version" == "$latest_canvaskit_version" ]; then
+    echo "Local canvaskit version $local_canvaskit_version does not match version $latest_canvaskit_version from the latest web engine copy. Please update before continuing."
     exit -1
   fi
+
+  local canvaskit_url="https://unpkg.com/canvaskit-wasm@$(local_canvaskit_version)/bin/"
 
   mkdir -p build/web/assets/canvaskit/profiling
 

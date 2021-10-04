@@ -4,6 +4,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+FLUTTER_DIR="`pwd`/flutter-sdk"
+PATH="$FLUTTER_DIR/bin":$PATH
+
+flutter --version
+
 set -x #echo on
 echo "Editing .gitignore to comment out build directory"
 
