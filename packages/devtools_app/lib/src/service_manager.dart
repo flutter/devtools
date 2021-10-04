@@ -345,7 +345,6 @@ class ServiceConnectionManager {
     _connectedState.value = connectionState;
     _connectionClosedController.add(null);
 
-    print('ZZZ vmServiceClosed');
     _inspectorService?.onIsolateStopped();
     _inspectorService?.dispose();
     _inspectorService = null;
