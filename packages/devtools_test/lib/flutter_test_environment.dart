@@ -122,6 +122,8 @@ class FlutterTestEnvironment {
 
     if (_beforeFinalTearDown != null) await _beforeFinalTearDown();
 
+    serviceManager.manuallyDisconnect();
+
     await _service.allFuturesCompleted.timeout(const Duration(seconds: 20),
         onTimeout: () {
       throw 'Timed out waiting for futures to complete during teardown. '
