@@ -9,12 +9,11 @@ import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/provider/provider_nodes.dart';
+import 'package:devtools_test/flutter_test_driver.dart';
+import 'package:devtools_test/flutter_test_environment.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
-
-import '../support/flutter_test_driver.dart';
-import '../support/flutter_test_environment.dart';
 
 Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
   EvalOnDartLibrary evalOnDartLibrary;

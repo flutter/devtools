@@ -15,6 +15,7 @@ void main(List<String> args) async {
     'packages/devtools_app/pubspec.yaml',
     'packages/devtools_server/pubspec.yaml',
     'packages/devtools_shared/pubspec.yaml',
+    'packages/devtools_test/pubspec.yaml',
   ].map((path) => File(path)).toList();
 
   final version = args.isNotEmpty
@@ -151,6 +152,7 @@ const devToolsDependencyPrefixes = [
   'devtools_app: ',
   'devtools_server: ',
   'devtools_shared: ',
+  'devtools_test: ',
 ];
 
 extension JoinExtension on List<String> {

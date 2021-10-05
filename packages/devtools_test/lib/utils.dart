@@ -7,8 +7,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:devtools_app/src/charts/treemap.dart';
-import 'package:devtools_app/src/ui/search.dart';
+import 'package:devtools_app/devtools_app.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,6 +18,7 @@ import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 
+import 'http_request_timeline_test_data.dart';
 import 'network_test_data.dart';
 
 /// Scoping method which registers `listener` as a listener for `listenable`,
@@ -59,11 +60,7 @@ Future<T> whenMatches<T>(ValueListenable<T> listenable, bool condition(T)) {
 
 /// Creates an instance of [Timeline] which contains recorded HTTP events.
 Future<Timeline> loadNetworkProfileTimeline() async {
-  // TODO(bkonyi): pull this JSON data into a .dart file.
-  const testDataPath = 'test/support/http_request_timeline_test_data.json';
-  final httpTestData = jsonDecode(
-    await File(testDataPath).readAsString(),
-  );
+  final httpTestData = jsonDecode(httpRequestTimelineTestData);
   return Timeline.parse(httpTestData);
 }
 
@@ -296,4 +293,24 @@ void verifyIsSearchMatch(
       expect(request.isSearchMatch, isFalse);
     }
   }
+}
+
+Future<void> waitFor(
+  Future<bool> condition(), {
+  // TODO(kenz): shorten this as long as it doesn't cause flakes.
+  Duration timeout = const Duration(seconds: 10),
+  String timeoutMessage = 'condition not satisfied',
+  Duration delay = const Duration(milliseconds: 100),
+}) async {
+  final DateTime end = DateTime.now().add(timeout);
+
+  while (!end.isBefore(DateTime.now())) {
+    if (await condition()) {
+      return;
+    }
+
+    await Future.delayed(delay);
+  }
+
+  throw timeoutMessage;
 }

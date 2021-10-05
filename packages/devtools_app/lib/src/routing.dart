@@ -137,13 +137,24 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     final newArgs = {...currentConfiguration.args, ...?argUpdates};
 
     // Ensure we disconnect from any previously connected applications if we do
-    // not have a vm service uri as a query parameter.
-    if (newArgs['uri'] == null) {
+    // not have a vm service uri as a query parameter, unless we are loading an
+    // offline file.
+    if (page != snapshotPageId && newArgs['uri'] == null) {
       serviceManager.manuallyDisconnect();
     }
 
     _replaceStack(DevToolsRouteConfiguration(page, newArgs));
     notifyListeners();
+  }
+
+  void navigateHome({bool clearUriParam = false, bool clearScreenParam}) {
+    navigate(
+      homePageId,
+      {
+        if (clearUriParam) 'uri': null,
+        if (clearScreenParam) 'screen': null,
+      },
+    );
   }
 
   /// Replaces the navigation stack with a new route.

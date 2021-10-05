@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/common_widgets.dart';
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_bottom_up.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_call_tree.dart';
@@ -15,13 +16,12 @@ import 'package:devtools_app/src/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_test/cpu_profile_test_data.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-
-import 'support/cpu_profile_test_data.dart';
-import 'support/mocks.dart';
-import 'support/wrappers.dart';
 
 void main() {
   CpuProfiler cpuProfiler;
@@ -39,6 +39,7 @@ void main() {
     when(fakeServiceManager.connectedApp.isFlutterNativeAppNow)
         .thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(OfflineModeController, OfflineModeController());
   });
 
   group('CpuProfiler', () {

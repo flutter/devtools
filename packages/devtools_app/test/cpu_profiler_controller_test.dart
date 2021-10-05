@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_test/cpu_profile_test_data.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'support/cpu_profile_test_data.dart';
-import 'support/mocks.dart';
-import 'support/utils.dart';
 
 void main() {
   group('CpuProfileController', () {
@@ -20,6 +20,7 @@ void main() {
     setUp(() {
       fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(OfflineModeController, OfflineModeController());
       controller = CpuProfilerController();
     });
 

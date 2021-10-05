@@ -32,7 +32,3 @@ extension IsolatePrivateViewExtension on Isolate {
   int get newSpaceCapacity => json['_heaps']['new']['capacity'];
   int get oldSpaceCapacity => json['_heaps']['old']['capacity'];
 }
-
-extension ClassPrivateViewExtension on Class {
-  String get vmName => json['_vmName'];
-}

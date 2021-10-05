@@ -1,3 +1,4 @@
+const httpRequestTimelineTestData = '''
 {
   "type": "Timeline",
   "traceEvents": [
@@ -1266,3 +1267,4 @@
   "timeOriginMicros": 231932850307,
   "timeExtentMicros": 4214988
 }
+''';

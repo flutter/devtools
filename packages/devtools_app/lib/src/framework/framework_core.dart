@@ -7,9 +7,9 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../../devtools.dart' as devtools show version;
+import '../config_specific/import_export/import_export.dart';
 import '../config_specific/logger/logger.dart';
 import '../core/message_bus.dart';
-import '../debugger/program_explorer_controller.dart';
 import '../framework_controller.dart';
 import '../globals.dart';
 import '../service.dart';
@@ -27,7 +27,7 @@ class FrameworkCore {
     setGlobal(MessageBus, MessageBus());
     setGlobal(FrameworkController, FrameworkController());
     setGlobal(SurveyService, SurveyService());
-    setGlobal(ProgramExplorerController, ProgramExplorerController());
+    setGlobal(OfflineModeController, OfflineModeController());
   }
 
   static void init({String url}) {

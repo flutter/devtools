@@ -3,18 +3,19 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_test/flutter_test_driver.dart'
+    show FlutterRunConfiguration;
+import 'package:devtools_test/flutter_test_environment.dart';
+import 'package:devtools_test/performance_test_data.dart';
+import 'package:devtools_test/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
-import 'support/flutter_test_environment.dart';
-import 'support/performance_test_data.dart';
-import 'support/utils.dart';
 
 void main() async {
   initializeLiveTestWidgetsFlutterBindingWithAssets();
@@ -25,6 +26,7 @@ void main() async {
 
   PerformanceController performanceController;
   env.afterNewSetup = () async {
+    setGlobal(OfflineModeController, OfflineModeController());
     performanceController = PerformanceController()..data = PerformanceData();
     await performanceController.initialized;
   };
@@ -36,7 +38,7 @@ void main() async {
 
     test('processOfflineData', () async {
       await env.setupEnvironment();
-      offlineMode = true;
+      offlineController.enterOfflineMode();
       final offlineTimelineData =
           OfflinePerformanceData.parse(offlinePerformanceDataJson);
       await performanceController.processOfflineData(offlineTimelineData);
