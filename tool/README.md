@@ -1,15 +1,7 @@
 ## How to release the next version of DevTools
 
-**Note:** If you need to publish a new version of devtools_server, you will need
-to do that prior to performing these steps, and update the devtools pubspec.yaml
-to reference the new published version of devtools_server. To publish devtools_server, run
-`pub publish` from `packages/devtools_server`. Be sure to test the server locally
-before publishing. For instructions on how to do that, see
-[CONTRIBUTING.md](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md#devtools-server).
+Create a branch for your release.
 
-Create a branch for your release. Below we're creating release 0.0.15, with all the PRs.
-
-## Update master branch and create a local release branch
 ```shell
 cd ~/devtools-git/devtools
 
@@ -17,88 +9,86 @@ checkout master
 
 git pull upstream master
 
-git checkout -b release_0_0_15
+git checkout -b release_2.7.0
 
 ```
 
-## Update the version number by running:
+### Update the version number by running:
 
-dart ./tool/update_version.dart 0.0.15
+dart ./tool/update_version.dart 2.7.0
 
 Verify that this script updated the pubspecs under packages/
 and updated all references to those packages. These packages always have their
-version numbers updated in lock step so we don't have to worry about
+version numbers updated in lock, so we don't have to worry about
 versioning. Also make sure that the version constant in
 **packages/devtools_app/lib/devtools.dart** was updated.
 
-## Update the CHANGELOG.md
-- **packages/devtools/CHANGELOG.md**
+### Update the CHANGELOG.md
 
-Add the release number and date followed by the features or changes e.g.,
-
-```
-## 0.0.15 - 2019-04-01
-* Added a great feature ...
-```
-
-Ue the tool generate-changelog to automatically update the CHANGELOG.md file e.g.,
+Use the tool `generate-changelog` to automatically update the `packages/devtools/CHANGELOG.md` file e.g.,
 
 ```shell
-> cd devtools
-> dart tool/bin/repo_tool.dart generate-changelog
+cd ~/path/to/devtools
+
+dart tool/bin/repo_tool.dart generate-changelog
 ```
 
-## Push the local branch
+Be sure to manually check that the version for the CHANGELOG entry was correctly generated
+and that the entries don't have any syntax errors. The `generate-changelog` script is
+intended to do the bulk of the work, but still needs manual review.
+
+### Push the local branch
 
 ```shell
+git add .
 
-git commit -a -m “Prepare for v0.0.15 release.”
+git commit -m “Prepare for 2.7.0 release.”
 
-git push origin release_0_0_15
+git push origin release_2.7.0
 ```
 
-## Create the PR and Commit the above changes
-From the git UI tool create the PR, squash and commit.
+From the git GUI tool or from github.com directly, create a PR, send for review,
+then squash and commit after receiving an LGTM.
 
-## Publishing DevTools
-### Update your master branch from the remote repository
+### Publishing DevTools
+#### Update your master branch from the remote repository
 > Ensure that the tip of master is the above commit, just made with the exact set of PRs wanted.  Otherwise, checkout using the SHA1 of the above commit e.g.,
-``` git checkout -b release_15 <SHA1>``` then proceed to the step 'Prep to publish'.
+``` git checkout <SHA1>``` then proceed to the step **Update the local flutter-sdk**.
 
 ```shell
-cd ~/devtools-git/devtools
+cd ~/path/to/devtools
 
 git checkout master
 
 git pull upstream master
 ```
 
-### 
+#### Update the local flutter-sdk 
 
-The build release script checks if your local Flutter matches the version expected.  To switch your Flutter version to the expect Flutter build run
+The build release script checks if your local Flutter matches the version expected.
+This is to ensure that we are building DevTools from the same version of Flutter that
+our CI tests against. To switch your Flutter version to the expected Flutter build, run:
 
 ```shell
 ./tool/update_flutter_sdk.sh
 ``` 
 
-### Prep to publish
+#### Build DevTools for publishing
 
 ```shell
 ./tool/publish.sh
-``` 
-
-### Publish
-#### Verify the package works (DevTools)
-
-- Launch the devtools server
 ```
-cd packages/devtools
-dart bin/devtools.dart
+
+#### Verify the DevTools binary works
+
+- Launch the DevTools server
+```
+dart packages/devtools/bin/devtools.dart
 ```
 - open the page in a browser (http://localhost:9100)
-- flutter run an application
-- connect to the running app from devtools, and verify that the pages
-  generally work, and there are no exceptions in the chrome devtools log
+- `flutter run` an application
+- connect to the running app from DevTools, verify that the pages
+  generally work and that there are no exceptions in the chrome devtools log
 
 #### Publish the packages
 
@@ -106,21 +96,12 @@ dart bin/devtools.dart
 ./tool/pub_publish.sh
 ```
 
-#### Revert the change to .gitignore and pubspec files
+#### Revert changes caused by the `publish.sh` script
 ```shell
-git checkout .gitignore
-git checkout packages/*/pubspec.yaml
+git checkout .
+
+git clean -f -d
 ```
-
-Update the version of DevTools referenced by
-https://github.com/flutter/flutter/blob/8c4538618f81a42e45cdb03c6a204f6e7bcf81b3/dev/devicelab/lib/tasks/perf_tests.dart#L1448
-
-with a CL like
-https://github.com/flutter/flutter/pull/81869
-
-to avoid the issue described by https://github.com/flutter/flutter/issues/81552
-Once DevTools is deployed as part of the Dart SDK we should be able to eliminate this step.
-
 
 #### Create the tag for this release and push to the remote repository.
 This script will automatically determine the version from the `packages/devtools/pubspec.yaml` so there
@@ -128,3 +109,51 @@ is no need to manually enter the version.
 ```shell
 tool/tag_version.sh
 ```
+
+#### Upload the DevTools binary to CIPD
+
+Checkout the version of DevTools you just tagged (for example, `2.7.0`):
+```shell
+git checkout v2.7.0
+
+Note: switching to 'v2.7.0'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 8881a7ca Update release scripts (#3426)
+```
+
+Copy the commit hash from the bottom of the CLI output (in the example above, `8881a7ca`).
+
+Using the [update.sh](https://github.com/dart-lang/sdk/blob/master/third_party/devtools/update.sh)
+script at https://github.com/dart-lang/sdk/tree/master/third_party/devtools, build DevTools at the 
+given git commit hash, and upload the binary to CIPD.
+
+```shell
+sdk/third_party/devtools/update.sh 8881a7ca
+```
+
+#### Update the DevTools hash in the Dart SDK
+
+Update the `devtools_rev` entry in the Dart SDK 
+[DEPS file](https://github.com/dart-lang/sdk/blob/master/DEPS)
+with the git commit hash you just built DevTools from (this is
+the id for the CIPD upload in the previous step). See this 
+[example CL](https://dart-review.googlesource.com/c/sdk/+/215520).
+
+Now verify that running `dart devtools` launches the version of DevTools you just released.
+> You'll need to ensure that `which dart` points to your local dart sdk or that your CL has
+> landed and is part of the dart version on your local machine.
