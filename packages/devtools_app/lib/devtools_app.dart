@@ -4,8 +4,11 @@
 
 export 'src/analytics/analytics_controller.dart';
 export 'src/app_size/app_size_controller.dart';
+export 'src/auto_dispose.dart';
+export 'src/auto_dispose_mixin.dart';
 export 'src/banner_messages.dart';
 export 'src/charts/treemap.dart';
+export 'src/common_widgets.dart';
 export 'src/connected_app.dart';
 export 'src/console_service.dart';
 export 'src/debugger/debugger_controller.dart';
@@ -32,6 +35,7 @@ export 'src/profiler/cpu_profile_model.dart';
 export 'src/profiler/profile_granularity.dart';
 export 'src/profiler/profiler_screen_controller.dart';
 export 'src/routing.dart';
+export 'src/screen.dart';
 export 'src/service_extensions.dart';
 export 'src/service_manager.dart';
 export 'src/theme.dart';
