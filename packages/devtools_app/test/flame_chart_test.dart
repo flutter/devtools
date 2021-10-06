@@ -11,13 +11,12 @@ import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/ui/colors.dart';
 import 'package:devtools_app/src/ui/utils.dart';
 import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_test/cpu_profile_test_data.dart';
+import 'package:devtools_test/performance_test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'support/cpu_profile_test_data.dart';
-import 'support/performance_test_data.dart';
 
 void main() {
   const defaultZoom = 1.0;

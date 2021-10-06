@@ -7,10 +7,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/preferences.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/vm_service_wrapper.dart';
+import 'package:devtools_app/devtools_app.dart';
 
 import 'flutter_test_driver.dart';
 
@@ -124,6 +121,8 @@ class FlutterTestEnvironment {
     }
 
     if (_beforeFinalTearDown != null) await _beforeFinalTearDown();
+
+    serviceManager.manuallyDisconnect();
 
     await _service.allFuturesCompleted.timeout(const Duration(seconds: 20),
         onTimeout: () {

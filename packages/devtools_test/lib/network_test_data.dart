@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/http/http_request_data.dart';
-import 'package:devtools_app/src/network/network_model.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:vm_service/vm_service.dart';
 
 const _getStartTime = 231935000000;

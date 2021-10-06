@@ -10,18 +10,16 @@ import 'package:devtools_app/src/debugger/controls.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/debugger/debugger_model.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
-import 'package:devtools_app/src/debugger/program_explorer_model.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/utils.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
-
-import 'support/mocks.dart';
-import 'support/utils.dart';
-import 'support/wrappers.dart';
 
 void main() {
   DebuggerScreen screen;
@@ -210,7 +208,7 @@ void main() {
         // this so that forcing a scroll event is no longer necessary. Remove
         // once the change is in the stable release.
         debuggerController.showScriptLocation(ScriptLocation(mockScriptRef,
-            location: const SourcePosition(line: 50, column: 50)));
+            location: SourcePosition(line: 50, column: 50)));
         await tester.pumpAndSettle();
 
         expect(find.byType(Scrollbar), findsNWidgets(2));
@@ -225,7 +223,7 @@ void main() {
       }, skip: !Platform.isMacOS);
     });
 
-    testWidgetsWithWindowSize('File Explorer hidden', windowSize,
+    testWidgetsWithWindowSize('Libraries hidden', windowSize,
         (WidgetTester tester) async {
       final scripts = [
         ScriptRef(uri: 'package:/test/script.dart', id: 'test-script')
@@ -234,40 +232,27 @@ void main() {
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
       when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
-      // File Explorer view is hidden
-      when(debuggerController.fileExplorerVisible)
+      // Libraries view is hidden
+      when(debuggerController.librariesVisible)
           .thenReturn(ValueNotifier(false));
       await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('File Explorer'), findsOneWidget);
+      expect(find.text('Libraries'), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize('File Explorer visible', windowSize,
+    testWidgetsWithWindowSize('Libraries visible', windowSize,
         (WidgetTester tester) async {
       final scripts = [
         ScriptRef(uri: 'package:test/script.dart', id: 'test-script')
       ];
 
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
-      when(debuggerController.programExplorerController.rootObjectNodes)
-          .thenReturn(
-        ValueNotifier(
-          [
-            VMServiceObjectNode(
-              debuggerController.programExplorerController,
-              'package:test',
-              null,
-            ),
-          ],
-        ),
-      );
       when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
-      // File Explorer view is shown
-      when(debuggerController.fileExplorerVisible)
-          .thenReturn(ValueNotifier(true));
+      // Libraries view is shown
+      when(debuggerController.librariesVisible).thenReturn(ValueNotifier(true));
       await pumpDebuggerScreen(tester, debuggerController);
-      // One for the button and one for the title of the File Explorer view.
-      expect(find.text('File Explorer'), findsNWidgets(2));
+      // One for the button and one for the title of the Libraries view.
+      expect(find.text('Libraries'), findsNWidgets(2));
 
       // test for items in the libraries tree
       expect(find.text(scripts.first.uri.split('/').first), findsOneWidget);
@@ -291,7 +276,7 @@ void main() {
       final breakpointsWithLocation = [
         BreakpointAndSourcePosition.create(
           breakpoints.first,
-          const SourcePosition(line: 10, column: 1),
+          SourcePosition(line: 10, column: 1),
         )
       ];
 
@@ -537,7 +522,7 @@ void main() {
             ),
             kind: FrameKind.kRegular,
           ),
-          position: const SourcePosition(
+          position: SourcePosition(
             line: 1,
             column: 10,
           ),

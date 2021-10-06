@@ -2,19 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/inspector/inspector_tree_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_test/inspector_tree.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/utils.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart' hide Fake;
 import 'package:mockito/mockito.dart';
-
-import 'support/inspector_tree.dart';
-import 'support/mocks.dart';
-import 'support/utils.dart';
-import 'support/wrappers.dart';
 
 void main() {
   FakeServiceManager fakeServiceManager;
@@ -38,7 +39,7 @@ void main() {
           onNodeAdded: (_, __) {},
           onClientActiveChange: (_) {},
         );
-      final debuggerController = TestDebuggerController();
+      final debuggerController = DebuggerController();
       await tester.pumpWidget(wrap(InspectorTree(
         controller: controller,
         debuggerController: debuggerController,
@@ -77,7 +78,7 @@ void main() {
       final treeController = inspectorTreeControllerFromNode(diagnosticNode);
       await tester.pumpWidget(wrap(InspectorTree(
         controller: treeController,
-        debuggerController: TestDebuggerController(),
+        debuggerController: DebuggerController(),
       )));
 
       expect(find.richText('Text: "Content"'), findsOneWidget);
@@ -99,7 +100,7 @@ void main() {
       final treeController = inspectorTreeControllerFromNode(diagnosticNode);
       await tester.pumpWidget(wrap(InspectorTree(
         controller: treeController,
-        debuggerController: TestDebuggerController(),
+        debuggerController: DebuggerController(),
       )));
 
       expect(find.richText('Text: "Rich text"'), findsOneWidget);
@@ -117,7 +118,7 @@ void main() {
       await tester.pumpWidget(
         wrap(InspectorTree(
           controller: treeController,
-          debuggerController: TestDebuggerController(),
+          debuggerController: DebuggerController(),
         )),
       );
 

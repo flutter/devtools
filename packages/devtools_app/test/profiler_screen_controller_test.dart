@@ -5,9 +5,8 @@ import 'package:devtools_app/src/config_specific/import_export/import_export.dar
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_test/mocks.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'support/mocks.dart';
 
 void main() {
   group('ProfilerScreenController', () {

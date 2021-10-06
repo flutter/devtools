@@ -17,7 +17,7 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../auto_dispose.dart';
-import '../debugger/debugger_model.dart';
+import '../debugger/debugger_model.dart' hide SourcePosition;
 import '../eval_on_dart_library.dart';
 import '../globals.dart';
 import '../utils.dart';
@@ -77,7 +77,7 @@ class InspectorService extends DisposableController
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       final mainIsolate = serviceManager.isolateManager.mainIsolate.value;
       if (mainIsolate != _lastMainIsolate) {
-        _onIsolateStopped();
+        onIsolateStopped();
       }
       _lastMainIsolate = mainIsolate;
     });
@@ -89,7 +89,7 @@ class InspectorService extends DisposableController
   final EvalOnDartLibrary inspectorLibrary;
   IsolateRef _lastMainIsolate;
 
-  void _onIsolateStopped() {
+  void onIsolateStopped() {
     // Clear data that is obsolete on an isolate restart.
     _currentSelection = null;
     _cachedSelectionGroups?.clear(true);
@@ -355,6 +355,9 @@ class InspectorService extends DisposableController
   void dispose() {
     _isDisposed = true;
     inspectorLibrary.dispose();
+
+    _cachedSelectionGroups?.clear(false);
+    _cachedSelectionGroups = null;
     super.dispose();
   }
 
