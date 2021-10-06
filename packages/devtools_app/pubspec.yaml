@@ -57,8 +57,7 @@ dependencies:
   vm_service: ^7.1.1
   vm_snapshot_analysis: ^0.6.0
   web_socket_channel: ^2.1.0
-  widget_icons:
-    path: ../../third_party/packages/widget_icons
+  # widget_icons: ^0.0.1
 
 dev_dependencies:
   build_runner: ^2.0.4
