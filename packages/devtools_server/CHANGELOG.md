@@ -1,6 +1,5 @@
 ## 0.2.6-dev.2
 - Updated package:vm_service to >= 4.1.0
-- Made `serveDevtools` Serve requests from in an error zone and log errors.
 
 ## 0.2.3
 - Updated package:vm_service to >= 3.0.0
