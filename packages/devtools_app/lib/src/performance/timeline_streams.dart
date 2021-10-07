@@ -84,7 +84,6 @@ class TimelineStreamManager extends Disposer {
             ),
         ],
       );
-    if (_streams.isEmpty) return;
   }
 
   /// Handles events from the VM service 'TimelineEvent' stream to track updates
