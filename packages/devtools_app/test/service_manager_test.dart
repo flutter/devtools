@@ -7,7 +7,6 @@ import 'dart:async';
 
 import 'package:devtools_app/src/eval_on_dart_library.dart';
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/performance/timeline_streams.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/service_registrations.dart' as registrations;
