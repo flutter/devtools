@@ -1473,7 +1473,8 @@ class CheckboxSetting extends StatelessWidget {
           textContent,
           Expanded(
             child: RichText(
-              overflow: TextOverflow.visible,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               text: TextSpan(
                 text: ' • $description',
                 style: theme.subtleTextStyle,
