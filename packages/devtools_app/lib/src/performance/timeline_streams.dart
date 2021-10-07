@@ -56,10 +56,17 @@ class TimelineStreamManager extends Disposer {
   final _streams = <String, TimelineStream>{};
 
   List<TimelineStream> get basicStreams =>
-      _streams.values.where((stream) => !stream.advanced).toList();
+      _streamsWhere((stream) => !stream.advanced);
 
   List<TimelineStream> get advancedStreams =>
-      _streams.values.where((stream) => stream.advanced).toList();
+      _streamsWhere((stream) => stream.advanced);
+
+  List<TimelineStream> get recordedStreams =>
+      _streamsWhere((stream) => stream.recorded.value);
+
+  List<TimelineStream> _streamsWhere(bool Function(TimelineStream) condition) {
+    return _streams.values.where(condition).toList();
+  }
 
   ValueListenable<bool> timelineStreamListenable(String name) {
     return _streams.containsKey(name) ? _streams[name].recorded : null;

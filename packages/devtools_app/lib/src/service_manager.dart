@@ -75,11 +75,9 @@ class ServiceConnectionManager {
       _registeredMethodsForService;
   final Map<String, List<String>> _registeredMethodsForService = {};
 
-  VmFlagManager get vmFlagManager => _vmFlagManager;
-  final _vmFlagManager = VmFlagManager();
+  final vmFlagManager = VmFlagManager();
 
-  TimelineStreamManager get timelineStreamManager => _timelineStreamManager;
-  final _timelineStreamManager = TimelineStreamManager();
+  final timelineStreamManager = TimelineStreamManager();
 
   final isolateManager = IsolateManager();
 
@@ -186,8 +184,8 @@ class ServiceConnectionManager {
     isolateManager.vmServiceOpened(service);
     consoleService.vmServiceOpened(service);
     serviceExtensionManager.vmServiceOpened(service, connectedApp);
-    await _vmFlagManager.vmServiceOpened(service);
-    await _timelineStreamManager.vmServiceOpened(service);
+    await vmFlagManager.vmServiceOpened(service);
+    await timelineStreamManager.vmServiceOpened(service);
     // This needs to be called last in the above group of `vmServiceOpened`
     // calls.
     errorBadgeManager.vmServiceOpened(service);
@@ -339,8 +337,8 @@ class ServiceConnectionManager {
     connectedApp = null;
     generateDevToolsTitle();
 
-    _vmFlagManager.vmServiceClosed();
-    _timelineStreamManager.vmServiceClosed();
+    vmFlagManager.vmServiceClosed();
+    timelineStreamManager.vmServiceClosed();
     serviceExtensionManager.vmServiceClosed();
 
     serviceTrafficLogger?.dispose();

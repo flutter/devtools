@@ -30,6 +30,7 @@ export 'src/network/network_model.dart';
 export 'src/notifications.dart';
 export 'src/performance/performance_controller.dart';
 export 'src/performance/performance_model.dart';
+export 'src/performance/timeline_streams.dart';
 export 'src/preferences.dart';
 export 'src/profiler/cpu_profile_model.dart';
 export 'src/profiler/profile_granularity.dart';
