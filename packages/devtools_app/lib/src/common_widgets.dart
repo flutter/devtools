@@ -1412,9 +1412,11 @@ class NotifierCheckbox extends StatelessWidget {
   final void Function(bool newValue) onChanged;
 
   void _updateValue(bool value) {
-    notifier.value = value;
-    if (onChanged != null) {
-      onChanged(value);
+    if (notifier.value != value) {
+      notifier.value = value;
+      if (onChanged != null) {
+        onChanged(value);
+      }
     }
   }
 
