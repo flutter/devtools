@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+import 'auto_dispose_mixin.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 import 'ui/icons.dart';
@@ -1386,5 +1387,118 @@ class CopyToClipboardControl extends StatelessWidget {
           : () => copyToClipboard(dataProvider(), successMessage, context),
       key: buttonKey,
     );
+  }
+}
+
+/// Checkbox Widget class that listens to and manages a [ValueNotifier].
+///
+/// Used to create a Checkbox widget who's boolean value is attached
+/// to a [ValueNotifier<bool>]. This allows for the pattern:
+///
+/// Create the [NotifierCheckbox] widget in build e.g.,
+///
+///   myCheckboxWidget = NotifierCheckbox(notifier: controller.myCheckbox);
+///
+/// The checkbox and the value notifier are now linked with clicks updating the
+/// [ValueNotifier] and changes to the [ValueNotifier] updating the checkbox.
+class NotifierCheckbox extends StatelessWidget {
+  const NotifierCheckbox({
+    Key key,
+    @required this.notifier,
+    this.onChanged,
+  }) : super(key: key);
+
+  final ValueNotifier<bool> notifier;
+
+  final void Function(bool newValue) onChanged;
+
+  void _updateValue(bool value) {
+    notifier.value = value;
+    if (onChanged != null) {
+      onChanged(value);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: notifier,
+      builder: (context, value, _) {
+        return Checkbox(
+          value: value,
+          onChanged: _updateValue,
+        );
+      },
+    );
+  }
+}
+
+class CheckboxSetting extends StatelessWidget {
+  const CheckboxSetting({
+    Key key,
+    @required this.notifier,
+    @required this.title,
+    this.description,
+    this.tooltip,
+    this.onChanged,
+  }) : super(key: key);
+
+  final ValueListenable<bool> notifier;
+
+  final String title;
+
+  final String description;
+
+  final String tooltip;
+
+  final void Function(bool newValue) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    Widget textContent = RichText(
+      overflow: TextOverflow.visible,
+      text: TextSpan(
+        text: title,
+        style: theme.regularTextStyle,
+      ),
+    );
+
+    if (description != null) {
+      textContent = Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          textContent,
+          Expanded(
+            child: RichText(
+              overflow: TextOverflow.visible,
+              text: TextSpan(
+                text: ' • $description',
+                style: theme.subtleTextStyle,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    final content = Row(
+      children: [
+        NotifierCheckbox(
+          notifier: notifier,
+          onChanged: onChanged,
+        ),
+        Flexible(
+          child: textContent,
+        ),
+      ],
+    );
+    if (tooltip != null) {
+      return DevToolsTooltip(
+        tooltip: tooltip,
+        child: content,
+      );
+    }
+    return content;
   }
 }
