@@ -117,7 +117,7 @@ class TimelineStreamManager extends Disposer {
   Future<void> vmServiceOpened(VmServiceWrapper service) async {
     cancel();
     _service = service;
-    // Upon setting the vm service, get initial values for vm flags.
+    // Upon setting the vm service, get initial values for timeline streams.
     await _initStreams();
 
     autoDispose(service.onTimelineEvent.listen(handleTimelineEvent));
