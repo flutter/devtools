@@ -435,6 +435,7 @@ extension ThemeDataExtension on ThemeData {
       );
 }
 
+const extraWideSearchTextWidth = 600.0;
 const wideSearchTextWidth = 400.0;
 const defaultSearchTextWidth = 200.0;
 double get defaultTextFieldHeight => scaleByFontFactor(32.0);
