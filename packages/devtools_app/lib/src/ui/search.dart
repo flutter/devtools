@@ -605,8 +605,6 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   /// pop-up is visible close the pop-up on first ESCAPE.
   /// [keyEventsToPropogate] a set of key events that should be propogated to
   /// other handlers
-  /// TODO(elliette): Have this return a private _AutoCompleteSearchField widget
-  ///  instead.
   Widget buildAutoCompleteSearchField({
     @required AutoCompleteSearchControllerMixin controller,
     @required GlobalKey searchFieldKey,
@@ -693,19 +691,31 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
       return KeyEventResult.ignored;
     };
 
-    return RawKeyboardListener(
-      focusNode: rawKeyboardFocusNode,
-      child: _buildSearchField(
+    if (_closeHandler != null) {
+      _searchFieldFocusNode.removeListener(_closeHandler);
+    }
+    _closeHandler = () {
+      if (!_searchFieldFocusNode.hasFocus) {
+        controller.closeAutoCompleteOverlay();
+      }
+    };
+    _searchFieldFocusNode.addListener(_closeHandler);
+
+    return _AutoCompleteSearchField(
+      searchField: _SearchField(
         controller: controller,
         searchFieldKey: searchFieldKey,
         searchFieldEnabled: searchFieldEnabled,
         shouldRequestFocus: shouldRequestFocus,
-        autoCompleteLayerLink: controller.autoCompleteLayerLink,
+        searchFieldFocusNode: _searchFieldFocusNode,
+        searchTextFieldController: searchTextFieldController,
         decoration: decoration,
         label: label,
         tracking: tracking,
         onClose: onClose,
       ),
+      rawKeyboardFocusNode: rawKeyboardFocusNode,
+      autoCompleteLayerLink: controller.autoCompleteLayerLink,
     );
   }
 
@@ -757,119 +767,16 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     bool supportsNavigation = false,
     VoidCallback onClose,
   }) {
-    return _buildSearchField(
+    return _SearchField(
       controller: controller,
       searchFieldKey: searchFieldKey,
       searchFieldEnabled: searchFieldEnabled,
       shouldRequestFocus: shouldRequestFocus,
-      autoCompleteLayerLink: null,
+      searchFieldFocusNode: _searchFieldFocusNode,
+      searchTextFieldController: searchTextFieldController,
       supportsNavigation: supportsNavigation,
       onClose: onClose,
     );
-  }
-
-  Widget _buildSearchField({
-    @required SearchControllerMixin controller,
-    @required GlobalKey searchFieldKey,
-    @required bool searchFieldEnabled,
-    @required bool shouldRequestFocus,
-    @required LayerLink autoCompleteLayerLink,
-    InputDecoration decoration,
-    String label,
-    bool supportsNavigation = false,
-    VoidCallback onClose,
-    bool tracking = false,
-  }) {
-    if (controller is AutoCompleteSearchControllerMixin) {
-      if (_closeHandler != null) {
-        _searchFieldFocusNode.removeListener(_closeHandler);
-      }
-      _closeHandler = () {
-        if (!_searchFieldFocusNode.hasFocus) {
-          controller.closeAutoCompleteOverlay();
-        }
-      };
-      _searchFieldFocusNode.addListener(_closeHandler);
-    }
-
-    final searchField = TextField(
-      key: searchFieldKey,
-      autofocus: true,
-      enabled: searchFieldEnabled,
-      focusNode: _searchFieldFocusNode,
-      controller: searchTextFieldController,
-      onChanged: (value) {
-        if (tracking) {
-          // Use a TextPainter to calculate the width of the newly entered text.
-          // TODO(terry): The TextPainter's TextStyle is default (same as this
-          //              TextField) consider explicitly using a TextStyle of
-          //              this TextField if the TextField needs styling.
-          final painter = TextPainter(
-            textDirection: TextDirection.ltr,
-            text: TextSpan(text: value),
-          );
-          painter.layout();
-
-          // X coordinate of the pop-up, immediately to the right of the insertion
-          // point (caret).
-          controller.xPosition = painter.width;
-        }
-        controller.search = value;
-      },
-      onEditingComplete: () {
-        _searchFieldFocusNode.requestFocus();
-      },
-      // Guarantee that the TextField on all platforms renders in the same
-      // color for border, label text, and cursor. Primarly, so golden screen
-      // snapshots will compare with the exact color.
-      // Guarantee that the TextField on all platforms renders in the same
-      // color for border, label text, and cursor. Primarly, so golden screen
-      // snapshots will compare with the exact color.
-      decoration: decoration ??
-          InputDecoration(
-            contentPadding: const EdgeInsets.all(denseSpacing),
-            focusedBorder:
-                OutlineInputBorder(borderSide: searchFocusBorderColor),
-            enabledBorder:
-                OutlineInputBorder(borderSide: searchFocusBorderColor),
-            labelStyle: TextStyle(color: searchColor),
-            border: const OutlineInputBorder(),
-            labelText: label ?? 'Search',
-            suffix: (supportsNavigation || onClose != null)
-                ? _buildSearchFieldSuffix(
-                    controller,
-                    supportsNavigation: supportsNavigation,
-                    onClose: onClose,
-                  )
-                : null,
-          ),
-      cursorColor: searchColor,
-    );
-
-    if (shouldRequestFocus) {
-      _searchFieldFocusNode.requestFocus();
-    }
-
-    if (controller is AutoCompleteSearchControllerMixin) {
-      return CompositedTransformTarget(
-        link: autoCompleteLayerLink,
-        child: searchField,
-      );
-    }
-    return searchField;
-  }
-
-  Widget _buildSearchFieldSuffix(
-    SearchControllerMixin controller, {
-    bool supportsNavigation = false,
-    VoidCallback onClose,
-  }) {
-    assert(supportsNavigation || onClose != null);
-    if (supportsNavigation) {
-      return SearchNavigationControls(controller, onClose: onClose);
-    } else {
-      return closeSearchDropdownButton(onClose);
-    }
   }
 
   void selectFromSearchField(
@@ -898,6 +805,141 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     searchTextFieldController.text = newValue;
     searchTextFieldController.selection =
         TextSelection.collapsed(offset: caretPosition);
+  }
+}
+
+class _SearchField extends StatelessWidget {
+  const _SearchField({
+    @required this.controller,
+    @required this.searchFieldKey,
+    @required this.searchFieldEnabled,
+    @required this.shouldRequestFocus,
+    @required this.searchFieldFocusNode,
+    @required this.searchTextFieldController,
+    this.label = 'Search',
+    this.supportsNavigation = false,
+    this.tracking = false,
+    this.decoration,
+    this.onClose,
+  });
+
+  final SearchControllerMixin controller;
+  final GlobalKey searchFieldKey;
+  final bool searchFieldEnabled;
+  final bool shouldRequestFocus;
+  final FocusNode searchFieldFocusNode;
+  final TextEditingController searchTextFieldController;
+  final String label;
+  final bool supportsNavigation;
+  final bool tracking;
+  final InputDecoration decoration;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final searchField = TextField(
+      key: searchFieldKey,
+      autofocus: true,
+      enabled: searchFieldEnabled,
+      focusNode: searchFieldFocusNode,
+      controller: searchTextFieldController,
+      onChanged: (value) {
+        if (tracking) {
+          // Use a TextPainter to calculate the width of the newly entered text.
+          // TODO(terry): The TextPainter's TextStyle is default (same as this
+          //              TextField) consider explicitly using a TextStyle of
+          //              this TextField if the TextField needs styling.
+          final painter = TextPainter(
+            textDirection: TextDirection.ltr,
+            text: TextSpan(text: value),
+          );
+          painter.layout();
+
+          // X coordinate of the pop-up, immediately to the right of the insertion
+          // point (caret).
+          controller.xPosition = painter.width;
+        }
+        controller.search = value;
+      },
+      onEditingComplete: () {
+        searchFieldFocusNode.requestFocus();
+      },
+      // Guarantee that the TextField on all platforms renders in the same
+      // color for border, label text, and cursor. Primarly, so golden screen
+      // snapshots will compare with the exact color.
+      // Guarantee that the TextField on all platforms renders in the same
+      // color for border, label text, and cursor. Primarly, so golden screen
+      // snapshots will compare with the exact color.
+      decoration: decoration ??
+          InputDecoration(
+            contentPadding: const EdgeInsets.all(denseSpacing),
+            focusedBorder:
+                OutlineInputBorder(borderSide: searchFocusBorderColor),
+            enabledBorder:
+                OutlineInputBorder(borderSide: searchFocusBorderColor),
+            labelStyle: TextStyle(color: searchColor),
+            border: const OutlineInputBorder(),
+            labelText: label ?? 'Search',
+            suffix: (supportsNavigation || onClose != null)
+                ? _SearchFieldSuffix(
+                    controller: controller,
+                    supportsNavigation: supportsNavigation,
+                    onClose: onClose,
+                  )
+                : null,
+          ),
+      cursorColor: searchColor,
+    );
+
+    if (shouldRequestFocus) {
+      searchFieldFocusNode.requestFocus();
+    }
+
+    return searchField;
+  }
+}
+
+class _AutoCompleteSearchField extends StatelessWidget {
+  const _AutoCompleteSearchField({
+    @required this.searchField,
+    @required this.rawKeyboardFocusNode,
+    @required this.autoCompleteLayerLink,
+  });
+
+  final _SearchField searchField;
+  final FocusNode rawKeyboardFocusNode;
+  final LayerLink autoCompleteLayerLink;
+
+  @override
+  Widget build(BuildContext context) {
+    return RawKeyboardListener(
+      focusNode: rawKeyboardFocusNode,
+      child: CompositedTransformTarget(
+        link: autoCompleteLayerLink,
+        child: searchField,
+      ),
+    );
+  }
+}
+
+class _SearchFieldSuffix extends StatelessWidget {
+  const _SearchFieldSuffix({
+    @required this.controller,
+    this.supportsNavigation = false,
+    this.onClose,
+  });
+  final SearchControllerMixin controller;
+  final bool supportsNavigation;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    assert(supportsNavigation || onClose != null);
+    if (supportsNavigation) {
+      return SearchNavigationControls(controller, onClose: onClose);
+    } else {
+      return closeSearchDropdownButton(onClose);
+    }
   }
 }
 
