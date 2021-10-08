@@ -68,7 +68,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/src/widgets/app.dart';
-import 'package:flutter/src/widgets/basic.dart';
 import 'package:flutter/src/widgets/binding.dart';
 import 'package:flutter/src/widgets/debug.dart';
 import 'package:flutter/src/widgets/framework.dart';
