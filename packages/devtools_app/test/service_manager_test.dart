@@ -33,6 +33,69 @@ void main() async {
         await env.tearDownEnvironment(force: true);
       });
 
+      test('verify number of vm service calls on connect', () async {
+        await env.setupEnvironment();
+        // Await a delay to ensure the service extensions have had a chance to
+        // be called. This delay may be able to be shortened if doing so does
+        // not cause bot flakiness.
+        await Future.delayed(const Duration(seconds: 10));
+        // Ensure all futures are completed before running checks.
+        await serviceManager.service.allFuturesCompleted;
+        expect(
+          serviceManager.service.vmServiceCallCount,
+          equals(32),
+          reason:
+              'Unexpected number of vm service calls upon connection. If this '
+              'is expected, please update this test to the new expected number '
+              'of calls.',
+        );
+        expect(
+          serviceManager.service.vmServiceCalls,
+          equals(
+            [
+              'streamListen',
+              'streamListen',
+              'getVM',
+              'getIsolate',
+              'getIsolate',
+              'resume',
+              'getVersion',
+              'callMethod getDartDevelopmentServiceVersion',
+              'getFlagList',
+              'getVMTimelineFlags',
+              'getVM',
+              'getIsolate',
+              'streamListen',
+              'streamListen',
+              'streamListen',
+              'streamListen',
+              'streamListen',
+              'streamListen',
+              'streamListen',
+              'streamListen',
+              // Service extensions are restored from the device on connection.
+              'callServiceExtension ext.dart.io.httpEnableTimelineLogging',
+              'callServiceExtension ext.dart.io.socketProfilingEnabled',
+              'evaluate Platform.isAndroid',
+              'callMethod s0.flutterVersion',
+              'callServiceExtension ext.flutter.platformOverride',
+              'callServiceExtension ext.flutter.timeDilation',
+              'callServiceExtension ext.flutter.debugPaint',
+              'callServiceExtension ext.flutter.debugPaintBaselinesEnabled',
+              'callServiceExtension ext.flutter.repaintRainbow',
+              'callServiceExtension ext.flutter.showPerformanceOverlay',
+              'callServiceExtension ext.flutter.debugAllowBanner',
+              'callServiceExtension ext.flutter.inspector.show',
+            ],
+          ),
+          reason:
+              'Unexpected list of vm service calls upon connection. If a change'
+              ' is expected, please update this test to the new expected list'
+              ' of calls.',
+        );
+        await env.tearDownEnvironment();
+      });
+
       test('vmServiceOpened', () async {
         await env.setupEnvironment();
 
