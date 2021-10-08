@@ -13,6 +13,7 @@ import '../config_specific/logger/logger.dart';
 import '../core/message_bus.dart';
 import '../debugger/hover.dart';
 import '../globals.dart';
+import '../listenable.dart';
 import '../notifications.dart';
 import '../scaffold.dart';
 import '../service_extensions.dart';
@@ -153,7 +154,7 @@ class _ServiceExtensionButtonGroupState
           extensionState.isSelected
               ? description.enabledIcon
               : description.disabledIcon,
-          description.description,
+          description.title,
           unscaledMinIncludeTextWidth:
               widget.minScreenWidthForTextBeforeScaling,
         ),
@@ -344,7 +345,7 @@ class StructuredErrorsToggle extends StatelessWidget {
 class _ServiceExtensionToggle extends _ServiceExtensionWidget {
   const _ServiceExtensionToggle({
     Key key,
-    this.service,
+    @required this.service,
     @required String Function(dynamic) describeError,
   }) : super(
           key: key,
@@ -396,7 +397,7 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
                 onChanged: _onClick,
               ),
             ),
-            Text(widget.service.description),
+            Text(widget.service.title),
             // The switch is padded on its sides by 16dp.
             // This balances out the tappable area.
             const Padding(padding: EdgeInsets.only(left: defaultSpacing)),
@@ -421,11 +422,80 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
   }
 }
 
+/// [Checkbox] that stays synced with the value of a service extension.
+///
+/// Service extensions can be found in [service_extensions.dart].
+class ServiceExtensionCheckbox extends _ServiceExtensionWidget {
+  ServiceExtensionCheckbox({
+    Key key,
+    @required this.service,
+  }) : super(
+          key: key,
+          // Don't show messages on success or when this toggle is in progress.
+          completedText: null,
+          describeError: (error) => _errorMessage(service.extension, error),
+        );
+
+  static String _errorMessage(String extensionName, dynamic error) {
+    return 'Failed to update $extensionName setting: $error';
+  }
+
+  final ToggleableServiceExtensionDescription service;
+
+  @override
+  _ServiceExtensionMixin<_ServiceExtensionWidget> createState() =>
+      _ServiceExtensionCheckboxState();
+}
+
+class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
+    with _ServiceExtensionMixin, AutoDisposeMixin {
+  /// Whether this checkbox should be enabled.
+  ///
+  /// This notifier listens to extension state changes from the service manager
+  /// and will propagate those changes to the checkbox accordingly.
+  final enabled = ValueNotifier<bool>(false);
+
+  @override
+  void initState() {
+    super.initState();
+    final state = serviceManager.serviceExtensionManager
+        .getServiceExtensionState(widget.service.extension);
+
+    enabled.value = state.value.enabled;
+    addAutoDisposeListener(state, () {
+      enabled.value = state.value.enabled;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CheckboxSetting(
+      notifier: enabled,
+      title: widget.service.title,
+      description: widget.service.description,
+      tooltip: widget.service.tooltip,
+      onChanged: _onChanged,
+    );
+  }
+
+  void _onChanged(bool value) {
+    invokeAndCatchErrors(() async {
+      await serviceManager.serviceExtensionManager.setServiceExtensionState(
+        widget.service.extension,
+        value,
+        value ? widget.service.enabledValue : widget.service.disabledValue,
+      );
+    });
+  }
+}
+
 /// Widget that knows how to talk to a service extension and surface the relevant errors.
 abstract class _ServiceExtensionWidget extends StatefulWidget {
-  const _ServiceExtensionWidget(
-      {Key key, @required this.completedText, @required this.describeError})
-      : assert(describeError != null),
+  const _ServiceExtensionWidget({
+    Key key,
+    @required this.completedText,
+    @required this.describeError,
+  })  : assert(describeError != null),
         super(key: key);
 
   /// The text to show when the action is completed.

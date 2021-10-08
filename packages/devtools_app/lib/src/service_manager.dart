@@ -1209,6 +1209,8 @@ class ServiceExtensionManager extends Disposer {
   }) async {
     if (callExtension && _serviceExtensions.contains(name)) {
       await _callServiceExtension(name, value);
+    } else if (callExtension) {
+      log('Attempted to call extension \'$name\', but no service with that name exists');
     }
 
     final state = ServiceExtensionState(enabled, value);

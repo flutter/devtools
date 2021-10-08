@@ -314,18 +314,14 @@ class _SecondaryControls extends StatelessWidget {
           profileGranularityFlagNotifier:
               controller.cpuProfilerController.profileGranularityFlagNotifier,
         ),
-        const SizedBox(width: defaultSpacing),
+        const SizedBox(width: denseSpacing),
         if (serviceManager.connectedApp.isFlutterAppNow)
-          ServiceExtensionButtonGroup(
-            minScreenWidthForTextBeforeScaling:
-                _secondaryControlsMinIncludeTextWidth,
-            extensions: [
-              performanceOverlay,
-              profileWidgetBuilds,
-              // TODO(devoncarew): Enable this once we have a UI displaying the
-              // values.
-              //trackRebuildWidgets,
-            ],
+          IconLabelButton(
+            icon: Icons.build,
+            label: 'Debugging options',
+            tooltip:
+                'Opens a list of options you can use to help debug performance',
+            onPressed: () => _openDebuggingOptionsDialog(context),
           ),
         const SizedBox(width: defaultSpacing),
         ExportButton(
@@ -352,10 +348,48 @@ class _SecondaryControls extends StatelessWidget {
     Notifications.of(context).push(successfulExportMessage(exportedFile));
   }
 
+  void _openDebuggingOptionsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => DebuggingOptionsDialog(),
+    );
+  }
+
   void _openSettingsDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => PerformanceSettingsDialog(controller),
+    );
+  }
+}
+
+class DebuggingOptionsDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return DevToolsDialog(
+      title: dialogTitleText(theme, 'Debugging Options'),
+      includeDivider: false,
+      content: Container(
+        width: defaultDialogWidth,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ServiceExtensionCheckbox(service: performanceOverlay),
+            ServiceExtensionCheckbox(service: profileWidgetBuilds),
+            // TODO(devoncarew): Enable this once we have a UI displaying the
+            // values.
+            // ServiceExtensionCheckbox(service: trackRebuildWidgets),
+            ServiceExtensionCheckbox(service: disableClipLayers),
+            ServiceExtensionCheckbox(service: disableOpacityLayers),
+            ServiceExtensionCheckbox(service: disablePhysicalShapeLayers),
+          ],
+        ),
+      ),
+      actions: [
+        DialogCloseButton(),
+      ],
     );
   }
 }
