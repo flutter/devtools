@@ -448,32 +448,47 @@ class ServiceExtensionCheckbox extends _ServiceExtensionWidget {
 
 class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
     with _ServiceExtensionMixin, AutoDisposeMixin {
-  /// Whether this checkbox should be enabled.
+  /// Whether this checkbox value is set to true.
   ///
   /// This notifier listens to extension state changes from the service manager
   /// and will propagate those changes to the checkbox accordingly.
-  final enabled = ValueNotifier<bool>(false);
+  final value = ValueNotifier<bool>(false);
+
+  /// Whether the extension for this checkbox is available.
+  final extensionAvailable = ValueNotifier<bool>(false);
 
   @override
   void initState() {
     super.initState();
-    final state = serviceManager.serviceExtensionManager
-        .getServiceExtensionState(widget.service.extension);
 
-    enabled.value = state.value.enabled;
-    addAutoDisposeListener(state, () {
-      enabled.value = state.value.enabled;
+    serviceManager.serviceExtensionManager
+        .waitForServiceExtensionAvailable(widget.service.extension)
+        .then((isServiceAvailable) {
+      if (isServiceAvailable) {
+        extensionAvailable.value = true;
+        final state = serviceManager.serviceExtensionManager
+            .getServiceExtensionState(widget.service.extension);
+        value.value = state.value.enabled;
+        addAutoDisposeListener(state, () {
+          value.value = state.value.enabled;
+        });
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return CheckboxSetting(
-      notifier: enabled,
-      title: widget.service.title,
-      description: widget.service.description,
-      tooltip: widget.service.tooltip,
-      onChanged: _onChanged,
+    return ValueListenableBuilder(
+      valueListenable: extensionAvailable,
+      builder: (context, available, _) {
+      return CheckboxSetting(
+        notifier: value,
+        title: widget.service.title,
+        description: widget.service.description,
+        tooltip: widget.service.tooltip,
+        onChanged: _onChanged,
+        enabled: available,
+      );},
     );
   }
 
