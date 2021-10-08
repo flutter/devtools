@@ -9,7 +9,6 @@ import 'dart:math' as math;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 

@@ -5,7 +5,6 @@
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'layout_explorer_serialization_delegate.dart';

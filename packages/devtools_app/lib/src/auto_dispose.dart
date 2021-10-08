@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 
 /// Provides functionality to simplify listening to streams and ValueNotifiers.
 ///
