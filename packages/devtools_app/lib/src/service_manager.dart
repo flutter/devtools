@@ -7,7 +7,6 @@ import 'dart:core';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 

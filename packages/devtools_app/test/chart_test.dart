@@ -10,7 +10,6 @@ import 'package:devtools_test/memory_test_data.dart';
 import 'package:devtools_test/mocks.dart';
 import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

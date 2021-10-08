@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('vm')
-import 'dart:ui';
 
 import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
@@ -21,7 +19,6 @@ import 'package:devtools_test/memory_test_data.dart';
 import 'package:devtools_test/mocks.dart';
 import 'package:devtools_test/utils.dart';
 import 'package:devtools_test/wrappers.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
