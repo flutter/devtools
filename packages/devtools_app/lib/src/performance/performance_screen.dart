@@ -376,14 +376,14 @@ class DebuggingOptionsDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ServiceExtensionCheckbox(service: performanceOverlay),
-            ServiceExtensionCheckbox(service: profileWidgetBuilds),
+            _maybeIncludeOption(performanceOverlay),
+            _maybeIncludeOption(profileWidgetBuilds),
             // TODO(devoncarew): Enable this once we have a UI displaying the
             // values.
-            // ServiceExtensionCheckbox(service: trackRebuildWidgets),
-            ServiceExtensionCheckbox(service: disableClipLayers),
-            ServiceExtensionCheckbox(service: disableOpacityLayers),
-            ServiceExtensionCheckbox(service: disablePhysicalShapeLayers),
+            // _maybeIncludeOption(trackRebuildWidgets),
+            _maybeIncludeOption(disableClipLayers),
+            _maybeIncludeOption(disableOpacityLayers),
+            _maybeIncludeOption(disablePhysicalShapeLayers),
           ],
         ),
       ),
@@ -391,6 +391,14 @@ class DebuggingOptionsDialog extends StatelessWidget {
         DialogCloseButton(),
       ],
     );
+  }
+
+  Widget _maybeIncludeOption(ToggleableServiceExtensionDescription service) {
+    if (serviceManager.serviceExtensionManager
+        .isServiceExtensionAvailable(service.extension)) {
+      return ServiceExtensionCheckbox(service: service);
+    }
+    return const SizedBox();
   }
 }
 
