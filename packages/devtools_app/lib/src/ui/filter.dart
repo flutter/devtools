@@ -7,7 +7,6 @@ import '../dialogs.dart';
 import '../theme.dart';
 import '../utils.dart';
 import 'label.dart';
-import 'utils.dart';
 
 // TODO(kenz): consider breaking this up flat data filtering and tree data
 // filtering.

@@ -27,7 +27,6 @@ import '../../split.dart';
 import '../../theme.dart';
 import '../../ui/icons.dart';
 import '../../ui/service_extension_widgets.dart';
-import '../../ui/utils.dart';
 import '../../ui/vm_flag_widgets.dart';
 import '../../version.dart';
 import 'event_details.dart';
@@ -403,15 +402,19 @@ class LegacyPerformanceSettingsDialog extends StatelessWidget {
     @required bool advanced,
   }) {
     final settings = <Widget>[];
-    final streams = controller.recordedStreams
-        .where((s) => s.advanced == advanced)
-        .toList();
+    final streams = advanced
+        ? serviceManager.timelineStreamManager.advancedStreams
+        : serviceManager.timelineStreamManager.basicStreams;
     for (final stream in streams) {
       settings.add(_buildStream(
         name: stream.name,
         description: ' • ${stream.description}',
-        listenable: stream.enabled,
-        onChanged: (_) => controller.toggleTimelineStream(stream),
+        listenable: stream.recorded,
+        onChanged: (newValue) =>
+            serviceManager.timelineStreamManager.updateTimelineStream(
+          stream,
+          newValue,
+        ),
         theme: theme,
       ));
     }

@@ -149,6 +149,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final InspectorService inspectorService = FakeInspectorService();
 
   @override
+  final TimelineStreamManager timelineStreamManager = TimelineStreamManager();
+
+  @override
   VM get vm => _mockVM;
 
   // TODO(jacobr): the fact that this has to be a static final is ugly.
