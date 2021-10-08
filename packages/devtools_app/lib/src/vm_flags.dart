@@ -5,7 +5,6 @@
 import 'dart:core';
 
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import 'auto_dispose.dart';
