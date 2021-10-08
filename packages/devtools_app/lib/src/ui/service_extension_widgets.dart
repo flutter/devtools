@@ -13,7 +13,6 @@ import '../config_specific/logger/logger.dart';
 import '../core/message_bus.dart';
 import '../debugger/hover.dart';
 import '../globals.dart';
-import '../listenable.dart';
 import '../notifications.dart';
 import '../scaffold.dart';
 import '../service_extensions.dart';
