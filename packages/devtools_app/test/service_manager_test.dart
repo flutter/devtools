@@ -47,7 +47,8 @@ void main() async {
           reason:
               'Unexpected number of vm service calls upon connection. If this '
               'is expected, please update this test to the new expected number '
-              'of calls.',
+              'of calls. Here are the calls for this test run:\n'
+              '${serviceManager.service.vmServiceCalls.toString()}',
         );
         expect(
           serviceManager.service.vmServiceCalls,
