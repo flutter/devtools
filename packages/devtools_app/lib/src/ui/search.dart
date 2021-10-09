@@ -553,6 +553,12 @@ typedef HighlightAutoComplete = Function(
   bool directionDown,
 );
 
+/// Callback for clearing the search field.
+typedef ClearSearchField = Function(
+  SearchControllerMixin controller, {
+  bool force,
+});
+
 mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   TextEditingController searchTextFieldController;
   FocusNode _searchFieldFocusNode;
@@ -621,142 +627,31 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   }) {
     _onSelection = onSelection;
 
-    onHighlightDropdown ??= _highlightDropdown;
-
-    final rawKeyboardFocusNode = FocusNode(debugLabel: 'search');
-
-    rawKeyboardFocusNode.onKey = (FocusNode node, RawKeyEvent event) {
-      if (event is RawKeyDownEvent) {
-        final key = event.data.logicalKey.keyId & LogicalKeyboardKey.valueMask;
-
-        if (key == escape) {
-          // TODO(kenz): Enable this once we find a way around the navigation
-          // this causes. This triggers a "back" navigation.
-          // ESCAPE key pressed clear search TextField.c
-          if (controller.autoCompleteOverlay != null) {
-            controller.closeAutoCompleteOverlay();
-          } else if (supportClearField) {
-            // If pop-up closed ESCAPE will clean the TextField.
-            clearSearchField(controller, force: true);
-          }
-
-          return _determineKeyEventResult(
-            key,
-            keyEventsToPropogate,
-          );
-        } else if (controller.autoCompleteOverlay != null) {
-          if (key == enter || key == enterMac || key == tab || key == tabMac) {
-            // Enter / Tab pressed.
-            String foundExact;
-
-            // What the user has typed in so far.
-            final searchToMatch = controller.search.toLowerCase();
-            // Find exact match in autocomplete list - use that as our search value.
-            for (final autoEntry in controller.searchAutoComplete.value) {
-              if (searchToMatch == autoEntry.text.toLowerCase()) {
-                foundExact = autoEntry.text;
-                break;
-              }
-            }
-            // Nothing found, pick item selected in dropdown.
-            final autoCompleteList = controller.searchAutoComplete.value;
-            if (foundExact == null ||
-                autoCompleteList[controller.currentDefaultIndex].text !=
-                    foundExact) {
-              if (autoCompleteList.isNotEmpty) {
-                foundExact =
-                    autoCompleteList[controller.currentDefaultIndex].text;
-              }
-            }
-
-            if (foundExact != null) {
-              controller.selectTheSearch = true;
-              controller.search = foundExact;
-              onSelection(foundExact);
-              return _determineKeyEventResult(key, keyEventsToPropogate);
-            }
-          } else if (key == arrowDown || key == arrowUp) {
-            onHighlightDropdown(controller, key == arrowDown);
-            return _determineKeyEventResult(key, keyEventsToPropogate);
-          }
-        }
-
-        // We don't support tabs in the search input. Swallow to prevent a
-        // change of focus.
-        if (key == tab || key == tabMac) {
-          _determineKeyEventResult(key, keyEventsToPropogate);
-        }
-      }
-
-      return KeyEventResult.ignored;
-    };
-
-    if (_closeHandler != null) {
-      _searchFieldFocusNode.removeListener(_closeHandler);
-    }
-    _closeHandler = () {
-      if (!_searchFieldFocusNode.hasFocus) {
-        controller.closeAutoCompleteOverlay();
-      }
-    };
-    _searchFieldFocusNode.addListener(_closeHandler);
+    final searchField = _SearchField(
+      controller: controller,
+      searchFieldKey: searchFieldKey,
+      searchFieldEnabled: searchFieldEnabled,
+      shouldRequestFocus: shouldRequestFocus,
+      searchFieldFocusNode: _searchFieldFocusNode,
+      searchTextFieldController: searchTextFieldController,
+      decoration: decoration,
+      label: label,
+      tracking: tracking,
+      onClose: onClose,
+    );
 
     return _AutoCompleteSearchField(
-      searchField: _SearchField(
-        controller: controller,
-        searchFieldKey: searchFieldKey,
-        searchFieldEnabled: searchFieldEnabled,
-        shouldRequestFocus: shouldRequestFocus,
-        searchFieldFocusNode: _searchFieldFocusNode,
-        searchTextFieldController: searchTextFieldController,
-        decoration: decoration,
-        label: label,
-        tracking: tracking,
-        onClose: onClose,
-      ),
-      rawKeyboardFocusNode: rawKeyboardFocusNode,
+      controller: controller,
+      searchField: searchField,
+      searchFieldFocusNode: _searchFieldFocusNode,
       autoCompleteLayerLink: controller.autoCompleteLayerLink,
+      onSelection: onSelection,
+      onHighlightDropdown: onHighlightDropdown,
+      clearSearchField: clearSearchField,
+      keyEventsToPropogate: keyEventsToPropogate,
+      supportClearField: supportClearField,
+      closeHandler: _closeHandler,
     );
-  }
-
-  KeyEventResult _determineKeyEventResult(
-    int keyEventId,
-    Set<LogicalKeyboardKey> keyEventsToPropogate,
-  ) {
-    final shouldPropogateKeyEvent = keyEventsToPropogate
-        .any((key) => key.keyId & LogicalKeyboardKey.valueMask == keyEventId);
-    return shouldPropogateKeyEvent
-        ? KeyEventResult.ignored
-        : KeyEventResult.handled;
-  }
-
-  void _highlightDropdown(
-    AutoCompleteSearchControllerMixin controller,
-    bool directionDown,
-  ) {
-    final numItems = controller.searchAutoComplete.value.length - 1;
-    var indexToSelect = controller.currentDefaultIndex;
-    if (directionDown) {
-      // Select next item in auto-complete overlay.
-      ++indexToSelect;
-      if (indexToSelect > numItems) {
-        // Greater than max go back to top list item.
-        indexToSelect = 0;
-      }
-    } else {
-      // Select previous item item in auto-complete overlay.
-      --indexToSelect;
-      if (indexToSelect < 0) {
-        // Less than first go back to bottom list item.
-        indexToSelect = numItems;
-      }
-    }
-
-    controller.currentDefaultIndex = indexToSelect;
-
-    // Cause the auto-complete list to update, list is small 10 items max.
-    controller.searchAutoComplete.value =
-        controller.searchAutoComplete.value.toList();
   }
 
   Widget buildSearchField({
@@ -780,7 +675,9 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   }
 
   void selectFromSearchField(
-      SearchControllerMixin controller, String selection) {
+    SearchControllerMixin controller,
+    String selection,
+  ) {
     searchTextFieldController.clear();
     controller.search = selection;
     clearSearchField(controller, force: true);
@@ -801,7 +698,10 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   }
 
   void updateSearchField(
-      SearchControllerMixin controller, String newValue, int caretPosition) {
+    SearchControllerMixin controller, {
+    String newValue,
+    int caretPosition,
+  }) {
     searchTextFieldController.text = newValue;
     searchTextFieldController.selection =
         TextSelection.collapsed(offset: caretPosition);
@@ -902,16 +802,110 @@ class _SearchField extends StatelessWidget {
 class _AutoCompleteSearchField extends StatelessWidget {
   const _AutoCompleteSearchField({
     @required this.searchField,
-    @required this.rawKeyboardFocusNode,
+    @required this.controller,
+    @required this.searchFieldFocusNode,
     @required this.autoCompleteLayerLink,
+    @required this.onSelection,
+    @required this.onHighlightDropdown,
+    @required this.clearSearchField,
+    this.keyEventsToPropogate = const {},
+    this.supportClearField = false,
+    this.closeHandler,
   });
 
+  final AutoCompleteSearchControllerMixin controller;
   final _SearchField searchField;
-  final FocusNode rawKeyboardFocusNode;
+  final FocusNode searchFieldFocusNode;
   final LayerLink autoCompleteLayerLink;
+  final SelectAutoComplete onSelection;
+  final HighlightAutoComplete onHighlightDropdown;
+  final ClearSearchField clearSearchField;
+  final Set<LogicalKeyboardKey> keyEventsToPropogate;
+  final bool supportClearField;
+  final VoidCallback closeHandler;
 
   @override
   Widget build(BuildContext context) {
+    final highlightDropdown =
+        onHighlightDropdown != null ? onHighlightDropdown : _highlightDropdown;
+
+    final rawKeyboardFocusNode = FocusNode(debugLabel: 'search');
+
+    rawKeyboardFocusNode.onKey = (FocusNode node, RawKeyEvent event) {
+      if (event is RawKeyDownEvent) {
+        final key = event.data.logicalKey.keyId & LogicalKeyboardKey.valueMask;
+
+        if (key == escape) {
+          // TODO(kenz): Enable this once we find a way around the navigation
+          // this causes. This triggers a "back" navigation.
+          // ESCAPE key pressed clear search TextField.c
+          if (controller.autoCompleteOverlay != null) {
+            controller.closeAutoCompleteOverlay();
+          } else if (supportClearField) {
+            // If pop-up closed ESCAPE will clean the TextField.
+            clearSearchField(controller, force: true);
+          }
+          return _determineKeyEventResult(
+            key,
+            keyEventsToPropogate,
+          );
+        } else if (controller.autoCompleteOverlay != null) {
+          if (key == enter || key == enterMac || key == tab || key == tabMac) {
+            // Enter / Tab pressed.
+            String foundExact;
+
+            // What the user has typed in so far.
+            final searchToMatch = controller.search.toLowerCase();
+            // Find exact match in autocomplete list - use that as our search value.
+            for (final autoEntry in controller.searchAutoComplete.value) {
+              if (searchToMatch == autoEntry.text.toLowerCase()) {
+                foundExact = autoEntry.text;
+                break;
+              }
+            }
+            // Nothing found, pick item selected in dropdown.
+            final autoCompleteList = controller.searchAutoComplete.value;
+            if (foundExact == null ||
+                autoCompleteList[controller.currentDefaultIndex].text !=
+                    foundExact) {
+              if (autoCompleteList.isNotEmpty) {
+                foundExact =
+                    autoCompleteList[controller.currentDefaultIndex].text;
+              }
+            }
+
+            if (foundExact != null) {
+              controller.selectTheSearch = true;
+              controller.search = foundExact;
+              onSelection(foundExact);
+              return _determineKeyEventResult(key, keyEventsToPropogate);
+            }
+          } else if (key == arrowDown || key == arrowUp) {
+            highlightDropdown(controller, key == arrowDown);
+            return _determineKeyEventResult(key, keyEventsToPropogate);
+          }
+        }
+
+        // We don't support tabs in the search input. Swallow to prevent a
+        // change of focus.
+        if (key == tab || key == tabMac) {
+          _determineKeyEventResult(key, keyEventsToPropogate);
+        }
+      }
+
+      return KeyEventResult.ignored;
+    };
+
+    if (closeHandler != null) {
+      searchFieldFocusNode.removeListener(closeHandler);
+    }
+    final autoCompleteCloseHandler = () {
+      if (!searchFieldFocusNode.hasFocus) {
+        controller.closeAutoCompleteOverlay();
+      }
+    };
+    searchFieldFocusNode.addListener(autoCompleteCloseHandler);
+
     return RawKeyboardListener(
       focusNode: rawKeyboardFocusNode,
       child: CompositedTransformTarget(
@@ -919,6 +913,46 @@ class _AutoCompleteSearchField extends StatelessWidget {
         child: searchField,
       ),
     );
+  }
+
+  KeyEventResult _determineKeyEventResult(
+    int keyEventId,
+    Set<LogicalKeyboardKey> keyEventsToPropogate,
+  ) {
+    final shouldPropogateKeyEvent = keyEventsToPropogate
+        .any((key) => key.keyId & LogicalKeyboardKey.valueMask == keyEventId);
+    return shouldPropogateKeyEvent
+        ? KeyEventResult.ignored
+        : KeyEventResult.handled;
+  }
+
+  void _highlightDropdown(
+    AutoCompleteSearchControllerMixin controller,
+    bool directionDown,
+  ) {
+    final numItems = controller.searchAutoComplete.value.length - 1;
+    var indexToSelect = controller.currentDefaultIndex;
+    if (directionDown) {
+      // Select next item in auto-complete overlay.
+      ++indexToSelect;
+      if (indexToSelect > numItems) {
+        // Greater than max go back to top list item.
+        indexToSelect = 0;
+      }
+    } else {
+      // Select previous item item in auto-complete overlay.
+      --indexToSelect;
+      if (indexToSelect < 0) {
+        // Less than first go back to bottom list item.
+        indexToSelect = numItems;
+      }
+    }
+
+    controller.currentDefaultIndex = indexToSelect;
+
+    // Cause the auto-complete list to update, list is small 10 items max.
+    controller.searchAutoComplete.value =
+        controller.searchAutoComplete.value.toList();
   }
 }
 
@@ -1017,3 +1051,16 @@ class AutoCompleteMatch {
   final String text;
   final List<Range> matchedSegments;
 }
+
+/// Platform independent (Mac or Linux).
+final arrowDown =
+    LogicalKeyboardKey.arrowDown.keyId & LogicalKeyboardKey.valueMask;
+final arrowUp = LogicalKeyboardKey.arrowUp.keyId & LogicalKeyboardKey.valueMask;
+final enter = LogicalKeyboardKey.enter.keyId & LogicalKeyboardKey.valueMask;
+final escape = LogicalKeyboardKey.escape.keyId & LogicalKeyboardKey.valueMask;
+final tab = LogicalKeyboardKey.tab.keyId & LogicalKeyboardKey.valueMask;
+
+/// Work around Mac Desktop bug returning physical keycode instead of logical
+/// keyId for the RawKeyEvent's data.logical keyId keys ENTER and TAB.
+final enterMac = PhysicalKeyboardKey.enter.usbHidUsage;
+final tabMac = PhysicalKeyboardKey.tab.usbHidUsage;
