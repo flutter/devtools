@@ -962,6 +962,7 @@ class _SearchFieldSuffix extends StatelessWidget {
     this.supportsNavigation = false,
     this.onClose,
   });
+
   final SearchControllerMixin controller;
   final bool supportsNavigation;
   final VoidCallback onClose;
