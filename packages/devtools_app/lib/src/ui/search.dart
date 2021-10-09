@@ -824,6 +824,22 @@ class _AutoCompleteSearchField extends StatelessWidget {
   final bool supportClearField;
   final VoidCallback closeHandler;
 
+  /// Platform independent (Mac or Linux).
+  int get arrowDown =>
+      LogicalKeyboardKey.arrowDown.keyId & LogicalKeyboardKey.valueMask;
+  int get arrowUp =>
+      LogicalKeyboardKey.arrowUp.keyId & LogicalKeyboardKey.valueMask;
+  int get enter =>
+      LogicalKeyboardKey.enter.keyId & LogicalKeyboardKey.valueMask;
+  int get escape =>
+      LogicalKeyboardKey.escape.keyId & LogicalKeyboardKey.valueMask;
+  int get tab => LogicalKeyboardKey.tab.keyId & LogicalKeyboardKey.valueMask;
+
+  /// Work around Mac Desktop bug returning physical keycode instead of logical
+  /// keyId for the RawKeyEvent's data.logical keyId keys ENTER and TAB.
+  int get enterMac => PhysicalKeyboardKey.enter.usbHidUsage;
+  int get tabMac => PhysicalKeyboardKey.tab.usbHidUsage;
+
   @override
   Widget build(BuildContext context) {
     final highlightDropdown =
@@ -1052,16 +1068,3 @@ class AutoCompleteMatch {
   final String text;
   final List<Range> matchedSegments;
 }
-
-/// Platform independent (Mac or Linux).
-final arrowDown =
-    LogicalKeyboardKey.arrowDown.keyId & LogicalKeyboardKey.valueMask;
-final arrowUp = LogicalKeyboardKey.arrowUp.keyId & LogicalKeyboardKey.valueMask;
-final enter = LogicalKeyboardKey.enter.keyId & LogicalKeyboardKey.valueMask;
-final escape = LogicalKeyboardKey.escape.keyId & LogicalKeyboardKey.valueMask;
-final tab = LogicalKeyboardKey.tab.keyId & LogicalKeyboardKey.valueMask;
-
-/// Work around Mac Desktop bug returning physical keycode instead of logical
-/// keyId for the RawKeyEvent's data.logical keyId keys ENTER and TAB.
-final enterMac = PhysicalKeyboardKey.enter.usbHidUsage;
-final tabMac = PhysicalKeyboardKey.tab.usbHidUsage;
