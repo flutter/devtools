@@ -20,7 +20,6 @@ import '../screen.dart';
 import '../theme.dart';
 import '../ui/icons.dart';
 import '../ui/tab.dart';
-import '../ui/utils.dart';
 import '../utils.dart';
 import 'memory_android_chart.dart' as android;
 import 'memory_charts.dart';

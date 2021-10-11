@@ -13,7 +13,6 @@ import 'package:devtools_test/mocks.dart';
 import 'package:devtools_test/utils.dart';
 import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart' hide Fake;
 import 'package:mockito/mockito.dart';
 

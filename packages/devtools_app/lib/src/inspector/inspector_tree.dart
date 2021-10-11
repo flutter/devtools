@@ -13,7 +13,6 @@ library inspector_tree;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 
 import '../theme.dart';
 import '../utils.dart';

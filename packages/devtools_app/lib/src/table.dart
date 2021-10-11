@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'auto_dispose_mixin.dart';
 import 'collapsible_mixin.dart';
 import 'common_widgets.dart';
-import 'common_widgets.dart' show ScrollControllerAutoScroll;
 import 'flutter_widgets/linked_scroll_controller.dart';
 import 'table_data.dart';
 import 'theme.dart';

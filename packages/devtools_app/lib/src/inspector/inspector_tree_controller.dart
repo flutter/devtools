@@ -10,7 +10,6 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 
 import '../auto_dispose_mixin.dart';

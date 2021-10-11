@@ -14,7 +14,6 @@
 library icons;
 
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 
 import '../inspector/layout_explorer/ui/widgets_theme.dart';
 import '../theme.dart';
