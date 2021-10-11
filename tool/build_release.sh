@@ -85,9 +85,9 @@ flutter build web \
   --no-tree-shake-icons
 
 mv build/web ../devtools/build
-# Delete the Flutter-generated service worker and copy over and rename
-# the DevTools-specific service worker:
+# Delete the Flutter-generated service worker:
 rm ../devtools/build/flutter_service_worker.js
+# Rename the DevTools-specific service worker:
 mv ../devtools/build/devtools_service_worker.js ../devtools/build/service_worker.js
 
 popd
