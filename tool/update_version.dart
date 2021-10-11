@@ -18,9 +18,19 @@ void main(List<String> args) async {
     'packages/devtools_test/pubspec.yaml',
   ].map((path) => File(path)).toList();
 
-  final version = args.isNotEmpty
-      ? args.first
-      : incrementVersion(versionFromPubspecFile(pubspecs.first)!);
+  final currentVersion = args.isNotEmpty && args.length > 1
+      ? args[1]
+      : versionFromPubspecFile(pubspecs.first);
+
+  if (currentVersion == null) {
+    print('Could not resolve current version number. Please explicitly pass in '
+        'the current version as the second argument, eg'
+        'dart tool/update_version.dart 2.7.1 2.7.0');
+    return;
+  }
+
+  final version =
+      args.isNotEmpty ? args.first : incrementVersion(currentVersion);
 
   if (version == null) {
     print('Something went wrong. Could not resolve version number.');
@@ -40,6 +50,10 @@ void main(List<String> args) async {
 
   print('Updating CHANGELOG to version $version...');
   writeVersionToChangelog(File('packages/devtools/CHANGELOG.md'), version);
+
+  print('Updating index.html to version $version...');
+  writeVersionToIndexHtml(
+      File('packages/devtools_app/web/index.html'), currentVersion, version);
 
   final process = await Process.start('./tool/pub_upgrade.sh', []);
   process.stdout.asBroadcastStream().listen((event) {
@@ -138,6 +152,28 @@ void writeVersionToChangelog(File changelog, String version) {
     'TODO: update changelog\n',
     ...lines,
   ].joinWithNewLine());
+}
+
+void writeVersionToIndexHtml(
+  File indexHtml,
+  String oldVersion,
+  String newVersion,
+) {
+  final lines = indexHtml.readAsLinesSync();
+  final revisedLines = <String>[];
+  for (final line in lines) {
+    if (line.contains(oldVersion)) {
+      final newLine = [
+        line.substring(0, line.indexOf(oldVersion)),
+        newVersion,
+        line.substring(line.indexOf(oldVersion) + oldVersion.length)
+      ].join();
+      revisedLines.add(newLine);
+    } else {
+      revisedLines.add(line);
+    }
+  }
+  indexHtml.writeAsStringSync(revisedLines.joinWithNewLine());
 }
 
 const pubspecVersionPrefix = 'version:';
