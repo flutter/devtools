@@ -8,11 +8,10 @@ import 'package:devtools_app/src/extension_points/extensions_base.dart';
 import 'package:devtools_app/src/extension_points/extensions_external.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/utils.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'support/mocks.dart';
-import 'support/utils.dart';
-import 'support/wrappers.dart';
 
 void main() {
   DevToolsAboutDialog aboutDialog;

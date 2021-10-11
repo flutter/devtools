@@ -7,39 +7,18 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools_test/chrome.dart';
+import 'package:devtools_test/cli_test_driver.dart';
+import 'package:devtools_test/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     show ConsoleAPIEvent, RemoteObject;
 
-import '../support/chrome.dart';
-import '../support/cli_test_driver.dart';
-import '../support/utils.dart';
-
 const bool verboseTesting = false;
 
 WebBuildFixture webBuildFixture;
 BrowserManager browserManager;
-
-Future<void> waitFor(
-  Future<bool> condition(), {
-  // TODO(kenz): shorten this as long as it doesn't cause flakes.
-  Duration timeout = const Duration(seconds: 10),
-  String timeoutMessage = 'condition not satisfied',
-  Duration delay = const Duration(milliseconds: 100),
-}) async {
-  final DateTime end = DateTime.now().add(timeout);
-
-  while (!end.isBefore(DateTime.now())) {
-    if (await condition()) {
-      return;
-    }
-
-    await Future.delayed(delay);
-  }
-
-  throw timeoutMessage;
-}
 
 class DevtoolsManager {
   DevtoolsManager(this.tabInstance, this.baseUri);

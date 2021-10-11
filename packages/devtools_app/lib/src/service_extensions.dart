@@ -5,7 +5,6 @@
 library service_extensions;
 
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 
 import 'analytics/constants.dart' as analytics_constants;
 import 'ui/icons.dart';

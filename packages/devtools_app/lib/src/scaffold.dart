@@ -5,9 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 import 'analytics/prompt.dart';
@@ -128,6 +126,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   @override
   void initState() {
     super.initState();
+
+    addAutoDisposeListener(offlineController.offlineMode);
 
     _setupTabController();
 
@@ -275,12 +275,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     // screen based on the flutter version of the imported file.
     final args = {'screen': screenId};
     final routerDelegate = DevToolsRouterDelegate.of(context);
-    // If we are already in offline mode, we need to replace the existing page
-    // so clicking Back does not go through all of the old snapshots.
-    if (!offlineMode) {
-      enterOfflineMode();
+    if (!offlineController.offlineMode.value) {
       routerDelegate.navigate(snapshotPageId, args);
     } else {
+      // If we are already in offline mode, we need to replace the existing page
+      // so clicking Back does not go through all of the old snapshots.
       // Router.neglect will cause the router to ignore this change, so
       // dragging a new export into the browser will not result in a new
       // history entry.
@@ -318,7 +317,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           children: tabBodies,
         ),
         if (serviceManager.connectedAppInitialized &&
-            !offlineMode &&
+            !offlineController.offlineMode.value &&
             _currentScreen.showFloatingDebuggerControls)
           Container(
             alignment: Alignment.topCenter,
@@ -344,7 +343,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               child: Scaffold(
                 appBar: widget.embed ? null : _buildAppBar(scaffoldTitle),
                 body: (serviceManager.connectedAppInitialized &&
-                        !offlineMode &&
+                        !offlineController.offlineMode.value &&
                         _currentScreen.showConsole(widget.embed))
                     ? Split(
                         axis: Axis.vertical,
@@ -469,12 +468,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ],
       ),
     );
-  }
-
-  void enterOfflineMode() {
-    setState(() {
-      offlineMode = true;
-    });
   }
 
   /// Returns the width of the scaffold title, tabs and default icons.

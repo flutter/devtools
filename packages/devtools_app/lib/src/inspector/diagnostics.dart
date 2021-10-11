@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../debugger/debugger_controller.dart';
@@ -307,7 +306,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             diagnosticDescription,
-            _buildLocation(),
+            _buildLocation(context),
           ],
         );
       }
@@ -318,7 +317,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     return Row(mainAxisSize: MainAxisSize.min, children: children);
   }
 
-  Widget _buildLocation() {
+  Widget _buildLocation(BuildContext context) {
+    final theme = Theme.of(context);
     final location = diagnostic.creationLocation;
     return Flexible(
       child: RichText(
@@ -327,7 +327,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         text: TextSpan(
           text:
               '${location.getFile().split('/').last}:${location.getLine()}:${location.getColumn()}            ',
-          style: inspector_text_styles.regular,
+          style: inspector_text_styles.regular
+              .copyWith(color: theme.colorScheme.defaultForeground),
         ),
       ),
     );

@@ -26,6 +26,14 @@ void screen(
   int value = 0,
 ]) {}
 
+void timeStart(String screenName, String timedOperation) {}
+
+void timeEnd(
+  String screenName,
+  String timedOperation, {
+  ScreenAnalyticsMetrics Function() screenMetricsProvider,
+}) {}
+
 void timeSync(
   String screenName,
   String timedOperation, {

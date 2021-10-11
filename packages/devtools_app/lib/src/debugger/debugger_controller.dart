@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' hide Stack;
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -148,13 +147,17 @@ class DebuggerController extends DisposableController
 
   ValueListenable<ParsedScript> get currentParsedScript => parsedScript;
 
+  ValueListenable<bool> get showSearchInFileField => _showSearchInFileField;
+
   final _showSearchInFileField = ValueNotifier<bool>(false);
 
-  ValueListenable<bool> get showSearchInFileField => _showSearchInFileField;
+  ValueListenable<ScriptLocation> get scriptLocation => _scriptLocation;
 
   final _scriptLocation = ValueNotifier<ScriptLocation>(null);
 
-  ValueListenable<ScriptLocation> get scriptLocation => _scriptLocation;
+  ValueListenable<bool> get showFileOpener => _showFileOpener;
+
+  final _showFileOpener = ValueNotifier<bool>(false);
 
   /// Jump to the given ScriptRef and optional SourcePosition.
   void showScriptLocation(ScriptLocation scriptLocation) {
@@ -1012,6 +1015,10 @@ class DebuggerController extends DisposableController
     if (!visible) {
       resetSearch();
     }
+  }
+
+  void toggleFileOpenerVisibility(bool visible) {
+    _showFileOpener.value = visible;
   }
 
   @override

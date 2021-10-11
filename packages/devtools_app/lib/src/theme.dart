@@ -314,6 +314,8 @@ extension DevToolsColorScheme on ColorScheme {
   Color get autoCompleteHighlightColor =>
       isLight ? Colors.grey[300] : Colors.grey[700];
 
+  Color get autoCompleteTextColor => isLight ? Colors.black : Colors.white;
+
   // Title of the hover card.
   TextStyle get hoverTitleTextStyle => TextStyle(
         color: defaultForeground,
@@ -433,6 +435,7 @@ extension ThemeDataExtension on ThemeData {
       );
 }
 
+const extraWideSearchTextWidth = 600.0;
 const wideSearchTextWidth = 400.0;
 const defaultSearchTextWidth = 200.0;
 double get defaultTextFieldHeight => scaleByFontFactor(32.0);

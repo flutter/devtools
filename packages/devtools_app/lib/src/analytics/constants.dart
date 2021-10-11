@@ -28,6 +28,7 @@ const String logging = LoggingScreen.id;
 const String devToolsMain = 'main';
 const String hotReload = 'hotReload';
 const String hotRestart = 'hotRestart';
+const String appDisconnected = 'appDisconnected';
 
 // DevTools UI action selected (clicked).
 
@@ -58,6 +59,7 @@ const traceEventProcessingTime = 'traceEventProcessingTime';
 // CPU profiler UX actions:
 const profileGranularityPrefix = 'profileGranularity';
 const loadAllCpuSamples = 'loadAllCpuSamples';
+const profileAppStartUp = 'profileAppStartUp';
 const cpuProfileFlameChartHelp = 'cpuProfileFlameChartHelp';
 const cpuProfileProcessingTime = 'cpuProfileProcessingTime';
 
@@ -105,3 +107,6 @@ const String export = 'export';
 const String expandAll = 'expandAll';
 const String collapseAll = 'collapseAll';
 const String documentationLink = 'documentationLink';
+// This should track the time from `initState` for a screen to the time when
+// the page data has loaded and is ready to interact with.
+const String pageReady = 'pageReady';

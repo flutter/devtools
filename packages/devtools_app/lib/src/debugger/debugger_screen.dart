@@ -9,10 +9,11 @@ import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
-import '../dialogs.dart';
 import '../flex_split_column.dart';
+import '../globals.dart';
 import '../listenable.dart';
 import '../screen.dart';
 import '../split.dart';
@@ -80,10 +81,14 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   DebuggerController controller;
 
+  bool _shownFirstScript;
+
   @override
   void initState() {
     super.initState();
     ga.screen(DebuggerScreen.id);
+    ga.timeStart(DebuggerScreen.id, analytics_constants.pageReady);
+    _shownFirstScript = false;
   }
 
   @override
@@ -93,11 +98,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
     controller = newController;
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   void _onLocationSelected(ScriptLocation location) {
@@ -114,6 +114,16 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         return ValueListenableBuilder(
           valueListenable: controller.currentParsedScript,
           builder: (context, parsedScript, _) {
+            if (scriptRef != null &&
+                parsedScript != null &&
+                !_shownFirstScript) {
+              ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
+              serviceManager.sendDwdsEvent(
+                screen: DebuggerScreen.id,
+                action: analytics_constants.pageReady,
+              );
+              _shownFirstScript = true;
+            }
             return CodeView(
               key: DebuggerScreenBody.codeViewKey,
               controller: controller,
@@ -159,13 +169,15 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       shortcuts: <LogicalKeySet, Intent>{
         goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
         searchInFileKeySet: SearchInFileIntent(controller),
-        escapeKeySet: EscapeIntent(context, controller),
+        escapeKeySet: EscapeIntent(controller),
+        openFileKeySet: OpenFileIntent(controller),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
           GoToLineNumberIntent: GoToLineNumberAction(),
           SearchInFileIntent: SearchInFileAction(),
           EscapeIntent: EscapeAction(),
+          OpenFileIntent: OpenFileAction(),
         },
         child: Split(
           axis: Axis.horizontal,
@@ -264,6 +276,8 @@ class GoToLineNumberAction extends Action<GoToLineNumberIntent> {
   @override
   void invoke(GoToLineNumberIntent intent) {
     showGoToLineDialog(intent._context, intent._controller);
+    intent._controller.toggleFileOpenerVisibility(false);
+    intent._controller.toggleSearchInFileVisibility(false);
   }
 }
 
@@ -277,20 +291,34 @@ class SearchInFileAction extends Action<SearchInFileIntent> {
   @override
   void invoke(SearchInFileIntent intent) {
     intent._controller.toggleSearchInFileVisibility(true);
+    intent._controller.toggleFileOpenerVisibility(false);
   }
 }
 
 class EscapeIntent extends Intent {
-  const EscapeIntent(this._context, this._controller);
+  const EscapeIntent(this._controller);
 
-  final BuildContext _context;
   final DebuggerController _controller;
 }
 
 class EscapeAction extends Action<EscapeIntent> {
   @override
   void invoke(EscapeIntent intent) {
-    Navigator.of(intent._context).pop(dialogDefaultContext);
+    intent._controller.toggleSearchInFileVisibility(false);
+    intent._controller.toggleFileOpenerVisibility(false);
+  }
+}
+
+class OpenFileIntent extends Intent {
+  const OpenFileIntent(this._controller);
+
+  final DebuggerController _controller;
+}
+
+class OpenFileAction extends Action<OpenFileIntent> {
+  @override
+  void invoke(OpenFileIntent intent) {
+    intent._controller.toggleFileOpenerVisibility(true);
     intent._controller.toggleSearchInFileVisibility(false);
   }
 }

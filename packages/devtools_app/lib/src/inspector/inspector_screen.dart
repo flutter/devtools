@@ -4,10 +4,8 @@
 
 import 'dart:collection';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
@@ -27,7 +25,7 @@ import '../ui/service_extension_widgets.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
 import 'inspector_service.dart';
-import 'inspector_tree_flutter.dart';
+import 'inspector_tree_controller.dart';
 
 class InspectorScreen extends Screen {
   const InspectorScreen()
@@ -66,8 +64,13 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   bool _layoutExplorerSupported = false;
 
   InspectorController inspectorController;
-  InspectorTreeControllerFlutter summaryTreeController;
-  InspectorTreeControllerFlutter detailsTreeController;
+
+  InspectorTreeController get summaryTreeController =>
+      inspectorController?.inspectorTree;
+
+  InspectorTreeController get detailsTreeController =>
+      inspectorController?.details?.inspectorTree;
+
   DebuggerController _debuggerController;
 
   bool get enableButtons => actionInProgress == false;
@@ -83,19 +86,17 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     super.initState();
     ga.screen(InspectorScreen.id);
 
-    autoDispose(
-        serviceManager.onConnectionAvailable.listen(_handleConnectionStart));
-    if (serviceManager.connectedAppInitialized) {
-      _handleConnectionStart(serviceManager.service);
+    if (serviceManager.inspectorService == null) {
+      // The app must not be a Flutter app.
+      return;
     }
-    autoDispose(
-        serviceManager.onConnectionClosed.listen(_handleConnectionStop));
-  }
-
-  @override
-  void dispose() {
-    inspectorController?.dispose();
-    super.dispose();
+    inspectorController = InspectorController(
+      inspectorTree: InspectorTreeController(),
+      detailsTree: InspectorTreeController(),
+      treeType: FlutterTreeType.widget,
+      onExpandCollapseSupported: _onExpandCollapseSupported,
+      onLayoutExplorerSupported: _onLayoutExplorerSupported,
+    );
   }
 
   void _onExpandClick() {
@@ -277,45 +278,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   void _onLayoutExplorerSupported() {
     setState(() {
       _layoutExplorerSupported = true;
-    });
-  }
-
-  void _handleConnectionStart(VmService service) async {
-    setState(() {
-      summaryTreeController = null;
-      detailsTreeController = null;
-    });
-
-    final inspectorService = serviceManager.inspectorService;
-
-    if (inspectorService == null) {
-      // The app must not be a Flutter app.
-      return;
-    }
-
-    setState(() {
-      inspectorController?.dispose();
-      summaryTreeController = InspectorTreeControllerFlutter();
-      detailsTreeController = InspectorTreeControllerFlutter();
-      inspectorController = InspectorController(
-        inspectorTree: summaryTreeController,
-        detailsTree: detailsTreeController,
-        treeType: FlutterTreeType.widget,
-        onExpandCollapseSupported: _onExpandCollapseSupported,
-        onLayoutExplorerSupported: _onLayoutExplorerSupported,
-      );
-
-      // Clear any existing badge/errors for older errors that were collected.
-      serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
-      inspectorController.filterErrors();
-    });
-  }
-
-  void _handleConnectionStop(dynamic event) {
-    inspectorController?.setActivate(false);
-    inspectorController?.dispose();
-    setState(() {
-      inspectorController = null;
     });
   }
 

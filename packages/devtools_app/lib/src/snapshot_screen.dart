@@ -72,16 +72,13 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
         Row(
           children: [
             ExitOfflineButton(onPressed: () {
-              offlineMode = false;
+              offlineController.exitOfflineMode();
               reset();
               // Use Router.neglect to replace the current history entry with
               // the homepage so that clicking Back will not return here.
               Router.neglect(
                 context,
-                () => routerDelegate.navigate(
-                  homePageId,
-                  {'screen': null},
-                ),
+                () => routerDelegate.navigateHome(clearScreenParam: true),
               );
             }),
           ],
@@ -102,7 +99,7 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
 
   void reset() {
     setState(() {
-      offlineDataJson.clear();
+      offlineController.offlineDataJson.clear();
       _screen = null;
     });
   }
