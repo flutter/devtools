@@ -1510,6 +1510,7 @@ class CheckboxSetting extends StatelessWidget {
     if (tooltip != null) {
       return DevToolsTooltip(
         tooltip: tooltip,
+        padding: const EdgeInsets.all(denseSpacing),
         child: content,
       );
     }

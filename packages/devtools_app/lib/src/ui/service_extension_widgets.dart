@@ -469,9 +469,13 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
         extensionAvailable.value = true;
         final state = serviceManager.serviceExtensionManager
             .getServiceExtensionState(widget.service.extension);
-        value.value = state.value.enabled;
+        final valueFromState = state.value.enabled;
+        value.value =
+            widget.service.inverted ? !valueFromState : valueFromState;
         addAutoDisposeListener(state, () {
-          value.value = state.value.enabled;
+          final valueFromState = state.value.enabled;
+          value.value =
+              widget.service.inverted ? !valueFromState : valueFromState;
         });
       }
     });
@@ -496,11 +500,12 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
 
   void _onChanged(bool value) {
     invokeAndCatchErrors(() async {
+      final _value = widget.service.inverted ? !value : value;
       await serviceManager.serviceExtensionManager.setServiceExtensionState(
         widget.service.extension,
-        enabled: value,
+        enabled: _value,
         value:
-            value ? widget.service.enabledValue : widget.service.disabledValue,
+            _value ? widget.service.enabledValue : widget.service.disabledValue,
       );
     });
   }

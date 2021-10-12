@@ -388,6 +388,13 @@ class DebuggingOptionsDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              'When toggling on/off a rendering layer, you will need '
+              'to reproduce activity in your app to see the effects of the '
+              'debugging option.',
+              style: theme.subtleTextStyle,
+            ),
+            const SizedBox(height: defaultSpacing),
             ServiceExtensionCheckbox(service: disableClipLayers),
             ServiceExtensionCheckbox(service: disableOpacityLayers),
             ServiceExtensionCheckbox(service: disablePhysicalShapeLayers),

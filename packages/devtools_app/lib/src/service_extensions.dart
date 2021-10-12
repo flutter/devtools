@@ -25,6 +25,7 @@ class ToggleableServiceExtensionDescription<T>
     String description,
     String tooltipUrl,
     bool shouldCallOnAllIsolates = false,
+    this.inverted = false,
   }) : super(
           extension: extension,
           title: title,
@@ -46,6 +47,15 @@ class ToggleableServiceExtensionDescription<T>
   T get enabledValue => values[enabledValueIndex];
 
   T get disabledValue => values[disabledValueIndex];
+
+  /// Whether this service extension will be inverted where it is exposed in
+  /// DevTools.
+  ///
+  /// For example, when [inverted] is true, a service extension may have a value
+  /// of 'false' in the framework, but will have a perceived value of 'true' in
+  /// DevTools, where the language describing the service extension toggle will
+  /// also be inverted.
+  final bool inverted;
 }
 
 class ServiceExtensionDescription<T> {
@@ -264,7 +274,8 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
 
 final disableClipLayers = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugDisableClipLayers',
-  title: 'Disable Clip layers',
+  inverted: true,
+  title: 'Render Clip layers',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/slow-white.png',
     darkModeAsset: 'icons/slow-dgrey.png',
@@ -277,14 +288,16 @@ final disableClipLayers = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.disableOpacityLayersOption,
-  description: 'Ignore all clipping effects in the layer tree',
-  tooltip: 'Use this to check whether excessive use of clipping is '
-      'affecting performance',
+  description: 'Render all clipping effects during paint (default)',
+  tooltip: '''Disable this option to check whether excessive use of clipping is
+affecting performance. If performance improves with this option
+disabled, try to reduce the use of clipping effects in your app.''',
 );
 
 final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugDisableOpacityLayers',
-  title: 'Disable Opacity layers',
+  inverted: true,
+  title: 'Render Opacity layers',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/slow-white.png',
     darkModeAsset: 'icons/slow-dgrey.png',
@@ -297,15 +310,17 @@ final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.disableOpacityLayersOption,
-  description: 'Ignore all opacity effects in the layer tree',
-  tooltip: 'Use this to check whether excessive use of opacity effects '
-      'is affecting performance',
+  description: 'Render all opacity effects during paint (default)',
+  tooltip: '''Disable this option to check whether excessive use of opacity
+effects is affecting performance. If performance improves with this
+option disabled, try to reduce the use of opacity effects in your app.''',
 );
 
 final disablePhysicalShapeLayers =
     ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugDisablePhysicalShapeLayers',
-  title: 'Disable Physical Shape layers',
+  inverted: true,
+  title: 'Render Physical Shape layers',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/slow-white.png',
     darkModeAsset: 'icons/slow-dgrey.png',
@@ -318,9 +333,11 @@ final disablePhysicalShapeLayers =
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.disableOpacityLayersOption,
-  description: 'Ignore all physical modeling effects in the layer tree',
-  tooltip: 'Use this to check whether excessive use of physical modeling '
-      'effects is affecting performance (shadows, elevations, etc.).',
+  description: 'Render all physical modeling effects during paint (default)',
+  tooltip: '''Disable this option to check whether excessive use of physical 
+modeling effects is affecting performance (shadows, elevations, etc.). 
+If performance improves with this option disabled, try to reduce the 
+use of physical modeling effects in your app.''',
 );
 
 final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
