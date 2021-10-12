@@ -773,8 +773,8 @@ class FakeServiceExtensionManager extends Fake
 
       await setServiceExtensionState(
         name,
-        enabled,
-        value,
+        enabled: enabled,
+        value: value,
         callExtension: false,
       );
     }
@@ -837,7 +837,7 @@ class FakeServiceExtensionManager extends Fake
         return ValueNotifier<ServiceExtensionState>(
           _enabledServiceExtensions.containsKey(name)
               ? _enabledServiceExtensions[name]
-              : ServiceExtensionState(false, null),
+              : ServiceExtensionState(enabled: false, value: null),
         );
       },
     );
@@ -851,10 +851,20 @@ class FakeServiceExtensionManager extends Fake
     final value = extensionValueOnDevice[name];
     if (extensionDescription is ToggleableServiceExtensionDescription) {
       if (value == extensionDescription.enabledValue) {
-        await setServiceExtensionState(name, true, value, callExtension: false);
+        await setServiceExtensionState(
+          name,
+          enabled: true,
+          value: value,
+          callExtension: false,
+        );
       }
     } else {
-      await setServiceExtensionState(name, true, value, callExtension: false);
+      await setServiceExtensionState(
+        name,
+        enabled: true,
+        value: value,
+        callExtension: false,
+      );
     }
   }
 
@@ -875,20 +885,26 @@ class FakeServiceExtensionManager extends Fake
   /// Sets the state for a service extension and makes the call to the VMService.
   @override
   Future<void> setServiceExtensionState(
-    String name,
-    bool enabled,
-    dynamic value, {
+    String name, {
+    @required bool enabled,
+    @required dynamic value,
     bool callExtension = true,
   }) async {
     if (callExtension && _serviceExtensions.contains(name)) {
       await callServiceExtension(name, value);
     }
 
-    _serviceExtensionState(name).value = ServiceExtensionState(enabled, value);
+    _serviceExtensionState(name).value = ServiceExtensionState(
+      enabled: enabled,
+      value: value,
+    );
 
     // Add or remove service extension from [enabledServiceExtensions].
     if (enabled) {
-      _enabledServiceExtensions[name] = ServiceExtensionState(enabled, value);
+      _enabledServiceExtensions[name] = ServiceExtensionState(
+        enabled: enabled,
+        value: value,
+      );
     } else {
       _enabledServiceExtensions.remove(name);
     }
