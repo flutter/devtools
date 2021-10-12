@@ -20,6 +20,8 @@ const dartHtmlLibraryUri = 'dart:html';
 class ConnectedApp {
   ConnectedApp();
 
+  Completer<bool> initialized = Completer();
+
   bool get connectedAppInitialized =>
       _isFlutterApp != null &&
       (_isFlutterApp == false ||
@@ -152,6 +154,7 @@ class ConnectedApp {
       flutterVersionServiceListenable.removeListener(listener);
     }
     generateDevToolsTitle();
+    initialized.complete(true);
   }
 }
 
