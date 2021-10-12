@@ -159,19 +159,23 @@ void writeVersionToIndexHtml(
   String oldVersion,
   String newVersion,
 ) {
+  var updatedVersion = false;
   final lines = indexHtml.readAsLinesSync();
   final revisedLines = <String>[];
   for (final line in lines) {
     if (line.contains(oldVersion)) {
-      final newLine = [
-        line.substring(0, line.indexOf(oldVersion)),
-        newVersion,
-        line.substring(line.indexOf(oldVersion) + oldVersion.length)
-      ].join();
+      final versionStart = line.indexOf(oldVersion);
+      final lineSegmentBefore = line.substring(0, versionStart);
+      final lineSegmentAfter = line.substring(versionStart + oldVersion.length);
+      final newLine = '$lineSegmentBefore$newVersion$lineSegmentAfter';
       revisedLines.add(newLine);
+      updatedVersion = true;
     } else {
       revisedLines.add(line);
     }
+  }
+  if (!updatedVersion) {
+    throw Exception('Unable to update version in index.html');
   }
   indexHtml.writeAsStringSync(revisedLines.joinWithNewLine());
 }
