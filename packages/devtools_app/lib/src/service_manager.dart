@@ -184,7 +184,7 @@ class ServiceConnectionManager {
     consoleService.vmServiceOpened(service);
     serviceExtensionManager.vmServiceOpened(service, connectedApp);
     await vmFlagManager.vmServiceOpened(service);
-    await timelineStreamManager.vmServiceOpened(service);
+    await timelineStreamManager.vmServiceOpened(service, connectedApp);
     // This needs to be called last in the above group of `vmServiceOpened`
     // calls.
     errorBadgeManager.vmServiceOpened(service);
