@@ -127,8 +127,8 @@ class InspectorController extends DisposableController
         if (_supportsToggleSelectWidgetMode.value) {
           serviceManager.serviceExtensionManager.setServiceExtensionState(
             extensions.enableOnDeviceInspector.extension,
-            true,
-            true,
+            enabled: true,
+            value: true,
           );
         }
       });

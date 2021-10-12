@@ -449,6 +449,9 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   socketProfiling,
   invertOversizedImages,
   trackRebuildWidgets,
+  disableClipLayers,
+  disableOpacityLayers,
+  disablePhysicalShapeLayers,
 ];
 
 final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =

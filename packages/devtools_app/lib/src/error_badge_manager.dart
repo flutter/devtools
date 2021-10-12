@@ -36,8 +36,8 @@ class ErrorBadgeManager extends DisposableController
     // Ensure structured errors are enabled.
     serviceManager.serviceExtensionManager.setServiceExtensionState(
       extensions.structuredErrors.extension,
-      true,
-      true,
+      enabled: true,
+      value: true,
     );
 
     // Log Flutter extension events.

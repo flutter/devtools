@@ -174,8 +174,8 @@ class _ServiceExtensionButtonGroupState
 
         serviceManager.serviceExtensionManager.setServiceExtensionState(
           extensionState.description.extension,
-          !wasSelected,
-          wasSelected
+          enabled: !wasSelected,
+          value: wasSelected
               ? extensionState.description.disabledValue
               : extensionState.description.enabledValue,
         );
@@ -414,8 +414,9 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
     invokeAndCatchErrors(() async {
       await serviceManager.serviceExtensionManager.setServiceExtensionState(
         widget.service.extension,
-        value,
-        value ? widget.service.enabledValue : widget.service.disabledValue,
+        enabled: value,
+        value:
+            value ? widget.service.enabledValue : widget.service.disabledValue,
       );
     });
   }
@@ -481,14 +482,15 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
     return ValueListenableBuilder(
       valueListenable: extensionAvailable,
       builder: (context, available, _) {
-      return CheckboxSetting(
-        notifier: value,
-        title: widget.service.title,
-        description: widget.service.description,
-        tooltip: widget.service.tooltip,
-        onChanged: _onChanged,
-        enabled: available,
-      );},
+        return CheckboxSetting(
+          notifier: value,
+          title: widget.service.title,
+          description: widget.service.description,
+          tooltip: widget.service.tooltip,
+          onChanged: _onChanged,
+          enabled: available,
+        );
+      },
     );
   }
 
@@ -496,8 +498,9 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
     invokeAndCatchErrors(() async {
       await serviceManager.serviceExtensionManager.setServiceExtensionState(
         widget.service.extension,
-        value,
-        value ? widget.service.enabledValue : widget.service.disabledValue,
+        enabled: value,
+        value:
+            value ? widget.service.enabledValue : widget.service.disabledValue,
       );
     });
   }

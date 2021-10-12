@@ -888,8 +888,8 @@ class ServiceExtensionManager extends Disposer {
 
       await setServiceExtensionState(
         name,
-        enabled,
-        extensionValue,
+        enabled: enabled,
+        value: extensionValue,
         callExtension: false,
       );
     }
@@ -1092,10 +1092,20 @@ class ServiceExtensionManager extends Disposer {
     if (extensionDescription
         is extensions.ToggleableServiceExtensionDescription) {
       if (value == extensionDescription.enabledValue) {
-        await setServiceExtensionState(name, true, value, callExtension: false);
+        await setServiceExtensionState(
+          name,
+          enabled: true,
+          value: value,
+          callExtension: false,
+        );
       }
     } else {
-      await setServiceExtensionState(name, true, value, callExtension: false);
+      await setServiceExtensionState(
+        name,
+        enabled: true,
+        value: value,
+        callExtension: false,
+      );
     }
   }
 
@@ -1201,9 +1211,9 @@ class ServiceExtensionManager extends Disposer {
 
   /// Sets the state for a service extension and makes the call to the VMService.
   Future<void> setServiceExtensionState(
-    String name,
-    bool enabled,
-    dynamic value, {
+    String name, {
+    @required bool enabled,
+    @required dynamic value,
     bool callExtension = true,
   }) async {
     if (callExtension && _serviceExtensions.contains(name)) {
@@ -1212,7 +1222,7 @@ class ServiceExtensionManager extends Disposer {
       log('Attempted to call extension \'$name\', but no service with that name exists');
     }
 
-    final state = ServiceExtensionState(enabled, value);
+    final state = ServiceExtensionState(enabled: enabled, value: value);
     _serviceExtensionState(name).value = state;
 
     // Add or remove service extension from [enabledServiceExtensions].
@@ -1272,7 +1282,7 @@ class ServiceExtensionManager extends Disposer {
         return ValueNotifier<ServiceExtensionState>(
           _enabledServiceExtensions.containsKey(name)
               ? _enabledServiceExtensions[name]
-              : ServiceExtensionState(false, null),
+              : ServiceExtensionState(enabled: false, value: value),
         );
       },
     );

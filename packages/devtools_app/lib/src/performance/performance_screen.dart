@@ -314,14 +314,27 @@ class _SecondaryControls extends StatelessWidget {
               controller.cpuProfilerController.profileGranularityFlagNotifier,
         ),
         const SizedBox(width: denseSpacing),
-        if (serviceManager.connectedApp.isFlutterAppNow)
+        if (serviceManager.connectedApp.isFlutterAppNow) ...[
+          ServiceExtensionButtonGroup(
+            minScreenWidthForTextBeforeScaling:
+                _secondaryControlsMinIncludeTextWidth,
+            extensions: [
+              performanceOverlay,
+              profileWidgetBuilds,
+              // TODO(devoncarew): Enable this once we have a UI displaying the
+              // values.
+              //trackRebuildWidgets,
+            ],
+          ),
+          const SizedBox(width: denseSpacing),
           IconLabelButton(
             icon: Icons.build,
-            label: 'Debugging options',
+            label: 'More debugging options',
             tooltip:
                 'Opens a list of options you can use to help debug performance',
             onPressed: () => _openDebuggingOptionsDialog(context),
           ),
+        ],
         const SizedBox(width: defaultSpacing),
         ExportButton(
           onPressed: () => _exportPerformanceData(context),
