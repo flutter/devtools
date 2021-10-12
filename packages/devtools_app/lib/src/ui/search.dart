@@ -696,8 +696,8 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
 
   void updateSearchField(
     SearchControllerMixin controller, {
-    String newValue,
-    int caretPosition,
+    @required String newValue,
+    @required int caretPosition,
   }) {
     searchTextFieldController.text = newValue;
     searchTextFieldController.selection =
