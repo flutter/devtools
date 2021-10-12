@@ -187,7 +187,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
 
   void _handleExpressionEval() async {
     final expressionText = searchTextFieldController.value.text.trim();
-    updateSearchField(_autoCompleteController, '', 0);
+    updateSearchField(_autoCompleteController, newValue: '', caretPosition: 0);
     clearSearchField(_autoCompleteController, force: true);
 
     if (expressionText.isEmpty) return;
