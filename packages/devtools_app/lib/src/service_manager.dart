@@ -1282,7 +1282,7 @@ class ServiceExtensionManager extends Disposer {
         return ValueNotifier<ServiceExtensionState>(
           _enabledServiceExtensions.containsKey(name)
               ? _enabledServiceExtensions[name]
-              : ServiceExtensionState(enabled: false, value: value),
+              : ServiceExtensionState(enabled: false, value: null),
         );
       },
     );
@@ -1314,7 +1314,7 @@ class ServiceExtensionManager extends Disposer {
 }
 
 class ServiceExtensionState {
-  ServiceExtensionState(this.enabled, this.value) {
+  ServiceExtensionState({@required this.enabled, @required this.value}) {
     if (value is bool) {
       assert(enabled == value);
     }
