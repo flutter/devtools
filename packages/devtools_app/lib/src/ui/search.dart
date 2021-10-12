@@ -742,19 +742,22 @@ class _SearchField extends StatelessWidget {
       controller: searchTextFieldController,
       onChanged: (value) {
         if (tracking) {
-          // Use a TextPainter to calculate the width of the newly entered text.
-          // TODO(terry): The TextPainter's TextStyle is default (same as this
-          //              TextField) consider explicitly using a TextStyle of
-          //              this TextField if the TextField needs styling.
-          final painter = TextPainter(
-            textDirection: TextDirection.ltr,
-            text: TextSpan(text: value),
+          // Calculate the width of the newly entered text
+          // up to the last "." or the insertion point (cursor).
+          final textSegment = value.contains('.')
+              ? value.substring(0, value.lastIndexOf('.') + 1)
+              : value;
+          final width = calculateTextSpanWidth(
+            TextSpan(
+              text: textSegment,
+              // Note: This is the default theme used by Flutter's TextField
+              // widget. If we change the style, we should also update here.
+              style: Theme.of(context).textTheme.subtitle1,
+            ),
           );
-          painter.layout();
-
-          // X coordinate of the pop-up, immediately to the right of the insertion
-          // point (caret).
-          controller.xPosition = painter.width;
+          // X coordinate of the pop-up, immediately to the right of the last
+          // "." or the insertion point (cursor).
+          controller.xPosition = width;
         }
         controller.search = value;
       },
