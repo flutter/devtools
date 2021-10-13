@@ -558,8 +558,10 @@ typedef ClearSearchField = Function(
 
 /// Provided by clients to specify where the autocomplete overlay should be
 /// positioned relative to the input text.
-typedef DetermineOverlayXPosition = double Function(
-    String inputValue, TextStyle inputStyle);
+typedef OverlayXPositionBuilder = double Function(
+  String inputValue,
+  TextStyle inputStyle,
+);
 
 mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   TextEditingController searchTextFieldController;
@@ -608,7 +610,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   /// [onSelection]
   /// [onHighlightDropdown] use to override default highlghter.
   /// [decoration]
-  /// [determineOverlayXPosition] callback function to determine where the
+  /// [overlayXPositionBuilder] callback function to determine where the
   /// autocomplete overlay should be positioned relative to the input text.
   /// [supportClearField] if true clear TextField content if pop-up not visible. If
   /// pop-up is visible close the pop-up on first ESCAPE.
@@ -623,7 +625,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     HighlightAutoComplete onHighlightDropdown,
     InputDecoration decoration,
     String label,
-    DetermineOverlayXPosition determineOverlayXPosition,
+    OverlayXPositionBuilder overlayXPositionBuilder,
     bool supportClearField = false,
     Set<LogicalKeyboardKey> keyEventsToPropogate = const {},
     VoidCallback onClose,
@@ -639,7 +641,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
       searchTextFieldController: searchTextFieldController,
       decoration: decoration,
       label: label,
-      determineOverlayXPosition: determineOverlayXPosition,
+      overlayXPositionBuilder: overlayXPositionBuilder,
       onClose: onClose,
     );
 
@@ -724,7 +726,7 @@ class _SearchField extends StatelessWidget {
     this.tracking = false,
     this.decoration,
     this.onClose,
-    this.determineOverlayXPosition,
+    this.overlayXPositionBuilder,
   });
 
   final SearchControllerMixin controller;
@@ -738,7 +740,7 @@ class _SearchField extends StatelessWidget {
   final bool tracking;
   final InputDecoration decoration;
   final VoidCallback onClose;
-  final DetermineOverlayXPosition determineOverlayXPosition;
+  final OverlayXPositionBuilder overlayXPositionBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -751,8 +753,8 @@ class _SearchField extends StatelessWidget {
       controller: searchTextFieldController,
       style: textStyle,
       onChanged: (value) {
-        if (determineOverlayXPosition != null) {
-          controller.xPosition = determineOverlayXPosition(value, textStyle);
+        if (overlayXPositionBuilder != null) {
+          controller.xPosition = overlayXPositionBuilder(value, textStyle);
         }
         controller.search = value;
       },

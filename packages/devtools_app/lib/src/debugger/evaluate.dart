@@ -143,12 +143,13 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
                 enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
                 labelText: 'Eval',
               ),
-              determineOverlayXPosition:
+              overlayXPositionBuilder:
                   (String inputValue, TextStyle inputStyle) {
                 // X-coordinate is equivalent to the width of the input text
                 // up to the last "." or the insertion point (cursor):
-                final textSegment = inputValue.contains('.')
-                    ? inputValue.substring(0, inputValue.lastIndexOf('.') + 1)
+                final indexOfDot = inputValue.lastIndexOf('.');
+                final textSegment = indexOfDot != -1
+                    ? inputValue.substring(0, indexOfDot + 1)
                     : inputValue;
                 return calculateTextSpanWidth(
                   TextSpan(
