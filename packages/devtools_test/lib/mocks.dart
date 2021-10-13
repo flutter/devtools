@@ -626,6 +626,7 @@ class FakeIsolateManager extends Fake implements IsolateManager {
 
   ValueNotifier<List<IsolateRef>> _isolates;
 
+  @override
   IsolateState isolateDebuggerState(IsolateRef isolate) {
     final state = MockIsolateState();
     final mockIsolate = MockIsolate();
