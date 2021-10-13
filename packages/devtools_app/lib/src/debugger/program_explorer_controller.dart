@@ -10,19 +10,22 @@ import 'package:vm_service/vm_service.dart';
 import '../auto_dispose.dart';
 import '../globals.dart';
 import '../utils.dart';
+import 'debugger_controller.dart';
 import 'program_explorer_model.dart';
 
 class ProgramExplorerController extends DisposableController
     with AutoDisposeControllerMixin {
-  ProgramExplorerController() {
+  ProgramExplorerController({@required this.debuggerController}) {
     addAutoDisposeListener(
       serviceManager.isolateManager.selectedIsolate,
       refresh,
     );
+    // Re-initialize after reload.
+    addAutoDisposeListener(
+      debuggerController.sortedScripts,
+      refresh,
+    );
   }
-
-  /// A list of objects containing the contents of each library.
-  final _programStructure = <VMServiceLibraryContents>[];
 
   /// The outline view nodes for the currently selected library.
   ValueListenable<List<VMServiceObjectNode>> get outlineNodes => _outlineNodes;
@@ -39,16 +42,14 @@ class ProgramExplorerController extends DisposableController
       _rootObjectNodes;
   final _rootObjectNodes = ListValueNotifier<VMServiceObjectNode>([]);
 
-  /// Cache of object IDs to their containing library to allow for easier
-  /// refreshing of library content, particularly for scripts.
-  final _objectIdToLibrary = <String, LibraryRef>{};
-
   IsolateRef _isolate;
 
   /// Notifies that the controller has finished initializing.
   ValueListenable<bool> get initialized => _initialized;
   final _initialized = ValueNotifier<bool>(false);
   bool _initializing = false;
+
+  DebuggerController debuggerController;
 
   /// Returns true if [function] is a getter or setter that was not explicitly
   /// defined (e.g., `int foo` creates `int get foo` and `set foo(int)`).
@@ -62,60 +63,23 @@ class ProgramExplorerController extends DisposableController
   }
 
   /// Initializes the program structure.
-  // TODO(bkonyi): reinitialize after hot reload.
-  Future<void> initialize() async {
+  void initialize() {
     if (_initializing) {
       return;
     }
     _initializing = true;
     _isolate = serviceManager.isolateManager.selectedIsolate.value;
     final libraries = _isolate != null
-        ? await Future.wait(
-            serviceManager.isolateManager
-                .isolateDebuggerState(_isolate)
-                .isolateNow
-                .libraries
-                .map(
-                  (lib) => VMServiceLibraryContents.getLibraryContents(lib),
-                ),
-          )
-        : <VMServiceLibraryContents>[];
-
-    void mapIdsToLibrary(LibraryRef lib, Iterable<ObjRef> objs) {
-      for (final e in objs) {
-        _objectIdToLibrary[e.id] = lib;
-      }
-    }
-
-    for (final libContents in libraries) {
-      final lib = libContents.lib;
-      mapIdsToLibrary(lib, [lib]);
-      mapIdsToLibrary(lib, lib.scripts);
-      mapIdsToLibrary(lib, libContents.classes);
-      mapIdsToLibrary(lib, libContents.fields);
-
-      // Filter out synthetic getters/setters
-      final filteredFunctions = libContents.functions
-          .where(
-            (e) => !_isSyntheticAccessor(e, libContents.fields),
-          )
-          .toList();
-      libContents.functions.clear();
-      libContents.functions.addAll(filteredFunctions);
-      mapIdsToLibrary(lib, libContents.functions);
-
-      // Account for entries in library parts.
-      mapIdsToLibrary(lib, libContents.functions.map((e) => e.location.script));
-      mapIdsToLibrary(lib, libContents.classes.map((e) => e.location.script));
-      mapIdsToLibrary(lib, libContents.fields.map((e) => e.location.script));
-    }
-
-    _programStructure.addAll(libraries);
+        ? serviceManager.isolateManager
+            .isolateDebuggerState(_isolate)
+            .isolateNow
+            .libraries
+        : <LibraryRef>[];
 
     // Build the initial tree.
     final nodes = VMServiceObjectNode.createRootsFrom(
       this,
-      _programStructure,
+      libraries,
     );
     _rootObjectNodes.addAll(nodes);
     _initialized.value = true;
@@ -146,15 +110,13 @@ class ProgramExplorerController extends DisposableController
   }
 
   /// Clears controller state and re-initializes.
-  Future<void> refresh() async {
-    _objectIdToLibrary.clear();
+  void refresh() {
     _selected = null;
     _isLoadingOutline.value = true;
     _outlineNodes.clear();
     _initialized.value = false;
     _initializing = false;
-    _programStructure.clear();
-    return await initialize();
+    return initialize();
   }
 
   /// Marks [node] as the currently selected node, clearing the selection state
@@ -164,6 +126,7 @@ class ProgramExplorerController extends DisposableController
       return;
     }
     if (_selected != node) {
+      await populateNode(node);
       node.select();
       _selected?.unselect();
       _selected = node;
@@ -181,92 +144,49 @@ class ProgramExplorerController extends DisposableController
   /// immediately returns.
   Future<void> populateNode(VMServiceObjectNode node) async {
     final object = node.object;
+    final service = serviceManager.service;
+    final isolateId = serviceManager.isolateManager.selectedIsolate.value.id;
+
+    Future<List<Obj>> getObjects(Iterable<ObjRef> objs) {
+      return Future.wait(
+        objs.map(
+          (o) => service.getObject(isolateId, o.id),
+        ),
+      );
+    }
+
+    Future<List<Func>> getFuncs(
+      Iterable<FuncRef> funcs,
+      Iterable<FieldRef> fields,
+    ) async {
+      final res = await getObjects(
+        funcs.where(
+          (f) => !_isSyntheticAccessor(f, fields),
+        ),
+      );
+      return res.cast<Func>();
+    }
+
     if (object == null || object is Obj) {
       return;
+    } else if (object is LibraryRef) {
+      final lib = await service.getObject(isolateId, object.id) as Library;
+      final results = await Future.wait([
+        getObjects(lib.variables),
+        getFuncs(lib.functions, lib.variables),
+      ]);
+      lib.variables = results[0].cast<Field>();
+      lib.functions = results[1].cast<Func>();
+      node.updateObject(lib);
+    } else if (object is ClassRef) {
+      final clazz = await service.getObject(isolateId, object.id) as Class;
+      final results = await Future.wait([
+        getObjects(clazz.fields),
+        getFuncs(clazz.functions, clazz.fields),
+      ]);
+      clazz.fields = results[0].cast<Field>();
+      clazz.functions = results[1].cast<Func>();
+      node.updateObject(clazz);
     }
-    final id = node.object.id;
-    final service = serviceManager.service;
-
-    // We don't know if the object ID is still valid. Re-request the library
-    // and find the object again.
-    final lib = _objectIdToLibrary[id];
-
-    final refreshedLib =
-        await service.getObject(_isolate.id, lib.id) as Library;
-    dynamic updatedObj;
-
-    // Find the relevant object reference in the refreshed library.
-    if (object is ClassRef) {
-      updatedObj = refreshedLib.classes.firstWhere(
-        (k) => k.name == object.name,
-      );
-    } else if (object is FieldRef) {
-      updatedObj = refreshedLib.variables.firstWhere(
-        (v) => v.name == object.name,
-      );
-    } else if (object is FuncRef) {
-      updatedObj = refreshedLib.functions.firstWhere(
-        (f) => f.name == object.name,
-      );
-    } else if (object is ScriptRef) {
-      updatedObj = refreshedLib.scripts.firstWhere(
-        (s) => s.uri == object.uri,
-      );
-    } else {
-      throw StateError('Unexpected type: ${object.runtimeType}');
-    }
-
-    // Request the full object for the node we're interested in and update all
-    // instances of the original reference object in the program structure with
-    // the full object.
-    updatedObj = await service.getObject(_isolate.id, updatedObj.id);
-
-    final library = _programStructure.firstWhere(
-      (e) => e.lib.uri == lib.uri,
-    );
-    if (updatedObj is Class) {
-      final clazz = updatedObj;
-      final i = library.classes.indexWhere(
-        (c) => c.name == clazz.name,
-      );
-      library.classes[i] = clazz;
-      final fields = await Future.wait(
-        clazz.fields.map(
-          (e) => service.getObject(_isolate.id, e.id),
-        ),
-      );
-      clazz.fields
-        ..clear()
-        ..addAll(fields.cast<FieldRef>());
-
-      final functions = await Future.wait(
-        clazz.functions.map(
-          (e) => service.getObject(_isolate.id, e.id).then((e) => e as Func),
-        ),
-      );
-      clazz.functions
-        ..clear()
-        ..addAll(
-          functions
-              .where((e) => !_isSyntheticAccessor(e, clazz.fields))
-              .cast<FuncRef>(),
-        );
-    } else if (updatedObj is Field) {
-      final i = library.fields.indexWhere(
-        (f) => f.name == updatedObj.name,
-      );
-      library.fields[i] = updatedObj;
-    } else if (object is Func) {
-      final i = library.functions.indexWhere(
-        (f) => f.name == updatedObj.name,
-      );
-      library.functions[i] = updatedObj;
-    }
-
-    _objectIdToLibrary.remove(id);
-    _objectIdToLibrary[updatedObj.id] = library.lib;
-
-    // Sets the contents of the node to contain the full object.
-    node.updateObject(updatedObj);
   }
 }

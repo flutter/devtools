@@ -34,15 +34,18 @@ class DebuggerController extends DisposableController
   // `initialSwitchToIsolate` can be set to false for tests to skip the logic
   // in `switchToIsolate`.
   DebuggerController({this.initialSwitchToIsolate = true}) {
+    _programExplorerController = ProgramExplorerController(
+      debuggerController: this,
+    );
     autoDispose(serviceManager.onConnectionAvailable
         .listen(_handleConnectionAvailable));
     _scriptHistoryListener = () {
       _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
     };
     scriptsHistory.current.addListener(_scriptHistoryListener);
-    addAutoDisposeListener(currentScriptRef, () async {
+    addAutoDisposeListener(currentScriptRef, () {
       if (!programExplorerController.initialized.value) {
-        await programExplorerController.initialize();
+        programExplorerController.initialize();
       }
       if (currentScriptRef.value != null) {
         programExplorerController.selectScriptNode(currentScriptRef.value);
@@ -128,7 +131,9 @@ class DebuggerController extends DisposableController
   Map<LibraryRef, Future<Set<String>>>
       libraryMemberAndImportsAutocompleteCache = {};
 
-  final programExplorerController = ProgramExplorerController();
+  ProgramExplorerController get programExplorerController =>
+      _programExplorerController;
+  ProgramExplorerController _programExplorerController;
 
   final ScriptCache _scriptCache = ScriptCache();
 

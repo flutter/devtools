@@ -6,73 +6,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
 import '../trees.dart';
-import '../version.dart';
 import 'program_explorer_controller.dart';
-
-class VMServiceLibraryContents {
-  const VMServiceLibraryContents({
-    this.lib,
-    this.classes,
-    this.functions,
-    this.fields,
-  });
-
-  final Library lib;
-  final List<ClassRef> classes;
-  final List<FuncRef> functions;
-  final List<FieldRef> fields;
-
-  static Future<VMServiceLibraryContents> getLibraryContents(
-    LibraryRef libRef,
-  ) async {
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value.id;
-    final service = serviceManager.service;
-
-    final lib = await service.getObject(isolateId, libRef.id) as Library;
-    var classes = <ClassRef>[];
-    var functions = <FuncRef>[];
-    var fields = <FieldRef>[];
-
-    classes.addAll(lib.classes);
-    functions.addAll(lib.functions);
-    fields.addAll(lib.variables);
-
-    // Before 3.46, ClassRef, FuncRef, and FieldRef didn't contain location
-    // information and couldn't be mapped to their parent scripts. For older
-    // versions of the protocol, we need to request the full objects for
-    // everything. We'll avoid doing this for versions >= 3.46 and lazily
-    // populate the tree with full instances as the user navigates.
-    if (!await service.isProtocolVersionSupported(
-      supportedVersion: SemanticVersion(major: 3, minor: 46),
-    )) {
-      final classesRequests = lib.classes.map(
-        (clazz) async => await service.getObject(isolateId, clazz.id) as Class,
-      );
-
-      classes = await Future.wait(classesRequests);
-    }
-
-    final funcsRequests = lib.functions.map(
-      (func) async => await service.getObject(isolateId, func.id) as Func,
-    );
-    functions = await Future.wait(funcsRequests);
-
-    final fieldsRequests = lib.variables.map(
-      (field) async => await service.getObject(isolateId, field.id) as Field,
-    );
-    fields = await Future.wait(fieldsRequests);
-
-    // Remove scripts pulled into libraries via mixins.
-    lib.scripts.removeWhere((e) => !e.uri.contains(lib.uri));
-
-    return VMServiceLibraryContents(
-      lib: lib,
-      classes: classes,
-      functions: functions,
-      fields: fields,
-    );
-  }
-}
 
 /// A node in a tree of VM service objects.
 ///
@@ -160,25 +94,18 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       uri = s.uri;
     }
 
-    for (final clazz in lib.classes) {
+    for (final clazzRef in lib.classes) {
       // Don't surface synthetic classes created by mixin applications.
-      if (clazz.name.contains('&')) {
+      if (clazzRef.name.contains('&')) {
         continue;
       }
-      if (clazz.location.script.uri == uri) {
+      if (clazzRef.location.script.uri == uri) {
         final clazzNode = VMServiceObjectNode(
           controller,
-          clazz.name,
-          clazz,
+          clazzRef.name,
+          clazzRef,
         );
-        if (clazz is Class) {
-          for (final function in clazz.functions) {
-            clazzNode._lookupOrCreateChild(function.name, function);
-          }
-          for (final field in clazz.fields) {
-            clazzNode._lookupOrCreateChild(field.name, field);
-          }
-        }
+        await controller.populateNode(clazzNode);
         root.addChild(clazzNode);
       }
     }
@@ -206,11 +133,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
         );
         await controller.populateNode(node);
         root.addChild(
-          VMServiceObjectNode(
-            controller,
-            field.name,
-            field,
-          ),
+          node,
         );
       }
     }
@@ -227,14 +150,22 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   /// representing the best hierarchical grouping.
   static List<VMServiceObjectNode> createRootsFrom(
     ProgramExplorerController controller,
-    List<VMServiceLibraryContents> libs,
+    List<LibraryRef> libs,
   ) {
     // The name of this node is not exposed to users.
     final root = VMServiceObjectNode(controller, '<root>', ObjRef(id: '0'));
 
-    for (var lib in libs) {
-      for (final script in lib.lib.scripts) {
-        _buildScriptNode(root, script, lib: lib.lib);
+    final scripts = controller.debuggerController.sortedScripts.value;
+
+    for (final script in scripts) {
+      _buildScriptNode(root, script);
+    }
+
+    for (final lib in libs) {
+      for (final child in root.children) {
+        if (child.script?.uri == lib.uri) {
+          child.object = lib;
+        }
       }
     }
 
