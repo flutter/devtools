@@ -148,6 +148,9 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     ProgramExplorerController controller,
     List<LibraryRef> libs,
   ) {
+    if (libs.isEmpty) {
+      return [];
+    }
     // The name of this node is not exposed to users.
     final root = VMServiceObjectNode(controller, '<root>', ObjRef(id: '0'));
 

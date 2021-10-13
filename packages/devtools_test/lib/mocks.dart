@@ -625,7 +625,17 @@ class FakeIsolateManager extends Fake implements IsolateManager {
   }
 
   ValueNotifier<List<IsolateRef>> _isolates;
+
+  IsolateState isolateDebuggerState(IsolateRef isolate) {
+    final state = MockIsolateState();
+    final mockIsolate = MockIsolate();
+    when(mockIsolate.libraries).thenReturn([]);
+    when(state.isolateNow).thenReturn(mockIsolate);
+    return state;
+  }
 }
+
+class MockIsolateState extends Mock implements IsolateState {}
 
 class MockServiceManager extends Mock implements ServiceConnectionManager {}
 
