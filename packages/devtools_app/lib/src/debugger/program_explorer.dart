@@ -7,6 +7,7 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../common_widgets.dart';
 import '../flex_split_column.dart';
+import '../globals.dart';
 import '../theme.dart';
 import '../tree.dart';
 import '../utils.dart';
@@ -377,32 +378,53 @@ class ProgramExplorer extends StatelessWidget {
         if (!initialized) {
           body = const CenteredCircularProgressIndicator();
         } else {
+          const fileExplorerHeader = AreaPaneHeader(
+            title: Text('File Explorer'),
+            needsTopBorder: true,
+          );
+          final fileExplorer = _FileExplorer(
+            controller: controller,
+            onItemExpanded: onItemExpanded,
+            onItemSelected: onItemSelected,
+          );
           body = LayoutBuilder(
             builder: (context, constraints) {
-              return FlexSplitColumn(
-                totalHeight: constraints.maxHeight,
-                initialFractions: const [0.7, 0.3],
-                minSizes: const [0.0, 0.0],
-                headers: const <PreferredSizeWidget>[
-                  AreaPaneHeader(
-                    title: Text('File Explorer'),
-                    needsTopBorder: false,
-                  ),
-                  AreaPaneHeader(title: Text('Outline')),
-                ],
-                children: [
-                  _FileExplorer(
-                    controller: controller,
-                    onItemExpanded: onItemExpanded,
-                    onItemSelected: onItemSelected,
-                  ),
-                  _ProgramOutlineView(
-                    controller: controller,
-                    onItemExpanded: onItemExpanded,
-                    onItemSelected: onItemSelected,
-                  ),
-                ],
-              );
+              // Disable the program outline view when talking with dwds due to
+              // the following bugs:
+              //   - https://github.com/dart-lang/webdev/issues/1427
+              //   - https://github.com/dart-lang/webdev/issues/1428
+              //
+              // TODO(bkonyi): enable outline view for web applications when
+              // the above issues are resolved.
+              //
+              // See https://github.com/flutter/devtools/issues/3447.
+              return serviceManager.connectedApp.isDartWebAppNow
+                  ? Column(
+                      children: [
+                        fileExplorerHeader,
+                        Expanded(child: fileExplorer),
+                      ],
+                    )
+                  : FlexSplitColumn(
+                      totalHeight: constraints.maxHeight,
+                      initialFractions: const [0.7, 0.3],
+                      minSizes: const [0.0, 0.0],
+                      headers: const <PreferredSizeWidget>[
+                        AreaPaneHeader(
+                          title: Text('File Explorer'),
+                          needsTopBorder: false,
+                        ),
+                        AreaPaneHeader(title: Text('Outline')),
+                      ],
+                      children: [
+                        fileExplorer,
+                        _ProgramOutlineView(
+                          controller: controller,
+                          onItemExpanded: onItemExpanded,
+                          onItemSelected: onItemSelected,
+                        ),
+                      ],
+                    );
             },
           );
         }
