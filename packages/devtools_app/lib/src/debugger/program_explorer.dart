@@ -380,7 +380,7 @@ class ProgramExplorer extends StatelessWidget {
         } else {
           const fileExplorerHeader = AreaPaneHeader(
             title: Text('File Explorer'),
-            needsTopBorder: true,
+            needsTopBorder: false,
           );
           final fileExplorer = _FileExplorer(
             controller: controller,
@@ -410,10 +410,7 @@ class ProgramExplorer extends StatelessWidget {
                       initialFractions: const [0.7, 0.3],
                       minSizes: const [0.0, 0.0],
                       headers: const <PreferredSizeWidget>[
-                        AreaPaneHeader(
-                          title: Text('File Explorer'),
-                          needsTopBorder: false,
-                        ),
+                        fileExplorerHeader,
                         AreaPaneHeader(title: Text('Outline')),
                       ],
                       children: [
