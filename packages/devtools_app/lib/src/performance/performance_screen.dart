@@ -313,8 +313,8 @@ class _SecondaryControls extends StatelessWidget {
           profileGranularityFlagNotifier:
               controller.cpuProfilerController.profileGranularityFlagNotifier,
         ),
-        const SizedBox(width: defaultSpacing),
-        if (serviceManager.connectedApp.isFlutterAppNow)
+        const SizedBox(width: denseSpacing),
+        if (serviceManager.connectedApp.isFlutterAppNow) ...[
           ServiceExtensionButtonGroup(
             minScreenWidthForTextBeforeScaling:
                 _secondaryControlsMinIncludeTextWidth,
@@ -326,6 +326,15 @@ class _SecondaryControls extends StatelessWidget {
               //trackRebuildWidgets,
             ],
           ),
+          const SizedBox(width: denseSpacing),
+          IconLabelButton(
+            icon: Icons.build,
+            label: 'More debugging options',
+            tooltip:
+                'Opens a list of options you can use to help debug performance',
+            onPressed: () => _openDebuggingOptionsDialog(context),
+          ),
+        ],
         const SizedBox(width: defaultSpacing),
         ExportButton(
           onPressed: () => _exportPerformanceData(context),
@@ -351,10 +360,50 @@ class _SecondaryControls extends StatelessWidget {
     Notifications.of(context).push(successfulExportMessage(exportedFile));
   }
 
+  void _openDebuggingOptionsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => DebuggingOptionsDialog(),
+    );
+  }
+
   void _openSettingsDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => PerformanceSettingsDialog(controller),
+    );
+  }
+}
+
+class DebuggingOptionsDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return DevToolsDialog(
+      title: dialogTitleText(theme, 'Debugging Options'),
+      includeDivider: false,
+      content: Container(
+        width: defaultDialogWidth,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'When toggling on/off a rendering layer, you will need '
+              'to reproduce activity in your app to see the effects of the '
+              'debugging option.',
+              style: theme.subtleTextStyle,
+            ),
+            const SizedBox(height: defaultSpacing),
+            ServiceExtensionCheckbox(service: disableClipLayers),
+            ServiceExtensionCheckbox(service: disableOpacityLayers),
+            ServiceExtensionCheckbox(service: disablePhysicalShapeLayers),
+          ],
+        ),
+      ),
+      actions: [
+        DialogCloseButton(),
+      ],
     );
   }
 }

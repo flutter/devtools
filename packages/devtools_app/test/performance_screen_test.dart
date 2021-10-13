@@ -65,7 +65,7 @@ void main() {
     expect(find.byType(PerformanceScreenBody), findsOneWidget);
   }
 
-  const windowSize = Size(2050.0, 1000.0);
+  const windowSize = Size(3000.0, 1000.0);
 
   group('PerformanceScreen', () {
     setUp(() async {

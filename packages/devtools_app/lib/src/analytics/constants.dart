@@ -55,6 +55,9 @@ const refreshTimelineEvents = 'refreshTimelineEvents';
 const timelineFlameChartHelp = 'timelineFlameChartHelp';
 const selectFlutterFrame = 'selectFlutterFrame';
 const traceEventProcessingTime = 'traceEventProcessingTime';
+const disableClipLayersOption = 'disableClipLayers';
+const disableOpacityLayersOption = 'disableOpacityLayers';
+const disablePhysicalShapeLayersOption = 'disablePhysicalShapeLayers';
 
 // CPU profiler UX actions:
 const profileGranularityPrefix = 'profileGranularity';
