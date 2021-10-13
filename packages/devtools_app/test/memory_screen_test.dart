@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('vm')
-import 'dart:ui';
 
 import 'package:devtools_app/src/common_widgets.dart';
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/memory/memory_events_pane.dart';
@@ -15,18 +14,16 @@ import 'package:devtools_app/src/memory/memory_vm_chart.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:flutter/foundation.dart';
+import 'package:devtools_test/memory_test_allocation_data.dart';
+import 'package:devtools_test/memory_test_data.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/utils.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
-
-import 'support/memory_test_allocation_data.dart';
-import 'support/memory_test_data.dart';
-import 'support/mocks.dart';
-import 'support/utils.dart';
-import 'support/wrappers.dart';
 
 void main() {
   MemoryScreen screen;
@@ -111,6 +108,7 @@ void main() {
 
     setUp(() async {
       await ensureInspectorDependencies();
+      setGlobal(OfflineModeController, OfflineModeController());
       fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)

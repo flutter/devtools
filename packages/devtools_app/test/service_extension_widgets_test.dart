@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 
 import 'package:devtools_app/src/core/message_bus.dart';
 import 'package:devtools_app/src/globals.dart';
@@ -11,13 +10,12 @@ import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/service_registrations.dart';
 import 'package:devtools_app/src/ui/service_extension_widgets.dart';
 import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-
-import 'support/mocks.dart';
-import 'support/wrappers.dart';
 
 void main() {
   MockServiceManager mockServiceManager;

@@ -6,14 +6,13 @@ import 'package:devtools_app/src/app_size/code_size_attribution.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/table.dart';
+import 'package:devtools_test/app_size_test_data/precompiler_trace.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_snapshot_analysis/precompiler_trace.dart';
 import 'package:vm_snapshot_analysis/program_info.dart';
-
-import 'support/app_size_test_data/precompiler_trace.dart';
-import 'support/mocks.dart';
-import 'support/wrappers.dart';
 
 void main() {
   CallGraph callGraph;

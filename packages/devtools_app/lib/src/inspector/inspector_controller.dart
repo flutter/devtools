@@ -18,7 +18,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -35,6 +34,7 @@ import 'inspector_screen.dart';
 import 'inspector_service.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
+import 'inspector_tree_controller.dart';
 
 const inspectorRefQueryParam = 'inspectorRef';
 

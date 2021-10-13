@@ -4,7 +4,6 @@
 
 import 'dart:collection';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -26,7 +25,7 @@ import '../ui/service_extension_widgets.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
 import 'inspector_service.dart';
-import 'inspector_tree_flutter.dart';
+import 'inspector_tree_controller.dart';
 
 class InspectorScreen extends Screen {
   const InspectorScreen()
@@ -66,10 +65,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   InspectorController inspectorController;
 
-  InspectorTreeControllerFlutter get summaryTreeController =>
+  InspectorTreeController get summaryTreeController =>
       inspectorController?.inspectorTree;
 
-  InspectorTreeControllerFlutter get detailsTreeController =>
+  InspectorTreeController get detailsTreeController =>
       inspectorController?.details?.inspectorTree;
 
   DebuggerController _debuggerController;
@@ -92,8 +91,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       return;
     }
     inspectorController = InspectorController(
-      inspectorTree: InspectorTreeControllerFlutter(),
-      detailsTree: InspectorTreeControllerFlutter(),
+      inspectorTree: InspectorTreeController(),
+      detailsTree: InspectorTreeController(),
       treeType: FlutterTreeType.widget,
       onExpandCollapseSupported: _onExpandCollapseSupported,
       onLayoutExplorerSupported: _onLayoutExplorerSupported,

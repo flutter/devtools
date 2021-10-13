@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'config_specific/ide_theme/ide_theme.dart';
+import 'config_specific/import_export/import_export.dart';
 import 'core/message_bus.dart';
 import 'extension_points/extensions_base.dart';
 import 'framework_controller.dart';
@@ -10,13 +11,6 @@ import 'preferences.dart';
 import 'service_manager.dart';
 import 'storage.dart';
 import 'survey.dart';
-
-/// Snapshot mode is an offline mode where DevTools can operate on an imported
-/// data file.
-bool offlineMode = false;
-
-// TODO(kenz): store this data in an inherited widget.
-Map<String, dynamic> offlineDataJson = {};
 
 final Map<Type, dynamic> globals = <Type, dynamic>{};
 
@@ -35,6 +29,8 @@ PreferencesController get preferences => globals[PreferencesController];
 
 DevToolsExtensionPoints get devToolsExtensionPoints =>
     globals[DevToolsExtensionPoints];
+
+OfflineModeController get offlineController => globals[OfflineModeController];
 
 IdeTheme get ideTheme => globals[IdeTheme];
 

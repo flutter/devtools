@@ -93,15 +93,15 @@ class _DebuggingControlsState extends State<DebuggingControls>
       child: Row(
         children: [
           DebuggerButton(
-            title: 'Step In',
-            icon: Codicons.debugStepInto,
-            onPressed: canStep ? controller.stepIn : null,
+            title: 'Step Over',
+            icon: Codicons.debugStepOver,
+            onPressed: canStep ? controller.stepOver : null,
           ),
           LeftBorder(
             child: DebuggerButton(
-              title: 'Step Over',
-              icon: Codicons.debugStepOver,
-              onPressed: canStep ? controller.stepOver : null,
+              title: 'Step In',
+              icon: Codicons.debugStepInto,
+              onPressed: canStep ? controller.stepIn : null,
             ),
           ),
           LeftBorder(

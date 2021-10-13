@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +23,6 @@ import '../split.dart';
 import '../theme.dart';
 import '../ui/icons.dart';
 import '../ui/service_extension_widgets.dart';
-import '../ui/utils.dart';
 import '../ui/vm_flag_widgets.dart';
 import '../version.dart';
 import 'event_details.dart';
@@ -91,6 +89,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   void initState() {
     super.initState();
     ga.screen(PerformanceScreen.id);
+    addAutoDisposeListener(offlineController.offlineMode);
   }
 
   @override
@@ -126,12 +125,12 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
       // with other trace viewers (catapult, perfetto, chrome://tracing), which
       // require a top level field named "traceEvents". See how timeline data is
       // encoded in [ExportController.encode].
-      final timelineJson =
-          Map<String, dynamic>.from(offlineDataJson[PerformanceScreen.id])
-            ..addAll({
-              PerformanceData.traceEventsKey:
-                  offlineDataJson[PerformanceData.traceEventsKey]
-            });
+      final timelineJson = Map<String, dynamic>.from(
+          offlineController.offlineDataJson[PerformanceScreen.id])
+        ..addAll({
+          PerformanceData.traceEventsKey:
+              offlineController.offlineDataJson[PerformanceData.traceEventsKey]
+        });
       final offlinePerformanceData = OfflinePerformanceData.parse(timelineJson);
       if (!offlinePerformanceData.isEmpty) {
         loadOfflineData(offlinePerformanceData);
@@ -141,16 +140,17 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    final isOfflineFlutterApp = offlineMode &&
+    final isOfflineFlutterApp = offlineController.offlineMode.value &&
         controller.offlinePerformanceData != null &&
         controller.offlinePerformanceData.frames.isNotEmpty;
 
     final performanceScreen = Column(
       children: [
-        if (!offlineMode) _buildPerformanceControls(),
+        if (!offlineController.offlineMode.value) _buildPerformanceControls(),
         const SizedBox(height: denseRowSpacing),
         if (isOfflineFlutterApp ||
-            (!offlineMode && serviceManager.connectedApp.isFlutterAppNow))
+            (!offlineController.offlineMode.value &&
+                serviceManager.connectedApp.isFlutterAppNow))
           ValueListenableBuilder(
             valueListenable: controller.flutterFrames,
             builder: (context, frames, _) => ValueListenableBuilder(
@@ -222,10 +222,9 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
   @override
   bool shouldLoadOfflineData() {
-    return offlineMode &&
-        offlineDataJson.isNotEmpty &&
-        offlineDataJson[PerformanceScreen.id] != null &&
-        offlineDataJson[PerformanceData.traceEventsKey] != null;
+    return offlineController.shouldLoadOfflineData(PerformanceScreen.id) &&
+        offlineController.offlineDataJson[PerformanceData.traceEventsKey] !=
+            null;
   }
 }
 
@@ -377,18 +376,38 @@ class PerformanceSettingsDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ...dialogSubHeader(theme, 'Recorded Timeline Streams'),
-            ..._defaultRecordedStreams(theme),
-            ..._advancedStreams(theme),
+            TimelineStreamSettings(controller: controller),
             if (serviceManager.connectedApp.isFlutterAppNow) ...[
               const SizedBox(height: denseSpacing),
-              ..._additionalFlutterSettings(theme),
+              FlutterSettings(controller: controller),
             ],
           ],
         ),
       ),
       actions: [
         DialogCloseButton(),
+      ],
+    );
+  }
+}
+
+class TimelineStreamSettings extends StatelessWidget {
+  const TimelineStreamSettings({
+    Key key,
+    @required this.controller,
+  }) : super(key: key);
+
+  final PerformanceController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...dialogSubHeader(theme, 'Recorded Timeline Streams'),
+        ..._defaultRecordedStreams(theme),
+        ..._advancedStreams(theme),
       ],
     );
   }
@@ -405,12 +424,11 @@ class PerformanceSettingsDialog extends StatelessWidget {
       // Special case "Network Traffic" because it is not implemented as a
       // Timeline recorded stream in the VM. The user does not need to be aware of
       // the distinction, however.
-      _buildStream(
-        name: 'Network',
-        description: ' • Http traffic',
-        listenable: controller.httpTimelineLoggingEnabled,
+      CheckboxSetting(
+        title: 'Network',
+        description: 'Http traffic',
+        notifier: controller.httpTimelineLoggingEnabled,
         onChanged: controller.toggleHttpRequestLogging,
-        theme: theme,
       ),
     ];
   }
@@ -431,85 +449,41 @@ class PerformanceSettingsDialog extends StatelessWidget {
     ThemeData theme, {
     @required bool advanced,
   }) {
-    final settings = <Widget>[];
-    final streams = controller.recordedStreams
-        .where((s) => s.advanced == advanced)
-        .toList();
-    for (final stream in streams) {
-      settings.add(_buildStream(
-        name: stream.name,
-        description: ' • ${stream.description}',
-        listenable: stream.enabled,
-        onChanged: (_) => controller.toggleTimelineStream(stream),
-        theme: theme,
-      ));
-    }
-    return settings;
-  }
-
-  Widget _buildStream({
-    @required String name,
-    @required String description,
-    @required ValueListenable listenable,
-    @required void Function(bool) onChanged,
-    @required ThemeData theme,
-  }) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // TODO(kenz): refactor so that we can use NotifierCheckbox here.
-        ValueListenableBuilder(
-          valueListenable: listenable,
-          builder: (context, value, _) {
-            return Checkbox(
-              value: value,
-              onChanged: onChanged,
-            );
-          },
-        ),
-        Flexible(
-          child: RichText(
-            overflow: TextOverflow.visible,
-            text: TextSpan(
-              text: name,
-              style: theme.regularTextStyle,
-              children: [
-                TextSpan(
-                  text: description,
-                  style: theme.subtleTextStyle,
-                ),
-              ],
+    final streams = advanced
+        ? serviceManager.timelineStreamManager.advancedStreams
+        : serviceManager.timelineStreamManager.basicStreams;
+    final settings = streams
+        .map(
+          (stream) => CheckboxSetting(
+            title: stream.name,
+            description: stream.description,
+            notifier: stream.recorded,
+            onChanged: (newValue) =>
+                serviceManager.timelineStreamManager.updateTimelineStream(
+              stream,
+              newValue,
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  List<Widget> _additionalFlutterSettings(ThemeData theme) {
-    return [
-      ...dialogSubHeader(theme, 'Additional Settings'),
-      _BadgeJankyFramesSetting(controller),
-    ];
+        )
+        .toList();
+    return settings;
   }
 }
 
-class _BadgeJankyFramesSetting extends StatelessWidget {
-  const _BadgeJankyFramesSetting(this.controller);
+class FlutterSettings extends StatelessWidget {
+  const FlutterSettings({Key key, @required this.controller}) : super(key: key);
 
   final PerformanceController controller;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        NotifierCheckbox(notifier: controller.badgeTabForJankyFrames),
-        RichText(
-          overflow: TextOverflow.visible,
-          text: TextSpan(
-            text: 'Badge Performance tab when Flutter UI jank is detected',
-            style: Theme.of(context).regularTextStyle,
-          ),
+        ...dialogSubHeader(Theme.of(context), 'Additional Settings'),
+        CheckboxSetting(
+          notifier: controller.badgeTabForJankyFrames,
+          title: 'Badge Performance tab when Flutter UI jank is detected',
         ),
       ],
     );

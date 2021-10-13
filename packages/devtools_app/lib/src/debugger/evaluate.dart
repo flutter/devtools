@@ -90,10 +90,15 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
         // the already typed.
         _autoCompleteController.clearSearchAutoComplete();
       } else {
-        _autoCompleteController.searchAutoComplete.value = matches.sublist(
-          0,
-          min(defaultTopMatchesLimit, matches.length),
-        );
+        final results = matches
+            .sublist(
+              0,
+              min(defaultTopMatchesLimit, matches.length),
+            )
+            .map((match) => AutoCompleteMatch(match))
+            .toList();
+
+        _autoCompleteController.searchAutoComplete.value = results;
         _autoCompleteController.currentDefaultIndex = 0;
       }
     } else {
@@ -182,7 +187,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
 
   void _handleExpressionEval() async {
     final expressionText = searchTextFieldController.value.text.trim();
-    updateSearchField(_autoCompleteController, '', 0);
+    updateSearchField(_autoCompleteController, newValue: '', caretPosition: 0);
     clearSearchField(_autoCompleteController, force: true);
 
     if (expressionText.isEmpty) return;

@@ -7,7 +7,6 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'scaffold.dart';
 import 'theme.dart';
@@ -94,6 +93,7 @@ class IconLabelButton extends StatelessWidget {
     this.minScreenWidthForTextBeforeScaling,
     this.elevatedButton = false,
     this.tooltip,
+    this.tooltipPadding,
   })  : assert((icon == null) != (imageIcon == null)),
         super(key: key);
 
@@ -114,6 +114,8 @@ class IconLabelButton extends StatelessWidget {
 
   final String tooltip;
 
+  final EdgeInsetsGeometry tooltipPadding;
+
   @override
   Widget build(BuildContext context) {
     final iconLabel = MaterialIconLabel(
@@ -125,8 +127,9 @@ class IconLabelButton extends StatelessWidget {
     );
     if (elevatedButton) {
       return maybeWrapWithTooltip(
-        tooltip,
-        ElevatedButton(
+        tooltip: tooltip,
+        tooltipPadding: tooltipPadding,
+        child: ElevatedButton(
           onPressed: onPressed,
           child: iconLabel,
         ),
@@ -135,8 +138,9 @@ class IconLabelButton extends StatelessWidget {
     // TODO(kenz): this SizedBox wrapper should be unnecessary once
     // https://github.com/flutter/flutter/issues/79894 is fixed.
     return maybeWrapWithTooltip(
-      tooltip,
-      SizedBox(
+      tooltip: tooltip,
+      tooltipPadding: tooltipPadding,
+      child: SizedBox(
         height: defaultButtonHeight,
         width: !includeText(context, minScreenWidthForTextBeforeScaling)
             ? buttonMinWidth
@@ -503,7 +507,7 @@ class ProcessingInfo extends StatelessWidget {
 /// onPressed:
 ///
 /// setState(() {
-///   offlineMode = false;
+///   offlineController.exitOfflineMode();
 /// }
 class ExitOfflineButton extends IconLabelButton {
   const ExitOfflineButton({@required VoidCallback onPressed})
@@ -1294,10 +1298,15 @@ class Link {
   final String url;
 }
 
-Widget maybeWrapWithTooltip(String tooltip, Widget child) {
+Widget maybeWrapWithTooltip({
+  @required String tooltip,
+  EdgeInsetsGeometry tooltipPadding,
+  @required Widget child,
+}) {
   if (tooltip != null) {
     return DevToolsTooltip(
       tooltip: tooltip,
+      padding: tooltipPadding,
       child: child,
     );
   }
@@ -1376,5 +1385,121 @@ class CopyToClipboardControl extends StatelessWidget {
           : () => copyToClipboard(dataProvider(), successMessage, context),
       key: buttonKey,
     );
+  }
+}
+
+/// Checkbox Widget class that listens to and manages a [ValueNotifier].
+///
+/// Used to create a Checkbox widget who's boolean value is attached
+/// to a [ValueNotifier<bool>]. This allows for the pattern:
+///
+/// Create the [NotifierCheckbox] widget in build e.g.,
+///
+///   myCheckboxWidget = NotifierCheckbox(notifier: controller.myCheckbox);
+///
+/// The checkbox and the value notifier are now linked with clicks updating the
+/// [ValueNotifier] and changes to the [ValueNotifier] updating the checkbox.
+class NotifierCheckbox extends StatelessWidget {
+  const NotifierCheckbox({
+    Key key,
+    @required this.notifier,
+    this.onChanged,
+  }) : super(key: key);
+
+  final ValueNotifier<bool> notifier;
+
+  final void Function(bool newValue) onChanged;
+
+  void _updateValue(bool value) {
+    if (notifier.value != value) {
+      notifier.value = value;
+      if (onChanged != null) {
+        onChanged(value);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: notifier,
+      builder: (context, value, _) {
+        return Checkbox(
+          value: value,
+          onChanged: _updateValue,
+        );
+      },
+    );
+  }
+}
+
+class CheckboxSetting extends StatelessWidget {
+  const CheckboxSetting({
+    Key key,
+    @required this.notifier,
+    @required this.title,
+    this.description,
+    this.tooltip,
+    this.onChanged,
+  }) : super(key: key);
+
+  final ValueListenable<bool> notifier;
+
+  final String title;
+
+  final String description;
+
+  final String tooltip;
+
+  final void Function(bool newValue) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    Widget textContent = RichText(
+      overflow: TextOverflow.visible,
+      text: TextSpan(
+        text: title,
+        style: theme.regularTextStyle,
+      ),
+    );
+
+    if (description != null) {
+      textContent = Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          textContent,
+          Expanded(
+            child: RichText(
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              text: TextSpan(
+                text: ' • $description',
+                style: theme.subtleTextStyle,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    final content = Row(
+      children: [
+        NotifierCheckbox(
+          notifier: notifier,
+          onChanged: onChanged,
+        ),
+        Flexible(
+          child: textContent,
+        ),
+      ],
+    );
+    if (tooltip != null) {
+      return DevToolsTooltip(
+        tooltip: tooltip,
+        child: content,
+      );
+    }
+    return content;
   }
 }

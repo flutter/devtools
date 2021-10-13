@@ -27,7 +27,6 @@ import '../../split.dart';
 import '../../theme.dart';
 import '../../ui/icons.dart';
 import '../../ui/service_extension_widgets.dart';
-import '../../ui/utils.dart';
 import '../../ui/vm_flag_widgets.dart';
 import '../../version.dart';
 import 'event_details.dart';
@@ -104,6 +103,7 @@ class LegacyPerformanceScreenBodyState
   void initState() {
     super.initState();
     ga.screen(LegacyPerformanceScreen.id);
+    addAutoDisposeListener(offlineController.offlineMode);
   }
 
   @override
@@ -135,7 +135,7 @@ class LegacyPerformanceScreenBodyState
 
     // Refresh data on page load if data is null. On subsequent tab changes,
     // this should not be called.
-    if (controller.data == null && !offlineMode) {
+    if (controller.data == null && !offlineController.offlineMode.value) {
       controller.refreshData();
     }
 
@@ -145,12 +145,12 @@ class LegacyPerformanceScreenBodyState
       // with other trace viewers (catapult, perfetto, chrome://tracing), which
       // require a top level field named "traceEvents". See how timeline data is
       // encoded in [ExportController.encode].
-      final timelineJson =
-          Map<String, dynamic>.from(offlineDataJson[LegacyPerformanceScreen.id])
-            ..addAll({
-              LegacyPerformanceData.traceEventsKey:
-                  offlineDataJson[LegacyPerformanceData.traceEventsKey]
-            });
+      final timelineJson = Map<String, dynamic>.from(
+          offlineController.offlineDataJson[LegacyPerformanceScreen.id])
+        ..addAll({
+          LegacyPerformanceData.traceEventsKey: offlineController
+              .offlineDataJson[LegacyPerformanceData.traceEventsKey]
+        });
       final offlinePerformanceData =
           LegacyOfflinePerformanceData.parse(timelineJson);
       if (!offlinePerformanceData.isEmpty) {
@@ -161,16 +161,17 @@ class LegacyPerformanceScreenBodyState
 
   @override
   Widget build(BuildContext context) {
-    final isOfflineFlutterApp = offlineMode &&
+    final isOfflineFlutterApp = offlineController.offlineMode.value &&
         controller.offlinePerformanceData != null &&
         controller.offlinePerformanceData.frames.isNotEmpty;
 
     final performanceScreen = Column(
       children: [
-        if (!offlineMode) _buildPerformanceControls(),
+        if (!offlineController.offlineMode.value) _buildPerformanceControls(),
         const SizedBox(height: denseRowSpacing),
         if (isOfflineFlutterApp ||
-            (!offlineMode && serviceManager.connectedApp.isFlutterAppNow))
+            (!offlineController.offlineMode.value &&
+                serviceManager.connectedApp.isFlutterAppNow))
           ValueListenableBuilder(
             valueListenable: controller.flutterFrames,
             builder: (context, frames, _) => ValueListenableBuilder(
@@ -321,10 +322,11 @@ class LegacyPerformanceScreenBodyState
 
   @override
   bool shouldLoadOfflineData() {
-    return offlineMode &&
-        offlineDataJson.isNotEmpty &&
-        offlineDataJson[LegacyPerformanceScreen.id] != null &&
-        offlineDataJson[LegacyPerformanceData.traceEventsKey] != null;
+    return offlineController
+            .shouldLoadOfflineData(LegacyPerformanceScreen.id) &&
+        offlineController
+                .offlineDataJson[LegacyPerformanceData.traceEventsKey] !=
+            null;
   }
 }
 
@@ -400,15 +402,19 @@ class LegacyPerformanceSettingsDialog extends StatelessWidget {
     @required bool advanced,
   }) {
     final settings = <Widget>[];
-    final streams = controller.recordedStreams
-        .where((s) => s.advanced == advanced)
-        .toList();
+    final streams = advanced
+        ? serviceManager.timelineStreamManager.advancedStreams
+        : serviceManager.timelineStreamManager.basicStreams;
     for (final stream in streams) {
       settings.add(_buildStream(
         name: stream.name,
         description: ' • ${stream.description}',
-        listenable: stream.enabled,
-        onChanged: (_) => controller.toggleTimelineStream(stream),
+        listenable: stream.recorded,
+        onChanged: (newValue) =>
+            serviceManager.timelineStreamManager.updateTimelineStream(
+          stream,
+          newValue,
+        ),
         theme: theme,
       ));
     }

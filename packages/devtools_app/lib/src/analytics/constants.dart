@@ -28,6 +28,7 @@ const String logging = LoggingScreen.id;
 const String devToolsMain = 'main';
 const String hotReload = 'hotReload';
 const String hotRestart = 'hotRestart';
+const String appDisconnected = 'appDisconnected';
 
 // DevTools UI action selected (clicked).
 
@@ -58,6 +59,7 @@ const traceEventProcessingTime = 'traceEventProcessingTime';
 // CPU profiler UX actions:
 const profileGranularityPrefix = 'profileGranularity';
 const loadAllCpuSamples = 'loadAllCpuSamples';
+const profileAppStartUp = 'profileAppStartUp';
 const cpuProfileFlameChartHelp = 'cpuProfileFlameChartHelp';
 const cpuProfileProcessingTime = 'cpuProfileProcessingTime';
 

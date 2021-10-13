@@ -12,8 +12,8 @@ import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
-import '../dialogs.dart';
 import '../flex_split_column.dart';
+import '../globals.dart';
 import '../listenable.dart';
 import '../screen.dart';
 import '../split.dart';
@@ -118,7 +118,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                 parsedScript != null &&
                 !_shownFirstScript) {
               ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
-              // TODO(annagrin): mark end of IPL timing for debugger page here.
+              serviceManager.sendDwdsEvent(
+                screen: DebuggerScreen.id,
+                action: analytics_constants.pageReady,
+              );
               _shownFirstScript = true;
             }
             return CodeView(
@@ -166,8 +169,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       shortcuts: <LogicalKeySet, Intent>{
         goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
         searchInFileKeySet: SearchInFileIntent(controller),
-        escapeKeySet: EscapeIntent(context, controller),
-        openFileKeySet: OpenFileIntent(context, controller),
+        escapeKeySet: EscapeIntent(controller),
+        openFileKeySet: OpenFileIntent(controller),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
@@ -273,6 +276,8 @@ class GoToLineNumberAction extends Action<GoToLineNumberIntent> {
   @override
   void invoke(GoToLineNumberIntent intent) {
     showGoToLineDialog(intent._context, intent._controller);
+    intent._controller.toggleFileOpenerVisibility(false);
+    intent._controller.toggleSearchInFileVisibility(false);
   }
 }
 
@@ -286,35 +291,35 @@ class SearchInFileAction extends Action<SearchInFileIntent> {
   @override
   void invoke(SearchInFileIntent intent) {
     intent._controller.toggleSearchInFileVisibility(true);
+    intent._controller.toggleFileOpenerVisibility(false);
   }
 }
 
 class EscapeIntent extends Intent {
-  const EscapeIntent(this._context, this._controller);
+  const EscapeIntent(this._controller);
 
-  final BuildContext _context;
   final DebuggerController _controller;
 }
 
 class EscapeAction extends Action<EscapeIntent> {
   @override
   void invoke(EscapeIntent intent) {
-    Navigator.of(intent._context).pop(dialogDefaultContext);
     intent._controller.toggleSearchInFileVisibility(false);
+    intent._controller.toggleFileOpenerVisibility(false);
   }
 }
 
 class OpenFileIntent extends Intent {
-  const OpenFileIntent(this._context, this._controller);
+  const OpenFileIntent(this._controller);
 
-  final BuildContext _context;
   final DebuggerController _controller;
 }
 
 class OpenFileAction extends Action<OpenFileIntent> {
   @override
   void invoke(OpenFileIntent intent) {
-    showOpenFileDialog(intent._context, intent._controller);
+    intent._controller.toggleFileOpenerVisibility(true);
+    intent._controller.toggleSearchInFileVisibility(false);
   }
 }
 

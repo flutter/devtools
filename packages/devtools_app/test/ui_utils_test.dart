@@ -5,85 +5,14 @@
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/utils.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'support/mocks.dart';
-import 'support/wrappers.dart';
 
 void main() {
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
-  });
-
-  bool findCheckboxValue() {
-    final Checkbox checkboxWidget =
-        find.byType(Checkbox).evaluate().first.widget;
-    return checkboxWidget.value;
-  }
-
-  group('NotifierCheckbox', () {
-    testWidgets('tap checkbox', (WidgetTester tester) async {
-      final notifier = ValueNotifier<bool>(false);
-      await tester.pumpWidget(wrap(NotifierCheckbox(notifier: notifier)));
-      final checkbox = find.byType(Checkbox);
-      expect(checkbox, findsOneWidget);
-      expect(notifier.value, isFalse);
-      expect(findCheckboxValue(), isFalse);
-      await tester.tap(checkbox);
-      await tester.pump();
-      expect(notifier.value, isTrue);
-      expect(findCheckboxValue(), isTrue);
-
-      await tester.tap(find.byType(Checkbox));
-      await tester.pump();
-      expect(notifier.value, isFalse);
-      expect(findCheckboxValue(), isFalse);
-    });
-
-    testWidgets('change notifier value', (WidgetTester tester) async {
-      final notifier = ValueNotifier<bool>(false);
-      await tester.pumpWidget(wrap(NotifierCheckbox(notifier: notifier)));
-      expect(notifier.value, isFalse);
-      expect(findCheckboxValue(), isFalse);
-
-      notifier.value = true;
-      await tester.pump();
-      expect(notifier.value, isTrue);
-      expect(findCheckboxValue(), isTrue);
-
-      notifier.value = false;
-      await tester.tap(find.byType(Checkbox));
-      await tester.pump();
-      expect(notifier.value, isFalse);
-      expect(findCheckboxValue(), isFalse);
-    });
-
-    testWidgets('change notifier', (WidgetTester tester) async {
-      final falseNotifier = ValueNotifier<bool>(false);
-      final trueNotifier = ValueNotifier<bool>(true);
-      await tester.pumpWidget(wrap(NotifierCheckbox(notifier: falseNotifier)));
-      expect(findCheckboxValue(), isFalse);
-
-      await tester.pumpWidget(wrap(NotifierCheckbox(notifier: trueNotifier)));
-      expect(findCheckboxValue(), isTrue);
-
-      await tester.pumpWidget(wrap(NotifierCheckbox(notifier: falseNotifier)));
-      expect(findCheckboxValue(), isFalse);
-
-      await tester.pumpWidget(wrap(NotifierCheckbox(notifier: trueNotifier)));
-      expect(findCheckboxValue(), isTrue);
-
-      // ensure we can modify the value of the notifier and changes are
-      // reflected even though this is different than the initial notifier.
-      trueNotifier.value = false;
-      await tester.pump();
-      expect(findCheckboxValue(), isFalse);
-
-      trueNotifier.value = true;
-      await tester.pump();
-      expect(findCheckboxValue(), isTrue);
-    });
   });
 
   group('truncateTextSpan', () {
@@ -198,6 +127,36 @@ void main() {
           '    "b"\n',
         ),
       );
+    });
+  });
+
+  group('findLongestTextSpan', () {
+    test('returns longest span', () {
+      const shortest = TextSpan(text: 'this is a short line of text');
+      const longer = TextSpan(text: 'this is a longer line of text');
+      const longest = TextSpan(text: 'this is an even longer line of text');
+
+      expect(
+          findLongestTextSpan([
+            shortest,
+            longer,
+            longest,
+          ]),
+          equals(longest));
+    });
+
+    test('returns first longest if multiple spans have the same length', () {
+      const shortest = TextSpan(text: 'this is a short line of text');
+      const longest = TextSpan(text: 'this is a longer line of text');
+      const alsoLongest = TextSpan(text: 'this is a ------ line of text');
+
+      expect(
+          findLongestTextSpan([
+            shortest,
+            longest,
+            alsoLongest,
+          ]),
+          equals(longest));
     });
   });
 

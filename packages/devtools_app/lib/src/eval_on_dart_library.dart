@@ -8,8 +8,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'auto_dispose.dart';

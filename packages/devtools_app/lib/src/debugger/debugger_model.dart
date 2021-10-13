@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -364,7 +363,7 @@ Future<void> buildVariablesTree(
       }
     }
   }
-  if (instanceRef != null) {
+  if (instanceRef != null && serviceManager.service != null) {
     try {
       final dynamic result = await serviceManager.service
           .getObject(variable.ref.isolateRef.id, instanceRef.id);
@@ -513,7 +512,9 @@ List<Variable> _createVariablesForAssociations(
       isolateRef: isolateRef,
     );
     variables.add(
-      Variable.text('[Entry $i]')..addChild(key)..addChild(value),
+      Variable.text('[Entry $i]')
+        ..addChild(key)
+        ..addChild(value),
     );
   }
   return variables;

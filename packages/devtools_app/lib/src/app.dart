@@ -311,6 +311,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       ),
       routerDelegate: DevToolsRouterDelegate(_getPage),
       routeInformationParser: DevToolsRouteInformationParser(),
+      // Disable default scrollbar behavior on web to fix duplicate scrollbars
+      // bug, see https://github.com/flutter/flutter/issues/90697:
+      scrollBehavior:
+          const MaterialScrollBehavior().copyWith(scrollbars: !kIsWeb),
     );
   }
 }

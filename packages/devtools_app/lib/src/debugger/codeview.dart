@@ -68,6 +68,7 @@ class CodeView extends StatefulWidget {
 
 class _CodeViewState extends State<CodeView>
     with AutoDisposeMixin, SearchFieldMixin<CodeView> {
+  static const fileOpenerLeftPadding = 100.0;
   static const searchFieldRightPadding = 75.0;
 
   LinkedScrollControllerGroup verticalController;
@@ -166,34 +167,35 @@ class _CodeViewState extends State<CodeView>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    if (scriptRef == null) {
-      return Center(
-        child: Text(
-          'Open a file: $openFileKeySetDescription',
-          style: theme.textTheme.subtitle1,
-        ),
-      );
-    }
-
     if (parsedScript == null) {
       return const CenteredCircularProgressIndicator();
     }
 
     return ValueListenableBuilder(
-      valueListenable: widget.controller.showSearchInFileField,
-      builder: (context, showSearch, _) {
-        return Stack(
-          children: [
-            buildCodeArea(context),
-            if (showSearch)
-              Positioned(
-                top: denseSpacing,
-                right: searchFieldRightPadding,
-                child: buildSearchInFileField(),
-              ),
-          ],
+      valueListenable: widget.controller.showFileOpener,
+      builder: (context, showFileOpener, _) {
+        return ValueListenableBuilder(
+          valueListenable: widget.controller.showSearchInFileField,
+          builder: (context, showSearch, _) {
+            return Stack(
+              children: [
+                scriptRef == null
+                    ? buildEmptyState(context)
+                    : buildCodeArea(context),
+                if (showFileOpener)
+                  Positioned(
+                    left: fileOpenerLeftPadding,
+                    child: buildFileSearchField(),
+                  ),
+                if (showSearch && scriptRef != null)
+                  Positioned(
+                    top: denseSpacing,
+                    right: searchFieldRightPadding,
+                    child: buildSearchInFileField(),
+                  ),
+              ],
+            );
+          },
         );
       },
     );
@@ -276,6 +278,7 @@ class _CodeViewState extends State<CodeView>
               child: Scrollbar(
                 key: CodeView.debuggerCodeViewVerticalScrollbarKey,
                 controller: textController,
+                isAlwaysShown: true,
                 // Only listen for vertical scroll notifications (ignore those
                 // from the nested horizontal SingleChildScrollView):
                 notificationPredicate: (ScrollNotification notification) =>
@@ -314,19 +317,9 @@ class _CodeViewState extends State<CodeView>
                         Expanded(
                           child: LayoutBuilder(
                             builder: (context, constraints) {
-                              // Find the longest line to measure file width:
-                              int longestLength = 0;
-                              TextSpan longestLine;
-                              for (var line in lines) {
-                                final int currentLength =
-                                    line.toPlainText().length;
-                                if (currentLength > longestLength) {
-                                  longestLength = currentLength;
-                                  longestLine = line;
-                                }
-                              }
-                              final double fileWidth =
-                                  calculateTextSpanWidth(longestLine);
+                              final double fileWidth = calculateTextSpanWidth(
+                                findLongestTextSpan(lines),
+                              );
 
                               return Scrollbar(
                                 key: CodeView
@@ -376,7 +369,10 @@ class _CodeViewState extends State<CodeView>
     );
   }
 
-  Widget buildSearchInFileField() {
+  Widget wrapInElevatedCard(
+    Widget widget, {
+    double width = wideSearchTextWidth,
+  }) {
     return Card(
       elevation: defaultElevation,
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -384,17 +380,43 @@ class _CodeViewState extends State<CodeView>
         borderRadius: BorderRadius.circular(defaultBorderRadius),
       ),
       child: Container(
-        width: wideSearchTextWidth,
+        width: width,
         height: defaultTextFieldHeight + 2 * denseSpacing,
         padding: const EdgeInsets.all(denseSpacing),
-        child: buildSearchField(
-          controller: widget.controller,
-          searchFieldKey: debuggerCodeViewSearchKey,
-          searchFieldEnabled: parsedScript != null,
-          shouldRequestFocus: true,
-          supportsNavigation: true,
-          onClose: () => widget.controller.toggleSearchInFileVisibility(false),
-        ),
+        child: widget,
+      ),
+    );
+  }
+
+  Widget buildFileSearchField() {
+    return wrapInElevatedCard(
+      FileSearchField(
+        debuggerController: widget.controller,
+      ),
+      width: extraWideSearchTextWidth,
+    );
+  }
+
+  Widget buildSearchInFileField() {
+    return wrapInElevatedCard(
+      buildSearchField(
+        controller: widget.controller,
+        searchFieldKey: debuggerCodeViewSearchKey,
+        searchFieldEnabled: parsedScript != null,
+        shouldRequestFocus: true,
+        supportsNavigation: true,
+        onClose: () => widget.controller.toggleSearchInFileVisibility(false),
+      ),
+    );
+  }
+
+  Widget buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Text(
+        'Open a file: $openFileKeySetDescription',
+        style: theme.textTheme.subtitle1,
       ),
     );
   }
@@ -1082,17 +1104,14 @@ final goToLineOption = ScriptPopupMenuOption(
   onSelected: showGoToLineDialog,
 );
 
-void showOpenFileDialog(BuildContext context, DebuggerController controller) {
-  showDialog(
-    context: context,
-    builder: (context) => OpenFileDialog(controller),
-  );
+void showFileOpener(BuildContext context, DebuggerController controller) {
+  controller.toggleFileOpenerVisibility(true);
 }
 
 final openFileOption = ScriptPopupMenuOption(
   label: 'Open file ($openFileKeySetDescription)',
   icon: Icons.folder_open,
-  onSelected: showOpenFileDialog,
+  onSelected: showFileOpener,
 );
 
 class GoToLineDialog extends StatelessWidget {
@@ -1132,31 +1151,6 @@ class GoToLineDialog extends StatelessWidget {
             ],
           )
         ],
-      ),
-      actions: const [
-        DialogCancelButton(),
-      ],
-    );
-  }
-}
-
-class OpenFileDialog extends StatelessWidget {
-  const OpenFileDialog(this._debuggerController);
-
-  final DebuggerController _debuggerController;
-
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsDialog(
-      title: dialogTitleText(Theme.of(context), 'Open file'),
-      includeDivider: false,
-      content: Container(
-        alignment: Alignment.topCenter,
-        height: 325,
-        width: 500,
-        child: FileSearchField(
-          controller: _debuggerController,
-        ),
       ),
       actions: const [
         DialogCancelButton(),

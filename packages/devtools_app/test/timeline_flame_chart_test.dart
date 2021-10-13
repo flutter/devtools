@@ -5,20 +5,20 @@
 import 'dart:io';
 
 import 'package:devtools_app/src/charts/flame_chart.dart';
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/performance_test_data.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
-
-import 'support/mocks.dart';
-import 'support/performance_test_data.dart';
-import 'support/wrappers.dart';
 
 void main() {
   FakeServiceManager fakeServiceManager;
@@ -41,6 +41,7 @@ void main() {
       when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
           .thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(OfflineModeController, OfflineModeController());
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
     }

@@ -4,6 +4,7 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/common_widgets.dart';
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/event_details.dart';
 import 'package:devtools_app/src/performance/flutter_frames_chart.dart';
@@ -12,14 +13,13 @@ import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/split.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/performance_test_data.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
-
-import 'support/mocks.dart';
-import 'support/performance_test_data.dart';
-import 'support/wrappers.dart';
 
 void main() {
   PerformanceScreen screen;
@@ -71,6 +71,7 @@ void main() {
     setUp(() async {
       await ensureInspectorDependencies();
       _setUpServiceManagerWithTimeline(testTimelineJson);
+      setGlobal(OfflineModeController, OfflineModeController());
       screen = const PerformanceScreen();
     });
 

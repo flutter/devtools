@@ -10,7 +10,6 @@ import '../common_widgets.dart';
 import '../dialogs.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import '../theme.dart';
-import '../ui/utils.dart';
 import 'memory_controller.dart';
 import 'memory_snapshot_models.dart';
 

@@ -7,7 +7,6 @@ import 'dart:core';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
@@ -21,12 +20,14 @@ import 'error_badge_manager.dart';
 import 'globals.dart';
 import 'inspector/inspector_service.dart';
 import 'logging/vm_service_logger.dart';
+import 'performance/timeline_streams.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_extensions.dart';
 import 'service_registrations.dart' as registrations;
 import 'title.dart';
 import 'utils.dart';
 import 'version.dart';
+import 'vm_flags.dart';
 import 'vm_service_wrapper.dart';
 
 // Note: don't check this in enabled.
@@ -73,8 +74,9 @@ class ServiceConnectionManager {
       _registeredMethodsForService;
   final Map<String, List<String>> _registeredMethodsForService = {};
 
-  VmFlagManager get vmFlagManager => _vmFlagManager;
-  final _vmFlagManager = VmFlagManager();
+  final vmFlagManager = VmFlagManager();
+
+  final timelineStreamManager = TimelineStreamManager();
 
   final isolateManager = IsolateManager();
 
@@ -182,6 +184,7 @@ class ServiceConnectionManager {
     consoleService.vmServiceOpened(service);
     serviceExtensionManager.vmServiceOpened(service, connectedApp);
     await vmFlagManager.vmServiceOpened(service);
+    await timelineStreamManager.vmServiceOpened(service, connectedApp);
     // This needs to be called last in the above group of `vmServiceOpened`
     // calls.
     errorBadgeManager.vmServiceOpened(service);
@@ -334,6 +337,7 @@ class ServiceConnectionManager {
     generateDevToolsTitle();
 
     vmFlagManager.vmServiceClosed();
+    timelineStreamManager.vmServiceClosed();
     serviceExtensionManager.vmServiceClosed();
 
     serviceTrafficLogger?.dispose();
@@ -344,6 +348,10 @@ class ServiceConnectionManager {
 
     _connectedState.value = connectionState;
     _connectionClosedController.add(null);
+
+    _inspectorService?.onIsolateStopped();
+    _inspectorService?.dispose();
+    _inspectorService = null;
   }
 
   /// This can throw an [RPCError].
@@ -364,6 +372,21 @@ class ServiceConnectionManager {
     return await _callServiceOnMainIsolate(
       registrations.flutterVersion.service,
     );
+  }
+
+  Future<void> sendDwdsEvent({
+    @required String screen,
+    @required String action,
+  }) async {
+    if (!kIsWeb) return;
+    return await _callServiceExtensionOnMainIsolate(registrations.dwdsSendEvent,
+        args: {
+          'type': 'DevtoolsEvent',
+          'payload': {
+            'screen': screen,
+            'action': action,
+          },
+        });
   }
 
   Future<Response> _callServiceOnMainIsolate(String name) async {
@@ -1301,61 +1324,6 @@ class ServiceExtensionState {
         enabled,
         value,
       );
-}
-
-class VmFlagManager extends Disposer {
-  VmServiceWrapper get service => _service;
-  VmServiceWrapper _service;
-
-  ValueListenable get flags => _flags;
-  final _flags = ValueNotifier<FlagList>(null);
-
-  final _flagNotifiers = <String, ValueNotifier<Flag>>{};
-
-  ValueNotifier<Flag> flag(String name) {
-    return _flagNotifiers.containsKey(name) ? _flagNotifiers[name] : null;
-  }
-
-  Future<void> _initFlags() async {
-    final flagList = await service.getFlagList();
-    _flags.value = flagList;
-    if (flagList == null) return;
-
-    final flags = <String, Flag>{};
-    for (var flag in flagList.flags) {
-      flags[flag.name] = flag;
-      _flagNotifiers[flag.name] = ValueNotifier<Flag>(flag);
-    }
-  }
-
-  @visibleForTesting
-  void handleVmEvent(Event event) async {
-    if (event.kind == EventKind.kVMFlagUpdate) {
-      if (_flagNotifiers.containsKey(event.flag)) {
-        final currentFlag = _flagNotifiers[event.flag].value;
-        _flagNotifiers[event.flag].value = Flag.parse({
-          'name': currentFlag.name,
-          'comment': currentFlag.comment,
-          'modified': true,
-          'valueAsString': event.newValue,
-        });
-        _flags.value = await service.getFlagList();
-      }
-    }
-  }
-
-  Future<void> vmServiceOpened(VmServiceWrapper service) async {
-    cancel();
-    _service = service;
-    // Upon setting the vm service, get initial values for vm flags.
-    await _initFlags();
-
-    autoDispose(service.onVMEvent.listen(handleVmEvent));
-  }
-
-  void vmServiceClosed() {
-    _flags.value = null;
-  }
 }
 
 class VmServiceCapabilities {
