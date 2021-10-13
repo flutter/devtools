@@ -596,7 +596,7 @@ class DevToolsTooltip extends StatelessWidget {
     @required this.child,
     this.waitDuration = tooltipWait,
     this.preferBelow = false,
-    this.padding,
+    this.padding = const EdgeInsets.all(defaultSpacing),
     this.decoration,
     this.textStyle,
   }) : super(key: key);
@@ -1404,11 +1404,19 @@ class NotifierCheckbox extends StatelessWidget {
     Key key,
     @required this.notifier,
     this.onChanged,
+    this.enabled = true,
   }) : super(key: key);
 
+  /// The notifier this [NotifierCheckbox] is responsible for listening to and
+  /// updating.
   final ValueNotifier<bool> notifier;
 
+  /// The callback to be called on change in addition to the notifier changes
+  /// handled by this class.
   final void Function(bool newValue) onChanged;
+
+  /// Whether this checkbox should be enabled for interaction.
+  final bool enabled;
 
   void _updateValue(bool value) {
     if (notifier.value != value) {
@@ -1426,7 +1434,7 @@ class NotifierCheckbox extends StatelessWidget {
       builder: (context, value, _) {
         return Checkbox(
           value: value,
-          onChanged: _updateValue,
+          onChanged: enabled ? _updateValue : null,
         );
       },
     );
@@ -1441,6 +1449,7 @@ class CheckboxSetting extends StatelessWidget {
     this.description,
     this.tooltip,
     this.onChanged,
+    this.enabled = true,
   }) : super(key: key);
 
   final ValueListenable<bool> notifier;
@@ -1453,6 +1462,9 @@ class CheckboxSetting extends StatelessWidget {
 
   final void Function(bool newValue) onChanged;
 
+  /// Whether this checkbox setting should be enabled for interaction.
+  final bool enabled;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1461,7 +1473,7 @@ class CheckboxSetting extends StatelessWidget {
       overflow: TextOverflow.visible,
       text: TextSpan(
         text: title,
-        style: theme.regularTextStyle,
+        style: enabled ? theme.regularTextStyle : theme.subtleTextStyle,
       ),
     );
 
@@ -1488,6 +1500,7 @@ class CheckboxSetting extends StatelessWidget {
         NotifierCheckbox(
           notifier: notifier,
           onChanged: onChanged,
+          enabled: enabled,
         ),
         Flexible(
           child: textContent,

@@ -16,17 +16,19 @@ class ToggleableServiceExtensionDescription<T>
     @required Widget enabledIcon,
     Widget disabledIcon,
     @required String extension,
-    @required String description,
+    @required String title,
     @required T enabledValue,
     @required T disabledValue,
     @required String gaScreenName,
     @required String gaItem,
     @required String tooltip,
+    String description,
     String tooltipUrl,
     bool shouldCallOnAllIsolates = false,
+    this.inverted = false,
   }) : super(
           extension: extension,
-          description: description,
+          title: title,
           enabledIcon: enabledIcon,
           disabledIcon: disabledIcon ?? enabledIcon,
           values: [enabledValue, disabledValue],
@@ -34,6 +36,7 @@ class ToggleableServiceExtensionDescription<T>
           gaItem: gaItem,
           shouldCallOnAllIsolates: shouldCallOnAllIsolates,
           tooltip: tooltip,
+          description: description ?? title,
           tooltipUrl: tooltipUrl,
         );
 
@@ -44,6 +47,15 @@ class ToggleableServiceExtensionDescription<T>
   T get enabledValue => values[enabledValueIndex];
 
   T get disabledValue => values[disabledValueIndex];
+
+  /// Whether this service extension will be inverted where it is exposed in
+  /// DevTools.
+  ///
+  /// For example, when [inverted] is true, a service extension may have a value
+  /// of 'false' in the framework, but will have a perceived value of 'true' in
+  /// DevTools, where the language describing the service extension toggle will
+  /// also be inverted.
+  final bool inverted;
 }
 
 class ServiceExtensionDescription<T> {
@@ -52,11 +64,12 @@ class ServiceExtensionDescription<T> {
     disabledIcon,
     List<String> displayValues,
     @required this.extension,
-    @required this.description,
+    @required this.title,
     @required this.values,
     @required this.gaScreenName,
     @required this.gaItem,
     @required this.tooltip,
+    this.description,
     this.tooltipUrl,
     this.shouldCallOnAllIsolates = false,
   })  : displayValues =
@@ -65,7 +78,7 @@ class ServiceExtensionDescription<T> {
 
   final String extension;
 
-  final String description;
+  final String title;
 
   final Widget enabledIcon;
 
@@ -85,12 +98,14 @@ class ServiceExtensionDescription<T> {
 
   final String tooltip;
 
+  final String description;
+
   final String tooltipUrl;
 }
 
 final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugAllowBanner',
-  description: 'Debug Banner',
+  title: 'Debug Banner',
   enabledIcon: const AssetImageIcon(asset: 'icons/debug_banner@2x.png'),
   enabledValue: true,
   disabledValue: false,
@@ -101,7 +116,7 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
 
 final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.invertOversizedImages',
-  description: 'Highlight Oversized Images',
+  title: 'Highlight Oversized Images',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/images-white.png',
     darkModeAsset: 'icons/images-dgrey.png',
@@ -122,7 +137,7 @@ final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
 
 final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaint',
-  description: 'Show Guidelines',
+  title: 'Show Guidelines',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/guidelines-white.png',
     darkModeAsset: 'icons/guidelines-dgrey.png',
@@ -142,7 +157,7 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>._(
 
 final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.debugPaintBaselinesEnabled',
-  description: 'Show Baselines',
+  title: 'Show Baselines',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/baselines-white.png',
     darkModeAsset: 'icons/baselines-dgrey.png',
@@ -163,7 +178,7 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
 
 final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.showPerformanceOverlay',
-  description: 'Performance Overlay',
+  title: 'Performance Overlay',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/performance-white.png',
     darkModeAsset: 'icons/performance-dgrey.png',
@@ -183,7 +198,7 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
 
 final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.profileWidgetBuilds',
-  description: 'Track Widget Builds',
+  title: 'Track Widget Builds',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/trackwidget-white.png',
     darkModeAsset: 'icons/trackwidget-dgrey.png',
@@ -201,7 +216,7 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
 
 final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.repaintRainbow',
-  description: 'Highlight Repaints',
+  title: 'Highlight Repaints',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/repaints-white.png',
     darkModeAsset: 'icons/repaints-dgrey.png',
@@ -222,7 +237,7 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
 
 final slowAnimations = ToggleableServiceExtensionDescription<num>._(
   extension: 'ext.flutter.timeDilation',
-  description: 'Slow Animations',
+  title: 'Slow Animations',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/slow-white.png',
     darkModeAsset: 'icons/slow-dgrey.png',
@@ -242,7 +257,7 @@ final slowAnimations = ToggleableServiceExtensionDescription<num>._(
 
 final togglePlatformMode = ServiceExtensionDescription<String>(
   extension: 'ext.flutter.platformOverride',
-  description: 'Override target platform',
+  title: 'Override target platform',
   enabledIcon: const AssetImageIcon(asset: 'icons/phone@2x.png'),
   values: ['iOS', 'android', 'fuchsia', 'macOS', 'linux'],
   displayValues: [
@@ -257,9 +272,77 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
   tooltip: 'Override Target Platform',
 );
 
+final disableClipLayers = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.debugDisableClipLayers',
+  inverted: true,
+  title: 'Render Clip layers',
+  enabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/slow-white.png',
+    darkModeAsset: 'icons/slow-dgrey.png',
+  ),
+  disabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/slow-dgrey.png',
+    darkModeAsset: 'icons/slow-lgrey.png',
+  ),
+  enabledValue: true,
+  disabledValue: false,
+  gaScreenName: analytics_constants.performance,
+  gaItem: analytics_constants.disableOpacityLayersOption,
+  description: 'Render all clipping effects during paint (default)',
+  tooltip: '''Disable this option to check whether excessive use of clipping is
+affecting performance. If performance improves with this option
+disabled, try to reduce the use of clipping effects in your app.''',
+);
+
+final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.debugDisableOpacityLayers',
+  inverted: true,
+  title: 'Render Opacity layers',
+  enabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/slow-white.png',
+    darkModeAsset: 'icons/slow-dgrey.png',
+  ),
+  disabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/slow-dgrey.png',
+    darkModeAsset: 'icons/slow-lgrey.png',
+  ),
+  enabledValue: true,
+  disabledValue: false,
+  gaScreenName: analytics_constants.performance,
+  gaItem: analytics_constants.disableOpacityLayersOption,
+  description: 'Render all opacity effects during paint (default)',
+  tooltip: '''Disable this option to check whether excessive use of opacity
+effects is affecting performance. If performance improves with this
+option disabled, try to reduce the use of opacity effects in your app.''',
+);
+
+final disablePhysicalShapeLayers =
+    ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.debugDisablePhysicalShapeLayers',
+  inverted: true,
+  title: 'Render Physical Shape layers',
+  enabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/slow-white.png',
+    darkModeAsset: 'icons/slow-dgrey.png',
+  ),
+  disabledIcon: const ThemedImageIcon(
+    lightModeAsset: 'icons/slow-dgrey.png',
+    darkModeAsset: 'icons/slow-lgrey.png',
+  ),
+  enabledValue: true,
+  disabledValue: false,
+  gaScreenName: analytics_constants.performance,
+  gaItem: analytics_constants.disableOpacityLayersOption,
+  description: 'Render all physical modeling effects during paint (default)',
+  tooltip: '''Disable this option to check whether excessive use of physical 
+modeling effects is affecting performance (shadows, elevations, etc.). 
+If performance improves with this option disabled, try to reduce the 
+use of physical modeling effects in your app.''',
+);
+
 final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.dart.io.httpEnableTimelineLogging',
-  description: 'Whether HTTP timeline logging is enabled',
+  title: 'Whether HTTP timeline logging is enabled',
   enabledIcon: const Placeholder(),
   enabledValue: true,
   disabledValue: false,
@@ -271,7 +354,7 @@ final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
 
 final socketProfiling = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.dart.io.socketProfilingEnabled',
-  description: 'Whether socket profiling is enabled',
+  title: 'Whether socket profiling is enabled',
   enabledIcon: const Placeholder(),
   enabledValue: true,
   disabledValue: false,
@@ -288,7 +371,7 @@ final toggleOnDeviceWidgetInspector =
   // Technically this enables the on-device widget inspector but for older
   // versions of package:flutter it makes sense to describe this extension as
   // toggling widget select mode as it is the only way to toggle that mode.
-  description: 'Select Widget Mode',
+  title: 'Select Widget Mode',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/widget-select-white.png',
     darkModeAsset: 'icons/widget-select-dgrey.png',
@@ -308,7 +391,7 @@ final toggleOnDeviceWidgetInspector =
 /// normal interactions.
 final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.selectMode',
-  description: 'Select widget mode',
+  title: 'Select widget mode',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/widget-select-white.png',
     darkModeAsset: 'icons/widget-select-dgrey.png',
@@ -331,7 +414,7 @@ final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
 /// mode is triggered.
 final enableOnDeviceInspector = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.enable',
-  description: 'Enable on-device inspector',
+  title: 'Enable on-device inspector',
   enabledIcon: const AssetImageIcon(asset: 'icons/general/locate@2x.png'),
   enabledValue: true,
   disabledValue: false,
@@ -342,7 +425,7 @@ final enableOnDeviceInspector = ToggleableServiceExtensionDescription<bool>._(
 
 final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.structuredErrors',
-  description: 'Show structured errors',
+  title: 'Show structured errors',
   enabledIcon: const AssetImageIcon(asset: 'icons/perf/RedExcl@2x.png'),
   enabledValue: true,
   disabledValue: false,
@@ -353,7 +436,7 @@ final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
 
 final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>._(
   extension: 'ext.flutter.inspector.trackRebuildDirtyWidgets',
-  description: 'Show Rebuild Counts',
+  title: 'Show Rebuild Counts',
   enabledIcon: const AssetImageIcon(asset: 'icons/widget_tree@2x.png'),
   enabledValue: true,
   disabledValue: false,
@@ -383,6 +466,9 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   socketProfiling,
   invertOversizedImages,
   trackRebuildWidgets,
+  disableClipLayers,
+  disableOpacityLayers,
+  disablePhysicalShapeLayers,
 ];
 
 final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =

@@ -85,8 +85,8 @@ void main() async {
         // Enable the service extension via ServiceExtensionManager.
         await serviceManager.serviceExtensionManager.setServiceExtensionState(
           extensionName,
-          true,
-          true,
+          enabled: true,
+          value: true,
         );
 
         await _verifyExtensionStateOnTestDevice(
@@ -122,8 +122,8 @@ void main() async {
         // Enable the service extension via ServiceExtensionManager.
         await serviceManager.serviceExtensionManager.setServiceExtensionState(
           extensionName,
-          true,
-          'iOS',
+          enabled: true,
+          value: 'iOS',
         );
 
         await _verifyExtensionStateOnTestDevice(
@@ -157,8 +157,8 @@ void main() async {
           // Enable the service extension via ServiceExtensionManager.
           await serviceManager.serviceExtensionManager.setServiceExtensionState(
             extensionName,
-            true,
-            5.0,
+            enabled: true,
+            value: 5.0,
           );
 
           await _verifyExtensionStateOnTestDevice(
