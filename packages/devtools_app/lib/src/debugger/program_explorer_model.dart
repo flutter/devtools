@@ -118,9 +118,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
           function,
         );
         await controller.populateNode(node);
-        root.addChild(
-          node,
-        );
+        root.addChild(node);
       }
     }
 
@@ -132,9 +130,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
           field,
         );
         await controller.populateNode(node);
-        root.addChild(
-          node,
-        );
+        root.addChild(node);
       }
     }
 
