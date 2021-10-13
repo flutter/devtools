@@ -596,7 +596,7 @@ class DevToolsTooltip extends StatelessWidget {
     @required this.child,
     this.waitDuration = tooltipWait,
     this.preferBelow = false,
-    this.padding,
+    this.padding = const EdgeInsets.all(defaultSpacing),
     this.decoration,
     this.textStyle,
   }) : super(key: key);
@@ -1510,7 +1510,6 @@ class CheckboxSetting extends StatelessWidget {
     if (tooltip != null) {
       return DevToolsTooltip(
         tooltip: tooltip,
-        padding: const EdgeInsets.all(denseSpacing),
         child: content,
       );
     }
