@@ -112,9 +112,9 @@ elif [ "$BOT" = "test_ddc" ]; then
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
     if [ "$PLATFORM" = "vm" ]; then
-        flutter test test/*.dart test/{core,fixtures}/
+        flutter test --reporter expanded test/*.dart test/{core,fixtures}/
     elif [ "$PLATFORM" = "chrome" ]; then
-        flutter test --platform chrome test/*.dart test/{core,fixtures}/
+        flutter test --reporter expanded --platform chrome test/*.dart test/{core,fixtures}/
     else
         echo "unknown test platform"
         exit 1
@@ -130,9 +130,9 @@ elif [ "$BOT" = "test_dart2js" ]; then
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
     if [ "$PLATFORM" = "vm" ]; then
-        WEBDEV_RELEASE=true flutter test test/*.dart test/{core,fixtures}/
+        WEBDEV_RELEASE=true flutter test --reporter expanded test/*.dart test/{core,fixtures}/
     elif [ "$PLATFORM" = "chrome" ]; then
-        WEBDEV_RELEASE=true flutter test --platform chrome test/*.dart test/{core,fixtures}/
+        WEBDEV_RELEASE=true flutter test --reporter expanded --platform chrome test/*.dart test/{core,fixtures}/
     else
         echo "unknown test platform"
         exit 1
@@ -146,9 +146,9 @@ elif [ "$BOT" = "integration_ddc" ]; then
     flutter config --enable-web
 
     # We need to run integration tests with -j1 to run with no concurrency.
-    flutter test -j1 test/integration_tests/
+    flutter test -j1 --reporter expanded test/integration_tests/
 
-    flutter test -j1 test/integration/
+    flutter test -j1 --reporter expanded  test/integration/
 
 elif [ "$BOT" = "integration_dart2js" ]; then
 
@@ -156,7 +156,7 @@ elif [ "$BOT" = "integration_dart2js" ]; then
     flutter config --enable-web
 
     # We need to run integration tests with -j1 to run with no concurrency.
-    WEBDEV_RELEASE=true flutter test -j1 test/integration_tests/
+    WEBDEV_RELEASE=true flutter test -j1 --reporter expanded test/integration_tests/
 
 elif [ "$BOT" = "packages" ]; then
 
