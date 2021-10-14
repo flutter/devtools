@@ -556,6 +556,13 @@ typedef ClearSearchField = Function(
   bool force,
 });
 
+/// Provided by clients to specify where the autocomplete overlay should be
+/// positioned relative to the input text.
+typedef OverlayXPositionBuilder = double Function(
+  String inputValue,
+  TextStyle inputStyle,
+);
+
 mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   TextEditingController searchTextFieldController;
   FocusNode _searchFieldFocusNode;
@@ -601,9 +608,10 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   /// [searchFieldKey]
   /// [searchFieldEnabled]
   /// [onSelection]
-  /// [onHilightDropdown] use to override default highlghter.
+  /// [onHighlightDropdown] use to override default highlghter.
   /// [decoration]
-  /// [tracking] if true displays pop-up to the right of the TextField's caret.
+  /// [overlayXPositionBuilder] callback function to determine where the
+  /// autocomplete overlay should be positioned relative to the input text.
   /// [supportClearField] if true clear TextField content if pop-up not visible. If
   /// pop-up is visible close the pop-up on first ESCAPE.
   /// [keyEventsToPropogate] a set of key events that should be propogated to
@@ -617,7 +625,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     HighlightAutoComplete onHighlightDropdown,
     InputDecoration decoration,
     String label,
-    bool tracking = false,
+    OverlayXPositionBuilder overlayXPositionBuilder,
     bool supportClearField = false,
     Set<LogicalKeyboardKey> keyEventsToPropogate = const {},
     VoidCallback onClose,
@@ -633,7 +641,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
       searchTextFieldController: searchTextFieldController,
       decoration: decoration,
       label: label,
-      tracking: tracking,
+      overlayXPositionBuilder: overlayXPositionBuilder,
       onClose: onClose,
     );
 
@@ -718,6 +726,7 @@ class _SearchField extends StatelessWidget {
     this.tracking = false,
     this.decoration,
     this.onClose,
+    this.overlayXPositionBuilder,
   });
 
   final SearchControllerMixin controller;
@@ -731,30 +740,21 @@ class _SearchField extends StatelessWidget {
   final bool tracking;
   final InputDecoration decoration;
   final VoidCallback onClose;
+  final OverlayXPositionBuilder overlayXPositionBuilder;
 
   @override
   Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.subtitle1;
     final searchField = TextField(
       key: searchFieldKey,
       autofocus: true,
       enabled: searchFieldEnabled,
       focusNode: searchFieldFocusNode,
       controller: searchTextFieldController,
+      style: textStyle,
       onChanged: (value) {
-        if (tracking) {
-          // Use a TextPainter to calculate the width of the newly entered text.
-          // TODO(terry): The TextPainter's TextStyle is default (same as this
-          //              TextField) consider explicitly using a TextStyle of
-          //              this TextField if the TextField needs styling.
-          final painter = TextPainter(
-            textDirection: TextDirection.ltr,
-            text: TextSpan(text: value),
-          );
-          painter.layout();
-
-          // X coordinate of the pop-up, immediately to the right of the insertion
-          // point (caret).
-          controller.xPosition = painter.width;
+        if (overlayXPositionBuilder != null) {
+          controller.xPosition = overlayXPositionBuilder(value, textStyle);
         }
         controller.search = value;
       },

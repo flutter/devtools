@@ -13,6 +13,7 @@ import '../globals.dart';
 import '../notifications.dart';
 import '../theme.dart';
 import '../ui/search.dart';
+import '../ui/utils.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
 
@@ -135,7 +136,6 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
               shouldRequestFocus: false,
               supportClearField: true,
               onSelection: _onSelection,
-              tracking: true,
               decoration: const InputDecoration(
                 contentPadding: EdgeInsets.all(denseSpacing),
                 border: OutlineInputBorder(),
@@ -143,6 +143,21 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
                 enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
                 labelText: 'Eval',
               ),
+              overlayXPositionBuilder:
+                  (String inputValue, TextStyle inputStyle) {
+                // X-coordinate is equivalent to the width of the input text
+                // up to the last "." or the insertion point (cursor):
+                final indexOfDot = inputValue.lastIndexOf('.');
+                final textSegment = indexOfDot != -1
+                    ? inputValue.substring(0, indexOfDot + 1)
+                    : inputValue;
+                return calculateTextSpanWidth(
+                  TextSpan(
+                    text: textSegment,
+                    style: inputStyle,
+                  ),
+                );
+              },
             ),
           ),
         ),
