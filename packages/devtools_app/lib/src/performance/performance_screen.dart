@@ -321,6 +321,8 @@ class _SecondaryControls extends StatelessWidget {
             extensions: [
               performanceOverlay,
               profileWidgetBuilds,
+              profileRenderObjectPaints,
+              profileRenderObjectLayouts,
               // TODO(devoncarew): Enable this once we have a UI displaying the
               // values.
               //trackRebuildWidgets,
