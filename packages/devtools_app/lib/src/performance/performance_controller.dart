@@ -322,6 +322,9 @@ class PerformanceController extends DisposableController
       return;
     }
 
+    data.selectedFrame = frame;
+    _selectedFrameNotifier.value = frame;
+
     if (!offlineController.offlineMode.value) {
       final bool frameBeforeFirstWellFormedFrame =
           firstWellFormedFrameMicros != null &&
@@ -351,9 +354,6 @@ class PerformanceController extends DisposableController
 
       if (_currentFrameBeingSelected != frame) return;
     }
-
-    data.selectedFrame = frame;
-    _selectedFrameNotifier.value = frame;
 
     // We do not need to pull the CPU profile because we will pull the profile
     // for the entire frame. The order of selecting the timeline event and

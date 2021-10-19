@@ -16,6 +16,7 @@ import '../globals.dart';
 import '../notifications.dart';
 import '../scaffold.dart';
 import '../service_extensions.dart';
+import '../service_manager.dart';
 import '../service_registrations.dart';
 import '../theme.dart';
 import '../utils.dart';
@@ -108,29 +109,17 @@ class _ServiceExtensionButtonGroupState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     // TODO(jacobr): respect _available better by displaying whether individual
     // widgets are available (not currently supported by ToggleButtons).
     final available = _extensionStates.any((e) => e.isAvailable);
     return SizedBox(
       height: defaultButtonHeight,
-      child: ToggleButtons(
-        // TODO(kenz): ensure border radius is set correctly for single child
-        // groups once https://github.com/flutter/flutter/issues/73725 is fixed.
-        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-        color: theme.colorScheme.serviceExtensionButtonsTitle,
-        selectedColor: theme.colorScheme.serviceExtensionButtonsTitleSelected,
-        fillColor: theme.colorScheme.serviceExtensionButtonsFillSelected,
-        textStyle: theme.textTheme.bodyText1,
-        constraints: BoxConstraints(
-          minWidth: defaultButtonHeight,
-          minHeight: defaultButtonHeight,
-        ),
+      child: DevToolsToggleButtonGroup(
         children: <Widget>[
           for (var extensionState in _extensionStates)
             _buildExtension(extensionState)
         ],
-        isSelected: [for (var e in _extensionStates) e.isSelected],
+        selectedStates: [for (var e in _extensionStates) e.isSelected],
         onPressed: available ? _onPressed : null,
       ),
     );
@@ -462,6 +451,13 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
   void initState() {
     super.initState();
 
+    if (serviceManager.serviceExtensionManager
+        .isServiceExtensionAvailable(widget.service.extension)) {
+      final state = serviceManager.serviceExtensionManager
+          .getServiceExtensionState(widget.service.extension);
+      _setValueFromState(state.value);
+    }
+
     serviceManager.serviceExtensionManager
         .waitForServiceExtensionAvailable(widget.service.extension)
         .then((isServiceAvailable) {
@@ -469,16 +465,17 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
         extensionAvailable.value = true;
         final state = serviceManager.serviceExtensionManager
             .getServiceExtensionState(widget.service.extension);
-        final valueFromState = state.value.enabled;
-        value.value =
-            widget.service.inverted ? !valueFromState : valueFromState;
+        _setValueFromState(state.value);
         addAutoDisposeListener(state, () {
-          final valueFromState = state.value.enabled;
-          value.value =
-              widget.service.inverted ? !valueFromState : valueFromState;
+          _setValueFromState(state.value);
         });
       }
     });
+  }
+
+  void _setValueFromState(ServiceExtensionState state) {
+    final valueFromState = state.enabled;
+    value.value = widget.service.inverted ? !valueFromState : valueFromState;
   }
 
   @override
@@ -649,7 +646,7 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
 
   Future<HoverCardData> _buildCardData(BuildContext context) {
     final textColor =
-        Theme.of(context).colorScheme.serviceExtensionButtonsTitle;
+        Theme.of(context).colorScheme.toggleButtonsTitle;
 
     return Future.value(
       HoverCardData(

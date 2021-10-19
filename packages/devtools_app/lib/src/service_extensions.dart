@@ -212,7 +212,8 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.trackRebuilds,
-  tooltip: 'Adds an event to the timeline for every Widget built.',
+  description: 'Adds an event to the timeline for every Widget built.',
+  tooltip: '',
 );
 
 final profileRenderObjectPaints = ToggleableServiceExtensionDescription<bool>._(
@@ -224,7 +225,8 @@ final profileRenderObjectPaints = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.trackPaints,
-  tooltip: 'Adds an event to the timeline for every RenderObject paint.',
+  description: 'Adds an event to the timeline for every RenderObject painted.',
+  tooltip: '',
 );
 
 final profileRenderObjectLayouts =
@@ -237,7 +239,8 @@ final profileRenderObjectLayouts =
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.trackLayouts,
-  tooltip: 'Adds an event to the timeline for every RenderObject layout.',
+      description: 'Adds an event to the timeline for every RenderObject layout.',
+  tooltip: '',
 );
 
 final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(

@@ -163,7 +163,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               onPressed: _refreshInspector,
               icon: Icons.refresh,
               label: 'Refresh Tree',
-              color: Theme.of(context).colorScheme.serviceExtensionButtonsTitle,
+              color: Theme.of(context).colorScheme.toggleButtonsTitle,
               minScreenWidthForTextBeforeScaling:
                   unscaledIncludeRefreshTreeWidth,
             ),

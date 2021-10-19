@@ -39,14 +39,14 @@ class MaterialIconLabel extends StatelessWidget {
     this.iconData,
     this.imageIcon,
     this.color,
-    this.unscaleIncludeTextWidth,
+    this.minScreenWidthForTextBeforeScaling,
   }) : assert((iconData == null) != (imageIcon == null));
 
   final IconData iconData;
   final ThemedImageIcon imageIcon;
   final Color color;
   final String label;
-  final double unscaleIncludeTextWidth;
+  final double minScreenWidthForTextBeforeScaling;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +63,7 @@ class MaterialIconLabel extends StatelessWidget {
               )
             : imageIcon,
         // TODO(jacobr): animate showing and hiding the text.
-        if (includeText(context, unscaleIncludeTextWidth))
+        if (includeText(context, minScreenWidthForTextBeforeScaling))
           Padding(
             padding: const EdgeInsets.only(left: denseSpacing),
             child: Text(

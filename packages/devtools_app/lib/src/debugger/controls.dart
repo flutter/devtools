@@ -238,7 +238,7 @@ class DebuggerButton extends StatelessWidget {
         child: MaterialIconLabel(
           label: title,
           iconData: icon,
-          unscaleIncludeTextWidth: mediumDeviceWidth,
+          minScreenWidthForTextBeforeScaling: mediumDeviceWidth,
         ),
       ),
     );
