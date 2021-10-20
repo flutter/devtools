@@ -326,6 +326,29 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       ],
     );
     final theme = Theme.of(context);
+    final scaffold = Scaffold(
+      appBar: widget.embed ? null : _buildAppBar(scaffoldTitle),
+      body: (serviceManager.connectedAppInitialized &&
+              !offlineController.offlineMode.value &&
+              _currentScreen.showConsole(widget.embed))
+          ? Split(
+              axis: Axis.vertical,
+              children: [
+                content,
+                Padding(
+                  padding: DevToolsScaffold.horizontalPadding,
+                  child: const DebuggerConsole(),
+                ),
+              ],
+              splitters: [
+                DebuggerConsole.buildHeader(),
+              ],
+              initialFractions: const [0.8, 0.2],
+            )
+          : content,
+      bottomNavigationBar: widget.embed ? null : _buildStatusLine(),
+    );
+
     return Provider<BannerMessagesController>(
       create: (_) => BannerMessagesController(),
       child: Provider<ImportController>.value(
@@ -340,28 +363,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               // Using theme.primaryColor matches the default behavior of the
               // title used by [WidgetsApp].
               color: theme.primaryColor,
-              child: Scaffold(
-                appBar: widget.embed ? null : _buildAppBar(scaffoldTitle),
-                body: (serviceManager.connectedAppInitialized &&
-                        !offlineController.offlineMode.value &&
-                        _currentScreen.showConsole(widget.embed))
-                    ? Split(
-                        axis: Axis.vertical,
-                        children: [
-                          content,
-                          Padding(
-                            padding: DevToolsScaffold.horizontalPadding,
-                            child: const DebuggerConsole(),
-                          ),
-                        ],
-                        splitters: [
-                          DebuggerConsole.buildHeader(),
-                        ],
-                        initialFractions: const [0.8, 0.2],
-                      )
-                    : content,
-                bottomNavigationBar: widget.embed ? null : _buildStatusLine(),
-              ),
+              child: _maybeWrapInShortcuts(
+                  scaffold, _currentScreen.keyboardShortcuts(context)),
             ),
           );
         },
@@ -466,6 +469,22 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
             child: StatusLine(_currentScreen),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _maybeWrapInShortcuts(
+    Widget widget,
+    ShortcutsConfiguration keyboardShortcuts,
+  ) {
+    if (keyboardShortcuts.isEmpty()) {
+      return widget;
+    }
+    return Shortcuts(
+      shortcuts: keyboardShortcuts.shortcuts,
+      child: Actions(
+        actions: keyboardShortcuts.actions,
+        child: widget,
       ),
     );
   }
