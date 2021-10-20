@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -21,7 +22,9 @@ import '../screen.dart';
 import '../service_extensions.dart';
 import '../split.dart';
 import '../theme.dart';
+import '../ui/colors.dart';
 import '../ui/icons.dart';
+import '../ui/label.dart';
 import '../ui/service_extension_widgets.dart';
 import '../ui/vm_flag_widgets.dart';
 import '../version.dart';
@@ -236,8 +239,6 @@ class _PrimaryControls extends StatelessWidget {
     this.onClear,
   }) : super(key: key);
 
-  static const _primaryControlsMinIncludeTextWidth = 760.0;
-
   final PerformanceController controller;
 
   final bool processing;
@@ -251,21 +252,21 @@ class _PrimaryControls extends StatelessWidget {
       builder: (context, recording, _) {
         return Row(
           children: [
-            PauseButton(
-              minScreenWidthForTextBeforeScaling:
-                  _primaryControlsMinIncludeTextWidth,
+            OutlinedIconButton(
+              icon: Icons.pause,
+              tooltip: 'Pause frame recording',
               onPressed: recording ? _pauseFrameRecording : null,
             ),
             const SizedBox(width: denseSpacing),
-            ResumeButton(
-              minScreenWidthForTextBeforeScaling:
-                  _primaryControlsMinIncludeTextWidth,
+            OutlinedIconButton(
+              icon: Icons.play_arrow,
+              tooltip: 'Resume frame recording',
               onPressed: recording ? null : _resumeFrameRecording,
             ),
             const SizedBox(width: denseSpacing),
-            ClearButton(
-              minScreenWidthForTextBeforeScaling:
-                  _primaryControlsMinIncludeTextWidth,
+            OutlinedIconButton(
+              icon: Icons.block,
+              tooltip: 'Clear',
               onPressed: processing ? null : _clearPerformanceData,
             ),
           ],
@@ -299,7 +300,7 @@ class _SecondaryControls extends StatelessWidget {
     @required this.controller,
   }) : super(key: key);
 
-  static const _secondaryControlsMinIncludeTextWidth = 1125.0;
+  static const minScreenWidthForTextBeforeScaling = 1050.0;
 
   final PerformanceController controller;
 
@@ -308,40 +309,44 @@ class _SecondaryControls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        ProfileGranularityDropdown(
-          screenId: PerformanceScreen.id,
-          profileGranularityFlagNotifier:
-              controller.cpuProfilerController.profileGranularityFlagNotifier,
-        ),
-        const SizedBox(width: denseSpacing),
         if (serviceManager.connectedApp.isFlutterAppNow) ...[
           ServiceExtensionButtonGroup(
             minScreenWidthForTextBeforeScaling:
-                _secondaryControlsMinIncludeTextWidth,
+                minScreenWidthForTextBeforeScaling,
             extensions: [
               performanceOverlay,
-              profileWidgetBuilds,
               // TODO(devoncarew): Enable this once we have a UI displaying the
               // values.
               //trackRebuildWidgets,
             ],
           ),
           const SizedBox(width: denseSpacing),
+          const EnhanceTracingButton(),
+          const SizedBox(width: denseSpacing),
           IconLabelButton(
             icon: Icons.build,
             label: 'More debugging options',
+            color: Theme.of(context).colorScheme.toggleButtonsTitle,
             tooltip:
                 'Opens a list of options you can use to help debug performance',
+            minScreenWidthForTextBeforeScaling:
+                minScreenWidthForTextBeforeScaling,
             onPressed: () => _openDebuggingOptionsDialog(context),
           ),
         ],
-        const SizedBox(width: defaultSpacing),
-        ExportButton(
-          onPressed: () => _exportPerformanceData(context),
-          minScreenWidthForTextBeforeScaling:
-              _secondaryControlsMinIncludeTextWidth,
+        const SizedBox(width: denseSpacing),
+        ProfileGranularityDropdown(
+          screenId: PerformanceScreen.id,
+          profileGranularityFlagNotifier:
+              controller.cpuProfilerController.profileGranularityFlagNotifier,
         ),
         const SizedBox(width: defaultSpacing),
+        OutlinedIconButton(
+          icon: Icons.file_download,
+          tooltip: 'Export data',
+          onPressed: () => _exportPerformanceData(context),
+        ),
+        const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
           onPressed: () => _openSettingsDialog(context),
           label: 'Performance Settings',
@@ -371,6 +376,215 @@ class _SecondaryControls extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => PerformanceSettingsDialog(controller),
+    );
+  }
+}
+
+class EnhanceTracingButton extends StatefulWidget {
+  const EnhanceTracingButton({Key key}) : super(key: key);
+
+  @override
+  State<EnhanceTracingButton> createState() => _EnhanceTracingButtonState();
+}
+
+class _EnhanceTracingButtonState extends State<EnhanceTracingButton>
+    with AutoDisposeMixin {
+  static const _hoverYOffset = 10.0;
+
+  final _tracingEnhanced = ValueNotifier(false);
+
+  List<bool> _extensionStates;
+
+  OverlayEntry _enhanceTracingOverlay;
+
+  bool _enhanceTracingOverlayHovered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _extensionStates = List.filled(
+      EnhanceTracingOverlay.tracingServiceExtensions.length,
+      false,
+    );
+    for (int i = 0;
+        i < EnhanceTracingOverlay.tracingServiceExtensions.length;
+        i++) {
+      final extension = EnhanceTracingOverlay.tracingServiceExtensions[i];
+      final state = serviceManager.serviceExtensionManager
+          .getServiceExtensionState(extension.extension);
+      _extensionStates[i] = state.value.enabled;
+      // Listen for extension state changes so that we can update the value of
+      // [_tracingEnhanced].
+      addAutoDisposeListener(state, () {
+        _extensionStates[i] = state.value.enabled;
+        _tracingEnhanced.value = _isTracingEnhanced();
+      });
+    }
+    _tracingEnhanced.value = _isTracingEnhanced();
+  }
+
+  bool _isTracingEnhanced() {
+    for (final state in _extensionStates) {
+      if (state) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: _tracingEnhanced,
+      builder: (context, tracingEnhanced, _) {
+        return DevToolsToggleButtonGroup(
+          children: const [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: defaultSpacing),
+              child: MaterialIconLabel(
+                label: 'Enhance Tracing',
+                iconData: Icons.auto_awesome,
+                minScreenWidthForTextBeforeScaling:
+                    _SecondaryControls.minScreenWidthForTextBeforeScaling,
+              ),
+            ),
+          ],
+          selectedStates: [tracingEnhanced],
+          onPressed: (_) => _insertOverlay(context),
+        );
+      },
+    );
+  }
+
+  /// Inserts an overlay with service extension toggles that will enhance the
+  /// timeline trace.
+  ///
+  /// The overlay will appear directly below the button, and will be dismissed
+  /// if there is a click outside of the list of toggles.
+  void _insertOverlay(BuildContext context) {
+    final offset = _calculateOverlayPosition(
+      EnhanceTracingOverlay.width,
+      context,
+    );
+    _enhanceTracingOverlay?.remove();
+    Overlay.of(context).insert(
+      _enhanceTracingOverlay = OverlayEntry(
+        maintainState: true,
+        builder: (context) {
+          return GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: _maybeRemoveEnhanceTracingOverlay,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: offset.dx,
+                  top: offset.dy,
+                  child: MouseRegion(
+                    onEnter: _mouseEnter,
+                    onExit: _mouseExit,
+                    child: const EnhanceTracingOverlay(),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Offset _calculateOverlayPosition(double width, BuildContext context) {
+    final overlayBox =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+    final box = context.findRenderObject() as RenderBox;
+
+    final maxX = overlayBox.size.width - width;
+    final maxY = overlayBox.size.height;
+
+    final offset = box.localToGlobal(
+      box.size.bottomCenter(Offset.zero).translate(-width / 2, _hoverYOffset),
+      ancestor: overlayBox,
+    );
+
+    return Offset(
+      offset.dx.clamp(0.0, maxX),
+      offset.dy.clamp(0.0, maxY),
+    );
+  }
+
+  void _mouseEnter(PointerEnterEvent event) {
+    _enhanceTracingOverlayHovered = true;
+  }
+
+  void _mouseExit(PointerExitEvent event) {
+    _enhanceTracingOverlayHovered = false;
+  }
+
+  void _maybeRemoveEnhanceTracingOverlay() {
+    if (!_enhanceTracingOverlayHovered) {
+      _enhanceTracingOverlay?.remove();
+      _enhanceTracingOverlay = null;
+    }
+  }
+}
+
+class EnhanceTracingOverlay extends StatelessWidget {
+  const EnhanceTracingOverlay({Key key}) : super(key: key);
+
+  static final tracingServiceExtensions = [
+    profileWidgetBuilds,
+    profileRenderObjectLayouts,
+    profileRenderObjectPaints,
+  ];
+
+  static const width = 600.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      child: Container(
+        width: width,
+        padding: const EdgeInsets.all(defaultSpacing),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.defaultBackgroundColor,
+          border: Border.all(
+            color: theme.focusColor,
+            width: hoverCardBorderWidth,
+          ),
+          borderRadius: BorderRadius.circular(defaultBorderRadius),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            RichText(
+              text: TextSpan(
+                text: 'These options can be used to add more detail to the '
+                    'timeline, but be aware that ',
+                style: theme.subtleTextStyle,
+                children: [
+                  TextSpan(
+                    text: 'frame times may be negatively affected',
+                    style:
+                        theme.subtleTextStyle.copyWith(color: rasterJankColor),
+                  ),
+                  TextSpan(
+                    text: '.',
+                    style: theme.subtleTextStyle,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: denseSpacing),
+            // TODO(kenz): link to documentation for each of these features when
+            // docs are available.
+            for (final serviceExtension
+                in EnhanceTracingOverlay.tracingServiceExtensions)
+              ServiceExtensionCheckbox(service: serviceExtension),
+          ],
+        ),
+      ),
     );
   }
 }

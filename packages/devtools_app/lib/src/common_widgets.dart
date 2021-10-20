@@ -77,6 +77,24 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
   );
 }
 
+class OutlinedIconButton extends IconLabelButton {
+  const OutlinedIconButton({
+    @required IconData icon,
+    @required VoidCallback onPressed,
+    String tooltip,
+  }) : super(
+          icon: icon,
+          label: '',
+          tooltip: tooltip,
+          onPressed: onPressed,
+          // TODO(jacobr): consider a more conservative min-width. To minimize the
+          // impact on the existing UI and deal with the fact that some of the
+          // existing label names are fairly verbose, we set a width that will
+          // never be hit.
+          minScreenWidthForTextBeforeScaling: 20000,
+        );
+}
+
 /// A button with an icon and a label.
 ///
 /// * `onPressed`: The callback to be called upon pressing the button.
@@ -122,7 +140,7 @@ class IconLabelButton extends StatelessWidget {
       label: label,
       iconData: icon,
       imageIcon: imageIcon,
-      unscaleIncludeTextWidth: minScreenWidthForTextBeforeScaling,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
       color: color,
     );
     if (elevatedButton) {
@@ -275,7 +293,7 @@ class StopRecordingButton extends IconLabelButton {
         );
 }
 
-class SettingsOutlinedButton extends IconLabelButton {
+class SettingsOutlinedButton extends OutlinedIconButton {
   const SettingsOutlinedButton({
     @required VoidCallback onPressed,
     @required String label,
@@ -283,13 +301,7 @@ class SettingsOutlinedButton extends IconLabelButton {
   }) : super(
           onPressed: onPressed,
           icon: Icons.settings,
-          label: label,
           tooltip: tooltip,
-          // TODO(jacobr): consider a more conservative min-width. To minimize the
-          // impact on the existing UI and deal with the fact that some of the
-          // existing label names are fairly verbose, we set a width that will
-          // never be hit.
-          minScreenWidthForTextBeforeScaling: 20000,
         );
 }
 
@@ -737,36 +749,37 @@ BorderSide defaultBorderSide(ThemeData theme) {
   return BorderSide(color: theme.focusColor);
 }
 
-/// Toggle button for use as a child of a [ToggleButtons] widget.
-class ToggleButton extends StatelessWidget {
-  const ToggleButton({
-    @required this.icon,
-    @required this.text,
-    @required this.enabledTooltip,
-    @required this.disabledTooltip,
-    @required this.minScreenWidthForTextBeforeScaling,
-    @required this.selected,
-  });
+class DevToolsToggleButtonGroup extends StatelessWidget {
+  const DevToolsToggleButtonGroup({
+    Key key,
+    @required this.children,
+    @required this.selectedStates,
+    @required this.onPressed,
+  }) : super(key: key);
 
-  final IconData icon;
-  final String text;
-  final String enabledTooltip;
-  final String disabledTooltip;
-  final double minScreenWidthForTextBeforeScaling;
-  final bool selected;
+  final List<Widget> children;
+
+  final List<bool> selectedStates;
+
+  final void Function(int) onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsTooltip(
-      tooltip: selected ? enabledTooltip : disabledTooltip,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-        child: MaterialIconLabel(
-          label: text,
-          iconData: icon,
-          unscaleIncludeTextWidth: minScreenWidthForTextBeforeScaling,
-        ),
+    final theme = Theme.of(context);
+    return ToggleButtons(
+      borderRadius:
+          const BorderRadius.all(Radius.circular(defaultBorderRadius)),
+      color: theme.colorScheme.toggleButtonsTitle,
+      selectedColor: theme.colorScheme.toggleButtonsTitleSelected,
+      fillColor: theme.colorScheme.toggleButtonsFillSelected,
+      textStyle: theme.textTheme.bodyText1,
+      constraints: BoxConstraints(
+        minWidth: defaultButtonHeight,
+        minHeight: defaultButtonHeight,
       ),
+      children: children,
+      isSelected: selectedStates,
+      onPressed: onPressed,
     );
   }
 }
@@ -1509,7 +1522,7 @@ class CheckboxSetting extends StatelessWidget {
         ),
       ],
     );
-    if (tooltip != null) {
+    if (tooltip != null && tooltip.isNotEmpty) {
       return DevToolsTooltip(
         tooltip: tooltip,
         child: content,

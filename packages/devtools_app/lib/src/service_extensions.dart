@@ -7,6 +7,7 @@ library service_extensions;
 import 'package:flutter/material.dart';
 
 import 'analytics/constants.dart' as analytics_constants;
+import 'theme.dart';
 import 'ui/icons.dart';
 
 // Each service extension needs to be added to [_extensionDescriptions].
@@ -211,7 +212,35 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.trackRebuilds,
-  tooltip: 'Adds an event to the timeline for every Widget built.',
+  description: 'Adds an event to the timeline for every Widget built.',
+  tooltip: '',
+);
+
+final profileRenderObjectPaints = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.profileRenderObjectPaints',
+  title: 'Track Paints',
+  enabledIcon: Icon(Icons.format_paint, size: defaultIconSize),
+  disabledIcon: Icon(Icons.format_paint, size: defaultIconSize),
+  enabledValue: true,
+  disabledValue: false,
+  gaScreenName: analytics_constants.performance,
+  gaItem: analytics_constants.trackPaints,
+  description: 'Adds an event to the timeline for every RenderObject painted.',
+  tooltip: '',
+);
+
+final profileRenderObjectLayouts =
+    ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.profileRenderObjectLayouts',
+  title: 'Track Layouts',
+  enabledIcon: Icon(Icons.auto_awesome_mosaic, size: defaultIconSize),
+  disabledIcon: Icon(Icons.auto_awesome_mosaic, size: defaultIconSize),
+  enabledValue: true,
+  disabledValue: false,
+  gaScreenName: analytics_constants.performance,
+  gaItem: analytics_constants.trackLayouts,
+      description: 'Adds an event to the timeline for every RenderObject layout.',
+  tooltip: '',
 );
 
 final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
