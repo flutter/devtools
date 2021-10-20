@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/event_details.dart';
@@ -93,9 +92,14 @@ void main() {
         expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
             findsNothing);
         expect(find.byType(EventDetails), findsOneWidget);
-        expect(find.byType(PauseButton), findsOneWidget);
-        expect(find.byType(ResumeButton), findsOneWidget);
-        expect(find.byType(ClearButton), findsOneWidget);
+        expect(find.byIcon(Icons.pause), findsOneWidget);
+        expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+        expect(find.byIcon(Icons.block), findsOneWidget);
+        expect(find.text('Performance Overlay'), findsOneWidget);
+        expect(find.text('Enhance Tracing'), findsOneWidget);
+        expect(find.text('More debugging options'), findsOneWidget);
+        expect(find.byIcon(Icons.file_download), findsOneWidget);
+        expect(find.byIcon(Icons.settings), findsOneWidget);
 
         // Verify the state of the splitter.
         final splitFinder = find.byType(Split);
@@ -117,9 +121,44 @@ void main() {
         expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
             findsOneWidget);
         expect(find.byType(EventDetails), findsOneWidget);
-        expect(find.byType(PauseButton), findsOneWidget);
-        expect(find.byType(ResumeButton), findsOneWidget);
-        expect(find.byType(ClearButton), findsOneWidget);
+        expect(find.byIcon(Icons.pause), findsOneWidget);
+        expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+        expect(find.byIcon(Icons.block), findsOneWidget);
+        expect(find.text('Performance Overlay'), findsOneWidget);
+        expect(find.text('Enhance Tracing'), findsOneWidget);
+        expect(find.text('More debugging options'), findsOneWidget);
+        expect(find.byIcon(Icons.file_download), findsOneWidget);
+        expect(find.byIcon(Icons.settings), findsOneWidget);
+
+        // Verify the state of the splitter.
+        final splitFinder = find.byType(Split);
+        expect(splitFinder, findsOneWidget);
+        final Split splitter = tester.widget(splitFinder);
+        expect(splitter.initialFractions[0], equals(0.7));
+      });
+    });
+
+    testWidgetsWithWindowSize(
+        'builds initial content for non-flutter app', windowSize,
+        (WidgetTester tester) async {
+      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(true);
+      await tester.runAsync(() async {
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(find.byType(FlutterFramesChart), findsNothing);
+        expect(find.byType(TimelineFlameChart), findsOneWidget);
+        expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+            findsNothing);
+        expect(find.byType(EventDetails), findsOneWidget);
+        expect(find.byIcon(Icons.pause), findsOneWidget);
+        expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+        expect(find.byIcon(Icons.block), findsOneWidget);
+        expect(find.text('Performance Overlay'), findsNothing);
+        expect(find.text('Enhance Tracing'), findsNothing);
+        expect(find.text('More debugging options'), findsNothing);
+        expect(find.byIcon(Icons.file_download), findsOneWidget);
+        expect(find.byIcon(Icons.settings), findsOneWidget);
 
         // Verify the state of the splitter.
         final splitFinder = find.byType(Split);
@@ -135,14 +174,14 @@ void main() {
       await tester.runAsync(() async {
         await pumpPerformanceScreen(tester, runAsync: true);
         await tester.pumpAndSettle();
-        expect(find.byType(PauseButton), findsOneWidget);
-        expect(find.byType(ResumeButton), findsOneWidget);
+        expect(find.byIcon(Icons.pause), findsOneWidget);
+        expect(find.byIcon(Icons.play_arrow), findsOneWidget);
 
         expect(controller.recordingFrames.value, isTrue);
-        await tester.tap(find.byType(PauseButton));
+        await tester.tap(find.byIcon(Icons.pause));
         await tester.pumpAndSettle();
         expect(controller.recordingFrames.value, isFalse);
-        await tester.tap(find.byType(ResumeButton));
+        await tester.tap(find.byIcon(Icons.play_arrow));
         await tester.pumpAndSettle();
         expect(controller.recordingFrames.value, isTrue);
       });
@@ -160,7 +199,7 @@ void main() {
             findsNothing);
         expect(find.byType(EventDetails), findsOneWidget);
 
-        await tester.tap(find.byType(ClearButton));
+        await tester.tap(find.byIcon(Icons.block));
         await tester.pumpAndSettle();
         expect(controller.allTraceEvents, isEmpty);
         expect(find.byType(FlutterFramesChart), findsOneWidget);
