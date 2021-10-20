@@ -93,10 +93,27 @@ class ScriptLocation {
   String toString() => '${scriptRef.uri} $location';
 }
 
-/// A line, column, and an optional tokenPos.
 class SourcePosition {
-  SourcePosition({@required this.line, @required this.column, this.tokenPos});
+  const SourcePosition({
+    @required this.line,
+    @required this.column,
+    this.file,
+    this.tokenPos,
+  });
 
+  factory SourcePosition.calculatePosition(Script script, int tokenPos) {
+    if (script.tokenPosTable == null) {
+      return null;
+    }
+
+    return SourcePosition(
+      line: script.getLineNumberFromTokenPos(tokenPos),
+      column: script.getColumnNumberFromTokenPos(tokenPos),
+      tokenPos: tokenPos,
+    );
+  }
+
+  final String file;
   final int line;
   final int column;
   final int tokenPos;
