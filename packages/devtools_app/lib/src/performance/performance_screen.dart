@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +23,6 @@ import '../split.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/icons.dart';
-import '../ui/label.dart';
 import '../ui/service_extension_widgets.dart';
 import '../ui/vm_flag_widgets.dart';
 import '../version.dart';
@@ -323,16 +321,7 @@ class _SecondaryControls extends StatelessWidget {
           const SizedBox(width: denseSpacing),
           const EnhanceTracingButton(),
           const SizedBox(width: denseSpacing),
-          IconLabelButton(
-            icon: Icons.build,
-            label: 'More debugging options',
-            color: Theme.of(context).colorScheme.toggleButtonsTitle,
-            tooltip:
-                'Opens a list of options you can use to help debug performance',
-            minScreenWidthForTextBeforeScaling:
-                minScreenWidthForTextBeforeScaling,
-            onPressed: () => _openDebuggingOptionsDialog(context),
-          ),
+          const MoreDebuggingOptionsButton(),
         ],
         const SizedBox(width: denseSpacing),
         ProfileGranularityDropdown(
@@ -365,13 +354,6 @@ class _SecondaryControls extends StatelessWidget {
     Notifications.of(context).push(successfulExportMessage(exportedFile));
   }
 
-  void _openDebuggingOptionsDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => DebuggingOptionsDialog(),
-    );
-  }
-
   void _openSettingsDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -380,244 +362,70 @@ class _SecondaryControls extends StatelessWidget {
   }
 }
 
-class EnhanceTracingButton extends StatefulWidget {
+class EnhanceTracingButton extends StatelessWidget {
   const EnhanceTracingButton({Key key}) : super(key: key);
 
   @override
-  State<EnhanceTracingButton> createState() => _EnhanceTracingButtonState();
-}
-
-class _EnhanceTracingButtonState extends State<EnhanceTracingButton>
-    with AutoDisposeMixin {
-  static const _hoverYOffset = 10.0;
-
-  final _tracingEnhanced = ValueNotifier(false);
-
-  List<bool> _extensionStates;
-
-  OverlayEntry _enhanceTracingOverlay;
-
-  bool _enhanceTracingOverlayHovered = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _extensionStates = List.filled(
-      EnhanceTracingOverlay.tracingServiceExtensions.length,
-      false,
-    );
-    for (int i = 0;
-        i < EnhanceTracingOverlay.tracingServiceExtensions.length;
-        i++) {
-      final extension = EnhanceTracingOverlay.tracingServiceExtensions[i];
-      final state = serviceManager.serviceExtensionManager
-          .getServiceExtensionState(extension.extension);
-      _extensionStates[i] = state.value.enabled;
-      // Listen for extension state changes so that we can update the value of
-      // [_tracingEnhanced].
-      addAutoDisposeListener(state, () {
-        _extensionStates[i] = state.value.enabled;
-        _tracingEnhanced.value = _isTracingEnhanced();
-      });
-    }
-    _tracingEnhanced.value = _isTracingEnhanced();
-  }
-
-  bool _isTracingEnhanced() {
-    for (final state in _extensionStates) {
-      if (state) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: _tracingEnhanced,
-      builder: (context, tracingEnhanced, _) {
-        return DevToolsToggleButtonGroup(
-          children: const [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: defaultSpacing),
-              child: MaterialIconLabel(
-                label: 'Enhance Tracing',
-                iconData: Icons.auto_awesome,
-                minScreenWidthForTextBeforeScaling:
-                    _SecondaryControls.minScreenWidthForTextBeforeScaling,
-              ),
-            ),
-          ],
-          selectedStates: [tracingEnhanced],
-          onPressed: (_) => _insertOverlay(context),
-        );
-      },
-    );
-  }
-
-  /// Inserts an overlay with service extension toggles that will enhance the
-  /// timeline trace.
-  ///
-  /// The overlay will appear directly below the button, and will be dismissed
-  /// if there is a click outside of the list of toggles.
-  void _insertOverlay(BuildContext context) {
-    final offset = _calculateOverlayPosition(
-      EnhanceTracingOverlay.width,
-      context,
-    );
-    _enhanceTracingOverlay?.remove();
-    Overlay.of(context).insert(
-      _enhanceTracingOverlay = OverlayEntry(
-        maintainState: true,
-        builder: (context) {
-          return GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: _maybeRemoveEnhanceTracingOverlay,
-            child: Stack(
-              children: [
-                Positioned(
-                  left: offset.dx,
-                  top: offset.dy,
-                  child: MouseRegion(
-                    onEnter: _mouseEnter,
-                    onExit: _mouseExit,
-                    child: const EnhanceTracingOverlay(),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Offset _calculateOverlayPosition(double width, BuildContext context) {
-    final overlayBox =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
-    final box = context.findRenderObject() as RenderBox;
-
-    final maxX = overlayBox.size.width - width;
-    final maxY = overlayBox.size.height;
-
-    final offset = box.localToGlobal(
-      box.size.bottomCenter(Offset.zero).translate(-width / 2, _hoverYOffset),
-      ancestor: overlayBox,
-    );
-
-    return Offset(
-      offset.dx.clamp(0.0, maxX),
-      offset.dy.clamp(0.0, maxY),
-    );
-  }
-
-  void _mouseEnter(PointerEnterEvent event) {
-    _enhanceTracingOverlayHovered = true;
-  }
-
-  void _mouseExit(PointerExitEvent event) {
-    _enhanceTracingOverlayHovered = false;
-  }
-
-  void _maybeRemoveEnhanceTracingOverlay() {
-    if (!_enhanceTracingOverlayHovered) {
-      _enhanceTracingOverlay?.remove();
-      _enhanceTracingOverlay = null;
-    }
-  }
-}
-
-class EnhanceTracingOverlay extends StatelessWidget {
-  const EnhanceTracingOverlay({Key key}) : super(key: key);
-
-  static final tracingServiceExtensions = [
-    profileWidgetBuilds,
-    profileRenderObjectLayouts,
-    profileRenderObjectPaints,
-  ];
-
-  static const width = 600.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Material(
-      child: Container(
-        width: width,
-        padding: const EdgeInsets.all(defaultSpacing),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.defaultBackgroundColor,
-          border: Border.all(
-            color: theme.focusColor,
-            width: hoverCardBorderWidth,
-          ),
-          borderRadius: BorderRadius.circular(defaultBorderRadius),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            RichText(
-              text: TextSpan(
-                text: 'These options can be used to add more detail to the '
-                    'timeline, but be aware that ',
-                style: theme.subtleTextStyle,
-                children: [
-                  TextSpan(
-                    text: 'frame times may be negatively affected',
-                    style:
-                        theme.subtleTextStyle.copyWith(color: rasterJankColor),
-                  ),
-                  TextSpan(
-                    text: '.',
-                    style: theme.subtleTextStyle,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: denseSpacing),
-            // TODO(kenz): link to documentation for each of these features when
-            // docs are available.
-            for (final serviceExtension
-                in EnhanceTracingOverlay.tracingServiceExtensions)
-              ServiceExtensionCheckbox(service: serviceExtension),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class DebuggingOptionsDialog extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return DevToolsDialog(
-      title: dialogTitleText(theme, 'Debugging Options'),
-      includeDivider: false,
-      content: Container(
-        width: defaultDialogWidth,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'When toggling on/off a rendering layer, you will need '
-              'to reproduce activity in your app to see the effects of the '
-              'debugging option.',
-              style: theme.subtleTextStyle,
-            ),
-            const SizedBox(height: defaultSpacing),
-            ServiceExtensionCheckbox(service: disableClipLayers),
-            ServiceExtensionCheckbox(service: disableOpacityLayers),
-            ServiceExtensionCheckbox(service: disablePhysicalShapeLayers),
-          ],
-        ),
-      ),
-      actions: [
-        DialogCloseButton(),
+    final textStyle = Theme.of(context).subtleTextStyle;
+    return ServiceExtensionCheckboxGroupButton(
+      title: 'Enhance Tracing',
+      icon: Icons.auto_awesome,
+      tooltip: 'Add more detail to the Timeline trace',
+      minScreenWidthForTextBeforeScaling:
+          _SecondaryControls.minScreenWidthForTextBeforeScaling,
+      extensions: [
+        profileWidgetBuilds,
+        profileRenderObjectLayouts,
+        profileRenderObjectPaints,
       ],
+      overlayDescription: RichText(
+        text: TextSpan(
+          text: 'These options can be used to add more detail to the '
+              'timeline, but be aware that ',
+          style: textStyle,
+          children: [
+            TextSpan(
+              text: 'frame times may be negatively affected',
+              style: textStyle.copyWith(color: rasterJankColor),
+            ),
+            TextSpan(
+              text: '.',
+              style: textStyle,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MoreDebuggingOptionsButton extends StatelessWidget {
+  const MoreDebuggingOptionsButton({Key key}) : super(key: key);
+
+  static const _width = 625.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return ServiceExtensionCheckboxGroupButton(
+      title: 'More debugging options',
+      icon: Icons.build,
+      tooltip: 'Opens a list of options you can use to help debug performance',
+      minScreenWidthForTextBeforeScaling:
+          _SecondaryControls.minScreenWidthForTextBeforeScaling,
+      extensions: [
+        disableClipLayers,
+        disableOpacityLayers,
+        disablePhysicalShapeLayers,
+      ],
+      overlayDescription: Text(
+        'When toggling on/off a rendering layer, you will need '
+        'to reproduce activity in your app to see the effects of the '
+        'debugging option. All layers are rendered by default - disabling a '
+        'layer may help you identify expensive operations in your app.',
+        style: Theme.of(context).subtleTextStyle,
+      ),
+      overlayWidthBeforeScaling: _width,
     );
   }
 }
