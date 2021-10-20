@@ -67,6 +67,10 @@ abstract class Screen {
   /// Whether to show the console for this screen.
   bool showConsole(bool embed) => false;
 
+  // Which keyboard shortcuts shoud be enabled for this screen.
+  ShortcutsConfiguration keyboardShortcuts(BuildContext context) =>
+      ShortcutsConfiguration.empty;
+
   final String screenId;
 
   /// The user-facing name of the page.
@@ -302,5 +306,22 @@ class BadgePainter extends CustomPainter {
       return number != oldDelegate.number;
     }
     return true;
+  }
+}
+
+class ShortcutsConfiguration {
+  ShortcutsConfiguration({
+    @required this.shortcuts,
+    @required this.actions,
+  });
+
+  final Map<ShortcutActivator, Intent> shortcuts;
+  final Map<Type, Action<Intent>> actions;
+
+  static ShortcutsConfiguration empty =
+      ShortcutsConfiguration(shortcuts: {}, actions: {});
+
+  bool isEmpty() {
+    return shortcuts.isEmpty && actions.isEmpty;
   }
 }

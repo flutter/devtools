@@ -45,6 +45,24 @@ class DebuggerScreen extends Screen {
   bool showConsole(bool embed) => true;
 
   @override
+  ShortcutsConfiguration keyboardShortcuts(BuildContext context) {
+    final controller = Provider.of<DebuggerController>(context);
+    final shortcuts = <LogicalKeySet, Intent>{
+      goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
+      searchInFileKeySet: SearchInFileIntent(controller),
+      escapeKeySet: EscapeIntent(controller),
+      openFileKeySet: OpenFileIntent(controller),
+    };
+    final actions = <Type, Action<Intent>>{
+      GoToLineNumberIntent: GoToLineNumberAction(),
+      SearchInFileIntent: SearchInFileAction(),
+      EscapeIntent: EscapeAction(),
+      OpenFileIntent: OpenFileAction(),
+    };
+    return ShortcutsConfiguration(shortcuts: shortcuts, actions: actions);
+  }
+
+  @override
   String get docPageId => screenId;
 
   @override
@@ -165,37 +183,21 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       },
     );
 
-    return Shortcuts(
-      shortcuts: <LogicalKeySet, Intent>{
-        goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
-        searchInFileKeySet: SearchInFileIntent(controller),
-        escapeKeySet: EscapeIntent(controller),
-        openFileKeySet: OpenFileIntent(controller),
-      },
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          GoToLineNumberIntent: GoToLineNumberAction(),
-          SearchInFileIntent: SearchInFileAction(),
-          EscapeIntent: EscapeAction(),
-          OpenFileIntent: OpenFileAction(),
-        },
-        child: Split(
-          axis: Axis.horizontal,
-          initialFractions: const [0.25, 0.75],
+    return Split(
+      axis: Axis.horizontal,
+      initialFractions: const [0.25, 0.75],
+      children: [
+        OutlineDecoration(child: debuggerPanes()),
+        Column(
           children: [
-            OutlineDecoration(child: debuggerPanes()),
-            Column(
-              children: [
-                const DebuggingControls(),
-                const SizedBox(height: denseRowSpacing),
-                Expanded(
-                  child: codeArea,
-                ),
-              ],
+            const DebuggingControls(),
+            const SizedBox(height: denseRowSpacing),
+            Expanded(
+              child: codeArea,
             ),
           ],
         ),
-      ),
+      ],
     );
   }
 
