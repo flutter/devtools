@@ -170,42 +170,34 @@ class _CodeViewState extends State<CodeView>
     if (parsedScript == null) {
       return const CenteredCircularProgressIndicator();
     }
-    final FocusNode focusNode = Focus.of(context);
 
-    return MouseRegion(
-      onEnter: (_) {
-        if (!focusNode.hasFocus) {
-          focusNode.requestFocus();
-        }
+    return ValueListenableBuilder(
+      valueListenable: widget.controller.showFileOpener,
+      builder: (context, showFileOpener, _) {
+        return ValueListenableBuilder(
+          valueListenable: widget.controller.showSearchInFileField,
+          builder: (context, showSearch, _) {
+            return Stack(
+              children: [
+                scriptRef == null
+                    ? buildEmptyState(context)
+                    : buildCodeArea(context),
+                if (showFileOpener)
+                  Positioned(
+                    left: fileOpenerLeftPadding,
+                    child: buildFileSearchField(),
+                  ),
+                if (showSearch && scriptRef != null)
+                  Positioned(
+                    top: denseSpacing,
+                    right: searchFieldRightPadding,
+                    child: buildSearchInFileField(),
+                  ),
+              ],
+            );
+          },
+        );
       },
-      child: ValueListenableBuilder(
-        valueListenable: widget.controller.showFileOpener,
-        builder: (context, showFileOpener, _) {
-          return ValueListenableBuilder(
-            valueListenable: widget.controller.showSearchInFileField,
-            builder: (context, showSearch, _) {
-              return Stack(
-                children: [
-                  scriptRef == null
-                      ? buildEmptyState(context)
-                      : buildCodeArea(context),
-                  if (showFileOpener)
-                    Positioned(
-                      left: fileOpenerLeftPadding,
-                      child: buildFileSearchField(),
-                    ),
-                  if (showSearch && scriptRef != null)
-                    Positioned(
-                      top: denseSpacing,
-                      right: searchFieldRightPadding,
-                      child: buildSearchInFileField(),
-                    ),
-                ],
-              );
-            },
-          );
-        },
-      ),
     );
   }
 
