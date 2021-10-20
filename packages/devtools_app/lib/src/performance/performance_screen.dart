@@ -391,12 +391,6 @@ class _EnhanceTracingButtonState extends State<EnhanceTracingButton>
     with AutoDisposeMixin {
   static const _hoverYOffset = 10.0;
 
-  final _tracingServiceExtensions = [
-    profileWidgetBuilds,
-    profileRenderObjectLayouts,
-    profileRenderObjectPaints,
-  ];
-
   final _tracingEnhanced = ValueNotifier(false);
 
   List<bool> _extensionStates;
@@ -408,10 +402,14 @@ class _EnhanceTracingButtonState extends State<EnhanceTracingButton>
   @override
   void initState() {
     super.initState();
-    _extensionStates =
-        List.generate(_tracingServiceExtensions.length, (index) => false);
-    for (int i = 0; i < _tracingServiceExtensions.length; i++) {
-      final extension = _tracingServiceExtensions[i];
+    _extensionStates = List.filled(
+      EnhanceTracingOverlay.tracingServiceExtensions.length,
+      false,
+    );
+    for (int i = 0;
+        i < EnhanceTracingOverlay.tracingServiceExtensions.length;
+        i++) {
+      final extension = EnhanceTracingOverlay.tracingServiceExtensions[i];
       final state = serviceManager.serviceExtensionManager
           .getServiceExtensionState(extension.extension);
       _extensionStates[i] = state.value.enabled;
@@ -458,6 +456,11 @@ class _EnhanceTracingButtonState extends State<EnhanceTracingButton>
     );
   }
 
+  /// Inserts an overlay with service extension toggles that will enhance the
+  /// timeline trace.
+  ///
+  /// The overlay will appear directly below the button, and will be dismissed
+  /// if there is a click outside of the list of toggles.
   void _insertOverlay(BuildContext context) {
     final offset = _calculateOverlayPosition(
       EnhanceTracingOverlay.width,
@@ -528,6 +531,12 @@ class _EnhanceTracingButtonState extends State<EnhanceTracingButton>
 class EnhanceTracingOverlay extends StatelessWidget {
   const EnhanceTracingOverlay({Key key}) : super(key: key);
 
+  static final tracingServiceExtensions = [
+    profileWidgetBuilds,
+    profileRenderObjectLayouts,
+    profileRenderObjectPaints,
+  ];
+
   static const width = 600.0;
 
   @override
@@ -570,9 +579,9 @@ class EnhanceTracingOverlay extends StatelessWidget {
             const SizedBox(height: denseSpacing),
             // TODO(kenz): link to documentation for each of these features when
             // docs are available.
-            ServiceExtensionCheckbox(service: profileWidgetBuilds),
-            ServiceExtensionCheckbox(service: profileRenderObjectLayouts),
-            ServiceExtensionCheckbox(service: profileRenderObjectPaints),
+            for (final serviceExtension
+                in EnhanceTracingOverlay.tracingServiceExtensions)
+              ServiceExtensionCheckbox(service: serviceExtension),
           ],
         ),
       ),
