@@ -239,7 +239,7 @@ final profileRenderObjectLayouts =
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.trackLayouts,
-      description: 'Adds an event to the timeline for every RenderObject layout.',
+  description: 'Adds an event to the timeline for every RenderObject layout.',
   tooltip: '',
 );
 
@@ -317,7 +317,7 @@ final disableClipLayers = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.disableOpacityLayersOption,
-  description: 'Render all clipping effects during paint (default)',
+  description: 'Render all clipping effects during paint',
   tooltip: '''Disable this option to check whether excessive use of clipping is
 affecting performance. If performance improves with this option
 disabled, try to reduce the use of clipping effects in your app.''',
@@ -339,7 +339,7 @@ final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.disableOpacityLayersOption,
-  description: 'Render all opacity effects during paint (default)',
+  description: 'Render all opacity effects during paint',
   tooltip: '''Disable this option to check whether excessive use of opacity
 effects is affecting performance. If performance improves with this
 option disabled, try to reduce the use of opacity effects in your app.''',
@@ -362,7 +362,7 @@ final disablePhysicalShapeLayers =
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.disableOpacityLayersOption,
-  description: 'Render all physical modeling effects during paint (default)',
+  description: 'Render all physical modeling effects during paint',
   tooltip: '''Disable this option to check whether excessive use of physical 
 modeling effects is affecting performance (shadows, elevations, etc.). 
 If performance improves with this option disabled, try to reduce the 
