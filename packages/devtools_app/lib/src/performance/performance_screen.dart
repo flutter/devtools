@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +23,6 @@ import '../split.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/icons.dart';
-import '../ui/label.dart';
 import '../ui/service_extension_widgets.dart';
 import '../ui/vm_flag_widgets.dart';
 import '../version.dart';
@@ -370,7 +368,7 @@ class EnhanceTracingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textStyle = Theme.of(context).subtleTextStyle;
-    return ServiceExtensionCheckboxOverlayButton(
+    return ServiceExtensionCheckboxGroupButton(
       title: 'Enhance Tracing',
       icon: Icons.auto_awesome,
       tooltip: 'Add more detail to the Timeline trace',
@@ -409,7 +407,7 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ServiceExtensionCheckboxOverlayButton(
+    return ServiceExtensionCheckboxGroupButton(
       title: 'More debugging options',
       icon: Icons.build,
       tooltip: 'Opens a list of options you can use to help debug performance',
@@ -427,7 +425,7 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
         'layer may help you identify expensive operations in your app.',
         style: Theme.of(context).subtleTextStyle,
       ),
-      overlayWidth: _width,
+      overlayWidthBeforeScaling: _width,
     );
   }
 }

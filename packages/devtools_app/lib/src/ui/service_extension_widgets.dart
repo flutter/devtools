@@ -511,17 +511,18 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
 
 /// A button that, when pressed, will display an overlay directly below that has
 /// a list of service extension checkbox settings.
-class ServiceExtensionCheckboxOverlayButton extends StatefulWidget {
-  const ServiceExtensionCheckboxOverlayButton({
+class ServiceExtensionCheckboxGroupButton extends StatefulWidget {
+  ServiceExtensionCheckboxGroupButton({
     Key key,
     @required this.title,
     @required this.icon,
     @required this.extensions,
     @required this.overlayDescription,
     this.tooltip,
-    this.overlayWidth = _defaultWidth,
+    double overlayWidthBeforeScaling = _defaultWidth,
     this.minScreenWidthForTextBeforeScaling,
-  }) : super(key: key);
+  })  : overlayWidth = scaleByFontFactor(overlayWidthBeforeScaling),
+        super(key: key);
 
   /// Title for the button.
   final String title;
@@ -549,12 +550,12 @@ class ServiceExtensionCheckboxOverlayButton extends StatefulWidget {
   static const _defaultWidth = 600.0;
 
   @override
-  State<ServiceExtensionCheckboxOverlayButton> createState() =>
-      _ServiceExtensionCheckboxOverlayButtonState();
+  State<ServiceExtensionCheckboxGroupButton> createState() =>
+      _ServiceExtensionCheckboxGroupButtonState();
 }
 
-class _ServiceExtensionCheckboxOverlayButtonState
-    extends State<ServiceExtensionCheckboxOverlayButton> with AutoDisposeMixin {
+class _ServiceExtensionCheckboxGroupButtonState
+    extends State<ServiceExtensionCheckboxGroupButton> with AutoDisposeMixin {
   static const _hoverYOffset = 10.0;
 
   /// Whether this button should have the enabled state, which makes the
@@ -645,7 +646,7 @@ class _ServiceExtensionCheckboxOverlayButtonState
                   child: MouseRegion(
                     onEnter: _mouseEnter,
                     onExit: _mouseExit,
-                    child: _ServiceExtensionCheckboxOverlay(
+                    child: _ServiceExtensionCheckboxGroupOverlay(
                       description: widget.overlayDescription,
                       extensions: widget.extensions,
                       width: widget.overlayWidth,
@@ -695,8 +696,8 @@ class _ServiceExtensionCheckboxOverlayButtonState
   }
 }
 
-class _ServiceExtensionCheckboxOverlay extends StatelessWidget {
-  const _ServiceExtensionCheckboxOverlay({
+class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
+  const _ServiceExtensionCheckboxGroupOverlay({
     Key key,
     @required this.description,
     @required this.extensions,
