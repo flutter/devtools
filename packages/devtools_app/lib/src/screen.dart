@@ -67,9 +67,9 @@ abstract class Screen {
   /// Whether to show the console for this screen.
   bool showConsole(bool embed) => false;
 
-  // Which keyboard shortcuts shoud be enabled for this screen.
-  ShortcutsConfiguration keyboardShortcuts(BuildContext context) =>
-      ShortcutsConfiguration.empty;
+  /// Which keyboard shortcuts shoud be enabled for this screen.
+  ShortcutsConfiguration buildKeyboardShortcuts(BuildContext context) =>
+      ShortcutsConfiguration.empty();
 
   final String screenId;
 
@@ -310,18 +310,17 @@ class BadgePainter extends CustomPainter {
 }
 
 class ShortcutsConfiguration {
-  ShortcutsConfiguration({
+  const ShortcutsConfiguration({
     @required this.shortcuts,
     @required this.actions,
-  });
+  }) : assert(shortcuts.length == actions.length);
+
+  factory ShortcutsConfiguration.empty() {
+    return ShortcutsConfiguration(shortcuts: {}, actions: {});
+  }
 
   final Map<ShortcutActivator, Intent> shortcuts;
   final Map<Type, Action<Intent>> actions;
 
-  static ShortcutsConfiguration empty =
-      ShortcutsConfiguration(shortcuts: {}, actions: {});
-
-  bool isEmpty() {
-    return shortcuts.isEmpty && actions.isEmpty;
-  }
+  bool get isEmpty => shortcuts.isEmpty && actions.isEmpty;
 }

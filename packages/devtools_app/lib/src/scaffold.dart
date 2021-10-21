@@ -326,28 +326,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       ],
     );
     final theme = Theme.of(context);
-    final scaffold = Scaffold(
-      appBar: widget.embed ? null : _buildAppBar(scaffoldTitle),
-      body: (serviceManager.connectedAppInitialized &&
-              !offlineController.offlineMode.value &&
-              _currentScreen.showConsole(widget.embed))
-          ? Split(
-              axis: Axis.vertical,
-              children: [
-                content,
-                Padding(
-                  padding: DevToolsScaffold.horizontalPadding,
-                  child: const DebuggerConsole(),
-                ),
-              ],
-              splitters: [
-                DebuggerConsole.buildHeader(),
-              ],
-              initialFractions: const [0.8, 0.2],
-            )
-          : content,
-      bottomNavigationBar: widget.embed ? null : _buildStatusLine(),
-    );
 
     return Provider<BannerMessagesController>(
       create: (_) => BannerMessagesController(),
@@ -363,8 +341,33 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               // Using theme.primaryColor matches the default behavior of the
               // title used by [WidgetsApp].
               color: theme.primaryColor,
-              child: _maybeWrapInShortcuts(
-                  scaffold, _currentScreen.keyboardShortcuts(context)),
+              child: KeyboardShortcuts(
+                keyboardShortcuts: _currentScreen.buildKeyboardShortcuts(
+                  context,
+                ),
+                child: Scaffold(
+                  appBar: widget.embed ? null : _buildAppBar(scaffoldTitle),
+                  body: (serviceManager.connectedAppInitialized &&
+                          !offlineController.offlineMode.value &&
+                          _currentScreen.showConsole(widget.embed))
+                      ? Split(
+                          axis: Axis.vertical,
+                          children: [
+                            content,
+                            Padding(
+                              padding: DevToolsScaffold.horizontalPadding,
+                              child: const DebuggerConsole(),
+                            ),
+                          ],
+                          splitters: [
+                            DebuggerConsole.buildHeader(),
+                          ],
+                          initialFractions: const [0.8, 0.2],
+                        )
+                      : content,
+                  bottomNavigationBar: widget.embed ? null : _buildStatusLine(),
+                ),
+              ),
             ),
           );
         },
@@ -473,22 +476,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     );
   }
 
-  Widget _maybeWrapInShortcuts(
-    Widget widget,
-    ShortcutsConfiguration keyboardShortcuts,
-  ) {
-    if (keyboardShortcuts.isEmpty()) {
-      return widget;
-    }
-    return Shortcuts(
-      shortcuts: keyboardShortcuts.shortcuts,
-      child: Actions(
-        actions: keyboardShortcuts.actions,
-        child: widget,
-      ),
-    );
-  }
-
   /// Returns the width of the scaffold title, tabs and default icons.
   double _wideWidth(String title, DevToolsScaffold widget) {
     final textTheme = Theme.of(context).textTheme;
@@ -511,6 +498,31 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           BulletSpacer.width;
     }
     return wideWidth;
+  }
+}
+
+class KeyboardShortcuts extends StatelessWidget {
+  const KeyboardShortcuts({
+    @required this.keyboardShortcuts,
+    @required this.child,
+  })  : assert(keyboardShortcuts != null),
+        assert(child != null);
+
+  final ShortcutsConfiguration keyboardShortcuts;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (keyboardShortcuts.isEmpty) {
+      return child;
+    }
+    return Shortcuts(
+      shortcuts: keyboardShortcuts.shortcuts,
+      child: Actions(
+        actions: keyboardShortcuts.actions,
+        child: child,
+      ),
+    );
   }
 }
 

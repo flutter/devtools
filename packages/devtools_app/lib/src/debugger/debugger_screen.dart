@@ -45,7 +45,7 @@ class DebuggerScreen extends Screen {
   bool showConsole(bool embed) => true;
 
   @override
-  ShortcutsConfiguration keyboardShortcuts(BuildContext context) {
+  ShortcutsConfiguration buildKeyboardShortcuts(BuildContext context) {
     final controller = Provider.of<DebuggerController>(context);
     final shortcuts = <LogicalKeySet, Intent>{
       goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
