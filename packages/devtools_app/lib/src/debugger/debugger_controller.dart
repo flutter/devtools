@@ -131,6 +131,8 @@ class DebuggerController extends DisposableController
   Map<LibraryRef, Future<Set<String>>>
       libraryMemberAndImportsAutocompleteCache = {};
 
+  Map<ClassRef, Class> clazzCache = {};
+
   ProgramExplorerController get programExplorerController =>
       _programExplorerController;
   ProgramExplorerController _programExplorerController;
@@ -272,7 +274,7 @@ class DebuggerController extends DisposableController
   /// May return null.
   Future<Class> classFor(ClassRef classRef) async {
     try {
-      return await getObject(classRef);
+      return clazzCache[classRef] ??= await getObject(classRef);
     } catch (_) {}
     return null;
   }
@@ -840,6 +842,7 @@ class DebuggerController extends DisposableController
   }
 
   void _clearAutocompleteCaches() {
+    clazzCache.clear();
     libraryMemberAutocompleteCache.clear();
     libraryMemberAndImportsAutocompleteCache.clear();
   }
