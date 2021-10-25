@@ -145,8 +145,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   // TODO(kenz): remove the pub warning code after devtools version 2.8.0 ships
   void _maybeShowPubWarning() {
     if (!_pubWarningShown) {
-      serviceManager.onConnectionAvailable.listen((event) {
-        print('connection available');
+      serviceManager.onConnectionAvailable?.listen((event) {
         if (shouldShowPubWarning()) {
           final colorScheme = Theme.of(context).colorScheme;
           OverlayEntry _entry;

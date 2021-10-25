@@ -84,6 +84,8 @@ class FlutterVersion extends SemanticVersion {
       );
 
   static SemanticVersion _parseDartVersion(String versionString) {
+    if (versionString == null) return null;
+
     // Example Dart version string: "2.15.0 (build 2.15.0-178.1.beta)"
     const prefix = '(build ';
     final startIndex = versionString.indexOf(prefix) + prefix.length;
