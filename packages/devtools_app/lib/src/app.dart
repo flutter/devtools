@@ -47,6 +47,7 @@ import 'screen.dart';
 import 'snapshot_screen.dart';
 import 'theme.dart';
 import 'ui/service_extension_widgets.dart';
+import 'utils.dart';
 import 'vm_developer/vm_developer_tools_controller.dart';
 import 'vm_developer/vm_developer_tools_screen.dart';
 
@@ -59,6 +60,12 @@ const showVmDeveloperMode = false;
 
 /// Whether this DevTools build is external.
 bool isExternalBuild = true;
+
+/// Whether DevTools should warn users to stop launching DevTools from Pub.
+///
+/// This flag will be turned on for the final release of DevTools on pub, but
+/// should remain off at HEAD.
+const showPubWarning = false;
 
 /// Top-level configuration for the app.
 @immutable
@@ -487,7 +494,6 @@ class DevToolsAboutDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return DevToolsDialog(
       title: dialogTitleText(theme, 'About DevTools'),
       content: Column(
@@ -496,6 +502,10 @@ class DevToolsAboutDialog extends StatelessWidget {
         children: [
           _aboutDevTools(context),
           const SizedBox(height: defaultSpacing),
+          if (shouldShowPubWarning()) ...[
+            const PubWarningText(),
+            const SizedBox(height: defaultSpacing),
+          ],
           ...dialogSubHeader(theme, 'Feedback'),
           Wrap(
             children: [

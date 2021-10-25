@@ -367,7 +367,8 @@ class EnhanceTracingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).subtleTextStyle;
+    final theme = Theme.of(context);
+    final textStyle = theme.subtleTextStyle;
     return ServiceExtensionCheckboxGroupButton(
       title: 'Enhance Tracing',
       icon: Icons.auto_awesome,
@@ -387,7 +388,8 @@ class EnhanceTracingButton extends StatelessWidget {
           children: [
             TextSpan(
               text: 'frame times may be negatively affected',
-              style: textStyle.copyWith(color: rasterJankColor),
+              style:
+                  textStyle.copyWith(color: theme.colorScheme.errorTextColor),
             ),
             TextSpan(
               text: '.',

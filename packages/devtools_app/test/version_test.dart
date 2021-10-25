@@ -138,7 +138,7 @@ void main() {
       expect(
         version.compareTo(
             SemanticVersion(major: 1, minor: 1, patch: 1, preReleaseMajor: 1)),
-        equals(1),
+        equals(-1),
       );
       expect(
         version.compareTo(SemanticVersion(

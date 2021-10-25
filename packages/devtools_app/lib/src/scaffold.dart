@@ -137,6 +137,49 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         frameworkController.onShowPageId.listen(_showPageById);
 
     _initTitle();
+    _maybeShowPubWarning();
+  }
+
+  bool _pubWarningShown = false;
+
+  void _maybeShowPubWarning() {
+    if (!_pubWarningShown) {
+      serviceManager.onConnectionAvailable.listen((event) {
+        print('connection available');
+        if (shouldShowPubWarning()) {
+          final colorScheme = Theme.of(context).colorScheme;
+          OverlayEntry _entry;
+          Overlay.of(context).insert(
+            _entry = OverlayEntry(
+              maintainState: true,
+              builder: (context) {
+                return Material(
+                  color: colorScheme.overlayShadowColor,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(defaultSpacing),
+                      color: colorScheme.overlayBackgroundColor,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const PubWarningText(),
+                          const SizedBox(height: defaultSpacing),
+                          ElevatedButton(
+                            child: const Text('Got it'),
+                            onPressed: () => _entry.remove(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+          _pubWarningShown = true;
+        }
+      });
+    }
   }
 
   @override

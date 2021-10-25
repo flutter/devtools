@@ -16,33 +16,12 @@ class FlutterVersion extends SemanticVersion {
     @required this.engineRevision,
     @required this.dartSdkVersion,
   }) {
-    // Flutter versions are expected in the format '2.3.1-16.1-pre', so we split
-    // on the dash char to separate the main semantic version from the pre
-    // release version.
-    final splitOnDash = version.split('-');
-    assert(splitOnDash.length <= 2);
-
-    final semVersion = splitOnDash.first;
-    final _versionParts = semVersion.split('.');
-    major =
-        _versionParts.isNotEmpty ? int.tryParse(_versionParts.first) ?? 0 : 0;
-    minor = _versionParts.length > 1 ? int.tryParse(_versionParts[1]) ?? 0 : 0;
-    patch = _versionParts.length > 2 ? int.tryParse(_versionParts[2]) ?? 0 : 0;
-
-    if (splitOnDash.length == 2) {
-      final preRelease = splitOnDash.last;
-      final preReleaseParts = preRelease
-          .split('.')
-          .map((part) => RegExp(r'\d+').stringMatch(part) ?? '')
-          .toList()
-        ..removeWhere((part) => part.isEmpty);
-      preReleaseMajor = preReleaseParts.isNotEmpty
-          ? int.tryParse(preReleaseParts.first) ?? 0
-          : 0;
-      preReleaseMinor = preReleaseParts.length > 1
-          ? int.tryParse(preReleaseParts[1]) ?? 0
-          : 0;
-    }
+    final semVer = SemanticVersion.parse(version);
+    major = semVer.major;
+    minor = semVer.minor;
+    patch = semVer.patch;
+    preReleaseMajor = semVer.preReleaseMajor;
+    preReleaseMinor = semVer.preReleaseMinor;
   }
 
   factory FlutterVersion.parse(Map<String, dynamic> json) {
@@ -53,7 +32,7 @@ class FlutterVersion extends SemanticVersion {
       frameworkRevision: json['frameworkRevisionShort'],
       frameworkCommitDate: json['frameworkCommitDate'],
       engineRevision: json['engineRevisionShort'],
-      dartSdkVersion: json['dartSdkVersion'],
+      dartSdkVersion: _parseDartVersion(json['dartSdkVersion']),
     );
   }
 
@@ -69,7 +48,7 @@ class FlutterVersion extends SemanticVersion {
 
   final String engineRevision;
 
-  final String dartSdkVersion;
+  final SemanticVersion dartSdkVersion;
 
   String get flutterVersionSummary => [
         if (version != 'unknown') version,
@@ -103,6 +82,17 @@ class FlutterVersion extends SemanticVersion {
         engineRevision,
         dartSdkVersion,
       );
+
+  static SemanticVersion _parseDartVersion(String versionString) {
+    // Example Dart version string: "2.15.0 (build 2.15.0-178.1.beta)"
+    const prefix = '(build ';
+    final startIndex = versionString.indexOf(prefix) + prefix.length;
+    final rawVersion = versionString.substring(
+      startIndex,
+      versionString.length - 1,
+    );
+    return SemanticVersion.parse(rawVersion);
+  }
 }
 
 class SemanticVersion with CompareMixin {
@@ -113,6 +103,54 @@ class SemanticVersion with CompareMixin {
     this.preReleaseMajor,
     this.preReleaseMinor,
   });
+
+  factory SemanticVersion.parse(String versionString) {
+    // [versionString] is expected to be of the form for VM.version, Dart, and
+    // Flutter, respectively:
+    // 2.15.0-233.0.dev (dev) (Mon Oct 18 14:06:26 2021 -0700) on "ios_x64"
+    // 2.15.0-178.1.beta
+    // 2.6.0-12.0.pre.443
+    //
+    // So split on the spaces to the version, and then on the dash char to
+    // separate the main semantic version from the pre release version.
+    final splitOnSpaces = versionString.split(' ');
+    final version = splitOnSpaces.first;
+    final splitOnDash = version.split('-');
+    assert(splitOnDash.length <= 2, 'version: $version');
+
+    final semVersion = splitOnDash.first;
+    final _versionParts = semVersion.split('.');
+    final major =
+        _versionParts.isNotEmpty ? int.tryParse(_versionParts.first) ?? 0 : 0;
+    final minor =
+        _versionParts.length > 1 ? int.tryParse(_versionParts[1]) ?? 0 : 0;
+    final patch =
+        _versionParts.length > 2 ? int.tryParse(_versionParts[2]) ?? 0 : 0;
+
+    int preReleaseMajor;
+    int preReleaseMinor;
+    if (splitOnDash.length == 2) {
+      final preRelease = splitOnDash.last;
+      final preReleaseParts = preRelease
+          .split('.')
+          .map((part) => RegExp(r'\d+').stringMatch(part) ?? '')
+          .toList()
+        ..removeWhere((part) => part.isEmpty);
+      preReleaseMajor = preReleaseParts.isNotEmpty
+          ? int.tryParse(preReleaseParts.first) ?? 0
+          : 0;
+      preReleaseMinor = preReleaseParts.length > 1
+          ? int.tryParse(preReleaseParts[1]) ?? 0
+          : 0;
+    }
+    return SemanticVersion(
+      major: major,
+      minor: minor,
+      patch: patch,
+      preReleaseMajor: preReleaseMajor,
+      preReleaseMinor: preReleaseMinor,
+    );
+  }
 
   int major;
 
@@ -145,7 +183,7 @@ class SemanticVersion with CompareMixin {
     }
     if (major == other.major && minor == other.minor && patch == other.patch) {
       if (isPreRelease != other.isPreRelease) {
-        return isPreRelease ? 1 : -1;
+        return isPreRelease ? -1 : 1;
       }
       if (preReleaseMajor > other.preReleaseMajor ||
           (preReleaseMajor == other.preReleaseMajor &&
