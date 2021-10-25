@@ -8,6 +8,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'globals.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 import 'ui/icons.dart';
@@ -1529,5 +1530,42 @@ class CheckboxSetting extends StatelessWidget {
       );
     }
     return content;
+  }
+}
+
+class PubWarningText extends StatelessWidget {
+  const PubWarningText({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isFlutterApp = serviceManager.connectedApp.isFlutterAppNow;
+    final sdkName = isFlutterApp ? 'Flutter' : 'Dart';
+    final minSdkVersion = isFlutterApp ? '2.8.0' : '2.15.0';
+    return SelectableText.rich(
+      TextSpan(
+        text: 'Warning: you should no longer be launching DevTools from'
+            ' pub.\n\n',
+        style: theme.subtleTextStyle
+            .copyWith(color: theme.colorScheme.errorTextColor),
+        children: [
+          TextSpan(
+            text: 'DevTools version 2.8.0 will be the last version to '
+                'be shipped on pub. As of $sdkName\nversion >= '
+                '$minSdkVersion, DevTools should be launched by running '
+                'the ',
+            style: theme.subtleTextStyle,
+          ),
+          TextSpan(
+            text: '`dart devtools`',
+            style: theme.subtleFixedFontStyle,
+          ),
+          TextSpan(
+            text: '\ncommand.',
+            style: theme.subtleTextStyle,
+          ),
+        ],
+      ),
+    );
   }
 }

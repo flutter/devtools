@@ -150,8 +150,7 @@ class _InitializerState extends State<Initializer>
     final theme = Theme.of(context);
     currentDisconnectedOverlay = OverlayEntry(
       builder: (context) => Container(
-        // TODO(dantup): Change this to a theme colour and ensure it works in both dart/light themes
-        color: const Color.fromRGBO(128, 128, 128, 0.5),
+        color: theme.colorScheme.overlayShadowColor,
         child: Center(
           child: Column(
             children: [

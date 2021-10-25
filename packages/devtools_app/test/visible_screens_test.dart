@@ -167,7 +167,15 @@ void main() {
         (WidgetTester tester) async {
       setupMockValues(
         flutter: true,
-        flutterVersion: SemanticVersion(major: 2, minor: 3),
+        flutterVersion: SemanticVersion(
+          major: 2,
+          minor: 3,
+          // Specifying patch makes the version number more readable.
+          // ignore: avoid_redundant_argument_values
+          patch: 0,
+          preReleaseMajor: 15,
+          preReleaseMinor: 0,
+        ),
       );
 
       expect(

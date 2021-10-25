@@ -234,6 +234,13 @@ extension DevToolsColorScheme on ColorScheme {
   Color get contrastForeground =>
       isLight ? Colors.black : _contrastForegroundWhite;
 
+  Color get overlayShadowColor => const Color.fromRGBO(0, 0, 0, 0.5);
+
+  Color get overlayBackgroundColor =>
+      isLight ? Colors.white : const Color(0xFF424242);
+
+  Color get errorTextColor => const Color(0xFFC3595A);
+
   Color get toggleButtonsTitle =>
       isLight ? const Color(0xFF464646) : const Color(0xFFAEAEB1);
 

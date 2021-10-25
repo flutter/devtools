@@ -16,9 +16,11 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'app.dart';
 import 'config_specific/logger/logger.dart' as logger;
 import 'globals.dart';
 import 'notifications.dart';
+import 'version.dart';
 
 bool isPrivate(String member) => member.startsWith('_');
 
@@ -1425,3 +1427,12 @@ const connectToNewAppText = 'Connect to a new app';
 /// Exception thrown when a request to process data has been cancelled in
 /// favor of a new request.
 class ProcessCancelledException implements Exception {}
+
+bool shouldShowPubWarning() =>
+    showPubWarning &&
+    (serviceManager.connectedApp?.isFlutterAppNow != null &&
+            serviceManager.connectedApp.flutterVersionNow >=
+                SemanticVersion(major: 2, minor: 8) ||
+        (serviceManager.vm != null &&
+            SemanticVersion.parse(serviceManager.vm.version) >=
+                SemanticVersion(major: 2, minor: 15)));
