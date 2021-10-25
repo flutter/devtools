@@ -473,7 +473,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   /// activeWord  is "cl"
   /// leftSide    is "controller."
   /// rightSide   is " + 1000 + myChart.tra"
-  static EditingParts activeEdtingParts(
+  static EditingParts activeEditingParts(
     String editing,
     TextSelection selection, {
     bool handleFields = false,

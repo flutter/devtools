@@ -175,6 +175,8 @@ class DebuggerController extends DisposableController
 
   final _showFileOpener = ValueNotifier<bool>(false);
 
+  final _clazzCache = <ClassRef, Class>{};
+
   /// Jump to the given ScriptRef and optional SourcePosition.
   void showScriptLocation(
     ScriptLocation scriptLocation, {
@@ -272,7 +274,7 @@ class DebuggerController extends DisposableController
   /// May return null.
   Future<Class> classFor(ClassRef classRef) async {
     try {
-      return await getObject(classRef);
+      return _clazzCache[classRef] ??= await getObject(classRef);
     } catch (_) {}
     return null;
   }
@@ -840,6 +842,7 @@ class DebuggerController extends DisposableController
   }
 
   void _clearAutocompleteCaches() {
+    _clazzCache.clear();
     libraryMemberAutocompleteCache.clear();
     libraryMemberAndImportsAutocompleteCache.clear();
   }
