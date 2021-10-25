@@ -12,6 +12,7 @@ import '../../../theme.dart';
 import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
+import '../../inspector_service.dart';
 import '../ui/arrow.dart';
 import '../ui/free_space.dart';
 import '../ui/layout_explorer_widget.dart';
@@ -208,7 +209,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               changedProperties =
                   properties.copyWith(crossAxisAlignment: newSelection);
             }
-            final service = properties.node.inspectorService;
+            final service = properties.node.inspectorService as ObjectGroup;
             final valueRef = properties.node.valueRef;
             markAsDirty();
             await service.invokeSetFlexProperties(
@@ -541,7 +542,7 @@ class FlexChildVisualizer extends StatelessWidget {
 
   void onChangeFlexFactor(int newFlexFactor) async {
     final node = properties.node;
-    final inspectorService = node.inspectorService;
+    final inspectorService = node.inspectorService as ObjectGroup;
     state.markAsDirty();
     await inspectorService.invokeSetFlexFactor(
       node.valueRef,
@@ -551,7 +552,7 @@ class FlexChildVisualizer extends StatelessWidget {
 
   void onChangeFlexFit(FlexFit newFlexFit) async {
     final node = properties.node;
-    final inspectorService = node.inspectorService;
+    final inspectorService = node.inspectorService as ObjectGroup;
     state.markAsDirty();
     await inspectorService.invokeSetFlexFit(
       node.valueRef,
