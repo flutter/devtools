@@ -77,8 +77,16 @@ abstract class InspectorServiceBase extends DisposableController
 
   static int nextGroupId = 0;
 
+  // The class name of the inspector that [InspectorServiceBase] is connecting
+  // to, for use when running evals. For example, this should be set to
+  // "WidgetInspectorService" when connecting to the Flutter inspector.
   final String clientInspectorName;
+
+  // The prefix added when invoking all registered inspector service extensions.
+  // For example, this should be set to "ext.flutter.inspector" when invoking
+  // service extensions registered by the Flutter inspector.
   final String serviceExtensionPrefix;
+
   final Set<InspectorServiceClient> clients;
   final EvalOnDartLibrary inspectorLibrary;
   IsolateRef _lastMainIsolate;
