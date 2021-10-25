@@ -174,8 +174,8 @@ class SemanticVersion with CompareMixin {
     if (major == other.major &&
         minor == other.minor &&
         patch == other.patch &&
-        preReleaseMajor == other.preReleaseMajor &&
-        preReleaseMinor == other.preReleaseMinor) {
+        (preReleaseMajor ?? 0) == (other.preReleaseMajor ?? 0) &&
+        (preReleaseMinor ?? 0) == (other.preReleaseMinor ?? 0)) {
       return 0;
     }
     if (major > other.major ||

@@ -121,11 +121,21 @@ void main() {
         version.compareTo(SemanticVersion(major: 1, minor: 1, patch: 1)),
         equals(0),
       );
+      expect(
+        version.compareTo(SemanticVersion(
+          major: 1,
+          minor: 1,
+          patch: 1,
+          preReleaseMajor: 0,
+          preReleaseMinor: 0,
+        )),
+        equals(0),
+      );
 
       expect(
         version.compareTo(
             SemanticVersion(major: 1, minor: 1, patch: 1, preReleaseMajor: 1)),
-        equals(-1),
+        equals(1),
       );
 
       version = SemanticVersion(
@@ -138,7 +148,7 @@ void main() {
       expect(
         version.compareTo(
             SemanticVersion(major: 1, minor: 1, patch: 1, preReleaseMajor: 1)),
-        equals(-1),
+        equals(1),
       );
       expect(
         version.compareTo(SemanticVersion(
