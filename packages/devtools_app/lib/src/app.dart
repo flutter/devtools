@@ -61,6 +61,7 @@ const showVmDeveloperMode = false;
 /// Whether this DevTools build is external.
 bool isExternalBuild = true;
 
+// TODO(kenz): remove the pub warning code after devtools version 2.8.0 ships
 /// Whether DevTools should warn users to stop launching DevTools from Pub.
 ///
 /// This flag will be turned on for the final release of DevTools on pub, but

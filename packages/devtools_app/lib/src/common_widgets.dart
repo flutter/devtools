@@ -1541,7 +1541,7 @@ class PubWarningText extends StatelessWidget {
     final theme = Theme.of(context);
     final isFlutterApp = serviceManager.connectedApp.isFlutterAppNow;
     final sdkName = isFlutterApp ? 'Flutter' : 'Dart';
-    final sdkVersion = isFlutterApp ? '2.8.0' : '2.15.0';
+    final minSdkVersion = isFlutterApp ? '2.8.0' : '2.15.0';
     return SelectableText.rich(
       TextSpan(
         text: 'Warning: you should no longer be launching DevTools from'
@@ -1552,7 +1552,7 @@ class PubWarningText extends StatelessWidget {
           TextSpan(
             text: 'DevTools version 2.8.0 will be the last version to '
                 'be shipped on pub. As of $sdkName\nversion >= '
-                '$sdkVersion, DevTools should be launched by running '
+                '$minSdkVersion, DevTools should be launched by running '
                 'the ',
             style: theme.subtleTextStyle,
           ),

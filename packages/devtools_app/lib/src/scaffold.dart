@@ -142,6 +142,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   bool _pubWarningShown = false;
 
+  // TODO(kenz): remove the pub warning code after devtools version 2.8.0 ships
   void _maybeShowPubWarning() {
     if (!_pubWarningShown) {
       serviceManager.onConnectionAvailable.listen((event) {
