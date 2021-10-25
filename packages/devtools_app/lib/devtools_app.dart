@@ -12,6 +12,7 @@ export 'src/common_widgets.dart';
 export 'src/connected_app.dart';
 export 'src/console_service.dart';
 export 'src/debugger/debugger_controller.dart';
+export 'src/debugger/program_explorer_controller.dart';
 export 'src/debugger/span_parser.dart';
 export 'src/debugger/syntax_highlighter.dart';
 export 'src/error_badge_manager.dart';

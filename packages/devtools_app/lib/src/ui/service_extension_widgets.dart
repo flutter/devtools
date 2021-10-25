@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../analytics/analytics.dart' as ga;
@@ -16,6 +17,7 @@ import '../globals.dart';
 import '../notifications.dart';
 import '../scaffold.dart';
 import '../service_extensions.dart';
+import '../service_manager.dart';
 import '../service_registrations.dart';
 import '../theme.dart';
 import '../utils.dart';
@@ -108,29 +110,17 @@ class _ServiceExtensionButtonGroupState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     // TODO(jacobr): respect _available better by displaying whether individual
     // widgets are available (not currently supported by ToggleButtons).
     final available = _extensionStates.any((e) => e.isAvailable);
     return SizedBox(
       height: defaultButtonHeight,
-      child: ToggleButtons(
-        // TODO(kenz): ensure border radius is set correctly for single child
-        // groups once https://github.com/flutter/flutter/issues/73725 is fixed.
-        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-        color: theme.colorScheme.serviceExtensionButtonsTitle,
-        selectedColor: theme.colorScheme.serviceExtensionButtonsTitleSelected,
-        fillColor: theme.colorScheme.serviceExtensionButtonsFillSelected,
-        textStyle: theme.textTheme.bodyText1,
-        constraints: BoxConstraints(
-          minWidth: defaultButtonHeight,
-          minHeight: defaultButtonHeight,
-        ),
+      child: DevToolsToggleButtonGroup(
         children: <Widget>[
           for (var extensionState in _extensionStates)
             _buildExtension(extensionState)
         ],
-        isSelected: [for (var e in _extensionStates) e.isSelected],
+        selectedStates: [for (var e in _extensionStates) e.isSelected],
         onPressed: available ? _onPressed : null,
       ),
     );
@@ -462,6 +452,13 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
   void initState() {
     super.initState();
 
+    if (serviceManager.serviceExtensionManager
+        .isServiceExtensionAvailable(widget.service.extension)) {
+      final state = serviceManager.serviceExtensionManager
+          .getServiceExtensionState(widget.service.extension);
+      _setValueFromState(state.value);
+    }
+
     serviceManager.serviceExtensionManager
         .waitForServiceExtensionAvailable(widget.service.extension)
         .then((isServiceAvailable) {
@@ -469,16 +466,17 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
         extensionAvailable.value = true;
         final state = serviceManager.serviceExtensionManager
             .getServiceExtensionState(widget.service.extension);
-        final valueFromState = state.value.enabled;
-        value.value =
-            widget.service.inverted ? !valueFromState : valueFromState;
+        _setValueFromState(state.value);
         addAutoDisposeListener(state, () {
-          final valueFromState = state.value.enabled;
-          value.value =
-              widget.service.inverted ? !valueFromState : valueFromState;
+          _setValueFromState(state.value);
         });
       }
     });
+  }
+
+  void _setValueFromState(ServiceExtensionState state) {
+    final valueFromState = state.enabled;
+    value.value = widget.service.inverted ? !valueFromState : valueFromState;
   }
 
   @override
@@ -508,6 +506,242 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
             _value ? widget.service.enabledValue : widget.service.disabledValue,
       );
     });
+  }
+}
+
+/// A button that, when pressed, will display an overlay directly below that has
+/// a list of service extension checkbox settings.
+class ServiceExtensionCheckboxGroupButton extends StatefulWidget {
+  ServiceExtensionCheckboxGroupButton({
+    Key key,
+    @required this.title,
+    @required this.icon,
+    @required this.extensions,
+    @required this.overlayDescription,
+    this.tooltip,
+    double overlayWidthBeforeScaling = _defaultWidth,
+    this.minScreenWidthForTextBeforeScaling,
+  })  : overlayWidth = scaleByFontFactor(overlayWidthBeforeScaling),
+        super(key: key);
+
+  /// Title for the button.
+  final String title;
+
+  /// Icon for the button.
+  final IconData icon;
+
+  /// The minimum screen width for which this button should include text.
+  final double minScreenWidthForTextBeforeScaling;
+
+  /// Extensions to be surfaced as checkbox settings in the overlay.
+  final List<ToggleableServiceExtensionDescription> extensions;
+
+  /// Description for the checkbox settings overlay.
+  ///
+  /// This may contain instructions, a warning, or any message that is helpful
+  /// to describe what the settings in this overlay are for. This widget should
+  /// likely be a [Text] or [RichText] widget, but any widget can be used here.
+  final Widget overlayDescription;
+
+  final String tooltip;
+
+  final double overlayWidth;
+
+  static const _defaultWidth = 600.0;
+
+  @override
+  State<ServiceExtensionCheckboxGroupButton> createState() =>
+      _ServiceExtensionCheckboxGroupButtonState();
+}
+
+class _ServiceExtensionCheckboxGroupButtonState
+    extends State<ServiceExtensionCheckboxGroupButton> with AutoDisposeMixin {
+  static const _hoverYOffset = 10.0;
+
+  /// Whether this button should have the enabled state, which makes the
+  /// button appear with an enabled background color to indicate some
+  /// non-default options are enabled.
+  final _enabled = ValueNotifier(false);
+
+  List<bool> _extensionStates;
+
+  OverlayEntry _overlay;
+
+  bool _overlayHovered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _extensionStates = List.filled(widget.extensions.length, false);
+    for (int i = 0; i < widget.extensions.length; i++) {
+      final extension = widget.extensions[i];
+      final state = serviceManager.serviceExtensionManager
+          .getServiceExtensionState(extension.extension);
+      _extensionStates[i] = state.value.enabled;
+      // Listen for extension state changes so that we can update the value of
+      // [_activated].
+      addAutoDisposeListener(state, () {
+        _extensionStates[i] = state.value.enabled;
+        _enabled.value = _isEnabled();
+      });
+    }
+    _enabled.value = _isEnabled();
+  }
+
+  bool _isEnabled() {
+    for (final state in _extensionStates) {
+      if (state) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget label = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+      child: MaterialIconLabel(
+        label: widget.title,
+        iconData: widget.icon,
+        minScreenWidthForTextBeforeScaling:
+            widget.minScreenWidthForTextBeforeScaling,
+      ),
+    );
+    if (widget.tooltip != null && widget.tooltip.isNotEmpty) {
+      label = DevToolsTooltip(tooltip: widget.tooltip, child: label);
+    }
+    return ValueListenableBuilder(
+      valueListenable: _enabled,
+      builder: (context, enabled, _) {
+        return DevToolsToggleButtonGroup(
+          children: [label],
+          selectedStates: [enabled],
+          onPressed: (_) => _insertOverlay(context),
+        );
+      },
+    );
+  }
+
+  /// Inserts an overlay with service extension toggles that will enhance the
+  /// timeline trace.
+  ///
+  /// The overlay will appear directly below the button, and will be dismissed
+  /// if there is a click outside of the list of toggles.
+  void _insertOverlay(BuildContext context) {
+    final offset = _calculateOverlayPosition(widget.overlayWidth, context);
+    _overlay?.remove();
+    Overlay.of(context).insert(
+      _overlay = OverlayEntry(
+        maintainState: true,
+        builder: (context) {
+          return GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: _maybeRemoveOverlay,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: offset.dx,
+                  top: offset.dy,
+                  child: MouseRegion(
+                    onEnter: _mouseEnter,
+                    onExit: _mouseExit,
+                    child: _ServiceExtensionCheckboxGroupOverlay(
+                      description: widget.overlayDescription,
+                      extensions: widget.extensions,
+                      width: widget.overlayWidth,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Offset _calculateOverlayPosition(double width, BuildContext context) {
+    final overlayBox =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+    final box = context.findRenderObject() as RenderBox;
+
+    final maxX = overlayBox.size.width - width;
+    final maxY = overlayBox.size.height;
+
+    final offset = box.localToGlobal(
+      box.size.bottomCenter(Offset.zero).translate(-width / 2, _hoverYOffset),
+      ancestor: overlayBox,
+    );
+
+    return Offset(
+      offset.dx.clamp(0.0, maxX),
+      offset.dy.clamp(0.0, maxY),
+    );
+  }
+
+  void _mouseEnter(PointerEnterEvent event) {
+    _overlayHovered = true;
+  }
+
+  void _mouseExit(PointerExitEvent event) {
+    _overlayHovered = false;
+  }
+
+  void _maybeRemoveOverlay() {
+    if (!_overlayHovered) {
+      _overlay?.remove();
+      _overlay = null;
+    }
+  }
+}
+
+class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
+  const _ServiceExtensionCheckboxGroupOverlay({
+    Key key,
+    @required this.description,
+    @required this.extensions,
+    @required this.width,
+  }) : super(key: key);
+
+  /// Description for this checkbox settings overlay.
+  ///
+  /// This may contain instructions, a warning, or any message that is helpful
+  /// to describe what the settings in this overlay are for. This widget should
+  /// likely be a [Text] or [RichText] widget, but any widget can be used here.
+  final Widget description;
+
+  final List<ToggleableServiceExtensionDescription> extensions;
+
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      child: Container(
+        width: width,
+        padding: const EdgeInsets.all(defaultSpacing),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.defaultBackgroundColor,
+          border: Border.all(
+            color: theme.focusColor,
+            width: hoverCardBorderWidth,
+          ),
+          borderRadius: BorderRadius.circular(defaultBorderRadius),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            description,
+            const SizedBox(height: denseSpacing),
+            for (final serviceExtension in extensions)
+              ServiceExtensionCheckbox(service: serviceExtension),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -648,8 +882,7 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
   }
 
   Future<HoverCardData> _buildCardData(BuildContext context) {
-    final textColor =
-        Theme.of(context).colorScheme.serviceExtensionButtonsTitle;
+    final textColor = Theme.of(context).colorScheme.toggleButtonsTitle;
 
     return Future.value(
       HoverCardData(

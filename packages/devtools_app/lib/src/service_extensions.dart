@@ -7,6 +7,7 @@ library service_extensions;
 import 'package:flutter/material.dart';
 
 import 'analytics/constants.dart' as analytics_constants;
+import 'theme.dart';
 import 'ui/icons.dart';
 
 // Each service extension needs to be added to [_extensionDescriptions].
@@ -211,7 +212,35 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.trackRebuilds,
-  tooltip: 'Adds an event to the timeline for every Widget built.',
+  description: 'Adds an event to the timeline for every Widget built.',
+  tooltip: '',
+);
+
+final profileRenderObjectPaints = ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.profileRenderObjectPaints',
+  title: 'Track Paints',
+  enabledIcon: Icon(Icons.format_paint, size: defaultIconSize),
+  disabledIcon: Icon(Icons.format_paint, size: defaultIconSize),
+  enabledValue: true,
+  disabledValue: false,
+  gaScreenName: analytics_constants.performance,
+  gaItem: analytics_constants.trackPaints,
+  description: 'Adds an event to the timeline for every RenderObject painted.',
+  tooltip: '',
+);
+
+final profileRenderObjectLayouts =
+    ToggleableServiceExtensionDescription<bool>._(
+  extension: 'ext.flutter.profileRenderObjectLayouts',
+  title: 'Track Layouts',
+  enabledIcon: Icon(Icons.auto_awesome_mosaic, size: defaultIconSize),
+  disabledIcon: Icon(Icons.auto_awesome_mosaic, size: defaultIconSize),
+  enabledValue: true,
+  disabledValue: false,
+  gaScreenName: analytics_constants.performance,
+  gaItem: analytics_constants.trackLayouts,
+  description: 'Adds an event to the timeline for every RenderObject layout.',
+  tooltip: '',
 );
 
 final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
@@ -288,7 +317,7 @@ final disableClipLayers = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.disableOpacityLayersOption,
-  description: 'Render all clipping effects during paint (default)',
+  description: 'Render all clipping effects during paint',
   tooltip: '''Disable this option to check whether excessive use of clipping is
 affecting performance. If performance improves with this option
 disabled, try to reduce the use of clipping effects in your app.''',
@@ -310,7 +339,7 @@ final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.disableOpacityLayersOption,
-  description: 'Render all opacity effects during paint (default)',
+  description: 'Render all opacity effects during paint',
   tooltip: '''Disable this option to check whether excessive use of opacity
 effects is affecting performance. If performance improves with this
 option disabled, try to reduce the use of opacity effects in your app.''',
@@ -333,7 +362,7 @@ final disablePhysicalShapeLayers =
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.disableOpacityLayersOption,
-  description: 'Render all physical modeling effects during paint (default)',
+  description: 'Render all physical modeling effects during paint',
   tooltip: '''Disable this option to check whether excessive use of physical 
 modeling effects is affecting performance (shadows, elevations, etc.). 
 If performance improves with this option disabled, try to reduce the 
