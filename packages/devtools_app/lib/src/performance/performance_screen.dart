@@ -21,7 +21,6 @@ import '../screen.dart';
 import '../service_extensions.dart';
 import '../split.dart';
 import '../theme.dart';
-import '../ui/colors.dart';
 import '../ui/icons.dart';
 import '../ui/service_extension_widgets.dart';
 import '../ui/vm_flag_widgets.dart';
