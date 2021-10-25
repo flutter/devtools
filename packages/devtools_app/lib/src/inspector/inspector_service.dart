@@ -31,16 +31,16 @@ class RegistrableServiceExtension {
 
   // Layout explorer service extensions.
   static const getLayoutExplorerNode =
-  RegistrableServiceExtension('getLayoutExplorerNode');
+      RegistrableServiceExtension('getLayoutExplorerNode');
   static const setFlexFit = RegistrableServiceExtension('setFlexFit');
   static const setFlexFactor = RegistrableServiceExtension('setFlexFactor');
   static const setFlexProperties =
-  RegistrableServiceExtension('setFlexProperties');
+      RegistrableServiceExtension('setFlexProperties');
   static const getRootWidgetSummaryTreeWithPreviews =
-  RegistrableServiceExtension('getRootWidgetSummaryTreeWithPreviews');
+      RegistrableServiceExtension('getRootWidgetSummaryTreeWithPreviews');
 
   static const getPubRootDirectories =
-  RegistrableServiceExtension('getPubRootDirectories');
+      RegistrableServiceExtension('getPubRootDirectories');
 }
 
 abstract class InspectorServiceBase extends DisposableController
@@ -134,7 +134,7 @@ abstract class InspectorServiceBase extends DisposableController
       assert(!directory.startsWith('package:'));
 
       final parts =
-      directory.split('/').where((element) => element.isNotEmpty).toList();
+          directory.split('/').where((element) => element.isNotEmpty).toList();
       final libIndex = parts.lastIndexOf('lib');
       final path = libIndex > 0 ? parts.sublist(0, libIndex) : parts;
       // Special case handling of bazel packages.
@@ -213,7 +213,7 @@ abstract class InspectorServiceBase extends DisposableController
   /// rendering.
   bool get useDaemonApi {
     return !(serviceManager
-        .isolateManager.mainIsolateDebuggerState?.isPaused?.value ??
+            .isolateManager.mainIsolateDebuggerState?.isPaused?.value ??
         false);
   }
 
@@ -241,7 +241,7 @@ abstract class InspectorServiceBase extends DisposableController
       return await invokeServiceMethodDaemonNoGroupArgs(methodName) == true;
     } else {
       return (await invokeServiceMethodObservatoryNoGroup(methodName))
-          ?.valueAsString ==
+              ?.valueAsString ==
           'true';
     }
   }
@@ -302,7 +302,7 @@ abstract class InspectorServiceBase extends DisposableController
     // No need to call this from a breakpoint.
     assert(useDaemonApi);
     final result =
-    invokeServiceMethodDaemonNoGroup('getPubRootDirectories', null);
+        invokeServiceMethodDaemonNoGroup('getPubRootDirectories', null);
     return result ?? [];
   }
 }
@@ -312,10 +312,10 @@ abstract class InspectorServiceBase extends DisposableController
 class InspectorService extends InspectorServiceBase {
   InspectorService()
       : super(
-    clientInspectorName: 'WidgetInspectorService',
-    serviceExtensionPrefix: 'ext.flutter.inspector',
-    inspectorLibraryUri: inspectorLibraryUri,
-  ) {
+          clientInspectorName: 'WidgetInspectorService',
+          serviceExtensionPrefix: 'ext.flutter.inspector',
+          inspectorLibraryUri: inspectorLibraryUri,
+        ) {
     // Note: We do not need to listen to event history here because the
     // inspector uses a separate API to get the current inspector selection.
     autoDispose(serviceManager.service.onExtensionEvent
@@ -548,8 +548,8 @@ class InspectorService extends InspectorServiceBase {
 
 abstract class ObjectGroupBase implements Disposable {
   ObjectGroupBase(
-      String debugName,
-      ) : groupName = '${debugName}_${InspectorServiceBase.nextGroupId}' {
+    String debugName,
+  ) : groupName = '${debugName}_${InspectorServiceBase.nextGroupId}' {
     InspectorServiceBase.nextGroupId++;
   }
 
@@ -726,9 +726,9 @@ abstract class ObjectGroupBase implements Disposable {
 
   // All calls to invokeServiceMethodDaemon bottom out to this call.
   Future<Object> invokeServiceMethodDaemonParams(
-      String methodName,
-      Map<String, Object> params,
-      ) async {
+    String methodName,
+    Map<String, Object> params,
+  ) async {
     final callMethodName =
         '${inspectorService.serviceExtensionPrefix}.$methodName';
     if (!serviceManager.serviceExtensionManager
@@ -782,10 +782,10 @@ abstract class ObjectGroupBase implements Disposable {
   }
 
   Future<List<RemoteDiagnosticsNode>> parseDiagnosticsNodesObservatory(
-      FutureOr<InstanceRef> instanceRefFuture,
-      RemoteDiagnosticsNode parent,
-      bool isProperty,
-      ) async {
+    FutureOr<InstanceRef> instanceRefFuture,
+    RemoteDiagnosticsNode parent,
+    bool isProperty,
+  ) async {
     if (disposed || instanceRefFuture == null) return [];
     final instanceRef = await instanceRefFuture;
     if (disposed || instanceRefFuture == null) return [];
@@ -797,10 +797,10 @@ abstract class ObjectGroupBase implements Disposable {
   }
 
   List<RemoteDiagnosticsNode> parseDiagnosticsNodesHelper(
-      List<Object> jsonObject,
-      RemoteDiagnosticsNode parent,
-      bool isProperty,
-      ) {
+    List<Object> jsonObject,
+    RemoteDiagnosticsNode parent,
+    bool isProperty,
+  ) {
     if (disposed || jsonObject == null) return const [];
     final List<RemoteDiagnosticsNode> nodes = [];
     for (Map<String, Object> element in jsonObject) {
@@ -810,10 +810,10 @@ abstract class ObjectGroupBase implements Disposable {
   }
 
   Future<List<RemoteDiagnosticsNode>> parseDiagnosticsNodesDaemon(
-      FutureOr<Object> jsonFuture,
-      RemoteDiagnosticsNode parent,
-      bool isProperty,
-      ) async {
+    FutureOr<Object> jsonFuture,
+    RemoteDiagnosticsNode parent,
+    bool isProperty,
+  ) async {
     if (disposed || jsonFuture == null) return const [];
 
     return parseDiagnosticsNodesHelper(await jsonFuture, parent, isProperty);
@@ -832,8 +832,8 @@ abstract class ObjectGroupBase implements Disposable {
   }
 
   Future<InstanceRef> toObservatoryInstanceRef(
-      InspectorInstanceRef inspectorInstanceRef,
-      ) async {
+    InspectorInstanceRef inspectorInstanceRef,
+  ) async {
     if (inspectorInstanceRef == null || inspectorInstanceRef.id == null) {
       return null;
     }
@@ -874,9 +874,9 @@ abstract class ObjectGroupBase implements Disposable {
   ///
   /// The future will immediately complete to null if the inspectorInstanceRef is null.
   Future<Map<String, InstanceRef>> getDartObjectProperties(
-      InspectorInstanceRef inspectorInstanceRef,
-      final List<String> propertyNames,
-      ) async {
+    InspectorInstanceRef inspectorInstanceRef,
+    final List<String> propertyNames,
+  ) async {
     final instanceRef = await toObservatoryInstanceRef(inspectorInstanceRef);
     if (disposed) return null;
     const objectName = 'that';
@@ -963,11 +963,11 @@ abstract class ObjectGroupBase implements Disposable {
   }
 
   Future<List<RemoteDiagnosticsNode>> getListHelper(
-      InspectorInstanceRef instanceRef,
-      String methodName,
-      RemoteDiagnosticsNode parent,
-      bool isProperty,
-      ) async {
+    InspectorInstanceRef instanceRef,
+    String methodName,
+    RemoteDiagnosticsNode parent,
+    bool isProperty,
+  ) async {
     if (disposed) return const [];
     if (useDaemonApi) {
       return parseDiagnosticsNodesDaemon(
@@ -980,7 +980,7 @@ abstract class ObjectGroupBase implements Disposable {
         instanceRef == null
             ? invokeServiceMethodObservatory(methodName)
             : invokeServiceMethodObservatoryInspectorRef(
-            methodName, instanceRef),
+                methodName, instanceRef),
         parent,
         isProperty,
       );
@@ -994,9 +994,9 @@ abstract class ObjectGroupBase implements Disposable {
   /// reference the same object and the [inspectorRef] is used as it is longer
   /// lived than an InstanceRef.
   Future<InstanceRef> evalOnRef(
-      String expression,
-      GenericInstanceRef ref,
-      ) async {
+    String expression,
+    GenericInstanceRef ref,
+  ) async {
     final inspectorRef = ref?.diagnostic?.valueRef;
     if (inspectorRef != null && inspectorRef.id != null) {
       return await inspectorLibrary.eval(
@@ -1043,10 +1043,10 @@ abstract class ObjectGroupBase implements Disposable {
   }
 
   Future<List<RemoteDiagnosticsNode>> getChildren(
-      InspectorInstanceRef instanceRef,
-      bool summaryTree,
-      RemoteDiagnosticsNode parent,
-      ) {
+    InspectorInstanceRef instanceRef,
+    bool summaryTree,
+    RemoteDiagnosticsNode parent,
+  ) {
     return getListHelper(
       instanceRef,
       summaryTree ? 'getChildrenSummaryTree' : 'getChildrenDetailsSubtree',
@@ -1063,17 +1063,17 @@ abstract class ObjectGroupBase implements Disposable {
 /// special logic to handle orphaned requests.
 class ObjectGroup extends ObjectGroupBase {
   ObjectGroup(
-      String debugName,
-      this.inspectorService,
-      ) : super(debugName);
+    String debugName,
+    this.inspectorService,
+  ) : super(debugName);
 
   @override
   final InspectorService inspectorService;
 
   Future<Object> invokeServiceExtensionMethod(
-      RegistrableServiceExtension extension,
-      Map<String, String> parameters,
-      ) async {
+    RegistrableServiceExtension extension,
+    Map<String, String> parameters,
+  ) async {
     final name = extension.name;
     final fullName = '${inspectorService.serviceExtensionPrefix}.$name';
     if (!serviceManager.serviceExtensionManager
@@ -1086,7 +1086,7 @@ class ObjectGroup extends ObjectGroupBase {
       final regularExtensionsRegistered = await serviceManager
           .serviceExtensionManager
           .waitForServiceExtensionAvailable(
-          '${inspectorService.serviceExtensionPrefix}.isWidgetCreationTracked');
+              '${inspectorService.serviceExtensionPrefix}.isWidgetCreationTracked');
       if (disposed) return null;
       assert(regularExtensionsRegistered);
       if (!serviceManager.serviceExtensionManager
@@ -1168,17 +1168,17 @@ class ObjectGroup extends ObjectGroupBase {
 */
 
   Future<RemoteDiagnosticsNode> getSelection(
-      RemoteDiagnosticsNode previousSelection,
-      FlutterTreeType treeType, {
-        @required bool isSummaryTree,
-      }) async {
+    RemoteDiagnosticsNode previousSelection,
+    FlutterTreeType treeType, {
+    @required bool isSummaryTree,
+  }) async {
     assert(isSummaryTree != null);
     // There is no reason to allow calling this method on a disposed group.
     assert(!disposed);
     if (disposed) return null;
     RemoteDiagnosticsNode newSelection;
     final InspectorInstanceRef previousSelectionRef =
-    previousSelection != null ? previousSelection.dartDiagnosticRef : null;
+        previousSelection != null ? previousSelection.dartDiagnosticRef : null;
 
     switch (treeType) {
       case FlutterTreeType.widget:
@@ -1235,9 +1235,9 @@ class ObjectGroup extends ObjectGroupBase {
   }
 
   Future<bool> handleSetSelectionObservatory(
-      Future<InstanceRef> setSelectionResult,
-      bool uiAlreadyUpdated,
-      ) async {
+    Future<InstanceRef> setSelectionResult,
+    bool uiAlreadyUpdated,
+  ) async {
     // TODO(jacobr): we need to cancel if another inspect request comes in while we are trying this one.
     if (disposed) return true;
     final instanceRef = await setSelectionResult;
@@ -1256,9 +1256,9 @@ class ObjectGroup extends ObjectGroupBase {
   }
 
   Future<bool> handleSetSelectionDaemon(
-      Future<Object> setSelectionResult,
-      bool uiAlreadyUpdated,
-      ) async {
+    Future<Object> setSelectionResult,
+    bool uiAlreadyUpdated,
+  ) async {
     if (disposed) return false;
     // TODO(jacobr): we need to cancel if another inspect request comes in while we are trying this one.
     final json = await setSelectionResult;
@@ -1267,9 +1267,9 @@ class ObjectGroup extends ObjectGroupBase {
   }
 
   Future<RemoteDiagnosticsNode> getDetailsSubtree(
-      RemoteDiagnosticsNode node, {
-        int subtreeDepth = 2,
-      }) async {
+    RemoteDiagnosticsNode node, {
+    int subtreeDepth = 2,
+  }) async {
     if (node == null) return null;
     final args = {
       'objectGroup': groupName,
@@ -1284,10 +1284,10 @@ class ObjectGroup extends ObjectGroupBase {
   }
 
   Future<void> invokeSetFlexProperties(
-      InspectorInstanceRef ref,
-      MainAxisAlignment mainAxisAlignment,
-      CrossAxisAlignment crossAxisAlignment,
-      ) async {
+    InspectorInstanceRef ref,
+    MainAxisAlignment mainAxisAlignment,
+    CrossAxisAlignment crossAxisAlignment,
+  ) async {
     if (ref == null) return null;
     await invokeServiceExtensionMethod(
       RegistrableServiceExtension.setFlexProperties,
@@ -1300,9 +1300,9 @@ class ObjectGroup extends ObjectGroupBase {
   }
 
   Future<void> invokeSetFlexFactor(
-      InspectorInstanceRef ref,
-      int flexFactor,
-      ) async {
+    InspectorInstanceRef ref,
+    int flexFactor,
+  ) async {
     if (ref == null) return null;
     await invokeServiceExtensionMethod(
       RegistrableServiceExtension.setFlexFactor,
@@ -1311,9 +1311,9 @@ class ObjectGroup extends ObjectGroupBase {
   }
 
   Future<void> invokeSetFlexFit(
-      InspectorInstanceRef ref,
-      FlexFit flexFit,
-      ) async {
+    InspectorInstanceRef ref,
+    FlexFit flexFit,
+  ) async {
     if (ref == null) return null;
     await invokeServiceExtensionMethod(
       RegistrableServiceExtension.setFlexFit,
@@ -1322,9 +1322,9 @@ class ObjectGroup extends ObjectGroupBase {
   }
 
   Future<RemoteDiagnosticsNode> getLayoutExplorerNode(
-      RemoteDiagnosticsNode node, {
-        int subtreeDepth = 1,
-      }) async {
+    RemoteDiagnosticsNode node, {
+    int subtreeDepth = 1,
+  }) async {
     if (node == null) return null;
     return parseDiagnosticsNodeDaemon(invokeServiceExtensionMethod(
       RegistrableServiceExtension.getLayoutExplorerNode,
