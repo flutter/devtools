@@ -15,17 +15,7 @@ import 'program_explorer_model.dart';
 
 class ProgramExplorerController extends DisposableController
     with AutoDisposeControllerMixin {
-  ProgramExplorerController({@required this.debuggerController}) {
-    addAutoDisposeListener(
-      serviceManager.isolateManager.selectedIsolate,
-      refresh,
-    );
-    // Re-initialize after reload.
-    addAutoDisposeListener(
-      debuggerController.sortedScripts,
-      refresh,
-    );
-  }
+  ProgramExplorerController({@required this.debuggerController});
 
   /// The outline view nodes for the currently selected library.
   ValueListenable<List<VMServiceObjectNode>> get outlineNodes => _outlineNodes;
@@ -68,6 +58,17 @@ class ProgramExplorerController extends DisposableController
       return;
     }
     _initializing = true;
+
+    addAutoDisposeListener(
+      serviceManager.isolateManager.selectedIsolate,
+      refresh,
+    );
+    // Re-initialize after reload.
+    addAutoDisposeListener(
+      debuggerController.sortedScripts,
+      refresh,
+    );
+
     _isolate = serviceManager.isolateManager.selectedIsolate.value;
     final libraries = _isolate != null
         ? serviceManager.isolateManager

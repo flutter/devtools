@@ -360,6 +360,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           children: tabBodies,
         ),
         if (serviceManager.connectedAppInitialized &&
+            !serviceManager.connectedApp.isProfileBuildNow &&
             !offlineController.offlineMode.value &&
             _currentScreen.showFloatingDebuggerControls)
           Container(
@@ -391,6 +392,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                 child: Scaffold(
                   appBar: widget.embed ? null : _buildAppBar(scaffoldTitle),
                   body: (serviceManager.connectedAppInitialized &&
+                          !serviceManager.connectedApp.isProfileBuildNow &&
                           !offlineController.offlineMode.value &&
                           _currentScreen.showConsole(widget.embed))
                       ? Split(

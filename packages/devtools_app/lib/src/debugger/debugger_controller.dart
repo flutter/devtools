@@ -39,6 +39,18 @@ class DebuggerController extends DisposableController
     );
     autoDispose(serviceManager.onConnectionAvailable
         .listen(_handleConnectionAvailable));
+    if (_service != null) {
+      initialize();
+    }
+  }
+
+  /// Callback to be called when the debugger screen is first loaded.
+  ///
+  /// We delay calling this method until the debugger screen is first loaded
+  /// for performance reasons. None of the code here needs to be called when
+  /// DevTools first connects to an app, and doing so inhibits DevTools from
+  /// connecting to low-end devices.
+  void onFirstDebuggerScreenLoad() {
     _scriptHistoryListener = () {
       _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
     };
@@ -51,10 +63,6 @@ class DebuggerController extends DisposableController
         programExplorerController.selectScriptNode(currentScriptRef.value);
       }
     });
-
-    if (_service != null) {
-      initialize();
-    }
   }
 
   /// Method to call after the vm service shuts down.

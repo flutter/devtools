@@ -106,6 +106,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     super.initState();
     ga.screen(DebuggerScreen.id);
     ga.timeStart(DebuggerScreen.id, analytics_constants.pageReady);
+    controller.onFirstDebuggerScreenLoad();
     _shownFirstScript = false;
   }
 
