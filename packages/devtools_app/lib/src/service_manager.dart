@@ -82,8 +82,8 @@ class ServiceConnectionManager {
 
   final consoleService = ConsoleService();
 
-  InspectorService get inspectorService => _inspectorService;
-  InspectorService _inspectorService;
+  InspectorServiceBase get inspectorService => _inspectorService;
+  InspectorServiceBase _inspectorService;
 
   ErrorBadgeManager get errorBadgeManager => _errorBadgeManager;
   final _errorBadgeManager = ErrorBadgeManager();
