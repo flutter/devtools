@@ -175,13 +175,34 @@ class ConsoleService extends Disposer {
   void vmServiceOpened(VmServiceWrapper service) {
     cancel();
     autoDispose(service.onDebugEvent.listen(_handleDebugEvent));
-    autoDispose(service.onStdoutEventWithHistory.listen(_handleStdoutEvent));
-    autoDispose(service.onStderrEventWithHistory.listen(_handleStderrEvent));
-    autoDispose(
-        service.onExtensionEventWithHistory.listen(_handleExtensionEvent));
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       clearStdio();
     });
+  }
+
+  /// Whether the listeners for event streams with history have been
+  /// initialized.
+  bool _listenersWithHistoryInitialized = false;
+
+  /// Initialize listeners for streams with event history.
+  ///
+  /// These should be initialized in a lazy manner, and only when they are first
+  /// needed. Since the streams have event history, we will not be missing any
+  /// events by listening late, and listening only when this data is needed will
+  /// improve performance for connecting to low-end devices, as well as when
+  /// DevTools pages that don't need the [ConsoleService] are being used.
+  void initializeListenersWithHistory() {
+    assert(serviceManager.isServiceAvailable);
+    if (!_listenersWithHistoryInitialized &&
+        serviceManager.isServiceAvailable) {
+      autoDispose(serviceManager.service.onStdoutEventWithHistory
+          .listen(_handleStdoutEvent));
+      autoDispose(serviceManager.service.onStderrEventWithHistory
+          .listen(_handleStderrEvent));
+      autoDispose(serviceManager.service.onExtensionEventWithHistory
+          .listen(_handleExtensionEvent));
+      _listenersWithHistoryInitialized = true;
+    }
   }
 
   void _handleExtensionEvent(Event e) async {
@@ -210,6 +231,7 @@ class ConsoleService extends Disposer {
 
   void handleVmServiceClosed() {
     cancel();
+    _listenersWithHistoryInitialized = false;
   }
 
   void _handleDebugEvent(Event event) async {
