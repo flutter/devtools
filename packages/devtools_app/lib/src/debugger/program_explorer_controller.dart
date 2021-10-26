@@ -59,16 +59,6 @@ class ProgramExplorerController extends DisposableController
     }
     _initializing = true;
 
-    addAutoDisposeListener(
-      serviceManager.isolateManager.selectedIsolate,
-      refresh,
-    );
-    // Re-initialize after reload.
-    addAutoDisposeListener(
-      debuggerController.sortedScripts,
-      refresh,
-    );
-
     _isolate = serviceManager.isolateManager.selectedIsolate.value;
     final libraries = _isolate != null
         ? serviceManager.isolateManager
@@ -84,6 +74,18 @@ class ProgramExplorerController extends DisposableController
     );
     _rootObjectNodes.addAll(nodes);
     _initialized.value = true;
+  }
+
+  void initListeners() {
+    addAutoDisposeListener(
+      serviceManager.isolateManager.selectedIsolate,
+      refresh,
+    );
+    // Re-initialize after reload.
+    addAutoDisposeListener(
+      debuggerController.sortedScripts,
+      refresh,
+    );
   }
 
   void selectScriptNode(ScriptRef script) {

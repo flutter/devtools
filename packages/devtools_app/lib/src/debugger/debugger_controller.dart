@@ -57,7 +57,9 @@ class DebuggerController extends DisposableController
     scriptsHistory.current.addListener(_scriptHistoryListener);
     addAutoDisposeListener(currentScriptRef, () {
       if (!programExplorerController.initialized.value) {
-        programExplorerController.initialize();
+        programExplorerController
+          ..initListeners()
+          ..initialize();
       }
       if (currentScriptRef.value != null) {
         programExplorerController.selectScriptNode(currentScriptRef.value);
