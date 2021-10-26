@@ -42,6 +42,9 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
 
   Axis get direction => properties.direction;
 
+  ObjectGroup get objectGroup =>
+      properties.node.inspectorService as ObjectGroup;
+
   Color horizontalColor(ColorScheme colorScheme) =>
       properties.isMainAxisHorizontal
           ? colorScheme.mainAxisColor
@@ -209,10 +212,9 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               changedProperties =
                   properties.copyWith(crossAxisAlignment: newSelection);
             }
-            final service = properties.node.inspectorService as ObjectGroup;
             final valueRef = properties.node.valueRef;
             markAsDirty();
-            await service.invokeSetFlexProperties(
+            await objectGroup.invokeSetFlexProperties(
               valueRef,
               changedProperties.mainAxisAlignment,
               changedProperties.crossAxisAlignment,
@@ -540,22 +542,21 @@ class FlexChildVisualizer extends StatelessWidget {
 
   LayoutProperties get properties => renderProperties.layoutProperties;
 
+  ObjectGroup get objectGroup =>
+      properties.node.inspectorService as ObjectGroup;
+
   void onChangeFlexFactor(int newFlexFactor) async {
-    final node = properties.node;
-    final inspectorService = node.inspectorService as ObjectGroup;
     state.markAsDirty();
-    await inspectorService.invokeSetFlexFactor(
-      node.valueRef,
+    await objectGroup.invokeSetFlexFactor(
+      properties.node.valueRef,
       newFlexFactor,
     );
   }
 
   void onChangeFlexFit(FlexFit newFlexFit) async {
-    final node = properties.node;
-    final inspectorService = node.inspectorService as ObjectGroup;
     state.markAsDirty();
-    await inspectorService.invokeSetFlexFit(
-      node.valueRef,
+    await objectGroup.invokeSetFlexFit(
+      properties.node.valueRef,
       newFlexFit,
     );
   }

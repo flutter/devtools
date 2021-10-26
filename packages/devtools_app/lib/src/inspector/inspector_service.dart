@@ -1066,6 +1066,7 @@ abstract class ObjectGroupBase implements Disposable {
 
 /// Class managing a group of inspector objects that can be freed by
 /// a single call to dispose().
+///
 /// After dispose is called, all pending requests made with the ObjectGroup
 /// will be skipped. This means that clients should not have to write any
 /// special logic to handle orphaned requests.
