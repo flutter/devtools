@@ -68,9 +68,39 @@ void main() {
       expect(flutterVersion.minor, equals(0));
       expect(flutterVersion.patch, equals(0));
     });
+
+    test('parses dart version correctly', () {
+      var flutterVersion = FlutterVersion.parse({
+        'frameworkVersion': '2.8.0',
+        'dartSdkVersion': '2.15.0',
+      });
+      expect(flutterVersion.dartSdkVersion.toString(), equals('2.15.0'));
+      flutterVersion = FlutterVersion.parse({
+        'frameworkVersion': '2.8.0',
+        'dartSdkVersion': '2.15.0 (build 2.15.0-178.1.beta)',
+      });
+      expect(flutterVersion.dartSdkVersion.toString(), equals('2.15.0-178.1'));
+    });
   });
 
   group('SemanticVersion', () {
+    test('parse', () {
+      expect(
+        SemanticVersion.parse(
+                '2.15.0-233.0.dev (dev) (Mon Oct 18 14:06:26 2021 -0700) on "ios_x64"')
+            .toString(),
+        equals('2.15.0-233.0'),
+      );
+      expect(
+        SemanticVersion.parse('2.15.0-178.1.beta').toString(),
+        equals('2.15.0-178.1'),
+      );
+      expect(
+        SemanticVersion.parse('2.6.0-12.0.pre.443').toString(),
+        equals('2.6.0-12.0'),
+      );
+    });
+
     test('isVersionSupported', () {
       final supportedVersion = SemanticVersion(major: 1, minor: 1, patch: 1);
       expect(
