@@ -302,11 +302,7 @@ class ServiceConnectionManager {
       return;
     }
 
-    if (connectedApp.isFlutterAppNow) {
-      _inspectorService = InspectorService();
-    } else {
-      _inspectorService = null;
-    }
+    _inspectorService = devToolsExtensionPoints.inspectorServiceProvider();
 
     // Set up analytics dimensions for the connected app.
     await ga.setupUserApplicationDimensions();
