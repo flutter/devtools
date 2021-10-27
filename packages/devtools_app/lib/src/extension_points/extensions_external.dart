@@ -8,7 +8,6 @@ import '../globals.dart';
 import '../inspector/inspector_service.dart';
 import 'extensions_base.dart';
 
-
 class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
   @override
   List<ScriptPopupMenuOption> buildExtraDebuggerScriptPopupMenuOptions() =>
