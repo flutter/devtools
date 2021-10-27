@@ -42,7 +42,13 @@ class DebuggerController extends DisposableController
     if (_service != null) {
       initialize();
     }
+    _scriptHistoryListener = () {
+      _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
+    };
+    scriptsHistory.current.addListener(_scriptHistoryListener);
   }
+
+  bool _firstDebuggerScreenLoaded = false;
 
   /// Callback to be called when the debugger screen is first loaded.
   ///
@@ -51,20 +57,22 @@ class DebuggerController extends DisposableController
   /// DevTools first connects to an app, and doing so inhibits DevTools from
   /// connecting to low-end devices.
   void onFirstDebuggerScreenLoad() {
-    _scriptHistoryListener = () {
-      _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
-    };
-    scriptsHistory.current.addListener(_scriptHistoryListener);
-    addAutoDisposeListener(currentScriptRef, () {
-      if (!programExplorerController.initialized.value) {
-        programExplorerController
-          ..initListeners()
-          ..initialize();
-      }
-      if (currentScriptRef.value != null) {
-        programExplorerController.selectScriptNode(currentScriptRef.value);
-      }
-    });
+    if (!_firstDebuggerScreenLoaded) {
+      _maybeSetUpProgramExplorer();
+      addAutoDisposeListener(currentScriptRef, _maybeSetUpProgramExplorer);
+      _firstDebuggerScreenLoaded = true;
+    }
+  }
+
+  void _maybeSetUpProgramExplorer() {
+    if (!programExplorerController.initialized.value) {
+      programExplorerController
+        ..initListeners()
+        ..initialize();
+    }
+    if (currentScriptRef.value != null) {
+      programExplorerController.selectScriptNode(currentScriptRef.value);
+    }
   }
 
   /// Method to call after the vm service shuts down.
@@ -92,6 +100,7 @@ class DebuggerController extends DisposableController
     _selectedBreakpoint.value = null;
     _librariesVisible.value = false;
     isolateRef = null;
+    _firstDebuggerScreenLoaded = false;
   }
 
   VmServiceWrapper _lastService;
