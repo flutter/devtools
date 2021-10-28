@@ -578,6 +578,9 @@ class IsolateManager extends Disposer {
   }
 
   IsolateState get mainIsolateDebuggerState {
+    print(
+        'in mainIsolateDebuggerState getter: _mainIsolate.value = _mainIsolate.value');
+    print('returning ${_isolateStates[_mainIsolate.value]}');
     return _isolateStates[_mainIsolate.value];
   }
 
@@ -617,6 +620,7 @@ class IsolateManager extends Disposer {
 
   void _registerIsolate(IsolateRef isolateRef) {
     assert(!_isolateStates.containsKey(isolateRef));
+    print('registering isolate ${isolateRef.id}');
     _isolateStates[isolateRef] = IsolateState(isolateRef);
     _isolates.add(isolateRef);
     isolateIndex(isolateRef);
@@ -656,6 +660,7 @@ class IsolateManager extends Disposer {
         _setSelectedIsolate(event.isolate);
       }
     } else if (event.kind == EventKind.kIsolateExit) {
+      print('isolate exit event. removing isolate ${event.isolate.id}');
       _isolateStates.remove(event.isolate)?.dispose();
       _isolates.remove(event.isolate);
       _isolateExitedController.add(event.isolate);
@@ -733,6 +738,7 @@ class IsolateManager extends Disposer {
     for (var isolateState in _isolateStates.values) {
       isolateState.dispose();
     }
+    print('clearing _isolateStates');
     _isolateStates.clear();
     _isolates.clear();
   }
@@ -750,6 +756,10 @@ class IsolateManager extends Disposer {
   }
 
   Future<Isolate> getIsolateCached(IsolateRef isolateRef) {
+    print('in getIsolateCached');
+    if (!_isolateStates.containsKey(isolateRef)) {
+      print('creating IsolateState for ${isolateRef.id}');
+    }
     final isolateState =
         _isolateStates.putIfAbsent(isolateRef, () => IsolateState(isolateRef));
     return isolateState.isolate;
