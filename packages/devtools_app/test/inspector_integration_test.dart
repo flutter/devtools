@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/inspector_screen.dart';
+import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_test/flutter_test_driver.dart'
     show FlutterRunConfiguration;
 import 'package:devtools_test/flutter_test_environment.dart';
@@ -29,19 +30,21 @@ void main() async {
   );
 
   env.afterEverySetup = () async {
+    final service = serviceManager.inspectorService;
     if (env.reuseTestEnvironment) {
       // Ensure the previous test did not set the selection on the device.
       // TODO(jacobr): add a proper method to WidgetInspectorService that does
       // this. setSelection currently ignores null selection requests which is
       // a misfeature.
-
-      await serviceManager.inspectorService.inspectorLibrary.eval(
+      await service.inspectorLibrary.eval(
         'WidgetInspectorService.instance.selection.clear()',
         isAlive: null,
       );
     }
 
-    await serviceManager.inspectorService.inferPubRootDirectoryIfNeeded();
+    if (service is InspectorService) {
+      await service.inferPubRootDirectoryIfNeeded();
+    }
   };
 
   group('screenshot tests', () {

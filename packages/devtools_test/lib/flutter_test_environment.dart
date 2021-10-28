@@ -97,6 +97,7 @@ class FlutterTestEnvironment {
       await preferencesController.init();
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
       setGlobal(PreferencesController, preferencesController);
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       await serviceManager.vmServiceOpened(
         _service,
         onClosed: Completer().future,
