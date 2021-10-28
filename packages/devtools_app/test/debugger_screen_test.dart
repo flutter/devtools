@@ -35,6 +35,7 @@ void main() {
     when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
+    print('initializing service');
     fakeServiceManager.consoleService.ensureServiceInitialized();
   });
 
@@ -117,6 +118,14 @@ void main() {
     });
 
     group('ConsoleControls', () {
+      final _stdio = ['First line', _ansiCodesOutput(), 'Third line'];
+
+      void _appendStdioLines() {
+        for (var line in _stdio) {
+          serviceManager.consoleService.appendStdio('$line\n');
+        }
+      }
+
       testWidgetsWithWindowSize(
           'Tapping the Console Clear button clears stdio.', windowSize,
           (WidgetTester tester) async {
@@ -133,19 +142,12 @@ void main() {
         expect(serviceManager.consoleService.stdio.value, isEmpty);
       });
 
-      final _stdio = ['First line', _ansiCodesOutput(), 'Third line'];
-
-      void _appendStdioLines() {
-        for (var line in _stdio) {
-          serviceManager.consoleService.appendStdio('$line\n');
-        }
-      }
-
       group('Clipboard', () {
         var _clipboardContents = '';
         final _expected = _stdio.join('\n');
 
         setUp(() {
+          print('appending lines');
           _appendStdioLines();
           // This intercepts the Clipboard.setData SystemChannel message,
           // and stores the contents that were (attempted) to be copied.
