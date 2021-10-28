@@ -48,19 +48,15 @@ void main() {
       if (web) {
         fakeServiceManager.availableLibraries.add('dart:html');
       }
-      mockIsFlutterApp(fakeServiceManager.connectedApp, flutter);
+      mockIsFlutterApp(
+        fakeServiceManager.connectedApp,
+        isFlutterApp: flutter,
+        isProfileBuild: !debugMode,
+      );
       if (flutter) {
         fakeServiceManager.availableLibraries
             .add('package:flutter/src/widgets/binding.dart');
       }
-      mockIsDebugFlutterApp(
-        fakeServiceManager.connectedApp,
-        flutter && debugMode,
-      );
-      mockIsProfileFlutterApp(
-        fakeServiceManager.connectedApp,
-        flutter && !debugMode,
-      );
       flutterVersion ??= SemanticVersion(major: 2, minor: 3, patch: 1);
       mockFlutterVersion(fakeServiceManager.connectedApp, flutterVersion);
     }

@@ -35,7 +35,8 @@ Widget wrap(Widget widget) {
       ),
       _testNavigatorKey,
     ),
-    routeInformationParser: DevToolsRouteInformationParser(),
+    routeInformationParser:
+        DevToolsRouteInformationParser.test('http://test/uri'),
   );
 }
 
