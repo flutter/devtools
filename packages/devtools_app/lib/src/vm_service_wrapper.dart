@@ -401,7 +401,10 @@ class VmServiceWrapper implements VmService {
     int offset,
     int count,
   }) {
-    return trackFuture('getObject', _vmService.getObject(isolateId, objectId));
+    return trackFuture(
+        'getObject',
+        _vmService.getObject(isolateId, objectId,
+            offset: offset, count: count));
   }
 
   @override

@@ -45,7 +45,9 @@ class Variables extends StatelessWidget {
   void onItemPressed(Variable v, DebuggerController controller) {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
-      v.children.forEach(buildVariablesTree);
+      v.children.forEach(
+        (v) => buildVariablesTree(v, offset: v.offset, count: v.count),
+      );
     }
   }
 }

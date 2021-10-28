@@ -763,6 +763,8 @@ class DebuggerController extends DisposableController
     // Collecting frames for Dart web applications can be slow. At the potential
     // cost of a flicker in the stack view, display only the top frame
     // initially.
+    // Note: Should find a better solution for this.
+    //Currently, this means we fetch all variable objects twice. (Once here, and once in _getFullStack)
     if (await serviceManager.connectedApp.isDartWebApp) {
       _populateFrameInfo(
         [
@@ -949,7 +951,7 @@ class DebuggerController extends DisposableController
     final variables =
         frame.vars.map((v) => Variable.create(v, isolateRef)).toList();
     variables
-      ..forEach(buildVariablesTree)
+      ..forEach((v) => buildVariablesTree(v, offset: 0, count: 0))
       ..sort((a, b) => sortFieldsByName(a.name, b.name));
     return variables;
   }

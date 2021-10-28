@@ -334,6 +334,8 @@ Future<void> addExpandableChildren(
 Future<void> buildVariablesTree(
   Variable variable, {
   bool expandAll = false,
+  int offset,
+  int count,
 }) async {
   final ref = variable.ref;
   if (!variable.isExpandable || variable.treeInitializeStarted || ref == null)
@@ -382,13 +384,29 @@ Future<void> buildVariablesTree(
   }
   if (instanceRef != null && serviceManager.service != null) {
     try {
-      final dynamic result = await serviceManager.service
-          .getObject(variable.ref.isolateRef.id, instanceRef.id);
+      final dynamic result = await serviceManager.service.getObject(
+          variable.ref.isolateRef.id, instanceRef.id,
+          offset: offset, count: count);
       if (result is Instance) {
         if (result.associations != null) {
-          variable.addAllChildren(
-              _createVariablesForAssociations(result, isolateRef));
+          if (variable.childCount > 50) {
+            var offset = 0;
+            while (offset + 50 < variable.childCount) {
+              variable.addChild(
+                Variable.grouping(variable.ref, offset: offset, count: 50),
+              );
+              offset = offset + 50;
+            }
+            final remainder = variable.childCount - offset;
+            final childVar = Variable.grouping(variable.ref,
+                offset: offset, count: remainder);
+            variable.addChild(childVar);
+          } else {
+            variable.addAllChildren(
+                _createVariablesForAssociations(result, isolateRef));
+          }
         } else if (result.elements != null) {
+          // this is for a list
           variable
               .addAllChildren(_createVariablesForElements(result, isolateRef));
         } else if (result.bytes != null) {
@@ -657,7 +675,12 @@ List<Variable> _createVariablesForFields(
 // TODO(jacobr): consider a new class name. This class is more just the data
 // model for a tree of Dart objects with properties rather than a "Variable".
 class Variable extends TreeNode<Variable> {
-  Variable._(this.name, ref, this.text) : _ref = ref {
+  Variable._(this.name, ref, this.text,
+      {int offset, int count, bool isGrouping = false})
+      : _ref = ref,
+        _offset = offset,
+        _count = count,
+        _isGrouping = isGrouping {
     indentChildren = ref?.diagnostic?.style != DiagnosticsTreeStyle.flat;
   }
 
@@ -702,10 +725,34 @@ class Variable extends TreeNode<Variable> {
     return Variable._(null, null, text);
   }
 
+  factory Variable.grouping(
+    GenericInstanceRef ref, {
+    @required int offset,
+    @required int count,
+  }) {
+    return Variable._(
+      null,
+      ref,
+      '[$offset - ${offset + count}]',
+      offset: offset,
+      count: count,
+      isGrouping: true,
+    );
+  }
+
   final String text;
   final String name;
   GenericInstanceRef get ref => _ref;
   GenericInstanceRef _ref;
+
+  int get offset => _offset;
+  int _offset;
+
+  int get count => _count;
+  int _count;
+
+  bool get isGrouping => _isGrouping;
+  bool _isGrouping;
 
   bool treeInitializeStarted = false;
   bool treeInitializeComplete = false;
@@ -725,6 +772,25 @@ class Variable extends TreeNode<Variable> {
   }
 
   Object get value => ref?.value;
+
+  int get childCount {
+    if (isGrouping) {
+      return count;
+    }
+
+    final value = this.value;
+    if (value is InstanceRef) {
+      if (value.kind == InstanceKind.kList) {
+        return value.length;
+      } else if (value.kind == InstanceKind.kMap) {
+        return value.length;
+      } else if (value.kind != null && value.kind.endsWith('List')) {
+        return value.length;
+      }
+    }
+
+    return 0;
+  }
 
   // TODO(kenz): add custom display for lists with more than 100 elements
   String get displayValue {
