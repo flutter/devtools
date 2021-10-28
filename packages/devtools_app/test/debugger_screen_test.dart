@@ -35,7 +35,6 @@ void main() {
     when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
-    print('initializing');
     fakeServiceManager.consoleService.ensureServiceInitialized();
   });
 
