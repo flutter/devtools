@@ -73,11 +73,6 @@ class ConsoleService extends Disposer {
     bool forceScrollIntoView = false,
     bool expandAll = false,
   }) async {
-    assert(
-      _serviceInitialized,
-      '`ConsoleService.ensureServiceInitialized` must be called before '
-      'interacting with the ConsoleService.',
-    );
     _stdioTrailingNewline = false;
     final variable = Variable.fromValue(
       name: name,
@@ -123,11 +118,6 @@ class ConsoleService extends Disposer {
     String text, {
     bool forceScrollIntoView = false,
   }) {
-    assert(
-      _serviceInitialized,
-      '`ConsoleService.ensureServiceInitialized` must be called before '
-      'interacting with the ConsoleService.',
-    );
     const int kMaxLogItemsLowerBound = 5000;
     const int kMaxLogItemsUpperBound = 5500;
 
@@ -161,7 +151,7 @@ class ConsoleService extends Disposer {
     // will grow to kMaxLogItemsUpperBound then truncate to
     // kMaxLogItemsLowerBound.
     if (_stdio.value.length > kMaxLogItemsUpperBound) {
-      _stdio.trimToSublist(stdio.value.length - kMaxLogItemsLowerBound);
+      _stdio.trimToSublist(_stdio.value.length - kMaxLogItemsLowerBound);
     }
   }
 
