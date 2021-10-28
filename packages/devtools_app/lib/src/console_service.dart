@@ -73,6 +73,11 @@ class ConsoleService extends Disposer {
     bool forceScrollIntoView = false,
     bool expandAll = false,
   }) async {
+    assert(
+      _serviceInitialized,
+      '`ConsoleService.ensureServiceInitialized` must be called before '
+      'interacting with the ConsoleService.',
+    );
     _stdioTrailingNewline = false;
     final variable = Variable.fromValue(
       name: name,
@@ -118,6 +123,11 @@ class ConsoleService extends Disposer {
     String text, {
     bool forceScrollIntoView = false,
   }) {
+    assert(
+      _serviceInitialized,
+      '`ConsoleService.ensureServiceInitialized` must be called before '
+      'interacting with the ConsoleService.',
+    );
     const int kMaxLogItemsLowerBound = 5000;
     const int kMaxLogItemsUpperBound = 5500;
 
@@ -158,7 +168,14 @@ class ConsoleService extends Disposer {
   /// Return the stdout and stderr emitted from the application.
   ///
   /// Note that this output might be truncated after significant output.
-  ValueListenable<List<ConsoleLine>> get stdio => _stdio;
+  ValueListenable<List<ConsoleLine>> get stdio {
+    assert(
+      _serviceInitialized,
+      '`ConsoleService.ensureServiceInitialized` must be called before '
+      'interacting with the ConsoleService.',
+    );
+    return _stdio;
+  }
 
   void _handleStdoutEvent(Event event) {
     final String text = decodeBase64(event.bytes);
@@ -174,34 +191,39 @@ class ConsoleService extends Disposer {
 
   void vmServiceOpened(VmServiceWrapper service) {
     cancel();
+    // The debug stream listener must be added as soon as the service is opened
+    // because this stream does not send event history upon the first
+    // subscription like the streams in [ensureServiceInitialized].
     autoDispose(service.onDebugEvent.listen(_handleDebugEvent));
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       clearStdio();
     });
   }
 
-  /// Whether the listeners for event streams with history have been
-  /// initialized.
-  bool _listenersWithHistoryInitialized = false;
+  /// Whether the console service has been initialized.
+  bool _serviceInitialized = false;
 
-  /// Initialize listeners for streams with event history.
+  /// Initialize the console service.
   ///
-  /// These should be initialized in a lazy manner, and only when they are first
-  /// needed. Since the streams have event history, we will not be missing any
-  /// events by listening late, and listening only when this data is needed will
-  /// improve performance for connecting to low-end devices, as well as when
-  /// DevTools pages that don't need the [ConsoleService] are being used.
-  void initializeListenersWithHistory() {
+  /// Consumers of [ConsoleService] should call this method before using the
+  /// console service in any way.
+  ///
+  /// These stream listeners are added here instead of in [vmServiceOpened] for
+  /// performance reasons. Since these streams have event history, we will not
+  /// be missing any events by listening after [vmServiceOpened], and listening
+  /// only when this data is needed will improve performance for connecting to
+  /// low-end devices, as well as when DevTools pages that don't need the
+  /// [ConsoleService] are being used.
+  void ensureServiceInitialized() {
     assert(serviceManager.isServiceAvailable);
-    if (!_listenersWithHistoryInitialized &&
-        serviceManager.isServiceAvailable) {
+    if (!_serviceInitialized && serviceManager.isServiceAvailable) {
       autoDispose(serviceManager.service.onStdoutEventWithHistory
           .listen(_handleStdoutEvent));
       autoDispose(serviceManager.service.onStderrEventWithHistory
           .listen(_handleStderrEvent));
       autoDispose(serviceManager.service.onExtensionEventWithHistory
           .listen(_handleExtensionEvent));
-      _listenersWithHistoryInitialized = true;
+      _serviceInitialized = true;
     }
   }
 
@@ -231,7 +253,7 @@ class ConsoleService extends Disposer {
 
   void handleVmServiceClosed() {
     cancel();
-    _listenersWithHistoryInitialized = false;
+    _serviceInitialized = false;
   }
 
   void _handleDebugEvent(Event event) async {

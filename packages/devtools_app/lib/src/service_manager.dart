@@ -80,15 +80,7 @@ class ServiceConnectionManager {
 
   final isolateManager = IsolateManager();
 
-  ConsoleService get consoleService {
-    // Initializing these listeners here ensures that we listen lazily to event
-    // streams with history, only listening and adding events to the console
-    // service when we need to.
-    _consoleService.initializeListenersWithHistory();
-    return _consoleService;
-  }
-
-  final _consoleService = ConsoleService();
+  final consoleService = ConsoleService();
 
   InspectorServiceBase get inspectorService => _inspectorService;
   InspectorServiceBase _inspectorService;
@@ -189,7 +181,7 @@ class ServiceConnectionManager {
     // performing any async operations. Otherwise, we may get end up with
     // race conditions where managers cannot listen for events soon enough.
     isolateManager.vmServiceOpened(service);
-    _consoleService.vmServiceOpened(service);
+    consoleService.vmServiceOpened(service);
     serviceExtensionManager.vmServiceOpened(service, connectedApp);
     await vmFlagManager.vmServiceOpened(service);
     await timelineStreamManager.vmServiceOpened(service, connectedApp);
@@ -347,7 +339,7 @@ class ServiceConnectionManager {
     serviceTrafficLogger?.dispose();
 
     isolateManager._handleVmServiceClosed();
-    _consoleService.handleVmServiceClosed();
+    consoleService.handleVmServiceClosed();
     setDeviceBusy(false);
 
     _connectedState.value = connectionState;

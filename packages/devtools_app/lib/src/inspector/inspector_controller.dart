@@ -143,6 +143,8 @@ class InspectorController extends DisposableController
     autoDispose(
       serviceManager.onConnectionClosed.listen(_handleConnectionStop),
     );
+
+    serviceManager.consoleService.ensureServiceInitialized();
   }
 
   void _handleConnectionStart(VmService service) {

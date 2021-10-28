@@ -42,6 +42,8 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
   void initState() {
     super.initState();
 
+    serviceManager.consoleService.ensureServiceInitialized();
+
     _autoCompleteController = AutoCompleteController();
 
     addAutoDisposeListener(_autoCompleteController.searchNotifier, () {
@@ -54,9 +56,13 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
       );
     });
     addAutoDisposeListener(
-        _autoCompleteController.selectTheSearchNotifier, _handleSearch);
+      _autoCompleteController.selectTheSearchNotifier,
+      _handleSearch,
+    );
     addAutoDisposeListener(
-        _autoCompleteController.searchNotifier, _handleSearch);
+      _autoCompleteController.searchNotifier,
+      _handleSearch,
+    );
   }
 
   void _handleSearch() async {
