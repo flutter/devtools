@@ -39,21 +39,39 @@ class DebuggerController extends DisposableController
     );
     autoDispose(serviceManager.onConnectionAvailable
         .listen(_handleConnectionAvailable));
+    if (_service != null) {
+      initialize();
+    }
     _scriptHistoryListener = () {
       _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
     };
     scriptsHistory.current.addListener(_scriptHistoryListener);
-    addAutoDisposeListener(currentScriptRef, () {
-      if (!programExplorerController.initialized.value) {
-        programExplorerController.initialize();
-      }
-      if (currentScriptRef.value != null) {
-        programExplorerController.selectScriptNode(currentScriptRef.value);
-      }
-    });
+  }
 
-    if (_service != null) {
-      initialize();
+  bool _firstDebuggerScreenLoaded = false;
+
+  /// Callback to be called when the debugger screen is first loaded.
+  ///
+  /// We delay calling this method until the debugger screen is first loaded
+  /// for performance reasons. None of the code here needs to be called when
+  /// DevTools first connects to an app, and doing so inhibits DevTools from
+  /// connecting to low-end devices.
+  void onFirstDebuggerScreenLoad() {
+    if (!_firstDebuggerScreenLoaded) {
+      _maybeSetUpProgramExplorer();
+      addAutoDisposeListener(currentScriptRef, _maybeSetUpProgramExplorer);
+      _firstDebuggerScreenLoaded = true;
+    }
+  }
+
+  void _maybeSetUpProgramExplorer() {
+    if (!programExplorerController.initialized.value) {
+      programExplorerController
+        ..initListeners()
+        ..initialize();
+    }
+    if (currentScriptRef.value != null) {
+      programExplorerController.selectScriptNode(currentScriptRef.value);
     }
   }
 
@@ -82,6 +100,7 @@ class DebuggerController extends DisposableController
     _selectedBreakpoint.value = null;
     _librariesVisible.value = false;
     isolateRef = null;
+    _firstDebuggerScreenLoaded = false;
   }
 
   VmServiceWrapper _lastService;

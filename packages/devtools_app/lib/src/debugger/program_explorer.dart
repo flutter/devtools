@@ -62,7 +62,11 @@ class _ProgramExplorerRow extends StatelessWidget {
                 text,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.fixedFontStyle,
+                style: theme.fixedFontStyle.copyWith(
+                  color: node.isSelected
+                      ? Colors.white
+                      : theme.fixedFontStyle.color,
+                ),
               ),
             ),
           ],
@@ -320,7 +324,6 @@ class _ProgramOutlineView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(controller.isLoadingOutline);
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isLoadingOutline,
       builder: (context, isLoadingOutline, _) {

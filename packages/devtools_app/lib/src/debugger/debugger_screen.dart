@@ -116,6 +116,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
     controller = newController;
+    controller.onFirstDebuggerScreenLoad();
   }
 
   void _onLocationSelected(ScriptLocation location) {

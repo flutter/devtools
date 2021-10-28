@@ -35,7 +35,9 @@ Widget wrap(Widget widget) {
       ),
       _testNavigatorKey,
     ),
-    routeInformationParser: DevToolsRouteInformationParser(),
+    routeInformationParser:
+        // ignore: invalid_use_of_visible_for_testing_member
+        DevToolsRouteInformationParser.test('http://test/uri'),
   );
 }
 
