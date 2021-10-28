@@ -35,7 +35,6 @@ void main() {
     when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
-    print('initializing service');
     fakeServiceManager.consoleService.ensureServiceInitialized();
   });
 
@@ -147,7 +146,6 @@ void main() {
         final _expected = _stdio.join('\n');
 
         setUp(() {
-          print('appending lines');
           _appendStdioLines();
           // This intercepts the Clipboard.setData SystemChannel message,
           // and stores the contents that were (attempted) to be copied.
