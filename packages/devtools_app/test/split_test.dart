@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/preferences.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/utils.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(PreferencesController, PreferencesController());
   });
 
   // Note: tester by default has a window size of 800x600.

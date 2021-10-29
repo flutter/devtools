@@ -10,6 +10,7 @@ import 'package:devtools_app/src/inspector/inspector_screen.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/inspector/layout_explorer/layout_explorer.dart';
+import 'package:devtools_app/src/preferences.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_test/mocks.dart';
@@ -43,6 +44,7 @@ void main() {
           .thenReturn(ValueNotifier<int>(0));
 
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(PreferencesController, PreferencesController());
       fakeServiceManager.consoleService.ensureServiceInitialized();
     });
 

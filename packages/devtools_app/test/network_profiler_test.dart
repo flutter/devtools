@@ -12,6 +12,7 @@ import 'package:devtools_app/src/network/network_model.dart';
 import 'package:devtools_app/src/network/network_request_inspector.dart';
 import 'package:devtools_app/src/network/network_request_inspector_views.dart';
 import 'package:devtools_app/src/network/network_screen.dart';
+import 'package:devtools_app/src/preferences.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/utils.dart';
@@ -65,6 +66,7 @@ void main() {
         ..httpEnableTimelineLoggingResult = false
         ..dartIoVersion = SemanticVersion(major: 1, minor: 6);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(PreferencesController, PreferencesController());
     });
 
     testWidgetsWithWindowSize('starts and stops', windowSize, (

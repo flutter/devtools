@@ -9,6 +9,7 @@ import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/logging/logging_screen.dart';
+import 'package:devtools_app/src/preferences.dart';
 import 'package:devtools_app/src/service_extensions.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/service_extension_widgets.dart';
@@ -53,6 +54,7 @@ void main() {
       when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(PreferencesController, PreferencesController());
 
       screen = const LoggingScreen();
     });

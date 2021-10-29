@@ -6,6 +6,7 @@
 
 import 'package:devtools_app/src/banner_messages.dart';
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/preferences.dart';
 import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/provider/provider_list.dart';
@@ -30,6 +31,7 @@ void main() {
 
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(PreferencesController, PreferencesController());
   });
 
   setUp(() {

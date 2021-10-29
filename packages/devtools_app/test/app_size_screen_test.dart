@@ -11,6 +11,7 @@ import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/file_import.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/notifications.dart';
+import 'package:devtools_app/src/preferences.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:devtools_app/src/utils.dart';
@@ -28,6 +29,7 @@ import 'package:mockito/mockito.dart';
 void main() {
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(PreferencesController, PreferencesController());
   });
 
   final lastModifiedTime = DateTime.parse('2020-07-28 13:29:00');

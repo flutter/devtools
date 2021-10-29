@@ -16,6 +16,7 @@ void main() {
     test('has value', () {
       expect(controller.darkModeTheme.value, isNotNull);
       expect(controller.denseModeEnabled.value, isNotNull);
+      expect(controller.splitFractions.value, isNotNull);
     });
 
     test('toggleDarkModeTheme', () {
@@ -56,6 +57,25 @@ void main() {
       controller.toggleDenseMode(!controller.denseModeEnabled.value);
       expect(valueChanged, isTrue);
       expect(controller.denseModeEnabled.value, isNot(originalValue));
+    });
+
+    test('setSplitFractions valid data', () {
+      bool valueChanged = false;
+      final originalValue = controller.splitFractions.value;
+
+      controller.splitFractions.addListener(() {
+        valueChanged = true;
+      });
+
+      controller.setSplitFractions(
+          '{"_hash01231234":[0.33342342423, 0.98989899343]}');
+      expect(valueChanged, isTrue);
+      expect(controller.splitFractions.value, isNot(originalValue));
+
+      valueChanged = false;
+      controller.setSplitFractions('data should be object "{}" json string');
+      expect(valueChanged, isTrue);
+      expect(controller.splitFractions.value, equals(originalValue));
     });
   });
 }

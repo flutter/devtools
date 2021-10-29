@@ -12,6 +12,7 @@ import 'package:devtools_app/src/debugger/debugger_model.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/debugger/program_explorer_model.dart';
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/preferences.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_test/mocks.dart';
 import 'package:devtools_test/utils.dart';
@@ -35,6 +36,7 @@ void main() {
     when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(PreferencesController, PreferencesController());
     fakeServiceManager.consoleService.ensureServiceInitialized();
   });
 

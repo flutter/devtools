@@ -10,6 +10,7 @@ import 'package:devtools_app/src/performance/flutter_frames_chart.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
+import 'package:devtools_app/src/preferences.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/split.dart';
 import 'package:devtools_test/mocks.dart';
@@ -71,6 +72,7 @@ void main() {
       await ensureInspectorDependencies();
       _setUpServiceManagerWithTimeline(testTimelineJson);
       setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(PreferencesController, PreferencesController());
       screen = const PerformanceScreen();
     });
 
