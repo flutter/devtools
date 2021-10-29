@@ -72,8 +72,7 @@
     }
 
     if ('serviceWorker' in navigator) {
-      if (window.location.hostname === 'localhost' ||
-          window.location.href.includes('index.ddc.html')) {
+      if (window.location.href.includes('index.ddc.html')) {
         // If we are running DevTools locally, immediately load `main.dart.js` and
         // unregister any service workers:
         loadMainDartJs();
