@@ -414,7 +414,6 @@ Future<void> buildVariablesTree(
           variable.addAllChildren(
               _createVariablesForAssociations(result, isolateRef));
         } else if (result.elements != null) {
-          // this is for a list
           variable
               .addAllChildren(_createVariablesForElements(result, isolateRef));
         } else if (result.bytes != null) {

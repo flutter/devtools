@@ -125,6 +125,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           isolateRef: serviceManager.inspectorService.isolateRef,
           diagnostic: diagnostic,
         );
+        print('------ build variable in diagnostics? -----');
         await buildVariablesTree(variable);
         for (var child in variable.children) {
           await buildVariablesTree(child);

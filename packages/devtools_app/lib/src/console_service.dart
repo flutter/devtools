@@ -81,6 +81,7 @@ class ConsoleService extends Disposer {
       isolateRef: isolateRef,
     );
     // TODO(jacobr): fix out of order issues by tracking raw order.
+    print('build variable in console.');
     await buildVariablesTree(variable, expandAll: expandAll);
     if (expandAll) {
       variable.expandCascading();
