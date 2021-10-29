@@ -382,29 +382,37 @@ Future<void> buildVariablesTree(
       }
     }
   }
-  if (instanceRef != null && serviceManager.service != null) {
+
+  if (variable.childCount > Variable.MAX_CHILDREN_IN_GROUPING) {
+    final numChildrenInGrouping = variable.childCount >=
+            Variable.MAX_CHILDREN_IN_GROUPING *
+                Variable.MAX_CHILDREN_IN_GROUPING
+        ? (roundToNearestPow10(variable.childCount) /
+                Variable.MAX_CHILDREN_IN_GROUPING)
+            .floor()
+        : Variable.MAX_CHILDREN_IN_GROUPING;
+
+    var offset = 0;
+    while (offset + numChildrenInGrouping < variable.childCount) {
+      variable.addChild(
+        Variable.grouping(variable.ref,
+            offset: offset, count: numChildrenInGrouping),
+      );
+      offset += numChildrenInGrouping;
+    }
+    variable.addChild(
+      Variable.grouping(variable.ref,
+          offset: offset, count: variable.childCount - offset),
+    );
+  } else if (instanceRef != null && serviceManager.service != null) {
     try {
       final dynamic result = await serviceManager.service.getObject(
           variable.ref.isolateRef.id, instanceRef.id,
           offset: offset, count: count);
       if (result is Instance) {
         if (result.associations != null) {
-          if (variable.childCount > 50) {
-            var offset = 0;
-            while (offset + 50 < variable.childCount) {
-              variable.addChild(
-                Variable.grouping(variable.ref, offset: offset, count: 50),
-              );
-              offset = offset + 50;
-            }
-            final remainder = variable.childCount - offset;
-            final childVar = Variable.grouping(variable.ref,
-                offset: offset, count: remainder);
-            variable.addChild(childVar);
-          } else {
-            variable.addAllChildren(
-                _createVariablesForAssociations(result, isolateRef));
-          }
+          variable.addAllChildren(
+              _createVariablesForAssociations(result, isolateRef));
         } else if (result.elements != null) {
           // this is for a list
           variable
@@ -546,8 +554,9 @@ List<Variable> _createVariablesForAssociations(
       value: association.value,
       isolateRef: isolateRef,
     );
+    final entryNum = instance.offset == null ? i : i + instance.offset;
     variables.add(
-      Variable.text('[Entry $i]')
+      Variable.text('[Entry $entryNum]')
         ..addChild(key)
         ..addChild(value),
     );
@@ -622,9 +631,10 @@ List<Variable> _createVariablesForBytes(
   }
 
   for (int i = 0; i < result.length; i++) {
+    final name = instance.offset == null ? i : i + instance.offset;
     variables.add(
       Variable.fromValue(
-        name: '[$i]',
+        name: '[$name]',
         value: result[i],
         isolateRef: isolateRef,
       ),
@@ -639,9 +649,10 @@ List<Variable> _createVariablesForElements(
 ) {
   final variables = <Variable>[];
   for (int i = 0; i < instance.elements.length; i++) {
+    final name = instance.offset == null ? i : i + instance.offset;
     variables.add(
       Variable.fromValue(
-        name: '[$i]',
+        name: '[$name]',
         value: instance.elements[i],
         isolateRef: isolateRef,
       ),
@@ -733,12 +744,14 @@ class Variable extends TreeNode<Variable> {
     return Variable._(
       null,
       ref,
-      '[$offset - ${offset + count}]',
+      '[$offset ... ${offset + count - 1}]',
       offset: offset,
       count: count,
       isGrouping: true,
     );
   }
+
+  static const MAX_CHILDREN_IN_GROUPING = 100;
 
   final String text;
   final String name;
@@ -759,8 +772,8 @@ class Variable extends TreeNode<Variable> {
 
   @override
   bool get isExpandable {
-    if (treeInitializeComplete || children.isNotEmpty) {
-      return children.isNotEmpty;
+    if (treeInitializeComplete || children.isNotEmpty || childCount > 0) {
+      return children.isNotEmpty || childCount > 0;
     }
     final diagnostic = ref.diagnostic;
     if (diagnostic != null &&

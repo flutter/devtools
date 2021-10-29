@@ -46,7 +46,8 @@ class Variables extends StatelessWidget {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
       v.children.forEach(
-        (v) => buildVariablesTree(v, offset: v.offset, count: v.count),
+        (child) =>
+            buildVariablesTree(child, offset: child.offset, count: child.count),
       );
     }
   }
