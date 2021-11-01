@@ -6,6 +6,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
 import '../trees.dart';
+import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
 
 /// A node in a tree of VM service objects.
@@ -34,6 +35,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
   ObjRef object;
   ScriptRef script;
+  ScriptLocation location;
 
   /// This exists to allow for O(1) lookup of children when building the tree.
   final _childrenAsMap = <String, VMServiceObjectNode>{};
@@ -298,6 +300,27 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       _sortEntriesByType();
     }
     this.object = object;
+  }
+
+  Future<void> populateLocation() async {
+    ScriptRef script = this.script;
+    int tokenPos = 0;
+    if (object != null &&
+        (object is FieldRef || object is FuncRef || object is ClassRef)) {
+      final location = (object as dynamic).location;
+      tokenPos = location.tokenPos;
+      script = location.script;
+    }
+
+    script = await controller.debuggerController.getScript(script);
+    final position = tokenPos == 0
+        ? null
+        : SourcePosition.calculatePosition(script, tokenPos);
+
+    location = ScriptLocation(
+      script,
+      location: position,
+    );
   }
 
   /// Clear the _childrenAsMap map recursively to save memory.

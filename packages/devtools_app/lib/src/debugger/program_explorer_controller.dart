@@ -24,8 +24,13 @@ class ProgramExplorerController extends DisposableController
   ValueListenable<bool> get isLoadingOutline => _isLoadingOutline;
   final _isLoadingOutline = ValueNotifier<bool>(false);
 
-  /// The currently selected node.
-  VMServiceObjectNode _selected;
+  /// The currently selected node in the Program Explorer file picker.
+  VMServiceObjectNode _scriptSelection;
+
+  /// The currently selected node in the Program Explorer outline.
+  ValueListenable<VMServiceObjectNode> get outlineSelection =>
+      _outlineSelection;
+  final _outlineSelection = ValueNotifier<VMServiceObjectNode>(null);
 
   /// The processed roots of the tree.
   ValueListenable<List<VMServiceObjectNode>> get rootObjectNodes =>
@@ -114,7 +119,8 @@ class ProgramExplorerController extends DisposableController
 
   /// Clears controller state and re-initializes.
   void refresh() {
-    _selected = null;
+    _scriptSelection = null;
+    _outlineSelection.value = null;
     _isLoadingOutline.value = true;
     _outlineNodes.clear();
     _initialized.value = false;
@@ -128,16 +134,28 @@ class ProgramExplorerController extends DisposableController
     if (!node.isSelectable) {
       return;
     }
-    if (_selected != node) {
+    if (_scriptSelection != node) {
       await populateNode(node);
       node.select();
-      _selected?.unselect();
-      _selected = node;
+      _scriptSelection?.unselect();
+      _scriptSelection = node;
       _isLoadingOutline.value = true;
+      _outlineSelection.value = null;
       _outlineNodes
         ..clear()
-        ..addAll(await _selected.outline);
+        ..addAll(await _scriptSelection.outline);
       _isLoadingOutline.value = false;
+    }
+  }
+
+  void selectOutlineNode(VMServiceObjectNode node) {
+    if (!node.isSelectable) {
+      return;
+    }
+    if (_outlineSelection.value != node) {
+      node.select();
+      _outlineSelection.value?.unselect();
+      _outlineSelection.value = node;
     }
   }
 
@@ -190,6 +208,9 @@ class ProgramExplorerController extends DisposableController
       clazz.fields = results[0].cast<Field>();
       clazz.functions = results[1].cast<Func>();
       node.updateObject(clazz);
+    } else {
+      final obj = await service.getObject(isolateId, object.id);
+      node.updateObject(obj);
     }
   }
 }
