@@ -45,11 +45,7 @@ class Variables extends StatelessWidget {
   void onItemPressed(Variable v, DebuggerController controller) {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
-      print('===== A =====');
-      v.children.forEach(
-        (child) =>
-            buildVariablesTree(child, offset: child.offset, count: child.count),
-      );
+      v.children.forEach(buildVariablesTree);
     }
   }
 }
@@ -76,11 +72,7 @@ class VariablesList extends StatelessWidget {
   void onItemPressed(Variable v, DebuggerController controller) {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
-      print('====== B =====');
-      v.children.forEach(
-        (child) =>
-            buildVariablesTree(child, offset: child.offset, count: child.count),
-      );
+      v.children.forEach(buildVariablesTree);
     }
   }
 }
@@ -119,11 +111,7 @@ class ExpandableVariable extends StatelessWidget {
   void onItemPressed(Variable v, DebuggerController controller) {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
-      print('======= C ======');
-      v.children.forEach(
-        (child) =>
-            buildVariablesTree(child, offset: child.offset, count: child.count),
-      );
+      v.children.forEach(buildVariablesTree);
     }
   }
 }

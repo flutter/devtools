@@ -334,8 +334,6 @@ Future<void> addExpandableChildren(
 Future<void> buildVariablesTree(
   Variable variable, {
   bool expandAll = false,
-  int offset,
-  int count,
 }) async {
   final ref = variable.ref;
   if (!variable.isExpandable || variable.treeInitializeStarted || ref == null)
@@ -392,23 +390,25 @@ Future<void> buildVariablesTree(
             .floor()
         : Variable.MAX_CHILDREN_IN_GROUPING;
 
-    var offset = 0;
-    while (offset + numChildrenInGrouping < variable.childCount) {
+    var index = 0;
+    while (index + numChildrenInGrouping < variable.childCount) {
       variable.addChild(
         Variable.grouping(variable.ref,
-            offset: offset, count: numChildrenInGrouping),
+            offset: index + (variable.offset ?? 0),
+            count: numChildrenInGrouping),
       );
-      offset += numChildrenInGrouping;
+      index += numChildrenInGrouping;
     }
     variable.addChild(
       Variable.grouping(variable.ref,
-          offset: offset, count: variable.childCount - offset),
+          offset: index + (variable.offset ?? 0),
+          count: variable.childCount - index),
     );
   } else if (instanceRef != null && serviceManager.service != null) {
     try {
       final dynamic result = await serviceManager.service.getObject(
           variable.ref.isolateRef.id, instanceRef.id,
-          offset: offset, count: count);
+          offset: variable.offset ?? 0, count: variable.count ?? 0);
       if (result is Instance) {
         if (result.associations != null) {
           variable.addAllChildren(
