@@ -480,7 +480,11 @@ class ServiceConnectionManager {
   bool libraryUriAvailableNow(String uri) {
     assert(_serviceAvailable.isCompleted);
     assert(serviceManager.isolateManager.mainIsolate.value != null);
-    final isolate = isolateManager.mainIsolateDebuggerState.isolateNow;
+    final maindebugstate = isolateManager.mainIsolateDebuggerState;
+    final isolate = maindebugstate.isolateNow;
+    print('about to assert "isolate != null"');
+    print('mainIsolateDebuggerState = $maindebugstate');
+    print('mainIsolateDebuggerState.isolateNow = $isolate');
     assert(isolate != null);
     return isolate.libraries
         .map((ref) => ref.uri)
@@ -512,6 +516,7 @@ class IsolateState {
   final _isPaused = ValueNotifier<bool>(null);
 
   void onIsolateLoaded(Isolate isolate) {
+    print('loading isolate for state');
     _isolateNow = isolate;
     _isolate.complete(isolate);
     if (_isPaused.value == null) {
@@ -579,7 +584,7 @@ class IsolateManager extends Disposer {
 
   IsolateState get mainIsolateDebuggerState {
     print(
-        'in mainIsolateDebuggerState getter: _mainIsolate.value = _mainIsolate.value');
+        'in mainIsolateDebuggerState getter: _mainIsolate.value = ${_mainIsolate.value}');
     print('returning ${_isolateStates[_mainIsolate.value]}');
     return _isolateStates[_mainIsolate.value];
   }
@@ -607,6 +612,7 @@ class IsolateManager extends Disposer {
   Future<void> _initIsolates(List<IsolateRef> isolates) async {
     _clearIsolateStates();
 
+    print('_initIsolates - registering each isolate');
     isolates.forEach(_registerIsolate);
 
     // It is critical that the _serviceExtensionManager is already listening
@@ -624,14 +630,17 @@ class IsolateManager extends Disposer {
     _isolateStates[isolateRef] = IsolateState(isolateRef);
     _isolates.add(isolateRef);
     isolateIndex(isolateRef);
+    print('in _registerIsolate and calling _loadIsolateState')
     _loadIsolateState(isolateRef);
   }
 
   void _loadIsolateState(IsolateRef isolateRef) {
+    print('_loadIsolateState');
     final service = _service;
     _service.getIsolate(isolateRef.id).then((Isolate isolate) {
       if (service != _service) return;
       final state = _isolateStates[isolateRef];
+      print('trying to load for state = $state');
       if (state != null) {
         // Isolate might have already been closed.
         state.onIsolateLoaded(isolate);
@@ -644,6 +653,7 @@ class IsolateManager extends Disposer {
 
     if (event.kind == EventKind.kIsolateStart &&
         !event.isolate.isSystemIsolate) {
+      print('registering isolate for kIsolateStart event');
       _registerIsolate(event.isolate);
       _isolateCreatedController.add(event.isolate);
       // TODO(jacobr): we assume the first isolate started is the main isolate
@@ -748,6 +758,7 @@ class IsolateManager extends Disposer {
 
     cancel();
     _service = service;
+    print('registering isolate event listener in vmServiceOpened');
     autoDispose(service.onIsolateEvent.listen(_handleIsolateEvent));
     autoDispose(service.onDebugEvent.listen(_handleDebugEvent));
 
