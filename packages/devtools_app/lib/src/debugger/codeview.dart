@@ -177,7 +177,8 @@ class _CodeViewState extends State<CodeView>
     // middle third of the screen.
     if (parsedScript.lineCount * CodeView.rowHeight > extent) {
       final lineIndex = location.line - 1;
-      final scrollPosition = lineIndex * CodeView.rowHeight;
+      final scrollPosition =
+          lineIndex * CodeView.rowHeight - ((extent - CodeView.rowHeight) / 2);
       if (animate) {
         verticalController.animateTo(
           scrollPosition,
@@ -701,14 +702,15 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
       itemBuilder: (context, index) {
         final lineNum = index + 1;
         final isPausedLine = pausedLine == lineNum;
-        return ValueListenableBuilder(
+        return ValueListenableBuilder<int>(
           valueListenable:
               widget.debugController.programExplorerController.focusedLine,
           builder: (context, focusedLine, _) {
+            final isFocusedLine = focusedLine == lineNum;
             return LineItem(
               lineContents: widget.lines[index],
               pausedFrame: isPausedLine ? widget.pausedFrame : null,
-              focused: isPausedLine || focusedLine == lineNum,
+              focused: isPausedLine || isFocusedLine,
               searchMatches: searchMatchesForLine(index),
               activeSearchMatch:
                   activeSearch?.position?.line == index ? activeSearch : null,

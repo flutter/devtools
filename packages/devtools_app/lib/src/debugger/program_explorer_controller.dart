@@ -11,7 +11,6 @@ import '../auto_dispose.dart';
 import '../globals.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
-import 'debugger_model.dart';
 import 'program_explorer_model.dart';
 
 class ProgramExplorerController extends DisposableController
@@ -35,9 +34,10 @@ class ProgramExplorerController extends DisposableController
   ValueListenable<bool> get isLoadingOutline => _isLoadingOutline;
   final _isLoadingOutline = ValueNotifier<bool>(false);
 
-  /// The currently selected node.
-  VMServiceObjectNode _selected;
+  /// The currently selected node in the Program Explorer file picker.
+  VMServiceObjectNode _scriptSelection;
 
+  /// The currently selected node in the Program Explorer outline.
   VMServiceObjectNode _outlineSelection;
 
   /// The processed roots of the tree.
@@ -52,6 +52,9 @@ class ProgramExplorerController extends DisposableController
   final _initialized = ValueNotifier<bool>(false);
   bool _initializing = false;
 
+  /// The line corresponding with the currently selected outline node. Results
+  /// in the declaration of the selected outline node being highlighted in the
+  /// [CodeView].
   ValueListenable<int> get focusedLine => _focusedLine;
   final _focusedLine = ValueNotifier<int>(null);
 
@@ -117,7 +120,7 @@ class ProgramExplorerController extends DisposableController
 
   /// Clears controller state and re-initializes.
   void refresh() {
-    _selected = null;
+    _scriptSelection = null;
     _outlineSelection = null;
     _focusedLine.value = null;
     _isLoadingOutline.value = true;
@@ -133,17 +136,17 @@ class ProgramExplorerController extends DisposableController
     if (!node.isSelectable) {
       return;
     }
-    if (_selected != node) {
+    if (_scriptSelection != node) {
       await populateNode(node);
       node.select();
-      _selected?.unselect();
-      _selected = node;
+      _scriptSelection?.unselect();
+      _scriptSelection = node;
       _isLoadingOutline.value = true;
       _outlineSelection = null;
       _focusedLine.value = null;
       _outlineNodes
         ..clear()
-        ..addAll(await _selected.outline);
+        ..addAll(await _scriptSelection.outline);
       _isLoadingOutline.value = false;
     }
   }
