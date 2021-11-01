@@ -106,20 +106,6 @@ abstract class InspectorServiceBase extends DisposableController
   /// Returns a new [ObjectGroupBase] with the given group name.
   ObjectGroupBase createObjectGroup(String debugName);
 
-  ValueListenable<List<String>> get rootDirectories => _rootDirectories;
-  final ValueNotifier<List<String>> _rootDirectories = ValueNotifier([]);
-
-  @visibleForTesting
-  Set<String> get rootPackages => _rootPackages;
-  Set<String> _rootPackages;
-
-  @visibleForTesting
-  List<String> get rootPackagePrefixes => _rootPackagePrefixes;
-  List<String> _rootPackagePrefixes;
-
-  @visibleForTesting
-  final Map<String, ClassRef> localClasses = {};
-
   bool get isDisposed => _isDisposed;
   bool _isDisposed = false;
 
@@ -129,89 +115,6 @@ abstract class InspectorServiceBase extends DisposableController
 
   void removeClient(InspectorServiceClient client) {
     clients.remove(client);
-  }
-
-  Future<void> _onRootDirectoriesChanged(List<String> directories) async {
-    _rootDirectories.value = directories;
-    _rootPackages = {};
-    _rootPackagePrefixes = [];
-    for (var directory in directories) {
-      // TODO(jacobr): add an API to DDS to provide the actual mapping to and
-      // from absolute file paths to packages instead of having to guess it
-      // here.
-      assert(!directory.startsWith('package:'));
-
-      final parts =
-          directory.split('/').where((element) => element.isNotEmpty).toList();
-      final libIndex = parts.lastIndexOf('lib');
-      final path = libIndex > 0 ? parts.sublist(0, libIndex) : parts;
-      // Special case handling of bazel packages.
-      final google3Index = path.lastIndexOf('google3');
-      if (google3Index != -1 && google3Index + 1 < path.length) {
-        var packageParts = path.sublist(google3Index + 1);
-        // A well formed third_party dart package should be in a directory of
-        // the form
-        // third_party/dart/packageName                    (package:packageName)
-        // or
-        // third_party/dart_src/long/package/name    (package:long.package.name)
-        // so its path should be at minimum depth 3.
-        const minThirdPartyPathDepth = 3;
-        if (packageParts[0] == 'third_party' &&
-            packageParts.length >= minThirdPartyPathDepth) {
-          assert(packageParts[1] == 'dart' || packageParts[1] == 'dart_src');
-          packageParts = packageParts.sublist(2);
-        }
-        final google3PackageName = packageParts.join('.');
-        _rootPackages.add(google3PackageName);
-        _rootPackagePrefixes.add(google3PackageName + '.');
-      } else {
-        _rootPackages.add(path.last);
-      }
-    }
-
-    await _updateLocalClasses();
-  }
-
-  Future<void> _updateLocalClasses() async {
-    localClasses.clear();
-    if (_rootDirectories.value.isNotEmpty) {
-      final isolate = inspectorLibrary.isolate;
-      for (var libraryRef in isolate.libraries) {
-        if (isLocalUri(libraryRef.uri)) {
-          try {
-            final Library library = await inspectorLibrary.service
-                .getObject(isolate.id, libraryRef.id);
-            for (var classRef in library.classes) {
-              localClasses[classRef.name] = classRef;
-            }
-          } catch (e) {
-            // Workaround until https://github.com/flutter/devtools/issues/3110
-            // is fixed.
-            assert(serviceManager.connectedApp.isDartWebAppNow);
-          }
-        }
-      }
-    }
-  }
-
-  @visibleForTesting
-  bool isLocalUri(String rawUri) {
-    final uri = Uri.parse(rawUri);
-    if (uri.scheme != 'file' && uri.scheme != 'dart') {
-      // package scheme or some other dart specific scheme.
-      final packageName = uri.pathSegments.first;
-      if (_rootPackages.contains(packageName)) return true;
-
-      // This attempts to gracefully handle the bazel package case.
-      return _rootPackagePrefixes
-          .any((prefix) => packageName.startsWith(prefix));
-    }
-    for (var root in _rootDirectories.value) {
-      if (root.endsWith(rawUri)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   /// Returns whether to use the Daemon API or the VM Service protocol directly.
@@ -291,28 +194,6 @@ abstract class InspectorServiceBase extends DisposableController
     }
     return json['result'];
   }
-
-  Future<void> setPubRootDirectories(List<String> rootDirectories) async {
-    await _setPubRootDirectories(rootDirectories);
-    await _onRootDirectoriesChanged(rootDirectories);
-  }
-
-  Future<void> _setPubRootDirectories(List<String> rootDirectories) {
-    // No need to call this from a breakpoint.
-    assert(useDaemonApi);
-    return invokeServiceMethodDaemonNoGroupArgs(
-      'setPubRootDirectories',
-      rootDirectories,
-    );
-  }
-
-  Future<List<String>> getPubRootDirectories() {
-    // No need to call this from a breakpoint.
-    assert(useDaemonApi);
-    final result =
-        invokeServiceMethodDaemonNoGroup('getPubRootDirectories', null);
-    return result ?? [];
-  }
 }
 
 /// Manages communication between inspector code running in the Flutter app and
@@ -331,6 +212,20 @@ class InspectorService extends InspectorServiceBase {
     autoDispose(
         serviceManager.service.onDebugEvent.listen(onDebugVmServiceReceived));
   }
+
+  ValueListenable<List<String>> get rootDirectories => _rootDirectories;
+  final ValueNotifier<List<String>> _rootDirectories = ValueNotifier([]);
+
+  @visibleForTesting
+  Set<String> get rootPackages => _rootPackages;
+  Set<String> _rootPackages;
+
+  @visibleForTesting
+  List<String> get rootPackagePrefixes => _rootPackagePrefixes;
+  List<String> _rootPackagePrefixes;
+
+  @visibleForTesting
+  final Map<String, ClassRef> localClasses = {};
 
   @override
   void onIsolateStopped() {
@@ -436,6 +331,111 @@ class InspectorService extends InspectorServiceBase {
       }
     }
     return false;
+  }
+
+  Future<void> _onRootDirectoriesChanged(List<String> directories) async {
+    _rootDirectories.value = directories;
+    _rootPackages = {};
+    _rootPackagePrefixes = [];
+    for (var directory in directories) {
+      // TODO(jacobr): add an API to DDS to provide the actual mapping to and
+      // from absolute file paths to packages instead of having to guess it
+      // here.
+      assert(!directory.startsWith('package:'));
+
+      final parts =
+          directory.split('/').where((element) => element.isNotEmpty).toList();
+      final libIndex = parts.lastIndexOf('lib');
+      final path = libIndex > 0 ? parts.sublist(0, libIndex) : parts;
+      // Special case handling of bazel packages.
+      final google3Index = path.lastIndexOf('google3');
+      if (google3Index != -1 && google3Index + 1 < path.length) {
+        var packageParts = path.sublist(google3Index + 1);
+        // A well formed third_party dart package should be in a directory of
+        // the form
+        // third_party/dart/packageName                    (package:packageName)
+        // or
+        // third_party/dart_src/long/package/name    (package:long.package.name)
+        // so its path should be at minimum depth 3.
+        const minThirdPartyPathDepth = 3;
+        if (packageParts[0] == 'third_party' &&
+            packageParts.length >= minThirdPartyPathDepth) {
+          assert(packageParts[1] == 'dart' || packageParts[1] == 'dart_src');
+          packageParts = packageParts.sublist(2);
+        }
+        final google3PackageName = packageParts.join('.');
+        _rootPackages.add(google3PackageName);
+        _rootPackagePrefixes.add(google3PackageName + '.');
+      } else {
+        _rootPackages.add(path.last);
+      }
+    }
+
+    await _updateLocalClasses();
+  }
+
+  Future<void> _updateLocalClasses() async {
+    localClasses.clear();
+    if (_rootDirectories.value.isNotEmpty) {
+      final isolate = inspectorLibrary.isolate;
+      for (var libraryRef in isolate.libraries) {
+        if (isLocalUri(libraryRef.uri)) {
+          try {
+            final Library library = await inspectorLibrary.service
+                .getObject(isolate.id, libraryRef.id);
+            for (var classRef in library.classes) {
+              localClasses[classRef.name] = classRef;
+            }
+          } catch (e) {
+            // Workaround until https://github.com/flutter/devtools/issues/3110
+            // is fixed.
+            assert(serviceManager.connectedApp.isDartWebAppNow);
+          }
+        }
+      }
+    }
+  }
+
+  @visibleForTesting
+  bool isLocalUri(String rawUri) {
+    final uri = Uri.parse(rawUri);
+    if (uri.scheme != 'file' && uri.scheme != 'dart') {
+      // package scheme or some other dart specific scheme.
+      final packageName = uri.pathSegments.first;
+      if (_rootPackages.contains(packageName)) return true;
+
+      // This attempts to gracefully handle the bazel package case.
+      return _rootPackagePrefixes
+          .any((prefix) => packageName.startsWith(prefix));
+    }
+    for (var root in _rootDirectories.value) {
+      if (root.endsWith(rawUri)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Future<void> setPubRootDirectories(List<String> rootDirectories) async {
+    await _setPubRootDirectories(rootDirectories);
+    await _onRootDirectoriesChanged(rootDirectories);
+  }
+
+  Future<void> _setPubRootDirectories(List<String> rootDirectories) {
+    // No need to call this from a breakpoint.
+    assert(useDaemonApi);
+    return invokeServiceMethodDaemonNoGroupArgs(
+      'setPubRootDirectories',
+      rootDirectories,
+    );
+  }
+
+  Future<List<String>> getPubRootDirectories() {
+    // No need to call this from a breakpoint.
+    assert(useDaemonApi);
+    final result =
+        invokeServiceMethodDaemonNoGroup('getPubRootDirectories', null);
+    return result ?? [];
   }
 
   /// As we aren't running from an IDE, we don't know exactly what the pub root
