@@ -314,9 +314,7 @@ class InspectorService extends InspectorServiceBase {
     // fixed in all versions of flutter we support, remove this logic and
     // determine the source of the inspector selection change directly from the
     // inspector selection changed event.
-    final currentTime = DateTime
-        .now()
-        .millisecondsSinceEpoch;
+    final currentTime = DateTime.now().millisecondsSinceEpoch;
     if (ref != null) {
       if (_expectedSelectionChanges.containsKey(ref)) {
         final times = _expectedSelectionChanges.remove(ref);
@@ -346,7 +344,7 @@ class InspectorService extends InspectorServiceBase {
       assert(!directory.startsWith('package:'));
 
       final parts =
-      directory.split('/').where((element) => element.isNotEmpty).toList();
+          directory.split('/').where((element) => element.isNotEmpty).toList();
       final libIndex = parts.lastIndexOf('lib');
       final path = libIndex > 0 ? parts.sublist(0, libIndex) : parts;
       // Special case handling of bazel packages.
@@ -435,7 +433,8 @@ class InspectorService extends InspectorServiceBase {
   Future<List<String>> getPubRootDirectories() {
     // No need to call this from a breakpoint.
     assert(useDaemonApi);
-    final result = invokeServiceMethodDaemonNoGroup('getPubRootDirectories', null);
+    final result =
+        invokeServiceMethodDaemonNoGroup('getPubRootDirectories', null);
     return result ?? [];
   }
 
