@@ -38,7 +38,9 @@ class ProgramExplorerController extends DisposableController
   VMServiceObjectNode _scriptSelection;
 
   /// The currently selected node in the Program Explorer outline.
-  VMServiceObjectNode _outlineSelection;
+  ValueListenable<VMServiceObjectNode> get outlineSelection =>
+      _outlineSelection;
+  final _outlineSelection = ValueNotifier<VMServiceObjectNode>(null);
 
   /// The processed roots of the tree.
   ValueListenable<List<VMServiceObjectNode>> get rootObjectNodes =>
@@ -51,12 +53,6 @@ class ProgramExplorerController extends DisposableController
   ValueListenable<bool> get initialized => _initialized;
   final _initialized = ValueNotifier<bool>(false);
   bool _initializing = false;
-
-  /// The line corresponding with the currently selected outline node. Results
-  /// in the declaration of the selected outline node being highlighted in the
-  /// [CodeView].
-  ValueListenable<int> get focusedLine => _focusedLine;
-  final _focusedLine = ValueNotifier<int>(null);
 
   DebuggerController debuggerController;
 
@@ -121,8 +117,7 @@ class ProgramExplorerController extends DisposableController
   /// Clears controller state and re-initializes.
   void refresh() {
     _scriptSelection = null;
-    _outlineSelection = null;
-    _focusedLine.value = null;
+    _outlineSelection.value = null;
     _isLoadingOutline.value = true;
     _outlineNodes.clear();
     _initialized.value = false;
@@ -142,8 +137,7 @@ class ProgramExplorerController extends DisposableController
       _scriptSelection?.unselect();
       _scriptSelection = node;
       _isLoadingOutline.value = true;
-      _outlineSelection = null;
-      _focusedLine.value = null;
+      _outlineSelection.value = null;
       _outlineNodes
         ..clear()
         ..addAll(await _scriptSelection.outline);
@@ -155,11 +149,10 @@ class ProgramExplorerController extends DisposableController
     if (!node.isSelectable) {
       return;
     }
-    if (_outlineSelection != node) {
+    if (_outlineSelection.value != node) {
       node.select();
-      _focusedLine.value = node.location?.location?.line;
-      _outlineSelection?.unselect();
-      _outlineSelection = node;
+      _outlineSelection.value?.unselect();
+      _outlineSelection.value = node;
     }
   }
 
