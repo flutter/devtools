@@ -630,7 +630,7 @@ class IsolateManager extends Disposer {
     _isolateStates[isolateRef] = IsolateState(isolateRef);
     _isolates.add(isolateRef);
     isolateIndex(isolateRef);
-    print('in _registerIsolate and calling _loadIsolateState')
+    print('in _registerIsolate and calling _loadIsolateState');
     _loadIsolateState(isolateRef);
   }
 
