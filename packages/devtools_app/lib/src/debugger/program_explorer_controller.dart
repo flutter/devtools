@@ -11,6 +11,7 @@ import '../auto_dispose.dart';
 import '../globals.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
+import 'debugger_model.dart';
 import 'program_explorer_model.dart';
 
 class ProgramExplorerController extends DisposableController
@@ -37,6 +38,8 @@ class ProgramExplorerController extends DisposableController
   /// The currently selected node.
   VMServiceObjectNode _selected;
 
+  VMServiceObjectNode _outlineSelection;
+
   /// The processed roots of the tree.
   ValueListenable<List<VMServiceObjectNode>> get rootObjectNodes =>
       _rootObjectNodes;
@@ -48,6 +51,9 @@ class ProgramExplorerController extends DisposableController
   ValueListenable<bool> get initialized => _initialized;
   final _initialized = ValueNotifier<bool>(false);
   bool _initializing = false;
+
+  ValueListenable<int> get focusedLine => _focusedLine;
+  final _focusedLine = ValueNotifier<int>(null);
 
   DebuggerController debuggerController;
 
@@ -112,6 +118,8 @@ class ProgramExplorerController extends DisposableController
   /// Clears controller state and re-initializes.
   void refresh() {
     _selected = null;
+    _outlineSelection = null;
+    _focusedLine.value = null;
     _isLoadingOutline.value = true;
     _outlineNodes.clear();
     _initialized.value = false;
@@ -131,10 +139,24 @@ class ProgramExplorerController extends DisposableController
       _selected?.unselect();
       _selected = node;
       _isLoadingOutline.value = true;
+      _outlineSelection = null;
+      _focusedLine.value = null;
       _outlineNodes
         ..clear()
         ..addAll(await _selected.outline);
       _isLoadingOutline.value = false;
+    }
+  }
+
+  void selectOutlineNode(VMServiceObjectNode node) {
+    if (!node.isSelectable) {
+      return;
+    }
+    if (_outlineSelection != node) {
+      node.select();
+      _focusedLine.value = node.location?.location?.line;
+      _outlineSelection?.unselect();
+      _outlineSelection = node;
     }
   }
 
@@ -187,6 +209,9 @@ class ProgramExplorerController extends DisposableController
       clazz.fields = results[0].cast<Field>();
       clazz.functions = results[1].cast<Func>();
       node.updateObject(clazz);
+    } else {
+      final obj = await service.getObject(isolateId, object.id);
+      node.updateObject(obj);
     }
   }
 }

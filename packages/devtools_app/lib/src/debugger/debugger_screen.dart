@@ -122,7 +122,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     if (location != null) {
       controller.showScriptLocation(
         location,
-        centerLocation: location.location == null,
       );
     }
   }

@@ -178,11 +178,8 @@ class DebuggerController extends DisposableController
   final _clazzCache = <ClassRef, Class>{};
 
   /// Jump to the given ScriptRef and optional SourcePosition.
-  void showScriptLocation(
-    ScriptLocation scriptLocation, {
-    bool centerLocation = true,
-  }) {
-    _showScriptLocation(scriptLocation, centerLocation: centerLocation);
+  void showScriptLocation(ScriptLocation scriptLocation) {
+    _showScriptLocation(scriptLocation);
 
     // Update the scripts history (and make sure we don't react to the
     // subsequent event).
@@ -193,11 +190,7 @@ class DebuggerController extends DisposableController
 
   /// Show the given script location (without updating the script navigation
   /// history).
-  void _showScriptLocation(
-    ScriptLocation scriptLocation, {
-    bool centerLocation = true,
-  }) {
-    _shouldCenterScrollLocation = centerLocation;
+  void _showScriptLocation(ScriptLocation scriptLocation) {
     _currentScriptRef.value = scriptLocation?.scriptRef;
 
     _parseCurrentScript();
@@ -305,9 +298,6 @@ class DebuggerController extends DisposableController
 
   /// Return the sorted list of ScriptRefs active in the current isolate.
   ValueListenable<List<ScriptRef>> get sortedScripts => _sortedScripts;
-
-  bool get shouldCenterScrollLocation => _shouldCenterScrollLocation;
-  bool _shouldCenterScrollLocation = true;
 
   final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
 
