@@ -613,7 +613,9 @@ class IsolateManager extends Disposer {
     _clearIsolateStates();
 
     print('_initIsolates - registering each isolate');
-    isolates.forEach(_registerIsolate);
+    await Future.wait([
+      for (final isolateRef in isolates) _registerIsolate(isolateRef),
+    ]);
 
     // It is critical that the _serviceExtensionManager is already listening
     // for events indicating that new extension rpcs are registered before this
@@ -624,28 +626,27 @@ class IsolateManager extends Disposer {
     await _initSelectedIsolate();
   }
 
-  void _registerIsolate(IsolateRef isolateRef) {
+  Future<void> _registerIsolate(IsolateRef isolateRef) async {
     assert(!_isolateStates.containsKey(isolateRef));
     print('registering isolate ${isolateRef.id}');
     _isolateStates[isolateRef] = IsolateState(isolateRef);
     _isolates.add(isolateRef);
     isolateIndex(isolateRef);
     print('in _registerIsolate and calling _loadIsolateState');
-    _loadIsolateState(isolateRef);
+    await _loadIsolateState(isolateRef);
   }
 
-  void _loadIsolateState(IsolateRef isolateRef) {
+  Future<void> _loadIsolateState(IsolateRef isolateRef) async {
     print('_loadIsolateState');
     final service = _service;
-    _service.getIsolate(isolateRef.id).then((Isolate isolate) {
-      if (service != _service) return;
-      final state = _isolateStates[isolateRef];
-      print('trying to load for state = $state');
-      if (state != null) {
-        // Isolate might have already been closed.
-        state.onIsolateLoaded(isolate);
-      }
-    });
+    final isolate = await _service.getIsolate(isolateRef.id);
+    if (service != _service) return;
+    final state = _isolateStates[isolateRef];
+    print('trying to load for state = $state');
+    if (state != null) {
+      // Isolate might have already been closed.
+      state.onIsolateLoaded(isolate);
+    }
   }
 
   Future<void> _handleIsolateEvent(Event event) async {
@@ -654,7 +655,7 @@ class IsolateManager extends Disposer {
     if (event.kind == EventKind.kIsolateStart &&
         !event.isolate.isSystemIsolate) {
       print('registering isolate for kIsolateStart event');
-      _registerIsolate(event.isolate);
+      await _registerIsolate(event.isolate);
       _isolateCreatedController.add(event.isolate);
       // TODO(jacobr): we assume the first isolate started is the main isolate
       // but that may not always be a safe assumption.
