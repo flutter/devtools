@@ -406,9 +406,9 @@ Future<void> buildVariablesTree(
     );
   } else if (instanceRef != null && serviceManager.service != null) {
     try {
-      final dynamic result = await serviceManager.service.getObject(
+      final dynamic result = await _getObjectWithRetry(
           variable.ref.isolateRef.id, instanceRef.id,
-          offset: variable.offset ?? 0, count: variable.count ?? 0);
+          offset: variable.offset, count: variable.count);
       if (result is Instance) {
         if (result.associations != null) {
           variable.addAllChildren(
@@ -498,6 +498,24 @@ Future<void> buildVariablesTree(
     }
   }
   variable.treeInitializeComplete = true;
+}
+
+Future<Obj> _getObjectWithRetry(
+  String isolateId,
+  String objectId, {
+  int offset,
+  int count,
+}) async {
+  try {
+    final dynamic result = await serviceManager.service
+        .getObject(isolateId, objectId, offset: offset ?? 0, count: count ?? 0);
+    return result;
+  } catch (e) {
+    // TODO(elliette): Remove once https://github.com/dart-lang/webdev/issues/1439 is landed. This fixes
+    final dynamic result =
+        await serviceManager.service.getObject(isolateId, objectId);
+    return result;
+  }
 }
 
 Future<Variable> _buildVariable(

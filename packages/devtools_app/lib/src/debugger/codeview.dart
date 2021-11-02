@@ -787,7 +787,6 @@ class _LineItemState extends State<LineItem> {
             value: response,
             isolateRef: isolateRef,
           );
-          print('===== ON HOVER, BUILD VARIABLE.');
           await buildVariablesTree(variable);
           if (_hasMouseExited) return;
           _hoverCard?.remove();
