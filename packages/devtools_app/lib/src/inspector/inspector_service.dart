@@ -995,7 +995,7 @@ abstract class ObjectGroupBase implements Disposable {
     }
   }
 
-  /// Evaluate an expression where `object` referrences the [inspectorRef] or
+  /// Evaluate an expression where `object` references the [inspectorRef] or
   /// [instanceRef] passed in.
   ///
   /// If both [inspectorRef] and [instanceRef] are passed in they are assumed to
