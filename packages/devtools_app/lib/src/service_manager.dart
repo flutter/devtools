@@ -480,11 +480,7 @@ class ServiceConnectionManager {
   bool libraryUriAvailableNow(String uri) {
     assert(_serviceAvailable.isCompleted);
     assert(serviceManager.isolateManager.mainIsolate.value != null);
-    final maindebugstate = isolateManager.mainIsolateDebuggerState;
-    final isolate = maindebugstate.isolateNow;
-    print('about to assert "isolate != null"');
-    print('mainIsolateDebuggerState = $maindebugstate');
-    print('mainIsolateDebuggerState.isolateNow = $isolate');
+    final isolate = isolateManager.mainIsolateDebuggerState.isolateNow;
     assert(isolate != null);
     return isolate.libraries
         .map((ref) => ref.uri)
@@ -516,7 +512,6 @@ class IsolateState {
   final _isPaused = ValueNotifier<bool>(null);
 
   void onIsolateLoaded(Isolate isolate) {
-    print('loading isolate for state');
     _isolateNow = isolate;
     _isolate.complete(isolate);
     if (_isPaused.value == null) {
@@ -583,9 +578,6 @@ class IsolateManager extends Disposer {
   }
 
   IsolateState get mainIsolateDebuggerState {
-    print(
-        'in mainIsolateDebuggerState getter: _mainIsolate.value = ${_mainIsolate.value}');
-    print('returning ${_isolateStates[_mainIsolate.value]}');
     return _isolateStates[_mainIsolate.value];
   }
 
@@ -612,7 +604,6 @@ class IsolateManager extends Disposer {
   Future<void> _initIsolates(List<IsolateRef> isolates) async {
     _clearIsolateStates();
 
-    print('_initIsolates - registering each isolate');
     await Future.wait([
       for (final isolateRef in isolates) _registerIsolate(isolateRef),
     ]);
@@ -628,21 +619,17 @@ class IsolateManager extends Disposer {
 
   Future<void> _registerIsolate(IsolateRef isolateRef) async {
     assert(!_isolateStates.containsKey(isolateRef));
-    print('registering isolate ${isolateRef.id}');
     _isolateStates[isolateRef] = IsolateState(isolateRef);
     _isolates.add(isolateRef);
     isolateIndex(isolateRef);
-    print('in _registerIsolate and calling _loadIsolateState');
     await _loadIsolateState(isolateRef);
   }
 
   Future<void> _loadIsolateState(IsolateRef isolateRef) async {
-    print('_loadIsolateState');
     final service = _service;
     final isolate = await _service.getIsolate(isolateRef.id);
     if (service != _service) return;
     final state = _isolateStates[isolateRef];
-    print('trying to load for state = $state');
     if (state != null) {
       // Isolate might have already been closed.
       state.onIsolateLoaded(isolate);
@@ -654,7 +641,6 @@ class IsolateManager extends Disposer {
 
     if (event.kind == EventKind.kIsolateStart &&
         !event.isolate.isSystemIsolate) {
-      print('registering isolate for kIsolateStart event');
       await _registerIsolate(event.isolate);
       _isolateCreatedController.add(event.isolate);
       // TODO(jacobr): we assume the first isolate started is the main isolate
@@ -671,7 +657,6 @@ class IsolateManager extends Disposer {
         _setSelectedIsolate(event.isolate);
       }
     } else if (event.kind == EventKind.kIsolateExit) {
-      print('isolate exit event. removing isolate ${event.isolate.id}');
       _isolateStates.remove(event.isolate)?.dispose();
       _isolates.remove(event.isolate);
       _isolateExitedController.add(event.isolate);
@@ -749,7 +734,6 @@ class IsolateManager extends Disposer {
     for (var isolateState in _isolateStates.values) {
       isolateState.dispose();
     }
-    print('clearing _isolateStates');
     _isolateStates.clear();
     _isolates.clear();
   }
@@ -759,7 +743,6 @@ class IsolateManager extends Disposer {
 
     cancel();
     _service = service;
-    print('registering isolate event listener in vmServiceOpened');
     autoDispose(service.onIsolateEvent.listen(_handleIsolateEvent));
     autoDispose(service.onDebugEvent.listen(_handleDebugEvent));
 
@@ -768,10 +751,6 @@ class IsolateManager extends Disposer {
   }
 
   Future<Isolate> getIsolateCached(IsolateRef isolateRef) {
-    print('in getIsolateCached');
-    if (!_isolateStates.containsKey(isolateRef)) {
-      print('creating IsolateState for ${isolateRef.id}');
-    }
     final isolateState =
         _isolateStates.putIfAbsent(isolateRef, () => IsolateState(isolateRef));
     return isolateState.isolate;
