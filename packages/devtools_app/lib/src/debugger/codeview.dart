@@ -708,7 +708,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
               widget.debugController.programExplorerController.outlineSelection,
           builder: (context, outlineNode, _) {
             final isFocusedLine =
-                outlineNode.location?.location?.line == lineNum;
+                (outlineNode?.location?.location?.line ?? -1) == lineNum;
             return LineItem(
               lineContents: widget.lines[index],
               pausedFrame: isPausedLine ? widget.pausedFrame : null,
