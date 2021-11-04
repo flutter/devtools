@@ -239,7 +239,7 @@ extension DevToolsColorScheme on ColorScheme {
   Color get overlayBackgroundColor =>
       isLight ? Colors.white : const Color(0xFF424242);
 
-  Color get errorTextColor => const Color(0xFFC3595A);
+  Color get errorTextColor => isLight ? const Color(0xFFA53725) : const Color(0xFFE09790);
 
   Color get toggleButtonsTitle =>
       isLight ? const Color(0xFF464646) : const Color(0xFFAEAEB1);
