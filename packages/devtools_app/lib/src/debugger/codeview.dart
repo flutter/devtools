@@ -31,6 +31,7 @@ import 'debugger_model.dart';
 import 'file_search.dart';
 import 'hover.dart';
 import 'key_sets.dart';
+import 'program_explorer_model.dart';
 import 'variables.dart';
 
 final debuggerCodeViewSearchKey =
@@ -42,6 +43,7 @@ class CodeView extends StatefulWidget {
   const CodeView({
     Key key,
     this.controller,
+    this.initialPosition,
     this.scriptRef,
     this.parsedScript,
     this.onSelected,
@@ -57,6 +59,7 @@ class CodeView extends StatefulWidget {
   static double get assumedCharacterWidth => scaleByFontFactor(16.0);
 
   final DebuggerController controller;
+  final ScriptLocation initialPosition;
   final ScriptRef scriptRef;
   final ParsedScript parsedScript;
 
@@ -80,6 +83,10 @@ class _CodeViewState extends State<CodeView>
 
   ParsedScript get parsedScript => widget.parsedScript;
 
+  // Used to ensure we don't update the scroll position when expanding or
+  // collapsing the file explorer.
+  ScriptRef _lastScriptRef;
+
   @override
   void initState() {
     super.initState();
@@ -88,6 +95,16 @@ class _CodeViewState extends State<CodeView>
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();
     horizontalController = ScrollController();
+    _lastScriptRef = widget.scriptRef;
+
+    if (widget.initialPosition != null) {
+      final location = widget.initialPosition.location;
+      // Lines are 1-indexed. Scrolling to line 1 required a scroll position of
+      // 0.
+      final lineIndex = location.line - 1;
+      final scrollPosition = lineIndex * CodeView.rowHeight;
+      verticalController.jumpTo(scrollPosition);
+    }
 
     addAutoDisposeListener(
       widget.controller.scriptLocation,
@@ -124,18 +141,33 @@ class _CodeViewState extends State<CodeView>
   }
 
   void _updateScrollPosition({bool animate = true}) {
-    if (widget.controller.scriptLocation.value?.scriptRef != scriptRef) {
-      return;
-    }
-
-    final location = widget.controller.scriptLocation.value?.location;
-    if (location?.line == null) {
+    if (widget.controller.scriptLocation.value?.scriptRef?.uri !=
+        scriptRef?.uri) {
       return;
     }
 
     if (!verticalController.hasAttachedControllers) {
       // TODO(devoncarew): I'm uncertain why this occurs.
       log('LinkedScrollControllerGroup has no attached controllers');
+      return;
+    }
+    final location = widget.controller.scriptLocation.value?.location;
+    if (location?.line == null) {
+      // Don't scroll to top if we're just rebuilding the code view for the
+      // same script.
+      if (_lastScriptRef?.uri != scriptRef?.uri) {
+        // Default to scrolling to the top of the script.
+        if (animate) {
+          verticalController.animateTo(
+            0,
+            duration: longDuration,
+            curve: defaultCurve,
+          );
+        } else {
+          verticalController.jumpTo(0);
+        }
+        _lastScriptRef = scriptRef;
+      }
       return;
     }
 
@@ -145,10 +177,9 @@ class _CodeViewState extends State<CodeView>
     // TODO(devoncarew): Adjust this so we don't scroll if we're already in the
     // middle third of the screen.
     if (parsedScript.lineCount * CodeView.rowHeight > extent) {
-      // Scroll to the middle of the screen.
       final lineIndex = location.line - 1;
       final scrollPosition =
-          lineIndex * CodeView.rowHeight - (extent - CodeView.rowHeight) / 2;
+          lineIndex * CodeView.rowHeight - ((extent - CodeView.rowHeight) / 2);
       if (animate) {
         verticalController.animateTo(
           scrollPosition,
@@ -159,6 +190,7 @@ class _CodeViewState extends State<CodeView>
         verticalController.jumpTo(scrollPosition);
       }
     }
+    _lastScriptRef = scriptRef;
   }
 
   void _onPressed(int line) {
@@ -334,6 +366,7 @@ class _CodeViewState extends State<CodeView>
                                     width: fileWidth,
                                     child: Lines(
                                       height: constraints.maxHeight,
+                                      debugController: widget.controller,
                                       scrollController: textController,
                                       lines: lines,
                                       pausedFrame: pausedFrame,
@@ -594,6 +627,7 @@ class Lines extends StatefulWidget {
   const Lines({
     Key key,
     @required this.height,
+    @required this.debugController,
     @required this.scrollController,
     @required this.lines,
     @required this.pausedFrame,
@@ -602,6 +636,7 @@ class Lines extends StatefulWidget {
   }) : super(key: key);
 
   final double height;
+  final DebuggerController debugController;
   final ScrollController scrollController;
   final List<TextSpan> lines;
   final StackFrameAndSourcePosition pausedFrame;
@@ -644,7 +679,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
 
         if (isOutOfViewTop || isOutOfViewBottom) {
           // Scroll this search token to the middle of the view.
-          final targetOffset = math.max(
+          final targetOffset = math.max<double>(
             activeSearch.position.line * CodeView.rowHeight - widget.height / 2,
             0.0,
           );
@@ -661,19 +696,28 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     final pausedLine = widget.pausedFrame?.line;
-
     return ListView.builder(
       controller: widget.scrollController,
       itemExtent: CodeView.rowHeight,
       itemCount: widget.lines.length,
       itemBuilder: (context, index) {
         final lineNum = index + 1;
-        return LineItem(
-          lineContents: widget.lines[index],
-          pausedFrame: pausedLine == lineNum ? widget.pausedFrame : null,
-          searchMatches: searchMatchesForLine(index),
-          activeSearchMatch:
-              activeSearch?.position?.line == index ? activeSearch : null,
+        final isPausedLine = pausedLine == lineNum;
+        return ValueListenableBuilder<VMServiceObjectNode>(
+          valueListenable:
+              widget.debugController.programExplorerController.outlineSelection,
+          builder: (context, outlineNode, _) {
+            final isFocusedLine =
+                (outlineNode?.location?.location?.line ?? -1) == lineNum;
+            return LineItem(
+              lineContents: widget.lines[index],
+              pausedFrame: isPausedLine ? widget.pausedFrame : null,
+              focused: isPausedLine || isFocusedLine,
+              searchMatches: searchMatchesForLine(index),
+              activeSearchMatch:
+                  activeSearch?.position?.line == index ? activeSearch : null,
+            );
+          },
         );
       },
     );
@@ -691,6 +735,7 @@ class LineItem extends StatefulWidget {
     Key key,
     @required this.lineContents,
     this.pausedFrame,
+    this.focused,
     this.searchMatches,
     this.activeSearchMatch,
   }) : super(key: key);
@@ -701,6 +746,7 @@ class LineItem extends StatefulWidget {
 
   final TextSpan lineContents;
   final StackFrameAndSourcePosition pausedFrame;
+  final bool focused;
   final List<SourceToken> searchMatches;
   final SourceToken activeSearchMatch;
 
@@ -849,7 +895,7 @@ class _LineItemState extends State<LineItem> {
       child = _hoverableLine();
     }
 
-    final backgroundColor = widget.pausedFrame != null
+    final backgroundColor = widget.focused
         ? (darkTheme
             ? theme.canvasColor.brighten()
             : theme.canvasColor.darken())

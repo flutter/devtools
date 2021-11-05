@@ -4,6 +4,7 @@
 
 import '../common_widgets.dart';
 import '../debugger/codeview.dart';
+import '../inspector/inspector_service.dart';
 
 abstract class DevToolsExtensionPoints {
   List<ScriptPopupMenuOption> buildExtraDebuggerScriptPopupMenuOptions();
@@ -11,4 +12,6 @@ abstract class DevToolsExtensionPoints {
   Link issueTrackerLink();
 
   String loadingAppSizeDataMessage();
+
+  InspectorServiceBase inspectorServiceProvider();
 }

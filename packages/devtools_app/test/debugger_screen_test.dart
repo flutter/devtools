@@ -10,6 +10,7 @@ import 'package:devtools_app/src/debugger/controls.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/debugger/debugger_model.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
+import 'package:devtools_app/src/debugger/program_explorer_model.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_test/mocks.dart';
@@ -25,16 +26,23 @@ void main() {
   DebuggerScreen screen;
   FakeServiceManager fakeServiceManager;
   MockDebuggerController debuggerController;
-  fakeServiceManager = FakeServiceManager();
-  when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
-  setGlobal(ServiceConnectionManager, fakeServiceManager);
 
   const windowSize = Size(4000.0, 4000.0);
   const smallWindowSize = Size(1000.0, 1000.0);
 
+  setUp(() {
+    fakeServiceManager = FakeServiceManager();
+    when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    fakeServiceManager.consoleService.ensureServiceInitialized();
+  });
+
   group('DebuggerScreen', () {
     Future<void> pumpDebuggerScreen(
-        WidgetTester tester, DebuggerController controller) async {
+      WidgetTester tester,
+      DebuggerController controller,
+    ) async {
       await tester.pumpWidget(wrapWithControllers(
         const DebuggerScreenBody(),
         debugger: controller,
@@ -42,7 +50,9 @@ void main() {
     }
 
     Future<void> pumpConsole(
-        WidgetTester tester, DebuggerController controller) async {
+      WidgetTester tester,
+      DebuggerController controller,
+    ) async {
       await tester.pumpWidget(wrapWithControllers(
         Row(
           children: [
@@ -107,6 +117,14 @@ void main() {
     });
 
     group('ConsoleControls', () {
+      final _stdio = ['First line', _ansiCodesOutput(), 'Third line'];
+
+      void _appendStdioLines() {
+        for (var line in _stdio) {
+          serviceManager.consoleService.appendStdio('$line\n');
+        }
+      }
+
       testWidgetsWithWindowSize(
           'Tapping the Console Clear button clears stdio.', windowSize,
           (WidgetTester tester) async {
@@ -123,30 +141,24 @@ void main() {
         expect(serviceManager.consoleService.stdio.value, isEmpty);
       });
 
-      final _stdio = ['First line', _ansiCodesOutput(), 'Third line'];
-
-      void _appendStdioLines() {
-        for (var line in _stdio) {
-          serviceManager.consoleService.appendStdio('$line\n');
-        }
-      }
-
       group('Clipboard', () {
-        _appendStdioLines();
         var _clipboardContents = '';
         final _expected = _stdio.join('\n');
 
         setUp(() {
+          _appendStdioLines();
           // This intercepts the Clipboard.setData SystemChannel message,
           // and stores the contents that were (attempted) to be copied.
           SystemChannels.platform.setMockMethodCallHandler((MethodCall call) {
             switch (call.method) {
               case 'Clipboard.setData':
                 _clipboardContents = call.arguments['text'];
-                return Future.value(true);
                 break;
               case 'Clipboard.getData':
                 return Future.value(<String, dynamic>{});
+                break;
+              case 'Clipboard.hasStrings':
+                return Future.value(<String, dynamic>{'value': true});
                 break;
               default:
                 break;
@@ -164,8 +176,6 @@ void main() {
         testWidgetsWithWindowSize(
             'Tapping the Copy to Clipboard button attempts to copy stdio to clipboard.',
             windowSize, (WidgetTester tester) async {
-          _appendStdioLines();
-
           await pumpConsole(tester, debuggerController);
 
           final copyButton =
@@ -208,7 +218,7 @@ void main() {
         // this so that forcing a scroll event is no longer necessary. Remove
         // once the change is in the stable release.
         debuggerController.showScriptLocation(ScriptLocation(mockScriptRef,
-            location: SourcePosition(line: 50, column: 50)));
+            location: const SourcePosition(line: 50, column: 50)));
         await tester.pumpAndSettle();
 
         expect(find.byType(Scrollbar), findsNWidgets(2));
@@ -223,7 +233,7 @@ void main() {
       }, skip: !Platform.isMacOS);
     });
 
-    testWidgetsWithWindowSize('Libraries hidden', windowSize,
+    testWidgetsWithWindowSize('File Explorer hidden', windowSize,
         (WidgetTester tester) async {
       final scripts = [
         ScriptRef(uri: 'package:/test/script.dart', id: 'test-script')
@@ -232,27 +242,40 @@ void main() {
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
       when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
-      // Libraries view is hidden
-      when(debuggerController.librariesVisible)
+      // File Explorer view is hidden
+      when(debuggerController.fileExplorerVisible)
           .thenReturn(ValueNotifier(false));
       await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('Libraries'), findsOneWidget);
+      expect(find.text('File Explorer'), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize('Libraries visible', windowSize,
+    testWidgetsWithWindowSize('File Explorer visible', windowSize,
         (WidgetTester tester) async {
       final scripts = [
         ScriptRef(uri: 'package:test/script.dart', id: 'test-script')
       ];
 
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
+      when(debuggerController.programExplorerController.rootObjectNodes)
+          .thenReturn(
+        ValueNotifier(
+          [
+            VMServiceObjectNode(
+              debuggerController.programExplorerController,
+              'package:test',
+              null,
+            ),
+          ],
+        ),
+      );
       when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
-      // Libraries view is shown
-      when(debuggerController.librariesVisible).thenReturn(ValueNotifier(true));
+      // File Explorer view is shown
+      when(debuggerController.fileExplorerVisible)
+          .thenReturn(ValueNotifier(true));
       await pumpDebuggerScreen(tester, debuggerController);
-      // One for the button and one for the title of the Libraries view.
-      expect(find.text('Libraries'), findsNWidgets(2));
+      // One for the button and one for the title of the File Explorer view.
+      expect(find.text('File Explorer'), findsNWidgets(2));
 
       // test for items in the libraries tree
       expect(find.text(scripts.first.uri.split('/').first), findsOneWidget);
@@ -276,7 +299,7 @@ void main() {
       final breakpointsWithLocation = [
         BreakpointAndSourcePosition.create(
           breakpoints.first,
-          SourcePosition(line: 10, column: 1),
+          const SourcePosition(line: 10, column: 1),
         )
       ];
 
@@ -522,7 +545,7 @@ void main() {
             ),
             kind: FrameKind.kRegular,
           ),
-          position: SourcePosition(
+          position: const SourcePosition(
             line: 1,
             column: 10,
           ),

@@ -236,8 +236,6 @@ class _PrimaryControls extends StatelessWidget {
     this.onClear,
   }) : super(key: key);
 
-  static const _primaryControlsMinIncludeTextWidth = 760.0;
-
   final PerformanceController controller;
 
   final bool processing;
@@ -251,21 +249,21 @@ class _PrimaryControls extends StatelessWidget {
       builder: (context, recording, _) {
         return Row(
           children: [
-            PauseButton(
-              minScreenWidthForTextBeforeScaling:
-                  _primaryControlsMinIncludeTextWidth,
+            OutlinedIconButton(
+              icon: Icons.pause,
+              tooltip: 'Pause frame recording',
               onPressed: recording ? _pauseFrameRecording : null,
             ),
             const SizedBox(width: denseSpacing),
-            ResumeButton(
-              minScreenWidthForTextBeforeScaling:
-                  _primaryControlsMinIncludeTextWidth,
+            OutlinedIconButton(
+              icon: Icons.play_arrow,
+              tooltip: 'Resume frame recording',
               onPressed: recording ? null : _resumeFrameRecording,
             ),
             const SizedBox(width: denseSpacing),
-            ClearButton(
-              minScreenWidthForTextBeforeScaling:
-                  _primaryControlsMinIncludeTextWidth,
+            OutlinedIconButton(
+              icon: Icons.block,
+              tooltip: 'Clear',
               onPressed: processing ? null : _clearPerformanceData,
             ),
           ],
@@ -299,7 +297,7 @@ class _SecondaryControls extends StatelessWidget {
     @required this.controller,
   }) : super(key: key);
 
-  static const _secondaryControlsMinIncludeTextWidth = 1125.0;
+  static const minScreenWidthForTextBeforeScaling = 1050.0;
 
   final PerformanceController controller;
 
@@ -308,31 +306,35 @@ class _SecondaryControls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
+        if (serviceManager.connectedApp.isFlutterAppNow) ...[
+          ServiceExtensionButtonGroup(
+            minScreenWidthForTextBeforeScaling:
+                minScreenWidthForTextBeforeScaling,
+            extensions: [
+              performanceOverlay,
+              // TODO(devoncarew): Enable this once we have a UI displaying the
+              // values.
+              //trackRebuildWidgets,
+            ],
+          ),
+          const SizedBox(width: denseSpacing),
+          const EnhanceTracingButton(),
+          const SizedBox(width: denseSpacing),
+          const MoreDebuggingOptionsButton(),
+        ],
+        const SizedBox(width: denseSpacing),
         ProfileGranularityDropdown(
           screenId: PerformanceScreen.id,
           profileGranularityFlagNotifier:
               controller.cpuProfilerController.profileGranularityFlagNotifier,
         ),
         const SizedBox(width: defaultSpacing),
-        if (serviceManager.connectedApp.isFlutterAppNow)
-          ServiceExtensionButtonGroup(
-            minScreenWidthForTextBeforeScaling:
-                _secondaryControlsMinIncludeTextWidth,
-            extensions: [
-              performanceOverlay,
-              profileWidgetBuilds,
-              // TODO(devoncarew): Enable this once we have a UI displaying the
-              // values.
-              //trackRebuildWidgets,
-            ],
-          ),
-        const SizedBox(width: defaultSpacing),
-        ExportButton(
+        OutlinedIconButton(
+          icon: Icons.file_download,
+          tooltip: 'Export data',
           onPressed: () => _exportPerformanceData(context),
-          minScreenWidthForTextBeforeScaling:
-              _secondaryControlsMinIncludeTextWidth,
         ),
-        const SizedBox(width: defaultSpacing),
+        const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
           onPressed: () => _openSettingsDialog(context),
           label: 'Performance Settings',
@@ -355,6 +357,76 @@ class _SecondaryControls extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => PerformanceSettingsDialog(controller),
+    );
+  }
+}
+
+class EnhanceTracingButton extends StatelessWidget {
+  const EnhanceTracingButton({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textStyle = theme.subtleTextStyle;
+    return ServiceExtensionCheckboxGroupButton(
+      title: 'Enhance Tracing',
+      icon: Icons.auto_awesome,
+      tooltip: 'Add more detail to the Timeline trace',
+      minScreenWidthForTextBeforeScaling:
+          _SecondaryControls.minScreenWidthForTextBeforeScaling,
+      extensions: [
+        profileWidgetBuilds,
+        profileRenderObjectLayouts,
+        profileRenderObjectPaints,
+      ],
+      overlayDescription: RichText(
+        text: TextSpan(
+          text: 'These options can be used to add more detail to the '
+              'timeline, but be aware that ',
+          style: textStyle,
+          children: [
+            TextSpan(
+              text: 'frame times may be negatively affected',
+              style:
+                  textStyle.copyWith(color: theme.colorScheme.errorTextColor),
+            ),
+            TextSpan(
+              text: '.',
+              style: textStyle,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MoreDebuggingOptionsButton extends StatelessWidget {
+  const MoreDebuggingOptionsButton({Key key}) : super(key: key);
+
+  static const _width = 625.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return ServiceExtensionCheckboxGroupButton(
+      title: 'More debugging options',
+      icon: Icons.build,
+      tooltip: 'Opens a list of options you can use to help debug performance',
+      minScreenWidthForTextBeforeScaling:
+          _SecondaryControls.minScreenWidthForTextBeforeScaling,
+      extensions: [
+        disableClipLayers,
+        disableOpacityLayers,
+        disablePhysicalShapeLayers,
+      ],
+      overlayDescription: Text(
+        'When toggling on/off a rendering layer, you will need '
+        'to reproduce activity in your app to see the effects of the '
+        'debugging option. All layers are rendered by default - disabling a '
+        'layer may help you identify expensive operations in your app.',
+        style: Theme.of(context).subtleTextStyle,
+      ),
+      overlayWidthBeforeScaling: _width,
     );
   }
 }

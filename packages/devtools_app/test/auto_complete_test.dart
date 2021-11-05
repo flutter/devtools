@@ -11,7 +11,7 @@ void main() {
     // [caretPosition] if null (default) TextSelection is set to EOL.
     EditingParts testEdit(String editing, [int caretPosition]) {
       final position = caretPosition == null ? editing.length : caretPosition;
-      return AutoCompleteSearchControllerMixin.activeEdtingParts(
+      return AutoCompleteSearchControllerMixin.activeEditingParts(
         editing,
         TextSelection(baseOffset: position, extentOffset: position),
         handleFields: true,

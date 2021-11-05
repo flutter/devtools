@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:core';
 
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../auto_dispose.dart';
+import '../connected_app.dart';
 import '../globals.dart';
 import '../vm_service_wrapper.dart';
 
@@ -121,13 +123,22 @@ class TimelineStreamManager extends Disposer {
     }
   }
 
-  Future<void> vmServiceOpened(VmServiceWrapper service) async {
+  Future<void> vmServiceOpened(
+    VmServiceWrapper service,
+    ConnectedApp connectedApp,
+  ) async {
     cancel();
     _service = service;
-    // Upon setting the vm service, get initial values for timeline streams.
-    await _initStreams();
 
+    // Listen for timeline events immediately, but wait until [connectedApp]
+    // has been initialized to initialize timeline stream values.
     autoDispose(service.onTimelineEvent.listen(handleTimelineEvent));
+    unawaited(connectedApp.initialized.future.then((_) async {
+      // The timeline is not supported for web applications.
+      if (!connectedApp.isDartWebAppNow) {
+        await _initStreams();
+      }
+    }));
   }
 
   void vmServiceClosed() {

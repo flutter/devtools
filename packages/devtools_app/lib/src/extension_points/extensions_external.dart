@@ -4,6 +4,8 @@
 
 import '../common_widgets.dart';
 import '../debugger/codeview.dart';
+import '../globals.dart';
+import '../inspector/inspector_service.dart';
 import 'extensions_base.dart';
 
 class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
@@ -21,4 +23,8 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
   String loadingAppSizeDataMessage() {
     return 'Loading app size data. Please wait...';
   }
+
+  @override
+  InspectorServiceBase inspectorServiceProvider() =>
+      serviceManager.connectedApp.isFlutterAppNow ? InspectorService() : null;
 }

@@ -625,7 +625,18 @@ class FakeIsolateManager extends Fake implements IsolateManager {
   }
 
   ValueNotifier<List<IsolateRef>> _isolates;
+
+  @override
+  IsolateState isolateDebuggerState(IsolateRef isolate) {
+    final state = MockIsolateState();
+    final mockIsolate = MockIsolate();
+    when(mockIsolate.libraries).thenReturn([]);
+    when(state.isolateNow).thenReturn(mockIsolate);
+    return state;
+  }
 }
+
+class MockIsolateState extends Mock implements IsolateState {}
 
 class MockServiceManager extends Mock implements ServiceConnectionManager {}
 
@@ -663,6 +674,16 @@ class MockPerformanceController extends Mock implements PerformanceController {}
 class MockProfilerScreenController extends Mock
     implements ProfilerScreenController {}
 
+class TestDebuggerController extends DebuggerController {
+  TestDebuggerController({bool initialSwitchToIsolate = true})
+      : super(initialSwitchToIsolate: initialSwitchToIsolate);
+
+  @override
+  ProgramExplorerController get programExplorerController =>
+      _explorerController;
+  final _explorerController = MockProgramExplorerController.withDefaults();
+}
+
 class MockDebuggerController extends Mock implements DebuggerController {
   MockDebuggerController();
 
@@ -674,7 +695,8 @@ class MockDebuggerController extends Mock implements DebuggerController {
     when(debuggerController.isSystemIsolate).thenReturn(false);
     when(debuggerController.breakpointsWithLocation)
         .thenReturn(ValueNotifier([]));
-    when(debuggerController.librariesVisible).thenReturn(ValueNotifier(false));
+    when(debuggerController.fileExplorerVisible)
+        .thenReturn(ValueNotifier(false));
     when(debuggerController.currentScriptRef).thenReturn(ValueNotifier(null));
     when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
     when(debuggerController.selectedBreakpoint).thenReturn(ValueNotifier(null));
@@ -690,6 +712,25 @@ class MockDebuggerController extends Mock implements DebuggerController {
     when(debuggerController.currentParsedScript)
         .thenReturn(ValueNotifier<ParsedScript>(null));
     return debuggerController;
+  }
+
+  @override
+  final programExplorerController =
+      MockProgramExplorerController.withDefaults();
+}
+
+class MockProgramExplorerController extends Mock
+    implements ProgramExplorerController {
+  MockProgramExplorerController();
+
+  factory MockProgramExplorerController.withDefaults() {
+    final controller = MockProgramExplorerController();
+    when(controller.initialized).thenReturn(ValueNotifier(true));
+    when(controller.rootObjectNodes).thenReturn(ValueNotifier([]));
+    when(controller.outlineNodes).thenReturn(ValueNotifier([]));
+    when(controller.isLoadingOutline).thenReturn(ValueNotifier(false));
+
+    return controller;
   }
 }
 
@@ -773,8 +814,8 @@ class FakeServiceExtensionManager extends Fake
 
       await setServiceExtensionState(
         name,
-        enabled,
-        value,
+        enabled: enabled,
+        value: value,
         callExtension: false,
       );
     }
@@ -837,7 +878,7 @@ class FakeServiceExtensionManager extends Fake
         return ValueNotifier<ServiceExtensionState>(
           _enabledServiceExtensions.containsKey(name)
               ? _enabledServiceExtensions[name]
-              : ServiceExtensionState(false, null),
+              : ServiceExtensionState(enabled: false, value: null),
         );
       },
     );
@@ -851,10 +892,20 @@ class FakeServiceExtensionManager extends Fake
     final value = extensionValueOnDevice[name];
     if (extensionDescription is ToggleableServiceExtensionDescription) {
       if (value == extensionDescription.enabledValue) {
-        await setServiceExtensionState(name, true, value, callExtension: false);
+        await setServiceExtensionState(
+          name,
+          enabled: true,
+          value: value,
+          callExtension: false,
+        );
       }
     } else {
-      await setServiceExtensionState(name, true, value, callExtension: false);
+      await setServiceExtensionState(
+        name,
+        enabled: true,
+        value: value,
+        callExtension: false,
+      );
     }
   }
 
@@ -875,20 +926,26 @@ class FakeServiceExtensionManager extends Fake
   /// Sets the state for a service extension and makes the call to the VMService.
   @override
   Future<void> setServiceExtensionState(
-    String name,
-    bool enabled,
-    dynamic value, {
+    String name, {
+    @required bool enabled,
+    @required dynamic value,
     bool callExtension = true,
   }) async {
     if (callExtension && _serviceExtensions.contains(name)) {
       await callServiceExtension(name, value);
     }
 
-    _serviceExtensionState(name).value = ServiceExtensionState(enabled, value);
+    _serviceExtensionState(name).value = ServiceExtensionState(
+      enabled: enabled,
+      value: value,
+    );
 
     // Add or remove service extension from [enabledServiceExtensions].
     if (enabled) {
-      _enabledServiceExtensions[name] = ServiceExtensionState(enabled, value);
+      _enabledServiceExtensions[name] = ServiceExtensionState(
+        enabled: enabled,
+        value: value,
+      );
     } else {
       _enabledServiceExtensions.remove(name);
     }
@@ -911,25 +968,16 @@ Future<void> ensureInspectorDependencies() async {
   );
 }
 
-void mockIsFlutterApp(MockConnectedApp connectedApp, [isFlutterApp = true]) {
+void mockIsFlutterApp(
+  MockConnectedApp connectedApp, {
+  bool isFlutterApp = true,
+  bool isProfileBuild = false,
+}) {
   when(connectedApp.isFlutterAppNow).thenReturn(isFlutterApp);
   when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(isFlutterApp));
-  when(connectedApp.isDebugFlutterAppNow).thenReturn(true);
   when(connectedApp.connectedAppInitialized).thenReturn(true);
-}
-
-void mockIsDebugFlutterApp(MockConnectedApp connectedApp,
-    [isDebugFlutterApp = true]) {
-  when(connectedApp.isDebugFlutterAppNow).thenReturn(isDebugFlutterApp);
-  when(connectedApp.isProfileBuildNow).thenReturn(!isDebugFlutterApp);
-  when(connectedApp.connectedAppInitialized).thenReturn(true);
-}
-
-void mockIsProfileFlutterApp(MockConnectedApp connectedApp,
-    [isProfileFlutterApp = true]) {
-  when(connectedApp.isDebugFlutterAppNow).thenReturn(!isProfileFlutterApp);
-  when(connectedApp.isProfileBuildNow).thenReturn(isProfileFlutterApp);
-  when(connectedApp.connectedAppInitialized).thenReturn(true);
+  when(connectedApp.isDebugFlutterAppNow).thenReturn(!isProfileBuild && isFlutterApp);
+  when(connectedApp.isProfileBuildNow).thenReturn(isProfileBuild);
 }
 
 void mockFlutterVersion(

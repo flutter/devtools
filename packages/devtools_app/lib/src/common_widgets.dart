@@ -8,6 +8,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'globals.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 import 'ui/icons.dart';
@@ -77,6 +78,24 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
   );
 }
 
+class OutlinedIconButton extends IconLabelButton {
+  const OutlinedIconButton({
+    @required IconData icon,
+    @required VoidCallback onPressed,
+    String tooltip,
+  }) : super(
+          icon: icon,
+          label: '',
+          tooltip: tooltip,
+          onPressed: onPressed,
+          // TODO(jacobr): consider a more conservative min-width. To minimize the
+          // impact on the existing UI and deal with the fact that some of the
+          // existing label names are fairly verbose, we set a width that will
+          // never be hit.
+          minScreenWidthForTextBeforeScaling: 20000,
+        );
+}
+
 /// A button with an icon and a label.
 ///
 /// * `onPressed`: The callback to be called upon pressing the button.
@@ -122,7 +141,7 @@ class IconLabelButton extends StatelessWidget {
       label: label,
       iconData: icon,
       imageIcon: imageIcon,
-      unscaleIncludeTextWidth: minScreenWidthForTextBeforeScaling,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
       color: color,
     );
     if (elevatedButton) {
@@ -275,7 +294,7 @@ class StopRecordingButton extends IconLabelButton {
         );
 }
 
-class SettingsOutlinedButton extends IconLabelButton {
+class SettingsOutlinedButton extends OutlinedIconButton {
   const SettingsOutlinedButton({
     @required VoidCallback onPressed,
     @required String label,
@@ -283,13 +302,7 @@ class SettingsOutlinedButton extends IconLabelButton {
   }) : super(
           onPressed: onPressed,
           icon: Icons.settings,
-          label: label,
           tooltip: tooltip,
-          // TODO(jacobr): consider a more conservative min-width. To minimize the
-          // impact on the existing UI and deal with the fact that some of the
-          // existing label names are fairly verbose, we set a width that will
-          // never be hit.
-          minScreenWidthForTextBeforeScaling: 20000,
         );
 }
 
@@ -596,7 +609,7 @@ class DevToolsTooltip extends StatelessWidget {
     @required this.child,
     this.waitDuration = tooltipWait,
     this.preferBelow = false,
-    this.padding,
+    this.padding = const EdgeInsets.all(defaultSpacing),
     this.decoration,
     this.textStyle,
   }) : super(key: key);
@@ -675,6 +688,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
     this.needsLeftBorder = false,
     this.leftActions = const [],
     this.rightActions = const [],
+    this.leftPadding = defaultSpacing,
     this.rightPadding = densePadding,
     this.tall = false,
   }) : super(key: key);
@@ -686,6 +700,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool needsLeftBorder;
   final List<Widget> leftActions;
   final List<Widget> rightActions;
+  final double leftPadding;
   final double rightPadding;
   final bool tall;
 
@@ -704,7 +719,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
           color: theme.titleSolidBackgroundColor,
         ),
-        padding: EdgeInsets.only(left: defaultSpacing, right: rightPadding),
+        padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
         alignment: Alignment.centerLeft,
         child: Row(
           children: [
@@ -735,36 +750,37 @@ BorderSide defaultBorderSide(ThemeData theme) {
   return BorderSide(color: theme.focusColor);
 }
 
-/// Toggle button for use as a child of a [ToggleButtons] widget.
-class ToggleButton extends StatelessWidget {
-  const ToggleButton({
-    @required this.icon,
-    @required this.text,
-    @required this.enabledTooltip,
-    @required this.disabledTooltip,
-    @required this.minScreenWidthForTextBeforeScaling,
-    @required this.selected,
-  });
+class DevToolsToggleButtonGroup extends StatelessWidget {
+  const DevToolsToggleButtonGroup({
+    Key key,
+    @required this.children,
+    @required this.selectedStates,
+    @required this.onPressed,
+  }) : super(key: key);
 
-  final IconData icon;
-  final String text;
-  final String enabledTooltip;
-  final String disabledTooltip;
-  final double minScreenWidthForTextBeforeScaling;
-  final bool selected;
+  final List<Widget> children;
+
+  final List<bool> selectedStates;
+
+  final void Function(int) onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsTooltip(
-      tooltip: selected ? enabledTooltip : disabledTooltip,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-        child: MaterialIconLabel(
-          label: text,
-          iconData: icon,
-          unscaleIncludeTextWidth: minScreenWidthForTextBeforeScaling,
-        ),
+    final theme = Theme.of(context);
+    return ToggleButtons(
+      borderRadius:
+          const BorderRadius.all(Radius.circular(defaultBorderRadius)),
+      color: theme.colorScheme.toggleButtonsTitle,
+      selectedColor: theme.colorScheme.toggleButtonsTitleSelected,
+      fillColor: theme.colorScheme.toggleButtonsFillSelected,
+      textStyle: theme.textTheme.bodyText1,
+      constraints: BoxConstraints(
+        minWidth: defaultButtonHeight,
+        minHeight: defaultButtonHeight,
       ),
+      children: children,
+      isSelected: selectedStates,
+      onPressed: onPressed,
     );
   }
 }
@@ -1404,11 +1420,19 @@ class NotifierCheckbox extends StatelessWidget {
     Key key,
     @required this.notifier,
     this.onChanged,
+    this.enabled = true,
   }) : super(key: key);
 
+  /// The notifier this [NotifierCheckbox] is responsible for listening to and
+  /// updating.
   final ValueNotifier<bool> notifier;
 
+  /// The callback to be called on change in addition to the notifier changes
+  /// handled by this class.
   final void Function(bool newValue) onChanged;
+
+  /// Whether this checkbox should be enabled for interaction.
+  final bool enabled;
 
   void _updateValue(bool value) {
     if (notifier.value != value) {
@@ -1426,7 +1450,7 @@ class NotifierCheckbox extends StatelessWidget {
       builder: (context, value, _) {
         return Checkbox(
           value: value,
-          onChanged: _updateValue,
+          onChanged: enabled ? _updateValue : null,
         );
       },
     );
@@ -1441,6 +1465,7 @@ class CheckboxSetting extends StatelessWidget {
     this.description,
     this.tooltip,
     this.onChanged,
+    this.enabled = true,
   }) : super(key: key);
 
   final ValueListenable<bool> notifier;
@@ -1453,6 +1478,9 @@ class CheckboxSetting extends StatelessWidget {
 
   final void Function(bool newValue) onChanged;
 
+  /// Whether this checkbox setting should be enabled for interaction.
+  final bool enabled;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1461,7 +1489,7 @@ class CheckboxSetting extends StatelessWidget {
       overflow: TextOverflow.visible,
       text: TextSpan(
         text: title,
-        style: theme.regularTextStyle,
+        style: enabled ? theme.regularTextStyle : theme.subtleTextStyle,
       ),
     );
 
@@ -1488,18 +1516,56 @@ class CheckboxSetting extends StatelessWidget {
         NotifierCheckbox(
           notifier: notifier,
           onChanged: onChanged,
+          enabled: enabled,
         ),
         Flexible(
           child: textContent,
         ),
       ],
     );
-    if (tooltip != null) {
+    if (tooltip != null && tooltip.isNotEmpty) {
       return DevToolsTooltip(
         tooltip: tooltip,
         child: content,
       );
     }
     return content;
+  }
+}
+
+class PubWarningText extends StatelessWidget {
+  const PubWarningText({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isFlutterApp = serviceManager.connectedApp.isFlutterAppNow;
+    final sdkName = isFlutterApp ? 'Flutter' : 'Dart';
+    final minSdkVersion = isFlutterApp ? '2.8.0' : '2.15.0';
+    return SelectableText.rich(
+      TextSpan(
+        text: 'Warning: you should no longer be launching DevTools from'
+            ' pub.\n\n',
+        style: theme.subtleTextStyle
+            .copyWith(color: theme.colorScheme.errorTextColor),
+        children: [
+          TextSpan(
+            text: 'DevTools version 2.8.0 will be the last version to '
+                'be shipped on pub. As of $sdkName\nversion >= '
+                '$minSdkVersion, DevTools should be launched by running '
+                'the ',
+            style: theme.subtleTextStyle,
+          ),
+          TextSpan(
+            text: '`dart devtools`',
+            style: theme.subtleFixedFontStyle,
+          ),
+          TextSpan(
+            text: '\ncommand.',
+            style: theme.subtleTextStyle,
+          ),
+        ],
+      ),
+    );
   }
 }

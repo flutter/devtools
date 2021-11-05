@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:dds/vm_service_extensions.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'globals.dart';
@@ -1274,5 +1274,25 @@ extension VmServicePrivate on VmServiceWrapper {
         'getPorts',
         isolateId: isolateId,
         parser: PortList.parse,
+      );
+
+  Future<InstanceRef> getReachableSize(String isolateId, String targetId) =>
+      _privateRpcInvoke(
+        'getReachableSize',
+        isolateId: isolateId,
+        args: {
+          'targetId': targetId,
+        },
+        parser: InstanceRef.parse,
+      );
+
+  Future<InstanceRef> getRetainedSize(String isolateId, String targetId) =>
+      _privateRpcInvoke(
+        'getRetainedSize',
+        isolateId: isolateId,
+        args: {
+          'targetId': targetId,
+        },
+        parser: InstanceRef.parse,
       );
 }

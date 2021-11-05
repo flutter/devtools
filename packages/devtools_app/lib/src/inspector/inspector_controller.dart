@@ -127,8 +127,8 @@ class InspectorController extends DisposableController
         if (_supportsToggleSelectWidgetMode.value) {
           serviceManager.serviceExtensionManager.setServiceExtensionState(
             extensions.enableOnDeviceInspector.extension,
-            true,
-            true,
+            enabled: true,
+            value: true,
           );
         }
       });
@@ -143,6 +143,8 @@ class InspectorController extends DisposableController
     autoDispose(
       serviceManager.onConnectionClosed.listen(_handleConnectionStop),
     );
+
+    serviceManager.consoleService.ensureServiceInitialized();
   }
 
   void _handleConnectionStart(VmService service) {

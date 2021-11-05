@@ -36,7 +36,7 @@ class Variables extends StatelessWidget {
           dataRoots: variables,
           dataDisplayProvider: (variable, onPressed) =>
               displayProvider(context, variable, onPressed, controller),
-          onItemPressed: (variable) => onItemPressed(variable, controller),
+          onItemSelected: (variable) => onItemPressed(variable, controller),
         );
       },
     );
@@ -65,7 +65,7 @@ class VariablesList extends StatelessWidget {
       dataRoots: lines,
       dataDisplayProvider: (variable, onPressed) =>
           displayProvider(context, variable, onPressed, controller),
-      onItemPressed: (variable) => onItemPressed(variable, controller),
+      onItemSelected: (variable) => onItemPressed(variable, controller),
     );
   }
 
@@ -101,7 +101,7 @@ class ExpandableVariable extends StatelessWidget {
           shrinkWrap: true,
           dataDisplayProvider: (variable, onPressed) =>
               displayProvider(context, variable, onPressed, debuggerController),
-          onItemPressed: (variable) =>
+          onItemSelected: (variable) =>
               onItemPressed(variable, debuggerController),
         );
       },
