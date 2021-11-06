@@ -12,15 +12,16 @@ import 'vm_service_wrapper.dart';
 
 /// A controller for global application preferences.
 class PreferencesController {
+  Map<String, List<double>> _initialFractions = {};
+
   final ValueNotifier<bool> _darkModeTheme = ValueNotifier(true);
   final ValueNotifier<bool> _vmDeveloperMode = ValueNotifier(false);
   final ValueNotifier<bool> _denseMode = ValueNotifier(false);
-  final ValueNotifier<String> _splitFractions = ValueNotifier('{}');
 
   ValueListenable<bool> get darkModeTheme => _darkModeTheme;
   ValueListenable<bool> get vmDeveloperModeEnabled => _vmDeveloperMode;
   ValueListenable<bool> get denseModeEnabled => _denseMode;
-  ValueListenable<String> get splitFractions => _splitFractions;
+  final splitFractions = <String, ValueListenable<List<double>>>{};
 
   Future<void> init() async {
     if (storage != null) {
@@ -43,12 +44,8 @@ class PreferencesController {
         storage.setValue('ui.denseMode', '${_denseMode.value}');
       });
 
-      final String _splitFractionsValue =
-          await storage.getValue('ui.splitFractions');
-      setSplitFractions(_splitFractionsValue);
-      _splitFractions.addListener(() {
-        storage.setValue('ui.splitFractions', '${_splitFractions.value}');
-      });
+      _initialFractions = fractionsFromJson(
+          jsonDecode(await storage.getValue('ui.splitFractions') ?? '{}'));
     } else {
       // This can happen when running tests.
       log('PreferencesController: storage not initialized');
@@ -72,17 +69,33 @@ class PreferencesController {
     _denseMode.value = enableDenseMode;
   }
 
-  /// Change the value for the split fractions setting.
-  void setSplitFractions(String splitFractions) {
-    dynamic decoded;
-    try {
-      decoded = jsonDecode(splitFractions);
-    } catch (e) {
-      decoded = false;
-    }
-    _splitFractions.value = ((splitFractions?.isNotEmpty ?? false) &&
-            decoded is Map<String, dynamic>)
-        ? splitFractions
-        : '{}';
+  /// Get the value for the split fractions.
+  ValueNotifier<List<double>> lookupSplitFractions(String key) {
+    return splitFractions.putIfAbsent(
+        key, () => ValueNotifier<List<double>>(_initialFractions[key] ?? []));
+  }
+
+  /// Update the value for the split fractions.
+  void updateSplitFractions(String key, List<double> value) {
+    if ((key?.isEmpty ?? true) ||
+        (value?.length ?? 0) < 2 ||
+        isListEqual(lookupSplitFractions(key).value, value)) return;
+    lookupSplitFractions(key).value = value;
+    storage?.setValue(
+        'ui.splitFractions', jsonEncode(fractionsToJson(splitFractions)));
+  }
+
+  Map<String, List<double>> fractionsFromJson(Map<String, dynamic> json) {
+    return json
+        .map((key, fractions) => MapEntry(key, fractions?.cast<double>()));
+  }
+
+  Map<String, List<double>> fractionsToJson(
+      Map<String, ValueListenable<List<double>>> fractions) {
+    return fractions.map((key, fractions) => MapEntry(key, fractions.value));
+  }
+
+  bool isListEqual(List value, List other) {
+    return jsonEncode(value) == jsonEncode(other);
   }
 }

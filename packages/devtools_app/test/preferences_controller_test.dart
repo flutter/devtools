@@ -16,7 +16,7 @@ void main() {
     test('has value', () {
       expect(controller.darkModeTheme.value, isNotNull);
       expect(controller.denseModeEnabled.value, isNotNull);
-      expect(controller.splitFractions.value, isNotNull);
+      expect(controller.splitFractions, isNotNull);
     });
 
     test('toggleDarkModeTheme', () {
@@ -59,23 +59,32 @@ void main() {
       expect(controller.denseModeEnabled.value, isNot(originalValue));
     });
 
-    test('setSplitFractions valid data', () {
+    test('updateSplitFractions', () {
       bool valueChanged = false;
-      final originalValue = controller.splitFractions.value;
+      const String fractionsKey = 'test';
+      const List<double> testValue = [0.33342342423, 0.98989899343];
+      const List<double> testValue2 = [0.33342342424, 0.98989899344];
+      final originalValue = controller.lookupSplitFractions(fractionsKey).value;
 
-      controller.splitFractions.addListener(() {
+      controller.lookupSplitFractions(fractionsKey).addListener(() {
         valueChanged = true;
       });
 
-      controller.setSplitFractions(
-          '{"_hash01231234":[0.33342342423, 0.98989899343]}');
+      controller.updateSplitFractions(fractionsKey, testValue);
       expect(valueChanged, isTrue);
-      expect(controller.splitFractions.value, isNot(originalValue));
+      expect(controller.lookupSplitFractions(fractionsKey).value,
+          isNot(originalValue));
 
       valueChanged = false;
-      controller.setSplitFractions('data should be object "{}" json string');
+      controller.updateSplitFractions(fractionsKey, testValue);
+      expect(valueChanged, isFalse);
+
+      controller.updateSplitFractions(fractionsKey, testValue2);
       expect(valueChanged, isTrue);
-      expect(controller.splitFractions.value, equals(originalValue));
+      expect(
+          controller.isListEqual(
+              controller.lookupSplitFractions(fractionsKey).value, testValue2),
+          isTrue);
     });
   });
 }

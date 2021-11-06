@@ -127,6 +127,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     final widgetTrees = Split(
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
+      fractionsKey: 'inspector_detail_tree',
       children: [
         summaryTree,
         InspectorDetailsTabController(

@@ -408,6 +408,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                             DebuggerConsole.buildHeader(),
                           ],
                           initialFractions: const [0.8, 0.2],
+                          fractionsKey: 'inspector_console',
                         )
                       : content,
                   bottomNavigationBar: widget.embed ? null : _buildStatusLine(),
