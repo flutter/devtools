@@ -185,7 +185,7 @@ class HotReloadButton extends StatelessWidget {
     // TODO(devoncarew): Show as disabled when reload service calls are in progress.
 
     return DevToolsTooltip(
-      tooltip: 'Hot reload',
+      message: 'Hot reload',
       child: _RegisteredServiceExtensionButton._(
         serviceDescription: hotReload,
         action: () {
@@ -207,7 +207,7 @@ class HotRestartButton extends StatelessWidget {
     // TODO(devoncarew): Show as disabled when reload service calls are in progress.
 
     return DevToolsTooltip(
-      tooltip: 'Hot restart',
+      message: 'Hot restart',
       child: _RegisteredServiceExtensionButton._(
         serviceDescription: hotRestart,
         action: () {
@@ -609,7 +609,7 @@ class _ServiceExtensionCheckboxGroupButtonState
       ),
     );
     if (widget.tooltip != null && widget.tooltip.isNotEmpty) {
-      label = DevToolsTooltip(tooltip: widget.tooltip, child: label);
+      label = DevToolsTooltip(message: widget.tooltip, child: label);
     }
     return ValueListenableBuilder(
       valueListenable: _enabled,
@@ -834,7 +834,7 @@ class ServiceExtensionTooltip extends StatelessWidget {
     final focusColor = Theme.of(context).focusColor;
 
     return DevToolsTooltip(
-      tooltip: description.tooltip,
+      message: description.tooltip,
       preferBelow: true,
       child: child,
       decoration: BoxDecoration(

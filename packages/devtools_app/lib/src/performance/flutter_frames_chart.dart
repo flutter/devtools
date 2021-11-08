@@ -331,7 +331,7 @@ class FlutterFramesChartItem extends StatelessWidget {
         children: [
           // TODO(kenz): make tooltip to persist if the frame is selected.
           DevToolsTooltip(
-            tooltip: _tooltipText(frame, hasShaderJank),
+            message: _tooltipText(frame, hasShaderJank),
             padding: const EdgeInsets.all(denseSpacing),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: densePadding),

@@ -415,7 +415,7 @@ class OpenAboutAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: 'About DevTools',
+      message: 'About DevTools',
       child: InkWell(
         onTap: () async {
           unawaited(showDialog(
@@ -441,7 +441,7 @@ class OpenSettingsAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: 'Settings',
+      message: 'Settings',
       child: InkWell(
         onTap: () async {
           unawaited(showDialog(
@@ -467,7 +467,7 @@ class ReportFeedbackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: 'Report feedback',
+      message: 'Report feedback',
       child: InkWell(
         onTap: () async {
           ga.select(

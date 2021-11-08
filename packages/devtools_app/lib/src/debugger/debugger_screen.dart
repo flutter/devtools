@@ -253,7 +253,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               onPressed:
                   breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
             ),
-            tooltip: 'Remove all breakpoints',
+            message: 'Remove all breakpoints',
           ),
         ]);
       },
@@ -458,7 +458,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               ),
             ),
             DevToolsTooltip(
-              tooltip: 'Resume',
+              message: 'Resume',
               child: TextButton(
                 onPressed: controller.resume,
                 child: Icon(
@@ -469,7 +469,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               ),
             ),
             DevToolsTooltip(
-              tooltip: 'Step over',
+              message: 'Step over',
               child: TextButton(
                 onPressed: controller.stepOver,
                 child: Icon(

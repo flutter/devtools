@@ -1295,7 +1295,7 @@ class LegacyThreadNavigatorButton extends StatelessWidget {
       height: useSmallButton ? smallButtonHeight : buttonMinWidth,
       width: buttonMinWidth,
       child: DevToolsTooltip(
-        tooltip: tooltip,
+        message: tooltip,
         child: IconButton(
           padding: EdgeInsets.zero,
           icon: Icon(

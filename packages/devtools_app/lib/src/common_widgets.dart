@@ -605,16 +605,19 @@ class Badge extends StatelessWidget {
 class DevToolsTooltip extends StatelessWidget {
   const DevToolsTooltip({
     Key key,
-    @required this.tooltip,
+    this.message,
+    this.richMessage,
     @required this.child,
     this.waitDuration = tooltipWait,
     this.preferBelow = false,
     this.padding = const EdgeInsets.all(defaultSpacing),
     this.decoration,
     this.textStyle,
-  }) : super(key: key);
+  })  : assert((message == null) != (richMessage == null)),
+        super(key: key);
 
-  final String tooltip;
+  final String message;
+  final InlineSpan richMessage;
   final Widget child;
   final Duration waitDuration;
   final bool preferBelow;
@@ -625,7 +628,8 @@ class DevToolsTooltip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: tooltip,
+      message: message,
+      richMessage: richMessage,
       waitDuration: waitDuration,
       preferBelow: preferBelow,
       padding: padding,
@@ -668,7 +672,7 @@ class ToolbarAction extends StatelessWidget {
     return tooltip == null
         ? button
         : DevToolsTooltip(
-            tooltip: tooltip,
+            message: tooltip,
             child: button,
           );
   }
@@ -822,7 +826,7 @@ class FilterButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return DevToolsTooltip(
-      tooltip: 'Filter',
+      message: 'Filter',
       // TODO(kenz): this SizedBox wrapper should be unnecessary once
       // https://github.com/flutter/flutter/issues/79894 is fixed.
       child: SizedBox(
@@ -1321,7 +1325,7 @@ Widget maybeWrapWithTooltip({
 }) {
   if (tooltip != null) {
     return DevToolsTooltip(
-      tooltip: tooltip,
+      message: tooltip,
       padding: tooltipPadding,
       child: child,
     );
@@ -1525,7 +1529,7 @@ class CheckboxSetting extends StatelessWidget {
     );
     if (tooltip != null && tooltip.isNotEmpty) {
       return DevToolsTooltip(
-        tooltip: tooltip,
+        message: tooltip,
         child: content,
       );
     }

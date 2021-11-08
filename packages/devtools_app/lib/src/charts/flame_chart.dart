@@ -1100,7 +1100,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     if (hovered || !selectable) {
       return DevToolsTooltip(
         key: key,
-        tooltip: data.tooltip,
+        message: data.tooltip,
         child: node,
       );
     } else {

@@ -295,7 +295,7 @@ class LegacyFlutterFramesChartItem extends StatelessWidget {
       children: [
         // TODO(kenz): make tooltip to persist if the frame is selected.
         DevToolsTooltip(
-          tooltip: _tooltipText(frame),
+          message: _tooltipText(frame),
           padding: const EdgeInsets.all(denseSpacing),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: densePadding),
