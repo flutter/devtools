@@ -773,7 +773,7 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
     final theme = Theme.of(context);
     return ToggleButtons(
       borderRadius:
-      const BorderRadius.all(Radius.circular(defaultBorderRadius)),
+          const BorderRadius.all(Radius.circular(defaultBorderRadius)),
       color: theme.colorScheme.toggleButtonsTitle,
       selectedColor: theme.colorScheme.toggleButtonsTitleSelected,
       fillColor: theme.colorScheme.toggleButtonsFillSelected,
