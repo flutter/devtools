@@ -1026,6 +1026,35 @@ class VmServiceWrapper implements VmService {
     }
   }
 
+  @override
+  Future<UriList> lookupPackageUris(String isolateId, List<String> uris) async {
+    if (await isProtocolVersionSupported(
+        supportedVersion: SemanticVersion(major: 7, minor: 4))) {
+      return trackFuture(
+        'lookupPackageUris',
+        _vmService.lookupPackageUris(isolateId, uris),
+      );
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  Future<UriList> lookupResolvedPackageUris(
+    String isolateId,
+    List<String> uris,
+  ) async {
+    if (await isProtocolVersionSupported(
+        supportedVersion: SemanticVersion(major: 7, minor: 4))) {
+      return trackFuture(
+        'lookupResolvedPackageUris',
+        _vmService.lookupResolvedPackageUris(isolateId, uris),
+      );
+    } else {
+      return null;
+    }
+  }
+
   /// Testing only method to indicate that we don't really need to await all
   /// currently pending futures.
   ///
