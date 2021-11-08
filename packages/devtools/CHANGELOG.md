@@ -1,5 +1,6 @@
 ## 2.9.3
 * Update package:vm_service to ^8.1.0 and package:dds to ^2.1.6 [#3545](https://github.com/flutter/devtools/pull/3545)
+* Add support for vm_service 7.4.0 [#3490](https://github.com/flutter/devtools/pull/3490)
 
 ## 2.8.0
 * Don't register service worker when running DevTools locally [#3476](https://github.com/flutter/devtools/pull/3476)
