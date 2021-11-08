@@ -13,6 +13,7 @@ import '../globals.dart';
 import '../notifications.dart';
 import '../theme.dart';
 import '../ui/search.dart';
+import '../ui/utils.dart';
 import '../utils.dart';
 import 'debugger_controller.dart';
 
@@ -32,11 +33,16 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
   AutoCompleteController _autoCompleteController;
   int historyPosition = -1;
 
+  String _activeWord = '';
+  List<String> _matches = [];
+
   final evalTextFieldKey = GlobalKey(debugLabel: 'evalTextFieldKey');
 
   @override
   void initState() {
     super.initState();
+
+    serviceManager.consoleService.ensureServiceInitialized();
 
     _autoCompleteController = AutoCompleteController();
 
@@ -50,9 +56,13 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
       );
     });
     addAutoDisposeListener(
-        _autoCompleteController.selectTheSearchNotifier, _handleSearch);
+      _autoCompleteController.selectTheSearchNotifier,
+      _handleSearch,
+    );
     addAutoDisposeListener(
-        _autoCompleteController.searchNotifier, _handleSearch);
+      _autoCompleteController.searchNotifier,
+      _handleSearch,
+    );
   }
 
   void _handleSearch() async {
@@ -73,7 +83,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
       final textFieldEditingValue = searchTextFieldController.value;
       final selection = textFieldEditingValue.selection;
 
-      final parts = AutoCompleteSearchControllerMixin.activeEdtingParts(
+      final parts = AutoCompleteSearchControllerMixin.activeEditingParts(
         searchingValue,
         selection,
         handleFields: isField,
@@ -84,16 +94,28 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
         _autoCompleteController.clearSearchAutoComplete();
         return;
       }
-      final matches = await autoCompleteResultsFor(parts, widget.controller);
+
+      final matches = parts.activeWord.startsWith(_activeWord)
+          ? _filterMatches(_matches, parts.activeWord)
+          : await autoCompleteResultsFor(parts, widget.controller);
+
+      _matches = matches;
+      _activeWord = parts.activeWord;
+
       if (matches.length == 1 && matches.first == parts.activeWord) {
         // It is not useful to show a single autocomplete that is exactly what
         // the already typed.
         _autoCompleteController.clearSearchAutoComplete();
       } else {
-        _autoCompleteController.searchAutoComplete.value = matches.sublist(
-          0,
-          min(defaultTopMatchesLimit, matches.length),
-        );
+        final results = matches
+            .sublist(
+              0,
+              min(defaultTopMatchesLimit, matches.length),
+            )
+            .map((match) => AutoCompleteMatch(match))
+            .toList();
+
+        _autoCompleteController.searchAutoComplete.value = results;
         _autoCompleteController.currentDefaultIndex = 0;
       }
     } else {
@@ -130,7 +152,6 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
               shouldRequestFocus: false,
               supportClearField: true,
               onSelection: _onSelection,
-              tracking: true,
               decoration: const InputDecoration(
                 contentPadding: EdgeInsets.all(denseSpacing),
                 border: OutlineInputBorder(),
@@ -138,6 +159,21 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
                 enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
                 labelText: 'Eval',
               ),
+              overlayXPositionBuilder:
+                  (String inputValue, TextStyle inputStyle) {
+                // X-coordinate is equivalent to the width of the input text
+                // up to the last "." or the insertion point (cursor):
+                final indexOfDot = inputValue.lastIndexOf('.');
+                final textSegment = indexOfDot != -1
+                    ? inputValue.substring(0, indexOfDot + 1)
+                    : inputValue;
+                return calculateTextSpanWidth(
+                  TextSpan(
+                    text: textSegment,
+                    style: inputStyle,
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -160,7 +196,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
     final editingValue = textFieldEditingValue.text;
     final selection = textFieldEditingValue.selection;
 
-    final parts = AutoCompleteSearchControllerMixin.activeEdtingParts(
+    final parts = AutoCompleteSearchControllerMixin.activeEditingParts(
       editingValue,
       selection,
       handleFields: _autoCompleteController.search.endsWith('.'),
@@ -180,9 +216,15 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
     );
   }
 
+  List<String> _filterMatches(List<String> previousMatches, String activeWord) {
+    return previousMatches
+        .where((match) => match.startsWith(activeWord))
+        .toList();
+  }
+
   void _handleExpressionEval() async {
     final expressionText = searchTextFieldController.value.text.trim();
-    updateSearchField(_autoCompleteController, '', 0);
+    updateSearchField(_autoCompleteController, newValue: '', caretPosition: 0);
     clearSearchField(_autoCompleteController, force: true);
 
     if (expressionText.isEmpty) return;
@@ -492,10 +534,7 @@ Future<Set<String>> _autoCompleteMembersFor(
   if (classRef == null) {
     return {};
   }
-  // TODO(jacobr): consider using controller.autocompleteCache to cache the list
-  // of autocomplete candidates for each class. The main challenge with caching
-  // is _isAccessible depends on the current source location so makes caching
-  // difficult.
+
   final result = <String>{};
   final clazz = await controller.classFor(classRef);
   if (clazz != null) {

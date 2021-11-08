@@ -6,22 +6,17 @@ import 'dart:convert';
 
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
-import 'package:devtools_app/src/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/inspector/inspector_screen.dart';
-import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
-import 'package:devtools_app/src/inspector/inspector_tree_controller.dart';
 import 'package:devtools_app/src/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/inspector/layout_explorer/layout_explorer.dart';
 import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:flutter/foundation.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart' hide Fake;
 import 'package:mockito/mockito.dart';
-
-import 'support/mocks.dart';
-import 'support/wrappers.dart';
 
 void main() {
   const screen = InspectorScreen();
@@ -43,13 +38,12 @@ void main() {
     setUp(() {
       fakeServiceManager = FakeServiceManager();
       fakeExtensionManager = fakeServiceManager.serviceExtensionManager;
-      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+      mockIsFlutterApp(fakeServiceManager.connectedApp);
       when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
           .thenReturn(ValueNotifier<int>(0));
 
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      mockIsFlutterApp(serviceManager.connectedApp);
+      fakeServiceManager.consoleService.ensureServiceInitialized();
     });
 
     void mockExtensions() {
@@ -104,7 +98,7 @@ void main() {
       await tester.pumpWidget(buildInspectorScreen());
       expect(find.byType(InspectorScreenBody), findsOneWidget);
       expect(find.text('Refresh Tree'), findsOneWidget);
-      expect(find.text(extensions.debugPaint.description), findsOneWidget);
+      expect(find.text(extensions.debugPaint.title), findsOneWidget);
       // Make sure there is not an overflow if the window is narrow.
       // TODO(jacobr): determine why there are overflows in the test environment
       // but not on the actual device for this cae.
@@ -139,13 +133,12 @@ void main() {
       // We need a frame to find out that the service extension state has changed.
       expect(find.byType(InspectorScreenBody), findsOneWidget);
       expect(
-        find.text(extensions.toggleSelectWidgetMode.description),
+        find.text(extensions.toggleSelectWidgetMode.title),
         findsOneWidget,
       );
-      expect(find.text(extensions.debugPaint.description), findsOneWidget);
+      expect(find.text(extensions.debugPaint.title), findsOneWidget);
       await tester.pump();
-      await tester
-          .tap(find.text(extensions.toggleSelectWidgetMode.description));
+      await tester.tap(find.text(extensions.toggleSelectWidgetMode.title));
       expect(
         fakeExtensionManager.extensionValueOnDevice[
             extensions.toggleSelectWidgetMode.extension],
@@ -158,15 +151,14 @@ void main() {
         isFalse,
       );
 
-      await tester
-          .tap(find.text(extensions.toggleSelectWidgetMode.description));
+      await tester.tap(find.text(extensions.toggleSelectWidgetMode.title));
       expect(
         fakeExtensionManager.extensionValueOnDevice[
             extensions.toggleSelectWidgetMode.extension],
         isTrue,
       );
 
-      await tester.tap(find.text(extensions.debugPaint.description));
+      await tester.tap(find.text(extensions.debugPaint.title));
       expect(
         fakeExtensionManager
             .extensionValueOnDevice[extensions.debugPaint.extension],
@@ -192,20 +184,20 @@ void main() {
       await tester.pumpWidget(buildInspectorScreen());
       await tester.pump();
       expect(find.byType(InspectorScreenBody), findsOneWidget);
-      expect(find.text(extensions.toggleOnDeviceWidgetInspector.description),
+      expect(find.text(extensions.toggleOnDeviceWidgetInspector.title),
           findsOneWidget);
-      expect(find.text(extensions.debugPaint.description), findsOneWidget);
+      expect(find.text(extensions.debugPaint.title), findsOneWidget);
       await tester.pump();
 
       await tester
-          .tap(find.text(extensions.toggleOnDeviceWidgetInspector.description));
+          .tap(find.text(extensions.toggleOnDeviceWidgetInspector.title));
       // Verify the service extension state has not changed.
       expect(
           fakeExtensionManager.extensionValueOnDevice[
               extensions.toggleOnDeviceWidgetInspector.extension],
           isTrue);
       await tester
-          .tap(find.text(extensions.toggleOnDeviceWidgetInspector.description));
+          .tap(find.text(extensions.toggleOnDeviceWidgetInspector.title));
       // Verify the service extension state has not changed.
       expect(
           fakeExtensionManager.extensionValueOnDevice[
@@ -300,56 +292,4 @@ void main() {
     // images. Alternately: support an offline inspector mode and add tests of
     // that mode which would enable faster tests that run as unittests.
   });
-}
-
-class FakeInspectorService extends Fake implements InspectorService {
-  @override
-  ObjectGroup createObjectGroup(String debugName) {
-    return ObjectGroup(debugName, this);
-  }
-
-  @override
-  Future<bool> isWidgetTreeReady() async {
-    return false;
-  }
-
-  @override
-  Future<List<String>> inferPubRootDirectoryIfNeeded() async {
-    return ['/some/directory'];
-  }
-
-  @override
-  bool get useDaemonApi => true;
-
-  @override
-  final Set<InspectorServiceClient> clients = {};
-
-  @override
-  void addClient(InspectorServiceClient client) {
-    clients.add(client);
-  }
-
-  @override
-  void removeClient(InspectorServiceClient client) {
-    clients.remove(client);
-  }
-}
-
-class MockInspectorTreeController extends Mock
-    implements InspectorTreeController {}
-
-class TestInspectorController extends Fake implements InspectorController {
-  InspectorService service = FakeInspectorService();
-
-  @override
-  ValueListenable<InspectorTreeNode> get selectedNode => _selectedNode;
-  final ValueNotifier<InspectorTreeNode> _selectedNode = ValueNotifier(null);
-
-  @override
-  void setSelectedNode(InspectorTreeNode newSelection) {
-    _selectedNode.value = newSelection;
-  }
-
-  @override
-  InspectorService get inspectorService => service;
 }

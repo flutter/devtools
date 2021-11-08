@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -1101,7 +1100,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     if (hovered || !selectable) {
       return DevToolsTooltip(
         key: key,
-        tooltip: data.tooltip,
+        message: data.tooltip,
         child: node,
       );
     } else {

@@ -3,15 +3,15 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
+import 'package:devtools_test/flutter_test_driver.dart'
+    show FlutterRunConfiguration;
+import 'package:devtools_test/flutter_test_environment.dart';
+import 'package:devtools_test/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'matchers/matchers.dart';
-import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
-import 'support/flutter_test_environment.dart';
-import 'support/utils.dart';
 
 void main() async {
   initializeLiveTestWidgetsFlutterBindingWithAssets();
@@ -30,6 +30,7 @@ void main() async {
   };
 
   env.beforeEveryTearDown = () async {
+    inspectorService?.onIsolateStopped();
     inspectorService?.dispose();
     inspectorService = null;
   };

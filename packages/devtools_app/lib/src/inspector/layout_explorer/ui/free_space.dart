@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../../common_widgets.dart';
 import '../../../utils.dart';
@@ -77,7 +76,7 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
         width: renderProperties.width,
         height: renderProperties.height,
         child: DevToolsTooltip(
-          tooltip: '$widthDescription\n$heightDescription',
+          message: '$widthDescription\n$heightDescription',
           child: showWidth ? widthWidget : heightWidget,
         ),
       ),

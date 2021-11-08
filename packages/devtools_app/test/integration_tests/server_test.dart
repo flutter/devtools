@@ -8,15 +8,15 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:devtools_test/chrome.dart';
+import 'package:devtools_test/cli_test_driver.dart';
+import 'package:devtools_test/devtools_server_driver.dart';
+import 'package:devtools_test/file_utils.dart';
+import 'package:devtools_test/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../support/chrome.dart';
-import '../support/cli_test_driver.dart';
-import '../support/devtools_server_driver.dart';
-import '../support/file_utils.dart';
-import '../support/utils.dart';
 import 'integration.dart';
 
 CliAppFixture appFixture;

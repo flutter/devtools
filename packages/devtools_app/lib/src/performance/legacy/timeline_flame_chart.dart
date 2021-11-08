@@ -7,7 +7,6 @@
 // hits flutter stable.
 
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -1296,7 +1295,7 @@ class LegacyThreadNavigatorButton extends StatelessWidget {
       height: useSmallButton ? smallButtonHeight : buttonMinWidth,
       width: buttonMinWidth,
       child: DevToolsTooltip(
-        tooltip: tooltip,
+        message: tooltip,
         child: IconButton(
           padding: EdgeInsets.zero,
           icon: Icon(

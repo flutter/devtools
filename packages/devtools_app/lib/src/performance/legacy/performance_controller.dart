@@ -28,7 +28,6 @@ import '../../trace_event.dart';
 import '../../trees.dart';
 import '../../ui/search.dart';
 import '../../utils.dart';
-import '../timeline_streams.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
 import 'timeline_event_processor.dart';
@@ -95,21 +94,6 @@ class LegacyPerformanceController
   ValueListenable<bool> get badgeTabForJankyFrames => _badgeTabForJankyFrames;
   final _badgeTabForJankyFrames = ValueNotifier<bool>(false);
 
-  // TODO(kenz): switch to use VmFlagManager-like pattern once
-  // https://github.com/dart-lang/sdk/issues/41822 is fixed.
-  /// Recorded timeline stream values.
-  final recordedStreams = [
-    dartTimelineStream,
-    embedderTimelineStream,
-    gcTimelineStream,
-    apiTimelineStream,
-    compilerTimelineStream,
-    compilerVerboseTimelineStream,
-    debuggerTimelineStream,
-    isolateTimelineStream,
-    vmTimelineStream,
-  ];
-
   final threadNamesById = <int, String>{};
 
   /// Active timeline data.
@@ -123,7 +107,7 @@ class LegacyPerformanceController
 
   /// Timeline data loaded via import.
   ///
-  /// This is expected to be null when we are not in [offlineMode].
+  /// This is expected to be null when we are not in [offlineController.offlineMode].
   ///
   /// This will contain the original data from the imported file, regardless of
   /// any selection modifications that occur while the data is displayed. [data]
@@ -147,7 +131,7 @@ class LegacyPerformanceController
   }
 
   Future<void> _initHelper() async {
-    if (!offlineMode) {
+    if (!offlineController.offlineMode.value) {
       await serviceManager.onServiceAvailable;
 
       // Default to true for profile builds only.
@@ -158,11 +142,7 @@ class LegacyPerformanceController
         serviceManager.service.setProfilePeriod(mediumProfilePeriod),
         logError: false,
       ));
-      await setTimelineStreams([
-        dartTimelineStream,
-        embedderTimelineStream,
-        gcTimelineStream,
-      ]);
+      await serviceManager.timelineStreamManager.setDefaultTimelineStreams();
       await toggleHttpRequestLogging(true);
 
       // Initialize displayRefreshRate.
@@ -193,7 +173,8 @@ class LegacyPerformanceController
           shouldRefreshSearchMatches: true,
         );
         data.cpuProfileData = cpuProfilerController.dataNotifier.value;
-      } else if ((!offlineMode || offlinePerformanceData == null) &&
+      } else if ((!offlineController.offlineMode.value ||
+              offlinePerformanceData == null) &&
           cpuProfilerController.profilerEnabled) {
         // Fetch a profile if not in offline mode and if the profiler is enabled
         cpuProfilerController.reset();
@@ -236,7 +217,7 @@ class LegacyPerformanceController
         cpuProfilerController.cpuProfileStore.lookupProfile(time: frame.time);
     if (storedProfileForFrame == null) {
       cpuProfilerController.reset();
-      if (!offlineMode) {
+      if (!offlineController.offlineMode.value) {
         await cpuProfilerController.pullAndProcessProfile(
           startMicros: frame.time.start.inMicroseconds,
           extentMicros: frame.time.duration.inMicroseconds,
@@ -507,30 +488,6 @@ class LegacyPerformanceController
   Future<void> toggleHttpRequestLogging(bool state) async {
     await HttpService.toggleHttpRequestLogging(state);
     _httpTimelineLoggingEnabled.value = state;
-  }
-
-  Future<void> setTimelineStreams(List<RecordedTimelineStream> streams) async {
-    for (final stream in streams) {
-      assert(recordedStreams.contains(stream));
-      stream.toggle(true);
-    }
-    await serviceManager.service
-        .setVMTimelineFlags(streams.map((s) => s.name).toList());
-  }
-
-  // TODO(kenz): this is not as robust as we'd like. Revisit once
-  // https://github.com/dart-lang/sdk/issues/41822 is addressed.
-  Future<void> toggleTimelineStream(RecordedTimelineStream stream) async {
-    final newValue = !stream.enabled.value;
-    final timelineFlags =
-        (await serviceManager.service.getVMTimelineFlags()).recordedStreams;
-    if (timelineFlags.contains(stream.name) && !newValue) {
-      timelineFlags.remove(stream.name);
-    } else if (!timelineFlags.contains(stream.name) && newValue) {
-      timelineFlags.add(stream.name);
-    }
-    await serviceManager.service.setVMTimelineFlags(timelineFlags);
-    stream.toggle(newValue);
   }
 
   /// Clears the timeline data currently stored by the controller.

@@ -154,7 +154,7 @@ class StatusLine extends StatelessWidget {
             }
 
             return DevToolsTooltip(
-              tooltip: 'Selected Isolate',
+              message: 'Selected Isolate',
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<IsolateRef>(
                   value: isolateRef,
@@ -224,7 +224,7 @@ class StatusLine extends StatelessWidget {
               ),
               const SizedBox(width: denseSpacing),
               DevToolsTooltip(
-                tooltip: 'Device Info',
+                message: 'Device Info',
                 child: InkWell(
                   onTap: () async {
                     final flutterVersion =

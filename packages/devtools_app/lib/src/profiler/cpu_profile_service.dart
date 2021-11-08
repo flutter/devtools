@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 
 import '../globals.dart';
 import '../vm_flags.dart' as vm_flags;

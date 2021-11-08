@@ -118,7 +118,9 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
       );
       Provider.of<BannerMessagesController>(context).addMessage(
         ShaderJankMessage(
-          offlineMode ? SimpleScreen.id : PerformanceScreen.id,
+          offlineController.offlineMode.value
+              ? SimpleScreen.id
+              : PerformanceScreen.id,
           jankyFramesCount: shaderJankFrames.length,
           jankDuration: shaderJankDuration,
         ).build(context),
@@ -329,7 +331,7 @@ class FlutterFramesChartItem extends StatelessWidget {
         children: [
           // TODO(kenz): make tooltip to persist if the frame is selected.
           DevToolsTooltip(
-            tooltip: _tooltipText(frame, hasShaderJank),
+            message: _tooltipText(frame, hasShaderJank),
             padding: const EdgeInsets.all(denseSpacing),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: densePadding),

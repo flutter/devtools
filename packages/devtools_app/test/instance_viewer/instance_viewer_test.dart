@@ -7,12 +7,11 @@ import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart'
 import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/provider/instance_viewer/instance_viewer.dart';
 import 'package:devtools_app/src/provider/instance_viewer/result.dart';
+import 'package:devtools_test/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../support/utils.dart';
 
 final alwaysExpandedOverride =
     isExpandedProvider.overrideWithProvider((ref, param) => true);

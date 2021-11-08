@@ -5,11 +5,10 @@
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_test/mocks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
-
-import 'support/mocks.dart';
 
 void main() {
   group('stdio', () {
@@ -30,8 +29,18 @@ void main() {
       when(service.onStderrEvent).thenAnswer((_) {
         return const Stream.empty();
       });
+      when(service.onStdoutEventWithHistory).thenAnswer((_) {
+        return const Stream.empty();
+      });
+      when(service.onStderrEventWithHistory).thenAnswer((_) {
+        return const Stream.empty();
+      });
+      when(service.onExtensionEventWithHistory).thenAnswer((_) {
+        return const Stream.empty();
+      });
       final manager = FakeServiceManager(service: service);
       setGlobal(ServiceConnectionManager, manager);
+      manager.consoleService.ensureServiceInitialized();
     });
 
     test('ignores trailing new lines', () {

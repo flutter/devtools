@@ -134,10 +134,13 @@ class AllocationTableViewState extends State<AllocationTableView>
       // Remove duplicates and sort the matches.
       final sortedAllocationMatches = matches.toSet().toList()..sort();
       // Use the top 10 matches:
-      controller.searchAutoComplete.value = sortedAllocationMatches.sublist(
-        0,
-        min(topMatchesLimit, sortedAllocationMatches.length),
-      );
+      controller.searchAutoComplete.value = sortedAllocationMatches
+          .sublist(
+            0,
+            min(topMatchesLimit, sortedAllocationMatches.length),
+          )
+          .map((match) => AutoCompleteMatch(match))
+          .toList();
     }
   }
 

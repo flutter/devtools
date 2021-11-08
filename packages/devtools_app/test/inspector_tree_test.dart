@@ -7,14 +7,13 @@ import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/inspector/inspector_tree_controller.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_test/inspector_tree.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/utils.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart' hide Fake;
 import 'package:mockito/mockito.dart';
-
-import 'support/inspector_tree.dart';
-import 'support/mocks.dart';
-import 'support/utils.dart';
-import 'support/wrappers.dart';
 
 void main() {
   FakeServiceManager fakeServiceManager;

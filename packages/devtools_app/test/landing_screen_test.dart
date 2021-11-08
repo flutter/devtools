@@ -5,11 +5,10 @@
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/landing_screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'support/mocks.dart';
-import 'support/wrappers.dart';
 
 void main() {
   setUp(() {

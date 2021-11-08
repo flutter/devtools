@@ -92,7 +92,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Service used to retrieve more detailed information about the value of
   /// the property and its children and properties.
-  final ObjectGroup inspectorService;
+  final ObjectGroupBase inspectorService;
 
   /// JSON describing the diagnostic node.
   final Map<String, Object> json;
@@ -138,7 +138,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   bool get isLocalClass {
     final objectGroup = inspectorService;
-    if (objectGroup is ObjectGroup) {
+    if (objectGroup is ObjectGroupBase) {
       return _isLocalClass ??= objectGroup.inspectorService.isLocalClass(this);
     } else {
       // TODO(jacobr): if objectGroup is a Future<ObjectGroup> we cannot compute
@@ -608,7 +608,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   Future<List<RemoteDiagnosticsNode>> getProperties(
-      ObjectGroup objectGroup) async {
+      ObjectGroupBase objectGroup) async {
     return await objectGroup.getProperties(dartDiagnosticRef);
   }
 
@@ -679,7 +679,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   Future<void> setSelectionInspector(bool uiAlreadyUpdated) async {
-    await inspectorService?.setSelectionInspector(valueRef, uiAlreadyUpdated);
+    final objectGroup = inspectorService;
+    if (objectGroup is ObjectGroup) {
+      await objectGroup.setSelectionInspector(valueRef, uiAlreadyUpdated);
+    }
   }
 }
 

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'dart:async';
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -13,15 +13,14 @@ import 'package:devtools_app/src/app.dart';
 import 'package:devtools_app/src/framework/framework_core.dart';
 import 'package:devtools_app/src/preferences.dart';
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:devtools_test/file_utils.dart';
+import 'package:devtools_test/flutter_test_driver.dart';
+import 'package:devtools_test/flutter_test_environment.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart' as intl;
-
-import '../support/file_utils.dart';
-import '../support/flutter_test_driver.dart';
-import '../support/flutter_test_environment.dart';
 
 Future<void> main() async {
   debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;

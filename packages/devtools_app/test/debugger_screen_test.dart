@@ -13,30 +13,36 @@ import 'package:devtools_app/src/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/debugger/program_explorer_model.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/utils.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'support/mocks.dart';
-import 'support/utils.dart';
-import 'support/wrappers.dart';
-
 void main() {
   DebuggerScreen screen;
   FakeServiceManager fakeServiceManager;
   MockDebuggerController debuggerController;
-  fakeServiceManager = FakeServiceManager();
-  when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
-  setGlobal(ServiceConnectionManager, fakeServiceManager);
 
   const windowSize = Size(4000.0, 4000.0);
   const smallWindowSize = Size(1000.0, 1000.0);
 
+  setUp(() {
+    fakeServiceManager = FakeServiceManager();
+    when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    fakeServiceManager.consoleService.ensureServiceInitialized();
+  });
+
   group('DebuggerScreen', () {
     Future<void> pumpDebuggerScreen(
-        WidgetTester tester, DebuggerController controller) async {
+      WidgetTester tester,
+      DebuggerController controller,
+    ) async {
       await tester.pumpWidget(wrapWithControllers(
         const DebuggerScreenBody(),
         debugger: controller,
@@ -44,7 +50,9 @@ void main() {
     }
 
     Future<void> pumpConsole(
-        WidgetTester tester, DebuggerController controller) async {
+      WidgetTester tester,
+      DebuggerController controller,
+    ) async {
       await tester.pumpWidget(wrapWithControllers(
         Row(
           children: [
@@ -109,6 +117,14 @@ void main() {
     });
 
     group('ConsoleControls', () {
+      final _stdio = ['First line', _ansiCodesOutput(), 'Third line'];
+
+      void _appendStdioLines() {
+        for (var line in _stdio) {
+          serviceManager.consoleService.appendStdio('$line\n');
+        }
+      }
+
       testWidgetsWithWindowSize(
           'Tapping the Console Clear button clears stdio.', windowSize,
           (WidgetTester tester) async {
@@ -125,30 +141,24 @@ void main() {
         expect(serviceManager.consoleService.stdio.value, isEmpty);
       });
 
-      final _stdio = ['First line', _ansiCodesOutput(), 'Third line'];
-
-      void _appendStdioLines() {
-        for (var line in _stdio) {
-          serviceManager.consoleService.appendStdio('$line\n');
-        }
-      }
-
       group('Clipboard', () {
-        _appendStdioLines();
         var _clipboardContents = '';
         final _expected = _stdio.join('\n');
 
         setUp(() {
+          _appendStdioLines();
           // This intercepts the Clipboard.setData SystemChannel message,
           // and stores the contents that were (attempted) to be copied.
           SystemChannels.platform.setMockMethodCallHandler((MethodCall call) {
             switch (call.method) {
               case 'Clipboard.setData':
                 _clipboardContents = call.arguments['text'];
-                return Future.value(true);
                 break;
               case 'Clipboard.getData':
                 return Future.value(<String, dynamic>{});
+                break;
+              case 'Clipboard.hasStrings':
+                return Future.value(<String, dynamic>{'value': true});
                 break;
               default:
                 break;
@@ -166,8 +176,6 @@ void main() {
         testWidgetsWithWindowSize(
             'Tapping the Copy to Clipboard button attempts to copy stdio to clipboard.',
             windowSize, (WidgetTester tester) async {
-          _appendStdioLines();
-
           await pumpConsole(tester, debuggerController);
 
           final copyButton =

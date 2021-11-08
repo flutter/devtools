@@ -47,6 +47,7 @@ import 'screen.dart';
 import 'snapshot_screen.dart';
 import 'theme.dart';
 import 'ui/service_extension_widgets.dart';
+import 'utils.dart';
 import 'vm_developer/vm_developer_tools_controller.dart';
 import 'vm_developer/vm_developer_tools_screen.dart';
 
@@ -59,6 +60,13 @@ const showVmDeveloperMode = false;
 
 /// Whether this DevTools build is external.
 bool isExternalBuild = true;
+
+// TODO(kenz): remove the pub warning code after devtools version 2.8.0 ships
+/// Whether DevTools should warn users to stop launching DevTools from Pub.
+///
+/// This flag will be turned on for the final release of DevTools on pub, but
+/// should remain off at HEAD.
+const showPubWarning = false;
 
 /// Top-level configuration for the app.
 @immutable
@@ -311,6 +319,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       ),
       routerDelegate: DevToolsRouterDelegate(_getPage),
       routeInformationParser: DevToolsRouteInformationParser(),
+      // Disable default scrollbar behavior on web to fix duplicate scrollbars
+      // bug, see https://github.com/flutter/flutter/issues/90697:
+      scrollBehavior:
+          const MaterialScrollBehavior().copyWith(scrollbars: !kIsWeb),
     );
   }
 }
@@ -403,7 +415,7 @@ class OpenAboutAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: 'About DevTools',
+      message: 'About DevTools',
       child: InkWell(
         onTap: () async {
           unawaited(showDialog(
@@ -429,7 +441,7 @@ class OpenSettingsAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: 'Settings',
+      message: 'Settings',
       child: InkWell(
         onTap: () async {
           unawaited(showDialog(
@@ -455,7 +467,7 @@ class ReportFeedbackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: 'Report feedback',
+      message: 'Report feedback',
       child: InkWell(
         onTap: () async {
           ga.select(
@@ -483,7 +495,6 @@ class DevToolsAboutDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return DevToolsDialog(
       title: dialogTitleText(theme, 'About DevTools'),
       content: Column(
@@ -492,6 +503,10 @@ class DevToolsAboutDialog extends StatelessWidget {
         children: [
           _aboutDevTools(context),
           const SizedBox(height: defaultSpacing),
+          if (shouldShowPubWarning()) ...[
+            const PubWarningText(),
+            const SizedBox(height: defaultSpacing),
+          ],
           ...dialogSubHeader(theme, 'Feedback'),
           Wrap(
             children: [

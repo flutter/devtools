@@ -30,7 +30,6 @@ import 'performance_screen.dart';
 import 'performance_utils.dart';
 import 'rebuild_counts.dart';
 import 'timeline_event_processor.dart';
-import 'timeline_streams.dart';
 
 /// This class contains the business logic for [performance_screen.dart].
 ///
@@ -83,21 +82,6 @@ class PerformanceController extends DisposableController
   ValueListenable<bool> get badgeTabForJankyFrames => _badgeTabForJankyFrames;
   final _badgeTabForJankyFrames = ValueNotifier<bool>(false);
 
-  // TODO(kenz): switch to use VmFlagManager-like pattern once
-  // https://github.com/dart-lang/sdk/issues/41822 is fixed.
-  /// Recorded timeline stream values.
-  final recordedStreams = [
-    dartTimelineStream,
-    embedderTimelineStream,
-    gcTimelineStream,
-    apiTimelineStream,
-    compilerTimelineStream,
-    compilerVerboseTimelineStream,
-    debuggerTimelineStream,
-    isolateTimelineStream,
-    vmTimelineStream,
-  ];
-
   final threadNamesById = <int, String>{};
 
   /// Active timeline data.
@@ -111,7 +95,7 @@ class PerformanceController extends DisposableController
 
   /// Timeline data loaded via import.
   ///
-  /// This is expected to be null when we are not in [offlineMode].
+  /// This is expected to be null when we are not in [offlineController.offlineMode].
   ///
   /// This will contain the original data from the imported file, regardless of
   /// any selection modifications that occur while the data is displayed. [data]
@@ -178,7 +162,7 @@ class PerformanceController extends DisposableController
   }
 
   Future<void> _initHelper() async {
-    if (!offlineMode) {
+    if (!offlineController.offlineMode.value) {
       await serviceManager.onServiceAvailable;
       await _initData();
 
@@ -190,11 +174,7 @@ class PerformanceController extends DisposableController
         serviceManager.service.setProfilePeriod(mediumProfilePeriod),
         logError: false,
       ));
-      await setTimelineStreams([
-        dartTimelineStream,
-        embedderTimelineStream,
-        gcTimelineStream,
-      ]);
+      await serviceManager.timelineStreamManager.setDefaultTimelineStreams();
       await toggleHttpRequestLogging(true);
 
       // Initialize displayRefreshRate.
@@ -305,7 +285,8 @@ class PerformanceController extends DisposableController
           shouldRefreshSearchMatches: true,
         );
         data.cpuProfileData = cpuProfilerController.dataNotifier.value;
-      } else if ((!offlineMode || offlinePerformanceData == null) &&
+      } else if ((!offlineController.offlineMode.value ||
+              offlinePerformanceData == null) &&
           cpuProfilerController.profilerEnabled) {
         // Fetch a profile if not in offline mode and if the profiler is enabled
         cpuProfilerController.reset();
@@ -341,7 +322,10 @@ class PerformanceController extends DisposableController
       return;
     }
 
-    if (!offlineMode) {
+    data.selectedFrame = frame;
+    _selectedFrameNotifier.value = frame;
+
+    if (!offlineController.offlineMode.value) {
       final bool frameBeforeFirstWellFormedFrame =
           firstWellFormedFrameMicros != null &&
               frame.timeFromFrameTiming.start.inMicroseconds <
@@ -371,9 +355,6 @@ class PerformanceController extends DisposableController
       if (_currentFrameBeingSelected != frame) return;
     }
 
-    data.selectedFrame = frame;
-    _selectedFrameNotifier.value = frame;
-
     // We do not need to pull the CPU profile because we will pull the profile
     // for the entire frame. The order of selecting the timeline event and
     // pulling the CPU profile for the frame (directly below) matters here.
@@ -390,7 +371,8 @@ class PerformanceController extends DisposableController
         .lookupProfile(time: frame.timeFromEventFlows);
     if (storedProfileForFrame == null) {
       cpuProfilerController.reset();
-      if (!offlineMode && frame.timeFromEventFlows.isWellFormed) {
+      if (!offlineController.offlineMode.value &&
+          frame.timeFromEventFlows.isWellFormed) {
         await cpuProfilerController.pullAndProcessProfile(
           startMicros: frame.timeFromEventFlows.start.inMicroseconds,
           extentMicros: frame.timeFromEventFlows.duration.inMicroseconds,
@@ -593,7 +575,7 @@ class PerformanceController extends DisposableController
   void addTimelineEvent(TimelineEvent event) {
     data.addTimelineEvent(event);
     if (event is SyncTimelineEvent) {
-      if (!offlineMode &&
+      if (!offlineController.offlineMode.value &&
           serviceManager.hasConnection &&
           !serviceManager.connectedApp.isFlutterAppNow) {
         return;
@@ -795,30 +777,6 @@ class PerformanceController extends DisposableController
   Future<void> toggleHttpRequestLogging(bool state) async {
     await HttpService.toggleHttpRequestLogging(state);
     _httpTimelineLoggingEnabled.value = state;
-  }
-
-  Future<void> setTimelineStreams(List<RecordedTimelineStream> streams) async {
-    for (final stream in streams) {
-      assert(recordedStreams.contains(stream));
-      stream.toggle(true);
-    }
-    await serviceManager.service
-        .setVMTimelineFlags(streams.map((s) => s.name).toList());
-  }
-
-  // TODO(kenz): this is not as robust as we'd like. Revisit once
-  // https://github.com/dart-lang/sdk/issues/41822 is addressed.
-  Future<void> toggleTimelineStream(RecordedTimelineStream stream) async {
-    final newValue = !stream.enabled.value;
-    final timelineFlags =
-        (await serviceManager.service.getVMTimelineFlags()).recordedStreams;
-    if (timelineFlags.contains(stream.name) && !newValue) {
-      timelineFlags.remove(stream.name);
-    } else if (!timelineFlags.contains(stream.name) && newValue) {
-      timelineFlags.add(stream.name);
-    }
-    await serviceManager.service.setVMTimelineFlags(timelineFlags);
-    stream.toggle(newValue);
   }
 
   /// Clears the timeline data currently stored by the controller as well the

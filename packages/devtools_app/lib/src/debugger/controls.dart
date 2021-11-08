@@ -227,7 +227,7 @@ class DebuggerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: title,
+      message: title,
       child: OutlinedButton(
         autofocus: autofocus,
         style: OutlinedButton.styleFrom(
@@ -238,7 +238,7 @@ class DebuggerButton extends StatelessWidget {
         child: MaterialIconLabel(
           label: title,
           iconData: icon,
-          unscaleIncludeTextWidth: mediumDeviceWidth,
+          minScreenWidthForTextBeforeScaling: mediumDeviceWidth,
         ),
       ),
     );

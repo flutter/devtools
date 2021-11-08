@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -172,7 +171,7 @@ class RefreshTimelineEventsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: 'Refresh timeline events',
+      message: 'Refresh timeline events',
       child: TextButton(
         onPressed: () {
           ga.select(
@@ -1377,7 +1376,7 @@ class ThreadNavigatorButton extends StatelessWidget {
       height: useSmallButton ? smallButtonHeight : buttonMinWidth,
       width: buttonMinWidth,
       child: DevToolsTooltip(
-        tooltip: tooltip,
+        message: tooltip,
         child: IconButton(
           padding: EdgeInsets.zero,
           icon: Icon(

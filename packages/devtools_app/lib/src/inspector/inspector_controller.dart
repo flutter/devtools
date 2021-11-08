@@ -18,7 +18,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -128,8 +127,8 @@ class InspectorController extends DisposableController
         if (_supportsToggleSelectWidgetMode.value) {
           serviceManager.serviceExtensionManager.setServiceExtensionState(
             extensions.enableOnDeviceInspector.extension,
-            true,
-            true,
+            enabled: true,
+            value: true,
           );
         }
       });
@@ -144,6 +143,8 @@ class InspectorController extends DisposableController
     autoDispose(
       serviceManager.onConnectionClosed.listen(_handleConnectionStop),
     );
+
+    serviceManager.consoleService.ensureServiceInitialized();
   }
 
   void _handleConnectionStart(VmService service) {

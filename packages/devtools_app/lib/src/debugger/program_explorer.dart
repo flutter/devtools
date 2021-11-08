@@ -7,6 +7,7 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../common_widgets.dart';
 import '../flex_split_column.dart';
+import '../globals.dart';
 import '../theme.dart';
 import '../tree.dart';
 import '../utils.dart';
@@ -46,7 +47,7 @@ class _ProgramExplorerRow extends StatelessWidget {
     }
 
     return DevToolsTooltip(
-      tooltip: toolTip ?? node.name,
+      message: toolTip ?? node.name,
       textStyle: theme.toolTipFixedFontStyle,
       child: InkWell(
         onTap: onTap,
@@ -61,7 +62,11 @@ class _ProgramExplorerRow extends StatelessWidget {
                 text,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.fixedFontStyle,
+                style: theme.fixedFontStyle.copyWith(
+                  color: node.isSelected
+                      ? Colors.white
+                      : theme.fixedFontStyle.color,
+                ),
               ),
             ),
           ],
@@ -91,7 +96,7 @@ class _ProgramExplorerRow extends StatelessWidget {
     } else if (node.object is Field) {
       final field = node.object as Field;
       final subtext = _buildFieldTypeText(field);
-      toolTip = '$subtext ${field.name}';
+      toolTip = '$subtext${field.name}';
     } else if (node.script != null) {
       toolTip = node.script.uri;
     }
@@ -115,7 +120,9 @@ class _ProgramExplorerRow extends StatelessWidget {
     if (field.isFinal && !field.isConst) {
       buffer.write('final ');
     }
-    buffer.write(field.declaredType.name);
+    if (field.declaredType.name != null) {
+      buffer.write('${field.declaredType.name} ');
+    }
     return buffer.toString();
   }
 
@@ -319,24 +326,36 @@ class _ProgramOutlineView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<VMServiceObjectNode>>(
-      valueListenable: controller.outlineNodes,
-      builder: (context, nodes, _) {
-        if (nodes == null || nodes.isEmpty) {
-          return const Center(
-            child: Text('Nothing to inspect'),
-          );
+    return ValueListenableBuilder<bool>(
+      valueListenable: controller.isLoadingOutline,
+      builder: (context, isLoadingOutline, _) {
+        if (isLoadingOutline) {
+          return const CenteredCircularProgressIndicator();
         }
-        return TreeView<VMServiceObjectNode>(
-          itemExtent: _programExplorerRowHeight,
-          dataRoots: nodes,
-          onItemSelected: onItemSelected,
-          onItemExpanded: onItemExpanded,
-          dataDisplayProvider: (node, onTap) {
-            return _ProgramExplorerRow(
-              controller: controller,
-              node: node,
-              onTap: onTap,
+        return ValueListenableBuilder<List<VMServiceObjectNode>>(
+          valueListenable: controller.outlineNodes,
+          builder: (context, nodes, _) {
+            if (nodes == null || nodes.isEmpty) {
+              return const Center(
+                child: Text('Nothing to inspect'),
+              );
+            }
+            return TreeView<VMServiceObjectNode>(
+              itemExtent: _programExplorerRowHeight,
+              dataRoots: nodes,
+              onItemSelected: onItemSelected,
+              onItemExpanded: onItemExpanded,
+              dataDisplayProvider: (node, onTap) {
+                return _ProgramExplorerRow(
+                  controller: controller,
+                  node: node,
+                  onTap: () async {
+                    await node.populateLocation();
+                    controller.selectOutlineNode(node);
+                    onTap();
+                  },
+                );
+              },
             );
           },
         );
@@ -368,32 +387,50 @@ class ProgramExplorer extends StatelessWidget {
         if (!initialized) {
           body = const CenteredCircularProgressIndicator();
         } else {
+          const fileExplorerHeader = AreaPaneHeader(
+            title: Text('File Explorer'),
+            needsTopBorder: false,
+          );
+          final fileExplorer = _FileExplorer(
+            controller: controller,
+            onItemExpanded: onItemExpanded,
+            onItemSelected: onItemSelected,
+          );
           body = LayoutBuilder(
             builder: (context, constraints) {
-              return FlexSplitColumn(
-                totalHeight: constraints.maxHeight,
-                initialFractions: const [0.7, 0.3],
-                minSizes: const [0.0, 0.0],
-                headers: const <PreferredSizeWidget>[
-                  AreaPaneHeader(
-                    title: Text('File Explorer'),
-                    needsTopBorder: false,
-                  ),
-                  AreaPaneHeader(title: Text('Outline')),
-                ],
-                children: [
-                  _FileExplorer(
-                    controller: controller,
-                    onItemExpanded: onItemExpanded,
-                    onItemSelected: onItemSelected,
-                  ),
-                  _ProgramOutlineView(
-                    controller: controller,
-                    onItemExpanded: onItemExpanded,
-                    onItemSelected: onItemSelected,
-                  ),
-                ],
-              );
+              // Disable the program outline view when talking with dwds due to
+              // the following bugs:
+              //   - https://github.com/dart-lang/webdev/issues/1427
+              //   - https://github.com/dart-lang/webdev/issues/1428
+              //
+              // TODO(bkonyi): enable outline view for web applications when
+              // the above issues are resolved.
+              //
+              // See https://github.com/flutter/devtools/issues/3447.
+              return serviceManager.connectedApp.isDartWebAppNow
+                  ? Column(
+                      children: [
+                        fileExplorerHeader,
+                        Expanded(child: fileExplorer),
+                      ],
+                    )
+                  : FlexSplitColumn(
+                      totalHeight: constraints.maxHeight,
+                      initialFractions: const [0.7, 0.3],
+                      minSizes: const [0.0, 0.0],
+                      headers: const <PreferredSizeWidget>[
+                        fileExplorerHeader,
+                        AreaPaneHeader(title: Text('Outline')),
+                      ],
+                      children: [
+                        fileExplorer,
+                        _ProgramOutlineView(
+                          controller: controller,
+                          onItemExpanded: onItemExpanded,
+                          onItemSelected: onItemSelected,
+                        ),
+                      ],
+                    );
             },
           );
         }
@@ -410,6 +447,8 @@ class ProgramExplorer extends StatelessWidget {
       return;
     }
 
+    await node.populateLocation();
+
     if (node.object != null && node.object is! Obj) {
       await controller.populateNode(node);
     }
@@ -420,24 +459,7 @@ class ProgramExplorer extends StatelessWidget {
       node.expand();
     }
 
-    ScriptRef script = node.script;
-    int tokenPos = 0;
-    if (node.object != null &&
-        (node.object is FieldRef ||
-            node.object is FuncRef ||
-            node.object is ClassRef)) {
-      final location = (node.object as dynamic).location;
-      tokenPos = location.tokenPos;
-      script = location.script;
-    }
-
-    script = await debugController.getScript(script);
-    final location = tokenPos == 0
-        ? null
-        : SourcePosition.calculatePosition(script, tokenPos);
-    onSelected(
-      ScriptLocation(script, location: location),
-    );
+    onSelected(node.location);
   }
 
   void onItemExpanded(VMServiceObjectNode node) async {

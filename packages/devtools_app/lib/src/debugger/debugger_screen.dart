@@ -45,6 +45,24 @@ class DebuggerScreen extends Screen {
   bool showConsole(bool embed) => true;
 
   @override
+  ShortcutsConfiguration buildKeyboardShortcuts(BuildContext context) {
+    final controller = Provider.of<DebuggerController>(context);
+    final shortcuts = <LogicalKeySet, Intent>{
+      goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
+      searchInFileKeySet: SearchInFileIntent(controller),
+      escapeKeySet: EscapeIntent(controller),
+      openFileKeySet: OpenFileIntent(controller),
+    };
+    final actions = <Type, Action<Intent>>{
+      GoToLineNumberIntent: GoToLineNumberAction(),
+      SearchInFileIntent: SearchInFileAction(),
+      EscapeIntent: EscapeAction(),
+      OpenFileIntent: OpenFileAction(),
+    };
+    return ShortcutsConfiguration(shortcuts: shortcuts, actions: actions);
+  }
+
+  @override
   String get docPageId => screenId;
 
   @override
@@ -98,14 +116,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
     controller = newController;
+    controller.onFirstDebuggerScreenLoad();
   }
 
   void _onLocationSelected(ScriptLocation location) {
     if (location != null) {
-      controller.showScriptLocation(
-        location,
-        centerLocation: location.location == null,
-      );
+      controller.showScriptLocation(location);
     }
   }
 
@@ -152,7 +168,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               ProgramExplorer(
                 debugController: controller,
                 onSelected: _onLocationSelected,
-              )
+              ),
             ],
           );
         } else {
@@ -161,37 +177,21 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       },
     );
 
-    return Shortcuts(
-      shortcuts: <LogicalKeySet, Intent>{
-        goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
-        searchInFileKeySet: SearchInFileIntent(controller),
-        escapeKeySet: EscapeIntent(controller),
-        openFileKeySet: OpenFileIntent(controller),
-      },
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          GoToLineNumberIntent: GoToLineNumberAction(),
-          SearchInFileIntent: SearchInFileAction(),
-          EscapeIntent: EscapeAction(),
-          OpenFileIntent: OpenFileAction(),
-        },
-        child: Split(
-          axis: Axis.horizontal,
-          initialFractions: const [0.25, 0.75],
+    return Split(
+      axis: Axis.horizontal,
+      initialFractions: const [0.25, 0.75],
+      children: [
+        OutlineDecoration(child: debuggerPanes()),
+        Column(
           children: [
-            OutlineDecoration(child: debuggerPanes()),
-            Column(
-              children: [
-                const DebuggingControls(),
-                const SizedBox(height: denseRowSpacing),
-                Expanded(
-                  child: codeArea,
-                ),
-              ],
+            const DebuggingControls(),
+            const SizedBox(height: denseRowSpacing),
+            Expanded(
+              child: codeArea,
             ),
           ],
         ),
-      ),
+      ],
     );
   }
 
@@ -253,7 +253,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               onPressed:
                   breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
             ),
-            tooltip: 'Remove all breakpoints',
+            message: 'Remove all breakpoints',
           ),
         ]);
       },
@@ -458,7 +458,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               ),
             ),
             DevToolsTooltip(
-              tooltip: 'Resume',
+              message: 'Resume',
               child: TextButton(
                 onPressed: controller.resume,
                 child: Icon(
@@ -469,7 +469,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               ),
             ),
             DevToolsTooltip(
-              tooltip: 'Step over',
+              message: 'Step over',
               child: TextButton(
                 onPressed: controller.stepOver,
                 child: Icon(

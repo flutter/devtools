@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../analytics/analytics.dart' as ga;
@@ -134,8 +133,9 @@ class CpuProfilerController
   /// Clients interested in the current value of [profilerFlagNotifier] should
   /// use this getter. Otherwise, clients subscribing to change notifications,
   /// should listen to [profilerFlagNotifier].
-  bool get profilerEnabled =>
-      offlineMode ? true : profilerFlagNotifier.value.valueAsString == 'true';
+  bool get profilerEnabled => offlineController.offlineMode.value
+      ? true
+      : profilerFlagNotifier.value.valueAsString == 'true';
 
   Future<dynamic> enableCpuProfiler() {
     return serviceManager.service.enableCpuProfiler();

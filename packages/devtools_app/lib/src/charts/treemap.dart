@@ -4,7 +4,6 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import '../common_widgets.dart';
 import '../theme.dart';
@@ -384,7 +383,7 @@ class _TreemapState extends State<Treemap> {
             // A key is required to force a rebuild of the tooltips for each cell.
             // Use tooltipMessage as the key to prevent rebuilds within a cell.
             key: Key(tooltipMessage),
-            tooltip: tooltipMessage,
+            message: tooltipMessage,
             waitDuration: tooltipWaitLong,
             child: MouseRegion(
               onHover: (event) => _onHover(event, positionedChildren),
@@ -541,7 +540,7 @@ class _TreemapState extends State<Treemap> {
   Widget buildSelectable({@required Widget child, TreemapNode newRoot}) {
     newRoot ??= widget.rootNode;
     return DevToolsTooltip(
-      tooltip: widget.rootNode.displayText(),
+      message: widget.rootNode.displayText(),
       waitDuration: tooltipWaitLong,
       child: InkWell(
         onTap: () {

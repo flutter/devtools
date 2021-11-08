@@ -11,11 +11,11 @@ import 'package:devtools_app/src/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/service_registrations.dart' as registrations;
 import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_test/flutter_test_driver.dart'
+    show FlutterRunConfiguration;
+import 'package:devtools_test/flutter_test_environment.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
-
-import 'support/flutter_test_driver.dart' show FlutterRunConfiguration;
-import 'support/flutter_test_environment.dart';
 
 // Error codes defined by
 // https://www.jsonrpc.org/specification#error_object
@@ -32,6 +32,58 @@ void main() async {
       tearDownAll(() async {
         await env.tearDownEnvironment(force: true);
       });
+
+      test('verify number of vm service calls on connect', () async {
+        await env.setupEnvironment();
+        // Await a delay to ensure the service extensions have had a chance to
+        // be called. This delay may be able to be shortened if doing so does
+        // not cause bot flakiness.
+        await Future.delayed(const Duration(seconds: 10));
+        // Ensure all futures are completed before running checks.
+        await serviceManager.service.allFuturesCompleted;
+        expect(
+          // Use a range instead of an exact number because service extension
+          // calls are not consistent. This will still catch any spurious calls
+          // that are unintentionally added at start up.
+          const Range(20, 40)
+              .contains(serviceManager.service.vmServiceCallCount),
+          isTrue,
+          reason:
+              'Unexpected number of vm service calls upon connection. If this '
+              'is expected, please update this test to the new expected number '
+              'of calls. Here are the calls for this test run:\n'
+              '${serviceManager.service.vmServiceCalls.toString()}',
+        );
+        // Check the ordering of the vm service calls we can expect to occur
+        // in a stable order.
+        expect(
+          serviceManager.service.vmServiceCalls.sublist(0, 19),
+          equals([
+            // Begin calls from package:devtools_testing:flutter_test_driver
+            'streamListen',
+            'streamListen',
+            'getVM',
+            'getIsolate',
+            'getIsolate',
+            'resume',
+            // End calls from package:devtools_testing:flutter_test_driver
+            'getVersion',
+            'callMethod getDartDevelopmentServiceVersion',
+            'getFlagList',
+            'getVM',
+            'getIsolate',
+            'streamListen',
+            'streamListen',
+            'streamListen',
+            'streamListen',
+            'streamListen',
+            'streamListen',
+            'streamListen',
+            'streamListen',
+          ]),
+        );
+        await env.tearDownEnvironment();
+      }, timeout: const Timeout.factor(4));
 
       test('vmServiceOpened', () async {
         await env.setupEnvironment();
@@ -85,8 +137,8 @@ void main() async {
         // Enable the service extension via ServiceExtensionManager.
         await serviceManager.serviceExtensionManager.setServiceExtensionState(
           extensionName,
-          true,
-          true,
+          enabled: true,
+          value: true,
         );
 
         await _verifyExtensionStateOnTestDevice(
@@ -122,8 +174,8 @@ void main() async {
         // Enable the service extension via ServiceExtensionManager.
         await serviceManager.serviceExtensionManager.setServiceExtensionState(
           extensionName,
-          true,
-          'iOS',
+          enabled: true,
+          value: 'iOS',
         );
 
         await _verifyExtensionStateOnTestDevice(
@@ -157,8 +209,8 @@ void main() async {
           // Enable the service extension via ServiceExtensionManager.
           await serviceManager.serviceExtensionManager.setServiceExtensionState(
             extensionName,
-            true,
-            5.0,
+            enabled: true,
+            value: 5.0,
           );
 
           await _verifyExtensionStateOnTestDevice(
@@ -260,42 +312,6 @@ void main() async {
       }, timeout: const Timeout.factor(4));
     },
   );
-
-  group('VmFlagManager', () {
-    tearDownAll(() async {
-      await env.tearDownEnvironment(force: true);
-    });
-
-    test('flags initialized on vm service opened', () async {
-      await env.setupEnvironment();
-
-      expect(serviceManager.service, equals(env.service));
-      expect(serviceManager.vmFlagManager, isNotNull);
-      expect(serviceManager.vmFlagManager.flags.value, isNotNull);
-
-      await env.tearDownEnvironment();
-    }, timeout: const Timeout.factor(4));
-
-    test('notifies on flag change', () async {
-      await env.setupEnvironment();
-      const profiler = 'profiler';
-
-      final flagManager = serviceManager.vmFlagManager;
-      final initialFlags = flagManager.flags.value;
-      final profilerFlagNotifier = flagManager.flag(profiler);
-      expect(profilerFlagNotifier.value.valueAsString, equals('true'));
-
-      await serviceManager.service.setFlag(profiler, 'false');
-      expect(profilerFlagNotifier.value.valueAsString, equals('false'));
-
-      // Await a delay so the new flags have time to be pulled and set.
-      await Future.delayed(const Duration(milliseconds: 5000));
-      final newFlags = flagManager.flags.value;
-      expect(newFlags, isNot(equals(initialFlags)));
-
-      await env.tearDownEnvironment();
-    }, timeout: const Timeout.factor(4));
-  });
 
   group('ServiceConnectionManager - restoring device-enabled extension', () {
     test('all extension types', () async {

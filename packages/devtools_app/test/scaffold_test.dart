@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/analytics/analytics_controller.dart';
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/framework_controller.dart';
 import 'package:devtools_app/src/globals.dart';
@@ -10,12 +11,11 @@ import 'package:devtools_app/src/scaffold.dart';
 import 'package:devtools_app/src/screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/survey.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-
-import 'support/mocks.dart';
-import 'support/wrappers.dart';
 
 void main() {
   group('DevToolsScaffold widget', () {
@@ -37,6 +37,7 @@ void main() {
       setGlobal(ServiceConnectionManager, mockServiceManager);
       setGlobal(FrameworkController, FrameworkController());
       setGlobal(SurveyService, SurveyService());
+      setGlobal(OfflineModeController, OfflineModeController());
     });
 
     Widget wrapScaffold(Widget child) {
@@ -125,11 +126,12 @@ void main() {
         (WidgetTester tester) async {
       final mockConnectedApp = MockConnectedApp();
       when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
+      when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
       when(mockServiceManager.connectedAppInitialized).thenReturn(true);
       when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
       final mockDebuggerController = MockDebuggerController();
       when(mockDebuggerController.isPaused)
-          .thenReturn(ValueNotifier<bool>(false));
+          .thenReturn(ValueNotifier<bool>(true));
 
       await tester.pumpWidget(
         wrapWithControllers(
@@ -146,11 +148,38 @@ void main() {
       expect(find.byType(FloatingDebuggerControls), findsOneWidget);
     });
 
+    testWidgets('does not display floating debugger controls in profile mode',
+        (WidgetTester tester) async {
+      final mockConnectedApp = MockConnectedApp();
+      when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
+      when(mockConnectedApp.isProfileBuildNow).thenReturn(true);
+      when(mockServiceManager.connectedAppInitialized).thenReturn(true);
+      when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
+      final mockDebuggerController = MockDebuggerController();
+      when(mockDebuggerController.isPaused)
+          .thenReturn(ValueNotifier<bool>(true));
+
+      await tester.pumpWidget(
+        wrapWithControllers(
+          const DevToolsScaffold(
+            tabs: [screen1, screen2],
+            ideTheme: null,
+          ),
+          debugger: mockDebuggerController,
+          analytics: AnalyticsController(enabled: false, firstRun: false),
+        ),
+      );
+      expect(find.byKey(k1), findsOneWidget);
+      expect(find.byKey(k2), findsNothing);
+      expect(find.byType(FloatingDebuggerControls), findsNothing);
+    });
+
     testWidgets(
         'does not display floating debugger controls when debugger screen is showing',
         (WidgetTester tester) async {
       final mockConnectedApp = MockConnectedApp();
       when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
+      when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
       when(mockServiceManager.connectedAppInitialized).thenReturn(true);
       when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
       final mockDebuggerController = MockDebuggerController();

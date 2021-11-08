@@ -3,19 +3,19 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/flutter_frames_chart.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/colors.dart';
+import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/performance_test_data.dart';
+import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-
-import 'support/mocks.dart';
-import 'support/performance_test_data.dart';
-import 'support/wrappers.dart';
 
 void main() {
   Future<void> pumpChart(
@@ -35,6 +35,7 @@ void main() {
       final fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(OfflineModeController, OfflineModeController());
     });
 
     testWidgets('builds with no frames', (WidgetTester tester) async {

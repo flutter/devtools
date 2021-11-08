@@ -10,7 +10,6 @@ import '../common_widgets.dart';
 import '../dialogs.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import '../theme.dart';
-import '../ui/utils.dart';
 import 'memory_controller.dart';
 import 'memory_snapshot_models.dart';
 
@@ -353,7 +352,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                         notifier: controller.filterPrivateClasses,
                       ),
                       const DevToolsTooltip(
-                        tooltip: 'Hide class names beginning with '
+                        message: 'Hide class names beginning with '
                             'an underscore e.g., _className',
                         child: Text('Hide Private Classes'),
                       ),

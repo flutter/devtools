@@ -4,7 +4,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 
 import '../utils.dart';
 import 'cpu_profile_model.dart';

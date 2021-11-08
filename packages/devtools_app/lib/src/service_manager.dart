@@ -7,7 +7,6 @@ import 'dart:core';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
@@ -21,12 +20,14 @@ import 'error_badge_manager.dart';
 import 'globals.dart';
 import 'inspector/inspector_service.dart';
 import 'logging/vm_service_logger.dart';
+import 'performance/timeline_streams.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_extensions.dart';
 import 'service_registrations.dart' as registrations;
 import 'title.dart';
 import 'utils.dart';
 import 'version.dart';
+import 'vm_flags.dart';
 import 'vm_service_wrapper.dart';
 
 // Note: don't check this in enabled.
@@ -73,15 +74,16 @@ class ServiceConnectionManager {
       _registeredMethodsForService;
   final Map<String, List<String>> _registeredMethodsForService = {};
 
-  VmFlagManager get vmFlagManager => _vmFlagManager;
-  final _vmFlagManager = VmFlagManager();
+  final vmFlagManager = VmFlagManager();
+
+  final timelineStreamManager = TimelineStreamManager();
 
   final isolateManager = IsolateManager();
 
   final consoleService = ConsoleService();
 
-  InspectorService get inspectorService => _inspectorService;
-  InspectorService _inspectorService;
+  InspectorServiceBase get inspectorService => _inspectorService;
+  InspectorServiceBase _inspectorService;
 
   ErrorBadgeManager get errorBadgeManager => _errorBadgeManager;
   final _errorBadgeManager = ErrorBadgeManager();
@@ -182,6 +184,7 @@ class ServiceConnectionManager {
     consoleService.vmServiceOpened(service);
     serviceExtensionManager.vmServiceOpened(service, connectedApp);
     await vmFlagManager.vmServiceOpened(service);
+    await timelineStreamManager.vmServiceOpened(service, connectedApp);
     // This needs to be called last in the above group of `vmServiceOpened`
     // calls.
     errorBadgeManager.vmServiceOpened(service);
@@ -299,11 +302,7 @@ class ServiceConnectionManager {
       return;
     }
 
-    if (connectedApp.isFlutterAppNow) {
-      _inspectorService = InspectorService();
-    } else {
-      _inspectorService = null;
-    }
+    _inspectorService = devToolsExtensionPoints.inspectorServiceProvider();
 
     // Set up analytics dimensions for the connected app.
     await ga.setupUserApplicationDimensions();
@@ -334,6 +333,7 @@ class ServiceConnectionManager {
     generateDevToolsTitle();
 
     vmFlagManager.vmServiceClosed();
+    timelineStreamManager.vmServiceClosed();
     serviceExtensionManager.vmServiceClosed();
 
     serviceTrafficLogger?.dispose();
@@ -344,6 +344,10 @@ class ServiceConnectionManager {
 
     _connectedState.value = connectionState;
     _connectionClosedController.add(null);
+
+    _inspectorService?.onIsolateStopped();
+    _inspectorService?.dispose();
+    _inspectorService = null;
   }
 
   /// This can throw an [RPCError].
@@ -600,7 +604,9 @@ class IsolateManager extends Disposer {
   Future<void> _initIsolates(List<IsolateRef> isolates) async {
     _clearIsolateStates();
 
-    isolates.forEach(_registerIsolate);
+    await Future.wait([
+      for (final isolateRef in isolates) _registerIsolate(isolateRef),
+    ]);
 
     // It is critical that the _serviceExtensionManager is already listening
     // for events indicating that new extension rpcs are registered before this
@@ -611,24 +617,23 @@ class IsolateManager extends Disposer {
     await _initSelectedIsolate();
   }
 
-  void _registerIsolate(IsolateRef isolateRef) {
+  Future<void> _registerIsolate(IsolateRef isolateRef) async {
     assert(!_isolateStates.containsKey(isolateRef));
     _isolateStates[isolateRef] = IsolateState(isolateRef);
     _isolates.add(isolateRef);
     isolateIndex(isolateRef);
-    _loadIsolateState(isolateRef);
+    await _loadIsolateState(isolateRef);
   }
 
-  void _loadIsolateState(IsolateRef isolateRef) {
+  Future<void> _loadIsolateState(IsolateRef isolateRef) async {
     final service = _service;
-    _service.getIsolate(isolateRef.id).then((Isolate isolate) {
-      if (service != _service) return;
-      final state = _isolateStates[isolateRef];
-      if (state != null) {
-        // Isolate might have already been closed.
-        state.onIsolateLoaded(isolate);
-      }
-    });
+    final isolate = await _service.getIsolate(isolateRef.id);
+    if (service != _service) return;
+    final state = _isolateStates[isolateRef];
+    if (state != null) {
+      // Isolate might have already been closed.
+      state.onIsolateLoaded(isolate);
+    }
   }
 
   Future<void> _handleIsolateEvent(Event event) async {
@@ -636,7 +641,7 @@ class IsolateManager extends Disposer {
 
     if (event.kind == EventKind.kIsolateStart &&
         !event.isolate.isSystemIsolate) {
-      _registerIsolate(event.isolate);
+      await _registerIsolate(event.isolate);
       _isolateCreatedController.add(event.isolate);
       // TODO(jacobr): we assume the first isolate started is the main isolate
       // but that may not always be a safe assumption.
@@ -880,8 +885,8 @@ class ServiceExtensionManager extends Disposer {
 
       await setServiceExtensionState(
         name,
-        enabled,
-        extensionValue,
+        enabled: enabled,
+        value: extensionValue,
         callExtension: false,
       );
     }
@@ -1084,10 +1089,20 @@ class ServiceExtensionManager extends Disposer {
     if (extensionDescription
         is extensions.ToggleableServiceExtensionDescription) {
       if (value == extensionDescription.enabledValue) {
-        await setServiceExtensionState(name, true, value, callExtension: false);
+        await setServiceExtensionState(
+          name,
+          enabled: true,
+          value: value,
+          callExtension: false,
+        );
       }
     } else {
-      await setServiceExtensionState(name, true, value, callExtension: false);
+      await setServiceExtensionState(
+        name,
+        enabled: true,
+        value: value,
+        callExtension: false,
+      );
     }
   }
 
@@ -1193,16 +1208,18 @@ class ServiceExtensionManager extends Disposer {
 
   /// Sets the state for a service extension and makes the call to the VMService.
   Future<void> setServiceExtensionState(
-    String name,
-    bool enabled,
-    dynamic value, {
+    String name, {
+    @required bool enabled,
+    @required dynamic value,
     bool callExtension = true,
   }) async {
     if (callExtension && _serviceExtensions.contains(name)) {
       await _callServiceExtension(name, value);
+    } else if (callExtension) {
+      log('Attempted to call extension \'$name\', but no service with that name exists');
     }
 
-    final state = ServiceExtensionState(enabled, value);
+    final state = ServiceExtensionState(enabled: enabled, value: value);
     _serviceExtensionState(name).value = state;
 
     // Add or remove service extension from [enabledServiceExtensions].
@@ -1262,7 +1279,7 @@ class ServiceExtensionManager extends Disposer {
         return ValueNotifier<ServiceExtensionState>(
           _enabledServiceExtensions.containsKey(name)
               ? _enabledServiceExtensions[name]
-              : ServiceExtensionState(false, null),
+              : ServiceExtensionState(enabled: false, value: null),
         );
       },
     );
@@ -1294,7 +1311,7 @@ class ServiceExtensionManager extends Disposer {
 }
 
 class ServiceExtensionState {
-  ServiceExtensionState(this.enabled, this.value) {
+  ServiceExtensionState({@required this.enabled, @required this.value}) {
     if (value is bool) {
       assert(enabled == value);
     }
@@ -1316,61 +1333,6 @@ class ServiceExtensionState {
         enabled,
         value,
       );
-}
-
-class VmFlagManager extends Disposer {
-  VmServiceWrapper get service => _service;
-  VmServiceWrapper _service;
-
-  ValueListenable get flags => _flags;
-  final _flags = ValueNotifier<FlagList>(null);
-
-  final _flagNotifiers = <String, ValueNotifier<Flag>>{};
-
-  ValueNotifier<Flag> flag(String name) {
-    return _flagNotifiers.containsKey(name) ? _flagNotifiers[name] : null;
-  }
-
-  Future<void> _initFlags() async {
-    final flagList = await service.getFlagList();
-    _flags.value = flagList;
-    if (flagList == null) return;
-
-    final flags = <String, Flag>{};
-    for (var flag in flagList.flags) {
-      flags[flag.name] = flag;
-      _flagNotifiers[flag.name] = ValueNotifier<Flag>(flag);
-    }
-  }
-
-  @visibleForTesting
-  void handleVmEvent(Event event) async {
-    if (event.kind == EventKind.kVMFlagUpdate) {
-      if (_flagNotifiers.containsKey(event.flag)) {
-        final currentFlag = _flagNotifiers[event.flag].value;
-        _flagNotifiers[event.flag].value = Flag.parse({
-          'name': currentFlag.name,
-          'comment': currentFlag.comment,
-          'modified': true,
-          'valueAsString': event.newValue,
-        });
-        _flags.value = await service.getFlagList();
-      }
-    }
-  }
-
-  Future<void> vmServiceOpened(VmServiceWrapper service) async {
-    cancel();
-    _service = service;
-    // Upon setting the vm service, get initial values for vm flags.
-    await _initFlags();
-
-    autoDispose(service.onVMEvent.listen(handleVmEvent));
-  }
-
-  void vmServiceClosed() {
-    _flags.value = null;
-  }
 }
 
 class VmServiceCapabilities {

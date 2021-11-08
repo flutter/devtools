@@ -31,6 +31,7 @@ import 'debugger_model.dart';
 import 'file_search.dart';
 import 'hover.dart';
 import 'key_sets.dart';
+import 'program_explorer_model.dart';
 import 'variables.dart';
 
 final debuggerCodeViewSearchKey =
@@ -70,7 +71,7 @@ class CodeView extends StatefulWidget {
 
 class _CodeViewState extends State<CodeView>
     with AutoDisposeMixin, SearchFieldMixin<CodeView> {
-  static const fileOpenerLeftPadding = 110.0;
+  static const fileOpenerLeftPadding = 100.0;
   static const searchFieldRightPadding = 75.0;
 
   LinkedScrollControllerGroup verticalController;
@@ -82,6 +83,10 @@ class _CodeViewState extends State<CodeView>
 
   ParsedScript get parsedScript => widget.parsedScript;
 
+  // Used to ensure we don't update the scroll position when expanding or
+  // collapsing the file explorer.
+  ScriptRef _lastScriptRef;
+
   @override
   void initState() {
     super.initState();
@@ -90,6 +95,7 @@ class _CodeViewState extends State<CodeView>
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();
     horizontalController = ScrollController();
+    _lastScriptRef = widget.scriptRef;
 
     if (widget.initialPosition != null) {
       final location = widget.initialPosition.location;
@@ -145,18 +151,22 @@ class _CodeViewState extends State<CodeView>
       log('LinkedScrollControllerGroup has no attached controllers');
       return;
     }
-
     final location = widget.controller.scriptLocation.value?.location;
     if (location?.line == null) {
-      // Default to scrolling to the top of the script.
-      if (animate) {
-        verticalController.animateTo(
-          0,
-          duration: longDuration,
-          curve: defaultCurve,
-        );
-      } else {
-        verticalController.jumpTo(0);
+      // Don't scroll to top if we're just rebuilding the code view for the
+      // same script.
+      if (_lastScriptRef?.uri != scriptRef?.uri) {
+        // Default to scrolling to the top of the script.
+        if (animate) {
+          verticalController.animateTo(
+            0,
+            duration: longDuration,
+            curve: defaultCurve,
+          );
+        } else {
+          verticalController.jumpTo(0);
+        }
+        _lastScriptRef = scriptRef;
       }
       return;
     }
@@ -168,10 +178,8 @@ class _CodeViewState extends State<CodeView>
     // middle third of the screen.
     if (parsedScript.lineCount * CodeView.rowHeight > extent) {
       final lineIndex = location.line - 1;
-      final scrollPosition = lineIndex * CodeView.rowHeight -
-          (widget.controller.shouldCenterScrollLocation
-              ? ((extent - CodeView.rowHeight) / 2)
-              : 0);
+      final scrollPosition =
+          lineIndex * CodeView.rowHeight - ((extent - CodeView.rowHeight) / 2);
       if (animate) {
         verticalController.animateTo(
           scrollPosition,
@@ -182,6 +190,7 @@ class _CodeViewState extends State<CodeView>
         verticalController.jumpTo(scrollPosition);
       }
     }
+    _lastScriptRef = scriptRef;
   }
 
   void _onPressed(int line) {
@@ -301,6 +310,7 @@ class _CodeViewState extends State<CodeView>
               child: Scrollbar(
                 key: CodeView.debuggerCodeViewVerticalScrollbarKey,
                 controller: textController,
+                isAlwaysShown: true,
                 // Only listen for vertical scroll notifications (ignore those
                 // from the nested horizontal SingleChildScrollView):
                 notificationPredicate: (ScrollNotification notification) =>
@@ -339,19 +349,9 @@ class _CodeViewState extends State<CodeView>
                         Expanded(
                           child: LayoutBuilder(
                             builder: (context, constraints) {
-                              // Find the longest line to measure file width:
-                              int longestLength = 0;
-                              TextSpan longestLine;
-                              for (var line in lines) {
-                                final int currentLength =
-                                    line.toPlainText().length;
-                                if (currentLength > longestLength) {
-                                  longestLength = currentLength;
-                                  longestLine = line;
-                                }
-                              }
-                              final double fileWidth =
-                                  calculateTextSpanWidth(longestLine);
+                              final double fileWidth = calculateTextSpanWidth(
+                                findLongestTextSpan(lines),
+                              );
 
                               return Scrollbar(
                                 key: CodeView
@@ -366,6 +366,7 @@ class _CodeViewState extends State<CodeView>
                                     width: fileWidth,
                                     child: Lines(
                                       height: constraints.maxHeight,
+                                      debugController: widget.controller,
                                       scrollController: textController,
                                       lines: lines,
                                       pausedFrame: pausedFrame,
@@ -401,7 +402,10 @@ class _CodeViewState extends State<CodeView>
     );
   }
 
-  Widget wrapInElevatedCard(Widget widget) {
+  Widget wrapInElevatedCard(
+    Widget widget, {
+    double width = wideSearchTextWidth,
+  }) {
     return Card(
       elevation: defaultElevation,
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -409,7 +413,7 @@ class _CodeViewState extends State<CodeView>
         borderRadius: BorderRadius.circular(defaultBorderRadius),
       ),
       child: Container(
-        width: wideSearchTextWidth,
+        width: width,
         height: defaultTextFieldHeight + 2 * denseSpacing,
         padding: const EdgeInsets.all(denseSpacing),
         child: widget,
@@ -422,6 +426,7 @@ class _CodeViewState extends State<CodeView>
       FileSearchField(
         debuggerController: widget.controller,
       ),
+      width: extraWideSearchTextWidth,
     );
   }
 
@@ -622,6 +627,7 @@ class Lines extends StatefulWidget {
   const Lines({
     Key key,
     @required this.height,
+    @required this.debugController,
     @required this.scrollController,
     @required this.lines,
     @required this.pausedFrame,
@@ -630,6 +636,7 @@ class Lines extends StatefulWidget {
   }) : super(key: key);
 
   final double height;
+  final DebuggerController debugController;
   final ScrollController scrollController;
   final List<TextSpan> lines;
   final StackFrameAndSourcePosition pausedFrame;
@@ -689,19 +696,28 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     final pausedLine = widget.pausedFrame?.line;
-
     return ListView.builder(
       controller: widget.scrollController,
       itemExtent: CodeView.rowHeight,
       itemCount: widget.lines.length,
       itemBuilder: (context, index) {
         final lineNum = index + 1;
-        return LineItem(
-          lineContents: widget.lines[index],
-          pausedFrame: pausedLine == lineNum ? widget.pausedFrame : null,
-          searchMatches: searchMatchesForLine(index),
-          activeSearchMatch:
-              activeSearch?.position?.line == index ? activeSearch : null,
+        final isPausedLine = pausedLine == lineNum;
+        return ValueListenableBuilder<VMServiceObjectNode>(
+          valueListenable:
+              widget.debugController.programExplorerController.outlineSelection,
+          builder: (context, outlineNode, _) {
+            final isFocusedLine =
+                (outlineNode?.location?.location?.line ?? -1) == lineNum;
+            return LineItem(
+              lineContents: widget.lines[index],
+              pausedFrame: isPausedLine ? widget.pausedFrame : null,
+              focused: isPausedLine || isFocusedLine,
+              searchMatches: searchMatchesForLine(index),
+              activeSearchMatch:
+                  activeSearch?.position?.line == index ? activeSearch : null,
+            );
+          },
         );
       },
     );
@@ -719,6 +735,7 @@ class LineItem extends StatefulWidget {
     Key key,
     @required this.lineContents,
     this.pausedFrame,
+    this.focused,
     this.searchMatches,
     this.activeSearchMatch,
   }) : super(key: key);
@@ -729,6 +746,7 @@ class LineItem extends StatefulWidget {
 
   final TextSpan lineContents;
   final StackFrameAndSourcePosition pausedFrame;
+  final bool focused;
   final List<SourceToken> searchMatches;
   final SourceToken activeSearchMatch;
 
@@ -877,7 +895,7 @@ class _LineItemState extends State<LineItem> {
       child = _hoverableLine();
     }
 
-    final backgroundColor = widget.pausedFrame != null
+    final backgroundColor = widget.focused
         ? (darkTheme
             ? theme.canvasColor.brighten()
             : theme.canvasColor.darken())

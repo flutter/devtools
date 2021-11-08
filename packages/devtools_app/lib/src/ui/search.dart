@@ -6,9 +6,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import '../auto_dispose.dart';
 import '../auto_dispose_mixin.dart';
@@ -168,18 +166,28 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         .regularTextStyle
         .copyWith(color: colorScheme.autoCompleteTextColor);
 
-    final tileContents = searchAutoComplete.value == null
-        ? <TextSpan>[]
-        : searchAutoComplete.value
-            .map((text) => TextSpan(
-                  text: text,
-                  style: autoCompleteTextStyle,
-                ))
-            .toList();
+    final autoCompleteHighlightedTextStyle =
+        Theme.of(context).regularTextStyle.copyWith(
+              color: searchColor,
+              fontWeight: FontWeight.bold,
+            );
+
+    final tileContents = searchAutoComplete.value
+        .map((match) => _maybeHighlightMatchText(
+              match,
+              autoCompleteTextStyle,
+              autoCompleteHighlightedTextStyle,
+            ))
+        .toList();
 
     final tileEntryHeight = tileContents.isEmpty
         ? 0.0
         : calculateTextSpanHeight(tileContents.first) + denseSpacing;
+
+    final tileEntryMaxWidth = tileContents.isEmpty
+        ? 0.0
+        : calculateTextSpanWidth(findLongestTextSpan(tileContents)) +
+            denseSpacing;
 
     // Find the searchField and place overlay below bottom of TextField and
     // make overlay width of TextField. This is also we decide the height of
@@ -244,7 +252,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     return Positioned(
       key: searchAutoCompleteKey,
       width: isMaxWidth
-          ? box.size.width
+          ? max(tileEntryMaxWidth, box.size.width)
           : AutoCompleteSearchControllerMixin.minPopupWidth,
       height: bottom ? null : count * tileEntryHeight,
       child: CompositedTransformFollower(
@@ -262,6 +270,63 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
           ),
         ),
       ),
+    );
+  }
+
+  TextSpan _maybeHighlightMatchText(
+    AutoCompleteMatch match,
+    TextStyle regularTextStyle,
+    TextStyle highlightedTextStyle,
+  ) {
+    final text = match.text;
+    final matchedSegments = match.matchedSegments;
+
+    if (matchedSegments == null || matchedSegments.isEmpty) {
+      return TextSpan(
+        text: text,
+        style: regularTextStyle,
+      );
+    }
+
+    final spans = <TextSpan>[];
+    int previousEndIndex = 0;
+
+    for (final segment in matchedSegments) {
+      if (previousEndIndex < segment.begin) {
+        // Add the unhighlighted segment before the current highlighted segment:
+        final segmentBefore = text.substring(previousEndIndex, segment.begin);
+        spans.add(
+          TextSpan(
+            text: segmentBefore,
+            style: regularTextStyle,
+          ),
+        );
+      }
+      // Add the current highlighted segment:
+      final highlightedSegment = text.substring(segment.begin, segment.end);
+      spans.add(
+        TextSpan(
+          text: highlightedSegment,
+          style: highlightedTextStyle,
+        ),
+      );
+      previousEndIndex = segment.end;
+    }
+    if (previousEndIndex < text.length - 1) {
+      // Add the last unhighlighted segment:
+      final lastSegment = text.substring(previousEndIndex);
+      spans.add(
+        TextSpan(
+          text: lastSegment,
+          style: regularTextStyle,
+        ),
+      );
+    }
+
+    return TextSpan(
+      text: spans.first.text,
+      style: spans.first.style,
+      children: spans.sublist(1),
     );
   }
 }
@@ -310,9 +375,9 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     selectTheSearchNotifier.value = v;
   }
 
-  final searchAutoComplete = ValueNotifier<List<String>>([]);
+  final searchAutoComplete = ValueNotifier<List<AutoCompleteMatch>>([]);
 
-  ValueListenable<List<String>> get searchAutoCompleteNotifier =>
+  ValueListenable<List<AutoCompleteMatch>> get searchAutoCompleteNotifier =>
       searchAutoComplete;
 
   void clearSearchAutoComplete() {
@@ -408,7 +473,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   /// activeWord  is "cl"
   /// leftSide    is "controller."
   /// rightSide   is " + 1000 + myChart.tra"
-  static EditingParts activeEdtingParts(
+  static EditingParts activeEditingParts(
     String editing,
     TextSelection selection, {
     bool handleFields = false,
@@ -485,6 +550,19 @@ typedef HighlightAutoComplete = Function(
   bool directionDown,
 );
 
+/// Callback for clearing the search field.
+typedef ClearSearchField = Function(
+  SearchControllerMixin controller, {
+  bool force,
+});
+
+/// Provided by clients to specify where the autocomplete overlay should be
+/// positioned relative to the input text.
+typedef OverlayXPositionBuilder = double Function(
+  String inputValue,
+  TextStyle inputStyle,
+);
+
 mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   TextEditingController searchTextFieldController;
   FocusNode _searchFieldFocusNode;
@@ -530,15 +608,14 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   /// [searchFieldKey]
   /// [searchFieldEnabled]
   /// [onSelection]
-  /// [onHilightDropdown] use to override default highlghter.
+  /// [onHighlightDropdown] use to override default highlghter.
   /// [decoration]
-  /// [tracking] if true displays pop-up to the right of the TextField's caret.
+  /// [overlayXPositionBuilder] callback function to determine where the
+  /// autocomplete overlay should be positioned relative to the input text.
   /// [supportClearField] if true clear TextField content if pop-up not visible. If
   /// pop-up is visible close the pop-up on first ESCAPE.
-  /// [keyEventsToPropogate] a set of key events that should be propogated to
+  /// [keyEventsToPropagate] a set of key events that should be propagated to
   /// other handlers
-  /// TODO(elliette): Have this return a private _AutoCompleteSearchField widget
-  ///  instead.
   Widget buildAutoCompleteSearchField({
     @required AutoCompleteSearchControllerMixin controller,
     @required GlobalKey searchFieldKey,
@@ -548,14 +625,222 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     HighlightAutoComplete onHighlightDropdown,
     InputDecoration decoration,
     String label,
-    bool tracking = false,
+    OverlayXPositionBuilder overlayXPositionBuilder,
     bool supportClearField = false,
-    Set<LogicalKeyboardKey> keyEventsToPropogate = const {},
+    Set<LogicalKeyboardKey> keyEventsToPropagate = const {},
     VoidCallback onClose,
   }) {
     _onSelection = onSelection;
 
-    onHighlightDropdown ??= _highlightDropdown;
+    final searchField = _SearchField(
+      controller: controller,
+      searchFieldKey: searchFieldKey,
+      searchFieldEnabled: searchFieldEnabled,
+      shouldRequestFocus: shouldRequestFocus,
+      searchFieldFocusNode: _searchFieldFocusNode,
+      searchTextFieldController: searchTextFieldController,
+      decoration: decoration,
+      label: label,
+      overlayXPositionBuilder: overlayXPositionBuilder,
+      onClose: onClose,
+    );
+
+    return _AutoCompleteSearchField(
+      controller: controller,
+      searchField: searchField,
+      searchFieldFocusNode: _searchFieldFocusNode,
+      autoCompleteLayerLink: controller.autoCompleteLayerLink,
+      onSelection: onSelection,
+      onHighlightDropdown: onHighlightDropdown,
+      clearSearchField: clearSearchField,
+      keyEventsToPropagate: keyEventsToPropagate,
+      supportClearField: supportClearField,
+      closeHandler: _closeHandler,
+    );
+  }
+
+  Widget buildSearchField({
+    @required SearchControllerMixin controller,
+    @required GlobalKey searchFieldKey,
+    @required bool searchFieldEnabled,
+    @required bool shouldRequestFocus,
+    bool supportsNavigation = false,
+    VoidCallback onClose,
+  }) {
+    return _SearchField(
+      controller: controller,
+      searchFieldKey: searchFieldKey,
+      searchFieldEnabled: searchFieldEnabled,
+      shouldRequestFocus: shouldRequestFocus,
+      searchFieldFocusNode: _searchFieldFocusNode,
+      searchTextFieldController: searchTextFieldController,
+      supportsNavigation: supportsNavigation,
+      onClose: onClose,
+    );
+  }
+
+  void selectFromSearchField(
+    SearchControllerMixin controller,
+    String selection,
+  ) {
+    searchTextFieldController.clear();
+    controller.search = selection;
+    clearSearchField(controller, force: true);
+    if (controller is AutoCompleteSearchControllerMixin) {
+      controller.selectTheSearch = true;
+      controller.closeAutoCompleteOverlay();
+    }
+  }
+
+  void clearSearchField(SearchControllerMixin controller, {force = false}) {
+    if (force || controller.search.isNotEmpty) {
+      searchTextFieldController.clear();
+      controller.resetSearch();
+      if (controller is AutoCompleteSearchControllerMixin) {
+        controller.closeAutoCompleteOverlay();
+      }
+    }
+  }
+
+  void updateSearchField(
+    SearchControllerMixin controller, {
+    @required String newValue,
+    @required int caretPosition,
+  }) {
+    searchTextFieldController.text = newValue;
+    searchTextFieldController.selection =
+        TextSelection.collapsed(offset: caretPosition);
+  }
+}
+
+class _SearchField extends StatelessWidget {
+  const _SearchField({
+    @required this.controller,
+    @required this.searchFieldKey,
+    @required this.searchFieldEnabled,
+    @required this.shouldRequestFocus,
+    @required this.searchFieldFocusNode,
+    @required this.searchTextFieldController,
+    this.label = 'Search',
+    this.supportsNavigation = false,
+    this.tracking = false,
+    this.decoration,
+    this.onClose,
+    this.overlayXPositionBuilder,
+  });
+
+  final SearchControllerMixin controller;
+  final GlobalKey searchFieldKey;
+  final bool searchFieldEnabled;
+  final bool shouldRequestFocus;
+  final FocusNode searchFieldFocusNode;
+  final TextEditingController searchTextFieldController;
+  final String label;
+  final bool supportsNavigation;
+  final bool tracking;
+  final InputDecoration decoration;
+  final VoidCallback onClose;
+  final OverlayXPositionBuilder overlayXPositionBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.subtitle1;
+    final searchField = TextField(
+      key: searchFieldKey,
+      autofocus: true,
+      enabled: searchFieldEnabled,
+      focusNode: searchFieldFocusNode,
+      controller: searchTextFieldController,
+      style: textStyle,
+      onChanged: (value) {
+        if (overlayXPositionBuilder != null) {
+          controller.xPosition = overlayXPositionBuilder(value, textStyle);
+        }
+        controller.search = value;
+      },
+      onEditingComplete: () {
+        searchFieldFocusNode.requestFocus();
+      },
+      // Guarantee that the TextField on all platforms renders in the same
+      // color for border, label text, and cursor. Primarly, so golden screen
+      // snapshots will compare with the exact color.
+      // Guarantee that the TextField on all platforms renders in the same
+      // color for border, label text, and cursor. Primarly, so golden screen
+      // snapshots will compare with the exact color.
+      decoration: decoration ??
+          InputDecoration(
+            contentPadding: const EdgeInsets.all(denseSpacing),
+            focusedBorder:
+                OutlineInputBorder(borderSide: searchFocusBorderColor),
+            enabledBorder:
+                OutlineInputBorder(borderSide: searchFocusBorderColor),
+            labelStyle: TextStyle(color: searchColor),
+            border: const OutlineInputBorder(),
+            labelText: label ?? 'Search',
+            suffix: (supportsNavigation || onClose != null)
+                ? _SearchFieldSuffix(
+                    controller: controller,
+                    supportsNavigation: supportsNavigation,
+                    onClose: onClose,
+                  )
+                : null,
+          ),
+      cursorColor: searchColor,
+    );
+
+    if (shouldRequestFocus) {
+      searchFieldFocusNode.requestFocus();
+    }
+
+    return searchField;
+  }
+}
+
+class _AutoCompleteSearchField extends StatelessWidget {
+  const _AutoCompleteSearchField({
+    @required this.searchField,
+    @required this.controller,
+    @required this.searchFieldFocusNode,
+    @required this.autoCompleteLayerLink,
+    @required this.onSelection,
+    @required this.onHighlightDropdown,
+    @required this.clearSearchField,
+    this.keyEventsToPropagate = const {},
+    this.supportClearField = false,
+    this.closeHandler,
+  });
+
+  final AutoCompleteSearchControllerMixin controller;
+  final _SearchField searchField;
+  final FocusNode searchFieldFocusNode;
+  final LayerLink autoCompleteLayerLink;
+  final SelectAutoComplete onSelection;
+  final HighlightAutoComplete onHighlightDropdown;
+  final ClearSearchField clearSearchField;
+  final Set<LogicalKeyboardKey> keyEventsToPropagate;
+  final bool supportClearField;
+  final VoidCallback closeHandler;
+
+  /// Platform independent (Mac or Linux).
+  int get arrowDown =>
+      LogicalKeyboardKey.arrowDown.keyId & LogicalKeyboardKey.valueMask;
+  int get arrowUp =>
+      LogicalKeyboardKey.arrowUp.keyId & LogicalKeyboardKey.valueMask;
+  int get enter =>
+      LogicalKeyboardKey.enter.keyId & LogicalKeyboardKey.valueMask;
+  int get escape =>
+      LogicalKeyboardKey.escape.keyId & LogicalKeyboardKey.valueMask;
+  int get tab => LogicalKeyboardKey.tab.keyId & LogicalKeyboardKey.valueMask;
+
+  /// Work around Mac Desktop bug returning physical keycode instead of logical
+  /// keyId for the RawKeyEvent's data.logical keyId keys ENTER and TAB.
+  int get enterMac => PhysicalKeyboardKey.enter.usbHidUsage;
+  int get tabMac => PhysicalKeyboardKey.tab.usbHidUsage;
+
+  @override
+  Widget build(BuildContext context) {
+    final highlightDropdown =
+        onHighlightDropdown != null ? onHighlightDropdown : _highlightDropdown;
 
     final rawKeyboardFocusNode = FocusNode(debugLabel: 'search');
 
@@ -573,10 +858,9 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
             // If pop-up closed ESCAPE will clean the TextField.
             clearSearchField(controller, force: true);
           }
-
           return _determineKeyEventResult(
             key,
-            keyEventsToPropogate,
+            keyEventsToPropagate,
           );
         } else if (controller.autoCompleteOverlay != null) {
           if (key == enter || key == enterMac || key == tab || key == tabMac) {
@@ -587,18 +871,19 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
             final searchToMatch = controller.search.toLowerCase();
             // Find exact match in autocomplete list - use that as our search value.
             for (final autoEntry in controller.searchAutoComplete.value) {
-              if (searchToMatch == autoEntry.toLowerCase()) {
-                foundExact = autoEntry;
+              if (searchToMatch == autoEntry.text.toLowerCase()) {
+                foundExact = autoEntry.text;
                 break;
               }
             }
             // Nothing found, pick item selected in dropdown.
             final autoCompleteList = controller.searchAutoComplete.value;
             if (foundExact == null ||
-                autoCompleteList[controller.currentDefaultIndex] !=
+                autoCompleteList[controller.currentDefaultIndex].text !=
                     foundExact) {
               if (autoCompleteList.isNotEmpty) {
-                foundExact = autoCompleteList[controller.currentDefaultIndex];
+                foundExact =
+                    autoCompleteList[controller.currentDefaultIndex].text;
               }
             }
 
@@ -606,47 +891,50 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
               controller.selectTheSearch = true;
               controller.search = foundExact;
               onSelection(foundExact);
-              return _determineKeyEventResult(key, keyEventsToPropogate);
+              return _determineKeyEventResult(key, keyEventsToPropagate);
             }
           } else if (key == arrowDown || key == arrowUp) {
-            onHighlightDropdown(controller, key == arrowDown);
-            return _determineKeyEventResult(key, keyEventsToPropogate);
+            highlightDropdown(controller, key == arrowDown);
+            return _determineKeyEventResult(key, keyEventsToPropagate);
           }
         }
 
         // We don't support tabs in the search input. Swallow to prevent a
         // change of focus.
         if (key == tab || key == tabMac) {
-          _determineKeyEventResult(key, keyEventsToPropogate);
+          _determineKeyEventResult(key, keyEventsToPropagate);
         }
       }
 
       return KeyEventResult.ignored;
     };
 
+    if (closeHandler != null) {
+      searchFieldFocusNode.removeListener(closeHandler);
+    }
+    final autoCompleteCloseHandler = () {
+      if (!searchFieldFocusNode.hasFocus) {
+        controller.closeAutoCompleteOverlay();
+      }
+    };
+    searchFieldFocusNode.addListener(autoCompleteCloseHandler);
+
     return RawKeyboardListener(
       focusNode: rawKeyboardFocusNode,
-      child: _buildSearchField(
-        controller: controller,
-        searchFieldKey: searchFieldKey,
-        searchFieldEnabled: searchFieldEnabled,
-        shouldRequestFocus: shouldRequestFocus,
-        autoCompleteLayerLink: controller.autoCompleteLayerLink,
-        decoration: decoration,
-        label: label,
-        tracking: tracking,
-        onClose: onClose,
+      child: CompositedTransformTarget(
+        link: autoCompleteLayerLink,
+        child: searchField,
       ),
     );
   }
 
   KeyEventResult _determineKeyEventResult(
     int keyEventId,
-    Set<LogicalKeyboardKey> keyEventsToPropogate,
+    Set<LogicalKeyboardKey> keyEventsToPropagate,
   ) {
-    final shouldPropogateKeyEvent = keyEventsToPropogate
+    final shouldPropagateKeyEvent = keyEventsToPropagate
         .any((key) => key.keyId & LogicalKeyboardKey.valueMask == keyEventId);
-    return shouldPropogateKeyEvent
+    return shouldPropagateKeyEvent
         ? KeyEventResult.ignored
         : KeyEventResult.handled;
   }
@@ -679,156 +967,27 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     controller.searchAutoComplete.value =
         controller.searchAutoComplete.value.toList();
   }
+}
 
-  Widget buildSearchField({
-    @required SearchControllerMixin controller,
-    @required GlobalKey searchFieldKey,
-    @required bool searchFieldEnabled,
-    @required bool shouldRequestFocus,
-    bool supportsNavigation = false,
-    VoidCallback onClose,
-  }) {
-    return _buildSearchField(
-      controller: controller,
-      searchFieldKey: searchFieldKey,
-      searchFieldEnabled: searchFieldEnabled,
-      shouldRequestFocus: shouldRequestFocus,
-      autoCompleteLayerLink: null,
-      supportsNavigation: supportsNavigation,
-      onClose: onClose,
-    );
-  }
+class _SearchFieldSuffix extends StatelessWidget {
+  const _SearchFieldSuffix({
+    @required this.controller,
+    this.supportsNavigation = false,
+    this.onClose,
+  });
 
-  Widget _buildSearchField({
-    @required SearchControllerMixin controller,
-    @required GlobalKey searchFieldKey,
-    @required bool searchFieldEnabled,
-    @required bool shouldRequestFocus,
-    @required LayerLink autoCompleteLayerLink,
-    InputDecoration decoration,
-    String label,
-    bool supportsNavigation = false,
-    VoidCallback onClose,
-    bool tracking = false,
-  }) {
-    if (controller is AutoCompleteSearchControllerMixin) {
-      if (_closeHandler != null) {
-        _searchFieldFocusNode.removeListener(_closeHandler);
-      }
-      _closeHandler = () {
-        if (!_searchFieldFocusNode.hasFocus) {
-          controller.closeAutoCompleteOverlay();
-        }
-      };
-      _searchFieldFocusNode.addListener(_closeHandler);
-    }
+  final SearchControllerMixin controller;
+  final bool supportsNavigation;
+  final VoidCallback onClose;
 
-    final searchField = TextField(
-      key: searchFieldKey,
-      autofocus: true,
-      enabled: searchFieldEnabled,
-      focusNode: _searchFieldFocusNode,
-      controller: searchTextFieldController,
-      onChanged: (value) {
-        if (tracking) {
-          // Use a TextPainter to calculate the width of the newly entered text.
-          // TODO(terry): The TextPainter's TextStyle is default (same as this
-          //              TextField) consider explicitly using a TextStyle of
-          //              this TextField if the TextField needs styling.
-          final painter = TextPainter(
-            textDirection: TextDirection.ltr,
-            text: TextSpan(text: value),
-          );
-          painter.layout();
-
-          // X coordinate of the pop-up, immediately to the right of the insertion
-          // point (caret).
-          controller.xPosition = painter.width;
-        }
-        controller.search = value;
-      },
-      onEditingComplete: () {
-        _searchFieldFocusNode.requestFocus();
-      },
-      // Guarantee that the TextField on all platforms renders in the same
-      // color for border, label text, and cursor. Primarly, so golden screen
-      // snapshots will compare with the exact color.
-      // Guarantee that the TextField on all platforms renders in the same
-      // color for border, label text, and cursor. Primarly, so golden screen
-      // snapshots will compare with the exact color.
-      decoration: decoration ??
-          InputDecoration(
-            contentPadding: const EdgeInsets.all(denseSpacing),
-            focusedBorder:
-                OutlineInputBorder(borderSide: searchFocusBorderColor),
-            enabledBorder:
-                OutlineInputBorder(borderSide: searchFocusBorderColor),
-            labelStyle: TextStyle(color: searchColor),
-            border: const OutlineInputBorder(),
-            labelText: label ?? 'Search',
-            suffix: (supportsNavigation || onClose != null)
-                ? _buildSearchFieldSuffix(
-                    controller,
-                    supportsNavigation: supportsNavigation,
-                    onClose: onClose,
-                  )
-                : null,
-          ),
-      cursorColor: searchColor,
-    );
-
-    if (shouldRequestFocus) {
-      _searchFieldFocusNode.requestFocus();
-    }
-
-    if (controller is AutoCompleteSearchControllerMixin) {
-      return CompositedTransformTarget(
-        link: autoCompleteLayerLink,
-        child: searchField,
-      );
-    }
-    return searchField;
-  }
-
-  Widget _buildSearchFieldSuffix(
-    SearchControllerMixin controller, {
-    bool supportsNavigation = false,
-    VoidCallback onClose,
-  }) {
+  @override
+  Widget build(BuildContext context) {
     assert(supportsNavigation || onClose != null);
     if (supportsNavigation) {
       return SearchNavigationControls(controller, onClose: onClose);
     } else {
       return closeSearchDropdownButton(onClose);
     }
-  }
-
-  void selectFromSearchField(
-      SearchControllerMixin controller, String selection) {
-    searchTextFieldController.clear();
-    controller.search = selection;
-    clearSearchField(controller, force: true);
-    if (controller is AutoCompleteSearchControllerMixin) {
-      controller.selectTheSearch = true;
-      controller.closeAutoCompleteOverlay();
-    }
-  }
-
-  void clearSearchField(SearchControllerMixin controller, {force = false}) {
-    if (force || controller.search.isNotEmpty) {
-      searchTextFieldController.clear();
-      controller.resetSearch();
-      if (controller is AutoCompleteSearchControllerMixin) {
-        controller.closeAutoCompleteOverlay();
-      }
-    }
-  }
-
-  void updateSearchField(
-      SearchControllerMixin controller, String newValue, int caretPosition) {
-    searchTextFieldController.text = newValue;
-    searchTextFieldController.selection =
-        TextSelection.collapsed(offset: caretPosition);
   }
 }
 
@@ -899,3 +1058,10 @@ mixin TreeDataSearchStateMixin<T extends TreeNode<T>>
 
 class AutoCompleteController extends DisposableController
     with SearchControllerMixin, AutoCompleteSearchControllerMixin {}
+
+class AutoCompleteMatch {
+  AutoCompleteMatch(this.text, {this.matchedSegments});
+
+  final String text;
+  final List<Range> matchedSegments;
+}

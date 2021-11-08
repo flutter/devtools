@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/allowed_error.dart';

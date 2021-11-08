@@ -67,6 +67,10 @@ abstract class Screen {
   /// Whether to show the console for this screen.
   bool showConsole(bool embed) => false;
 
+  /// Which keyboard shortcuts should be enabled for this screen.
+  ShortcutsConfiguration buildKeyboardShortcuts(BuildContext context) =>
+      ShortcutsConfiguration.empty();
+
   final String screenId;
 
   /// The user-facing name of the page.
@@ -219,7 +223,7 @@ mixin OfflineScreenMixin<T extends StatefulWidget, U> on State<T> {
 
 /// Check whether a screen should be shown in the UI.
 bool shouldShowScreen(Screen screen) {
-  if (offlineMode) {
+  if (offlineController.offlineMode.value) {
     return screen.worksOffline;
   }
   // No sense in ever showing screens in non-offline mode unless the service
@@ -303,4 +307,20 @@ class BadgePainter extends CustomPainter {
     }
     return true;
   }
+}
+
+class ShortcutsConfiguration {
+  const ShortcutsConfiguration({
+    @required this.shortcuts,
+    @required this.actions,
+  }) : assert(shortcuts.length == actions.length);
+
+  factory ShortcutsConfiguration.empty() {
+    return ShortcutsConfiguration(shortcuts: {}, actions: {});
+  }
+
+  final Map<ShortcutActivator, Intent> shortcuts;
+  final Map<Type, Action<Intent>> actions;
+
+  bool get isEmpty => shortcuts.isEmpty && actions.isEmpty;
 }

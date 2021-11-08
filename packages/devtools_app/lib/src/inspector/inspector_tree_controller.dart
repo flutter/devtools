@@ -10,7 +10,6 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 
 import '../auto_dispose_mixin.dart';
@@ -1056,7 +1055,7 @@ class InspectorRowContent extends StatelessWidget {
     // Wrap with tooltip if there is an error for this node's widget.
     if (hasError) {
       rowWidget =
-          DevToolsTooltip(child: rowWidget, tooltip: error.errorMessage);
+          DevToolsTooltip(child: rowWidget, message: error.errorMessage);
     }
 
     return CustomPaint(
