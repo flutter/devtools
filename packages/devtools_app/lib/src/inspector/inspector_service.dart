@@ -637,7 +637,9 @@ abstract class ObjectGroupBase implements Disposable {
   }
 
   Future<RemoteDiagnosticsNode> invokeServiceMethodWithArgReturningNode(
-      String methodName, String arg) async {
+    String methodName,
+    String arg,
+  ) async {
     if (disposed) return null;
     if (useDaemonApi) {
       return parseDiagnosticsNodeDaemon(
