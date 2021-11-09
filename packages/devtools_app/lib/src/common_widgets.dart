@@ -8,6 +8,8 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'analytics/analytics.dart' as ga;
+import 'config_specific/launch_url/launch_url.dart';
 import 'globals.dart';
 import 'scaffold.dart';
 import 'theme.dart';
@@ -627,17 +629,20 @@ class DevToolsTooltip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TextStyle style = textStyle;
+    if (richMessage == null) {
+      style = TextStyle(
+        color: Theme.of(context).colorScheme.tooltipTextColor,
+        fontSize: defaultFontSize,
+      );
+    }
     return Tooltip(
       message: message,
       richMessage: richMessage,
       waitDuration: waitDuration,
       preferBelow: preferBelow,
       padding: padding,
-      textStyle: textStyle ??
-          TextStyle(
-            color: Theme.of(context).colorScheme.tooltipTextColor,
-            fontSize: defaultFontSize,
-          ),
+      textStyle: style,
       decoration: decoration,
       child: child,
     );
@@ -1308,6 +1313,71 @@ class FormattedJson extends StatelessWidget {
       style: useSubtleStyle ? theme.subtleFixedFontStyle : theme.fixedFontStyle,
     );
   }
+}
+
+class MoreInfoLink extends StatelessWidget {
+  const MoreInfoLink({
+    Key key,
+    @required this.url,
+    @required this.gaScreenName,
+    @required this.gaSelectedItemDescription,
+  }) : super(key: key);
+
+  final String url;
+
+  final String gaScreenName;
+
+  final String gaSelectedItemDescription;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: () => _onLinkTap(context),
+      borderRadius: BorderRadius.circular(defaultBorderRadius),
+      child: Padding(
+        padding: const EdgeInsets.all(denseSpacing),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              'More info',
+              style: theme.linkTextStyle,
+            ),
+            const SizedBox(width: densePadding),
+            Icon(
+              Icons.launch,
+              size: tooltipIconSize,
+              color: theme.colorScheme.toggleButtonsTitle,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _onLinkTap(BuildContext context) {
+    launchUrl(url, context);
+    ga.select(gaScreenName, gaSelectedItemDescription);
+  }
+}
+
+class LinkTextSpan extends TextSpan {
+  LinkTextSpan({
+    @required Link link,
+    @required BuildContext context,
+    TextStyle style,
+    VoidCallback onTap,
+  }) : super(
+          text: link.display,
+          style: style ?? Theme.of(context).linkTextStyle,
+          recognizer: TapGestureRecognizer()
+            ..onTap = () async {
+              if (onTap != null) onTap();
+              await launchUrl(link.url, context);
+            },
+        );
 }
 
 class Link {
