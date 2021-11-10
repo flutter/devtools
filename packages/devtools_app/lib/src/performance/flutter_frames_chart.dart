@@ -18,6 +18,7 @@ import '../scaffold.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/hover.dart';
+import '../ui/utils.dart';
 import '../utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
