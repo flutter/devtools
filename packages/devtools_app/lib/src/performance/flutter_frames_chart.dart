@@ -412,10 +412,10 @@ class FlutterFrameTooltip extends StatelessWidget {
   }
 
   Future<HoverCardData> _buildCardData(BuildContext context) {
-    final textStyle =
-        TextStyle(color: Theme.of(context).colorScheme.toggleButtonsTitle);
-    final uiText = 'UI: ${msText(frame.buildTime)}\n';
-    final rasterText = 'Raster: ${msText(frame.rasterTime)}\n';
+    final textColor = Theme.of(context).colorScheme.toggleButtonsTitle;
+    final textStyle = TextStyle(color: textColor);
+    final uiText = 'UI: ${msText(frame.buildTime)}';
+    final rasterText = 'Raster: ${msText(frame.rasterTime)}';
     final shaderText = hasShaderJank
         ? 'Shader Compilation: ${msText(frame.shaderDuration)}  -'
         : '';
@@ -432,6 +432,7 @@ class FlutterFrameTooltip extends StatelessWidget {
                 uiText,
                 style: textStyle,
               ),
+              const SizedBox(height: densePadding),
               Text(
                 rasterText,
                 style: textStyle,
@@ -439,6 +440,11 @@ class FlutterFrameTooltip extends StatelessWidget {
               if (hasShaderJank)
                 Row(
                   children: [
+                    Icon(
+                      Icons.subdirectory_arrow_right,
+                      color: textColor,
+                      size: defaultIconSizeBeforeScaling,
+                    ),
                     Text(
                       shaderText,
                       style: textStyle,
@@ -473,7 +479,7 @@ class FlutterFrameTooltip extends StatelessWidget {
     // text vs text displayed.
     maxWidth += 2 * denseSpacing + _textMeasurementBuffer;
     if (hasShaderJank) {
-      return maxWidth + _moreInfoLinkWidth;
+      return maxWidth + defaultIconSizeBeforeScaling + _moreInfoLinkWidth;
     }
     return maxWidth;
   }
