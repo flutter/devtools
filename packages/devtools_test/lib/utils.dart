@@ -143,7 +143,6 @@ Finder findSubstring(Widget widget, String text) {
     } else if (widget is SelectableText) {
       if (widget.data != null) return widget.data.contains(text);
     }
-
     return false;
   });
 }

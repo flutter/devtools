@@ -52,19 +52,15 @@ class DeviceDialog extends StatelessWidget {
     final items = {
       'Dart Version': version,
       'CPU / OS': '${vm.targetCPU}$bits / ${vm.operatingSystem}',
+      if (flutterVersion != null) ...{
+        'Flutter Version':
+            '${flutterVersion.version} / ${flutterVersion.channel}',
+        'Framework / Engine': '${flutterVersion.frameworkRevision} / '
+            '${flutterVersion.engineRevision}',
+      },
+      if (serviceManager.service.connectedUri != null)
+        'VM Service Connection': serviceManager.service.connectedUri.toString(),
     };
-
-    if (flutterVersion != null) {
-      items['Flutter Version'] =
-          '${flutterVersion.version} / ${flutterVersion.channel}';
-      items['Framework / Engine'] = '${flutterVersion.frameworkRevision} / '
-          '${flutterVersion.engineRevision}';
-    }
-
-    if (serviceManager.service.connectedUri != null) {
-      items['VM Service Connection'] =
-          serviceManager.service.connectedUri.toString();
-    }
 
     // TODO(kenz): set actions alignment to `spaceBetween` if
     // https://github.com/flutter/flutter/issues/69708 is fixed.
