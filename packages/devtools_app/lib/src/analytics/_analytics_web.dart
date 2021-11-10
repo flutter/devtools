@@ -29,6 +29,7 @@ import 'constants.dart' as analytics_constants;
 // Dimensions1 AppType values:
 const String appTypeFlutter = 'flutter';
 const String appTypeWeb = 'web';
+const String appTypeFlutterWeb = 'flutter_web';
 // Dimensions2 BuildType values:
 const String buildTypeDebug = 'debug';
 const String buildTypeProfile = 'profile';
@@ -557,6 +558,10 @@ Future<void> computeUserApplicationCustomGTagData() async {
   if (serviceManager.connectedApp.isDartWebAppNow) {
     userAppType = appTypeWeb;
   }
+  if (serviceManager.connectedApp.isFlutterWebAppNow) {
+    userAppType = appTypeFlutterWeb;
+  }
+
   userBuildType = serviceManager.connectedApp.isProfileBuildNow
       ? buildTypeProfile
       : buildTypeDebug;
