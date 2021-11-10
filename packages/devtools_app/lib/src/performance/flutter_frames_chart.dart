@@ -467,12 +467,8 @@ class FlutterFrameTooltip extends StatelessWidget {
   double _calculateTooltipWidth(List<String> lines) {
     var maxWidth = 0.0;
     for (final line in lines) {
-      final textPainter = TextPainter(
-        text: TextSpan(text: line),
-        textAlign: TextAlign.right,
-        textDirection: TextDirection.ltr,
-      )..layout();
-      maxWidth = math.max(maxWidth, textPainter.width);
+      final lineWidth = calculateTextSpanWidth(TextSpan(text: line));
+      maxWidth = math.max(maxWidth, lineWidth);
     }
     // Add (2 * denseSpacing) for the card padding, and add
     // [_textMeasurementBuffer] to account for slight variations in the measured
