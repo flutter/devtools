@@ -636,6 +636,20 @@ abstract class ObjectGroupBase implements Disposable {
     }
   }
 
+  Future<RemoteDiagnosticsNode> invokeServiceMethodWithArgReturningNode(
+    String methodName,
+    String arg,
+  ) async {
+    if (disposed) return null;
+    if (useDaemonApi) {
+      return parseDiagnosticsNodeDaemon(
+          invokeServiceMethodDaemonArg(methodName, arg, groupName));
+    } else {
+      return parseDiagnosticsNodeObservatory(
+          invokeServiceMethodObservatoryWithGroupName1(methodName, arg));
+    }
+  }
+
   Future<void> invokeVoidServiceMethodInspectorRef(
       String methodName, InspectorInstanceRef ref) async {
     if (disposed) return;
