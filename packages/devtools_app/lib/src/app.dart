@@ -528,18 +528,16 @@ class DevToolsAboutDialog extends StatelessWidget {
   }
 
   Widget _createFeedbackLink(BuildContext context) {
-    final reportIssuesLink = devToolsExtensionPoints.issueTrackerLink();
-    return InkWell(
-      onTap: () async {
-        ga.select(
-          analytics_constants.devToolsMain,
-          analytics_constants.feedbackLink,
-        );
-        await launchUrl(reportIssuesLink.url, context);
-      },
-      child: Text(
-        reportIssuesLink.display,
-        style: Theme.of(context).linkTextStyle,
+    return RichText(
+      text: LinkTextSpan(
+        link: devToolsExtensionPoints.issueTrackerLink(),
+        context: context,
+        onTap: () {
+          ga.select(
+            analytics_constants.devToolsMain,
+            analytics_constants.feedbackLink,
+          );
+        },
       ),
     );
   }

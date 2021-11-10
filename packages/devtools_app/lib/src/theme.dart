@@ -145,10 +145,11 @@ double get smallButtonHeight => scaleByFontFactor(20.0);
 
 double get buttonMinWidth => scaleByFontFactor(36.0);
 
-double get defaultIconSize => scaleByFontFactor(16.0);
 double get actionsIconSize => scaleByFontFactor(20.0);
+double get defaultIconSize => scaleByFontFactor(defaultIconSizeBeforeScaling);
 double get tooltipIconSize => scaleByFontFactor(12.0);
 
+const defaultIconSizeBeforeScaling = 16.0;
 const defaultSpacing = 16.0;
 const denseSpacing = 8.0;
 const denseModeDenseSpacing = 2.0;

@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 
 import '../debugger/debugger_controller.dart';
 import '../debugger/debugger_model.dart';
-import '../debugger/hover.dart';
 import '../debugger/variables.dart';
 import '../globals.dart';
 import '../theme.dart';
+import '../ui/hover.dart';
 import '../ui/icons.dart';
 import '../utils.dart';
 import 'diagnostics_node.dart';

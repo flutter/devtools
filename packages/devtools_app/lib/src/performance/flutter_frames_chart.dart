@@ -17,6 +17,8 @@ import '../globals.dart';
 import '../scaffold.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
+import '../ui/hover.dart';
+import '../ui/utils.dart';
 import '../utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
@@ -330,9 +332,9 @@ class FlutterFramesChartItem extends StatelessWidget {
       child: Stack(
         children: [
           // TODO(kenz): make tooltip to persist if the frame is selected.
-          DevToolsTooltip(
-            message: _tooltipText(frame, hasShaderJank),
-            padding: const EdgeInsets.all(denseSpacing),
+          FlutterFrameTooltip(
+            frame: frame,
+            hasShaderJank: hasShaderJank,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: densePadding),
               color: selected ? colorScheme.selectedFrameBackgroundColor : null,
@@ -357,26 +359,10 @@ class FlutterFramesChartItem extends StatelessWidget {
               color: defaultSelectionColor,
               height: selectedIndicatorHeight,
             ),
-          if (hasShaderJank)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                ShaderJankWarningIcon(),
-              ],
-            ),
+          if (hasShaderJank) const ShaderJankWarningIcon(),
         ],
       ),
     );
-  }
-
-  // TODO(kenz): Support a rich tooltip
-  // https://github.com/flutter/devtools/issues/3139
-  String _tooltipText(FlutterFrame frame, bool hasShaderJank) {
-    return [
-      'UI: ${msText(frame.buildTime)}',
-      'Raster: ${msText(frame.rasterTime)}',
-      if (hasShaderJank) 'Shader Compilation: ${msText(frame.shaderDuration)}',
-    ].join('\n');
   }
 
   void _selectFrame() {
@@ -396,6 +382,103 @@ class FlutterFramesChartItem extends StatelessWidget {
       );
     }
     controller.toggleSelectedFrame(frame);
+  }
+}
+
+class FlutterFrameTooltip extends StatelessWidget {
+  const FlutterFrameTooltip({
+    Key key,
+    @required this.child,
+    @required this.frame,
+    @required this.hasShaderJank,
+  }) : super(key: key);
+
+  final Widget child;
+
+  final FlutterFrame frame;
+
+  final bool hasShaderJank;
+
+  static const double _moreInfoLinkWidth = 85.0;
+
+  static const _textMeasurementBuffer = 4.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return HoverCardTooltip(
+      enabled: () => true,
+      onHover: (_) => _buildCardData(context),
+      child: child,
+    );
+  }
+
+  Future<HoverCardData> _buildCardData(BuildContext context) {
+    final textColor = Theme.of(context).colorScheme.toggleButtonsTitle;
+    final textStyle = TextStyle(color: textColor);
+    final uiText = 'UI: ${msText(frame.buildTime)}';
+    final rasterText = 'Raster: ${msText(frame.rasterTime)}';
+    final shaderText = hasShaderJank
+        ? 'Shader Compilation: ${msText(frame.shaderDuration)}  -'
+        : '';
+    return Future.value(
+      HoverCardData(
+        position: HoverCardPosition.element,
+        width: _calculateTooltipWidth([uiText, rasterText, shaderText]),
+        contents: Material(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                uiText,
+                style: textStyle,
+              ),
+              const SizedBox(height: densePadding),
+              Text(
+                rasterText,
+                style: textStyle,
+              ),
+              if (hasShaderJank)
+                Row(
+                  children: [
+                    Icon(
+                      Icons.subdirectory_arrow_right,
+                      color: textColor,
+                      size: defaultIconSizeBeforeScaling,
+                    ),
+                    Text(
+                      shaderText,
+                      style: textStyle,
+                    ),
+                    const MoreInfoLink(
+                      url: preCompileShadersDocsUrl,
+                      gaScreenName: analytics_constants.performance,
+                      gaSelectedItemDescription:
+                          analytics_constants.shaderCompilationDocsTooltipLink,
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  double _calculateTooltipWidth(List<String> lines) {
+    var maxWidth = 0.0;
+    for (final line in lines) {
+      final lineWidth = calculateTextSpanWidth(TextSpan(text: line));
+      maxWidth = math.max(maxWidth, lineWidth);
+    }
+    // Add (2 * denseSpacing) for the card padding, and add
+    // [_textMeasurementBuffer] to account for slight variations in the measured
+    // text vs text displayed.
+    maxWidth += 2 * denseSpacing + _textMeasurementBuffer;
+    if (hasShaderJank) {
+      return maxWidth + defaultIconSizeBeforeScaling + _moreInfoLinkWidth;
+    }
+    return maxWidth;
   }
 }
 
