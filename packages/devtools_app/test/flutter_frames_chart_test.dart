@@ -101,7 +101,7 @@ void main() {
       final shaders = tester.widget(find.byKey(const Key('frame 5 - shaders')))
           as Container;
       expect(shaders.color, equals(shaderCompilationColor.background));
-      expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
+      expect(find.byType(ShaderJankWarningIcon), findsOneWidget);
     });
 
     testWidgets('builds with janky frame with subtle shader jank',
@@ -118,7 +118,7 @@ void main() {
       final shaders = tester.widget(find.byKey(const Key('frame 6 - shaders')))
           as Container;
       expect(shaders.color, equals(shaderCompilationColor.background));
-      expect(find.byIcon(Icons.warning_amber_rounded), findsNothing);
+      expect(find.byType(ShaderJankWarningIcon), findsNothing);
     });
   });
 
