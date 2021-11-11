@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -1641,6 +1642,66 @@ class PubWarningText extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class BlinkingIcon extends StatefulWidget {
+  const BlinkingIcon({
+    Key key,
+    @required this.icon,
+    @required this.color,
+    @required this.size,
+  }) : super(key: key);
+
+  final IconData icon;
+
+  final Color color;
+
+  final double size;
+
+  @override
+  _BlinkingIconState createState() => _BlinkingIconState();
+}
+
+class _BlinkingIconState extends State<BlinkingIcon> {
+  Timer timer;
+
+  bool showFirst;
+
+  @override
+  void initState() {
+    super.initState();
+    showFirst = true;
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        showFirst = !showFirst;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedCrossFade(
+      duration: const Duration(seconds: 1),
+      firstChild: _icon(),
+      secondChild: _icon(color: widget.color),
+      crossFadeState:
+          showFirst ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+    );
+  }
+
+  Widget _icon({Color color}) {
+    return Icon(
+      widget.icon,
+      size: widget.size,
+      color: color,
     );
   }
 }

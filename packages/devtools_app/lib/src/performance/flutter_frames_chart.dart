@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -512,50 +511,25 @@ class AverageFPS extends StatelessWidget {
   }
 }
 
-class ShaderJankWarningIcon extends StatefulWidget {
-  const ShaderJankWarningIcon({Key key}) : super(key: key);
-
-  @override
-  State<ShaderJankWarningIcon> createState() => _ShaderJankWarningIconState();
-}
-
-class _ShaderJankWarningIconState extends State<ShaderJankWarningIcon> {
-  Timer timer;
-
-  bool showFirst;
-
-  @override
-  void initState() {
-    super.initState();
-    showFirst = true;
-    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        showFirst = !showFirst;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    timer.cancel();
-    super.dispose();
-  }
+class ShaderJankWarningIcon extends StatelessWidget {
+  const ShaderJankWarningIcon();
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedCrossFade(
-      duration: const Duration(seconds: 1),
-      firstChild: _warningIcon(),
-      secondChild: _warningIcon(color: Colors.amber),
-      crossFadeState:
-          showFirst ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-    );
-  }
-
-  Widget _warningIcon({Color color}) {
-    return Icon(
-      Icons.warning_amber_rounded,
-      color: color,
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: FlutterFramesChartItem.selectedIndicatorHeight,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          BlinkingIcon(
+            icon: Icons.warning_amber_rounded,
+            color: Colors.amber,
+            size: defaultActionsIconSizeBeforeScaling,
+          ),
+        ],
+      ),
     );
   }
 }
