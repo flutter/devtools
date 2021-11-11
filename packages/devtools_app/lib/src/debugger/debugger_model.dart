@@ -406,9 +406,8 @@ Future<void> buildVariablesTree(
     );
   } else if (instanceRef != null && serviceManager.service != null) {
     try {
-      final dynamic result = await _getObjectWithRetry(
-          variable.ref.isolateRef.id, instanceRef.id,
-          offset: variable.offset, count: variable.count);
+      final dynamic result =
+          await _getObjectWithRetry(instanceRef.id, variable);
       if (result is Instance) {
         if (result.associations != null) {
           variable.addAllChildren(
@@ -500,20 +499,21 @@ Future<void> buildVariablesTree(
   variable.treeInitializeComplete = true;
 }
 
+// TODO(elliette): Remove once the fix for dart-lang/webdev/issues/1439
+// is landed. This works around a bug in DWDS where an error is thrown if
+// `getObject` is called with offset/count for an object that has no length.
 Future<Obj> _getObjectWithRetry(
-  String isolateId,
-  String objectId, {
-  int offset,
-  int count,
-}) async {
+  String objectId,
+  Variable variable,
+) async {
   try {
-    final dynamic result = await serviceManager.service
-        .getObject(isolateId, objectId, offset: offset ?? 0, count: count ?? 0);
+    final dynamic result = await serviceManager.service.getObject(
+        variable.ref.isolateRef.id, objectId,
+        offset: variable.offset, count: variable.childCount);
     return result;
   } catch (e) {
-    // TODO(elliette): Remove once https://github.com/dart-lang/webdev/issues/1439 is landed. This fixes
-    final dynamic result =
-        await serviceManager.service.getObject(isolateId, objectId);
+    final dynamic result = await serviceManager.service
+        .getObject(variable.ref.isolateRef.id, objectId);
     return result;
   }
 }
@@ -703,12 +703,10 @@ List<Variable> _createVariablesForFields(
 // TODO(jacobr): consider a new class name. This class is more just the data
 // model for a tree of Dart objects with properties rather than a "Variable".
 class Variable extends TreeNode<Variable> {
-  Variable._(this.name, ref, this.text,
-      {int offset, int count, bool isGrouping = false})
+  Variable._(this.name, ref, this.text, {int offset, int childCount})
       : _ref = ref,
         _offset = offset,
-        _count = count,
-        _isGrouping = isGrouping {
+        _childCount = childCount {
     indentChildren = ref?.diagnostic?.style != DiagnosticsTreeStyle.flat;
   }
 
@@ -761,10 +759,9 @@ class Variable extends TreeNode<Variable> {
     return Variable._(
       null,
       ref,
-      '[$offset ... ${offset + count - 1}]',
+      '[$offset - ${offset + count - 1}]',
       offset: offset,
-      count: count,
-      isGrouping: true,
+      childCount: count,
     );
   }
 
@@ -775,14 +772,31 @@ class Variable extends TreeNode<Variable> {
   GenericInstanceRef get ref => _ref;
   GenericInstanceRef _ref;
 
-  int get offset => _offset;
+  int get offset {
+    if (_offset != null) return _offset;
+    return 0;
+  }
+
   int _offset;
 
-  int get count => _count;
-  int _count;
+  int get childCount {
+    if (_childCount != null) return _childCount;
 
-  bool get isGrouping => _isGrouping;
-  bool _isGrouping;
+    final value = this.value;
+    if (value is InstanceRef) {
+      if (value.kind == InstanceKind.kList) {
+        return value.length ?? 0;
+      } else if (value.kind == InstanceKind.kMap) {
+        return value.length ?? 0;
+      } else if (value.kind != null && value.kind.endsWith('List')) {
+        return value.length ?? 0;
+      }
+    }
+
+    return 0;
+  }
+
+  int _childCount;
 
   bool treeInitializeStarted = false;
   bool treeInitializeComplete = false;
@@ -802,25 +816,6 @@ class Variable extends TreeNode<Variable> {
   }
 
   Object get value => ref?.value;
-
-  int get childCount {
-    if (isGrouping) {
-      return count;
-    }
-
-    final value = this.value;
-    if (value is InstanceRef) {
-      if (value.kind == InstanceKind.kList) {
-        return value.length;
-      } else if (value.kind == InstanceKind.kMap) {
-        return value.length;
-      } else if (value.kind != null && value.kind.endsWith('List')) {
-        return value.length;
-      }
-    }
-
-    return 0;
-  }
 
   // TODO(kenz): add custom display for lists with more than 100 elements
   String get displayValue {
