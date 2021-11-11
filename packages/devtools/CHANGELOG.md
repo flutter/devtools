@@ -1,3 +1,6 @@
+## 2.8.0-dev.1
+TODO: update changelog
+
 ## 2.8.0
 * Don't register service worker when running DevTools locally [#3476](https://github.com/flutter/devtools/pull/3476)
 * [Cleanup] Moved `[set/get]PubRootDirectories` functions from `InspectorServiceBase` to `InspectorService` [#3478](https://github.com/flutter/devtools/pull/3478)
