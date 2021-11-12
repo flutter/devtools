@@ -463,8 +463,8 @@ Future<void> buildVariablesTree(
         // TODO(jacobr): cache the full class hierarchy so we can cheaply check
         // instanceRef is DiagnosticsNode without having to do an eval.
         if (instanceRef != null &&
-            (instanceRef.classRef.name == 'DiagnosticableTreeNode' ||
-                instanceRef.classRef.name == 'DiagnosticsProperty')) {
+            (instanceRef.classRef?.name == 'DiagnosticableTreeNode' ||
+                instanceRef.classRef?.name == 'DiagnosticsProperty')) {
           // The user is expecting to see the object the DiagnosticsNode is
           // describing not the DiagnosticsNode itself.
           try {
@@ -789,6 +789,9 @@ class Variable extends TreeNode<Variable> {
       } else if (value.kind == InstanceKind.kMap) {
         return value.length ?? 0;
       } else if (value.kind != null && value.kind.endsWith('List')) {
+        // Catch-all for Uint8ClampedList, Uint8List, Uint16List, Uint32List,
+        // Uint64List, Int8List, Int16List, Int32List, Int64List, Flooat32List,
+        // Float64List, Inst32x3List, Float32x4List, and Float64x2List types:
         return value.length ?? 0;
       }
     }

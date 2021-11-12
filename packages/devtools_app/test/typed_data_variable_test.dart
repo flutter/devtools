@@ -53,6 +53,7 @@ void main() {
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
+      length: 4,
     );
     final variable = Variable.create(
       BoundVariable(
@@ -64,7 +65,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 4))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -86,6 +88,7 @@ void main() {
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
+      length: 4,
     );
     final variable = Variable.create(
       BoundVariable(
@@ -97,7 +100,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 4))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -119,6 +123,7 @@ void main() {
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
+      length: 4,
     );
     final variable = Variable.create(
       BoundVariable(
@@ -130,7 +135,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 4))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -152,6 +158,7 @@ void main() {
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
+      length: 4,
     );
     final variable = Variable.create(
       BoundVariable(
@@ -163,7 +170,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 4))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -185,6 +193,7 @@ void main() {
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
+      length: 4,
     );
     final variable = Variable.create(
       BoundVariable(
@@ -196,7 +205,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 4))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -218,6 +228,7 @@ void main() {
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
+      length: 4,
     );
     final variable = Variable.create(
       BoundVariable(
@@ -229,7 +240,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 4))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -251,6 +263,7 @@ void main() {
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
+      length: 4,
     );
     final variable = Variable.create(
       BoundVariable(
@@ -262,7 +275,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 4))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -284,6 +298,7 @@ void main() {
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
+      length: 4,
     );
     final variable = Variable.create(
       BoundVariable(
@@ -295,7 +310,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 4))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -317,6 +333,7 @@ void main() {
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
+      length: 4,
     );
     final variable = Variable.create(
       BoundVariable(
@@ -328,7 +345,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 4))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -351,6 +369,7 @@ void main() {
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
+      length: 4,
     );
     final variable = Variable.create(
       BoundVariable(
@@ -362,7 +381,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 4))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -383,6 +403,7 @@ void main() {
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
+      length: 4,
     );
 
     final variable = Variable.create(
@@ -395,7 +416,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 4))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -417,6 +439,7 @@ void main() {
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
+      length: 4,
     );
 
     final variable = Variable.create(
@@ -429,7 +452,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 4))
+        .thenAnswer((_) async {
       return instance;
     });
     await buildVariablesTree(variable);
@@ -451,6 +475,7 @@ void main() {
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
+      length: 4,
     );
 
     final variable = Variable.create(
@@ -463,7 +488,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 4))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -485,6 +511,7 @@ void main() {
       classRef: null,
       bytes: base64.encode(bytes.buffer.asUint8List()),
       identityHashCode: null,
+      length: 4,
     );
 
     final variable = Variable.create(
@@ -497,7 +524,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 4))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -507,6 +535,81 @@ void main() {
         skip: kIsWeb);
     expect(variable.children.first.displayValue, '[0, -1232.222]',
         skip: !kIsWeb);
+  });
+
+  test('Retries getObject calls with no offset/count if error is thrown',
+      () async {
+    final bytes = Uint8List.fromList([0, 1, 2, 3]);
+    final instance = Instance(
+      kind: InstanceKind.kUint8List,
+      id: '123',
+      classRef: null,
+      bytes: base64.encode(bytes.buffer.asUint8List()),
+      identityHashCode: null,
+      length: 4,
+    );
+    final variable = Variable.create(
+      BoundVariable(
+        name: 'test',
+        value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
+      ),
+      isolateRef,
+    );
+
+    when(manager.service.getObject(any, any, offset: 0, count: 4))
+        .thenThrow('Unrecognized parameters offset / count.');
+
+    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+      return instance;
+    });
+
+    await buildVariablesTree(variable);
+
+    expect(variable.children, [
+      matchesVariable(name: '[0]', value: 0),
+      matchesVariable(name: '[1]', value: 1),
+      matchesVariable(name: '[2]', value: 2),
+      matchesVariable(name: '[3]', value: 3),
+    ]);
+  });
+
+  test(
+      'Creates bound variable with groupings for children for a large Uint8ClampedList instance',
+      () async {
+    final instance = Instance(
+      kind: InstanceKind.kUint8ClampedList,
+      id: '123',
+      classRef: null,
+      bytes: null,
+      identityHashCode: null,
+      length: 332,
+    );
+    final variable = Variable.create(
+      BoundVariable(
+        name: 'test',
+        value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
+      ),
+      isolateRef,
+    );
+    when(manager.service.getObject(any, any, offset: 0, count: 4))
+        .thenAnswer((_) async {
+      return instance;
+    });
+
+    await buildVariablesTree(variable);
+
+    expect(variable.children, [
+      matchesVariableGroup(start: 0, end: 99),
+      matchesVariableGroup(start: 100, end: 199),
+      matchesVariableGroup(start: 200, end: 299),
+      matchesVariableGroup(start: 300, end: 331),
+    ]);
   });
 }
 
@@ -520,4 +623,15 @@ Matcher matchesVariable({
       const TypeMatcher<Variable>()
           .having((v) => v.name, 'name', equals(name))
           .having((v) => v.ref.value, 'value', equals(value)));
+}
+
+Matcher matchesVariableGroup({
+  @required int start,
+  @required int end,
+}) {
+  return const TypeMatcher<Variable>().having(
+      (v) => v,
+      'boundVar',
+      const TypeMatcher<Variable>()
+          .having((v) => v.text, 'text', equals('[$start - $end]')));
 }
