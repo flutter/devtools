@@ -583,7 +583,6 @@ void main() {
       kind: InstanceKind.kUint8ClampedList,
       id: '123',
       classRef: null,
-      bytes: null,
       identityHashCode: null,
       length: 332,
     );
