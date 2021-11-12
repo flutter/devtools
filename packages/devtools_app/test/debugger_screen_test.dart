@@ -513,119 +513,121 @@ void main() {
         expect(mapElement1Finder, findsOneWidget);
         expect(mapElement2Finder, findsOneWidget);
       });
-    });
 
-    testWidgetsWithWindowSize('Children in large list variables are grouped',
-        const Size(1000.0, 4000.0), (WidgetTester tester) async {
-      final list = buildParentListVariable(length: 380250);
-      await buildVariablesTree(list);
-      when(debuggerController.variables).thenReturn(
-        ValueNotifier(
-          [
-            list,
-          ],
-        ),
-      );
-      await pumpDebuggerScreen(tester, debuggerController);
+      testWidgetsWithWindowSize('Children in large list variables are grouped',
+          const Size(1000.0, 4000.0), (WidgetTester tester) async {
+        final list = buildParentListVariable(length: 380250);
+        await buildVariablesTree(list);
+        when(debuggerController.variables).thenReturn(
+          ValueNotifier(
+            [
+              list,
+            ],
+          ),
+        );
+        await pumpDebuggerScreen(tester, debuggerController);
 
-      final listFinder =
-          find.selectableText('Root 1: _GrowableList (380,250 items)');
-      final group0To9999Finder = find.selectableTextContaining('[0 - 9999]');
-      final group10000To19999Finder =
-          find.selectableTextContaining('[10000 - 19999]');
-      final group370000To379999Finder =
-          find.selectableTextContaining('[370000 - 379999]');
-      final group380000To380249Finder =
-          find.selectableTextContaining('[380000 - 380249]');
+        final listFinder =
+            find.selectableText('Root 1: _GrowableList (380,250 items)');
+        final group0To9999Finder = find.selectableTextContaining('[0 - 9999]');
+        final group10000To19999Finder =
+            find.selectableTextContaining('[10000 - 19999]');
+        final group370000To379999Finder =
+            find.selectableTextContaining('[370000 - 379999]');
+        final group380000To380249Finder =
+            find.selectableTextContaining('[380000 - 380249]');
 
-      final group370000To370099Finder =
-          find.selectableTextContaining('[370000 - 370099]');
-      final group370100To370199Finder =
-          find.selectableTextContaining('[370100 - 370199]');
-      final group370200To370299Finder =
-          find.selectableTextContaining('[370200 - 370299]');
+        final group370000To370099Finder =
+            find.selectableTextContaining('[370000 - 370099]');
+        final group370100To370199Finder =
+            find.selectableTextContaining('[370100 - 370199]');
+        final group370200To370299Finder =
+            find.selectableTextContaining('[370200 - 370299]');
 
-      // Initially list is not expanded.
-      expect(listFinder, findsOneWidget);
-      expect(group0To9999Finder, findsNothing);
-      expect(group10000To19999Finder, findsNothing);
-      expect(group370000To379999Finder, findsNothing);
-      expect(group380000To380249Finder, findsNothing);
+        // Initially list is not expanded.
+        expect(listFinder, findsOneWidget);
+        expect(group0To9999Finder, findsNothing);
+        expect(group10000To19999Finder, findsNothing);
+        expect(group370000To379999Finder, findsNothing);
+        expect(group380000To380249Finder, findsNothing);
 
-      // Expand list.
-      await tester.tap(listFinder);
-      await tester.pump();
-      expect(group0To9999Finder, findsOneWidget);
-      expect(group10000To19999Finder, findsOneWidget);
-      expect(group370000To379999Finder, findsOneWidget);
-      expect(group380000To380249Finder, findsOneWidget);
+        // Expand list.
+        await tester.tap(listFinder);
+        await tester.pump();
+        expect(group0To9999Finder, findsOneWidget);
+        expect(group10000To19999Finder, findsOneWidget);
+        expect(group370000To379999Finder, findsOneWidget);
+        expect(group380000To380249Finder, findsOneWidget);
 
-      // Initially group [370000 - 379999] is not expanded.
-      expect(group370000To370099Finder, findsNothing);
-      expect(group370100To370199Finder, findsNothing);
-      expect(group370200To370299Finder, findsNothing);
+        // Initially group [370000 - 379999] is not expanded.
+        expect(group370000To370099Finder, findsNothing);
+        expect(group370100To370199Finder, findsNothing);
+        expect(group370200To370299Finder, findsNothing);
 
-      // Expand group [370000 - 379999].
-      await tester.tap(group370000To379999Finder);
-      await tester.pump();
-      expect(group370000To370099Finder, findsOneWidget);
-      expect(group370100To370199Finder, findsOneWidget);
-      expect(group370200To370299Finder, findsOneWidget);
-    });
+        // Expand group [370000 - 379999].
+        await tester.tap(group370000To379999Finder);
+        await tester.pump();
+        expect(group370000To370099Finder, findsOneWidget);
+        expect(group370100To370199Finder, findsOneWidget);
+        expect(group370200To370299Finder, findsOneWidget);
+      });
 
-    testWidgetsWithWindowSize('Children in large map variables are grouped',
-        const Size(1000.0, 4000.0), (WidgetTester tester) async {
-      final map = buildParentMapVariable(length: 243621);
-      await buildVariablesTree(map);
-      when(debuggerController.variables).thenReturn(
-        ValueNotifier(
-          [
-            map,
-          ],
-        ),
-      );
-      await pumpDebuggerScreen(tester, debuggerController);
+      testWidgetsWithWindowSize('Children in large map variables are grouped',
+          const Size(1000.0, 4000.0), (WidgetTester tester) async {
+        final map = buildParentMapVariable(length: 243621);
+        await buildVariablesTree(map);
+        when(debuggerController.variables).thenReturn(
+          ValueNotifier(
+            [
+              map,
+            ],
+          ),
+        );
+        await pumpDebuggerScreen(tester, debuggerController);
 
-      final listFinder =
-          find.selectableText('Root 1: _InternalLinkedHashmap (243,621 items)');
-      final group0To9999Finder = find.selectableTextContaining('[0 - 9999]');
-      final group10000To19999Finder =
-          find.selectableTextContaining('[10000 - 19999]');
-      final group230000To239999Finder =
-          find.selectableTextContaining('[230000 - 239999]');
-      final group240000To243620Finder =
-          find.selectableTextContaining('[240000 - 243620]');
+        final listFinder = find
+            .selectableText('Root 1: _InternalLinkedHashmap (243,621 items)');
+        final group0To9999Finder = find.selectableTextContaining('[0 - 9999]');
+        final group10000To19999Finder =
+            find.selectableTextContaining('[10000 - 19999]');
+        final group230000To239999Finder =
+            find.selectableTextContaining('[230000 - 239999]');
+        final group240000To243620Finder =
+            find.selectableTextContaining('[240000 - 243620]');
 
-      final group0To99Finder = find.selectableTextContaining('[0 - 99]');
-      final group100To199Finder = find.selectableTextContaining('[100 - 199]');
-      final group200To299Finder = find.selectableTextContaining('[200 - 299]');
+        final group0To99Finder = find.selectableTextContaining('[0 - 99]');
+        final group100To199Finder =
+            find.selectableTextContaining('[100 - 199]');
+        final group200To299Finder =
+            find.selectableTextContaining('[200 - 299]');
 
-      // Initially map is not expanded.
-      expect(listFinder, findsOneWidget);
-      expect(group0To9999Finder, findsNothing);
-      expect(group10000To19999Finder, findsNothing);
-      expect(group230000To239999Finder, findsNothing);
-      expect(group240000To243620Finder, findsNothing);
+        // Initially map is not expanded.
+        expect(listFinder, findsOneWidget);
+        expect(group0To9999Finder, findsNothing);
+        expect(group10000To19999Finder, findsNothing);
+        expect(group230000To239999Finder, findsNothing);
+        expect(group240000To243620Finder, findsNothing);
 
-      // Expand map.
-      await tester.tap(listFinder);
-      await tester.pump();
-      expect(group0To9999Finder, findsOneWidget);
-      expect(group10000To19999Finder, findsOneWidget);
-      expect(group230000To239999Finder, findsOneWidget);
-      expect(group240000To243620Finder, findsOneWidget);
+        // Expand map.
+        await tester.tap(listFinder);
+        await tester.pump();
+        expect(group0To9999Finder, findsOneWidget);
+        expect(group10000To19999Finder, findsOneWidget);
+        expect(group230000To239999Finder, findsOneWidget);
+        expect(group240000To243620Finder, findsOneWidget);
 
-      // Initially group [0 - 9999] is not expanded.
-      expect(group0To99Finder, findsNothing);
-      expect(group100To199Finder, findsNothing);
-      expect(group200To299Finder, findsNothing);
+        // Initially group [0 - 9999] is not expanded.
+        expect(group0To99Finder, findsNothing);
+        expect(group100To199Finder, findsNothing);
+        expect(group200To299Finder, findsNothing);
 
-      // Expand group [0 - 9999].
-      await tester.tap(group0To9999Finder);
-      await tester.pump();
-      expect(group0To99Finder, findsOneWidget);
-      expect(group100To199Finder, findsOneWidget);
-      expect(group200To299Finder, findsOneWidget);
+        // Expand group [0 - 9999].
+        await tester.tap(group0To9999Finder);
+        await tester.pump();
+        expect(group0To99Finder, findsOneWidget);
+        expect(group100To199Finder, findsOneWidget);
+        expect(group200To299Finder, findsOneWidget);
+      });
     });
 
     WidgetPredicate createDebuggerButtonPredicate(String title) {
