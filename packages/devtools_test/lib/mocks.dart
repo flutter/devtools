@@ -980,25 +980,16 @@ Future<void> ensureInspectorDependencies() async {
   );
 }
 
-void mockIsFlutterApp(MockConnectedApp connectedApp, [isFlutterApp = true]) {
+void mockIsFlutterApp(
+  MockConnectedApp connectedApp, {
+  bool isFlutterApp = true,
+  bool isProfileBuild = false,
+}) {
   when(connectedApp.isFlutterAppNow).thenReturn(isFlutterApp);
   when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(isFlutterApp));
-  when(connectedApp.isDebugFlutterAppNow).thenReturn(true);
   when(connectedApp.connectedAppInitialized).thenReturn(true);
-}
-
-void mockIsDebugFlutterApp(MockConnectedApp connectedApp,
-    [isDebugFlutterApp = true]) {
-  when(connectedApp.isDebugFlutterAppNow).thenReturn(isDebugFlutterApp);
-  when(connectedApp.isProfileBuildNow).thenReturn(!isDebugFlutterApp);
-  when(connectedApp.connectedAppInitialized).thenReturn(true);
-}
-
-void mockIsProfileFlutterApp(MockConnectedApp connectedApp,
-    [isProfileFlutterApp = true]) {
-  when(connectedApp.isDebugFlutterAppNow).thenReturn(!isProfileFlutterApp);
-  when(connectedApp.isProfileBuildNow).thenReturn(isProfileFlutterApp);
-  when(connectedApp.connectedAppInitialized).thenReturn(true);
+  when(connectedApp.isDebugFlutterAppNow).thenReturn(!isProfileBuild && isFlutterApp);
+  when(connectedApp.isProfileBuildNow).thenReturn(isProfileBuild);
 }
 
 void mockFlutterVersion(

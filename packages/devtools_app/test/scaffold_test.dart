@@ -126,11 +126,12 @@ void main() {
         (WidgetTester tester) async {
       final mockConnectedApp = MockConnectedApp();
       when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
+      when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
       when(mockServiceManager.connectedAppInitialized).thenReturn(true);
       when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
       final mockDebuggerController = MockDebuggerController();
       when(mockDebuggerController.isPaused)
-          .thenReturn(ValueNotifier<bool>(false));
+          .thenReturn(ValueNotifier<bool>(true));
 
       await tester.pumpWidget(
         wrapWithControllers(
@@ -147,11 +148,38 @@ void main() {
       expect(find.byType(FloatingDebuggerControls), findsOneWidget);
     });
 
+    testWidgets('does not display floating debugger controls in profile mode',
+        (WidgetTester tester) async {
+      final mockConnectedApp = MockConnectedApp();
+      when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
+      when(mockConnectedApp.isProfileBuildNow).thenReturn(true);
+      when(mockServiceManager.connectedAppInitialized).thenReturn(true);
+      when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
+      final mockDebuggerController = MockDebuggerController();
+      when(mockDebuggerController.isPaused)
+          .thenReturn(ValueNotifier<bool>(true));
+
+      await tester.pumpWidget(
+        wrapWithControllers(
+          const DevToolsScaffold(
+            tabs: [screen1, screen2],
+            ideTheme: null,
+          ),
+          debugger: mockDebuggerController,
+          analytics: AnalyticsController(enabled: false, firstRun: false),
+        ),
+      );
+      expect(find.byKey(k1), findsOneWidget);
+      expect(find.byKey(k2), findsNothing);
+      expect(find.byType(FloatingDebuggerControls), findsNothing);
+    });
+
     testWidgets(
         'does not display floating debugger controls when debugger screen is showing',
         (WidgetTester tester) async {
       final mockConnectedApp = MockConnectedApp();
       when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
+      when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
       when(mockServiceManager.connectedAppInitialized).thenReturn(true);
       when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
       final mockDebuggerController = MockDebuggerController();

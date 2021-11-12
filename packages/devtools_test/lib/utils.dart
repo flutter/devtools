@@ -138,10 +138,11 @@ Finder findSubstring(Widget widget, String text) {
     if (widget is Text) {
       if (widget.data != null) return widget.data.contains(text);
       return widget.textSpan.toPlainText().contains(text);
+    } else if (widget is RichText) {
+      return widget.text.toPlainText().contains(text);
     } else if (widget is SelectableText) {
       if (widget.data != null) return widget.data.contains(text);
     }
-
     return false;
   });
 }

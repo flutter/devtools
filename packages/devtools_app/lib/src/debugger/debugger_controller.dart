@@ -39,21 +39,39 @@ class DebuggerController extends DisposableController
     );
     autoDispose(serviceManager.onConnectionAvailable
         .listen(_handleConnectionAvailable));
+    if (_service != null) {
+      initialize();
+    }
     _scriptHistoryListener = () {
       _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
     };
     scriptsHistory.current.addListener(_scriptHistoryListener);
-    addAutoDisposeListener(currentScriptRef, () {
-      if (!programExplorerController.initialized.value) {
-        programExplorerController.initialize();
-      }
-      if (currentScriptRef.value != null) {
-        programExplorerController.selectScriptNode(currentScriptRef.value);
-      }
-    });
+  }
 
-    if (_service != null) {
-      initialize();
+  bool _firstDebuggerScreenLoaded = false;
+
+  /// Callback to be called when the debugger screen is first loaded.
+  ///
+  /// We delay calling this method until the debugger screen is first loaded
+  /// for performance reasons. None of the code here needs to be called when
+  /// DevTools first connects to an app, and doing so inhibits DevTools from
+  /// connecting to low-end devices.
+  void onFirstDebuggerScreenLoad() {
+    if (!_firstDebuggerScreenLoaded) {
+      _maybeSetUpProgramExplorer();
+      addAutoDisposeListener(currentScriptRef, _maybeSetUpProgramExplorer);
+      _firstDebuggerScreenLoaded = true;
+    }
+  }
+
+  void _maybeSetUpProgramExplorer() {
+    if (!programExplorerController.initialized.value) {
+      programExplorerController
+        ..initListeners()
+        ..initialize();
+    }
+    if (currentScriptRef.value != null) {
+      programExplorerController.selectScriptNode(currentScriptRef.value);
     }
   }
 
@@ -82,6 +100,7 @@ class DebuggerController extends DisposableController
     _selectedBreakpoint.value = null;
     _librariesVisible.value = false;
     isolateRef = null;
+    _firstDebuggerScreenLoaded = false;
   }
 
   VmServiceWrapper _lastService;
@@ -175,12 +194,11 @@ class DebuggerController extends DisposableController
 
   final _showFileOpener = ValueNotifier<bool>(false);
 
+  final _clazzCache = <ClassRef, Class>{};
+
   /// Jump to the given ScriptRef and optional SourcePosition.
-  void showScriptLocation(
-    ScriptLocation scriptLocation, {
-    bool centerLocation = true,
-  }) {
-    _showScriptLocation(scriptLocation, centerLocation: centerLocation);
+  void showScriptLocation(ScriptLocation scriptLocation) {
+    _showScriptLocation(scriptLocation);
 
     // Update the scripts history (and make sure we don't react to the
     // subsequent event).
@@ -191,11 +209,7 @@ class DebuggerController extends DisposableController
 
   /// Show the given script location (without updating the script navigation
   /// history).
-  void _showScriptLocation(
-    ScriptLocation scriptLocation, {
-    bool centerLocation = true,
-  }) {
-    _shouldCenterScrollLocation = centerLocation;
+  void _showScriptLocation(ScriptLocation scriptLocation) {
     _currentScriptRef.value = scriptLocation?.scriptRef;
 
     _parseCurrentScript();
@@ -272,7 +286,7 @@ class DebuggerController extends DisposableController
   /// May return null.
   Future<Class> classFor(ClassRef classRef) async {
     try {
-      return await getObject(classRef);
+      return _clazzCache[classRef] ??= await getObject(classRef);
     } catch (_) {}
     return null;
   }
@@ -303,9 +317,6 @@ class DebuggerController extends DisposableController
 
   /// Return the sorted list of ScriptRefs active in the current isolate.
   ValueListenable<List<ScriptRef>> get sortedScripts => _sortedScripts;
-
-  bool get shouldCenterScrollLocation => _shouldCenterScrollLocation;
-  bool _shouldCenterScrollLocation = true;
 
   final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
 
@@ -843,6 +854,7 @@ class DebuggerController extends DisposableController
   }
 
   void _clearAutocompleteCaches() {
+    _clazzCache.clear();
     libraryMemberAutocompleteCache.clear();
     libraryMemberAndImportsAutocompleteCache.clear();
   }

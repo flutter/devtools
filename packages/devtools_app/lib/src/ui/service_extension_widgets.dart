@@ -9,10 +9,8 @@ import 'package:flutter/material.dart';
 import '../analytics/analytics.dart' as ga;
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
-import '../config_specific/launch_url/launch_url.dart';
 import '../config_specific/logger/logger.dart';
 import '../core/message_bus.dart';
-import '../debugger/hover.dart';
 import '../globals.dart';
 import '../notifications.dart';
 import '../scaffold.dart';
@@ -21,6 +19,7 @@ import '../service_manager.dart';
 import '../service_registrations.dart';
 import '../theme.dart';
 import '../utils.dart';
+import 'hover.dart';
 import 'label.dart';
 
 /// Group of buttons where each button toggles the state of a VMService
@@ -185,7 +184,7 @@ class HotReloadButton extends StatelessWidget {
     // TODO(devoncarew): Show as disabled when reload service calls are in progress.
 
     return DevToolsTooltip(
-      tooltip: 'Hot reload',
+      message: 'Hot reload',
       child: _RegisteredServiceExtensionButton._(
         serviceDescription: hotReload,
         action: () {
@@ -207,7 +206,7 @@ class HotRestartButton extends StatelessWidget {
     // TODO(devoncarew): Show as disabled when reload service calls are in progress.
 
     return DevToolsTooltip(
-      tooltip: 'Hot restart',
+      message: 'Hot restart',
       child: _RegisteredServiceExtensionButton._(
         serviceDescription: hotRestart,
         action: () {
@@ -609,7 +608,7 @@ class _ServiceExtensionCheckboxGroupButtonState
       ),
     );
     if (widget.tooltip != null && widget.tooltip.isNotEmpty) {
-      label = DevToolsTooltip(tooltip: widget.tooltip, child: label);
+      label = DevToolsTooltip(message: widget.tooltip, child: label);
     }
     return ValueListenableBuilder(
       valueListenable: _enabled,
@@ -834,7 +833,7 @@ class ServiceExtensionTooltip extends StatelessWidget {
     final focusColor = Theme.of(context).focusColor;
 
     return DevToolsTooltip(
-      tooltip: description.tooltip,
+      message: description.tooltip,
       preferBelow: true,
       child: child,
       decoration: BoxDecoration(
@@ -863,15 +862,6 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
 
   static const double _tooltipWidth = 300.0;
 
-  void _onLinkTap(BuildContext context) {
-    launchUrl(description.tooltipUrl, context);
-
-    ga.select(
-      description.gaScreenName,
-      description.gaItemTooltipLink,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return HoverCardTooltip(
@@ -899,28 +889,10 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
               ),
               Align(
                 alignment: Alignment.bottomRight,
-                child: InkWell(
-                  onTap: () => _onLinkTap(context),
-                  borderRadius: BorderRadius.circular(defaultBorderRadius),
-                  child: Padding(
-                    padding: const EdgeInsets.all(denseSpacing),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          'More info',
-                          style: Theme.of(context).linkTextStyle,
-                        ),
-                        const SizedBox(width: densePadding),
-                        Icon(
-                          Icons.launch,
-                          size: tooltipIconSize,
-                          color: textColor,
-                        )
-                      ],
-                    ),
-                  ),
+                child: MoreInfoLink(
+                  url: description.tooltipUrl,
+                  gaScreenName: description.gaScreenName,
+                  gaSelectedItemDescription: description.gaItemTooltipLink,
                 ),
               ),
             ],

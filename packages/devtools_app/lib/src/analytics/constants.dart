@@ -60,6 +60,7 @@ const String trackLayouts = 'trackLayouts';
 const disableClipLayersOption = 'disableClipLayers';
 const disableOpacityLayersOption = 'disableOpacityLayers';
 const disablePhysicalShapeLayersOption = 'disablePhysicalShapeLayers';
+const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
 
 // CPU profiler UX actions:
 const profileGranularityPrefix = 'profileGranularity';

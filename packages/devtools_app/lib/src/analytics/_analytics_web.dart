@@ -29,6 +29,8 @@ import 'constants.dart' as analytics_constants;
 // Dimensions1 AppType values:
 const String appTypeFlutter = 'flutter';
 const String appTypeWeb = 'web';
+const String appTypeFlutterWeb = 'flutter_web';
+const String appTypeDartCLI = 'dart_cli';
 // Dimensions2 BuildType values:
 const String buildTypeDebug = 'debug';
 const String buildTypeProfile = 'profile';
@@ -550,13 +552,16 @@ Future<void> computeUserApplicationCustomGTagData() async {
         ? serviceManager.vm.operatingSystem
         : 'unknown';
   }
-
-  if (serviceManager.connectedApp.isFlutterAppNow) {
+  if (serviceManager.connectedApp.isFlutterWebAppNow) {
+    userAppType = appTypeFlutterWeb;
+  } else if (serviceManager.connectedApp.isFlutterAppNow) {
     userAppType = appTypeFlutter;
-  }
-  if (serviceManager.connectedApp.isDartWebAppNow) {
+  } else if (serviceManager.connectedApp.isDartWebAppNow) {
     userAppType = appTypeWeb;
+  } else {
+    userAppType = appTypeDartCLI;
   }
+
   userBuildType = serviceManager.connectedApp.isProfileBuildNow
       ? buildTypeProfile
       : buildTypeDebug;

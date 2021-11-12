@@ -1055,7 +1055,7 @@ class InspectorRowContent extends StatelessWidget {
     // Wrap with tooltip if there is an error for this node's widget.
     if (hasError) {
       rowWidget =
-          DevToolsTooltip(child: rowWidget, tooltip: error.errorMessage);
+          DevToolsTooltip(child: rowWidget, message: error.errorMessage);
     }
 
     return CustomPaint(

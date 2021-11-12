@@ -430,7 +430,7 @@ Future<void> buildVariablesTree(
   }
   if (diagnostic != null && includeDiagnosticChildren) {
     // Always add children last after properties to avoid confusion.
-    final ObjectGroup service = diagnostic.inspectorService;
+    final ObjectGroupBase service = diagnostic.inspectorService;
     final diagnosticChildren = await diagnostic.children;
     if (diagnosticChildren?.isNotEmpty ?? false) {
       final childrenNode = Variable.text(
@@ -452,7 +452,7 @@ Future<void> buildVariablesTree(
   final inspectorService = serviceManager.inspectorService;
   if (inspectorService != null) {
     final tasks = <Future>[];
-    ObjectGroup group;
+    ObjectGroupBase group;
     Future<void> _maybeUpdateRef(Variable child) async {
       if (child.ref == null) return;
       if (child.ref.diagnostic == null) {
@@ -520,7 +520,7 @@ Future<Obj> _getObjectWithRetry(
 
 Future<Variable> _buildVariable(
   RemoteDiagnosticsNode diagnostic,
-  ObjectGroup inspectorService,
+  ObjectGroupBase inspectorService,
   IsolateRef isolateRef,
 ) async {
   final instanceRef =
@@ -534,7 +534,7 @@ Future<Variable> _buildVariable(
 }
 
 Future<List<Variable>> _createVariablesForDiagnostics(
-  ObjectGroup inspectorService,
+  ObjectGroupBase inspectorService,
   List<RemoteDiagnosticsNode> diagnostics,
   IsolateRef isolateRef,
 ) async {
@@ -889,16 +889,18 @@ class Variable extends TreeNode<Variable> {
     }
     // Group name doesn't matter in this case.
     final group = inspectorService.createObjectGroup('inspect-variables');
-
-    try {
-      return await group.setSelection(ref);
-    } catch (e) {
-      // This is somewhat unexpected. The inspectorRef must have been disposed.
-      return false;
-    } finally {
-      // Not really needed as we shouldn't actually be allocating anything.
-      unawaited(group.dispose());
+    if (group is ObjectGroup) {
+      try {
+        return await group.setSelection(ref);
+      } catch (e) {
+        // This is somewhat unexpected. The inspectorRef must have been disposed.
+        return false;
+      } finally {
+        // Not really needed as we shouldn't actually be allocating anything.
+        unawaited(group.dispose());
+      }
     }
+    return false;
   }
 
   Future<bool> get isInspectable async {

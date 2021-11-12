@@ -76,7 +76,7 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
         width: renderProperties.width,
         height: renderProperties.height,
         child: DevToolsTooltip(
-          tooltip: '$widthDescription\n$heightDescription',
+          message: '$widthDescription\n$heightDescription',
           child: showWidth ? widthWidget : heightWidget,
         ),
       ),

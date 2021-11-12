@@ -9,7 +9,7 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../charts/flame_chart.dart';
 import '../../profiler/cpu_profile_model.dart';

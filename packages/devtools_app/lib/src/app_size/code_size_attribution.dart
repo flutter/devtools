@@ -180,7 +180,7 @@ class _CallGraphViewState extends State<CallGraphView> {
           child: Icon(Icons.arrow_forward),
         ),
         DevToolsTooltip(
-          tooltip: selectedNode.data.toString(),
+          message: selectedNode.data.toString(),
           child: Container(
             padding: const EdgeInsets.all(densePadding),
             child: Text(

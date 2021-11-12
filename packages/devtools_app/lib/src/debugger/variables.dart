@@ -151,7 +151,7 @@ Widget displayProvider(
     );
   }
   return DevToolsTooltip(
-    tooltip: variable.displayValue,
+    message: variable.displayValue,
     waitDuration: tooltipWaitLong,
     child: SelectableText.rich(
       TextSpan(

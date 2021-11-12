@@ -21,6 +21,7 @@ import '../globals.dart';
 import '../history_viewport.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
+import '../ui/hover.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
@@ -29,8 +30,8 @@ import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'file_search.dart';
-import 'hover.dart';
 import 'key_sets.dart';
+import 'program_explorer_model.dart';
 import 'variables.dart';
 
 final debuggerCodeViewSearchKey =
@@ -177,10 +178,8 @@ class _CodeViewState extends State<CodeView>
     // middle third of the screen.
     if (parsedScript.lineCount * CodeView.rowHeight > extent) {
       final lineIndex = location.line - 1;
-      final scrollPosition = lineIndex * CodeView.rowHeight -
-          (widget.controller.shouldCenterScrollLocation
-              ? ((extent - CodeView.rowHeight) / 2)
-              : 0);
+      final scrollPosition =
+          lineIndex * CodeView.rowHeight - ((extent - CodeView.rowHeight) / 2);
       if (animate) {
         verticalController.animateTo(
           scrollPosition,
@@ -367,6 +366,7 @@ class _CodeViewState extends State<CodeView>
                                     width: fileWidth,
                                     child: Lines(
                                       height: constraints.maxHeight,
+                                      debugController: widget.controller,
                                       scrollController: textController,
                                       lines: lines,
                                       pausedFrame: pausedFrame,
@@ -627,6 +627,7 @@ class Lines extends StatefulWidget {
   const Lines({
     Key key,
     @required this.height,
+    @required this.debugController,
     @required this.scrollController,
     @required this.lines,
     @required this.pausedFrame,
@@ -635,6 +636,7 @@ class Lines extends StatefulWidget {
   }) : super(key: key);
 
   final double height;
+  final DebuggerController debugController;
   final ScrollController scrollController;
   final List<TextSpan> lines;
   final StackFrameAndSourcePosition pausedFrame;
@@ -694,19 +696,28 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     final pausedLine = widget.pausedFrame?.line;
-
     return ListView.builder(
       controller: widget.scrollController,
       itemExtent: CodeView.rowHeight,
       itemCount: widget.lines.length,
       itemBuilder: (context, index) {
         final lineNum = index + 1;
-        return LineItem(
-          lineContents: widget.lines[index],
-          pausedFrame: pausedLine == lineNum ? widget.pausedFrame : null,
-          searchMatches: searchMatchesForLine(index),
-          activeSearchMatch:
-              activeSearch?.position?.line == index ? activeSearch : null,
+        final isPausedLine = pausedLine == lineNum;
+        return ValueListenableBuilder<VMServiceObjectNode>(
+          valueListenable:
+              widget.debugController.programExplorerController.outlineSelection,
+          builder: (context, outlineNode, _) {
+            final isFocusedLine =
+                (outlineNode?.location?.location?.line ?? -1) == lineNum;
+            return LineItem(
+              lineContents: widget.lines[index],
+              pausedFrame: isPausedLine ? widget.pausedFrame : null,
+              focused: isPausedLine || isFocusedLine,
+              searchMatches: searchMatchesForLine(index),
+              activeSearchMatch:
+                  activeSearch?.position?.line == index ? activeSearch : null,
+            );
+          },
         );
       },
     );
@@ -724,6 +735,7 @@ class LineItem extends StatefulWidget {
     Key key,
     @required this.lineContents,
     this.pausedFrame,
+    this.focused,
     this.searchMatches,
     this.activeSearchMatch,
   }) : super(key: key);
@@ -734,6 +746,7 @@ class LineItem extends StatefulWidget {
 
   final TextSpan lineContents;
   final StackFrameAndSourcePosition pausedFrame;
+  final bool focused;
   final List<SourceToken> searchMatches;
   final SourceToken activeSearchMatch;
 
@@ -882,7 +895,7 @@ class _LineItemState extends State<LineItem> {
       child = _hoverableLine();
     }
 
-    final backgroundColor = widget.pausedFrame != null
+    final backgroundColor = widget.focused
         ? (darkTheme
             ? theme.canvasColor.brighten()
             : theme.canvasColor.darken())

@@ -404,7 +404,7 @@ class UserTagDropdown extends StatelessWidget {
                 ? 'Filter the CPU profile by the given UserTag'
                 : 'No UserTags found for this CPU profile';
             return DevToolsTooltip(
-              tooltip: tooltip,
+              message: tooltip,
               child: RoundedDropDownButton<String>(
                 isDense: true,
                 style: Theme.of(context).textTheme.bodyText2,

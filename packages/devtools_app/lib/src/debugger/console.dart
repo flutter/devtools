@@ -17,7 +17,7 @@ import 'evaluate.dart';
 // TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
 
 /// Display the stdout and stderr output from the process under debug.
-class DebuggerConsole extends StatelessWidget {
+class DebuggerConsole extends StatefulWidget {
   const DebuggerConsole({
     Key key,
   }) : super(key: key);
@@ -26,8 +26,38 @@ class DebuggerConsole extends StatelessWidget {
       Key('debugger_console_copy_to_clipboard_button');
   static const clearStdioButtonKey = Key('debugger_console_clear_stdio_button');
 
+  @override
+  State<DebuggerConsole> createState() => _DebuggerConsoleState();
+
+  static PreferredSizeWidget buildHeader() {
+    return AreaPaneHeader(
+      title: const Text('Console'),
+      needsTopBorder: false,
+      rightActions: [
+        CopyToClipboardControl(
+          dataProvider: () =>
+              serviceManager.consoleService.stdio.value?.join('\n') ?? '',
+          buttonKey: DebuggerConsole.copyToClipboardButtonKey,
+        ),
+        DeleteControl(
+          buttonKey: DebuggerConsole.clearStdioButtonKey,
+          tooltip: 'Clear console output',
+          onPressed: () => serviceManager.consoleService.clearStdio(),
+        ),
+      ],
+    );
+  }
+}
+
+class _DebuggerConsoleState extends State<DebuggerConsole> {
   ValueListenable<List<ConsoleLine>> get stdio =>
       serviceManager.consoleService.stdio;
+
+  @override
+  void initState() {
+    super.initState();
+    serviceManager.consoleService.ensureServiceInitialized();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,25 +74,6 @@ class DebuggerConsole extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  static PreferredSizeWidget buildHeader() {
-    return AreaPaneHeader(
-      title: const Text('Console'),
-      needsTopBorder: false,
-      rightActions: [
-        CopyToClipboardControl(
-          dataProvider: () =>
-              serviceManager.consoleService.stdio.value?.join('\n') ?? '',
-          buttonKey: DebuggerConsole.copyToClipboardButtonKey,
-        ),
-        DeleteControl(
-          buttonKey: DebuggerConsole.clearStdioButtonKey,
-          tooltip: 'Clear console output',
-          onPressed: () => serviceManager.consoleService.clearStdio(),
         ),
       ],
     );
