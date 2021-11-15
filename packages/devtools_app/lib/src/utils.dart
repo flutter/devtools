@@ -192,7 +192,7 @@ double logBase({@required int x, @required int base}) {
   return log(x) / log(base);
 }
 
-int log2(num x) => (logBase(x: x, base: 2)).floor();
+int log2(num x) => (logBase(x: x.floor(), base: 2)).floor();
 
 int roundToNearestPow10(num x) =>
     pow(10, logBase(x: x, base: 10).ceil()).floor();
