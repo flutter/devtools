@@ -169,10 +169,10 @@ class _CpuProfilerState extends State<CpuProfiler>
                       if (widget.searchFieldKey != null)
                         _buildSearchField(hasData),
                       FlameChartHelpButton(
-                        screenId: widget.standaloneProfiler
+                        gaScreen: widget.standaloneProfiler
                             ? analytics_constants.cpuProfiler
                             : analytics_constants.performance,
-                        analyticsAction:
+                        gaSelection:
                             analytics_constants.cpuProfileFlameChartHelp,
                         additionalInfo: [
                           ...dialogSubHeader(Theme.of(context), 'Legend'),

@@ -311,22 +311,26 @@ class SettingsOutlinedButton extends OutlinedIconButton {
 }
 
 class HelpButton extends StatelessWidget {
-  const HelpButton({@required this.onPressed});
+  const HelpButton({
+    @required this.onPressed,
+    @required this.gaScreen,
+    @required this.gaSelection,
+  });
 
   final VoidCallback onPressed;
 
+  final String gaScreen;
+
+  final String gaSelection;
+
   @override
   Widget build(BuildContext context) {
-    return TextButton(
+    return DevToolsIconButton(
+      iconData: Icons.help_outline,
       onPressed: onPressed,
-      child: Container(
-        height: defaultButtonHeight,
-        width: defaultButtonHeight,
-        child: Icon(
-          Icons.help_outline,
-          size: defaultIconSize,
-        ),
-      ),
+      tooltip: 'Help',
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
     );
   }
 }
@@ -647,6 +651,55 @@ class DevToolsTooltip extends StatelessWidget {
       textStyle: style,
       decoration: decoration,
       child: child,
+    );
+  }
+}
+
+class DevToolsIconButton extends StatelessWidget {
+  const DevToolsIconButton({
+    Key key,
+    this.iconData,
+    this.iconWidget,
+    @required this.onPressed,
+    @required this.tooltip,
+    @required this.gaScreen,
+    @required this.gaSelection,
+  })  : assert((iconData == null) != (iconWidget == null)),
+        super(key: key);
+
+  final IconData iconData;
+
+  final Widget iconWidget;
+
+  final VoidCallback onPressed;
+
+  final String tooltip;
+
+  final String gaScreen;
+
+  final String gaSelection;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = iconData != null
+        ? Icon(
+            iconData,
+            size: defaultIconSize,
+          )
+        : iconWidget;
+    return DevToolsTooltip(
+      message: tooltip,
+      child: TextButton(
+        onPressed: () {
+          ga.select(gaScreen, gaSelection);
+          onPressed();
+        },
+        child: Container(
+          height: defaultButtonHeight,
+          width: defaultButtonHeight,
+          child: icon,
+        ),
+      ),
     );
   }
 }
