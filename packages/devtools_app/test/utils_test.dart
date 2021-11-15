@@ -109,7 +109,6 @@ void main() {
     });
 
     test('roundToNearestPow10', () {
-      expect(roundToNearestPow10(0.1), equals(1));
       expect(roundToNearestPow10(1), equals(1));
       expect(roundToNearestPow10(2), equals(10));
       expect(roundToNearestPow10(10), equals(10));
