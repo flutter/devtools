@@ -116,8 +116,8 @@ class _LegacyTimelineFlameChartContainerState
             rightActions: [
               _buildSearchField(searchFieldEnabled),
               const FlameChartHelpButton(
-                screenId: PerformanceScreen.id,
-                analyticsAction: analytics_constants.timelineFlameChartHelp,
+                gaScreen: PerformanceScreen.id,
+                gaSelection: analytics_constants.timelineFlameChartHelp,
               ),
             ],
           ),
