@@ -1189,6 +1189,13 @@ class VmServiceWrapper implements VmService {
     );
     return future;
   }
+
+  /// Prevent DevTools from blocking Dart SDK rolls if changes in
+  /// package:vm_service are unimplemented in DevTools.
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return super.noSuchMethod(invocation);
+  }
 }
 
 class TrackedFuture<T> {
