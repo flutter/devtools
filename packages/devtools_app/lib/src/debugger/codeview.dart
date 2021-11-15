@@ -447,9 +447,13 @@ class _CodeViewState extends State<CodeView>
     final theme = Theme.of(context);
 
     return Center(
-      child: Text(
-        'Open a file: $openFileKeySetDescription',
-        style: theme.textTheme.subtitle1,
+      child: ElevatedButton(
+        autofocus: true,
+        onPressed: () => widget.controller.toggleFileOpenerVisibility(true),
+        child: Text(
+          'Open a file ($openFileKeySetDescription)',
+          style: theme.textTheme.subtitle1,
+        ),
       ),
     );
   }
