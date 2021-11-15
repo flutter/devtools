@@ -403,8 +403,12 @@ class VmServiceWrapper implements VmService {
   }) {
     return trackFuture(
         'getObject',
-        _vmService.getObject(isolateId, objectId,
-            offset: offset, count: count));
+        _vmService.getObject(
+          isolateId,
+          objectId,
+          offset: offset,
+          count: count,
+        ));
   }
 
   @override

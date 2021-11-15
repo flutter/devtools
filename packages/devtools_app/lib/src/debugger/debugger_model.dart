@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -382,13 +383,12 @@ Future<void> buildVariablesTree(
   }
 
   if (variable.childCount > Variable.MAX_CHILDREN_IN_GROUPING) {
-    final numChildrenInGrouping = variable.childCount >=
-            Variable.MAX_CHILDREN_IN_GROUPING *
-                Variable.MAX_CHILDREN_IN_GROUPING
-        ? (roundToNearestPow10(variable.childCount) /
-                Variable.MAX_CHILDREN_IN_GROUPING)
-            .floor()
-        : Variable.MAX_CHILDREN_IN_GROUPING;
+    final numChildrenInGrouping =
+        variable.childCount >= pow(Variable.MAX_CHILDREN_IN_GROUPING, 2)
+            ? (roundToNearestPow10(variable.childCount) /
+                    Variable.MAX_CHILDREN_IN_GROUPING)
+                .floor()
+            : Variable.MAX_CHILDREN_IN_GROUPING;
 
     var index = 0;
     while (index + numChildrenInGrouping < variable.childCount) {

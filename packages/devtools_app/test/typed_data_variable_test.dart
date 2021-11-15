@@ -559,8 +559,12 @@ void main() {
       isolateRef,
     );
 
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
-        .thenThrow('Unrecognized parameters offset / count.');
+    when(manager.service.getObject(
+      any,
+      any,
+      offset: 0,
+      count: 4,
+    )).thenThrow('Unrecognized parameters offset / count.');
 
     when(manager.service.getObject(any, any)).thenAnswer((_) async {
       return instance;
@@ -573,6 +577,19 @@ void main() {
       matchesVariable(name: '[1]', value: 1),
       matchesVariable(name: '[2]', value: 2),
       matchesVariable(name: '[3]', value: 3),
+    ]);
+
+    verifyInOrder([
+      manager.service.getObject(
+        any,
+        any,
+        offset: 0,
+        count: 4,
+      ),
+      manager.service.getObject(
+        any,
+        any,
+      ),
     ]);
   });
 

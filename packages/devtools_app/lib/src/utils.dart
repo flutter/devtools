@@ -188,13 +188,14 @@ T nullSafeMax<T extends num>(T a, T b) {
   return max<T>(a, b);
 }
 
-double logBase(num x, num base) {
+double logBase({@required int x, @required int base}) {
   return log(x) / log(base);
 }
 
-int log2(num x) => (logBase(x, 2)).floor();
+int log2(num x) => (logBase(x: x, base: 2)).floor();
 
-int roundToNearestPow10(num x) => pow(10, logBase(x, 10).ceil()).floor();
+int roundToNearestPow10(num x) =>
+    pow(10, logBase(x: x, base: 10).ceil()).floor();
 
 String isolateName(IsolateRef ref) {
   // analysis_server.dart.snapshot$main
