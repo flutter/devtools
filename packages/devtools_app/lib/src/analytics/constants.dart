@@ -61,7 +61,6 @@ const disableClipLayersOption = 'disableClipLayers';
 const disableOpacityLayersOption = 'disableOpacityLayers';
 const disablePhysicalShapeLayersOption = 'disablePhysicalShapeLayers';
 const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
-const analyzeSelectedFrame = 'analyzeSelectedFrame';
 
 // CPU profiler UX actions:
 const profileGranularityPrefix = 'profileGranularity';

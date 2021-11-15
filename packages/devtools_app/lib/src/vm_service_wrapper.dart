@@ -1156,13 +1156,6 @@ class VmServiceWrapper implements VmService {
           ? 'Service'
           : '_Service';
 
-  // This is an escape hatch to ensure DevTools doesn't break on
-  // package:vm_service changes.
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    super.noSuchMethod(invocation);
-  }
-
   @visibleForTesting
   int vmServiceCallCount = 0;
 
