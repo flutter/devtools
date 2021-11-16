@@ -31,6 +31,9 @@ import 'performance_utils.dart';
 import 'rebuild_counts.dart';
 import 'timeline_event_processor.dart';
 
+/// Flag to hide the frame analysis feature while it is under development.
+bool frameAnalysisSupported = true;
+
 /// This class contains the business logic for [performance_screen.dart].
 ///
 /// The controller manages the timeline data model and communicates with the
@@ -81,6 +84,47 @@ class PerformanceController extends DisposableController
 
   ValueListenable<bool> get badgeTabForJankyFrames => _badgeTabForJankyFrames;
   final _badgeTabForJankyFrames = ValueNotifier<bool>(false);
+
+  ValueListenable<List<FlutterFrameAnalysisTabData>> get analysisTabs =>
+      _analysisTabs;
+  final _analysisTabs = ListValueNotifier<FlutterFrameAnalysisTabData>([]);
+
+  ValueListenable<FlutterFrameAnalysisTabData> get selectedAnalysisTab =>
+      _selectedAnalysisTab;
+  final _selectedAnalysisTab = ValueNotifier<FlutterFrameAnalysisTabData>(null);
+
+  void openAnalysisTab(FlutterFrame frame) {
+    if (_selectedAnalysisTab.value?.frame?.id == frame.id) return;
+    final existingTabForFrame = _analysisTabs.value.firstWhere(
+      (tab) => tab.frame.id == frame.id,
+      orElse: () => null,
+    );
+    if (existingTabForFrame != null) {
+      _selectedAnalysisTab.value = existingTabForFrame;
+    } else {
+      final newTab = FlutterFrameAnalysisTabData('Frame ${frame.id}', frame);
+      _analysisTabs.add(newTab);
+      _selectedAnalysisTab.value = newTab;
+    }
+  }
+
+  void closeAnalysisTab(FlutterFrameAnalysisTabData tabData) {
+    if (_selectedAnalysisTab.value == tabData) {
+      // Re-adjust the selection to a different tab.
+      final indexOfTab = _analysisTabs.value.indexOf(tabData);
+      if (indexOfTab != 0) {
+        _selectedAnalysisTab.value = _analysisTabs.value[indexOfTab - 1];
+      }
+    }
+    _analysisTabs.remove(tabData);
+    if (_analysisTabs.value.isEmpty) {
+      _selectedAnalysisTab.value = null;
+    }
+  }
+
+  void showTimeline() {
+    _selectedAnalysisTab.value = null;
+  }
 
   final threadNamesById = <int, String>{};
 
@@ -324,6 +368,10 @@ class PerformanceController extends DisposableController
 
     data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
+
+    // Default to viewing the timeline events flame chart when a new frame is
+    // selected.
+    _selectedAnalysisTab.value = null;
 
     if (!offlineController.offlineMode.value) {
       final bool frameBeforeFirstWellFormedFrame =
@@ -813,4 +861,14 @@ class PerformanceController extends DisposableController
     cpuProfilerController.dispose();
     super.dispose();
   }
+}
+
+// TODO(kenz): in the future this could be expanded to show data for an
+// arbitrary range of timeline data, not just a single flutter frame.
+class FlutterFrameAnalysisTabData {
+  FlutterFrameAnalysisTabData(this.title, this.frame);
+
+  final String title;
+
+  final FlutterFrame frame;
 }

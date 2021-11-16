@@ -168,7 +168,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             axis: Axis.vertical,
             initialFractions: const [0.7, 0.3],
             children: [
-              TimelineFlameChartContainer(
+              TimelineAnalysisContainer(
                 processing: processing,
                 processingProgress: processingProgress,
               ),
@@ -297,7 +297,7 @@ class _SecondaryControls extends StatelessWidget {
     @required this.controller,
   }) : super(key: key);
 
-  static const minScreenWidthForTextBeforeScaling = 1050.0;
+  static const minScreenWidthForTextBeforeScaling = 1075.0;
 
   final PerformanceController controller;
 

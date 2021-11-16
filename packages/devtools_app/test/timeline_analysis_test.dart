@@ -9,6 +9,7 @@ import 'package:devtools_app/src/config_specific/import_export/import_export.dar
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_screen.dart';
+import 'package:devtools_app/src/performance/timeline_analysis.dart';
 import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_test/mocks.dart';
@@ -50,7 +51,7 @@ void main() {
       _setUpServiceManagerWithTimeline(testTimelineJson);
     });
 
-    Future<void> pumpTimelineBody(
+    Future<void> pumpPerformanceScreenBody(
       WidgetTester tester, {
       PerformanceController performanceController,
       bool runAsync = false,
@@ -76,7 +77,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.runAsync(() async {
         _setUpServiceManagerWithTimeline({});
-        await pumpTimelineBody(tester);
+        await pumpPerformanceScreenBody(tester);
         await tester.pumpAndSettle();
         expect(find.text('Timeline Events'), findsOneWidget);
         expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
@@ -89,7 +90,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.runAsync(() async {
         _setUpServiceManagerWithTimeline({});
-        await pumpTimelineBody(tester);
+        await pumpPerformanceScreenBody(tester);
         await tester.pumpAndSettle();
 
         final helpButtonFinder = find.byType(FlameChartHelpButton);
@@ -103,9 +104,9 @@ void main() {
     testWidgetsWithWindowSize('builds flame chart with data', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        await pumpTimelineBody(tester, runAsync: true);
+        await pumpPerformanceScreenBody(tester, runAsync: true);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
-        expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+        expect(find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
             findsNothing);
       });
     });
@@ -114,10 +115,10 @@ void main() {
         (WidgetTester tester) async {
       await tester.runAsync(() async {
         _setUpServiceManagerWithTimeline({});
-        await pumpTimelineBody(tester, runAsync: true);
+        await pumpPerformanceScreenBody(tester, runAsync: true);
         await tester.pumpAndSettle();
         expect(find.byType(TimelineFlameChart), findsNothing);
-        expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+        expect(find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
             findsOneWidget);
       });
     });
@@ -126,7 +127,7 @@ void main() {
         'builds flame chart with selected frame', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        await pumpTimelineBody(tester, runAsync: true);
+        await pumpPerformanceScreenBody(tester, runAsync: true);
         controller
           ..addFrame(testFrame1.shallowCopy())
           ..addTimelineEvent(goldenUiTimelineEvent)

@@ -89,7 +89,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
-        expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+        expect(find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
             findsNothing);
         expect(find.byType(EventDetails), findsOneWidget);
         expect(find.byIcon(Icons.pause), findsOneWidget);
@@ -118,7 +118,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsNothing);
-        expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+        expect(find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
             findsOneWidget);
         expect(find.byType(EventDetails), findsOneWidget);
         expect(find.byIcon(Icons.pause), findsOneWidget);
@@ -148,7 +148,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byType(FlutterFramesChart), findsNothing);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
-        expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+        expect(find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
             findsNothing);
         expect(find.byType(EventDetails), findsOneWidget);
         expect(find.byIcon(Icons.pause), findsOneWidget);
@@ -195,7 +195,7 @@ void main() {
         expect(controller.allTraceEvents, isNotEmpty);
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
-        expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+        expect(find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
             findsNothing);
         expect(find.byType(EventDetails), findsOneWidget);
 
@@ -204,7 +204,7 @@ void main() {
         expect(controller.allTraceEvents, isEmpty);
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsNothing);
-        expect(find.byKey(TimelineFlameChartContainer.emptyTimelineKey),
+        expect(find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
             findsOneWidget);
         expect(find.byType(EventDetails), findsOneWidget);
       });

@@ -358,7 +358,22 @@ class FlutterFramesChartItem extends StatelessWidget {
               color: defaultSelectionColor,
               height: selectedIndicatorHeight,
             ),
-          if (hasShaderJank) const ShaderJankWarningIcon(),
+          if (hasShaderJank)
+            const Padding(
+              padding: EdgeInsets.only(
+                top: FlutterFramesChartItem.selectedIndicatorHeight,
+              ),
+              child: ShaderJankWarningIcon(),
+            ),
+          if (frameAnalysisSupported && uiJanky)
+            const Positioned(
+              left: (FlutterFramesChartItem.defaultFrameWidth +
+                      2 * densePadding -
+                      defaultActionsIconSizeBeforeScaling) /
+                  2,
+              bottom: denseSpacing,
+              child: FrameAnalysisIcon(),
+            ),
         ],
       ),
     );
@@ -516,20 +531,37 @@ class ShaderJankWarningIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        top: FlutterFramesChartItem.selectedIndicatorHeight,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          BlinkingIcon(
-            icon: Icons.warning_amber_rounded,
-            color: Colors.amber,
-            size: defaultActionsIconSizeBeforeScaling,
-          ),
-        ],
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: const [
+        BlinkingIcon(
+          icon: Icons.warning_amber_rounded,
+          color: Colors.amber,
+          size: defaultActionsIconSizeBeforeScaling,
+        ),
+      ],
+    );
+  }
+}
+
+class FrameAnalysisIcon extends StatelessWidget {
+  const FrameAnalysisIcon({
+    this.iconSize = defaultActionsIconSizeBeforeScaling,
+  });
+
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        BlinkingIcon(
+          icon: Icons.saved_search,
+          color: Colors.amber,
+          size: iconSize,
+        ),
+      ],
     );
   }
 }
