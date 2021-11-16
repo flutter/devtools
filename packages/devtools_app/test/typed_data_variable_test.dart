@@ -613,10 +613,6 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
-        .thenAnswer((_) async {
-      return instance;
-    });
 
     await buildVariablesTree(variable);
 
@@ -625,6 +621,35 @@ void main() {
       matchesVariableGroup(start: 100, end: 199),
       matchesVariableGroup(start: 200, end: 299),
       matchesVariableGroup(start: 300, end: 331),
+    ]);
+  });
+
+  test('Creates groupings of exactly 100 if the length is a multiple of 100',
+      () async {
+    final instance = Instance(
+      kind: InstanceKind.kUint8ClampedList,
+      id: '123',
+      classRef: null,
+      identityHashCode: null,
+      length: 300,
+    );
+    final variable = Variable.create(
+      BoundVariable(
+        name: 'test',
+        value: instance,
+        declarationTokenPos: null,
+        scopeEndTokenPos: null,
+        scopeStartTokenPos: null,
+      ),
+      isolateRef,
+    );
+
+    await buildVariablesTree(variable);
+
+    expect(variable.children, [
+      matchesVariableGroup(start: 0, end: 99),
+      matchesVariableGroup(start: 100, end: 199),
+      matchesVariableGroup(start: 200, end: 299),
     ]);
   });
 }

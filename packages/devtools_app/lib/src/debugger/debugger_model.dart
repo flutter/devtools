@@ -390,20 +390,15 @@ Future<void> buildVariablesTree(
                 .floor()
             : Variable.MAX_CHILDREN_IN_GROUPING;
 
-    var index = 0;
-    while (index + numChildrenInGrouping < variable.childCount) {
+    var start = variable.offset ?? 0;
+    final end = start + variable.childCount;
+    while (start < end) {
+      final count = min(end - start, numChildrenInGrouping);
       variable.addChild(
-        Variable.grouping(variable.ref,
-            offset: index + (variable.offset ?? 0),
-            count: numChildrenInGrouping),
+        Variable.grouping(variable.ref, offset: start, count: count),
       );
-      index += numChildrenInGrouping;
+      start += count;
     }
-    variable.addChild(
-      Variable.grouping(variable.ref,
-          offset: index + (variable.offset ?? 0),
-          count: variable.childCount - index),
-    );
   } else if (instanceRef != null && serviceManager.service != null) {
     try {
       final dynamic result =
