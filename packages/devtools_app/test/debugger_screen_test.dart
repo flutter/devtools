@@ -496,18 +496,21 @@ void main() {
           findsOneWidget,
         );
 
-        // Expand list.
+        // Initially list is not expanded.
         expect(find.selectableTextContaining('0: 3'), findsNothing);
         expect(find.selectableTextContaining('1: 4'), findsNothing);
 
+        // Expand list.
         await tester.tap(listFinder);
         await tester.pump();
         expect(find.selectableTextContaining('0: 0'), findsOneWidget);
         expect(find.selectableTextContaining('1: 1'), findsOneWidget);
 
-        // Expand map.
+        // Initially map is not expanded.
         expect(mapElement1Finder, findsNothing);
         expect(mapElement2Finder, findsNothing);
+
+        // Expand map.
         await tester.tap(mapFinder);
         await tester.pump();
         expect(mapElement1Finder, findsOneWidget);
@@ -813,7 +816,7 @@ final isolateRef = IsolateRef(
 int refNumber = 0;
 
 String incrementRef() {
-  refNumber = refNumber + 1;
+  refNumber++;
   return 'ref$refNumber';
 }
 
@@ -824,7 +827,7 @@ void resetRef() {
 int rootNumber = 0;
 
 String incrementRoot() {
-  rootNumber = rootNumber + 1;
+  rootNumber++;
   return 'Root $rootNumber';
 }
 

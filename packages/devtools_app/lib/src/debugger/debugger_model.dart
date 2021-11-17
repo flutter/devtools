@@ -697,6 +697,8 @@ List<Variable> _createVariablesForFields(
 // InstanceRef objects have become sentinels.
 // TODO(jacobr): consider a new class name. This class is more just the data
 // model for a tree of Dart objects with properties rather than a "Variable".
+// TODO(elliette): Refactor to make name, ref, text named (and potentially
+// required?) parameters. Give ref a type.
 class Variable extends TreeNode<Variable> {
   Variable._(this.name, ref, this.text, {int offset, int childCount})
       : _ref = ref,
@@ -767,10 +769,9 @@ class Variable extends TreeNode<Variable> {
   GenericInstanceRef get ref => _ref;
   GenericInstanceRef _ref;
 
-  int get offset {
-    if (_offset != null) return _offset;
-    return 0;
-  }
+  /// The point to fetch the variable from (in the case of large variables that
+  /// we fetch only parts of at a time).
+  int get offset => _offset ?? 0;
 
   int _offset;
 
@@ -779,14 +780,8 @@ class Variable extends TreeNode<Variable> {
 
     final value = this.value;
     if (value is InstanceRef) {
-      if (value.kind == InstanceKind.kList) {
-        return value.length ?? 0;
-      } else if (value.kind == InstanceKind.kMap) {
-        return value.length ?? 0;
-      } else if (value.kind != null && value.kind.endsWith('List')) {
-        // Catch-all for Uint8ClampedList, Uint8List, Uint16List, Uint32List,
-        // Uint64List, Int8List, Int16List, Int32List, Int64List, Flooat32List,
-        // Float64List, Inst32x3List, Float32x4List, and Float64x2List types:
+      if (value.kind != null &&
+          (value.kind.endsWith('List') || value.kind == InstanceKind.kMap)) {
         return value.length ?? 0;
       }
     }
