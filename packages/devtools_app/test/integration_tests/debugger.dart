@@ -212,7 +212,7 @@ void debuggingTests() {
     expect(await debuggingManager.getState(), 'running');
 
     // set break on exceptions mode
-    await debuggingManager.setExceptionPauseMode('All');
+    await debuggingManager.setIsolatePauseMode('All');
 
     // wait for paused state
     await waitFor(() async => await debuggingManager.getState() == 'paused');
@@ -232,7 +232,7 @@ void debuggingTests() {
     ]);
 
     // resume
-    await debuggingManager.setExceptionPauseMode('Unhandled');
+    await debuggingManager.setIsolatePauseMode('Unhandled');
     await debuggingManager.resume();
 
     await delay();
@@ -367,8 +367,8 @@ class DebuggingManager {
     await tools.tabInstance.send('debugger.addBreakpoint', [path, line]);
   }
 
-  Future<void> setExceptionPauseMode(String mode) async {
-    await tools.tabInstance.send('debugger.setExceptionPauseMode', mode);
+  Future<void> setIsolatePauseMode(String mode) async {
+    await tools.tabInstance.send('debugger.setIsolatePauseMode', mode);
   }
 
   Future<List<String>> getBreakpoints() async {
