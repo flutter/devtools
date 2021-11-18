@@ -432,7 +432,7 @@ final endVsyncTrace = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 193938752696,
+  'ts': 193938762696,
   'ph': 'E',
   'args': {}
 });

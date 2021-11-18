@@ -209,3 +209,13 @@ class AnalyzeFrameButton extends StatelessWidget {
     );
   }
 }
+
+// TODO(kenz): in the future this could be expanded to show data for an
+// arbitrary range of timeline data, not just a single flutter frame.
+class FlutterFrameAnalysisTabData {
+  FlutterFrameAnalysisTabData(this.title, this.frame);
+
+  final String title;
+
+  final FlutterFrame frame;
+}
