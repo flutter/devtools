@@ -781,7 +781,9 @@ class Variable extends TreeNode<Variable> {
     final value = this.value;
     if (value is InstanceRef) {
       if (value.kind != null &&
-          (value.kind.endsWith('List') || value.kind == InstanceKind.kMap)) {
+          (value.kind.endsWith('List') ||
+              value.kind == InstanceKind.kList ||
+              value.kind == InstanceKind.kMap)) {
         return value.length ?? 0;
       }
     }
