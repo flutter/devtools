@@ -1,3 +1,36 @@
+## 2.8.0-dev.1
+TODO: update changelog
+
+## 2.8.0
+* Don't register service worker when running DevTools locally [#3476](https://github.com/flutter/devtools/pull/3476)
+* [Cleanup] Moved `[set/get]PubRootDirectories` functions from `InspectorServiceBase` to `InspectorService` [#3478](https://github.com/flutter/devtools/pull/3478)
+* Improve startup performance of DevTools by using lazy initialization for debugger and console service [#3468](https://github.com/flutter/devtools/pull/3468)
+* Fix bug with version parsing [#3473](https://github.com/flutter/devtools/pull/3473)
+* Add new `inspectorServiceProvider()` function to `extensions_base.dart` [#3470](https://github.com/flutter/devtools/pull/3470)
+* Add inspector/diagnostics.dart and split.dart exports to devtools_app.dart [#3469](https://github.com/flutter/devtools/pull/3469)
+* Refactor InspectorServiceBase and ObjectGroupBase out of InspectorService and ObjectGroup [#3465](https://github.com/flutter/devtools/pull/3465)
+* Add a warning to stop launching on pub for DevTools version 2.8.0 [#3464](https://github.com/flutter/devtools/pull/3464)
+* Keyboard shortcuts are set on the top-level scaffold [#3458](https://github.com/flutter/devtools/pull/3458)
+* Adds caching to speed up the expression evaluation autocomplete [#3463](https://github.com/flutter/devtools/pull/3463)
+* Cleanup "More Debugging Options" button on Performance page [#3461](https://github.com/flutter/devtools/pull/3461)
+* Add Track Paints and Track Layouts toggles to the performance page [#3451](https://github.com/flutter/devtools/pull/3451)
+* Reland `ProgramExplorer` [#3448](https://github.com/flutter/devtools/pull/3448)
+* Expression evaluation autocomplete overlay is positioned over the last `.` in the expression [#3449](https://github.com/flutter/devtools/pull/3449)
+* Add debug disable layer toggles to the Performance page [#3441](https://github.com/flutter/devtools/pull/3441)
+* Add service worker to cache `main.dart.js` and everything in `/assets` [#3325](https://github.com/flutter/devtools/pull/3325)
+* Do not fetch timeline stream values for web apps [#3446](https://github.com/flutter/devtools/pull/3446)
+* Refactors search to have private _SearchField and _AutoCompleteSearchField widgets [#3442](https://github.com/flutter/devtools/pull/3442)
+* Fix 'unnecessary import' warnings [#3440](https://github.com/flutter/devtools/pull/3440)
+* Listen to timeline stream changes from the VM service and cleanup perf settings [#3432](https://github.com/flutter/devtools/pull/3432)
+* Update widget_icons changelog to match version number [#3437](https://github.com/flutter/devtools/pull/3437)
+* Update git url for widget_icons pubspec [#3436](https://github.com/flutter/devtools/pull/3436)
+* Tweak positioning of file picker [#3421](https://github.com/flutter/devtools/pull/3421)
+* Clean up pubspec files [#3431](https://github.com/flutter/devtools/pull/3431)
+* Run serveRequests in an error zone and log errors [#3429](https://github.com/flutter/devtools/pull/3429)
+* Widget Icons package added [#3409](https://github.com/flutter/devtools/pull/3409)
+* Update DevTools release instructions [#3428](https://github.com/flutter/devtools/pull/3428)
+* Expose more common devtools_app source files via devtools_app.dart [#3427](https://github.com/flutter/devtools/pull/3427)
+
 ## 2.7.0
 * Fix file:line:col color fixed (#3249) [#3365](https://github.com/flutter/devtools/pull/3365)
 * Moved test helper code from "test/support" to a new "devtools_test" package [#3406](https://github.com/flutter/devtools/pull/3406)

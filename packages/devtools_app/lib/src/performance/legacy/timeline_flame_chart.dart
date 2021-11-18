@@ -116,8 +116,8 @@ class _LegacyTimelineFlameChartContainerState
             rightActions: [
               _buildSearchField(searchFieldEnabled),
               const FlameChartHelpButton(
-                screenId: PerformanceScreen.id,
-                analyticsAction: analytics_constants.timelineFlameChartHelp,
+                gaScreen: PerformanceScreen.id,
+                gaSelection: analytics_constants.timelineFlameChartHelp,
               ),
             ],
           ),
@@ -1295,7 +1295,7 @@ class LegacyThreadNavigatorButton extends StatelessWidget {
       height: useSmallButton ? smallButtonHeight : buttonMinWidth,
       width: buttonMinWidth,
       child: DevToolsTooltip(
-        tooltip: tooltip,
+        message: tooltip,
         child: IconButton(
           padding: EdgeInsets.zero,
           icon: Icon(

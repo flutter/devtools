@@ -36,7 +36,7 @@ class Variables extends StatelessWidget {
           dataRoots: variables,
           dataDisplayProvider: (variable, onPressed) =>
               displayProvider(context, variable, onPressed, controller),
-          onItemPressed: (variable) => onItemPressed(variable, controller),
+          onItemSelected: (variable) => onItemPressed(variable, controller),
         );
       },
     );
@@ -65,7 +65,7 @@ class VariablesList extends StatelessWidget {
       dataRoots: lines,
       dataDisplayProvider: (variable, onPressed) =>
           displayProvider(context, variable, onPressed, controller),
-      onItemPressed: (variable) => onItemPressed(variable, controller),
+      onItemSelected: (variable) => onItemPressed(variable, controller),
     );
   }
 
@@ -101,7 +101,7 @@ class ExpandableVariable extends StatelessWidget {
           shrinkWrap: true,
           dataDisplayProvider: (variable, onPressed) =>
               displayProvider(context, variable, onPressed, debuggerController),
-          onItemPressed: (variable) =>
+          onItemSelected: (variable) =>
               onItemPressed(variable, debuggerController),
         );
       },
@@ -151,7 +151,7 @@ Widget displayProvider(
     );
   }
   return DevToolsTooltip(
-    tooltip: variable.displayValue,
+    message: variable.displayValue,
     waitDuration: tooltipWaitLong,
     child: SelectableText.rich(
       TextSpan(
@@ -221,7 +221,8 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
       endpoints: endpoints,
       delegate: delegate,
       clipboardStatus: clipboardStatus,
-      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+      handleCut:
+          canCut(delegate) ? () => handleCut(delegate, clipboardStatus) : null,
       handleCopy: canCopy(delegate)
           ? () => handleCopy(delegate, clipboardStatus)
           : null,

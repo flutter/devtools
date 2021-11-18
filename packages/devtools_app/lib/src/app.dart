@@ -47,6 +47,7 @@ import 'screen.dart';
 import 'snapshot_screen.dart';
 import 'theme.dart';
 import 'ui/service_extension_widgets.dart';
+import 'utils.dart';
 import 'vm_developer/vm_developer_tools_controller.dart';
 import 'vm_developer/vm_developer_tools_screen.dart';
 
@@ -59,6 +60,13 @@ const showVmDeveloperMode = false;
 
 /// Whether this DevTools build is external.
 bool isExternalBuild = true;
+
+// TODO(kenz): remove the pub warning code after devtools version 2.8.0 ships
+/// Whether DevTools should warn users to stop launching DevTools from Pub.
+///
+/// This flag will be turned on for the final release of DevTools on pub, but
+/// should remain off at HEAD.
+const showPubWarning = false;
 
 /// Top-level configuration for the app.
 @immutable
@@ -407,7 +415,7 @@ class OpenAboutAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: 'About DevTools',
+      message: 'About DevTools',
       child: InkWell(
         onTap: () async {
           unawaited(showDialog(
@@ -433,7 +441,7 @@ class OpenSettingsAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: 'Settings',
+      message: 'Settings',
       child: InkWell(
         onTap: () async {
           unawaited(showDialog(
@@ -459,7 +467,7 @@ class ReportFeedbackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: 'Report feedback',
+      message: 'Report feedback',
       child: InkWell(
         onTap: () async {
           ga.select(
@@ -487,7 +495,6 @@ class DevToolsAboutDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return DevToolsDialog(
       title: dialogTitleText(theme, 'About DevTools'),
       content: Column(
@@ -496,6 +503,10 @@ class DevToolsAboutDialog extends StatelessWidget {
         children: [
           _aboutDevTools(context),
           const SizedBox(height: defaultSpacing),
+          if (shouldShowPubWarning()) ...[
+            const PubWarningText(),
+            const SizedBox(height: defaultSpacing),
+          ],
           ...dialogSubHeader(theme, 'Feedback'),
           Wrap(
             children: [
@@ -517,18 +528,16 @@ class DevToolsAboutDialog extends StatelessWidget {
   }
 
   Widget _createFeedbackLink(BuildContext context) {
-    final reportIssuesLink = devToolsExtensionPoints.issueTrackerLink();
-    return InkWell(
-      onTap: () async {
-        ga.select(
-          analytics_constants.devToolsMain,
-          analytics_constants.feedbackLink,
-        );
-        await launchUrl(reportIssuesLink.url, context);
-      },
-      child: Text(
-        reportIssuesLink.display,
-        style: Theme.of(context).linkTextStyle,
+    return RichText(
+      text: LinkTextSpan(
+        link: devToolsExtensionPoints.issueTrackerLink(),
+        context: context,
+        onTap: () {
+          ga.select(
+            analytics_constants.devToolsMain,
+            analytics_constants.feedbackLink,
+          );
+        },
       ),
     );
   }

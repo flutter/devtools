@@ -1371,7 +1371,7 @@ class _TableRowState<T> extends State<TableRow<T>>
               Flexible(
                 child: column.titleTooltip != null
                     ? DevToolsTooltip(
-                        tooltip: column.titleTooltip,
+                        message: column.titleTooltip,
                         padding: const EdgeInsets.all(denseSpacing),
                         child: title,
                       )
@@ -1402,7 +1402,7 @@ class _TableRowState<T> extends State<TableRow<T>>
         final tooltip = column.getTooltip(node);
         if (tooltip != null && tooltip is String && tooltip.isNotEmpty) {
           content = DevToolsTooltip(
-            tooltip: tooltip,
+            message: tooltip,
             waitDuration: tooltipWaitLong,
             child: content,
           );

@@ -473,7 +473,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   /// activeWord  is "cl"
   /// leftSide    is "controller."
   /// rightSide   is " + 1000 + myChart.tra"
-  static EditingParts activeEdtingParts(
+  static EditingParts activeEditingParts(
     String editing,
     TextSelection selection, {
     bool handleFields = false,
@@ -556,6 +556,13 @@ typedef ClearSearchField = Function(
   bool force,
 });
 
+/// Provided by clients to specify where the autocomplete overlay should be
+/// positioned relative to the input text.
+typedef OverlayXPositionBuilder = double Function(
+  String inputValue,
+  TextStyle inputStyle,
+);
+
 mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   TextEditingController searchTextFieldController;
   FocusNode _searchFieldFocusNode;
@@ -601,12 +608,13 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   /// [searchFieldKey]
   /// [searchFieldEnabled]
   /// [onSelection]
-  /// [onHilightDropdown] use to override default highlghter.
+  /// [onHighlightDropdown] use to override default highlghter.
   /// [decoration]
-  /// [tracking] if true displays pop-up to the right of the TextField's caret.
+  /// [overlayXPositionBuilder] callback function to determine where the
+  /// autocomplete overlay should be positioned relative to the input text.
   /// [supportClearField] if true clear TextField content if pop-up not visible. If
   /// pop-up is visible close the pop-up on first ESCAPE.
-  /// [keyEventsToPropogate] a set of key events that should be propogated to
+  /// [keyEventsToPropagate] a set of key events that should be propagated to
   /// other handlers
   Widget buildAutoCompleteSearchField({
     @required AutoCompleteSearchControllerMixin controller,
@@ -617,9 +625,9 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     HighlightAutoComplete onHighlightDropdown,
     InputDecoration decoration,
     String label,
-    bool tracking = false,
+    OverlayXPositionBuilder overlayXPositionBuilder,
     bool supportClearField = false,
-    Set<LogicalKeyboardKey> keyEventsToPropogate = const {},
+    Set<LogicalKeyboardKey> keyEventsToPropagate = const {},
     VoidCallback onClose,
   }) {
     _onSelection = onSelection;
@@ -633,7 +641,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
       searchTextFieldController: searchTextFieldController,
       decoration: decoration,
       label: label,
-      tracking: tracking,
+      overlayXPositionBuilder: overlayXPositionBuilder,
       onClose: onClose,
     );
 
@@ -645,7 +653,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
       onSelection: onSelection,
       onHighlightDropdown: onHighlightDropdown,
       clearSearchField: clearSearchField,
-      keyEventsToPropogate: keyEventsToPropogate,
+      keyEventsToPropagate: keyEventsToPropagate,
       supportClearField: supportClearField,
       closeHandler: _closeHandler,
     );
@@ -718,6 +726,7 @@ class _SearchField extends StatelessWidget {
     this.tracking = false,
     this.decoration,
     this.onClose,
+    this.overlayXPositionBuilder,
   });
 
   final SearchControllerMixin controller;
@@ -731,30 +740,21 @@ class _SearchField extends StatelessWidget {
   final bool tracking;
   final InputDecoration decoration;
   final VoidCallback onClose;
+  final OverlayXPositionBuilder overlayXPositionBuilder;
 
   @override
   Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.subtitle1;
     final searchField = TextField(
       key: searchFieldKey,
       autofocus: true,
       enabled: searchFieldEnabled,
       focusNode: searchFieldFocusNode,
       controller: searchTextFieldController,
+      style: textStyle,
       onChanged: (value) {
-        if (tracking) {
-          // Use a TextPainter to calculate the width of the newly entered text.
-          // TODO(terry): The TextPainter's TextStyle is default (same as this
-          //              TextField) consider explicitly using a TextStyle of
-          //              this TextField if the TextField needs styling.
-          final painter = TextPainter(
-            textDirection: TextDirection.ltr,
-            text: TextSpan(text: value),
-          );
-          painter.layout();
-
-          // X coordinate of the pop-up, immediately to the right of the insertion
-          // point (caret).
-          controller.xPosition = painter.width;
+        if (overlayXPositionBuilder != null) {
+          controller.xPosition = overlayXPositionBuilder(value, textStyle);
         }
         controller.search = value;
       },
@@ -805,7 +805,7 @@ class _AutoCompleteSearchField extends StatelessWidget {
     @required this.onSelection,
     @required this.onHighlightDropdown,
     @required this.clearSearchField,
-    this.keyEventsToPropogate = const {},
+    this.keyEventsToPropagate = const {},
     this.supportClearField = false,
     this.closeHandler,
   });
@@ -817,7 +817,7 @@ class _AutoCompleteSearchField extends StatelessWidget {
   final SelectAutoComplete onSelection;
   final HighlightAutoComplete onHighlightDropdown;
   final ClearSearchField clearSearchField;
-  final Set<LogicalKeyboardKey> keyEventsToPropogate;
+  final Set<LogicalKeyboardKey> keyEventsToPropagate;
   final bool supportClearField;
   final VoidCallback closeHandler;
 
@@ -860,7 +860,7 @@ class _AutoCompleteSearchField extends StatelessWidget {
           }
           return _determineKeyEventResult(
             key,
-            keyEventsToPropogate,
+            keyEventsToPropagate,
           );
         } else if (controller.autoCompleteOverlay != null) {
           if (key == enter || key == enterMac || key == tab || key == tabMac) {
@@ -891,18 +891,18 @@ class _AutoCompleteSearchField extends StatelessWidget {
               controller.selectTheSearch = true;
               controller.search = foundExact;
               onSelection(foundExact);
-              return _determineKeyEventResult(key, keyEventsToPropogate);
+              return _determineKeyEventResult(key, keyEventsToPropagate);
             }
           } else if (key == arrowDown || key == arrowUp) {
             highlightDropdown(controller, key == arrowDown);
-            return _determineKeyEventResult(key, keyEventsToPropogate);
+            return _determineKeyEventResult(key, keyEventsToPropagate);
           }
         }
 
         // We don't support tabs in the search input. Swallow to prevent a
         // change of focus.
         if (key == tab || key == tabMac) {
-          _determineKeyEventResult(key, keyEventsToPropogate);
+          _determineKeyEventResult(key, keyEventsToPropagate);
         }
       }
 
@@ -930,11 +930,11 @@ class _AutoCompleteSearchField extends StatelessWidget {
 
   KeyEventResult _determineKeyEventResult(
     int keyEventId,
-    Set<LogicalKeyboardKey> keyEventsToPropogate,
+    Set<LogicalKeyboardKey> keyEventsToPropagate,
   ) {
-    final shouldPropogateKeyEvent = keyEventsToPropogate
+    final shouldPropagateKeyEvent = keyEventsToPropagate
         .any((key) => key.keyId & LogicalKeyboardKey.valueMask == keyEventId);
-    return shouldPropogateKeyEvent
+    return shouldPropagateKeyEvent
         ? KeyEventResult.ignored
         : KeyEventResult.handled;
   }

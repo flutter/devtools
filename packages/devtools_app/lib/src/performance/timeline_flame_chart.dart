@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../charts/flame_chart.dart';
@@ -122,8 +121,8 @@ class _TimelineFlameChartContainerState
             rightActions: [
               _buildSearchField(searchFieldEnabled),
               const FlameChartHelpButton(
-                screenId: PerformanceScreen.id,
-                analyticsAction: analytics_constants.timelineFlameChartHelp,
+                gaScreen: PerformanceScreen.id,
+                gaSelection: analytics_constants.timelineFlameChartHelp,
               ),
             ],
           ),
@@ -170,25 +169,12 @@ class RefreshTimelineEventsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsTooltip(
+    return DevToolsIconButton(
+      iconData: Icons.refresh,
+      onPressed: controller.processAvailableEvents,
       tooltip: 'Refresh timeline events',
-      child: TextButton(
-        onPressed: () {
-          ga.select(
-            analytics_constants.performance,
-            analytics_constants.refreshTimelineEvents,
-          );
-          controller.processAvailableEvents();
-        },
-        child: Container(
-          height: defaultButtonHeight,
-          width: defaultButtonHeight,
-          child: Icon(
-            Icons.refresh,
-            size: defaultIconSize,
-          ),
-        ),
-      ),
+      gaScreen: analytics_constants.performance,
+      gaSelection: analytics_constants.refreshTimelineEvents,
     );
   }
 }
@@ -1376,7 +1362,7 @@ class ThreadNavigatorButton extends StatelessWidget {
       height: useSmallButton ? smallButtonHeight : buttonMinWidth,
       width: buttonMinWidth,
       child: DevToolsTooltip(
-        tooltip: tooltip,
+        message: tooltip,
         child: IconButton(
           padding: EdgeInsets.zero,
           icon: Icon(

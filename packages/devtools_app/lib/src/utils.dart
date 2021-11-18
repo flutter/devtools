@@ -16,9 +16,11 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
+import 'app.dart';
 import 'config_specific/logger/logger.dart' as logger;
 import 'globals.dart';
 import 'notifications.dart';
+import 'version.dart';
 
 bool isPrivate(String member) => member.startsWith('_');
 
@@ -186,7 +188,14 @@ T nullSafeMax<T extends num>(T a, T b) {
   return max<T>(a, b);
 }
 
-int log2(num x) => (log(x) / log(2)).floor();
+double logBase({@required int x, @required int base}) {
+  return log(x) / log(base);
+}
+
+int log2(num x) => (logBase(x: x.floor(), base: 2)).floor();
+
+int roundToNearestPow10(int x) =>
+    pow(10, logBase(x: x, base: 10).ceil()).floor();
 
 String isolateName(IsolateRef ref) {
   // analysis_server.dart.snapshot$main
@@ -1425,3 +1434,37 @@ const connectToNewAppText = 'Connect to a new app';
 /// Exception thrown when a request to process data has been cancelled in
 /// favor of a new request.
 class ProcessCancelledException implements Exception {}
+
+bool shouldShowPubWarning() =>
+    showPubWarning &&
+    (serviceManager.connectedApp?.isFlutterAppNow != null &&
+            serviceManager.connectedApp.flutterVersionNow >=
+                SemanticVersion(major: 2, minor: 8) ||
+        (serviceManager.vm != null &&
+            SemanticVersion.parse(serviceManager.vm.version) >=
+                SemanticVersion(major: 2, minor: 15)));
+
+extension UriExtension on Uri {
+  Uri copyWith({
+    String scheme,
+    String userInfo,
+    String host,
+    int port,
+    String path,
+    Iterable<String> pathSegments,
+    String query,
+    Map<String, dynamic> queryParameters,
+    String fragment,
+  }) {
+    return Uri(
+      scheme: scheme ?? this.scheme,
+      userInfo: userInfo ?? this.userInfo,
+      host: host ?? this.host,
+      port: port ?? this.port,
+      pathSegments: pathSegments ?? this.pathSegments,
+      query: query ?? this.query,
+      queryParameters: queryParameters ?? this.queryParameters,
+      fragment: fragment ?? this.fragment,
+    );
+  }
+}

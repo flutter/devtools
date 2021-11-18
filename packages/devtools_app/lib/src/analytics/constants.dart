@@ -44,7 +44,6 @@ const String paintBaseline = 'paintBaseline';
 const String slowAnimation = 'slowAnimation';
 const String repaintRainbow = 'repaintRainbow';
 const String debugBanner = 'debugBanner';
-const String trackRebuilds = 'trackRebuilds';
 const String togglePlatform = 'togglePlatform';
 const String selectWidgetMode = 'selectWidgetMode';
 const String enableOnDeviceInspector = 'enableOnDeviceInspector';
@@ -55,6 +54,13 @@ const refreshTimelineEvents = 'refreshTimelineEvents';
 const timelineFlameChartHelp = 'timelineFlameChartHelp';
 const selectFlutterFrame = 'selectFlutterFrame';
 const traceEventProcessingTime = 'traceEventProcessingTime';
+const String trackRebuilds = 'trackRebuilds';
+const String trackPaints = 'trackPaints';
+const String trackLayouts = 'trackLayouts';
+const disableClipLayersOption = 'disableClipLayers';
+const disableOpacityLayersOption = 'disableOpacityLayers';
+const disablePhysicalShapeLayersOption = 'disablePhysicalShapeLayers';
+const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
 
 // CPU profiler UX actions:
 const profileGranularityPrefix = 'profileGranularity';

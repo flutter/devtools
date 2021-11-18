@@ -259,7 +259,7 @@ class InspectorTreeController extends Object {
 
     selection = root
         .getRow(
-        (root.getRowIndex(selection) + indexOffset).clamp(0, numRows - 1))
+            (root.getRowIndex(selection) + indexOffset).clamp(0, numRows - 1))
         ?.node;
   }
 
@@ -404,7 +404,7 @@ class InspectorTreeController extends Object {
       if (row != null) {
         final rowRect = getBoundingBox(row);
         targetRect =
-        targetRect == null ? rowRect : targetRect.expandToInclude(rowRect);
+            targetRect == null ? rowRect : targetRect.expandToInclude(rowRect);
       }
     }
 
@@ -438,11 +438,11 @@ class InspectorTreeController extends Object {
   }
 
   InspectorTreeNode setupInspectorTreeNode(
-      InspectorTreeNode node,
-      RemoteDiagnosticsNode diagnosticsNode, {
-        @required bool expandChildren,
-        @required bool expandProperties,
-      }) {
+    InspectorTreeNode node,
+    RemoteDiagnosticsNode diagnosticsNode, {
+    @required bool expandChildren,
+    @required bool expandProperties,
+  }) {
     assert(expandChildren != null);
     assert(expandProperties != null);
     node.diagnostic = diagnosticsNode;
@@ -454,7 +454,7 @@ class InspectorTreeController extends Object {
         diagnosticsNode.inlineProperties.isNotEmpty) {
       if (diagnosticsNode.childrenReady || !diagnosticsNode.hasChildren) {
         final bool styleIsMultiline =
-        expandPropertiesByDefault(diagnosticsNode.style);
+            expandPropertiesByDefault(diagnosticsNode.style);
         setupChildren(
           diagnosticsNode,
           node,
@@ -471,12 +471,12 @@ class InspectorTreeController extends Object {
   }
 
   void setupChildren(
-      RemoteDiagnosticsNode parent,
-      InspectorTreeNode treeNode,
-      List<RemoteDiagnosticsNode> children, {
-        @required bool expandChildren,
-        @required bool expandProperties,
-      }) {
+    RemoteDiagnosticsNode parent,
+    InspectorTreeNode treeNode,
+    List<RemoteDiagnosticsNode> children, {
+    @required bool expandChildren,
+    @required bool expandProperties,
+  }) {
     assert(expandChildren != null);
     assert(expandProperties != null);
     treeNode.isExpanded = expandChildren;
@@ -1055,7 +1055,7 @@ class InspectorRowContent extends StatelessWidget {
     // Wrap with tooltip if there is an error for this node's widget.
     if (hasError) {
       rowWidget =
-          DevToolsTooltip(child: rowWidget, tooltip: error.errorMessage);
+          DevToolsTooltip(child: rowWidget, message: error.errorMessage);
     }
 
     return CustomPaint(

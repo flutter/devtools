@@ -82,8 +82,8 @@ class ServiceConnectionManager {
 
   final consoleService = ConsoleService();
 
-  InspectorService get inspectorService => _inspectorService;
-  InspectorService _inspectorService;
+  InspectorServiceBase get inspectorService => _inspectorService;
+  InspectorServiceBase _inspectorService;
 
   ErrorBadgeManager get errorBadgeManager => _errorBadgeManager;
   final _errorBadgeManager = ErrorBadgeManager();
@@ -302,11 +302,7 @@ class ServiceConnectionManager {
       return;
     }
 
-    if (connectedApp.isFlutterAppNow) {
-      _inspectorService = InspectorService();
-    } else {
-      _inspectorService = null;
-    }
+    _inspectorService = devToolsExtensionPoints.inspectorServiceProvider();
 
     // Set up analytics dimensions for the connected app.
     await ga.setupUserApplicationDimensions();
@@ -608,7 +604,9 @@ class IsolateManager extends Disposer {
   Future<void> _initIsolates(List<IsolateRef> isolates) async {
     _clearIsolateStates();
 
-    isolates.forEach(_registerIsolate);
+    await Future.wait([
+      for (final isolateRef in isolates) _registerIsolate(isolateRef),
+    ]);
 
     // It is critical that the _serviceExtensionManager is already listening
     // for events indicating that new extension rpcs are registered before this
@@ -619,24 +617,23 @@ class IsolateManager extends Disposer {
     await _initSelectedIsolate();
   }
 
-  void _registerIsolate(IsolateRef isolateRef) {
+  Future<void> _registerIsolate(IsolateRef isolateRef) async {
     assert(!_isolateStates.containsKey(isolateRef));
     _isolateStates[isolateRef] = IsolateState(isolateRef);
     _isolates.add(isolateRef);
     isolateIndex(isolateRef);
-    _loadIsolateState(isolateRef);
+    await _loadIsolateState(isolateRef);
   }
 
-  void _loadIsolateState(IsolateRef isolateRef) {
+  Future<void> _loadIsolateState(IsolateRef isolateRef) async {
     final service = _service;
-    _service.getIsolate(isolateRef.id).then((Isolate isolate) {
-      if (service != _service) return;
-      final state = _isolateStates[isolateRef];
-      if (state != null) {
-        // Isolate might have already been closed.
-        state.onIsolateLoaded(isolate);
-      }
-    });
+    final isolate = await _service.getIsolate(isolateRef.id);
+    if (service != _service) return;
+    final state = _isolateStates[isolateRef];
+    if (state != null) {
+      // Isolate might have already been closed.
+      state.onIsolateLoaded(isolate);
+    }
   }
 
   Future<void> _handleIsolateEvent(Event event) async {
@@ -644,7 +641,7 @@ class IsolateManager extends Disposer {
 
     if (event.kind == EventKind.kIsolateStart &&
         !event.isolate.isSystemIsolate) {
-      _registerIsolate(event.isolate);
+      await _registerIsolate(event.isolate);
       _isolateCreatedController.add(event.isolate);
       // TODO(jacobr): we assume the first isolate started is the main isolate
       // but that may not always be a safe assumption.
@@ -888,8 +885,8 @@ class ServiceExtensionManager extends Disposer {
 
       await setServiceExtensionState(
         name,
-        enabled,
-        extensionValue,
+        enabled: enabled,
+        value: extensionValue,
         callExtension: false,
       );
     }
@@ -1092,10 +1089,20 @@ class ServiceExtensionManager extends Disposer {
     if (extensionDescription
         is extensions.ToggleableServiceExtensionDescription) {
       if (value == extensionDescription.enabledValue) {
-        await setServiceExtensionState(name, true, value, callExtension: false);
+        await setServiceExtensionState(
+          name,
+          enabled: true,
+          value: value,
+          callExtension: false,
+        );
       }
     } else {
-      await setServiceExtensionState(name, true, value, callExtension: false);
+      await setServiceExtensionState(
+        name,
+        enabled: true,
+        value: value,
+        callExtension: false,
+      );
     }
   }
 
@@ -1201,16 +1208,18 @@ class ServiceExtensionManager extends Disposer {
 
   /// Sets the state for a service extension and makes the call to the VMService.
   Future<void> setServiceExtensionState(
-    String name,
-    bool enabled,
-    dynamic value, {
+    String name, {
+    @required bool enabled,
+    @required dynamic value,
     bool callExtension = true,
   }) async {
     if (callExtension && _serviceExtensions.contains(name)) {
       await _callServiceExtension(name, value);
+    } else if (callExtension) {
+      log('Attempted to call extension \'$name\', but no service with that name exists');
     }
 
-    final state = ServiceExtensionState(enabled, value);
+    final state = ServiceExtensionState(enabled: enabled, value: value);
     _serviceExtensionState(name).value = state;
 
     // Add or remove service extension from [enabledServiceExtensions].
@@ -1270,7 +1279,7 @@ class ServiceExtensionManager extends Disposer {
         return ValueNotifier<ServiceExtensionState>(
           _enabledServiceExtensions.containsKey(name)
               ? _enabledServiceExtensions[name]
-              : ServiceExtensionState(false, null),
+              : ServiceExtensionState(enabled: false, value: null),
         );
       },
     );
@@ -1302,7 +1311,7 @@ class ServiceExtensionManager extends Disposer {
 }
 
 class ServiceExtensionState {
-  ServiceExtensionState(this.enabled, this.value) {
+  ServiceExtensionState({@required this.enabled, @required this.value}) {
     if (value is bool) {
       assert(enabled == value);
     }

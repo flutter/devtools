@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -93,10 +94,27 @@ class ScriptLocation {
   String toString() => '${scriptRef.uri} $location';
 }
 
-/// A line, column, and an optional tokenPos.
 class SourcePosition {
-  SourcePosition({@required this.line, @required this.column, this.tokenPos});
+  const SourcePosition({
+    @required this.line,
+    @required this.column,
+    this.file,
+    this.tokenPos,
+  });
 
+  factory SourcePosition.calculatePosition(Script script, int tokenPos) {
+    if (script.tokenPosTable == null) {
+      return null;
+    }
+
+    return SourcePosition(
+      line: script.getLineNumberFromTokenPos(tokenPos),
+      column: script.getColumnNumberFromTokenPos(tokenPos),
+      tokenPos: tokenPos,
+    );
+  }
+
+  final String file;
   final int line;
   final int column;
   final int tokenPos;
@@ -363,10 +381,28 @@ Future<void> buildVariablesTree(
       }
     }
   }
-  if (instanceRef != null && serviceManager.service != null) {
+
+  if (variable.childCount > Variable.MAX_CHILDREN_IN_GROUPING) {
+    final numChildrenInGrouping =
+        variable.childCount >= pow(Variable.MAX_CHILDREN_IN_GROUPING, 2)
+            ? (roundToNearestPow10(variable.childCount) /
+                    Variable.MAX_CHILDREN_IN_GROUPING)
+                .floor()
+            : Variable.MAX_CHILDREN_IN_GROUPING;
+
+    var start = variable.offset ?? 0;
+    final end = start + variable.childCount;
+    while (start < end) {
+      final count = min(end - start, numChildrenInGrouping);
+      variable.addChild(
+        Variable.grouping(variable.ref, offset: start, count: count),
+      );
+      start += count;
+    }
+  } else if (instanceRef != null && serviceManager.service != null) {
     try {
-      final dynamic result = await serviceManager.service
-          .getObject(variable.ref.isolateRef.id, instanceRef.id);
+      final dynamic result =
+          await _getObjectWithRetry(instanceRef.id, variable);
       if (result is Instance) {
         if (result.associations != null) {
           variable.addAllChildren(
@@ -389,7 +425,7 @@ Future<void> buildVariablesTree(
   }
   if (diagnostic != null && includeDiagnosticChildren) {
     // Always add children last after properties to avoid confusion.
-    final ObjectGroup service = diagnostic.inspectorService;
+    final ObjectGroupBase service = diagnostic.inspectorService;
     final diagnosticChildren = await diagnostic.children;
     if (diagnosticChildren?.isNotEmpty ?? false) {
       final childrenNode = Variable.text(
@@ -411,7 +447,7 @@ Future<void> buildVariablesTree(
   final inspectorService = serviceManager.inspectorService;
   if (inspectorService != null) {
     final tasks = <Future>[];
-    ObjectGroup group;
+    ObjectGroupBase group;
     Future<void> _maybeUpdateRef(Variable child) async {
       if (child.ref == null) return;
       if (child.ref.diagnostic == null) {
@@ -422,8 +458,8 @@ Future<void> buildVariablesTree(
         // TODO(jacobr): cache the full class hierarchy so we can cheaply check
         // instanceRef is DiagnosticsNode without having to do an eval.
         if (instanceRef != null &&
-            (instanceRef.classRef.name == 'DiagnosticableTreeNode' ||
-                instanceRef.classRef.name == 'DiagnosticsProperty')) {
+            (instanceRef.classRef?.name == 'DiagnosticableTreeNode' ||
+                instanceRef.classRef?.name == 'DiagnosticsProperty')) {
           // The user is expecting to see the object the DiagnosticsNode is
           // describing not the DiagnosticsNode itself.
           try {
@@ -458,9 +494,28 @@ Future<void> buildVariablesTree(
   variable.treeInitializeComplete = true;
 }
 
+// TODO(elliette): Remove once the fix for dart-lang/webdev/issues/1439
+// is landed. This works around a bug in DWDS where an error is thrown if
+// `getObject` is called with offset/count for an object that has no length.
+Future<Obj> _getObjectWithRetry(
+  String objectId,
+  Variable variable,
+) async {
+  try {
+    final dynamic result = await serviceManager.service.getObject(
+        variable.ref.isolateRef.id, objectId,
+        offset: variable.offset, count: variable.childCount);
+    return result;
+  } catch (e) {
+    final dynamic result = await serviceManager.service
+        .getObject(variable.ref.isolateRef.id, objectId);
+    return result;
+  }
+}
+
 Future<Variable> _buildVariable(
   RemoteDiagnosticsNode diagnostic,
-  ObjectGroup inspectorService,
+  ObjectGroupBase inspectorService,
   IsolateRef isolateRef,
 ) async {
   final instanceRef =
@@ -474,7 +529,7 @@ Future<Variable> _buildVariable(
 }
 
 Future<List<Variable>> _createVariablesForDiagnostics(
-  ObjectGroup inspectorService,
+  ObjectGroupBase inspectorService,
   List<RemoteDiagnosticsNode> diagnostics,
   IsolateRef isolateRef,
 ) async {
@@ -511,8 +566,9 @@ List<Variable> _createVariablesForAssociations(
       value: association.value,
       isolateRef: isolateRef,
     );
+    final entryNum = instance.offset == null ? i : i + instance.offset;
     variables.add(
-      Variable.text('[Entry $i]')
+      Variable.text('[Entry $entryNum]')
         ..addChild(key)
         ..addChild(value),
     );
@@ -587,9 +643,10 @@ List<Variable> _createVariablesForBytes(
   }
 
   for (int i = 0; i < result.length; i++) {
+    final name = instance.offset == null ? i : i + instance.offset;
     variables.add(
       Variable.fromValue(
-        name: '[$i]',
+        name: '[$name]',
         value: result[i],
         isolateRef: isolateRef,
       ),
@@ -604,9 +661,10 @@ List<Variable> _createVariablesForElements(
 ) {
   final variables = <Variable>[];
   for (int i = 0; i < instance.elements.length; i++) {
+    final name = instance.offset == null ? i : i + instance.offset;
     variables.add(
       Variable.fromValue(
-        name: '[$i]',
+        name: '[$name]',
         value: instance.elements[i],
         isolateRef: isolateRef,
       ),
@@ -639,8 +697,13 @@ List<Variable> _createVariablesForFields(
 // InstanceRef objects have become sentinels.
 // TODO(jacobr): consider a new class name. This class is more just the data
 // model for a tree of Dart objects with properties rather than a "Variable".
+// TODO(elliette): Refactor to make name, ref, text named (and potentially
+// required?) parameters. Give ref a type.
 class Variable extends TreeNode<Variable> {
-  Variable._(this.name, ref, this.text) : _ref = ref {
+  Variable._(this.name, ref, this.text, {int offset, int childCount})
+      : _ref = ref,
+        _offset = offset,
+        _childCount = childCount {
     indentChildren = ref?.diagnostic?.style != DiagnosticsTreeStyle.flat;
   }
 
@@ -685,18 +748,58 @@ class Variable extends TreeNode<Variable> {
     return Variable._(null, null, text);
   }
 
+  factory Variable.grouping(
+    GenericInstanceRef ref, {
+    @required int offset,
+    @required int count,
+  }) {
+    return Variable._(
+      null,
+      ref,
+      '[$offset - ${offset + count - 1}]',
+      offset: offset,
+      childCount: count,
+    );
+  }
+
+  static const MAX_CHILDREN_IN_GROUPING = 100;
+
   final String text;
   final String name;
   GenericInstanceRef get ref => _ref;
   GenericInstanceRef _ref;
+
+  /// The point to fetch the variable from (in the case of large variables that
+  /// we fetch only parts of at a time).
+  int get offset => _offset ?? 0;
+
+  int _offset;
+
+  int get childCount {
+    if (_childCount != null) return _childCount;
+
+    final value = this.value;
+    if (value is InstanceRef) {
+      if (value.kind != null &&
+          (value.kind.endsWith('List') ||
+              value.kind == InstanceKind.kList ||
+              value.kind == InstanceKind.kMap)) {
+        return value.length ?? 0;
+      }
+    }
+
+    return 0;
+  }
+
+  int _childCount;
 
   bool treeInitializeStarted = false;
   bool treeInitializeComplete = false;
 
   @override
   bool get isExpandable {
-    if (treeInitializeComplete || children.isNotEmpty) {
-      return children.isNotEmpty;
+    if (treeInitializeComplete || children.isNotEmpty || childCount > 0) {
+      return children.isNotEmpty || childCount > 0;
     }
     final diagnostic = ref.diagnostic;
     if (diagnostic != null &&
@@ -781,16 +884,18 @@ class Variable extends TreeNode<Variable> {
     }
     // Group name doesn't matter in this case.
     final group = inspectorService.createObjectGroup('inspect-variables');
-
-    try {
-      return await group.setSelection(ref);
-    } catch (e) {
-      // This is somewhat unexpected. The inspectorRef must have been disposed.
-      return false;
-    } finally {
-      // Not really needed as we shouldn't actually be allocating anything.
-      unawaited(group.dispose());
+    if (group is ObjectGroup) {
+      try {
+        return await group.setSelection(ref);
+      } catch (e) {
+        // This is somewhat unexpected. The inspectorRef must have been disposed.
+        return false;
+      } finally {
+        // Not really needed as we shouldn't actually be allocating anything.
+        unawaited(group.dispose());
+      }
     }
+    return false;
   }
 
   Future<bool> get isInspectable async {

@@ -9,7 +9,7 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../charts/flame_chart.dart';
 import '../../profiler/cpu_profile_model.dart';
@@ -681,7 +681,8 @@ abstract class LegacyTimelineEvent extends TreeNode<LegacyTimelineEvent>
   }
 
   @override
-  void addChild(LegacyTimelineEvent child) {
+  void addChild(LegacyTimelineEvent child, {int index}) {
+    assert(index == null);
     void _putChildInTree(LegacyTimelineEvent root) {
       // [root] is a leaf. Add child here.
       if (root.children.isEmpty) {
@@ -970,7 +971,8 @@ class LegacyAsyncTimelineEvent extends LegacyTimelineEvent {
   }
 
   @override
-  void addChild(LegacyTimelineEvent child) {
+  void addChild(LegacyTimelineEvent child, {int index}) {
+    assert(index == null);
     final LegacyAsyncTimelineEvent _child = child;
     // Short circuit if we are using an explicit parentId.
     if (_child.hasExplicitParent &&

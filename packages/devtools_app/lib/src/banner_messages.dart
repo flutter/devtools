@@ -3,12 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'common_widgets.dart';
-import 'config_specific/launch_url/launch_url.dart';
 import 'globals.dart';
 import 'screen.dart';
 import 'theme.dart';
@@ -243,17 +241,13 @@ Relaunch your application with the '--profile' argument, or ''',
             fontSize: defaultFontSize,
           ),
         ),
-        TextSpan(
-          text: 'relaunch in profile mode from VS Code or IntelliJ',
-          style: TextStyle(
-            decoration: TextDecoration.underline,
-            color: _BannerError.linkColor,
-            fontSize: defaultFontSize,
+        LinkTextSpan(
+          link: const Link(
+            display: 'relaunch in profile mode from VS Code or IntelliJ',
+            url: _runInProfileModeDocsUrl,
           ),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () async {
-              await launchUrl(_runInProfileModeDocsUrl, context);
-            },
+          context: context,
+          style: Theme.of(context).errorMessageLinkStyle,
         ),
         TextSpan(
           text: '.',
@@ -320,17 +314,13 @@ To pre-compile shaders, see the instructions at ''',
             fontSize: defaultFontSize,
           ),
         ),
-        TextSpan(
-          text: preCompileShadersDocsUrl,
-          style: TextStyle(
-            decoration: TextDecoration.underline,
-            color: _BannerError.linkColor,
-            fontSize: defaultFontSize,
+        LinkTextSpan(
+          link: const Link(
+            display: preCompileShadersDocsUrl,
+            url: preCompileShadersDocsUrl,
           ),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () async {
-              await launchUrl(preCompileShadersDocsUrl, context);
-            },
+          context: context,
+          style: Theme.of(context).errorMessageLinkStyle,
         ),
         TextSpan(
           text: '.',
@@ -365,17 +355,13 @@ You are opting in to a high CPU sampling rate. This may affect the performance o
             fontSize: defaultFontSize,
           ),
         ),
-        TextSpan(
-          text: 'documentation',
-          style: TextStyle(
-            decoration: TextDecoration.underline,
-            color: _BannerWarning.linkColor,
-            fontSize: defaultFontSize,
+        LinkTextSpan(
+          link: const Link(
+            display: 'documentation',
+            url: _profileGranularityDocsUrl,
           ),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () async {
-              await launchUrl(_profileGranularityDocsUrl, context);
-            },
+          context: context,
+          style: Theme.of(context).warningMessageLinkStyle,
         ),
         TextSpan(
           text: ' to understand the trade-offs associated with this setting.',
@@ -408,17 +394,13 @@ For the most accurate absolute memory stats, relaunch your application with the 
             fontSize: defaultFontSize,
           ),
         ),
-        TextSpan(
-          text: 'relaunch in profile mode from VS Code or IntelliJ',
-          style: TextStyle(
-            decoration: TextDecoration.underline,
-            color: _BannerWarning.linkColor,
-            fontSize: defaultFontSize,
+        LinkTextSpan(
+          link: const Link(
+            display: 'relaunch in profile mode from VS Code or IntelliJ',
+            url: _runInProfileModeDocsUrl,
           ),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () async {
-              await launchUrl(_runInProfileModeDocsUrl, context);
-            },
+          context: context,
+          style: Theme.of(context).warningMessageLinkStyle,
         ),
         TextSpan(
           text: '.',
@@ -453,4 +435,18 @@ void maybePushDebugModeMemoryMessage(
     Provider.of<BannerMessagesController>(context)
         .addMessage(DebugModeMemoryMessage(screenId).build(context));
   }
+}
+
+extension BannerMessageThemeExtension on ThemeData {
+  TextStyle get warningMessageLinkStyle => TextStyle(
+        decoration: TextDecoration.underline,
+        color: _BannerWarning.linkColor,
+        fontSize: defaultFontSize,
+      );
+
+  TextStyle get errorMessageLinkStyle => TextStyle(
+        decoration: TextDecoration.underline,
+        color: _BannerError.linkColor,
+        fontSize: defaultFontSize,
+      );
 }

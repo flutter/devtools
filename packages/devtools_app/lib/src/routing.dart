@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'globals.dart';
+import 'utils.dart';
 
 /// The page ID (used in routing) for the standalone app-size page.
 ///
@@ -31,10 +32,27 @@ class DevToolsRouteConfiguration {
 /// in the address bar/state objects).
 class DevToolsRouteInformationParser
     extends RouteInformationParser<DevToolsRouteConfiguration> {
+  DevToolsRouteInformationParser();
+
+  @visibleForTesting
+  DevToolsRouteInformationParser.test(this._forceVmServiceUri);
+
+  /// The value for the 'uri' query parameter in a DevTools uri.
+  ///
+  /// This is to be used in a testing environment only and can be set via the
+  /// [DevToolsRouteInformationParser.test] constructor.
+  String _forceVmServiceUri;
+
   @override
   Future<DevToolsRouteConfiguration> parseRouteInformation(
       RouteInformation routeInformation) {
-    final uri = Uri.parse(routeInformation.location);
+    var uri = Uri.parse(routeInformation.location);
+
+    if (_forceVmServiceUri != null) {
+      final newQueryParams = Map<String, dynamic>.from(uri.queryParameters);
+      newQueryParams['uri'] = _forceVmServiceUri;
+      uri = uri.copyWith(queryParameters: newQueryParams);
+    }
 
     // If the uri has been modified and we do not have a vm service uri as a
     // query parameter, ensure we manually disconnect from any previously

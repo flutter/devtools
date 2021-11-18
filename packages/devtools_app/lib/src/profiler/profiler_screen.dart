@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
@@ -17,7 +16,6 @@ import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
 import '../common_widgets.dart';
 import '../config_specific/import_export/import_export.dart';
-import '../config_specific/launch_url/launch_url.dart';
 import '../globals.dart';
 import '../listenable.dart';
 import '../notifications.dart';
@@ -200,14 +198,12 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
                                 text: '''
 \n\nIf you are attempting to profile on a real iOS device, you may be hitting a known issue. Try using this ''',
                               ),
-                              TextSpan(
-                                text: 'workaround',
-                                style: Theme.of(context).linkTextStyle,
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () async {
-                                    await launchUrl(
-                                        iosProfilerWorkaround, context);
-                                  },
+                              LinkTextSpan(
+                                link: const Link(
+                                  display: 'workaround',
+                                  url: iosProfilerWorkaround,
+                                ),
+                                context: context,
                               ),
                               const TextSpan(text: '.'),
                             ]

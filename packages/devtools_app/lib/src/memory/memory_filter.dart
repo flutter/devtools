@@ -352,7 +352,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                         notifier: controller.filterPrivateClasses,
                       ),
                       const DevToolsTooltip(
-                        tooltip: 'Hide class names beginning with '
+                        message: 'Hide class names beginning with '
                             'an underscore e.g., _className',
                         child: Text('Hide Private Classes'),
                       ),

@@ -19,6 +19,7 @@ import '../ui/search.dart';
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
 import 'debugger_model.dart';
+import 'program_explorer_controller.dart';
 import 'syntax_highlighter.dart';
 
 // TODO(devoncarew): Add some delayed resume value notifiers (to be used to
@@ -33,15 +34,44 @@ class DebuggerController extends DisposableController
   // `initialSwitchToIsolate` can be set to false for tests to skip the logic
   // in `switchToIsolate`.
   DebuggerController({this.initialSwitchToIsolate = true}) {
+    _programExplorerController = ProgramExplorerController(
+      debuggerController: this,
+    );
     autoDispose(serviceManager.onConnectionAvailable
         .listen(_handleConnectionAvailable));
+    if (_service != null) {
+      initialize();
+    }
     _scriptHistoryListener = () {
       _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
     };
     scriptsHistory.current.addListener(_scriptHistoryListener);
+  }
 
-    if (_service != null) {
-      initialize();
+  bool _firstDebuggerScreenLoaded = false;
+
+  /// Callback to be called when the debugger screen is first loaded.
+  ///
+  /// We delay calling this method until the debugger screen is first loaded
+  /// for performance reasons. None of the code here needs to be called when
+  /// DevTools first connects to an app, and doing so inhibits DevTools from
+  /// connecting to low-end devices.
+  void onFirstDebuggerScreenLoad() {
+    if (!_firstDebuggerScreenLoaded) {
+      _maybeSetUpProgramExplorer();
+      addAutoDisposeListener(currentScriptRef, _maybeSetUpProgramExplorer);
+      _firstDebuggerScreenLoaded = true;
+    }
+  }
+
+  void _maybeSetUpProgramExplorer() {
+    if (!programExplorerController.initialized.value) {
+      programExplorerController
+        ..initListeners()
+        ..initialize();
+    }
+    if (currentScriptRef.value != null) {
+      programExplorerController.selectScriptNode(currentScriptRef.value);
     }
   }
 
@@ -70,6 +100,7 @@ class DebuggerController extends DisposableController
     _selectedBreakpoint.value = null;
     _librariesVisible.value = false;
     isolateRef = null;
+    _firstDebuggerScreenLoaded = false;
   }
 
   VmServiceWrapper _lastService;
@@ -119,6 +150,10 @@ class DebuggerController extends DisposableController
   Map<LibraryRef, Future<Set<String>>>
       libraryMemberAndImportsAutocompleteCache = {};
 
+  ProgramExplorerController get programExplorerController =>
+      _programExplorerController;
+  ProgramExplorerController _programExplorerController;
+
   final ScriptCache _scriptCache = ScriptCache();
 
   final ScriptsHistory scriptsHistory = ScriptsHistory();
@@ -158,6 +193,8 @@ class DebuggerController extends DisposableController
   ValueListenable<bool> get showFileOpener => _showFileOpener;
 
   final _showFileOpener = ValueNotifier<bool>(false);
+
+  final _clazzCache = <ClassRef, Class>{};
 
   /// Jump to the given ScriptRef and optional SourcePosition.
   void showScriptLocation(ScriptLocation scriptLocation) {
@@ -249,7 +286,7 @@ class DebuggerController extends DisposableController
   /// May return null.
   Future<Class> classFor(ClassRef classRef) async {
     try {
-      return await getObject(classRef);
+      return _clazzCache[classRef] ??= await getObject(classRef);
     } catch (_) {}
     return null;
   }
@@ -303,7 +340,7 @@ class DebuggerController extends DisposableController
 
   final _librariesVisible = ValueNotifier(false);
 
-  ValueListenable<bool> get librariesVisible => _librariesVisible;
+  ValueListenable<bool> get fileExplorerVisible => _librariesVisible;
 
   /// Make the 'Libraries' view on the right-hand side of the screen visible or
   /// hidden.
@@ -607,7 +644,6 @@ class DebuggerController extends DisposableController
 
   void _handleIsolateEvent(Event event) {
     if (event.isolate.id != isolateRef?.id) return;
-
     switch (event.kind) {
       case EventKind.kIsolateReload:
         _updateAfterIsolateReload(event);
@@ -738,6 +774,9 @@ class DebuggerController extends DisposableController
     // Collecting frames for Dart web applications can be slow. At the potential
     // cost of a flicker in the stack view, display only the top frame
     // initially.
+    // TODO(elliette): Find a better solution for this. Currently, this means
+    // we fetch all variable objects twice (once in _getFullStack and once in
+    // in_createStackFrameWithLocation).
     if (await serviceManager.connectedApp.isDartWebApp) {
       _populateFrameInfo(
         [
@@ -815,6 +854,7 @@ class DebuggerController extends DisposableController
   }
 
   void _clearAutocompleteCaches() {
+    _clazzCache.clear();
     libraryMemberAutocompleteCache.clear();
     libraryMemberAndImportsAutocompleteCache.clear();
   }
@@ -862,25 +902,12 @@ class DebuggerController extends DisposableController
     _populateScriptAndShowLocation(mainScriptRef);
   }
 
-  SourcePosition calculatePosition(Script script, int tokenPos) {
-    final List<List<int>> table = script.tokenPosTable;
-    if (table == null) {
-      return null;
-    }
-
-    return SourcePosition(
-      line: script.getLineNumberFromTokenPos(tokenPos),
-      column: script.getColumnNumberFromTokenPos(tokenPos),
-      tokenPos: tokenPos,
-    );
-  }
-
   Future<BreakpointAndSourcePosition> _createBreakpointWithLocation(
       Breakpoint breakpoint) async {
     if (breakpoint.resolved) {
       final bp = BreakpointAndSourcePosition.create(breakpoint);
       return getScript(bp.scriptRef).then((Script script) {
-        final pos = calculatePosition(script, bp.tokenPos);
+        final pos = SourcePosition.calculatePosition(script, bp.tokenPos);
         return BreakpointAndSourcePosition.create(breakpoint, pos);
       });
     } else {
@@ -897,7 +924,8 @@ class DebuggerController extends DisposableController
     }
 
     final script = await getScript(location.script);
-    final position = calculatePosition(script, location.tokenPos);
+    final position =
+        SourcePosition.calculatePosition(script, location.tokenPos);
     return StackFrameAndSourcePosition(frame, position: position);
   }
 
@@ -1002,7 +1030,7 @@ class DebuggerController extends DisposableController
     for (SourceReportRange range in report.ranges) {
       if (range.possibleBreakpoints != null) {
         for (int tokenPos in range.possibleBreakpoints) {
-          positions.add(calculatePosition(script, tokenPos));
+          positions.add(SourcePosition.calculatePosition(script, tokenPos));
         }
       }
     }

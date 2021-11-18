@@ -5,7 +5,6 @@ import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 
 import '../charts/flame_chart.dart';
 import '../profiler/cpu_profile_model.dart';
@@ -789,7 +788,8 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   }
 
   @override
-  void addChild(TimelineEvent child) {
+  void addChild(TimelineEvent child, {int index}) {
+    assert(index == null);
     void _putChildInTree(TimelineEvent root) {
       // [root] is a leaf. Add child here.
       if (root.children.isEmpty) {
@@ -1102,7 +1102,8 @@ class AsyncTimelineEvent extends TimelineEvent {
   }
 
   @override
-  void addChild(TimelineEvent child) {
+  void addChild(TimelineEvent child, {int index}) {
+    assert(index == null);
     final AsyncTimelineEvent _child = child;
     // Short circuit if we are using an explicit parentId.
     if (_child.hasExplicitParent &&

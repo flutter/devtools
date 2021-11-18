@@ -137,6 +137,49 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         frameworkController.onShowPageId.listen(_showPageById);
 
     _initTitle();
+    _maybeShowPubWarning();
+  }
+
+  bool _pubWarningShown = false;
+
+  // TODO(kenz): remove the pub warning code after devtools version 2.8.0 ships
+  void _maybeShowPubWarning() {
+    if (!_pubWarningShown) {
+      serviceManager.onConnectionAvailable?.listen((event) {
+        if (shouldShowPubWarning()) {
+          final colorScheme = Theme.of(context).colorScheme;
+          OverlayEntry _entry;
+          Overlay.of(context).insert(
+            _entry = OverlayEntry(
+              maintainState: true,
+              builder: (context) {
+                return Material(
+                  color: colorScheme.overlayShadowColor,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(defaultSpacing),
+                      color: colorScheme.overlayBackgroundColor,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const PubWarningText(),
+                          const SizedBox(height: defaultSpacing),
+                          ElevatedButton(
+                            child: const Text('Got it'),
+                            onPressed: () => _entry.remove(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+          _pubWarningShown = true;
+        }
+      });
+    }
   }
 
   @override
@@ -317,6 +360,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           children: tabBodies,
         ),
         if (serviceManager.connectedAppInitialized &&
+            !serviceManager.connectedApp.isProfileBuildNow &&
             !offlineController.offlineMode.value &&
             _currentScreen.showFloatingDebuggerControls)
           Container(
@@ -326,6 +370,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       ],
     );
     final theme = Theme.of(context);
+
     return Provider<BannerMessagesController>(
       create: (_) => BannerMessagesController(),
       child: Provider<ImportController>.value(
@@ -340,27 +385,33 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               // Using theme.primaryColor matches the default behavior of the
               // title used by [WidgetsApp].
               color: theme.primaryColor,
-              child: Scaffold(
-                appBar: widget.embed ? null : _buildAppBar(scaffoldTitle),
-                body: (serviceManager.connectedAppInitialized &&
-                        !offlineController.offlineMode.value &&
-                        _currentScreen.showConsole(widget.embed))
-                    ? Split(
-                        axis: Axis.vertical,
-                        children: [
-                          content,
-                          Padding(
-                            padding: DevToolsScaffold.horizontalPadding,
-                            child: const DebuggerConsole(),
-                          ),
-                        ],
-                        splitters: [
-                          DebuggerConsole.buildHeader(),
-                        ],
-                        initialFractions: const [0.8, 0.2],
-                      )
-                    : content,
-                bottomNavigationBar: widget.embed ? null : _buildStatusLine(),
+              child: KeyboardShortcuts(
+                keyboardShortcuts: _currentScreen.buildKeyboardShortcuts(
+                  context,
+                ),
+                child: Scaffold(
+                  appBar: widget.embed ? null : _buildAppBar(scaffoldTitle),
+                  body: (serviceManager.connectedAppInitialized &&
+                          !serviceManager.connectedApp.isProfileBuildNow &&
+                          !offlineController.offlineMode.value &&
+                          _currentScreen.showConsole(widget.embed))
+                      ? Split(
+                          axis: Axis.vertical,
+                          children: [
+                            content,
+                            Padding(
+                              padding: DevToolsScaffold.horizontalPadding,
+                              child: const DebuggerConsole(),
+                            ),
+                          ],
+                          splitters: [
+                            DebuggerConsole.buildHeader(),
+                          ],
+                          initialFractions: const [0.8, 0.2],
+                        )
+                      : content,
+                  bottomNavigationBar: widget.embed ? null : _buildStatusLine(),
+                ),
               ),
             ),
           );
@@ -492,6 +543,31 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           BulletSpacer.width;
     }
     return wideWidth;
+  }
+}
+
+class KeyboardShortcuts extends StatelessWidget {
+  const KeyboardShortcuts({
+    @required this.keyboardShortcuts,
+    @required this.child,
+  })  : assert(keyboardShortcuts != null),
+        assert(child != null);
+
+  final ShortcutsConfiguration keyboardShortcuts;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (keyboardShortcuts.isEmpty) {
+      return child;
+    }
+    return Shortcuts(
+      shortcuts: keyboardShortcuts.shortcuts,
+      child: Actions(
+        actions: keyboardShortcuts.actions,
+        child: child,
+      ),
+    );
   }
 }
 

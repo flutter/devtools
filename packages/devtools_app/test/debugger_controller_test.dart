@@ -29,8 +29,18 @@ void main() {
       when(service.onStderrEvent).thenAnswer((_) {
         return const Stream.empty();
       });
+      when(service.onStdoutEventWithHistory).thenAnswer((_) {
+        return const Stream.empty();
+      });
+      when(service.onStderrEventWithHistory).thenAnswer((_) {
+        return const Stream.empty();
+      });
+      when(service.onExtensionEventWithHistory).thenAnswer((_) {
+        return const Stream.empty();
+      });
       final manager = FakeServiceManager(service: service);
       setGlobal(ServiceConnectionManager, manager);
+      manager.consoleService.ensureServiceInitialized();
     });
 
     test('ignores trailing new lines', () {
@@ -97,7 +107,7 @@ void main() {
       expect(history.current.value, ref1);
     });
 
-    test('moveBack', () {
+    test('moveForward', () {
       history.pushEntry(ref1);
       history.pushEntry(ref2);
 
@@ -257,7 +267,9 @@ void main() {
     DebuggerController debuggerController;
 
     setUp(() {
-      debuggerController = DebuggerController(initialSwitchToIsolate: false);
+      debuggerController = TestDebuggerController(
+        initialSwitchToIsolate: false,
+      );
       debuggerController.parsedScript.value = ParsedScript(
         script: testScript,
         highlighter: null,

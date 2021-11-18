@@ -26,7 +26,7 @@ import 'controls.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'key_sets.dart';
-import 'scripts.dart';
+import 'program_explorer.dart';
 import 'variables.dart';
 
 class DebuggerScreen extends Screen {
@@ -43,6 +43,24 @@ class DebuggerScreen extends Screen {
 
   @override
   bool showConsole(bool embed) => true;
+
+  @override
+  ShortcutsConfiguration buildKeyboardShortcuts(BuildContext context) {
+    final controller = Provider.of<DebuggerController>(context);
+    final shortcuts = <LogicalKeySet, Intent>{
+      goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
+      searchInFileKeySet: SearchInFileIntent(controller),
+      escapeKeySet: EscapeIntent(controller),
+      openFileKeySet: OpenFileIntent(controller),
+    };
+    final actions = <Type, Action<Intent>>{
+      GoToLineNumberIntent: GoToLineNumberAction(),
+      SearchInFileIntent: SearchInFileAction(),
+      EscapeIntent: EscapeAction(),
+      OpenFileIntent: OpenFileAction(),
+    };
+    return ShortcutsConfiguration(shortcuts: shortcuts, actions: actions);
+  }
 
   @override
   String get docPageId => screenId;
@@ -98,6 +116,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
     controller = newController;
+    controller.onFirstDebuggerScreenLoad();
   }
 
   void _onLocationSelected(ScriptLocation location) {
@@ -137,7 +156,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     );
 
     final codeArea = ValueListenableBuilder(
-      valueListenable: controller.librariesVisible,
+      valueListenable: controller.fileExplorerVisible,
       builder: (context, visible, _) {
         if (visible) {
           // TODO(devoncarew): Animate this opening and closing.
@@ -146,16 +165,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             initialFractions: const [0.70, 0.30],
             children: [
               codeView,
-              ValueListenableBuilder(
-                valueListenable: controller.sortedScripts,
-                builder: (context, scripts, _) {
-                  return ScriptPicker(
-                    key: DebuggerScreenBody.scriptViewKey,
-                    controller: controller,
-                    scripts: scripts,
-                    onSelected: _onLocationSelected,
-                  );
-                },
+              ProgramExplorer(
+                debugController: controller,
+                onSelected: _onLocationSelected,
               ),
             ],
           );
@@ -165,37 +177,21 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       },
     );
 
-    return Shortcuts(
-      shortcuts: <LogicalKeySet, Intent>{
-        goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
-        searchInFileKeySet: SearchInFileIntent(controller),
-        escapeKeySet: EscapeIntent(controller),
-        openFileKeySet: OpenFileIntent(controller),
-      },
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          GoToLineNumberIntent: GoToLineNumberAction(),
-          SearchInFileIntent: SearchInFileAction(),
-          EscapeIntent: EscapeAction(),
-          OpenFileIntent: OpenFileAction(),
-        },
-        child: Split(
-          axis: Axis.horizontal,
-          initialFractions: const [0.25, 0.75],
+    return Split(
+      axis: Axis.horizontal,
+      initialFractions: const [0.25, 0.75],
+      children: [
+        OutlineDecoration(child: debuggerPanes()),
+        Column(
           children: [
-            OutlineDecoration(child: debuggerPanes()),
-            Column(
-              children: [
-                const DebuggingControls(),
-                const SizedBox(height: denseRowSpacing),
-                Expanded(
-                  child: codeArea,
-                ),
-              ],
+            const DebuggingControls(),
+            const SizedBox(height: denseRowSpacing),
+            Expanded(
+              child: codeArea,
             ),
           ],
         ),
-      ),
+      ],
     );
   }
 
@@ -257,7 +253,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               onPressed:
                   breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
             ),
-            tooltip: 'Remove all breakpoints',
+            message: 'Remove all breakpoints',
           ),
         ]);
       },
@@ -393,7 +389,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     final fileName = ' at ' + frame.location.script.uri.split('/').last;
     final script = await widget.controller.getScript(frame.location.script);
     final pos =
-        widget.controller.calculatePosition(script, frame.location.tokenPos);
+        SourcePosition.calculatePosition(script, frame.location.tokenPos);
 
     return 'paused$reason$fileName $pos';
   }
@@ -462,7 +458,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               ),
             ),
             DevToolsTooltip(
-              tooltip: 'Resume',
+              message: 'Resume',
               child: TextButton(
                 onPressed: controller.resume,
                 child: Icon(
@@ -473,7 +469,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               ),
             ),
             DevToolsTooltip(
-              tooltip: 'Step over',
+              message: 'Step over',
               child: TextButton(
                 onPressed: controller.stepOver,
                 child: Icon(
