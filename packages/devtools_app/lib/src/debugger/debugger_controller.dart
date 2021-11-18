@@ -547,8 +547,8 @@ class DebuggerController extends DisposableController
     }
   }
 
-  Future<void> setExceptionPauseMode(String mode) async {
-    await _service.setExceptionPauseMode(isolateRef.id, mode);
+  Future<void> setIsolatePauseMode(String mode) async {
+    await _service.setIsolatePauseMode(isolateRef.id, exceptionPauseMode: mode);
     _exceptionPauseMode.value = mode;
   }
 

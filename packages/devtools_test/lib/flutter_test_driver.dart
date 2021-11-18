@@ -362,8 +362,10 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       // to hit breakpoints, etc.
       await waitForPause();
       if (runConfig.pauseOnExceptions) {
-        await vmService.setExceptionPauseMode(
-            await getFlutterIsolateId(), ExceptionPauseMode.kUnhandled);
+        await vmService.setIsolatePauseMode(
+          await getFlutterIsolateId(),
+          exceptionPauseMode: ExceptionPauseMode.kUnhandled,
+        );
       }
       await resume(wait: false);
     }
