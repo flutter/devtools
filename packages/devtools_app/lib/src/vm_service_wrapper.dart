@@ -841,9 +841,9 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Success> setExceptionPauseMode(String isolateId, String mode) {
-    return trackFuture('setExceptionPauseMode',
-        _vmService.setExceptionPauseMode(isolateId, mode));
+  Future<Success> setIsolatePauseMode(String isolateId, String mode) {
+    return trackFuture(
+        'setIsolatePauseMode', _vmService.setIsolatePauseMode(isolateId, mode));
   }
 
   @override

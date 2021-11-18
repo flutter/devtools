@@ -538,7 +538,7 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> setExceptionPauseMode(String mode) async {
-    await _service.setExceptionPauseMode(isolateRef.id, mode);
+    await _service.setIsolatePauseMode(isolateRef.id, mode);
     _exceptionPauseMode.value = mode;
   }
 
@@ -774,6 +774,9 @@ class DebuggerController extends DisposableController
     // Collecting frames for Dart web applications can be slow. At the potential
     // cost of a flicker in the stack view, display only the top frame
     // initially.
+    // TODO(elliette): Find a better solution for this. Currently, this means
+    // we fetch all variable objects twice (once in _getFullStack and once in
+    // in_createStackFrameWithLocation).
     if (await serviceManager.connectedApp.isDartWebApp) {
       _populateFrameInfo(
         [
