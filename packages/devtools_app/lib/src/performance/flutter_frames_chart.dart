@@ -365,6 +365,8 @@ class FlutterFramesChartItem extends StatelessWidget {
               ),
               child: ShaderJankWarningIcon(),
             ),
+          // TODO(kenz): support frame analysis for raster thread jank when the
+          // data becomes more actionable.
           if (frameAnalysisSupported && uiJanky)
             const Positioned(
               left: (FlutterFramesChartItem.defaultFrameWidth +

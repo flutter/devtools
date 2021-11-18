@@ -68,6 +68,15 @@ final testFrame1 = FlutterFrame.parse({
   'vsyncOverhead': 1000,
 });
 
+final testFrame2 = FlutterFrame.parse({
+  'number': 2,
+  'startTime': 40000,
+  'elapsed': 20000,
+  'build': 16000,
+  'raster': 16000,
+  'vsyncOverhead': 1000,
+});
+
 final jankyFrame = FlutterFrame.parse({
   'number': 2,
   'startTime': 10000,
@@ -423,7 +432,7 @@ final endVsyncTrace = testTraceEventWrapper({
   'cat': 'Embedder',
   'tid': testUiThreadId,
   'pid': 94955,
-  'ts': 193938742696,
+  'ts': 193938752696,
   'ph': 'E',
   'args': {}
 });

@@ -60,6 +60,7 @@ void main() {
       final raster =
           tester.widget(find.byKey(const Key('frame 2 - raster'))) as Container;
       expect(raster.color, equals(rasterJankColor));
+      expect(find.byType(FrameAnalysisIcon), findsOneWidget);
     });
 
     testWidgets('builds with janky frame ui only', (WidgetTester tester) async {
@@ -72,6 +73,7 @@ void main() {
       final raster =
           tester.widget(find.byKey(const Key('frame 3 - raster'))) as Container;
       expect(raster.color, equals(mainRasterColor));
+      expect(find.byType(FrameAnalysisIcon), findsOneWidget);
     });
 
     testWidgets('builds with janky frame raster only',
@@ -85,6 +87,7 @@ void main() {
       final raster =
           tester.widget(find.byKey(const Key('frame 4 - raster'))) as Container;
       expect(raster.color, equals(rasterJankColor));
+      expect(find.byType(FrameAnalysisIcon), findsNothing);
     });
 
     testWidgets('builds with janky frame with shader jank',

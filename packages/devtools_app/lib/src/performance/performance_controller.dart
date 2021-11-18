@@ -114,6 +114,8 @@ class PerformanceController extends DisposableController
       final indexOfTab = _analysisTabs.value.indexOf(tabData);
       if (indexOfTab != 0) {
         _selectedAnalysisTab.value = _analysisTabs.value[indexOfTab - 1];
+      } else if (_analysisTabs.value.length > 1) {
+        _selectedAnalysisTab.value = _analysisTabs.value[1];
       }
     }
     _analysisTabs.remove(tabData);
@@ -847,6 +849,8 @@ class PerformanceController extends DisposableController
     _selectedTimelineEventNotifier.value = null;
     _selectedFrameNotifier.value = null;
     _processing.value = false;
+    _analysisTabs.clear();
+    _selectedAnalysisTab.value = null;
     serviceManager.errorBadgeManager.clearErrors(PerformanceScreen.id);
   }
 
