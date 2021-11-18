@@ -47,6 +47,7 @@ void main() {
       kind: InstanceKind.kMap,
       id: '123',
       classRef: null,
+      length: 2,
       associations: [
         MapAssociation(
           key: InstanceRef(
@@ -83,7 +84,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 2))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -111,6 +113,7 @@ void main() {
       kind: InstanceKind.kMap,
       id: '123',
       classRef: null,
+      length: 2,
       associations: [
         MapAssociation(
           key: InstanceRef(
@@ -141,7 +144,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 2))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -168,6 +172,7 @@ void main() {
       kind: InstanceKind.kMap,
       id: '123',
       classRef: null,
+      length: 2,
       associations: [
         MapAssociation(
           key: InstanceRef(
@@ -197,7 +202,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 2))
+        .thenAnswer((_) async {
       return instance;
     });
 
