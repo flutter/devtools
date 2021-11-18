@@ -4,6 +4,7 @@
 
 library inspector_tree;
 
+import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
@@ -17,9 +18,12 @@ import '../collapsible_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../debugger/debugger_controller.dart';
+import '../debugger/debugger_model.dart';
 import '../error_badge_manager.dart';
+import '../globals.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
+import '../ui/search.dart';
 import '../ui/utils.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
@@ -96,11 +100,14 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
   bool shouldShow() => widget.node.shouldShow;
 }
 
-class InspectorTreeController extends Object {
+class InspectorTreeController extends Object
+    with SearchControllerMixin<InspectorTreeRow> {
   /// Clients the controller notifies to trigger changes to the UI.
   final Set<InspectorControllerClient> _clients = {};
 
   InspectorTreeNode createNode() => InspectorTreeNode();
+
+  SearchTargetType _searchTarget = SearchTargetType.widget;
 
   void addClient(InspectorControllerClient value) {
     final firstClient = _clients.isEmpty;
@@ -172,6 +179,11 @@ class InspectorTreeController extends Object {
   double lastContentWidth;
 
   final List<InspectorTreeRow> cachedRows = [];
+
+  void setSearchTarget(SearchTargetType searchTarget) {
+    _searchTarget = searchTarget;
+    matchesForSearch(search);
+  }
 
   // TODO: we should add a listener instead that clears the cache when the
   // root is marked as dirty.
@@ -295,6 +307,14 @@ class InspectorTreeController extends Object {
   void expandPath(InspectorTreeNode node) {
     setState(() {
       _expandPath(node);
+    });
+  }
+
+  void setSearchMatch(InspectorTreeNode node, bool hasSearchMatch) {
+    if (node == null) return;
+    setState(() {
+      _expandPath(node);
+      node.hasSearchMatch = hasSearchMatch;
     });
   }
 
@@ -542,6 +562,224 @@ class InspectorTreeController extends Object {
       }
     }
   }
+
+  /* Search support */
+  @override
+  void previousMatch() {
+    super.previousMatch();
+    final currentSearchMatches = searchMatches.value;
+    for (int i = 0; i < currentSearchMatches.length; i++) {
+      final searchMatch = currentSearchMatches[i];
+
+      if (searchMatch.isSelected) {
+        final rowToSelect = i == 0
+            ? currentSearchMatches[currentSearchMatches.length - 1]
+            : currentSearchMatches[i - 1];
+
+        onSelectRow(rowToSelect);
+        break;
+      }
+    }
+  }
+
+  @override
+  void nextMatch() {
+    super.nextMatch();
+    final currentSearchMatches = searchMatches.value;
+    for (int i = 0; i < currentSearchMatches.length; i++) {
+      final searchMatch = currentSearchMatches[i];
+
+      if (searchMatch.isSelected) {
+        final rowToSelect = i == currentSearchMatches.length - 1
+            ? currentSearchMatches[0]
+            : currentSearchMatches[i + 1];
+
+        onSelectRow(rowToSelect);
+        break;
+      }
+    }
+  }
+
+  void dispose() {
+    if (_searchDebounce?.isActive ?? false) {
+      _searchDebounce.cancel();
+    }
+  }
+
+  Future _searchOperation;
+  Timer _searchDebounce;
+  bool _shouldAbortSearch = false;
+
+  @override
+  List<InspectorTreeRow> matchesForSearch(String search) {
+    updateMatches([]);
+    _shouldAbortSearch = true;
+    searchInProgress = true;
+
+    if (_searchDebounce?.isActive ?? false) {
+      _searchDebounce.cancel();
+    }
+    _searchDebounce =
+        Timer(Duration(milliseconds: search.isEmpty ? 0 : 300), () async {
+      // do something with query
+
+      // Abort any ongoing search operations and start a new one
+      _shouldAbortSearch = true;
+      if (_searchOperation != null) {
+        try {
+          await _searchOperation;
+        } catch (e) {
+          log(e, LogLevel.error);
+        }
+      }
+      _shouldAbortSearch = false;
+      searchInProgress = true;
+
+      // Start new search operation
+      _searchOperation = matchesForSearchAsyncOld(search, _searchTarget);
+
+      await _searchOperation;
+      searchInProgress = false;
+    });
+    return [];
+  }
+
+  Future<void> matchesForSearchAsyncOld(
+      String search, SearchTargetType searchTarget) async {
+    final matches = <InspectorTreeRow>[];
+
+    bool _firstSearchMatch = true;
+    void _updateSearchMatches() {
+      updateMatches(matches);
+
+      if (matches.isNotEmpty && _firstSearchMatch) {
+        _firstSearchMatch = false;
+        // Always select the first search match
+        onSelectRow(matches[0]);
+      }
+    }
+
+    int _statsSearchOps = 0;
+    int _statsWidgets = 0;
+
+    if (search == null ||
+        search.isEmpty ||
+        serviceManager.inspectorService == null ||
+        serviceManager.inspectorService.isDisposed) {
+      _updateSearchMatches();
+      debugPrint('Search completed, no search');
+      return;
+    }
+
+    debugPrint('Search started: ' + _searchTarget.toString());
+    final caseInsensitiveSearch = search.toLowerCase();
+
+    // Reset search matches
+    for (final row in cachedRows) {
+      _statsWidgets++;
+      setSearchMatch(row.node, false);
+    }
+    _updateSearchMatches();
+
+    for (final row in cachedRows) {
+      final diagnostic = row.node.diagnostic;
+      if (row.node == null || diagnostic == null) continue;
+
+      // Widget search begin
+      if (searchTarget == SearchTargetType.widget) {
+        final description = diagnostic.toStringShort();
+        final textPreview = diagnostic.json['textPreview'];
+
+        final searchValue = textPreview is String
+            ? description + ' ' + textPreview.replaceAll('\n', ' ')
+            : description;
+
+        _statsSearchOps++;
+        if (searchValue.toLowerCase().contains(caseInsensitiveSearch)) {
+          matches.add(row);
+          setSearchMatch(row.node, true);
+          _updateSearchMatches();
+
+          // Skip detailed search if we already have a match for this row
+          continue;
+        }
+      }
+      // Widget search end
+
+      // Details search begin
+      if (searchTarget == SearchTargetType.details) {
+        if (diagnostic.valueRef != null &&
+            diagnostic.inspectorService != null &&
+            !diagnostic.inspectorService.disposed &&
+            !diagnostic.isProperty) {
+          debugPrint('Detail search begin: ' + diagnostic.description);
+          DateTime date;
+
+          date = DateTime.now();
+          final objectGroup = serviceManager.inspectorService
+              .createObjectGroup('inspectorSearchDetails');
+          debugPrint('Took A ' +
+              date.difference(DateTime.now()).inMilliseconds.toString());
+          date = DateTime.now();
+          final variable = Variable.fromValue(
+            value:
+                await objectGroup.toObservatoryInstanceRef(diagnostic.valueRef),
+            isolateRef: serviceManager.inspectorService.isolateRef,
+            diagnostic: diagnostic,
+          );
+
+          debugPrint('Took B ' +
+              date.difference(DateTime.now()).inMilliseconds.toString());
+
+          date = DateTime.now();
+          await buildVariablesTree(variable);
+
+          debugPrint('Took C ' +
+              date.difference(DateTime.now()).inMilliseconds.toString());
+
+          date = DateTime.now();
+          for (final child in variable.children) {
+            if (child.name?.isNotEmpty == true && child.name != 'child') {
+              final variableDiagnostic = child.ref?.diagnostic;
+              if (variableDiagnostic != null) {
+                _statsSearchOps += 2;
+                if (child.name.toLowerCase().contains(caseInsensitiveSearch) ||
+                    variableDiagnostic.description
+                        .toLowerCase()
+                        .contains(caseInsensitiveSearch)) {
+                  matches.add(row);
+                  setSearchMatch(row.node, true);
+                  _updateSearchMatches();
+
+                  // Skip rest of the children if we already have a match for this row
+                  continue;
+                }
+              }
+            }
+          }
+          debugPrint('Took C ' +
+              date.difference(DateTime.now()).inMilliseconds.toString() +
+              'ms');
+          debugPrint('Detail search end: ' + diagnostic.description);
+
+          _updateSearchMatches();
+
+          if (_shouldAbortSearch) {
+            // Abort asynchronous search operation
+            debugPrint('Abort search');
+            break;
+          }
+        }
+      }
+      // Details search end
+    }
+
+    debugPrint('Search completed with ' +
+        _statsWidgets.toString() +
+        ' widgets, ' +
+        _statsSearchOps.toString() +
+        ' ops');
+  }
 }
 
 abstract class InspectorControllerClient {
@@ -578,7 +816,6 @@ class _InspectorTreeState extends State<InspectorTree>
         AutoDisposeMixin
     implements InspectorControllerClient {
   InspectorTreeController get controller => widget.controller;
-
   bool get isSummaryTree => widget.isSummaryTree;
 
   ScrollController _scrollControllerY;
@@ -1007,48 +1244,59 @@ class InspectorRowContent extends StatelessWidget {
 
     Widget rowWidget = Padding(
       padding: EdgeInsets.only(left: currentX),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          node.showExpandCollapse
-              ? InkWell(
-                  onTap: onToggle,
-                  child: RotationTransition(
-                    turns: expandArrowAnimation,
-                    child: Icon(
-                      Icons.expand_more,
-                      size: defaultIconSize,
+      child: ValueListenableBuilder<String>(
+        valueListenable: controller.searchNotifier,
+        builder: (context, searchValue, _) {
+          return Opacity(
+            opacity: searchValue.isEmpty || node.hasSearchMatch ? 1 : 0.2,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                node.showExpandCollapse
+                    ? InkWell(
+                        onTap: onToggle,
+                        child: RotationTransition(
+                          turns: expandArrowAnimation,
+                          child: Icon(
+                            Icons.expand_more,
+                            size: defaultIconSize,
+                          ),
+                        ),
+                      )
+                    : const SizedBox(
+                        width: defaultSpacing, height: defaultSpacing),
+                Expanded(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: backgroundColor,
+                      border:
+                          hasError ? Border.all(color: devtoolsError) : null,
+                    ),
+                    child: InkWell(
+                      onTap: () {
+                        controller.onSelectRow(row);
+                        // TODO(gmoothart): It may be possible to capture the tap
+                        // and request focus directly from the InspectorTree. Then
+                        // we wouldn't need this.
+                        controller.requestFocus();
+                      },
+                      child: Container(
+                        height: rowHeight,
+                        child: DiagnosticsNodeDescription(
+                          node.diagnostic,
+                          isSelected: row.isSelected,
+                          hasSearchMatch: row.hasSearchMatch,
+                          errorText: error?.errorMessage,
+                          debuggerController: debuggerController,
+                        ),
+                      ),
                     ),
                   ),
-                )
-              : const SizedBox(width: defaultSpacing, height: defaultSpacing),
-          Expanded(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: backgroundColor,
-                border: hasError ? Border.all(color: devtoolsError) : null,
-              ),
-              child: InkWell(
-                onTap: () {
-                  controller.onSelectRow(row);
-                  // TODO(gmoothart): It may be possible to capture the tap
-                  // and request focus directly from the InspectorTree. Then
-                  // we wouldn't need this.
-                  controller.requestFocus();
-                },
-                child: Container(
-                  height: rowHeight,
-                  child: DiagnosticsNodeDescription(
-                    node.diagnostic,
-                    isSelected: row.isSelected,
-                    errorText: error?.errorMessage,
-                    debuggerController: debuggerController,
-                  ),
                 ),
-              ),
+              ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
 

@@ -113,6 +113,7 @@ class IconLabelButton extends StatelessWidget {
     this.elevatedButton = false,
     this.tooltip,
     this.tooltipPadding,
+    this.outlined = true,
   })  : assert((icon == null) != (imageIcon == null)),
         super(key: key);
 
@@ -134,6 +135,8 @@ class IconLabelButton extends StatelessWidget {
   final String tooltip;
 
   final EdgeInsetsGeometry tooltipPadding;
+
+  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
@@ -164,12 +167,17 @@ class IconLabelButton extends StatelessWidget {
         width: !includeText(context, minScreenWidthForTextBeforeScaling)
             ? buttonMinWidth
             : null,
-        child: OutlinedButton(
-          style: denseAwareOutlinedButtonStyle(
-              context, minScreenWidthForTextBeforeScaling),
-          onPressed: onPressed,
-          child: iconLabel,
-        ),
+        child: outlined
+            ? OutlinedButton(
+                style: denseAwareOutlinedButtonStyle(
+                    context, minScreenWidthForTextBeforeScaling),
+                onPressed: onPressed,
+                child: iconLabel,
+              )
+            : TextButton(
+                onPressed: onPressed,
+                child: iconLabel,
+              ),
       ),
     );
   }

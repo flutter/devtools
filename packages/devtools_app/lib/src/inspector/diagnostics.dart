@@ -35,6 +35,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   const DiagnosticsNodeDescription(
     this.diagnostic, {
     this.isSelected,
+    this.hasSearchMatch,
     this.errorText,
     this.multiline = false,
     this.style,
@@ -43,6 +44,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
   final RemoteDiagnosticsNode diagnostic;
   final bool isSelected;
+  final bool hasSearchMatch;
   final String errorText;
   final bool multiline;
   final TextStyle style;

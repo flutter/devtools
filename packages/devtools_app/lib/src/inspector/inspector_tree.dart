@@ -15,6 +15,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import '../ui/search.dart';
 import '../utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
@@ -98,6 +99,7 @@ class InspectorTreeNode {
   bool _shouldShow;
 
   bool selected = false;
+  bool hasSearchMatch = false;
 
   RemoteDiagnosticsNode _diagnostic;
   final List<InspectorTreeNode> _children;
@@ -266,8 +268,8 @@ class InspectorTreeNode {
 }
 
 /// A row in the tree with all information required to render it.
-class InspectorTreeRow {
-  const InspectorTreeRow({
+class InspectorTreeRow with DataSearchStateMixin {
+  InspectorTreeRow({
     @required this.node,
     @required this.index,
     @required this.ticks,
@@ -284,6 +286,7 @@ class InspectorTreeRow {
   final bool lineToParent;
 
   bool get isSelected => node.selected;
+  bool get hasSearchMatch => node.hasSearchMatch;
 }
 
 /// Callback issued every time a node is added to the tree.
@@ -308,4 +311,21 @@ class InspectorTreeConfig {
   final void Function(bool added) onClientActiveChange;
   final TreeEventCallback onExpand;
   final TreeEventCallback onHover;
+}
+
+enum SearchTargetType {
+  widget,
+  details,
+}
+
+extension SearchTargetTypeExtension on SearchTargetType {
+  String get name {
+    switch (this) {
+      case SearchTargetType.details:
+        return 'Details';
+      case SearchTargetType.widget:
+      default:
+        return 'Widget';
+    }
+  }
 }

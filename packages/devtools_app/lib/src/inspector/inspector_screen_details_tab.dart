@@ -57,7 +57,7 @@ class _InspectorDetailsTabControllerState
   Widget build(BuildContext context) {
     final tabs = <Tab>[
       if (widget.layoutExplorerSupported) _buildTab('Layout Explorer'),
-      _buildTab('Details Tree'),
+      _buildTab('Widget Details Tree'),
     ];
     final tabViews = <Widget>[
       if (widget.layoutExplorerSupported)
@@ -81,28 +81,29 @@ class _InspectorDetailsTabControllerState
           // collapse buttons.
           height: defaultButtonHeight +
               (isDense() ? denseModeDenseSpacing : denseSpacing),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: <Widget>[
-              Container(
-                color: focusColor,
-                child: TabBar(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Theme.of(context).focusColor),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                TabBar(
                   controller: _tabController,
                   labelColor: theme.textTheme.bodyText1.color,
                   tabs: tabs,
                   isScrollable: true,
                 ),
-              ),
-              Expanded(
-                child: Container(
-                  alignment: Alignment.centerRight,
-                  decoration: BoxDecoration(border: Border(bottom: borderSide)),
-                  child: hasActionButtons
-                      ? widget.actionButtons
-                      : const SizedBox(),
+                Expanded(
+                  child: Container(
+                    alignment: Alignment.centerRight,
+                    child: hasActionButtons
+                        ? widget.actionButtons
+                        : const SizedBox(),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         Expanded(
