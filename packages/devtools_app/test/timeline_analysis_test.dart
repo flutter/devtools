@@ -8,6 +8,7 @@ import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
+import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/performance/timeline_analysis.dart';
 import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
@@ -25,28 +26,145 @@ void main() {
   FakeServiceManager fakeServiceManager;
   PerformanceController controller;
 
-  group('TimelineFlameChartContent', () {
-    void _setUpServiceManagerWithTimeline(
-      Map<String, dynamic> timelineJson,
-    ) {
-      fakeServiceManager = FakeServiceManager(
-        service: FakeServiceManager.createFakeService(
-          timelineData: vm_service.Timeline.parse(timelineJson),
+  void _setUpServiceManagerWithTimeline(
+    Map<String, dynamic> timelineJson,
+  ) {
+    fakeServiceManager = FakeServiceManager(
+      service: FakeServiceManager.createFakeService(
+        timelineData: vm_service.Timeline.parse(timelineJson),
+      ),
+    );
+    when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+    when(fakeServiceManager.connectedApp.isProfileBuild)
+        .thenAnswer((_) => Future.value(true));
+    when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
+        .thenReturn(false);
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(OfflineModeController, OfflineModeController());
+    when(serviceManager.connectedApp.isDartWebApp)
+        .thenAnswer((_) => Future.value(false));
+  }
+
+  group('TimelineAnalysisHeader', () {
+    setUp(() async {
+      _setUpServiceManagerWithTimeline(testTimelineJson);
+      frameAnalysisSupported = true;
+    });
+
+    Future<void> pumpHeader(
+      WidgetTester tester, {
+      PerformanceController performanceController,
+      bool runAsync = false,
+    }) async {
+      controller = performanceController ?? PerformanceController()
+        ..data = PerformanceData();
+
+      if (runAsync) {
+        // Await a small delay to allow the PerformanceController to complete
+        // initialization.
+        await Future.delayed(const Duration(seconds: 1));
+      }
+
+      await tester.pumpWidget(
+        wrap(
+          TimelineAnalysisHeader(
+            controller: controller,
+            selectedTab: null,
+            searchFieldBuilder: () => const SizedBox(),
+          ),
         ),
       );
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
-      when(fakeServiceManager.connectedApp.isProfileBuild)
-          .thenAnswer((_) => Future.value(true));
-      when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
-          .thenReturn(false);
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
-      setGlobal(OfflineModeController, OfflineModeController());
-      when(serviceManager.connectedApp.isDartWebApp)
-          .thenAnswer((_) => Future.value(false));
+      await tester.pumpAndSettle();
     }
 
+    const windowSize = Size(2225.0, 1000.0);
+
+    testWidgetsWithWindowSize('builds header content', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        _setUpServiceManagerWithTimeline({});
+        await pumpHeader(tester);
+        await tester.pumpAndSettle();
+        expect(find.text('Timeline Events'), findsOneWidget);
+        expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
+        expect(find.byType(FlameChartHelpButton), findsOneWidget);
+      });
+    });
+
+    testWidgetsWithWindowSize(
+        'builds header content for selected frame', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        _setUpServiceManagerWithTimeline({});
+
+        // This frame does not have UI jank.
+        final frame0 = testFrame0.shallowCopy()
+          ..setEventFlow(animatorBeginFrameEvent)
+          ..setEventFlow(goldenRasterTimelineEvent);
+
+        controller = PerformanceController()..data = PerformanceData();
+        await controller.toggleSelectedFrame(frame0);
+
+        await pumpHeader(tester, performanceController: controller);
+        await tester.pumpAndSettle();
+        expect(find.text('Timeline Events'), findsOneWidget);
+        expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
+        expect(find.byType(FlameChartHelpButton), findsOneWidget);
+        expect(find.byType(AnalyzeFrameButton), findsNothing);
+      });
+    });
+
+    testWidgetsWithWindowSize(
+        'builds header content for selected frame with jank', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        _setUpServiceManagerWithTimeline({});
+
+        // This frame has UI jank.
+        final frame0 = jankyFrame.shallowCopy();
+
+        controller = PerformanceController()..data = PerformanceData();
+        await controller.toggleSelectedFrame(frame0);
+
+        await pumpHeader(tester, performanceController: controller);
+        await tester.pumpAndSettle();
+        expect(find.text('Timeline Events'), findsOneWidget);
+        expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
+        expect(find.byType(FlameChartHelpButton), findsOneWidget);
+        expect(find.byType(AnalyzeFrameButton), findsOneWidget);
+      });
+    });
+
+    testWidgetsWithWindowSize(
+        'selecting analyze frame button opens tab', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        _setUpServiceManagerWithTimeline({});
+
+        // This frame has UI jank.
+        final frame0 = jankyFrame.shallowCopy();
+        controller = PerformanceController()..data = PerformanceData();
+        await controller.toggleSelectedFrame(frame0);
+
+        await pumpHeader(tester, performanceController: controller);
+        await tester.pumpAndSettle();
+        expect(find.byType(AnalyzeFrameButton), findsOneWidget);
+        expect(controller.selectedAnalysisTab.value, isNull);
+        expect(controller.analysisTabs.value, isEmpty);
+
+        await tester.tap(find.byType(AnalyzeFrameButton));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(FlutterFrameAnalysisTab), findsOneWidget);
+        expect(controller.selectedAnalysisTab.value, isNotNull);
+        expect(controller.analysisTabs.value, isNotEmpty);
+      });
+    });
+  });
+
+  group('TimelineAnalysisContainer', () {
     setUp(() async {
       _setUpServiceManagerWithTimeline(testTimelineJson);
     });
@@ -73,7 +191,7 @@ void main() {
 
     const windowSize = Size(2225.0, 1000.0);
 
-    testWidgetsWithWindowSize('builds header content', windowSize,
+    testWidgetsWithWindowSize('builds header with search field', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
         _setUpServiceManagerWithTimeline({});

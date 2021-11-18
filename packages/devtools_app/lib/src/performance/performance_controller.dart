@@ -29,10 +29,11 @@ import 'performance_model.dart';
 import 'performance_screen.dart';
 import 'performance_utils.dart';
 import 'rebuild_counts.dart';
+import 'timeline_analysis.dart';
 import 'timeline_event_processor.dart';
 
 /// Flag to hide the frame analysis feature while it is under development.
-bool frameAnalysisSupported = true;
+bool frameAnalysisSupported = false;
 
 /// This class contains the business logic for [performance_screen.dart].
 ///
@@ -865,14 +866,4 @@ class PerformanceController extends DisposableController
     cpuProfilerController.dispose();
     super.dispose();
   }
-}
-
-// TODO(kenz): in the future this could be expanded to show data for an
-// arbitrary range of timeline data, not just a single flutter frame.
-class FlutterFrameAnalysisTabData {
-  FlutterFrameAnalysisTabData(this.title, this.frame);
-
-  final String title;
-
-  final FlutterFrame frame;
 }

@@ -114,7 +114,7 @@ class _TimelineAnalysisContainerState extends State<TimelineAnalysisContainer>
               selectionNotifier: controller.selectedTimelineEvent,
               searchMatchesNotifier: controller.searchMatches,
               activeSearchMatchNotifier: controller.activeSearchMatch,
-              onDataSelected: (e) => controller.selectTimelineEvent(e),
+              onDataSelected: controller.selectTimelineEvent,
             );
           },
         );

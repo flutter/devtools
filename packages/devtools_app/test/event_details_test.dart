@@ -120,7 +120,7 @@ void main() {
       eventSummary = EventSummary(goldenUiTimelineEvent);
       await tester.pumpWidget(wrap(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
-      expect(find.text('Time:  1.6 ms'), findsOneWidget);
+      expect(find.text('Time:  21.6 ms'), findsOneWidget);
       expect(find.text('Thread id:  1'), findsOneWidget);
       expect(find.text('Process id:  94955'), findsOneWidget);
       expect(find.text('Category:  Embedder'), findsOneWidget);
@@ -144,7 +144,7 @@ void main() {
       eventSummary = EventSummary(goldenUiTimelineEvent);
       await tester.pumpWidget(wrap(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
-      expect(find.text('Time:  1.6 ms'), findsOneWidget);
+      expect(find.text('Time:  21.6 ms'), findsOneWidget);
       expect(find.text('Thread id:  1'), findsOneWidget);
       expect(find.text('Process id:  94955'), findsOneWidget);
       expect(find.text('Category:  Embedder'), findsOneWidget);
