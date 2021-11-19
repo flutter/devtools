@@ -36,6 +36,7 @@ void main() {
       when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
+      frameAnalysisSupported = true;
     });
 
     testWidgets('builds with no frames', (WidgetTester tester) async {
