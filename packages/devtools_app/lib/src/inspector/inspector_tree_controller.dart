@@ -26,6 +26,7 @@ import '../ui/search.dart';
 import '../ui/utils.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
+import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
 
 /// Presents a [TreeNode].
@@ -607,12 +608,10 @@ class InspectorTreeController extends Object
 
   Future _searchOperation;
   Timer _searchDebounce;
-  bool _shouldAbortSearch = false;
 
   @override
   List<InspectorTreeRow> matchesForSearch(String search) {
     updateMatches([]);
-    _shouldAbortSearch = true;
     searchInProgress = true;
 
     if (_searchDebounce?.isActive ?? false) {
@@ -623,7 +622,6 @@ class InspectorTreeController extends Object
       // do something with query
 
       // Abort any ongoing search operations and start a new one
-      _shouldAbortSearch = true;
       if (_searchOperation != null) {
         try {
           await _searchOperation;
@@ -631,7 +629,6 @@ class InspectorTreeController extends Object
           log(e, LogLevel.error);
         }
       }
-      _shouldAbortSearch = false;
       searchInProgress = true;
 
       // Start new search operation
@@ -1157,7 +1154,8 @@ class InspectorRowContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double currentX = controller.getDepthIndent(row.depth) - columnWidth;
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     if (row == null) {
       return const SizedBox();
@@ -1218,6 +1216,10 @@ class InspectorRowContent extends StatelessWidget {
                           hasSearchMatch: row.hasSearchMatch,
                           errorText: error?.errorMessage,
                           debuggerController: debuggerController,
+                          nodeDescriptionHighlightStyle:
+                              searchValue.isEmpty || !node.hasSearchMatch
+                                  ? inspector_text_styles.regular
+                                  : theme.searchMatchHighlightStyle,
                         ),
                       ),
                     ),

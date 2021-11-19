@@ -40,6 +40,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.multiline = false,
     this.style,
     @required this.debuggerController,
+    this.nodeDescriptionHighlightStyle,
   });
 
   final RemoteDiagnosticsNode diagnostic;
@@ -49,6 +50,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final bool multiline;
   final TextStyle style;
   final DebuggerController debuggerController;
+  final TextStyle nodeDescriptionHighlightStyle;
 
   Widget _paddedIcon(Widget icon) {
     return Padding(
@@ -93,7 +95,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       final preview = textPreview.replaceAll('\n', ' ');
       yield TextSpan(
         text: ': "$preview"',
-        style: textStyle.merge(inspector_text_styles.unimportant(colorScheme)),
+        style: textStyle.merge(nodeDescriptionHighlightStyle),
       );
     }
   }
@@ -285,7 +287,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
       var diagnosticDescription = buildDescription(
         diagnostic.description,
-        descriptionTextStyle,
+        descriptionTextStyle.merge(nodeDescriptionHighlightStyle),
         context,
         colorScheme,
         isProperty: false,
