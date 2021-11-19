@@ -24,7 +24,7 @@ class ConsoleLine {
       );
 
   factory ConsoleLine.variable(
-    Variable variable, {
+    DartObjectNode variable, {
     bool forceScrollIntoView = false,
   }) =>
       VariableConsoleLine(
@@ -54,7 +54,7 @@ class VariableConsoleLine extends ConsoleLine {
       : super._(
           forceScrollIntoView,
         );
-  final Variable variable;
+  final DartObjectNode variable;
 
   @override
   String toString() {

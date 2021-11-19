@@ -74,7 +74,7 @@ void main() {
       name: 'my-isolate',
       isSystemIsolate: false,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -134,7 +134,7 @@ void main() {
       ],
       identityHashCode: null,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -192,7 +192,7 @@ void main() {
       ],
       identityHashCode: null,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -223,7 +223,7 @@ Matcher matchesVariable({
   @required String name,
   @required Object value,
 }) {
-  return const TypeMatcher<Variable>()
+  return const TypeMatcher<DartObjectNode>()
       .having(
         (v) => v.displayValue,
         'displayValue',
