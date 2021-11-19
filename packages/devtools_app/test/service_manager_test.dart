@@ -45,7 +45,7 @@ void main() async {
           // Use a range instead of an exact number because service extension
           // calls are not consistent. This will still catch any spurious calls
           // that are unintentionally added at start up.
-          const Range(20, 40)
+          const Range(15, 35)
               .contains(serviceManager.service.vmServiceCallCount),
           isTrue,
           reason:
@@ -61,14 +61,8 @@ void main() async {
               // Filter out unawaited streamListen calls.
               .where((call) => call != 'streamListen')
               .toList()
-              .sublist(0, 9),
+              .sublist(0, 5),
           equals([
-            // Begin calls from package:devtools_testing:flutter_test_driver
-            'getVM',
-            'getIsolate',
-            'getIsolate',
-            'resume',
-            // End calls from package:devtools_testing:flutter_test_driver
             'getVersion',
             'callMethod getDartDevelopmentServiceVersion',
             'getFlagList',
@@ -82,7 +76,7 @@ void main() async {
               .where((call) => call == 'streamListen')
               .toList()
               .length,
-          equals(2 + 8), // 2 from package:devtools_testing:flutter_test_driver.
+          equals(8),
         );
 
         await env.tearDownEnvironment();
