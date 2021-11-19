@@ -264,7 +264,7 @@ extension DevToolsColorScheme on ColorScheme {
   Color get devtoolsLink =>
       isLight ? const Color(0xFF1976D2) : Colors.lightBlueAccent;
 
-  Color get searchMatchHighlightColor => Colors.orange;
+  Color get searchMatchHighlightColor => const Color(0xFFFDAB40);
 
   // TODO(jacobr): replace this with Theme.of(context).scaffoldBackgroundColor, but we use
   // this in places where we do not have access to the context.
@@ -448,8 +448,8 @@ extension ThemeDataExtension on ThemeData {
       );
 
   TextStyle get searchMatchHighlightStyle => TextStyle(
-      color: colorScheme.searchMatchHighlightColor,
-  );
+        color: colorScheme.searchMatchHighlightColor,
+      );
 }
 
 const extraWideSearchTextWidth = 600.0;
