@@ -74,7 +74,7 @@ class ConsoleService extends Disposer {
     bool expandAll = false,
   }) async {
     _stdioTrailingNewline = false;
-    final variable = Variable.fromValue(
+    final variable = DartObjectNode.fromValue(
       name: name,
       value: value,
       diagnostic: diagnostic,

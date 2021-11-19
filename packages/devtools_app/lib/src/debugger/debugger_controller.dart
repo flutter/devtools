@@ -309,9 +309,9 @@ class DebuggerController extends DisposableController
       _selectedStackFrame.value?.frame ??
       _stackFramesWithLocation.value?.safeFirst?.frame;
 
-  final _variables = ValueNotifier<List<Variable>>([]);
+  final _variables = ValueNotifier<List<DartObjectNode>>([]);
 
-  ValueListenable<List<Variable>> get variables => _variables;
+  ValueListenable<List<DartObjectNode>> get variables => _variables;
 
   final _sortedScripts = ValueNotifier<List<ScriptRef>>([]);
 

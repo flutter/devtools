@@ -449,7 +449,7 @@ Future<void> buildVariablesTree(
   if (inspectorService != null) {
     final tasks = <Future>[];
     ObjectGroupBase group;
-    Future<void> _maybeUpdateRef(Variable child) async {
+    Future<void> _maybeUpdateRef(DartObjectNode child) async {
       if (child.ref == null) return;
       if (child.ref.diagnostic == null) {
         // TODO(jacobr): also check whether the InstanceRef is an instance of
