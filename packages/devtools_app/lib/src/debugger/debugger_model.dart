@@ -696,10 +696,6 @@ List<DartObjectNode> _createVariablesForFields(
 
 // TODO(jacobr): gracefully handle cases where the isolate has closed and
 // InstanceRef objects have become sentinels.
-// TODO(jacobr): consider a new class name. This class is more just the data
-// model for a tree of Dart objects with properties rather than a "Variable".
-// TODO(elliette): Refactor to make name, ref, text named (and potentially
-// required?) parameters. Give ref a type.
 class DartObjectNode extends TreeNode<DartObjectNode> {
   DartObjectNode._({
     this.name,
