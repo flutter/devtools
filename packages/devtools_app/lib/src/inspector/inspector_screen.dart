@@ -317,33 +317,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           shouldRequestFocus: searchVisible,
           supportsNavigation: true,
           onClose: _onSearchVisibleToggle,
-          prefix: _searchControlPrefix(),
         ),
       ),
     );
-  }
-
-  Widget _searchControlPrefix() {
-    return SearchDropdown<SearchTargetType>(
-        isDense: isDense(),
-        style: TextStyle(fontSize: 12.0, color: Theme.of(context).hintColor),
-        value: searchTarget,
-        onTap: () {
-          searchPreventCloseOnBlur = true;
-        },
-        onChanged: (SearchTargetType newTarget) {
-          setState(() {
-            searchTarget = newTarget;
-            summaryTreeController.setSearchTarget(searchTarget);
-          });
-          summaryTreeController.refreshSearchMatches();
-        },
-        items: SearchTargetType.values.map((SearchTargetType target) {
-          return DropdownMenuItem<SearchTargetType>(
-            value: target,
-            child: Text(target.name),
-          );
-        }).toList());
   }
 
   void _onSearchVisibleToggle() {

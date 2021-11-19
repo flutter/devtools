@@ -18,7 +18,6 @@ import '../collapsible_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../debugger/debugger_controller.dart';
-import '../debugger/debugger_model.dart';
 import '../error_badge_manager.dart';
 import '../globals.dart';
 import '../theme.dart';
@@ -699,79 +698,10 @@ class InspectorTreeController extends Object
           matches.add(row);
           setSearchMatch(row.node, true);
           _updateSearchMatches();
-
-          // Skip detailed search if we already have a match for this row
           continue;
         }
       }
       // Widget search end
-
-      // Details search begin
-      if (searchTarget == SearchTargetType.details) {
-        if (diagnostic.valueRef != null &&
-            diagnostic.inspectorService != null &&
-            !diagnostic.inspectorService.disposed &&
-            !diagnostic.isProperty) {
-          debugPrint('Detail search begin: ' + diagnostic.description);
-          DateTime date;
-
-          date = DateTime.now();
-          final objectGroup = serviceManager.inspectorService
-              .createObjectGroup('inspectorSearchDetails');
-          debugPrint('Took A ' +
-              date.difference(DateTime.now()).inMilliseconds.toString());
-          date = DateTime.now();
-          final variable = Variable.fromValue(
-            value:
-                await objectGroup.toObservatoryInstanceRef(diagnostic.valueRef),
-            isolateRef: serviceManager.inspectorService.isolateRef,
-            diagnostic: diagnostic,
-          );
-
-          debugPrint('Took B ' +
-              date.difference(DateTime.now()).inMilliseconds.toString());
-
-          date = DateTime.now();
-          await buildVariablesTree(variable);
-
-          debugPrint('Took C ' +
-              date.difference(DateTime.now()).inMilliseconds.toString());
-
-          date = DateTime.now();
-          for (final child in variable.children) {
-            if (child.name?.isNotEmpty == true && child.name != 'child') {
-              final variableDiagnostic = child.ref?.diagnostic;
-              if (variableDiagnostic != null) {
-                _statsSearchOps += 2;
-                if (child.name.toLowerCase().contains(caseInsensitiveSearch) ||
-                    variableDiagnostic.description
-                        .toLowerCase()
-                        .contains(caseInsensitiveSearch)) {
-                  matches.add(row);
-                  setSearchMatch(row.node, true);
-                  _updateSearchMatches();
-
-                  // Skip rest of the children if we already have a match for this row
-                  continue;
-                }
-              }
-            }
-          }
-          debugPrint('Took C ' +
-              date.difference(DateTime.now()).inMilliseconds.toString() +
-              'ms');
-          debugPrint('Detail search end: ' + diagnostic.description);
-
-          _updateSearchMatches();
-
-          if (_shouldAbortSearch) {
-            // Abort asynchronous search operation
-            debugPrint('Abort search');
-            break;
-          }
-        }
-      }
-      // Details search end
     }
 
     debugPrint('Search completed with ' +
