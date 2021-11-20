@@ -1049,8 +1049,12 @@ class DebuggerController extends DisposableController
     _showFileOpener.value = visible;
   }
 
+  // TODO(kenz): search through previous matches when possible.
   @override
-  List<SourceToken> matchesForSearch(String search) {
+  List<SourceToken> matchesForSearch(
+    String search, {
+    bool searchPreviousMatches = false,
+  }) {
     if (search == null || search.isEmpty || parsedScript.value == null) {
       return [];
     }

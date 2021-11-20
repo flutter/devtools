@@ -30,8 +30,12 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
   double xPosition = 0.0;
 
   set search(String value) {
+    final previousSearchValue = _searchNotifier.value;
+    final shouldSearchPreviousMatches = previousSearchValue != null &&
+        previousSearchValue.isNotEmpty &&
+        value.caseInsensitiveContains(previousSearchValue);
     _searchNotifier.value = value;
-    refreshSearchMatches();
+    refreshSearchMatches(searchPreviousMatches: shouldSearchPreviousMatches);
   }
 
   String get search => _searchNotifier.value;
@@ -40,18 +44,31 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
 
   ValueListenable<List<T>> get searchMatches => _searchMatches;
 
-  void refreshSearchMatches() {
-    updateMatches(matchesForSearch(_searchNotifier.value));
+  void refreshSearchMatches({bool searchPreviousMatches = false}) {
+    final matches =
+        (_searchNotifier.value != null && _searchNotifier.value.isNotEmpty)
+            ? matchesForSearch(
+                _searchNotifier.value,
+                searchPreviousMatches: searchPreviousMatches,
+              )
+            : <T>[];
+    updateMatches(matches);
   }
 
   void updateMatches(List<T> matches) {
-    _searchMatches.value = matches;
+    for (final previousMatch in _searchMatches.value) {
+      previousMatch.isSearchMatch = false;
+    }
+    for (final newMatch in matches) {
+      newMatch.isSearchMatch = true;
+    }
     if (matches.isEmpty) {
       matchIndex.value = 0;
     }
     if (matches.isNotEmpty && matchIndex.value == 0) {
       matchIndex.value = 1;
     }
+    _searchMatches.value = matches;
     _updateActiveSearchMatch();
   }
 
@@ -93,7 +110,11 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
       ..isActiveSearchMatch = true;
   }
 
-  List<T> matchesForSearch(String search) => [];
+  List<T> matchesForSearch(
+    String search, {
+    bool searchPreviousMatches = false,
+  }) =>
+      [];
 
   void resetSearch() {
     _searchNotifier.value = '';
@@ -1052,7 +1073,7 @@ mixin DataSearchStateMixin {
 }
 
 // This mixin is used to get around the type system where a type `T` needs to
-// both extend `TreeNode<T>` and mixin `SearchableDataMixin`.
+// both extend `TreeNode<T>` and mixin `DataSearchStateMixin`.
 mixin TreeDataSearchStateMixin<T extends TreeNode<T>>
     on TreeNode<T>, DataSearchStateMixin {}
 

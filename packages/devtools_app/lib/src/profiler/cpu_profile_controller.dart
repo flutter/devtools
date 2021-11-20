@@ -240,8 +240,12 @@ class CpuProfilerController
     }
   }
 
+  // TODO(kenz): search through previous matches when possible.
   @override
-  List<CpuStackFrame> matchesForSearch(String search) {
+  List<CpuStackFrame> matchesForSearch(
+    String search, {
+    bool searchPreviousMatches = false,
+  }) {
     if (search?.isEmpty ?? true) return [];
     final regexSearch = RegExp(search, caseSensitive: false);
     final matches = <CpuStackFrame>[];
@@ -250,9 +254,6 @@ class CpuProfilerController
       if (frame.name.caseInsensitiveContains(regexSearch) ||
           frame.processedUrl.caseInsensitiveContains(regexSearch)) {
         matches.add(frame);
-        frame.isSearchMatch = true;
-      } else {
-        frame.isSearchMatch = false;
       }
     }
     return matches;
