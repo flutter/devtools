@@ -703,8 +703,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     GenericInstanceRef ref,
     int offset,
     int childCount,
-  })  : assert(name != null || text != null),
-        _ref = ref,
+  })  : _ref = ref,
         _offset = offset,
         _childCount = childCount {
     indentChildren = ref?.diagnostic?.style != DiagnosticsTreeStyle.flat;
