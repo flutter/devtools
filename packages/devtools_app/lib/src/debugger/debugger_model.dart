@@ -327,8 +327,8 @@ Future<void> addExpandableChildren(
   }
 }
 
-/// Builds the tree representation for a [Variable] object by querying data,
-/// creating child DartObjectNode objects, and assigning parent-child
+/// Builds the tree representation for a [DartObjectNode] object by querying
+/// data, creating child [DartObjectNode] objects, and assigning parent-child
 /// relationships.
 ///
 /// We call this method as we expand variables in the variable tree, because

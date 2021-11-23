@@ -23,7 +23,7 @@ class ConsoleLine {
         forceScrollIntoView: forceScrollIntoView,
       );
 
-  factory ConsoleLine.variable(
+  factory ConsoleLine.dartObjectNode(
     DartObjectNode variable, {
     bool forceScrollIntoView = false,
   }) =>
@@ -85,7 +85,7 @@ class ConsoleService extends Disposer {
     if (expandAll) {
       variable.expandCascading();
     }
-    _stdio.add(ConsoleLine.variable(
+    _stdio.add(ConsoleLine.dartObjectNode(
       variable,
       forceScrollIntoView: forceScrollIntoView,
     ));
