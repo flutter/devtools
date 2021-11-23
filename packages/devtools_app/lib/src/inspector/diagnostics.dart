@@ -94,8 +94,16 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     if (textPreview is String) {
       final preview = textPreview.replaceAll('\n', ' ');
       yield TextSpan(
-        text: ': "$preview"',
-        style: textStyle.merge(nodeDescriptionHighlightStyle),
+        children: [
+          TextSpan(
+            text: ': ',
+            style: textStyle,
+          ),
+          TextSpan(
+            text: '"$preview"',
+            style: textStyle.merge(nodeDescriptionHighlightStyle),
+          ),
+        ],
       );
     }
   }
@@ -287,7 +295,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
       var diagnosticDescription = buildDescription(
         diagnostic.description,
-        descriptionTextStyle.merge(nodeDescriptionHighlightStyle),
+        descriptionTextStyle,
         context,
         colorScheme,
         isProperty: false,

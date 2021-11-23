@@ -448,7 +448,8 @@ extension ThemeDataExtension on ThemeData {
       );
 
   TextStyle get searchMatchHighlightStyle => TextStyle(
-        color: colorScheme.searchMatchHighlightColor,
+        color: Colors.black,
+        backgroundColor: colorScheme.searchMatchHighlightColor,
       );
 }
 
