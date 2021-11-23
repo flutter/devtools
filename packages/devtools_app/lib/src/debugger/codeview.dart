@@ -800,7 +800,7 @@ class _LineItemState extends State<LineItem> {
           final response = await _debuggerController.evalAtCurrentFrame(word);
           final isolateRef = _debuggerController.isolateRef;
           if (response is! InstanceRef) return;
-          final variable = Variable.fromValue(
+          final variable = DartObjectNode.fromValue(
             value: response,
             isolateRef: isolateRef,
           );

@@ -23,8 +23,8 @@ class ConsoleLine {
         forceScrollIntoView: forceScrollIntoView,
       );
 
-  factory ConsoleLine.variable(
-    Variable variable, {
+  factory ConsoleLine.dartObjectNode(
+    DartObjectNode variable, {
     bool forceScrollIntoView = false,
   }) =>
       VariableConsoleLine(
@@ -54,7 +54,7 @@ class VariableConsoleLine extends ConsoleLine {
       : super._(
           forceScrollIntoView,
         );
-  final Variable variable;
+  final DartObjectNode variable;
 
   @override
   String toString() {
@@ -74,7 +74,7 @@ class ConsoleService extends Disposer {
     bool expandAll = false,
   }) async {
     _stdioTrailingNewline = false;
-    final variable = Variable.fromValue(
+    final variable = DartObjectNode.fromValue(
       name: name,
       value: value,
       diagnostic: diagnostic,
@@ -85,7 +85,7 @@ class ConsoleService extends Disposer {
     if (expandAll) {
       variable.expandCascading();
     }
-    _stdio.add(ConsoleLine.variable(
+    _stdio.add(ConsoleLine.dartObjectNode(
       variable,
       forceScrollIntoView: forceScrollIntoView,
     ));
