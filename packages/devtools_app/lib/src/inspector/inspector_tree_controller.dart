@@ -1219,7 +1219,9 @@ class InspectorRowContent extends StatelessWidget {
                           nodeDescriptionHighlightStyle:
                               searchValue.isEmpty || !node.hasSearchMatch
                                   ? inspector_text_styles.regular
-                                  : theme.searchMatchHighlightStyle,
+                                  : row.isSelected
+                                      ? theme.searchMatchHighlightStyleFocused
+                                      : theme.searchMatchHighlightStyle,
                         ),
                       ),
                     ),
