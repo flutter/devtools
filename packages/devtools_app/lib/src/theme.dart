@@ -455,9 +455,9 @@ extension ThemeDataExtension on ThemeData {
       );
 
   TextStyle get searchMatchHighlightStyleFocused => TextStyle(
-    color: Colors.black,
-    backgroundColor: colorScheme.searchMatchHighlightColorFocused,
-  );
+        color: Colors.black,
+        backgroundColor: colorScheme.searchMatchHighlightColorFocused,
+      );
 }
 
 const extraWideSearchTextWidth = 600.0;
