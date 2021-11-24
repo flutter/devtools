@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'common_widgets.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
+import 'ui/colors.dart';
 import 'utils.dart';
 
 const _contrastForegroundWhite = Color.fromARGB(255, 240, 240, 240);
@@ -264,10 +265,6 @@ extension DevToolsColorScheme on ColorScheme {
   Color get devtoolsLink =>
       isLight ? const Color(0xFF1976D2) : Colors.lightBlueAccent;
 
-  Color get searchMatchHighlightColor => const Color(0xFFFFFF00);
-
-  Color get searchMatchHighlightColorFocused => const Color(0xFFFBAE42);
-
   // TODO(jacobr): replace this with Theme.of(context).scaffoldBackgroundColor, but we use
   // this in places where we do not have access to the context.
   Color get defaultBackgroundColor =>
@@ -449,14 +446,14 @@ extension ThemeDataExtension on ThemeData {
         fontSize: defaultFontSize,
       );
 
-  TextStyle get searchMatchHighlightStyle => TextStyle(
+  TextStyle get searchMatchHighlightStyle => const TextStyle(
         color: Colors.black,
-        backgroundColor: colorScheme.searchMatchHighlightColor,
+        backgroundColor: activeSearchMatchColor,
       );
 
-  TextStyle get searchMatchHighlightStyleFocused => TextStyle(
+  TextStyle get searchMatchHighlightStyleFocused => const TextStyle(
         color: Colors.black,
-        backgroundColor: colorScheme.searchMatchHighlightColorFocused,
+        backgroundColor: searchMatchColor,
       );
 }
 
