@@ -93,7 +93,9 @@ commit hash for the tag you just created) and the [update.sh](https://github.com
 script, build and upload the DevTools binary to CIPD.
 
 ```shell
-sdk/third_party/devtools/update.sh 8881a7caa9067471008a8e00750b161f53cdb843
+cd path/to/dart-sdk/sdk
+git rebase-update
+third_party/devtools/update.sh 8881a7caa9067471008a8e00750b161f53cdb843
 ```
 
 ### Update the DevTools hash in the Dart SDK
