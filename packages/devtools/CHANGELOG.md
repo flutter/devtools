@@ -1,3 +1,6 @@
+## 2.9.1
+* Fix build script logic to download canvaskit [#3519](https://github.com/flutter/devtools/pull/3519)
+
 ## 2.9.0
 * Fix bugs with performance page search and improve performance [#3515](https://github.com/flutter/devtools/pull/3515)
 * Refactor `Variable` class and rename it to `DartObjectNode` [#3513](https://github.com/flutter/devtools/pull/3513)
