@@ -106,14 +106,14 @@ class InspectorTreeController extends Object {
     final firstClient = _clients.isEmpty;
     _clients.add(value);
     if (firstClient) {
-      config.onClientActiveChange(true);
+      config.onClientActiveChange?.call(true);
     }
   }
 
   void removeClient(InspectorControllerClient value) {
     _clients.remove(value);
     if (_clients.isEmpty) {
-      config.onClientActiveChange(false);
+      config.onClientActiveChange?.call(false);
     }
   }
 
