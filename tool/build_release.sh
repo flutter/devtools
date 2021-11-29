@@ -35,19 +35,19 @@ set -ex
 # (https://github.com/flutter/flutter/issues/70101), or to read this from a manifest 
 # provided (https://github.com/flutter/flutter/issues/74934).
 function download_canvaskit() {
-  local local_canvaskit_version="0.28.1"
-  local canvaskit_version_prefix="const String canvaskitVersion"
+  local local_canvaskit_version="0.30.0"
+  local canvaskit_version_prefix="const String _canvaskitVersion"
 
   flutter precache --web
 
   local flutter_bin=$(which flutter)
-  local canvaskit_dart_file=$(dirname $flutter_bin)/cache/flutter_web_sdk/lib/_engine/engine/canvaskit/initialization.dart
+  local canvaskit_dart_file=$(dirname $flutter_bin)/cache/flutter_web_sdk/lib/_engine/engine/configuration.dart
 
   local canvaskit_version_line="$(grep "$canvaskit_version_prefix" "$canvaskit_dart_file")"
 
   # Grab the canvaskit semantic version as a substring from this line. Example:
   # "const String canvaskitVersion = '0.28.1';" -> "0.28.1"
-  local latest_canvaskit_version=${canvaskit_version_line:33:6}
+  local latest_canvaskit_version=${canvaskit_version_line:34:6}
 
   if [ ! "$local_canvaskit_version" == "$latest_canvaskit_version" ]; then
     echo "Local canvaskit version $local_canvaskit_version does not match version $latest_canvaskit_version from the latest web engine copy. Please update before continuing."
