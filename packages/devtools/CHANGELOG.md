@@ -1,5 +1,29 @@
-## 2.8.0-dev.1
-TODO: update changelog
+## 2.9.0
+* Fix bugs with performance page search and improve performance [#3515](https://github.com/flutter/devtools/pull/3515)
+* Refactor `Variable` class and rename it to `DartObjectNode` [#3513](https://github.com/flutter/devtools/pull/3513)
+* Add skeleton for frame analysis feature [#3509](https://github.com/flutter/devtools/pull/3509)
+* Add VSCode config files to gitignore [#3512](https://github.com/flutter/devtools/pull/3512)
+* Update survey metadata url to match new website location [#3511](https://github.com/flutter/devtools/pull/3511)
+* Fixes VM service breakage due to deprecated method [#3510](https://github.com/flutter/devtools/pull/3510)
+* Improve inspecting large `Map` and `List` types [#3497](https://github.com/flutter/devtools/pull/3497)
+* Update flutter version for bots to latest flutter beta [#3508](https://github.com/flutter/devtools/pull/3508)
+* VM service wrapper implements noSuchMethod [#3505](https://github.com/flutter/devtools/pull/3505)
+* Add DevToolsIconButton helper widget [#3504](https://github.com/flutter/devtools/pull/3504)
+* Add a button for opening a file in empty state page [#3501](https://github.com/flutter/devtools/pull/3501)
+* Create `BlinkingIcon` helper widget [#3496](https://github.com/flutter/devtools/pull/3496)
+* Bump version to 2.8.0-dev.1 [#3495](https://github.com/flutter/devtools/pull/3495)
+* Track whether an app is a Flutter Web app in analytics [#3494](https://github.com/flutter/devtools/pull/3494)
+* Create rich tooltip for Flutter frames in the performance view [#3493](https://github.com/flutter/devtools/pull/3493)
+* Add new 'invokeServiceMethodWithArgReturningNode' helper to 'ObjectGroupBase' [#3492](https://github.com/flutter/devtools/pull/3492)
+* Add richMessage support to DevToolsTooltip widget [#3491](https://github.com/flutter/devtools/pull/3491)
+* Add integration test to verify the expected vm service calls at startup [#3443](https://github.com/flutter/devtools/pull/3443)
+* Add support for vm_service 7.4.0 [#3490](https://github.com/flutter/devtools/pull/3490)
+* Update errorTextColor to meet color contrast requirements [#3488](https://github.com/flutter/devtools/pull/3488)
+* Fix test flakes with the service manager [#3474](https://github.com/flutter/devtools/pull/3474)
+* Do not focus a line in the code view when no outlineNode is selected [#3487](https://github.com/flutter/devtools/pull/3487)
+* Fix typos [#3486](https://github.com/flutter/devtools/pull/3486)
+* Remove package meta dependency and imports [#3484](https://github.com/flutter/devtools/pull/3484)
+* Add support for selecting objects in the program explorer outline view [#3480](https://github.com/flutter/devtools/pull/3480)
 
 ## 2.8.0
 * Don't register service worker when running DevTools locally [#3476](https://github.com/flutter/devtools/pull/3476)
