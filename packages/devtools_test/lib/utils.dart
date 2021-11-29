@@ -295,6 +295,24 @@ void verifyIsSearchMatch(
   }
 }
 
+void verifyIsSearchMatchForTreeData<T extends TreeDataSearchStateMixin<T>>(
+  List<T> data,
+  List<T> matches,
+) {
+  for (final node in data) {
+    breadthFirstTraversal<T>(
+      node,
+      action: (T e) {
+        if (matches.contains(e)) {
+          expect(e.isSearchMatch, isTrue);
+        } else {
+          expect(e.isSearchMatch, isFalse);
+        }
+      },
+    );
+  }
+}
+
 Future<void> waitFor(
   Future<bool> condition(), {
   // TODO(kenz): shorten this as long as it doesn't cause flakes.

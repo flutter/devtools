@@ -808,19 +808,31 @@ class PerformanceController extends DisposableController
   }
 
   @override
-  List<TimelineEvent> matchesForSearch(String search) {
+  List<TimelineEvent> matchesForSearch(
+    String search, {
+    bool searchPreviousMatches = false,
+  }) {
     if (search?.isEmpty ?? true) return [];
     final matches = <TimelineEvent>[];
-    final events = List<TimelineEvent>.from(data.timelineEvents);
-    for (final event in events) {
-      breadthFirstTraversal<TimelineEvent>(event, action: (TimelineEvent e) {
-        if (e.name.caseInsensitiveContains(search)) {
-          matches.add(e);
-          e.isSearchMatch = true;
-        } else {
-          e.isSearchMatch = false;
+    if (searchPreviousMatches) {
+      final previousMatches = searchMatches.value;
+      for (final previousMatch in previousMatches) {
+        if (previousMatch.name.caseInsensitiveContains(search)) {
+          matches.add(previousMatch);
         }
-      });
+      }
+    } else {
+      final events = List<TimelineEvent>.from(data.timelineEvents);
+      for (final event in events) {
+        breadthFirstTraversal<TimelineEvent>(
+          event,
+          action: (TimelineEvent e) {
+            if (e.name.caseInsensitiveContains(search)) {
+              matches.add(e);
+            }
+          },
+        );
+      }
     }
     return matches;
   }

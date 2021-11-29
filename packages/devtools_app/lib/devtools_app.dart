@@ -46,6 +46,7 @@ export 'src/service_manager.dart';
 export 'src/split.dart';
 export 'src/theme.dart';
 export 'src/trace_event.dart';
+export 'src/trees.dart';
 export 'src/ui/icons.dart';
 export 'src/ui/search.dart';
 export 'src/utils.dart';

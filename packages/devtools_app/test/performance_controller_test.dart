@@ -8,7 +8,6 @@ import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/trace_event.dart';
-import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_test/flutter_test_driver.dart'
     show FlutterRunConfiguration;
@@ -164,7 +163,7 @@ void main() async {
       expect(performanceController.data.timelineEvents, isEmpty);
       expect(performanceController.matchesForSearch('test'), isEmpty);
 
-      performanceController.addTimelineEvent(goldenUiTimelineEvent);
+      performanceController.addTimelineEvent(goldenUiTimelineEvent..deepCopy());
       expect(performanceController.matchesForSearch('test'), isEmpty);
 
       final matches = performanceController.matchesForSearch('frame');
@@ -177,18 +176,41 @@ void main() async {
       await env.tearDownEnvironment();
     });
 
-    test('matchesForSearch sets isSearchMatch property', () async {
+    test('search query searches through previous matches', () async {
       await env.setupEnvironment();
 
       await performanceController.clearData();
-      performanceController.addTimelineEvent(goldenUiTimelineEvent);
-      var matches = performanceController.matchesForSearch('frame');
+      performanceController.addTimelineEvent(goldenUiTimelineEvent..deepCopy());
+      performanceController.search = 'fram';
+      var matches = performanceController.searchMatches.value;
       expect(matches.length, equals(4));
-      verifyIsSearchMatch(performanceController.data.timelineEvents, matches);
+      verifyIsSearchMatchForTreeData<TimelineEvent>(
+        performanceController.data.timelineEvents,
+        matches,
+      );
 
-      matches = performanceController.matchesForSearch('begin');
-      expect(matches.length, equals(2));
-      verifyIsSearchMatch(performanceController.data.timelineEvents, matches);
+      // Add another timeline event to verify that this event is not searched
+      // for matches.
+      performanceController.addTimelineEvent(goldenUiTimelineEvent..deepCopy());
+
+      performanceController.search = 'frame';
+      matches = performanceController.searchMatches.value;
+      expect(matches.length, equals(4));
+      verifyIsSearchMatchForTreeData<TimelineEvent>(
+        performanceController.data.timelineEvents,
+        matches,
+      );
+
+      // Verify that more matches are found without `searchPreviousMatches` set
+      // to true.
+      performanceController.search = '';
+      performanceController.search = 'frame';
+      matches = performanceController.searchMatches.value;
+      expect(matches.length, equals(8));
+      verifyIsSearchMatchForTreeData<TimelineEvent>(
+        performanceController.data.timelineEvents,
+        matches,
+      );
 
       await env.tearDownEnvironment();
     });
@@ -386,17 +408,4 @@ bool isPerformanceDataEqual(PerformanceData a, PerformanceData b) {
       a.selectedEvent.name == b.selectedEvent.name &&
       a.selectedEvent.time == b.selectedEvent.time &&
       a.cpuProfileData == b.cpuProfileData;
-}
-
-void verifyIsSearchMatch(
-  List<DataSearchStateMixin> data,
-  List<DataSearchStateMixin> matches,
-) {
-  for (final request in data) {
-    if (matches.contains(request)) {
-      expect(request.isSearchMatch, isTrue);
-    } else {
-      expect(request.isSearchMatch, isFalse);
-    }
-  }
 }
