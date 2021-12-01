@@ -84,6 +84,7 @@ class GtagEventDevTools extends GtagEvent {
     String ide_launched, // dimension7 Devtools launched (CLI, VSCode, Android)
     String flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
     bool is_external_build, // dimension9 External build or google3
+    bool is_embedded, // dimension10 Whether devtools is embedded
 
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int ui_duration_micros,
@@ -181,6 +182,7 @@ GtagEventDevTools gtagEventWithScreenMetrics({
     ide_launched: ideLaunched,
     flutter_client_id: flutterClientId,
     is_external_build: isExternalBuild,
+    is_embedded: ideTheme.embed,
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
         : null,
@@ -273,6 +275,7 @@ void screen(
       ide_launched: ideLaunched,
       flutter_client_id: flutterClientId,
       is_external_build: isExternalBuild,
+      is_embedded: ideTheme.embed,
     ),
   );
 }
