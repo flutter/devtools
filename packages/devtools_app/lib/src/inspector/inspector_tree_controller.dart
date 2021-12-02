@@ -26,6 +26,7 @@ import '../ui/search.dart';
 import '../ui/utils.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
+import 'inspector_breadcrumbs.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
 
@@ -140,6 +141,7 @@ class InspectorTreeController extends Object
 
   InspectorTreeNode get root => _root;
   InspectorTreeNode _root;
+
   set root(InspectorTreeNode node) {
     setState(() {
       _root = node;
@@ -208,6 +210,27 @@ class InspectorTreeController extends Object
 
   double getRowOffset(int index) {
     return (getCachedRow(index)?.depth ?? 0) * columnWidth;
+  }
+
+  List<InspectorTreeRow> getPathFromSelectedRowToRoot() {
+    final selectedItem = cachedRows.firstWhere(
+      (element) => element.isSelected,
+      orElse: () => null,
+    );
+    if (selectedItem == null) return [];
+
+    final pathToRoot = <InspectorTreeRow>[selectedItem];
+    InspectorTreeNode nextParentNode = selectedItem.node.parent;
+    while (nextParentNode != null) {
+      final rowItem = cachedRows.firstWhere(
+        (element) => element.node == nextParentNode,
+        orElse: null,
+      );
+      if (rowItem == null) break;
+      pathToRoot.add(rowItem);
+      nextParentNode = rowItem.node.parent;
+    }
+    return pathToRoot.reversed.toList();
   }
 
   set hover(InspectorTreeNode node) {
@@ -722,11 +745,15 @@ class InspectorTree extends StatefulWidget {
     Key key,
     @required this.controller,
     @required this.debuggerController,
+    this.inspectorTreeController,
     this.isSummaryTree = false,
     this.widgetErrors,
-  }) : super(key: key);
+  })  : assert(isSummaryTree && inspectorTreeController == null ||
+            !isSummaryTree && inspectorTreeController != null),
+        super(key: key);
 
   final InspectorTreeController controller;
+  final InspectorTreeController inspectorTreeController;
   final DebuggerController debuggerController;
   final bool isSummaryTree;
   final LinkedHashMap<String, InspectableWidgetError> widgetErrors;
@@ -743,6 +770,7 @@ class _InspectorTreeState extends State<InspectorTree>
         AutoDisposeMixin
     implements InspectorControllerClient {
   InspectorTreeController get controller => widget.controller;
+
   bool get isSummaryTree => widget.isSummaryTree;
 
   ScrollController _scrollControllerY;
@@ -979,7 +1007,7 @@ class _InspectorTreeState extends State<InspectorTree>
     return LayoutBuilder(
       builder: (context, constraints) {
         final viewportWidth = constraints.maxWidth;
-        return Scrollbar(
+        final Widget tree = Scrollbar(
           isAlwaysShown: true,
           controller: _scrollControllerX,
           child: SingleChildScrollView(
@@ -1038,6 +1066,23 @@ class _InspectorTreeState extends State<InspectorTree>
             ),
           ),
         );
+
+        final bool shouldShowBreadcrumbs = !widget.isSummaryTree;
+        if (shouldShowBreadcrumbs) {
+          final parents =
+              widget.inspectorTreeController.getPathFromSelectedRowToRoot();
+          return Column(
+            children: [
+              InspectorBreadcrumbNavigator(
+                rows: parents,
+                onTap: (row) => widget.inspectorTreeController.onSelectRow(row),
+              ),
+              Expanded(child: tree),
+            ],
+          );
+        }
+
+        return tree;
       },
     );
   }

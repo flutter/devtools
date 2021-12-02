@@ -110,9 +110,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // The app must not be a Flutter app.
       return;
     }
+    final inspectorTreeController = InspectorTreeController();
+    final detailsTree = InspectorTreeController();
     inspectorController = InspectorController(
-      inspectorTree: InspectorTreeController(),
-      detailsTree: InspectorTreeController(),
+      inspectorTree: inspectorTreeController,
+      detailsTree: detailsTree,
       treeType: FlutterTreeType.widget,
       onExpandCollapseSupported: _onExpandCollapseSupported,
       onLayoutExplorerSupported: _onLayoutExplorerSupported,
@@ -162,6 +164,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       key: detailsTreeKey,
       controller: detailsTreeController,
       debuggerController: _debuggerController,
+      inspectorTreeController: summaryTreeController,
     );
 
     final splitAxis = Split.axisFor(context, 0.85);

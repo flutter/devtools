@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/inspector/inspector_breadcrumbs.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/inspector/inspector_tree_controller.dart';
@@ -41,6 +42,7 @@ void main() {
       await tester.pumpWidget(wrap(InspectorTree(
         controller: controller,
         debuggerController: debuggerController,
+        inspectorTreeController: InspectorTreeController(),
       )));
 
       expect(controller.getRow(const Offset(0, -100.0)), isNull);
@@ -53,6 +55,7 @@ void main() {
       await tester.pumpWidget(wrap(InspectorTree(
         controller: controller,
         debuggerController: debuggerController,
+        inspectorTreeController: InspectorTreeController(),
       )));
 
       expect(controller.getRow(const Offset(0, -20)).index, 0);
@@ -77,6 +80,7 @@ void main() {
       await tester.pumpWidget(wrap(InspectorTree(
         controller: treeController,
         debuggerController: TestDebuggerController(),
+        inspectorTreeController: InspectorTreeController(),
       )));
 
       expect(find.richText('Text: "Content"'), findsOneWidget);
@@ -99,6 +103,7 @@ void main() {
       await tester.pumpWidget(wrap(InspectorTree(
         controller: treeController,
         debuggerController: TestDebuggerController(),
+        inspectorTreeController: InspectorTreeController(),
       )));
 
       expect(find.richText('Text: "Rich text"'), findsOneWidget);
@@ -117,10 +122,49 @@ void main() {
         wrap(InspectorTree(
           controller: treeController,
           debuggerController: TestDebuggerController(),
+          inspectorTreeController: InspectorTreeController(),
         )),
       );
 
       expect(find.richText('Text: "Multiline text  content"'), findsOneWidget);
+    });
+
+    testWidgets('Shows breadcrumbs in Widget detail tree', (tester) async {
+      final diagnosticNode = await widgetToInspectorTreeDiagnosticsNode(
+        widget: const Text('Hello'),
+        tester: tester,
+      );
+
+      final controller = inspectorTreeControllerFromNode(diagnosticNode);
+      await tester.pumpWidget(wrap(
+        InspectorTree(
+          controller: controller,
+          debuggerController: TestDebuggerController(),
+          inspectorTreeController: InspectorTreeController(),
+          // ignore: avoid_redundant_argument_values
+          isSummaryTree: false,
+        ),
+      ));
+
+      expect(find.byType(InspectorBreadcrumbNavigator), findsOneWidget);
+    });
+
+    testWidgets('Shows no breadcrumbs widget in summary tree', (tester) async {
+      final diagnosticNode = await widgetToInspectorTreeDiagnosticsNode(
+        widget: const Text('Hello'),
+        tester: tester,
+      );
+
+      final controller = inspectorTreeControllerFromNode(diagnosticNode);
+      await tester.pumpWidget(wrap(
+        InspectorTree(
+          controller: controller,
+          debuggerController: TestDebuggerController(),
+          isSummaryTree: true,
+        ),
+      ));
+
+      expect(find.byType(InspectorBreadcrumbNavigator), findsNothing);
     });
   });
 }
