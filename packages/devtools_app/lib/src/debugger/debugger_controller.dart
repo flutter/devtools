@@ -309,9 +309,9 @@ class DebuggerController extends DisposableController
       _selectedStackFrame.value?.frame ??
       _stackFramesWithLocation.value?.safeFirst?.frame;
 
-  final _variables = ValueNotifier<List<Variable>>([]);
+  final _variables = ValueNotifier<List<DartObjectNode>>([]);
 
-  ValueListenable<List<Variable>> get variables => _variables;
+  ValueListenable<List<DartObjectNode>> get variables => _variables;
 
   final _sortedScripts = ValueNotifier<List<ScriptRef>>([]);
 
@@ -955,14 +955,14 @@ class DebuggerController extends DisposableController
     }
   }
 
-  List<Variable> _createVariablesForFrame(Frame frame) {
+  List<DartObjectNode> _createVariablesForFrame(Frame frame) {
     // vars can be null for async frames.
     if (frame.vars == null) {
       return [];
     }
 
     final variables =
-        frame.vars.map((v) => Variable.create(v, isolateRef)).toList();
+        frame.vars.map((v) => DartObjectNode.create(v, isolateRef)).toList();
     variables
       ..forEach(buildVariablesTree)
       ..sort((a, b) => sortFieldsByName(a.name, b.name));
@@ -1049,8 +1049,12 @@ class DebuggerController extends DisposableController
     _showFileOpener.value = visible;
   }
 
+  // TODO(kenz): search through previous matches when possible.
   @override
-  List<SourceToken> matchesForSearch(String search) {
+  List<SourceToken> matchesForSearch(
+    String search, {
+    bool searchPreviousMatches = false,
+  }) {
     if (search == null || search.isEmpty || parsedScript.value == null) {
       return [];
     }

@@ -835,8 +835,8 @@ void resetRoot() {
   rootNumber = 0;
 }
 
-Variable buildParentListVariable({int length = 2}) {
-  return Variable.create(
+DartObjectNode buildParentListVariable({int length = 2}) {
+  return DartObjectNode.create(
     BoundVariable(
       name: incrementRoot(),
       value: InstanceRef(
@@ -858,12 +858,12 @@ Variable buildParentListVariable({int length = 2}) {
   );
 }
 
-Variable buildListVariable({int length = 2}) {
+DartObjectNode buildListVariable({int length = 2}) {
   final listVariable = buildParentListVariable(length: length);
 
   for (int i = 0; i < length; i++) {
     listVariable.addChild(
-      Variable.create(
+      DartObjectNode.create(
         BoundVariable(
           name: '$i',
           value: InstanceRef(
@@ -887,8 +887,8 @@ Variable buildListVariable({int length = 2}) {
   return listVariable;
 }
 
-Variable buildParentMapVariable({int length = 2}) {
-  return Variable.create(
+DartObjectNode buildParentMapVariable({int length = 2}) {
+  return DartObjectNode.create(
     BoundVariable(
       name: incrementRoot(),
       value: InstanceRef(
@@ -909,12 +909,12 @@ Variable buildParentMapVariable({int length = 2}) {
   );
 }
 
-Variable buildMapVariable({int length = 2}) {
+DartObjectNode buildMapVariable({int length = 2}) {
   final mapVariable = buildParentMapVariable(length: length);
 
   for (int i = 0; i < length; i++) {
     mapVariable.addChild(
-      Variable.create(
+      DartObjectNode.create(
         BoundVariable(
           name: "['key${i + 1}']",
           value: InstanceRef(
@@ -938,8 +938,8 @@ Variable buildMapVariable({int length = 2}) {
   return mapVariable;
 }
 
-Variable buildStringVariable(String value) {
-  return Variable.create(
+DartObjectNode buildStringVariable(String value) {
+  return DartObjectNode.create(
     BoundVariable(
       name: incrementRoot(),
       value: InstanceRef(
@@ -962,8 +962,8 @@ Variable buildStringVariable(String value) {
   );
 }
 
-Variable buildBooleanVariable(bool value) {
-  return Variable.create(
+DartObjectNode buildBooleanVariable(bool value) {
+  return DartObjectNode.create(
     BoundVariable(
       name: incrementRoot(),
       value: InstanceRef(

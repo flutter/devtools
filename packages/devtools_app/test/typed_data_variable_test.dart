@@ -55,7 +55,7 @@ void main() {
       identityHashCode: null,
       length: 4,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -90,7 +90,7 @@ void main() {
       identityHashCode: null,
       length: 4,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -125,7 +125,7 @@ void main() {
       identityHashCode: null,
       length: 4,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -160,7 +160,7 @@ void main() {
       identityHashCode: null,
       length: 4,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -195,7 +195,7 @@ void main() {
       identityHashCode: null,
       length: 4,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -230,7 +230,7 @@ void main() {
       identityHashCode: null,
       length: 4,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -265,7 +265,7 @@ void main() {
       identityHashCode: null,
       length: 4,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -300,7 +300,7 @@ void main() {
       identityHashCode: null,
       length: 4,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -335,7 +335,7 @@ void main() {
       identityHashCode: null,
       length: 4,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -371,7 +371,7 @@ void main() {
       identityHashCode: null,
       length: 4,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -406,7 +406,7 @@ void main() {
       length: 4,
     );
 
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -442,7 +442,7 @@ void main() {
       length: 4,
     );
 
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -478,7 +478,7 @@ void main() {
       length: 4,
     );
 
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -514,7 +514,7 @@ void main() {
       length: 4,
     );
 
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -548,7 +548,7 @@ void main() {
       identityHashCode: null,
       length: 4,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -603,7 +603,7 @@ void main() {
       identityHashCode: null,
       length: 332,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -633,7 +633,7 @@ void main() {
       identityHashCode: null,
       length: 300,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -658,10 +658,10 @@ Matcher matchesVariable({
   @required String name,
   @required Object value,
 }) {
-  return const TypeMatcher<Variable>().having(
+  return const TypeMatcher<DartObjectNode>().having(
       (v) => v,
       'boundVar',
-      const TypeMatcher<Variable>()
+      const TypeMatcher<DartObjectNode>()
           .having((v) => v.name, 'name', equals(name))
           .having((v) => v.ref.value, 'value', equals(value)));
 }
@@ -670,9 +670,9 @@ Matcher matchesVariableGroup({
   @required int start,
   @required int end,
 }) {
-  return const TypeMatcher<Variable>().having(
+  return const TypeMatcher<DartObjectNode>().having(
       (v) => v,
       'boundVar',
-      const TypeMatcher<Variable>()
+      const TypeMatcher<DartObjectNode>()
           .having((v) => v.text, 'text', equals('[$start - $end]')));
 }

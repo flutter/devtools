@@ -597,8 +597,12 @@ class LoggingController extends DisposableController
     );
   }
 
+  // TODO(kenz): search through previous matches when possible.
   @override
-  List<LogData> matchesForSearch(String search) {
+  List<LogData> matchesForSearch(
+    String search, {
+    bool searchPreviousMatches = false,
+  }) {
     if (search == null || search.isEmpty) return [];
     final matches = <LogData>[];
     final caseInsensitiveSearch = search.toLowerCase();
@@ -610,11 +614,8 @@ class LoggingController extends DisposableController
           (log.details != null &&
               log.details.toLowerCase().contains(caseInsensitiveSearch))) {
         matches.add(log);
-        // TODO(kenz): use the value of this property in the logs table to
+        // TODO(kenz): use the value of log.isSearchMatch in the logs table to
         // improve performance. This will require some refactoring of FlatTable.
-        log.isSearchMatch = true;
-      } else {
-        log.isSearchMatch = false;
       }
     }
     return matches;

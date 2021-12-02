@@ -751,6 +751,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
     this.needsBottomBorder = true,
     this.needsLeftBorder = false,
     this.leftActions = const [],
+    this.scrollableCenterActions = const [],
     this.rightActions = const [],
     this.leftPadding = defaultSpacing,
     this.rightPadding = densePadding,
@@ -764,6 +765,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool needsLeftBorder;
   final List<Widget> leftActions;
   final List<Widget> rightActions;
+  final List<Widget> scrollableCenterActions;
   final double leftPadding;
   final double rightPadding;
   final bool tall;
@@ -793,13 +795,35 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
               style: theme.textTheme.subtitle2,
               child: title,
             ),
-            ...leftActions,
-            if (rightActions.isNotEmpty) const Spacer(),
-            ...rightActions,
+            ..._buildActions(),
           ],
         ),
       ),
     );
+  }
+
+  List<Widget> _buildActions() {
+    return [
+      if (scrollableCenterActions.isEmpty)
+        Expanded(
+          child: Row(
+            children: leftActions,
+          ),
+        ),
+      if (scrollableCenterActions.isNotEmpty) ...[
+        ...leftActions,
+        Expanded(
+          // TODO(kenz): make this look more scrollable when there are too many
+          // actions. Either with a faded overlay over the end of the list or
+          // with a scrollbar.
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: scrollableCenterActions,
+          ),
+        )
+      ],
+      ...rightActions,
+    ];
   }
 
   @override

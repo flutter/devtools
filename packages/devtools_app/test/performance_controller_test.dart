@@ -8,7 +8,6 @@ import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/trace_event.dart';
-import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_test/flutter_test_driver.dart'
     show FlutterRunConfiguration;
@@ -164,7 +163,7 @@ void main() async {
       expect(performanceController.data.timelineEvents, isEmpty);
       expect(performanceController.matchesForSearch('test'), isEmpty);
 
-      performanceController.addTimelineEvent(goldenUiTimelineEvent);
+      performanceController.addTimelineEvent(goldenUiTimelineEvent..deepCopy());
       expect(performanceController.matchesForSearch('test'), isEmpty);
 
       final matches = performanceController.matchesForSearch('frame');
@@ -177,20 +176,227 @@ void main() async {
       await env.tearDownEnvironment();
     });
 
-    test('matchesForSearch sets isSearchMatch property', () async {
+    test('search query searches through previous matches', () async {
       await env.setupEnvironment();
 
       await performanceController.clearData();
-      performanceController.addTimelineEvent(goldenUiTimelineEvent);
-      var matches = performanceController.matchesForSearch('frame');
+      performanceController.addTimelineEvent(goldenUiTimelineEvent..deepCopy());
+      performanceController.search = 'fram';
+      var matches = performanceController.searchMatches.value;
       expect(matches.length, equals(4));
-      verifyIsSearchMatch(performanceController.data.timelineEvents, matches);
+      verifyIsSearchMatchForTreeData<TimelineEvent>(
+        performanceController.data.timelineEvents,
+        matches,
+      );
 
-      matches = performanceController.matchesForSearch('begin');
-      expect(matches.length, equals(2));
-      verifyIsSearchMatch(performanceController.data.timelineEvents, matches);
+      // Add another timeline event to verify that this event is not searched
+      // for matches.
+      performanceController.addTimelineEvent(goldenUiTimelineEvent..deepCopy());
+
+      performanceController.search = 'frame';
+      matches = performanceController.searchMatches.value;
+      expect(matches.length, equals(4));
+      verifyIsSearchMatchForTreeData<TimelineEvent>(
+        performanceController.data.timelineEvents,
+        matches,
+      );
+
+      // Verify that more matches are found without `searchPreviousMatches` set
+      // to true.
+      performanceController.search = '';
+      performanceController.search = 'frame';
+      matches = performanceController.searchMatches.value;
+      expect(matches.length, equals(8));
+      verifyIsSearchMatchForTreeData<TimelineEvent>(
+        performanceController.data.timelineEvents,
+        matches,
+      );
 
       await env.tearDownEnvironment();
+    });
+
+    group('Frame analysis', () {
+      setUp(() {
+        frameAnalysisSupported = true;
+      });
+
+      tearDown(() {
+        performanceController.clearData();
+      });
+
+      tearDownAll(() {
+        frameAnalysisSupported = false;
+      });
+
+      test('openAnalysisTab opens a new tab and selects it', () async {
+        await env.setupEnvironment();
+
+        expect(performanceController.analysisTabs.value, isEmpty);
+        expect(performanceController.selectedAnalysisTab.value, isNull);
+
+        performanceController.openAnalysisTab(testFrame0);
+        expect(performanceController.analysisTabs.value.length, equals(1));
+        expect(performanceController.selectedAnalysisTab.value, isNotNull);
+        expect(performanceController.selectedAnalysisTab.value.frame.id,
+            equals(testFrame0.id));
+      });
+
+      test('openAnalysisTab opens an existing tab and selects it', () async {
+        await env.setupEnvironment();
+
+        expect(performanceController.analysisTabs.value, isEmpty);
+        expect(performanceController.selectedAnalysisTab.value, isNull);
+
+        performanceController.openAnalysisTab(testFrame0);
+        expect(performanceController.analysisTabs.value.length, equals(1));
+        expect(performanceController.selectedAnalysisTab.value, isNotNull);
+        expect(performanceController.selectedAnalysisTab.value.frame.id,
+            equals(testFrame0.id));
+
+        performanceController.openAnalysisTab(testFrame1);
+        expect(performanceController.analysisTabs.value.length, equals(2));
+        expect(performanceController.selectedAnalysisTab.value, isNotNull);
+        expect(performanceController.selectedAnalysisTab.value.frame.id,
+            equals(testFrame1.id));
+
+        performanceController.openAnalysisTab(testFrame0);
+        expect(performanceController.analysisTabs.value.length, equals(2));
+        expect(performanceController.selectedAnalysisTab.value, isNotNull);
+        expect(performanceController.selectedAnalysisTab.value.frame.id,
+            equals(testFrame0.id));
+      });
+
+      test('closeAnalysisTab closes a selected tab at index 0', () async {
+        await env.setupEnvironment();
+
+        expect(performanceController.analysisTabs.value, isEmpty);
+        expect(performanceController.selectedAnalysisTab.value, isNull);
+
+        performanceController.openAnalysisTab(testFrame0);
+        performanceController.openAnalysisTab(testFrame1);
+        performanceController.openAnalysisTab(testFrame2);
+        expect(performanceController.analysisTabs.value.length, equals(3));
+
+        // Re-select frame 0 to select the 0-indexed tab.
+        performanceController.openAnalysisTab(testFrame0);
+
+        final firstTab = performanceController.analysisTabs.value[0];
+        expect(firstTab.frame.id, equals(testFrame0.id));
+        expect(performanceController.selectedAnalysisTab.value.frame.id,
+            equals(testFrame0.id));
+
+        // Close the first tab (index 0).
+        performanceController.closeAnalysisTab(firstTab);
+
+        // The selected tab should now be the next tab.
+        expect(performanceController.analysisTabs.value[0].frame.id,
+            equals(testFrame1.id));
+        expect(performanceController.selectedAnalysisTab.value.frame.id,
+            equals(testFrame1.id));
+      });
+
+      test('closeAnalysisTab closes a selected tab at a non-zero index',
+          () async {
+        await env.setupEnvironment();
+
+        expect(performanceController.analysisTabs.value, isEmpty);
+        expect(performanceController.selectedAnalysisTab.value, isNull);
+
+        performanceController.openAnalysisTab(testFrame0);
+        performanceController.openAnalysisTab(testFrame1);
+        performanceController.openAnalysisTab(testFrame2);
+        expect(performanceController.analysisTabs.value.length, equals(3));
+
+        final lastTab = performanceController.analysisTabs.value[2];
+        expect(lastTab.frame.id, equals(testFrame2.id));
+        expect(performanceController.selectedAnalysisTab.value.frame.id,
+            equals(testFrame2.id));
+
+        // Close the last tab (index 2).
+        performanceController.closeAnalysisTab(lastTab);
+
+        // The selected tab should now be the previous tab.
+        expect(performanceController.analysisTabs.value[1].frame.id,
+            equals(testFrame1.id));
+        expect(performanceController.selectedAnalysisTab.value.frame.id,
+            equals(testFrame1.id));
+      });
+
+      test('closeAnalysisTab closes a non-selected tab', () async {
+        await env.setupEnvironment();
+
+        expect(performanceController.analysisTabs.value, isEmpty);
+        expect(performanceController.selectedAnalysisTab.value, isNull);
+
+        performanceController.openAnalysisTab(testFrame0);
+        performanceController.openAnalysisTab(testFrame1);
+        performanceController.openAnalysisTab(testFrame2);
+        expect(performanceController.analysisTabs.value.length, equals(3));
+
+        final firstTab = performanceController.analysisTabs.value[0];
+        final lastTab = performanceController.analysisTabs.value[2];
+        expect(firstTab.frame.id, equals(testFrame0.id));
+        expect(performanceController.selectedAnalysisTab.value.frame.id,
+            equals(lastTab.frame.id));
+
+        // Close the first tab (not selected).
+        performanceController.closeAnalysisTab(firstTab);
+
+        // The selected tab should still be the last tab.
+        expect(performanceController.analysisTabs.value[1].frame.id,
+            equals(lastTab.frame.id));
+        expect(performanceController.selectedAnalysisTab.value.frame.id,
+            equals(lastTab.frame.id));
+      });
+
+      test('showTimeline un-selects the selected tab', () async {
+        await env.setupEnvironment();
+
+        expect(performanceController.analysisTabs.value, isEmpty);
+        expect(performanceController.selectedAnalysisTab.value, isNull);
+
+        performanceController.openAnalysisTab(testFrame0);
+        performanceController.openAnalysisTab(testFrame1);
+        performanceController.openAnalysisTab(testFrame2);
+        expect(performanceController.analysisTabs.value.length, equals(3));
+
+        final lastTab = performanceController.analysisTabs.value[2];
+        expect(performanceController.selectedAnalysisTab.value.frame.id,
+            equals(lastTab.frame.id));
+
+        // Show the timeline.
+        performanceController.showTimeline();
+
+        expect(performanceController.analysisTabs.value.length, equals(3));
+        expect(performanceController.selectedAnalysisTab.value, isNull);
+      });
+
+      test('selecting a frame un-selects the selected tab', () async {
+        await env.setupEnvironment();
+
+        final frame0 = testFrame0.shallowCopy()
+          ..setEventFlow(goldenUiTimelineEvent)
+          ..setEventFlow(goldenRasterTimelineEvent);
+
+        expect(performanceController.selectedAnalysisTab.value, isNull);
+        expect(performanceController.analysisTabs.value, isEmpty);
+        performanceController.openAnalysisTab(testFrame0);
+        expect(performanceController.analysisTabs.value.length, equals(1));
+        expect(performanceController.selectedAnalysisTab.value, isNotNull);
+        expect(performanceController.selectedAnalysisTab.value.frame.id,
+            equals(testFrame0.id));
+
+        // Select a frame.
+        expect(performanceController.data.selectedFrame, isNull);
+        await performanceController.toggleSelectedFrame(frame0);
+        expect(
+          performanceController.data.selectedFrame,
+          equals(frame0),
+        );
+
+        expect(performanceController.analysisTabs.value.length, equals(1));
+        expect(performanceController.selectedAnalysisTab.value, isNull);
+      });
     });
   });
 }
@@ -202,17 +408,4 @@ bool isPerformanceDataEqual(PerformanceData a, PerformanceData b) {
       a.selectedEvent.name == b.selectedEvent.name &&
       a.selectedEvent.time == b.selectedEvent.time &&
       a.cpuProfileData == b.cpuProfileData;
-}
-
-void verifyIsSearchMatch(
-  List<DataSearchStateMixin> data,
-  List<DataSearchStateMixin> matches,
-) {
-  for (final request in data) {
-    if (matches.contains(request)) {
-      expect(request.isSearchMatch, isTrue);
-    } else {
-      expect(request.isSearchMatch, isFalse);
-    }
-  }
 }
