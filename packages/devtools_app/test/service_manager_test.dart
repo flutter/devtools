@@ -45,7 +45,7 @@ void main() async {
           // Use a range instead of an exact number because service extension
           // calls are not consistent. This will still catch any spurious calls
           // that are unintentionally added at start up.
-          const Range(20, 40)
+          const Range(15, 35)
               .contains(serviceManager.service.vmServiceCallCount),
           isTrue,
           reason:
@@ -57,31 +57,28 @@ void main() async {
         // Check the ordering of the vm service calls we can expect to occur
         // in a stable order.
         expect(
-          serviceManager.service.vmServiceCalls.sublist(0, 19),
+          serviceManager.service.vmServiceCalls
+              // Filter out unawaited streamListen calls.
+              .where((call) => call != 'streamListen')
+              .toList()
+              .sublist(0, 5),
           equals([
-            // Begin calls from package:devtools_testing:flutter_test_driver
-            'streamListen',
-            'streamListen',
-            'getVM',
-            'getIsolate',
-            'getIsolate',
-            'resume',
-            // End calls from package:devtools_testing:flutter_test_driver
             'getVersion',
             'callMethod getDartDevelopmentServiceVersion',
             'getFlagList',
             'getVM',
             'getIsolate',
-            'streamListen',
-            'streamListen',
-            'streamListen',
-            'streamListen',
-            'streamListen',
-            'streamListen',
-            'streamListen',
-            'streamListen',
           ]),
         );
+
+        expect(
+          serviceManager.service.vmServiceCalls
+              .where((call) => call == 'streamListen')
+              .toList()
+              .length,
+          equals(8),
+        );
+
         await env.tearDownEnvironment();
       }, timeout: const Timeout.factor(4));
 

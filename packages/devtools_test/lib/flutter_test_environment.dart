@@ -98,6 +98,11 @@ class FlutterTestEnvironment {
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
       setGlobal(PreferencesController, preferencesController);
       setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+
+      // Clear out VM service calls from the test driver.
+      // ignore: invalid_use_of_visible_for_testing_member
+      _service.clearVmServiceCalls();
+
       await serviceManager.vmServiceOpened(
         _service,
         onClosed: Completer().future,
