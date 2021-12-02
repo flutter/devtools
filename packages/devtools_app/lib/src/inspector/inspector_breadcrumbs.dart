@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import '../../devtools_app.dart';
 import 'inspector_text_styles.dart';
