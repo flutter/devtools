@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'common_widgets.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
+import 'ui/colors.dart';
 import 'utils.dart';
 
 const _contrastForegroundWhite = Color.fromARGB(255, 240, 240, 240);
@@ -443,6 +444,16 @@ extension ThemeDataExtension on ThemeData {
         color: colorScheme.devtoolsLink,
         decoration: TextDecoration.underline,
         fontSize: defaultFontSize,
+      );
+
+  TextStyle get searchMatchHighlightStyle => const TextStyle(
+        color: Colors.black,
+        backgroundColor: activeSearchMatchColor,
+      );
+
+  TextStyle get searchMatchHighlightStyleFocused => const TextStyle(
+        color: Colors.black,
+        backgroundColor: searchMatchColor,
       );
 }
 

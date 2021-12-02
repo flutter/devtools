@@ -36,19 +36,23 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.diagnostic, {
     this.isSelected,
     this.hasSearchMatch,
+    this.searchValue,
     this.errorText,
     this.multiline = false,
     this.style,
     @required this.debuggerController,
+    this.nodeDescriptionHighlightStyle,
   });
 
   final RemoteDiagnosticsNode diagnostic;
   final bool isSelected;
   final bool hasSearchMatch;
   final String errorText;
+  final String searchValue;
   final bool multiline;
   final TextStyle style;
   final DebuggerController debuggerController;
+  final TextStyle nodeDescriptionHighlightStyle;
 
   Widget _paddedIcon(Widget icon) {
     return Padding(
@@ -92,8 +96,18 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     if (textPreview is String) {
       final preview = textPreview.replaceAll('\n', ' ');
       yield TextSpan(
-        text: ': "$preview"',
-        style: textStyle.merge(inspector_text_styles.unimportant(colorScheme)),
+        children: [
+          TextSpan(
+            text: ': ',
+            style: textStyle,
+          ),
+          _buildHighlightedSearchPreview(
+            preview,
+            searchValue,
+            textStyle,
+            textStyle.merge(nodeDescriptionHighlightStyle),
+          ),
+        ],
       );
     }
   }
@@ -351,5 +365,56 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  TextSpan _buildHighlightedSearchPreview(
+    String textPreview,
+    String searchValue,
+    TextStyle textStyle,
+    TextStyle highlightTextStyle,
+  ) {
+    if (searchValue == null ||
+        textPreview.toLowerCase() == searchValue.toLowerCase()) {
+      return TextSpan(
+        text: '"$textPreview"',
+        style: highlightTextStyle,
+      );
+    }
+
+    final matches =
+        searchValue.toLowerCase().allMatches(textPreview.toLowerCase());
+    if (matches.isEmpty) {
+      return TextSpan(
+        text: '"$textPreview"',
+        style: highlightTextStyle,
+      );
+    }
+
+    final quoteSpan = TextSpan(text: '"', style: textStyle);
+    final spans = <TextSpan>[quoteSpan];
+    var previousItemEnd = 0;
+    for (final match in matches) {
+      if (match.start > previousItemEnd) {
+        spans.add(TextSpan(
+          text: textPreview.substring(previousItemEnd, match.start),
+          style: textStyle,
+        ));
+      }
+
+      spans.add(TextSpan(
+        text: textPreview.substring(match.start, match.end),
+        style: highlightTextStyle,
+      ));
+
+      previousItemEnd = match.end;
+    }
+
+    spans.add(TextSpan(
+      text: textPreview.substring(previousItemEnd, textPreview.length),
+      style: textStyle,
+    ));
+    spans.add(quoteSpan);
+
+    return TextSpan(children: spans);
   }
 }

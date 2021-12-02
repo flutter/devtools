@@ -315,14 +315,11 @@ class InspectorTreeConfig {
 
 enum SearchTargetType {
   widget,
-  details,
 }
 
 extension SearchTargetTypeExtension on SearchTargetType {
   String get name {
     switch (this) {
-      case SearchTargetType.details:
-        return 'Details';
       case SearchTargetType.widget:
       default:
         return 'Widget';

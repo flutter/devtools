@@ -110,9 +110,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // The app must not be a Flutter app.
       return;
     }
+    final inspectorTreeController = InspectorTreeController();
+    final detailsTree = InspectorTreeController();
     inspectorController = InspectorController(
-      inspectorTree: InspectorTreeController(),
-      detailsTree: InspectorTreeController(),
+      inspectorTree: inspectorTreeController,
+      detailsTree: detailsTree,
       treeType: FlutterTreeType.widget,
       onExpandCollapseSupported: _onExpandCollapseSupported,
       onLayoutExplorerSupported: _onLayoutExplorerSupported,
@@ -162,6 +164,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       key: detailsTreeKey,
       controller: detailsTreeController,
       debuggerController: _debuggerController,
+      inspectorTreeController: summaryTreeController,
     );
 
     final splitAxis = Split.axisFor(context, 0.85);
@@ -317,33 +320,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           shouldRequestFocus: searchVisible,
           supportsNavigation: true,
           onClose: _onSearchVisibleToggle,
-          prefix: _searchControlPrefix(),
         ),
       ),
     );
-  }
-
-  Widget _searchControlPrefix() {
-    return SearchDropdown<SearchTargetType>(
-        isDense: isDense(),
-        style: TextStyle(fontSize: 12.0, color: Theme.of(context).hintColor),
-        value: searchTarget,
-        onTap: () {
-          searchPreventCloseOnBlur = true;
-        },
-        onChanged: (SearchTargetType newTarget) {
-          setState(() {
-            searchTarget = newTarget;
-            summaryTreeController.setSearchTarget(searchTarget);
-          });
-          summaryTreeController.refreshSearchMatches();
-        },
-        items: SearchTargetType.values.map((SearchTargetType target) {
-          return DropdownMenuItem<SearchTargetType>(
-            value: target,
-            child: Text(target.name),
-          );
-        }).toList());
   }
 
   void _onSearchVisibleToggle() {

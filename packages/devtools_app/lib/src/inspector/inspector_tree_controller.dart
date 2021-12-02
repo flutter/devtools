@@ -18,7 +18,6 @@ import '../collapsible_mixin.dart';
 import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../debugger/debugger_controller.dart';
-import '../debugger/debugger_model.dart';
 import '../error_badge_manager.dart';
 import '../globals.dart';
 import '../theme.dart';
@@ -27,6 +26,8 @@ import '../ui/search.dart';
 import '../ui/utils.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
+import 'inspector_breadcrumbs.dart';
+import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
 
 /// Presents a [TreeNode].
@@ -140,6 +141,7 @@ class InspectorTreeController extends Object
 
   InspectorTreeNode get root => _root;
   InspectorTreeNode _root;
+
   set root(InspectorTreeNode node) {
     setState(() {
       _root = node;
@@ -208,6 +210,27 @@ class InspectorTreeController extends Object
 
   double getRowOffset(int index) {
     return (getCachedRow(index)?.depth ?? 0) * columnWidth;
+  }
+
+  List<InspectorTreeRow> getPathFromSelectedRowToRoot() {
+    final selectedItem = cachedRows.firstWhere(
+      (element) => element.isSelected,
+      orElse: () => null,
+    );
+    if (selectedItem == null) return [];
+
+    final pathToRoot = <InspectorTreeRow>[selectedItem];
+    InspectorTreeNode nextParentNode = selectedItem.node.parent;
+    while (nextParentNode != null) {
+      final rowItem = cachedRows.firstWhere(
+        (element) => element.node == nextParentNode,
+        orElse: null,
+      );
+      if (rowItem == null) break;
+      pathToRoot.add(rowItem);
+      nextParentNode = rowItem.node.parent;
+    }
+    return pathToRoot.reversed.toList();
   }
 
   set hover(InspectorTreeNode node) {
@@ -608,12 +631,10 @@ class InspectorTreeController extends Object
 
   Future _searchOperation;
   Timer _searchDebounce;
-  bool _shouldAbortSearch = false;
 
   @override
   List<InspectorTreeRow> matchesForSearch(String search) {
     updateMatches([]);
-    _shouldAbortSearch = true;
     searchInProgress = true;
 
     if (_searchDebounce?.isActive ?? false) {
@@ -624,7 +645,6 @@ class InspectorTreeController extends Object
       // do something with query
 
       // Abort any ongoing search operations and start a new one
-      _shouldAbortSearch = true;
       if (_searchOperation != null) {
         try {
           await _searchOperation;
@@ -632,7 +652,6 @@ class InspectorTreeController extends Object
           log(e, LogLevel.error);
         }
       }
-      _shouldAbortSearch = false;
       searchInProgress = true;
 
       // Start new search operation
@@ -699,79 +718,10 @@ class InspectorTreeController extends Object
           matches.add(row);
           setSearchMatch(row.node, true);
           _updateSearchMatches();
-
-          // Skip detailed search if we already have a match for this row
           continue;
         }
       }
       // Widget search end
-
-      // Details search begin
-      if (searchTarget == SearchTargetType.details) {
-        if (diagnostic.valueRef != null &&
-            diagnostic.inspectorService != null &&
-            !diagnostic.inspectorService.disposed &&
-            !diagnostic.isProperty) {
-          debugPrint('Detail search begin: ' + diagnostic.description);
-          DateTime date;
-
-          date = DateTime.now();
-          final objectGroup = serviceManager.inspectorService
-              .createObjectGroup('inspectorSearchDetails');
-          debugPrint('Took A ' +
-              date.difference(DateTime.now()).inMilliseconds.toString());
-          date = DateTime.now();
-          final variable = Variable.fromValue(
-            value:
-                await objectGroup.toObservatoryInstanceRef(diagnostic.valueRef),
-            isolateRef: serviceManager.inspectorService.isolateRef,
-            diagnostic: diagnostic,
-          );
-
-          debugPrint('Took B ' +
-              date.difference(DateTime.now()).inMilliseconds.toString());
-
-          date = DateTime.now();
-          await buildVariablesTree(variable);
-
-          debugPrint('Took C ' +
-              date.difference(DateTime.now()).inMilliseconds.toString());
-
-          date = DateTime.now();
-          for (final child in variable.children) {
-            if (child.name?.isNotEmpty == true && child.name != 'child') {
-              final variableDiagnostic = child.ref?.diagnostic;
-              if (variableDiagnostic != null) {
-                _statsSearchOps += 2;
-                if (child.name.toLowerCase().contains(caseInsensitiveSearch) ||
-                    variableDiagnostic.description
-                        .toLowerCase()
-                        .contains(caseInsensitiveSearch)) {
-                  matches.add(row);
-                  setSearchMatch(row.node, true);
-                  _updateSearchMatches();
-
-                  // Skip rest of the children if we already have a match for this row
-                  continue;
-                }
-              }
-            }
-          }
-          debugPrint('Took C ' +
-              date.difference(DateTime.now()).inMilliseconds.toString() +
-              'ms');
-          debugPrint('Detail search end: ' + diagnostic.description);
-
-          _updateSearchMatches();
-
-          if (_shouldAbortSearch) {
-            // Abort asynchronous search operation
-            debugPrint('Abort search');
-            break;
-          }
-        }
-      }
-      // Details search end
     }
 
     debugPrint('Search completed with ' +
@@ -795,11 +745,15 @@ class InspectorTree extends StatefulWidget {
     Key key,
     @required this.controller,
     @required this.debuggerController,
+    this.inspectorTreeController,
     this.isSummaryTree = false,
     this.widgetErrors,
-  }) : super(key: key);
+  })  : assert(isSummaryTree && inspectorTreeController == null ||
+            !isSummaryTree && inspectorTreeController != null),
+        super(key: key);
 
   final InspectorTreeController controller;
+  final InspectorTreeController inspectorTreeController;
   final DebuggerController debuggerController;
   final bool isSummaryTree;
   final LinkedHashMap<String, InspectableWidgetError> widgetErrors;
@@ -816,6 +770,7 @@ class _InspectorTreeState extends State<InspectorTree>
         AutoDisposeMixin
     implements InspectorControllerClient {
   InspectorTreeController get controller => widget.controller;
+
   bool get isSummaryTree => widget.isSummaryTree;
 
   ScrollController _scrollControllerY;
@@ -1052,7 +1007,7 @@ class _InspectorTreeState extends State<InspectorTree>
     return LayoutBuilder(
       builder: (context, constraints) {
         final viewportWidth = constraints.maxWidth;
-        return Scrollbar(
+        final Widget tree = Scrollbar(
           isAlwaysShown: true,
           controller: _scrollControllerX,
           child: SingleChildScrollView(
@@ -1111,6 +1066,23 @@ class _InspectorTreeState extends State<InspectorTree>
             ),
           ),
         );
+
+        final bool shouldShowBreadcrumbs = !widget.isSummaryTree;
+        if (shouldShowBreadcrumbs) {
+          final parents =
+              widget.inspectorTreeController.getPathFromSelectedRowToRoot();
+          return Column(
+            children: [
+              InspectorBreadcrumbNavigator(
+                rows: parents,
+                onTap: (row) => widget.inspectorTreeController.onSelectRow(row),
+              ),
+              Expanded(child: tree),
+            ],
+          );
+        }
+
+        return tree;
       },
     );
   }
@@ -1227,7 +1199,8 @@ class InspectorRowContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double currentX = controller.getDepthIndent(row.depth) - columnWidth;
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     if (row == null) {
       return const SizedBox();
@@ -1286,8 +1259,15 @@ class InspectorRowContent extends StatelessWidget {
                           node.diagnostic,
                           isSelected: row.isSelected,
                           hasSearchMatch: row.hasSearchMatch,
+                          searchValue: searchValue,
                           errorText: error?.errorMessage,
                           debuggerController: debuggerController,
+                          nodeDescriptionHighlightStyle:
+                              searchValue.isEmpty || !node.hasSearchMatch
+                                  ? inspector_text_styles.regular
+                                  : row.isSelected
+                                      ? theme.searchMatchHighlightStyleFocused
+                                      : theme.searchMatchHighlightStyle,
                         ),
                       ),
                     ),
