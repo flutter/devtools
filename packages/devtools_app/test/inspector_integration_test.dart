@@ -85,7 +85,7 @@ void main() async {
       );
 
       // Select the details tree.
-      await tester.tap(find.text('Details Tree'));
+      await tester.tap(find.text('Widget Details Tree'));
       await tester.pumpAndSettle(inspectorChangeSettleTime);
       await expectLater(
         find.byType(InspectorScreenBody),
@@ -111,8 +111,10 @@ void main() async {
       // icons is "Default value".
       // Test selecting a widget.
 
+      // Two 'Scaffold's: a breadcrumb and an actual tree item
+      expect(find.richText('Scaffold'), findsNWidgets(2));
       // select Scaffold widget in summary tree.
-      await tester.tap(find.richText('Scaffold'));
+      await tester.tap(find.richText('Scaffold').last);
       await tester.pumpAndSettle(inspectorChangeSettleTime);
       // This tree is huge. If there is a change to package:flutter it may
       // change. If this happens don't panic and rebaseline the golden.
