@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/allowed_error.dart';
@@ -355,8 +354,12 @@ class NetworkController
     }
   }
 
+  // TODO(kenz): search through previous matches when possible.
   @override
-  List<NetworkRequest> matchesForSearch(String search) {
+  List<NetworkRequest> matchesForSearch(
+    String search, {
+    bool searchPreviousMatches = false,
+  }) {
     if (search == null || search.isEmpty) return [];
     final matches = <NetworkRequest>[];
     final caseInsensitiveSearch = search.toLowerCase();
@@ -365,12 +368,9 @@ class NetworkController
     for (final request in currentRequests) {
       if (request.uri.toLowerCase().contains(caseInsensitiveSearch)) {
         matches.add(request);
-        // TODO(kenz): use the value of this property in the network requests
-        // table to improve performance. This will require some refactoring of
-        // FlatTable.
-        request.isSearchMatch = true;
-      } else {
-        request.isSearchMatch = false;
+        // TODO(kenz): use the value request.isSearchMatch in the network
+        // requests table to improve performance. This will require some
+        // refactoring of FlatTable.
       }
     }
     return matches;

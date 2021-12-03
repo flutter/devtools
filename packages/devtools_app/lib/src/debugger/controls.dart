@@ -12,7 +12,6 @@ import '../common_widgets.dart';
 import '../theme.dart';
 import '../ui/label.dart';
 import 'debugger_controller.dart';
-import 'scripts.dart';
 
 class DebuggingControls extends StatefulWidget {
   const DebuggingControls({Key key}) : super(key: key);
@@ -118,13 +117,14 @@ class _DebuggingControlsState extends State<DebuggingControls>
 
   Widget _librariesButton() {
     return ValueListenableBuilder(
-      valueListenable: controller.librariesVisible,
+      valueListenable: controller.fileExplorerVisible,
       builder: (context, visible, _) {
+        const libraryIcon = Icons.insert_chart;
         return RoundedOutlinedBorder(
           child: Container(
             color: visible ? Theme.of(context).highlightColor : null,
             child: DebuggerButton(
-              title: 'Libraries',
+              title: 'File Explorer',
               icon: libraryIcon,
               onPressed: controller.toggleLibrariesVisible,
             ),
@@ -154,7 +154,7 @@ class BreakOnExceptionsControl extends StatelessWidget {
           onChanged: controller.isSystemIsolate
               ? null
               : (ExceptionMode mode) {
-                  controller.setExceptionPauseMode(mode.id);
+                  controller.setIsolatePauseMode(mode.id);
                 },
           isDense: true,
           items: [
@@ -227,7 +227,7 @@ class DebuggerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: title,
+      message: title,
       child: OutlinedButton(
         autofocus: autofocus,
         style: OutlinedButton.styleFrom(
@@ -238,7 +238,7 @@ class DebuggerButton extends StatelessWidget {
         child: MaterialIconLabel(
           label: title,
           iconData: icon,
-          unscaleIncludeTextWidth: mediumDeviceWidth,
+          minScreenWidthForTextBeforeScaling: mediumDeviceWidth,
         ),
       ),
     );

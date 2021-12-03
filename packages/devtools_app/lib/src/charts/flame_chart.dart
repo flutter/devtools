@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -1101,7 +1100,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     if (hovered || !selectable) {
       return DevToolsTooltip(
         key: key,
-        tooltip: data.tooltip,
+        message: data.tooltip,
         child: node,
       );
     } else {
@@ -1451,14 +1450,14 @@ class TimelineGridPainter extends FlameChartPainter {
 
 class FlameChartHelpButton extends StatelessWidget {
   const FlameChartHelpButton({
-    @required this.screenId,
-    @required this.analyticsAction,
+    @required this.gaScreen,
+    @required this.gaSelection,
     this.additionalInfo = const <Widget>[],
   });
 
-  final String screenId;
+  final String gaScreen;
 
-  final String analyticsAction;
+  final String gaSelection;
 
   final List<Widget> additionalInfo;
 
@@ -1466,7 +1465,7 @@ class FlameChartHelpButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return HelpButton(
       onPressed: () {
-        ga.select(screenId, analyticsAction);
+        ga.select(gaScreen, gaSelection);
         showDialog(
           context: context,
           builder: (context) => _FlameChartHelpDialog(
@@ -1474,6 +1473,8 @@ class FlameChartHelpButton extends StatelessWidget {
           ),
         );
       },
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
     );
   }
 }

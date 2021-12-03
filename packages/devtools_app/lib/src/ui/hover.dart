@@ -5,14 +5,13 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../eval_on_dart_library.dart';
 import '../theme.dart';
-import '../ui/utils.dart';
 import '../utils.dart';
+import 'utils.dart';
 
 /// Regex for valid Dart identifiers.
 final _identifier = RegExp(r'^[a-zA-Z0-9]|_|\$');

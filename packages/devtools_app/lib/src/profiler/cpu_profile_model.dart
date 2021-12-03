@@ -4,8 +4,7 @@
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import '../charts/flame_chart.dart';
 import '../trace_event.dart';

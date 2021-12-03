@@ -233,7 +233,11 @@ Future<HttpServer?> serveDevTools({
   // Ensure browsers don't cache older versions of the app.
   _server.defaultResponseHeaders
       .add(HttpHeaders.cacheControlHeader, 'max-age=900');
-  shelf.serveRequests(_server, handler);
+  // Serve requests in an error zone to prevent failures
+  // when running from another error zone.
+  runZonedGuarded(() => shelf.serveRequests(_server, handler!), (e, _) {
+    print('Error serving requests: $e');
+  });
 
   final devToolsUrl = 'http://${_server.address.host}:${_server.port}';
 

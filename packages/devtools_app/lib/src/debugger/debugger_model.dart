@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -94,10 +94,27 @@ class ScriptLocation {
   String toString() => '${scriptRef.uri} $location';
 }
 
-/// A line, column, and an optional tokenPos.
 class SourcePosition {
-  SourcePosition({@required this.line, @required this.column, this.tokenPos});
+  const SourcePosition({
+    @required this.line,
+    @required this.column,
+    this.file,
+    this.tokenPos,
+  });
 
+  factory SourcePosition.calculatePosition(Script script, int tokenPos) {
+    if (script.tokenPosTable == null) {
+      return null;
+    }
+
+    return SourcePosition(
+      line: script.getLineNumberFromTokenPos(tokenPos),
+      column: script.getColumnNumberFromTokenPos(tokenPos),
+      tokenPos: tokenPos,
+    );
+  }
+
+  final String file;
   final int line;
   final int column;
   final int tokenPos;
@@ -294,8 +311,8 @@ class StackFrameAndSourcePosition {
 }
 
 Future<void> addExpandableChildren(
-  Variable variable,
-  List<Variable> children, {
+  DartObjectNode variable,
+  List<DartObjectNode> children, {
   bool expandAll = false,
 }) async {
   final tasks = <Future>[];
@@ -310,13 +327,14 @@ Future<void> addExpandableChildren(
   }
 }
 
-/// Builds the tree representation for a [Variable] object by querying data,
-/// creating child Variable objects, and assigning parent-child relationships.
+/// Builds the tree representation for a [DartObjectNode] object by querying
+/// data, creating child [DartObjectNode] objects, and assigning parent-child
+/// relationships.
 ///
 /// We call this method as we expand variables in the variable tree, because
 /// building the tree for all variable data at once is very expensive.
 Future<void> buildVariablesTree(
-  Variable variable, {
+  DartObjectNode variable, {
   bool expandAll = false,
 }) async {
   final ref = variable.ref;
@@ -364,10 +382,28 @@ Future<void> buildVariablesTree(
       }
     }
   }
-  if (instanceRef != null) {
+
+  if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
+    final numChildrenInGrouping =
+        variable.childCount >= pow(DartObjectNode.MAX_CHILDREN_IN_GROUPING, 2)
+            ? (roundToNearestPow10(variable.childCount) /
+                    DartObjectNode.MAX_CHILDREN_IN_GROUPING)
+                .floor()
+            : DartObjectNode.MAX_CHILDREN_IN_GROUPING;
+
+    var start = variable.offset ?? 0;
+    final end = start + variable.childCount;
+    while (start < end) {
+      final count = min(end - start, numChildrenInGrouping);
+      variable.addChild(
+        DartObjectNode.grouping(variable.ref, offset: start, count: count),
+      );
+      start += count;
+    }
+  } else if (instanceRef != null && serviceManager.service != null) {
     try {
-      final dynamic result = await serviceManager.service
-          .getObject(variable.ref.isolateRef.id, instanceRef.id);
+      final dynamic result =
+          await _getObjectWithRetry(instanceRef.id, variable);
       if (result is Instance) {
         if (result.associations != null) {
           variable.addAllChildren(
@@ -390,10 +426,10 @@ Future<void> buildVariablesTree(
   }
   if (diagnostic != null && includeDiagnosticChildren) {
     // Always add children last after properties to avoid confusion.
-    final ObjectGroup service = diagnostic.inspectorService;
+    final ObjectGroupBase service = diagnostic.inspectorService;
     final diagnosticChildren = await diagnostic.children;
     if (diagnosticChildren?.isNotEmpty ?? false) {
-      final childrenNode = Variable.text(
+      final childrenNode = DartObjectNode.text(
         pluralize('child', diagnosticChildren.length, plural: 'children'),
       );
       variable.addChild(childrenNode);
@@ -412,8 +448,8 @@ Future<void> buildVariablesTree(
   final inspectorService = serviceManager.inspectorService;
   if (inspectorService != null) {
     final tasks = <Future>[];
-    ObjectGroup group;
-    Future<void> _maybeUpdateRef(Variable child) async {
+    ObjectGroupBase group;
+    Future<void> _maybeUpdateRef(DartObjectNode child) async {
       if (child.ref == null) return;
       if (child.ref.diagnostic == null) {
         // TODO(jacobr): also check whether the InstanceRef is an instance of
@@ -423,8 +459,8 @@ Future<void> buildVariablesTree(
         // TODO(jacobr): cache the full class hierarchy so we can cheaply check
         // instanceRef is DiagnosticsNode without having to do an eval.
         if (instanceRef != null &&
-            (instanceRef.classRef.name == 'DiagnosticableTreeNode' ||
-                instanceRef.classRef.name == 'DiagnosticsProperty')) {
+            (instanceRef.classRef?.name == 'DiagnosticableTreeNode' ||
+                instanceRef.classRef?.name == 'DiagnosticsProperty')) {
           // The user is expecting to see the object the DiagnosticsNode is
           // describing not the DiagnosticsNode itself.
           try {
@@ -459,14 +495,33 @@ Future<void> buildVariablesTree(
   variable.treeInitializeComplete = true;
 }
 
-Future<Variable> _buildVariable(
+// TODO(elliette): Remove once the fix for dart-lang/webdev/issues/1439
+// is landed. This works around a bug in DWDS where an error is thrown if
+// `getObject` is called with offset/count for an object that has no length.
+Future<Obj> _getObjectWithRetry(
+  String objectId,
+  DartObjectNode variable,
+) async {
+  try {
+    final dynamic result = await serviceManager.service.getObject(
+        variable.ref.isolateRef.id, objectId,
+        offset: variable.offset, count: variable.childCount);
+    return result;
+  } catch (e) {
+    final dynamic result = await serviceManager.service
+        .getObject(variable.ref.isolateRef.id, objectId);
+    return result;
+  }
+}
+
+Future<DartObjectNode> _buildVariable(
   RemoteDiagnosticsNode diagnostic,
-  ObjectGroup inspectorService,
+  ObjectGroupBase inspectorService,
   IsolateRef isolateRef,
 ) async {
   final instanceRef =
       await inspectorService.toObservatoryInstanceRef(diagnostic.valueRef);
-  return Variable.fromValue(
+  return DartObjectNode.fromValue(
     name: diagnostic.name,
     value: instanceRef,
     diagnostic: diagnostic,
@@ -474,12 +529,12 @@ Future<Variable> _buildVariable(
   );
 }
 
-Future<List<Variable>> _createVariablesForDiagnostics(
-  ObjectGroup inspectorService,
+Future<List<DartObjectNode>> _createVariablesForDiagnostics(
+  ObjectGroupBase inspectorService,
   List<RemoteDiagnosticsNode> diagnostics,
   IsolateRef isolateRef,
 ) async {
-  final variables = <Future<Variable>>[];
+  final variables = <Future<DartObjectNode>>[];
   for (var diagnostic in diagnostics) {
     // Omit hidden properties.
     if (diagnostic.level == DiagnosticLevel.hidden) continue;
@@ -492,28 +547,31 @@ Future<List<Variable>> _createVariablesForDiagnostics(
   }
 }
 
-List<Variable> _createVariablesForAssociations(
+List<DartObjectNode> _createVariablesForAssociations(
   Instance instance,
   IsolateRef isolateRef,
 ) {
-  final variables = <Variable>[];
+  final variables = <DartObjectNode>[];
   for (var i = 0; i < instance.associations.length; i++) {
     final association = instance.associations[i];
     if (association.key is! InstanceRef) {
       continue;
     }
-    final key = Variable.fromValue(
+    final key = DartObjectNode.fromValue(
       name: '[key]',
       value: association.key,
       isolateRef: isolateRef,
     );
-    final value = Variable.fromValue(
+    final value = DartObjectNode.fromValue(
       name: '[value]',
       value: association.value,
       isolateRef: isolateRef,
     );
+    final entryNum = instance.offset == null ? i : i + instance.offset;
     variables.add(
-      Variable.text('[Entry $i]')..addChild(key)..addChild(value),
+      DartObjectNode.text('[Entry $entryNum]')
+        ..addChild(key)
+        ..addChild(value),
     );
   }
   return variables;
@@ -525,12 +583,12 @@ List<Variable> _createVariablesForAssociations(
 ///
 /// This method does not currently support [Uint64List] or
 /// [Int64List].
-List<Variable> _createVariablesForBytes(
+List<DartObjectNode> _createVariablesForBytes(
   Instance instance,
   IsolateRef isolateRef,
 ) {
   final bytes = base64.decode(instance.bytes);
-  final variables = <Variable>[];
+  final variables = <DartObjectNode>[];
   List<dynamic> result;
   switch (instance.kind) {
     case InstanceKind.kUint8ClampedList:
@@ -546,7 +604,7 @@ List<Variable> _createVariablesForBytes(
     case InstanceKind.kUint64List:
       // TODO: https://github.com/flutter/devtools/issues/2159
       if (kIsWeb) {
-        return <Variable>[];
+        return <DartObjectNode>[];
       }
       result = Uint64List.view(bytes.buffer);
       break;
@@ -562,7 +620,7 @@ List<Variable> _createVariablesForBytes(
     case InstanceKind.kInt64List:
       // TODO: https://github.com/flutter/devtools/issues/2159
       if (kIsWeb) {
-        return <Variable>[];
+        return <DartObjectNode>[];
       }
       result = Int64List.view(bytes.buffer);
       break;
@@ -586,9 +644,10 @@ List<Variable> _createVariablesForBytes(
   }
 
   for (int i = 0; i < result.length; i++) {
+    final name = instance.offset == null ? i : i + instance.offset;
     variables.add(
-      Variable.fromValue(
-        name: '[$i]',
+      DartObjectNode.fromValue(
+        name: '[$name]',
         value: result[i],
         isolateRef: isolateRef,
       ),
@@ -597,15 +656,16 @@ List<Variable> _createVariablesForBytes(
   return variables;
 }
 
-List<Variable> _createVariablesForElements(
+List<DartObjectNode> _createVariablesForElements(
   Instance instance,
   IsolateRef isolateRef,
 ) {
-  final variables = <Variable>[];
+  final variables = <DartObjectNode>[];
   for (int i = 0; i < instance.elements.length; i++) {
+    final name = instance.offset == null ? i : i + instance.offset;
     variables.add(
-      Variable.fromValue(
-        name: '[$i]',
+      DartObjectNode.fromValue(
+        name: '[$name]',
         value: instance.elements[i],
         isolateRef: isolateRef,
       ),
@@ -614,17 +674,17 @@ List<Variable> _createVariablesForElements(
   return variables;
 }
 
-List<Variable> _createVariablesForFields(
+List<DartObjectNode> _createVariablesForFields(
   Instance instance,
   IsolateRef isolateRef, {
   Set<String> existingNames,
 }) {
-  final variables = <Variable>[];
+  final variables = <DartObjectNode>[];
   for (var field in instance.fields) {
     final name = field.decl.name;
     if (existingNames != null && existingNames.contains(name)) continue;
     variables.add(
-      Variable.fromValue(
+      DartObjectNode.fromValue(
         name: name,
         value: field.value,
         isolateRef: isolateRef,
@@ -636,10 +696,16 @@ List<Variable> _createVariablesForFields(
 
 // TODO(jacobr): gracefully handle cases where the isolate has closed and
 // InstanceRef objects have become sentinels.
-// TODO(jacobr): consider a new class name. This class is more just the data
-// model for a tree of Dart objects with properties rather than a "Variable".
-class Variable extends TreeNode<Variable> {
-  Variable._(this.name, ref, this.text) : _ref = ref {
+class DartObjectNode extends TreeNode<DartObjectNode> {
+  DartObjectNode._({
+    this.name,
+    this.text,
+    GenericInstanceRef ref,
+    int offset,
+    int childCount,
+  })  : _ref = ref,
+        _offset = offset,
+        _childCount = childCount {
     indentChildren = ref?.diagnostic?.style != DiagnosticsTreeStyle.flat;
   }
 
@@ -648,54 +714,91 @@ class Variable extends TreeNode<Variable> {
   ///
   /// [value] should typically be an [InstanceRef] but can also be a [Sentinel]
   /// [ObjRef] or primitive type such as num or String.
-  factory Variable.fromValue({
+  factory DartObjectNode.fromValue({
     String name = '',
     @required Object value,
     RemoteDiagnosticsNode diagnostic,
     @required IsolateRef isolateRef,
   }) {
-    return Variable._(
-      name,
-      GenericInstanceRef(
+    return DartObjectNode._(
+      name: name,
+      ref: GenericInstanceRef(
         isolateRef: isolateRef,
         diagnostic: diagnostic,
         value: value,
       ),
-      null,
     );
   }
 
-  factory Variable.create(
+  factory DartObjectNode.create(
     BoundVariable variable,
     IsolateRef isolateRef,
   ) {
     final value = variable.value;
-    return Variable._(
-      variable.name,
-      GenericInstanceRef(
+    return DartObjectNode._(
+      name: variable.name,
+      ref: GenericInstanceRef(
         isolateRef: isolateRef,
         value: value,
       ),
-      null,
     );
   }
 
-  factory Variable.text(String text) {
-    return Variable._(null, null, text);
+  factory DartObjectNode.text(String text) {
+    return DartObjectNode._(text: text);
   }
+
+  factory DartObjectNode.grouping(
+    GenericInstanceRef ref, {
+    @required int offset,
+    @required int count,
+  }) {
+    return DartObjectNode._(
+      ref: ref,
+      text: '[$offset - ${offset + count - 1}]',
+      offset: offset,
+      childCount: count,
+    );
+  }
+
+  static const MAX_CHILDREN_IN_GROUPING = 100;
 
   final String text;
   final String name;
   GenericInstanceRef get ref => _ref;
   GenericInstanceRef _ref;
 
+  /// The point to fetch the variable from (in the case of large variables that
+  /// we fetch only parts of at a time).
+  int get offset => _offset ?? 0;
+
+  int _offset;
+
+  int get childCount {
+    if (_childCount != null) return _childCount;
+
+    final value = this.value;
+    if (value is InstanceRef) {
+      if (value.kind != null &&
+          (value.kind.endsWith('List') ||
+              value.kind == InstanceKind.kList ||
+              value.kind == InstanceKind.kMap)) {
+        return value.length ?? 0;
+      }
+    }
+
+    return 0;
+  }
+
+  int _childCount;
+
   bool treeInitializeStarted = false;
   bool treeInitializeComplete = false;
 
   @override
   bool get isExpandable {
-    if (treeInitializeComplete || children.isNotEmpty) {
-      return children.isNotEmpty;
+    if (treeInitializeComplete || children.isNotEmpty || childCount > 0) {
+      return children.isNotEmpty || childCount > 0;
     }
     final diagnostic = ref.diagnostic;
     if (diagnostic != null &&
@@ -780,16 +883,18 @@ class Variable extends TreeNode<Variable> {
     }
     // Group name doesn't matter in this case.
     final group = inspectorService.createObjectGroup('inspect-variables');
-
-    try {
-      return await group.setSelection(ref);
-    } catch (e) {
-      // This is somewhat unexpected. The inspectorRef must have been disposed.
-      return false;
-    } finally {
-      // Not really needed as we shouldn't actually be allocating anything.
-      unawaited(group.dispose());
+    if (group is ObjectGroup) {
+      try {
+        return await group.setSelection(ref);
+      } catch (e) {
+        // This is somewhat unexpected. The inspectorRef must have been disposed.
+        return false;
+      } finally {
+        // Not really needed as we shouldn't actually be allocating anything.
+        unawaited(group.dispose());
+      }
     }
+    return false;
   }
 
   Future<bool> get isInspectable async {
@@ -819,7 +924,7 @@ class Variable extends TreeNode<Variable> {
   bool _isInspectable;
 
   @override
-  Variable shallowCopy() {
+  DartObjectNode shallowCopy() {
     throw UnimplementedError('This method is not implemented. Implement if you '
         'need to call `shallowCopy` on an instance of this class.');
   }

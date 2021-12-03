@@ -13,7 +13,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
@@ -139,10 +138,11 @@ Finder findSubstring(Widget widget, String text) {
     if (widget is Text) {
       if (widget.data != null) return widget.data.contains(text);
       return widget.textSpan.toPlainText().contains(text);
+    } else if (widget is RichText) {
+      return widget.text.toPlainText().contains(text);
     } else if (widget is SelectableText) {
       if (widget.data != null) return widget.data.contains(text);
     }
-
     return false;
   });
 }
@@ -292,6 +292,24 @@ void verifyIsSearchMatch(
     } else {
       expect(request.isSearchMatch, isFalse);
     }
+  }
+}
+
+void verifyIsSearchMatchForTreeData<T extends TreeDataSearchStateMixin<T>>(
+  List<T> data,
+  List<T> matches,
+) {
+  for (final node in data) {
+    breadthFirstTraversal<T>(
+      node,
+      action: (T e) {
+        if (matches.contains(e)) {
+          expect(e.isSearchMatch, isTrue);
+        } else {
+          expect(e.isSearchMatch, isFalse);
+        }
+      },
+    );
   }
 }
 

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 class HistoryManager<T> {
   /// The currently selected historical item.
@@ -51,6 +50,11 @@ class HistoryManager<T> {
     _historyIndex--;
     _current.value = _history[_historyIndex];
   }
+
+  /// Return the next value.
+  ///
+  /// Returns null if there is no next value.
+  T peekNext() => hasNext ? _history[_historyIndex + 1] : null;
 
   /// Remove the most recent historical item on the stack.
   ///

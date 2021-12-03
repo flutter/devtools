@@ -26,23 +26,23 @@ class Variables extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Provider.of<DebuggerController>(context);
 
-    return ValueListenableBuilder<List<Variable>>(
+    return ValueListenableBuilder<List<DartObjectNode>>(
       valueListenable: controller.variables,
       builder: (context, variables, _) {
         if (variables.isEmpty) return const SizedBox();
         // TODO(kenz): preserve expanded state of tree on switching frames and
         // on stepping.
-        return TreeView<Variable>(
+        return TreeView<DartObjectNode>(
           dataRoots: variables,
           dataDisplayProvider: (variable, onPressed) =>
               displayProvider(context, variable, onPressed, controller),
-          onItemPressed: (variable) => onItemPressed(variable, controller),
+          onItemSelected: (variable) => onItemPressed(variable, controller),
         );
       },
     );
   }
 
-  void onItemPressed(Variable v, DebuggerController controller) {
+  void onItemPressed(DartObjectNode v, DebuggerController controller) {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
       v.children.forEach(buildVariablesTree);
@@ -53,7 +53,7 @@ class Variables extends StatelessWidget {
 class VariablesList extends StatelessWidget {
   const VariablesList({Key key, this.lines}) : super(key: key);
 
-  final List<Variable> lines;
+  final List<DartObjectNode> lines;
 
   @override
   Widget build(BuildContext context) {
@@ -61,15 +61,15 @@ class VariablesList extends StatelessWidget {
     if (lines.isEmpty) return const SizedBox();
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
-    return TreeView<Variable>(
+    return TreeView<DartObjectNode>(
       dataRoots: lines,
       dataDisplayProvider: (variable, onPressed) =>
           displayProvider(context, variable, onPressed, controller),
-      onItemPressed: (variable) => onItemPressed(variable, controller),
+      onItemSelected: (variable) => onItemPressed(variable, controller),
     );
   }
 
-  void onItemPressed(Variable v, DebuggerController controller) {
+  void onItemPressed(DartObjectNode v, DebuggerController controller) {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
       v.children.forEach(buildVariablesTree);
@@ -85,30 +85,30 @@ class ExpandableVariable extends StatelessWidget {
   })  : assert(debuggerController != null),
         super(key: key);
 
-  final ValueListenable<Variable> variable;
+  final ValueListenable<DartObjectNode> variable;
   final DebuggerController debuggerController;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<Variable>(
+    return ValueListenableBuilder<DartObjectNode>(
       valueListenable: variable,
       builder: (context, variable, _) {
         if (variable == null) return const SizedBox();
         // TODO(kenz): preserve expanded state of tree on switching frames and
         // on stepping.
-        return TreeView<Variable>(
+        return TreeView<DartObjectNode>(
           dataRoots: [variable],
           shrinkWrap: true,
           dataDisplayProvider: (variable, onPressed) =>
               displayProvider(context, variable, onPressed, debuggerController),
-          onItemPressed: (variable) =>
+          onItemSelected: (variable) =>
               onItemPressed(variable, debuggerController),
         );
       },
     );
   }
 
-  void onItemPressed(Variable v, DebuggerController controller) {
+  void onItemPressed(DartObjectNode v, DebuggerController controller) {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
       v.children.forEach(buildVariablesTree);
@@ -119,7 +119,7 @@ class ExpandableVariable extends StatelessWidget {
 // TODO(jacobr): this looks like a widget.
 Widget displayProvider(
   BuildContext context,
-  Variable variable,
+  DartObjectNode variable,
   VoidCallback onTap,
   DebuggerController controller,
 ) {
@@ -151,7 +151,7 @@ Widget displayProvider(
     );
   }
   return DevToolsTooltip(
-    tooltip: variable.displayValue,
+    message: variable.displayValue,
     waitDuration: tooltipWaitLong,
     child: SelectableText.rich(
       TextSpan(
@@ -221,7 +221,8 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
       endpoints: endpoints,
       delegate: delegate,
       clipboardStatus: clipboardStatus,
-      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+      handleCut:
+          canCut(delegate) ? () => handleCut(delegate, clipboardStatus) : null,
       handleCopy: canCopy(delegate)
           ? () => handleCopy(delegate, clipboardStatus)
           : null,

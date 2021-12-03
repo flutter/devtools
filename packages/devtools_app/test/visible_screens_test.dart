@@ -48,19 +48,15 @@ void main() {
       if (web) {
         fakeServiceManager.availableLibraries.add('dart:html');
       }
-      mockIsFlutterApp(fakeServiceManager.connectedApp, flutter);
+      mockIsFlutterApp(
+        fakeServiceManager.connectedApp,
+        isFlutterApp: flutter,
+        isProfileBuild: !debugMode,
+      );
       if (flutter) {
         fakeServiceManager.availableLibraries
             .add('package:flutter/src/widgets/binding.dart');
       }
-      mockIsDebugFlutterApp(
-        fakeServiceManager.connectedApp,
-        flutter && debugMode,
-      );
-      mockIsProfileFlutterApp(
-        fakeServiceManager.connectedApp,
-        flutter && !debugMode,
-      );
       flutterVersion ??= SemanticVersion(major: 2, minor: 3, patch: 1);
       mockFlutterVersion(fakeServiceManager.connectedApp, flutterVersion);
     }
@@ -167,7 +163,15 @@ void main() {
         (WidgetTester tester) async {
       setupMockValues(
         flutter: true,
-        flutterVersion: SemanticVersion(major: 2, minor: 3),
+        flutterVersion: SemanticVersion(
+          major: 2,
+          minor: 3,
+          // Specifying patch makes the version number more readable.
+          // ignore: avoid_redundant_argument_values
+          patch: 0,
+          preReleaseMajor: 15,
+          preReleaseMinor: 0,
+        ),
       );
 
       expect(

@@ -165,11 +165,13 @@ void main() {
       final profile = requestsNotifier.value;
       expect(profile.requests.length, numRequests);
 
-      var matches = controller.matchesForSearch('year=2019');
+      controller.search = 'year=2019';
+      var matches = controller.searchMatches.value;
       expect(matches.length, equals(5));
       verifyIsSearchMatch(profile.requests, matches);
 
-      matches = controller.matchesForSearch('IPv6');
+      controller.search = 'IPv6';
+      matches = controller.searchMatches.value;
       expect(matches.length, equals(2));
       verifyIsSearchMatch(profile.requests, matches);
     });

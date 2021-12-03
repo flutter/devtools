@@ -7,7 +7,6 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 import 'package:provider/provider.dart';
 
 import 'mocks.dart';
@@ -35,7 +34,9 @@ Widget wrap(Widget widget) {
       ),
       _testNavigatorKey,
     ),
-    routeInformationParser: DevToolsRouteInformationParser(),
+    routeInformationParser:
+        // ignore: invalid_use_of_visible_for_testing_member
+        DevToolsRouteInformationParser.test('http://test/uri'),
   );
 }
 
@@ -102,7 +103,6 @@ Widget wrapWithInspectorControllers(Widget widget) {
 
 /// Call [testWidgets], allowing the test to set specific values for app globals
 /// ([MessageBus], ...).
-@isTest
 void testWidgetsWithContext(
   String description,
   WidgetTesterCallback callback, {
@@ -128,7 +128,6 @@ void testWidgetsWithContext(
 }
 
 /// Runs a test with the size of the app window under test to [windowSize].
-@isTest
 void testWidgetsWithWindowSize(
   String name,
   Size windowSize,

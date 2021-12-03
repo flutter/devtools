@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:devtools_app/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -108,6 +106,15 @@ void main() {
       expect(log2(2), equals(1));
       expect(log2(3), equals(1));
       expect(log2(4), equals(2));
+    });
+
+    test('roundToNearestPow10', () {
+      expect(roundToNearestPow10(1), equals(1));
+      expect(roundToNearestPow10(2), equals(10));
+      expect(roundToNearestPow10(10), equals(10));
+      expect(roundToNearestPow10(11), equals(100));
+      expect(roundToNearestPow10(189), equals(1000));
+      expect(roundToNearestPow10(6581), equals(10000));
     });
 
     test('executeWithDelay', () async {

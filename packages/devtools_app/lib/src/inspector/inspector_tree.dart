@@ -13,7 +13,6 @@ library inspector_tree;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 
 import '../theme.dart';
 import '../utils.dart';
@@ -295,8 +294,8 @@ class InspectorTreeConfig {
   InspectorTreeConfig({
     @required this.summaryTree,
     @required this.treeType,
-    @required this.onNodeAdded,
-    @required this.onClientActiveChange,
+    this.onNodeAdded,
+    this.onClientActiveChange,
     this.onSelectionChange,
     this.onExpand,
     this.onHover,

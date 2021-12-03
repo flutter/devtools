@@ -102,11 +102,13 @@ void main() {
       addGcData('gc2');
 
       expect(controller.filteredData.value, hasLength(5));
-      var matches = controller.matchesForSearch('abc');
+      controller.search = 'abc';
+      var matches = controller.searchMatches.value;
       expect(matches.length, equals(2));
       verifyIsSearchMatch(controller.filteredData.value, matches);
 
-      matches = controller.matchesForSearch('gc');
+      controller.search = 'gc';
+      matches = controller.searchMatches.value;
       expect(matches.length, equals(2));
       verifyIsSearchMatch(controller.filteredData.value, matches);
     });

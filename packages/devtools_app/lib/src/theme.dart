@@ -145,9 +145,13 @@ double get smallButtonHeight => scaleByFontFactor(20.0);
 
 double get buttonMinWidth => scaleByFontFactor(36.0);
 
-double get defaultIconSize => scaleByFontFactor(16.0);
-double get actionsIconSize => scaleByFontFactor(20.0);
+double get defaultIconSize => scaleByFontFactor(defaultIconSizeBeforeScaling);
+double get actionsIconSize =>
+    scaleByFontFactor(defaultActionsIconSizeBeforeScaling);
 double get tooltipIconSize => scaleByFontFactor(12.0);
+
+const defaultIconSizeBeforeScaling = 16.0;
+const defaultActionsIconSizeBeforeScaling = 20.0;
 
 const defaultSpacing = 16.0;
 const denseSpacing = 8.0;
@@ -234,13 +238,21 @@ extension DevToolsColorScheme on ColorScheme {
   Color get contrastForeground =>
       isLight ? Colors.black : _contrastForegroundWhite;
 
-  Color get serviceExtensionButtonsTitle =>
+  Color get overlayShadowColor => const Color.fromRGBO(0, 0, 0, 0.5);
+
+  Color get overlayBackgroundColor =>
+      isLight ? Colors.white : const Color(0xFF424242);
+
+  Color get errorTextColor =>
+      isLight ? const Color(0xFFA53725) : const Color(0xFFE09790);
+
+  Color get toggleButtonsTitle =>
       isLight ? const Color(0xFF464646) : const Color(0xFFAEAEB1);
 
-  Color get serviceExtensionButtonsTitleSelected =>
+  Color get toggleButtonsTitleSelected =>
       isLight ? Colors.white : const Color(0xFF464646);
 
-  Color get serviceExtensionButtonsFillSelected => devtoolsBlue[400];
+  Color get toggleButtonsFillSelected => devtoolsBlue[400];
 
   Color get grey => isLight
       ? const Color.fromARGB(255, 128, 128, 128)
@@ -421,6 +433,10 @@ extension ThemeDataExtension on ThemeData {
   TextStyle get subtleFixedFontStyle =>
       fixedFontStyle.copyWith(color: unselectedWidgetColor);
 
+  TextStyle get toolTipFixedFontStyle => fixedFontStyle.copyWith(
+        color: colorScheme.tooltipTextColor,
+      );
+
   TextStyle get devToolsTitleStyle =>
       textTheme.headline6.copyWith(color: Colors.white);
 
@@ -435,6 +451,7 @@ extension ThemeDataExtension on ThemeData {
       );
 }
 
+const extraWideSearchTextWidth = 600.0;
 const wideSearchTextWidth = 400.0;
 const defaultSearchTextWidth = 200.0;
 double get defaultTextFieldHeight => scaleByFontFactor(32.0);

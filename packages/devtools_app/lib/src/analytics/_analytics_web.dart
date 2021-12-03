@@ -29,6 +29,8 @@ import 'constants.dart' as analytics_constants;
 // Dimensions1 AppType values:
 const String appTypeFlutter = 'flutter';
 const String appTypeWeb = 'web';
+const String appTypeFlutterWeb = 'flutter_web';
+const String appTypeDartCLI = 'dart_cli';
 // Dimensions2 BuildType values:
 const String buildTypeDebug = 'debug';
 const String buildTypeProfile = 'profile';
@@ -82,6 +84,7 @@ class GtagEventDevTools extends GtagEvent {
     String ide_launched, // dimension7 Devtools launched (CLI, VSCode, Android)
     String flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
     bool is_external_build, // dimension9 External build or google3
+    bool is_embedded, // dimension10 Whether devtools is embedded
 
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int ui_duration_micros,
@@ -179,6 +182,7 @@ GtagEventDevTools gtagEventWithScreenMetrics({
     ide_launched: ideLaunched,
     flutter_client_id: flutterClientId,
     is_external_build: isExternalBuild,
+    is_embedded: ideTheme.embed,
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
         : null,
@@ -271,6 +275,7 @@ void screen(
       ide_launched: ideLaunched,
       flutter_client_id: flutterClientId,
       is_external_build: isExternalBuild,
+      is_embedded: ideTheme.embed,
     ),
   );
 }
@@ -550,13 +555,16 @@ Future<void> computeUserApplicationCustomGTagData() async {
         ? serviceManager.vm.operatingSystem
         : 'unknown';
   }
-
-  if (serviceManager.connectedApp.isFlutterAppNow) {
+  if (serviceManager.connectedApp.isFlutterWebAppNow) {
+    userAppType = appTypeFlutterWeb;
+  } else if (serviceManager.connectedApp.isFlutterAppNow) {
     userAppType = appTypeFlutter;
-  }
-  if (serviceManager.connectedApp.isDartWebAppNow) {
+  } else if (serviceManager.connectedApp.isDartWebAppNow) {
     userAppType = appTypeWeb;
+  } else {
+    userAppType = appTypeDartCLI;
   }
+
   userBuildType = serviceManager.connectedApp.isProfileBuildNow
       ? buildTypeProfile
       : buildTypeDebug;

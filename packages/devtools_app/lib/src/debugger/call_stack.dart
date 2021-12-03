@@ -122,7 +122,7 @@ class _CallStackState extends State<CallStack> {
       return result;
     } else {
       return DevToolsTooltip(
-        tooltip: locationDescription == null
+        message: locationDescription == null
             ? frameDescription
             : '$frameDescription $locationDescription',
         waitDuration: tooltipWaitLong,

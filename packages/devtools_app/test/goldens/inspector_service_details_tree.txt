@@ -12,13 +12,6 @@ MaterialApp
          └─Semantics
            │ container: false
            │ properties: SemanticsProperties
-           │ label: null
-           │ attributedLabel: "null"
-           │ value: null
-           │ attributedValue: "null"
-           │ hint: null
-           │ attributedHint: "null"
-           │ hintOverrides: null
            │ renderObject: RenderSemanticsAnnotations#00000
            │
            └─WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]
@@ -28,4 +21,11 @@ MaterialApp
                │ state: _RootRestorationScopeState#00000
                │
                └─UnmanagedRestorationScope
+                 └─RestorationScope
+                   │ dependencies: [UnmanagedRestorationScope]
+                   │ state: _RestorationScopeState#00000
+                   │
+                   └─UnmanagedRestorationScope
+                     └─SharedAppData
+                       │ state: _SharedAppDataState#00000
 ...

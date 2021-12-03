@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:devtools_app/src/core/message_bus.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_extensions.dart';
@@ -170,13 +168,19 @@ void main() {
       await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
       expect(find.byWidget(button), findsOneWidget);
 
-      await mockServiceManager.serviceExtensionManager
-          .setServiceExtensionState(structuredErrors.extension, true, true);
+      await mockServiceManager.serviceExtensionManager.setServiceExtensionState(
+        structuredErrors.extension,
+        enabled: true,
+        value: true,
+      );
       await tester.pumpAndSettle();
       expect(toggle.value, true, reason: 'The extension is enabled.');
 
-      await mockServiceManager.serviceExtensionManager
-          .setServiceExtensionState(structuredErrors.extension, false, false);
+      await mockServiceManager.serviceExtensionManager.setServiceExtensionState(
+        structuredErrors.extension,
+        enabled: false,
+        value: false,
+      );
       await tester.pumpAndSettle();
       expect(toggle.value, false, reason: 'The extension is disabled.');
     });
