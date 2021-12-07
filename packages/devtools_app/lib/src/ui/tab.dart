@@ -43,6 +43,10 @@ class DevToolsTab extends Tab {
 
 /// A combined [TabBar] and [TabBarView] implementation that tracks tab changes
 /// to our analytics.
+///
+/// When using this widget, ensure that the [AnalyticsTabbedView] is not being
+/// rebuilt unnecessarily, as each call to [initState] and [didUpdateWidget]
+/// will send an event to analytics for the default selected tab.
 class AnalyticsTabbedView<T> extends StatefulWidget {
   const AnalyticsTabbedView({
     Key key,
