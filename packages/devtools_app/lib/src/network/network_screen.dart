@@ -113,12 +113,8 @@ Example queries:
 }
 
 class _NetworkScreenBodyState extends State<NetworkScreenBody>
-    with AutoDisposeMixin, SearchFieldMixin<NetworkScreenBody> {
+    with AutoDisposeMixin {
   NetworkController _networkController;
-
-  NetworkRequests requests;
-
-  List<NetworkRequest> filteredRequests;
 
   @override
   void initState() {
@@ -135,19 +131,6 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 
     _networkController = newController;
     _networkController.startRecording();
-
-    requests = _networkController.requests.value;
-    addAutoDisposeListener(_networkController.requests, () {
-      setState(() {
-        requests = _networkController.requests.value;
-      });
-    });
-    filteredRequests = _networkController.filteredData.value;
-    addAutoDisposeListener(_networkController.filteredData, () {
-      setState(() {
-        filteredRequests = _networkController.filteredData.value;
-      });
-    });
   }
 
   @override
@@ -158,14 +141,112 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     super.dispose();
   }
 
-  /// Builds the row of buttons that control the Network profiler (e.g., record,
-  /// pause, etc.)
-  Widget _buildProfilerControls() {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _NetworkProfilerControls(controller: _networkController),
+        const SizedBox(height: denseRowSpacing),
+        _NetworkProfilerBody(controller: _networkController),
+      ],
+    );
+  }
+}
+
+/// The row of controls that control the Network profiler (e.g., record, pause,
+/// clear, search, filter, etc.).
+class _NetworkProfilerControls extends StatefulWidget {
+  const _NetworkProfilerControls({
+    Key key,
+    @required this.controller,
+  }) : super(key: key);
+
+  static const _includeTextWidth = 810.0;
+
+  final NetworkController controller;
+
+  @override
+  State<_NetworkProfilerControls> createState() =>
+      _NetworkProfilerControlsState();
+}
+
+class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
+    with AutoDisposeMixin, SearchFieldMixin<_NetworkProfilerControls> {
+  NetworkRequests requests;
+
+  List<NetworkRequest> filteredRequests;
+
+  bool recording;
+
+  @override
+  void initState() {
+    super.initState();
+
+    recording = widget.controller.recordingNotifier.value;
+    addAutoDisposeListener(widget.controller.recordingNotifier, () {
+      setState(() {
+        recording = widget.controller.recordingNotifier.value;
+      });
+    });
+    requests = widget.controller.requests.value;
+    addAutoDisposeListener(widget.controller.requests, () {
+      setState(() {
+        requests = widget.controller.requests.value;
+      });
+    });
+    filteredRequests = widget.controller.filteredData.value;
+    addAutoDisposeListener(widget.controller.filteredData, () {
+      setState(() {
+        filteredRequests = widget.controller.filteredData.value;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final hasRequests = filteredRequests.isNotEmpty;
     return Row(
       children: [
-        _NetworkProfilerControls(
-          controller: _networkController,
+        PauseButton(
+          minScreenWidthForTextBeforeScaling:
+              _NetworkProfilerControls._includeTextWidth,
+          tooltip: 'Pause recording network traffic',
+          onPressed: recording
+              ? () {
+                  ga.select(
+                    analytics_constants.network,
+                    analytics_constants.pause,
+                  );
+                  widget.controller.togglePolling(false);
+                }
+              : null,
+        ),
+        const SizedBox(width: denseSpacing),
+        ResumeButton(
+          minScreenWidthForTextBeforeScaling:
+              _NetworkProfilerControls._includeTextWidth,
+          tooltip: 'Resume recording network traffic',
+          onPressed: recording
+              ? null
+              : () {
+                  ga.select(
+                    analytics_constants.network,
+                    analytics_constants.resume,
+                  );
+                  widget.controller.togglePolling(true);
+                },
+        ),
+        const SizedBox(width: denseSpacing),
+        ClearButton(
+          minScreenWidthForTextBeforeScaling:
+              _NetworkProfilerControls._includeTextWidth,
+          onPressed: () {
+            ga.select(
+              analytics_constants.network,
+              analytics_constants.clear,
+            );
+            widget.controller.clear();
+          },
         ),
         const SizedBox(width: defaultSpacing),
         const Expanded(child: SizedBox()),
@@ -174,7 +255,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
           width: wideSearchTextWidth,
           height: defaultTextFieldHeight,
           child: buildSearchField(
-            controller: _networkController,
+            controller: widget.controller,
             searchFieldKey: networkSearchFieldKey,
             searchFieldEnabled: hasRequests,
             shouldRequestFocus: false,
@@ -190,9 +271,27 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     );
   }
 
-  Widget _buildProfilerBody() {
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => FilterDialog<NetworkController, NetworkRequest>(
+        controller: widget.controller,
+        queryInstructions: NetworkScreenBody.filterQueryInstructions,
+        queryFilterArguments: widget.controller.filterArgs,
+      ),
+    );
+  }
+}
+
+class _NetworkProfilerBody extends StatelessWidget {
+  const _NetworkProfilerBody({Key key, this.controller}) : super(key: key);
+
+  final NetworkController controller;
+
+  @override
+  Widget build(BuildContext context) {
     return ValueListenableBuilder<NetworkRequest>(
-      valueListenable: _networkController.selectedRequest,
+      valueListenable: controller.selectedRequest,
       builder: (context, selectedRequest, _) {
         return Expanded(
           // TODO(@lesliearkorful): remove GestureDetector once #80455 is fixed
@@ -203,103 +302,20 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
               minSizes: const [200, 200],
               axis: Axis.horizontal,
               children: [
-                NetworkRequestsTable(
-                  networkController: _networkController,
-                  requests: filteredRequests,
-                  searchMatchesNotifier: _networkController.searchMatches,
-                  activeSearchMatchNotifier:
-                      _networkController.activeSearchMatch,
-                ),
+                ValueListenableBuilder<List<NetworkRequest>>(
+                    valueListenable: controller.filteredData,
+                    builder: (context, filteredRequests, _) {
+                      return NetworkRequestsTable(
+                        networkController: controller,
+                        requests: filteredRequests,
+                        searchMatchesNotifier: controller.searchMatches,
+                        activeSearchMatchNotifier: controller.activeSearchMatch,
+                      );
+                    }),
                 NetworkRequestInspector(selectedRequest),
               ],
             ),
           ),
-        );
-      },
-    );
-  }
-
-  void _showFilterDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => FilterDialog<NetworkController, NetworkRequest>(
-        controller: _networkController,
-        queryInstructions: NetworkScreenBody.filterQueryInstructions,
-        queryFilterArguments: _networkController.filterArgs,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildProfilerControls(),
-        const SizedBox(height: denseRowSpacing),
-        _buildProfilerBody(),
-      ],
-    );
-  }
-}
-
-/// The row of controls that control the Network profiler (e.g., record, pause,
-/// clear).
-class _NetworkProfilerControls extends StatelessWidget {
-  const _NetworkProfilerControls({
-    Key key,
-    @required this.controller,
-  }) : super(key: key);
-
-  static const _includeTextWidth = 810.0;
-
-  final NetworkController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: controller.recordingNotifier,
-      builder: (context, recording, _) {
-        return Row(
-          children: [
-            PauseButton(
-              minScreenWidthForTextBeforeScaling: _includeTextWidth,
-              tooltip: 'Pause recording network traffic',
-              onPressed: recording
-                  ? () {
-                      ga.select(
-                        analytics_constants.network,
-                        analytics_constants.pause,
-                      );
-                      controller.togglePolling(false);
-                    }
-                  : null,
-            ),
-            const SizedBox(width: denseSpacing),
-            ResumeButton(
-              minScreenWidthForTextBeforeScaling: _includeTextWidth,
-              tooltip: 'Resume recording network traffic',
-              onPressed: recording
-                  ? null
-                  : () {
-                      ga.select(
-                        analytics_constants.network,
-                        analytics_constants.resume,
-                      );
-                      controller.togglePolling(true);
-                    },
-            ),
-            const SizedBox(width: denseSpacing),
-            ClearButton(
-              minScreenWidthForTextBeforeScaling: _includeTextWidth,
-              onPressed: () {
-                ga.select(
-                  analytics_constants.network,
-                  analytics_constants.clear,
-                );
-                controller.clear();
-              },
-            ),
-          ],
         );
       },
     );

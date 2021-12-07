@@ -4,17 +4,15 @@
 
 import 'package:flutter/material.dart';
 
-import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../common_widgets.dart';
 import '../http/http_request_data.dart';
-import '../theme.dart';
 import '../ui/tab.dart';
 import 'network_model.dart';
 import 'network_request_inspector_views.dart';
 
 /// A [Widget] which displays information about a network request.
-class NetworkRequestInspector extends StatefulWidget {
+class NetworkRequestInspector extends StatelessWidget {
   const NetworkRequestInspector(this.data);
 
   static const _overviewTabTitle = 'Overview';
@@ -38,60 +36,10 @@ class NetworkRequestInspector extends StatefulWidget {
 
   final NetworkRequest data;
 
-  @override
-  State<NetworkRequestInspector> createState() =>
-      _NetworkRequestInspectorState();
-}
-
-class _NetworkRequestInspectorState extends State<NetworkRequestInspector>
-    with TickerProviderStateMixin {
-  TabController _tabController;
-
-  List<DevToolsTab> _tabs;
-
-  int _currentTabControllerIndex = 0;
-
-  void _initTabController() {
-    _tabController?.removeListener(_onTabChanged);
-    _tabController?.dispose();
-    _tabs = <DevToolsTab>[
-      _buildTab(NetworkRequestInspector._overviewTabTitle),
-      if (widget.data is HttpRequestData) ...[
-        _buildTab(NetworkRequestInspector._headersTabTitle),
-        if ((widget.data as HttpRequestData).requestBody != null)
-          _buildTab(NetworkRequestInspector._requestTabTitle),
-        if ((widget.data as HttpRequestData).responseBody != null)
-          _buildTab(NetworkRequestInspector._responseTabTitle),
-        if ((widget.data as HttpRequestData).hasCookies)
-          _buildTab(NetworkRequestInspector._cookiesTabTitle),
-      ],
-    ];
-    _tabController = TabController(
-      length: _tabs.length,
-      vsync: this,
-    );
-    if (_currentTabControllerIndex >= _tabController.length) {
-      _currentTabControllerIndex = 0;
-    }
-    _tabController
-      ..index = _currentTabControllerIndex
-      ..addListener(_onTabChanged);
-  }
-
-  void _onTabChanged() {
-    if (_currentTabControllerIndex != _tabController.index) {
-      _currentTabControllerIndex = _tabController.index;
-      ga.select(
-        analytics_constants.network,
-        _tabs[_currentTabControllerIndex].gaId,
-      );
-    }
-  }
-
   Widget _buildTab(String tabName) {
     return DevToolsTab(
       key: ValueKey<String>(tabName),
-      gaId: tabName,
+      gaId: 'requestInspectorTab_$tabName',
       child: Text(
         tabName,
         overflow: TextOverflow.ellipsis,
@@ -100,74 +48,36 @@ class _NetworkRequestInspectorState extends State<NetworkRequestInspector>
   }
 
   @override
-  void initState() {
-    super.initState();
-    _initTabController();
-  }
-
-  @override
-  void didUpdateWidget(NetworkRequestInspector oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.data != widget.data) {
-      _initTabController();
-      final currentTabIndex = _tabController.index;
-      // We are now showing this tab for a new network request, so record a
-      // selection of this tab for analytics.
-      ga.select(
-        analytics_constants.network,
-        _tabs[currentTabIndex].gaId,
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _tabController?.removeListener(_onTabChanged);
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final tabbedContent = Column(
-      children: [
-        Row(
-          children: [
-            Flexible(
-              child: TabBar(
-                labelColor: Theme.of(context).textTheme.bodyText1.color,
-                controller: _tabController,
-                tabs: _tabs,
-              ),
-            ),
-          ],
-        ),
-        Expanded(
-          child: TabBarView(
-            physics: defaultTabBarViewPhysics,
-            controller: _tabController,
-            children: [
-              NetworkRequestOverviewView(widget.data),
-              if (widget.data is HttpRequestData) ...[
-                HttpRequestHeadersView(widget.data),
-                if ((widget.data as HttpRequestData).requestBody != null)
-                  HttpRequestView(widget.data),
-                if ((widget.data as HttpRequestData).responseBody != null)
-                  HttpResponseView(widget.data),
-                if ((widget.data as HttpRequestData).hasCookies)
-                  HttpRequestCookiesView(widget.data),
-              ],
-            ],
-          ),
-        ),
+    final tabs = <DevToolsTab>[
+      _buildTab(NetworkRequestInspector._overviewTabTitle),
+      if (data is HttpRequestData) ...[
+        _buildTab(NetworkRequestInspector._headersTabTitle),
+        if ((data as HttpRequestData).requestBody != null)
+          _buildTab(NetworkRequestInspector._requestTabTitle),
+        if ((data as HttpRequestData).responseBody != null)
+          _buildTab(NetworkRequestInspector._responseTabTitle),
+        if ((data as HttpRequestData).hasCookies)
+          _buildTab(NetworkRequestInspector._cookiesTabTitle),
       ],
-    );
+    ];
+    final tabViews = [
+      NetworkRequestOverviewView(data),
+      if (data is HttpRequestData) ...[
+        HttpRequestHeadersView(data),
+        if ((data as HttpRequestData).requestBody != null)
+          HttpRequestView(data),
+        if ((data as HttpRequestData).responseBody != null)
+          HttpResponseView(data),
+        if ((data as HttpRequestData).hasCookies) HttpRequestCookiesView(data),
+      ],
+    ];
 
     return Card(
       margin: EdgeInsets.zero,
       color: Theme.of(context).canvasColor,
       child: RoundedOutlinedBorder(
-        child: (widget.data == null)
+        child: (data == null)
             ? Center(
                 child: Text(
                   'No request selected',
@@ -175,7 +85,11 @@ class _NetworkRequestInspectorState extends State<NetworkRequestInspector>
                   style: Theme.of(context).textTheme.headline6,
                 ),
               )
-            : tabbedContent,
+            : AnalyticsTabbedView(
+                tabs: tabs,
+                tabViews: tabViews,
+                gaScreen: analytics_constants.network,
+              ),
       ),
     );
   }

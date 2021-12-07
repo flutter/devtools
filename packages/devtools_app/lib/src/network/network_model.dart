@@ -30,6 +30,9 @@ abstract class NetworkRequest with DataSearchStateMixin {
 
   bool get didFail;
 
+  /// True if the request hasn't completed yet.
+  bool get inProgress;
+
   String get durationDisplay =>
       'Duration: ${duration != null ? msText(duration) : 'Pending'}';
 
@@ -45,15 +48,17 @@ abstract class NetworkRequest with DataSearchStateMixin {
     return other is NetworkRequest &&
         runtimeType == other.runtimeType &&
         startTimestamp == other.startTimestamp &&
-        endTimestamp == other.endTimestamp &&
-        duration == other.duration &&
         method == other.method &&
         uri == other.uri &&
         contentType == other.contentType &&
         type == other.type &&
-        status == other.status &&
         port == other.port &&
-        didFail == other.didFail;
+        (inProgress == other.inProgress
+            ? (endTimestamp == other.endTimestamp &&
+                duration == other.duration &&
+                status == other.status &&
+                didFail == other.didFail)
+            : true);
   }
 
   @override
@@ -62,12 +67,8 @@ abstract class NetworkRequest with DataSearchStateMixin {
         uri,
         contentType,
         type,
-        status,
         port,
-        didFail,
         startTimestamp,
-        endTimestamp,
-        duration,
       );
 }
 
@@ -137,6 +138,9 @@ class WebSocket extends NetworkRequest {
   // codes with a tooltip of "101 Web Socket Protocol Handshake"
   @override
   String get status => '101';
+
+  @override
+  bool get inProgress => false;
 
   @override
   bool operator ==(other) => other is WebSocket && id == other.id;
