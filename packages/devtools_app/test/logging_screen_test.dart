@@ -42,6 +42,8 @@ void main() {
       when(mockLoggingController.search).thenReturn('');
       when(mockLoggingController.searchMatches)
           .thenReturn(ValueNotifier<List<LogData>>([]));
+      when(mockLoggingController.searchInProgressNotifier)
+          .thenReturn(ValueNotifier<bool>(false));
       when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
       when(mockLoggingController.filteredData)
           .thenReturn(ListValueNotifier<LogData>([]));
