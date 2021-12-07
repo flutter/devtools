@@ -7,6 +7,7 @@
 import '../inspector/inspector_screen.dart';
 import '../logging/logging_screen.dart';
 import '../memory/memory_screen.dart';
+import '../network/network_screen.dart';
 import '../performance/performance_screen.dart';
 import '../profiler/profiler_screen.dart';
 
@@ -22,6 +23,7 @@ const String inspector = InspectorScreen.id;
 const String performance = PerformanceScreen.id;
 const String cpuProfiler = ProfilerScreen.id;
 const String memory = MemoryScreen.id;
+const String network = NetworkScreen.id;
 const String logging = LoggingScreen.id;
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
