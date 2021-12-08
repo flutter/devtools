@@ -76,34 +76,32 @@ class _InspectorDetailsTabControllerState
 
     return Column(
       children: <Widget>[
-        SizedBox(
+        Container(
           // Add [denseSpacing] to add slight padding around the expand /
           // collapse buttons.
           height: defaultButtonHeight +
               (isDense() ? denseModeDenseSpacing : denseSpacing),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).focusColor),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                TabBar(
-                  controller: _tabController,
-                  labelColor: theme.textTheme.bodyText1.color,
-                  tabs: tabs,
-                  isScrollable: true,
+          decoration: BoxDecoration(
+            border: Border.all(color: Theme.of(context).focusColor),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              TabBar(
+                controller: _tabController,
+                labelColor: theme.textTheme.bodyText1.color,
+                tabs: tabs,
+                isScrollable: true,
+              ),
+              Expanded(
+                child: Container(
+                  alignment: Alignment.centerRight,
+                  child: hasActionButtons
+                      ? widget.actionButtons
+                      : const SizedBox(),
                 ),
-                Expanded(
-                  child: Container(
-                    alignment: Alignment.centerRight,
-                    child: hasActionButtons
-                        ? widget.actionButtons
-                        : const SizedBox(),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
         Expanded(
