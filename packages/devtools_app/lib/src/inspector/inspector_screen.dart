@@ -358,43 +358,39 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   Widget _expandCollapseButtons() {
     if (!_expandCollapseSupported) return null;
 
-    return Align(
+    return Container(
       alignment: Alignment.centerRight,
-      child: Container(
-        // Add [denseSpacing] to add slight padding around the expand /
-        // collapse buttons.
-        decoration: BoxDecoration(
-          border: Border(
-            left: defaultBorderSide(Theme.of(context)),
-          ),
+      decoration: BoxDecoration(
+        border: Border(
+          left: defaultBorderSide(Theme.of(context)),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              child: IconLabelButton(
-                icon: Icons.unfold_more,
-                onPressed: enableButtons ? _onExpandClick : null,
-                label: 'Expand all',
-                minScreenWidthForTextBeforeScaling:
-                    minScreenWidthForTextBeforeScaling,
-                outlined: false,
-              ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            child: IconLabelButton(
+              icon: Icons.unfold_more,
+              onPressed: enableButtons ? _onExpandClick : null,
+              label: 'Expand all',
+              minScreenWidthForTextBeforeScaling:
+                  minScreenWidthForTextBeforeScaling,
+              outlined: false,
             ),
-            const SizedBox(width: denseSpacing),
-            SizedBox(
-              child: IconLabelButton(
-                icon: Icons.unfold_less,
-                onPressed: enableButtons ? _onResetClick : null,
-                label: 'Collapse to selected',
-                minScreenWidthForTextBeforeScaling:
-                    minScreenWidthForTextBeforeScaling,
-                outlined: false,
-              ),
-            )
-          ],
-        ),
+          ),
+          const SizedBox(width: denseSpacing),
+          SizedBox(
+            child: IconLabelButton(
+              icon: Icons.unfold_less,
+              onPressed: enableButtons ? _onResetClick : null,
+              label: 'Collapse to selected',
+              minScreenWidthForTextBeforeScaling:
+                  minScreenWidthForTextBeforeScaling,
+              outlined: false,
+            ),
+          )
+        ],
       ),
     );
   }
