@@ -371,7 +371,14 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     TextStyle textStyle,
     TextStyle highlightTextStyle,
   ) {
-    if (searchValue == null || textPreview.caseInsensitiveEquals(searchValue)) {
+    if (searchValue == null || searchValue.isEmpty) {
+      return TextSpan(
+        text: '"$textPreview"',
+        style: textStyle,
+      );
+    }
+
+    if (textPreview.caseInsensitiveEquals(searchValue)) {
       return TextSpan(
         text: '"$textPreview"',
         style: highlightTextStyle,
@@ -382,7 +389,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     if (matches.isEmpty) {
       return TextSpan(
         text: '"$textPreview"',
-        style: highlightTextStyle,
+        style: textStyle,
       );
     }
 
