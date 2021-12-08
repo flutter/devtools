@@ -184,9 +184,11 @@ class _InspectorBreadcrumbData {
 
   Widget get icon => alternativeIcon ?? row?.node?.diagnostic?.icon;
 
-  bool get isChevron => row == null && alternativeText == null;
+  bool get isChevron =>
+      row == null && alternativeText == null ?? alternativeIcon != null;
 
-  bool get isEllipsis => row == null && alternativeIcon == null;
+  bool get isEllipsis =>
+      row == null && alternativeIcon == null && alternativeText != null;
 
   bool get isClickable => !isSelected && !isEllipsis;
 }
