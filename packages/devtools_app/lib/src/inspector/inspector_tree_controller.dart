@@ -24,6 +24,7 @@ import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
+import '../utils.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
 import 'inspector_breadcrumbs.dart';
@@ -642,8 +643,6 @@ class InspectorTreeController extends Object
     }
     _searchDebounce =
         Timer(Duration(milliseconds: search.isEmpty ? 0 : 300), () async {
-      // do something with query
-
       // Abort any ongoing search operations and start a new one
       if (_searchOperation != null) {
         try {
@@ -664,7 +663,9 @@ class InspectorTreeController extends Object
   }
 
   Future<void> matchesForSearchAsyncOld(
-      String search, SearchTargetType searchTarget) async {
+    String search,
+    SearchTargetType searchTarget,
+  ) async {
     final matches = <InspectorTreeRow>[];
 
     bool _firstSearchMatch = true;
@@ -714,7 +715,7 @@ class InspectorTreeController extends Object
             : description;
 
         _statsSearchOps++;
-        if (searchValue.toLowerCase().contains(caseInsensitiveSearch)) {
+        if (searchValue.caseInsensitiveContains(caseInsensitiveSearch)) {
           matches.add(row);
           setSearchMatch(row.node, true);
           _updateSearchMatches();
@@ -748,8 +749,7 @@ class InspectorTree extends StatefulWidget {
     this.inspectorTreeController,
     this.isSummaryTree = false,
     this.widgetErrors,
-  })  : assert(isSummaryTree && inspectorTreeController == null ||
-            !isSummaryTree && inspectorTreeController != null),
+  })  : assert(isSummaryTree == (inspectorTreeController == null)),
         super(key: key);
 
   final InspectorTreeController controller;
@@ -1237,7 +1237,9 @@ class InspectorRowContent extends StatelessWidget {
                         ),
                       )
                     : const SizedBox(
-                        width: defaultSpacing, height: defaultSpacing),
+                        width: defaultSpacing,
+                        height: defaultSpacing,
+                      ),
                 Expanded(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
@@ -1258,7 +1260,6 @@ class InspectorRowContent extends StatelessWidget {
                         child: DiagnosticsNodeDescription(
                           node.diagnostic,
                           isSelected: row.isSelected,
-                          hasSearchMatch: row.hasSearchMatch,
                           searchValue: searchValue,
                           errorText: error?.errorMessage,
                           debuggerController: debuggerController,

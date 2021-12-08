@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../devtools_app.dart';
+import '../theme.dart';
+import '../utils.dart';
 import 'inspector_text_styles.dart';
+import 'inspector_tree.dart';
 
 class InspectorBreadcrumbNavigator extends StatelessWidget {
   const InspectorBreadcrumbNavigator({
@@ -19,8 +21,7 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
       return const SizedBox();
     }
 
-    final items = _getBreadcrumbs(rows);
-    final breadcrumbs = _getBreadcrumbWithChevron(items);
+    final breadcrumbs = _generateBreadcrumbs(rows);
     return SizedBox(
       height: isDense() ? 24 : 28,
       child: Padding(
@@ -46,29 +47,27 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
     );
   }
 
-  List<_InspectorBreadcrumbData> _getBreadcrumbs(List<InspectorTreeRow> rows) {
-    final List<_InspectorBreadcrumbData> items = rows
-        .map((e) => _InspectorBreadcrumbData.wrap(e, e == rows.safeLast))
-        .toList();
+  List<_InspectorBreadcrumbData> _generateBreadcrumbs(
+    List<InspectorTreeRow> rows,
+  ) {
+    final List<_InspectorBreadcrumbData> items = rows.map((row) {
+      return _InspectorBreadcrumbData.wrap(
+        row: row,
+        isSelected: row == rows.safeLast,
+      );
+    }).toList();
+    List<_InspectorBreadcrumbData> breadcrumbs;
     if (items.length > 5) {
-      return []
-        ..add(items[0])
-        ..add(_InspectorBreadcrumbData.more())
-        ..addAll(items.sublist(items.length - 4, items.length));
+      breadcrumbs = [
+        items[0],
+        _InspectorBreadcrumbData.more(),
+        ...items.sublist(items.length - 4, items.length),
+      ];
     } else {
-      return items;
+      breadcrumbs = items;
     }
-  }
 
-  Iterable<_InspectorBreadcrumbData> _getBreadcrumbWithChevron(
-      List<_InspectorBreadcrumbData> items) sync* {
-    for (int i = 0; i < items.length; i++) {
-      yield items[i];
-
-      if (i != items.length - 1) {
-        yield _InspectorBreadcrumbData.chevron();
-      }
-    }
+    return breadcrumbs.joinWith(_InspectorBreadcrumbData.chevron());
   }
 }
 
@@ -81,7 +80,9 @@ class _InspectorBreadcrumb extends StatelessWidget {
         super(key: key);
 
   static const BorderRadius _borderRadius =
-      BorderRadius.all(Radius.circular(4));
+      BorderRadius.all(Radius.circular(defaultBorderRadius));
+
+  static const _iconScale = .75;
 
   final _InspectorBreadcrumbData data;
   final VoidCallback onTap;
@@ -98,7 +99,7 @@ class _InspectorBreadcrumb extends StatelessWidget {
     final icon = data.icon == null
         ? null
         : Transform.scale(
-            scale: .75,
+            scale: _iconScale,
             child: Padding(
               padding: const EdgeInsets.only(right: iconPadding),
               child: data.icon,
@@ -109,7 +110,10 @@ class _InspectorBreadcrumb extends StatelessWidget {
       onTap: data.isClickable ? onTap : null,
       borderRadius: _borderRadius,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        padding: const EdgeInsets.symmetric(
+          horizontal: densePadding,
+          vertical: borderPadding,
+        ),
         decoration: BoxDecoration(
           borderRadius: _borderRadius,
           color: data.isSelected
@@ -129,41 +133,60 @@ class _InspectorBreadcrumb extends StatelessWidget {
 }
 
 class _InspectorBreadcrumbData {
-  const _InspectorBreadcrumbData._(
-    this.row,
-    this.isSelected,
-    this._alternativeText,
-    this._alternativeIcon,
-  );
+  const _InspectorBreadcrumbData._({
+    @required this.row,
+    @required this.isSelected,
+    @required this.alternativeText,
+    @required this.alternativeIcon,
+  });
 
-  factory _InspectorBreadcrumbData.wrap(
-          InspectorTreeRow row, bool isSelected) =>
-      _InspectorBreadcrumbData._(row, isSelected, null, null);
+  factory _InspectorBreadcrumbData.wrap({
+    @required InspectorTreeRow row,
+    @required bool isSelected,
+  }) {
+    return _InspectorBreadcrumbData._(
+      row: row,
+      isSelected: isSelected,
+      alternativeText: null,
+      alternativeIcon: null,
+    );
+  }
 
   /// Construct a special item for showing '…' symbol between other items
-  factory _InspectorBreadcrumbData.more() =>
-      const _InspectorBreadcrumbData._(null, false, '…', null);
+  factory _InspectorBreadcrumbData.more() {
+    return const _InspectorBreadcrumbData._(
+      row: null,
+      isSelected: false,
+      alternativeText: '…',
+      alternativeIcon: null,
+    );
+  }
 
   factory _InspectorBreadcrumbData.chevron() {
     final icon = Icon(
       Icons.chevron_right,
       size: defaultIconSize,
     );
-    return _InspectorBreadcrumbData._(null, false, null, icon);
+    return _InspectorBreadcrumbData._(
+      row: null,
+      isSelected: false,
+      alternativeText: null,
+      alternativeIcon: icon,
+    );
   }
 
   final InspectorTreeRow row;
-  final Widget _alternativeIcon;
-  final String _alternativeText;
+  final Widget alternativeIcon;
+  final String alternativeText;
   final bool isSelected;
 
-  String get text => _alternativeText ?? row?.node?.diagnostic?.description;
+  String get text => alternativeText ?? row?.node?.diagnostic?.description;
 
-  Widget get icon => _alternativeIcon ?? row?.node?.diagnostic?.icon;
+  Widget get icon => alternativeIcon ?? row?.node?.diagnostic?.icon;
 
-  bool get isChevron => row == null && _alternativeText == null;
+  bool get isChevron => row == null && alternativeText == null;
 
-  bool get isEllipsis => row == null && _alternativeIcon == null;
+  bool get isEllipsis => row == null && alternativeIcon == null;
 
   bool get isClickable => !isSelected && !isEllipsis;
 }

@@ -170,13 +170,19 @@ class IconLabelButton extends StatelessWidget {
         child: outlined
             ? OutlinedButton(
                 style: denseAwareOutlinedButtonStyle(
-                    context, minScreenWidthForTextBeforeScaling),
+                  context,
+                  minScreenWidthForTextBeforeScaling,
+                ),
                 onPressed: onPressed,
                 child: iconLabel,
               )
             : TextButton(
                 onPressed: onPressed,
                 child: iconLabel,
+                style: denseAwareOutlinedButtonStyle(
+                  context,
+                  minScreenWidthForTextBeforeScaling,
+                ),
               ),
       ),
     );

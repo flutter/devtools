@@ -1066,6 +1066,17 @@ extension StringExtension on String {
     }
     return true;
   }
+
+  /// Whether [other] is a case insensitive match for this String
+  bool caseInsensitiveEquals(String other) {
+    return toLowerCase() == other.toLowerCase();
+  }
+
+  /// Find all case insensitive matches of query in this String
+  /// See [allMatches] for more info
+  Iterable<Match> caseInsensitiveAllMatches(String query) {
+    return toLowerCase().allMatches(query.toLowerCase());
+  }
 }
 
 extension ListExtension<T> on List<T> {

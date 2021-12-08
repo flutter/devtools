@@ -83,6 +83,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   bool searchVisible = false;
   bool searchPreventCloseOnBlur = false;
+
   SearchTargetType searchTarget = SearchTargetType.widget;
 
   static const summaryTreeKey = Key('Summary Tree');
@@ -234,79 +235,82 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       );
     }
 
-    return LayoutBuilder(builder: (context, constraints) {
-      return OutlineDecoration(
-        child: Column(
-          children: [
-            _controlsContainer(
-              Row(children: <Widget>[
-                const SizedBox(width: denseSpacing),
-                const Text('Widget Tree'),
-                const SizedBox(width: denseSpacing),
-                ...!searchVisible
-                    ? [
-                        const Spacer(),
-                        ToolbarAction(
-                          icon: Icons.search,
-                          onPressed: _onSearchVisibleToggle,
-                          tooltip: 'Search Tree',
-                        ),
-                      ]
-                    : [
-                        constraints.maxWidth >= _searchBreakpoint
-                            ? _buildSearchControls(constraints)
-                            : const Spacer()
-                      ],
-                ToolbarAction(
-                  icon: Icons.refresh,
-                  onPressed: _refreshInspector,
-                  tooltip: 'Refresh Tree',
-                ),
-              ]),
-            ),
-            if (searchVisible && constraints.maxWidth < _searchBreakpoint)
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return OutlineDecoration(
+          child: Column(
+            children: [
               _controlsContainer(
-                  Row(children: [_buildSearchControls(constraints)])),
-            Expanded(
-              child: ValueListenableBuilder(
-                valueListenable: serviceManager.errorBadgeManager
-                    .erroredItemsForPage(InspectorScreen.id),
-                builder: (_, LinkedHashMap<String, DevToolsError> errors, __) {
-                  final inspectableErrors = errors.map((key, value) =>
-                      MapEntry(key, value as InspectableWidgetError));
-                  return Stack(
-                    children: [
-                      InspectorTree(
-                        key: summaryTreeKey,
-                        controller: summaryTreeController,
-                        isSummaryTree: true,
-                        widgetErrors: inspectableErrors,
-                        debuggerController: debuggerController,
-                      ),
-                      if (errors.isNotEmpty && inspectorController != null)
-                        ValueListenableBuilder(
-                          valueListenable:
-                              inspectorController.selectedErrorIndex,
-                          builder: (_, selectedErrorIndex, __) => Positioned(
-                            top: 0,
-                            right: 0,
-                            child: ErrorNavigator(
-                              errors: inspectableErrors,
-                              errorIndex: selectedErrorIndex,
-                              onSelectError:
-                                  inspectorController.selectErrorByIndex,
+                Row(children: <Widget>[
+                  const SizedBox(width: denseSpacing),
+                  const Text('Widget Tree'),
+                  const SizedBox(width: denseSpacing),
+                  ...!searchVisible
+                      ? [
+                          const Spacer(),
+                          ToolbarAction(
+                            icon: Icons.search,
+                            onPressed: _onSearchVisibleToggle,
+                            tooltip: 'Search Tree',
+                          ),
+                        ]
+                      : [
+                          constraints.maxWidth >= _searchBreakpoint
+                              ? _buildSearchControls(constraints)
+                              : const Spacer()
+                        ],
+                  ToolbarAction(
+                    icon: Icons.refresh,
+                    onPressed: _refreshInspector,
+                    tooltip: 'Refresh Tree',
+                  ),
+                ]),
+              ),
+              if (searchVisible && constraints.maxWidth < _searchBreakpoint)
+                _controlsContainer(
+                    Row(children: [_buildSearchControls(constraints)])),
+              Expanded(
+                child: ValueListenableBuilder(
+                  valueListenable: serviceManager.errorBadgeManager
+                      .erroredItemsForPage(InspectorScreen.id),
+                  builder:
+                      (_, LinkedHashMap<String, DevToolsError> errors, __) {
+                    final inspectableErrors = errors.map((key, value) =>
+                        MapEntry(key, value as InspectableWidgetError));
+                    return Stack(
+                      children: [
+                        InspectorTree(
+                          key: summaryTreeKey,
+                          controller: summaryTreeController,
+                          isSummaryTree: true,
+                          widgetErrors: inspectableErrors,
+                          debuggerController: debuggerController,
+                        ),
+                        if (errors.isNotEmpty && inspectorController != null)
+                          ValueListenableBuilder(
+                            valueListenable:
+                                inspectorController.selectedErrorIndex,
+                            builder: (_, selectedErrorIndex, __) => Positioned(
+                              top: 0,
+                              right: 0,
+                              child: ErrorNavigator(
+                                errors: inspectableErrors,
+                                errorIndex: selectedErrorIndex,
+                                onSelectError:
+                                    inspectorController.selectErrorByIndex,
+                              ),
                             ),
                           ),
-                        ),
-                    ],
-                  );
-                },
-              ),
-            )
-          ],
-        ),
-      );
-    });
+                      ],
+                    );
+                  },
+                ),
+              )
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildSearchControls(BoxConstraints constraints) {
@@ -355,43 +359,44 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     if (!_expandCollapseSupported) return null;
 
     return Align(
-        alignment: Alignment.centerRight,
-        child: Container(
-          // Add [denseSpacing] to add slight padding around the expand /
-          // collapse buttons.
-          decoration: BoxDecoration(
-            border: Border(
-              left: defaultBorderSide(Theme.of(context)),
-            ),
+      alignment: Alignment.centerRight,
+      child: Container(
+        // Add [denseSpacing] to add slight padding around the expand /
+        // collapse buttons.
+        decoration: BoxDecoration(
+          border: Border(
+            left: defaultBorderSide(Theme.of(context)),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                child: IconLabelButton(
-                  icon: Icons.unfold_more,
-                  onPressed: enableButtons ? _onExpandClick : null,
-                  label: 'Expand all',
-                  minScreenWidthForTextBeforeScaling:
-                      minScreenWidthForTextBeforeScaling,
-                  outlined: false,
-                ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              child: IconLabelButton(
+                icon: Icons.unfold_more,
+                onPressed: enableButtons ? _onExpandClick : null,
+                label: 'Expand all',
+                minScreenWidthForTextBeforeScaling:
+                    minScreenWidthForTextBeforeScaling,
+                outlined: false,
               ),
-              const SizedBox(width: denseSpacing),
-              SizedBox(
-                child: IconLabelButton(
-                  icon: Icons.unfold_less,
-                  onPressed: enableButtons ? _onResetClick : null,
-                  label: 'Collapse to selected',
-                  minScreenWidthForTextBeforeScaling:
-                      minScreenWidthForTextBeforeScaling,
-                  outlined: false,
-                ),
-              )
-            ],
-          ),
-        ));
+            ),
+            const SizedBox(width: denseSpacing),
+            SizedBox(
+              child: IconLabelButton(
+                icon: Icons.unfold_less,
+                onPressed: enableButtons ? _onResetClick : null,
+                label: 'Collapse to selected',
+                minScreenWidthForTextBeforeScaling:
+                    minScreenWidthForTextBeforeScaling,
+                outlined: false,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   void _onExpandCollapseSupported() {

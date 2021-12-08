@@ -857,16 +857,17 @@ class SearchDropdown<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonHideUnderline(
-        child: DropdownButton<T>(
-      iconSize: defaultIconSize,
-      value: value,
-      onTap: onTap,
-      onChanged: onChanged,
-      isDense: true,
-      style: style,
-      selectedItemBuilder: selectedItemBuilder,
-      items: items,
-    ));
+      child: DropdownButton<T>(
+        iconSize: defaultIconSize,
+        value: value,
+        onTap: onTap,
+        onChanged: onChanged,
+        isDense: true,
+        style: style,
+        selectedItemBuilder: selectedItemBuilder,
+        items: items,
+      ),
+    );
   }
 }
 

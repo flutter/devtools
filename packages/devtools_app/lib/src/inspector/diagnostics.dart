@@ -35,7 +35,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   const DiagnosticsNodeDescription(
     this.diagnostic, {
     this.isSelected,
-    this.hasSearchMatch,
     this.searchValue,
     this.errorText,
     this.multiline = false,
@@ -46,7 +45,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
   final RemoteDiagnosticsNode diagnostic;
   final bool isSelected;
-  final bool hasSearchMatch;
   final String errorText;
   final String searchValue;
   final bool multiline;
@@ -373,16 +371,14 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     TextStyle textStyle,
     TextStyle highlightTextStyle,
   ) {
-    if (searchValue == null ||
-        textPreview.toLowerCase() == searchValue.toLowerCase()) {
+    if (searchValue == null || textPreview.caseInsensitiveEquals(searchValue)) {
       return TextSpan(
         text: '"$textPreview"',
         style: highlightTextStyle,
       );
     }
 
-    final matches =
-        searchValue.toLowerCase().allMatches(textPreview.toLowerCase());
+    final matches = searchValue.caseInsensitiveAllMatches(textPreview);
     if (matches.isEmpty) {
       return TextSpan(
         text: '"$textPreview"',
