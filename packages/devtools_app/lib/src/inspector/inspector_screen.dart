@@ -218,57 +218,27 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   Widget _buildSummaryTreeColumn(
     DebuggerController debuggerController,
   ) {
-    const _searchBreakpoint = 375.0;
-
-    Container _controlsContainer(Widget child) {
-      return Container(
-        // Add [denseSpacing] to add slight padding around the expand /
-        // collapse buttons.
-        height: defaultButtonHeight +
-            (isDense() ? denseModeDenseSpacing : denseSpacing),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: defaultBorderSide(Theme.of(context)),
-          ),
-        ),
-        child: child,
-      );
-    }
-
     return LayoutBuilder(
       builder: (context, constraints) {
         return OutlineDecoration(
           child: Column(
             children: [
-              _controlsContainer(
-                Row(children: <Widget>[
-                  const SizedBox(width: denseSpacing),
-                  const Text('Widget Tree'),
-                  const SizedBox(width: denseSpacing),
-                  ...!searchVisible
-                      ? [
-                          const Spacer(),
-                          ToolbarAction(
-                            icon: Icons.search,
-                            onPressed: _onSearchVisibleToggle,
-                            tooltip: 'Search Tree',
-                          ),
-                        ]
-                      : [
-                          constraints.maxWidth >= _searchBreakpoint
-                              ? _buildSearchControls(constraints)
-                              : const Spacer()
-                        ],
-                  ToolbarAction(
-                    icon: Icons.refresh,
-                    onPressed: _refreshInspector,
-                    tooltip: 'Refresh Tree',
+              InspectorSummaryTreeControls(
+                isSearchVisible: searchVisible,
+                constraints: constraints,
+                onRefreshInspectorPressed: _refreshInspector,
+                onSearchVisibleToggle:  _onSearchVisibleToggle,
+                searchFieldBuilder: () => buildSearchField(
+                  controller: summaryTreeController,
+                  searchFieldKey: GlobalKey(
+                    debugLabel: 'inspectorScreenSearch',
                   ),
-                ]),
+                  searchFieldEnabled: true,
+                  shouldRequestFocus: searchVisible,
+                  supportsNavigation: true,
+                  onClose: _onSearchVisibleToggle,
+                ),
               ),
-              if (searchVisible && constraints.maxWidth < _searchBreakpoint)
-                _controlsContainer(
-                    Row(children: [_buildSearchControls(constraints)])),
               Expanded(
                 child: ValueListenableBuilder(
                   valueListenable: serviceManager.errorBadgeManager
@@ -310,22 +280,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           ),
         );
       },
-    );
-  }
-
-  Widget _buildSearchControls(BoxConstraints constraints) {
-    return Expanded(
-      child: Container(
-        height: defaultTextFieldHeight,
-        child: buildSearchField(
-          controller: summaryTreeController,
-          searchFieldKey: GlobalKey(debugLabel: 'inspectorScreenSearch'),
-          searchFieldEnabled: true,
-          shouldRequestFocus: searchVisible,
-          supportsNavigation: true,
-          onClose: _onSearchVisibleToggle,
-        ),
-      ),
     );
   }
 
@@ -412,6 +366,91 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     blockWhileInProgress(() async {
       await inspectorController?.onForceRefresh();
     });
+  }
+}
+
+class InspectorSummaryTreeControls extends StatelessWidget {
+  const InspectorSummaryTreeControls({
+    Key key,
+    @required this.constraints,
+    @required this.isSearchVisible,
+    @required this.onRefreshInspectorPressed,
+    @required this.onSearchVisibleToggle,
+    @required this.searchFieldBuilder,
+  }) : super(key: key);
+
+  static const _searchBreakpoint = 375.0;
+
+  final bool isSearchVisible;
+  final BoxConstraints constraints;
+  final VoidCallback onRefreshInspectorPressed;
+  final VoidCallback onSearchVisibleToggle;
+  final Widget Function() searchFieldBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _controlsContainer(
+          context,
+          Row(
+            children: <Widget>[
+              const SizedBox(width: denseSpacing),
+              const Text('Widget Tree'),
+              const SizedBox(width: denseSpacing),
+              ...!isSearchVisible
+                  ? [
+                      const Spacer(),
+                      ToolbarAction(
+                        icon: Icons.search,
+                        onPressed: onSearchVisibleToggle,
+                        tooltip: 'Search Tree',
+                      ),
+                    ]
+                  : [
+                      constraints.maxWidth >= _searchBreakpoint
+                          ? _buildSearchControls()
+                          : const Spacer()
+                    ],
+              ToolbarAction(
+                icon: Icons.refresh,
+                onPressed: onRefreshInspectorPressed,
+                tooltip: 'Refresh Tree',
+              ),
+            ],
+          ),
+        ),
+        if (isSearchVisible && constraints.maxWidth < _searchBreakpoint)
+          _controlsContainer(
+            context,
+            Row(children: [_buildSearchControls()]),
+          ),
+      ],
+    );
+  }
+
+  Container _controlsContainer(BuildContext context, Widget child) {
+    return Container(
+      // Add [denseSpacing] to add slight padding around the expand /
+      // collapse buttons.
+      height: defaultButtonHeight +
+          (isDense() ? denseModeDenseSpacing : denseSpacing),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: defaultBorderSide(Theme.of(context)),
+        ),
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildSearchControls() {
+    return Expanded(
+      child: Container(
+        height: defaultTextFieldHeight,
+        child: searchFieldBuilder(),
+      ),
+    );
   }
 }
 
