@@ -1586,3 +1586,20 @@ class PubWarningText extends StatelessWidget {
     );
   }
 }
+
+class SmallCircularProgressIndicator extends StatelessWidget {
+  const SmallCircularProgressIndicator({
+    Key key,
+    @required this.valueColor,
+  }) : super(key: key);
+
+  final Animation<Color> valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return CircularProgressIndicator(
+      strokeWidth: 2,
+      valueColor: valueColor,
+    );
+  }
+}
