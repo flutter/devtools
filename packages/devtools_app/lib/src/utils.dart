@@ -1223,6 +1223,15 @@ class ListValueNotifier<T> extends ChangeNotifier
     _listChanged();
   }
 
+  /// Replaces all elements in the list and notifies listeners. It's preferred
+  /// to calling .clear() then .addAll(), because it only notifies listeners
+  /// once.
+  void replaceAll(Iterable<T> elements) {
+    _rawList.clear();
+    _rawList.addAll(elements);
+    _listChanged();
+  }
+
   /// Adds elements to the list and notifies listeners.
   void addAll(Iterable<T> elements) {
     _rawList.addAll(elements);

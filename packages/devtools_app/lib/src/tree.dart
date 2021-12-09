@@ -63,10 +63,8 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
   @override
   void didUpdateWidget(TreeView<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.dataRoots != oldWidget.dataRoots) {
-      _initData();
-      _updateItems();
-    }
+    _initData();
+    _updateItems();
   }
 
   void _initData() {
