@@ -182,6 +182,7 @@ class InspectorTreeController extends Object
   double lastContentWidth;
 
   final List<InspectorTreeRow> cachedRows = [];
+  InspectorTreeRow _cachedSelectedRow;
 
   void setSearchTarget(SearchTargetType searchTarget) {
     _searchTarget = searchTarget;
@@ -193,6 +194,7 @@ class InspectorTreeController extends Object
   void _maybeClearCache() {
     if (root != null && root.isDirty) {
       cachedRows.clear();
+      _cachedSelectedRow = null;
       root.isDirty = false;
       lastContentWidth = null;
     }
@@ -206,6 +208,9 @@ class InspectorTreeController extends Object
       cachedRows.add(null);
     }
     cachedRows[index] ??= root?.getRow(index);
+    if (cachedRows[index]?.isSelected == true) {
+      _cachedSelectedRow = cachedRows[index];
+    }
     return cachedRows[index];
   }
 
@@ -214,10 +219,11 @@ class InspectorTreeController extends Object
   }
 
   List<InspectorTreeRow> getPathFromSelectedRowToRoot() {
-    final selectedItem = cachedRows.firstWhere(
-      (element) => element.isSelected,
-      orElse: () => null,
-    );
+    final selectedItem = _cachedSelectedRow ??
+        cachedRows.firstWhere(
+          (element) => element.isSelected,
+          orElse: () => null,
+        );
     if (selectedItem == null) return [];
 
     final pathToRoot = <InspectorTreeRow>[selectedItem];
