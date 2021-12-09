@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 
 import 'collapsible_mixin.dart';
@@ -12,7 +13,7 @@ import 'trees.dart';
 
 class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   const TreeView({
-    this.dataRoots,
+    this.dataRootsListenable,
     this.dataDisplayProvider,
     this.onItemSelected,
     this.onItemExpanded,
@@ -21,7 +22,7 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
     this.onTraverse,
   });
 
-  final List<T> dataRoots;
+  final ValueListenable<List<T>> dataRootsListenable;
 
   /// Use [shrinkWrap] iff you need to place a TreeView inside a ListView or
   /// other container with unconstrained height.
@@ -56,19 +57,30 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
   @override
   void initState() {
     super.initState();
-    _initData();
-    _updateItems();
+    widget.dataRootsListenable.addListener(_updateTreeView);
+    _updateTreeView();
   }
 
   @override
-  void didUpdateWidget(TreeView<T> oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _initData();
-    _updateItems();
+  void dispose() {
+    widget.dataRootsListenable.removeListener(_updateTreeView);
+    super.dispose();
   }
 
+  // @override
+  // void didUpdateWidget(TreeView<T> oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  //   _initData();
+  //   _updateItems();
+  // }
+
   void _initData() {
-    dataRoots = List.from(widget.dataRoots);
+    dataRoots = List.from(widget.dataRootsListenable.value);
+  }
+
+  void _updateTreeView() {
+    _initData();
+    _updateItems();
   }
 
   @override

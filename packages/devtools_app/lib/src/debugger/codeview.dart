@@ -814,7 +814,7 @@ class _LineItemState extends State<LineItem> {
                 child: Material(
                   child: ExpandableVariable(
                     debuggerController: _debuggerController,
-                    variable: ValueNotifier(variable),
+                    variable: variable,
                   ),
                 ),
               ),

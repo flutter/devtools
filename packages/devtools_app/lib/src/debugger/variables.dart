@@ -25,44 +25,11 @@ class Variables extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DebuggerController>(context);
-
-    return ValueListenableBuilder<List<DartObjectNode>>(
-      valueListenable: controller.variables,
-      builder: (context, variables, _) {
-        if (variables.isEmpty) return const SizedBox();
-        // TODO(kenz): preserve expanded state of tree on switching frames and
-        // on stepping.
-        return TreeView<DartObjectNode>(
-          dataRoots: variables,
-          dataDisplayProvider: (variable, onPressed) =>
-              displayProvider(context, variable, onPressed, controller),
-          onItemSelected: (variable) => onItemPressed(variable, controller),
-        );
-      },
-    );
-  }
-
-  void onItemPressed(DartObjectNode v, DebuggerController controller) {
-    // On expansion, lazily build the variables tree for performance reasons.
-    if (v.isExpanded) {
-      v.children.forEach(buildVariablesTree);
-    }
-  }
-}
-
-class VariablesList extends StatelessWidget {
-  const VariablesList({Key key, this.lines}) : super(key: key);
-
-  final List<DartObjectNode> lines;
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = Provider.of<DebuggerController>(context);
-    if (lines.isEmpty) return const SizedBox();
+    if (controller.variables.value.isEmpty) return const SizedBox();
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
     return TreeView<DartObjectNode>(
-      dataRoots: lines,
+      dataRootsListenable: controller.variables,
       dataDisplayProvider: (variable, onPressed) =>
           displayProvider(context, variable, onPressed, controller),
       onItemSelected: (variable) => onItemPressed(variable, controller),
@@ -85,26 +52,20 @@ class ExpandableVariable extends StatelessWidget {
   })  : assert(debuggerController != null),
         super(key: key);
 
-  final ValueListenable<DartObjectNode> variable;
+  final DartObjectNode variable;
   final DebuggerController debuggerController;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<DartObjectNode>(
-      valueListenable: variable,
-      builder: (context, variable, _) {
-        if (variable == null) return const SizedBox();
-        // TODO(kenz): preserve expanded state of tree on switching frames and
-        // on stepping.
-        return TreeView<DartObjectNode>(
-          dataRoots: [variable],
-          shrinkWrap: true,
-          dataDisplayProvider: (variable, onPressed) =>
-              displayProvider(context, variable, onPressed, debuggerController),
-          onItemSelected: (variable) =>
-              onItemPressed(variable, debuggerController),
-        );
-      },
+    if (variable == null) return const SizedBox();
+    // TODO(kenz): preserve expanded state of tree on switching frames and
+    // on stepping.
+    return TreeView<DartObjectNode>(
+      dataRootsListenable: ValueNotifier([variable]),
+      shrinkWrap: true,
+      dataDisplayProvider: (variable, onPressed) =>
+          displayProvider(context, variable, onPressed, debuggerController),
+      onItemSelected: (variable) => onItemPressed(variable, debuggerController),
     );
   }
 
