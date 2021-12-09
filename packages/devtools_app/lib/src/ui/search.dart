@@ -20,6 +20,8 @@ import '../utils.dart';
 const defaultTopMatchesLimit = 10;
 int topMatchesLimit = defaultTopMatchesLimit;
 
+const double _searchControlDividerHeight = 24.0;
+
 mixin SearchControllerMixin<T extends DataSearchStateMixin> {
   final _searchNotifier = ValueNotifier<String>('');
   final _searchInProgress = ValueNotifier<bool>(false);
@@ -801,7 +803,7 @@ class _SearchField extends StatelessWidget {
                     children: <Widget>[
                       prefix,
                       SizedBox(
-                        height: 24.0,
+                        height: _searchControlDividerHeight,
                         width: defaultIconSize,
                         child: Transform.rotate(
                           angle: degToRad(90),
@@ -1087,8 +1089,8 @@ class SearchNavigationControls extends StatelessWidget {
                   Opacity(
                     opacity: isSearchInProgress ? 1 : 0,
                     child: SizedBox(
-                      width: scaleByFontFactor(10.0),
-                      height: scaleByFontFactor(10.0),
+                      width: scaleByFontFactor(smallProgressSize),
+                      height: scaleByFontFactor(smallProgressSize),
                       child: isSearchInProgress
                           ? SmallCircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(
@@ -1100,7 +1102,7 @@ class SearchNavigationControls extends StatelessWidget {
                   ),
                   _matchesStatus(numMatches),
                   SizedBox(
-                    height: 24.0,
+                    height: _searchControlDividerHeight,
                     width: defaultIconSize,
                     child: Transform.rotate(
                       angle: degToRad(90),
