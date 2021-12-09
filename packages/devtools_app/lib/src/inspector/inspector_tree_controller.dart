@@ -679,8 +679,8 @@ class InspectorTreeController extends Object
       }
     }
 
-    int _statsSearchOps = 0;
-    int _statsWidgets = 0;
+    int _debugStatsSearchOps = 0;
+    int _debugStatsWidgets = 0;
 
     if (search == null ||
         search.isEmpty ||
@@ -696,7 +696,7 @@ class InspectorTreeController extends Object
 
     // Reset search matches
     for (final row in cachedRows) {
-      _statsWidgets++;
+      _debugStatsWidgets++;
       setSearchMatch(row.node, false);
     }
     _updateSearchMatches();
@@ -714,7 +714,7 @@ class InspectorTreeController extends Object
             ? description + ' ' + textPreview.replaceAll('\n', ' ')
             : description;
 
-        _statsSearchOps++;
+        _debugStatsSearchOps++;
         if (searchValue.caseInsensitiveContains(caseInsensitiveSearch)) {
           matches.add(row);
           setSearchMatch(row.node, true);
@@ -726,9 +726,9 @@ class InspectorTreeController extends Object
     }
 
     debugPrint('Search completed with ' +
-        _statsWidgets.toString() +
+        _debugStatsWidgets.toString() +
         ' widgets, ' +
-        _statsSearchOps.toString() +
+        _debugStatsSearchOps.toString() +
         ' ops');
   }
 }
