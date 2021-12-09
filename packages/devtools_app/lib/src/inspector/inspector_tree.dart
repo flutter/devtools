@@ -315,6 +315,7 @@ class InspectorTreeConfig {
 
 enum SearchTargetType {
   widget,
+  // TODO(https://github.com/flutter/devtools/issues/3489) implement other search scopes: details, all etc
 }
 
 extension SearchTargetTypeExtension on SearchTargetType {
