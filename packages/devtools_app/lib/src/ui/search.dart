@@ -799,19 +799,17 @@ class _SearchField extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
-                        prefix,
-                        SizedBox(
-                          height: 24.0,
-                          width: defaultIconSize,
-                          child: Transform.rotate(
-                            angle: degToRad(90),
-                            child: const PaddedDivider(
-                              padding:
-                                  EdgeInsets.symmetric(vertical: densePadding),
-                            ),
-                          ),
+                      prefix,
+                      SizedBox(
+                        height: 24.0,
+                        width: defaultIconSize,
+                        child: Transform.rotate(
+                          angle: degToRad(90),
+                          child: PaddedDivider.vertical(),
                         ),
-                      ])
+                      ),
+                    ],
+                  )
                 : null,
             suffix: suffix != null
                 ? suffix
@@ -1106,9 +1104,7 @@ class SearchNavigationControls extends StatelessWidget {
                     width: defaultIconSize,
                     child: Transform.rotate(
                       angle: degToRad(90),
-                      child: const PaddedDivider(
-                        padding: EdgeInsets.symmetric(vertical: densePadding),
-                      ),
+                      child: PaddedDivider.vertical(),
                     ),
                   ),
                   inputDecorationSuffixButton(Icons.keyboard_arrow_up,

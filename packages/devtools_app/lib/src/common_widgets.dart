@@ -36,6 +36,9 @@ class PaddedDivider extends StatelessWidget {
   const PaddedDivider.thin({Key key})
       : padding = const EdgeInsets.only(bottom: 4.0);
 
+  PaddedDivider.vertical({Key key, double padding = densePadding})
+      : padding = EdgeInsets.symmetric(vertical: padding);
+
   /// The padding to place around the divider.
   final EdgeInsets padding;
 
