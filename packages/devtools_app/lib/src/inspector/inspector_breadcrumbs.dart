@@ -12,6 +12,8 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
     @required this.onTap,
   }) : super(key: key);
 
+  static const _maxNumberOfBreadcrumbs = 4;
+
   final List<InspectorTreeRow> rows;
   final Function(InspectorTreeRow) onTap;
 
@@ -57,11 +59,11 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
       );
     }).toList();
     List<_InspectorBreadcrumbData> breadcrumbs;
-    if (items.length > 5) {
+    if (items.length > _maxNumberOfBreadcrumbs) {
       breadcrumbs = [
         items[0],
         _InspectorBreadcrumbData.more(),
-        ...items.sublist(items.length - 4, items.length),
+        ...items.sublist(items.length - _maxNumberOfBreadcrumbs, items.length),
       ];
     } else {
       breadcrumbs = items;
