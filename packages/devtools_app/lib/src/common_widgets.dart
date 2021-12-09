@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 
 import 'analytics/analytics.dart' as ga;
 import 'config_specific/launch_url/launch_url.dart';
+import 'flutter_widgets/linked_scroll_controller.dart';
 import 'globals.dart';
 import 'scaffold.dart';
 import 'theme.dart';
@@ -1188,6 +1189,39 @@ extension ScrollControllerAutoScroll on ScrollController {
 
     // Scroll again if we've received new content in the interim.
     if (hasClients) {
+      final pos = position;
+      if (pos.pixels != pos.maxScrollExtent) {
+        jumpTo(pos.maxScrollExtent);
+      }
+    }
+  }
+}
+
+/// An extension on [LinkedScrollControllerGroup] to facilitate having the
+/// scrolling widgets auto scroll to the bottom on new content.
+///
+/// This extension serves the same function as the [ScrollControllerAutoScroll]
+/// extension above, but we need to implement these methods again as an
+/// extension on [LinkedScrollControllerGroup] because individual
+/// [ScrollController]s are intentionally inaccessible from
+/// [LinkedScrollControllerGroup].
+extension LinkedScrollControllerGroupExtension on LinkedScrollControllerGroup {
+  bool get atScrollBottom {
+    final pos = position;
+    return pos.pixels == pos.maxScrollExtent;
+  }
+
+  /// Scroll the content to the bottom using the app's default animation
+  /// duration and curve..
+  void autoScrollToBottom() async {
+    await animateTo(
+      position.maxScrollExtent,
+      duration: rapidDuration,
+      curve: defaultCurve,
+    );
+
+    // Scroll again if we've received new content in the interim.
+    if (hasAttachedControllers) {
       final pos = position;
       if (pos.pixels != pos.maxScrollExtent) {
         jumpTo(pos.maxScrollExtent);
