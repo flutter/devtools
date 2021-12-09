@@ -126,7 +126,7 @@ class ProgramExplorerController extends DisposableController
 
   /// Marks [node] as the currently selected node, clearing the selection state
   /// of any currently selected node.
-  /// TODO(elliette): Scroll to node when selected.
+  /// TODO(elliette): Scroll to node in program explorer tree when selected.
   void selectNode(VMServiceObjectNode node) async {
     if (!node.isSelectable) {
       return;
