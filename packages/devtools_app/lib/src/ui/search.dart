@@ -101,6 +101,7 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
     // [matchIndex] is 1-based. Subtract 1 for the 0-based list [searchMatches].
     final activeMatchIndex = matchIndex.value - 1;
     if (activeMatchIndex < 0) {
+      _activeSearchMatch.value?.isActiveSearchMatch = false;
       _activeSearchMatch.value = null;
       return;
     }
