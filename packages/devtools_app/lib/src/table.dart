@@ -394,6 +394,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         List.generate(dataRoots.length, (index) => dataRoots[index].isExpanded);
     _updateItems();
     _focusNode = FocusNode(debugLabel: 'table');
+    autoDisposeFocusNode(_focusNode);
   }
 
   void expandParents(T parent) {

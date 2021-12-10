@@ -268,6 +268,7 @@ abstract class FlameChartState<T extends FlameChart,
   @override
   void dispose() {
     zoomController.dispose();
+    focusNode.dispose();
     super.dispose();
   }
 

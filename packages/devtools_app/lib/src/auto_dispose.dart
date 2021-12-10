@@ -4,9 +4,10 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
-/// Provides functionality to simplify listening to streams and ValueNotifiers.
+/// Provides functionality to simplify listening to streams and ValueNotifiers,
+/// and disposing FocusNodes.
 ///
 /// See also:
 /// * [AutoDisposeControllerMixin] which integrates this functionality
@@ -15,6 +16,7 @@ import 'package:flutter/foundation.dart';
 ///   objects.
 class Disposer {
   final List<StreamSubscription> _subscriptions = [];
+  final List<FocusNode> _focusNodes = [];
 
   final List<Listenable> _listenables = [];
   final List<VoidCallback> _listeners = [];
@@ -23,6 +25,12 @@ class Disposer {
   void autoDispose(StreamSubscription subscription) {
     if (subscription == null) return;
     _subscriptions.add(subscription);
+  }
+
+  /// Track a focus node that will be automatically disposed on dispose.
+  void autoDisposeFocusNode(FocusNode node) {
+    if (node == null) return;
+    _focusNodes.add(node);
   }
 
   /// Add a listener to a Listenable object that is automatically removed when
@@ -38,6 +46,11 @@ class Disposer {
   ///
   /// It is fine to call this method and then add additional listeners.
   void cancel() {
+    for (FocusNode focusNode in _focusNodes) {
+      focusNode.dispose();
+    }
+    _focusNodes.clear();
+
     for (StreamSubscription subscription in _subscriptions) {
       subscription.cancel();
     }
@@ -84,6 +97,11 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   @override
   void autoDispose(StreamSubscription subscription) {
     _delegate.autoDispose(subscription);
+  }
+
+  @override
+  void autoDisposeFocusNode(FocusNode node) {
+    _delegate.autoDisposeFocusNode(node);
   }
 
   @override
