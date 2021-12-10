@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 
+import 'auto_dispose_mixin.dart';
 import 'collapsible_mixin.dart';
 import 'theme.dart';
 import 'trees.dart';
@@ -53,33 +54,16 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
 }
 
 class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
-    with TreeMixin<T> {
+    with TreeMixin<T>, AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
-    widget.dataRootsListenable.addListener(_updateTreeView);
+    addAutoDisposeListener(widget.dataRootsListenable, _updateTreeView);
     _updateTreeView();
   }
 
-  @override
-  void dispose() {
-    widget.dataRootsListenable.removeListener(_updateTreeView);
-    super.dispose();
-  }
-
-  // @override
-  // void didUpdateWidget(TreeView<T> oldWidget) {
-  //   super.didUpdateWidget(oldWidget);
-  //   _initData();
-  //   _updateItems();
-  // }
-
-  void _initData() {
-    dataRoots = List.from(widget.dataRootsListenable.value);
-  }
-
   void _updateTreeView() {
-    _initData();
+    dataRoots = List.from(widget.dataRootsListenable.value);
     _updateItems();
   }
 

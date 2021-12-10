@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +10,7 @@ import '../common_widgets.dart';
 import '../globals.dart';
 import '../inspector/diagnostics.dart';
 import '../inspector/inspector_screen.dart';
+import '../listenable.dart';
 import '../notifications.dart';
 import '../routing.dart';
 import '../theme.dart';
@@ -25,14 +25,19 @@ class Variables extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DebuggerController>(context);
-    if (controller.variables.value.isEmpty) return const SizedBox();
-    // TODO(kenz): preserve expanded state of tree on switching frames and
-    // on stepping.
-    return TreeView<DartObjectNode>(
-      dataRootsListenable: controller.variables,
-      dataDisplayProvider: (variable, onPressed) =>
-          displayProvider(context, variable, onPressed, controller),
-      onItemSelected: (variable) => onItemPressed(variable, controller),
+    return ValueListenableBuilder<List<DartObjectNode>>(
+      valueListenable: controller.variables,
+      builder: (context, variables, _) {
+        if (variables.isEmpty) return const SizedBox();
+        // TODO(kenz): preserve expanded state of tree on switching frames and
+        // on stepping.
+        return TreeView<DartObjectNode>(
+          dataRootsListenable: controller.variables,
+          dataDisplayProvider: (variable, onPressed) =>
+              displayProvider(context, variable, onPressed, controller),
+          onItemSelected: (variable) => onItemPressed(variable, controller),
+        );
+      },
     );
   }
 
@@ -61,7 +66,8 @@ class ExpandableVariable extends StatelessWidget {
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
     return TreeView<DartObjectNode>(
-      dataRootsListenable: ValueNotifier([variable]),
+      dataRootsListenable:
+          FixedValueListenable<List<DartObjectNode>>([variable]),
       shrinkWrap: true,
       dataDisplayProvider: (variable, onPressed) =>
           displayProvider(context, variable, onPressed, debuggerController),
