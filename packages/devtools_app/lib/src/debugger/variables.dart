@@ -25,19 +25,13 @@ class Variables extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DebuggerController>(context);
-    return ValueListenableBuilder<List<DartObjectNode>>(
-      valueListenable: controller.variables,
-      builder: (context, variables, _) {
-        if (variables.isEmpty) return const SizedBox();
-        // TODO(kenz): preserve expanded state of tree on switching frames and
-        // on stepping.
-        return TreeView<DartObjectNode>(
-          dataRootsListenable: controller.variables,
-          dataDisplayProvider: (variable, onPressed) =>
-              displayProvider(context, variable, onPressed, controller),
-          onItemSelected: (variable) => onItemPressed(variable, controller),
-        );
-      },
+    // TODO(kenz): preserve expanded state of tree on switching frames and
+    // on stepping.
+    return TreeView<DartObjectNode>(
+      dataRootsListenable: controller.variables,
+      dataDisplayProvider: (variable, onPressed) =>
+          displayProvider(context, variable, onPressed, controller),
+      onItemSelected: (variable) => onItemPressed(variable, controller),
     );
   }
 

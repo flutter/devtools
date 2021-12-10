@@ -21,6 +21,7 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
     this.shrinkWrap = false,
     this.itemExtent,
     this.onTraverse,
+    this.emptyTreeViewBuilder,
   });
 
   final ValueListenable<List<T>> dataRootsListenable;
@@ -49,6 +50,10 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   /// Called on traversal of child node during [buildFlatList].
   final void Function(T) onTraverse;
 
+  /// Builds a widget representing the empty tree. If [emptyTreeViewBuilder]
+  /// is not provided, then an empty [SizedBox] will be built.
+  final Widget Function() emptyTreeViewBuilder;
+
   @override
   _TreeViewState<T> createState() => _TreeViewState<T>();
 }
@@ -69,7 +74,7 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
 
   @override
   Widget build(BuildContext context) {
-    if (items.isEmpty) return const SizedBox();
+    if (items.isEmpty) return _emptyTreeViewBuilder();
     return ListView.builder(
       itemCount: items.length,
       itemExtent: widget.itemExtent,
@@ -86,6 +91,13 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
         );
       },
     );
+  }
+
+  Widget _emptyTreeViewBuilder() {
+    if (widget.emptyTreeViewBuilder != null) {
+      return widget.emptyTreeViewBuilder();
+    }
+    return const SizedBox();
   }
 
   // TODO(kenz): animate expansions and collapses.

@@ -83,6 +83,8 @@ class ProgramExplorerController extends DisposableController
 
   void initListeners() {
     // Re-initialize after reload.
+    // TODO(elliette): If file was opened from before the reload, we should try
+    // to open that one instead of the entrypoint file.
     addAutoDisposeListener(
       debuggerController.sortedScripts,
       refresh,
