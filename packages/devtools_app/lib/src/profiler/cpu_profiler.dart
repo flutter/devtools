@@ -82,9 +82,12 @@ class _CpuProfilerState extends State<CpuProfiler>
         SearchFieldMixin<CpuProfiler> {
   TabController _tabController;
 
+  CpuProfileData data;
+
   @override
   void initState() {
     super.initState();
+    data = widget.data;
     _initTabController();
   }
 
@@ -95,7 +98,9 @@ class _CpuProfilerState extends State<CpuProfiler>
       _initTabController();
     }
     if (widget.data != oldWidget.data) {
-      setState(() {});
+      setState(() {
+        data = widget.data;
+      });
     }
   }
 
@@ -135,10 +140,9 @@ class _CpuProfilerState extends State<CpuProfiler>
     final colorScheme = theme.colorScheme;
     final currentTab =
         widget.tabs.isNotEmpty ? widget.tabs[_tabController.index] : null;
-    final hasData =
-        widget.data != CpuProfilerController.baseStateCpuProfileData &&
-            widget.data != null &&
-            !widget.data.isEmpty;
+    final hasData = data != CpuProfilerController.baseStateCpuProfileData &&
+        data != null &&
+        !data.isEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,7 +274,7 @@ class _CpuProfilerState extends State<CpuProfiler>
   }
 
   Widget _buildCpuProfileDataView() {
-    if (widget.data != null) {
+    if (data != null) {
       return TabBarView(
         physics: defaultTabBarViewPhysics,
         controller: _tabController,
@@ -289,7 +293,7 @@ class _CpuProfilerState extends State<CpuProfiler>
     final cpuFlameChart = LayoutBuilder(
       builder: (context, constraints) {
         return CpuProfileFlameChart(
-          data: widget.data,
+          data: data,
           controller: widget.controller,
           width: constraints.maxWidth,
           height: constraints.maxHeight,
@@ -303,7 +307,7 @@ class _CpuProfilerState extends State<CpuProfiler>
     // TODO(kenz): make this order configurable.
     return [
       if (widget.summaryView != null) widget.summaryView,
-      if (!widget.data.isEmpty) ...[
+      if (!data.isEmpty) ...[
         bottomUp,
         callTree,
         cpuFlameChart,
