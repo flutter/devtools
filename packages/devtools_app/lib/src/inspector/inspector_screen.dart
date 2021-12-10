@@ -435,8 +435,6 @@ class InspectorSummaryTreeControls extends StatelessWidget {
 
   Container _controlsContainer(BuildContext context, Widget child) {
     return Container(
-      // Add [denseSpacing] to add slight padding around the expand /
-      // collapse buttons.
       height: defaultButtonHeight +
           (isDense() ? denseModeDenseSpacing : denseSpacing),
       decoration: BoxDecoration(

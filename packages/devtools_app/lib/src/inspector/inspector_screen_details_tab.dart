@@ -77,8 +77,6 @@ class _InspectorDetailsTabControllerState
     return Column(
       children: <Widget>[
         Container(
-          // Add [denseSpacing] to add slight padding around the expand /
-          // collapse buttons.
           height: defaultButtonHeight +
               (isDense() ? denseModeDenseSpacing : denseSpacing),
           decoration: BoxDecoration(
