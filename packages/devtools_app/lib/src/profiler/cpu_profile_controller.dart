@@ -428,6 +428,7 @@ class CpuProfilerController
     _selectedCpuStackFrameNotifier.value = null;
     _dataNotifier.value = data ?? baseStateCpuProfileData;
     _processingNotifier.value = false;
+    _userTagFilter.value = userTagNone;
     transformer.reset();
     resetSearch();
   }

@@ -94,6 +94,9 @@ class _CpuProfilerState extends State<CpuProfiler>
     if (widget.tabs.length != oldWidget.tabs.length) {
       _initTabController();
     }
+    if (widget.data != oldWidget.data) {
+      setState(() {});
+    }
   }
 
   @override
@@ -389,51 +392,41 @@ class UserTagDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const filterByTag = 'Filter by tag:';
-    // This needs to rebuild whenever there is new CPU profile data because the
-    // user tags will change with the data.
-    // TODO(kenz): remove the nested ValueListenableBuilders
-    // https://github.com/flutter/devtools/issues/2989.
-    return ValueListenableBuilder<CpuProfileData>(
-      valueListenable: controller.dataNotifier,
-      builder: (context, cpuProfileData, _) {
-        return ValueListenableBuilder<String>(
-          valueListenable: controller.userTagFilter,
-          builder: (context, userTag, _) {
-            final userTags = controller.userTags ?? [];
-            final tooltip = userTags.isNotEmpty
-                ? 'Filter the CPU profile by the given UserTag'
-                : 'No UserTags found for this CPU profile';
-            return DevToolsTooltip(
-              message: tooltip,
-              child: RoundedDropDownButton<String>(
-                isDense: true,
-                style: Theme.of(context).textTheme.bodyText2,
-                value: userTag,
-                items: [
-                  _buildMenuItem(
-                    display:
-                        '$filterByTag ${CpuProfilerController.userTagNone}',
-                    value: CpuProfilerController.userTagNone,
-                  ),
-                  // We don't want to show the 'Default' tag if it is the only
-                  // tag available. The 'none' tag above is equivalent in this
-                  // case.
-                  if (!(userTags.length == 1 &&
-                      userTags.first == UserTag.defaultTag.label))
-                    for (final tag in userTags)
-                      _buildMenuItem(
-                        display: '$filterByTag $tag',
-                        value: tag,
-                      ),
-                ],
-                onChanged: userTags.isEmpty ||
-                        (userTags.length == 1 &&
-                            userTags.first == UserTag.defaultTag.label)
-                    ? null
-                    : (String tag) => _onUserTagChanged(tag, context),
+    return ValueListenableBuilder<String>(
+      valueListenable: controller.userTagFilter,
+      builder: (context, userTag, _) {
+        final userTags = controller.userTags ?? [];
+        final tooltip = userTags.isNotEmpty
+            ? 'Filter the CPU profile by the given UserTag'
+            : 'No UserTags found for this CPU profile';
+        return DevToolsTooltip(
+          message: tooltip,
+          child: RoundedDropDownButton<String>(
+            isDense: true,
+            style: Theme.of(context).textTheme.bodyText2,
+            value: userTag,
+            items: [
+              _buildMenuItem(
+                display: '$filterByTag ${CpuProfilerController.userTagNone}',
+                value: CpuProfilerController.userTagNone,
               ),
-            );
-          },
+              // We don't want to show the 'Default' tag if it is the only
+              // tag available. The 'none' tag above is equivalent in this
+              // case.
+              if (!(userTags.length == 1 &&
+                  userTags.first == UserTag.defaultTag.label))
+                for (final tag in userTags)
+                  _buildMenuItem(
+                    display: '$filterByTag $tag',
+                    value: tag,
+                  ),
+            ],
+            onChanged: userTags.isEmpty ||
+                    (userTags.length == 1 &&
+                        userTags.first == UserTag.defaultTag.label)
+                ? null
+                : (String tag) => _onUserTagChanged(tag, context),
+          ),
         );
       },
     );
