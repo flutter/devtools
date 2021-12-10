@@ -82,7 +82,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   bool get enableButtons => actionInProgress == false;
 
   bool searchVisible = false;
-  bool searchPreventCloseOnBlur = false;
+
+  /// Indicates whether search can be closed. The value is set to true when
+  /// search target type dropdown is displayed
+  /// TODO(https://github.com/flutter/devtools/issues/3489) use this variable when adding the scope dropdown
+  bool searchPreventClose = false;
 
   SearchTargetType searchTarget = SearchTargetType.widget;
 
@@ -126,19 +130,19 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     addAutoDisposeListener(searchFieldFocusNode, () {
       // Close the search once focus is lost and following conditions are met:
       //  1. Search string is empty.
-      //  2. searchPreventCloseOnBlur = false (this is set true when searchTargetType Dropdown is opened).
+      //  2. searchPreventClose == false (this is set true when searchTargetType Dropdown is opened).
       if (!searchFieldFocusNode.hasFocus &&
           summaryTreeController.search.isEmpty &&
-          !searchPreventCloseOnBlur) {
+          !searchPreventClose) {
         setState(() {
           searchVisible = false;
         });
       }
 
-      // Reset searchPreventCloseOnBlur state to false after the search field gains focus.
+      // Reset searchPreventClose state to false after the search field gains focus.
       // Focus is returned automatically once the Dropdown menu is closed.
       if (searchFieldFocusNode.hasFocus) {
-        searchPreventCloseOnBlur = false;
+        searchPreventClose = false;
       }
     });
   }
