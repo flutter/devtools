@@ -453,12 +453,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         widget.selectionNotifier ?? ValueNotifier<Selection<T>>(Selection<T>());
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _focusNode.dispose();
-  }
-
   void _updateItems() {
     setState(() {
       items = buildFlatList(dataRoots);
