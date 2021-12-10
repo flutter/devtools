@@ -50,10 +50,10 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
   ValueListenable<List<T>> get searchMatches => _searchMatches;
 
   void refreshSearchMatches() {
-    updateMatches(matchesForSearch(_searchNotifier.value));
+    _updateMatches(matchesForSearch(_searchNotifier.value));
   }
 
-  void updateMatches(List<T> matches) {
+  void _updateMatches(List<T> matches) {
     _searchMatches.value = matches;
     if (matches.isEmpty) {
       matchIndex.value = 0;
@@ -100,9 +100,13 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
     _activeSearchMatch.value?.isActiveSearchMatch = false;
     _activeSearchMatch.value = searchMatches.value[activeMatchIndex]
       ..isActiveSearchMatch = true;
+    onMatchChanged(activeMatchIndex);
   }
 
   List<T> matchesForSearch(String search) => [];
+
+  /// Called when selected match index changes. Index is 0 based
+  void onMatchChanged(int index) {}
 
   void resetSearch() {
     _searchNotifier.value = '';

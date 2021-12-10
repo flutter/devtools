@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
+import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -595,94 +596,78 @@ class InspectorTreeController extends Object
 
   /* Search support */
   @override
-  void previousMatch() {
-    super.previousMatch();
-    final currentSearchMatches = searchMatches.value;
-    for (int i = 0; i < currentSearchMatches.length; i++) {
-      final searchMatch = currentSearchMatches[i];
-
-      if (searchMatch.isSelected) {
-        final rowToSelect = i == 0
-            ? currentSearchMatches[currentSearchMatches.length - 1]
-            : currentSearchMatches[i - 1];
-
-        onSelectRow(rowToSelect);
-        break;
-      }
-    }
-  }
-
-  @override
-  void nextMatch() {
-    super.nextMatch();
-    final currentSearchMatches = searchMatches.value;
-    for (int i = 0; i < currentSearchMatches.length; i++) {
-      final searchMatch = currentSearchMatches[i];
-
-      if (searchMatch.isSelected) {
-        final rowToSelect = i == currentSearchMatches.length - 1
-            ? currentSearchMatches[0]
-            : currentSearchMatches[i + 1];
-
-        onSelectRow(rowToSelect);
-        break;
-      }
-    }
+  void onMatchChanged(int index) {
+    onSelectRow(searchMatches.value[index]);
   }
 
   void dispose() {
+    _searchOperation?.cancel();
     if (_searchDebounce?.isActive ?? false) {
       _searchDebounce.cancel();
     }
   }
 
-  Future _searchOperation;
+  CancelableOperation<void> _searchOperation;
   Timer _searchDebounce;
+
+  List<InspectorTreeRow> _searchResults = [];
+
+  @override
+  void resetSearch() {
+    _searchResults = [];
+    super.resetSearch();
+  }
+
+  @override
+  set search(String search) {
+    _searchResults = [];
+    super.search = search;
+
+    _startSearchDebounceTimer();
+  }
 
   @override
   List<InspectorTreeRow> matchesForSearch(String search) {
-    updateMatches([]);
+    return _searchResults;
+  }
+
+  void _startSearchDebounceTimer() {
     searchInProgress = true;
 
     if (_searchDebounce?.isActive ?? false) {
       _searchDebounce.cancel();
     }
-    _searchDebounce =
-        Timer(Duration(milliseconds: search.isEmpty ? 0 : 300), () async {
-      // Abort any ongoing search operations and start a new one
-      if (_searchOperation != null) {
+
+    _searchDebounce = Timer(
+      Duration(milliseconds: search.isEmpty ? 0 : 300),
+      () async {
+        // Abort any ongoing search operations and start a new one
         try {
-          await _searchOperation;
+          await _searchOperation?.cancel();
         } catch (e) {
           log(e, LogLevel.error);
         }
-      }
-      searchInProgress = true;
+        searchInProgress = true;
 
-      // Start new search operation
-      _searchOperation = matchesForSearchAsyncOld(search, _searchTarget);
+        // Start new search operation
+        _searchOperation = CancelableOperation.fromFuture(
+            _findSearchMatches(search, _searchTarget));
 
-      await _searchOperation;
-      searchInProgress = false;
-    });
-    return [];
+        await _searchOperation.value;
+        searchInProgress = false;
+      },
+    );
   }
 
-  Future<void> matchesForSearchAsyncOld(
+  Future<void> _findSearchMatches(
     String search,
     SearchTargetType searchTarget,
   ) async {
     final matches = <InspectorTreeRow>[];
 
-    bool _firstSearchMatch = true;
     void _updateSearchMatches() {
-      updateMatches(matches);
-
-      if (matches.isNotEmpty && _firstSearchMatch) {
-        _firstSearchMatch = false;
-        // Always select the first search match
-        onSelectRow(matches[0]);
-      }
+      _searchResults = matches;
+      refreshSearchMatches();
     }
 
     int _debugStatsSearchOps = 0;

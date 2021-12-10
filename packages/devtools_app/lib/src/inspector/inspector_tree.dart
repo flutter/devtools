@@ -286,7 +286,6 @@ class InspectorTreeRow with DataSearchStateMixin {
   final bool lineToParent;
 
   bool get isSelected => node.selected;
-  bool get hasSearchMatch => node.hasSearchMatch;
 }
 
 /// Callback issued every time a node is added to the tree.
