@@ -98,7 +98,7 @@ class MemoryBodyState extends State<MemoryBody>
   /// Updated when the MemoryController's _androidCollectionEnabled ValueNotifier changes.
   bool isAndroidCollection = MemoryController.androidADBDefault;
 
-  final FocusNode _focusNode = FocusNode(debugLabel: 'memory');
+  final _focusNode = FocusNode(debugLabel: 'memory');
 
   @override
   void initState() {
