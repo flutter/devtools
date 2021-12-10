@@ -101,7 +101,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       if (clazzRef.name.contains('&')) {
         continue;
       }
-      if (clazzRef.location.script.uri == uri) {
+      if (clazzRef?.location?.script?.uri == uri) {
         final clazzNode = VMServiceObjectNode(
           controller,
           clazzRef.name,

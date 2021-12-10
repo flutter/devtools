@@ -250,7 +250,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
             );
           } else if (line is VariableConsoleLine) {
             return ExpandableVariable(
-              variable: ValueNotifier(line.variable),
+              variable: line.variable,
               debuggerController: _debuggerController,
             );
           } else {
