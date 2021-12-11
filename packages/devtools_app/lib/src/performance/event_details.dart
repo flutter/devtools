@@ -88,9 +88,9 @@ class EventDetails extends StatelessWidget {
   Widget _buildCpuProfiler(CpuProfilerController cpuProfilerController) {
     return ValueListenableBuilder<CpuProfileData>(
       valueListenable: cpuProfilerController.dataNotifier,
-      builder: (context, cpuProfileData, _) {
+      builder: (context, cpuProfileData, child) {
         if (cpuProfileData == null) {
-          return _buildProcessingInfo(cpuProfilerController);
+          return child;
         }
         return CpuProfiler(
           data: cpuProfileData,
@@ -98,6 +98,7 @@ class EventDetails extends StatelessWidget {
           summaryView: EventSummary(selectedEvent),
         );
       },
+      child: _buildProcessingInfo(cpuProfilerController),
     );
   }
 

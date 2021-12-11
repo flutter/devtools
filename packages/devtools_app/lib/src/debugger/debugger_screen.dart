@@ -127,44 +127,16 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    final codeView = ValueListenableBuilder(
-      valueListenable: controller.currentScriptRef,
-      builder: (context, scriptRef, _) {
-        return ValueListenableBuilder(
-          valueListenable: controller.currentParsedScript,
-          builder: (context, parsedScript, _) {
-            if (scriptRef != null &&
-                parsedScript != null &&
-                !_shownFirstScript) {
-              ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
-              serviceManager.sendDwdsEvent(
-                screen: DebuggerScreen.id,
-                action: analytics_constants.pageReady,
-              );
-              _shownFirstScript = true;
-            }
-            return CodeView(
-              key: DebuggerScreenBody.codeViewKey,
-              controller: controller,
-              scriptRef: scriptRef,
-              parsedScript: parsedScript,
-              onSelected: controller.toggleBreakpoint,
-            );
-          },
-        );
-      },
-    );
-
     final codeArea = ValueListenableBuilder(
       valueListenable: controller.fileExplorerVisible,
-      builder: (context, visible, _) {
+      builder: (context, visible, child) {
         if (visible) {
           // TODO(devoncarew): Animate this opening and closing.
           return Split(
             axis: Axis.horizontal,
             initialFractions: const [0.70, 0.30],
             children: [
-              codeView,
+              child,
               ProgramExplorer(
                 debugController: controller,
                 onSelected: _onLocationSelected,
@@ -172,9 +144,30 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             ],
           );
         } else {
-          return codeView;
+          return child;
         }
       },
+      child: DualValueListenableBuilder<ScriptRef, ParsedScript>(
+        firstListenable: controller.currentScriptRef,
+        secondListenable: controller.currentParsedScript,
+        builder: (context, scriptRef, parsedScript, _) {
+          if (scriptRef != null && parsedScript != null && !_shownFirstScript) {
+            ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
+            serviceManager.sendDwdsEvent(
+              screen: DebuggerScreen.id,
+              action: analytics_constants.pageReady,
+            );
+            _shownFirstScript = true;
+          }
+          return CodeView(
+            key: DebuggerScreenBody.codeViewKey,
+            controller: controller,
+            scriptRef: scriptRef,
+            parsedScript: parsedScript,
+            onSelected: controller.toggleBreakpoint,
+          );
+        },
+      ),
     );
 
     return Split(
@@ -245,17 +238,19 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     return ValueListenableBuilder(
       valueListenable: controller.breakpointsWithLocation,
       builder: (context, breakpoints, _) {
-        return Row(children: [
-          BreakpointsCountBadge(breakpoints: breakpoints),
-          DevToolsTooltip(
-            child: ToolbarAction(
-              icon: Icons.delete,
-              onPressed:
-                  breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
+        return Row(
+          children: [
+            BreakpointsCountBadge(breakpoints: breakpoints),
+            DevToolsTooltip(
+              child: ToolbarAction(
+                icon: Icons.delete,
+                onPressed:
+                    breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
+              ),
+              message: 'Remove all breakpoints',
             ),
-            message: 'Remove all breakpoints',
-          ),
-        ]);
+          ],
+        );
       },
     );
   }
