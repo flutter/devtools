@@ -9,7 +9,6 @@ import '../common_widgets.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/utils.dart';
-import 'flutter_frames_chart.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
@@ -198,9 +197,7 @@ class AnalyzeFrameButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsIconButton(
-      iconWidget: FrameAnalysisIcon(
-        iconSize: defaultIconSize,
-      ),
+      iconData: Icons.saved_search,
       onPressed: () =>
           controller.openAnalysisTab(controller.selectedFrame.value),
       tooltip: 'Analyze the selected frame',

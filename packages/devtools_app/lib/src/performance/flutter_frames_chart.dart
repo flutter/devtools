@@ -582,23 +582,24 @@ class ShaderJankWarningIcon extends StatelessWidget {
 }
 
 class FrameAnalysisIcon extends StatelessWidget {
-  const FrameAnalysisIcon({
-    this.iconSize = defaultActionsIconSizeBeforeScaling,
-  });
+  const FrameAnalysisIcon({Key key}) : super(key: key);
 
-  final double iconSize;
+  static const _backgroundColor = Color.fromRGBO(48, 48, 48, 0.8);
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        BlinkingIcon(
-          icon: Icons.saved_search,
-          color: Colors.amber,
-          size: iconSize,
-        ),
-      ],
+    return Container(
+      width: defaultActionsIconSizeBeforeScaling,
+      height: defaultActionsIconSizeBeforeScaling,
+      decoration: const BoxDecoration(
+        color: _backgroundColor,
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(
+        Icons.saved_search,
+        color: Colors.white,
+        size: defaultIconSizeBeforeScaling,
+      ),
     );
   }
 }
