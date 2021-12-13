@@ -394,7 +394,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         List.generate(dataRoots.length, (index) => dataRoots[index].isExpanded);
     _updateItems();
     _focusNode = FocusNode(debugLabel: 'table');
-    autoDisposeFocusNode(_focusNode);
   }
 
   void expandParents(T parent) {
@@ -432,6 +431,16 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     rootsExpanded =
         List.generate(dataRoots.length, (index) => dataRoots[index].isExpanded);
     _updateItems();
+  }
+
+  @override
+  void dispose() {
+    // TODO(elliette): Figure out why the test fails when registering the
+    // FocusNode with autoDisposeFocusNode in initState. This should be
+    // equivalent. Since the AutoDisposeMixin is listed last, it is the `super`
+    // called below.
+    _focusNode.dispose();
+    super.dispose();
   }
 
   void _initData() {
