@@ -66,7 +66,8 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
       breadcrumbs = [
         items[0],
         _InspectorBreadcrumbData.more(),
-        ...items.sublist(items.length - _maxNumberOfBreadcrumbs + 1, items.length),
+        ...items.sublist(
+            items.length - _maxNumberOfBreadcrumbs + 1, items.length),
       ];
     } else {
       breadcrumbs = items;
@@ -162,38 +163,45 @@ class _InspectorBreadcrumbData {
     return const _InspectorBreadcrumbData._(
       row: null,
       isSelected: false,
-      alternativeText: '…',
+      alternativeText: ellipsisValue,
       alternativeIcon: null,
     );
   }
 
   factory _InspectorBreadcrumbData.chevron() {
-    final icon = Icon(
-      Icons.chevron_right,
-      size: defaultIconSize,
-    );
-    return _InspectorBreadcrumbData._(
+    return const _InspectorBreadcrumbData._(
       row: null,
       isSelected: false,
       alternativeText: null,
-      alternativeIcon: icon,
+      alternativeIcon: breadcrumbSeparatorIcon,
     );
   }
 
+  static const String ellipsisValue = '…';
+  static const IconData breadcrumbSeparatorIcon = Icons.chevron_right;
+
   final InspectorTreeRow row;
-  final Widget alternativeIcon;
+  final IconData alternativeIcon;
   final String alternativeText;
   final bool isSelected;
 
   String get text => alternativeText ?? row?.node?.diagnostic?.description;
 
-  Widget get icon => alternativeIcon ?? row?.node?.diagnostic?.icon;
+  Widget get icon {
+    if (alternativeIcon != null) {
+      return Icon(
+        Icons.chevron_right,
+        size: defaultIconSize,
+      );
+    }
+
+    return row?.node?.diagnostic?.icon;
+  }
 
   bool get isChevron =>
-      row == null && alternativeText == null ?? alternativeIcon != null;
+      row == null && alternativeIcon == breadcrumbSeparatorIcon;
 
-  bool get isEllipsis =>
-      row == null && alternativeIcon == null && alternativeText != null;
+  bool get isEllipsis => row == null && alternativeText == ellipsisValue;
 
   bool get isClickable => !isSelected && !isEllipsis;
 }
