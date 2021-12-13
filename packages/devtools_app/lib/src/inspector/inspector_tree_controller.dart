@@ -613,6 +613,17 @@ class InspectorTreeController extends Object
   }) {
     final matches = <InspectorTreeRow>[];
 
+    if (searchPreviousMatches) {
+      final previousMatches = searchMatches.value;
+      for (final previousMatch in previousMatches) {
+        if (previousMatch.node.diagnostic.searchValue
+            .caseInsensitiveContains(search)) {
+          matches.add(previousMatch);
+        }
+      }
+      return matches;
+    }
+
     int _debugStatsSearchOps = 0;
     int _debugStatsWidgets = 0;
 
@@ -625,7 +636,6 @@ class InspectorTreeController extends Object
     }
 
     debugPrint('Search started: ' + _searchTarget.toString());
-    final caseInsensitiveSearch = search.toLowerCase();
 
     // Reset search matches
     for (final row in cachedRows) {
@@ -639,21 +649,13 @@ class InspectorTreeController extends Object
 
       // Widget search begin
       if (_searchTarget == SearchTargetType.widget) {
-        final description = diagnostic.toStringShort();
-        final textPreview = diagnostic.json['textPreview'];
-
-        final searchValue = textPreview is String
-            ? description + ' ' + textPreview.replaceAll('\n', ' ')
-            : description;
-
         _debugStatsSearchOps++;
-        if (searchValue.caseInsensitiveContains(caseInsensitiveSearch)) {
+        if (diagnostic.searchValue.caseInsensitiveContains(search)) {
           matches.add(row);
           setSearchMatch(row.node, true);
           continue;
         }
       }
-
       // Widget search end
     }
 
@@ -664,6 +666,16 @@ class InspectorTreeController extends Object
         ' ops');
 
     return matches;
+  }
+}
+
+extension RemoteDiagnosticsNodeExtension on RemoteDiagnosticsNode {
+  String get searchValue {
+    final description = toStringShort();
+    final textPreview = json['textPreview'];
+    return textPreview is String
+        ? description + ' ' + textPreview.replaceAll('\n', ' ')
+        : description;
   }
 }
 
