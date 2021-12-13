@@ -186,7 +186,7 @@ class InspectorTreeController extends Object
 
   void setSearchTarget(SearchTargetType searchTarget) {
     _searchTarget = searchTarget;
-    matchesForSearch(search);
+    refreshSearchMatches();
   }
 
   // TODO: we should add a listener instead that clears the cache when the
