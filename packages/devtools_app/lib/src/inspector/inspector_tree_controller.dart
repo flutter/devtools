@@ -8,7 +8,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
-import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -600,75 +599,19 @@ class InspectorTreeController extends Object
     onSelectRow(searchMatches.value[index]);
   }
 
+  @override
+  Duration get debounceDelay => const Duration(milliseconds: 300);
+
   void dispose() {
-    _searchOperation?.cancel();
-    if (_searchDebounce?.isActive ?? false) {
-      _searchDebounce.cancel();
-    }
-  }
-
-  CancelableOperation<void> _searchOperation;
-  Timer _searchDebounce;
-
-  List<InspectorTreeRow> _searchResults = [];
-
-  @override
-  void resetSearch() {
-    _searchResults = [];
-    super.resetSearch();
+    disposeSearch();
   }
 
   @override
-  set search(String search) {
-    _searchResults = [];
-    super.search = search;
-
-    _startSearchDebounceTimer();
-  }
-
-  @override
-  List<InspectorTreeRow> matchesForSearch(String search) {
-    return _searchResults;
-  }
-
-  void _startSearchDebounceTimer() {
-    searchInProgress = true;
-
-    if (_searchDebounce?.isActive ?? false) {
-      _searchDebounce.cancel();
-    }
-
-    _searchDebounce = Timer(
-      Duration(milliseconds: search.isEmpty ? 0 : 300),
-      () async {
-        // Abort any ongoing search operations and start a new one
-        try {
-          await _searchOperation?.cancel();
-        } catch (e) {
-          log(e, LogLevel.error);
-        }
-        searchInProgress = true;
-
-        // Start new search operation
-        _searchOperation = CancelableOperation.fromFuture(
-            _findSearchMatches(search, _searchTarget));
-
-        await _searchOperation.value;
-        searchInProgress = false;
-      },
-    );
-  }
-
-  Future<void> _findSearchMatches(
-    String search,
-    SearchTargetType searchTarget,
-  ) async {
+  List<InspectorTreeRow> matchesForSearch(
+    String search, {
+    bool searchPreviousMatches = false,
+  }) {
     final matches = <InspectorTreeRow>[];
-
-    void _updateSearchMatches() {
-      _searchResults = matches;
-      refreshSearchMatches();
-    }
 
     int _debugStatsSearchOps = 0;
     int _debugStatsWidgets = 0;
@@ -677,9 +620,8 @@ class InspectorTreeController extends Object
         search.isEmpty ||
         serviceManager.inspectorService == null ||
         serviceManager.inspectorService.isDisposed) {
-      _updateSearchMatches();
       debugPrint('Search completed, no search');
-      return;
+      return matches;
     }
 
     debugPrint('Search started: ' + _searchTarget.toString());
@@ -690,14 +632,13 @@ class InspectorTreeController extends Object
       _debugStatsWidgets++;
       setSearchMatch(row.node, false);
     }
-    _updateSearchMatches();
 
     for (final row in cachedRows) {
       final diagnostic = row.node.diagnostic;
       if (row.node == null || diagnostic == null) continue;
 
       // Widget search begin
-      if (searchTarget == SearchTargetType.widget) {
+      if (_searchTarget == SearchTargetType.widget) {
         final description = diagnostic.toStringShort();
         final textPreview = diagnostic.json['textPreview'];
 
@@ -709,10 +650,10 @@ class InspectorTreeController extends Object
         if (searchValue.caseInsensitiveContains(caseInsensitiveSearch)) {
           matches.add(row);
           setSearchMatch(row.node, true);
-          _updateSearchMatches();
           continue;
         }
       }
+
       // Widget search end
     }
 
@@ -721,6 +662,8 @@ class InspectorTreeController extends Object
         ' widgets, ' +
         _debugStatsSearchOps.toString() +
         ' ops');
+
+    return matches;
   }
 }
 

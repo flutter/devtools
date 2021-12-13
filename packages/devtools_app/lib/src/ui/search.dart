@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
+import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +13,7 @@ import 'package:flutter/services.dart';
 import '../auto_dispose.dart';
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
+import '../config_specific/logger/logger.dart';
 import '../theme.dart';
 import '../trees.dart';
 import '../ui/utils.dart';
@@ -33,6 +36,9 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
   /// Last X position of caret in search field, used for pop-up position.
   double xPosition = 0.0;
 
+  CancelableOperation<void> _searchOperation;
+  Timer _searchDebounce;
+
   set search(String value) {
     final previousSearchValue = _searchNotifier.value;
     final shouldSearchPreviousMatches = previousSearchValue != null &&
@@ -54,14 +60,57 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
   ValueListenable<List<T>> get searchMatches => _searchMatches;
 
   void refreshSearchMatches({bool searchPreviousMatches = false}) {
-    final matches =
-        (_searchNotifier.value != null && _searchNotifier.value.isNotEmpty)
-            ? matchesForSearch(
-                _searchNotifier.value,
-                searchPreviousMatches: searchPreviousMatches,
-              )
-            : <T>[];
-    _updateMatches(matches);
+    if (_searchNotifier.value != null && _searchNotifier.value.isNotEmpty) {
+      if (debounceDelay != Duration.zero) {
+        _startDebounceTimer(
+          search,
+          searchPreviousMatches: searchPreviousMatches,
+        );
+      } else {
+        final matches = matchesForSearch(
+          _searchNotifier.value,
+          searchPreviousMatches: searchPreviousMatches,
+        );
+        _updateMatches(matches);
+      }
+    } else {
+      _updateMatches(<T>[]);
+    }
+  }
+
+  void _startDebounceTimer(
+    String search, {
+    @required bool searchPreviousMatches,
+  }) {
+    searchInProgress = true;
+
+    if (_searchDebounce?.isActive ?? false) {
+      _searchDebounce.cancel();
+    }
+
+    _searchDebounce = Timer(
+      search.isEmpty ? Duration.zero : debounceDelay,
+      () async {
+        // Abort any ongoing search operations and start a new one
+        try {
+          await _searchOperation?.cancel();
+        } catch (e) {
+          log(e, LogLevel.error);
+        }
+        searchInProgress = true;
+
+        // Start new search operation
+        final future = Future(() {
+          return matchesForSearch(
+            _searchNotifier.value,
+            searchPreviousMatches: searchPreviousMatches,
+          );
+        }).then((matches) => _updateMatches(matches));
+        _searchOperation = CancelableOperation.fromFuture(future);
+        await _searchOperation.value;
+        searchInProgress = false;
+      },
+    );
   }
 
   void _updateMatches(List<T> matches) {
@@ -121,6 +170,10 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
     onMatchChanged(activeMatchIndex);
   }
 
+  /// Delay to reduce the amount of search queries
+  /// Duration.zero (default) disables debounce
+  Duration get debounceDelay => Duration.zero;
+
   List<T> matchesForSearch(
     String search, {
     bool searchPreviousMatches = false,
@@ -133,6 +186,13 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
   void resetSearch() {
     _searchNotifier.value = '';
     refreshSearchMatches();
+  }
+
+  void disposeSearch() {
+    _searchOperation?.cancel();
+    if (_searchDebounce?.isActive ?? false) {
+      _searchDebounce.cancel();
+    }
   }
 }
 
