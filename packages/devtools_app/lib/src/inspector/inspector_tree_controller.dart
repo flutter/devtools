@@ -621,7 +621,8 @@ class InspectorTreeController extends Object
           matches.add(previousMatch);
         }
       }
-      return matches;
+
+      if (matches.isNotEmpty) return matches;
     }
 
     int _debugStatsSearchOps = 0;
