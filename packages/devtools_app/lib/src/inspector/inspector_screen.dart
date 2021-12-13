@@ -399,9 +399,10 @@ class InspectorSummaryTreeControls extends StatelessWidget {
           context,
           Row(
             children: <Widget>[
-              const SizedBox(width: denseSpacing),
-              const Text('Widget Tree'),
-              const SizedBox(width: denseSpacing),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: denseSpacing),
+                child: Text('Widget Tree'),
+              ),
               ...!isSearchVisible
                   ? [
                       const Spacer(),
