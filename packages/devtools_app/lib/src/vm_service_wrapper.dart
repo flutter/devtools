@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:dds/vm_service_extensions.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'globals.dart';
@@ -401,7 +401,14 @@ class VmServiceWrapper implements VmService {
     int offset,
     int count,
   }) {
-    return trackFuture('getObject', _vmService.getObject(isolateId, objectId));
+    return trackFuture(
+        'getObject',
+        _vmService.getObject(
+          isolateId,
+          objectId,
+          offset: offset,
+          count: count,
+        ));
   }
 
   @override
@@ -841,9 +848,19 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Success> setExceptionPauseMode(String isolateId, String mode) {
-    return trackFuture('setExceptionPauseMode',
-        _vmService.setExceptionPauseMode(isolateId, mode));
+  Future<Success> setIsolatePauseMode(
+    String isolateId, {
+    /*ExceptionPauseMode*/ String exceptionPauseMode,
+    bool shouldPauseOnExit,
+  }) {
+    return trackFuture(
+      'setIsolatePauseMode',
+      _vmService.setIsolatePauseMode(
+        isolateId,
+        exceptionPauseMode: exceptionPauseMode,
+        shouldPauseOnExit: shouldPauseOnExit,
+      ),
+    );
   }
 
   @override
@@ -1026,6 +1043,35 @@ class VmServiceWrapper implements VmService {
     }
   }
 
+  @override
+  Future<UriList> lookupPackageUris(String isolateId, List<String> uris) async {
+    if (await isProtocolVersionSupported(
+        supportedVersion: SemanticVersion(major: 7, minor: 4))) {
+      return trackFuture(
+        'lookupPackageUris',
+        _vmService.lookupPackageUris(isolateId, uris),
+      );
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  Future<UriList> lookupResolvedPackageUris(
+    String isolateId,
+    List<String> uris,
+  ) async {
+    if (await isProtocolVersionSupported(
+        supportedVersion: SemanticVersion(major: 7, minor: 4))) {
+      return trackFuture(
+        'lookupResolvedPackageUris',
+        _vmService.lookupResolvedPackageUris(isolateId, uris),
+      );
+    } else {
+      return null;
+    }
+  }
+
   /// Testing only method to indicate that we don't really need to await all
   /// currently pending futures.
   ///
@@ -1128,10 +1174,25 @@ class VmServiceWrapper implements VmService {
           : '_Service';
 
   @visibleForTesting
+  int vmServiceCallCount = 0;
+
+  @visibleForTesting
+  final vmServiceCalls = <String>[];
+
+  @visibleForTesting
+  void clearVmServiceCalls() {
+    vmServiceCalls.clear();
+    vmServiceCallCount = 0;
+  }
+
+  @visibleForTesting
   Future<T> trackFuture<T>(String name, Future<T> future) {
     if (!trackFutures) {
       return future;
     }
+    vmServiceCallCount++;
+    vmServiceCalls.add(name);
+
     final trackedFuture = TrackedFuture(name, future);
     if (_allFuturesCompleter.isCompleted) {
       _allFuturesCompleter = Completer<bool>();
@@ -1150,6 +1211,13 @@ class VmServiceWrapper implements VmService {
       onError: (error) => futureComplete(),
     );
     return future;
+  }
+
+  /// Prevent DevTools from blocking Dart SDK rolls if changes in
+  /// package:vm_service are unimplemented in DevTools.
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return super.noSuchMethod(invocation);
   }
 }
 

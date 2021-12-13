@@ -47,7 +47,7 @@ class _ProgramExplorerRow extends StatelessWidget {
     }
 
     return DevToolsTooltip(
-      tooltip: toolTip ?? node.name,
+      message: toolTip ?? node.name,
       textStyle: theme.toolTipFixedFontStyle,
       child: InkWell(
         onTap: onTap,
@@ -96,7 +96,7 @@ class _ProgramExplorerRow extends StatelessWidget {
     } else if (node.object is Field) {
       final field = node.object as Field;
       final subtext = _buildFieldTypeText(field);
-      toolTip = '$subtext ${field.name}';
+      toolTip = '$subtext${field.name}';
     } else if (node.script != null) {
       toolTip = node.script.uri;
     }
@@ -120,7 +120,9 @@ class _ProgramExplorerRow extends StatelessWidget {
     if (field.isFinal && !field.isConst) {
       buffer.write('final ');
     }
-    buffer.write(field.declaredType.name);
+    if (field.declaredType.name != null) {
+      buffer.write('${field.declaredType.name} ');
+    }
     return buffer.toString();
   }
 
@@ -347,7 +349,11 @@ class _ProgramOutlineView extends StatelessWidget {
                 return _ProgramExplorerRow(
                   controller: controller,
                   node: node,
-                  onTap: onTap,
+                  onTap: () async {
+                    await node.populateLocation();
+                    controller.selectOutlineNode(node);
+                    onTap();
+                  },
                 );
               },
             );
@@ -441,6 +447,8 @@ class ProgramExplorer extends StatelessWidget {
       return;
     }
 
+    await node.populateLocation();
+
     if (node.object != null && node.object is! Obj) {
       await controller.populateNode(node);
     }
@@ -451,24 +459,7 @@ class ProgramExplorer extends StatelessWidget {
       node.expand();
     }
 
-    ScriptRef script = node.script;
-    int tokenPos = 0;
-    if (node.object != null &&
-        (node.object is FieldRef ||
-            node.object is FuncRef ||
-            node.object is ClassRef)) {
-      final location = (node.object as dynamic).location;
-      tokenPos = location.tokenPos;
-      script = location.script;
-    }
-
-    script = await debugController.getScript(script);
-    final location = tokenPos == 0
-        ? null
-        : SourcePosition.calculatePosition(script, tokenPos);
-    onSelected(
-      ScriptLocation(script, location: location),
-    );
+    onSelected(node.location);
   }
 
   void onItemExpanded(VMServiceObjectNode node) async {

@@ -181,7 +181,7 @@ class ToggleFilterElement extends StatelessWidget {
     );
     if (filter.tooltip != null) {
       content = DevToolsTooltip(
-        tooltip: filter.tooltip,
+        message: filter.tooltip,
         child: content,
       );
     }

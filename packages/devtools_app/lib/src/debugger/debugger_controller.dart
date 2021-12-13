@@ -197,11 +197,8 @@ class DebuggerController extends DisposableController
   final _clazzCache = <ClassRef, Class>{};
 
   /// Jump to the given ScriptRef and optional SourcePosition.
-  void showScriptLocation(
-    ScriptLocation scriptLocation, {
-    bool centerLocation = true,
-  }) {
-    _showScriptLocation(scriptLocation, centerLocation: centerLocation);
+  void showScriptLocation(ScriptLocation scriptLocation) {
+    _showScriptLocation(scriptLocation);
 
     // Update the scripts history (and make sure we don't react to the
     // subsequent event).
@@ -212,11 +209,7 @@ class DebuggerController extends DisposableController
 
   /// Show the given script location (without updating the script navigation
   /// history).
-  void _showScriptLocation(
-    ScriptLocation scriptLocation, {
-    bool centerLocation = true,
-  }) {
-    _shouldCenterScrollLocation = centerLocation;
+  void _showScriptLocation(ScriptLocation scriptLocation) {
     _currentScriptRef.value = scriptLocation?.scriptRef;
 
     _parseCurrentScript();
@@ -316,17 +309,14 @@ class DebuggerController extends DisposableController
       _selectedStackFrame.value?.frame ??
       _stackFramesWithLocation.value?.safeFirst?.frame;
 
-  final _variables = ValueNotifier<List<Variable>>([]);
+  final _variables = ValueNotifier<List<DartObjectNode>>([]);
 
-  ValueListenable<List<Variable>> get variables => _variables;
+  ValueListenable<List<DartObjectNode>> get variables => _variables;
 
   final _sortedScripts = ValueNotifier<List<ScriptRef>>([]);
 
   /// Return the sorted list of ScriptRefs active in the current isolate.
   ValueListenable<List<ScriptRef>> get sortedScripts => _sortedScripts;
-
-  bool get shouldCenterScrollLocation => _shouldCenterScrollLocation;
-  bool _shouldCenterScrollLocation = true;
 
   final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
 
@@ -547,8 +537,8 @@ class DebuggerController extends DisposableController
     }
   }
 
-  Future<void> setExceptionPauseMode(String mode) async {
-    await _service.setExceptionPauseMode(isolateRef.id, mode);
+  Future<void> setIsolatePauseMode(String mode) async {
+    await _service.setIsolatePauseMode(isolateRef.id, exceptionPauseMode: mode);
     _exceptionPauseMode.value = mode;
   }
 
@@ -784,6 +774,9 @@ class DebuggerController extends DisposableController
     // Collecting frames for Dart web applications can be slow. At the potential
     // cost of a flicker in the stack view, display only the top frame
     // initially.
+    // TODO(elliette): Find a better solution for this. Currently, this means
+    // we fetch all variable objects twice (once in _getFullStack and once in
+    // in_createStackFrameWithLocation).
     if (await serviceManager.connectedApp.isDartWebApp) {
       _populateFrameInfo(
         [
@@ -962,14 +955,14 @@ class DebuggerController extends DisposableController
     }
   }
 
-  List<Variable> _createVariablesForFrame(Frame frame) {
+  List<DartObjectNode> _createVariablesForFrame(Frame frame) {
     // vars can be null for async frames.
     if (frame.vars == null) {
       return [];
     }
 
     final variables =
-        frame.vars.map((v) => Variable.create(v, isolateRef)).toList();
+        frame.vars.map((v) => DartObjectNode.create(v, isolateRef)).toList();
     variables
       ..forEach(buildVariablesTree)
       ..sort((a, b) => sortFieldsByName(a.name, b.name));
@@ -1056,8 +1049,12 @@ class DebuggerController extends DisposableController
     _showFileOpener.value = visible;
   }
 
+  // TODO(kenz): search through previous matches when possible.
   @override
-  List<SourceToken> matchesForSearch(String search) {
+  List<SourceToken> matchesForSearch(
+    String search, {
+    bool searchPreviousMatches = false,
+  }) {
     if (search == null || search.isEmpty || parsedScript.value == null) {
       return [];
     }

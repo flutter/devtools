@@ -296,8 +296,8 @@ class InspectorTreeConfig {
   InspectorTreeConfig({
     @required this.summaryTree,
     @required this.treeType,
-    @required this.onNodeAdded,
-    @required this.onClientActiveChange,
+    this.onNodeAdded,
+    this.onClientActiveChange,
     this.onSelectionChange,
     this.onExpand,
     this.onHover,

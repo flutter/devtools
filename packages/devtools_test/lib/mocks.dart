@@ -367,6 +367,16 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   }
 
   @override
+  Future<Obj> getObject(
+    String isolateId,
+    String objectId, {
+    int offset,
+    int count,
+  }) {
+    return Future.value(MockObj());
+  }
+
+  @override
   Future<MemoryUsage> getMemoryUsage(String isolateId) async {
     if (_memoryData == null) {
       throw StateError('_memoryData was not provided to FakeServiceManager');
@@ -643,6 +653,8 @@ class MockServiceManager extends Mock implements ServiceConnectionManager {}
 class MockVmService extends Mock implements VmServiceWrapper {}
 
 class MockIsolate extends Mock implements Isolate {}
+
+class MockObj extends Mock implements Obj {}
 
 class MockConnectedApp extends Mock implements ConnectedApp {}
 

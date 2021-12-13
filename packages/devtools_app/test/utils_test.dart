@@ -108,6 +108,15 @@ void main() {
       expect(log2(4), equals(2));
     });
 
+    test('roundToNearestPow10', () {
+      expect(roundToNearestPow10(1), equals(1));
+      expect(roundToNearestPow10(2), equals(10));
+      expect(roundToNearestPow10(10), equals(10));
+      expect(roundToNearestPow10(11), equals(100));
+      expect(roundToNearestPow10(189), equals(1000));
+      expect(roundToNearestPow10(6581), equals(10000));
+    });
+
     test('executeWithDelay', () async {
       const delayMs = 500;
       int n = 1;

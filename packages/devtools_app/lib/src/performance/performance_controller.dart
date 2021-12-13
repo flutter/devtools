@@ -29,7 +29,11 @@ import 'performance_model.dart';
 import 'performance_screen.dart';
 import 'performance_utils.dart';
 import 'rebuild_counts.dart';
+import 'timeline_analysis.dart';
 import 'timeline_event_processor.dart';
+
+/// Flag to hide the frame analysis feature while it is under development.
+bool frameAnalysisSupported = false;
 
 /// This class contains the business logic for [performance_screen.dart].
 ///
@@ -81,6 +85,54 @@ class PerformanceController extends DisposableController
 
   ValueListenable<bool> get badgeTabForJankyFrames => _badgeTabForJankyFrames;
   final _badgeTabForJankyFrames = ValueNotifier<bool>(false);
+
+  ValueListenable<List<FlutterFrameAnalysisTabData>> get analysisTabs =>
+      _analysisTabs;
+  final _analysisTabs = ListValueNotifier<FlutterFrameAnalysisTabData>([]);
+
+  ValueListenable<FlutterFrameAnalysisTabData> get selectedAnalysisTab =>
+      _selectedAnalysisTab;
+  final _selectedAnalysisTab = ValueNotifier<FlutterFrameAnalysisTabData>(null);
+
+  void openAnalysisTab(FlutterFrame frame) {
+    if (_selectedAnalysisTab.value?.frame?.id == frame.id) return;
+    final existingTabForFrame = _analysisTabs.value.firstWhere(
+      (tab) => tab.frame.id == frame.id,
+      orElse: () => null,
+    );
+    if (existingTabForFrame != null) {
+      _selectedAnalysisTab.value = existingTabForFrame;
+    } else {
+      // TODO(https://github.com/flutter/flutter/issues/94896): stop dividing by
+      // 2 to get the proper id.
+      final newTab = FlutterFrameAnalysisTabData(
+        'Frame ${frame.id ~/ 2}',
+        frame,
+      );
+      _analysisTabs.add(newTab);
+      _selectedAnalysisTab.value = newTab;
+    }
+  }
+
+  void closeAnalysisTab(FlutterFrameAnalysisTabData tabData) {
+    if (_selectedAnalysisTab.value == tabData) {
+      // Re-adjust the selection to a different tab.
+      final indexOfTab = _analysisTabs.value.indexOf(tabData);
+      if (indexOfTab != 0) {
+        _selectedAnalysisTab.value = _analysisTabs.value[indexOfTab - 1];
+      } else if (_analysisTabs.value.length > 1) {
+        _selectedAnalysisTab.value = _analysisTabs.value[1];
+      }
+    }
+    _analysisTabs.remove(tabData);
+    if (_analysisTabs.value.isEmpty) {
+      _selectedAnalysisTab.value = null;
+    }
+  }
+
+  void showTimeline() {
+    _selectedAnalysisTab.value = null;
+  }
 
   final threadNamesById = <int, String>{};
 
@@ -324,6 +376,10 @@ class PerformanceController extends DisposableController
 
     data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
+
+    // Default to viewing the timeline events flame chart when a new frame is
+    // selected.
+    _selectedAnalysisTab.value = null;
 
     if (!offlineController.offlineMode.value) {
       final bool frameBeforeFirstWellFormedFrame =
@@ -757,19 +813,31 @@ class PerformanceController extends DisposableController
   }
 
   @override
-  List<TimelineEvent> matchesForSearch(String search) {
+  List<TimelineEvent> matchesForSearch(
+    String search, {
+    bool searchPreviousMatches = false,
+  }) {
     if (search?.isEmpty ?? true) return [];
     final matches = <TimelineEvent>[];
-    final events = List<TimelineEvent>.from(data.timelineEvents);
-    for (final event in events) {
-      breadthFirstTraversal<TimelineEvent>(event, action: (TimelineEvent e) {
-        if (e.name.caseInsensitiveContains(search)) {
-          matches.add(e);
-          e.isSearchMatch = true;
-        } else {
-          e.isSearchMatch = false;
+    if (searchPreviousMatches) {
+      final previousMatches = searchMatches.value;
+      for (final previousMatch in previousMatches) {
+        if (previousMatch.name.caseInsensitiveContains(search)) {
+          matches.add(previousMatch);
         }
-      });
+      }
+    } else {
+      final events = List<TimelineEvent>.from(data.timelineEvents);
+      for (final event in events) {
+        breadthFirstTraversal<TimelineEvent>(
+          event,
+          action: (TimelineEvent e) {
+            if (e.name.caseInsensitiveContains(search)) {
+              matches.add(e);
+            }
+          },
+        );
+      }
     }
     return matches;
   }
@@ -799,6 +867,8 @@ class PerformanceController extends DisposableController
     _selectedTimelineEventNotifier.value = null;
     _selectedFrameNotifier.value = null;
     _processing.value = false;
+    _analysisTabs.clear();
+    _selectedAnalysisTab.value = null;
     serviceManager.errorBadgeManager.clearErrors(PerformanceScreen.id);
   }
 

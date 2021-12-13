@@ -6,8 +6,8 @@ import 'package:devtools_app/src/debugger/debugger_model.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_test/mocks.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -47,6 +47,7 @@ void main() {
       kind: InstanceKind.kMap,
       id: '123',
       classRef: null,
+      length: 2,
       associations: [
         MapAssociation(
           key: InstanceRef(
@@ -73,7 +74,7 @@ void main() {
       name: 'my-isolate',
       isSystemIsolate: false,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -83,7 +84,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 2))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -111,6 +113,7 @@ void main() {
       kind: InstanceKind.kMap,
       id: '123',
       classRef: null,
+      length: 2,
       associations: [
         MapAssociation(
           key: InstanceRef(
@@ -131,7 +134,7 @@ void main() {
       ],
       identityHashCode: null,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -141,7 +144,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 2))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -168,6 +172,7 @@ void main() {
       kind: InstanceKind.kMap,
       id: '123',
       classRef: null,
+      length: 2,
       associations: [
         MapAssociation(
           key: InstanceRef(
@@ -187,7 +192,7 @@ void main() {
       ],
       identityHashCode: null,
     );
-    final variable = Variable.create(
+    final variable = DartObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -197,7 +202,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service.getObject(any, any)).thenAnswer((_) async {
+    when(manager.service.getObject(any, any, offset: 0, count: 2))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -217,7 +223,7 @@ Matcher matchesVariable({
   @required String name,
   @required Object value,
 }) {
-  return const TypeMatcher<Variable>()
+  return const TypeMatcher<DartObjectNode>()
       .having(
         (v) => v.displayValue,
         'displayValue',

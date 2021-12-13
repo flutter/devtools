@@ -169,10 +169,10 @@ class _CpuProfilerState extends State<CpuProfiler>
                       if (widget.searchFieldKey != null)
                         _buildSearchField(hasData),
                       FlameChartHelpButton(
-                        screenId: widget.standaloneProfiler
+                        gaScreen: widget.standaloneProfiler
                             ? analytics_constants.cpuProfiler
                             : analytics_constants.performance,
-                        analyticsAction:
+                        gaSelection:
                             analytics_constants.cpuProfileFlameChartHelp,
                         additionalInfo: [
                           ...dialogSubHeader(Theme.of(context), 'Legend'),
@@ -404,7 +404,7 @@ class UserTagDropdown extends StatelessWidget {
                 ? 'Filter the CPU profile by the given UserTag'
                 : 'No UserTags found for this CPU profile';
             return DevToolsTooltip(
-              tooltip: tooltip,
+              message: tooltip,
               child: RoundedDropDownButton<String>(
                 isDense: true,
                 style: Theme.of(context).textTheme.bodyText2,

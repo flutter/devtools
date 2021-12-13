@@ -10,7 +10,6 @@ import '../devtools.dart' as devtools;
 import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as analytics_constants;
 import 'common_widgets.dart';
-import 'config_specific/launch_url/launch_url.dart';
 import 'device_dialog.dart';
 import 'globals.dart';
 import 'info/info_controller.dart';
@@ -112,18 +111,19 @@ class StatusLine extends StatelessWidget {
   ) {
     final String docPageId = currentScreen.docPageId;
     if (docPageId != null) {
-      return InkWell(
-        onTap: () async {
-          final url = 'https://flutter.dev/devtools/$docPageId';
-          ga.select(
-            currentScreen.screenId,
-            analytics_constants.documentationLink,
-          );
-          await launchUrl(url, context);
-        },
-        child: Text(
-          'flutter.dev/devtools/$docPageId',
-          style: Theme.of(context).linkTextStyle,
+      return RichText(
+        text: LinkTextSpan(
+          link: Link(
+            display: 'flutter.dev/devtools/$docPageId',
+            url: 'https://flutter.dev/devtools/$docPageId',
+          ),
+          onTap: () {
+            ga.select(
+              currentScreen.screenId,
+              analytics_constants.documentationLink,
+            );
+          },
+          context: context,
         ),
       );
     } else {
@@ -154,7 +154,7 @@ class StatusLine extends StatelessWidget {
             }
 
             return DevToolsTooltip(
-              tooltip: 'Selected Isolate',
+              message: 'Selected Isolate',
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<IsolateRef>(
                   value: isolateRef,
@@ -223,7 +223,7 @@ class StatusLine extends StatelessWidget {
               ),
               const SizedBox(width: denseSpacing),
               DevToolsTooltip(
-                tooltip: 'Device Info',
+                message: 'Device Info',
                 child: InkWell(
                   onTap: () async {
                     final flutterVersion =

@@ -146,9 +146,13 @@ double get smallButtonHeight => scaleByFontFactor(20.0);
 
 double get buttonMinWidth => scaleByFontFactor(36.0);
 
-double get defaultIconSize => scaleByFontFactor(16.0);
-double get actionsIconSize => scaleByFontFactor(20.0);
+double get defaultIconSize => scaleByFontFactor(defaultIconSizeBeforeScaling);
+double get actionsIconSize =>
+    scaleByFontFactor(defaultActionsIconSizeBeforeScaling);
 double get tooltipIconSize => scaleByFontFactor(12.0);
+
+const defaultIconSizeBeforeScaling = 16.0;
+const defaultActionsIconSizeBeforeScaling = 20.0;
 
 const defaultSpacing = 16.0;
 const denseSpacing = 8.0;
@@ -240,7 +244,8 @@ extension DevToolsColorScheme on ColorScheme {
   Color get overlayBackgroundColor =>
       isLight ? Colors.white : const Color(0xFF424242);
 
-  Color get errorTextColor => const Color(0xFFC3595A);
+  Color get errorTextColor =>
+      isLight ? const Color(0xFFA53725) : const Color(0xFFE09790);
 
   Color get toggleButtonsTitle =>
       isLight ? const Color(0xFF464646) : const Color(0xFFAEAEB1);
@@ -444,6 +449,11 @@ extension ThemeDataExtension on ThemeData {
         color: colorScheme.devtoolsLink,
         decoration: TextDecoration.underline,
         fontSize: defaultFontSize,
+      );
+
+  TextStyle get subtleChartTextStyle => TextStyle(
+        color: colorScheme.chartSubtleColor,
+        fontSize: chartFontSizeSmall,
       );
 
   TextStyle get searchMatchHighlightStyle => const TextStyle(

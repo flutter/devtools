@@ -415,7 +415,7 @@ class OpenAboutAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: 'About DevTools',
+      message: 'About DevTools',
       child: InkWell(
         onTap: () async {
           unawaited(showDialog(
@@ -441,7 +441,7 @@ class OpenSettingsAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: 'Settings',
+      message: 'Settings',
       child: InkWell(
         onTap: () async {
           unawaited(showDialog(
@@ -467,7 +467,7 @@ class ReportFeedbackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: 'Report feedback',
+      message: 'Report feedback',
       child: InkWell(
         onTap: () async {
           ga.select(
@@ -528,18 +528,16 @@ class DevToolsAboutDialog extends StatelessWidget {
   }
 
   Widget _createFeedbackLink(BuildContext context) {
-    final reportIssuesLink = devToolsExtensionPoints.issueTrackerLink();
-    return InkWell(
-      onTap: () async {
-        ga.select(
-          analytics_constants.devToolsMain,
-          analytics_constants.feedbackLink,
-        );
-        await launchUrl(reportIssuesLink.url, context);
-      },
-      child: Text(
-        reportIssuesLink.display,
-        style: Theme.of(context).linkTextStyle,
+    return RichText(
+      text: LinkTextSpan(
+        link: devToolsExtensionPoints.issueTrackerLink(),
+        context: context,
+        onTap: () {
+          ga.select(
+            analytics_constants.devToolsMain,
+            analytics_constants.feedbackLink,
+          );
+        },
       ),
     );
   }

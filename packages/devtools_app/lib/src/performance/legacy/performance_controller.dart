@@ -468,7 +468,10 @@ class LegacyPerformanceController
   }
 
   @override
-  List<LegacyTimelineEvent> matchesForSearch(String search) {
+  List<LegacyTimelineEvent> matchesForSearch(
+    String search, {
+    bool searchPreviousMatches = false,
+  }) {
     if (search?.isEmpty ?? true) return [];
     final matches = <LegacyTimelineEvent>[];
     for (final event in data.timelineEvents) {

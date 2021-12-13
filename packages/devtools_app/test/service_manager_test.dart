@@ -33,6 +33,55 @@ void main() async {
         await env.tearDownEnvironment(force: true);
       });
 
+      test('verify number of vm service calls on connect', () async {
+        await env.setupEnvironment();
+        // Await a delay to ensure the service extensions have had a chance to
+        // be called. This delay may be able to be shortened if doing so does
+        // not cause bot flakiness.
+        await Future.delayed(const Duration(seconds: 10));
+        // Ensure all futures are completed before running checks.
+        await serviceManager.service.allFuturesCompleted;
+        expect(
+          // Use a range instead of an exact number because service extension
+          // calls are not consistent. This will still catch any spurious calls
+          // that are unintentionally added at start up.
+          const Range(15, 35)
+              .contains(serviceManager.service.vmServiceCallCount),
+          isTrue,
+          reason:
+              'Unexpected number of vm service calls upon connection. If this '
+              'is expected, please update this test to the new expected number '
+              'of calls. Here are the calls for this test run:\n'
+              '${serviceManager.service.vmServiceCalls.toString()}',
+        );
+        // Check the ordering of the vm service calls we can expect to occur
+        // in a stable order.
+        expect(
+          serviceManager.service.vmServiceCalls
+              // Filter out unawaited streamListen calls.
+              .where((call) => call != 'streamListen')
+              .toList()
+              .sublist(0, 5),
+          equals([
+            'getVersion',
+            'callMethod getDartDevelopmentServiceVersion',
+            'getFlagList',
+            'getVM',
+            'getIsolate',
+          ]),
+        );
+
+        expect(
+          serviceManager.service.vmServiceCalls
+              .where((call) => call == 'streamListen')
+              .toList()
+              .length,
+          equals(8),
+        );
+
+        await env.tearDownEnvironment();
+      }, timeout: const Timeout.factor(4));
+
       test('vmServiceOpened', () async {
         await env.setupEnvironment();
 
