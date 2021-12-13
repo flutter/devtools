@@ -103,12 +103,7 @@ class PerformanceController extends DisposableController
     if (existingTabForFrame != null) {
       _selectedAnalysisTab.value = existingTabForFrame;
     } else {
-      // TODO(https://github.com/flutter/flutter/issues/94896): stop dividing by
-      // 2 to get the proper id.
-      final newTab = FlutterFrameAnalysisTabData(
-        'Frame ${frame.id ~/ 2}',
-        frame,
-      );
+      final newTab = FlutterFrameAnalysisTabData('Frame ${frame.id}', frame);
       _analysisTabs.add(newTab);
       _selectedAnalysisTab.value = newTab;
     }

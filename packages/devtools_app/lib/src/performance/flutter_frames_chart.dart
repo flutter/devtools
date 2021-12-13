@@ -229,9 +229,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
               }
               return Center(
                 child: Text(
-                  // TODO(https://github.com/flutter/flutter/issues/94896): stop
-                  // dividing by 2 to get the proper id.
-                  '${widget.frames[index].id ~/ 2}',
+                  '${widget.frames[index].id}',
                   style: themeData.subtleChartTextStyle,
                 ),
               );
