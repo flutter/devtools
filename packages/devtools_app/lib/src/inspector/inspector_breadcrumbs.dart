@@ -12,7 +12,10 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
     @required this.onTap,
   }) : super(key: key);
 
-  static const _maxNumberOfBreadcrumbs = 4;
+  /// Max number of visible breadcrumbs including root item but not 'more' item.
+  /// E.g. value 5 means root and 4 breadcrumbs can be displayed, other
+  /// breadcrumbs (if any) will be replaced by '...' item.
+  static const _maxNumberOfBreadcrumbs = 5;
 
   final List<InspectorTreeRow> rows;
   final Function(InspectorTreeRow) onTap;
@@ -63,7 +66,7 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
       breadcrumbs = [
         items[0],
         _InspectorBreadcrumbData.more(),
-        ...items.sublist(items.length - _maxNumberOfBreadcrumbs, items.length),
+        ...items.sublist(items.length - _maxNumberOfBreadcrumbs + 1, items.length),
       ];
     } else {
       breadcrumbs = items;
