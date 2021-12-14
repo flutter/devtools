@@ -42,26 +42,36 @@ class Disposer {
     listenable.addListener(listener);
   }
 
-  /// Cancel all listeners added & stream subscriptions.
+  /// Cancel all stream subscriptions added.
   ///
-  /// It is fine to call this method and then add additional listeners.
-  void cancel() {
-    for (FocusNode focusNode in _focusNodes) {
-      focusNode.dispose();
-    }
-    _focusNodes.clear();
-
+  /// It is fine to call this method and then add additional subscriptions.
+  void cancelStreamSubscriptions() {
     for (StreamSubscription subscription in _subscriptions) {
       subscription.cancel();
     }
     _subscriptions.clear();
+  }
 
+  /// Cancel all listeners added.
+  ///
+  /// It is fine to call this method and then add additional listeners.
+  void cancelListeners() {
     assert(_listenables.length == _listeners.length);
     for (int i = 0; i < _listenables.length; ++i) {
       _listenables[i].removeListener(_listeners[i]);
     }
     _listenables.clear();
     _listeners.clear();
+  }
+
+  /// Cancel all focus nodes added.
+  ///
+  /// It is fine to call this method and then add additional focus nodes.
+  void cancelFocusNodes() {
+    for (FocusNode focusNode in _focusNodes) {
+      focusNode.dispose();
+    }
+    _focusNodes.clear();
   }
 }
 
