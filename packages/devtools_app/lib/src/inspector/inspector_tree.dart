@@ -311,14 +311,17 @@ class InspectorTreeConfig {
   final TreeEventCallback onHover;
 }
 
+// TODO(https://github.com/flutter/devtools/issues/3489) implement other search scopes
 enum SearchTargetType {
   widget,
-  // TODO(https://github.com/flutter/devtools/issues/3489) implement other search scopes: details, all etc
+  details,
 }
 
 extension SearchTargetTypeExtension on SearchTargetType {
   String get name {
     switch (this) {
+      case SearchTargetType.details:
+        return 'Details';
       case SearchTargetType.widget:
       default:
         return 'Widget';

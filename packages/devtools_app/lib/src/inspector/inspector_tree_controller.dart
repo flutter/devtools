@@ -109,7 +109,7 @@ class InspectorTreeController extends Object
 
   InspectorTreeNode createNode() => InspectorTreeNode();
 
-  SearchTargetType _searchTarget = SearchTargetType.widget;
+  SearchTargetType _searchTarget = SearchTargetType.details;
 
   void addClient(InspectorControllerClient value) {
     final firstClient = _clients.isEmpty;
@@ -620,20 +620,23 @@ class InspectorTreeController extends Object
   }) async {
     final matches = <InspectorTreeRow>[];
 
-    if (searchPreviousMatches) {
-      final previousMatches = searchMatches.value;
-      for (final previousMatch in previousMatches) {
-        if (previousMatch.node.diagnostic.searchValue
-            .caseInsensitiveContains(search)) {
-          matches.add(previousMatch);
-        }
-      }
-
-      if (matches.isNotEmpty) return matches;
-    }
+    // TODO fix this
+    // if (searchPreviousMatches) {
+    //   final previousMatches = searchMatches.value;
+    //   for (final previousMatch in previousMatches) {
+    //     if (previousMatch.node.diagnostic.searchValue
+    //         .caseInsensitiveContains(search)) {
+    //       matches.add(previousMatch);
+    //     }
+    //   }
+    //
+    //   if (matches.isNotEmpty) return matches;
+    // }
 
     int _debugStatsSearchOps = 0;
     final _debugStatsWidgets = _searchableCachedRows.length;
+    int _debugStatsWidgetsTotal = 0;
+    int _debugStatsRowsFound = 0;
 
     if (search == null ||
         search.isEmpty ||
@@ -649,24 +652,55 @@ class InspectorTreeController extends Object
       final diagnostic = row.node.diagnostic;
       if (row.node == null || diagnostic == null) continue;
 
-      // Widget search begin
-      if (_searchTarget == SearchTargetType.widget) {
-        _debugStatsSearchOps++;
-        if (diagnostic.searchValue.caseInsensitiveContains(search)) {
-          matches.add(row);
-          continue;
-        }
+      bool hasMatch = false;
+      switch (_searchTarget) {
+        case SearchTargetType.widget:
+          hasMatch = _hasWidgetMatch(diagnostic, search);
+          break;
+        case SearchTargetType.details:
+          hasMatch = await _hasPropertyMatch(diagnostic, search);
+          break;
       }
-      // Widget search end
+
+      if (hasMatch) {
+        _debugStatsRowsFound++;
+        matches.add(row);
+        setSearchMatch(row.node, true);
+      }
     }
 
-    debugPrint('Search completed with ' +
-        _debugStatsWidgets.toString() +
-        ' widgets, ' +
-        _debugStatsSearchOps.toString() +
-        ' ops');
+    debugPrint('Search completed. '
+        'Found $_debugStatsRowsFound rows. '
+        'Total rows is $_debugStatsWidgetsTotal');
 
     return matches;
+  }
+
+  bool _hasWidgetMatch(RemoteDiagnosticsNode diagnostic, String search) {
+    return diagnostic.searchValue.caseInsensitiveContains(search);
+  }
+
+  Future<bool> _hasPropertyMatch(
+    RemoteDiagnosticsNode diagnostic,
+    String search,
+  ) async {
+    List<RemoteDiagnosticsNode> properties = diagnostic.inlineProperties;
+    if (diagnostic.inlineProperties?.isNotEmpty != true) {
+      final service = diagnostic.inspectorService;
+      if (!service.disposed) {
+        properties = await diagnostic.getProperties(service);
+      }
+    }
+
+    if (properties == null) return false;
+
+    for (final property in properties) {
+      if (property.name.caseInsensitiveContains(search) ||
+          property.description?.caseInsensitiveContains(search) == true) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 
