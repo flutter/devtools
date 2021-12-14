@@ -176,15 +176,15 @@ class ReleaseNotesController {
     } else {
       previousVersion = SemanticVersion.parse(lastReleaseNotesShownVersion);
     }
-    final latestStableVersion = _latestStableVersion();
-    final currentVersion = SemanticVersion.parse(latestStableVersion);
+    const devtoolsVersion = devtools.version;
+    final currentVersion = SemanticVersion.parse(devtoolsVersion);
     if (currentVersion > previousVersion) {
       try {
         final releaseNotesMarkdown =
-            await http.read(Uri.parse(_releaseNotesUrl()));
+            await http.read(Uri.parse(_releaseNotesUrl(devtoolsVersion)));
         _releaseNotesMarkdown.value = releaseNotesMarkdown;
         toggleReleaseNotesVisible(true);
-        unawaited(server.setLastShownReleaseNotesVersion(latestStableVersion));
+        unawaited(server.setLastShownReleaseNotesVersion(devtoolsVersion));
       } catch (e) {
         // Fail gracefully if we cannot find release notes for the current
         // version of DevTools.
@@ -203,15 +203,7 @@ class ReleaseNotesController {
     _releaseNotesVisible.value = visible;
   }
 
-  String _releaseNotesUrl() {
-    return 'https://raw.githubusercontent.com/flutter/website/main/src/development/tools/sdk/release-notes/index.md';
-    // final latestStableVersion = _latestStableVersion();
-    // return 'https://raw.githubusercontent.com/flutter/website/main/src/development/tools/devtools/release-notes/release-notes-${latestStableVersion}.md';
-  }
-
-  String _latestStableVersion() {
-    // TODO(kenz): clean up version number to to most recent stable version
-    // (e.g. 2.8.0-dev.1 --> 2.7.0).
-    return devtools.version;
+  String _releaseNotesUrl(String currentVersion) {
+    return 'https://raw.githubusercontent.com/flutter/website/main/src/development/tools/devtools/release-notes/release-notes-$currentVersion-src.md';
   }
 }
