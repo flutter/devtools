@@ -12,6 +12,7 @@ import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../banner_messages.dart';
 import '../common_widgets.dart';
+import '../flutter_widgets/linked_scroll_controller.dart';
 import '../globals.dart';
 import '../scaffold.dart';
 import '../theme.dart';
@@ -51,15 +52,20 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   static const outlineBorderWidth = 1.0;
 
+  double get frameNumberSectionHeight => scaleByFontFactor(20.0);
+
+  double get frameChartScrollbarOffset =>
+      defaultScrollBarOffset + frameNumberSectionHeight;
+
   PerformanceController _controller;
 
-  ScrollController scrollController;
+  LinkedScrollControllerGroup linkedScrollControllerGroup;
+
+  ScrollController framesScrollController;
+
+  ScrollController frameNumbersScrollController;
 
   FlutterFrame _selectedFrame;
-
-  double horizontalScrollOffset = 0.0;
-
-  double get availableChartHeight => defaultChartHeight - defaultSpacing;
 
   /// Milliseconds per pixel value for the y-axis.
   ///
@@ -67,15 +73,14 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   /// target frame time for a single frame (e.g. 16.6 * 2 for a 60 FPS device).
   double get msPerPx =>
       // Multiply by two to reach two times the target frame time.
-      1 / widget.displayRefreshRate * 1000 * 2 / availableChartHeight;
+      1 / widget.displayRefreshRate * 1000 * 2 / defaultChartHeight;
 
   @override
   void initState() {
     super.initState();
-    scrollController = ScrollController()
-      ..addListener(() {
-        horizontalScrollOffset = scrollController.offset;
-      });
+    linkedScrollControllerGroup = LinkedScrollControllerGroup();
+    framesScrollController = linkedScrollControllerGroup.addAndGet();
+    frameNumbersScrollController = linkedScrollControllerGroup.addAndGet();
   }
 
   @override
@@ -99,8 +104,9 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void didUpdateWidget(FlutterFramesChart oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (scrollController.hasClients && scrollController.atScrollBottom) {
-      scrollController.autoScrollToBottom();
+    if (linkedScrollControllerGroup.hasAttachedControllers &&
+        linkedScrollControllerGroup.atScrollBottom) {
+      linkedScrollControllerGroup.autoScrollToBottom();
     }
 
     if (!collectionEquals(oldWidget.frames, widget.frames)) {
@@ -131,25 +137,26 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   @override
   void dispose() {
-    scrollController.dispose();
+    framesScrollController.dispose();
+    frameNumbersScrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(
+      margin: const EdgeInsets.only(
         left: denseSpacing,
         right: denseSpacing,
-        bottom: defaultSpacing,
+        bottom: denseSpacing,
       ),
-      height: defaultChartHeight + defaultScrollBarOffset,
+      height: defaultChartHeight + frameChartScrollbarOffset,
       child: Row(
         children: [
           Expanded(child: _buildChart()),
           const SizedBox(width: defaultSpacing),
           Padding(
-            padding: const EdgeInsets.only(bottom: defaultScrollBarOffset),
+            padding: EdgeInsets.only(bottom: frameChartScrollbarOffset),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,12 +192,12 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         final themeData = Theme.of(context);
         final chart = Scrollbar(
           isAlwaysShown: true,
-          controller: scrollController,
+          controller: framesScrollController,
           child: Padding(
-            padding: const EdgeInsets.only(bottom: defaultScrollBarOffset),
+            padding: EdgeInsets.only(bottom: frameChartScrollbarOffset),
             child: RoundedOutlinedBorder(
               child: ListView.builder(
-                controller: scrollController,
+                controller: framesScrollController,
                 scrollDirection: Axis.horizontal,
                 itemCount: widget.frames.length,
                 itemExtent: defaultFrameWidthWithPadding,
@@ -200,11 +207,33 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
                   selected: widget.frames[index] == _selectedFrame,
                   msPerPx: msPerPx,
                   availableChartHeight:
-                      availableChartHeight - 2 * outlineBorderWidth,
+                      defaultChartHeight - 2 * outlineBorderWidth,
                   displayRefreshRate: widget.displayRefreshRate,
                 ),
               ),
             ),
+          ),
+        );
+        final frameNumbers = Container(
+          height: frameNumberSectionHeight,
+          padding: EdgeInsets.only(left: yAxisUnitsSpace),
+          child: ListView.builder(
+            controller: frameNumbersScrollController,
+            scrollDirection: Axis.horizontal,
+            itemCount: widget.frames.length,
+            itemExtent: defaultFrameWidthWithPadding,
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              if (index % 2 == 1) {
+                return const SizedBox(width: defaultFrameWidthWithPadding);
+              }
+              return Center(
+                child: Text(
+                  '${widget.frames[index].id}',
+                  style: themeData.subtleChartTextStyle,
+                ),
+              );
+            },
           ),
         );
         final chartAxisPainter = CustomPaint(
@@ -214,6 +243,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
             displayRefreshRate: widget.displayRefreshRate,
             msPerPx: msPerPx,
             themeData: themeData,
+            bottomMargin: frameChartScrollbarOffset,
           ),
         );
         final fpsLinePainter = CustomPaint(
@@ -223,11 +253,16 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
             displayRefreshRate: widget.displayRefreshRate,
             msPerPx: msPerPx,
             themeData: themeData,
+            bottomMargin: frameChartScrollbarOffset,
           ),
         );
         return Stack(
           children: [
             chartAxisPainter,
+            Positioned(
+              top: defaultChartHeight,
+              child: frameNumbers,
+            ),
             Padding(
               padding: EdgeInsets.only(left: yAxisUnitsSpace),
               child: chart,
@@ -547,23 +582,24 @@ class ShaderJankWarningIcon extends StatelessWidget {
 }
 
 class FrameAnalysisIcon extends StatelessWidget {
-  const FrameAnalysisIcon({
-    this.iconSize = defaultActionsIconSizeBeforeScaling,
-  });
+  const FrameAnalysisIcon({Key key}) : super(key: key);
 
-  final double iconSize;
+  static const _backgroundColor = Color.fromRGBO(48, 48, 48, 0.8);
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        BlinkingIcon(
-          icon: Icons.saved_search,
-          color: Colors.amber,
-          size: iconSize,
-        ),
-      ],
+    return Container(
+      width: defaultActionsIconSizeBeforeScaling,
+      height: defaultActionsIconSizeBeforeScaling,
+      decoration: const BoxDecoration(
+        color: _backgroundColor,
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(
+        Icons.saved_search,
+        color: Colors.white,
+        size: defaultIconSizeBeforeScaling,
+      ),
     );
   }
 }
@@ -575,6 +611,7 @@ class ChartAxisPainter extends CustomPainter {
     @required this.displayRefreshRate,
     @required this.msPerPx,
     @required this.themeData,
+    @required this.bottomMargin,
   });
 
   static const yAxisTickWidth = 8.0;
@@ -589,7 +626,7 @@ class ChartAxisPainter extends CustomPainter {
 
   final ThemeData themeData;
 
-  ColorScheme get colorScheme => themeData.colorScheme;
+  final double bottomMargin;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -598,7 +635,7 @@ class ChartAxisPainter extends CustomPainter {
       yAxisUnitsSpace,
       0.0,
       constraints.maxWidth - yAxisUnitsSpace,
-      constraints.maxHeight - defaultScrollBarOffset,
+      constraints.maxHeight - bottomMargin,
     );
 
     _paintYAxisLabels(canvas, chartArea);
@@ -608,7 +645,7 @@ class ChartAxisPainter extends CustomPainter {
     Canvas canvas,
     Rect chartArea,
   ) {
-    const yAxisLabelCount = 6;
+    const yAxisLabelCount = 5;
     final totalMs = msPerPx * constraints.maxHeight;
 
     // Subtract 1 because one of the labels will be 0.0 ms.
@@ -651,20 +688,23 @@ class ChartAxisPainter extends CustomPainter {
 
     // Paint a tick on the axis.
     final tickY = chartArea.height - timeMs / msPerPx;
+
+    // Do not draw the y axis label if it will collide with the 0.0 label or if
+    // it will go beyond the uper bound of the chart.
+    if (timeMs != 0 && (tickY > chartArea.height - 10.0 || tickY < 10.0))
+      return;
+
     canvas.drawLine(
       Offset(chartArea.left - yAxisTickWidth / 2, tickY),
       Offset(chartArea.left + yAxisTickWidth / 2, tickY),
-      Paint()..color = colorScheme.chartAccentColor,
+      Paint()..color = themeData.colorScheme.chartAccentColor,
     );
 
     // Paint the axis label.
     final textPainter = TextPainter(
       text: TextSpan(
         text: labelText,
-        style: TextStyle(
-          color: colorScheme.chartSubtleColor,
-          fontSize: chartFontSizeSmall,
-        ),
+        style: themeData.subtleChartTextStyle,
       ),
       textAlign: TextAlign.end,
       textDirection: TextDirection.ltr,
@@ -700,6 +740,7 @@ class FPSLinePainter extends CustomPainter {
     @required this.displayRefreshRate,
     @required this.msPerPx,
     @required this.themeData,
+    @required this.bottomMargin,
   });
 
   double get fpsTextSpace => scaleByFontFactor(45.0);
@@ -714,7 +755,7 @@ class FPSLinePainter extends CustomPainter {
 
   final ThemeData themeData;
 
-  ColorScheme get colorScheme => themeData.colorScheme;
+  final double bottomMargin;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -723,7 +764,7 @@ class FPSLinePainter extends CustomPainter {
       yAxisUnitsSpace,
       0.0,
       constraints.maxWidth - yAxisUnitsSpace,
-      constraints.maxHeight - defaultScrollBarOffset,
+      constraints.maxHeight - bottomMargin,
     );
 
     // Max FPS non-jank value in ms. E.g., 16.6 for 60 FPS, 8.3 for 120 FPS.
@@ -733,16 +774,13 @@ class FPSLinePainter extends CustomPainter {
     canvas.drawLine(
       Offset(chartArea.left, targetLineY),
       Offset(chartArea.right, targetLineY),
-      Paint()..color = colorScheme.chartAccentColor,
+      Paint()..color = themeData.colorScheme.chartAccentColor,
     );
 
     final textPainter = TextPainter(
       text: TextSpan(
         text: '${displayRefreshRate.toStringAsFixed(0)} FPS',
-        style: TextStyle(
-          color: colorScheme.chartSubtleColor,
-          fontSize: chartFontSizeSmall,
-        ),
+        style: themeData.subtleChartTextStyle,
       ),
       textAlign: TextAlign.right,
       textDirection: TextDirection.ltr,

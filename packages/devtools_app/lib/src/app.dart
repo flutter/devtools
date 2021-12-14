@@ -215,21 +215,12 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         // enabled.
         return ValueListenableBuilder<bool>(
           valueListenable: preferences.vmDeveloperModeEnabled,
-          builder: (_, __, ___) {
+          builder: (_, __, child) {
             final tabs = _visibleScreens()
                 .where((p) => embed && page != null ? p.screenId == page : true)
                 .where((p) => !hide.contains(p.screenId))
                 .toList();
-            if (tabs.isEmpty) {
-              return DevToolsScaffold.withChild(
-                child: CenteredMessage(
-                  page != null
-                      ? 'The "$page" screen is not available for this application.'
-                      : 'No tabs available for this application.',
-                ),
-                ideTheme: ideTheme,
-              );
-            }
+            if (tabs.isEmpty) return child;
             return _providedControllers(
               child: DevToolsScaffold(
                 embed: embed,
@@ -249,6 +240,14 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               ),
             );
           },
+          child: DevToolsScaffold.withChild(
+            child: CenteredMessage(
+              page != null
+                  ? 'The "$page" screen is not available for this application.'
+                  : 'No tabs available for this application.',
+            ),
+            ideTheme: ideTheme,
+          ),
         );
       },
     );

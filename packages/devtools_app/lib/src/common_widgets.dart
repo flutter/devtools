@@ -11,7 +11,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'analytics/analytics.dart' as ga;
+import 'auto_dispose_mixin.dart';
 import 'config_specific/launch_url/launch_url.dart';
+import 'flutter_widgets/linked_scroll_controller.dart';
 import 'globals.dart';
 import 'scaffold.dart';
 import 'theme.dart';
@@ -1196,6 +1198,39 @@ extension ScrollControllerAutoScroll on ScrollController {
   }
 }
 
+/// An extension on [LinkedScrollControllerGroup] to facilitate having the
+/// scrolling widgets auto scroll to the bottom on new content.
+///
+/// This extension serves the same function as the [ScrollControllerAutoScroll]
+/// extension above, but we need to implement these methods again as an
+/// extension on [LinkedScrollControllerGroup] because individual
+/// [ScrollController]s are intentionally inaccessible from
+/// [LinkedScrollControllerGroup].
+extension LinkedScrollControllerGroupExtension on LinkedScrollControllerGroup {
+  bool get atScrollBottom {
+    final pos = position;
+    return pos.pixels == pos.maxScrollExtent;
+  }
+
+  /// Scroll the content to the bottom using the app's default animation
+  /// duration and curve..
+  void autoScrollToBottom() async {
+    await animateTo(
+      position.maxScrollExtent,
+      duration: rapidDuration,
+      curve: defaultCurve,
+    );
+
+    // Scroll again if we've received new content in the interim.
+    if (hasAttachedControllers) {
+      final pos = position;
+      if (pos.pixels != pos.maxScrollExtent) {
+        jumpTo(pos.maxScrollExtent);
+      }
+    }
+  }
+}
+
 /// Utility extension methods to the [Color] class.
 extension ColorExtension on Color {
   /// Return a slightly darker color than the current color.
@@ -1779,6 +1814,58 @@ class _BlinkingIconState extends State<BlinkingIcon> {
       widget.icon,
       size: widget.size,
       color: color,
+    );
+  }
+}
+
+/// A widget that listens for changes to two different [ValueListenable]s and
+/// rebuilds for change notifications to either.
+///
+/// This widget is preferred over nesting two [ValueListenableBuilder]s in a
+/// single build method.
+class DualValueListenableBuilder<T, U> extends StatefulWidget {
+  const DualValueListenableBuilder({
+    Key key,
+    @required this.firstListenable,
+    @required this.secondListenable,
+    @required this.builder,
+    this.child,
+  }) : super(key: key);
+
+  final ValueListenable<T> firstListenable;
+
+  final ValueListenable<U> secondListenable;
+
+  final Widget Function(
+    BuildContext context,
+    T firstValue,
+    U secondValue,
+    Widget child,
+  ) builder;
+
+  final Widget child;
+
+  @override
+  _DualValueListenableBuilderState createState() =>
+      _DualValueListenableBuilderState<T, U>();
+}
+
+class _DualValueListenableBuilderState<T, U>
+    extends State<DualValueListenableBuilder<T, U>> with AutoDisposeMixin {
+  @override
+  void initState() {
+    super.initState();
+    addAutoDisposeListener(widget.firstListenable);
+    addAutoDisposeListener(widget.secondListenable);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(
+      context,
+      widget.firstListenable.value,
+      widget.secondListenable.value,
+      widget.child,
     );
   }
 }

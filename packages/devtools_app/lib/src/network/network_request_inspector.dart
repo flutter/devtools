@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 
+import '../analytics/constants.dart' as analytics_constants;
 import '../common_widgets.dart';
 import '../http/http_request_data.dart';
-import '../theme.dart';
 import '../ui/tab.dart';
 import 'network_model.dart';
 import 'network_request_inspector_views.dart';
@@ -39,6 +39,7 @@ class NetworkRequestInspector extends StatelessWidget {
   Widget _buildTab(String tabName) {
     return DevToolsTab(
       key: ValueKey<String>(tabName),
+      gaId: 'requestInspectorTab_$tabName',
       child: Text(
         tabName,
         overflow: TextOverflow.ellipsis,
@@ -48,51 +49,29 @@ class NetworkRequestInspector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tabs = <Tab>[
-      _buildTab(_overviewTabTitle),
+    final tabs = <DevToolsTab>[
+      _buildTab(NetworkRequestInspector._overviewTabTitle),
       if (data is HttpRequestData) ...[
-        _buildTab(_headersTabTitle),
+        _buildTab(NetworkRequestInspector._headersTabTitle),
         if ((data as HttpRequestData).requestBody != null)
-          _buildTab(_requestTabTitle),
+          _buildTab(NetworkRequestInspector._requestTabTitle),
         if ((data as HttpRequestData).responseBody != null)
-          _buildTab(_responseTabTitle),
-        if ((data as HttpRequestData).hasCookies) _buildTab(_cookiesTabTitle),
+          _buildTab(NetworkRequestInspector._responseTabTitle),
+        if ((data as HttpRequestData).hasCookies)
+          _buildTab(NetworkRequestInspector._cookiesTabTitle),
       ],
     ];
-    final tabbedContent = DefaultTabController(
-      length: tabs.length,
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Flexible(
-                child: TabBar(
-                  labelColor: Theme.of(context).textTheme.bodyText1.color,
-                  tabs: tabs,
-                ),
-              ),
-            ],
-          ),
-          Expanded(
-            child: TabBarView(
-              physics: defaultTabBarViewPhysics,
-              children: [
-                NetworkRequestOverviewView(data),
-                if (data is HttpRequestData) ...[
-                  HttpRequestHeadersView(data),
-                  if ((data as HttpRequestData).requestBody != null)
-                    HttpRequestView(data),
-                  if ((data as HttpRequestData).responseBody != null)
-                    HttpResponseView(data),
-                  if ((data as HttpRequestData).hasCookies)
-                    HttpRequestCookiesView(data),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    final tabViews = [
+      NetworkRequestOverviewView(data),
+      if (data is HttpRequestData) ...[
+        HttpRequestHeadersView(data),
+        if ((data as HttpRequestData).requestBody != null)
+          HttpRequestView(data),
+        if ((data as HttpRequestData).responseBody != null)
+          HttpResponseView(data),
+        if ((data as HttpRequestData).hasCookies) HttpRequestCookiesView(data),
+      ],
+    ];
 
     return Card(
       margin: EdgeInsets.zero,
@@ -102,11 +81,15 @@ class NetworkRequestInspector extends StatelessWidget {
             ? Center(
                 child: Text(
                   'No request selected',
-                  key: noRequestSelectedKey,
+                  key: NetworkRequestInspector.noRequestSelectedKey,
                   style: Theme.of(context).textTheme.headline6,
                 ),
               )
-            : tabbedContent,
+            : AnalyticsTabbedView(
+                tabs: tabs,
+                tabViews: tabViews,
+                gaScreen: analytics_constants.network,
+              ),
       ),
     );
   }

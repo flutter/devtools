@@ -449,6 +449,11 @@ extension ThemeDataExtension on ThemeData {
         decoration: TextDecoration.underline,
         fontSize: defaultFontSize,
       );
+
+  TextStyle get subtleChartTextStyle => TextStyle(
+        color: colorScheme.chartSubtleColor,
+        fontSize: chartFontSizeSmall,
+      );
 }
 
 const extraWideSearchTextWidth = 600.0;

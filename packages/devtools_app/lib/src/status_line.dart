@@ -54,13 +54,13 @@ class StatusLine extends StatelessWidget {
             return showIsolateSelector
                 ? Flexible(
                     child: Row(
-                      children: [
+                      children: const [
                         Expanded(
-                          child: Align(
-                            child: buildIsolateSelector(context, textTheme),
+                          child: Center(
+                            child: IsolateSelector(),
                           ),
                         ),
-                        const BulletSpacer(),
+                        BulletSpacer(),
                       ],
                     ),
                   )
@@ -133,63 +133,17 @@ class StatusLine extends StatelessWidget {
   }
 
   Widget buildPageStatus(
-      BuildContext context, Screen currentScreen, TextTheme textTheme) {
+    BuildContext context,
+    Screen currentScreen,
+    TextTheme textTheme,
+  ) {
     return currentScreen.buildStatus(context, textTheme);
-  }
-
-  Widget buildIsolateSelector(BuildContext context, TextTheme textTheme) {
-    final IsolateManager isolateManager = serviceManager.isolateManager;
-
-    return ValueListenableBuilder(
-      valueListenable: isolateManager.isolates,
-      builder: (context, isolates, _) {
-        return ValueListenableBuilder(
-          valueListenable: isolateManager.selectedIsolate,
-          builder: (context, isolateRef, _) {
-            final isolates = isolateManager.isolates;
-
-            String isolateName(IsolateRef ref) {
-              final name = ref.name;
-              return '$name #${isolateManager.isolateIndex(ref)}';
-            }
-
-            return DevToolsTooltip(
-              message: 'Selected Isolate',
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<IsolateRef>(
-                  value: isolateRef,
-                  onChanged: isolateManager.selectIsolate,
-                  isDense: true,
-                  items: isolates.value.map((IsolateRef ref) {
-                    return DropdownMenuItem<IsolateRef>(
-                      value: ref,
-                      child: Row(
-                        children: [
-                          ref.isSystemIsolate
-                              ? const Icon(Icons.settings_applications)
-                              : const Icon(Icons.call_split),
-                          const SizedBox(width: denseSpacing),
-                          Text(
-                            isolateName(ref),
-                            style: textTheme.bodyText2,
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
   }
 
   Widget buildConnectionStatus(TextTheme textTheme) {
     return ValueListenableBuilder<ConnectedState>(
       valueListenable: serviceManager.connectedState,
-      builder: (context, ConnectedState connectedState, _) {
+      builder: (context, connectedState, child) {
         if (connectedState.connected) {
           final app = serviceManager.connectedApp;
 
@@ -257,12 +211,63 @@ class StatusLine extends StatelessWidget {
             ],
           );
         } else {
-          return Text(
-            'No client connection',
-            style: textTheme.bodyText2,
-          );
+          return child;
         }
       },
+      child: Text(
+        'No client connection',
+        style: textTheme.bodyText2,
+      ),
     );
+  }
+}
+
+class IsolateSelector extends StatelessWidget {
+  const IsolateSelector({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final IsolateManager isolateManager = serviceManager.isolateManager;
+    return DualValueListenableBuilder<List<IsolateRef>, IsolateRef>(
+      firstListenable: isolateManager.isolates,
+      secondListenable: isolateManager.selectedIsolate,
+      builder: (context, isolates, selectedIsolateRef, _) {
+        return DevToolsTooltip(
+          message: 'Selected Isolate',
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<IsolateRef>(
+              value: selectedIsolateRef,
+              onChanged: isolateManager.selectIsolate,
+              isDense: true,
+              items: isolates.map(
+                (IsolateRef ref) {
+                  return DropdownMenuItem<IsolateRef>(
+                    value: ref,
+                    child: Row(
+                      children: [
+                        ref.isSystemIsolate
+                            ? const Icon(Icons.settings_applications)
+                            : const Icon(Icons.call_split),
+                        const SizedBox(width: denseSpacing),
+                        Text(
+                          _isolateName(ref),
+                          style: textTheme.bodyText2,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ).toList(),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _isolateName(IsolateRef ref) {
+    final name = ref.name;
+    return '$name #${serviceManager.isolateManager.isolateIndex(ref)}';
   }
 }

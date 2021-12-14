@@ -158,6 +158,7 @@ void main() {
       // The number of valid requests recorded in the test data.
       const numRequests = 16;
 
+      await controller.startRecording();
       final requestsNotifier = controller.requests;
       // Refresh network data and ensure requests are populated.
       await controller.networkService.refreshNetworkData();

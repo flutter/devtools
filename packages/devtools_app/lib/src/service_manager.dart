@@ -248,19 +248,6 @@ class ServiceConnectionManager {
 
     service.onEvent(serviceStreamName).listen(handleServiceEvent);
 
-    _connectedState.value = const ConnectedState(true);
-
-    final isolates = [
-      ...vm.isolates,
-      if (preferences.vmDeveloperModeEnabled.value) ...vm.systemIsolates,
-    ];
-
-    await isolateManager.init(isolates);
-    if (service != this.service) {
-      // A different service has been opened.
-      return;
-    }
-
     final streamIds = [
       EventStreams.kDebug,
       EventStreams.kExtension,
@@ -274,9 +261,9 @@ class ServiceConnectionManager {
       serviceStreamName,
     ];
 
-    await Future.wait(streamIds.map((String id) async {
+    for (final id in streamIds) {
       try {
-        await service.streamListen(id);
+        unawaited(service.streamListen(id));
       } catch (e) {
         if (id.endsWith('Logging')) {
           // Don't complain about '_Logging' or 'Logging' events (new VMs don't
@@ -288,7 +275,20 @@ class ServiceConnectionManager {
           );
         }
       }
-    }));
+    }
+    if (service != this.service) {
+      // A different service has been opened.
+      return;
+    }
+
+    _connectedState.value = const ConnectedState(true);
+
+    final isolates = [
+      ...vm.isolates,
+      if (preferences.vmDeveloperModeEnabled.value) ...vm.systemIsolates,
+    ];
+
+    await isolateManager.init(isolates);
     if (service != this.service) {
       // A different service has been opened.
       return;

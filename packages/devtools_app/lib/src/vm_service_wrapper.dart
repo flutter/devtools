@@ -1180,6 +1180,12 @@ class VmServiceWrapper implements VmService {
   final vmServiceCalls = <String>[];
 
   @visibleForTesting
+  void clearVmServiceCalls() {
+    vmServiceCalls.clear();
+    vmServiceCallCount = 0;
+  }
+
+  @visibleForTesting
   Future<T> trackFuture<T>(String name, Future<T> future) {
     if (!trackFutures) {
       return future;

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../http/http_request_data.dart';
@@ -29,6 +30,9 @@ abstract class NetworkRequest with DataSearchStateMixin {
 
   bool get didFail;
 
+  /// True if the request hasn't completed yet.
+  bool get inProgress;
+
   String get durationDisplay =>
       'Duration: ${duration != null ? msText(duration) : 'Pending'}';
 
@@ -38,6 +42,34 @@ abstract class NetworkRequest with DataSearchStateMixin {
 
   @override
   String toString() => '$method $uri';
+
+  @override
+  bool operator ==(other) {
+    return other is NetworkRequest &&
+        runtimeType == other.runtimeType &&
+        startTimestamp == other.startTimestamp &&
+        method == other.method &&
+        uri == other.uri &&
+        contentType == other.contentType &&
+        type == other.type &&
+        port == other.port &&
+        (inProgress == other.inProgress
+            ? (endTimestamp == other.endTimestamp &&
+                duration == other.duration &&
+                status == other.status &&
+                didFail == other.didFail)
+            : true);
+  }
+
+  @override
+  int get hashCode => hashValues(
+        method,
+        uri,
+        contentType,
+        type,
+        port,
+        startTimestamp,
+      );
 }
 
 class WebSocket extends NetworkRequest {
@@ -106,6 +138,9 @@ class WebSocket extends NetworkRequest {
   // codes with a tooltip of "101 Web Socket Protocol Handshake"
   @override
   String get status => '101';
+
+  @override
+  bool get inProgress => false;
 
   @override
   bool operator ==(other) => other is WebSocket && id == other.id;
