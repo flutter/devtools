@@ -615,10 +615,9 @@ class InspectorTreeController extends Object
   }
 
   @override
-  List<InspectorTreeRow> matchesForSearch(
-    String search, {
+  Future<List<InspectorTreeRow>> matchesForSearch(String search, {
     bool searchPreviousMatches = false,
-  }) {
+  }) async {
     final matches = <InspectorTreeRow>[];
 
     if (searchPreviousMatches) {

@@ -601,10 +601,10 @@ class LoggingController extends DisposableController
 
   // TODO(kenz): search through previous matches when possible.
   @override
-  List<LogData> matchesForSearch(
+  Future<List<LogData>> matchesForSearch(
     String search, {
     bool searchPreviousMatches = false,
-  }) {
+  }) async {
     if (search == null || search.isEmpty) return [];
     final matches = <LogData>[];
     final caseInsensitiveSearch = search.toLowerCase();

@@ -59,7 +59,9 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
 
   ValueListenable<List<T>> get searchMatches => _searchMatches;
 
-  void refreshSearchMatches({bool searchPreviousMatches = false}) {
+  Future<void> refreshSearchMatches({
+    bool searchPreviousMatches = false,
+  }) async {
     if (_searchNotifier.value != null && _searchNotifier.value.isNotEmpty) {
       if (debounceDelay != null) {
         _startDebounceTimer(
@@ -67,7 +69,7 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
           searchPreviousMatches: searchPreviousMatches,
         );
       } else {
-        final matches = matchesForSearch(
+        final matches = await matchesForSearch(
           _searchNotifier.value,
           searchPreviousMatches: searchPreviousMatches,
         );
@@ -100,12 +102,11 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
         searchInProgress = true;
 
         // Start new search operation
-        final future = Future(() {
-          return matchesForSearch(
-            _searchNotifier.value,
-            searchPreviousMatches: searchPreviousMatches,
-          );
-        }).then((matches) {
+        final future =
+        final future = matchesForSearch(
+          _searchNotifier.value,
+          searchPreviousMatches: searchPreviousMatches,
+        ).then((matches) {
           searchInProgress = false;
           _updateMatches(matches);
         });
@@ -181,10 +182,10 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
   /// Duration.zero (default) disables debounce
   Duration get debounceDelay => null;
 
-  List<T> matchesForSearch(
+  Future<List<T>> matchesForSearch(
     String search, {
     bool searchPreviousMatches = false,
-  }) =>
+  }) async =>
       [];
 
   /// Called when selected match index changes. Index is 0 based

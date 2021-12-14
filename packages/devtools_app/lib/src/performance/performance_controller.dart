@@ -809,10 +809,10 @@ class PerformanceController extends DisposableController
   }
 
   @override
-  List<TimelineEvent> matchesForSearch(
+  Future<List<TimelineEvent>> matchesForSearch(
     String search, {
     bool searchPreviousMatches = false,
-  }) {
+  }) async {
     if (search?.isEmpty ?? true) return [];
     final matches = <TimelineEvent>[];
     if (searchPreviousMatches) {

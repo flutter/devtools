@@ -356,10 +356,10 @@ class NetworkController
 
   // TODO(kenz): search through previous matches when possible.
   @override
-  List<NetworkRequest> matchesForSearch(
+  Future<List<NetworkRequest>> matchesForSearch(
     String search, {
     bool searchPreviousMatches = false,
-  }) {
+  }) async {
     if (search == null || search.isEmpty) return [];
     final matches = <NetworkRequest>[];
     final caseInsensitiveSearch = search.toLowerCase();

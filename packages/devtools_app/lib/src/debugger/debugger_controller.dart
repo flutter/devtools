@@ -1053,10 +1053,10 @@ class DebuggerController extends DisposableController
 
   // TODO(kenz): search through previous matches when possible.
   @override
-  List<SourceToken> matchesForSearch(
+  Future<List<SourceToken>> matchesForSearch(
     String search, {
     bool searchPreviousMatches = false,
-  }) {
+  }) async {
     if (search == null || search.isEmpty || parsedScript.value == null) {
       return [];
     }
