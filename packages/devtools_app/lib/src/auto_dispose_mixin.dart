@@ -40,6 +40,11 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
   }
 
   @override
+  void autoDisposeFocusNode(FocusNode node) {
+    _delegate.autoDisposeFocusNode(node);
+  }
+
+  @override
   void cancel() {
     _delegate.cancel();
   }

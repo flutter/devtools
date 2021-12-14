@@ -585,9 +585,12 @@ typedef OverlayXPositionBuilder = double Function(
   TextStyle inputStyle,
 );
 
+// TODO(elliette) Consider refactoring this mixin to be a widget. See discussion
+// at https://github.com/flutter/devtools/pull/3532#discussion_r767015567.
 mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   TextEditingController searchTextFieldController;
   FocusNode _searchFieldFocusNode;
+  FocusNode _rawKeyboardFocusNode;
   SelectAutoComplete _onSelection;
   void Function() _closeHandler;
 
@@ -595,6 +598,8 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   void initState() {
     super.initState();
     _searchFieldFocusNode = FocusNode(debugLabel: 'search-field');
+    _rawKeyboardFocusNode = FocusNode(debugLabel: 'search-raw-keyboard');
+
     searchTextFieldController = TextEditingController();
   }
 
@@ -606,7 +611,10 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   void dispose() {
     super.dispose();
     searchTextFieldController?.dispose();
+    // TODO(https://github.com/flutter/devtools/issues/3538): Switch to
+    // autoDisposeFocusNode.
     _searchFieldFocusNode?.dispose();
+    _rawKeyboardFocusNode?.dispose();
   }
 
   /// Platform independent (Mac or Linux).
@@ -671,6 +679,7 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
       controller: controller,
       searchField: searchField,
       searchFieldFocusNode: _searchFieldFocusNode,
+      rawKeyboardFocusNode: _rawKeyboardFocusNode,
       autoCompleteLayerLink: controller.autoCompleteLayerLink,
       onSelection: onSelection,
       onHighlightDropdown: onHighlightDropdown,
@@ -823,6 +832,7 @@ class _AutoCompleteSearchField extends StatelessWidget {
     @required this.searchField,
     @required this.controller,
     @required this.searchFieldFocusNode,
+    @required this.rawKeyboardFocusNode,
     @required this.autoCompleteLayerLink,
     @required this.onSelection,
     @required this.onHighlightDropdown,
@@ -835,6 +845,7 @@ class _AutoCompleteSearchField extends StatelessWidget {
   final AutoCompleteSearchControllerMixin controller;
   final _SearchField searchField;
   final FocusNode searchFieldFocusNode;
+  final FocusNode rawKeyboardFocusNode;
   final LayerLink autoCompleteLayerLink;
   final SelectAutoComplete onSelection;
   final HighlightAutoComplete onHighlightDropdown;
@@ -863,8 +874,6 @@ class _AutoCompleteSearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     final highlightDropdown =
         onHighlightDropdown != null ? onHighlightDropdown : _highlightDropdown;
-
-    final rawKeyboardFocusNode = FocusNode(debugLabel: 'search');
 
     rawKeyboardFocusNode.onKey = (FocusNode node, RawKeyEvent event) {
       if (event is RawKeyDownEvent) {

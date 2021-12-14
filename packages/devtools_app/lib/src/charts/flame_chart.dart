@@ -250,6 +250,8 @@ abstract class FlameChartState<T extends FlameChart,
         }
       });
     }
+
+    autoDisposeFocusNode(focusNode);
   }
 
   @override

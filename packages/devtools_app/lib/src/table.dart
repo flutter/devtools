@@ -433,6 +433,15 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     _updateItems();
   }
 
+  @override
+  void dispose() {
+    // TODO(https://github.com/flutter/devtools/issues/3538): Switch to using
+    // autoDisposeFocusNode once we are only canceling  the listeners in
+    // didUpdateWidget.
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   void _initData() {
     dataRoots = List.generate(widget.dataRoots.length, (index) {
       final root = widget.dataRoots[index];
@@ -450,12 +459,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
     selectionNotifier =
         widget.selectionNotifier ?? ValueNotifier<Selection<T>>(Selection<T>());
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _focusNode.dispose();
   }
 
   void _updateItems() {
