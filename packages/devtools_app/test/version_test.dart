@@ -99,6 +99,16 @@ void main() {
         SemanticVersion.parse('2.6.0-12.0.pre.443').toString(),
         equals('2.6.0-12.0'),
       );
+
+      expect(
+        SemanticVersion.parse('2.6.0-1.2.dev+build.metadata').toString(),
+        equals('2.6.0-1.2'),
+      );
+
+      expect(
+        SemanticVersion.parse('2.6.0+build.metadata').toString(),
+        equals('2.6.0'),
+      );
     });
 
     test('isVersionSupported', () {
