@@ -830,7 +830,8 @@ class MemoryController extends DisposableController
     // Log Flutter extension events.
     // Note: We do not need to listen to event history here because we do not
     // have matching historical data about total memory usage.
-    autoDispose(serviceManager.service.onExtensionEvent.listen((Event event) {
+    autoDisposeStreamSubscription(
+        serviceManager.service.onExtensionEvent.listen((Event event) {
       var extensionEventKind = event.extensionKind;
       String customEventKind;
       if (MemoryTimeline.isCustomEvent(event.extensionKind)) {
@@ -855,12 +856,12 @@ class MemoryController extends DisposableController
       }
     }));
 
-    autoDispose(
+    autoDisposeStreamSubscription(
       _memoryTracker.onChange.listen((_) {
         _memoryTrackerController.add(_memoryTracker);
       }),
     );
-    autoDispose(
+    autoDisposeStreamSubscription(
       _memoryTracker.onChange.listen((_) {
         _memoryTrackerController.add(_memoryTracker);
       }),
@@ -891,14 +892,14 @@ class MemoryController extends DisposableController
       _handleIsolateChanged,
     );
 
-    autoDispose(
+    autoDisposeStreamSubscription(
       serviceManager.onConnectionAvailable
           .listen((_) => _handleConnectionStart(serviceManager)),
     );
     if (serviceManager.connectedAppInitialized) {
       _handleConnectionStart(serviceManager);
     }
-    autoDispose(
+    autoDisposeStreamSubscription(
       serviceManager.onConnectionClosed.listen(_handleConnectionStop),
     );
   }

@@ -37,8 +37,8 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
   }
 
   @override
-  void autoDispose(StreamSubscription subscription) {
-    _delegate.autoDispose(subscription);
+  void autoDisposeStreamSubscription(StreamSubscription subscription) {
+    _delegate.autoDisposeStreamSubscription(subscription);
   }
 
   @override

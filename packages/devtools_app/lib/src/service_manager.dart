@@ -743,8 +743,10 @@ class IsolateManager extends Disposer {
 
     cancelStreamSubscriptions();
     _service = service;
-    autoDispose(service.onIsolateEvent.listen(_handleIsolateEvent));
-    autoDispose(service.onDebugEvent.listen(_handleDebugEvent));
+    autoDisposeStreamSubscription(
+        service.onIsolateEvent.listen(_handleIsolateEvent));
+    autoDisposeStreamSubscription(
+        service.onDebugEvent.listen(_handleDebugEvent));
 
     // We don't yet known the main isolate.
     _mainIsolate.value = null;
@@ -1293,14 +1295,17 @@ class ServiceExtensionManager extends Disposer {
     _connectedApp = connectedApp;
     _service = service;
     // TODO(kenz): do we want to listen with event history here?
-    autoDispose(service.onExtensionEvent.listen(_handleExtensionEvent));
+    autoDisposeStreamSubscription(
+        service.onExtensionEvent.listen(_handleExtensionEvent));
     addAutoDisposeListener(
       hasServiceExtension(extensions.didSendFirstFrameEvent),
       _maybeCheckForFirstFlutterFrame,
     );
     addAutoDisposeListener(_isolateManager.mainIsolate, _onMainIsolateChanged);
-    autoDispose(service.onDebugEvent.listen(_handleDebugEvent));
-    autoDispose(service.onIsolateEvent.listen(_handleIsolateEvent));
+    autoDisposeStreamSubscription(
+        service.onDebugEvent.listen(_handleDebugEvent));
+    autoDisposeStreamSubscription(
+        service.onIsolateEvent.listen(_handleIsolateEvent));
     final mainIsolateRef = _isolateManager.mainIsolate.value;
     if (mainIsolateRef != null) {
       _checkForFirstFrameStarted = false;

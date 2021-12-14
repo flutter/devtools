@@ -63,7 +63,7 @@ class VmFlagManager extends Disposer {
     // Upon setting the vm service, get initial values for vm flags.
     await _initFlags();
 
-    autoDispose(service.onVMEvent.listen(handleVmEvent));
+    autoDisposeStreamSubscription(service.onVMEvent.listen(handleVmEvent));
   }
 
   void vmServiceClosed() {

@@ -37,7 +37,7 @@ class DebuggerController extends DisposableController
     _programExplorerController = ProgramExplorerController(
       debuggerController: this,
     );
-    autoDispose(serviceManager.onConnectionAvailable
+    autoDisposeStreamSubscription(serviceManager.onConnectionAvailable
         .listen(_handleConnectionAvailable));
     if (_service != null) {
       initialize();
@@ -123,8 +123,10 @@ class DebuggerController extends DisposableController
     addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
       switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
     });
-    autoDispose(_service.onDebugEvent.listen(_handleDebugEvent));
-    autoDispose(_service.onIsolateEvent.listen(_handleIsolateEvent));
+    autoDisposeStreamSubscription(
+        _service.onDebugEvent.listen(_handleDebugEvent));
+    autoDisposeStreamSubscription(
+        _service.onIsolateEvent.listen(_handleIsolateEvent));
   }
 
   final bool initialSwitchToIsolate;

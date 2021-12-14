@@ -22,7 +22,7 @@ class Disposer {
   final List<VoidCallback> _listeners = [];
 
   /// Track a stream subscription to be automatically cancelled on dispose.
-  void autoDispose(StreamSubscription subscription) {
+  void autoDisposeStreamSubscription(StreamSubscription subscription) {
     if (subscription == null) return;
     _subscriptions.add(subscription);
   }
@@ -105,8 +105,8 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   }
 
   @override
-  void autoDispose(StreamSubscription subscription) {
-    _delegate.autoDispose(subscription);
+  void autoDisposeStreamSubscription(StreamSubscription subscription) {
+    _delegate.autoDisposeStreamSubscription(subscription);
   }
 
   @override

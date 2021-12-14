@@ -27,7 +27,7 @@ class _AutoDisposedWidgetState extends State<AutoDisposedWidget>
   @override
   void initState() {
     super.initState();
-    autoDispose(widget.stream.listen(_onData));
+    autoDisposeStreamSubscription(widget.stream.listen(_onData));
   }
 
   void _onData(dynamic data) {
@@ -48,10 +48,10 @@ void main() {
       final controller2 = StreamController(sync: true);
       var c1Events = 0;
       var c2Events = 0;
-      disposer.autoDispose(controller1.stream.listen((data) {
+      disposer.autoDisposeStreamSubscription(controller1.stream.listen((data) {
         c1Events++;
       }));
-      disposer.autoDispose(controller2.stream.listen((data) {
+      disposer.autoDisposeStreamSubscription(controller2.stream.listen((data) {
         c2Events++;
       }));
       expect(c1Events, 0);
