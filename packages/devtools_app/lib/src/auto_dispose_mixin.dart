@@ -60,8 +60,4 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
   void cancelFocusNodes() {
     _delegate.cancelFocusNodes();
   }
-
-  void cancel() {
-    print('CANCEL');
-  }
 }

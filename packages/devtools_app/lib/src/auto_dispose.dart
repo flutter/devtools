@@ -95,7 +95,9 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
 
   @override
   void dispose() {
-    cancel();
+    cancelStreamSubscriptions();
+    cancelListeners();
+    cancelFocusNodes();
     super.dispose();
   }
 
@@ -127,9 +129,5 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   @override
   void cancelFocusNodes() {
     _delegate.cancelFocusNodes();
-  }
-
-  void cancel() {
-    print('CANCEL');
   }
 }
