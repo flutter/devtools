@@ -207,9 +207,9 @@ class InspectorService extends InspectorServiceBase {
         ) {
     // Note: We do not need to listen to event history here because the
     // inspector uses a separate API to get the current inspector selection.
-    autoDispose(serviceManager.service.onExtensionEvent
+    autoDisposeStreamSubscription(serviceManager.service.onExtensionEvent
         .listen(onExtensionVmServiceReceived));
-    autoDispose(
+    autoDisposeStreamSubscription(
         serviceManager.service.onDebugEvent.listen(onDebugVmServiceReceived));
   }
 

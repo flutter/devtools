@@ -160,13 +160,13 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
   @override
   void didUpdateWidget(_ConsoleOutput oldWidget) {
     if (oldWidget.lines != widget.lines) {
-      cancel();
       _initHelper();
     }
     super.didUpdateWidget(oldWidget);
   }
 
   void _initHelper() {
+    cancelListeners();
     addAutoDisposeListener(widget.lines, _onConsoleLinesChanged);
     addAutoDisposeListener(_scroll, _onScrollChanged);
     _onConsoleLinesChanged();

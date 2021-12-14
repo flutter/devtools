@@ -90,7 +90,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     if (newController == _controller) return;
     _controller = newController;
 
-    cancel();
+    cancelListeners();
     _selectedFrame = _controller.selectedFrame.value;
     addAutoDisposeListener(_controller.selectedFrame, () {
       setState(() {

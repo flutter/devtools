@@ -100,7 +100,7 @@ class _ServiceExtensionButtonGroupState
   @override
   void didUpdateWidget(ServiceExtensionButtonGroup oldWidget) {
     if (!listEquals(oldWidget.extensions, widget.extensions)) {
-      cancel();
+      cancelListeners();
       _initExtensionState();
       setState(() {});
     }

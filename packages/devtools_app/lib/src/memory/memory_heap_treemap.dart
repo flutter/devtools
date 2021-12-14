@@ -48,7 +48,7 @@ class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
       root = sizes.root;
     }
 
-    cancel();
+    cancelListeners();
 
     addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {

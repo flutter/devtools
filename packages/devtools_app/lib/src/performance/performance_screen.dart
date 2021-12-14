@@ -101,7 +101,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     if (newController == controller) return;
     controller = newController;
 
-    cancel();
+    cancelListeners();
 
     processing = controller.processing.value;
     addAutoDisposeListener(controller.processing, () {

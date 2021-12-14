@@ -82,7 +82,7 @@ class _InitializerState extends State<Initializer>
     // Trigger a rebuild when the connection becomes available. This is done
     // by onConnectionAvailable and not onStateChange because we also need
     // to have queried what type of app this is before we load the UI.
-    autoDispose(
+    autoDisposeStreamSubscription(
       serviceManager.onConnectionAvailable.listen((_) => setState(() {})),
     );
 

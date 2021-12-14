@@ -117,7 +117,7 @@ class _CodeViewState extends State<CodeView>
     super.didUpdateWidget(oldWidget);
 
     if (widget.controller != oldWidget.controller) {
-      cancel();
+      cancelListeners();
 
       addAutoDisposeListener(
           widget.controller.scriptLocation, _handleScriptLocationChanged);
@@ -656,7 +656,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
   void initState() {
     super.initState();
 
-    cancel();
+    cancelListeners();
     searchMatches = widget.searchMatchesNotifier.value;
     addAutoDisposeListener(widget.searchMatchesNotifier, () {
       setState(() {

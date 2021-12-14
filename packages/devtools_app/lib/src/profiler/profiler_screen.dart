@@ -97,7 +97,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     if (newController == controller) return;
     controller = newController;
 
-    cancel();
+    cancelListeners();
 
     addAutoDisposeListener(controller.recordingNotifier, () {
       setState(() {

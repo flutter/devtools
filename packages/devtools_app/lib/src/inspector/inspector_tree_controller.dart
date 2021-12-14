@@ -600,6 +600,7 @@ class _InspectorTreeState extends State<InspectorTree>
       constraintDisplayController = longAnimationController(this);
     }
     _focusNode = FocusNode(debugLabel: 'inspector-tree');
+    autoDisposeFocusNode(_focusNode);
     _bindToController();
   }
 
@@ -608,7 +609,10 @@ class _InspectorTreeState extends State<InspectorTree>
     if (oldWidget.controller != widget.controller) {
       final InspectorTreeController oldController = oldWidget.controller;
       oldController?.removeClient(this);
-      cancel();
+
+      // TODO(elliette): Figure out if we can remove this. See explanation:
+      // https://github.com/flutter/devtools/pull/1290/files#r342399899.
+      cancelListeners();
 
       _bindToController();
     }
@@ -622,7 +626,6 @@ class _InspectorTreeState extends State<InspectorTree>
     _scrollControllerX.dispose();
     _scrollControllerY.dispose();
     constraintDisplayController?.dispose();
-    _focusNode.dispose();
   }
 
   @override

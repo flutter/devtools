@@ -130,7 +130,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
 
     colorScheme = Theme.of(context).colorScheme;
 
-    cancel();
+    cancelListeners();
 
     setupTraces();
     _chartController.setupData();

@@ -22,7 +22,7 @@ class Disposer {
   final List<VoidCallback> _listeners = [];
 
   /// Track a stream subscription to be automatically cancelled on dispose.
-  void autoDispose(StreamSubscription subscription) {
+  void autoDisposeStreamSubscription(StreamSubscription subscription) {
     if (subscription == null) return;
     _subscriptions.add(subscription);
   }
@@ -42,26 +42,36 @@ class Disposer {
     listenable.addListener(listener);
   }
 
-  /// Cancel all listeners added & stream subscriptions.
+  /// Cancel all stream subscriptions added.
   ///
-  /// It is fine to call this method and then add additional listeners.
-  void cancel() {
-    for (FocusNode focusNode in _focusNodes) {
-      focusNode.dispose();
-    }
-    _focusNodes.clear();
-
+  /// It is fine to call this method and then add additional subscriptions.
+  void cancelStreamSubscriptions() {
     for (StreamSubscription subscription in _subscriptions) {
       subscription.cancel();
     }
     _subscriptions.clear();
+  }
 
+  /// Cancel all listeners added.
+  ///
+  /// It is fine to call this method and then add additional listeners.
+  void cancelListeners() {
     assert(_listenables.length == _listeners.length);
     for (int i = 0; i < _listenables.length; ++i) {
       _listenables[i].removeListener(_listeners[i]);
     }
     _listenables.clear();
     _listeners.clear();
+  }
+
+  /// Cancel all focus nodes added.
+  ///
+  /// It is fine to call this method and then add additional focus nodes.
+  void cancelFocusNodes() {
+    for (FocusNode focusNode in _focusNodes) {
+      focusNode.dispose();
+    }
+    _focusNodes.clear();
   }
 }
 
@@ -85,7 +95,9 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
 
   @override
   void dispose() {
-    cancel();
+    cancelStreamSubscriptions();
+    cancelListeners();
+    cancelFocusNodes();
     super.dispose();
   }
 
@@ -95,8 +107,8 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   }
 
   @override
-  void autoDispose(StreamSubscription subscription) {
-    _delegate.autoDispose(subscription);
+  void autoDisposeStreamSubscription(StreamSubscription subscription) {
+    _delegate.autoDisposeStreamSubscription(subscription);
   }
 
   @override
@@ -105,7 +117,17 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   }
 
   @override
-  void cancel() {
-    _delegate.cancel();
+  void cancelStreamSubscriptions() {
+    _delegate.cancelStreamSubscriptions();
+  }
+
+  @override
+  void cancelListeners() {
+    _delegate.cancelListeners();
+  }
+
+  @override
+  void cancelFocusNodes() {
+    _delegate.cancelFocusNodes();
   }
 }
