@@ -600,6 +600,7 @@ class _InspectorTreeState extends State<InspectorTree>
       constraintDisplayController = longAnimationController(this);
     }
     _focusNode = FocusNode(debugLabel: 'inspector-tree');
+    autoDisposeFocusNode(_focusNode);
     _bindToController();
   }
 
@@ -625,9 +626,6 @@ class _InspectorTreeState extends State<InspectorTree>
     _scrollControllerX.dispose();
     _scrollControllerY.dispose();
     constraintDisplayController?.dispose();
-    // TODO(https://github.com/flutter/devtools/issues/3538): Switch to using
-    // autoDisposeFocusNode.
-    _focusNode.dispose();
   }
 
   @override

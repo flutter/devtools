@@ -394,6 +394,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         List.generate(dataRoots.length, (index) => dataRoots[index].isExpanded);
     _updateItems();
     _focusNode = FocusNode(debugLabel: 'table');
+    autoDisposeFocusNode(_focusNode);
   }
 
   void expandParents(T parent) {
@@ -431,15 +432,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     rootsExpanded =
         List.generate(dataRoots.length, (index) => dataRoots[index].isExpanded);
     _updateItems();
-  }
-
-  @override
-  void dispose() {
-    // TODO(https://github.com/flutter/devtools/issues/3538): Switch to using
-    // autoDisposeFocusNode once we are only canceling  the listeners in
-    // didUpdateWidget.
-    _focusNode.dispose();
-    super.dispose();
   }
 
   void _initData() {
