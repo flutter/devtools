@@ -171,7 +171,7 @@ const testMessage1 = BannerMessage(
   backgroundColor: Colors.black,
   foregroundColor: Colors.white,
   screenId: testMessage1ScreenId,
-  headerText: 'WARNING',
+  messageType: BannerMessageType.warning,
 );
 const testMessage2 = BannerMessage(
   key: k2,
@@ -179,7 +179,7 @@ const testMessage2 = BannerMessage(
   backgroundColor: Colors.black,
   foregroundColor: Colors.white,
   screenId: testMessage2ScreenId,
-  headerText: 'WARNING',
+  messageType: BannerMessageType.warning,
 );
 const testMessage3 = BannerMessage(
   key: k3,
@@ -187,5 +187,5 @@ const testMessage3 = BannerMessage(
   backgroundColor: Colors.black,
   foregroundColor: Colors.white,
   screenId: testMessage3ScreenId,
-  headerText: 'WARNING',
+  messageType: BannerMessageType.warning,
 );

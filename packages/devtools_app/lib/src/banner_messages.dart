@@ -120,6 +120,12 @@ class BannerMessages extends StatelessWidget {
   }
 }
 
+enum BannerMessageType {
+  warning,
+  error,
+}
+
+@visibleForTesting
 class BannerMessage extends StatelessWidget {
   const BannerMessage({
     @required Key key,
@@ -127,14 +133,14 @@ class BannerMessage extends StatelessWidget {
     @required this.backgroundColor,
     @required this.foregroundColor,
     @required this.screenId,
-    @required this.headerText,
+    @required this.messageType,
   }) : super(key: key);
 
-  final List<TextSpan> textSpans;
+  final List<InlineSpan> textSpans;
   final Color backgroundColor;
   final Color foregroundColor;
   final String screenId;
-  final String headerText;
+  final BannerMessageType messageType;
 
   @override
   Widget build(BuildContext context) {
@@ -151,18 +157,13 @@ class BannerMessage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  headerText,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyText1
-                      .copyWith(color: foregroundColor),
-                ),
-                const SizedBox(width: defaultSpacing),
                 Expanded(
                   child: RichText(
                     text: TextSpan(
-                      children: textSpans,
+                      children: [
+                        _iconSpanForMessage(),
+                        ...textSpans,
+                      ],
                     ),
                   ),
                 ),
@@ -184,10 +185,65 @@ class BannerMessage extends StatelessWidget {
       ),
     );
   }
+
+  WidgetSpan _iconSpanForMessage() {
+    Widget child;
+    switch (messageType) {
+      case BannerMessageType.warning:
+        child = const _BannerWarningIcon();
+        break;
+      case BannerMessageType.error:
+      default:
+        child = Icon(
+          Icons.error_outline,
+          color: BannerError.foreground,
+          size: actionsIconSize,
+        );
+        break;
+    }
+    return WidgetSpan(
+      child: Padding(
+        padding: const EdgeInsets.only(right: denseSpacing),
+        child: child,
+      ),
+    );
+  }
 }
 
-class _BannerError extends BannerMessage {
-  const _BannerError({
+class _BannerWarningIcon extends StatelessWidget {
+  const _BannerWarningIcon({Key key}) : super(key: key);
+
+  static const _backdropTopOffset = 6.0;
+  static const _backdropWidth = 4.0;
+  static const _backdropHeight = 10.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        // This positioned container is to make the exclamation point in the
+        // warning icon appear black.
+        Positioned(
+          top: _backdropTopOffset,
+          left: denseSpacing,
+          child: Container(
+            width: _backdropWidth,
+            height: _backdropHeight,
+            decoration: const BoxDecoration(color: Colors.black),
+          ),
+        ),
+        Icon(
+          Icons.warning,
+          color: Colors.amber,
+          size: actionsIconSize,
+        ),
+      ],
+    );
+  }
+}
+
+class BannerError extends BannerMessage {
+  const BannerError({
     @required Key key,
     @required List<TextSpan> textSpans,
     @required String screenId,
@@ -197,7 +253,7 @@ class _BannerError extends BannerMessage {
           backgroundColor: devtoolsError,
           foregroundColor: foreground,
           screenId: screenId,
-          headerText: 'ERROR',
+          messageType: BannerMessageType.error,
         );
 
   static const foreground = Colors.white;
@@ -205,8 +261,8 @@ class _BannerError extends BannerMessage {
 }
 
 // TODO(kenz): add "Do not show this again" option to warnings.
-class _BannerWarning extends BannerMessage {
-  const _BannerWarning({
+class BannerWarning extends BannerMessage {
+  const BannerWarning({
     @required Key key,
     @required List<TextSpan> textSpans,
     @required String screenId,
@@ -216,7 +272,7 @@ class _BannerWarning extends BannerMessage {
           backgroundColor: devtoolsWarning,
           foregroundColor: foreground,
           screenId: screenId,
-          headerText: 'WARNING',
+          messageType: BannerMessageType.warning,
         );
 
   static const foreground = Colors.black87;
@@ -228,33 +284,33 @@ class DebugModePerformanceMessage {
 
   final String screenId;
 
-  Widget build(BuildContext context) {
-    return _BannerError(
+  BannerMessage build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textStyle = theme.warningMessageTextStyle;
+    return BannerWarning(
       key: Key('DebugModePerformanceMessage - $screenId'),
       textSpans: [
         TextSpan(
-          text: '''
-You are running your app in debug mode. Debug mode performance is not indicative of release performance.
-Relaunch your application with the '--profile' argument, or ''',
-          style: TextStyle(
-            color: _BannerError.foreground,
-            fontSize: defaultFontSize,
-          ),
+          text:
+              'You are running your app in debug mode. Debug mode performance '
+              'is not indicative of release performance, but you may use debug '
+              'mode to gain visibility into the work the system performs (e.g. '
+              'building widgets, calculating layouts, rasterizing scenes,'
+              ' etc.). For precise measurement of performance, relaunch your '
+              'application in ',
+          style: textStyle,
         ),
         LinkTextSpan(
           link: const Link(
-            display: 'relaunch in profile mode from VS Code or IntelliJ',
+            display: 'profile mode',
             url: _runInProfileModeDocsUrl,
           ),
           context: context,
-          style: Theme.of(context).errorMessageLinkStyle,
+          style: theme.errorMessageLinkStyle,
         ),
         TextSpan(
           text: '.',
-          style: TextStyle(
-            color: _BannerError.foreground,
-            fontSize: defaultFontSize,
-          ),
+          style: textStyle,
         ),
       ],
       screenId: screenId,
@@ -268,7 +324,7 @@ class ProviderUnknownErrorBanner {
   final String screenId;
 
   BannerMessage build(BuildContext context) {
-    return _BannerError(
+    return BannerError(
       key: Key('ProviderUnknownErrorBanner - $screenId'),
       screenId: screenId,
       textSpans: [
@@ -278,7 +334,7 @@ DevTools failed to connect with package:provider.
 
 This could be caused by an older version of package:provider; please make sure that you are using version >=5.0.0.''',
           style: TextStyle(
-            color: _BannerError.foreground,
+            color: BannerError.foreground,
             fontSize: defaultFontSize,
           ),
         ),
@@ -300,8 +356,10 @@ class ShaderJankMessage {
 
   final Duration jankDuration;
 
-  Widget build(BuildContext context) {
-    return _BannerError(
+  BannerMessage build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textStyle = theme.errorMessageTextStyle;
+    return BannerError(
       key: Key('ShaderJankMessage - $screenId'),
       textSpans: [
         TextSpan(
@@ -309,10 +367,7 @@ class ShaderJankMessage {
 Shader compilation jank detected. $jankyFramesCount ${pluralize('frame', jankyFramesCount)} janked with a total of ${msText(jankDuration)} spent in shader compilation.
 
 To pre-compile shaders, see the instructions at ''',
-          style: TextStyle(
-            color: _BannerError.foreground,
-            fontSize: defaultFontSize,
-          ),
+          style: textStyle,
         ),
         LinkTextSpan(
           link: const Link(
@@ -320,14 +375,11 @@ To pre-compile shaders, see the instructions at ''',
             url: preCompileShadersDocsUrl,
           ),
           context: context,
-          style: Theme.of(context).errorMessageLinkStyle,
+          style: theme.errorMessageLinkStyle,
         ),
         TextSpan(
           text: '.',
-          style: TextStyle(
-            color: _BannerError.foreground,
-            fontSize: defaultFontSize,
-          ),
+          style: textStyle,
         ),
       ],
       screenId: screenId,
@@ -344,16 +396,15 @@ class HighProfileGranularityMessage {
   final String screenId;
 
   Widget build(BuildContext context) {
-    return _BannerWarning(
+    final theme = Theme.of(context);
+    final textStyle = theme.warningMessageTextStyle;
+    return BannerWarning(
       key: key,
       textSpans: [
         TextSpan(
           text: '''
 You are opting in to a high CPU sampling rate. This may affect the performance of your application. Please read our ''',
-          style: TextStyle(
-            color: _BannerWarning.foreground,
-            fontSize: defaultFontSize,
-          ),
+          style: textStyle,
         ),
         LinkTextSpan(
           link: const Link(
@@ -361,14 +412,11 @@ You are opting in to a high CPU sampling rate. This may affect the performance o
             url: _profileGranularityDocsUrl,
           ),
           context: context,
-          style: Theme.of(context).warningMessageLinkStyle,
+          style: theme.warningMessageLinkStyle,
         ),
         TextSpan(
           text: ' to understand the trade-offs associated with this setting.',
-          style: TextStyle(
-            color: _BannerWarning.foreground,
-            fontSize: defaultFontSize,
-          ),
+          style: textStyle,
         ),
       ],
       screenId: screenId,
@@ -382,32 +430,28 @@ class DebugModeMemoryMessage {
   final String screenId;
 
   BannerMessage build(BuildContext context) {
-    return _BannerWarning(
+    final theme = Theme.of(context);
+    final textStyle = theme.warningMessageTextStyle;
+    return BannerWarning(
       key: Key('DebugModeMemoryMessage - $screenId'),
       textSpans: [
         TextSpan(
           text: '''
 You are running your app in debug mode. Absolute memory usage may be higher in a debug build than in a release build.
-For the most accurate absolute memory stats, relaunch your application with the '--profile' argument, or ''',
-          style: TextStyle(
-            color: _BannerWarning.foreground,
-            fontSize: defaultFontSize,
-          ),
+For the most accurate absolute memory stats, relaunch your application in ''',
+          style: textStyle,
         ),
         LinkTextSpan(
           link: const Link(
-            display: 'relaunch in profile mode from VS Code or IntelliJ',
+            display: 'profile mode',
             url: _runInProfileModeDocsUrl,
           ),
           context: context,
-          style: Theme.of(context).warningMessageLinkStyle,
+          style: theme.errorMessageLinkStyle,
         ),
         TextSpan(
           text: '.',
-          style: TextStyle(
-            color: _BannerWarning.foreground,
-            fontSize: defaultFontSize,
-          ),
+          style: textStyle,
         ),
       ],
       screenId: screenId,
@@ -438,15 +482,25 @@ void maybePushDebugModeMemoryMessage(
 }
 
 extension BannerMessageThemeExtension on ThemeData {
+  TextStyle get warningMessageTextStyle => TextStyle(
+        color: BannerWarning.foreground,
+        fontSize: defaultFontSize,
+      );
+
   TextStyle get warningMessageLinkStyle => TextStyle(
         decoration: TextDecoration.underline,
-        color: _BannerWarning.linkColor,
+        color: BannerWarning.linkColor,
+        fontSize: defaultFontSize,
+      );
+
+  TextStyle get errorMessageTextStyle => TextStyle(
+        color: BannerError.foreground,
         fontSize: defaultFontSize,
       );
 
   TextStyle get errorMessageLinkStyle => TextStyle(
         decoration: TextDecoration.underline,
-        color: _BannerError.linkColor,
+        color: BannerError.linkColor,
         fontSize: defaultFontSize,
       );
 }
