@@ -538,7 +538,7 @@ class AnalysisInstanceViewState extends State<AnalysisInstanceViewTable>
     if (newController == controller) return;
     controller = newController;
 
-    cancel();
+    cancelListeners();
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(controller.selectedSnapshotNotifier, () {

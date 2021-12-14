@@ -720,7 +720,7 @@ class IsolateManager extends Disposer {
   }
 
   void _handleVmServiceClosed() {
-    cancel();
+    cancelStreamSubscriptions();
     _selectedIsolate.value = null;
     _service = null;
     _lastIsolateIndex = 0;
@@ -741,7 +741,7 @@ class IsolateManager extends Disposer {
   void vmServiceOpened(VmServiceWrapper service) {
     _selectedIsolate.value = null;
 
-    cancel();
+    cancelStreamSubscriptions();
     _service = service;
     autoDispose(service.onIsolateEvent.listen(_handleIsolateEvent));
     autoDispose(service.onDebugEvent.listen(_handleDebugEvent));
@@ -1182,7 +1182,7 @@ class ServiceExtensionManager extends Disposer {
   }
 
   void vmServiceClosed() {
-    cancel();
+    cancelStreamSubscriptions();
     _mainIsolateClosed();
   }
 
@@ -1288,7 +1288,8 @@ class ServiceExtensionManager extends Disposer {
   void vmServiceOpened(
       VmServiceWrapper service, ConnectedApp connectedApp) async {
     _checkForFirstFrameStarted = false;
-    cancel();
+    cancelStreamSubscriptions();
+    cancelListeners();
     _connectedApp = connectedApp;
     _service = service;
     // TODO(kenz): do we want to listen with event history here?

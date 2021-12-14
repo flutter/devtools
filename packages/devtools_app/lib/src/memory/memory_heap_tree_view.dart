@@ -197,7 +197,7 @@ class HeapTreeViewState extends State<HeapTree>
 
     controller = newController;
 
-    cancel();
+    cancelListeners();
 
     addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
@@ -1176,7 +1176,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
     if (newController == controller) return;
     controller = newController;
 
-    cancel();
+    cancelListeners();
 
     // Update the tree when the tree state changes e.g., expand, collapse, etc.
     addAutoDisposeListener(controller.treeChangedNotifier, () {

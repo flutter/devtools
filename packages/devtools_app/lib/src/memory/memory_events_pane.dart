@@ -207,7 +207,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     final themeData = Theme.of(context);
     colorScheme = themeData.colorScheme;
 
-    cancel();
+    cancelListeners();
 
     setupTraces(isDarkMode: themeData.isDarkTheme);
     _chartController.setupData();

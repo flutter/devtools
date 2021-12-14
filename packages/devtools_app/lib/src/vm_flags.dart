@@ -58,7 +58,7 @@ class VmFlagManager extends Disposer {
   }
 
   Future<void> vmServiceOpened(VmServiceWrapper service) async {
-    cancel();
+    cancelStreamSubscriptions();
     _service = service;
     // Upon setting the vm service, get initial values for vm flags.
     await _initFlags();

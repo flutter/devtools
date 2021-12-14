@@ -101,7 +101,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     if (newController == controller) return;
     controller = newController;
 
-    cancel();
+    cancelListeners();
 
     filteredLogs = controller.filteredData.value;
     addAutoDisposeListener(controller.filteredData, () {

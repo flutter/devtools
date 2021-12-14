@@ -160,7 +160,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
   @override
   void didUpdateWidget(_ConsoleOutput oldWidget) {
     if (oldWidget.lines != widget.lines) {
-      cancel();
+      cancelListeners();
       _initHelper();
     }
     super.didUpdateWidget(oldWidget);

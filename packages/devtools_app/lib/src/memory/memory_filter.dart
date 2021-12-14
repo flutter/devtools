@@ -158,8 +158,6 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     for (var key in oldFiltered.keys) {
       oldFilteredLibraries[key] = oldFiltered[key].first.hide;
     }
-
-    cancel();
   }
 
   void addLibrary(String libraryName, {bool hideState = false}) {

@@ -115,7 +115,7 @@ class LegacyPerformanceScreenBodyState
     if (newController == controller) return;
     controller = newController;
 
-    cancel();
+    cancelListeners();
 
     processing = controller.processing.value;
     addAutoDisposeListener(controller.processing, () {

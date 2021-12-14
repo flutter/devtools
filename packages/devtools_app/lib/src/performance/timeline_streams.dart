@@ -127,7 +127,7 @@ class TimelineStreamManager extends Disposer {
     VmServiceWrapper service,
     ConnectedApp connectedApp,
   ) async {
-    cancel();
+    cancelStreamSubscriptions();
     _service = service;
 
     // Listen for timeline events immediately, but wait until [connectedApp]
