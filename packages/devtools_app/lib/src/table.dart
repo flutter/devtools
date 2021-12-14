@@ -435,10 +435,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   @override
   void dispose() {
-    // TODO(elliette): Figure out why the test fails when registering the
-    // FocusNode with autoDisposeFocusNode in initState. This should be
-    // equivalent. Since the AutoDisposeMixin is listed last, it is the `super`
-    // called below.
+    // TODO(https://github.com/flutter/devtools/issues/3538): Switch to using
+    // autoDisposeFocusNode once we are only canceling  the listeners in
+    // didUpdateWidget.
     _focusNode.dispose();
     super.dispose();
   }

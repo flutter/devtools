@@ -27,7 +27,7 @@ class FileSearchField extends StatefulWidget {
 }
 
 class FileSearchFieldState extends State<FileSearchField>
-    with AutoDisposeMixin, SearchFieldMixin {
+    with SearchFieldMixin, AutoDisposeMixin {
   AutoCompleteController autoCompleteController;
 
   final _scriptsCache = <String, ScriptRef>{};

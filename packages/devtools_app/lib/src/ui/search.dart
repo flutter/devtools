@@ -584,8 +584,9 @@ typedef OverlayXPositionBuilder = double Function(
   TextStyle inputStyle,
 );
 
-mixin SearchFieldMixin<T extends StatefulWidget>
-    on AutoDisposeMixin<T>, State<T> {
+// TODO(elliette) Consider refactoring this mixin to be a widget. See discussion
+// at https://github.com/flutter/devtools/pull/3532#discussion_r767015567.
+mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   TextEditingController searchTextFieldController;
   FocusNode _searchFieldFocusNode;
   FocusNode _rawKeyboardFocusNode;
@@ -597,8 +598,6 @@ mixin SearchFieldMixin<T extends StatefulWidget>
     super.initState();
     _searchFieldFocusNode = FocusNode(debugLabel: 'search-field');
     _rawKeyboardFocusNode = FocusNode(debugLabel: 'search-raw-keyboard');
-    autoDisposeFocusNode(_searchFieldFocusNode);
-    autoDisposeFocusNode(_rawKeyboardFocusNode);
 
     searchTextFieldController = TextEditingController();
   }
@@ -611,6 +610,10 @@ mixin SearchFieldMixin<T extends StatefulWidget>
   void dispose() {
     super.dispose();
     searchTextFieldController?.dispose();
+    // TODO(https://github.com/flutter/devtools/issues/3538): Switch to
+    // autoDisposeFocusNode.
+    _searchFieldFocusNode?.dispose();
+    _rawKeyboardFocusNode?.dispose();
   }
 
   /// Platform independent (Mac or Linux).

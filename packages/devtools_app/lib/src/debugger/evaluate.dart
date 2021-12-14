@@ -29,7 +29,7 @@ class ExpressionEvalField extends StatefulWidget {
 }
 
 class _ExpressionEvalFieldState extends State<ExpressionEvalField>
-    with AutoDisposeMixin, SearchFieldMixin {
+    with SearchFieldMixin, AutoDisposeMixin {
   AutoCompleteController _autoCompleteController;
   int historyPosition = -1;
 
