@@ -584,7 +584,8 @@ typedef OverlayXPositionBuilder = double Function(
   TextStyle inputStyle,
 );
 
-mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
+mixin SearchFieldMixin<T extends StatefulWidget>
+    on AutoDisposeMixin<T>, State<T> {
   TextEditingController searchTextFieldController;
   FocusNode _searchFieldFocusNode;
   FocusNode _rawKeyboardFocusNode;
@@ -596,6 +597,8 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
     super.initState();
     _searchFieldFocusNode = FocusNode(debugLabel: 'search-field');
     _rawKeyboardFocusNode = FocusNode(debugLabel: 'search-raw-keyboard');
+    autoDisposeFocusNode(_searchFieldFocusNode);
+    autoDisposeFocusNode(_rawKeyboardFocusNode);
 
     searchTextFieldController = TextEditingController();
   }
@@ -608,8 +611,6 @@ mixin SearchFieldMixin<T extends StatefulWidget> on State<T> {
   void dispose() {
     super.dispose();
     searchTextFieldController?.dispose();
-    _searchFieldFocusNode?.dispose();
-    _rawKeyboardFocusNode?.dispose();
   }
 
   /// Platform independent (Mac or Linux).
