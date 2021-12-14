@@ -194,11 +194,7 @@ class BannerMessage extends StatelessWidget {
         break;
       case BannerMessageType.error:
       default:
-        child = Icon(
-          Icons.error_outline,
-          color: BannerError.foreground,
-          size: actionsIconSize,
-        );
+        child = const _BannerErrorIcon();
         break;
     }
     return WidgetSpan(
@@ -238,6 +234,19 @@ class _BannerWarningIcon extends StatelessWidget {
           size: actionsIconSize,
         ),
       ],
+    );
+  }
+}
+
+class _BannerErrorIcon extends StatelessWidget {
+  const _BannerErrorIcon({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Icon(
+      Icons.error_outline,
+      color: BannerError.foreground,
+      size: actionsIconSize,
     );
   }
 }
