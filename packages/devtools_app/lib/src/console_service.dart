@@ -181,6 +181,7 @@ class ConsoleService extends Disposer {
 
   void vmServiceOpened(VmServiceWrapper service) {
     cancelStreamSubscriptions();
+    cancelListeners();
     // The debug stream listener must be added as soon as the service is opened
     // because this stream does not send event history upon the first
     // subscription like the streams in [ensureServiceInitialized].
