@@ -67,7 +67,9 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
         items[0],
         _InspectorBreadcrumbData.more(),
         ...items.sublist(
-            items.length - _maxNumberOfBreadcrumbs + 1, items.length),
+          items.length - _maxNumberOfBreadcrumbs + 1,
+          items.length,
+        ),
       ];
     } else {
       breadcrumbs = items;
@@ -163,7 +165,7 @@ class _InspectorBreadcrumbData {
     return const _InspectorBreadcrumbData._(
       row: null,
       isSelected: false,
-      alternativeText: ellipsisValue,
+      alternativeText: _ellipsisValue,
       alternativeIcon: null,
     );
   }
@@ -173,12 +175,12 @@ class _InspectorBreadcrumbData {
       row: null,
       isSelected: false,
       alternativeText: null,
-      alternativeIcon: breadcrumbSeparatorIcon,
+      alternativeIcon: _breadcrumbSeparatorIcon,
     );
   }
 
-  static const String ellipsisValue = '…';
-  static const IconData breadcrumbSeparatorIcon = Icons.chevron_right;
+  static const _ellipsisValue = '…';
+  static const _breadcrumbSeparatorIcon = Icons.chevron_right;
 
   final InspectorTreeRow row;
   final IconData alternativeIcon;
@@ -190,7 +192,7 @@ class _InspectorBreadcrumbData {
   Widget get icon {
     if (alternativeIcon != null) {
       return Icon(
-        Icons.chevron_right,
+        _breadcrumbSeparatorIcon,
         size: defaultIconSize,
       );
     }
@@ -199,9 +201,9 @@ class _InspectorBreadcrumbData {
   }
 
   bool get isChevron =>
-      row == null && alternativeIcon == breadcrumbSeparatorIcon;
+      row == null && alternativeIcon == _breadcrumbSeparatorIcon;
 
-  bool get isEllipsis => row == null && alternativeText == ellipsisValue;
+  bool get isEllipsis => row == null && alternativeText == _ellipsisValue;
 
   bool get isClickable => !isSelected && !isEllipsis;
 }

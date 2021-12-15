@@ -675,7 +675,7 @@ extension RemoteDiagnosticsNodeExtension on RemoteDiagnosticsNode {
     final description = toStringShort();
     final textPreview = json['textPreview'];
     return textPreview is String
-        ? description + ' ' + textPreview.replaceAll('\n', ' ')
+        ? '$description ${textPreview.replaceAll('\n', ' ')}'
         : description;
   }
 }

@@ -61,7 +61,7 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
 
   void refreshSearchMatches({bool searchPreviousMatches = false}) {
     if (_searchNotifier.value != null && _searchNotifier.value.isNotEmpty) {
-      if (debounceDelay != Duration.zero) {
+      if (debounceDelay != null) {
         _startDebounceTimer(
           search,
           searchPreviousMatches: searchPreviousMatches,
@@ -172,7 +172,7 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
 
   /// Delay to reduce the amount of search queries
   /// Duration.zero (default) disables debounce
-  Duration get debounceDelay => Duration.zero;
+  Duration get debounceDelay => null;
 
   List<T> matchesForSearch(
     String search, {
