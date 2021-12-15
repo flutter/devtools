@@ -99,7 +99,6 @@ class InspectorTreeNode {
   bool _shouldShow;
 
   bool selected = false;
-  bool hasSearchMatch = false;
 
   RemoteDiagnosticsNode _diagnostic;
   final List<InspectorTreeNode> _children;

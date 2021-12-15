@@ -340,14 +340,6 @@ class InspectorTreeController extends Object
     });
   }
 
-  void setSearchMatch(InspectorTreeNode node, bool hasSearchMatch) {
-    if (node == null) return;
-    setState(() {
-      _expandPath(node);
-      node.hasSearchMatch = hasSearchMatch;
-    });
-  }
-
   void _expandPath(InspectorTreeNode node) {
     while (node != null) {
       if (!node.isExpanded) {
@@ -595,6 +587,13 @@ class InspectorTreeController extends Object
 
   /* Search support */
   @override
+  set search(String value) {
+    // Expand tree so all rows are available for search
+    expandPath(root);
+    super.search = value;
+  }
+
+  @override
   void onMatchChanged(int index) {
     onSelectRow(searchMatches.value[index]);
   }
@@ -616,8 +615,9 @@ class InspectorTreeController extends Object
     if (searchPreviousMatches) {
       final previousMatches = searchMatches.value;
       for (final previousMatch in previousMatches) {
-        if (previousMatch.node.diagnostic.searchValue
-            .caseInsensitiveContains(search)) {
+        if (cachedRows.contains(previousMatch) &&
+            previousMatch.node.diagnostic.searchValue
+                .caseInsensitiveContains(search)) {
           matches.add(previousMatch);
         }
       }
@@ -626,7 +626,7 @@ class InspectorTreeController extends Object
     }
 
     int _debugStatsSearchOps = 0;
-    int _debugStatsWidgets = 0;
+    final _debugStatsWidgets = cachedRows.length;
 
     if (search == null ||
         search.isEmpty ||
@@ -638,12 +638,6 @@ class InspectorTreeController extends Object
 
     debugPrint('Search started: ' + _searchTarget.toString());
 
-    // Reset search matches
-    for (final row in cachedRows) {
-      _debugStatsWidgets++;
-      setSearchMatch(row.node, false);
-    }
-
     for (final row in cachedRows) {
       final diagnostic = row.node.diagnostic;
       if (row.node == null || diagnostic == null) continue;
@@ -653,7 +647,6 @@ class InspectorTreeController extends Object
         _debugStatsSearchOps++;
         if (diagnostic.searchValue.caseInsensitiveContains(search)) {
           matches.add(row);
-          setSearchMatch(row.node, true);
           continue;
         }
       }
@@ -987,7 +980,7 @@ class _InspectorTreeState extends State<InspectorTree>
                             return SizedBox(height: rowHeight);
                           }
                           final InspectorTreeRow row =
-                              controller.root?.getRow(index);
+                              controller.getCachedRow(index);
                           final inspectorRef =
                               row.node.diagnostic?.valueRef?.id;
                           return _InspectorTreeRowWidget(
@@ -1168,7 +1161,7 @@ class InspectorRowContent extends StatelessWidget {
         valueListenable: controller.searchNotifier,
         builder: (context, searchValue, _) {
           return Opacity(
-            opacity: searchValue.isEmpty || node.hasSearchMatch ? 1 : 0.2,
+            opacity: searchValue.isEmpty || row.isSearchMatch ? 1 : 0.2,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -1211,7 +1204,7 @@ class InspectorRowContent extends StatelessWidget {
                           errorText: error?.errorMessage,
                           debuggerController: debuggerController,
                           nodeDescriptionHighlightStyle:
-                              searchValue.isEmpty || !node.hasSearchMatch
+                              searchValue.isEmpty || !row.isSearchMatch
                                   ? inspector_text_styles.regular
                                   : row.isSelected
                                       ? theme.searchMatchHighlightStyleFocused
