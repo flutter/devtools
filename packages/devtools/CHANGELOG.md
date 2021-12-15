@@ -1,3 +1,23 @@
+## 2.10.0
+* Refactors `AutoDisposeMixin` to have separate cancel methods for listeners, stream subscriptions, and focus nodes [#3540](https://github.com/flutter/devtools/pull/3540)
+* Fix a parsing bug with the SemanticVersion class [#3539](https://github.com/flutter/devtools/pull/3539)
+* Follow best practices for creating FocusNode objects [#3532](https://github.com/flutter/devtools/pull/3532)
+* Apply UX suggestions to frame analysis icon [#3536](https://github.com/flutter/devtools/pull/3536)
+* Create `DualValueListenableBuilder` widget and clean up ValueListenableBuilders to user `child` parameter [#3533](https://github.com/flutter/devtools/pull/3533)
+* Use proper frame id to number frames in the performance page [#3535](https://github.com/flutter/devtools/pull/3535)
+* Fix state issue with CpuProfiler user tags [#3531](https://github.com/flutter/devtools/pull/3531)
+* Fixes program explorer bug on hot restart [#3527](https://github.com/flutter/devtools/pull/3527)
+* Escape text directional Unicode [#3529](https://github.com/flutter/devtools/pull/3529)
+* Fix bug with search [#3528](https://github.com/flutter/devtools/pull/3528)
+* Add frame numbers to the flutter frames chart in the performance page [#3526](https://github.com/flutter/devtools/pull/3526)
+* Add selection analytics for NetworkScreen [#3360](https://github.com/flutter/devtools/pull/3360)
+* Do not wait on stream listening during start up [#3358](https://github.com/flutter/devtools/pull/3358)
+* Add analytics/analytics.dart export to devtools_app.dart [#3523](https://github.com/flutter/devtools/pull/3523)
+* Add is_embedded dimension to DevTools analytics [#3522](https://github.com/flutter/devtools/pull/3522)
+
+## 2.9.2-dev.1
+TODO: update changelog
+
 ## 2.9.1
 * Fix build script logic to download canvaskit [#3519](https://github.com/flutter/devtools/pull/3519)
 
