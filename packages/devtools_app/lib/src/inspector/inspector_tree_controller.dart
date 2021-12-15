@@ -340,6 +340,13 @@ class InspectorTreeController extends Object
     });
   }
 
+  void _expandAll(InspectorTreeNode node) {
+    setState(() {
+      node.isExpanded = true;
+    });
+    (node.children ?? []).forEach(_expandAll);
+  }
+
   void _expandPath(InspectorTreeNode node) {
     while (node != null) {
       if (!node.isExpanded) {
@@ -589,7 +596,7 @@ class InspectorTreeController extends Object
   @override
   set search(String value) {
     // Expand tree so all rows are available for search
-    expandPath(root);
+    _expandAll(root);
     super.search = value;
   }
 
