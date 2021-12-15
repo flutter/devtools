@@ -28,7 +28,7 @@ class ReleaseNotesViewer extends StatefulWidget {
 
 class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  static const _viewerWidth = 500.0;
+  static const viewerWidth = 600.0;
 
   /// Animation controller for animating the opening and closing of the viewer.
   AnimationController visibilityController;
@@ -47,8 +47,11 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
     markdownData = widget.releaseNotesController.releaseNotesMarkdown.value;
 
     visibilityController = longAnimationController(this);
-    visibilityAnimation = Tween<double>(begin: 0, end: _viewerWidth)
-        .animate(visibilityController);
+    // Add [densePadding] to the end to account for the space between the
+    // release notes viewer and the right edge of DevTools.
+    visibilityAnimation =
+        Tween<double>(begin: 0, end: viewerWidth + densePadding)
+            .animate(visibilityController);
 
     addAutoDisposeListener(widget.releaseNotesController.releaseNotesVisible,
         () {
@@ -107,8 +110,9 @@ class ReleaseNotes extends AnimatedWidget {
     return Positioned(
       top: densePadding,
       bottom: densePadding,
-      right: densePadding,
-      width: animation.value,
+      right: densePadding -
+          (_ReleaseNotesViewerState.viewerWidth - animation.value),
+      width: _ReleaseNotesViewerState.viewerWidth,
       child: Card(
         elevation: defaultElevation,
         color: theme.scaffoldBackgroundColor,
@@ -162,7 +166,7 @@ class ReleaseNotesController {
   final _releaseNotesVisible = ValueNotifier<bool>(false);
 
   void _init() {
-    if (server.isDevToolsServerAvailable) {
+    if (server.isDevToolsServerAvailable && !isEmbedded()) {
       _maybeFetchReleaseNotes();
     }
   }
@@ -180,8 +184,17 @@ class ReleaseNotesController {
     final currentVersion = SemanticVersion.parse(devtoolsVersion);
     if (currentVersion > previousVersion) {
       try {
-        final releaseNotesMarkdown =
+        String releaseNotesMarkdown =
             await http.read(Uri.parse(_releaseNotesUrl(devtoolsVersion)));
+        // This is a workaround so that the images in release notes will appear.
+        // The {{site.url}} syntax is best practices for the flutter website
+        // repo, where these release notes are hosted, so we are performing this
+        // workaround on our end to ensure the images render properly.
+        releaseNotesMarkdown = releaseNotesMarkdown.replaceAll(
+          '{{site.url}}',
+          'https://docs.flutter.dev',
+        );
+
         _releaseNotesMarkdown.value = releaseNotesMarkdown;
         toggleReleaseNotesVisible(true);
         unawaited(server.setLastShownReleaseNotesVersion(devtoolsVersion));
@@ -204,6 +217,6 @@ class ReleaseNotesController {
   }
 
   String _releaseNotesUrl(String currentVersion) {
-    return 'https://raw.githubusercontent.com/flutter/website/main/src/development/tools/devtools/release-notes/release-notes-$currentVersion-src.md';
+    return 'https://docs.flutter.dev/development/tools/devtools/release-notes/release-notes-$currentVersion-src.md';
   }
 }
