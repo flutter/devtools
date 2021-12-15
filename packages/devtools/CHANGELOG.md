@@ -1,4 +1,4 @@
-## 2.10.0
+## 2.9.2-dev.1
 * Refactors `AutoDisposeMixin` to have separate cancel methods for listeners, stream subscriptions, and focus nodes [#3540](https://github.com/flutter/devtools/pull/3540)
 * Fix a parsing bug with the SemanticVersion class [#3539](https://github.com/flutter/devtools/pull/3539)
 * Follow best practices for creating FocusNode objects [#3532](https://github.com/flutter/devtools/pull/3532)
@@ -14,9 +14,6 @@
 * Do not wait on stream listening during start up [#3358](https://github.com/flutter/devtools/pull/3358)
 * Add analytics/analytics.dart export to devtools_app.dart [#3523](https://github.com/flutter/devtools/pull/3523)
 * Add is_embedded dimension to DevTools analytics [#3522](https://github.com/flutter/devtools/pull/3522)
-
-## 2.9.2-dev.1
-TODO: update changelog
 
 ## 2.9.1
 * Fix build script logic to download canvaskit [#3519](https://github.com/flutter/devtools/pull/3519)
