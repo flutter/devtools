@@ -337,7 +337,7 @@ class MemoryProfile {
       return '0' * (length - result.length) + result;
     }
 
-    return toStringLength(value.hour, 2) +
+    return toStringLength(1 + value.hour % 12, 2) +
         ':' +
         toStringLength(value.minute, 2) +
         ':' +
