@@ -334,6 +334,7 @@ class MemoryProfile {
   static String _formatTime(DateTime value) {
     String toStringLength(int value, int length) {
       final result = '$value';
+      assert(length >= result.length);
       return '0' * (length - result.length) + result;
     }
 
