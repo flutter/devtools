@@ -146,6 +146,7 @@ class InspectorTreeController extends Object
   set root(InspectorTreeNode node) {
     setState(() {
       _root = node;
+      _populateSearchableCachedRows();
     });
   }
 
@@ -184,6 +185,10 @@ class InspectorTreeController extends Object
   final List<InspectorTreeRow> cachedRows = [];
   InspectorTreeRow _cachedSelectedRow;
 
+  /// Cached rows of the tree. Similar to [cachedRows] but items are populated
+  /// when root is changed and don't change when nodes are expanded or collapsed
+  final List<InspectorTreeRow> _searchableCachedRows = [];
+
   void setSearchTarget(SearchTargetType searchTarget) {
     _searchTarget = searchTarget;
     refreshSearchMatches();
@@ -200,6 +205,13 @@ class InspectorTreeController extends Object
     }
   }
 
+  void _populateSearchableCachedRows() {
+    _searchableCachedRows.clear();
+    for (int i = 0; i < numRows; i++) {
+      _searchableCachedRows.add(getCachedRow(i));
+    }
+  }
+
   InspectorTreeRow getCachedRow(int index) {
     if (index < 0) return null;
 
@@ -211,7 +223,10 @@ class InspectorTreeController extends Object
     if (cachedRows[index]?.isSelected == true) {
       _cachedSelectedRow = cachedRows[index];
     }
-    return cachedRows[index];
+    final cachedRow = cachedRows[index];
+    cachedRow?.isSearchMatch =
+        _searchableCachedRows.safeGet(index)?.isSearchMatch ?? false;
+    return cachedRow;
   }
 
   double getRowOffset(int index) {
@@ -219,19 +234,15 @@ class InspectorTreeController extends Object
   }
 
   List<InspectorTreeRow> getPathFromSelectedRowToRoot() {
-    final selectedItem = _cachedSelectedRow ??
-        cachedRows.firstWhere(
-          (element) => element.isSelected,
-          orElse: () => null,
-        );
+    final selectedItem = _cachedSelectedRow;
     if (selectedItem == null) return [];
 
     final pathToRoot = <InspectorTreeRow>[selectedItem];
     InspectorTreeNode nextParentNode = selectedItem.node.parent;
     while (nextParentNode != null) {
-      final rowItem = cachedRows.firstWhere(
-        (element) => element.node == nextParentNode,
-        orElse: null,
+      final rowItem = _searchableCachedRows.firstWhere(
+        (element) => element?.node == nextParentNode,
+        orElse: () => null,
       );
       if (rowItem == null) break;
       pathToRoot.add(rowItem);
@@ -338,13 +349,6 @@ class InspectorTreeController extends Object
     setState(() {
       _expandPath(node);
     });
-  }
-
-  void _expandAll(InspectorTreeNode node) {
-    setState(() {
-      node.isExpanded = true;
-    });
-    (node.children ?? []).forEach(_expandAll);
   }
 
   void _expandPath(InspectorTreeNode node) {
@@ -594,13 +598,6 @@ class InspectorTreeController extends Object
 
   /* Search support */
   @override
-  set search(String value) {
-    // Expand tree so all rows are available for search
-    _expandAll(root);
-    super.search = value;
-  }
-
-  @override
   void onMatchChanged(int index) {
     onSelectRow(searchMatches.value[index]);
   }
@@ -622,9 +619,8 @@ class InspectorTreeController extends Object
     if (searchPreviousMatches) {
       final previousMatches = searchMatches.value;
       for (final previousMatch in previousMatches) {
-        if (cachedRows.contains(previousMatch) &&
-            previousMatch.node.diagnostic.searchValue
-                .caseInsensitiveContains(search)) {
+        if (previousMatch.node.diagnostic.searchValue
+            .caseInsensitiveContains(search)) {
           matches.add(previousMatch);
         }
       }
@@ -633,7 +629,7 @@ class InspectorTreeController extends Object
     }
 
     int _debugStatsSearchOps = 0;
-    final _debugStatsWidgets = cachedRows.length;
+    final _debugStatsWidgets = _searchableCachedRows.length;
 
     if (search == null ||
         search.isEmpty ||
@@ -645,7 +641,7 @@ class InspectorTreeController extends Object
 
     debugPrint('Search started: ' + _searchTarget.toString());
 
-    for (final row in cachedRows) {
+    for (final row in _searchableCachedRows) {
       final diagnostic = row.node.diagnostic;
       if (row.node == null || diagnostic == null) continue;
 
