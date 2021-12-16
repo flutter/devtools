@@ -41,6 +41,7 @@ import 'performance/performance_screen.dart';
 import 'profiler/profiler_screen.dart';
 import 'profiler/profiler_screen_controller.dart';
 import 'provider/provider_screen.dart';
+import 'release_notes.dart';
 import 'routing.dart';
 import 'scaffold.dart';
 import 'screen.dart';
@@ -101,6 +102,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   bool get denseModeEnabled => _denseModeEnabled;
   bool _denseModeEnabled;
 
+  ReleaseNotesController releaseNotesController;
+
   @override
   void initState() {
     super.initState();
@@ -133,6 +136,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         _denseModeEnabled = preferences.denseModeEnabled.value;
       });
     });
+
+    releaseNotesController = ReleaseNotesController();
   }
 
   @override
@@ -314,7 +319,12 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       ),
       builder: (context, child) => Provider<AnalyticsController>.value(
         value: widget.analyticsController,
-        child: Notifications(child: child),
+        child: Notifications(
+          child: ReleaseNotesViewer(
+            releaseNotesController: releaseNotesController,
+            child: child,
+          ),
+        ),
       ),
       routerDelegate: DevToolsRouterDelegate(_getPage),
       routeInformationParser: DevToolsRouteInformationParser(),
