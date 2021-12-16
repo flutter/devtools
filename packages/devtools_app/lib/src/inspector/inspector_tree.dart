@@ -311,7 +311,7 @@ class InspectorTreeConfig {
   final TreeEventCallback onHover;
 }
 
-// TODO(https://github.com/flutter/devtools/issues/3489) implement other search scopes
+// TODO(https://github.com/flutter/devtools/issues/3489) implement other search scopes ('all')
 enum SearchTargetType {
   widget,
   details,

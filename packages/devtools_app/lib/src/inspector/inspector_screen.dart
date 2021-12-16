@@ -85,10 +85,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   /// Indicates whether search can be closed. The value is set to true when
   /// search target type dropdown is displayed
-  /// TODO(https://github.com/flutter/devtools/issues/3489) use this variable when adding the scope dropdown
   bool searchPreventClose = false;
-
-  SearchTargetType searchTarget = SearchTargetType.widget;
 
   static const summaryTreeKey = Key('Summary Tree');
   static const detailsTreeKey = Key('Details Tree');
@@ -124,8 +121,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       onExpandCollapseSupported: _onExpandCollapseSupported,
       onLayoutExplorerSupported: _onLayoutExplorerSupported,
     );
-
-    summaryTreeController.setSearchTarget(searchTarget);
 
     addAutoDisposeListener(searchFieldFocusNode, () {
       // Close the search once focus is lost and following conditions are met:
@@ -241,6 +236,23 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                   shouldRequestFocus: searchVisible,
                   supportsNavigation: true,
                   onClose: _onSearchVisibleToggle,
+                  prefix: ValueListenableBuilder(
+                    valueListenable: summaryTreeController.searchTarget,
+                    builder: (context, value, child) {
+                      return DropdownButton<SearchTargetType>(
+                        value: value,
+                        items: SearchTargetType.values.map((e) {
+                          return DropdownMenuItem(
+                            child: Text(e.name),
+                            value: e,
+                          );
+                        }).toList(),
+                        onTap: () => searchPreventClose = !searchPreventClose,
+                        onChanged: (value) =>
+                            summaryTreeController.setSearchTarget(value),
+                      );
+                    },
+                  ),
                 ),
               ),
               Expanded(

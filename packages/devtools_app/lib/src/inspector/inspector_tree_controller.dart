@@ -109,8 +109,6 @@ class InspectorTreeController extends Object
 
   InspectorTreeNode createNode() => InspectorTreeNode();
 
-  SearchTargetType _searchTarget = SearchTargetType.widget;
-
   void addClient(InspectorControllerClient value) {
     final firstClient = _clients.isEmpty;
     _clients.add(value);
@@ -193,10 +191,15 @@ class InspectorTreeController extends Object
   /// * items are populated only when root is changed
   final _searchableCachedRows = <InspectorTreeRow>[];
 
-  void setSearchTarget(SearchTargetType searchTarget) {
-    _searchTarget = searchTarget;
+  final _searchTarget =
+      ValueNotifier<SearchTargetType>(SearchTargetType.widget);
+
+  void setSearchTarget(SearchTargetType value) {
+    _searchTarget.value = value;
     refreshSearchMatches();
   }
+
+  ValueListenable get searchTarget => _searchTarget;
 
   // TODO: we should add a listener instead that clears the cache when the
   // root is marked as dirty.
@@ -651,7 +654,7 @@ class InspectorTreeController extends Object
       if (row.node == null || diagnostic == null) continue;
 
       bool hasMatch = false;
-      switch (_searchTarget) {
+      switch (_searchTarget.value) {
         case SearchTargetType.widget:
           hasMatch = _hasWidgetMatch(diagnostic, search);
           break;
