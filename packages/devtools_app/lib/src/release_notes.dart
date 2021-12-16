@@ -157,6 +157,10 @@ class ReleaseNotesController {
     _init();
   }
 
+  static const _unsupportedPathSyntax = '{{site.url}}';
+
+  static const _flutterDocsSite = 'https://docs.flutter.dev';
+
   ValueListenable<String> get releaseNotesMarkdown => _releaseNotesMarkdown;
 
   final _releaseNotesMarkdown = ValueNotifier<String>(null);
@@ -191,8 +195,8 @@ class ReleaseNotesController {
         // repo, where these release notes are hosted, so we are performing this
         // workaround on our end to ensure the images render properly.
         releaseNotesMarkdown = releaseNotesMarkdown.replaceAll(
-          '{{site.url}}',
-          'https://docs.flutter.dev',
+          _unsupportedPathSyntax,
+          _flutterDocsSite,
         );
 
         _releaseNotesMarkdown.value = releaseNotesMarkdown;
