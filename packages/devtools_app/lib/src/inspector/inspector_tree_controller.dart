@@ -109,7 +109,7 @@ class InspectorTreeController extends Object
 
   InspectorTreeNode createNode() => InspectorTreeNode();
 
-  SearchTargetType _searchTarget = SearchTargetType.details;
+  SearchTargetType _searchTarget = SearchTargetType.widget;
 
   void addClient(InspectorControllerClient value) {
     final firstClient = _clients.isEmpty;
@@ -633,9 +633,7 @@ class InspectorTreeController extends Object
     //   if (matches.isNotEmpty) return matches;
     // }
 
-    int _debugStatsSearchOps = 0;
-    final _debugStatsWidgets = _searchableCachedRows.length;
-    int _debugStatsWidgetsTotal = 0;
+    final _debugStatsWidgetsTotal = _searchableCachedRows.length;
     int _debugStatsRowsFound = 0;
 
     if (search == null ||
@@ -665,7 +663,6 @@ class InspectorTreeController extends Object
       if (hasMatch) {
         _debugStatsRowsFound++;
         matches.add(row);
-        setSearchMatch(row.node, true);
       }
     }
 
