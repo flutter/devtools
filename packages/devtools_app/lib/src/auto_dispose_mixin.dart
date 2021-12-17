@@ -23,7 +23,9 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
 
   @override
   void dispose() {
-    cancel();
+    cancelStreamSubscriptions();
+    cancelListeners();
+    cancelFocusNodes();
     super.dispose();
   }
 
@@ -35,12 +37,27 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
   }
 
   @override
-  void autoDispose(StreamSubscription subscription) {
-    _delegate.autoDispose(subscription);
+  void autoDisposeStreamSubscription(StreamSubscription subscription) {
+    _delegate.autoDisposeStreamSubscription(subscription);
   }
 
   @override
-  void cancel() {
-    _delegate.cancel();
+  void autoDisposeFocusNode(FocusNode node) {
+    _delegate.autoDisposeFocusNode(node);
+  }
+
+  @override
+  void cancelStreamSubscriptions() {
+    _delegate.cancelStreamSubscriptions();
+  }
+
+  @override
+  void cancelListeners() {
+    _delegate.cancelListeners();
+  }
+
+  @override
+  void cancelFocusNodes() {
+    _delegate.cancelFocusNodes();
   }
 }

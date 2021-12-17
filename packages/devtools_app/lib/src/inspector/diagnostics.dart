@@ -151,7 +151,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           contents: Material(
             child: ExpandableVariable(
               debuggerController: debuggerController,
-              variable: ValueNotifier(variable),
+              variable: variable,
             ),
           ),
         );

@@ -90,7 +90,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
     if (newController == _controller) return;
     _controller = newController;
 
-    cancel();
+    cancelListeners();
     _selectedFrame = _controller.selectedFrame.value;
     addAutoDisposeListener(_controller.selectedFrame, () {
       setState(() {
@@ -229,9 +229,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
               }
               return Center(
                 child: Text(
-                  // TODO(https://github.com/flutter/flutter/issues/94896): stop
-                  // dividing by 2 to get the proper id.
-                  '${widget.frames[index].id ~/ 2}',
+                  '${widget.frames[index].id}',
                   style: themeData.subtleChartTextStyle,
                 ),
               );
@@ -584,23 +582,24 @@ class ShaderJankWarningIcon extends StatelessWidget {
 }
 
 class FrameAnalysisIcon extends StatelessWidget {
-  const FrameAnalysisIcon({
-    this.iconSize = defaultActionsIconSizeBeforeScaling,
-  });
+  const FrameAnalysisIcon({Key key}) : super(key: key);
 
-  final double iconSize;
+  static const _backgroundColor = Color.fromRGBO(48, 48, 48, 0.8);
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        BlinkingIcon(
-          icon: Icons.saved_search,
-          color: Colors.amber,
-          size: iconSize,
-        ),
-      ],
+    return Container(
+      width: defaultActionsIconSizeBeforeScaling,
+      height: defaultActionsIconSizeBeforeScaling,
+      decoration: const BoxDecoration(
+        color: _backgroundColor,
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(
+        Icons.saved_search,
+        color: Colors.white,
+        size: defaultIconSizeBeforeScaling,
+      ),
     );
   }
 }

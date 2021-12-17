@@ -46,43 +46,39 @@ class NetworkScreen extends Screen {
     final networkController = Provider.of<NetworkController>(context);
     final color = Theme.of(context).textTheme.bodyText2.color;
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: networkController.recordingNotifier,
-      builder: (context, recording, _) {
-        return ValueListenableBuilder<NetworkRequests>(
-          valueListenable: networkController.requests,
-          builder: (context, networkRequests, _) {
-            return ValueListenableBuilder<List<NetworkRequest>>(
-              valueListenable: networkController.filteredData,
-              builder: (context, filteredRequests, _) {
-                final filteredCount = filteredRequests.length;
-                final totalCount = networkRequests.requests.length;
-
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Showing ${nf.format(filteredCount)} of '
-                      '${nf.format(totalCount)} '
-                      '${pluralize('request', totalCount)}',
-                    ),
-                    const SizedBox(width: denseSpacing),
-                    SizedBox(
-                      width: smallProgressSize,
-                      height: smallProgressSize,
-                      child: recording
-                          ? SmallCircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(color),
-                            )
-                          : const SizedBox(),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
+    return DualValueListenableBuilder<NetworkRequests, List<NetworkRequest>>(
+      firstListenable: networkController.requests,
+      secondListenable: networkController.filteredData,
+      builder: (context, networkRequests, filteredRequests, child) {
+        final filteredCount = filteredRequests.length;
+        final totalCount = networkRequests.requests.length;
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Showing ${nf.format(filteredCount)} of '
+              '${nf.format(totalCount)} '
+              '${pluralize('request', totalCount)}',
+            ),
+            const SizedBox(width: denseSpacing),
+            child,
+          ],
         );
       },
+      child: ValueListenableBuilder<bool>(
+        valueListenable: networkController.recordingNotifier,
+        builder: (context, recording, _) {
+          return SizedBox(
+            width: smallProgressSize,
+            height: smallProgressSize,
+            child: recording
+                ? SmallCircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(color),
+                  )
+                : const SizedBox(),
+          );
+        },
+      ),
     );
   }
 }
@@ -146,7 +142,9 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
       children: [
         _NetworkProfilerControls(controller: _networkController),
         const SizedBox(height: denseRowSpacing),
-        _NetworkProfilerBody(controller: _networkController),
+        Expanded(
+          child: _NetworkProfilerBody(controller: _networkController),
+        ),
       ],
     );
   }
@@ -289,31 +287,25 @@ class _NetworkProfilerBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<NetworkRequest>(
-      valueListenable: controller.selectedRequest,
-      builder: (context, selectedRequest, _) {
-        return Expanded(
-          // TODO(@lesliearkorful): remove GestureDetector once #80455 is fixed
-          child: GestureDetector(
-            onTap: () => FocusScope.of(context)?.unfocus(),
-            child: Split(
-              initialFractions: const [0.5, 0.5],
-              minSizes: const [200, 200],
-              axis: Axis.horizontal,
-              children: [
-                ValueListenableBuilder<List<NetworkRequest>>(
-                    valueListenable: controller.filteredData,
-                    builder: (context, filteredRequests, _) {
-                      return NetworkRequestsTable(
-                        networkController: controller,
-                        requests: filteredRequests,
-                        searchMatchesNotifier: controller.searchMatches,
-                        activeSearchMatchNotifier: controller.activeSearchMatch,
-                      );
-                    }),
-                NetworkRequestInspector(selectedRequest),
-              ],
-            ),
+    return DualValueListenableBuilder<NetworkRequest, List<NetworkRequest>>(
+      firstListenable: controller.selectedRequest,
+      secondListenable: controller.filteredData,
+      builder: (context, selectedRequest, filteredRequests, _) {
+        return GestureDetector(
+          onTap: () => FocusScope.of(context)?.unfocus(),
+          child: Split(
+            initialFractions: const [0.5, 0.5],
+            minSizes: const [200, 200],
+            axis: Axis.horizontal,
+            children: [
+              NetworkRequestsTable(
+                networkController: controller,
+                requests: filteredRequests,
+                searchMatchesNotifier: controller.searchMatches,
+                activeSearchMatchNotifier: controller.activeSearchMatch,
+              ),
+              NetworkRequestInspector(selectedRequest),
+            ],
           ),
         );
       },

@@ -117,7 +117,7 @@ class _CodeViewState extends State<CodeView>
     super.didUpdateWidget(oldWidget);
 
     if (widget.controller != oldWidget.controller) {
-      cancel();
+      cancelListeners();
 
       addAutoDisposeListener(
           widget.controller.scriptLocation, _handleScriptLocationChanged);
@@ -203,31 +203,27 @@ class _CodeViewState extends State<CodeView>
       return const CenteredCircularProgressIndicator();
     }
 
-    return ValueListenableBuilder(
-      valueListenable: widget.controller.showFileOpener,
-      builder: (context, showFileOpener, _) {
-        return ValueListenableBuilder(
-          valueListenable: widget.controller.showSearchInFileField,
-          builder: (context, showSearch, _) {
-            return Stack(
-              children: [
-                scriptRef == null
-                    ? buildEmptyState(context)
-                    : buildCodeArea(context),
-                if (showFileOpener)
-                  Positioned(
-                    left: fileOpenerLeftPadding,
-                    child: buildFileSearchField(),
-                  ),
-                if (showSearch && scriptRef != null)
-                  Positioned(
-                    top: denseSpacing,
-                    right: searchFieldRightPadding,
-                    child: buildSearchInFileField(),
-                  ),
-              ],
-            );
-          },
+    return DualValueListenableBuilder<bool, bool>(
+      firstListenable: widget.controller.showFileOpener,
+      secondListenable: widget.controller.showSearchInFileField,
+      builder: (context, showFileOpener, showSearch, _) {
+        return Stack(
+          children: [
+            scriptRef == null
+                ? buildEmptyState(context)
+                : buildCodeArea(context),
+            if (showFileOpener)
+              Positioned(
+                left: fileOpenerLeftPadding,
+                child: buildFileSearchField(),
+              ),
+            if (showSearch && scriptRef != null)
+              Positioned(
+                top: denseSpacing,
+                right: searchFieldRightPadding,
+                child: buildSearchInFileField(),
+              ),
+          ],
         );
       },
     );
@@ -660,7 +656,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
   void initState() {
     super.initState();
 
-    cancel();
+    cancelListeners();
     searchMatches = widget.searchMatchesNotifier.value;
     addAutoDisposeListener(widget.searchMatchesNotifier, () {
       setState(() {
@@ -814,7 +810,7 @@ class _LineItemState extends State<LineItem> {
                 child: Material(
                   child: ExpandableVariable(
                     debuggerController: _debuggerController,
-                    variable: ValueNotifier(variable),
+                    variable: variable,
                   ),
                 ),
               ),

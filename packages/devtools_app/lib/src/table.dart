@@ -394,6 +394,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         List.generate(dataRoots.length, (index) => dataRoots[index].isExpanded);
     _updateItems();
     _focusNode = FocusNode(debugLabel: 'table');
+    autoDisposeFocusNode(_focusNode);
   }
 
   void expandParents(T parent) {
@@ -414,7 +415,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
     if (widget == oldWidget) return;
 
-    cancel();
+    cancelListeners();
 
     addAutoDisposeListener(selectionNotifier, () {
       setState(() {
@@ -450,12 +451,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
     selectionNotifier =
         widget.selectionNotifier ?? ValueNotifier<Selection<T>>(Selection<T>());
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _focusNode.dispose();
   }
 
   void _updateItems() {
@@ -835,7 +830,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   void didUpdateWidget(_Table oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    cancel();
+    cancelListeners();
 
     // TODO(kenz): pull this code into a helper and also call from initState.
     // Detect selection changes but only care about scrollIntoView.
@@ -1203,7 +1198,7 @@ class _TableRowState<T> extends State<TableRow<T>>
       scrollController = widget.linkedScrollControllerGroup.addAndGet();
     }
 
-    cancel();
+    cancelListeners();
     _initSearchListeners();
   }
 

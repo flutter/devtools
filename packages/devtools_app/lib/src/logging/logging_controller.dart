@@ -163,12 +163,12 @@ class LoggingController extends DisposableController
         FilterControllerMixin<LogData>,
         AutoDisposeControllerMixin {
   LoggingController() {
-    autoDispose(
+    autoDisposeStreamSubscription(
         serviceManager.onConnectionAvailable.listen(_handleConnectionStart));
     if (serviceManager.connectedAppInitialized) {
       _handleConnectionStart(serviceManager.service);
     }
-    autoDispose(
+    autoDisposeStreamSubscription(
         serviceManager.onConnectionClosed.listen(_handleConnectionStop));
     _handleBusEvents();
   }
@@ -250,22 +250,24 @@ class LoggingController extends DisposableController
     // Log stdout events.
     final _StdoutEventHandler stdoutHandler =
         _StdoutEventHandler(this, 'stdout');
-    autoDispose(service.onStdoutEventWithHistory.listen(stdoutHandler.handle));
+    autoDisposeStreamSubscription(
+        service.onStdoutEventWithHistory.listen(stdoutHandler.handle));
 
     // Log stderr events.
     final _StdoutEventHandler stderrHandler =
         _StdoutEventHandler(this, 'stderr', isError: true);
-    autoDispose(service.onStderrEventWithHistory.listen(stderrHandler.handle));
+    autoDisposeStreamSubscription(
+        service.onStderrEventWithHistory.listen(stderrHandler.handle));
 
     // Log GC events.
-    autoDispose(service.onGCEvent.listen(_handleGCEvent));
+    autoDisposeStreamSubscription(service.onGCEvent.listen(_handleGCEvent));
 
     // Log `dart:developer` `log` events.
-    autoDispose(
+    autoDisposeStreamSubscription(
         service.onLoggingEventWithHistory.listen(_handleDeveloperLogEvent));
 
     // Log Flutter extension events.
-    autoDispose(
+    autoDisposeStreamSubscription(
         service.onExtensionEventWithHistory.listen(_handleExtensionEvent));
   }
 
@@ -522,7 +524,7 @@ class LoggingController extends DisposableController
   void _handleBusEvents() {
     // TODO(jacobr): expose the messageBus for use by vm tests.
     if (messageBus != null) {
-      autoDispose(
+      autoDisposeStreamSubscription(
           messageBus.onEvent(type: 'reload.end').listen((BusEvent event) {
         log(
           LogData(
@@ -533,7 +535,7 @@ class LoggingController extends DisposableController
         );
       }));
 
-      autoDispose(
+      autoDisposeStreamSubscription(
           messageBus.onEvent(type: 'restart.end').listen((BusEvent event) {
         log(
           LogData(
@@ -545,14 +547,14 @@ class LoggingController extends DisposableController
       }));
 
       // Listen for debugger events.
-      autoDispose(messageBus
+      autoDisposeStreamSubscription(messageBus
           .onEvent()
           .where((event) =>
               event.type == 'debugger' || event.type.startsWith('debugger.'))
           .listen(_handleDebuggerEvent));
 
       // Listen for DevTools internal events.
-      autoDispose(messageBus
+      autoDisposeStreamSubscription(messageBus
           .onEvent()
           .where((event) => event.type.startsWith('devtools.'))
           .listen(_handleDevToolsEvent));

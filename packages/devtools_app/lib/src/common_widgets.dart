@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'analytics/analytics.dart' as ga;
+import 'auto_dispose_mixin.dart';
 import 'config_specific/launch_url/launch_url.dart';
 import 'flutter_widgets/linked_scroll_controller.dart';
 import 'globals.dart';
@@ -1830,6 +1831,58 @@ class _BlinkingIconState extends State<BlinkingIcon> {
       widget.icon,
       size: widget.size,
       color: color,
+    );
+  }
+}
+
+/// A widget that listens for changes to two different [ValueListenable]s and
+/// rebuilds for change notifications to either.
+///
+/// This widget is preferred over nesting two [ValueListenableBuilder]s in a
+/// single build method.
+class DualValueListenableBuilder<T, U> extends StatefulWidget {
+  const DualValueListenableBuilder({
+    Key key,
+    @required this.firstListenable,
+    @required this.secondListenable,
+    @required this.builder,
+    this.child,
+  }) : super(key: key);
+
+  final ValueListenable<T> firstListenable;
+
+  final ValueListenable<U> secondListenable;
+
+  final Widget Function(
+    BuildContext context,
+    T firstValue,
+    U secondValue,
+    Widget child,
+  ) builder;
+
+  final Widget child;
+
+  @override
+  _DualValueListenableBuilderState createState() =>
+      _DualValueListenableBuilderState<T, U>();
+}
+
+class _DualValueListenableBuilderState<T, U>
+    extends State<DualValueListenableBuilder<T, U>> with AutoDisposeMixin {
+  @override
+  void initState() {
+    super.initState();
+    addAutoDisposeListener(widget.firstListenable);
+    addAutoDisposeListener(widget.secondListenable);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(
+      context,
+      widget.firstListenable.value,
+      widget.secondListenable.value,
+      widget.child,
     );
   }
 }

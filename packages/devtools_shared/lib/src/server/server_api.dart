@@ -151,6 +151,21 @@ class ServerApi {
           request,
           json.encode(_devToolsUsage.surveyShownCount),
         );
+      case apiGetLastReleaseNotesVersion:
+        return api.getCompleted(
+          request,
+          json.encode(_devToolsUsage.lastReleaseNotesVersion),
+        );
+      case apiSetLastReleaseNotesVersion:
+        final queryParams = request.requestedUri.queryParameters;
+        if (queryParams.containsKey(lastReleaseNotesVersionPropertyName)) {
+          _devToolsUsage.lastReleaseNotesVersion =
+              queryParams[lastReleaseNotesVersionPropertyName]!;
+        }
+        return api.getCompleted(
+          request,
+          json.encode(_devToolsUsage.lastReleaseNotesVersion),
+        );
       case apiGetBaseAppSizeFile:
         final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(baseAppSizeFilePropertyName)) {

@@ -103,12 +103,7 @@ class PerformanceController extends DisposableController
     if (existingTabForFrame != null) {
       _selectedAnalysisTab.value = existingTabForFrame;
     } else {
-      // TODO(https://github.com/flutter/flutter/issues/94896): stop dividing by
-      // 2 to get the proper id.
-      final newTab = FlutterFrameAnalysisTabData(
-        'Frame ${frame.id ~/ 2}',
-        frame,
-      );
+      final newTab = FlutterFrameAnalysisTabData('Frame ${frame.id}', frame);
       _analysisTabs.add(newTab);
       _selectedAnalysisTab.value = newTab;
     }
@@ -236,7 +231,7 @@ class PerformanceController extends DisposableController
 
       // Listen for Flutter.Frame events with frame timing data.
       // Listen for Flutter.RebuiltWidgets events.
-      autoDispose(
+      autoDisposeStreamSubscription(
           serviceManager.service.onExtensionEventWithHistory.listen((event) {
         if (event.extensionKind == 'Flutter.Frame') {
           final frame = FlutterFrame.parse(event.extensionData.data);
@@ -246,7 +241,8 @@ class PerformanceController extends DisposableController
         }
       }));
 
-      autoDispose(serviceManager.onConnectionClosed.listen((_) {
+      autoDisposeStreamSubscription(
+          serviceManager.onConnectionClosed.listen((_) {
         _pollingTimer?.cancel();
         _timelinePollingRateLimiter?.dispose();
       }));

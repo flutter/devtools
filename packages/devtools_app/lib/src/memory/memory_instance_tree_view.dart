@@ -45,7 +45,7 @@ class InstanceTreeViewState extends State<InstanceTreeView>
     if (newController == controller) return;
     controller = newController;
 
-    cancel();
+    cancelListeners();
 
     // TODO(terry): setState should be called to set our state not change the
     //              controller. Have other ValueListenables on controller to

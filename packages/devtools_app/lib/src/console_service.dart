@@ -180,11 +180,13 @@ class ConsoleService extends Disposer {
   }
 
   void vmServiceOpened(VmServiceWrapper service) {
-    cancel();
+    cancelStreamSubscriptions();
+    cancelListeners();
     // The debug stream listener must be added as soon as the service is opened
     // because this stream does not send event history upon the first
     // subscription like the streams in [ensureServiceInitialized].
-    autoDispose(service.onDebugEvent.listen(_handleDebugEvent));
+    autoDisposeStreamSubscription(
+        service.onDebugEvent.listen(_handleDebugEvent));
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       clearStdio();
     });
@@ -207,11 +209,14 @@ class ConsoleService extends Disposer {
   void ensureServiceInitialized() {
     assert(serviceManager.isServiceAvailable);
     if (!_serviceInitialized && serviceManager.isServiceAvailable) {
-      autoDispose(serviceManager.service.onStdoutEventWithHistory
+      autoDisposeStreamSubscription(serviceManager
+          .service.onStdoutEventWithHistory
           .listen(_handleStdoutEvent));
-      autoDispose(serviceManager.service.onStderrEventWithHistory
+      autoDisposeStreamSubscription(serviceManager
+          .service.onStderrEventWithHistory
           .listen(_handleStderrEvent));
-      autoDispose(serviceManager.service.onExtensionEventWithHistory
+      autoDisposeStreamSubscription(serviceManager
+          .service.onExtensionEventWithHistory
           .listen(_handleExtensionEvent));
       _serviceInitialized = true;
     }
@@ -242,7 +247,7 @@ class ConsoleService extends Disposer {
   }
 
   void handleVmServiceClosed() {
-    cancel();
+    cancelStreamSubscriptions();
     _serviceInitialized = false;
   }
 

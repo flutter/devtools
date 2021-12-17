@@ -98,10 +98,13 @@ class MemoryBodyState extends State<MemoryBody>
   /// Updated when the MemoryController's _androidCollectionEnabled ValueNotifier changes.
   bool isAndroidCollection = MemoryController.androidADBDefault;
 
+  final _focusNode = FocusNode(debugLabel: 'memory');
+
   @override
   void initState() {
     super.initState();
     ga.screen(MemoryScreen.id);
+    autoDisposeFocusNode(_focusNode);
   }
 
   @override
@@ -303,7 +306,7 @@ class MemoryBodyState extends State<MemoryBody>
 
     // TODO(terry): Can Flutter's focus system be used instead of listening to keyboard?
     return RawKeyboardListener(
-      focusNode: FocusNode(debugLabel: 'memory'),
+      focusNode: _focusNode,
       onKey: (RawKeyEvent event) {
         if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
           hideHover();

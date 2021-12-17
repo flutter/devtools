@@ -97,7 +97,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     if (newController == controller) return;
     controller = newController;
 
-    cancel();
+    cancelListeners();
 
     addAutoDisposeListener(controller.recordingNotifier, () {
       setState(() {
@@ -146,6 +146,49 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
   }
 
   Widget _buildProfilerScreenBody(ProfilerScreenController controller) {
+    final emptyAppStartUpProfileView = Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Text(
+            'There are no app start up samples available.',
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: denseSpacing),
+          Text(
+            'To avoid this, try to open the DevTools CPU profiler '
+            'sooner after starting your app.',
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+    // TODO(kenz): remove the note about profiling on iOS after
+    // https://github.com/flutter/flutter/issues/88466 is fixed.
+    final emptyProfileView = Center(
+      child: RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          text: 'No CPU samples recorded.',
+          children: serviceManager.vm.operatingSystem == 'ios'
+              ? [
+                  const TextSpan(
+                    text: '''
+\n\nIf you are attempting to profile on a real iOS device, you may be hitting a known issue. Try using this ''',
+                  ),
+                  LinkTextSpan(
+                    link: const Link(
+                      display: 'workaround',
+                      url: iosProfilerWorkaround,
+                    ),
+                    context: context,
+                  ),
+                  const TextSpan(text: '.'),
+                ]
+              : [],
+        ),
+      ),
+    );
     final profilerScreen = Column(
       children: [
         if (!offlineController.offlineMode.value)
@@ -166,51 +209,10 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
               }
               if (cpuProfileData ==
                   CpuProfilerController.emptyAppStartUpProfile) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text(
-                        'There are no app start up samples available.',
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: denseSpacing),
-                      Text(
-                        'To avoid this, try to open the DevTools CPU profiler '
-                        'sooner after starting your app.',
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                );
+                return emptyAppStartUpProfileView;
               }
               if (cpuProfileData.isEmpty) {
-                // TODO(kenz): remove the note about profiling on iOS after
-                // https://github.com/flutter/flutter/issues/88466 is fixed.
-                return Center(
-                  child: RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      text: 'No CPU samples recorded.',
-                      children: serviceManager.vm.operatingSystem == 'ios'
-                          ? [
-                              const TextSpan(
-                                text: '''
-\n\nIf you are attempting to profile on a real iOS device, you may be hitting a known issue. Try using this ''',
-                              ),
-                              LinkTextSpan(
-                                link: const Link(
-                                  display: 'workaround',
-                                  url: iosProfilerWorkaround,
-                                ),
-                                context: context,
-                              ),
-                              const TextSpan(text: '.'),
-                            ]
-                          : [],
-                    ),
-                  ),
-                );
+                return emptyProfileView;
               }
               return CpuProfiler(
                 data: cpuProfileData,

@@ -720,7 +720,7 @@ class IsolateManager extends Disposer {
   }
 
   void _handleVmServiceClosed() {
-    cancel();
+    cancelStreamSubscriptions();
     _selectedIsolate.value = null;
     _service = null;
     _lastIsolateIndex = 0;
@@ -741,10 +741,12 @@ class IsolateManager extends Disposer {
   void vmServiceOpened(VmServiceWrapper service) {
     _selectedIsolate.value = null;
 
-    cancel();
+    cancelStreamSubscriptions();
     _service = service;
-    autoDispose(service.onIsolateEvent.listen(_handleIsolateEvent));
-    autoDispose(service.onDebugEvent.listen(_handleDebugEvent));
+    autoDisposeStreamSubscription(
+        service.onIsolateEvent.listen(_handleIsolateEvent));
+    autoDisposeStreamSubscription(
+        service.onDebugEvent.listen(_handleDebugEvent));
 
     // We don't yet known the main isolate.
     _mainIsolate.value = null;
@@ -1182,7 +1184,7 @@ class ServiceExtensionManager extends Disposer {
   }
 
   void vmServiceClosed() {
-    cancel();
+    cancelStreamSubscriptions();
     _mainIsolateClosed();
   }
 
@@ -1288,18 +1290,22 @@ class ServiceExtensionManager extends Disposer {
   void vmServiceOpened(
       VmServiceWrapper service, ConnectedApp connectedApp) async {
     _checkForFirstFrameStarted = false;
-    cancel();
+    cancelStreamSubscriptions();
+    cancelListeners();
     _connectedApp = connectedApp;
     _service = service;
     // TODO(kenz): do we want to listen with event history here?
-    autoDispose(service.onExtensionEvent.listen(_handleExtensionEvent));
+    autoDisposeStreamSubscription(
+        service.onExtensionEvent.listen(_handleExtensionEvent));
     addAutoDisposeListener(
       hasServiceExtension(extensions.didSendFirstFrameEvent),
       _maybeCheckForFirstFlutterFrame,
     );
     addAutoDisposeListener(_isolateManager.mainIsolate, _onMainIsolateChanged);
-    autoDispose(service.onDebugEvent.listen(_handleDebugEvent));
-    autoDispose(service.onIsolateEvent.listen(_handleIsolateEvent));
+    autoDisposeStreamSubscription(
+        service.onDebugEvent.listen(_handleDebugEvent));
+    autoDisposeStreamSubscription(
+        service.onIsolateEvent.listen(_handleIsolateEvent));
     final mainIsolateRef = _isolateManager.mainIsolate.value;
     if (mainIsolateRef != null) {
       _checkForFirstFrameStarted = false;

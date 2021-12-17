@@ -77,16 +77,14 @@ class ProgramExplorerController extends DisposableController
       this,
       libraries,
     );
-    _rootObjectNodes.addAll(nodes);
+    _rootObjectNodes.replaceAll(nodes);
     _initialized.value = true;
   }
 
   void initListeners() {
-    addAutoDisposeListener(
-      serviceManager.isolateManager.selectedIsolate,
-      refresh,
-    );
     // Re-initialize after reload.
+    // TODO(elliette): If file was opened from before the reload, we should try
+    // to open that one instead of the entrypoint file.
     addAutoDisposeListener(
       debuggerController.sortedScripts,
       refresh,
@@ -130,6 +128,7 @@ class ProgramExplorerController extends DisposableController
 
   /// Marks [node] as the currently selected node, clearing the selection state
   /// of any currently selected node.
+  /// TODO(elliette): Scroll to node in program explorer tree when selected.
   void selectNode(VMServiceObjectNode node) async {
     if (!node.isSelectable) {
       return;
@@ -141,9 +140,7 @@ class ProgramExplorerController extends DisposableController
       _scriptSelection = node;
       _isLoadingOutline.value = true;
       _outlineSelection.value = null;
-      _outlineNodes
-        ..clear()
-        ..addAll(await _scriptSelection.outline);
+      _outlineNodes.replaceAll(await _scriptSelection.outline);
       _isLoadingOutline.value = false;
     }
   }

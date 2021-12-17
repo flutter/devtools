@@ -101,7 +101,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     if (newController == controller) return;
     controller = newController;
 
-    cancel();
+    cancelListeners();
 
     processing = controller.processing.value;
     addAutoDisposeListener(controller.processing, () {
@@ -151,17 +151,15 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         if (isOfflineFlutterApp ||
             (!offlineController.offlineMode.value &&
                 serviceManager.connectedApp.isFlutterAppNow))
-          ValueListenableBuilder(
-            valueListenable: controller.flutterFrames,
-            builder: (context, frames, _) => ValueListenableBuilder(
-              valueListenable: controller.displayRefreshRate,
-              builder: (context, displayRefreshRate, _) {
-                return FlutterFramesChart(
-                  frames,
-                  displayRefreshRate,
-                );
-              },
-            ),
+          DualValueListenableBuilder<List<FlutterFrame>, double>(
+            firstListenable: controller.flutterFrames,
+            secondListenable: controller.displayRefreshRate,
+            builder: (context, frames, displayRefreshRate, child) {
+              return FlutterFramesChart(
+                frames,
+                displayRefreshRate,
+              );
+            },
           ),
         Expanded(
           child: Split(
@@ -246,7 +244,7 @@ class _PrimaryControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: controller.recordingFrames,
-      builder: (context, recording, _) {
+      builder: (context, recording, child) {
         return Row(
           children: [
             OutlinedIconButton(
@@ -261,14 +259,15 @@ class _PrimaryControls extends StatelessWidget {
               onPressed: recording ? null : _resumeFrameRecording,
             ),
             const SizedBox(width: denseSpacing),
-            OutlinedIconButton(
-              icon: Icons.block,
-              tooltip: 'Clear',
-              onPressed: processing ? null : _clearPerformanceData,
-            ),
+            child,
           ],
         );
       },
+      child: OutlinedIconButton(
+        icon: Icons.block,
+        tooltip: 'Clear',
+        onPressed: processing ? null : _clearPerformanceData,
+      ),
     );
   }
 

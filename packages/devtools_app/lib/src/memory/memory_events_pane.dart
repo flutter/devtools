@@ -207,7 +207,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     final themeData = Theme.of(context);
     colorScheme = themeData.colorScheme;
 
-    cancel();
+    cancelListeners();
 
     setupTraces(isDarkMode: themeData.isDarkTheme);
     _chartController.setupData();
@@ -217,13 +217,12 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
       setState(() {
         _processHeapSample(_memoryTimeline.sampleAddedNotifier.value);
       });
-
-      // Monitor event fired.
-      addAutoDisposeListener(_memoryTimeline.eventNotifier, () {
-        setState(() {
-          // TODO(terry): New event received.
-          //_processHeapSample(_memoryTimeline.eventNotifier.value);
-        });
+    });
+    // Monitor event fired.
+    addAutoDisposeListener(_memoryTimeline.eventNotifier, () {
+      setState(() {
+        // TODO(terry): New event received.
+        //_processHeapSample(_memoryTimeline.eventNotifier.value);
       });
     });
   }

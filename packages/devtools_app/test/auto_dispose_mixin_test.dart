@@ -27,7 +27,7 @@ class _AutoDisposedWidgetState extends State<AutoDisposedWidget>
   @override
   void initState() {
     super.initState();
-    autoDispose(widget.stream.listen(_onData));
+    autoDisposeStreamSubscription(widget.stream.listen(_onData));
   }
 
   void _onData(dynamic data) {
@@ -48,10 +48,10 @@ void main() {
       final controller2 = StreamController(sync: true);
       var c1Events = 0;
       var c2Events = 0;
-      disposer.autoDispose(controller1.stream.listen((data) {
+      disposer.autoDisposeStreamSubscription(controller1.stream.listen((data) {
         c1Events++;
       }));
-      disposer.autoDispose(controller2.stream.listen((data) {
+      disposer.autoDisposeStreamSubscription(controller2.stream.listen((data) {
         c2Events++;
       }));
       expect(c1Events, 0);
@@ -63,7 +63,7 @@ void main() {
       controller2.add(null);
       expect(c1Events, 2);
       expect(c2Events, 1);
-      disposer.cancel();
+      disposer.cancelStreamSubscriptions();
 
       // Make sure stream subscriptions are cancelled.
       controller1.add(null);
@@ -89,7 +89,7 @@ void main() {
       expect(values.last, equals(15));
       // ignore: invalid_use_of_protected_member
       expect(notifier.hasListeners, isTrue);
-      disposer.cancel();
+      disposer.cancelListeners();
       // ignore: invalid_use_of_protected_member
       expect(notifier.hasListeners, isFalse);
       notifier.value = 17;
@@ -106,7 +106,7 @@ void main() {
       notifier.value = 19;
       expect(values.length, equals(3));
       expect(values.last, equals(19));
-      disposer.cancel();
+      disposer.cancelListeners();
 
       // ignore: invalid_use_of_protected_member
       expect(notifier.hasListeners, isFalse);
@@ -129,7 +129,7 @@ void main() {
       // After disposal, all notifier methods will throw. Disposer needs
       // to ignore this when cancelling.
       notifier.dispose();
-      expect(() => disposer.cancel(), throwsA(anything));
+      expect(() => disposer.cancelListeners(), throwsA(anything));
       expect(values, [72]);
     });
   });
@@ -176,7 +176,7 @@ void main() {
     expect(values.last, equals(15));
     // ignore: invalid_use_of_protected_member
     expect(notifier.hasListeners, isTrue);
-    controller.cancel();
+    controller.cancelListeners();
     // ignore: invalid_use_of_protected_member
     expect(notifier.hasListeners, isFalse);
     notifier.value = 17;

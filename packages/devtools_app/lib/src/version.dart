@@ -114,6 +114,13 @@ class SemanticVersion with CompareMixin {
   });
 
   factory SemanticVersion.parse(String versionString) {
+    // Remove any build metadata, denoted by a '+' character and whatever
+    // follows.
+    final buildMetadataIndex = versionString.indexOf('+');
+    if (buildMetadataIndex != -1) {
+      versionString = versionString.substring(0, buildMetadataIndex);
+    }
+
     // [versionString] is expected to be of the form for VM.version, Dart, and
     // Flutter, respectively:
     // 2.15.0-233.0.dev (dev) (Mon Oct 18 14:06:26 2021 -0700) on "ios_x64"
