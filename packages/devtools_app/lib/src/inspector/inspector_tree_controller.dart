@@ -185,9 +185,13 @@ class InspectorTreeController extends Object
   final List<InspectorTreeRow> cachedRows = [];
   InspectorTreeRow _cachedSelectedRow;
 
-  /// Cached rows of the tree. Similar to [cachedRows] but items are populated
-  /// when root is changed and don't change when nodes are expanded or collapsed
-  final List<InspectorTreeRow> _searchableCachedRows = [];
+  /// All cached rows of the tree.
+  ///
+  /// Similar to [cachedRows] but:
+  /// * contains every row in the tree (including collapsed rows)
+  /// * items don't change when nodes are expanded or collapsed
+  /// * items are populated only when root is changed
+  final _searchableCachedRows = <InspectorTreeRow>[];
 
   void setSearchTarget(SearchTargetType searchTarget) {
     _searchTarget = searchTarget;
@@ -220,12 +224,14 @@ class InspectorTreeController extends Object
       cachedRows.add(null);
     }
     cachedRows[index] ??= root?.getRow(index);
-    if (cachedRows[index]?.isSelected == true) {
-      _cachedSelectedRow = cachedRows[index];
-    }
+
     final cachedRow = cachedRows[index];
     cachedRow?.isSearchMatch =
         _searchableCachedRows.safeGet(index)?.isSearchMatch ?? false;
+
+    if (cachedRows[index]?.isSelected == true) {
+      _cachedSelectedRow = cachedRow;
+    }
     return cachedRow;
   }
 
