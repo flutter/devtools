@@ -145,7 +145,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
 
     colorScheme = Theme.of(context).colorScheme;
 
-    cancel();
+    cancelListeners();
 
     setupTraces();
     _chartController.setupData();

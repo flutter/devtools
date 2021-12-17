@@ -58,7 +58,7 @@
        application. For more information, see:
        https://developers.google.com/web/fundamentals/primers/service-workers -->
   <script>
-    var version = '2.7.0';
+    var version = '2.9.2-dev.1';
     var scriptLoaded = false;
     function loadMainDartJs() {
       if (scriptLoaded) {
@@ -72,47 +72,64 @@
     }
 
     if ('serviceWorker' in navigator) {
-      // Service workers are supported. Use them.
-      window.addEventListener('load', function () {
-        // Wait for registration to finish before dropping the <script> tag.
-        // Otherwise, the browser will load the script multiple times,
-        // potentially different versions.
-        var serviceWorkerUrl = 'service_worker.js?v=' + version;
-        navigator.serviceWorker.register(serviceWorkerUrl)
-          .then((reg) => {
-            function waitForActivation(serviceWorker) {
-              serviceWorker.addEventListener('statechange', () => {
-                if (serviceWorker.state == 'activated') {
+      if (window.location.href.includes('index.ddc.html')) {
+        // If we are running DevTools locally, immediately load `main.dart.js` and
+        // unregister any service workers:
+        loadMainDartJs();
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for (let registration of registrations) {
+            registration.unregister();
+          }
+        });
+      } else {
+        // Service workers are supported. Use them.
+        window.addEventListener('load', function() {
+          // Wait for registration to finish before dropping the <script> tag.
+          // Otherwise, the browser will load the script multiple times,
+          // potentially different versions.
+          var serviceWorkerUrl = 'service_worker.js?v=' + version;
+          navigator.serviceWorker.register(serviceWorkerUrl)
+              .then((reg) => {
+                function waitForActivation(serviceWorker) {
+                  serviceWorker.addEventListener('statechange', () => {
+                    if (serviceWorker.state == 'activated') {
+                      loadMainDartJs();
+                    }
+                  });
+                }
+                if (!reg.active && (reg.installing || reg.waiting)) {
+                  // No active web worker and we have installed or are installing
+                  // one for the first time. Simply wait for it to activate.
+                  waitForActivation(reg.installing || reg.waiting);
+                } else if (!reg.active.scriptURL.endsWith(version)) {
+                  // When the app updates the version changes, so we
+                  // need to ask the service worker to update.
+                  reg.update();
+                  waitForActivation(reg.installing);
+                } else {
+                  // Existing service worker is still good.
                   loadMainDartJs();
                 }
+              })
+              .catch((err) => {
+                console.warn(
+                    ` Falling back to plain <script> tag. Error loading service worker: ${
+                        err}`);
+                loadMainDartJs();
               });
-            }
-            if (!reg.active && (reg.installing || reg.waiting)) {
-              // No active web worker and we have installed or are installing
-              // one for the first time. Simply wait for it to activate.
-              waitForActivation(reg.installing || reg.waiting);
-            } else if (!reg.active.scriptURL.endsWith(version)) {
-              // When the app updates the version changes, so we
-              // need to ask the service worker to update.
-              reg.update();
-              waitForActivation(reg.installing);
-            } else {
-              // Existing service worker is still good.
+
+          // If service worker doesn't succeed in a reasonable amount of time,
+          // fallback to plain <script> tag.
+          setTimeout(() => {
+            if (!scriptLoaded) {
+              console.warn(
+                  'Failed to load app from service worker. Falling back to plain <script> tag.',
+              );
               loadMainDartJs();
             }
-          });
-
-        // If service worker doesn't succeed in a reasonable amount of time,
-        // fallback to plain <script> tag.
-        setTimeout(() => {
-          if (!scriptLoaded) {
-            console.warn(
-              'Failed to load app from service worker. Falling back to plain <script> tag.',
-            );
-            loadMainDartJs();
-          }
-        }, 4000);
-      });
+          }, 4000);
+        });
+      }
     } else {
       // Service workers not supported. Just drop the <script> tag.
       loadMainDartJs();

@@ -29,7 +29,7 @@ class ExpressionEvalField extends StatefulWidget {
 }
 
 class _ExpressionEvalFieldState extends State<ExpressionEvalField>
-    with SearchFieldMixin, AutoDisposeMixin {
+    with AutoDisposeMixin, SearchFieldMixin {
   AutoCompleteController _autoCompleteController;
   int historyPosition = -1;
 
@@ -41,6 +41,8 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
   @override
   void initState() {
     super.initState();
+
+    serviceManager.consoleService.ensureServiceInitialized();
 
     _autoCompleteController = AutoCompleteController();
 
@@ -54,9 +56,13 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
       );
     });
     addAutoDisposeListener(
-        _autoCompleteController.selectTheSearchNotifier, _handleSearch);
+      _autoCompleteController.selectTheSearchNotifier,
+      _handleSearch,
+    );
     addAutoDisposeListener(
-        _autoCompleteController.searchNotifier, _handleSearch);
+      _autoCompleteController.searchNotifier,
+      _handleSearch,
+    );
   }
 
   void _handleSearch() async {

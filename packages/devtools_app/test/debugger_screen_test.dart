@@ -26,17 +26,23 @@ void main() {
   DebuggerScreen screen;
   FakeServiceManager fakeServiceManager;
   MockDebuggerController debuggerController;
-  fakeServiceManager = FakeServiceManager();
-  when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
-  when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
-  setGlobal(ServiceConnectionManager, fakeServiceManager);
 
   const windowSize = Size(4000.0, 4000.0);
   const smallWindowSize = Size(1000.0, 1000.0);
 
+  setUp(() {
+    fakeServiceManager = FakeServiceManager();
+    when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    fakeServiceManager.consoleService.ensureServiceInitialized();
+  });
+
   group('DebuggerScreen', () {
     Future<void> pumpDebuggerScreen(
-        WidgetTester tester, DebuggerController controller) async {
+      WidgetTester tester,
+      DebuggerController controller,
+    ) async {
       await tester.pumpWidget(wrapWithControllers(
         const DebuggerScreenBody(),
         debugger: controller,
@@ -44,7 +50,9 @@ void main() {
     }
 
     Future<void> pumpConsole(
-        WidgetTester tester, DebuggerController controller) async {
+      WidgetTester tester,
+      DebuggerController controller,
+    ) async {
       await tester.pumpWidget(wrapWithControllers(
         Row(
           children: [
@@ -109,6 +117,14 @@ void main() {
     });
 
     group('ConsoleControls', () {
+      final _stdio = ['First line', _ansiCodesOutput(), 'Third line'];
+
+      void _appendStdioLines() {
+        for (var line in _stdio) {
+          serviceManager.consoleService.appendStdio('$line\n');
+        }
+      }
+
       testWidgetsWithWindowSize(
           'Tapping the Console Clear button clears stdio.', windowSize,
           (WidgetTester tester) async {
@@ -125,30 +141,24 @@ void main() {
         expect(serviceManager.consoleService.stdio.value, isEmpty);
       });
 
-      final _stdio = ['First line', _ansiCodesOutput(), 'Third line'];
-
-      void _appendStdioLines() {
-        for (var line in _stdio) {
-          serviceManager.consoleService.appendStdio('$line\n');
-        }
-      }
-
       group('Clipboard', () {
-        _appendStdioLines();
         var _clipboardContents = '';
         final _expected = _stdio.join('\n');
 
         setUp(() {
+          _appendStdioLines();
           // This intercepts the Clipboard.setData SystemChannel message,
           // and stores the contents that were (attempted) to be copied.
           SystemChannels.platform.setMockMethodCallHandler((MethodCall call) {
             switch (call.method) {
               case 'Clipboard.setData':
                 _clipboardContents = call.arguments['text'];
-                return Future.value(true);
                 break;
               case 'Clipboard.getData':
                 return Future.value(<String, dynamic>{});
+                break;
+              case 'Clipboard.hasStrings':
+                return Future.value(<String, dynamic>{'value': true});
                 break;
               default:
                 break;
@@ -166,8 +176,6 @@ void main() {
         testWidgetsWithWindowSize(
             'Tapping the Copy to Clipboard button attempts to copy stdio to clipboard.',
             windowSize, (WidgetTester tester) async {
-          _appendStdioLines();
-
           await pumpConsole(tester, debuggerController);
 
           final copyButton =
@@ -439,54 +447,190 @@ void main() {
       expect(find.text('<async break>'), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize(
-        'Variables shows items', const Size(1000.0, 4000.0),
-        (WidgetTester tester) async {
-      when(debuggerController.variables)
-          .thenReturn(ValueNotifier(testVariables));
-      await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('Variables'), findsOneWidget);
+    group('Variables', () {
+      setUp(() {
+        resetRef();
+        resetRoot();
+      });
 
-      final listFinder = find.selectableText('Root 1: _GrowableList (2 items)');
+      testWidgetsWithWindowSize(
+          'Variables shows items', const Size(1000.0, 4000.0),
+          (WidgetTester tester) async {
+        when(debuggerController.variables).thenReturn(
+          ValueNotifier(
+            [
+              buildListVariable(),
+              buildMapVariable(),
+              buildStringVariable('test str'),
+              buildBooleanVariable(true),
+            ],
+          ),
+        );
+        await pumpDebuggerScreen(tester, debuggerController);
+        expect(find.text('Variables'), findsOneWidget);
 
-      // expect a tooltip for the list value
-      expect(
-        find.byTooltip('_GrowableList (2 items)'),
-        findsOneWidget,
-      );
+        final listFinder =
+            find.selectableText('Root 1: _GrowableList (2 items)');
 
-      final mapFinder = find
-          .selectableTextContaining('Root 2: _InternalLinkedHashmap (2 items)');
-      final mapElement1Finder = find.selectableTextContaining("['key1']: 1.0");
-      final mapElement2Finder = find.selectableTextContaining("['key2']: 1.1");
+        // expect a tooltip for the list value
+        expect(
+          find.byTooltip('_GrowableList (2 items)'),
+          findsOneWidget,
+        );
 
-      expect(listFinder, findsOneWidget);
-      expect(mapFinder, findsOneWidget);
-      expect(
-        find.selectableTextContaining("Root 3: 'test str...'"),
-        findsOneWidget,
-      );
-      expect(
-        find.selectableTextContaining('Root 4: true'),
-        findsOneWidget,
-      );
+        final mapFinder = find.selectableTextContaining(
+            'Root 2: _InternalLinkedHashmap (2 items)');
+        final mapElement1Finder =
+            find.selectableTextContaining("['key1']: 1.0");
+        final mapElement2Finder =
+            find.selectableTextContaining("['key2']: 2.0");
 
-      // Expand list.
-      expect(find.selectableTextContaining('0: 3'), findsNothing);
-      expect(find.selectableTextContaining('1: 4'), findsNothing);
+        expect(listFinder, findsOneWidget);
+        expect(mapFinder, findsOneWidget);
+        expect(
+          find.selectableTextContaining("Root 3: 'test str...'"),
+          findsOneWidget,
+        );
+        expect(
+          find.selectableTextContaining('Root 4: true'),
+          findsOneWidget,
+        );
 
-      await tester.tap(listFinder);
-      await tester.pump();
-      expect(find.selectableTextContaining('0: 3'), findsOneWidget);
-      expect(find.selectableTextContaining('1: 4'), findsOneWidget);
+        // Initially list is not expanded.
+        expect(find.selectableTextContaining('0: 3'), findsNothing);
+        expect(find.selectableTextContaining('1: 4'), findsNothing);
 
-      // Expand map.
-      expect(mapElement1Finder, findsNothing);
-      expect(mapElement2Finder, findsNothing);
-      await tester.tap(mapFinder);
-      await tester.pump();
-      expect(mapElement1Finder, findsOneWidget);
-      expect(mapElement2Finder, findsOneWidget);
+        // Expand list.
+        await tester.tap(listFinder);
+        await tester.pump();
+        expect(find.selectableTextContaining('0: 0'), findsOneWidget);
+        expect(find.selectableTextContaining('1: 1'), findsOneWidget);
+
+        // Initially map is not expanded.
+        expect(mapElement1Finder, findsNothing);
+        expect(mapElement2Finder, findsNothing);
+
+        // Expand map.
+        await tester.tap(mapFinder);
+        await tester.pump();
+        expect(mapElement1Finder, findsOneWidget);
+        expect(mapElement2Finder, findsOneWidget);
+      });
+
+      testWidgetsWithWindowSize('Children in large list variables are grouped',
+          const Size(1000.0, 4000.0), (WidgetTester tester) async {
+        final list = buildParentListVariable(length: 380250);
+        await buildVariablesTree(list);
+        when(debuggerController.variables).thenReturn(
+          ValueNotifier(
+            [
+              list,
+            ],
+          ),
+        );
+        await pumpDebuggerScreen(tester, debuggerController);
+
+        final listFinder =
+            find.selectableText('Root 1: _GrowableList (380,250 items)');
+        final group0To9999Finder = find.selectableTextContaining('[0 - 9999]');
+        final group10000To19999Finder =
+            find.selectableTextContaining('[10000 - 19999]');
+        final group370000To379999Finder =
+            find.selectableTextContaining('[370000 - 379999]');
+        final group380000To380249Finder =
+            find.selectableTextContaining('[380000 - 380249]');
+
+        final group370000To370099Finder =
+            find.selectableTextContaining('[370000 - 370099]');
+        final group370100To370199Finder =
+            find.selectableTextContaining('[370100 - 370199]');
+        final group370200To370299Finder =
+            find.selectableTextContaining('[370200 - 370299]');
+
+        // Initially list is not expanded.
+        expect(listFinder, findsOneWidget);
+        expect(group0To9999Finder, findsNothing);
+        expect(group10000To19999Finder, findsNothing);
+        expect(group370000To379999Finder, findsNothing);
+        expect(group380000To380249Finder, findsNothing);
+
+        // Expand list.
+        await tester.tap(listFinder);
+        await tester.pump();
+        expect(group0To9999Finder, findsOneWidget);
+        expect(group10000To19999Finder, findsOneWidget);
+        expect(group370000To379999Finder, findsOneWidget);
+        expect(group380000To380249Finder, findsOneWidget);
+
+        // Initially group [370000 - 379999] is not expanded.
+        expect(group370000To370099Finder, findsNothing);
+        expect(group370100To370199Finder, findsNothing);
+        expect(group370200To370299Finder, findsNothing);
+
+        // Expand group [370000 - 379999].
+        await tester.tap(group370000To379999Finder);
+        await tester.pump();
+        expect(group370000To370099Finder, findsOneWidget);
+        expect(group370100To370199Finder, findsOneWidget);
+        expect(group370200To370299Finder, findsOneWidget);
+      });
+
+      testWidgetsWithWindowSize('Children in large map variables are grouped',
+          const Size(1000.0, 4000.0), (WidgetTester tester) async {
+        final map = buildParentMapVariable(length: 243621);
+        await buildVariablesTree(map);
+        when(debuggerController.variables).thenReturn(
+          ValueNotifier(
+            [
+              map,
+            ],
+          ),
+        );
+        await pumpDebuggerScreen(tester, debuggerController);
+
+        final listFinder = find
+            .selectableText('Root 1: _InternalLinkedHashmap (243,621 items)');
+        final group0To9999Finder = find.selectableTextContaining('[0 - 9999]');
+        final group10000To19999Finder =
+            find.selectableTextContaining('[10000 - 19999]');
+        final group230000To239999Finder =
+            find.selectableTextContaining('[230000 - 239999]');
+        final group240000To243620Finder =
+            find.selectableTextContaining('[240000 - 243620]');
+
+        final group0To99Finder = find.selectableTextContaining('[0 - 99]');
+        final group100To199Finder =
+            find.selectableTextContaining('[100 - 199]');
+        final group200To299Finder =
+            find.selectableTextContaining('[200 - 299]');
+
+        // Initially map is not expanded.
+        expect(listFinder, findsOneWidget);
+        expect(group0To9999Finder, findsNothing);
+        expect(group10000To19999Finder, findsNothing);
+        expect(group230000To239999Finder, findsNothing);
+        expect(group240000To243620Finder, findsNothing);
+
+        // Expand map.
+        await tester.tap(listFinder);
+        await tester.pump();
+        expect(group0To9999Finder, findsOneWidget);
+        expect(group10000To19999Finder, findsOneWidget);
+        expect(group230000To239999Finder, findsOneWidget);
+        expect(group240000To243620Finder, findsOneWidget);
+
+        // Initially group [0 - 9999] is not expanded.
+        expect(group0To99Finder, findsNothing);
+        expect(group100To199Finder, findsNothing);
+        expect(group200To299Finder, findsNothing);
+
+        // Expand group [0 - 9999].
+        await tester.tap(group0To9999Finder);
+        await tester.pump();
+        expect(group0To99Finder, findsOneWidget);
+        expect(group100To199Finder, findsOneWidget);
+        expect(group200To299Finder, findsOneWidget);
+      });
     });
 
     WidgetPredicate createDebuggerButtonPredicate(String title) {
@@ -669,19 +813,41 @@ final isolateRef = IsolateRef(
   isSystemIsolate: false,
 );
 
-final testVariables = [
-  Variable.create(
+int refNumber = 0;
+
+String incrementRef() {
+  refNumber++;
+  return 'ref$refNumber';
+}
+
+void resetRef() {
+  refNumber = 0;
+}
+
+int rootNumber = 0;
+
+String incrementRoot() {
+  rootNumber++;
+  return 'Root $rootNumber';
+}
+
+void resetRoot() {
+  rootNumber = 0;
+}
+
+DartObjectNode buildParentListVariable({int length = 2}) {
+  return DartObjectNode.create(
     BoundVariable(
-      name: 'Root 1',
+      name: incrementRoot(),
       value: InstanceRef(
-        id: 'ref1',
+        id: incrementRef(),
         kind: InstanceKind.kList,
         classRef: ClassRef(
           name: '_GrowableList',
-          id: 'ref2',
+          id: incrementRef(),
           library: libraryRef,
         ),
-        length: 2,
+        length: length,
         identityHashCode: null,
       ),
       declarationTokenPos: null,
@@ -689,16 +855,23 @@ final testVariables = [
       scopeStartTokenPos: null,
     ),
     isolateRef,
-  )..addAllChildren([
-      Variable.create(
+  );
+}
+
+DartObjectNode buildListVariable({int length = 2}) {
+  final listVariable = buildParentListVariable(length: length);
+
+  for (int i = 0; i < length; i++) {
+    listVariable.addChild(
+      DartObjectNode.create(
         BoundVariable(
-          name: '0',
+          name: '$i',
           value: InstanceRef(
-            id: 'ref3',
+            id: incrementRef(),
             kind: InstanceKind.kInt,
-            classRef:
-                ClassRef(name: 'Integer', id: 'ref4', library: libraryRef),
-            valueAsString: '3',
+            classRef: ClassRef(
+                name: 'Integer', id: incrementRef(), library: libraryRef),
+            valueAsString: '$i',
             valueAsStringIsTruncated: false,
             identityHashCode: null,
           ),
@@ -708,34 +881,24 @@ final testVariables = [
         ),
         isolateRef,
       ),
-      Variable.create(
-        BoundVariable(
-          name: '1',
-          value: InstanceRef(
-            id: 'ref5',
-            kind: InstanceKind.kInt,
-            classRef:
-                ClassRef(name: 'Integer', id: 'ref6', library: libraryRef),
-            valueAsString: '4',
-            valueAsStringIsTruncated: false,
-            identityHashCode: null,
-          ),
-          declarationTokenPos: null,
-          scopeEndTokenPos: null,
-          scopeStartTokenPos: null,
-        ),
-        isolateRef,
-      ),
-    ]),
-  Variable.create(
+    );
+  }
+
+  return listVariable;
+}
+
+DartObjectNode buildParentMapVariable({int length = 2}) {
+  return DartObjectNode.create(
     BoundVariable(
-      name: 'Root 2',
+      name: incrementRoot(),
       value: InstanceRef(
-        id: 'ref7',
+        id: incrementRef(),
         kind: InstanceKind.kMap,
         classRef: ClassRef(
-            name: '_InternalLinkedHashmap', id: 'ref8', library: libraryRef),
-        length: 2,
+            name: '_InternalLinkedHashmap',
+            id: incrementRef(),
+            library: libraryRef),
+        length: length,
         identityHashCode: null,
       ),
       declarationTokenPos: null,
@@ -743,16 +906,23 @@ final testVariables = [
       scopeStartTokenPos: null,
     ),
     isolateRef,
-  )..addAllChildren([
-      Variable.create(
+  );
+}
+
+DartObjectNode buildMapVariable({int length = 2}) {
+  final mapVariable = buildParentMapVariable(length: length);
+
+  for (int i = 0; i < length; i++) {
+    mapVariable.addChild(
+      DartObjectNode.create(
         BoundVariable(
-          name: "['key1']",
+          name: "['key${i + 1}']",
           value: InstanceRef(
-            id: 'ref9',
+            id: incrementRef(),
             kind: InstanceKind.kDouble,
-            classRef:
-                ClassRef(name: 'Double', id: 'ref10', library: libraryRef),
-            valueAsString: '1.0',
+            classRef: ClassRef(
+                name: 'Double', id: incrementRef(), library: libraryRef),
+            valueAsString: '${i + 1}.0',
             valueAsStringIsTruncated: false,
             identityHashCode: null,
           ),
@@ -762,33 +932,25 @@ final testVariables = [
         ),
         isolateRef,
       ),
-      Variable.create(
-        BoundVariable(
-          name: "['key2']",
-          value: InstanceRef(
-            id: 'ref11',
-            kind: InstanceKind.kDouble,
-            classRef:
-                ClassRef(name: 'Double', id: 'ref12', library: libraryRef),
-            valueAsString: '1.1',
-            valueAsStringIsTruncated: false,
-            identityHashCode: null,
-          ),
-          declarationTokenPos: null,
-          scopeEndTokenPos: null,
-          scopeStartTokenPos: null,
-        ),
-        isolateRef,
-      ),
-    ]),
-  Variable.create(
+    );
+  }
+
+  return mapVariable;
+}
+
+DartObjectNode buildStringVariable(String value) {
+  return DartObjectNode.create(
     BoundVariable(
-      name: 'Root 3',
+      name: incrementRoot(),
       value: InstanceRef(
-        id: 'ref13',
+        id: incrementRef(),
         kind: InstanceKind.kString,
-        classRef: ClassRef(name: 'String', id: 'ref14', library: libraryRef),
-        valueAsString: 'test str',
+        classRef: ClassRef(
+          name: 'String',
+          id: incrementRef(),
+          library: libraryRef,
+        ),
+        valueAsString: value,
         valueAsStringIsTruncated: true,
         identityHashCode: null,
       ),
@@ -797,15 +959,22 @@ final testVariables = [
       scopeStartTokenPos: null,
     ),
     isolateRef,
-  ),
-  Variable.create(
+  );
+}
+
+DartObjectNode buildBooleanVariable(bool value) {
+  return DartObjectNode.create(
     BoundVariable(
-      name: 'Root 4',
+      name: incrementRoot(),
       value: InstanceRef(
-        id: 'ref15',
+        id: incrementRef(),
         kind: InstanceKind.kBool,
-        classRef: ClassRef(name: 'Boolean', id: 'ref16', library: libraryRef),
-        valueAsString: 'true',
+        classRef: ClassRef(
+          name: 'Boolean',
+          id: incrementRef(),
+          library: libraryRef,
+        ),
+        valueAsString: '$value',
         valueAsStringIsTruncated: false,
         identityHashCode: null,
       ),
@@ -814,5 +983,5 @@ final testVariables = [
       scopeStartTokenPos: null,
     ),
     isolateRef,
-  ),
-];
+  );
+}

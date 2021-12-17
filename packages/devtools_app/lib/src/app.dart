@@ -41,6 +41,7 @@ import 'performance/performance_screen.dart';
 import 'profiler/profiler_screen.dart';
 import 'profiler/profiler_screen_controller.dart';
 import 'provider/provider_screen.dart';
+import 'release_notes.dart';
 import 'routing.dart';
 import 'scaffold.dart';
 import 'screen.dart';
@@ -101,6 +102,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   bool get denseModeEnabled => _denseModeEnabled;
   bool _denseModeEnabled;
 
+  ReleaseNotesController releaseNotesController;
+
   @override
   void initState() {
     super.initState();
@@ -133,6 +136,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         _denseModeEnabled = preferences.denseModeEnabled.value;
       });
     });
+
+    releaseNotesController = ReleaseNotesController();
   }
 
   @override
@@ -210,21 +215,12 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         // enabled.
         return ValueListenableBuilder<bool>(
           valueListenable: preferences.vmDeveloperModeEnabled,
-          builder: (_, __, ___) {
+          builder: (_, __, child) {
             final tabs = _visibleScreens()
                 .where((p) => embed && page != null ? p.screenId == page : true)
                 .where((p) => !hide.contains(p.screenId))
                 .toList();
-            if (tabs.isEmpty) {
-              return DevToolsScaffold.withChild(
-                child: CenteredMessage(
-                  page != null
-                      ? 'The "$page" screen is not available for this application.'
-                      : 'No tabs available for this application.',
-                ),
-                ideTheme: ideTheme,
-              );
-            }
+            if (tabs.isEmpty) return child;
             return _providedControllers(
               child: DevToolsScaffold(
                 embed: embed,
@@ -244,6 +240,14 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               ),
             );
           },
+          child: DevToolsScaffold.withChild(
+            child: CenteredMessage(
+              page != null
+                  ? 'The "$page" screen is not available for this application.'
+                  : 'No tabs available for this application.',
+            ),
+            ideTheme: ideTheme,
+          ),
         );
       },
     );
@@ -315,7 +319,12 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       ),
       builder: (context, child) => Provider<AnalyticsController>.value(
         value: widget.analyticsController,
-        child: Notifications(child: child),
+        child: Notifications(
+          child: ReleaseNotesViewer(
+            releaseNotesController: releaseNotesController,
+            child: child,
+          ),
+        ),
       ),
       routerDelegate: DevToolsRouterDelegate(_getPage),
       routeInformationParser: DevToolsRouteInformationParser(),
@@ -415,7 +424,7 @@ class OpenAboutAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: 'About DevTools',
+      message: 'About DevTools',
       child: InkWell(
         onTap: () async {
           unawaited(showDialog(
@@ -441,7 +450,7 @@ class OpenSettingsAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: 'Settings',
+      message: 'Settings',
       child: InkWell(
         onTap: () async {
           unawaited(showDialog(
@@ -467,7 +476,7 @@ class ReportFeedbackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: 'Report feedback',
+      message: 'Report feedback',
       child: InkWell(
         onTap: () async {
           ga.select(
@@ -528,18 +537,16 @@ class DevToolsAboutDialog extends StatelessWidget {
   }
 
   Widget _createFeedbackLink(BuildContext context) {
-    final reportIssuesLink = devToolsExtensionPoints.issueTrackerLink();
-    return InkWell(
-      onTap: () async {
-        ga.select(
-          analytics_constants.devToolsMain,
-          analytics_constants.feedbackLink,
-        );
-        await launchUrl(reportIssuesLink.url, context);
-      },
-      child: Text(
-        reportIssuesLink.display,
-        style: Theme.of(context).linkTextStyle,
+    return RichText(
+      text: LinkTextSpan(
+        link: devToolsExtensionPoints.issueTrackerLink(),
+        context: context,
+        onTap: () {
+          ga.select(
+            analytics_constants.devToolsMain,
+            analytics_constants.feedbackLink,
+          );
+        },
       ),
     );
   }

@@ -539,7 +539,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     return Flexible(
       flex: flex,
       child: DevToolsTooltip(
-        tooltip: '$label - ${msText(duration)}',
+        message: '$label - ${msText(duration)}',
         child: Container(
           height: _timingGraphHeight,
           color: color,

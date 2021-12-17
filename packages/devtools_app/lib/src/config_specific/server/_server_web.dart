@@ -48,7 +48,7 @@ Future<bool> isFirstRun() async {
 }
 
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
-/// '~\.devtools'.
+/// '~/.flutter-devtools/.devtools'.
 Future<bool> isAnalyticsEnabled() async {
   bool enabled = false;
   if (isDevToolsServerAvailable) {
@@ -142,7 +142,7 @@ Future<String> flutterGAClientID() async {
 
 /// Set DevTools parameter value for the active survey (e.g. 'Q1-2020').
 ///
-/// The value is stored in the file '~\.devtools'.
+/// The value is stored in the file '~/.flutter-devtools/.devtools'.
 ///
 /// This method must be called before calling other survey related methods
 /// ([isSurveyActionTaken], [setSurveyActionTaken], [surveyShownCount],
@@ -163,7 +163,7 @@ Future<bool> setActiveSurvey(String value) async {
 
 /// Request DevTools property value 'surveyActionTaken' for the active survey.
 ///
-/// The value is stored in the file '~\.devtools'.
+/// The value is stored in the file '~/.flutter-devtools/.devtools'.
 ///
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
 Future<bool> surveyActionTaken() async {
@@ -183,7 +183,7 @@ Future<bool> surveyActionTaken() async {
 
 /// Set DevTools property value 'surveyActionTaken' for the active survey.
 ///
-/// The value is stored in the file '~\.devtools'.
+/// The value is stored in the file '~/.flutter-devtools/.devtools'.
 ///
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
 Future<void> setSurveyActionTaken() async {
@@ -200,7 +200,7 @@ Future<void> setSurveyActionTaken() async {
 
 /// Request DevTools property value 'surveyShownCount' for the active survey.
 ///
-/// The value is stored in the file '~\.devtools'.
+/// The value is stored in the file '~/.flutter-devtools/.devtools'.
 ///
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
 Future<int> surveyShownCount() async {
@@ -220,7 +220,7 @@ Future<int> surveyShownCount() async {
 
 /// Increment DevTools property value 'surveyShownCount' for the active survey.
 ///
-/// The value is stored in the file '~\.devtools'.
+/// The value is stored in the file '~/.flutter-devtools/.devtools'.
 ///
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
 Future<int> incrementSurveyShownCount() async {
@@ -236,6 +236,39 @@ Future<int> incrementSurveyShownCount() async {
     }
   }
   return surveyShownCount;
+}
+
+/// Requests the DevTools version for which we last showed release notes.
+///
+/// This value is stored in the file '~/.flutter-devtools/.devtools'.
+Future<String> getLastShownReleaseNotesVersion() async {
+  String version = '';
+  if (isDevToolsServerAvailable) {
+    final resp = await _request(apiGetLastReleaseNotesVersion);
+    if (resp?.status == HttpStatus.ok) {
+      version = json.decode(resp.responseText);
+    } else {
+      logWarning(resp, apiGetLastReleaseNotesVersion);
+    }
+  }
+  return version;
+}
+
+/// Sets the DevTools version for which we last showed release notes.
+///
+/// This value is stored in the file '~/.flutter-devtools/.devtools'.
+Future<void> setLastShownReleaseNotesVersion(String version) async {
+  if (isDevToolsServerAvailable) {
+    final resp = await _request(
+      '$apiSetLastReleaseNotesVersion'
+      '?$lastReleaseNotesVersionPropertyName=$version',
+    );
+    if (resp == null ||
+        resp.status != HttpStatus.ok ||
+        !json.decode(resp.responseText)) {
+      logWarning(resp, apiSetLastReleaseNotesVersion, resp?.responseText);
+    }
+  }
 }
 
 /// Requests all .devtools properties to be reset to their default values in the

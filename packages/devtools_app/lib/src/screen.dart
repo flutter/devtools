@@ -67,7 +67,7 @@ abstract class Screen {
   /// Whether to show the console for this screen.
   bool showConsole(bool embed) => false;
 
-  /// Which keyboard shortcuts shoud be enabled for this screen.
+  /// Which keyboard shortcuts should be enabled for this screen.
   ShortcutsConfiguration buildKeyboardShortcuts(BuildContext context) =>
       ShortcutsConfiguration.empty();
 

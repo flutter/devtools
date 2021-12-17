@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+export 'src/analytics/analytics.dart';
 export 'src/analytics/analytics_controller.dart';
 export 'src/app_size/app_size_controller.dart';
 export 'src/auto_dispose.dart';
@@ -46,6 +47,7 @@ export 'src/service_manager.dart';
 export 'src/split.dart';
 export 'src/theme.dart';
 export 'src/trace_event.dart';
+export 'src/trees.dart';
 export 'src/ui/icons.dart';
 export 'src/ui/search.dart';
 export 'src/utils.dart';

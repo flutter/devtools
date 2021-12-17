@@ -4,7 +4,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mime/mime.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -168,10 +168,6 @@ abstract class HttpRequestData extends NetworkRequest {
     }
     return false;
   }
-
-  /// True if the HTTP request hasn't completed yet, determined by the lack of
-  /// an end event.
-  bool get inProgress;
 
   /// All instant events logged to the timeline for this HTTP request.
   List<HttpInstantEvent> get instantEvents;
@@ -481,17 +477,22 @@ class TimelineHttpRequestData extends HttpRequestData {
   String toString() => '$method $uri';
 }
 
+int _dartIoHttpRequestWrapperId = 0;
+
 class DartIOHttpRequestData extends HttpRequestData {
   DartIOHttpRequestData(
     int timelineMicrosBase,
     this._request,
-  ) : super(timelineMicrosBase) {
+  )   : wrapperId = _dartIoHttpRequestWrapperId++,
+        super(timelineMicrosBase) {
     if (_request.isResponseComplete) {
       getFullRequestData();
     }
   }
 
   HttpProfileRequestRef _request;
+
+  final int wrapperId;
 
   Future<void> getFullRequestData() {
     return serviceManager.service
@@ -674,4 +675,22 @@ class DartIOHttpRequestData extends HttpRequestData {
       lastTime = instantTime;
     }
   }
+
+  @override
+  bool operator ==(other) {
+    return other is DartIOHttpRequestData &&
+        wrapperId == other.wrapperId &&
+        super == other;
+  }
+
+  @override
+  int get hashCode => hashValues(
+        wrapperId,
+        method,
+        uri,
+        contentType,
+        type,
+        port,
+        startTimestamp,
+      );
 }

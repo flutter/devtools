@@ -248,19 +248,6 @@ class ServiceConnectionManager {
 
     service.onEvent(serviceStreamName).listen(handleServiceEvent);
 
-    _connectedState.value = const ConnectedState(true);
-
-    final isolates = [
-      ...vm.isolates,
-      if (preferences.vmDeveloperModeEnabled.value) ...vm.systemIsolates,
-    ];
-
-    await isolateManager.init(isolates);
-    if (service != this.service) {
-      // A different service has been opened.
-      return;
-    }
-
     final streamIds = [
       EventStreams.kDebug,
       EventStreams.kExtension,
@@ -274,9 +261,9 @@ class ServiceConnectionManager {
       serviceStreamName,
     ];
 
-    await Future.wait(streamIds.map((String id) async {
+    for (final id in streamIds) {
       try {
-        await service.streamListen(id);
+        unawaited(service.streamListen(id));
       } catch (e) {
         if (id.endsWith('Logging')) {
           // Don't complain about '_Logging' or 'Logging' events (new VMs don't
@@ -288,7 +275,20 @@ class ServiceConnectionManager {
           );
         }
       }
-    }));
+    }
+    if (service != this.service) {
+      // A different service has been opened.
+      return;
+    }
+
+    _connectedState.value = const ConnectedState(true);
+
+    final isolates = [
+      ...vm.isolates,
+      if (preferences.vmDeveloperModeEnabled.value) ...vm.systemIsolates,
+    ];
+
+    await isolateManager.init(isolates);
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -604,7 +604,9 @@ class IsolateManager extends Disposer {
   Future<void> _initIsolates(List<IsolateRef> isolates) async {
     _clearIsolateStates();
 
-    isolates.forEach(_registerIsolate);
+    await Future.wait([
+      for (final isolateRef in isolates) _registerIsolate(isolateRef),
+    ]);
 
     // It is critical that the _serviceExtensionManager is already listening
     // for events indicating that new extension rpcs are registered before this
@@ -615,24 +617,23 @@ class IsolateManager extends Disposer {
     await _initSelectedIsolate();
   }
 
-  void _registerIsolate(IsolateRef isolateRef) {
+  Future<void> _registerIsolate(IsolateRef isolateRef) async {
     assert(!_isolateStates.containsKey(isolateRef));
     _isolateStates[isolateRef] = IsolateState(isolateRef);
     _isolates.add(isolateRef);
     isolateIndex(isolateRef);
-    _loadIsolateState(isolateRef);
+    await _loadIsolateState(isolateRef);
   }
 
-  void _loadIsolateState(IsolateRef isolateRef) {
+  Future<void> _loadIsolateState(IsolateRef isolateRef) async {
     final service = _service;
-    _service.getIsolate(isolateRef.id).then((Isolate isolate) {
-      if (service != _service) return;
-      final state = _isolateStates[isolateRef];
-      if (state != null) {
-        // Isolate might have already been closed.
-        state.onIsolateLoaded(isolate);
-      }
-    });
+    final isolate = await _service.getIsolate(isolateRef.id);
+    if (service != _service) return;
+    final state = _isolateStates[isolateRef];
+    if (state != null) {
+      // Isolate might have already been closed.
+      state.onIsolateLoaded(isolate);
+    }
   }
 
   Future<void> _handleIsolateEvent(Event event) async {
@@ -640,7 +641,7 @@ class IsolateManager extends Disposer {
 
     if (event.kind == EventKind.kIsolateStart &&
         !event.isolate.isSystemIsolate) {
-      _registerIsolate(event.isolate);
+      await _registerIsolate(event.isolate);
       _isolateCreatedController.add(event.isolate);
       // TODO(jacobr): we assume the first isolate started is the main isolate
       // but that may not always be a safe assumption.
@@ -719,7 +720,7 @@ class IsolateManager extends Disposer {
   }
 
   void _handleVmServiceClosed() {
-    cancel();
+    cancelStreamSubscriptions();
     _selectedIsolate.value = null;
     _service = null;
     _lastIsolateIndex = 0;
@@ -740,10 +741,12 @@ class IsolateManager extends Disposer {
   void vmServiceOpened(VmServiceWrapper service) {
     _selectedIsolate.value = null;
 
-    cancel();
+    cancelStreamSubscriptions();
     _service = service;
-    autoDispose(service.onIsolateEvent.listen(_handleIsolateEvent));
-    autoDispose(service.onDebugEvent.listen(_handleDebugEvent));
+    autoDisposeStreamSubscription(
+        service.onIsolateEvent.listen(_handleIsolateEvent));
+    autoDisposeStreamSubscription(
+        service.onDebugEvent.listen(_handleDebugEvent));
 
     // We don't yet known the main isolate.
     _mainIsolate.value = null;
@@ -1181,7 +1184,7 @@ class ServiceExtensionManager extends Disposer {
   }
 
   void vmServiceClosed() {
-    cancel();
+    cancelStreamSubscriptions();
     _mainIsolateClosed();
   }
 
@@ -1287,18 +1290,22 @@ class ServiceExtensionManager extends Disposer {
   void vmServiceOpened(
       VmServiceWrapper service, ConnectedApp connectedApp) async {
     _checkForFirstFrameStarted = false;
-    cancel();
+    cancelStreamSubscriptions();
+    cancelListeners();
     _connectedApp = connectedApp;
     _service = service;
     // TODO(kenz): do we want to listen with event history here?
-    autoDispose(service.onExtensionEvent.listen(_handleExtensionEvent));
+    autoDisposeStreamSubscription(
+        service.onExtensionEvent.listen(_handleExtensionEvent));
     addAutoDisposeListener(
       hasServiceExtension(extensions.didSendFirstFrameEvent),
       _maybeCheckForFirstFlutterFrame,
     );
     addAutoDisposeListener(_isolateManager.mainIsolate, _onMainIsolateChanged);
-    autoDispose(service.onDebugEvent.listen(_handleDebugEvent));
-    autoDispose(service.onIsolateEvent.listen(_handleIsolateEvent));
+    autoDisposeStreamSubscription(
+        service.onDebugEvent.listen(_handleDebugEvent));
+    autoDisposeStreamSubscription(
+        service.onIsolateEvent.listen(_handleIsolateEvent));
     final mainIsolateRef = _isolateManager.mainIsolate.value;
     if (mainIsolateRef != null) {
       _checkForFirstFrameStarted = false;

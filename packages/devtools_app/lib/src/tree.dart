@@ -4,24 +4,27 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 
+import 'auto_dispose_mixin.dart';
 import 'collapsible_mixin.dart';
 import 'theme.dart';
 import 'trees.dart';
 
 class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   const TreeView({
-    this.dataRoots,
+    this.dataRootsListenable,
     this.dataDisplayProvider,
     this.onItemSelected,
     this.onItemExpanded,
     this.shrinkWrap = false,
     this.itemExtent,
     this.onTraverse,
+    this.emptyTreeViewBuilder,
   });
 
-  final List<T> dataRoots;
+  final ValueListenable<List<T>> dataRootsListenable;
 
   /// Use [shrinkWrap] iff you need to place a TreeView inside a ListView or
   /// other container with unconstrained height.
@@ -47,35 +50,31 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   /// Called on traversal of child node during [buildFlatList].
   final void Function(T) onTraverse;
 
+  /// Builds a widget representing the empty tree. If [emptyTreeViewBuilder]
+  /// is not provided, then an empty [SizedBox] will be built.
+  final Widget Function() emptyTreeViewBuilder;
+
   @override
   _TreeViewState<T> createState() => _TreeViewState<T>();
 }
 
 class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
-    with TreeMixin<T> {
+    with TreeMixin<T>, AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
-    _initData();
+    addAutoDisposeListener(widget.dataRootsListenable, _updateTreeView);
+    _updateTreeView();
+  }
+
+  void _updateTreeView() {
+    dataRoots = List.from(widget.dataRootsListenable.value);
     _updateItems();
   }
 
   @override
-  void didUpdateWidget(TreeView<T> oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.dataRoots != oldWidget.dataRoots) {
-      _initData();
-      _updateItems();
-    }
-  }
-
-  void _initData() {
-    dataRoots = List.from(widget.dataRoots);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (items.isEmpty) return const SizedBox();
+    if (items.isEmpty) return _emptyTreeViewBuilder();
     return ListView.builder(
       itemCount: items.length,
       itemExtent: widget.itemExtent,
@@ -92,6 +91,13 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
         );
       },
     );
+  }
+
+  Widget _emptyTreeViewBuilder() {
+    if (widget.emptyTreeViewBuilder != null) {
+      return widget.emptyTreeViewBuilder();
+    }
+    return const SizedBox();
   }
 
   // TODO(kenz): animate expansions and collapses.

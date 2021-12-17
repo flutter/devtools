@@ -81,7 +81,7 @@ class _LegacyFlutterFramesChartState extends State<LegacyFlutterFramesChart>
     if (newController == _controller) return;
     _controller = newController;
 
-    cancel();
+    cancelListeners();
     _selectedFrame = _controller.selectedFrame.value;
     addAutoDisposeListener(_controller.selectedFrame, () {
       setState(() {
@@ -295,7 +295,7 @@ class LegacyFlutterFramesChartItem extends StatelessWidget {
       children: [
         // TODO(kenz): make tooltip to persist if the frame is selected.
         DevToolsTooltip(
-          tooltip: _tooltipText(frame),
+          message: _tooltipText(frame),
           padding: const EdgeInsets.all(denseSpacing),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: densePadding),

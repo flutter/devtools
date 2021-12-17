@@ -154,7 +154,7 @@ class BreakOnExceptionsControl extends StatelessWidget {
           onChanged: controller.isSystemIsolate
               ? null
               : (ExceptionMode mode) {
-                  controller.setExceptionPauseMode(mode.id);
+                  controller.setIsolatePauseMode(mode.id);
                 },
           isDense: true,
           items: [
@@ -227,7 +227,7 @@ class DebuggerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      tooltip: title,
+      message: title,
       child: OutlinedButton(
         autofocus: autofocus,
         style: OutlinedButton.styleFrom(

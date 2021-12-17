@@ -40,57 +40,56 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
     final textTheme = theme.textTheme;
     return ValueListenableBuilder(
       valueListenable: _controller.shouldPrompt,
-      builder: (context, showPrompt, _) {
+      builder: (context, showPrompt, child) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (showPrompt)
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(defaultBorderRadius),
-                  side: BorderSide(
-                    color: theme.focusColor,
-                  ),
-                ),
-                color: theme.canvasColor,
-                margin: const EdgeInsets.only(bottom: denseSpacing),
-                child: Padding(
-                  padding: const EdgeInsets.all(defaultSpacing),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Send usage statistics for DevTools?',
-                            style: textTheme.headline5,
-                          ),
-                          CircularIconButton(
-                            icon: Icons.close,
-                            onPressed: _controller.hidePrompt,
-                            backgroundColor: theme.canvasColor,
-                            foregroundColor:
-                                theme.colorScheme.contrastForeground,
-                          ),
-                        ],
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.only(top: defaultSpacing),
-                      ),
-                      _analyticsDescription(textTheme),
-                      const SizedBox(height: denseRowSpacing),
-                      _actionButtons(),
-                    ],
-                  ),
-                ),
-              ),
+            if (showPrompt) child,
             Expanded(child: widget.child),
           ],
         );
       },
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(defaultBorderRadius),
+          side: BorderSide(
+            color: theme.focusColor,
+          ),
+        ),
+        color: theme.canvasColor,
+        margin: const EdgeInsets.only(bottom: denseSpacing),
+        child: Padding(
+          padding: const EdgeInsets.all(defaultSpacing),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Send usage statistics for DevTools?',
+                    style: textTheme.headline5,
+                  ),
+                  CircularIconButton(
+                    icon: Icons.close,
+                    onPressed: _controller.hidePrompt,
+                    backgroundColor: theme.canvasColor,
+                    foregroundColor: theme.colorScheme.contrastForeground,
+                  ),
+                ],
+              ),
+              const Padding(
+                padding: EdgeInsets.only(top: defaultSpacing),
+              ),
+              _analyticsDescription(textTheme),
+              const SizedBox(height: denseRowSpacing),
+              _actionButtons(),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

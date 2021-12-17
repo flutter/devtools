@@ -164,14 +164,16 @@ void main() {
       expect(
           controller.dataNotifier.value.stackFrames.values.length, equals(17));
 
-      var matches = controller.matchesForSearch('render');
-      verifyIsSearchMatch(
+      controller.search = 'render';
+      var matches = controller.searchMatches.value;
+      verifyIsSearchMatchForTreeData(
         controller.dataNotifier.value.stackFrames.values.toList(),
         matches,
       );
 
-      matches = controller.matchesForSearch('THREAD');
-      verifyIsSearchMatch(
+      controller.search = 'THREAD';
+      matches = controller.searchMatches.value;
+      verifyIsSearchMatchForTreeData(
         controller.dataNotifier.value.stackFrames.values.toList(),
         matches,
       );

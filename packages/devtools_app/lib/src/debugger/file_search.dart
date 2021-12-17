@@ -27,7 +27,7 @@ class FileSearchField extends StatefulWidget {
 }
 
 class FileSearchFieldState extends State<FileSearchField>
-    with SearchFieldMixin, AutoDisposeMixin {
+    with AutoDisposeMixin, SearchFieldMixin {
   AutoCompleteController autoCompleteController;
 
   final _scriptsCache = <String, ScriptRef>{};
@@ -63,7 +63,7 @@ class FileSearchFieldState extends State<FileSearchField>
       searchFieldKey: fileSearchFieldKey,
       searchFieldEnabled: true,
       shouldRequestFocus: true,
-      keyEventsToPropogate: {LogicalKeyboardKey.escape},
+      keyEventsToPropagate: {LogicalKeyboardKey.escape},
       onSelection: _onSelection,
       onClose: _onClose,
       label: 'Open',

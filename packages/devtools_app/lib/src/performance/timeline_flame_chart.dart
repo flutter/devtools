@@ -8,8 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/analytics.dart' as ga;
-import '../analytics/constants.dart' as analytics_constants;
 import '../auto_dispose_mixin.dart';
 import '../charts/flame_chart.dart';
 import '../common_widgets.dart';
@@ -24,13 +22,17 @@ import '../ui/utils.dart';
 import '../utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
-import 'performance_screen.dart';
 import 'performance_utils.dart';
+import 'timeline_analysis.dart';
+
+// TODO(kenz): move all classes not directly related to the timeline flame chart
+// to timeline_analysis.dart. Do this in a follow up PR so that the git diff
+// isn't messed up.
 
 final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
 
-class TimelineFlameChartContainer extends StatefulWidget {
-  const TimelineFlameChartContainer({
+class TimelineAnalysisContainer extends StatefulWidget {
+  const TimelineAnalysisContainer({
     @required this.processing,
     @required this.processingProgress,
   });
@@ -43,14 +45,15 @@ class TimelineFlameChartContainer extends StatefulWidget {
   final double processingProgress;
 
   @override
-  _TimelineFlameChartContainerState createState() =>
-      _TimelineFlameChartContainerState();
+  _TimelineAnalysisContainerState createState() =>
+      _TimelineAnalysisContainerState();
 }
 
-class _TimelineFlameChartContainerState
-    extends State<TimelineFlameChartContainer>
-    with AutoDisposeMixin, SearchFieldMixin<TimelineFlameChartContainer> {
+class _TimelineAnalysisContainerState extends State<TimelineAnalysisContainer>
+    with AutoDisposeMixin, SearchFieldMixin<TimelineAnalysisContainer> {
   PerformanceController controller;
+
+  FlutterFrameAnalysisTabData selectedTab;
 
   @override
   void didChangeDependencies() {
@@ -59,73 +62,77 @@ class _TimelineFlameChartContainerState
     final newController = Provider.of<PerformanceController>(context);
     if (newController == controller) return;
     controller = newController;
+
+    if (frameAnalysisSupported) {
+      selectedTab = controller.selectedAnalysisTab.value;
+      addAutoDisposeListener(controller.selectedAnalysisTab, () {
+        setState(() {
+          selectedTab = controller.selectedAnalysisTab.value;
+        });
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     Widget content;
-    final timelineEmpty = (controller.data?.isEmpty ?? true) ||
-        controller.data.eventGroups.isEmpty;
-    if (widget.processing) {
-      content = _buildProcessingInfo();
-    } else if (timelineEmpty) {
-      content = Center(
-        key: TimelineFlameChartContainer.emptyTimelineKey,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'No timeline events. Try clicking the refresh button ',
-              style: Theme.of(context).subtleTextStyle,
-            ),
-            Icon(
-              Icons.refresh,
-              size: defaultIconSize,
-            ),
-            Text(
-              ' to load more data.',
-              style: Theme.of(context).subtleTextStyle,
-            ),
-          ],
-        ),
-      );
+    if (frameAnalysisSupported && selectedTab != null) {
+      content = FlutterFrameAnalysisView(frame: selectedTab.frame);
     } else {
-      content = LayoutBuilder(
-        builder: (context, constraints) {
-          return TimelineFlameChart(
-            controller.data,
-            width: constraints.maxWidth,
-            height: constraints.maxHeight,
-            selectionNotifier: controller.selectedTimelineEvent,
-            searchMatchesNotifier: controller.searchMatches,
-            activeSearchMatchNotifier: controller.activeSearchMatch,
-            onDataSelected: (e) => controller.selectTimelineEvent(e),
-          );
-        },
-      );
+      final timelineEmpty = (controller.data?.isEmpty ?? true) ||
+          controller.data.eventGroups.isEmpty;
+      if (widget.processing) {
+        content = _buildProcessingInfo();
+      } else if (timelineEmpty) {
+        content = Center(
+          key: TimelineAnalysisContainer.emptyTimelineKey,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'No timeline events. Try clicking the refresh button ',
+                style: Theme.of(context).subtleTextStyle,
+              ),
+              Icon(
+                Icons.refresh,
+                size: defaultIconSize,
+              ),
+              Text(
+                ' to load more data.',
+                style: Theme.of(context).subtleTextStyle,
+              ),
+            ],
+          ),
+        );
+      } else {
+        content = LayoutBuilder(
+          builder: (context, constraints) {
+            return TimelineFlameChart(
+              controller.data,
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+              selectionNotifier: controller.selectedTimelineEvent,
+              searchMatchesNotifier: controller.searchMatches,
+              activeSearchMatchNotifier: controller.activeSearchMatch,
+              onDataSelected: controller.selectTimelineEvent,
+            );
+          },
+        );
+      }
     }
 
-    final searchFieldEnabled =
-        !(controller.data?.isEmpty ?? true) && !widget.processing;
+    final searchFieldEnabled = selectedTab == null &&
+        !(controller.data?.isEmpty ?? true) &&
+        !widget.processing;
+
     return OutlineDecoration(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          AreaPaneHeader(
-            title: const Text('Timeline Events'),
-            tall: true,
-            needsTopBorder: false,
-            rightPadding: 0.0,
-            leftActions: [
-              RefreshTimelineEventsButton(controller: controller),
-            ],
-            rightActions: [
-              _buildSearchField(searchFieldEnabled),
-              const FlameChartHelpButton(
-                screenId: PerformanceScreen.id,
-                analyticsAction: analytics_constants.timelineFlameChartHelp,
-              ),
-            ],
+          TimelineAnalysisHeader(
+            controller: controller,
+            selectedTab: selectedTab,
+            searchFieldBuilder: () => _buildSearchField(searchFieldEnabled),
           ),
           Expanded(
             child: Padding(
@@ -140,7 +147,7 @@ class _TimelineFlameChartContainerState
 
   Widget _buildSearchField(bool searchFieldEnabled) {
     return Container(
-      width: wideSearchTextWidth,
+      width: defaultSearchTextWidth,
       height: defaultTextFieldHeight,
       child: buildSearchField(
         controller: controller,
@@ -156,39 +163,6 @@ class _TimelineFlameChartContainerState
     return ProcessingInfo(
       progressValue: widget.processingProgress,
       processedObject: 'timeline trace',
-    );
-  }
-}
-
-class RefreshTimelineEventsButton extends StatelessWidget {
-  const RefreshTimelineEventsButton({
-    Key key,
-    @required this.controller,
-  }) : super(key: key);
-
-  final PerformanceController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsTooltip(
-      tooltip: 'Refresh timeline events',
-      child: TextButton(
-        onPressed: () {
-          ga.select(
-            analytics_constants.performance,
-            analytics_constants.refreshTimelineEvents,
-          );
-          controller.processAvailableEvents();
-        },
-        child: Container(
-          height: defaultButtonHeight,
-          width: defaultButtonHeight,
-          child: Icon(
-            Icons.refresh,
-            size: defaultIconSize,
-          ),
-        ),
-      ),
     );
   }
 }
@@ -1376,7 +1350,7 @@ class ThreadNavigatorButton extends StatelessWidget {
       height: useSmallButton ? smallButtonHeight : buttonMinWidth,
       width: buttonMinWidth,
       child: DevToolsTooltip(
-        tooltip: tooltip,
+        message: tooltip,
         child: IconButton(
           padding: EdgeInsets.zero,
           icon: Icon(

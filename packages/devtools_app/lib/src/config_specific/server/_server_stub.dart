@@ -47,6 +47,14 @@ Future<int> incrementSurveyShownCount() async {
   throw Exception(unsupportedMessage);
 }
 
+Future<String> getLastShownReleaseNotesVersion() async {
+  throw Exception(unsupportedMessage);
+}
+
+Future<String> setLastShownReleaseNotesVersion(String version) async {
+  throw Exception(unsupportedMessage);
+}
+
 Future<void> resetDevToolsFile() async {
   throw Exception(unsupportedMessage);
 }

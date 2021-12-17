@@ -82,9 +82,12 @@ class _CpuProfilerState extends State<CpuProfiler>
         SearchFieldMixin<CpuProfiler> {
   TabController _tabController;
 
+  CpuProfileData data;
+
   @override
   void initState() {
     super.initState();
+    data = widget.data;
     _initTabController();
   }
 
@@ -93,6 +96,11 @@ class _CpuProfilerState extends State<CpuProfiler>
     super.didUpdateWidget(oldWidget);
     if (widget.tabs.length != oldWidget.tabs.length) {
       _initTabController();
+    }
+    if (widget.data != oldWidget.data) {
+      setState(() {
+        data = widget.data;
+      });
     }
   }
 
@@ -132,10 +140,9 @@ class _CpuProfilerState extends State<CpuProfiler>
     final colorScheme = theme.colorScheme;
     final currentTab =
         widget.tabs.isNotEmpty ? widget.tabs[_tabController.index] : null;
-    final hasData =
-        widget.data != CpuProfilerController.baseStateCpuProfileData &&
-            widget.data != null &&
-            !widget.data.isEmpty;
+    final hasData = data != CpuProfilerController.baseStateCpuProfileData &&
+        data != null &&
+        !data.isEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,10 +176,10 @@ class _CpuProfilerState extends State<CpuProfiler>
                       if (widget.searchFieldKey != null)
                         _buildSearchField(hasData),
                       FlameChartHelpButton(
-                        screenId: widget.standaloneProfiler
+                        gaScreen: widget.standaloneProfiler
                             ? analytics_constants.cpuProfiler
                             : analytics_constants.performance,
-                        analyticsAction:
+                        gaSelection:
                             analytics_constants.cpuProfileFlameChartHelp,
                         additionalInfo: [
                           ...dialogSubHeader(Theme.of(context), 'Legend'),
@@ -267,7 +274,7 @@ class _CpuProfilerState extends State<CpuProfiler>
   }
 
   Widget _buildCpuProfileDataView() {
-    if (widget.data != null) {
+    if (data != null) {
       return TabBarView(
         physics: defaultTabBarViewPhysics,
         controller: _tabController,
@@ -286,7 +293,7 @@ class _CpuProfilerState extends State<CpuProfiler>
     final cpuFlameChart = LayoutBuilder(
       builder: (context, constraints) {
         return CpuProfileFlameChart(
-          data: widget.data,
+          data: data,
           controller: widget.controller,
           width: constraints.maxWidth,
           height: constraints.maxHeight,
@@ -300,7 +307,7 @@ class _CpuProfilerState extends State<CpuProfiler>
     // TODO(kenz): make this order configurable.
     return [
       if (widget.summaryView != null) widget.summaryView,
-      if (!widget.data.isEmpty) ...[
+      if (!data.isEmpty) ...[
         bottomUp,
         callTree,
         cpuFlameChart,
@@ -389,51 +396,41 @@ class UserTagDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const filterByTag = 'Filter by tag:';
-    // This needs to rebuild whenever there is new CPU profile data because the
-    // user tags will change with the data.
-    // TODO(kenz): remove the nested ValueListenableBuilders
-    // https://github.com/flutter/devtools/issues/2989.
-    return ValueListenableBuilder<CpuProfileData>(
-      valueListenable: controller.dataNotifier,
-      builder: (context, cpuProfileData, _) {
-        return ValueListenableBuilder<String>(
-          valueListenable: controller.userTagFilter,
-          builder: (context, userTag, _) {
-            final userTags = controller.userTags ?? [];
-            final tooltip = userTags.isNotEmpty
-                ? 'Filter the CPU profile by the given UserTag'
-                : 'No UserTags found for this CPU profile';
-            return DevToolsTooltip(
-              tooltip: tooltip,
-              child: RoundedDropDownButton<String>(
-                isDense: true,
-                style: Theme.of(context).textTheme.bodyText2,
-                value: userTag,
-                items: [
-                  _buildMenuItem(
-                    display:
-                        '$filterByTag ${CpuProfilerController.userTagNone}',
-                    value: CpuProfilerController.userTagNone,
-                  ),
-                  // We don't want to show the 'Default' tag if it is the only
-                  // tag available. The 'none' tag above is equivalent in this
-                  // case.
-                  if (!(userTags.length == 1 &&
-                      userTags.first == UserTag.defaultTag.label))
-                    for (final tag in userTags)
-                      _buildMenuItem(
-                        display: '$filterByTag $tag',
-                        value: tag,
-                      ),
-                ],
-                onChanged: userTags.isEmpty ||
-                        (userTags.length == 1 &&
-                            userTags.first == UserTag.defaultTag.label)
-                    ? null
-                    : (String tag) => _onUserTagChanged(tag, context),
+    return ValueListenableBuilder<String>(
+      valueListenable: controller.userTagFilter,
+      builder: (context, userTag, _) {
+        final userTags = controller.userTags ?? [];
+        final tooltip = userTags.isNotEmpty
+            ? 'Filter the CPU profile by the given UserTag'
+            : 'No UserTags found for this CPU profile';
+        return DevToolsTooltip(
+          message: tooltip,
+          child: RoundedDropDownButton<String>(
+            isDense: true,
+            style: Theme.of(context).textTheme.bodyText2,
+            value: userTag,
+            items: [
+              _buildMenuItem(
+                display: '$filterByTag ${CpuProfilerController.userTagNone}',
+                value: CpuProfilerController.userTagNone,
               ),
-            );
-          },
+              // We don't want to show the 'Default' tag if it is the only
+              // tag available. The 'none' tag above is equivalent in this
+              // case.
+              if (!(userTags.length == 1 &&
+                  userTags.first == UserTag.defaultTag.label))
+                for (final tag in userTags)
+                  _buildMenuItem(
+                    display: '$filterByTag $tag',
+                    value: tag,
+                  ),
+            ],
+            onChanged: userTags.isEmpty ||
+                    (userTags.length == 1 &&
+                        userTags.first == UserTag.defaultTag.label)
+                ? null
+                : (String tag) => _onUserTagChanged(tag, context),
+          ),
         );
       },
     );

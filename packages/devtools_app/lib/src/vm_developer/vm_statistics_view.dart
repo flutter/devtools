@@ -34,14 +34,12 @@ class VMStatisticsViewBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: controller.refreshing,
-      builder: (context, refreshing, _) {
+      builder: (context, refreshing, child) {
         return Column(
           children: [
             Row(
               children: [
-                RefreshButton(
-                  onPressed: controller.refresh,
-                ),
+                child,
               ],
             ),
             Expanded(
@@ -52,6 +50,9 @@ class VMStatisticsViewBody extends StatelessWidget {
           ],
         );
       },
+      child: RefreshButton(
+        onPressed: controller.refresh,
+      ),
     );
   }
 }

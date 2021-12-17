@@ -33,20 +33,17 @@ class _CallStackState extends State<CallStack> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<StackFrameAndSourcePosition>>(
-      valueListenable: controller.stackFramesWithLocation,
-      builder: (context, stackFrames, _) {
-        return ValueListenableBuilder<StackFrameAndSourcePosition>(
-          valueListenable: controller.selectedStackFrame,
-          builder: (context, selectedFrame, _) {
-            return ListView.builder(
-              itemCount: stackFrames.length,
-              itemExtent: defaultListItemHeight,
-              itemBuilder: (_, index) {
-                final frame = stackFrames[index];
-                return _buildStackFrame(frame, frame == selectedFrame);
-              },
-            );
+    return DualValueListenableBuilder<List<StackFrameAndSourcePosition>,
+        StackFrameAndSourcePosition>(
+      firstListenable: controller.stackFramesWithLocation,
+      secondListenable: controller.selectedStackFrame,
+      builder: (context, stackFrames, selectedFrame, _) {
+        return ListView.builder(
+          itemCount: stackFrames.length,
+          itemExtent: defaultListItemHeight,
+          itemBuilder: (_, index) {
+            final frame = stackFrames[index];
+            return _buildStackFrame(frame, frame == selectedFrame);
           },
         );
       },
@@ -122,7 +119,7 @@ class _CallStackState extends State<CallStack> {
       return result;
     } else {
       return DevToolsTooltip(
-        tooltip: locationDescription == null
+        message: locationDescription == null
             ? frameDescription
             : '$frameDescription $locationDescription',
         waitDuration: tooltipWaitLong,

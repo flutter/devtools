@@ -10,7 +10,6 @@ import '../devtools.dart' as devtools;
 import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as analytics_constants;
 import 'common_widgets.dart';
-import 'config_specific/launch_url/launch_url.dart';
 import 'device_dialog.dart';
 import 'globals.dart';
 import 'info/info_controller.dart';
@@ -55,13 +54,13 @@ class StatusLine extends StatelessWidget {
             return showIsolateSelector
                 ? Flexible(
                     child: Row(
-                      children: [
+                      children: const [
                         Expanded(
-                          child: Align(
-                            child: buildIsolateSelector(context, textTheme),
+                          child: Center(
+                            child: IsolateSelector(),
                           ),
                         ),
-                        const BulletSpacer(),
+                        BulletSpacer(),
                       ],
                     ),
                   )
@@ -112,18 +111,19 @@ class StatusLine extends StatelessWidget {
   ) {
     final String docPageId = currentScreen.docPageId;
     if (docPageId != null) {
-      return InkWell(
-        onTap: () async {
-          final url = 'https://flutter.dev/devtools/$docPageId';
-          ga.select(
-            currentScreen.screenId,
-            analytics_constants.documentationLink,
-          );
-          await launchUrl(url, context);
-        },
-        child: Text(
-          'flutter.dev/devtools/$docPageId',
-          style: Theme.of(context).linkTextStyle,
+      return RichText(
+        text: LinkTextSpan(
+          link: Link(
+            display: 'flutter.dev/devtools/$docPageId',
+            url: 'https://flutter.dev/devtools/$docPageId',
+          ),
+          onTap: () {
+            ga.select(
+              currentScreen.screenId,
+              analytics_constants.documentationLink,
+            );
+          },
+          context: context,
         ),
       );
     } else {
@@ -133,63 +133,17 @@ class StatusLine extends StatelessWidget {
   }
 
   Widget buildPageStatus(
-      BuildContext context, Screen currentScreen, TextTheme textTheme) {
+    BuildContext context,
+    Screen currentScreen,
+    TextTheme textTheme,
+  ) {
     return currentScreen.buildStatus(context, textTheme);
-  }
-
-  Widget buildIsolateSelector(BuildContext context, TextTheme textTheme) {
-    final IsolateManager isolateManager = serviceManager.isolateManager;
-
-    return ValueListenableBuilder(
-      valueListenable: isolateManager.isolates,
-      builder: (context, isolates, _) {
-        return ValueListenableBuilder(
-          valueListenable: isolateManager.selectedIsolate,
-          builder: (context, isolateRef, _) {
-            final isolates = isolateManager.isolates;
-
-            String isolateName(IsolateRef ref) {
-              final name = ref.name;
-              return '$name #${isolateManager.isolateIndex(ref)}';
-            }
-
-            return DevToolsTooltip(
-              tooltip: 'Selected Isolate',
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<IsolateRef>(
-                  value: isolateRef,
-                  onChanged: isolateManager.selectIsolate,
-                  isDense: true,
-                  items: isolates.value.map((IsolateRef ref) {
-                    return DropdownMenuItem<IsolateRef>(
-                      value: ref,
-                      child: Row(
-                        children: [
-                          ref.isSystemIsolate
-                              ? const Icon(Icons.settings_applications)
-                              : const Icon(Icons.call_split),
-                          const SizedBox(width: denseSpacing),
-                          Text(
-                            isolateName(ref),
-                            style: textTheme.bodyText2,
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
   }
 
   Widget buildConnectionStatus(TextTheme textTheme) {
     return ValueListenableBuilder<ConnectedState>(
       valueListenable: serviceManager.connectedState,
-      builder: (context, ConnectedState connectedState, _) {
+      builder: (context, connectedState, child) {
         if (connectedState.connected) {
           final app = serviceManager.connectedApp;
 
@@ -224,7 +178,7 @@ class StatusLine extends StatelessWidget {
               ),
               const SizedBox(width: denseSpacing),
               DevToolsTooltip(
-                tooltip: 'Device Info',
+                message: 'Device Info',
                 child: InkWell(
                   onTap: () async {
                     final flutterVersion =
@@ -257,12 +211,63 @@ class StatusLine extends StatelessWidget {
             ],
           );
         } else {
-          return Text(
-            'No client connection',
-            style: textTheme.bodyText2,
-          );
+          return child;
         }
       },
+      child: Text(
+        'No client connection',
+        style: textTheme.bodyText2,
+      ),
     );
+  }
+}
+
+class IsolateSelector extends StatelessWidget {
+  const IsolateSelector({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final IsolateManager isolateManager = serviceManager.isolateManager;
+    return DualValueListenableBuilder<List<IsolateRef>, IsolateRef>(
+      firstListenable: isolateManager.isolates,
+      secondListenable: isolateManager.selectedIsolate,
+      builder: (context, isolates, selectedIsolateRef, _) {
+        return DevToolsTooltip(
+          message: 'Selected Isolate',
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<IsolateRef>(
+              value: selectedIsolateRef,
+              onChanged: isolateManager.selectIsolate,
+              isDense: true,
+              items: isolates.map(
+                (IsolateRef ref) {
+                  return DropdownMenuItem<IsolateRef>(
+                    value: ref,
+                    child: Row(
+                      children: [
+                        ref.isSystemIsolate
+                            ? const Icon(Icons.settings_applications)
+                            : const Icon(Icons.call_split),
+                        const SizedBox(width: denseSpacing),
+                        Text(
+                          _isolateName(ref),
+                          style: textTheme.bodyText2,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ).toList(),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _isolateName(IsolateRef ref) {
+    final name = ref.name;
+    return '$name #${serviceManager.isolateManager.isolateIndex(ref)}';
   }
 }

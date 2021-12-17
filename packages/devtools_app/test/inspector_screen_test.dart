@@ -38,13 +38,12 @@ void main() {
     setUp(() {
       fakeServiceManager = FakeServiceManager();
       fakeExtensionManager = fakeServiceManager.serviceExtensionManager;
-      when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+      mockIsFlutterApp(fakeServiceManager.connectedApp);
       when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
           .thenReturn(ValueNotifier<int>(0));
 
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      mockIsFlutterApp(serviceManager.connectedApp);
+      fakeServiceManager.consoleService.ensureServiceInitialized();
     });
 
     void mockExtensions() {
@@ -139,8 +138,7 @@ void main() {
       );
       expect(find.text(extensions.debugPaint.title), findsOneWidget);
       await tester.pump();
-      await tester
-          .tap(find.text(extensions.toggleSelectWidgetMode.title));
+      await tester.tap(find.text(extensions.toggleSelectWidgetMode.title));
       expect(
         fakeExtensionManager.extensionValueOnDevice[
             extensions.toggleSelectWidgetMode.extension],
@@ -153,8 +151,7 @@ void main() {
         isFalse,
       );
 
-      await tester
-          .tap(find.text(extensions.toggleSelectWidgetMode.title));
+      await tester.tap(find.text(extensions.toggleSelectWidgetMode.title));
       expect(
         fakeExtensionManager.extensionValueOnDevice[
             extensions.toggleSelectWidgetMode.extension],

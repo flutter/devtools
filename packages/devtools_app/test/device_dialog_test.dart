@@ -55,10 +55,11 @@ void main() {
       await tester.pumpWidget(wrap(deviceDialog));
       expect(find.text('Device Info'), findsOneWidget);
 
-      expect(findSubstring(deviceDialog, 'Dart Version'), findsOneWidget);
-      expect(findSubstring(deviceDialog, 'Flutter Version'), findsNothing);
-      expect(
-          findSubstring(deviceDialog, 'VM Service Connection'), findsOneWidget);
+      expect(find.text('Dart Version: '), findsOneWidget);
+      expect(find.text('CPU / OS: '), findsOneWidget);
+      expect(find.text('Flutter Version: '), findsNothing);
+      expect(find.text('Framework / Engine: '), findsNothing);
+      expect(find.text('VM Service Connection: '), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('builds dialog flutter', windowSize,
@@ -77,10 +78,11 @@ void main() {
       await tester.pumpWidget(wrap(deviceDialog));
       expect(find.text('Device Info'), findsOneWidget);
 
-      expect(findSubstring(deviceDialog, 'Dart Version'), findsOneWidget);
-      expect(findSubstring(deviceDialog, 'Flutter Version'), findsOneWidget);
-      expect(
-          findSubstring(deviceDialog, 'VM Service Connection'), findsOneWidget);
+      expect(find.text('Dart Version: '), findsOneWidget);
+      expect(find.text('CPU / OS: '), findsOneWidget);
+      expect(find.text('Flutter Version: '), findsOneWidget);
+      expect(find.text('Framework / Engine: '), findsOneWidget);
+      expect(find.text('VM Service Connection: '), findsOneWidget);
     });
   });
 
@@ -117,8 +119,10 @@ void main() {
       await tester.pumpWidget(wrap(vmFlagsDialog));
       expect(find.text('VM Flags'), findsOneWidget);
 
-      expect(findSubstring(vmFlagsDialog, 'flag 1 name'), findsOneWidget);
-      expect(findSubstring(vmFlagsDialog, 'flag 1 comment'), findsOneWidget);
+      expect(find.text('flag 1 name'), findsOneWidget);
+      final Text commentText = tester
+          .firstWidget<Text>(findSubstring(vmFlagsDialog, 'flag 1 comment'));
+      expect(commentText, isNotNull);
     });
   });
 }
