@@ -233,20 +233,15 @@ class InspectorTreeController extends Object
     return (getCachedRow(index)?.depth ?? 0) * columnWidth;
   }
 
-  List<InspectorTreeRow> getPathFromSelectedRowToRoot() {
-    final selectedItem = _cachedSelectedRow;
+  List<InspectorTreeNode> getPathFromSelectedRowToRoot() {
+    final selectedItem = _cachedSelectedRow?.node;
     if (selectedItem == null) return [];
 
-    final pathToRoot = <InspectorTreeRow>[selectedItem];
-    InspectorTreeNode nextParentNode = selectedItem.node.parent;
+    final pathToRoot = <InspectorTreeNode>[selectedItem];
+    InspectorTreeNode nextParentNode = selectedItem.parent;
     while (nextParentNode != null) {
-      final rowItem = _searchableCachedRows.firstWhere(
-        (element) => element?.node == nextParentNode,
-        orElse: () => null,
-      );
-      if (rowItem == null) break;
-      pathToRoot.add(rowItem);
-      nextParentNode = rowItem.node.parent;
+      pathToRoot.add(nextParentNode);
+      nextParentNode = nextParentNode.parent;
     }
     return pathToRoot.reversed.toList();
   }
@@ -403,8 +398,12 @@ class InspectorTreeController extends Object
   }
 
   void onSelectRow(InspectorTreeRow row) {
-    selection = row.node;
-    expandPath(row.node);
+    onSelectNode(row.node);
+  }
+
+  void onSelectNode(InspectorTreeNode node) {
+    selection = node;
+    expandPath(node);
   }
 
   Rect getBoundingBox(InspectorTreeRow row) {
@@ -1017,8 +1016,9 @@ class _InspectorTreeState extends State<InspectorTree>
           return Column(
             children: [
               InspectorBreadcrumbNavigator(
-                rows: parents,
-                onTap: (row) => widget.inspectorTreeController.onSelectRow(row),
+                items: parents,
+                onTap: (node) =>
+                    widget.inspectorTreeController.onSelectNode(node),
               ),
               Expanded(child: tree),
             ],

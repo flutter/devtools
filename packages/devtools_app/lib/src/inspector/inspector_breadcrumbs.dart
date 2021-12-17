@@ -8,7 +8,7 @@ import 'inspector_tree.dart';
 class InspectorBreadcrumbNavigator extends StatelessWidget {
   const InspectorBreadcrumbNavigator({
     Key key,
-    @required this.rows,
+    @required this.items,
     @required this.onTap,
   }) : super(key: key);
 
@@ -17,16 +17,16 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
   /// breadcrumbs (if any) will be replaced by '...' item.
   static const _maxNumberOfBreadcrumbs = 5;
 
-  final List<InspectorTreeRow> rows;
-  final Function(InspectorTreeRow) onTap;
+  final List<InspectorTreeNode> items;
+  final Function(InspectorTreeNode) onTap;
 
   @override
   Widget build(BuildContext context) {
-    if (rows.isEmpty) {
+    if (items.isEmpty) {
       return const SizedBox();
     }
 
-    final breadcrumbs = _generateBreadcrumbs(rows);
+    final breadcrumbs = _generateBreadcrumbs(items);
     return SizedBox(
       height: isDense() ? 24 : 28,
       child: Padding(
@@ -43,7 +43,7 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
             return Flexible(
               child: _InspectorBreadcrumb(
                 data: item,
-                onTap: () => onTap(item.row),
+                onTap: () => onTap(item.node),
               ),
             );
           }).toList(),
@@ -53,12 +53,12 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
   }
 
   List<_InspectorBreadcrumbData> _generateBreadcrumbs(
-    List<InspectorTreeRow> rows,
+    List<InspectorTreeNode> nodes,
   ) {
-    final List<_InspectorBreadcrumbData> items = rows.map((row) {
+    final List<_InspectorBreadcrumbData> items = nodes.map((node) {
       return _InspectorBreadcrumbData.wrap(
-        row: row,
-        isSelected: row == rows.safeLast,
+        node: node,
+        isSelected: node  == nodes.safeLast,
       );
     }).toList();
     List<_InspectorBreadcrumbData> breadcrumbs;
@@ -142,18 +142,18 @@ class _InspectorBreadcrumb extends StatelessWidget {
 
 class _InspectorBreadcrumbData {
   const _InspectorBreadcrumbData._({
-    @required this.row,
+    @required this.node,
     @required this.isSelected,
     @required this.alternativeText,
     @required this.alternativeIcon,
   });
 
   factory _InspectorBreadcrumbData.wrap({
-    @required InspectorTreeRow row,
+    @required InspectorTreeNode node,
     @required bool isSelected,
   }) {
     return _InspectorBreadcrumbData._(
-      row: row,
+      node: node,
       isSelected: isSelected,
       alternativeText: null,
       alternativeIcon: null,
@@ -163,7 +163,7 @@ class _InspectorBreadcrumbData {
   /// Construct a special item for showing '…' symbol between other items
   factory _InspectorBreadcrumbData.more() {
     return const _InspectorBreadcrumbData._(
-      row: null,
+      node: null,
       isSelected: false,
       alternativeText: _ellipsisValue,
       alternativeIcon: null,
@@ -172,7 +172,7 @@ class _InspectorBreadcrumbData {
 
   factory _InspectorBreadcrumbData.chevron() {
     return const _InspectorBreadcrumbData._(
-      row: null,
+      node: null,
       isSelected: false,
       alternativeText: null,
       alternativeIcon: _breadcrumbSeparatorIcon,
@@ -182,12 +182,12 @@ class _InspectorBreadcrumbData {
   static const _ellipsisValue = '…';
   static const _breadcrumbSeparatorIcon = Icons.chevron_right;
 
-  final InspectorTreeRow row;
+  final InspectorTreeNode node;
   final IconData alternativeIcon;
   final String alternativeText;
   final bool isSelected;
 
-  String get text => alternativeText ?? row?.node?.diagnostic?.description;
+  String get text => alternativeText ?? node?.diagnostic?.description;
 
   Widget get icon {
     if (alternativeIcon != null) {
@@ -197,13 +197,13 @@ class _InspectorBreadcrumbData {
       );
     }
 
-    return row?.node?.diagnostic?.icon;
+    return node?.diagnostic?.icon;
   }
 
   bool get isChevron =>
-      row == null && alternativeIcon == _breadcrumbSeparatorIcon;
+      node == null && alternativeIcon == _breadcrumbSeparatorIcon;
 
-  bool get isEllipsis => row == null && alternativeText == _ellipsisValue;
+  bool get isEllipsis => node == null && alternativeText == _ellipsisValue;
 
   bool get isClickable => !isSelected && !isEllipsis;
 }
