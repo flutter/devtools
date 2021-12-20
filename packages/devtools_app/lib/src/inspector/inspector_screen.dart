@@ -240,6 +240,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                     valueListenable: summaryTreeController.searchTarget,
                     builder: (context, value, child) {
                       return DropdownButton<SearchTargetType>(
+                        underline: const SizedBox(),
                         value: value,
                         items: SearchTargetType.values.map((e) {
                           return DropdownMenuItem(
