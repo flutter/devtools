@@ -702,6 +702,7 @@ class InspectorTreeController extends Object
     if (properties == null) return false;
 
     for (final property in properties) {
+      if (property.level == DiagnosticLevel.hidden) continue;
       if (property.name.caseInsensitiveContains(search) ||
           property.description?.caseInsensitiveContains(search) == true) {
         return true;
