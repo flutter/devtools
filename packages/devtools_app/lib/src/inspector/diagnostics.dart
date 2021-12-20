@@ -199,6 +199,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       if (name?.isNotEmpty == true && diagnostic.showName) {
         children.add(
           RichText(
+            maxLines: 1,
             text: TextSpan(
               children: [
                 _buildHighlightedSearchPreview(
@@ -278,6 +279,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       children.add(
         Flexible(
           child: RichText(
+            maxLines: 1,
             text: TextSpan(
               children: [
                 _buildHighlightedSearchPreview(
