@@ -198,6 +198,7 @@ class InspectorTreeController extends Object
 
   void setSearchTarget(SearchTargetType value) {
     _searchTarget.value = value;
+    matchIndex.value = 0;
     refreshSearchMatches();
   }
 
