@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:intl/intl.dart' as intl;
 import 'package:vm_service/vm_service.dart';
 
 import 'service_registrations.dart' as service_registrations;
@@ -309,9 +308,9 @@ class MemoryProfile {
     );
 
     if (_verboseMode) {
-      final intl.DateFormat mFormat = intl.DateFormat('hh:mm:ss.mmm');
-      final timeCollected =
-          mFormat.format(DateTime.fromMillisecondsSinceEpoch(time));
+      final timeCollected = _formatTime(
+        DateTime.fromMillisecondsSinceEpoch(time),
+      );
 
       print(' Collected Sample: [$timeCollected] capacity=$capacity, '
           'ADB MemoryInfo total=${adbMemoryInfo!.total}${fromGC ? ' [GC]' : ''}');
@@ -330,6 +329,22 @@ class MemoryProfile {
       }
     }
     return heapList;
+  }
+
+  static String _formatTime(DateTime value) {
+    String toStringLength(int value, int length) {
+      final result = '$value';
+      assert(length >= result.length);
+      return '0' * (length - result.length) + result;
+    }
+
+    return toStringLength(value.hour, 2) +
+        ':' +
+        toStringLength(value.minute, 2) +
+        ':' +
+        toStringLength(value.second, 2) +
+        '.' +
+        toStringLength(value.millisecond, 3);
   }
 }
 

@@ -159,7 +159,7 @@ void validateJSONFile(List<Verbose> values) {
 
   var samplesIndex = 0;
   for (var value in values) {
-    final intl.DateFormat mFormat = intl.DateFormat('hh:mm:ss.mmm');
+    final intl.DateFormat mFormat = intl.DateFormat('HH:mm:ss.SSS');
     final timeCollected = mFormat.format(
         DateTime.fromMillisecondsSinceEpoch(samples[samplesIndex].timestamp));
 

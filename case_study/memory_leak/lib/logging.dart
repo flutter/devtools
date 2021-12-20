@@ -46,7 +46,7 @@ class TimeStamp {
   String date;
   String meridiem;
 
-  DateFormat currentTime = DateFormat('h:mm:ss', 'en_US');
+  DateFormat currentTime = DateFormat('H:mm:ss', 'en_US');
   DateFormat currentDate = DateFormat('EEEE, MMM d', 'en_US');
   DateFormat currentMeridiem = DateFormat('aaa', 'en_US');
 }

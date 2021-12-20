@@ -283,7 +283,7 @@ class HeapTreeViewState extends State<HeapTree>
     final heapSum = heapSample.external + heapSample.used;
     heapMovingAverage.add(heapSum);
 
-    final dateTimeFormat = DateFormat('hh:mm:ss.mmm');
+    final dateTimeFormat = DateFormat('HH:mm:ss.SSS');
     final startDateTime = dateTimeFormat
         .format(DateTime.fromMillisecondsSinceEpoch(heapSample.timestamp));
 
