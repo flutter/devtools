@@ -1,3 +1,6 @@
+## 2.9.2
+* Update `package:vm_service` to `^8.1.0` [#3545](https://github.com/flutter/devtools/pull/3545)
+
 ## 2.9.2-dev.1
 * Refactors `AutoDisposeMixin` to have separate cancel methods for listeners, stream subscriptions, and focus nodes [#3540](https://github.com/flutter/devtools/pull/3540)
 * Fix a parsing bug with the SemanticVersion class [#3539](https://github.com/flutter/devtools/pull/3539)
