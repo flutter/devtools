@@ -55,10 +55,11 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
   List<_InspectorBreadcrumbData> _generateBreadcrumbs(
     List<InspectorTreeNode> nodes,
   ) {
+    final lastNode = nodes.safeLast;
     final List<_InspectorBreadcrumbData> items = nodes.map((node) {
       return _InspectorBreadcrumbData.wrap(
         node: node,
-        isSelected: node  == nodes.safeLast,
+        isSelected: node  == lastNode,
       );
     }).toList();
     List<_InspectorBreadcrumbData> breadcrumbs;

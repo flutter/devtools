@@ -229,7 +229,7 @@ class InspectorTreeController extends Object
     cachedRow?.isSearchMatch =
         _searchableCachedRows.safeGet(index)?.isSearchMatch ?? false;
 
-    if (cachedRows[index]?.isSelected == true) {
+    if (cachedRow?.isSelected == true) {
       _cachedSelectedRow = cachedRow;
     }
     return cachedRow;
