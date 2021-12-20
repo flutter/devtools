@@ -663,6 +663,10 @@ class InspectorTreeController extends Object
         case SearchTargetType.details:
           hasMatch = await _hasPropertyMatch(diagnostic, search);
           break;
+        case SearchTargetType.all:
+          hasMatch = _hasWidgetMatch(diagnostic, search) ||
+              await _hasPropertyMatch(diagnostic, search);
+          break;
       }
 
       if (hasMatch) {
