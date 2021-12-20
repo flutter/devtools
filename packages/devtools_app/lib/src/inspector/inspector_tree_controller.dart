@@ -81,6 +81,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
           setExpanded(!isExpanded);
         },
         debuggerController: widget.debuggerController,
+        isSummaryTree: widget.inspectorTreeState.isSummaryTree,
       ),
     );
   }
@@ -696,8 +697,6 @@ class InspectorTreeController extends Object
 
     if (properties == null) return false;
 
-    // TODO move property name check to the top so there's no need to retrieve
-    // properties when match could be found without extra operation
     for (final property in properties) {
       if (property.name.caseInsensitiveContains(search) ||
           property.description?.caseInsensitiveContains(search) == true) {
@@ -1171,6 +1170,7 @@ class InspectorRowContent extends StatelessWidget {
     @required this.scrollControllerX,
     @required this.viewportWidth,
     @required this.debuggerController,
+    @required this.isSummaryTree,
   });
 
   final InspectorTreeRow row;
@@ -1181,6 +1181,7 @@ class InspectorRowContent extends StatelessWidget {
   final ScrollController scrollControllerX;
   final double viewportWidth;
   final ValueListenable searchNotifier;
+  final bool isSummaryTree;
 
   /// A [DevToolsError] that applies to the widget in this row.
   ///
@@ -1215,8 +1216,10 @@ class InspectorRowContent extends StatelessWidget {
         valueListenable: searchNotifier ?? controller.searchNotifier,
         builder: (context, searchValue, _) {
           return Opacity(
-            // TODO set opacity to 1 always for details tree
-            opacity: node.isProperty || searchValue.isEmpty || row.isSearchMatch
+            opacity: !isSummaryTree ||
+                    node.isProperty ||
+                    searchValue.isEmpty ||
+                    row.isSearchMatch
                 ? 1
                 : 0.2,
             child: Row(
