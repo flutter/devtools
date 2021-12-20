@@ -163,13 +163,11 @@ class DevToolsUsage {
   }
 
   String get lastReleaseNotesVersion {
-    print('in getter');
     final version = properties['lastReleaseNotesVersion'] ??= '';
     return version;
   }
 
   set lastReleaseNotesVersion(String value) {
-    print('in setter');
     properties['lastReleaseNotesVersion'] = value;
   }
 }
