@@ -1,3 +1,6 @@
+## 2.9.3
+* Update package:vm_service to ^8.1.0 and package:dds to ^2.1.6 [#3545](https://github.com/flutter/devtools/pull/3545)
+
 ## 2.8.0
 * Don't register service worker when running DevTools locally [#3476](https://github.com/flutter/devtools/pull/3476)
 * [Cleanup] Moved `[set/get]PubRootDirectories` functions from `InspectorServiceBase` to `InspectorService` [#3478](https://github.com/flutter/devtools/pull/3478)
