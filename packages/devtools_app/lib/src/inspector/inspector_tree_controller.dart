@@ -1268,7 +1268,7 @@ class InspectorRowContent extends StatelessWidget {
                           errorText: error?.errorMessage,
                           debuggerController: debuggerController,
                           nodeDescriptionHighlightStyle:
-                              row.isSelected
+                              row.isSelected || !isSummaryTree
                                   ? theme.searchMatchHighlightStyleFocused
                                   : theme.searchMatchHighlightStyle,
                         ),
