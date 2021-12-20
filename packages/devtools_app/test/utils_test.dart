@@ -282,7 +282,7 @@ void main() {
     });
 
     test('formatDateTime', () {
-      expect(formatDateTime(DateTime(2020, 1, 16, 13)), '1:00:00.000 PM');
+      expect(formatDateTime(DateTime(2020, 1, 16, 13)), '00:00:00.000');
     });
 
     test('longestFittingSubstring', () {
