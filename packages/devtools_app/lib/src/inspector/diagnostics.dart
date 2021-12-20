@@ -186,6 +186,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     TextStyle textStyle =
         baseStyle.merge(textStyleForLevel(diagnostic.level, colorScheme));
     var descriptionTextStyle = textStyle;
+    final TextStyle searchMatchTextStyle = textStyle?.copyWith(
+      color: nodeDescriptionHighlightStyle?.color,
+      backgroundColor: nodeDescriptionHighlightStyle?.backgroundColor,
+    );
     // TODO(jacobr): use TextSpans and SelectableText instead of Text.
     if (diagnostic.isProperty) {
       // Display of inline properties.
@@ -201,7 +205,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
                   name,
                   searchValue,
                   textStyle,
-                  textStyle?.copyWith(backgroundColor: Colors.red),
+                  searchMatchTextStyle,
                 ),
                 TextSpan(text: '${diagnostic.separator} '),
               ],
@@ -264,6 +268,12 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         textStyle = textStyle..merge(inspector_text_styles.link(colorScheme));
       }
 
+      final TextStyle descriptionSearchMatchTextStyle =
+          descriptionTextStyle?.copyWith(
+        color: nodeDescriptionHighlightStyle?.color,
+        backgroundColor: nodeDescriptionHighlightStyle?.backgroundColor,
+      );
+
       // TODO(jacobr): custom display for units, iterables, and padding.
       children.add(
         Flexible(
@@ -274,7 +284,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
                   description,
                   searchValue,
                   descriptionTextStyle,
-                  descriptionTextStyle?.copyWith(backgroundColor: Colors.red),
+                  descriptionSearchMatchTextStyle,
                 ),
               ],
             ),

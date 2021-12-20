@@ -28,7 +28,6 @@ import '../utils.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
 import 'inspector_breadcrumbs.dart';
-import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
 
 /// Presents a [TreeNode].
@@ -1264,11 +1263,9 @@ class InspectorRowContent extends StatelessWidget {
                           errorText: error?.errorMessage,
                           debuggerController: debuggerController,
                           nodeDescriptionHighlightStyle:
-                              searchValue.isEmpty || !row.isSearchMatch
-                                  ? inspector_text_styles.regular
-                                  : row.isSelected
-                                      ? theme.searchMatchHighlightStyleFocused
-                                      : theme.searchMatchHighlightStyle,
+                              row.isSelected
+                                  ? theme.searchMatchHighlightStyleFocused
+                                  : theme.searchMatchHighlightStyle,
                         ),
                       ),
                     ),
