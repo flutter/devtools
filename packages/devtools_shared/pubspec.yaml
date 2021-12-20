@@ -14,4 +14,4 @@ dependencies:
   path: ^1.8.0
   shelf: ^1.1.0
   usage: ^4.0.0
-  vm_service: ^7.1.0
+  vm_service: ^8.1.0
