@@ -104,6 +104,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
             searchValue,
             textStyle,
             textStyle.merge(nodeDescriptionHighlightStyle),
+            addQuotes: true,
           ),
         ],
       );
@@ -192,7 +193,22 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       final Map<String, Object> properties = diagnostic.valuePropertiesJson;
 
       if (name?.isNotEmpty == true && diagnostic.showName) {
-        children.add(Text('$name${diagnostic.separator} ', style: textStyle));
+        children.add(
+          RichText(
+            text: TextSpan(
+              children: [
+                _buildHighlightedSearchPreview(
+                  name,
+                  searchValue,
+                  textStyle,
+                  textStyle?.copyWith(backgroundColor: Colors.red),
+                ),
+                TextSpan(text: '${diagnostic.separator} '),
+              ],
+            ),
+          ),
+        );
+
         // provide some contrast between the name and description if both are
         // present.
         descriptionTextStyle =
@@ -249,15 +265,22 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
 
       // TODO(jacobr): custom display for units, iterables, and padding.
-      children.add(Flexible(
-        child: buildDescription(
-          description,
-          descriptionTextStyle,
-          context,
-          colorScheme,
-          isProperty: true,
+      children.add(
+        Flexible(
+          child: RichText(
+            text: TextSpan(
+              children: [
+                _buildHighlightedSearchPreview(
+                  description,
+                  searchValue,
+                  descriptionTextStyle,
+                  descriptionTextStyle?.copyWith(backgroundColor: Colors.red),
+                ),
+              ],
+            ),
+          ),
         ),
-      ));
+      );
 
       if (diagnostic.level == DiagnosticLevel.fine &&
           diagnostic.hasDefaultValue) {
@@ -369,18 +392,19 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     String textPreview,
     String searchValue,
     TextStyle textStyle,
-    TextStyle highlightTextStyle,
-  ) {
+    TextStyle highlightTextStyle, {
+    bool addQuotes = false,
+  }) {
     if (searchValue == null || searchValue.isEmpty) {
       return TextSpan(
-        text: '"$textPreview"',
+        text: addQuotes ? '"$textPreview"' : textPreview,
         style: textStyle,
       );
     }
 
     if (textPreview.caseInsensitiveEquals(searchValue)) {
       return TextSpan(
-        text: '"$textPreview"',
+        text: addQuotes ? '"$textPreview"' : textPreview,
         style: highlightTextStyle,
       );
     }
@@ -388,13 +412,14 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     final matches = searchValue.caseInsensitiveAllMatches(textPreview);
     if (matches.isEmpty) {
       return TextSpan(
-        text: '"$textPreview"',
+        text: addQuotes ? '"$textPreview"' : textPreview,
         style: textStyle,
       );
     }
 
     final quoteSpan = TextSpan(text: '"', style: textStyle);
-    final spans = <TextSpan>[quoteSpan];
+    final spans = <TextSpan>[];
+    if (addQuotes) spans.add(quoteSpan);
     var previousItemEnd = 0;
     for (final match in matches) {
       if (match.start > previousItemEnd) {
@@ -416,7 +441,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       text: textPreview.substring(previousItemEnd, textPreview.length),
       style: textStyle,
     ));
-    spans.add(quoteSpan);
+    if (addQuotes) spans.add(quoteSpan);
 
     return TextSpan(children: spans);
   }

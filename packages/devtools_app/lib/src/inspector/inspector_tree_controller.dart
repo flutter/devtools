@@ -75,6 +75,8 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
         controller: widget.inspectorTreeState.controller,
         scrollControllerX: widget.scrollControllerX,
         viewportWidth: widget.viewportWidth,
+        searchNotifier:
+            widget.inspectorTreeState.inspectorTreeController?.searchNotifier,
         onToggle: () {
           setExpanded(!isExpanded);
         },
@@ -647,7 +649,7 @@ class InspectorTreeController extends Object
       return matches;
     }
 
-    debugPrint('Search started: ' + _searchTarget.toString());
+    debugPrint('Search started: ${searchTarget.value}');
 
     for (final row in _searchableCachedRows) {
       final diagnostic = row.node.diagnostic;
@@ -694,6 +696,8 @@ class InspectorTreeController extends Object
 
     if (properties == null) return false;
 
+    // TODO move property name check to the top so there's no need to retrieve
+    // properties when match could be found without extra operation
     for (final property in properties) {
       if (property.name.caseInsensitiveContains(search) ||
           property.description?.caseInsensitiveContains(search) == true) {
@@ -751,6 +755,9 @@ class _InspectorTreeState extends State<InspectorTree>
         AutoDisposeMixin
     implements InspectorControllerClient {
   InspectorTreeController get controller => widget.controller;
+
+  InspectorTreeController get inspectorTreeController =>
+      widget.inspectorTreeController;
 
   bool get isSummaryTree => widget.isSummaryTree;
 
@@ -1159,6 +1166,7 @@ class InspectorRowContent extends StatelessWidget {
     @required this.controller,
     @required this.onToggle,
     @required this.expandArrowAnimation,
+    @required this.searchNotifier,
     this.error,
     @required this.scrollControllerX,
     @required this.viewportWidth,
@@ -1172,6 +1180,7 @@ class InspectorRowContent extends StatelessWidget {
   final Animation<double> expandArrowAnimation;
   final ScrollController scrollControllerX;
   final double viewportWidth;
+  final ValueListenable searchNotifier;
 
   /// A [DevToolsError] that applies to the widget in this row.
   ///
@@ -1203,10 +1212,13 @@ class InspectorRowContent extends StatelessWidget {
     Widget rowWidget = Padding(
       padding: EdgeInsets.only(left: currentX),
       child: ValueListenableBuilder<String>(
-        valueListenable: controller.searchNotifier,
+        valueListenable: searchNotifier ?? controller.searchNotifier,
         builder: (context, searchValue, _) {
           return Opacity(
-            opacity: searchValue.isEmpty || row.isSearchMatch ? 1 : 0.2,
+            // TODO set opacity to 1 always for details tree
+            opacity: node.isProperty || searchValue.isEmpty || row.isSearchMatch
+                ? 1
+                : 0.2,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
