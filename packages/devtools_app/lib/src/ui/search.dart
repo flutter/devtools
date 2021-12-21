@@ -105,7 +105,10 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
             _searchNotifier.value,
             searchPreviousMatches: searchPreviousMatches,
           );
-        }).then((matches) => _updateMatches(matches));
+        }).then((matches) {
+          searchInProgress = false;
+          _updateMatches(matches);
+        });
         _searchOperation = CancelableOperation.fromFuture(future);
         await _searchOperation.value;
         searchInProgress = false;
