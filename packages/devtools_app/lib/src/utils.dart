@@ -617,7 +617,7 @@ class TimeRange {
 }
 
 String formatDateTime(DateTime time) {
-  return DateFormat('h:mm:ss.S a').format(time);
+  return DateFormat('H:mm:ss.S').format(time);
 }
 
 bool isDebugBuild() {

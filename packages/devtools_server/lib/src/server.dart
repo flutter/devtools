@@ -41,6 +41,7 @@ const argPort = 'port';
 const argProfileMemory = 'record-memory-profile';
 const argTryPorts = 'try-ports';
 const argVerbose = 'verbose';
+const argVersion = 'version';
 const launchDevToolsService = 'launchDevTools';
 
 const defaultTryPorts = 10;
@@ -84,6 +85,7 @@ Future<HttpServer?> _serveDevToolsWithArgs(
   String? customDevToolsPath,
 }) async {
   final help = args[argHelp];
+  final bool version = args[argVersion];
   final bool machineMode = args[argMachine];
   // launchBrowser defaults based on machine-mode if not explicitly supplied.
   final bool launchBrowser =
@@ -110,6 +112,18 @@ Future<HttpServer?> _serveDevToolsWithArgs(
     print('Dart DevTools version ${await _getVersion()}');
     print('');
     _printUsage(verbose);
+    return null;
+  }
+
+  if (version) {
+    final versionStr = await _getVersion();
+    printOutput(
+      'Dart DevTools version $versionStr',
+      {
+        'version': versionStr,
+      },
+      machineMode: machineMode,
+    );
     return null;
   }
 
@@ -502,6 +516,11 @@ ArgParser configureArgsParser(ArgParser parser, bool verbose) {
   }
 
   parser
+    ..addFlag(
+      argVersion,
+      negatable: false,
+      help: 'Prints the DevTools version.',
+    )
     ..addFlag(
       argVerbose,
       negatable: false,

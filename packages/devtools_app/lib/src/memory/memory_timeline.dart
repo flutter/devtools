@@ -244,7 +244,7 @@ class MemoryTimeline {
   /// Common utility function to handle loading of the data into the
   /// chart for either offline or live Feed.
 
-  static final DateFormat _milliFormat = DateFormat('hh:mm:ss.mmm');
+  static final DateFormat _milliFormat = DateFormat('HH:mm:ss.SSS');
 
   static String fineGrainTimestampFormat(int timestamp) =>
       _milliFormat.format(DateTime.fromMillisecondsSinceEpoch(timestamp));
@@ -264,7 +264,7 @@ class MemoryTimeline {
 
     // Debugging data - to enable remove logical not operator.
     if (!true) {
-      final DateFormat mFormat = DateFormat('hh:mm:ss.mmm');
+      final DateFormat mFormat = DateFormat('HH:mm:ss.SSS');
       final startDT = mFormat.format(DateTime.fromMillisecondsSinceEpoch(
           data[startingIndex].timestamp.toInt()));
       final endDT = mFormat.format(DateTime.fromMillisecondsSinceEpoch(

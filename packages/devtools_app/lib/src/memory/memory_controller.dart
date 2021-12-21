@@ -36,7 +36,7 @@ enum ChartType {
 // TODO(terry): Consider supporting more than one file since app was launched.
 // Memory Log filename.
 final String _memoryLogFilename =
-    '${MemoryController.logFilenamePrefix}${DateFormat("yyyyMMdd_hh_mm").format(DateTime.now())}';
+    '${MemoryController.logFilenamePrefix}${DateFormat("yyyyMMdd_HH_mm").format(DateTime.now())}';
 
 /// Automatic pruning of collected memory statistics (plotted) full data is
 /// still retained. Default is the best view each tick is 10 pixels, the
@@ -288,7 +288,7 @@ class MemoryController extends DisposableController
       _selectedSnapshotNotifier;
 
   static String formattedTimestamp(DateTime timestamp) =>
-      timestamp != null ? DateFormat('MMM dd hh:mm:ss').format(timestamp) : '';
+      timestamp != null ? DateFormat('MMM dd HH:mm:ss').format(timestamp) : '';
 
   /// Stored value is pretty timestamp when the snapshot was done.
   final _selectedSnapshotNotifier = ValueNotifier<DateTime>(null);
