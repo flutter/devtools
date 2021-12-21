@@ -157,13 +157,17 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
 
   void _updateActiveSearchMatch() {
     // [matchIndex] is 1-based. Subtract 1 for the 0-based list [searchMatches].
-    final activeMatchIndex = matchIndex.value - 1;
+    int activeMatchIndex = matchIndex.value - 1;
     if (activeMatchIndex < 0) {
       _activeSearchMatch.value?.isActiveSearchMatch = false;
       _activeSearchMatch.value = null;
       return;
     }
-    assert(activeMatchIndex < searchMatches.value.length);
+    if (searchMatches.value.isNotEmpty &&
+        activeMatchIndex >= searchMatches.value.length) {
+      activeMatchIndex = 0;
+      matchIndex.value = 1; // first item because [matchIndex] us 1-based
+    }
     _activeSearchMatch.value?.isActiveSearchMatch = false;
     _activeSearchMatch.value = searchMatches.value[activeMatchIndex]
       ..isActiveSearchMatch = true;
