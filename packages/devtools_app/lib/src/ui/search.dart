@@ -102,7 +102,6 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
         searchInProgress = true;
 
         // Start new search operation
-        final future =
         final future = matchesForSearch(
           _searchNotifier.value,
           searchPreviousMatches: searchPreviousMatches,
