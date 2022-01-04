@@ -1,5 +1,8 @@
 ## 2.9.3
 * Update package:vm_service to ^8.1.0 and package:dds to ^2.1.6 [#3545](https://github.com/flutter/devtools/pull/3545)
+* escape (unsafe) text directional Unicode [#3529](https://github.com/flutter/devtools/pull/3529)
+* Fixes VM service breakage due to deprecated method [#3510](https://github.com/flutter/devtools/pull/3510)
+* VM service wrapper implements noSuchMethod [#3505](https://github.com/flutter/devtools/pull/3505)
 * Add support for vm_service 7.4.0 [#3490](https://github.com/flutter/devtools/pull/3490)
 
 ## 2.8.0
