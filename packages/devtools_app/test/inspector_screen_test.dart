@@ -97,7 +97,7 @@ void main() {
 
       await tester.pumpWidget(buildInspectorScreen());
       expect(find.byType(InspectorScreenBody), findsOneWidget);
-      expect(find.text('Refresh Tree'), findsOneWidget);
+      expect(find.byTooltip('Refresh Tree'), findsOneWidget);
       expect(find.text(extensions.debugPaint.title), findsOneWidget);
       // Make sure there is not an overflow if the window is narrow.
       // TODO(jacobr): determine why there are overflows in the test environment

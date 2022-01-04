@@ -1249,6 +1249,45 @@ void main() {
           isFalse,
         );
       });
+
+      test('caseInsensitiveEquals', () {
+        const str = 'hello, world!';
+        expect(str.caseInsensitiveEquals(str), isTrue);
+        expect(str.caseInsensitiveEquals('HELLO, WORLD!'), isTrue);
+        expect(str.caseInsensitiveEquals('hElLo, WoRlD!'), isTrue);
+        expect(str.caseInsensitiveEquals('hello'), isFalse);
+        expect(str.caseInsensitiveEquals(''), isFalse);
+        expect(str.caseInsensitiveEquals(null), isFalse);
+        expect(''.caseInsensitiveEquals(''), isTrue);
+        expect(''.caseInsensitiveEquals(null), isFalse);
+      });
+
+      test('caseInsensitiveAllMatches', () {
+        const str = 'This is a TEST. Test string is "test"';
+        final matches = 'test'.caseInsensitiveAllMatches(str).toList();
+        expect(matches.length, equals(3));
+
+        // First match: 'TEST'
+        expect(matches[0].start, equals(10));
+        expect(matches[0].end, equals(14));
+
+        // Second match: 'Test'
+        expect(matches[1].start, equals(16));
+        expect(matches[1].end, equals(20));
+
+        // Third match: 'test'
+        expect(matches[2].start, equals(32));
+        expect(matches[2].end, equals(36));
+
+        // Dart's allMatches returns 1 char matches when pattern is an empty string
+        expect(
+          ''.caseInsensitiveAllMatches('hello world').length,
+          equals('hello world'.length + 1),
+        );
+        expect('*'.caseInsensitiveAllMatches('hello world'), isEmpty);
+        expect('test'.caseInsensitiveAllMatches(''), isEmpty);
+        expect('test'.caseInsensitiveAllMatches(null), isEmpty);
+      });
     });
 
     group('BoolExtension', () {

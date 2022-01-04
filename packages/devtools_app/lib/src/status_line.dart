@@ -168,8 +168,7 @@ class StatusLine extends StatelessWidget {
                     width: smallProgressSize,
                     height: smallProgressSize,
                     child: isBusy
-                        ? CircularProgressIndicator(
-                            strokeWidth: 2,
+                        ? SmallCircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(color),
                           )
                         : const SizedBox(),

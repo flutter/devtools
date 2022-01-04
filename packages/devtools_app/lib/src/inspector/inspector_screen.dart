@@ -21,10 +21,13 @@ import '../service_extensions.dart' as extensions;
 import '../split.dart';
 import '../theme.dart';
 import '../ui/icons.dart';
+import '../ui/search.dart';
 import '../ui/service_extension_widgets.dart';
+import '../utils.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
 import 'inspector_service.dart';
+import 'inspector_tree.dart';
 import 'inspector_tree_controller.dart';
 
 class InspectorScreen extends Screen {
@@ -59,7 +62,10 @@ class InspectorScreenBody extends StatefulWidget {
 }
 
 class InspectorScreenBodyState extends State<InspectorScreenBody>
-    with BlockingActionMixin, AutoDisposeMixin {
+    with
+        BlockingActionMixin,
+        AutoDisposeMixin,
+        SearchFieldMixin<InspectorScreenBody> {
   bool _expandCollapseSupported = false;
   bool _layoutExplorerSupported = false;
 
@@ -75,11 +81,30 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   bool get enableButtons => actionInProgress == false;
 
+  bool searchVisible = false;
+
+  /// Indicates whether search can be closed. The value is set to true when
+  /// search target type dropdown is displayed
+  /// TODO(https://github.com/flutter/devtools/issues/3489) use this variable when adding the scope dropdown
+  bool searchPreventClose = false;
+
+  SearchTargetType searchTarget = SearchTargetType.widget;
+
   static const summaryTreeKey = Key('Summary Tree');
   static const detailsTreeKey = Key('Details Tree');
   static const minScreenWidthForTextBeforeScaling = 900.0;
   static const unscaledIncludeRefreshTreeWidth = 1255.0;
   static const serviceExtensionButtonsIncludeTextWidth = 1160.0;
+
+  @override
+  void dispose() {
+    inspectorController.inspectorTree.dispose();
+    if (inspectorController.isSummaryTree &&
+        inspectorController.details != null) {
+      inspectorController.details.inspectorTree.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -90,13 +115,36 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // The app must not be a Flutter app.
       return;
     }
+    final inspectorTreeController = InspectorTreeController();
+    final detailsTree = InspectorTreeController();
     inspectorController = InspectorController(
-      inspectorTree: InspectorTreeController(),
-      detailsTree: InspectorTreeController(),
+      inspectorTree: inspectorTreeController,
+      detailsTree: detailsTree,
       treeType: FlutterTreeType.widget,
       onExpandCollapseSupported: _onExpandCollapseSupported,
       onLayoutExplorerSupported: _onLayoutExplorerSupported,
     );
+
+    summaryTreeController.setSearchTarget(searchTarget);
+
+    addAutoDisposeListener(searchFieldFocusNode, () {
+      // Close the search once focus is lost and following conditions are met:
+      //  1. Search string is empty.
+      //  2. [searchPreventClose] == false (this is set true when searchTargetType Dropdown is opened).
+      if (!searchFieldFocusNode.hasFocus &&
+          summaryTreeController.search.isEmpty &&
+          !searchPreventClose) {
+        setState(() {
+          searchVisible = false;
+        });
+      }
+
+      // Reset [searchPreventClose] state to false after the search field gains focus.
+      // Focus is returned automatically once the Dropdown menu is closed.
+      if (searchFieldFocusNode.hasFocus) {
+        searchPreventClose = false;
+      }
+    });
   }
 
   void _onExpandClick() {
@@ -121,6 +169,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       key: detailsTreeKey,
       controller: detailsTreeController,
       debuggerController: _debuggerController,
+      inspectorTreeController: summaryTreeController,
     );
 
     final splitAxis = Split.axisFor(context, 0.85);
@@ -158,15 +207,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                 );
               },
             ),
-            const SizedBox(width: denseSpacing),
-            IconLabelButton(
-              onPressed: _refreshInspector,
-              icon: Icons.refresh,
-              label: 'Refresh Tree',
-              color: Theme.of(context).colorScheme.toggleButtonsTitle,
-              minScreenWidthForTextBeforeScaling:
-                  unscaledIncludeRefreshTreeWidth,
-            ),
             const Spacer(),
             Row(children: getServiceExtensionWidgets()),
           ],
@@ -182,40 +222,77 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   Widget _buildSummaryTreeColumn(
     DebuggerController debuggerController,
   ) {
-    return OutlineDecoration(
-      child: ValueListenableBuilder(
-        valueListenable: serviceManager.errorBadgeManager
-            .erroredItemsForPage(InspectorScreen.id),
-        builder: (_, LinkedHashMap<String, DevToolsError> errors, __) {
-          final inspectableErrors = errors.map(
-              (key, value) => MapEntry(key, value as InspectableWidgetError));
-          return Stack(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return OutlineDecoration(
+          child: Column(
             children: [
-              InspectorTree(
-                key: summaryTreeKey,
-                controller: summaryTreeController,
-                isSummaryTree: true,
-                widgetErrors: inspectableErrors,
-                debuggerController: debuggerController,
-              ),
-              if (errors.isNotEmpty && inspectorController != null)
-                ValueListenableBuilder(
-                  valueListenable: inspectorController.selectedErrorIndex,
-                  builder: (_, selectedErrorIndex, __) => Positioned(
-                    top: 0,
-                    right: 0,
-                    child: ErrorNavigator(
-                      errors: inspectableErrors,
-                      errorIndex: selectedErrorIndex,
-                      onSelectError: inspectorController.selectErrorByIndex,
-                    ),
+              InspectorSummaryTreeControls(
+                isSearchVisible: searchVisible,
+                constraints: constraints,
+                onRefreshInspectorPressed: _refreshInspector,
+                onSearchVisibleToggle:  _onSearchVisibleToggle,
+                searchFieldBuilder: () => buildSearchField(
+                  controller: summaryTreeController,
+                  searchFieldKey: GlobalKey(
+                    debugLabel: 'inspectorScreenSearch',
                   ),
-                )
+                  searchFieldEnabled: true,
+                  shouldRequestFocus: searchVisible,
+                  supportsNavigation: true,
+                  onClose: _onSearchVisibleToggle,
+                ),
+              ),
+              Expanded(
+                child: ValueListenableBuilder(
+                  valueListenable: serviceManager.errorBadgeManager
+                      .erroredItemsForPage(InspectorScreen.id),
+                  builder:
+                      (_, LinkedHashMap<String, DevToolsError> errors, __) {
+                    final inspectableErrors = errors.map((key, value) =>
+                        MapEntry(key, value as InspectableWidgetError));
+                    return Stack(
+                      children: [
+                        InspectorTree(
+                          key: summaryTreeKey,
+                          controller: summaryTreeController,
+                          isSummaryTree: true,
+                          widgetErrors: inspectableErrors,
+                          debuggerController: debuggerController,
+                        ),
+                        if (errors.isNotEmpty && inspectorController != null)
+                          ValueListenableBuilder(
+                            valueListenable:
+                                inspectorController.selectedErrorIndex,
+                            builder: (_, selectedErrorIndex, __) => Positioned(
+                              top: 0,
+                              right: 0,
+                              child: ErrorNavigator(
+                                errors: inspectableErrors,
+                                errorIndex: selectedErrorIndex,
+                                onSelectError:
+                                    inspectorController.selectErrorByIndex,
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              )
             ],
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
+  }
+
+  void _onSearchVisibleToggle() {
+    setState(() {
+      searchVisible = !searchVisible;
+    });
+    summaryTreeController.resetSearch();
+    searchTextFieldController.clear();
   }
 
   List<Widget> getServiceExtensionWidgets() {
@@ -239,8 +316,13 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   Widget _expandCollapseButtons() {
     if (!_expandCollapseSupported) return null;
 
-    return Align(
+    return Container(
       alignment: Alignment.centerRight,
+      decoration: BoxDecoration(
+        border: Border(
+          left: defaultBorderSide(Theme.of(context)),
+        ),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
@@ -252,6 +334,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               label: 'Expand all',
               minScreenWidthForTextBeforeScaling:
                   minScreenWidthForTextBeforeScaling,
+              outlined: false,
             ),
           ),
           const SizedBox(width: denseSpacing),
@@ -262,6 +345,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               label: 'Collapse to selected',
               minScreenWidthForTextBeforeScaling:
                   minScreenWidthForTextBeforeScaling,
+              outlined: false,
             ),
           )
         ],
@@ -286,6 +370,90 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     blockWhileInProgress(() async {
       await inspectorController?.onForceRefresh();
     });
+  }
+}
+
+class InspectorSummaryTreeControls extends StatelessWidget {
+  const InspectorSummaryTreeControls({
+    Key key,
+    @required this.constraints,
+    @required this.isSearchVisible,
+    @required this.onRefreshInspectorPressed,
+    @required this.onSearchVisibleToggle,
+    @required this.searchFieldBuilder,
+  }) : super(key: key);
+
+  static const _searchBreakpoint = 375.0;
+
+  final bool isSearchVisible;
+  final BoxConstraints constraints;
+  final VoidCallback onRefreshInspectorPressed;
+  final VoidCallback onSearchVisibleToggle;
+  final Widget Function() searchFieldBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _controlsContainer(
+          context,
+          Row(
+            children: <Widget>[
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: denseSpacing),
+                child: Text('Widget Tree'),
+              ),
+              ...!isSearchVisible
+                  ? [
+                      const Spacer(),
+                      ToolbarAction(
+                        icon: Icons.search,
+                        onPressed: onSearchVisibleToggle,
+                        tooltip: 'Search Tree',
+                      ),
+                    ]
+                  : [
+                      constraints.maxWidth >= _searchBreakpoint
+                          ? _buildSearchControls()
+                          : const Spacer()
+                    ],
+              ToolbarAction(
+                icon: Icons.refresh,
+                onPressed: onRefreshInspectorPressed,
+                tooltip: 'Refresh Tree',
+              ),
+            ],
+          ),
+        ),
+        if (isSearchVisible && constraints.maxWidth < _searchBreakpoint)
+          _controlsContainer(
+            context,
+            Row(children: [_buildSearchControls()]),
+          ),
+      ],
+    );
+  }
+
+  Container _controlsContainer(BuildContext context, Widget child) {
+    return Container(
+      height: defaultButtonHeight +
+          (isDense() ? denseModeDenseSpacing : denseSpacing),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: defaultBorderSide(Theme.of(context)),
+        ),
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildSearchControls() {
+    return Expanded(
+      child: Container(
+        height: defaultTextFieldHeight,
+        child: searchFieldBuilder(),
+      ),
+    );
   }
 }
 

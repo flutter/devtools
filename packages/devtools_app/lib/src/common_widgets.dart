@@ -42,6 +42,9 @@ class PaddedDivider extends StatelessWidget {
   const PaddedDivider.thin({Key key})
       : padding = const EdgeInsets.only(bottom: 4.0);
 
+  PaddedDivider.vertical({Key key, double padding = densePadding})
+      : padding = EdgeInsets.symmetric(vertical: padding);
+
   /// The padding to place around the divider.
   final EdgeInsets padding;
 
@@ -119,6 +122,7 @@ class IconLabelButton extends StatelessWidget {
     this.elevatedButton = false,
     this.tooltip,
     this.tooltipPadding,
+    this.outlined = true,
   })  : assert((icon == null) != (imageIcon == null)),
         super(key: key);
 
@@ -140,6 +144,8 @@ class IconLabelButton extends StatelessWidget {
   final String tooltip;
 
   final EdgeInsetsGeometry tooltipPadding;
+
+  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
@@ -170,12 +176,23 @@ class IconLabelButton extends StatelessWidget {
         width: !includeText(context, minScreenWidthForTextBeforeScaling)
             ? buttonMinWidth
             : null,
-        child: OutlinedButton(
-          style: denseAwareOutlinedButtonStyle(
-              context, minScreenWidthForTextBeforeScaling),
-          onPressed: onPressed,
-          child: iconLabel,
-        ),
+        child: outlined
+            ? OutlinedButton(
+                style: denseAwareOutlinedButtonStyle(
+                  context,
+                  minScreenWidthForTextBeforeScaling,
+                ),
+                onPressed: onPressed,
+                child: iconLabel,
+              )
+            : TextButton(
+                onPressed: onPressed,
+                child: iconLabel,
+                style: denseAwareOutlinedButtonStyle(
+                  context,
+                  minScreenWidthForTextBeforeScaling,
+                ),
+              ),
       ),
     );
   }
@@ -1866,6 +1883,23 @@ class _DualValueListenableBuilderState<T, U>
       widget.firstListenable.value,
       widget.secondListenable.value,
       widget.child,
+    );
+  }
+}
+
+class SmallCircularProgressIndicator extends StatelessWidget {
+  const SmallCircularProgressIndicator({
+    Key key,
+    @required this.valueColor,
+  }) : super(key: key);
+
+  final Animation<Color> valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return CircularProgressIndicator(
+      strokeWidth: 2,
+      valueColor: valueColor,
     );
   }
 }

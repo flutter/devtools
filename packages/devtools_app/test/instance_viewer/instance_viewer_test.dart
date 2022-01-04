@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/eval_on_dart_library.dart';
+import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/provider/instance_viewer/instance_viewer.dart';
 import 'package:devtools_app/src/provider/instance_viewer/result.dart';
+import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_test/mocks.dart';
 import 'package:devtools_test/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -114,6 +117,10 @@ final enumValueInstance = AsyncValue.data(
 
 void main() {
   setUpAll(() => loadFonts());
+
+  setUp(() {
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
+  });
 
   group('InstanceViewer', () {
     testWidgets(

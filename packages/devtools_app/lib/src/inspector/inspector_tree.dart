@@ -15,6 +15,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import '../ui/search.dart';
 import '../utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
@@ -266,8 +267,8 @@ class InspectorTreeNode {
 }
 
 /// A row in the tree with all information required to render it.
-class InspectorTreeRow {
-  const InspectorTreeRow({
+class InspectorTreeRow with DataSearchStateMixin {
+  InspectorTreeRow({
     @required this.node,
     @required this.index,
     @required this.ticks,
@@ -308,4 +309,19 @@ class InspectorTreeConfig {
   final void Function(bool added) onClientActiveChange;
   final TreeEventCallback onExpand;
   final TreeEventCallback onHover;
+}
+
+enum SearchTargetType {
+  widget,
+  // TODO(https://github.com/flutter/devtools/issues/3489) implement other search scopes: details, all etc
+}
+
+extension SearchTargetTypeExtension on SearchTargetType {
+  String get name {
+    switch (this) {
+      case SearchTargetType.widget:
+      default:
+        return 'Widget';
+    }
+  }
 }

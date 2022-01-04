@@ -77,7 +77,7 @@ class LandingScreenSection extends StatelessWidget {
         ),
         const PaddedDivider(),
         child,
-        const PaddedDivider(padding: EdgeInsets.symmetric(vertical: 10.0)),
+        PaddedDivider.vertical(padding: 10.0),
       ],
     );
   }

@@ -72,8 +72,7 @@ class NetworkScreen extends Screen {
             width: smallProgressSize,
             height: smallProgressSize,
             child: recording
-                ? CircularProgressIndicator(
-                    strokeWidth: 2,
+                ? SmallCircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(color),
                   )
                 : const SizedBox(),

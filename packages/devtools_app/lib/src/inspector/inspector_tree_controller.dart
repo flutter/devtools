@@ -4,6 +4,7 @@
 
 library inspector_tree;
 
+import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
@@ -18,11 +19,16 @@ import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../debugger/debugger_controller.dart';
 import '../error_badge_manager.dart';
+import '../globals.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
+import '../ui/search.dart';
 import '../ui/utils.dart';
+import '../utils.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
+import 'inspector_breadcrumbs.dart';
+import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
 
 /// Presents a [TreeNode].
@@ -96,11 +102,14 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
   bool shouldShow() => widget.node.shouldShow;
 }
 
-class InspectorTreeController extends Object {
+class InspectorTreeController extends Object
+    with SearchControllerMixin<InspectorTreeRow> {
   /// Clients the controller notifies to trigger changes to the UI.
   final Set<InspectorControllerClient> _clients = {};
 
   InspectorTreeNode createNode() => InspectorTreeNode();
+
+  SearchTargetType _searchTarget = SearchTargetType.widget;
 
   void addClient(InspectorControllerClient value) {
     final firstClient = _clients.isEmpty;
@@ -133,9 +142,11 @@ class InspectorTreeController extends Object {
 
   InspectorTreeNode get root => _root;
   InspectorTreeNode _root;
+
   set root(InspectorTreeNode node) {
     setState(() {
       _root = node;
+      _populateSearchableCachedRows();
     });
   }
 
@@ -172,14 +183,36 @@ class InspectorTreeController extends Object {
   double lastContentWidth;
 
   final List<InspectorTreeRow> cachedRows = [];
+  InspectorTreeRow _cachedSelectedRow;
+
+  /// All cached rows of the tree.
+  ///
+  /// Similar to [cachedRows] but:
+  /// * contains every row in the tree (including collapsed rows)
+  /// * items don't change when nodes are expanded or collapsed
+  /// * items are populated only when root is changed
+  final _searchableCachedRows = <InspectorTreeRow>[];
+
+  void setSearchTarget(SearchTargetType searchTarget) {
+    _searchTarget = searchTarget;
+    refreshSearchMatches();
+  }
 
   // TODO: we should add a listener instead that clears the cache when the
   // root is marked as dirty.
   void _maybeClearCache() {
     if (root != null && root.isDirty) {
       cachedRows.clear();
+      _cachedSelectedRow = null;
       root.isDirty = false;
       lastContentWidth = null;
+    }
+  }
+
+  void _populateSearchableCachedRows() {
+    _searchableCachedRows.clear();
+    for (int i = 0; i < numRows; i++) {
+      _searchableCachedRows.add(getCachedRow(i));
     }
   }
 
@@ -191,11 +224,32 @@ class InspectorTreeController extends Object {
       cachedRows.add(null);
     }
     cachedRows[index] ??= root?.getRow(index);
-    return cachedRows[index];
+
+    final cachedRow = cachedRows[index];
+    cachedRow?.isSearchMatch =
+        _searchableCachedRows.safeGet(index)?.isSearchMatch ?? false;
+
+    if (cachedRow?.isSelected == true) {
+      _cachedSelectedRow = cachedRow;
+    }
+    return cachedRow;
   }
 
   double getRowOffset(int index) {
     return (getCachedRow(index)?.depth ?? 0) * columnWidth;
+  }
+
+  List<InspectorTreeNode> getPathFromSelectedRowToRoot() {
+    final selectedItem = _cachedSelectedRow?.node;
+    if (selectedItem == null) return [];
+
+    final pathToRoot = <InspectorTreeNode>[selectedItem];
+    InspectorTreeNode nextParentNode = selectedItem.parent;
+    while (nextParentNode != null) {
+      pathToRoot.add(nextParentNode);
+      nextParentNode = nextParentNode.parent;
+    }
+    return pathToRoot.reversed.toList();
   }
 
   set hover(InspectorTreeNode node) {
@@ -350,8 +404,12 @@ class InspectorTreeController extends Object {
   }
 
   void onSelectRow(InspectorTreeRow row) {
-    selection = row.node;
-    expandPath(row.node);
+    onSelectNode(row.node);
+  }
+
+  void onSelectNode(InspectorTreeNode node) {
+    selection = node;
+    expandPath(node);
   }
 
   Rect getBoundingBox(InspectorTreeRow row) {
@@ -542,6 +600,85 @@ class InspectorTreeController extends Object {
       }
     }
   }
+
+  /* Search support */
+  @override
+  void onMatchChanged(int index) {
+    onSelectRow(searchMatches.value[index]);
+  }
+
+  @override
+  Duration get debounceDelay => const Duration(milliseconds: 300);
+
+  void dispose() {
+    disposeSearch();
+  }
+
+  @override
+  List<InspectorTreeRow> matchesForSearch(
+    String search, {
+    bool searchPreviousMatches = false,
+  }) {
+    final matches = <InspectorTreeRow>[];
+
+    if (searchPreviousMatches) {
+      final previousMatches = searchMatches.value;
+      for (final previousMatch in previousMatches) {
+        if (previousMatch.node.diagnostic.searchValue
+            .caseInsensitiveContains(search)) {
+          matches.add(previousMatch);
+        }
+      }
+
+      if (matches.isNotEmpty) return matches;
+    }
+
+    int _debugStatsSearchOps = 0;
+    final _debugStatsWidgets = _searchableCachedRows.length;
+
+    if (search == null ||
+        search.isEmpty ||
+        serviceManager.inspectorService == null ||
+        serviceManager.inspectorService.isDisposed) {
+      debugPrint('Search completed, no search');
+      return matches;
+    }
+
+    debugPrint('Search started: ' + _searchTarget.toString());
+
+    for (final row in _searchableCachedRows) {
+      final diagnostic = row.node.diagnostic;
+      if (row.node == null || diagnostic == null) continue;
+
+      // Widget search begin
+      if (_searchTarget == SearchTargetType.widget) {
+        _debugStatsSearchOps++;
+        if (diagnostic.searchValue.caseInsensitiveContains(search)) {
+          matches.add(row);
+          continue;
+        }
+      }
+      // Widget search end
+    }
+
+    debugPrint('Search completed with ' +
+        _debugStatsWidgets.toString() +
+        ' widgets, ' +
+        _debugStatsSearchOps.toString() +
+        ' ops');
+
+    return matches;
+  }
+}
+
+extension RemoteDiagnosticsNodeExtension on RemoteDiagnosticsNode {
+  String get searchValue {
+    final description = toStringShort();
+    final textPreview = json['textPreview'];
+    return textPreview is String
+        ? '$description ${textPreview.replaceAll('\n', ' ')}'
+        : description;
+  }
 }
 
 abstract class InspectorControllerClient {
@@ -557,11 +694,14 @@ class InspectorTree extends StatefulWidget {
     Key key,
     @required this.controller,
     @required this.debuggerController,
+    this.inspectorTreeController,
     this.isSummaryTree = false,
     this.widgetErrors,
-  }) : super(key: key);
+  })  : assert(isSummaryTree == (inspectorTreeController == null)),
+        super(key: key);
 
   final InspectorTreeController controller;
+  final InspectorTreeController inspectorTreeController;
   final DebuggerController debuggerController;
   final bool isSummaryTree;
   final LinkedHashMap<String, InspectableWidgetError> widgetErrors;
@@ -818,7 +958,7 @@ class _InspectorTreeState extends State<InspectorTree>
     return LayoutBuilder(
       builder: (context, constraints) {
         final viewportWidth = constraints.maxWidth;
-        return Scrollbar(
+        final Widget tree = Scrollbar(
           isAlwaysShown: true,
           controller: _scrollControllerX,
           child: SingleChildScrollView(
@@ -851,7 +991,7 @@ class _InspectorTreeState extends State<InspectorTree>
                             return SizedBox(height: rowHeight);
                           }
                           final InspectorTreeRow row =
-                              controller.root?.getRow(index);
+                              controller.getCachedRow(index);
                           final inspectorRef =
                               row.node.diagnostic?.valueRef?.id;
                           return _InspectorTreeRowWidget(
@@ -877,6 +1017,24 @@ class _InspectorTreeState extends State<InspectorTree>
             ),
           ),
         );
+
+        final bool shouldShowBreadcrumbs = !widget.isSummaryTree;
+        if (shouldShowBreadcrumbs) {
+          final parents =
+              widget.inspectorTreeController.getPathFromSelectedRowToRoot();
+          return Column(
+            children: [
+              InspectorBreadcrumbNavigator(
+                items: parents,
+                onTap: (node) =>
+                    widget.inspectorTreeController.onSelectNode(node),
+              ),
+              Expanded(child: tree),
+            ],
+          );
+        }
+
+        return tree;
       },
     );
   }
@@ -993,7 +1151,8 @@ class InspectorRowContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double currentX = controller.getDepthIndent(row.depth) - columnWidth;
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     if (row == null) {
       return const SizedBox();
@@ -1010,48 +1169,67 @@ class InspectorRowContent extends StatelessWidget {
 
     Widget rowWidget = Padding(
       padding: EdgeInsets.only(left: currentX),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          node.showExpandCollapse
-              ? InkWell(
-                  onTap: onToggle,
-                  child: RotationTransition(
-                    turns: expandArrowAnimation,
-                    child: Icon(
-                      Icons.expand_more,
-                      size: defaultIconSize,
+      child: ValueListenableBuilder<String>(
+        valueListenable: controller.searchNotifier,
+        builder: (context, searchValue, _) {
+          return Opacity(
+            opacity: searchValue.isEmpty || row.isSearchMatch ? 1 : 0.2,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                node.showExpandCollapse
+                    ? InkWell(
+                        onTap: onToggle,
+                        child: RotationTransition(
+                          turns: expandArrowAnimation,
+                          child: Icon(
+                            Icons.expand_more,
+                            size: defaultIconSize,
+                          ),
+                        ),
+                      )
+                    : const SizedBox(
+                        width: defaultSpacing,
+                        height: defaultSpacing,
+                      ),
+                Expanded(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: backgroundColor,
+                      border:
+                          hasError ? Border.all(color: devtoolsError) : null,
+                    ),
+                    child: InkWell(
+                      onTap: () {
+                        controller.onSelectRow(row);
+                        // TODO(gmoothart): It may be possible to capture the tap
+                        // and request focus directly from the InspectorTree. Then
+                        // we wouldn't need this.
+                        controller.requestFocus();
+                      },
+                      child: Container(
+                        height: rowHeight,
+                        child: DiagnosticsNodeDescription(
+                          node.diagnostic,
+                          isSelected: row.isSelected,
+                          searchValue: searchValue,
+                          errorText: error?.errorMessage,
+                          debuggerController: debuggerController,
+                          nodeDescriptionHighlightStyle:
+                              searchValue.isEmpty || !row.isSearchMatch
+                                  ? inspector_text_styles.regular
+                                  : row.isSelected
+                                      ? theme.searchMatchHighlightStyleFocused
+                                      : theme.searchMatchHighlightStyle,
+                        ),
+                      ),
                     ),
                   ),
-                )
-              : const SizedBox(width: defaultSpacing, height: defaultSpacing),
-          Expanded(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: backgroundColor,
-                border: hasError ? Border.all(color: devtoolsError) : null,
-              ),
-              child: InkWell(
-                onTap: () {
-                  controller.onSelectRow(row);
-                  // TODO(gmoothart): It may be possible to capture the tap
-                  // and request focus directly from the InspectorTree. Then
-                  // we wouldn't need this.
-                  controller.requestFocus();
-                },
-                child: Container(
-                  height: rowHeight,
-                  child: DiagnosticsNodeDescription(
-                    node.diagnostic,
-                    isSelected: row.isSelected,
-                    errorText: error?.errorMessage,
-                    debuggerController: debuggerController,
-                  ),
                 ),
-              ),
+              ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
 

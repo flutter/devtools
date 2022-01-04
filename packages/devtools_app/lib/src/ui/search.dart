@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
+import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +13,7 @@ import 'package:flutter/services.dart';
 import '../auto_dispose.dart';
 import '../auto_dispose_mixin.dart';
 import '../common_widgets.dart';
+import '../config_specific/logger/logger.dart';
 import '../theme.dart';
 import '../trees.dart';
 import '../ui/utils.dart';
@@ -20,14 +23,21 @@ import '../utils.dart';
 const defaultTopMatchesLimit = 10;
 int topMatchesLimit = defaultTopMatchesLimit;
 
+const double _searchControlDividerHeight = 24.0;
+
 mixin SearchControllerMixin<T extends DataSearchStateMixin> {
   final _searchNotifier = ValueNotifier<String>('');
+  final _searchInProgress = ValueNotifier<bool>(false);
 
   /// Notify that the search has changed.
   ValueListenable get searchNotifier => _searchNotifier;
+  ValueListenable get searchInProgressNotifier => _searchInProgress;
 
   /// Last X position of caret in search field, used for pop-up position.
   double xPosition = 0.0;
+
+  CancelableOperation<void> _searchOperation;
+  Timer _searchDebounce;
 
   set search(String value) {
     final previousSearchValue = _searchNotifier.value;
@@ -38,24 +48,75 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
     refreshSearchMatches(searchPreviousMatches: shouldSearchPreviousMatches);
   }
 
+  set searchInProgress(bool searchInProgress) {
+    _searchInProgress.value = searchInProgress;
+  }
+
   String get search => _searchNotifier.value;
+  bool get isSearchInProgress => _searchInProgress.value;
 
   final _searchMatches = ValueNotifier<List<T>>([]);
 
   ValueListenable<List<T>> get searchMatches => _searchMatches;
 
   void refreshSearchMatches({bool searchPreviousMatches = false}) {
-    final matches =
-        (_searchNotifier.value != null && _searchNotifier.value.isNotEmpty)
-            ? matchesForSearch(
-                _searchNotifier.value,
-                searchPreviousMatches: searchPreviousMatches,
-              )
-            : <T>[];
-    updateMatches(matches);
+    if (_searchNotifier.value != null && _searchNotifier.value.isNotEmpty) {
+      if (debounceDelay != null) {
+        _startDebounceTimer(
+          search,
+          searchPreviousMatches: searchPreviousMatches,
+        );
+      } else {
+        final matches = matchesForSearch(
+          _searchNotifier.value,
+          searchPreviousMatches: searchPreviousMatches,
+        );
+        _updateMatches(matches);
+      }
+    } else {
+      _updateMatches(<T>[]);
+    }
   }
 
-  void updateMatches(List<T> matches) {
+  void _startDebounceTimer(
+    String search, {
+    @required bool searchPreviousMatches,
+  }) {
+    searchInProgress = true;
+
+    if (_searchDebounce?.isActive ?? false) {
+      _searchDebounce.cancel();
+    }
+
+    _searchDebounce = Timer(
+      search.isEmpty ? Duration.zero : debounceDelay,
+      () async {
+        // Abort any ongoing search operations and start a new one
+        try {
+          await _searchOperation?.cancel();
+        } catch (e) {
+          log(e, LogLevel.error);
+        }
+        searchInProgress = true;
+
+        // Start new search operation
+        final future = Future(() {
+          return matchesForSearch(
+            _searchNotifier.value,
+            searchPreviousMatches: searchPreviousMatches,
+          );
+        }).then((matches) {
+          searchInProgress = false;
+          _updateMatches(matches);
+        });
+        _searchOperation = CancelableOperation.fromFuture(future);
+        await _searchOperation.value;
+        searchInProgress = false;
+      },
+    );
+  }
+
+  void _updateMatches(List<T> matches) {
     for (final previousMatch in _searchMatches.value) {
       previousMatch.isSearchMatch = false;
     }
@@ -99,17 +160,26 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
 
   void _updateActiveSearchMatch() {
     // [matchIndex] is 1-based. Subtract 1 for the 0-based list [searchMatches].
-    final activeMatchIndex = matchIndex.value - 1;
+    int activeMatchIndex = matchIndex.value - 1;
     if (activeMatchIndex < 0) {
       _activeSearchMatch.value?.isActiveSearchMatch = false;
       _activeSearchMatch.value = null;
       return;
     }
-    assert(activeMatchIndex < searchMatches.value.length);
+    if (searchMatches.value.isNotEmpty &&
+        activeMatchIndex >= searchMatches.value.length) {
+      activeMatchIndex = 0;
+      matchIndex.value = 1; // first item because [matchIndex] us 1-based
+    }
     _activeSearchMatch.value?.isActiveSearchMatch = false;
     _activeSearchMatch.value = searchMatches.value[activeMatchIndex]
       ..isActiveSearchMatch = true;
+    onMatchChanged(activeMatchIndex);
   }
+
+  /// Delay to reduce the amount of search queries
+  /// Duration.zero (default) disables debounce
+  Duration get debounceDelay => null;
 
   List<T> matchesForSearch(
     String search, {
@@ -117,9 +187,19 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
   }) =>
       [];
 
+  /// Called when selected match index changes. Index is 0 based
+  void onMatchChanged(int index) {}
+
   void resetSearch() {
     _searchNotifier.value = '';
     refreshSearchMatches();
+  }
+
+  void disposeSearch() {
+    _searchOperation?.cancel();
+    if (_searchDebounce?.isActive ?? false) {
+      _searchDebounce.cancel();
+    }
   }
 }
 
@@ -595,6 +675,8 @@ mixin SearchFieldMixin<T extends StatefulWidget>
   SelectAutoComplete _onSelection;
   void Function() _closeHandler;
 
+  FocusNode get searchFieldFocusNode => _searchFieldFocusNode;
+
   @override
   void initState() {
     super.initState();
@@ -696,6 +778,8 @@ mixin SearchFieldMixin<T extends StatefulWidget>
     @required bool shouldRequestFocus,
     bool supportsNavigation = false,
     VoidCallback onClose,
+    Widget prefix,
+    Widget suffix,
   }) {
     return _SearchField(
       controller: controller,
@@ -706,6 +790,8 @@ mixin SearchFieldMixin<T extends StatefulWidget>
       searchTextFieldController: searchTextFieldController,
       supportsNavigation: supportsNavigation,
       onClose: onClose,
+      prefix: prefix,
+      suffix: suffix,
     );
   }
 
@@ -757,6 +843,8 @@ class _SearchField extends StatelessWidget {
     this.decoration,
     this.onClose,
     this.overlayXPositionBuilder,
+    this.prefix,
+    this.suffix,
   });
 
   final SearchControllerMixin controller;
@@ -771,6 +859,8 @@ class _SearchField extends StatelessWidget {
   final InputDecoration decoration;
   final VoidCallback onClose;
   final OverlayXPositionBuilder overlayXPositionBuilder;
+  final Widget prefix;
+  final Widget suffix;
 
   @override
   Widget build(BuildContext context) {
@@ -807,13 +897,32 @@ class _SearchField extends StatelessWidget {
             labelStyle: TextStyle(color: searchColor),
             border: const OutlineInputBorder(),
             labelText: label ?? 'Search',
-            suffix: (supportsNavigation || onClose != null)
-                ? _SearchFieldSuffix(
-                    controller: controller,
-                    supportsNavigation: supportsNavigation,
-                    onClose: onClose,
+            prefix: prefix != null
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      prefix,
+                      SizedBox(
+                        height: _searchControlDividerHeight,
+                        width: defaultIconSize,
+                        child: Transform.rotate(
+                          angle: degToRad(90),
+                          child: PaddedDivider.vertical(),
+                        ),
+                      ),
+                    ],
                   )
                 : null,
+            suffix: suffix != null
+                ? suffix
+                : (supportsNavigation || onClose != null)
+                    ? _SearchFieldSuffix(
+                        controller: controller,
+                        supportsNavigation: supportsNavigation,
+                        onClose: onClose,
+                      )
+                    : null,
           ),
       cursorColor: searchColor,
     );
@@ -823,6 +932,43 @@ class _SearchField extends StatelessWidget {
     }
 
     return searchField;
+  }
+}
+
+class SearchDropdown<T> extends StatelessWidget {
+  const SearchDropdown({
+    Key key,
+    this.value,
+    this.onChanged,
+    this.isDense = false,
+    this.style,
+    this.selectedItemBuilder,
+    this.items,
+    this.onTap,
+  }) : super(key: key);
+
+  final T value;
+  final ValueChanged<T> onChanged;
+  final bool isDense;
+  final TextStyle style;
+  final DropdownButtonBuilder selectedItemBuilder;
+  final List<DropdownMenuItem<T>> items;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonHideUnderline(
+      child: DropdownButton<T>(
+        iconSize: defaultIconSize,
+        value: value,
+        onTap: onTap,
+        onChanged: onChanged,
+        isDense: true,
+        style: style,
+        selectedItemBuilder: selectedItemBuilder,
+        items: items,
+      ),
+    );
   }
 }
 
@@ -1031,33 +1177,49 @@ class SearchNavigationControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: controller.searchMatches,
-      builder: (context, matches, _) {
-        final numMatches = matches.length;
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            _matchesStatus(numMatches),
-            SizedBox(
-              height: 24.0,
-              width: defaultIconSize,
-              child: Transform.rotate(
-                angle: degToRad(90),
-                child: const PaddedDivider(
-                  padding: EdgeInsets.symmetric(vertical: densePadding),
-                ),
-              ),
-            ),
-            inputDecorationSuffixButton(Icons.keyboard_arrow_up,
-                numMatches > 1 ? controller.previousMatch : null),
-            inputDecorationSuffixButton(Icons.keyboard_arrow_down,
-                numMatches > 1 ? controller.nextMatch : null),
-            if (onClose != null) closeSearchDropdownButton(onClose)
-          ],
-        );
-      },
-    );
+        valueListenable: controller.searchMatches,
+        builder: (context, matches, _) {
+          final numMatches = matches.length;
+          return ValueListenableBuilder(
+            valueListenable: controller.searchInProgressNotifier,
+            builder: (context, isSearchInProgress, _) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Opacity(
+                    opacity: isSearchInProgress ? 1 : 0,
+                    child: SizedBox(
+                      width: scaleByFontFactor(smallProgressSize),
+                      height: scaleByFontFactor(smallProgressSize),
+                      child: isSearchInProgress
+                          ? SmallCircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Theme.of(context).textTheme.bodyText2.color,
+                              ),
+                            )
+                          : const SizedBox(),
+                    ),
+                  ),
+                  _matchesStatus(numMatches),
+                  SizedBox(
+                    height: _searchControlDividerHeight,
+                    width: defaultIconSize,
+                    child: Transform.rotate(
+                      angle: degToRad(90),
+                      child: PaddedDivider.vertical(),
+                    ),
+                  ),
+                  inputDecorationSuffixButton(Icons.keyboard_arrow_up,
+                      numMatches > 1 ? controller.previousMatch : null),
+                  inputDecorationSuffixButton(Icons.keyboard_arrow_down,
+                      numMatches > 1 ? controller.nextMatch : null),
+                  if (onClose != null) closeSearchDropdownButton(onClose)
+                ],
+              );
+            },
+          );
+        });
   }
 
   Widget _matchesStatus(int numMatches) {
