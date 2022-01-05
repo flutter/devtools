@@ -112,8 +112,6 @@ class InspectorTreeController extends Object
 
   InspectorTreeNode createNode() => InspectorTreeNode();
 
-  SearchTargetType _searchTarget = SearchTargetType.widget;
-
   void addClient(InspectorControllerClient value) {
     final firstClient = _clients.isEmpty;
     _clients.add(value);
@@ -1221,6 +1219,7 @@ class InspectorRowContent extends StatelessWidget {
     Widget rowWidget = Padding(
       padding: EdgeInsets.only(left: currentX),
       child: ValueListenableBuilder<String>(
+        // TODO find better solution than passing searchNotifier here
         valueListenable: searchNotifier ?? controller.searchNotifier,
         builder: (context, searchValue, _) {
           return Opacity(
