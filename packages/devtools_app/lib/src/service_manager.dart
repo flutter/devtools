@@ -559,6 +559,8 @@ class IsolateManager extends Disposer {
   ValueListenable<IsolateRef> get mainIsolate => _mainIsolate;
   final _mainIsolate = ValueNotifier<IsolateRef>(null);
 
+  final _isolateRunnableCompleters = <String, Completer<void>>{};
+
   Future<void> init(List<IsolateRef> isolates) async {
     // Re-initialize isolates when VM developer mode is enabled/disabled to
     // display/hide system isolates.
@@ -627,7 +629,17 @@ class IsolateManager extends Disposer {
 
   Future<void> _loadIsolateState(IsolateRef isolateRef) async {
     final service = _service;
-    final isolate = await _service.getIsolate(isolateRef.id);
+    var isolate = await _service.getIsolate(isolateRef.id);
+    if (!isolate.runnable) {
+      final isolateRunnableCompleter = _isolateRunnableCompleters.putIfAbsent(
+        isolate.id,
+        () => Completer<void>(),
+      );
+      if (!isolateRunnableCompleter.isCompleted) {
+        await isolateRunnableCompleter.future;
+        isolate = await _service.getIsolate(isolate.id);
+      }
+    }
     if (service != _service) return;
     final state = _isolateStates[isolateRef];
     if (state != null) {
@@ -638,8 +650,13 @@ class IsolateManager extends Disposer {
 
   Future<void> _handleIsolateEvent(Event event) async {
     _sendToMessageBus(event);
-
-    if (event.kind == EventKind.kIsolateStart &&
+    if (event.kind == EventKind.kIsolateRunnable) {
+      final isolateRunnable = _isolateRunnableCompleters.putIfAbsent(
+        event.isolate.id,
+        () => Completer<void>(),
+      );
+      isolateRunnable.complete();
+    } else if (event.kind == EventKind.kIsolateStart &&
         !event.isolate.isSystemIsolate) {
       await _registerIsolate(event.isolate);
       _isolateCreatedController.add(event.isolate);
@@ -667,6 +684,7 @@ class IsolateManager extends Disposer {
         _selectedIsolate.value =
             _isolateStates.isEmpty ? null : _isolateStates.keys.first;
       }
+      _isolateRunnableCompleters.remove(event.isolate.id);
     }
   }
 
@@ -728,6 +746,7 @@ class IsolateManager extends Disposer {
     _isolateIndexMap.clear();
     _clearIsolateStates();
     _mainIsolate.value = null;
+    _isolateRunnableCompleters.clear();
   }
 
   void _clearIsolateStates() {
