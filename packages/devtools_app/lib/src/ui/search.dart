@@ -69,7 +69,7 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
           searchPreviousMatches: searchPreviousMatches,
         );
       } else {
-        final matches = await matchesForSearch(
+        final matches = matchesForSearch(
           _searchNotifier.value,
           searchPreviousMatches: searchPreviousMatches,
         );
@@ -181,11 +181,18 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
   /// Duration.zero (default) disables debounce
   Duration get debounceDelay => null;
 
+  /// Delay to reduce the amount of search queries
+  /// Duration.zero (default) disables debounce
+  Duration get debounceDelay => null;
+
   Future<List<T>> matchesForSearch(
     String search, {
     bool searchPreviousMatches = false,
   }) async =>
       [];
+
+  /// Called when selected match index changes. Index is 0 based
+  void onMatchChanged(int index) {}
 
   /// Called when selected match index changes. Index is 0 based
   void onMatchChanged(int index) {}

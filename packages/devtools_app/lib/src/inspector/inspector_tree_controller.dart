@@ -28,6 +28,7 @@ import '../utils.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
 import 'inspector_breadcrumbs.dart';
+import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
 
 /// Presents a [TreeNode].
@@ -110,6 +111,8 @@ class InspectorTreeController extends Object
   final Set<InspectorControllerClient> _clients = {};
 
   InspectorTreeNode createNode() => InspectorTreeNode();
+
+  SearchTargetType _searchTarget = SearchTargetType.widget;
 
   void addClient(InspectorControllerClient value) {
     final firstClient = _clients.isEmpty;
@@ -688,9 +691,9 @@ class InspectorTreeController extends Object
   }
 
   Future<bool> _hasPropertyMatch(
-    RemoteDiagnosticsNode diagnostic,
-    String search,
-  ) async {
+      RemoteDiagnosticsNode diagnostic,
+      String search,
+      ) async {
     List<RemoteDiagnosticsNode> properties = diagnostic.inlineProperties;
     if (diagnostic.inlineProperties?.isNotEmpty != true) {
       final service = diagnostic.inspectorService;
