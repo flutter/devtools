@@ -640,11 +640,17 @@ class InspectorTreeController extends Object
         search.isEmpty ||
         serviceManager.inspectorService == null ||
         serviceManager.inspectorService.isDisposed) {
-      debugPrint('Search completed, no search');
+      assert(() {
+        debugPrint('Search completed, no search');
+        return true;
+      }());
       return matches;
     }
 
-    debugPrint('Search started: ' + _searchTarget.toString());
+    assert(() {
+      debugPrint('Search started: ' + _searchTarget.toString());
+      return true;
+    }());
 
     for (final row in _searchableCachedRows) {
       final diagnostic = row.node.diagnostic;
@@ -661,11 +667,14 @@ class InspectorTreeController extends Object
       // Widget search end
     }
 
-    debugPrint('Search completed with ' +
-        _debugStatsWidgets.toString() +
-        ' widgets, ' +
-        _debugStatsSearchOps.toString() +
-        ' ops');
+    assert(() {
+      debugPrint('Search completed with ' +
+          _debugStatsWidgets.toString() +
+          ' widgets, ' +
+          _debugStatsSearchOps.toString() +
+          ' ops');
+      return true;
+    }());
 
     return matches;
   }
