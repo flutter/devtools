@@ -571,7 +571,7 @@ class FrameTimelineEventData {
 
   bool get wellFormed => uiEvent != null && rasterEvent != null;
 
-  bool get isEmpty => uiEvent == null && rasterEvent == null;
+  bool get isNotEmpty => uiEvent != null || rasterEvent != null;
 
   final time = TimeRange();
 

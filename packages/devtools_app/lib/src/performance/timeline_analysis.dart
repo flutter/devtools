@@ -34,7 +34,8 @@ class TimelineAnalysisHeader extends StatelessWidget {
         (controller.selectedFrame.value
                 ?.isUiJanky(controller.displayRefreshRate.value) ??
             false) &&
-        (!(controller.selectedFrame.value?.timelineEventData?.isEmpty ?? true));
+        (controller.selectedFrame.value?.timelineEventData?.isNotEmpty ??
+            false);
     return ValueListenableBuilder(
       valueListenable: controller.analysisTabs,
       builder: (context, tabs, _) {
