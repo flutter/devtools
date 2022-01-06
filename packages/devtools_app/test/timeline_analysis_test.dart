@@ -13,6 +13,7 @@ import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/performance/timeline_analysis.dart';
 import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_test/mocks.dart';
 import 'package:devtools_test/performance_test_data.dart';
 import 'package:devtools_test/wrappers.dart';
@@ -124,6 +125,11 @@ void main() {
 
         // This frame has UI jank.
         final frame0 = jankyFrame.shallowCopy();
+        frame0.timelineEventData
+          ..setEventFlow(
+              event: goldenUiTimelineEvent, type: TimelineEventType.ui)
+          ..setEventFlow(
+              event: goldenRasterTimelineEvent, type: TimelineEventType.raster);
 
         controller = PerformanceController()..data = PerformanceData();
         await controller.toggleSelectedFrame(frame0);
@@ -145,6 +151,12 @@ void main() {
 
         // This frame has UI jank.
         final frame0 = jankyFrame.shallowCopy();
+        frame0.timelineEventData
+          ..setEventFlow(
+              event: goldenUiTimelineEvent, type: TimelineEventType.ui)
+          ..setEventFlow(
+              event: goldenRasterTimelineEvent, type: TimelineEventType.raster);
+
         controller = PerformanceController()..data = PerformanceData();
         await controller.toggleSelectedFrame(frame0);
 

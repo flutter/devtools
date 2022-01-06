@@ -171,7 +171,9 @@ class FlutterFrameAnalysisView extends StatelessWidget {
         children: [
           // TODO(kenz): add IntelligentFrameFindings here
           // TODO(kenz): handle missing timeline events.
-          FrameTimeVisualizer(frameAnalysis: frameAnalysis),
+          Expanded(
+            child: FrameTimeVisualizer(frameAnalysis: frameAnalysis),
+          ),
         ],
       ),
     );
