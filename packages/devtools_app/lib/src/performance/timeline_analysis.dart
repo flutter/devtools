@@ -9,6 +9,7 @@ import '../common_widgets.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/utils.dart';
+import '../utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
@@ -32,6 +33,8 @@ class TimelineAnalysisHeader extends StatelessWidget {
     final showFrameAnalysisButton = frameAnalysisSupported &&
         (controller.selectedFrame.value
                 ?.isUiJanky(controller.displayRefreshRate.value) ??
+            false) &&
+        (controller.selectedFrame.value?.timelineEventData?.isNotEmpty ??
             false);
     return ValueListenableBuilder(
       valueListenable: controller.analysisTabs,
@@ -156,15 +159,223 @@ class FlutterFrameAnalysisTab extends StatelessWidget {
 class FlutterFrameAnalysisView extends StatelessWidget {
   const FlutterFrameAnalysisView({
     Key key,
-    @required this.frame,
+    @required this.frameAnalysis,
   }) : super(key: key);
 
-  final FlutterFrame frame;
+  final FrameAnalysis frameAnalysis;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('Analysis for frame ${frame.id} - Coming Soon'),
+    return Padding(
+      padding: const EdgeInsets.all(defaultSpacing),
+      child: Column(
+        children: [
+          // TODO(kenz): add IntelligentFrameFindings here
+          // TODO(kenz): handle missing timeline events.
+          Expanded(
+            child: FrameTimeVisualizer(frameAnalysis: frameAnalysis),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class FrameTimeVisualizer extends StatefulWidget {
+  const FrameTimeVisualizer({
+    Key key,
+    @required this.frameAnalysis,
+  }) : super(key: key);
+
+  final FrameAnalysis frameAnalysis;
+
+  @override
+  State<FrameTimeVisualizer> createState() => _FrameTimeVisualizerState();
+}
+
+class _FrameTimeVisualizerState extends State<FrameTimeVisualizer> {
+  static const _build = 'Build';
+
+  static const _layout = 'Layout';
+
+  static const _paint = 'Paint';
+
+  static const _raster = 'Raster';
+
+  String _selectedBlockTitle;
+
+  @override
+  void initState() {
+    super.initState();
+    // TODO(kenz): automatically select the most expensive part of the frame.
+    _selectedBlockTitle = _build;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO(kenz): calculate ratios to use as flex values. This will be a bit
+    // tricky because sometimes the Build event(s) are children of Layout.
+    // final buildTimeRatio = widget.frameAnalysis.buildTimeRatio();
+    // final layoutTimeRatio = widget.frameAnalysis.layoutTimeRatio();
+    // final paintTimeRatio = widget.frameAnalysis.paintTimeRatio();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('UI phases:'),
+        const SizedBox(height: denseSpacing),
+        Row(
+          children: [
+            Flexible(
+              child: FrameTimeVisualizerBlock(
+                label: _build,
+                icon: Icons.build,
+                duration: widget.frameAnalysis.buildTime,
+                isSelected: _selectedBlockTitle == _build,
+                onSelected: _onBlockSelected,
+              ),
+            ),
+            Flexible(
+              child: FrameTimeVisualizerBlock(
+                label: _layout,
+                icon: Icons.auto_awesome_mosaic,
+                duration: widget.frameAnalysis.layoutTime,
+                isSelected: _selectedBlockTitle == _layout,
+                onSelected: _onBlockSelected,
+              ),
+            ),
+            Flexible(
+              fit: FlexFit.tight,
+              child: FrameTimeVisualizerBlock(
+                label: _paint,
+                icon: Icons.format_paint,
+                duration: widget.frameAnalysis.paintTime,
+                isSelected: _selectedBlockTitle == _paint,
+                onSelected: _onBlockSelected,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: denseSpacing),
+        const Text('Raster phase:'),
+        const SizedBox(height: denseSpacing),
+        Row(
+          children: [
+            Expanded(
+              child: FrameTimeVisualizerBlock(
+                label: _raster,
+                icon: Icons.grid_on,
+                duration: widget.frameAnalysis.frame.timelineEventData
+                        .rasterEvent?.time?.duration ??
+                    Duration.zero,
+                isSelected: _selectedBlockTitle == _raster,
+                onSelected: _onBlockSelected,
+              ),
+            )
+          ],
+        ),
+        const SizedBox(height: defaultSpacing),
+        Expanded(
+          child: FrameSectionProfile(selectedSection: _selectedBlockTitle),
+        ),
+      ],
+    );
+  }
+
+  void _onBlockSelected(String blockName) {
+    setState(() {
+      _selectedBlockTitle = blockName;
+    });
+  }
+}
+
+class FrameTimeVisualizerBlock extends StatelessWidget {
+  const FrameTimeVisualizerBlock({
+    Key key,
+    @required this.label,
+    @required this.icon,
+    @required this.duration,
+    @required this.isSelected,
+    @required this.onSelected,
+  }) : super(key: key);
+
+  static const _height = 30.0;
+
+  static const _selectedIndicatorHeight = 4.0;
+
+  static const _backgroundColor = ThemedColor(
+    light: Color(0xFFEEEEEE),
+    dark: Color(0xFF3C4043),
+  );
+
+  static const _selectedBackgroundColor = ThemedColor(
+    light: Color(0xFFFFFFFF),
+    dark: Color(0xFF5F6367),
+  );
+
+  final String label;
+
+  final IconData icon;
+
+  final Duration duration;
+
+  final bool isSelected;
+
+  final void Function(String) onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final durationText = msText(duration);
+    return InkWell(
+      onTap: () => onSelected(label),
+      child: Stack(
+        alignment: AlignmentDirectional.bottomStart,
+        children: [
+          Container(
+            color: isSelected
+                ? _selectedBackgroundColor.colorFor(colorScheme)
+                : _backgroundColor.colorFor(colorScheme),
+            height: _height,
+            padding: const EdgeInsets.symmetric(horizontal: densePadding),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: defaultIconSize,
+                ),
+                const SizedBox(width: denseSpacing),
+                Text('$label - $durationText'),
+              ],
+            ),
+          ),
+          if (isSelected)
+            Container(
+              color: defaultSelectionColor,
+              height: _selectedIndicatorHeight,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class FrameSectionProfile extends StatelessWidget {
+  const FrameSectionProfile({
+    Key key,
+    this.selectedSection,
+  }) : super(key: key);
+
+  // TODO(kenz): pass the event to this section instead of the title.
+  final String selectedSection;
+
+  @override
+  Widget build(BuildContext context) {
+    return RoundedOutlinedBorder(
+      child: Center(
+        child: Text(
+            'flame chart / bottom up chart showing timeline events for $selectedSection'),
+      ),
     );
   }
 }
@@ -210,9 +421,12 @@ class AnalyzeFrameButton extends StatelessWidget {
 // TODO(kenz): in the future this could be expanded to show data for an
 // arbitrary range of timeline data, not just a single flutter frame.
 class FlutterFrameAnalysisTabData {
-  FlutterFrameAnalysisTabData(this.title, this.frame);
+  FlutterFrameAnalysisTabData(this.title, FlutterFrame frame)
+      : frameAnalysis = FrameAnalysis(frame);
 
   final String title;
 
-  final FlutterFrame frame;
+  final FrameAnalysis frameAnalysis;
+
+  FlutterFrame get frame => frameAnalysis.frame;
 }

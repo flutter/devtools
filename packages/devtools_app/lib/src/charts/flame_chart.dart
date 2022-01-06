@@ -26,7 +26,7 @@ import '../utils.dart';
 const double rowPadding = 2.0;
 // Flame chart rows contain text so are not readable if they do not scale with
 // the font factor.
-double get rowHeight => scaleByFontFactor(25.0);
+double get rowHeight => scaleByFontFactor(22.0);
 double get rowHeightWithPadding => rowHeight + rowPadding;
 
 // This spacing needs to be scaled by the font factor otherwise section
@@ -1386,7 +1386,7 @@ class TimelineGridPainter extends FlameChartPainter {
     // of text widgets for the timestamps instead of painting them.
     final xOffset = lineX - textPainter.width - timestampOffset;
     if (xOffset > 0) {
-      textPainter.paint(canvas, Offset(xOffset, 5.0));
+      textPainter.paint(canvas, Offset(xOffset, rowPadding));
     }
   }
 

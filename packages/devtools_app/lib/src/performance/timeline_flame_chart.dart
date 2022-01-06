@@ -77,7 +77,9 @@ class _TimelineAnalysisContainerState extends State<TimelineAnalysisContainer>
   Widget build(BuildContext context) {
     Widget content;
     if (frameAnalysisSupported && selectedTab != null) {
-      content = FlutterFrameAnalysisView(frame: selectedTab.frame);
+      content = FlutterFrameAnalysisView(
+        frameAnalysis: selectedTab.frameAnalysis,
+      );
     } else {
       final timelineEmpty = (controller.data?.isEmpty ?? true) ||
           controller.data.eventGroups.isEmpty;
