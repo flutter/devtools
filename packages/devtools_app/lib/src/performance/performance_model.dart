@@ -571,6 +571,8 @@ class FrameTimelineEventData {
 
   bool get wellFormed => uiEvent != null && rasterEvent != null;
 
+  bool get isEmpty => uiEvent == null && rasterEvent == null;
+
   final time = TimeRange();
 
   void setEventFlow({
@@ -1180,4 +1182,111 @@ class AsyncTimelineEvent extends TimelineEvent {
     }
     return false;
   }
+}
+
+class FrameAnalysis {
+  FrameAnalysis(this.frame);
+
+  final FlutterFrame frame;
+
+  static const buildEventName = 'Build';
+
+  static const layoutEventName = 'Layout';
+
+  static const paintEventName = 'Paint';
+
+  /// For a single flutter frame there can be more than one build event.
+  ///
+  /// Example:
+  /// [-----------------Layout-----------------]
+  ///    [--Build--]     [----Build----]
+  List<SyncTimelineEvent> get buildEvents {
+    if (frame.timelineEventData.uiEvent == null) return [];
+    if (_buildEvents != null) return _buildEvents;
+
+    final firstBuildEvent = frame.timelineEventData.uiEvent
+        .firstChildWithCondition(
+            (event) => event.name.caseInsensitiveEquals(buildEventName));
+    if (firstBuildEvent != null) {
+      final buildParent = firstBuildEvent.parent;
+      if (buildParent != null) {
+        return _buildEvents = buildParent.children
+            .where((child) => child.name.caseInsensitiveEquals(buildEventName))
+            .cast<SyncTimelineEvent>()
+            .toList();
+      }
+    }
+    return _buildEvents = [];
+  }
+
+  List<SyncTimelineEvent> _buildEvents;
+
+  Duration get buildTime => _buildTime ??=
+          buildEvents.fold(Duration.zero, (previous, SyncTimelineEvent event) {
+        return previous + event.time.duration;
+      });
+
+  Duration _buildTime;
+
+  SyncTimelineEvent get layoutEvent {
+    if (frame.timelineEventData.uiEvent == null) return null;
+    if (_layoutEvent != null) return _layoutEvent;
+
+    return _layoutEvent = frame.timelineEventData.uiEvent
+        .firstChildWithCondition(
+            (event) => event.name.caseInsensitiveEquals(layoutEventName));
+  }
+
+  SyncTimelineEvent _layoutEvent;
+
+  Duration get layoutTime => layoutEvent?.time?.duration ?? Duration.zero;
+
+  SyncTimelineEvent get paintEvent {
+    if (frame.timelineEventData.uiEvent == null) return null;
+    if (_paintEvent != null) return _paintEvent;
+
+    return _paintEvent = frame.timelineEventData.uiEvent
+        .firstChildWithCondition(
+            (event) => event.name.caseInsensitiveEquals(paintEventName));
+  }
+
+  SyncTimelineEvent _paintEvent;
+
+  Duration get paintTime => paintEvent?.time?.duration ?? Duration.zero;
+
+  bool get canAnalyzeBuild =>
+      buildEvents.firstWhere((buildEvent) => buildEvent.children.isNotEmpty) !=
+      null;
+
+  bool get canAnalyzeLayout => layoutEvent.children.isNotEmpty;
+
+  bool get canAnalyzePaint => paintEvent.children.isNotEmpty;
+
+  // TODO(kenz): calculate ratios to use as flex values. This will be a bit
+  // tricky because sometimes the Build event(s) are children of Layout.
+  // int buildTimeRatio() {
+  //   final totalBuildEventTimeMicros = buildTime.inMicroseconds;
+  //   final uiEvent = frame.timelineEventData.uiEvent;
+  //   if (uiEvent == null) return 1;
+  //   final totalUiTimeMicros = uiEvent.time.duration.inMicroseconds;
+  //   return ((totalBuildEventTimeMicros / totalUiTimeMicros) * 1000000).round();
+  // }
+  //
+  // int layoutTimeRatio() {
+  //   final totalLayoutTimeMicros = layoutTime.inMicroseconds;
+  //   final uiEvent = frame.timelineEventData.uiEvent;
+  //   if (uiEvent == null) return 1;
+  //   final totalUiTimeMicros =
+  //       frame.timelineEventData.uiEvent.time.duration.inMicroseconds;
+  //   return ((totalLayoutTimeMicros / totalUiTimeMicros) * 1000000).round();
+  // }
+  //
+  // int paintTimeRatio() {
+  //   final totalPaintTimeMicros = paintTime.inMicroseconds;
+  //   final uiEvent = frame.timelineEventData.uiEvent;
+  //   if (uiEvent == null) return 1;
+  //   final totalUiTimeMicros =
+  //       frame.timelineEventData.uiEvent.time.duration.inMicroseconds;
+  //   return ((totalPaintTimeMicros / totalUiTimeMicros) * 1000000).round();
+  // }
 }
