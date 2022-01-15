@@ -380,55 +380,21 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     TextStyle regularTextStyle,
     TextStyle highlightedTextStyle,
   ) {
-    final text = match.text;
-    final matchedSegments = match.matchedSegments;
-
-    if (matchedSegments == null || matchedSegments.isEmpty) {
-      return TextSpan(
-        text: text,
+    return transformAutoCompleteMatch<TextSpan>(
+      match: match,
+      transformMatchedSegment: (segment) => TextSpan(
+        text: segment,
+        style: highlightedTextStyle,
+      ),
+      transformUnmatchedSegment: (segment) => TextSpan(
+        text: segment,
         style: regularTextStyle,
-      );
-    }
-
-    final spans = <TextSpan>[];
-    int previousEndIndex = 0;
-
-    for (final segment in matchedSegments) {
-      if (previousEndIndex < segment.begin) {
-        // Add the unhighlighted segment before the current highlighted segment:
-        final segmentBefore = text.substring(previousEndIndex, segment.begin);
-        spans.add(
-          TextSpan(
-            text: segmentBefore,
-            style: regularTextStyle,
-          ),
-        );
-      }
-      // Add the current highlighted segment:
-      final highlightedSegment = text.substring(segment.begin, segment.end);
-      spans.add(
-        TextSpan(
-          text: highlightedSegment,
-          style: highlightedTextStyle,
-        ),
-      );
-      previousEndIndex = segment.end;
-    }
-    if (previousEndIndex < text.length - 1) {
-      // Add the last unhighlighted segment:
-      final lastSegment = text.substring(previousEndIndex);
-      spans.add(
-        TextSpan(
-          text: lastSegment,
-          style: regularTextStyle,
-        ),
-      );
-    }
-
-    return TextSpan(
-      text: spans.first.text,
-      style: spans.first.style,
-      children: spans.sublist(1),
+      ),
+      combineSegments: (segments) => TextSpan(
+        text: segments.first.text,
+        style: segments.first.style,
+        children: segments.sublist(1),
+      ),
     );
   }
 }
@@ -1256,4 +1222,40 @@ class AutoCompleteMatch {
 
   final String text;
   final List<Range> matchedSegments;
+}
+
+// Utility function that can be used to transform an autocomplete match somehow
+// (e.g. create a TextSpan where the matched segments are highlighted).
+T transformAutoCompleteMatch<T>(
+    {AutoCompleteMatch match,
+    T transformMatchedSegment(String segment),
+    T transformUnmatchedSegment(String segment),
+    T combineSegments(List<T> segments)}) {
+  final text = match.text;
+  final matchedSegments = match.matchedSegments;
+
+  if (matchedSegments == null || matchedSegments.isEmpty) {
+    return transformUnmatchedSegment(text);
+  }
+
+  final values = <T>[];
+  int previousEndIndex = 0;
+  for (final segment in matchedSegments) {
+    if (previousEndIndex < segment.begin) {
+      // Add the unmatched segment before the current matched segment:
+      final segmentBefore = text.substring(previousEndIndex, segment.begin);
+      values.add(transformUnmatchedSegment(segmentBefore));
+    }
+    // Add the matched segment:
+    final matchedSegment = text.substring(segment.begin, segment.end);
+    values.add(transformMatchedSegment(matchedSegment));
+    previousEndIndex = segment.end;
+  }
+  if (previousEndIndex < text.length - 1) {
+    // Add the last unmatched segment:
+    final lastSegment = text.substring(previousEndIndex);
+    values.add(transformUnmatchedSegment(lastSegment));
+  }
+
+  return combineSegments(values);
 }
