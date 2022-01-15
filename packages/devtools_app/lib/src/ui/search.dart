@@ -380,8 +380,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     TextStyle regularTextStyle,
     TextStyle highlightedTextStyle,
   ) {
-    return transformAutoCompleteMatch<TextSpan>(
-      match: match,
+    return match.transformAutoCompleteMatch<TextSpan>(
       transformMatchedSegment: (segment) => TextSpan(
         text: segment,
         style: highlightedTextStyle,
@@ -1222,40 +1221,36 @@ class AutoCompleteMatch {
 
   final String text;
   final List<Range> matchedSegments;
-}
 
-// Utility function that can be used to transform an autocomplete match somehow
-// (e.g. create a TextSpan where the matched segments are highlighted).
-T transformAutoCompleteMatch<T>(
-    {AutoCompleteMatch match,
-    T transformMatchedSegment(String segment),
-    T transformUnmatchedSegment(String segment),
-    T combineSegments(List<T> segments)}) {
-  final text = match.text;
-  final matchedSegments = match.matchedSegments;
-
-  if (matchedSegments == null || matchedSegments.isEmpty) {
-    return transformUnmatchedSegment(text);
-  }
-
-  final values = <T>[];
-  int previousEndIndex = 0;
-  for (final segment in matchedSegments) {
-    if (previousEndIndex < segment.begin) {
-      // Add the unmatched segment before the current matched segment:
-      final segmentBefore = text.substring(previousEndIndex, segment.begin);
-      values.add(transformUnmatchedSegment(segmentBefore));
+  // Transform the autocomplete match somehow (e.g. create a TextSpan where the
+  // matched segments are highlighted).
+  T transformAutoCompleteMatch<T>(
+      {T transformMatchedSegment(String segment),
+      T transformUnmatchedSegment(String segment),
+      T combineSegments(List<T> segments)}) {
+    if (matchedSegments == null || matchedSegments.isEmpty) {
+      return transformUnmatchedSegment(text);
     }
-    // Add the matched segment:
-    final matchedSegment = text.substring(segment.begin, segment.end);
-    values.add(transformMatchedSegment(matchedSegment));
-    previousEndIndex = segment.end;
-  }
-  if (previousEndIndex < text.length - 1) {
-    // Add the last unmatched segment:
-    final lastSegment = text.substring(previousEndIndex);
-    values.add(transformUnmatchedSegment(lastSegment));
-  }
 
-  return combineSegments(values);
+    final values = <T>[];
+    int previousEndIndex = 0;
+    for (final segment in matchedSegments) {
+      if (previousEndIndex < segment.begin) {
+        // Add the unmatched segment before the current matched segment:
+        final segmentBefore = text.substring(previousEndIndex, segment.begin);
+        values.add(transformUnmatchedSegment(segmentBefore));
+      }
+      // Add the matched segment:
+      final matchedSegment = text.substring(segment.begin, segment.end);
+      values.add(transformMatchedSegment(matchedSegment));
+      previousEndIndex = segment.end;
+    }
+    if (previousEndIndex < text.length - 1) {
+      // Add the last unmatched segment:
+      final lastSegment = text.substring(previousEndIndex);
+      values.add(transformUnmatchedSegment(lastSegment));
+    }
+
+    return combineSegments(values);
+  }
 }

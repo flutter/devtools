@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/src/debugger/file_search.dart';
 import 'package:devtools_app/src/ui/search.dart';
-import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_test/mocks.dart';
 import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
@@ -193,8 +192,7 @@ void main() {
 List<String> getAutoCompleteMatch(List<AutoCompleteMatch> matches) {
   return matches
       .map(
-        (match) => transformAutoCompleteMatch<String>(
-          match: match,
+        (match) => match.transformAutoCompleteMatch<String>(
           transformMatchedSegment: (segment) => segment.toUpperCase(),
           transformUnmatchedSegment: (segment) => segment.toLowerCase(),
           combineSegments: (segments) => segments.join(''),
