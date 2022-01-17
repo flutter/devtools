@@ -22,13 +22,14 @@ From a separate terminal, start running a flutter app to connect to DevTools:
 - `cd gallery`
 - ensure the iOS Simulator is open (or a physical device is connected)
 - `flutter run`
+- open the link 'The Flutter DevTools debugger and profiler...' in the command output 
 
 ## Workflow for making changes
 
 - Create a branch from your cloned repo: `git checkout -b myBranch`
 - Commit work to your branch: `git commit -m “description”`
 - Push to your branch: `git push origin myBranch`
-- Navigate to the Pull Requests tab in the main [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull request from branch in your cloned repo to DevTools master. Create a pull request.
+- Navigate to the Pull Requests tab in the main [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull request from the branch in your cloned repo to DevTools master. Create a pull request.
 
 ### Keeping your fork in-sync
 
