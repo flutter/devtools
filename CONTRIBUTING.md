@@ -28,7 +28,7 @@ From a separate terminal, start running a flutter app to connect to DevTools:
 - Create a branch from your cloned repo: `git checkout -b myBranch`
 - Commit work to your branch: `git commit -m “description”`
 - Push to your branch: `git push origin myBranch`
-- Navigate to the Pull Requests tab in the main [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull request from your local branch to DevTools master. Create a pull request.
+- Navigate to the Pull Requests tab in the main [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull request from branch in your cloned repo to DevTools master. Create a pull request.
 
 ### Keeping your fork in-sync
 
@@ -37,15 +37,7 @@ From a separate terminal, start running a flutter app to connect to DevTools:
 
 ## Development
 
-To run DevTools as a Flutter web app, follow these steps.
-
-First, perform one-time setup:
-
-- `flutter config --enable-web`
-
-Now you can run the app at any time with the flutter command.
-
-From the packages/devtools_app directory:
+To run DevTools as a Flutter web app, from the packages/devtools_app directory:
 
 - `flutter run -d chrome`
 
