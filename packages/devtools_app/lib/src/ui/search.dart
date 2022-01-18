@@ -1222,35 +1222,37 @@ class AutoCompleteMatch {
   final String text;
   final List<Range> matchedSegments;
 
-  // Transform the autocomplete match somehow (e.g. create a TextSpan where the
-  // matched segments are highlighted).
-  T transformAutoCompleteMatch<T>(
-      {T transformMatchedSegment(String segment),
-      T transformUnmatchedSegment(String segment),
-      T combineSegments(List<T> segments)}) {
+  /// Transform the autocomplete match somehow (e.g. create a TextSpan where the
+  /// matched segments are highlighted).
+  T transformAutoCompleteMatch<T>({
+    T transformMatchedSegment(String segment),
+    T transformUnmatchedSegment(String segment),
+    T combineSegments(List<T> segments),
+  }) {
     if (matchedSegments == null || matchedSegments.isEmpty) {
       return transformUnmatchedSegment(text);
     }
 
-    final values = <T>[];
+    final segments = <T>[];
     int previousEndIndex = 0;
     for (final segment in matchedSegments) {
       if (previousEndIndex < segment.begin) {
         // Add the unmatched segment before the current matched segment:
         final segmentBefore = text.substring(previousEndIndex, segment.begin);
-        values.add(transformUnmatchedSegment(segmentBefore));
+        segments.add(transformUnmatchedSegment(segmentBefore));
       }
       // Add the matched segment:
       final matchedSegment = text.substring(segment.begin, segment.end);
-      values.add(transformMatchedSegment(matchedSegment));
+      segments.add(transformMatchedSegment(matchedSegment));
       previousEndIndex = segment.end;
     }
     if (previousEndIndex < text.length - 1) {
       // Add the last unmatched segment:
       final lastSegment = text.substring(previousEndIndex);
-      values.add(transformUnmatchedSegment(lastSegment));
+      segments.add(transformUnmatchedSegment(lastSegment));
     }
 
-    return combineSegments(values);
+    assert(segments.isNotEmpty);
+    return combineSegments(segments);
   }
 }
