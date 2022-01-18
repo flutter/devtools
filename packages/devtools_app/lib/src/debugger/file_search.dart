@@ -135,22 +135,9 @@ class FileSearchFieldState extends State<FileSearchField>
       return FileSearchResults.emptyQuery(scriptRefs);
     }
 
-    final exactFullPathMatches = <ScriptRef>[];
-    final fuzzyMatches = <ScriptRef>[];
-    final fileQuery = FileQuery(query);
-
-    for (final scriptRef in scriptRefs) {
-      if (fileQuery.isExactFullPathMatch(scriptRef)) {
-        exactFullPathMatches.add(scriptRef);
-      } else if (fileQuery.isFuzzyMatch(scriptRef)) {
-        fuzzyMatches.add(scriptRef);
-      }
-    }
-
     return FileSearchResults.withQuery(
-      exactFullPathMatches: exactFullPathMatches,
-      fuzzyMatches: fuzzyMatches,
-      query: fileQuery,
+      allScripts: scriptRefs,
+      query: FileQuery(query),
     );
   }
 }
@@ -225,40 +212,56 @@ class FileQuery {
 }
 
 class FileSearchResults {
-  FileSearchResults.emptyQuery(this.allScripts)
-      : exactFullPathMatches = const [],
-        fuzzyMatches = const [],
-        query = FileQuery.empty();
+  FileSearchResults.emptyQuery(this.allScripts) : query = FileQuery.empty();
 
   FileSearchResults.withQuery({
     @required this.query,
-    this.exactFullPathMatches = const [],
-    this.fuzzyMatches = const [],
-  })  : allScripts = const [],
-        assert(!query.isEmpty);
+    @required this.allScripts,
+  }) {
+    assert(!query.isEmpty);
+
+    for (final scriptRef in allScripts) {
+      if (query.isExactFullPathMatch(scriptRef)) {
+        _exactFullPathMatches.add(scriptRef);
+      } else if (query.isFuzzyMatch(scriptRef)) {
+        _fuzzyMatches.add(scriptRef);
+      }
+    }
+  }
+
+  FileSearchResults._({
+    @required this.query,
+    @required this.allScripts,
+    @required exactFullPathMatches,
+    @required fuzzyMatches,
+  }) {
+    _exactFullPathMatches.addAll(exactFullPathMatches);
+    _fuzzyMatches.addAll(fuzzyMatches);
+  }
 
   final List<ScriptRef> allScripts;
-  final List<ScriptRef> exactFullPathMatches;
-  final List<ScriptRef> fuzzyMatches;
   final FileQuery query;
+  final List<ScriptRef> _exactFullPathMatches = [];
+  final List<ScriptRef> _fuzzyMatches = [];
 
   FileSearchResults get topMatches => _buildTopMatches();
 
-  List<ScriptRef> get scriptRefs => allScripts.isNotEmpty
-      ? allScripts
-      : [...exactFullPathMatches, ...fuzzyMatches];
+  List<ScriptRef> get scriptRefs =>
+      query.isEmpty ? allScripts : [..._exactFullPathMatches, ..._fuzzyMatches];
 
-  List<AutoCompleteMatch> get autoCompleteMatches => allScripts.isNotEmpty
+  List<AutoCompleteMatch> get autoCompleteMatches => query.isEmpty
       ? allScripts.map((script) => AutoCompleteMatch(script.uri)).toList()
       : [
-          ...exactFullPathMatches
+          ..._exactFullPathMatches
               .map(query.createExactFullPathAutoCompleteMatch)
               .toList(),
-          ...fuzzyMatches.map(query.createFuzzyMatchAutoCompleteMatch).toList(),
+          ..._fuzzyMatches
+              .map(query.createFuzzyMatchAutoCompleteMatch)
+              .toList(),
         ];
 
   FileSearchResults _buildTopMatches() {
-    if (allScripts.isNotEmpty) {
+    if (query.isEmpty) {
       return FileSearchResults.emptyQuery(
         allScripts.sublist(
           0,
@@ -269,25 +272,27 @@ class FileSearchResults {
 
     if (scriptRefs.length <= numOfMatchesToShow) {
       // Make a copy of this:
-      return FileSearchResults.withQuery(
-        exactFullPathMatches: exactFullPathMatches,
-        fuzzyMatches: fuzzyMatches,
+      return FileSearchResults._(
+        allScripts: allScripts,
         query: query,
+        exactFullPathMatches: _exactFullPathMatches,
+        fuzzyMatches: _fuzzyMatches,
       );
     }
 
     final topMatches = [];
     int matchesLeft = numOfMatchesToShow;
-    for (final matches in [exactFullPathMatches, fuzzyMatches]) {
+    for (final matches in [_exactFullPathMatches, _fuzzyMatches]) {
       final selected = _takeMatches(matches, matchesLeft);
       topMatches.add(selected);
       matchesLeft -= selected.length;
     }
 
-    return FileSearchResults.withQuery(
+    return FileSearchResults._(
+      allScripts: allScripts,
+      query: query,
       exactFullPathMatches: topMatches[0],
       fuzzyMatches: topMatches[1],
-      query: query,
     );
   }
 
