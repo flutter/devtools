@@ -1,0 +1,96 @@
+# Copyright 2022 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: devtools-test-workflow
+
+on:
+  workflow_call:
+    inputs:
+      channel:
+        required: true
+        type: string
+
+env:
+  CHANNEL: ${{ inputs.channel }}
+
+jobs:
+
+  main:
+    name: main
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: git clone
+        uses: actions/checkout@v2
+      - name: tool/bots.sh
+        env:
+          BOT: main
+        run: ./tool/bots.sh
+
+  packages:
+    name: packages
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: git clone
+        uses: actions/checkout@v2
+      - name: tool/bots.sh
+        env:
+          BOT: packages
+        run: ./tool/bots.sh
+
+  test:
+    name: test ${{ matrix.bot }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bot:
+          - test_ddc
+          - test_dart2js
+    steps:
+      - name: git clone
+        uses: actions/checkout@v2
+
+      - name: tool/bots.sh
+        env:
+          BOT: ${{ matrix.bot }}
+          PLATFORM: vm
+        run: ./tool/bots.sh
+
+      - name: image failures
+        uses: actions/upload-artifact@v1
+        if: failure() # Only if failure then failures directory exists.
+        with:
+          # TODO(terry): matrix.os currently empty. If we run tests on other
+          #              platforms this will be used.
+          name: test-image-failures-${{ matrix.os }} # Name for the artifact
+          path: packages/devtools_app/test/failures # Path to upload
+
+  integration:
+    name: integration ${{ matrix.bot }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bot:
+          - integration_ddc
+          - integration_dart2js
+    steps:
+      - name: git clone
+        uses: actions/checkout@v2
+      - name: tool/bots.sh
+        env:
+          BOT: ${{ matrix.bot }}
+        run: ./tool/bots.sh
+
+# TODO(https://github.com/flutter/devtools/issues/2437):
+# PLATFORM=chrome is going away. We need to move these tests to run with
+# chromedriver.
+#    - BOT=test_ddc            PLATFORM=chrome
+# PLATFORM=chrome is going away. We need to move these tests to run with
+# chromedriver.
+#   - BOT=test_dart2js        PLATFORM=chrome
