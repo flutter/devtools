@@ -20,9 +20,10 @@ file.
 From a separate terminal, start running a flutter app to connect to DevTools:
 - `git clone https://github.com/flutter/gallery.git` (this is an existing application with many examples of Flutter widgets)
 - `cd gallery`
+- ensure your flutter channel is one required by the [gallery documentation](https://github.com/flutter/gallery#running-flutter-gallery-on-flutters-master-channel)
 - ensure the iOS Simulator is open (or a physical device is connected)
 - `flutter run`
-- copy the "Observatory debugger and profiler" uri printed in the command output, to connect to the app from DevTools.
+- copy the "Observatory debugger and profiler" uri printed in the command output, to connect to the app from DevTools later
 
 ## Development
 
