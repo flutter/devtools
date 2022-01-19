@@ -218,6 +218,7 @@ class FileSearchResults {
     @required this.query,
     @required this.allScripts,
   }) {
+    // ignore: prefer_asserts_in_initializer_lists
     assert(!query.isEmpty);
 
     for (final scriptRef in allScripts) {
