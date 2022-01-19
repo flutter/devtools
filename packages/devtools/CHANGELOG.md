@@ -1,3 +1,6 @@
+## 2.9.2+1
+* Quick fix to survey url parsing bug [#3574](https://github.com/flutter/devtools/pull/3574)
+
 ## 2.9.2
 * Update `package:vm_service` to `^8.1.0` [#3545](https://github.com/flutter/devtools/pull/3545)
 * Refactors `AutoDisposeMixin` to have separate cancel methods for listeners, stream subscriptions, and focus nodes [#3540](https://github.com/flutter/devtools/pull/3540)
