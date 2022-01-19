@@ -22,7 +22,24 @@ From a separate terminal, start running a flutter app to connect to DevTools:
 - `cd gallery`
 - ensure the iOS Simulator is open (or a physical device is connected)
 - `flutter run`
-- open the link 'The Flutter DevTools debugger and profiler...' in the command output 
+- copy the "Observatory debugger and profiler" uri printed in the command output, to connect to the app from DevTools.
+
+## Development
+
+To run DevTools as a Flutter web app, from the packages/devtools_app directory:
+
+- `flutter run -d chrome`
+
+*NOTE:* Though DevTools is shipped as a Flutter Web app, we recommend developing as a Flutter Desktop app where possible for a more efficient development workflow. Please see the [Desktop Embedder] section below for instructions on running DevTools as a Flutter Desktop app.
+
+To test release performance:
+
+- `flutter run -d web-server --release --dart-define=FLUTTER_WEB_USE_SKIA=true`
+
+You can also use `-d headless-server`, which will start a headless server that serves the HTML
+files for the DevTools Flutter app.
+
+To connect to your running application, paste the earlier copied observatory URL into the section "Connect to a Running App" in DevTools.
 
 ## Workflow for making changes
 
@@ -35,19 +52,6 @@ From a separate terminal, start running a flutter app to connect to DevTools:
 
 - Fetch branches/commits from the upstream DevTools: `git fetch upstream`
 - From your local branch, merge in the upstream master branch: `git merge upstream/master`
-
-## Development
-
-To run DevTools as a Flutter web app, from the packages/devtools_app directory:
-
-- `flutter run -d chrome`
-
-To test release performance:
-
-- `flutter run -d web-server --release --dart-define=FLUTTER_WEB_USE_SKIA=true`
-
-You can also use `-d headless-server`, which will start a headless server that serves the HTML
-files for the DevTools Flutter app.
 
 ## Development (DevTools server + DevTools Flutter web app)
 
@@ -72,7 +76,7 @@ refresh in your browser to see the changes. Hit `q` in the command line to termi
 
 ### Desktop Embedder
 
-You can also try running the app in the Flutter desktop embedder on linux or macos.
+You can also run the app in the Flutter desktop embedder on linux or macos.
 
 *NOTE:* The Linux desktop version only works with the master branch of Flutter (and sometimes this is true for MacOS as well). Syncing
 to a the master branch of Flutter may fail with a runner version error. If this occurs run
@@ -133,8 +137,8 @@ critical that the devtools_server is released first and the version numbers in
 
 ### Running tests
 
-Make sure your Flutter SDK matches the tip of trunk before
-running these tests.
+Make sure your Flutter SDK matches the version specified in `devtools/flutter-version.txt`
+before running these tests.
 
 ```
 cd packages/devtools_app
