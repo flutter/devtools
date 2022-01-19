@@ -93,18 +93,6 @@ Now you can run with either of the following:
 - `flutter run -d macos`
 - `flutter run -d linux`
 
-### Where to put Flutter code
-
-We also roll DevTools' code into a bazel build system, where we need to run only the non-flutter
-code from the app. To facilitate this, please keep code that imports package:flutter under a
-directory named 'flutter'.
-
-For example, `lib/src/flutter`, `lib/src/inspector/flutter`, or `test/flutter` are all acceptable
-locations to put new Flutter code.
-
-When we are ready to turn down the `dart:html` web version of the app, we will delete all code that
-isn't inside of or imported by the flutter code.
-
 ## Developing with VS Code
 
 ### DevTools Web
