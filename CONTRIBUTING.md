@@ -10,6 +10,18 @@ You can do this online, and it only takes a minute. If you've never submitted co
 you must add your (or your organization's) name and contact info to the [AUTHORS](AUTHORS)
 file.
 
+## Workflow for making changes
+
+- Create a branch from your cloned repo: `git checkout -b myBranch`
+- Commit work to your branch: `git commit -m “description”`
+- Push to your branch: `git push origin myBranch`
+- Navigate to the Pull Requests tab in the main [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull request from the branch in your cloned repo to DevTools master. Create a pull request.
+
+### Keeping your fork in-sync
+
+- Fetch branches/commits from the upstream DevTools: `git fetch upstream`
+- From your local branch, merge in the upstream master branch: `git merge upstream/master`
+
 ## Development prep
 
 1. If you haven't already, follow the [instructions](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) to generate a new SSH key and connect to Github with SSH
@@ -27,11 +39,11 @@ From a separate terminal, start running a flutter app to connect to DevTools:
 
 ## Development
 
+*NOTE:* Though DevTools is shipped as a Flutter Web app, we recommend developing as a Flutter Desktop app where possible for a more efficient development workflow. Please see the [Desktop Embedder] section below for instructions on running DevTools as a Flutter Desktop app.
+
 To run DevTools as a Flutter web app, from the packages/devtools_app directory:
 
 - `flutter run -d chrome`
-
-*NOTE:* Though DevTools is shipped as a Flutter Web app, we recommend developing as a Flutter Desktop app where possible for a more efficient development workflow. Please see the [Desktop Embedder] section below for instructions on running DevTools as a Flutter Desktop app.
 
 To test release performance:
 
@@ -41,18 +53,6 @@ You can also use `-d headless-server`, which will start a headless server that s
 files for the DevTools Flutter app.
 
 To connect to your running application, paste the earlier copied observatory URL into the section "Connect to a Running App" in DevTools.
-
-## Workflow for making changes
-
-- Create a branch from your cloned repo: `git checkout -b myBranch`
-- Commit work to your branch: `git commit -m “description”`
-- Push to your branch: `git push origin myBranch`
-- Navigate to the Pull Requests tab in the main [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull request from the branch in your cloned repo to DevTools master. Create a pull request.
-
-### Keeping your fork in-sync
-
-- Fetch branches/commits from the upstream DevTools: `git fetch upstream`
-- From your local branch, merge in the upstream master branch: `git merge upstream/master`
 
 ## Development (DevTools server + DevTools Flutter web app)
 
