@@ -51,8 +51,10 @@ class FileSearchFieldState extends State<FileSearchField>
         _handleAutoCompleteOverlay);
 
     _query = autoCompleteController.search;
+
     _searchResults = FileSearchResults.emptyQuery(
-        widget.debuggerController.sortedScripts.value);
+      widget.debuggerController.sortedScripts.value,
+    );
 
     // Open the autocomplete results immediately before a query is entered:
     SchedulerBinding.instance.addPostFrameCallback((_) => _handleSearch());
@@ -89,7 +91,7 @@ class FileSearchFieldState extends State<FileSearchField>
         ? _searchResults.scriptRefs
         : widget.debuggerController.sortedScripts.value;
 
-    final searchResults = _getSearchResults(currentQuery, scripts);
+    final searchResults = _createSearchResults(currentQuery, scripts);
     if (searchResults.scriptRefs.isEmpty) {
       autoCompleteController.searchAutoComplete.value = [];
     } else {
@@ -127,7 +129,7 @@ class FileSearchFieldState extends State<FileSearchField>
     _scriptsCache.clear();
   }
 
-  FileSearchResults _getSearchResults(
+  FileSearchResults _createSearchResults(
     String query,
     List<ScriptRef> scriptRefs,
   ) {
@@ -147,7 +149,7 @@ class FileQuery {
 
   FileQuery.empty() : query = '';
 
-  String query;
+  final String query;
 
   bool get isEmpty => query.isEmpty;
 
@@ -166,14 +168,14 @@ class FileQuery {
   bool isFuzzyMatch(ScriptRef script) {
     if (isEmpty) return false;
 
-    final fileName = _getFileName(script.uri);
+    final fileName = _fileName(script.uri);
     return fileName.caseInsensitiveFuzzyMatch(query);
   }
 
   AutoCompleteMatch createFuzzyMatchAutoCompleteMatch(ScriptRef script) {
     if (isEmpty) return AutoCompleteMatch(script.uri);
 
-    final fileName = _getFileName(script.uri);
+    final fileName = _fileName(script.uri);
     final fileNameIdx = script.uri.lastIndexOf(fileName);
     final matchedSegments = _findFuzzySegments(fileName)
         .map((range) =>
@@ -206,44 +208,57 @@ class FileQuery {
     return autoCompleteResultSegments;
   }
 
-  String _getFileName(String fullPath) {
+  String _fileName(String fullPath) {
     return _fileNamesCache[fullPath] ??= fullPath.split('/').last;
   }
 }
 
 class FileSearchResults {
-  FileSearchResults.emptyQuery(this.allScripts) : query = FileQuery.empty();
+  factory FileSearchResults.emptyQuery(List<ScriptRef> allScripts) {
+    return FileSearchResults._(
+      query: FileQuery.empty(),
+      allScripts: allScripts,
+      exactFullPathMatches: [],
+      fuzzyMatches: [],
+    );
+  }
 
-  FileSearchResults.withQuery({
-    @required this.query,
-    @required this.allScripts,
+  factory FileSearchResults.withQuery({
+    @required FileQuery query,
+    @required List<ScriptRef> allScripts,
   }) {
-    // ignore: prefer_asserts_in_initializer_lists
     assert(!query.isEmpty);
+    final List<ScriptRef> exactFullPathMatches = [];
+    final List<ScriptRef> fuzzyMatches = [];
 
     for (final scriptRef in allScripts) {
       if (query.isExactFullPathMatch(scriptRef)) {
-        _exactFullPathMatches.add(scriptRef);
+        exactFullPathMatches.add(scriptRef);
       } else if (query.isFuzzyMatch(scriptRef)) {
-        _fuzzyMatches.add(scriptRef);
+        fuzzyMatches.add(scriptRef);
       }
     }
+
+    return FileSearchResults._(
+      query: query,
+      allScripts: allScripts,
+      exactFullPathMatches: exactFullPathMatches,
+      fuzzyMatches: fuzzyMatches,
+    );
   }
 
   FileSearchResults._({
     @required this.query,
     @required this.allScripts,
-    @required exactFullPathMatches,
-    @required fuzzyMatches,
-  }) {
-    _exactFullPathMatches.addAll(exactFullPathMatches);
-    _fuzzyMatches.addAll(fuzzyMatches);
-  }
+    @required List<ScriptRef> exactFullPathMatches,
+    @required List<ScriptRef> fuzzyMatches,
+  })  : _exactFullPathMatches = exactFullPathMatches,
+        _fuzzyMatches = fuzzyMatches;
 
   final List<ScriptRef> allScripts;
   final FileQuery query;
-  final List<ScriptRef> _exactFullPathMatches = [];
-  final List<ScriptRef> _fuzzyMatches = [];
+  final List<ScriptRef> _exactFullPathMatches;
+  final List<ScriptRef> _fuzzyMatches;
 
   FileSearchResults get topMatches => _buildTopMatches();
 
@@ -261,24 +276,29 @@ class FileSearchResults {
               .toList(),
         ];
 
+  FileSearchResults copyWith({
+    List<ScriptRef> allScripts,
+    FileQuery query,
+    List<ScriptRef> exactFullPathMatches,
+    List<ScriptRef> fuzzyMatches,
+  }) {
+    return FileSearchResults._(
+      query: query ?? this.query,
+      allScripts: allScripts ?? this.allScripts,
+      exactFullPathMatches: exactFullPathMatches ?? _exactFullPathMatches,
+      fuzzyMatches: fuzzyMatches ?? _fuzzyMatches,
+    );
+  }
+
   FileSearchResults _buildTopMatches() {
     if (query.isEmpty) {
-      return FileSearchResults.emptyQuery(
-        allScripts.sublist(
-          0,
-          numOfMatchesToShow,
-        ),
+      return copyWith(
+        allScripts: allScripts.sublist(0, numOfMatchesToShow),
       );
     }
 
     if (scriptRefs.length <= numOfMatchesToShow) {
-      // Make a copy of this:
-      return FileSearchResults._(
-        allScripts: allScripts,
-        query: query,
-        exactFullPathMatches: _exactFullPathMatches,
-        fuzzyMatches: _fuzzyMatches,
-      );
+      return copyWith();
     }
 
     final topMatches = [];
@@ -289,9 +309,7 @@ class FileSearchResults {
       matchesLeft -= selected.length;
     }
 
-    return FileSearchResults._(
-      allScripts: allScripts,
-      query: query,
+    return copyWith(
       exactFullPathMatches: topMatches[0],
       fuzzyMatches: topMatches[1],
     );
