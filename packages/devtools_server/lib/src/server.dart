@@ -270,19 +270,25 @@ Future<HttpServer?> serveDevTools({
         .replace(queryParameters: queryParameters)
         .toString();
 
+    String page = '';
+
     // If app size parameters are present, open to the standalone `appsize`
     // page, regardless if there is a vm service uri specified. We only check
     // for the presence of [appSizeBase] here because [appSizeTest] may or may
     // not be specified (it should only be present for diffs). If [appSizeTest]
     // is present without [appSizeBase], we will ignore the parameter.
     if (appSizeBase != null) {
-      final startQueryParamIndex = url.indexOf('?');
-      if (startQueryParamIndex != -1) {
-        url = '${url.substring(0, startQueryParamIndex)}'
-            '/#/appsize'
-            '${url.substring(startQueryParamIndex)}';
-      }
+      page = 'appsize';
     }
+
+    // Move any querystring to after the fragment where it's expected.
+    var startQueryParamIndex = url.indexOf('?');
+    if (startQueryParamIndex == -1) {
+      startQueryParamIndex = url.length;
+    }
+    url = '${url.substring(0, startQueryParamIndex)}'
+        '/#/$page'
+        '${url.substring(startQueryParamIndex)}';
 
     try {
       await Chrome.start([url]);
