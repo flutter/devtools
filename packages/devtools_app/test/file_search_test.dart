@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/src/debugger/file_search.dart';
 import 'package:devtools_app/src/ui/search.dart';
-import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_test/mocks.dart';
 import 'package:devtools_test/wrappers.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +41,7 @@ void main() {
 
       autoCompleteController.search = '';
       expect(
-        getAutoCompleteTextValues(
+        getAutoCompleteMatch(
           autoCompleteController.searchAutoComplete.value,
         ),
         equals(
@@ -61,240 +60,125 @@ void main() {
           ],
         ),
       );
-      expect(
-          getAutoCompleteSegmentValues(
-            autoCompleteController.searchAutoComplete.value,
-          ),
-          equals(
-            ['[]', '[]', '[]', '[]', '[]', '[]', '[]', '[]', '[]', '[]'],
-          ));
 
       autoCompleteController.search = 'c';
       expect(
-        getAutoCompleteTextValues(
+        getAutoCompleteMatch(
           autoCompleteController.searchAutoComplete.value,
         ),
         equals(
           [
             // Exact matches:
-            'zoo:animals/cats/meow.dart',
-            'zoo:animals/cats/purr.dart',
-            'zoo:animals/insects/caterpillar.dart',
-            'zoo:animals/insects/cicada.dart',
-            'kitchen:food/catering/party.dart',
-            'kitchen:food/carton/milk.dart',
-            'kitchen:food/milk/carton.dart',
-            'travel:adventure/cave_tours_europe.dart',
-            'travel:canada/banff.dart',
-          ],
-        ),
-      );
-      expect(
-        getAutoCompleteSegmentValues(
-          autoCompleteController.searchAutoComplete.value,
-        ),
-        equals(
-          [
-            // Exact matches:
-            '[12-13]',
-            '[12-13]',
-            '[16-17]',
-            '[16-17]',
-            '[3-4]',
-            '[3-4]',
-            '[3-4]',
-            '[17-18]',
-            '[7-8]'
+            'zoo:animals/Cats/meow.dart',
+            'zoo:animals/Cats/purr.dart',
+            'zoo:animals/inseCts/caterpillar.dart',
+            'zoo:animals/inseCts/cicada.dart',
+            'kitChen:food/catering/party.dart',
+            'kitChen:food/carton/milk.dart',
+            'kitChen:food/milk/carton.dart',
+            'travel:adventure/Cave_tours_europe.dart',
+            'travel:Canada/banff.dart'
           ],
         ),
       );
 
       autoCompleteController.search = 'ca';
       expect(
-        getAutoCompleteTextValues(
+        getAutoCompleteMatch(
           autoCompleteController.searchAutoComplete.value,
         ),
         equals(
           [
             // Exact matches:
-            'zoo:animals/cats/meow.dart',
-            'zoo:animals/cats/purr.dart',
-            'zoo:animals/insects/caterpillar.dart',
-            'zoo:animals/insects/cicada.dart',
-            'kitchen:food/catering/party.dart',
-            'kitchen:food/carton/milk.dart',
-            'kitchen:food/milk/carton.dart',
-            'travel:adventure/cave_tours_europe.dart',
-            'travel:canada/banff.dart',
-          ],
-        ),
-      );
-      expect(
-        getAutoCompleteSegmentValues(
-          autoCompleteController.searchAutoComplete.value,
-        ),
-        equals(
-          [
-            // Exact matches:
-            '[12-14]',
-            '[12-14]',
-            '[20-22]',
-            '[22-24]',
-            '[13-15]',
-            '[13-15]',
-            '[18-20]',
-            '[17-19]',
-            '[7-9]'
+            'zoo:animals/CAts/meow.dart',
+            'zoo:animals/CAts/purr.dart',
+            'zoo:animals/insects/CAterpillar.dart',
+            'zoo:animals/insects/ciCAda.dart',
+            'kitchen:food/CAtering/party.dart',
+            'kitchen:food/CArton/milk.dart',
+            'kitchen:food/milk/CArton.dart',
+            'travel:adventure/CAve_tours_europe.dart',
+            'travel:CAnada/banff.dart'
           ],
         ),
       );
 
       autoCompleteController.search = 'cat';
       expect(
-        getAutoCompleteTextValues(
+        getAutoCompleteMatch(
           autoCompleteController.searchAutoComplete.value,
         ),
         equals(
           [
             // Exact matches:
-            'zoo:animals/cats/meow.dart',
-            'zoo:animals/cats/purr.dart',
-            'zoo:animals/insects/caterpillar.dart',
-            'kitchen:food/catering/party.dart',
+            'zoo:animals/CATs/meow.dart',
+            'zoo:animals/CATs/purr.dart',
+            'zoo:animals/insects/CATerpillar.dart',
+            'kitchen:food/CATering/party.dart',
             // Fuzzy matches:
-            'zoo:animals/insects/cicada.dart',
-            'kitchen:food/milk/carton.dart',
-            'travel:adventure/cave_tours_europe.dart',
-          ],
-        ),
-      );
-      expect(
-        getAutoCompleteSegmentValues(
-          autoCompleteController.searchAutoComplete.value,
-        ),
-        equals(
-          [
-            // Exact matches:
-            '[12-15]',
-            '[12-15]',
-            '[20-23]',
-            '[13-16]',
-            // Fuzzy matches:
-            '[20-21, 23-24, 30-31]',
-            '[18-19, 19-20, 21-22]',
-            '[17-18, 18-19, 22-23]'
+            'zoo:animals/insects/CicAda.darT',
+            'kitchen:food/milk/CArTon.dart',
+            'travel:adventure/CAve_Tours_europe.dart'
           ],
         ),
       );
 
       autoCompleteController.search = 'cate';
       expect(
-        getAutoCompleteTextValues(
+        getAutoCompleteMatch(
           autoCompleteController.searchAutoComplete.value,
         ),
         equals(
           [
             // Exact matches:
-            'zoo:animals/insects/caterpillar.dart',
-            'kitchen:food/catering/party.dart',
+            'zoo:animals/insects/CATErpillar.dart',
+            'kitchen:food/CATEring/party.dart',
             // Fuzzy matches:
-            'travel:adventure/cave_tours_europe.dart',
-          ],
-        ),
-      );
-      expect(
-        getAutoCompleteSegmentValues(
-          autoCompleteController.searchAutoComplete.value,
-        ),
-        equals(
-          [
-            // Exact matches:
-            '[20-24]',
-            '[13-17]',
-            // Fuzzy matches:
-            '[17-18, 18-19, 22-23, 28-29]'
+            'travel:adventure/CAve_Tours_Europe.dart'
           ],
         ),
       );
 
       autoCompleteController.search = 'cater';
       expect(
-        getAutoCompleteTextValues(
+        getAutoCompleteMatch(
           autoCompleteController.searchAutoComplete.value,
         ),
         equals(
           [
             // Exact matches:
-            'zoo:animals/insects/caterpillar.dart',
-            'kitchen:food/catering/party.dart',
+            'zoo:animals/insects/CATERpillar.dart',
+            'kitchen:food/CATERing/party.dart',
             // Fuzzy matches:
-            'travel:adventure/cave_tours_europe.dart',
-          ],
-        ),
-      );
-      expect(
-        getAutoCompleteSegmentValues(
-          autoCompleteController.searchAutoComplete.value,
-        ),
-        equals(
-          [
-            // Exact matches:
-            '[20-25]',
-            '[13-18]',
-            // Fuzzy matches:
-            '[17-18, 18-19, 22-23, 28-29, 30-31]'
+            'travel:adventure/CAve_Tours_EuRope.dart'
           ],
         ),
       );
 
       autoCompleteController.search = 'caterp';
       expect(
-        getAutoCompleteTextValues(
+        getAutoCompleteMatch(
           autoCompleteController.searchAutoComplete.value,
         ),
         equals(
           [
             // Exact matches:
-            'zoo:animals/insects/caterpillar.dart',
+            'zoo:animals/insects/CATERPillar.dart',
             // Fuzzy matches:
-            'travel:adventure/cave_tours_europe.dart',
-          ],
-        ),
-      );
-      expect(
-        getAutoCompleteSegmentValues(
-          autoCompleteController.searchAutoComplete.value,
-        ),
-        equals(
-          [
-            // Exact matches:
-            '[20-26]',
-            // Fuzzy matches:
-            '[17-18, 18-19, 22-23, 28-29, 30-31, 32-33]'
+            'travel:adventure/CAve_Tours_EuRoPe.dart'
           ],
         ),
       );
 
       autoCompleteController.search = 'caterpi';
       expect(
-        getAutoCompleteTextValues(
+        getAutoCompleteMatch(
           autoCompleteController.searchAutoComplete.value,
         ),
         equals(
           [
             // Exact matches:
-            'zoo:animals/insects/caterpillar.dart',
-          ],
-        ),
-      );
-      expect(
-        getAutoCompleteSegmentValues(
-          autoCompleteController.searchAutoComplete.value,
-        ),
-        equals(
-          [
-            // Exact matches:
-            '[20-27]',
+            'zoo:animals/insects/CATERPIllar.dart',
           ],
         ),
       );
@@ -305,22 +189,14 @@ void main() {
   });
 }
 
-List<String> getAutoCompleteTextValues(List<AutoCompleteMatch> matches) {
-  return matches.map((match) => match.text).toList();
-}
-
-List<String> getAutoCompleteSegmentValues(List<AutoCompleteMatch> matches) {
+List<String> getAutoCompleteMatch(List<AutoCompleteMatch> matches) {
   return matches
-      .map((match) => convertSegmentsToString(match.matchedSegments))
+      .map(
+        (match) => match.transformAutoCompleteMatch<String>(
+          transformMatchedSegment: (segment) => segment.toUpperCase(),
+          transformUnmatchedSegment: (segment) => segment.toLowerCase(),
+          combineSegments: (segments) => segments.join(''),
+        ),
+      )
       .toList();
-}
-
-String convertSegmentsToString(List<Range> segments) {
-  if (segments == null || segments.isEmpty) {
-    return '[]';
-  }
-
-  final stringSegments =
-      segments.map((segment) => '${segment.begin}-${segment.end}');
-  return '[${stringSegments.join(', ')}]';
 }

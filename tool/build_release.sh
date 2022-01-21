@@ -58,10 +58,10 @@ function download_canvaskit() {
 
   mkdir -p build/web/assets/canvaskit/profiling
 
-  curl $canvaskit_url/canvaskit.js -o build/web/assets/canvaskit/canvaskit.js
-  curl $canvaskit_url/canvaskit.wasm -o build/web/assets/canvaskit/canvaskit.wasm
-  curl $canvaskit_url/profiling/canvaskit.js -o build/web/assets/canvaskit/profiling/canvaskit.js
-  curl $canvaskit_url/profiling/canvaskit.wasm -o build/web/assets/canvaskit/profiling/canvaskit.wasm
+  curl $canvaskit_url/canvaskit.js -o build/web/assets/canvaskit/canvaskit.js && chmod 0755 build/web/assets/canvaskit/canvaskit.js
+  curl $canvaskit_url/canvaskit.wasm -o build/web/assets/canvaskit/canvaskit.wasm && chmod 0755 build/web/assets/canvaskit/canvaskit.wasm
+  curl $canvaskit_url/profiling/canvaskit.js -o build/web/assets/canvaskit/profiling/canvaskit.js && chmod 0755 build/web/assets/canvaskit/profiling/canvaskit.js
+  curl $canvaskit_url/profiling/canvaskit.wasm -o build/web/assets/canvaskit/profiling/canvaskit.wasm && chmod 0755 build/web/assets/canvaskit/profiling/canvaskit.wasm
 }
 
 pushd packages/devtools_app
