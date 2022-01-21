@@ -15,6 +15,6 @@ Text
      softWrap: wrapping at box width
      maxLines: unlimited
      text: "Hello, World!"
-     dependencies: [Directionality,
-       _LocalizationsScope-[GlobalKey#00000]]
+     dependencies: [_LocalizationsScope-[GlobalKey#00000],
+       Directionality]
      renderObject: RenderParagraph#00000 relayoutBoundary=up2
