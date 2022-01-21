@@ -51,6 +51,7 @@ rm ../devtools/build/flutter_service_worker.js
 mv ../devtools/build/devtools_service_worker.js ../devtools/build/service_worker.js
 
 popd
+
 pushd packages/devtools
 flutter pub get
 popd
