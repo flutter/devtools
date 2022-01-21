@@ -161,7 +161,7 @@ class FileQuery {
     if (isEmpty) return false;
 
     final fileName = _fileName(script.uri);
-    // print('checking if $fileName contains $query');
+
     if (isMultiToken) {
       return tokens.every((token) => fileName.caseInsensitiveContains(token));
     }
