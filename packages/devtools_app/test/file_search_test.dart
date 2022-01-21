@@ -4,8 +4,7 @@
 
 import 'package:devtools_app/src/debugger/file_search.dart';
 import 'package:devtools_app/src/ui/search.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';

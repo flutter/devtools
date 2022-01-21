@@ -7,10 +7,10 @@ import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_test/cpu_profile_test_data.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/utils.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_data/cpu_profile_test_data.dart';
 
 void main() {
   group('CpuProfileController', () {

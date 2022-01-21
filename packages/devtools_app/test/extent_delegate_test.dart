@@ -4,10 +4,11 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/extent_delegate_list.dart';
-import 'package:devtools_test/rendering_tester.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_utils/rendering_tester.dart';
 
 class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   TestRenderSliverBoxChildManager({

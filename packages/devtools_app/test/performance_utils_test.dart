@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/performance/performance_utils.dart';
-import 'package:devtools_test/performance_test_data.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_data/performance_test_data.dart';
 
 void main() {
   group('PerformanceUtils', () {

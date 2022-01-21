@@ -9,8 +9,7 @@ import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dar
 import 'package:devtools_app/src/provider/instance_viewer/instance_viewer.dart';
 import 'package:devtools_app/src/provider/instance_viewer/result.dart';
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/utils.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

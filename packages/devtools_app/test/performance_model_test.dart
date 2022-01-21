@@ -8,10 +8,11 @@ import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_test/cpu_profile_test_data.dart';
-import 'package:devtools_test/performance_test_data.dart';
-import 'package:devtools_test/test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_data/cpu_profile_test_data.dart';
+import 'test_data/performance_test_data.dart';
+import 'test_utils/test_utils.dart';
 
 void main() {
   group('PerformanceData', () {

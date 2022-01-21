@@ -12,8 +12,6 @@ import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'cpu_profile_test_data.dart';
-
 class FakeInspectorService extends Fake implements InspectorService {
   @override
   ObjectGroup createObjectGroup(String debugName) {
@@ -540,7 +538,16 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     int origin,
     int extent,
   ) {
-    return Future.value(CpuProfileData.parse(goldenCpuProfileDataJson));
+    return Future.value(CpuProfileData.parse({
+      'type': '_CpuProfileTimeline',
+      'samplePeriod': 50,
+      'sampleCount': 8,
+      'stackDepth': 128,
+      'timeOriginMicros': 47377796685,
+      'timeExtentMicros': 3000,
+      'stackFrames': [],
+      'traceEvents': [],
+    }));
   }
 
   @override
@@ -988,7 +995,8 @@ void mockIsFlutterApp(
   when(connectedApp.isFlutterAppNow).thenReturn(isFlutterApp);
   when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(isFlutterApp));
   when(connectedApp.connectedAppInitialized).thenReturn(true);
-  when(connectedApp.isDebugFlutterAppNow).thenReturn(!isProfileBuild && isFlutterApp);
+  when(connectedApp.isDebugFlutterAppNow)
+      .thenReturn(!isProfileBuild && isFlutterApp);
   when(connectedApp.isProfileBuildNow).thenReturn(isProfileBuild);
 }
 

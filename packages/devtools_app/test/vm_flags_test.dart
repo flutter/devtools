@@ -4,10 +4,10 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_test/flutter_test_driver.dart'
-    show FlutterRunConfiguration;
-import 'package:devtools_test/flutter_test_environment.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'test_infra/flutter_test_environment.dart';
 
 void main() async {
   final FlutterTestEnvironment env = FlutterTestEnvironment(

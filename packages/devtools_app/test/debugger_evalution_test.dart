@@ -8,12 +8,12 @@ import 'package:devtools_app/src/eval_on_dart_library.dart';
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_test/flutter_test_driver.dart';
-import 'package:devtools_test/flutter_test_environment.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/utils.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pedantic/pedantic.dart';
+
+import 'test_infra/flutter_test_driver.dart';
+import 'test_infra/flutter_test_environment.dart';
 
 void main() {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
