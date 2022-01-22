@@ -18,7 +18,11 @@ void main() {
     FakeServiceManager fakeServiceManager;
 
     setUp(() {
-      fakeServiceManager = FakeServiceManager();
+      fakeServiceManager = FakeServiceManager(
+        service: FakeServiceManager.createFakeService(
+          cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
+        ),
+      );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       controller = CpuProfilerController();

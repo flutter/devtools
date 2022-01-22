@@ -91,6 +91,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     HttpProfile httpProfile,
     SamplesMemoryJson memoryData,
     AllocationMemoryJson allocationData,
+    CpuProfileData cpuProfileData,
   }) =>
       FakeVmService(
         _flagManager,
@@ -99,6 +100,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
         httpProfile,
         memoryData,
         allocationData,
+        cpuProfileData,
       );
 
   final List<String> availableServices;
@@ -244,8 +246,19 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     this._httpProfile,
     this._memoryData,
     this._allocationData,
+    CpuProfileData cpuProfileData,
   )   : _startingSockets = _socketProfile?.sockets ?? [],
-        _startingRequests = _httpProfile?.requests ?? [];
+        _startingRequests = _httpProfile?.requests ?? [],
+        cpuProfileData = cpuProfileData ??
+            CpuProfileData.parse(<String, dynamic>{
+              'type': '_CpuProfileTimeline',
+              'samplePeriod': 50,
+              'sampleCount': 0,
+              'stackDepth': 128,
+              'timeOriginMicros': 47377796685,
+              'timeExtentMicros': 3000,
+              'traceEvents': <Map<String, dynamic>>[],
+            });
 
   /// Specifies the return value of `httpEnableTimelineLogging`.
   bool httpEnableTimelineLoggingResult = true;
@@ -267,6 +280,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   final List<HttpProfileRequest> _startingRequests;
   final SamplesMemoryJson _memoryData;
   final AllocationMemoryJson _allocationData;
+  final CpuProfileData cpuProfileData;
 
   final _flags = <String, dynamic>{
     'flags': <Flag>[
@@ -538,16 +552,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     int origin,
     int extent,
   ) {
-    return Future.value(CpuProfileData.parse({
-      'type': '_CpuProfileTimeline',
-      'samplePeriod': 50,
-      'sampleCount': 8,
-      'stackDepth': 128,
-      'timeOriginMicros': 47377796685,
-      'timeExtentMicros': 3000,
-      'stackFrames': [],
-      'traceEvents': [],
-    }));
+    return Future.value(cpuProfileData);
   }
 
   @override

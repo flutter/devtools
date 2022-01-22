@@ -5,6 +5,7 @@
 import 'package:devtools_app/src/common_widgets.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
@@ -16,6 +17,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+import 'test_data/cpu_profile_test_data.dart';
+
 void main() {
   ProfilerScreen screen;
   FakeServiceManager fakeServiceManager;
@@ -24,7 +27,11 @@ void main() {
 
   group('ProfilerScreen', () {
     setUp(() async {
-      fakeServiceManager = FakeServiceManager();
+      fakeServiceManager = FakeServiceManager(
+        service: FakeServiceManager.createFakeService(
+          cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
+        ),
+      );
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
           .thenReturn(false);
