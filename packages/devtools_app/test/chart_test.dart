@@ -6,11 +6,11 @@ import 'package:devtools_app/src/memory/memory_charts.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:devtools_test/memory_test_data.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_data/memory_test_data.dart';
 
 void main() {
   const windowSize = Size(2225.0, 1000.0);

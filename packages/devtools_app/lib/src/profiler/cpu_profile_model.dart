@@ -48,7 +48,7 @@ class CpuProfileData {
 
     // Initialize all stack frames.
     final stackFrames = <String, CpuStackFrame>{};
-    final stackFramesJson =
+    final Map<String, dynamic> stackFramesJson =
         jsonDecode(jsonEncode(json[stackFramesKey] ?? <String, dynamic>{}));
     for (final MapEntry<String, dynamic> entry in stackFramesJson.entries) {
       final stackFrameJson = entry.value;

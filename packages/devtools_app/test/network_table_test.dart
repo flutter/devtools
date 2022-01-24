@@ -10,11 +10,12 @@ import 'package:devtools_app/src/network/network_model.dart';
 import 'package:devtools_app/src/network/network_screen.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/version.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/network_test_data.dart';
-import 'package:devtools_test/utils.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
+
+import 'test_data/network_test_data.dart';
+import 'test_utils/network_test_utils.dart';
 
 void main() {
   group('NetworkScreen NetworkRequestsTable', () {

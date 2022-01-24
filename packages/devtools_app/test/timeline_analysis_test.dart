@@ -14,14 +14,14 @@ import 'package:devtools_app/src/performance/timeline_analysis.dart';
 import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/trace_event.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/performance_test_data.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
+
+import 'test_data/performance_test_data.dart';
 
 void main() {
   FakeServiceManager fakeServiceManager;

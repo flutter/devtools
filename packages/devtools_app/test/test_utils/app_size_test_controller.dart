@@ -1,7 +1,6 @@
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/widgets.dart';
-
-import 'utils.dart';
 
 class AppSizeTestController extends AppSizeController {
   @override

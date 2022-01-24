@@ -83,7 +83,7 @@ class FileSearchFieldState extends State<FileSearchField>
 
   void _handleSearch() {
     final previousQuery = _query;
-    final currentQuery = autoCompleteController.search;
+    final currentQuery = autoCompleteController.search.trim();
 
     // If the current query is a continuation of the previous query, then
     // filter down the previous matches. Otherwise search through all scripts:
@@ -153,8 +153,41 @@ class FileQuery {
 
   bool get isEmpty => query.isEmpty;
 
+  bool get isMultiToken => query.contains(' ');
+
+  List<String> get tokens => query.split(' ');
+
+  bool isExactFileNameMatch(ScriptRef script) {
+    if (isEmpty) return false;
+
+    final fileName = _fileName(script.uri);
+
+    if (isMultiToken) {
+      return tokens.every((token) => fileName.caseInsensitiveContains(token));
+    }
+
+    return fileName.caseInsensitiveContains(query);
+  }
+
+  AutoCompleteMatch createExactFileNameAutoCompleteMatch(ScriptRef script) {
+    if (isEmpty) return AutoCompleteMatch(script.uri);
+
+    final fileName = _fileName(script.uri);
+    final fileNameIndex = script.uri.lastIndexOf(fileName);
+    final matchedSegments = _findExactSegments(fileName)
+        .map((range) =>
+            Range(range.begin + fileNameIndex, range.end + fileNameIndex))
+        .toList();
+    return AutoCompleteMatch(script.uri, matchedSegments: matchedSegments);
+  }
+
   bool isExactFullPathMatch(ScriptRef script) {
     if (isEmpty) return false;
+
+    if (isMultiToken) {
+      return tokens.every((token) => script.uri.caseInsensitiveContains(token));
+    }
+
     return script.uri.caseInsensitiveContains(query);
   }
 
@@ -168,32 +201,46 @@ class FileQuery {
   bool isFuzzyMatch(ScriptRef script) {
     if (isEmpty) return false;
 
-    final fileName = _fileName(script.uri);
-    return fileName.caseInsensitiveFuzzyMatch(query);
+    if (isMultiToken) {
+      return script.uri.caseInsensitiveFuzzyMatch(query.replaceAll(' ', ''));
+    }
+
+    return _fileName(script.uri).caseInsensitiveFuzzyMatch(query);
   }
 
   AutoCompleteMatch createFuzzyMatchAutoCompleteMatch(ScriptRef script) {
     if (isEmpty) return AutoCompleteMatch(script.uri);
 
-    final fileName = _fileName(script.uri);
-    final fileNameIdx = script.uri.lastIndexOf(fileName);
-    final matchedSegments = _findFuzzySegments(fileName)
-        .map((range) =>
-            Range(range.begin + fileNameIdx, range.end + fileNameIdx))
-        .toList();
+    List<Range> matchedSegments;
+    if (isMultiToken) {
+      matchedSegments =
+          _findFuzzySegments(script.uri, query.replaceAll(' ', ''));
+    } else {
+      final fileName = _fileName(script.uri);
+      final fileNameIndex = script.uri.lastIndexOf(fileName);
+      matchedSegments = _findFuzzySegments(fileName, query)
+          .map((range) =>
+              Range(range.begin + fileNameIndex, range.end + fileNameIndex))
+          .toList();
+    }
 
     return AutoCompleteMatch(script.uri, matchedSegments: matchedSegments);
   }
 
   List<Range> _findExactSegments(String file) {
-    final autoCompleteResultSegments = <Range>[];
-    final start = file.indexOf(query);
-    final end = start + query.length;
-    autoCompleteResultSegments.add(Range(start, end));
-    return autoCompleteResultSegments;
+    final matchedSegments = <Range>[];
+    for (final token in isMultiToken ? tokens : [query]) {
+      final start = file.indexOf(token);
+      final end = start + token.length;
+      matchedSegments.add(Range(start, end));
+    }
+    matchedSegments
+        .sort((rangeA, rangeB) => rangeA.begin.compareTo(rangeB.begin));
+
+    return matchedSegments;
   }
 
-  List<Range> _findFuzzySegments(String file) {
+  List<Range> _findFuzzySegments(String file, String query) {
     final autoCompleteResultSegments = <Range>[];
     var queryIndex = 0;
     for (int matchIndex = 0; matchIndex < file.length; matchIndex++) {
@@ -218,6 +265,7 @@ class FileSearchResults {
     return FileSearchResults._(
       query: FileQuery.empty(),
       allScripts: allScripts,
+      exactFileNameMatches: [],
       exactFullPathMatches: [],
       fuzzyMatches: [],
     );
@@ -228,11 +276,14 @@ class FileSearchResults {
     @required List<ScriptRef> allScripts,
   }) {
     assert(!query.isEmpty);
+    final List<ScriptRef> exactFileNameMatches = [];
     final List<ScriptRef> exactFullPathMatches = [];
     final List<ScriptRef> fuzzyMatches = [];
 
     for (final scriptRef in allScripts) {
-      if (query.isExactFullPathMatch(scriptRef)) {
+      if (query.isExactFileNameMatch(scriptRef)) {
+        exactFileNameMatches.add(scriptRef);
+      } else if (query.isExactFullPathMatch(scriptRef)) {
         exactFullPathMatches.add(scriptRef);
       } else if (query.isFuzzyMatch(scriptRef)) {
         fuzzyMatches.add(scriptRef);
@@ -242,6 +293,7 @@ class FileSearchResults {
     return FileSearchResults._(
       query: query,
       allScripts: allScripts,
+      exactFileNameMatches: exactFileNameMatches,
       exactFullPathMatches: exactFullPathMatches,
       fuzzyMatches: fuzzyMatches,
     );
@@ -250,24 +302,35 @@ class FileSearchResults {
   FileSearchResults._({
     @required this.query,
     @required this.allScripts,
+    @required List<ScriptRef> exactFileNameMatches,
     @required List<ScriptRef> exactFullPathMatches,
     @required List<ScriptRef> fuzzyMatches,
-  })  : _exactFullPathMatches = exactFullPathMatches,
+  })  : _exactFileNameMatches = exactFileNameMatches,
+        _exactFullPathMatches = exactFullPathMatches,
         _fuzzyMatches = fuzzyMatches;
 
   final List<ScriptRef> allScripts;
   final FileQuery query;
+  final List<ScriptRef> _exactFileNameMatches;
   final List<ScriptRef> _exactFullPathMatches;
   final List<ScriptRef> _fuzzyMatches;
 
   FileSearchResults get topMatches => _buildTopMatches();
 
-  List<ScriptRef> get scriptRefs =>
-      query.isEmpty ? allScripts : [..._exactFullPathMatches, ..._fuzzyMatches];
+  List<ScriptRef> get scriptRefs => query.isEmpty
+      ? allScripts
+      : [
+          ..._exactFileNameMatches,
+          ..._exactFullPathMatches,
+          ..._fuzzyMatches,
+        ];
 
   List<AutoCompleteMatch> get autoCompleteMatches => query.isEmpty
       ? allScripts.map((script) => AutoCompleteMatch(script.uri)).toList()
       : [
+          ..._exactFileNameMatches
+              .map(query.createExactFileNameAutoCompleteMatch)
+              .toList(),
           ..._exactFullPathMatches
               .map(query.createExactFullPathAutoCompleteMatch)
               .toList(),
@@ -279,12 +342,14 @@ class FileSearchResults {
   FileSearchResults copyWith({
     List<ScriptRef> allScripts,
     FileQuery query,
+    List<ScriptRef> exactFileNameMatches,
     List<ScriptRef> exactFullPathMatches,
     List<ScriptRef> fuzzyMatches,
   }) {
     return FileSearchResults._(
       query: query ?? this.query,
       allScripts: allScripts ?? this.allScripts,
+      exactFileNameMatches: exactFileNameMatches ?? _exactFileNameMatches,
       exactFullPathMatches: exactFullPathMatches ?? _exactFullPathMatches,
       fuzzyMatches: fuzzyMatches ?? _fuzzyMatches,
     );
@@ -303,15 +368,20 @@ class FileSearchResults {
 
     final topMatches = [];
     int matchesLeft = numOfMatchesToShow;
-    for (final matches in [_exactFullPathMatches, _fuzzyMatches]) {
+    for (final matches in [
+      _exactFileNameMatches,
+      _exactFullPathMatches,
+      _fuzzyMatches
+    ]) {
       final selected = _takeMatches(matches, matchesLeft);
       topMatches.add(selected);
       matchesLeft -= selected.length;
     }
 
     return copyWith(
-      exactFullPathMatches: topMatches[0],
-      fuzzyMatches: topMatches[1],
+      exactFileNameMatches: topMatches[0],
+      exactFullPathMatches: topMatches[1],
+      fuzzyMatches: topMatches[2],
     );
   }
 
