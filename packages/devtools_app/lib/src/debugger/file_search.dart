@@ -173,10 +173,10 @@ class FileQuery {
     if (isEmpty) return AutoCompleteMatch(script.uri);
 
     final fileName = _fileName(script.uri);
-    final fileNameIdx = script.uri.lastIndexOf(fileName);
+    final fileNameIndex = script.uri.lastIndexOf(fileName);
     final matchedSegments = _findExactSegments(fileName)
         .map((range) =>
-            Range(range.begin + fileNameIdx, range.end + fileNameIdx))
+            Range(range.begin + fileNameIndex, range.end + fileNameIndex))
         .toList();
     return AutoCompleteMatch(script.uri, matchedSegments: matchedSegments);
   }
@@ -217,10 +217,10 @@ class FileQuery {
           _findFuzzySegments(script.uri, query.replaceAll(' ', ''));
     } else {
       final fileName = _fileName(script.uri);
-      final fileNameIdx = script.uri.lastIndexOf(fileName);
+      final fileNameIndex = script.uri.lastIndexOf(fileName);
       matchedSegments = _findFuzzySegments(fileName, query)
           .map((range) =>
-              Range(range.begin + fileNameIdx, range.end + fileNameIdx))
+              Range(range.begin + fileNameIndex, range.end + fileNameIndex))
           .toList();
     }
 
@@ -230,11 +230,9 @@ class FileQuery {
   List<Range> _findExactSegments(String file) {
     final matchedSegments = <Range>[];
     for (final token in isMultiToken ? tokens : [query]) {
-      final autoCompleteResultSegments = <Range>[];
       final start = file.indexOf(token);
       final end = start + token.length;
-      autoCompleteResultSegments.add(Range(start, end));
-      matchedSegments.addAll(autoCompleteResultSegments);
+      matchedSegments.add(Range(start, end));
     }
     matchedSegments
         .sort((rangeA, rangeB) => rangeA.begin.compareTo(rangeB.begin));
