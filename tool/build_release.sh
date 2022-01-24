@@ -28,7 +28,7 @@ set -ex
 
 pushd packages/devtools_app
 
-rm -rf build
+flutter clean
 rm -rf ../devtools/build
 
 flutter pub get
@@ -41,7 +41,6 @@ flutter build web \
   --pwa-strategy=none \
   --profile \
   --dart-define=FLUTTER_WEB_USE_SKIA=true \
-  --dart-define=FLUTTER_WEB_CANVASKIT_URL=canvaskit/ \
   --no-tree-shake-icons
 
 mv build/web ../devtools/build
@@ -49,6 +48,10 @@ mv build/web ../devtools/build
 rm ../devtools/build/flutter_service_worker.js
 # Rename the DevTools-specific service worker:
 mv ../devtools/build/devtools_service_worker.js ../devtools/build/service_worker.js
+
+# Ensure permissions are set correctly on canvaskit binaries.
+chmod 0755 ../devtools/build/canvaskit/canvaskit.*
+chmod 0755 ../devtools/build/canvaskit/profiling/canvaskit.*
 
 popd
 
