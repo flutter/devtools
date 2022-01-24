@@ -19,6 +19,7 @@ import 'src/screens/provider/riverpod_error_logger_observer.dart';
 import 'src/shared/app_error_handling.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/preferences.dart';
+import 'src/url_strategy/url_strategy.dart';
 
 void main() async {
   usePathUrlStrategy();
