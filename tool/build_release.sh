@@ -41,6 +41,7 @@ flutter build web \
   --pwa-strategy=none \
   --profile \
   --dart-define=FLUTTER_WEB_USE_SKIA=true \
+  --dart-define=FLUTTER_WEB_CANVASKIT_URL=canvaskit/ \
   --no-tree-shake-icons
 
 mv build/web ../devtools/build
