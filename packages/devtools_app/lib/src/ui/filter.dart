@@ -64,7 +64,7 @@ class _FilterDialogState<T> extends State<FilterDialog> with AutoDisposeMixin {
   void initState() {
     super.initState();
     queryTextFieldController = TextEditingController(
-        text: widget.controller.activeFilter.value?.query ?? '');
+        text: widget.controller.activeFilter.value?.queryFilter?.query ?? '');
   }
 
   @override
