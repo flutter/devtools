@@ -19,6 +19,9 @@ flutter-sdk/
 
 # Generated files not intended to be checked in to version control
 .flutter-plugins
+**/.flutter-plugins-dependencies
 flutter_export_environment.sh
 Podfile
 Podfile.lock
+**/generated/not_namespaced_r_class_sources/
+**/build/
