@@ -4,6 +4,7 @@
 
 // @dart=2.9
 
+import 'package:devtools_app/src/url_strategy/url_strategy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,6 +21,8 @@ import 'src/shared/globals.dart';
 import 'src/shared/preferences.dart';
 
 void main() async {
+  usePathUrlStrategy();
+
   // Initialize the framework before we do anything else, otherwise the
   // StorageController won't be initialized and preferences won't be loaded.
   await initializeFramework();
