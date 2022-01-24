@@ -7,11 +7,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
-
-import 'utils.dart';
 
 class AppFixture {
   AppFixture._(

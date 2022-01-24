@@ -5,13 +5,12 @@
 @TestOn('vm')
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
-import 'package:devtools_test/flutter_test_driver.dart'
-    show FlutterRunConfiguration;
-import 'package:devtools_test/flutter_test_environment.dart';
-import 'package:devtools_test/utils.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'matchers/matchers.dart';
+import 'test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'test_infra/flutter_test_environment.dart';
 
 void main() async {
   initializeLiveTestWidgetsFlutterBindingWithAssets();

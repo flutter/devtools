@@ -21,7 +21,7 @@ import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_app/src/version.dart';
 import 'package:devtools_app/src/vm_developer/vm_developer_tools_screen.dart';
-import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

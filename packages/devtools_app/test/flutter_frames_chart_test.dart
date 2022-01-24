@@ -10,12 +10,12 @@ import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/ui/colors.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/performance_test_data.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+
+import 'test_data/performance_test_data.dart';
 
 void main() {
   Future<void> pumpChart(

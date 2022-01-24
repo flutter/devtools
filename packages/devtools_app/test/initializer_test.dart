@@ -6,7 +6,7 @@
 import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/initializer.dart';
 import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_test/mocks.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
