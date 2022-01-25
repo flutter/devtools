@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/analytics/analytics_common.dart';
 import 'package:devtools_app/src/shared/survey.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -34,6 +35,26 @@ void main() {
       expect(emptySurvey.endDate, isNull);
       expect(emptySurvey.title, isNull);
       expect(emptySurvey.url, isNull);
+    });
+
+    group('parses the current page', () {
+      test('from the path', () {
+        final page =
+            extractCurrentPageFromUrl('http://localhost:9000/inspector?uri=x');
+        expect(page, 'inspector');
+      });
+
+      test('from the query string', () {
+        final page = extractCurrentPageFromUrl(
+            'http://localhost:9000/?uri=x&page=inspector&theme=dark');
+        expect(page, 'inspector');
+      });
+
+      test('from the path even if query string is populated', () {
+        final page = extractCurrentPageFromUrl(
+            'http://localhost:9000/memory?uri=x&page=inspector&theme=dark');
+        expect(page, 'memory');
+      });
     });
   });
 }

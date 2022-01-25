@@ -720,29 +720,8 @@ Map<String, dynamic> generateSurveyQueryParameters() {
   const fromKey = 'From';
   const internalKey = 'Internal';
 
-  // TODO(https://github.com/flutter/devtools/issues/2475): fix url structure
-  // Parsing the url via Uri.parse returns an incorrect value for fragment.
-  // Grab the fragment value manually. The url will be of the form
-  // http://127.0.0.1:9100/#/timeline?ide=IntelliJ-IDEA&uri=..., and we want the
-  // part equal to '/timeline'.
-  final url = window.location.toString();
-  const fromValuePrefix = '#/';
-  final startIndex = url.indexOf(fromValuePrefix);
-  // Use the last index because the url can be of the form
-  // 'http://127.0.0.1:9103/?#/?' and we want to be referencing the last '?'
-  // character.
-  final endIndex = url.lastIndexOf('?');
-  var fromPage = '';
-  try {
-    fromPage = url.substring(
-      startIndex + fromValuePrefix.length,
-      endIndex,
-    );
-  } catch (_) {
-    // Fail gracefully if finding the [fromPage] value throws an exception.
-  }
-
   final internalValue = (!isExternalBuild).toString();
+  final fromPage = extractCurrentPageFromUrl(window.location.toString());
 
   return {
     ideKey: ideLaunched,
