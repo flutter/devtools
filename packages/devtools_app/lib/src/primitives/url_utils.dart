@@ -35,3 +35,15 @@ String getSimplePackageUrl(String url) {
   }
   return url;
 }
+
+/// Extracts the current DevTools page from the given [url].
+String extractCurrentPageFromUrl(String url) {
+  // The url can be in one of two forms:
+  // - /page?uri=xxx
+  // - /?page=xxx&uri=yyy (original formats IDEs may use)
+  // Use the path in preference to &page= as it's the one DevTools is updating
+  final uri = Uri.parse(url);
+  return uri.path == '/'
+      ? uri.queryParameters['page'] ?? ''
+      : uri.path.substring(1);
+}
