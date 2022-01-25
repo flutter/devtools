@@ -184,12 +184,17 @@ class ReleaseNotesController {
     } else {
       previousVersion = SemanticVersion.parse(lastReleaseNotesShownVersion);
     }
-    const devtoolsVersion = devtools.version;
-    final currentVersion = SemanticVersion.parse(devtoolsVersion);
-    if (currentVersion > previousVersion) {
+    // Parse the current version instead of using [devtools.version] directly to
+    // strip off any build metadata (any characters following a '+' character).
+    // Release notes will be hosted on the Flutter website with a version number
+    // that does not contain any build metadata.
+    final parsedCurrentVersion = SemanticVersion.parse(devtools.version);
+    final parsedCurrentVersionStr = parsedCurrentVersion.toString();
+    if (parsedCurrentVersion > previousVersion) {
       try {
-        String releaseNotesMarkdown =
-            await http.read(Uri.parse(_releaseNotesUrl(devtoolsVersion)));
+        String releaseNotesMarkdown = await http.read(
+          Uri.parse(_releaseNotesUrl(parsedCurrentVersionStr)),
+        );
         // This is a workaround so that the images in release notes will appear.
         // The {{site.url}} syntax is best practices for the flutter website
         // repo, where these release notes are hosted, so we are performing this
@@ -201,7 +206,9 @@ class ReleaseNotesController {
 
         _releaseNotesMarkdown.value = releaseNotesMarkdown;
         toggleReleaseNotesVisible(true);
-        unawaited(server.setLastShownReleaseNotesVersion(devtoolsVersion));
+        unawaited(
+          server.setLastShownReleaseNotesVersion(parsedCurrentVersionStr),
+        );
       } catch (e) {
         // Fail gracefully if we cannot find release notes for the current
         // version of DevTools.
@@ -209,7 +216,7 @@ class ReleaseNotesController {
         toggleReleaseNotesVisible(false);
         logger.log(
           'Warning: could not find release notes for DevTools version '
-          '$currentVersion. $e',
+          '$parsedCurrentVersionStr. $e',
           logger.LogLevel.warning,
         );
       }
