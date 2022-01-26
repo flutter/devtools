@@ -6,10 +6,14 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:http/http.dart' as http;
 
 import '../devtools.dart' as devtools;
-import '../devtools_app.dart';
+import 'auto_dispose_mixin.dart';
+import 'common_widgets.dart';
 import 'config_specific/launch_url/launch_url.dart';
 import 'config_specific/logger/logger.dart' as logger;
 import 'config_specific/server/server.dart' as server;
+import 'theme.dart';
+import 'utils.dart';
+import 'version.dart';
 
 class ReleaseNotesViewer extends StatefulWidget {
   const ReleaseNotesViewer({
