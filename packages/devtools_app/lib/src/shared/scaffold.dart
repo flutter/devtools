@@ -217,16 +217,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         // Clear error count when navigating to a screen.
         serviceManager.errorBadgeManager.clearErrors(screen.screenId);
 
-        // If the tab index is 0 and the current route has no page ID (eg. we're
-        // at the URL /?uri= with no page ID), those are equivalent pages but
-        // navigateIfNotCurrent does not know that and will try to navigate, so
-        // skip that here.
-        final routerDelegate = DevToolsRouterDelegate.of(context);
-        if (_tabController!.index == 0 &&
-            (routerDelegate.currentConfiguration!.page.isEmpty)) {
-          return;
-        }
-
         // Update routing with the change.
         routerDelegate.navigateIfNotCurrent(screen.screenId);
       }
