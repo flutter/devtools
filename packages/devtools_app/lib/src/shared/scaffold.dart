@@ -218,6 +218,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         serviceManager.errorBadgeManager.clearErrors(screen.screenId);
 
         // Update routing with the change.
+        final routerDelegate = DevToolsRouterDelegate.of(context);
         routerDelegate.navigateIfNotCurrent(screen.screenId);
       }
     });
