@@ -232,6 +232,18 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       }
     });
 
+    // If we had no explicit page, we want to write one into the URL but
+    // without triggering a navigation.
+    if (widget.page == null) {
+      final routerDelegate = DevToolsRouterDelegate.of(context);
+      Router.neglect(context, () {
+        routerDelegate.navigateIfNotCurrent(
+          _currentScreen.screenId,
+          routerDelegate.currentConfiguration.args,
+        );
+      });
+    }
+
     // Broadcast the initial page.
     frameworkController.notifyPageChange(
       PageChangeEvent(_currentScreen.screenId, widget.embed),
