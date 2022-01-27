@@ -46,7 +46,7 @@ jobs:
       matrix:
         channel:
           - 2.10.0-0.2.pre
-          - master
+#          - master
     steps:
       - name: git clone
         uses: actions/checkout@v2
@@ -67,7 +67,7 @@ jobs:
           - test_dart2js
         channel:
           - 2.10.0-0.2.pre
-          - master
+#          - master
     steps:
       - name: git clone
         uses: actions/checkout@v2
@@ -99,7 +99,7 @@ jobs:
           - integration_dart2js
         channel:
           - 2.10.0-0.2.pre
-          - master
+#          - master
     steps:
       - name: git clone
         uses: actions/checkout@v2
