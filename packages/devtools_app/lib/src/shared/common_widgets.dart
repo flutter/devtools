@@ -11,14 +11,14 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../analytics/analytics.dart' as ga;
-import '../primitives/auto_dispose_mixin.dart';
 import '../config_specific/launch_url/launch_url.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../ui/icons.dart';
+import '../ui/label.dart';
 import 'globals.dart';
 import 'scaffold.dart';
 import 'theme.dart';
-import '../ui/icons.dart';
-import '../ui/label.dart';
 import 'utils.dart';
 
 const tooltipWait = Duration(milliseconds: 500);

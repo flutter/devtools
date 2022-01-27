@@ -12,12 +12,12 @@ import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart';
-import '../shared/globals.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
 import '../primitives/trees.dart';
-import '../ui/search.dart';
+import '../shared/globals.dart';
 import '../shared/utils.dart';
+import '../ui/search.dart';
 
 /// Whether to include properties surfaced through Diagnosticable objects as
 /// part of the generic Debugger view of an object.

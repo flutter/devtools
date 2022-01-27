@@ -4,12 +4,12 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/inspector_screen.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/inspector/layout_explorer/layout_explorer.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_test/devtools_test.dart';

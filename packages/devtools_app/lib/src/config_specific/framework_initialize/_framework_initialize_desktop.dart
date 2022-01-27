@@ -8,8 +8,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
-import '../../shared/globals.dart';
 import '../../primitives/storage.dart';
+import '../../shared/globals.dart';
 import '../logger/logger.dart';
 
 /// Return the url the application is launched from.

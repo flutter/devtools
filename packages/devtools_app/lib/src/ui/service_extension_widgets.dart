@@ -7,10 +7,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../analytics/analytics.dart' as ga;
-import '../primitives/auto_dispose_mixin.dart';
-import '../shared/common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../core/message_bus.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
 import '../shared/scaffold.dart';

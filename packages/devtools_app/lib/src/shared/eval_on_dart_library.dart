@@ -10,10 +10,10 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/auto_dispose.dart';
 import '../config_specific/logger/logger.dart';
-import 'globals.dart';
 import '../inspector/inspector_service.dart';
+import '../primitives/auto_dispose.dart';
+import 'globals.dart';
 import 'vm_service_wrapper.dart';
 
 class Disposable {

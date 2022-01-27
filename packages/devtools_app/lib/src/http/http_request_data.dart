@@ -8,11 +8,11 @@ import 'package:flutter/widgets.dart';
 import 'package:mime/mime.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../shared/common_widgets.dart';
 import '../config_specific/logger/logger.dart';
-import '../shared/globals.dart';
 import '../network/network_model.dart';
 import '../primitives/trace_event.dart';
+import '../shared/common_widgets.dart';
+import '../shared/globals.dart';
 import '../shared/utils.dart';
 import 'http.dart';
 

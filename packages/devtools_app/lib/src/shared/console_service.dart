@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/auto_dispose.dart';
 import '../debugger/debugger_model.dart';
-import 'globals.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
+import '../primitives/auto_dispose.dart';
+import 'globals.dart';
 import 'utils.dart';
 import 'vm_service_wrapper.dart';
 

@@ -9,8 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide VmService;
 
 import '../primitives/auto_dispose.dart';
-import '../shared/globals.dart';
 import '../profiler/cpu_profile_controller.dart';
+import '../shared/globals.dart';
 import '../shared/vm_service_wrapper.dart';
 import 'vm_service_private_extensions.dart';
 

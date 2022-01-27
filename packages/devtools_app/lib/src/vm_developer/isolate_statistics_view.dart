@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../shared/common_widgets.dart';
 import '../profiler/cpu_profiler.dart';
+import '../shared/common_widgets.dart';
 import '../shared/split.dart';
 import '../shared/table.dart';
 import '../shared/table_data.dart';

@@ -8,14 +8,14 @@ import 'package:flutter/material.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
-import '../primitives/auto_dispose_mixin.dart';
-import 'common_widgets.dart';
 import '../framework/framework_core.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/url_utils.dart';
+import 'common_widgets.dart';
 import 'globals.dart';
 import 'notifications.dart';
 import 'routing.dart';
 import 'theme.dart';
-import '../primitives/url_utils.dart';
 import 'utils.dart';
 
 /// Widget that requires business logic to be loaded before building its

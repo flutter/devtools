@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('vm')
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/network/network_model.dart';
+@TestOn('vm')
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/service_manager.dart';
-import 'package:devtools_app/src/ui/filter.dart';
 import 'package:devtools_app/src/shared/version.dart';
+import 'package:devtools_app/src/ui/filter.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';

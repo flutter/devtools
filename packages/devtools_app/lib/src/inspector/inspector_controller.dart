@@ -21,9 +21,9 @@ import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/auto_dispose.dart';
 import '../config_specific/logger/logger.dart';
 import '../config_specific/url/url.dart';
+import '../primitives/auto_dispose.dart';
 import '../shared/globals.dart';
 import '../shared/service_extensions.dart' as extensions;
 import '../shared/service_registrations.dart' as registrations;

@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../info/info_controller.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'dialogs.dart';
 import 'globals.dart';
-import '../info/info_controller.dart';
 import 'routing.dart';
 import 'table.dart';
 import 'table_data.dart';

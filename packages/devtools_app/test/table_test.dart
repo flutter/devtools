@@ -1,8 +1,8 @@
+import 'package:devtools_app/src/primitives/trees.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/shared/table.dart';
 import 'package:devtools_app/src/shared/table_data.dart';
-import 'package:devtools_app/src/primitives/trees.dart';
 import 'package:devtools_app/src/shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart' hide TableRow;

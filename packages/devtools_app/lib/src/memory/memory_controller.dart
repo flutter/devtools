@@ -11,16 +11,16 @@ import 'package:vm_service/vm_service.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
-import '../primitives/auto_dispose.dart';
 import '../config_specific/file/file.dart';
 import '../config_specific/logger/logger.dart';
+import '../primitives/auto_dispose.dart';
 import '../shared/globals.dart';
 import '../shared/service_manager.dart';
 import '../shared/table.dart';
 import '../shared/table_data.dart';
-import '../ui/search.dart';
 import '../shared/utils.dart';
 import '../shared/version.dart';
+import '../ui/search.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
 import 'memory_protocol.dart';

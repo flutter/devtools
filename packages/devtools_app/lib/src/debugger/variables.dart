@@ -6,11 +6,11 @@ import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
-import '../shared/common_widgets.dart';
-import '../shared/globals.dart';
 import '../inspector/diagnostics.dart';
 import '../inspector/inspector_screen.dart';
 import '../primitives/listenable.dart';
+import '../shared/common_widgets.dart';
+import '../shared/globals.dart';
 import '../shared/notifications.dart';
 import '../shared/routing.dart';
 import '../shared/theme.dart';

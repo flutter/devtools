@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/profiler/profile_granularity.dart';
+import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/shared/banner_messages.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/profiler/profile_granularity.dart';
-import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/shared/theme.dart';
-import 'package:devtools_app/src/ui/vm_flag_widgets.dart';
 import 'package:devtools_app/src/shared/vm_flags.dart' as vm_flags;
+import 'package:devtools_app/src/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
+import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
+import 'package:devtools_app/src/provider/provider_nodes.dart';
 // ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member, non_constant_identifier_names
 
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
-import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
-import 'package:devtools_app/src/provider/provider_nodes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;

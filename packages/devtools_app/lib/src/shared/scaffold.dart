@@ -10,14 +10,14 @@ import 'package:provider/provider.dart';
 
 import '../analytics/prompt.dart';
 import '../app.dart';
-import '../primitives/auto_dispose_mixin.dart';
-import 'banner_messages.dart';
-import 'common_widgets.dart';
 import '../config_specific/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/ide_theme/ide_theme.dart';
 import '../config_specific/import_export/import_export.dart';
 import '../debugger/console.dart';
 import '../debugger/debugger_screen.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import 'banner_messages.dart';
+import 'common_widgets.dart';
 import 'framework_controller.dart';
 import 'globals.dart';
 import 'notifications.dart';

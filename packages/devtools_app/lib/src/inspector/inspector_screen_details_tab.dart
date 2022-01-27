@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../primitives/auto_dispose_mixin.dart';
 import '../shared/theme.dart';
-import '../ui/tab.dart';
 import '../shared/utils.dart';
+import '../ui/tab.dart';
 import 'inspector_controller.dart';
 import 'layout_explorer/layout_explorer.dart';
 

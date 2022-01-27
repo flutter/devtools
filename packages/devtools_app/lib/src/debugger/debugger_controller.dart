@@ -9,15 +9,15 @@ import 'package:flutter/foundation.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/auto_dispose.dart';
 import '../config_specific/logger/logger.dart';
 import '../core/message_bus.dart';
-import '../shared/globals.dart';
+import '../primitives/auto_dispose.dart';
 import '../primitives/history_manager.dart';
+import '../shared/globals.dart';
 import '../shared/service_manager.dart';
-import '../ui/search.dart';
 import '../shared/utils.dart';
 import '../shared/vm_service_wrapper.dart';
+import '../ui/search.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
 import 'syntax_highlighter.dart';

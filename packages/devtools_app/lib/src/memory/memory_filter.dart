@@ -5,10 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../shared/common_widgets.dart';
 import '../shared/dialogs.dart';
-import '../flutter_widgets/linked_scroll_controller.dart';
 import '../shared/theme.dart';
 import 'memory_controller.dart';
 import 'memory_snapshot_models.dart';

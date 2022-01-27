@@ -6,10 +6,10 @@ import '../config_specific/ide_theme/ide_theme.dart';
 import '../config_specific/import_export/import_export.dart';
 import '../core/message_bus.dart';
 import '../extension_points/extensions_base.dart';
+import '../primitives/storage.dart';
 import 'framework_controller.dart';
 import 'preferences.dart';
 import 'service_manager.dart';
-import '../primitives/storage.dart';
 import 'survey.dart';
 
 final Map<Type, dynamic> globals = <Type, dynamic>{};

@@ -6,11 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../debugger/debugger_controller.dart';
+import '../debugger/variables.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import 'common_widgets.dart';
 import 'console_service.dart';
-import '../debugger/debugger_controller.dart';
-import '../debugger/variables.dart';
 import 'theme.dart';
 import 'utils.dart';
 

@@ -7,8 +7,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../primitives/auto_dispose_mixin.dart';
 import '../config_specific/logger/logger.dart' as logger;
+import '../primitives/auto_dispose_mixin.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';
 import 'chart_controller.dart';

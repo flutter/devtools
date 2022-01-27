@@ -4,8 +4,8 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/shared/utils.dart';
 import 'package:devtools_app/src/shared/version.dart';

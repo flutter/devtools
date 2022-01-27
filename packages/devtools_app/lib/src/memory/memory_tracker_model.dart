@@ -5,11 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../primitives/trees.dart';
 import '../shared/split.dart';
 import '../shared/table.dart';
 import '../shared/table_data.dart';
 import '../shared/theme.dart';
-import '../primitives/trees.dart';
 import '../shared/utils.dart';
 import 'memory_allocation_table_view.dart';
 import 'memory_controller.dart';

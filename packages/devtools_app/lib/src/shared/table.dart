@@ -4,16 +4,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 
-import '../primitives/auto_dispose_mixin.dart';
-import 'collapsible_mixin.dart';
-import 'common_widgets.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
-import 'table_data.dart';
-import 'theme.dart';
-import 'tree.dart';
+import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/trees.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
+import 'collapsible_mixin.dart';
+import 'common_widgets.dart';
+import 'table_data.dart';
+import 'theme.dart';
+import 'tree.dart';
 import 'utils.dart';
 
 // TODO(devoncarew): We need to render the selected row with a different

@@ -7,17 +7,17 @@ import 'package:provider/provider.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
-import '../primitives/blocking_action_mixin.dart';
-import 'common_widgets.dart';
 import '../config_specific/import_export/import_export.dart';
-import 'file_import.dart';
 import '../framework/framework_core.dart';
+import '../primitives/blocking_action_mixin.dart';
+import '../primitives/url_utils.dart';
+import '../ui/label.dart';
+import 'common_widgets.dart';
+import 'file_import.dart';
 import 'globals.dart';
 import 'notifications.dart';
 import 'routing.dart';
 import 'theme.dart';
-import '../ui/label.dart';
-import '../primitives/url_utils.dart';
 import 'utils.dart';
 
 /// The landing screen when starting Dart DevTools without being connected to an

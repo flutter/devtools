@@ -4,8 +4,8 @@
 
 library flutter_widget;
 
-import '../ui/icons.dart';
 import '../shared/utils.dart';
+import '../ui/icons.dart';
 
 class Category {
   const Category(this.label, this.icon);

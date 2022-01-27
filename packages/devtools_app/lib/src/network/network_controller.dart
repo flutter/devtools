@@ -8,12 +8,12 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/allowed_error.dart';
-import '../shared/globals.dart';
 import '../http/http_request_data.dart';
 import '../http/http_service.dart';
+import '../shared/globals.dart';
+import '../shared/utils.dart';
 import '../ui/filter.dart';
 import '../ui/search.dart';
-import '../shared/utils.dart';
 import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';

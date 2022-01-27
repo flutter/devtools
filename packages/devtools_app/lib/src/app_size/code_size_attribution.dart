@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:vm_snapshot_analysis/precompiler_trace.dart';
 import 'package:vm_snapshot_analysis/program_info.dart';
 
+import '../primitives/trees.dart';
 import '../shared/common_widgets.dart';
 import '../shared/table.dart';
 import '../shared/table_data.dart';
 import '../shared/theme.dart';
-import '../primitives/trees.dart';
 import '../shared/utils.dart';
 
 class CallGraphWithDominators extends StatefulWidget {

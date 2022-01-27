@@ -17,12 +17,12 @@ import '../shared/split.dart';
 import '../shared/table.dart';
 import '../shared/table_data.dart';
 import '../shared/theme.dart';
+import '../shared/utils.dart';
 import '../ui/colors.dart';
 import '../ui/filter.dart';
 import '../ui/icons.dart';
 import '../ui/search.dart';
 import '../ui/service_extension_widgets.dart';
-import '../shared/utils.dart';
 import 'logging_controller.dart';
 
 final loggingSearchFieldKey = GlobalKey(debugLabel: 'LoggingSearchFieldKey');

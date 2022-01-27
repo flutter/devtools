@@ -12,9 +12,9 @@ import '../primitives/auto_dispose_mixin.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
 import '../shared/theme.dart';
+import '../shared/utils.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
-import '../shared/utils.dart';
 import 'debugger_controller.dart';
 
 class ExpressionEvalField extends StatefulWidget {

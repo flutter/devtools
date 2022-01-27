@@ -8,9 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 
 import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/trees.dart';
 import 'collapsible_mixin.dart';
 import 'theme.dart';
-import '../primitives/trees.dart';
 
 class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   const TreeView({
