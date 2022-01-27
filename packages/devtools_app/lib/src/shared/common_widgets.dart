@@ -1787,20 +1787,21 @@ class InternalFlutterWebWarningText extends StatelessWidget {
         children: [
           TextSpan(
               text:
-                  'Warning: Flutter DevTools is not currently supported for Flutter Web apps.\n\n',
+                  'Warning: Flutter DevTools is currently not supported for Flutter Web apps.\n\n',
               style: theme.subtleTextStyle
                   .copyWith(color: theme.colorScheme.errorTextColor)),
           TextSpan(
               text: 'Some debugging features might not work as expected.\n',
               style: theme.subtleTextStyle),
           TextSpan(text: 'See ', style: theme.subtleTextStyle),
-          TextSpan(
-              text: 'b/204213138',
-              style: theme.linkTextStyle,
-              recognizer: TapGestureRecognizer()
-                ..onTap = () async {
-                  await launch('https://b.corp.google.com/issues/204213138');
-                }),
+          LinkTextSpan(
+            link: const Link(
+              display: 'b/204213138',
+              url: 'https://b.corp.google.com/issues/204213138',
+            ),
+            context: context,
+            style: theme.linkTextStyle,
+          ),
           TextSpan(text: ' for details.', style: theme.subtleTextStyle),
         ],
       ),
