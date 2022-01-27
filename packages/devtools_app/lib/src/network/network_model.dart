@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../http/http_request_data.dart';
+import '../shared/utils.dart';
 import '../ui/search.dart';
-import '../utils.dart';
 
 abstract class NetworkRequest with DataSearchStateMixin {
   NetworkRequest(this._timelineMicrosBase);

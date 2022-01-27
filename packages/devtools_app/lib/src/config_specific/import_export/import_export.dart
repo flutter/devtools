@@ -7,13 +7,13 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 import '../../../devtools.dart';
-import '../../connected_app.dart';
-import '../../globals.dart';
-import '../../notifications.dart';
 import '../../performance/legacy/performance_screen.dart';
 import '../../performance/performance_model.dart';
 import '../../performance/performance_screen.dart';
-import '../../utils.dart';
+import '../../shared/connected_app.dart';
+import '../../shared/globals.dart';
+import '../../shared/notifications.dart';
+import '../../shared/utils.dart';
 import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
     if (dart.library.io) '_export_desktop.dart';

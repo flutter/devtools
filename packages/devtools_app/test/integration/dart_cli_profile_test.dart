@@ -11,7 +11,7 @@ import 'dart:typed_data';
 import 'package:devtools_app/src/analytics/analytics_controller.dart';
 import 'package:devtools_app/src/app.dart';
 import 'package:devtools_app/src/framework/framework_core.dart';
-import 'package:devtools_app/src/preferences.dart';
+import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:devtools_app/src/geometry.dart';
+import 'package:devtools_app/src/primitives/geometry.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

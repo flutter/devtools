@@ -18,11 +18,11 @@ import '../app.dart';
 import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';
-import '../globals.dart';
 import '../performance/performance_screen.dart';
 import '../profiler/profiler_screen.dart';
+import '../shared/globals.dart';
+import '../shared/version.dart';
 import '../ui/gtags.dart';
-import '../version.dart';
 import 'analytics_common.dart';
 import 'constants.dart' as analytics_constants;
 

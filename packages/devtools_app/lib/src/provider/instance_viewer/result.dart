@@ -6,7 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
 
-import '../../eval_on_dart_library.dart';
+import '../../shared/eval_on_dart_library.dart';
 
 import 'fake_freezed_annotation.dart';
 

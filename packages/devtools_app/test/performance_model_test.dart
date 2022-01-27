@@ -4,10 +4,10 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/performance/performance_model.dart';
+import 'package:devtools_app/src/primitives/trace_event.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/trace_event.dart';
-import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
+import 'package:devtools_app/src/shared/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_data/cpu_profile_test_data.dart';

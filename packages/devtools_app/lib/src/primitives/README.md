@@ -1,0 +1,1 @@
+This folder contains code that does not depend on code in other folders.

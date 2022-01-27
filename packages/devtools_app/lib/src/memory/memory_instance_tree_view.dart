@@ -5,10 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../auto_dispose_mixin.dart';
-import '../table.dart';
-import '../table_data.dart';
-import '../utils.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../shared/table.dart';
+import '../shared/table_data.dart';
+import '../shared/utils.dart';
 import 'memory_controller.dart';
 import 'memory_snapshot_models.dart';
 

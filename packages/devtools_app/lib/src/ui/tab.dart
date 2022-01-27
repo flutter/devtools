@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../analytics/analytics.dart' as ga;
-import '../theme.dart';
-import '../utils.dart';
+import '../shared/theme.dart';
+import '../shared/utils.dart';
 
 double get _tabHeight => scaleByFontFactor(46.0);
 double get _textAndIconTabHeight => scaleByFontFactor(72.0);

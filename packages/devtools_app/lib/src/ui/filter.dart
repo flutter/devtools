@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../auto_dispose_mixin.dart';
-import '../common_widgets.dart';
-import '../dialogs.dart';
-import '../theme.dart';
-import '../utils.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../shared/common_widgets.dart';
+import '../shared/dialogs.dart';
+import '../shared/theme.dart';
+import '../shared/utils.dart';
 import 'label.dart';
 
 // TODO(kenz): consider breaking this up flat data filtering and tree data

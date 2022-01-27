@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import '../../auto_dispose_mixin.dart';
+import '../../primitives/auto_dispose_mixin.dart';
 import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
 import 'box/box.dart';

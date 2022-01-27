@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../eval_on_dart_library.dart';
+import '../shared/eval_on_dart_library.dart';
 import 'instance_viewer/eval.dart';
 import 'provider_debounce.dart';
 

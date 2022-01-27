@@ -7,9 +7,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../auto_dispose.dart';
-import '../globals.dart';
-import '../utils.dart';
+import '../primitives/auto_dispose.dart';
+import '../shared/globals.dart';
+import '../shared/utils.dart';
 import 'debugger_controller.dart';
 import 'program_explorer_model.dart';
 

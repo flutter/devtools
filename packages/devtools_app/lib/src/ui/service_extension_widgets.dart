@@ -7,18 +7,18 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../analytics/analytics.dart' as ga;
-import '../auto_dispose_mixin.dart';
-import '../common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../core/message_bus.dart';
-import '../globals.dart';
-import '../notifications.dart';
-import '../scaffold.dart';
-import '../service_extensions.dart';
-import '../service_manager.dart';
-import '../service_registrations.dart';
-import '../theme.dart';
-import '../utils.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../shared/common_widgets.dart';
+import '../shared/globals.dart';
+import '../shared/notifications.dart';
+import '../shared/scaffold.dart';
+import '../shared/service_extensions.dart';
+import '../shared/service_manager.dart';
+import '../shared/service_registrations.dart';
+import '../shared/theme.dart';
+import '../shared/utils.dart';
 import 'hover.dart';
 import 'label.dart';
 

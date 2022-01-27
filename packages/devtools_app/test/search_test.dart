@@ -1,5 +1,5 @@
+import 'package:devtools_app/src/shared/utils.dart';
 import 'package:devtools_app/src/ui/search.dart';
-import 'package:devtools_app/src/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // TODO(https://github.com/flutter/devtools/issues/3514): increase test coverage

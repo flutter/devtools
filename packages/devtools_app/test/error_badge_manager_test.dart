@@ -4,13 +4,13 @@
 
 import 'package:devtools_app/src/app_size/app_size_screen.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
-import 'package:devtools_app/src/error_badge_manager.dart';
 import 'package:devtools_app/src/inspector/inspector_screen.dart';
 import 'package:devtools_app/src/logging/logging_screen.dart';
 import 'package:devtools_app/src/memory/memory_screen.dart';
 import 'package:devtools_app/src/network/network_screen.dart';
 import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/profiler/profiler_screen.dart';
+import 'package:devtools_app/src/shared/error_badge_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const supportedScreenIds = [

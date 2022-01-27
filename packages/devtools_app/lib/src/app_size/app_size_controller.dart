@@ -11,7 +11,7 @@ import 'package:vm_snapshot_analysis/utils.dart';
 import 'package:vm_snapshot_analysis/v8_profile.dart';
 
 import '../charts/treemap.dart';
-import '../utils.dart';
+import '../shared/utils.dart';
 import 'app_size_screen.dart';
 
 enum DiffTreeType {

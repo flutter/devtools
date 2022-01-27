@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../common_widgets.dart';
-import '../../../utils.dart';
+import '../../../shared/common_widgets.dart';
+import '../../../shared/utils.dart';
 import '../../inspector_data_models.dart';
 import 'arrow.dart';
 import 'dimension.dart';

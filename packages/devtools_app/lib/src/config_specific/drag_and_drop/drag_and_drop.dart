@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import '../../notifications.dart';
-import '../../utils.dart';
+import '../../shared/notifications.dart';
+import '../../shared/utils.dart';
 import '_drag_and_drop_stub.dart'
     if (dart.library.html) '_drag_and_drop_web.dart'
     if (dart.library.io) '_drag_and_drop_desktop.dart';

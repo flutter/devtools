@@ -1,5 +1,5 @@
-import '../table_data.dart';
-import '../utils.dart';
+import '../shared/table_data.dart';
+import '../shared/utils.dart';
 import 'cpu_profile_model.dart';
 
 const _timeColumnWidthPx = 180.0;

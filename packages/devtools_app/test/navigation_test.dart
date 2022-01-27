@@ -1,4 +1,4 @@
-import 'package:devtools_app/src/navigation.dart';
+import 'package:devtools_app/src/shared/navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

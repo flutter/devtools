@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider show Provider;
 
-import '../banner_messages.dart';
-import '../common_widgets.dart';
-import '../dialogs.dart';
-import '../screen.dart';
-import '../split.dart';
+import '../shared/banner_messages.dart';
+import '../shared/common_widgets.dart';
+import '../shared/dialogs.dart';
+import '../shared/screen.dart';
+import '../shared/split.dart';
 import 'instance_viewer/instance_details.dart';
 import 'instance_viewer/instance_providers.dart';
 import 'instance_viewer/instance_viewer.dart';
