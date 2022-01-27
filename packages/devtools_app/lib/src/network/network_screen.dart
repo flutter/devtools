@@ -8,8 +8,8 @@ import 'package:provider/provider.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
-import '../auto_dispose_mixin.dart';
-import '../common_widgets.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../shared/common_widgets.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../table.dart';

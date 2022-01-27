@@ -6,10 +6,10 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 
 import '../analytics/constants.dart' as analytics_constants;
-import '../auto_dispose_mixin.dart';
+import '../primitives/auto_dispose_mixin.dart';
 import '../charts/flame_chart.dart';
-import '../common_widgets.dart';
-import '../dialogs.dart';
+import '../shared/common_widgets.dart';
+import '../shared/dialogs.dart';
 import '../notifications.dart';
 import '../theme.dart';
 import '../ui/colors.dart';

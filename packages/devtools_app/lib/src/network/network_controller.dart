@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/allowed_error.dart';
-import '../globals.dart';
+import '../shared/globals.dart';
 import '../http/http_request_data.dart';
 import '../http/http_service.dart';
 import '../ui/filter.dart';

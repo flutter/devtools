@@ -4,7 +4,7 @@
 
 import 'dart:html' hide Storage;
 
-import '../../globals.dart';
+import '../../shared/globals.dart';
 import '../../server_api_client.dart';
 import '../../storage.dart';
 

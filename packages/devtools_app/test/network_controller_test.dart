@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/network/network_model.dart';

@@ -1,7 +1,7 @@
 import 'package:devtools_app/src/charts/chart.dart';
 import 'package:devtools_app/src/charts/chart_controller.dart';
 import 'package:devtools_app/src/charts/chart_trace.dart';
-import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/memory/memory_charts.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_app/src/utils.dart';

@@ -11,7 +11,7 @@ import 'package:devtools_app/src/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/debugger/debugger_model.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/debugger/program_explorer_model.dart';
-import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/service_manager.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';

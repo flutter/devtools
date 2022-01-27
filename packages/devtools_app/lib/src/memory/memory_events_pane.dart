@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import '../auto_dispose_mixin.dart';
+import '../primitives/auto_dispose_mixin.dart';
 import '../charts/chart.dart';
 import '../charts/chart_controller.dart';
 import '../charts/chart_trace.dart' as trace;

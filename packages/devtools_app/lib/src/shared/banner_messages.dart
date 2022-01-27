@@ -8,9 +8,9 @@ import 'package:provider/provider.dart';
 
 import 'common_widgets.dart';
 import 'globals.dart';
-import 'screen.dart';
-import 'theme.dart';
-import 'utils.dart';
+import '../screen.dart';
+import '../theme.dart';
+import '../utils.dart';
 
 const _runInProfileModeDocsUrl =
     'https://flutter.dev/docs/testing/ui-performance#run-in-profile-mode';

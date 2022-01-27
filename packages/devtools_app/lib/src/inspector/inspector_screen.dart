@@ -9,13 +9,13 @@ import 'package:provider/provider.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
-import '../auto_dispose_mixin.dart';
-import '../blocking_action_mixin.dart';
-import '../common_widgets.dart';
-import '../connected_app.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/blocking_action_mixin.dart';
+import '../shared/common_widgets.dart';
+import '../shared/connected_app.dart';
 import '../debugger/debugger_controller.dart';
-import '../error_badge_manager.dart';
-import '../globals.dart';
+import '../shared/error_badge_manager.dart';
+import '../shared/globals.dart';
 import '../screen.dart';
 import '../service_extensions.dart' as extensions;
 import '../split.dart';
@@ -231,7 +231,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                 isSearchVisible: searchVisible,
                 constraints: constraints,
                 onRefreshInspectorPressed: _refreshInspector,
-                onSearchVisibleToggle:  _onSearchVisibleToggle,
+                onSearchVisibleToggle: _onSearchVisibleToggle,
                 searchFieldBuilder: () => buildSearchField(
                   controller: summaryTreeController,
                   searchFieldKey: GlobalKey(

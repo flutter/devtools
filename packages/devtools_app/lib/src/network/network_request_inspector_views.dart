@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image;
 
-import '../common_widgets.dart';
+import '../shared/common_widgets.dart';
 import '../http/http.dart';
 import '../http/http_request_data.dart';
 import '../table.dart';

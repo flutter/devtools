@@ -4,8 +4,8 @@
 
 // ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member, non_constant_identifier_names
 
-import 'package:devtools_app/src/eval_on_dart_library.dart';
-import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/provider/provider_nodes.dart';

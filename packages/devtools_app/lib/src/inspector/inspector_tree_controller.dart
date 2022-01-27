@@ -13,13 +13,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pedantic/pedantic.dart';
 
-import '../auto_dispose_mixin.dart';
-import '../collapsible_mixin.dart';
-import '../common_widgets.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../shared/collapsible_mixin.dart';
+import '../shared/common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../debugger/debugger_controller.dart';
-import '../error_badge_manager.dart';
-import '../globals.dart';
+import '../shared/error_badge_manager.dart';
+import '../shared/globals.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';

@@ -6,18 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'auto_dispose_mixin.dart';
+import '../primitives/auto_dispose_mixin.dart';
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'dialogs.dart';
 import 'globals.dart';
-import 'info/info_controller.dart';
-import 'routing.dart';
-import 'table.dart';
-import 'table_data.dart';
-import 'theme.dart';
-import 'utils.dart';
-import 'version.dart';
+import '../info/info_controller.dart';
+import '../routing.dart';
+import '../table.dart';
+import '../table_data.dart';
+import '../theme.dart';
+import '../utils.dart';
+import '../version.dart';
 
 class DeviceDialog extends StatelessWidget {
   const DeviceDialog({

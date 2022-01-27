@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../analytics/constants.dart' as analytics_constants;
 import '../charts/flame_chart.dart';
-import '../common_widgets.dart';
+import '../shared/common_widgets.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/utils.dart';

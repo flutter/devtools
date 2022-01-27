@@ -7,17 +7,17 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'auto_dispose.dart';
+import '../primitives/auto_dispose.dart';
 import 'globals.dart';
-import 'inspector/diagnostics_node.dart';
-import 'inspector/inspector_screen.dart';
-import 'listenable.dart';
-import 'logging/logging_screen.dart';
-import 'network/network_screen.dart';
-import 'performance/performance_screen.dart';
-import 'service_extensions.dart' as extensions;
-import 'utils.dart';
-import 'vm_service_wrapper.dart';
+import '../inspector/diagnostics_node.dart';
+import '../inspector/inspector_screen.dart';
+import '../listenable.dart';
+import '../logging/logging_screen.dart';
+import '../network/network_screen.dart';
+import '../performance/performance_screen.dart';
+import '../service_extensions.dart' as extensions;
+import '../utils.dart';
+import '../vm_service_wrapper.dart';
 
 class ErrorBadgeManager extends DisposableController
     with AutoDisposeControllerMixin {

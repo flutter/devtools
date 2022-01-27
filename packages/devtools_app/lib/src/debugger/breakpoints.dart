@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../common_widgets.dart';
+import '../shared/common_widgets.dart';
 import '../theme.dart';
 import '../utils.dart';
 import 'common.dart';

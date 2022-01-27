@@ -4,7 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
-import '../globals.dart';
+import '../shared/globals.dart';
 import '../trees.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';

@@ -9,9 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../analytics/analytics.dart' as ga;
-import '../auto_dispose_mixin.dart';
-import '../common_widgets.dart';
-import '../console.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../shared/common_widgets.dart';
+import '../shared/console.dart';
 import '../screen.dart';
 import '../split.dart';
 import '../table.dart';

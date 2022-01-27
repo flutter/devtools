@@ -5,8 +5,8 @@
 import 'package:devtools_app/src/analytics/analytics_controller.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
-import 'package:devtools_app/src/framework_controller.dart';
-import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/shared/framework_controller.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/scaffold.dart';
 import 'package:devtools_app/src/screen.dart';
 import 'package:devtools_app/src/service_manager.dart';

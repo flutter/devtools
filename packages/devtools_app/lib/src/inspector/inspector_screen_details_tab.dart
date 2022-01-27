@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../auto_dispose_mixin.dart';
+import '../primitives/auto_dispose_mixin.dart';
 import '../theme.dart';
 import '../ui/tab.dart';
 import '../utils.dart';

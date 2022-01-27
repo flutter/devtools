@@ -11,8 +11,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../auto_dispose_mixin.dart';
-import '../../common_widgets.dart';
+import '../../primitives/auto_dispose_mixin.dart';
+import '../../shared/common_widgets.dart';
 import '../../theme.dart';
 import '../../ui/colors.dart';
 import '../../utils.dart';

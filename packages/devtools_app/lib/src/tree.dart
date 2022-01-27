@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 
-import 'auto_dispose_mixin.dart';
-import 'collapsible_mixin.dart';
+import 'primitives/auto_dispose_mixin.dart';
+import 'shared/collapsible_mixin.dart';
 import 'theme.dart';
 import 'trees.dart';
 

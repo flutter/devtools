@@ -12,12 +12,12 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../auto_dispose_mixin.dart';
-import '../common_widgets.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../shared/common_widgets.dart';
 import '../config_specific/logger/logger.dart';
-import '../dialogs.dart';
+import '../shared/dialogs.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
-import '../globals.dart';
+import '../shared/globals.dart';
 import '../history_viewport.dart';
 import '../theme.dart';
 import '../ui/colors.dart';

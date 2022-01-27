@@ -10,8 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
-import '../../common_widgets.dart';
-import '../../globals.dart';
+import '../../shared/common_widgets.dart';
+import '../../shared/globals.dart';
 import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_model.dart';
 import '../../profiler/cpu_profiler.dart';

@@ -7,8 +7,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 import '../../../devtools.dart';
-import '../../connected_app.dart';
-import '../../globals.dart';
+import '../../shared/connected_app.dart';
+import '../../shared/globals.dart';
 import '../../notifications.dart';
 import '../../performance/legacy/performance_screen.dart';
 import '../../performance/performance_model.dart';

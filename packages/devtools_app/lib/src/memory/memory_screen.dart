@@ -8,13 +8,13 @@ import 'package:provider/provider.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
-import '../auto_dispose_mixin.dart';
-import '../banner_messages.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../shared/banner_messages.dart';
 import '../charts/chart_controller.dart';
-import '../common_widgets.dart';
+import '../shared/common_widgets.dart';
 import '../config_specific/logger/logger.dart';
-import '../dialogs.dart';
-import '../globals.dart';
+import '../shared/dialogs.dart';
+import '../shared/globals.dart';
 import '../notifications.dart';
 import '../screen.dart';
 import '../theme.dart';

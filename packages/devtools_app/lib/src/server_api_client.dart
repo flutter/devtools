@@ -10,8 +10,8 @@ import 'package:http/http.dart' as http;
 import 'config_specific/logger/logger.dart';
 import 'config_specific/notifications/notifications.dart';
 import 'config_specific/sse/sse_shim.dart';
-import 'framework_controller.dart';
-import 'globals.dart';
+import 'shared/framework_controller.dart';
+import 'shared/globals.dart';
 
 /// This class coordinates the connection between the DevTools server and the
 /// DevTools web app.

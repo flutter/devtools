@@ -21,10 +21,10 @@ import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../auto_dispose.dart';
+import '../primitives/auto_dispose.dart';
 import '../config_specific/logger/logger.dart';
 import '../config_specific/url/url.dart';
-import '../globals.dart';
+import '../shared/globals.dart';
 import '../service_extensions.dart' as extensions;
 import '../service_registrations.dart' as registrations;
 import '../utils.dart';

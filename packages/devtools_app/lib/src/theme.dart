@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'common_widgets.dart';
+import 'shared/common_widgets.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
 import 'ui/colors.dart';
 import 'utils.dart';

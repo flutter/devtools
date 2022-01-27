@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../auto_dispose.dart';
-import '../globals.dart';
+import '../primitives/auto_dispose.dart';
+import '../shared/globals.dart';
 import '../service_registrations.dart' as registrations;
 import '../version.dart';
 

@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'config_specific/logger/logger.dart';
-import 'globals.dart';
+import 'shared/globals.dart';
 import 'vm_service_wrapper.dart';
 
 /// A controller for global application preferences.

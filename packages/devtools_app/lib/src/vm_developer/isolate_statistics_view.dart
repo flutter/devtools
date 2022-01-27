@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../common_widgets.dart';
+import '../shared/common_widgets.dart';
 import '../profiler/cpu_profiler.dart';
 import '../split.dart';
 import '../table.dart';

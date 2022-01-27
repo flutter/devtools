@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-import 'common_widgets.dart';
+import 'shared/common_widgets.dart';
 import 'status_line.dart' as status_line;
 import 'theme.dart';
 import 'utils.dart';

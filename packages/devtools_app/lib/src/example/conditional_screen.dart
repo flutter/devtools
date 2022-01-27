@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../common_widgets.dart';
-import '../globals.dart';
+import '../shared/common_widgets.dart';
+import '../shared/globals.dart';
 import '../screen.dart';
 
 /// This is an example implementation of a conditional screen that supports

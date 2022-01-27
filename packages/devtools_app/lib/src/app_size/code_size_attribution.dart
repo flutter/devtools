@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_snapshot_analysis/precompiler_trace.dart';
 import 'package:vm_snapshot_analysis/program_info.dart';
 
-import '../common_widgets.dart';
+import '../shared/common_widgets.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';

@@ -11,13 +11,13 @@ import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import 'analytics/analytics.dart' as ga;
-import 'auto_dispose.dart';
+import 'primitives/auto_dispose.dart';
 import 'config_specific/logger/logger.dart';
-import 'connected_app.dart';
-import 'console_service.dart';
+import 'shared/connected_app.dart';
+import 'shared/console_service.dart';
 import 'core/message_bus.dart';
-import 'error_badge_manager.dart';
-import 'globals.dart';
+import 'shared/error_badge_manager.dart';
+import 'shared/globals.dart';
 import 'inspector/inspector_service.dart';
 import 'logging/vm_service_logger.dart';
 import 'performance/timeline_streams.dart';

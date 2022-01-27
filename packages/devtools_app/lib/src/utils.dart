@@ -18,7 +18,7 @@ import 'package:vm_service/vm_service.dart';
 
 import 'app.dart';
 import 'config_specific/logger/logger.dart' as logger;
-import 'globals.dart';
+import 'shared/globals.dart';
 import 'notifications.dart';
 import 'version.dart';
 

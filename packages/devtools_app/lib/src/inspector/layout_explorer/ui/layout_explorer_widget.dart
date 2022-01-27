@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../globals.dart';
+import '../../../shared/globals.dart';
 import '../../../theme.dart';
 import '../../../utils.dart';
 import '../../diagnostics_node.dart';

@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../auto_dispose_mixin.dart';
+import '../primitives/auto_dispose_mixin.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../utils.dart';

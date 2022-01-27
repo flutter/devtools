@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'theme.dart';
+import '../theme.dart';
 
 /// Provides [animations] triggered by toggling the expanded and visible state
 /// of a widget.

@@ -9,10 +9,10 @@ import 'package:flutter/foundation.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../auto_dispose.dart';
+import '../primitives/auto_dispose.dart';
 import '../config_specific/logger/logger.dart';
 import '../core/message_bus.dart';
-import '../globals.dart';
+import '../shared/globals.dart';
 import '../history_manager.dart';
 import '../service_manager.dart';
 import '../ui/search.dart';

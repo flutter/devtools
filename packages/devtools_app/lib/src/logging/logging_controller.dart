@@ -12,10 +12,10 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
-import '../auto_dispose.dart';
+import '../primitives/auto_dispose.dart';
 import '../config_specific/logger/logger.dart' as logger;
 import '../core/message_bus.dart';
-import '../globals.dart';
+import '../shared/globals.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
 import '../inspector/inspector_tree.dart';

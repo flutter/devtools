@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../auto_dispose_mixin.dart';
-import '../globals.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../shared/globals.dart';
 import '../notifications.dart';
 import '../theme.dart';
 import '../ui/search.dart';

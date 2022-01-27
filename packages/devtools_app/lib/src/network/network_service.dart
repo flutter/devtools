@@ -4,7 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
-import '../globals.dart';
+import '../shared/globals.dart';
 import '../utils.dart';
 import '../version.dart';
 import 'network_controller.dart';

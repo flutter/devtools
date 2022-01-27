@@ -14,11 +14,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../analytics/constants.dart' as analytics_constants;
-import '../../auto_dispose_mixin.dart';
+import '../../primitives/auto_dispose_mixin.dart';
 import '../../charts/flame_chart.dart';
-import '../../common_widgets.dart';
+import '../../shared/common_widgets.dart';
 import '../../flutter_widgets/linked_scroll_controller.dart';
-import '../../geometry.dart';
+import '../../primitives/geometry.dart';
 import '../../notifications.dart';
 import '../../theme.dart';
 import '../../trace_event.dart';

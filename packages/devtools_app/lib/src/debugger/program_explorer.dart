@@ -5,9 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../common_widgets.dart';
-import '../flex_split_column.dart';
-import '../globals.dart';
+import '../shared/common_widgets.dart';
+import '../shared/flex_split_column.dart';
+import '../shared/globals.dart';
 import '../theme.dart';
 import '../tree.dart';
 import '../utils.dart';

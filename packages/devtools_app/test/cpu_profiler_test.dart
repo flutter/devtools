@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/charts/flame_chart.dart';
-import 'package:devtools_app/src/common_widgets.dart';
+import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/globals.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_bottom_up.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_call_tree.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_controller.dart';

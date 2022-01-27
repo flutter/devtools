@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 import 'package:flutter/material.dart';
 
-import 'split.dart';
+import '../split.dart';
 
 class FlexSplitColumn extends StatelessWidget {
   FlexSplitColumn({

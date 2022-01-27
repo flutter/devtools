@@ -11,10 +11,10 @@ import 'package:vm_service/vm_service.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
-import '../auto_dispose.dart';
+import '../primitives/auto_dispose.dart';
 import '../config_specific/file/file.dart';
 import '../config_specific/logger/logger.dart';
-import '../globals.dart';
+import '../shared/globals.dart';
 import '../service_manager.dart';
 import '../table.dart';
 import '../table_data.dart';

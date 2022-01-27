@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../common_widgets.dart';
+import '../shared/common_widgets.dart';
 import '../theme.dart';
 
 /// Create a header area for a debugger component.

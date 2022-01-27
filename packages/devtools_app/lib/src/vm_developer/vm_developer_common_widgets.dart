@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../common_widgets.dart';
+import '../shared/common_widgets.dart';
 import '../table.dart';
 import '../theme.dart';
 

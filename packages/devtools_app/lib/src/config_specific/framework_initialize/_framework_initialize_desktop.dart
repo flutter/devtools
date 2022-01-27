@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
-import '../../globals.dart';
+import '../../shared/globals.dart';
 import '../../storage.dart';
 import '../logger/logger.dart';
 

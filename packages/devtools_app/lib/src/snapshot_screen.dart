@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 import 'package:flutter/material.dart';
 
-import 'common_widgets.dart';
-import 'globals.dart';
+import 'shared/common_widgets.dart';
+import 'shared/globals.dart';
 import 'routing.dart';
 import 'screen.dart';
 import 'theme.dart';

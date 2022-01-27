@@ -13,11 +13,11 @@ import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../analytics/constants.dart' as analytics_constants;
-import '../../auto_dispose.dart';
+import '../../primitives/auto_dispose.dart';
 import '../../config_specific/import_export/import_export.dart';
 import '../../config_specific/logger/allowed_error.dart';
 import '../../config_specific/logger/logger.dart';
-import '../../globals.dart';
+import '../../shared/globals.dart';
 import '../../http/http_service.dart';
 import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_service.dart';

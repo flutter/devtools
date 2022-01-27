@@ -7,14 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../analytics/analytics.dart' as ga;
-import '../auto_dispose_mixin.dart';
+import '../primitives/auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
-import '../common_widgets.dart';
+import '../shared/common_widgets.dart';
 import '../config_specific/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';
-import '../file_import.dart';
-import '../globals.dart';
+import '../shared/file_import.dart';
+import '../shared/globals.dart';
 import '../notifications.dart';
 import '../screen.dart';
 import '../split.dart';

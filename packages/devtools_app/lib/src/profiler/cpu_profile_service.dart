@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../globals.dart';
+import '../shared/globals.dart';
 import '../vm_flags.dart' as vm_flags;
 import '../vm_service_wrapper.dart';
 import 'cpu_profile_model.dart';

@@ -8,9 +8,9 @@ import 'package:flutter/widgets.dart';
 import 'package:mime/mime.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../common_widgets.dart';
+import '../shared/common_widgets.dart';
 import '../config_specific/logger/logger.dart';
-import '../globals.dart';
+import '../shared/globals.dart';
 import '../network/network_model.dart';
 import '../trace_event.dart';
 import '../utils.dart';

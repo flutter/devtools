@@ -11,10 +11,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../analytics/analytics.dart' as ga;
-import '../auto_dispose_mixin.dart';
-import '../common_widgets.dart';
-import '../dialogs.dart';
-import '../extent_delegate_list.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../shared/common_widgets.dart';
+import '../shared/dialogs.dart';
+import '../primitives/extent_delegate_list.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import '../theme.dart';
 import '../trees.dart';

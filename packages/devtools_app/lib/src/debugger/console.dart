@@ -6,10 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../common_widgets.dart';
-import '../console.dart';
-import '../console_service.dart';
-import '../globals.dart';
+import '../shared/common_widgets.dart';
+import '../shared/console.dart';
+import '../shared/console_service.dart';
+import '../shared/globals.dart';
 import '../theme.dart';
 import 'debugger_controller.dart';
 import 'evaluate.dart';

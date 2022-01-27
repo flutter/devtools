@@ -7,8 +7,8 @@ import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../auto_dispose_mixin.dart';
-import '../common_widgets.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../shared/common_widgets.dart';
 import '../theme.dart';
 import '../ui/label.dart';
 import 'debugger_controller.dart';

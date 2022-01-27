@@ -5,9 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../auto_dispose_mixin.dart';
-import '../common_widgets.dart';
-import '../dialogs.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../shared/common_widgets.dart';
+import '../shared/dialogs.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import '../theme.dart';
 import 'memory_controller.dart';

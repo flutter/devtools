@@ -6,8 +6,8 @@ import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
-import '../common_widgets.dart';
-import '../globals.dart';
+import '../shared/common_widgets.dart';
+import '../shared/globals.dart';
 import '../inspector/diagnostics.dart';
 import '../inspector/inspector_screen.dart';
 import '../listenable.dart';

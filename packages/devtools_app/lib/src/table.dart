@@ -4,9 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 
-import 'auto_dispose_mixin.dart';
-import 'collapsible_mixin.dart';
-import 'common_widgets.dart';
+import 'primitives/auto_dispose_mixin.dart';
+import 'shared/collapsible_mixin.dart';
+import 'shared/common_widgets.dart';
 import 'flutter_widgets/linked_scroll_controller.dart';
 import 'table_data.dart';
 import 'theme.dart';
