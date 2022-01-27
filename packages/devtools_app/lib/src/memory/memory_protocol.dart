@@ -10,7 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart' as logger;
 import '../shared/globals.dart';
-import '../service_manager.dart';
+import '../shared/service_manager.dart';
 import '../utils.dart';
 import '../version.dart';
 import '../vm_service_wrapper.dart';

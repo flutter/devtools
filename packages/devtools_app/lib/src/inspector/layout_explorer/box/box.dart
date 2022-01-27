@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import '../../../math_utils.dart';
+import '../../../primitives/math_utils.dart';
 import '../../../theme.dart';
 import '../../../utils.dart';
 import '../../diagnostics_node.dart';

@@ -16,7 +16,7 @@ import '../primitives/auto_dispose_mixin.dart';
 import '../shared/common_widgets.dart';
 import '../config_specific/logger/logger.dart' as logger;
 import '../shared/globals.dart';
-import '../split.dart';
+import '../shared/split.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';

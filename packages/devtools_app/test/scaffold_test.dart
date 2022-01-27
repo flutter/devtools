@@ -7,9 +7,9 @@ import 'package:devtools_app/src/config_specific/import_export/import_export.dar
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/scaffold.dart';
-import 'package:devtools_app/src/screen.dart';
-import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/shared/scaffold.dart';
+import 'package:devtools_app/src/shared/screen.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/survey.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';

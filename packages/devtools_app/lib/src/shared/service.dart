@@ -8,8 +8,8 @@ import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/utils.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import 'config_specific/sse/sse_shim.dart';
-import 'vm_service_wrapper.dart';
+import '../config_specific/sse/sse_shim.dart';
+import '../vm_service_wrapper.dart';
 
 Future<VmServiceWrapper> _connectWithSse(
   Uri uri,

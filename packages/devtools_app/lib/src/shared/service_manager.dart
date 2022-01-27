@@ -10,25 +10,25 @@ import 'package:flutter/foundation.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import 'analytics/analytics.dart' as ga;
-import 'primitives/auto_dispose.dart';
-import 'config_specific/logger/logger.dart';
-import 'shared/connected_app.dart';
-import 'shared/console_service.dart';
-import 'core/message_bus.dart';
-import 'shared/error_badge_manager.dart';
-import 'shared/globals.dart';
-import 'inspector/inspector_service.dart';
-import 'logging/vm_service_logger.dart';
-import 'performance/timeline_streams.dart';
+import '../analytics/analytics.dart' as ga;
+import '../primitives/auto_dispose.dart';
+import '../config_specific/logger/logger.dart';
+import 'connected_app.dart';
+import 'console_service.dart';
+import '../core/message_bus.dart';
+import 'error_badge_manager.dart';
+import 'globals.dart';
+import '../inspector/inspector_service.dart';
+import '../logging/vm_service_logger.dart';
+import '../performance/timeline_streams.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_extensions.dart';
 import 'service_registrations.dart' as registrations;
-import 'title.dart';
-import 'utils.dart';
-import 'version.dart';
-import 'vm_flags.dart';
-import 'vm_service_wrapper.dart';
+import '../title.dart';
+import '../utils.dart';
+import '../version.dart';
+import '../vm_flags.dart';
+import '../vm_service_wrapper.dart';
 
 // Note: don't check this in enabled.
 /// Used to debug service protocol traffic. All requests to to the VM service

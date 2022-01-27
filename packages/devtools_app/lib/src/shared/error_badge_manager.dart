@@ -11,11 +11,11 @@ import '../primitives/auto_dispose.dart';
 import 'globals.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_screen.dart';
-import '../listenable.dart';
+import '../primitives/listenable.dart';
 import '../logging/logging_screen.dart';
 import '../network/network_screen.dart';
 import '../performance/performance_screen.dart';
-import '../service_extensions.dart' as extensions;
+import 'service_extensions.dart' as extensions;
 import '../utils.dart';
 import '../vm_service_wrapper.dart';
 

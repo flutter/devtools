@@ -8,7 +8,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../shared/common_widgets.dart';
 import '../profiler/cpu_profiler.dart';
-import '../split.dart';
+import '../shared/split.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../utils.dart';

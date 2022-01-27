@@ -8,12 +8,12 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'shared/globals.dart';
-import 'listenable.dart';
+import 'globals.dart';
+import '../primitives/listenable.dart';
 import 'scaffold.dart';
-import 'theme.dart';
-import 'ui/tab.dart';
-import 'version.dart';
+import '../theme.dart';
+import '../ui/tab.dart';
+import '../version.dart';
 
 /// Defines a page shown in the DevTools [TabBar].
 @immutable

@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../split.dart';
+import '../shared/split.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';

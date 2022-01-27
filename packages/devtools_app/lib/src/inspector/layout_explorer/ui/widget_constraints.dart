@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../math_utils.dart';
+import '../../../primitives/math_utils.dart';
 import '../../../theme.dart';
 import '../../../utils.dart';
 import '../../inspector_data_models.dart';

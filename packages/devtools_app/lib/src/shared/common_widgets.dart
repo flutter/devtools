@@ -15,7 +15,7 @@ import '../primitives/auto_dispose_mixin.dart';
 import '../config_specific/launch_url/launch_url.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import 'globals.dart';
-import '../scaffold.dart';
+import 'scaffold.dart';
 import '../theme.dart';
 import '../ui/icons.dart';
 import '../ui/label.dart';

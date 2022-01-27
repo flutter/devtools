@@ -18,7 +18,7 @@ import '../config_specific/logger/logger.dart';
 import '../shared/dialogs.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import '../shared/globals.dart';
-import '../history_viewport.dart';
+import '../shared/history_viewport.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/hover.dart';

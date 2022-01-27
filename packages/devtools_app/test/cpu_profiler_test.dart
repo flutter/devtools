@@ -15,7 +15,7 @@ import 'package:devtools_app/src/profiler/cpu_profile_transformer.dart';
 import 'package:devtools_app/src/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
-import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

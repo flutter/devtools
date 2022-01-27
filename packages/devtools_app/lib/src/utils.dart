@@ -19,7 +19,7 @@ import 'package:vm_service/vm_service.dart';
 import 'app.dart';
 import 'config_specific/logger/logger.dart' as logger;
 import 'shared/globals.dart';
-import 'notifications.dart';
+import 'shared/notifications.dart';
 import 'version.dart';
 
 bool isPrivate(String member) => member.startsWith('_');

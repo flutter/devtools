@@ -12,7 +12,7 @@ import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/performance/timeline_analysis.dart';
 import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
-import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/trace_event.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';

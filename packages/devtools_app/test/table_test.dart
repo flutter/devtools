@@ -1,5 +1,5 @@
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/table.dart';
 import 'package:devtools_app/src/table_data.dart';
 import 'package:devtools_app/src/trees.dart';

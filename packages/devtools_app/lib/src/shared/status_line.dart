@@ -6,17 +6,17 @@ import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../devtools.dart' as devtools;
-import 'analytics/analytics.dart' as ga;
-import 'analytics/constants.dart' as analytics_constants;
-import 'shared/common_widgets.dart';
-import 'shared/device_dialog.dart';
-import 'shared/globals.dart';
-import 'info/info_controller.dart';
+import '../../devtools.dart' as devtools;
+import '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
+import 'common_widgets.dart';
+import 'device_dialog.dart';
+import 'globals.dart';
+import '../info/info_controller.dart';
 import 'screen.dart';
 import 'service_manager.dart';
-import 'theme.dart';
-import 'utils.dart';
+import '../theme.dart';
+import '../utils.dart';
 
 double get statusLineHeight => scaleByFontFactor(24.0);
 

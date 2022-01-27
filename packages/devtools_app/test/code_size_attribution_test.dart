@@ -4,7 +4,7 @@
 
 import 'package:devtools_app/src/app_size/code_size_attribution.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/table.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';

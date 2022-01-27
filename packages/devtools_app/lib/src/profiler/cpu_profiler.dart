@@ -10,7 +10,7 @@ import '../primitives/auto_dispose_mixin.dart';
 import '../charts/flame_chart.dart';
 import '../shared/common_widgets.dart';
 import '../shared/dialogs.dart';
-import '../notifications.dart';
+import '../shared/notifications.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/filter.dart';

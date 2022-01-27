@@ -14,7 +14,7 @@ import '../shared/banner_messages.dart';
 import '../shared/common_widgets.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import '../shared/globals.dart';
-import '../scaffold.dart';
+import '../shared/scaffold.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/hover.dart';

@@ -14,7 +14,7 @@ import 'src/debugger/syntax_highlighter.dart';
 import 'src/extension_points/extensions_base.dart';
 import 'src/extension_points/extensions_external.dart';
 import 'src/shared/globals.dart';
-import 'src/preferences.dart';
+import 'src/shared/preferences.dart';
 import 'src/provider/riverpod_error_logger_observer.dart';
 
 void main() async {

@@ -23,7 +23,7 @@ import '../../profiler/cpu_profile_controller.dart';
 import '../../profiler/cpu_profile_service.dart';
 import '../../profiler/cpu_profile_transformer.dart';
 import '../../profiler/profile_granularity.dart';
-import '../../service_manager.dart';
+import '../../shared/service_manager.dart';
 import '../../trace_event.dart';
 import '../../trees.dart';
 import '../../ui/search.dart';

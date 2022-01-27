@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/split.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
+import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_app/src/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';

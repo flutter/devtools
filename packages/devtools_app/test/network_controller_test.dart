@@ -7,7 +7,7 @@ import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/network/network_model.dart';
-import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/ui/filter.dart';
 import 'package:devtools_app/src/version.dart';
 import 'package:devtools_test/devtools_test.dart';

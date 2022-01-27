@@ -8,7 +8,7 @@ import 'package:devtools_app/src/performance/event_details.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/profiler/cpu_profiler.dart';
-import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';

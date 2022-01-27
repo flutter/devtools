@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/auto_dispose_mixin.dart';
-import '../split.dart';
+import '../shared/split.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../ui/icons.dart';

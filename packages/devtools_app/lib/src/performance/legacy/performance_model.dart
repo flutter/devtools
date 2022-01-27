@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../charts/flame_chart.dart';
 import '../../profiler/cpu_profile_model.dart';
-import '../../service_manager.dart';
+import '../../shared/service_manager.dart';
 import '../../trace_event.dart';
 import '../../trees.dart';
 import '../../ui/search.dart';

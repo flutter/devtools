@@ -15,7 +15,7 @@ import '../primitives/auto_dispose.dart';
 import '../config_specific/file/file.dart';
 import '../config_specific/logger/logger.dart';
 import '../shared/globals.dart';
-import '../service_manager.dart';
+import '../shared/service_manager.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../ui/search.dart';

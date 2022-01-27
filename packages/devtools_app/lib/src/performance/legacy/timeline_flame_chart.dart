@@ -19,7 +19,7 @@ import '../../charts/flame_chart.dart';
 import '../../shared/common_widgets.dart';
 import '../../flutter_widgets/linked_scroll_controller.dart';
 import '../../primitives/geometry.dart';
-import '../../notifications.dart';
+import '../../shared/notifications.dart';
 import '../../theme.dart';
 import '../../trace_event.dart';
 import '../../ui/colors.dart';

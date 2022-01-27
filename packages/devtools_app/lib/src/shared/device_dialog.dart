@@ -12,7 +12,7 @@ import 'connected_app.dart';
 import 'dialogs.dart';
 import 'globals.dart';
 import '../info/info_controller.dart';
-import '../routing.dart';
+import 'routing.dart';
 import '../table.dart';
 import '../table_data.dart';
 import '../theme.dart';

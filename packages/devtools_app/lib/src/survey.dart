@@ -7,7 +7,7 @@ import 'analytics/analytics.dart' as ga;
 import 'config_specific/launch_url/launch_url.dart';
 import 'config_specific/logger/logger.dart';
 import 'config_specific/server/server.dart' as server;
-import 'notifications.dart';
+import 'shared/notifications.dart';
 import 'utils.dart';
 
 class SurveyService {
