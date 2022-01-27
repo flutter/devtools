@@ -170,7 +170,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
         textAlign: TextAlign.center,
         text: TextSpan(
           text: 'No CPU samples recorded.',
-          children: serviceManager.vm.operatingSystem == 'ios'
+          children: serviceManager.vm?.operatingSystem == 'ios'
               ? [
                   const TextSpan(
                     text: '''
