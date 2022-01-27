@@ -11,7 +11,7 @@ import '../primitives/auto_dispose_mixin.dart';
 import '../charts/chart.dart';
 import '../charts/chart_controller.dart';
 import '../charts/chart_trace.dart' as trace;
-import '../theme.dart';
+import '../shared/theme.dart';
 
 import 'memory_controller.dart';
 import 'memory_timeline.dart';

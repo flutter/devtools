@@ -13,9 +13,9 @@ import '../inspector/inspector_screen.dart';
 import '../primitives/listenable.dart';
 import '../shared/notifications.dart';
 import '../shared/routing.dart';
-import '../theme.dart';
-import '../tree.dart';
-import '../utils.dart';
+import '../shared/theme.dart';
+import '../shared/tree.dart';
+import '../shared/utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 

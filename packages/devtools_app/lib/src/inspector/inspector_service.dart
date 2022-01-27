@@ -18,7 +18,7 @@ import '../primitives/auto_dispose.dart';
 import '../debugger/debugger_model.dart';
 import '../shared/eval_on_dart_library.dart';
 import '../shared/globals.dart';
-import '../utils.dart';
+import '../shared/utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service_polyfill.dart';
 

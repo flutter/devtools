@@ -24,11 +24,11 @@ import '../performance/timeline_streams.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_extensions.dart';
 import 'service_registrations.dart' as registrations;
-import '../title.dart';
-import '../utils.dart';
-import '../version.dart';
-import '../vm_flags.dart';
-import '../vm_service_wrapper.dart';
+import 'title.dart';
+import 'utils.dart';
+import 'version.dart';
+import 'vm_flags.dart';
+import 'vm_service_wrapper.dart';
 
 // Note: don't check this in enabled.
 /// Used to debug service protocol traffic. All requests to to the VM service

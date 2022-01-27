@@ -10,7 +10,7 @@ import 'package:vm_service/vm_service.dart';
 import '../primitives/auto_dispose.dart';
 import '../shared/globals.dart';
 import '../shared/service_registrations.dart' as registrations;
-import '../version.dart';
+import '../shared/version.dart';
 
 class InfoController extends DisposableController
     with AutoDisposeControllerMixin {

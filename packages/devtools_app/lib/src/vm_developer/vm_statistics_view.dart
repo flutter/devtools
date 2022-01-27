@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../shared/common_widgets.dart';
-import '../table.dart';
-import '../table_data.dart';
-import '../utils.dart';
+import '../shared/table.dart';
+import '../shared/table_data.dart';
+import '../shared/utils.dart';
 import 'vm_developer_common_widgets.dart';
 import 'vm_developer_tools_screen.dart';
 import 'vm_service_private_extensions.dart';

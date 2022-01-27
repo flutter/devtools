@@ -14,10 +14,10 @@ import '../primitives/auto_dispose.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../shared/common_widgets.dart';
 import '../config_specific/logger/logger.dart';
-import '../theme.dart';
-import '../trees.dart';
+import '../shared/theme.dart';
+import '../primitives/trees.dart';
 import '../ui/utils.dart';
-import '../utils.dart';
+import '../shared/utils.dart';
 
 /// Top 10 matches to display in auto-complete overlay.
 const defaultTopMatchesLimit = 10;

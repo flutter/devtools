@@ -16,12 +16,12 @@ import '../shared/common_widgets.dart';
 import '../shared/dialogs.dart';
 import '../primitives/extent_delegate_list.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
-import '../theme.dart';
-import '../trees.dart';
+import '../shared/theme.dart';
+import '../primitives/trees.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
-import '../utils.dart';
+import '../shared/utils.dart';
 
 const double rowPadding = 2.0;
 // Flame chart rows contain text so are not readable if they do not scale with

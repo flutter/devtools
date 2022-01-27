@@ -13,11 +13,11 @@ import 'dialogs.dart';
 import 'globals.dart';
 import '../info/info_controller.dart';
 import 'routing.dart';
-import '../table.dart';
-import '../table_data.dart';
-import '../theme.dart';
-import '../utils.dart';
-import '../version.dart';
+import 'table.dart';
+import 'table_data.dart';
+import 'theme.dart';
+import 'utils.dart';
+import 'version.dart';
 
 class DeviceDialog extends StatelessWidget {
   const DeviceDialog({

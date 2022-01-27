@@ -8,8 +8,8 @@ import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'shared/globals.dart';
-import 'profiler/cpu_profile_model.dart' hide CpuSample;
+import 'globals.dart';
+import '../profiler/cpu_profile_model.dart' hide CpuSample;
 import 'version.dart';
 
 class VmServiceWrapper implements VmService {

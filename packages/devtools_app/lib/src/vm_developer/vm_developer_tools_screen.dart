@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../primitives/auto_dispose_mixin.dart';
 import '../shared/screen.dart';
-import '../theme.dart';
+import '../shared/theme.dart';
 import 'isolate_statistics_view.dart';
 import 'vm_developer_tools_controller.dart';
 import 'vm_statistics_view.dart';

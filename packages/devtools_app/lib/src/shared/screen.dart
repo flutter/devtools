@@ -11,9 +11,9 @@ import 'package:flutter/material.dart';
 import 'globals.dart';
 import '../primitives/listenable.dart';
 import 'scaffold.dart';
-import '../theme.dart';
+import 'theme.dart';
 import '../ui/tab.dart';
-import '../version.dart';
+import 'version.dart';
 
 /// Defines a page shown in the DevTools [TabBar].
 @immutable

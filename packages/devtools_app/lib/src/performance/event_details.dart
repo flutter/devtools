@@ -11,9 +11,9 @@ import '../shared/globals.dart';
 import '../profiler/cpu_profile_controller.dart';
 import '../profiler/cpu_profile_model.dart';
 import '../profiler/cpu_profiler.dart';
-import '../theme.dart';
-import '../trace_event.dart';
-import '../utils.dart';
+import '../shared/theme.dart';
+import '../primitives/trace_event.dart';
+import '../shared/utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 

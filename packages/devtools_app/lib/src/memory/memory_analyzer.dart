@@ -9,9 +9,9 @@ import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/auto_dispose_mixin.dart';
-import '../table.dart';
-import '../table_data.dart';
-import '../utils.dart';
+import '../shared/table.dart';
+import '../shared/table_data.dart';
+import '../shared/utils.dart';
 import 'memory_controller.dart';
 import 'memory_graph_model.dart';
 import 'memory_heap_tree_view.dart';

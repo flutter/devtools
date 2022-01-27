@@ -5,7 +5,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
-import '../utils.dart';
+import '../shared/utils.dart';
 import 'cpu_profile_model.dart';
 
 /// Process for composing [CpuProfileData] into a structured tree of

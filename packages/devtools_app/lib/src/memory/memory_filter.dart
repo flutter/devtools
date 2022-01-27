@@ -9,7 +9,7 @@ import '../primitives/auto_dispose_mixin.dart';
 import '../shared/common_widgets.dart';
 import '../shared/dialogs.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
-import '../theme.dart';
+import '../shared/theme.dart';
 import 'memory_controller.dart';
 import 'memory_snapshot_models.dart';
 

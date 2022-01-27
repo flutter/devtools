@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../charts/treemap.dart';
 import '../shared/common_widgets.dart';
-import '../theme.dart';
+import '../shared/theme.dart';
 import 'memory_controller.dart';
 import 'memory_graph_model.dart';
 

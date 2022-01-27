@@ -7,7 +7,7 @@ import 'common_widgets.dart';
 import 'globals.dart';
 import 'routing.dart';
 import 'screen.dart';
-import '../theme.dart';
+import 'theme.dart';
 
 /// The screen in the app responsible for connecting to the Dart VM.
 ///

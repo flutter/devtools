@@ -5,10 +5,10 @@
 import 'package:flutter/material.dart';
 
 import '../charts/treemap.dart';
-import '../table.dart';
-import '../table_data.dart';
+import '../shared/table.dart';
+import '../shared/table_data.dart';
 import '../ui/colors.dart';
-import '../utils.dart';
+import '../shared/utils.dart';
 
 class AppSizeAnalysisTable extends StatelessWidget {
   factory AppSizeAnalysisTable({@required rootNode}) {

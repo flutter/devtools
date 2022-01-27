@@ -14,9 +14,9 @@ import '../framework/framework_core.dart';
 import 'globals.dart';
 import 'notifications.dart';
 import 'routing.dart';
-import '../theme.dart';
-import '../url_utils.dart';
-import '../utils.dart';
+import 'theme.dart';
+import '../primitives/url_utils.dart';
+import 'utils.dart';
 
 /// Widget that requires business logic to be loaded before building its
 /// [builder].

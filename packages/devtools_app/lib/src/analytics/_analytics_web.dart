@@ -22,7 +22,7 @@ import '../shared/globals.dart';
 import '../performance/performance_screen.dart';
 import '../profiler/profiler_screen.dart';
 import '../ui/gtags.dart';
-import '../version.dart';
+import '../shared/version.dart';
 import 'analytics_common.dart';
 import 'constants.dart' as analytics_constants;
 

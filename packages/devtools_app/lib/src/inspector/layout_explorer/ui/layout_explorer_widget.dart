@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../shared/globals.dart';
-import '../../../theme.dart';
-import '../../../utils.dart';
+import '../../../shared/theme.dart';
+import '../../../shared/utils.dart';
 import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';

@@ -9,10 +9,10 @@ import 'package:flutter/foundation.dart';
 import '../charts/flame_chart.dart';
 import '../profiler/cpu_profile_model.dart';
 import '../shared/service_manager.dart';
-import '../trace_event.dart';
-import '../trees.dart';
+import '../primitives/trace_event.dart';
+import '../primitives/trees.dart';
 import '../ui/search.dart';
-import '../utils.dart';
+import '../shared/utils.dart';
 import 'performance_utils.dart';
 import 'timeline_event_processor.dart';
 

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'common_widgets.dart';
 import '../debugger/common.dart';
 import '../primitives/history_manager.dart';
-import '../theme.dart';
+import 'theme.dart';
 
 /// A [Widget] that allows for displaying content based on the current state of a
 /// [HistoryManager]. Includes built-in controls for navigating back and forth

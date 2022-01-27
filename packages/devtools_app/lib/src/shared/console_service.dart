@@ -6,8 +6,8 @@ import '../debugger/debugger_model.dart';
 import 'globals.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
-import '../utils.dart';
-import '../vm_service_wrapper.dart';
+import 'utils.dart';
+import 'vm_service_wrapper.dart';
 
 /// A line in the console.
 ///

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../shared/common_widgets.dart';
 import '../shared/dialogs.dart';
-import '../theme.dart';
-import '../utils.dart';
+import '../shared/theme.dart';
+import '../shared/utils.dart';
 import 'label.dart';
 
 // TODO(kenz): consider breaking this up flat data filtering and tree data

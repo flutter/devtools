@@ -14,9 +14,9 @@ import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/service.dart';
 import '../shared/service_manager.dart';
-import '../survey.dart';
-import '../utils.dart';
-import '../vm_service_wrapper.dart';
+import '../shared/survey.dart';
+import '../shared/utils.dart';
+import '../shared/vm_service_wrapper.dart';
 
 typedef ErrorReporter = void Function(String title, dynamic error);
 

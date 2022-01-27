@@ -11,10 +11,10 @@ import 'package:vm_service/vm_service.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
-import '../theme.dart';
+import '../shared/theme.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
-import '../utils.dart';
+import '../shared/utils.dart';
 import 'debugger_controller.dart';
 
 class ExpressionEvalField extends StatefulWidget {

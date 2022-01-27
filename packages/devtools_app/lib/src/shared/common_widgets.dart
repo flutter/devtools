@@ -16,10 +16,10 @@ import '../config_specific/launch_url/launch_url.dart';
 import '../flutter_widgets/linked_scroll_controller.dart';
 import 'globals.dart';
 import 'scaffold.dart';
-import '../theme.dart';
+import 'theme.dart';
 import '../ui/icons.dart';
 import '../ui/label.dart';
-import '../utils.dart';
+import 'utils.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
 const tooltipWaitLong = Duration(milliseconds: 1000);

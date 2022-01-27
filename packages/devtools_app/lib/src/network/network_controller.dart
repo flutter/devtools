@@ -13,7 +13,7 @@ import '../http/http_request_data.dart';
 import '../http/http_service.dart';
 import '../ui/filter.dart';
 import '../ui/search.dart';
-import '../utils.dart';
+import '../shared/utils.dart';
 import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';

@@ -10,7 +10,7 @@ import 'package:devtools_app/src/profiler/cpu_profile_flame_chart.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/ui/colors.dart';
 import 'package:devtools_app/src/ui/utils.dart';
-import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_app/src/shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

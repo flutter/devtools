@@ -12,8 +12,8 @@ import '../shared/common_widgets.dart';
 import '../config_specific/logger/logger.dart';
 import '../shared/globals.dart';
 import '../network/network_model.dart';
-import '../trace_event.dart';
-import '../utils.dart';
+import '../primitives/trace_event.dart';
+import '../shared/utils.dart';
 import 'http.dart';
 
 class TimelineHttpInstantEvent extends HttpInstantEvent {

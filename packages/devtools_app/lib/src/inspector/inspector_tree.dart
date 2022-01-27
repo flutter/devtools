@@ -14,9 +14,9 @@ library inspector_tree;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../theme.dart';
+import '../shared/theme.dart';
 import '../ui/search.dart';
-import '../utils.dart';
+import '../shared/utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
-import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_app/src/shared/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_data/cpu_profile_test_data.dart';

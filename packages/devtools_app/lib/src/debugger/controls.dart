@@ -9,7 +9,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../primitives/auto_dispose_mixin.dart';
 import '../shared/common_widgets.dart';
-import '../theme.dart';
+import '../shared/theme.dart';
 import '../ui/label.dart';
 import 'debugger_controller.dart';
 

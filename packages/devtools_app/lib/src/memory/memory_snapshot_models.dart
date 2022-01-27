@@ -4,7 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
-import '../trees.dart';
+import '../primitives/trees.dart';
 import 'memory_controller.dart';
 import 'memory_graph_model.dart';
 

@@ -15,10 +15,10 @@ import '../framework/framework_core.dart';
 import 'globals.dart';
 import 'notifications.dart';
 import 'routing.dart';
-import '../theme.dart';
+import 'theme.dart';
 import '../ui/label.dart';
-import '../url_utils.dart';
-import '../utils.dart';
+import '../primitives/url_utils.dart';
+import 'utils.dart';
 
 /// The landing screen when starting Dart DevTools without being connected to an
 /// app.

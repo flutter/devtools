@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../shared/common_widgets.dart';
-import '../theme.dart';
-import '../utils.dart';
+import '../shared/theme.dart';
+import '../shared/utils.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';

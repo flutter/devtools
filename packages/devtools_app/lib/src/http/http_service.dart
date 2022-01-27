@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import '../shared/globals.dart';
-import '../utils.dart';
+import '../shared/utils.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class HttpService {

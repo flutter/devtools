@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../auto_dispose.dart';
+import '../primitives/auto_dispose.dart';
 import 'chart_trace.dart';
 
 ///_____________________________________________________________________

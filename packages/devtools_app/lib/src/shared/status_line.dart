@@ -15,8 +15,8 @@ import 'globals.dart';
 import '../info/info_controller.dart';
 import 'screen.dart';
 import 'service_manager.dart';
-import '../theme.dart';
-import '../utils.dart';
+import 'theme.dart';
+import 'utils.dart';
 
 double get statusLineHeight => scaleByFontFactor(24.0);
 

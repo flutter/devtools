@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../table.dart';
-import '../table_data.dart';
-import '../utils.dart';
+import '../shared/table.dart';
+import '../shared/table_data.dart';
+import '../shared/utils.dart';
 import 'cpu_profile_columns.dart';
 import 'cpu_profile_model.dart';
 

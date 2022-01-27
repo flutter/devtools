@@ -14,7 +14,7 @@ import '../primitives/auto_dispose.dart';
 import '../config_specific/logger/logger.dart';
 import 'globals.dart';
 import '../inspector/inspector_service.dart';
-import '../vm_service_wrapper.dart';
+import 'vm_service_wrapper.dart';
 
 class Disposable {
   bool disposed = false;

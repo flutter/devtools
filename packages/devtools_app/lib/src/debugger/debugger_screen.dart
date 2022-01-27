@@ -17,7 +17,7 @@ import '../shared/globals.dart';
 import '../primitives/listenable.dart';
 import '../shared/screen.dart';
 import '../shared/split.dart';
-import '../theme.dart';
+import '../shared/theme.dart';
 import '../ui/icons.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';

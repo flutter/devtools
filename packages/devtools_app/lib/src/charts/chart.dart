@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 
 import '../primitives/auto_dispose_mixin.dart';
 import '../config_specific/logger/logger.dart' as logger;
-import '../theme.dart';
-import '../utils.dart';
+import '../shared/theme.dart';
+import '../shared/utils.dart';
 import 'chart_controller.dart';
 import 'chart_trace.dart';
 

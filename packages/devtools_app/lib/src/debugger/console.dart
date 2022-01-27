@@ -10,7 +10,7 @@ import '../shared/common_widgets.dart';
 import '../shared/console.dart';
 import '../shared/console_service.dart';
 import '../shared/globals.dart';
-import '../theme.dart';
+import '../shared/theme.dart';
 import 'debugger_controller.dart';
 import 'evaluate.dart';
 

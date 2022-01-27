@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-import 'shared/common_widgets.dart';
-import 'config_specific/ide_theme/ide_theme.dart';
-import 'ui/colors.dart';
+import 'common_widgets.dart';
+import '../config_specific/ide_theme/ide_theme.dart';
+import '../ui/colors.dart';
 import 'utils.dart';
 
 const _contrastForegroundWhite = Color.fromARGB(255, 240, 240, 240);

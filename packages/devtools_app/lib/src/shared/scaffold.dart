@@ -25,9 +25,9 @@ import 'routing.dart';
 import 'screen.dart';
 import 'split.dart';
 import 'status_line.dart';
-import '../theme.dart';
-import '../title.dart';
-import '../utils.dart';
+import 'theme.dart';
+import 'title.dart';
+import 'utils.dart';
 
 /// Scaffolding for a screen and navigation in the DevTools App.
 ///

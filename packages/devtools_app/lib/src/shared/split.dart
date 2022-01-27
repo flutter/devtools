@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../utils.dart';
+import 'utils.dart';
 
 /// A widget that takes a list of children, lays them out along [axis], and
 /// allows the user to resize them.

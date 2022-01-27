@@ -11,8 +11,8 @@ import '../config_specific/logger/logger.dart' as logger;
 import 'eval_on_dart_library.dart';
 import 'globals.dart';
 import 'service_registrations.dart' as registrations;
-import '../title.dart';
-import '../version.dart';
+import 'title.dart';
+import 'version.dart';
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const dartHtmlLibraryUri = 'dart:html';

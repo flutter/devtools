@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../primitives/math_utils.dart';
-import '../../../theme.dart';
-import '../../../utils.dart';
+import '../../../shared/theme.dart';
+import '../../../shared/utils.dart';
 import '../../inspector_data_models.dart';
 import '../ui/arrow.dart';
 import '../ui/dimension.dart';

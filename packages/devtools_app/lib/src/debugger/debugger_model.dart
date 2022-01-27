@@ -15,9 +15,9 @@ import '../config_specific/logger/logger.dart';
 import '../shared/globals.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
-import '../trees.dart';
+import '../primitives/trees.dart';
 import '../ui/search.dart';
-import '../utils.dart';
+import '../shared/utils.dart';
 
 /// Whether to include properties surfaced through Diagnosticable objects as
 /// part of the generic Debugger view of an object.

@@ -22,8 +22,8 @@ import '../inspector/inspector_tree.dart';
 import '../inspector/inspector_tree_controller.dart';
 import '../ui/filter.dart';
 import '../ui/search.dart';
-import '../utils.dart';
-import '../vm_service_wrapper.dart';
+import '../shared/utils.dart';
+import '../shared/vm_service_wrapper.dart';
 import 'logging_screen.dart';
 
 // For performance reasons, we drop old logs in batches, so the log will grow

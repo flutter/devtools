@@ -17,8 +17,8 @@ import '../shared/scaffold.dart';
 import '../shared/service_extensions.dart';
 import '../shared/service_manager.dart';
 import '../shared/service_registrations.dart';
-import '../theme.dart';
-import '../utils.dart';
+import '../shared/theme.dart';
+import '../shared/utils.dart';
 import 'hover.dart';
 import 'label.dart';
 

@@ -11,9 +11,9 @@ import 'common_widgets.dart';
 import '../config_specific/launch_url/launch_url.dart';
 import '../config_specific/logger/logger.dart' as logger;
 import '../config_specific/server/server.dart' as server;
-import '../theme.dart';
-import '../utils.dart';
-import '../version.dart';
+import 'theme.dart';
+import 'utils.dart';
+import 'version.dart';
 
 class ReleaseNotesViewer extends StatefulWidget {
   const ReleaseNotesViewer({

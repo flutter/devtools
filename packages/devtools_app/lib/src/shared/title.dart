@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'shared/globals.dart';
+import 'globals.dart';
 
 void generateDevToolsTitle() {
   if (!serviceManager.connectedAppInitialized) {

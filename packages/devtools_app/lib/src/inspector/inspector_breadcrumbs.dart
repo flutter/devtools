@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../theme.dart';
-import '../utils.dart';
+import '../shared/theme.dart';
+import '../shared/utils.dart';
 import 'inspector_text_styles.dart';
 import 'inspector_tree.dart';
 
@@ -59,7 +59,7 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
     final List<_InspectorBreadcrumbData> items = nodes.map((node) {
       return _InspectorBreadcrumbData.wrap(
         node: node,
-        isSelected: node  == lastNode,
+        isSelected: node == lastNode,
       );
     }).toList();
     List<_InspectorBreadcrumbData> breadcrumbs;

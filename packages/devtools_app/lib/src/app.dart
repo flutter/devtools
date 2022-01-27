@@ -46,9 +46,9 @@ import 'shared/routing.dart';
 import 'shared/scaffold.dart';
 import 'shared/screen.dart';
 import 'shared/snapshot_screen.dart';
-import 'theme.dart';
+import 'shared/theme.dart';
 import 'ui/service_extension_widgets.dart';
-import 'utils.dart';
+import 'shared/utils.dart';
 import 'vm_developer/vm_developer_tools_controller.dart';
 import 'vm_developer/vm_developer_tools_screen.dart';
 

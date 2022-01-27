@@ -5,8 +5,8 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../shared/globals.dart';
-import '../utils.dart';
-import '../version.dart';
+import '../shared/utils.dart';
+import '../shared/version.dart';
 import 'network_controller.dart';
 
 class NetworkService {

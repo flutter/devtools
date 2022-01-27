@@ -10,7 +10,7 @@ import 'framework_controller.dart';
 import 'preferences.dart';
 import 'service_manager.dart';
 import '../primitives/storage.dart';
-import '../survey.dart';
+import 'survey.dart';
 
 final Map<Type, dynamic> globals = <Type, dynamic>{};
 

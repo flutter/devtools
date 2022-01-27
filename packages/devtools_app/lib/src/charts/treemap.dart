@@ -6,10 +6,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../shared/common_widgets.dart';
-import '../theme.dart';
-import '../trees.dart';
+import '../shared/theme.dart';
+import '../primitives/trees.dart';
 import '../ui/colors.dart';
-import '../utils.dart';
+import '../shared/utils.dart';
 
 enum PivotType { pivotByMiddle, pivotBySize }
 

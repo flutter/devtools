@@ -16,10 +16,10 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'app.dart';
-import 'config_specific/logger/logger.dart' as logger;
-import 'shared/globals.dart';
-import 'shared/notifications.dart';
+import '../app.dart';
+import '../config_specific/logger/logger.dart' as logger;
+import 'globals.dart';
+import 'notifications.dart';
 import 'version.dart';
 
 bool isPrivate(String member) => member.startsWith('_');

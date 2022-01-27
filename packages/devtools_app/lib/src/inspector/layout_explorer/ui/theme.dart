@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../theme.dart';
-import '../../../utils.dart';
+import '../../../shared/theme.dart';
+import '../../../shared/utils.dart';
 
 const margin = 8.0;
 

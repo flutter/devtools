@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../shared/common_widgets.dart';
-import '../theme.dart';
+import '../shared/theme.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 

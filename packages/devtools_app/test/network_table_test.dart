@@ -9,7 +9,7 @@ import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/network/network_model.dart';
 import 'package:devtools_app/src/network/network_screen.dart';
 import 'package:devtools_app/src/shared/service_manager.dart';
-import 'package:devtools_app/src/version.dart';
+import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';

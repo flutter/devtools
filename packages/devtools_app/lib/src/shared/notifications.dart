@@ -9,8 +9,8 @@ import 'package:flutter/scheduler.dart';
 
 import 'common_widgets.dart';
 import 'status_line.dart' as status_line;
-import '../theme.dart';
-import '../utils.dart';
+import 'theme.dart';
+import 'utils.dart';
 
 double get _notificationHeight => scaleByFontFactor(175.0);
 final _notificationWidth = _notificationHeight * goldenRatio;

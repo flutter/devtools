@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'globals.dart';
-import '../utils.dart';
+import 'utils.dart';
 
 /// The page ID (used in routing) for the standalone app-size page.
 ///

@@ -20,7 +20,7 @@ import '../shared/globals.dart';
 import '../primitives/listenable.dart';
 import '../shared/notifications.dart';
 import '../shared/screen.dart';
-import '../theme.dart';
+import '../shared/theme.dart';
 import '../ui/icons.dart';
 import '../ui/vm_flag_widgets.dart';
 import 'cpu_profile_controller.dart';

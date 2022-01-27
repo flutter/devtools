@@ -11,7 +11,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/eval_on_dart_library.dart';
 import '../../shared/globals.dart';
-import '../../vm_service_wrapper.dart';
+import '../../shared/vm_service_wrapper.dart';
 
 /// Exposes the current VmServiceWrapper.
 /// By listening to this provider instead of directly accessing `serviceManager.service`,

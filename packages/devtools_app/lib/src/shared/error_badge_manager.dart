@@ -16,8 +16,8 @@ import '../logging/logging_screen.dart';
 import '../network/network_screen.dart';
 import '../performance/performance_screen.dart';
 import 'service_extensions.dart' as extensions;
-import '../utils.dart';
-import '../vm_service_wrapper.dart';
+import 'utils.dart';
+import 'vm_service_wrapper.dart';
 
 class ErrorBadgeManager extends DisposableController
     with AutoDisposeControllerMixin {

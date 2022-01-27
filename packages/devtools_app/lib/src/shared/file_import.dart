@@ -10,9 +10,9 @@ import 'package:flutter/material.dart';
 import 'common_widgets.dart';
 import '../config_specific/drag_and_drop/drag_and_drop.dart';
 import 'notifications.dart';
-import '../theme.dart';
+import 'theme.dart';
 import '../ui/label.dart';
-import '../utils.dart';
+import 'utils.dart';
 
 class FileImportContainer extends StatefulWidget {
   const FileImportContainer({

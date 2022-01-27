@@ -10,7 +10,7 @@ import '../primitives/auto_dispose.dart';
 import '../config_specific/import_export/import_export.dart';
 import '../config_specific/logger/allowed_error.dart';
 import '../shared/globals.dart';
-import '../utils.dart';
+import '../shared/utils.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';

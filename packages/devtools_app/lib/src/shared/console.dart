@@ -11,8 +11,8 @@ import 'common_widgets.dart';
 import 'console_service.dart';
 import '../debugger/debugger_controller.dart';
 import '../debugger/variables.dart';
-import '../theme.dart';
-import '../utils.dart';
+import 'theme.dart';
+import 'utils.dart';
 
 // TODO(devoncarew): Allow scrolling horizontally as well.
 
