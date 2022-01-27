@@ -7,23 +7,22 @@ import 'dart:convert';
 import 'package:devtools_app/src/app_size/app_size_controller.dart';
 import 'package:devtools_app/src/app_size/app_size_screen.dart';
 import 'package:devtools_app/src/app_size/app_size_table.dart';
-import 'package:devtools_app/src/common_widgets.dart';
-import 'package:devtools_app/src/file_import.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/notifications.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/split.dart';
-import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_test/app_size_test_controller.dart';
-import 'package:devtools_test/app_size_test_data/new_v8.dart';
-import 'package:devtools_test/app_size_test_data/old_v8.dart';
-import 'package:devtools_test/app_size_test_data/sizes.dart';
-import 'package:devtools_test/app_size_test_data/unsupported_file.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/src/shared/common_widgets.dart';
+import 'package:devtools_app/src/shared/file_import.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/notifications.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
+import 'package:devtools_app/src/shared/split.dart';
+import 'package:devtools_app/src/shared/utils.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+
+import 'test_data/app_size_test_data/new_v8.dart';
+import 'test_data/app_size_test_data/old_v8.dart';
+import 'test_data/app_size_test_data/sizes.dart';
+import 'test_data/app_size_test_data/unsupported_file.dart';
 
 void main() {
   setUp(() {
@@ -430,4 +429,32 @@ void main() {
       );
     });
   });
+}
+
+class AppSizeTestController extends AppSizeController {
+  @override
+  void loadTreeFromJsonFile({
+    @required DevToolsJsonFile jsonFile,
+    @required void Function(String error) onError,
+    bool delayed = false,
+  }) async {
+    if (delayed) {
+      await delay();
+    }
+    super.loadTreeFromJsonFile(jsonFile: jsonFile, onError: onError);
+  }
+
+  @override
+  void loadDiffTreeFromJsonFiles({
+    @required DevToolsJsonFile oldFile,
+    @required DevToolsJsonFile newFile,
+    @required void Function(String error) onError,
+    bool delayed = false,
+  }) async {
+    if (delayed) {
+      await delay();
+    }
+    super.loadDiffTreeFromJsonFiles(
+        oldFile: oldFile, newFile: newFile, onError: onError);
+  }
 }

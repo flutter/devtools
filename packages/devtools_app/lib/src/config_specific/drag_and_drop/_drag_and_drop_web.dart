@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
 
-import '../../utils.dart';
+import '../../shared/utils.dart';
 import 'drag_and_drop.dart';
 
 DragAndDropManagerWeb createDragAndDropManager() {

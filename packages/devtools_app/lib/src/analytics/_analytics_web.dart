@@ -18,11 +18,11 @@ import '../app.dart';
 import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';
-import '../globals.dart';
 import '../performance/performance_screen.dart';
 import '../profiler/profiler_screen.dart';
+import '../shared/globals.dart';
+import '../shared/version.dart';
 import '../ui/gtags.dart';
-import '../version.dart';
 import 'analytics_common.dart';
 import 'constants.dart' as analytics_constants;
 
@@ -689,11 +689,19 @@ Map<String, dynamic> generateSurveyQueryParameters() {
   final url = window.location.toString();
   const fromValuePrefix = '#/';
   final startIndex = url.indexOf(fromValuePrefix);
-  final endIndex = url.indexOf('?');
-  final fromPage = url.substring(
-    startIndex + fromValuePrefix.length,
-    endIndex,
-  );
+  // Use the last index because the url can be of the form
+  // 'http://127.0.0.1:9103/?#/?' and we want to be referencing the last '?'
+  // character.
+  final endIndex = url.lastIndexOf('?');
+  var fromPage = '';
+  try {
+    fromPage = url.substring(
+      startIndex + fromValuePrefix.length,
+      endIndex,
+    );
+  } catch (_) {
+    // Fail gracefully if finding the [fromPage] value throws an exception.
+  }
 
   final clientId = flutterClientId;
   final internalValue = (!isExternalBuild).toString();

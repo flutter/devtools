@@ -4,17 +4,17 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_model.dart';
-import 'package:devtools_app/src/trace_event.dart';
-import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_test/flutter_test_driver.dart'
-    show FlutterRunConfiguration;
-import 'package:devtools_test/flutter_test_environment.dart';
-import 'package:devtools_test/performance_test_data.dart';
-import 'package:devtools_test/utils.dart';
+import 'package:devtools_app/src/primitives/trace_event.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/utils.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_data/performance_test_data.dart';
+import 'test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'test_infra/flutter_test_environment.dart';
 
 void main() async {
   initializeLiveTestWidgetsFlutterBindingWithAssets();

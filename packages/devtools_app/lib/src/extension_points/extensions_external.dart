@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../common_widgets.dart';
 import '../debugger/codeview.dart';
-import '../globals.dart';
 import '../inspector/inspector_service.dart';
+import '../shared/common_widgets.dart';
+import '../shared/globals.dart';
 import 'extensions_base.dart';
 
 class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {

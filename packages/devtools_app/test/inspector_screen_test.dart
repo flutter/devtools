@@ -4,16 +4,15 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/inspector_screen.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/inspector/layout_explorer/layout_explorer.dart';
-import 'package:devtools_app/src/service_extensions.dart' as extensions;
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/service_extensions.dart' as extensions;
+import 'package:devtools_app/src/shared/service_manager.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart' hide Fake;
 import 'package:mockito/mockito.dart';

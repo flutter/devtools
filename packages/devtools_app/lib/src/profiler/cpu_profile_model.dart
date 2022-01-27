@@ -7,11 +7,11 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 import '../charts/flame_chart.dart';
-import '../trace_event.dart';
-import '../trees.dart';
+import '../primitives/trace_event.dart';
+import '../primitives/trees.dart';
+import '../primitives/url_utils.dart';
+import '../shared/utils.dart';
 import '../ui/search.dart';
-import '../url_utils.dart';
-import '../utils.dart';
 import 'cpu_profile_transformer.dart';
 
 /// Data model for DevTools CPU profile.
@@ -48,7 +48,7 @@ class CpuProfileData {
 
     // Initialize all stack frames.
     final stackFrames = <String, CpuStackFrame>{};
-    final stackFramesJson =
+    final Map<String, dynamic> stackFramesJson =
         jsonDecode(jsonEncode(json[stackFramesKey] ?? <String, dynamic>{}));
     for (final MapEntry<String, dynamic> entry in stackFramesJson.entries) {
       final stackFrameJson = entry.value;

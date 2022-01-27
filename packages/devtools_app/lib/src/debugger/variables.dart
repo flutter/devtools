@@ -6,16 +6,16 @@ import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
-import '../common_widgets.dart';
-import '../globals.dart';
 import '../inspector/diagnostics.dart';
 import '../inspector/inspector_screen.dart';
-import '../listenable.dart';
-import '../notifications.dart';
-import '../routing.dart';
-import '../theme.dart';
-import '../tree.dart';
-import '../utils.dart';
+import '../primitives/listenable.dart';
+import '../shared/common_widgets.dart';
+import '../shared/globals.dart';
+import '../shared/notifications.dart';
+import '../shared/routing.dart';
+import '../shared/theme.dart';
+import '../shared/tree.dart';
+import '../shared/utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 

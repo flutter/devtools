@@ -6,11 +6,9 @@ import 'package:devtools_app/devtools.dart' as devtools;
 import 'package:devtools_app/src/app.dart';
 import 'package:devtools_app/src/extension_points/extensions_base.dart';
 import 'package:devtools_app/src/extension_points/extensions_external.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/utils.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

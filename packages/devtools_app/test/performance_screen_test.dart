@@ -4,21 +4,21 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/performance/event_details.dart';
 import 'package:devtools_app/src/performance/flutter_frames_chart.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/split.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/performance_test_data.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
+import 'package:devtools_app/src/shared/split.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
+
+import 'test_data/performance_test_data.dart';
 
 void main() {
   PerformanceScreen screen;

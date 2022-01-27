@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/eval_on_dart_library.dart';
-import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/provider/instance_viewer/instance_viewer.dart';
 import 'package:devtools_app/src/provider/instance_viewer/result.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/utils.dart';
+import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

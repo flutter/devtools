@@ -2,18 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('vm')
-import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/network/network_model.dart';
-import 'package:devtools_app/src/service_manager.dart';
+@TestOn('vm')
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
+import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_app/src/ui/filter.dart';
-import 'package:devtools_app/src/version.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/utils.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
+
+import 'test_utils/network_test_utils.dart';
 
 void main() {
   group('NetworkController', () {

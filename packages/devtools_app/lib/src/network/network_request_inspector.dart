@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 
 import '../analytics/constants.dart' as analytics_constants;
-import '../common_widgets.dart';
 import '../http/http_request_data.dart';
+import '../shared/common_widgets.dart';
 import '../ui/tab.dart';
 import 'network_model.dart';
 import 'network_request_inspector_views.dart';

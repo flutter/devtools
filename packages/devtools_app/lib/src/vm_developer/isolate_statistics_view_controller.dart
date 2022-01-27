@@ -8,10 +8,10 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide VmService;
 
-import '../auto_dispose.dart';
-import '../globals.dart';
+import '../primitives/auto_dispose.dart';
 import '../profiler/cpu_profile_controller.dart';
-import '../vm_service_wrapper.dart';
+import '../shared/globals.dart';
+import '../shared/vm_service_wrapper.dart';
 import 'vm_service_private_extensions.dart';
 
 class IsolateStatisticsViewController extends DisposableController

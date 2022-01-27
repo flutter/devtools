@@ -4,7 +4,7 @@
 
 import 'package:devtools_app/src/inspector/inspector_data_models.dart';
 import 'package:devtools_app/src/inspector/layout_explorer/ui/theme.dart';
-import 'package:devtools_app/src/math_utils.dart';
+import 'package:devtools_app/src/primitives/math_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';

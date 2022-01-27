@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import '../enum_utils.dart';
-import '../math_utils.dart';
-import '../utils.dart';
+import '../primitives/enum_utils.dart';
+import '../primitives/math_utils.dart';
+import '../shared/utils.dart';
 import 'diagnostics_node.dart';
 import 'layout_explorer/flex/utils.dart';
 

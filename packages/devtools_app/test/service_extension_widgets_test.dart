@@ -3,14 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/core/message_bus.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/service_extensions.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/service_registrations.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/service_extensions.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
+import 'package:devtools_app/src/shared/service_registrations.dart';
+import 'package:devtools_app/src/shared/utils.dart';
 import 'package:devtools_app/src/ui/service_extension_widgets.dart';
-import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -7,7 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-import '../theme.dart';
+import '../shared/theme.dart';
 
 /// Returns a [TextSpan] that only includes the first [length] characters of
 /// [span].

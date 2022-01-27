@@ -5,17 +5,18 @@
 @TestOn('vm')
 import 'dart:async';
 
-import 'package:devtools_app/src/eval_on_dart_library.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/service_extensions.dart' as extensions;
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/service_registrations.dart' as registrations;
-import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_test/flutter_test_driver.dart'
-    show FlutterRunConfiguration;
-import 'package:devtools_test/flutter_test_environment.dart';
+import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/service_extensions.dart' as extensions;
+import 'package:devtools_app/src/shared/service_manager.dart';
+import 'package:devtools_app/src/shared/service_registrations.dart'
+    as registrations;
+import 'package:devtools_app/src/shared/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
+
+import 'test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'test_infra/flutter_test_environment.dart';
 
 // Error codes defined by
 // https://www.jsonrpc.org/specification#error_object

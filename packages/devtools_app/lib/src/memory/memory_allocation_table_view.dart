@@ -9,13 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../auto_dispose_mixin.dart';
-import '../split.dart';
-import '../table.dart';
-import '../table_data.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../shared/split.dart';
+import '../shared/table.dart';
+import '../shared/table_data.dart';
+import '../shared/utils.dart';
 import '../ui/icons.dart';
 import '../ui/search.dart';
-import '../utils.dart';
 import 'memory_allocation_table_data.dart';
 import 'memory_controller.dart';
 import 'memory_tracker_model.dart';

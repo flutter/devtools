@@ -4,16 +4,15 @@
 
 import 'dart:io';
 
-import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/inspector/inspector_screen.dart';
 import 'package:devtools_app/src/inspector/inspector_service.dart';
-import 'package:devtools_test/flutter_test_driver.dart'
-    show FlutterRunConfiguration;
-import 'package:devtools_test/flutter_test_environment.dart';
-import 'package:devtools_test/utils.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
+import 'test_infra/flutter_test_environment.dart';
 
 // This is a bit conservative to ensure we do not get flakes due to
 // slow interactions with the VM Service. This delay could likely be

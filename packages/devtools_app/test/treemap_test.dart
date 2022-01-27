@@ -5,18 +5,17 @@
 import 'dart:io';
 
 import 'package:devtools_app/src/charts/treemap.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_test/app_size_test_data/apk_analysis.dart';
-import 'package:devtools_test/app_size_test_data/new_v8.dart';
-import 'package:devtools_test/app_size_test_data/sizes.dart';
-import 'package:devtools_test/app_size_test_data/small_sizes.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/utils.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_data/app_size_test_data/apk_analysis.dart';
+import 'test_data/app_size_test_data/new_v8.dart';
+import 'test_data/app_size_test_data/sizes.dart';
+import 'test_data/app_size_test_data/small_sizes.dart';
 
 void main() {
   TreemapNode root;

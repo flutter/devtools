@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/globals.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_controller.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_test/cpu_profile_test_data.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/utils.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_data/cpu_profile_test_data.dart';
 
 void main() {
   group('CpuProfileController', () {
@@ -18,7 +18,11 @@ void main() {
     FakeServiceManager fakeServiceManager;
 
     setUp(() {
-      fakeServiceManager = FakeServiceManager();
+      fakeServiceManager = FakeServiceManager(
+        service: FakeServiceManager.createFakeService(
+          cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
+        ),
+      );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       controller = CpuProfilerController();
