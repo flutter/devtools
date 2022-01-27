@@ -138,48 +138,67 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     _initTitle();
     _maybeShowPubWarning();
+    _maybeShowInternalFlutterWebWarning();
   }
 
   bool _pubWarningShown = false;
+
+  bool _internalFlutterWebWarningShown = false;
+
+  void _maybeShowInternalFlutterWebWarning() {
+    if (isExternalBuild) return;
+    if (_internalFlutterWebWarningShown) return;
+
+    serviceManager.onConnectionAvailable?.listen((_) {
+      if (serviceManager.connectedApp.isFlutterWebAppNow) {
+        _showWarning(const InternalFlutterWebWarningText());
+        _internalFlutterWebWarningShown = true;
+      }
+    });
+  }
 
   // TODO(kenz): remove the pub warning code after devtools version 2.8.0 ships
   void _maybeShowPubWarning() {
     if (!_pubWarningShown) {
       serviceManager.onConnectionAvailable?.listen((event) {
         if (shouldShowPubWarning()) {
-          final colorScheme = Theme.of(context).colorScheme;
-          OverlayEntry _entry;
-          Overlay.of(context).insert(
-            _entry = OverlayEntry(
-              maintainState: true,
-              builder: (context) {
-                return Material(
-                  color: colorScheme.overlayShadowColor,
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.all(defaultSpacing),
-                      color: colorScheme.overlayBackgroundColor,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const PubWarningText(),
-                          const SizedBox(height: defaultSpacing),
-                          ElevatedButton(
-                            child: const Text('Got it'),
-                            onPressed: () => _entry.remove(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          );
+          _showWarning(const PubWarningText());
           _pubWarningShown = true;
         }
       });
     }
+  }
+
+  void _showWarning(Widget warningText) {
+    final colorScheme = Theme.of(context).colorScheme;
+    OverlayEntry _entry;
+    Overlay.of(context).insert(
+      _entry = OverlayEntry(
+        maintainState: true,
+        builder: (context) {
+          return Material(
+            color: colorScheme.overlayShadowColor,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.all(defaultSpacing),
+                color: colorScheme.overlayBackgroundColor,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    warningText,
+                    const SizedBox(height: defaultSpacing),
+                    ElevatedButton(
+                      child: const Text('Got it'),
+                      onPressed: () => _entry.remove(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override

@@ -9,6 +9,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../config_specific/launch_url/launch_url.dart';
@@ -1769,6 +1770,38 @@ class PubWarningText extends StatelessWidget {
             text: '\ncommand.',
             style: theme.subtleTextStyle,
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class InternalFlutterWebWarningText extends StatelessWidget {
+  const InternalFlutterWebWarningText({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+              text:
+                  'Warning: Flutter DevTools is not currently supported for Flutter Web apps.\n\n',
+              style: theme.subtleTextStyle
+                  .copyWith(color: theme.colorScheme.errorTextColor)),
+          TextSpan(
+              text: 'Some debugging features might not work as expected.\n',
+              style: theme.subtleTextStyle),
+          TextSpan(text: 'See ', style: theme.subtleTextStyle),
+          TextSpan(
+              text: 'b/204213138',
+              style: theme.linkTextStyle,
+              recognizer: TapGestureRecognizer()
+                ..onTap = () async {
+                  await launch('https://b.corp.google.com/issues/204213138');
+                }),
+          TextSpan(text: ' for details.', style: theme.subtleTextStyle),
         ],
       ),
     );
