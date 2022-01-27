@@ -21,7 +21,7 @@ on:
 
 jobs:
   call-workflow-on-pinned-flutter:
-    uses: .github/workflows/test-workflow.yml@bots
+    uses: ./.github/workflows/test-workflow.yml
     with:
       # When updating this version, also update the version in
       # flutter-version.txt.
@@ -32,7 +32,7 @@ jobs:
       channel: 2.10.0-0.2.pre
 
   call-workflow-on-flutter-master:
-    uses: .github/workflows/test-workflow.yml@bots
+    uses: ./.github/workflows/test-workflow.yml
     with:
       channel: master
 #  main:
