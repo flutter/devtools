@@ -15,12 +15,22 @@ import 'memory_graph_model.dart';
 import 'memory_snapshot_models.dart';
 
 // Diff Image.
+/*
 Image diffImage(BuildContext context) {
   final themeData = Theme.of(context);
   return createImageIcon(
     themeData.isDarkTheme
         ? 'icons/memory/communities_white.png'
         : 'icons/memory/communities_black.png',
+  );
+}
+*/
+
+ThemedImageIcon diffImage(BuildContext context) {
+  // TODO(terry): Match shape in event pane.
+  return const ThemedImageIcon(
+    darkModeAsset: 'icons/memory/communities_white.png',
+    lightModeAsset: 'icons/memory/communities_black.png',
   );
 }
 
