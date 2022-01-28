@@ -213,6 +213,9 @@ class DebuggerController extends DisposableController
   /// history).
   void _showScriptLocation(ScriptLocation scriptLocation) {
     _currentScriptRef.value = scriptLocation?.scriptRef;
+    if (_currentScriptRef.value == null) {
+      log('Trying to show a location with a null script ref', LogLevel.error);
+    }
 
     _parseCurrentScript();
 
