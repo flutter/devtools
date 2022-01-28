@@ -79,7 +79,7 @@ popd
 pushd packages/devtools_app
 echo `pwd`
 
-if [ "$BOT" = "main"* ]; then
+if [ "$BOT" = "main" ]; then
 
     # Provision our packages.
     flutter pub get
