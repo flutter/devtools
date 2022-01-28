@@ -27,7 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         channel:
-          - 2.10.0-0.2.pre
+          - $PINNED_FLUTTER_CHANNEL
     steps:
       - name: git clone
         uses: actions/checkout@v2
