@@ -565,7 +565,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   }
 }
 
-class KeyboardShortcuts extends StatelessWidget {
+class KeyboardShortcuts extends StatefulWidget {
   const KeyboardShortcuts({
     @required this.keyboardShortcuts,
     @required this.child,
@@ -576,15 +576,35 @@ class KeyboardShortcuts extends StatelessWidget {
   final Widget child;
 
   @override
+  KeyboardShortcutsState createState() => KeyboardShortcutsState();
+}
+
+class KeyboardShortcutsState extends State<KeyboardShortcuts>
+    with AutoDisposeMixin {
+  FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode(debugLabel: 'keyboard-shortcuts');
+    autoDisposeFocusNode(_focusNode);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (keyboardShortcuts.isEmpty) {
-      return child;
+    if (widget.keyboardShortcuts.isEmpty) {
+      return widget.child;
     }
-    return Shortcuts(
-      shortcuts: keyboardShortcuts.shortcuts,
-      child: Actions(
-        actions: keyboardShortcuts.actions,
-        child: child,
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => FocusScope.of(context).requestFocus(_focusNode),
+      child: FocusableActionDetector(
+        child: widget.child,
+        shortcuts: widget.keyboardShortcuts.shortcuts,
+        actions: widget.keyboardShortcuts.actions,
+        autofocus: true,
+        focusNode: _focusNode,
       ),
     );
   }
