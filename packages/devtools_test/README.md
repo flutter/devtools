@@ -1,6 +1,6 @@
 ## What is this?
 
-This is a package containing test utilities for use when writing [Dart DevTools](https://pub.dev/packages/devtools) tests.
+This is a package containing test utilities for use when writing [Dart DevTools](https://docs.flutter.dev/development/tools/devtools/overview) tests.
 
 ## Terms and Privacy
 
