@@ -17,7 +17,7 @@ on:
 # track the latest Flutter dev release. Dev releases come out ~weekly;
 # the versions can be viewed at https://github.com/flutter/flutter/tags.
 env:
-  PINNED_FLUTTER_CHANNEL: 2.10.0-0.2.pre
+  PINNED_FLUTTER_CHANNEL: 2.10.0-0.3.pre
 
 jobs:
   main:
@@ -28,7 +28,6 @@ jobs:
       matrix:
         channel:
           - 2.10.0-0.2.pre
-          - master
     steps:
       - name: git clone
         uses: actions/checkout@v2
@@ -46,7 +45,6 @@ jobs:
       matrix:
         channel:
           - 2.10.0-0.2.pre
-#          - master
     steps:
       - name: git clone
         uses: actions/checkout@v2
@@ -67,7 +65,7 @@ jobs:
           - test_dart2js
         channel:
           - 2.10.0-0.2.pre
-#          - master
+          - master
     steps:
       - name: git clone
         uses: actions/checkout@v2
@@ -99,7 +97,7 @@ jobs:
           - integration_dart2js
         channel:
           - 2.10.0-0.2.pre
-#          - master
+          - master
     steps:
       - name: git clone
         uses: actions/checkout@v2
