@@ -661,13 +661,15 @@ class HeapTreeViewState extends State<HeapTree>
             const SizedBox(width: defaultSpacing),
             _groupByDropdown(textTheme),
             const SizedBox(width: defaultSpacing),
-            DevToolsTooltip(
-              tooltip: 'Diff 2 Snapshots',
-              child: OutlinedButton(
-                key: diffKey,
-                onPressed: enableDiffButton()
+        IconLabelButton(
+          tooltip: 'Diff 2 Snapshots',
+          imageIcon: diffImage(context),
+          label: 'Diff',
+          onPressed: 
+enableDiffButton()
                     ? () async {
-                        MemoryScreen.gaAction(key: diffKey);
+// TODO(kenzie): How to do???
+//                        MemoryScreen.gaAction(key: diffKey);
 
                         // Find the last two snapshots to diff.
                         final snapshots = controller.findSnapshotsToDiff();
@@ -686,12 +688,43 @@ class HeapTreeViewState extends State<HeapTree>
                         }
                       }
                     : null,
+        ),
+
+/*
+            DevToolsTooltip(
+              message: 'Diff 2 Snapshots',
+              child: OutlinedButton(
+                key: diffKey,
+                onPressed: enableDiffButton()
+                    ? () async {
+// TODO(kenzie): How to do???
+//                        MemoryScreen.gaAction(key: diffKey);
+
+                        // Find the last two snapshots to diff.
+                        final snapshots = controller.findSnapshotsToDiff();
+                        if (snapshots.isNotEmpty) {
+                          controller.toggleDiffRunning(true);
+
+                          // Diff the two snapshots.
+                          // TODO(terry): Make this asynchronous?
+                          final diffSnapshot = _diffSnapshots(
+                            snapshots.first,
+                            snapshots.last,
+                          );
+                          controller.diffSnapshots.add(diffSnapshot);
+
+                          controller.toggleDiffRunning(false);
+                        }
+                      }
+                    : null,
+                    
                 child: MaterialIconLabel(
                   label: 'Diff',
-                  imageIcon: diffImage(context),
+                  iconData: diffImage(context),
                 ),
               ),
             ),
+*/
             const SizedBox(width: defaultSpacing),
             // TODO(terry): Mechanism to handle expand/collapse on both tables
             // objects/fields. Maybe notion in table?

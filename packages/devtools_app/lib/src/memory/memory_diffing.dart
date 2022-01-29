@@ -5,11 +5,11 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/core/message_bus.dart';
-import 'package:devtools_app/src/theme.dart';
+//import 'package:devtools_app/src/theme.dart';
 import 'package:devtools_app/src/ui/icons.dart';
 import 'package:flutter/material.dart';
 
-import '../globals.dart';
+import '../shared/globals.dart';
 import 'memory_controller.dart';
 import 'memory_graph_model.dart';
 import 'memory_snapshot_models.dart';

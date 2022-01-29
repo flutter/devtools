@@ -6,7 +6,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../primitives/trees.dart';
 import '../core/message_bus.dart';
-import '../globals.dart';
+import '../shared/globals.dart';
 //import '../trees.dart';
 import 'memory_controller.dart';
 import 'memory_diffing.dart';
