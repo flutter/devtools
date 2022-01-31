@@ -12,11 +12,11 @@ import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../analytics/analytics.dart' as ga;
 import '../config_specific/logger/logger.dart';
-import '../core/message_bus.dart';
 import '../inspector/inspector_service.dart';
 import '../logging/vm_service_logger.dart';
 import '../performance/timeline_streams.dart';
 import '../primitives/auto_dispose.dart';
+import '../primitives/message_bus.dart';
 import 'connected_app.dart';
 import 'console_service.dart';
 import 'error_badge_manager.dart';

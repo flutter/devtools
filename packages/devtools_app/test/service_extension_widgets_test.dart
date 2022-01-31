@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/core/message_bus.dart';
+import 'package:devtools_app/src/primitives/message_bus.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/service_extensions.dart';
 import 'package:devtools_app/src/shared/service_manager.dart';
