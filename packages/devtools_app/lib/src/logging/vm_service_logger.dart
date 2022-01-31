@@ -7,7 +7,7 @@ import 'dart:convert';
 
 import 'package:vm_service/vm_service.dart';
 
-import '../core/message_bus.dart';
+import '../primitives/message_bus.dart';
 import '../shared/globals.dart';
 
 /// A class which listens for all traffic over the VM service protocol and logs
