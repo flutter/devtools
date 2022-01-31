@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../config_specific/logger/logger.dart';
-import '../core/message_bus.dart';
 import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/message_bus.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';

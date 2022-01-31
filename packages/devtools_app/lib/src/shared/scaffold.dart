@@ -138,48 +138,67 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     _initTitle();
     _maybeShowPubWarning();
+    _maybeShowInternalFlutterWebWarning();
   }
 
   bool _pubWarningShown = false;
+
+  bool _internalFlutterWebWarningShown = false;
+
+  void _maybeShowInternalFlutterWebWarning() {
+    if (isExternalBuild) return;
+    if (_internalFlutterWebWarningShown) return;
+
+    serviceManager.onConnectionAvailable?.listen((_) {
+      if (serviceManager.connectedApp.isFlutterWebAppNow) {
+        _showWarning(const InternalFlutterWebWarningText());
+        _internalFlutterWebWarningShown = true;
+      }
+    });
+  }
 
   // TODO(kenz): remove the pub warning code after devtools version 2.8.0 ships
   void _maybeShowPubWarning() {
     if (!_pubWarningShown) {
       serviceManager.onConnectionAvailable?.listen((event) {
         if (shouldShowPubWarning()) {
-          final colorScheme = Theme.of(context).colorScheme;
-          OverlayEntry _entry;
-          Overlay.of(context).insert(
-            _entry = OverlayEntry(
-              maintainState: true,
-              builder: (context) {
-                return Material(
-                  color: colorScheme.overlayShadowColor,
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.all(defaultSpacing),
-                      color: colorScheme.overlayBackgroundColor,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const PubWarningText(),
-                          const SizedBox(height: defaultSpacing),
-                          ElevatedButton(
-                            child: const Text('Got it'),
-                            onPressed: () => _entry.remove(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          );
+          _showWarning(const PubWarningText());
           _pubWarningShown = true;
         }
       });
     }
+  }
+
+  void _showWarning(Widget warningText) {
+    final colorScheme = Theme.of(context).colorScheme;
+    OverlayEntry _entry;
+    Overlay.of(context).insert(
+      _entry = OverlayEntry(
+        maintainState: true,
+        builder: (context) {
+          return Material(
+            color: colorScheme.overlayShadowColor,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.all(defaultSpacing),
+                color: colorScheme.overlayBackgroundColor,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    warningText,
+                    const SizedBox(height: defaultSpacing),
+                    ElevatedButton(
+                      child: const Text('Got it'),
+                      onPressed: () => _entry.remove(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -546,7 +565,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   }
 }
 
-class KeyboardShortcuts extends StatelessWidget {
+class KeyboardShortcuts extends StatefulWidget {
   const KeyboardShortcuts({
     @required this.keyboardShortcuts,
     @required this.child,
@@ -557,15 +576,35 @@ class KeyboardShortcuts extends StatelessWidget {
   final Widget child;
 
   @override
+  KeyboardShortcutsState createState() => KeyboardShortcutsState();
+}
+
+class KeyboardShortcutsState extends State<KeyboardShortcuts>
+    with AutoDisposeMixin {
+  FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode(debugLabel: 'keyboard-shortcuts');
+    autoDisposeFocusNode(_focusNode);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (keyboardShortcuts.isEmpty) {
-      return child;
+    if (widget.keyboardShortcuts.isEmpty) {
+      return widget.child;
     }
-    return Shortcuts(
-      shortcuts: keyboardShortcuts.shortcuts,
-      child: Actions(
-        actions: keyboardShortcuts.actions,
-        child: child,
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => FocusScope.of(context).requestFocus(_focusNode),
+      child: FocusableActionDetector(
+        child: widget.child,
+        shortcuts: widget.keyboardShortcuts.shortcuts,
+        actions: widget.keyboardShortcuts.actions,
+        autofocus: true,
+        focusNode: _focusNode,
       ),
     );
   }
