@@ -398,37 +398,20 @@ class _CodeViewState extends State<CodeView>
     );
   }
 
-  Widget wrapInElevatedCard(
-    Widget widget, {
-    double width = wideSearchTextWidth,
-  }) {
-    return Card(
-      elevation: defaultElevation,
-      color: Theme.of(context).scaffoldBackgroundColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(defaultBorderRadius),
-      ),
-      child: Container(
-        width: width,
-        height: defaultTextFieldHeight + 2 * denseSpacing,
-        padding: const EdgeInsets.all(denseSpacing),
-        child: widget,
-      ),
-    );
-  }
-
   Widget buildFileSearchField() {
-    return wrapInElevatedCard(
-      FileSearchField(
+    return ElevatedCard(
+      child: FileSearchField(
         debuggerController: widget.controller,
       ),
       width: extraWideSearchTextWidth,
+      padding: EdgeInsets.zero,
+      height: defaultTextFieldHeight,
     );
   }
 
   Widget buildSearchInFileField() {
-    return wrapInElevatedCard(
-      buildSearchField(
+    return ElevatedCard(
+      child: buildSearchField(
         controller: widget.controller,
         searchFieldKey: debuggerCodeViewSearchKey,
         searchFieldEnabled: parsedScript != null,
