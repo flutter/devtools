@@ -227,7 +227,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     // without triggering a navigation. Since we can't nagivate during a build
     // we have to wrap this in `Future.microtask`.
     if (widget.page == null && _currentScreen is! SimpleScreen) {
-      Future.microtask(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         final routerDelegate = DevToolsRouterDelegate.of(context);
         Router.neglect(context, () {
           routerDelegate.navigateIfNotCurrent(
