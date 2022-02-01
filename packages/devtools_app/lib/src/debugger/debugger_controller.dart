@@ -200,6 +200,7 @@ class DebuggerController extends DisposableController
 
   /// Jump to the given ScriptRef and optional SourcePosition.
   void showScriptLocation(ScriptLocation scriptLocation) {
+    toggleFileOpenerVisibility(false);
     _showScriptLocation(scriptLocation);
 
     // Update the scripts history (and make sure we don't react to the
@@ -350,6 +351,7 @@ class DebuggerController extends DisposableController
   /// Make the 'Libraries' view on the right-hand side of the screen visible or
   /// hidden.
   void toggleLibrariesVisible() {
+    toggleFileOpenerVisibility(false);
     _librariesVisible.value = !_librariesVisible.value;
   }
 

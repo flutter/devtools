@@ -976,12 +976,8 @@ class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField>
   void initState() {
     super.initState();
 
-    if (widget.onFocusLost == null) {
-      // Default behavior is to close the autocomplete overlay when focus is
-      // lost from the search field:
-      addAutoDisposeListener(widget.searchFieldFocusNode, _handleLostFocus);
-      addAutoDisposeListener(widget.rawKeyboardFocusNode, _handleLostFocus);
-    }
+    addAutoDisposeListener(widget.searchFieldFocusNode, _handleLostFocus);
+    addAutoDisposeListener(widget.rawKeyboardFocusNode, _handleLostFocus);
     widget.rawKeyboardFocusNode.onKey = _handleKeyStrokes;
   }
 
@@ -997,10 +993,8 @@ class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField>
   }
 
   void _handleLostFocus() {
-    print('HANDLING FOCUS CHANGE!');
     if (widget.searchFieldFocusNode.hasPrimaryFocus ||
         widget.rawKeyboardFocusNode.hasPrimaryFocus) {
-      print('returning because something has primary focus');
       return;
     }
 
