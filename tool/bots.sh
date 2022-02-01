@@ -62,8 +62,10 @@ echo "Flutter version is '$FLUTTER_VERSION'"
 
 echo "Testing with the Flutter test environment: $FLUTTER_TEST_ENV"
 if ["$FLUTTER_TEST_ENV" = "pinned"]; then
+  echo "in pinned branch"
   export DART_DEFINE_ARGS=""
 else
+  echo "in else branch"
   export DART_DEFINE_ARGS="--dart-define=FLUTTER_BRANCH=$FLUTTER_TEST_ENV"
 fi
 
