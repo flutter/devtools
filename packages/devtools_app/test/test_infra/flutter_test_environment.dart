@@ -20,12 +20,20 @@ typedef FlutterDriverFactory = FlutterTestDriver Function(
 FlutterRunTestDriver defaultFlutterRunDriver(Directory appDir) =>
     FlutterRunTestDriver(appDir);
 
+final defaultFlutterExecutable = Platform.isWindows ? 'flutter.bat' : 'flutter';
+
 class FlutterTestEnvironment {
   FlutterTestEnvironment(
     this._runConfig, {
     this.testAppDirectory = 'test/fixtures/flutter_app',
     FlutterDriverFactory flutterDriverFactory,
-  }) : _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver;
+  })  : _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver,
+        _flutterBranch = _parseFlutterBranchFromEnv();
+
+  static String _parseFlutterBranchFromEnv() {
+    const flutterBranch = String.fromEnvironment('FLUTTER_BRANCH');
+    return flutterBranch.isNotEmpty ? flutterBranch : null;
+  }
 
   FlutterRunConfiguration _runConfig;
   FlutterRunConfiguration get runConfig => _runConfig;
@@ -40,6 +48,18 @@ class FlutterTestEnvironment {
   /// A factory method which can return a [FlutterRunTestDriver] for a test
   /// fixture directory.
   final FlutterDriverFactory _flutterDriverFactory;
+
+  /// The Flutter branch to use for this test environment.
+  ///
+  /// This channel can be specified using the --dart-define flag
+  /// (e.g. flutter test --dart-define=FLUTTER_BRANCH=master test/my_test.dart)
+  final String _flutterBranch;
+
+  /// The temporary directly that will hold the flutter sdk checkout at branch
+  /// [_flutterBranch].
+  ///
+  /// If [_flutterBranch] is null, this will be null also.
+  Directory tmpFlutterDirectory;
 
   // This function will be called after we have ran the Flutter app and the
   // vmService is opened.
@@ -89,8 +109,35 @@ class FlutterTestEnvironment {
 
       _needsSetup = false;
 
+      var flutterExecutable = defaultFlutterExecutable;
+
+      if (_flutterBranch != null) {
+        // Create a temproary location to store the new flutter SDK.
+        tmpFlutterDirectory =
+            Directory('${Directory.systemTemp.path}/flutter-sdk-tmp')
+              ..createSync();
+
+        print('Cloning the Flutter $_flutterBranch branch...');
+        final gitCloneProcess = await Process.start(
+          'git',
+          [
+            'clone',
+            'https://github.com/flutter/flutter.git',
+            '--branch',
+            '$_flutterBranch',
+          ],
+          workingDirectory: tmpFlutterDirectory.path,
+        );
+        await gitCloneProcess.exitCode;
+
+        flutterExecutable = '${tmpFlutterDirectory.path}/flutter/bin/flutter';
+      }
+
       _flutter = _flutterDriverFactory(Directory(testAppDirectory));
-      await _flutter.run(runConfig: _runConfig);
+      await _flutter.run(
+        flutterExecutable: flutterExecutable,
+        runConfig: _runConfig,
+      );
 
       _service = _flutter.vmService;
       final preferencesController = PreferencesController();
@@ -137,6 +184,11 @@ class FlutterTestEnvironment {
           '  ${_service.activeFutures.map((tf) => tf.name).join('\n  ')}';
     });
     await _flutter.stop();
+
+    // Delete the temporary flutter directory used for this test environment, if
+    // on exists.
+    tmpFlutterDirectory?.deleteSync(recursive: true);
+
     _flutter = null;
 
     _needsSetup = true;

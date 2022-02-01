@@ -21,41 +21,41 @@ env:
 
 jobs:
   main:
-    name: main - flutter ${{ matrix.channel }}
+    name: main
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        channel:
-          - "$PINNED_FLUTTER_CHANNEL"
+        flutter-test-env:
+          - pinned
     steps:
       - name: git clone
         uses: actions/checkout@v2
       - name: tool/bots.sh
         env:
           BOT: main
-          CHANNEL: ${{ matrix.channel }}
+          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
         run: ./tool/bots.sh
 
   packages:
-    name: packages - flutter ${{ matrix.channel }}
+    name: packages
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        channel:
-          - 2.10.0-0.2.pre
+        flutter-test-env:
+          - pinned
     steps:
       - name: git clone
         uses: actions/checkout@v2
       - name: tool/bots.sh
         env:
           BOT: packages
-          CHANNEL: ${{ matrix.channel }}
+          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
         run: ./tool/bots.sh
 
   test:
-    name: test ${{ matrix.bot }} - flutter ${{ matrix.channel }}
+    name: test ${{ matrix.bot }} - flutter ${{ matrix.flutter-test-env }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -63,8 +63,8 @@ jobs:
         bot:
           - test_ddc
           - test_dart2js
-        channel:
-          - 2.10.0-0.2.pre
+        flutter-test-env:
+          - pinned
           - master
     steps:
       - name: git clone
@@ -74,7 +74,7 @@ jobs:
         env:
           BOT: ${{ matrix.bot }}
           PLATFORM: vm
-          CHANNEL: ${{ matrix.channel }}
+          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
         run: ./tool/bots.sh
 
       - name: image failures
@@ -87,7 +87,7 @@ jobs:
           path: packages/devtools_app/test/failures # Path to upload
 
   integration:
-    name: integration ${{ matrix.bot }} - flutter ${{ matrix.channel }}
+    name: integration ${{ matrix.bot }} - flutter ${{ matrix.flutter-test-env }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -95,8 +95,8 @@ jobs:
         bot:
           - integration_ddc
           - integration_dart2js
-        channel:
-          - 2.10.0-0.2.pre
+        flutter-test-env:
+          - pinned
           - master
     steps:
       - name: git clone
@@ -104,7 +104,7 @@ jobs:
       - name: tool/bots.sh
         env:
           BOT: ${{ matrix.bot }}
-          CHANNEL: ${{ matrix.channel }}
+          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
         run: ./tool/bots.sh
 
 # TODO(https://github.com/flutter/devtools/issues/2437):
