@@ -1961,8 +1961,8 @@ class ElevatedCard extends StatelessWidget {
       ),
       child: Container(
         child: child,
-        width: width ?? wideSearchTextWidth,
-        height: height ?? defaultTextFieldHeight + 2 * denseSpacing,
+        width: width,
+        height: height,
         padding: padding ?? const EdgeInsets.all(denseSpacing),
       ),
     );

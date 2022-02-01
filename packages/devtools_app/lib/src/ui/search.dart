@@ -286,11 +286,6 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         ? 0.0
         : calculateTextSpanHeight(tileContents.first) + denseSpacing;
 
-    final tileEntryMaxWidth = tileContents.isEmpty
-        ? 0.0
-        : calculateTextSpanWidth(findLongestTextSpan(tileContents)) +
-            denseSpacing;
-
     // Find the searchField and place overlay below bottom of TextField and
     // make overlay width of TextField. This is also we decide the height of
     // the ListTile height, position above (if bottom is false).
@@ -354,7 +349,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     return Positioned(
       key: searchAutoCompleteKey,
       width: isMaxWidth
-          ? max(tileEntryMaxWidth, box.size.width)
+          ? box.size.width
           : AutoCompleteSearchControllerMixin.minPopupWidth,
       height: bottom ? null : count * tileEntryHeight,
       child: CompositedTransformFollower(
@@ -690,6 +685,7 @@ mixin SearchFieldMixin<T extends StatefulWidget>
     bool supportClearField = false,
     Set<LogicalKeyboardKey> keyEventsToPropagate = const {},
     VoidCallback onClose,
+    VoidCallback onFocusLost,
   }) {
     _onSelection = onSelection;
 
@@ -717,6 +713,7 @@ mixin SearchFieldMixin<T extends StatefulWidget>
       clearSearchField: clearSearchField,
       keyEventsToPropagate: keyEventsToPropagate,
       supportClearField: supportClearField,
+      onFocusLost: onFocusLost,
     );
   }
 
@@ -933,6 +930,7 @@ class _AutoCompleteSearchField extends StatefulWidget {
     @required this.clearSearchField,
     this.keyEventsToPropagate = const {},
     this.supportClearField = false,
+    this.onFocusLost,
   });
 
   final AutoCompleteSearchControllerMixin controller;
@@ -945,6 +943,7 @@ class _AutoCompleteSearchField extends StatefulWidget {
   final ClearSearchField clearSearchField;
   final Set<LogicalKeyboardKey> keyEventsToPropagate;
   final bool supportClearField;
+  final VoidCallback onFocusLost;
 
   @override
   State<_AutoCompleteSearchField> createState() =>
@@ -976,7 +975,13 @@ class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField> {
   void initState() {
     super.initState();
 
-    widget.searchFieldFocusNode.addListener(_closeAutoCompleteOnFocusLost);
+    if (widget.onFocusLost == null) {
+      // Default behavior is to close the autocomplete overlay when focus is
+      // lost from the search field:
+      widget.searchFieldFocusNode.addListener(_handleLostFocus);
+      widget.rawKeyboardFocusNode.addListener(_handleLostFocus);
+    }
+
     widget.rawKeyboardFocusNode.onKey = _handleKeyStrokes;
   }
 
@@ -991,8 +996,17 @@ class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField> {
     );
   }
 
-  void _closeAutoCompleteOnFocusLost() {
-    if (!widget.searchFieldFocusNode.hasFocus) {
+  void _handleLostFocus() {
+    print('HANDLING FOCUS CHANGE!');
+    if (widget.searchFieldFocusNode.hasPrimaryFocus ||
+        widget.rawKeyboardFocusNode.hasPrimaryFocus) {
+      print('returning because something has primary focus');
+      return;
+    }
+
+    if (widget.onFocusLost != null) {
+      widget.onFocusLost();
+    } else {
       widget.controller.closeAutoCompleteOverlay();
     }
   }

@@ -71,7 +71,6 @@ class CodeView extends StatefulWidget {
 
 class _CodeViewState extends State<CodeView>
     with AutoDisposeMixin, SearchFieldMixin<CodeView> {
-  static const fileOpenerLeftPadding = 100.0;
   static const searchFieldRightPadding = 75.0;
 
   LinkedScrollControllerGroup verticalController;
@@ -214,7 +213,8 @@ class _CodeViewState extends State<CodeView>
                 : buildCodeArea(context),
             if (showFileOpener)
               Positioned(
-                left: fileOpenerLeftPadding,
+                left: noPadding,
+                right: noPadding,
                 child: buildFileSearchField(),
               ),
             if (showSearch && scriptRef != null)
@@ -404,8 +404,8 @@ class _CodeViewState extends State<CodeView>
         debuggerController: widget.controller,
       ),
       width: extraWideSearchTextWidth,
-      padding: EdgeInsets.zero,
       height: defaultTextFieldHeight,
+      padding: EdgeInsets.zero,
     );
   }
 
@@ -419,6 +419,8 @@ class _CodeViewState extends State<CodeView>
         supportsNavigation: true,
         onClose: () => widget.controller.toggleSearchInFileVisibility(false),
       ),
+      width: wideSearchTextWidth,
+      height: defaultTextFieldHeight + 2 * denseSpacing,
     );
   }
 
