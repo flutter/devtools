@@ -951,7 +951,8 @@ class _AutoCompleteSearchField extends StatefulWidget {
       _AutoCompleteSearchFieldState();
 }
 
-class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField> {
+class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField>
+    with AutoDisposeMixin {
   /// Platform independent (Mac or Linux).
   int get arrowDown =>
       LogicalKeyboardKey.arrowDown.keyId & LogicalKeyboardKey.valueMask;
@@ -976,7 +977,8 @@ class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField> {
   void initState() {
     super.initState();
 
-    widget.searchFieldFocusNode.addListener(_closeAutoCompleteOnFocusLost);
+    addAutoDisposeListener(
+        widget.searchFieldFocusNode, _closeAutoCompleteOnFocusLost);
     widget.rawKeyboardFocusNode.onKey = _handleKeyStrokes;
   }
 
