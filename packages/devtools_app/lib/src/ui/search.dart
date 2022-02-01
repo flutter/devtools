@@ -950,7 +950,8 @@ class _AutoCompleteSearchField extends StatefulWidget {
       _AutoCompleteSearchFieldState();
 }
 
-class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField> {
+class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField>
+    with AutoDisposeMixin {
   /// Platform independent (Mac or Linux).
   int get arrowDown =>
       LogicalKeyboardKey.arrowDown.keyId & LogicalKeyboardKey.valueMask;
@@ -978,10 +979,9 @@ class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField> {
     if (widget.onFocusLost == null) {
       // Default behavior is to close the autocomplete overlay when focus is
       // lost from the search field:
-      widget.searchFieldFocusNode.addListener(_handleLostFocus);
-      widget.rawKeyboardFocusNode.addListener(_handleLostFocus);
+      addAutoDisposeListener(widget.searchFieldFocusNode, _handleLostFocus);
+      addAutoDisposeListener(widget.rawKeyboardFocusNode, _handleLostFocus);
     }
-
     widget.rawKeyboardFocusNode.onKey = _handleKeyStrokes;
   }
 
