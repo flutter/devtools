@@ -67,6 +67,8 @@ else
   export DART_DEFINE_ARGS="--dart-define=FLUTTER_BRANCH=$FLUTTER_TEST_ENV"
 fi
 
+echo "dart define args: $DART_DEFINE_ARGS"
+
 # Some integration tests assume the devtools package is up to date and located
 # adjacent to the devtools_app package.
 pushd packages/devtools
