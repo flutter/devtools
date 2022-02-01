@@ -13,12 +13,12 @@ import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart' as logger;
-import '../core/message_bus.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
 import '../inspector/inspector_tree.dart';
 import '../inspector/inspector_tree_controller.dart';
 import '../primitives/auto_dispose.dart';
+import '../primitives/message_bus.dart';
 import '../shared/globals.dart';
 import '../shared/utils.dart';
 import '../shared/vm_service_wrapper.dart';

@@ -10,9 +10,9 @@ import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart';
-import '../core/message_bus.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/history_manager.dart';
+import '../primitives/message_bus.dart';
 import '../shared/globals.dart';
 import '../shared/service_manager.dart';
 import '../shared/utils.dart';

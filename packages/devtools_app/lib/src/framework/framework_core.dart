@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import '../../devtools.dart' as devtools show version;
 import '../config_specific/import_export/import_export.dart';
 import '../config_specific/logger/logger.dart';
-import '../core/message_bus.dart';
+import '../primitives/message_bus.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/service.dart';
