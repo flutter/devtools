@@ -55,7 +55,7 @@ class FlutterTestEnvironment {
   /// (e.g. flutter test --dart-define=FLUTTER_BRANCH=master test/my_test.dart)
   final String _flutterBranch;
 
-  /// The temporary directly that will hold the flutter sdk checkout at branch
+  /// The temporary directory that will hold the flutter sdk checkout at branch
   /// [_flutterBranch].
   ///
   /// If [_flutterBranch] is null, this will be null also.
