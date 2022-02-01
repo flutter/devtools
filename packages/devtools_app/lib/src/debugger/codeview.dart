@@ -288,6 +288,7 @@ class _CodeViewState extends State<CodeView>
     return HistoryViewport(
       history: widget.controller.scriptsHistory,
       generateTitle: (script) => script.uri,
+      onTitleTap: () => widget.controller.toggleFileOpenerVisibility(true),
       controls: [
         ScriptPopupMenu(widget.controller),
         ScriptHistoryPopupMenu(
