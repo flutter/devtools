@@ -15,8 +15,6 @@ import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
-import 'flutter_test_environment.dart';
-
 /// This class was copied from
 /// flutter/packages/flutter_tools/test/integration/test_driver.dart. Its
 /// supporting classes were also copied from flutter/packages/flutter_tools.
