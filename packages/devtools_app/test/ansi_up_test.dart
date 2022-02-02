@@ -158,6 +158,8 @@ void main() {
     }
 
     setUp(() async {
+      // TODO(polinach): remove unnecessary setup steps after fixing
+      // https://github.com/flutter/devtools/issues/3616.
       await ensureInspectorDependencies();
       mockLoggingController = MockLoggingController();
       when(mockLoggingController.data).thenReturn([]);
@@ -255,6 +257,8 @@ void main() {
     }
 
     setUp(() {
+      // TODO(polinach): remove unnecessary setup steps after fixing
+      // https://github.com/flutter/devtools/issues/3616.
       fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
