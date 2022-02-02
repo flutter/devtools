@@ -74,8 +74,6 @@ abstract class FlutterTestDriver {
     FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File pidFile,
   }) async {
-    flutterExecutable ??= defaultFlutterExecutable;
-
     final _args = [
       ...args,
       if (runConfig.withDebugger) '--start-paused',

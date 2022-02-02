@@ -30,6 +30,20 @@ function flutter {
 echo "Cloning the Flutter $PINNED_FLUTTER_CHANNEL branch"
 git clone https://github.com/flutter/flutter.git --branch $PINNED_FLUTTER_CHANNEL ./flutter-sdk
 
+if [ "$FLUTTER_TEST_ENV" = "pinned" ]; then
+  export FLUTTER_EXE_FOR_TEST_APP="./flutter-sdk/flutter/bin/flutter"
+else
+  echo "Cloning the Flutter $FLUTTER_TEST_ENV branch to use for test apps"
+  git clone https://github.com/flutter/flutter.git --branch $FLUTTER_TEST_ENV ./flutter-sdk-$FLUTTER_TEST_ENV
+  export FLUTTER_EXE_FOR_TEST_APP="./flutter-sdk-$FLUTTER_TEST_ENV/flutter/bin/flutter"
+fi
+
+echo "Testing with Flutter test environment: $FLUTTER_TEST_ENV"
+echo "Flutter executable for test apps: $FLUTTER_EXE_FOR_TEST_APP"
+
+export DART_DEFINE_ARGS="--dart-define=FLUTTER_EXE=$FLUTTER_EXE_FOR_TEST_APP"
+echo "Flutter tests will be ran with args: $DART_DEFINE_ARGS"
+
 # Look in the dart bin dir first, then the flutter one, then the one for the
 # devtools repo. We don't use the dart script from flutter/bin as that script
 # can and does print 'Waiting for another flutter command...' at inopportune
@@ -59,16 +73,6 @@ dart --version
 # Second awk splits on space (default) and takes the second field (the version)
 export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | awk '{print $2}')
 echo "Flutter version is '$FLUTTER_VERSION'"
-
-echo "Testing with the Flutter test environment: $FLUTTER_TEST_ENV"
-
-if [ "$FLUTTER_TEST_ENV" = "pinned" ]; then
-  export DART_DEFINE_ARGS=""
-else
-  export DART_DEFINE_ARGS="--dart-define=FLUTTER_BRANCH=$FLUTTER_TEST_ENV"
-fi
-
-echo "Flutter tests will be ran with args: $DART_DEFINE_ARGS"
 
 # Some integration tests assume the devtools package is up to date and located
 # adjacent to the devtools_app package.
@@ -146,9 +150,7 @@ elif [ "$BOT" = "integration_ddc" ]; then
     flutter config --enable-web
 
     # We need to run integration tests with -j1 to run with no concurrency.
-    flutter test -j1 $DART_DEFINE_ARGS test/integration_tests/
-
-    flutter test -j1 $DART_DEFINE_ARGS test/integration/
+    flutter test -j1 $DART_DEFINE_ARGS test/integration_tests/ test/integration/
 
 elif [ "$BOT" = "integration_dart2js" ]; then
 
