@@ -225,7 +225,7 @@ void main() {
     });
   });
 
-  group('DebuggerScreen', () {
+  group('Debugger Screen', () {
     FakeServiceManager fakeServiceManager;
     MockDebuggerController debuggerController;
 
