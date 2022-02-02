@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 
-import '../flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
