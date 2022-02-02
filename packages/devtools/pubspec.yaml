@@ -16,18 +16,7 @@ environment:
   sdk: '>=2.3.0 <3.0.0'
 
 dependencies:
-  devtools_server: 2.10.0
-  devtools_shared: 2.10.0
-  http: ^0.13.0
-
-dependency_overrides:
-# The "#OVERRIDE_FOR_DEVELOPMENT" lines are stripped out when we publish.
-# All overriden dependencies are published together so there is no harm
-# in treating them like they are part of a mono-repo while developing.
-  devtools_shared:  #OVERRIDE_FOR_DEVELOPMENT
-    path: ../devtools_shared  #OVERRIDE_FOR_DEVELOPMENT
-  devtools_server:  #OVERRIDE_FOR_DEVELOPMENT
-    path: ../devtools_server  #OVERRIDE_FOR_DEVELOPMENT
+  dds: ^2.2.0
 
 executables:
   devtools:

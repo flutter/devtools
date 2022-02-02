@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_server/devtools_server.dart';
+import 'dart:async';
+
+import 'package:dds/devtools_server.dart';
 
 void main(List<String> arguments) async {
   // ignore: unawaited_futures
-  serveDevToolsWithArgs(arguments);
+  // TODO(kenz): uncomment this out once a new version of dds is published.
+  // unawaited(DevToolsServer().serveDevToolsWithArgs(arguments));
+  unawaited(DevToolsServer().serveDevTools());
 }

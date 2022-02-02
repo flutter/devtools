@@ -16,7 +16,7 @@ import 'globals.dart';
 /// This class coordinates the connection between the DevTools server and the
 /// DevTools web app.
 ///
-/// See `packages/devtools_server/lib/src/client_manager.dart`.
+/// See `package:dds/src/devtools/client.dart`.
 class DevToolsServerConnection {
   DevToolsServerConnection._(this.sseClient) {
     sseClient.stream.listen((msg) {
