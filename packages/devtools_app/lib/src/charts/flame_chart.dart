@@ -11,9 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../analytics/analytics.dart' as ga;
-import '../primitives/linked_scroll_controller.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/extent_delegate_list.dart';
+import '../primitives/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
 import '../shared/common_widgets.dart';
 import '../shared/dialogs.dart';

@@ -12,8 +12,8 @@ import 'package:flutter/material.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../config_specific/launch_url/launch_url.dart';
-import '../primitives/linked_scroll_controller.dart';
 import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/linked_scroll_controller.dart';
 import '../ui/icons.dart';
 import '../ui/label.dart';
 import 'globals.dart';
