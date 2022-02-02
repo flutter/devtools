@@ -88,32 +88,6 @@ void main() {
       expect(find.selectableText('test stdio'), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize(
-        'Console area shows processed ansi text', windowSize,
-        (WidgetTester tester) async {
-      serviceManager.consoleService.appendStdio(_ansiCodesOutput());
-
-      await pumpConsole(tester, debuggerController);
-
-      final finder =
-          find.selectableText('Ansi color codes processed for console');
-      expect(finder, findsOneWidget);
-      finder.evaluate().forEach((element) {
-        final selectableText = element.widget as SelectableText;
-        final textSpan = selectableText.textSpan;
-        final secondSpan = textSpan.children[1] as TextSpan;
-        expect(
-          secondSpan.text,
-          'console',
-          reason: 'Text with ansi code should be in separate span',
-        );
-        expect(
-          secondSpan.style.backgroundColor,
-          const Color.fromRGBO(215, 95, 135, 1),
-        );
-      });
-    });
-
     group('ConsoleControls', () {
       final _stdio = ['First line', _ansiCodesOutput(), 'Third line'];
 
