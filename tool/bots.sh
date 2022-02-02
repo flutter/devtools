@@ -31,17 +31,14 @@ echo "Cloning the Flutter $PINNED_FLUTTER_CHANNEL branch"
 git clone https://github.com/flutter/flutter.git --branch $PINNED_FLUTTER_CHANNEL ./flutter-sdk
 
 if [ "$FLUTTER_TEST_ENV" = "pinned" ]; then
-  export FLUTTER_EXE_FOR_TEST_APP="./flutter-sdk/flutter/bin/flutter"
+  export DART_DEFINE_ARGS=""
 else
   echo "Cloning the Flutter $FLUTTER_TEST_ENV branch to use for test apps"
   git clone https://github.com/flutter/flutter.git --branch $FLUTTER_TEST_ENV ./flutter-sdk-$FLUTTER_TEST_ENV
-  export FLUTTER_EXE_FOR_TEST_APP="./flutter-sdk-$FLUTTER_TEST_ENV/flutter/bin/flutter"
+  export DART_DEFINE_ARGS="--dart-define=FLUTTER_EXE=`pwd`/flutter-sdk-$FLUTTER_TEST_ENV/flutter/bin/flutter"
 fi
 
 echo "Testing with Flutter test environment: $FLUTTER_TEST_ENV"
-echo "Flutter executable for test apps: $FLUTTER_EXE_FOR_TEST_APP"
-
-export DART_DEFINE_ARGS="--dart-define=FLUTTER_EXE=$FLUTTER_EXE_FOR_TEST_APP"
 echo "Flutter tests will be ran with args: $DART_DEFINE_ARGS"
 
 # Look in the dart bin dir first, then the flutter one, then the one for the
