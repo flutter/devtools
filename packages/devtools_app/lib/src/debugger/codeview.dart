@@ -71,7 +71,6 @@ class CodeView extends StatefulWidget {
 
 class _CodeViewState extends State<CodeView>
     with AutoDisposeMixin, SearchFieldMixin<CodeView> {
-  static const fileOpenerLeftPadding = 100.0;
   static const searchFieldRightPadding = 75.0;
 
   LinkedScrollControllerGroup verticalController;
@@ -214,7 +213,8 @@ class _CodeViewState extends State<CodeView>
                 : buildCodeArea(context),
             if (showFileOpener)
               Positioned(
-                left: fileOpenerLeftPadding,
+                left: noPadding,
+                right: noPadding,
                 child: buildFileSearchField(),
               ),
             if (showSearch && scriptRef != null)
@@ -288,6 +288,7 @@ class _CodeViewState extends State<CodeView>
     return HistoryViewport(
       history: widget.controller.scriptsHistory,
       generateTitle: (script) => script.uri,
+      onTitleTap: () => widget.controller.toggleFileOpenerVisibility(true),
       controls: [
         ScriptPopupMenu(widget.controller),
         ScriptHistoryPopupMenu(
@@ -398,37 +399,20 @@ class _CodeViewState extends State<CodeView>
     );
   }
 
-  Widget wrapInElevatedCard(
-    Widget widget, {
-    double width = wideSearchTextWidth,
-  }) {
-    return Card(
-      elevation: defaultElevation,
-      color: Theme.of(context).scaffoldBackgroundColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(defaultBorderRadius),
-      ),
-      child: Container(
-        width: width,
-        height: defaultTextFieldHeight + 2 * denseSpacing,
-        padding: const EdgeInsets.all(denseSpacing),
-        child: widget,
-      ),
-    );
-  }
-
   Widget buildFileSearchField() {
-    return wrapInElevatedCard(
-      FileSearchField(
+    return ElevatedCard(
+      child: FileSearchField(
         debuggerController: widget.controller,
       ),
       width: extraWideSearchTextWidth,
+      height: defaultTextFieldHeight,
+      padding: EdgeInsets.zero,
     );
   }
 
   Widget buildSearchInFileField() {
-    return wrapInElevatedCard(
-      buildSearchField(
+    return ElevatedCard(
+      child: buildSearchField(
         controller: widget.controller,
         searchFieldKey: debuggerCodeViewSearchKey,
         searchFieldEnabled: parsedScript != null,
@@ -436,6 +420,8 @@ class _CodeViewState extends State<CodeView>
         supportsNavigation: true,
         onClose: () => widget.controller.toggleSearchInFileVisibility(false),
       ),
+      width: wideSearchTextWidth,
+      height: defaultTextFieldHeight + 2 * denseSpacing,
     );
   }
 
