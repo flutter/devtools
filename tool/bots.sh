@@ -35,7 +35,7 @@ if [ "$FLUTTER_TEST_ENV" = "pinned" ]; then
 else
   echo "Cloning the Flutter $FLUTTER_TEST_ENV branch to use for test apps"
   git clone https://github.com/flutter/flutter.git --branch $FLUTTER_TEST_ENV ./flutter-sdk-$FLUTTER_TEST_ENV
-  export DART_DEFINE_ARGS="--dart-define=FLUTTER_EXE=`pwd`/flutter-sdk-$FLUTTER_TEST_ENV/flutter/bin/flutter"
+  export DART_DEFINE_ARGS="--dart-define=FLUTTER_EXE=`pwd`/flutter-sdk-$FLUTTER_TEST_ENV/bin/flutter"
 fi
 
 echo "Testing with Flutter test environment: $FLUTTER_TEST_ENV"
