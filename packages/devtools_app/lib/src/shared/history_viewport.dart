@@ -77,6 +77,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
     final title = widget.generateTitle == null
         ? '  '
         : widget.generateTitle(widget.history.current.value);
+    final defaultTitleStyle = theme.textTheme.subtitle2;
     return debuggerSectionTitle(
       theme,
       child: Row(
@@ -119,14 +120,14 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
             child: widget.onTitleTap == null
                 ? Text(
                     title,
-                    style: theme.textTheme.subtitle2,
+                    style: defaultTitleStyle,
                   )
                 : MouseRegion(
                     cursor: SystemMouseCursors.click,
-                    onExit: (_) => _updateTitleStyle(theme.textTheme.subtitle2),
+                    onExit: (_) => _updateTitleStyle(defaultTitleStyle),
                     onEnter: (_) {
                       _updateTitleStyle(
-                        theme.textTheme.subtitle2.copyWith(
+                        defaultTitleStyle.copyWith(
                           color: theme.colorScheme.devtoolsLink,
                         ),
                       );
