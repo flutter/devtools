@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/linked_scroll_controller.dart';
+import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 // ignore: directives_ordering
 import '../primitives/auto_dispose_mixin.dart';
 import '../shared/common_widgets.dart';
