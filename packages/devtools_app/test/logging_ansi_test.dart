@@ -16,10 +16,54 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  MockLoggingController mockLoggingController;
-  const windowSize = Size(1000.0, 1000.0);
   group('Logging Screen', () {
+    MockLoggingController mockLoggingController;
     FakeServiceManager fakeServiceManager;
+    const windowSize = Size(1000.0, 1000.0);
+
+    const totalLogs = 10;
+
+    const nonJsonOutput = 'Non-json details for log number 8';
+    const jsonOutput = '{\n"Details": "of log event 9",\n"logEvent": "9"\n}\n';
+
+    String _ansiCodesOutput() {
+      final sb = StringBuffer();
+      sb.write('Ansi color codes processed for ');
+      final pen = AnsiPen()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
+      sb.write(pen('log 5'));
+      return sb.toString();
+    }
+
+    LogData _generate(int i) {
+      String details = 'log event $i';
+      String kind = 'kind $i';
+      String computedDetails;
+      switch (i) {
+        case 9:
+          computedDetails = jsonOutput;
+          break;
+        case 8:
+          computedDetails = nonJsonOutput;
+          break;
+        case 7:
+          details = null;
+          break;
+        case 5:
+          kind = 'stdout';
+          details = _ansiCodesOutput();
+          break;
+        default:
+          break;
+      }
+
+      final detailsComputer = computedDetails == null
+          ? null
+          : () =>
+              Future.delayed(const Duration(seconds: 1), () => computedDetails);
+      return LogData(kind, details, i, detailsComputer: detailsComputer);
+    }
+
+    final fakeLogData = List<LogData>.generate(totalLogs, _generate);
 
     Future<void> pumpLoggingScreen(WidgetTester tester) async {
       await tester.pumpWidget(wrapWithControllers(
@@ -48,99 +92,51 @@ void main() {
       when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      when(mockLoggingController.data).thenReturn(fakeLogData);
+      when(mockLoggingController.filteredData)
+          .thenReturn(ListValueNotifier<LogData>(fakeLogData));
     });
 
-    group('with data', () {
-      setUp(() {
-        when(mockLoggingController.data).thenReturn(fakeLogData);
-        when(mockLoggingController.filteredData)
-            .thenReturn(ListValueNotifier<LogData>(fakeLogData));
-      });
+    testWidgetsWithWindowSize('can process Ansi codes', windowSize,
+        (WidgetTester tester) async {
+      await pumpLoggingScreen(tester);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(ValueKey(fakeLogData[5])));
+      await tester.pumpAndSettle();
 
-      testWidgetsWithWindowSize('can process Ansi codes', windowSize,
-          (WidgetTester tester) async {
-        await pumpLoggingScreen(tester);
-        await tester.pumpAndSettle();
-        await tester.tap(find.byKey(ValueKey(fakeLogData[5])));
-        await tester.pumpAndSettle();
+      // Entry in tree.
+      expect(
+        find.richText('Ansi color codes processed for log 5'),
+        findsOneWidget,
+        reason: 'Processed text without ansi codes should exist in logs and '
+            'details sections.',
+      );
 
-        // Entry in tree.
+      // Entry in details panel.
+      final finder =
+          find.selectableText('Ansi color codes processed for log 5');
+
+      expect(
+        find.richText('Ansi color codes processed for log 5'),
+        findsOneWidget,
+        reason: 'Processed text without ansi codes should exist in logs and '
+            'details sections.',
+      );
+
+      finder.evaluate().forEach((element) {
+        final richText = element.widget as RichText;
+        final textSpan = richText.text as TextSpan;
+        final secondSpan = textSpan.children[1] as TextSpan;
         expect(
-          find.richText('Ansi color codes processed for log 5'),
-          findsOneWidget,
-          reason: 'Processed text without ansi codes should exist in logs and '
-              'details sections.',
+          secondSpan.text,
+          'log 5',
+          reason: 'Text with ansi code should be in separate span',
         );
-
-        // Entry in details panel.
-        final finder =
-            find.selectableText('Ansi color codes processed for log 5');
-
         expect(
-          find.richText('Ansi color codes processed for log 5'),
-          findsOneWidget,
-          reason: 'Processed text without ansi codes should exist in logs and '
-              'details sections.',
+          secondSpan.style.backgroundColor,
+          const Color.fromRGBO(215, 95, 135, 1),
         );
-
-        finder.evaluate().forEach((element) {
-          final richText = element.widget as RichText;
-          final textSpan = richText.text as TextSpan;
-          final secondSpan = textSpan.children[1] as TextSpan;
-          expect(
-            secondSpan.text,
-            'log 5',
-            reason: 'Text with ansi code should be in separate span',
-          );
-          expect(
-            secondSpan.style.backgroundColor,
-            const Color.fromRGBO(215, 95, 135, 1),
-          );
-        });
       });
     });
   });
-}
-
-const totalLogs = 10;
-
-final fakeLogData = List<LogData>.generate(totalLogs, _generate);
-
-LogData _generate(int i) {
-  String details = 'log event $i';
-  String kind = 'kind $i';
-  String computedDetails;
-  switch (i) {
-    case 9:
-      computedDetails = jsonOutput;
-      break;
-    case 8:
-      computedDetails = nonJsonOutput;
-      break;
-    case 7:
-      details = null;
-      break;
-    case 5:
-      kind = 'stdout';
-      details = _ansiCodesOutput();
-      break;
-    default:
-      break;
-  }
-
-  final detailsComputer = computedDetails == null
-      ? null
-      : () => Future.delayed(const Duration(seconds: 1), () => computedDetails);
-  return LogData(kind, details, i, detailsComputer: detailsComputer);
-}
-
-const nonJsonOutput = 'Non-json details for log number 8';
-const jsonOutput = '{\n"Details": "of log event 9",\n"logEvent": "9"\n}\n';
-
-String _ansiCodesOutput() {
-  final sb = StringBuffer();
-  sb.write('Ansi color codes processed for ');
-  final pen = AnsiPen()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
-  sb.write(pen('log 5'));
-  return sb.toString();
 }
