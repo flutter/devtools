@@ -1936,3 +1936,35 @@ class SmallCircularProgressIndicator extends StatelessWidget {
     );
   }
 }
+
+class ElevatedCard extends StatelessWidget {
+  const ElevatedCard({
+    Key key,
+    @required this.child,
+    this.width,
+    this.height,
+    this.padding,
+  }) : super(key: key);
+
+  final Widget child;
+  final double width;
+  final double height;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: defaultElevation,
+      color: Theme.of(context).scaffoldBackgroundColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(defaultBorderRadius),
+      ),
+      child: Container(
+        child: child,
+        width: width,
+        height: height,
+        padding: padding ?? const EdgeInsets.all(denseSpacing),
+      ),
+    );
+  }
+}

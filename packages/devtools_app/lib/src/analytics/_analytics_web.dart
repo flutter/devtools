@@ -676,7 +676,6 @@ Future<void> setupUserApplicationDimensions() async {
 }
 
 Map<String, dynamic> generateSurveyQueryParameters() {
-  const clientIdKey = 'ClientId';
   const ideKey = 'IDE';
   const fromKey = 'From';
   const internalKey = 'Internal';
@@ -703,11 +702,9 @@ Map<String, dynamic> generateSurveyQueryParameters() {
     // Fail gracefully if finding the [fromPage] value throws an exception.
   }
 
-  final clientId = flutterClientId;
   final internalValue = (!isExternalBuild).toString();
 
   return {
-    clientIdKey: clientId,
     ideKey: ideLaunched,
     fromKey: fromPage,
     internalKey: internalValue,

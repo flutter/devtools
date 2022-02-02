@@ -164,6 +164,7 @@ const defaultElevation = 4.0;
 
 const borderPadding = 2.0;
 const densePadding = 4.0;
+const noPadding = 0.0;
 
 double get smallProgressSize => scaleByFontFactor(12.0);
 

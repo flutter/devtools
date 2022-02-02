@@ -70,7 +70,8 @@ class FileSearchFieldState extends State<FileSearchField>
       keyEventsToPropagate: {LogicalKeyboardKey.escape},
       onSelection: _onSelection,
       onClose: _onClose,
-      label: 'Open',
+      label: 'Open file',
+      onFocusLost: _onClose,
     );
   }
 
