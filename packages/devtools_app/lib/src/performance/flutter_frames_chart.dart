@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
-import '../flutter_widgets/linked_scroll_controller.dart';
+import '../primitives/linked_scroll_controller.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../shared/banner_messages.dart';
 import '../shared/common_widgets.dart';

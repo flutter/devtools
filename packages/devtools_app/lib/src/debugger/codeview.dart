@@ -13,7 +13,7 @@ import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../config_specific/logger/logger.dart';
-import '../flutter_widgets/linked_scroll_controller.dart';
+import '../primitives/linked_scroll_controller.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../shared/common_widgets.dart';
 import '../shared/dialogs.dart';
