@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../charts/flame_chart.dart';
-import '../flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/geometry.dart';
 import '../primitives/trace_event.dart';
 import '../shared/common_widgets.dart';
