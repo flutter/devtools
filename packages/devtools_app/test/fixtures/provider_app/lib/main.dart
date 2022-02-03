@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 // ignore: unused_import, allows the tests to use functions from tester.dart
+
+// @dart=2.9
+
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
