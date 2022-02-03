@@ -80,24 +80,5 @@ void main() {
       );
       expect(pointerSignalEventCount, equals(1));
     });
-
-    testWidgets('throws for null childrenDelegate', (tester) async {
-      expect(
-        () async {
-          await pumpList(
-            tester,
-            ExtentDelegateListView(
-              controller: ScrollController(),
-              extentDelegate: FixedExtentDelegate(
-                computeLength: () => children.length,
-                computeExtent: (index) => children[index],
-              ),
-              childrenDelegate: null,
-            ),
-          );
-        },
-        throwsAssertionError,
-      );
-    });
   });
 }
