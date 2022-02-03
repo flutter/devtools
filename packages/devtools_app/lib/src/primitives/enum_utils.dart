@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:flutter/foundation.dart';
 
@@ -20,7 +20,7 @@ import 'package:flutter/foundation.dart';
 class EnumUtils<T> {
   EnumUtils(List<T> enumValues) {
     for (var val in enumValues) {
-      final enumDescription = describeEnum(val);
+      final enumDescription = describeEnum(val!);
       _lookupTable[enumDescription] = val;
       _reverseLookupTable[val] = enumDescription;
     }
@@ -29,7 +29,7 @@ class EnumUtils<T> {
   final Map<String, T> _lookupTable = {};
   final Map<T, String> _reverseLookupTable = {};
 
-  T enumEntry(String enumName) => _lookupTable[enumName];
+  T? enumEntry(String? enumName) => _lookupTable[enumName!];
 
-  String name(T enumEntry) => _reverseLookupTable[enumEntry];
+  String? name(T enumEntry) => _reverseLookupTable[enumEntry];
 }

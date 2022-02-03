@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 
 // TODO(kenz): consolidate the logic between [VerticalLineSegment] and
 // [HorizontalLineSegment] by using [LineSegment] and switching on the main axis
 abstract class LineSegment {
-  LineSegment(this.start, this.end, {@required this.opacity});
+  LineSegment(this.start, this.end, {required this.opacity});
 
   final Offset start;
   final Offset end;
@@ -31,16 +31,16 @@ abstract class LineSegment {
   }
 
   LineSegment toZoomed({
-    @required double zoom,
-    @required double unzoomableOffsetLineStart,
-    @required double unzoomableOffsetLineEnd,
+    required double zoom,
+    required double unzoomableOffsetLineStart,
+    required double unzoomableOffsetLineEnd,
   });
 
   @visibleForTesting
   static double zoomedXPosition({
-    @required double x,
-    @required double zoom,
-    @required double unzoomableOffset,
+    required double x,
+    required double zoom,
+    required double unzoomableOffset,
   }) {
     assert(x >= unzoomableOffset);
     return (x - unzoomableOffset) * zoom + unzoomableOffset;
@@ -75,9 +75,9 @@ class HorizontalLineSegment extends LineSegment
 
   @override
   HorizontalLineSegment toZoomed({
-    @required double zoom,
-    @required double unzoomableOffsetLineStart,
-    @required double unzoomableOffsetLineEnd,
+    required double zoom,
+    required double unzoomableOffsetLineStart,
+    required double unzoomableOffsetLineEnd,
   }) {
     final zoomedLineStartX = LineSegment.zoomedXPosition(
       x: start.dx,
@@ -125,9 +125,9 @@ class VerticalLineSegment extends LineSegment
 
   @override
   VerticalLineSegment toZoomed({
-    @required double zoom,
-    @required double unzoomableOffsetLineStart,
-    @required double unzoomableOffsetLineEnd,
+    required double zoom,
+    required double unzoomableOffsetLineStart,
+    required double unzoomableOffsetLineEnd,
   }) {
     final zoomedLineStartX = LineSegment.zoomedXPosition(
       x: start.dx,
