@@ -27,7 +27,7 @@ class EnumUtils<T> {
   final Map<String, T> _lookupTable = {};
   final Map<T, String> _reverseLookupTable = {};
 
-  T? enumEntry(String? enumName) => _lookupTable[enumName!];
+  T? enumEntry(String enumName) => _lookupTable[enumName];
 
   String? name(T enumEntry) => _reverseLookupTable[enumEntry];
 }
