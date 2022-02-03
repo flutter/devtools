@@ -31,20 +31,20 @@ class TextmateGrammar {
   final List<Rule> _fileRules = [];
   final Map<String, Rule> _ruleMap = {};
 
-  Map? _definition;
+  late final Map _definition;
 
   /// The name of the grammar.
-  String? get name => _definition!['name'];
+  String? get name => _definition['name'];
 
   /// The file type extensions that the grammar should be used with.
   List<String> get fileTypes =>
-      (_definition!['fileTypes'] as List).cast<String>();
+      (_definition['fileTypes'] as List).cast<String>();
 
   /// A unique name for the grammar.
-  String? get scopeName => _definition!['scopeName'];
+  String? get scopeName => _definition['scopeName'];
 
   void _parseRules() {
-    final Map repository = _definition!['repository'];
+    final Map repository = _definition['repository'];
     for (String name in repository.keys as Iterable<String>) {
       _ruleMap[name] = Rule(name);
     }
@@ -57,7 +57,7 @@ class TextmateGrammar {
   }
 
   void _parseFileRules() {
-    final List<dynamic> patterns = _definition!['patterns'];
+    final List<dynamic> patterns = _definition['patterns'];
     for (Map info in patterns as Iterable<Map<dynamic, dynamic>>) {
       _fileRules.add(Rule(info['name']).._parse(info));
     }
