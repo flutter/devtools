@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 // TODO(kenz): try to eliminate this method once
 // https://github.com/dart-lang/sdk/issues/46872 is fixed.
 /// Returns a simplified version of a package url, replacing "path/to/flutter"
@@ -48,7 +46,7 @@ String getSimplePackageUrl(String url) {
 ///
 /// Returns null if the [Uri] parsed from [value] is not [Uri.absolute]
 /// (ie, it has no scheme or it has a fragment).
-Uri normalizeVmServiceUri(String value) {
+Uri? normalizeVmServiceUri(String value) {
   value = value.trim();
 
   // Clean up urls that have a devtools server's prefix, aka:

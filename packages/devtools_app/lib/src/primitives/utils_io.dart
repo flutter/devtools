@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -17,6 +15,6 @@ Directory getDartPrefsDirectory() {
 String getUserHomeDir() {
   final String envKey =
       Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-  final String value = Platform.environment[envKey];
+  final String? value = Platform.environment[envKey];
   return value == null ? '.' : value;
 }
