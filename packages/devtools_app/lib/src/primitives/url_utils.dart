@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
 // TODO(kenz): try to eliminate this method once
 // https://github.com/dart-lang/sdk/issues/46872 is fixed.
 /// Returns a simplified version of a package url, replacing "path/to/flutter"

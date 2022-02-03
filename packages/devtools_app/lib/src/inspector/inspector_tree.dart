@@ -9,6 +9,9 @@
 ///
 /// This allows tests of the complicated logic in this class to run on the VM
 /// and will help simplify porting this code to work with Hummingbird.
+
+// @dart=2.9
+
 library inspector_tree;
 
 import 'package:flutter/foundation.dart';

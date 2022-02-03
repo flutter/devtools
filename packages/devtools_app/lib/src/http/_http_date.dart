@@ -16,6 +16,8 @@
 // ignore_for_file: unused_catch_clause
 // ignore_for_file: unused_local_variable
 
+// @dart=2.9
+
 part of http;
 
 // ignore: avoid_classes_with_only_static_members

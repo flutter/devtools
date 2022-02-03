@@ -4,6 +4,8 @@
  * found in the LICENSE file.
  */
 
+// @dart=2.9
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 

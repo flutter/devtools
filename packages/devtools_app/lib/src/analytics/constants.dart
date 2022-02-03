@@ -4,6 +4,8 @@
 
 // Type of events (event_category):
 
+// @dart=2.9
+
 import '../inspector/inspector_screen.dart';
 import '../logging/logging_screen.dart';
 import '../memory/memory_screen.dart';

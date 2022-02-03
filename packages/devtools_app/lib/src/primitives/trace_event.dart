@@ -4,6 +4,8 @@
 
 // TODO(devoncarew): Upstream this class to the service protocol library.
 
+// @dart=2.9
+
 import 'package:flutter/foundation.dart';
 
 /// A single timeline event.
