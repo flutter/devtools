@@ -29,8 +29,8 @@ class LinkedScrollControllerGroup {
 
   final _allControllers = <_LinkedScrollController>[];
 
-  ChangeNotifier get offsetNotifier => _offsetNotifier;
-  _LinkedScrollControllerGroupOffsetNotifier _offsetNotifier;
+  ChangeNotifier/*!*/ get offsetNotifier => _offsetNotifier;
+  _LinkedScrollControllerGroupOffsetNotifier/*!*/ _offsetNotifier;
 
   bool get hasAttachedControllers => _attachedControllers.isNotEmpty;
 
@@ -166,7 +166,7 @@ class _LinkedScrollController extends ScrollController {
 
   @override
   _LinkedScrollPosition createScrollPosition(ScrollPhysics physics,
-      ScrollContext context, ScrollPosition oldPosition) {
+      ScrollContext context, ScrollPosition/*!*/ oldPosition) {
     return _LinkedScrollPosition(
       this,
       physics: physics,
