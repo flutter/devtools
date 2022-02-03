@@ -216,8 +216,7 @@ class _LinkedScrollPosition extends ScrollPositionWithSingleContext {
     required ScrollContext context,
     double? initialPixels,
     ScrollPosition? oldPosition,
-  })  : assert(owner != null),
-        super(
+  }) : super(
           physics: physics,
           context: context,
           initialPixels: initialPixels,
@@ -347,7 +346,7 @@ class _LinkedScrollActivity extends ScrollActivity {
   void unlink(_LinkedScrollPosition driver) {
     drivers.remove(driver);
     if (drivers.isEmpty) {
-      delegate?.goIdle();
+      delegate.goIdle();
     }
   }
 
