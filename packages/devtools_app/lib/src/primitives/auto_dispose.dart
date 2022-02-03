@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'dart:async';
 
@@ -30,14 +30,14 @@ class Disposer {
   }
 
   /// Track a focus node that will be automatically disposed on dispose.
-  void autoDisposeFocusNode(FocusNode node) {
+  void autoDisposeFocusNode(FocusNode? node) {
     if (node == null) return;
     _focusNodes.add(node);
   }
 
   /// Add a listener to a Listenable object that is automatically removed when
   /// cancel is called.
-  void addAutoDisposeListener(Listenable listenable, [VoidCallback listener]) {
+  void addAutoDisposeListener(Listenable? listenable, [VoidCallback? listener]) {
     if (listenable == null || listener == null) return;
     _listenables.add(listenable);
     _listeners.add(listener);
@@ -104,7 +104,7 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   }
 
   @override
-  void addAutoDisposeListener(Listenable listenable, [VoidCallback listener]) {
+  void addAutoDisposeListener(Listenable? listenable, [VoidCallback? listener]) {
     _delegate.addAutoDisposeListener(listenable, listener);
   }
 
@@ -114,7 +114,7 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   }
 
   @override
-  void autoDisposeFocusNode(FocusNode node) {
+  void autoDisposeFocusNode(FocusNode? node) {
     _delegate.autoDisposeFocusNode(node);
   }
 
