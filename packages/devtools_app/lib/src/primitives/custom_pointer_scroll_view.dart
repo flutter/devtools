@@ -276,7 +276,7 @@ class CustomPointerScrollable extends StatefulWidget {
     if (widget == null) {
       return false;
     }
-    return widget.position!.recommendDeferredLoading(context);
+    return widget.position.recommendDeferredLoading(context);
   }
 
   /// Scrolls the scrollables that enclose the given context so as to make the
@@ -618,7 +618,7 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
     // must be placed above the widget using it: RawGestureDetector
     Widget result = _ScrollableScope(
       scrollable: this,
-      position: position,
+      position: position!,
       // TODO(ianh): Having all these global keys is sad.
       child: Listener(
         onPointerSignal:
@@ -684,7 +684,7 @@ class _ScrollableScope extends InheritedWidget {
   }) : super(key: key, child: child);
 
   final _CustomPointerScrollableState scrollable;
-  final ScrollPosition? position;
+  final ScrollPosition position;
 
   @override
   bool updateShouldNotify(_ScrollableScope old) {
