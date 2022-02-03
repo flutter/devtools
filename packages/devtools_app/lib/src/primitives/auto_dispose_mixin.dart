@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
@@ -34,7 +32,8 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
   void _refresh() => setState(() {});
 
   @override
-  void addAutoDisposeListener(Listenable? listenable, [VoidCallback? listener]) {
+  void addAutoDisposeListener(Listenable? listenable,
+      [VoidCallback? listener]) {
     _delegate.addAutoDisposeListener(listenable, listener ?? _refresh);
   }
 
