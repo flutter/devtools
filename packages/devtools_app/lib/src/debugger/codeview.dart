@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -13,8 +15,8 @@ import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../config_specific/logger/logger.dart';
-import '../flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../shared/common_widgets.dart';
 import '../shared/dialogs.dart';
 import '../shared/globals.dart';
@@ -71,7 +73,6 @@ class CodeView extends StatefulWidget {
 
 class _CodeViewState extends State<CodeView>
     with AutoDisposeMixin, SearchFieldMixin<CodeView> {
-  static const fileOpenerLeftPadding = 100.0;
   static const searchFieldRightPadding = 75.0;
 
   LinkedScrollControllerGroup verticalController;
@@ -214,7 +215,8 @@ class _CodeViewState extends State<CodeView>
                 : buildCodeArea(context),
             if (showFileOpener)
               Positioned(
-                left: fileOpenerLeftPadding,
+                left: noPadding,
+                right: noPadding,
                 child: buildFileSearchField(),
               ),
             if (showSearch && scriptRef != null)
@@ -288,6 +290,7 @@ class _CodeViewState extends State<CodeView>
     return HistoryViewport(
       history: widget.controller.scriptsHistory,
       generateTitle: (script) => script.uri,
+      onTitleTap: () => widget.controller.toggleFileOpenerVisibility(true),
       controls: [
         ScriptPopupMenu(widget.controller),
         ScriptHistoryPopupMenu(
@@ -398,37 +401,20 @@ class _CodeViewState extends State<CodeView>
     );
   }
 
-  Widget wrapInElevatedCard(
-    Widget widget, {
-    double width = wideSearchTextWidth,
-  }) {
-    return Card(
-      elevation: defaultElevation,
-      color: Theme.of(context).scaffoldBackgroundColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(defaultBorderRadius),
-      ),
-      child: Container(
-        width: width,
-        height: defaultTextFieldHeight + 2 * denseSpacing,
-        padding: const EdgeInsets.all(denseSpacing),
-        child: widget,
-      ),
-    );
-  }
-
   Widget buildFileSearchField() {
-    return wrapInElevatedCard(
-      FileSearchField(
+    return ElevatedCard(
+      child: FileSearchField(
         debuggerController: widget.controller,
       ),
       width: extraWideSearchTextWidth,
+      height: defaultTextFieldHeight,
+      padding: EdgeInsets.zero,
     );
   }
 
   Widget buildSearchInFileField() {
-    return wrapInElevatedCard(
-      buildSearchField(
+    return ElevatedCard(
+      child: buildSearchField(
         controller: widget.controller,
         searchFieldKey: debuggerCodeViewSearchKey,
         searchFieldEnabled: parsedScript != null,
@@ -436,6 +422,8 @@ class _CodeViewState extends State<CodeView>
         supportsNavigation: true,
         onClose: () => widget.controller.toggleSearchInFileVisibility(false),
       ),
+      width: wideSearchTextWidth,
+      height: defaultTextFieldHeight + 2 * denseSpacing,
     );
   }
 

@@ -32,7 +32,8 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
   void _refresh() => setState(() {});
 
   @override
-  void addAutoDisposeListener(Listenable listenable, [VoidCallback listener]) {
+  void addAutoDisposeListener(Listenable? listenable,
+      [VoidCallback? listener]) {
     _delegate.addAutoDisposeListener(listenable, listener ?? _refresh);
   }
 
@@ -42,7 +43,7 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
   }
 
   @override
-  void autoDisposeFocusNode(FocusNode node) {
+  void autoDisposeFocusNode(FocusNode? node) {
     _delegate.autoDisposeFocusNode(node);
   }
 

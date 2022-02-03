@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'dart:convert';
 
 import '../config_specific/asset/asset.dart' as asset;

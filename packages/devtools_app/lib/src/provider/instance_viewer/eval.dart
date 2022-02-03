@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 /// A few utilities related to evaluating dart code
+
+// @dart=2.9
+
 library eval;
 
 import 'package:flutter/foundation.dart';

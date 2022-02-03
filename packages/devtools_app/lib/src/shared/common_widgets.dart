@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -12,8 +14,8 @@ import 'package:flutter/material.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../config_specific/launch_url/launch_url.dart';
-import '../flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../ui/icons.dart';
 import '../ui/label.dart';
 import 'globals.dart';
@@ -1933,6 +1935,38 @@ class SmallCircularProgressIndicator extends StatelessWidget {
     return CircularProgressIndicator(
       strokeWidth: 2,
       valueColor: valueColor,
+    );
+  }
+}
+
+class ElevatedCard extends StatelessWidget {
+  const ElevatedCard({
+    Key key,
+    @required this.child,
+    this.width,
+    this.height,
+    this.padding,
+  }) : super(key: key);
+
+  final Widget child;
+  final double width;
+  final double height;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: defaultElevation,
+      color: Theme.of(context).scaffoldBackgroundColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(defaultBorderRadius),
+      ),
+      child: Container(
+        child: child,
+        width: width,
+        height: height,
+        padding: padding ?? const EdgeInsets.all(denseSpacing),
+      ),
     );
   }
 }

@@ -71,13 +71,6 @@ dart --version
 export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | awk '{print $2}')
 echo "Flutter version is '$FLUTTER_VERSION'"
 
-# Some integration tests assume the devtools package is up to date and located
-# adjacent to the devtools_app package.
-pushd packages/devtools
-    # We want to make sure that devtools is retrievable with regular pub.
-    flutter pub get
-popd
-
 # Change the CI to the packages/devtools_app directory.
 pushd packages/devtools_app
 echo `pwd`
@@ -146,16 +139,18 @@ elif [ "$BOT" = "integration_ddc" ]; then
     flutter pub get
     flutter config --enable-web
 
+    # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
     # We need to run integration tests with -j1 to run with no concurrency.
-    flutter test -j1 $DART_DEFINE_ARGS test/integration_tests/ test/integration/
+    # flutter test -j1 $DART_DEFINE_ARGS test/integration_tests/
 
 elif [ "$BOT" = "integration_dart2js" ]; then
 
     flutter pub get
     flutter config --enable-web
 
+    # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
     # We need to run integration tests with -j1 to run with no concurrency.
-    WEBDEV_RELEASE=true flutter test -j1 $DART_DEFINE_ARGS test/integration_tests/ test/integration/
+    # WEBDEV_RELEASE=true flutter test -j1 $DART_DEFINE_ARGS test/integration_tests/
 
 elif [ "$BOT" = "packages" ]; then
 

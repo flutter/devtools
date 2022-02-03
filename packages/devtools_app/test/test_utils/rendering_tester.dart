@@ -6,6 +6,8 @@
 // and is convenient for adding tests to render object behavior similar to
 // existing tests implemented in package:flutter.
 
+// @dart=2.9
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';

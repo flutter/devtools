@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -16,7 +18,7 @@ import 'globals.dart';
 /// This class coordinates the connection between the DevTools server and the
 /// DevTools web app.
 ///
-/// See `packages/devtools_server/lib/src/client_manager.dart`.
+/// See `package:dds/src/devtools/client.dart`.
 class DevToolsServerConnection {
   DevToolsServerConnection._(this.sseClient) {
     sseClient.stream.listen((msg) {

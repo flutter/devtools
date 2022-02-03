@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
 import 'dart:async';
 
 import 'package:async/async.dart';
@@ -200,6 +202,12 @@ class DebuggerController extends DisposableController
 
   /// Jump to the given ScriptRef and optional SourcePosition.
   void showScriptLocation(ScriptLocation scriptLocation) {
+    // TODO(elliette): This is here so that when a program is selected in the
+    // program explorer, the file opener will close (if it was open). Instead,
+    // give the program explorer focus so that the focus changes so the file
+    // opener will close automatically when its focus is lost.
+    toggleFileOpenerVisibility(false);
+
     _showScriptLocation(scriptLocation);
 
     // Update the scripts history (and make sure we don't react to the
@@ -350,6 +358,7 @@ class DebuggerController extends DisposableController
   /// Make the 'Libraries' view on the right-hand side of the screen visible or
   /// hidden.
   void toggleLibrariesVisible() {
+    toggleFileOpenerVisibility(false);
     _librariesVisible.value = !_librariesVisible.value;
   }
 

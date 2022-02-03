@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
 @JS()
 library gtags;
 
@@ -676,7 +678,6 @@ Future<void> setupUserApplicationDimensions() async {
 }
 
 Map<String, dynamic> generateSurveyQueryParameters() {
-  const clientIdKey = 'ClientId';
   const ideKey = 'IDE';
   const fromKey = 'From';
   const internalKey = 'Internal';
@@ -703,11 +704,9 @@ Map<String, dynamic> generateSurveyQueryParameters() {
     // Fail gracefully if finding the [fromPage] value throws an exception.
   }
 
-  final clientId = flutterClientId;
   final internalValue = (!isExternalBuild).toString();
 
   return {
-    clientIdKey: clientId,
     ideKey: ideLaunched,
     fromKey: fromPage,
     internalKey: internalValue,

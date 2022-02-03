@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
 import 'package:flutter/material.dart';
 
 import '../config_specific/ide_theme/ide_theme.dart';
@@ -164,6 +166,7 @@ const defaultElevation = 4.0;
 
 const borderPadding = 2.0;
 const densePadding = 4.0;
+const noPadding = 0.0;
 
 double get smallProgressSize => scaleByFontFactor(12.0);
 

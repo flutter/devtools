@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/flutter_widgets/linked_scroll_controller.dart';
+// @dart=2.9
+
+import 'package:devtools_app/src/primitives/flutter_widgets/linked_scroll_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pedantic/pedantic.dart';

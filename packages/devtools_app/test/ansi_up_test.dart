@@ -2,9 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
+@TestOn('browser')
+
 import 'package:ansi_up/ansi_up.dart';
 import 'package:ansicolor/ansicolor.dart';
+import 'package:devtools_app/src/debugger/console.dart';
+import 'package:devtools_app/src/debugger/debugger_controller.dart';
+import 'package:devtools_app/src/logging/logging_controller.dart';
+import 'package:devtools_app/src/logging/logging_screen.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
+import 'package:devtools_app/src/shared/utils.dart';
+import 'package:devtools_test/devtools_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 void main() {
   group('ansi_up', () {
@@ -86,6 +100,203 @@ void main() {
               '<span style=\'background-color: rgb(8,8,8);color: rgb(255,255,255)\'> 232 </span><span style=\'color: rgb(8,8,8)\'> 232 </span><span style=\'background-color: rgb(18,18,18);color: rgb(255,255,255)\'> 233 </span><span style=\'color: rgb(18,18,18)\'> 233 </span><span style=\'background-color: rgb(28,28,28);color: rgb(255,255,255)\'> 234 </span><span style=\'color: rgb(28,28,28)\'> 234 </span><span style=\'background-color: rgb(38,38,38);color: rgb(255,255,255)\'> 235 </span><span style=\'color: rgb(38,38,38)\'> 235 </span><span style=\'background-color: rgb(48,48,48);color: rgb(255,255,255)\'> 236 </span><span style=\'color: rgb(48,48,48)\'> 236 </span><span style=\'background-color: rgb(58,58,58);color: rgb(255,255,255)\'> 237 </span><span style=\'color: rgb(58,58,58)\'> 237 </span><span style=\'background-color: rgb(68,68,68);color: rgb(255,255,255)\'> 238 </span><span style=\'color: rgb(68,68,68)\'> 238 </span><span style=\'background-color: rgb(78,78,78);color: rgb(255,255,255)\'> 239 </span><span style=\'color: rgb(78,78,78)\'> 239 </span>\n'
               '<span style=\'background-color: rgb(88,88,88);color: rgb(255,255,255)\'> 240 </span><span style=\'color: rgb(88,88,88)\'> 240 </span><span style=\'background-color: rgb(98,98,98);color: rgb(255,255,255)\'> 241 </span><span style=\'color: rgb(98,98,98)\'> 241 </span><span style=\'background-color: rgb(108,108,108);color: rgb(255,255,255)\'> 242 </span><span style=\'color: rgb(108,108,108)\'> 242 </span><span style=\'background-color: rgb(118,118,118);color: rgb(255,255,255)\'> 243 </span><span style=\'color: rgb(118,118,118)\'> 243 </span><span style=\'background-color: rgb(128,128,128);color: rgb(255,255,255)\'> 244 </span><span style=\'color: rgb(128,128,128)\'> 244 </span><span style=\'background-color: rgb(138,138,138);color: rgb(255,255,255)\'> 245 </span><span style=\'color: rgb(138,138,138)\'> 245 </span><span style=\'background-color: rgb(148,148,148);color: rgb(255,255,255)\'> 246 </span><span style=\'color: rgb(148,148,148)\'> 246 </span><span style=\'background-color: rgb(158,158,158);color: rgb(255,255,255)\'> 247 </span><span style=\'color: rgb(158,158,158)\'> 247 </span>\n'
               '<span style=\'background-color: rgb(168,168,168);color: rgb(255,255,255)\'> 248 </span><span style=\'color: rgb(168,168,168)\'> 248 </span><span style=\'background-color: rgb(178,178,178);color: rgb(255,255,255)\'> 249 </span><span style=\'color: rgb(178,178,178)\'> 249 </span><span style=\'background-color: rgb(188,188,188);color: rgb(255,255,255)\'> 250 </span><span style=\'color: rgb(188,188,188)\'> 250 </span><span style=\'background-color: rgb(198,198,198);color: rgb(255,255,255)\'> 251 </span><span style=\'color: rgb(198,198,198)\'> 251 </span><span style=\'background-color: rgb(208,208,208);color: rgb(255,255,255)\'> 252 </span><span style=\'color: rgb(208,208,208)\'> 252 </span><span style=\'background-color: rgb(218,218,218);color: rgb(255,255,255)\'> 253 </span><span style=\'color: rgb(218,218,218)\'> 253 </span><span style=\'background-color: rgb(228,228,228);color: rgb(255,255,255)\'> 254 </span><span style=\'color: rgb(228,228,228)\'> 254 </span><span style=\'background-color: rgb(238,238,238);color: rgb(255,255,255)\'> 255 </span><span style=\'color: rgb(238,238,238)\'> 255 </span>'));
+    });
+  });
+
+  group('Logging Screen', () {
+    MockLoggingController mockLoggingController;
+    FakeServiceManager fakeServiceManager;
+    const windowSize = Size(1000.0, 1000.0);
+
+    const totalLogs = 10;
+
+    const nonJsonOutput = 'Non-json details for log number 8';
+    const jsonOutput = '{\n"Details": "of log event 9",\n"logEvent": "9"\n}\n';
+
+    String _ansiCodesOutput() {
+      final sb = StringBuffer();
+      sb.write('Ansi color codes processed for ');
+      final pen = AnsiPen()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
+      sb.write(pen('log 5'));
+      return sb.toString();
+    }
+
+    LogData _generate(int i) {
+      String details = 'log event $i';
+      String kind = 'kind $i';
+      String computedDetails;
+      switch (i) {
+        case 9:
+          computedDetails = jsonOutput;
+          break;
+        case 8:
+          computedDetails = nonJsonOutput;
+          break;
+        case 7:
+          details = null;
+          break;
+        case 5:
+          kind = 'stdout';
+          details = _ansiCodesOutput();
+          break;
+        default:
+          break;
+      }
+
+      final detailsComputer = computedDetails == null
+          ? null
+          : () =>
+              Future.delayed(const Duration(seconds: 1), () => computedDetails);
+      return LogData(kind, details, i, detailsComputer: detailsComputer);
+    }
+
+    final fakeLogData = List<LogData>.generate(totalLogs, _generate);
+
+    Future<void> pumpLoggingScreen(WidgetTester tester) async {
+      await tester.pumpWidget(wrapWithControllers(
+        const LoggingScreenBody(),
+        logging: mockLoggingController,
+      ));
+    }
+
+    setUp(() async {
+      // TODO(polinach): remove unnecessary setup steps after fixing
+      // https://github.com/flutter/devtools/issues/3616.
+      await ensureInspectorDependencies();
+      mockLoggingController = MockLoggingController();
+      when(mockLoggingController.data).thenReturn([]);
+      when(mockLoggingController.search).thenReturn('');
+      when(mockLoggingController.searchMatches)
+          .thenReturn(ValueNotifier<List<LogData>>([]));
+      when(mockLoggingController.searchInProgressNotifier)
+          .thenReturn(ValueNotifier<bool>(false));
+      when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
+      when(mockLoggingController.filteredData)
+          .thenReturn(ListValueNotifier<LogData>([]));
+
+      fakeServiceManager = FakeServiceManager();
+      when(fakeServiceManager.connectedApp.isFlutterWebAppNow)
+          .thenReturn(false);
+      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+          .thenReturn(ValueNotifier<int>(0));
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      when(mockLoggingController.data).thenReturn(fakeLogData);
+      when(mockLoggingController.filteredData)
+          .thenReturn(ListValueNotifier<LogData>(fakeLogData));
+    });
+
+    testWidgetsWithWindowSize('can process Ansi codes', windowSize,
+        (WidgetTester tester) async {
+      await pumpLoggingScreen(tester);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(ValueKey(fakeLogData[5])));
+      await tester.pumpAndSettle();
+
+      // Entry in tree.
+      expect(
+        find.richText('Ansi color codes processed for log 5'),
+        findsOneWidget,
+        reason: 'Processed text without ansi codes should exist in logs and '
+            'details sections.',
+      );
+
+      // Entry in details panel.
+      final finder =
+          find.selectableText('Ansi color codes processed for log 5');
+
+      expect(
+        find.richText('Ansi color codes processed for log 5'),
+        findsOneWidget,
+        reason: 'Processed text without ansi codes should exist in logs and '
+            'details sections.',
+      );
+
+      finder.evaluate().forEach((element) {
+        final richText = element.widget as RichText;
+        final textSpan = richText.text as TextSpan;
+        final secondSpan = textSpan.children[1] as TextSpan;
+        expect(
+          secondSpan.text,
+          'log 5',
+          reason: 'Text with ansi code should be in separate span',
+        );
+        expect(
+          secondSpan.style.backgroundColor,
+          const Color.fromRGBO(215, 95, 135, 1),
+        );
+      });
+    });
+  });
+
+  group('Debugger Screen', () {
+    FakeServiceManager fakeServiceManager;
+    MockDebuggerController debuggerController;
+
+    const windowSize = Size(4000.0, 4000.0);
+
+    Future<void> pumpConsole(
+      WidgetTester tester,
+      DebuggerController controller,
+    ) async {
+      await tester.pumpWidget(wrapWithControllers(
+        Row(
+          children: [
+            Flexible(child: DebuggerConsole.buildHeader()),
+            const Expanded(child: DebuggerConsole()),
+          ],
+        ),
+        debugger: controller,
+      ));
+    }
+
+    String _ansiCodesOutput() {
+      final sb = StringBuffer();
+      sb.write('Ansi color codes processed for ');
+      final pen = AnsiPen()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
+      sb.write(pen('console'));
+      return sb.toString();
+    }
+
+    setUp(() {
+      // TODO(polinach): remove unnecessary setup steps after fixing
+      // https://github.com/flutter/devtools/issues/3616.
+      fakeServiceManager = FakeServiceManager();
+      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      fakeServiceManager.consoleService.ensureServiceInitialized();
+
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+          .thenReturn(ValueNotifier<int>(0));
+
+      debuggerController = MockDebuggerController.withDefaults();
+    });
+
+    testWidgetsWithWindowSize(
+        'Console area shows processed ansi text', windowSize,
+        (WidgetTester tester) async {
+      serviceManager.consoleService.appendStdio(_ansiCodesOutput());
+
+      await pumpConsole(tester, debuggerController);
+
+      final finder =
+          find.selectableText('Ansi color codes processed for console');
+      expect(finder, findsOneWidget);
+      finder.evaluate().forEach((element) {
+        final selectableText = element.widget as SelectableText;
+        final textSpan = selectableText.textSpan;
+        final secondSpan = textSpan.children[1] as TextSpan;
+        expect(
+          secondSpan.text,
+          'console',
+          reason: 'Text with ansi code should be in separate span',
+        );
+        expect(
+          secondSpan.style.backgroundColor,
+          const Color.fromRGBO(215, 95, 135, 1),
+        );
+      });
     });
   });
 }

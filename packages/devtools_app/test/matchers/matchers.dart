@@ -4,6 +4,8 @@
 
 // ignore_for_file: implementation_imports
 
+// @dart=2.9
+
 library matchers;
 
 import 'dart:io' as io;

@@ -10,19 +10,15 @@
 echo "Running pub upgrade on all packages"
 pushd packages
 
-pushd devtools
-flutter pub upgrade
-popd
-
 pushd devtools_app
 flutter pub upgrade
 popd
 
-pushd devtools_server
+pushd devtools_shared
 flutter pub upgrade
 popd
 
-pushd devtools_shared
+pushd devtools_test
 flutter pub upgrade
 popd
 

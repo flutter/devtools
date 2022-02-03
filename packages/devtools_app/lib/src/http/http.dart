@@ -4,6 +4,8 @@
 
 /// This library contains code pulled from dart:io that is not platform specific.
 
+// @dart=2.9
+
 library http;
 
 part '_http_cookies.dart';

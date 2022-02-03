@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
 import 'package:flutter/material.dart';
 
 import '../debugger/common.dart';
@@ -23,7 +25,7 @@ import 'theme.dart';
 ///
 /// If [generateTitle] is provided, the title string will be set to the
 /// returned value. If not provided, the title will be empty.
-class HistoryViewport<T> extends StatelessWidget {
+class HistoryViewport<T> extends StatefulWidget {
   const HistoryViewport({
     @required this.history,
     @required this.contentBuilder,
@@ -31,6 +33,7 @@ class HistoryViewport<T> extends StatelessWidget {
     this.generateTitle,
     this.onChange,
     this.historyEnabled = true,
+    this.onTitleTap,
   });
 
   final HistoryManager<T> history;
@@ -39,18 +42,32 @@ class HistoryViewport<T> extends StatelessWidget {
   final Widget Function(BuildContext, T) contentBuilder;
   final void Function(T, T) onChange;
   final bool historyEnabled;
+  final VoidCallback onTitleTap;
+
+  @override
+  State<HistoryViewport<T>> createState() => _HistoryViewportState<T>();
+}
+
+class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
+  TextStyle _titleStyle;
+
+  void _updateTitleStyle(TextStyle style) {
+    setState(() {
+      _titleStyle = style;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return OutlineDecoration(
       child: ValueListenableBuilder(
-        valueListenable: history.current,
+        valueListenable: widget.history.current,
         builder: (context, current, _) {
           return Column(
             children: [
               _buildTitle(context, theme),
-              contentBuilder(context, current),
+              widget.contentBuilder(context, current),
             ],
           );
         },
@@ -59,20 +76,24 @@ class HistoryViewport<T> extends StatelessWidget {
   }
 
   Widget _buildTitle(BuildContext context, ThemeData theme) {
+    final title = widget.generateTitle == null
+        ? '  '
+        : widget.generateTitle(widget.history.current.value);
+    final defaultTitleStyle = theme.textTheme.subtitle2;
     return debuggerSectionTitle(
       theme,
       child: Row(
         children: [
-          if (historyEnabled) ...[
+          if (widget.historyEnabled) ...[
             ToolbarAction(
               icon: Icons.chevron_left,
-              onPressed: history.hasPrevious
+              onPressed: widget.history.hasPrevious
                   ? () {
-                      history.moveBack();
-                      if (onChange != null) {
-                        onChange(
-                          history.current.value,
-                          history.peekNext(),
+                      widget.history.moveBack();
+                      if (widget.onChange != null) {
+                        widget.onChange(
+                          widget.history.current.value,
+                          widget.history.peekNext(),
                         );
                       }
                     }
@@ -80,13 +101,13 @@ class HistoryViewport<T> extends StatelessWidget {
             ),
             ToolbarAction(
               icon: Icons.chevron_right,
-              onPressed: history.hasNext
+              onPressed: widget.history.hasNext
                   ? () {
-                      final current = history.current.value;
-                      history.moveForward();
-                      if (onChange != null) {
-                        onChange(
-                          history.current.value,
+                      final current = widget.history.current.value;
+                      widget.history.moveForward();
+                      if (widget.onChange != null) {
+                        widget.onChange(
+                          widget.history.current.value,
                           current,
                         );
                       }
@@ -98,16 +119,33 @@ class HistoryViewport<T> extends StatelessWidget {
             const SizedBox(width: defaultSpacing),
           ],
           Expanded(
-            child: Text(
-              generateTitle == null
-                  ? '  '
-                  : generateTitle(history.current.value),
-              style: theme.textTheme.subtitle2,
-            ),
+            child: widget.onTitleTap == null
+                ? Text(
+                    title,
+                    style: defaultTitleStyle,
+                  )
+                : MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    onExit: (_) => _updateTitleStyle(defaultTitleStyle),
+                    onEnter: (_) {
+                      _updateTitleStyle(
+                        defaultTitleStyle.copyWith(
+                          color: theme.colorScheme.devtoolsLink,
+                        ),
+                      );
+                    },
+                    child: GestureDetector(
+                      onTap: widget.onTitleTap,
+                      child: Text(
+                        title,
+                        style: _titleStyle ?? theme.textTheme.subtitle2,
+                      ),
+                    ),
+                  ),
           ),
-          if (controls != null) ...[
+          if (widget.controls != null) ...[
             const SizedBox(width: denseSpacing),
-            for (final widget in controls) ...[
+            for (final widget in widget.controls) ...[
               widget,
               const SizedBox(width: denseSpacing),
             ],

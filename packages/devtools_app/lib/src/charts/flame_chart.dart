@@ -1,6 +1,9 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// @dart=2.9
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -11,9 +14,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../analytics/analytics.dart' as ga;
-import '../flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/extent_delegate_list.dart';
+import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
 import '../shared/common_widgets.dart';
 import '../shared/dialogs.dart';

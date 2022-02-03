@@ -6,6 +6,8 @@
 // https://github.com/flutter/flutter/commit/78a96b09d64dc2a520e5b269d5cea1b9dde27d3f
 // hits flutter stable.
 
+// @dart=2.9
+
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
@@ -15,8 +17,8 @@ import 'package:provider/provider.dart';
 
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../charts/flame_chart.dart';
-import '../../flutter_widgets/linked_scroll_controller.dart';
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../../primitives/geometry.dart';
 import '../../primitives/trace_event.dart';
 import '../../shared/common_widgets.dart';

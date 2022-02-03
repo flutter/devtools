@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -9,8 +11,8 @@ import 'package:provider/provider.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
-import '../flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../shared/banner_messages.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
