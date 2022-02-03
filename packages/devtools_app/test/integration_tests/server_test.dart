@@ -51,11 +51,9 @@ void main() {
 
     // The devtools package build directory needs to reflect the latest
     // devtools_app package contents.
-    if (Directory('../devtools/build').existsSync()) {
-      Directory('../devtools/build').deleteSync(recursive: true);
+    if (Directory('build/web').existsSync()) {
+      Directory('build/web').deleteSync(recursive: true);
     }
-
-    Directory('build/web').renameSync('../devtools/build');
   });
 
   setUp(() async {
