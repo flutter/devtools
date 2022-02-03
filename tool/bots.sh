@@ -32,10 +32,12 @@ git clone https://github.com/flutter/flutter.git --branch $PINNED_FLUTTER_CHANNE
 
 if [ "$FLUTTER_TEST_ENV" = "pinned" ]; then
   export DART_DEFINE_ARGS=""
+  export SHOULD_TEST_GOLDENS=true
 else
   echo "Cloning the Flutter $FLUTTER_TEST_ENV branch to use for test apps"
   git clone https://github.com/flutter/flutter.git --branch $FLUTTER_TEST_ENV ./flutter-sdk-$FLUTTER_TEST_ENV
   export DART_DEFINE_ARGS="--dart-define=FLUTTER_EXE=`pwd`/flutter-sdk-$FLUTTER_TEST_ENV/bin/flutter"
+  export SHOULD_TEST_GOLDENS=false
 fi
 
 echo "Testing with Flutter test environment: $FLUTTER_TEST_ENV"
