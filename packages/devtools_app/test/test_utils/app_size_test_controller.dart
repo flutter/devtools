@@ -1,5 +1,5 @@
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter/widgets.dart';
 
 class AppSizeTestController extends AppSizeController {

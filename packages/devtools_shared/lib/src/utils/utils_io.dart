@@ -15,6 +15,6 @@ Directory getDartPrefsDirectory() {
 String getUserHomeDir() {
   final String envKey =
       Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-  final String value = Platform.environment[envKey];
+  final String? value = Platform.environment[envKey];
   return value == null ? '.' : value;
 }

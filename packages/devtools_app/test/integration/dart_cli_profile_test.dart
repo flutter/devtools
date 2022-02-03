@@ -21,7 +21,6 @@ import 'package:intl/intl.dart' as intl;
 
 import '../test_infra/flutter_test_driver.dart';
 import '../test_infra/flutter_test_environment.dart';
-import '../test_utils/file_utils.dart';
 
 Future<void> main() async {
   debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
@@ -45,7 +44,6 @@ Future<void> main() async {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
-  compensateForFlutterTestDirectoryBug();
 
   group('Whole app', () {
     testWidgets('CLI Memory Profile Collection', (tester) async {

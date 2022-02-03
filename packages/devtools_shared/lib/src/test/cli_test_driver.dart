@@ -6,11 +6,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_test/devtools_test.dart';
 import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
+
+import 'test_utils.dart';
 
 class AppFixture {
   AppFixture._(
@@ -38,20 +38,24 @@ class AppFixture {
   final Process process;
   final Stream<String> lines;
   final Uri serviceUri;
-  final VmServiceWrapper serviceConnection;
-  final List<IsolateRef> isolates;
-  Future<void> _onAppStarted;
+  final VmService serviceConnection;
+  final List<IsolateRef?> isolates;
+  late Future<void> _onAppStarted;
 
   Future<void> get onAppStarted => _onAppStarted;
 
-  IsolateRef get mainIsolate => isolates.isEmpty ? null : isolates.first;
+  IsolateRef? get mainIsolate => isolates.isEmpty ? null : isolates.first;
 
   Future<dynamic> invoke(String expression) async {
-    final IsolateRef isolateRef = mainIsolate;
-    final Isolate isolate = await serviceConnection.getIsolate(isolateRef.id);
+    final IsolateRef isolateRef = mainIsolate!;
+    final String isolateId = isolateRef.id!;
+    final Isolate isolate = await serviceConnection.getIsolate(isolateId);
 
     return await serviceConnection.evaluate(
-        isolateRef.id, isolate.rootLib.id, expression);
+      isolateId,
+      isolate.rootLib!.id!,
+      expression,
+    );
   }
 
   Future<void> teardown() async {
@@ -67,7 +71,7 @@ class CliAppFixture extends AppFixture {
     Process process,
     Stream<String> lines,
     Uri serviceUri,
-    VmServiceWrapper serviceConnection,
+    VmService serviceConnection,
     List<IsolateRef> isolates,
   ) : super._(process, lines, serviceUri, serviceConnection, isolates);
 
@@ -105,21 +109,21 @@ class CliAppFixture extends AppFixture {
         observatoryText.replaceAll(observatoryMarker, '');
     var uri = Uri.parse(observatoryUri);
 
-    if (uri == null || !uri.isAbsolute) {
+    if (!uri.isAbsolute) {
       throw 'Could not parse VM Service URI: "$observatoryText"';
     }
 
     // Map to WS URI.
     uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
 
-    final VmServiceWrapper serviceConnection =
-        VmServiceWrapper(await vmServiceConnectUri(uri.toString()), uri);
+    final VmService serviceConnection =
+        await vmServiceConnectUri(uri.toString());
 
     final VM vm = await serviceConnection.getVM();
 
     final Isolate isolate =
         await _waitForIsolate(serviceConnection, 'PauseStart');
-    await serviceConnection.resume(isolate.id);
+    await serviceConnection.resume(isolate.id!);
 
     return CliAppFixture._(
       appScriptPath,
@@ -127,36 +131,34 @@ class CliAppFixture extends AppFixture {
       lineController.stream,
       uri,
       serviceConnection,
-      vm.isolates,
+      vm.isolates!,
     );
   }
 
   static Future<Isolate> _waitForIsolate(
-    VmServiceWrapper serviceConnection,
+    VmService serviceConnection,
     String pauseEventKind,
   ) async {
-    Isolate foundIsolate;
+    Isolate? foundIsolate;
     await waitFor(() async {
       final vm = await serviceConnection.getVM();
-      final isolates = await Future.wait(vm.isolates.map(
-        (ref) => serviceConnection.getIsolate(ref.id)
+      final List<Isolate?> isolates = await Future.wait(vm.isolates!.map(
+        (ref) => serviceConnection.getIsolate(ref.id!)
             // Calling getIsolate() can sometimes return a collected sentinel
             // for an isolate that hasn't started yet. We can just ignore these
             // as on the next trip around the Isolate will be returned.
             // https://github.com/dart-lang/sdk/issues/33747
             .catchError((error) {
           print('getIsolate(${ref.id}) failed, skipping\n$error');
-          return Future<Isolate>.value();
         }),
       ));
       foundIsolate = isolates.firstWhere(
-        (isolate) =>
-            isolate is Isolate && isolate.pauseEvent.kind == pauseEventKind,
+        (isolate) => isolate!.pauseEvent?.kind == pauseEventKind,
         orElse: () => null,
       );
       return foundIsolate != null;
     });
-    return foundIsolate;
+    return foundIsolate!;
   }
 
   String get scriptSource {
