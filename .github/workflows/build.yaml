@@ -75,22 +75,23 @@ jobs:
           name: test-image-failures-${{ matrix.os }} # Name for the artifact
           path: packages/devtools_app/test/failures # Path to upload
 
-  integration:
-    name: integration ${{ matrix.bot }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        bot:
-          - integration_ddc
-          - integration_dart2js
-    steps:
-      - name: git clone
-        uses: actions/checkout@v2
-      - name: tool/bots.sh
-        env:
-          BOT: ${{ matrix.bot }}
-        run: ./tool/bots.sh
+# TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
+#  integration:
+#    name: integration ${{ matrix.bot }}
+#    runs-on: ubuntu-latest
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        bot:
+#          - integration_ddc
+#          - integration_dart2js
+#    steps:
+#      - name: git clone
+#        uses: actions/checkout@v2
+#      - name: tool/bots.sh
+#        env:
+#          BOT: ${{ matrix.bot }}
+#        run: ./tool/bots.sh
 
 # TODO(https://github.com/flutter/devtools/issues/2437):
 # PLATFORM=chrome is going away. We need to move these tests to run with
