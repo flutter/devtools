@@ -49,8 +49,8 @@ void main(List<String> args) async {
 }
 
 void _printToConsole(Process process) {
-  _transformToLines(process.stdout).listen((String line) => print(line));
-  _transformToLines(process.stderr).listen((String line) => print(line));
+  _transformToLines(process.stdout).listen(print);
+  _transformToLines(process.stderr).listen(print);
 }
 
 Stream<String> _transformToLines(Stream<List<int>> byteStream) {
