@@ -12,6 +12,9 @@
 /// with some refactors to make the code more of a controller than a combination
 /// of view and controller. View specific portions of InspectorPanel.java have
 /// been moved to inspector.dart.
+
+// @dart=2.9
+
 library inspector_controller;
 
 import 'dart:async';

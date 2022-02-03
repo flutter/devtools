@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
 export 'src/analytics/analytics.dart';
 export 'src/analytics/analytics_controller.dart';
 export 'src/app_size/app_size_controller.dart';
