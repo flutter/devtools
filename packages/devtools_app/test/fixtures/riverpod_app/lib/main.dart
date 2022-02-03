@@ -6,8 +6,6 @@
 
 // @dart=2.9
 
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
