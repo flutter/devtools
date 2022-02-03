@@ -7,6 +7,8 @@
 // We could instead remove the annotations, but that would make the process of
 // updating the generated files tedious.
 
+// @dart=2.9
+
 const nullable = Object();
 const freezed = Object();
 
