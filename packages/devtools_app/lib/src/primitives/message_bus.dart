@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 /// An event type for use with [MessageBus].
@@ -11,7 +9,7 @@ class BusEvent {
   BusEvent(this.type, {this.data});
 
   final String type;
-  final Object data;
+  final Object? data;
 
   @override
   String toString() => type;
@@ -25,11 +23,11 @@ class MessageBus {
     _controller = StreamController.broadcast();
   }
 
-  StreamController<BusEvent> _controller;
+  late StreamController<BusEvent> _controller;
 
   /// Listen for events on the event bus. Clients can pass in an optional [type],
   /// which filters the events to only those specific ones.
-  Stream<BusEvent> onEvent({String type}) {
+  Stream<BusEvent> onEvent({String? type}) {
     if (type == null) {
       return _controller.stream;
     } else {
