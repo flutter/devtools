@@ -11,7 +11,6 @@ import 'dart:io';
 
 void main(List<String> args) async {
   final pubspecs = [
-    'packages/devtools/pubspec.yaml',
     'packages/devtools_app/pubspec.yaml',
     'packages/devtools_shared/pubspec.yaml',
     'packages/devtools_test/pubspec.yaml',
@@ -48,7 +47,7 @@ void main(List<String> args) async {
   );
 
   print('Updating CHANGELOG to version $version...');
-  writeVersionToChangelog(File('packages/devtools/CHANGELOG.md'), version);
+  writeVersionToChangelog(File('CHANGELOG.md'), version);
 
   print('Updating index.html to version $version...');
   writeVersionToIndexHtml(
@@ -187,7 +186,6 @@ const editablePubspecSections = [
 ];
 
 const devToolsDependencyPrefixes = [
-  'devtools: ',
   'devtools_app: ',
   'devtools_shared: ',
   'devtools_test: ',
