@@ -68,13 +68,6 @@ dart --version
 export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | awk '{print $2}')
 echo "Flutter version is '$FLUTTER_VERSION'"
 
-# Some integration tests assume the devtools package is up to date and located
-# adjacent to the devtools_app package.
-pushd packages/devtools
-    # We want to make sure that devtools is retrievable with regular pub.
-    flutter pub get
-popd
-
 # Change the CI to the packages/devtools_app directory.
 pushd packages/devtools_app
 echo `pwd`
