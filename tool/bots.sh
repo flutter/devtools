@@ -142,8 +142,6 @@ elif [ "$BOT" = "integration_ddc" ]; then
     # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
     # flutter test -j1 test/integration_tests/
 
-    flutter test -j1 test/integration/
-
 elif [ "$BOT" = "integration_dart2js" ]; then
 
     flutter pub get
@@ -152,8 +150,6 @@ elif [ "$BOT" = "integration_dart2js" ]; then
     # We need to run integration tests with -j1 to run with no concurrency.
     # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
     # WEBDEV_RELEASE=true flutter test -j1 test/integration_tests/
-
-    WEBDEV_RELEASE=true flutter test -j1 test/integration/
 
 elif [ "$BOT" = "packages" ]; then
 
