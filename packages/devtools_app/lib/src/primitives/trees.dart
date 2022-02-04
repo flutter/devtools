@@ -128,8 +128,8 @@ abstract class TreeNode<T extends TreeNode<T>> {
     return children.removeAt(index);
   }
 
-  void addAllChildren(List<T?> children) {
-    children.forEach(addChild as void Function(T?));
+  void addAllChildren(List<T> children) {
+    children.forEach(addChild);
   }
 
   /// Expands this node and all of its children (cascading).
