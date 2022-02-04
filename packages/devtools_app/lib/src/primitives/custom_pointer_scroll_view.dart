@@ -604,6 +604,7 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
 
   @override
   Widget build(BuildContext context) {
+    assert(position != null);
     // _ScrollableScope must be placed above the BuildContext returned by
     // notificationContext so that we can get this _CustomPointerScrollableState
     // by doing the following:
