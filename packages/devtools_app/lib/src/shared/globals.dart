@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(polinach): remove after null-safety migration
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
 import '../config_specific/ide_theme/ide_theme.dart';
@@ -17,25 +16,25 @@ import 'survey.dart';
 
 final Map<Type, dynamic> globals = <Type, dynamic>{};
 
-ServiceConnectionManager? get serviceManager =>
+ServiceConnectionManager get serviceManager =>
     globals[ServiceConnectionManager];
 
-MessageBus? get messageBus => globals[MessageBus];
+MessageBus get messageBus => globals[MessageBus];
 
-FrameworkController? get frameworkController => globals[FrameworkController];
+FrameworkController get frameworkController => globals[FrameworkController];
 
-Storage? get storage => globals[Storage];
+Storage get storage => globals[Storage];
 
-SurveyService? get surveyService => globals[SurveyService];
+SurveyService get surveyService => globals[SurveyService];
 
-PreferencesController? get preferences => globals[PreferencesController];
+PreferencesController get preferences => globals[PreferencesController];
 
-DevToolsExtensionPoints? get devToolsExtensionPoints =>
+DevToolsExtensionPoints get devToolsExtensionPoints =>
     globals[DevToolsExtensionPoints];
 
-OfflineModeController? get offlineController => globals[OfflineModeController];
+OfflineModeController get offlineController => globals[OfflineModeController];
 
-IdeTheme? get ideTheme => globals[IdeTheme];
+IdeTheme get ideTheme => globals[IdeTheme];
 
 void setGlobal(Type clazz, dynamic instance) {
   globals[clazz] = instance;
