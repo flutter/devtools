@@ -28,7 +28,7 @@ class LinkedScrollControllerGroup {
   final _allControllers = <_LinkedScrollController>[];
 
   ChangeNotifier? get offsetNotifier => _offsetNotifier;
-  _LinkedScrollControllerGroupOffsetNotifier? _offsetNotifier;
+  late final _LinkedScrollControllerGroupOffsetNotifier _offsetNotifier;
 
   bool get hasAttachedControllers => _attachedControllers.isNotEmpty;
 
@@ -60,18 +60,18 @@ class LinkedScrollControllerGroup {
     final controller =
         _LinkedScrollController(this, initialScrollOffset: initialScrollOffset);
     _allControllers.add(controller);
-    controller.addListener(_offsetNotifier!.notifyListeners);
+    controller.addListener(_offsetNotifier.notifyListeners);
     return controller;
   }
 
   /// Adds a callback that will be called when the value of [offset] changes.
   void addOffsetChangedListener(VoidCallback onChanged) {
-    _offsetNotifier!.addListener(onChanged);
+    _offsetNotifier.addListener(onChanged);
   }
 
   /// Removes the specified offset changed listener.
   void removeOffsetChangedListener(VoidCallback listener) {
-    _offsetNotifier!.removeListener(listener);
+    _offsetNotifier.removeListener(listener);
   }
 
   Iterable<_LinkedScrollController> get _attachedControllers =>
