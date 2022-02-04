@@ -22,12 +22,20 @@ typedef FlutterDriverFactory = FlutterTestDriver Function(
 FlutterRunTestDriver defaultFlutterRunDriver(Directory appDir) =>
     FlutterRunTestDriver(appDir);
 
+final defaultFlutterExecutable = Platform.isWindows ? 'flutter.bat' : 'flutter';
+
 class FlutterTestEnvironment {
   FlutterTestEnvironment(
     this._runConfig, {
     this.testAppDirectory = 'test/fixtures/flutter_app',
     FlutterDriverFactory flutterDriverFactory,
-  }) : _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver;
+  })  : _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver,
+        _flutterExe = _parseFlutterExeFromEnv();
+
+  static String _parseFlutterExeFromEnv() {
+    const flutterExe = String.fromEnvironment('FLUTTER_CMD');
+    return flutterExe.isNotEmpty ? flutterExe : defaultFlutterExecutable;
+  }
 
   FlutterRunConfiguration _runConfig;
   FlutterRunConfiguration get runConfig => _runConfig;
@@ -42,6 +50,13 @@ class FlutterTestEnvironment {
   /// A factory method which can return a [FlutterRunTestDriver] for a test
   /// fixture directory.
   final FlutterDriverFactory _flutterDriverFactory;
+
+  /// The Flutter executable to use for this test environment.
+  ///
+  /// This executable can be specified using the --dart-define flag
+  /// (e.g. `flutter test --dart-define=FLUTTER_CMD=path/to/flutter/bin/flutter
+  /// test/my_test.dart`).
+  final String _flutterExe;
 
   // This function will be called after we have ran the Flutter app and the
   // vmService is opened.
@@ -92,7 +107,10 @@ class FlutterTestEnvironment {
       _needsSetup = false;
 
       _flutter = _flutterDriverFactory(Directory(testAppDirectory));
-      await _flutter.run(runConfig: _runConfig);
+      await _flutter.run(
+        flutterExecutable: _flutterExe,
+        runConfig: _runConfig,
+      );
 
       _service = _flutter.vmService;
       final preferencesController = PreferencesController();
@@ -139,6 +157,7 @@ class FlutterTestEnvironment {
           '  ${_service.activeFutures.map((tf) => tf.name).join('\n  ')}';
     });
     await _flutter.stop();
+
     _flutter = null;
 
     _needsSetup = true;

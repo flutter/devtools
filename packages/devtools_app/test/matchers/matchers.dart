@@ -89,18 +89,24 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    final String description = _normalize(object);
-    if (_value != description) {
-      if (updateGoldens) {
-        io.File(path).writeAsStringSync(description);
-        print('Updated golden file $path\nto\n$description');
-        // Act like the match succeeded so all goldens are updated instead of
-        // just the first failure.
-        return true;
-      }
+    const shouldCheckForMatchingGoldens = bool.fromEnvironment(
+      'SHOULD_TEST_GOLDENS',
+      defaultValue: true,
+    );
+    if (shouldCheckForMatchingGoldens) {
+      final String description = _normalize(object);
+      if (_value != description) {
+        if (updateGoldens) {
+          io.File(path).writeAsStringSync(description);
+          print('Updated golden file $path\nto\n$description');
+          // Act like the match succeeded so all goldens are updated instead of
+          // just the first failure.
+          return true;
+        }
 
-      matchState[_mismatchedValueKey] = description;
-      return false;
+        matchState[_mismatchedValueKey] = description;
+        return false;
+      }
     }
     return true;
   }

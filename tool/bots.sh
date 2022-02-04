@@ -27,16 +27,19 @@ function flutter {
 }
 
 # Get Flutter.
-echo "Cloning the Flutter $CHANNEL branch"
-git clone https://github.com/flutter/flutter.git --branch $CHANNEL ./flutter-sdk
+echo "Cloning the Flutter $PINNED_FLUTTER_CHANNEL branch"
+git clone https://github.com/flutter/flutter.git --branch $PINNED_FLUTTER_CHANNEL ./flutter-sdk
 
-if [ "$CHANNEL" = "stable" ]; then
-    # Set the suffix so we use stable goldens.
-    export DEVTOOLS_GOLDENS_SUFFIX="_stable"
+if [ "$FLUTTER_TEST_ENV" = "pinned" ]; then
+  export DART_DEFINE_ARGS="--dart-define=SHOULD_TEST_GOLDENS=true"
 else
-    # Set the suffix so we use the non-stable goldens
-    export DEVTOOLS_GOLDENS_SUFFIX=""
+  echo "Cloning the Flutter $FLUTTER_TEST_ENV branch to use for test apps"
+  git clone https://github.com/flutter/flutter.git --branch $FLUTTER_TEST_ENV ./flutter-sdk-$FLUTTER_TEST_ENV
+  export DART_DEFINE_ARGS="--dart-define=SHOULD_TEST_GOLDENS=false --dart-define=FLUTTER_CMD=`pwd`/flutter-sdk-$FLUTTER_TEST_ENV/bin/flutter"
 fi
+
+echo "Testing with Flutter test environment: $FLUTTER_TEST_ENV"
+echo "Flutter tests will be ran with args: $DART_DEFINE_ARGS"
 
 # Look in the dart bin dir first, then the flutter one, then the one for the
 # devtools repo. We don't use the dart script from flutter/bin as that script
@@ -77,12 +80,10 @@ if [ "$BOT" = "main" ]; then
     # Provision our packages.
     flutter pub get
 
-    if [ "$CHANNEL" = "master" ]; then
-        # Verify that dart format has been run.
-        echo "Checking formatting..."
-        # Here, we use the dart instance from the flutter sdk.
-        $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
-    fi
+    # Verify that dart format has been run.
+    echo "Checking formatting..."
+    # Here, we use the dart instance from the flutter sdk.
+    $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
 
     # Make sure the app versions are in sync.
     repo_tool repo-check
@@ -105,9 +106,9 @@ elif [ "$BOT" = "test_ddc" ]; then
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
     if [ "$PLATFORM" = "vm" ]; then
-        flutter test test/*.dart test/fixtures/
+        flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/
     elif [ "$PLATFORM" = "chrome" ]; then
-        flutter test --platform chrome test/*.dart test/fixtures/
+        flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/
     else
         echo "unknown test platform"
         exit 1
@@ -123,9 +124,9 @@ elif [ "$BOT" = "test_dart2js" ]; then
     # The flutter tool doesn't support excluding a specific set of targets,
     # so we explicitly provide them.
     if [ "$PLATFORM" = "vm" ]; then
-        WEBDEV_RELEASE=true flutter test test/*.dart test/fixtures/
+        WEBDEV_RELEASE=true flutter test $DART_DEFINE_ARGS test/*.dart test/fixtures/
     elif [ "$PLATFORM" = "chrome" ]; then
-        WEBDEV_RELEASE=true flutter test --platform chrome test/*.dart test/fixtures/
+        WEBDEV_RELEASE=true flutter test --platform chrome $DART_DEFINE_ARGS test/*.dart test/fixtures/
     else
         echo "unknown test platform"
         exit 1
@@ -138,18 +139,18 @@ elif [ "$BOT" = "integration_ddc" ]; then
     flutter pub get
     flutter config --enable-web
 
-    # We need to run integration tests with -j1 to run with no concurrency.
     # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
-    # flutter test -j1 test/integration_tests/
+    # We need to run integration tests with -j1 to run with no concurrency.
+    # flutter test -j1 $DART_DEFINE_ARGS test/integration_tests/
 
 elif [ "$BOT" = "integration_dart2js" ]; then
 
     flutter pub get
     flutter config --enable-web
 
-    # We need to run integration tests with -j1 to run with no concurrency.
     # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
-    # WEBDEV_RELEASE=true flutter test -j1 test/integration_tests/
+    # We need to run integration tests with -j1 to run with no concurrency.
+    # WEBDEV_RELEASE=true flutter test -j1 $DART_DEFINE_ARGS test/integration_tests/
 
 elif [ "$BOT" = "packages" ]; then
 
