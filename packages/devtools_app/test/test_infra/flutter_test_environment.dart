@@ -33,7 +33,7 @@ class FlutterTestEnvironment {
         _flutterExe = _parseFlutterExeFromEnv();
 
   static String _parseFlutterExeFromEnv() {
-    const flutterExe = String.fromEnvironment('FLUTTER_EXE');
+    const flutterExe = String.fromEnvironment('FLUTTER_CMD');
     return flutterExe.isNotEmpty ? flutterExe : defaultFlutterExecutable;
   }
 
@@ -54,7 +54,7 @@ class FlutterTestEnvironment {
   /// The Flutter executable to use for this test environment.
   ///
   /// This executable can be specified using the --dart-define flag
-  /// (e.g. `flutter test --dart-define=FLUTTER_EXE=path/to/flutter/bin/flutter
+  /// (e.g. `flutter test --dart-define=FLUTTER_CMD=path/to/flutter/bin/flutter
   /// test/my_test.dart`).
   final String _flutterExe;
 
