@@ -294,7 +294,7 @@ class CustomPointerScrollable extends StatefulWidget {
     _CustomPointerScrollableState? scrollable =
         CustomPointerScrollable.of(context);
     while (scrollable != null) {
-      futures.add(scrollable.position.ensureVisible(
+      futures.add(scrollable.position!.ensureVisible(
         context.findRenderObject()!,
         alignment: alignment,
         duration: duration,
@@ -326,7 +326,7 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
   /// To control what kind of [ScrollPosition] is created for a [Scrollable],
   /// provide it with custom [ScrollController] that creates the appropriate
   /// [ScrollPosition] in its [ScrollController.createScrollPosition] method.
-  ScrollPosition get position => _position!;
+  ScrollPosition? get position => _position;
   ScrollPosition? _position;
 
   @override
@@ -354,7 +354,8 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
         controller?.createScrollPosition(_physics!, this, oldPosition) ??
             ScrollPositionWithSingleContext(
                 physics: _physics!, context: this, oldPosition: oldPosition);
-    controller?.attach(position);
+    assert(position != null);
+    controller?.attach(position!);
   }
 
   @override
@@ -386,8 +387,8 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
     super.didUpdateWidget(oldWidget);
 
     if (widget.controller != oldWidget.controller) {
-      oldWidget.controller?.detach(position);
-      widget.controller?.attach(position);
+      oldWidget.controller?.detach(position!);
+      widget.controller?.attach(position!);
     }
 
     if (_shouldUpdatePosition(oldWidget)) _updatePosition();
@@ -395,8 +396,8 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
 
   @override
   void dispose() {
-    widget.controller?.detach(position);
-    position.dispose();
+    widget.controller?.detach(position!);
+    position!.dispose();
     super.dispose();
   }
 
@@ -515,7 +516,7 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
   void _handleDragDown(DragDownDetails details) {
     assert(_drag == null);
     assert(_hold == null);
-    _hold = position.hold(_disposeHold);
+    _hold = position!.hold(_disposeHold);
   }
 
   void _handleDragStart(DragStartDetails details) {
@@ -523,7 +524,7 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
     // _handleDragStart, for example if some user code calls jumpTo or otherwise
     // triggers a new activity to begin.
     assert(_drag == null);
-    _drag = position.drag(details, _disposeDrag);
+    _drag = position!.drag(details, _disposeDrag);
     assert(_drag != null);
     assert(_hold == null);
   }
@@ -572,16 +573,17 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
       delta *= -1;
     }
 
-    return math.min(math.max(position.pixels + delta, position.minScrollExtent),
-        position.maxScrollExtent);
+    return math.min(
+        math.max(position!.pixels + delta, position!.minScrollExtent),
+        position!.maxScrollExtent);
   }
 
   void _receivedPointerSignal(PointerSignalEvent event) {
-    if (event is PointerScrollEvent) {
+    if (event is PointerScrollEvent && position != null) {
       final double targetScrollOffset =
           _targetScrollOffsetForPointerScroll(event);
       // Only express interest in the event if it would actually result in a scroll.
-      if (targetScrollOffset != position.pixels) {
+      if (targetScrollOffset != position!.pixels) {
         GestureBinding.instance!.pointerSignalResolver
             .register(event, _handlePointerScroll);
       }
@@ -590,13 +592,13 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
 
   void _handlePointerScroll(PointerEvent event) {
     assert(event is PointerScrollEvent);
-    if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
+    if (_physics != null && !_physics!.shouldAcceptUserOffset(position!)) {
       return;
     }
     final double targetScrollOffset =
         _targetScrollOffsetForPointerScroll(event as PointerScrollEvent);
-    if (targetScrollOffset != position.pixels) {
-      position.jumpTo(targetScrollOffset);
+    if (targetScrollOffset != position!.pixels) {
+      position!.jumpTo(targetScrollOffset);
     }
   }
 
@@ -616,7 +618,7 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
     // must be placed above the widget using it: RawGestureDetector
     Widget result = _ScrollableScope(
       scrollable: this,
-      position: position,
+      position: position!,
       // TODO(ianh): Having all these global keys is sad.
       child: Listener(
         onPointerSignal:
@@ -632,7 +634,7 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
               key: _ignorePointerKey,
               ignoring: _shouldIgnorePointer,
               ignoringSemantics: false,
-              child: widget.viewportBuilder(context, position),
+              child: widget.viewportBuilder(context, position!),
             ),
           ),
         ),
@@ -643,7 +645,7 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
       result = _ScrollSemantics(
         key: _scrollSemanticsKey,
         child: result,
-        position: position,
+        position: position!,
         allowImplicitScrolling: widget.physics?.allowImplicitScrolling ??
             _physics!.allowImplicitScrolling,
         semanticChildCount: widget.semanticChildCount,
