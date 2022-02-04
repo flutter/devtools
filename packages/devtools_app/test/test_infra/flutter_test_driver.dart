@@ -11,6 +11,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart';
@@ -69,24 +70,27 @@ abstract class FlutterTestDriver {
 
   Future<void> setupProcess(
     List<String> args, {
+    @required String flutterExecutable,
     FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File pidFile,
   }) async {
-    if (runConfig.withDebugger) {
-      args.add('--start-paused');
-    }
-    if (pidFile != null) {
-      args.addAll(<String>['--pid-file', pidFile.path]);
-    }
-    debugPrint('Spawning flutter $args in ${projectFolder.path}');
+    final _args = [
+      ...args,
+      if (runConfig.withDebugger) '--start-paused',
+      if (pidFile != null) ...['--pid-file', pidFile.path],
+    ];
+
+    debugPrint('Spawning flutter $_args in ${projectFolder.path}');
 
     proc = await Process.start(
-        Platform.isWindows ? 'flutter.bat' : 'flutter', args,
-        workingDirectory: projectFolder.path,
-        environment: <String, String>{
-          'FLUTTER_TEST': 'true',
-          'DART_VM_OPTIONS': '',
-        });
+      flutterExecutable,
+      _args,
+      workingDirectory: projectFolder.path,
+      environment: <String, String>{
+        'FLUTTER_TEST': 'true',
+        'DART_VM_OPTIONS': '',
+      },
+    );
     // This class doesn't use the result of the future. It's made available
     // via a getter for external uses.
     unawaited(proc.exitCode.then((int code) {
@@ -264,6 +268,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   String _currentRunningAppId;
 
   Future<void> run({
+    @required String flutterExecutable,
     FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File pidFile,
   }) async {
@@ -280,6 +285,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     args.addAll(['-d', 'flutter-tester']);
     await setupProcess(
       args,
+      flutterExecutable: flutterExecutable,
       runConfig: runConfig,
       pidFile: pidFile,
     );
@@ -287,6 +293,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
   Future<void> attach(
     int port, {
+    @required String flutterExecutable,
     FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File pidFile,
   }) async {
@@ -299,6 +306,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         '--debug-port',
         '$port',
       ],
+      flutterExecutable: flutterExecutable,
       runConfig: runConfig,
       pidFile: pidFile,
     );
@@ -307,11 +315,13 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   @override
   Future<void> setupProcess(
     List<String> args, {
+    @required String flutterExecutable,
     FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File pidFile,
   }) async {
     await super.setupProcess(
       args,
+      flutterExecutable: flutterExecutable,
       runConfig: runConfig,
       pidFile: pidFile,
     );
