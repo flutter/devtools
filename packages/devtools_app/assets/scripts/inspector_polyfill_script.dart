@@ -45,6 +45,8 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 // ignore_for_file: invalid_use_of_protected_member
 
+// This annotation should stay here as the script should be compatible with
+// legacy code.
 // @dart=2.9
 
 import 'dart:async';
