@@ -10,13 +10,13 @@ import 'utils.dart';
 
 class FlutterVersion extends SemanticVersion {
   FlutterVersion._({
-    required this.version,
-    required this.channel,
+    this.version,
+    this.channel,
     this.repositoryUrl,
-    required this.frameworkRevision,
-    required this.frameworkCommitDate,
-    required this.engineRevision,
-    required this.dartSdkVersion,
+    this.frameworkRevision,
+    this.frameworkCommitDate,
+    this.engineRevision,
+    this.dartSdkVersion,
   }) {
     final semVer = SemanticVersion.parse(version);
     major = semVer.major;
@@ -38,17 +38,17 @@ class FlutterVersion extends SemanticVersion {
     );
   }
 
-  final String version;
+  final String? version;
 
-  final String channel;
+  final String? channel;
 
   final String? repositoryUrl;
 
-  final String frameworkRevision;
+  final String? frameworkRevision;
 
-  final String frameworkCommitDate;
+  final String? frameworkCommitDate;
 
-  final String engineRevision;
+  final String? engineRevision;
 
   final SemanticVersion? dartSdkVersion;
 
@@ -116,7 +116,9 @@ class SemanticVersion with CompareMixin {
     this.preReleaseMinor,
   });
 
-  factory SemanticVersion.parse(String versionString) {
+  factory SemanticVersion.parse(String? versionString) {
+    if (versionString == null) return SemanticVersion();
+
     // Remove any build metadata, denoted by a '+' character and whatever
     // follows.
     final buildMetadataIndex = versionString.indexOf('+');
