@@ -194,9 +194,8 @@ class _LinkedScrollController extends ScrollController {
   Iterable<_LinkedScrollActivity> link(_LinkedScrollPosition driver) {
     assert(hasClients);
     final activities = <_LinkedScrollActivity>[];
-    for (_LinkedScrollPosition position
-        in positions as Iterable<_LinkedScrollPosition>) {
-      activities.add(position.link(driver));
+    for (ScrollPosition position in positions) {
+      activities.add((position as _LinkedScrollPosition).link(driver));
     }
     return activities;
   }
