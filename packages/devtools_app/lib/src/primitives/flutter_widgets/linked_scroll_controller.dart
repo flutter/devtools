@@ -374,7 +374,7 @@ class _LinkedScrollActivity extends ScrollActivity {
 
   void _updateUserScrollDirection() {
     assert(drivers.isNotEmpty);
-    late ScrollDirection? commonDirection;
+    ScrollDirection? commonDirection;
     for (var driver in drivers) {
       commonDirection ??= driver.userScrollDirection;
       if (driver.userScrollDirection != commonDirection) {
