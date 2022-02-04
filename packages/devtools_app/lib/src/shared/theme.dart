@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 
@@ -18,9 +18,9 @@ const contrastForegroundWhite = _contrastForegroundWhite;
 /// Constructs the light or dark theme for the app taking into account
 /// IDE-supplied theming.
 ThemeData themeFor({
-  @required bool isDarkTheme,
-  @required IdeTheme ideTheme,
-  ThemeData theme,
+  required bool isDarkTheme,
+  required IdeTheme ideTheme,
+  ThemeData? theme,
 }) {
   ThemeData colorTheme;
   // If the theme specifies a background color, use it to infer a theme.
@@ -47,40 +47,40 @@ ThemeData themeFor({
 ThemeData _darkTheme(IdeTheme ideTheme) {
   final theme = ThemeData.dark();
   final background = isValidDarkColor(ideTheme?.backgroundColor)
-      ? ideTheme?.backgroundColor
+      ? ideTheme?.backgroundColor!
       : theme.canvasColor;
   return _baseTheme(
     theme: theme,
     ideTheme: ideTheme,
-    primaryColor: devtoolsGrey[900],
+    primaryColor: devtoolsGrey[900]!,
     backgroundColor: background,
-    indicatorColor: devtoolsBlue[400],
-    selectedRowColor: devtoolsGrey[600],
+    indicatorColor: devtoolsBlue[400]!,
+    selectedRowColor: devtoolsGrey[600]!,
   );
 }
 
 ThemeData _lightTheme(IdeTheme ideTheme) {
   final theme = ThemeData.light();
   final background = isValidLightColor(ideTheme?.backgroundColor)
-      ? ideTheme?.backgroundColor
+      ? ideTheme?.backgroundColor!
       : theme.canvasColor;
   return _baseTheme(
     theme: theme,
     ideTheme: ideTheme,
-    primaryColor: devtoolsBlue[600],
+    primaryColor: devtoolsBlue[600]!,
     backgroundColor: background,
-    indicatorColor: Colors.yellowAccent[400],
-    selectedRowColor: devtoolsBlue[600],
+    indicatorColor: Colors.yellowAccent[400]!,
+    selectedRowColor: devtoolsBlue[600]!,
   );
 }
 
 ThemeData _baseTheme({
-  @required ThemeData theme,
-  @required IdeTheme ideTheme,
-  @required Color primaryColor,
-  @required Color backgroundColor,
-  @required Color indicatorColor,
-  @required Color selectedRowColor,
+  required ThemeData theme,
+  required IdeTheme ideTheme,
+  required Color primaryColor,
+  required Color backgroundColor,
+  required Color indicatorColor,
+  required Color selectedRowColor,
 }) {
   return theme.copyWith(
     primaryColor: primaryColor,
@@ -127,14 +127,14 @@ ThemeData _baseTheme({
 /// Flutter's luminance calculation.
 const _lightDarkLuminanceThreshold = 0.1;
 
-bool isValidDarkColor(Color color) {
+bool isValidDarkColor(Color? color) {
   if (color == null) {
     return false;
   }
   return color.computeLuminance() <= _lightDarkLuminanceThreshold;
 }
 
-bool isValidLightColor(Color color) {
+bool isValidLightColor(Color? color) {
   if (color == null) {
     return false;
   }
@@ -256,7 +256,7 @@ extension DevToolsColorScheme on ColorScheme {
   Color get toggleButtonsTitleSelected =>
       isLight ? Colors.white : const Color(0xFF464646);
 
-  Color get toggleButtonsFillSelected => devtoolsBlue[400];
+  Color? get toggleButtonsFillSelected => devtoolsBlue[400];
 
   Color get grey => isLight
       ? const Color.fromARGB(255, 128, 128, 128)
@@ -276,7 +276,7 @@ extension DevToolsColorScheme on ColorScheme {
   // TODO(jacobr): replace this with Theme.of(context).scaffoldBackgroundColor, but we use
   // this in places where we do not have access to the context.
   Color get defaultBackgroundColor =>
-      isLight ? Colors.grey[50] : Colors.grey[850];
+      isLight ? Colors.grey[50]! : Colors.grey[850]!;
 
   Color get alternatingBackgroundColor => isLight
       ? defaultBackgroundColor.darken()
@@ -324,11 +324,11 @@ extension DevToolsColorScheme on ColorScheme {
 
   // Bar color for current selection (hover).
   Color get hoverSelectionBarColor =>
-      isLight ? Colors.lime[600] : Colors.yellowAccent;
+      isLight ? Colors.lime[600]! : Colors.yellowAccent;
 
   // Highlight color for an selected item in the autocomplete dropdown list.
   Color get autoCompleteHighlightColor =>
-      isLight ? Colors.grey[300] : Colors.grey[700];
+      isLight ? Colors.grey[300]! : Colors.grey[700]!;
 
   Color get autoCompleteTextColor => isLight ? Colors.black : Colors.white;
 
@@ -381,13 +381,13 @@ extension DevToolsColorScheme on ColorScheme {
         decoration: TextDecoration.none,
       );
 
-  Color get expandedColor => isLight ? Colors.grey[200] : Colors.grey[800];
+  Color get expandedColor => isLight ? Colors.grey[200]! : Colors.grey[800]!;
 
   Color get expandedTopContentColor =>
-      isLight ? Colors.grey[50] : Colors.grey[850];
+      isLight ? Colors.grey[50]! : Colors.grey[850]!;
 
   Color get expandedBottomContentColor =>
-      isLight ? Colors.grey[200] : Colors.grey[800];
+      isLight ? Colors.grey[200]! : Colors.grey[800]!;
 
   Gradient get verticalGradient => LinearGradient(
         begin: Alignment.topCenter,
@@ -417,7 +417,7 @@ extension ThemeDataExtension on ThemeData {
   bool get isDarkTheme => brightness == Brightness.dark;
 
   TextStyle get regularTextStyle => TextStyle(
-        color: textTheme.bodyText2.color,
+        color: textTheme.bodyText2!.color,
         fontSize: defaultFontSize,
       );
 
@@ -432,7 +432,7 @@ extension ThemeDataExtension on ThemeData {
       );
 
   TextStyle get fixedFontStyle =>
-      textTheme.bodyText2.copyWith(fontFamily: 'RobotoMono');
+      textTheme.bodyText2!.copyWith(fontFamily: 'RobotoMono');
 
   TextStyle get subtleFixedFontStyle =>
       fixedFontStyle.copyWith(color: unselectedWidgetColor);
@@ -442,7 +442,7 @@ extension ThemeDataExtension on ThemeData {
       );
 
   TextStyle get devToolsTitleStyle =>
-      textTheme.headline6.copyWith(color: Colors.white);
+      textTheme.headline6!.copyWith(color: Colors.white);
 
   Color get titleSolidBackgroundColor => colorScheme.isLight
       ? colorScheme.alternatingBackgroundColor
@@ -514,7 +514,7 @@ const longDuration = Duration(milliseconds: 400);
 /// This is the standard duration to use for animations.
 AnimationController defaultAnimationController(
   TickerProvider vsync, {
-  double value,
+  required double value,
 }) {
   return AnimationController(
     duration: defaultDuration,
@@ -528,7 +528,7 @@ AnimationController defaultAnimationController(
 /// This is the standard duration to use for slow animations.
 AnimationController longAnimationController(
   TickerProvider vsync, {
-  double value,
+  required double value,
 }) {
   return AnimationController(
     duration: longDuration,
@@ -566,11 +566,11 @@ ButtonStyle denseAwareOutlinedButtonStyle(
 ) {
   var buttonStyle = Theme.of(context).outlinedButtonTheme.style;
   if (!includeText(context, minScreenWidthForTextBeforeScaling)) {
-    buttonStyle = buttonStyle.copyWith(
+    buttonStyle = buttonStyle!.copyWith(
       padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
         return EdgeInsets.zero;
       }),
     );
   }
-  return buttonStyle;
+  return buttonStyle!;
 }
