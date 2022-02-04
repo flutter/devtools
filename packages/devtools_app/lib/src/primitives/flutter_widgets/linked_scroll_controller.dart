@@ -139,9 +139,10 @@ class _LinkedScrollControllerGroupOffsetNotifier extends ChangeNotifier {
 /// A scroll controller that mirrors its movements to a peer, which must also
 /// be a [_LinkedScrollController].
 class _LinkedScrollController extends ScrollController {
-  _LinkedScrollController(this._controllers,
-      {required double initialScrollOffset})
-      : super(initialScrollOffset: initialScrollOffset);
+  _LinkedScrollController(
+    this._controllers, {
+    required double initialScrollOffset,
+  }) : super(initialScrollOffset: initialScrollOffset);
 
   final LinkedScrollControllerGroup _controllers;
 
