@@ -46,11 +46,11 @@ abstract class TreeNode<T extends TreeNode<T>> {
   bool get isSelected => _selected;
   bool _selected = false;
 
-  T? get root {
+  T get root {
     if (_root != null) {
-      return _root;
+      return _root!;
     }
-    if (parent == null) return _root = this as T?;
+    if (parent == null) return _root = this as T;
     return _root = parent!.root;
   }
 
