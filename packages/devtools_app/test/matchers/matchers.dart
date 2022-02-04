@@ -93,14 +93,6 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
       'SHOULD_TEST_GOLDENS',
       defaultValue: true,
     );
-    print(
-        'FLUTTER_TEST_ENV: ${const String.fromEnvironment('FLUTTER_TEST_ENV')}');
-    print('SHOULD_TEST_GOLDENS');
-    print(const bool.fromEnvironment('SHOULD_TEST_GOLDENS'));
-    print(const bool.fromEnvironment(
-      'SHOULD_TEST_GOLDENS',
-      defaultValue: true,
-    ));
     if (shouldCheckForMatchingGoldens) {
       final String description = _normalize(object);
       if (_value != description) {
