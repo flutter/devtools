@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/material.dart';
 
@@ -24,9 +24,9 @@ ThemeData themeFor({
 }) {
   ThemeData colorTheme;
   // If the theme specifies a background color, use it to infer a theme.
-  if (isValidDarkColor(ideTheme?.backgroundColor)) {
+  if (isValidDarkColor(ideTheme.backgroundColor)) {
     colorTheme = _darkTheme(ideTheme);
-  } else if (isValidLightColor(ideTheme?.backgroundColor)) {
+  } else if (isValidLightColor(ideTheme.backgroundColor)) {
     colorTheme = _lightTheme(ideTheme);
   } else {
     colorTheme = isDarkTheme ? _darkTheme(ideTheme) : _lightTheme(ideTheme);
@@ -36,18 +36,18 @@ ThemeData themeFor({
     primaryTextTheme: (theme != null
             ? theme.primaryTextTheme.merge(colorTheme.primaryTextTheme)
             : colorTheme.primaryTextTheme)
-        .apply(fontSizeFactor: ideTheme?.fontSizeFactor ?? 1.0),
+        .apply(fontSizeFactor: ideTheme.fontSizeFactor ?? 1.0),
     textTheme: (theme != null
             ? theme.textTheme.merge(colorTheme.textTheme)
             : colorTheme.textTheme)
-        .apply(fontSizeFactor: ideTheme?.fontSizeFactor ?? 1.0),
+        .apply(fontSizeFactor: ideTheme.fontSizeFactor ?? 1.0),
   );
 }
 
 ThemeData _darkTheme(IdeTheme ideTheme) {
   final theme = ThemeData.dark();
-  final background = isValidDarkColor(ideTheme?.backgroundColor)
-      ? ideTheme?.backgroundColor!
+  final background = isValidDarkColor(ideTheme.backgroundColor)
+      ? ideTheme.backgroundColor!
       : theme.canvasColor;
   return _baseTheme(
     theme: theme,
@@ -61,8 +61,8 @@ ThemeData _darkTheme(IdeTheme ideTheme) {
 
 ThemeData _lightTheme(IdeTheme ideTheme) {
   final theme = ThemeData.light();
-  final background = isValidLightColor(ideTheme?.backgroundColor)
-      ? ideTheme?.backgroundColor!
+  final background = isValidLightColor(ideTheme.backgroundColor)
+      ? ideTheme.backgroundColor!
       : theme.canvasColor;
   return _baseTheme(
     theme: theme,
@@ -256,7 +256,7 @@ extension DevToolsColorScheme on ColorScheme {
   Color get toggleButtonsTitleSelected =>
       isLight ? Colors.white : const Color(0xFF464646);
 
-  Color? get toggleButtonsFillSelected => devtoolsBlue[400];
+  Color get toggleButtonsFillSelected => devtoolsBlue[400]!;
 
   Color get grey => isLight
       ? const Color.fromARGB(255, 128, 128, 128)
@@ -554,7 +554,7 @@ double get chartFontSizeSmall => scaleByFontFactor(12.0);
 const lightSelection = Color(0xFFD4D7DA);
 
 bool includeText(
-    BuildContext context, double minScreenWidthForTextBeforeScaling) {
+    BuildContext context, double? minScreenWidthForTextBeforeScaling) {
   return minScreenWidthForTextBeforeScaling == null ||
       MediaQuery.of(context).size.width >
           scaleByFontFactor(minScreenWidthForTextBeforeScaling);
@@ -564,13 +564,13 @@ ButtonStyle denseAwareOutlinedButtonStyle(
   BuildContext context,
   double minScreenWidthForTextBeforeScaling,
 ) {
-  var buttonStyle = Theme.of(context).outlinedButtonTheme.style;
+  ButtonStyle buttonStyle = Theme.of(context).outlinedButtonTheme.style!;
   if (!includeText(context, minScreenWidthForTextBeforeScaling)) {
-    buttonStyle = buttonStyle!.copyWith(
+    buttonStyle = buttonStyle.copyWith(
       padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
         return EdgeInsets.zero;
       }),
     );
   }
-  return buttonStyle!;
+  return buttonStyle;
 }
