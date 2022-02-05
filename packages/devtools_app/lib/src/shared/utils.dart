@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 import 'dart:collection';
@@ -85,14 +85,14 @@ String getLoremFragment([int? wordCount]) {
           .trim())!;
 }
 
-String escape(String text) => text == null ? '' : htmlEscape.convert(text);
+String escape(String? text) => text == null ? '' : htmlEscape.convert(text);
 
 final NumberFormat nf = NumberFormat.decimalPattern();
 
 String percent2(double d) => '${(d * 100).toStringAsFixed(2)}%';
 
-String prettyPrintBytes(
-  num bytes, {
+String? prettyPrintBytes(
+  num? bytes, {
   int kbFractionDigits = 0,
   int mbFractionDigits = 1,
   int gbFractionDigits = 1,
@@ -176,14 +176,14 @@ String renderDuration(Duration duration) {
   }
 }
 
-T nullSafeMin<T extends num?>(T a, T b) {
+T? nullSafeMin<T extends num>(T? a, T? b) {
   if (a == null || b == null) {
     return a ?? b;
   }
   return min<T>(a, b);
 }
 
-T nullSafeMax<T extends num?>(T a, T b) {
+T? nullSafeMax<T extends num>(T? a, T? b) {
   if (a == null || b == null) {
     return a ?? b;
   }
@@ -245,7 +245,10 @@ Future<void> delayForBatchProcessing({int micros = 0}) async {
 /// Completes with null on timeout.
 Future<T> timeout<T>(Future<T> operation, int timeoutMillis) => Future.any<T>([
       operation,
-      Future<T>.delayed(Duration(milliseconds: timeoutMillis), (() => null) as FutureOr<T> Function()?)
+      Future<T>.delayed(
+          Duration(milliseconds: timeoutMillis),
+          // ignore: unnecessary_parenthesis
+          (() => null) as FutureOr<T> Function()?)
     ]);
 
 String longestFittingSubstring(
@@ -314,9 +317,9 @@ String getSimpleStackFrameName(String name) {
 Stream combineStreams(Stream a, Stream b, Stream c) {
   late StreamController controller;
 
-  StreamSubscription? asub;
-  StreamSubscription? bsub;
-  StreamSubscription? csub;
+  late StreamSubscription asub;
+  late StreamSubscription bsub;
+  late StreamSubscription csub;
 
   controller = StreamController(
     onListen: () {
@@ -325,9 +328,9 @@ Stream combineStreams(Stream a, Stream b, Stream c) {
       csub = c.listen(controller.add);
     },
     onCancel: () {
-      asub?.cancel();
-      bsub?.cancel();
-      csub?.cancel();
+      asub.cancel();
+      bsub.cancel();
+      csub.cancel();
     },
   );
 
@@ -450,7 +453,7 @@ class JsonUtils {
     return values.cast();
   }
 
-  static bool hasJsonData(String data) {
+  static bool hasJsonData(String? data) {
     return data != null && data.isNotEmpty && data != 'null';
   }
 }
@@ -611,6 +614,7 @@ class TimeRange {
 
   @override
   bool operator ==(other) {
+    if (other is! TimeRange) return false;
     return start == other.start && end == other.end;
   }
 
@@ -639,7 +643,8 @@ bool isDebugBuild() {
 /// NaN, null, or infinite.
 ///
 /// [ifNotFinite] defaults to 0.0.
-double safeDivide(num? numerator, num? denominator, {double ifNotFinite = 0.0}) {
+double safeDivide(num? numerator, num? denominator,
+    {double ifNotFinite = 0.0}) {
   if (numerator != null && denominator != null) {
     final quotient = numerator / denominator;
     if (quotient.isFinite) {
@@ -768,6 +773,7 @@ class Range {
 
   @override
   bool operator ==(other) {
+    if (other is! Range) return false;
     return begin == other.begin && end == other.end;
   }
 
@@ -780,7 +786,7 @@ enum SortDirection {
   descending,
 }
 
-extension SortDirectionExtension on SortDirection? {
+extension SortDirectionExtension on SortDirection {
   SortDirection reverse() {
     return this == SortDirection.ascending
         ? SortDirection.descending
@@ -798,15 +804,15 @@ bool equalsWithinEpsilon(double a, double b) {
 
 /// A dev time class to help trace DevTools application events.
 class DebugTimingLogger {
-  DebugTimingLogger(this.name, {this.mute});
+  DebugTimingLogger(this.name, {this.mute = false});
 
   final String name;
-  final bool? mute;
+  final bool mute;
 
   Stopwatch? _timer;
 
   void log(String message) {
-    if (mute!) return;
+    if (mute) return;
 
     if (_timer != null) {
       _timer!.stop();
@@ -899,8 +905,8 @@ class MovingAverage {
 ///
 /// Shows a `successMessage` [Notification] on the passed in `context`.
 Future<void> copyToClipboard(
-  String? data,
-  String successMessage,
+  String data,
+  String? successMessage,
   BuildContext context,
 ) async {
   await Clipboard.setData(ClipboardData(
@@ -1127,7 +1133,7 @@ Map<String, String> devToolsQueryParams(String url) {
 ///
 /// We read from the 'uri' value if it exists; otherwise we create a uri from
 /// the from 'port' and 'token' values.
-Uri? getServiceUriFromQueryString(String location) {
+Uri? getServiceUriFromQueryString(String? location) {
   if (location == null) {
     return null;
   }
@@ -1171,7 +1177,7 @@ Uri? getServiceUriFromQueryString(String location) {
 /// Helper function to return the name of a key. If widget has a key
 /// use the key's name to record the select e.g.,
 ///   ga.select(MemoryScreen.id, ga.keyName(MemoryScreen.gcButtonKey));
-String keyName(Key key) => (key as ValueKey<String>)?.value;
+String keyName(Key key) => (key as ValueKey<String>).value;
 
 double safePositiveDouble(double value) {
   if (value.isNaN) return 0.0;
@@ -1211,11 +1217,6 @@ class ListValueNotifier<T> extends ChangeNotifier
 
   @override
   List<T>? get value => _currentList;
-
-  @override
-  void notifyListeners() {
-    super.notifyListeners();
-  }
 
   void _listChanged() {
     _currentList = ImmutableList(_rawList);
