@@ -1400,16 +1400,15 @@ class ImmutableList<T> with ListMixin<T> implements List<T> {
 }
 
 double scaleByFontFactor(double original) {
-  return (original * (ideTheme?.fontSizeFactor ?? 1.0)).roundToDouble();
+  return (original * (ideTheme.fontSizeFactor ?? 1.0)).roundToDouble();
 }
 
 bool isDense() {
-  return preferences != null && preferences.denseModeEnabled.value ||
-      isEmbedded();
+  return preferences.denseModeEnabled.value || isEmbedded();
 }
 
 bool isEmbedded() {
-  return ideTheme?.embed ?? false;
+  return ideTheme.embed ?? false;
 }
 
 mixin CompareMixin implements Comparable {

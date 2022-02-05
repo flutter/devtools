@@ -528,7 +528,7 @@ AnimationController defaultAnimationController(
 /// This is the standard duration to use for slow animations.
 AnimationController longAnimationController(
   TickerProvider vsync, {
-  required double value,
+  double? value,
 }) {
   return AnimationController(
     duration: longDuration,
