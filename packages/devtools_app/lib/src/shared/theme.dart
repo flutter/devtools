@@ -514,7 +514,7 @@ const longDuration = Duration(milliseconds: 400);
 /// This is the standard duration to use for animations.
 AnimationController defaultAnimationController(
   TickerProvider vsync, {
-  required double value,
+  double? value,
 }) {
   return AnimationController(
     duration: defaultDuration,
