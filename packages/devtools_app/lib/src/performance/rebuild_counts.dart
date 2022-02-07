@@ -116,7 +116,6 @@ class RebuildCountModel {
     }
 
     // We've updated the build counts.
-    // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
     _locations.notifyListeners();
   }
 }
