@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/material.dart';
 
@@ -10,13 +10,13 @@ import 'utils.dart';
 
 class FlutterVersion extends SemanticVersion {
   FlutterVersion._({
-    @required this.version,
-    @required this.channel,
-    @required this.repositoryUrl,
-    @required this.frameworkRevision,
-    @required this.frameworkCommitDate,
-    @required this.engineRevision,
-    @required this.dartSdkVersion,
+    required this.version,
+    required this.channel,
+    required this.repositoryUrl,
+    required this.frameworkRevision,
+    required this.frameworkCommitDate,
+    required this.engineRevision,
+    required this.dartSdkVersion,
   }) {
     final semVer = SemanticVersion.parse(version);
     major = semVer.major;
@@ -38,19 +38,19 @@ class FlutterVersion extends SemanticVersion {
     );
   }
 
-  final String version;
+  final String? version;
 
-  final String channel;
+  final String? channel;
 
-  final String repositoryUrl;
+  final String? repositoryUrl;
 
-  final String frameworkRevision;
+  final String? frameworkRevision;
 
-  final String frameworkCommitDate;
+  final String? frameworkCommitDate;
 
-  final String engineRevision;
+  final String? engineRevision;
 
-  final SemanticVersion dartSdkVersion;
+  final SemanticVersion? dartSdkVersion;
 
   String get flutterVersionSummary => [
         if (version != 'unknown') version,
@@ -65,6 +65,7 @@ class FlutterVersion extends SemanticVersion {
 
   @override
   bool operator ==(other) {
+    if (other is! FlutterVersion) return false;
     return version == other.version &&
         channel == other.channel &&
         repositoryUrl == other.repositoryUrl &&
@@ -85,7 +86,7 @@ class FlutterVersion extends SemanticVersion {
         dartSdkVersion,
       );
 
-  static SemanticVersion _parseDartVersion(String versionString) {
+  static SemanticVersion? _parseDartVersion(String? versionString) {
     if (versionString == null) return null;
 
     // Example Dart version string: "2.15.0 (build 2.15.0-178.1.beta)"
@@ -115,7 +116,9 @@ class SemanticVersion with CompareMixin {
     this.preReleaseMinor,
   });
 
-  factory SemanticVersion.parse(String versionString) {
+  factory SemanticVersion.parse(String? versionString) {
+    if (versionString == null) return SemanticVersion();
+
     // Remove any build metadata, denoted by a '+' character and whatever
     // follows.
     final buildMetadataIndex = versionString.indexOf('+');
@@ -145,8 +148,8 @@ class SemanticVersion with CompareMixin {
     final patch =
         _versionParts.length > 2 ? int.tryParse(_versionParts[2]) ?? 0 : 0;
 
-    int preReleaseMajor;
-    int preReleaseMinor;
+    int? preReleaseMajor;
+    int? preReleaseMinor;
     if (splitOnDash.length == 2) {
       final preRelease = splitOnDash.last;
       final preReleaseParts = preRelease
@@ -176,13 +179,13 @@ class SemanticVersion with CompareMixin {
 
   int patch;
 
-  int preReleaseMajor;
+  int? preReleaseMajor;
 
-  int preReleaseMinor;
+  int? preReleaseMinor;
 
   bool get isPreRelease => preReleaseMajor != null || preReleaseMinor != null;
 
-  bool isSupported({@required SemanticVersion supportedVersion}) =>
+  bool isSupported({required SemanticVersion supportedVersion}) =>
       compareTo(supportedVersion) >= 0;
 
   @override
@@ -203,7 +206,7 @@ class SemanticVersion with CompareMixin {
       if (isPreRelease != other.isPreRelease) {
         return isPreRelease ? -1 : 1;
       }
-      if (preReleaseMajor > other.preReleaseMajor ||
+      if (preReleaseMajor! > other.preReleaseMajor ||
           (preReleaseMajor == other.preReleaseMajor &&
               (preReleaseMinor ?? 0) > (other.preReleaseMinor ?? 0))) {
         return 1;
