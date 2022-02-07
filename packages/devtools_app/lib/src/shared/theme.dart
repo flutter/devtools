@@ -554,7 +554,9 @@ double get chartFontSizeSmall => scaleByFontFactor(12.0);
 const lightSelection = Color(0xFFD4D7DA);
 
 bool includeText(
-    BuildContext context, double? minScreenWidthForTextBeforeScaling) {
+  BuildContext context,
+  double? minScreenWidthForTextBeforeScaling,
+) {
   return minScreenWidthForTextBeforeScaling == null ||
       MediaQuery.of(context).size.width >
           scaleByFontFactor(minScreenWidthForTextBeforeScaling);
