@@ -184,8 +184,6 @@ void main() {
         when(debuggerController.searchMatches).thenReturn(ValueNotifier([]));
         when(debuggerController.activeSearchMatch)
             .thenReturn(ValueNotifier(null));
-        when(debuggerController.programExplorerController).thenReturn(
-            ProgramExplorerController(debuggerController: debuggerController));
       });
 
       testWidgetsWithWindowSize(
