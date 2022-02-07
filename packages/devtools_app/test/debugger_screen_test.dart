@@ -7,6 +7,8 @@
 import 'dart:io';
 
 import 'package:ansicolor/ansicolor.dart';
+import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/debugger/console.dart';
 import 'package:devtools_app/src/debugger/controls.dart';
 import 'package:devtools_app/src/debugger/debugger_controller.dart';
@@ -35,6 +37,7 @@ void main() {
     when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(IdeTheme, IdeTheme());
     fakeServiceManager.consoleService.ensureServiceInitialized();
   });
 
@@ -181,6 +184,8 @@ void main() {
         when(debuggerController.searchMatches).thenReturn(ValueNotifier([]));
         when(debuggerController.activeSearchMatch)
             .thenReturn(ValueNotifier(null));
+        when(debuggerController.programExplorerController).thenReturn(
+            ProgramExplorerController(debuggerController: debuggerController));
       });
 
       testWidgetsWithWindowSize(
