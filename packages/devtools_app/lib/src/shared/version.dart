@@ -10,13 +10,13 @@ import 'utils.dart';
 
 class FlutterVersion extends SemanticVersion {
   FlutterVersion._({
-    this.version,
-    this.channel,
-    this.repositoryUrl,
-    this.frameworkRevision,
-    this.frameworkCommitDate,
-    this.engineRevision,
-    this.dartSdkVersion,
+    required this.version,
+    required this.channel,
+    required this.repositoryUrl,
+    required this.frameworkRevision,
+    required this.frameworkCommitDate,
+    required this.engineRevision,
+    required this.dartSdkVersion,
   }) {
     final semVer = SemanticVersion.parse(version);
     major = semVer.major;
