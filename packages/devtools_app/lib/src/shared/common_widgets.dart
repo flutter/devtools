@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'dart:async';
 import 'dart:convert';
@@ -37,14 +37,14 @@ double get areaPaneHeaderHeight => scaleByFontFactor(36.0);
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
   const PaddedDivider({
-    Key key,
+    Key? key,
     this.padding = const EdgeInsets.only(bottom: 10.0),
   }) : super(key: key);
 
-  const PaddedDivider.thin({Key key})
+  const PaddedDivider.thin({Key? key})
       : padding = const EdgeInsets.only(bottom: 4.0);
 
-  PaddedDivider.vertical({Key key, double padding = densePadding})
+  PaddedDivider.vertical({Key? key, double padding = densePadding})
       : padding = EdgeInsets.symmetric(vertical: padding);
 
   /// The padding to place around the divider.
@@ -91,9 +91,9 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
 
 class OutlinedIconButton extends IconLabelButton {
   const OutlinedIconButton({
-    @required IconData icon,
-    @required VoidCallback onPressed,
-    String tooltip,
+    required IconData icon,
+    required VoidCallback? onPressed,
+    String? tooltip,
   }) : super(
           icon: icon,
           label: '',
@@ -114,11 +114,11 @@ class OutlinedIconButton extends IconLabelButton {
 ///    omitted.
 class IconLabelButton extends StatelessWidget {
   const IconLabelButton({
-    Key key,
+    Key? key,
     this.icon,
     this.imageIcon,
-    @required this.label,
-    @required this.onPressed,
+    required this.label,
+    required this.onPressed,
     this.color,
     this.minScreenWidthForTextBeforeScaling,
     this.elevatedButton = false,
@@ -128,24 +128,24 @@ class IconLabelButton extends StatelessWidget {
   })  : assert((icon == null) != (imageIcon == null)),
         super(key: key);
 
-  final IconData icon;
+  final IconData? icon;
 
-  final ThemedImageIcon imageIcon;
+  final ThemedImageIcon? imageIcon;
 
   final String label;
 
-  final double minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForTextBeforeScaling;
 
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
-  final Color color;
+  final Color? color;
 
   /// Whether this icon label button should use an elevated button style.
   final bool elevatedButton;
 
-  final String tooltip;
+  final String? tooltip;
 
-  final EdgeInsetsGeometry tooltipPadding;
+  final EdgeInsetsGeometry? tooltipPadding;
 
   final bool outlined;
 
@@ -182,7 +182,7 @@ class IconLabelButton extends StatelessWidget {
             ? OutlinedButton(
                 style: denseAwareOutlinedButtonStyle(
                   context,
-                  minScreenWidthForTextBeforeScaling,
+                  minScreenWidthForTextBeforeScaling!,
                 ),
                 onPressed: onPressed,
                 child: iconLabel,
@@ -192,7 +192,7 @@ class IconLabelButton extends StatelessWidget {
                 child: iconLabel,
                 style: denseAwareOutlinedButtonStyle(
                   context,
-                  minScreenWidthForTextBeforeScaling,
+                  minScreenWidthForTextBeforeScaling!,
                 ),
               ),
       ),
@@ -202,10 +202,10 @@ class IconLabelButton extends StatelessWidget {
 
 class PauseButton extends IconLabelButton {
   const PauseButton({
-    Key key,
-    double minScreenWidthForTextBeforeScaling,
+    Key? key,
+    double? minScreenWidthForTextBeforeScaling,
     String tooltip = 'Pause',
-    @required VoidCallback onPressed,
+    required VoidCallback? onPressed,
   }) : super(
           key: key,
           icon: Icons.pause,
@@ -219,10 +219,10 @@ class PauseButton extends IconLabelButton {
 
 class ResumeButton extends IconLabelButton {
   const ResumeButton({
-    Key key,
-    double minScreenWidthForTextBeforeScaling,
+    Key? key,
+    double? minScreenWidthForTextBeforeScaling,
     String tooltip = 'Resume',
-    @required VoidCallback onPressed,
+    required VoidCallback? onPressed,
   }) : super(
           key: key,
           icon: Icons.play_arrow,
@@ -236,10 +236,10 @@ class ResumeButton extends IconLabelButton {
 
 class ClearButton extends IconLabelButton {
   const ClearButton({
-    Key key,
-    double minScreenWidthForTextBeforeScaling,
+    Key? key,
+    double? minScreenWidthForTextBeforeScaling,
     String tooltip = 'Clear',
-    @required VoidCallback onPressed,
+    required VoidCallback? onPressed,
   }) : super(
           key: key,
           icon: Icons.block,
@@ -253,11 +253,11 @@ class ClearButton extends IconLabelButton {
 
 class RefreshButton extends IconLabelButton {
   const RefreshButton({
-    Key key,
+    Key? key,
     String label = 'Refresh',
-    double minScreenWidthForTextBeforeScaling,
-    String tooltip,
-    @required VoidCallback onPressed,
+    double? minScreenWidthForTextBeforeScaling,
+    String? tooltip,
+    required VoidCallback? onPressed,
   }) : super(
           key: key,
           icon: Icons.refresh,
@@ -278,11 +278,11 @@ class RefreshButton extends IconLabelButton {
 /// * `onPressed`: The callback to be called upon pressing the button.
 class RecordButton extends IconLabelButton {
   const RecordButton({
-    Key key,
-    @required bool recording,
-    @required VoidCallback onPressed,
-    double minScreenWidthForTextBeforeScaling,
-    String labelOverride,
+    Key? key,
+    required bool recording,
+    required VoidCallback onPressed,
+    double? minScreenWidthForTextBeforeScaling,
+    String? labelOverride,
     String tooltip = 'Start recording',
   }) : super(
           key: key,
@@ -303,10 +303,10 @@ class RecordButton extends IconLabelButton {
 /// * `onPressed`: The callback to be called upon pressing the button.
 class StopRecordingButton extends IconLabelButton {
   const StopRecordingButton({
-    Key key,
-    @required bool recording,
-    @required VoidCallback onPressed,
-    double minScreenWidthForTextBeforeScaling,
+    Key? key,
+    required bool recording,
+    required VoidCallback onPressed,
+    double? minScreenWidthForTextBeforeScaling,
     String tooltip = 'Stop recording',
   }) : super(
           key: key,
@@ -321,9 +321,9 @@ class StopRecordingButton extends IconLabelButton {
 
 class SettingsOutlinedButton extends OutlinedIconButton {
   const SettingsOutlinedButton({
-    @required VoidCallback onPressed,
-    @required String label,
-    String tooltip,
+    required VoidCallback onPressed,
+    required String label,
+    String? tooltip,
   }) : super(
           onPressed: onPressed,
           icon: Icons.settings,
@@ -333,9 +333,9 @@ class SettingsOutlinedButton extends OutlinedIconButton {
 
 class HelpButton extends StatelessWidget {
   const HelpButton({
-    @required this.onPressed,
-    @required this.gaScreen,
-    @required this.gaSelection,
+    required this.onPressed,
+    required this.gaScreen,
+    required this.gaSelection,
   });
 
   final VoidCallback onPressed;
@@ -357,7 +357,7 @@ class HelpButton extends StatelessWidget {
 }
 
 class ExpandAllButton extends StatelessWidget {
-  const ExpandAllButton({Key key, @required this.onPressed}) : super(key: key);
+  const ExpandAllButton({Key? key, required this.onPressed}) : super(key: key);
 
   final VoidCallback onPressed;
 
@@ -371,7 +371,7 @@ class ExpandAllButton extends StatelessWidget {
 }
 
 class CollapseAllButton extends StatelessWidget {
-  const CollapseAllButton({Key key, @required this.onPressed})
+  const CollapseAllButton({Key? key, required this.onPressed})
       : super(key: key);
 
   final VoidCallback onPressed;
@@ -390,18 +390,18 @@ class RecordingInfo extends StatelessWidget {
     this.instructionsKey,
     this.recordingStatusKey,
     this.processingStatusKey,
-    @required this.recording,
-    @required this.recordedObject,
-    @required this.processing,
+    required this.recording,
+    required this.recordedObject,
+    required this.processing,
     this.progressValue,
     this.isPause = false,
   });
 
-  final Key instructionsKey;
+  final Key? instructionsKey;
 
-  final Key recordingStatusKey;
+  final Key? recordingStatusKey;
 
-  final Key processingStatusKey;
+  final Key? processingStatusKey;
 
   final bool recording;
 
@@ -409,7 +409,7 @@ class RecordingInfo extends StatelessWidget {
 
   final bool processing;
 
-  final double progressValue;
+  final double? progressValue;
 
   final bool isPause;
 
@@ -442,8 +442,8 @@ class RecordingInfo extends StatelessWidget {
 
 class RecordingStatus extends StatelessWidget {
   const RecordingStatus({
-    Key key,
-    @required this.recordedObject,
+    Key? key,
+    required this.recordedObject,
   }) : super(key: key);
 
   final String recordedObject;
@@ -466,9 +466,9 @@ class RecordingStatus extends StatelessWidget {
 
 class RecordingInstructions extends StatelessWidget {
   const RecordingInstructions({
-    Key key,
-    @required this.isPause,
-    @required this.recordedObject,
+    Key? key,
+    required this.isPause,
+    required this.recordedObject,
   }) : super(key: key);
 
   final String recordedObject;
@@ -510,12 +510,12 @@ class RecordingInstructions extends StatelessWidget {
 
 class ProcessingInfo extends StatelessWidget {
   const ProcessingInfo({
-    Key key,
-    @required this.progressValue,
-    @required this.processedObject,
+    Key? key,
+    required this.progressValue,
+    required this.processedObject,
   }) : super(key: key);
 
-  final double progressValue;
+  final double? progressValue;
 
   final String processedObject;
 
@@ -552,7 +552,7 @@ class ProcessingInfo extends StatelessWidget {
 ///   offlineController.exitOfflineMode();
 /// }
 class ExitOfflineButton extends IconLabelButton {
-  const ExitOfflineButton({@required VoidCallback onPressed})
+  const ExitOfflineButton({required VoidCallback onPressed})
       : super(
           key: const Key('exit offline button'),
           onPressed: onPressed,
@@ -574,7 +574,7 @@ class BulletSpacer extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    TextStyle textStyle;
+    TextStyle? textStyle;
     if (useAccentColor) {
       textStyle = theme.appBarTheme.toolbarTextStyle ??
           theme.primaryTextTheme.bodyText2;
@@ -623,7 +623,7 @@ class Badge extends StatelessWidget {
       child: Text(
         text,
         // Use a slightly smaller font for the badge.
-        style: theme.primaryTextTheme.bodyText2.apply(fontSizeDelta: -1),
+        style: theme.primaryTextTheme.bodyText2!.apply(fontSizeDelta: -1),
       ),
     );
   }
@@ -633,10 +633,10 @@ class Badge extends StatelessWidget {
 /// common delay before the tooltip is shown.
 class DevToolsTooltip extends StatelessWidget {
   const DevToolsTooltip({
-    Key key,
+    Key? key,
     this.message,
     this.richMessage,
-    @required this.child,
+    required this.child,
     this.waitDuration = tooltipWait,
     this.preferBelow = false,
     this.padding = const EdgeInsets.all(defaultSpacing),
@@ -645,18 +645,18 @@ class DevToolsTooltip extends StatelessWidget {
   })  : assert((message == null) != (richMessage == null)),
         super(key: key);
 
-  final String message;
-  final InlineSpan richMessage;
+  final String? message;
+  final InlineSpan? richMessage;
   final Widget child;
   final Duration waitDuration;
   final bool preferBelow;
-  final EdgeInsetsGeometry padding;
-  final Decoration decoration;
-  final TextStyle textStyle;
+  final EdgeInsetsGeometry? padding;
+  final Decoration? decoration;
+  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
-    TextStyle style = textStyle;
+    TextStyle? style = textStyle;
     if (richMessage == null) {
       style = TextStyle(
         color: Theme.of(context).colorScheme.tooltipTextColor,
@@ -678,19 +678,19 @@ class DevToolsTooltip extends StatelessWidget {
 
 class DevToolsIconButton extends StatelessWidget {
   const DevToolsIconButton({
-    Key key,
+    Key? key,
     this.iconData,
     this.iconWidget,
-    @required this.onPressed,
-    @required this.tooltip,
-    @required this.gaScreen,
-    @required this.gaSelection,
+    required this.onPressed,
+    required this.tooltip,
+    required this.gaScreen,
+    required this.gaSelection,
   })  : assert((iconData == null) != (iconWidget == null)),
         super(key: key);
 
-  final IconData iconData;
+  final IconData? iconData;
 
-  final Widget iconWidget;
+  final Widget? iconWidget;
 
   final VoidCallback onPressed;
 
@@ -729,15 +729,15 @@ class DevToolsIconButton extends StatelessWidget {
 /// small toolbar actions.
 class ToolbarAction extends StatelessWidget {
   const ToolbarAction({
-    @required this.icon,
-    @required this.onPressed,
+    required this.icon,
+    required this.onPressed,
     this.tooltip,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   final IconData icon;
-  final String tooltip;
-  final VoidCallback onPressed;
+  final String? tooltip;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -765,8 +765,8 @@ class ToolbarAction extends StatelessWidget {
 /// This is typically used as a title for a logical area of the screen.
 class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   const AreaPaneHeader({
-    Key key,
-    @required this.title,
+    Key? key,
+    required this.title,
     this.maxLines = 1,
     this.needsTopBorder = true,
     this.needsBottomBorder = true,
@@ -813,7 +813,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
             DefaultTextStyle(
               maxLines: maxLines,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.subtitle2,
+              style: theme.textTheme.subtitle2!,
               child: title,
             ),
             ..._buildActions(),
@@ -861,17 +861,17 @@ BorderSide defaultBorderSide(ThemeData theme) {
 
 class DevToolsToggleButtonGroup extends StatelessWidget {
   const DevToolsToggleButtonGroup({
-    Key key,
-    @required this.children,
-    @required this.selectedStates,
-    @required this.onPressed,
+    Key? key,
+    required this.children,
+    required this.selectedStates,
+    required this.onPressed,
   }) : super(key: key);
 
   final List<Widget> children;
 
   final List<bool> selectedStates;
 
-  final void Function(int) onPressed;
+  final void Function(int)? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -901,9 +901,9 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
 /// * `onPressed`: The callback to be called upon pressing the button.
 class ExportButton extends IconLabelButton {
   const ExportButton({
-    Key key,
-    @required VoidCallback onPressed,
-    @required double minScreenWidthForTextBeforeScaling,
+    Key? key,
+    required VoidCallback? onPressed,
+    required double minScreenWidthForTextBeforeScaling,
     String tooltip = 'Export data',
   }) : super(
           key: key,
@@ -918,9 +918,9 @@ class ExportButton extends IconLabelButton {
 
 class FilterButton extends StatelessWidget {
   const FilterButton({
-    Key key,
-    @required this.onPressed,
-    @required this.isFilterActive,
+    Key? key,
+    required this.onPressed,
+    required this.isFilterActive,
   }) : super(key: key);
 
   final VoidCallback onPressed;
@@ -959,7 +959,7 @@ class FilterButton extends StatelessWidget {
 
 class RoundedDropDownButton<T> extends StatelessWidget {
   const RoundedDropDownButton({
-    Key key,
+    Key? key,
     this.value,
     this.onChanged,
     this.isDense = false,
@@ -968,17 +968,17 @@ class RoundedDropDownButton<T> extends StatelessWidget {
     this.items,
   }) : super(key: key);
 
-  final T value;
+  final T? value;
 
-  final ValueChanged<T> onChanged;
+  final ValueChanged<T?>? onChanged;
 
   final bool isDense;
 
-  final TextStyle style;
+  final TextStyle? style;
 
-  final DropdownButtonBuilder selectedItemBuilder;
+  final DropdownButtonBuilder? selectedItemBuilder;
 
-  final List<DropdownMenuItem<T>> items;
+  final List<DropdownMenuItem<T>>? items;
 
   @override
   Widget build(BuildContext context) {
@@ -1010,11 +1010,11 @@ Widget clearInputButton(VoidCallback onPressed) {
   return inputDecorationSuffixButton(Icons.clear, onPressed);
 }
 
-Widget closeSearchDropdownButton(VoidCallback onPressed) {
+Widget closeSearchDropdownButton(VoidCallback? onPressed) {
   return inputDecorationSuffixButton(Icons.close, onPressed);
 }
 
-Widget inputDecorationSuffixButton(IconData icon, VoidCallback onPressed) {
+Widget inputDecorationSuffixButton(IconData icon, VoidCallback? onPressed) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: densePadding),
     width: defaultIconSize + denseSpacing,
@@ -1029,11 +1029,11 @@ Widget inputDecorationSuffixButton(IconData icon, VoidCallback onPressed) {
 }
 
 class OutlinedRowGroup extends StatelessWidget {
-  const OutlinedRowGroup({@required this.children, this.borderColor});
+  const OutlinedRowGroup({required this.children, this.borderColor});
 
   final List<Widget> children;
 
-  final Color borderColor;
+  final Color? borderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -1062,9 +1062,9 @@ class OutlinedRowGroup extends StatelessWidget {
 }
 
 class OutlineDecoration extends StatelessWidget {
-  const OutlineDecoration({Key key, this.child}) : super(key: key);
+  const OutlineDecoration({Key? key, this.child}) : super(key: key);
 
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -1078,9 +1078,9 @@ class OutlineDecoration extends StatelessWidget {
 }
 
 class RoundedOutlinedBorder extends StatelessWidget {
-  const RoundedOutlinedBorder({Key key, this.child}) : super(key: key);
+  const RoundedOutlinedBorder({Key? key, this.child}) : super(key: key);
 
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -1099,7 +1099,7 @@ BoxDecoration roundedBorderDecoration(BuildContext context) => BoxDecoration(
 class LeftBorder extends StatelessWidget {
   const LeftBorder({this.child});
 
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -1147,10 +1147,10 @@ class CenteredCircularProgressIndicator extends StatelessWidget {
 
 class CircularIconButton extends StatelessWidget {
   const CircularIconButton({
-    @required this.icon,
-    @required this.onPressed,
-    @required this.backgroundColor,
-    @required this.foregroundColor,
+    required this.icon,
+    required this.onPressed,
+    required this.backgroundColor,
+    required this.foregroundColor,
   });
 
   final IconData icon;
@@ -1289,8 +1289,8 @@ Color alternatingColorForIndex(int index, ColorScheme colorScheme) {
 
 class BreadcrumbNavigator extends StatelessWidget {
   const BreadcrumbNavigator.builder({
-    @required this.itemCount,
-    @required this.builder,
+    required this.itemCount,
+    required this.builder,
   });
 
   final int itemCount;
@@ -1313,9 +1313,9 @@ class BreadcrumbNavigator extends StatelessWidget {
 
 class Breadcrumb extends StatelessWidget {
   const Breadcrumb({
-    @required this.text,
-    @required this.isRoot,
-    @required this.onPressed,
+    required this.text,
+    required this.isRoot,
+    required this.onPressed,
   });
 
   static const height = 28.0;
@@ -1371,10 +1371,10 @@ class Breadcrumb extends StatelessWidget {
 
 class _BreadcrumbPainter extends CustomPainter {
   _BreadcrumbPainter({
-    @required this.textPainter,
-    @required this.isRoot,
-    @required this.breadcrumbWidth,
-    @required this.colorScheme,
+    required this.textPainter,
+    required this.isRoot,
+    required this.breadcrumbWidth,
+    required this.colorScheme,
   });
 
   final TextPainter textPainter;
@@ -1431,9 +1431,9 @@ class FormattedJson extends StatelessWidget {
 
   static const encoder = JsonEncoder.withIndent('  ');
 
-  final Map<String, dynamic> json;
+  final Map<String, dynamic>? json;
 
-  final String formattedString;
+  final String? formattedString;
 
   final bool useSubtleStyle;
 
@@ -1442,7 +1442,7 @@ class FormattedJson extends StatelessWidget {
     final theme = Theme.of(context);
     // TODO(kenz): we could consider using a prettier format like YAML.
     return SelectableText(
-      json != null ? encoder.convert(json) : formattedString,
+      json != null ? encoder.convert(json) : formattedString!,
       style: useSubtleStyle ? theme.subtleFixedFontStyle : theme.fixedFontStyle,
     );
   }
@@ -1450,15 +1450,15 @@ class FormattedJson extends StatelessWidget {
 
 class MoreInfoLink extends StatelessWidget {
   const MoreInfoLink({
-    Key key,
-    @required this.url,
-    @required this.gaScreenName,
-    @required this.gaSelectedItemDescription,
+    Key? key,
+    required this.url,
+    required this.gaScreenName,
+    required this.gaSelectedItemDescription,
   }) : super(key: key);
 
-  final String url;
+  final String? url;
 
-  final String gaScreenName;
+  final String? gaScreenName;
 
   final String gaSelectedItemDescription;
 
@@ -1491,24 +1491,24 @@ class MoreInfoLink extends StatelessWidget {
   }
 
   void _onLinkTap(BuildContext context) {
-    launchUrl(url, context);
+    launchUrl(url!, context);
     ga.select(gaScreenName, gaSelectedItemDescription);
   }
 }
 
 class LinkTextSpan extends TextSpan {
   LinkTextSpan({
-    @required Link link,
-    @required BuildContext context,
-    TextStyle style,
-    VoidCallback onTap,
+    required Link link,
+    required BuildContext context,
+    TextStyle? style,
+    VoidCallback? onTap,
   }) : super(
           text: link.display,
           style: style ?? Theme.of(context).linkTextStyle,
           recognizer: TapGestureRecognizer()
             ..onTap = () async {
               if (onTap != null) onTap();
-              await launchUrl(link.url, context);
+              await launchUrl(link.url!, context);
             },
         );
 }
@@ -1516,15 +1516,15 @@ class LinkTextSpan extends TextSpan {
 class Link {
   const Link({this.display, this.url});
 
-  final String display;
+  final String? display;
 
-  final String url;
+  final String? url;
 }
 
 Widget maybeWrapWithTooltip({
-  @required String tooltip,
-  EdgeInsetsGeometry tooltipPadding,
-  @required Widget child,
+  required String? tooltip,
+  EdgeInsetsGeometry? tooltipPadding,
+  required Widget child,
 }) {
   if (tooltip != null) {
     return DevToolsTooltip(
@@ -1537,7 +1537,7 @@ Widget maybeWrapWithTooltip({
 }
 
 class Legend extends StatelessWidget {
-  const Legend({Key key, @required this.entries}) : super(key: key);
+  const Legend({Key? key, required this.entries}) : super(key: key);
 
   double get legendSquareSize => scaleByFontFactor(16.0);
 
@@ -1545,7 +1545,7 @@ class Legend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final legendItems = entries
+    final List<Widget> legendItems = entries
         .map((entry) => _legendItem(entry.description, entry.color))
         .toList()
         .joinWith(const SizedBox(height: denseRowSpacing));
@@ -1555,7 +1555,7 @@ class Legend extends StatelessWidget {
     );
   }
 
-  Widget _legendItem(String description, Color color) {
+  Widget _legendItem(String description, Color? color) {
     return Row(
       children: [
         Container(
@@ -1575,11 +1575,11 @@ class LegendEntry {
 
   final String description;
 
-  final Color color;
+  final Color? color;
 }
 
 /// The type of data provider function used by the CopyToClipboard Control.
-typedef ClipboardDataProvider = String Function();
+typedef ClipboardDataProvider = String? Function();
 
 /// Control that copies `data` to the clipboard.
 ///
@@ -1592,10 +1592,10 @@ class CopyToClipboardControl extends StatelessWidget {
     this.buttonKey,
   });
 
-  final ClipboardDataProvider dataProvider;
+  final ClipboardDataProvider? dataProvider;
   final String successMessage;
   final String tooltip;
-  final Key buttonKey;
+  final Key? buttonKey;
 
   @override
   Widget build(BuildContext context) {
@@ -1605,7 +1605,7 @@ class CopyToClipboardControl extends StatelessWidget {
       tooltip: tooltip,
       onPressed: disabled
           ? null
-          : () => copyToClipboard(dataProvider(), successMessage, context),
+          : () => copyToClipboard(dataProvider!(), successMessage, context),
       key: buttonKey,
     );
   }
@@ -1624,28 +1624,28 @@ class CopyToClipboardControl extends StatelessWidget {
 /// [ValueNotifier] and changes to the [ValueNotifier] updating the checkbox.
 class NotifierCheckbox extends StatelessWidget {
   const NotifierCheckbox({
-    Key key,
-    @required this.notifier,
+    Key? key,
+    required this.notifier,
     this.onChanged,
     this.enabled = true,
   }) : super(key: key);
 
   /// The notifier this [NotifierCheckbox] is responsible for listening to and
   /// updating.
-  final ValueNotifier<bool> notifier;
+  final ValueNotifier<bool?> notifier;
 
   /// The callback to be called on change in addition to the notifier changes
   /// handled by this class.
-  final void Function(bool newValue) onChanged;
+  final void Function(bool? newValue)? onChanged;
 
   /// Whether this checkbox should be enabled for interaction.
   final bool enabled;
 
-  void _updateValue(bool value) {
+  void _updateValue(bool? value) {
     if (notifier.value != value) {
       notifier.value = value;
       if (onChanged != null) {
-        onChanged(value);
+        onChanged!(value);
       }
     }
   }
@@ -1654,7 +1654,7 @@ class NotifierCheckbox extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: notifier,
-      builder: (context, value, _) {
+      builder: (context, dynamic value, _) {
         return Checkbox(
           value: value,
           onChanged: enabled ? _updateValue : null,
@@ -1666,24 +1666,24 @@ class NotifierCheckbox extends StatelessWidget {
 
 class CheckboxSetting extends StatelessWidget {
   const CheckboxSetting({
-    Key key,
-    @required this.notifier,
-    @required this.title,
+    Key? key,
+    required this.notifier,
+    required this.title,
     this.description,
     this.tooltip,
     this.onChanged,
     this.enabled = true,
   }) : super(key: key);
 
-  final ValueListenable<bool> notifier;
+  final ValueListenable<bool?> notifier;
 
   final String title;
 
-  final String description;
+  final String? description;
 
-  final String tooltip;
+  final String? tooltip;
 
-  final void Function(bool newValue) onChanged;
+  final void Function(bool newValue)? onChanged;
 
   /// Whether this checkbox setting should be enabled for interaction.
   final bool enabled;
@@ -1721,7 +1721,7 @@ class CheckboxSetting extends StatelessWidget {
     final content = Row(
       children: [
         NotifierCheckbox(
-          notifier: notifier,
+          notifier: notifier as ValueNotifier<bool?>,
           onChanged: onChanged,
           enabled: enabled,
         ),
@@ -1730,7 +1730,7 @@ class CheckboxSetting extends StatelessWidget {
         ),
       ],
     );
-    if (tooltip != null && tooltip.isNotEmpty) {
+    if (tooltip != null && tooltip!.isNotEmpty) {
       return DevToolsTooltip(
         message: tooltip,
         child: content,
@@ -1741,12 +1741,12 @@ class CheckboxSetting extends StatelessWidget {
 }
 
 class PubWarningText extends StatelessWidget {
-  const PubWarningText({Key key}) : super(key: key);
+  const PubWarningText({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isFlutterApp = serviceManager.connectedApp.isFlutterAppNow;
+    final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow!;
     final sdkName = isFlutterApp ? 'Flutter' : 'Dart';
     final minSdkVersion = isFlutterApp ? '2.8.0' : '2.15.0';
     return SelectableText.rich(
@@ -1778,7 +1778,7 @@ class PubWarningText extends StatelessWidget {
 }
 
 class InternalFlutterWebWarningText extends StatelessWidget {
-  const InternalFlutterWebWarningText({Key key}) : super(key: key);
+  const InternalFlutterWebWarningText({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -1812,10 +1812,10 @@ class InternalFlutterWebWarningText extends StatelessWidget {
 
 class BlinkingIcon extends StatefulWidget {
   const BlinkingIcon({
-    Key key,
-    @required this.icon,
-    @required this.color,
-    @required this.size,
+    Key? key,
+    required this.icon,
+    required this.color,
+    required this.size,
   }) : super(key: key);
 
   final IconData icon;
@@ -1829,9 +1829,9 @@ class BlinkingIcon extends StatefulWidget {
 }
 
 class _BlinkingIconState extends State<BlinkingIcon> {
-  Timer timer;
+  late Timer timer;
 
-  bool showFirst;
+  late bool showFirst;
 
   @override
   void initState() {
@@ -1861,7 +1861,7 @@ class _BlinkingIconState extends State<BlinkingIcon> {
     );
   }
 
-  Widget _icon({Color color}) {
+  Widget _icon({Color? color}) {
     return Icon(
       widget.icon,
       size: widget.size,
@@ -1877,10 +1877,10 @@ class _BlinkingIconState extends State<BlinkingIcon> {
 /// single build method.
 class DualValueListenableBuilder<T, U> extends StatefulWidget {
   const DualValueListenableBuilder({
-    Key key,
-    @required this.firstListenable,
-    @required this.secondListenable,
-    @required this.builder,
+    Key? key,
+    required this.firstListenable,
+    required this.secondListenable,
+    required this.builder,
     this.child,
   }) : super(key: key);
 
@@ -1892,10 +1892,10 @@ class DualValueListenableBuilder<T, U> extends StatefulWidget {
     BuildContext context,
     T firstValue,
     U secondValue,
-    Widget child,
+    Widget? child,
   ) builder;
 
-  final Widget child;
+  final Widget? child;
 
   @override
   _DualValueListenableBuilderState createState() =>
@@ -1924,11 +1924,11 @@ class _DualValueListenableBuilderState<T, U>
 
 class SmallCircularProgressIndicator extends StatelessWidget {
   const SmallCircularProgressIndicator({
-    Key key,
-    @required this.valueColor,
+    Key? key,
+    required this.valueColor,
   }) : super(key: key);
 
-  final Animation<Color> valueColor;
+  final Animation<Color?> valueColor;
 
   @override
   Widget build(BuildContext context) {
@@ -1941,17 +1941,17 @@ class SmallCircularProgressIndicator extends StatelessWidget {
 
 class ElevatedCard extends StatelessWidget {
   const ElevatedCard({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
     this.width,
     this.height,
     this.padding,
   }) : super(key: key);
 
   final Widget child;
-  final double width;
-  final double height;
-  final EdgeInsetsGeometry padding;
+  final double? width;
+  final double? height;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
