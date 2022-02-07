@@ -564,7 +564,8 @@ ButtonStyle denseAwareOutlinedButtonStyle(
   BuildContext context,
   double minScreenWidthForTextBeforeScaling,
 ) {
-  ButtonStyle buttonStyle = Theme.of(context).outlinedButtonTheme.style!;
+  ButtonStyle buttonStyle =
+      Theme.of(context).outlinedButtonTheme.style ?? const ButtonStyle();
   if (!includeText(context, minScreenWidthForTextBeforeScaling)) {
     buttonStyle = buttonStyle.copyWith(
       padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
