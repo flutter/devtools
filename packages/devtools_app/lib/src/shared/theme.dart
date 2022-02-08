@@ -19,14 +19,14 @@ const contrastForegroundWhite = _contrastForegroundWhite;
 /// IDE-supplied theming.
 ThemeData themeFor({
   required bool isDarkTheme,
-  required IdeTheme? ideTheme,
+  required IdeTheme ideTheme,
   ThemeData? theme,
 }) {
   ThemeData colorTheme;
   // If the theme specifies a background color, use it to infer a theme.
-  if (isValidDarkColor(ideTheme?.backgroundColor)) {
+  if (isValidDarkColor(ideTheme.backgroundColor)) {
     colorTheme = _darkTheme(ideTheme);
-  } else if (isValidLightColor(ideTheme?.backgroundColor)) {
+  } else if (isValidLightColor(ideTheme.backgroundColor)) {
     colorTheme = _lightTheme(ideTheme);
   } else {
     colorTheme = isDarkTheme ? _darkTheme(ideTheme) : _lightTheme(ideTheme);
@@ -36,11 +36,11 @@ ThemeData themeFor({
     primaryTextTheme: (theme != null
             ? theme.primaryTextTheme.merge(colorTheme.primaryTextTheme)
             : colorTheme.primaryTextTheme)
-        .apply(fontSizeFactor: ideTheme?.fontSizeFactor ?? 1.0),
+        .apply(fontSizeFactor: ideTheme.fontSizeFactor ?? 1.0),
     textTheme: (theme != null
             ? theme.textTheme.merge(colorTheme.textTheme)
             : colorTheme.textTheme)
-        .apply(fontSizeFactor: ideTheme?.fontSizeFactor ?? 1.0),
+        .apply(fontSizeFactor: ideTheme.fontSizeFactor ?? 1.0),
   );
 }
 
