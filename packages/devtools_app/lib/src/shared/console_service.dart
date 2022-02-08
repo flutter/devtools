@@ -11,8 +11,8 @@ import '../debugger/debugger_model.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
 import '../primitives/auto_dispose.dart';
+import '../primitives/utils.dart';
 import 'globals.dart';
-import 'utils.dart';
 import 'vm_service_wrapper.dart';
 
 /// A line in the console.

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../http/http_request_data.dart';
-import '../shared/utils.dart';
+import '../primitives/utils.dart';
 import '../ui/search.dart';
 
 abstract class NetworkRequest with DataSearchStateMixin {

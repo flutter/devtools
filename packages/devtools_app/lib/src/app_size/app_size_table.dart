@@ -7,6 +7,7 @@
 import 'package:flutter/material.dart';
 
 import '../charts/treemap.dart';
+import '../primitives/utils.dart';
 import '../shared/table.dart';
 import '../shared/table_data.dart';
 import '../shared/utils.dart';

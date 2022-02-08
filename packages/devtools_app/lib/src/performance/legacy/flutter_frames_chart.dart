@@ -14,9 +14,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/theme.dart';
-import '../../shared/utils.dart';
 import '../../ui/colors.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';

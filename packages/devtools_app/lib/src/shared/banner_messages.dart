@@ -8,11 +8,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../primitives/utils.dart';
 import 'common_widgets.dart';
 import 'globals.dart';
 import 'screen.dart';
 import 'theme.dart';
-import 'utils.dart';
 
 const _runInProfileModeDocsUrl =
     'https://flutter.dev/docs/testing/ui-performance#run-in-profile-mode';

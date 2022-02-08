@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
+import '../primitives/utils.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
 import 'collapsible_mixin.dart';
