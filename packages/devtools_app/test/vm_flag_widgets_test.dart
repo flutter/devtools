@@ -4,6 +4,7 @@
 
 // @dart=2.9
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/profiler/profile_granularity.dart';
 import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/shared/banner_messages.dart';
@@ -39,7 +40,7 @@ void main() {
     Future<void> pumpDropdown(WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: themeFor(isDarkTheme: false, ideTheme: null),
+          theme: themeFor(isDarkTheme: false, ideTheme: IdeTheme()),
           home: Material(
             child: wrapWithControllers(
               Builder(
