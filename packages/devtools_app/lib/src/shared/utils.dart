@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file contain higher level utils, i.e. utils that depend on
+// other libraries in this package.
+// Utils, that do not have dependencies, should go to primitives/utils.dart.
+
 // @dart=2.9
 
 import 'dart:async';
