@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../info/info_controller.dart';
 import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/utils.dart';
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'dialogs.dart';

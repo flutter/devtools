@@ -142,6 +142,9 @@ this flag.  For example, it is OK to do the following:
 flutter test test/ui/
 ```
 
+If you run the tests on other that linux environment, first time add the flag `--update-goldens`, 
+because goldens on your machine will be little different.
+
 ### Updating golden files
 
 Some of the golden file tests will fail if Flutter changes the implementation or diagnostic

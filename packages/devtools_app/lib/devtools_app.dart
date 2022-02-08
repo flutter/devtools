@@ -33,6 +33,7 @@ export 'src/primitives/auto_dispose_mixin.dart';
 export 'src/primitives/listenable.dart';
 export 'src/primitives/trace_event.dart';
 export 'src/primitives/trees.dart';
+export 'src/primitives/utils.dart';
 export 'src/primitives/utils_io.dart';
 export 'src/profiler/cpu_profile_model.dart';
 export 'src/profiler/profile_granularity.dart';

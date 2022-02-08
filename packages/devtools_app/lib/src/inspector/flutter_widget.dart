@@ -6,7 +6,7 @@
 
 library flutter_widget;
 
-import '../shared/utils.dart';
+import '../primitives/utils.dart';
 import '../ui/icons.dart';
 
 class Category {

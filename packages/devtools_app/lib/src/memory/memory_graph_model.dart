@@ -7,7 +7,7 @@
 import 'package:vm_service/vm_service.dart';
 
 // import '../config_specific/logger/logger.dart';
-import '../shared/utils.dart';
+import '../primitives/utils.dart';
 import 'memory_controller.dart';
 
 // TODO(terry): Ask Ben, what is a class name of ::?

@@ -11,10 +11,10 @@ import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/utils.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
 import '../shared/theme.dart';
-import '../shared/utils.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
 import 'debugger_controller.dart';

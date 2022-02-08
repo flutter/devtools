@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/auto_dispose_mixin.dart';
-import '../shared/utils.dart';
+import '../primitives/utils.dart';
 import '../ui/search.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';

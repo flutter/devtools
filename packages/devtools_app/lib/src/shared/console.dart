@@ -11,10 +11,10 @@ import 'package:provider/provider.dart';
 import '../debugger/debugger_controller.dart';
 import '../debugger/variables.dart';
 import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/utils.dart';
 import 'common_widgets.dart';
 import 'console_service.dart';
 import 'theme.dart';
-import 'utils.dart';
 
 // TODO(devoncarew): Allow scrolling horizontally as well.
 
