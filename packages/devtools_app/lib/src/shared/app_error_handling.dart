@@ -29,7 +29,7 @@ void setupErrorHandling(Future Function() appStartCallback) {
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
 
     FlutterError.onError = (FlutterErrorDetails details) {
-      _reportError(details.exception, details.stack!);
+      _reportError(details.exception, details.stack ?? StackTrace.empty);
 
       if (oldHandler != null) {
         oldHandler(details);
