@@ -7,4 +7,4 @@
 import 'ide_theme.dart';
 
 /// Load any IDE-supplied theming.
-IdeTheme getIdeTheme() => null;
+IdeTheme getIdeTheme() => IdeTheme();
