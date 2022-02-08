@@ -15,6 +15,7 @@ import '../config_specific/logger/logger.dart' as logger;
 import 'globals.dart';
 import 'notifications.dart';
 import 'version.dart';
+import '../primitives/utils.dart';
 
 /// Attempts to copy a String of `data` to the clipboard.
 ///
