@@ -18,6 +18,7 @@ import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/extent_delegate_list.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
+import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';
 import '../shared/dialogs.dart';
 import '../shared/theme.dart';

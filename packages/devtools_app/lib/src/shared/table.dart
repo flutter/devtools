@@ -21,6 +21,7 @@ import 'table_data.dart';
 import 'theme.dart';
 import 'tree.dart';
 import 'utils.dart';
+import '../primitives/utils.dart';
 
 // TODO(devoncarew): We need to render the selected row with a different
 // background color.

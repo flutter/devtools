@@ -12,9 +12,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
 
+import '../../primitives/utils.dart';
 import '../../shared/eval_on_dart_library.dart';
 import '../../shared/globals.dart';
-import '../../shared/utils.dart';
 import '../provider_debounce.dart';
 import 'eval.dart';
 import 'instance_details.dart';

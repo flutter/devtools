@@ -12,7 +12,7 @@ import 'package:flutter/widgets.dart';
 
 import '../primitives/enum_utils.dart';
 import '../primitives/math_utils.dart';
-import '../shared/utils.dart';
+import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
 import 'layout_explorer/flex/utils.dart';
 

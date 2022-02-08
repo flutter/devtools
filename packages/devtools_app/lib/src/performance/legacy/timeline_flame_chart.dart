@@ -24,7 +24,7 @@ import '../../primitives/trace_event.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/notifications.dart';
 import '../../shared/theme.dart';
-import '../../shared/utils.dart';
+import '../../primitives/utils.dart';
 import '../../ui/colors.dart';
 import '../../ui/search.dart';
 import '../../ui/utils.dart';

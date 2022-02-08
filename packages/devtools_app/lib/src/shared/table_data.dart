@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 
 import '../primitives/trees.dart';
 import 'utils.dart';
+import '../primitives/utils.dart';
 
 class HoverCellData<T> {
   HoverCellData(this.data);

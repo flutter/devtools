@@ -13,8 +13,8 @@ import '../analytics/analytics.dart' as ga;
 import '../config_specific/launch_url/launch_url.dart';
 import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
+import '../primitives/utils.dart';
 import 'notifications.dart';
-import 'utils.dart';
 
 class SurveyService {
   static const _noThanksLabel = 'NO THANKS';

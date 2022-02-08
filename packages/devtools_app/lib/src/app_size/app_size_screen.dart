@@ -21,7 +21,7 @@ import '../shared/notifications.dart';
 import '../shared/screen.dart';
 import '../shared/split.dart';
 import '../shared/theme.dart';
-import '../shared/utils.dart';
+import '../primitives/utils.dart';
 import '../ui/icons.dart';
 import '../ui/tab.dart';
 import 'app_size_controller.dart';
