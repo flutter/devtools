@@ -15,7 +15,6 @@ import '../config_specific/logger/logger.dart' as logger;
 import 'globals.dart';
 import 'notifications.dart';
 import 'version.dart';
-import '../primitives/utils.dart';
 
 /// Attempts to copy a String of `data` to the clipboard.
 ///
@@ -53,6 +52,24 @@ bool isDense() {
 
 bool isEmbedded() {
   return ideTheme?.embed ?? false;
+}
+
+mixin CompareMixin implements Comparable {
+  bool operator <(other) {
+    return compareTo(other) < 0;
+  }
+
+  bool operator >(other) {
+    return compareTo(other) > 0;
+  }
+
+  bool operator <=(other) {
+    return compareTo(other) <= 0;
+  }
+
+  bool operator >=(other) {
+    return compareTo(other) >= 0;
+  }
 }
 
 bool shouldShowPubWarning() =>

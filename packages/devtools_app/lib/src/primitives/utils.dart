@@ -1367,24 +1367,6 @@ class ImmutableList<T> with ListMixin<T> implements List<T> {
   }
 }
 
-mixin CompareMixin implements Comparable {
-  bool operator <(other) {
-    return compareTo(other) < 0;
-  }
-
-  bool operator >(other) {
-    return compareTo(other) > 0;
-  }
-
-  bool operator <=(other) {
-    return compareTo(other) <= 0;
-  }
-
-  bool operator >=(other) {
-    return compareTo(other) >= 0;
-  }
-}
-
 extension BoolExtension on bool {
   int boolCompare(bool other) {
     if ((this && other) || (!this && !other)) return 0;

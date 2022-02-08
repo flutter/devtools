@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import '../shared/utils.dart';
+import '../primitives/utils.dart';
 import 'analytics_common.dart';
 
 Future<void> setAnalyticsEnabled(bool value) async {}
