@@ -5,8 +5,6 @@
 // This file contain low level utils, i.e. utils that do not depend on
 // libraries in this package.
 
-
-
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
@@ -82,7 +80,7 @@ String? getLoremFragment([int? wordCount]) {
           .trim());
 }
 
-String escape(String text) => text == null ? '' : htmlEscape.convert(text);
+String escape(String? text) => text == null ? '' : htmlEscape.convert(text);
 
 final NumberFormat nf = NumberFormat.decimalPattern();
 
@@ -173,14 +171,14 @@ String renderDuration(Duration duration) {
   }
 }
 
-T nullSafeMin<T extends num?>(T a, T b) {
+T? nullSafeMin<T extends num>(T? a, T? b) {
   if (a == null || b == null) {
     return a ?? b;
   }
   return min<T>(a, b);
 }
 
-T nullSafeMax<T extends num?>(T a, T b) {
+T? nullSafeMax<T extends num>(T? a, T? b) {
   if (a == null || b == null) {
     return a ?? b;
   }
@@ -242,7 +240,10 @@ Future<void> delayForBatchProcessing({int micros = 0}) async {
 /// Completes with null on timeout.
 Future<T> timeout<T>(Future<T> operation, int timeoutMillis) => Future.any<T>([
       operation,
-      Future<T>.delayed(Duration(milliseconds: timeoutMillis), (() => null) as FutureOr<T> Function()?)
+      Future<T>.delayed(
+          Duration(milliseconds: timeoutMillis),
+          // ignore: unnecessary_parenthesis
+          (() => null) as FutureOr<T> Function()?)
     ]);
 
 String longestFittingSubstring(
@@ -447,7 +448,7 @@ class JsonUtils {
     return values.cast();
   }
 
-  static bool hasJsonData(String data) {
+  static bool hasJsonData(String? data) {
     return data != null && data.isNotEmpty && data != 'null';
   }
 }
@@ -608,6 +609,7 @@ class TimeRange {
 
   @override
   bool operator ==(other) {
+    if (other is! TimeRange) return false;
     return start == other.start && end == other.end;
   }
 
@@ -636,7 +638,8 @@ bool isDebugBuild() {
 /// NaN, null, or infinite.
 ///
 /// [ifNotFinite] defaults to 0.0.
-double safeDivide(num? numerator, num? denominator, {double ifNotFinite = 0.0}) {
+double safeDivide(num? numerator, num? denominator,
+    {double ifNotFinite = 0.0}) {
   if (numerator != null && denominator != null) {
     final quotient = numerator / denominator;
     if (quotient.isFinite) {
@@ -765,6 +768,7 @@ class Range {
 
   @override
   bool operator ==(other) {
+    if (other is! Range) return false;
     return begin == other.begin && end == other.end;
   }
 
@@ -1099,7 +1103,7 @@ Map<String, String> devToolsQueryParams(String url) {
 ///
 /// We read from the 'uri' value if it exists; otherwise we create a uri from
 /// the from 'port' and 'token' values.
-Uri? getServiceUriFromQueryString(String location) {
+Uri? getServiceUriFromQueryString(String? location) {
   if (location == null) {
     return null;
   }
@@ -1143,7 +1147,7 @@ Uri? getServiceUriFromQueryString(String location) {
 /// Helper function to return the name of a key. If widget has a key
 /// use the key's name to record the select e.g.,
 ///   ga.select(MemoryScreen.id, ga.keyName(MemoryScreen.gcButtonKey));
-String keyName(Key key) => (key as ValueKey<String>)?.value;
+String keyName(Key key) => (key as ValueKey<String>).value;
 
 double safePositiveDouble(double value) {
   if (value.isNaN) return 0.0;
@@ -1185,6 +1189,8 @@ class ListValueNotifier<T> extends ChangeNotifier
   List<T>? get value => _currentList;
 
   @override
+  // This override is needed to change visibility of the method.
+  // ignore: unnecessary_overrides
   void notifyListeners() {
     super.notifyListeners();
   }
