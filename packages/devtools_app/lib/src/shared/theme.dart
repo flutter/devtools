@@ -19,14 +19,14 @@ const contrastForegroundWhite = _contrastForegroundWhite;
 /// IDE-supplied theming.
 ThemeData themeFor({
   required bool isDarkTheme,
-  required IdeTheme? ideTheme,
+  required IdeTheme ideTheme,
   ThemeData? theme,
 }) {
   ThemeData colorTheme;
   // If the theme specifies a background color, use it to infer a theme.
-  if (isValidDarkColor(ideTheme?.backgroundColor)) {
+  if (isValidDarkColor(ideTheme.backgroundColor)) {
     colorTheme = _darkTheme(ideTheme);
-  } else if (isValidLightColor(ideTheme?.backgroundColor)) {
+  } else if (isValidLightColor(ideTheme.backgroundColor)) {
     colorTheme = _lightTheme(ideTheme);
   } else {
     colorTheme = isDarkTheme ? _darkTheme(ideTheme) : _lightTheme(ideTheme);
@@ -36,18 +36,18 @@ ThemeData themeFor({
     primaryTextTheme: (theme != null
             ? theme.primaryTextTheme.merge(colorTheme.primaryTextTheme)
             : colorTheme.primaryTextTheme)
-        .apply(fontSizeFactor: ideTheme?.fontSizeFactor ?? 1.0),
+        .apply(fontSizeFactor: ideTheme.fontSizeFactor ?? 1.0),
     textTheme: (theme != null
             ? theme.textTheme.merge(colorTheme.textTheme)
             : colorTheme.textTheme)
-        .apply(fontSizeFactor: ideTheme?.fontSizeFactor ?? 1.0),
+        .apply(fontSizeFactor: ideTheme.fontSizeFactor ?? 1.0),
   );
 }
 
-ThemeData _darkTheme(IdeTheme? ideTheme) {
+ThemeData _darkTheme(IdeTheme ideTheme) {
   final theme = ThemeData.dark();
-  final background = isValidDarkColor(ideTheme?.backgroundColor)
-      ? ideTheme!.backgroundColor!
+  final background = isValidDarkColor(ideTheme.backgroundColor)
+      ? ideTheme.backgroundColor!
       : theme.canvasColor;
   return _baseTheme(
     theme: theme,
@@ -59,10 +59,10 @@ ThemeData _darkTheme(IdeTheme? ideTheme) {
   );
 }
 
-ThemeData _lightTheme(IdeTheme? ideTheme) {
+ThemeData _lightTheme(IdeTheme ideTheme) {
   final theme = ThemeData.light();
-  final background = isValidLightColor(ideTheme?.backgroundColor)
-      ? ideTheme!.backgroundColor!
+  final background = isValidLightColor(ideTheme.backgroundColor)
+      ? ideTheme.backgroundColor!
       : theme.canvasColor;
   return _baseTheme(
     theme: theme,
@@ -76,7 +76,7 @@ ThemeData _lightTheme(IdeTheme? ideTheme) {
 
 ThemeData _baseTheme({
   required ThemeData theme,
-  required IdeTheme? ideTheme,
+  required IdeTheme ideTheme,
   required Color primaryColor,
   required Color backgroundColor,
   required Color indicatorColor,

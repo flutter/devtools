@@ -22,7 +22,7 @@ final _testNavigatorKey = GlobalKey<NavigatorState>();
 /// [Directionality] to support [RenderFlex] widgets like [Row] and [Column].
 Widget wrap(Widget widget) {
   return MaterialApp.router(
-    theme: themeFor(isDarkTheme: false, ideTheme: null),
+    theme: themeFor(isDarkTheme: false, ideTheme: IdeTheme()),
     routerDelegate: DevToolsRouterDelegate(
       (context, page, args) => MaterialPage(
         child: Material(

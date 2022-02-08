@@ -8,7 +8,6 @@ import 'dart:io';
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/debugger/console.dart';
 import 'package:devtools_app/src/debugger/controls.dart';
 import 'package:devtools_app/src/debugger/debugger_model.dart';
