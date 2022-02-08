@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/material.dart';
 
@@ -17,15 +17,15 @@ import 'theme.dart';
 mixin CollapsibleAnimationMixin<T extends StatefulWidget>
     on TickerProviderStateMixin<T> {
   /// Animation controller for animating the expand/collapse icon.
-  AnimationController expandController;
+  late AnimationController expandController;
 
   /// An animation that rotates the expand arrow
   /// from pointing right (0.75 full turns) to pointing down (1.0 full turns).
-  Animation<double> expandArrowAnimation;
+  late Animation<double> expandArrowAnimation;
 
   /// A curved animation that matches [expandController], moving from 0.0 to 1.0
   /// Useful for animating the size of a child that is appearing.
-  Animation<double> expandCurve;
+  late Animation<double> expandCurve;
 
   /// Visibility state of the collapsible.
   ///
@@ -69,7 +69,7 @@ mixin CollapsibleAnimationMixin<T extends StatefulWidget>
 
   @override
   void didUpdateWidget(Widget oldWidget) {
-    super.didUpdateWidget(oldWidget);
+    super.didUpdateWidget(oldWidget as T);
     if (isExpanded) {
       expandController.forward();
     } else {
