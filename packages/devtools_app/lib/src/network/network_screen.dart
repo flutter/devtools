@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';
 import '../shared/screen.dart';
 import '../shared/split.dart';

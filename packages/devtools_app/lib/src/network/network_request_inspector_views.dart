@@ -9,10 +9,10 @@ import 'package:image/image.dart' as image;
 
 import '../http/http.dart';
 import '../http/http_request_data.dart';
+import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';
 import '../shared/table.dart';
 import '../shared/theme.dart';
-import '../shared/utils.dart';
 import '../ui/colors.dart';
 import 'network_model.dart';
 

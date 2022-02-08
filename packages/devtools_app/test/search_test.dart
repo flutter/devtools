@@ -4,7 +4,7 @@
 
 // @dart=2.9
 
-import 'package:devtools_app/src/shared/utils.dart';
+import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:flutter_test/flutter_test.dart';
 

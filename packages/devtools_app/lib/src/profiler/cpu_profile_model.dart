@@ -13,7 +13,7 @@ import '../charts/flame_chart.dart';
 import '../primitives/trace_event.dart';
 import '../primitives/trees.dart';
 import '../primitives/url_utils.dart';
-import '../shared/utils.dart';
+import '../primitives/utils.dart';
 import '../ui/search.dart';
 import 'cpu_profile_transformer.dart';
 

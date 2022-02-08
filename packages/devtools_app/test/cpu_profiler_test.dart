@@ -5,6 +5,7 @@
 // @dart=2.9
 
 import 'package:devtools_app/src/charts/flame_chart.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_bottom_up.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_call_tree.dart';
@@ -42,6 +43,7 @@ void main() {
         .thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(IdeTheme, IdeTheme());
   });
 
   group('CpuProfiler', () {

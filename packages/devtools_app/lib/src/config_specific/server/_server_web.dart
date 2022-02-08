@@ -12,7 +12,7 @@ import 'dart:html';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../shared/utils.dart';
+import '../../primitives/utils.dart';
 import '../logger/logger.dart';
 
 // Code to check if DevTools server is available, will only be true in release

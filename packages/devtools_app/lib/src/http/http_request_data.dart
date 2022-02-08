@@ -14,9 +14,9 @@ import 'package:vm_service/vm_service.dart';
 import '../config_specific/logger/logger.dart';
 import '../network/network_model.dart';
 import '../primitives/trace_event.dart';
+import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
-import '../shared/utils.dart';
 import 'http.dart';
 
 class TimelineHttpInstantEvent extends HttpInstantEvent {

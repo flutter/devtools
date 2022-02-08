@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../primitives/trees.dart';
+import '../primitives/utils.dart';
 import 'utils.dart';
 
 class HoverCellData<T> {
