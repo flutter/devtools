@@ -17,15 +17,15 @@ import 'theme.dart';
 mixin CollapsibleAnimationMixin<T extends StatefulWidget>
     on TickerProviderStateMixin<T> {
   /// Animation controller for animating the expand/collapse icon.
-  late AnimationController expandController;
+  late final AnimationController expandController;
 
   /// An animation that rotates the expand arrow
   /// from pointing right (0.75 full turns) to pointing down (1.0 full turns).
-  late Animation<double> expandArrowAnimation;
+  late final Animation<double> expandArrowAnimation;
 
   /// A curved animation that matches [expandController], moving from 0.0 to 1.0
   /// Useful for animating the size of a child that is appearing.
-  late Animation<double> expandCurve;
+  late final Animation<double> expandCurve;
 
   /// Visibility state of the collapsible.
   ///
