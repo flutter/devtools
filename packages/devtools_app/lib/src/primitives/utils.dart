@@ -5,7 +5,7 @@
 // This file contain low level utils, i.e. utils that do not depend on
 // libraries in this package.
 
-// @dart=2.9
+
 
 import 'dart:async';
 import 'dart:collection';
@@ -74,7 +74,7 @@ final List<String> _words = loremIpsum
     .map((String w) => w.endsWith(',') ? w.substring(0, w.length - 1) : w)
     .toList();
 
-String getLoremFragment([int wordCount]) {
+String? getLoremFragment([int? wordCount]) {
   wordCount ??= r.nextInt(8) + 1;
   return toBeginningOfSentenceCase(
       List<String>.generate(wordCount, (_) => _words[r.nextInt(_words.length)])
@@ -88,8 +88,8 @@ final NumberFormat nf = NumberFormat.decimalPattern();
 
 String percent2(double d) => '${(d * 100).toStringAsFixed(2)}%';
 
-String prettyPrintBytes(
-  num bytes, {
+String? prettyPrintBytes(
+  num? bytes, {
   int kbFractionDigits = 0,
   int mbFractionDigits = 1,
   int gbFractionDigits = 1,
@@ -173,21 +173,21 @@ String renderDuration(Duration duration) {
   }
 }
 
-T nullSafeMin<T extends num>(T a, T b) {
+T nullSafeMin<T extends num?>(T a, T b) {
   if (a == null || b == null) {
     return a ?? b;
   }
   return min<T>(a, b);
 }
 
-T nullSafeMax<T extends num>(T a, T b) {
+T nullSafeMax<T extends num?>(T a, T b) {
   if (a == null || b == null) {
     return a ?? b;
   }
   return max<T>(a, b);
 }
 
-double logBase({@required int x, @required int base}) {
+double logBase({required int x, required int base}) {
   return log(x) / log(base);
 }
 
@@ -198,7 +198,7 @@ int roundToNearestPow10(int x) =>
 
 String isolateName(IsolateRef ref) {
   // analysis_server.dart.snapshot$main
-  String name = ref.name;
+  String name = ref.name!;
   name = name.replaceFirst(r'.snapshot', '');
   if (name.contains(r'.dart$')) {
     name = name + '()';
@@ -206,7 +206,7 @@ String isolateName(IsolateRef ref) {
   return name;
 }
 
-String funcRefName(FuncRef ref) {
+String? funcRefName(FuncRef ref) {
   if (ref.owner is LibraryRef) {
     //(ref.owner as LibraryRef).uri;
     return ref.name;
@@ -242,7 +242,7 @@ Future<void> delayForBatchProcessing({int micros = 0}) async {
 /// Completes with null on timeout.
 Future<T> timeout<T>(Future<T> operation, int timeoutMillis) => Future.any<T>([
       operation,
-      Future<T>.delayed(Duration(milliseconds: timeoutMillis), () => null)
+      Future<T>.delayed(Duration(milliseconds: timeoutMillis), (() => null) as FutureOr<T> Function()?)
     ]);
 
 String longestFittingSubstring(
@@ -282,7 +282,7 @@ bool isLetter(int codeUnit) =>
 /// Pass a custom named `plural` for irregular plurals:
 /// `pluralize('index', count, plural: 'indices')`
 /// So it returns `indices` and not `indexs`.
-String pluralize(String word, int count, {String plural}) =>
+String pluralize(String word, int? count, {String? plural}) =>
     count == 1 ? word : (plural ?? '${word}s');
 
 /// Returns a simplified version of a StackFrame name.
@@ -309,11 +309,11 @@ String getSimpleStackFrameName(String name) {
 /// Return a Stream that fires events whenever any of the three given parameter
 /// streams fire.
 Stream combineStreams(Stream a, Stream b, Stream c) {
-  StreamController controller;
+  late StreamController controller;
 
-  StreamSubscription asub;
-  StreamSubscription bsub;
-  StreamSubscription csub;
+  StreamSubscription? asub;
+  StreamSubscription? bsub;
+  StreamSubscription? csub;
 
   controller = StreamController(
     onListen: () {
@@ -392,10 +392,10 @@ class DelayedTimer {
   final Duration minDelay;
   final Duration maxDelay;
 
-  VoidCallback _closure;
+  VoidCallback? _closure;
 
-  Timer _minTimer;
-  Timer _maxTimer;
+  Timer? _minTimer;
+  Timer? _maxTimer;
 
   void invoke(VoidCallback closure) {
     _closure = closure;
@@ -404,7 +404,7 @@ class DelayedTimer {
       _minTimer = Timer(minDelay, _fire);
       _maxTimer = Timer(maxDelay, _fire);
     } else {
-      _minTimer.cancel();
+      _minTimer!.cancel();
       _minTimer = Timer(minDelay, _fire);
     }
   }
@@ -416,7 +416,7 @@ class DelayedTimer {
     _maxTimer?.cancel();
     _maxTimer = null;
 
-    _closure();
+    _closure!();
     _closure = null;
   }
 }
@@ -428,18 +428,18 @@ class DelayedTimer {
 class JsonUtils {
   JsonUtils._();
 
-  static String getStringMember(Map<String, Object> json, String memberName) {
+  static String? getStringMember(Map<String, Object?> json, String memberName) {
     // TODO(jacobr): should we handle non-string values with a reasonable
     // toString differently?
-    return json[memberName] as String;
+    return json[memberName] as String?;
   }
 
-  static int getIntMember(Map<String, Object> json, String memberName) {
-    return json[memberName] as int ?? -1;
+  static int getIntMember(Map<String, Object?> json, String memberName) {
+    return json[memberName] as int? ?? -1;
   }
 
   static List<String> getValues(Map<String, Object> json, String member) {
-    final List<dynamic> values = json[member] as List;
+    final List<dynamic>? values = json[member] as List?;
     if (values == null || values.isEmpty) {
       return const [];
     }
@@ -453,11 +453,11 @@ class JsonUtils {
 }
 
 /// Add pretty print for a JSON payload.
-extension JsonMap on Map<String, Object> {
+extension JsonMap on Map<String, Object?> {
   String prettyPrint() => const JsonEncoder.withIndent('  ').convert(this);
 }
 
-typedef RateLimiterCallback = Future<Object> Function();
+typedef RateLimiterCallback = Future<Object?> Function();
 
 /// Rate limiter that ensures a [callback] is run no more  than the
 /// specified rate and that at most one async [callback] is running at a time.
@@ -466,14 +466,14 @@ class RateLimiter {
       : delayBetweenRequests = 1000 ~/ requestsPerSecond;
 
   final RateLimiterCallback callback;
-  Completer<void> _pendingRequest;
+  Completer<void>? _pendingRequest;
 
   /// A request has been scheduled to run but is not yet pending.
   bool requestScheduledButNotStarted = false;
-  int _lastRequestTime;
+  int? _lastRequestTime;
   final int delayBetweenRequests;
 
-  Timer _activeTimer;
+  Timer? _activeTimer;
 
   /// Schedules the callback to be run the next time the rate limiter allows it.
   ///
@@ -486,12 +486,12 @@ class RateLimiter {
       return;
     }
 
-    if (_pendingRequest != null && !_pendingRequest.isCompleted) {
+    if (_pendingRequest != null && !_pendingRequest!.isCompleted) {
       // Wait for the pending request to be done before scheduling the new
       // request. The existing request has already started so may return state
       // that is now out of date.
       requestScheduledButNotStarted = true;
-      _pendingRequest.future.whenComplete(() {
+      _pendingRequest!.future.whenComplete(() {
         _pendingRequest = null;
         requestScheduledButNotStarted = false;
         scheduleRequest();
@@ -501,7 +501,7 @@ class RateLimiter {
 
     final currentTime = DateTime.now().millisecondsSinceEpoch;
     if (_lastRequestTime == null ||
-        _lastRequestTime + delayBetweenRequests <= currentTime) {
+        _lastRequestTime! + delayBetweenRequests <= currentTime) {
       // Safe to perform the request immediately.
       _performRequest();
       return;
@@ -512,7 +512,7 @@ class RateLimiter {
     _activeTimer = Timer(
         Duration(
             milliseconds:
-                currentTime - _lastRequestTime + delayBetweenRequests), () {
+                currentTime - _lastRequestTime! + delayBetweenRequests), () {
       _activeTimer = null;
       requestScheduledButNotStarted = false;
       _performRequest();
@@ -525,7 +525,7 @@ class RateLimiter {
       _pendingRequest = Completer();
       await callback();
     } finally {
-      _pendingRequest.complete(null);
+      _pendingRequest!.complete(null);
     }
   }
 
@@ -550,52 +550,52 @@ class TimeRange {
 
   final bool singleAssignment;
 
-  Duration get start => _start;
+  Duration? get start => _start;
 
-  Duration _start;
+  Duration? _start;
 
-  set start(Duration value) {
+  set start(Duration? value) {
     if (singleAssignment) {
       assert(_start == null);
     }
     if (_end != null) {
       assert(
-        value <= _end,
+        value! <= _end!,
         '$value is not less than or equal to end time $_end',
       );
     }
     _start = value;
   }
 
-  Duration get end => _end;
+  Duration? get end => _end;
 
-  Duration _end;
+  Duration? _end;
 
-  set end(Duration value) {
+  set end(Duration? value) {
     if (singleAssignment) {
       assert(_end == null);
     }
     if (_start != null) {
       assert(
-        value >= _start,
+        value! >= _start!,
         '$value is not greater than or equal to start time $_start',
       );
     }
     _end = value;
   }
 
-  Duration get duration => end - start;
+  Duration get duration => end! - start!;
 
-  bool contains(Duration target) => start <= target && end >= target;
+  bool contains(Duration target) => start! <= target && end! >= target;
 
-  bool containsRange(TimeRange t) => start <= t.start && end >= t.end;
+  bool containsRange(TimeRange t) => start! <= t.start! && end! >= t.end!;
 
-  bool overlaps(TimeRange t) => t.end > start && t.start < end;
+  bool overlaps(TimeRange t) => t.end! > start! && t.start! < end!;
 
   bool get isWellFormed => _start != null && _end != null;
 
   @override
-  String toString({TimeUnit unit}) {
+  String toString({TimeUnit? unit}) {
     unit ??= TimeUnit.microseconds;
     switch (unit) {
       case TimeUnit.microseconds:
@@ -636,7 +636,7 @@ bool isDebugBuild() {
 /// NaN, null, or infinite.
 ///
 /// [ifNotFinite] defaults to 0.0.
-double safeDivide(num numerator, num denominator, {double ifNotFinite = 0.0}) {
+double safeDivide(num? numerator, num? denominator, {double ifNotFinite = 0.0}) {
   if (numerator != null && denominator != null) {
     final quotient = numerator / denominator;
     if (quotient.isFinite) {
@@ -737,13 +737,13 @@ class ImmediateValueNotifier<T> extends ValueNotifier<T> {
 }
 
 extension SafeAccessList<T> on List<T> {
-  T safeGet(int index) => index < 0 || index >= length ? null : this[index];
+  T? safeGet(int index) => index < 0 || index >= length ? null : this[index];
 }
 
 extension SafeAccess<T> on Iterable<T> {
-  T get safeFirst => isNotEmpty ? first : null;
+  T? get safeFirst => isNotEmpty ? first : null;
 
-  T get safeLast => isNotEmpty ? last : null;
+  T? get safeLast => isNotEmpty ? last : null;
 }
 
 /// Range class for all nums (double and int).
@@ -777,7 +777,7 @@ enum SortDirection {
   descending,
 }
 
-extension SortDirectionExtension on SortDirection {
+extension SortDirectionExtension on SortDirection? {
   SortDirection reverse() {
     return this == SortDirection.ascending
         ? SortDirection.descending
@@ -798,21 +798,21 @@ class DebugTimingLogger {
   DebugTimingLogger(this.name, {this.mute});
 
   final String name;
-  final bool mute;
+  final bool? mute;
 
-  Stopwatch _timer;
+  Stopwatch? _timer;
 
   void log(String message) {
-    if (mute) return;
+    if (mute!) return;
 
     if (_timer != null) {
-      _timer.stop();
-      print('[$name}]   ${_timer.elapsedMilliseconds}ms');
-      _timer.reset();
+      _timer!.stop();
+      print('[$name}]   ${_timer!.elapsedMilliseconds}ms');
+      _timer!.reset();
     }
 
     _timer ??= Stopwatch();
-    _timer.start();
+    _timer!.start();
 
     print('[$name] $message');
   }
@@ -825,7 +825,7 @@ class MovingAverage {
   MovingAverage({
     this.averagePeriod = 50,
     this.ratio = .5,
-    List<int> newDataSet,
+    List<int>? newDataSet,
   }) : assert(ratio >= 0 && ratio <= 1, 'Value ratio $ratio is not 0 to 1.') {
     if (newDataSet != null) {
       var initialDataSet = newDataSet;
@@ -892,7 +892,7 @@ class MovingAverage {
   }
 }
 
-List<TextSpan> processAnsiTerminalCodes(String input, TextStyle defaultStyle) {
+List<TextSpan> processAnsiTerminalCodes(String? input, TextStyle defaultStyle) {
   if (input == null) {
     return [];
   }
@@ -904,10 +904,10 @@ List<TextSpan> processAnsiTerminalCodes(String input, TextStyle defaultStyle) {
               ? defaultStyle
               : TextStyle(
                   color: entry.fgColor != null
-                      ? colorFromAnsi(entry.fgColor)
+                      ? colorFromAnsi(entry.fgColor!)
                       : null,
                   backgroundColor: entry.bgColor != null
-                      ? colorFromAnsi(entry.bgColor)
+                      ? colorFromAnsi(entry.bgColor!)
                       : null,
                   fontWeight: entry.bold ? FontWeight.bold : FontWeight.normal,
                 ),
@@ -972,13 +972,13 @@ extension LogicalKeySetExtension on LogicalKeySet {
 // Method to convert degrees to radians
 num degToRad(num deg) => deg * (pi / 180.0);
 
-typedef DevToolsJsonFileHandler = void Function(DevToolsJsonFile file);
+typedef DevToolsJsonFileHandler = void Function(DevToolsJsonFile? file);
 
-class DevToolsJsonFile extends DevToolsFile<Object> {
+class DevToolsJsonFile extends DevToolsFile<Object?> {
   const DevToolsJsonFile({
-    @required String name,
-    @required DateTime lastModifiedTime,
-    @required Object data,
+    required String name,
+    required DateTime lastModifiedTime,
+    required Object? data,
   }) : super(
           path: name,
           lastModifiedTime: lastModifiedTime,
@@ -988,9 +988,9 @@ class DevToolsJsonFile extends DevToolsFile<Object> {
 
 class DevToolsFile<T> {
   const DevToolsFile({
-    @required this.path,
-    @required this.lastModifiedTime,
-    @required this.data,
+    required this.path,
+    required this.lastModifiedTime,
+    required this.data,
   });
 
   final String path;
@@ -1006,7 +1006,7 @@ final _lowercaseLookup = <String, String>{};
 // TODO(kenz): replace other uses of toLowerCase() for string matching with
 // this extension method.
 extension StringExtension on String {
-  bool caseInsensitiveContains(Pattern pattern) {
+  bool caseInsensitiveContains(Pattern? pattern) {
     if (pattern is RegExp) {
       assert(pattern.isCaseSensitive == false);
       return contains(pattern);
@@ -1049,13 +1049,13 @@ extension StringExtension on String {
   }
 
   /// Whether [other] is a case insensitive match for this String
-  bool caseInsensitiveEquals(String other) {
+  bool caseInsensitiveEquals(String? other) {
     return toLowerCase() == other?.toLowerCase();
   }
 
   /// Find all case insensitive matches of query in this String
   /// See [allMatches] for more info
-  Iterable<Match> caseInsensitiveAllMatches(String query) {
+  Iterable<Match> caseInsensitiveAllMatches(String? query) {
     if (query == null) return const [];
     return toLowerCase().allMatches(query.toLowerCase());
   }
@@ -1099,7 +1099,7 @@ Map<String, String> devToolsQueryParams(String url) {
 ///
 /// We read from the 'uri' value if it exists; otherwise we create a uri from
 /// the from 'port' and 'token' values.
-Uri getServiceUriFromQueryString(String location) {
+Uri? getServiceUriFromQueryString(String location) {
   if (location == null) {
     return null;
   }
@@ -1108,7 +1108,7 @@ Uri getServiceUriFromQueryString(String location) {
 
   // First try to use uri.
   if (queryParams['uri'] != null) {
-    final uri = Uri.tryParse(queryParams['uri']);
+    final uri = Uri.tryParse(queryParams['uri']!);
 
     // Lots of things are considered valid URIs (including empty strings
     // and single letters) since they can be relative, so we need to do some
@@ -1171,7 +1171,7 @@ String prettyTimestamp(
 /// listeners are notified whenever the data is modified, but notifying can be
 /// optionally disabled.
 class ListValueNotifier<T> extends ChangeNotifier
-    implements ValueListenable<List<T>> {
+    implements ValueListenable<List<T>?> {
   /// Creates a [ListValueNotifier] that wraps this value [_rawList].
   ListValueNotifier(List<T> rawList) : _rawList = List<T>.from(rawList) {
     _currentList = ImmutableList(_rawList);
@@ -1179,10 +1179,10 @@ class ListValueNotifier<T> extends ChangeNotifier
 
   List<T> _rawList;
 
-  ImmutableList<T> _currentList;
+  ImmutableList<T>? _currentList;
 
   @override
-  List<T> get value => _currentList;
+  List<T>? get value => _currentList;
 
   @override
   void notifyListeners() {
@@ -1237,7 +1237,7 @@ class ListValueNotifier<T> extends ChangeNotifier
   /// The `start` and `end` positions must satisfy the relations
   /// 0 ≤ `start` ≤ `end` ≤ [length]
   /// If `end` is equal to `start`, then the returned list is empty.
-  void trimToSublist(int start, [int end]) {
+  void trimToSublist(int start, [int? end]) {
     // TODO(jacobr): use a more sophisticated data structure such as
     // https://en.wikipedia.org/wiki/Rope_(data_structure) to make the
     // implementation of this method more efficient.
@@ -1295,7 +1295,7 @@ class ImmutableList<T> with ListMixin<T> implements List<T> {
   }
 
   @override
-  bool remove(Object element) {
+  bool remove(Object? element) {
     throw Exception('Cannot modify the content of ImmutableList');
   }
 
@@ -1340,7 +1340,7 @@ class ImmutableList<T> with ListMixin<T> implements List<T> {
   }
 
   @override
-  void fillRange(int start, int end, [T fill]) {
+  void fillRange(int start, int end, [T? fill]) {
     throw Exception('Cannot modify the content of ImmutableList');
   }
 
@@ -1360,12 +1360,12 @@ class ImmutableList<T> with ListMixin<T> implements List<T> {
   }
 
   @override
-  void sort([int Function(T a, T b) compare]) {
+  void sort([int Function(T a, T b)? compare]) {
     throw Exception('Cannot modify the content of ImmutableList');
   }
 
   @override
-  void shuffle([Random random]) {
+  void shuffle([Random? random]) {
     throw Exception('Cannot modify the content of ImmutableList');
   }
 }
@@ -1401,15 +1401,15 @@ class ProcessCancelledException implements Exception {}
 
 extension UriExtension on Uri {
   Uri copyWith({
-    String scheme,
-    String userInfo,
-    String host,
-    int port,
-    String path,
-    Iterable<String> pathSegments,
-    String query,
-    Map<String, dynamic> queryParameters,
-    String fragment,
+    String? scheme,
+    String? userInfo,
+    String? host,
+    int? port,
+    String? path,
+    Iterable<String>? pathSegments,
+    String? query,
+    Map<String, dynamic>? queryParameters,
+    String? fragment,
   }) {
     return Uri(
       scheme: scheme ?? this.scheme,
