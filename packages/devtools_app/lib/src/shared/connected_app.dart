@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -36,62 +34,62 @@ class ConnectedApp {
   Future<bool> get isFlutterApp async => _isFlutterApp ??=
       await serviceManager.libraryUriAvailable(flutterLibraryUri);
 
-  bool get isFlutterAppNow {
+  bool? get isFlutterAppNow {
     assert(_isFlutterApp != null);
-    return _isFlutterApp;
+    return _isFlutterApp == true;
   }
 
-  bool _isFlutterApp;
+  bool? _isFlutterApp;
 
-  FlutterVersion get flutterVersionNow {
+  FlutterVersion? get flutterVersionNow {
     return isFlutterNativeAppNow ? _flutterVersion : null;
   }
 
-  FlutterVersion _flutterVersion;
+  FlutterVersion? _flutterVersion;
 
   final _flutterVersionCompleter = Completer<FlutterVersion>();
 
   static const _flutterVersionTimeout = Duration(seconds: 3);
 
-  Future<bool> get isProfileBuild async {
+  Future<bool?> get isProfileBuild async {
     _isProfileBuild ??= await _connectedToProfileBuild();
     return _isProfileBuild;
   }
 
-  bool get isProfileBuildNow {
+  bool? get isProfileBuildNow {
     assert(_isProfileBuild != null);
     return _isProfileBuild;
   }
 
-  bool _isProfileBuild;
+  bool? _isProfileBuild;
 
   // TODO(kenz): investigate if we can use `libraryUriAvailableNow` instead.
   Future<bool> get isDartWebApp async => _isDartWebApp ??=
       await serviceManager.libraryUriAvailable(dartHtmlLibraryUri);
 
-  bool get isDartWebAppNow {
+  bool? get isDartWebAppNow {
     assert(_isDartWebApp != null);
     return _isDartWebApp;
   }
 
-  bool _isDartWebApp;
+  bool? _isDartWebApp;
 
-  bool get isFlutterWebAppNow => isFlutterAppNow && isDartWebAppNow;
+  bool get isFlutterWebAppNow => isFlutterAppNow! && isDartWebAppNow!;
 
-  bool get isFlutterNativeAppNow => isFlutterAppNow && !isDartWebAppNow;
+  bool get isFlutterNativeAppNow => isFlutterAppNow! && !isDartWebAppNow!;
 
-  bool get isDebugFlutterAppNow => isFlutterAppNow && !isProfileBuildNow;
+  bool get isDebugFlutterAppNow => isFlutterAppNow! && !isProfileBuildNow!;
 
-  bool get isRunningOnDartVM => serviceManager.vm.name != 'ChromeDebugProxy';
+  bool? get isRunningOnDartVM => serviceManager.vm!.name != 'ChromeDebugProxy';
 
   Future<bool> get isDartCliApp async =>
-      isRunningOnDartVM && !(await isFlutterApp);
+      isRunningOnDartVM! && !(await isFlutterApp);
 
-  bool get isDartCliAppNow => isRunningOnDartVM && !isFlutterAppNow;
+  bool get isDartCliAppNow => isRunningOnDartVM! && !isFlutterAppNow!;
 
   Future<bool> _connectedToProfileBuild() async {
     // If Dart or Flutter web, assume profile is false.
-    if (!isRunningOnDartVM) {
+    if (!isRunningOnDartVM!) {
       return false;
     }
 
@@ -138,8 +136,8 @@ class ConnectedApp {
       flutterVersionServiceListenable.addListener(listener = () async {
         final registered = flutterVersionServiceListenable.value;
         if (registered) {
-          _flutterVersionCompleter.complete(
-              FlutterVersion.parse((await serviceManager.flutterVersion).json));
+          _flutterVersionCompleter.complete(FlutterVersion.parse(
+              (await serviceManager.flutterVersion).json!));
         }
       });
 
@@ -168,25 +166,25 @@ class OfflineConnectedApp extends ConnectedApp {
     this.isRunningOnDartVM,
   });
 
-  factory OfflineConnectedApp.parse(Map<String, Object> json) {
-    if (json == null) return null;
+  factory OfflineConnectedApp.parse(Map<String, Object>? json) {
+    if (json == null) return OfflineConnectedApp();
     return OfflineConnectedApp(
-      isFlutterAppNow: json[isFlutterAppKey],
-      isProfileBuildNow: json[isProfileBuildKey],
-      isDartWebAppNow: json[isDartWebAppKey],
-      isRunningOnDartVM: json[isRunningOnDartVMKey],
+      isFlutterAppNow: json[isFlutterAppKey] as bool?,
+      isProfileBuildNow: json[isProfileBuildKey] as bool?,
+      isDartWebAppNow: json[isDartWebAppKey] as bool?,
+      isRunningOnDartVM: json[isRunningOnDartVMKey] as bool?,
     );
   }
 
   @override
-  final bool isFlutterAppNow;
+  final bool? isFlutterAppNow;
 
   @override
-  final bool isProfileBuildNow;
+  final bool? isProfileBuildNow;
 
   @override
-  final bool isDartWebAppNow;
+  final bool? isDartWebAppNow;
 
   @override
-  final bool isRunningOnDartVM;
+  final bool? isRunningOnDartVM;
 }
