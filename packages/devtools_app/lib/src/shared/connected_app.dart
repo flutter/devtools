@@ -58,7 +58,7 @@ class ConnectedApp {
     return _isProfileBuild!;
   }
 
-  bool get isProfileBuildNow {
+  bool? get isProfileBuildNow {
     assert(_isProfileBuild != null);
     return _isProfileBuild!;
   }
@@ -69,7 +69,7 @@ class ConnectedApp {
   Future<bool> get isDartWebApp async => _isDartWebApp ??=
       await serviceManager.libraryUriAvailable(dartHtmlLibraryUri);
 
-  bool get isDartWebAppNow {
+  bool? get isDartWebAppNow {
     assert(_isDartWebApp != null);
     return _isDartWebApp!;
   }
