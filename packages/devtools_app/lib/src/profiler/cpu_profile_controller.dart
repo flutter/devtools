@@ -11,8 +11,8 @@ import 'package:vm_service/vm_service.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
+import '../primitives/utils.dart';
 import '../shared/globals.dart';
-import '../shared/utils.dart';
 import '../shared/vm_flags.dart' as vm_flags;
 import '../ui/filter.dart';
 import '../ui/search.dart';

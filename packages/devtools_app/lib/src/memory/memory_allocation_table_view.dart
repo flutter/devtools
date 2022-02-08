@@ -12,10 +12,10 @@ import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/utils.dart';
 import '../shared/split.dart';
 import '../shared/table.dart';
 import '../shared/table_data.dart';
-import '../shared/utils.dart';
 import '../ui/icons.dart';
 import '../ui/search.dart';
 import 'memory_allocation_table_data.dart';

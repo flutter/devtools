@@ -8,7 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
 
-import '../../shared/utils.dart';
+import '../../primitives/utils.dart';
 import 'drag_and_drop.dart';
 
 DragAndDropManagerWeb createDragAndDropManager() {
