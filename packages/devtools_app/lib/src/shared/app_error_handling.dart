@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 
@@ -26,10 +26,10 @@ void setupErrorHandling(Future Function() appStartCallback) {
   return runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
 
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
 
     FlutterError.onError = (FlutterErrorDetails details) {
-      _reportError(details.exception, details.stack);
+      _reportError(details.exception, details.stack ?? StackTrace.empty);
 
       if (oldHandler != null) {
         oldHandler(details);
