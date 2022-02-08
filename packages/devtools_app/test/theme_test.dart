@@ -13,6 +13,18 @@ void main() {
   group('Theme', () {
     ThemeData theme;
 
+    test('can be used without override', () {
+      theme = themeFor(isDarkTheme: true, ideTheme: IdeTheme());
+      expect(theme.brightness, equals(Brightness.dark));
+      expect(theme.scaffoldBackgroundColor,
+          equals(ThemeData.dark().scaffoldBackgroundColor));
+
+      theme = themeFor(isDarkTheme: false, ideTheme: IdeTheme());
+      expect(theme.brightness, equals(Brightness.light));
+      expect(theme.scaffoldBackgroundColor,
+          equals(ThemeData.light().scaffoldBackgroundColor));
+    });
+
     test('can be inferred from override background color', () {
       theme = themeFor(
         isDarkTheme: false, // Will be overridden by black BG
