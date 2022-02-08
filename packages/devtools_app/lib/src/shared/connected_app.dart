@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -47,7 +49,7 @@ class ConnectedApp {
 
   FlutterVersion? _flutterVersion;
 
-  final _flutterVersionCompleter = Completer<FlutterVersion>();
+  final _flutterVersionCompleter = Completer<FlutterVersion?>();
 
   static const _flutterVersionTimeout = Duration(seconds: 3);
 
@@ -102,7 +104,7 @@ class ConnectedApp {
       isAlive: null,
       shouldLogError: false,
     );
-    return !(value?.kind == 'Bool');
+    return !(value.kind == 'Bool');
 
     // TODO(terry): Disabled below code, it will hang if flutter run --start-paused
     //              see issue https://github.com/flutter/devtools/issues/2082.
@@ -148,7 +150,7 @@ class ConnectedApp {
             'Timed out trying to fetch flutter version from '
             '`ConnectedApp.initializeValues`.',
           );
-          return Future<FlutterVersion>.value();
+          return Future<FlutterVersion?>.value();
         },
       );
       flutterVersionServiceListenable.removeListener(listener);
