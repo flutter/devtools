@@ -53,14 +53,14 @@ class ConnectedApp {
 
   static const _flutterVersionTimeout = Duration(seconds: 3);
 
-  Future<bool?> get isProfileBuild async {
+  Future<bool> get isProfileBuild async {
     _isProfileBuild ??= await _connectedToProfileBuild();
-    return _isProfileBuild;
+    return _isProfileBuild!;
   }
 
-  bool? get isProfileBuildNow {
+  bool get isProfileBuildNow {
     assert(_isProfileBuild != null);
-    return _isProfileBuild;
+    return _isProfileBuild!;
   }
 
   bool? _isProfileBuild;
@@ -69,9 +69,9 @@ class ConnectedApp {
   Future<bool> get isDartWebApp async => _isDartWebApp ??=
       await serviceManager.libraryUriAvailable(dartHtmlLibraryUri);
 
-  bool? get isDartWebAppNow {
+  bool get isDartWebAppNow {
     assert(_isDartWebApp != null);
-    return _isDartWebApp;
+    return _isDartWebApp!;
   }
 
   bool? _isDartWebApp;
