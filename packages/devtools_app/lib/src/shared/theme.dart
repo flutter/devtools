@@ -44,10 +44,10 @@ ThemeData themeFor({
   );
 }
 
-ThemeData _darkTheme(IdeTheme? ideTheme) {
+ThemeData _darkTheme(IdeTheme ideTheme) {
   final theme = ThemeData.dark();
-  final background = isValidDarkColor(ideTheme?.backgroundColor)
-      ? ideTheme!.backgroundColor!
+  final background = isValidDarkColor(ideTheme.backgroundColor)
+      ? ideTheme.backgroundColor!
       : theme.canvasColor;
   return _baseTheme(
     theme: theme,
@@ -59,10 +59,10 @@ ThemeData _darkTheme(IdeTheme? ideTheme) {
   );
 }
 
-ThemeData _lightTheme(IdeTheme? ideTheme) {
+ThemeData _lightTheme(IdeTheme ideTheme) {
   final theme = ThemeData.light();
-  final background = isValidLightColor(ideTheme?.backgroundColor)
-      ? ideTheme!.backgroundColor!
+  final background = isValidLightColor(ideTheme.backgroundColor)
+      ? ideTheme.backgroundColor!
       : theme.canvasColor;
   return _baseTheme(
     theme: theme,
@@ -76,7 +76,7 @@ ThemeData _lightTheme(IdeTheme? ideTheme) {
 
 ThemeData _baseTheme({
   required ThemeData theme,
-  required IdeTheme? ideTheme,
+  required IdeTheme ideTheme,
   required Color primaryColor,
   required Color backgroundColor,
   required Color indicatorColor,
