@@ -6,6 +6,7 @@
 
 import 'package:devtools_app/devtools.dart' as devtools;
 import 'package:devtools_app/src/app.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/extension_points/extensions_base.dart';
 import 'package:devtools_app/src/extension_points/extensions_external.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -21,6 +22,7 @@ void main() {
       aboutDialog = DevToolsAboutDialog();
       setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(ServiceConnectionManager, FakeServiceManager());
+      setGlobal(IdeTheme, IdeTheme());
     });
 
     testWidgets('builds dialog', (WidgetTester tester) async {

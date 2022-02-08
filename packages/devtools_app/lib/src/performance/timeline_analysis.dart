@@ -8,9 +8,9 @@ import 'package:flutter/material.dart';
 
 import '../analytics/constants.dart' as analytics_constants;
 import '../charts/flame_chart.dart';
+import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';
 import '../shared/theme.dart';
-import '../shared/utils.dart';
 import '../ui/colors.dart';
 import '../ui/utils.dart';
 import 'performance_controller.dart';

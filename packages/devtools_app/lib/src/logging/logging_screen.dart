@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';
 import '../shared/console.dart';
 import '../shared/screen.dart';

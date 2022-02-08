@@ -6,6 +6,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../primitives/utils.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';
 import 'inspector_text_styles.dart';
