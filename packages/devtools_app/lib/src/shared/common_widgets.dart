@@ -181,20 +181,24 @@ class IconLabelButton extends StatelessWidget {
             : null,
         child: outlined
             ? OutlinedButton(
-                style: denseAwareOutlinedButtonStyle(
-                  context,
-                  minScreenWidthForTextBeforeScaling!,
-                ),
+                style: minScreenWidthForTextBeforeScaling != null
+                    ? denseAwareOutlinedButtonStyle(
+                        context,
+                        minScreenWidthForTextBeforeScaling!,
+                      )
+                    : null,
                 onPressed: onPressed,
                 child: iconLabel,
               )
             : TextButton(
                 onPressed: onPressed,
                 child: iconLabel,
-                style: denseAwareOutlinedButtonStyle(
-                  context,
-                  minScreenWidthForTextBeforeScaling!,
-                ),
+                style: minScreenWidthForTextBeforeScaling != null
+                    ? denseAwareOutlinedButtonStyle(
+                        context,
+                        minScreenWidthForTextBeforeScaling!,
+                      )
+                    : null,
               ),
       ),
     );
@@ -624,7 +628,8 @@ class Badge extends StatelessWidget {
       child: Text(
         text,
         // Use a slightly smaller font for the badge.
-        style: theme.primaryTextTheme.bodyText2!.apply(fontSizeDelta: -1),
+        style: (theme.primaryTextTheme.bodyText2 ?? const TextStyle())
+            .apply(fontSizeDelta: -1),
       ),
     );
   }
@@ -1600,11 +1605,10 @@ class CopyToClipboardControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final disabled = dataProvider == null;
     return ToolbarAction(
       icon: Icons.content_copy,
       tooltip: tooltip,
-      onPressed: disabled
+      onPressed: dataProvider == null
           ? null
           : () => copyToClipboard(dataProvider!(), successMessage, context),
       key: buttonKey,
@@ -1747,7 +1751,7 @@ class PubWarningText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow!;
+    final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow == true;
     final sdkName = isFlutterApp ? 'Flutter' : 'Dart';
     final minSdkVersion = isFlutterApp ? '2.8.0' : '2.15.0';
     return SelectableText.rich(
