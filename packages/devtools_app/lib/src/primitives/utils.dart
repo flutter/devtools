@@ -768,15 +768,15 @@ bool equalsWithinEpsilon(double a, double b) {
 
 /// A dev time class to help trace DevTools application events.
 class DebugTimingLogger {
-  DebugTimingLogger(this.name, {this.mute});
+  DebugTimingLogger(this.name, {this.mute = false});
 
   final String name;
-  final bool? mute;
+  final bool mute;
 
   Stopwatch? _timer;
 
   void log(String message) {
-    if (mute!) return;
+    if (mute) return;
 
     if (_timer != null) {
       _timer!.stop();
