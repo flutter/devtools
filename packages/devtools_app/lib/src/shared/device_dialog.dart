@@ -255,7 +255,7 @@ class _NameColumn extends ColumnData<_DialogFlag> {
         );
 
   @override
-  String? getValue(_DialogFlag dataObject) => dataObject.name;
+  String getValue(_DialogFlag dataObject) => dataObject.name ?? '';
 }
 
 class _DescriptionColumn extends ColumnData<_DialogFlag> {
