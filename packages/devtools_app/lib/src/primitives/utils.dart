@@ -424,7 +424,7 @@ extension JsonMap on Map<String, Object?> {
   String prettyPrint() => const JsonEncoder.withIndent('  ').convert(this);
 }
 
-typedef RateLimiterCallback = Future<Object?> Function();
+typedef RateLimiterCallback = Future<Object> Function();
 
 /// Rate limiter that ensures a [callback] is run no more  than the
 /// specified rate and that at most one async [callback] is running at a time.
@@ -604,8 +604,11 @@ bool isDebugBuild() {
 /// NaN, null, or infinite.
 ///
 /// [ifNotFinite] defaults to 0.0.
-double safeDivide(num? numerator, num? denominator,
-    {double ifNotFinite = 0.0}) {
+double safeDivide(
+  num? numerator,
+  num? denominator, {
+  double ifNotFinite = 0.0,
+}) {
   if (numerator != null && denominator != null) {
     final quotient = numerator / denominator;
     if (quotient.isFinite) {
