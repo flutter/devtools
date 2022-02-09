@@ -579,7 +579,7 @@ class BulletSpacer extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    TextStyle? textStyle;
+    late TextStyle? textStyle;
     if (useAccentColor) {
       textStyle = theme.appBarTheme.toolbarTextStyle ??
           theme.primaryTextTheme.bodyText2;
@@ -1462,9 +1462,9 @@ class MoreInfoLink extends StatelessWidget {
     required this.gaSelectedItemDescription,
   }) : super(key: key);
 
-  final String? url;
+  final String url;
 
-  final String? gaScreenName;
+  final String gaScreenName;
 
   final String gaSelectedItemDescription;
 
@@ -1497,7 +1497,7 @@ class MoreInfoLink extends StatelessWidget {
   }
 
   void _onLinkTap(BuildContext context) {
-    launchUrl(url!, context);
+    launchUrl(url, context);
     ga.select(gaScreenName, gaSelectedItemDescription);
   }
 }
@@ -1514,17 +1514,17 @@ class LinkTextSpan extends TextSpan {
           recognizer: TapGestureRecognizer()
             ..onTap = () async {
               if (onTap != null) onTap();
-              await launchUrl(link.url!, context);
+              await launchUrl(link.url, context);
             },
         );
 }
 
 class Link {
-  const Link({this.display, this.url});
+  const Link({required this.display, required this.url});
 
-  final String? display;
+  final String display;
 
-  final String? url;
+  final String url;
 }
 
 Widget maybeWrapWithTooltip({
@@ -1659,7 +1659,7 @@ class NotifierCheckbox extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: notifier,
-      builder: (context, dynamic value, _) {
+      builder: (context, bool? value, _) {
         return Checkbox(
           value: value,
           onChanged: enabled ? _updateValue : null,
