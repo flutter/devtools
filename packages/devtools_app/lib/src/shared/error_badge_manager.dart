@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:collection';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -36,7 +37,7 @@ class ErrorBadgeManager extends DisposableController
 
   void vmServiceOpened(VmServiceWrapper service) {
     // Ensure structured errors are enabled.
-    serviceManager.serviceExtensionManager.setServiceExtensionState(
+    serviceManager.serviceExtensionManager!.setServiceExtensionState(
       extensions.structuredErrors.extension,
       enabled: true,
       value: true,
@@ -63,33 +64,31 @@ class ErrorBadgeManager extends DisposableController
     }
   }
 
-  InspectableWidgetError _extractInspectableError(Event error) {
+  InspectableWidgetError? _extractInspectableError(Event error) {
     // TODO(dantup): Switch to using the inspectorService from the serviceManager
     //  once Jacob's change to add it lands.
     final node =
-        RemoteDiagnosticsNode(error.extensionData.data, null, false, null);
+        RemoteDiagnosticsNode(error.extensionData!.data, null, false, null);
 
     final errorSummaryNode = node.inlineProperties
-        ?.firstWhere((p) => p.type == 'ErrorSummary', orElse: () => null);
+        ?.firstWhereOrNull((p) => p.type == 'ErrorSummary');
     final errorMessage = errorSummaryNode?.description;
     if (errorMessage == null) {
       return null;
     }
 
-    final devToolsUrlNode = node.inlineProperties?.firstWhere(
+    final devToolsUrlNode = node.inlineProperties?.firstWhereOrNull(
       (p) =>
           p.type == 'DevToolsDeepLinkProperty' &&
           p.getStringMember('value') != null,
-      orElse: () => null,
     );
     if (devToolsUrlNode == null) {
       return null;
     }
 
     final queryParams =
-        devToolsQueryParams(devToolsUrlNode.getStringMember('value'));
-    final inspectorRef =
-        queryParams != null ? queryParams['inspectorRef'] : null;
+        devToolsQueryParams(devToolsUrlNode.getStringMember('value')!);
+    final inspectorRef = queryParams['inspectorRef'] ?? '';
 
     return InspectableWidgetError(errorMessage, inspectorRef);
   }
@@ -107,13 +106,14 @@ class ErrorBadgeManager extends DisposableController
   }
 
   void appendError(String screenId, DevToolsError error) {
-    final errors = _activeErrors[screenId];
+    final ValueNotifier<LinkedHashMap<String?, DevToolsError>>? errors =
+        _activeErrors[screenId];
     if (errors == null) return;
 
     // Build a new map with the new error. Adding to the existing map
     // won't cause the ValueNotifier to fire (and it's not permitted to call
     // notifyListeners() directly).
-    final newValue = LinkedHashMap<String, DevToolsError>.from(errors.value);
+    final newValue = LinkedHashMap<String?, DevToolsError>.from(errors.value);
     newValue[error.id] = error;
     errors.value = newValue;
   }
@@ -129,7 +129,7 @@ class ErrorBadgeManager extends DisposableController
             LinkedHashMap<String, DevToolsError>());
   }
 
-  ValueNotifier<int> _errorCountNotifier(String screenId) {
+  ValueNotifier<int>? _errorCountNotifier(String screenId) {
     return _activeErrorCounts[screenId];
   }
 
@@ -145,7 +145,7 @@ class ErrorBadgeManager extends DisposableController
     final newValue =
         Map.fromEntries(errors.value.entries.where((e) => isValid(e.key)));
     if (newValue.length != oldCount) {
-      errors.value = newValue;
+      errors.value = newValue as LinkedHashMap<String, DevToolsError>;
     }
   }
 
@@ -183,7 +183,7 @@ class InspectableWidgetError extends DevToolsError {
   InspectableWidgetError(String errorMessage, String id, {bool read = false})
       : super(errorMessage, id, read: read);
 
-  String get inspectorRef => id;
+  String? get inspectorRef => id;
 
   @override
   InspectableWidgetError asRead() =>
