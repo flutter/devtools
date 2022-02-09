@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -21,12 +19,13 @@ class AppFixture {
     this.serviceUri,
     this.serviceConnection,
     this.isolates,
+    this.onTeardown,
   ) {
     // "starting app"
     _onAppStarted = lines.first;
 
     serviceConnection.streamListen(EventStreams.kIsolate);
-    serviceConnection.onIsolateEvent.listen((Event event) {
+    streamSubs.add(serviceConnection.onIsolateEvent.listen((Event event) {
       if (event.kind == EventKind.kIsolateExit) {
         isolates.remove(event.isolate);
       } else {
@@ -34,14 +33,17 @@ class AppFixture {
           isolates.add(event.isolate);
         }
       }
-    });
+    }));
   }
+
+  final streamSubs = <StreamSubscription<dynamic>>[];
 
   final Process process;
   final Stream<String> lines;
   final Uri serviceUri;
   final VmService serviceConnection;
   final List<IsolateRef?> isolates;
+  final Future<void> Function()? onTeardown;
   late Future<void> _onAppStarted;
 
   Future<void> get onAppStarted => _onAppStarted;
@@ -61,6 +63,12 @@ class AppFixture {
   }
 
   Future<void> teardown() async {
+    if (onTeardown != null) {
+      await onTeardown!();
+    }
+    for (final sub in streamSubs) {
+      await sub.cancel();
+    }
     await serviceConnection.dispose();
     process.kill();
   }
@@ -75,7 +83,15 @@ class CliAppFixture extends AppFixture {
     Uri serviceUri,
     VmService serviceConnection,
     List<IsolateRef> isolates,
-  ) : super._(process, lines, serviceUri, serviceConnection, isolates);
+    Future<void> Function()? onTeardown,
+  ) : super._(
+          process,
+          lines,
+          serviceUri,
+          serviceConnection,
+          isolates,
+          onTeardown,
+        );
 
   final String appScriptPath;
 
@@ -93,7 +109,7 @@ class CliAppFixture extends AppFixture {
         StreamController<String>.broadcast();
     final Completer<String> completer = Completer<String>();
 
-    lines.listen((String line) {
+    final linesSubscription = lines.listen((String line) {
       if (completer.isCompleted) {
         lineController.add(line);
       } else if (line.contains(observatoryMarker)) {
@@ -127,6 +143,11 @@ class CliAppFixture extends AppFixture {
         await _waitForIsolate(serviceConnection, 'PauseStart');
     await serviceConnection.resume(isolate.id!);
 
+    Future<void> _onTeardown() async {
+      await linesSubscription.cancel();
+      await lineController.close();
+    }
+
     return CliAppFixture._(
       appScriptPath,
       process,
@@ -134,6 +155,7 @@ class CliAppFixture extends AppFixture {
       uri,
       serviceConnection,
       vm.isolates!,
+      _onTeardown,
     );
   }
 
