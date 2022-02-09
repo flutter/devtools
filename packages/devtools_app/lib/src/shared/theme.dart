@@ -564,7 +564,7 @@ bool includeText(
 
 ButtonStyle denseAwareOutlinedButtonStyle(
   BuildContext context,
-  double minScreenWidthForTextBeforeScaling,
+  double? minScreenWidthForTextBeforeScaling,
 ) {
   ButtonStyle buttonStyle =
       Theme.of(context).outlinedButtonTheme.style ?? const ButtonStyle();
