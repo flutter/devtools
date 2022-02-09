@@ -231,6 +231,10 @@ class ConsoleService extends Disposer {
   void _handleExtensionEvent(Event e) async {
     if (e.extensionKind == 'Flutter.Error' ||
         e.extensionKind == 'Flutter.Print') {
+      if (serviceManager.connectedApp.isProfileBuildNow != true) {
+        // The app isn't a debug build.
+        return;
+      }
       // TODO(jacobr): events may be out of order. Use unique ids to ensure
       // consistent order of regular print statements and structured messages.
       appendInstanceRef(
