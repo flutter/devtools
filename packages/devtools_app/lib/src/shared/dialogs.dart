@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/material.dart';
 
@@ -27,8 +27,8 @@ List<Widget> dialogSubHeader(ThemeData theme, String titleText) {
 /// It normalizes dialog layout, spacing, and look and feel.
 class DevToolsDialog extends StatelessWidget {
   const DevToolsDialog({
-    @required this.title,
-    @required this.content,
+    required this.title,
+    required this.content,
     this.includeDivider = true,
     this.actions,
   });
@@ -38,7 +38,7 @@ class DevToolsDialog extends StatelessWidget {
   final Widget title;
   final Widget content;
   final bool includeDivider;
-  final List<Widget> actions;
+  final List<Widget>? actions;
 
   @override
   Widget build(BuildContext context) {
@@ -80,13 +80,13 @@ class DialogCloseButton extends StatelessWidget {
 class DialogCancelButton extends StatelessWidget {
   const DialogCancelButton({this.cancelAction}) : super();
 
-  final VoidCallback cancelAction;
+  final VoidCallback? cancelAction;
 
   @override
   Widget build(BuildContext context) {
     return DialogTextButton(
       onPressed: () {
-        if (cancelAction != null) cancelAction();
+        if (cancelAction != null) cancelAction!();
         Navigator.of(context).pop(dialogDefaultContext);
       },
       child: const Text('CANCEL'),
@@ -96,7 +96,7 @@ class DialogCancelButton extends StatelessWidget {
 
 /// A TextButton used to close a containing dialog (APPLY).
 class DialogApplyButton extends StatelessWidget {
-  const DialogApplyButton({@required this.onPressed}) : super();
+  const DialogApplyButton({required this.onPressed}) : super();
 
   final Function onPressed;
 
@@ -104,7 +104,7 @@ class DialogApplyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return DialogTextButton(
       onPressed: () {
-        if (onPressed != null) onPressed();
+        onPressed();
         Navigator.of(context).pop(dialogDefaultContext);
       },
       child: const Text('APPLY'),
@@ -115,9 +115,9 @@ class DialogApplyButton extends StatelessWidget {
 class DialogTextButton extends StatelessWidget {
   const DialogTextButton({this.onPressed, this.child});
 
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +125,7 @@ class DialogTextButton extends StatelessWidget {
       height: defaultButtonHeight,
       child: TextButton(
         onPressed: onPressed,
-        child: child,
+        child: child!,
       ),
     );
   }
