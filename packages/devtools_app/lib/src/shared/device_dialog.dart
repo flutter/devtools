@@ -156,7 +156,7 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
   }
 
   void _updateFromController() {
-    flags = infoController.flagListNotifier.value!.flags!
+    flags = (infoController.flagListNotifier.value?.flags ?? [])
         .map((flag) => _DialogFlag(flag))
         .toList();
     _refilter();
