@@ -43,42 +43,8 @@ bool collectionEquals(e1, e2, {bool ordered = true}) {
   return const DeepCollectionEquality.unordered().equals(e1, e2);
 }
 
-const String loremIpsum = '''
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus dolor quis rhoncus feugiat. Ut imperdiet
-libero vel vestibulum vulputate. Aliquam consequat, lectus nec euismod commodo, turpis massa volutpat ex, a
-elementum tellus turpis nec arcu. Suspendisse erat nisl, rhoncus ut nisi in, lacinia pretium dui. Donec at erat
-ultrices, tincidunt quam sit amet, cursus lectus. Integer justo turpis, vestibulum condimentum lectus eget,
-sodales suscipit risus. Nullam consequat sit amet turpis vitae facilisis. Integer sit amet tempus arcu.
-''';
-
 // 2^52 is the max int for dart2js.
 final int maxJsInt = pow(2, 52) as int;
-
-String getLoremText([int paragraphCount = 1]) {
-  String str = '';
-  for (int i = 0; i < paragraphCount; i++) {
-    str += '$loremIpsum\n';
-  }
-  return str.trim();
-}
-
-final Random r = Random();
-
-final List<String> _words = loremIpsum
-    .replaceAll('\n', ' ')
-    .split(' ')
-    .map((String w) => w.toLowerCase())
-    .map((String w) => w.endsWith('.') ? w.substring(0, w.length - 1) : w)
-    .map((String w) => w.endsWith(',') ? w.substring(0, w.length - 1) : w)
-    .toList();
-
-String? getLoremFragment([int? wordCount]) {
-  wordCount ??= r.nextInt(8) + 1;
-  return toBeginningOfSentenceCase(
-      List<String>.generate(wordCount, (_) => _words[r.nextInt(_words.length)])
-          .join(' ')
-          .trim());
-}
 
 String escape(String? text) => text == null ? '' : htmlEscape.convert(text);
 
