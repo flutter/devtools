@@ -947,11 +947,11 @@ num degToRad(num deg) => deg * (pi / 180.0);
 
 typedef DevToolsJsonFileHandler = void Function(DevToolsJsonFile file);
 
-class DevToolsJsonFile extends DevToolsFile<Object?> {
+class DevToolsJsonFile extends DevToolsFile<Object> {
   const DevToolsJsonFile({
     required String name,
     required DateTime lastModifiedTime,
-    required Object? data,
+    required Object data,
   }) : super(
           path: name,
           lastModifiedTime: lastModifiedTime,
@@ -1113,11 +1113,6 @@ Uri? getServiceUriFromQueryString(String? location) {
   return null;
 }
 
-/// Helper function to return the name of a key. If widget has a key
-/// use the key's name to record the select e.g.,
-///   ga.select(MemoryScreen.id, ga.keyName(MemoryScreen.gcButtonKey));
-String keyName(Key key) => (key as ValueKey<String>).value;
-
 double safePositiveDouble(double value) {
   if (value.isNaN) return 0.0;
   return max(value, 0.0);
@@ -1144,7 +1139,7 @@ String prettyTimestamp(
 /// listeners are notified whenever the data is modified, but notifying can be
 /// optionally disabled.
 class ListValueNotifier<T> extends ChangeNotifier
-    implements ValueListenable<List<T>?> {
+    implements ValueListenable<List<T>> {
   /// Creates a [ListValueNotifier] that wraps this value [_rawList].
   ListValueNotifier(List<T> rawList) : _rawList = List<T>.from(rawList) {
     _currentList = ImmutableList(_rawList);
@@ -1152,10 +1147,10 @@ class ListValueNotifier<T> extends ChangeNotifier
 
   List<T> _rawList;
 
-  ImmutableList<T>? _currentList;
+  late ImmutableList<T> _currentList;
 
   @override
-  List<T>? get value => _currentList;
+  List<T> get value => _currentList;
 
   @override
   // This override is needed to change visibility of the method.
