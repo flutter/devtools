@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -24,14 +24,14 @@ import 'theme.dart';
 /// top-right corner.
 class Console extends StatelessWidget {
   const Console({
-    this.controls,
-    @required this.lines,
+    this.controls = const <Widget>[],
+    required this.lines,
     this.title,
     this.footer,
   }) : super();
 
-  final Widget title;
-  final Widget footer;
+  final Widget? title;
+  final Widget? footer;
   final List<Widget> controls;
   final ValueListenable<List<ConsoleLine>> lines;
 
@@ -50,12 +50,12 @@ class Console extends StatelessWidget {
 
 class ConsoleFrame extends StatelessWidget {
   const ConsoleFrame({
-    this.controls,
-    @required this.child,
+    this.controls = const <Widget>[],
+    required this.child,
     this.title,
   }) : super();
 
-  final Widget title;
+  final Widget? title;
   final Widget child;
   final List<Widget> controls;
 
@@ -64,13 +64,13 @@ class ConsoleFrame extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (title != null) title,
+        if (title != null) title!,
         Expanded(
           child: Material(
             child: Stack(
               children: [
                 child,
-                if (controls != null && controls.isNotEmpty)
+                if (controls.isNotEmpty)
                   _ConsoleControls(
                     controls: controls,
                   ),
@@ -87,7 +87,7 @@ class ConsoleFrame extends StatelessWidget {
 /// (`controls`).
 class _ConsoleControls extends StatelessWidget {
   const _ConsoleControls({
-    this.controls,
+    required this.controls,
   }) : super();
 
   final List<Widget> controls;
@@ -110,14 +110,14 @@ class _ConsoleControls extends StatelessWidget {
 /// This is a ListView of text lines, with a monospace font and a border.
 class _ConsoleOutput extends StatefulWidget {
   const _ConsoleOutput({
-    Key key,
-    @required this.lines,
+    Key? key,
+    required this.lines,
     this.footer,
   }) : super(key: key);
 
   final ValueListenable<List<ConsoleLine>> lines;
 
-  final Widget footer;
+  final Widget? footer;
 
   @override
   _ConsoleOutputState createState() => _ConsoleOutputState();
@@ -131,17 +131,16 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
 
   static const _scrollBarKey = Key('console-scrollbar');
 
-  List<ConsoleLine> _currentLines;
+  List<ConsoleLine> _currentLines = const [];
   bool _scrollToBottom = true;
   bool _considerScrollAtBottom = true;
   double _lastScrollOffset = 0.0;
 
-  DebuggerController _debuggerController;
+  late DebuggerController _debuggerController;
 
   @override
   void initState() {
     super.initState();
-    _currentLines = const [];
     _initHelper();
   }
 
@@ -175,7 +174,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
   }
 
   void _onConsoleLinesChanged() {
-    final nextLines = widget.lines.value ?? const [];
+    final nextLines = widget.lines.value;
     if (nextLines == _currentLines) return;
 
     var forceScrollIntoView = false;
@@ -208,7 +207,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
 
     if (_scrollToBottom) {
       _scrollToBottom = false;
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
         if (_scroll.hasClients) {
           _scroll.autoScrollToBottom();
         } else {
@@ -236,7 +235,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
         },
         itemBuilder: (context, index) {
           if (index == _currentLines.length && widget.footer != null) {
-            return widget.footer;
+            return widget.footer!;
           }
           final line = _currentLines[index];
           if (line is TextConsoleLine) {
@@ -279,9 +278,9 @@ class DeleteControl extends StatelessWidget {
     this.buttonKey,
   });
 
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final String tooltip;
-  final Key buttonKey;
+  final Key? buttonKey;
 
   @override
   Widget build(BuildContext context) {
