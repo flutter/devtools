@@ -750,7 +750,7 @@ enum SortDirection {
   descending,
 }
 
-extension SortDirectionExtension on SortDirection? {
+extension SortDirectionExtension on SortDirection {
   SortDirection reverse() {
     return this == SortDirection.ascending
         ? SortDirection.descending
