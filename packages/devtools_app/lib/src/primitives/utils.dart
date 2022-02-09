@@ -249,7 +249,7 @@ bool isLetter(int codeUnit) =>
 /// Pass a custom named `plural` for irregular plurals:
 /// `pluralize('index', count, plural: 'indices')`
 /// So it returns `indices` and not `indexs`.
-String pluralize(String word, int? count, {String? plural}) =>
+String pluralize(String word, int count, {String? plural}) =>
     count == 1 ? word : (plural ?? '${word}s');
 
 /// Returns a simplified version of a StackFrame name.
