@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -25,13 +26,13 @@ const preCompileShadersDocsUrl =
 
 class BannerMessagesController {
   final _messages = <String, ValueNotifier<List<BannerMessage>>>{};
-  final _dismissedMessageKeys = <Key>{};
+  final _dismissedMessageKeys = <Key?>{};
 
   void addMessage(BannerMessage message) {
     // We push the banner message in a post frame callback because otherwise,
     // we'd be trying to call setState while the parent widget `BannerMessages`
     // is in the middle of `build`.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
       if (isMessageDismissed(message) || isMessageVisible(message)) return;
       final messages = _messagesForScreen(message.screenId);
       messages.value.add(message);
@@ -47,7 +48,7 @@ class BannerMessagesController {
     // We push the banner message in a post frame callback because otherwise,
     // we'd be trying to call setState while the parent widget `BannerMessages`
     // is in the middle of `build`.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
       if (dismiss) {
         assert(!_dismissedMessageKeys.contains(message.key));
         _dismissedMessageKeys.add(message.key);
@@ -61,9 +62,8 @@ class BannerMessagesController {
 
   void removeMessageByKey(Key key, String screenId) {
     final currentMessages = _messagesForScreen(screenId);
-    final messageWithKey = currentMessages.value.firstWhere(
+    final messageWithKey = currentMessages.value.firstWhereOrNull(
       (m) => m.key == key,
-      orElse: () => null,
     );
     if (messageWithKey != null) {
       removeMessage(messageWithKey);
@@ -94,7 +94,7 @@ class BannerMessagesController {
 }
 
 class BannerMessages extends StatelessWidget {
-  const BannerMessages({Key key, @required this.screen}) : super(key: key);
+  const BannerMessages({Key? key, required this.screen}) : super(key: key);
 
   final Screen screen;
 
@@ -102,18 +102,17 @@ class BannerMessages extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<BannerMessagesController>(context);
-    final messagesForScreen = controller?.messagesForScreen(screen.screenId);
+    final messagesForScreen = controller.messagesForScreen(screen.screenId);
     return Column(
       children: [
-        if (messagesForScreen != null)
-          ValueListenableBuilder<List<BannerMessage>>(
-            valueListenable: messagesForScreen,
-            builder: (context, messages, _) {
-              return Column(
-                children: messages,
-              );
-            },
-          ),
+        ValueListenableBuilder<List<BannerMessage>>(
+          valueListenable: messagesForScreen,
+          builder: (context, messages, _) {
+            return Column(
+              children: messages,
+            );
+          },
+        ),
         Expanded(
           child: screen.build(context),
         )
@@ -124,12 +123,12 @@ class BannerMessages extends StatelessWidget {
 
 class BannerMessage extends StatelessWidget {
   const BannerMessage({
-    @required Key key,
-    @required this.textSpans,
-    @required this.backgroundColor,
-    @required this.foregroundColor,
-    @required this.screenId,
-    @required this.headerText,
+    required Key key,
+    required this.textSpans,
+    required this.backgroundColor,
+    required this.foregroundColor,
+    required this.screenId,
+    required this.headerText,
   }) : super(key: key);
 
   final List<TextSpan> textSpans;
@@ -157,7 +156,7 @@ class BannerMessage extends StatelessWidget {
                   headerText,
                   style: Theme.of(context)
                       .textTheme
-                      .bodyText1
+                      .bodyText1!
                       .copyWith(color: foregroundColor),
                 ),
                 const SizedBox(width: defaultSpacing),
@@ -190,9 +189,9 @@ class BannerMessage extends StatelessWidget {
 
 class _BannerError extends BannerMessage {
   const _BannerError({
-    @required Key key,
-    @required List<TextSpan> textSpans,
-    @required String screenId,
+    required Key key,
+    required List<TextSpan> textSpans,
+    required String screenId,
   }) : super(
           key: key,
           textSpans: textSpans,
@@ -209,9 +208,9 @@ class _BannerError extends BannerMessage {
 // TODO(kenz): add "Do not show this again" option to warnings.
 class _BannerWarning extends BannerMessage {
   const _BannerWarning({
-    @required Key key,
-    @required List<TextSpan> textSpans,
-    @required String screenId,
+    required Key key,
+    required List<TextSpan> textSpans,
+    required String screenId,
   }) : super(
           key: key,
           textSpans: textSpans,
@@ -265,7 +264,7 @@ Relaunch your application with the '--profile' argument, or ''',
 }
 
 class ProviderUnknownErrorBanner {
-  const ProviderUnknownErrorBanner({@required this.screenId});
+  const ProviderUnknownErrorBanner({required this.screenId});
 
   final String screenId;
 
@@ -292,8 +291,8 @@ This could be caused by an older version of package:provider; please make sure t
 class ShaderJankMessage {
   const ShaderJankMessage(
     this.screenId, {
-    @required this.jankyFramesCount,
-    @required this.jankDuration,
+    required this.jankyFramesCount,
+    required this.jankDuration,
   });
 
   final String screenId;
@@ -423,8 +422,9 @@ void maybePushDebugModePerformanceMessage(
 ) {
   if (offlineController.offlineMode.value) return;
   if (serviceManager.connectedApp?.isDebugFlutterAppNow ?? false) {
-    Provider.of<BannerMessagesController>(context)
-        .addMessage(DebugModePerformanceMessage(screenId).build(context));
+    Provider.of<BannerMessagesController>(context).addMessage(
+      DebugModePerformanceMessage(screenId).build(context) as BannerMessage,
+    );
   }
 }
 
