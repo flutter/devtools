@@ -26,7 +26,7 @@ const preCompileShadersDocsUrl =
 
 class BannerMessagesController {
   final _messages = <String, ValueNotifier<List<BannerMessage>>>{};
-  final Set<Key?> _dismissedMessageKeys = <Key?>{};
+  final _dismissedMessageKeys = <Key?>{};
 
   void addMessage(BannerMessage message) {
     // We push the banner message in a post frame callback because otherwise,
@@ -423,7 +423,8 @@ void maybePushDebugModePerformanceMessage(
   if (offlineController.offlineMode.value) return;
   if (serviceManager.connectedApp?.isDebugFlutterAppNow ?? false) {
     Provider.of<BannerMessagesController>(context).addMessage(
-        DebugModePerformanceMessage(screenId).build(context) as BannerMessage);
+      DebugModePerformanceMessage(screenId).build(context) as BannerMessage,
+    );
   }
 }
 
