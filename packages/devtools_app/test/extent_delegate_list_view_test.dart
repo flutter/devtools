@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
 @TestOn('vm')
 import 'package:devtools_app/src/primitives/extent_delegate_list.dart';
 import 'package:flutter/gestures.dart';
@@ -77,25 +79,6 @@ void main() {
         testPointer.scroll(const Offset(0.0, 10.0)),
       );
       expect(pointerSignalEventCount, equals(1));
-    });
-
-    testWidgets('throws for null childrenDelegate', (tester) async {
-      expect(
-        () async {
-          await pumpList(
-            tester,
-            ExtentDelegateListView(
-              controller: ScrollController(),
-              extentDelegate: FixedExtentDelegate(
-                computeLength: () => children.length,
-                computeExtent: (index) => children[index],
-              ),
-              childrenDelegate: null,
-            ),
-          );
-        },
-        throwsAssertionError,
-      );
     });
   });
 }

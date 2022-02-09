@@ -15,7 +15,7 @@ import 'dart:math';
 // file.
 
 abstract class TreeNode<T extends TreeNode<T>> {
-  T parent;
+  T? parent;
 
   final List<T> children = [];
 
@@ -48,24 +48,24 @@ abstract class TreeNode<T extends TreeNode<T>> {
 
   T get root {
     if (_root != null) {
-      return _root;
+      return _root!;
     }
-    if (parent == null) return _root = this;
-    return _root = parent.root;
+    if (parent == null) return _root = this as T;
+    return _root = parent!.root;
   }
 
-  T _root;
+  T? _root;
 
   /// The level (0-based) of this tree node in the tree.
   int get level {
     if (_level != null) {
-      return _level;
+      return _level!;
     }
     if (parent == null) return _level = 0;
-    return _level = 1 + parent.level;
+    return _level = 1 + parent!.level;
   }
 
-  int _level;
+  int? _level;
 
   /// Whether the tree table node is expandable.
   bool get isExpandable => children.isNotEmpty;
@@ -96,7 +96,7 @@ abstract class TreeNode<T extends TreeNode<T>> {
   ///
   /// When using this, consider caching the value. It is O([level]) to compute.
   bool shouldShow() =>
-      parent == null || (parent.isExpanded && parent.shouldShow());
+      parent == null || (parent!.isExpanded && parent!.shouldShow());
 
   void collapse() {
     _isExpanded = false;
@@ -109,11 +109,11 @@ abstract class TreeNode<T extends TreeNode<T>> {
   /// Override to handle pressing on a Leaf node.
   void leaf() {}
 
-  void addChild(T child, {int index}) {
+  void addChild(T child, {int? index}) {
     index ??= children.length;
     assert(index <= children.length);
     children.insert(index, child);
-    child.parent = this;
+    child.parent = this as T?;
     child.index = index;
     for (int i = index + 1; i < children.length; ++i) {
       children[i].index++;
@@ -134,7 +134,7 @@ abstract class TreeNode<T extends TreeNode<T>> {
 
   /// Expands this node and all of its children (cascading).
   void expandCascading() {
-    breadthFirstTraversal<T>(this, action: (T node) {
+    breadthFirstTraversal<T>(this as T, action: (T node) {
       node.expand();
     });
   }
@@ -147,7 +147,7 @@ abstract class TreeNode<T extends TreeNode<T>> {
 
   /// Collapses this node and all of its children (cascading).
   void collapseCascading() {
-    breadthFirstTraversal<T>(this, action: (T node) {
+    breadthFirstTraversal<T>(this as T, action: (T node) {
       node.collapse();
     });
   }
@@ -157,13 +157,13 @@ abstract class TreeNode<T extends TreeNode<T>> {
   }
 
   bool subtreeHasNodeWithCondition(bool condition(T node)) {
-    final T childWithCondition = firstChildWithCondition(condition);
+    final T? childWithCondition = firstChildWithCondition(condition);
     return childWithCondition != null;
   }
 
-  T firstChildWithCondition(bool condition(T node)) {
+  T? firstChildWithCondition(bool condition(T node)) {
     return breadthFirstTraversal<T>(
-      this,
+      this as T,
       returnCondition: condition,
     );
   }
@@ -183,7 +183,7 @@ abstract class TreeNode<T extends TreeNode<T>> {
   /// [level 3]         D
   ///
   /// E.firstSubNodeAtLevel(1) => F
-  T firstChildNodeAtLevel(int level) {
+  T? firstChildNodeAtLevel(int level) {
     return _childNodeAtLevelWithCondition(
       level,
       // When this condition is called, we have already ensured that
@@ -209,7 +209,7 @@ abstract class TreeNode<T extends TreeNode<T>> {
   /// [level 3]         D
   ///
   /// E.lastSubNodeAtLevel(1) => G
-  T lastChildNodeAtLevel(int level) {
+  T? lastChildNodeAtLevel(int level) {
     return _childNodeAtLevelWithCondition(
         level,
         // When this condition is called, we have already ensured that
@@ -226,7 +226,7 @@ abstract class TreeNode<T extends TreeNode<T>> {
   ///
   /// The runtime of this method is O(level * tree width). The worst case
   /// scenario is searching for a very deep level in a very wide tree.
-  T _childNodeAtLevelWithCondition(
+  T? _childNodeAtLevelWithCondition(
     int level,
     T traversalCondition(T currentNode, int levelWithOffset),
   ) {
@@ -234,14 +234,14 @@ abstract class TreeNode<T extends TreeNode<T>> {
     // The current node [this] is not guaranteed to be at level 0, so we need
     // to account for the level offset of [this].
     final levelWithOffset = level + this.level;
-    var currentNode = this;
+    TreeNode<T> currentNode = this;
     while (currentNode.level < levelWithOffset) {
       // Walk down the tree until we find the node at [level].
       if (currentNode.children.isNotEmpty) {
-        currentNode = traversalCondition(currentNode, levelWithOffset);
+        currentNode = traversalCondition(currentNode as T, levelWithOffset);
       }
     }
-    return currentNode;
+    return currentNode as T?;
   }
 
   TreeNode<T> shallowCopy();
@@ -259,12 +259,12 @@ abstract class TreeNode<T extends TreeNode<T>> {
         for (final child in node.children) {
           copy.addAllChildren(walkAndCopy(child));
         }
-        return [copy];
+        return [copy as T];
       }
       return [for (final child in node.children) ...walkAndCopy(child)];
     }
 
-    return walkAndCopy(this);
+    return walkAndCopy(this as T);
   }
 }
 
@@ -276,10 +276,10 @@ abstract class TreeNode<T extends TreeNode<T>> {
 /// searching for. [action] specifies an action that we will execute on each
 /// node. For example, if we need to traverse a tree and change a property on
 /// every single node, we would do this through the [action] param.
-T breadthFirstTraversal<T extends TreeNode<T>>(
+T? breadthFirstTraversal<T extends TreeNode<T>>(
   T root, {
-  bool returnCondition(T node),
-  void action(T node),
+  bool returnCondition(T node)?,
+  void action(T node)?,
 }) {
   final queue = Queue.of([root]);
   while (queue.isNotEmpty) {

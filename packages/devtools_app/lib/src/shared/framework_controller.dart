@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-
 import 'globals.dart';
 
 /// This controller is used by the connection to the DevTools server to receive
@@ -64,7 +62,7 @@ class FrameworkController {
     serviceManager.connectedState.addListener(() {
       final connectionState = serviceManager.connectedState.value;
       if (connectionState.connected) {
-        _connectedController.add(serviceManager.service.connectedUri);
+        _connectedController.add(serviceManager.service!.connectedUri!);
       } else {
         _disconnectedController.add(null);
       }
@@ -73,7 +71,7 @@ class FrameworkController {
 }
 
 class ConnectVmEvent {
-  ConnectVmEvent({@required this.serviceProtocolUri, this.notify = false});
+  ConnectVmEvent({required this.serviceProtocolUri, this.notify = false});
 
   final Uri serviceProtocolUri;
   final bool notify;

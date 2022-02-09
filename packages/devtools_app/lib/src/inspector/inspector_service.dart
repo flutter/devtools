@@ -6,6 +6,9 @@
 //
 // If you add methods to this class you should also add them to
 // InspectorService.java.
+
+// @dart=2.9
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';

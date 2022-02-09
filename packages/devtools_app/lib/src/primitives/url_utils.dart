@@ -46,7 +46,7 @@ String getSimplePackageUrl(String url) {
 ///
 /// Returns null if the [Uri] parsed from [value] is not [Uri.absolute]
 /// (ie, it has no scheme or it has a fragment).
-Uri normalizeVmServiceUri(String value) {
+Uri? normalizeVmServiceUri(String value) {
   value = value.trim();
 
   // Clean up urls that have a devtools server's prefix, aka:

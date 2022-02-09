@@ -8,9 +8,9 @@ class HistoryManager<T> {
   /// The currently selected historical item.
   ///
   /// Returns null if there is no historical items.
-  ValueListenable<T> get current => _current;
+  ValueListenable<T?> get current => _current;
 
-  final _current = ValueNotifier<T>(null);
+  final _current = ValueNotifier<T?>(null);
   final _history = <T>[];
   int _historyIndex = -1;
 
@@ -54,7 +54,7 @@ class HistoryManager<T> {
   /// Return the next value.
   ///
   /// Returns null if there is no next value.
-  T peekNext() => hasNext ? _history[_historyIndex + 1] : null;
+  T? peekNext() => hasNext ? _history[_historyIndex + 1] : null;
 
   /// Remove the most recent historical item on the stack.
   ///

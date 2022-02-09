@@ -4,8 +4,6 @@
 
 // TODO(devoncarew): Upstream this class to the service protocol library.
 
-import 'package:flutter/foundation.dart';
-
 /// A single timeline event.
 class TraceEvent {
   /// Creates a timeline event given JSON-encoded event data.
@@ -50,28 +48,28 @@ class TraceEvent {
   /// The name of the event.
   ///
   /// Corresponds to the "name" field in the JSON event.
-  final String name;
+  final String? name;
 
   /// Event category. Events with different names may share the same category.
   ///
   /// Corresponds to the "cat" field in the JSON event.
-  final String category;
+  final String? category;
 
   /// For a given long lasting event, denotes the phase of the event, such as
   /// "B" for "event began", and "E" for "event ended".
   ///
   /// Corresponds to the "ph" field in the JSON event.
-  final String phase;
+  final String? phase;
 
   /// ID of process that emitted the event.
   ///
   /// Corresponds to the "pid" field in the JSON event.
-  final int processId;
+  final int? processId;
 
   /// ID of thread that issues the event.
   ///
   /// Corresponds to the "tid" field in the JSON event.
-  final int threadId;
+  final int? threadId;
 
   /// Each async event has an additional required parameter id. We consider the
   /// events with the same category and id as events from the same event tree.
@@ -80,7 +78,7 @@ class TraceEvent {
   /// An optional scope string can be specified to avoid id conflicts, in which
   /// case we consider events with the same category, scope, and id as events
   /// from the same event tree.
-  String get scope => json[scopeKey];
+  String? get scope => json[scopeKey];
 
   /// The duration of the event, in microseconds.
   ///
@@ -88,18 +86,18 @@ class TraceEvent {
   /// pair of begin/end events.
   ///
   /// Corresponds to the "dur" field in the JSON event.
-  final int duration;
+  final int? duration;
 
   /// Time passed since tracing was enabled, in microseconds.
-  final int timestampMicros;
+  final int? timestampMicros;
 
   /// Arbitrary data attached to the event.
-  final Map<String, dynamic> args;
+  final Map<String, dynamic>? args;
 
   String get asyncUID =>
       generateAsyncUID(id: id, category: category, scope: scope);
 
-  TimelineEventType _type;
+  TimelineEventType? _type;
 
   TimelineEventType get type => _type ??= TimelineEventType.other;
 
@@ -129,7 +127,7 @@ class TraceEventWrapper implements Comparable<TraceEventWrapper> {
 
   bool processed = false;
 
-  bool get isShaderEvent => event.args['devtoolsTag'] == 'shaders';
+  bool get isShaderEvent => event.args!['devtoolsTag'] == 'shaders';
 
   @override
   int compareTo(TraceEventWrapper other) {
@@ -142,9 +140,9 @@ class TraceEventWrapper implements Comparable<TraceEventWrapper> {
 }
 
 String generateAsyncUID({
-  @required String id,
-  @required String category,
-  String scope,
+  required String? id,
+  required String? category,
+  String? scope,
 }) {
   return [category, if (scope != null) scope, id].join(':');
 }

@@ -4,6 +4,8 @@
 
 // TODO(rrousselGit) merge this code with the debugger view
 
+// @dart=2.9
+
 import 'dart:async';
 import 'dart:math' as math;
 

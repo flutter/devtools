@@ -4,6 +4,8 @@
 
 // This code was pulled from dart:io.
 
+// @dart=2.9
+
 part of http;
 
 class HttpException {
