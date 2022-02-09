@@ -26,7 +26,7 @@ const preCompileShadersDocsUrl =
 
 class BannerMessagesController {
   final _messages = <String, ValueNotifier<List<BannerMessage>>>{};
-  final Set<Key?> _dismissedMessageKeys = <Key>{};
+  final Set<Key?> _dismissedMessageKeys = <Key?>{};
 
   void addMessage(BannerMessage message) {
     // We push the banner message in a post frame callback because otherwise,
