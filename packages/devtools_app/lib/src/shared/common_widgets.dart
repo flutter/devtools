@@ -1676,7 +1676,7 @@ class CheckboxSetting extends StatelessWidget {
     this.enabled = true,
   }) : super(key: key);
 
-  final ValueListenable<bool?> notifier;
+  final ValueNotifier<bool?> notifier;
 
   final String title;
 
@@ -1722,7 +1722,7 @@ class CheckboxSetting extends StatelessWidget {
     final content = Row(
       children: [
         NotifierCheckbox(
-          notifier: notifier as ValueNotifier<bool?>,
+          notifier: notifier,
           onChanged: onChanged,
           enabled: enabled,
         ),
