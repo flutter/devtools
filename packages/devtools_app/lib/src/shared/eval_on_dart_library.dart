@@ -488,7 +488,7 @@ class EvalOnDartLibrary extends DisposableController
       /// allows easily chaining eval calls, without having to check "disposed"
       /// between each request.
       /// It also removes the need for using `!` once the devtool is migrated to NNBD
-      if (isAlive!.disposed) {
+      if (isAlive?.disposed ?? true) {
         // throw before _handleError as we don't want to log cancellations.
         throw CancelledException('safeEval');
       }
@@ -534,9 +534,9 @@ class EvalOnDartLibrary extends DisposableController
         return;
       }
       try {
-        final Object? value = await request();
+        final T value = await request();
         if (!_disposed && value is! Sentinel) {
-          response.complete(value as FutureOr<T>?);
+          response.complete(value);
         } else {
           response.complete(null);
         }
@@ -607,8 +607,8 @@ class FutureFailedException implements Exception {
   FutureFailedException(this.expression, this.errorRef, this.stacktraceRef);
 
   final String expression;
-  final InstanceRef? errorRef;
-  final InstanceRef? stacktraceRef;
+  final InstanceRef errorRef;
+  final InstanceRef stacktraceRef;
 
   @override
   String toString() {
