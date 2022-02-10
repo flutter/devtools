@@ -1,4 +1,8 @@
-// @dart=2.9
+// Copyright 2021 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 
@@ -19,9 +23,9 @@ import 'version.dart';
 
 class ReleaseNotesViewer extends StatefulWidget {
   const ReleaseNotesViewer({
-    Key key,
-    @required this.releaseNotesController,
-    @required this.child,
+    Key? key,
+    required this.releaseNotesController,
+    required this.child,
   }) : super(key: key);
 
   final ReleaseNotesController releaseNotesController;
@@ -37,14 +41,14 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
   static const viewerWidth = 600.0;
 
   /// Animation controller for animating the opening and closing of the viewer.
-  AnimationController visibilityController;
+  late AnimationController visibilityController;
 
   /// A curved animation that matches [visibilityController].
-  Animation<double> visibilityAnimation;
+  late Animation<double> visibilityAnimation;
 
-  String markdownData;
+  String? markdownData;
 
-  bool isVisible;
+  late bool isVisible;
 
   @override
   void initState() {
@@ -99,15 +103,15 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
 
 class ReleaseNotes extends AnimatedWidget {
   const ReleaseNotes({
-    Key key,
-    @required this.releaseNotesController,
-    @required Animation<double> visibilityAnimation,
-    @required this.markdownData,
+    Key? key,
+    required this.releaseNotesController,
+    required Animation<double> visibilityAnimation,
+    required this.markdownData,
   }) : super(key: key, listenable: visibilityAnimation);
 
-  final ReleaseNotesController releaseNotesController;
+  final ReleaseNotesController? releaseNotesController;
 
-  final String markdownData;
+  final String? markdownData;
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +142,7 @@ class ReleaseNotes extends AnimatedWidget {
                 IconButton(
                   padding: const EdgeInsets.all(0.0),
                   onPressed: () =>
-                      releaseNotesController.toggleReleaseNotesVisible(false),
+                      releaseNotesController!.toggleReleaseNotesVisible(false),
                   icon: const Icon(Icons.close),
                 ),
               ],
@@ -147,8 +151,8 @@ class ReleaseNotes extends AnimatedWidget {
                 ? const Text('Stay tuned for updates.')
                 : Expanded(
                     child: Markdown(
-                      data: markdownData,
-                      onTapLink: (_, href, __) => launchUrl(href, context),
+                      data: markdownData!,
+                      onTapLink: (_, href, __) => launchUrl(href!, context),
                     ),
                   ),
           ],
@@ -167,9 +171,9 @@ class ReleaseNotesController {
 
   static const _flutterDocsSite = 'https://docs.flutter.dev';
 
-  ValueListenable<String> get releaseNotesMarkdown => _releaseNotesMarkdown;
+  ValueListenable<String?> get releaseNotesMarkdown => _releaseNotesMarkdown;
 
-  final _releaseNotesMarkdown = ValueNotifier<String>(null);
+  final _releaseNotesMarkdown = ValueNotifier<String?>(null);
 
   ValueListenable<bool> get releaseNotesVisible => _releaseNotesVisible;
 
