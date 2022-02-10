@@ -32,7 +32,7 @@ class EvalOnDartLibrary extends DisposableController
   EvalOnDartLibrary(
     this.libraryName,
     this.service, {
-    ValueListenable<IsolateRef?>? isolate,
+    ValueListenable<IsolateRef>? isolate,
     this.disableBreakpoints = true,
     this.oneRequestAtATime = false,
   }) : _clientId = Random().nextInt(1000000000) {
@@ -44,7 +44,7 @@ class EvalOnDartLibrary extends DisposableController
     _init(isolate.value);
   }
 
-  void _init(IsolateRef? isolateRef) {
+  void _init(IsolateRef isolateRef) {
     if (_isolateRef == isolateRef) return;
 
     _currentRequestId++;
@@ -53,9 +53,7 @@ class EvalOnDartLibrary extends DisposableController
       _libraryRef = Completer();
     }
 
-    if (isolateRef != null) {
-      _initialize(isolateRef, _currentRequestId);
-    }
+    _initialize(isolateRef, _currentRequestId);
   }
 
   /// Whether to wait for one request to complete before issuing another
