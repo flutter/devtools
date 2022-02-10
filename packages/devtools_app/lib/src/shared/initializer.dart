@@ -149,7 +149,7 @@ class _InitializerState extends State<Initializer>
 
   OverlayEntry _createDisconnectedOverlay() {
     final theme = Theme.of(context);
-    final OverlayEntry currentDisconnectedOverlay = OverlayEntry(
+    currentDisconnectedOverlay = OverlayEntry(
       builder: (context) => Container(
         color: theme.colorScheme.overlayShadowColor,
         child: Center(
@@ -184,7 +184,7 @@ class _InitializerState extends State<Initializer>
         ),
       ),
     );
-    return currentDisconnectedOverlay;
+    return currentDisconnectedOverlay!;
   }
 
   @override
