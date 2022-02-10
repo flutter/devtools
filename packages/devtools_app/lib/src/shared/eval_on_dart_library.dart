@@ -106,7 +106,6 @@ class EvalOnDartLibrary extends DisposableController
       return;
     }
 
-    assert(isolateRef != null);
     try {
       final Isolate isolate =
           await serviceManager.isolateManager.getIsolateCached(isolateRef);
@@ -115,11 +114,6 @@ class EvalOnDartLibrary extends DisposableController
         return;
       }
       _isolate = isolate;
-      if (isolate == null) {
-        _libraryRef.completeError(LibraryNotFound(libraryName));
-        // Nothing to do here.
-        return;
-      }
       for (LibraryRef library in isolate.libraries!) {
         if (libraryName == library.uri) {
           assert(!_libraryRef.isCompleted);
@@ -158,11 +152,11 @@ class EvalOnDartLibrary extends DisposableController
     }
     return await addRequest(
       isAlive,
-      (() => _eval(
-            expression,
-            scope: scope,
-            shouldLogError: shouldLogError,
-          ).then((value) => value!)) as Future<InstanceRef> Function(),
+      () => _eval(
+        expression,
+        scope: scope,
+        shouldLogError: shouldLogError,
+      ).then((value) => value!),
     );
   }
 
@@ -175,12 +169,12 @@ class EvalOnDartLibrary extends DisposableController
   }) {
     return addRequest(
       isAlive,
-      (() => _invoke(
-            instanceRef,
-            name,
-            argRefs,
-            shouldLogError: shouldLogError,
-          ).then((value) => value!)) as Future<InstanceRef> Function(),
+      () => _invoke(
+        instanceRef,
+        name,
+        argRefs,
+        shouldLogError: shouldLogError,
+      ).then((value) => value!),
     );
   }
 
@@ -206,7 +200,6 @@ class EvalOnDartLibrary extends DisposableController
 
     try {
       final libraryRef = await _waitForLibraryRef();
-      if (libraryRef == null) return null;
       final result = await service!.evaluate(
         _isolateRef!.id!,
         libraryRef.id!,
@@ -238,8 +231,6 @@ class EvalOnDartLibrary extends DisposableController
     if (_disposed) return null;
 
     try {
-      final libraryRef = await _waitForLibraryRef();
-      if (libraryRef == null) return null;
       final result = await service!.invoke(
         _isolateRef!.id!,
         instanceRef.id!,
@@ -275,9 +266,7 @@ class EvalOnDartLibrary extends DisposableController
       default:
         log('Unrecognized error: $e', LogLevel.error);
     }
-    if (stack != null) {
-      log(stack.toString(), LogLevel.error);
-    }
+    log(stack.toString(), LogLevel.error);
   }
 
   Future<Library?> getLibrary(LibraryRef instance, Disposable isAlive) {
