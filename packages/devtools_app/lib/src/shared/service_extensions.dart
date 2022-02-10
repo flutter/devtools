@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 library service_extensions;
 
@@ -16,17 +16,17 @@ import 'theme.dart';
 class ToggleableServiceExtensionDescription<T>
     extends ServiceExtensionDescription {
   ToggleableServiceExtensionDescription._({
-    @required Widget enabledIcon,
-    Widget disabledIcon,
-    @required String extension,
-    @required String title,
-    @required T enabledValue,
-    @required T disabledValue,
-    @required String gaScreenName,
-    @required String gaItem,
-    @required String tooltip,
-    String description,
-    String tooltipUrl,
+    required Widget enabledIcon,
+    Widget? disabledIcon,
+    required String extension,
+    required String title,
+    required T enabledValue,
+    required T disabledValue,
+    required String? gaScreenName,
+    required String? gaItem,
+    required String tooltip,
+    String? description,
+    String? tooltipUrl,
     bool shouldCallOnAllIsolates = false,
     this.inverted = false,
   }) : super(
@@ -47,9 +47,9 @@ class ToggleableServiceExtensionDescription<T>
 
   static const disabledValueIndex = 1;
 
-  T get enabledValue => values[enabledValueIndex];
+  T? get enabledValue => values[enabledValueIndex];
 
-  T get disabledValue => values[disabledValueIndex];
+  T? get disabledValue => values[disabledValueIndex];
 
   /// Whether this service extension will be inverted where it is exposed in
   /// DevTools.
@@ -63,15 +63,15 @@ class ToggleableServiceExtensionDescription<T>
 
 class ServiceExtensionDescription<T> {
   ServiceExtensionDescription({
-    @required this.enabledIcon,
+    required this.enabledIcon,
     disabledIcon,
-    List<String> displayValues,
-    @required this.extension,
-    @required this.title,
-    @required this.values,
-    @required this.gaScreenName,
-    @required this.gaItem,
-    @required this.tooltip,
+    List<String>? displayValues,
+    required this.extension,
+    required this.title,
+    required this.values,
+    required this.gaScreenName,
+    required this.gaItem,
+    required this.tooltip,
     this.description,
     this.tooltipUrl,
     this.shouldCallOnAllIsolates = false,
@@ -91,9 +91,10 @@ class ServiceExtensionDescription<T> {
 
   final List<String> displayValues;
 
-  final String gaScreenName; // Analytics screen (screen name where item lives).
+  final String?
+      gaScreenName; // Analytics screen (screen name where item lives).
 
-  final String gaItem; // Analytics item name (toggleable item's name).
+  final String? gaItem; // Analytics item name (toggleable item's name).
 
   String get gaItemTooltipLink => '${gaItem}TooltipLink';
 
@@ -101,9 +102,9 @@ class ServiceExtensionDescription<T> {
 
   final String tooltip;
 
-  final String description;
+  final String? description;
 
-  final String tooltipUrl;
+  final String? tooltipUrl;
 }
 
 final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
@@ -502,7 +503,7 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   disablePhysicalShapeLayers,
 ];
 
-final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =
+final Map<String?, ServiceExtensionDescription?> serviceExtensionsAllowlist =
     Map.fromIterable(
   _extensionDescriptions,
   key: (extension) => extension.extension,
@@ -531,7 +532,7 @@ final Set<String> _unsafeBeforeFirstFrameFlutterExtensions =
   slowAnimations,
 ].map((extension) => extension.extension).toSet();
 
-bool isUnsafeBeforeFirstFlutterFrame(String extensionName) {
+bool isUnsafeBeforeFirstFlutterFrame(String? extensionName) {
   return _unsafeBeforeFirstFrameFlutterExtensions.contains(extensionName);
 }
 
