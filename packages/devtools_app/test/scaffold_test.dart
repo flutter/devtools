@@ -5,6 +5,7 @@
 // @dart=2.9
 
 import 'package:devtools_app/src/analytics/analytics_controller.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
@@ -49,9 +50,9 @@ void main() {
         'displays in narrow mode without error', const Size(200.0, 1200.0),
         (WidgetTester tester) async {
       await tester.pumpWidget(wrapScaffold(
-        const DevToolsScaffold(
-          tabs: [screen1, screen2, screen3, screen4, screen5],
-          ideTheme: null,
+        DevToolsScaffold(
+          tabs: const [screen1, screen2, screen3, screen4, screen5],
+          ideTheme: IdeTheme(),
         ),
       ));
       expect(find.byKey(k1), findsOneWidget);
@@ -63,9 +64,9 @@ void main() {
         'displays in full-width mode without error', const Size(1200.0, 1200.0),
         (WidgetTester tester) async {
       await tester.pumpWidget(wrapScaffold(
-        const DevToolsScaffold(
-          tabs: [screen1, screen2, screen3, screen4, screen5],
-          ideTheme: null,
+        DevToolsScaffold(
+          tabs: const [screen1, screen2, screen3, screen4, screen5],
+          ideTheme: IdeTheme(),
         ),
       ));
       expect(find.byKey(k1), findsOneWidget);
@@ -76,9 +77,9 @@ void main() {
     testWidgets('displays no tabs when only one is given',
         (WidgetTester tester) async {
       await tester.pumpWidget(wrapScaffold(
-        const DevToolsScaffold(
-          tabs: [screen1],
-          ideTheme: null,
+        DevToolsScaffold(
+          tabs: const [screen1],
+          ideTheme: IdeTheme(),
         ),
       ));
       expect(find.byKey(k1), findsOneWidget);
@@ -87,9 +88,9 @@ void main() {
 
     testWidgets('displays only the selected tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrapScaffold(
-        const DevToolsScaffold(
-          tabs: [screen1, screen2],
-          ideTheme: null,
+        DevToolsScaffold(
+          tabs: const [screen1, screen2],
+          ideTheme: IdeTheme(),
         ),
       ));
       expect(find.byKey(k1), findsOneWidget);
@@ -115,7 +116,7 @@ void main() {
         DevToolsScaffold(
           tabs: const [screen1, screen2],
           page: screen2.screenId,
-          ideTheme: null,
+          ideTheme: IdeTheme(),
         ),
       ));
 
@@ -136,9 +137,9 @@ void main() {
 
       await tester.pumpWidget(
         wrapWithControllers(
-          const DevToolsScaffold(
-            tabs: [screen1, screen2],
-            ideTheme: null,
+          DevToolsScaffold(
+            tabs: const [screen1, screen2],
+            ideTheme: IdeTheme(),
           ),
           debugger: mockDebuggerController,
           analytics: AnalyticsController(enabled: false, firstRun: false),
@@ -162,9 +163,9 @@ void main() {
 
       await tester.pumpWidget(
         wrapWithControllers(
-          const DevToolsScaffold(
-            tabs: [screen1, screen2],
-            ideTheme: null,
+          DevToolsScaffold(
+            tabs: const [screen1, screen2],
+            ideTheme: IdeTheme(),
           ),
           debugger: mockDebuggerController,
           analytics: AnalyticsController(enabled: false, firstRun: false),
