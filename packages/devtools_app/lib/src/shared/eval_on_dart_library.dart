@@ -141,7 +141,7 @@ class EvalOnDartLibrary extends DisposableController
         isAlive: isAlive,
         shouldLogError: shouldLogError,
       );
-      if (result == null || isAlive!.disposed) return null;
+      if (result == null || (isAlive?.disposed ?? true)) return null;
       return await invoke(
         result,
         'call',
