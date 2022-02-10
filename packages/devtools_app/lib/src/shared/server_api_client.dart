@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 import 'dart:convert';
@@ -21,13 +21,13 @@ import 'globals.dart';
 /// See `package:dds/src/devtools/client.dart`.
 class DevToolsServerConnection {
   DevToolsServerConnection._(this.sseClient) {
-    sseClient.stream.listen((msg) {
+    sseClient.stream!.listen((msg) {
       _handleMessage(msg);
     });
     initFrameworkController();
   }
 
-  static Future<DevToolsServerConnection> connect() async {
+  static Future<DevToolsServerConnection?> connect() async {
     final baseUri = Uri.base;
     // Ensure we don't drop portions of the path at which DevTools is hosted.
     final baseUriPathSegments = baseUri.pathSegments.where(
@@ -74,7 +74,7 @@ class DevToolsServerConnection {
   final SseClient sseClient;
 
   int _nextRequestId = 0;
-  Notification _lastNotification;
+  Notification? _lastNotification;
 
   final Map<String, Completer> _completers = {};
 
@@ -83,8 +83,6 @@ class DevToolsServerConnection {
   /// This is called once, sometime after the `DevToolsServerConnection`
   /// instance is created.
   void initFrameworkController() {
-    assert(frameworkController != null);
-
     frameworkController.onConnected.listen((vmServiceUri) {
       _notifyConnected(vmServiceUri);
     });
@@ -118,7 +116,7 @@ class DevToolsServerConnection {
     _lastNotification?.close();
   }
 
-  Future<T> _callMethod<T>(String method, [Map<String, dynamic> params]) {
+  Future<T> _callMethod<T>(String method, [Map<String, dynamic>? params]) {
     final id = '${_nextRequestId++}';
     final json = jsonEncode({
       'jsonrpc': '2.0',
@@ -128,7 +126,7 @@ class DevToolsServerConnection {
     });
     final completer = Completer<T>();
     _completers[id] = completer;
-    sseClient.sink.add(json);
+    sseClient.sink!.add(json);
     return completer.future;
   }
 
@@ -137,8 +135,8 @@ class DevToolsServerConnection {
       final Map request = jsonDecode(msg);
 
       if (request.containsKey('method')) {
-        final String method = request['method'];
-        final Map<String, dynamic> params = request['params'];
+        final String? method = request['method'];
+        final Map<String, dynamic>? params = request['params'];
         _handleMethod(method, params);
       } else if (request.containsKey('id')) {
         _handleResponse(request['id'], request['result']);
@@ -150,10 +148,10 @@ class DevToolsServerConnection {
     }
   }
 
-  void _handleMethod(String method, Map<String, dynamic> params) {
+  void _handleMethod(String? method, Map<String, dynamic>? params) {
     switch (method) {
       case 'connectToVm':
-        final String uri = params['uri'];
+        final String uri = params!['uri'];
         final bool notify = params['notify'] == true;
         frameworkController.notifyConnectToVmEvent(
           Uri.parse(uri),
@@ -161,7 +159,7 @@ class DevToolsServerConnection {
         );
         return;
       case 'showPage':
-        final String pageId = params['page'];
+        final String pageId = params!['page'];
         frameworkController.notifyShowPageId(pageId);
         return;
       case 'enableNotifications':
@@ -175,7 +173,7 @@ class DevToolsServerConnection {
     }
   }
 
-  void _handleResponse(String id, dynamic result) {
+  void _handleResponse(String? id, dynamic result) {
     final completer = _completers.remove(id);
     completer?.complete(result);
   }
@@ -189,7 +187,7 @@ class DevToolsServerConnection {
       'currentPage',
       {
         'id': page.id,
-        if (page.embedded != null) 'embedded': page.embedded,
+        'embedded': page.embedded,
       },
     );
   }
