@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/material.dart';
 
@@ -10,15 +10,16 @@ import 'split.dart';
 
 class FlexSplitColumn extends StatelessWidget {
   FlexSplitColumn({
-    Key key,
-    @required this.totalHeight,
-    @required this.headers,
-    @required List<Widget> children,
-    @required List<double> initialFractions,
-    List<double> minSizes,
-  })  : assert(children != null && children.length >= 2),
-        assert(initialFractions != null && initialFractions.length >= 2),
+    Key? key,
+    required this.totalHeight,
+    required this.headers,
+    required List<Widget> children,
+    required List<double> initialFractions,
+    required List<double> minSizes,
+  })  : assert(children.length >= 2),
+        assert(initialFractions.length >= 2),
         assert(children.length == initialFractions.length),
+        assert(minSizes.length == children.length),
         _children = buildChildrenWithFirstHeader(children, headers),
         _initialFractions = modifyInitialFractionsToIncludeFirstHeader(
           initialFractions,
@@ -26,11 +27,7 @@ class FlexSplitColumn extends StatelessWidget {
           totalHeight,
         ),
         _minSizes = modifyMinSizesToIncludeFirstHeader(minSizes, headers),
-        super(key: key) {
-    if (minSizes != null) {
-      assert(minSizes.length == children.length);
-    }
-  }
+        super(key: key);
 
   /// The headers that will be laid out above each corresponding child in
   /// [children].
