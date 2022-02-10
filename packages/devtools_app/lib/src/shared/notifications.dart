@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 
@@ -34,7 +34,7 @@ abstract class NotificationService {
 ///
 /// Must be inside of an [Overlay].
 class Notifications extends StatelessWidget {
-  const Notifications({Key key, @required this.child}) : super(key: key);
+  const Notifications({Key? key, required this.child}) : super(key: key);
 
   final Widget child;
 
@@ -52,7 +52,7 @@ class Notifications extends StatelessWidget {
     ]);
   }
 
-  static NotificationsState of(BuildContext context) {
+  static NotificationsState? of(BuildContext context) {
     final provider =
         context.dependOnInheritedWidgetOfExactType<_InheritedNotifications>();
     return provider?.data;
@@ -60,7 +60,8 @@ class Notifications extends StatelessWidget {
 }
 
 class _NotificationsProvider extends StatefulWidget {
-  const _NotificationsProvider({Key key, this.child}) : super(key: key);
+  const _NotificationsProvider({Key? key, required this.child})
+      : super(key: key);
 
   final Widget child;
 
@@ -69,7 +70,7 @@ class _NotificationsProvider extends StatefulWidget {
 }
 
 class _InheritedNotifications extends InheritedWidget {
-  const _InheritedNotifications({this.data, Widget child})
+  const _InheritedNotifications({required this.data, required Widget child})
       : super(child: child);
 
   final NotificationsState data;
@@ -82,7 +83,7 @@ class _InheritedNotifications extends InheritedWidget {
 
 class NotificationsState extends State<_NotificationsProvider>
     implements NotificationService {
-  OverlayEntry _overlayEntry;
+  OverlayEntry? _overlayEntry;
 
   final List<_Notification> _notifications = [];
 
@@ -95,15 +96,15 @@ class NotificationsState extends State<_NotificationsProvider>
         maintainState: true,
         builder: _buildOverlay,
       );
-      SchedulerBinding.instance.scheduleFrameCallback((_) {
-        Overlay.of(context).insert(_overlayEntry);
+      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+        Overlay.of(context)!.insert(_overlayEntry!);
       });
     }
   }
 
   @override
   void dispose() {
-    _overlayEntry.remove();
+    _overlayEntry!.remove();
     super.dispose();
   }
 
@@ -112,7 +113,7 @@ class NotificationsState extends State<_NotificationsProvider>
   /// successfully pushed.
   @override
   bool push(
-    String message, {
+    String? message, {
     List<Widget> actions = const [],
     Duration duration = Notifications.defaultDuration,
     bool allowDuplicates = true,
@@ -125,7 +126,7 @@ class NotificationsState extends State<_NotificationsProvider>
     setState(() {
       _notifications.add(
         _Notification(
-          message: message,
+          message: message!,
           actions: actions,
           remove: _removeNotification,
           duration: duration,
@@ -137,7 +138,7 @@ class NotificationsState extends State<_NotificationsProvider>
   }
 
   /// Dismisses all notifications with a matching message.
-  void dismiss(String message) {
+  void dismiss(String? message) {
     bool didDismiss = false;
     // Make a copy so we do not remove a notification from [_notifications]
     // while iterating over it.
@@ -196,15 +197,12 @@ class NotificationsState extends State<_NotificationsProvider>
 
 class _Notification extends StatefulWidget {
   const _Notification({
-    Key key,
-    @required this.message,
+    Key? key,
+    required this.message,
     this.actions = const [],
     this.duration = Notifications.defaultDuration,
-    @required this.remove,
-  })  : assert(message != null),
-        assert(remove != null),
-        assert(duration != null),
-        super(key: key);
+    required this.remove,
+  }) : super(key: key);
 
   final Duration duration;
   final String message;
@@ -217,9 +215,9 @@ class _Notification extends StatefulWidget {
 
 class _NotificationState extends State<_Notification>
     with SingleTickerProviderStateMixin {
-  AnimationController controller;
-  CurvedAnimation curve;
-  Timer _dismissTimer;
+  late AnimationController controller;
+  late CurvedAnimation curve;
+  late Timer _dismissTimer;
 
   @override
   void initState() {
@@ -271,7 +269,7 @@ class _NotificationState extends State<_Notification>
           color: theme.snackBarTheme.backgroundColor,
           child: DefaultTextStyle(
             style: theme.snackBarTheme.contentTextStyle ??
-                theme.primaryTextTheme.subtitle1,
+                theme.primaryTextTheme.subtitle1!,
             child: Padding(
               padding: const EdgeInsets.all(denseSpacing),
               child: Column(
