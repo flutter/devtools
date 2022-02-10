@@ -51,7 +51,7 @@ class HistoryViewport<T> extends StatefulWidget {
 class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
   TextStyle? _titleStyle;
 
-  void _updateTitleStyle(TextStyle? style) {
+  void _updateTitleStyle(TextStyle style) {
     setState(() {
       _titleStyle = style;
     });
@@ -79,7 +79,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
     final title = widget.generateTitle == null
         ? '  '
         : widget.generateTitle!(widget.history.current.value!);
-    final defaultTitleStyle = theme.textTheme.subtitle2;
+    final defaultTitleStyle = theme.textTheme.subtitle2 ?? const TextStyle();
     return debuggerSectionTitle(
       theme,
       child: Row(
@@ -129,7 +129,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
                     onExit: (_) => _updateTitleStyle(defaultTitleStyle),
                     onEnter: (_) {
                       _updateTitleStyle(
-                        defaultTitleStyle!.copyWith(
+                        defaultTitleStyle.copyWith(
                           color: theme.colorScheme.devtoolsLink,
                         ),
                       );
