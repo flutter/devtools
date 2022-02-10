@@ -32,7 +32,7 @@ class EvalOnDartLibrary extends DisposableController
   EvalOnDartLibrary(
     this.libraryName,
     this.service, {
-    ValueListenable<IsolateRef>? isolate,
+    ValueListenable<IsolateRef?>? isolate,
     this.disableBreakpoints = true,
     this.oneRequestAtATime = false,
   }) : _clientId = Random().nextInt(1000000000) {
@@ -44,7 +44,7 @@ class EvalOnDartLibrary extends DisposableController
     _init(isolate.value);
   }
 
-  void _init(IsolateRef isolateRef) {
+  void _init(IsolateRef? isolateRef) {
     if (_isolateRef == isolateRef) return;
 
     _currentRequestId++;
@@ -53,7 +53,9 @@ class EvalOnDartLibrary extends DisposableController
       _libraryRef = Completer();
     }
 
-    _initialize(isolateRef, _currentRequestId);
+    if (isolateRef != null) {
+      _initialize(isolateRef, _currentRequestId);
+    }
   }
 
   /// Whether to wait for one request to complete before issuing another
@@ -83,7 +85,7 @@ class EvalOnDartLibrary extends DisposableController
   }
 
   final String libraryName;
-  final VmServiceWrapper? service;
+  final VmServiceWrapper service;
 
   IsolateRef? get isolateRef => _isolateRef;
   IsolateRef? _isolateRef;
@@ -198,7 +200,7 @@ class EvalOnDartLibrary extends DisposableController
 
     try {
       final libraryRef = await _waitForLibraryRef();
-      final result = await service!.evaluate(
+      final result = await service.evaluate(
         _isolateRef!.id!,
         libraryRef.id!,
         expression,
@@ -229,7 +231,7 @@ class EvalOnDartLibrary extends DisposableController
     if (_disposed) return null;
 
     try {
-      final result = await service!.invoke(
+      final result = await service.invoke(
         _isolateRef!.id!,
         instanceRef.id!,
         name,
@@ -451,7 +453,7 @@ class EvalOnDartLibrary extends DisposableController
       result = await addRequest(isAlive, () async {
         final libraryRef = await _waitForLibraryRef();
 
-        return await service!.evaluate(
+        return await service.evaluate(
           isolateRef!.id!,
           libraryRef.id!,
           expression,
@@ -578,7 +580,7 @@ class EvalOnDartLibrary extends DisposableController
     int? count,
   }) {
     return addRequest<T>(isAlive, () async {
-      final T value = await service!.getObject(
+      final T value = await service.getObject(
         _isolateRef!.id!,
         instance!.id!,
         offset: offset,
@@ -589,7 +591,7 @@ class EvalOnDartLibrary extends DisposableController
   }
 
   Future<String?> retrieveFullValueAsString(InstanceRef? stringRef) {
-    return service!.retrieveFullStringValue(_isolateRef!.id, stringRef);
+    return service.retrieveFullStringValue(_isolateRef!.id, stringRef);
   }
 }
 
