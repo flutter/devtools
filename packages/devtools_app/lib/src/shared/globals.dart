@@ -23,7 +23,7 @@ MessageBus get messageBus => globals[MessageBus];
 
 FrameworkController get frameworkController => globals[FrameworkController];
 
-Storage get storage => globals[Storage];
+Storage? get storage => globals[Storage];
 
 SurveyService get surveyService => globals[SurveyService];
 
