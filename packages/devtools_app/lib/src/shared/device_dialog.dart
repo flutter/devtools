@@ -268,10 +268,10 @@ class _DescriptionColumn extends ColumnData<_DialogFlag> {
         );
 
   @override
-  String? getValue(_DialogFlag dataObject) => dataObject.description;
+  String getValue(_DialogFlag dataObject) => dataObject.description ?? '';
 
   @override
-  String? getTooltip(_DialogFlag dataObject) => getValue(dataObject);
+  String getTooltip(_DialogFlag dataObject) => getValue(dataObject);
 }
 
 class _ValueColumn extends ColumnData<_DialogFlag> {
@@ -283,7 +283,7 @@ class _ValueColumn extends ColumnData<_DialogFlag> {
         );
 
   @override
-  String? getValue(_DialogFlag dataObject) => dataObject.value;
+  String getValue(_DialogFlag dataObject) => dataObject.value ?? '';
 }
 
 class _DialogFlag {
