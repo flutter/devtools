@@ -273,7 +273,7 @@ class EvalOnDartLibrary extends DisposableController
     return getObjHelper(instance, isAlive);
   }
 
-  Future<Class?> getClass(ClassRef? instance, Disposable isAlive) {
+  Future<Class?> getClass(ClassRef instance, Disposable isAlive) {
     return getObjHelper(instance, isAlive);
   }
 
@@ -282,7 +282,7 @@ class EvalOnDartLibrary extends DisposableController
   }
 
   Future<Instance?> getInstance(
-    FutureOr<InstanceRef>? instanceRefFuture,
+    FutureOr<InstanceRef> instanceRefFuture,
     Disposable? isAlive,
   ) async {
     return await getObjHelper(await instanceRefFuture, isAlive);
@@ -352,7 +352,7 @@ class EvalOnDartLibrary extends DisposableController
   Future<InstanceRef?> asyncEval(
     String expression, {
     required Disposable? isAlive,
-    Map<String, String>? scope,
+    Map<String, String?>? scope,
   }) async {
     final futureId = _nextAsyncEvalId++;
 
@@ -574,7 +574,7 @@ class EvalOnDartLibrary extends DisposableController
   }
 
   Future<T?> getObjHelper<T extends Obj>(
-    ObjRef? instance,
+    ObjRef instance,
     Disposable? isAlive, {
     int? offset,
     int? count,
@@ -582,7 +582,7 @@ class EvalOnDartLibrary extends DisposableController
     return addRequest<T>(isAlive, () async {
       final T value = await service.getObject(
         _isolateRef!.id!,
-        instance!.id!,
+        instance.id!,
         offset: offset,
         count: count,
       ) as T;
