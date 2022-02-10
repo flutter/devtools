@@ -113,11 +113,11 @@ class DialogApplyButton extends StatelessWidget {
 }
 
 class DialogTextButton extends StatelessWidget {
-  const DialogTextButton({this.onPressed, this.child});
+  const DialogTextButton({this.onPressed, required this.child});
 
   final VoidCallback? onPressed;
 
-  final Widget? child;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +125,7 @@ class DialogTextButton extends StatelessWidget {
       height: defaultButtonHeight,
       child: TextButton(
         onPressed: onPressed,
-        child: child!,
+        child: child,
       ),
     );
   }
