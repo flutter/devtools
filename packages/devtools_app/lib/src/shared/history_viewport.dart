@@ -45,10 +45,10 @@ class HistoryViewport<T> extends StatefulWidget {
   final VoidCallback? onTitleTap;
 
   @override
-  State<HistoryViewport<T?>> createState() => _HistoryViewportState<T>();
+  State<HistoryViewport<T>> createState() => _HistoryViewportState<T>();
 }
 
-class _HistoryViewportState<T> extends State<HistoryViewport<T?>> {
+class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
   TextStyle? _titleStyle;
 
   void _updateTitleStyle(TextStyle? style) {
@@ -61,13 +61,13 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T?>> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return OutlineDecoration(
-      child: ValueListenableBuilder(
+      child: ValueListenableBuilder<T?>(
         valueListenable: widget.history.current,
-        builder: (context, dynamic current, _) {
+        builder: (context, T? current, _) {
           return Column(
             children: [
               _buildTitle(context, theme),
-              widget.contentBuilder(context, current),
+              widget.contentBuilder(context, current!),
             ],
           );
         },
@@ -78,7 +78,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T?>> {
   Widget _buildTitle(BuildContext context, ThemeData theme) {
     final title = widget.generateTitle == null
         ? '  '
-        : widget.generateTitle!(widget.history.current.value);
+        : widget.generateTitle!(widget.history.current.value!);
     final defaultTitleStyle = theme.textTheme.subtitle2;
     return debuggerSectionTitle(
       theme,
@@ -92,8 +92,8 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T?>> {
                       widget.history.moveBack();
                       if (widget.onChange != null) {
                         widget.onChange!(
-                          widget.history.current.value,
-                          widget.history.peekNext(),
+                          widget.history.current.value!,
+                          widget.history.peekNext()!,
                         );
                       }
                     }
@@ -103,11 +103,11 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T?>> {
               icon: Icons.chevron_right,
               onPressed: widget.history.hasNext
                   ? () {
-                      final current = widget.history.current.value;
+                      final current = widget.history.current.value!;
                       widget.history.moveForward();
                       if (widget.onChange != null) {
                         widget.onChange!(
-                          widget.history.current.value,
+                          widget.history.current.value!,
                           current,
                         );
                       }
