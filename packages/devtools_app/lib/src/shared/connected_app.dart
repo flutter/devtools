@@ -104,7 +104,7 @@ class ConnectedApp {
       isAlive: null,
       shouldLogError: false,
     );
-    return !(value?.kind == 'Bool');
+    return !(value.kind == 'Bool');
 
     // TODO(terry): Disabled below code, it will hang if flutter run --start-paused
     //              see issue https://github.com/flutter/devtools/issues/2082.
