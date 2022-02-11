@@ -192,8 +192,8 @@ void main() {
       const debuggerTabKey = Key('debugger tab');
       await tester.pumpWidget(
         wrapWithControllers(
-          const DevToolsScaffold(
-            tabs: [
+          DevToolsScaffold(
+            tabs: const [
               _TestScreen(
                 DebuggerScreen.id,
                 debuggerScreenKey,
@@ -202,7 +202,7 @@ void main() {
               ),
               screen2,
             ],
-            ideTheme: null,
+            ideTheme: IdeTheme(),
           ),
           debugger: mockDebuggerController,
           analytics: AnalyticsController(enabled: false, firstRun: false),
@@ -234,9 +234,9 @@ void main() {
         (WidgetTester tester) async {
       when(mockServiceManager.connectedAppInitialized).thenReturn(false);
       await tester.pumpWidget(wrapScaffold(
-        const DevToolsScaffold(
-          tabs: [screen1, screen2],
-          ideTheme: null,
+        DevToolsScaffold(
+          tabs: const [screen1, screen2],
+          ideTheme: IdeTheme(),
         ),
       ));
       expect(find.byKey(k1), findsOneWidget);

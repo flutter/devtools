@@ -92,7 +92,7 @@ class DevToolsScaffold extends StatefulWidget {
   final bool embed;
 
   /// IDE-supplied theming.
-  final IdeTheme? ideTheme;
+  final IdeTheme ideTheme;
 
   /// Actions that it's possible to perform in this Scaffold.
   ///
@@ -117,10 +117,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   late Screen _currentScreen;
 
-  ImportController? _importController;
+  late ImportController _importController;
 
-  StreamSubscription<ConnectVmEvent>? _connectVmSubscription;
-  StreamSubscription<String>? _showPageSubscription;
+  late StreamSubscription<ConnectVmEvent> _connectVmSubscription;
+  late StreamSubscription<String> _showPageSubscription;
 
   late String scaffoldTitle;
 
@@ -242,8 +242,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   @override
   void dispose() {
     _tabController?.dispose();
-    _connectVmSubscription?.cancel();
-    _showPageSubscription?.cancel();
+    _connectVmSubscription.cancel();
+    _showPageSubscription.cancel();
 
     super.dispose();
   }
@@ -393,11 +393,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     return Provider<BannerMessagesController>(
       create: (_) => BannerMessagesController(),
-      child: Provider<ImportController?>.value(
+      child: Provider<ImportController>.value(
         value: _importController,
         builder: (context, _) {
           return DragAndDrop(
-            handleDrop: _importController!.importData,
+            handleDrop: _importController.importData,
             child: Title(
               title: scaffoldTitle,
               // Color is a required parameter but the color only appears to
@@ -458,7 +458,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       actions.insert(0, const BulletSpacer(useAccentColor: true));
     }
 
-    if (widget.tabs.length > 1) {
+    final bool multipleTabs = widget.tabs.length > 1;
+
+    if (multipleTabs) {
       tabBar = TabBar(
         controller: _tabController,
         isScrollable: true,
@@ -503,7 +505,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       flexibleSpace: flexibleSpace,
     );
 
-    if (flexibleSpace == null) return appBar;
+    if (multipleTabs) return appBar;
 
     return PreferredSize(
       key: isNarrow
