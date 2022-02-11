@@ -18,14 +18,12 @@ class InspectorDetailsTabController extends StatefulWidget {
     this.detailsTree,
     this.actionButtons,
     this.controller,
-    this.layoutExplorerSupported,
     Key key,
   }) : super(key: key);
 
   final Widget detailsTree;
   final Widget actionButtons;
   final InspectorController controller;
-  final bool layoutExplorerSupported;
 
   @override
   _InspectorDetailsTabControllerState createState() =>
@@ -37,39 +35,30 @@ class _InspectorDetailsTabControllerState
     with TickerProviderStateMixin, AutoDisposeMixin {
   static const _detailsTreeTabIndex = 1;
   static const _tabsLengthWithLayoutExplorer = 2;
-  static const _tabsLengthWithoutLayoutExplorer = 1;
 
-  TabController _tabControllerWithLayoutExplorer;
-  TabController _tabControllerWithoutLayoutExplorer;
+  TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     addAutoDisposeListener(
-      _tabControllerWithLayoutExplorer =
-          TabController(length: _tabsLengthWithLayoutExplorer, vsync: this),
-    );
-    addAutoDisposeListener(
-      _tabControllerWithoutLayoutExplorer =
-          TabController(length: _tabsLengthWithoutLayoutExplorer, vsync: this),
+      _tabController = TabController(
+        length: _tabsLengthWithLayoutExplorer,
+        vsync: this,
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final tabs = <Tab>[
-      if (widget.layoutExplorerSupported) _buildTab('Layout Explorer'),
+      _buildTab('Layout Explorer'),
       _buildTab('Widget Details Tree'),
     ];
     final tabViews = <Widget>[
-      if (widget.layoutExplorerSupported)
-        LayoutExplorerTab(controller: widget.controller),
+      LayoutExplorerTab(controller: widget.controller),
       widget.detailsTree,
     ];
-    final _tabController = widget.layoutExplorerSupported
-        ? _tabControllerWithLayoutExplorer
-        : _tabControllerWithoutLayoutExplorer;
-
     final theme = Theme.of(context);
     final focusColor = theme.focusColor;
     final borderSide = BorderSide(color: focusColor);
