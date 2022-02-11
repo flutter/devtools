@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 import 'dart:math' as math;
@@ -39,20 +39,19 @@ import 'utils.dart';
 /// for different routes.
 class DevToolsScaffold extends StatefulWidget {
   const DevToolsScaffold({
-    Key key,
-    @required this.tabs,
+    Key? key,
+    required this.tabs,
     this.page,
     this.actions,
     this.embed = false,
-    @required this.ideTheme,
-  })  : assert(tabs != null),
-        super(key: key);
+    required this.ideTheme,
+  }) : super(key: key);
 
   DevToolsScaffold.withChild({
-    Key key,
-    @required Widget child,
-    @required IdeTheme ideTheme,
-    List<Widget> actions,
+    Key? key,
+    required Widget child,
+    required IdeTheme ideTheme,
+    List<Widget>? actions,
   }) : this(
           key: key,
           tabs: [SimpleScreen(child)],
@@ -87,7 +86,7 @@ class DevToolsScaffold extends StatefulWidget {
   final List<Screen> tabs;
 
   /// The page being rendered.
-  final String page;
+  final String? page;
 
   /// Whether to render the embedded view (without the header).
   final bool embed;
@@ -98,7 +97,7 @@ class DevToolsScaffold extends StatefulWidget {
   /// Actions that it's possible to perform in this Scaffold.
   ///
   /// These will generally be [RegisteredServiceExtensionButton]s.
-  final List<Widget> actions;
+  final List<Widget>? actions;
 
   @override
   State<StatefulWidget> createState() => DevToolsScaffoldState();
@@ -114,16 +113,16 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   ///
   /// This will be passed to both the [TabBar] and the [TabBarView] widgets to
   /// coordinate their animation when the tab selection changes.
-  TabController _tabController;
+  TabController? _tabController;
 
-  Screen _currentScreen;
+  late Screen _currentScreen;
 
-  ImportController _importController;
+  late ImportController _importController;
 
-  StreamSubscription<ConnectVmEvent> _connectVmSubscription;
-  StreamSubscription<String> _showPageSubscription;
+  late final StreamSubscription<ConnectVmEvent> _connectVmSubscription;
+  late final StreamSubscription<String> _showPageSubscription;
 
-  String scaffoldTitle;
+  late String scaffoldTitle;
 
   @override
   void initState() {
@@ -149,7 +148,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     if (_internalFlutterWebWarningShown) return;
 
     serviceManager.onConnectionAvailable?.listen((_) {
-      if (serviceManager.connectedApp.isFlutterWebAppNow) {
+      if (serviceManager.connectedApp!.isFlutterWebAppNow) {
         _showWarning(const InternalFlutterWebWarningText());
         _internalFlutterWebWarningShown = true;
       }
@@ -158,8 +157,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   void _showWarning(Widget warningText) {
     final colorScheme = Theme.of(context).colorScheme;
-    OverlayEntry _entry;
-    Overlay.of(context).insert(
+    late OverlayEntry _entry;
+    Overlay.of(context)!.insert(
       _entry = OverlayEntry(
         maintainState: true,
         builder: (context) {
@@ -196,19 +195,19 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       var newIndex = 0;
       // Stay on the current tab if possible when the collection of tabs changes.
       if (_tabController != null &&
-          widget.tabs.contains(oldWidget.tabs[_tabController.index])) {
-        newIndex = widget.tabs.indexOf(oldWidget.tabs[_tabController.index]);
+          widget.tabs.contains(oldWidget.tabs[_tabController!.index])) {
+        newIndex = widget.tabs.indexOf(oldWidget.tabs[_tabController!.index]);
       }
       // Create a new tab controller to reflect the changed tabs.
       _setupTabController();
-      _tabController.index = newIndex;
-    } else if (widget.tabs[_tabController.index].screenId != widget.page) {
+      _tabController!.index = newIndex;
+    } else if (widget.tabs[_tabController!.index].screenId != widget.page) {
       // If the page changed (eg. the route was modified by pressing back in the
       // browser), animate to the new one.
       final newIndex = widget.page == null
           ? 0 // When there's no supplied page, we show the first one.
           : widget.tabs.indexWhere((t) => t.screenId == widget.page);
-      _tabController.animateTo(newIndex);
+      _tabController!.animateTo(newIndex);
     }
   }
 
@@ -228,8 +227,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   @override
   void dispose() {
     _tabController?.dispose();
-    _connectVmSubscription?.cancel();
-    _showPageSubscription?.cancel();
+    _connectVmSubscription.cancel();
+    _showPageSubscription.cancel();
 
     super.dispose();
   }
@@ -251,13 +250,13 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       final initialIndex =
           widget.tabs.indexWhere((screen) => screen.screenId == widget.page);
       if (initialIndex != -1) {
-        _tabController.index = initialIndex;
+        _tabController!.index = initialIndex;
       }
     }
 
-    _currentScreen = widget.tabs[_tabController.index];
-    _tabController.addListener(() {
-      final screen = widget.tabs[_tabController.index];
+    _currentScreen = widget.tabs[_tabController!.index];
+    _tabController!.addListener(() {
+      final screen = widget.tabs[_tabController!.index];
 
       if (_currentScreen != screen) {
         setState(() {
@@ -267,24 +266,24 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         // Send the page change info to the framework controller (it can then
         // send it on to the devtools server, if one is connected).
         frameworkController.notifyPageChange(
-          PageChangeEvent(screen?.screenId, widget.embed),
+          PageChangeEvent(screen.screenId, widget.embed),
         );
 
         // Clear error count when navigating to a screen.
-        serviceManager.errorBadgeManager.clearErrors(screen?.screenId);
+        serviceManager.errorBadgeManager.clearErrors(screen.screenId);
 
         // If the tab index is 0 and the current route has no page ID (eg. we're
         // at the URL /?uri= with no page ID), those are equivalent pages but
         // navigateIfNotCurrent does not know that and will try to navigate, so
         // skip that here.
         final routerDelegate = DevToolsRouterDelegate.of(context);
-        if (_tabController.index == 0 &&
-            (routerDelegate.currentConfiguration.page?.isEmpty ?? true)) {
+        if (_tabController!.index == 0 &&
+            (routerDelegate.currentConfiguration!.page.isEmpty)) {
           return;
         }
 
         // Update routing with the change.
-        routerDelegate.navigateIfNotCurrent(screen?.screenId);
+        routerDelegate.navigateIfNotCurrent(screen.screenId);
       }
     });
 
@@ -308,7 +307,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// for example if the user clicks the Inspector button in the IDE and DevTools
   /// is already open on the Memory page, it should transition to the Inspector page.
   void _showPageById(String pageId) {
-    final existingTabIndex = _tabController.index;
+    final existingTabIndex = _tabController!.index;
 
     final newIndex =
         widget.tabs.indexWhere((screen) => screen.screenId == pageId);
@@ -366,7 +365,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           children: tabBodies,
         ),
         if (serviceManager.connectedAppInitialized &&
-            !serviceManager.connectedApp.isProfileBuildNow &&
+            !serviceManager.connectedApp!.isProfileBuildNow! &&
             !offlineController.offlineMode.value &&
             _currentScreen.showFloatingDebuggerControls)
           Container(
@@ -396,9 +395,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                   context,
                 ),
                 child: Scaffold(
-                  appBar: widget.embed ? null : _buildAppBar(scaffoldTitle),
+                  appBar: widget.embed
+                      ? null
+                      : _buildAppBar(scaffoldTitle) as PreferredSizeWidget?,
                   body: (serviceManager.connectedAppInitialized &&
-                          !serviceManager.connectedApp.isProfileBuildNow &&
+                          !serviceManager.connectedApp!.isProfileBuildNow! &&
                           !offlineController.offlineMode.value &&
                           _currentScreen.showConsole(widget.embed))
                       ? Split(
@@ -429,8 +430,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// Builds an [AppBar] with the [TabBar] placed on the side or the bottom,
   /// depending on the screen width.
   Widget _buildAppBar(String title) {
-    Widget flexibleSpace;
-    Size preferredSize;
+    Widget? flexibleSpace;
+    late final Size preferredSize;
     TabBar tabBar;
 
     final isNarrow =
@@ -442,7 +443,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       actions.insert(0, const BulletSpacer(useAccentColor: true));
     }
 
-    if (widget.tabs.length > 1) {
+    final bool hasMultipleTabs = widget.tabs.length > 1;
+
+    if (hasMultipleTabs) {
       tabBar = TabBar(
         controller: _tabController,
         isScrollable: true,
@@ -459,7 +462,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           ? 0.0
           : math.max(
               0.0,
-              DevToolsScaffold.actionWidgetSize * (actions?.length ?? 0.0) -
+              DevToolsScaffold.actionWidgetSize * (actions.length) -
                   rightAdjust);
 
       flexibleSpace = Align(
@@ -487,7 +490,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       flexibleSpace: flexibleSpace,
     );
 
-    if (flexibleSpace == null) return appBar;
+    if (!hasMultipleTabs) return appBar;
 
     return PreferredSize(
       key: isNarrow
@@ -554,10 +557,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
 class KeyboardShortcuts extends StatefulWidget {
   const KeyboardShortcuts({
-    @required this.keyboardShortcuts,
-    @required this.child,
-  })  : assert(keyboardShortcuts != null),
-        assert(child != null);
+    required this.keyboardShortcuts,
+    required this.child,
+  });
 
   final ShortcutsConfiguration keyboardShortcuts;
   final Widget child;
@@ -568,7 +570,7 @@ class KeyboardShortcuts extends StatefulWidget {
 
 class KeyboardShortcutsState extends State<KeyboardShortcuts>
     with AutoDisposeMixin {
-  FocusNode _focusNode;
+  late final FocusNode _focusNode;
 
   @override
   void initState() {
