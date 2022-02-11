@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
@@ -26,7 +24,7 @@ class DevToolsRouteConfiguration {
   DevToolsRouteConfiguration(this.page, this.args);
 
   final String page;
-  final Map<String, String> args;
+  final Map<String, String?> args;
 }
 
 /// Converts between structured [DevToolsRouteConfiguration] (our internal data
@@ -43,12 +41,12 @@ class DevToolsRouteInformationParser
   ///
   /// This is to be used in a testing environment only and can be set via the
   /// [DevToolsRouteInformationParser.test] constructor.
-  String _forceVmServiceUri;
+  String? _forceVmServiceUri;
 
   @override
   Future<DevToolsRouteConfiguration> parseRouteInformation(
       RouteInformation routeInformation) {
-    var uri = Uri.parse(routeInformation.location);
+    var uri = Uri.parse(routeInformation.location!);
 
     if (_forceVmServiceUri != null) {
       final newQueryParams = Map<String, dynamic>.from(uri.queryParameters);
@@ -77,10 +75,10 @@ class DevToolsRouteInformationParser
   ) {
     // Add a leading slash to convert the page ID to a URL path (this is
     // the opposite of what's done in [parseRouteInformation]).
-    final path = '/${configuration.page ?? ''}';
+    final path = '/${configuration.page}';
     // Create a new map in case the one we were given was unmodifiable.
-    final params = {...?configuration.args};
-    params?.removeWhere((key, value) => value == null);
+    final params = {...configuration.args};
+    params.removeWhere((key, value) => value == null);
     return RouteInformation(
         location: Uri(path: path, queryParameters: params).toString());
   }
@@ -90,7 +88,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     with
         ChangeNotifier,
         PopNavigatorRouterDelegateMixin<DevToolsRouteConfiguration> {
-  DevToolsRouterDelegate(this._getPage, [GlobalKey<NavigatorState> key])
+  DevToolsRouterDelegate(this._getPage, [GlobalKey<NavigatorState>? key])
       : navigatorKey = key ?? GlobalKey<NavigatorState>();
 
   static DevToolsRouterDelegate of(BuildContext context) =>
@@ -99,7 +97,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   @override
   final GlobalKey<NavigatorState> navigatorKey;
 
-  final Page Function(BuildContext, String, Map<String, String>) _getPage;
+  final Page Function(BuildContext, String?, Map<String, String?>) _getPage;
 
   /// A list of any routes/pages on the stack.
   ///
@@ -108,7 +106,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   final routes = ListQueue<DevToolsRouteConfiguration>();
 
   @override
-  DevToolsRouteConfiguration get currentConfiguration =>
+  DevToolsRouteConfiguration? get currentConfiguration =>
       routes.isEmpty ? null : routes.last;
 
   @override
@@ -139,8 +137,8 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   /// If page and args would be the same, does nothing.
   /// Existing arguments (for example &uri=) will be preserved unless
   /// overwritten by [argUpdates].
-  void navigateIfNotCurrent(String page, [Map<String, String> argUpdates]) {
-    final pageChanged = page != currentConfiguration.page;
+  void navigateIfNotCurrent(String page, [Map<String, String>? argUpdates]) {
+    final pageChanged = page != currentConfiguration!.page;
     final argsChanged = _changesArgs(argUpdates);
     if (!pageChanged && !argsChanged) {
       return;
@@ -153,8 +151,8 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   ///
   /// Existing arguments (for example &uri=) will be preserved unless
   /// overwritten by [argUpdates].
-  void navigate(String page, [Map<String, String> argUpdates]) {
-    final newArgs = {...currentConfiguration.args, ...?argUpdates};
+  void navigate(String page, [Map<String, String?>? argUpdates]) {
+    final newArgs = {...currentConfiguration!.args, ...?argUpdates};
 
     // Ensure we disconnect from any previously connected applications if we do
     // not have a vm service uri as a query parameter, unless we are loading an
@@ -167,7 +165,10 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     notifyListeners();
   }
 
-  void navigateHome({bool clearUriParam = false, bool clearScreenParam}) {
+  void navigateHome({
+    bool clearUriParam = false,
+    required bool clearScreenParam,
+  }) {
     navigate(
       homePageId,
       {
@@ -200,16 +201,16 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
       return;
     }
 
-    final currentPage = currentConfiguration.page;
-    final newArgs = {...currentConfiguration.args, ...?argUpdates};
+    final currentPage = currentConfiguration!.page;
+    final newArgs = {...currentConfiguration!.args, ...argUpdates};
     _replaceStack(DevToolsRouteConfiguration(currentPage, newArgs));
     notifyListeners();
   }
 
   /// Checks whether applying [changes] over the current routes args will result
   /// in any changes.
-  bool _changesArgs(Map<String, String> changes) => !mapEquals(
-        {...?currentConfiguration.args, ...?changes},
-        {...?currentConfiguration.args},
+  bool _changesArgs(Map<String, String>? changes) => !mapEquals(
+        {...currentConfiguration!.args, ...?changes},
+        {...currentConfiguration!.args},
       );
 }

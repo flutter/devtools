@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 import 'dart:math' as math;
@@ -22,7 +22,7 @@ import 'version.dart';
 abstract class Screen {
   const Screen(
     this.screenId, {
-    this.title,
+    this.title = '',
     this.icon,
     this.tabKey,
     this.requiresLibrary,
@@ -35,17 +35,17 @@ abstract class Screen {
   });
 
   const Screen.conditional({
-    @required String id,
-    String requiresLibrary,
+    required String id,
+    String? requiresLibrary,
     bool requiresDartVm = false,
     bool requiresDebugBuild = false,
     bool requiresVmDeveloperMode = false,
     bool worksOffline = false,
-    bool Function(FlutterVersion currentVersion) shouldShowForFlutterVersion,
+    bool Function(FlutterVersion? currentVersion)? shouldShowForFlutterVersion,
     bool showFloatingDebuggerControls = true,
-    String title,
-    IconData icon,
-    Key tabKey,
+    String title = '',
+    IconData? icon,
+    Key? tabKey,
   }) : this(
           id,
           requiresLibrary: requiresLibrary,
@@ -78,11 +78,11 @@ abstract class Screen {
   /// The user-facing name of the page.
   final String title;
 
-  final IconData icon;
+  final IconData? icon;
 
   /// An optional key to use when creating the Tab widget (for use during
   /// testing).
-  final Key tabKey;
+  final Key? tabKey;
 
   /// Library uri that determines whether to include this screen in DevTools.
   ///
@@ -92,7 +92,7 @@ abstract class Screen {
   /// Examples:
   ///  * 'package:provider/provider.dart'
   ///  * 'package:provider/'
-  final String requiresLibrary;
+  final String? requiresLibrary;
 
   /// Whether this screen should only be included when the app is running on the Dart VM.
   final bool requiresDartVm;
@@ -108,7 +108,7 @@ abstract class Screen {
 
   /// A callback that will determine whether or not this screen should be
   /// available for a given flutter version.
-  final bool Function(FlutterVersion currentFlutterVersion)
+  final bool Function(FlutterVersion? currentFlutterVersion)?
       shouldShowForFlutterVersion;
 
   /// Whether this screen should display the isolate selector in the status
@@ -123,7 +123,7 @@ abstract class Screen {
   ///
   /// If the screen does not have a custom documentation page, this property
   /// should return `null`.
-  String get docPageId => null;
+  String? get docPageId => null;
 
   int get badgeCount => 0;
 
@@ -199,7 +199,7 @@ abstract class Screen {
   /// Build a widget to display in the status line.
   ///
   /// If this method returns `null`, then no page specific status is displayed.
-  Widget buildStatus(BuildContext context, TextTheme textTheme) {
+  Widget? buildStatus(BuildContext context, TextTheme textTheme) {
     return null;
   }
 }
@@ -232,7 +232,7 @@ bool shouldShowScreen(Screen screen) {
   // is available. This also avoids odd edge cases where we could show screens
   // while the ServiceManager is still initializing.
   if (!serviceManager.isServiceAvailable ||
-      !serviceManager.connectedApp.connectedAppInitialized) return false;
+      !serviceManager.connectedApp!.connectedAppInitialized) return false;
 
   if (screen.requiresLibrary != null) {
     if (serviceManager.isolateManager.mainIsolate.value == null ||
@@ -241,12 +241,12 @@ bool shouldShowScreen(Screen screen) {
     }
   }
   if (screen.requiresDartVm) {
-    if (!serviceManager.connectedApp.isRunningOnDartVM) {
+    if (serviceManager.connectedApp!.isRunningOnDartVM != true) {
       return false;
     }
   }
   if (screen.requiresDebugBuild) {
-    if (serviceManager.connectedApp.isProfileBuildNow) {
+    if (serviceManager.connectedApp!.isProfileBuildNow == true) {
       return false;
     }
   }
@@ -256,9 +256,9 @@ bool shouldShowScreen(Screen screen) {
     }
   }
   if (screen.shouldShowForFlutterVersion != null) {
-    if (serviceManager.connectedApp.isFlutterAppNow &&
-        !screen.shouldShowForFlutterVersion(
-            serviceManager.connectedApp.flutterVersionNow)) {
+    if (serviceManager.connectedApp!.isFlutterAppNow == true &&
+        !screen.shouldShowForFlutterVersion!(
+            serviceManager.connectedApp!.flutterVersionNow)) {
       return false;
     }
   }
@@ -266,7 +266,7 @@ bool shouldShowScreen(Screen screen) {
 }
 
 class BadgePainter extends CustomPainter {
-  BadgePainter({@required this.number});
+  BadgePainter({required this.number});
 
   final int number;
 
@@ -313,8 +313,8 @@ class BadgePainter extends CustomPainter {
 
 class ShortcutsConfiguration {
   const ShortcutsConfiguration({
-    @required this.shortcuts,
-    @required this.actions,
+    required this.shortcuts,
+    required this.actions,
   }) : assert(shortcuts.length == actions.length);
 
   factory ShortcutsConfiguration.empty() {
