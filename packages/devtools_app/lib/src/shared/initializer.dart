@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 
@@ -31,12 +31,11 @@ import 'theme.dart';
 /// here.
 class Initializer extends StatefulWidget {
   const Initializer({
-    Key key,
-    @required this.url,
-    @required this.builder,
+    Key? key,
+    required this.url,
+    required this.builder,
     this.allowConnectionScreenOnDisconnect = true,
-  })  : assert(builder != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// The builder for the widget's children.
   ///
@@ -46,7 +45,7 @@ class Initializer extends StatefulWidget {
   /// The url to attempt to load a vm service from.
   ///
   /// If null, the app will navigate to the [ConnectScreen].
-  final String url;
+  final String? url;
 
   /// Whether to allow navigating to the connection screen upon disconnect.
   final bool allowConnectionScreenOnDisconnect;
@@ -63,7 +62,7 @@ class _InitializerState extends State<Initializer>
   /// change between successive calls.
   bool _checkLoaded() => serviceManager.hasConnection;
 
-  OverlayEntry currentDisconnectedOverlay;
+  OverlayEntry? currentDisconnectedOverlay;
 
   @override
   void initState() {
@@ -107,12 +106,12 @@ class _InitializerState extends State<Initializer>
       return;
     }
 
-    final uri = normalizeVmServiceUri(widget.url);
+    final uri = normalizeVmServiceUri(widget.url!);
     final connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
       errorReporter: (message, error) =>
-          Notifications.of(context).push('$message, $error'),
+          Notifications.of(context)!.push('$message, $error'),
     );
 
     if (!connected) {
@@ -122,15 +121,15 @@ class _InitializerState extends State<Initializer>
 
   /// Shows a "disconnected" overlay if the [service.serviceManager] is not currently connected.
   void _handleNoConnection() {
-    WidgetsBinding.instance.scheduleFrameCallback((_) {
+    WidgetsBinding.instance!.scheduleFrameCallback((_) {
       if (!_checkLoaded() &&
-          ModalRoute.of(context).isCurrent &&
+          ModalRoute.of(context)!.isCurrent &&
           currentDisconnectedOverlay == null) {
         ga.select(
           analytics_constants.devToolsMain,
           analytics_constants.appDisconnected,
         );
-        Overlay.of(context).insert(_createDisconnectedOverlay());
+        Overlay.of(context)!.insert(_createDisconnectedOverlay());
 
         addAutoDisposeListener(serviceManager.connectedState, () {
           final connectedState = serviceManager.connectedState.value;
@@ -185,7 +184,7 @@ class _InitializerState extends State<Initializer>
         ),
       ),
     );
-    return currentDisconnectedOverlay;
+    return currentDisconnectedOverlay!;
   }
 
   @override

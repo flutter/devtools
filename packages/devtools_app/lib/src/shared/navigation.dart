@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 import 'theme.dart';
@@ -17,20 +15,21 @@ import 'theme.dart';
 ///
 /// This will fail because we can't determine what the theme value for the app
 /// is.
+
 String routeNameWithQueryParams(
-  BuildContext context,
+  BuildContext? context,
   String routeName, [
-  Map<String, String> queryParameters,
+  Map<String, String>? queryParameters,
 ]) {
   final newQueryParams =
       queryParameters == null ? null : Map.of(queryParameters);
 
-  String previousQuery;
+  String? previousQuery;
   if (context == null) {
     // We allow null context values to make easy pure-VM tests.
     previousQuery = '';
   } else {
-    previousQuery = ModalRoute.of(context).settings.name;
+    previousQuery = ModalRoute.of(context)!.settings.name;
     // When this function is invoked from an unnamed context,
     // infer from the global theme configuration.
     previousQuery ??= _inferThemeParameter(Theme.of(context).colorScheme);
