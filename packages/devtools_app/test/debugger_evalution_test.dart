@@ -9,6 +9,7 @@ import 'package:devtools_app/src/debugger/evaluate.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,6 +27,7 @@ void main() {
   DebuggerController debuggerController;
   EvalOnDartLibrary eval;
   setUp(() async {
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
     isAlive = Disposable();
     await env.setupEnvironment();
     debuggerController = TestDebuggerController();
