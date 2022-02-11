@@ -1218,7 +1218,8 @@ class ListValueNotifier<T> extends ChangeNotifier
   /// Removes the first occurrence of [value] from this list.
   ///
   /// Runtime is O(n).
-  bool remove(T value) {
+  bool remove(T? value) {
+    if (value == null) return false;
     final index = _rawList.indexOf(value);
     if (index == -1) return false;
     _rawList = _rawList.toList();

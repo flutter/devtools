@@ -96,7 +96,7 @@ class ConnectedApp {
     }
 
     // If eval works we're not a profile build.
-    final io = EvalOnDartLibrary('dart:io', serviceManager.service);
+    final io = EvalOnDartLibrary('dart:io', serviceManager.service!);
     // Do not log the error if this eval fails - we expect it to fail for a
     // profile build.
     final value = await io.eval(
