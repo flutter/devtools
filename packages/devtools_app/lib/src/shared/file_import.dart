@@ -354,7 +354,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
   }
 
   Widget _buildActionButton() {
-    final notifications = Notifications.of(context);
+    final notifications = Notifications.of(context)!;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
