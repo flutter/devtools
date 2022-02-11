@@ -119,8 +119,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   late ImportController _importController;
 
-  late StreamSubscription<ConnectVmEvent> _connectVmSubscription;
-  late StreamSubscription<String> _showPageSubscription;
+  late final StreamSubscription<ConnectVmEvent> _connectVmSubscription;
+  late final StreamSubscription<String> _showPageSubscription;
 
   late String scaffoldTitle;
 
