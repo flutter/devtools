@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../info/info_controller.dart';
 import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/utils.dart';
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'dialogs.dart';
@@ -23,23 +24,23 @@ import 'version.dart';
 
 class DeviceDialog extends StatelessWidget {
   const DeviceDialog({
-    @required this.connectedApp,
-    @required this.flutterVersion,
+    required this.connectedApp,
+    required this.flutterVersion,
   });
 
   final ConnectedApp connectedApp;
-  final FlutterVersion flutterVersion;
+  final FlutterVersion? flutterVersion;
 
   @override
   Widget build(BuildContext context) {
     const boldText = TextStyle(fontWeight: FontWeight.bold);
     final theme = Theme.of(context);
 
-    final vm = serviceManager.vm;
+    final VM? vm = serviceManager.vm;
 
     if (vm == null) return const SizedBox();
 
-    var version = vm.version;
+    var version = vm.version!;
     // Convert '2.9.0-13.0.dev (dev) (Fri May ... +0200) on "macos_x64"' to
     // '2.9.0-13.0.dev'.
     if (version.contains(' ')) {
@@ -56,12 +57,13 @@ class DeviceDialog extends StatelessWidget {
       'CPU / OS': '${vm.targetCPU}$bits / ${vm.operatingSystem}',
       if (flutterVersion != null) ...{
         'Flutter Version':
-            '${flutterVersion.version} / ${flutterVersion.channel}',
-        'Framework / Engine': '${flutterVersion.frameworkRevision} / '
-            '${flutterVersion.engineRevision}',
+            '${flutterVersion!.version} / ${flutterVersion!.channel}',
+        'Framework / Engine': '${flutterVersion!.frameworkRevision} / '
+            '${flutterVersion!.engineRevision}',
       },
-      if (serviceManager.service.connectedUri != null)
-        'VM Service Connection': serviceManager.service.connectedUri.toString(),
+      if (serviceManager.service!.connectedUri != null)
+        'VM Service Connection':
+            serviceManager.service!.connectedUri.toString(),
     };
 
     // TODO(kenz): set actions alignment to `spaceBetween` if
@@ -78,7 +80,7 @@ class DeviceDialog extends StatelessWidget {
               child: Row(
                 children: [
                   Text('$name: ', style: boldText),
-                  Text(items[name], style: theme.subtleTextStyle),
+                  Text(items[name]!, style: theme.subtleTextStyle),
                 ],
               ),
             ),
@@ -86,7 +88,7 @@ class DeviceDialog extends StatelessWidget {
       ),
       actions: [
         _connectToNewAppButton(context),
-        if (connectedApp.isRunningOnDartVM) _ViewVMFlagsButton(),
+        if (connectedApp.isRunningOnDartVM!) _ViewVMFlagsButton(),
         DialogCloseButton(),
       ],
     );
@@ -128,8 +130,8 @@ class VMFlagsDialog extends StatefulWidget {
 }
 
 class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
-  InfoController infoController;
-  TextEditingController filterController;
+  late InfoController infoController;
+  late final TextEditingController filterController;
 
   List<_DialogFlag> flags = [];
   List<_DialogFlag> filteredFlags = [];
@@ -156,7 +158,7 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
   }
 
   void _updateFromController() {
-    flags = infoController.flagListNotifier.value.flags
+    flags = (infoController.flagListNotifier.value?.flags ?? [])
         .map((flag) => _DialogFlag(flag))
         .toList();
     _refilter();
@@ -238,7 +240,7 @@ class _FlagTable extends StatelessWidget {
       child: FlatTable<_DialogFlag>(
         columns: columns,
         data: flags,
-        keyFactory: (_DialogFlag flag) => ValueKey<String>(flag.name),
+        keyFactory: (_DialogFlag flag) => ValueKey<String?>(flag.name),
         sortColumn: name,
         sortDirection: SortDirection.ascending,
         onItemSelected: (_) => null,
@@ -255,7 +257,7 @@ class _NameColumn extends ColumnData<_DialogFlag> {
         );
 
   @override
-  String getValue(_DialogFlag dataObject) => dataObject.name;
+  String getValue(_DialogFlag dataObject) => dataObject.name ?? '';
 }
 
 class _DescriptionColumn extends ColumnData<_DialogFlag> {
@@ -266,7 +268,7 @@ class _DescriptionColumn extends ColumnData<_DialogFlag> {
         );
 
   @override
-  String getValue(_DialogFlag dataObject) => dataObject.description;
+  String getValue(_DialogFlag dataObject) => dataObject.description ?? '';
 
   @override
   String getTooltip(_DialogFlag dataObject) => getValue(dataObject);
@@ -281,7 +283,7 @@ class _ValueColumn extends ColumnData<_DialogFlag> {
         );
 
   @override
-  String getValue(_DialogFlag dataObject) => dataObject.value;
+  String getValue(_DialogFlag dataObject) => dataObject.value ?? '';
 }
 
 class _DialogFlag {
@@ -293,9 +295,9 @@ class _DialogFlag {
   final Flag flag;
   final String filterText;
 
-  String get name => flag.name;
+  String? get name => flag.name;
 
-  String get description => flag.comment;
+  String? get description => flag.comment;
 
-  String get value => flag.valueAsString;
+  String? get value => flag.valueAsString;
 }

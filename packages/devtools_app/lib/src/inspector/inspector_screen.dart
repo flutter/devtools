@@ -68,9 +68,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         BlockingActionMixin,
         AutoDisposeMixin,
         SearchFieldMixin<InspectorScreenBody> {
-  bool _expandCollapseSupported = false;
-  bool _layoutExplorerSupported = false;
-
   InspectorController inspectorController;
 
   InspectorTreeController get summaryTreeController =>
@@ -123,8 +120,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       inspectorTree: inspectorTreeController,
       detailsTree: detailsTree,
       treeType: FlutterTreeType.widget,
-      onExpandCollapseSupported: _onExpandCollapseSupported,
-      onLayoutExplorerSupported: _onLayoutExplorerSupported,
     );
 
     summaryTreeController.setSearchTarget(searchTarget);
@@ -184,7 +179,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           detailsTree: detailsTree,
           controller: inspectorController,
           actionButtons: _expandCollapseButtons(),
-          layoutExplorerSupported: _layoutExplorerSupported,
         ),
       ],
     );
@@ -316,8 +310,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 
   Widget _expandCollapseButtons() {
-    if (!_expandCollapseSupported) return null;
-
     return Container(
       alignment: Alignment.centerRight,
       decoration: BoxDecoration(
@@ -353,18 +345,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         ],
       ),
     );
-  }
-
-  void _onExpandCollapseSupported() {
-    setState(() {
-      _expandCollapseSupported = true;
-    });
-  }
-
-  void _onLayoutExplorerSupported() {
-    setState(() {
-      _layoutExplorerSupported = true;
-    });
   }
 
   void _refreshInspector() {

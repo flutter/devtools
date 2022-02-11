@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
@@ -11,8 +11,8 @@ import '../debugger/debugger_model.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
 import '../primitives/auto_dispose.dart';
+import '../primitives/utils.dart';
 import 'globals.dart';
-import 'utils.dart';
 import 'vm_service_wrapper.dart';
 
 /// A line in the console.
@@ -72,10 +72,10 @@ class VariableConsoleLine extends ConsoleLine {
 /// VM and events emitted from other UI.
 class ConsoleService extends Disposer {
   void appendInstanceRef({
-    String name,
-    @required InstanceRef value,
-    @required RemoteDiagnosticsNode diagnostic,
-    @required IsolateRef isolateRef,
+    String? name,
+    required InstanceRef? value,
+    required RemoteDiagnosticsNode? diagnostic,
+    required IsolateRef? isolateRef,
     bool forceScrollIntoView = false,
     bool expandAll = false,
   }) async {
@@ -100,21 +100,21 @@ class ConsoleService extends Disposer {
   final _stdio = ListValueNotifier<ConsoleLine>([]);
   bool _stdioTrailingNewline = false;
 
-  ObjectGroupBase get objectGroup {
+  ObjectGroupBase? get objectGroup {
     final inspectorService = serviceManager.inspectorService;
     if (_objectGroup?.inspectorService == inspectorService) {
       return _objectGroup;
     }
     _objectGroup?.dispose();
-    _objectGroup = inspectorService?.createObjectGroup('console');
+    _objectGroup = inspectorService.createObjectGroup('console');
     return _objectGroup;
   }
 
-  ObjectGroupBase _objectGroup;
+  ObjectGroupBase? _objectGroup;
 
   /// Clears the contents of stdio.
   void clearStdio() {
-    if (_stdio.value?.isNotEmpty ?? false) {
+    if (_stdio.value.isNotEmpty) {
       _stdio.clear();
     }
   }
@@ -174,12 +174,12 @@ class ConsoleService extends Disposer {
   }
 
   void _handleStdoutEvent(Event event) {
-    final String text = decodeBase64(event.bytes);
+    final String text = decodeBase64(event.bytes!);
     appendStdio(text);
   }
 
   void _handleStderrEvent(Event event) {
-    final String text = decodeBase64(event.bytes);
+    final String text = decodeBase64(event.bytes!);
     // TODO(devoncarew): Change to reporting stdio along with information about
     // whether the event was stdout or stderr.
     appendStdio(text);
@@ -216,13 +216,13 @@ class ConsoleService extends Disposer {
     assert(serviceManager.isServiceAvailable);
     if (!_serviceInitialized && serviceManager.isServiceAvailable) {
       autoDisposeStreamSubscription(serviceManager
-          .service.onStdoutEventWithHistory
+          .service!.onStdoutEventWithHistory
           .listen(_handleStdoutEvent));
       autoDisposeStreamSubscription(serviceManager
-          .service.onStderrEventWithHistory
+          .service!.onStderrEventWithHistory
           .listen(_handleStderrEvent));
       autoDisposeStreamSubscription(serviceManager
-          .service.onExtensionEventWithHistory
+          .service!.onExtensionEventWithHistory
           .listen(_handleExtensionEvent));
       _serviceInitialized = true;
     }
@@ -231,22 +231,21 @@ class ConsoleService extends Disposer {
   void _handleExtensionEvent(Event e) async {
     if (e.extensionKind == 'Flutter.Error' ||
         e.extensionKind == 'Flutter.Print') {
-      final inspectorService = serviceManager.inspectorService;
-      if (inspectorService == null) {
+      if (serviceManager.connectedApp.isProfileBuildNow != true) {
         // The app isn't a debug build.
         return;
       }
-      // TODO(jacobr): events are may be out of order. Use unique ids to ensure
+      // TODO(jacobr): events may be out of order. Use unique ids to ensure
       // consistent order of regular print statements and structured messages.
       appendInstanceRef(
         value: null,
         diagnostic: RemoteDiagnosticsNode(
-          e.extensionData.data,
+          e.extensionData!.data,
           objectGroup,
           false,
           null,
         ),
-        isolateRef: objectGroup.inspectorService.isolateRef,
+        isolateRef: objectGroup!.inspectorService.isolateRef,
         expandAll: true,
       );
     }

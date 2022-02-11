@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 // @dart=2.9
-
 export 'src/analytics/analytics.dart';
 export 'src/analytics/analytics_controller.dart';
 export 'src/app_size/app_size_controller.dart';
 export 'src/charts/treemap.dart';
+export 'src/config_specific/ide_theme/ide_theme.dart';
 export 'src/debugger/debugger_controller.dart';
 export 'src/debugger/program_explorer_controller.dart';
 export 'src/debugger/span_parser.dart';
@@ -33,6 +33,7 @@ export 'src/primitives/auto_dispose_mixin.dart';
 export 'src/primitives/listenable.dart';
 export 'src/primitives/trace_event.dart';
 export 'src/primitives/trees.dart';
+export 'src/primitives/utils.dart';
 export 'src/profiler/cpu_profile_model.dart';
 export 'src/profiler/profile_granularity.dart';
 export 'src/profiler/profiler_screen_controller.dart';

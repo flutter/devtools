@@ -6,6 +6,7 @@
 
 import 'package:devtools_app/src/analytics/analytics_controller.dart';
 import 'package:devtools_app/src/analytics/prompt.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/service_manager.dart';
@@ -32,6 +33,7 @@ void main() {
     setUp(() {
       didCallEnableAnalytics = false;
       setGlobal(ServiceConnectionManager, FakeServiceManager());
+      setGlobal(IdeTheme, IdeTheme());
     });
     group('with analytics enabled', () {
       group('on first run', () {

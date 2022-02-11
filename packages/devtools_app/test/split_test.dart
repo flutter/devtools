@@ -4,10 +4,10 @@
 
 // @dart=2.9
 
+import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/shared/split.dart';
-import 'package:devtools_app/src/shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

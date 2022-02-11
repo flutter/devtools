@@ -4,8 +4,8 @@
 
 // @dart=2.9
 
+import '../primitives/utils.dart';
 import '../shared/globals.dart';
-import '../shared/utils.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class HttpService {

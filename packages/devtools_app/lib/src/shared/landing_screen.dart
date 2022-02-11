@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,6 +11,9 @@ import '../config_specific/import_export/import_export.dart';
 import '../framework/framework_core.dart';
 import '../primitives/blocking_action_mixin.dart';
 import '../primitives/url_utils.dart';
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
+import '../primitives/utils.dart';
 import '../ui/label.dart';
 import 'common_widgets.dart';
 import 'file_import.dart';
@@ -58,9 +59,9 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
 
 class LandingScreenSection extends StatelessWidget {
   const LandingScreenSection({
-    Key key,
-    @required this.title,
-    @required this.child,
+    Key? key,
+    required this.title,
+    required this.child,
   }) : super(key: key);
 
   final String title;
@@ -86,7 +87,7 @@ class LandingScreenSection extends StatelessWidget {
 }
 
 class ConnectDialog extends StatefulWidget {
-  const ConnectDialog({Key key}) : super(key: key);
+  const ConnectDialog({Key? key}) : super(key: key);
 
   @override
   _ConnectDialogState createState() => _ConnectDialogState();
@@ -94,7 +95,7 @@ class ConnectDialog extends StatefulWidget {
 
 class _ConnectDialogState extends State<ConnectDialog>
     with BlockingActionMixin {
-  TextEditingController connectDialogController;
+  late final TextEditingController connectDialogController;
 
   @override
   void initState() {
@@ -183,8 +184,8 @@ class _ConnectDialogState extends State<ConnectDialog>
       analytics_constants.landingScreen,
       analytics_constants.connectToApp,
     );
-    if (connectDialogController.text?.isEmpty ?? true) {
-      Notifications.of(context).push('Please enter a VM Service URL.');
+    if (connectDialogController.text.isEmpty) {
+      Notifications.of(context)!.push('Please enter a VM Service URL.');
       return;
     }
 
@@ -192,11 +193,11 @@ class _ConnectDialogState extends State<ConnectDialog>
     // Cache the routerDelegate and notifications providers before the async
     // gap as the landing screen may not be displayed by the time the async gap
     // is complete but we still want to show notifications and change the route.
-    // TODO(jacobr): better understand why this is the case. It is  bit counter
+    // TODO(jacobr): better understand why this is the case. It is bit counter
     // intuitive that we don't want to just cancel the route change or
     // notification if we are already on a different screen.
     final routerDelegate = DevToolsRouterDelegate.of(context);
-    final notifications = Notifications.of(context);
+    final notifications = Notifications.of(context)!;
     final connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
@@ -205,7 +206,7 @@ class _ConnectDialogState extends State<ConnectDialog>
       },
     );
     if (connected) {
-      final connectedUri = serviceManager.service.connectedUri;
+      final connectedUri = serviceManager.service!.connectedUri!;
       routerDelegate.updateArgsIfNotCurrent({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
       notifications.push('Successfully connected to $shortUri.');
@@ -219,7 +220,7 @@ class _ConnectDialogState extends State<ConnectDialog>
 }
 
 class ImportFileInstructions extends StatelessWidget {
-  const ImportFileInstructions({Key key}) : super(key: key);
+  const ImportFileInstructions({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -256,9 +257,10 @@ class ImportFileInstructions extends StatelessWidget {
       analytics_constants.landingScreen,
       analytics_constants.importFile,
     );
-    final importedFile = await importFileFromPicker(
+    final DevToolsJsonFile? importedFile = await importFileFromPicker(
       acceptedTypes: ['json'],
     );
+
     if (importedFile != null) {
       Provider.of<ImportController>(context, listen: false)
           .importData(importedFile);
@@ -267,7 +269,7 @@ class ImportFileInstructions extends StatelessWidget {
 }
 
 class AppSizeToolingInstructions extends StatelessWidget {
-  const AppSizeToolingInstructions({Key key}) : super(key: key);
+  const AppSizeToolingInstructions({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

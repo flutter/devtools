@@ -5,6 +5,7 @@
 // @dart=2.9
 
 import 'package:devtools_app/src/app_size/code_size_attribution.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/shared/table.dart';
@@ -21,6 +22,7 @@ void main() {
 
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(IdeTheme, IdeTheme());
     callGraph = generateCallGraphWithDominators(
       precompilerTrace,
       NodeType.packageNode,

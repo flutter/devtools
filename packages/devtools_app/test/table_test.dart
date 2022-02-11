@@ -5,6 +5,7 @@
 // @dart=2.9
 
 import 'package:devtools_app/src/primitives/trees.dart';
+import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/shared/table.dart';

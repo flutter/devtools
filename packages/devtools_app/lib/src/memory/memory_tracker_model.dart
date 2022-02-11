@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/trees.dart';
+import '../primitives/utils.dart';
 import '../shared/split.dart';
 import '../shared/table.dart';
 import '../shared/table_data.dart';
