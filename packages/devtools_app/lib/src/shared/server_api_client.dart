@@ -139,7 +139,7 @@ class DevToolsServerConnection {
         final Map<String, dynamic> params = request['params'] ?? {};
         _handleMethod(method, params);
       } else if (request.containsKey('id')) {
-        _handleResponse(request['id'], request['result']);
+        _handleResponse(request['id']!, request['result']);
       } else {
         print('Unable to parse API message from server:\n\n$msg');
       }
@@ -173,7 +173,7 @@ class DevToolsServerConnection {
     }
   }
 
-  void _handleResponse(String? id, dynamic result) {
+  void _handleResponse(String id, dynamic result) {
     final completer = _completers.remove(id);
     completer?.complete(result);
   }
