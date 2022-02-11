@@ -138,7 +138,7 @@ class NotificationsState extends State<_NotificationsProvider>
   }
 
   /// Dismisses all notifications with a matching message.
-  void dismiss(String? message) {
+  void dismiss(String message) {
     bool didDismiss = false;
     // Make a copy so we do not remove a notification from [_notifications]
     // while iterating over it.
