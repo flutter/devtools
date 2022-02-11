@@ -278,7 +278,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         // skip that here.
         final routerDelegate = DevToolsRouterDelegate.of(context);
         if (_tabController!.index == 0 &&
-            (routerDelegate.currentConfiguration!.page?.isEmpty ?? true)) {
+            (routerDelegate.currentConfiguration!.page.isEmpty)) {
           return;
         }
 
@@ -443,9 +443,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       actions.insert(0, const BulletSpacer(useAccentColor: true));
     }
 
-    final bool multipleTabs = widget.tabs.length > 1;
+    final bool hasMultipleTabs = widget.tabs.length > 1;
 
-    if (multipleTabs) {
+    if (hasMultipleTabs) {
       tabBar = TabBar(
         controller: _tabController,
         isScrollable: true,
@@ -490,7 +490,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       flexibleSpace: flexibleSpace,
     );
 
-    if (multipleTabs) return appBar;
+    if (!hasMultipleTabs) return appBar;
 
     return PreferredSize(
       key: isNarrow
