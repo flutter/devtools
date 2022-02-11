@@ -136,7 +136,7 @@ class DevToolsServerConnection {
 
       if (request.containsKey('method')) {
         final String? method = request['method'];
-        final Map<String, dynamic>? params = request['params'];
+        final Map<String, dynamic> params = request['params'] ?? {};
         _handleMethod(method, params);
       } else if (request.containsKey('id')) {
         _handleResponse(request['id'], request['result']);
@@ -148,10 +148,10 @@ class DevToolsServerConnection {
     }
   }
 
-  void _handleMethod(String? method, Map<String, dynamic>? params) {
+  void _handleMethod(String? method, Map<String, dynamic> params) {
     switch (method) {
       case 'connectToVm':
-        final String uri = params!['uri'];
+        final String uri = params['uri'];
         final bool notify = params['notify'] == true;
         frameworkController.notifyConnectToVmEvent(
           Uri.parse(uri),
@@ -159,7 +159,7 @@ class DevToolsServerConnection {
         );
         return;
       case 'showPage':
-        final String pageId = params!['page'];
+        final String pageId = params['page'];
         frameworkController.notifyShowPageId(pageId);
         return;
       case 'enableNotifications':
