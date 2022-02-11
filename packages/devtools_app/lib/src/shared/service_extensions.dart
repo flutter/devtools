@@ -47,9 +47,9 @@ class ToggleableServiceExtensionDescription<T>
 
   static const disabledValueIndex = 1;
 
-  T? get enabledValue => values[enabledValueIndex];
+  T get enabledValue => values[enabledValueIndex];
 
-  T? get disabledValue => values[disabledValueIndex];
+  T get disabledValue => values[disabledValueIndex];
 
   /// Whether this service extension will be inverted where it is exposed in
   /// DevTools.
