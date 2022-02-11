@@ -22,7 +22,7 @@ class PreferencesController {
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
     String? value = await storage.getValue('ui.darkMode');
-    toggleDarkModeTheme(value == 'true');
+    toggleDarkModeTheme(value == null || value == 'true');
     _darkModeTheme.addListener(() {
       storage.setValue('ui.darkMode', '${_darkModeTheme.value}');
     });
