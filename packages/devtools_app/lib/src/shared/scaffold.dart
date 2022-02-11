@@ -446,7 +446,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// depending on the screen width.
   Widget _buildAppBar(String title) {
     Widget? flexibleSpace;
-    late Size preferredSize;
+    late final Size preferredSize;
     TabBar tabBar;
 
     final isNarrow =
@@ -585,7 +585,7 @@ class KeyboardShortcuts extends StatefulWidget {
 
 class KeyboardShortcutsState extends State<KeyboardShortcuts>
     with AutoDisposeMixin {
-  FocusNode? _focusNode;
+  late final FocusNode _focusNode;
 
   @override
   void initState() {
