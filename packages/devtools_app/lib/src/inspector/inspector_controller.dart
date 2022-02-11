@@ -30,8 +30,6 @@ import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import '../shared/globals.dart';
 import '../shared/service_extensions.dart' as extensions;
-import '../shared/service_registrations.dart' as registrations;
-import '../shared/version.dart';
 import 'diagnostics_node.dart';
 import 'inspector_screen.dart';
 import 'inspector_service.dart';
@@ -77,8 +75,6 @@ class InspectorController extends DisposableController
     @required this.treeType,
     this.parent,
     this.isSummaryTree = true,
-    this.onExpandCollapseSupported,
-    this.onLayoutExplorerSupported,
   })  : _treeGroups = InspectorObjectGroupManager(
           serviceManager.inspectorService,
           'tree',
@@ -109,9 +105,6 @@ class InspectorController extends DisposableController
     } else {
       details = null;
     }
-
-    _checkForExpandCollapseSupport();
-    _checkForLayoutExplorerSupport();
 
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       final isolate = serviceManager.isolateManager.mainIsolate.value;
@@ -199,10 +192,6 @@ class InspectorController extends DisposableController
   static const double refreshFramesPerSecond = 5.0;
 
   final bool isSummaryTree;
-
-  final VoidCallback onExpandCollapseSupported;
-
-  final VoidCallback onLayoutExplorerSupported;
 
   /// Parent InspectorController if this is a details subtree.
   InspectorController parent;
@@ -979,44 +968,5 @@ class InspectorController extends DisposableController
   Future<void> collapseDetailsToSelected() async {
     details.inspectorTree.collapseToSelected();
     details.animateTo(details.inspectorTree.selection);
-  }
-
-  /// execute given [callback] when minimum Flutter [version] is met.
-  void _onVersionSupported(
-    SemanticVersion version,
-    VoidCallback callback,
-  ) {
-    final flutterVersionServiceListenable = serviceManager
-        .registeredServiceListenable(registrations.flutterVersion.service);
-    addAutoDisposeListener(flutterVersionServiceListenable, () async {
-      final registered = flutterVersionServiceListenable.value;
-      if (registered) {
-        final flutterVersion =
-            FlutterVersion.parse((await serviceManager.flutterVersion).json);
-        if (_disposed) return;
-        if (flutterVersion.isSupported(supportedVersion: version)) {
-          callback();
-        }
-      }
-    });
-  }
-
-  void _checkForExpandCollapseSupport() {
-    if (onExpandCollapseSupported == null) return;
-    // Configurable subtree depth is available in versions of Flutter
-    // greater than or equal to 1.9.7, but the flutterVersion service is
-    // not available until 1.10.1, so we will check for 1.10.1 here.
-    _onVersionSupported(
-      SemanticVersion(major: 1, minor: 10, patch: 1),
-      onExpandCollapseSupported,
-    );
-  }
-
-  void _checkForLayoutExplorerSupport() {
-    if (onLayoutExplorerSupported == null) return;
-    _onVersionSupported(
-      SemanticVersion(major: 1, minor: 13, patch: 1),
-      onLayoutExplorerSupported,
-    );
   }
 }

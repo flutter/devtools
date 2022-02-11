@@ -74,7 +74,8 @@ void main() {
       fakeExtensionManager.fakeFrame();
     }
 
-    testWidgets('builds its tab', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('builds its tab', windowSize,
+        (WidgetTester tester) async {
       await tester.pumpWidget(buildInspectorScreen());
       await tester.pumpAndSettle();
       expect(find.byType(InspectorScreenBody), findsOneWidget);

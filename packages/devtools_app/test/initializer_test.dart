@@ -31,6 +31,7 @@ void main() {
         initialRoute: '/init',
         routes: {
           '/init': (_) => Initializer(
+                // ignore: avoid_redundant_argument_values
                 url: null,
                 builder: (_) => const SizedBox(key: initializedKey),
               ),

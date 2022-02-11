@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:convert';
 
@@ -19,15 +19,15 @@ import 'utils.dart';
 
 class FileImportContainer extends StatefulWidget {
   const FileImportContainer({
-    @required this.title,
-    @required this.instructions,
+    required this.title,
+    required this.instructions,
     this.actionText,
     this.onAction,
     this.onFileSelected,
     this.onFileCleared,
     this.onError,
     this.extensions = const ['json'],
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   final String title;
@@ -35,15 +35,15 @@ class FileImportContainer extends StatefulWidget {
   final String instructions;
 
   /// The title of the action button.
-  final String actionText;
+  final String? actionText;
 
-  final DevToolsJsonFileHandler onAction;
+  final DevToolsJsonFileHandler? onAction;
 
-  final DevToolsJsonFileHandler onFileSelected;
+  final DevToolsJsonFileHandler? onFileSelected;
 
-  final VoidCallback onFileCleared;
+  final VoidCallback? onFileCleared;
 
-  final void Function(String error) onError;
+  final void Function(String error)? onError;
 
   /// The file's extensions where we are going to get the data from.
   final List<String> extensions;
@@ -53,7 +53,7 @@ class FileImportContainer extends StatefulWidget {
 }
 
 class _FileImportContainerState extends State<FileImportContainer> {
-  DevToolsJsonFile importedFile;
+  DevToolsJsonFile? importedFile;
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +95,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
         widget.instructions,
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: Theme.of(context).textTheme.headline1.color,
+          color: Theme.of(context).textTheme.headline1!.color,
         ),
       ),
     );
@@ -149,7 +149,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
             importedFile?.path ?? 'No File Selected',
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: Theme.of(context).textTheme.headline1.color,
+              color: Theme.of(context).textTheme.headline1!.color,
             ),
             textAlign: TextAlign.left,
           ),
@@ -169,7 +169,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
           children: [
             ElevatedButton(
               onPressed: importedFile != null
-                  ? () => widget.onAction(importedFile)
+                  ? () => widget.onAction!(importedFile!)
                   : null,
               child: MaterialIconLabel(
                 label: widget.actionText,
@@ -197,7 +197,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
       });
     }
     if (widget.onFileCleared != null) {
-      widget.onFileCleared();
+      widget.onFileCleared!();
     }
   }
 
@@ -211,13 +211,13 @@ class _FileImportContainerState extends State<FileImportContainer> {
       });
     }
     if (widget.onFileSelected != null) {
-      widget.onFileSelected(file);
+      widget.onFileSelected!(file);
     }
   }
 }
 
-Future<DevToolsJsonFile> importFileFromPicker({
-  @required List<String> acceptedTypes,
+Future<DevToolsJsonFile?> importFileFromPicker({
+  required List<String> acceptedTypes,
 }) async {
   final acceptedTypeGroups = [XTypeGroup(extensions: acceptedTypes)];
   final file = await openFile(acceptedTypeGroups: acceptedTypeGroups);
@@ -236,7 +236,7 @@ Future<DevToolsJsonFile> importFileFromPicker({
 
 class FileImportButton extends StatelessWidget {
   const FileImportButton({
-    @required this.onPressed,
+    required this.onPressed,
     this.elevatedButton = false,
   });
 
@@ -257,13 +257,13 @@ class FileImportButton extends StatelessWidget {
 
 class DualFileImportContainer extends StatefulWidget {
   const DualFileImportContainer({
-    @required this.firstFileTitle,
-    @required this.secondFileTitle,
-    @required this.firstInstructions,
-    @required this.secondInstructions,
-    @required this.actionText,
-    @required this.onAction,
-    Key key,
+    required this.firstFileTitle,
+    required this.secondFileTitle,
+    required this.firstInstructions,
+    required this.secondInstructions,
+    required this.actionText,
+    required this.onAction,
+    Key? key,
   });
 
   final String firstFileTitle;
@@ -278,8 +278,8 @@ class DualFileImportContainer extends StatefulWidget {
   final String actionText;
 
   final Function(
-    DevToolsJsonFile firstImportedFile,
-    DevToolsJsonFile secondImportedFile,
+    DevToolsJsonFile? firstImportedFile,
+    DevToolsJsonFile? secondImportedFile,
     void Function(String error) onError,
   ) onAction;
 
@@ -289,8 +289,8 @@ class DualFileImportContainer extends StatefulWidget {
 }
 
 class _DualFileImportContainerState extends State<DualFileImportContainer> {
-  DevToolsJsonFile firstImportedFile;
-  DevToolsJsonFile secondImportedFile;
+  DevToolsJsonFile? firstImportedFile;
+  DevToolsJsonFile? secondImportedFile;
 
   @override
   Widget build(BuildContext context) {
@@ -354,7 +354,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
   }
 
   Widget _buildActionButton() {
-    final notifications = Notifications.of(context);
+    final notifications = Notifications.of(context)!;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
