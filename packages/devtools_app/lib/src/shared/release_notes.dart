@@ -109,7 +109,7 @@ class ReleaseNotes extends AnimatedWidget {
     required this.markdownData,
   }) : super(key: key, listenable: visibilityAnimation);
 
-  final ReleaseNotesController? releaseNotesController;
+  final ReleaseNotesController releaseNotesController;
 
   final String? markdownData;
 
@@ -142,7 +142,7 @@ class ReleaseNotes extends AnimatedWidget {
                 IconButton(
                   padding: const EdgeInsets.all(0.0),
                   onPressed: () =>
-                      releaseNotesController!.toggleReleaseNotesVisible(false),
+                      releaseNotesController.toggleReleaseNotesVisible(false),
                   icon: const Icon(Icons.close),
                 ),
               ],
