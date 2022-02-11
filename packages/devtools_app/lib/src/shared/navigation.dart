@@ -17,8 +17,11 @@ import 'theme.dart';
 ///
 /// This will fail because we can't determine what the theme value for the app
 /// is.
-String routeNameWithQueryParams(BuildContext context, String routeName,
-    [Map<String, String> queryParameters]) {
+String routeNameWithQueryParams(
+  BuildContext context,
+  String routeName, [
+  Map<String, String> queryParameters,
+]) {
   final newQueryParams =
       queryParameters == null ? null : Map.of(queryParameters);
 
