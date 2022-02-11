@@ -97,7 +97,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   @override
   final GlobalKey<NavigatorState> navigatorKey;
 
-  final Page Function(BuildContext, String?, Map<String, String?>)? _getPage;
+  final Page Function(BuildContext, String?, Map<String, String?>) _getPage;
 
   /// A list of any routes/pages on the stack.
   ///
@@ -117,7 +117,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
 
     return Navigator(
       key: navigatorKey,
-      pages: [_getPage!(context, page, args)],
+      pages: [_getPage(context, page, args)],
       onPopPage: _handleOnPopPage,
     );
   }
