@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/material.dart';
 
@@ -27,8 +27,8 @@ import 'theme.dart';
 /// returned value. If not provided, the title will be empty.
 class HistoryViewport<T> extends StatefulWidget {
   const HistoryViewport({
-    @required this.history,
-    @required this.contentBuilder,
+    required this.history,
+    required this.contentBuilder,
     this.controls,
     this.generateTitle,
     this.onChange,
@@ -37,19 +37,19 @@ class HistoryViewport<T> extends StatefulWidget {
   });
 
   final HistoryManager<T> history;
-  final String Function(T) generateTitle;
-  final List<Widget> controls;
-  final Widget Function(BuildContext, T) contentBuilder;
-  final void Function(T, T) onChange;
+  final Widget Function(BuildContext, T?) contentBuilder;
+  final List<Widget>? controls;
+  final String Function(T?)? generateTitle;
+  final void Function(T?, T?)? onChange;
   final bool historyEnabled;
-  final VoidCallback onTitleTap;
+  final VoidCallback? onTitleTap;
 
   @override
   State<HistoryViewport<T>> createState() => _HistoryViewportState<T>();
 }
 
 class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
-  TextStyle _titleStyle;
+  TextStyle? _titleStyle;
 
   void _updateTitleStyle(TextStyle style) {
     setState(() {
@@ -61,9 +61,9 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return OutlineDecoration(
-      child: ValueListenableBuilder(
+      child: ValueListenableBuilder<T?>(
         valueListenable: widget.history.current,
-        builder: (context, current, _) {
+        builder: (context, T? current, _) {
           return Column(
             children: [
               _buildTitle(context, theme),
@@ -78,8 +78,8 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
   Widget _buildTitle(BuildContext context, ThemeData theme) {
     final title = widget.generateTitle == null
         ? '  '
-        : widget.generateTitle(widget.history.current.value);
-    final defaultTitleStyle = theme.textTheme.subtitle2;
+        : widget.generateTitle!(widget.history.current.value);
+    final defaultTitleStyle = theme.textTheme.subtitle2 ?? const TextStyle();
     return debuggerSectionTitle(
       theme,
       child: Row(
@@ -91,7 +91,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
                   ? () {
                       widget.history.moveBack();
                       if (widget.onChange != null) {
-                        widget.onChange(
+                        widget.onChange!(
                           widget.history.current.value,
                           widget.history.peekNext(),
                         );
@@ -103,10 +103,10 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
               icon: Icons.chevron_right,
               onPressed: widget.history.hasNext
                   ? () {
-                      final current = widget.history.current.value;
+                      final current = widget.history.current.value!;
                       widget.history.moveForward();
                       if (widget.onChange != null) {
-                        widget.onChange(
+                        widget.onChange!(
                           widget.history.current.value,
                           current,
                         );
@@ -145,7 +145,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
           ),
           if (widget.controls != null) ...[
             const SizedBox(width: denseSpacing),
-            for (final widget in widget.controls) ...[
+            for (final widget in widget.controls!) ...[
               widget,
               const SizedBox(width: denseSpacing),
             ],
