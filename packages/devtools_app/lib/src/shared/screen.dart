@@ -22,7 +22,7 @@ import 'version.dart';
 abstract class Screen {
   const Screen(
     this.screenId, {
-    this.title,
+    this.title = '',
     this.icon,
     this.tabKey,
     this.requiresLibrary,
@@ -43,7 +43,7 @@ abstract class Screen {
     bool worksOffline = false,
     bool Function(FlutterVersion? currentVersion)? shouldShowForFlutterVersion,
     bool showFloatingDebuggerControls = true,
-    String? title,
+    String title = '',
     IconData? icon,
     Key? tabKey,
   }) : this(
@@ -76,7 +76,7 @@ abstract class Screen {
   final String screenId;
 
   /// The user-facing name of the page.
-  final String? title;
+  final String title;
 
   final IconData? icon;
 
@@ -155,7 +155,7 @@ abstract class Screen {
               Icon(icon, size: defaultIconSize),
               Padding(
                 padding: const EdgeInsets.only(left: denseSpacing),
-                child: Text(title ?? ''),
+                child: Text(title),
               ),
             ],
           ),
