@@ -113,7 +113,7 @@ class NotificationsState extends State<_NotificationsProvider>
   /// successfully pushed.
   @override
   bool push(
-    String? message, {
+    String message, {
     List<Widget> actions = const [],
     Duration duration = Notifications.defaultDuration,
     bool allowDuplicates = true,
@@ -126,7 +126,7 @@ class NotificationsState extends State<_NotificationsProvider>
     setState(() {
       _notifications.add(
         _Notification(
-          message: message!,
+          message: message,
           actions: actions,
           remove: _removeNotification,
           duration: duration,
