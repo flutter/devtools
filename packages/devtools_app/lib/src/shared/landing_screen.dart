@@ -193,11 +193,11 @@ class _ConnectDialogState extends State<ConnectDialog>
     // Cache the routerDelegate and notifications providers before the async
     // gap as the landing screen may not be displayed by the time the async gap
     // is complete but we still want to show notifications and change the route.
-    // TODO(jacobr): better understand why this is the case. It is  bit counter
+    // TODO(jacobr): better understand why this is the case. It is bit counter
     // intuitive that we don't want to just cancel the route change or
     // notification if we are already on a different screen.
     final routerDelegate = DevToolsRouterDelegate.of(context);
-    final notifications = Notifications.of(context);
+    final notifications = Notifications.of(context)!;
     final connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
