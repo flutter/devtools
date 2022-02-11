@@ -49,7 +49,6 @@ import 'shared/scaffold.dart';
 import 'shared/screen.dart';
 import 'shared/snapshot_screen.dart';
 import 'shared/theme.dart';
-import 'shared/utils.dart';
 import 'ui/service_extension_widgets.dart';
 import 'vm_developer/vm_developer_tools_controller.dart';
 import 'vm_developer/vm_developer_tools_screen.dart';
@@ -63,13 +62,6 @@ const showVmDeveloperMode = false;
 
 /// Whether this DevTools build is external.
 bool isExternalBuild = true;
-
-// TODO(kenz): remove the pub warning code after devtools version 2.8.0 ships
-/// Whether DevTools should warn users to stop launching DevTools from Pub.
-///
-/// This flag will be turned on for the final release of DevTools on pub, but
-/// should remain off at HEAD.
-const showPubWarning = false;
 
 /// Top-level configuration for the app.
 @immutable
@@ -514,10 +506,6 @@ class DevToolsAboutDialog extends StatelessWidget {
         children: [
           _aboutDevTools(context),
           const SizedBox(height: defaultSpacing),
-          if (shouldShowPubWarning()) ...[
-            const PubWarningText(),
-            const SizedBox(height: defaultSpacing),
-          ],
           ...dialogSubHeader(theme, 'Feedback'),
           Wrap(
             children: [

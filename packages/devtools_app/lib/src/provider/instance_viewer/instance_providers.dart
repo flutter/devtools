@@ -213,7 +213,7 @@ Future<EnumInstance> _tryParseEnum(
 
   final nameSplit = name.valueAsString.split('.');
 
-  if (nameSplit.length > 2) return null;
+  if (nameSplit.length != 2) return null;
 
   return EnumInstance(
     type: nameSplit.first,
