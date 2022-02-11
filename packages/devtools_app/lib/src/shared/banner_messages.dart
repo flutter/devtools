@@ -456,18 +456,19 @@ void maybePushUnsupportedFlutterVersionWarning(
   String screenId, {
   required SemanticVersion supportedFlutterVersion,
 }) {
-  if (offlineController.offlineMode.value) return;
-  if (serviceManager.connectedApp?.isFlutterAppNow ?? false) {
-    final currentVersion = serviceManager.connectedApp!.flutterVersionNow!;
-    if (currentVersion < supportedFlutterVersion) {
-      Provider.of<BannerMessagesController>(context).addMessage(
-        UnsupportedFlutterVersionWarning(
-          screenId: screenId,
-          currentFlutterVersion: currentVersion,
-          supportedFlutterVersion: supportedFlutterVersion,
-        ).build(context),
-      );
-    }
+  final isFlutterApp = serviceManager.connectedApp?.isFlutterAppNow;
+  if (offlineController.offlineMode.value ||
+      isFlutterApp == null ||
+      !isFlutterApp) return;
+  final currentVersion = serviceManager.connectedApp!.flutterVersionNow!;
+  if (currentVersion < supportedFlutterVersion) {
+    Provider.of<BannerMessagesController>(context).addMessage(
+      UnsupportedFlutterVersionWarning(
+        screenId: screenId,
+        currentFlutterVersion: currentVersion,
+        supportedFlutterVersion: supportedFlutterVersion,
+      ).build(context),
+    );
   }
 }
 
