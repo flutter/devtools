@@ -459,7 +459,9 @@ void maybePushUnsupportedFlutterVersionWarning(
   final isFlutterApp = serviceManager.connectedApp?.isFlutterAppNow;
   if (offlineController.offlineMode.value ||
       isFlutterApp == null ||
-      !isFlutterApp) return;
+      !isFlutterApp) {
+    return;
+  }
   final currentVersion = serviceManager.connectedApp!.flutterVersionNow!;
   if (currentVersion < supportedFlutterVersion) {
     Provider.of<BannerMessagesController>(context).addMessage(
