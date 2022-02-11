@@ -138,11 +138,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         frameworkController.onShowPageId.listen(_showPageById);
 
     _initTitle();
-    _maybeShowPubWarning();
     _maybeShowInternalFlutterWebWarning();
   }
-
-  bool _pubWarningShown = false;
 
   bool _internalFlutterWebWarningShown = false;
 
@@ -156,18 +153,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         _internalFlutterWebWarningShown = true;
       }
     });
-  }
-
-  // TODO(kenz): remove the pub warning code after devtools version 2.8.0 ships
-  void _maybeShowPubWarning() {
-    if (!_pubWarningShown) {
-      serviceManager.onConnectionAvailable?.listen((event) {
-        if (shouldShowPubWarning()) {
-          _showWarning(const PubWarningText());
-          _pubWarningShown = true;
-        }
-      });
-    }
   }
 
   void _showWarning(Widget warningText) {

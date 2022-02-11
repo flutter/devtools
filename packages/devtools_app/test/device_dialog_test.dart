@@ -50,6 +50,8 @@ void main() {
 
       deviceDialog = DeviceDialog(
         connectedApp: fakeServiceManager.connectedApp,
+        // The parameter is required.
+        // ignore: avoid_redundant_argument_values
         flutterVersion: null,
       );
 

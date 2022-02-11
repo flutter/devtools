@@ -14,11 +14,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../app.dart';
 import '../config_specific/logger/logger.dart' as logger;
 import 'globals.dart';
 import 'notifications.dart';
-import 'version.dart';
 
 /// Attempts to copy a String of `data` to the clipboard.
 ///
@@ -75,12 +73,3 @@ mixin CompareMixin implements Comparable {
     return compareTo(other) >= 0;
   }
 }
-
-bool shouldShowPubWarning() =>
-    showPubWarning &&
-    (serviceManager.connectedApp?.isFlutterAppNow != null &&
-            serviceManager.connectedApp.flutterVersionNow >=
-                SemanticVersion(major: 2, minor: 8) ||
-        (serviceManager.vm != null &&
-            SemanticVersion.parse(serviceManager.vm.version) >=
-                SemanticVersion(major: 2, minor: 15)));
