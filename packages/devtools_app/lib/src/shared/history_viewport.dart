@@ -37,10 +37,10 @@ class HistoryViewport<T> extends StatefulWidget {
   });
 
   final HistoryManager<T> history;
-  final Widget Function(BuildContext, T) contentBuilder;
+  final Widget Function(BuildContext, T?) contentBuilder;
   final List<Widget>? controls;
-  final String Function(T)? generateTitle;
-  final void Function(T, T)? onChange;
+  final String Function(T?)? generateTitle;
+  final void Function(T?, T?)? onChange;
   final bool historyEnabled;
   final VoidCallback? onTitleTap;
 
@@ -67,7 +67,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
           return Column(
             children: [
               _buildTitle(context, theme),
-              widget.contentBuilder(context, current!),
+              widget.contentBuilder(context, current),
             ],
           );
         },
@@ -78,7 +78,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
   Widget _buildTitle(BuildContext context, ThemeData theme) {
     final title = widget.generateTitle == null
         ? '  '
-        : widget.generateTitle!(widget.history.current.value!);
+        : widget.generateTitle!(widget.history.current.value);
     final defaultTitleStyle = theme.textTheme.subtitle2 ?? const TextStyle();
     return debuggerSectionTitle(
       theme,
@@ -92,8 +92,8 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
                       widget.history.moveBack();
                       if (widget.onChange != null) {
                         widget.onChange!(
-                          widget.history.current.value!,
-                          widget.history.peekNext()!,
+                          widget.history.current.value,
+                          widget.history.peekNext(),
                         );
                       }
                     }
@@ -107,7 +107,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
                       widget.history.moveForward();
                       if (widget.onChange != null) {
                         widget.onChange!(
-                          widget.history.current.value!,
+                          widget.history.current.value,
                           current,
                         );
                       }
