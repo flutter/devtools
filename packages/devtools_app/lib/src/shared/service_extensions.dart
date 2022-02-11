@@ -91,10 +91,11 @@ class ServiceExtensionDescription<T> {
 
   final List<String> displayValues;
 
-  final String?
-      gaScreenName; // Analytics screen (screen name where item lives).
+  /// Analytics screen (screen name where item lives).
+  final String? gaScreenName;
 
-  final String? gaItem; // Analytics item name (toggleable item's name).
+  /// Analytics item name (toggleable item's name).
+  final String? gaItem;
 
   String get gaItemTooltipLink => '${gaItem}TooltipLink';
 
@@ -503,7 +504,7 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   disablePhysicalShapeLayers,
 ];
 
-final Map<String?, ServiceExtensionDescription?> serviceExtensionsAllowlist =
+final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =
     Map.fromIterable(
   _extensionDescriptions,
   key: (extension) => extension.extension,
