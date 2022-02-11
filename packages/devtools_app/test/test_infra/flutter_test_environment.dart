@@ -10,7 +10,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/config_specific/framework_initialize/_framework_initialize_web.dart';
+import 'package:devtools_app/src/config_specific/framework_initialize/_framework_initialize_desktop.dart';
 import 'package:devtools_app/src/primitives/storage.dart';
 
 import 'flutter_test_driver.dart';
@@ -116,7 +116,7 @@ class FlutterTestEnvironment {
 
       _service = _flutter.vmService;
       final preferencesController = PreferencesController();
-      setGlobal(Storage, BrowserStorage());
+      setGlobal(Storage, FlutterDesktopStorage());
       await preferencesController.init();
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
       setGlobal(PreferencesController, preferencesController);
