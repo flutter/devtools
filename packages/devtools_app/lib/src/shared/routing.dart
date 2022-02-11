@@ -165,8 +165,10 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     notifyListeners();
   }
 
-  void navigateHome(
-      {bool clearUriParam = false, required bool clearScreenParam}) {
+  void navigateHome({
+    bool clearUriParam = false,
+    required bool clearScreenParam,
+  }) {
     navigate(
       homePageId,
       {
