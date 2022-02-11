@@ -135,7 +135,7 @@ class DevToolsServerConnection {
       final Map request = jsonDecode(msg);
 
       if (request.containsKey('method')) {
-        final String? method = request['method'];
+        final String method = request['method'];
         final Map<String, dynamic> params = request['params'] ?? {};
         _handleMethod(method, params);
       } else if (request.containsKey('id')) {
@@ -148,7 +148,7 @@ class DevToolsServerConnection {
     }
   }
 
-  void _handleMethod(String? method, Map<String, dynamic> params) {
+  void _handleMethod(String method, Map<String, dynamic> params) {
     switch (method) {
       case 'connectToVm':
         final String uri = params['uri'];
