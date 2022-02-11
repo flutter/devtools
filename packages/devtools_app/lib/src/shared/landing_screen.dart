@@ -4,6 +4,7 @@
 
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
+import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -256,12 +257,14 @@ class ImportFileInstructions extends StatelessWidget {
       analytics_constants.landingScreen,
       analytics_constants.importFile,
     );
-    final importedFile = await importFileFromPicker(
+    final DevToolsJsonFile? importedFile = await importFileFromPicker(
       acceptedTypes: ['json'],
     );
 
-    Provider.of<ImportController>(context, listen: false)
-        .importData(importedFile);
+    if (importedFile != null) {
+      Provider.of<ImportController>(context, listen: false)
+          .importData(importedFile);
+    }
   }
 }
 
