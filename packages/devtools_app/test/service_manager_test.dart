@@ -247,7 +247,9 @@ void main() async {
 
         // Service with 0 registrations.
         await expectLater(
-            serviceManager.callService('fakeMethod'), throwsException);
+          serviceManager.callService('fakeMethod', isolateId: 'isolate_id'),
+          throwsException,
+        );
 
         await env.tearDownEnvironment();
       }, timeout: const Timeout.factor(4));

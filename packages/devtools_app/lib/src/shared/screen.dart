@@ -236,7 +236,7 @@ bool shouldShowScreen(Screen screen) {
 
   if (screen.requiresLibrary != null) {
     if (serviceManager.isolateManager.mainIsolate.value == null ||
-        !serviceManager.libraryUriAvailableNow(screen.requiresLibrary)) {
+        !serviceManager.libraryUriAvailableNow(screen.requiresLibrary!)) {
       return false;
     }
   }

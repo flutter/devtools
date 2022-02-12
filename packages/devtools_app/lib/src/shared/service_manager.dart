@@ -502,7 +502,7 @@ class IsolateState {
 
   ValueListenable<bool?> get isPaused => _isPaused;
 
-  final IsolateRef? isolateRef;
+  final IsolateRef isolateRef;
 
   Future<Isolate?> get isolate => _isolate.future;
   Completer<Isolate?> _isolate = Completer();
@@ -537,7 +537,7 @@ class IsolateState {
 }
 
 class IsolateManager extends Disposer {
-  final _isolateStates = <IsolateRef?, IsolateState>{};
+  final _isolateStates = <IsolateRef, IsolateState>{};
   VmServiceWrapper? _service;
 
   final StreamController<IsolateRef?> _isolateCreatedController =
@@ -717,8 +717,8 @@ class IsolateManager extends Disposer {
       if (_selectedIsolate.value == null) {
         final isolate = await isolateState.isolate;
         if (service != _service) return null;
-        if (isolate.extensionRPCs != null) {
-          for (String extensionName in isolate.extensionRPCs!) {
+        if (isolate?.extensionRPCs != null) {
+          for (String extensionName in isolate!.extensionRPCs!) {
             if (extensions.isFlutterExtension(extensionName)) {
               return isolateState.isolateRef;
             }
@@ -727,7 +727,10 @@ class IsolateManager extends Disposer {
       }
     }
 
-    final IsolateRef? ref = _isolateStates.keys.firstWhere((IsolateRef? ref) {
+    // We need the cast to provide nullable orElse.
+    // ignore: unnecessary_cast
+    final IsolateRef? ref = (_isolateStates.keys as Iterable<IsolateRef?>)
+        .firstWhere((IsolateRef? ref) {
       // 'foo.dart:main()'
       return ref!.name!.contains(':main(');
     }, orElse: () => null);
@@ -773,7 +776,7 @@ class IsolateManager extends Disposer {
     _mainIsolate.value = null;
   }
 
-  Future<Isolate> getIsolateCached(IsolateRef? isolateRef) {
+  Future<Isolate?> getIsolateCached(IsolateRef isolateRef) {
     final isolateState =
         _isolateStates.putIfAbsent(isolateRef, () => IsolateState(isolateRef));
     return isolateState.isolate;
@@ -782,10 +785,6 @@ class IsolateManager extends Disposer {
   void _handleDebugEvent(Event event) {
     final isolate = event.isolate;
     final isolateState = _isolateStates[isolate]!;
-    assert(isolateState != null);
-    if (isolateState == null) {
-      return;
-    }
 
     switch (event.kind) {
       case EventKind.kResume:
@@ -953,7 +952,8 @@ class ServiceExtensionManager extends Disposer {
     _checkForFirstFrameStarted = false;
 
     final isolateRef = _isolateManager.mainIsolate.value;
-    final Isolate isolate = await _isolateManager.getIsolateCached(isolateRef);
+    final Isolate isolate =
+        (await _isolateManager.getIsolateCached(isolateRef!))!;
 
     await _registerMainIsolate(isolate, isolateRef);
   }
@@ -1096,7 +1096,8 @@ class ServiceExtensionManager extends Disposer {
 
     if (isolateRef != _isolateManager.mainIsolate.value) return;
 
-    final Isolate isolate = await _isolateManager.getIsolateCached(isolateRef);
+    final Isolate isolate =
+        (await _isolateManager.getIsolateCached(isolateRef))!;
     if (isolateRef != _isolateManager.mainIsolate.value) return;
 
     // Do not try to restore Dart IO extensions for a paused isolate.
@@ -1191,7 +1192,8 @@ class ServiceExtensionManager extends Disposer {
     }
 
     if (mainIsolate == null) return;
-    final Isolate isolate = await _isolateManager.getIsolateCached(mainIsolate);
+    final Isolate isolate =
+        (await _isolateManager.getIsolateCached(mainIsolate))!;
     if (_isolateManager.mainIsolate.value != mainIsolate) return;
 
     // Do not try to call Dart IO extensions for a paused isolate.
@@ -1333,7 +1335,7 @@ class ServiceExtensionManager extends Disposer {
     if (mainIsolateRef != null) {
       _checkForFirstFrameStarted = false;
       final mainIsolate =
-          await _isolateManager.getIsolateCached(mainIsolateRef);
+          (await _isolateManager.getIsolateCached(mainIsolateRef))!;
       await _registerMainIsolate(mainIsolate, mainIsolateRef);
     }
   }

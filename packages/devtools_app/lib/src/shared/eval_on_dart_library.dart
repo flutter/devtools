@@ -107,14 +107,14 @@ class EvalOnDartLibrary extends DisposableController
     }
 
     try {
-      final Isolate isolate =
+      final Isolate? isolate =
           await serviceManager.isolateManager.getIsolateCached(isolateRef);
       if (_currentRequestId != requestId) {
         // The initialize request is obsolete.
         return;
       }
       _isolate = isolate;
-      for (LibraryRef library in isolate.libraries!) {
+      for (LibraryRef library in isolate?.libraries ?? []) {
         if (libraryName == library.uri) {
           assert(!_libraryRef.isCompleted);
           _libraryRef.complete(library);
