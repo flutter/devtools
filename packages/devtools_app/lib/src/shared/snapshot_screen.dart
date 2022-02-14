@@ -12,10 +12,10 @@ import 'routing.dart';
 import 'screen.dart';
 import 'theme.dart';
 
-/// The screen in the app responsible for connecting to the Dart VM.
+/// The screen used for displaying a snapshot of imported data.
 ///
-/// We need to use this screen to get a guarantee that the app has a Dart VM
-/// available.
+/// This screen can be displayed both when DevTools is and is not connected to
+/// an app.
 class SnapshotScreenBody extends StatefulWidget {
   const SnapshotScreenBody(this.args, this.possibleScreens);
 
