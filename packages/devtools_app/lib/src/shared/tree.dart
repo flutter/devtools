@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -26,7 +24,7 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
     this.emptyTreeViewBuilder,
   });
 
-  final ValueListenable<List<T>> dataRootsListenable;
+  final ValueListenable<List<T>>? dataRootsListenable;
 
   /// Use [shrinkWrap] iff you need to place a TreeView inside a ListView or
   /// other container with unconstrained height.
@@ -36,25 +34,25 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   /// Defaults to false.
   final bool shrinkWrap;
 
-  final Widget Function(T, VoidCallback) dataDisplayProvider;
+  final Widget Function(T, VoidCallback)? dataDisplayProvider;
 
   /// Invoked when a tree node is selected. If [onItemExpanded] is not
   /// provided, this method will also be called when the expand button is
   /// tapped.
-  final FutureOr<void> Function(T) onItemSelected;
+  final FutureOr<void> Function(T)? onItemSelected;
 
   /// If provided, this method will be called when the expand button is tapped.
   /// Otherwise, [onItemSelected] will be invoked, if provided.
-  final FutureOr<void> Function(T) onItemExpanded;
+  final FutureOr<void> Function(T)? onItemExpanded;
 
-  final double itemExtent;
+  final double? itemExtent;
 
   /// Called on traversal of child node during [buildFlatList].
-  final void Function(T) onTraverse;
+  final void Function(T)? onTraverse;
 
   /// Builds a widget representing the empty tree. If [emptyTreeViewBuilder]
   /// is not provided, then an empty [SizedBox] will be built.
-  final Widget Function() emptyTreeViewBuilder;
+  final Widget Function()? emptyTreeViewBuilder;
 
   @override
   _TreeViewState<T> createState() => _TreeViewState<T>();
@@ -70,24 +68,24 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
   }
 
   void _updateTreeView() {
-    dataRoots = List.from(widget.dataRootsListenable.value);
+    dataRoots = List.from(widget.dataRootsListenable!.value);
     _updateItems();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (items.isEmpty) return _emptyTreeViewBuilder();
+    if (items!.isEmpty) return _emptyTreeViewBuilder();
     return ListView.builder(
-      itemCount: items.length,
+      itemCount: items!.length,
       itemExtent: widget.itemExtent,
       shrinkWrap: widget.shrinkWrap,
       physics: widget.shrinkWrap ? const ClampingScrollPhysics() : null,
       itemBuilder: (context, index) {
-        final item = items[index];
+        final T item = items![index];
         return TreeViewItem<T>(
           item,
           buildDisplay: (onPressed) =>
-              widget.dataDisplayProvider(item, onPressed),
+              widget.dataDisplayProvider!(item, onPressed),
           onItemSelected: _onItemSelected,
           onItemExpanded: _onItemExpanded,
         );
@@ -97,7 +95,7 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
 
   Widget _emptyTreeViewBuilder() {
     if (widget.emptyTreeViewBuilder != null) {
-      return widget.emptyTreeViewBuilder();
+      return widget.emptyTreeViewBuilder!();
     }
     return const SizedBox();
   }
@@ -109,7 +107,7 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
       item.toggleExpansion();
     }
     if (widget.onItemSelected != null) {
-      await widget.onItemSelected(item);
+      await widget.onItemSelected!(item);
     }
     _updateItems();
   }
@@ -119,9 +117,9 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
       item.toggleExpansion();
     }
     if (widget.onItemExpanded != null) {
-      await widget.onItemExpanded(item);
+      await widget.onItemExpanded!(item);
     } else if (widget.onItemSelected != null) {
-      await widget.onItemSelected(item);
+      await widget.onItemSelected!(item);
     }
     _updateItems();
   }
@@ -129,7 +127,7 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
   void _updateItems() {
     setState(() {
       items = buildFlatList(
-        dataRoots,
+        dataRoots!,
         onTraverse: widget.onTraverse,
       );
     });
@@ -146,10 +144,10 @@ class TreeViewItem<T extends TreeNode<T>> extends StatefulWidget {
 
   final T data;
 
-  final Widget Function(VoidCallback onPressed) buildDisplay;
+  final Widget Function(VoidCallback onPressed)? buildDisplay;
 
-  final void Function(T) onItemSelected;
-  final void Function(T) onItemExpanded;
+  final void Function(T)? onItemSelected;
+  final void Function(T)? onItemExpanded;
 
   @override
   _TreeViewItemState<T> createState() => _TreeViewItemState<T>();
@@ -179,7 +177,7 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
                     ),
                   )
                 : SizedBox(width: defaultIconSize),
-            Expanded(child: widget.buildDisplay(_onSelected)),
+            Expanded(child: widget.buildDisplay!(_onSelected)),
           ],
         ),
       ),
@@ -200,24 +198,24 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
   }
 
   void _onExpanded() {
-    widget?.onItemExpanded(widget.data);
+    widget.onItemExpanded!(widget.data);
     setExpanded(widget.data.isExpanded);
   }
 
   void _onSelected() {
-    widget?.onItemSelected(widget.data);
+    widget.onItemSelected!(widget.data);
     setExpanded(widget.data.isExpanded);
   }
 }
 
 mixin TreeMixin<T extends TreeNode<T>> {
-  List<T> dataRoots;
+  List<T>? dataRoots;
 
-  List<T> items;
+  List<T>? items;
 
   List<T> buildFlatList(
     List<T> roots, {
-    void onTraverse(T node),
+    void onTraverse(T node)?,
   }) {
     final flatList = <T>[];
     for (T root in roots) {
@@ -231,7 +229,6 @@ mixin TreeMixin<T extends TreeNode<T>> {
   }
 
   void traverse(T node, bool Function(T) callback) {
-    if (node == null) return;
     final shouldContinue = callback(node);
     if (shouldContinue) {
       for (var child in node.children) {
