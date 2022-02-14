@@ -6,8 +6,6 @@
 // other libraries in this package.
 // Utils, that do not have dependencies, should go to primitives/utils.dart.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -22,8 +20,8 @@ import 'notifications.dart';
 ///
 /// Shows a `successMessage` [Notification] on the passed in `context`.
 Future<void> copyToClipboard(
-  String data,
-  String successMessage,
+  String? data,
+  String? successMessage,
   BuildContext context,
 ) async {
   await Clipboard.setData(ClipboardData(
@@ -44,16 +42,15 @@ void debugLogger(String message) {
 }
 
 double scaleByFontFactor(double original) {
-  return (original * (ideTheme?.fontSizeFactor ?? 1.0)).roundToDouble();
+  return (original * (ideTheme.fontSizeFactor ?? 1.0)).roundToDouble();
 }
 
 bool isDense() {
-  return preferences != null && preferences.denseModeEnabled.value ||
-      isEmbedded();
+  return preferences.denseModeEnabled.value || isEmbedded();
 }
 
 bool isEmbedded() {
-  return ideTheme?.embed ?? false;
+  return ideTheme.embed ?? false;
 }
 
 mixin CompareMixin implements Comparable {
