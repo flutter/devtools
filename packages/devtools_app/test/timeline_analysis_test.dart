@@ -16,6 +16,7 @@ import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/primitives/trace_event.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/service_manager.dart';
+import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -29,9 +30,9 @@ void main() {
   FakeServiceManager fakeServiceManager;
   PerformanceController controller;
 
-  void _setUpServiceManagerWithTimeline(
+  Future<void> _setUpServiceManagerWithTimeline(
     Map<String, dynamic> timelineJson,
-  ) {
+  ) async {
     fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(
         timelineData: vm_service.Timeline.parse(timelineJson),
@@ -39,6 +40,8 @@ void main() {
     );
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+    when(fakeServiceManager.connectedApp.flutterVersionNow).thenReturn(
+        FlutterVersion.parse((await fakeServiceManager.flutterVersion).json));
     when(fakeServiceManager.connectedApp.isProfileBuild)
         .thenAnswer((_) => Future.value(true));
     when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
@@ -52,7 +55,7 @@ void main() {
 
   group('TimelineAnalysisHeader', () {
     setUp(() async {
-      _setUpServiceManagerWithTimeline(testTimelineJson);
+      await _setUpServiceManagerWithTimeline(testTimelineJson);
       frameAnalysisSupported = true;
     });
 
@@ -87,7 +90,7 @@ void main() {
     testWidgetsWithWindowSize('builds header content', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        _setUpServiceManagerWithTimeline({});
+        await _setUpServiceManagerWithTimeline({});
         await pumpHeader(tester);
         await tester.pumpAndSettle();
         expect(find.text('Timeline Events'), findsOneWidget);
@@ -100,7 +103,7 @@ void main() {
         'builds header content for selected frame', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        _setUpServiceManagerWithTimeline({});
+        await _setUpServiceManagerWithTimeline({});
 
         // This frame does not have UI jank.
         final frame0 = testFrame0.shallowCopy()
@@ -123,7 +126,7 @@ void main() {
         'builds header content for selected frame with jank', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        _setUpServiceManagerWithTimeline({});
+        await _setUpServiceManagerWithTimeline({});
 
         // This frame has UI jank.
         final frame0 = jankyFrame.shallowCopy();
@@ -149,7 +152,7 @@ void main() {
         'selecting analyze frame button opens tab', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        _setUpServiceManagerWithTimeline({});
+        await _setUpServiceManagerWithTimeline({});
 
         // This frame has UI jank.
         final frame0 = jankyFrame.shallowCopy();
@@ -180,7 +183,7 @@ void main() {
 
   group('TimelineAnalysisContainer', () {
     setUp(() async {
-      _setUpServiceManagerWithTimeline(testTimelineJson);
+      await _setUpServiceManagerWithTimeline(testTimelineJson);
     });
 
     Future<void> pumpPerformanceScreenBody(
@@ -208,7 +211,7 @@ void main() {
     testWidgetsWithWindowSize('builds header with search field', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        _setUpServiceManagerWithTimeline({});
+        await _setUpServiceManagerWithTimeline({});
         await pumpPerformanceScreenBody(tester);
         await tester.pumpAndSettle();
         expect(find.text('Timeline Events'), findsOneWidget);
@@ -221,7 +224,7 @@ void main() {
     testWidgetsWithWindowSize('can show help dialog', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        _setUpServiceManagerWithTimeline({});
+        await _setUpServiceManagerWithTimeline({});
         await pumpPerformanceScreenBody(tester);
         await tester.pumpAndSettle();
 
@@ -246,7 +249,7 @@ void main() {
     testWidgetsWithWindowSize('builds flame chart with no data', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        _setUpServiceManagerWithTimeline({});
+        await _setUpServiceManagerWithTimeline({});
         await pumpPerformanceScreenBody(tester, runAsync: true);
         await tester.pumpAndSettle();
         expect(find.byType(TimelineFlameChart), findsNothing);

@@ -47,14 +47,10 @@ flutter build web \
 # Delete the Flutter-generated service worker:
 rm build/web/flutter_service_worker.js
 # Rename the DevTools-specific service worker:
-mv build/web/devtools_service_worker.js ../devtools/build/service_worker.js
+mv build/web/devtools_service_worker.js build/web/service_worker.js
 
 # Ensure permissions are set correctly on canvaskit binaries.
 chmod 0755 build/web/canvaskit/canvaskit.*
 chmod 0755 build/web/canvaskit/profiling/canvaskit.*
 
-popd
-
-pushd packages/devtools
 flutter pub get
-popd

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 library service_extensions;
 
@@ -16,17 +16,17 @@ import 'theme.dart';
 class ToggleableServiceExtensionDescription<T>
     extends ServiceExtensionDescription {
   ToggleableServiceExtensionDescription._({
-    @required Widget enabledIcon,
-    Widget disabledIcon,
-    @required String extension,
-    @required String title,
-    @required T enabledValue,
-    @required T disabledValue,
-    @required String gaScreenName,
-    @required String gaItem,
-    @required String tooltip,
-    String description,
-    String tooltipUrl,
+    required Widget enabledIcon,
+    Widget? disabledIcon,
+    required String extension,
+    required String title,
+    required T enabledValue,
+    required T disabledValue,
+    required String? gaScreenName,
+    required String? gaItem,
+    required String tooltip,
+    String? description,
+    String? tooltipUrl,
     bool shouldCallOnAllIsolates = false,
     this.inverted = false,
   }) : super(
@@ -63,15 +63,15 @@ class ToggleableServiceExtensionDescription<T>
 
 class ServiceExtensionDescription<T> {
   ServiceExtensionDescription({
-    @required this.enabledIcon,
+    required this.enabledIcon,
     disabledIcon,
-    List<String> displayValues,
-    @required this.extension,
-    @required this.title,
-    @required this.values,
-    @required this.gaScreenName,
-    @required this.gaItem,
-    @required this.tooltip,
+    List<String>? displayValues,
+    required this.extension,
+    required this.title,
+    required this.values,
+    required this.gaScreenName,
+    required this.gaItem,
+    required this.tooltip,
     this.description,
     this.tooltipUrl,
     this.shouldCallOnAllIsolates = false,
@@ -91,9 +91,11 @@ class ServiceExtensionDescription<T> {
 
   final List<String> displayValues;
 
-  final String gaScreenName; // Analytics screen (screen name where item lives).
+  /// Analytics screen (screen name where item lives).
+  final String? gaScreenName;
 
-  final String gaItem; // Analytics item name (toggleable item's name).
+  /// Analytics item name (toggleable item's name).
+  final String? gaItem;
 
   String get gaItemTooltipLink => '${gaItem}TooltipLink';
 
@@ -101,9 +103,9 @@ class ServiceExtensionDescription<T> {
 
   final String tooltip;
 
-  final String description;
+  final String? description;
 
-  final String tooltipUrl;
+  final String? tooltipUrl;
 }
 
 final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
@@ -531,7 +533,7 @@ final Set<String> _unsafeBeforeFirstFrameFlutterExtensions =
   slowAnimations,
 ].map((extension) => extension.extension).toSet();
 
-bool isUnsafeBeforeFirstFlutterFrame(String extensionName) {
+bool isUnsafeBeforeFirstFlutterFrame(String? extensionName) {
   return _unsafeBeforeFirstFrameFlutterExtensions.contains(extensionName);
 }
 
