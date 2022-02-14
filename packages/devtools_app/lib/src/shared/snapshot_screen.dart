@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 
@@ -63,7 +61,7 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
 
   void _initScreen() {
     _screen = widget.possibleScreens.firstWhereOrNull(
-      (s) => s.screenId == widget.args?.screenId,
+      (s) => s.screenId == widget.args.screenId,
     );
   }
 
@@ -97,7 +95,7 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
 
   Widget _buildSnapshotError() {
     return CenteredMessage(
-        'Cannot load snapshot for screen \'${widget.args?.screenId}\'');
+        'Cannot load snapshot for screen \'${widget.args.screenId}\'');
   }
 
   void reset() {
