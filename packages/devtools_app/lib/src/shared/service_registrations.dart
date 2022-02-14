@@ -12,15 +12,15 @@ import 'theme.dart';
 
 class RegisteredServiceDescription {
   const RegisteredServiceDescription._({
-    this.service,
-    this.title,
+    required this.service,
+    required this.title,
     this.icon,
     this.gaScreenName,
     this.gaItem,
   });
 
-  final String? service;
-  final String? title;
+  final String service;
+  final String title;
   final Widget? icon;
   final String? gaScreenName;
   final String? gaItem;
