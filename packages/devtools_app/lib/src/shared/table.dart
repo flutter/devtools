@@ -40,7 +40,7 @@ typedef IndexedScrollableWidgetBuilder = Widget Function(
 );
 
 typedef TableKeyEventHandler = KeyEventResult Function(RawKeyEvent event,
-    ScrollController? scrollController, BoxConstraints constraints);
+    ScrollController scrollController, BoxConstraints constraints);
 
 enum ScrollKind { up, down, parent }
 
@@ -64,7 +64,7 @@ class FlatTable<T> extends StatefulWidget {
     this.searchMatchesNotifier,
     this.activeSearchMatchNotifier,
     this.selectionNotifier,
-  })  : super(key: key);
+  }) : super(key: key);
 
   final List<ColumnData<T>?> columns;
 
@@ -210,7 +210,7 @@ class FlatTableState<T> extends State<FlatTable<T?>>
           unconstrainedFound++;
         }
       }
-      widths.add(width!);
+      widths.add(width);
     }
     assert(unconstrainedCount == unconstrainedFound);
     return widths;
@@ -275,7 +275,7 @@ class FlatTableState<T> extends State<FlatTable<T?>>
         widget.onSortChanged!(
           column as ColumnData<T>,
           direction,
-          secondarySortColumn: secondarySortColumn as ColumnData<T*>?,
+          secondarySortColumn: secondarySortColumn as ColumnData<T>?,
         );
       }
     });
@@ -328,7 +328,7 @@ class Selection<T> {
 /// If [dataRoots.length] > 1, there are multiple trees in this tree table. In
 /// this case, tree table operations (expand all, collapse all, sort, etc.) will
 /// be applied to every tree.
-class TreeTable<T extends TreeNode<T>?> extends StatefulWidget {
+class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   TreeTable({
     Key? key,
     required this.columns,
@@ -373,7 +373,7 @@ class TreeTable<T extends TreeNode<T>?> extends StatefulWidget {
   TreeTableState<T> createState() => TreeTableState<T>();
 }
 
-class TreeTableState<T extends TreeNode<T>?> extends State<TreeTable<T?>>
+class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     with TickerProviderStateMixin, TreeMixin<T?>, AutoDisposeMixin
     implements SortableTable<T> {
   /// The number of items to show when animating out the tree table.
@@ -393,8 +393,8 @@ class TreeTableState<T extends TreeNode<T>?> extends State<TreeTable<T?>>
   void initState() {
     super.initState();
     _initData();
-    rootsExpanded =
-        List.generate(dataRoots!.length, (index) => dataRoots![index].isExpanded);
+    rootsExpanded = List.generate(
+        dataRoots!.length, (index) => dataRoots![index]!.isExpanded);
     _updateItems();
     _focusNode = FocusNode(debugLabel: 'table');
     autoDisposeFocusNode(_focusNode);
@@ -414,7 +414,7 @@ class TreeTableState<T extends TreeNode<T>?> extends State<TreeTable<T?>>
 
   @override
   void didUpdateWidget(TreeTable oldWidget) {
-    super.didUpdateWidget(oldWidget as TreeTable<T*>);
+    super.didUpdateWidget(oldWidget as TreeTable<T>);
 
     if (widget == oldWidget) return;
 
@@ -432,14 +432,14 @@ class TreeTableState<T extends TreeNode<T>?> extends State<TreeTable<T?>>
         !collectionEquals(widget.dataRoots, oldWidget.dataRoots)) {
       _initData();
     }
-    rootsExpanded =
-        List.generate(dataRoots!.length, (index) => dataRoots![index].isExpanded);
+    rootsExpanded = List.generate(
+        dataRoots!.length, (index) => dataRoots![index]!.isExpanded);
     _updateItems();
   }
 
   void _initData() {
     dataRoots = List.generate(widget.dataRoots.length, (index) {
-      final T? root = widget.dataRoots[index];
+      final T root = widget.dataRoots[index];
       if (widget.autoExpandRoots) {
         root.expand();
       }
@@ -571,9 +571,9 @@ class TreeTableState<T extends TreeNode<T>?> extends State<TreeTable<T?>>
 
   Widget _buildRow(
     BuildContext context,
-    LinkedScrollControllerGroup linkedScrollControllerGroup,
+    LinkedScrollControllerGroup? linkedScrollControllerGroup,
     int index,
-    List<double> columnWidths,
+    List<double>? columnWidths,
   ) {
     Widget rowForNode(T node) {
       node.index = index;
@@ -601,7 +601,7 @@ class TreeTableState<T extends TreeNode<T>?> extends State<TreeTable<T?>>
       );
     }
 
-    final T? node = items![index];
+    final T node = items![index]!;
     if (animatingChildrenSet.contains(node)) return const SizedBox();
     return rowForNode(node);
   }
@@ -815,7 +815,7 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
   LinkedScrollControllerGroup? _linkedHorizontalScrollControllerGroup;
   ColumnData<T?>? sortColumn;
   SortDirection? sortDirection;
-  ScrollController? scrollController;
+  late ScrollController scrollController;
 
   @override
   void initState() {
@@ -831,7 +831,7 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
 
   @override
   void didUpdateWidget(_Table oldWidget) {
-    super.didUpdateWidget(oldWidget as _Table<T*>);
+    super.didUpdateWidget(oldWidget as _Table<T>);
 
     cancelListeners();
 
@@ -847,7 +847,7 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
           final newPos = selectedDisplayRow * defaultRowHeight;
 
           // TODO(terry): Should animate factor out _moveSelection to reuse here.
-          scrollController!.jumpTo(newPos);
+          scrollController.jumpTo(newPos);
         }
       });
     });
@@ -870,10 +870,10 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
 
     if (index != -1) {
       final y = index * defaultRowHeight;
-      final indexInView = y > scrollController!.offset &&
-          y < scrollController!.offset + scrollController!.position.extentInside;
+      final indexInView = y > scrollController.offset &&
+          y < scrollController.offset + scrollController.position.extentInside;
       if (!indexInView) {
-        await scrollController!.animateTo(
+        await scrollController.animateTo(
           index * defaultRowHeight,
           duration: defaultDuration,
           curve: defaultCurve,
@@ -893,7 +893,7 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
 
     var totalVisibleRowsAboveNode = 0;
     while (!scanNode.isRoot) {
-      final rowsAbove = parent.children.indexWhere((node) {
+      final int rowsAbove = parent.children.indexWhere((node) {
         return scanNode == node;
       });
 
@@ -910,7 +910,7 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
         if (sibling.isExpanded) {
           // Count of a parent node's children and parent, if expanded,
           // above selected node.
-          totalVisibleRowsAboveNode += sibling.children.length + 1;
+          totalVisibleRowsAboveNode += (sibling.children.length as int) + 1;
         }
       }
 
@@ -924,7 +924,7 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
 
   @override
   void dispose() {
-    scrollController!.dispose();
+    scrollController.dispose();
     super.dispose();
   }
 
@@ -951,8 +951,8 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     // If we're at the end already, scroll to expose the new content.
     if (widget.autoScrollContent) {
-      if (scrollController!.hasClients && scrollController!.atScrollBottom) {
-        scrollController!.autoScrollToBottom();
+      if (scrollController.hasClients && scrollController.atScrollBottom) {
+        scrollController.autoScrollToBottom();
       }
     }
 
