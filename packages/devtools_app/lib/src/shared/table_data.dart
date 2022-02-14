@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 
 import '../primitives/trees.dart';
@@ -29,7 +30,7 @@ abstract class TableDataClient<T> {
   /// The way the columns are sorted have changed.
   ///
   /// Update the UI to reflect the new state.
-  void onColumnSortChanged(ColumnData<T> column, SortDirection sortDirection);
+  void onColumnSortChanged(ColumnData<T>? column, SortDirection? sortDirection);
 
   /// Selects by index. Note: This is index of the row as it's rendered
   /// and not necessarily for rows[] since it may be being rendered in reverse.
@@ -53,7 +54,7 @@ class TableData<T> extends Object {
     client?.setState(modifyState);
   }
 
-  TableDataClient<T> client;
+  TableDataClient<T?>? client;
 
   bool _hasPendingRebuild = false;
 
@@ -63,11 +64,11 @@ class TableData<T> extends Object {
 
   List<T> data = [];
 
-  int get rowCount => data?.length ?? 0;
+  int get rowCount => data.length;
 
-  ColumnData<T> _sortColumn;
+  ColumnData<T?>? _sortColumn;
 
-  SortDirection _sortDirection;
+  SortDirection? _sortDirection;
 
   set sortColumn(ColumnData<T> column) {
     _sortColumn = column;
@@ -115,9 +116,8 @@ class TableData<T> extends Object {
     client?.onSetRows();
 
     if (_sortColumn == null) {
-      final ColumnData<T> column = _columns.firstWhere(
-          (ColumnData<T> c) => c.supportsSorting,
-          orElse: () => null);
+      final ColumnData<T>? column =
+          _columns.firstWhereOrNull((ColumnData<T> c) => c.supportsSorting);
       if (column != null) {
         sortColumn = column;
       }
@@ -164,7 +164,7 @@ class TableData<T> extends Object {
   }
 
   void _doSort() {
-    final ColumnData<T> column = _sortColumn;
+    final ColumnData<T?>? column = _sortColumn;
     final int direction = _sortDirection == SortDirection.ascending ? 1 : -1;
 
     client?.onColumnSortChanged(column, _sortDirection);
@@ -172,22 +172,22 @@ class TableData<T> extends Object {
     _sortData(column, direction);
   }
 
-  void _sortData(ColumnData column, int direction) {
-    data.sort((T a, T b) => _compareData(a, b, column, direction));
+  void _sortData(ColumnData? column, int direction) {
+    data.sort((T a, T b) => _compareData(a, b, column!, direction));
   }
 
   int _compareData(T a, T b, ColumnData column, int direction) {
     return column.compare(a, b) * direction;
   }
 
-  T get selectedObject => _selectedObject;
-  T _selectedObject;
+  T? get selectedObject => _selectedObject;
+  T? _selectedObject;
 
-  int get selectedObjectIndex => _selectedObjectIndex;
-  int _selectedObjectIndex;
+  int? get selectedObjectIndex => _selectedObjectIndex;
+  int? _selectedObjectIndex;
 
   void setSelection(T object, int index) {
-    assert(index == null || data[index] == object);
+    assert(data[index] == object);
     _selectedObjectIndex = index;
     if (selectedObject != object) {
       _selectedObject = object;
@@ -203,7 +203,7 @@ class TableData<T> extends Object {
     }
 
     if (_sortColumn == column) {
-      _sortDirection = _sortDirection.reverse();
+      _sortDirection = _sortDirection!.reverse();
     } else {
       sortColumn = column;
     }
@@ -223,9 +223,9 @@ class TableData<T> extends Object {
 /// collapsed.
 ///
 /// A TreeTableData must have exactly one column that is a [TreeColumnData].
-class TreeTableData<T extends TreeNode<T>> extends TableData<T> {
+class TreeTableData<T extends TreeNode<T>> extends TableData<T?> {
   @override
-  void addColumn(ColumnData<T> column) {
+  void addColumn(ColumnData<T?> column) {
     // Avoid adding multiple TreeColumnData columns.
     assert(column is! TreeColumnData<T> ||
         _columns.whereType<TreeColumnData>().isEmpty);
@@ -235,13 +235,13 @@ class TreeTableData<T extends TreeNode<T>> extends TableData<T> {
   @override
   void handleLeftKey() {
     if (_selectedObject != null) {
-      if (_selectedObject.isExpanded) {
+      if (_selectedObject!.isExpanded) {
         // Collapse node and preserve selection.
-        collapseNode(_selectedObject);
+        collapseNode(_selectedObject!);
       } else {
         // Select the node's parent.
-        final parentIndex = data.indexOf(_selectedObject.parent);
-        if (parentIndex != null && parentIndex != -1) {
+        final parentIndex = data.indexOf(_selectedObject!.parent);
+        if (parentIndex != -1) {
           client?.selectByIndex(parentIndex);
         }
       }
@@ -251,13 +251,13 @@ class TreeTableData<T extends TreeNode<T>> extends TableData<T> {
   @override
   void handleRightKey() {
     if (_selectedObject != null) {
-      if (_selectedObject.isExpanded) {
+      if (_selectedObject!.isExpanded) {
         // Select the node's first child.
-        final firstChildIndex = data.indexOf(_selectedObject.children.first);
+        final firstChildIndex = data.indexOf(_selectedObject!.children.first);
         client?.selectByIndex(firstChildIndex);
-      } else if (_selectedObject.isExpandable) {
+      } else if (_selectedObject!.isExpandable) {
         // Expand node and preserve selection.
-        expandNode(_selectedObject);
+        expandNode(_selectedObject!);
       } else {
         // The node is not expandable. Select the next node in range.
         final nextIndex = data.indexOf(_selectedObject) + 1;
@@ -269,20 +269,20 @@ class TreeTableData<T extends TreeNode<T>> extends TableData<T> {
   }
 
   @override
-  void _sortData(ColumnData column, int direction) {
-    final List<T> sortedData = [];
+  void _sortData(ColumnData? column, int direction) {
+    final List<T?> sortedData = [];
 
-    void _addToSortedData(T dataObject) {
+    void _addToSortedData(T? dataObject) {
       sortedData.add(dataObject);
-      if (dataObject.isExpanded) {
+      if (dataObject!.isExpanded) {
         dataObject.children
-          ..sort((T a, T b) => _compareData(a, b, column, direction))
+          ..sort((T a, T b) => _compareData(a, b, column!, direction))
           ..forEach(_addToSortedData);
       }
     }
 
-    data.where((dataObject) => dataObject.level == 0).toList()
-      ..sort((T a, T b) => _compareData(a, b, column, direction))
+    data.where((dataObject) => dataObject!.level == 0).toList()
+      ..sort((T? a, T? b) => _compareData(a, b, column!, direction))
       ..forEach(_addToSortedData);
 
     data = sortedData;
@@ -329,10 +329,9 @@ abstract class ColumnData<T> {
   ColumnData(
     this.title, {
     this.titleTooltip,
-    @required this.fixedWidthPx,
+    required double this.fixedWidthPx,
     this.alignment = ColumnAlignment.left,
-  })  : assert(fixedWidthPx != null),
-        minWidthPx = null;
+  }) : minWidthPx = null;
 
   ColumnData.wide(
     this.title, {
@@ -343,12 +342,12 @@ abstract class ColumnData<T> {
 
   final String title;
 
-  final String titleTooltip;
+  final String? titleTooltip;
 
   /// Width of the column expressed as a fixed number of pixels.
-  final double fixedWidthPx;
+  final double? fixedWidthPx;
 
-  final double minWidthPx;
+  final double? minWidthPx;
 
   /// How much to indent the data object by.
   ///
@@ -363,7 +362,7 @@ abstract class ColumnData<T> {
 
   int compare(T a, T b) {
     final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    final Comparable? valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 
@@ -371,14 +370,14 @@ abstract class ColumnData<T> {
   dynamic getValue(T dataObject);
 
   /// Get the cell's display value from the given [dataObject].
-  String getDisplayValue(T dataObject) => getValue(dataObject).toString();
+  String? getDisplayValue(T dataObject) => getValue(dataObject).toString();
 
   // TODO(kenz): this isn't hooked up to the table elements. Do this.
   /// Get the cell's tooltip value from the given [dataObject].
-  String getTooltip(T dataObject) => getDisplayValue(dataObject);
+  String? getTooltip(T dataObject) => getDisplayValue(dataObject);
 
   /// Get the cell's text color from the given [dataObject].
-  Color getTextColor(T dataObject) => null;
+  Color? getTextColor(T dataObject) => null;
 
   @override
   String toString() => title;
