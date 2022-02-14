@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/foundation.dart';
 
 import 'globals.dart';
@@ -13,7 +11,7 @@ void generateDevToolsTitle() {
     _devToolsTitle.value = 'DevTools for Flutter & Dart';
     return;
   }
-  _devToolsTitle.value = serviceManager.connectedApp.isFlutterAppNow
+  _devToolsTitle.value = serviceManager.connectedApp!.isFlutterAppNow!
       ? 'Flutter DevTools'
       : 'Dart DevTools';
 }
