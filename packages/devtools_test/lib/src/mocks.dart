@@ -187,7 +187,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   Future<Response> get flutterVersion {
     return Future.value(Response.parse({
       'type': 'Success',
-      'frameworkVersion': '1.19.0-2.0.pre.59',
+      'frameworkVersion': '2.10.0',
       'channel': 'unknown',
       'repositoryUrl': 'unknown source',
       'frameworkRevision': '74432fa91c8ffbc555ffc2701309e8729380a012',
@@ -668,6 +668,10 @@ class MockIsolate extends Mock implements Isolate {}
 
 class MockObj extends Mock implements Obj {}
 
+// TODO(kenz): make it easier to mock a connected app by adding a constructor
+// that will override the public getters on the class (e.g. isFlutterAppNow,
+// isProfileBuildNow, etc.). Do this after devtools_app is migrated to null
+// safety so that we can use null-safety here.
 class MockConnectedApp extends Mock implements ConnectedApp {}
 
 class FakeConnectedApp extends Mock implements ConnectedApp {}
