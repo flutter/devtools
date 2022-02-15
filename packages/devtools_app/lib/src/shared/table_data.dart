@@ -362,7 +362,7 @@ abstract class ColumnData<T> {
 
   int compare(T a, T b) {
     final Comparable valueA = getValue(a);
-    final Comparable? valueB = getValue(b);
+    final Comparable valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 
@@ -370,11 +370,11 @@ abstract class ColumnData<T> {
   dynamic getValue(T dataObject);
 
   /// Get the cell's display value from the given [dataObject].
-  String? getDisplayValue(T dataObject) => getValue(dataObject).toString();
+  String getDisplayValue(T dataObject) => getValue(dataObject).toString();
 
   // TODO(kenz): this isn't hooked up to the table elements. Do this.
   /// Get the cell's tooltip value from the given [dataObject].
-  String? getTooltip(T dataObject) => getDisplayValue(dataObject);
+  String getTooltip(T dataObject) => getDisplayValue(dataObject);
 
   /// Get the cell's text color from the given [dataObject].
   Color? getTextColor(T dataObject) => null;
