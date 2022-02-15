@@ -23,7 +23,6 @@ import '../shared/screen.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';
 import '../ui/icons.dart';
-import '../ui/tab.dart';
 import 'memory_android_chart.dart' as android;
 import 'memory_charts.dart';
 import 'memory_controller.dart';
@@ -75,11 +74,6 @@ class MemoryScreen extends Screen {
 
 class MemoryBody extends StatefulWidget {
   const MemoryBody();
-
-  static final List<Tab> memoryTabs = [
-    DevToolsTab(text: 'Analysis'),
-    DevToolsTab(text: 'Allocations'),
-  ];
 
   @override
   MemoryBodyState createState() => MemoryBodyState();

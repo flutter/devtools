@@ -83,10 +83,17 @@ class AppSizeBody extends StatefulWidget {
 
 class _AppSizeBodyState extends State<AppSizeBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  static final diffTab =
-      DevToolsTab(text: 'Diff', key: AppSizeScreen.diffTabKey);
-  static final analysisTab =
-      DevToolsTab(text: 'Analysis', key: AppSizeScreen.analysisTabKey);
+  static const _gaPrefix = 'appSizeTab';
+  static final diffTab = DevToolsTab.create(
+    tabName: 'Diff',
+    gaPrefix: _gaPrefix,
+    key: AppSizeScreen.diffTabKey,
+  );
+  static final analysisTab = DevToolsTab.create(
+    tabName: 'Analysis',
+    gaPrefix: _gaPrefix,
+    key: AppSizeScreen.analysisTabKey,
+  );
   static final tabs = [analysisTab, diffTab];
 
   AppSizeController controller;

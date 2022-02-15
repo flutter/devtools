@@ -11,7 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../primitives/listenable.dart';
-import '../ui/tab.dart';
 import 'globals.dart';
 import 'scaffold.dart';
 import 'theme.dart';
@@ -148,7 +147,7 @@ abstract class Screen {
       valueListenable:
           serviceManager.errorBadgeManager.errorCountNotifier(screenId),
       builder: (context, count, _) {
-        final tab = DevToolsTab(
+        final tab = Tab(
           key: tabKey,
           child: Row(
             children: <Widget>[
