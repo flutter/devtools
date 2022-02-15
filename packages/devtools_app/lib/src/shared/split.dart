@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -22,23 +20,22 @@ import '../primitives/utils.dart';
 class Split extends StatefulWidget {
   /// Builds a split oriented along [axis].
   Split({
-    Key key,
-    @required this.axis,
-    @required this.children,
-    @required this.initialFractions,
+    Key? key,
+    required this.axis,
+    required this.children,
+    required this.initialFractions,
     this.minSizes,
     this.splitters,
-  })  : assert(axis != null),
-        assert(children != null && children.length >= 2),
-        assert(initialFractions != null && initialFractions.length >= 2),
+  })  : assert(children.length >= 2),
+        assert(initialFractions.length >= 2),
         assert(children.length == initialFractions.length),
         super(key: key) {
     _verifyFractionsSumTo1(initialFractions);
     if (minSizes != null) {
-      assert(minSizes.length == children.length);
+      assert(minSizes!.length == children.length);
     }
     if (splitters != null) {
-      assert(splitters.length == children.length - 1);
+      assert(splitters!.length == children.length - 1);
     }
   }
 
@@ -63,12 +60,12 @@ class Split extends StatefulWidget {
   final List<double> initialFractions;
 
   /// The minimum size each child is allowed to be.
-  final List<double> minSizes;
+  final List<double>? minSizes;
 
   /// Splitter widgets to divide [children].
   ///
   /// If this is null, a default splitter will be used to divide [children].
-  final List<PreferredSizeWidget> splitters;
+  final List<PreferredSizeWidget>? splitters;
 
   /// The key passed to the divider between children[index] and
   /// children[index + 1].
@@ -89,7 +86,7 @@ class Split extends StatefulWidget {
 }
 
 class _SplitState extends State<Split> {
-  List<double> fractions;
+  late final List<double> fractions;
 
   bool get isHorizontal => widget.axis == Axis.horizontal;
 
@@ -116,16 +113,16 @@ class _SplitState extends State<Split> {
       if (widget.minSizes == null) return 0.0;
 
       double totalMinSize = 0;
-      for (var minSize in widget.minSizes) {
+      for (var minSize in widget.minSizes!) {
         totalMinSize += minSize;
       }
 
       // Reduce the min sizes gracefully if the total required min size for all
       // children is greater than the available size for children.
       if (totalMinSize > availableSize) {
-        return widget.minSizes[index] * availableSize / totalMinSize;
+        return widget.minSizes![index] * availableSize / totalMinSize;
       } else {
-        return widget.minSizes[index];
+        return widget.minSizes![index];
       }
     }
 
@@ -269,7 +266,7 @@ class _SplitState extends State<Split> {
               // drag action triggers which is't ideal but isn't a launch blocker.
               dragStartBehavior: DragStartBehavior.down,
               child: widget.splitters != null
-                  ? widget.splitters[i]
+                  ? widget.splitters![i]
                   : DefaultSplitter(isHorizontal: isHorizontal),
             ),
           ),
@@ -288,7 +285,7 @@ class _SplitState extends State<Split> {
       return numSplitters * DefaultSplitter.splitterWidth;
     } else {
       var totalSize = 0.0;
-      for (var splitter in widget.splitters) {
+      for (var splitter in widget.splitters!) {
         totalSize += isHorizontal
             ? splitter.preferredSize.width
             : splitter.preferredSize.height;
@@ -299,7 +296,7 @@ class _SplitState extends State<Split> {
 }
 
 class DefaultSplitter extends StatelessWidget {
-  const DefaultSplitter({@required this.isHorizontal});
+  const DefaultSplitter({required this.isHorizontal});
 
   static const double iconSize = 24.0;
   static const double splitterWidth = 12.0;
@@ -309,7 +306,7 @@ class DefaultSplitter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Transform.rotate(
-      angle: isHorizontal ? degToRad(90.0) : degToRad(0.0),
+      angle: isHorizontal ? degToRad(90.0) as double : degToRad(0.0) as double,
       child: Align(
         widthFactor: 0.5,
         heightFactor: 0.5,
