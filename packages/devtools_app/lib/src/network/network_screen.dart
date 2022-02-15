@@ -290,28 +290,27 @@ class _NetworkProfilerBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<NetworkRequest, List<NetworkRequest>>(
-      firstListenable: controller.selectedRequest,
-      secondListenable: controller.filteredData,
-      builder: (context, selectedRequest, filteredRequests, _) {
-        return GestureDetector(
-          onTap: () => FocusScope.of(context)?.unfocus(),
-          child: Split(
-            initialFractions: const [0.5, 0.5],
-            minSizes: const [200, 200],
-            axis: Axis.horizontal,
-            children: [
-              NetworkRequestsTable(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context)?.unfocus(),
+      child: Split(
+        initialFractions: const [0.5, 0.5],
+        minSizes: const [200, 200],
+        axis: Axis.horizontal,
+        children: [
+          ValueListenableBuilder(
+            valueListenable: controller.filteredData,
+            builder: (context, filteredRequests, _) {
+              return NetworkRequestsTable(
                 networkController: controller,
                 requests: filteredRequests,
                 searchMatchesNotifier: controller.searchMatches,
                 activeSearchMatchNotifier: controller.activeSearchMatch,
-              ),
-              NetworkRequestInspector(selectedRequest),
-            ],
+              );
+            },
           ),
-        );
-      },
+          NetworkRequestInspector(controller),
+        ],
+      ),
     );
   }
 }
