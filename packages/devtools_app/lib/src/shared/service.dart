@@ -26,8 +26,10 @@ Future<VmServiceWrapper> _connectWithSse(
   final client = SseClient('$uri');
   final Stream<String>? stream =
       client.stream?.asBroadcastStream() as Stream<String>?;
+
+  assert(stream != null);
   final service = VmServiceWrapper.fromNewVmService(
-    stream,
+    stream!,
     client.sink!.add,
     uri,
   );
@@ -38,7 +40,7 @@ Future<VmServiceWrapper> _connectWithSse(
   }));
   serviceCompleter.complete(service);
 
-  unawaited(stream?.drain().catchError(onError));
+  unawaited(stream.drain().catchError(onError));
   return serviceCompleter.future;
 }
 
