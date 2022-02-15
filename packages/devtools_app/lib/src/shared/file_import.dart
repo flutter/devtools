@@ -227,6 +227,10 @@ Future<DevToolsJsonFile?> importFileFromPicker({
   final lastModifiedTime = await file.lastModified();
   // TODO(kenz): this will need to be modified if we need to support other file
   // extensions than .json. We will need to return a more generic file type.
+
+  // We need this assert
+  // ignore: unnecessary_null_comparison
+  assert(file.name != null);
   return DevToolsJsonFile(
     data: data,
     name: file.name,
