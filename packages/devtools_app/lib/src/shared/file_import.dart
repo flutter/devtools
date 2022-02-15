@@ -228,7 +228,7 @@ Future<DevToolsJsonFile?> importFileFromPicker({
   // TODO(kenz): this will need to be modified if we need to support other file
   // extensions than .json. We will need to return a more generic file type.
 
-  // We need this assert
+  // We need this assert to handle older version of the dependency in Google3.
   // ignore: unnecessary_null_comparison
   assert(file.name != null);
   return DevToolsJsonFile(
