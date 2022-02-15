@@ -59,7 +59,7 @@ class VmServiceWrapper implements VmService {
   }
 
   Uri? get connectedUri => _connectedUri;
-  final Uri? _connectedUri;
+  final Uri _connectedUri;
 
   final bool trackFutures;
   final Map<String, Future<Success>> _activeStreams = {};
