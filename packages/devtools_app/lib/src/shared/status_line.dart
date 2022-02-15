@@ -161,7 +161,7 @@ class StatusLine extends StatelessWidget {
             children: [
               ValueListenableBuilder(
                 valueListenable: serviceManager.deviceBusy,
-                builder: (context, dynamic isBusy, _) {
+                builder: (context, bool isBusy, _) {
                   return SizedBox(
                     width: smallProgressSize,
                     height: smallProgressSize,
