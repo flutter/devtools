@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 
 import 'common_widgets.dart';
@@ -12,10 +11,10 @@ import 'routing.dart';
 import 'screen.dart';
 import 'theme.dart';
 
-/// The screen in the app responsible for connecting to the Dart VM.
+/// The screen used for displaying a snapshot of imported data.
 ///
-/// We need to use this screen to get a guarantee that the app has a Dart VM
-/// available.
+/// This screen can be displayed both when DevTools is and is not connected to
+/// an app.
 class SnapshotScreenBody extends StatefulWidget {
   const SnapshotScreenBody(this.args, this.possibleScreens);
 
@@ -38,7 +37,7 @@ class SnapshotScreenBody extends StatefulWidget {
 }
 
 class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
-  Screen _screen;
+  Screen? _screen;
 
   @override
   void initState() {
@@ -61,9 +60,8 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
   }
 
   void _initScreen() {
-    _screen = widget.possibleScreens.firstWhere(
-      (s) => s.screenId == widget.args?.screenId,
-      orElse: () => null,
+    _screen = widget.possibleScreens.firstWhereOrNull(
+      (s) => s.screenId == widget.args.screenId,
     );
   }
 
@@ -89,7 +87,7 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
         const SizedBox(height: denseRowSpacing),
         Expanded(
           child:
-              _screen != null ? _screen.build(context) : _buildSnapshotError(),
+              _screen != null ? _screen!.build(context) : _buildSnapshotError(),
         ),
       ],
     );
@@ -97,7 +95,7 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
 
   Widget _buildSnapshotError() {
     return CenteredMessage(
-        'Cannot load snapshot for screen \'${widget.args?.screenId}\'');
+        'Cannot load snapshot for screen \'${widget.args.screenId}\'');
   }
 
   void reset() {
@@ -111,7 +109,7 @@ class _SnapshotScreenBodyState extends State<SnapshotScreenBody> {
 class SnapshotArguments {
   SnapshotArguments(this.screenId);
 
-  SnapshotArguments.fromArgs(Map<String, String> args) : this(args['screen']);
+  SnapshotArguments.fromArgs(Map<String, String?> args) : this(args['screen']);
 
-  final String screenId;
+  final String? screenId;
 }

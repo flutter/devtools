@@ -14,6 +14,7 @@ import 'common_widgets.dart';
 import 'globals.dart';
 import 'screen.dart';
 import 'theme.dart';
+import 'version.dart';
 
 const _runInProfileModeDocsUrl =
     'https://flutter.dev/docs/testing/ui-performance#run-in-profile-mode';
@@ -412,6 +413,63 @@ For the most accurate absolute memory stats, relaunch your application with the 
         ),
       ],
       screenId: screenId,
+    );
+  }
+}
+
+class UnsupportedFlutterVersionWarning {
+  const UnsupportedFlutterVersionWarning({
+    required this.screenId,
+    required this.currentFlutterVersion,
+    required this.supportedFlutterVersion,
+  });
+
+  final String screenId;
+
+  final FlutterVersion currentFlutterVersion;
+
+  final SemanticVersion supportedFlutterVersion;
+
+  BannerMessage build(BuildContext context) {
+    return _BannerWarning(
+      key: Key('UnsupportedFlutterVersionWarning - $screenId'),
+      textSpans: [
+        TextSpan(
+          text: 'This version of DevTools expects the connected app to be run'
+              ' on Flutter >= $supportedFlutterVersion, but the connected app'
+              ' is running on Flutter $currentFlutterVersion. Some'
+              ' functionality may not work. If this causes issues, try'
+              ' upgrading your Flutter version.',
+          style: TextStyle(
+            color: _BannerWarning.foreground,
+            fontSize: defaultFontSize,
+          ),
+        ),
+      ],
+      screenId: screenId,
+    );
+  }
+}
+
+void maybePushUnsupportedFlutterVersionWarning(
+  BuildContext context,
+  String screenId, {
+  required SemanticVersion supportedFlutterVersion,
+}) {
+  final isFlutterApp = serviceManager.connectedApp?.isFlutterAppNow;
+  if (offlineController.offlineMode.value ||
+      isFlutterApp == null ||
+      !isFlutterApp) {
+    return;
+  }
+  final currentVersion = serviceManager.connectedApp!.flutterVersionNow!;
+  if (currentVersion < supportedFlutterVersion) {
+    Provider.of<BannerMessagesController>(context).addMessage(
+      UnsupportedFlutterVersionWarning(
+        screenId: screenId,
+        currentFlutterVersion: currentVersion,
+        supportedFlutterVersion: supportedFlutterVersion,
+      ).build(context),
     );
   }
 }

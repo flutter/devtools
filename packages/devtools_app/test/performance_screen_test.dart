@@ -14,6 +14,7 @@ import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/shared/split.dart';
+import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,7 +28,9 @@ void main() {
   PerformanceController controller;
   FakeServiceManager fakeServiceManager;
 
-  void _setUpServiceManagerWithTimeline(Map<String, dynamic> timelineJson) {
+  Future<void> _setUpServiceManagerWithTimeline(
+    Map<String, dynamic> timelineJson,
+  ) async {
     fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(
         timelineData: vm_service.Timeline.parse(timelineJson),
@@ -37,6 +40,8 @@ void main() {
         .thenReturn(ValueNotifier<int>(0));
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+    when(fakeServiceManager.connectedApp.flutterVersionNow).thenReturn(
+        FlutterVersion.parse((await fakeServiceManager.flutterVersion).json));
     when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
         .thenReturn(false);
@@ -71,7 +76,7 @@ void main() {
   group('PerformanceScreen', () {
     setUp(() async {
       await ensureInspectorDependencies();
-      _setUpServiceManagerWithTimeline(testTimelineJson);
+      await _setUpServiceManagerWithTimeline(testTimelineJson);
       setGlobal(OfflineModeController, OfflineModeController());
       screen = const PerformanceScreen();
     });
@@ -115,7 +120,7 @@ void main() {
         'builds initial content for empty timeline', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        _setUpServiceManagerWithTimeline({});
+        await _setUpServiceManagerWithTimeline({});
         await pumpPerformanceScreen(tester, runAsync: true);
         await tester.pumpAndSettle();
         expect(find.byType(FlutterFramesChart), findsOneWidget);

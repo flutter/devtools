@@ -12,7 +12,6 @@ import 'package:devtools_app/src/inspector/inspector_screen.dart';
 import 'package:devtools_app/src/logging/logging_screen.dart';
 import 'package:devtools_app/src/memory/memory_screen.dart';
 import 'package:devtools_app/src/network/network_screen.dart';
-import 'package:devtools_app/src/performance/legacy/performance_screen.dart';
 import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/profiler/profiler_screen.dart';
@@ -180,8 +179,7 @@ void main() {
           visibleScreenTypes,
           equals([
             InspectorScreen,
-            LegacyPerformanceScreen,
-            // PerformanceScreen,
+            PerformanceScreen,
             ProfilerScreen,
             MemoryScreen,
             DebuggerScreen,
@@ -200,7 +198,6 @@ void main() {
           visibleScreenTypes,
           equals([
             // InspectorScreen,
-            LegacyPerformanceScreen, // Works offline, so appears regardless of web flag
             PerformanceScreen, // Works offline, so appears regardless of web flag
             ProfilerScreen, // Works offline, so appears regardless of web flag
             // MemoryScreen,
