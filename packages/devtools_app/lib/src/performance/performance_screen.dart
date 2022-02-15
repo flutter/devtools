@@ -42,26 +42,11 @@ class PerformanceScreen extends Screen {
           id: id,
           requiresDartVm: true,
           worksOffline: true,
-          shouldShowForFlutterVersion: _shouldShowForFlutterVersion,
           title: 'Performance',
           icon: Octicons.pulse,
         );
 
   static const id = 'performance';
-
-  static bool _shouldShowForFlutterVersion(FlutterVersion currentVersion) {
-    return currentVersion != null &&
-        currentVersion >=
-            SemanticVersion(
-              major: 2,
-              minor: 3,
-              // Specifying patch makes the version number more readable.
-              // ignore: avoid_redundant_argument_values
-              patch: 0,
-              preReleaseMajor: 16,
-              preReleaseMinor: 0,
-            );
-  }
 
   @override
   String get docPageId => id;
@@ -97,6 +82,19 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    maybePushUnsupportedFlutterVersionWarning(
+      context,
+      PerformanceScreen.id,
+      supportedFlutterVersion: SemanticVersion(
+        major: 2,
+        minor: 3,
+        // Specifying patch makes the version number more readable.
+        // ignore: avoid_redundant_argument_values
+        patch: 0,
+        preReleaseMajor: 16,
+        preReleaseMinor: 0,
+      ),
+    );
     maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
 
     final newController = Provider.of<PerformanceController>(context);
