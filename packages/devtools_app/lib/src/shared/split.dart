@@ -86,7 +86,7 @@ class Split extends StatefulWidget {
 }
 
 class _SplitState extends State<Split> {
-  late List<double> fractions;
+  late final List<double> fractions;
 
   bool get isHorizontal => widget.axis == Axis.horizontal;
 

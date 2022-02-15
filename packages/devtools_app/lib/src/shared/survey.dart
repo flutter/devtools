@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:convert';
 
@@ -33,15 +33,15 @@ class SurveyService {
   /// it.
   static const _notificationDuration = Duration(days: 1);
 
-  DevToolsSurvey _cachedSurvey;
+  DevToolsSurvey? _cachedSurvey;
 
-  Future<DevToolsSurvey> get activeSurvey async {
+  Future<DevToolsSurvey?> get activeSurvey async {
     // If the server is unavailable we don't need to do anything survey related.
     if (!server.isDevToolsServerAvailable) return null;
 
     _cachedSurvey ??= await _fetchSurveyContent();
     if (_cachedSurvey != null) {
-      await server.setActiveSurvey(_cachedSurvey.id);
+      await server.setActiveSurvey(_cachedSurvey!.id);
     }
 
     if (await _shouldShowSurvey()) {
@@ -53,7 +53,7 @@ class SurveyService {
   void maybeShowSurveyPrompt(BuildContext context) async {
     final survey = await activeSurvey;
     if (survey != null) {
-      final message = survey.title;
+      final message = survey.title!;
       final actions = [
         NotificationAction(
           _noThanksLabel,
@@ -65,15 +65,15 @@ class SurveyService {
         NotificationAction(
           _takeSurveyLabel,
           () => _takeSurveyPressed(
-            surveyUrl: _generateSurveyUrl(survey.url),
+            surveyUrl: _generateSurveyUrl(survey.url!),
             message: message,
             context: context,
           ),
           isPrimary: true,
         ),
       ];
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final didPush = Notifications.of(context).push(
+      WidgetsBinding.instance!.addPostFrameCallback((_) {
+        final didPush = Notifications.of(context)!.push(
           message,
           actions: actions,
           duration: _notificationDuration,
@@ -108,13 +108,13 @@ class SurveyService {
 
     final currentTimeMs = DateTime.now().millisecondsSinceEpoch;
     final activeSurveyRange = Range(
-      _cachedSurvey.startDate.millisecondsSinceEpoch,
-      _cachedSurvey.endDate.millisecondsSinceEpoch,
+      _cachedSurvey!.startDate!.millisecondsSinceEpoch,
+      _cachedSurvey!.endDate!.millisecondsSinceEpoch,
     );
     return activeSurveyRange.contains(currentTimeMs);
   }
 
-  Future<DevToolsSurvey> _fetchSurveyContent() async {
+  Future<DevToolsSurvey?> _fetchSurveyContent() async {
     try {
       final response = await get(_metadataUrl);
       if (response.statusCode == 200) {
@@ -128,21 +128,21 @@ class SurveyService {
   }
 
   void _noThanksPressed({
-    @required String message,
-    @required BuildContext context,
+    required String message,
+    required BuildContext context,
   }) async {
     await server.setSurveyActionTaken();
-    Notifications.of(context).dismiss(message);
+    Notifications.of(context)!.dismiss(message);
   }
 
   void _takeSurveyPressed({
-    @required String surveyUrl,
-    @required String message,
-    @required BuildContext context,
+    required String surveyUrl,
+    required String message,
+    required BuildContext context,
   }) async {
     await launchUrl(surveyUrl, context);
     await server.setSurveyActionTaken();
-    Notifications.of(context).dismiss(message);
+    Notifications.of(context)!.dismiss(message);
   }
 }
 
@@ -166,13 +166,13 @@ class DevToolsSurvey {
     return DevToolsSurvey._(id, startDate, endDate, title, surveyUrl);
   }
 
-  final String id;
+  final String? id;
 
-  final DateTime startDate;
+  final DateTime? startDate;
 
-  final DateTime endDate;
+  final DateTime? endDate;
 
-  final String title;
+  final String? title;
 
-  final String url;
+  final String? url;
 }
