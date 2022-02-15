@@ -243,7 +243,7 @@ class IsolateSelector extends StatelessWidget {
                     value: ref,
                     child: Row(
                       children: [
-                        ref.isSystemIsolate!
+                        ref.isSystemIsolate ?? false
                             ? const Icon(Icons.settings_applications)
                             : const Icon(Icons.call_split),
                         const SizedBox(width: denseSpacing),
