@@ -47,7 +47,8 @@ class DebuggerController extends DisposableController
       initialize();
     }
     _scriptHistoryListener = () {
-      _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
+      if (scriptsHistory.current.value != null)
+        _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
     };
     scriptsHistory.current.addListener(_scriptHistoryListener);
   }
