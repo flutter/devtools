@@ -199,8 +199,8 @@ class FlatTableState<T> extends State<FlatTable<T?>>
         unconstrainedCount > 0 ? available / unconstrainedCount : available;
     int unconstrainedFound = 0;
     final widths = <double>[];
-    for (ColumnData<T?>? column in widget.columns) {
-      double? width = column!.fixedWidthPx;
+    for (ColumnData<T?> column in widget.columns) {
+      double? width = column.fixedWidthPx;
       if (width == null) {
         if (column.minWidthPx != null &&
             column.minWidthPx! > unconstrainedWidth) {
@@ -345,7 +345,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
         super(key: key);
 
   /// The columns to show in this table.
-  final List<ColumnData<T>?> columns;
+  final List<ColumnData<T>> columns;
 
   /// The column of the table to treat as expandable.
   final TreeColumnData<T>? treeColumn;
@@ -529,8 +529,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       }
     }
     final widths = <double>[];
-    for (ColumnData<T?>? column in widget.columns) {
-      double width = column!.getNodeIndentPx(deepest as T?);
+    for (ColumnData<T?> column in widget.columns) {
+      double width = column.getNodeIndentPx(deepest as T?);
       assert(width >= 0.0);
       if (column.fixedWidthPx != null) {
         width += column.fixedWidthPx!;
