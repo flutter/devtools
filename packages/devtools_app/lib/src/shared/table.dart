@@ -66,7 +66,7 @@ class FlatTable<T> extends StatefulWidget {
     this.selectionNotifier,
   }) : super(key: key);
 
-  final List<ColumnData<T>?> columns;
+  final List<ColumnData<T>> columns;
 
   final List<T> data;
 
@@ -141,18 +141,18 @@ class FlatTableState<T> extends State<FlatTable<T?>>
 
     double available = maxWidth;
     // Columns sorted by increasing minWidth.
-    final List<ColumnData<T?>?> sortedColumns = widget.columns.toList()
+    final List<ColumnData<T?>> sortedColumns = widget.columns.toList()
       ..sort((a, b) {
-        if (a!.minWidthPx != null && b!.minWidthPx != null) {
+        if (a.minWidthPx != null && b.minWidthPx != null) {
           return a.minWidthPx!.compareTo(b.minWidthPx!);
         }
         if (a.minWidthPx != null) return -1;
-        if (b!.minWidthPx != null) return 1;
+        if (b.minWidthPx != null) return 1;
         return 0;
       });
 
     for (var col in widget.columns) {
-      if (col!.fixedWidthPx != null) {
+      if (col.fixedWidthPx != null) {
         available -= col.fixedWidthPx!;
       } else if (col.minWidthPx != null) {
         available -= col.minWidthPx!;
@@ -161,7 +161,7 @@ class FlatTableState<T> extends State<FlatTable<T?>>
     available = max(available, 0);
     int unconstrainedCount = 0;
     for (var column in sortedColumns) {
-      if (column!.fixedWidthPx == null && column.minWidthPx == null) {
+      if (column.fixedWidthPx == null && column.minWidthPx == null) {
         unconstrainedCount++;
       }
     }
@@ -175,7 +175,7 @@ class FlatTableState<T> extends State<FlatTable<T?>>
       // incrementally adding columns where the minWidth constraint can be
       // satisfied using the width given to unconstrained columns.
       for (var column in sortedColumns) {
-        if (column!.fixedWidthPx == null && column.minWidthPx != null) {
+        if (column.fixedWidthPx == null && column.minWidthPx != null) {
           // Width of this column if it was not clamped to its min width.
           // We add column.minWidthPx to the available width because
           // available is currently not considering the space reserved for this
@@ -1164,7 +1164,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
         SearchableMixin {
   Key? contentKey;
 
-  ScrollController? scrollController;
+  late final ScrollController scrollController;
 
   bool isSearchMatch = false;
 
@@ -1194,7 +1194,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
     setExpanded(widget.isExpanded);
     if (oldWidget.linkedScrollControllerGroup !=
         widget.linkedScrollControllerGroup) {
-      scrollController?.dispose();
+      scrollController.dispose();
       scrollController = widget.linkedScrollControllerGroup!.addAndGet();
     }
 
@@ -1205,7 +1205,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
   @override
   void dispose() {
     super.dispose();
-    scrollController!.dispose();
+    scrollController.dispose();
   }
 
   @override
