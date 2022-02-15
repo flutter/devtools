@@ -4,6 +4,8 @@
 
 // @dart=2.9
 
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'package:devtools_app/src/primitives/trees.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/shared/globals.dart';

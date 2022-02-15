@@ -204,7 +204,7 @@ class FlatTableState<T> extends State<FlatTable<T?>>
       if (width == null) {
         if (column.minWidthPx != null &&
             column.minWidthPx! > unconstrainedWidth) {
-          width = column.minWidthPx;
+          width = column.minWidthPx!;
         } else {
           width = unconstrainedWidth;
           unconstrainedFound++;
@@ -342,9 +342,6 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     this.autoExpandRoots = false,
   })  : assert(columns.contains(treeColumn)),
         assert(columns.contains(sortColumn)),
-        assert(columns != null),
-        assert(keyFactory != null),
-        assert(dataRoots != null),
         super(key: key);
 
   /// The columns to show in this table.
@@ -407,7 +404,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       expandParents(parent.parent);
     }
 
-    if (parent != null && !parent.isExpanded) {
+    if (!parent.isExpanded) {
       _toggleNode(parent);
     }
   }
@@ -521,14 +518,14 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   List<double> _computeColumnWidths(List<T?> flattenedList) {
     final T? firstRoot = dataRoots!.first;
-    TreeNode? deepest = firstRoot as TreeNode<TreeNode<dynamic>>?;
+    TreeNode? deepest = firstRoot;
     // This will use the width of all rows in the table, even the rows
     // that are hidden by nesting.
     // We may want to change this to using a flattened list of only
     // the list items that should show right now.
     for (var node in flattenedList) {
       if (node!.level > deepest!.level) {
-        deepest = node as TreeNode<TreeNode<dynamic>>?;
+        deepest = node;
       }
     }
     final widths = <double>[];
@@ -1391,14 +1388,14 @@ class _TableRowState<T> extends State<TableRow<T?>>
           );
         }
         content ??= Text(
-          column.getDisplayValue(node)!,
+          column.getDisplayValue(node),
           overflow: TextOverflow.ellipsis,
           style: contentTextStyle(column),
           maxLines: 1,
         );
 
         final tooltip = column.getTooltip(node);
-        if (tooltip != null && tooltip is String && tooltip.isNotEmpty) {
+        if (tooltip.isNotEmpty) {
           content = DevToolsTooltip(
             message: tooltip,
             waitDuration: tooltipWaitLong,
