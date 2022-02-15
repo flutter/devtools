@@ -53,12 +53,12 @@ class SurveyService {
   void maybeShowSurveyPrompt(BuildContext context) async {
     final survey = await activeSurvey;
     if (survey != null) {
-      final message = survey.title;
+      final message = survey.title!;
       final actions = [
         NotificationAction(
           _noThanksLabel,
           () => _noThanksPressed(
-            message: message!,
+            message: message,
             context: context,
           ),
         ),
@@ -66,7 +66,7 @@ class SurveyService {
           _takeSurveyLabel,
           () => _takeSurveyPressed(
             surveyUrl: _generateSurveyUrl(survey.url!),
-            message: message!,
+            message: message,
             context: context,
           ),
           isPrimary: true,
@@ -74,7 +74,7 @@ class SurveyService {
       ];
       WidgetsBinding.instance!.addPostFrameCallback((_) {
         final didPush = Notifications.of(context)!.push(
-          message!,
+          message,
           actions: actions,
           duration: _notificationDuration,
           allowDuplicates: false,
