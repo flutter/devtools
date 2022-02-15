@@ -576,6 +576,11 @@ class PerformanceController extends DisposableController
     List<TraceEventWrapper> traceEvents, {
     bool isInitialUpdate = false,
   }) {
+    final isFlutterApp = offlineController.offlineMode.value
+        ? offlinePerformanceData != null &&
+            offlinePerformanceData.frames.isNotEmpty
+        : serviceManager.connectedApp.isFlutterAppNow;
+
     final threadNameEvents = traceEvents
         .map((TraceEventWrapper wrapper) => wrapper.event)
         .where((TraceEvent event) {
@@ -589,7 +594,7 @@ class PerformanceController extends DisposableController
     for (TraceEvent event in threadNameEvents) {
       final name = event.args['name'];
 
-      if (isInitialUpdate) {
+      if (isFlutterApp && isInitialUpdate) {
         // Android: "1.ui (12652)"
         // iOS: "io.flutter.1.ui (12652)"
         // MacOS, Linux, Windows, Dream (g3): "io.flutter.ui (225695)"
@@ -621,7 +626,7 @@ class PerformanceController extends DisposableController
       threadNamesById[event.threadId] = name;
     }
 
-    if (isInitialUpdate) {
+    if (isFlutterApp && isInitialUpdate) {
       if (uiThreadId == null || rasterThreadId == null) {
         log('Could not find UI thread and / or Raster thread from names: '
             '${threadNamesById.values}');
@@ -862,6 +867,7 @@ class PerformanceController extends DisposableController
     allTraceEvents.clear();
     offlinePerformanceData = null;
     cpuProfilerController.reset();
+    threadNamesById.clear();
     data?.clear();
     processor?.reset();
     _flutterFrames.clear();
