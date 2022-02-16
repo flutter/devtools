@@ -39,13 +39,21 @@ class CpuProfiler extends StatefulWidget {
         bottomUpRoots = data?.bottomUpRoots ?? [],
         tabs = [
           if (summaryView != null)
-            DevToolsTab(key: summaryTab, text: 'Summary'),
+            _buildTab(key: summaryTab, tabName: 'Summary'),
           if (data != null && !data.isEmpty) ...[
-            DevToolsTab(key: bottomUpTab, text: 'Bottom Up'),
-            DevToolsTab(key: callTreeTab, text: 'Call Tree'),
-            DevToolsTab(key: flameChartTab, text: 'CPU Flame Chart'),
+            _buildTab(key: bottomUpTab, tabName: 'Bottom Up'),
+            _buildTab(key: callTreeTab, tabName: 'Call Tree'),
+            _buildTab(key: flameChartTab, tabName: 'CPU Flame Chart'),
           ],
         ];
+
+  static DevToolsTab _buildTab({Key key, @required String tabName}) {
+    return DevToolsTab.create(
+      key: key,
+      tabName: tabName,
+      gaPrefix: 'cpuProfilerTab',
+    );
+  }
 
   final CpuProfileData data;
 
