@@ -4,6 +4,7 @@
 
 // @dart=2.9
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/network/network_screen.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/service_manager.dart';
@@ -21,6 +22,7 @@ void main() {
       fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(IdeTheme, IdeTheme());
       when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
           .thenReturn(ValueNotifier<int>(0));
       screen = const NetworkScreen();
