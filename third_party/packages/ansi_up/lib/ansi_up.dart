@@ -304,11 +304,9 @@ enum PacketKind {
 }
 
 class _TextPacket {
-  _TextPacket({required this.kind, this.text = '', this.url = ''});
+  _TextPacket({required this.kind});
 
   PacketKind kind;
-  String text;
-  final String url;
 }
 
 String _colorToCss(List/*<int>*/ rgb) => 'rgb(${rgb.join(',')})';
