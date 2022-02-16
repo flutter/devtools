@@ -5,6 +5,7 @@
 // @dart=2.9
 
 @TestOn('vm')
+import 'package:devtools_app/src/shared/framework_controller.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/initializer.dart';
 import 'package:devtools_app/src/shared/service_manager.dart';
@@ -22,10 +23,8 @@ void main() {
       final serviceManager = FakeServiceManager();
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
-      setGlobal(
-        ServiceConnectionManager,
-        serviceManager,
-      );
+      setGlobal(ServiceConnectionManager, serviceManager);
+      setGlobal(FrameworkController, FrameworkController());
 
       app = MaterialApp(
         initialRoute: '/init',

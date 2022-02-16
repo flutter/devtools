@@ -17,8 +17,6 @@ import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-export 'package:devtools_app/src/primitives/utils_io.dart';
-
 void main() {
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());

@@ -41,19 +41,3 @@ Future<String> resolvePackagePath(String package) async {
   }
   return path;
 }
-
-/// Work-around for flutter test using different directories based on how it's
-/// run.
-///
-/// If you are writing a test that depends heavily on the current directory
-/// remaining constant, consider calling this function in the `setUp()` of your
-/// test.
-///
-/// If your only use of the filesystem is to resolve package paths, then you
-/// should only need to use [resolvePackagePath].
-// TODO(https://github.com/flutter/flutter/issues/20907): Remove this.
-void compensateForFlutterTestDirectoryBug() {
-  if (io.Directory.current.path.endsWith('test')) {
-    io.Directory.current = io.Directory.current.parent;
-  }
-}
