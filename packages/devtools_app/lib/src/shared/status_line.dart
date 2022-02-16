@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
@@ -47,45 +47,41 @@ class StatusLine extends StatelessWidget {
 
     children.add(const BulletSpacer());
 
-    // Optionally display an isolate selector.
-    if (currentScreen != null) {
-      children.add(
-        ValueListenableBuilder<bool>(
-          valueListenable: currentScreen.showIsolateSelector,
-          builder: (context, showIsolateSelector, _) {
-            return showIsolateSelector
-                ? Flexible(
-                    child: Row(
-                      children: const [
-                        Expanded(
-                          child: Center(
-                            child: IsolateSelector(),
-                          ),
+    // Display an isolate selector.
+    children.add(
+      ValueListenableBuilder<bool>(
+        valueListenable: currentScreen.showIsolateSelector,
+        builder: (context, showIsolateSelector, _) {
+          return showIsolateSelector
+              ? Flexible(
+                  child: Row(
+                    children: const [
+                      Expanded(
+                        child: Center(
+                          child: IsolateSelector(),
                         ),
-                        BulletSpacer(),
-                      ],
-                    ),
-                  )
-                : Container();
-          },
+                      ),
+                      BulletSpacer(),
+                    ],
+                  ),
+                )
+              : Container();
+        },
+      ),
+    );
+
+    // Display page specific status.
+    final Widget? pageStatus =
+        buildPageStatus(context, currentScreen, textTheme);
+
+    if (pageStatus != null) {
+      children.add(Expanded(
+        child: Align(
+          child: buildPageStatus(context, currentScreen, textTheme),
         ),
-      );
-    }
+      ));
 
-    // Optionally display page specific status.
-    if (currentScreen != null) {
-      final Widget pageStatus =
-          buildPageStatus(context, currentScreen, textTheme);
-
-      if (pageStatus != null) {
-        children.add(Expanded(
-          child: Align(
-            child: buildPageStatus(context, currentScreen, textTheme),
-          ),
-        ));
-
-        children.add(const BulletSpacer());
-      }
+      children.add(const BulletSpacer());
     }
 
     // Always display connection status (docked to the right).
@@ -111,7 +107,7 @@ class StatusLine extends StatelessWidget {
     Screen currentScreen,
     TextTheme textTheme,
   ) {
-    final String docPageId = currentScreen.docPageId;
+    final String? docPageId = currentScreen.docPageId;
     if (docPageId != null) {
       return RichText(
         text: LinkTextSpan(
@@ -134,7 +130,7 @@ class StatusLine extends StatelessWidget {
     }
   }
 
-  Widget buildPageStatus(
+  Widget? buildPageStatus(
     BuildContext context,
     Screen currentScreen,
     TextTheme textTheme,
@@ -147,31 +143,31 @@ class StatusLine extends StatelessWidget {
       valueListenable: serviceManager.connectedState,
       builder: (context, connectedState, child) {
         if (connectedState.connected) {
-          final app = serviceManager.connectedApp;
+          final app = serviceManager.connectedApp!;
 
           String description;
-          if (!app.isRunningOnDartVM) {
+          if (!app.isRunningOnDartVM!) {
             description = 'web app';
           } else {
-            final VM vm = serviceManager.vm;
+            final VM vm = serviceManager.vm!;
             description =
                 '${vm.targetCPU}-${vm.architectureBits} ${vm.operatingSystem}';
           }
 
-          final color = Theme.of(context).textTheme.bodyText2.color;
+          final color = Theme.of(context).textTheme.bodyText2!.color;
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               ValueListenableBuilder(
                 valueListenable: serviceManager.deviceBusy,
-                builder: (context, isBusy, _) {
+                builder: (context, bool isBusy, _) {
                   return SizedBox(
                     width: smallProgressSize,
                     height: smallProgressSize,
                     child: isBusy
                         ? SmallCircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(color),
+                            valueColor: AlwaysStoppedAnimation<Color?>(color),
                           )
                         : const SizedBox(),
                   );
@@ -212,7 +208,7 @@ class StatusLine extends StatelessWidget {
             ],
           );
         } else {
-          return child;
+          return child!;
         }
       },
       child: Text(
@@ -224,13 +220,13 @@ class StatusLine extends StatelessWidget {
 }
 
 class IsolateSelector extends StatelessWidget {
-  const IsolateSelector({Key key}) : super(key: key);
+  const IsolateSelector({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final IsolateManager isolateManager = serviceManager.isolateManager;
-    return DualValueListenableBuilder<List<IsolateRef>, IsolateRef>(
+    return DualValueListenableBuilder<List<IsolateRef>, IsolateRef?>(
       firstListenable: isolateManager.isolates,
       secondListenable: isolateManager.selectedIsolate,
       builder: (context, isolates, selectedIsolateRef, _) {
@@ -247,7 +243,7 @@ class IsolateSelector extends StatelessWidget {
                     value: ref,
                     child: Row(
                       children: [
-                        ref.isSystemIsolate
+                        ref.isSystemIsolate ?? false
                             ? const Icon(Icons.settings_applications)
                             : const Icon(Icons.call_split),
                         const SizedBox(width: denseSpacing),

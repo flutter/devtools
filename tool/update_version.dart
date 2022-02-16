@@ -12,7 +12,6 @@ import 'dart:io';
 void main(List<String> args) async {
   final pubspecs = [
     'packages/devtools_app/pubspec.yaml',
-    'packages/devtools_shared/pubspec.yaml',
     'packages/devtools_test/pubspec.yaml',
   ].map((path) => File(path)).toList();
 
@@ -187,7 +186,6 @@ const editablePubspecSections = [
 
 const devToolsDependencyPrefixes = [
   'devtools_app: ',
-  'devtools_shared: ',
   'devtools_test: ',
 ];
 
