@@ -14,9 +14,9 @@ import 'theme.dart';
 
 class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   const TreeView({
-    this.dataRootsListenable,
-    this.dataDisplayProvider,
-    this.onItemSelected,
+    required this.dataRootsListenable,
+    required this.dataDisplayProvider,
+    required this.onItemSelected,
     this.onItemExpanded,
     this.shrinkWrap = false,
     this.itemExtent,
@@ -24,7 +24,7 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
     this.emptyTreeViewBuilder,
   });
 
-  final ValueListenable<List<T>>? dataRootsListenable;
+  final ValueListenable<List<T>> dataRootsListenable;
 
   /// Use [shrinkWrap] iff you need to place a TreeView inside a ListView or
   /// other container with unconstrained height.
@@ -34,12 +34,12 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   /// Defaults to false.
   final bool shrinkWrap;
 
-  final Widget Function(T, VoidCallback)? dataDisplayProvider;
+  final Widget Function(T, VoidCallback) dataDisplayProvider;
 
   /// Invoked when a tree node is selected. If [onItemExpanded] is not
   /// provided, this method will also be called when the expand button is
   /// tapped.
-  final FutureOr<void> Function(T)? onItemSelected;
+  final FutureOr<void> Function(T) onItemSelected;
 
   /// If provided, this method will be called when the expand button is tapped.
   /// Otherwise, [onItemSelected] will be invoked, if provided.
