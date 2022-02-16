@@ -207,7 +207,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
 
     if (_scrollToBottom) {
       _scrollToBottom = false;
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         if (_scroll.hasClients) {
           _scroll.autoScrollToBottom();
         } else {

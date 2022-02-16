@@ -121,7 +121,7 @@ class _InitializerState extends State<Initializer>
 
   /// Shows a "disconnected" overlay if the [service.serviceManager] is not currently connected.
   void _handleNoConnection() {
-    WidgetsBinding.instance!.scheduleFrameCallback((_) {
+    WidgetsBinding.instance.scheduleFrameCallback((_) {
       if (!_checkLoaded() &&
           ModalRoute.of(context)!.isCurrent &&
           currentDisconnectedOverlay == null) {

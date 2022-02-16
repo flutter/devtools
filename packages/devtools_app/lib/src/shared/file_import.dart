@@ -229,7 +229,7 @@ Future<DevToolsJsonFile?> importFileFromPicker({
   // extensions than .json. We will need to return a more generic file type.
   return DevToolsJsonFile(
     data: data,
-    name: file.name,
+    name: file.name ?? '',
     lastModifiedTime: lastModifiedTime,
   );
 }
