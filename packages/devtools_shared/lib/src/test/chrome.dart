@@ -87,7 +87,6 @@ class Chrome {
       args.addAll(<String>[
         '--headless',
         '--disable-gpu',
-        '--no-sandbox',
       ]);
     }
     if (url != null) {

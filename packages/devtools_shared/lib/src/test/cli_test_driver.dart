@@ -96,10 +96,11 @@ class CliAppFixture extends AppFixture {
   final String appScriptPath;
 
   static Future<CliAppFixture> create(String appScriptPath) async {
-    const String observatoryMarker = 'Observatory listening on ';
+    final dartVmServicePrefix =
+        RegExp('(Observatory|Dart VM Service) listening on ');
 
     final Process process = await Process.start(
-      'dart',
+      Platform.resolvedExecutable,
       <String>['--observe=0', '--pause-isolates-on-start', appScriptPath],
     );
 
@@ -112,7 +113,7 @@ class CliAppFixture extends AppFixture {
     final linesSubscription = lines.listen((String line) {
       if (completer.isCompleted) {
         lineController.add(line);
-      } else if (line.contains(observatoryMarker)) {
+      } else if (line.contains(dartVmServicePrefix)) {
         completer.complete(line);
       } else {
         // Often something like:
@@ -124,7 +125,7 @@ class CliAppFixture extends AppFixture {
     // Observatory listening on http://127.0.0.1:9595/(token)
     final String observatoryText = await completer.future;
     final String observatoryUri =
-        observatoryText.replaceAll(observatoryMarker, '');
+        observatoryText.replaceAll(dartVmServicePrefix, '');
     var uri = Uri.parse(observatoryUri);
 
     if (!uri.isAbsolute) {
