@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 
-import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/utils.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -24,20 +23,21 @@ Future<VmServiceWrapper> _connectWithSse(
       ? uri.replace(scheme: 'http')
       : uri.replace(scheme: 'https');
   final client = SseClient('$uri');
-  final Stream<String> stream = client.stream?.asBroadcastStream();
+  final Stream<String>? stream =
+      client.stream?.asBroadcastStream() as Stream<String>?;
   final service = VmServiceWrapper.fromNewVmService(
     stream,
-    client.sink.add,
+    client.sink!.add,
     uri,
   );
 
-  unawaited(client.sink?.done?.whenComplete(() {
+  unawaited(client.sink?.done.whenComplete(() {
     finishedCompleter.complete();
     service.dispose();
   }));
   serviceCompleter.complete(service);
 
-  unawaited(stream?.drain()?.catchError(onError));
+  unawaited(stream?.drain().catchError(onError));
   return serviceCompleter.future;
 }
 
@@ -118,7 +118,7 @@ Future<VmServiceWrapper> connect(Uri uri, Completer<void> finishedCompleter) {
 /// https://github.com/dart-lang/sdk/issues/34656
 Stream<T> convertBroadcastToSingleSubscriber<T>(Stream<T> stream) {
   final StreamController<T> controller = StreamController<T>();
-  StreamSubscription<T> subscription;
+  late StreamSubscription<T> subscription;
   controller.onListen =
       () => subscription = stream.listen((T e) => controller.add(e));
   controller.onCancel = () => subscription.cancel();

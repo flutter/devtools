@@ -10,7 +10,6 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart';
@@ -47,7 +46,8 @@ class DebuggerController extends DisposableController
       initialize();
     }
     _scriptHistoryListener = () {
-      _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
+      if (scriptsHistory.current.value != null)
+        _showScriptLocation(ScriptLocation(scriptsHistory.current.value));
     };
     scriptsHistory.current.addListener(_scriptHistoryListener);
   }

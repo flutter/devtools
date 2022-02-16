@@ -9,7 +9,6 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import '../test_utils/file_utils.dart';
 import 'app.dart';
 import 'debugger.dart';
 import 'integration.dart';
@@ -21,7 +20,6 @@ void main() {
     // ignore: dead_code
     if (false) {
       setUpAll(() async {
-        compensateForFlutterTestDirectoryBug();
         final bool testInReleaseMode =
             Platform.environment['WEBDEV_RELEASE'] == 'true';
 

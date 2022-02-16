@@ -9,7 +9,6 @@ import 'dart:core';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../analytics/analytics.dart' as ga;
@@ -198,7 +197,6 @@ class ServiceConnectionManager {
     _inspectorService?.dispose();
     _inspectorService = null;
 
-    final serviceStreamName = await service.serviceStreamName;
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -248,7 +246,7 @@ class ServiceConnectionManager {
       }
     }
 
-    service.onEvent(serviceStreamName).listen(handleServiceEvent);
+    service.onEvent(EventStreams.kService).listen(handleServiceEvent);
 
     final streamIds = [
       EventStreams.kDebug,
@@ -260,7 +258,7 @@ class ServiceConnectionManager {
       EventStreams.kStdout,
       EventStreams.kTimeline,
       EventStreams.kVM,
-      serviceStreamName,
+      EventStreams.kService,
     ];
 
     for (final id in streamIds) {
