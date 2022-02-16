@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/material.dart';
 
@@ -12,8 +12,8 @@ import 'theme.dart';
 
 class RegisteredServiceDescription {
   const RegisteredServiceDescription._({
-    this.service,
-    this.title,
+    required this.service,
+    required this.title,
     this.icon,
     this.gaScreenName,
     this.gaItem,
@@ -21,9 +21,9 @@ class RegisteredServiceDescription {
 
   final String service;
   final String title;
-  final Widget icon;
-  final String gaScreenName;
-  final String gaItem;
+  final Widget? icon;
+  final String? gaScreenName;
+  final String? gaItem;
 }
 
 /// Hot reload service registered by Flutter Tools.

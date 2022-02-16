@@ -70,6 +70,7 @@ void select(
   String screenName,
   String selectedItem, {
   int value = 0,
+  bool nonInteraction,
   ScreenAnalyticsMetrics Function() screenMetricsProvider,
 }) {}
 
