@@ -1,4 +1,8 @@
 ## 2.11.0
+* Fix some issues preventing the google3 roll [#3702](https://github.com/flutter/devtools/pull/3702)
+* Update the generate_changelog tool [#3698](https://github.com/flutter/devtools/pull/3698)
+* Remove dependency on package:pedantic [#3697](https://github.com/flutter/devtools/pull/3697)
+* Changes to enable devtools server tests to run on DDS [#3696](https://github.com/flutter/devtools/pull/3696)
 * Add inspector tab switch analytics and fix regression with network screen tabs [#3694](https://github.com/flutter/devtools/pull/3694)
 * Migrate table_data.dart to null safety [#3685](https://github.com/flutter/devtools/pull/3685)
 * Migrate survey.dart to null safety [#3684](https://github.com/flutter/devtools/pull/3684)
