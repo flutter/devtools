@@ -74,14 +74,14 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
 
   @override
   Widget build(BuildContext context) {
-    if (items!.isEmpty) return _emptyTreeViewBuilder();
+    if (items.isEmpty) return _emptyTreeViewBuilder();
     return ListView.builder(
-      itemCount: items!.length,
+      itemCount: items.length,
       itemExtent: widget.itemExtent,
       shrinkWrap: widget.shrinkWrap,
       physics: widget.shrinkWrap ? const ClampingScrollPhysics() : null,
       itemBuilder: (context, index) {
-        final T item = items![index];
+        final T item = items[index];
         return _TreeViewItem<T>(
           item,
           buildDisplay: (onPressed) =>
@@ -126,7 +126,7 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
   void _updateItems() {
     setState(() {
       items = buildFlatList(
-        dataRoots!,
+        dataRoots,
         onTraverse: widget.onTraverse,
       );
     });
@@ -208,9 +208,9 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<_TreeViewItem<T>>
 }
 
 mixin TreeMixin<T extends TreeNode<T>> {
-  List<T>? dataRoots;
+  late List<T> dataRoots;
 
-  List<T>? items;
+  late List<T> items;
 
   List<T> buildFlatList(
     List<T> roots, {
