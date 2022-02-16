@@ -40,6 +40,7 @@ void main() {
       setGlobal(FrameworkController, FrameworkController());
       setGlobal(SurveyService, SurveyService());
       setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(IdeTheme, IdeTheme());
     });
 
     Widget wrapScaffold(Widget child) {

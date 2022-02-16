@@ -4,6 +4,7 @@
 
 // @dart=2.9
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/primitives/message_bus.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -36,6 +37,7 @@ void main() {
         reloads++;
         return Future<void>.value();
       });
+      setGlobal(IdeTheme, IdeTheme());
     });
 
     testWidgetsWithContext('performs a hot reload when pressed',

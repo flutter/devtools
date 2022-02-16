@@ -29,6 +29,7 @@ void main() {
     setUp(() async {
       fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(IdeTheme, IdeTheme());
       await fakeServiceManager.flagsInitialized.future;
       dropdown = ProfileGranularityDropdown(
         screenId: ProfilerScreen.id,

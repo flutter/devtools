@@ -4,6 +4,7 @@
 
 // @dart=2.9
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
 import 'package:devtools_app/src/network/network_model.dart';
@@ -41,6 +42,7 @@ void main() {
         outstandingRequestsMap: {},
       );
       requests = networkRequests.requests;
+      setGlobal(IdeTheme, IdeTheme());
     });
 
     test('UriColumn', () {
