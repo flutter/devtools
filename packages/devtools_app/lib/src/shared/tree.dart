@@ -68,7 +68,7 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
   }
 
   void _updateTreeView() {
-    dataRoots = List.from(widget.dataRootsListenable!.value);
+    dataRoots = List.from(widget.dataRootsListenable.value);
     _updateItems();
   }
 
@@ -82,10 +82,10 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
       physics: widget.shrinkWrap ? const ClampingScrollPhysics() : null,
       itemBuilder: (context, index) {
         final T item = items![index];
-        return TreeViewItem<T>(
+        return _TreeViewItem<T>(
           item,
           buildDisplay: (onPressed) =>
-              widget.dataDisplayProvider!(item, onPressed),
+              widget.dataDisplayProvider(item, onPressed),
           onItemSelected: _onItemSelected,
           onItemExpanded: _onItemExpanded,
         );
@@ -106,9 +106,8 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
     if (widget.onItemExpanded == null && item.isExpandable) {
       item.toggleExpansion();
     }
-    if (widget.onItemSelected != null) {
-      await widget.onItemSelected!(item);
-    }
+    await widget.onItemSelected(item);
+
     _updateItems();
   }
 
@@ -118,8 +117,8 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
     }
     if (widget.onItemExpanded != null) {
       await widget.onItemExpanded!(item);
-    } else if (widget.onItemSelected != null) {
-      await widget.onItemSelected!(item);
+    } else {
+      await widget.onItemSelected(item);
     }
     _updateItems();
   }
@@ -134,26 +133,26 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
   }
 }
 
-class TreeViewItem<T extends TreeNode<T>> extends StatefulWidget {
-  const TreeViewItem(
+class _TreeViewItem<T extends TreeNode<T>> extends StatefulWidget {
+  const _TreeViewItem(
     this.data, {
     this.buildDisplay,
-    this.onItemExpanded,
-    this.onItemSelected,
+    required this.onItemExpanded,
+    required this.onItemSelected,
   });
 
   final T data;
 
   final Widget Function(VoidCallback onPressed)? buildDisplay;
 
-  final void Function(T)? onItemSelected;
-  final void Function(T)? onItemExpanded;
+  final void Function(T) onItemSelected;
+  final void Function(T) onItemExpanded;
 
   @override
   _TreeViewItemState<T> createState() => _TreeViewItemState<T>();
 }
 
-class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
+class _TreeViewItemState<T extends TreeNode<T>> extends State<_TreeViewItem<T>>
     with TickerProviderStateMixin, CollapsibleAnimationMixin {
   @override
   Widget build(BuildContext context) {
@@ -198,12 +197,12 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
   }
 
   void _onExpanded() {
-    widget.onItemExpanded!(widget.data);
+    widget.onItemExpanded(widget.data);
     setExpanded(widget.data.isExpanded);
   }
 
   void _onSelected() {
-    widget.onItemSelected!(widget.data);
+    widget.onItemSelected(widget.data);
     setExpanded(widget.data.isExpanded);
   }
 }
