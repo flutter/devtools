@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:pedantic/pedantic.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     hide ChromeTab;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
