@@ -25,11 +25,9 @@ import 'test_data/performance_test_data.dart';
 void main() {
   const defaultZoom = 1.0;
 
-  setUp(() {
-    setGlobal(IdeTheme, IdeTheme());
-  });
-
   group('FlameChart', () {
+    setGlobal(IdeTheme, IdeTheme());
+
     const narrowNodeKey = Key('narrow node');
     final narrowNode = FlameChartNode<TimelineEvent>(
       key: narrowNodeKey,
