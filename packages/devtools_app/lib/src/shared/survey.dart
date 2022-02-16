@@ -72,7 +72,7 @@ class SurveyService {
           isPrimary: true,
         ),
       ];
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance!.addPostFrameCallback((_) {
         final didPush = Notifications.of(context)!.push(
           message,
           actions: actions,
