@@ -25,7 +25,8 @@ class AppFixture {
     _onAppStarted = lines.first;
 
     serviceConnection.streamListen(EventStreams.kIsolate);
-    streamSubs.add(serviceConnection.onIsolateEvent.listen((Event event) {
+    _isolateEventStreamSubscription =
+        serviceConnection.onIsolateEvent.listen((Event event) {
       if (event.kind == EventKind.kIsolateExit) {
         isolates.remove(event.isolate);
       } else {
@@ -33,16 +34,15 @@ class AppFixture {
           isolates.add(event.isolate);
         }
       }
-    }));
+    });
   }
-
-  final streamSubs = <StreamSubscription<dynamic>>[];
 
   final Process process;
   final Stream<String> lines;
   final Uri serviceUri;
   final VmService serviceConnection;
   final List<IsolateRef?> isolates;
+  late final StreamSubscription<Event> _isolateEventStreamSubscription;
   final Future<void> Function()? onTeardown;
   late Future<void> _onAppStarted;
 
@@ -66,9 +66,7 @@ class AppFixture {
     if (onTeardown != null) {
       await onTeardown!();
     }
-    for (final sub in streamSubs) {
-      await sub.cancel();
-    }
+    await _isolateEventStreamSubscription.cancel();
     await serviceConnection.dispose();
     process.kill();
   }

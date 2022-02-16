@@ -6,7 +6,7 @@ Future<void> waitFor(
   Future<bool> condition(), {
   Duration timeout = const Duration(seconds: 10),
   String timeoutMessage = 'condition not satisfied',
-  Duration delay = const Duration(milliseconds: 100),
+  Duration delay = _shortDelay,
 }) async {
   final DateTime end = DateTime.now().add(timeout);
   while (!end.isBefore(DateTime.now())) {
@@ -23,5 +23,7 @@ Future delay({Duration duration = const Duration(milliseconds: 500)}) {
 }
 
 Future shortDelay() {
-  return delay(duration: const Duration(milliseconds: 100));
+  return delay(duration: _shortDelay);
 }
+
+const _shortDelay = Duration(milliseconds: 100);

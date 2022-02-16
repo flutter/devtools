@@ -4,7 +4,6 @@
 
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';

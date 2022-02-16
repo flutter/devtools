@@ -184,18 +184,18 @@ class ChromeTab {
 
   Future<WipConnection?> connect({bool verbose = false}) async {
     _wip = await wipTab.connect();
-    final WipConnection wip = _wip!;
+    final WipConnection wipConnection = _wip!;
 
-    await wip.log.enable();
-    wip.log.onEntryAdded.listen((LogEntry entry) {
+    await wipConnection.log.enable();
+    wipConnection.log.onEntryAdded.listen((LogEntry entry) {
       if (_lostConnectionTime == null ||
           entry.timestamp > _lostConnectionTime!) {
         _entryAddedController.add(entry);
       }
     });
 
-    await wip.runtime.enable();
-    wip.runtime.onConsoleAPICalled.listen((ConsoleAPIEvent event) {
+    await wipConnection.runtime.enable();
+    wipConnection.runtime.onConsoleAPICalled.listen((ConsoleAPIEvent event) {
       if (_lostConnectionTime == null ||
           event.timestamp > _lostConnectionTime!) {
         _consoleAPICalledController.add(event);
@@ -203,11 +203,13 @@ class ChromeTab {
     });
 
     unawaited(
-        _exceptionThrownController.addStream(wip.runtime.onExceptionThrown));
+      _exceptionThrownController
+          .addStream(wipConnection.runtime.onExceptionThrown),
+    );
 
-    unawaited(wip.page.enable());
+    unawaited(wipConnection.page.enable());
 
-    wip.onClose.listen((_) {
+    wipConnection.onClose.listen((_) {
       _wip = null;
       _disconnectStream.add(null);
       _lostConnectionTime = DateTime.now().millisecondsSinceEpoch;
