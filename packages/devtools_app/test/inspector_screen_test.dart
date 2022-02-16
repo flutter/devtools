@@ -6,6 +6,7 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/inspector/inspector_screen.dart';
 import 'package:devtools_app/src/inspector/inspector_tree.dart';
@@ -44,6 +45,7 @@ void main() {
           .thenReturn(ValueNotifier<int>(0));
 
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(IdeTheme, IdeTheme());
       fakeServiceManager.consoleService.ensureServiceInitialized();
     });
 

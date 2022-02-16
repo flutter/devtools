@@ -5,6 +5,7 @@
 // @dart=2.9
 
 @TestOn('vm')
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/performance/flutter_frames_chart.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
@@ -38,6 +39,7 @@ void main() {
       when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(IdeTheme, IdeTheme());
       frameAnalysisSupported = true;
     });
 
