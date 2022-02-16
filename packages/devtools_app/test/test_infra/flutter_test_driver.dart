@@ -12,7 +12,6 @@ import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter/foundation.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
