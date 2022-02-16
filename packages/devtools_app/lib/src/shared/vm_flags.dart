@@ -34,8 +34,7 @@ class VmFlagManager extends Disposer {
   }
 
   Future<void> _initFlags() async {
-    final FlagList flagList =
-        await service!.getFlagList() ?? FlagList(flags: []);
+    final flagList = await service!.getFlagList() ?? FlagList(flags: []);
     _flags.value = flagList;
 
     for (var flag in flagList.flags!) {
