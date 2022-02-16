@@ -167,8 +167,7 @@ class GenerateChangelogCommand extends Command {
           'inserted to any files other than changelog.');
     }
 
-    final changelogFile =
-        File('${repo.repoPath}/packages/devtools/CHANGELOG.md');
+    final changelogFile = File('${repo.repoPath}/CHANGELOG.md');
     final output = '## $nextVersion\n' + changes.join('\n') + '\n\n';
     await changelogFile.writeAsString(
       output + changelogFile.readAsStringSync(),
@@ -181,23 +180,31 @@ class GenerateChangelogCommand extends Command {
   }
 
   String _sanitize(String message) {
-    message = message.split('\n').first;
-    message = message.substring(0, 1).toUpperCase() +
-        message.substring(1, message.length);
-    const prPrefix = '(#';
-    final periodNumberIndex = message.lastIndexOf('. $prPrefix');
-    if (periodNumberIndex != -1) {
-      message =
-          message.replaceFirst('. $prPrefix', prPrefix, periodNumberIndex);
+    try {
+      var modifiedMessage = message.split('\n').first;
+      modifiedMessage = modifiedMessage.substring(0, 1).toUpperCase() +
+          modifiedMessage.substring(1, modifiedMessage.length);
+      const prPrefix = '(#';
+      final periodNumberIndex = modifiedMessage.lastIndexOf('. $prPrefix');
+      if (periodNumberIndex != -1) {
+        modifiedMessage = modifiedMessage.replaceFirst(
+          '. $prPrefix',
+          prPrefix,
+          periodNumberIndex,
+        );
+      }
+      final prIndex = modifiedMessage.indexOf(prPrefix);
+      final endPrIndexExclusive = modifiedMessage.lastIndexOf(')');
+      final pr = modifiedMessage.substring(
+        prIndex + prPrefix.length,
+        endPrIndexExclusive,
+      );
+      return modifiedMessage.substring(0, prIndex).trim() +
+          ' [#$pr](https://github.com/flutter/devtools/pull/$pr)';
+    } catch (_) {
+      return '# Something went wrong. Please input this CHANGELOG entry '
+          'manually: "$message"';
     }
-    final prIndex = message.indexOf(prPrefix);
-    final endPrIndexExclusive = message.lastIndexOf(')');
-    final pr = message.substring(
-      prIndex + prPrefix.length,
-      endPrIndexExclusive,
-    );
-    return message.substring(0, prIndex).trim() +
-        ' [#$pr](https://github.com/flutter/devtools/pull/$pr)';
   }
 
   bool _shouldSkip(String message) {
