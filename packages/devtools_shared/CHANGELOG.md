@@ -1,3 +1,5 @@
+## 2.11.0
+- Create `devtools_test_utils.dart`, which exposes shared test infrastructure.  
 ## 2.3.0
 - Migrate to null safety.
 ## 0.2.3
