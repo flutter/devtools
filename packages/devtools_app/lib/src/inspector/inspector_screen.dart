@@ -78,8 +78,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   DebuggerController _debuggerController;
 
-  bool get enableButtons => actionInProgress == false;
-
   bool searchVisible = false;
 
   /// Indicates whether search can be closed. The value is set to true when
@@ -144,14 +142,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     });
   }
 
-  void _onExpandClick() {
-    blockWhileInProgress(inspectorController.expandAllNodesInDetailsTree);
-  }
-
-  void _onResetClick() {
-    blockWhileInProgress(inspectorController.collapseDetailsToSelected);
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -175,10 +165,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       initialFractions: const [0.33, 0.67],
       children: [
         summaryTree,
-        InspectorDetailsTabController(
+        InspectorDetails(
           detailsTree: detailsTree,
           controller: inspectorController,
-          actionButtons: _expandCollapseButtons(),
         ),
       ],
     );
@@ -307,44 +296,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // TODO(jacobr): implement TogglePlatformSelector.
       //  TogglePlatformSelector().selector
     ];
-  }
-
-  Widget _expandCollapseButtons() {
-    return Container(
-      alignment: Alignment.centerRight,
-      decoration: BoxDecoration(
-        border: Border(
-          left: defaultBorderSide(Theme.of(context)),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            child: IconLabelButton(
-              icon: Icons.unfold_more,
-              onPressed: enableButtons ? _onExpandClick : null,
-              label: 'Expand all',
-              minScreenWidthForTextBeforeScaling:
-                  minScreenWidthForTextBeforeScaling,
-              outlined: false,
-            ),
-          ),
-          const SizedBox(width: denseSpacing),
-          SizedBox(
-            child: IconLabelButton(
-              icon: Icons.unfold_less,
-              onPressed: enableButtons ? _onResetClick : null,
-              label: 'Collapse to selected',
-              minScreenWidthForTextBeforeScaling:
-                  minScreenWidthForTextBeforeScaling,
-              outlined: false,
-            ),
-          )
-        ],
-      ),
-    );
   }
 
   void _refreshInspector() {

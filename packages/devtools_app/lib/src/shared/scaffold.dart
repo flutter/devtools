@@ -4,7 +4,6 @@
 
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -119,9 +118,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   late ImportController _importController;
 
-  late final StreamSubscription<ConnectVmEvent> _connectVmSubscription;
-  late final StreamSubscription<String> _showPageSubscription;
-
   late String scaffoldTitle;
 
   @override
@@ -132,10 +128,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     _setupTabController();
 
-    _connectVmSubscription =
-        frameworkController.onConnectVmEvent.listen(_connectVm);
-    _showPageSubscription =
-        frameworkController.onShowPageId.listen(_showPageById);
+    autoDisposeStreamSubscription(
+      frameworkController.onShowPageId.listen(_showPageById),
+    );
 
     _initTitle();
     _maybeShowInternalFlutterWebWarning();
@@ -227,9 +222,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   @override
   void dispose() {
     _tabController?.dispose();
-    _connectVmSubscription.cancel();
-    _showPageSubscription.cancel();
-
     super.dispose();
   }
 
@@ -291,16 +283,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     frameworkController.notifyPageChange(
       PageChangeEvent(_currentScreen.screenId, widget.embed),
     );
-  }
-
-  /// Connects to the VM with the given URI. This request usually comes from the
-  /// IDE via the server API to reuse the DevTools window after being disconnected
-  /// (for example if the user stops a debug session then launches a new one).
-  void _connectVm(event) {
-    DevToolsRouterDelegate.of(context).updateArgsIfNotCurrent({
-      'uri': event.serviceProtocolUri.toString(),
-      if (event.notify) 'notify': 'true',
-    });
   }
 
   /// Switch to the given page ID. This request usually comes from the server API

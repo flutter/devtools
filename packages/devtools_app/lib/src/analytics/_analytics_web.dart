@@ -427,6 +427,7 @@ void select(
   String screenName,
   String selectedItem, {
   int value = 0,
+  bool nonInteraction,
   ScreenAnalyticsMetrics Function() screenMetricsProvider,
 }) {
   GTag.event(
@@ -435,6 +436,7 @@ void select(
       event_category: analytics_constants.selectEvent,
       event_label: selectedItem,
       value: value,
+      non_interaction: nonInteraction,
       send_to: gaDevToolsPropertyId(),
       user_app: userAppType,
       user_build: userBuildType,
