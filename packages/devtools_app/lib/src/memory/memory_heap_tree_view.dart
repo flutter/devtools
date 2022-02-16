@@ -149,9 +149,19 @@ class HeapTreeViewState extends State<HeapTree>
   static const int analysisTabIndex = 0;
   static const int allocationsTabIndex = 1;
 
+  static const _gaPrefix = 'memoryTab';
+
   static final List<Tab> dartHeapTabs = [
-    DevToolsTab(key: dartHeapAnalysisTabKey, text: 'Analysis'),
-    DevToolsTab(key: dartHeapAllocationsTabKey, text: 'Allocations'),
+    DevToolsTab.create(
+      key: dartHeapAnalysisTabKey,
+      gaPrefix: _gaPrefix,
+      tabName: 'Analysis',
+    ),
+    DevToolsTab.create(
+      key: dartHeapAllocationsTabKey,
+      gaPrefix: _gaPrefix,
+      tabName: 'Allocations',
+    ),
   ];
 
   MemoryController controller;
