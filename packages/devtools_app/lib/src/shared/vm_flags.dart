@@ -37,7 +37,7 @@ class VmFlagManager extends Disposer {
     final flagList = await service!.getFlagList() ?? FlagList(flags: []);
     _flags.value = flagList;
 
-    for (var flag in flagList.flags!) {
+    for (var flag in flagList.flags ?? <Flag>[]) {
       _flagNotifiers[flag.name] = ValueNotifier<Flag>(flag);
     }
   }
