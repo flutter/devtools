@@ -4,8 +4,9 @@
 
 // @dart=2.9
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../devtools.dart' as devtools;
