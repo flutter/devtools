@@ -237,7 +237,7 @@ class TreeTracker {
         ),
         Expanded(
           child: Scrollbar(
-            isAlwaysShown: true,
+            thumbVisibility: true,
             controller: scroller,
             child: ListView.separated(
               shrinkWrap: true,

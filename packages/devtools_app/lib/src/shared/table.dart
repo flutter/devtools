@@ -982,7 +982,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
             ),
             Expanded(
               child: Scrollbar(
-                isAlwaysShown: true,
+                thumbVisibility: true,
                 controller: scrollController,
                 child: GestureDetector(
                   behavior: HitTestBehavior.translucent,

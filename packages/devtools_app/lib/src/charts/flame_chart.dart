@@ -291,7 +291,7 @@ abstract class FlameChartState<T extends FlameChart,
         // rendered on top of the custom painters defined in [buildCustomPaints]
         child: Scrollbar(
           controller: _flameChartScrollController,
-          isAlwaysShown: true,
+          thumbVisibility: true,
           child: LayoutBuilder(
             builder: (context, constraints) {
               final chartOverlays = buildChartOverlays(constraints, context);

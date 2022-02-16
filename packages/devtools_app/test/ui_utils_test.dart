@@ -169,7 +169,7 @@ void main() {
     await tester.pumpWidget(
       wrap(
         Scrollbar(
-          isAlwaysShown: true,
+          thumbVisibility: true,
           key: root,
           controller: _scrollControllerX,
           child: SingleChildScrollView(

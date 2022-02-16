@@ -194,7 +194,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
       builder: (context, constraints) {
         final themeData = Theme.of(context);
         final chart = Scrollbar(
-          isAlwaysShown: true,
+          thumbVisibility: true,
           controller: framesScrollController,
           child: Padding(
             padding: EdgeInsets.only(bottom: frameChartScrollbarOffset),
