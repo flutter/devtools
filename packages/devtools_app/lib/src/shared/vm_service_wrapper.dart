@@ -1166,15 +1166,6 @@ class VmServiceWrapper implements VmService {
     }
   }
 
-  /// Gets the name of the service stream for the connected VM service. Pre-v3.22
-  /// this was a private API and named _Service and in v3.22 (July 2019) it was
-  /// made public ("Service").
-  Future<String> get serviceStreamName async =>
-      (await isProtocolVersionSupported(
-              supportedVersion: SemanticVersion(major: 3, minor: 22)))
-          ? 'Service'
-          : '_Service';
-
   @visibleForTesting
   int vmServiceCallCount = 0;
 

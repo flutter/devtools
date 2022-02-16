@@ -229,7 +229,9 @@ Future<DevToolsJsonFile?> importFileFromPicker({
   // extensions than .json. We will need to return a more generic file type.
   return DevToolsJsonFile(
     data: data,
-    name: file.name,
+    // This '!' is needed for google3.
+    // ignore: unnecessary_non_null_assertion
+    name: file.name!,
     lastModifiedTime: lastModifiedTime,
   );
 }

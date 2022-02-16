@@ -8,7 +8,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../analytics/analytics.dart' as ga;

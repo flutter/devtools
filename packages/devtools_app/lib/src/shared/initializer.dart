@@ -68,6 +68,10 @@ class _InitializerState extends State<Initializer>
   void initState() {
     super.initState();
 
+    autoDisposeStreamSubscription(
+      frameworkController.onConnectVmEvent.listen(_connectVm),
+    );
+
     // If we become disconnected by means other than a manual disconnect action,
     // attempt to reconnect.
     addAutoDisposeListener(serviceManager.connectedState, () {
@@ -98,6 +102,16 @@ class _InitializerState extends State<Initializer>
     if (widget.url != null && widget.url != oldWidget.url) {
       _attemptUrlConnection();
     }
+  }
+
+  /// Connects to the VM with the given URI. This request usually comes from the
+  /// IDE via the server API to reuse the DevTools window after being disconnected
+  /// (for example if the user stops a debug session then launches a new one).
+  void _connectVm(event) {
+    DevToolsRouterDelegate.of(context).updateArgsIfNotCurrent({
+      'uri': event.serviceProtocolUri.toString(),
+      if (event.notify) 'notify': 'true',
+    });
   }
 
   Future<void> _attemptUrlConnection() async {
