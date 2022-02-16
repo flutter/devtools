@@ -27,19 +27,18 @@ class VmFlagManager extends Disposer {
   ValueListenable get flags => _flags;
   final _flags = ValueNotifier<FlagList?>(null);
 
-  final _flagNotifiers = <String?, ValueNotifier<Flag?>>{};
+  final _flagNotifiers = <String?, ValueNotifier<Flag>>{};
 
-  ValueNotifier<Flag?>? flag(String name) {
+  ValueNotifier<Flag>? flag(String name) {
     return _flagNotifiers.containsKey(name) ? _flagNotifiers[name] : null;
   }
 
   Future<void> _initFlags() async {
-    final FlagList? flagList = await service!.getFlagList();
+    final FlagList flagList = await service!.getFlagList();
     _flags.value = flagList;
-    if (flagList == null) return;
 
     for (var flag in flagList.flags!) {
-      _flagNotifiers[flag.name] = ValueNotifier<Flag?>(flag);
+      _flagNotifiers[flag.name] = ValueNotifier<Flag>(flag);
     }
   }
 
@@ -47,13 +46,13 @@ class VmFlagManager extends Disposer {
   void handleVmEvent(Event event) async {
     if (event.kind == EventKind.kVMFlagUpdate) {
       if (_flagNotifiers.containsKey(event.flag)) {
-        final currentFlag = _flagNotifiers[event.flag]!.value!;
+        final currentFlag = _flagNotifiers[event.flag]!.value;
         _flagNotifiers[event.flag]!.value = Flag.parse({
           'name': currentFlag.name,
           'comment': currentFlag.comment,
           'modified': true,
           'valueAsString': event.newValue,
-        });
+        })!;
         _flags.value = await service!.getFlagList();
       }
     }
