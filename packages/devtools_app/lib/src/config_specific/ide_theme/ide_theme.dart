@@ -26,5 +26,6 @@ class IdeTheme {
   final double fontSize;
   final bool embed;
 
-  double get fontSizeFactor => fontSize / unscaledDefaultFontSize;
+  double get fontSizeFactor =>
+      (fontSize ?? unscaledDefaultFontSize) / unscaledDefaultFontSize;
 }
