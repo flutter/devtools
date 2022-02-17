@@ -17,8 +17,8 @@ class IdeTheme {
   IdeTheme({
     this.backgroundColor,
     this.foregroundColor,
-    this.fontSize,
-    this.embed,
+    this.fontSize = unscaledDefaultFontSize,
+    this.embed = false,
   });
 
   final Color backgroundColor;
@@ -26,6 +26,5 @@ class IdeTheme {
   final double fontSize;
   final bool embed;
 
-  double get fontSizeFactor =>
-      fontSize != null ? fontSize / unscaledDefaultFontSize : 1.0;
+  double get fontSizeFactor => fontSize / unscaledDefaultFontSize;
 }

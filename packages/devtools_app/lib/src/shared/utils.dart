@@ -20,17 +20,15 @@ import 'notifications.dart';
 ///
 /// Shows a `successMessage` [Notification] on the passed in `context`.
 Future<void> copyToClipboard(
-  String? data,
-  String? successMessage,
+  String data,
+  String successMessage,
   BuildContext context,
 ) async {
   await Clipboard.setData(ClipboardData(
     text: data,
   ));
 
-  if (successMessage != null) {
-    Notifications.of(context)?.push(successMessage);
-  }
+  Notifications.of(context)?.push(successMessage);
 }
 
 /// Logging to debug console only in debug runs.
@@ -42,16 +40,14 @@ void debugLogger(String message) {
 }
 
 double scaleByFontFactor(double original) {
-  return (original * (ideTheme.fontSizeFactor ?? 1.0)).roundToDouble();
+  return (original * ideTheme.fontSizeFactor).roundToDouble();
 }
 
 bool isDense() {
   return preferences.denseModeEnabled.value || isEmbedded();
 }
 
-bool isEmbedded() {
-  return ideTheme.embed ?? false;
-}
+bool isEmbedded() => ideTheme.embed;
 
 mixin CompareMixin implements Comparable {
   bool operator <(other) {
