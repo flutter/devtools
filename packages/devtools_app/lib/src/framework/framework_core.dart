@@ -13,12 +13,12 @@ import '../config_specific/import_export/import_export.dart';
 import '../config_specific/logger/logger.dart';
 import '../primitives/message_bus.dart';
 import '../primitives/utils.dart';
+import '../service/service.dart';
+import '../service/service_manager.dart';
+import '../service/vm_service_wrapper.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
-import '../shared/service.dart';
-import '../shared/service_manager.dart';
 import '../shared/survey.dart';
-import '../shared/vm_service_wrapper.dart';
 
 typedef ErrorReporter = void Function(String title, dynamic error);
 

@@ -4,9 +4,10 @@
 
 // @dart=2.9
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:provider/provider.dart';
 
 import '../devtools.dart' as devtools;

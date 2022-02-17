@@ -45,7 +45,6 @@ dependencies:
   js: ^0.6.1+1
   mime: ^1.0.0
   path: ^1.8.0
-  pedantic: ^1.11.0
   provider: ^5.0.0
   sse: ^4.0.0
   stack_trace: ^1.10.0

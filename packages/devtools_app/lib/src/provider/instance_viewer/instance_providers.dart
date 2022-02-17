@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
 
 import '../../primitives/utils.dart';

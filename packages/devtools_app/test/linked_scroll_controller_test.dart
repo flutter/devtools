@@ -4,10 +4,11 @@
 
 // @dart=2.9
 
+import 'dart:async';
+
 import 'package:devtools_app/src/primitives/flutter_widgets/linked_scroll_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pedantic/pedantic.dart';
 
 // This file was originally forked from package:flutter_widgets. Note that the
 // source may diverge over time.
