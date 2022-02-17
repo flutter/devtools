@@ -713,8 +713,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         newSelectedNodeIndex = max(selectedNodeIndex! - 1, 0);
         break;
       case ScrollKind.parent:
-        newSelectedNodeIndex =
-            max(items.indexOf(selectionValue.node!.parent!), 0);
+        newSelectedNodeIndex = selectionValue.node!.parent != null
+            ? max(items.indexOf(selectionValue.node!.parent!), 0)
+            : 0;
         break;
     }
 
