@@ -375,8 +375,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     implements SortableTable<T> {
   /// The number of items to show when animating out the tree table.
   static const itemsToShowWhenAnimating = 50;
-  List<T> animatingChildren = [];
-  Set<T> animatingChildrenSet = {};
+  late List<T> animatingChildren = [];
+  late Set<T> animatingChildrenSet = {};
   T? animatingNode;
   late List<double> columnWidths;
   late List<bool> rootsExpanded;
@@ -390,8 +390,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   void initState() {
     super.initState();
     _initData();
-    rootsExpanded = List.generate(
-        dataRoots!.length, (index) => dataRoots![index]!.isExpanded);
+    rootsExpanded =
+        List.generate(dataRoots.length, (index) => dataRoots[index].isExpanded);
     _updateItems();
     _focusNode = FocusNode(debugLabel: 'table');
     autoDisposeFocusNode(_focusNode);
@@ -429,8 +429,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         !collectionEquals(widget.dataRoots, oldWidget.dataRoots)) {
       _initData();
     }
-    rootsExpanded = List.generate(
-        dataRoots!.length, (index) => dataRoots![index]!.isExpanded);
+    rootsExpanded =
+        List.generate(dataRoots.length, (index) => dataRoots[index].isExpanded);
     _updateItems();
   }
 
@@ -455,9 +455,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   void _updateItems() {
     setState(() {
-      items = buildFlatList(dataRoots!);
+      items = buildFlatList(dataRoots);
       // Leave enough space for the animating children during the animation.
-      columnWidths = _computeColumnWidths([...items!, ...animatingChildren]);
+      columnWidths = _computeColumnWidths([...items, ...animatingChildren]);
     });
   }
 
@@ -466,7 +466,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       animatingChildren = [];
       animatingChildrenSet = {};
       // Remove the animating children from the column width computations.
-      columnWidths = _computeColumnWidths(items!);
+      columnWidths = _computeColumnWidths(items);
     });
   }
 
@@ -508,8 +508,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       animatingChildrenSet = Set.of(animatingChildren);
 
       // Update the tracked expansion of the root node if needed.
-      if (dataRoots!.contains(node)) {
-        final rootIndex = dataRoots!.indexOf(node);
+      if (dataRoots.contains(node)) {
+        final rootIndex = dataRoots.indexOf(node);
         rootsExpanded[rootIndex] = node.isExpanded;
       }
     });
@@ -517,7 +517,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   List<double> _computeColumnWidths(List<T?> flattenedList) {
-    final T? firstRoot = dataRoots!.first;
+    final T? firstRoot = dataRoots.first;
     TreeNode? deepest = firstRoot;
     // This will use the width of all rows in the table, even the rows
     // that are hidden by nesting.
@@ -598,7 +598,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       );
     }
 
-    final T node = items![index]!;
+    final T node = items[index];
     if (animatingChildrenSet.contains(node)) return const SizedBox();
     return rowForNode(node);
   }
@@ -645,13 +645,13 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     // If there is no selected node, choose the first one.
     if (selectionNotifier.value.node == null) {
       selectionNotifier.value = Selection(
-        node: items![0],
+        node: items[0],
         nodeIndex: 0,
       );
     }
 
     assert(selectionNotifier.value.node ==
-        items![selectionNotifier.value.nodeIndex!]);
+        items[selectionNotifier.value.nodeIndex!]);
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
       _moveSelection(ScrollKind.down, scrollController, constraints.maxHeight);
@@ -707,18 +707,18 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     final selectedNodeIndex = selectionValue.nodeIndex;
     switch (scrollKind) {
       case ScrollKind.down:
-        newSelectedNodeIndex = min(selectedNodeIndex! + 1, items!.length - 1);
+        newSelectedNodeIndex = min(selectedNodeIndex! + 1, items.length - 1);
         break;
       case ScrollKind.up:
         newSelectedNodeIndex = max(selectedNodeIndex! - 1, 0);
         break;
       case ScrollKind.parent:
         newSelectedNodeIndex =
-            max(items!.indexOf(selectionValue.node!.parent), 0);
+            max(items.indexOf(selectionValue.node!.parent!), 0);
         break;
     }
 
-    final T? newSelectedNode = items![newSelectedNodeIndex];
+    final T newSelectedNode = items[newSelectedNodeIndex];
     final isBelowViewport = newSelectedNodeIndex > lastItemIndex;
     final isAboveViewport = newSelectedNodeIndex < firstItemIndex;
 
