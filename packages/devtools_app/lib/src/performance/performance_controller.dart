@@ -295,18 +295,21 @@ class PerformanceController extends DisposableController
     );
     _nextPollStartMicros = currentVmTime.timestamp + 1;
 
-    final traceEvents = <TraceEventWrapper>[];
+    final threadNameEvents = <TraceEvent>[];
     for (final event in timeline.traceEvents) {
+      final traceEvent = TraceEvent(event.json);
       final eventWrapper = TraceEventWrapper(
-        TraceEvent(event.json),
+        traceEvent,
         DateTime.now().millisecondsSinceEpoch,
       );
-      traceEvents.add(eventWrapper);
+      if (traceEvent.phase == 'M' && traceEvent.name == 'thread_name') {
+        threadNameEvents.add(traceEvent);
+      }
       allTraceEvents.add(eventWrapper);
       debugTraceEventCallback(() => log(eventWrapper.event.json));
     }
 
-    updateThreadIds(traceEvents, isInitialUpdate: isInitialPull);
+    updateThreadIds(threadNameEvents, isInitialUpdate: isInitialPull);
   }
 
   FutureOr<void> processAvailableEvents() async {
@@ -573,19 +576,13 @@ class PerformanceController extends DisposableController
   }
 
   void updateThreadIds(
-    List<TraceEventWrapper> traceEvents, {
+    List<TraceEvent> threadNameEvents, {
     bool isInitialUpdate = false,
   }) {
     final isFlutterApp = offlineController.offlineMode.value
         ? offlinePerformanceData != null &&
             offlinePerformanceData.frames.isNotEmpty
         : serviceManager.connectedApp.isFlutterAppNow;
-
-    final threadNameEvents = traceEvents
-        .map((TraceEventWrapper wrapper) => wrapper.event)
-        .where((TraceEvent event) {
-      return event.phase == 'M' && event.name == 'thread_name';
-    }).toList();
 
     // TODO(kenz): Remove this logic once ui/raster distinction changes are
     // available in the engine.
