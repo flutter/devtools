@@ -222,7 +222,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
       builder: (context, constraints) {
         final columnWidths = computeColumnWidths(constraints.maxWidth);
 
-        return _Table<T?>(
+        return _Table<T>(
           data: data,
           columns: widget.columns,
           columnWidths: columnWidths,
