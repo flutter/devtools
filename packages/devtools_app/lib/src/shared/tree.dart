@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -16,9 +14,9 @@ import 'theme.dart';
 
 class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   const TreeView({
-    this.dataRootsListenable,
-    this.dataDisplayProvider,
-    this.onItemSelected,
+    required this.dataRootsListenable,
+    required this.dataDisplayProvider,
+    required this.onItemSelected,
     this.onItemExpanded,
     this.shrinkWrap = false,
     this.itemExtent,
@@ -45,16 +43,16 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
 
   /// If provided, this method will be called when the expand button is tapped.
   /// Otherwise, [onItemSelected] will be invoked, if provided.
-  final FutureOr<void> Function(T) onItemExpanded;
+  final FutureOr<void> Function(T)? onItemExpanded;
 
-  final double itemExtent;
+  final double? itemExtent;
 
   /// Called on traversal of child node during [buildFlatList].
-  final void Function(T) onTraverse;
+  final void Function(T)? onTraverse;
 
   /// Builds a widget representing the empty tree. If [emptyTreeViewBuilder]
   /// is not provided, then an empty [SizedBox] will be built.
-  final Widget Function() emptyTreeViewBuilder;
+  final Widget Function()? emptyTreeViewBuilder;
 
   @override
   _TreeViewState<T> createState() => _TreeViewState<T>();
@@ -83,8 +81,8 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
       shrinkWrap: widget.shrinkWrap,
       physics: widget.shrinkWrap ? const ClampingScrollPhysics() : null,
       itemBuilder: (context, index) {
-        final item = items[index];
-        return TreeViewItem<T>(
+        final T item = items[index];
+        return _TreeViewItem<T>(
           item,
           buildDisplay: (onPressed) =>
               widget.dataDisplayProvider(item, onPressed),
@@ -97,7 +95,7 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
 
   Widget _emptyTreeViewBuilder() {
     if (widget.emptyTreeViewBuilder != null) {
-      return widget.emptyTreeViewBuilder();
+      return widget.emptyTreeViewBuilder!();
     }
     return const SizedBox();
   }
@@ -108,9 +106,8 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
     if (widget.onItemExpanded == null && item.isExpandable) {
       item.toggleExpansion();
     }
-    if (widget.onItemSelected != null) {
-      await widget.onItemSelected(item);
-    }
+    await widget.onItemSelected(item);
+
     _updateItems();
   }
 
@@ -119,8 +116,8 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
       item.toggleExpansion();
     }
     if (widget.onItemExpanded != null) {
-      await widget.onItemExpanded(item);
-    } else if (widget.onItemSelected != null) {
+      await widget.onItemExpanded!(item);
+    } else {
       await widget.onItemSelected(item);
     }
     _updateItems();
@@ -136,12 +133,12 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
   }
 }
 
-class TreeViewItem<T extends TreeNode<T>> extends StatefulWidget {
-  const TreeViewItem(
+class _TreeViewItem<T extends TreeNode<T>> extends StatefulWidget {
+  const _TreeViewItem(
     this.data, {
-    this.buildDisplay,
-    this.onItemExpanded,
-    this.onItemSelected,
+    required this.buildDisplay,
+    required this.onItemExpanded,
+    required this.onItemSelected,
   });
 
   final T data;
@@ -155,7 +152,7 @@ class TreeViewItem<T extends TreeNode<T>> extends StatefulWidget {
   _TreeViewItemState<T> createState() => _TreeViewItemState<T>();
 }
 
-class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
+class _TreeViewItemState<T extends TreeNode<T>> extends State<_TreeViewItem<T>>
     with TickerProviderStateMixin, CollapsibleAnimationMixin {
   @override
   Widget build(BuildContext context) {
@@ -200,24 +197,24 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<TreeViewItem<T>>
   }
 
   void _onExpanded() {
-    widget?.onItemExpanded(widget.data);
+    widget.onItemExpanded(widget.data);
     setExpanded(widget.data.isExpanded);
   }
 
   void _onSelected() {
-    widget?.onItemSelected(widget.data);
+    widget.onItemSelected(widget.data);
     setExpanded(widget.data.isExpanded);
   }
 }
 
 mixin TreeMixin<T extends TreeNode<T>> {
-  List<T> dataRoots;
+  late List<T> dataRoots;
 
-  List<T> items;
+  late List<T> items;
 
   List<T> buildFlatList(
     List<T> roots, {
-    void onTraverse(T node),
+    void onTraverse(T node)?,
   }) {
     final flatList = <T>[];
     for (T root in roots) {
@@ -231,7 +228,6 @@ mixin TreeMixin<T extends TreeNode<T>> {
   }
 
   void traverse(T node, bool Function(T) callback) {
-    if (node == null) return;
     final shouldContinue = callback(node);
     if (shouldContinue) {
       for (var child in node.children) {
