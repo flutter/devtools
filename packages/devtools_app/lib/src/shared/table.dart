@@ -141,7 +141,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
 
     double available = maxWidth;
     // Columns sorted by increasing minWidth.
-    final List<ColumnData<T?>> sortedColumns = widget.columns.toList()
+    final List<ColumnData<T>> sortedColumns = widget.columns.toList()
       ..sort((a, b) {
         if (a.minWidthPx != null && b.minWidthPx != null) {
           return a.minWidthPx!.compareTo(b.minWidthPx!);
@@ -199,7 +199,7 @@ class FlatTableState<T> extends State<FlatTable<T>>
         unconstrainedCount > 0 ? available / unconstrainedCount : available;
     int unconstrainedFound = 0;
     final widths = <double>[];
-    for (ColumnData<T?> column in widget.columns) {
+    for (ColumnData<T> column in widget.columns) {
       double? width = column.fixedWidthPx;
       if (width == null) {
         if (column.minWidthPx != null &&
@@ -240,9 +240,9 @@ class FlatTableState<T> extends State<FlatTable<T>>
 
   Widget _buildRow(
     BuildContext context,
-    LinkedScrollControllerGroup? linkedScrollControllerGroup,
+    LinkedScrollControllerGroup linkedScrollControllerGroup,
     int index,
-    List<double>? columnWidths,
+    List<double> columnWidths,
   ) {
     final node = data[index];
     return TableRow<T>(
@@ -265,17 +265,17 @@ class FlatTableState<T> extends State<FlatTable<T>>
   }
 
   void _sortDataAndUpdate(
-    ColumnData column,
+    ColumnData<T> column,
     SortDirection direction, {
-    ColumnData? secondarySortColumn,
+    ColumnData<T>? secondarySortColumn,
   }) {
     setState(() {
       sortData(column, direction, secondarySortColumn: secondarySortColumn);
       if (widget.onSortChanged != null) {
         widget.onSortChanged!(
-          column as ColumnData<T>,
+          column,
           direction,
-          secondarySortColumn: secondarySortColumn as ColumnData<T>?,
+          secondarySortColumn: secondarySortColumn,
         );
       }
     });
@@ -283,15 +283,15 @@ class FlatTableState<T> extends State<FlatTable<T>>
 
   @override
   void sortData(
-    ColumnData? column,
-    SortDirection? direction, {
+    ColumnData column,
+    SortDirection direction, {
     ColumnData? secondarySortColumn,
   }) {
     data.sort(
       (T a, T b) => _compareData<T>(
         a,
         b,
-        column!,
+        column,
         direction,
         secondarySortColumn: secondarySortColumn,
       ),
@@ -356,7 +356,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   /// Factory that creates keys for each row in this table.
   final Key Function(T) keyFactory;
 
-  final ColumnData<T>? sortColumn;
+  final ColumnData<T> sortColumn;
 
   final SortDirection sortDirection;
 
@@ -371,18 +371,18 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
 }
 
 class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
-    with TickerProviderStateMixin, TreeMixin<T?>, AutoDisposeMixin
+    with TickerProviderStateMixin, TreeMixin<T>, AutoDisposeMixin
     implements SortableTable<T> {
   /// The number of items to show when animating out the tree table.
   static const itemsToShowWhenAnimating = 50;
-  List<T?> animatingChildren = [];
-  Set<T?> animatingChildrenSet = {};
+  List<T> animatingChildren = [];
+  Set<T> animatingChildrenSet = {};
   T? animatingNode;
   late List<double> columnWidths;
   late List<bool> rootsExpanded;
-  FocusNode? _focusNode;
+  late FocusNode _focusNode;
 
-  ValueNotifier<Selection<T?>>? selectionNotifier;
+  late ValueNotifier<Selection<T>> selectionNotifier;
 
   FocusNode? get focusNode => _focusNode;
 
@@ -419,7 +419,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
     addAutoDisposeListener(selectionNotifier, () {
       setState(() {
-        final node = selectionNotifier!.value.node;
+        final node = selectionNotifier.value.node;
         expandParents(node?.parent);
       });
     });
@@ -472,7 +472,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   void _onItemPressed(T node, int nodeIndex) {
     // Rebuilds the table whenever the tree structure has been updated.
-    selectionNotifier!.value = Selection(
+    selectionNotifier.value = Selection(
       node: node,
       nodeIndex: nodeIndex,
     );
@@ -490,7 +490,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     setState(() {
       if (!node.isExpandable) return;
       animatingNode = node;
-      List<T?> nodeChildren;
+      List<T> nodeChildren;
       if (node.isExpanded) {
         // Compute the children of the expanded node before collapsing.
         nodeChildren = buildFlatList([node]);
@@ -586,14 +586,14 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         columns: widget.columns,
         columnWidths: columnWidths,
         expandableColumn: widget.treeColumn,
-        isSelected: selectionNotifier!.value.node == node,
+        isSelected: selectionNotifier.value.node == node,
         isExpanded: node.isExpanded,
         isExpandable: node.isExpandable,
         isShown: node.shouldShow(),
         expansionChildren:
             node != animatingNode || animatingChildrenSet.contains(node)
                 ? null
-                : [for (var child in animatingChildren) rowForNode(child!)],
+                : [for (var child in animatingChildren) rowForNode(child)],
         onExpansionCompleted: _onItemsAnimated,
       );
     }
@@ -643,15 +643,15 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     ].contains(event.logicalKey)) return KeyEventResult.ignored;
 
     // If there is no selected node, choose the first one.
-    if (selectionNotifier!.value.node == null) {
-      selectionNotifier!.value = Selection(
+    if (selectionNotifier.value.node == null) {
+      selectionNotifier.value = Selection(
         node: items![0],
         nodeIndex: 0,
       );
     }
 
-    assert(selectionNotifier!.value.node ==
-        items![selectionNotifier!.value.nodeIndex!]);
+    assert(selectionNotifier.value.node ==
+        items![selectionNotifier.value.nodeIndex!]);
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
       _moveSelection(ScrollKind.down, scrollController, constraints.maxHeight);
@@ -660,8 +660,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
       // On left arrow collapse the row if it is expanded. If it is not, move
       // selection to its parent.
-      if (selectionNotifier!.value.node!.isExpanded) {
-        _toggleNode(selectionNotifier!.value.node!);
+      if (selectionNotifier.value.node!.isExpanded) {
+        _toggleNode(selectionNotifier.value.node!);
       } else {
         _moveSelection(
           ScrollKind.parent,
@@ -671,9 +671,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       }
     } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
       // On right arrow expand the row if possible, otherwise move selection down.
-      if (selectionNotifier!.value.node!.isExpandable &&
-          !selectionNotifier!.value.node!.isExpanded) {
-        _toggleNode(selectionNotifier!.value.node!);
+      if (selectionNotifier.value.node!.isExpandable &&
+          !selectionNotifier.value.node!.isExpanded) {
+        _toggleNode(selectionNotifier.value.node!);
       } else {
         _moveSelection(
           ScrollKind.down,
@@ -703,7 +703,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     final lastItemIndex = firstItemIndex + minCompleteItemsInView - 1;
     int? newSelectedNodeIndex;
 
-    final selectionValue = selectionNotifier!.value;
+    final selectionValue = selectionNotifier.value;
     final selectedNodeIndex = selectionValue.nodeIndex;
     switch (scrollKind) {
       case ScrollKind.down:
@@ -743,7 +743,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       // We do not need to scroll into view here because we have manually
       // managed the scrolling in the above checks for `isBelowViewport` and
       // `isAboveViewport`.
-      selectionNotifier!.value = Selection(
+      selectionNotifier.value = Selection(
         node: newSelectedNode,
         nodeIndex: newSelectedNodeIndex,
       );
