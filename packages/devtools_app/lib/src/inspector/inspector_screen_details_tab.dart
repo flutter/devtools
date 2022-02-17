@@ -6,119 +6,145 @@
 
 import 'package:flutter/material.dart';
 
-import '../primitives/auto_dispose_mixin.dart';
+import '../analytics/analytics.dart' as ga;
+import '../analytics/constants.dart' as analytics_constants;
+import '../primitives/blocking_action_mixin.dart';
+import '../shared/common_widgets.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';
 import '../ui/tab.dart';
 import 'inspector_controller.dart';
+import 'inspector_screen.dart';
 import 'layout_explorer/layout_explorer.dart';
 
-class InspectorDetailsTabController extends StatefulWidget {
-  const InspectorDetailsTabController({
-    this.detailsTree,
-    this.actionButtons,
-    this.controller,
+class InspectorDetails extends StatelessWidget {
+  const InspectorDetails({
+    @required this.detailsTree,
+    @required this.controller,
     Key key,
   }) : super(key: key);
 
   final Widget detailsTree;
-  final Widget actionButtons;
   final InspectorController controller;
 
   @override
-  _InspectorDetailsTabControllerState createState() =>
-      _InspectorDetailsTabControllerState();
-}
-
-class _InspectorDetailsTabControllerState
-    extends State<InspectorDetailsTabController>
-    with TickerProviderStateMixin, AutoDisposeMixin {
-  static const _detailsTreeTabIndex = 1;
-  static const _tabsLengthWithLayoutExplorer = 2;
-
-  TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    addAutoDisposeListener(
-      _tabController = TabController(
-        length: _tabsLengthWithLayoutExplorer,
-        vsync: this,
-      ),
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final tabs = <Tab>[
-      _buildTab('Layout Explorer'),
-      _buildTab('Widget Details Tree'),
+    final tabs = [
+      _buildTab(tabName: 'Layout Explorer'),
+      _buildTab(
+        tabName: 'Widget Details Tree',
+        trailing: InspectorExpandCollapseButtons(controller: controller),
+      ),
     ];
     final tabViews = <Widget>[
-      LayoutExplorerTab(controller: widget.controller),
-      widget.detailsTree,
+      LayoutExplorerTab(controller: controller),
+      detailsTree,
     ];
     final theme = Theme.of(context);
     final focusColor = theme.focusColor;
     final borderSide = BorderSide(color: focusColor);
-    final hasActionButtons = widget.actionButtons != null &&
-        _tabController.index == _detailsTreeTabIndex;
 
-    return Column(
-      children: <Widget>[
-        Container(
-          height: defaultButtonHeight +
-              (isDense() ? denseModeDenseSpacing : denseSpacing),
-          decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).focusColor),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: <Widget>[
-              TabBar(
-                controller: _tabController,
-                labelColor: theme.textTheme.bodyText1.color,
-                tabs: tabs,
-                isScrollable: true,
-              ),
-              Expanded(
-                child: Container(
-                  alignment: Alignment.centerRight,
-                  child: hasActionButtons
-                      ? widget.actionButtons
-                      : const SizedBox(),
-                ),
-              ),
-            ],
+    return AnalyticsTabbedView(
+      tabs: tabs,
+      tabViews: tabViews,
+      gaScreen: analytics_constants.inspector,
+      tabBarContainer: (child) => Container(
+        height: defaultButtonHeight +
+            (isDense() ? denseModeDenseSpacing : denseSpacing),
+        decoration: BoxDecoration(
+          border: Border.all(color: Theme.of(context).focusColor),
+        ),
+        child: child,
+      ),
+      tabViewContainer: (child) => Container(
+        decoration: BoxDecoration(
+          border: Border(
+            left: borderSide,
+            bottom: borderSide,
+            right: borderSide,
           ),
         ),
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border(
-                left: borderSide,
-                bottom: borderSide,
-                right: borderSide,
-              ),
-            ),
-            child: TabBarView(
-              physics: defaultTabBarViewPhysics,
-              controller: _tabController,
-              children: tabViews,
-            ),
-          ),
-        ),
-      ],
+        child: child,
+      ),
     );
   }
 
-  Widget _buildTab(String tabName) {
-    return DevToolsTab(
-      child: Text(
-        tabName,
-        overflow: TextOverflow.ellipsis,
+  DevToolsTab _buildTab({@required String tabName, Widget trailing}) {
+    return DevToolsTab.create(
+      tabName: tabName,
+      gaPrefix: 'inspectorDetailsTab',
+      trailing: trailing,
+    );
+  }
+}
+
+class InspectorExpandCollapseButtons extends StatefulWidget {
+  const InspectorExpandCollapseButtons({
+    Key key,
+    @required this.controller,
+  }) : super(key: key);
+
+  final InspectorController controller;
+
+  @override
+  State<InspectorExpandCollapseButtons> createState() =>
+      _InspectorExpandCollapseButtonsState();
+}
+
+class _InspectorExpandCollapseButtonsState
+    extends State<InspectorExpandCollapseButtons> with BlockingActionMixin {
+  bool get enableButtons => actionInProgress == false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.centerRight,
+      decoration: BoxDecoration(
+        border: Border(
+          left: defaultBorderSide(Theme.of(context)),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            child: IconLabelButton(
+              icon: Icons.unfold_more,
+              onPressed: enableButtons ? _onExpandClick : null,
+              label: 'Expand all',
+              minScreenWidthForTextBeforeScaling:
+                  InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
+              outlined: false,
+            ),
+          ),
+          const SizedBox(width: denseSpacing),
+          SizedBox(
+            child: IconLabelButton(
+              icon: Icons.unfold_less,
+              onPressed: enableButtons ? _onCollapseClick : null,
+              label: 'Collapse to selected',
+              minScreenWidthForTextBeforeScaling:
+                  InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
+              outlined: false,
+            ),
+          )
+        ],
       ),
     );
+  }
+
+  void _onExpandClick() {
+    blockWhileInProgress(() async {
+      ga.select(analytics_constants.inspector, analytics_constants.expandAll);
+      await widget.controller.expandAllNodesInDetailsTree();
+    });
+  }
+
+  void _onCollapseClick() {
+    blockWhileInProgress(() async {
+      ga.select(analytics_constants.inspector, analytics_constants.collapseAll);
+      await widget.controller.collapseDetailsToSelected();
+    });
   }
 }

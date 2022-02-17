@@ -14,12 +14,12 @@ import '../analytics/constants.dart' as analytics_constants;
 import '../debugger/debugger_controller.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/blocking_action_mixin.dart';
+import '../service/service_extensions.dart' as extensions;
 import '../shared/common_widgets.dart';
 import '../shared/connected_app.dart';
 import '../shared/error_badge_manager.dart';
 import '../shared/globals.dart';
 import '../shared/screen.dart';
-import '../shared/service_extensions.dart' as extensions;
 import '../shared/split.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';
@@ -77,8 +77,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       inspectorController?.details?.inspectorTree;
 
   DebuggerController _debuggerController;
-
-  bool get enableButtons => actionInProgress == false;
 
   bool searchVisible = false;
 
@@ -144,14 +142,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     });
   }
 
-  void _onExpandClick() {
-    blockWhileInProgress(inspectorController.expandAllNodesInDetailsTree);
-  }
-
-  void _onResetClick() {
-    blockWhileInProgress(inspectorController.collapseDetailsToSelected);
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -175,10 +165,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       initialFractions: const [0.33, 0.67],
       children: [
         summaryTree,
-        InspectorDetailsTabController(
+        InspectorDetails(
           detailsTree: detailsTree,
           controller: inspectorController,
-          actionButtons: _expandCollapseButtons(),
         ),
       ],
     );
@@ -307,44 +296,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // TODO(jacobr): implement TogglePlatformSelector.
       //  TogglePlatformSelector().selector
     ];
-  }
-
-  Widget _expandCollapseButtons() {
-    return Container(
-      alignment: Alignment.centerRight,
-      decoration: BoxDecoration(
-        border: Border(
-          left: defaultBorderSide(Theme.of(context)),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            child: IconLabelButton(
-              icon: Icons.unfold_more,
-              onPressed: enableButtons ? _onExpandClick : null,
-              label: 'Expand all',
-              minScreenWidthForTextBeforeScaling:
-                  minScreenWidthForTextBeforeScaling,
-              outlined: false,
-            ),
-          ),
-          const SizedBox(width: denseSpacing),
-          SizedBox(
-            child: IconLabelButton(
-              icon: Icons.unfold_less,
-              onPressed: enableButtons ? _onResetClick : null,
-              label: 'Collapse to selected',
-              minScreenWidthForTextBeforeScaling:
-                  minScreenWidthForTextBeforeScaling,
-              outlined: false,
-            ),
-          )
-        ],
-      ),
-    );
   }
 
   void _refreshInspector() {

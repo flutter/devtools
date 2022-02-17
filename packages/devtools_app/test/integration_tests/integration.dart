@@ -9,14 +9,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     show ConsoleAPIEvent, RemoteObject;
-
-import '../test_infra/chrome.dart';
-import '../test_infra/cli_test_driver.dart';
 
 const bool verboseTesting = false;
 

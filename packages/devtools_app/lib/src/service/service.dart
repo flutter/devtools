@@ -6,7 +6,6 @@
 
 import 'dart:async';
 
-import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/utils.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 

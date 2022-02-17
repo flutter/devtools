@@ -4,10 +4,9 @@
 
 // @dart=2.9
 
-import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../test_infra/cli_test_driver.dart';
 import 'integration.dart';
 
 void appTests() {

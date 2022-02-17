@@ -11,8 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../profiler/cpu_profile_model.dart' hide CpuSample;
-import 'globals.dart';
-import 'version.dart';
+import '../shared/globals.dart';
+import '../shared/version.dart';
 
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(
@@ -1165,15 +1165,6 @@ class VmServiceWrapper implements VmService {
           'The full string for "{stringRef.valueAsString}..." is unavailable');
     }
   }
-
-  /// Gets the name of the service stream for the connected VM service. Pre-v3.22
-  /// this was a private API and named _Service and in v3.22 (July 2019) it was
-  /// made public ("Service").
-  Future<String> get serviceStreamName async =>
-      (await isProtocolVersionSupported(
-              supportedVersion: SemanticVersion(major: 3, minor: 22)))
-          ? 'Service'
-          : '_Service';
 
   @visibleForTesting
   int vmServiceCallCount = 0;

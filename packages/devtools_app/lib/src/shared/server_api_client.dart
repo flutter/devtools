@@ -44,8 +44,7 @@ class DevToolsServerConnection {
         ]);
 
     try {
-      // ignore: unused_local_variable
-      final response = await http.get(uri).timeout(const Duration(seconds: 1));
+      final response = await http.get(uri).timeout(const Duration(seconds: 5));
       // When running with the local dev server Flutter may serve its index page
       // for missing files to support the hashless url strategy. Check the response
       // content to confirm it came from our server.
@@ -122,7 +121,7 @@ class DevToolsServerConnection {
       'jsonrpc': '2.0',
       'id': id,
       'method': method,
-      'params': params,
+      if (params != null) 'params': params,
     });
     final completer = Completer<T>();
     _completers[id] = completer;
