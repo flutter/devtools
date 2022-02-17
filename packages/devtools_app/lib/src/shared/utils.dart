@@ -6,8 +6,6 @@
 // other libraries in this package.
 // Utils, that do not have dependencies, should go to primitives/utils.dart.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -30,9 +28,7 @@ Future<void> copyToClipboard(
     text: data,
   ));
 
-  if (successMessage != null) {
-    Notifications.of(context)?.push(successMessage);
-  }
+  Notifications.of(context)?.push(successMessage);
 }
 
 /// Logging to debug console only in debug runs.
@@ -44,17 +40,14 @@ void debugLogger(String message) {
 }
 
 double scaleByFontFactor(double original) {
-  return (original * (ideTheme?.fontSizeFactor ?? 1.0)).roundToDouble();
+  return (original * ideTheme.fontSizeFactor).roundToDouble();
 }
 
 bool isDense() {
-  return preferences != null && preferences.denseModeEnabled.value ||
-      isEmbedded();
+  return preferences.denseModeEnabled.value || isEmbedded();
 }
 
-bool isEmbedded() {
-  return ideTheme?.embed ?? false;
-}
+bool isEmbedded() => ideTheme.embed;
 
 mixin CompareMixin implements Comparable {
   bool operator <(other) {

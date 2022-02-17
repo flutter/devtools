@@ -6,6 +6,7 @@
 
 // ignore_for_file: avoid_redundant_argument_values
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/primitives/trees.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
@@ -21,6 +22,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(IdeTheme, IdeTheme());
   });
 
   group('FlatTable view', () {

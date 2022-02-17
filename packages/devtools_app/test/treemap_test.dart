@@ -7,6 +7,7 @@
 import 'dart:io';
 
 import 'package:devtools_app/src/charts/treemap.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -48,6 +49,7 @@ void main() {
 
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(IdeTheme, IdeTheme());
   });
 
   group('TreemapNode', () {
