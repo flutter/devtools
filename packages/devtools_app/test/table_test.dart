@@ -474,35 +474,6 @@ void main() {
       await tester.tap(find.byKey(key));
       expect(selected, testData);
     });
-
-    test('fails with no data', () {
-      expect(
-        () {
-          FlatTable<TestData>(
-            columns: [flatNameColumn],
-            data: null,
-            keyFactory: (d) => Key(d.name),
-            onItemSelected: noop,
-            sortColumn: flatNameColumn,
-            sortDirection: SortDirection.ascending,
-          );
-        },
-        throwsAssertionError,
-      );
-    });
-
-    test('fails when a TreeNode cannot provide a key', () {
-      expect(() {
-        FlatTable<TestData>(
-          columns: [flatNameColumn],
-          data: flatData,
-          keyFactory: null,
-          onItemSelected: noop,
-          sortColumn: flatNameColumn,
-          sortDirection: SortDirection.ascending,
-        );
-      }, throwsAssertionError);
-    });
   });
 
   group('TreeTable view', () {
@@ -954,47 +925,7 @@ void main() {
       expect(crackleRow.backgroundColor.value, equals(color1Value));
     });
 
-    test('fails with no data', () {
-      expect(
-        () {
-          TreeTable<TestData>(
-            columns: [treeColumn],
-            dataRoots: null,
-            treeColumn: treeColumn,
-            keyFactory: (d) => Key(d.name),
-            sortColumn: treeColumn,
-            sortDirection: SortDirection.ascending,
-          );
-        },
-        throwsAssertionError,
-      );
-    });
-
-    test('fails when a TreeNode cannot provide a key', () {
-      expect(() {
-        TreeTable<TestData>(
-          columns: [treeColumn],
-          dataRoots: [tree1],
-          treeColumn: treeColumn,
-          keyFactory: null,
-          sortColumn: treeColumn,
-          sortDirection: SortDirection.ascending,
-        );
-      }, throwsAssertionError);
-    });
-
-    test('fails when there is no TreeColumn', () {
-      expect(() {
-        TreeTable<TestData>(
-          columns: [treeColumn],
-          dataRoots: [tree1],
-          treeColumn: null,
-          keyFactory: (d) => Key(d.name),
-          sortColumn: treeColumn,
-          sortDirection: SortDirection.ascending,
-        );
-      }, throwsAssertionError);
-
+    test('fails when TreeColumn is not in column list', () {
       expect(() {
         TreeTable<TestData>(
           columns: const [],

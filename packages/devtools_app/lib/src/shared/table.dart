@@ -348,7 +348,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   final List<ColumnData<T>> columns;
 
   /// The column of the table to treat as expandable.
-  final TreeColumnData<T>? treeColumn;
+  final TreeColumnData<T> treeColumn;
 
   /// The tree structures of rows to show in this table.
   final List<T> dataRoots;
