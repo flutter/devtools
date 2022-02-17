@@ -4,6 +4,7 @@
 
 // @dart=2.9
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/http/http.dart';
 import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
@@ -53,6 +54,7 @@ void main() {
   setUpAll(() async {
     socketProfile = loadSocketProfile();
     httpProfile = loadHttpProfile();
+    setGlobal(IdeTheme, IdeTheme());
   });
 
   group('Network Profiler', () {

@@ -4,6 +4,7 @@
 
 // @dart=2.9
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/service/service_registrations.dart'
     as registrations;
@@ -35,6 +36,7 @@ void main() {
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isRunningOnDartVM).thenReturn(true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(IdeTheme, IdeTheme());
     }
 
     DeviceDialog deviceDialog;

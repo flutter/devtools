@@ -1581,7 +1581,7 @@ class LegendEntry {
 }
 
 /// The type of data provider function used by the CopyToClipboard Control.
-typedef ClipboardDataProvider = String? Function();
+typedef ClipboardDataProvider = String Function();
 
 /// Control that copies `data` to the clipboard.
 ///

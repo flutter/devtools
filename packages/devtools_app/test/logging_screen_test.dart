@@ -7,6 +7,7 @@
 @TestOn('vm')
 
 import 'package:ansicolor/ansicolor.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/logging/logging_controller.dart';
 import 'package:devtools_app/src/logging/logging_screen.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
@@ -55,6 +56,7 @@ void main() {
       when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(IdeTheme, IdeTheme());
 
       screen = const LoggingScreen();
     });

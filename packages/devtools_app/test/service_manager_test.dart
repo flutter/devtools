@@ -7,6 +7,7 @@
 @TestOn('vm')
 import 'dart:async';
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_extension_manager.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
@@ -25,6 +26,7 @@ import 'test_infra/flutter_test_environment.dart';
 const jsonRpcInvalidParamsCode = -32602;
 
 void main() async {
+  setGlobal(IdeTheme, IdeTheme());
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );

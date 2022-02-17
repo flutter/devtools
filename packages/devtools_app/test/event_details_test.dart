@@ -4,6 +4,7 @@
 
 // @dart=2.9
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/performance/event_details.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
@@ -41,6 +42,7 @@ void main() {
       final fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(IdeTheme, IdeTheme());
       when(serviceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     });
 

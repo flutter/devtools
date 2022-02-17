@@ -4,6 +4,7 @@
 
 // @dart=2.9
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/memory/memory_controller.dart';
 import 'package:devtools_app/src/memory/memory_events_pane.dart';
@@ -119,6 +120,7 @@ void main() {
       when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(IdeTheme, IdeTheme());
       screen = const MemoryScreen();
 
       expect(MemoryScreen.isDebugging, isFalse);
