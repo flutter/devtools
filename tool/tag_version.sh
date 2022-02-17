@@ -1,5 +1,5 @@
 #!/bin/bash
-CURRENT_VERSION="$(sed -n -e 's/^.*version: //p' packages/devtools/pubspec.yaml)"
+CURRENT_VERSION="$(sed -n -e 's/^.*version: //p' packages/devtools_app/pubspec.yaml)"
 
 echo "Tagging version: $CURRENT_VERSION"
 set -x #echo on

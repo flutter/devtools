@@ -10,8 +10,8 @@ import 'package:devtools_app/src/config_specific/import_export/import_export.dar
 import 'package:devtools_app/src/performance/flutter_frames_chart.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_model.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/ui/colors.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';

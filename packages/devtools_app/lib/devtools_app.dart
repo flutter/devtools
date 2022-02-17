@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: directives_ordering
+
 // @dart=2.9
 export 'src/analytics/analytics.dart';
 export 'src/analytics/analytics_controller.dart';
@@ -47,13 +49,15 @@ export 'src/shared/notifications.dart';
 export 'src/shared/preferences.dart';
 export 'src/shared/routing.dart';
 export 'src/shared/screen.dart';
-export 'src/shared/service_extensions.dart';
-export 'src/shared/service_manager.dart';
+export 'src/service/service_extensions.dart';
+export 'src/service/service_manager.dart';
+export 'src/service/service_extension_manager.dart';
+export 'src/service/isolate_manager.dart';
 export 'src/shared/split.dart';
 export 'src/shared/theme.dart';
 export 'src/shared/utils.dart';
 export 'src/shared/version.dart';
-export 'src/shared/vm_flags.dart';
-export 'src/shared/vm_service_wrapper.dart';
+export 'src/service/vm_flags.dart';
+export 'src/service/vm_service_wrapper.dart';
 export 'src/ui/icons.dart';
 export 'src/ui/search.dart';
