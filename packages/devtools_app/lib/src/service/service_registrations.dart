@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../analytics/constants.dart' as analytics_constants;
 import '../ui/icons.dart';
-import 'theme.dart';
+import '../shared/theme.dart';
 
 class RegisteredServiceDescription {
   const RegisteredServiceDescription._({

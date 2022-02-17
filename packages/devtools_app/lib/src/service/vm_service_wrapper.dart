@@ -11,8 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../profiler/cpu_profile_model.dart' hide CpuSample;
-import 'globals.dart';
-import 'version.dart';
+import '../shared/globals.dart';
+import '../shared/version.dart';
 
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(

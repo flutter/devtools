@@ -28,7 +28,7 @@ import '../config_specific/url/url.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import '../shared/globals.dart';
-import '../shared/service_extensions.dart' as extensions;
+import '../service/service_extensions.dart' as extensions;
 import 'diagnostics_node.dart';
 import 'inspector_screen.dart';
 import 'inspector_service.dart';

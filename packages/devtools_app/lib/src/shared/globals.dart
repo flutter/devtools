@@ -11,7 +11,7 @@ import '../primitives/message_bus.dart';
 import '../primitives/storage.dart';
 import 'framework_controller.dart';
 import 'preferences.dart';
-import 'service_manager.dart';
+import '../service/service_manager.dart';
 import 'survey.dart';
 
 final Map<Type, dynamic> globals = <Type, dynamic>{};

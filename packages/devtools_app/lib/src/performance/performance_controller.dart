@@ -25,7 +25,7 @@ import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/profile_granularity.dart';
 import '../shared/globals.dart';
-import '../shared/service_manager.dart';
+import '../service/service_manager.dart';
 import '../ui/search.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';

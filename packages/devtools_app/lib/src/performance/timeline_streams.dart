@@ -13,7 +13,7 @@ import 'package:vm_service/vm_service.dart' hide Error;
 import '../primitives/auto_dispose.dart';
 import '../shared/connected_app.dart';
 import '../shared/globals.dart';
-import '../shared/vm_service_wrapper.dart';
+import '../service/vm_service_wrapper.dart';
 
 class TimelineStreamManager extends Disposer {
   static const dartTimelineStream = 'Dart';

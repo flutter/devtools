@@ -14,7 +14,7 @@ import '../primitives/trace_event.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../profiler/cpu_profile_model.dart';
-import '../shared/service_manager.dart';
+import '../service/service_manager.dart';
 import '../ui/search.dart';
 import 'performance_utils.dart';
 import 'timeline_event_processor.dart';

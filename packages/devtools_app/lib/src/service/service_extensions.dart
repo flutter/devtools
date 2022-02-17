@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 
 import '../analytics/constants.dart' as analytics_constants;
 import '../ui/icons.dart';
-import 'theme.dart';
+import '../shared/theme.dart';
 
 // Each service extension needs to be added to [_extensionDescriptions].
 class ToggleableServiceExtensionDescription<T>

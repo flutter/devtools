@@ -20,7 +20,7 @@ import '../shared/dialogs.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
 import '../shared/screen.dart';
-import '../shared/service_extensions.dart';
+import '../service/service_extensions.dart';
 import '../shared/split.dart';
 import '../shared/theme.dart';
 import '../shared/version.dart';

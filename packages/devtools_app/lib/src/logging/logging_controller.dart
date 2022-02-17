@@ -23,7 +23,7 @@ import '../primitives/auto_dispose.dart';
 import '../primitives/message_bus.dart';
 import '../primitives/utils.dart';
 import '../shared/globals.dart';
-import '../shared/vm_service_wrapper.dart';
+import '../service/vm_service_wrapper.dart';
 import '../ui/filter.dart';
 import '../ui/search.dart';
 import 'logging_screen.dart';

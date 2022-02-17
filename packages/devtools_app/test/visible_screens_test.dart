@@ -19,7 +19,7 @@ import 'package:devtools_app/src/shared/framework_controller.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_app/src/shared/screen.dart';
-import 'package:devtools_app/src/shared/service_manager.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_app/src/vm_developer/vm_developer_tools_screen.dart';
 import 'package:devtools_test/devtools_test.dart';

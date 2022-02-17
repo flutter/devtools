@@ -9,6 +9,7 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
+import 'package:devtools_app/src/service/isolate_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -18,8 +19,8 @@ import '../primitives/history_manager.dart';
 import '../primitives/message_bus.dart';
 import '../primitives/utils.dart';
 import '../shared/globals.dart';
-import '../shared/service_manager.dart';
-import '../shared/vm_service_wrapper.dart';
+import '../service/service_manager.dart';
+import '../service/vm_service_wrapper.dart';
 import '../ui/search.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';

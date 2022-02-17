@@ -6,8 +6,8 @@
 
 import 'package:devtools_app/src/shared/device_dialog.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/service_manager.dart';
-import 'package:devtools_app/src/shared/service_registrations.dart'
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/service/service_registrations.dart'
     as registrations;
 import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_test/devtools_test.dart';

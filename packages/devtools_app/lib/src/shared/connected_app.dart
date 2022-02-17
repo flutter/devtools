@@ -12,7 +12,7 @@ import '../config_specific/import_export/import_export.dart';
 import '../config_specific/logger/logger.dart' as logger;
 import 'eval_on_dart_library.dart';
 import 'globals.dart';
-import 'service_registrations.dart' as registrations;
+import '../service/service_registrations.dart' as registrations;
 import 'title.dart';
 import 'version.dart';
 

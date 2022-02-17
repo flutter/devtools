@@ -19,7 +19,7 @@ import '../shared/connected_app.dart';
 import '../shared/error_badge_manager.dart';
 import '../shared/globals.dart';
 import '../shared/screen.dart';
-import '../shared/service_extensions.dart' as extensions;
+import '../service/service_extensions.dart' as extensions;
 import '../shared/split.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';

@@ -19,8 +19,8 @@ import '../primitives/auto_dispose.dart';
 import '../primitives/listenable.dart';
 import '../primitives/utils.dart';
 import 'globals.dart';
-import 'service_extensions.dart' as extensions;
-import 'vm_service_wrapper.dart';
+import '../service/service_extensions.dart' as extensions;
+import '../service/vm_service_wrapper.dart';
 
 class ErrorBadgeManager extends DisposableController
     with AutoDisposeControllerMixin {
