@@ -34,9 +34,9 @@ double get defaultRowHeight => scaleByFontFactor(32.0);
 
 typedef IndexedScrollableWidgetBuilder = Widget Function(
   BuildContext,
-  LinkedScrollControllerGroup? linkedScrollControllerGroup,
+  LinkedScrollControllerGroup linkedScrollControllerGroup,
   int index,
-  List<double>? columnWidths,
+  List<double> columnWidths,
 );
 
 typedef TableKeyEventHandler = KeyEventResult Function(RawKeyEvent event,
@@ -78,9 +78,9 @@ class FlatTable<T> extends StatefulWidget {
 
   final ItemCallback<T> onItemSelected;
 
-  final ColumnData<T>? sortColumn;
+  final ColumnData<T> sortColumn;
 
-  final SortDirection? sortDirection;
+  final SortDirection sortDirection;
 
   final ColumnData<T>? secondarySortColumn;
 
@@ -102,9 +102,9 @@ class FlatTable<T> extends StatefulWidget {
   FlatTableState<T> createState() => FlatTableState<T>();
 }
 
-class FlatTableState<T> extends State<FlatTable<T?>>
+class FlatTableState<T> extends State<FlatTable<T>>
     implements SortableTable<T> {
-  List<T>? data;
+  late List<T> data;
 
   @override
   void initState() {
@@ -114,7 +114,7 @@ class FlatTableState<T> extends State<FlatTable<T?>>
   }
 
   @override
-  void didUpdateWidget(FlatTable<T?> oldWidget) {
+  void didUpdateWidget(FlatTable<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.sortColumn != oldWidget.sortColumn ||
         widget.sortDirection != oldWidget.sortDirection ||
@@ -244,8 +244,8 @@ class FlatTableState<T> extends State<FlatTable<T?>>
     int index,
     List<double>? columnWidths,
   ) {
-    final node = data![index];
-    return TableRow<T?>(
+    final node = data[index];
+    return TableRow<T>(
       key: widget.keyFactory(node),
       linkedScrollControllerGroup: linkedScrollControllerGroup,
       node: node,
@@ -287,7 +287,7 @@ class FlatTableState<T> extends State<FlatTable<T?>>
     SortDirection? direction, {
     ColumnData? secondarySortColumn,
   }) {
-    data!.sort(
+    data.sort(
       (T a, T b) => _compareData<T>(
         a,
         b,
@@ -378,7 +378,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   List<T?> animatingChildren = [];
   Set<T?> animatingChildrenSet = {};
   T? animatingNode;
-  List<double>? columnWidths;
+  late List<double> columnWidths;
   late List<bool> rootsExpanded;
   FocusNode? _focusNode;
 
@@ -763,7 +763,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 // TODO(kenz): https://github.com/flutter/devtools/issues/1522. The table code
 // needs to be refactored to support flexible column widths.
 class _Table<T> extends StatefulWidget {
-  const _Table({
+  // Class with late fields cannot have const constructior.
+  // ignore: prefer_const_constructors_in_immutables
+  _Table({
     Key? key,
     required this.data,
     required this.columns,
@@ -780,11 +782,11 @@ class _Table<T> extends StatefulWidget {
     this.activeSearchMatchNotifier,
   }) : super(key: key);
 
-  final List<T>? data;
+  late final List<T> data;
 
   final bool autoScrollContent;
   final List<ColumnData<T>?> columns;
-  final List<double>? columnWidths;
+  final List<double> columnWidths;
   final IndexedScrollableWidgetBuilder rowBuilder;
   final ColumnData<T>? sortColumn;
   final SortDirection? sortDirection;
@@ -809,7 +811,7 @@ class _Table<T> extends StatefulWidget {
 }
 
 class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
-  LinkedScrollControllerGroup? _linkedHorizontalScrollControllerGroup;
+  late LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
   ColumnData<T?>? sortColumn;
   SortDirection? sortDirection;
   late ScrollController scrollController;
@@ -863,7 +865,7 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
 
   void _onActiveSearchChange() async {
     final T? activeSearch = widget.activeSearchMatchNotifier!.value;
-    final index = widget.data!.indexOf(activeSearch);
+    final index = widget.data.indexOf(activeSearch);
 
     if (index != -1) {
       final y = index * defaultRowHeight;
@@ -929,7 +931,7 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
   double get tableWidth {
     var tableWidth = 2 * defaultSpacing;
     tableWidth += widget.numSpacers * defaultSpacing;
-    for (var columnWidth in widget.columnWidths!) {
+    for (var columnWidth in widget.columnWidths) {
       tableWidth += columnWidth;
     }
     return tableWidth;
@@ -992,7 +994,7 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
                     focusNode: widget.focusNode,
                     child: ListView.builder(
                       controller: scrollController,
-                      itemCount: widget.data!.length,
+                      itemCount: widget.data.length,
                       itemBuilder: _buildItem,
                     ),
                   ),
