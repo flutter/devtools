@@ -136,14 +136,14 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
 class _TreeViewItem<T extends TreeNode<T>> extends StatefulWidget {
   const _TreeViewItem(
     this.data, {
-    this.buildDisplay,
+    required this.buildDisplay,
     required this.onItemExpanded,
     required this.onItemSelected,
   });
 
   final T data;
 
-  final Widget Function(VoidCallback onPressed)? buildDisplay;
+  final Widget Function(VoidCallback onPressed) buildDisplay;
 
   final void Function(T) onItemSelected;
   final void Function(T) onItemExpanded;
@@ -176,7 +176,7 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<_TreeViewItem<T>>
                     ),
                   )
                 : SizedBox(width: defaultIconSize),
-            Expanded(child: widget.buildDisplay!(_onSelected)),
+            Expanded(child: widget.buildDisplay(_onSelected)),
           ],
         ),
       ),
