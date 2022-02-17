@@ -6,7 +6,6 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/src/service/isolate_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -14,11 +13,12 @@ import '../../devtools.dart' as devtools;
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
 import '../info/info_controller.dart';
+import '../service/isolate_manager.dart';
+import '../service/service_manager.dart';
 import 'common_widgets.dart';
 import 'device_dialog.dart';
 import 'globals.dart';
 import 'screen.dart';
-import '../service/service_manager.dart';
 import 'theme.dart';
 import 'utils.dart';
 

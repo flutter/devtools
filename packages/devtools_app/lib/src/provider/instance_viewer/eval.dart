@@ -12,9 +12,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../service/vm_service_wrapper.dart';
 import '../../shared/eval_on_dart_library.dart';
 import '../../shared/globals.dart';
-import '../../service/vm_service_wrapper.dart';
 
 /// Exposes the current VmServiceWrapper.
 /// By listening to this provider instead of directly accessing `serviceManager.service`,

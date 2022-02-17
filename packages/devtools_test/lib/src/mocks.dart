@@ -162,7 +162,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   final FakeServiceExtensionManager serviceExtensionManager =
-      FakeServiceExtensionManager();
+      FakeServiceExtensionManager() as ServiceExtensionManager;
 
   @override
   Future<Response> get rasterCacheMetrics => Future.value(Response.parse({

@@ -11,11 +11,11 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart' as logger;
-import '../shared/globals.dart';
 import '../service/service_manager.dart';
+import '../service/vm_service_wrapper.dart';
+import '../shared/globals.dart';
 import '../shared/utils.dart';
 import '../shared/version.dart';
-import '../service/vm_service_wrapper.dart';
 import 'memory_controller.dart';
 import 'memory_screen.dart';
 import 'memory_timeline.dart';

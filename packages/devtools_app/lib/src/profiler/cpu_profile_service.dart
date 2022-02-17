@@ -6,9 +6,9 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../shared/globals.dart';
 import '../service/vm_flags.dart' as vm_flags;
 import '../service/vm_service_wrapper.dart';
+import '../shared/globals.dart';
 import 'cpu_profile_model.dart';
 
 /// Manages interactions between the Cpu Profiler and the VmService.

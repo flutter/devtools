@@ -6,8 +6,8 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'globals.dart';
 import '../service/vm_service_wrapper.dart';
+import 'globals.dart';
 
 /// A controller for global application preferences.
 class PreferencesController {

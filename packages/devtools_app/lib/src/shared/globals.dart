@@ -9,9 +9,9 @@ import '../config_specific/import_export/import_export.dart';
 import '../extension_points/extensions_base.dart';
 import '../primitives/message_bus.dart';
 import '../primitives/storage.dart';
+import '../service/service_manager.dart';
 import 'framework_controller.dart';
 import 'preferences.dart';
-import '../service/service_manager.dart';
 import 'survey.dart';
 
 final Map<Type, dynamic> globals = <Type, dynamic>{};

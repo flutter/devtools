@@ -12,8 +12,8 @@ import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
-import 'globals.dart';
 import '../service/vm_service_wrapper.dart';
+import 'globals.dart';
 
 /// A line in the console.
 ///

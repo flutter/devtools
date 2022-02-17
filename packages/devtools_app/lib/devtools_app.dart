@@ -51,6 +51,8 @@ export 'src/shared/routing.dart';
 export 'src/shared/screen.dart';
 export 'src/service/service_extensions.dart';
 export 'src/service/service_manager.dart';
+export 'src/service/service_extension_manager.dart';
+export 'src/service/isolate_manager.dart';
 export 'src/shared/split.dart';
 export 'src/shared/theme.dart';
 export 'src/shared/utils.dart';
