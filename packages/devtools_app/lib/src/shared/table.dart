@@ -1456,7 +1456,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
             return const SizedBox(width: defaultSpacing);
           }
           return columnFor(
-            widget.columns[i ~/ 2]!,
+            widget.columns[i ~/ 2] as ColumnData<T>,
             widget.columnWidths![i ~/ 2],
           );
         },
@@ -1464,10 +1464,10 @@ class _TableRowState<T> extends State<TableRow<T?>>
     );
   }
 
-  TextStyle contentTextStyle(ColumnData<T?> column) {
+  TextStyle contentTextStyle(ColumnData<T> column) {
     final textColor = widget.isSelected
         ? defaultSelectionForegroundColor
-        : column.getTextColor(widget.node);
+        : column.getTextColor(widget.node!);
     final fontStyle = Theme.of(context).fixedFontStyle;
     return textColor == null ? fontStyle : fontStyle.copyWith(color: textColor);
   }
@@ -1482,7 +1482,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
   bool shouldShow() => widget.isShown;
 
   void _handleSortChange(
-    ColumnData<T?> columnData, {
+    ColumnData<T> columnData, {
     ColumnData<T?>? secondarySortColumn,
   }) {
     SortDirection direction;
@@ -1505,14 +1505,14 @@ abstract class SortableTable<T> {
   void sortData(ColumnData column, SortDirection direction);
 }
 
-int _compareFactor(SortDirection? direction) =>
+int _compareFactor(SortDirection direction) =>
     direction == SortDirection.ascending ? 1 : -1;
 
 int _compareData<T>(
   T a,
   T b,
   ColumnData column,
-  SortDirection? direction, {
+  SortDirection direction, {
   ColumnData? secondarySortColumn,
 }) {
   final compare = column.compare(a, b) * _compareFactor(direction);
