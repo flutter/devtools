@@ -375,8 +375,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     implements SortableTable<T> {
   /// The number of items to show when animating out the tree table.
   static const itemsToShowWhenAnimating = 50;
-  late List<T> animatingChildren = [];
-  late Set<T> animatingChildrenSet = {};
+  List<T> animatingChildren = [];
+  Set<T> animatingChildrenSet = {};
   T? animatingNode;
   late List<double> columnWidths;
   late List<bool> rootsExpanded;
@@ -516,21 +516,21 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     _updateItems();
   }
 
-  List<double> _computeColumnWidths(List<T?> flattenedList) {
-    final T? firstRoot = dataRoots.first;
-    TreeNode? deepest = firstRoot;
+  List<double> _computeColumnWidths(List<T> flattenedList) {
+    final T firstRoot = dataRoots.first;
+    TreeNode deepest = firstRoot;
     // This will use the width of all rows in the table, even the rows
     // that are hidden by nesting.
     // We may want to change this to using a flattened list of only
     // the list items that should show right now.
     for (var node in flattenedList) {
-      if (node!.level > deepest!.level) {
+      if (node.level > deepest.level) {
         deepest = node;
       }
     }
     final widths = <double>[];
-    for (ColumnData<T?> column in widget.columns) {
-      double width = column.getNodeIndentPx(deepest as T?);
+    for (ColumnData<T> column in widget.columns) {
+      double width = column.getNodeIndentPx(deepest as T);
       assert(width >= 0.0);
       if (column.fixedWidthPx != null) {
         width += column.fixedWidthPx!;
@@ -551,7 +551,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   @override
   Widget build(BuildContext context) {
-    return _Table<T?>(
+    return _Table<T>(
       data: items,
       columns: widget.columns,
       columnWidths: columnWidths,
@@ -1336,7 +1336,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
 
   /// Presents the content of this row.
   Widget tableRowFor(BuildContext context, {VoidCallback? onPressed}) {
-    Widget columnFor(ColumnData<T?> column, double columnWidth) {
+    Widget columnFor(ColumnData<T> column, double columnWidth) {
       Widget? content;
       final node = widget.node;
       if (node == null) {
