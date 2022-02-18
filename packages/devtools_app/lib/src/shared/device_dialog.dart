@@ -62,9 +62,7 @@ class DeviceDialog extends StatelessWidget {
         'Framework / Engine': '${flutterVersion!.frameworkRevision} / '
             '${flutterVersion!.engineRevision}',
       },
-      if (serviceManager.service!.connectedUri != null)
-        'VM Service Connection':
-            serviceManager.service!.connectedUri.toString(),
+      'VM Service Connection': serviceManager.service!.connectedUri.toString(),
     };
 
     // TODO(kenz): set actions alignment to `spaceBetween` if
