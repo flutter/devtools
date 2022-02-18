@@ -4,8 +4,9 @@
 
 // @dart=2.9
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/ui/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(IdeTheme, IdeTheme());
   });
 
   group('truncateTextSpan', () {

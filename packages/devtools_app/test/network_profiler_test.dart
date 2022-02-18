@@ -4,6 +4,7 @@
 
 // @dart=2.9
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/http/http.dart';
 import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/network/network_controller.dart';
@@ -12,10 +13,10 @@ import 'package:devtools_app/src/network/network_request_inspector.dart';
 import 'package:devtools_app/src/network/network_request_inspector_views.dart';
 import 'package:devtools_app/src/network/network_screen.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
 @TestOn('vm')
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -53,6 +54,7 @@ void main() {
   setUpAll(() async {
     socketProfile = loadSocketProfile();
     httpProfile = loadHttpProfile();
+    setGlobal(IdeTheme, IdeTheme());
   });
 
   group('Network Profiler', () {

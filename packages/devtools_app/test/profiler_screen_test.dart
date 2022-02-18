@@ -4,15 +4,16 @@
 
 // @dart=2.9
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/service_manager.dart';
-import 'package:devtools_app/src/shared/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -44,6 +45,7 @@ void main() {
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(IdeTheme, IdeTheme());
       screen = const ProfilerScreen();
     });
 

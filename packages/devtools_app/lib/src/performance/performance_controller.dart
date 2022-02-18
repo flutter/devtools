@@ -8,7 +8,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
+import 'package:pedantic/pedantic.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
@@ -24,8 +24,8 @@ import '../profiler/cpu_profile_controller.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/profile_granularity.dart';
+import '../service/service_manager.dart';
 import '../shared/globals.dart';
-import '../shared/service_manager.dart';
 import '../ui/search.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
@@ -250,7 +250,7 @@ class PerformanceController extends DisposableController
       }));
 
       // Load available timeline events.
-      await _pullTraceEventsFromVmTimeline(shouldPrimeThreadIds: true);
+      await _pullTraceEventsFromVmTimeline(isInitialPull: true);
 
       _processing.value = true;
       await processTraceEvents(allTraceEvents);
@@ -280,7 +280,7 @@ class PerformanceController extends DisposableController
   }
 
   Future<void> _pullTraceEventsFromVmTimeline({
-    bool shouldPrimeThreadIds = false,
+    bool isInitialPull = false,
   }) async {
     final currentVmTime = await serviceManager.service.getVMTimelineMicros();
     debugTraceEventCallback(
@@ -295,16 +295,21 @@ class PerformanceController extends DisposableController
     );
     _nextPollStartMicros = currentVmTime.timestamp + 1;
 
-    // TODO(kenz): move this priming logic into the loop below.
-    if (shouldPrimeThreadIds) primeThreadIds(timeline);
+    final threadNameEvents = <TraceEvent>[];
     for (final event in timeline.traceEvents) {
+      final traceEvent = TraceEvent(event.json);
       final eventWrapper = TraceEventWrapper(
-        TraceEvent(event.json),
+        traceEvent,
         DateTime.now().millisecondsSinceEpoch,
       );
+      if (traceEvent.phase == 'M' && traceEvent.name == 'thread_name') {
+        threadNameEvents.add(traceEvent);
+      }
       allTraceEvents.add(eventWrapper);
       debugTraceEventCallback(() => log(eventWrapper.event.json));
     }
+
+    updateThreadIds(threadNameEvents, isInitialUpdate: isInitialPull);
   }
 
   FutureOr<void> processAvailableEvents() async {
@@ -570,13 +575,14 @@ class PerformanceController extends DisposableController
     }
   }
 
-  void primeThreadIds(vm_service.Timeline timeline) {
-    threadNamesById.clear();
-    final threadNameEvents = timeline.traceEvents
-        .map((event) => TraceEvent(event.json))
-        .where((TraceEvent event) {
-      return event.phase == 'M' && event.name == 'thread_name';
-    }).toList();
+  void updateThreadIds(
+    List<TraceEvent> threadNameEvents, {
+    bool isInitialUpdate = false,
+  }) {
+    final isFlutterApp = offlineController.offlineMode.value
+        ? offlinePerformanceData != null &&
+            offlinePerformanceData.frames.isNotEmpty
+        : serviceManager.connectedApp.isFlutterAppNow;
 
     // TODO(kenz): Remove this logic once ui/raster distinction changes are
     // available in the engine.
@@ -585,45 +591,49 @@ class PerformanceController extends DisposableController
     for (TraceEvent event in threadNameEvents) {
       final name = event.args['name'];
 
-      // Android: "1.ui (12652)"
-      // iOS: "io.flutter.1.ui (12652)"
-      // MacOS, Linux, Windows, Dream (g3): "io.flutter.ui (225695)"
-      if (name.contains('.ui')) {
-        uiThreadId = event.threadId;
-      }
+      if (isFlutterApp && isInitialUpdate) {
+        // Android: "1.ui (12652)"
+        // iOS: "io.flutter.1.ui (12652)"
+        // MacOS, Linux, Windows, Dream (g3): "io.flutter.ui (225695)"
+        if (name.contains('.ui')) {
+          uiThreadId = event.threadId;
+        }
 
-      // Android: "1.raster (12651)"
-      // iOS: "io.flutter.1.raster (12651)"
-      // Linux, Windows, Dream (g3): "io.flutter.raster (12651)"
-      // MacOS: Does not exist
-      // Also look for .gpu here for older versions of Flutter.
-      // TODO(kenz): remove check for .gpu name in April 2021.
-      if (name.contains('.raster') || name.contains('.gpu')) {
-        rasterThreadId = event.threadId;
-      }
+        // Android: "1.raster (12651)"
+        // iOS: "io.flutter.1.raster (12651)"
+        // Linux, Windows, Dream (g3): "io.flutter.raster (12651)"
+        // MacOS: Does not exist
+        // Also look for .gpu here for older versions of Flutter.
+        // TODO(kenz): remove check for .gpu name in April 2021.
+        if (name.contains('.raster') || name.contains('.gpu')) {
+          rasterThreadId = event.threadId;
+        }
 
-      // Android: "1.platform (22585)"
-      // iOS: "io.flutter.1.platform (22585)"
-      // MacOS, Linux, Windows, Dream (g3): "io.flutter.platform (22596)"
-      if (name.contains('.platform')) {
-        // MacOS and Flutter apps with platform views do not have a .gpu thread.
-        // In these cases, the "Raster" events will come on the .platform thread
-        // instead.
-        rasterThreadId ??= event.threadId;
+        // Android: "1.platform (22585)"
+        // iOS: "io.flutter.1.platform (22585)"
+        // MacOS, Linux, Windows, Dream (g3): "io.flutter.platform (22596)"
+        if (name.contains('.platform')) {
+          // MacOS and Flutter apps with platform views do not have a .gpu
+          // thread. In these cases, the "Raster" events will come on the
+          // .platform thread instead.
+          rasterThreadId ??= event.threadId;
+        }
       }
 
       threadNamesById[event.threadId] = name;
     }
 
-    if (uiThreadId == null || rasterThreadId == null) {
-      log('Could not find UI thread and / or Raster thread from names: '
-          '${threadNamesById.values}');
-    }
+    if (isFlutterApp && isInitialUpdate) {
+      if (uiThreadId == null || rasterThreadId == null) {
+        log('Could not find UI thread and / or Raster thread from names: '
+            '${threadNamesById.values}');
+      }
 
-    processor.primeThreadIds(
-      uiThreadId: uiThreadId,
-      rasterThreadId: rasterThreadId,
-    );
+      processor.primeThreadIds(
+        uiThreadId: uiThreadId,
+        rasterThreadId: rasterThreadId,
+      );
+    }
   }
 
   void addTimelineEvent(TimelineEvent event) {
@@ -854,6 +864,7 @@ class PerformanceController extends DisposableController
     allTraceEvents.clear();
     offlinePerformanceData = null;
     cpuProfilerController.reset();
+    threadNamesById.clear();
     data?.clear();
     processor?.reset();
     _flutterFrames.clear();

@@ -4,10 +4,11 @@
 
 // @dart=2.9
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/primitives/trees.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/shared/table.dart';
 import 'package:devtools_app/src/shared/table_data.dart';
 import 'package:devtools_app/src/shared/utils.dart';
@@ -19,6 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(IdeTheme, IdeTheme());
   });
 
   group('FlatTable view', () {

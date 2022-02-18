@@ -5,14 +5,15 @@
 // @dart=2.9
 
 @TestOn('vm')
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/performance/event_details.dart';
 import 'package:devtools_app/src/performance/flutter_frames_chart.dart';
 import 'package:devtools_app/src/performance/performance_controller.dart';
 import 'package:devtools_app/src/performance/performance_screen.dart';
 import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/service_manager.dart';
 import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -24,6 +25,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import 'test_data/performance_test_data.dart';
 
 void main() {
+  setGlobal(IdeTheme, IdeTheme());
   PerformanceScreen screen;
   PerformanceController controller;
   FakeServiceManager fakeServiceManager;
