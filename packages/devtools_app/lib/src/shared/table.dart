@@ -568,17 +568,17 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   Widget _buildRow(
     BuildContext context,
-    LinkedScrollControllerGroup? linkedScrollControllerGroup,
+    LinkedScrollControllerGroup linkedScrollControllerGroup,
     int index,
-    List<double>? columnWidths,
+    List<double> columnWidths,
   ) {
     Widget rowForNode(T node) {
       node.index = index;
-      return TableRow<T?>(
+      return TableRow<T>(
         key: widget.keyFactory(node),
         linkedScrollControllerGroup: linkedScrollControllerGroup,
         node: node,
-        onPressed: (item) => _onItemPressed(item!, index),
+        onPressed: (item) => _onItemPressed(item, index),
         backgroundColor: alternatingColorForIndex(
           index,
           Theme.of(context).colorScheme,
@@ -605,19 +605,19 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   @override
   void sortData(
-    ColumnData? column,
+    ColumnData column,
     SortDirection direction, {
     ColumnData? secondarySortColumn,
   }) {
-    final sortFunction = (T? a, T? b) => _compareData<T?>(
+    final sortFunction = (T a, T b) => _compareData<T>(
           a,
           b,
-          column!,
+          column,
           direction,
           secondarySortColumn: secondarySortColumn,
         );
-    void _sort(T? dataObject) {
-      dataObject!.children
+    void _sort(T dataObject) {
+      dataObject.children
         ..sort(sortFunction)
         ..forEach(_sort);
     }
@@ -783,14 +783,14 @@ class _Table<T> extends StatefulWidget {
     this.activeSearchMatchNotifier,
   }) : super(key: key);
 
-  late final List<T> data;
+  final List<T> data;
 
   final bool autoScrollContent;
-  final List<ColumnData<T>?> columns;
+  final List<ColumnData<T>> columns;
   final List<double> columnWidths;
   final IndexedScrollableWidgetBuilder rowBuilder;
-  final ColumnData<T>? sortColumn;
-  final SortDirection? sortDirection;
+  final ColumnData<T> sortColumn;
+  final SortDirection sortDirection;
   final ColumnData<T>? secondarySortColumn;
   final Function(
     ColumnData<T> column,
@@ -813,8 +813,8 @@ class _Table<T> extends StatefulWidget {
 
 class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
   late LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
-  ColumnData<T?>? sortColumn;
-  SortDirection? sortDirection;
+  late ColumnData<T?> sortColumn;
+  late SortDirection sortDirection;
   late ScrollController scrollController;
 
   @override
@@ -839,9 +839,9 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
     // Detect selection changes but only care about scrollIntoView.
     addAutoDisposeListener(oldWidget.selectionNotifier, () {
       setState(() {
-        final Selection<dynamic> selection = oldWidget.selectionNotifier!.value;
+        final Selection<T> selection = oldWidget.selectionNotifier!.value;
         if (selection.scrollIntoView) {
-          final int selectedDisplayRow = selection.node.index;
+          final int selectedDisplayRow = selection.node!.index;
           // TODO(terry): Optimize selecting row, if row's visible in
           //              the viewport just select otherwise jumpTo row.
           final newPos = selectedDisplayRow * defaultRowHeight;
