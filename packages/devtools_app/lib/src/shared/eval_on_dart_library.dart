@@ -590,8 +590,8 @@ class EvalOnDartLibrary extends DisposableController
     });
   }
 
-  Future<String?> retrieveFullValueAsString(InstanceRef? stringRef) {
-    return service.retrieveFullStringValue(_isolateRef!.id, stringRef);
+  Future<String?> retrieveFullValueAsString(InstanceRef stringRef) {
+    return service.retrieveFullStringValue(_isolateRef!.id!, stringRef);
   }
 }
 
