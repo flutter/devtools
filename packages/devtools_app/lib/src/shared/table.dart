@@ -830,8 +830,8 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
   }
 
   @override
-  void didUpdateWidget(_Table oldWidget) {
-    super.didUpdateWidget(oldWidget as _Table<T>);
+  void didUpdateWidget(_Table<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
     cancelListeners();
 
@@ -841,7 +841,7 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
       setState(() {
         final Selection<T> selection = oldWidget.selectionNotifier!.value;
         if (selection.scrollIntoView) {
-          final int selectedDisplayRow = selection.node!.index;
+          final int selectedDisplayRow = (selection.node! as dynamic).index;
           // TODO(terry): Optimize selecting row, if row's visible in
           //              the viewport just select otherwise jumpTo row.
           final newPos = selectedDisplayRow * defaultRowHeight;
