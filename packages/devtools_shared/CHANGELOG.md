@@ -1,3 +1,5 @@
+## 2.11.1
+- Update CLI test driver with the correct Dart VM Service prefix
 ## 2.11.0
 - Create `devtools_test_utils.dart`, which exposes shared test infrastructure.  
 ## 2.3.0
