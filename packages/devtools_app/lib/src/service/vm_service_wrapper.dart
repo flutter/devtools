@@ -181,7 +181,7 @@ class VmServiceWrapper implements VmService {
     String isolateId,
     String targetId,
     String expression, {
-    Map<String, String?>? scope,
+    Map<String, String>? scope,
     bool? disableBreakpoints,
   }) {
     return trackFuture(
@@ -200,7 +200,7 @@ class VmServiceWrapper implements VmService {
     String isolateId,
     int frameIndex,
     String expression, {
-    Map<String, String?>? scope,
+    Map<String, String>? scope,
     bool? disableBreakpoints,
   }) {
     return trackFuture(
@@ -676,7 +676,7 @@ class VmServiceWrapper implements VmService {
     String isolateId,
     String targetId,
     String selector,
-    List<String?> argumentIds, {
+    List<String> argumentIds, {
     bool? disableBreakpoints,
   }) {
     return trackFuture(

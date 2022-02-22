@@ -131,7 +131,7 @@ class EvalOnDartLibrary extends DisposableController
   Future<InstanceRef?> eval(
     String expression, {
     required Disposable? isAlive,
-    Map<String, String?>? scope,
+    Map<String, String>? scope,
     bool shouldLogError = true,
   }) async {
     if ((scope?.isNotEmpty ?? false) &&
@@ -163,7 +163,7 @@ class EvalOnDartLibrary extends DisposableController
   Future<InstanceRef?> invoke(
     InstanceRef instanceRef,
     String name,
-    List<String?> argRefs, {
+    List<String> argRefs, {
     required Disposable? isAlive,
     bool shouldLogError = true,
   }) {
@@ -193,7 +193,7 @@ class EvalOnDartLibrary extends DisposableController
 
   Future<InstanceRef?> _eval(
     String expression, {
-    required Map<String, String?>? scope,
+    required Map<String, String>? scope,
     bool shouldLogError = true,
   }) async {
     if (_disposed) return null;
@@ -225,7 +225,7 @@ class EvalOnDartLibrary extends DisposableController
   Future<InstanceRef?> _invoke(
     InstanceRef instanceRef,
     String name,
-    List<String?> argRefs, {
+    List<String> argRefs, {
     bool shouldLogError = true,
   }) async {
     if (_disposed) return null;
@@ -298,7 +298,7 @@ class EvalOnDartLibrary extends DisposableController
     final hash = await (evalInstance(
       'instance.hashCode',
       isAlive: isAlive,
-      scope: {'instance': instance.id},
+      scope: {'instance': instance.id!},
     ) as FutureOr<Instance>);
 
     return int.parse(hash.valueAsString!);
@@ -308,7 +308,7 @@ class EvalOnDartLibrary extends DisposableController
   Future<Instance?> evalInstance(
     String expression, {
     required Disposable? isAlive,
-    Map<String, String?>? scope,
+    Map<String, String>? scope,
   }) async {
     return getInstance(
       // This is safe to do because `safeEval` will throw instead of returning `null`
@@ -352,7 +352,7 @@ class EvalOnDartLibrary extends DisposableController
   Future<InstanceRef?> asyncEval(
     String expression, {
     required Disposable? isAlive,
-    Map<String, String?>? scope,
+    Map<String, String>? scope,
   }) async {
     final futureId = _nextAsyncEvalId++;
 
@@ -383,7 +383,7 @@ class EvalOnDartLibrary extends DisposableController
       // the "reader" is not GCed
       'widgetInspectorService.toId(<dynamic>[], "$readerGroup")',
       isAlive: isAlive,
-      scope: {'widgetInspectorService': widgetInspectorServiceRef.id},
+      scope: {'widgetInspectorService': widgetInspectorServiceRef.id!},
     ).then((ref) => ref.valueAsString!);
 
     await safeEval(
@@ -403,8 +403,8 @@ class EvalOnDartLibrary extends DisposableController
       isAlive: isAlive,
       scope: {
         ...?scope,
-        'postEvent': postEventRef.id,
-        'widgetInspectorService': widgetInspectorServiceRef.id,
+        'postEvent': postEventRef.id!,
+        'widgetInspectorService': widgetInspectorServiceRef.id!,
       },
     );
 
@@ -417,7 +417,7 @@ class EvalOnDartLibrary extends DisposableController
       '  return result;'
       '}()',
       isAlive: isAlive,
-      scope: {'widgetInspectorService': widgetInspectorServiceRef.id},
+      scope: {'widgetInspectorService': widgetInspectorServiceRef.id!},
     ) as FutureOr<Instance>);
 
     assert(resultRef.length == 1 || resultRef.length == 2);
@@ -439,7 +439,7 @@ class EvalOnDartLibrary extends DisposableController
   Future<InstanceRef> safeEval(
     String expression, {
     required Disposable? isAlive,
-    Map<String, String?>? scope,
+    Map<String, String>? scope,
   }) async {
     Object? result;
 
