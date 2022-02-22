@@ -682,7 +682,7 @@ mixin SearchFieldMixin<T extends StatefulWidget>
     required SelectAutoComplete onSelection,
     HighlightAutoComplete? onHighlightDropdown,
     InputDecoration? decoration,
-    String label = '',
+    String label = 'Search',
     OverlayXPositionBuilder? overlayXPositionBuilder,
     bool supportClearField = false,
     Set<LogicalKeyboardKey> keyEventsToPropagate = const {},
