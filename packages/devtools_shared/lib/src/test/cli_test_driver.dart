@@ -95,7 +95,7 @@ class CliAppFixture extends AppFixture {
 
   static Future<CliAppFixture> create(String appScriptPath) async {
     final dartVmServicePrefix =
-        RegExp('(Observatory|Dart VM Service) listening on ');
+        RegExp('(Observatory|The Dart VM service is) listening on ');
 
     final Process process = await Process.start(
       Platform.resolvedExecutable,
