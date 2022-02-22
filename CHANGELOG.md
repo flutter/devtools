@@ -1,3 +1,6 @@
+## 2.11.1
+* Update CLI test driver with correct Dart VM Service prefix string [#3716](https://github.com/flutter/devtools/pull/3716)
+
 ## 2.11.0
 * Fix some issues preventing the google3 roll [#3702](https://github.com/flutter/devtools/pull/3702)
 * Update the generate_changelog tool [#3698](https://github.com/flutter/devtools/pull/3698)
