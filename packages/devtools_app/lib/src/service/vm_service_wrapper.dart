@@ -286,10 +286,10 @@ class VmServiceWrapper implements VmService {
         return current.name;
       }
 
-      void processStackFrame({
+      Future<void> processStackFrame({
         @required _CpuProfileTimelineTree current,
         @required _CpuProfileTimelineTree parent,
-      }) {
+      }) async {
         final id = nextId++;
         current.frameId = id;
 
@@ -300,17 +300,18 @@ class VmServiceWrapper implements VmService {
             CpuProfileData.categoryKey: 'Dart',
             CpuProfileData.nameKey: nameForStackFrame(current),
             CpuProfileData.resolvedUrlKey: current.resolvedUrl,
+            CpuProfileData.sourceTokenPosKey: await current.sourceLine,
             if (parent != null && parent.frameId != 0)
               CpuProfileData.parentIdKey: '$isolateId-${parent.frameId}',
           };
         }
         for (final child in current.children) {
-          processStackFrame(current: child, parent: current);
+          await processStackFrame(current: child, parent: current);
         }
       }
 
       final root = _CpuProfileTimelineTree.fromCpuSamples(cpuSamples);
-      processStackFrame(current: root, parent: null);
+      await processStackFrame(current: root, parent: null);
 
       // Build the trace events.
       for (final sample in cpuSamples.samples) {
@@ -1260,6 +1261,10 @@ class _CpuProfileTimelineTree {
   }
 
   String get resolvedUrl => samples.functions[index].resolvedUrl;
+
+  Future<int> get sourceLine async {
+    return samples.functions[index].function.location.line;
+  }
 
   final children = <_CpuProfileTimelineTree>[];
 

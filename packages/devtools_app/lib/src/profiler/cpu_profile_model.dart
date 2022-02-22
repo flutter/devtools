@@ -31,6 +31,7 @@ class CpuProfileData {
       category: 'Dart',
       rawUrl: '',
       processedUrl: '',
+      sourceTokenPos: null,
       profileMetaData: profileMetaData,
       parentId: null,
     );
@@ -64,6 +65,7 @@ class CpuProfileData {
         // included in the response, this will be null. If the frame is a native
         // frame, the this will be the empty string.
         rawUrl: stackFrameJson[resolvedUrlKey] ?? '',
+        sourceTokenPos: stackFrameJson[sourceTokenPosKey],
         parentId: stackFrameJson[parentIdKey] ?? rootId,
         profileMetaData: profileMetaData,
       );
@@ -287,6 +289,7 @@ class CpuProfileData {
   static const parentIdKey = 'parent';
   static const stackFrameIdKey = 'sf';
   static const resolvedUrlKey = 'resolvedUrl';
+  static const sourceTokenPosKey = 'sourceTokenPos';
   static const stackFramesKey = 'stackFrames';
   static const traceEventsKey = 'traceEvents';
   static const sampleCountKey = 'sampleCount';
@@ -436,6 +439,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     @required String verboseName,
     @required String category,
     @required String rawUrl,
+    @required int sourceTokenPos,
     @required String parentId,
     @required CpuProfileMetaData profileMetaData,
   }) {
@@ -446,7 +450,9 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       verboseName: verboseName,
       category: category,
       rawUrl: rawUrl,
-      processedUrl: getSimplePackageUrl(rawUrl),
+      processedUrl:
+          '${getSimplePackageUrl(rawUrl)}${sourceTokenPos != null ? ':$sourceTokenPos' : ''}',
+      sourceTokenPos: sourceTokenPos,
       parentId: parentId,
       profileMetaData: profileMetaData,
     );
@@ -459,6 +465,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     @required this.category,
     @required this.rawUrl,
     @required this.processedUrl,
+    @required this.sourceTokenPos,
     @required this.parentId,
     @required this.profileMetaData,
   });
@@ -486,6 +493,8 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   final String rawUrl;
 
   final String processedUrl;
+
+  final int sourceTokenPos;
 
   final String parentId;
 
@@ -611,6 +620,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       category: category ?? this.category,
       rawUrl: url ?? rawUrl,
       processedUrl: url != null ? getSimplePackageUrl(url) : processedUrl,
+      sourceTokenPos: sourceTokenPos,
       parentId: parentId ?? this.parentId,
       profileMetaData: profileMetaData ?? this.profileMetaData,
     );
