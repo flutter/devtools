@@ -31,7 +31,7 @@ class CpuProfileData {
       category: 'Dart',
       rawUrl: '',
       processedUrl: '',
-      sourceTokenPos: null,
+      sourceLine: null,
       profileMetaData: profileMetaData,
       parentId: null,
     );
@@ -65,7 +65,7 @@ class CpuProfileData {
         // included in the response, this will be null. If the frame is a native
         // frame, the this will be the empty string.
         rawUrl: stackFrameJson[resolvedUrlKey] ?? '',
-        sourceTokenPos: stackFrameJson[sourceTokenPosKey],
+        sourceLine: stackFrameJson[sourceLine],
         parentId: stackFrameJson[parentIdKey] ?? rootId,
         profileMetaData: profileMetaData,
       );
@@ -289,7 +289,7 @@ class CpuProfileData {
   static const parentIdKey = 'parent';
   static const stackFrameIdKey = 'sf';
   static const resolvedUrlKey = 'resolvedUrl';
-  static const sourceTokenPosKey = 'sourceTokenPos';
+  static const sourceLine = 'sourceLine';
   static const stackFramesKey = 'stackFrames';
   static const traceEventsKey = 'traceEvents';
   static const sampleCountKey = 'sampleCount';
@@ -439,7 +439,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     @required String verboseName,
     @required String category,
     @required String rawUrl,
-    @required int sourceTokenPos,
+    @required int sourceLine,
     @required String parentId,
     @required CpuProfileMetaData profileMetaData,
   }) {
@@ -451,8 +451,8 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       category: category,
       rawUrl: rawUrl,
       processedUrl:
-          '${getSimplePackageUrl(rawUrl)}${sourceTokenPos != null ? ':$sourceTokenPos' : ''}',
-      sourceTokenPos: sourceTokenPos,
+          '${getSimplePackageUrl(rawUrl)}${sourceLine != null ? ':$sourceLine' : ''}',
+      sourceLine: sourceLine,
       parentId: parentId,
       profileMetaData: profileMetaData,
     );
@@ -465,7 +465,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     @required this.category,
     @required this.rawUrl,
     @required this.processedUrl,
-    @required this.sourceTokenPos,
+    @required this.sourceLine,
     @required this.parentId,
     @required this.profileMetaData,
   });
@@ -494,7 +494,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
 
   final String processedUrl;
 
-  final int sourceTokenPos;
+  final int sourceLine;
 
   final String parentId;
 
@@ -620,7 +620,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       category: category ?? this.category,
       rawUrl: url ?? rawUrl,
       processedUrl: url != null ? getSimplePackageUrl(url) : processedUrl,
-      sourceTokenPos: sourceTokenPos,
+      sourceLine: sourceLine,
       parentId: parentId ?? this.parentId,
       profileMetaData: profileMetaData ?? this.profileMetaData,
     );
@@ -654,7 +654,8 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   bool matches(CpuStackFrame other) =>
       name == other.name &&
       rawUrl == other.rawUrl &&
-      category == other.category;
+      category == other.category &&
+      sourceLine == other.sourceLine;
 
   void _format(StringBuffer buf, String indent) {
     buf.writeln('$indent$name - children: ${children.length} - excl: '

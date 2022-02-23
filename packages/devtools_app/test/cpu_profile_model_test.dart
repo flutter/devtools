@@ -107,6 +107,7 @@ void main() {
           verboseName: 'all',
           category: 'Dart',
           rawUrl: '',
+          sourceLine: null,
           parentId: null,
           profileMetaData: profileMetaData,
         ).isNative,
@@ -215,5 +216,6 @@ void main() {
   test('matches', () {
     expect(stackFrameC.matches(stackFrameC2), isTrue);
     expect(stackFrameC.matches(stackFrameG), isFalse);
+    expect(stackFrameC.matches(stackFrameC4), isFalse);
   });
 }
