@@ -1263,7 +1263,15 @@ class _CpuProfileTimelineTree {
   String get resolvedUrl => samples.functions[index].resolvedUrl;
 
   Future<int> get sourceLine async {
-    return samples.functions[index].function.location.line;
+    final function = samples.functions[index].function;
+    try {
+      return function.location?.line;
+    } catch (_) {
+      // Fail gracefully if `function` has no getter `location` (for example, if
+      // the function is an instance of [NativeFunction]) or generally if
+      // `function.location.line` throws an exception.
+      return null;
+    }
   }
 
   final children = <_CpuProfileTimelineTree>[];
