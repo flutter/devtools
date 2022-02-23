@@ -11,7 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../profiler/cpu_profile_model.dart' hide CpuSample;
-import '../shared/globals.dart';
 import '../shared/version.dart';
 
 class VmServiceWrapper implements VmService {
@@ -120,8 +119,11 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Response> callMethod(String method,
-      {String? isolateId, Map<String, dynamic>? args}) {
+  Future<Response> callMethod(
+    String method, {
+    String? isolateId,
+    Map<String, dynamic>? args,
+  }) {
     return trackFuture('callMethod $method',
         _vmService.callMethod(method, isolateId: isolateId, args: args));
   }
@@ -313,7 +315,7 @@ class VmServiceWrapper implements VmService {
       processStackFrame(current: root, parent: null);
 
       // Build the trace events.
-      for (final sample in cpuSamples.samples!) {
+      for (final sample in cpuSamples.samples ?? <CpuSample>[]) {
         final tree = _CpuProfileTimelineTree.getTreeFromSample(sample)!;
         // Skip the root.
         if (tree.frameId == kRootId) {
@@ -433,16 +435,6 @@ class VmServiceWrapper implements VmService {
     bool? forceCompile,
     bool? reportLines,
   }) async {
-    // Workaround for https://github.com/flutter/devtools/issues/2981.
-    // TODO(bkonyi): remove after Flutter stable is on Dart SDK > 2.12.
-    if (await serviceManager.connectedApp!.isProfileBuild) {
-      const kFeatureDisabled = 100;
-      throw RPCError(
-        'getSourceReport',
-        kFeatureDisabled,
-        'disabled in AOT mode and PRODUCT.',
-      );
-    }
     return trackFuture(
         'getSourceReport',
         _vmService.getSourceReport(
@@ -498,15 +490,15 @@ class VmServiceWrapper implements VmService {
   // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
   Future<bool> isHttpTimelineLoggingAvailable(String isolateId) async {
     final Isolate isolate = await getIsolate(isolateId);
+    final rpcs = isolate.extensionRPCs ?? [];
+
     if (await isDartIoVersionSupported(
       supportedVersion: SemanticVersion(major: 1, minor: 3),
       isolateId: isolateId,
     )) {
-      return isolate.extensionRPCs!
-          .contains('ext.dart.io.httpEnableTimelineLogging');
+      return rpcs.contains('ext.dart.io.httpEnableTimelineLogging');
     } else {
-      return isolate.extensionRPCs!
-          .contains('ext.dart.io.setHttpEnableTimelineLogging');
+      return rpcs.contains('ext.dart.io.setHttpEnableTimelineLogging');
     }
   }
 
@@ -541,7 +533,7 @@ class VmServiceWrapper implements VmService {
   // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
   Future<bool> isHttpProfilingAvailable(String isolateId) async {
     final Isolate isolate = await getIsolate(isolateId);
-    return isolate.extensionRPCs!.contains('ext.dart.io.getHttpProfile');
+    return (isolate.extensionRPCs ?? []).contains('ext.dart.io.getHttpProfile');
   }
 
   /// The `getHttpProfile` RPC is used to retrieve HTTP profiling information
@@ -590,7 +582,8 @@ class VmServiceWrapper implements VmService {
   // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
   Future<bool> isSocketProfilingAvailable(String isolateId) async {
     final Isolate isolate = await getIsolate(isolateId);
-    return isolate.extensionRPCs!.contains('ext.dart.io.getSocketProfile');
+    return (isolate.extensionRPCs ?? [])
+        .contains('ext.dart.io.getSocketProfile');
   }
 
   Future<SocketProfilingState> socketProfilingEnabled(
@@ -961,8 +954,12 @@ class VmServiceWrapper implements VmService {
           _vmService.getRetainingPath(isolateId, targetId, limit));
 
   @override
-  Future<CpuSamples> getAllocationTraces(String isolateId,
-      {int? timeOriginMicros, int? timeExtentMicros, String? classId}) {
+  Future<CpuSamples> getAllocationTraces(
+    String isolateId, {
+    int? timeOriginMicros,
+    int? timeExtentMicros,
+    String? classId,
+  }) {
     return trackFuture(
         'getAllocationTraces',
         _vmService.getAllocationTraces(isolateId,
@@ -974,18 +971,18 @@ class VmServiceWrapper implements VmService {
   @override
   Future<Success> setTraceClassAllocation(
     String isolateId,
-    String? classId,
+    String classId,
     bool enable,
   ) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 43))) {
-      return trackFuture('setTraceClassAllocation',
-          _vmService.setTraceClassAllocation(isolateId, classId!, enable));
+      return trackFuture(
+        'setTraceClassAllocation',
+        _vmService.setTraceClassAllocation(isolateId, classId, enable),
+      );
     } else {
       final Map<String, dynamic> args = {};
-      if (classId != null) {
-        args['classId'] = classId;
-      }
+      args['classId'] = classId;
       args['enable'] = enable ? true : false;
 
       final response = await trackFuture(
@@ -1223,7 +1220,7 @@ class _CpuProfileTimelineTree {
     final root = _CpuProfileTimelineTree._fromIndex(cpuSamples, kRootIndex);
     _CpuProfileTimelineTree current;
     // TODO(bkonyi): handle truncated?
-    for (final sample in cpuSamples.samples!) {
+    for (final sample in cpuSamples.samples ?? []) {
       current = root;
       // Build an inclusive trie.
       for (final index in sample.stack!.reversed) {
