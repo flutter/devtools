@@ -653,6 +653,7 @@ final CpuStackFrame stackFrameA = CpuStackFrame(
   verboseName: 'A',
   category: 'Dart',
   rawUrl: '',
+  sourceLine: null,
   parentId: null,
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 0;
@@ -663,6 +664,7 @@ final CpuStackFrame stackFrameB = CpuStackFrame(
   verboseName: 'B',
   category: 'Dart',
   rawUrl: 'org-dartlang-sdk:///third_party/dart/sdk/lib/async/zone.dart',
+  sourceLine: null,
   parentId: 'id_0',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 0;
@@ -674,6 +676,7 @@ final CpuStackFrame stackFrameC = CpuStackFrame(
   category: 'Dart',
   rawUrl:
       'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+  sourceLine: null,
   parentId: 'id_1',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 2;
@@ -683,6 +686,7 @@ final CpuStackFrame stackFrameD = CpuStackFrame(
   verboseName: 'D',
   category: 'Dart',
   rawUrl: 'flutter::AnimatorBeginFrame',
+  sourceLine: null,
   parentId: 'id_1',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 2;
@@ -693,6 +697,7 @@ final CpuStackFrame stackFrameE = CpuStackFrame(
   verboseName: 'E',
   category: 'Dart',
   rawUrl: 'url',
+  sourceLine: null,
   parentId: 'id_3',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 1;
@@ -702,6 +707,7 @@ final CpuStackFrame stackFrameF = CpuStackFrame(
   verboseName: 'F',
   category: 'Dart',
   rawUrl: 'url',
+  sourceLine: null,
   parentId: 'id_4',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 0;
@@ -712,6 +718,7 @@ final CpuStackFrame stackFrameF2 = CpuStackFrame(
   verboseName: 'F',
   category: 'Dart',
   rawUrl: 'url',
+  sourceLine: null,
   parentId: 'id_3',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 3;
@@ -723,6 +730,7 @@ final CpuStackFrame stackFrameC2 = CpuStackFrame(
   category: 'Dart',
   rawUrl:
       'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+  sourceLine: null,
   parentId: 'id_5',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 1;
@@ -734,6 +742,19 @@ final CpuStackFrame stackFrameC3 = CpuStackFrame(
   category: 'Dart',
   rawUrl:
       'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+  sourceLine: null,
+  parentId: 'id_6',
+  profileMetaData: profileMetaData,
+)..exclusiveSampleCount = 1;
+
+final CpuStackFrame stackFrameC4 = CpuStackFrame(
+  id: 'id_8',
+  name: 'C',
+  verboseName: 'C',
+  category: 'Dart',
+  rawUrl:
+      'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+  sourceLine: 47,
   parentId: 'id_6',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 1;
@@ -745,6 +766,7 @@ final CpuStackFrame stackFrameG = CpuStackFrame(
   category: 'Dart',
   rawUrl:
       'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+  sourceLine: null,
   parentId: 'id_0',
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 1;
@@ -846,6 +868,7 @@ final CpuStackFrame zeroStackFrame = CpuStackFrame(
   verboseName: 'A',
   category: 'Dart',
   rawUrl: '',
+  sourceLine: null,
   parentId: null,
   profileMetaData: zeroProfileMetaData,
 )..exclusiveSampleCount = 0;
@@ -856,6 +879,7 @@ final flutterEngineStackFrame = CpuStackFrame(
   verboseName: 'flutter::AnimatorBeginFrame',
   category: 'Dart',
   rawUrl: '',
+  sourceLine: null,
   parentId: null,
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 1;
