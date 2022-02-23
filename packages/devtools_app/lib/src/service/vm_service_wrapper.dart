@@ -1256,8 +1256,8 @@ class _CpuProfileTimelineTree {
 
   String? get resolvedUrl => samples.functions![index].resolvedUrl;
 
-  int get sourceLine {
-    final function = samples.functions[index].function;
+  int? get sourceLine {
+    final function = samples.functions![index].function;
     try {
       return function.location?.line;
     } catch (_) {
