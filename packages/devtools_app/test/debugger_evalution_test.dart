@@ -123,8 +123,8 @@ void main() {
           expect(
             await autoCompleteResultsFor(
               EditingParts(
-                activeWord: '',
                 leftSide: 'FooClass.',
+                activeWord: '',
                 rightSide: '',
               ),
               debuggerController,
@@ -283,8 +283,8 @@ void main() {
           expect(
             await autoCompleteResultsFor(
               EditingParts(
-                activeWord: '',
                 leftSide: '7.',
+                activeWord: '',
                 rightSide: '',
               ),
               debuggerController,
