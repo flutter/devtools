@@ -21,8 +21,8 @@ const profiler = 'profiler';
 const profilePeriod = 'profile_period';
 
 class VmFlagManager extends Disposer {
-  VmServiceWrapper? get service => _service;
-  VmServiceWrapper? _service;
+  VmServiceWrapper get service => _service;
+  late VmServiceWrapper _service;
 
   ValueListenable get flags => _flags;
   final _flags = ValueNotifier<FlagList?>(null);
@@ -34,7 +34,7 @@ class VmFlagManager extends Disposer {
   }
 
   Future<void> _initFlags() async {
-    final flagList = await service?.getFlagList() ?? FlagList(flags: []);
+    final flagList = await service.getFlagList();
     _flags.value = flagList;
 
     for (var flag in flagList.flags ?? <Flag>[]) {
@@ -53,7 +53,7 @@ class VmFlagManager extends Disposer {
           'modified': true,
           'valueAsString': event.newValue,
         })!;
-        _flags.value = await service!.getFlagList();
+        _flags.value = await service.getFlagList();
       }
     }
   }
