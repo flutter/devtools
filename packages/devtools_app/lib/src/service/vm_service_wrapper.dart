@@ -300,6 +300,7 @@ class VmServiceWrapper implements VmService {
             CpuProfileData.categoryKey: 'Dart',
             CpuProfileData.nameKey: nameForStackFrame(current),
             CpuProfileData.resolvedUrlKey: current.resolvedUrl,
+            CpuProfileData.sourceLine: current.sourceLine,
             if (parent != null && parent.frameId != 0)
               CpuProfileData.parentIdKey: '$isolateId-${parent.frameId}',
           };
@@ -1260,6 +1261,18 @@ class _CpuProfileTimelineTree {
   }
 
   String get resolvedUrl => samples.functions[index].resolvedUrl;
+
+  int get sourceLine {
+    final function = samples.functions[index].function;
+    try {
+      return function.location?.line;
+    } catch (_) {
+      // Fail gracefully if `function` has no getter `location` (for example, if
+      // the function is an instance of [NativeFunction]) or generally if
+      // `function.location.line` throws an exception.
+      return null;
+    }
+  }
 
   final children = <_CpuProfileTimelineTree>[];
 
