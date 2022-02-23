@@ -4,8 +4,6 @@
  * found in the LICENSE file.
  */
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -17,7 +15,7 @@ TextSpan truncateTextSpan(TextSpan span, int length) {
   int available = length;
   TextSpan truncateHelper(TextSpan span) {
     var text = span.text;
-    List<TextSpan> children;
+    List<TextSpan>? children;
     if (text != null) {
       if (text.length > available) {
         text = text.substring(0, available);
@@ -26,9 +24,9 @@ TextSpan truncateTextSpan(TextSpan span, int length) {
     }
     if (span.children != null) {
       children = <TextSpan>[];
-      for (var child in span.children) {
+      for (var child in span.children!) {
         if (available <= 0) break;
-        children.add(truncateHelper(child));
+        children.add(truncateHelper(child as TextSpan));
       }
       if (children.isEmpty) {
         children = null;
@@ -47,7 +45,7 @@ TextSpan truncateTextSpan(TextSpan span, int length) {
 }
 
 /// Returns the width in pixels of the [span].
-double calculateTextSpanWidth(TextSpan span) {
+double calculateTextSpanWidth(TextSpan? span) {
   final textPainter = TextPainter(
     text: span,
     textAlign: TextAlign.left,
@@ -68,9 +66,9 @@ double calculateTextSpanHeight(TextSpan span) {
   return textPainter.height;
 }
 
-TextSpan findLongestTextSpan(List<TextSpan> spans) {
+TextSpan? findLongestTextSpan(List<TextSpan> spans) {
   int longestLength = 0;
-  TextSpan longestSpan;
+  TextSpan? longestSpan;
   for (final span in spans) {
     final int currentLength = span.toPlainText().length;
     if (currentLength > longestLength) {
@@ -95,13 +93,13 @@ TextSpan findLongestTextSpan(List<TextSpan> spans) {
 /// [offsetController].
 class OffsetScrollbar extends StatefulWidget {
   const OffsetScrollbar({
-    Key key,
+    Key? key,
     this.isAlwaysShown = false,
-    @required this.axis,
-    @required this.controller,
-    @required this.offsetController,
-    @required this.child,
-    @required this.offsetControllerViewportDimension,
+    required this.axis,
+    required this.controller,
+    required this.offsetController,
+    required this.child,
+    required this.offsetControllerViewportDimension,
   }) : super(key: key);
 
   final bool isAlwaysShown;
@@ -127,7 +125,7 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
   @override
   Widget build(BuildContext context) {
     if (!widget.offsetController.position.hasContentDimensions) {
-      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
         if (widget.offsetController.position.hasViewportDimension && mounted) {
           // TODO(jacobr): find a cleaner way to be notified that the
           // offsetController now has a valid dimension. We would probably
@@ -180,7 +178,7 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
 }
 
 class ColorPair {
-  const ColorPair({@required this.background, @required this.foreground});
+  const ColorPair({required this.background, required this.foreground});
 
   final Color foreground;
 
@@ -188,7 +186,7 @@ class ColorPair {
 }
 
 class ThemedColorPair {
-  const ThemedColorPair({@required this.background, @required this.foreground});
+  const ThemedColorPair({required this.background, required this.foreground});
 
   factory ThemedColorPair.from(ColorPair colorPair) {
     return ThemedColorPair(
@@ -209,7 +207,7 @@ class ThemedColorPair {
 /// may be used when access to the [BuildContext] is not available at the time
 /// the color needs to be specified.
 class ThemedColor {
-  const ThemedColor({this.light, this.dark});
+  const ThemedColor({required this.light, required this.dark});
 
   const ThemedColor.fromSingle(Color color)
       : light = color,
