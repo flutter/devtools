@@ -1030,7 +1030,7 @@ abstract class ColumnRenderer<T> {
   ///
   /// This method can return `null` to indicate that the default rendering
   /// should be used instead.
-  Widget? build(
+  Widget build(
     BuildContext context,
     T data, {
     bool isRowSelected = false,
@@ -1097,12 +1097,12 @@ class TableRow<T> extends StatefulWidget {
         activeSearchMatchNotifier = null,
         super(key: key);
 
-  final LinkedScrollControllerGroup? linkedScrollControllerGroup;
+  final LinkedScrollControllerGroup linkedScrollControllerGroup;
 
   final T? node;
-  final List<ColumnData<T>?> columns;
+  final List<ColumnData<T>> columns;
   final ItemCallback<T>? onPressed;
-  final List<double>? columnWidths;
+  final List<double> columnWidths;
   final bool isSelected;
 
   /// Which column, if any, should show expansion affordances
@@ -1167,7 +1167,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
         SearchableMixin {
   Key? contentKey;
 
-  late final ScrollController scrollController;
+  late ScrollController scrollController;
 
   bool isSearchMatch = false;
 
@@ -1177,7 +1177,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
   void initState() {
     super.initState();
     contentKey = ValueKey(this);
-    scrollController = widget.linkedScrollControllerGroup!.addAndGet();
+    scrollController = widget.linkedScrollControllerGroup.addAndGet();
 
     expandController.addStatusListener((status) {
       setState(() {});
@@ -1198,7 +1198,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
     if (oldWidget.linkedScrollControllerGroup !=
         widget.linkedScrollControllerGroup) {
       scrollController.dispose();
-      scrollController = widget.linkedScrollControllerGroup!.addAndGet();
+      scrollController = widget.linkedScrollControllerGroup.addAndGet();
     }
 
     cancelListeners();
@@ -1215,7 +1215,9 @@ class _TableRowState<T> extends State<TableRow<T?>>
   Widget build(BuildContext context) {
     final row = tableRowFor(
       context,
-      onPressed: () => widget.onPressed!(widget.node),
+      onPressed: widget.onPressed != null
+          ? () => widget.onPressed!(widget.node)
+          : null,
     );
 
     final box = SizedBox(
@@ -1310,7 +1312,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
     return searchAwareBackgroundColor;
   }
 
-  Alignment _alignmentFor(ColumnData<T?> column) {
+  Alignment _alignmentFor(ColumnData<T> column) {
     switch (column.alignment) {
       case ColumnAlignment.center:
         return Alignment.center;
@@ -1322,7 +1324,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
     }
   }
 
-  MainAxisAlignment _mainAxisAlignmentFor(ColumnData<T?> column) {
+  MainAxisAlignment _mainAxisAlignmentFor(ColumnData<T> column) {
     switch (column.alignment) {
       case ColumnAlignment.center:
         return MainAxisAlignment.center;
@@ -1390,7 +1392,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
             onPressed: onPressed,
           );
         }
-        content ??= Text(
+        content = Text(
           column.getDisplayValue(node),
           overflow: TextOverflow.ellipsis,
           style: contentTextStyle(column),
@@ -1457,7 +1459,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
           }
           return columnFor(
             widget.columns[i ~/ 2] as ColumnData<T>,
-            widget.columnWidths![i ~/ 2],
+            widget.columnWidths[i ~/ 2],
           );
         },
       ),
