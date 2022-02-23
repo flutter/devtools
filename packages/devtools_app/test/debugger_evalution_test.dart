@@ -64,6 +64,8 @@ void main() {
             await autoCompleteResultsFor(
               EditingParts(
                 activeWord: 'foo',
+                leftSide: '',
+                rightSide: '',
               ),
               debuggerController,
             ),
@@ -73,6 +75,8 @@ void main() {
             await autoCompleteResultsFor(
               EditingParts(
                 activeWord: 'b',
+                leftSide: '',
+                rightSide: '',
               ),
               debuggerController,
             ),
@@ -92,6 +96,7 @@ void main() {
                 EditingParts(
                   activeWord: 'f',
                   leftSide: 'foo.',
+                  rightSide: '',
                 ),
                 debuggerController,
               ),
@@ -101,6 +106,7 @@ void main() {
                 EditingParts(
                   activeWord: 'fu',
                   leftSide: 'foo.',
+                  rightSide: '',
                 ),
                 debuggerController,
               ),
@@ -118,6 +124,8 @@ void main() {
             await autoCompleteResultsFor(
               EditingParts(
                 leftSide: 'FooClass.',
+                activeWord: '',
+                rightSide: '',
               ),
               debuggerController,
             ),
@@ -134,6 +142,7 @@ void main() {
               EditingParts(
                 activeWord: 'fa',
                 leftSide: 'FooClass.',
+                rightSide: '',
               ),
               debuggerController,
             ),
@@ -152,6 +161,8 @@ void main() {
               await autoCompleteResultsFor(
                 EditingParts(
                   activeWord: '_',
+                  leftSide: '',
+                  rightSide: '',
                 ),
                 debuggerController,
               ),
@@ -176,6 +187,8 @@ void main() {
             await autoCompleteResultsFor(
               EditingParts(
                 activeWord: 'exportedField',
+                leftSide: '',
+                rightSide: '',
               ),
               debuggerController,
             ),
@@ -188,6 +201,8 @@ void main() {
             await autoCompleteResultsFor(
               EditingParts(
                 activeWord: 'ExportedClass',
+                leftSide: '',
+                rightSide: '',
               ),
               debuggerController,
             ),
@@ -201,6 +216,8 @@ void main() {
             await autoCompleteResultsFor(
               EditingParts(
                 activeWord: '_privateExportedField',
+                leftSide: '',
+                rightSide: '',
               ),
               debuggerController,
             ),
@@ -211,6 +228,8 @@ void main() {
             await autoCompleteResultsFor(
               EditingParts(
                 activeWord: '_PrivateExportedClass',
+                leftSide: '',
+                rightSide: '',
               ),
               debuggerController,
             ),
@@ -229,6 +248,8 @@ void main() {
             await autoCompleteResultsFor(
               EditingParts(
                 activeWord: 'developer',
+                leftSide: '',
+                rightSide: '',
               ),
               debuggerController,
             ),
@@ -241,6 +262,8 @@ void main() {
             await autoCompleteResultsFor(
               EditingParts(
                 activeWord: 'math',
+                leftSide: '',
+                rightSide: '',
               ),
               debuggerController,
             ),
@@ -261,6 +284,8 @@ void main() {
             await autoCompleteResultsFor(
               EditingParts(
                 leftSide: '7.',
+                activeWord: '',
+                rightSide: '',
               ),
               debuggerController,
             ),

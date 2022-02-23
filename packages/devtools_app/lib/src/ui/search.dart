@@ -122,10 +122,10 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
   }
 
   void _updateMatches(List<T> matches) {
-    for (final T previousMatch in _searchMatches.value) {
+    for (final previousMatch in _searchMatches.value) {
       previousMatch.isSearchMatch = false;
     }
-    for (final T newMatch in matches) {
+    for (final newMatch in matches) {
       newMatch.isSearchMatch = true;
     }
     if (matches.isEmpty) {
@@ -403,9 +403,9 @@ final searchAutoCompleteKey = GlobalKey(debugLabel: searchAutoCompleteKeyName);
 /// Parts of active editing for auto-complete.
 class EditingParts {
   EditingParts({
-    this.activeWord = '',
-    this.leftSide = '',
-    this.rightSide = '',
+    required this.activeWord,
+    required this.leftSide,
+    required this.rightSide,
   });
 
   final String activeWord;
@@ -1107,13 +1107,13 @@ class SearchNavigationControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<List<DataSearchStateMixin>>(
         valueListenable: controller.searchMatches,
-        builder: (context, List<DataSearchStateMixin> matches, _) {
+        builder: (context, matches, _) {
           final numMatches = matches.length;
           return ValueListenableBuilder<bool>(
             valueListenable: controller.searchInProgressNotifier,
-            builder: (context, bool isSearchInProgress, _) {
+            builder: (context, isSearchInProgress, _) {
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -1154,9 +1154,9 @@ class SearchNavigationControls extends StatelessWidget {
   }
 
   Widget _matchesStatus(int numMatches) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<int>(
       valueListenable: controller.matchIndex,
-      builder: (context, int index, _) {
+      builder: (context, index, _) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: densePadding),
           child: Text(
@@ -1205,12 +1205,12 @@ class AutoCompleteMatch {
       if (previousEndIndex < segment.begin) {
         // Add the unmatched segment before the current matched segment:
         final segmentBefore =
-            text.substring(previousEndIndex, segment.begin as int?);
+            text.substring(previousEndIndex, segment.begin as int);
         segments.add(transformUnmatchedSegment(segmentBefore));
       }
       // Add the matched segment:
       final matchedSegment =
-          text.substring(segment.begin as int, segment.end as int?);
+          text.substring(segment.begin as int, segment.end as int);
       segments.add(transformMatchedSegment(matchedSegment));
       previousEndIndex = segment.end as int;
     }
