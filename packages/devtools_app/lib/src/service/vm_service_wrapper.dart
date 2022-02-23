@@ -142,12 +142,12 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Success> clearCpuSamples(String? isolateId) async {
+  Future<Success> clearCpuSamples(String isolateId) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 27))) {
       return trackFuture(
         'clearCpuSamples',
-        _vmService.clearCpuSamples(isolateId!),
+        _vmService.clearCpuSamples(isolateId),
       );
     } else {
       final response = await trackFuture(
@@ -255,13 +255,13 @@ class VmServiceWrapper implements VmService {
   }
 
   Future<CpuProfileData> getCpuProfileTimeline(
-      String? isolateId, int origin, int extent) async {
+      String isolateId, int origin, int extent) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 27))) {
       // As of service protocol version 3.27 _getCpuProfileTimeline does not exist
       // and has been replaced by getCpuSamples. We need to do some processing to
       // get back to the format we expect.
-      final cpuSamples = await getCpuSamples(isolateId!, origin, extent);
+      final cpuSamples = await getCpuSamples(isolateId, origin, extent);
 
       // The root ID is associated with an artificial frame / node that is the root
       // of all stacks, regardless of entrypoint. This should never be seen in the
@@ -355,7 +355,7 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<InstanceSet> getInstances(
-    String? isolateId,
+    String isolateId,
     String objectId,
     int limit, {
     String? classId,
@@ -364,7 +364,7 @@ class VmServiceWrapper implements VmService {
         supportedVersion: SemanticVersion(major: 3, minor: 20))) {
       return trackFuture(
         'getInstances',
-        _vmService.getInstances(isolateId!, objectId, limit),
+        _vmService.getInstances(isolateId, objectId, limit),
       );
     } else {
       final response = await trackFuture(
@@ -457,16 +457,16 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Stack> getStack(String? isolateId, {int? limit}) async {
+  Future<Stack> getStack(String isolateId, {int? limit}) async {
     if (await isProtocolVersionSupported(
       supportedVersion: SemanticVersion(major: 3, minor: 42),
     )) {
       return trackFuture(
         'getStack',
-        _vmService.getStack(isolateId!, limit: limit),
+        _vmService.getStack(isolateId, limit: limit),
       );
     } else {
-      return trackFuture('getStack', _vmService.getStack(isolateId!));
+      return trackFuture('getStack', _vmService.getStack(isolateId));
     }
   }
 
@@ -932,7 +932,7 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<InboundReferences> getInboundReferences(
-    String? isolateId,
+    String isolateId,
     String targetId,
     int limit,
   ) async {
@@ -940,7 +940,7 @@ class VmServiceWrapper implements VmService {
         supportedVersion: SemanticVersion(major: 3, minor: 25))) {
       return trackFuture(
         'getInboundReferences',
-        _vmService.getInboundReferences(isolateId!, targetId, limit),
+        _vmService.getInboundReferences(isolateId, targetId, limit),
       );
     } else {
       return trackFuture(
@@ -973,14 +973,14 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Success> setTraceClassAllocation(
-    String? isolateId,
+    String isolateId,
     String? classId,
     bool enable,
   ) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 43))) {
       return trackFuture('setTraceClassAllocation',
-          _vmService.setTraceClassAllocation(isolateId!, classId!, enable));
+          _vmService.setTraceClassAllocation(isolateId, classId!, enable));
     } else {
       final Map<String, dynamic> args = {};
       if (classId != null) {
@@ -1031,12 +1031,12 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<PortList> getPorts(String? isolateId) async {
+  Future<PortList> getPorts(String isolateId) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 42))) {
       return trackFuture(
         'getPorts',
-        _vmService.getPorts(isolateId!),
+        _vmService.getPorts(isolateId),
       );
     } else {
       throw Exception('Unsupported protocol version.');
