@@ -800,7 +800,7 @@ class _Table<T> extends StatefulWidget {
   final FocusNode? focusNode;
   final TableKeyEventHandler? handleKeyEvent;
   final ValueNotifier<Selection<T>>? selectionNotifier;
-  final ValueListenable<T>? activeSearchMatchNotifier;
+  final ValueListenable<T?>? activeSearchMatchNotifier;
 
   /// The width to assume for columns that don't specify a width.
   static const defaultColumnWidth = 500.0;
