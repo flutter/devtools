@@ -66,7 +66,7 @@ class FrameworkController {
     serviceManager.connectedState.addListener(() {
       final connectionState = serviceManager.connectedState.value;
       if (connectionState.connected) {
-        _connectedController.add(serviceManager.service.connectedUri);
+        _connectedController.add(serviceManager.service!.connectedUri);
       } else {
         _disconnectedController.add(null);
       }
