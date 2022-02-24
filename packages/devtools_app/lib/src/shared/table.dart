@@ -283,9 +283,9 @@ class FlatTableState<T> extends State<FlatTable<T>>
 
   @override
   void sortData(
-    ColumnData column,
+    ColumnData<T> column,
     SortDirection direction, {
-    ColumnData? secondarySortColumn,
+    ColumnData<T>? secondarySortColumn,
   }) {
     data.sort(
       (T a, T b) => _compareData<T>(
@@ -410,8 +410,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   @override
-  void didUpdateWidget(TreeTable oldWidget) {
-    super.didUpdateWidget(oldWidget as TreeTable<T>);
+  void didUpdateWidget(TreeTable<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
     if (widget == oldWidget) return;
 
@@ -436,7 +436,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   void _initData() {
     dataRoots = List.generate(widget.dataRoots.length, (index) {
-      final T root = widget.dataRoots[index];
+      final root = widget.dataRoots[index];
       if (widget.autoExpandRoots) {
         root.expand();
       }
@@ -517,8 +517,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   List<double> _computeColumnWidths(List<T> flattenedList) {
-    final T firstRoot = dataRoots.first;
-    TreeNode deepest = firstRoot;
+    final firstRoot = dataRoots.first;
+    var deepest = firstRoot;
     // This will use the width of all rows in the table, even the rows
     // that are hidden by nesting.
     // We may want to change this to using a flattened list of only
@@ -529,8 +529,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       }
     }
     final widths = <double>[];
-    for (ColumnData<T> column in widget.columns) {
-      double width = column.getNodeIndentPx(deepest as T);
+    for (var column in widget.columns) {
+      var width = column.getNodeIndentPx(deepest);
       assert(width >= 0.0);
       if (column.fixedWidthPx != null) {
         width += column.fixedWidthPx!;
@@ -598,16 +598,16 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       );
     }
 
-    final T node = items[index];
+    final node = items[index];
     if (animatingChildrenSet.contains(node)) return const SizedBox();
     return rowForNode(node);
   }
 
   @override
   void sortData(
-    ColumnData column,
+    ColumnData<T> column,
     SortDirection direction, {
-    ColumnData? secondarySortColumn,
+    ColumnData<T>? secondarySortColumn,
   }) {
     final sortFunction = (T a, T b) => _compareData<T>(
           a,
@@ -701,7 +701,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     final minCompleteItemsInView =
         max((viewportHeight / defaultRowHeight).floor() - 2, 0);
     final lastItemIndex = firstItemIndex + minCompleteItemsInView - 1;
-    int? newSelectedNodeIndex;
+    late int newSelectedNodeIndex;
 
     final selectionValue = selectionNotifier.value;
     final selectedNodeIndex = selectionValue.nodeIndex;
@@ -719,7 +719,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         break;
     }
 
-    final T newSelectedNode = items[newSelectedNodeIndex];
+    final newSelectedNode = items[newSelectedNodeIndex];
     final isBelowViewport = newSelectedNodeIndex > lastItemIndex;
     final isAboveViewport = newSelectedNodeIndex < firstItemIndex;
 
@@ -752,9 +752,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   void _sortDataAndUpdate(
-    ColumnData column,
+    ColumnData<T> column,
     SortDirection direction, {
-    ColumnData? secondarySortColumn,
+    ColumnData<T>? secondarySortColumn,
   }) {
     sortData(column, direction, secondarySortColumn: secondarySortColumn);
     _updateItems();
@@ -764,9 +764,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 // TODO(kenz): https://github.com/flutter/devtools/issues/1522. The table code
 // needs to be refactored to support flexible column widths.
 class _Table<T> extends StatefulWidget {
-  // Class with late fields cannot have const constructior.
-  // ignore: prefer_const_constructors_in_immutables
-  _Table({
+  const _Table({
     Key? key,
     required this.data,
     required this.columns,
@@ -865,7 +863,7 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
   }
 
   void _onActiveSearchChange() async {
-    final T? activeSearch = widget.activeSearchMatchNotifier!.value;
+    final activeSearch = widget.activeSearchMatchNotifier!.value;
     final index = widget.data.indexOf(activeSearch);
 
     if (index != -1) {
@@ -880,46 +878,6 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
         );
       }
     }
-  }
-
-  /// Return the number of visible rows above the selected node.
-  // TODO(terry): Must refactory should be T not dynamic but that requires hanlding
-  //              for both Table and TreeTable.
-  int selectionRowNumber(dynamic selectedNode) {
-    var scanNode = selectedNode;
-    var parent = scanNode?.parent;
-
-    assert(parent != null);
-
-    var totalVisibleRowsAboveNode = 0;
-    while (!scanNode.isRoot) {
-      final int rowsAbove = parent.children.indexWhere((node) {
-        return scanNode == node;
-      });
-
-      if (rowsAbove > 0) {
-        // Add parent row to the count.
-        totalVisibleRowsAboveNode += rowsAbove + (parent.index >= 0 ? 1 : 0);
-      }
-
-      // Check all scanNode's parent siblings above current scanNode.
-      for (final sibling in parent.children) {
-        if (sibling == scanNode) break;
-
-        // Any parent siblings above expanded? Count those rows too.
-        if (sibling.isExpanded) {
-          // Count of a parent node's children and parent, if expanded,
-          // above selected node.
-          totalVisibleRowsAboveNode += (sibling.children.length as int) + 1;
-        }
-      }
-
-      scanNode = parent;
-      parent = scanNode.parent;
-    }
-
-    // Return zero based row.
-    return totalVisibleRowsAboveNode - 1;
   }
 
   @override
@@ -991,7 +949,7 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
                             scrollController,
                             constraints,
                           )
-                        : false as KeyEventResult,
+                        : KeyEventResult.ignored,
                     focusNode: widget.focusNode,
                     child: ListView.builder(
                       controller: scrollController,
@@ -1339,7 +1297,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
   /// Presents the content of this row.
   Widget tableRowFor(BuildContext context, {VoidCallback? onPressed}) {
     Widget columnFor(ColumnData<T> column, double columnWidth) {
-      Widget? content;
+      late Widget content;
       final node = widget.node;
       if (node == null) {
         final isSortColumn = column == widget.sortColumn;
@@ -1391,13 +1349,14 @@ class _TableRowState<T> extends State<TableRow<T?>>
             isRowSelected: widget.isSelected,
             onPressed: onPressed,
           );
+        } else {
+          content = Text(
+            column.getDisplayValue(node),
+            overflow: TextOverflow.ellipsis,
+            style: contentTextStyle(column),
+            maxLines: 1,
+          );
         }
-        content ??= Text(
-          column.getDisplayValue(node),
-          overflow: TextOverflow.ellipsis,
-          style: contentTextStyle(column),
-          maxLines: 1,
-        );
 
         final tooltip = column.getTooltip(node);
         if (tooltip.isNotEmpty) {
@@ -1504,7 +1463,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
 }
 
 abstract class SortableTable<T> {
-  void sortData(ColumnData column, SortDirection direction);
+  void sortData(ColumnData<T> column, SortDirection direction);
 }
 
 int _compareFactor(SortDirection direction) =>
@@ -1513,9 +1472,9 @@ int _compareFactor(SortDirection direction) =>
 int _compareData<T>(
   T a,
   T b,
-  ColumnData column,
+  ColumnData<T> column,
   SortDirection direction, {
-  ColumnData? secondarySortColumn,
+  ColumnData<T>? secondarySortColumn,
 }) {
   final compare = column.compare(a, b) * _compareFactor(direction);
   if (compare != 0 || secondarySortColumn == null) return compare;
