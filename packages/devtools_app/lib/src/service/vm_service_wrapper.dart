@@ -1303,9 +1303,9 @@ extension VmServicePrivate on VmServiceWrapper {
   /// only be set by [PreferencesController.toggleVmDeveloperMode] or tests.
   static bool enablePrivateRpcs = false;
 
-  Future<T> _privateRpcInvoke<T>(
+  Future<T?> _privateRpcInvoke<T>(
     String method, {
-    required T Function(Map<String, dynamic>?) parser,
+    required T? Function(Map<String, dynamic>?) parser,
     String? isolateId,
     Map<String, dynamic>? args,
   }) async {
