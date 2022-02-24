@@ -29,11 +29,11 @@ class CustomIcon extends StatelessWidget {
     this.isAbstract = false,
   });
 
-  final IconKind? kind;
+  final IconKind kind;
   final String text;
   final bool isAbstract;
 
-  AssetImageIcon get baseIcon => kind!.icon;
+  AssetImageIcon get baseIcon => kind.icon;
 
   @override
   Widget build(BuildContext context) {
@@ -102,15 +102,15 @@ class CustomIconMaker {
     IconKind? kind,
     bool isAbstract = false,
   }) {
-    kind ??= IconKind.classIcon;
+    final theKind = kind ?? IconKind.classIcon;
     if (fromText.isEmpty != false) {
       return null;
     }
 
     final String text = fromText[0].toUpperCase();
-    final String mapKey = '${text}_${kind.name}_$isAbstract';
+    final String mapKey = '${text}_${theKind.name}_$isAbstract';
     return iconCache.putIfAbsent(mapKey, () {
-      return CustomIcon(kind: kind, text: text, isAbstract: isAbstract);
+      return CustomIcon(kind: theKind, text: text, isAbstract: isAbstract);
     });
   }
 
@@ -298,7 +298,7 @@ class AssetImageIcon extends StatelessWidget {
   })  : _width = width,
         _height = height;
 
-  final String? asset;
+  final String asset;
   final double? _height;
   final double? _width;
 
@@ -308,7 +308,7 @@ class AssetImageIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image(
-      image: AssetImage(asset!),
+      image: AssetImage(asset),
       height: height,
       width: width,
       fit: BoxFit.fill,
