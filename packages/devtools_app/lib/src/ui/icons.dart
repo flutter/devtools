@@ -95,7 +95,7 @@ class CircleIcon extends StatelessWidget {
 }
 
 class CustomIconMaker {
-  final Map<String?, Widget> iconCache = {};
+  final Map<String, Widget> iconCache = {};
 
   Widget? getCustomIcon(
     String fromText, {
