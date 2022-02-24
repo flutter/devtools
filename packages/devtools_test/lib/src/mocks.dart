@@ -447,7 +447,8 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<FlagList> getFlagList() => Future.value(FlagList.parse(_flags));
+  Future<FlagList> getFlagList() =>
+      Future.value(FlagList.parse(_flags) ?? FlagList(flags: []));
 
   final _vmTimelineFlags = <String, dynamic>{
     'type': 'TimelineFlags',
@@ -662,7 +663,10 @@ class MockIsolateState extends Mock implements IsolateState {}
 
 class MockServiceManager extends Mock implements ServiceConnectionManager {}
 
-class MockVmService extends Mock implements VmServiceWrapper {}
+class MockVmService extends Mock implements VmServiceWrapper {
+  @override
+  Future<FlagList> getFlagList() => Future.value(FlagList(flags: []));
+}
 
 class MockIsolate extends Mock implements Isolate {}
 

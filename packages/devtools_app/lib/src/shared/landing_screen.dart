@@ -206,7 +206,7 @@ class _ConnectDialogState extends State<ConnectDialog>
       },
     );
     if (connected) {
-      final connectedUri = serviceManager.service!.connectedUri!;
+      final connectedUri = serviceManager.service!.connectedUri;
       routerDelegate.updateArgsIfNotCurrent({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
       notifications.push('Successfully connected to $shortUri.');
