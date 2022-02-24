@@ -108,7 +108,7 @@ class EvalOnDartLibrary extends DisposableController
 
     try {
       final Isolate isolate =
-          await serviceManager.isolateManager.getIsolateCached(isolateRef);
+          (await serviceManager.isolateManager.getIsolateCached(isolateRef))!;
       if (_currentRequestId != requestId) {
         // The initialize request is obsolete.
         return;
