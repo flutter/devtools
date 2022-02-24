@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 @JS()
 library gtags;
@@ -42,12 +42,12 @@ class GTag {
 @anonymous
 class GtagEvent {
   external factory GtagEvent({
-    String event_category,
-    String event_label, // Event e.g., gaScreenViewEvent, gaSelectEvent, etc.
-    String send_to, // UA ID of target GA property to receive event data.
+    String? event_category,
+    String? event_label, // Event e.g., gaScreenViewEvent, gaSelectEvent, etc.
+    String? send_to, // UA ID of target GA property to receive event data.
 
-    int value,
-    bool non_interaction,
+    int? value,
+    bool? non_interaction,
     dynamic custom_map,
   });
 
@@ -67,8 +67,8 @@ class GtagEvent {
 @anonymous
 class GtagException {
   external factory GtagException({
-    String description,
-    bool fatal,
+    String? description,
+    bool? fatal,
   });
 
   external String get description; // Description of the error.
