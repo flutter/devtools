@@ -50,7 +50,7 @@ class IsolateManager extends Disposer {
     addAutoDisposeListener(preferences.vmDeveloperModeEnabled, () async {
       final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
       final vm = await serviceManager.service!.getVM();
-      final isolates = [
+      final List<IsolateRef> isolates = [
         ...vm.isolates ?? [],
         if (vmDeveloperModeEnabled) ...vm.systemIsolates ?? [],
       ];
