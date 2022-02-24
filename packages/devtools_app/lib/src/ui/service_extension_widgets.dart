@@ -485,7 +485,7 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: extensionAvailable,
-      builder: (context, dynamic available, _) {
+      builder: (context, bool available, _) {
         return CheckboxSetting(
           notifier: value,
           title: widget.service.title,
@@ -500,12 +500,14 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
 
   void _onChanged(bool? value) {
     invokeAndCatchErrors(() async {
-      final _value = widget.service.inverted ? !value! : value!;
+      var enabled = value == true;
+      if (widget.service.inverted) enabled = !enabled;
       await serviceManager.serviceExtensionManager!.setServiceExtensionState(
         widget.service.extension,
-        enabled: _value,
-        value:
-            _value ? widget.service.enabledValue : widget.service.disabledValue,
+        enabled: enabled,
+        value: enabled
+            ? widget.service.enabledValue
+            : widget.service.disabledValue,
       );
     });
   }
@@ -615,7 +617,7 @@ class _ServiceExtensionCheckboxGroupButtonState
     }
     return ValueListenableBuilder(
       valueListenable: _enabled,
-      builder: (context, dynamic enabled, _) {
+      builder: (context, bool enabled, _) {
         return DevToolsToggleButtonGroup(
           children: [label],
           selectedStates: [enabled],
