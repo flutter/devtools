@@ -1,3 +1,5 @@
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 /*
  * Copyright 2017 The Chromium Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
@@ -12,8 +14,6 @@
 /// The benefit of this approach is that icons can be const objects and tests
 /// of code that uses icons can run on the Dart VM.
 
-// @dart=2.9
-
 library icons;
 
 import 'package:flutter/material.dart';
@@ -24,16 +24,16 @@ import '../shared/utils.dart';
 
 class CustomIcon extends StatelessWidget {
   const CustomIcon({
-    @required this.kind,
-    @required this.text,
+    required this.kind,
+    required this.text,
     this.isAbstract = false,
   });
 
-  final IconKind kind;
+  final IconKind? kind;
   final String text;
   final bool isAbstract;
 
-  AssetImageIcon get baseIcon => kind.icon;
+  AssetImageIcon get baseIcon => kind!.icon;
 
   @override
   Widget build(BuildContext context) {
@@ -61,8 +61,8 @@ class CustomIcon extends StatelessWidget {
 /// An icon with one character
 class CircleIcon extends StatelessWidget {
   const CircleIcon({
-    @required this.text,
-    @required this.color,
+    required this.text,
+    required this.color,
   });
 
   /// Text to display. Should be one character.
@@ -95,15 +95,15 @@ class CircleIcon extends StatelessWidget {
 }
 
 class CustomIconMaker {
-  final Map<String, Widget> iconCache = {};
+  final Map<String?, Widget> iconCache = {};
 
-  Widget getCustomIcon(
+  Widget? getCustomIcon(
     String fromText, {
-    IconKind kind,
+    IconKind? kind,
     bool isAbstract = false,
   }) {
     kind ??= IconKind.classIcon;
-    if (fromText?.isEmpty != false) {
+    if (fromText.isEmpty != false) {
       return null;
     }
 
@@ -114,12 +114,12 @@ class CustomIconMaker {
     });
   }
 
-  Widget fromWidgetName(String name) {
+  Widget? fromWidgetName(String? name) {
     if (name == null) {
       return null;
     }
 
-    while (name.isNotEmpty && !isAlphabetic(name.codeUnitAt(0))) {
+    while (name!.isNotEmpty && !isAlphabetic(name.codeUnitAt(0))) {
       name = name.substring(1);
     }
 
@@ -140,11 +140,7 @@ class CustomIconMaker {
     });
   }
 
-  Widget fromInfo(String name) {
-    if (name == null) {
-      return null;
-    }
-
+  Widget? fromInfo(String name) {
     if (name.isEmpty) {
       return null;
     }
@@ -160,7 +156,7 @@ class CustomIconMaker {
 }
 
 class IconKind {
-  const IconKind(this.name, this.icon, [AssetImageIcon abstractIcon])
+  const IconKind(this.name, this.icon, [AssetImageIcon? abstractIcon])
       : abstractIcon = abstractIcon ?? icon;
 
   static IconKind classIcon = const IconKind(
@@ -296,15 +292,15 @@ class FlutterMaterialIcons {
 
 class AssetImageIcon extends StatelessWidget {
   const AssetImageIcon({
-    @required this.asset,
-    double height,
-    double width,
+    required this.asset,
+    double? height,
+    double? width,
   })  : _width = width,
         _height = height;
 
-  final String asset;
-  final double _height;
-  final double _width;
+  final String? asset;
+  final double? _height;
+  final double? _width;
 
   double get width => _width ?? defaultIconSize;
   double get height => _height ?? defaultIconSize;
@@ -312,7 +308,7 @@ class AssetImageIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image(
-      image: AssetImage(asset),
+      image: AssetImage(asset!),
       height: height,
       width: width,
       fit: BoxFit.fill,
@@ -322,8 +318,8 @@ class AssetImageIcon extends StatelessWidget {
 
 class ThemedImageIcon extends StatelessWidget {
   const ThemedImageIcon({
-    @required this.lightModeAsset,
-    @required this.darkModeAsset,
+    required this.lightModeAsset,
+    required this.darkModeAsset,
   });
 
   final String lightModeAsset;
