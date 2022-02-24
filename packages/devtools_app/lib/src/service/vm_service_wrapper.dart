@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 
@@ -11,7 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../profiler/cpu_profile_model.dart' hide CpuSample;
-import '../shared/globals.dart';
 import '../shared/version.dart';
 
 class VmServiceWrapper implements VmService {
@@ -25,8 +24,8 @@ class VmServiceWrapper implements VmService {
     Stream<dynamic> /*String|List<int>*/ inStream,
     void writeMessage(String message),
     this._connectedUri, {
-    Log log,
-    DisposeHandler disposeHandler,
+    Log? log,
+    DisposeHandler? disposeHandler,
     this.trackFutures = false,
   }) {
     _vmService = VmService(
@@ -37,10 +36,10 @@ class VmServiceWrapper implements VmService {
     );
   }
 
-  VmService _vmService;
-  Version _protocolVersion;
-  Version _dartIoVersion;
-  Version _ddsVersion;
+  late final VmService _vmService;
+  Version? _protocolVersion;
+  Version? _dartIoVersion;
+  Version? _ddsVersion;
 
   Future<void> initServiceVersions() async {
     // Note: We cannot init [_dartIoVersion] here because it requires an
@@ -79,7 +78,7 @@ class VmServiceWrapper implements VmService {
       Future<void> Function(IsolateRef) callback) async {
     final vm = await _vmService.getVM();
     final futures = <Future>[];
-    for (final isolate in vm.isolates) {
+    for (final isolate in vm.isolates ?? []) {
       futures.add(callback(isolate));
     }
     await Future.wait(futures);
@@ -90,7 +89,7 @@ class VmServiceWrapper implements VmService {
     String isolateId,
     String scriptId,
     int line, {
-    int column,
+    int? column,
   }) {
     return trackFuture('addBreakpoint',
         _vmService.addBreakpoint(isolateId, scriptId, line, column: column));
@@ -107,7 +106,7 @@ class VmServiceWrapper implements VmService {
     String isolateId,
     String scriptUri,
     int line, {
-    int column,
+    int? column,
   }) {
     return trackFuture(
         'addBreakpointWithScriptUri',
@@ -120,8 +119,11 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Response> callMethod(String method,
-      {String isolateId, Map<String, dynamic> args}) {
+  Future<Response> callMethod(
+    String method, {
+    String? isolateId,
+    Map<String, dynamic>? args,
+  }) {
     return trackFuture('callMethod $method',
         _vmService.callMethod(method, isolateId: isolateId, args: args));
   }
@@ -129,8 +131,8 @@ class VmServiceWrapper implements VmService {
   @override
   Future<Response> callServiceExtension(
     String method, {
-    String isolateId,
-    Map<String, dynamic> args,
+    String? isolateId,
+    Map<String, dynamic>? args,
   }) {
     return trackFuture(
         'callServiceExtension $method',
@@ -181,8 +183,8 @@ class VmServiceWrapper implements VmService {
     String isolateId,
     String targetId,
     String expression, {
-    Map<String, String> scope,
-    bool disableBreakpoints,
+    Map<String, String>? scope,
+    bool? disableBreakpoints,
   }) {
     return trackFuture(
         'evaluate $expression',
@@ -200,8 +202,8 @@ class VmServiceWrapper implements VmService {
     String isolateId,
     int frameIndex,
     String expression, {
-    Map<String, String> scope,
-    bool disableBreakpoints,
+    Map<String, String>? scope,
+    bool? disableBreakpoints,
   }) {
     return trackFuture(
         'evaluateInFrame $expression',
@@ -217,8 +219,8 @@ class VmServiceWrapper implements VmService {
   @override
   Future<AllocationProfile> getAllocationProfile(
     String isolateId, {
-    bool reset,
-    bool gc,
+    bool? reset,
+    bool? gc,
   }) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 18))) {
@@ -238,7 +240,7 @@ class VmServiceWrapper implements VmService {
         'getAllocationProfile',
         callMethod('_getAllocationProfile', isolateId: isolateId, args: args),
       );
-      return AllocationProfile.parse(response.json);
+      return AllocationProfile.parse(response.json)!;
     }
   }
 
@@ -278,7 +280,7 @@ class VmServiceWrapper implements VmService {
         CpuProfileData.traceEventsKey: [],
       };
 
-      String nameForStackFrame(_CpuProfileTimelineTree current) {
+      String? nameForStackFrame(_CpuProfileTimelineTree current) {
         final className = current.className;
         if (className != null) {
           return '$className.${current.name}';
@@ -287,8 +289,8 @@ class VmServiceWrapper implements VmService {
       }
 
       void processStackFrame({
-        @required _CpuProfileTimelineTree current,
-        @required _CpuProfileTimelineTree parent,
+        required _CpuProfileTimelineTree current,
+        required _CpuProfileTimelineTree? parent,
       }) {
         final id = nextId++;
         current.frameId = id;
@@ -314,8 +316,8 @@ class VmServiceWrapper implements VmService {
       processStackFrame(current: root, parent: null);
 
       // Build the trace events.
-      for (final sample in cpuSamples.samples) {
-        final tree = _CpuProfileTimelineTree.getTreeFromSample(sample);
+      for (final sample in cpuSamples.samples ?? <CpuSample>[]) {
+        final tree = _CpuProfileTimelineTree.getTreeFromSample(sample)!;
         // Skip the root.
         if (tree.frameId == kRootId) {
           continue;
@@ -346,7 +348,7 @@ class VmServiceWrapper implements VmService {
               'timeOriginMicros': origin,
               'timeExtentMicros': extent,
             },
-          )).then((Response response) => CpuProfileData.parse(response.json));
+          )).then((Response response) => CpuProfileData.parse(response.json!));
     }
   }
 
@@ -359,7 +361,7 @@ class VmServiceWrapper implements VmService {
     String isolateId,
     String objectId,
     int limit, {
-    String classId,
+    String? classId,
   }) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 20))) {
@@ -376,7 +378,7 @@ class VmServiceWrapper implements VmService {
           'limit': limit,
         }),
       );
-      return InstanceSet.parse(response.json);
+      return InstanceSet.parse(response.json)!;
     }
   }
 
@@ -401,8 +403,8 @@ class VmServiceWrapper implements VmService {
   Future<Obj> getObject(
     String isolateId,
     String objectId, {
-    int offset,
-    int count,
+    int? offset,
+    int? count,
   }) {
     return trackFuture(
         'getObject',
@@ -428,22 +430,12 @@ class VmServiceWrapper implements VmService {
   Future<SourceReport> getSourceReport(
     String isolateId,
     List<String> reports, {
-    String scriptId,
-    int tokenPos,
-    int endTokenPos,
-    bool forceCompile,
-    bool reportLines,
+    String? scriptId,
+    int? tokenPos,
+    int? endTokenPos,
+    bool? forceCompile,
+    bool? reportLines,
   }) async {
-    // Workaround for https://github.com/flutter/devtools/issues/2981.
-    // TODO(bkonyi): remove after Flutter stable is on Dart SDK > 2.12.
-    if (await serviceManager.connectedApp.isProfileBuild) {
-      const kFeatureDisabled = 100;
-      throw RPCError(
-        'getSourceReport',
-        kFeatureDisabled,
-        'disabled in AOT mode and PRODUCT.',
-      );
-    }
     return trackFuture(
         'getSourceReport',
         _vmService.getSourceReport(
@@ -458,7 +450,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Stack> getStack(String isolateId, {int limit}) async {
+  Future<Stack> getStack(String isolateId, {int? limit}) async {
     if (await isProtocolVersionSupported(
       supportedVersion: SemanticVersion(major: 3, minor: 42),
     )) {
@@ -476,8 +468,8 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Timeline> getVMTimeline({
-    int timeOriginMicros,
-    int timeExtentMicros,
+    int? timeOriginMicros,
+    int? timeExtentMicros,
   }) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 19))) {
@@ -491,7 +483,7 @@ class VmServiceWrapper implements VmService {
     } else {
       final Response response =
           await trackFuture('getVMTimeline', callMethod('_getVMTimeline'));
-      return Timeline.parse(response.json);
+      return Timeline.parse(response.json)!;
     }
   }
 
@@ -499,21 +491,21 @@ class VmServiceWrapper implements VmService {
   // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
   Future<bool> isHttpTimelineLoggingAvailable(String isolateId) async {
     final Isolate isolate = await getIsolate(isolateId);
+    final rpcs = isolate.extensionRPCs ?? [];
+
     if (await isDartIoVersionSupported(
       supportedVersion: SemanticVersion(major: 1, minor: 3),
       isolateId: isolateId,
     )) {
-      return isolate.extensionRPCs
-          .contains('ext.dart.io.httpEnableTimelineLogging');
+      return rpcs.contains('ext.dart.io.httpEnableTimelineLogging');
     } else {
-      return isolate.extensionRPCs
-          .contains('ext.dart.io.setHttpEnableTimelineLogging');
+      return rpcs.contains('ext.dart.io.setHttpEnableTimelineLogging');
     }
   }
 
   Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
     String isolateId, [
-    bool enabled,
+    bool? enabled,
   ]) async {
     assert(await isHttpTimelineLoggingAvailable(isolateId));
     if (await isDartIoVersionSupported(
@@ -542,7 +534,7 @@ class VmServiceWrapper implements VmService {
   // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
   Future<bool> isHttpProfilingAvailable(String isolateId) async {
     final Isolate isolate = await getIsolate(isolateId);
-    return isolate.extensionRPCs.contains('ext.dart.io.getHttpProfile');
+    return (isolate.extensionRPCs ?? []).contains('ext.dart.io.getHttpProfile');
   }
 
   /// The `getHttpProfile` RPC is used to retrieve HTTP profiling information
@@ -553,7 +545,7 @@ class VmServiceWrapper implements VmService {
   /// [clearHttpProfile] invocation.
   Future<HttpProfile> getHttpProfile(
     String isolateId, {
-    int updatedSince,
+    int? updatedSince,
   }) async {
     assert(await isHttpProfilingAvailable(isolateId));
     return trackFuture(
@@ -591,12 +583,13 @@ class VmServiceWrapper implements VmService {
   // https://github.com/dart-lang/sdk/blob/master/pkg/vm_service/lib/src/dart_io_extensions.dart
   Future<bool> isSocketProfilingAvailable(String isolateId) async {
     final Isolate isolate = await getIsolate(isolateId);
-    return isolate.extensionRPCs.contains('ext.dart.io.getSocketProfile');
+    return (isolate.extensionRPCs ?? [])
+        .contains('ext.dart.io.getSocketProfile');
   }
 
   Future<SocketProfilingState> socketProfilingEnabled(
     String isolateId, [
-    bool enabled,
+    bool? enabled,
   ]) async {
     assert(await isSocketProfilingAvailable(isolateId));
     if (await isDartIoVersionSupported(
@@ -655,14 +648,14 @@ class VmServiceWrapper implements VmService {
         _vmService.getVMTimelineMicros(),
       );
     } else {
-      return null;
+      throw Exception('Unsupported protocol version.');
     }
   }
 
   @override
   Future<Version> getVersion() async {
-    return _protocolVersion ??=
-        await trackFuture('getVersion', _vmService.getVersion());
+    return (_protocolVersion ??=
+        await trackFuture('getVersion', _vmService.getVersion()))!;
   }
 
   Future<Version> getDartIOVersion(String isolateId) =>
@@ -678,7 +671,7 @@ class VmServiceWrapper implements VmService {
     String targetId,
     String selector,
     List<String> argumentIds, {
-    bool disableBreakpoints,
+    bool? disableBreakpoints,
   }) {
     return trackFuture(
         'invoke $selector',
@@ -822,10 +815,10 @@ class VmServiceWrapper implements VmService {
   @override
   Future<ReloadReport> reloadSources(
     String isolateId, {
-    bool force,
-    bool pause,
-    String rootLibUri,
-    String packagesUri,
+    bool? force,
+    bool? pause,
+    String? rootLibUri,
+    String? packagesUri,
   }) {
     return trackFuture(
         'reloadSources',
@@ -845,7 +838,7 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
-  Future<Success> resume(String isolateId, {String step, int frameIndex}) {
+  Future<Success> resume(String isolateId, {String? step, int? frameIndex}) {
     return trackFuture('resume',
         _vmService.resume(isolateId, step: step, frameIndex: frameIndex));
   }
@@ -853,8 +846,8 @@ class VmServiceWrapper implements VmService {
   @override
   Future<Success> setIsolatePauseMode(
     String isolateId, {
-    /*ExceptionPauseMode*/ String exceptionPauseMode,
-    bool shouldPauseOnExit,
+    /*ExceptionPauseMode*/ String? exceptionPauseMode,
+    bool? shouldPauseOnExit,
   }) {
     return trackFuture(
       'setIsolatePauseMode',
@@ -927,7 +920,7 @@ class VmServiceWrapper implements VmService {
       _activeStreams[streamId] = future;
       return future;
     } else {
-      return _activeStreams[streamId];
+      return _activeStreams[streamId]!.then((value) => value);
     }
   }
 
@@ -950,7 +943,7 @@ class VmServiceWrapper implements VmService {
           '_getInboundReferences',
           isolateId: isolateId,
           args: {'targetId': targetId, 'limit': limit},
-        ),
+        ).then((value) => value as InboundReferences),
       );
     }
   }
@@ -962,8 +955,12 @@ class VmServiceWrapper implements VmService {
           _vmService.getRetainingPath(isolateId, targetId, limit));
 
   @override
-  Future<CpuSamples> getAllocationTraces(String isolateId,
-      {int timeOriginMicros, int timeExtentMicros, String classId}) {
+  Future<CpuSamples> getAllocationTraces(
+    String isolateId, {
+    int? timeOriginMicros,
+    int? timeExtentMicros,
+    String? classId,
+  }) {
     return trackFuture(
         'getAllocationTraces',
         _vmService.getAllocationTraces(isolateId,
@@ -980,16 +977,14 @@ class VmServiceWrapper implements VmService {
   ) async {
     if (await isProtocolVersionSupported(
         supportedVersion: SemanticVersion(major: 3, minor: 43))) {
-      return trackFuture('setTraceClassAllocation',
-          _vmService.setTraceClassAllocation(isolateId, classId, enable));
+      return trackFuture(
+        'setTraceClassAllocation',
+        _vmService.setTraceClassAllocation(isolateId, classId, enable),
+      );
     } else {
       final Map<String, dynamic> args = {};
-      if (classId != null) {
-        args['classId'] = classId;
-      }
-      if (enable != null) {
-        args['enable'] = enable ? true : false;
-      }
+      args['classId'] = classId;
+      args['enable'] = enable ? true : false;
 
       final response = await trackFuture(
         '_setTraceClassAllocation',
@@ -1029,7 +1024,7 @@ class VmServiceWrapper implements VmService {
         _vmService.getSupportedProtocols(),
       );
     } else {
-      return null;
+      throw Exception('Unsupported protocol version.');
     }
   }
 
@@ -1042,7 +1037,7 @@ class VmServiceWrapper implements VmService {
         _vmService.getPorts(isolateId),
       );
     } else {
-      return null;
+      throw Exception('Unsupported protocol version.');
     }
   }
 
@@ -1055,7 +1050,7 @@ class VmServiceWrapper implements VmService {
         _vmService.lookupPackageUris(isolateId, uris),
       );
     } else {
-      return null;
+      throw Exception('Unsupported protocol version.');
     }
   }
 
@@ -1071,7 +1066,7 @@ class VmServiceWrapper implements VmService {
         _vmService.lookupResolvedPackageUris(isolateId, uris),
       );
     } else {
-      return null;
+      throw Exception('Unsupported protocol version.');
     }
   }
 
@@ -1089,46 +1084,46 @@ class VmServiceWrapper implements VmService {
   }
 
   Future<bool> isProtocolVersionSupported({
-    @required SemanticVersion supportedVersion,
+    required SemanticVersion supportedVersion,
   }) async {
     _protocolVersion ??= await getVersion();
     return isProtocolVersionSupportedNow(supportedVersion: supportedVersion);
   }
 
   bool isProtocolVersionSupportedNow({
-    @required SemanticVersion supportedVersion,
+    required SemanticVersion supportedVersion,
   }) {
     return _versionSupported(
-      version: _protocolVersion,
+      version: _protocolVersion!,
       supportedVersion: supportedVersion,
     );
   }
 
   bool _versionSupported({
-    @required Version version,
-    @required SemanticVersion supportedVersion,
+    required Version version,
+    required SemanticVersion supportedVersion,
   }) {
     return SemanticVersion(
-      major: version.major,
-      minor: version.minor,
+      major: version.major!,
+      minor: version.minor!,
     ).isSupported(supportedVersion: supportedVersion);
   }
 
   Future<bool> isDartIoVersionSupported({
-    @required SemanticVersion supportedVersion,
-    @required String isolateId,
+    required SemanticVersion supportedVersion,
+    required String isolateId,
   }) async {
     _dartIoVersion ??= await getDartIOVersion(isolateId);
     return _versionSupported(
-      version: _dartIoVersion,
+      version: _dartIoVersion!,
       supportedVersion: supportedVersion,
     );
   }
 
-  bool _isDdsVersionSupportedNow({@required SemanticVersion supportedVersion}) {
+  bool _isDdsVersionSupportedNow({required SemanticVersion supportedVersion}) {
     return _ddsVersion != null &&
         _versionSupported(
-          version: _ddsVersion,
+          version: _ddsVersion!,
           supportedVersion: supportedVersion,
         );
   }
@@ -1141,19 +1136,18 @@ class VmServiceWrapper implements VmService {
   /// [onUnavailable] is called to return how the truncated value should be
   /// displayed. If [onUnavailable] is not specified, an exception is thrown
   /// if the full value cannot be retrieved.
-  Future<String> retrieveFullStringValue(
+  Future<String?> retrieveFullStringValue(
     String isolateId,
     InstanceRef stringRef, {
-    String onUnavailable(String truncatedValue),
+    String onUnavailable(String? truncatedValue)?,
   }) async {
-    if (stringRef == null) return null;
     if (stringRef.valueAsStringIsTruncated != true) {
       return stringRef.valueAsString;
     }
 
     final result = await getObject(
       isolateId,
-      stringRef.id,
+      stringRef.id!,
       offset: 0,
       count: stringRef.length,
     );
@@ -1187,7 +1181,7 @@ class VmServiceWrapper implements VmService {
     vmServiceCallCount++;
     vmServiceCalls.add(name);
 
-    final trackedFuture = TrackedFuture(name, future);
+    final trackedFuture = TrackedFuture(name, future as Future<Object>);
     if (_allFuturesCompleter.isCompleted) {
       _allFuturesCompleter = Completer<bool>();
     }
@@ -1227,10 +1221,10 @@ class _CpuProfileTimelineTree {
     final root = _CpuProfileTimelineTree._fromIndex(cpuSamples, kRootIndex);
     _CpuProfileTimelineTree current;
     // TODO(bkonyi): handle truncated?
-    for (final sample in cpuSamples.samples) {
+    for (final sample in cpuSamples.samples ?? []) {
       current = root;
       // Build an inclusive trie.
-      for (final index in sample.stack.reversed) {
+      for (final index in sample.stack!.reversed) {
         current = current._getChild(index);
       }
       _timelineTreeExpando[sample] = current;
@@ -1247,10 +1241,10 @@ class _CpuProfileTimelineTree {
   final int index;
   int frameId = kNoFrameId;
 
-  String get name => samples.functions[index].function.name;
+  String? get name => samples.functions![index].function.name;
 
-  String get className {
-    final function = samples.functions[index].function;
+  String? get className {
+    final function = samples.functions![index].function;
     if (function is FuncRef) {
       final owner = function.owner;
       if (owner is ClassRef) {
@@ -1260,10 +1254,10 @@ class _CpuProfileTimelineTree {
     return null;
   }
 
-  String get resolvedUrl => samples.functions[index].resolvedUrl;
+  String? get resolvedUrl => samples.functions![index].resolvedUrl;
 
-  int get sourceLine {
-    final function = samples.functions[index].function;
+  int? get sourceLine {
+    final function = samples.functions![index].function;
     try {
       return function.location?.line;
     } catch (_) {
@@ -1276,7 +1270,7 @@ class _CpuProfileTimelineTree {
 
   final children = <_CpuProfileTimelineTree>[];
 
-  static _CpuProfileTimelineTree getTreeFromSample(CpuSample sample) =>
+  static _CpuProfileTimelineTree? getTreeFromSample(CpuSample sample) =>
       _timelineTreeExpando[sample];
 
   _CpuProfileTimelineTree _getChild(int index) {
@@ -1309,11 +1303,11 @@ extension VmServicePrivate on VmServiceWrapper {
   /// only be set by [PreferencesController.toggleVmDeveloperMode] or tests.
   static bool enablePrivateRpcs = false;
 
-  Future<T> _privateRpcInvoke<T>(
+  Future<T?> _privateRpcInvoke<T>(
     String method, {
-    @required T Function(Map<String, dynamic>) parser,
-    String isolateId,
-    Map<String, dynamic> args,
+    required T? Function(Map<String, dynamic>?) parser,
+    String? isolateId,
+    Map<String, dynamic>? args,
   }) async {
     if (!enablePrivateRpcs) {
       throw StateError('Attempted to invoke private RPC');
@@ -1330,18 +1324,18 @@ extension VmServicePrivate on VmServiceWrapper {
   }
 
   /// Forces the VM to perform a full garbage collection.
-  Future<Success> collectAllGarbage() => _privateRpcInvoke(
+  Future<Success?> collectAllGarbage() => _privateRpcInvoke(
         'collectAllGarbage',
         parser: Success.parse,
       );
 
-  Future<PortList> getPorts(String isolateId) => _privateRpcInvoke(
+  Future<PortList?> getPorts(String isolateId) => _privateRpcInvoke(
         'getPorts',
         isolateId: isolateId,
         parser: PortList.parse,
       );
 
-  Future<InstanceRef> getReachableSize(String isolateId, String targetId) =>
+  Future<InstanceRef?> getReachableSize(String isolateId, String targetId) =>
       _privateRpcInvoke(
         'getReachableSize',
         isolateId: isolateId,
@@ -1351,7 +1345,7 @@ extension VmServicePrivate on VmServiceWrapper {
         parser: InstanceRef.parse,
       );
 
-  Future<InstanceRef> getRetainedSize(String isolateId, String targetId) =>
+  Future<InstanceRef?> getRetainedSize(String isolateId, String targetId) =>
       _privateRpcInvoke(
         'getRetainedSize',
         isolateId: isolateId,
