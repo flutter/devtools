@@ -19,11 +19,11 @@ class DevToolsTab extends Tab {
   /// The only difference is this tab makes more of an effort to reflect
   /// changes in font and icon sizes.
   DevToolsTab._({
-    Key? key,
+    required Key? key,
     String? text,
     Icon? icon,
     EdgeInsets iconMargin = const EdgeInsets.only(bottom: 10.0),
-    this.gaId,
+    required this.gaId,
     this.trailing,
     Widget? child,
   })  : assert(text != null || child != null || icon != null),
@@ -63,7 +63,7 @@ class DevToolsTab extends Tab {
   }
 
   /// Tab id for google analytics.
-  final String? gaId;
+  final String gaId;
 
   final Widget? trailing;
 }
@@ -126,7 +126,6 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
       ..addListener(_onTabChanged);
 
     // Record a selection for the visible tab.
-    assert(widget.tabs[_currentTabControllerIndex].gaId != null);
     ga.select(
       widget.gaScreen,
       widget.tabs[_currentTabControllerIndex].gaId,
@@ -139,7 +138,6 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
       setState(() {
         _currentTabControllerIndex = _tabController!.index;
       });
-      assert(widget.tabs[_currentTabControllerIndex].gaId != null);
       ga.select(
         widget.gaScreen,
         widget.tabs[_currentTabControllerIndex].gaId,
@@ -165,8 +163,8 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
 
   @override
   void dispose() {
-    _tabController!.removeListener(_onTabChanged);
-    _tabController!.dispose();
+    _tabController?.removeListener(_onTabChanged);
+    _tabController?.dispose();
     super.dispose();
   }
 
