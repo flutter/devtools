@@ -46,7 +46,10 @@ class MaterialIconLabel extends StatelessWidget {
     this.imageIcon,
     this.color,
     this.minScreenWidthForTextBeforeScaling,
-  }) : assert((iconData == null) != (imageIcon == null));
+  }) : assert(
+          (iconData == null) != (imageIcon == null),
+          'Exactly one of iconData and imageIcon should be present.',
+        );
 
   final IconData? iconData;
   final ThemedImageIcon? imageIcon;
