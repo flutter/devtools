@@ -46,8 +46,8 @@ class GtagEvent {
     String? event_label, // Event e.g., gaScreenViewEvent, gaSelectEvent, etc.
     String? send_to, // UA ID of target GA property to receive event data.
 
-    int value,
-    bool non_interaction,
+    int value = 0,
+    bool non_interaction = false,
     dynamic custom_map,
   });
 
@@ -68,7 +68,7 @@ class GtagEvent {
 class GtagException {
   external factory GtagException({
     String? description,
-    bool fatal,
+    bool fatal = false,
   });
 
   external String get description; // Description of the error.
