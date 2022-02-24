@@ -56,20 +56,20 @@ class ServiceConnectionManager {
   VmServiceCapabilities? _serviceCapabilities;
   VmServiceTrafficLogger? serviceTrafficLogger;
 
-  Future<VmServiceCapabilities?> get serviceCapabilities async {
+  Future<VmServiceCapabilities> get serviceCapabilities async {
     if (_serviceCapabilities == null) {
       await _serviceAvailable.future;
       final version = await service!.getVersion();
       _serviceCapabilities = VmServiceCapabilities(version);
     }
-    return _serviceCapabilities;
+    return _serviceCapabilities!;
   }
 
   final _registeredServiceNotifiers = <String?, ImmediateValueNotifier<bool>>{};
 
-  Map<String?, List<String?>> get registeredMethodsForService =>
+  Map<String, List<String>> get registeredMethodsForService =>
       _registeredMethodsForService;
-  final Map<String?, List<String?>> _registeredMethodsForService = {};
+  final Map<String, List<String>> _registeredMethodsForService = {};
 
   final vmFlagManager = VmFlagManager();
 
@@ -85,9 +85,9 @@ class ServiceConnectionManager {
   ErrorBadgeManager get errorBadgeManager => _errorBadgeManager;
   final _errorBadgeManager = ErrorBadgeManager();
 
-  ServiceExtensionManager? get serviceExtensionManager =>
+  ServiceExtensionManager get serviceExtensionManager =>
       _serviceExtensionManager;
-  ServiceExtensionManager? _serviceExtensionManager;
+  late final ServiceExtensionManager _serviceExtensionManager;
 
   ConnectedApp? connectedApp;
 
@@ -137,16 +137,16 @@ class ServiceConnectionManager {
   Future<Response> callService(
     String name, {
     String? isolateId,
-    Map? args,
+    Map<String, dynamic>? args,
   }) async {
     final registered = _registeredMethodsForService[name] ?? const [];
     if (registered.isEmpty) {
       throw Exception('There are no registered methods for service "$name"');
     }
     return service!.callMethod(
-      registered.first!,
+      registered.first,
       isolateId: isolateId,
-      args: args as Map<String, dynamic>?,
+      args: args,
     );
   }
 
@@ -159,7 +159,7 @@ class ServiceConnectionManager {
   }
 
   Future<void> vmServiceOpened(
-    VmServiceWrapper? service, {
+    VmServiceWrapper service, {
     required Future<void> onClosed,
   }) async {
     if (service == this.service) {
@@ -167,7 +167,7 @@ class ServiceConnectionManager {
       return;
     }
     this.service = service;
-    await service!.initServiceVersions();
+    await service.initServiceVersions();
     if (_serviceAvailable.isCompleted) {
       _serviceAvailable = Completer();
     }
@@ -178,7 +178,7 @@ class ServiceConnectionManager {
     // race conditions where managers cannot listen for events soon enough.
     isolateManager.vmServiceOpened(service);
     consoleService.vmServiceOpened(service);
-    serviceExtensionManager!.vmServiceOpened(service, connectedApp);
+    serviceExtensionManager.vmServiceOpened(service, connectedApp!);
     await vmFlagManager.vmServiceOpened(service);
     await timelineStreamManager.vmServiceOpened(service, connectedApp!);
     // This needs to be called last in the above group of `vmServiceOpened`
@@ -219,10 +219,10 @@ class ServiceConnectionManager {
 
     void handleServiceEvent(Event e) {
       if (e.kind == EventKind.kServiceRegistered) {
-        final serviceName = e.service;
+        final serviceName = e.service!;
         _registeredMethodsForService
             .putIfAbsent(serviceName, () => [])
-            .add(e.method);
+            .add(e.method!);
         final serviceNotifier = _registeredServiceNotifiers.putIfAbsent(
           serviceName,
           () => ImmediateValueNotifier(true),
@@ -278,7 +278,7 @@ class ServiceConnectionManager {
 
     _connectedState.value = const ConnectedState(true);
 
-    final List<IsolateRef> isolates = [
+    final isolates = <IsolateRef>[
       ...vm?.isolates ?? [],
       if (preferences.vmDeveloperModeEnabled.value) ...vm?.systemIsolates ?? [],
     ];
@@ -329,7 +329,7 @@ class ServiceConnectionManager {
 
     vmFlagManager.vmServiceClosed();
     timelineStreamManager.vmServiceClosed();
-    serviceExtensionManager!.vmServiceClosed();
+    serviceExtensionManager.vmServiceClosed();
 
     serviceTrafficLogger?.dispose();
 
@@ -443,7 +443,7 @@ class ServiceConnectionManager {
 
     return await _callServiceExtensionOnMainIsolate(
       registrations.flutterEngineEstimateRasterCache,
-      args: <String, String?>{
+      args: {
         'viewId': viewId,
       },
     );
@@ -461,7 +461,7 @@ class ServiceConnectionManager {
       registrations.displayRefreshRate,
       args: {'viewId': viewId},
     );
-    final double? fps = displayRefreshRateResponse.json!['fps'];
+    final double fps = displayRefreshRateResponse.json!['fps'];
 
     // The Flutter engine returns 0.0 if the refresh rate is unknown. Return
     // [defaultRefreshRate] instead.
@@ -469,7 +469,7 @@ class ServiceConnectionManager {
       return defaultRefreshRate;
     }
 
-    return fps!.roundToDouble();
+    return fps.roundToDouble();
   }
 
   bool libraryUriAvailableNow(String? uri) {

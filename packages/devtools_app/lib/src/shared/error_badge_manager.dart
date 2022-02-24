@@ -37,7 +37,7 @@ class ErrorBadgeManager extends DisposableController
 
   void vmServiceOpened(VmServiceWrapper service) {
     // Ensure structured errors are enabled.
-    serviceManager.serviceExtensionManager!.setServiceExtensionState(
+    serviceManager.serviceExtensionManager.setServiceExtensionState(
       extensions.structuredErrors.extension,
       enabled: true,
       value: true,
