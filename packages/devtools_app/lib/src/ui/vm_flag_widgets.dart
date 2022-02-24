@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -21,13 +21,13 @@ import '../shared/globals.dart';
 /// This flag controls the rate at which the vm samples the CPU call stack.
 class ProfileGranularityDropdown extends StatelessWidget {
   const ProfileGranularityDropdown({
-    @required this.screenId,
-    @required this.profileGranularityFlagNotifier,
+    required this.screenId,
+    required this.profileGranularityFlagNotifier,
   });
 
   final String screenId;
 
-  final ValueNotifier<Flag> profileGranularityFlagNotifier;
+  final ValueNotifier<Flag>? profileGranularityFlagNotifier;
 
   /// The key to identify the dropdown button.
   @visibleForTesting
@@ -37,14 +37,14 @@ class ProfileGranularityDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Flag>(
-      valueListenable: profileGranularityFlagNotifier,
+      valueListenable: profileGranularityFlagNotifier!,
       builder: (context, flag, _) {
         // Use [ProfileGranularityExtension.fromValue] here so we can
         // guarantee that the value corresponds to one of the items in the
         // dropdown list. We default to [ProfileGranularity.medium] if the flag
         // value is not one of the three defaults in DevTools (50, 250, 1000).
         final safeValue =
-            ProfileGranularityExtension.fromValue(flag.valueAsString).value;
+            ProfileGranularityExtension.fromValue(flag.valueAsString!).value;
         // Set the vm flag value to the [safeValue] if we get to this state.
         if (safeValue != flag.valueAsString) {
           _onProfileGranularityChanged(safeValue);
@@ -54,7 +54,8 @@ class ProfileGranularityDropdown extends StatelessWidget {
             Provider.of<BannerMessagesController>(context);
         if (safeValue == highProfilePeriod) {
           bannerMessageController.addMessage(
-            HighProfileGranularityMessage(screenId).build(context),
+            HighProfileGranularityMessage(screenId).build(context)
+                as BannerMessage,
           );
         } else {
           bannerMessageController.removeMessageByKey(
@@ -68,9 +69,10 @@ class ProfileGranularityDropdown extends StatelessWidget {
           style: Theme.of(context).textTheme.bodyText2,
           value: safeValue,
           items: [
-            _buildMenuItem(ProfileGranularity.low),
-            _buildMenuItem(ProfileGranularity.medium),
-            _buildMenuItem(ProfileGranularity.high),
+            _buildMenuItem(ProfileGranularity.low) as DropdownMenuItem<String>,
+            _buildMenuItem(ProfileGranularity.medium)
+                as DropdownMenuItem<String>,
+            _buildMenuItem(ProfileGranularity.high) as DropdownMenuItem<String>,
           ],
           onChanged: _onProfileGranularityChanged,
         );
@@ -85,11 +87,11 @@ class ProfileGranularityDropdown extends StatelessWidget {
     );
   }
 
-  Future<void> _onProfileGranularityChanged(String newValue) async {
+  Future<void> _onProfileGranularityChanged(String? newValue) async {
     ga.select(
       screenId,
       '${analytics_constants.profileGranularityPrefix}'
-      '${ProfileGranularityExtension.fromValue(newValue).displayShort}',
+      '${ProfileGranularityExtension.fromValue(newValue!).displayShort}',
     );
     await serviceManager.service.setProfilePeriod(newValue);
   }
