@@ -204,7 +204,7 @@ class ServiceConnectionManager {
       return;
     }
     sdkVersion = vm!.version;
-    if (sdkVersion!.contains(' ')) {
+    if (sdkVersion?.contains(' ') == true) {
       sdkVersion = sdkVersion!.substring(0, sdkVersion!.indexOf(' '));
     }
 
@@ -279,8 +279,8 @@ class ServiceConnectionManager {
     _connectedState.value = const ConnectedState(true);
 
     final isolates = [
-      ...vm!.isolates!,
-      if (preferences.vmDeveloperModeEnabled.value) ...vm!.systemIsolates!,
+      ...vm?.isolates ?? [],
+      if (preferences.vmDeveloperModeEnabled.value) ...vm?.systemIsolates ?? [],
     ];
 
     await isolateManager.init(isolates);
@@ -406,7 +406,7 @@ class ServiceConnectionManager {
 
   /// @returns view id of selected isolate's 'FlutterView'.
   /// @throws Exception if no 'FlutterView'.
-  Future<String?> get flutterViewId async {
+  Future<String> get flutterViewId async {
     final flutterViewListResponse = await _callServiceExtensionOnMainIsolate(
         registrations.flutterListViews);
     final List<dynamic> views =
@@ -477,10 +477,10 @@ class ServiceConnectionManager {
     assert(_serviceAvailable.isCompleted);
     assert(serviceManager.isolateManager.mainIsolate.value != null);
     final isolate = isolateManager.mainIsolateDebuggerState!.isolateNow!;
-    return isolate.libraries!
+    return (isolate.libraries ?? [])
         .map((ref) => ref.uri)
         .toList()
-        .any((u) => u!.startsWith(uri));
+        .any((u) => u?.startsWith(uri) == true);
   }
 
   Future<bool> libraryUriAvailable(String uri) async {
