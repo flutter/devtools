@@ -76,7 +76,7 @@ class _ServiceExtensionButtonGroupState
       // VMServiceManager.
       final extensionName = extension.description.extension;
       // Update the button state to match the latest state on the VM.
-      final state = serviceManager.serviceExtensionManager!
+      final state = serviceManager.serviceExtensionManager
           .getServiceExtensionState(extensionName);
       extension.isSelected = state.value.enabled;
 
@@ -483,9 +483,9 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<bool>(
       valueListenable: extensionAvailable,
-      builder: (context, bool available, _) {
+      builder: (context, available, _) {
         return CheckboxSetting(
           notifier: value,
           title: widget.service.title,
@@ -615,9 +615,9 @@ class _ServiceExtensionCheckboxGroupButtonState
     if (widget.tooltip != null && widget.tooltip!.isNotEmpty) {
       label = DevToolsTooltip(message: widget.tooltip, child: label);
     }
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<bool>(
       valueListenable: _enabled,
-      builder: (context, bool enabled, _) {
+      builder: (context, enabled, _) {
         return DevToolsToggleButtonGroup(
           children: [label],
           selectedStates: [enabled],
@@ -891,14 +891,16 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
                 description.tooltip,
                 style: TextStyle(color: textColor),
               ),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: MoreInfoLink(
-                  url: description.tooltipUrl!,
-                  gaScreenName: description.gaScreenName!,
-                  gaSelectedItemDescription: description.gaItemTooltipLink,
+              if (description.tooltipUrl != null &&
+                  description.gaScreenName != null)
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: MoreInfoLink(
+                    url: description.tooltipUrl!,
+                    gaScreenName: description.gaScreenName!,
+                    gaSelectedItemDescription: description.gaItemTooltipLink,
+                  ),
                 ),
-              ),
             ],
           ),
         ),
