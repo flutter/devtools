@@ -106,22 +106,22 @@ class AnalyticsTabbedView<T> extends StatefulWidget {
 
 class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
     with TickerProviderStateMixin {
-  late TabController _tabController;
+  TabController? _tabController;
 
   int _currentTabControllerIndex = 0;
 
   void _initTabController() {
-    _tabController.removeListener(_onTabChanged);
-    _tabController.dispose();
+    _tabController?.removeListener(_onTabChanged);
+    _tabController?.dispose();
 
     _tabController = TabController(
       length: widget.tabs.length,
       vsync: this,
     );
-    if (_currentTabControllerIndex >= _tabController.length) {
+    if (_currentTabControllerIndex >= _tabController!.length) {
       _currentTabControllerIndex = 0;
     }
-    _tabController
+    _tabController!
       ..index = _currentTabControllerIndex
       ..addListener(_onTabChanged);
 
@@ -135,9 +135,9 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
   }
 
   void _onTabChanged() {
-    if (_currentTabControllerIndex != _tabController.index) {
+    if (_currentTabControllerIndex != _tabController!.index) {
       setState(() {
-        _currentTabControllerIndex = _tabController.index;
+        _currentTabControllerIndex = _tabController!.index;
       });
       assert(widget.tabs[_currentTabControllerIndex].gaId != null);
       ga.select(
@@ -165,8 +165,8 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
 
   @override
   void dispose() {
-    _tabController.removeListener(_onTabChanged);
-    _tabController.dispose();
+    _tabController!.removeListener(_onTabChanged);
+    _tabController!.dispose();
     super.dispose();
   }
 
@@ -177,7 +177,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
     Widget tabBar = Row(
       children: [
         TabBar(
-          labelColor: theme.textTheme.bodyText1!.color,
+          labelColor: theme.textTheme.bodyText1?.color,
           controller: _tabController,
           tabs: widget.tabs,
           isScrollable: true,
