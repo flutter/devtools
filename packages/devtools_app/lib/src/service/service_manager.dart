@@ -278,7 +278,7 @@ class ServiceConnectionManager {
 
     _connectedState.value = const ConnectedState(true);
 
-    final isolates = [
+    final List<IsolateRef> isolates = [
       ...vm?.isolates ?? [],
       if (preferences.vmDeveloperModeEnabled.value) ...vm?.systemIsolates ?? [],
     ];
