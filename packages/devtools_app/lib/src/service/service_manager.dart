@@ -65,7 +65,7 @@ class ServiceConnectionManager {
     return _serviceCapabilities!;
   }
 
-  final _registeredServiceNotifiers = <String?, ImmediateValueNotifier<bool>>{};
+  final _registeredServiceNotifiers = <String, ImmediateValueNotifier<bool>>{};
 
   Map<String, List<String>> get registeredMethodsForService =>
       _registeredMethodsForService;
@@ -231,7 +231,7 @@ class ServiceConnectionManager {
       }
 
       if (e.kind == EventKind.kServiceUnregistered) {
-        final serviceName = e.service;
+        final serviceName = e.service!;
         _registeredMethodsForService.remove(serviceName);
         final serviceNotifier = _registeredServiceNotifiers.putIfAbsent(
           serviceName,
