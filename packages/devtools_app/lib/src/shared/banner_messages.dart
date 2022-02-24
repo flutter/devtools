@@ -345,7 +345,7 @@ class HighProfileGranularityMessage {
 
   final String screenId;
 
-  Widget build(BuildContext context) {
+  BannerMessage build(BuildContext context) {
     return _BannerWarning(
       key: key,
       textSpans: [

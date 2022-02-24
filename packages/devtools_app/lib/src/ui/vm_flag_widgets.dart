@@ -55,8 +55,7 @@ class ProfileGranularityDropdown extends StatelessWidget {
             Provider.of<BannerMessagesController>(context);
         if (safeValue == highProfilePeriod) {
           bannerMessageController.addMessage(
-            HighProfileGranularityMessage(screenId).build(context)
-                as BannerMessage,
+            HighProfileGranularityMessage(screenId).build(context),
           );
         } else {
           bannerMessageController.removeMessageByKey(
@@ -70,10 +69,9 @@ class ProfileGranularityDropdown extends StatelessWidget {
           style: Theme.of(context).textTheme.bodyText2,
           value: safeValue,
           items: [
-            _buildMenuItem(ProfileGranularity.low) as DropdownMenuItem<String>,
-            _buildMenuItem(ProfileGranularity.medium)
-                as DropdownMenuItem<String>,
-            _buildMenuItem(ProfileGranularity.high) as DropdownMenuItem<String>,
+            _buildMenuItem(ProfileGranularity.low),
+            _buildMenuItem(ProfileGranularity.medium),
+            _buildMenuItem(ProfileGranularity.high),
           ],
           onChanged: _onProfileGranularityChanged,
         );
@@ -81,7 +79,7 @@ class ProfileGranularityDropdown extends StatelessWidget {
     );
   }
 
-  DropdownMenuItem _buildMenuItem(ProfileGranularity granularity) {
+  DropdownMenuItem<String> _buildMenuItem(ProfileGranularity granularity) {
     return DropdownMenuItem<String>(
       value: granularity.value,
       child: Text(granularity.display),
