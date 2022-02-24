@@ -142,7 +142,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     if (isExternalBuild) return;
     if (_internalFlutterWebWarningShown) return;
 
-    serviceManager.onConnectionAvailable?.listen((_) {
+    serviceManager.onConnectionAvailable.listen((_) {
       if (serviceManager.connectedApp!.isFlutterWebAppNow) {
         _showWarning(const InternalFlutterWebWarningText());
         _internalFlutterWebWarningShown = true;
