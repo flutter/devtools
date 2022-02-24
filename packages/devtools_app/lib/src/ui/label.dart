@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/material.dart';
 
@@ -19,7 +19,7 @@ class ImageIconLabel extends StatelessWidget {
 
   final Widget icon;
   final String text;
-  final double unscaledMinIncludeTextWidth;
+  final double? unscaledMinIncludeTextWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -41,18 +41,18 @@ class ImageIconLabel extends StatelessWidget {
 
 class MaterialIconLabel extends StatelessWidget {
   const MaterialIconLabel({
-    @required this.label,
+    required this.label,
     this.iconData,
     this.imageIcon,
     this.color,
     this.minScreenWidthForTextBeforeScaling,
   }) : assert((iconData == null) != (imageIcon == null));
 
-  final IconData iconData;
-  final ThemedImageIcon imageIcon;
-  final Color color;
+  final IconData? iconData;
+  final ThemedImageIcon? imageIcon;
+  final Color? color;
   final String label;
-  final double minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForTextBeforeScaling;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +67,7 @@ class MaterialIconLabel extends StatelessWidget {
                 size: defaultIconSize,
                 color: color,
               )
-            : imageIcon,
+            : imageIcon!,
         // TODO(jacobr): animate showing and hiding the text.
         if (includeText(context, minScreenWidthForTextBeforeScaling))
           Padding(

@@ -172,7 +172,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
                   ? () => widget.onAction!(importedFile!)
                   : null,
               child: MaterialIconLabel(
-                label: widget.actionText,
+                label: widget.actionText ?? '',
                 iconData: Icons.highlight,
               ),
             ),
