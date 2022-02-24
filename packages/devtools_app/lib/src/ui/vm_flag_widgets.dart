@@ -27,7 +27,7 @@ class ProfileGranularityDropdown extends StatelessWidget {
 
   final String screenId;
 
-  final ValueNotifier<Flag>? profileGranularityFlagNotifier;
+  final ValueNotifier<Flag> profileGranularityFlagNotifier;
 
   /// The key to identify the dropdown button.
   @visibleForTesting
@@ -37,14 +37,15 @@ class ProfileGranularityDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Flag>(
-      valueListenable: profileGranularityFlagNotifier!,
+      valueListenable: profileGranularityFlagNotifier,
       builder: (context, flag, _) {
         // Use [ProfileGranularityExtension.fromValue] here so we can
         // guarantee that the value corresponds to one of the items in the
         // dropdown list. We default to [ProfileGranularity.medium] if the flag
         // value is not one of the three defaults in DevTools (50, 250, 1000).
         final safeValue =
-            ProfileGranularityExtension.fromValue(flag.valueAsString!).value;
+            ProfileGranularityExtension.fromValue(flag.valueAsString ?? '')
+                .value;
         // Set the vm flag value to the [safeValue] if we get to this state.
         if (safeValue != flag.valueAsString) {
           _onProfileGranularityChanged(safeValue);
@@ -91,7 +92,7 @@ class ProfileGranularityDropdown extends StatelessWidget {
     ga.select(
       screenId,
       '${analytics_constants.profileGranularityPrefix}'
-      '${ProfileGranularityExtension.fromValue(newValue!).displayShort}',
+      '${ProfileGranularityExtension.fromValue(newValue ?? '').displayShort}',
     );
     await serviceManager.service.setProfilePeriod(newValue);
   }
