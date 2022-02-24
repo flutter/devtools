@@ -923,15 +923,15 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TableRow.tableHeader(
+            TableRow<T>.tableHeader(
               key: const Key('Table header'),
               linkedScrollControllerGroup:
                   _linkedHorizontalScrollControllerGroup,
-              columns: widget.columns,
+              columns: widget.columns as List<ColumnData<T>>,
               columnWidths: widget.columnWidths,
-              sortColumn: sortColumn,
+              sortColumn: sortColumn as ColumnData<T>?,
               sortDirection: sortDirection,
-              secondarySortColumn: widget.secondarySortColumn,
+              secondarySortColumn: widget.secondarySortColumn as ColumnData<T>?,
               onSortChanged: _sortData,
             ),
             Expanded(
@@ -967,9 +967,9 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
   }
 
   void _sortData(
-    ColumnData<T?> column,
+    ColumnData<T> column,
     SortDirection direction, {
-    ColumnData<T?>? secondarySortColumn,
+    ColumnData<T>? secondarySortColumn,
   }) {
     sortDirection = direction;
     sortColumn = column;
@@ -1311,7 +1311,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
           canRequestFocus: false,
           onTap: () => _handleSortChange(
             column,
-            secondarySortColumn: widget.secondarySortColumn,
+            secondarySortColumn: widget.secondarySortColumn as ColumnData<T>,
           ),
           child: Row(
             mainAxisAlignment: _mainAxisAlignmentFor(column),
@@ -1444,7 +1444,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
 
   void _handleSortChange(
     ColumnData<T> columnData, {
-    ColumnData<T?>? secondarySortColumn,
+    ColumnData<T>? secondarySortColumn,
   }) {
     SortDirection direction;
     if (columnData.title == widget.sortColumn!.title) {
