@@ -19,7 +19,7 @@ class DevToolsTab extends Tab {
   /// The only difference is this tab makes more of an effort to reflect
   /// changes in font and icon sizes.
   DevToolsTab._({
-    required Key? key,
+    required Key key,
     String? text,
     Icon? icon,
     EdgeInsets iconMargin = const EdgeInsets.only(bottom: 10.0),
