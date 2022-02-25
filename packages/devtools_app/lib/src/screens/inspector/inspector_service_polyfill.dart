@@ -2,8 +2,8 @@
 
 import 'dart:convert';
 
-import '../config_specific/asset/asset.dart' as asset;
-import '../config_specific/logger/logger.dart';
+import '../../config_specific/asset/asset.dart' as asset;
+import '../../config_specific/logger/logger.dart';
 import 'inspector_service.dart';
 
 // Magic tokens to detect the start and the end of the block of code from the

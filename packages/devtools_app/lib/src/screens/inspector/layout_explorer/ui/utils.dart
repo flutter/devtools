@@ -8,9 +8,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../../../primitives/utils.dart';
-import '../../../shared/common_widgets.dart';
-import '../../../shared/theme.dart';
+import '../../../../primitives/utils.dart';
+import '../../../../shared/common_widgets.dart';
+import '../../../../shared/theme.dart';
 import '../../diagnostics_node.dart';
 import '../../inspector_data_models.dart';
 import 'overflow_indicator_painter.dart';

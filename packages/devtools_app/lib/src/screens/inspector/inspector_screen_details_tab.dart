@@ -6,13 +6,13 @@
 
 import 'package:flutter/material.dart';
 
-import '../analytics/analytics.dart' as ga;
-import '../analytics/constants.dart' as analytics_constants;
-import '../primitives/blocking_action_mixin.dart';
-import '../shared/common_widgets.dart';
-import '../shared/theme.dart';
-import '../shared/utils.dart';
-import '../ui/tab.dart';
+import '../../analytics/analytics.dart' as ga;
+import '../../analytics/constants.dart' as analytics_constants;
+import '../../primitives/blocking_action_mixin.dart';
+import '../../shared/common_widgets.dart';
+import '../../shared/theme.dart';
+import '../../shared/utils.dart';
+import '../../ui/tab.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen.dart';
 import 'layout_explorer/layout_explorer.dart';

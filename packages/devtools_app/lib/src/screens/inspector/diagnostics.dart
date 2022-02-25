@@ -6,14 +6,14 @@
 
 import 'package:flutter/material.dart';
 
-import '../debugger/debugger_controller.dart';
-import '../debugger/debugger_model.dart';
-import '../debugger/variables.dart';
-import '../primitives/utils.dart';
-import '../shared/globals.dart';
-import '../shared/theme.dart';
-import '../ui/hover.dart';
-import '../ui/icons.dart';
+import '../../debugger/debugger_controller.dart';
+import '../../debugger/debugger_model.dart';
+import '../../debugger/variables.dart';
+import '../../primitives/utils.dart';
+import '../../shared/globals.dart';
+import '../../shared/theme.dart';
+import '../../ui/hover.dart';
+import '../../ui/icons.dart';
 import 'diagnostics_node.dart';
 import 'inspector_controller.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;

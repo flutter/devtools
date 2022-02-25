@@ -8,8 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../debugger/debugger_model.dart';
-import '../inspector/diagnostics_node.dart';
-import '../inspector/inspector_service.dart';
+import '../screens/inspector/diagnostics_node.dart';
+import '../screens/inspector/inspector_service.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import '../service/vm_service_wrapper.dart';

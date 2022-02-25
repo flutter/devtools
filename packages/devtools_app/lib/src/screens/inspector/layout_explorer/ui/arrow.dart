@@ -8,7 +8,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import '../../../shared/theme.dart';
+import '../../../../shared/theme.dart';
 
 const defaultArrowColor = Colors.white;
 const defaultArrowStrokeWidth = 2.0;

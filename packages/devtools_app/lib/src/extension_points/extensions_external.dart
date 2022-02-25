@@ -5,7 +5,7 @@
 // @dart=2.9
 
 import '../debugger/codeview.dart';
-import '../inspector/inspector_service.dart';
+import '../screens/inspector/inspector_service.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import 'extensions_base.dart';

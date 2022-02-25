@@ -6,8 +6,8 @@
 
 library flutter_widget;
 
-import '../primitives/utils.dart';
-import '../ui/icons.dart';
+import '../../primitives/utils.dart';
+import '../../ui/icons.dart';
 
 class Category {
   const Category(this.label, this.icon);

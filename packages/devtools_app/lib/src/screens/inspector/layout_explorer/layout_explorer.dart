@@ -6,11 +6,11 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../../primitives/auto_dispose_mixin.dart';
+import '../../../primitives/auto_dispose_mixin.dart';
 import '../diagnostics_node.dart';
 import '../inspector_controller.dart';
-import 'box/box.dart';
-import 'flex/flex.dart';
+import '../layout_explorer/box/box.dart';
+import '../layout_explorer/flex/flex.dart';
 
 /// Tab that acts as a proxy to decide which widget to be displayed
 class LayoutExplorerTab extends StatefulWidget {

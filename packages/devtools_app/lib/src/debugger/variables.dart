@@ -8,8 +8,8 @@ import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
-import '../inspector/diagnostics.dart';
-import '../inspector/inspector_screen.dart';
+import '../screens/inspector/diagnostics.dart';
+import '../screens/inspector/inspector_screen.dart';
 import '../primitives/listenable.dart';
 import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';

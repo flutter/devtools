@@ -6,13 +6,13 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../primitives/math_utils.dart';
-import '../../../primitives/utils.dart';
-import '../../../shared/theme.dart';
+import '../../../../primitives/math_utils.dart';
+import '../../../../primitives/utils.dart';
+import '../../../../shared/theme.dart';
 import '../../inspector_data_models.dart';
-import '../ui/arrow.dart';
-import '../ui/dimension.dart';
-import '../ui/theme.dart';
+import 'arrow.dart';
+import 'dimension.dart';
+import 'theme.dart';
 import 'utils.dart';
 
 class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {

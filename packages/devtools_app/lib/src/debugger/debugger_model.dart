@@ -15,8 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart';
-import '../inspector/diagnostics_node.dart';
-import '../inspector/inspector_service.dart';
+import '../screens/inspector/diagnostics_node.dart';
+import '../screens/inspector/inspector_service.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../shared/globals.dart';

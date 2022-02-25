@@ -6,7 +6,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../shared/theme.dart';
+import '../../shared/theme.dart';
 
 TextStyle unimportant(ColorScheme colorScheme) => TextStyle(
     color: colorScheme.isLight ? Colors.grey.shade500 : Colors.grey.shade600);

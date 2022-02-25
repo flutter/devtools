@@ -7,14 +7,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../primitives/utils.dart';
-import '../../../shared/globals.dart';
-import '../../../shared/theme.dart';
+import '../../../../primitives/utils.dart';
+import '../../../../shared/globals.dart';
+import '../../../../shared/theme.dart';
 import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
 import '../../inspector_service.dart';
-import '../ui/utils.dart';
+import 'utils.dart';
 import 'utils.dart';
 
 const maxRequestsPerSecond = 3.0;
