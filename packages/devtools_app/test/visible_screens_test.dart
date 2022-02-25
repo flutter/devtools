@@ -14,7 +14,7 @@ import 'package:devtools_app/src/memory/memory_screen.dart';
 import 'package:devtools_app/src/network/network_screen.dart';
 import 'package:devtools_app/src/screens/performance/performance_screen.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
-import 'package:devtools_app/src/profiler/profiler_screen.dart';
+import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
 import 'package:devtools_app/src/shared/globals.dart';
