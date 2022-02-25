@@ -4,6 +4,8 @@
 
 // @dart=2.9
 
+// ignore_for_file: directives_ordering
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;

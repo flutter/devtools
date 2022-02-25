@@ -4,6 +4,8 @@
 
 // @dart=2.9
 
+// ignore_for_file: directives_ordering
+
 library inspector_tree;
 
 import 'dart:async';

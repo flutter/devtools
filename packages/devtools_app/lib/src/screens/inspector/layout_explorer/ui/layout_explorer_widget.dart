@@ -15,7 +15,6 @@ import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
 import '../../inspector_service.dart';
 import 'utils.dart';
-import 'utils.dart';
 
 const maxRequestsPerSecond = 3.0;
 

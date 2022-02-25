@@ -4,6 +4,8 @@
 
 // @dart=2.9
 
+// ignore_for_file: directives_ordering
+
 import 'package:devtools_app/src/charts/chart.dart';
 import 'package:devtools_app/src/charts/chart_controller.dart';
 import 'package:devtools_app/src/charts/chart_trace.dart';

@@ -4,6 +4,8 @@
 
 // @dart=2.9
 
+// ignore_for_file: directives_ordering
+
 import 'dart:convert';
 
 import 'package:devtools_app/src/screens/app_size/app_size_controller.dart';

@@ -4,6 +4,8 @@
 
 // @dart=2.9
 
+// ignore_for_file: directives_ordering
+
 @TestOn('browser')
 
 import 'package:ansi_up/ansi_up.dart';
