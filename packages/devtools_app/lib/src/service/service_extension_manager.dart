@@ -35,7 +35,7 @@ class ServiceExtensionManager extends Disposer {
 
   bool get _firstFrameEventReceived => _firstFrameReceived.isCompleted;
 
-  final _serviceExtensionAvailable = <String?, ValueNotifier<bool>>{};
+  final _serviceExtensionAvailable = <String, ValueNotifier<bool>>{};
 
   final Map<String, ValueNotifier<ServiceExtensionState>>
       _serviceExtensionStateController =
@@ -45,7 +45,7 @@ class ServiceExtensionManager extends Disposer {
   final _serviceExtensions = <String>{};
 
   /// All service extensions that are currently enabled.
-  final _enabledServiceExtensions = <String?, ServiceExtensionState>{};
+  final _enabledServiceExtensions = <String, ServiceExtensionState>{};
 
   /// Map from service extension name to [Completer] that completes when the
   /// service extension is registered or the isolate shuts down.
@@ -501,7 +501,7 @@ class ServiceExtensionManager extends Disposer {
     return _hasServiceExtension(name);
   }
 
-  ValueNotifier<bool> _hasServiceExtension(String? name) {
+  ValueNotifier<bool> _hasServiceExtension(String name) {
     return _serviceExtensionAvailable.putIfAbsent(
       name,
       () => ValueNotifier(_serviceExtensions.contains(name)),
