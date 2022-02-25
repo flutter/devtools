@@ -381,7 +381,7 @@ class ServiceConnectionManager {
   }
 
   Future<Response> _callServiceOnMainIsolate(String name) async {
-    final isolate = await whenValueNonNull(isolateManager.mainIsolate);
+    final isolate = (await whenValueNonNull(isolateManager.mainIsolate))!;
     return await callService(name, isolateId: isolate.id!);
   }
 
@@ -389,7 +389,7 @@ class ServiceConnectionManager {
     String method, {
     Map<String, dynamic>? args,
   }) async {
-    final isolate = await whenValueNonNull(isolateManager.mainIsolate);
+    final isolate = (await whenValueNonNull(isolateManager.mainIsolate))!;
 
     return await service!.callServiceExtension(
       method,
