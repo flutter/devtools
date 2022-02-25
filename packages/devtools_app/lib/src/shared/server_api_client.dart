@@ -21,7 +21,7 @@ import 'globals.dart';
 /// See `package:dds/src/devtools/client.dart`.
 class DevToolsServerConnection {
   DevToolsServerConnection._(this.sseClient) {
-    sseClient.stream!.listen((msg) {
+    sseClient.stream.listen((msg) {
       _handleMessage(msg);
     });
     initFrameworkController();
@@ -125,7 +125,7 @@ class DevToolsServerConnection {
     });
     final completer = Completer<T>();
     _completers[id] = completer;
-    sseClient.sink!.add(json);
+    sseClient.sink.add(json);
     return completer.future;
   }
 

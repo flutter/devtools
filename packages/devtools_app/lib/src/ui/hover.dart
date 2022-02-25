@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -92,12 +90,12 @@ enum HoverCardPosition {
 class HoverCardData {
   HoverCardData({
     this.title,
-    @required this.contents,
-    double width,
+    required this.contents,
+    double? width,
     this.position = HoverCardPosition.cursor,
   }) : width = width ?? HoverCardTooltip.defaultHoverWidth;
 
-  final String title;
+  final String? title;
   final Widget contents;
   final double width;
   final HoverCardPosition position;
@@ -111,13 +109,13 @@ class HoverCardData {
 /// Note that if a mouse has never entered, it will not remove itself.
 class HoverCard {
   HoverCard({
-    @required BuildContext context,
-    @required Widget contents,
-    @required double width,
-    @required Offset position,
-    String title,
+    required BuildContext context,
+    required Widget contents,
+    required double width,
+    required Offset position,
+    String? title,
   }) {
-    final overlayState = Overlay.of(context);
+    final overlayState = Overlay.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     final focusColor = Theme.of(context).focusColor;
     final hoverHeading = colorScheme.hoverTitleTextStyle;
@@ -170,11 +168,11 @@ class HoverCard {
   }
 
   HoverCard.fromHoverEvent({
-    @required BuildContext context,
-    @required PointerHoverEvent event,
-    @required Widget contents,
-    @required double width,
-    String title,
+    required BuildContext context,
+    required PointerHoverEvent event,
+    required Widget contents,
+    required double width,
+    String? title,
   }) : this(
           context: context,
           contents: contents,
@@ -186,7 +184,7 @@ class HoverCard {
           title: title,
         );
 
-  OverlayEntry _overlayEntry;
+  late OverlayEntry _overlayEntry;
 
   bool _isRemoved = false;
 
@@ -211,9 +209,9 @@ class HoverCard {
 /// A hover card based tooltip.
 class HoverCardTooltip extends StatefulWidget {
   const HoverCardTooltip({
-    @required this.enabled,
-    @required this.onHover,
-    @required this.child,
+    required this.enabled,
+    required this.onHover,
+    required this.child,
     this.disposable,
   });
 
@@ -229,7 +227,7 @@ class HoverCardTooltip extends StatefulWidget {
   final Widget child;
 
   /// Disposable object to be disposed when the group is closed.
-  final Disposable disposable;
+  final Disposable? disposable;
 
   @override
   _HoverCardTooltipState createState() => _HoverCardTooltipState();
@@ -237,13 +235,13 @@ class HoverCardTooltip extends StatefulWidget {
 
 class _HoverCardTooltipState extends State<HoverCardTooltip> {
   /// A timer that shows a [HoverCard] with an evaluation result when completed.
-  Timer _showTimer;
+  Timer? _showTimer;
 
   /// A timer that removes a [HoverCard] when completed.
-  Timer _removeTimer;
+  Timer? _removeTimer;
 
   /// Displays the evaluation result of a source code item.
-  HoverCard _hoverCard;
+  HoverCard? _hoverCard;
 
   void _onHoverExit() {
     _showTimer?.cancel();
@@ -264,31 +262,29 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
       _hoverCard = null;
       final hoverCardData = await widget.onHover(event);
       if (!mounted) return;
-      if (hoverCardData != null) {
-        if (hoverCardData.position == HoverCardPosition.cursor) {
-          _hoverCard = HoverCard.fromHoverEvent(
-            context: context,
-            title: hoverCardData.title,
-            contents: hoverCardData.contents,
-            width: hoverCardData.width,
-            event: event,
-          );
-        } else {
-          _hoverCard = HoverCard(
-            context: context,
-            title: hoverCardData.title,
-            contents: hoverCardData.contents,
-            width: hoverCardData.width,
-            position: _calculateTooltipPosition(hoverCardData.width),
-          );
-        }
+      if (hoverCardData.position == HoverCardPosition.cursor) {
+        _hoverCard = HoverCard.fromHoverEvent(
+          context: context,
+          title: hoverCardData.title,
+          contents: hoverCardData.contents,
+          width: hoverCardData.width,
+          event: event,
+        );
+      } else {
+        _hoverCard = HoverCard(
+          context: context,
+          title: hoverCardData.title,
+          contents: hoverCardData.contents,
+          width: hoverCardData.width,
+          position: _calculateTooltipPosition(hoverCardData.width),
+        );
       }
     });
   }
 
   Offset _calculateTooltipPosition(double width) {
     final overlayBox =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
+        Overlay.of(context)!.context.findRenderObject() as RenderBox;
     final box = context.findRenderObject() as RenderBox;
 
     final maxX = overlayBox.size.width - _hoverMargin - width;
