@@ -526,7 +526,7 @@ class ServiceExtensionManager extends Disposer {
   }
 
   void vmServiceOpened(
-      VmServiceWrapper service, ConnectedApp? connectedApp) async {
+      VmServiceWrapper service, ConnectedApp connectedApp) async {
     _checkForFirstFrameStarted = false;
     cancelStreamSubscriptions();
     cancelListeners();
