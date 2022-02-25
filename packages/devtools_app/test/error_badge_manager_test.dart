@@ -10,7 +10,7 @@ import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';
 import 'package:devtools_app/src/logging/logging_screen.dart';
 import 'package:devtools_app/src/memory/memory_screen.dart';
 import 'package:devtools_app/src/network/network_screen.dart';
-import 'package:devtools_app/src/performance/performance_screen.dart';
+import 'package:devtools_app/src/screens/performance/performance_screen.dart';
 import 'package:devtools_app/src/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/shared/error_badge_manager.dart';
 import 'package:flutter_test/flutter_test.dart';

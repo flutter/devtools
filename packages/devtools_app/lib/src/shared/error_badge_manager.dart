@@ -14,7 +14,7 @@ import '../screens/inspector/diagnostics_node.dart';
 import '../screens/inspector/inspector_screen.dart';
 import '../logging/logging_screen.dart';
 import '../network/network_screen.dart';
-import '../performance/performance_screen.dart';
+import '../screens/performance/performance_screen.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/listenable.dart';
 import '../primitives/utils.dart';

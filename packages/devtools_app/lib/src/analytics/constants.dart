@@ -10,7 +10,7 @@ import '../screens/inspector/inspector_screen.dart';
 import '../logging/logging_screen.dart';
 import '../memory/memory_screen.dart';
 import '../network/network_screen.dart';
-import '../performance/performance_screen.dart';
+import '../screens/performance/performance_screen.dart';
 import '../profiler/profiler_screen.dart';
 
 const String screenViewEvent = 'screen'; // Active screen (tab selected).

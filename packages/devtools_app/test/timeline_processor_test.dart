@@ -4,9 +4,9 @@
 
 // @dart=2.9
 
-import 'package:devtools_app/src/performance/performance_controller.dart';
-import 'package:devtools_app/src/performance/performance_model.dart';
-import 'package:devtools_app/src/performance/timeline_event_processor.dart';
+import 'package:devtools_app/src/screens/performance/performance_controller.dart';
+import 'package:devtools_app/src/screens/performance/performance_model.dart';
+import 'package:devtools_app/src/screens/performance/timeline_event_processor.dart';
 import 'package:devtools_app/src/primitives/trace_event.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -7,7 +7,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
-import '../primitives/utils.dart';
+import '../../primitives/utils.dart';
 
 // An example of a widget rebuild count event:
 

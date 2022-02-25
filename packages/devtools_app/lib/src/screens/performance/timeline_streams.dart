@@ -10,10 +10,10 @@ import 'dart:core';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../primitives/auto_dispose.dart';
-import '../service/vm_service_wrapper.dart';
-import '../shared/connected_app.dart';
-import '../shared/globals.dart';
+import '../../primitives/auto_dispose.dart';
+import '../../service/vm_service_wrapper.dart';
+import '../../shared/connected_app.dart';
+import '../../shared/globals.dart';
 
 class TimelineStreamManager extends Disposer {
   static const dartTimelineStream = 'Dart';

@@ -14,7 +14,7 @@ import '../analytics/analytics.dart' as ga;
 import '../config_specific/logger/logger.dart';
 import '../screens/inspector/inspector_service.dart';
 import '../logging/vm_service_logger.dart';
-import '../performance/timeline_streams.dart';
+import '../screens/performance/timeline_streams.dart';
 import '../primitives/utils.dart';
 import '../shared/connected_app.dart';
 import '../shared/console_service.dart';
