@@ -809,9 +809,9 @@ class _Table<T> extends StatefulWidget {
   _TableState<T> createState() => _TableState<T>();
 }
 
-class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
+class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   late LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
-  late ColumnData<T?> sortColumn;
+  late ColumnData<T> sortColumn;
   late SortDirection sortDirection;
   late ScrollController scrollController;
 
@@ -864,19 +864,22 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
 
   void _onActiveSearchChange() async {
     final activeSearch = widget.activeSearchMatchNotifier!.value;
+
+    if (activeSearch == null) return;
+
     final index = widget.data.indexOf(activeSearch);
 
-    if (index != -1) {
-      final y = index * defaultRowHeight;
-      final indexInView = y > scrollController.offset &&
-          y < scrollController.offset + scrollController.position.extentInside;
-      if (!indexInView) {
-        await scrollController.animateTo(
-          index * defaultRowHeight,
-          duration: defaultDuration,
-          curve: defaultCurve,
-        );
-      }
+    if (index == -1) return;
+
+    final y = index * defaultRowHeight;
+    final indexInView = y > scrollController.offset &&
+        y < scrollController.offset + scrollController.position.extentInside;
+    if (!indexInView) {
+      await scrollController.animateTo(
+        index * defaultRowHeight,
+        duration: defaultDuration,
+        curve: defaultCurve,
+      );
     }
   }
 
@@ -927,11 +930,11 @@ class _TableState<T> extends State<_Table<T?>> with AutoDisposeMixin {
               key: const Key('Table header'),
               linkedScrollControllerGroup:
                   _linkedHorizontalScrollControllerGroup,
-              columns: widget.columns as List<ColumnData<T>>,
+              columns: widget.columns,
               columnWidths: widget.columnWidths,
-              sortColumn: sortColumn as ColumnData<T>?,
+              sortColumn: sortColumn,
               sortDirection: sortDirection,
-              secondarySortColumn: widget.secondarySortColumn as ColumnData<T>?,
+              secondarySortColumn: widget.secondarySortColumn,
               onSortChanged: _sortData,
             ),
             Expanded(
