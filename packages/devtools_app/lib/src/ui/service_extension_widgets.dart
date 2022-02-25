@@ -86,7 +86,7 @@ class _ServiceExtensionButtonGroupState
         });
       });
       // Track whether the extension is actually exposed by the VM.
-      final listenable = serviceManager.serviceExtensionManager!
+      final listenable = serviceManager.serviceExtensionManager
           .hasServiceExtension(extensionName);
       extension.isAvailable = listenable.value;
       addAutoDisposeListener(
@@ -164,7 +164,7 @@ class _ServiceExtensionButtonGroupState
 
         final wasSelected = extensionState.isSelected;
 
-        serviceManager.serviceExtensionManager!.setServiceExtensionState(
+        serviceManager.serviceExtensionManager.setServiceExtensionState(
           extensionState.description.extension,
           enabled: !wasSelected,
           value: wasSelected
@@ -358,7 +358,7 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
   @override
   void initState() {
     super.initState();
-    final state = serviceManager.serviceExtensionManager!
+    final state = serviceManager.serviceExtensionManager
         .getServiceExtensionState(widget.service.extension);
 
     value = state.value.enabled;
@@ -404,7 +404,7 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
     });
 
     invokeAndCatchErrors(() async {
-      await serviceManager.serviceExtensionManager!.setServiceExtensionState(
+      await serviceManager.serviceExtensionManager.setServiceExtensionState(
         widget.service.extension,
         enabled: value,
         value:
@@ -454,19 +454,19 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
   void initState() {
     super.initState();
 
-    if (serviceManager.serviceExtensionManager!
+    if (serviceManager.serviceExtensionManager
         .isServiceExtensionAvailable(widget.service.extension)) {
-      final state = serviceManager.serviceExtensionManager!
+      final state = serviceManager.serviceExtensionManager
           .getServiceExtensionState(widget.service.extension);
       _setValueFromState(state.value);
     }
 
-    serviceManager.serviceExtensionManager!
+    serviceManager.serviceExtensionManager
         .waitForServiceExtensionAvailable(widget.service.extension)
         .then((isServiceAvailable) {
       if (isServiceAvailable) {
         extensionAvailable.value = true;
-        final state = serviceManager.serviceExtensionManager!
+        final state = serviceManager.serviceExtensionManager
             .getServiceExtensionState(widget.service.extension);
         _setValueFromState(state.value);
         addAutoDisposeListener(state, () {
@@ -502,7 +502,7 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
     invokeAndCatchErrors(() async {
       var enabled = value == true;
       if (widget.service.inverted) enabled = !enabled;
-      await serviceManager.serviceExtensionManager!.setServiceExtensionState(
+      await serviceManager.serviceExtensionManager.setServiceExtensionState(
         widget.service.extension,
         enabled: enabled,
         value: enabled
@@ -579,7 +579,7 @@ class _ServiceExtensionCheckboxGroupButtonState
     _extensionStates = List.filled(widget.extensions.length, false);
     for (int i = 0; i < widget.extensions.length; i++) {
       final extension = widget.extensions[i];
-      final state = serviceManager.serviceExtensionManager!
+      final state = serviceManager.serviceExtensionManager
           .getServiceExtensionState(extension.extension);
       _extensionStates[i] = state.value.enabled;
       // Listen for extension state changes so that we can update the value of
