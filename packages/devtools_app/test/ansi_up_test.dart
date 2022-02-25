@@ -8,10 +8,10 @@
 
 import 'package:ansi_up/ansi_up.dart';
 import 'package:ansicolor/ansicolor.dart';
-import 'package:devtools_app/src/debugger/console.dart';
-import 'package:devtools_app/src/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/logging/logging_controller.dart';
-import 'package:devtools_app/src/logging/logging_screen.dart';
+import 'package:devtools_app/src/screens/debugger/console.dart';
+import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
+import 'package:devtools_app/src/screens/logging/logging_controller.dart';
+import 'package:devtools_app/src/screens/logging/logging_screen.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';

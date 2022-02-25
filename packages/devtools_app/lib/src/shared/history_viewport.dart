@@ -6,7 +6,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../debugger/common.dart';
+import '../screens/debugger/common.dart';
 import '../primitives/history_manager.dart';
 import 'common_widgets.dart';
 import 'theme.dart';

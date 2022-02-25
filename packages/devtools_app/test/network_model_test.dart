@@ -6,7 +6,7 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/network/network_controller.dart';
+import 'package:devtools_app/src/screens/network/network_controller.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';

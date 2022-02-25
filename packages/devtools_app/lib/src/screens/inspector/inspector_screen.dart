@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
-import '../../debugger/debugger_controller.dart';
+import '../debugger/debugger_controller.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/blocking_action_mixin.dart';
 import '../../service/service_extensions.dart' as extensions;

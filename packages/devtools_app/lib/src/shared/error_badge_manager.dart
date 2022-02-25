@@ -12,8 +12,8 @@ import 'package:vm_service/vm_service.dart';
 
 import '../screens/inspector/diagnostics_node.dart';
 import '../screens/inspector/inspector_screen.dart';
-import '../logging/logging_screen.dart';
-import '../network/network_screen.dart';
+import '../screens/logging/logging_screen.dart';
+import '../screens/network/network_screen.dart';
 import '../screens/performance/performance_screen.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/listenable.dart';

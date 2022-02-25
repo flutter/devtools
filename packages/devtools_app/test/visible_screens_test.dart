@@ -7,11 +7,11 @@
 import 'package:devtools_app/src/app.dart';
 import 'package:devtools_app/src/app_size/app_size_screen.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/debugger/debugger_screen.dart';
+import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';
-import 'package:devtools_app/src/logging/logging_screen.dart';
-import 'package:devtools_app/src/memory/memory_screen.dart';
-import 'package:devtools_app/src/network/network_screen.dart';
+import 'package:devtools_app/src/screens/logging/logging_screen.dart';
+import 'package:devtools_app/src/screens/memory/memory_screen.dart';
+import 'package:devtools_app/src/screens/network/network_screen.dart';
 import 'package:devtools_app/src/screens/performance/performance_screen.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';

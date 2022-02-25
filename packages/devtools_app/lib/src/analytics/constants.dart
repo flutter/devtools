@@ -7,9 +7,9 @@
 // @dart=2.9
 
 import '../screens/inspector/inspector_screen.dart';
-import '../logging/logging_screen.dart';
-import '../memory/memory_screen.dart';
-import '../network/network_screen.dart';
+import '../screens/logging/logging_screen.dart';
+import '../screens/memory/memory_screen.dart';
+import '../screens/network/network_screen.dart';
 import '../screens/performance/performance_screen.dart';
 import '../screens/profiler/profiler_screen.dart';
 

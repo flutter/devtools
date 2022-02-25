@@ -6,9 +6,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../../debugger/debugger_controller.dart';
-import '../../debugger/debugger_model.dart';
-import '../../debugger/variables.dart';
+import '../debugger/debugger_controller.dart';
+import '../debugger/debugger_model.dart';
+import '../debugger/variables.dart';
 import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
 import '../../shared/theme.dart';

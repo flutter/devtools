@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../config_specific/logger/logger.dart';
-import '../../debugger/debugger_controller.dart';
+import '../debugger/debugger_controller.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
 import '../../shared/collapsible_mixin.dart';

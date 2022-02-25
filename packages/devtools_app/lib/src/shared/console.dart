@@ -8,8 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../debugger/debugger_controller.dart';
-import '../debugger/variables.dart';
+import '../screens/debugger/debugger_controller.dart';
+import '../screens/debugger/variables.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/utils.dart';
 import 'common_widgets.dart';

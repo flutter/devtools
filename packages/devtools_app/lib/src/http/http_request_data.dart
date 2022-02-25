@@ -12,7 +12,7 @@ import 'package:mime/mime.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart';
-import '../network/network_model.dart';
+import '../screens/network/network_model.dart';
 import '../primitives/trace_event.dart';
 import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';
