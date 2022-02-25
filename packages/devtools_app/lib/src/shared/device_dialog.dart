@@ -62,7 +62,7 @@ class DeviceDialog extends StatelessWidget {
         'Framework / Engine': '${flutterVersion!.frameworkRevision} / '
             '${flutterVersion!.engineRevision}',
       },
-      if (serviceManager.service!.connectedUri != null)
+      if (serviceManager.service != null)
         'VM Service Connection':
             serviceManager.service!.connectedUri.toString(),
     };

@@ -160,6 +160,8 @@ class _FileImportContainerState extends State<FileImportContainer> {
   }
 
   Widget _buildActionButton() {
+    assert(widget.actionText != null);
+    assert(widget.onAction != null);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -172,7 +174,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
                   ? () => widget.onAction!(importedFile!)
                   : null,
               child: MaterialIconLabel(
-                label: widget.actionText,
+                label: widget.actionText!,
                 iconData: Icons.highlight,
               ),
             ),

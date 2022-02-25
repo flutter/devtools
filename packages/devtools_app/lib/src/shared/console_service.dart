@@ -101,7 +101,7 @@ class ConsoleService extends Disposer {
   bool _stdioTrailingNewline = false;
 
   ObjectGroupBase? get objectGroup {
-    final inspectorService = serviceManager.inspectorService;
+    final inspectorService = serviceManager.inspectorService!;
     if (_objectGroup?.inspectorService == inspectorService) {
       return _objectGroup;
     }
@@ -231,7 +231,7 @@ class ConsoleService extends Disposer {
   void _handleExtensionEvent(Event e) async {
     if (e.extensionKind == 'Flutter.Error' ||
         e.extensionKind == 'Flutter.Print') {
-      if (serviceManager.connectedApp.isProfileBuildNow != true) {
+      if (serviceManager.connectedApp?.isProfileBuildNow != true) {
         // The app isn't a debug build.
         return;
       }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/material.dart';
 
@@ -19,13 +19,13 @@ class DevToolsTab extends Tab {
   /// The only difference is this tab makes more of an effort to reflect
   /// changes in font and icon sizes.
   DevToolsTab._({
-    Key key,
-    String text,
-    Icon icon,
+    required Key key,
+    String? text,
+    Icon? icon,
     EdgeInsets iconMargin = const EdgeInsets.only(bottom: 10.0),
-    this.gaId,
+    required this.gaId,
     this.trailing,
-    Widget child,
+    Widget? child,
   })  : assert(text != null || child != null || icon != null),
         assert(text == null || child == null),
         super(
@@ -38,10 +38,10 @@ class DevToolsTab extends Tab {
         );
 
   factory DevToolsTab.create({
-    Key key,
-    @required String tabName,
-    @required String gaPrefix,
-    Widget trailing,
+    Key? key,
+    required String tabName,
+    required String gaPrefix,
+    Widget? trailing,
   }) {
     return DevToolsTab._(
       key: key ?? ValueKey<String>(tabName),
@@ -54,7 +54,7 @@ class DevToolsTab extends Tab {
     );
   }
 
-  static double calculateHeight(Icon icon, String text, Widget child) {
+  static double calculateHeight(Icon? icon, String? text, Widget? child) {
     if (icon == null || (text == null && child == null)) {
       return _tabHeight;
     } else {
@@ -65,7 +65,7 @@ class DevToolsTab extends Tab {
   /// Tab id for google analytics.
   final String gaId;
 
-  final Widget trailing;
+  final Widget? trailing;
 }
 
 /// A combined [TabBar] and [TabBarView] implementation that tracks tab changes
@@ -76,10 +76,10 @@ class DevToolsTab extends Tab {
 /// will send an event to analytics for the default selected tab.
 class AnalyticsTabbedView<T> extends StatefulWidget {
   AnalyticsTabbedView({
-    Key key,
-    @required this.tabs,
-    @required this.tabViews,
-    @required this.gaScreen,
+    Key? key,
+    required this.tabs,
+    required this.tabViews,
+    required this.gaScreen,
     this.tabBarContainer,
     this.tabViewContainer,
   })  : trailingWidgets = List.generate(
@@ -96,9 +96,9 @@ class AnalyticsTabbedView<T> extends StatefulWidget {
 
   final List<Widget> trailingWidgets;
 
-  final Widget Function(Widget child) tabBarContainer;
+  final Widget Function(Widget child)? tabBarContainer;
 
-  final Widget Function(Widget child) tabViewContainer;
+  final Widget Function(Widget child)? tabViewContainer;
 
   @override
   _AnalyticsTabbedViewState createState() => _AnalyticsTabbedViewState();
@@ -106,7 +106,7 @@ class AnalyticsTabbedView<T> extends StatefulWidget {
 
 class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
     with TickerProviderStateMixin {
-  TabController _tabController;
+  TabController? _tabController;
 
   int _currentTabControllerIndex = 0;
 
@@ -118,15 +118,14 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
       length: widget.tabs.length,
       vsync: this,
     );
-    if (_currentTabControllerIndex >= _tabController.length) {
+    if (_currentTabControllerIndex >= _tabController!.length) {
       _currentTabControllerIndex = 0;
     }
-    _tabController
+    _tabController!
       ..index = _currentTabControllerIndex
       ..addListener(_onTabChanged);
 
     // Record a selection for the visible tab.
-    assert(widget.tabs[_currentTabControllerIndex].gaId != null);
     ga.select(
       widget.gaScreen,
       widget.tabs[_currentTabControllerIndex].gaId,
@@ -135,11 +134,10 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
   }
 
   void _onTabChanged() {
-    if (_currentTabControllerIndex != _tabController.index) {
+    if (_currentTabControllerIndex != _tabController!.index) {
       setState(() {
-        _currentTabControllerIndex = _tabController.index;
+        _currentTabControllerIndex = _tabController!.index;
       });
-      assert(widget.tabs[_currentTabControllerIndex].gaId != null);
       ga.select(
         widget.gaScreen,
         widget.tabs[_currentTabControllerIndex].gaId,
@@ -177,7 +175,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
     Widget tabBar = Row(
       children: [
         TabBar(
-          labelColor: theme.textTheme.bodyText1.color,
+          labelColor: theme.textTheme.bodyText1?.color,
           controller: _tabController,
           tabs: widget.tabs,
           isScrollable: true,
@@ -188,7 +186,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
       ],
     );
     if (widget.tabBarContainer != null) {
-      tabBar = widget.tabBarContainer(tabBar);
+      tabBar = widget.tabBarContainer!(tabBar);
     }
 
     Widget tabView = TabBarView(
@@ -197,7 +195,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
       children: widget.tabViews,
     );
     if (widget.tabViewContainer != null) {
-      tabView = widget.tabViewContainer(tabView);
+      tabView = widget.tabViewContainer!(tabView);
     }
 
     return Column(
