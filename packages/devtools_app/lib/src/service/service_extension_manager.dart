@@ -324,8 +324,8 @@ class ServiceExtensionManager extends Disposer {
     }
   }
 
-  Future<void> _maybeRestoreExtension(String? name, dynamic value) async {
-    final extensionDescription = extensions.serviceExtensionsAllowlist[name!];
+  Future<void> _maybeRestoreExtension(String name, dynamic value) async {
+    final extensionDescription = extensions.serviceExtensionsAllowlist[name];
     if (extensionDescription
         is extensions.ToggleableServiceExtensionDescription) {
       if (value == extensionDescription.enabledValue) {
