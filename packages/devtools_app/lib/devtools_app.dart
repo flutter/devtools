@@ -7,7 +7,7 @@
 // @dart=2.9
 export 'src/analytics/analytics.dart';
 export 'src/analytics/analytics_controller.dart';
-export 'src/app_size/app_size_controller.dart';
+export 'src/screens/app_size/app_size_controller.dart';
 export 'src/charts/treemap.dart';
 export 'src/config_specific/ide_theme/ide_theme.dart';
 export 'src/screens/debugger/debugger_controller.dart';

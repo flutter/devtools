@@ -5,7 +5,7 @@
 // @dart=2.9
 
 import 'package:devtools_app/src/app.dart';
-import 'package:devtools_app/src/app_size/app_size_screen.dart';
+import 'package:devtools_app/src/screens/app_size/app_size_screen.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';

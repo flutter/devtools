@@ -6,9 +6,9 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/app_size/app_size_controller.dart';
-import 'package:devtools_app/src/app_size/app_size_screen.dart';
-import 'package:devtools_app/src/app_size/app_size_table.dart';
+import 'package:devtools_app/src/screens/app_size/app_size_controller.dart';
+import 'package:devtools_app/src/screens/app_size/app_size_screen.dart';
+import 'package:devtools_app/src/screens/app_size/app_size_table.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
