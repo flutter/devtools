@@ -202,8 +202,10 @@ class ServiceExtensionManager extends Disposer {
   }
 
   Future<void> _maybeCheckForFirstFlutterFrame() async {
-    final _lastMainIsolate = _isolateManager.mainIsolate.value;
-    if (_checkForFirstFrameStarted || _firstFrameEventReceived) return;
+    final IsolateRef? _lastMainIsolate = _isolateManager.mainIsolate.value;
+    if (_checkForFirstFrameStarted ||
+        _firstFrameEventReceived ||
+        _lastMainIsolate == null) return;
     if (!isServiceExtensionAvailable(extensions.didSendFirstFrameEvent)) {
       return;
     }
