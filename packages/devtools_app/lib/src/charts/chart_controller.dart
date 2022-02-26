@@ -40,7 +40,7 @@ class ChartController extends DisposableController
     this.displayXLabels = true,
     this.displayYLabels = true,
     this.name,
-    List<int?>? sharedLabelimestamps,
+    List<int>? sharedLabelimestamps,
   }) {
     // TODO(terry): Compute dynamically based on X-axis lables text height.
     bottomPadding = !displayXLabels ? 0.0 : 40.0;
@@ -124,12 +124,12 @@ class ChartController extends DisposableController
 
   // TODO(terry): Consider timestamps returning UnmodifiableListView
   //              if loaded from a file (not live).
-  List<int?> get timestamps => _timestamps;
+  List<int> get timestamps => _timestamps;
 
   /// X axis ticks, each timestamp is a tick on the X axis.
-  final _timestamps = <int?>[];
+  final _timestamps = <int>[];
 
-  void addTimestamp(int? timestamp) {
+  void addTimestamp(int timestamp) {
     _timestamps.add(timestamp);
     dirty = true;
   }
@@ -212,7 +212,7 @@ class ChartController extends DisposableController
 
   /// List of timestamps where a label is displayed.  First in the left-most
   /// label (which will eventually scroll out of view and be replaced).
-  var labelTimestamps = <int?>[];
+  var labelTimestamps = <int>[];
 
   bool get isLabelsShared => _labelsShared;
 
@@ -234,12 +234,15 @@ class ChartController extends DisposableController
     } else if (duration.inMinutes == 0) {
       _tickWidth = 10.0; // Live
     } else if (timestamps.isNotEmpty && duration.inMinutes > 0) {
-      final firstDT = DateTime.fromMillisecondsSinceEpoch(timestamps.first!);
-      final lastDT = DateTime.fromMillisecondsSinceEpoch(timestamps.last!);
+      final firstDT = DateTime.fromMillisecondsSinceEpoch(timestamps.first);
+      final lastDT = DateTime.fromMillisecondsSinceEpoch(timestamps.last);
       // Greater or equal to range we're zooming in on?
       if (lastDT.difference(firstDT).inMinutes >= duration.inMinutes) {
         // Grab the duration in minutes passed in.
-        final startOfLastNMinutes = timestamps.reversed.firstWhere(
+        final startOfLastNMinutes =
+            // We need this cast to be able to return null if nothing is found.
+            // ignore: unnecessary_cast
+            (timestamps as List<int?>).reversed.firstWhere(
           (timestamp) {
             final currentDT = DateTime.fromMillisecondsSinceEpoch(timestamp!);
             final diff = lastDT.difference(currentDT);
@@ -252,8 +255,9 @@ class ChartController extends DisposableController
           orElse: () => null,
         );
 
-        final ticksVisible =
-            timestampsLength - timestamps.indexOf(startOfLastNMinutes);
+        final ticksVisible = startOfLastNMinutes != null
+            ? timestampsLength - timestamps.indexOf(startOfLastNMinutes)
+            : timestampsLength + 1;
         _tickWidth = canvasChartWidth! / ticksVisible;
       } else {
         // No but lets scale x-axis based on the last two timestamps diffs we have.
@@ -262,9 +266,9 @@ class ChartController extends DisposableController
         final length = timestampsLength;
         // Enough data (at least 2 points) to know how many ticks for the duration.
         if (length > 1) {
-          final lastTS = DateTime.fromMillisecondsSinceEpoch(timestamps.last!);
+          final lastTS = DateTime.fromMillisecondsSinceEpoch(timestamps.last);
           final previousTS =
-              DateTime.fromMillisecondsSinceEpoch(timestamps[length - 2]!);
+              DateTime.fromMillisecondsSinceEpoch(timestamps[length - 2]);
           final diffTS = lastTS.difference(previousTS);
           final ticksPerMinute = oneMinuteInMs / diffTS.inMilliseconds;
           final ticksVisible = ticksPerMinute * duration.inMinutes;
@@ -295,8 +299,8 @@ class ChartController extends DisposableController
 
   void computeLabelInterval() {
     if (zoomDuration == null && timestamps.isNotEmpty) {
-      final firstDT = DateTime.fromMillisecondsSinceEpoch(timestamps.first!);
-      final lastDT = DateTime.fromMillisecondsSinceEpoch(timestamps.last!);
+      final firstDT = DateTime.fromMillisecondsSinceEpoch(timestamps.first);
+      final lastDT = DateTime.fromMillisecondsSinceEpoch(timestamps.last);
       final totalDuration = lastDT.difference(firstDT);
       final totalHours = totalDuration.inHours;
       if (totalHours == 0) {
@@ -345,11 +349,11 @@ class ChartController extends DisposableController
     if (refresh) {
       labelTimestamps.clear();
       final leftMostTimestamp = leftMostVisibleTimestampIndex;
-      final lastTimestamp = timestamps[leftMostTimestamp]!;
+      final lastTimestamp = timestamps[leftMostTimestamp];
       labelTimestamps.add(lastTimestamp);
       var lastLabelDT = DateTime.fromMillisecondsSinceEpoch(lastTimestamp);
       for (var index = leftMostTimestamp; index < timestampsLength; index++) {
-        final currentTimestamp = timestamps[index]!;
+        final currentTimestamp = timestamps[index];
         final currentDT = DateTime.fromMillisecondsSinceEpoch(currentTimestamp);
         if (currentDT.difference(lastLabelDT).inSeconds >= labelInterval) {
           labelTimestamps.add(currentTimestamp);
@@ -367,7 +371,7 @@ class ChartController extends DisposableController
       final leftEdge = leftMostVisibleTimestampIndex;
       // TODO(terry): Need to insure that more than one label may not be
       //              visible e.g., when panning the chart.
-      if (labelTimestamps.first! < timestamps[leftEdge]!) {
+      if (labelTimestamps.first < timestamps[leftEdge]) {
         // Label is outside of visible range, remove the left label.
         labelTimestamps.removeAt(0);
       }
@@ -375,17 +379,17 @@ class ChartController extends DisposableController
 
     if (labelTimestamps.isEmpty) return;
 
-    final rightLabelTimestamp = labelTimestamps.last!;
+    final rightLabelTimestamp = labelTimestamps.last;
     final rightMostLableDT =
         DateTime.fromMillisecondsSinceEpoch(rightLabelTimestamp);
     final rightMostTimestampDT =
-        DateTime.fromMillisecondsSinceEpoch(timestamps.last!);
+        DateTime.fromMillisecondsSinceEpoch(timestamps.last);
 
     final nSeconds =
         rightMostTimestampDT.difference(rightMostLableDT).inSeconds;
 
     if (nSeconds >= labelInterval) {
-      int? foundTimestamp;
+      late final int foundTimestamp;
       if (nSeconds == labelInterval) {
         foundTimestamp = timestamps.last;
       } else {
@@ -393,12 +397,11 @@ class ChartController extends DisposableController
         final startIndex = timestamps.indexOf(rightLabelTimestamp);
         for (var index = startIndex; index < timestampsLength; index++) {
           foundTimestamp = timestamps[index];
-          final nextDT = DateTime.fromMillisecondsSinceEpoch(foundTimestamp!);
+          final nextDT = DateTime.fromMillisecondsSinceEpoch(foundTimestamp);
           final secsDiff = nextDT.difference(rightMostTimestampDT).inSeconds;
           if (secsDiff >= labelInterval) break;
         }
       }
-      assert(foundTimestamp != null);
       labelTimestamps.add(foundTimestamp);
     }
   }
@@ -537,7 +540,7 @@ class ChartController extends DisposableController
   /// Returns a 0 based X-coordinate, this coordinate is not yet translated
   /// to the coordinates of the rendered chart. Returns -1 if timestamp not
   /// visible.
-  double timestampToXCanvasCoord(int? timestamp) {
+  double timestampToXCanvasCoord(int timestamp) {
     final index = timestamps.indexOf(timestamp);
     if (index >= 0) {
       // Valid index.
