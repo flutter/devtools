@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 import 'dart:math' as math;
@@ -51,11 +51,11 @@ double get baseTimelineGridIntervalPx => scaleByFontFactor(150.0);
 abstract class FlameChart<T, V> extends StatefulWidget {
   const FlameChart(
     this.data, {
-    @required this.time,
-    @required this.containerWidth,
-    @required this.containerHeight,
-    @required this.selectionNotifier,
-    @required this.onDataSelected,
+    required this.time,
+    required this.containerWidth,
+    required this.containerHeight,
+    required this.selectionNotifier,
+    required this.onDataSelected,
     this.searchMatchesNotifier,
     this.activeSearchMatchNotifier,
     this.startInset = sideInset,
@@ -88,9 +88,9 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 
   final ValueListenable<V> selectionNotifier;
 
-  final ValueListenable<List<V>> searchMatchesNotifier;
+  final ValueListenable<List<V>>? searchMatchesNotifier;
 
-  final ValueListenable<V> activeSearchMatchNotifier;
+  final ValueListenable<V>? activeSearchMatchNotifier;
 
   final void Function(V data) onDataSelected;
 
@@ -118,19 +118,19 @@ abstract class FlameChartState<T extends FlameChart,
 
   bool _altKeyPressed = false;
 
-  double mouseHoverX;
+  double? mouseHoverX;
 
-  FixedExtentDelegate verticalExtentDelegate;
+  FixedExtentDelegate? verticalExtentDelegate;
 
-  LinkedScrollControllerGroup verticalControllerGroup;
+  late LinkedScrollControllerGroup verticalControllerGroup;
 
-  LinkedScrollControllerGroup horizontalControllerGroup;
+  LinkedScrollControllerGroup? horizontalControllerGroup;
 
-  ScrollController _flameChartScrollController;
+  ScrollController? _flameChartScrollController;
 
   /// Animation controller for animating flame chart zoom changes.
   @visibleForTesting
-  AnimationController zoomController;
+  late AnimationController zoomController;
 
   double currentZoom = FlameChart.minZoomLevel;
 
@@ -158,7 +158,7 @@ abstract class FlameChartState<T extends FlameChart,
       contentWidthWithZoom + widget.startInset + widget.endInset;
 
   TimeRange get visibleTimeRange {
-    final horizontalScrollOffset = horizontalControllerGroup.offset;
+    final horizontalScrollOffset = horizontalControllerGroup!.offset;
     final startMicros = horizontalScrollOffset < widget.startInset
         ? startTimeOffset
         : startTimeOffset +
@@ -181,7 +181,7 @@ abstract class FlameChartState<T extends FlameChart,
   double get startingPxPerMicro =>
       widget.startingContentWidth / widget.time.duration.inMicroseconds;
 
-  int get startTimeOffset => widget.time.start.inMicroseconds;
+  int get startTimeOffset => widget.time.start!.inMicroseconds;
 
   double get maxZoomLevel {
     // The max zoom level is hit when 1 microsecond is the width of each grid
@@ -210,9 +210,9 @@ abstract class FlameChartState<T extends FlameChart,
     horizontalControllerGroup = LinkedScrollControllerGroup();
     verticalControllerGroup = LinkedScrollControllerGroup();
 
-    addAutoDisposeListener(horizontalControllerGroup.offsetNotifier, () {
+    addAutoDisposeListener(horizontalControllerGroup!.offsetNotifier, () {
       setState(() {
-        horizontalScrollOffset = horizontalControllerGroup.offset;
+        horizontalScrollOffset = horizontalControllerGroup!.offset;
       });
     });
     addAutoDisposeListener(verticalControllerGroup.offsetNotifier, () {
@@ -238,7 +238,7 @@ abstract class FlameChartState<T extends FlameChart,
 
     if (widget.activeSearchMatchNotifier != null) {
       addAutoDisposeListener(widget.activeSearchMatchNotifier, () async {
-        final activeSearch = widget.activeSearchMatchNotifier.value;
+        final activeSearch = widget.activeSearchMatchNotifier!.value;
         if (activeSearch == null) return;
 
         // Ensure the [activeSearch] is vertically in view.
@@ -262,10 +262,10 @@ abstract class FlameChartState<T extends FlameChart,
   void didUpdateWidget(T oldWidget) {
     if (widget.data != oldWidget.data) {
       initFlameChartElements();
-      horizontalControllerGroup.resetScroll();
+      horizontalControllerGroup!.resetScroll();
       verticalControllerGroup.resetScroll();
       zoomController.reset();
-      verticalExtentDelegate.recompute();
+      verticalExtentDelegate!.recompute();
     }
     FocusScope.of(context).requestFocus(focusNode);
     super.didUpdateWidget(oldWidget);
@@ -328,7 +328,7 @@ abstract class FlameChartState<T extends FlameChart,
               // Look back until we find the first non-empty row.
               if (rows[i].nodes.isNotEmpty) {
                 rowBackgroundColor = alternatingColorForIndex(
-                  rows[i].nodes.first.sectionIndex,
+                  rows[i].nodes.first.sectionIndex!,
                   Theme.of(context).colorScheme,
                 );
                 break;
@@ -336,7 +336,7 @@ abstract class FlameChartState<T extends FlameChart,
             }
           } else if (nodes.isNotEmpty) {
             rowBackgroundColor = alternatingColorForIndex(
-              nodes.first.sectionIndex,
+              nodes.first.sectionIndex!,
               Theme.of(context).colorScheme,
             );
           }
@@ -345,9 +345,11 @@ abstract class FlameChartState<T extends FlameChart,
             nodes: nodes,
             width: math.max(constraints.maxWidth, widthWithZoom),
             startInset: widget.startInset,
-            selectionNotifier: widget.selectionNotifier,
-            searchMatchesNotifier: widget.searchMatchesNotifier,
-            activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
+            selectionNotifier: widget.selectionNotifier as ValueListenable<V>,
+            searchMatchesNotifier:
+                widget.searchMatchesNotifier as ValueListenable<List<V>>?,
+            activeSearchMatchNotifier:
+                widget.activeSearchMatchNotifier as ValueListenable<V>?,
             onTapUp: focusNode.requestFocus,
             backgroundColor: rowBackgroundColor,
             zoom: currentZoom,
@@ -401,9 +403,9 @@ abstract class FlameChartState<T extends FlameChart,
           currentZoom - keyboardZoomOutUnit,
         ));
       } else if (keyLabel == 'a') {
-        scrollToX(horizontalControllerGroup.offset - keyboardScrollUnit);
+        scrollToX(horizontalControllerGroup!.offset - keyboardScrollUnit);
       } else if (keyLabel == 'd') {
-        scrollToX(horizontalControllerGroup.offset + keyboardScrollUnit);
+        scrollToX(horizontalControllerGroup!.offset + keyboardScrollUnit);
       }
     }
   }
@@ -436,7 +438,7 @@ abstract class FlameChartState<T extends FlameChart,
           );
           await zoomTo(newZoomLevel, jump: true);
           if (newZoomLevel == FlameChart.minZoomLevel &&
-              horizontalControllerGroup.offset != 0.0) {
+              horizontalControllerGroup!.offset != 0.0) {
             // We do not need to call this in a post frame callback because
             // `FlameChart.minScrollOffset` (0.0) is guaranteed to be less than
             // the scroll controllers max scroll extent.
@@ -453,7 +455,7 @@ abstract class FlameChartState<T extends FlameChart,
     if (previousZoom == newZoom) return;
 
     // Store current scroll values for re-calculating scroll location on zoom.
-    final lastScrollOffset = horizontalControllerGroup.offset;
+    final lastScrollOffset = horizontalControllerGroup!.offset;
 
     final safeMouseHoverX = mouseHoverX ?? widget.containerWidth / 2;
     // Position in the zoomable coordinate space that we want to keep fixed.
@@ -477,7 +479,7 @@ abstract class FlameChartState<T extends FlameChart,
 
   Future<void> zoomTo(
     double zoom, {
-    double forceMouseX,
+    double? forceMouseX,
     bool jump = false,
   }) async {
     if (forceMouseX != null) {
@@ -502,12 +504,12 @@ abstract class FlameChartState<T extends FlameChart,
   }) async {
     final target = offset.clamp(
       FlameChart.minScrollOffset,
-      horizontalControllerGroup.position.maxScrollExtent,
+      horizontalControllerGroup!.position.maxScrollExtent,
     );
     if (jump) {
-      horizontalControllerGroup.jumpTo(target);
+      horizontalControllerGroup!.jumpTo(target);
     } else {
-      await horizontalControllerGroup.animateTo(
+      await horizontalControllerGroup!.animateTo(
         target,
         curve: defaultCurve,
         duration: shortDuration,
@@ -539,9 +541,9 @@ abstract class FlameChartState<T extends FlameChart,
   }
 
   Future<void> zoomAndScrollToData({
-    @required int startMicros,
-    @required int durationMicros,
-    @required V data,
+    required int startMicros,
+    required int durationMicros,
+    required V data,
     bool scrollVertically = true,
     bool jumpZoom = false,
   }) async {
@@ -554,7 +556,7 @@ abstract class FlameChartState<T extends FlameChart,
     // had time to update their scroll extents. Otherwise, we can hit a race
     // where are trying to scroll to an offset that is beyond what the scroll
     // controller thinks its max scroll extent is.
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance!.addPostFrameCallback((_) async {
       await Future.wait([
         scrollHorizontallyToData(data),
         if (scrollVertically) scrollVerticallyToData(data),
@@ -563,9 +565,9 @@ abstract class FlameChartState<T extends FlameChart,
   }
 
   Future<void> zoomToTimeRange({
-    @required int startMicros,
-    @required int durationMicros,
-    double targetWidth,
+    required int startMicros,
+    required int durationMicros,
+    double? targetWidth,
     bool jump = false,
   }) async {
     targetWidth ??= widget.containerWidth * 0.8;
@@ -589,19 +591,19 @@ abstract class FlameChartState<T extends FlameChart,
 class ScrollingFlameChartRow<V extends FlameChartDataMixin<V>>
     extends StatefulWidget {
   const ScrollingFlameChartRow({
-    @required this.linkedScrollControllerGroup,
-    @required this.nodes,
-    @required this.width,
-    @required this.startInset,
-    @required this.selectionNotifier,
-    @required this.searchMatchesNotifier,
-    @required this.activeSearchMatchNotifier,
-    @required this.onTapUp,
-    @required this.backgroundColor,
-    @required this.zoom,
+    required this.linkedScrollControllerGroup,
+    required this.nodes,
+    required this.width,
+    required this.startInset,
+    required this.selectionNotifier,
+    required this.searchMatchesNotifier,
+    required this.activeSearchMatchNotifier,
+    required this.onTapUp,
+    required this.backgroundColor,
+    required this.zoom,
   });
 
-  final LinkedScrollControllerGroup linkedScrollControllerGroup;
+  final LinkedScrollControllerGroup? linkedScrollControllerGroup;
 
   final List<FlameChartNode<V>> nodes;
 
@@ -611,9 +613,9 @@ class ScrollingFlameChartRow<V extends FlameChartDataMixin<V>>
 
   final ValueListenable<V> selectionNotifier;
 
-  final ValueListenable<List<V>> searchMatchesNotifier;
+  final ValueListenable<List<V>>? searchMatchesNotifier;
 
-  final ValueListenable<V> activeSearchMatchNotifier;
+  final ValueListenable<V>? activeSearchMatchNotifier;
 
   final VoidCallback onTapUp;
 
@@ -627,24 +629,24 @@ class ScrollingFlameChartRow<V extends FlameChartDataMixin<V>>
 }
 
 class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
-    extends State<ScrollingFlameChartRow> with AutoDisposeMixin {
-  ScrollController scrollController;
+    extends State<ScrollingFlameChartRow<V>> with AutoDisposeMixin {
+  late final ScrollController scrollController;
 
-  _ScrollingFlameChartRowExtentDelegate extentDelegate;
+  late final _ScrollingFlameChartRowExtentDelegate extentDelegate;
 
   /// Convenience getter for widget.nodes.
   List<FlameChartNode<V>> get nodes => widget.nodes;
 
-  List<V> _nodeData;
+  late List<V> _nodeData;
 
-  V selected;
+  V? selected;
 
-  V hovered;
+  V? hovered;
 
   @override
   void initState() {
     super.initState();
-    scrollController = widget.linkedScrollControllerGroup.addAndGet();
+    scrollController = widget.linkedScrollControllerGroup!.addAndGet();
     extentDelegate = _ScrollingFlameChartRowExtentDelegate(
       nodeIntervals: nodes.toPaddedZoomedIntervals(
         zoom: widget.zoom,
@@ -681,7 +683,7 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
   }
 
   @override
-  void didUpdateWidget(ScrollingFlameChartRow oldWidget) {
+  void didUpdateWidget(ScrollingFlameChartRow<V> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.nodes != widget.nodes) {
       _initNodeDataList();
@@ -777,7 +779,7 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
   }
 
   void _handleTapUp(TapUpDetails details) {
-    final RenderBox referenceBox = context.findRenderObject();
+    final RenderBox referenceBox = context.findRenderObject() as RenderBox;
     final tapPosition = referenceBox.globalToLocal(details.globalPosition);
     final nodeToSelect =
         binarySearchForNode(tapPosition.dx + scrollController.offset);
@@ -788,7 +790,7 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
   }
 
   @visibleForTesting
-  FlameChartNode<V> binarySearchForNode(double x) {
+  FlameChartNode<V>? binarySearchForNode(double x) {
     int min = 0;
     int max = nodes.length;
     while (min < max) {
@@ -815,14 +817,14 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
 
 class FlameChartNodeWidget extends StatelessWidget {
   const FlameChartNodeWidget({
-    Key key,
-    @required this.index,
-    @required this.nodes,
-    @required this.zoom,
-    @required this.startInset,
-    @required this.chartWidth,
-    @required this.selected,
-    @required this.hovered,
+    Key? key,
+    required this.index,
+    required this.nodes,
+    required this.zoom,
+    required this.startInset,
+    required this.chartWidth,
+    required this.selected,
+    required this.hovered,
   }) : super(key: key);
 
   final int index;
@@ -873,9 +875,9 @@ class FlameChartNodeWidget extends StatelessWidget {
 
 extension NodeListExtension on List<FlameChartNode> {
   List<Range> toPaddedZoomedIntervals({
-    @required double zoom,
-    @required double chartStartInset,
-    @required double chartWidth,
+    required double zoom,
+    required double chartStartInset,
+    required double chartWidth,
   }) {
     return List<Range>.generate(
       length,
@@ -895,8 +897,8 @@ class FlameChartUtils {
   static double leftPaddingForNode(
     int index,
     List<FlameChartNode> nodes, {
-    @required double chartZoom,
-    @required double chartStartInset,
+    required double chartZoom,
+    required double chartStartInset,
   }) {
     final node = nodes[index];
     double padding;
@@ -916,9 +918,9 @@ class FlameChartUtils {
   static double rightPaddingForNode(
     int index,
     List<FlameChartNode> nodes, {
-    @required double chartZoom,
-    @required double chartStartInset,
-    @required double chartWidth,
+    required double chartZoom,
+    required double chartStartInset,
+    required double chartWidth,
   }) {
     // TODO(kenz): workaround for https://github.com/flutter/devtools/issues/2012.
     // This is a ridiculous amount of padding but it ensures that we don't hit
@@ -943,7 +945,7 @@ class FlameChartUtils {
     return math.max(0.0, padding);
   }
 
-  static double zoomForNode(FlameChartNode node, double chartZoom) {
+  static double zoomForNode(FlameChartNode? node, double chartZoom) {
     return node != null && node.selectable
         ? chartZoom
         : FlameChart.minZoomLevel;
@@ -952,9 +954,9 @@ class FlameChartUtils {
   static Range paddedZoomedInterval(
     int index,
     List<FlameChartNode> nodes, {
-    @required double chartZoom,
-    @required double chartStartInset,
-    @required double chartWidth,
+    required double chartZoom,
+    required double chartStartInset,
+    required double chartWidth,
   }) {
     final node = nodes[index];
     final zoomedRect = node.zoomedRect(chartZoom, chartStartInset);
@@ -980,8 +982,8 @@ class FlameChartUtils {
 class FlameChartSection {
   FlameChartSection(
     this.index, {
-    @required this.startRow,
-    @required this.endRow,
+    required this.startRow,
+    required this.endRow,
   });
 
   final int index;
@@ -1004,7 +1006,7 @@ class FlameChartRow<T extends FlameChartDataMixin<T>> {
   ///
   /// If [index] is specified and in range of the list, [node] will be added at
   /// [index]. Otherwise, [node] will be added to the end of [nodes]
-  void addNode(FlameChartNode<T> node, {int index}) {
+  void addNode(FlameChartNode<T> node, {int? index}) {
     if (index != null && index >= 0 && index < nodes.length) {
       nodes.insert(index, node);
     } else {
@@ -1024,11 +1026,11 @@ mixin FlameChartDataMixin<T extends TreeNode<T>>
 class FlameChartNode<T extends FlameChartDataMixin<T>> {
   FlameChartNode({
     this.key,
-    @required this.text,
-    @required this.rect,
-    @required this.colorPair,
-    @required this.data,
-    @required this.onSelected,
+    required this.text,
+    required this.rect,
+    required this.colorPair,
+    required this.data,
+    required this.onSelected,
     this.selectable = true,
     this.sectionIndex,
   });
@@ -1040,25 +1042,25 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
   // performance.
   static const _minWidthForText = 30.0;
 
-  final Key key;
+  final Key? key;
   final Rect rect;
-  final String text;
+  final String? text;
   final ThemedColorPair colorPair;
   final T data;
   final void Function(T) onSelected;
   final bool selectable;
 
-  FlameChartRow row;
+  late FlameChartRow row;
 
-  int sectionIndex;
+  int? sectionIndex;
 
   Widget buildWidget({
-    @required bool selected,
-    @required bool hovered,
-    @required bool searchMatch,
-    @required bool activeSearchMatch,
-    @required double zoom,
-    @required ColorScheme colorScheme,
+    required bool selected,
+    required bool hovered,
+    required bool searchMatch,
+    required bool activeSearchMatch,
+    required double zoom,
+    required ColorScheme colorScheme,
   }) {
     // This math.max call prevents using a rect with negative width for
     // small events that have padding.
@@ -1089,7 +1091,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
       ),
       child: zoomedWidth >= _minWidthForText
           ? Text(
-              text,
+              text!,
               textAlign: TextAlign.left,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -1115,10 +1117,10 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
   }
 
   Color _backgroundColor({
-    @required bool selected,
-    @required bool searchMatch,
-    @required bool activeSearchMatch,
-    @required ColorScheme colorScheme,
+    required bool selected,
+    required bool searchMatch,
+    required bool activeSearchMatch,
+    required ColorScheme colorScheme,
   }) {
     if (selected) return defaultSelectionColor;
     if (activeSearchMatch) return activeSearchMatchColor;
@@ -1127,10 +1129,10 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
   }
 
   Color _textColor({
-    @required bool selected,
-    @required bool searchMatch,
-    @required bool activeSearchMatch,
-    @required ColorScheme colorScheme,
+    required bool selected,
+    required bool searchMatch,
+    required bool activeSearchMatch,
+    required ColorScheme colorScheme,
   }) {
     if (selected || searchMatch || activeSearchMatch) return _darkTextColor;
     return colorPair.foreground.colorFor(colorScheme);
@@ -1174,10 +1176,10 @@ mixin FlameChartColorMixin {
 /// known for each list item.
 class _ScrollingFlameChartRowExtentDelegate extends ExtentDelegate {
   _ScrollingFlameChartRowExtentDelegate({
-    @required this.nodeIntervals,
-    @required this.zoom,
-    @required this.chartStartInset,
-    @required this.chartWidth,
+    required this.nodeIntervals,
+    required this.zoom,
+    required this.chartStartInset,
+    required this.chartWidth,
   }) {
     recompute();
   }
@@ -1191,10 +1193,10 @@ class _ScrollingFlameChartRowExtentDelegate extends ExtentDelegate {
   double chartWidth;
 
   void recomputeWith({
-    @required List<Range> nodeIntervals,
-    @required double zoom,
-    @required double chartStartInset,
-    @required double chartWidth,
+    required List<Range> nodeIntervals,
+    required double zoom,
+    required double chartStartInset,
+    required double chartWidth,
   }) {
     this.nodeIntervals = nodeIntervals;
     this.zoom = zoom;
@@ -1206,14 +1208,14 @@ class _ScrollingFlameChartRowExtentDelegate extends ExtentDelegate {
   @override
   double itemExtent(int index) {
     if (index >= length) return 0;
-    return nodeIntervals[index].size;
+    return nodeIntervals[index].size as double;
   }
 
   @override
-  double layoutOffset(int index) {
-    if (index <= 0) return 0.0;
-    if (index >= length) return nodeIntervals.last.end;
-    return nodeIntervals[index].begin;
+  double layoutOffset(int? index) {
+    if (index! <= 0) return 0.0;
+    if (index >= length) return nodeIntervals.last.end as double;
+    return nodeIntervals[index].begin as double;
   }
 
   @override
@@ -1255,13 +1257,13 @@ class _ScrollingFlameChartRowExtentDelegate extends ExtentDelegate {
 
 abstract class FlameChartPainter extends CustomPainter {
   FlameChartPainter({
-    @required this.zoom,
-    @required this.constraints,
-    @required this.verticalScrollOffset,
-    @required this.horizontalScrollOffset,
-    @required this.chartStartInset,
-    @required this.colorScheme,
-  }) : assert(colorScheme != null);
+    required this.zoom,
+    required this.constraints,
+    required this.verticalScrollOffset,
+    required this.horizontalScrollOffset,
+    required this.chartStartInset,
+    required this.colorScheme,
+  });
 
   final double zoom;
 
@@ -1301,15 +1303,15 @@ abstract class FlameChartPainter extends CustomPainter {
 
 class TimelineGridPainter extends FlameChartPainter {
   TimelineGridPainter({
-    @required double zoom,
-    @required BoxConstraints constraints,
-    @required double verticalScrollOffset,
-    @required double horizontalScrollOffset,
-    @required double chartStartInset,
-    @required this.chartEndInset,
-    @required this.flameChartWidth,
-    @required this.duration,
-    @required ColorScheme colorScheme,
+    required double zoom,
+    required BoxConstraints constraints,
+    required double verticalScrollOffset,
+    required double horizontalScrollOffset,
+    required double chartStartInset,
+    required this.chartEndInset,
+    required this.flameChartWidth,
+    required this.duration,
+    required ColorScheme colorScheme,
   }) : super(
           zoom: zoom,
           constraints: constraints,
@@ -1435,6 +1437,7 @@ class TimelineGridPainter extends FlameChartPainter {
 
   @override
   bool operator ==(other) {
+    if (other is! TimelineGridPainter) return false;
     return zoom == other.zoom &&
         constraints == other.constraints &&
         flameChartWidth == other.flameChartWidth &&
@@ -1456,8 +1459,8 @@ class TimelineGridPainter extends FlameChartPainter {
 
 class FlameChartHelpButton extends StatelessWidget {
   const FlameChartHelpButton({
-    @required this.gaScreen,
-    @required this.gaSelection,
+    required this.gaScreen,
+    required this.gaSelection,
     this.additionalInfo = const <Widget>[],
   });
 
@@ -1618,9 +1621,9 @@ class _FlameChartHelpDialog extends StatelessWidget {
 
 class EmptyFlameChartRow extends StatelessWidget {
   const EmptyFlameChartRow({
-    @required this.height,
-    @required this.width,
-    @required this.backgroundColor,
+    required this.height,
+    required this.width,
+    required this.backgroundColor,
   });
 
   final double height;
