@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
+// ignore_for_file: import_of_legacy_library_into_null_safe, unnecessary_null_comparison
 
 import 'dart:async';
 import 'dart:math' as math;
@@ -120,11 +120,11 @@ abstract class FlameChartState<T extends FlameChart,
 
   double? mouseHoverX;
 
-  FixedExtentDelegate? verticalExtentDelegate;
+  late final FixedExtentDelegate verticalExtentDelegate;
 
-  late LinkedScrollControllerGroup verticalControllerGroup;
+  late final LinkedScrollControllerGroup verticalControllerGroup;
 
-  LinkedScrollControllerGroup? horizontalControllerGroup;
+  late final LinkedScrollControllerGroup horizontalControllerGroup;
 
   ScrollController? _flameChartScrollController;
 
@@ -158,7 +158,7 @@ abstract class FlameChartState<T extends FlameChart,
       contentWidthWithZoom + widget.startInset + widget.endInset;
 
   TimeRange get visibleTimeRange {
-    final horizontalScrollOffset = horizontalControllerGroup!.offset;
+    final horizontalScrollOffset = horizontalControllerGroup.offset;
     final startMicros = horizontalScrollOffset < widget.startInset
         ? startTimeOffset
         : startTimeOffset +
@@ -210,9 +210,9 @@ abstract class FlameChartState<T extends FlameChart,
     horizontalControllerGroup = LinkedScrollControllerGroup();
     verticalControllerGroup = LinkedScrollControllerGroup();
 
-    addAutoDisposeListener(horizontalControllerGroup!.offsetNotifier, () {
+    addAutoDisposeListener(horizontalControllerGroup.offsetNotifier, () {
       setState(() {
-        horizontalScrollOffset = horizontalControllerGroup!.offset;
+        horizontalScrollOffset = horizontalControllerGroup.offset;
       });
     });
     addAutoDisposeListener(verticalControllerGroup.offsetNotifier, () {
@@ -262,10 +262,10 @@ abstract class FlameChartState<T extends FlameChart,
   void didUpdateWidget(T oldWidget) {
     if (widget.data != oldWidget.data) {
       initFlameChartElements();
-      horizontalControllerGroup!.resetScroll();
+      horizontalControllerGroup.resetScroll();
       verticalControllerGroup.resetScroll();
       zoomController.reset();
-      verticalExtentDelegate!.recompute();
+      verticalExtentDelegate.recompute();
     }
     FocusScope.of(context).requestFocus(focusNode);
     super.didUpdateWidget(oldWidget);
@@ -347,9 +347,9 @@ abstract class FlameChartState<T extends FlameChart,
             startInset: widget.startInset,
             selectionNotifier: widget.selectionNotifier as ValueListenable<V>,
             searchMatchesNotifier:
-                widget.searchMatchesNotifier as ValueListenable<List<V>>?,
+                widget.searchMatchesNotifier as ValueListenable<List<V>>,
             activeSearchMatchNotifier:
-                widget.activeSearchMatchNotifier as ValueListenable<V>?,
+                widget.activeSearchMatchNotifier as ValueListenable<V>,
             onTapUp: focusNode.requestFocus,
             backgroundColor: rowBackgroundColor,
             zoom: currentZoom,
@@ -403,9 +403,9 @@ abstract class FlameChartState<T extends FlameChart,
           currentZoom - keyboardZoomOutUnit,
         ));
       } else if (keyLabel == 'a') {
-        scrollToX(horizontalControllerGroup!.offset - keyboardScrollUnit);
+        scrollToX(horizontalControllerGroup.offset - keyboardScrollUnit);
       } else if (keyLabel == 'd') {
-        scrollToX(horizontalControllerGroup!.offset + keyboardScrollUnit);
+        scrollToX(horizontalControllerGroup.offset + keyboardScrollUnit);
       }
     }
   }
@@ -438,7 +438,7 @@ abstract class FlameChartState<T extends FlameChart,
           );
           await zoomTo(newZoomLevel, jump: true);
           if (newZoomLevel == FlameChart.minZoomLevel &&
-              horizontalControllerGroup!.offset != 0.0) {
+              horizontalControllerGroup.offset != 0.0) {
             // We do not need to call this in a post frame callback because
             // `FlameChart.minScrollOffset` (0.0) is guaranteed to be less than
             // the scroll controllers max scroll extent.
@@ -455,7 +455,7 @@ abstract class FlameChartState<T extends FlameChart,
     if (previousZoom == newZoom) return;
 
     // Store current scroll values for re-calculating scroll location on zoom.
-    final lastScrollOffset = horizontalControllerGroup!.offset;
+    final lastScrollOffset = horizontalControllerGroup.offset;
 
     final safeMouseHoverX = mouseHoverX ?? widget.containerWidth / 2;
     // Position in the zoomable coordinate space that we want to keep fixed.
@@ -504,12 +504,12 @@ abstract class FlameChartState<T extends FlameChart,
   }) async {
     final target = offset.clamp(
       FlameChart.minScrollOffset,
-      horizontalControllerGroup!.position.maxScrollExtent,
+      horizontalControllerGroup.position.maxScrollExtent,
     );
     if (jump) {
-      horizontalControllerGroup!.jumpTo(target);
+      horizontalControllerGroup.jumpTo(target);
     } else {
-      await horizontalControllerGroup!.animateTo(
+      await horizontalControllerGroup.animateTo(
         target,
         curve: defaultCurve,
         duration: shortDuration,
@@ -603,7 +603,7 @@ class ScrollingFlameChartRow<V extends FlameChartDataMixin<V>>
     required this.zoom,
   });
 
-  final LinkedScrollControllerGroup? linkedScrollControllerGroup;
+  final LinkedScrollControllerGroup linkedScrollControllerGroup;
 
   final List<FlameChartNode<V>> nodes;
 
@@ -613,9 +613,9 @@ class ScrollingFlameChartRow<V extends FlameChartDataMixin<V>>
 
   final ValueListenable<V> selectionNotifier;
 
-  final ValueListenable<List<V>>? searchMatchesNotifier;
+  final ValueListenable<List<V>> searchMatchesNotifier;
 
-  final ValueListenable<V>? activeSearchMatchNotifier;
+  final ValueListenable<V> activeSearchMatchNotifier;
 
   final VoidCallback onTapUp;
 
@@ -646,7 +646,7 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
   @override
   void initState() {
     super.initState();
-    scrollController = widget.linkedScrollControllerGroup!.addAndGet();
+    scrollController = widget.linkedScrollControllerGroup.addAndGet();
     extentDelegate = _ScrollingFlameChartRowExtentDelegate(
       nodeIntervals: nodes.toPaddedZoomedIntervals(
         zoom: widget.zoom,
@@ -779,7 +779,7 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
   }
 
   void _handleTapUp(TapUpDetails details) {
-    final RenderBox referenceBox = context.findRenderObject() as RenderBox;
+    final referenceBox = context.findRenderObject() as RenderBox;
     final tapPosition = referenceBox.globalToLocal(details.globalPosition);
     final nodeToSelect =
         binarySearchForNode(tapPosition.dx + scrollController.offset);
@@ -1044,7 +1044,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
 
   final Key? key;
   final Rect rect;
-  final String? text;
+  final String text;
   final ThemedColorPair colorPair;
   final T data;
   final void Function(T) onSelected;
@@ -1091,7 +1091,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
       ),
       child: zoomedWidth >= _minWidthForText
           ? Text(
-              text!,
+              text,
               textAlign: TextAlign.left,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
