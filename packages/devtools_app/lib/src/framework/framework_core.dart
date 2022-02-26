@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'dart:async';
 
@@ -32,7 +32,7 @@ class FrameworkCore {
     setGlobal(OfflineModeController, OfflineModeController());
   }
 
-  static void init({String url}) {
+  static void init({String? url}) {
     // Print the version number at startup.
     log('DevTools version ${devtools.version}.');
   }
@@ -40,8 +40,8 @@ class FrameworkCore {
   /// Returns true if we're able to connect to a device and false otherwise.
   static Future<bool> initVmService(
     String url, {
-    Uri explicitUri,
-    @required ErrorReporter errorReporter,
+    Uri? explicitUri,
+    required ErrorReporter errorReporter,
   }) async {
     if (serviceManager.hasConnection) {
       // TODO(https://github.com/flutter/devtools/issues/1568): why do we call
@@ -49,7 +49,7 @@ class FrameworkCore {
       return true;
     }
 
-    final Uri uri = explicitUri ?? getServiceUriFromQueryString(url);
+    final Uri? uri = explicitUri ?? getServiceUriFromQueryString(url);
     if (uri != null) {
       final finishedCompleter = Completer<void>();
 
