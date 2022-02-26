@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -18,28 +16,28 @@ enum PivotType { pivotByMiddle, pivotBySize }
 class Treemap extends StatefulWidget {
   // TODO(peterdjlee): Consider auto-expanding rootNode named 'src'.
   const Treemap.fromRoot({
-    @required this.rootNode,
+    required this.rootNode,
     this.nodes,
-    @required this.levelsVisible,
+    required this.levelsVisible,
     this.isOutermostLevel = false,
-    @required this.width,
-    @required this.height,
-    @required this.onRootChangedCallback,
+    required this.width,
+    required this.height,
+    required this.onRootChangedCallback,
   });
 
   const Treemap.fromNodes({
     this.rootNode,
-    @required this.nodes,
-    @required this.levelsVisible,
+    required this.nodes,
+    required this.levelsVisible,
     this.isOutermostLevel = false,
-    @required this.width,
-    @required this.height,
-    @required this.onRootChangedCallback,
+    required this.width,
+    required this.height,
+    required this.onRootChangedCallback,
   });
 
-  final TreemapNode rootNode;
+  final TreemapNode? rootNode;
 
-  final List<TreemapNode> nodes;
+  final List<TreemapNode>? nodes;
 
   /// The depth of children visible from this Treemap widget.
   ///
@@ -72,7 +70,7 @@ class Treemap extends StatefulWidget {
 
   final double height;
 
-  final void Function(TreemapNode node) onRootChangedCallback;
+  final void Function(TreemapNode? node) onRootChangedCallback;
 
   static const PivotType pivotType = PivotType.pivotByMiddle;
 
@@ -88,19 +86,19 @@ class Treemap extends StatefulWidget {
 }
 
 class _TreemapState extends State<Treemap> {
-  TreemapNode hoveredNode;
+  TreemapNode? hoveredNode;
 
   /// Computes the total size of a given list of treemap nodes.
   /// [endIndex] defaults to nodes.length - 1.
   int computeByteSizeForNodes({
-    @required List<TreemapNode> nodes,
+    required List<TreemapNode> nodes,
     int startIndex = 0,
-    int endIndex,
+    int? endIndex,
   }) {
     endIndex ??= nodes.length - 1;
     int sum = 0;
     for (int i = startIndex; i <= endIndex; i++) {
-      sum += nodes[i].unsignedByteSize ?? 0;
+      sum += nodes[i].unsignedByteSize;
     }
     return sum;
   }
@@ -148,11 +146,11 @@ class _TreemapState extends State<Treemap> {
   /// ----------------------
   /// ```
   List<PositionedCell> buildTreemaps({
-    @required List<TreemapNode> children,
-    @required double x,
-    @required double y,
-    @required double width,
-    @required double height,
+    required List<TreemapNode> children,
+    required double x,
+    required double y,
+    required double width,
+    required double height,
   }) {
     final isHorizontalRectangle = width > height;
 
@@ -352,7 +350,7 @@ class _TreemapState extends State<Treemap> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.rootNode == null && widget.nodes.isNotEmpty) {
+    if (widget.rootNode == null && widget.nodes!.isNotEmpty) {
       // If constructed with Treemap.fromNodes
       return buildSubTreemaps();
     } else {
@@ -370,7 +368,7 @@ class _TreemapState extends State<Treemap> {
           return const SizedBox();
         }
         final positionedChildren = buildTreemaps(
-          children: widget.nodes,
+          children: widget.nodes!,
           x: 0,
           y: 0,
           width: constraints.maxWidth,
@@ -421,7 +419,7 @@ class _TreemapState extends State<Treemap> {
   /// ----------------------------
   /// ```
   Widget buildTreemap(BuildContext context) {
-    if (widget.rootNode.children.isNotEmpty) {
+    if (widget.rootNode!.children.isNotEmpty) {
       return Padding(
         padding: const EdgeInsets.all(1.0),
         child: buildTreemapFromNodes(context),
@@ -439,7 +437,7 @@ class _TreemapState extends State<Treemap> {
           buildTitleText(context),
         Expanded(
           child: Treemap.fromNodes(
-            nodes: widget.rootNode.children,
+            nodes: widget.rootNode!.children,
             levelsVisible: widget.levelsVisible,
             onRootChangedCallback: widget.onRootChangedCallback,
             width: widget.width,
@@ -466,14 +464,14 @@ class _TreemapState extends State<Treemap> {
   Container buildCell() {
     return Container(
       decoration: BoxDecoration(
-        color: widget.rootNode.displayColor,
+        color: widget.rootNode!.displayColor,
         border: Border.all(color: Colors.black87),
       ),
       child: Center(
         child: widget.height > Treemap.minHeightToDisplayCellText
             ? buildNameAndSizeText(
                 textColor:
-                    widget.rootNode.showDiff ? Colors.white : Colors.black,
+                    widget.rootNode!.showDiff ? Colors.white : Colors.black,
                 oneLine: false,
               )
             : const SizedBox(),
@@ -493,7 +491,9 @@ class _TreemapState extends State<Treemap> {
             border: Border.all(color: Colors.black87),
           ),
           child: buildNameAndSizeText(
-            textColor: Theme.of(context).textTheme.bodyText2.color,
+            textColor:
+                (Theme.of(context).textTheme.bodyText2 ?? const TextStyle())
+                    .color,
             oneLine: true,
           ),
         ),
@@ -502,11 +502,11 @@ class _TreemapState extends State<Treemap> {
   }
 
   Text buildNameAndSizeText({
-    @required Color textColor,
-    @required bool oneLine,
+    required Color? textColor,
+    required bool oneLine,
   }) {
     return Text(
-      widget.rootNode.displayText(oneLine: oneLine),
+      widget.rootNode!.displayText(oneLine: oneLine),
       style: TextStyle(color: textColor),
       textAlign: TextAlign.center,
       overflow: TextOverflow.ellipsis,
@@ -514,7 +514,7 @@ class _TreemapState extends State<Treemap> {
   }
 
   Widget buildBreadcrumbNavigator() {
-    final pathFromRoot = widget.rootNode.pathFromRoot();
+    final pathFromRoot = widget.rootNode!.pathFromRoot();
     return Padding(
       padding: const EdgeInsets.only(bottom: denseRowSpacing),
       child: BreadcrumbNavigator.builder(
@@ -539,10 +539,10 @@ class _TreemapState extends State<Treemap> {
   /// to the associated [TreemapNode].
   ///
   /// The default value for newRoot is [widget.rootNode].
-  Widget buildSelectable({@required Widget child, TreemapNode newRoot}) {
+  Widget buildSelectable({required Widget child, TreemapNode? newRoot}) {
     newRoot ??= widget.rootNode;
     return DevToolsTooltip(
-      message: widget.rootNode.displayText(),
+      message: widget.rootNode!.displayText(),
       waitDuration: tooltipWaitLong,
       child: InkWell(
         onTap: () {
@@ -579,13 +579,11 @@ class _TreemapState extends State<Treemap> {
 
 class TreemapNode extends TreeNode<TreemapNode> {
   TreemapNode({
-    @required this.name,
+    required this.name,
     this.byteSize = 0,
     this.childrenMap = const <String, TreemapNode>{},
     this.showDiff = false,
-  })  : assert(name != null),
-        assert(byteSize != null),
-        assert(childrenMap != null);
+  });
 
   final String name;
   final Map<String, TreemapNode> childrenMap;
@@ -611,9 +609,9 @@ class TreemapNode extends TreeNode<TreemapNode> {
     // If the parent node and the child node's name are exactly the same,
     // do not trim in order to avoid empty names.
     if (parent != null &&
-        displayName.startsWith(parent.name) &&
-        displayName != parent.name) {
-      displayName = displayName.replaceFirst(parent.name, '');
+        displayName.startsWith(parent!.name) &&
+        displayName != parent!.name) {
+      displayName = displayName.replaceFirst(parent!.name, '');
       if (displayName.startsWith('/')) {
         displayName = displayName.replaceFirst('/', '');
       }
@@ -630,7 +628,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
 
   /// Returns a list of [TreemapNode] in the path from root node to [this].
   List<TreemapNode> pathFromRoot() {
-    TreemapNode node = this;
+    TreemapNode? node = this;
     final path = <TreemapNode>[];
     while (node != null) {
       path.add(node);
@@ -644,7 +642,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
   /// Includes only package nodes (nodes that start with 'package:').
   List<String> packagePath() {
     final reversedPath = <String>[];
-    var current = this;
+    TreemapNode? current = this;
 
     while (current != null) {
       if (current.name.contains('(Dart AOT)')) {
@@ -694,9 +692,9 @@ class TreemapNode extends TreeNode<TreemapNode> {
 
 class PositionedCell extends Positioned {
   PositionedCell({
-    @required this.rect,
-    @required this.node,
-    @required child,
+    required this.rect,
+    required this.node,
+    required child,
   }) : super(
           left: rect.left,
           top: rect.top,
@@ -711,7 +709,7 @@ class PositionedCell extends Positioned {
 }
 
 class MultiCellPainter extends CustomPainter {
-  const MultiCellPainter({@required this.nodes});
+  const MultiCellPainter({required this.nodes});
 
   final List<PositionedCell> nodes;
 
@@ -720,7 +718,7 @@ class MultiCellPainter extends CustomPainter {
     for (final positionedCell in nodes) {
       paintCell(
         canvas,
-        Size(positionedCell.width, positionedCell.height),
+        Size(positionedCell.width!, positionedCell.height!),
         positionedCell,
       );
     }
@@ -730,8 +728,8 @@ class MultiCellPainter extends CustomPainter {
     final node = positionedCell.node;
 
     final bounds = Rect.fromLTWH(
-      positionedCell.left,
-      positionedCell.top,
+      positionedCell.left!,
+      positionedCell.top!,
       size.width,
       size.height,
     );
@@ -745,8 +743,8 @@ class MultiCellPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
     canvas.drawRect(bounds, borderPaint);
 
-    if (positionedCell.width > Treemap.minWidthToDisplayCellText &&
-        positionedCell.height > Treemap.minHeightToDisplayCellText) {
+    if (positionedCell.width! > Treemap.minWidthToDisplayCellText &&
+        positionedCell.height! > Treemap.minHeightToDisplayCellText) {
       final textPainter = TextPainter(
         text: TextSpan(
           text: node.displayText(oneLine: false),
@@ -760,9 +758,9 @@ class MultiCellPainter extends CustomPainter {
       )..layout(maxWidth: size.width);
 
       final centerX =
-          positionedCell.left + bounds.width / 2 - textPainter.width / 2;
+          positionedCell.left! + bounds.width / 2 - textPainter.width / 2;
       final centerY =
-          positionedCell.top + bounds.height / 2 - textPainter.height / 2;
+          positionedCell.top! + bounds.height / 2 - textPainter.height / 2;
       textPainter.paint(
         canvas,
         Offset(centerX, centerY),
