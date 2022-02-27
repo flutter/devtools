@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'dart:html' as html;
 
 class Notification {
-  Notification(String title, {String body}) {
+  Notification(String title, {String? body}) {
     _impl = html.Notification(title, body: body);
   }
 
-  html.Notification _impl;
+  late html.Notification _impl;
 
   static Future<String> requestPermission() {
     return html.Notification.requestPermission();
