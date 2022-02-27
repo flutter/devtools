@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'dart:async';
 
@@ -61,11 +61,11 @@ Future<void> resetDevToolsFile() async {
   throw Exception(unsupportedMessage);
 }
 
-Future<DevToolsJsonFile> requestBaseAppSizeFile(String path) async {
+Future<DevToolsJsonFile> requestBaseAppSizeFile(String? path) async {
   throw Exception(unsupportedMessage);
 }
 
-Future<DevToolsJsonFile> requestTestAppSizeFile(String path) async {
+Future<DevToolsJsonFile> requestTestAppSizeFile(String? path) async {
   throw Exception(unsupportedMessage);
 }
 

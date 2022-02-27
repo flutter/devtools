@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'dart:async';
 import 'dart:convert';
@@ -22,8 +22,8 @@ bool get isDevToolsServerAvailable => !isDebugBuild();
 /// Helper to catch any server request which could fail.
 ///
 /// Returns HttpRequest or null (if server failure).
-Future<HttpRequest> _request(String url) async {
-  HttpRequest response;
+Future<HttpRequest?> _request(String url) async {
+  HttpRequest? response;
 
   try {
     response = await HttpRequest.request(url, method: 'POST');
@@ -34,13 +34,13 @@ Future<HttpRequest> _request(String url) async {
 
 /// Request DevTools property value 'firstRun' (GA dialog) stored in the file
 /// '~/flutter-devtools/.devtools'.
-Future<bool> isFirstRun() async {
-  bool firstRun = false;
+Future<bool?> isFirstRun() async {
+  bool? firstRun = false;
 
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiGetDevToolsFirstRun);
     if (resp?.status == HttpStatus.ok) {
-      firstRun = json.decode(resp.responseText);
+      firstRun = json.decode(resp!.responseText!);
     } else {
       logWarning(resp, apiGetDevToolsFirstRun);
     }
@@ -51,12 +51,12 @@ Future<bool> isFirstRun() async {
 
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
 /// '~/.flutter-devtools/.devtools'.
-Future<bool> isAnalyticsEnabled() async {
-  bool enabled = false;
+Future<bool?> isAnalyticsEnabled() async {
+  bool? enabled = false;
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiGetDevToolsEnabled);
     if (resp?.status == HttpStatus.ok) {
-      enabled = json.decode(resp.responseText);
+      enabled = json.decode(resp!.responseText!);
     } else {
       logWarning(resp, apiGetDevToolsEnabled);
     }
@@ -75,10 +75,10 @@ Future<bool> setAnalyticsEnabled([bool value = true]) async {
       '?$devToolsEnabledPropertyName=$value',
     );
     if (resp?.status == HttpStatus.ok) {
-      assert(json.decode(resp.responseText) == value);
+      assert(json.decode(resp!.responseText!) == value);
       return true;
     } else {
-      logWarning(resp, apiSetDevToolsEnabled, resp.responseText);
+      logWarning(resp, apiSetDevToolsEnabled, resp!.responseText);
     }
   }
   return false;
@@ -102,7 +102,7 @@ Future<bool> _isFlutterGAEnabled() async {
     if (resp?.status == HttpStatus.ok) {
       // A return value of 'null' implies Flutter tool has never been run so
       // return false for Flutter GA enabled.
-      final responseValue = json.decode(resp.responseText);
+      final responseValue = json.decode(resp!.responseText!);
       enabled = responseValue == null ? false : responseValue;
     } else {
       logWarning(resp, apiGetFlutterGAEnabled);
@@ -116,9 +116,9 @@ Future<bool> _isFlutterGAEnabled() async {
 /// the file '~\.flutter'.
 ///
 /// Return as a String, empty string implies Flutter Tool has never been run.
-Future<String> flutterGAClientID() async {
+Future<String?> flutterGAClientID() async {
   // Default empty string, Flutter tool never run.
-  String clientId = '';
+  String? clientId = '';
 
   if (isDevToolsServerAvailable) {
     // Test if Flutter is enabled (or if Flutter Tool ever ran) if not enabled
@@ -126,7 +126,7 @@ Future<String> flutterGAClientID() async {
     if (await _isFlutterGAEnabled()) {
       final resp = await _request(apiGetFlutterGAClientId);
       if (resp?.status == HttpStatus.ok) {
-        clientId = json.decode(resp.responseText);
+        clientId = json.decode(resp!.responseText!);
         if (clientId == null) {
           // Requested value of 'null' (Flutter tool never ran). Server request
           // apiGetFlutterGAClientId should not happen because the
@@ -154,7 +154,7 @@ Future<bool> setActiveSurvey(String value) async {
   if (isDevToolsServerAvailable) {
     final resp = await _request('$apiSetActiveSurvey'
         '?$activeSurveyName=$value');
-    if (resp?.status == HttpStatus.ok && json.decode(resp.responseText)) {
+    if (resp?.status == HttpStatus.ok && json.decode(resp!.responseText!)) {
       return true;
     } else {
       logWarning(resp, apiSetActiveSurvey);
@@ -168,13 +168,13 @@ Future<bool> setActiveSurvey(String value) async {
 /// The value is stored in the file '~/.flutter-devtools/.devtools'.
 ///
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
-Future<bool> surveyActionTaken() async {
-  bool surveyActionTaken = false;
+Future<bool?> surveyActionTaken() async {
+  bool? surveyActionTaken = false;
 
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiGetSurveyActionTaken);
     if (resp?.status == HttpStatus.ok) {
-      surveyActionTaken = json.decode(resp.responseText);
+      surveyActionTaken = json.decode(resp!.responseText!);
     } else {
       logWarning(resp, apiGetSurveyActionTaken);
     }
@@ -194,8 +194,8 @@ Future<void> setSurveyActionTaken() async {
       '$apiSetSurveyActionTaken'
       '?$surveyActionTakenPropertyName=true',
     );
-    if (resp?.status != HttpStatus.ok || !json.decode(resp.responseText)) {
-      logWarning(resp, apiSetSurveyActionTaken, resp.responseText);
+    if (resp?.status != HttpStatus.ok || !json.decode(resp!.responseText!)) {
+      logWarning(resp, apiSetSurveyActionTaken, resp!.responseText);
     }
   }
 }
@@ -205,13 +205,13 @@ Future<void> setSurveyActionTaken() async {
 /// The value is stored in the file '~/.flutter-devtools/.devtools'.
 ///
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
-Future<int> surveyShownCount() async {
-  int surveyShownCount = 0;
+Future<int?> surveyShownCount() async {
+  int? surveyShownCount = 0;
 
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiGetSurveyShownCount);
     if (resp?.status == HttpStatus.ok) {
-      surveyShownCount = json.decode(resp.responseText);
+      surveyShownCount = json.decode(resp!.responseText!);
     } else {
       logWarning(resp, apiGetSurveyShownCount);
     }
@@ -225,14 +225,14 @@ Future<int> surveyShownCount() async {
 /// The value is stored in the file '~/.flutter-devtools/.devtools'.
 ///
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
-Future<int> incrementSurveyShownCount() async {
+Future<int?> incrementSurveyShownCount() async {
   // Any failure will still return 0.
-  int surveyShownCount = 0;
+  int? surveyShownCount = 0;
 
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiIncrementSurveyShownCount);
     if (resp?.status == HttpStatus.ok) {
-      surveyShownCount = json.decode(resp.responseText);
+      surveyShownCount = json.decode(resp!.responseText!);
     } else {
       logWarning(resp, apiIncrementSurveyShownCount);
     }
@@ -243,12 +243,12 @@ Future<int> incrementSurveyShownCount() async {
 /// Requests the DevTools version for which we last showed release notes.
 ///
 /// This value is stored in the file '~/.flutter-devtools/.devtools'.
-Future<String> getLastShownReleaseNotesVersion() async {
-  String version = '';
+Future<String?> getLastShownReleaseNotesVersion() async {
+  String? version = '';
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiGetLastReleaseNotesVersion);
     if (resp?.status == HttpStatus.ok) {
-      version = json.decode(resp.responseText);
+      version = json.decode(resp!.responseText!);
     } else {
       logWarning(resp, apiGetLastReleaseNotesVersion);
     }
@@ -267,7 +267,7 @@ Future<void> setLastShownReleaseNotesVersion(String version) async {
     );
     if (resp == null ||
         resp.status != HttpStatus.ok ||
-        !json.decode(resp.responseText)) {
+        !json.decode(resp.responseText!)) {
       logWarning(resp, apiSetLastReleaseNotesVersion, resp?.responseText);
     }
   }
@@ -279,14 +279,14 @@ Future<void> resetDevToolsFile() async {
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiResetDevTools);
     if (resp?.status == HttpStatus.ok) {
-      assert(json.decode(resp.responseText));
+      assert(json.decode(resp!.responseText!));
     } else {
       logWarning(resp, apiResetDevTools);
     }
   }
 }
 
-Future<DevToolsJsonFile> requestBaseAppSizeFile(String path) async {
+Future<DevToolsJsonFile?> requestBaseAppSizeFile(String path) async {
   return requestFile(
     api: apiGetBaseAppSizeFile,
     fileKey: baseAppSizeFilePropertyName,
@@ -294,7 +294,7 @@ Future<DevToolsJsonFile> requestBaseAppSizeFile(String path) async {
   );
 }
 
-Future<DevToolsJsonFile> requestTestAppSizeFile(String path) async {
+Future<DevToolsJsonFile?> requestTestAppSizeFile(String path) async {
   return requestFile(
     api: apiGetTestAppSizeFile,
     fileKey: testAppSizeFilePropertyName,
@@ -302,16 +302,16 @@ Future<DevToolsJsonFile> requestTestAppSizeFile(String path) async {
   );
 }
 
-Future<DevToolsJsonFile> requestFile({
-  @required String api,
-  @required String fileKey,
-  @required String filePath,
+Future<DevToolsJsonFile?> requestFile({
+  required String api,
+  required String fileKey,
+  required String filePath,
 }) async {
   if (isDevToolsServerAvailable) {
     final url = Uri(path: api, queryParameters: {fileKey: filePath});
     final resp = await _request(url.toString());
     if (resp?.status == HttpStatus.ok) {
-      return _devToolsJsonFileFromResponse(resp, filePath);
+      return _devToolsJsonFileFromResponse(resp!, filePath);
     } else {
       logWarning(resp, api);
     }
@@ -334,7 +334,7 @@ DevToolsJsonFile _devToolsJsonFileFromResponse(
   );
 }
 
-void logWarning(HttpRequest response, String apiType, [String respText]) {
+void logWarning(HttpRequest? response, String apiType, [String? respText]) {
   log(
     'HttpRequest $apiType failed status = ${response?.status}'
     '${respText != null ? ', responseText = $respText' : ''}',
