@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -22,11 +22,11 @@ abstract class DragAndDropManager {
 
   static DragAndDropManager get instance => _instance ?? DragAndDropManager();
 
-  static DragAndDropManager _instance;
+  static DragAndDropManager? _instance;
 
   final _dragAndDropStates = <DragAndDropState>{};
 
-  DragAndDropState activeState;
+  DragAndDropState? activeState;
 
   @mustCallSuper
   void init() {
@@ -64,7 +64,7 @@ abstract class DragAndDropManager {
   /// newly active [DragAndDrop] widgets accordingly.
   void hitTestAndUpdateActiveId(double x, double y) {
     final hitTestResult = HitTestResult();
-    RendererBinding.instance.hitTest(hitTestResult, Offset(x, y));
+    RendererBinding.instance!.hitTest(hitTestResult, Offset(x, y));
 
     // Starting at bottom of [hitTestResult.path], look for the first
     // [DragAndDrop] widget. This widget will be marked by a [RenderMetaData]
@@ -83,7 +83,7 @@ abstract class DragAndDropManager {
             final previousActiveState = activeState;
             previousActiveState?.setIsActive(false);
             activeState = newActiveState;
-            activeState.setIsActive(true);
+            activeState!.setIsActive(true);
             return;
           }
         }
@@ -94,14 +94,14 @@ abstract class DragAndDropManager {
 
 class DragAndDrop extends StatefulWidget {
   const DragAndDrop({
-    @required this.child,
+    required this.child,
     this.handleDrop,
   });
 
   /// Callback to handle parsed data from drag and drop.
   ///
   /// The current implementation expects data in json format.
-  final DevToolsJsonFileHandler handleDrop;
+  final DevToolsJsonFileHandler? handleDrop;
 
   final Widget child;
 
@@ -112,9 +112,9 @@ class DragAndDrop extends StatefulWidget {
 class DragAndDropState extends State<DragAndDrop> {
   final _dragging = ValueNotifier<bool>(false);
 
-  NotificationsState notifications;
+  NotificationsState? notifications;
 
-  bool _isActive;
+  bool? _isActive;
 
   @override
   void initState() {
@@ -141,7 +141,7 @@ class DragAndDropState extends State<DragAndDrop> {
       child: widget.handleDrop != null
           ? ValueListenableBuilder(
               valueListenable: _dragging,
-              builder: (context, dragging, _) {
+              builder: (context, dynamic dragging, _) {
                 // TODO(kenz): use AnimatedOpacity instead.
                 return Opacity(
                   opacity: dragging ? 0.5 : 1.0,
@@ -167,7 +167,7 @@ class DragAndDropState extends State<DragAndDrop> {
 
   void setIsActive(bool active) {
     _isActive = active;
-    if (!_isActive) {
+    if (!_isActive!) {
       _dragEnd();
     }
   }
@@ -184,7 +184,7 @@ class DragAndDropState extends State<DragAndDrop> {
 /// field set to an instance of this class. [value] must be a unique identifier
 /// for [DragAndDrop] widgets.
 class DragAndDropMetaData {
-  const DragAndDropMetaData({@required this.state});
+  const DragAndDropMetaData({required this.state});
 
   final DragAndDropState state;
 }
