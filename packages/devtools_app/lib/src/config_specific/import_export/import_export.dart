@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'dart:convert';
 
@@ -32,7 +32,7 @@ const nonDevToolsFileMessage = 'The imported file is not a Dart DevTools file.'
     ' At this time, DevTools only supports importing files that were originally'
     ' exported from DevTools.';
 
-String attemptingToImportMessage(String devToolsScreen) {
+String attemptingToImportMessage(String? devToolsScreen) {
   return 'Attempting to import file for screen with id "$devToolsScreen".';
 }
 
@@ -49,11 +49,11 @@ class ImportController {
 
   static const repeatImportTimeBufferMs = 500;
 
-  final void Function(String screenId) _pushSnapshotScreenForImport;
+  final void Function(String? screenId) _pushSnapshotScreenForImport;
 
-  final NotificationService _notifications;
+  final NotificationService? _notifications;
 
-  DateTime previousImportTime;
+  DateTime? previousImportTime;
 
   // TODO(kenz): improve error handling here or in snapshot_screen.dart.
   void importData(DevToolsJsonFile jsonFile) {
@@ -63,7 +63,7 @@ class ImportController {
     // workaround for the fact that we get two drop events for the same file.
     final now = DateTime.now();
     if (previousImportTime != null &&
-        (now.millisecondsSinceEpoch - previousImportTime.millisecondsSinceEpoch)
+        (now.millisecondsSinceEpoch - previousImportTime!.millisecondsSinceEpoch)
                 .abs() <
             repeatImportTimeBufferMs) {
       return;
@@ -73,7 +73,7 @@ class ImportController {
     final isDevToolsSnapshot =
         json is Map<String, dynamic> && json[devToolsSnapshotKey] == true;
     if (!isDevToolsSnapshot) {
-      _notifications.push(nonDevToolsFileMessage);
+      _notifications!.push(nonDevToolsFileMessage);
       return;
     }
 
@@ -85,7 +85,7 @@ class ImportController {
       ..offlineDataJson = devToolsSnapshot;
     serviceManager.connectedApp =
         OfflineConnectedApp.parse(devToolsSnapshot[connectedAppKey]);
-    _notifications.push(attemptingToImportMessage(activeScreenId));
+    _notifications!.push(attemptingToImportMessage(activeScreenId));
     _pushSnapshotScreenForImport(activeScreenId);
   }
 }
@@ -114,14 +114,14 @@ abstract class ExportController {
       activeScreenIdKey: activeScreenId,
       devToolsVersionKey: version,
       connectedAppKey: {
-        isFlutterAppKey: serviceManager.connectedApp.isFlutterAppNow,
-        isProfileBuildKey: serviceManager.connectedApp.isProfileBuildNow,
-        isDartWebAppKey: serviceManager.connectedApp.isDartWebAppNow,
-        isRunningOnDartVMKey: serviceManager.connectedApp.isRunningOnDartVM,
+        isFlutterAppKey: serviceManager.connectedApp!.isFlutterAppNow,
+        isProfileBuildKey: serviceManager.connectedApp!.isProfileBuildNow,
+        isDartWebAppKey: serviceManager.connectedApp!.isDartWebAppNow,
+        isRunningOnDartVMKey: serviceManager.connectedApp!.isRunningOnDartVM,
       },
-      if (serviceManager.connectedApp.flutterVersionNow != null)
+      if (serviceManager.connectedApp!.flutterVersionNow != null)
         flutterVersionKey:
-            serviceManager.connectedApp.flutterVersionNow.version,
+            serviceManager.connectedApp!.flutterVersionNow!.version,
     };
     // This is a workaround to guarantee that DevTools exports are compatible
     // with other trace viewers (catapult, perfetto, chrome://tracing), which
@@ -145,7 +145,7 @@ class OfflineModeController {
 
   /// Stores the [ConnectedApp] instance temporarily while switching between
   /// offline and online modes.
-  ConnectedApp _previousConnectedApp;
+  ConnectedApp? _previousConnectedApp;
 
   bool shouldLoadOfflineData(String screenId) {
     return _offlineMode.value &&
