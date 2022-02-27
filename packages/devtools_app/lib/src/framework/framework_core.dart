@@ -30,7 +30,7 @@ class FrameworkCore {
     setGlobal(OfflineModeController, OfflineModeController());
   }
 
-  static void init({String? url}) {
+  static void init() {
     // Print the version number at startup.
     log('DevTools version ${devtools.version}.');
   }
@@ -53,16 +53,12 @@ class FrameworkCore {
 
       try {
         final VmServiceWrapper service = await connect(uri, finishedCompleter);
-        if (serviceManager != null) {
-          await serviceManager.vmServiceOpened(
-            service,
-            onClosed: finishedCompleter.future,
-          );
-          return true;
-        } else {
-          errorReporter('Unable to connect to VM service at $uri', null);
-          return false;
-        }
+
+        await serviceManager.vmServiceOpened(
+          service,
+          onClosed: finishedCompleter.future,
+        );
+        return true;
       } catch (e, st) {
         log('$e\n$st', LogLevel.error);
 

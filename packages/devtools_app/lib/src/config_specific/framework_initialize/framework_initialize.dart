@@ -11,6 +11,6 @@ import '_framework_initialize_stub.dart'
 
 Future initializeFramework() async {
   FrameworkCore.initGlobals();
-  final url = await initializePlatform();
-  FrameworkCore.init(url: url);
+  await initializePlatform();
+  FrameworkCore.init();
 }
