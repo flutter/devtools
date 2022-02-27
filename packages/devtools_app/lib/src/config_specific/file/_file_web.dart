@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'file.dart';
 
@@ -30,10 +30,10 @@ class FileSystemWeb implements FileIO {
 
   @override
   String readStringFromFile(String filename, {bool isMemory = false}) =>
-      _files.containsKey(filename) ? _files[filename] : null;
+      _files.containsKey(filename) ? _files[filename]! : null;
 
   @override
-  List<String> list({String prefix, bool isMemory = false}) =>
+  List<String> list({String? prefix, bool isMemory = false}) =>
       _files.keys.toList();
 
   @override
