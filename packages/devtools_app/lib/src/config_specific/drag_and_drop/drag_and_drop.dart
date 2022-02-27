@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -20,9 +18,9 @@ abstract class DragAndDropManager {
     init();
   }
 
-  static DragAndDropManager get instance => _instance ?? DragAndDropManager();
+  static DragAndDropManager get instance => _instance;
 
-  static DragAndDropManager? _instance;
+  static late DragAndDropManager _instance = DragAndDropManager();
 
   final _dragAndDropStates = <DragAndDropState>{};
 
@@ -79,13 +77,12 @@ abstract class DragAndDropManager {
         if (metaData is DragAndDropMetaData) {
           final newActiveState = metaData.state;
           // Activate the new state and deactivate the previously active state.
-          if (newActiveState != null) {
-            final previousActiveState = activeState;
-            previousActiveState?.setIsActive(false);
-            activeState = newActiveState;
-            activeState!.setIsActive(true);
-            return;
-          }
+
+          final previousActiveState = activeState;
+          previousActiveState?.setIsActive(false);
+          activeState = newActiveState;
+          activeState!.setIsActive(true);
+          return;
         }
       }
     }
@@ -114,7 +111,7 @@ class DragAndDropState extends State<DragAndDrop> {
 
   NotificationsState? notifications;
 
-  bool? _isActive;
+  bool _isActive = false;
 
   @override
   void initState() {
@@ -139,9 +136,9 @@ class DragAndDropState extends State<DragAndDrop> {
     return MetaData(
       metaData: DragAndDropMetaData(state: this),
       child: widget.handleDrop != null
-          ? ValueListenableBuilder(
+          ? ValueListenableBuilder<bool>(
               valueListenable: _dragging,
-              builder: (context, dynamic dragging, _) {
+              builder: (context, dragging, _) {
                 // TODO(kenz): use AnimatedOpacity instead.
                 return Opacity(
                   opacity: dragging ? 0.5 : 1.0,
@@ -154,7 +151,7 @@ class DragAndDropState extends State<DragAndDrop> {
   }
 
   void dragOver() {
-    _dragging.value = _isActive ?? false;
+    _dragging.value = _isActive;
   }
 
   void dragLeave() {
@@ -167,7 +164,7 @@ class DragAndDropState extends State<DragAndDrop> {
 
   void setIsActive(bool active) {
     _isActive = active;
-    if (!_isActive!) {
+    if (!_isActive) {
       _dragEnd();
     }
   }

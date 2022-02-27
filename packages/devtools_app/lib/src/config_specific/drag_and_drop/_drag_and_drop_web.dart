@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
@@ -18,11 +16,11 @@ DragAndDropManagerWeb createDragAndDropManager() {
 class DragAndDropManagerWeb extends DragAndDropManager {
   DragAndDropManagerWeb() : super.impl();
 
-  StreamSubscription<MouseEvent>? onDragOverSubscription;
+  late final StreamSubscription<MouseEvent> onDragOverSubscription;
 
-  StreamSubscription<MouseEvent>? onDropSubscription;
+  late final StreamSubscription<MouseEvent> onDropSubscription;
 
-  StreamSubscription<MouseEvent>? onDragLeaveSubscription;
+  late final StreamSubscription<MouseEvent> onDragLeaveSubscription;
 
   @override
   void init() {
@@ -34,9 +32,9 @@ class DragAndDropManagerWeb extends DragAndDropManager {
 
   @override
   void dispose() {
-    onDragOverSubscription?.cancel();
-    onDragLeaveSubscription?.cancel();
-    onDropSubscription?.cancel();
+    onDragOverSubscription.cancel();
+    onDragLeaveSubscription.cancel();
+    onDropSubscription.cancel();
     super.dispose();
   }
 
@@ -60,7 +58,7 @@ class DragAndDropManagerWeb extends DragAndDropManager {
 
     // If there is no active state or the active state does not have a drop
     // handler, return early.
-    if (activeState?.widget?.handleDrop == null) return;
+    if (activeState?.widget.handleDrop == null) return;
 
     final List<File> files = event.dataTransfer.files!;
     if (files.length > 1) {
