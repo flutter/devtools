@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:html';
 
@@ -39,17 +39,17 @@ Color? foregroundColor;
 double? fontSize;
 
 Color? _tryParseColor(String? input) {
+  if (input == null) return null;
+
   try {
-    if (input != null) {
-      return parseCssHexColor(input);
-    }
+    return parseCssHexColor(input);
   } catch (e) {
     // The user can manipulate the query string so if the value is invalid
     // print the value but otherwise continue.
     log('Failed to parse "$input" as a color from the querystring, ignoring: $e',
         LogLevel.warning);
+    return null;
   }
-  return null;
 }
 
 double? _tryParseDouble(String? input) {
