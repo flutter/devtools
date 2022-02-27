@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -26,36 +24,32 @@ Future<String> initializePlatform() async {
 }
 
 class FlutterDesktopStorage implements Storage {
-  Map<String, dynamic>? _values;
+  late final Map<String, dynamic> _values = _readValues();
 
   @override
   Future<String?> getValue(String key) async {
-    _values ??= _readValues();
-    return _values![key];
+    return _values[key];
   }
 
   @override
   Future setValue(String key, String value) async {
-    try {
-      _values = _readValues();
-    } catch (e, st) {
-      // ignore the error reading
-      log('$e\n$st');
-
-      _values = {};
-    }
-
-    _values![key] = value;
+    _values[key] = value;
 
     const encoder = JsonEncoder.withIndent('  ');
     _preferencesFile.writeAsStringSync('${encoder.convert(_values)}\n');
   }
 
-  Map<String, dynamic>? _readValues() {
+  Map<String, dynamic> _readValues() {
     final File file = _preferencesFile;
-    if (file.existsSync()) {
-      return jsonDecode(file.readAsStringSync());
-    } else {
+    try {
+      if (file.existsSync()) {
+        return jsonDecode(file.readAsStringSync()) ?? {};
+      } else {
+        return {};
+      }
+    } catch (e, st) {
+      // ignore the error reading
+      log('$e\n$st');
       return {};
     }
   }
