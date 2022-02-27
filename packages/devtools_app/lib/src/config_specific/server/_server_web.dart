@@ -2,15 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-
-
 import 'dart:async';
 import 'dart:convert';
 // TODO(jacobr): this should use package:http instead of dart:html.
 import 'dart:html';
 
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:flutter/foundation.dart';
 
 import '../../primitives/utils.dart';
 import '../logger/logger.dart';
@@ -34,8 +31,8 @@ Future<HttpRequest?> _request(String url) async {
 
 /// Request DevTools property value 'firstRun' (GA dialog) stored in the file
 /// '~/flutter-devtools/.devtools'.
-Future<bool?> isFirstRun() async {
-  bool? firstRun = false;
+Future<bool> isFirstRun() async {
+  bool firstRun = false;
 
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiGetDevToolsFirstRun);
@@ -51,8 +48,8 @@ Future<bool?> isFirstRun() async {
 
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
 /// '~/.flutter-devtools/.devtools'.
-Future<bool?> isAnalyticsEnabled() async {
-  bool? enabled = false;
+Future<bool> isAnalyticsEnabled() async {
+  bool enabled = false;
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiGetDevToolsEnabled);
     if (resp?.status == HttpStatus.ok) {
@@ -116,9 +113,9 @@ Future<bool> _isFlutterGAEnabled() async {
 /// the file '~\.flutter'.
 ///
 /// Return as a String, empty string implies Flutter Tool has never been run.
-Future<String?> flutterGAClientID() async {
+Future<String> flutterGAClientID() async {
   // Default empty string, Flutter tool never run.
-  String? clientId = '';
+  String clientId = '';
 
   if (isDevToolsServerAvailable) {
     // Test if Flutter is enabled (or if Flutter Tool ever ran) if not enabled
@@ -127,11 +124,11 @@ Future<String?> flutterGAClientID() async {
       final resp = await _request(apiGetFlutterGAClientId);
       if (resp?.status == HttpStatus.ok) {
         clientId = json.decode(resp!.responseText!);
-        if (clientId == null) {
+        if (clientId.isEmpty) {
           // Requested value of 'null' (Flutter tool never ran). Server request
           // apiGetFlutterGAClientId should not happen because the
           // isFlutterGAEnabled test should have been false.
-          log('$apiGetFlutterGAClientId is null', LogLevel.warning);
+          log('$apiGetFlutterGAClientId is empty', LogLevel.warning);
         }
       } else {
         logWarning(resp, apiGetFlutterGAClientId);
@@ -168,8 +165,8 @@ Future<bool> setActiveSurvey(String value) async {
 /// The value is stored in the file '~/.flutter-devtools/.devtools'.
 ///
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
-Future<bool?> surveyActionTaken() async {
-  bool? surveyActionTaken = false;
+Future<bool> surveyActionTaken() async {
+  bool surveyActionTaken = false;
 
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiGetSurveyActionTaken);
@@ -195,7 +192,7 @@ Future<void> setSurveyActionTaken() async {
       '?$surveyActionTakenPropertyName=true',
     );
     if (resp?.status != HttpStatus.ok || !json.decode(resp!.responseText!)) {
-      logWarning(resp, apiSetSurveyActionTaken, resp!.responseText);
+      logWarning(resp, apiSetSurveyActionTaken, resp?.responseText);
     }
   }
 }
@@ -278,8 +275,8 @@ Future<void> setLastShownReleaseNotesVersion(String version) async {
 Future<void> resetDevToolsFile() async {
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiResetDevTools);
-    if (resp?.status == HttpStatus.ok) {
-      assert(json.decode(resp!.responseText!));
+    if (resp!.status == HttpStatus.ok) {
+      assert(json.decode(resp.responseText!));
     } else {
       logWarning(resp, apiResetDevTools);
     }
