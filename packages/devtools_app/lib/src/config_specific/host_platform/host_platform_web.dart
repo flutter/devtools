@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-
-
 import 'dart:html';
 
 class HostPlatform {
@@ -11,9 +9,9 @@ class HostPlatform {
     _isMacOS = window.navigator.userAgent.contains('Macintosh');
   }
 
-  static final HostPlatform instance = HostPlatform._();
+  static final HostPlatform? instance = HostPlatform._();
 
-  bool? _isMacOS;
+  late bool _isMacOS;
 
-  bool? get isMacOS => _isMacOS;
+  bool get isMacOS => _isMacOS;
 }
