@@ -202,8 +202,8 @@ Future<void> setSurveyActionTaken() async {
 /// The value is stored in the file '~/.flutter-devtools/.devtools'.
 ///
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
-Future<int?> surveyShownCount() async {
-  int? surveyShownCount = 0;
+Future<int> surveyShownCount() async {
+  int surveyShownCount = 0;
 
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiGetSurveyShownCount);
@@ -222,9 +222,9 @@ Future<int?> surveyShownCount() async {
 /// The value is stored in the file '~/.flutter-devtools/.devtools'.
 ///
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
-Future<int?> incrementSurveyShownCount() async {
+Future<int> incrementSurveyShownCount() async {
   // Any failure will still return 0.
-  int? surveyShownCount = 0;
+  int surveyShownCount = 0;
 
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiIncrementSurveyShownCount);
@@ -240,8 +240,8 @@ Future<int?> incrementSurveyShownCount() async {
 /// Requests the DevTools version for which we last showed release notes.
 ///
 /// This value is stored in the file '~/.flutter-devtools/.devtools'.
-Future<String?> getLastShownReleaseNotesVersion() async {
-  String? version = '';
+Future<String> getLastShownReleaseNotesVersion() async {
+  String version = '';
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiGetLastReleaseNotesVersion);
     if (resp?.status == HttpStatus.ok) {
