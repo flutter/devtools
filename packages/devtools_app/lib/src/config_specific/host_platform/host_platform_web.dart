@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'dart:html';
 
@@ -13,7 +13,7 @@ class HostPlatform {
 
   static final HostPlatform instance = HostPlatform._();
 
-  bool _isMacOS;
+  bool? _isMacOS;
 
-  bool get isMacOS => _isMacOS;
+  bool? get isMacOS => _isMacOS;
 }
