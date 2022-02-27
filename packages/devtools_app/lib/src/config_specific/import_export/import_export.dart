@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:convert';
 
@@ -32,7 +32,7 @@ const nonDevToolsFileMessage = 'The imported file is not a Dart DevTools file.'
     ' At this time, DevTools only supports importing files that were originally'
     ' exported from DevTools.';
 
-String attemptingToImportMessage(String? devToolsScreen) {
+String attemptingToImportMessage(String devToolsScreen) {
   return 'Attempting to import file for screen with id "$devToolsScreen".';
 }
 
@@ -49,7 +49,7 @@ class ImportController {
 
   static const repeatImportTimeBufferMs = 500;
 
-  final void Function(String? screenId) _pushSnapshotScreenForImport;
+  final void Function(String screenId) _pushSnapshotScreenForImport;
 
   final NotificationService? _notifications;
 
@@ -63,7 +63,8 @@ class ImportController {
     // workaround for the fact that we get two drop events for the same file.
     final now = DateTime.now();
     if (previousImportTime != null &&
-        (now.millisecondsSinceEpoch - previousImportTime!.millisecondsSinceEpoch)
+        (now.millisecondsSinceEpoch -
+                    previousImportTime!.millisecondsSinceEpoch)
                 .abs() <
             repeatImportTimeBufferMs) {
       return;
