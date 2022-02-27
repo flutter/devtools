@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'dart:convert';
 import 'dart:io';
@@ -26,12 +26,12 @@ Future<String> initializePlatform() async {
 }
 
 class FlutterDesktopStorage implements Storage {
-  Map<String, dynamic> _values;
+  Map<String, dynamic>? _values;
 
   @override
-  Future<String> getValue(String key) async {
+  Future<String?> getValue(String key) async {
     _values ??= _readValues();
-    return _values[key];
+    return _values![key];
   }
 
   @override
@@ -45,13 +45,13 @@ class FlutterDesktopStorage implements Storage {
       _values = {};
     }
 
-    _values[key] = value;
+    _values![key] = value;
 
     const encoder = JsonEncoder.withIndent('  ');
     _preferencesFile.writeAsStringSync('${encoder.convert(_values)}\n');
   }
 
-  Map<String, dynamic> _readValues() {
+  Map<String, dynamic>? _readValues() {
     final File file = _preferencesFile;
     if (file.existsSync()) {
       return jsonDecode(file.readAsStringSync());
@@ -66,7 +66,7 @@ class FlutterDesktopStorage implements Storage {
   static String _userHomeDir() {
     final String envKey =
         Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-    final String value = Platform.environment[envKey];
+    final String? value = Platform.environment[envKey];
     return value == null ? '.' : value;
   }
 }
