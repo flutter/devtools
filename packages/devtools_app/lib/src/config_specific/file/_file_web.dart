@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'file.dart';
 
 FileSystemWeb createFileSystem() {
@@ -29,11 +27,11 @@ class FileSystemWeb implements FileIO {
   }
 
   @override
-  String readStringFromFile(String filename, {bool isMemory = false}) =>
+  String? readStringFromFile(String filename, {bool isMemory = false}) =>
       _files.containsKey(filename) ? _files[filename]! : null;
 
   @override
-  List<String> list({String? prefix, bool isMemory = false}) =>
+  List<String> list({required String prefix, bool isMemory = false}) =>
       _files.keys.toList();
 
   @override

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as _path;
@@ -69,7 +67,7 @@ class FileSystemDesktop implements FileIO {
   }
 
   @override
-  List<String> list({String? prefix, bool isMemory = false}) {
+  List<String> list({required String prefix, bool isMemory = false}) {
     final List<String> logs = [];
 
     try {
@@ -83,7 +81,7 @@ class FileSystemDesktop implements FileIO {
       final allFiles = directory.listSync(followLinks: false);
       for (FileSystemEntity entry in allFiles) {
         final basename = _path.basename(entry.path);
-        if (_fs.isFileSync(entry.path) && basename.startsWith(prefix!)) {
+        if (_fs.isFileSync(entry.path) && basename.startsWith(prefix)) {
           logs.add(basename);
         }
       }
