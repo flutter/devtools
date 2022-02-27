@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'dart:html';
 
@@ -27,18 +27,18 @@ IdeTheme getIdeTheme() {
   // If the environment has provided a background color, set it immediately
   // to avoid a white page until the first Flutter frame is rendered.
   if (overrides.backgroundColor != null) {
-    document.body.style.backgroundColor =
-        toCssHexColor(overrides.backgroundColor);
+    document.body!.style.backgroundColor =
+        toCssHexColor(overrides.backgroundColor!);
   }
 
   return overrides;
 }
 
-Color backgroundColor;
-Color foregroundColor;
-double fontSize;
+Color? backgroundColor;
+Color? foregroundColor;
+double? fontSize;
 
-Color _tryParseColor(String input) {
+Color? _tryParseColor(String? input) {
   try {
     if (input != null) {
       return parseCssHexColor(input);
@@ -52,7 +52,7 @@ Color _tryParseColor(String input) {
   return null;
 }
 
-double _tryParseDouble(String input) {
+double? _tryParseDouble(String? input) {
   try {
     if (input != null) {
       return double.parse(input);
