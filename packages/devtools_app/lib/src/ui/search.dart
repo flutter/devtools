@@ -317,9 +317,10 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
       autoCompleteTiles.add(
         GestureDetector(
           onTap: () {
+            final selected = textSpan.toPlainText();
             controller.selectTheSearch = true;
-            controller.search = textSpan.text ?? '';
-            autoComplete.onTap(textSpan.text ?? '');
+            controller.search = selected;
+            autoComplete.onTap(selected);
           },
           child: Container(
             color: controller.currentDefaultIndex == index
