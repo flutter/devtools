@@ -5,10 +5,10 @@
 // @dart=2.9
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/inspector/inspector_breadcrumbs.dart';
-import 'package:devtools_app/src/inspector/inspector_service.dart';
-import 'package:devtools_app/src/inspector/inspector_tree.dart';
-import 'package:devtools_app/src/inspector/inspector_tree_controller.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_breadcrumbs.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_service.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_tree.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_tree_controller.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/preferences.dart';

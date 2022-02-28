@@ -5,7 +5,7 @@
 // @dart=2.9
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/debugger/file_search.dart';
+import 'package:devtools_app/src/screens/debugger/file_search.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_test/devtools_test.dart';

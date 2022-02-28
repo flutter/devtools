@@ -7,9 +7,9 @@
 @TestOn('vm')
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/performance/flutter_frames_chart.dart';
-import 'package:devtools_app/src/performance/performance_controller.dart';
-import 'package:devtools_app/src/performance/performance_model.dart';
+import 'package:devtools_app/src/screens/performance/flutter_frames_chart.dart';
+import 'package:devtools_app/src/screens/performance/performance_controller.dart';
+import 'package:devtools_app/src/screens/performance/performance_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/ui/colors.dart';

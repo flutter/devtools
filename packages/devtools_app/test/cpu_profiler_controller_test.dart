@@ -5,8 +5,8 @@
 // @dart=2.9
 
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/profiler/cpu_profile_controller.dart';
-import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
