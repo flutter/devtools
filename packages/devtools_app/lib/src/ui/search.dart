@@ -310,33 +310,18 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         ? searchAutoComplete.value.length
         : (maxAreaForPopup / tileEntryHeight).truncateToDouble();
 
-    final autoCompleteTiles = <GestureDetector>[];
+    final autoCompleteTiles = <AutoCompleteTile>[];
     final count = min(searchAutoComplete.value.length, totalTiles);
     for (var index = 0; index < count; index++) {
       final textSpan = tileContents[index];
       autoCompleteTiles.add(
-        GestureDetector(
-          onTap: () {
-            final selected = textSpan.toPlainText();
-            controller.selectTheSearch = true;
-            controller.search = selected;
-            autoComplete.onTap(selected);
-          },
-          child: Container(
-            color: controller.currentDefaultIndex == index
-                ? colorScheme.autoCompleteHighlightColor
-                : colorScheme.defaultBackgroundColor,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text.rich(
-                  textSpan,
-                  maxLines: 1,
-                ),
-              ),
-            ),
-          ),
+        AutoCompleteTile(
+          index: index,
+          textSpan: textSpan,
+          controller: controller,
+          onTap: autoComplete.onTap,
+          highlightColor: colorScheme.autoCompleteHighlightColor,
+          defaultColor: colorScheme.defaultBackgroundColor,
         ),
       );
     }
@@ -391,6 +376,65 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
         text: segments.first.text,
         style: segments.first.style,
         children: segments.sublist(1),
+      ),
+    );
+  }
+}
+
+class AutoCompleteTile extends StatelessWidget {
+  const AutoCompleteTile({
+    required this.textSpan,
+    required this.index,
+    required this.controller,
+    required this.onTap,
+    required this.highlightColor,
+    required this.defaultColor,
+  });
+
+  final TextSpan textSpan;
+  final int index;
+  final AutoCompleteSearchControllerMixin controller;
+  final SelectAutoComplete onTap;
+  final Color highlightColor;
+  final Color defaultColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onHover: (_) {
+        controller.currentDefaultIndex = index;
+      },
+      child: GestureDetector(
+        onTap: () {
+          final selected = textSpan.toPlainText();
+          controller.selectTheSearch = true;
+          controller.search = selected;
+          onTap(selected);
+        },
+        child: ValueListenableBuilder(
+          valueListenable: controller.currentDefaultIndexListenable,
+          builder: (
+            context,
+            currentDefaultIndex,
+            _,
+          ) {
+            return Container(
+              color: controller.currentDefaultIndex == index
+                  ? highlightColor
+                  : defaultColor,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text.rich(
+                    textSpan,
+                    maxLines: 1,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -457,7 +501,16 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
 
   OverlayEntry? autoCompleteOverlay;
 
-  int currentDefaultIndex = 0;
+  ValueListenable<int> get currentDefaultIndexListenable =>
+      _currentDefaultIndex;
+
+  int get currentDefaultIndex => _currentDefaultIndex.value;
+
+  set currentDefaultIndex(int index) {
+    _currentDefaultIndex.value = index;
+  }
+
+  final _currentDefaultIndex = ValueNotifier<int>(0);
 
   static const minPopupWidth = 300.0;
 
@@ -1070,10 +1123,6 @@ class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField>
     }
 
     controller.currentDefaultIndex = indexToSelect;
-
-    // Cause the auto-complete list to update, list is small 10 items max.
-    controller.searchAutoComplete.value =
-        controller.searchAutoComplete.value.toList();
   }
 }
 
