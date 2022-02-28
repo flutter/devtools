@@ -235,7 +235,7 @@ void main() {
 
       autoCompleteController.search = 'caterpie';
       expect(autoCompleteController.searchAutoComplete.value, equals([]));
-    }, skip: true);
+    });
 
     testWidgetsWithWindowSize(
         'Multi token search returns expected files', const Size(1000.0, 4000.0),
@@ -419,7 +419,7 @@ void main() {
           ],
         ),
       );
-    }, skip: true);
+    });
   });
 }
 
