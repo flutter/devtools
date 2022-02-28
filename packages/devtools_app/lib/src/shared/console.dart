@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe, directives_ordering
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../screens/debugger/debugger_controller.dart';
-import '../screens/debugger/variables.dart';
 import '../primitives/auto_dispose_mixin.dart';
 import '../primitives/utils.dart';
+import '../screens/debugger/debugger_controller.dart';
+import '../screens/debugger/variables.dart';
 import 'common_widgets.dart';
 import 'console_service.dart';
 import 'theme.dart';

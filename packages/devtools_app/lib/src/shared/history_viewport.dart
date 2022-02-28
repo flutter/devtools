@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe, directives_ordering
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/material.dart';
 
-import '../screens/debugger/common.dart';
 import '../primitives/history_manager.dart';
+import '../screens/debugger/common.dart';
 import 'common_widgets.dart';
 import 'theme.dart';
 

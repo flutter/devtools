@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe, directives_ordering
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 // This code is directly based on src/io/flutter/inspector/EvalOnDartLibrary.java
 // If you add a method to this class you should also add it to EvalOnDartLibrary.java
@@ -13,8 +13,8 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart';
-import '../screens/inspector/inspector_service.dart';
 import '../primitives/auto_dispose.dart';
+import '../screens/inspector/inspector_service.dart';
 import '../service/vm_service_wrapper.dart';
 import 'globals.dart';
 

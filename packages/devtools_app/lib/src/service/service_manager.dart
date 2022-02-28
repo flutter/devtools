@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe, directives_ordering
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 import 'dart:core';
@@ -12,10 +12,10 @@ import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../analytics/analytics.dart' as ga;
 import '../config_specific/logger/logger.dart';
+import '../primitives/utils.dart';
 import '../screens/inspector/inspector_service.dart';
 import '../screens/logging/vm_service_logger.dart';
 import '../screens/performance/timeline_streams.dart';
-import '../primitives/utils.dart';
 import '../shared/connected_app.dart';
 import '../shared/console_service.dart';
 import '../shared/error_badge_manager.dart';

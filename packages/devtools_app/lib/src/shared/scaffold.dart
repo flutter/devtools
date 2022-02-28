@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe, directives_ordering
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:math' as math;
 
@@ -14,9 +14,9 @@ import '../app.dart';
 import '../config_specific/drag_and_drop/drag_and_drop.dart';
 import '../config_specific/ide_theme/ide_theme.dart';
 import '../config_specific/import_export/import_export.dart';
+import '../primitives/auto_dispose_mixin.dart';
 import '../screens/debugger/console.dart';
 import '../screens/debugger/debugger_screen.dart';
-import '../primitives/auto_dispose_mixin.dart';
 import 'banner_messages.dart';
 import 'common_widgets.dart';
 import 'framework_controller.dart';

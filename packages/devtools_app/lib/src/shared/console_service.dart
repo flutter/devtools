@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe, directives_ordering
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../primitives/auto_dispose.dart';
+import '../primitives/utils.dart';
 import '../screens/debugger/debugger_model.dart';
 import '../screens/inspector/diagnostics_node.dart';
 import '../screens/inspector/inspector_service.dart';
-import '../primitives/auto_dispose.dart';
-import '../primitives/utils.dart';
 import '../service/vm_service_wrapper.dart';
 import 'globals.dart';
 
