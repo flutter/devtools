@@ -5,9 +5,9 @@
 // @dart=2.9
 
 @TestOn('vm')
-import 'package:devtools_app/src/memory/memory_controller.dart';
-import 'package:devtools_app/src/memory/memory_protocol.dart';
-import 'package:devtools_app/src/memory/memory_timeline.dart';
+import 'package:devtools_app/src/screens/memory/memory_controller.dart';
+import 'package:devtools_app/src/screens/memory/memory_protocol.dart';
+import 'package:devtools_app/src/screens/memory/memory_timeline.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter_test/flutter_test.dart';
 

@@ -6,10 +6,10 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/performance/performance_controller.dart';
-import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/primitives/trace_event.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/screens/performance/performance_controller.dart';
+import 'package:devtools_app/src/screens/performance/performance_model.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';

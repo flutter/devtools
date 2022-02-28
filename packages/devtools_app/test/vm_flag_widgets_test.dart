@@ -5,8 +5,8 @@
 // @dart=2.9
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/profiler/profile_granularity.dart';
-import 'package:devtools_app/src/profiler/profiler_screen.dart';
+import 'package:devtools_app/src/screens/profiler/profile_granularity.dart';
+import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/shared/banner_messages.dart';
