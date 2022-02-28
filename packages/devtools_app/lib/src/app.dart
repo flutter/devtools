@@ -4,8 +4,6 @@
 
 // @dart=2.9
 
-// ignore_for_file: directives_ordering
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -16,14 +14,15 @@ import '../devtools.dart' as devtools;
 import 'analytics/analytics.dart' as ga;
 import 'analytics/analytics_controller.dart';
 import 'analytics/constants.dart' as analytics_constants;
-import 'screens/app_size/app_size_controller.dart';
-import 'screens/app_size/app_size_screen.dart';
 import 'config_specific/launch_url/launch_url.dart';
 import 'config_specific/server/server.dart';
-import 'screens/debugger/debugger_controller.dart';
-import 'screens/debugger/debugger_screen.dart';
 import 'example/conditional_screen.dart';
 import 'framework/framework_core.dart';
+import 'primitives/auto_dispose_mixin.dart';
+import 'screens/app_size/app_size_controller.dart';
+import 'screens/app_size/app_size_screen.dart';
+import 'screens/debugger/debugger_controller.dart';
+import 'screens/debugger/debugger_screen.dart';
 import 'screens/inspector/inspector_controller.dart';
 import 'screens/inspector/inspector_screen.dart';
 import 'screens/logging/logging_controller.dart';
@@ -34,7 +33,6 @@ import 'screens/network/network_controller.dart';
 import 'screens/network/network_screen.dart';
 import 'screens/performance/performance_controller.dart';
 import 'screens/performance/performance_screen.dart';
-import 'primitives/auto_dispose_mixin.dart';
 import 'screens/profiler/profiler_screen.dart';
 import 'screens/profiler/profiler_screen_controller.dart';
 import 'screens/provider/provider_screen.dart';

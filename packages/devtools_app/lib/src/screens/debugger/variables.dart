@@ -4,14 +4,10 @@
 
 // @dart=2.9
 
-// ignore_for_file: directives_ordering
-
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
-import '../inspector/diagnostics.dart';
-import '../inspector/inspector_screen.dart';
 import '../../primitives/listenable.dart';
 import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
@@ -20,6 +16,8 @@ import '../../shared/notifications.dart';
 import '../../shared/routing.dart';
 import '../../shared/theme.dart';
 import '../../shared/tree.dart';
+import '../inspector/diagnostics.dart';
+import '../inspector/inspector_screen.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 

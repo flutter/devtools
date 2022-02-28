@@ -4,8 +4,6 @@
 
 // @dart=2.9
 
-// ignore_for_file: directives_ordering
-
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -13,7 +11,6 @@ import 'package:provider/provider.dart';
 
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as analytics_constants;
-import '../debugger/debugger_controller.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/blocking_action_mixin.dart';
 import '../../service/service_extensions.dart' as extensions;
@@ -28,6 +25,7 @@ import '../../shared/utils.dart';
 import '../../ui/icons.dart';
 import '../../ui/search.dart';
 import '../../ui/service_extension_widgets.dart';
+import '../debugger/debugger_controller.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
 import 'inspector_service.dart';

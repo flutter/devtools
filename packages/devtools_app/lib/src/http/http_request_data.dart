@@ -4,8 +4,6 @@
 
 // @dart=2.9
 
-// ignore_for_file: directives_ordering
-
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -14,9 +12,9 @@ import 'package:mime/mime.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../config_specific/logger/logger.dart';
-import '../screens/network/network_model.dart';
 import '../primitives/trace_event.dart';
 import '../primitives/utils.dart';
+import '../screens/network/network_model.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import 'http.dart';

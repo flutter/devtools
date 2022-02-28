@@ -4,8 +4,6 @@
 
 // @dart=2.9
 
-// ignore_for_file: directives_ordering
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
@@ -17,10 +15,6 @@ import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
 import '../../config_specific/logger/logger.dart' as logger;
-import '../inspector/diagnostics_node.dart';
-import '../inspector/inspector_service.dart';
-import '../inspector/inspector_tree.dart';
-import '../inspector/inspector_tree_controller.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../primitives/message_bus.dart';
 import '../../primitives/utils.dart';
@@ -28,6 +22,10 @@ import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../../ui/filter.dart';
 import '../../ui/search.dart';
+import '../inspector/diagnostics_node.dart';
+import '../inspector/inspector_service.dart';
+import '../inspector/inspector_tree.dart';
+import '../inspector/inspector_tree_controller.dart';
 import 'logging_screen.dart';
 
 // For performance reasons, we drop old logs in batches, so the log will grow

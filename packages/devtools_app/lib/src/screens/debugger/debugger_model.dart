@@ -4,10 +4,7 @@
 
 // @dart=2.9
 
-// ignore_for_file: directives_ordering
-
 import 'dart:async';
-
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
@@ -17,12 +14,12 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../config_specific/logger/logger.dart';
-import '../inspector/diagnostics_node.dart';
-import '../inspector/inspector_service.dart';
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
 import '../../ui/search.dart';
+import '../inspector/diagnostics_node.dart';
+import '../inspector/inspector_service.dart';
 
 /// Whether to include properties surfaced through Diagnosticable objects as
 /// part of the generic Debugger view of an object.

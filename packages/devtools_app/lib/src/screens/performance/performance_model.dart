@@ -4,8 +4,6 @@
 
 // @dart=2.9
 
-// ignore_for_file: directives_ordering
-
 import 'dart:collection';
 import 'dart:math' as math;
 
@@ -15,9 +13,9 @@ import '../../charts/flame_chart.dart';
 import '../../primitives/trace_event.dart';
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
-import '../profiler/cpu_profile_model.dart';
 import '../../service/service_manager.dart';
 import '../../ui/search.dart';
+import '../profiler/cpu_profile_model.dart';
 import 'performance_utils.dart';
 import 'timeline_event_processor.dart';
 

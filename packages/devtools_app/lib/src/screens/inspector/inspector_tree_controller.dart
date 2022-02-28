@@ -4,8 +4,6 @@
 
 // @dart=2.9
 
-// ignore_for_file: directives_ordering
-
 library inspector_tree;
 
 import 'dart:async';
@@ -17,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../config_specific/logger/logger.dart';
-import '../debugger/debugger_controller.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
 import '../../shared/collapsible_mixin.dart';
@@ -28,6 +25,7 @@ import '../../shared/theme.dart';
 import '../../ui/colors.dart';
 import '../../ui/search.dart';
 import '../../ui/utils.dart';
+import '../debugger/debugger_controller.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
 import 'inspector_breadcrumbs.dart';

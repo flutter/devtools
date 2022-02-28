@@ -4,8 +4,6 @@
 
 // @dart=2.9
 
-// ignore_for_file: directives_ordering
-
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -22,13 +20,13 @@ import '../../primitives/auto_dispose.dart';
 import '../../primitives/trace_event.dart';
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
+import '../../service/service_manager.dart';
+import '../../shared/globals.dart';
+import '../../ui/search.dart';
 import '../profiler/cpu_profile_controller.dart';
 import '../profiler/cpu_profile_service.dart';
 import '../profiler/cpu_profile_transformer.dart';
 import '../profiler/profile_granularity.dart';
-import '../../service/service_manager.dart';
-import '../../shared/globals.dart';
-import '../../ui/search.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
 import 'performance_utils.dart';

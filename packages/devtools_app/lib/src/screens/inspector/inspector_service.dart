@@ -9,8 +9,6 @@
 
 // @dart=2.9
 
-// ignore_for_file: directives_ordering
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
@@ -19,11 +17,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../debugger/debugger_model.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../primitives/utils.dart';
 import '../../shared/eval_on_dart_library.dart';
 import '../../shared/globals.dart';
+import '../debugger/debugger_model.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service_polyfill.dart';
 

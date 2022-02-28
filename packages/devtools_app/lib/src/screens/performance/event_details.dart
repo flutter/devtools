@@ -4,20 +4,18 @@
 
 // @dart=2.9
 
-// ignore_for_file: directives_ordering
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
 import '../../primitives/trace_event.dart';
 import '../../primitives/utils.dart';
-import '../profiler/cpu_profile_controller.dart';
-import '../profiler/cpu_profile_model.dart';
-import '../profiler/cpu_profiler.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/theme.dart';
+import '../profiler/cpu_profile_controller.dart';
+import '../profiler/cpu_profile_model.dart';
+import '../profiler/cpu_profiler.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 

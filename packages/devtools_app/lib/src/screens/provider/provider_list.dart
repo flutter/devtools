@@ -4,13 +4,11 @@
 
 // @dart=2.9
 
-// ignore_for_file: directives_ordering
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../inspector/inspector_tree.dart';
 import '../../shared/theme.dart';
+import '../inspector/inspector_tree.dart';
 import 'provider_nodes.dart';
 
 const _tilePadding = EdgeInsets.only(
