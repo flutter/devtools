@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/utils.dart';
-import '../profiler/cpu_profiler.dart';
+import '../screens/profiler/cpu_profiler.dart';
 import '../shared/common_widgets.dart';
 import '../shared/split.dart';
 import '../shared/table.dart';
