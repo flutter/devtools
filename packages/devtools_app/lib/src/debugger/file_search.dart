@@ -45,7 +45,8 @@ class FileSearchFieldState extends State<FileSearchField>
   void initState() {
     super.initState();
 
-    autoCompleteController = AutoCompleteController()..currentDefaultIndex = 0;
+    autoCompleteController = AutoCompleteController();
+    autoCompleteController.setCurrentHoveredIndexValue(0);
 
     addAutoDisposeListener(
         autoCompleteController.searchNotifier, _handleSearch);

@@ -625,7 +625,7 @@ void main() {
         await simulateKeyDownEvent(downArrow
             ? LogicalKeyboardKey.arrowDown
             : LogicalKeyboardKey.arrowUp);
-        expect(controller.currentDefaultIndex, hilightedIndex);
+        expect(controller.currentHoveredIndex.value, hilightedIndex);
       }
 
       Future<void> downArrow(int hilightedIndex) async {
@@ -661,7 +661,7 @@ void main() {
       // Check that up arrow circles around to bottom item in drop-down list.
       await upArrow(autoCompletes.indexOf('IClass'));
       expect(
-        controller.currentDefaultIndex,
+        controller.currentHoveredIndex.value,
         autoCompletes.indexOf('IClass'),
       ); // IClass hilighted.
       await simulateKeyDownEvent(LogicalKeyboardKey.enter);
@@ -690,7 +690,7 @@ void main() {
       autoCompletesDisplayed = controller.searchAutoComplete.value;
       expect(autoCompletesDisplayed, hasLength(1));
       expect(autoCompletesDisplayed.single, 'ZClass');
-      expect(controller.currentDefaultIndex, 0); // ZClass hilighted.
+      expect(controller.currentHoveredIndex.value, 0); // ZClass hilighted.
       await simulateKeyDownEvent(LogicalKeyboardKey.enter);
 
       choosenAutoComplete =
@@ -713,7 +713,7 @@ void main() {
       expect(autoCompletesDisplayed.join(','), autoCompletes4AsString);
 
       expect(
-        controller.currentDefaultIndex,
+        controller.currentHoveredIndex.value,
         autoCompletes5.indexOf('AnotherClass'),
       ); // AnotherClass hilighted.
 

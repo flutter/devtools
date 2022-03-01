@@ -401,8 +401,9 @@ class AutoCompleteTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
+      cursor: SystemMouseCursors.click,
       onHover: (_) {
-        controller.currentDefaultIndex = index;
+        controller.setCurrentHoveredIndexValue(index);
       },
       child: GestureDetector(
         onTap: () {
@@ -412,25 +413,16 @@ class AutoCompleteTile extends StatelessWidget {
           onTap(selected);
         },
         child: ValueListenableBuilder(
-          valueListenable: controller.currentDefaultIndexListenable,
-          builder: (
-            context,
-            currentDefaultIndex,
-            _,
-          ) {
+          valueListenable: controller.currentHoveredIndex,
+          builder: (context, currentHoveredIndex, _) {
             return Container(
-              color: controller.currentDefaultIndex == index
-                  ? highlightColor
-                  : defaultColor,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text.rich(
-                    textSpan,
-                    maxLines: 1,
-                  ),
-                ),
+              color:
+                  currentHoveredIndex == index ? highlightColor : defaultColor,
+              padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+              alignment: Alignment.centerLeft,
+              child: Text.rich(
+                textSpan,
+                maxLines: 1,
               ),
             );
           },
@@ -489,30 +481,27 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   ValueListenable<List<AutoCompleteMatch>> get searchAutoCompleteNotifier =>
       searchAutoComplete;
 
-  void clearSearchAutoComplete() {
-    searchAutoComplete.value = [];
-
-    // Default index is 0.
-    currentDefaultIndex = 0;
-  }
-
   /// Layer links autoComplete popup to the search TextField widget.
   final LayerLink autoCompleteLayerLink = LayerLink();
 
   OverlayEntry? autoCompleteOverlay;
 
-  ValueListenable<int> get currentDefaultIndexListenable =>
-      _currentDefaultIndex;
+  ValueListenable<int> get currentHoveredIndex => _currentHoveredIndex;
 
-  int get currentDefaultIndex => _currentDefaultIndex.value;
-
-  set currentDefaultIndex(int index) {
-    _currentDefaultIndex.value = index;
-  }
-
-  final _currentDefaultIndex = ValueNotifier<int>(0);
+  final _currentHoveredIndex = ValueNotifier<int>(0);
 
   static const minPopupWidth = 300.0;
+
+  void setCurrentHoveredIndexValue(int index) {
+    _currentHoveredIndex.value = index;
+  }
+
+  void clearSearchAutoComplete() {
+    searchAutoComplete.value = [];
+
+    // Default index is 0.
+    setCurrentHoveredIndexValue(0);
+  }
 
   /// [bottom] if false placed above TextField (search field).
   /// [maxWidth] if true drop-down is width of TextField otherwise minPopupWidth.
@@ -1059,11 +1048,13 @@ class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField>
           // Nothing found, pick item selected in dropdown.
           final autoCompleteList = widget.controller.searchAutoComplete.value;
           if (foundExact == null ||
-              autoCompleteList[widget.controller.currentDefaultIndex].text !=
+              autoCompleteList[widget.controller.currentHoveredIndex.value]
+                      .text !=
                   foundExact) {
             if (autoCompleteList.isNotEmpty) {
               foundExact =
-                  autoCompleteList[widget.controller.currentDefaultIndex].text;
+                  autoCompleteList[widget.controller.currentHoveredIndex.value]
+                      .text;
             }
           }
 
@@ -1105,7 +1096,7 @@ class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField>
     bool directionDown,
   ) {
     final numItems = controller.searchAutoComplete.value.length - 1;
-    var indexToSelect = controller.currentDefaultIndex;
+    var indexToSelect = controller.currentHoveredIndex.value;
     if (directionDown) {
       // Select next item in auto-complete overlay.
       ++indexToSelect;
@@ -1122,7 +1113,7 @@ class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField>
       }
     }
 
-    controller.currentDefaultIndex = indexToSelect;
+    controller.setCurrentHoveredIndexValue(indexToSelect);
   }
 }
 
