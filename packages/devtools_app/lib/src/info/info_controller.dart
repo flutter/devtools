@@ -39,8 +39,8 @@ class InfoController extends DisposableController
 
   final _flutterVersion = ValueNotifier<FlutterVersion?>(null);
 
-  ValueNotifier<FlagList?> get flagListNotifier =>
-      serviceManager.vmFlagManager.flags as ValueNotifier<FlagList?>;
+  ValueListenable<FlagList?> get flagListNotifier =>
+      serviceManager.vmFlagManager.flags;
 
   Future<void> _listenForFlutterVersionChanges() async {
     if (serviceManager.connectedApp!.isFlutterAppNow!) {
