@@ -37,8 +37,7 @@ class ServiceExtensionManager extends Disposer {
 
   final _serviceExtensionAvailable = <String, ValueNotifier<bool>>{};
 
-  final Map<String, ValueNotifier<ServiceExtensionState>>
-      _serviceExtensionStateController =
+  final _serviceExtensionStateController =
       <String, ValueNotifier<ServiceExtensionState>>{};
 
   /// All available service extensions.
@@ -58,8 +57,8 @@ class ServiceExtensionManager extends Disposer {
 
   Map<IsolateRef, List<AsyncCallback>> _callbacksOnIsolateResume = {};
 
-  ConnectedApp? get connectedApp => _connectedApp;
-  ConnectedApp? _connectedApp;
+  ConnectedApp get connectedApp => _connectedApp;
+  late ConnectedApp _connectedApp;
 
   Future<void> _handleIsolateEvent(Event event) async {
     if (event.kind == EventKind.kServiceExtensionAdded) {
@@ -176,14 +175,16 @@ class ServiceExtensionManager extends Disposer {
   }
 
   Future<void> _registerMainIsolate(
-      Isolate mainIsolate, IsolateRef? expectedMainIsolateRef) async {
+    Isolate mainIsolate,
+    IsolateRef? expectedMainIsolateRef,
+  ) async {
     if (expectedMainIsolateRef != _isolateManager.mainIsolate.value) {
       // Isolate has changed again.
       return;
     }
 
     if (mainIsolate.extensionRPCs != null) {
-      if (await connectedApp!.isFlutterApp) {
+      if (await connectedApp.isFlutterApp) {
         if (expectedMainIsolateRef != _isolateManager.mainIsolate.value) {
           // Isolate has changed again.
           return;
