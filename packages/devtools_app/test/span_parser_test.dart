@@ -8,7 +8,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/src/debugger/span_parser.dart';
+import 'package:devtools_app/src/screens/debugger/span_parser.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
