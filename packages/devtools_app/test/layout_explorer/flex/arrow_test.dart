@@ -4,7 +4,7 @@
 
 // @dart=2.9
 
-import 'package:devtools_app/src/inspector/layout_explorer/ui/arrow.dart';
+import 'package:devtools_app/src/screens/inspector/layout_explorer/ui/arrow.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

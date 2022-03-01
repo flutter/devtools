@@ -8,9 +8,9 @@
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/logging/logging_controller.dart';
-import 'package:devtools_app/src/logging/logging_screen.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/screens/logging/logging_controller.dart';
+import 'package:devtools_app/src/screens/logging/logging_screen.dart';
 import 'package:devtools_app/src/service/service_extensions.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';

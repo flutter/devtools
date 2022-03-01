@@ -4,11 +4,11 @@
 
 // @dart=2.9
 
-import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
-import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
-import 'package:devtools_app/src/provider/provider_list.dart';
-import 'package:devtools_app/src/provider/provider_nodes.dart';
-import 'package:devtools_app/src/provider/provider_screen.dart';
+import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
+import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
+import 'package:devtools_app/src/screens/provider/provider_list.dart';
+import 'package:devtools_app/src/screens/provider/provider_nodes.dart';
+import 'package:devtools_app/src/screens/provider/provider_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 @TestOn('vm')
 import 'package:devtools_app/src/shared/banner_messages.dart';

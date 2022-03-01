@@ -7,11 +7,11 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/inspector/diagnostics_node.dart';
-import 'package:devtools_app/src/inspector/inspector_screen.dart';
-import 'package:devtools_app/src/inspector/inspector_tree.dart';
-import 'package:devtools_app/src/inspector/layout_explorer/flex/flex.dart';
-import 'package:devtools_app/src/inspector/layout_explorer/layout_explorer.dart';
+import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_tree.dart';
+import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dart';
+import 'package:devtools_app/src/screens/inspector/layout_explorer/layout_explorer.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
