@@ -5,7 +5,7 @@
 // ignore: avoid_classes_with_only_static_members
 class HostPlatform {
   // ignore: prefer_const_declarations
-  static final HostPlatform? instance = null;
+  static late final HostPlatform instance = HostPlatform();
 
   bool get isMacOS => throw UnimplementedError();
 }
