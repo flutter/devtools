@@ -4,8 +4,6 @@
 
 // This code was pulled from dart:io.
 
-// @dart=2.9
-
 part of http;
 
 class HttpException {
@@ -23,5 +21,5 @@ class HttpException {
   }
 
   final String message;
-  final Uri uri;
+  final Uri? uri;
 }
