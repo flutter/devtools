@@ -61,7 +61,9 @@ class FilterDialog<FilterControllerMixin, T> extends StatefulWidget {
   _FilterDialogState<T> createState() => _FilterDialogState<T>();
 }
 
-class _FilterDialogState<T> extends State<FilterDialog> with AutoDisposeMixin {
+class _FilterDialogState<T>
+    extends State<FilterDialog<FilterControllerMixin, T>>
+    with AutoDisposeMixin {
   late final TextEditingController queryTextFieldController;
 
   @override
@@ -97,7 +99,7 @@ class _FilterDialogState<T> extends State<FilterDialog> with AutoDisposeMixin {
               const SizedBox(height: defaultSpacing),
             ],
             if (widget.toggleFilters != null)
-              for (final toggleFilter in widget.toggleFilters ?? []) ...[
+              for (final toggleFilter in widget.toggleFilters!) ...[
                 ToggleFilterElement(filter: toggleFilter),
               ],
           ],
@@ -111,7 +113,7 @@ class _FilterDialogState<T> extends State<FilterDialog> with AutoDisposeMixin {
                   ? QueryFilter.parse(queryTextFieldController.value.text,
                       widget.queryFilterArguments!)
                   : null,
-              toggleFilters: widget.toggleFilters as List<ToggleFilter<T>>?,
+              toggleFilters: widget.toggleFilters,
             ),
           ),
         ),
@@ -298,7 +300,7 @@ class QueryFilterArgument {
     return false;
   }
 
-  bool matchesValue(String? dataValue, {bool substringMatch = false}) {
+  bool matchesValue(String dataValue, {bool substringMatch = false}) {
     // If there are no specified filter values, consider [dataValue] to match
     // this filter.
     if (values.isEmpty) return true;
@@ -307,7 +309,7 @@ class QueryFilterArgument {
     for (final value in values) {
       final lowerCaseFilterValue = value.toLowerCase();
       matches = substringMatch
-          ? dataValue!.contains(lowerCaseFilterValue)
+          ? dataValue.contains(lowerCaseFilterValue)
           : dataValue == lowerCaseFilterValue;
       if (matches) break;
     }
