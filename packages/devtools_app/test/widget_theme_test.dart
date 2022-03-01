@@ -4,7 +4,7 @@
 
 // @dart=2.9
 
-import 'package:devtools_app/src/inspector/layout_explorer/ui/widgets_theme.dart';
+import 'package:devtools_app/src/screens/inspector/layout_explorer/ui/widgets_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
