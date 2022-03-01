@@ -4,10 +4,10 @@
 
 // @dart=2.9
 
-import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
-import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
-import 'package:devtools_app/src/provider/instance_viewer/instance_viewer.dart';
-import 'package:devtools_app/src/provider/instance_viewer/result.dart';
+import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
+import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
+import 'package:devtools_app/src/screens/provider/instance_viewer/instance_viewer.dart';
+import 'package:devtools_app/src/screens/provider/instance_viewer/result.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
 import 'package:devtools_app/src/shared/globals.dart';
