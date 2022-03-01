@@ -23,7 +23,7 @@ class Treemap extends StatefulWidget {
     required this.width,
     required this.height,
     required this.onRootChangedCallback,
-  });
+  }) : assert((rootNode == null) != (nodes == null));
 
   const Treemap.fromNodes({
     this.rootNode,
@@ -33,7 +33,7 @@ class Treemap extends StatefulWidget {
     required this.width,
     required this.height,
     required this.onRootChangedCallback,
-  });
+  }) : assert((rootNode == null) != (nodes == null));
 
   final TreemapNode? rootNode;
 
@@ -360,6 +360,7 @@ class _TreemapState extends State<Treemap> {
   }
 
   Widget buildSubTreemaps() {
+    assert(widget.nodes != null && widget.nodes!.isNotEmpty);
     return LayoutBuilder(
       builder: (context, constraints) {
         // TODO(peterdjlee): Investigate why exception is thrown without this check
@@ -419,6 +420,7 @@ class _TreemapState extends State<Treemap> {
   /// ----------------------------
   /// ```
   Widget buildTreemap(BuildContext context) {
+    assert(widget.rootNode != null);
     if (widget.rootNode!.children.isNotEmpty) {
       return Padding(
         padding: const EdgeInsets.all(1.0),
