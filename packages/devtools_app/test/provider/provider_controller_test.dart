@@ -4,9 +4,9 @@
 
 // @dart=2.9
 
-import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
-import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
-import 'package:devtools_app/src/provider/provider_nodes.dart';
+import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
+import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
+import 'package:devtools_app/src/screens/provider/provider_nodes.dart';
 // ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member, non_constant_identifier_names
 
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';

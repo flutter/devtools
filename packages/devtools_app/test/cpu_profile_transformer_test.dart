@@ -4,8 +4,8 @@
 
 // @dart=2.9
 
-import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
-import 'package:devtools_app/src/profiler/cpu_profile_transformer.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_transformer.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_data/cpu_profile_test_data.dart';

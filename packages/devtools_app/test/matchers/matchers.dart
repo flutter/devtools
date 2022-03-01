@@ -10,7 +10,7 @@ library matchers;
 
 import 'dart:io' as io;
 
-import 'package:devtools_app/src/inspector/diagnostics_node.dart';
+import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 RemoteDiagnosticsNode findNodeMatching(
