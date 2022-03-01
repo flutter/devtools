@@ -21,9 +21,8 @@ class IdeTheme {
 
   final Color? backgroundColor;
   final Color? foregroundColor;
-  final double? fontSize;
+  final double fontSize;
   final bool embed;
 
-  double get fontSizeFactor =>
-      (fontSize ?? unscaledDefaultFontSize) / unscaledDefaultFontSize;
+  double get fontSizeFactor => fontSize / unscaledDefaultFontSize;
 }

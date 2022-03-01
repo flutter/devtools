@@ -9,6 +9,7 @@ import 'dart:html';
 import 'package:flutter/widgets.dart';
 
 import '../../primitives/utils.dart';
+import '../../shared/theme.dart';
 import '../logger/logger.dart';
 import '../url/url.dart';
 import 'ide_theme.dart';
@@ -20,7 +21,8 @@ IdeTheme getIdeTheme() {
   final overrides = IdeTheme(
     backgroundColor: _tryParseColor(queryParams['backgroundColor']),
     foregroundColor: _tryParseColor(queryParams['foregroundColor']),
-    fontSize: _tryParseDouble(queryParams['fontSize']),
+    fontSize:
+        _tryParseDouble(queryParams['fontSize']) ?? unscaledDefaultFontSize,
     embed: queryParams['embed'] == 'true',
   );
 
@@ -36,7 +38,7 @@ IdeTheme getIdeTheme() {
 
 Color? backgroundColor;
 Color? foregroundColor;
-double? fontSize;
+double fontSize = unscaledDefaultFontSize;
 
 Color? _tryParseColor(String? input) {
   if (input == null) return null;
