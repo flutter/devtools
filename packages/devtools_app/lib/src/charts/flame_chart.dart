@@ -340,6 +340,8 @@ abstract class FlameChartState<T extends FlameChart,
               Theme.of(context).colorScheme,
             );
           }
+          // TODO(polinach): figure out how to get rid of the type cast.
+          // See https://github.com/flutter/devtools/pull/3738#discussion_r817135162
           return ScrollingFlameChartRow<V>(
             linkedScrollControllerGroup: horizontalControllerGroup,
             nodes: nodes,
