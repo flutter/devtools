@@ -6,10 +6,10 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/performance/performance_model.dart';
 import 'package:devtools_app/src/primitives/trace_event.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
-import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/screens/performance/performance_model.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 

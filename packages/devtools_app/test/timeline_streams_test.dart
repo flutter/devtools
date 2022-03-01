@@ -4,7 +4,7 @@
 
 // @dart=2.9
 
-import 'package:devtools_app/src/performance/timeline_streams.dart';
+import 'package:devtools_app/src/screens/performance/timeline_streams.dart';
 @TestOn('vm')
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:flutter_test/flutter_test.dart';
