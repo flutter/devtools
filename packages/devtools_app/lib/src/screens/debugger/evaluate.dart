@@ -118,7 +118,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
             .toList();
 
         _autoCompleteController.searchAutoComplete.value = results;
-        _autoCompleteController.currentDefaultIndex = 0;
+        _autoCompleteController.setCurrentHoveredIndexValue(0);
       }
     } else {
       _autoCompleteController.closeAutoCompleteOverlay();

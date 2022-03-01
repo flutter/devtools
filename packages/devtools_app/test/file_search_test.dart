@@ -36,6 +36,47 @@ void main() {
     });
 
     testWidgetsWithWindowSize(
+        'Selecting search sets current file', const Size(1000.0, 4000.0),
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildFileSearch());
+      final FileSearchFieldState state =
+          tester.state(find.byType(FileSearchField));
+      final autoCompleteController = state.autoCompleteController;
+
+      autoCompleteController.search = 'cat';
+
+      await tester.pumpAndSettle();
+
+      expect(
+        getAutoCompleteMatch(
+          autoCompleteController.searchAutoComplete.value,
+        ),
+        equals(
+          [
+            // Exact file name matches:
+            'zoo:animals/insects/CATerpillar.dart',
+            // Exact full path matches:
+            'zoo:animals/CATs/meow.dart',
+            'zoo:animals/CATs/purr.dart',
+            'kitchen:food/CATering/party.dart',
+            // Fuzzy matches:
+            'zoo:animals/insects/CicAda.darT',
+            'kitchen:food/milk/CArTon.dart',
+            'travel:adventure/CAve_Tours_europe.dart'
+          ],
+        ),
+      );
+
+      final tileFinder = find.byType(AutoCompleteTile);
+      expect(tileFinder, findsNWidgets(7));
+
+      await tester.tap(tileFinder.at(3));
+
+      expect(autoCompleteController.search,
+          equals('kitchen:food/catering/party.dart'));
+    });
+
+    testWidgetsWithWindowSize(
         'Search returns expected files', const Size(1000.0, 4000.0),
         (WidgetTester tester) async {
       await tester.pumpWidget(buildFileSearch());

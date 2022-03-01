@@ -244,7 +244,7 @@ class HeapTreeViewState extends State<HeapTree>
 
     addAutoDisposeListener(controller.searchNotifier, () {
       controller.closeAutoCompleteOverlay();
-      controller.currentDefaultIndex = 0;
+      controller..setCurrentHoveredIndexValue(0);
     });
 
     addAutoDisposeListener(controller.searchAutoCompleteNotifier, () {
