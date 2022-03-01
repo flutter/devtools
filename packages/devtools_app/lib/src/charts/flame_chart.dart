@@ -90,7 +90,7 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 
   final ValueListenable<List<V>>? searchMatchesNotifier;
 
-  final ValueListenable<V>? activeSearchMatchNotifier;
+  final ValueListenable<V?>? activeSearchMatchNotifier;
 
   final void Function(V data) onDataSelected;
 
@@ -126,11 +126,11 @@ abstract class FlameChartState<T extends FlameChart,
 
   late final LinkedScrollControllerGroup horizontalControllerGroup;
 
-  ScrollController? _flameChartScrollController;
+  late final ScrollController _flameChartScrollController;
 
   /// Animation controller for animating flame chart zoom changes.
   @visibleForTesting
-  late AnimationController zoomController;
+  late final AnimationController zoomController;
 
   double currentZoom = FlameChart.minZoomLevel;
 
@@ -328,7 +328,7 @@ abstract class FlameChartState<T extends FlameChart,
               // Look back until we find the first non-empty row.
               if (rows[i].nodes.isNotEmpty) {
                 rowBackgroundColor = alternatingColorForIndex(
-                  rows[i].nodes.first.sectionIndex!,
+                  rows[i].nodes.first.sectionIndex,
                   Theme.of(context).colorScheme,
                 );
                 break;
@@ -336,7 +336,7 @@ abstract class FlameChartState<T extends FlameChart,
             }
           } else if (nodes.isNotEmpty) {
             rowBackgroundColor = alternatingColorForIndex(
-              nodes.first.sectionIndex!,
+              nodes.first.sectionIndex,
               Theme.of(context).colorScheme,
             );
           }
@@ -611,7 +611,7 @@ class ScrollingFlameChartRow<V extends FlameChartDataMixin<V>>
 
   final double startInset;
 
-  final ValueListenable<V> selectionNotifier;
+  final ValueListenable<V?> selectionNotifier;
 
   final ValueListenable<List<V>> searchMatchesNotifier;
 
@@ -1032,7 +1032,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     required this.data,
     required this.onSelected,
     this.selectable = true,
-    this.sectionIndex,
+    this.sectionIndex = 0,
   });
 
   static const _darkTextColor = Colors.black;
@@ -1052,7 +1052,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
 
   late FlameChartRow row;
 
-  int? sectionIndex;
+  int sectionIndex;
 
   Widget buildWidget({
     required bool selected,
