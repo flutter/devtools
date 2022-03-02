@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import '../screens/debugger/codeview.dart';
 import '../screens/inspector/inspector_service.dart';
@@ -27,6 +27,8 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
   }
 
   @override
-  InspectorServiceBase inspectorServiceProvider() =>
-      serviceManager.connectedApp.isFlutterAppNow ? InspectorService() : null;
+  InspectorServiceBase? inspectorServiceProvider() =>
+      serviceManager.connectedApp!.isFlutterAppNow == true
+          ? InspectorService()
+          : null;
 }
