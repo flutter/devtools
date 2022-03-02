@@ -7,6 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
+import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
@@ -283,11 +284,13 @@ class _FileExplorer extends StatelessWidget {
     @required this.controller,
     @required this.onItemSelected,
     @required this.onItemExpanded,
+    @required this.scrollController,
   });
 
   final ProgramExplorerController controller;
   final Function(VMServiceObjectNode) onItemSelected;
   final Function(VMServiceObjectNode) onItemExpanded;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -296,6 +299,7 @@ class _FileExplorer extends StatelessWidget {
       dataRootsListenable: controller.rootObjectNodes,
       onItemSelected: onItemSelected,
       onItemExpanded: onItemExpanded,
+      scrollController: scrollController,
       dataDisplayProvider: (node, onTap) {
         return _ProgramExplorerRow(
           controller: controller,
@@ -356,7 +360,7 @@ class _ProgramOutlineView extends StatelessWidget {
 
 /// Picker that displays the program's structure, allowing for navigation and
 /// filtering.
-class ProgramExplorer extends StatelessWidget {
+class ProgramExplorer extends StatefulWidget {
   ProgramExplorer({
     Key key,
     @required this.debugController,
@@ -369,9 +373,23 @@ class ProgramExplorer extends StatelessWidget {
   final void Function(ScriptLocation) onSelected;
 
   @override
+  State<ProgramExplorer> createState() => _ProgramExplorerState();
+}
+
+class _ProgramExplorerState extends State<ProgramExplorer>
+    with AutoDisposeMixin {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    addAutoDisposeListener(widget.controller.nodeIndex, _scrollToNode);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: controller.initialized,
+      valueListenable: widget.controller.initialized,
       builder: (context, initialized, _) {
         Widget body;
         if (!initialized) {
@@ -382,9 +400,10 @@ class ProgramExplorer extends StatelessWidget {
             needsTopBorder: false,
           );
           final fileExplorer = _FileExplorer(
-            controller: controller,
+            controller: widget.controller,
             onItemExpanded: onItemExpanded,
             onItemSelected: onItemSelected,
+            scrollController: _scrollController,
           );
           body = LayoutBuilder(
             builder: (context, constraints) {
@@ -401,7 +420,13 @@ class ProgramExplorer extends StatelessWidget {
                   ? Column(
                       children: [
                         fileExplorerHeader,
-                        Expanded(child: fileExplorer),
+                        Expanded(
+                          child: Scrollbar(
+                            isAlwaysShown: true,
+                            controller: _scrollController,
+                            child: fileExplorer,
+                          ),
+                        ),
                       ],
                     )
                   : FlexSplitColumn(
@@ -415,7 +440,7 @@ class ProgramExplorer extends StatelessWidget {
                       children: [
                         fileExplorer,
                         _ProgramOutlineView(
-                          controller: controller,
+                          controller: widget.controller,
                           onItemExpanded: onItemExpanded,
                           onItemSelected: onItemSelected,
                         ),
@@ -440,7 +465,7 @@ class ProgramExplorer extends StatelessWidget {
     await node.populateLocation();
 
     if (node.object != null && node.object is! Obj) {
-      await controller.populateNode(node);
+      await widget.controller.populateNode(node);
     }
 
     // If the node is collapsed and we select it, we'll always want to expand
@@ -449,12 +474,20 @@ class ProgramExplorer extends StatelessWidget {
       node.expand();
     }
 
-    onSelected(node.location);
+    widget.onSelected(node.location);
   }
 
   void onItemExpanded(VMServiceObjectNode node) async {
     if (node.object != null && node.object is! Obj) {
-      await controller.populateNode(node);
+      await widget.controller.populateNode(node);
     }
+  }
+
+  void _scrollToNode() {
+    final nodeIndex = widget.controller.nodeIndex.value;
+    final topSpacing = _programExplorerRowHeight * 4;
+    final scrollPosition = _programExplorerRowHeight * nodeIndex - topSpacing;
+    _scrollController.animateTo(scrollPosition,
+        duration: longDuration, curve: defaultCurve);
   }
 }

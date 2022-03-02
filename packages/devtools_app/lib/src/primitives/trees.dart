@@ -294,3 +294,35 @@ T? breadthFirstTraversal<T extends TreeNode<T>>(
   }
   return null;
 }
+
+/// Traverses a tree in depth-first order.
+///
+/// [returnCondition] specifies the condition for which we should stop
+/// traversing the tree. For example, if we are calling this method to perform
+/// DFS, [returnCondition] would specify when we have found the node we are
+/// searching for. [action] specifies an action that we will execute on each
+/// node. For example, if we need to traverse a tree and change a property on
+/// every single node, we would do this through the [action] param.
+/// [exploreChildrenCondition] specifies the condition for which we should
+/// explore the children of a node. By default, all children are explored.
+T? depthFirstTraversal<T extends TreeNode<T>>(
+  T root, {
+  bool returnCondition(T node)?,
+  void action(T node)?,
+  bool exploreChildrenCondition(T node)?,
+}) {
+  final stack = Queue.of([root]);
+  while (stack.isNotEmpty) {
+    final node = stack.removeLast();
+    if (returnCondition != null && returnCondition(node)) {
+      return node;
+    }
+    if (action != null) {
+      action(node);
+    }
+    if (exploreChildrenCondition == null || exploreChildrenCondition(node)) {
+      node.children.reversed.forEach(stack.add);
+    }
+  }
+  return null;
+}

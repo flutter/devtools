@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/auto_dispose.dart';
+import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
 import 'debugger_controller.dart';
@@ -38,6 +39,9 @@ class ProgramExplorerController extends DisposableController
   ValueListenable<List<VMServiceObjectNode>> get rootObjectNodes =>
       _rootObjectNodes;
   final _rootObjectNodes = ListValueNotifier<VMServiceObjectNode>([]);
+
+  ValueListenable<int> get nodeIndex => _nodeIndex;
+  final _nodeIndex = ValueNotifier<int>(0);
 
   IsolateRef _isolate;
 
@@ -105,6 +109,7 @@ class ProgramExplorerController extends DisposableController
     ScriptRef script,
     List<VMServiceObjectNode> nodes,
   ) {
+    var index = 0;
     for (final node in nodes) {
       final result = node.firstChildWithCondition(
         (node) => node.script?.uri == script.uri,
@@ -112,6 +117,19 @@ class ProgramExplorerController extends DisposableController
       if (result != null) {
         selectNode(result);
         result.expandAscending();
+      }
+
+      // For each node, do a depth-first traversal of all visible children
+      // to calculate the index of the selected script.
+      depthFirstTraversal(
+        node,
+        returnCondition: (node) => node.script?.uri == script.uri,
+        exploreChildrenCondition: (node) => node.isExpanded,
+        action: (_) => index++,
+      );
+
+      if (result != null) {
+        _nodeIndex.value = index;
         return;
       }
     }
