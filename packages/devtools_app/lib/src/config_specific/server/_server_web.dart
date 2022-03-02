@@ -75,7 +75,7 @@ Future<bool> setAnalyticsEnabled([bool value = true]) async {
       assert(json.decode(resp!.responseText!) == value);
       return true;
     } else {
-      logWarning(resp, apiSetDevToolsEnabled, resp!.responseText);
+      logWarning(resp, apiSetDevToolsEnabled, resp?.responseText);
     }
   }
   return false;
@@ -275,8 +275,8 @@ Future<void> setLastShownReleaseNotesVersion(String version) async {
 Future<void> resetDevToolsFile() async {
   if (isDevToolsServerAvailable) {
     final resp = await _request(apiResetDevTools);
-    if (resp!.status == HttpStatus.ok) {
-      assert(json.decode(resp.responseText!));
+    if (resp?.status == HttpStatus.ok) {
+      assert(json.decode(resp!.responseText!));
     } else {
       logWarning(resp, apiResetDevTools);
     }
