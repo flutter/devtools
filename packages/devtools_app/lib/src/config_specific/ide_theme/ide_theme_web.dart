@@ -37,7 +37,7 @@ IdeTheme getIdeTheme() {
 }
 
 // TODO(polinach): this field seems to be not used, but the app fails without it:
-// https://github.com/flutter/devtools/pull/3748#discussion_r817269281
+// https://github.com/flutter/devtools/pull/3748#discussion_r817269768
 Color? foregroundColor;
 
 Color? _tryParseColor(String? input) {
