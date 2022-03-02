@@ -36,9 +36,9 @@ IdeTheme getIdeTheme() {
   return overrides;
 }
 
-Color? backgroundColor;
+// TODO(polinach): this field seems to be not used, but the app fails without it:
+// https://github.com/flutter/devtools/pull/3748#discussion_r817269281
 Color? foregroundColor;
-double fontSize = unscaledDefaultFontSize;
 
 Color? _tryParseColor(String? input) {
   if (input == null) return null;
