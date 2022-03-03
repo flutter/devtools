@@ -211,7 +211,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     super.didChangeDependencies();
 
     _importController = ImportController(
-      Notifications.of(context),
+      Notifications.of(context)!,
       _pushSnapshotScreenForImport,
     );
     // This needs to be called at the scaffold level because we need an instance
