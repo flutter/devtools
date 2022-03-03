@@ -7,7 +7,7 @@
 import 'package:devtools_app/src/analytics/analytics_controller.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/debugger/debugger_screen.dart';
+import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -50,12 +50,12 @@ void main() {
     testWidgetsWithWindowSize(
         'displays in narrow mode without error', const Size(200.0, 1200.0),
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrapScaffold(
+      await tester.pumpWidget(wrapScaffold(wrapWithNotifications(
         DevToolsScaffold(
           tabs: const [screen1, screen2, screen3, screen4, screen5],
           ideTheme: IdeTheme(),
         ),
-      ));
+      )));
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.fullWidthKey), findsNothing);
@@ -64,12 +64,12 @@ void main() {
     testWidgetsWithWindowSize(
         'displays in full-width mode without error', const Size(1200.0, 1200.0),
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrapScaffold(
+      await tester.pumpWidget(wrapScaffold(wrapWithNotifications(
         DevToolsScaffold(
           tabs: const [screen1, screen2, screen3, screen4, screen5],
           ideTheme: IdeTheme(),
         ),
-      ));
+      )));
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.fullWidthKey), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsNothing);
@@ -77,23 +77,23 @@ void main() {
 
     testWidgets('displays no tabs when only one is given',
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrapScaffold(
+      await tester.pumpWidget(wrapScaffold(wrapWithNotifications(
         DevToolsScaffold(
           tabs: const [screen1],
           ideTheme: IdeTheme(),
         ),
-      ));
+      )));
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(t1), findsNothing);
     });
 
     testWidgets('displays only the selected tab', (WidgetTester tester) async {
-      await tester.pumpWidget(wrapScaffold(
+      await tester.pumpWidget(wrapScaffold(wrapWithNotifications(
         DevToolsScaffold(
           tabs: const [screen1, screen2],
           ideTheme: IdeTheme(),
         ),
-      ));
+      )));
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(k2), findsNothing);
 
@@ -113,13 +113,13 @@ void main() {
 
     testWidgets('displays the requested initial page',
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrapScaffold(
+      await tester.pumpWidget(wrapScaffold(wrapWithNotifications(
         DevToolsScaffold(
           tabs: const [screen1, screen2],
           page: screen2.screenId,
           ideTheme: IdeTheme(),
         ),
-      ));
+      )));
 
       expect(find.byKey(k1), findsNothing);
       expect(find.byKey(k2), findsOneWidget);
@@ -234,12 +234,12 @@ void main() {
         'does not display floating debugger tab controls when no app is connected',
         (WidgetTester tester) async {
       when(mockServiceManager.connectedAppInitialized).thenReturn(false);
-      await tester.pumpWidget(wrapScaffold(
+      await tester.pumpWidget(wrapScaffold(wrapWithNotifications(
         DevToolsScaffold(
           tabs: const [screen1, screen2],
           ideTheme: IdeTheme(),
         ),
-      ));
+      )));
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(k2), findsNothing);
       expect(find.byType(FloatingDebuggerControls), findsNothing);

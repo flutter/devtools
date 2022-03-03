@@ -203,7 +203,7 @@ class ChartPainter extends CustomPainter {
     // TODO(terry): Need to compute x-axis left-most position for last timestamp.
     //              May need to do the other direction so it looks better.
     final endVisibleIndex =
-        chartController.timestampsLength - chartController.visibleTicks;
+        chartController.timestampsLength - chartController.visibleXAxisTicks;
 
     final xTranslation = chartController.xCoordLeftMostVisibleTimestamp;
     final yTranslation = chartController.zeroYPosition;

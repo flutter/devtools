@@ -7,7 +7,7 @@
 import 'dart:collection';
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/inspector/inspector_screen.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/error_badge_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';

@@ -6,9 +6,9 @@
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/http/http_request_data.dart';
-import 'package:devtools_app/src/network/network_controller.dart';
-import 'package:devtools_app/src/network/network_model.dart';
-import 'package:devtools_app/src/network/network_screen.dart';
+import 'package:devtools_app/src/screens/network/network_controller.dart';
+import 'package:devtools_app/src/screens/network/network_model.dart';
+import 'package:devtools_app/src/screens/network/network_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 @TestOn('vm')
 import 'package:devtools_app/src/shared/globals.dart';

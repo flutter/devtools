@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:html' hide Storage;
 
 import '../../primitives/storage.dart';
@@ -13,7 +11,7 @@ import '../../shared/server_api_client.dart';
 /// Return the url the application is launched from.
 Future<String> initializePlatform() async {
   // Clear out the unneeded HTML from index.html.
-  for (var element in document.body.querySelectorAll('.legacy-dart')) {
+  for (var element in document.body!.querySelectorAll('.legacy-dart')) {
     element.remove();
   }
 
@@ -58,7 +56,7 @@ void _sendKeyPressToParent(KeyboardEvent event) {
   // Check we have a connection and we appear to be embedded somewhere expected
   // because we can't use targetOrigin in postMessage as only the scheme is fixed
   // for VS Code (vscode-webview://[some guid]).
-  if (serviceManager == null || !serviceManager.hasConnection) return;
+  if (!serviceManager.hasConnection) return;
   if (!window.navigator.userAgent.contains('Electron')) return;
 
   final data = {
@@ -93,7 +91,7 @@ class ServerConnectionStorage implements Storage {
 
 class BrowserStorage implements Storage {
   @override
-  Future<String> getValue(String key) async {
+  Future<String?> getValue(String key) async {
     return window.localStorage[key];
   }
 
