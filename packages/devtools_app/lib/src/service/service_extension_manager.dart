@@ -169,7 +169,7 @@ class ServiceExtensionManager extends Disposer {
     _checkForFirstFrameStarted = false;
 
     final isolateRef = _isolateManager.mainIsolate.value;
-    final Isolate isolate = await _isolateManager.getIsolateCached(isolateRef);
+    final Isolate isolate = await _isolateManager.getIsolateCached(isolateRef!);
 
     await _registerMainIsolate(isolate, isolateRef);
   }
@@ -390,18 +390,18 @@ class ServiceExtensionManager extends Disposer {
             }
           });
         } else {
-          await call(mainIsolate.id, value);
+          await call(mainIsolate?.id, value);
         }
       } else if (value is String) {
         await _service!.callServiceExtension(
           name,
-          isolateId: mainIsolate.id,
+          isolateId: mainIsolate?.id,
           args: {'value': value},
         );
       } else if (value is double) {
         await _service!.callServiceExtension(
           name,
-          isolateId: mainIsolate.id,
+          isolateId: mainIsolate?.id,
           // The param name for a numeric service extension will be the last part
           // of the extension name (ext.flutter.extensionName => extensionName).
           args: {name.substring(name.lastIndexOf('.') + 1): value},

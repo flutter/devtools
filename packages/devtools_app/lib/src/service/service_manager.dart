@@ -382,7 +382,7 @@ class ServiceConnectionManager {
 
   Future<Response> _callServiceOnMainIsolate(String name) async {
     final isolate = await whenValueNonNull(isolateManager.mainIsolate);
-    return await callService(name, isolateId: isolate.id!);
+    return await callService(name, isolateId: isolate?.id);
   }
 
   Future<Response> _callServiceExtensionOnMainIsolate(
@@ -394,7 +394,7 @@ class ServiceConnectionManager {
     return await service!.callServiceExtension(
       method,
       args: args,
-      isolateId: isolate.id,
+      isolateId: isolate?.id,
     );
   }
 
