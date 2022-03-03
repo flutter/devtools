@@ -56,8 +56,8 @@ abstract class FlameChart<T, V> extends StatefulWidget {
     required this.containerHeight,
     required this.selectionNotifier,
     required this.onDataSelected,
-    required this.searchMatchesNotifier,
-    required this.activeSearchMatchNotifier,
+    this.searchMatchesNotifier,
+    this.activeSearchMatchNotifier,
     this.startInset = sideInset,
     this.endInset = sideInset,
   });
@@ -88,9 +88,9 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 
   final ValueListenable<V> selectionNotifier;
 
-  final ValueListenable<List<V>> searchMatchesNotifier;
+  final ValueListenable<List<V>>? searchMatchesNotifier;
 
-  final ValueListenable<V?> activeSearchMatchNotifier;
+  final ValueListenable<V?>? activeSearchMatchNotifier;
 
   final void Function(V data) onDataSelected;
 
@@ -238,7 +238,7 @@ abstract class FlameChartState<T extends FlameChart,
 
     if (widget.activeSearchMatchNotifier != null) {
       addAutoDisposeListener(widget.activeSearchMatchNotifier, () async {
-        final activeSearch = widget.activeSearchMatchNotifier.value;
+        final activeSearch = widget.activeSearchMatchNotifier as V?;
         if (activeSearch == null) return;
 
         // Ensure the [activeSearch] is vertically in view.
@@ -349,9 +349,9 @@ abstract class FlameChartState<T extends FlameChart,
             startInset: widget.startInset,
             selectionNotifier: widget.selectionNotifier as ValueListenable<V>,
             searchMatchesNotifier:
-                widget.searchMatchesNotifier as ValueListenable<List<V>>,
+                widget.searchMatchesNotifier as ValueListenable<List<V>>?,
             activeSearchMatchNotifier:
-                widget.activeSearchMatchNotifier as ValueListenable<V>,
+                widget.activeSearchMatchNotifier as ValueListenable<V?>?,
             onTapUp: focusNode.requestFocus,
             backgroundColor: rowBackgroundColor,
             zoom: currentZoom,
@@ -615,9 +615,9 @@ class ScrollingFlameChartRow<V extends FlameChartDataMixin<V>>
 
   final ValueListenable<V?> selectionNotifier;
 
-  final ValueListenable<List<V>> searchMatchesNotifier;
+  final ValueListenable<List<V>>? searchMatchesNotifier;
 
-  final ValueListenable<V> activeSearchMatchNotifier;
+  final ValueListenable<V?>? activeSearchMatchNotifier;
 
   final VoidCallback onTapUp;
 
