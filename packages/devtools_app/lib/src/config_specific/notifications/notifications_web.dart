@@ -9,7 +9,7 @@ class Notification {
     _impl = html.Notification(title, body: body);
   }
 
-  late html.Notification _impl;
+  late final html.Notification _impl;
 
   static Future<String> requestPermission() {
     return html.Notification.requestPermission();
