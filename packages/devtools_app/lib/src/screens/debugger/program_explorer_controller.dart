@@ -40,8 +40,8 @@ class ProgramExplorerController extends DisposableController
       _rootObjectNodes;
   final _rootObjectNodes = ListValueNotifier<VMServiceObjectNode>([]);
 
-  ValueListenable<int> get nodeIndex => _nodeIndex;
-  final _nodeIndex = ValueNotifier<int>(0);
+  ValueListenable<int> get selectedNodeIndex => _selectedNodeIndex;
+  final _selectedNodeIndex = ValueNotifier<int>(0);
 
   IsolateRef _isolate;
 
@@ -109,30 +109,32 @@ class ProgramExplorerController extends DisposableController
     ScriptRef script,
     List<VMServiceObjectNode> nodes,
   ) {
-    var index = 0;
+    final searchCondition = (node) => node.script?.uri == script.uri;
     for (final node in nodes) {
-      final result = node.firstChildWithCondition(
-        (node) => node.script?.uri == script.uri,
-      );
+      final result = node.firstChildWithCondition(searchCondition);
       if (result != null) {
         selectNode(result);
         result.expandAscending();
-      }
-
-      // For each node, do a depth-first traversal of all visible children
-      // to calculate the index of the selected script.
-      depthFirstTraversal(
-        node,
-        returnCondition: (node) => node.script?.uri == script.uri,
-        exploreChildrenCondition: (node) => node.isExpanded,
-        action: (_) => index++,
-      );
-
-      if (result != null) {
-        _nodeIndex.value = index;
+        _selectedNodeIndex.value = _calculateNodeIndex(searchCondition);
         return;
       }
     }
+  }
+
+  int _calculateNodeIndex(
+      bool matchingNodeCondition(VMServiceObjectNode node)) {
+    var index = 0;
+    for (final node in _rootObjectNodes.value) {
+      final matchingNode = depthFirstTraversal(
+        node,
+        returnCondition: matchingNodeCondition,
+        exploreChildrenCondition: (node) => node.isExpanded,
+        action: (_) => index++,
+      );
+      if (matchingNode != null) return index;
+    }
+    // If the node wasn't found, return 0.
+    return 0;
   }
 
   /// Clears controller state and re-initializes.
@@ -148,7 +150,6 @@ class ProgramExplorerController extends DisposableController
 
   /// Marks [node] as the currently selected node, clearing the selection state
   /// of any currently selected node.
-  /// TODO(elliette): Scroll to node in program explorer tree when selected.
   void selectNode(VMServiceObjectNode node) async {
     if (!node.isSelectable) {
       return;

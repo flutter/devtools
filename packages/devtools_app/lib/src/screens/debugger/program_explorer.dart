@@ -24,6 +24,7 @@ const libraryIcon = Icons.insert_drive_file;
 const listItemHeight = 40.0;
 
 double get _programExplorerRowHeight => scaleByFontFactor(22.0);
+double get _selectedNodeTopSpacing => _programExplorerRowHeight * 3;
 
 class _ProgramExplorerRow extends StatelessWidget {
   const _ProgramExplorerRow({
@@ -279,38 +280,70 @@ class ProgramStructureIcon extends StatelessWidget {
   }
 }
 
-class _FileExplorer extends StatelessWidget {
+// TODO Elliott turn this into stateful widget, add scrollToNode here.
+// Check if the current scroll position matches the node index. If not, scroll
+// to node.
+class _FileExplorer extends StatefulWidget {
   const _FileExplorer({
     @required this.controller,
     @required this.onItemSelected,
     @required this.onItemExpanded,
-    @required this.scrollController,
   });
 
   final ProgramExplorerController controller;
   final Function(VMServiceObjectNode) onItemSelected;
   final Function(VMServiceObjectNode) onItemExpanded;
-  final ScrollController scrollController;
+
+  double get selectedNodeOffset =>
+      controller.selectedNodeIndex.value * _programExplorerRowHeight -
+      _selectedNodeTopSpacing;
+
+  @override
+  State<_FileExplorer> createState() => _FileExplorerState();
+}
+
+class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    addAutoDisposeListener(
+        widget.controller.selectedNodeIndex, _maybeScrollToSelectedNode);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return TreeView<VMServiceObjectNode>(
-      itemExtent: _programExplorerRowHeight,
-      dataRootsListenable: controller.rootObjectNodes,
-      onItemSelected: onItemSelected,
-      onItemExpanded: onItemExpanded,
-      scrollController: scrollController,
-      dataDisplayProvider: (node, onTap) {
-        return _ProgramExplorerRow(
-          controller: controller,
-          node: node,
-          onTap: () {
-            controller.selectNode(node);
-            onTap();
-          },
-        );
-      },
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _maybeScrollToSelectedNode());
+    return Scrollbar(
+      isAlwaysShown: true,
+      controller: _scrollController,
+      child: TreeView<VMServiceObjectNode>(
+        itemExtent: _programExplorerRowHeight,
+        dataRootsListenable: widget.controller.rootObjectNodes,
+        onItemSelected: widget.onItemSelected,
+        onItemExpanded: widget.onItemExpanded,
+        scrollController: _scrollController,
+        dataDisplayProvider: (node, onTap) {
+          return _ProgramExplorerRow(
+            controller: widget.controller,
+            node: node,
+            onTap: () {
+              widget.controller.selectNode(node);
+              onTap();
+            },
+          );
+        },
+      ),
     );
+  }
+
+  void _maybeScrollToSelectedNode() {
+    if (_scrollController.offset != widget.selectedNodeOffset) {
+      _scrollController.animateTo(widget.selectedNodeOffset,
+          duration: longDuration, curve: defaultCurve);
+    }
   }
 }
 
@@ -360,7 +393,7 @@ class _ProgramOutlineView extends StatelessWidget {
 
 /// Picker that displays the program's structure, allowing for navigation and
 /// filtering.
-class ProgramExplorer extends StatefulWidget {
+class ProgramExplorer extends StatelessWidget {
   ProgramExplorer({
     Key key,
     @required this.debugController,
@@ -373,23 +406,9 @@ class ProgramExplorer extends StatefulWidget {
   final void Function(ScriptLocation) onSelected;
 
   @override
-  State<ProgramExplorer> createState() => _ProgramExplorerState();
-}
-
-class _ProgramExplorerState extends State<ProgramExplorer>
-    with AutoDisposeMixin {
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    addAutoDisposeListener(widget.controller.nodeIndex, _scrollToNode);
-  }
-
-  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: widget.controller.initialized,
+      valueListenable: controller.initialized,
       builder: (context, initialized, _) {
         Widget body;
         if (!initialized) {
@@ -400,10 +419,9 @@ class _ProgramExplorerState extends State<ProgramExplorer>
             needsTopBorder: false,
           );
           final fileExplorer = _FileExplorer(
-            controller: widget.controller,
+            controller: controller,
             onItemExpanded: onItemExpanded,
             onItemSelected: onItemSelected,
-            scrollController: _scrollController,
           );
           body = LayoutBuilder(
             builder: (context, constraints) {
@@ -420,13 +438,7 @@ class _ProgramExplorerState extends State<ProgramExplorer>
                   ? Column(
                       children: [
                         fileExplorerHeader,
-                        Expanded(
-                          child: Scrollbar(
-                            isAlwaysShown: true,
-                            controller: _scrollController,
-                            child: fileExplorer,
-                          ),
-                        ),
+                        Expanded(child: fileExplorer),
                       ],
                     )
                   : FlexSplitColumn(
@@ -440,7 +452,7 @@ class _ProgramExplorerState extends State<ProgramExplorer>
                       children: [
                         fileExplorer,
                         _ProgramOutlineView(
-                          controller: widget.controller,
+                          controller: controller,
                           onItemExpanded: onItemExpanded,
                           onItemSelected: onItemSelected,
                         ),
@@ -465,7 +477,7 @@ class _ProgramExplorerState extends State<ProgramExplorer>
     await node.populateLocation();
 
     if (node.object != null && node.object is! Obj) {
-      await widget.controller.populateNode(node);
+      await controller.populateNode(node);
     }
 
     // If the node is collapsed and we select it, we'll always want to expand
@@ -474,20 +486,12 @@ class _ProgramExplorerState extends State<ProgramExplorer>
       node.expand();
     }
 
-    widget.onSelected(node.location);
+    onSelected(node.location);
   }
 
   void onItemExpanded(VMServiceObjectNode node) async {
     if (node.object != null && node.object is! Obj) {
-      await widget.controller.populateNode(node);
+      await controller.populateNode(node);
     }
-  }
-
-  void _scrollToNode() {
-    final nodeIndex = widget.controller.nodeIndex.value;
-    final topSpacing = _programExplorerRowHeight * 4;
-    final scrollPosition = _programExplorerRowHeight * nodeIndex - topSpacing;
-    _scrollController.animateTo(scrollPosition,
-        duration: longDuration, curve: defaultCurve);
   }
 }
