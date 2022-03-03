@@ -51,7 +51,7 @@ class ImportController {
 
   final void Function(String screenId) _pushSnapshotScreenForImport;
 
-  final NotificationService? _notifications;
+  final NotificationService _notifications;
 
   DateTime? previousImportTime;
 
@@ -74,7 +74,7 @@ class ImportController {
     final isDevToolsSnapshot =
         json is Map<String, dynamic> && json[devToolsSnapshotKey] == true;
     if (!isDevToolsSnapshot) {
-      _notifications!.push(nonDevToolsFileMessage);
+      _notifications.push(nonDevToolsFileMessage);
       return;
     }
 
@@ -86,7 +86,7 @@ class ImportController {
       ..offlineDataJson = devToolsSnapshot;
     serviceManager.connectedApp =
         OfflineConnectedApp.parse(devToolsSnapshot[connectedAppKey]);
-    _notifications!.push(attemptingToImportMessage(activeScreenId));
+    _notifications.push(attemptingToImportMessage(activeScreenId));
     _pushSnapshotScreenForImport(activeScreenId);
   }
 }
