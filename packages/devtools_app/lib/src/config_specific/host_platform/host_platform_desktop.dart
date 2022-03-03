@@ -7,7 +7,7 @@ import 'dart:io';
 class HostPlatform {
   HostPlatform._();
 
-  static final HostPlatform instance = HostPlatform._();
+  static late final HostPlatform instance = HostPlatform._();
 
   bool get isMacOS => Platform.isMacOS;
 }
