@@ -43,7 +43,7 @@ class _ExampleConditionalScreenBody extends StatefulWidget {
 
 class _ExampleConditionalScreenBodyState
     extends State<_ExampleConditionalScreenBody>
-    with OfflineScreenMixin<_ExampleConditionalScreenBody, String?> {
+    with OfflineScreenMixin<_ExampleConditionalScreenBody, String> {
   ExampleController? controller;
 
   @override
@@ -64,10 +64,10 @@ class _ExampleConditionalScreenBodyState
 
   @override
   Widget build(BuildContext context) {
-    final exampleScreen = ValueListenableBuilder<String?>(
+    final exampleScreen = ValueListenableBuilder<String>(
       valueListenable: controller!.title,
-      builder: (context, String? value, _) {
-        return Center(child: Text(value ?? ''));
+      builder: (context, String value, _) {
+        return Center(child: Text(value));
       },
     );
 
@@ -88,7 +88,7 @@ class _ExampleConditionalScreenBodyState
   }
 
   @override
-  FutureOr<void> processOfflineData(String? offlineData) async {
+  FutureOr<void> processOfflineData(String offlineData) async {
     await controller!.processOfflineData(offlineData);
   }
 
@@ -99,9 +99,9 @@ class _ExampleConditionalScreenBodyState
 }
 
 class ExampleController {
-  final ValueNotifier<String?> title = ValueNotifier('Example screen');
+  final ValueNotifier<String> title = ValueNotifier('Example screen');
 
-  FutureOr<void> processOfflineData(String? offlineData) {
+  FutureOr<void> processOfflineData(String offlineData) {
     title.value = offlineData;
   }
 }
