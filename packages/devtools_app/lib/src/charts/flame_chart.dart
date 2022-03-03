@@ -56,8 +56,8 @@ abstract class FlameChart<T, V> extends StatefulWidget {
     required this.containerHeight,
     required this.selectionNotifier,
     required this.onDataSelected,
-    this.searchMatchesNotifier,
-    this.activeSearchMatchNotifier,
+    required this.searchMatchesNotifier,
+    required this.activeSearchMatchNotifier,
     this.startInset = sideInset,
     this.endInset = sideInset,
   });
@@ -88,9 +88,9 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 
   final ValueListenable<V> selectionNotifier;
 
-  final ValueListenable<List<V>>? searchMatchesNotifier;
+  final ValueListenable<List<V>> searchMatchesNotifier;
 
-  final ValueListenable<V?>? activeSearchMatchNotifier;
+  final ValueListenable<V?> activeSearchMatchNotifier;
 
   final void Function(V data) onDataSelected;
 
@@ -238,7 +238,7 @@ abstract class FlameChartState<T extends FlameChart,
 
     if (widget.activeSearchMatchNotifier != null) {
       addAutoDisposeListener(widget.activeSearchMatchNotifier, () async {
-        final activeSearch = widget.activeSearchMatchNotifier!.value;
+        final activeSearch = widget.activeSearchMatchNotifier.value;
         if (activeSearch == null) return;
 
         // Ensure the [activeSearch] is vertically in view.
