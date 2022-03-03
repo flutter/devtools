@@ -13,4 +13,7 @@ DragAndDropManagerDesktop createDragAndDropManager() {
 
 class DragAndDropManagerDesktop extends DragAndDropManager {
   DragAndDropManagerDesktop() : super.impl();
+
+  @override
+  void init() {}
 }
