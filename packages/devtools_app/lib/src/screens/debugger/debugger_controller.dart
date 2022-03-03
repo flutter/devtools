@@ -17,7 +17,7 @@ import '../../primitives/auto_dispose.dart';
 import '../../primitives/history_manager.dart';
 import '../../primitives/message_bus.dart';
 import '../../primitives/utils.dart';
-import '../../service/isolate_manager.dart';
+import '../../service/isolate_state.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../../ui/search.dart';
