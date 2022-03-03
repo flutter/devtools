@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe, unnecessary_null_comparison
 
 import 'dart:async';
 import 'dart:core';
@@ -24,7 +24,7 @@ import 'vm_service_wrapper.dart';
 class ServiceExtensionManager extends Disposer {
   ServiceExtensionManager(this._isolateManager);
 
-  VmServiceWrapper _service;
+  VmServiceWrapper? _service;
 
   bool _checkForFirstFrameStarted = false;
 
@@ -58,7 +58,7 @@ class ServiceExtensionManager extends Disposer {
   Map<IsolateRef, List<AsyncCallback>> _callbacksOnIsolateResume = {};
 
   ConnectedApp get connectedApp => _connectedApp;
-  ConnectedApp _connectedApp;
+  late ConnectedApp _connectedApp;
 
   Future<void> _handleIsolateEvent(Event event) async {
     if (event.kind == EventKind.kServiceExtensionAdded) {
@@ -74,25 +74,25 @@ class ServiceExtensionManager extends Disposer {
         await _onFrameEventReceived();
         break;
       case 'Flutter.ServiceExtensionStateChanged':
-        final name = event.json['extensionData']['extension'].toString();
-        final encodedValue = event.json['extensionData']['value'].toString();
+        final name = event.json!['extensionData']['extension'].toString();
+        final encodedValue = event.json!['extensionData']['value'].toString();
         await _updateServiceExtensionForStateChange(name, encodedValue);
         break;
       case 'HttpTimelineLoggingStateChange':
         final name = extensions.httpEnableTimelineLogging.extension;
-        final encodedValue = event.json['extensionData']['enabled'].toString();
+        final encodedValue = event.json!['extensionData']['enabled'].toString();
         await _updateServiceExtensionForStateChange(name, encodedValue);
         break;
       case 'SocketProfilingStateChange':
         final name = extensions.socketProfiling.extension;
-        final encodedValue = event.json['extensionData']['enabled'].toString();
+        final encodedValue = event.json!['extensionData']['enabled'].toString();
         await _updateServiceExtensionForStateChange(name, encodedValue);
     }
   }
 
   Future<void> _handleDebugEvent(Event event) async {
     if (event.kind == EventKind.kResume) {
-      final isolateRef = event.isolate;
+      final isolateRef = event.isolate!;
       final callbacks = _callbacksOnIsolateResume[isolateRef] ?? [];
       _callbacksOnIsolateResume = {};
       for (final callback in callbacks) {
@@ -134,7 +134,7 @@ class ServiceExtensionManager extends Disposer {
 
   dynamic _getExtensionValue(String name, String encodedValue) {
     final expectedValueType =
-        extensions.serviceExtensionsAllowlist[name].values.first.runtimeType;
+        extensions.serviceExtensionsAllowlist[name]!.values.first.runtimeType;
     switch (expectedValueType) {
       case bool:
         return encodedValue == 'true';
@@ -175,7 +175,9 @@ class ServiceExtensionManager extends Disposer {
   }
 
   Future<void> _registerMainIsolate(
-      Isolate mainIsolate, IsolateRef expectedMainIsolateRef) async {
+    Isolate mainIsolate,
+    IsolateRef? expectedMainIsolateRef,
+  ) async {
     if (expectedMainIsolateRef != _isolateManager.mainIsolate.value) {
       // Isolate has changed again.
       return;
@@ -188,12 +190,12 @@ class ServiceExtensionManager extends Disposer {
           return;
         }
         await Future.wait([
-          for (String extension in mainIsolate.extensionRPCs)
+          for (String extension in mainIsolate.extensionRPCs!)
             _maybeAddServiceExtension(extension)
         ]);
       } else {
         await Future.wait([
-          for (String extension in mainIsolate.extensionRPCs)
+          for (String extension in mainIsolate.extensionRPCs!)
             _addServiceExtension(extension)
         ]);
       }
@@ -201,7 +203,7 @@ class ServiceExtensionManager extends Disposer {
   }
 
   Future<void> _maybeCheckForFirstFlutterFrame() async {
-    final _lastMainIsolate = _isolateManager.mainIsolate.value;
+    final IsolateRef? _lastMainIsolate = _isolateManager.mainIsolate.value;
     if (_checkForFirstFrameStarted ||
         _firstFrameEventReceived ||
         _lastMainIsolate == null) return;
@@ -210,7 +212,7 @@ class ServiceExtensionManager extends Disposer {
     }
     _checkForFirstFrameStarted = true;
 
-    final value = await _service.callServiceExtension(
+    final value = await _service!.callServiceExtension(
       extensions.didSendFirstFrameEvent,
       isolateId: _lastMainIsolate.id,
     );
@@ -219,14 +221,15 @@ class ServiceExtensionManager extends Disposer {
       // frame.
       return;
     }
-    final didSendFirstFrameEvent = value?.json['enabled'] == 'true';
+    final didSendFirstFrameEvent = value.json!['enabled'] == 'true';
 
     if (didSendFirstFrameEvent) {
       await _onFrameEventReceived();
     }
   }
 
-  Future<void> _maybeAddServiceExtension(String name) async {
+  Future<void> _maybeAddServiceExtension(String? name) async {
+    if (name == null) return;
     if (_firstFrameEventReceived || !isUnsafeBeforeFirstFlutterFrame(name)) {
       await _addServiceExtension(name);
     } else {
@@ -251,7 +254,7 @@ class ServiceExtensionManager extends Disposer {
       // initial start.
       return await _callServiceExtension(
         name,
-        _enabledServiceExtensions[name].value,
+        _enabledServiceExtensions[name]!.value,
       );
     } else {
       // Set any extensions that are already enabled on the device. This will
@@ -268,13 +271,13 @@ class ServiceExtensionManager extends Disposer {
       return;
     }
     final expectedValueType =
-        extensions.serviceExtensionsAllowlist[name].values.first.runtimeType;
+        extensions.serviceExtensionsAllowlist[name]!.values.first.runtimeType;
 
     Future<void> restore() async {
       // The restore request is obsolete if the isolate has changed.
       if (isolateRef != _isolateManager.mainIsolate.value) return;
       try {
-        final response = await _service.callServiceExtension(
+        final response = await _service!.callServiceExtension(
           name,
           isolateId: isolateRef.id,
         );
@@ -284,17 +287,17 @@ class ServiceExtensionManager extends Disposer {
         switch (expectedValueType) {
           case bool:
             final bool enabled =
-                response.json['enabled'] == 'true' ? true : false;
+                response.json!['enabled'] == 'true' ? true : false;
             await _maybeRestoreExtension(name, enabled);
             return;
           case String:
-            final String value = response.json['value'];
+            final String? value = response.json!['value'];
             await _maybeRestoreExtension(name, value);
             return;
           case int:
           case double:
             final num value = num.parse(
-                response.json[name.substring(name.lastIndexOf('.') + 1)]);
+                response.json![name.substring(name.lastIndexOf('.') + 1)]);
             await _maybeRestoreExtension(name, value);
             return;
           default:
@@ -317,7 +320,7 @@ class ServiceExtensionManager extends Disposer {
 
     // Do not try to restore Dart IO extensions for a paused isolate.
     if (extensions.isDartIoExtension(name) &&
-        isolate.pauseEvent.kind.contains('Pause')) {
+        isolate.pauseEvent!.kind!.contains('Pause')) {
       _callbacksOnIsolateResume.putIfAbsent(isolateRef, () => []).add(restore);
     } else {
       await restore();
@@ -357,8 +360,8 @@ class ServiceExtensionManager extends Disposer {
 
       assert(value != null);
       if (value is bool) {
-        Future<void> call(String isolateId, bool value) async {
-          await _service.callServiceExtension(
+        Future<void> call(String? isolateId, bool value) async {
+          await _service!.callServiceExtension(
             name,
             isolateId: isolateId,
             args: {'enabled': value},
@@ -371,17 +374,17 @@ class ServiceExtensionManager extends Disposer {
           // service extension is available on one isolate it is available on
           // all. For example, some isolates may still be initializing so may
           // not expose the service extension yet.
-          await _service.forEachIsolate((isolate) async {
+          await _service!.forEachIsolate((isolate) async {
             // TODO(kenz): stop special casing http timeline logging once
             // dart io version 1.4 hits stable (when vm_service 5.3.0 hits
             // Flutter stable).
             // See https://github.com/dart-lang/sdk/issues/43628.
             if (name == extensions.httpEnableTimelineLogging.extension &&
-                !(await _service.isDartIoVersionSupported(
+                !(await _service!.isDartIoVersionSupported(
                   supportedVersion: SemanticVersion(major: 1, minor: 4),
-                  isolateId: isolate.id,
+                  isolateId: isolate.id!,
                 ))) {
-              await _service.httpEnableTimelineLogging(isolate.id, value);
+              await _service!.httpEnableTimelineLogging(isolate.id!, value);
             } else {
               await call(isolate.id, value);
             }
@@ -390,13 +393,13 @@ class ServiceExtensionManager extends Disposer {
           await call(mainIsolate.id, value);
         }
       } else if (value is String) {
-        await _service.callServiceExtension(
+        await _service!.callServiceExtension(
           name,
           isolateId: mainIsolate.id,
           args: {'value': value},
         );
       } else if (value is double) {
-        await _service.callServiceExtension(
+        await _service!.callServiceExtension(
           name,
           isolateId: mainIsolate.id,
           // The param name for a numeric service extension will be the last part
@@ -412,7 +415,7 @@ class ServiceExtensionManager extends Disposer {
 
     // Do not try to call Dart IO extensions for a paused isolate.
     if (extensions.isDartIoExtension(name) &&
-        isolate.pauseEvent.kind.contains('Pause')) {
+        isolate.pauseEvent!.kind!.contains('Pause')) {
       _callbacksOnIsolateResume
           .putIfAbsent(mainIsolate, () => [])
           .add(callExtension);
@@ -449,8 +452,8 @@ class ServiceExtensionManager extends Disposer {
   /// Sets the state for a service extension and makes the call to the VMService.
   Future<void> setServiceExtensionState(
     String name, {
-    @required bool enabled,
-    @required dynamic value,
+    required bool enabled,
+    required dynamic value,
     bool callExtension = true,
   }) async {
     if (callExtension && _serviceExtensions.contains(name)) {
@@ -482,7 +485,7 @@ class ServiceExtensionManager extends Disposer {
       // Listen for when the service extension is added and use it.
       final completer = Completer<bool>();
       final listenable = hasServiceExtension(name);
-      VoidCallback listener;
+      late VoidCallback listener;
       listener = () {
         if (listenable.value || completer.isCompleted) {
           listenable.removeListener(listener);
@@ -494,7 +497,7 @@ class ServiceExtensionManager extends Disposer {
     }
 
     _maybeRegisteringServiceExtensions[name] ??= createCompleter();
-    return _maybeRegisteringServiceExtensions[name].future;
+    return _maybeRegisteringServiceExtensions[name]!.future;
   }
 
   ValueListenable<bool> hasServiceExtension(String name) {
@@ -518,7 +521,7 @@ class ServiceExtensionManager extends Disposer {
       () {
         return ValueNotifier<ServiceExtensionState>(
           _enabledServiceExtensions.containsKey(name)
-              ? _enabledServiceExtensions[name]
+              ? _enabledServiceExtensions[name]!
               : ServiceExtensionState(enabled: false, value: null),
         );
       },
@@ -555,7 +558,7 @@ class ServiceExtensionManager extends Disposer {
 }
 
 class ServiceExtensionState {
-  ServiceExtensionState({@required this.enabled, @required this.value}) {
+  ServiceExtensionState({required this.enabled, required this.value}) {
     if (value is bool) {
       assert(enabled == value);
     }

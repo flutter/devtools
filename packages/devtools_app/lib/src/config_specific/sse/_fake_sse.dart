@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 /// A shim that imitates the interface of SseClient from package:sse.
@@ -14,7 +12,7 @@ import 'dart:async';
 class SseClient {
   SseClient(String endpoint);
 
-  Stream get stream => null;
+  Stream? get stream => null;
 
-  StreamSink get sink => null;
+  StreamSink? get sink => null;
 }
