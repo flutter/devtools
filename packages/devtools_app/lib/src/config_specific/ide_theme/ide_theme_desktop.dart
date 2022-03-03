@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-// @dart=2.9
+import '../../shared/theme.dart';
 
 import 'ide_theme.dart';
 
@@ -10,4 +10,5 @@ import 'ide_theme.dart';
 bool debugLargeFontSize = false;
 
 /// Load any IDE-supplied theming.
-IdeTheme getIdeTheme() => IdeTheme(fontSize: debugLargeFontSize ? 40.0 : null);
+IdeTheme getIdeTheme() =>
+    IdeTheme(fontSize: debugLargeFontSize ? 40.0 : unscaledDefaultFontSize);

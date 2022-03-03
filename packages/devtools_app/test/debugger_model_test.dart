@@ -4,7 +4,7 @@
 
 // @dart=2.9
 
-import 'package:devtools_app/src/debugger/debugger_model.dart';
+import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 

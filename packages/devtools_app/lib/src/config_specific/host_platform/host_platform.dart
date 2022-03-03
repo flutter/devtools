@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-// @dart=2.9
-
 export 'host_platform_stub.dart'
     if (dart.library.html) 'host_platform_web.dart'
     if (dart.library.io) 'host_platform_desktop.dart';

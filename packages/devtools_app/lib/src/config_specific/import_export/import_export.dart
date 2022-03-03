@@ -9,9 +9,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 import '../../../devtools.dart';
-import '../../performance/performance_model.dart';
-import '../../performance/performance_screen.dart';
 import '../../primitives/utils.dart';
+import '../../screens/performance/performance_model.dart';
+import '../../screens/performance/performance_screen.dart';
 import '../../shared/connected_app.dart';
 import '../../shared/globals.dart';
 import '../../shared/notifications.dart';

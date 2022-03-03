@@ -8,8 +8,8 @@ import 'package:devtools_app/src/charts/chart.dart';
 import 'package:devtools_app/src/charts/chart_controller.dart';
 import 'package:devtools_app/src/charts/chart_trace.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/memory/memory_charts.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/screens/memory/memory_charts.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -194,7 +194,7 @@ void main() {
         expect(find.byWidget(theChart), findsOneWidget);
 
         // Validate the X axis before data added.
-        expect(controller.visibleTicks, equals(215));
+        expect(controller.visibleXAxisTicks, equals(215));
         expect(controller.xCanvasChart, equals(50.0));
         expect(controller.xPaddingRight, equals(0.0));
         expect(controller.displayXLabels, true);
@@ -264,7 +264,7 @@ void main() {
           await tester.pumpAndSettle(const Duration(seconds: 2));
 
           // Validate the X axis after data added to all traces.
-          expect(controller.visibleTicks, equals(215));
+          expect(controller.visibleXAxisTicks, equals(215));
           expect(controller.xCanvasChart, equals(50.0));
           expect(controller.xPaddingRight, equals(0.0));
           expect(controller.displayXLabels, true);
@@ -347,7 +347,7 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 2));
 
         // Validate the X axis after data added to all traces.
-        expect(controller.visibleTicks, equals(104));
+        expect(controller.visibleXAxisTicks, equals(104));
         expect(controller.xCanvasChart, equals(50.0));
         expect(controller.xPaddingRight, equals(0.0));
         expect(controller.displayXLabels, true);
@@ -386,7 +386,7 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 2));
 
         // Validate the X axis after data added to all traces.
-        expect(controller.visibleTicks, equals(1704));
+        expect(controller.visibleXAxisTicks, equals(1704));
         expect(controller.xCanvasChart, equals(50.0));
         expect(controller.xPaddingRight, equals(0.6880000000001019));
         expect(controller.displayXLabels, true);
@@ -576,7 +576,7 @@ void main() {
         loadData();
 
         // Validate the X axis before any data.
-        expect(controller.visibleTicks, equals(215));
+        expect(controller.visibleXAxisTicks, equals(215));
         expect(controller.xCanvasChart, equals(50.0));
         expect(controller.xPaddingRight, equals(0.0));
         expect(controller.displayXLabels, true);
@@ -616,7 +616,7 @@ void main() {
           await tester.pumpAndSettle(const Duration(seconds: 2));
 
           // Validate the X axis after data added to all traces.
-          expect(controller.visibleTicks, equals(215));
+          expect(controller.visibleXAxisTicks, equals(215));
           expect(controller.xCanvasChart, equals(50.0));
           expect(controller.xPaddingRight, equals(0.0));
           expect(controller.displayXLabels, true);
@@ -725,7 +725,7 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 2));
 
         // Validate the X axis after data added to all traces.
-        expect(controller.visibleTicks, equals(104));
+        expect(controller.visibleXAxisTicks, equals(104));
         expect(controller.xCanvasChart, equals(50.0));
         expect(controller.xPaddingRight, equals(0.0));
         expect(controller.displayXLabels, true);
@@ -777,7 +777,7 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 2));
 
         // Validate the X axis after data added to all traces.
-        expect(controller.visibleTicks, equals(1704));
+        expect(controller.visibleXAxisTicks, equals(1704));
         expect(controller.xCanvasChart, equals(50.0));
         expect(controller.xPaddingRight, equals(0.6880000000001019));
         expect(controller.displayXLabels, true);

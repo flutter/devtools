@@ -20,10 +20,10 @@ abstract class FileIO {
       {bool isMemory = false});
 
   /// Returns content of filename or null if file is unknown or content empty.
-  String readStringFromFile(String filename, {bool isMemory = false});
+  String? readStringFromFile(String filename, {bool isMemory = false});
 
   /// List of files (basename only).
-  List<String> list({String prefix, bool isMemory = false});
+  List<String> list({required String prefix, bool isMemory = false});
 
   /// Delete exported files created for testing only.
   bool deleteFile(String path, {bool isMemory = false});
