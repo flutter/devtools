@@ -24,7 +24,7 @@ class DragAndDropManagerWeb extends DragAndDropManager {
 
   @override
   void init() {
-    super.init();
+    DragAndDropManager.instance = this;
     onDragOverSubscription = document.body!.onDragOver.listen(_onDragOver);
     onDragLeaveSubscription = document.body!.onDragLeave.listen(_onDragLeave);
     onDropSubscription = document.body!.onDrop.listen(_onDrop);
