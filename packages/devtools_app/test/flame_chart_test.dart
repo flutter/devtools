@@ -4,6 +4,8 @@
 
 // @dart=2.9
 
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/primitives/flutter_widgets/linked_scroll_controller.dart';
