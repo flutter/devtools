@@ -64,10 +64,10 @@ class _ExampleConditionalScreenBodyState
 
   @override
   Widget build(BuildContext context) {
-    final exampleScreen = ValueListenableBuilder(
+    final exampleScreen = ValueListenableBuilder<String?>(
       valueListenable: controller!.title,
-      builder: (context, dynamic value, _) {
-        return Center(child: Text(value));
+      builder: (context, String? value, _) {
+        return Center(child: Text(value ?? ''));
       },
     );
 
