@@ -280,9 +280,6 @@ class ProgramStructureIcon extends StatelessWidget {
   }
 }
 
-// TODO Elliott turn this into stateful widget, add scrollToNode here.
-// Check if the current scroll position matches the node index. If not, scroll
-// to node.
 class _FileExplorer extends StatefulWidget {
   const _FileExplorer({
     @required this.controller,
