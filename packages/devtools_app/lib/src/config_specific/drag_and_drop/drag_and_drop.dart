@@ -108,7 +108,7 @@ class DragAndDrop extends StatefulWidget {
 class DragAndDropState extends State<DragAndDrop> {
   final _dragging = ValueNotifier<bool>(false);
 
-  NotificationsState? notifications;
+  late NotificationsState notifications;
 
   bool _isActive = false;
 
@@ -121,7 +121,7 @@ class DragAndDropState extends State<DragAndDrop> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    notifications = Notifications.of(context);
+    notifications = Notifications.of(context)!;
   }
 
   @override
