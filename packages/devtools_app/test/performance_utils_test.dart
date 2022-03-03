@@ -4,7 +4,7 @@
 
 // @dart=2.9
 
-import 'package:devtools_app/src/performance/performance_utils.dart';
+import 'package:devtools_app/src/screens/performance/performance_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_data/performance_test_data.dart';

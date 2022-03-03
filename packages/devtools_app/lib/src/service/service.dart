@@ -28,11 +28,11 @@ Future<VmServiceWrapper> _connectWithSse(
 
   final service = VmServiceWrapper.fromNewVmService(
     stream,
-    client.sink.add,
+    client.sink!.add,
     uri,
   );
 
-  unawaited(client.sink.done.whenComplete(() {
+  unawaited(client.sink!.done.whenComplete(() {
     finishedCompleter.complete();
     service.dispose();
   }));

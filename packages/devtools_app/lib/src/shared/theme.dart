@@ -36,11 +36,11 @@ ThemeData themeFor({
     primaryTextTheme: (theme != null
             ? theme.primaryTextTheme.merge(colorTheme.primaryTextTheme)
             : colorTheme.primaryTextTheme)
-        .apply(fontSizeFactor: ideTheme.fontSizeFactor ?? 1.0),
+        .apply(fontSizeFactor: ideTheme.fontSizeFactor),
     textTheme: (theme != null
             ? theme.textTheme.merge(colorTheme.textTheme)
             : colorTheme.textTheme)
-        .apply(fontSizeFactor: ideTheme.fontSizeFactor ?? 1.0),
+        .apply(fontSizeFactor: ideTheme.fontSizeFactor),
   );
 }
 

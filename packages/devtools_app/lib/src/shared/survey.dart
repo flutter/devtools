@@ -40,8 +40,8 @@ class SurveyService {
     if (!server.isDevToolsServerAvailable) return null;
 
     _cachedSurvey ??= await _fetchSurveyContent();
-    if (_cachedSurvey != null) {
-      await server.setActiveSurvey(_cachedSurvey!.id);
+    if (_cachedSurvey?.id != null) {
+      await server.setActiveSurvey(_cachedSurvey!.id!);
     }
 
     if (await _shouldShowSurvey()) {

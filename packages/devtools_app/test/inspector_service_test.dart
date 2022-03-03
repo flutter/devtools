@@ -5,8 +5,8 @@
 // @dart=2.9
 
 @TestOn('vm')
-import 'package:devtools_app/src/inspector/diagnostics_node.dart';
-import 'package:devtools_app/src/inspector/inspector_service.dart';
+import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_service.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
