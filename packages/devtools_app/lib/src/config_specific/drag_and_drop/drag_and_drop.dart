@@ -18,17 +18,15 @@ abstract class DragAndDropManager {
     init();
   }
 
-  static DragAndDropManager get instance => _instance ?? DragAndDropManager();
+  static DragAndDropManager get instance => _instance;
 
-  static set instance(value) => _instance = value;
-
-  static DragAndDropManager? _instance;
+  static late final DragAndDropManager _instance = DragAndDropManager();
 
   final _dragAndDropStates = <DragAndDropState>{};
 
   DragAndDropState? activeState;
 
-  void init();
+  void init() {}
 
   @mustCallSuper
   void dispose() {
