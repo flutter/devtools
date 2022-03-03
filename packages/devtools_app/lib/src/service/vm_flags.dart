@@ -24,10 +24,10 @@ class VmFlagManager extends Disposer {
   VmServiceWrapper get service => _service;
   late VmServiceWrapper _service;
 
-  ValueListenable get flags => _flags;
+  ValueListenable<FlagList?> get flags => _flags;
   final _flags = ValueNotifier<FlagList?>(null);
 
-  final _flagNotifiers = <String?, ValueNotifier<Flag>>{};
+  final _flagNotifiers = <String, ValueNotifier<Flag>>{};
 
   ValueNotifier<Flag>? flag(String name) {
     return _flagNotifiers.containsKey(name) ? _flagNotifiers[name] : null;
@@ -38,7 +38,7 @@ class VmFlagManager extends Disposer {
     _flags.value = flagList;
 
     for (var flag in flagList.flags ?? <Flag>[]) {
-      _flagNotifiers[flag.name] = ValueNotifier<Flag>(flag);
+      _flagNotifiers[flag.name ?? ''] = ValueNotifier<Flag>(flag);
     }
   }
 
