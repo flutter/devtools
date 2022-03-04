@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 import 'dart:convert';
@@ -133,7 +133,7 @@ extension SelectableTextChecking on CommonFinders {
     return find.byWidgetPredicate((widget) =>
         widget is SelectableText &&
         ((widget.data?.contains(text) ?? false) ||
-            (widget.textSpan?.toPlainText()?.contains(text) ?? false)));
+            (widget.textSpan?.toPlainText().contains(text) ?? false)));
   }
 }
 
