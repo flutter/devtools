@@ -467,11 +467,11 @@ class TimelineHttpRequestData extends HttpRequestData {
 
   void _recalculateInstantEventTimes() {
     assert(_startEvent != null);
-    int? lastTime = _startEvent!.timestampMicros;
+    int lastTime = _startEvent!.timestampMicros!;
     for (final instant in instantEvents) {
       final instantTime = instant.timestampMicros!;
       instant._timeRange = TimeRange()
-        ..start = Duration(microseconds: lastTime!)
+        ..start = Duration(microseconds: lastTime)
         ..end = Duration(microseconds: instantTime);
       lastTime = instantTime;
     }
