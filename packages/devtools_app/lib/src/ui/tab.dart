@@ -141,7 +141,6 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
       ga.select(
         widget.gaScreen,
         widget.tabs[_currentTabControllerIndex].gaId,
-        nonInteraction: false,
       );
     }
   }
