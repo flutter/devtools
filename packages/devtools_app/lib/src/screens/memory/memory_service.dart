@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:vm_service/vm_service.dart';
@@ -15,15 +13,15 @@ import '../../shared/globals.dart';
 // TODO(terry): because of dart:js usage.  Look at abstracting errors to a log
 // TODO(terry): and fatal errors are eventually sent to analytics.
 
-String? get _isolateId => serviceManager.isolateManager.selectedIsolate.value!.id;
+String? get _isolateId =>
+    serviceManager.isolateManager.selectedIsolate.value?.id;
 
 Future<InstanceRef?> evaluate(String objectRef, String expression) async {
-  final dynamic result =
-      await serviceManager.service!.evaluate(_isolateId!, objectRef, expression);
+  final result = await serviceManager.service!
+      .evaluate(_isolateId!, objectRef, expression);
   switch (result.runtimeType) {
     case InstanceRef:
       return InstanceRef.parse(result.json);
-      break;
     case ErrorRef:
       return null;
     default:
@@ -66,7 +64,7 @@ class InboundReference extends Response {
   }
 
   static InboundReference parse(Map<String, dynamic> json) {
-    return json == null ? null : InboundReference._fromJson(json);
+    return InboundReference._fromJson(json);
   }
 
   dynamic parentField;
@@ -122,7 +120,7 @@ typedef BuildInboundEntry = void Function(
   /* Field that owns reference to allocated memory */
   String? owningAllocator,
   /* Parent class that allocated memory. */
-  bool? owningAllocatorIsAbstract,
+  bool owningAllocatorIsAbstract,
   /* is owning class abstract */
 );
 
@@ -130,7 +128,7 @@ ClassHeapDetailStats? _searchClass(
   List<ClassHeapDetailStats> allClasses,
   String? className,
 ) =>
-    allClasses.firstWhereOrNull((dynamic stat) => stat.classRef.name == className);
+    allClasses.firstWhereOrNull((stat) => stat.classRef.name == className);
 
 // Compute the inboundRefs, who allocated the class/which field owns the ref.
 void computeInboundRefs(
@@ -138,7 +136,7 @@ void computeInboundRefs(
   InboundReferences refs,
   BuildInboundEntry buildCallback,
 ) {
-  final Iterable<InboundReference> elements = refs?.elements ?? [];
+  final Iterable<InboundReference> elements = refs.elements ?? [];
   for (InboundReference element in elements) {
     // Could be a reference to an evaluate so this isn't known.
 
@@ -151,7 +149,7 @@ void computeInboundRefs(
 
     String? referenceName;
     String? owningAllocator; // Class or library that allocated.
-    bool? owningAllocatorIsAbstract;
+    bool owningAllocatorIsAbstract = false;
 
     switch (element.parentField.runtimeType.toString()) {
       case 'ClassRef':
@@ -233,13 +231,11 @@ void computeInboundRefs(
     }
 
     // call the build UI callback.
-    if (buildCallback != null) {
-      buildCallback(
-        referenceName,
-        owningAllocator,
-        owningAllocatorIsAbstract,
-      );
-    }
+    buildCallback(
+      referenceName,
+      owningAllocator,
+      owningAllocatorIsAbstract,
+    );
   }
 }
 
