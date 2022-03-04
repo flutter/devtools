@@ -77,6 +77,10 @@ class GtagEventDevTools extends GtagEvent {
     int value,
     bool non_interaction,
     dynamic custom_map,
+
+    // NOTE: Do not reorder any of these. Order here must match the order in the
+    // Google Analytics console.
+
     String user_app, // dimension1 (flutter or web)
     String user_build, // dimension2 (debug or profile)
     String user_platform, // dimension3 (android/ios/fuchsia/linux/mac/windows)
@@ -89,13 +93,14 @@ class GtagEventDevTools extends GtagEvent {
     bool is_embedded, // dimension10 Whether devtools is embedded
 
     // Performance screen metrics. See [PerformanceScreenMetrics].
-    int ui_duration_micros,
-    int raster_duration_micros,
-    int shader_compilation_duration_micros,
-    int trace_event_count,
+    int ui_duration_micros, // metric1
+    int raster_duration_micros, // metric2
+    int shader_compilation_duration_micros, // metric3
     // Profiler screen metrics. See [ProfilerScreenMetrics].
-    int cpu_sample_count,
-    int cpu_stack_depth,
+    int cpu_sample_count, // metric4
+    int cpu_stack_depth, // metric5
+    // Performance screen metric. See [PerformanceScreenMetrics].
+    int trace_event_count, // metric6
   });
 
   @override
@@ -135,6 +140,8 @@ class GtagEventDevTools extends GtagEvent {
 
   external bool get is_external_build;
 
+  external bool get is_embedded;
+
   // Custom metrics:
   external int get ui_duration_micros;
 
@@ -142,31 +149,21 @@ class GtagEventDevTools extends GtagEvent {
 
   external int get shader_compilation_duration_micros;
 
-  external int get trace_event_count;
-
   external int get cpu_sample_count;
 
   external int get cpu_stack_depth;
+
+  external int get trace_event_count;
 }
 
 // This cannot be a factory constructor in the [GtagEventDevTools] class due to
 // https://github.com/dart-lang/sdk/issues/46967.
-GtagEventDevTools gtagEventWithScreenMetrics({
+GtagEventDevTools _gtagEvent({
   String event_category,
   String event_label,
   String send_to,
-  int value,
   bool non_interaction,
-  dynamic custom_map,
-  String user_app,
-  String user_build,
-  String user_platform,
-  String devtools_platform,
-  String devtools_chrome,
-  String devtools_version,
-  String ide_launched,
-  String flutter_client_id,
-  bool is_external_build,
+  int value,
   ScreenAnalyticsMetrics screenMetrics,
 }) {
   return GtagEventDevTools(
@@ -207,12 +204,58 @@ GtagEventDevTools gtagEventWithScreenMetrics({
   );
 }
 
+// This cannot be a factory constructor in the [GtagExceptionDevTools] class due to
+// https://github.com/dart-lang/sdk/issues/46967.
+GtagExceptionDevTools _gtagException(
+  String errorMessage, {
+  bool fatal = false,
+  ScreenAnalyticsMetrics screenMetrics,
+}) {
+  return GtagExceptionDevTools(
+    description: errorMessage,
+    fatal: fatal,
+    user_app: userAppType,
+    user_build: userBuildType,
+    user_platform: userPlatformType,
+    devtools_platform: devtoolsPlatformType,
+    devtools_chrome: devtoolsChrome,
+    devtools_version: devtoolsVersion,
+    ide_launched: ideLaunched,
+    flutter_client_id: flutterClientId,
+    is_external_build: isExternalBuild,
+    is_embedded: ideTheme.embed,
+    ui_duration_micros: screenMetrics is PerformanceScreenMetrics
+        ? screenMetrics.uiDuration?.inMicroseconds
+        : null,
+    raster_duration_micros: screenMetrics is PerformanceScreenMetrics
+        ? screenMetrics.rasterDuration?.inMicroseconds
+        : null,
+    shader_compilation_duration_micros:
+        screenMetrics is PerformanceScreenMetrics
+            ? screenMetrics.shaderCompilationDuration?.inMicroseconds
+            : null,
+    trace_event_count: screenMetrics is PerformanceScreenMetrics
+        ? screenMetrics.traceEventCount
+        : null,
+    cpu_sample_count: screenMetrics is ProfilerScreenMetrics
+        ? screenMetrics.cpuSampleCount
+        : null,
+    cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
+        ? screenMetrics.cpuStackDepth
+        : null,
+  );
+}
+
 @JS()
 @anonymous
 class GtagExceptionDevTools extends GtagException {
   external factory GtagExceptionDevTools({
     String description,
     bool fatal,
+
+    // NOTE: Do not reorder any of these. Order here must match the order in the
+    // Google Analytics console.
+
     String user_app, // dimension1 (flutter or web)
     String user_build, // dimension2 (debug or profile)
     String user_platform, // dimension3 (android or ios)
@@ -221,6 +264,18 @@ class GtagExceptionDevTools extends GtagException {
     String devtools_version, // dimension6 DevTools version #
     String ide_launched, // dimension7 IDE launched DevTools
     String flutter_client_id, // dimension8 Flutter tool clientId
+    bool is_external_build, // dimension9 External build or google3
+    bool is_embedded, // dimension10 Whether devtools is embedded
+
+    // Performance screen metrics. See [PerformanceScreenMetrics].
+    int ui_duration_micros, // metric1
+    int raster_duration_micros, // metric2
+    int shader_compilation_duration_micros, // metric3
+    // Profiler screen metrics. See [ProfilerScreenMetrics].
+    int cpu_sample_count, // metric4
+    int cpu_stack_depth, // metric5
+    // Performance screen metric. See [PerformanceScreenMetrics].
+    int trace_event_count, // metric6
   });
 
   @override
@@ -244,6 +299,23 @@ class GtagExceptionDevTools extends GtagException {
   external String get ide_launched;
 
   external String get flutter_client_id;
+
+  external bool get is_external_build;
+
+  external bool get is_embedded;
+
+  // Custom metrics:
+  external int get ui_duration_micros;
+
+  external int get raster_duration_micros;
+
+  external int get shader_compilation_duration_micros;
+
+  external int get cpu_sample_count;
+
+  external int get cpu_stack_depth;
+
+  external int get trace_event_count;
 }
 
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
@@ -264,20 +336,10 @@ void screen(
 ]) {
   GTag.event(
     screenName,
-    GtagEventDevTools(
+    _gtagEvent(
       event_category: analytics_constants.screenViewEvent,
       value: value,
       send_to: gaDevToolsPropertyId(),
-      user_app: userAppType,
-      user_build: userBuildType,
-      user_platform: userPlatformType,
-      devtools_platform: devtoolsPlatformType,
-      devtools_chrome: devtoolsChrome,
-      devtools_version: devtoolsVersion,
-      ide_launched: ideLaunched,
-      flutter_client_id: flutterClientId,
-      is_external_build: isExternalBuild,
-      is_embedded: ideTheme.embed,
     ),
   );
 }
@@ -405,19 +467,11 @@ void _timing(
 }) {
   GTag.event(
     screenName,
-    gtagEventWithScreenMetrics(
+    _gtagEvent(
       event_category: analytics_constants.timingEvent,
       event_label: timedOperation,
       value: durationMicros,
       send_to: gaDevToolsPropertyId(),
-      user_app: userAppType,
-      user_build: userBuildType,
-      user_platform: userPlatformType,
-      devtools_platform: devtoolsPlatformType,
-      devtools_chrome: devtoolsChrome,
-      devtools_version: devtoolsVersion,
-      ide_launched: ideLaunched,
-      flutter_client_id: flutterClientId,
       screenMetrics: screenMetrics,
     ),
   );
@@ -432,20 +486,12 @@ void select(
 }) {
   GTag.event(
     screenName,
-    gtagEventWithScreenMetrics(
+    _gtagEvent(
       event_category: analytics_constants.selectEvent,
       event_label: selectedItem,
       value: value,
       non_interaction: nonInteraction,
       send_to: gaDevToolsPropertyId(),
-      user_app: userAppType,
-      user_build: userBuildType,
-      user_platform: userPlatformType,
-      devtools_platform: devtoolsPlatformType,
-      devtools_chrome: devtoolsChrome,
-      devtools_version: devtoolsVersion,
-      ide_launched: ideLaunched,
-      flutter_client_id: flutterClientId,
       screenMetrics:
           screenMetricsProvider != null ? screenMetricsProvider() : null,
     ),
@@ -457,23 +503,18 @@ String _lastGaError;
 void reportError(
   String errorMessage, {
   bool fatal = false,
+  ScreenAnalyticsMetrics Function() screenMetricsProvider,
 }) {
   // Don't keep recording same last error.
   if (_lastGaError == errorMessage) return;
   _lastGaError = errorMessage;
 
   GTag.exception(
-    GtagExceptionDevTools(
-      description: errorMessage,
+    _gtagException(
+      errorMessage,
       fatal: fatal,
-      user_app: userAppType,
-      user_build: userBuildType,
-      user_platform: userPlatformType,
-      devtools_platform: devtoolsPlatformType,
-      devtools_chrome: devtoolsChrome,
-      devtools_version: devtoolsVersion,
-      ide_launched: ideLaunched,
-      flutter_client_id: flutterClientId,
+      screenMetrics:
+          screenMetricsProvider != null ? screenMetricsProvider() : null,
     ),
   );
 }
