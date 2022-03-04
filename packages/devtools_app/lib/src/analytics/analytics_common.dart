@@ -20,6 +20,6 @@
 /// }
 /// ```
 ///
-/// Then, add your fields to the `GtagEventDevTools.withScreenMetrics` factory
-/// constructor.
+/// Then, add your fields to the [GtagEventDevTools] factory constructor and add
+/// a corresponding getter in the class.
 abstract class ScreenAnalyticsMetrics {}
