@@ -281,18 +281,12 @@ T? breadthFirstTraversal<T extends TreeNode<T>>(
   bool returnCondition(T node)?,
   void action(T node)?,
 }) {
-  final queue = Queue.of([root]);
-  while (queue.isNotEmpty) {
-    final node = queue.removeFirst();
-    if (returnCondition != null && returnCondition(node)) {
-      return node;
-    }
-    if (action != null) {
-      action(node);
-    }
-    node.children.forEach(queue.add);
-  }
-  return null;
+  return _treeTraversal(
+    root,
+    bfs: true,
+    returnCondition: returnCondition,
+    action: action,
+  );
 }
 
 /// Traverses a tree in depth-first order.
@@ -311,9 +305,25 @@ T? depthFirstTraversal<T extends TreeNode<T>>(
   void action(T node)?,
   bool exploreChildrenCondition(T node)?,
 }) {
-  final stack = Queue.of([root]);
-  while (stack.isNotEmpty) {
-    final node = stack.removeLast();
+  return _treeTraversal(
+    root,
+    bfs: false,
+    returnCondition: returnCondition,
+    action: action,
+    exploreChildrenCondition: exploreChildrenCondition,
+  );
+}
+
+T? _treeTraversal<T extends TreeNode<T>>(
+  T root, {
+  bool bfs = true,
+  bool returnCondition(T node)?,
+  void action(T node)?,
+  bool exploreChildrenCondition(T node)?,
+}) {
+  final toVisit = Queue.of([root]);
+  while (toVisit.isNotEmpty) {
+    final node = bfs ? toVisit.removeFirst() : toVisit.removeLast();
     if (returnCondition != null && returnCondition(node)) {
       return node;
     }
@@ -321,7 +331,8 @@ T? depthFirstTraversal<T extends TreeNode<T>>(
       action(node);
     }
     if (exploreChildrenCondition == null || exploreChildrenCondition(node)) {
-      node.children.reversed.forEach(stack.add);
+      final children = bfs ? node.children : node.children.reversed;
+      children.forEach(toVisit.add);
     }
   }
   return null;

@@ -203,6 +203,150 @@ void main() {
       9
 '''));
     });
+
+    group('Tree traversal', () {
+      TraversalTestTreeNode treeNodeA;
+      TraversalTestTreeNode treeNodeB;
+      TraversalTestTreeNode treeNodeC;
+      TraversalTestTreeNode treeNodeD;
+      TraversalTestTreeNode treeNodeE;
+      TraversalTestTreeNode treeNodeF;
+      TraversalTestTreeNode treeNodeG;
+      TraversalTestTreeNode treeNodeH;
+      TraversalTestTreeNode treeNodeI;
+      TraversalTestTreeNode treeNodeJ;
+
+      TraversalTestTreeNode tree;
+
+      setUp(() {
+        /// Traversal test tree structure:
+        ///
+        /// [level 0]                A
+        ///                      /   |   \
+        /// [level 1]           B    C    D
+        ///                   /   \       |
+        /// [level 2]        E    F       G
+        ///                 /            / \
+        /// [level 3]      H            I   J
+        ///
+        /// BFS traversal order: A, B, C, D, E, F, G, H, I, J
+        /// DFS traversal order: A, B, E, H, F, C, D, G, I, J
+
+        treeNodeA = TraversalTestTreeNode('A');
+        treeNodeB = TraversalTestTreeNode('B');
+        treeNodeC = TraversalTestTreeNode('C');
+        treeNodeD = TraversalTestTreeNode('D');
+        treeNodeE = TraversalTestTreeNode('E');
+        treeNodeF = TraversalTestTreeNode('F');
+        treeNodeG = TraversalTestTreeNode('G');
+        treeNodeH = TraversalTestTreeNode('H');
+        treeNodeI = TraversalTestTreeNode('I');
+        treeNodeJ = TraversalTestTreeNode('J');
+
+        tree = treeNodeA
+          ..addAllChildren(
+            [
+              treeNodeB
+                ..addAllChildren(
+                  [
+                    treeNodeE
+                      ..addAllChildren([
+                        treeNodeH,
+                      ]),
+                    treeNodeF,
+                  ],
+                ),
+              treeNodeC,
+              treeNodeD
+                ..addAllChildren([
+                  treeNodeG
+                    ..addAllChildren([
+                      treeNodeI,
+                      treeNodeJ,
+                    ])
+                ])
+            ],
+          );
+      });
+
+      group('BFS', () {
+        test('traverses tree in correct order', () {
+          var visitedCount = 0;
+          breadthFirstTraversal(
+            tree,
+            action: (node) => node.setVisitedOrder(++visitedCount),
+          );
+          // BFS order: A, B, C, D, E, F, G, H, I, J
+          expect(treeNodeA.visitedOrder, equals(1));
+          expect(treeNodeB.visitedOrder, equals(2));
+          expect(treeNodeC.visitedOrder, equals(3));
+          expect(treeNodeD.visitedOrder, equals(4));
+          expect(treeNodeE.visitedOrder, equals(5));
+          expect(treeNodeF.visitedOrder, equals(6));
+          expect(treeNodeG.visitedOrder, equals(7));
+          expect(treeNodeH.visitedOrder, equals(8));
+          expect(treeNodeI.visitedOrder, equals(9));
+          expect(treeNodeJ.visitedOrder, equals(10));
+        });
+
+        test('finds the correct node', () {
+          final node = breadthFirstTraversal(
+            tree,
+            returnCondition: (node) => node.id == 'H',
+          );
+          expect(node.id, equals('H'));
+        });
+      });
+
+      group('DFS', () {
+        test('traverses tree in correct order', () {
+          var visitedCount = 0;
+          depthFirstTraversal(
+            tree,
+            action: (node) => node.setVisitedOrder(++visitedCount),
+          );
+          // DFS order: A, B, E, H, F, C, D, G, I, J
+          expect(treeNodeA.visitedOrder, equals(1));
+          expect(treeNodeB.visitedOrder, equals(2));
+          expect(treeNodeE.visitedOrder, equals(3));
+          expect(treeNodeH.visitedOrder, equals(4));
+          expect(treeNodeF.visitedOrder, equals(5));
+          expect(treeNodeC.visitedOrder, equals(6));
+          expect(treeNodeD.visitedOrder, equals(7));
+          expect(treeNodeG.visitedOrder, equals(8));
+          expect(treeNodeI.visitedOrder, equals(9));
+          expect(treeNodeJ.visitedOrder, equals(10));
+        });
+
+        test('finds the correct node', () {
+          final node = depthFirstTraversal(
+            tree,
+            returnCondition: (node) => node.id == 'H',
+          );
+          expect(node.id, equals('H'));
+        });
+
+        test('explores correct children', () {
+          var visitedCount = 0;
+          depthFirstTraversal(
+            tree,
+            action: (node) => node.setVisitedOrder(++visitedCount),
+            exploreChildrenCondition: (node) => node.id != 'B',
+          );
+          // DFS order: A, B, [skip] E, H, F, [end skip], C, D, G, I, J
+          expect(treeNodeA.visitedOrder, equals(1));
+          expect(treeNodeB.visitedOrder, equals(2));
+          expect(treeNodeE.visitedOrder, equals(-1));
+          expect(treeNodeH.visitedOrder, equals(-1));
+          expect(treeNodeF.visitedOrder, equals(-1));
+          expect(treeNodeC.visitedOrder, equals(3));
+          expect(treeNodeD.visitedOrder, equals(4));
+          expect(treeNodeG.visitedOrder, equals(5));
+          expect(treeNodeI.visitedOrder, equals(6));
+          expect(treeNodeJ.visitedOrder, equals(7));
+        });
+      });
+    });
   });
 }
 
@@ -252,5 +396,21 @@ class TestTreeNode extends TreeNode<TestTreeNode> {
 
     writeNode(this);
     return buf.toString();
+  }
+}
+
+class TraversalTestTreeNode extends TreeNode<TraversalTestTreeNode> {
+  TraversalTestTreeNode(this.id);
+
+  final String id;
+
+  int get visitedOrder => _visitedOrder;
+  int _visitedOrder = -1;
+
+  @override
+  TraversalTestTreeNode shallowCopy() => TraversalTestTreeNode(id);
+
+  void setVisitedOrder(int order) {
+    _visitedOrder = order;
   }
 }
