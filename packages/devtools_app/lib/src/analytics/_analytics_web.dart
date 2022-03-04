@@ -89,8 +89,8 @@ class GtagEventDevTools extends GtagEvent {
     String devtools_version, // dimension6 DevTools version #
     String ide_launched, // dimension7 Devtools launched (CLI, VSCode, Android)
     String flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
-    bool is_external_build, // dimension9 External build or google3
-    bool is_embedded, // dimension10 Whether devtools is embedded
+    String is_external_build, // dimension9 External build or google3
+    String is_embedded, // dimension10 Whether devtools is embedded
 
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int ui_duration_micros, // metric1
@@ -138,9 +138,9 @@ class GtagEventDevTools extends GtagEvent {
 
   external String get flutter_client_id;
 
-  external bool get is_external_build;
+  external String get is_external_build;
 
-  external bool get is_embedded;
+  external String get is_embedded;
 
   // Custom metrics:
   external int get ui_duration_micros;
@@ -180,8 +180,8 @@ GtagEventDevTools _gtagEvent({
     devtools_version: devtoolsVersion,
     ide_launched: ideLaunched,
     flutter_client_id: flutterClientId,
-    is_external_build: isExternalBuild,
-    is_embedded: ideTheme.embed,
+    is_external_build: isExternalBuild.toString(),
+    is_embedded: ideTheme.embed.toString(),
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
         : null,
@@ -192,14 +192,14 @@ GtagEventDevTools _gtagEvent({
         screenMetrics is PerformanceScreenMetrics
             ? screenMetrics.shaderCompilationDuration?.inMicroseconds
             : null,
-    trace_event_count: screenMetrics is PerformanceScreenMetrics
-        ? screenMetrics.traceEventCount
-        : null,
     cpu_sample_count: screenMetrics is ProfilerScreenMetrics
         ? screenMetrics.cpuSampleCount
         : null,
     cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
         ? screenMetrics.cpuStackDepth
+        : null,
+    trace_event_count: screenMetrics is PerformanceScreenMetrics
+        ? screenMetrics.traceEventCount
         : null,
   );
 }
@@ -222,8 +222,8 @@ GtagExceptionDevTools _gtagException(
     devtools_version: devtoolsVersion,
     ide_launched: ideLaunched,
     flutter_client_id: flutterClientId,
-    is_external_build: isExternalBuild,
-    is_embedded: ideTheme.embed,
+    is_external_build: isExternalBuild.toString(),
+    is_embedded: ideTheme.embed.toString(),
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
         : null,
@@ -234,14 +234,14 @@ GtagExceptionDevTools _gtagException(
         screenMetrics is PerformanceScreenMetrics
             ? screenMetrics.shaderCompilationDuration?.inMicroseconds
             : null,
-    trace_event_count: screenMetrics is PerformanceScreenMetrics
-        ? screenMetrics.traceEventCount
-        : null,
     cpu_sample_count: screenMetrics is ProfilerScreenMetrics
         ? screenMetrics.cpuSampleCount
         : null,
     cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
         ? screenMetrics.cpuStackDepth
+        : null,
+    trace_event_count: screenMetrics is PerformanceScreenMetrics
+        ? screenMetrics.traceEventCount
         : null,
   );
 }
@@ -264,8 +264,8 @@ class GtagExceptionDevTools extends GtagException {
     String devtools_version, // dimension6 DevTools version #
     String ide_launched, // dimension7 IDE launched DevTools
     String flutter_client_id, // dimension8 Flutter tool clientId
-    bool is_external_build, // dimension9 External build or google3
-    bool is_embedded, // dimension10 Whether devtools is embedded
+    String is_external_build, // dimension9 External build or google3
+    String is_embedded, // dimension10 Whether devtools is embedded
 
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int ui_duration_micros, // metric1
@@ -300,9 +300,9 @@ class GtagExceptionDevTools extends GtagException {
 
   external String get flutter_client_id;
 
-  external bool get is_external_build;
+  external String get is_external_build;
 
-  external bool get is_embedded;
+  external String get is_embedded;
 
   // Custom metrics:
   external int get ui_duration_micros;
