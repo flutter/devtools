@@ -61,8 +61,6 @@ class IsolateState {
       case EventKind.kPausePostRequest:
         _isPaused.value = true;
         break;
-      default:
-        throw Exception('Unexpected kind: $kind.');
     }
   }
 }
