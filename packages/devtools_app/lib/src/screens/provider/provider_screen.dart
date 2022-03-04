@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider show Provider;
 
+import '../../analytics/analytics.dart' as ga;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
@@ -55,6 +56,26 @@ class ProviderScreen extends Screen {
         );
 
   static const id = 'provider';
+
+  @override
+  Widget build(BuildContext context) {
+    return const ProviderScreenWrapper();
+  }
+}
+
+class ProviderScreenWrapper extends StatefulWidget {
+  const ProviderScreenWrapper({Key key}) : super(key: key);
+
+  @override
+  _ProviderScreenWrapperState createState() => _ProviderScreenWrapperState();
+}
+
+class _ProviderScreenWrapperState extends State<ProviderScreenWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    ga.screen(ProviderScreen.id);
+  }
 
   @override
   Widget build(BuildContext context) {
