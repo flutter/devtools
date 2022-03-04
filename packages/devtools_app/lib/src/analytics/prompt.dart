@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +14,7 @@ import 'analytics_controller.dart';
 /// Conditionally displays a prompt to request permission for collection of
 /// usage analytics.
 class AnalyticsPrompt extends StatefulWidget {
-  const AnalyticsPrompt({@required this.child});
+  const AnalyticsPrompt({required this.child});
 
   final Widget child;
 
@@ -25,7 +23,7 @@ class AnalyticsPrompt extends StatefulWidget {
 }
 
 class _AnalyticsPromptState extends State<AnalyticsPrompt> {
-  AnalyticsController _controller;
+  AnalyticsController? _controller;
 
   @override
   void didChangeDependencies() {
@@ -40,13 +38,13 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    return ValueListenableBuilder(
-      valueListenable: _controller.shouldPrompt,
+    return ValueListenableBuilder<bool>(
+      valueListenable: _controller!.shouldPrompt,
       builder: (context, showPrompt, child) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (showPrompt) child,
+            if (showPrompt) child!,
             Expanded(child: widget.child),
           ],
         );
@@ -76,7 +74,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
                   ),
                   CircularIconButton(
                     icon: Icons.close,
-                    onPressed: _controller.hidePrompt,
+                    onPressed: _controller!.hidePrompt,
                     backgroundColor: theme.canvasColor,
                     foregroundColor: theme.colorScheme.contrastForeground,
                   ),
@@ -107,7 +105,8 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
           ),
           TextSpan(
             text: 'privacy policy',
-            style: textTheme.subtitle1.copyWith(color: const Color(0xFF54C1EF)),
+            style:
+                textTheme.subtitle1!.copyWith(color: const Color(0xFF54C1EF)),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
                 launchUrl(
@@ -132,7 +131,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
         ElevatedButton(
           onPressed: () {
             // This will also hide the prompt.
-            _controller.toggleAnalyticsEnabled(false);
+            _controller!.toggleAnalyticsEnabled(false);
           },
           style: ElevatedButton.styleFrom(primary: Colors.grey),
           child: const Text('No thanks.'),
@@ -142,7 +141,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
         ),
         ElevatedButton(
           onPressed: () {
-            _controller
+            _controller!
               ..toggleAnalyticsEnabled(true)
               ..hidePrompt();
           },
