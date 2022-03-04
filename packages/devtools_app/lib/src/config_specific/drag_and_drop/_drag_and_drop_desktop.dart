@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'drag_and_drop.dart';
 
 // TODO(kenz): implement once Desktop support is available. See
@@ -15,4 +13,7 @@ DragAndDropManagerDesktop createDragAndDropManager() {
 
 class DragAndDropManagerDesktop extends DragAndDropManager {
   DragAndDropManagerDesktop() : super.impl();
+
+  @override
+  void init() {}
 }
