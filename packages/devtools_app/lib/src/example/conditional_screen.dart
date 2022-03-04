@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -46,7 +44,7 @@ class _ExampleConditionalScreenBody extends StatefulWidget {
 class _ExampleConditionalScreenBodyState
     extends State<_ExampleConditionalScreenBody>
     with OfflineScreenMixin<_ExampleConditionalScreenBody, String> {
-  ExampleController controller;
+  ExampleController? controller;
 
   @override
   void didChangeDependencies() {
@@ -66,9 +64,9 @@ class _ExampleConditionalScreenBodyState
 
   @override
   Widget build(BuildContext context) {
-    final exampleScreen = ValueListenableBuilder(
-      valueListenable: controller.title,
-      builder: (context, value, _) {
+    final exampleScreen = ValueListenableBuilder<String>(
+      valueListenable: controller!.title,
+      builder: (context, String value, _) {
         return Center(child: Text(value));
       },
     );
@@ -91,7 +89,7 @@ class _ExampleConditionalScreenBodyState
 
   @override
   FutureOr<void> processOfflineData(String offlineData) async {
-    await controller.processOfflineData(offlineData);
+    await controller!.processOfflineData(offlineData);
   }
 
   @override
