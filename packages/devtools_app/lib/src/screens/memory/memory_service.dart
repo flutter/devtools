@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
 
+
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -14,11 +15,11 @@ import '../../shared/globals.dart';
 // TODO(terry): because of dart:js usage.  Look at abstracting errors to a log
 // TODO(terry): and fatal errors are eventually sent to analytics.
 
-String get _isolateId => serviceManager.isolateManager.selectedIsolate.value.id;
+String? get _isolateId => serviceManager.isolateManager.selectedIsolate.value!.id;
 
-Future<InstanceRef> evaluate(String objectRef, String expression) async {
+Future<InstanceRef?> evaluate(String objectRef, String expression) async {
   final dynamic result =
-      await serviceManager.service.evaluate(_isolateId, objectRef, expression);
+      await serviceManager.service!.evaluate(_isolateId!, objectRef, expression);
   switch (result.runtimeType) {
     case InstanceRef:
       return InstanceRef.parse(result.json);
@@ -35,15 +36,15 @@ Future<InstanceRef> evaluate(String objectRef, String expression) async {
   return null;
 }
 
-Future<InboundReferences> getInboundReferences(
+Future<InboundReferences?> getInboundReferences(
     String objectRef, int maxInstances) async {
   // TODO(terry): Expose a stream to reduce stalls querying 1000s of instances.
-  final Response response = await serviceManager.service
-      .getInboundReferences(_isolateId, objectRef, maxInstances);
+  final Response response = await serviceManager.service!
+      .getInboundReferences(_isolateId!, objectRef, maxInstances);
 
   if (response.type == 'Sentinel') return null;
 
-  return InboundReferences(response.json);
+  return InboundReferences(response.json!);
 }
 
 class InboundReferences extends Response {
@@ -53,7 +54,7 @@ class InboundReferences extends Response {
         .toList();
   }
 
-  Iterable<InboundReference> elements;
+  Iterable<InboundReference>? elements;
 }
 
 class InboundReference extends Response {
@@ -70,67 +71,66 @@ class InboundReference extends Response {
 
   dynamic parentField;
 
-  int parentListIndex;
+  int? parentListIndex;
 
-  int parentWordOffset;
+  int? parentWordOffset;
 
   bool get isFieldRef => parentField.runtimeType == FieldRef;
 
-  FieldRef get fieldRef => isFieldRef ? parentField as FieldRef : null;
+  FieldRef? get fieldRef => isFieldRef ? parentField as FieldRef? : null;
 
   bool get isClassRef => parentField.runtimeType == ClassRef;
 
-  ClassRef get classRef => isFieldRef ? parentField as ClassRef : null;
+  ClassRef? get classRef => isFieldRef ? parentField as ClassRef? : null;
 
   bool get isFuncRef => parentField.runtimeType == FuncRef;
 
-  FuncRef get funcRef => isFuncRef ? parentField as FuncRef : null;
+  FuncRef? get funcRef => isFuncRef ? parentField as FuncRef? : null;
 
   bool get isNullVal => parentField.runtimeType == NullVal;
 
   bool get isNullValRef => parentField.runtimeType == NullValRef;
 
-  NullVal get nullVal => isInstanceRef ? parentField as NullVal : null;
+  NullVal? get nullVal => isInstanceRef ? parentField as NullVal? : null;
 
   bool get isInstance => parentField.runtimeType == Instance;
 
-  Instance get instance => isInstance ? parentField as Instance : null;
+  Instance? get instance => isInstance ? parentField as Instance? : null;
 
   bool get isInstanceRef => parentField.runtimeType == InstanceRef;
 
-  InstanceRef get instanceRef =>
-      isInstanceRef ? parentField as InstanceRef : null;
+  InstanceRef? get instanceRef =>
+      isInstanceRef ? parentField as InstanceRef? : null;
 
   bool get isLibrary => parentField.runtimeType == Library;
 
   bool get isLibraryRef => parentField.runtimeType == LibraryRef;
 
-  Library get library => isLibrary ? parentField as Library : null;
+  Library? get library => isLibrary ? parentField as Library? : null;
 
   bool get isObj => parentField.runtimeType == Obj;
 
   bool get isObjRef => parentField.runtimeType == ObjRef;
 
-  Obj get obj => isObj ? parentField as Obj : null;
+  Obj? get obj => isObj ? parentField as Obj? : null;
 
   bool get isSentinel => parentField.runtimeType == Sentinel;
 }
 
 typedef BuildInboundEntry = void Function(
-  String referenceName,
+  String? referenceName,
   /* Field that owns reference to allocated memory */
-  String owningAllocator,
+  String? owningAllocator,
   /* Parent class that allocated memory. */
-  bool owningAllocatorIsAbstract,
+  bool? owningAllocatorIsAbstract,
   /* is owning class abstract */
 );
 
-ClassHeapDetailStats _searchClass(
+ClassHeapDetailStats? _searchClass(
   List<ClassHeapDetailStats> allClasses,
-  String className,
+  String? className,
 ) =>
-    allClasses.firstWhere((dynamic stat) => stat.classRef.name == className,
-        orElse: () => null);
+    allClasses.firstWhereOrNull((dynamic stat) => stat.classRef.name == className);
 
 // Compute the inboundRefs, who allocated the class/which field owns the ref.
 void computeInboundRefs(
@@ -149,13 +149,13 @@ void computeInboundRefs(
     if (element.parentField.owner != null &&
         element.parentField.owner.name.contains('&')) continue;
 
-    String referenceName;
-    String owningAllocator; // Class or library that allocated.
-    bool owningAllocatorIsAbstract;
+    String? referenceName;
+    String? owningAllocator; // Class or library that allocated.
+    bool? owningAllocatorIsAbstract;
 
     switch (element.parentField.runtimeType.toString()) {
       case 'ClassRef':
-        final ClassRef classRef = element.classRef;
+        final ClassRef classRef = element.classRef!;
         owningAllocator = classRef.name;
         // TODO(terry): Quick way to detect if class is probably abstract-
         // TODO(terry): Does it exist in the class list table?
@@ -163,11 +163,11 @@ void computeInboundRefs(
             _searchClass(allClasses, owningAllocator) == null;
         break;
       case 'FieldRef':
-        final FieldRef fieldRef = element.fieldRef;
+        final FieldRef fieldRef = element.fieldRef!;
         referenceName = fieldRef.name;
         switch (fieldRef.owner.runtimeType.toString()) {
           case 'ClassRef':
-            final ClassRef classRef = ClassRef.parse(fieldRef.owner.json);
+            final ClassRef classRef = ClassRef.parse(fieldRef.owner!.json)!;
             owningAllocator = classRef.name;
             // TODO(terry): Quick way to detect if class is probably abstract-
             // TODO(terry): Does it exist in the class list table?
@@ -176,7 +176,7 @@ void computeInboundRefs(
             break;
           case 'Library':
           case 'LibraryRef':
-            final Library library = Library.parse(fieldRef.owner.json);
+            final Library? library = Library.parse(fieldRef.owner!.json);
             owningAllocator = 'Library ${library?.name ?? ""}';
             break;
         }
