@@ -269,18 +269,6 @@ class IsolateManager extends Disposer {
       return;
     }
 
-    switch (event.kind) {
-      case EventKind.kResume:
-        isolateState.resume();
-        break;
-      case EventKind.kPauseStart:
-      case EventKind.kPauseExit:
-      case EventKind.kPauseBreakpoint:
-      case EventKind.kPauseInterrupted:
-      case EventKind.kPauseException:
-      case EventKind.kPausePostRequest:
-        isolateState.pause();
-        break;
-    }
+    isolateState.handleDebugEvent(event.kind);
   }
 }

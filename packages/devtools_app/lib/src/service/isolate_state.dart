@@ -48,7 +48,21 @@ class IsolateState {
     }
   }
 
-  void pause() => _isPaused.value = true;
-
-  void resume() => _isPaused.value = false;
+  void handleDebugEvent(String kind) {
+    switch (kind) {
+      case EventKind.kResume:
+        _isPaused.value = false;
+        break;
+      case EventKind.kPauseStart:
+      case EventKind.kPauseExit:
+      case EventKind.kPauseBreakpoint:
+      case EventKind.kPauseInterrupted:
+      case EventKind.kPauseException:
+      case EventKind.kPausePostRequest:
+        _isPaused.value = true;
+        break;
+      default:
+        throw Exception('Unexpected kind: $kind.');
+    }
+  }
 }
