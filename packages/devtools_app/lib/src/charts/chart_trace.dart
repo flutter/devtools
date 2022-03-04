@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -27,7 +25,7 @@ class DataAggregate extends Data {
 
 class PaintCharacteristics {
   PaintCharacteristics({
-    @required this.color,
+    required this.color,
     this.colorAggregate,
     this.symbol = ChartSymbol.ring,
     this.strokeWidth = 1,
@@ -41,7 +39,7 @@ class PaintCharacteristics {
   });
 
   PaintCharacteristics.concentric({
-    @required this.color,
+    required this.color,
     this.colorAggregate,
     this.symbol = ChartSymbol.concentric,
     this.strokeWidth = 1,
@@ -56,11 +54,11 @@ class PaintCharacteristics {
 
   /// If specified Y scale is computed and min value is fixed.
   /// Will assert if new data point is less than min specified.
-  double fixedMinY;
+  double? fixedMinY;
 
   /// If specified Y scale is computed and max value is fixed.
   /// Will assert if new data point is more than max specified.
-  double fixedMaxY;
+  double? fixedMaxY;
 
   /// Primary color.
   Color color;
@@ -74,7 +72,7 @@ class PaintCharacteristics {
   /// Color to use if count > 1.
   ///
   /// See [DataAggregate.count].
-  Color colorAggregate;
+  Color? colorAggregate;
 
   ChartSymbol symbol;
 
@@ -91,12 +89,8 @@ class PaintCharacteristics {
 
 class Trace {
   Trace(this.controller, this._chartType, this.characteristics) {
-    double minY = characteristics.fixedMinY;
-    minY ??= 0.0;
-
-    double maxY = characteristics.fixedMaxY;
-    maxY ??= 0.0;
-
+    final double minY = characteristics.fixedMinY ?? 0.0;
+    final double maxY = characteristics.fixedMaxY ?? 0.0;
     yAxis = AxisScale(minY, maxY, 30);
   }
 
@@ -117,15 +111,15 @@ class Trace {
   /// | ___/'''''''\    \  /''''''     <--- Trace 2 (lowest Y is zero)
   /// |/            \____\/_____/''    <--- Trace 1
   /// -------------------------------
-  bool stacked;
+  late bool stacked;
 
-  String name;
+  String? name;
 
   double dataYMax = 0;
 
   final _data = <Data>[];
 
-  Path get symbolPath {
+  Path? get symbolPath {
     if (_symbolPath != null) return _symbolPath;
 
     switch (characteristics.symbol) {
@@ -149,7 +143,7 @@ class Trace {
   }
 
   /// Path to draw symbol.
-  Path _symbolPath;
+  Path? _symbolPath;
 
   // TODO(terry): Consider UnmodifiableListView if data is loaded from offline file (not live).
   List<Data> get data => _data;
@@ -161,7 +155,7 @@ class Trace {
 
   ChartType get chartType => _chartType;
 
-  AxisScale yAxis;
+  AxisScale? yAxis;
 
   void clearData() {
     _data.clear();
@@ -174,16 +168,16 @@ class Trace {
 
     if (characteristics.fixedMaxY != null) {
       assert(
-        datum.y <= characteristics.fixedMaxY,
+        datum.y <= characteristics.fixedMaxY!,
         'y=${datum.y} fixedMaxY=${characteristics.fixedMaxY}',
       );
-    } else if (dataYMax != null && datum.y > dataYMax) {
+    } else if (datum.y > dataYMax) {
       dataYMax = datum.y.toDouble();
       yAxis = AxisScale(0, dataYMax, 30);
     }
 
-    if (datum.y > controller?.yMaxValue) {
-      controller?.yMaxValue = datum.y;
+    if (datum.y > controller.yMaxValue) {
+      controller.yMaxValue = datum.y;
     }
 
     final traceIndex = controller.traceIndex(this);
@@ -198,11 +192,11 @@ class Trace {
   ///            | * |
   ///            !___!
   ///
-  Path _createSquare() {
+  Path? _createSquare() {
     if (_symbolPath == null) {
       _symbolPath = Path();
 
-      _symbolPath.addRect(
+      _symbolPath!.addRect(
         Rect.fromLTWH(
           0,
           0,
@@ -211,7 +205,7 @@ class Trace {
         ),
       );
 
-      _symbolPath.close();
+      _symbolPath!.close();
     }
 
     return _symbolPath;
@@ -223,7 +217,7 @@ class Trace {
   ///         / * \
   ///       ./_____\.
   ///
-  Path _createTriangle() {
+  Path? _createTriangle() {
     if (_symbolPath == null) {
       final width = characteristics.width;
       final height = characteristics.height;
@@ -231,15 +225,15 @@ class Trace {
       _symbolPath = Path();
 
       // Top point.
-      _symbolPath.moveTo(width / 2, 0);
+      _symbolPath!.moveTo(width / 2, 0);
       // Diagonal line from top point to bottom right-side.
-      _symbolPath.lineTo(width, height);
+      _symbolPath!.lineTo(width, height);
       // Horizontal line from bottom right-side to bottom left-side.
-      _symbolPath.lineTo(0, height);
+      _symbolPath!.lineTo(0, height);
 
       // Closing path finishes left-side diagonal line from bottom-left corner
       // to top point.
-      _symbolPath.close();
+      _symbolPath!.close();
     }
 
     return _symbolPath;
@@ -251,7 +245,7 @@ class Trace {
   //             \ * /
   //              \ /
   //               `
-  Path _createTriangleDown() {
+  Path? _createTriangleDown() {
     if (_symbolPath == null) {
       final width = characteristics.width;
       final height = characteristics.height;
@@ -259,13 +253,13 @@ class Trace {
       _symbolPath = Path();
 
       // Straight horizontal line to top-right corner (moveTo starts at 0,0).
-      _symbolPath.lineTo(width, 0);
+      _symbolPath!.lineTo(width, 0);
       // Diagonal right-side line to bottom tip point.
-      _symbolPath.lineTo(width / 2, height);
+      _symbolPath!.lineTo(width / 2, height);
 
       // Closing path finishes left-side diagonal line from bottom tip point to
       // top-left corner.
-      _symbolPath.close();
+      _symbolPath!.close();
     }
 
     return _symbolPath;
@@ -313,22 +307,22 @@ class AxisScale {
 
   final double maxTicks;
 
-  double get tickSpacing => _tickSpacing;
+  double? get tickSpacing => _tickSpacing;
 
-  double _tickSpacing;
+  double? _tickSpacing;
 
-  double get computedMin => _computedMin;
-  double get computedMax => _computedMax;
+  double? get computedMin => _computedMin;
+  double? get computedMax => _computedMax;
 
-  double _computedMin, _computedMax;
+  double? _computedMin, _computedMax;
 
-  double _range;
+  late double _range;
 
   /// Unit for the label (exponent) e.g., 6 = 10^6
-  double labelUnitExponent;
+  double? labelUnitExponent;
 
   /// Number of lables.
-  double labelTicks;
+  double? labelTicks;
 
   void _calculate() {
     _range = _niceNum(maxPoint, false);
@@ -348,9 +342,9 @@ class AxisScale {
     }
   }
 
-  double _calculateMin() => (minPoint / _tickSpacing).floor() * _tickSpacing;
+  double _calculateMin() => (minPoint / _tickSpacing!).floor() * _tickSpacing!;
 
-  double _calculateMax() => (maxPoint / _tickSpacing).ceil() * _tickSpacing;
+  double _calculateMax() => (maxPoint / _tickSpacing!).ceil() * _tickSpacing!;
 
   Map _exponentFraction(double range) {
     if (range == 0) return {};
@@ -378,7 +372,7 @@ class AxisScale {
 
     double exponent; // exponent of range
     double fraction; // fractional part of range
-    double niceFraction; // nice, rounded fraction
+    late double niceFraction; // nice, rounded fraction
 
     exponent = (log10(range)).floor().toDouble();
     fraction = range / pow(10, exponent);
@@ -403,5 +397,5 @@ class AxisScale {
   }
 
   double tickFromValue(double value) =>
-      (value / tickSpacing).truncateToDouble();
+      (value / tickSpacing!).truncateToDouble();
 }
