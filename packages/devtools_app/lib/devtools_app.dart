@@ -38,6 +38,7 @@ export 'src/screens/profiler/cpu_profile_model.dart';
 export 'src/screens/profiler/profile_granularity.dart';
 export 'src/screens/profiler/profiler_screen_controller.dart';
 export 'src/service/isolate_manager.dart';
+export 'src/service/isolate_state.dart';
 export 'src/service/service_extension_manager.dart';
 export 'src/service/service_extensions.dart';
 export 'src/service/service_manager.dart';

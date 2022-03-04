@@ -14,6 +14,7 @@ import '../primitives/auto_dispose.dart';
 import '../primitives/message_bus.dart';
 import '../primitives/utils.dart';
 import '../shared/globals.dart';
+import 'isolate_state.dart';
 import 'service_extensions.dart' as extensions;
 import 'vm_service_wrapper.dart';
 
@@ -268,57 +269,6 @@ class IsolateManager extends Disposer {
       return;
     }
 
-    switch (event.kind) {
-      case EventKind.kResume:
-        isolateState._isPaused.value = false;
-        break;
-      case EventKind.kPauseStart:
-      case EventKind.kPauseExit:
-      case EventKind.kPauseBreakpoint:
-      case EventKind.kPauseInterrupted:
-      case EventKind.kPauseException:
-      case EventKind.kPausePostRequest:
-        isolateState._isPaused.value = true;
-        break;
-    }
-  }
-}
-
-class IsolateState {
-  IsolateState(this.isolateRef);
-
-  ValueListenable<bool> get isPaused => _isPaused;
-
-  final IsolateRef isolateRef;
-
-  Future<Isolate> get isolate => _isolate.future;
-  Completer<Isolate> _isolate = Completer();
-
-  Isolate get isolateNow => _isolateNow;
-  Isolate _isolateNow;
-
-  /// Paused is null until we know whether the isolate is paused or not.
-  final _isPaused = ValueNotifier<bool>(null);
-
-  void onIsolateLoaded(Isolate isolate) {
-    _isolateNow = isolate;
-    _isolate.complete(isolate);
-    if (_isPaused.value == null) {
-      if (isolate.pauseEvent != null &&
-          isolate.pauseEvent.kind != EventKind.kResume) {
-        _isPaused.value = true;
-      } else {
-        _isPaused.value = false;
-      }
-    }
-  }
-
-  void dispose() {
-    _isolateNow = null;
-    if (!_isolate.isCompleted) {
-      _isolate.complete(null);
-    } else {
-      _isolate = Completer()..complete(null);
-    }
+    isolateState.handleDebugEvent(event.kind);
   }
 }
