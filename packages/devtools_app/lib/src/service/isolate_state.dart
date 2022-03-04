@@ -47,4 +47,8 @@ class IsolateState {
       _isolate = Completer()..complete(null);
     }
   }
+
+  void pause() => _isPaused.value = true;
+
+  void resume() => _isPaused.value = false;
 }

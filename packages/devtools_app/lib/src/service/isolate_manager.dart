@@ -271,7 +271,7 @@ class IsolateManager extends Disposer {
 
     switch (event.kind) {
       case EventKind.kResume:
-        (isolateState.isPaused as ValueNotifier<bool>).value = false;
+        isolateState.resume();
         break;
       case EventKind.kPauseStart:
       case EventKind.kPauseExit:
@@ -279,7 +279,7 @@ class IsolateManager extends Disposer {
       case EventKind.kPauseInterrupted:
       case EventKind.kPauseException:
       case EventKind.kPausePostRequest:
-        (isolateState.isPaused as ValueNotifier<bool>).value = true;
+        isolateState.pause();
         break;
     }
   }
