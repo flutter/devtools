@@ -3,7 +3,7 @@ description: Web-based performance tooling for Dart and Flutter.
 
 # Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of devtools packages (devtools_app, devtools_test).
-version: 2.11.1
+version: 2.11.2
 
 homepage: https://github.com/flutter/devtools
 
@@ -57,7 +57,7 @@ dependencies:
 
 dev_dependencies:
   build_runner: ^2.0.4
-  devtools_test: 2.11.1
+  devtools_test: 2.11.2
   flutter_test:
     sdk: flutter
   mockito: ^5.0.9
