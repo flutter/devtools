@@ -115,26 +115,34 @@ class ProgramExplorerController extends DisposableController
       if (result != null) {
         selectNode(result);
         result.expandAscending();
-        _selectedNodeIndex.value = _calculateNodeIndex(searchCondition);
+        _selectedNodeIndex.value = _calculateNodeIndex(
+          matchingNodeCondition: searchCondition,
+          includeCollapsedNodes: false,
+        );
         return;
       }
     }
   }
 
-  int _calculateNodeIndex(
-      bool matchingNodeCondition(VMServiceObjectNode node)) {
+  int _calculateNodeIndex({
+    bool matchingNodeCondition(VMServiceObjectNode node),
+    bool includeCollapsedNodes,
+  }) {
+    // Index tracks the position of the node in the flat-list representation of
+    // the tree:
     var index = 0;
     for (final node in _rootObjectNodes.value) {
       final matchingNode = depthFirstTraversal(
         node,
         returnCondition: matchingNodeCondition,
-        exploreChildrenCondition: (node) => node.isExpanded,
+        exploreChildrenCondition:
+            includeCollapsedNodes ? null : (node) => node.isExpanded,
         action: (_) => index++,
       );
       if (matchingNode != null) return index;
     }
     // If the node wasn't found, return 0.
-    return 0;
+    return -1;
   }
 
   /// Clears controller state and re-initializes.

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../primitives/auto_dispose_mixin.dart';
+import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
@@ -291,10 +292,6 @@ class _FileExplorer extends StatefulWidget {
   final Function(VMServiceObjectNode) onItemSelected;
   final Function(VMServiceObjectNode) onItemExpanded;
 
-  double get selectedNodeOffset =>
-      controller.selectedNodeIndex.value * _programExplorerRowHeight -
-      _selectedNodeTopSpacing;
-
   @override
   State<_FileExplorer> createState() => _FileExplorerState();
 }
@@ -302,11 +299,18 @@ class _FileExplorer extends StatefulWidget {
 class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
   final ScrollController _scrollController = ScrollController();
 
+  double get selectedNodeOffset => widget.controller.selectedNodeIndex.value ==
+          -1
+      ? -1
+      : widget.controller.selectedNodeIndex.value * _programExplorerRowHeight;
+
   @override
   void initState() {
     super.initState();
     addAutoDisposeListener(
-        widget.controller.selectedNodeIndex, _maybeScrollToSelectedNode);
+      widget.controller.selectedNodeIndex,
+      _maybeScrollToSelectedNode,
+    );
   }
 
   @override
@@ -337,9 +341,19 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
   }
 
   void _maybeScrollToSelectedNode() {
-    if (_scrollController.offset != widget.selectedNodeOffset) {
-      _scrollController.animateTo(widget.selectedNodeOffset,
-          duration: longDuration, curve: defaultCurve);
+    // If the node offset is invalid, don't scroll.
+    if (selectedNodeOffset < 0) return;
+
+    final extentVisible = Range(
+      _scrollController.offset,
+      _scrollController.offset + _scrollController.position.extentInside,
+    );
+    if (!extentVisible.contains(selectedNodeOffset)) {
+      _scrollController.animateTo(
+        selectedNodeOffset - _selectedNodeTopSpacing,
+        duration: longDuration,
+        curve: defaultCurve,
+      );
     }
   }
 }

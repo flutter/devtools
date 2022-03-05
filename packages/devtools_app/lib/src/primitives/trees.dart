@@ -289,7 +289,7 @@ T? breadthFirstTraversal<T extends TreeNode<T>>(
   );
 }
 
-/// Traverses a tree in depth-first order.
+/// Traverses a tree in depth-first preorder order.
 ///
 /// [returnCondition] specifies the condition for which we should stop
 /// traversing the tree. For example, if we are calling this method to perform
@@ -331,6 +331,7 @@ T? _treeTraversal<T extends TreeNode<T>>(
       action(node);
     }
     if (exploreChildrenCondition == null || exploreChildrenCondition(node)) {
+      // For DFS, reverse the children to gaurantee preorder traversal.
       final children = bfs ? node.children : node.children.reversed;
       children.forEach(toVisit.add);
     }
