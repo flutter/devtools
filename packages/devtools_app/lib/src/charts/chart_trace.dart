@@ -217,7 +217,7 @@ class Trace {
   ///         / * \
   ///       ./_____\.
   ///
-  Path? _createTriangle() {
+  Path _createTriangle() {
     if (_symbolPath == null) {
       final width = characteristics.width;
       final height = characteristics.height;
@@ -236,7 +236,7 @@ class Trace {
       _symbolPath!.close();
     }
 
-    return _symbolPath;
+    return _symbolPath!;
   }
 
   // Draw triangle centered on [x,y] point (*).
@@ -245,7 +245,7 @@ class Trace {
   //             \ * /
   //              \ /
   //               `
-  Path? _createTriangleDown() {
+  Path _createTriangleDown() {
     if (_symbolPath == null) {
       final width = characteristics.width;
       final height = characteristics.height;
@@ -262,7 +262,7 @@ class Trace {
       _symbolPath!.close();
     }
 
-    return _symbolPath;
+    return _symbolPath!;
   }
 }
 
