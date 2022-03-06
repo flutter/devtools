@@ -15,7 +15,7 @@ class IsolateState {
 
   final IsolateRef isolateRef;
 
-  Future<Isolate> get isolate => _completer.future.then((value) => value!);
+  Future<Isolate?> get isolate => _completer.future;
   Completer<Isolate?> _completer = Completer();
 
   Isolate? get isolateNow => _isolateNow;
