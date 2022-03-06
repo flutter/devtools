@@ -61,7 +61,7 @@ abstract class HttpInstantEvent {
 
 /// An abstraction of an HTTP request made through dart:io.
 abstract class HttpRequestData extends NetworkRequest {
-  HttpRequestData(int? timelineMicrosBase) : super(timelineMicrosBase);
+  HttpRequestData(int timelineMicrosBase) : super(timelineMicrosBase);
 
   static const _connectionInfoKey = 'connectionInfo';
   static const _contentTypeKey = 'content-type';
@@ -173,7 +173,7 @@ abstract class HttpRequestData extends NetworkRequest {
   }
 
   /// All instant events logged to the timeline for this HTTP request.
-  List<HttpInstantEvent>? get instantEvents;
+  List<HttpInstantEvent> get instantEvents;
 
   /// A list of all cookies contained within the request headers.
   List<Cookie> get requestCookies;
@@ -205,7 +205,7 @@ abstract class HttpRequestData extends NetworkRequest {
 /// An abstraction of an HTTP request made through dart:io.
 class TimelineHttpRequestData extends HttpRequestData {
   TimelineHttpRequestData._(
-    int? timelineMicrosBase,
+    int timelineMicrosBase,
     this._startEvent,
     this._endEvent,
     this.responseBody,
@@ -217,7 +217,7 @@ class TimelineHttpRequestData extends HttpRequestData {
   /// timeline event. `events` is a list of Chrome trace format timeline
   /// events.
   factory TimelineHttpRequestData.fromTimeline({
-    required int? timelineMicrosBase,
+    required int timelineMicrosBase,
     required List<Map<String, dynamic>> requestEvents,
     required List<Map<String, dynamic>> responseEvents,
   }) {
@@ -485,9 +485,10 @@ int _dartIoHttpRequestWrapperId = 0;
 
 class DartIOHttpRequestData extends HttpRequestData {
   DartIOHttpRequestData(
-    int? timelineMicrosBase,
+    int timelineMicrosBase,
     this._request,
   )   : wrapperId = _dartIoHttpRequestWrapperId++,
+        _instantEvents = [],
         super(timelineMicrosBase) {
     if (_request.isResponseComplete) {
       getFullRequestData();
@@ -564,7 +565,7 @@ class DartIOHttpRequestData extends HttpRequestData {
 
   /// All instant events logged to the timeline for this HTTP request.
   @override
-  List<HttpInstantEvent>? get instantEvents {
+  List<HttpInstantEvent> get instantEvents {
     if (_instantEvents == null) {
       _instantEvents = [
         for (final event in _request.request?.events ?? [])
@@ -572,7 +573,7 @@ class DartIOHttpRequestData extends HttpRequestData {
       ];
       _recalculateInstantEventTimes();
     }
-    return _instantEvents;
+    return _instantEvents!;
   }
 
   List<HttpInstantEvent>? _instantEvents;
@@ -672,7 +673,7 @@ class DartIOHttpRequestData extends HttpRequestData {
 
   void _recalculateInstantEventTimes() {
     int lastTime = _request.startTime;
-    for (final instant in instantEvents!) {
+    for (final instant in instantEvents) {
       final instantTime = instant.timestampMicros!;
       instant._timeRange = TimeRange()
         ..start = Duration(microseconds: lastTime)
