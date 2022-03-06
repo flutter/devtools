@@ -196,7 +196,7 @@ abstract class HttpRequestData extends NetworkRequest {
   /// Merges the information from another [HttpRequestData] into this instance.
   void merge(HttpRequestData data);
 
-  static List<Cookie> _parseCookies(List? cookies) {
+  static List<Cookie> _parseCookies(List<String>? cookies) {
     if (cookies == null) return [];
     return cookies.map((cookie) => Cookie.fromSetCookieValue(cookie)).toList();
   }
@@ -319,7 +319,7 @@ class TimelineHttpRequestData extends HttpRequestData {
 
   /// A map of general information associated with an HTTP request.
   @override
-  Map<String, dynamic>? get general {
+  Map<String, dynamic> get general {
     if (_general != null) return _general;
     if (!isValid) return null;
     final copy = Map<String, dynamic>.from(_startEvent!.args!);
