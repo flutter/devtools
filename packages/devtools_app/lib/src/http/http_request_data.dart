@@ -319,7 +319,7 @@ class TimelineHttpRequestData extends HttpRequestData {
 
   /// A map of general information associated with an HTTP request.
   @override
-  Map<String, dynamic> get general {
+  Map<String, dynamic>? get general {
     if (_general != null) return _general;
     if (!isValid) return null;
     final copy = Map<String, dynamic>.from(_startEvent!.args!);
