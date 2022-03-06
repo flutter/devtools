@@ -196,7 +196,7 @@ abstract class HttpRequestData extends NetworkRequest {
   /// Merges the information from another [HttpRequestData] into this instance.
   void merge(HttpRequestData data);
 
-  static List<Cookie> _parseCookies(List<String>? cookies) {
+  static List<Cookie> _parseCookies(List<dynamic>? cookies) {
     if (cookies == null) return [];
     return cookies.map((cookie) => Cookie.fromSetCookieValue(cookie)).toList();
   }
