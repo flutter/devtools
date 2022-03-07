@@ -5,6 +5,7 @@
 // @dart=2.9
 
 @TestOn('vm')
+import 'package:devtools_app/src/primitives/message_bus.dart';
 import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_service.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -17,6 +18,7 @@ import 'test_infra/flutter_test_environment.dart';
 
 void main() async {
   initializeLiveTestWidgetsFlutterBindingWithAssets();
+  setGlobal(MessageBus, MessageBus());
 
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
@@ -25,7 +27,7 @@ void main() async {
   InspectorService inspectorService;
 
   env.afterEverySetup = () async {
-    assert(serviceManager.connectedApp.flutterVersionNow != null);
+    assert(serviceManager.connectedAppInitialized);
 
     inspectorService = InspectorService();
     if (env.runConfig.trackWidgetCreation) {
