@@ -1,4 +1,8 @@
 ## 2.11.2
+* Migrate analytics code to null-safety [#3790](https://github.com/flutter/devtools/pull/3790)
+* Migrate isolate_state.dart to null safety [#3781](https://github.com/flutter/devtools/pull/3781)
+* Migrate memory_service.dart to null safety [#3783](https://github.com/flutter/devtools/pull/3783)
+* Update wrappers.dart [#3785](https://github.com/flutter/devtools/pull/3785)
 * Fix type warnings from GA [#3789](https://github.com/flutter/devtools/pull/3789)
 * Add missing custom dimensions to GTag exceptions [#3787](https://github.com/flutter/devtools/pull/3787)
 * Add missing analytics screen event for Provider page [#3788](https://github.com/flutter/devtools/pull/3788)
