@@ -24,14 +24,13 @@ class ConnectedApp {
 
   Completer<bool> initialized = Completer();
 
-  bool get connectedAppInitialized {
-    return _isFlutterApp != null &&
-        (_isFlutterApp == false ||
-            _isDartWebApp == true ||
-            _flutterVersion != null) &&
-        _isProfileBuild != null &&
-        _isDartWebApp != null;
-  }
+  bool get connectedAppInitialized =>
+      _isFlutterApp != null &&
+      (_isFlutterApp == false ||
+          _isDartWebApp == true ||
+          _flutterVersion != null) &&
+      _isProfileBuild != null &&
+      _isDartWebApp != null;
 
   // TODO(kenz): investigate if we can use `libraryUriAvailableNow` instead.
   Future<bool> get isFlutterApp async => _isFlutterApp ??=
