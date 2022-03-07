@@ -315,8 +315,6 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _maybeScrollToSelectedNode());
     return Scrollbar(
       isAlwaysShown: true,
       controller: _scrollController,
