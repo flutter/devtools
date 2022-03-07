@@ -126,7 +126,7 @@ class ProgramExplorerController extends DisposableController
 
   int _calculateNodeIndex({
     bool matchingNodeCondition(VMServiceObjectNode node),
-    bool includeCollapsedNodes,
+    bool includeCollapsedNodes = true,
   }) {
     // Index tracks the position of the node in the flat-list representation of
     // the tree:
