@@ -344,17 +344,19 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
     // If the node offset is invalid, don't scroll.
     if (selectedNodeOffset < 0) return;
 
-    final extentVisible = Range(
-      _scrollController.offset,
-      _scrollController.offset + _scrollController.position.extentInside,
-    );
-    if (!extentVisible.contains(selectedNodeOffset)) {
-      _scrollController.animateTo(
-        selectedNodeOffset - _selectedNodeTopSpacing,
-        duration: longDuration,
-        curve: defaultCurve,
+    setState(() {
+      final extentVisible = Range(
+        _scrollController.offset,
+        _scrollController.offset + _scrollController.position.extentInside,
       );
-    }
+      if (!extentVisible.contains(selectedNodeOffset)) {
+        _scrollController.animateTo(
+          selectedNodeOffset - _selectedNodeTopSpacing,
+          duration: longDuration,
+          curve: defaultCurve,
+        );
+      }
+    });
   }
 }
 
