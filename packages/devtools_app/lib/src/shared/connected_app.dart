@@ -24,13 +24,14 @@ class ConnectedApp {
 
   Completer<bool> initialized = Completer();
 
-  bool get connectedAppInitialized =>
-      _isFlutterApp != null &&
-      (_isFlutterApp == false ||
-          _isDartWebApp == true ||
-          _flutterVersion != null) &&
-      _isProfileBuild != null &&
-      _isDartWebApp != null;
+  bool get connectedAppInitialized {
+    return _isFlutterApp != null &&
+        (_isFlutterApp == false ||
+            _isDartWebApp == true ||
+            _flutterVersion != null) &&
+        _isProfileBuild != null &&
+        _isDartWebApp != null;
+  }
 
   // TODO(kenz): investigate if we can use `libraryUriAvailableNow` instead.
   Future<bool> get isFlutterApp async => _isFlutterApp ??=
@@ -143,6 +144,7 @@ class ConnectedApp {
         }
       });
 
+      print('initializing flutter version...');
       _flutterVersion = await _flutterVersionCompleter.future.timeout(
         _flutterVersionTimeout,
         onTimeout: () {
@@ -153,6 +155,7 @@ class ConnectedApp {
           return Future<FlutterVersion?>.value();
         },
       );
+      print('_flutterVersion after initialization: $_flutterVersion');
       flutterVersionServiceListenable.removeListener(listener);
     }
     generateDevToolsTitle();

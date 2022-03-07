@@ -25,7 +25,7 @@ void main() async {
   InspectorService inspectorService;
 
   env.afterEverySetup = () async {
-    assert(serviceManager.connectedAppInitialized);
+    assert(serviceManager.connectedApp.flutterVersionNow != null);
 
     inspectorService = InspectorService();
     if (env.runConfig.trackWidgetCreation) {
