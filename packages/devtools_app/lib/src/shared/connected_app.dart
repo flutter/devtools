@@ -143,7 +143,6 @@ class ConnectedApp {
         }
       });
 
-      print('initializing flutter version...');
       _flutterVersion = await _flutterVersionCompleter.future.timeout(
         _flutterVersionTimeout,
         onTimeout: () {
@@ -154,7 +153,6 @@ class ConnectedApp {
           return Future<FlutterVersion?>.value();
         },
       );
-      print('_flutterVersion after initialization: $_flutterVersion');
       flutterVersionServiceListenable.removeListener(listener);
     }
     generateDevToolsTitle();
