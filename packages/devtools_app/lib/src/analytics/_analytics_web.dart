@@ -597,7 +597,7 @@ Future<void> computeUserApplicationCustomGTagData() async {
     userPlatformType = (await serviceManager.service!
             .isProtocolVersionSupported(
                 supportedVersion: SemanticVersion(major: 3, minor: 24)))
-        ? serviceManager.vm!.operatingSystem ?? unknownOS
+        ? serviceManager.vm?.operatingSystem ?? unknownOS
         : unknownOS;
   }
   if (serviceManager.connectedApp!.isFlutterWebAppNow) {

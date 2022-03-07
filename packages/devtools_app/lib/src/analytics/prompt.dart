@@ -106,7 +106,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
           TextSpan(
             text: 'privacy policy',
             style:
-                textTheme.subtitle1!.copyWith(color: const Color(0xFF54C1EF)),
+                textTheme.subtitle1?.copyWith(color: const Color(0xFF54C1EF)),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
                 launchUrl(
