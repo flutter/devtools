@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import '../config_specific/server/server.dart' as server;
@@ -11,7 +9,7 @@ import 'analytics.dart' as ga;
 import 'analytics_controller.dart';
 
 Future<AnalyticsController> get devToolsAnalyticsController async {
-  if (_controllerCompleter != null) return _controllerCompleter.future;
+  if (_controllerCompleter != null) return _controllerCompleter!.future;
   _controllerCompleter = Completer<AnalyticsController>();
   var enabled = false;
   var firstRun = false;
@@ -25,7 +23,7 @@ Future<AnalyticsController> get devToolsAnalyticsController async {
   } catch (_) {
     // Ignore issues if analytics could not be initialized.
   }
-  _controllerCompleter.complete(
+  _controllerCompleter!.complete(
     AnalyticsController(
       enabled: enabled,
       firstRun: firstRun,
@@ -37,7 +35,7 @@ Future<AnalyticsController> get devToolsAnalyticsController async {
       },
     ),
   );
-  return _controllerCompleter.future;
+  return _controllerCompleter!.future;
 }
 
-Completer<AnalyticsController> _controllerCompleter;
+Completer<AnalyticsController>? _controllerCompleter;
