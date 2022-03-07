@@ -97,23 +97,23 @@ class ProgramExplorerController extends DisposableController
     );
   }
 
-  void selectScriptNode(ScriptRef script) {
+  Future<void> selectScriptNode(ScriptRef script) async {
     if (!initialized.value) {
       return;
     }
-    _selectScriptNode(script, _rootObjectNodes.value);
+    await _selectScriptNode(script, _rootObjectNodes.value);
     _rootObjectNodes.notifyListeners();
   }
 
-  void _selectScriptNode(
+  Future<void> _selectScriptNode(
     ScriptRef script,
     List<VMServiceObjectNode> nodes,
-  ) {
+  ) async {
     final searchCondition = (node) => node.script?.uri == script.uri;
     for (final node in nodes) {
       final result = node.firstChildWithCondition(searchCondition);
       if (result != null) {
-        selectNode(result);
+        await selectNode(result);
         result.expandAscending();
         _selectedNodeIndex.value = _calculateNodeIndex(
           matchingNodeCondition: searchCondition,
@@ -158,7 +158,7 @@ class ProgramExplorerController extends DisposableController
 
   /// Marks [node] as the currently selected node, clearing the selection state
   /// of any currently selected node.
-  void selectNode(VMServiceObjectNode node) async {
+  Future<void> selectNode(VMServiceObjectNode node) async {
     if (!node.isSelectable) {
       return;
     }
