@@ -157,10 +157,11 @@ class _ServiceExtensionButtonGroupState
     final extensionState = _extensionStates[index];
     if (extensionState.isAvailable) {
       setState(() {
-        ga.select(
-          extensionState.description.gaScreenName,
-          extensionState.description.gaItem,
-        );
+        final gaScreenName = extensionState.description.gaScreenName;
+        final gaItem = extensionState.description.gaItem;
+        if (gaScreenName != null && gaItem != null) {
+          ga.select(gaScreenName, gaItem);
+        }
 
         final wasSelected = extensionState.isSelected;
 
@@ -294,12 +295,10 @@ class _RegisteredServiceExtensionButtonState
 
     return InkWell(
       onTap: () => invokeAndCatchErrors(() async {
-        if (widget.serviceDescription.gaScreenName != null &&
-            widget.serviceDescription.gaItem != null) {
-          ga.select(
-            widget.serviceDescription.gaScreenName,
-            widget.serviceDescription.gaItem,
-          );
+        final gaScreenName = widget.serviceDescription.gaScreenName;
+        final gaItem = widget.serviceDescription.gaItem;
+        if (gaScreenName != null && gaItem != null) {
+          ga.select(gaScreenName, gaItem);
         }
         await widget.action();
       }),

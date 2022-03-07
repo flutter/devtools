@@ -51,11 +51,11 @@ class GtagEvent {
     dynamic custom_map,
   });
 
-  external String get event_category;
+  external String? get event_category;
 
-  external String get event_label;
+  external String? get event_label;
 
-  external String get send_to;
+  external String? get send_to;
 
   external int get value; // Positive number.
   external bool get non_interaction;
@@ -71,6 +71,6 @@ class GtagException {
     bool fatal = false,
   });
 
-  external String get description; // Description of the error.
+  external String? get description; // Description of the error.
   external bool get fatal; // Fatal error.
 }
