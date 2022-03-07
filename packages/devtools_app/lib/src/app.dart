@@ -36,6 +36,8 @@ import 'screens/performance/performance_screen.dart';
 import 'screens/profiler/profiler_screen.dart';
 import 'screens/profiler/profiler_screen_controller.dart';
 import 'screens/provider/provider_screen.dart';
+import 'screens/vm_developer/vm_developer_tools_controller.dart';
+import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'shared/common_widgets.dart';
 import 'shared/dialogs.dart';
 import 'shared/globals.dart';
@@ -49,8 +51,6 @@ import 'shared/screen.dart';
 import 'shared/snapshot_screen.dart';
 import 'shared/theme.dart';
 import 'ui/service_extension_widgets.dart';
-import 'vm_developer/vm_developer_tools_controller.dart';
-import 'vm_developer/vm_developer_tools_screen.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.

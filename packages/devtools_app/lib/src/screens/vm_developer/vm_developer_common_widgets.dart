@@ -6,9 +6,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../shared/common_widgets.dart';
-import '../shared/table.dart';
-import '../shared/theme.dart';
+import '../../shared/common_widgets.dart';
+import '../../shared/table.dart';
+import '../../shared/theme.dart';
 
 /// A convenience widget used to create non-scrollable information cards.
 ///

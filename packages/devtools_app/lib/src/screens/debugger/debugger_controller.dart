@@ -60,22 +60,22 @@ class DebuggerController extends DisposableController
   /// for performance reasons. None of the code here needs to be called when
   /// DevTools first connects to an app, and doing so inhibits DevTools from
   /// connecting to low-end devices.
-  void onFirstDebuggerScreenLoad() {
+  Future<void> onFirstDebuggerScreenLoad() async {
     if (!_firstDebuggerScreenLoaded) {
-      _maybeSetUpProgramExplorer();
+      await _maybeSetUpProgramExplorer();
       addAutoDisposeListener(currentScriptRef, _maybeSetUpProgramExplorer);
       _firstDebuggerScreenLoaded = true;
     }
   }
 
-  void _maybeSetUpProgramExplorer() {
+  Future<void> _maybeSetUpProgramExplorer() async {
     if (!programExplorerController.initialized.value) {
       programExplorerController
         ..initListeners()
         ..initialize();
     }
     if (currentScriptRef.value != null) {
-      programExplorerController.selectScriptNode(currentScriptRef.value);
+      await programExplorerController.selectScriptNode(currentScriptRef.value);
     }
   }
 

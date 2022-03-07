@@ -7,6 +7,8 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
+import '../../primitives/auto_dispose_mixin.dart';
+import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
@@ -23,6 +25,7 @@ const libraryIcon = Icons.insert_drive_file;
 const listItemHeight = 40.0;
 
 double get _programExplorerRowHeight => scaleByFontFactor(22.0);
+double get _selectedNodeTopSpacing => _programExplorerRowHeight * 3;
 
 class _ProgramExplorerRow extends StatelessWidget {
   const _ProgramExplorerRow({
@@ -278,7 +281,7 @@ class ProgramStructureIcon extends StatelessWidget {
   }
 }
 
-class _FileExplorer extends StatelessWidget {
+class _FileExplorer extends StatefulWidget {
   const _FileExplorer({
     @required this.controller,
     @required this.onItemSelected,
@@ -290,23 +293,66 @@ class _FileExplorer extends StatelessWidget {
   final Function(VMServiceObjectNode) onItemExpanded;
 
   @override
-  Widget build(BuildContext context) {
-    return TreeView<VMServiceObjectNode>(
-      itemExtent: _programExplorerRowHeight,
-      dataRootsListenable: controller.rootObjectNodes,
-      onItemSelected: onItemSelected,
-      onItemExpanded: onItemExpanded,
-      dataDisplayProvider: (node, onTap) {
-        return _ProgramExplorerRow(
-          controller: controller,
-          node: node,
-          onTap: () {
-            controller.selectNode(node);
-            onTap();
-          },
-        );
-      },
+  State<_FileExplorer> createState() => _FileExplorerState();
+}
+
+class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
+  final ScrollController _scrollController = ScrollController();
+
+  double get selectedNodeOffset => widget.controller.selectedNodeIndex.value ==
+          -1
+      ? -1
+      : widget.controller.selectedNodeIndex.value * _programExplorerRowHeight;
+
+  @override
+  void initState() {
+    super.initState();
+    addAutoDisposeListener(
+      widget.controller.selectedNodeIndex,
+      _maybeScrollToSelectedNode,
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scrollbar(
+      isAlwaysShown: true,
+      controller: _scrollController,
+      child: TreeView<VMServiceObjectNode>(
+        itemExtent: _programExplorerRowHeight,
+        dataRootsListenable: widget.controller.rootObjectNodes,
+        onItemSelected: widget.onItemSelected,
+        onItemExpanded: widget.onItemExpanded,
+        scrollController: _scrollController,
+        dataDisplayProvider: (node, onTap) {
+          return _ProgramExplorerRow(
+            controller: widget.controller,
+            node: node,
+            onTap: () {
+              widget.controller.selectNode(node);
+              onTap();
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  void _maybeScrollToSelectedNode() {
+    // If the node offset is invalid, don't scroll.
+    if (selectedNodeOffset < 0) return;
+
+    final extentVisible = Range(
+      _scrollController.offset,
+      _scrollController.offset + _scrollController.position.extentInside,
+    );
+    if (!extentVisible.contains(selectedNodeOffset)) {
+      _scrollController.animateTo(
+        selectedNodeOffset - _selectedNodeTopSpacing,
+        duration: longDuration,
+        curve: defaultCurve,
+      );
+    }
   }
 }
 

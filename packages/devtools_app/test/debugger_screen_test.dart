@@ -214,6 +214,8 @@ void main() {
         ScriptRef(uri: 'package:/test/script.dart', id: 'test-script')
       ];
 
+      when(debuggerController.programExplorerController.selectedNodeIndex)
+          .thenReturn(ValueNotifier(0));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
       when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
@@ -230,6 +232,8 @@ void main() {
         ScriptRef(uri: 'package:test/script.dart', id: 'test-script')
       ];
 
+      when(debuggerController.programExplorerController.selectedNodeIndex)
+          .thenReturn(ValueNotifier(0));
       when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
       when(debuggerController.programExplorerController.rootObjectNodes)
           .thenReturn(
