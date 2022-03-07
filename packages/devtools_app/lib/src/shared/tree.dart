@@ -22,6 +22,7 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
     this.itemExtent,
     this.onTraverse,
     this.emptyTreeViewBuilder,
+    this.scrollController,
   });
 
   final ValueListenable<List<T>> dataRootsListenable;
@@ -54,6 +55,8 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   /// is not provided, then an empty [SizedBox] will be built.
   final Widget Function()? emptyTreeViewBuilder;
 
+  final ScrollController? scrollController;
+
   @override
   _TreeViewState<T> createState() => _TreeViewState<T>();
 }
@@ -80,6 +83,7 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
       itemExtent: widget.itemExtent,
       shrinkWrap: widget.shrinkWrap,
       physics: widget.shrinkWrap ? const ClampingScrollPhysics() : null,
+      controller: widget.scrollController,
       itemBuilder: (context, index) {
         final T item = items[index];
         return _TreeViewItem<T>(

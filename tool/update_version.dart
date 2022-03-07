@@ -13,6 +13,7 @@ void main(List<String> args) async {
   final pubspecs = [
     'packages/devtools_app/pubspec.yaml',
     'packages/devtools_test/pubspec.yaml',
+    'packages/devtools_shared/pubspec.yaml',
   ].map((path) => File(path)).toList();
 
   final currentVersion = args.isNotEmpty && args.length > 1
@@ -187,6 +188,7 @@ const editablePubspecSections = [
 const devToolsDependencyPrefixes = [
   'devtools_app: ',
   'devtools_test: ',
+  'devtools_shared: ',
 ];
 
 extension JoinExtension on List<String> {

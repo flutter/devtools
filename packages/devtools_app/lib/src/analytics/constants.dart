@@ -4,7 +4,7 @@
 
 // Type of events (event_category):
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import '../screens/inspector/inspector_screen.dart';
 import '../screens/logging/logging_screen.dart';
