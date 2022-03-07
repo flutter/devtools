@@ -488,7 +488,6 @@ class DartIOHttpRequestData extends HttpRequestData {
     int timelineMicrosBase,
     this._request,
   )   : wrapperId = _dartIoHttpRequestWrapperId++,
-        _instantEvents = [],
         super(timelineMicrosBase) {
     if (_request.isResponseComplete) {
       getFullRequestData();
