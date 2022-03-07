@@ -1,4 +1,5 @@
 ## 2.11.2
+* Automatic scrolling in the Program Explorer [#3786](https://github.com/flutter/devtools/pull/3786)
 * Migrate analytics code to null-safety [#3790](https://github.com/flutter/devtools/pull/3790)
 * Migrate isolate_state.dart to null safety [#3781](https://github.com/flutter/devtools/pull/3781)
 * Migrate memory_service.dart to null safety [#3783](https://github.com/flutter/devtools/pull/3783)
