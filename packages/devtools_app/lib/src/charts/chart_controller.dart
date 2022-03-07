@@ -431,7 +431,7 @@ class ChartController extends DisposableController
     canvasChartHeight = size!.height - topPadding - bottomPadding;
 
     if (fixedMinY != null && fixedMaxY != null) {
-      yScale = AxisScale(fixedMinY, fixedMaxY, canvasChartHeight.toDouble());
+      yScale = AxisScale(fixedMinY!, fixedMaxY!, canvasChartHeight.toDouble());
     } else {
       // TODO(terry): Better value than fixed amount?
       // Allocate a bit of slop to approach near top.
