@@ -6,6 +6,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app/src/primitives/message_bus.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/evaluate.dart';
@@ -22,6 +23,8 @@ void main() {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
+
+  setGlobal(MessageBus, MessageBus());
 
   Disposable isAlive;
   DebuggerController debuggerController;
