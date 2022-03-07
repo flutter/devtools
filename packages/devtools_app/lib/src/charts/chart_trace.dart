@@ -192,7 +192,7 @@ class Trace {
   ///            | * |
   ///            !___!
   ///
-  Path? _createSquare() {
+  Path _createSquare() {
     if (_symbolPath == null) {
       _symbolPath = Path();
 
@@ -208,7 +208,7 @@ class Trace {
       _symbolPath!.close();
     }
 
-    return _symbolPath;
+    return _symbolPath!;
   }
 
   /// Draw triangle centered on [x,y] point (*).
