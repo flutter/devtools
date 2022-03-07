@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/auto_dispose.dart';
+import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
 import 'debugger_controller.dart';
@@ -38,6 +39,9 @@ class ProgramExplorerController extends DisposableController
   ValueListenable<List<VMServiceObjectNode>> get rootObjectNodes =>
       _rootObjectNodes;
   final _rootObjectNodes = ListValueNotifier<VMServiceObjectNode>([]);
+
+  ValueListenable<int> get selectedNodeIndex => _selectedNodeIndex;
+  final _selectedNodeIndex = ValueNotifier<int>(0);
 
   IsolateRef _isolate;
 
@@ -105,16 +109,40 @@ class ProgramExplorerController extends DisposableController
     ScriptRef script,
     List<VMServiceObjectNode> nodes,
   ) {
+    final searchCondition = (node) => node.script?.uri == script.uri;
     for (final node in nodes) {
-      final result = node.firstChildWithCondition(
-        (node) => node.script?.uri == script.uri,
-      );
+      final result = node.firstChildWithCondition(searchCondition);
       if (result != null) {
         selectNode(result);
         result.expandAscending();
+        _selectedNodeIndex.value = _calculateNodeIndex(
+          matchingNodeCondition: searchCondition,
+          includeCollapsedNodes: false,
+        );
         return;
       }
     }
+  }
+
+  int _calculateNodeIndex({
+    bool matchingNodeCondition(VMServiceObjectNode node),
+    bool includeCollapsedNodes = true,
+  }) {
+    // Index tracks the position of the node in the flat-list representation of
+    // the tree:
+    var index = 0;
+    for (final node in _rootObjectNodes.value) {
+      final matchingNode = depthFirstTraversal(
+        node,
+        returnCondition: matchingNodeCondition,
+        exploreChildrenCondition:
+            includeCollapsedNodes ? null : (node) => node.isExpanded,
+        action: (_) => index++,
+      );
+      if (matchingNode != null) return index;
+    }
+    // If the node wasn't found, return 0.
+    return -1;
   }
 
   /// Clears controller state and re-initializes.
@@ -130,7 +158,6 @@ class ProgramExplorerController extends DisposableController
 
   /// Marks [node] as the currently selected node, clearing the selection state
   /// of any currently selected node.
-  /// TODO(elliette): Scroll to node in program explorer tree when selected.
   void selectNode(VMServiceObjectNode node) async {
     if (!node.isSelectable) {
       return;

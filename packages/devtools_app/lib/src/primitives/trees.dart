@@ -281,16 +281,60 @@ T? breadthFirstTraversal<T extends TreeNode<T>>(
   bool returnCondition(T node)?,
   void action(T node)?,
 }) {
-  final queue = Queue.of([root]);
-  while (queue.isNotEmpty) {
-    final node = queue.removeFirst();
+  return _treeTraversal(
+    root,
+    bfs: true,
+    returnCondition: returnCondition,
+    action: action,
+  );
+}
+
+/// Traverses a tree in depth-first preorder order.
+///
+/// [returnCondition] specifies the condition for which we should stop
+/// traversing the tree. For example, if we are calling this method to perform
+/// DFS, [returnCondition] would specify when we have found the node we are
+/// searching for. [action] specifies an action that we will execute on each
+/// node. For example, if we need to traverse a tree and change a property on
+/// every single node, we would do this through the [action] param.
+/// [exploreChildrenCondition] specifies the condition for which we should
+/// explore the children of a node. By default, all children are explored.
+T? depthFirstTraversal<T extends TreeNode<T>>(
+  T root, {
+  bool returnCondition(T node)?,
+  void action(T node)?,
+  bool exploreChildrenCondition(T node)?,
+}) {
+  return _treeTraversal(
+    root,
+    bfs: false,
+    returnCondition: returnCondition,
+    action: action,
+    exploreChildrenCondition: exploreChildrenCondition,
+  );
+}
+
+T? _treeTraversal<T extends TreeNode<T>>(
+  T root, {
+  bool bfs = true,
+  bool returnCondition(T node)?,
+  void action(T node)?,
+  bool exploreChildrenCondition(T node)?,
+}) {
+  final toVisit = Queue.of([root]);
+  while (toVisit.isNotEmpty) {
+    final node = bfs ? toVisit.removeFirst() : toVisit.removeLast();
     if (returnCondition != null && returnCondition(node)) {
       return node;
     }
     if (action != null) {
       action(node);
     }
-    node.children.forEach(queue.add);
+    if (exploreChildrenCondition == null || exploreChildrenCondition(node)) {
+      // For DFS, reverse the children to gaurantee preorder traversal.
+      final children = bfs ? node.children : node.children.reversed;
+      children.forEach(toVisit.add);
+    }
   }
   return null;
 }
