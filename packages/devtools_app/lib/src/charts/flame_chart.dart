@@ -6,6 +6,8 @@
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -741,28 +743,40 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
           color: widget.backgroundColor,
           // TODO(kenz): investigate if `addAutomaticKeepAlives: false` and
           // `addRepaintBoundaries: false` are needed here for perf improvement.
-          child: ExtentDelegateListView(
+          child: SingleChildScrollView(
             controller: scrollController,
             scrollDirection: Axis.horizontal,
-            extentDelegate: extentDelegate,
-            childrenDelegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final node = nodes[index];
-                return FlameChartNodeWidget(
-                  index: index,
-                  nodes: nodes,
-                  zoom: widget.zoom,
-                  startInset: widget.startInset,
-                  chartWidth: widget.width,
-                  selected: node.data == selected,
-                  hovered: node.data == hovered,
-                );
-              },
-              childCount: nodes.length,
-              addRepaintBoundaries: false,
-              addAutomaticKeepAlives: false,
+            child: FlameChartNodeRow(
+              nodes: nodes,
+              zoom: widget.zoom,
+              startInset: widget.startInset,
+              chartWidth: widget.width,
+              selected: selected,
+              hovered: hovered,
             ),
           ),
+          // child: ExtentDelegateListView(
+          //   controller: scrollController,
+          //   scrollDirection: Axis.horizontal,
+          //   extentDelegate: extentDelegate,
+          //   childrenDelegate: SliverChildBuilderDelegate(
+          //     (context, index) {
+          //       final node = nodes[index];
+          //       return FlameChartNodeWidget(
+          //         index: index,
+          //         nodes: nodes,
+          //         zoom: widget.zoom,
+          //         startInset: widget.startInset,
+          //         chartWidth: widget.width,
+          //         selected: node.data == selected,
+          //         hovered: node.data == hovered,
+          //       );
+          //     },
+          //     childCount: nodes.length,
+          //     addRepaintBoundaries: false,
+          //     addAutomaticKeepAlives: false,
+          //   ),
+          // ),
         ),
       ),
     );
@@ -817,10 +831,9 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
   }
 }
 
-class FlameChartNodeWidget extends StatelessWidget {
-  const FlameChartNodeWidget({
+class FlameChartNodeRow extends LeafRenderObjectWidget {
+  const FlameChartNodeRow({
     Key? key,
-    required this.index,
     required this.nodes,
     required this.zoom,
     required this.startInset,
@@ -828,8 +841,6 @@ class FlameChartNodeWidget extends StatelessWidget {
     required this.selected,
     required this.hovered,
   }) : super(key: key);
-
-  final int index;
 
   final List<FlameChartNode> nodes;
 
@@ -839,39 +850,140 @@ class FlameChartNodeWidget extends StatelessWidget {
 
   final double chartWidth;
 
-  final bool selected;
+  final Object? selected;
 
-  final bool hovered;
+  final Object? hovered;
 
   @override
-  Widget build(BuildContext context) {
-    final node = nodes[index];
-    return Padding(
-      padding: EdgeInsets.only(
-        left: FlameChartUtils.leftPaddingForNode(
-          index,
-          nodes,
-          chartZoom: zoom,
-          chartStartInset: startInset,
-        ),
-        right: FlameChartUtils.rightPaddingForNode(
-          index,
-          nodes,
-          chartZoom: zoom,
-          chartStartInset: startInset,
-          chartWidth: chartWidth,
-        ),
-        bottom: rowPadding,
-      ),
-      child: node.buildWidget(
-        selected: selected,
-        hovered: hovered,
-        searchMatch: node.data.isSearchMatch,
-        activeSearchMatch: node.data.isActiveSearchMatch,
-        zoom: FlameChartUtils.zoomForNode(node, zoom),
-        colorScheme: Theme.of(context).colorScheme,
-      ),
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderFlameRow()
+      ..nodes = nodes
+      ..zoom = zoom
+      ..startInset = startInset
+      ..chartWidth = chartWidth
+      ..selected = selected
+      ..hovered = hovered
+      ..colorScheme = Theme.of(context).colorScheme;
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderFlameRow renderObject) {
+    _RenderFlameRow()
+      ..nodes = nodes
+      ..zoom = zoom
+      ..startInset = startInset
+      ..chartWidth = chartWidth
+      ..selected = selected
+      ..hovered = hovered
+      ..colorScheme = Theme.of(context).colorScheme;
+  }
+}
+
+class _RenderFlameRow extends RenderBox {
+   _RenderFlameRow();
+
+  List<FlameChartNode> get nodes => _nodes;
+  List<FlameChartNode> _nodes = [];
+  set nodes(List<FlameChartNode> values) {
+    if (identical(values, nodes)) {
+      return;
+    }
+    _nodes = values;
+    markNeedsLayout();
+  }
+
+  double get zoom => _zoom;
+  double _zoom = 1;
+  set zoom(double value) {
+    if (value == zoom) {
+      return;
+    }
+    _zoom = value;
+    markNeedsLayout();
+  }
+
+  double get startInset => _startInset;
+  double _startInset = 0;
+  set startInset(double value) {
+    if (value == startInset) {
+      return;
+    }
+    _startInset = value;
+    markNeedsLayout();
+  }
+
+  double get chartWidth => _chartWidth;
+  double _chartWidth = 0;
+  set chartWidth(double value) {
+    if (value == chartWidth) {
+      return;
+    }
+    _chartWidth = value;
+    markNeedsLayout();
+  }
+
+  Object? get selected => _selected;
+  Object? _selected;
+  set selected(Object? value) {
+    if (value == selected) {
+      return;
+    }
+    _selected = value;
+    markNeedsPaint();
+  }
+
+  Object? get hovered => _hovered;
+  Object? _hovered ;
+  set hovered(Object? value) {
+    if (value == _hovered) {
+      return;
+    }
+    _hovered = value;
+    markNeedsPaint();
+  }
+
+  ColorScheme get colorScheme => _colorScheme!;
+  ColorScheme? _colorScheme;
+  set colorScheme(ColorScheme value) {
+    if (value == _colorScheme) {
+      return;
+    }
+    _colorScheme = value;
+    markNeedsPaint();
+  }
+
+  @override
+  void performLayout() {
+    size = Size(
+      nodes.length * 10, // TBD
+      constraints.maxHeight,
     );
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    var accumulated = 0.0;
+    var index = 0;
+    for (var node in nodes) {
+      final left = FlameChartUtils.leftPaddingForNode(
+        index,
+        nodes,
+        chartZoom: zoom,
+        chartStartInset: startInset,
+      );
+      node.draw(
+        canvas: context.canvas,
+        topLeft: offset + Offset(left + accumulated, 0),
+        selected: node == selected,
+        hovered: node == hovered,
+        searchMatch:  node.data.isSearchMatch,
+        activeSearchMatch: node.data.isActiveSearchMatch,
+        zoom: zoom,
+        colorScheme: colorScheme,
+      );
+      accumulated += 10; // TBD
+      index += 1;
+    }
   }
 }
 
@@ -1035,7 +1147,21 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     required this.onSelected,
     this.selectable = true,
     this.sectionIndex = 0,
-  });
+  }) {
+    final paragraphBuilder = ParagraphBuilder(
+      ParagraphStyle(
+        ellipsis: '...',
+        textAlign: TextAlign.left,
+        maxLines: 1,
+        fontStyle: FontStyle.normal,
+        textDirection: TextDirection.ltr,
+        fontSize: 10,
+      ),
+    );
+    paragraphBuilder.pushStyle(ui.TextStyle(color: _darkTextColor));
+    paragraphBuilder.addText(text);
+    paragraph = paragraphBuilder.build();
+  }
 
   static const _darkTextColor = Colors.black;
 
@@ -1053,10 +1179,13 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
   final bool selectable;
 
   late FlameChartRow row;
+  late Paragraph paragraph;
 
   int sectionIndex;
 
-  Widget buildWidget({
+  void draw({
+    required Canvas canvas,
+    required Offset topLeft,
     required bool selected,
     required bool hovered,
     required bool searchMatch,
@@ -1073,48 +1202,23 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     // TODO(kenz): this is intended to improve performance but can probably be
     // improved. Perhaps we should still show a solid line and fade it out?
     if (zoomedWidth < 0.5) {
-      return SizedBox(width: zoomedWidth);
+      return;
     }
 
     selected = selectable ? selected : false;
     hovered = selectable ? hovered : false;
-
-    final node = Container(
-      key: hovered ? null : key,
-      width: zoomedWidth,
-      height: rect.height,
-      padding: const EdgeInsets.symmetric(horizontal: 6.0),
-      alignment: Alignment.centerLeft,
-      color: _backgroundColor(
+    final drawnRect = Rect.fromLTWH(topLeft.dx, topLeft.dy, rect.width * zoom, rect.height * zoom);
+    final paint = Paint()
+      ..color = _backgroundColor(
         selected: selected,
         searchMatch: searchMatch,
         activeSearchMatch: activeSearchMatch,
         colorScheme: colorScheme,
-      ),
-      child: zoomedWidth >= _minWidthForText
-          ? Text(
-              text,
-              textAlign: TextAlign.left,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: _textColor(
-                  selected: selected,
-                  searchMatch: searchMatch,
-                  activeSearchMatch: activeSearchMatch,
-                  colorScheme: colorScheme,
-                ),
-              ),
-            )
-          : const SizedBox(),
-    );
-    if (hovered || !selectable) {
-      return DevToolsTooltip(
-        key: key,
-        message: data.tooltip,
-        child: node,
       );
-    } else {
-      return node;
+    canvas.drawRect(drawnRect, paint);
+    if (zoomedWidth >= _minWidthForText) {
+      paragraph.layout(ParagraphConstraints(width: drawnRect.width));
+      canvas.drawParagraph(paragraph, topLeft);
     }
   }
 
