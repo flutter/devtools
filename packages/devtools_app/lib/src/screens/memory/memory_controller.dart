@@ -79,7 +79,7 @@ final displayDurationsStrings = <String>[
 String displayDuration(ChartInterval interval) =>
     displayDurationsStrings[interval.index];
 
-ChartInterval? chartInterval(String displayName) {
+ChartInterval chartInterval(String displayName) {
   final index = displayDurationsStrings.indexOf(displayName);
   switch (index) {
     case 0:
@@ -98,8 +98,7 @@ ChartInterval? chartInterval(String displayName) {
       assert(index == ChartInterval.All.index);
       return ChartInterval.All;
     default:
-      assert(false);
-      return null;
+      return ChartInterval.All;
   }
 }
 
@@ -123,7 +122,7 @@ class AllocationStackTrace {
 
   final stacktrace = <String>[];
 
-  final sources = <String>[];
+  final sources = <String?>[];
 
   int get stackDepth => stacktrace.length;
 
@@ -158,8 +157,10 @@ class AllocationStackTrace {
 
   String get sourcesDisplay => sources.join('\r');
 
-  void computeStacktrace(CpuSample cpuSample,
-      {List<ProfileFunction>? functions}) {
+  void computeStacktrace(
+    CpuSample cpuSample, {
+    List<ProfileFunction>? functions,
+  }) {
     if (cpuSample.stack?.isNotEmpty == true) {
       final stackLength = cpuSample.stack!.length;
       for (var stackIndex = 0; stackIndex < stackLength; stackIndex++) {
@@ -194,8 +195,7 @@ class AllocationStackTrace {
           } else {
             stacktrace.add('$ownerName.$functionName');
           }
-          if (profileFunc.resolvedUrl != null)
-            sources.add(profileFunc.resolvedUrl!);
+          sources.add(profileFunc.resolvedUrl);
         }
       }
     }
@@ -456,13 +456,13 @@ class MemoryController extends DisposableController
   /// Notifies that the source of the memory feed has changed.
   ValueListenable get memorySourceNotifier => _memorySourceNotifier;
 
-  final _memorySourceNotifier = ValueNotifier<String?>(liveFeed);
+  final _memorySourceNotifier = ValueNotifier<String>(liveFeed);
 
-  set memorySource(String? source) {
+  set memorySource(String source) {
     _memorySourceNotifier.value = source;
   }
 
-  String? get memorySource => _memorySourceNotifier.value;
+  String get memorySource => _memorySourceNotifier.value;
 
   ValueListenable get refreshCharts => _refreshCharts;
 
@@ -498,16 +498,16 @@ class MemoryController extends DisposableController
   /// Default is to display default tick width based on width of chart of the collected
   /// data in the chart.
   final _displayIntervalNotifier =
-      ValueNotifier<ChartInterval?>(ChartInterval.Default);
+      ValueNotifier<ChartInterval>(ChartInterval.Default);
 
-  ValueListenable<ChartInterval?> get displayIntervalNotifier =>
+  ValueListenable<ChartInterval> get displayIntervalNotifier =>
       _displayIntervalNotifier;
 
-  set displayInterval(ChartInterval? interval) {
+  set displayInterval(ChartInterval interval) {
     _displayIntervalNotifier.value = interval;
   }
 
-  ChartInterval? get displayInterval => _displayIntervalNotifier.value;
+  ChartInterval get displayInterval => _displayIntervalNotifier.value;
 
   /// 1 minute in milliseconds.
   static const int minuteInMs = 60 * 1000;
@@ -520,7 +520,7 @@ class MemoryController extends DisposableController
 
   /// Return the pruning interval in milliseconds.
   int get intervalDurationInMs =>
-      displayIntervalToIntervalDurationInMs(displayInterval!);
+      displayIntervalToIntervalDurationInMs(displayInterval);
 
   /// MemorySource has changed update the view.
   /// Return value of null implies offline file loaded.
@@ -537,7 +537,7 @@ class MemoryController extends DisposableController
       }
     } else {
       // Switching to an offline memory log (JSON file in /tmp).
-      await memoryLog.loadOffline(memorySource!).catchError((e) {
+      await memoryLog.loadOffline(memorySource).catchError((e) {
         throw OfflineFileException(e.toString());
       });
     }
@@ -622,7 +622,7 @@ class MemoryController extends DisposableController
 
   /// Track where/when a class is allocated (constructor new'd).
   Future<void> _setTracking(ClassRef ref, bool enable) async {
-    if (!await isIsolateLive(_isolateId!)) return;
+    if (_isolateId == null || !await isIsolateLive(_isolateId!)) return;
 
     final Success returnObject =
         await serviceManager.service!.setTraceClassAllocation(
@@ -642,8 +642,10 @@ class MemoryController extends DisposableController
         assert(trackAllocations[ref.name] == ref);
         return;
       }
-      // Add to tracking list.
-      trackAllocations[ref.name!] = ref;
+      if (ref.name != null) {
+        // Add to tracking list.
+        trackAllocations[ref.name!] = ref;
+      }
     } else {
       // Remove from tracking list.
       assert(trackAllocations.containsKey(ref.name));
@@ -795,9 +797,9 @@ class MemoryController extends DisposableController
   static const groupByClass = 'Class';
   static const groupByInstance = 'Instance';
 
-  final groupingBy = ValueNotifier<String?>(groupByLibrary);
+  final groupingBy = ValueNotifier<String>(groupByLibrary);
 
-  ValueListenable<String?> get groupingByNotifier => groupingBy;
+  ValueListenable<String> get groupingByNotifier => groupingBy;
 
   String? get _isolateId =>
       serviceManager.isolateManager.selectedIsolate.value?.id;
@@ -997,7 +999,7 @@ class MemoryController extends DisposableController
   Future<List<ClassHeapDetailStats>> getAllocationProfile({
     bool reset = false,
   }) async {
-    if (!await isIsolateLive(_isolateId!)) return [];
+    if (_isolateId == null || !await isIsolateLive(_isolateId!)) return [];
 
     AllocationProfile allocationProfile;
     allocationProfile = await serviceManager.service!.getAllocationProfile(
@@ -1103,9 +1105,10 @@ class MemoryController extends DisposableController
 
     final externalReferences =
         ExternalReferences(this, snapshotGraph.externalSize);
-    for (final liveExternal in heapGraph?.externals ?? []) {
+    for (final liveExternal
+        in heapGraph?.externals ?? <HeapGraphExternalLive>[]) {
       final HeapGraphClassLive? classLive =
-          liveExternal?.live?.theClass as HeapGraphClassLive?;
+          liveExternal.live?.theClass as HeapGraphClassLive?;
 
       ExternalReference? externalReference;
 
@@ -1131,7 +1134,7 @@ class MemoryController extends DisposableController
 
       // Sum up the externalSize of the children, under the externalReference group.
       externalReference.sumExternalSizes +=
-          liveExternal.externalProperty.externalSize as int;
+          liveExternal.externalProperty.externalSize;
 
       externalReference.addChild(classInstance);
     }
