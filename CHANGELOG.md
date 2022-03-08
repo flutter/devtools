@@ -1,4 +1,5 @@
 ## 2.11.4
+* Fix bug with release notes viewer [#3811](https://github.com/flutter/devtools/pull/3811)
 * Try downgraded patch versions until we find release notes [#3809](https://github.com/flutter/devtools/pull/3809)
 * Fix null assertion in profile mode [#3808](https://github.com/flutter/devtools/pull/3808)
 
