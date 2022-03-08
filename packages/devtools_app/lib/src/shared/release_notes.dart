@@ -21,6 +21,8 @@ import 'theme.dart';
 import 'utils.dart';
 import 'version.dart';
 
+const debugTestReleaseNotes = true;
+
 class ReleaseNotesViewer extends StatefulWidget {
   const ReleaseNotesViewer({
     Key? key,
@@ -169,7 +171,9 @@ class ReleaseNotesController {
 
   static const _unsupportedPathSyntax = '{{site.url}}';
 
-  static const _flutterDocsSite = 'https://docs.flutter.dev';
+  String get _flutterDocsSite => debugTestReleaseNotes
+      ? 'https://flutter-website-dt-staging.web.app'
+      : 'https://docs.flutter.dev';
 
   ValueListenable<String?> get releaseNotesMarkdown => _releaseNotesMarkdown;
 
@@ -189,7 +193,7 @@ class ReleaseNotesController {
     final lastReleaseNotesShownVersion =
         await server.getLastShownReleaseNotesVersion();
     SemanticVersion previousVersion;
-    if (lastReleaseNotesShownVersion.isEmpty) {
+    if (debugTestReleaseNotes || lastReleaseNotesShownVersion.isEmpty) {
       previousVersion = SemanticVersion();
     } else {
       previousVersion = SemanticVersion.parse(lastReleaseNotesShownVersion);
@@ -238,6 +242,7 @@ class ReleaseNotesController {
   }
 
   String _releaseNotesUrl(String currentVersion) {
-    return 'https://docs.flutter.dev/development/tools/devtools/release-notes/release-notes-$currentVersion-src.md';
+    return '$_flutterDocsSite/development/tools/devtools/release-notes/'
+        'release-notes-$currentVersion-src.md';
   }
 }
