@@ -248,6 +248,12 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
             widget.controller.clear();
           },
         ),
+        const SizedBox(width: denseSpacing),
+        ExportButton(
+          minScreenWidthForTextBeforeScaling:
+              _NetworkProfilerControls._includeTextWidth,
+          onPressed: widget.controller.exportAsHarFile,
+        ),
         const SizedBox(width: defaultSpacing),
         const Expanded(child: SizedBox()),
         // TODO(kenz): fix focus issue when state is refreshed
