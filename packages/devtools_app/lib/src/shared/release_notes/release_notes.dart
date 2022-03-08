@@ -21,7 +21,7 @@ import '../theme.dart';
 import '../utils.dart';
 import '../version.dart';
 
-const debugTestReleaseNotes = true;
+const debugTestReleaseNotes = false;
 
 class ReleaseNotesViewer extends StatefulWidget {
   const ReleaseNotesViewer({
