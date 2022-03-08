@@ -222,6 +222,8 @@ class ReleaseNotesController {
   }
 
   Future<void> _fetchReleaseNotes(SemanticVersion version) async {
+    final currentVersionString = version.toString();
+
     // Try all patch versions for this major.minor combination until we find
     // release notes (e.g. 2.11.4 -> 2.11.3 -> 2.11.2 -> ...).
     var attempts = version.patch;
@@ -243,7 +245,7 @@ class ReleaseNotesController {
         _releaseNotesMarkdown.value = releaseNotesMarkdown;
         toggleReleaseNotesVisible(true);
         unawaited(
-          server.setLastShownReleaseNotesVersion(versionString),
+          server.setLastShownReleaseNotesVersion(currentVersionString),
         );
         return;
       } catch (_) {
