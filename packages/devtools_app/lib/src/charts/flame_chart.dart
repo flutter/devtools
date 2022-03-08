@@ -753,30 +753,10 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
               chartWidth: widget.width,
               selected: selected,
               hovered: hovered,
+              extentDelegate: extentDelegate,
+              controller: scrollController,
             ),
           ),
-          // child: ExtentDelegateListView(
-          //   controller: scrollController,
-          //   scrollDirection: Axis.horizontal,
-          //   extentDelegate: extentDelegate,
-          //   childrenDelegate: SliverChildBuilderDelegate(
-          //     (context, index) {
-          //       final node = nodes[index];
-          //       return FlameChartNodeWidget(
-          //         index: index,
-          //         nodes: nodes,
-          //         zoom: widget.zoom,
-          //         startInset: widget.startInset,
-          //         chartWidth: widget.width,
-          //         selected: node.data == selected,
-          //         hovered: node.data == hovered,
-          //       );
-          //     },
-          //     childCount: nodes.length,
-          //     addRepaintBoundaries: false,
-          //     addAutomaticKeepAlives: false,
-          //   ),
-          // ),
         ),
       ),
     );
@@ -840,6 +820,8 @@ class FlameChartNodeRow extends LeafRenderObjectWidget {
     required this.chartWidth,
     required this.selected,
     required this.hovered,
+    required this.extentDelegate,
+    required this.controller,
   }) : super(key: key);
 
   final List<FlameChartNode> nodes;
@@ -854,6 +836,10 @@ class FlameChartNodeRow extends LeafRenderObjectWidget {
 
   final Object? hovered;
 
+  final _ScrollingFlameChartRowExtentDelegate extentDelegate;
+
+  final ScrollController controller;
+
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderFlameRow()
@@ -863,24 +849,39 @@ class FlameChartNodeRow extends LeafRenderObjectWidget {
       ..chartWidth = chartWidth
       ..selected = selected
       ..hovered = hovered
+      ..extentDelegate = extentDelegate
+      ..controller = controller
       ..colorScheme = Theme.of(context).colorScheme;
   }
 
   @override
   void updateRenderObject(BuildContext context, covariant _RenderFlameRow renderObject) {
-    _RenderFlameRow()
+    renderObject
       ..nodes = nodes
       ..zoom = zoom
       ..startInset = startInset
       ..chartWidth = chartWidth
       ..selected = selected
       ..hovered = hovered
+      ..extentDelegate = extentDelegate
+      ..controller = controller
       ..colorScheme = Theme.of(context).colorScheme;
   }
 }
 
 class _RenderFlameRow extends RenderBox {
    _RenderFlameRow();
+
+  _ScrollingFlameChartRowExtentDelegate? extentDelegate;
+  ScrollController? _controller;
+  set controller(ScrollController value) {
+    if (_controller == value) {
+      return;
+    }
+    _controller?.removeListener(markNeedsPaint);
+    _controller = value;
+    _controller?.addListener(markNeedsPaint);
+  }
 
   List<FlameChartNode> get nodes => _nodes;
   List<FlameChartNode> _nodes = [];
@@ -893,13 +894,13 @@ class _RenderFlameRow extends RenderBox {
   }
 
   double get zoom => _zoom;
-  double _zoom = 1;
+  double _zoom = 0.5;
   set zoom(double value) {
     if (value == zoom) {
       return;
     }
     _zoom = value;
-    markNeedsLayout();
+    markNeedsPaint();
   }
 
   double get startInset => _startInset;
@@ -954,8 +955,9 @@ class _RenderFlameRow extends RenderBox {
 
   @override
   void performLayout() {
+    final width = extentDelegate!.chartWidth;
     size = Size(
-      nodes.length * 10, // TBD
+      width,
       constraints.maxHeight,
     );
   }
@@ -981,7 +983,7 @@ class _RenderFlameRow extends RenderBox {
         zoom: zoom,
         colorScheme: colorScheme,
       );
-      accumulated += 10; // TBD
+      accumulated += extentDelegate!.itemExtent(index);
       index += 1;
     }
   }
