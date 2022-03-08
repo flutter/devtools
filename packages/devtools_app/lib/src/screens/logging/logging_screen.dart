@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'dart:convert';
 
@@ -54,7 +54,7 @@ class LoggingScreen extends Screen {
 
     return StreamBuilder<String>(
       initialData: controller.statusText,
-      stream: controller.onLogStatusChanged,
+      stream: controller.onLogStatusChanged as Stream<String>?,
       builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
         return Text(snapshot.data ?? '');
       },
@@ -84,11 +84,11 @@ Example queries:
 
 class _LoggingScreenState extends State<LoggingScreenBody>
     with AutoDisposeMixin, SearchFieldMixin<LoggingScreenBody> {
-  LogData selected;
+  LogData? selected;
 
-  LoggingController controller;
+  LoggingController? controller;
 
-  List<LogData> filteredLogs;
+  List<LogData?>? filteredLogs;
 
   @override
   void initState() {
@@ -106,17 +106,17 @@ class _LoggingScreenState extends State<LoggingScreenBody>
 
     cancelListeners();
 
-    filteredLogs = controller.filteredData.value;
-    addAutoDisposeListener(controller.filteredData, () {
+    filteredLogs = controller!.filteredData.value;
+    addAutoDisposeListener(controller!.filteredData, () {
       setState(() {
-        filteredLogs = controller.filteredData.value;
+        filteredLogs = controller!.filteredData.value;
       });
     });
 
-    selected = controller.selectedLog.value;
-    addAutoDisposeListener(controller.selectedLog, () {
+    selected = controller!.selectedLog.value;
+    addAutoDisposeListener(controller!.selectedLog, () {
       setState(() {
-        selected = controller.selectedLog.value;
+        selected = controller!.selectedLog.value;
       });
     });
   }
@@ -133,10 +133,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   }
 
   Widget _buildLoggingControls() {
-    final hasData = controller.filteredData.value.isNotEmpty;
+    final hasData = controller!.filteredData.value.isNotEmpty;
     return Row(
       children: [
-        ClearButton(onPressed: controller.clear),
+        ClearButton(onPressed: controller!.clear),
         const Spacer(),
         StructuredErrorsToggle(),
         const SizedBox(width: denseSpacing),
@@ -145,7 +145,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
           width: wideSearchTextWidth,
           height: defaultTextFieldHeight,
           child: buildSearchField(
-            controller: controller,
+            controller: controller!,
             searchFieldKey: loggingSearchFieldKey,
             searchFieldEnabled: hasData,
             shouldRequestFocus: false,
@@ -155,7 +155,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         const SizedBox(width: denseSpacing),
         FilterButton(
           onPressed: _showFilterDialog,
-          isFilterActive: filteredLogs.length != controller.data.length,
+          isFilterActive: filteredLogs!.length != controller!.data.length,
         ),
       ],
     );
@@ -169,10 +169,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         OutlineDecoration(
           child: LogsTable(
             data: filteredLogs,
-            onItemSelected: controller.selectLog,
-            selectionNotifier: controller.selectedLog,
-            searchMatchesNotifier: controller.searchMatches,
-            activeSearchMatchNotifier: controller.activeSearchMatch,
+            onItemSelected: controller!.selectLog,
+            selectionNotifier: controller!.selectedLog,
+            searchMatchesNotifier: controller!.searchMatches,
+            activeSearchMatchNotifier: controller!.activeSearchMatch,
           ),
         ),
         LogDetails(log: selected),
@@ -183,10 +183,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   void _showFilterDialog() {
     showDialog(
       context: context,
-      builder: (context) => FilterDialog<LoggingController, LogData>(
+      builder: (context) => FilterDialog<LoggingController?, LogData>(
         controller: controller,
         queryInstructions: LoggingScreenBody.filterQueryInstructions,
-        queryFilterArguments: controller.filterArgs,
+        queryFilterArguments: controller!.filterArgs,
       ),
     );
   }
@@ -194,19 +194,19 @@ class _LoggingScreenState extends State<LoggingScreenBody>
 
 class LogsTable extends StatelessWidget {
   LogsTable({
-    Key key,
-    @required this.data,
-    @required this.onItemSelected,
-    @required this.selectionNotifier,
-    @required this.searchMatchesNotifier,
-    @required this.activeSearchMatchNotifier,
+    Key? key,
+    required this.data,
+    required this.onItemSelected,
+    required this.selectionNotifier,
+    required this.searchMatchesNotifier,
+    required this.activeSearchMatchNotifier,
   }) : super(key: key);
 
-  final List<LogData> data;
-  final ItemCallback<LogData> onItemSelected;
-  final ValueListenable<LogData> selectionNotifier;
+  final List<LogData?>? data;
+  final ItemCallback<LogData?> onItemSelected;
+  final ValueListenable<LogData?> selectionNotifier;
   final ValueListenable<List<LogData>> searchMatchesNotifier;
-  final ValueListenable<LogData> activeSearchMatchNotifier;
+  final ValueListenable<LogData?> activeSearchMatchNotifier;
 
   final ColumnData<LogData> when = _WhenColumn();
   final ColumnData<LogData> kind = _KindColumn();
@@ -216,11 +216,11 @@ class LogsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlatTable<LogData>(
+    return FlatTable<LogData?>(
       columns: columns,
-      data: data,
+      data: data!,
       autoScrollContent: true,
-      keyFactory: (LogData data) => ValueKey<LogData>(data),
+      keyFactory: (LogData? data) => ValueKey<LogData?>(data),
       onItemSelected: onItemSelected,
       selectionNotifier: selectionNotifier,
       sortColumn: when,
@@ -233,9 +233,9 @@ class LogsTable extends StatelessWidget {
 }
 
 class LogDetails extends StatefulWidget {
-  const LogDetails({Key key, @required this.log}) : super(key: key);
+  const LogDetails({Key? key, required this.log}) : super(key: key);
 
-  final LogData log;
+  final LogData? log;
 
   @override
   _LogDetailsState createState() => _LogDetailsState();
@@ -246,8 +246,8 @@ class LogDetails extends StatefulWidget {
 
 class _LogDetailsState extends State<LogDetails>
     with SingleTickerProviderStateMixin {
-  String _lastDetails;
-  ScrollController scrollController;
+  String? _lastDetails;
+  ScrollController? scrollController;
 
   @override
   void initState() {
@@ -266,7 +266,7 @@ class _LogDetailsState extends State<LogDetails>
 
   Future<void> _computeLogDetails() async {
     if (widget.log?.needsComputing ?? false) {
-      await widget.log.compute();
+      await widget.log!.compute();
       setState(() {});
     }
   }
@@ -280,7 +280,7 @@ class _LogDetailsState extends State<LogDetails>
     );
   }
 
-  Widget _buildContent(BuildContext context, LogData log) {
+  Widget _buildContent(BuildContext context, LogData? log) {
     // TODO(#1370): Handle showing flutter errors in a structured manner.
     return Stack(
       children: [
@@ -291,14 +291,14 @@ class _LogDetailsState extends State<LogDetails>
     );
   }
 
-  Widget _buildSimpleLog(BuildContext context, LogData log) {
-    final disabled = log?.details == null || log.details.isEmpty;
+  Widget _buildSimpleLog(BuildContext context, LogData? log) {
+    final disabled = log?.details == null || log!.details!.isEmpty;
 
     final details = log?.details;
     if (details != _lastDetails) {
-      if (scrollController.hasClients) {
+      if (scrollController!.hasClients) {
         // Make sure we change the scroll if the log details shown have changed.
-        scrollController.jumpTo(0);
+        scrollController!.jumpTo(0);
       }
       _lastDetails = details;
     }
@@ -310,7 +310,7 @@ class _LogDetailsState extends State<LogDetails>
           needsTopBorder: false,
           rightActions: [
             CopyToClipboardControl(
-              dataProvider: disabled ? null : () => log?.prettyPrinted,
+              dataProvider: disabled ? null : (() => log?.prettyPrinted!) as String Function()?,
               buttonKey: LogDetails.copyToClipboardButtonKey,
             ),
           ],
@@ -345,7 +345,7 @@ class _WhenColumn extends ColumnData<LogData> {
   String getValue(LogData dataObject) => dataObject.timestamp == null
       ? ''
       : timeFormat
-          .format(DateTime.fromMillisecondsSinceEpoch(dataObject.timestamp));
+          .format(DateTime.fromMillisecondsSinceEpoch(dataObject.timestamp!));
 }
 
 class _KindColumn extends ColumnData<LogData>
@@ -367,7 +367,7 @@ class _KindColumn extends ColumnData<LogData>
     BuildContext context,
     LogData item, {
     bool isRowSelected = false,
-    VoidCallback onPressed,
+    VoidCallback? onPressed,
   }) {
     final String kind = item.kind;
 
@@ -410,20 +410,20 @@ class MessageColumn extends ColumnData<LogData>
   bool get supportsSorting => false;
 
   @override
-  String getValue(LogData dataObject) =>
+  String? getValue(LogData dataObject) =>
       dataObject.summary ?? dataObject.details;
 
   @override
   int compare(LogData a, LogData b) {
-    final String valueA = getValue(a);
-    final String valueB = getValue(b);
+    final String valueA = getValue(a)!;
+    final String valueB = getValue(b)!;
     // Matches frame descriptions (e.g. '#12  11.4ms ')
     final regex = RegExp(r'#(\d+)\s+\d+.\d+ms\s*');
     final valueAIsFrameLog = valueA.startsWith(regex);
     final valueBIsFrameLog = valueB.startsWith(regex);
     if (valueAIsFrameLog && valueBIsFrameLog) {
-      final frameNumberA = regex.firstMatch(valueA)[1];
-      final frameNumberB = regex.firstMatch(valueB)[1];
+      final frameNumberA = regex.firstMatch(valueA)![1]!;
+      final frameNumberB = regex.firstMatch(valueB)![1]!;
       return int.parse(frameNumberA).compareTo(int.parse(frameNumberB));
     } else if (valueAIsFrameLog && !valueBIsFrameLog) {
       return -1;
@@ -438,7 +438,7 @@ class MessageColumn extends ColumnData<LogData>
     BuildContext context,
     LogData data, {
     bool isRowSelected = false,
-    VoidCallback onPressed,
+    VoidCallback? onPressed,
   }) {
     TextStyle textStyle = Theme.of(context).fixedFontStyle;
     if (isRowSelected) {
@@ -455,7 +455,7 @@ class MessageColumn extends ColumnData<LogData>
 
       double frameLength = 0.0;
       try {
-        final int micros = jsonDecode(data.details)['elapsed'];
+        final int micros = jsonDecode(data.details!)['elapsed'];
         frameLength = micros * 3.0 / 1000.0;
       } catch (e) {
         // ignore
