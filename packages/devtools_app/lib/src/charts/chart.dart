@@ -40,7 +40,7 @@ void drawTranslate(
 class Chart extends StatefulWidget {
   Chart(
     this.controller, {
-    String? title,
+    String title = '',
   }) {
     controller.title = title;
   }
@@ -167,7 +167,7 @@ class ChartPainter extends CustomPainter {
 
     drawTranslate(
       canvas,
-      chartController.xCanvasChart!,
+      chartController.xCanvasChart,
       chartController.yCanvasChart,
       (canavas) {
         drawAxes(
@@ -201,7 +201,7 @@ class ChartPainter extends CustomPainter {
     // TODO(terry): Need to compute x-axis left-most position for last timestamp.
     //              May need to do the other direction so it looks better.
     final endVisibleIndex =
-        chartController.timestampsLength - chartController.visibleXAxisTicks!;
+        chartController.timestampsLength - chartController.visibleXAxisTicks;
 
     final xTranslation = chartController.xCoordLeftMostVisibleTimestamp;
     final yTranslation = chartController.zeroYPosition;
@@ -290,6 +290,9 @@ class ChartPainter extends CustomPainter {
                       chartController.tickWidth - 4,
                     );
                   } else if (previousTracesData[index] != null) {
+                    final previous = previousTracesData[index]!;
+                    final current = currentTracesData[index]!;
+
                     // Stacked lines.
                     // Drawline from previous plotted point to new point.
                     drawConnectedLine(
@@ -297,8 +300,8 @@ class ChartPainter extends CustomPainter {
                       trace.characteristics,
                       xCoord,
                       yCoord,
-                      previousTracesData[index]!.x,
-                      previousTracesData[index]!.y,
+                      previous.x,
+                      previous.y,
                     );
                     drawSymbol(
                       canvas,
@@ -315,12 +318,12 @@ class ChartPainter extends CustomPainter {
                     drawFillArea(
                       canvas,
                       trace.characteristics,
-                      previousTracesData[index]!.x,
-                      previousTracesData[index]!.y,
-                      previousTracesData[index]!.base!,
-                      currentTracesData[index]!.x,
-                      currentTracesData[index]!.y,
-                      currentTracesData[index]!.base!,
+                      previous.x,
+                      previous.y,
+                      previous.base!,
+                      current.x,
+                      current.y,
+                      current.base!,
                     );
                   } else {
                     // Draw point
@@ -390,7 +393,7 @@ class ChartPainter extends CustomPainter {
       // X translation is left-most edge of chart widget.
       drawTranslate(
         canvas,
-        chartController.xCanvasChart!,
+        chartController.xCanvasChart,
         yTranslation,
         (canvas) {
           // Rescale Y-axis to max visible Y range.
@@ -419,14 +422,14 @@ class ChartPainter extends CustomPainter {
   }
 
   void clipChart(Canvas canvas, {ClipOp op = ClipOp.intersect}) {
-    final leftSideSide = chartController.xCanvasChart!;
+    final leftSideSide = chartController.xCanvasChart;
     final topChartSide = chartController.yCanvasChart;
     final r = Rect.fromLTRB(
       leftSideSide,
       topChartSide,
       chartController.canvasChartWidth +
           leftSideSide -
-          chartController.xPaddingRight!,
+          chartController.xPaddingRight,
       topChartSide + chartController.canvasChartHeight,
     );
 
@@ -434,7 +437,7 @@ class ChartPainter extends CustomPainter {
   }
 
   // TODO(terry): Use drawText?
-  void drawTitle(Canvas canvas, Size size, String? title) {
+  void drawTitle(Canvas canvas, Size size, String title) {
     final tp = createText(title, 1.5);
     tp.paint(canvas, Offset(size.width / 2 - tp.width / 2, 0));
   }
@@ -448,7 +451,7 @@ class ChartPainter extends CustomPainter {
     bool displayTopLine = true,
   }) {
     final chartWidthPosition =
-        chartController.canvasChartWidth - chartController.xPaddingRight!;
+        chartController.canvasChartWidth - chartController.xPaddingRight;
     final chartHeight = chartController.canvasChartHeight;
 
     // Top line of chart.
@@ -492,19 +495,19 @@ class ChartPainter extends CustomPainter {
   void drawYTicks(Canvas canvas, ChartController chartController, Paint axis) {
     final yScale = chartController.yScale;
 
-    for (var labelIndex = yScale.labelTicks!; labelIndex >= 0; labelIndex--) {
-      final unit = pow(10, yScale.labelUnitExponent!).floor();
+    for (var labelIndex = yScale.labelTicks; labelIndex >= 0; labelIndex--) {
+      final unit = pow(10, yScale.labelUnitExponent).floor();
       final y = labelIndex * unit;
       // Need to be zero based
       final yCoord = chartController.yPositionToYCanvasCoord(y);
 
       final labelName = constructLabel(
         labelIndex.floor(),
-        yScale.labelUnitExponent!.floor(),
+        yScale.labelUnitExponent.floor(),
       );
 
       // Label starts at left edge.
-      drawText(labelName, canvas, -chartController.xCanvasChart! / 2, yCoord);
+      drawText(labelName, canvas, -chartController.xCanvasChart / 2, yCoord);
 
       // Draw horizontal tick 6 pixels from Y-axis line.
       canvas.drawLine(
@@ -594,7 +597,7 @@ class ChartPainter extends CustomPainter {
     tp.paint(canvas, Offset(x + -tp.width / 2, y - tp.height / 2));
   }
 
-  TextPainter createText(String? textValue, double scale) {
+  TextPainter createText(String textValue, double scale) {
     final span = TextSpan(
       // TODO(terry): All text in a chart is grey. A chart like a Trace
       //              should have PaintCharacteristics.

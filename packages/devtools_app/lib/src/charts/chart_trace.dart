@@ -319,10 +319,10 @@ class AxisScale {
   late double _range;
 
   /// Unit for the label (exponent) e.g., 6 = 10^6
-  double? labelUnitExponent;
+  late double labelUnitExponent;
 
   /// Number of lables.
-  double? labelTicks;
+  late double labelTicks;
 
   void _calculate() {
     _range = _niceNum(maxPoint, false);
