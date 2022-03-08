@@ -51,8 +51,8 @@ class IsolateManager extends Disposer {
       final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
       final vm = await serviceManager.service!.getVM();
       final isolates = [
-        ...vm.isolates ?? [],
-        if (vmDeveloperModeEnabled) ...vm.systemIsolates ?? [],
+        ...vm.isolates ?? <IsolateRef>[],
+        if (vmDeveloperModeEnabled) ...vm.systemIsolates ?? <IsolateRef>[],
       ];
       if (selectedIsolate.value!.isSystemIsolate! && !vmDeveloperModeEnabled) {
         selectIsolate(_isolates.value.first);
