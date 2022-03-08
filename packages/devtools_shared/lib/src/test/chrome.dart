@@ -54,6 +54,11 @@ class Chrome {
       }
     }
 
+    final pathFromEnv = Platform.environment['CHROME_PATH'];
+    if (pathFromEnv != null && FileSystemEntity.isFileSync(pathFromEnv)) {
+      return Chrome.from(pathFromEnv);
+    }
+
     // TODO(devoncarew): check default install locations for linux
     // TODO(devoncarew): try `which` on mac, linux
 
