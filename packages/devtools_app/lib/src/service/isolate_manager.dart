@@ -32,7 +32,7 @@ class IsolateManager extends Disposer {
   int _lastIsolateIndex = 0;
   final Map<String?, int> _isolateIndexMap = {};
 
-  ValueListenable<List<IsolateRef?>> get isolates => _isolates;
+  ValueListenable<List<IsolateRef>> get isolates => _isolates;
   final _isolates = ListValueNotifier(const <IsolateRef>[]);
 
   Stream<IsolateRef?> get onIsolateCreated => _isolateCreatedController.stream;
@@ -51,8 +51,8 @@ class IsolateManager extends Disposer {
       final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
       final vm = await serviceManager.service!.getVM();
       final isolates = [
-        ...vm.isolates!,
-        if (vmDeveloperModeEnabled) ...vm.systemIsolates!,
+        ...vm.isolates ?? [],
+        if (vmDeveloperModeEnabled) ...vm.systemIsolates ?? [],
       ];
       if (selectedIsolate.value!.isSystemIsolate! && !vmDeveloperModeEnabled) {
         selectIsolate(_isolates.value.first);
@@ -63,15 +63,17 @@ class IsolateManager extends Disposer {
   }
 
   IsolateState? get mainIsolateDebuggerState {
-    return _isolateStates[_mainIsolate.value!];
+    return _mainIsolate.value != null
+        ? _isolateStates[_mainIsolate.value!]
+        : null;
   }
 
   IsolateState? isolateDebuggerState(IsolateRef? isolate) {
-    return _isolateStates[isolate!];
+    return isolate != null ? _isolateStates[isolate] : null;
   }
 
   IsolateState? get selectedIsolateState {
-    return _isolateStates[_mainIsolate.value!];
+    return mainIsolateDebuggerState;
   }
 
   /// Return a unique, monotonically increasing number for this Isolate.
@@ -113,7 +115,7 @@ class IsolateManager extends Disposer {
   Future<void> _loadIsolateState(IsolateRef isolateRef) async {
     final service = _service;
     var isolate = await _service!.getIsolate(isolateRef.id!);
-    if (!isolate.runnable!) {
+    if (isolate.runnable == false) {
       final isolateRunnableCompleter = _isolateRunnableCompleters.putIfAbsent(
         isolate.id,
         () => Completer<void>(),
@@ -198,11 +200,9 @@ class IsolateManager extends Disposer {
       if (_selectedIsolate.value == null) {
         final isolate = await isolateState.isolate;
         if (service != _service) return null;
-        if (isolate!.extensionRPCs != null) {
-          for (String extensionName in isolate.extensionRPCs!) {
-            if (extensions.isFlutterExtension(extensionName)) {
-              return isolateState.isolateRef;
-            }
+        for (String extensionName in isolate?.extensionRPCs ?? []) {
+          if (extensions.isFlutterExtension(extensionName)) {
+            return isolateState.isolateRef;
           }
         }
       }
