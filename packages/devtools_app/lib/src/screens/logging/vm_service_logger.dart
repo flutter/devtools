@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -25,14 +23,14 @@ class VmServiceTrafficLogger {
 
   static const eventName = 'devtools.service';
 
-  StreamSubscription _sendSub;
-  StreamSubscription _receiveSub;
+  late final StreamSubscription _sendSub;
+  late final StreamSubscription _receiveSub;
 
   void _logServiceProtocolCalls(String message) {
     final Map m = jsonDecode(message);
 
-    final String method = m['method'];
-    final String id = m['id'];
+    final String? method = m['method'];
+    final String? id = m['id'];
 
     messageBus.addEvent(BusEvent(
       eventName,
@@ -43,21 +41,21 @@ class VmServiceTrafficLogger {
   void _logServiceProtocolResponses(String message) {
     final Map m = jsonDecode(message);
 
-    String details = m['method'];
+    String? details = m['method'];
     if (details == null) {
       if (m['result'] != null) {
         details = m['result']['type'];
       } else {
-        final Map error = m['error'];
+        final Map? error = m['error'];
         details = error == null ? '' : '$error';
       }
     } else if (details == 'streamNotify') {
       details = '';
     }
 
-    final String id = m['id'];
-    var streamId = '';
-    var kind = '';
+    final String? id = m['id'];
+    String? streamId = '';
+    String? kind = '';
 
     if (m['params'] != null) {
       final Map p = m['params'];
@@ -75,7 +73,7 @@ class VmServiceTrafficLogger {
   }
 
   void dispose() {
-    _sendSub?.cancel();
-    _receiveSub?.cancel();
+    _sendSub.cancel();
+    _receiveSub.cancel();
   }
 }
