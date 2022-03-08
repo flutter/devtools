@@ -1,3 +1,6 @@
+## 2.11.3
+Check for CHROME_PATH env variable in devtools_shared [#3805](https://github.com/flutter/devtools/pull/3805)
+
 ## 2.11.2
 * Fix selection issue if file is already visible in program explorer [#3794](https://github.com/flutter/devtools/pull/3794) 
 * Automatic scrolling in the Program Explorer [#3786](https://github.com/flutter/devtools/pull/3786)
