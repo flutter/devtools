@@ -206,8 +206,30 @@ class ReleaseNotesController {
     final parsedCurrentVersionStr = parsedCurrentVersion.toString();
     if (parsedCurrentVersion > previousVersion) {
       try {
+        await _fetchReleaseNotes(parsedCurrentVersion);
+      } catch (e) {
+        // Fail gracefully if we cannot find release notes for the current
+        // version of DevTools.
+        _releaseNotesMarkdown.value = null;
+        toggleReleaseNotesVisible(false);
+        logger.log(
+          'Warning: could not find release notes for DevTools version '
+          '$parsedCurrentVersionStr. $e',
+          logger.LogLevel.warning,
+        );
+      }
+    }
+  }
+
+  Future<void> _fetchReleaseNotes(SemanticVersion version) async {
+    // Try all patch versions for this major.minor combination until we find
+    // release notes (e.g. 2.11.4 -> 2.11.3 -> 2.11.2 -> ...).
+    var attempts = version.patch;
+    while (attempts >= 0) {
+      final versionString = version.toString();
+      try {
         String releaseNotesMarkdown = await http.read(
-          Uri.parse(_releaseNotesUrl(parsedCurrentVersionStr)),
+          Uri.parse(_releaseNotesUrl(versionString)),
         );
         // This is a workaround so that the images in release notes will appear.
         // The {{site.url}} syntax is best practices for the flutter website
@@ -221,18 +243,15 @@ class ReleaseNotesController {
         _releaseNotesMarkdown.value = releaseNotesMarkdown;
         toggleReleaseNotesVisible(true);
         unawaited(
-          server.setLastShownReleaseNotesVersion(parsedCurrentVersionStr),
+          server.setLastShownReleaseNotesVersion(versionString),
         );
-      } catch (e) {
-        // Fail gracefully if we cannot find release notes for the current
-        // version of DevTools.
-        _releaseNotesMarkdown.value = null;
-        toggleReleaseNotesVisible(false);
-        logger.log(
-          'Warning: could not find release notes for DevTools version '
-          '$parsedCurrentVersionStr. $e',
-          logger.LogLevel.warning,
-        );
+        return;
+      } catch (_) {
+        attempts--;
+        if (attempts < 0) {
+          rethrow;
+        }
+        version = version.downgrade(downgradePatch: true);
       }
     }
   }
