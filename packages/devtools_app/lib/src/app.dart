@@ -44,7 +44,7 @@ import 'shared/globals.dart';
 import 'shared/initializer.dart';
 import 'shared/landing_screen.dart';
 import 'shared/notifications.dart';
-import 'shared/release_notes.dart';
+import 'shared/release_notes/release_notes.dart';
 import 'shared/routing.dart';
 import 'shared/scaffold.dart';
 import 'shared/screen.dart';
