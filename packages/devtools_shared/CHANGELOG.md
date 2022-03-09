@@ -1,3 +1,6 @@
+## 2.11.3
+Check for CHROME_PATH env variable in devtools_shared [#3805](https://github.com/flutter/devtools/pull/3805)
+
 ## 2.11.1
 - Update CLI test driver with the correct Dart VM Service prefix
 ## 2.11.0

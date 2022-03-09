@@ -75,7 +75,7 @@ class ChartController extends DisposableController
   double _tickWidth = 10.0;
 
   /// Number of ticks visible (on the X-axis);
-  int? visibleXAxisTicks;
+  late int visibleXAxisTicks;
 
   // TODO(terry): For now three labels.  Need better mechanism, some number of labels
   //              based on x-axis zoom factor and default unit to display for labels e.g.,
@@ -105,13 +105,13 @@ class ChartController extends DisposableController
   final bool displayYLabels;
 
   /// xCanvas coord for plotting data.
-  double? xCanvasChart;
+  double xCanvasChart = 0;
 
   /// Width of the canvas for plotting data (#).
   late double canvasChartWidth;
 
   /// Right-side padding after computing minPadding and max number of integral ticks for canvasChartWidth.
-  double? xPaddingRight;
+  late double xPaddingRight;
 
   /// yCanvas coord for plotting data.
   double yCanvasChart = 0;
@@ -183,13 +183,13 @@ class ChartController extends DisposableController
 
   double? get fixedMaxY => _fixedMaxY;
 
-  String? get title => _title;
+  String get title => _title;
 
-  String? _title;
+  String _title = '';
 
-  set title(String? value) {
+  set title(String value) {
     // TODO(terry): Compute dynamically based on title text height.
-    topPadding = value != null ? 20.0 : 0.0;
+    topPadding = value.isNotEmpty ? 20.0 : 0.0;
     _title = value;
   }
 
@@ -424,7 +424,7 @@ class ChartController extends DisposableController
     final width = size!.width - leftPadding - rightPadding;
     // Compute max number of ticks visible on X-Axis.
     visibleXAxisTicks = (width / tickWidth).truncate();
-    canvasChartWidth = visibleXAxisTicks!.toDouble() * tickWidth;
+    canvasChartWidth = visibleXAxisTicks.toDouble() * tickWidth;
     // Right-side padding after adjust for max ticks on width.
     xPaddingRight = width - canvasChartWidth;
     yCanvasChart = topPadding;
@@ -480,14 +480,14 @@ class ChartController extends DisposableController
   }
 
   /// If negative then total ticks collected < number of visible ticks to display.
-  int get totalTimestampTicks => timestampsLength - visibleXAxisTicks!;
+  int get totalTimestampTicks => timestampsLength - visibleXAxisTicks;
 
   int get leftVisibleIndex {
     final leftIndex = totalTimestampTicks;
     if (leftIndex > 0) return leftIndex;
 
     // Less ticks than total size of ticks to show.
-    return visibleXAxisTicks! - timestampsLength;
+    return visibleXAxisTicks - timestampsLength;
   }
 
   bool _isTimestampVisible(int timestampIndex) {
@@ -512,8 +512,8 @@ class ChartController extends DisposableController
   /// Return timestamps index of the left most visible datum.
   int get leftMostVisibleTimestampIndex {
     var index = 0;
-    if (timestampsLength > visibleXAxisTicks!) {
-      index = timestampsLength - visibleXAxisTicks!;
+    if (timestampsLength > visibleXAxisTicks) {
+      index = timestampsLength - visibleXAxisTicks;
     }
 
     return index;
@@ -523,10 +523,9 @@ class ChartController extends DisposableController
   /// returns a zero based X-coord this X-coord must be translated by the
   /// value of this getter.
   double get xCoordLeftMostVisibleTimestamp {
-    assert(xCanvasChart != null);
-    double indexOffset = xCanvasChart!;
-    if (timestampsLength < visibleXAxisTicks!) {
-      final startIndex = visibleXAxisTicks! - timestampsLength;
+    double indexOffset = xCanvasChart;
+    if (timestampsLength < visibleXAxisTicks) {
+      final startIndex = visibleXAxisTicks - timestampsLength;
       indexOffset += startIndex * tickWidth;
     }
 

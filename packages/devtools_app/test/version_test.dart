@@ -4,6 +4,9 @@
 
 // @dart=2.9
 
+// Ignoring redundant argument values makes the test easier to read.
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'package:devtools_app/src/shared/version.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -110,6 +113,50 @@ void main() {
       expect(
         SemanticVersion.parse('2.6.0+build.metadata').toString(),
         equals('2.6.0'),
+      );
+    });
+
+    test('downgrade', () {
+      var version = SemanticVersion(
+        major: 3,
+        minor: 2,
+        patch: 1,
+        preReleaseMajor: 1,
+        preReleaseMinor: 2,
+      );
+      expect(
+        version.downgrade().toString(),
+        equals('3.2.1'),
+      );
+
+      version = SemanticVersion(major: 3, minor: 2, patch: 1);
+      expect(
+        version.downgrade().toString(),
+        equals('3.2.1'),
+      );
+      expect(
+        version.downgrade(downgradeMajor: true).toString(),
+        equals('2.2.1'),
+      );
+      expect(
+        version.downgrade(downgradeMinor: true).toString(),
+        equals('3.1.1'),
+      );
+      expect(
+        version.downgrade(downgradePatch: true).toString(),
+        equals('3.2.0'),
+      );
+
+      version = SemanticVersion(major: 3, minor: 0, patch: 0);
+      expect(
+        version
+            .downgrade(
+              downgradeMajor: true,
+              downgradeMinor: true,
+              downgradePatch: true,
+            )
+            .toString(),
+        equals('2.0.0'),
       );
     });
 

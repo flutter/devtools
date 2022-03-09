@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:math';
 import 'dart:ui';
 
@@ -42,7 +40,7 @@ void drawTranslate(
 class Chart extends StatefulWidget {
   Chart(
     this.controller, {
-    String title,
+    String title = '',
   }) {
     controller.title = title;
   }
@@ -129,12 +127,12 @@ class PointAndBase {
   PointAndBase(
     this.x,
     this.y, {
-    double yBase,
+    double? yBase,
   }) : base = yBase;
 
   final double x;
   final double y;
-  final double base;
+  final double? base;
 }
 
 class ChartPainter extends CustomPainter {
@@ -246,34 +244,65 @@ class ChartPainter extends CustomPainter {
           final xCanvasCoord =
               chartController.timestampToXCanvasCoord(xTimestamp);
           if (currentTimestamp == xTimestamp) {
-            if (xCanvasCoord != null) {
-              // Get ready to render on canvas. Remember old canvas state
-              // and setup translations for x,y coordinates into the rendering
-              // area of the chart.
-              drawTranslate(
-                canvas,
-                xTranslation,
-                yTranslation,
-                (canvas) {
-                  final xCoord = xCanvasCoord;
-                  final yCoord =
-                      chartController.yPositionToYCanvasCoord(yValue);
-                  final hasMultipleExtensionEvents =
-                      traceData is DataAggregate ? traceData.count > 1 : false;
+            // Get ready to render on canvas. Remember old canvas state
+            // and setup translations for x,y coordinates into the rendering
+            // area of the chart.
+            drawTranslate(
+              canvas,
+              xTranslation,
+              yTranslation,
+              (canvas) {
+                final xCoord = xCanvasCoord;
+                final yCoord = chartController.yPositionToYCanvasCoord(yValue);
+                final hasMultipleExtensionEvents =
+                    traceData is DataAggregate ? traceData.count > 1 : false;
 
-                  // Is the visible Y-axis max larger.
-                  if (yValue > visibleYMax) {
-                    visibleYMax = yValue;
-                  }
+                // Is the visible Y-axis max larger.
+                if (yValue > visibleYMax) {
+                  visibleYMax = yValue;
+                }
 
-                  currentTracesData[index] = PointAndBase(
+                currentTracesData[index] = PointAndBase(
+                  xCoord,
+                  yCoord,
+                  yBase: chartController.yPositionToYCanvasCoord(stackedY),
+                );
+
+                if (trace.chartType == ChartType.symbol) {
+                  assert(!trace.stacked);
+                  drawSymbol(
+                    canvas,
+                    trace.characteristics,
                     xCoord,
                     yCoord,
-                    yBase: chartController.yPositionToYCanvasCoord(stackedY),
+                    hasMultipleExtensionEvents,
+                    trace.symbolPath,
                   );
+                } else if (trace.chartType == ChartType.line) {
+                  if (trace.characteristics.symbol == ChartSymbol.dashedLine) {
+                    // TODO(terry): Collect all points and draw a dashed line using
+                    // path_drawing package.
+                    drawDashed(
+                      canvas,
+                      trace.characteristics,
+                      xCoord,
+                      yCoord,
+                      chartController.tickWidth - 4,
+                    );
+                  } else if (previousTracesData[index] != null) {
+                    final previous = previousTracesData[index]!;
+                    final current = currentTracesData[index]!;
 
-                  if (trace.chartType == ChartType.symbol) {
-                    assert(!trace.stacked);
+                    // Stacked lines.
+                    // Drawline from previous plotted point to new point.
+                    drawConnectedLine(
+                      canvas,
+                      trace.characteristics,
+                      xCoord,
+                      yCoord,
+                      previous.x,
+                      previous.y,
+                    );
                     drawSymbol(
                       canvas,
                       trace.characteristics,
@@ -282,69 +311,37 @@ class ChartPainter extends CustomPainter {
                       hasMultipleExtensionEvents,
                       trace.symbolPath,
                     );
-                  } else if (trace.chartType == ChartType.line) {
-                    if (trace.characteristics.symbol ==
-                        ChartSymbol.dashedLine) {
-                      // TODO(terry): Collect all points and draw a dashed line using
-                      // path_drawing package.
-                      drawDashed(
-                        canvas,
-                        trace.characteristics,
-                        xCoord,
-                        yCoord,
-                        chartController.tickWidth - 4,
-                      );
-                    } else if (previousTracesData[index] != null) {
-                      // Stacked lines.
-                      // Drawline from previous plotted point to new point.
-                      drawConnectedLine(
-                        canvas,
-                        trace.characteristics,
-                        xCoord,
-                        yCoord,
-                        previousTracesData[index].x,
-                        previousTracesData[index].y,
-                      );
-                      drawSymbol(
-                        canvas,
-                        trace.characteristics,
-                        xCoord,
-                        yCoord,
-                        hasMultipleExtensionEvents,
-                        trace.symbolPath,
-                      );
-                      // TODO(terry): Honor z-order and also maybe path just on the traces e.g.,
-                      //              fill from top of trace 0 to top of trace 1 don't origin
-                      //              from zero.
-                      // Fill area between traces.
-                      drawFillArea(
-                        canvas,
-                        trace.characteristics,
-                        previousTracesData[index].x,
-                        previousTracesData[index].y,
-                        previousTracesData[index].base,
-                        currentTracesData[index].x,
-                        currentTracesData[index].y,
-                        currentTracesData[index].base,
-                      );
-                    } else {
-                      // Draw point
-                      drawSymbol(
-                        canvas,
-                        trace.characteristics,
-                        xCoord,
-                        yCoord,
-                        hasMultipleExtensionEvents,
-                        trace.symbolPath,
-                      );
-                    }
+                    // TODO(terry): Honor z-order and also maybe path just on the traces e.g.,
+                    //              fill from top of trace 0 to top of trace 1 don't origin
+                    //              from zero.
+                    // Fill area between traces.
+                    drawFillArea(
+                      canvas,
+                      trace.characteristics,
+                      previous.x,
+                      previous.y,
+                      previous.base!,
+                      current.x,
+                      current.y,
+                      current.base!,
+                    );
+                  } else {
+                    // Draw point
+                    drawSymbol(
+                      canvas,
+                      trace.characteristics,
+                      xCoord,
+                      yCoord,
+                      hasMultipleExtensionEvents,
+                      trace.symbolPath,
+                    );
                   }
-                  tracesDataIndex[index]--;
-                },
-              );
-            }
+                }
+                tracesDataIndex[index]--;
+              },
+            );
 
-            final tapLocation = chartController.tapLocation?.value;
+            final tapLocation = chartController.tapLocation.value;
             if (tapLocation?.index == xTickIndex ||
                 tapLocation?.timestamp == currentTimestamp) {
               drawTranslate(
@@ -499,7 +496,7 @@ class ChartPainter extends CustomPainter {
     final yScale = chartController.yScale;
 
     for (var labelIndex = yScale.labelTicks; labelIndex >= 0; labelIndex--) {
-      final unit = pow(10, yScale?.labelUnitExponent).floor();
+      final unit = pow(10, yScale.labelUnitExponent).floor();
       final y = labelIndex * unit;
       // Need to be zero based
       final yCoord = chartController.yPositionToYCanvasCoord(y);
@@ -530,34 +527,34 @@ class ChartPainter extends CustomPainter {
       case 1:
       case 2:
       case 3:
-        labelValue = labelValue * pow(10, unitExponent);
+        labelValue = labelValue * (pow(10, unitExponent) as int);
         break;
       // Return units in K e.g., 10K, 80K, 100K, 700K, etc.
       // Notice that anything < 10K will return as 500, 2050, 5000, 9000, etc.
       case 4:
       case 5:
-        labelValue = labelValue * pow(10, unitExponent - 4);
+        labelValue = labelValue * (pow(10, unitExponent - 4) as int);
         unit = 'K';
         break;
       // Return units in M e.g., 1M, 8M, 10M, 30M, 100M, 400M, etc.
       case 6:
       case 7:
       case 8:
-        labelValue = labelValue * pow(10, unitExponent - 6);
+        labelValue = labelValue * (pow(10, unitExponent - 6) as int);
         unit = 'M';
         break;
       // Return units in B e.g., 1B, 7B, 10B, 50B, 100B, 900B, etc.
       case 9:
       case 10:
       case 11:
-        labelValue = labelValue * pow(10, unitExponent - 9);
+        labelValue = labelValue * (pow(10, unitExponent - 9) as int);
         unit = 'B';
         break;
       // Return units in T e.g., 1T, 5T, 10T, 40T, 100T, 300T, etc.
       case 12:
       case 13:
       case 14:
-        labelValue = labelValue * pow(10, unitExponent - 12);
+        labelValue = labelValue * (pow(10, unitExponent - 12) as int);
         unit = 'T';
         break;
       default:
@@ -626,10 +623,10 @@ class ChartPainter extends CustomPainter {
     double x,
     double y,
     bool aggregateEvents,
-    Path symbolPathToDraw,
+    Path? symbolPathToDraw,
   ) {
-    PaintingStyle firstStyle;
-    PaintingStyle secondStyle;
+    late PaintingStyle firstStyle;
+    late PaintingStyle secondStyle;
     switch (characteristics.symbol) {
       case ChartSymbol.disc:
       case ChartSymbol.filledSquare:
@@ -655,7 +652,7 @@ class ChartPainter extends CustomPainter {
       ..style = firstStyle
       ..strokeWidth = characteristics.strokeWidth
       ..color = aggregateEvents
-          ? characteristics.colorAggregate
+          ? characteristics.colorAggregate!
           : characteristics.color;
 
     switch (characteristics.symbol) {
@@ -682,7 +679,7 @@ class ChartPainter extends CustomPainter {
           ..strokeWidth = 0
           // TODO(terry): Aggregate for concentric maybe needed someday.
           ..color = aggregateEvents
-              ? characteristics.colorAggregate
+              ? characteristics.colorAggregate!
               : characteristics.concentricCenterColor;
         canvas.drawCircle(
           Offset(x, y),
@@ -697,7 +694,7 @@ class ChartPainter extends CustomPainter {
       case ChartSymbol.triangle:
       case ChartSymbol.triangleDown:
         // Draw symbol centered on [x,y] point (*).
-        final path = symbolPathToDraw.shift(
+        final path = symbolPathToDraw!.shift(
           Offset(
             x - characteristics.width / 2,
             y - characteristics.height / 2,
@@ -808,7 +805,7 @@ class ChartPainter extends CustomPainter {
 
   /// Return the largest Y value in a particular trace if traceIndex is passed or
   /// all traces if traceIndex is not passed in.
-  double maxValue({int traceIndex}) {
+  double maxValue({int? traceIndex}) {
     var maxValue = 0.0;
     if (traceIndex == null) {
       for (var index = 0; index < chartController.traces.length; index++) {

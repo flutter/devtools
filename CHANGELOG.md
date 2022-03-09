@@ -1,4 +1,13 @@
+## 2.11.4
+* Fix bug with release notes viewer [#3811](https://github.com/flutter/devtools/pull/3811)
+* Try downgraded patch versions until we find release notes [#3809](https://github.com/flutter/devtools/pull/3809)
+* Fix null assertion in profile mode [#3808](https://github.com/flutter/devtools/pull/3808)
+
+## 2.11.3
+Check for CHROME_PATH env variable in devtools_shared [#3805](https://github.com/flutter/devtools/pull/3805)
+
 ## 2.11.2
+* Migrate chart_trace.dart to null safety [#3782](https://github.com/flutter/devtools/pull/3782)
 * Fix selection issue if file is already visible in program explorer [#3794](https://github.com/flutter/devtools/pull/3794) 
 * Automatic scrolling in the Program Explorer [#3786](https://github.com/flutter/devtools/pull/3786)
 * Migrate analytics code to null-safety [#3790](https://github.com/flutter/devtools/pull/3790)
