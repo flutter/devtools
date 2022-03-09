@@ -168,8 +168,10 @@ class ServiceExtensionManager extends Disposer {
     }
     _checkForFirstFrameStarted = false;
 
-    final isolateRef = _isolateManager.mainIsolate.value;
-    final Isolate isolate = await _isolateManager.getIsolateCached(isolateRef);
+    final isolateRef = _isolateManager.mainIsolate.value!;
+    final Isolate? isolate = await _isolateManager.getIsolateCached(isolateRef);
+
+    if (isolate == null) return;
 
     await _registerMainIsolate(isolate, isolateRef);
   }
@@ -315,12 +317,12 @@ class ServiceExtensionManager extends Disposer {
 
     if (isolateRef != _isolateManager.mainIsolate.value) return;
 
-    final Isolate isolate = await _isolateManager.getIsolateCached(isolateRef);
+    final Isolate? isolate = await _isolateManager.getIsolateCached(isolateRef);
     if (isolateRef != _isolateManager.mainIsolate.value) return;
 
     // Do not try to restore Dart IO extensions for a paused isolate.
     if (extensions.isDartIoExtension(name) &&
-        isolate.pauseEvent!.kind!.contains('Pause')) {
+        isolate?.pauseEvent?.kind?.contains('Pause') == true) {
       _callbacksOnIsolateResume.putIfAbsent(isolateRef, () => []).add(restore);
     } else {
       await restore();
@@ -390,18 +392,18 @@ class ServiceExtensionManager extends Disposer {
             }
           });
         } else {
-          await call(mainIsolate.id, value);
+          await call(mainIsolate?.id, value);
         }
       } else if (value is String) {
         await _service!.callServiceExtension(
           name,
-          isolateId: mainIsolate.id,
+          isolateId: mainIsolate?.id,
           args: {'value': value},
         );
       } else if (value is double) {
         await _service!.callServiceExtension(
           name,
-          isolateId: mainIsolate.id,
+          isolateId: mainIsolate?.id!,
           // The param name for a numeric service extension will be the last part
           // of the extension name (ext.flutter.extensionName => extensionName).
           args: {name.substring(name.lastIndexOf('.') + 1): value},
@@ -410,12 +412,13 @@ class ServiceExtensionManager extends Disposer {
     }
 
     if (mainIsolate == null) return;
-    final Isolate isolate = await _isolateManager.getIsolateCached(mainIsolate);
+    final Isolate? isolate =
+        await _isolateManager.getIsolateCached(mainIsolate);
     if (_isolateManager.mainIsolate.value != mainIsolate) return;
 
     // Do not try to call Dart IO extensions for a paused isolate.
     if (extensions.isDartIoExtension(name) &&
-        isolate.pauseEvent!.kind!.contains('Pause')) {
+        isolate?.pauseEvent?.kind?.contains('Pause') == true) {
       _callbacksOnIsolateResume
           .putIfAbsent(mainIsolate, () => [])
           .add(callExtension);
@@ -552,7 +555,8 @@ class ServiceExtensionManager extends Disposer {
       _checkForFirstFrameStarted = false;
       final mainIsolate =
           await _isolateManager.getIsolateCached(mainIsolateRef);
-      await _registerMainIsolate(mainIsolate, mainIsolateRef);
+      if (mainIsolate != null)
+        await _registerMainIsolate(mainIsolate, mainIsolateRef);
     }
   }
 }
