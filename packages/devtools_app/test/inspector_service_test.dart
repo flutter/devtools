@@ -7,6 +7,7 @@
 @TestOn('vm')
 import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_service.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -24,6 +25,8 @@ void main() async {
   InspectorService inspectorService;
 
   env.afterEverySetup = () async {
+    assert(serviceManager.connectedAppInitialized);
+
     inspectorService = InspectorService();
     if (env.runConfig.trackWidgetCreation) {
       await inspectorService.inferPubRootDirectoryIfNeeded();
