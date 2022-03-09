@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:convert';
 
@@ -54,7 +54,7 @@ class LoggingScreen extends Screen {
 
     return StreamBuilder<String>(
       initialData: controller.statusText,
-      stream: controller.onLogStatusChanged as Stream<String>?,
+      stream: controller.onLogStatusChanged,
       builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
         return Text(snapshot.data ?? '');
       },
@@ -88,7 +88,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
 
   LoggingController? controller;
 
-  List<LogData?>? filteredLogs;
+  late List<LogData> filteredLogs;
 
   @override
   void initState() {
@@ -155,7 +155,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         const SizedBox(width: denseSpacing),
         FilterButton(
           onPressed: _showFilterDialog,
-          isFilterActive: filteredLogs!.length != controller!.data.length,
+          isFilterActive: filteredLogs.length != controller!.data.length,
         ),
       ],
     );
@@ -202,11 +202,11 @@ class LogsTable extends StatelessWidget {
     required this.activeSearchMatchNotifier,
   }) : super(key: key);
 
-  final List<LogData?>? data;
-  final ItemCallback<LogData?> onItemSelected;
-  final ValueListenable<LogData?> selectionNotifier;
+  final List<LogData> data;
+  final ItemCallback<LogData> onItemSelected;
+  final ValueListenable<LogData> selectionNotifier;
   final ValueListenable<List<LogData>> searchMatchesNotifier;
-  final ValueListenable<LogData?> activeSearchMatchNotifier;
+  final ValueListenable<LogData> activeSearchMatchNotifier;
 
   final ColumnData<LogData> when = _WhenColumn();
   final ColumnData<LogData> kind = _KindColumn();
@@ -216,9 +216,9 @@ class LogsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlatTable<LogData?>(
+    return FlatTable<LogData>(
       columns: columns,
-      data: data!,
+      data: data,
       autoScrollContent: true,
       keyFactory: (LogData? data) => ValueKey<LogData?>(data),
       onItemSelected: onItemSelected,
@@ -271,7 +271,7 @@ class _LogDetailsState extends State<LogDetails>
     }
   }
 
-  bool showSimple(LogData log) => log != null && !log.needsComputing;
+  bool showSimple(LogData log) => !log.needsComputing;
 
   @override
   Widget build(BuildContext context) {
@@ -310,7 +310,7 @@ class _LogDetailsState extends State<LogDetails>
           needsTopBorder: false,
           rightActions: [
             CopyToClipboardControl(
-              dataProvider: disabled ? null : (() => log?.prettyPrinted!) as String Function()?,
+              dataProvider: disabled ? null : () => log!.prettyPrinted!,
               buttonKey: LogDetails.copyToClipboardButtonKey,
             ),
           ],
@@ -487,7 +487,7 @@ class MessageColumn extends ColumnData<LogData>
         maxLines: 1,
       );
     } else {
-      return null;
+      return const SizedBox.shrink();
     }
   }
 }

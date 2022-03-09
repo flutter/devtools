@@ -187,7 +187,7 @@ class LoggingController extends DisposableController
   /// A stream of events for the textual description of the log contents.
   ///
   /// See also [statusText].
-  Stream get onLogStatusChanged => _logStatusController.stream;
+  Stream<String> get onLogStatusChanged => _logStatusController.stream;
 
   List<LogData> data = <LogData>[];
 
