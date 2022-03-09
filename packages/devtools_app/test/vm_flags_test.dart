@@ -5,7 +5,6 @@
 // @dart=2.9
 
 @TestOn('vm')
-import 'package:devtools_app/src/primitives/message_bus.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -16,8 +15,6 @@ void main() async {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
-
-  setGlobal(MessageBus, MessageBus());
 
   group('VmFlagManager', () {
     tearDownAll(() async {

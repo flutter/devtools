@@ -4,7 +4,6 @@
 
 // @dart=2.9
 
-import 'package:devtools_app/src/primitives/message_bus.dart';
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,7 +16,6 @@ void main() {
     const FlutterRunConfiguration(withDebugger: true),
   );
 
-  setGlobal(MessageBus, MessageBus());
   Disposable isAlive;
 
   setUp(() {

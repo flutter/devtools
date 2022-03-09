@@ -6,7 +6,6 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/primitives/message_bus.dart';
 import 'package:devtools_app/src/primitives/trace_event.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/performance/performance_controller.dart';
@@ -25,8 +24,6 @@ void main() async {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
-
-  setGlobal(MessageBus, MessageBus());
 
   PerformanceController performanceController;
   env.afterNewSetup = () async {
