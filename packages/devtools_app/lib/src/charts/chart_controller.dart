@@ -387,7 +387,7 @@ class ChartController extends DisposableController
         rightMostTimestampDT.difference(rightMostLableDT).inSeconds;
 
     if (nSeconds >= labelInterval) {
-      late final int foundTimestamp;
+      late int foundTimestamp;
       if (nSeconds == labelInterval) {
         foundTimestamp = timestamps.last;
       } else {
