@@ -977,17 +977,22 @@ class _RenderFlameRow extends RenderBox {
         chartZoom: zoom,
         chartStartInset: startInset,
       );
-      node.draw(
-        canvas: context.canvas,
-        topLeft: offset + Offset(left + accumulated - _controller!.offset, 0),
-        selected: node == selected,
-        hovered: node == hovered,
-        searchMatch: node.data.isSearchMatch,
-        activeSearchMatch: node.data.isActiveSearchMatch,
-        zoom: zoom,
-        colorScheme: colorScheme,
-      );
-      accumulated += extentDelegate!.itemExtent(index);
+      final position =
+          offset + Offset(left + accumulated - _controller!.offset, 0);
+      final double extent = extentDelegate!.itemExtent(index);
+      if (position.dx + extent >= 0 && position.dx <= size.width) {
+        node.draw(
+          canvas: context.canvas,
+          topLeft: position,
+          selected: node == selected,
+          hovered: node == hovered,
+          searchMatch: node.data.isSearchMatch,
+          activeSearchMatch: node.data.isActiveSearchMatch,
+          zoom: zoom,
+          colorScheme: colorScheme,
+        );
+      }
+      accumulated += extent;
       index += 1;
     }
   }
