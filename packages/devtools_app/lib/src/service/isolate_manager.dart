@@ -72,10 +72,6 @@ class IsolateManager extends Disposer {
     return isolate != null ? _isolateStates[isolate] : null;
   }
 
-  IsolateState? get selectedIsolateState {
-    return mainIsolateDebuggerState;
-  }
-
   /// Return a unique, monotonically increasing number for this Isolate.
   int? isolateIndex(IsolateRef isolateRef) {
     if (!_isolateIndexMap.containsKey(isolateRef.id)) {

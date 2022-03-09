@@ -191,8 +191,8 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     // Place the root library's parent node at the top of the explorer if it's
     // part of a package. Otherwise, it's a file path and its directory should
     // appear near the top of the list anyway.
-    final rootLib =
-        serviceManager.isolateManager.selectedIsolateState.isolateNow.rootLib;
+    final rootLib = serviceManager
+        .isolateManager.mainIsolateDebuggerState.isolateNow.rootLib;
     if (rootLib.uri.startsWith('package:') ||
         rootLib.uri.startsWith('google3:')) {
       final parts = rootLib.uri.split('/')..removeLast();
