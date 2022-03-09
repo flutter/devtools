@@ -266,12 +266,12 @@ class MemoryTracker {
   /// events until the next HeapSample (tick) received see [_recalculate].
   EventSample pullClone(MemoryTimeline memoryTimeline, int time) {
     final pulledEvent = memoryTimeline.pullEventSample();
-    final extensionEvents = memoryTimeline.extensionEvents;
+    final ExtensionEvents? extensionEvents = memoryTimeline.extensionEvents;
     final eventSample = pulledEvent.clone(
       time,
       extensionEvents: extensionEvents,
     );
-    if (extensionEvents.isNotEmpty) {
+    if (extensionEvents?.isNotEmpty == true) {
       debugLogger('ExtensionEvents Received');
     }
 
