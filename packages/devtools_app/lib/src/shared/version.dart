@@ -4,6 +4,8 @@
 
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import 'utils.dart';
@@ -170,6 +172,39 @@ class SemanticVersion with CompareMixin {
       patch: patch,
       preReleaseMajor: preReleaseMajor,
       preReleaseMinor: preReleaseMinor,
+    );
+  }
+
+  /// Returns a new [SemanticVersion] that is downgraded from [this].
+  ///
+  /// At a minimum, the pre-release version will be removed. Other downgrades
+  /// can be applied by specifying any of [downgradeMajor], [downgradeMinor],
+  /// and [downgradePatch], which will decrement the value of their respective
+  /// version part by one (unless the value is already 0).
+  ///
+  /// This method may return a version equal to [this] if no downgrade options
+  /// are specified.
+  SemanticVersion downgrade({
+    bool downgradeMajor = false,
+    bool downgradeMinor = false,
+    bool downgradePatch = false,
+  }) {
+    var _major = major;
+    var _minor = minor;
+    var _patch = patch;
+    if (downgradeMajor) {
+      _major = math.max(0, _major - 1);
+    }
+    if (downgradeMinor) {
+      _minor = math.max(0, _minor - 1);
+    }
+    if (downgradePatch) {
+      _patch = math.max(0, _patch - 1);
+    }
+    return SemanticVersion(
+      major: _major,
+      minor: _minor,
+      patch: _patch,
     );
   }
 

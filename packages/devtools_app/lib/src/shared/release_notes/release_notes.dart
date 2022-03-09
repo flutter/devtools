@@ -11,15 +11,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:http/http.dart' as http;
 
-import '../../devtools.dart' as devtools;
-import '../config_specific/launch_url/launch_url.dart';
-import '../config_specific/logger/logger.dart' as logger;
-import '../config_specific/server/server.dart' as server;
-import '../primitives/auto_dispose_mixin.dart';
-import 'common_widgets.dart';
-import 'theme.dart';
-import 'utils.dart';
-import 'version.dart';
+import '../../../devtools.dart' as devtools;
+import '../../config_specific/launch_url/launch_url.dart';
+import '../../config_specific/logger/logger.dart' as logger;
+import '../../config_specific/server/server.dart' as server;
+import '../../primitives/auto_dispose_mixin.dart';
+import '../common_widgets.dart';
+import '../theme.dart';
+import '../utils.dart';
+import '../version.dart';
+
+const debugTestReleaseNotes = false;
 
 class ReleaseNotesViewer extends StatefulWidget {
   const ReleaseNotesViewer({
@@ -169,7 +171,9 @@ class ReleaseNotesController {
 
   static const _unsupportedPathSyntax = '{{site.url}}';
 
-  static const _flutterDocsSite = 'https://docs.flutter.dev';
+  String get _flutterDocsSite => debugTestReleaseNotes
+      ? 'https://flutter-website-dt-staging.web.app'
+      : 'https://docs.flutter.dev';
 
   ValueListenable<String?> get releaseNotesMarkdown => _releaseNotesMarkdown;
 
@@ -189,7 +193,7 @@ class ReleaseNotesController {
     final lastReleaseNotesShownVersion =
         await server.getLastShownReleaseNotesVersion();
     SemanticVersion previousVersion;
-    if (lastReleaseNotesShownVersion.isEmpty) {
+    if (debugTestReleaseNotes || lastReleaseNotesShownVersion.isEmpty) {
       previousVersion = SemanticVersion();
     } else {
       previousVersion = SemanticVersion.parse(lastReleaseNotesShownVersion);
@@ -202,23 +206,7 @@ class ReleaseNotesController {
     final parsedCurrentVersionStr = parsedCurrentVersion.toString();
     if (parsedCurrentVersion > previousVersion) {
       try {
-        String releaseNotesMarkdown = await http.read(
-          Uri.parse(_releaseNotesUrl(parsedCurrentVersionStr)),
-        );
-        // This is a workaround so that the images in release notes will appear.
-        // The {{site.url}} syntax is best practices for the flutter website
-        // repo, where these release notes are hosted, so we are performing this
-        // workaround on our end to ensure the images render properly.
-        releaseNotesMarkdown = releaseNotesMarkdown.replaceAll(
-          _unsupportedPathSyntax,
-          _flutterDocsSite,
-        );
-
-        _releaseNotesMarkdown.value = releaseNotesMarkdown;
-        toggleReleaseNotesVisible(true);
-        unawaited(
-          server.setLastShownReleaseNotesVersion(parsedCurrentVersionStr),
-        );
+        await _fetchReleaseNotes(parsedCurrentVersion);
       } catch (e) {
         // Fail gracefully if we cannot find release notes for the current
         // version of DevTools.
@@ -233,11 +221,49 @@ class ReleaseNotesController {
     }
   }
 
+  Future<void> _fetchReleaseNotes(SemanticVersion version) async {
+    final currentVersionString = version.toString();
+
+    // Try all patch versions for this major.minor combination until we find
+    // release notes (e.g. 2.11.4 -> 2.11.3 -> 2.11.2 -> ...).
+    var attempts = version.patch;
+    while (attempts >= 0) {
+      final versionString = version.toString();
+      try {
+        String releaseNotesMarkdown = await http.read(
+          Uri.parse(_releaseNotesUrl(versionString)),
+        );
+        // This is a workaround so that the images in release notes will appear.
+        // The {{site.url}} syntax is best practices for the flutter website
+        // repo, where these release notes are hosted, so we are performing this
+        // workaround on our end to ensure the images render properly.
+        releaseNotesMarkdown = releaseNotesMarkdown.replaceAll(
+          _unsupportedPathSyntax,
+          _flutterDocsSite,
+        );
+
+        _releaseNotesMarkdown.value = releaseNotesMarkdown;
+        toggleReleaseNotesVisible(true);
+        unawaited(
+          server.setLastShownReleaseNotesVersion(currentVersionString),
+        );
+        return;
+      } catch (_) {
+        attempts--;
+        if (attempts < 0) {
+          rethrow;
+        }
+        version = version.downgrade(downgradePatch: true);
+      }
+    }
+  }
+
   void toggleReleaseNotesVisible(bool visible) {
     _releaseNotesVisible.value = visible;
   }
 
   String _releaseNotesUrl(String currentVersion) {
-    return 'https://docs.flutter.dev/development/tools/devtools/release-notes/release-notes-$currentVersion-src.md';
+    return '$_flutterDocsSite/development/tools/devtools/release-notes/'
+        'release-notes-$currentVersion-src.md';
   }
 }

@@ -133,53 +133,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     );
 
     _initTitle();
-    _maybeShowInternalFlutterWebWarning();
-  }
-
-  bool _internalFlutterWebWarningShown = false;
-
-  void _maybeShowInternalFlutterWebWarning() {
-    if (isExternalBuild) return;
-    if (_internalFlutterWebWarningShown) return;
-
-    serviceManager.onConnectionAvailable.listen((_) {
-      if (serviceManager.connectedApp!.isFlutterWebAppNow) {
-        _showWarning(const InternalFlutterWebWarningText());
-        _internalFlutterWebWarningShown = true;
-      }
-    });
-  }
-
-  void _showWarning(Widget warningText) {
-    final colorScheme = Theme.of(context).colorScheme;
-    late OverlayEntry _entry;
-    Overlay.of(context)!.insert(
-      _entry = OverlayEntry(
-        maintainState: true,
-        builder: (context) {
-          return Material(
-            color: colorScheme.overlayShadowColor,
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.all(defaultSpacing),
-                color: colorScheme.overlayBackgroundColor,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    warningText,
-                    const SizedBox(height: defaultSpacing),
-                    ElevatedButton(
-                      child: const Text('Got it'),
-                      onPressed: () => _entry.remove(),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
   }
 
   @override

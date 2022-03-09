@@ -150,13 +150,13 @@ class EvalOnDartLibrary extends DisposableController
         shouldLogError: shouldLogError,
       );
     }
-    return await addRequest(
+    return await addRequest<InstanceRef?>(
       isAlive,
       () => _eval(
         expression,
         scope: scope,
         shouldLogError: shouldLogError,
-      ).then((value) => value!),
+      ),
     );
   }
 
