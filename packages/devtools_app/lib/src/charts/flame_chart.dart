@@ -743,19 +743,21 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
           color: widget.backgroundColor,
           // TODO(kenz): investigate if `addAutomaticKeepAlives: false` and
           // `addRepaintBoundaries: false` are needed here for perf improvement.
-          child: SingleChildScrollView(
+          child: ListView(
             controller: scrollController,
             scrollDirection: Axis.horizontal,
-            child: FlameChartNodeRow(
-              nodes: nodes,
-              zoom: widget.zoom,
-              startInset: widget.startInset,
-              chartWidth: widget.width,
-              selected: selected,
-              hovered: hovered,
-              extentDelegate: extentDelegate,
-              controller: scrollController,
-            ),
+            children: [
+              FlameChartNodeRow(
+                nodes: nodes,
+                zoom: widget.zoom,
+                startInset: widget.startInset,
+                chartWidth: widget.width,
+                selected: selected,
+                hovered: hovered,
+                extentDelegate: extentDelegate,
+                controller: scrollController,
+              ),
+            ],
           ),
         ),
       ),
@@ -855,7 +857,8 @@ class FlameChartNodeRow extends LeafRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderFlameRow renderObject) {
+  void updateRenderObject(
+      BuildContext context, covariant _RenderFlameRow renderObject) {
     renderObject
       ..nodes = nodes
       ..zoom = zoom
@@ -870,9 +873,10 @@ class FlameChartNodeRow extends LeafRenderObjectWidget {
 }
 
 class _RenderFlameRow extends RenderBox {
-   _RenderFlameRow();
+  _RenderFlameRow();
 
   _ScrollingFlameChartRowExtentDelegate? extentDelegate;
+
   ScrollController? _controller;
   set controller(ScrollController value) {
     if (_controller == value) {
@@ -934,7 +938,7 @@ class _RenderFlameRow extends RenderBox {
   }
 
   Object? get hovered => _hovered;
-  Object? _hovered ;
+  Object? _hovered;
   set hovered(Object? value) {
     if (value == _hovered) {
       return;
@@ -975,10 +979,10 @@ class _RenderFlameRow extends RenderBox {
       );
       node.draw(
         canvas: context.canvas,
-        topLeft: offset + Offset(left + accumulated, 0),
+        topLeft: offset + Offset(left + accumulated - _controller!.offset, 0),
         selected: node == selected,
         hovered: node == hovered,
-        searchMatch:  node.data.isSearchMatch,
+        searchMatch: node.data.isSearchMatch,
         activeSearchMatch: node.data.isActiveSearchMatch,
         zoom: zoom,
         colorScheme: colorScheme,
@@ -1149,21 +1153,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     required this.onSelected,
     this.selectable = true,
     this.sectionIndex = 0,
-  }) {
-    final paragraphBuilder = ParagraphBuilder(
-      ParagraphStyle(
-        ellipsis: '...',
-        textAlign: TextAlign.left,
-        maxLines: 1,
-        fontStyle: FontStyle.normal,
-        textDirection: TextDirection.ltr,
-        fontSize: 10,
-      ),
-    );
-    paragraphBuilder.pushStyle(ui.TextStyle(color: _darkTextColor));
-    paragraphBuilder.addText(text);
-    paragraph = paragraphBuilder.build();
-  }
+  });
 
   static const _darkTextColor = Colors.black;
 
@@ -1181,9 +1171,28 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
   final bool selectable;
 
   late FlameChartRow row;
-  late Paragraph paragraph;
 
   int sectionIndex;
+
+  Paragraph? _paragraph;
+  Paragraph _getParagraph() {
+    if (_paragraph == null) {
+      final paragraphBuilder = ParagraphBuilder(
+        ParagraphStyle(
+          ellipsis: '...',
+          textAlign: TextAlign.left,
+          maxLines: 1,
+          fontStyle: FontStyle.normal,
+          textDirection: TextDirection.ltr,
+          fontSize: 10,
+        ),
+      );
+      paragraphBuilder.pushStyle(ui.TextStyle(color: _darkTextColor));
+      paragraphBuilder.addText(text);
+      _paragraph = paragraphBuilder.build();
+    }
+    return _paragraph!;
+  }
 
   void draw({
     required Canvas canvas,
@@ -1209,7 +1218,8 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
 
     selected = selectable ? selected : false;
     hovered = selectable ? hovered : false;
-    final drawnRect = Rect.fromLTWH(topLeft.dx, topLeft.dy, rect.width * zoom, rect.height * zoom);
+    final drawnRect =
+        Rect.fromLTWH(topLeft.dx, topLeft.dy, rect.width * zoom, rect.height);
     final paint = Paint()
       ..color = _backgroundColor(
         selected: selected,
@@ -1219,6 +1229,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
       );
     canvas.drawRect(drawnRect, paint);
     if (zoomedWidth >= _minWidthForText) {
+      final Paragraph paragraph = _getParagraph();
       paragraph.layout(ParagraphConstraints(width: drawnRect.width));
       canvas.drawParagraph(paragraph, topLeft);
     }
