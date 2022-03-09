@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
@@ -13,6 +11,7 @@ import '../../shared/common_widgets.dart';
 import '../../shared/split.dart';
 import '../../shared/table.dart';
 import '../../shared/table_data.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import '../profiler/cpu_profiler.dart';
 import 'isolate_statistics_view_controller.dart';
 import 'vm_developer_common_widgets.dart';
@@ -114,23 +113,23 @@ class IsolateStatisticsViewBody extends StatelessWidget {
 ///   - Root library
 ///   - Isolate ID
 class GeneralIsolateStatisticsWidget extends StatelessWidget {
-  const GeneralIsolateStatisticsWidget({@required this.controller});
+  const GeneralIsolateStatisticsWidget({required this.controller});
 
   final IsolateStatisticsViewController controller;
 
-  String _startTime(Isolate isolate) {
+  String? _startTime(Isolate? isolate) {
     if (isolate == null) {
       return null;
     }
     final startedAtFormatter = DateFormat.yMMMMd().add_jms();
     return startedAtFormatter.format(
       DateTime.fromMillisecondsSinceEpoch(
-        isolate.startTime,
+        isolate.startTime!,
       ).toLocal(),
     );
   }
 
-  String _uptime(Isolate isolate) {
+  String? _uptime(Isolate? isolate) {
     if (isolate == null) {
       return null;
     }
@@ -138,7 +137,7 @@ class GeneralIsolateStatisticsWidget extends StatelessWidget {
     return uptimeFormatter.format(
       DateTime.now()
           .subtract(
-            Duration(milliseconds: isolate.startTime),
+            Duration(milliseconds: isolate.startTime!),
           )
           .toUtc(),
     );
@@ -164,11 +163,11 @@ class GeneralIsolateStatisticsWidget extends StatelessWidget {
 ///   - Total Dart heap size
 ///   - New + Old space capacity and usage
 class IsolateMemoryStatisticsWidget extends StatelessWidget {
-  const IsolateMemoryStatisticsWidget({@required this.controller});
+  const IsolateMemoryStatisticsWidget({required this.controller});
 
   final IsolateStatisticsViewController controller;
 
-  String _buildMemoryString(num usage, num capacity) {
+  String _buildMemoryString(num? usage, num? capacity) {
     if (usage == null || capacity == null) {
       return '--';
     }
@@ -217,7 +216,7 @@ class IsolateMemoryStatisticsWidget extends StatelessWidget {
 /// A table which displays the amount of time the VM is performing certain
 /// tagged tasks.
 class TagStatisticsWidget extends StatelessWidget {
-  TagStatisticsWidget({@required this.controller});
+  TagStatisticsWidget({required this.controller});
 
   final name = _TagColumn();
   final percentage = _PercentageColumn();
@@ -276,8 +275,10 @@ class _PortNameColumn extends ColumnData<InstanceRef> {
   _PortNameColumn() : super.wide('Name');
 
   @override
-  String getValue(InstanceRef port) =>
-      port.debugName.isEmpty ? 'N/A' : port.debugName;
+  String getValue(InstanceRef port) {
+    final debugName = port.debugName!;
+    return debugName.isEmpty ? 'N/A' : debugName;
+  }
 }
 
 class _StackTraceViewerFrameColumn extends ColumnData<String> {
@@ -299,17 +300,17 @@ class _StackTraceViewerFrameColumn extends ColumnData<String> {
 // TODO(bkonyi): merge with debugger stack trace viewer.
 /// A simple table to display a stack trace, sorted by frame number.
 class StackTraceViewerWidget extends StatelessWidget {
-  StackTraceViewerWidget({@required this.stackTrace});
+  StackTraceViewerWidget({required this.stackTrace});
 
-  final InstanceRef stackTrace;
+  final InstanceRef? stackTrace;
   final frame = _StackTraceViewerFrameColumn();
 
   @override
   Widget build(BuildContext context) {
-    final List<String> lines = stackTrace?.allocationLocation?.valueAsString
+    final List<String>? lines = stackTrace?.allocationLocation?.valueAsString
         ?.split('\n')
-        ?.where((e) => e.isNotEmpty)
-        ?.toList();
+        .where((e) => e.isNotEmpty)
+        .toList();
     return VMInfoList(
       title: 'Allocation Location',
       table: lines == null
@@ -340,7 +341,7 @@ class StackTraceViewerWidget extends StatelessWidget {
 ///   - Internal port ID
 ///   - Allocation location stack trace
 class IsolatePortsWidget extends StatefulWidget {
-  const IsolatePortsWidget({@required this.controller});
+  const IsolatePortsWidget({required this.controller});
 
   final IsolateStatisticsViewController controller;
 
@@ -352,9 +353,9 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
   final id = _PortIDColumn();
   final name = _PortNameColumn();
 
-  final selectedPort = ValueNotifier<InstanceRef>(null);
+  final selectedPort = ValueNotifier<InstanceRef?>(null);
 
-  List<ColumnData<InstanceRef>> get columns => [
+  List<ColumnData<InstanceRef?>> get columns => [
         name,
         id,
       ];
@@ -371,15 +372,15 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
               child: Split(
                 axis: Axis.horizontal,
                 children: [
-                  FlatTable<InstanceRef>(
+                  FlatTable<InstanceRef?>(
                     columns: columns,
                     data: ports,
-                    keyFactory: (InstanceRef port) =>
-                        ValueKey<String>(port.debugName),
+                    keyFactory: (InstanceRef? port) =>
+                        ValueKey<String>(port!.debugName!),
                     sortColumn: id,
                     sortDirection: SortDirection.ascending,
                     selectionNotifier: selectedPort,
-                    onItemSelected: (InstanceRef port) => setState(
+                    onItemSelected: (InstanceRef? port) => setState(
                       () {
                         if (port == selectedPort.value) {
                           selectedPort.value = null;
@@ -416,7 +417,7 @@ class _ServiceExtensionNameColumn extends ColumnData<String> {
 /// A table displaying the list of service extensions registered with an
 /// isolate.
 class ServiceExtensionsWidget extends StatelessWidget {
-  ServiceExtensionsWidget({@required this.controller});
+  ServiceExtensionsWidget({required this.controller});
 
   final name = _ServiceExtensionNameColumn();
 
