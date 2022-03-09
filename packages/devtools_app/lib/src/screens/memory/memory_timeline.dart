@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
@@ -86,14 +84,14 @@ class MemoryTimeline {
   int offlineStartingIndex = 0;
 
   /// Extension Events.
-  final _eventFiredNotifier = ValueNotifier<Event>(null);
+  final _eventFiredNotifier = ValueNotifier<Event?>(null);
 
-  ValueListenable<Event> get eventNotifier => _eventFiredNotifier;
+  ValueListenable<Event?> get eventNotifier => _eventFiredNotifier;
 
   /// Notifies that a new Heap sample has been added to the timeline.
-  final _sampleAddedNotifier = ValueNotifier<HeapSample>(null);
+  final _sampleAddedNotifier = ValueNotifier<HeapSample?>(null);
 
-  ValueListenable<HeapSample> get sampleAddedNotifier => _sampleAddedNotifier;
+  ValueListenable<HeapSample?> get sampleAddedNotifier => _sampleAddedNotifier;
 
   /// List of events awaiting to be posted to HeapSample.
   final _eventSamples = <EventSample>[];
@@ -160,19 +158,18 @@ class MemoryTimeline {
   void displayContinousEvents() {
     for (var index = liveData.length - 1; index >= 0; index--) {
       final sample = liveData[index];
-      if (sample.memoryEventInfo != null &&
-          sample.memoryEventInfo.isEventAllocationAccumulator) {
+      if (sample.memoryEventInfo.isEventAllocationAccumulator) {
         final allocationAccumulator =
-            sample.memoryEventInfo.allocationAccumulator;
+            sample.memoryEventInfo.allocationAccumulator!;
         if (allocationAccumulator.isReset || allocationAccumulator.isStart) {
           for (var flipIndex = index + 1;
               flipIndex < liveData.length;
               flipIndex++) {
             final continuousEvent = liveData[flipIndex];
             assert(continuousEvent
-                .memoryEventInfo.allocationAccumulator.isContinues);
+                .memoryEventInfo.allocationAccumulator!.isContinues);
             continuousEvent
-                .memoryEventInfo.allocationAccumulator.continuesVisible = true;
+                .memoryEventInfo.allocationAccumulator!.continuesVisible = true;
           }
         }
       }
@@ -265,6 +262,7 @@ class MemoryTimeline {
     startingIndex = dataIndex;
 
     // Debugging data - to enable remove logical not operator.
+    // ignore: dead_code
     if (!true) {
       final DateFormat mFormat = DateFormat('HH:mm:ss.SSS');
       final startDT = mFormat.format(DateTime.fromMillisecondsSinceEpoch(
@@ -302,7 +300,7 @@ class MemoryTimeline {
 
   bool get anyPendingExtensionEvents => _extensionEvents.isNotEmpty;
 
-  ExtensionEvents get extensionEvents {
+  ExtensionEvents? get extensionEvents {
     if (_extensionEvents.isNotEmpty) {
       final eventsToProcess = ExtensionEvents(_extensionEvents.toList());
       _extensionEvents.clear();
@@ -312,10 +310,10 @@ class MemoryTimeline {
   }
 
   void addExtensionEvent(
-    int timestamp,
-    String eventKind,
+    int? timestamp,
+    String? eventKind,
     Map<String, Object> json, {
-    String customEventName,
+    String? customEventName,
   }) {
     final extensionEvent = customEventName == null
         ? ExtensionEvent(timestamp, eventKind, json)
