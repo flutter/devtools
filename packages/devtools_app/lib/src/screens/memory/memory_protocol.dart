@@ -11,8 +11,6 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../config_specific/logger/logger.dart' as logger;
-import '../../service/service_manager.dart';
-import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../../shared/utils.dart';
 import '../../shared/version.dart';
@@ -21,28 +19,22 @@ import 'memory_screen.dart';
 import 'memory_timeline.dart';
 
 class MemoryTracker {
-  MemoryTracker(this.serviceManager, this.memoryController);
-
-  ServiceConnectionManager? serviceManager;
+  MemoryTracker(this.memoryController);
 
   final MemoryController memoryController;
 
-  VmServiceWrapper? get service => serviceManager?.service;
-
   Timer? _pollingTimer;
 
-  final Map<String, MemoryUsage> isolateHeaps = {};
+  final isolateHeaps = <String, MemoryUsage>{};
 
   /// Polled VM current RSS.
-  int? processRss;
+  late int processRss;
 
   /// Polled adb dumpsys meminfo values.
-  AdbMemoryInfo? adbMemoryInfo;
+  late AdbMemoryInfo adbMemoryInfo;
 
   /// Polled engine's RasterCache estimates.
   RasterCache? rasterCache;
-
-  bool get hasConnection => service != null;
 
   Stream<void> get onChange => _changeController.stream;
   final _changeController = StreamController<void>.broadcast();
@@ -52,18 +44,19 @@ class MemoryTracker {
   Timer? _monitorContinues;
 
   void start() {
-    _updateLiveDataPolling(memoryController.paused.value);
+    _updateLiveDataPolling();
     memoryController.paused.addListener(_updateLiveDataPolling);
   }
 
-  void _updateLiveDataPolling([bool paused = false]) {
-    if (service == null) {
+  void _updateLiveDataPolling() {
+    if (serviceManager.service == null) {
       // A service of null implies we're disconnected - signal paused.
       memoryController.pauseLiveFeed();
     }
 
     _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
-    _gcStreamListener ??= service?.onGCEvent.listen(_handleGCEvent);
+    _gcStreamListener ??=
+        serviceManager.service?.onGCEvent.listen(_handleGCEvent);
   }
 
   void stop() {
@@ -74,8 +67,6 @@ class MemoryTracker {
     _gcStreamListener?.cancel();
     _gcStreamListener = null;
     _pollingTimer = null;
-
-    serviceManager = null;
   }
 
   void _handleGCEvent(Event event) {
@@ -94,24 +85,25 @@ class MemoryTracker {
   void _pollMemory() async {
     _pollingTimer = null;
 
-    if (!hasConnection || memoryController.memoryTracker == null) {
+    if (!serviceManager.hasConnection ||
+        memoryController.memoryTracker == null) {
       logger.log('VM service connection and/or MemoryTracker lost.');
       return;
     }
 
     final isolateMemory = <IsolateRef, MemoryUsage>{};
     for (IsolateRef isolateRef
-        in serviceManager!.isolateManager.isolates.value) {
+        in serviceManager.isolateManager.isolates.value) {
       if (await memoryController.isIsolateLive(isolateRef.id!)) {
         isolateMemory[isolateRef] =
-            await service!.getMemoryUsage(isolateRef.id!);
+            await serviceManager.service!.getMemoryUsage(isolateRef.id!);
       }
     }
 
     // Polls for current Android meminfo using:
     //    > adb shell dumpsys meminfo -d <package_name>
-    if (hasConnection &&
-        serviceManager!.vm!.operatingSystem == 'android' &&
+    if (serviceManager.hasConnection &&
+        serviceManager.vm!.operatingSystem == 'android' &&
         memoryController.androidCollectionEnabled.value) {
       adbMemoryInfo = await _fetchAdbInfo();
     } else {
@@ -123,7 +115,7 @@ class MemoryTracker {
     rasterCache = await _fetchRasterCacheInfo();
 
     // Polls for current RSS size.
-    final vm = await service!.getVM();
+    final vm = await serviceManager.service!.getVM();
     _update(vm, isolateMemory);
 
     // TODO(terry): Is there a better way to detect an integration test running?
@@ -152,7 +144,7 @@ class MemoryTracker {
   /// Poll Fultter engine's Raster Cache metrics.
   /// @returns engine's rasterCache estimates or null.
   Future<RasterCache?> _fetchRasterCacheInfo() async {
-    final response = await serviceManager!.rasterCacheMetrics;
+    final response = await serviceManager.rasterCacheMetrics;
     if (response == null) return null;
     final rasterCache = RasterCache.parse(response.json);
     return rasterCache;
@@ -160,7 +152,7 @@ class MemoryTracker {
 
   /// Poll ADB meminfo, ADB returns values in KB convert to total bytes.
   Future<AdbMemoryInfo> _fetchAdbInfo() async => AdbMemoryInfo.fromJsonInKB(
-        (await serviceManager!.adbMemoryInfo).json!,
+        (await serviceManager.adbMemoryInfo).json!,
       );
 
   /// Returns the MemoryUsage of a particular isolate.
@@ -168,7 +160,9 @@ class MemoryTracker {
   /// @param usage associated with the passed in isolate's id.
   /// @returns the MemoryUsage of the isolate or null if isolate is a sentinal.
   Future<MemoryUsage?> _isolateMemoryUsage(
-          String id, MemoryUsage? usage) async =>
+    String id,
+    MemoryUsage? usage,
+  ) async =>
       await memoryController.isIsolateLive(id) ? usage : null;
 
   void _recalculate([bool fromGC = false]) async {
@@ -231,7 +225,7 @@ class MemoryTracker {
 
     final HeapSample sample = HeapSample(
       time,
-      processRss!,
+      processRss,
       // Displaying capacity dashed line on top of stacked (used + external).
       capacity + external,
       used,
@@ -266,7 +260,7 @@ class MemoryTracker {
   /// events until the next HeapSample (tick) received see [_recalculate].
   EventSample pullClone(MemoryTimeline memoryTimeline, int time) {
     final pulledEvent = memoryTimeline.pullEventSample();
-    final ExtensionEvents? extensionEvents = memoryTimeline.extensionEvents;
+    final extensionEvents = memoryTimeline.extensionEvents;
     final eventSample = pulledEvent.clone(
       time,
       extensionEvents: extensionEvents,
@@ -322,9 +316,10 @@ class MemoryTracker {
     if (memoryTimeline.anyPendingExtensionEvents) {
       final extensionEvents = memoryTimeline.extensionEvents;
 
-      if (MemoryScreen.isDebuggingEnabled && extensionEvents.isNotEmpty) {
+      if (MemoryScreen.isDebuggingEnabled &&
+          extensionEvents?.isNotEmpty == true) {
         debugLogger('Receieved Extension Events '
-            '${extensionEvents.theEvents.length}');
+            '${extensionEvents!.theEvents.length}');
         for (var e in extensionEvents.theEvents) {
           final dt = DateTime.fromMillisecondsSinceEpoch(e.timestamp!);
           debugLogger('  ${e.eventKind} ${e.customEventName} '
@@ -377,8 +372,6 @@ ClassHeapDetailStats parseJsonClassHeapStats(Map<String, dynamic> json) {
   int bytesCurrent = 0;
   int bytesDelta = 0;
 
-  ClassRef? classRef;
-
   void _update(List<dynamic> stats) {
     instancesDelta += stats[ACCUMULATED] as int;
     bytesDelta += stats[ACCUMULATED_SIZE] as int;
@@ -387,7 +380,7 @@ ClassHeapDetailStats parseJsonClassHeapStats(Map<String, dynamic> json) {
         stats[LIVE_AFTER_GC_SIZE] + stats[ALLOCATED_SINCE_GC_SIZE] as int;
   }
 
-  classRef = ClassRef.parse(json['class'])!;
+  final classRef = ClassRef.parse(json['class'])!;
   if (serviceManager.service!.isProtocolVersionSupportedNow(
       supportedVersion: SemanticVersion(major: 3, minor: 18))) {
     instancesCurrent = json['instancesCurrent'];

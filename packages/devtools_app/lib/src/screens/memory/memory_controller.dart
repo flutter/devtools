@@ -825,7 +825,7 @@ class MemoryController extends DisposableController
   }
 
   void _handleConnectionStart(ServiceConnectionManager serviceManager) {
-    _memoryTracker = MemoryTracker(serviceManager, this);
+    _memoryTracker = MemoryTracker(this);
     _memoryTracker!.start();
 
     // Log Flutter extension events.
