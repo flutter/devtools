@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:math';
 
@@ -54,7 +54,8 @@ class AllocationTableViewState extends State<AllocationTableView>
     with AutoDisposeMixin {
   AllocationTableViewState() : super();
 
-  MemoryController controller;
+  late MemoryController controller;
+  bool _initialized = false;
 
   final List<ColumnData<ClassHeapDetailStats>> columns = [];
 
@@ -82,8 +83,9 @@ class AllocationTableViewState extends State<AllocationTableView>
     super.didChangeDependencies();
 
     final newController = Provider.of<MemoryController>(context);
-    if (newController == controller) return;
+    if (_initialized && newController == controller) return;
     controller = newController;
+    _initialized = true;
 
     cancelListeners();
 
@@ -159,7 +161,7 @@ class AllocationTableViewState extends State<AllocationTableView>
     //              at end using addAll().  Also, should not build large list just
     //              up to max needed.
     for (var allocation in controller.monitorAllocations) {
-      final knownName = allocation.classRef.name;
+      final knownName = allocation.classRef.name!;
       if (knownName.startsWith(searchingValue)) {
         startMatches.add(knownName);
       } else if (knownName.contains(searchingValue)) {
@@ -200,12 +202,12 @@ class AllocationTableViewState extends State<AllocationTableView>
 
     controller.searchMatchMonitorAllocationsNotifier.value = null;
 
-    controller.allocationsFieldsTable = FlatTable<ClassHeapDetailStats>(
+    controller.allocationsFieldsTable = FlatTable<ClassHeapDetailStats?>(
       columns: columns,
       data: controller.monitorAllocations,
-      keyFactory: (d) => Key(d.classRef.name),
+      keyFactory: (d) => Key(d!.classRef.name!),
       onItemSelected: (ref) =>
-          controller.toggleAllocationTracking(ref, !ref.isStacktraced),
+          controller.toggleAllocationTracking(ref!, !ref.isStacktraced),
       sortColumn: controller.sortedMonitorColumn,
       sortDirection: controller.sortedMonitorDirection,
       onSortChanged: (column, direction, {secondarySortColumn}) {
@@ -223,7 +225,7 @@ class AllocationTableViewState extends State<AllocationTableView>
       minSizes: const [200, 0],
       axis: Axis.vertical,
       children: [
-        controller.allocationsFieldsTable,
+        controller.allocationsFieldsTable!,
         trackerData.createTrackingTable(
           context,
           controller,
