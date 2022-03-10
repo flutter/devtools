@@ -54,7 +54,7 @@ class AllocationTableViewState extends State<AllocationTableView>
     with AutoDisposeMixin {
   AllocationTableViewState() : super();
 
-  late final MemoryController controller;
+  late MemoryController controller;
   bool _initialized = false;
 
   final List<ColumnData<ClassHeapDetailStats>> columns = [];
