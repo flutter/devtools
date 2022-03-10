@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/theme.dart';
@@ -120,10 +119,6 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     with AutoDisposeMixin {
   bool _intitialized = false;
 
-  late final LinkedScrollControllerGroup _controllers;
-
-  late final ScrollController _letters;
-
   late final bool oldFilterPrivateClassesValue;
 
   late final bool oldFilterZeroInstancesValue;
@@ -131,15 +126,6 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
   late final bool oldFilterLibraryNoInstancesValue;
 
   final oldFilteredLibraries = <String, bool?>{};
-
-  @override
-  void initState() {
-    super.initState();
-
-    _controllers = LinkedScrollControllerGroup();
-
-    _letters = _controllers.addAndGet();
-  }
 
   @override
   void didChangeDependencies() {
@@ -154,16 +140,10 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     oldFilterZeroInstancesValue = widget.controller.filterZeroInstances.value;
     oldFilterLibraryNoInstancesValue =
         widget.controller.filterLibraryNoInstances.value;
-
-    final oldFiltered = widget.controller.filteredLibrariesByGroupName;
-    for (var key in oldFiltered.keys) {
-      oldFilteredLibraries[key] = oldFiltered[key]!.first.hide;
-    }
   }
 
   void addLibrary(String libraryName, {bool hideState = false}) {
-    final Map<String?, List<LibraryFilter>> filteredGroup =
-        widget.controller.filteredLibrariesByGroupName;
+    final Map<String, List<LibraryFilter>> filteredGroup = {};
     final filters = widget.controller.libraryFilters;
 
     final isFiltered = filters.isLibraryFiltered(libraryName);
@@ -186,14 +166,12 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
   void buildFilters() {
     // First time filters created, populate with the default list of libraries
     // to filters
-    if (widget.controller.filteredLibrariesByGroupName.isEmpty) {
-      for (final library
-          in widget.controller.libraryFilters.librariesFiltered) {
-        addLibrary(library, hideState: true);
-      }
-      // If not snapshots, return no libraries to process.
-      if (widget.controller.snapshots.isEmpty) return;
+
+    for (final library in widget.controller.libraryFilters.librariesFiltered) {
+      addLibrary(library, hideState: true);
     }
+    // If not snapshots, return no libraries to process.
+    if (widget.controller.snapshots.isEmpty) return;
 
     // No libraries to compute until a snapshot exist.
     if (widget.controller.snapshots.isEmpty) return;
@@ -213,55 +191,6 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     }
   }
 
-  /// Process wildcard groups dart:* and package:flutter*. If a wildcard group is
-  /// toggled from on to off then all the dart: packages will appear if the group
-  /// dart:* is toggled back on then all the dart: packages must be removed.
-  void cleanupFilteredLibrariesByGroupName() {
-    final filteredGroup = widget.controller.filteredLibrariesByGroupName;
-    final dartGlobal = filteredGroup[_prettyPrintDartAbbreviation]!.first.hide;
-    final flutterGlobal =
-        filteredGroup[_prettyPrintFlutterAbbreviation]!.first.hide;
-
-    filteredGroup.removeWhere((groupName, libraryFilter) {
-      if (dartGlobal &&
-          groupName != _prettyPrintDartAbbreviation &&
-          groupName.startsWith(_dartLibraryUriPrefix)) {
-        return true;
-      } else if (flutterGlobal &&
-          groupName != _prettyPrintFlutterAbbreviation &&
-          groupName.startsWith(_flutterLibraryUriPrefix)) {
-        return true;
-      }
-
-      return false;
-    });
-  }
-
-  Widget createLibraryListBox(BoxConstraints constraints) {
-    final allLibraries =
-        widget.controller.filteredLibrariesByGroupName.keys.map((String key) {
-      return CheckboxListTile(
-        title: Text(key),
-        dense: true,
-        value: widget.controller.filteredLibrariesByGroupName[key]!.first.hide,
-        onChanged: (bool? value) {
-          setState(() {
-            for (var filter
-                in widget.controller.filteredLibrariesByGroupName[key]!) {
-              filter.hide = value == true;
-            }
-          });
-        },
-      );
-    }).toList();
-
-    // TODO(terry): Need to change all of this to use flex, not the below computation.
-    return SizedBox(
-      height: constraints.maxHeight / 4,
-      child: ListView(controller: _letters, children: allLibraries),
-    );
-  }
-
   Widget applyAndCancelButton() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -270,19 +199,6 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
           onPressed: () {
             // Re-generate librariesFiltered
             widget.controller.libraryFilters.clearFilters();
-            widget.controller.filteredLibrariesByGroupName
-                .forEach((groupName, value) {
-              if (value.first.hide) {
-                var filteredName = groupName;
-                if (filteredName.endsWith('*')) {
-                  filteredName = filteredName.substring(
-                    0,
-                    filteredName.length - 1,
-                  );
-                }
-                widget.controller.libraryFilters.addFilter(filteredName);
-              }
-            });
             // Re-filter the groups.
             widget.controller.libraryRoot = null;
             if (widget.controller.lastSnapshot != null) {
@@ -291,7 +207,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                 graph: widget.controller.lastSnapshot!.snapshotGraph,
               );
             }
-            cleanupFilteredLibrariesByGroupName();
+
             widget.controller.updateFilter();
           },
         ),
@@ -304,15 +220,6 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                 oldFilterZeroInstancesValue;
             widget.controller.filterLibraryNoInstances.value =
                 oldFilterLibraryNoInstancesValue;
-
-            // Restore hide state.
-            widget.controller.filteredLibrariesByGroupName
-                .forEach((key, values) {
-              final oldHide = oldFilteredLibraries[key];
-              for (var value in values) {
-                value.hide = oldHide == true;
-              }
-            });
           },
         ),
       ],
@@ -327,11 +234,6 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     //      - one row of buttons Ok/Cancel
     // For very tall app keep the dialog at a reasonable height w/o too much vertical whitespace.
     // The listbox area is the area that grows to accommodate the list of known libraries.
-
-    final constraints = BoxConstraints(
-      maxWidth: defaultDialogWidth,
-      maxHeight: MediaQuery.of(context).size.height,
-    );
 
     final theme = Theme.of(context);
 
@@ -377,13 +279,6 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                       const Text('Hide Library with No Instances'),
                     ],
                   ),
-                  const SizedBox(height: defaultSpacing),
-                  ...dialogSubHeader(
-                    theme,
-                    'Hide Libraries or Packages '
-                    '(${widget.controller.filteredLibrariesByGroupName.length})',
-                  ),
-                  createLibraryListBox(constraints),
                   applyAndCancelButton(),
                 ],
               ),

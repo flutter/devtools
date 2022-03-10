@@ -755,16 +755,6 @@ class MemoryController extends DisposableController
   /// Root of known classes (used for group by class).
   LibraryReference? classRoot;
 
-  /// Used by the filter dialog, grouped name displayed in filter dialog
-  /// e.g., dart:*, package:flutter/*
-  ///
-  /// The key is the group name (displayed in dialog), value is list of
-  /// libraries associated to the group. Structure is used to:
-  ///    - allow user to hide/show a library when filtering a snapshot.
-  ///    - create the hide list of libraries to drive the UX on when showing
-  ///      list of libraries/classes/objects in a snapshot table.
-  final filteredLibrariesByGroupName = <String, List<LibraryFilter>>{};
-
   /// Notify that the filtering has changed.
   ValueListenable<int> get filterNotifier => _filterNotifier;
 
