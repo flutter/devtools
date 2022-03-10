@@ -4,7 +4,6 @@
 
 // @dart=2.9
 
-import 'package:devtools_app/src/primitives/message_bus.dart';
 import 'package:devtools_app/src/screens/performance/timeline_streams.dart';
 @TestOn('vm')
 import 'package:devtools_app/src/shared/globals.dart';
