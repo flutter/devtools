@@ -400,7 +400,7 @@ class ServiceConnectionManager {
 
   Future<Response> get adbMemoryInfo async {
     return await _callServiceOnMainIsolate(
-      registrations.flutterMemory.service,
+      registrations.flutterMemoryInfo.service,
     );
   }
 
