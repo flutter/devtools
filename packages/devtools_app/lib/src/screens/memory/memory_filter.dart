@@ -101,7 +101,7 @@ class LibraryFilter {
   LibraryFilter(this.displayName, this.hide);
 
   /// Displayed library name.
-  final String? displayName;
+  final String displayName;
 
   /// Whether classes in this library hidden (filtered).
   bool hide = false;
@@ -161,7 +161,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     }
   }
 
-  void addLibrary(String? libraryName, {bool hideState = false}) {
+  void addLibrary(String libraryName, {bool hideState = false}) {
     final Map<String?, List<LibraryFilter>> filteredGroup =
         widget.controller.filteredLibrariesByGroupName;
     final filters = widget.controller.libraryFilters;
@@ -170,7 +170,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     String? groupedName = libraryName;
     bool hide = hideState;
     if (isFiltered) {
-      if (filters.isDartLibraryName(libraryName!)) {
+      if (filters.isDartLibraryName(libraryName)) {
         groupedName = _prettyPrintDartAbbreviation;
       } else if (filters.isFlutterLibraryName(libraryName)) {
         groupedName = _prettyPrintFlutterAbbreviation;
