@@ -1108,7 +1108,7 @@ class MemoryController extends DisposableController
     for (final liveExternal
         in heapGraph?.externals ?? <HeapGraphExternalLive>[]) {
       final HeapGraphClassLive? classLive =
-          liveExternal.live?.theClass as HeapGraphClassLive?;
+          liveExternal.live.theClass as HeapGraphClassLive?;
 
       ExternalReference? externalReference;
 

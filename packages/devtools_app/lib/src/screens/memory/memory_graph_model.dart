@@ -109,7 +109,7 @@ bool monitorClass({int? classId, String? className, String message = ''}) {
 }
 
 HeapGraph convertHeapGraph(
-  MemoryController? controller,
+  MemoryController controller,
   HeapSnapshotGraph graph, [
   List<String>? classNamesToMonitor,
 ]) {
@@ -121,8 +121,7 @@ HeapGraph convertHeapGraph(
   }
 
   // Construct all the classes in the snapshot.
-  final classesDraft =
-      List<HeapGraphClassLive?>.filled(graph.classes.length, null);
+  final classes = List<HeapGraphClassLive?>.filled(graph.classes.length, null);
   for (int i = 0; i < graph.classes.length; i++) {
     final HeapSnapshotClass c = graph.classes[i];
 
@@ -145,27 +144,23 @@ HeapGraph convertHeapGraph(
       _monitorClasses.putIfAbsent(i, () => className);
     }
 
-    classesDraft[i] = HeapGraphClassLive(c);
+    classes[i] = HeapGraphClassLive(c);
   }
 
-  final classes = classesDraft as List<HeapGraphClassLive>;
-
   // Pre-allocate the number of objects in the snapshot.
-  final elementsDraft =
+  final elements =
       List<HeapGraphElementLive?>.filled(graph.objects.length, null);
 
   // Construct all objects.
   for (int i = 0; i < graph.objects.length; i++) {
     final HeapSnapshotObject o = graph.objects[i];
-    elementsDraft[i] = HeapGraphElementLive(o);
+    elements[i] = HeapGraphElementLive(o);
   }
-
-  final elements = elementsDraft as List<HeapGraphElementLive>;
 
   // Associate each object with a Class.
   for (int i = 0; i < graph.objects.length; i++) {
     final HeapSnapshotObject o = graph.objects[i];
-    final HeapGraphElementLive converted = elements[i];
+    final HeapGraphElementLive converted = elements[i]!;
 
     // New style snapshot class index is zero based.
     if (o.classId == 0) {
@@ -175,7 +170,7 @@ HeapGraph convertHeapGraph(
       // Support for new snapshot class index is zero based (starts at
       // zero) and the previous snapshot classId is 1-based index.
       final classId =
-          controller!.newSnapshotSemantics ? o.classId : o.classId - 1;
+          controller.newSnapshotSemantics ? o.classId : o.classId - 1;
       monitorClass(classId: classId);
       converted.theClass = classes[classId];
     }
@@ -183,11 +178,11 @@ HeapGraph convertHeapGraph(
     // Lazily compute the references.
     converted.referencesFiller = () {
       for (int refId in o.references) {
-        HeapGraphElement? ref;
+        HeapGraphElement ref;
         if (refId == 0) {
           ref = HeapGraph.elementSentinel;
         } else {
-          ref = elements[controller!.newSnapshotSemantics ? refId : refId - 1];
+          ref = elements[controller.newSnapshotSemantics ? refId : refId - 1]!;
         }
         converted.references!.add(ref);
       }
@@ -197,24 +192,22 @@ HeapGraph convertHeapGraph(
   final snapshotExternals = graph.externalProperties;
 
   // Pre-allocate the number of external objects in the snapshot.
-  final externalsDraft =
+  final externals =
       List<HeapGraphExternalLive?>.filled(snapshotExternals.length, null);
 
   // Construct all external objects and link to its live element.
   for (int index = 0; index < snapshotExternals.length; index++) {
     final snapshotObject = snapshotExternals[index];
-    final liveElement = elements[snapshotObject.object];
-    externalsDraft[index] = HeapGraphExternalLive(snapshotObject, liveElement);
+    final liveElement = elements[snapshotObject.object]!;
+    externals[index] = HeapGraphExternalLive(snapshotObject, liveElement);
   }
-
-  final externals = externalsDraft as List<HeapGraphExternalLive>;
 
   return HeapGraph(
     controller,
     builtInClasses,
-    classes,
-    elements,
-    externals,
+    classes as List<HeapGraphClassLive>,
+    elements as List<HeapGraphElementLive>,
+    externals as List<HeapGraphExternalLive>,
   );
 }
 
@@ -227,7 +220,7 @@ class HeapGraph {
     this.externals,
   );
 
-  final MemoryController? controller;
+  final MemoryController controller;
 
   bool _instancesComputed = false;
 
@@ -253,7 +246,7 @@ class HeapGraph {
 
   /// Group all classes by libraries (key is library, value are classes).
   /// This is the entire set of objects (no filter applied).
-  final Map<String, Set<HeapGraphClassLive?>> rawGroupByLibrary = {};
+  final Map<String, Set<HeapGraphClassLive>> rawGroupByLibrary = {};
 
   /// Group all classes by libraries (key is library, value is classes).
   /// Filtering out objects that match a given filter. This is always a
@@ -311,7 +304,7 @@ class HeapGraph {
       // Collect classes for each library (group by library).
       sb.write(libraryKey);
       final librarySbToString = sb.toString();
-      rawGroupByLibrary[librarySbToString] ??= <HeapGraphClassLive?>{};
+      rawGroupByLibrary[librarySbToString] ??= <HeapGraphClassLive>{};
       rawGroupByLibrary[librarySbToString]!.add(c);
       sb.clear();
 
@@ -337,10 +330,10 @@ class HeapGraph {
     // Prune classes that are private or have zero instances.
     filteredElements.clear();
     groupByClass.removeWhere((className, instances) {
-      final remove = (controller!.filterZeroInstances.value &&
-              instances.isEmpty) ||
-          (controller!.filterPrivateClasses.value && isPrivate(className)) ||
-          className == internalClassName;
+      final remove =
+          (controller.filterZeroInstances.value && instances.isEmpty) ||
+              (controller.filterPrivateClasses.value && isPrivate(className)) ||
+              className == internalClassName;
       if (remove) {
         filteredElements.putIfAbsent(className, () => instances);
       }
@@ -359,17 +352,16 @@ class HeapGraph {
 
     groupByLibrary.removeWhere((libraryName, classes) {
       classes.removeWhere((actual) {
-        final result = (controller!.filterZeroInstances.value &&
+        final result = (controller.filterZeroInstances.value &&
                 actual.getInstances(this).isEmpty) ||
-            (controller!.filterPrivateClasses.value &&
-                isPrivate(actual.name)) ||
+            (controller.filterPrivateClasses.value && isPrivate(actual.name)) ||
             actual.name == internalClassName;
         return result;
       });
 
       final result =
-          (controller!.libraryFilters.isLibraryFiltered(libraryName)) ||
-              controller!.filterLibraryNoInstances.value && classes.isEmpty;
+          (controller.libraryFilters.isLibraryFiltered(libraryName)) ||
+              controller.filterLibraryNoInstances.value && classes.isEmpty;
       if (result) {
         filteredLibraries.putIfAbsent(libraryName, () => classes);
       }
@@ -393,11 +385,11 @@ class HeapGraph {
 
 abstract class HeapGraphElement {
   /// Outbound references, i.e. this element points to elements in this list.
-  List<HeapGraphElement?>? _references;
+  List<HeapGraphElement>? _references;
 
   void Function()? referencesFiller;
 
-  List<HeapGraphElement?>? get references {
+  List<HeapGraphElement>? get references {
     if (_references == null && referencesFiller != null) {
       _references = [];
       referencesFiller!();
@@ -439,8 +431,8 @@ class HeapGraphElementLive extends HeapGraphElement {
     return null;
   }
 
-  List<MapEntry<String, HeapGraphElement?>> getFields() {
-    final List<MapEntry<String, HeapGraphElement?>> result = [];
+  List<MapEntry<String, HeapGraphElement>> getFields() {
+    final List<MapEntry<String, HeapGraphElement>> result = [];
     if (theClass is HeapGraphClassLive) {
       final HeapGraphClassLive c = theClass as HeapGraphClassLive;
       for (final field in c.origin.fields) {
@@ -477,21 +469,21 @@ class HeapGraphExternalLive extends HeapGraphElement {
   HeapGraphExternalLive(this.externalProperty, this.live);
 
   final HeapSnapshotExternalProperty externalProperty;
-  final HeapGraphElementLive? live;
+  final HeapGraphElementLive live;
 
   @override
   bool get isSentinel => false;
 
   @override
   String toString() {
-    if (live!.origin.data is HeapSnapshotObjectNoData) {
-      return 'Instance of ${live!.theClass}';
+    if (live.origin.data is HeapSnapshotObjectNoData) {
+      return 'Instance of ${live.theClass}';
     }
-    if (live!.origin.data is HeapSnapshotObjectLengthData) {
-      final HeapSnapshotObjectLengthData data = live!.origin.data;
-      return 'Instance of ${live!.theClass} length = ${data.length}';
+    if (live.origin.data is HeapSnapshotObjectLengthData) {
+      final HeapSnapshotObjectLengthData data = live.origin.data;
+      return 'Instance of ${live.theClass} length = ${data.length}';
     }
-    return 'Instance of ${live!.theClass}; data: \'${live!.origin.data}\'';
+    return 'Instance of ${live.theClass}; data: \'${live.origin.data}\'';
   }
 }
 
