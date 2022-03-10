@@ -33,7 +33,7 @@ class BannerMessagesController {
     // We push the banner message in a post frame callback because otherwise,
     // we'd be trying to call setState while the parent widget `BannerMessages`
     // is in the middle of `build`.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
       if (isMessageDismissed(message) || isMessageVisible(message)) return;
       final messages = _messagesForScreen(message.screenId);
       messages.value.add(message);
@@ -49,7 +49,7 @@ class BannerMessagesController {
     // We push the banner message in a post frame callback because otherwise,
     // we'd be trying to call setState while the parent widget `BannerMessages`
     // is in the middle of `build`.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
       if (dismiss) {
         assert(!_dismissedMessageKeys.contains(message.key));
         _dismissedMessageKeys.add(message.key);

@@ -96,7 +96,7 @@ class NotificationsState extends State<_NotificationsProvider>
         maintainState: true,
         builder: _buildOverlay,
       );
-      SchedulerBinding.instance.scheduleFrameCallback((_) {
+      SchedulerBinding.instance!.scheduleFrameCallback((_) {
         Overlay.of(context)!.insert(_overlayEntry!);
       });
     }
