@@ -825,7 +825,7 @@ class MemoryController extends DisposableController
   }
 
   void _handleConnectionStart(ServiceConnectionManager serviceManager) {
-    _memoryTracker = MemoryTracker(serviceManager, this);
+    _memoryTracker = MemoryTracker(this);
     _memoryTracker!.start();
 
     // Log Flutter extension events.
@@ -1108,7 +1108,7 @@ class MemoryController extends DisposableController
     for (final liveExternal
         in heapGraph?.externals ?? <HeapGraphExternalLive>[]) {
       final HeapGraphClassLive? classLive =
-          liveExternal.live?.theClass as HeapGraphClassLive?;
+          liveExternal.live.theClass as HeapGraphClassLive?;
 
       ExternalReference? externalReference;
 
