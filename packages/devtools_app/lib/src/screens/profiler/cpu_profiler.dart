@@ -89,7 +89,9 @@ class _CpuProfilerState extends State<CpuProfiler>
         TickerProviderStateMixin,
         AutoDisposeMixin,
         SearchFieldMixin<CpuProfiler> {
-  TabController? _tabController;
+  bool _tabControllerInitialized = false;
+
+  late TabController _tabController;
 
   late CpuProfileData data;
 
@@ -115,30 +117,33 @@ class _CpuProfilerState extends State<CpuProfiler>
 
   @override
   void dispose() {
-    _tabController?.removeListener(_onTabChanged);
-    _tabController?.dispose();
+    _tabController.removeListener(_onTabChanged);
+    _tabController.dispose();
     super.dispose();
   }
 
   void _initTabController() {
-    _tabController?.removeListener(_onTabChanged);
-    _tabController?.dispose();
+    if (_tabControllerInitialized) {
+      _tabController.removeListener(_onTabChanged);
+      _tabController.dispose();
+    }
     _tabController = TabController(
       length: widget.tabs.length,
       vsync: this,
     );
+    _tabControllerInitialized = true;
 
-    if (widget.controller.selectedProfilerTabIndex >= _tabController!.length) {
+    if (widget.controller.selectedProfilerTabIndex >= _tabController.length) {
       widget.controller.changeSelectedProfilerTab(0);
     }
-    _tabController!
+    _tabController
       ..index = widget.controller.selectedProfilerTabIndex
       ..addListener(_onTabChanged);
   }
 
   void _onTabChanged() {
     setState(() {
-      widget.controller.changeSelectedProfilerTab(_tabController!.index);
+      widget.controller.changeSelectedProfilerTab(_tabController.index);
     });
   }
 
@@ -148,7 +153,7 @@ class _CpuProfilerState extends State<CpuProfiler>
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
     final currentTab =
-        widget.tabs.isNotEmpty ? widget.tabs[_tabController!.index] : null;
+        widget.tabs.isNotEmpty ? widget.tabs[_tabController.index] : null;
     final hasData =
         data != CpuProfilerController.baseStateCpuProfileData && !data.isEmpty;
 
@@ -303,9 +308,10 @@ class _CpuProfilerState extends State<CpuProfiler>
         );
       },
     );
+    final summaryView = widget.summaryView;
     // TODO(kenz): make this order configurable.
     return [
-      if (widget.summaryView != null) widget.summaryView!,
+      if (summaryView != null) summaryView,
       if (!data.isEmpty) ...[
         bottomUp,
         callTree,

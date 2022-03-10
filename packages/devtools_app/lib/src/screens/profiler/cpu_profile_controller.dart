@@ -64,8 +64,7 @@ class CpuProfilerController
       );
 
   /// Store of cached CPU profiles for each isolate.
-  final Map<String, CpuProfileStore> _cpuProfileStoreByIsolateId =
-      <String, CpuProfileStore>{};
+  final _cpuProfileStoreByIsolateId = <String, CpuProfileStore>{};
 
   /// Notifies that new cpu profile data is available.
   ValueListenable<CpuProfileData?> get dataNotifier => _dataNotifier;
