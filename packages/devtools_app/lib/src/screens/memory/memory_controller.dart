@@ -1113,15 +1113,18 @@ class MemoryController extends DisposableController
       ExternalReference? externalReference;
 
       if (externalReferences.children.isNotEmpty) {
-        externalReference = externalReferences.children.singleWhere(
-          (knownClass) => knownClass.name == classLive?.name,
+        externalReference =
+            // We need cast to return null.
+            // ignore: unnecessary_cast
+            (externalReferences.children as List<Reference?>).singleWhere(
+          (knownClass) => knownClass!.name == classLive?.name,
           orElse: () => null,
         ) as ExternalReference?;
       }
 
       if (externalReference == null) {
         externalReference =
-            ExternalReference(this, classLive?.name, liveExternal);
+            ExternalReference(this, classLive?.name ?? '', liveExternal);
         externalReferences.addChild(externalReference);
       }
 

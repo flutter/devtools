@@ -496,13 +496,14 @@ abstract class HeapGraphClass {
     _instances.add(instance);
   }
 
-  List<HeapGraphElementLive> getInstances(HeapGraph graph) {
+  List<HeapGraphElementLive> getInstances(HeapGraph? graph) {
     // TODO(polinach): this code never executes and should be reviewed and
     // fixed.
     // ignore: unnecessary_null_comparison
     if (_instances == null) {
-      for (var i = 0; i < graph.elements.length; i++) {
-        final HeapGraphElementLive converted = graph.elements[i];
+      final len = graph?.elements.length ?? 0;
+      for (var i = 0; i < len; i++) {
+        final HeapGraphElementLive converted = graph!.elements[i];
         if (converted.theClass == this) {
           _instances.add(converted);
         }

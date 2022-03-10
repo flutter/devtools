@@ -366,8 +366,6 @@ class SnapshotReference extends Reference {
         );
 
   static String title(Snapshot snapshot) {
-    if (snapshot == null) return '';
-
     final timestamp = snapshot.collectedTimestamp;
     final displayTimestamp = MemoryController.formattedTimestamp(timestamp);
     return snapshot.autoSnapshot
@@ -395,7 +393,7 @@ class LibraryReference extends Reference {
               reference.children.clear();
 
               final libraryReference = reference as LibraryReference;
-              for (final actualClass in libraryReference.actualClasses) {
+              for (final actualClass in libraryReference.actualClasses ?? {}) {
                 final classRef = ClassReference(controller, actualClass);
                 reference.addChild(classRef);
 
@@ -411,7 +409,7 @@ class LibraryReference extends Reference {
           },
         );
 
-  Set<HeapGraphClassLive> actualClasses;
+  Set<HeapGraphClassLive>? actualClasses;
 }
 
 class ExternalReferences extends Reference {
@@ -528,7 +526,7 @@ class Snapshot {
   final MemoryController controller;
   final DateTime collectedTimestamp;
   final HeapSnapshotGraph snapshotGraph;
-  LibraryReference libraryRoot;
+  LibraryReference? libraryRoot;
 
   final Map<String, LibraryReference> libraries = {};
 
@@ -667,15 +665,19 @@ class ObjectFieldReference extends FieldReference {
       final computedFields = <FieldReference>[];
       for (final ref in objFields) {
         // Check if aready computed/expanded then skip.
-        final FieldReference? exist = objectFieldReference.children.singleWhere(
-          (element) => element.name == ref!.name,
+        final FieldReference? exist =
+            // We need this cast to return null.
+            // ignore: unnecessary_cast
+            (objectFieldReference.children as List<FieldReference?>)
+                .singleWhere(
+          (element) => element!.name == ref.name,
           orElse: () => null,
         );
         if (exist == null) {
           // Doesn't exist so add field.
           if (ref is ObjectFieldReference && !ref.isNull) {
             computedFields.add(ref);
-          } else if (ref is FieldReference) {
+          } else {
             final FieldReference fieldRef = ref;
             final HeapGraphElementLive live = fieldRef.instance!;
             final HeapGraphClassLive theClass =
@@ -706,8 +708,8 @@ List<FieldReference> instanceToFieldNodes(
   MemoryController? controller,
   HeapGraphElementLive instance,
 ) {
-  final List<FieldReference?> root = [];
-  final List<MapEntry<String, HeapGraphElement?>> fields = instance.getFields();
+  final List<FieldReference> root = [];
+  final List<MapEntry<String, HeapGraphElement>> fields = instance.getFields();
 
   var sentinelCount = 0;
   var fieldIndex = 0;
@@ -730,14 +732,14 @@ List<FieldReference> instanceToFieldNodes(
   }
 
   if (root.isNotEmpty && sentinelCount > 0) {
-    root.removeWhere((e) => e!.isSentinelReference);
+    root.removeWhere((e) => e.isSentinelReference);
   }
 
   return root;
 }
 
 /// Return a FieldReference node (TableTree use) from the field of an instance.
-FieldReference? fieldToFieldReference(
+FieldReference fieldToFieldReference(
   MemoryController? controller,
   HeapGraphElementLive instance,
   MapEntry<String, HeapGraphElement?> fieldElement,
@@ -830,7 +832,7 @@ FieldReference createScalar(
       final classId =
           controller!.newSnapshotSemantics ? originClassId : originClassId - 1;
       dataValue = data.toString();
-      final dataTypeClass = controller.heapGraph!.classes[classId]!;
+      final dataTypeClass = controller.heapGraph!.classes[classId];
       final predefined = predefinedClasses[dataTypeClass.fullQualifiedName]!;
       dataType = predefined.prettyName;
   }
@@ -845,7 +847,7 @@ FieldReference createScalar(
 }
 
 /// Display a List.
-FieldReference? listToFieldEntries(
+FieldReference listToFieldEntries(
   MemoryController? controller,
   HeapGraphElement? reference,
   String fieldName,
@@ -854,7 +856,7 @@ FieldReference? listToFieldEntries(
 }) {
   bool isAMap = false;
   HeapGraphElementLive? actualListElement;
-  ObjectFieldReference? listObjectReference;
+  late ObjectFieldReference listObjectReference;
   if (reference is HeapGraphElementLive) {
     final actualListClass = reference.theClass as HeapGraphClassLive;
     if (isBuiltInList(actualListClass)) {
@@ -891,8 +893,6 @@ FieldReference? listToFieldEntries(
       }
     }
   }
-
-  assert(listObjectReference != null);
 
   var listIndex = 0;
   final allEntryReferences = actualListElement!.references!;
@@ -948,7 +948,7 @@ FieldReference? listToFieldEntries(
               final HeapGraphClassLive valueClass =
                   valueElement.theClass as HeapGraphClassLive;
               predefined = predefinedClasses[valueClass.fullQualifiedName]!;
-              if (predefined != null && predefined.isScalar) {
+              if (predefined.isScalar) {
                 valueEntry = createScalar(controller, 'value', valueElement);
               } else {
                 valueEntry = ObjectFieldReference(
@@ -983,7 +983,7 @@ FieldReference? listToFieldEntries(
               final keyFields = entryElement.getFields();
               for (final keyField in keyFields) {
                 final key = keyField.key;
-                final value = keyField.value!;
+                final value = keyField.value;
 
                 // Skip sentinels and null values.
                 if (!value.isSentinel &&
@@ -1019,7 +1019,7 @@ FieldReference? listToFieldEntries(
         }
 
         // Add our [n] entry.
-        listObjectReference!.addChild(listEntry);
+        listObjectReference.addChild(listEntry);
 
         // TODO(terry): Consider showing all entries - is it useful?
         // Add each entry to the list, up to 100.
