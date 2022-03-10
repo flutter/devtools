@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:math';
 
 import 'package:devtools_shared/devtools_shared.dart';
@@ -46,14 +44,14 @@ class FieldTrack extends ColumnData<ClassHeapDetailStats>
     BuildContext context,
     ClassHeapDetailStats item, {
     bool isRowSelected = false,
-    VoidCallback onPressed,
+    VoidCallback? onPressed,
   }) {
     final controller = Provider.of<MemoryController>(context);
 
     return Checkbox(
       value: item.isStacktraced,
       onChanged: (value) {
-        controller.toggleAllocationTracking(item, value);
+        controller.toggleAllocationTracking(item, value!);
       },
     );
   }
@@ -63,7 +61,7 @@ class FieldClassName extends ColumnData<ClassHeapDetailStats> {
   FieldClassName() : super('Class', fixedWidthPx: scaleByFontFactor(200.0));
 
   @override
-  String getValue(ClassHeapDetailStats dataObject) => dataObject.classRef.name;
+  String? getValue(ClassHeapDetailStats dataObject) => dataObject.classRef.name;
 
   @override
   String getDisplayValue(ClassHeapDetailStats dataObject) =>
@@ -74,8 +72,8 @@ class FieldClassName extends ColumnData<ClassHeapDetailStats> {
 
   @override
   int compare(ClassHeapDetailStats a, ClassHeapDetailStats b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    final Comparable valueA = getValue(a)!;
+    final Comparable valueB = getValue(b)!;
     return valueA.compareTo(valueB);
   }
 }
