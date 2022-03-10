@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -23,19 +21,19 @@ class CpuProfileTransformer {
   ValueListenable get progressNotifier => _progressNotifier;
   final _progressNotifier = ValueNotifier<double>(0.0);
 
-  int _stackFramesCount;
+  late int _stackFramesCount;
 
-  List<String> _stackFrameKeys;
+  List<String?>? _stackFrameKeys;
 
-  List<CpuStackFrame> _stackFrameValues;
+  List<CpuStackFrame>? _stackFrameValues;
 
   int _stackFramesProcessed = 0;
 
-  String _activeProcessId;
+  String? _activeProcessId;
 
   Future<void> processData(
     CpuProfileData cpuProfileData, {
-    String processId,
+    required String processId,
   }) async {
     // Do not process this data if it has already been processed.
     if (cpuProfileData.processed) return;
@@ -44,10 +42,9 @@ class CpuProfileTransformer {
     reset();
 
     _activeProcessId = processId;
-    _stackFramesCount = cpuProfileData?.stackFrames?.length ?? 0;
-    _stackFrameKeys = cpuProfileData?.stackFrames?.keys?.toList() ?? <String>[];
-    _stackFrameValues =
-        cpuProfileData?.stackFrames?.values?.toList() ?? <CpuStackFrame>[];
+    _stackFramesCount = cpuProfileData.stackFrames.length;
+    _stackFrameKeys = cpuProfileData.stackFrames.keys.toList();
+    _stackFrameValues = cpuProfileData.stackFrames.values.toList();
 
     // At minimum, process the data in 4 batches to smooth the appearance of
     // the progress indicator.
@@ -59,7 +56,7 @@ class CpuProfileTransformer {
 
     // Use batch processing to maintain a responsive UI.
     while (_stackFramesProcessed < _stackFramesCount) {
-      _processBatch(batchSize, cpuProfileData, processId);
+      _processBatch(batchSize, cpuProfileData, processId: processId);
       _progressNotifier.value = _stackFramesProcessed / _stackFramesCount;
 
       // Await a small delay to give the UI thread a chance to update the
@@ -91,18 +88,18 @@ class CpuProfileTransformer {
 
   void _processBatch(
     int batchSize,
-    CpuProfileData cpuProfileData,
-    String processId,
-  ) {
+    CpuProfileData cpuProfileData, {
+    required String processId,
+  }) {
     final batchEnd =
         math.min(_stackFramesProcessed + batchSize, _stackFramesCount);
     for (int i = _stackFramesProcessed; i < batchEnd; i++) {
       if (processId != _activeProcessId) {
         throw ProcessCancelledException();
       }
-      final key = _stackFrameKeys[i];
-      final value = _stackFrameValues[i];
-      final stackFrame = cpuProfileData.stackFrames[key];
+      final key = _stackFrameKeys![i];
+      final value = _stackFrameValues![i];
+      final stackFrame = cpuProfileData.stackFrames[key]!;
       final parent = cpuProfileData.stackFrames[value.parentId];
       _processStackFrame(stackFrame, parent, cpuProfileData);
       _stackFramesProcessed++;
@@ -111,7 +108,7 @@ class CpuProfileTransformer {
 
   void _processStackFrame(
     CpuStackFrame stackFrame,
-    CpuStackFrame parent,
+    CpuStackFrame? parent,
     CpuProfileData cpuProfileData,
   ) {
     if (parent == null) {
@@ -126,18 +123,20 @@ class CpuProfileTransformer {
   void _setExclusiveSampleCountsAndTags(CpuProfileData cpuProfileData) {
     for (CpuSample sample in cpuProfileData.cpuSamples) {
       final leafId = sample.leafId;
+      final stackFrame = cpuProfileData.stackFrames[leafId];
       assert(
-        cpuProfileData.stackFrames[leafId] != null,
+        stackFrame != null,
         'No StackFrame found for id $leafId. If you see this assertion, please '
         'export the timeline trace and send to kenzieschmoll@google.com. Note: '
         'you must export the timeline immediately after the AssertionError is '
         'thrown.',
       );
-      final stackFrame = cpuProfileData.stackFrames[leafId];
-      stackFrame?.exclusiveSampleCount++;
-      final userTag = sample.userTag;
-      if (userTag != null) {
-        stackFrame.incrementTagSampleCount(userTag);
+      if (stackFrame != null) {
+        stackFrame.exclusiveSampleCount++;
+        final userTag = sample.userTag;
+        if (userTag != null) {
+          stackFrame.incrementTagSampleCount(userTag);
+        }
       }
     }
   }
@@ -182,7 +181,7 @@ class BottomUpProfileTransformer {
   @visibleForTesting
   static List<CpuStackFrame> getRoots(
     CpuStackFrame node,
-    CpuStackFrame currentBottomUpRoot,
+    CpuStackFrame? currentBottomUpRoot,
     List<CpuStackFrame> bottomUpRoots,
   ) {
     final copy = node.shallowCopy();

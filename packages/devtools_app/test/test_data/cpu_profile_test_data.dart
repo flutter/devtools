@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
-import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 
 final Map<String, dynamic> goldenCpuProfileDataJson = {
   'type': '_CpuProfileTimeline',
@@ -654,7 +653,7 @@ final CpuStackFrame stackFrameA = CpuStackFrame(
   category: 'Dart',
   rawUrl: '',
   sourceLine: null,
-  parentId: null,
+  parentId: CpuProfileData.rootId,
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 0;
 
@@ -869,7 +868,7 @@ final CpuStackFrame zeroStackFrame = CpuStackFrame(
   category: 'Dart',
   rawUrl: '',
   sourceLine: null,
-  parentId: null,
+  parentId: CpuProfileData.rootId,
   profileMetaData: zeroProfileMetaData,
 )..exclusiveSampleCount = 0;
 
@@ -880,6 +879,6 @@ final flutterEngineStackFrame = CpuStackFrame(
   category: 'Dart',
   rawUrl: '',
   sourceLine: null,
-  parentId: null,
+  parentId: CpuProfileData.rootId,
   profileMetaData: profileMetaData,
 )..exclusiveSampleCount = 1;

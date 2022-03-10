@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -75,7 +73,8 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     with
         AutoDisposeMixin,
         OfflineScreenMixin<ProfilerScreenBody, CpuProfileData> {
-  ProfilerScreenController controller;
+  late ProfilerScreenController controller;
+  bool _controllerInitialized = false;
 
   bool recording = false;
 
@@ -96,8 +95,9 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     maybePushDebugModePerformanceMessage(context, ProfilerScreen.id);
 
     final newController = Provider.of<ProfilerScreenController>(context);
-    if (newController == controller) return;
+    if (_controllerInitialized && newController == controller) return;
     controller = newController;
+    _controllerInitialized = true;
 
     cancelListeners();
 
@@ -138,7 +138,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     if (offlineController.offlineMode.value)
       return _buildProfilerScreenBody(controller);
     return ValueListenableBuilder<Flag>(
-      valueListenable: controller.cpuProfilerController.profilerFlagNotifier,
+      valueListenable: controller.cpuProfilerController.profilerFlagNotifier!,
       builder: (context, profilerFlag, _) {
         return profilerFlag.valueAsString == 'true'
             ? _buildProfilerScreenBody(controller)
@@ -201,7 +201,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
           ),
         const SizedBox(height: denseRowSpacing),
         Expanded(
-          child: ValueListenableBuilder<CpuProfileData>(
+          child: ValueListenableBuilder<CpuProfileData?>(
             valueListenable: controller.cpuProfilerController.dataNotifier,
             builder: (context, cpuProfileData, _) {
               if (cpuProfileData ==
@@ -256,7 +256,10 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
 
   @override
   FutureOr<void> processOfflineData(CpuProfileData offlineData) async {
-    await controller.cpuProfilerController.transformer.processData(offlineData);
+    await controller.cpuProfilerController.transformer.processData(
+      offlineData,
+      processId: 'offline data processing',
+    );
     controller.cpuProfilerController.loadProcessedData(
       offlineData,
       storeAsUserTagNone: true,
@@ -271,9 +274,9 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
 
 class ProfilerScreenControls extends StatelessWidget {
   const ProfilerScreenControls({
-    @required this.controller,
-    @required this.recording,
-    @required this.processing,
+    required this.controller,
+    required this.recording,
+    required this.processing,
   });
 
   final ProfilerScreenController controller;
@@ -303,8 +306,8 @@ class ProfilerScreenControls extends StatelessWidget {
 
 class _PrimaryControls extends StatelessWidget {
   const _PrimaryControls({
-    @required this.controller,
-    @required this.recording,
+    required this.controller,
+    required this.recording,
   });
 
   static const _primaryControlsMinIncludeTextWidth = 1050.0;
@@ -363,8 +366,8 @@ class _PrimaryControls extends StatelessWidget {
 
 class _SecondaryControls extends StatelessWidget {
   const _SecondaryControls({
-    @required this.controller,
-    @required this.profilerBusy,
+    required this.controller,
+    required this.profilerBusy,
   });
 
   static const _secondaryControlsMinScreenWidthForText = 1050.0;
@@ -380,7 +383,7 @@ class _SecondaryControls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (serviceManager.connectedApp.isFlutterNativeAppNow)
+        if (serviceManager.connectedApp!.isFlutterNativeAppNow)
           IconLabelButton(
             icon: Icons.timer,
             label: 'Profile app start up',
@@ -419,13 +422,13 @@ class _SecondaryControls extends StatelessWidget {
         ProfileGranularityDropdown(
           screenId: ProfilerScreen.id,
           profileGranularityFlagNotifier:
-              controller.cpuProfilerController.profileGranularityFlagNotifier,
+              controller.cpuProfilerController.profileGranularityFlagNotifier!,
         ),
         const SizedBox(width: denseSpacing),
         ExportButton(
           onPressed: !profilerBusy &&
                   controller.cpuProfileData != null &&
-                  !controller.cpuProfileData.isEmpty
+                  controller.cpuProfileData?.isEmpty == false
               ? () {
                   ga.select(
                     analytics_constants.cpuProfiler,
@@ -447,12 +450,15 @@ class _SecondaryControls extends StatelessWidget {
     // download always successful?
     // TODO(peterdjlee): find a way to push the notification logic into the
     // export controller.
-    Notifications.of(context).push(successfulExportMessage(exportedFile));
+    Notifications.of(context)!.push(successfulExportMessage(exportedFile));
   }
 }
 
 class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
-  ProfilerScreenMetrics({this.cpuSampleCount, this.cpuStackDepth});
+  ProfilerScreenMetrics({
+    required this.cpuSampleCount,
+    required this.cpuStackDepth,
+  });
 
   final int cpuSampleCount;
   final int cpuStackDepth;
