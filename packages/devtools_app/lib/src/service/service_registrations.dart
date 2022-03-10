@@ -2,25 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
 import '../analytics/constants.dart' as analytics_constants;
 import '../shared/theme.dart';
 import '../ui/icons.dart';
 
-class RegisteredServiceDescription {
+class RegisteredServiceDescription extends RegisteredService {
   const RegisteredServiceDescription._({
-    required this.service,
-    required this.title,
+    required String service,
+    required String title,
     this.icon,
     this.gaScreenName,
     this.gaItem,
-  });
+  }) : super(service: service, title: title);
 
-  final String service;
-  final String title;
   final Widget? icon;
   final String? gaScreenName;
   final String? gaItem;
@@ -59,27 +56,18 @@ final hotRestart = RegisteredServiceDescription._(
 ///
 /// We call this service to get version information about the Flutter framework,
 /// the Flutter engine, and the Dart sdk.
-const flutterVersion = RegisteredServiceDescription._(
+const flutterVersion = RegisteredService(
   service: 'flutterVersion',
   title: 'Flutter Version',
 );
 
-/// Flutter memory service registered by Flutter Tools.
-///
-/// We call this service to get version information about the Flutter Android
-/// memory info using Android's ADB.
-const flutterMemory = RegisteredServiceDescription._(
-  service: 'flutterMemoryInfo',
-  title: 'Flutter Memory Info',
-);
+RegisteredService get flutterMemoryInfo => flutterMemory;
 
 const flutterListViews = '_flutter.listViews';
 
 const displayRefreshRate = '_flutter.getDisplayRefreshRate';
 
-/// Flutter engine returns estimate how much memory is used by layer/picture raster
-/// cache entries in bytes.
-const flutterEngineEstimateRasterCache = '_flutter.estimateRasterCacheMemory';
+String get flutterEngineEstimateRasterCache => flutterEngineRasterCache;
 
 /// Dwds listens to events for recording end-to-end analytics.
 const dwdsSendEvent = 'ext.dwds.sendEvent';
