@@ -355,7 +355,7 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
 
   final selectedPort = ValueNotifier<InstanceRef?>(null);
 
-  List<ColumnData<InstanceRef?>> get columns => [
+  List<ColumnData<InstanceRef>> get columns => [
         name,
         id,
       ];
