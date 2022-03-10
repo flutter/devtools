@@ -8,6 +8,7 @@
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_protocol.dart';
 import 'package:devtools_app/src/screens/memory/memory_timeline.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -45,7 +46,7 @@ void main() async {
         await env.setupEnvironment();
 
         memoryController.onMemory.listen((MemoryTracker memoryTracker) {
-          if (!memoryController.memoryTracker.hasConnection) {
+          if (!serviceManager.hasConnection) {
             // VM Service connection has stopped - unexpected.
             fail('VM Service connection stoped unexpectantly.');
           } else {
