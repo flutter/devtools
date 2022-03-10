@@ -228,24 +228,24 @@ class IsolateSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final IsolateManager isolateManager = serviceManager.isolateManager;
-    return DualValueListenableBuilder<List<IsolateRef>, IsolateRef?>(
+    return DualValueListenableBuilder<List<IsolateRef?>, IsolateRef?>(
       firstListenable: isolateManager.isolates,
       secondListenable: isolateManager.selectedIsolate,
       builder: (context, isolates, selectedIsolateRef, _) {
         return DevToolsTooltip(
           message: 'Selected Isolate',
           child: DropdownButtonHideUnderline(
-            child: DropdownButton<IsolateRef>(
+            child: DropdownButton<IsolateRef?>(
               value: selectedIsolateRef,
               onChanged: isolateManager.selectIsolate,
               isDense: true,
-              items: isolates.map(
-                (IsolateRef ref) {
+              items: isolates.where((ref) => ref != null).map(
+                (ref) {
                   return DropdownMenuItem<IsolateRef>(
                     value: ref,
                     child: Row(
                       children: [
-                        ref.isSystemIsolate ?? false
+                        ref!.isSystemIsolate ?? false
                             ? const Icon(Icons.settings_applications)
                             : const Icon(Icons.call_split),
                         const SizedBox(width: denseSpacing),

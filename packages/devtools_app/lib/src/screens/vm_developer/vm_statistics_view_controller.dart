@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide VmService;
@@ -19,15 +17,16 @@ class VMStatisticsViewController extends DisposableController {
 
   Future<void> refresh() async {
     _refreshing.value = true;
-    _vm = await _service.getVM();
+    final vm = await _service.getVM();
+    _vm = vm;
     _isolates = await Future.wait<Isolate>(
-      _vm.isolates.map(
-        (i) => _service.getIsolate(i.id),
+      vm.isolates!.map(
+        (i) => _service.getIsolate(i.id!),
       ),
     );
     _systemIsolates = await Future.wait<Isolate>(
-      _vm.systemIsolates.map(
-        (i) => _service.getIsolate(i.id),
+      vm.systemIsolates!.map(
+        (i) => _service.getIsolate(i.id!),
       ),
     );
     _refreshing.value = false;
@@ -36,10 +35,10 @@ class VMStatisticsViewController extends DisposableController {
   ValueListenable<bool> get refreshing => _refreshing;
   final _refreshing = ValueNotifier<bool>(true);
 
-  VmServiceWrapper get _service => serviceManager.service;
+  VmServiceWrapper get _service => serviceManager.service!;
 
-  VM get vm => _vm;
-  VM _vm;
+  VM? get vm => _vm;
+  VM? _vm;
 
   /// The list of [Isolate]s running user code.
   List<Isolate> get isolates => UnmodifiableListView(_isolates);

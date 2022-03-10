@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 import '../../shared/common_widgets.dart';
@@ -21,14 +19,14 @@ import '../../shared/theme.dart';
 /// rows specified for `rowKeyValues`.
 class VMInfoCard extends StatelessWidget {
   const VMInfoCard({
-    @required this.title,
+    required this.title,
     this.rowKeyValues,
     this.table,
   });
 
   final String title;
-  final List<MapEntry> rowKeyValues;
-  final Widget table;
+  final List<MapEntry>? rowKeyValues;
+  final Widget? table;
 
   @override
   Widget build(BuildContext context) {
@@ -44,18 +42,21 @@ class VMInfoCard extends StatelessWidget {
 
 class VMInfoList extends StatelessWidget {
   const VMInfoList({
-    @required this.title,
+    required this.title,
     this.rowKeyValues,
     this.table,
   });
 
   final String title;
-  final List<MapEntry> rowKeyValues;
-  final Widget table;
+  final List<MapEntry>? rowKeyValues;
+  final Widget? table;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Create shadow variables locally to avoid extra null checks.
+    final rowKeyValues = this.rowKeyValues;
+    final table = this.table;
     return Column(
       children: [
         AreaPaneHeader(
@@ -77,7 +78,7 @@ class VMInfoList extends StatelessWidget {
                     const SizedBox(width: denseSpacing),
                     Flexible(
                       child: SelectableText(
-                        row?.value?.toString() ?? '--',
+                        row.value?.toString() ?? '--',
                         style: theme.fixedFontStyle,
                       ),
                     ),

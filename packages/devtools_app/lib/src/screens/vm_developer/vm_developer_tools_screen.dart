@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,8 +16,8 @@ import 'vm_statistics_view.dart';
 abstract class VMDeveloperView {
   const VMDeveloperView(
     this.screenId, {
-    this.title,
-    this.icon,
+    required this.title,
+    required this.icon,
   });
 
   final String screenId;
@@ -41,7 +39,7 @@ abstract class VMDeveloperView {
 
 class VMDeveloperToolsScreen extends Screen {
   const VMDeveloperToolsScreen({
-    @required this.controller,
+    required this.controller,
   }) : super.conditional(
           id: id,
           title: 'VM Tools',
@@ -75,14 +73,17 @@ class VMDeveloperToolsScreenBody extends StatefulWidget {
 
 class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
     with AutoDisposeMixin {
-  VMDeveloperToolsController controller;
+  bool initialized = false;
+  late VMDeveloperToolsController controller;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final newController = Provider.of<VMDeveloperToolsController>(context);
-    if (newController == controller) return;
+    // Don't access `controller` if we haven't already initialized it.
+    if (initialized && newController == controller) return;
     controller = newController;
+    initialized = true;
   }
 
   @override
