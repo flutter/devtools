@@ -73,7 +73,7 @@ class FieldClassName extends ColumnData<ClassHeapDetailStats> {
   @override
   int compare(ClassHeapDetailStats a, ClassHeapDetailStats b) {
     final Comparable valueA = getValue(a)!;
-    final Comparable? valueB = getValue(b);
+    final Comparable valueB = getValue(b)!;
     return valueA.compareTo(valueB);
   }
 }
