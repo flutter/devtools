@@ -18,8 +18,6 @@ void main() async {
     const FlutterRunConfiguration(withDebugger: true),
   );
 
-  setGlobal(MessageBus, MessageBus());
-
   group('TimelineStreamManager', () {
     tearDownAll(() async {
       await env.tearDownEnvironment(force: true);

@@ -52,13 +52,14 @@ Future<String> _retrieveFullStringValue(
 ) {
   final fallback = '${stringRef.valueAsString}...';
   // TODO(kenz): why is service null?
+
   return service
           ?.retrieveFullStringValue(
             isolateRef.id!,
             stringRef,
             onUnavailable: (truncatedValue) => fallback,
           )
-          .then((value) => value!) ??
+          .then((value) => value != null ? value : fallback) ??
       Future.value(fallback);
 }
 
@@ -71,7 +72,7 @@ class LoggingDetailsController {
 
   static const JsonEncoder jsonEncoder = JsonEncoder.withIndent('  ');
 
-  LogData? data;
+  late LogData data;
 
   /// Callback to execute to show the inspector.
   final VoidCallback onShowInspector;
@@ -138,17 +139,17 @@ class LoggingDetailsController {
   }
 
   void _updateUIFromData() {
-    if (data?.details?.startsWith('{') == true &&
-        data?.details?.endsWith('}') == true) {
+    if (data.details?.startsWith('{') == true &&
+        data.details?.endsWith('}') == true) {
       try {
         // If the string decodes properly, then format the json.
-        final result = jsonDecode(data!.details!);
+        final result = jsonDecode(data.details!);
         onShowDetails(text: jsonEncoder.convert(result));
       } catch (e) {
-        onShowDetails(text: data!.details);
+        onShowDetails(text: data.details);
       }
     } else {
-      onShowDetails(text: data!.details);
+      onShowDetails(text: data.details);
     }
   }
 }
@@ -162,7 +163,7 @@ class LoggingController extends DisposableController
     autoDisposeStreamSubscription(
         serviceManager.onConnectionAvailable.listen(_handleConnectionStart));
     if (serviceManager.connectedAppInitialized) {
-      _handleConnectionStart(serviceManager.service);
+      _handleConnectionStart(serviceManager.service!);
     }
     autoDisposeStreamSubscription(
         serviceManager.onConnectionClosed.listen(_handleConnectionStop));
@@ -211,8 +212,8 @@ class LoggingController extends DisposableController
     }
   }
 
-  ObjectGroup? get objectGroup =>
-      serviceManager.consoleService.objectGroup as ObjectGroup?;
+  ObjectGroup get objectGroup =>
+      serviceManager.consoleService.objectGroup as ObjectGroup;
 
   String get statusText {
     final int totalCount = data.length;
@@ -243,12 +244,12 @@ class LoggingController extends DisposableController
     serviceManager.errorBadgeManager.clearErrors(LoggingScreen.id);
   }
 
-  void _handleConnectionStart(VmServiceWrapper? service) async {
+  void _handleConnectionStart(VmServiceWrapper service) async {
     // Log stdout events.
     final _StdoutEventHandler stdoutHandler =
         _StdoutEventHandler(this, 'stdout');
     autoDisposeStreamSubscription(
-        service!.onStdoutEventWithHistory.listen(stdoutHandler.handle));
+        service.onStdoutEventWithHistory.listen(stdoutHandler.handle));
 
     // Log stderr events.
     final _StdoutEventHandler stderrHandler =
@@ -339,7 +340,11 @@ class LoggingController extends DisposableController
       // TODO(pq): add tests for error extension handling once framework changes
       // are landed.
       final RemoteDiagnosticsNode node = RemoteDiagnosticsNode(
-          e.extensionData!.data, objectGroup, false, null);
+        e.extensionData!.data,
+        objectGroup,
+        false,
+        null,
+      );
       // Workaround the fact that the error objects from the server don't have
       // style error.
       node.style = DiagnosticsTreeStyle.error;
@@ -446,7 +451,10 @@ class LoggingController extends DisposableController
               result += '\n\n$errorString';
             } else if (toStringResult is InstanceRef) {
               final String str = await _retrieveFullStringValue(
-                  service, e.isolate!, toStringResult);
+                service,
+                e.isolate!,
+                toStringResult,
+              );
               result += '\n\n$str';
             }
           }
@@ -510,8 +518,8 @@ class LoggingController extends DisposableController
       }
     }
     if (node.childrenNow != null) {
-      for (RemoteDiagnosticsNode? child in node.childrenNow!) {
-        summary = _findFirstSummary(child!);
+      for (RemoteDiagnosticsNode child in node.childrenNow!) {
+        summary = _findFirstSummary(child);
         if (summary != null) return summary;
       }
     }
