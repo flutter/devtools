@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 import 'dart:convert';
@@ -37,39 +37,42 @@ final DateFormat timeFormat = DateFormat('HH:mm:ss.SSS');
 bool _verboseDebugging = false;
 
 typedef OnShowDetails = void Function({
-  String text,
-  InspectorTreeController tree,
+  String? text,
+  InspectorTreeController? tree,
 });
 
 typedef CreateLoggingTree = InspectorTreeController Function({
-  VoidCallback onSelectionChange,
+  VoidCallback? onSelectionChange,
 });
 
 Future<String> _retrieveFullStringValue(
-  VmServiceWrapper service,
+  VmServiceWrapper? service,
   IsolateRef isolateRef,
   InstanceRef stringRef,
 ) {
   final fallback = '${stringRef.valueAsString}...';
   // TODO(kenz): why is service null?
-  return service?.retrieveFullStringValue(
-        isolateRef.id,
-        stringRef,
-        onUnavailable: (truncatedValue) => fallback,
-      ) ??
-      fallback;
+
+  return service
+          ?.retrieveFullStringValue(
+            isolateRef.id!,
+            stringRef,
+            onUnavailable: (truncatedValue) => fallback,
+          )
+          .then((value) => value != null ? value : fallback) ??
+      Future.value(fallback);
 }
 
 class LoggingDetailsController {
   LoggingDetailsController({
-    @required this.onShowInspector,
-    @required this.onShowDetails,
-    @required this.createLoggingTree,
+    required this.onShowInspector,
+    required this.onShowDetails,
+    required this.createLoggingTree,
   });
 
   static const JsonEncoder jsonEncoder = JsonEncoder.withIndent('  ');
 
-  LogData data;
+  late LogData data;
 
   /// Callback to execute to show the inspector.
   final VoidCallback onShowInspector;
@@ -81,48 +84,39 @@ class LoggingDetailsController {
   /// type.
   final CreateLoggingTree createLoggingTree;
 
-  InspectorTreeController tree;
+  InspectorTreeController? tree;
 
   void setData(LogData data) {
     this.data = data;
 
     tree = null;
 
-    if (data == null) {
-      onShowDetails(text: '');
-      return;
-    }
-
     if (data.node != null) {
       tree = createLoggingTree(
         onSelectionChange: () {
-          final InspectorTreeNode node = tree.selection;
-          if (node != null) {
-            tree.maybePopulateChildren(node);
-          }
+          final InspectorTreeNode node = tree!.selection!;
+          tree!.maybePopulateChildren(node);
 
           // TODO(jacobr): node.diagnostic.isDiagnosticableValue isn't quite
           // right.
-          if (node.diagnostic.isDiagnosticableValue) {
+          if (node.diagnostic.isDiagnosticableValue!) {
             // TODO(jacobr): warn if the selection can't be set as the node is
             // stale which is likely if this is an old log entry.
-            if (onShowInspector != null) {
-              onShowInspector();
-            }
+            onShowInspector();
             node.diagnostic.setSelectionInspector(false);
           }
         },
       );
 
-      final InspectorTreeNode root = tree.setupInspectorTreeNode(
-        tree.createNode(),
-        data.node,
+      final InspectorTreeNode root = tree!.setupInspectorTreeNode(
+        tree!.createNode(),
+        data.node!,
         expandChildren: true,
         expandProperties: true,
       );
       // No sense in collapsing the root node.
       root.allowExpandCollapse = false;
-      tree.root = root;
+      tree!.root = root;
       onShowDetails(tree: tree);
 
       return;
@@ -145,10 +139,11 @@ class LoggingDetailsController {
   }
 
   void _updateUIFromData() {
-    if (data.details.startsWith('{') && data.details.endsWith('}')) {
+    if (data.details?.startsWith('{') == true &&
+        data.details?.endsWith('}') == true) {
       try {
         // If the string decodes properly, then format the json.
-        final dynamic result = jsonDecode(data.details);
+        final result = jsonDecode(data.details!);
         onShowDetails(text: jsonEncoder.convert(result));
       } catch (e) {
         onShowDetails(text: data.details);
@@ -168,7 +163,7 @@ class LoggingController extends DisposableController
     autoDisposeStreamSubscription(
         serviceManager.onConnectionAvailable.listen(_handleConnectionStart));
     if (serviceManager.connectedAppInitialized) {
-      _handleConnectionStart(serviceManager.service);
+      _handleConnectionStart(serviceManager.service!);
     }
     autoDisposeStreamSubscription(
         serviceManager.onConnectionClosed.listen(_handleConnectionStop));
@@ -191,9 +186,9 @@ class LoggingController extends DisposableController
 
   List<LogData> data = <LogData>[];
 
-  final _selectedLog = ValueNotifier<LogData>(null);
+  final _selectedLog = ValueNotifier<LogData?>(null);
 
-  ValueListenable<LogData> get selectedLog => _selectedLog;
+  ValueListenable<LogData?> get selectedLog => _selectedLog;
 
   void selectLog(LogData data) {
     _selectedLog.value = data;
@@ -210,14 +205,15 @@ class LoggingController extends DisposableController
   void _updateSelection() {
     final selected = _selectedLog.value;
     if (selected != null) {
-      final logs = filteredData.value;
+      final List<LogData> logs = filteredData.value;
       if (!logs.contains(selected)) {
         _selectedLog.value = null;
       }
     }
   }
 
-  ObjectGroup get objectGroup => serviceManager.consoleService.objectGroup;
+  ObjectGroup get objectGroup =>
+      serviceManager.consoleService.objectGroup as ObjectGroup;
 
   String get statusText {
     final int totalCount = data.length;
@@ -291,51 +287,51 @@ class LoggingController extends DisposableController
     }
 
     if (e.extensionKind == FrameInfo.eventName) {
-      final FrameInfo frame = FrameInfo.from(e.extensionData.data);
+      final FrameInfo frame = FrameInfo.from(e.extensionData!.data);
 
       final String frameId = '#${frame.number}';
       final String frameInfoText =
-          '$frameId ${frame.elapsedMs.toStringAsFixed(1).padLeft(4)}ms ';
+          '$frameId ${frame.elapsedMs!.toStringAsFixed(1).padLeft(4)}ms ';
 
       log(LogData(
-        e.extensionKind.toLowerCase(),
-        jsonEncode(e.extensionData.data),
+        e.extensionKind!.toLowerCase(),
+        jsonEncode(e.extensionData!.data),
         e.timestamp,
         summary: frameInfoText,
       ));
     } else if (e.extensionKind == ImageSizesForFrame.eventName) {
-      final images = ImageSizesForFrame.from(e.extensionData.data);
+      final images = ImageSizesForFrame.from(e.extensionData!.data);
 
       for (final image in images) {
         log(LogData(
-          e.extensionKind.toLowerCase(),
+          e.extensionKind!.toLowerCase(),
           jsonEncode(image.rawJson),
           e.timestamp,
           summary: image.summary,
         ));
       }
     } else if (e.extensionKind == NavigationInfo.eventName) {
-      final NavigationInfo navInfo = NavigationInfo.from(e.extensionData.data);
+      final NavigationInfo navInfo = NavigationInfo.from(e.extensionData!.data);
 
       log(LogData(
-        e.extensionKind.toLowerCase(),
+        e.extensionKind!.toLowerCase(),
         jsonEncode(e.json),
         e.timestamp,
         summary: navInfo.routeDescription,
       ));
     } else if (untitledEvents.contains(e.extensionKind)) {
       log(LogData(
-        e.extensionKind.toLowerCase(),
+        e.extensionKind!.toLowerCase(),
         jsonEncode(e.json),
         e.timestamp,
         summary: '',
       ));
     } else if (e.extensionKind == ServiceExtensionStateChangedInfo.eventName) {
       final ServiceExtensionStateChangedInfo changedInfo =
-          ServiceExtensionStateChangedInfo.from(e.extensionData.data);
+          ServiceExtensionStateChangedInfo.from(e.extensionData!.data);
 
       log(LogData(
-        e.extensionKind.toLowerCase(),
+        e.extensionKind!.toLowerCase(),
         jsonEncode(e.json),
         e.timestamp,
         summary: '${changedInfo.extension}: ${changedInfo.value}',
@@ -343,8 +339,12 @@ class LoggingController extends DisposableController
     } else if (e.extensionKind == 'Flutter.Error') {
       // TODO(pq): add tests for error extension handling once framework changes
       // are landed.
-      final RemoteDiagnosticsNode node =
-          RemoteDiagnosticsNode(e.extensionData.data, objectGroup, false, null);
+      final RemoteDiagnosticsNode node = RemoteDiagnosticsNode(
+        e.extensionData!.data,
+        objectGroup,
+        false,
+        null,
+      );
       // Workaround the fact that the error objects from the server don't have
       // style error.
       node.style = DiagnosticsTreeStyle.error;
@@ -354,14 +354,14 @@ class LoggingController extends DisposableController
 
       final RemoteDiagnosticsNode summary = _findFirstSummary(node) ?? node;
       log(LogData(
-        e.extensionKind.toLowerCase(),
-        jsonEncode(e.extensionData.data),
+        e.extensionKind!.toLowerCase(),
+        jsonEncode(e.extensionData!.data),
         e.timestamp,
         summary: summary.toDiagnosticsNode().toString(),
       ));
     } else {
       log(LogData(
-        e.extensionKind.toLowerCase(),
+        e.extensionKind!.toLowerCase(),
         jsonEncode(e.json),
         e.timestamp,
         summary: e.json.toString(),
@@ -370,21 +370,21 @@ class LoggingController extends DisposableController
   }
 
   void _handleGCEvent(Event e) {
-    final HeapSpace newSpace = HeapSpace.parse(e.json['new']);
-    final HeapSpace oldSpace = HeapSpace.parse(e.json['old']);
-    final Map<dynamic, dynamic> isolateRef = e.json['isolate'];
+    final HeapSpace newSpace = HeapSpace.parse(e.json!['new'])!;
+    final HeapSpace oldSpace = HeapSpace.parse(e.json!['old'])!;
+    final isolateRef = e.json!['isolate'];
 
-    final int usedBytes = newSpace.used + oldSpace.used;
-    final int capacityBytes = newSpace.capacity + oldSpace.capacity;
+    final int usedBytes = newSpace.used! + oldSpace.used!;
+    final int capacityBytes = newSpace.capacity! + oldSpace.capacity!;
 
-    final int time = ((newSpace.time + oldSpace.time) * 1000).round();
+    final int time = ((newSpace.time! + oldSpace.time!) * 1000).round();
 
     final String summary = '${isolateRef['name']} • '
-        '${e.json['reason']} collection in $time ms • '
+        '${e.json!['reason']} collection in $time ms • '
         '${printMB(usedBytes, includeUnit: true)} used of ${printMB(capacityBytes, includeUnit: true)}';
 
-    final Map<String, dynamic> event = <String, dynamic>{
-      'reason': e.json['reason'],
+    final event = <String, dynamic>{
+      'reason': e.json!['reason'],
       'new': newSpace.json,
       'old': oldSpace.json,
       'isolate': isolateRef,
@@ -395,26 +395,26 @@ class LoggingController extends DisposableController
   }
 
   void _handleDeveloperLogEvent(Event e) {
-    final VmServiceWrapper service = serviceManager.service;
+    final VmServiceWrapper? service = serviceManager.service;
 
-    final dynamic logRecord = e.json['logRecord'];
+    final logRecord = e.json!['logRecord'];
 
-    String loggerName =
+    String? loggerName =
         _valueAsString(InstanceRef.parse(logRecord['loggerName']));
     if (loggerName == null || loggerName.isEmpty) {
       loggerName = 'log';
     }
-    final int level = logRecord['level'];
-    final InstanceRef messageRef = InstanceRef.parse(logRecord['message']);
-    String summary = _valueAsString(messageRef);
+    final int? level = logRecord['level'];
+    final InstanceRef messageRef = InstanceRef.parse(logRecord['message'])!;
+    String? summary = _valueAsString(messageRef);
     if (messageRef.valueAsStringIsTruncated == true) {
-      summary += '...';
+      summary = summary! + '...';
     }
-    final InstanceRef error = InstanceRef.parse(logRecord['error']);
-    final InstanceRef stackTrace = InstanceRef.parse(logRecord['stackTrace']);
+    final InstanceRef? error = InstanceRef.parse(logRecord['error']);
+    final InstanceRef? stackTrace = InstanceRef.parse(logRecord['stackTrace']);
 
-    final String details = summary;
-    Future<String> Function() detailsComputer;
+    final String? details = summary;
+    Future<String> Function()? detailsComputer;
 
     // If the message string was truncated by the VM, or the error object or
     // stackTrace objects were non-null, we need to ask the VM for more
@@ -426,32 +426,35 @@ class LoggingController extends DisposableController
       detailsComputer = () async {
         // Get the full string value of the message.
         String result =
-            await _retrieveFullStringValue(service, e.isolate, messageRef);
+            await _retrieveFullStringValue(service, e.isolate!, messageRef);
 
         // Get information about the error object. Some users of the
         // dart:developer log call may pass a data payload in the `error`
         // field, encoded as a json encoded string, so handle that case.
         if (_isNotNull(error)) {
-          if (error.valueAsString != null) {
+          if (error!.valueAsString != null) {
             final String errorString =
-                await _retrieveFullStringValue(service, e.isolate, error);
+                await _retrieveFullStringValue(service, e.isolate!, error);
             result += '\n\n$errorString';
           } else {
             // Call `toString()` on the error object and display that.
-            final dynamic toStringResult = await service.invoke(
-              e.isolate.id,
-              error.id,
+            final toStringResult = await service!.invoke(
+              e.isolate!.id!,
+              error.id!,
               'toString',
               <String>[],
               disableBreakpoints: true,
             );
 
             if (toStringResult is ErrorRef) {
-              final String errorString = _valueAsString(error);
+              final String? errorString = _valueAsString(error);
               result += '\n\n$errorString';
             } else if (toStringResult is InstanceRef) {
               final String str = await _retrieveFullStringValue(
-                  service, e.isolate, toStringResult);
+                service,
+                e.isolate!,
+                toStringResult,
+              );
               result += '\n\n$str';
             }
           }
@@ -503,19 +506,19 @@ class LoggingController extends DisposableController
     _updateData(currentLogs);
   }
 
-  static RemoteDiagnosticsNode _findFirstSummary(RemoteDiagnosticsNode node) {
+  static RemoteDiagnosticsNode? _findFirstSummary(RemoteDiagnosticsNode node) {
     if (node.level == DiagnosticLevel.summary) {
       return node;
     }
-    RemoteDiagnosticsNode summary;
+    RemoteDiagnosticsNode? summary;
     if (node.inlineProperties != null) {
-      for (RemoteDiagnosticsNode property in node.inlineProperties) {
+      for (RemoteDiagnosticsNode property in node.inlineProperties!) {
         summary = _findFirstSummary(property);
         if (summary != null) return summary;
       }
     }
     if (node.childrenNow != null) {
-      for (RemoteDiagnosticsNode child in node.childrenNow) {
+      for (RemoteDiagnosticsNode child in node.childrenNow!) {
         summary = _findFirstSummary(child);
         if (summary != null) return summary;
       }
@@ -525,46 +528,44 @@ class LoggingController extends DisposableController
 
   void _handleBusEvents() {
     // TODO(jacobr): expose the messageBus for use by vm tests.
-    if (messageBus != null) {
-      autoDisposeStreamSubscription(
-          messageBus.onEvent(type: 'reload.end').listen((BusEvent event) {
-        log(
-          LogData(
-            'hot.reload',
-            event.data,
-            DateTime.now().millisecondsSinceEpoch,
-          ),
-        );
-      }));
+    autoDisposeStreamSubscription(
+        messageBus.onEvent(type: 'reload.end').listen((BusEvent event) {
+      log(
+        LogData(
+          'hot.reload',
+          event.data as String?,
+          DateTime.now().millisecondsSinceEpoch,
+        ),
+      );
+    }));
 
-      autoDisposeStreamSubscription(
-          messageBus.onEvent(type: 'restart.end').listen((BusEvent event) {
-        log(
-          LogData(
-            'hot.restart',
-            event.data,
-            DateTime.now().millisecondsSinceEpoch,
-          ),
-        );
-      }));
+    autoDisposeStreamSubscription(
+        messageBus.onEvent(type: 'restart.end').listen((BusEvent event) {
+      log(
+        LogData(
+          'hot.restart',
+          event.data as String?,
+          DateTime.now().millisecondsSinceEpoch,
+        ),
+      );
+    }));
 
-      // Listen for debugger events.
-      autoDisposeStreamSubscription(messageBus
-          .onEvent()
-          .where((event) =>
-              event.type == 'debugger' || event.type.startsWith('debugger.'))
-          .listen(_handleDebuggerEvent));
+    // Listen for debugger events.
+    autoDisposeStreamSubscription(messageBus
+        .onEvent()
+        .where((event) =>
+            event.type == 'debugger' || event.type.startsWith('debugger.'))
+        .listen(_handleDebuggerEvent));
 
-      // Listen for DevTools internal events.
-      autoDisposeStreamSubscription(messageBus
-          .onEvent()
-          .where((event) => event.type.startsWith('devtools.'))
-          .listen(_handleDevToolsEvent));
-    }
+    // Listen for DevTools internal events.
+    autoDisposeStreamSubscription(messageBus
+        .onEvent()
+        .where((event) => event.type.startsWith('devtools.'))
+        .listen(_handleDevToolsEvent));
   }
 
   void _handleDebuggerEvent(BusEvent event) {
-    final Event debuggerEvent = event.data;
+    final Event debuggerEvent = event.data as Event;
 
     // Filter ServiceExtensionAdded events as they're pretty noisy.
     if (debuggerEvent.kind == EventKind.kServiceExtensionAdded) {
@@ -576,14 +577,14 @@ class LoggingController extends DisposableController
         event.type,
         jsonEncode(debuggerEvent.json),
         debuggerEvent.timestamp,
-        summary: '${debuggerEvent.kind} ${debuggerEvent.isolate.id}',
+        summary: '${debuggerEvent.kind} ${debuggerEvent.isolate!.id}',
       ),
     );
   }
 
   void _handleDevToolsEvent(BusEvent event) {
     var details = event.data.toString();
-    String summary;
+    String? summary;
 
     if (details.contains('\n')) {
       final lines = details.split('\n');
@@ -607,16 +608,16 @@ class LoggingController extends DisposableController
     String search, {
     bool searchPreviousMatches = false,
   }) {
-    if (search == null || search.isEmpty) return [];
+    if (search.isEmpty) return [];
     final matches = <LogData>[];
     final caseInsensitiveSearch = search.toLowerCase();
 
-    final currentLogs = filteredData.value;
+    final List<LogData> currentLogs = filteredData.value;
     for (final log in currentLogs) {
       if ((log.summary != null &&
-              log.summary.toLowerCase().contains(caseInsensitiveSearch)) ||
+              log.summary!.toLowerCase().contains(caseInsensitiveSearch)) ||
           (log.details != null &&
-              log.details.toLowerCase().contains(caseInsensitiveSearch))) {
+              log.details!.toLowerCase().contains(caseInsensitiveSearch))) {
         matches.add(log);
         // TODO(kenz): use the value of log.isSearchMatch in the logs table to
         // improve performance. This will require some refactoring of FlatTable.
@@ -626,7 +627,7 @@ class LoggingController extends DisposableController
   }
 
   @override
-  void filterData(Filter<LogData> filter) {
+  void filterData(Filter<LogData>? filter) {
     if (filter?.queryFilter == null) {
       filteredData
         ..clear()
@@ -635,25 +636,25 @@ class LoggingController extends DisposableController
       filteredData
         ..clear()
         ..addAll(data.where((log) {
-          final kindArg = filter.queryFilter.filterArguments[kindFilterId];
+          final kindArg = filter!.queryFilter!.filterArguments[kindFilterId];
           if (kindArg != null &&
               !kindArg.matchesValue(log.kind.toLowerCase())) {
             return false;
           }
 
-          if (filter.queryFilter.substrings.isNotEmpty) {
-            for (final substring in filter.queryFilter.substrings) {
+          if (filter.queryFilter!.substrings.isNotEmpty) {
+            for (final substring in filter.queryFilter!.substrings) {
               final caseInsensitiveSubstring = substring.toLowerCase();
-              final matchesKind = log.kind != null &&
+              final matchesKind =
                   log.kind.toLowerCase().contains(caseInsensitiveSubstring);
               if (matchesKind) return true;
 
               final matchesSummary = log.summary != null &&
-                  log.summary.toLowerCase().contains(caseInsensitiveSubstring);
+                  log.summary!.toLowerCase().contains(caseInsensitiveSubstring);
               if (matchesSummary) return true;
 
               final matchesDetails = log.details != null &&
-                  log.summary.toLowerCase().contains(caseInsensitiveSubstring);
+                  log.summary!.toLowerCase().contains(caseInsensitiveSubstring);
               if (matchesDetails) return true;
             }
             return false;
@@ -679,28 +680,28 @@ class _StdoutEventHandler {
   final String name;
   final bool isError;
 
-  LogData buffer;
-  Timer timer;
+  LogData? buffer;
+  Timer? timer;
 
   void handle(Event e) {
-    final String message = decodeBase64(e.bytes);
+    final String message = decodeBase64(e.bytes!);
 
     if (buffer != null) {
       timer?.cancel();
 
       if (message == '\n') {
         loggingController.log(LogData(
-          buffer.kind,
-          buffer.details + message,
-          buffer.timestamp,
-          summary: buffer.summary + message,
-          isError: buffer.isError,
+          buffer!.kind,
+          buffer!.details! + message,
+          buffer!.timestamp,
+          summary: buffer!.summary! + message,
+          isError: buffer!.isError,
         ));
         buffer = null;
         return;
       }
 
-      loggingController.log(buffer);
+      loggingController.log(buffer!);
       buffer = null;
     }
 
@@ -724,18 +725,18 @@ class _StdoutEventHandler {
     } else {
       buffer = data;
       timer = Timer(const Duration(milliseconds: 1), () {
-        loggingController.log(buffer);
+        loggingController.log(buffer!);
         buffer = null;
       });
     }
   }
 }
 
-bool _isNotNull(InstanceRef serviceRef) {
+bool _isNotNull(InstanceRef? serviceRef) {
   return serviceRef != null && serviceRef.kind != 'Null';
 }
 
-String _valueAsString(InstanceRef ref) {
+String? _valueAsString(InstanceRef? ref) {
   if (ref == null) {
     return null;
   }
@@ -771,32 +772,34 @@ class LogData with DataSearchStateMixin {
   });
 
   final String kind;
-  final int timestamp;
+  final int? timestamp;
   final bool isError;
-  final String summary;
+  final String? summary;
 
-  final RemoteDiagnosticsNode node;
-  String _details;
-  Future<String> Function() detailsComputer;
+  final RemoteDiagnosticsNode? node;
+  String? _details;
+  Future<String> Function()? detailsComputer;
 
   static const JsonEncoder prettyPrinter = JsonEncoder.withIndent('  ');
 
-  String get details => _details;
+  String? get details => _details;
 
   bool get needsComputing => detailsComputer != null;
 
   Future<void> compute() async {
-    _details = await detailsComputer();
+    _details = await detailsComputer!();
     detailsComputer = null;
   }
 
-  String get prettyPrinted {
+  String? get prettyPrinted {
     if (needsComputing) {
       return details;
     }
 
     try {
-      return prettyPrinter.convert(jsonDecode(details)).replaceAll(r'\n', '\n');
+      return prettyPrinter
+          .convert(jsonDecode(details!))
+          .replaceAll(r'\n', '\n');
     } catch (_) {
       return details;
     }
@@ -807,11 +810,11 @@ class LogData with DataSearchStateMixin {
       return true;
     }
 
-    if (summary != null && summary.toLowerCase().contains(filter)) {
+    if (summary != null && summary!.toLowerCase().contains(filter)) {
       return true;
     }
 
-    if (_details != null && _details.toLowerCase().contains(filter)) {
+    if (_details != null && _details!.toLowerCase().contains(filter)) {
       return true;
     }
 
@@ -834,12 +837,12 @@ class FrameInfo {
         data['number'], data['elapsed'] / 1000, data['startTime'] / 1000);
   }
 
-  final int number;
-  final num elapsedMs;
-  final num startTimeMs;
+  final int? number;
+  final num? elapsedMs;
+  final num? startTimeMs;
 
   @override
-  String toString() => 'frame $number ${elapsedMs.toStringAsFixed(1)}ms';
+  String toString() => 'frame $number ${elapsedMs!.toStringAsFixed(1)}ms';
 }
 
 class ImageSizesForFrame {
@@ -877,32 +880,30 @@ class ImageSizesForFrame {
     }).toList();
   }
 
-  final String source;
-  final Map<String, Object> displaySize;
-  final Map<String, Object> imageSize;
-  final Map<String, Object> rawJson;
+  final String? source;
+  final Map<String, Object>? displaySize;
+  final Map<String, Object>? imageSize;
+  final Map<String, Object>? rawJson;
 
   String get summary {
-    final file = path.basename(source);
+    final file = path.basename(source!);
 
-    final int displaySizeInBytes = rawJson['displaySizeInBytes'];
-    final int decodedSizeInBytes = rawJson['decodedSizeInBytes'];
+    final int? displaySizeInBytes = rawJson!['displaySizeInBytes'] as int?;
+    final int? decodedSizeInBytes = rawJson!['decodedSizeInBytes'] as int?;
 
     final double expansion =
         math.sqrt(decodedSizeInBytes ?? 0) / math.sqrt(displaySizeInBytes ?? 1);
 
     return 'Image $file • displayed at '
-        '${_round(displaySize['width'])}x${_round(displaySize['height'])}'
+        '${(displaySize!['width'] as double).round()}x${(displaySize!['height'] as double).round()}'
         ' • created at '
-        '${_round(imageSize['width'])}x${_round(imageSize['height'])}'
+        '${(imageSize!['width'] as double).round()}x${(imageSize!['height'] as double).round()}'
         ' • ${expansion.toStringAsFixed(1)}x';
   }
 
-  int _round(num value) => value.round();
-
   @override
   String toString() =>
-      '$source ${displaySize['width']}x${displaySize['height']}';
+      '$source ${displaySize!['width']}x${displaySize!['height']}';
 }
 
 class NavigationInfo {
@@ -914,9 +915,10 @@ class NavigationInfo {
     return NavigationInfo(data['route']);
   }
 
-  final Map<String, dynamic> _route;
+  final Map<String, dynamic>? _route;
 
-  String get routeDescription => _route == null ? null : _route['description'];
+  String? get routeDescription =>
+      _route == null ? null : _route!['description'];
 }
 
 class ServiceExtensionStateChangedInfo {
@@ -928,6 +930,6 @@ class ServiceExtensionStateChangedInfo {
     return ServiceExtensionStateChangedInfo(data['extension'], data['value']);
   }
 
-  final String extension;
+  final String? extension;
   final dynamic value;
 }
