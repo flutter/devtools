@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
@@ -38,7 +38,7 @@ class FilteredLibraries {
   ];
 
   static String normalizeLibraryUri(Library library) {
-    final uriParts = library.uri.split('/');
+    final uriParts = library.uri!.split('/');
     final firstPart = uriParts.first;
     if (firstPart.startsWith(_dartLibraryUriPrefix)) {
       return _dartLibraryUriPrefix;
@@ -74,10 +74,10 @@ class FilteredLibraries {
   List<String> sort() => _filteredLibraries..sort();
 
   bool isDartLibrary(Library library) =>
-      library.uri.startsWith(_dartLibraryUriPrefix);
+      library.uri!.startsWith(_dartLibraryUriPrefix);
 
   bool isFlutterLibrary(Library library) =>
-      library.uri.startsWith(_flutterLibraryUriPrefix);
+      library.uri!.startsWith(_flutterLibraryUriPrefix);
 
   bool isDartLibraryName(String libraryName) =>
       libraryName.startsWith(_dartLibraryUriPrefix);
@@ -85,13 +85,13 @@ class FilteredLibraries {
   bool isFlutterLibraryName(String libraryName) =>
       libraryName.startsWith(_flutterLibraryUriPrefix);
 
-  bool isLibraryFiltered(String libraryName) =>
+  bool isLibraryFiltered(String? libraryName) =>
       // Are dart:* libraries filtered and its a Dart library?
       (_filteredLibraries.contains(_dartLibraryUriPrefix) &&
-          isDartLibraryName(libraryName)) ||
+          isDartLibraryName(libraryName!)) ||
       // Are package:flutter* filtered and its a Flutter package?
       (_filteredLibraries.contains(_flutterLibraryUriPrefix) &&
-          isFlutterLibraryName(libraryName)) ||
+          isFlutterLibraryName(libraryName!)) ||
       // Is this library filtered?
       _filteredLibraries.contains(libraryName);
 }
@@ -101,10 +101,10 @@ class LibraryFilter {
   LibraryFilter(this.displayName, this.hide);
 
   /// Displayed library name.
-  final String displayName;
+  final String? displayName;
 
   /// Whether classes in this library hidden (filtered).
-  bool hide;
+  bool hide = false;
 }
 
 class SnapshotFilterDialog extends StatefulWidget {
@@ -118,19 +118,19 @@ class SnapshotFilterDialog extends StatefulWidget {
 
 class SnapshotFilterState extends State<SnapshotFilterDialog>
     with AutoDisposeMixin {
-  MemoryController controller;
+  bool _intitialized = false;
 
-  LinkedScrollControllerGroup _controllers;
+  late final LinkedScrollControllerGroup _controllers;
 
-  ScrollController _letters;
+  late final ScrollController _letters;
 
-  bool oldFilterPrivateClassesValue;
+  late final bool oldFilterPrivateClassesValue;
 
-  bool oldFilterZeroInstancesValue;
+  late final bool oldFilterZeroInstancesValue;
 
-  bool oldFilterLibraryNoInstancesValue;
+  late final bool oldFilterLibraryNoInstancesValue;
 
-  final oldFilteredLibraries = <String, bool>{};
+  final oldFilteredLibraries = <String, bool?>{};
 
   @override
   void initState() {
@@ -145,32 +145,32 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    if (controller == widget.controller) return;
-
-    controller = widget.controller;
+    if (_intitialized) return;
+    _intitialized = true;
 
     buildFilters();
 
-    oldFilterPrivateClassesValue = controller.filterPrivateClasses.value;
-    oldFilterZeroInstancesValue = controller.filterZeroInstances.value;
+    oldFilterPrivateClassesValue = widget.controller.filterPrivateClasses.value;
+    oldFilterZeroInstancesValue = widget.controller.filterZeroInstances.value;
     oldFilterLibraryNoInstancesValue =
-        controller.filterLibraryNoInstances.value;
+        widget.controller.filterLibraryNoInstances.value;
 
-    final oldFiltered = controller.filteredLibrariesByGroupName;
+    final oldFiltered = widget.controller.filteredLibrariesByGroupName;
     for (var key in oldFiltered.keys) {
-      oldFilteredLibraries[key] = oldFiltered[key].first.hide;
+      oldFilteredLibraries[key] = oldFiltered[key]!.first.hide;
     }
   }
 
-  void addLibrary(String libraryName, {bool hideState = false}) {
-    final filteredGroup = controller.filteredLibrariesByGroupName;
-    final filters = controller.libraryFilters;
+  void addLibrary(String? libraryName, {bool hideState = false}) {
+    final Map<String?, List<LibraryFilter>> filteredGroup =
+        widget.controller.filteredLibrariesByGroupName;
+    final filters = widget.controller.libraryFilters;
 
     final isFiltered = filters.isLibraryFiltered(libraryName);
-    String groupedName = libraryName;
+    String? groupedName = libraryName;
     bool hide = hideState;
     if (isFiltered) {
-      if (filters.isDartLibraryName(libraryName)) {
+      if (filters.isDartLibraryName(libraryName!)) {
         groupedName = _prettyPrintDartAbbreviation;
       } else if (filters.isFlutterLibraryName(libraryName)) {
         groupedName = _prettyPrintFlutterAbbreviation;
@@ -180,30 +180,29 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
 
     // Used by checkboxes in dialog.
     filteredGroup[groupedName] ??= [];
-    filteredGroup[groupedName].add(LibraryFilter(libraryName, hide));
+    filteredGroup[groupedName]!.add(LibraryFilter(libraryName, hide));
   }
 
   void buildFilters() {
-    if (controller == null) return;
-
     // First time filters created, populate with the default list of libraries
     // to filters
-    if (controller.filteredLibrariesByGroupName.isEmpty) {
-      for (final library in controller.libraryFilters.librariesFiltered) {
+    if (widget.controller.filteredLibrariesByGroupName.isEmpty) {
+      for (final library
+          in widget.controller.libraryFilters.librariesFiltered) {
         addLibrary(library, hideState: true);
       }
       // If not snapshots, return no libraries to process.
-      if (controller.snapshots.isEmpty) return;
+      if (widget.controller.snapshots.isEmpty) return;
     }
 
     // No libraries to compute until a snapshot exist.
-    if (controller.snapshots.isEmpty) return;
+    if (widget.controller.snapshots.isEmpty) return;
 
-    final libraries = controller.libraryRoot == null
-        ? controller.activeSnapshot.children
-        : controller.libraryRoot.children;
+    final List<Reference> libraries = widget.controller.libraryRoot == null
+        ? widget.controller.activeSnapshot.children
+        : widget.controller.libraryRoot!.children;
 
-    libraries..sort((a, b) => a.name.compareTo(b.name));
+    libraries..sort((a, b) => a.name!.compareTo(b.name!));
 
     for (final library in libraries) {
       // Don't include external and filtered these are a composite and can't be filtered out.
@@ -218,10 +217,10 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
   /// toggled from on to off then all the dart: packages will appear if the group
   /// dart:* is toggled back on then all the dart: packages must be removed.
   void cleanupFilteredLibrariesByGroupName() {
-    final filteredGroup = controller.filteredLibrariesByGroupName;
-    final dartGlobal = filteredGroup[_prettyPrintDartAbbreviation].first.hide;
+    final filteredGroup = widget.controller.filteredLibrariesByGroupName;
+    final dartGlobal = filteredGroup[_prettyPrintDartAbbreviation]!.first.hide;
     final flutterGlobal =
-        filteredGroup[_prettyPrintFlutterAbbreviation].first.hide;
+        filteredGroup[_prettyPrintFlutterAbbreviation]!.first.hide;
 
     filteredGroup.removeWhere((groupName, libraryFilter) {
       if (dartGlobal &&
@@ -240,15 +239,16 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
 
   Widget createLibraryListBox(BoxConstraints constraints) {
     final allLibraries =
-        controller.filteredLibrariesByGroupName.keys.map((String key) {
+        widget.controller.filteredLibrariesByGroupName.keys.map((String key) {
       return CheckboxListTile(
         title: Text(key),
         dense: true,
-        value: controller.filteredLibrariesByGroupName[key].first?.hide,
-        onChanged: (bool value) {
+        value: widget.controller.filteredLibrariesByGroupName[key]!.first.hide,
+        onChanged: (bool? value) {
           setState(() {
-            for (var filter in controller.filteredLibrariesByGroupName[key]) {
-              filter.hide = value;
+            for (var filter
+                in widget.controller.filteredLibrariesByGroupName[key]!) {
+              filter.hide = value == true;
             }
           });
         },
@@ -269,8 +269,9 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
         DialogApplyButton(
           onPressed: () {
             // Re-generate librariesFiltered
-            controller.libraryFilters.clearFilters();
-            controller.filteredLibrariesByGroupName.forEach((groupName, value) {
+            widget.controller.libraryFilters.clearFilters();
+            widget.controller.filteredLibrariesByGroupName
+                .forEach((groupName, value) {
               if (value.first.hide) {
                 var filteredName = groupName;
                 if (filteredName.endsWith('*')) {
@@ -279,35 +280,37 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                     filteredName.length - 1,
                   );
                 }
-                controller.libraryFilters.addFilter(filteredName);
+                widget.controller.libraryFilters.addFilter(filteredName);
               }
             });
             // Re-filter the groups.
-            controller.libraryRoot = null;
-            if (controller.lastSnapshot != null) {
-              controller.heapGraph.computeFilteredGroups();
-              controller.computeAllLibraries(
-                graph: controller.lastSnapshot.snapshotGraph,
+            widget.controller.libraryRoot = null;
+            if (widget.controller.lastSnapshot != null) {
+              widget.controller.heapGraph!.computeFilteredGroups();
+              widget.controller.computeAllLibraries(
+                graph: widget.controller.lastSnapshot!.snapshotGraph,
               );
             }
             cleanupFilteredLibrariesByGroupName();
-            controller.updateFilter();
+            widget.controller.updateFilter();
           },
         ),
         const SizedBox(width: defaultSpacing),
         DialogCancelButton(
           cancelAction: () {
-            controller.filterPrivateClasses.value =
+            widget.controller.filterPrivateClasses.value =
                 oldFilterPrivateClassesValue;
-            controller.filterZeroInstances.value = oldFilterZeroInstancesValue;
-            controller.filterLibraryNoInstances.value =
+            widget.controller.filterZeroInstances.value =
+                oldFilterZeroInstancesValue;
+            widget.controller.filterLibraryNoInstances.value =
                 oldFilterLibraryNoInstancesValue;
 
             // Restore hide state.
-            controller.filteredLibrariesByGroupName.forEach((key, values) {
+            widget.controller.filteredLibrariesByGroupName
+                .forEach((key, values) {
               final oldHide = oldFilteredLibraries[key];
               for (var value in values) {
-                value.hide = oldHide;
+                value.hide = oldHide == true;
               }
             });
           },
@@ -349,7 +352,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                   Row(
                     children: [
                       NotifierCheckbox(
-                        notifier: controller.filterPrivateClasses,
+                        notifier: widget.controller.filterPrivateClasses,
                       ),
                       const DevToolsTooltip(
                         message: 'Hide class names beginning with '
@@ -361,7 +364,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                   Row(
                     children: [
                       NotifierCheckbox(
-                        notifier: controller.filterZeroInstances,
+                        notifier: widget.controller.filterZeroInstances,
                       ),
                       const Text('Hide Classes with No Instances'),
                     ],
@@ -369,7 +372,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                   Row(
                     children: [
                       NotifierCheckbox(
-                        notifier: controller.filterLibraryNoInstances,
+                        notifier: widget.controller.filterLibraryNoInstances,
                       ),
                       const Text('Hide Library with No Instances'),
                     ],
@@ -378,7 +381,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
                   ...dialogSubHeader(
                     theme,
                     'Hide Libraries or Packages '
-                    '(${controller.filteredLibrariesByGroupName.length})',
+                    '(${widget.controller.filteredLibrariesByGroupName.length})',
                   ),
                   createLibraryListBox(constraints),
                   applyAndCancelButton(),
