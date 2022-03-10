@@ -36,7 +36,10 @@ void main() {
     final transformer = CpuProfileTransformer();
     controller = CpuProfilerController();
     cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson);
-    await transformer.processData(cpuProfileData);
+    await transformer.processData(
+      cpuProfileData,
+      processId: 'test',
+    );
 
     fakeServiceManager = FakeServiceManager();
     when(fakeServiceManager.connectedApp.isFlutterNativeAppNow)
@@ -277,8 +280,10 @@ void main() {
       setUp(() async {
         controller = ProfilerScreenController();
         cpuProfileData = CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
-        await controller.cpuProfilerController.transformer
-            .processData(cpuProfileData);
+        await controller.cpuProfilerController.transformer.processData(
+          cpuProfileData,
+          processId: 'test',
+        );
         // Call this to force the value of `_dataByTag[userTagNone]` to be set.
         controller.cpuProfilerController.loadProcessedData(
           cpuProfileData,

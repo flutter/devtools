@@ -22,7 +22,10 @@ void main() {
 
     test('processData', () async {
       expect(cpuProfileData.processed, isFalse);
-      await cpuProfileTransformer.processData(cpuProfileData);
+      await cpuProfileTransformer.processData(
+        cpuProfileData,
+        processId: 'test',
+      );
       expect(cpuProfileData.processed, isTrue);
       expect(
         cpuProfileData.cpuProfileRoot.toStringDeep(),
@@ -36,8 +39,10 @@ void main() {
             CpuProfileData.parse(responseWithMissingLeafFrame);
         expect(
           () async {
-            await cpuProfileTransformer
-                .processData(cpuProfileDataWithMissingLeaf);
+            await cpuProfileTransformer.processData(
+              cpuProfileDataWithMissingLeaf,
+              processId: 'test',
+            );
           },
           throwsA(const TypeMatcher<AssertionError>()),
         );
