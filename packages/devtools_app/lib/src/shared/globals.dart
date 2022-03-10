@@ -34,7 +34,7 @@ DevToolsExtensionPoints get devToolsExtensionPoints =>
 
 OfflineModeController get offlineController => globals[OfflineModeController];
 
-IdeTheme get ideTheme => globals[IdeTheme];
+IdeTheme? get ideTheme => globals[IdeTheme];
 
 void setGlobal(Type clazz, dynamic instance) {
   globals[clazz] = instance;

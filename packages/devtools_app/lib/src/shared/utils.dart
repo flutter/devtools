@@ -40,14 +40,14 @@ void debugLogger(String message) {
 }
 
 double scaleByFontFactor(double original) {
-  return (original * ideTheme.fontSizeFactor).roundToDouble();
+  return (original * (ideTheme?.fontSizeFactor ?? 1.0)).roundToDouble();
 }
 
 bool isDense() {
   return preferences.denseModeEnabled.value || isEmbedded();
 }
 
-bool isEmbedded() => ideTheme.embed;
+bool isEmbedded() => ideTheme?.embed ?? false;
 
 mixin CompareMixin implements Comparable {
   bool operator <(other) {
