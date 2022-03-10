@@ -203,10 +203,10 @@ class LogsTable extends StatelessWidget {
   }) : super(key: key);
 
   final List<LogData> data;
-  final ItemCallback<LogData> onItemSelected;
-  final ValueListenable<LogData> selectionNotifier;
+  final ItemCallback<LogData?> onItemSelected;
+  final ValueListenable<LogData?> selectionNotifier;
   final ValueListenable<List<LogData>> searchMatchesNotifier;
-  final ValueListenable<LogData> activeSearchMatchNotifier;
+  final ValueListenable<LogData?> activeSearchMatchNotifier;
 
   final ColumnData<LogData> when = _WhenColumn();
   final ColumnData<LogData> kind = _KindColumn();
@@ -216,7 +216,7 @@ class LogsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlatTable<LogData>(
+    return FlatTable<LogData?>(
       columns: columns,
       data: data,
       autoScrollContent: true,
@@ -247,7 +247,7 @@ class LogDetails extends StatefulWidget {
 class _LogDetailsState extends State<LogDetails>
     with SingleTickerProviderStateMixin {
   String? _lastDetails;
-  ScrollController? scrollController;
+  late final ScrollController scrollController;
 
   @override
   void initState() {
@@ -296,9 +296,9 @@ class _LogDetailsState extends State<LogDetails>
 
     final details = log?.details;
     if (details != _lastDetails) {
-      if (scrollController!.hasClients) {
+      if (scrollController.hasClients) {
         // Make sure we change the scroll if the log details shown have changed.
-        scrollController!.jumpTo(0);
+        scrollController.jumpTo(0);
       }
       _lastDetails = details;
     }

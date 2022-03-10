@@ -190,7 +190,7 @@ class LoggingController extends DisposableController
 
   ValueListenable<LogData?> get selectedLog => _selectedLog;
 
-  void selectLog(LogData data) {
+  void selectLog(LogData? data) {
     _selectedLog.value = data;
   }
 
