@@ -44,8 +44,8 @@ class ServiceConnectionManager {
     _serviceExtensionManager = ServiceExtensionManager(isolateManager);
   }
 
-  final StreamController<VmServiceWrapper?> _connectionAvailableController =
-      StreamController<VmServiceWrapper?>.broadcast();
+  final StreamController<VmServiceWrapper> _connectionAvailableController =
+      StreamController<VmServiceWrapper>.broadcast();
 
   Completer<VmService> _serviceAvailable = Completer();
 
@@ -105,7 +105,7 @@ class ServiceConnectionManager {
   final ValueNotifier<ConnectedState> _connectedState =
       ValueNotifier(const ConnectedState(false));
 
-  Stream<VmServiceWrapper?> get onConnectionAvailable =>
+  Stream<VmServiceWrapper> get onConnectionAvailable =>
       _connectionAvailableController.stream;
 
   Stream<void> get onConnectionClosed => _connectionClosedController.stream;
@@ -382,7 +382,7 @@ class ServiceConnectionManager {
 
   Future<Response> _callServiceOnMainIsolate(String name) async {
     final isolate = await whenValueNonNull(isolateManager.mainIsolate);
-    return await callService(name, isolateId: isolate.id!);
+    return await callService(name, isolateId: isolate?.id);
   }
 
   Future<Response> _callServiceExtensionOnMainIsolate(
@@ -394,13 +394,13 @@ class ServiceConnectionManager {
     return await service!.callServiceExtension(
       method,
       args: args,
-      isolateId: isolate.id,
+      isolateId: isolate?.id,
     );
   }
 
   Future<Response> get adbMemoryInfo async {
     return await _callServiceOnMainIsolate(
-      registrations.flutterMemory.service,
+      registrations.flutterMemoryInfo.service,
     );
   }
 

@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
@@ -53,7 +54,7 @@ enum ChartInterval {
 }
 
 /// Duration for each ChartInterval.
-const displayDurations = <Duration>[
+const displayDurations = <Duration?>[
   Duration.zero, // ChartInterval.Default
   Duration(minutes: 1), // ChartInterval.OneMinute
   Duration(minutes: 5), // ChartInterval.FiveMinutes
@@ -61,7 +62,7 @@ const displayDurations = <Duration>[
   null, // ChartInterval.All
 ];
 
-Duration chartDuration(ChartInterval interval) =>
+Duration? chartDuration(ChartInterval interval) =>
     displayDurations[interval.index];
 
 const displayDefault = 'Default';
@@ -69,9 +70,9 @@ const displayAll = 'All';
 
 final displayDurationsStrings = <String>[
   displayDefault,
-  chartDuration(ChartInterval.OneMinute).inMinutes.toString(),
-  chartDuration(ChartInterval.FiveMinutes).inMinutes.toString(),
-  chartDuration(ChartInterval.TenMinutes).inMinutes.toString(),
+  chartDuration(ChartInterval.OneMinute)!.inMinutes.toString(),
+  chartDuration(ChartInterval.FiveMinutes)!.inMinutes.toString(),
+  chartDuration(ChartInterval.TenMinutes)!.inMinutes.toString(),
   displayAll,
 ];
 
@@ -97,8 +98,7 @@ ChartInterval chartInterval(String displayName) {
       assert(index == ChartInterval.All.index);
       return ChartInterval.All;
     default:
-      assert(false);
-      return null;
+      return ChartInterval.All;
   }
 }
 
@@ -112,17 +112,17 @@ class OfflineFileException implements Exception {
 }
 
 class AllocationStackTrace {
-  AllocationStackTrace(CpuSample sample, {List<ProfileFunction> functions}) {
+  AllocationStackTrace(CpuSample sample, {List<ProfileFunction>? functions}) {
     computeStacktrace(sample, functions: functions);
   }
 
-  int timestamp;
+  int? timestamp;
 
   var showFullStacktrace = false;
 
   final stacktrace = <String>[];
 
-  final sources = <String>[];
+  final sources = <String?>[];
 
   int get stackDepth => stacktrace.length;
 
@@ -157,33 +157,32 @@ class AllocationStackTrace {
 
   String get sourcesDisplay => sources.join('\r');
 
-  void computeStacktrace(CpuSample cpuSample,
-      {List<ProfileFunction> functions}) {
-    if (cpuSample.stack.isNotEmpty) {
-      final stackLength = cpuSample.stack.length;
+  void computeStacktrace(
+    CpuSample cpuSample, {
+    List<ProfileFunction>? functions,
+  }) {
+    if (cpuSample.stack?.isNotEmpty == true) {
+      final stackLength = cpuSample.stack!.length;
       for (var stackIndex = 0; stackIndex < stackLength; stackIndex++) {
-        final functionId = cpuSample.stack[stackIndex];
-        final ProfileFunction profileFunc = functions[functionId];
-        String ownerName;
-        String functionName;
+        final functionId = cpuSample.stack![stackIndex];
+        final ProfileFunction profileFunc = functions![functionId];
+        late final String ownerName;
+        late final String functionName;
         if (profileFunc.function is FuncRef) {
           final FuncRef funcRef = profileFunc.function;
           if (funcRef.owner is ClassRef) {
-            final ClassRef classRef = funcRef.owner;
-            ownerName = classRef.name;
+            ownerName = funcRef.owner.name ?? '';
           } else if (funcRef.owner is LibraryRef) {
-            final LibraryRef libraryRef = funcRef.owner;
-            ownerName = libraryRef.name;
+            ownerName = funcRef.owner.name ?? '';
           } else {
             assert(funcRef.owner is FuncRef);
-            final FuncRef fRef = funcRef.owner;
-            ownerName = '${fRef.name}.';
+            ownerName = '${funcRef.owner.name}.';
           }
-          functionName = funcRef.name;
+          functionName = funcRef.name ?? '';
         } else {
           final NativeFunction nativeFunction = profileFunc.function;
           ownerName = '';
-          functionName = nativeFunction.name;
+          functionName = nativeFunction.name ?? '';
         }
 
         // Skip any internal binding names e.g.,
@@ -208,17 +207,17 @@ class AllocationSamples {
     _computeCpuSamples(cpuSamples);
   }
 
-  final ClassRef classRef;
+  final ClassRef? classRef;
 
   final stacktraces = <AllocationStackTrace>[];
 
-  int get totalStacktraces => stacktraces?.length;
+  int get totalStacktraces => stacktraces.length;
 
   void _computeCpuSamples(CpuSamples cpuSamples) {
-    final samplesLength = cpuSamples.samples.length;
+    final samplesLength = cpuSamples.samples!.length;
     for (var index = 0; index < samplesLength; index++) {
-      final cpuSample = cpuSamples.samples[index];
-      if (cpuSample.stack.isNotEmpty) {
+      final cpuSample = cpuSamples.samples![index];
+      if (cpuSample.stack!.isNotEmpty) {
         stacktraces.add(
           AllocationStackTrace(
             cpuSample,
@@ -246,11 +245,12 @@ class MemoryController extends DisposableController
     /// package:vm_service version 6.1.0+1 updated the VM Service protocol version
     /// to 3.43.0. This changed snapshot indexes for classes, instances and
     /// sentinels.  Primarily classes are indexed by a 0 based index not (1-based).
-    newSnapshotSemantics = serviceManager.service.isProtocolVersionSupportedNow(
-        supportedVersion: SemanticVersion(major: 3, minor: 43));
+    newSnapshotSemantics = serviceManager.service!
+        .isProtocolVersionSupportedNow(
+            supportedVersion: SemanticVersion(major: 3, minor: 43));
   }
 
-  bool newSnapshotSemantics;
+  late bool newSnapshotSemantics;
 
   static const logFilenamePrefix = 'memory_log_';
 
@@ -279,7 +279,7 @@ class MemoryController extends DisposableController
 
   final List<Snapshot> snapshots = [];
 
-  Snapshot get lastSnapshot => snapshots.safeLast;
+  Snapshot? get lastSnapshot => snapshots.safeLast;
 
   /// Root nodes names that contains nodes of either libraries or classes depending on
   /// group by library or group by class.
@@ -287,33 +287,33 @@ class MemoryController extends DisposableController
   static const classRootNode = '___CLASSES___';
 
   /// Notifies that the source of the memory feed has changed.
-  ValueListenable<DateTime> get selectedSnapshotNotifier =>
+  ValueListenable<DateTime?> get selectedSnapshotNotifier =>
       _selectedSnapshotNotifier;
 
-  static String formattedTimestamp(DateTime timestamp) =>
+  static String formattedTimestamp(DateTime? timestamp) =>
       timestamp != null ? DateFormat('MMM dd HH:mm:ss').format(timestamp) : '';
 
   /// Stored value is pretty timestamp when the snapshot was done.
-  final _selectedSnapshotNotifier = ValueNotifier<DateTime>(null);
+  final _selectedSnapshotNotifier = ValueNotifier<DateTime?>(null);
 
-  set selectedSnapshotTimestamp(DateTime snapshotTimestamp) {
+  set selectedSnapshotTimestamp(DateTime? snapshotTimestamp) {
     _selectedSnapshotNotifier.value = snapshotTimestamp;
   }
 
-  DateTime get selectedSnapshotTimestamp => _selectedSnapshotNotifier.value;
+  DateTime? get selectedSnapshotTimestamp => _selectedSnapshotNotifier.value;
 
-  HeapGraph heapGraph;
+  HeapGraph? heapGraph;
 
   /// Leaf node of tabletree snapshot selected?  If selected then the instance
   /// view is displayed to view the fields of an instance.
-  final _leafSelectedNotifier = ValueNotifier<HeapGraphElementLive>(null);
+  final _leafSelectedNotifier = ValueNotifier<HeapGraphElementLive?>(null);
 
-  ValueListenable<HeapGraphElementLive> get leafSelectedNotifier =>
+  ValueListenable<HeapGraphElementLive?> get leafSelectedNotifier =>
       _leafSelectedNotifier;
 
-  HeapGraphElementLive get selectedLeaf => _leafSelectedNotifier.value;
+  HeapGraphElementLive? get selectedLeaf => _leafSelectedNotifier.value;
 
-  set selectedLeaf(HeapGraphElementLive selected) {
+  set selectedLeaf(HeapGraphElementLive? selected) {
     _leafSelectedNotifier.value = selected;
   }
 
@@ -321,28 +321,28 @@ class MemoryController extends DisposableController
 
   void computeRoot() {
     if (selectedLeaf != null) {
-      final root = instanceToFieldNodes(this, selectedLeaf);
+      final root = instanceToFieldNodes(this, selectedLeaf!);
       _instanceRoot = root.isNotEmpty ? root : [FieldReference.empty];
     } else {
       _instanceRoot = [FieldReference.empty];
     }
   }
 
-  List<FieldReference> _instanceRoot;
+  List<FieldReference>? _instanceRoot;
 
-  List<FieldReference> get instanceRoot => _instanceRoot;
+  List<FieldReference>? get instanceRoot => _instanceRoot;
 
   /// Leaf node of analysis selected?  If selected then the field
   /// view is displayed to view an abbreviated fields of an instance.
-  final _leafAnalysisSelectedNotifier = ValueNotifier<AnalysisInstance>(null);
+  final _leafAnalysisSelectedNotifier = ValueNotifier<AnalysisInstance?>(null);
 
-  ValueListenable<AnalysisInstance> get leafAnalysisSelectedNotifier =>
+  ValueListenable<AnalysisInstance?> get leafAnalysisSelectedNotifier =>
       _leafAnalysisSelectedNotifier;
 
-  AnalysisInstance get selectedAnalysisLeaf =>
+  AnalysisInstance? get selectedAnalysisLeaf =>
       _leafAnalysisSelectedNotifier.value;
 
-  set selectedAnalysisLeaf(AnalysisInstance selected) {
+  set selectedAnalysisLeaf(AnalysisInstance? selected) {
     _leafAnalysisSelectedNotifier.value = selected;
   }
 
@@ -350,7 +350,8 @@ class MemoryController extends DisposableController
 
   void computeAnalysisInstanceRoot() {
     if (selectedAnalysisLeaf != null) {
-      final analysisFields = selectedAnalysisLeaf.fieldsRoot.children;
+      final List<AnalysisField> analysisFields =
+          selectedAnalysisLeaf!.fieldsRoot.children;
       _analysisInstanceRoot =
           analysisFields.isNotEmpty ? analysisFields : [AnalysisField.empty];
     } else {
@@ -358,16 +359,16 @@ class MemoryController extends DisposableController
     }
   }
 
-  List<AnalysisField> _analysisInstanceRoot;
+  List<AnalysisField>? _analysisInstanceRoot;
 
-  List<AnalysisField> get analysisInstanceRoot => _analysisInstanceRoot;
+  List<AnalysisField>? get analysisInstanceRoot => _analysisInstanceRoot;
 
   // List of completed Analysis of Snapshots.
   final List<AnalysisSnapshotReference> completedAnalyses = [];
 
   /// Determine the snapshot to analyze - current active snapshot (selected or node
   /// under snapshot selected), last snapshot or null (unknown).
-  Snapshot get computeSnapshotToAnalyze {
+  Snapshot? get computeSnapshotToAnalyze {
     // Any snapshots to analyze?
     if (snapshots.isEmpty) return null;
 
@@ -389,14 +390,14 @@ class MemoryController extends DisposableController
     if (snapshotsCount > analysesCount &&
         snapshotsCount == (analysesCount + 1)) {
       // Has the last snapshot been analyzed?
-      return _findSnapshotAnalyzed(lastSnapshot);
+      return _findSnapshotAnalyzed(lastSnapshot!);
     }
 
     return null;
   }
 
   /// Has the snapshot been analyzed, if not return the snapshot otherwise null.
-  Snapshot _findSnapshotAnalyzed(Snapshot snapshot) {
+  Snapshot? _findSnapshotAnalyzed(Snapshot snapshot) {
     final snapshotDateTime = snapshot.collectedTimestamp;
     final foundMatch = completedAnalyses
         .where((analysis) => analysis.dateTime == snapshotDateTime);
@@ -424,19 +425,19 @@ class MemoryController extends DisposableController
   bool toggleLegendVisibility() =>
       _legendVisibleNotifier.value = !_legendVisibleNotifier.value;
 
-  MemoryTimeline memoryTimeline;
+  MemoryTimeline? memoryTimeline;
 
-  MemoryLog memoryLog;
+  late MemoryLog memoryLog;
 
   /// Source of memory heap samples. False live data, True loaded from a
   /// memory_log file.
   bool offline = false;
 
-  HeapSample _selectedDartSample;
+  HeapSample? _selectedDartSample;
 
-  HeapSample _selectedAndroidSample;
+  HeapSample? _selectedAndroidSample;
 
-  HeapSample getSelectedSample(ChartType type) => type == ChartType.DartHeaps
+  HeapSample? getSelectedSample(ChartType type) => type == ChartType.DartHeaps
       ? _selectedDartSample
       : _selectedAndroidSample;
 
@@ -450,7 +451,7 @@ class MemoryController extends DisposableController
 
   static const liveFeed = 'Live Feed';
 
-  String memorySourcePrefix;
+  String? memorySourcePrefix;
 
   /// Notifies that the source of the memory feed has changed.
   ValueListenable get memorySourceNotifier => _memorySourceNotifier;
@@ -482,10 +483,11 @@ class MemoryController extends DisposableController
   /// Compute total timeline stops used by Timeline slider.
   int computeStops() {
     int stops = 0;
-    if (memoryTimeline.data.isNotEmpty) {
-      final lastSampleTimestamp = memoryTimeline.data.last.timestamp.toDouble();
+    if (memoryTimeline!.data.isNotEmpty) {
+      final lastSampleTimestamp =
+          memoryTimeline!.data.last.timestamp.toDouble();
       final firstSampleTimestamp =
-          memoryTimeline.data.first.timestamp.toDouble();
+          memoryTimeline!.data.first.timestamp.toDouble();
       stops =
           ((lastSampleTimestamp - firstSampleTimestamp) / intervalDurationInMs)
               .round();
@@ -513,7 +515,7 @@ class MemoryController extends DisposableController
   static int displayIntervalToIntervalDurationInMs(ChartInterval interval) {
     return interval == ChartInterval.All
         ? maxJsInt
-        : chartDuration(interval).inMilliseconds;
+        : chartDuration(interval)!.inMilliseconds;
   }
 
   /// Return the pruning interval in milliseconds.
@@ -527,7 +529,7 @@ class MemoryController extends DisposableController
     if (memorySource == MemoryController.liveFeed) {
       if (offline) {
         // User is switching back to 'Live Feed'.
-        memoryTimeline.offlineData.clear();
+        memoryTimeline!.offlineData.clear();
         offline = false; // We're live again...
       } else {
         // Still a live feed - keep collecting.
@@ -576,13 +578,13 @@ class MemoryController extends DisposableController
       ValueNotifier<Selection<Reference>>(Selection<Reference>());
 
   /// Tree to view Libary/Class/Instance (grouped by)
-  TreeTable<Reference> groupByTreeTable;
+  late TreeTable<Reference> groupByTreeTable;
 
   /// Tree to view fields of an instance.
-  TreeTable<FieldReference> instanceFieldsTreeTable;
+  TreeTable<FieldReference>? instanceFieldsTreeTable;
 
   /// Tree to view fields of an analysis.
-  TreeTable<AnalysisField> analysisFieldsTreeTable;
+  late TreeTable<AnalysisField> analysisFieldsTreeTable;
 
   final _updateClassStackTraces = ValueNotifier(0);
 
@@ -598,9 +600,8 @@ class MemoryController extends DisposableController
 
   /// Set up the class to be tracked.
   void setTracking(ClassRef classRef, bool enable) {
-    final foundClass = monitorAllocations.firstWhere(
+    final foundClass = monitorAllocations.firstWhereOrNull(
       (element) => element.classRef == classRef,
-      orElse: () => null,
     );
 
     if (foundClass != null) {
@@ -621,12 +622,12 @@ class MemoryController extends DisposableController
 
   /// Track where/when a class is allocated (constructor new'd).
   Future<void> _setTracking(ClassRef ref, bool enable) async {
-    if (!await isIsolateLive(_isolateId)) return;
+    if (_isolateId == null || !await isIsolateLive(_isolateId!)) return;
 
     final Success returnObject =
-        await serviceManager.service.setTraceClassAllocation(
-      _isolateId,
-      ref.id,
+        await serviceManager.service!.setTraceClassAllocation(
+      _isolateId!,
+      ref.id!,
       enable,
     );
 
@@ -641,8 +642,10 @@ class MemoryController extends DisposableController
         assert(trackAllocations[ref.name] == ref);
         return;
       }
-      // Add to tracking list.
-      trackAllocations[ref.name] = ref;
+      if (ref.name != null) {
+        // Add to tracking list.
+        trackAllocations[ref.name!] = ref;
+      }
     } else {
       // Remove from tracking list.
       assert(trackAllocations.containsKey(ref.name));
@@ -651,10 +654,10 @@ class MemoryController extends DisposableController
   }
 
   /// Track where/when a particular class is allocated (constructor new'd).
-  Future<CpuSamples> getAllocationTraces(ClassRef ref) async {
-    if (!await isIsolateLive(_isolateId)) return null;
-    final returnObject = await serviceManager.service.getAllocationTraces(
-      _isolateId,
+  Future<CpuSamples?> getAllocationTraces(ClassRef ref) async {
+    if (!await isIsolateLive(_isolateId!)) return null;
+    final returnObject = await serviceManager.service!.getAllocationTraces(
+      _isolateId!,
       classId: ref.id,
     );
 
@@ -672,9 +675,9 @@ class MemoryController extends DisposableController
     final keys = trackAllocations.keys;
     for (var key in keys) {
       // TODO(terry): Need to process output.
-      final samples = await getAllocationTraces(trackAllocations[key]);
+      final samples = await getAllocationTraces(trackAllocations[key]!);
       if (samples != null) {
-        _allAllocationSamples[trackAllocations[key]] = samples;
+        _allAllocationSamples[trackAllocations[key]!] = samples;
       }
     }
 
@@ -682,19 +685,14 @@ class MemoryController extends DisposableController
   }
 
   /// Table to view fields of an Allocation Profile.
-  FlatTable<ClassHeapDetailStats> allocationsFieldsTable;
+  FlatTable<ClassHeapDetailStats?>? allocationsFieldsTable;
 
   /// State of filters used by filter dialog (create/modify) and used
   /// by filtering in grouping.
   final FilteredLibraries libraryFilters = FilteredLibraries();
 
   /// All known libraries of the selected snapshot.
-  LibraryReference get libraryRoot {
-    if (selectionSnapshotNotifier.value == null) {
-      // No selectied snapshot use last snapshot.
-      return snapshots.safeLast.libraryRoot;
-    }
-
+  LibraryReference? get libraryRoot {
     // Find the selected snapshot's libraryRoot.
     final snapshot = getSnapshot(selectionSnapshotNotifier.value.node);
     if (snapshot != null) return snapshot.libraryRoot;
@@ -703,8 +701,8 @@ class MemoryController extends DisposableController
   }
 
   /// Re-compute the libraries (possible filter change).
-  set libraryRoot(LibraryReference newRoot) {
-    Snapshot snapshot;
+  set libraryRoot(LibraryReference? newRoot) {
+    Snapshot? snapshot;
 
     // Use last snapshot.
     if (snapshots.isNotEmpty) {
@@ -732,14 +730,14 @@ class MemoryController extends DisposableController
     }
 
     // No selected snapshot so return the last snapshot.
-    final lastSnapshot = groupByTreeTable.dataRoots.safeLast;
+    final lastSnapshot = groupByTreeTable.dataRoots.safeLast!;
     assert(lastSnapshot is SnapshotReference);
 
-    return lastSnapshot;
+    return lastSnapshot as SnapshotReference;
   }
 
   /// Given a node return its snapshot.
-  Snapshot getSnapshot(Reference reference) {
+  Snapshot? getSnapshot(Reference? reference) {
     while (reference != null) {
       if (reference is SnapshotReference) {
         final SnapshotReference snapshotRef = reference;
@@ -752,10 +750,10 @@ class MemoryController extends DisposableController
   }
 
   /// Root node of all known analysis and snapshots.
-  LibraryReference topNode;
+  LibraryReference? topNode;
 
   /// Root of known classes (used for group by class).
-  LibraryReference classRoot;
+  LibraryReference? classRoot;
 
   /// Used by the filter dialog, grouped name displayed in filter dialog
   /// e.g., dart:*, package:flutter/*
@@ -803,53 +801,53 @@ class MemoryController extends DisposableController
 
   ValueListenable<String> get groupingByNotifier => groupingBy;
 
-  String get _isolateId =>
-      serviceManager.isolateManager.selectedIsolate.value.id;
+  String? get _isolateId =>
+      serviceManager.isolateManager.selectedIsolate.value?.id;
 
-  final StreamController<MemoryTracker> _memoryTrackerController =
-      StreamController<MemoryTracker>.broadcast();
+  final StreamController<MemoryTracker?> _memoryTrackerController =
+      StreamController<MemoryTracker?>.broadcast();
 
-  Stream<MemoryTracker> get onMemory => _memoryTrackerController.stream;
+  Stream<MemoryTracker?> get onMemory => _memoryTrackerController.stream;
 
   Stream<void> get onDisconnect => _disconnectController.stream;
   final _disconnectController = StreamController<void>.broadcast();
 
-  MemoryTracker _memoryTracker;
+  MemoryTracker? _memoryTracker;
 
-  MemoryTracker get memoryTracker => _memoryTracker;
+  MemoryTracker? get memoryTracker => _memoryTracker;
 
   bool get hasStarted => _memoryTracker != null;
 
-  bool hasStopped;
+  bool hasStopped = false;
 
   void _handleIsolateChanged() {
     // TODO(terry): Need an event on the controller for this too?
   }
 
   void _handleConnectionStart(ServiceConnectionManager serviceManager) {
-    _memoryTracker = MemoryTracker(serviceManager, this);
-    _memoryTracker.start();
+    _memoryTracker = MemoryTracker(this);
+    _memoryTracker!.start();
 
     // Log Flutter extension events.
     // Note: We do not need to listen to event history here because we do not
     // have matching historical data about total memory usage.
     autoDisposeStreamSubscription(
-        serviceManager.service.onExtensionEvent.listen((Event event) {
+        serviceManager.service!.onExtensionEvent.listen((Event event) {
       var extensionEventKind = event.extensionKind;
-      String customEventKind;
-      if (MemoryTimeline.isCustomEvent(event.extensionKind)) {
+      String? customEventKind;
+      if (MemoryTimeline.isCustomEvent(event.extensionKind!)) {
         extensionEventKind = MemoryTimeline.devToolsExtensionEvent;
-        customEventKind = MemoryTimeline.customEventName(event.extensionKind);
+        customEventKind = MemoryTimeline.customEventName(event.extensionKind!);
       }
-      final jsonData = event.extensionData.data;
+      final jsonData = event.extensionData!.data as Map<String, Object>;
       // TODO(terry): Display events enabled in a settings page for now only these events.
       switch (extensionEventKind) {
         case 'Flutter.ImageSizesForFrame':
-          memoryTimeline.addExtensionEvent(
+          memoryTimeline!.addExtensionEvent(
               event.timestamp, event.extensionKind, jsonData);
           break;
         case MemoryTimeline.devToolsExtensionEvent:
-          memoryTimeline.addExtensionEvent(
+          memoryTimeline!.addExtensionEvent(
             event.timestamp,
             MemoryTimeline.customDevToolsEvent,
             jsonData,
@@ -860,12 +858,12 @@ class MemoryController extends DisposableController
     }));
 
     autoDisposeStreamSubscription(
-      _memoryTracker.onChange.listen((_) {
+      _memoryTracker!.onChange.listen((_) {
         _memoryTrackerController.add(_memoryTracker);
       }),
     );
     autoDisposeStreamSubscription(
-      _memoryTracker.onChange.listen((_) {
+      _memoryTracker!.onChange.listen((_) {
         _memoryTrackerController.add(_memoryTracker);
       }),
     );
@@ -876,7 +874,7 @@ class MemoryController extends DisposableController
     // to happen David is working on scaffolding.
     _memoryTrackerController.stream.listen((_) {}, onDone: () {
       // Stop polling and reset memoryTracker.
-      _memoryTracker.stop();
+      _memoryTracker!.stop();
       _memoryTracker = null;
     });
   }
@@ -907,27 +905,29 @@ class MemoryController extends DisposableController
     );
   }
 
-  Future<HeapSnapshotGraph> snapshotMemory() async {
-    return await serviceManager?.service?.getHeapSnapshotGraph(
-        serviceManager?.isolateManager?.selectedIsolate?.value);
+  Future<HeapSnapshotGraph?> snapshotMemory() async {
+    if (serviceManager.isolateManager.selectedIsolate.value == null)
+      return null;
+    return await serviceManager.service?.getHeapSnapshotGraph(
+        serviceManager.isolateManager.selectedIsolate.value!);
   }
 
   final _monitorAllocationsNotifier = ValueNotifier<int>(0);
 
   /// Last column sorted and sort direction in allocation monitoring. As table
   /// is reconstructed e.g., reset, etc. remembers user's sorting preference.
-  ColumnData<ClassHeapDetailStats> sortedMonitorColumn;
-  SortDirection sortedMonitorDirection;
+  late ColumnData<ClassHeapDetailStats?> sortedMonitorColumn;
+  late SortDirection sortedMonitorDirection;
 
   ValueListenable<int> get monitorAllocationsNotifier =>
       _monitorAllocationsNotifier;
 
-  DateTime monitorTimestamp;
+  DateTime? monitorTimestamp;
 
-  ValueListenable<DateTime> get lastMonitorTimestampNotifier =>
+  ValueListenable<DateTime?> get lastMonitorTimestampNotifier =>
       lastMonitorTimestamp;
 
-  final lastMonitorTimestamp = ValueNotifier<DateTime>(null);
+  final lastMonitorTimestamp = ValueNotifier<DateTime?>(null);
 
   /// Used for Allocations table search auto-complete.
 
@@ -958,7 +958,7 @@ class MemoryController extends DisposableController
 
   /// Used for searching in monitor allocation table.
   final searchMatchMonitorAllocationsNotifier =
-      ValueNotifier<ClassHeapDetailStats>(null);
+      ValueNotifier<ClassHeapDetailStats?>(null);
 
   var _monitorAllocations = <ClassHeapDetailStats>[];
 
@@ -975,9 +975,8 @@ class MemoryController extends DisposableController
 
     // Update the tracking (stacktrace) state of the newly fetched monitored allocations.
     for (var monitorAllocation in _monitorAllocations) {
-      final trackedClass = trackAllocations.entries.firstWhere(
+      final trackedClass = trackAllocations.entries.firstWhereOrNull(
         (trackRef) => monitorAllocation.classRef.id == trackRef.value.id,
-        orElse: () => null,
       );
 
       if (trackedClass != null) {
@@ -1000,11 +999,11 @@ class MemoryController extends DisposableController
   Future<List<ClassHeapDetailStats>> getAllocationProfile({
     bool reset = false,
   }) async {
-    if (!await isIsolateLive(_isolateId)) return [];
+    if (_isolateId == null || !await isIsolateLive(_isolateId!)) return [];
 
     AllocationProfile allocationProfile;
-    allocationProfile = await serviceManager.service.getAllocationProfile(
-      _isolateId,
+    allocationProfile = await serviceManager.service!.getAllocationProfile(
+      _isolateId!,
       reset: reset,
     );
 
@@ -1015,8 +1014,8 @@ class MemoryController extends DisposableController
           '${MemoryController.formattedTimestamp(resetTimestamp)}');
     }
 
-    final allocations = allocationProfile.members
-        .map((ClassHeapStats stats) => parseJsonClassHeapStats(stats.json))
+    final allocations = allocationProfile.members!
+        .map((ClassHeapStats stats) => parseJsonClassHeapStats(stats.json!))
         .where((ClassHeapDetailStats stats) {
       return stats.instancesCurrent > 0 || stats.instancesDelta > 0;
     }).toList();
@@ -1027,7 +1026,7 @@ class MemoryController extends DisposableController
       final allClassRefTracked = allSamples.keys;
       allocationSamples.clear();
       for (var classRef in allClassRefTracked) {
-        final cpuSamples = allSamples[classRef];
+        final cpuSamples = allSamples[classRef]!;
         allocationSamples.add(AllocationSamples(classRef, cpuSamples));
       }
     }
@@ -1041,11 +1040,11 @@ class MemoryController extends DisposableController
   /// If offline and if any Android collected data then we can view the Android
   /// data.
   bool get isOfflineAndAndroidData {
-    return offline && memoryTimeline.data.first.adbMemoryInfo.realtime > 0;
+    return offline && memoryTimeline!.data.first.adbMemoryInfo.realtime > 0;
   }
 
   bool get isConnectedDeviceAndroid {
-    return serviceManager?.vm?.operatingSystem == 'android';
+    return serviceManager.vm?.operatingSystem == 'android';
   }
 
   /// Source file name as returned from allocation's stacktrace.
@@ -1071,8 +1070,8 @@ class MemoryController extends DisposableController
     // TODO(terry): of instances.
     InstanceSet instanceSet;
     try {
-      instanceSet = await serviceManager.service.getInstances(
-        _isolateId,
+      instanceSet = await serviceManager.service!.getInstances(
+        _isolateId!,
         classRef,
         maxInstances,
         classId: classRef,
@@ -1080,18 +1079,18 @@ class MemoryController extends DisposableController
     } on SentinelException catch (_) {
       return [];
     }
-    return instanceSet.instances
+    return instanceSet.instances!
         .map((ObjRef ref) => InstanceSummary(classRef, className, ref.id))
         .toList();
   }
 
   /// When new snapshot occurs entire libraries should be rebuilt then rebuild should be true.
-  LibraryReference computeAllLibraries({
+  LibraryReference? computeAllLibraries({
     bool filtered = true,
     bool rebuild = false,
-    HeapSnapshotGraph graph,
+    HeapSnapshotGraph? graph,
   }) {
-    final HeapSnapshotGraph snapshotGraph =
+    final HeapSnapshotGraph? snapshotGraph =
         graph != null ? graph : snapshots.safeLast?.snapshotGraph;
 
     if (snapshotGraph == null) return null;
@@ -1106,21 +1105,23 @@ class MemoryController extends DisposableController
 
     final externalReferences =
         ExternalReferences(this, snapshotGraph.externalSize);
-    for (final liveExternal in heapGraph.externals) {
-      final HeapGraphClassLive classLive = liveExternal.live.theClass;
+    for (final liveExternal
+        in heapGraph?.externals ?? <HeapGraphExternalLive>[]) {
+      final HeapGraphClassLive? classLive =
+          liveExternal.live.theClass as HeapGraphClassLive?;
 
-      ExternalReference externalReference;
+      ExternalReference? externalReference;
 
       if (externalReferences.children.isNotEmpty) {
         externalReference = externalReferences.children.singleWhere(
-          (knownClass) => knownClass.name == classLive.name,
+          (knownClass) => knownClass.name == classLive?.name,
           orElse: () => null,
-        );
+        ) as ExternalReference?;
       }
 
       if (externalReference == null) {
         externalReference =
-            ExternalReference(this, classLive.name, liveExternal);
+            ExternalReference(this, classLive?.name, liveExternal);
         externalReferences.addChild(externalReference);
       }
 
@@ -1143,7 +1144,7 @@ class MemoryController extends DisposableController
     // Add our filtered items under the 'Filtered' node.
     if (filtered) {
       final filteredReference = FilteredReference(this);
-      final filtered = heapGraph.filteredLibraries;
+      final filtered = heapGraph!.filteredLibraries;
       addAllToNode(filteredReference, filtered);
 
       newLibraryRoot.addChild(filteredReference);
@@ -1151,13 +1152,13 @@ class MemoryController extends DisposableController
 
     // Compute all libraries.
     final groupBy =
-        filtered ? heapGraph.groupByLibrary : heapGraph.rawGroupByLibrary;
+        filtered ? heapGraph!.groupByLibrary : heapGraph!.rawGroupByLibrary;
 
     groupBy.forEach((libraryName, classes) {
-      LibraryReference libReference =
-          newLibraryRoot.children.singleWhere((library) {
+      LibraryReference? libReference =
+          newLibraryRoot.children.singleWhereOrNull((library) {
         return libraryName == library.name;
-      }, orElse: () => null);
+      }) as LibraryReference?;
 
       // Library not found add to list of children.
       if (libReference == null) {
@@ -1165,9 +1166,9 @@ class MemoryController extends DisposableController
         newLibraryRoot.addChild(libReference);
       }
 
-      for (var actualClass in libReference.actualClasses) {
+      for (var actualClass in libReference.actualClasses ?? {}) {
         monitorClass(
-          className: actualClass.name,
+          className: actualClass!.name,
           message: 'computeAllLibraries',
         );
         final classRef = ClassReference(this, actualClass);
@@ -1179,7 +1180,7 @@ class MemoryController extends DisposableController
         // (root) to reset the level/depth values.
         final classRefClassGroupBy = ClassReference(this, actualClass);
         classRefClassGroupBy.addChild(Reference.empty);
-        classRoot.addChild(classRefClassGroupBy);
+        classRoot!.addChild(classRefClassGroupBy);
       }
     });
 
@@ -1195,17 +1196,18 @@ class MemoryController extends DisposableController
   void addAllToNode(
       Reference root, Map<String, Set<HeapGraphClassLive>> allItems) {
     allItems.forEach((libraryName, classes) {
-      LibraryReference libReference = root.children.singleWhere((library) {
+      LibraryReference? libReference =
+          root.children.singleWhereOrNull((library) {
         return libraryName == library.name;
-      }, orElse: () => null);
+      }) as LibraryReference?;
 
       // Library not found add to list of children.
       libReference ??= LibraryReference(this, libraryName, classes);
       root.addChild(libReference);
 
-      for (var actualClass in libReference.actualClasses) {
+      for (var actualClass in libReference.actualClasses ?? {}) {
         monitorClass(
-          className: actualClass.name,
+          className: actualClass!.name,
           message: 'computeAllLibraries',
         );
         final classRef = ClassReference(this, actualClass);
@@ -1217,15 +1219,15 @@ class MemoryController extends DisposableController
         // (root) to reset the level/depth values.
         final classRefClassGroupBy = ClassReference(this, actualClass);
         classRefClassGroupBy.addChild(Reference.empty);
-        classRoot.addChild(classRefClassGroupBy);
+        classRoot!.addChild(classRefClassGroupBy);
       }
     });
   }
 
-  AnalysesReference findAnalysesNode() {
+  AnalysesReference? findAnalysesNode() {
     if (topNode == null) return null;
 
-    for (final child in topNode.children) {
+    for (final child in topNode!.children) {
       if (child is AnalysesReference) {
         return child;
       }
@@ -1233,32 +1235,29 @@ class MemoryController extends DisposableController
     return null;
   }
 
-  void createSnapshotEntries(Reference parent) {
+  void createSnapshotEntries(Reference? parent) {
     for (final snapshot in snapshots) {
-      final snaphotMatch = parent.children.firstWhere(
-        (element) {
-          var result = false;
-          if (element is SnapshotReference) {
-            final SnapshotReference node = element;
-            result = node.snapshot == snapshot;
-          }
+      final Reference? snaphotMatch =
+          parent!.children.firstWhereOrNull((element) {
+        var result = false;
+        if (element is SnapshotReference) {
+          final SnapshotReference node = element;
+          result = node.snapshot == snapshot;
+        }
 
-          return result;
-        },
-        orElse: () => null,
-      );
+        return result;
+      });
       if (snaphotMatch == null) {
         // New snapshot add it.
         final snapshotNode = SnapshotReference(snapshot);
         parent.addChild(snapshotNode);
 
-        final allLibraries = computeAllLibraries(graph: snapshot.snapshotGraph);
+        final allLibraries =
+            computeAllLibraries(graph: snapshot.snapshotGraph)!;
         snapshotNode.addAllChildren(allLibraries.children);
 
         return;
       }
-
-      assert(snaphotMatch != null, 'Unexpected Snapshot.');
     }
   }
 
@@ -1275,26 +1274,24 @@ class MemoryController extends DisposableController
     _treeChangedNotifier.value = state;
   }
 
-  Reference buildTreeFromAllData() {
-    final oldChildren = topNode?.children;
+  Reference? buildTreeFromAllData() {
+    final List<Reference>? oldChildren = topNode?.children;
     if (isTreeChanged) topNode = null;
     topNode ??= LibraryReference(this, libraryRootNode, null);
 
     if (isTreeChanged && oldChildren != null) {
-      topNode.addAllChildren(oldChildren);
+      topNode!.addAllChildren(oldChildren);
     }
 
-    final anyAnalyses = topNode.children.firstWhere(
-          (reference) => reference is AnalysesReference,
-          orElse: () => null,
-        ) !=
+    final anyAnalyses = topNode!.children
+            .firstWhereOrNull((reference) => reference is AnalysesReference) !=
         null;
 
     if (snapshots.isNotEmpty && !anyAnalyses) {
       // Create Analysis entry.
       final analysesRoot = AnalysesReference();
       analysesRoot.addChild(AnalysisReference(''));
-      topNode.addChild(analysesRoot);
+      topNode!.addChild(analysesRoot);
     }
 
     createSnapshotEntries(topNode);
@@ -1303,8 +1300,8 @@ class MemoryController extends DisposableController
   }
 
   Future getObject(String objectRef) async =>
-      await serviceManager.service.getObject(
-        _isolateId,
+      await serviceManager.service!.getObject(
+        _isolateId!,
         objectRef,
       );
 
@@ -1316,8 +1313,8 @@ class MemoryController extends DisposableController
     _gcing = true;
 
     try {
-      await serviceManager.service.getAllocationProfile(
-        _isolateId,
+      await serviceManager.service!.getAllocationProfile(
+        _isolateId!,
         gc: true,
       );
     } finally {
@@ -1333,15 +1330,15 @@ class MemoryController extends DisposableController
     final dynamic object = await getObject(objectRef);
     if (object is Instance) {
       final Instance instance = object;
-      final List<BoundField> fields = instance.fields;
+      final List<BoundField> fields = instance.fields!;
       for (var field in fields) {
-        if (field.decl.name == fieldName) {
-          final InstanceRef ref = field.value;
+        if (field.decl?.name == fieldName) {
+          final InstanceRef? ref = field.value;
 
           if (ref == null) continue;
 
-          final evalResult = await evaluate(ref.id, 'hashCode');
-          final int objHashCode = int.parse(evalResult?.valueAsString);
+          final evalResult = (await evaluate(ref.id!, 'hashCode'))!;
+          final int objHashCode = int.parse(evalResult.valueAsString!);
           if (objHashCode == instanceHashCode) {
             return true;
           }
@@ -1360,7 +1357,7 @@ class MemoryController extends DisposableController
     return false;
   }
 
-  List<Reference> snapshotByLibraryData;
+  List<Reference>? snapshotByLibraryData;
 
   void createSnapshotByLibrary() {
     snapshotByLibraryData ??= lastSnapshot?.librariesToList();
@@ -1392,7 +1389,7 @@ class MemoryController extends DisposableController
   /// Detect stale isolates (sentinaled), may happen after a hot restart.
   Future<bool> isIsolateLive(String isolateId) async {
     try {
-      final service = serviceManager?.service;
+      final service = serviceManager.service!;
       await service.getIsolate(isolateId);
     } catch (e) {
       if (e is SentinelException) {
@@ -1480,7 +1477,7 @@ class MemoryLog {
   List<String> exportMemory() {
     ga.select(analytics_constants.memory, analytics_constants.export);
 
-    final liveData = controller.memoryTimeline.liveData;
+    final liveData = controller.memoryTimeline!.liveData;
 
     bool pseudoData = false;
     if (liveData.isEmpty) {
@@ -1534,7 +1531,7 @@ class MemoryLog {
 
   /// Load the memory profile data from a saved memory log file.
   Future<void> loadOffline(String filename) async {
-    final jsonPayload = _fs.readStringFromFile(filename, isMemory: true);
+    final jsonPayload = _fs.readStringFromFile(filename, isMemory: true)!;
 
     final memoryJson = SamplesMemoryJson.decode(argJsonString: jsonPayload);
 
@@ -1548,8 +1545,8 @@ class MemoryLog {
     assert(memoryJson.isMemoryPayload);
 
     controller.offline = true;
-    controller.memoryTimeline.offlineData.clear();
-    controller.memoryTimeline.offlineData.addAll(memoryJson.data);
+    controller.memoryTimeline!.offlineData.clear();
+    controller.memoryTimeline!.offlineData.addAll(memoryJson.data);
   }
 
   @visibleForTesting

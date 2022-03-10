@@ -94,6 +94,18 @@ if [ "$BOT" = "main" ]; then
     # Ensure we can build the app.
     flutter pub run build_runner build -o web:build --release
 
+    # Test the devtools_shared package tests on the main bot.
+    popd
+    pushd packages/devtools_shared
+    echo `pwd`
+
+    flutter test test/
+    popd
+
+    # Change the directory back to devtools_app.
+    pushd packages/devtools_app
+    echo `pwd`
+
 elif [ "$BOT" = "test_ddc" ]; then
 
     flutter pub get
