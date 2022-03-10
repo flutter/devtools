@@ -54,7 +54,8 @@ class AllocationTableViewState extends State<AllocationTableView>
     with AutoDisposeMixin {
   AllocationTableViewState() : super();
 
-  MemoryController? controller;
+  late final MemoryController controller;
+  bool _initialized = false;
 
   final List<ColumnData<ClassHeapDetailStats>> columns = [];
 
@@ -82,8 +83,9 @@ class AllocationTableViewState extends State<AllocationTableView>
     super.didChangeDependencies();
 
     final newController = Provider.of<MemoryController>(context);
-    if (newController == controller) return;
+    if (_initialized && newController == controller) return;
     controller = newController;
+    _initialized = true;
 
     cancelListeners();
 
@@ -91,52 +93,52 @@ class AllocationTableViewState extends State<AllocationTableView>
     //              controller. Have other ValueListenables on controller to
     //              listen to, so we don't need the setState calls.
     // Update the chart when the memorySource changes.
-    addAutoDisposeListener(controller!.selectedSnapshotNotifier, () {
+    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
       setState(() {
-        controller!.computeAllLibraries(rebuild: true);
+        controller.computeAllLibraries(rebuild: true);
       });
     });
 
-    addAutoDisposeListener(controller!.updateClassStackTraces, () {
+    addAutoDisposeListener(controller.updateClassStackTraces, () {
       setState(() {
         trackerData.createTrackerTree(
-          controller!.trackAllocations,
-          controller!.allocationSamples,
+          controller.trackAllocations,
+          controller.allocationSamples,
         );
       });
     });
 
-    addAutoDisposeListener(controller!.treeChangedNotifier);
+    addAutoDisposeListener(controller.treeChangedNotifier);
 
-    addAutoDisposeListener(controller!.monitorAllocationsNotifier);
+    addAutoDisposeListener(controller.monitorAllocationsNotifier);
 
     addAutoDisposeListener(trackerData.selectionNotifier);
 
-    addAutoDisposeListener(controller!.selectTheSearchNotifier, _handleSearch);
+    addAutoDisposeListener(controller.selectTheSearchNotifier, _handleSearch);
 
-    addAutoDisposeListener(controller!.searchNotifier, _handleSearch);
+    addAutoDisposeListener(controller.searchNotifier, _handleSearch);
   }
 
   void _handleSearch() {
-    final searchingValue = controller!.search;
+    final searchingValue = controller.search;
     if (searchingValue.isNotEmpty) {
-      if (controller!.selectTheSearch) {
+      if (controller.selectTheSearch) {
         // Found an exact match.
-        controller!.selectItemInAllocationTable(searchingValue);
-        controller!.selectTheSearch = false;
-        controller!.resetSearch();
+        controller.selectItemInAllocationTable(searchingValue);
+        controller.selectTheSearch = false;
+        controller.resetSearch();
         return;
       }
 
       // No exact match, return the list of possible matches.
-      controller!.clearSearchAutoComplete();
+      controller.clearSearchAutoComplete();
 
       final matches = _allocationMatches(searchingValue);
 
       // Remove duplicates and sort the matches.
       final sortedAllocationMatches = matches.toSet().toList()..sort();
       // Use the top 10 matches:
-      controller!.searchAutoComplete.value = sortedAllocationMatches
+      controller.searchAutoComplete.value = sortedAllocationMatches
           .sublist(
             0,
             min(topMatchesLimit, sortedAllocationMatches.length),
@@ -158,7 +160,7 @@ class AllocationTableViewState extends State<AllocationTableView>
     // TODO(terry): Consider matches using the starts and the containing are added
     //              at end using addAll().  Also, should not build large list just
     //              up to max needed.
-    for (var allocation in controller!.monitorAllocations) {
+    for (var allocation in controller.monitorAllocations) {
       final knownName = allocation.classRef.name!;
       if (knownName.startsWith(searchingValue)) {
         startMatches.add(knownName);
@@ -175,13 +177,13 @@ class AllocationTableViewState extends State<AllocationTableView>
 
   @override
   Widget build(BuildContext context) {
-    if (controller!.allocationsFieldsTable == null) {
+    if (controller.allocationsFieldsTable == null) {
       // Sort by class name.
-      controller!.sortedMonitorColumn = columns[1];
-      controller!.sortedMonitorDirection = SortDirection.ascending;
+      controller.sortedMonitorColumn = columns[1];
+      controller.sortedMonitorDirection = SortDirection.ascending;
     }
 
-    if (controller!.monitorAllocations.isEmpty) {
+    if (controller.monitorAllocations.isEmpty) {
       // Display help text on how to monitor classes constructed.
       return Center(
         child: Row(
@@ -198,22 +200,22 @@ class AllocationTableViewState extends State<AllocationTableView>
       );
     }
 
-    controller!.searchMatchMonitorAllocationsNotifier.value = null;
+    controller.searchMatchMonitorAllocationsNotifier.value = null;
 
-    controller!.allocationsFieldsTable = FlatTable<ClassHeapDetailStats?>(
+    controller.allocationsFieldsTable = FlatTable<ClassHeapDetailStats?>(
       columns: columns,
-      data: controller!.monitorAllocations,
+      data: controller.monitorAllocations,
       keyFactory: (d) => Key(d!.classRef.name!),
       onItemSelected: (ref) =>
-          controller!.toggleAllocationTracking(ref!, !ref.isStacktraced),
-      sortColumn: controller!.sortedMonitorColumn,
-      sortDirection: controller!.sortedMonitorDirection,
+          controller.toggleAllocationTracking(ref!, !ref.isStacktraced),
+      sortColumn: controller.sortedMonitorColumn,
+      sortDirection: controller.sortedMonitorDirection,
       onSortChanged: (column, direction, {secondarySortColumn}) {
-        controller!.sortedMonitorColumn = column;
-        controller!.sortedMonitorDirection = direction;
+        controller.sortedMonitorColumn = column;
+        controller.sortedMonitorDirection = direction;
       },
       activeSearchMatchNotifier:
-          controller!.searchMatchMonitorAllocationsNotifier,
+          controller.searchMatchMonitorAllocationsNotifier,
     );
 
     final ScrollController scrollerController = ScrollController();
@@ -223,10 +225,10 @@ class AllocationTableViewState extends State<AllocationTableView>
       minSizes: const [200, 0],
       axis: Axis.vertical,
       children: [
-        controller!.allocationsFieldsTable!,
+        controller.allocationsFieldsTable!,
         trackerData.createTrackingTable(
           context,
-          controller!,
+          controller,
           scrollerController,
         ),
       ],
