@@ -86,14 +86,14 @@ class _TrackerClassColumn extends TreeColumnData<Tracker> {
 
   @override
   int compare(Tracker a, Tracker b) {
-    Comparable? valueA = getValue(a);
-    Comparable? valueB = getValue(b);
+    Comparable valueA = getValue(a);
+    Comparable valueB = getValue(b);
     if (a is TrackerCall) {
       // Sort is always by child index for the stacktrace, call stack should not reorder.
       valueA = a.parent!.children.indexOf(a);
       valueB = b.parent!.children.indexOf(b);
     }
-    return valueA!.compareTo(valueB);
+    return valueA.compareTo(valueB);
   }
 
   @override
