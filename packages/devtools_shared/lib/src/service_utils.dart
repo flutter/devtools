@@ -14,8 +14,8 @@ class RegisteredService {
 
 /// Flutter memory service registered by Flutter Tools.
 ///
-/// We call this service to get version information about the Flutter Android memory info
-/// using Android's ADB.
+/// We call this service to get version information about the Flutter Android
+/// memory info using Android's ADB.
 const flutterMemory = RegisteredService(
   service: 'flutterMemoryInfo',
   title: 'Flutter Memory Info',
@@ -23,8 +23,8 @@ const flutterMemory = RegisteredService(
 
 const flutterListViews = '_flutter.listViews';
 
-/// Flutter engine returns estimate how much memory is used by layer/picture raster
-/// cache entries in bytes.
+/// Flutter engine returns estimate how much memory is used by layer/picture
+/// raster cache entries in bytes.
 const flutterEngineRasterCache = '_flutter.estimateRasterCacheMemory';
 
 /// Returns a normalized vm service uri.
@@ -44,8 +44,9 @@ Uri? normalizeVmServiceUri(String value) {
   // http://127.0.0.1:9101?uri=http%3A%2F%2F127.0.0.1%3A56142%2FHOwgrxalK00%3D%2F
   const uriParamToken = '?uri=';
   if (value.contains(uriParamToken)) {
-    value =
-        value.substring(value.indexOf(uriParamToken) + uriParamToken.length);
+    value = value.substring(
+      value.indexOf(uriParamToken) + uriParamToken.length,
+    );
   }
 
   // Cleanup encoded urls likely copied from the uri of an existing running
