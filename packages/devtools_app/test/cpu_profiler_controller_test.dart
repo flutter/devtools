@@ -157,7 +157,6 @@ void main() {
           controller.dataNotifier.value.stackFrames.values.length, equals(17));
 
       // Match on name.
-      expect(controller.matchesForSearch(null).length, equals(0));
       expect(controller.matchesForSearch('').length, equals(0));
       expect(controller.matchesForSearch('render').length, equals(9));
       expect(controller.matchesForSearch('RenderObject').length, equals(3));

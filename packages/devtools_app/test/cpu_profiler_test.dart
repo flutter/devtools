@@ -53,30 +53,6 @@ void main() {
     const windowSize = Size(2000.0, 1000.0);
     final searchFieldKey = GlobalKey(debugLabel: 'test search field key');
 
-    testWidgetsWithWindowSize('builds for null cpuProfileData', windowSize,
-        (WidgetTester tester) async {
-      cpuProfiler = CpuProfiler(
-        data: null,
-        controller: controller,
-        searchFieldKey: searchFieldKey,
-      );
-      await tester.pumpWidget(wrap(cpuProfiler));
-      expect(find.byType(TabBar), findsOneWidget);
-      expect(find.byKey(CpuProfiler.dataProcessingKey), findsOneWidget);
-      expect(find.byType(CpuProfileFlameChart), findsNothing);
-      expect(find.byType(CpuCallTreeTable), findsNothing);
-      expect(find.byType(CpuBottomUpTable), findsNothing);
-      expect(find.byType(UserTagDropdown), findsNothing);
-      expect(find.byType(ExpandAllButton), findsNothing);
-      expect(find.byType(CollapseAllButton), findsNothing);
-      expect(find.byType(FlameChartHelpButton), findsNothing);
-      expect(find.byKey(searchFieldKey), findsNothing);
-      expect(find.byKey(CpuProfiler.flameChartTab), findsNothing);
-      expect(find.byKey(CpuProfiler.callTreeTab), findsNothing);
-      expect(find.byKey(CpuProfiler.bottomUpTab), findsNothing);
-      expect(find.byKey(CpuProfiler.summaryTab), findsNothing);
-    });
-
     testWidgetsWithWindowSize('builds for empty cpuProfileData', windowSize,
         (WidgetTester tester) async {
       cpuProfileData = CpuProfileData.parse(emptyCpuProfileDataJson);
