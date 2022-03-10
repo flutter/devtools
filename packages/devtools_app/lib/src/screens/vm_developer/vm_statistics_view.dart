@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -41,7 +39,7 @@ class VMStatisticsViewBody extends StatelessWidget {
           children: [
             Row(
               children: [
-                child,
+                child!,
               ],
             ),
             Expanded(
@@ -60,7 +58,7 @@ class VMStatisticsViewBody extends StatelessWidget {
 }
 
 class VMStatisticsWidget extends StatelessWidget {
-  const VMStatisticsWidget({@required this.controller});
+  const VMStatisticsWidget({required this.controller});
 
   final VMStatisticsViewController controller;
 
@@ -116,7 +114,7 @@ class VMStatisticsWidget extends StatelessWidget {
 ///   - Profiler mode
 ///   - Current memory consumption
 class GeneralVMStatisticsWidget extends StatelessWidget {
-  const GeneralVMStatisticsWidget({@required this.controller});
+  const GeneralVMStatisticsWidget({required this.controller});
 
   final VMStatisticsViewController controller;
 
@@ -134,7 +132,7 @@ class GeneralVMStatisticsWidget extends StatelessWidget {
           vm == null
               ? null
               : formatDateTime(
-                  DateTime.fromMillisecondsSinceEpoch(vm.startTime),
+                  DateTime.fromMillisecondsSinceEpoch(vm.startTime!),
                 ),
         ),
         MapEntry('Profiler Mode', vm?.profilerMode),
@@ -158,7 +156,7 @@ class GeneralVMStatisticsWidget extends StatelessWidget {
 ///   - Current and maximum resident set size (RSS) utilization
 ///   - Zone allocator memory utilization
 class ProcessStatisticsWidget extends StatelessWidget {
-  const ProcessStatisticsWidget({@required this.controller});
+  const ProcessStatisticsWidget({required this.controller});
 
   final VMStatisticsViewController controller;
 
@@ -203,14 +201,14 @@ class _IsolateNameColumn extends ColumnData<Isolate> {
   _IsolateNameColumn() : super.wide('Name');
 
   @override
-  String getValue(Isolate i) => i.name;
+  String getValue(Isolate i) => i.name!;
 }
 
 class _IsolateIDColumn extends ColumnData<Isolate> {
   _IsolateIDColumn() : super.wide('ID');
 
   @override
-  String getValue(Isolate i) => i.number;
+  String getValue(Isolate i) => i.number!;
 }
 
 abstract class _IsolateMemoryColumn extends ColumnData<Isolate> {
@@ -263,7 +261,7 @@ class _IsolateHeapColumn extends _IsolateMemoryColumn {
 ///   - Dart heap usage
 class IsolatesPreviewWidget extends StatelessWidget {
   IsolatesPreviewWidget({
-    @required this.controller,
+    required this.controller,
     this.systemIsolates = false,
   });
 
@@ -290,12 +288,12 @@ class IsolatesPreviewWidget extends StatelessWidget {
     final isolates =
         systemIsolates ? controller.systemIsolates : controller.isolates;
     return VMInfoCard(
-      title: '$title (${isolates?.length ?? 0})',
+      title: '$title (${isolates.length})',
       table: Flexible(
         child: FlatTable<Isolate>(
           columns: columns,
           data: isolates,
-          keyFactory: (Isolate i) => ValueKey<String>(i.id),
+          keyFactory: (Isolate i) => ValueKey<String>(i.id!),
           sortColumn: name,
           sortDirection: SortDirection.descending,
           onItemSelected: (_) => null,
