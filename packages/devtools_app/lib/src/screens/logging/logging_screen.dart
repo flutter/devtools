@@ -86,7 +86,8 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     with AutoDisposeMixin, SearchFieldMixin<LoggingScreenBody> {
   LogData? selected;
 
-  LoggingController? controller;
+  bool initialized = false;
+  late LoggingController controller;
 
   late List<LogData> filteredLogs;
 
@@ -101,22 +102,24 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     super.didChangeDependencies();
 
     final newController = Provider.of<LoggingController>(context);
-    if (newController == controller) return;
+    if (initialized && newController == controller) return;
+
     controller = newController;
+    initialized = true;
 
     cancelListeners();
 
-    filteredLogs = controller!.filteredData.value;
-    addAutoDisposeListener(controller!.filteredData, () {
+    filteredLogs = controller.filteredData.value;
+    addAutoDisposeListener(controller.filteredData, () {
       setState(() {
-        filteredLogs = controller!.filteredData.value;
+        filteredLogs = controller.filteredData.value;
       });
     });
 
-    selected = controller!.selectedLog.value;
-    addAutoDisposeListener(controller!.selectedLog, () {
+    selected = controller.selectedLog.value;
+    addAutoDisposeListener(controller.selectedLog, () {
       setState(() {
-        selected = controller!.selectedLog.value;
+        selected = controller.selectedLog.value;
       });
     });
   }
@@ -133,10 +136,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   }
 
   Widget _buildLoggingControls() {
-    final hasData = controller!.filteredData.value.isNotEmpty;
+    final hasData = controller.filteredData.value.isNotEmpty;
     return Row(
       children: [
-        ClearButton(onPressed: controller!.clear),
+        ClearButton(onPressed: controller.clear),
         const Spacer(),
         StructuredErrorsToggle(),
         const SizedBox(width: denseSpacing),
@@ -145,7 +148,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
           width: wideSearchTextWidth,
           height: defaultTextFieldHeight,
           child: buildSearchField(
-            controller: controller!,
+            controller: controller,
             searchFieldKey: loggingSearchFieldKey,
             searchFieldEnabled: hasData,
             shouldRequestFocus: false,
@@ -155,7 +158,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         const SizedBox(width: denseSpacing),
         FilterButton(
           onPressed: _showFilterDialog,
-          isFilterActive: filteredLogs.length != controller!.data.length,
+          isFilterActive: filteredLogs.length != controller.data.length,
         ),
       ],
     );
@@ -169,10 +172,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         OutlineDecoration(
           child: LogsTable(
             data: filteredLogs,
-            onItemSelected: controller!.selectLog,
-            selectionNotifier: controller!.selectedLog,
-            searchMatchesNotifier: controller!.searchMatches,
-            activeSearchMatchNotifier: controller!.activeSearchMatch,
+            onItemSelected: controller.selectLog,
+            selectionNotifier: controller.selectedLog,
+            searchMatchesNotifier: controller.searchMatches,
+            activeSearchMatchNotifier: controller.activeSearchMatch,
           ),
         ),
         LogDetails(log: selected),
@@ -186,7 +189,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
       builder: (context) => FilterDialog<LoggingController?, LogData>(
         controller: controller,
         queryInstructions: LoggingScreenBody.filterQueryInstructions,
-        queryFilterArguments: controller!.filterArgs,
+        queryFilterArguments: controller.filterArgs,
       ),
     );
   }
