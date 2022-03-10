@@ -558,7 +558,7 @@ abstract class FlameChartState<T extends FlameChart,
     // had time to update their scroll extents. Otherwise, we can hit a race
     // where are trying to scroll to an offset that is beyond what the scroll
     // controller thinks its max scroll extent is.
-    WidgetsBinding.instance!.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.wait([
         scrollHorizontallyToData(data),
         if (scrollVertically) scrollVerticallyToData(data),

@@ -71,23 +71,20 @@ class ImportController {
     }
     previousImportTime = now;
 
-    final isDevToolsSnapshot =
-        json is Map<String, dynamic> && json[devToolsSnapshotKey] == true;
-    if (!isDevToolsSnapshot) {
+    final devToolsSnapshot = json;
+    if (devToolsSnapshot is Map<String, dynamic> &&
+        devToolsSnapshot[devToolsSnapshotKey] == true) {
+      final activeScreenId = devToolsSnapshot[activeScreenIdKey];
+      offlineController
+        ..enterOfflineMode()
+        ..offlineDataJson = devToolsSnapshot;
+      serviceManager.connectedApp =
+          OfflineConnectedApp.parse(devToolsSnapshot[connectedAppKey]);
+      _notifications.push(attemptingToImportMessage(activeScreenId));
+      _pushSnapshotScreenForImport(activeScreenId);
+    } else {
       _notifications.push(nonDevToolsFileMessage);
-      return;
     }
-
-    final devToolsSnapshot = json as Map<String, dynamic>;
-    // TODO(kenz): support imports for more than one screen at a time.
-    final activeScreenId = devToolsSnapshot[activeScreenIdKey];
-    offlineController
-      ..enterOfflineMode()
-      ..offlineDataJson = devToolsSnapshot;
-    serviceManager.connectedApp =
-        OfflineConnectedApp.parse(devToolsSnapshot[connectedAppKey]);
-    _notifications.push(attemptingToImportMessage(activeScreenId));
-    _pushSnapshotScreenForImport(activeScreenId);
   }
 }
 

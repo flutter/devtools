@@ -584,7 +584,7 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
           _targetScrollOffsetForPointerScroll(event);
       // Only express interest in the event if it would actually result in a scroll.
       if (targetScrollOffset != position!.pixels) {
-        GestureBinding.instance!.pointerSignalResolver
+        GestureBinding.instance.pointerSignalResolver
             .register(event, _handlePointerScroll);
       }
     }

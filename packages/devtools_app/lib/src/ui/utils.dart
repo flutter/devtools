@@ -125,7 +125,7 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
   @override
   Widget build(BuildContext context) {
     if (!widget.offsetController.position.hasContentDimensions) {
-      SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
         if (widget.offsetController.position.hasViewportDimension && mounted) {
           // TODO(jacobr): find a cleaner way to be notified that the
           // offsetController now has a valid dimension. We would probably
