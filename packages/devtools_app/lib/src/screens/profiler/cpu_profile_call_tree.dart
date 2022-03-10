@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 import '../../primitives/utils.dart';
@@ -14,7 +12,7 @@ import 'cpu_profile_model.dart';
 
 /// A table of the CPU's top-down call tree.
 class CpuCallTreeTable extends StatelessWidget {
-  factory CpuCallTreeTable(List<CpuStackFrame> dataRoots, {Key key}) {
+  factory CpuCallTreeTable(List<CpuStackFrame> dataRoots, {Key? key}) {
     final treeColumn = MethodNameColumn();
     final startingSortColumn = TotalTimeColumn(titleTooltip: totalTimeTooltip);
     final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
@@ -33,7 +31,7 @@ class CpuCallTreeTable extends StatelessWidget {
   }
 
   const CpuCallTreeTable._(
-    Key key,
+    Key? key,
     this.dataRoots,
     this.treeColumn,
     this.sortColumn,

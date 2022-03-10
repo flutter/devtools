@@ -92,6 +92,8 @@ class ProfileGranularityDropdown extends StatelessWidget {
       '${analytics_constants.profileGranularityPrefix}'
       '${ProfileGranularityExtension.fromValue(newValue ?? '').displayShort}',
     );
-    await serviceManager.service.setProfilePeriod(newValue);
+    await serviceManager.service!.setProfilePeriod(
+      newValue ?? mediumProfilePeriod,
+    );
   }
 }

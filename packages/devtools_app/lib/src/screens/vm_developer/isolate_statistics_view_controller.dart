@@ -20,7 +20,7 @@ class IsolateStatisticsViewController extends DisposableController
   IsolateStatisticsViewController() {
     // If the CPU profiler is enabled later, refresh the isolate data to get
     // the tag information.
-    cpuProfilerController.profilerFlagNotifier.addListener(
+    cpuProfilerController.profilerFlagNotifier?.addListener(
       () => refresh(),
     );
 

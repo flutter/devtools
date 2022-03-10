@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 import '../../primitives/utils.dart';
@@ -14,7 +12,7 @@ import 'cpu_profile_model.dart';
 
 /// A table of the CPU's bottom-up call tree.
 class CpuBottomUpTable extends StatelessWidget {
-  factory CpuBottomUpTable(List<CpuStackFrame> bottomUpRoots, {Key key}) {
+  factory CpuBottomUpTable(List<CpuStackFrame> bottomUpRoots, {Key? key}) {
     final treeColumn = MethodNameColumn();
     final startingSortColumn = SelfTimeColumn(titleTooltip: selfTimeTooltip);
     final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
@@ -33,7 +31,7 @@ class CpuBottomUpTable extends StatelessWidget {
   }
 
   const CpuBottomUpTable._(
-    Key key,
+    Key? key,
     this.bottomUpRoots,
     this.treeColumn,
     this.sortColumn,

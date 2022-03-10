@@ -750,8 +750,10 @@ class PerformanceController extends DisposableController
     );
     await processTraceEvents(traceEvents);
     if (data.cpuProfileData != null) {
-      await cpuProfilerController.transformer
-          .processData(offlinePerformanceData.cpuProfileData);
+      await cpuProfilerController.transformer.processData(
+        offlinePerformanceData.cpuProfileData,
+        processId: 'process offline data',
+      );
     }
 
     offlinePerformanceData.frames.forEach(_assignEventsToFrame);
