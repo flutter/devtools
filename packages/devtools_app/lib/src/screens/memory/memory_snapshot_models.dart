@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/trees.dart';
@@ -88,9 +89,12 @@ class Reference extends TreeNode<Reference> {
           onLeaf: onLeaf,
         );
 
-  Reference.allocationMonitor(MemoryController controller, String name,
-      {Function? onExpand, Function? onLeaf})
-      : this._internal(
+  Reference.allocationMonitor(
+    MemoryController controller,
+    String name, {
+    Function? onExpand,
+    Function? onLeaf,
+  }) : this._internal(
           controller: controller,
           name: name,
           isAllocation: true,
@@ -484,7 +488,7 @@ class ClassReference extends Reference {
           },
         );
 
-  List<HeapGraphElementLive?> get instances =>
+  List<HeapGraphElementLive> get instances =>
       actualClass!.getInstances(controller!.heapGraph);
 }
 
@@ -495,7 +499,7 @@ class ObjectReference extends Reference {
     this.instance,
   ) : super.object(controller, 'Instance $index');
 
-  final HeapGraphElementLive? instance;
+  final HeapGraphElementLive instance;
 }
 
 class ExternalObjectReference extends ObjectReference {
@@ -665,14 +669,8 @@ class ObjectFieldReference extends FieldReference {
       final computedFields = <FieldReference>[];
       for (final ref in objFields) {
         // Check if aready computed/expanded then skip.
-        final FieldReference? exist =
-            // We need this cast to return null.
-            // ignore: unnecessary_cast
-            (objectFieldReference.children as List<FieldReference?>)
-                .singleWhere(
-          (element) => element!.name == ref.name,
-          orElse: () => null,
-        );
+        final exist = objectFieldReference.children
+            .singleWhereOrNull((element) => element.name == ref.name);
         if (exist == null) {
           // Doesn't exist so add field.
           if (ref is ObjectFieldReference && !ref.isNull) {
@@ -927,28 +925,30 @@ FieldReference listToFieldEntries(
       final entryClass = entryElement.theClass;
       if (entryClass is HeapGraphClassLive &&
           entryClass.fullQualifiedName != predefinedNull) {
-        final predefined = predefinedClasses[entryClass.fullQualifiedName];
+        final predefined0 = predefinedClasses[entryClass.fullQualifiedName];
         FieldReference? listEntry;
-        if (predefined != null && predefined.isScalar) {
+        if (predefined0 != null && predefined0.isScalar) {
           if (isAMap) {
             if (hasKeyValues) {
               final HeapGraphElementLive valueElement =
                   realEntries[realEntryIndex + 1] as HeapGraphElementLive;
               realEntryIndex++;
               // The value entry is computed on key expansion.
-              var predefined = predefinedClasses[entryClass.fullQualifiedName]!;
+              final predefined1 =
+                  predefinedClasses[entryClass.fullQualifiedName]!;
               listEntry = ObjectFieldReference(
                 controller,
                 entryElement,
-                '${predefined.prettyName}',
+                '${predefined1.prettyName}',
                 'key \'${entryElement.origin.data}\'',
               );
 
               FieldReference valueEntry;
               final HeapGraphClassLive valueClass =
                   valueElement.theClass as HeapGraphClassLive;
-              predefined = predefinedClasses[valueClass.fullQualifiedName]!;
-              if (predefined.isScalar) {
+              final predefined2 =
+                  predefinedClasses[valueClass.fullQualifiedName];
+              if (predefined2 != null && predefined2.isScalar) {
                 valueEntry = createScalar(controller, 'value', valueElement);
               } else {
                 valueEntry = ObjectFieldReference(
