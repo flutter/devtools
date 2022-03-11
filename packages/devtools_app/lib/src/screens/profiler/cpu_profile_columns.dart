@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import '../../primitives/utils.dart';
 import '../../shared/table_data.dart';
 import '../../shared/utils.dart';
@@ -12,7 +10,7 @@ import 'cpu_profile_model.dart';
 const _timeColumnWidthPx = 180.0;
 
 class SelfTimeColumn extends ColumnData<CpuStackFrame> {
-  SelfTimeColumn({String titleTooltip})
+  SelfTimeColumn({String? titleTooltip})
       : super(
           'Self Time',
           titleTooltip: titleTooltip,
@@ -46,7 +44,7 @@ class SelfTimeColumn extends ColumnData<CpuStackFrame> {
 }
 
 class TotalTimeColumn extends ColumnData<CpuStackFrame> {
-  TotalTimeColumn({String titleTooltip})
+  TotalTimeColumn({String? titleTooltip})
       : super(
           'Total Time',
           titleTooltip: titleTooltip,

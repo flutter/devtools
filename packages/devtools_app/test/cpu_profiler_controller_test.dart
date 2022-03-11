@@ -31,7 +31,11 @@ void main() {
     });
 
     Future<void> pullProfileAndSelectFrame() async {
-      await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
+      await controller.pullAndProcessProfile(
+        startMicros: 0,
+        extentMicros: 100,
+        processId: 'test',
+      );
       controller.selectCpuStackFrame(testStackFrame);
       expect(
         controller.dataNotifier.value,
@@ -51,7 +55,11 @@ void main() {
       expect(controller.processingNotifier.value, false);
 
       // [startMicros] and [extentMicros] are arbitrary for testing.
-      await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
+      await controller.pullAndProcessProfile(
+        startMicros: 0,
+        extentMicros: 100,
+        processId: 'test',
+      );
       expect(
         controller.dataNotifier.value,
         isNot(equals(CpuProfilerController.baseStateCpuProfileData)),
@@ -67,7 +75,11 @@ void main() {
 
     test('loads filtered data by default', () async {
       // [startMicros] and [extentMicros] are arbitrary for testing.
-      await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
+      await controller.pullAndProcessProfile(
+        startMicros: 0,
+        extentMicros: 100,
+        processId: 'test',
+      );
       final originalData = controller.cpuProfileStore.lookupProfile(
         label: CpuProfilerController.userTagNone,
       );
@@ -136,12 +148,15 @@ void main() {
       }
 
       // [startMicros] and [extentMicros] are arbitrary for testing.
-      await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
+      await controller.pullAndProcessProfile(
+        startMicros: 0,
+        extentMicros: 100,
+        processId: 'test',
+      );
       expect(
           controller.dataNotifier.value.stackFrames.values.length, equals(17));
 
       // Match on name.
-      expect(controller.matchesForSearch(null).length, equals(0));
       expect(controller.matchesForSearch('').length, equals(0));
       expect(controller.matchesForSearch('render').length, equals(9));
       expect(controller.matchesForSearch('RenderObject').length, equals(3));
@@ -166,7 +181,11 @@ void main() {
       }
 
       // [startMicros] and [extentMicros] are arbitrary for testing.
-      await controller.pullAndProcessProfile(startMicros: 0, extentMicros: 100);
+      await controller.pullAndProcessProfile(
+        startMicros: 0,
+        extentMicros: 100,
+        processId: 'test',
+      );
       expect(
           controller.dataNotifier.value.stackFrames.values.length, equals(17));
 
@@ -193,7 +212,10 @@ void main() {
 
       final cpuProfileDataWithTags =
           CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
-      await controller.transformer.processData(cpuProfileDataWithTags);
+      await controller.transformer.processData(
+        cpuProfileDataWithTags,
+        processId: 'test',
+      );
       controller.loadProcessedData(
         cpuProfileDataWithTags,
         storeAsUserTagNone: true,
@@ -263,7 +285,10 @@ void main() {
       expect(controller.toggleFilters[0].enabled.value, isTrue);
       final cpuProfileDataWithTags =
           CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
-      await controller.transformer.processData(cpuProfileDataWithTags);
+      await controller.transformer.processData(
+        cpuProfileDataWithTags,
+        processId: 'test',
+      );
       controller.loadProcessedData(
         cpuProfileDataWithTags,
         storeAsUserTagNone: true,

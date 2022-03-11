@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -30,24 +28,24 @@ import 'cpu_profile_model.dart';
 
 class CpuProfiler extends StatefulWidget {
   CpuProfiler({
-    @required this.data,
-    @required this.controller,
+    required this.data,
+    required this.controller,
     this.searchFieldKey,
     this.standaloneProfiler = true,
     this.summaryView,
-  })  : callTreeRoots = data?.callTreeRoots ?? [],
-        bottomUpRoots = data?.bottomUpRoots ?? [],
+  })  : callTreeRoots = data.callTreeRoots,
+        bottomUpRoots = data.bottomUpRoots,
         tabs = [
           if (summaryView != null)
             _buildTab(key: summaryTab, tabName: 'Summary'),
-          if (data != null && !data.isEmpty) ...[
+          if (!data.isEmpty) ...[
             _buildTab(key: bottomUpTab, tabName: 'Bottom Up'),
             _buildTab(key: callTreeTab, tabName: 'Call Tree'),
             _buildTab(key: flameChartTab, tabName: 'CPU Flame Chart'),
           ],
         ];
 
-  static DevToolsTab _buildTab({Key key, @required String tabName}) {
+  static DevToolsTab _buildTab({Key? key, required String tabName}) {
     return DevToolsTab.create(
       key: key,
       tabName: tabName,
@@ -63,11 +61,11 @@ class CpuProfiler extends StatefulWidget {
 
   final List<CpuStackFrame> bottomUpRoots;
 
-  final Key searchFieldKey;
+  final GlobalKey? searchFieldKey;
 
   final bool standaloneProfiler;
 
-  final Widget summaryView;
+  final Widget? summaryView;
 
   final List<DevToolsTab> tabs;
 
@@ -91,9 +89,11 @@ class _CpuProfilerState extends State<CpuProfiler>
         TickerProviderStateMixin,
         AutoDisposeMixin,
         SearchFieldMixin<CpuProfiler> {
-  TabController _tabController;
+  bool _tabControllerInitialized = false;
 
-  CpuProfileData data;
+  late TabController _tabController;
+
+  late CpuProfileData data;
 
   @override
   void initState() {
@@ -117,18 +117,21 @@ class _CpuProfilerState extends State<CpuProfiler>
 
   @override
   void dispose() {
-    _tabController?.removeListener(_onTabChanged);
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
   }
 
   void _initTabController() {
-    _tabController?.removeListener(_onTabChanged);
-    _tabController?.dispose();
+    if (_tabControllerInitialized) {
+      _tabController.removeListener(_onTabChanged);
+      _tabController.dispose();
+    }
     _tabController = TabController(
       length: widget.tabs.length,
       vsync: this,
     );
+    _tabControllerInitialized = true;
 
     if (widget.controller.selectedProfilerTabIndex >= _tabController.length) {
       widget.controller.changeSelectedProfilerTab(0);
@@ -151,9 +154,8 @@ class _CpuProfilerState extends State<CpuProfiler>
     final colorScheme = theme.colorScheme;
     final currentTab =
         widget.tabs.isNotEmpty ? widget.tabs[_tabController.index] : null;
-    final hasData = data != CpuProfilerController.baseStateCpuProfileData &&
-        data != null &&
-        !data.isEmpty;
+    final hasData =
+        data != CpuProfilerController.baseStateCpuProfileData && !data.isEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,14 +165,15 @@ class _CpuProfilerState extends State<CpuProfiler>
           child: Row(
             children: [
               TabBar(
-                labelColor: textTheme.bodyText1.color,
+                labelColor:
+                    textTheme.bodyText1?.color ?? colorScheme.defaultForeground,
                 isScrollable: true,
                 controller: _tabController,
                 tabs: widget.tabs,
               ),
               const Spacer(),
               if (hasData) ...[
-                if (currentTab.key != CpuProfiler.summaryTab) ...[
+                if (currentTab!.key != CpuProfiler.summaryTab) ...[
                   FilterButton(
                     onPressed: _showFilterDialog,
                     isFilterActive: widget.controller.isToggleFilterActive,
@@ -255,7 +258,11 @@ class _CpuProfilerState extends State<CpuProfiler>
           ),
         ),
         Expanded(
-          child: _buildCpuProfileDataView(),
+          child: TabBarView(
+            physics: defaultTabBarViewPhysics,
+            controller: _tabController,
+            children: _buildProfilerViews(),
+          ),
         ),
       ],
     );
@@ -276,26 +283,12 @@ class _CpuProfilerState extends State<CpuProfiler>
       height: defaultTextFieldHeight,
       child: buildSearchField(
         controller: widget.controller,
-        searchFieldKey: widget.searchFieldKey,
+        searchFieldKey: widget.searchFieldKey!,
         searchFieldEnabled: hasData,
         shouldRequestFocus: false,
         supportsNavigation: true,
       ),
     );
-  }
-
-  Widget _buildCpuProfileDataView() {
-    if (data != null) {
-      return TabBarView(
-        physics: defaultTabBarViewPhysics,
-        controller: _tabController,
-        children: _buildProfilerViews(),
-      );
-    } else {
-      // If [data] is null, CPU profile data is being processed, so return a
-      // placeholder.
-      return const SizedBox(key: CpuProfiler.dataProcessingKey);
-    }
   }
 
   List<Widget> _buildProfilerViews() {
@@ -315,9 +308,10 @@ class _CpuProfilerState extends State<CpuProfiler>
         );
       },
     );
+    final summaryView = widget.summaryView;
     // TODO(kenz): make this order configurable.
     return [
-      if (widget.summaryView != null) widget.summaryView,
+      if (summaryView != null) summaryView,
       if (!data.isEmpty) ...[
         bottomUp,
         callTree,
@@ -341,8 +335,8 @@ class _CpuProfilerState extends State<CpuProfiler>
 
 class CpuProfileFilterDialog extends StatelessWidget {
   CpuProfileFilterDialog({
-    @required this.controller,
-    Key key,
+    required this.controller,
+    Key? key,
   })  : oldToggleFilterValues = List.generate(controller.toggleFilters.length,
             (index) => controller.toggleFilters[index].enabled.value),
         super(key: key);
@@ -410,7 +404,7 @@ class UserTagDropdown extends StatelessWidget {
     return ValueListenableBuilder<String>(
       valueListenable: controller.userTagFilter,
       builder: (context, userTag, _) {
-        final userTags = controller.userTags ?? [];
+        final userTags = controller.userTags;
         final tooltip = userTags.isNotEmpty
             ? 'Filter the CPU profile by the given UserTag'
             : 'No UserTags found for this CPU profile';
@@ -440,16 +434,16 @@ class UserTagDropdown extends StatelessWidget {
                     (userTags.length == 1 &&
                         userTags.first == UserTag.defaultTag.label)
                 ? null
-                : (String tag) => _onUserTagChanged(tag, context),
+                : (String? tag) => _onUserTagChanged(tag!, context),
           ),
         );
       },
     );
   }
 
-  DropdownMenuItem _buildMenuItem({
-    @required String display,
-    @required String value,
+  DropdownMenuItem<String> _buildMenuItem({
+    required String display,
+    required String value,
   }) {
     return DropdownMenuItem<String>(
       value: value,
@@ -461,7 +455,7 @@ class UserTagDropdown extends StatelessWidget {
     try {
       await controller.loadDataWithTag(newTag);
     } catch (e) {
-      Notifications.of(context).push(e.toString());
+      Notifications.of(context)!.push(e.toString());
     }
   }
 }

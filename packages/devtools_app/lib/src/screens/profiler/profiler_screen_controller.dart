@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -24,7 +22,7 @@ class ProfilerScreenController extends DisposableController
   ProfilerScreenController() {
     if (!offlineController.offlineMode.value) {
       allowedError(
-        serviceManager.service.setProfilePeriod(mediumProfilePeriod),
+        serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
         logError: false,
       );
 
@@ -40,9 +38,10 @@ class ProfilerScreenController extends DisposableController
 
   final _exportController = ExportController();
 
-  CpuProfileData get cpuProfileData => cpuProfilerController.dataNotifier.value;
+  CpuProfileData? get cpuProfileData =>
+      cpuProfilerController.dataNotifier.value;
 
-  final _previousProfileByIsolateId = <String, CpuProfileData>{};
+  final _previousProfileByIsolateId = <String?, CpuProfileData?>{};
 
   /// Notifies that a CPU profile is currently being recorded.
   ValueListenable<bool> get recordingNotifier => _recordingNotifier;
@@ -51,9 +50,9 @@ class ProfilerScreenController extends DisposableController
 
   final int _profileStartMicros = 0;
 
-  IsolateRef _currentIsolate;
+  IsolateRef? _currentIsolate;
 
-  void switchToIsolate(IsolateRef ref) {
+  void switchToIsolate(IsolateRef? ref) {
     // Store the data for the current isolate.
     if (_currentIsolate?.id != null) {
       _previousProfileByIsolateId[_currentIsolate?.id] =
@@ -88,7 +87,7 @@ class ProfilerScreenController extends DisposableController
   /// This method returns the name of the file that was downloaded.
   String exportData() {
     final encodedData =
-        _exportController.encode(ProfilerScreen.id, cpuProfileData.toJson);
+        _exportController.encode(ProfilerScreen.id, cpuProfileData!.toJson);
     return _exportController.downloadFile(encodedData);
   }
 

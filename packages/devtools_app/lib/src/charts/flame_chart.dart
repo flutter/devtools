@@ -86,7 +86,7 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 
   final double endInset;
 
-  final ValueListenable<V> selectionNotifier;
+  final ValueListenable<V?> selectionNotifier;
 
   final ValueListenable<List<V>>? searchMatchesNotifier;
 
@@ -238,7 +238,7 @@ abstract class FlameChartState<T extends FlameChart,
 
     if (widget.activeSearchMatchNotifier != null) {
       addAutoDisposeListener(widget.activeSearchMatchNotifier, () async {
-        final activeSearch = widget.activeSearchMatchNotifier as V?;
+        final activeSearch = widget.activeSearchMatchNotifier!.value as V?;
         if (activeSearch == null) return;
 
         // Ensure the [activeSearch] is vertically in view.
@@ -347,7 +347,7 @@ abstract class FlameChartState<T extends FlameChart,
             nodes: nodes,
             width: math.max(constraints.maxWidth, widthWithZoom),
             startInset: widget.startInset,
-            selectionNotifier: widget.selectionNotifier as ValueListenable<V>,
+            selectionNotifier: widget.selectionNotifier as ValueListenable<V?>,
             searchMatchesNotifier:
                 widget.searchMatchesNotifier as ValueListenable<List<V>>?,
             activeSearchMatchNotifier:
@@ -664,10 +664,10 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
 
     selected = widget.selectionNotifier.value;
     addAutoDisposeListener(widget.selectionNotifier, () {
-      final containsPreviousSelected = _nodeData.contains(selected);
-      final containsNewSelected =
-          _nodeData.contains(widget.selectionNotifier.value);
+      final containsPreviousSelected =
+          selected != null && _nodeData.contains(selected);
       selected = widget.selectionNotifier.value;
+      final containsNewSelected = _nodeData.contains(selected);
       // We only want to rebuild the row if it contains the previous or new
       // selected node.
       if (containsPreviousSelected || containsNewSelected) {
