@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -21,11 +22,11 @@ import 'memory_controller.dart';
 const defaultSpacerHeight = 12.0;
 
 class Tracker extends TreeNode<Tracker> {
-  factory Tracker({String className}) {
+  factory Tracker({required String className}) {
     return Tracker._internal(name: className);
   }
 
-  Tracker._internal({this.name});
+  Tracker._internal({required this.name});
 
   /// Used for both class name and call stack entry value.
   final String name;
@@ -46,9 +47,9 @@ class TrackerClass extends Tracker {
 
 class TrackerAllocation extends Tracker {
   TrackerAllocation(this.timestamp, this.stacktrace)
-      : super._internal(name: null);
+      : super._internal(name: '');
 
-  final int timestamp;
+  final int? timestamp;
 
   /// Sources and callstack for an instance.
   final AllocationStackTrace stacktrace;
@@ -89,8 +90,8 @@ class _TrackerClassColumn extends TreeColumnData<Tracker> {
     Comparable valueB = getValue(b);
     if (a is TrackerCall) {
       // Sort is always by child index for the stacktrace, call stack should not reorder.
-      valueA = a.parent.children.indexOf(a);
-      valueB = b.parent.children.indexOf(b);
+      valueA = a.parent!.children.indexOf(a);
+      valueB = b.parent!.children.indexOf(b);
     }
     return valueA.compareTo(valueB);
   }
@@ -128,7 +129,7 @@ class _TrackerCountColumn extends ColumnData<Tracker> {
 }
 
 class TreeTracker {
-  TrackerClass tree1;
+  late TrackerClass tree1;
 
   TreeColumnData<Tracker> treeColumn = _TrackerClassColumn();
 
@@ -149,17 +150,17 @@ class TreeTracker {
       final classEntry = TrackerClass(className);
       tree1.addChild(classEntry);
 
-      final trackedClassId = classesTracked[className].id;
+      final trackedClassId = classesTracked[className]!.id;
 
-      final allocationSample = allocationSamples.singleWhere((sample) {
+      final allocationSample = allocationSamples.singleWhereOrNull((sample) {
         // If no stacktraces, then nothing to handle.
         if (sample.totalStacktraces == 0) return false;
 
         // Match the sample to the class being tracked.
-        final allocationClassRef = sample.classRef;
+        final allocationClassRef = sample.classRef!;
         final allocationClassId = allocationClassRef.id;
         return allocationClassId == trackedClassId;
-      }, orElse: () => null);
+      });
 
       if (allocationSample != null) {
         for (var stacktrace in allocationSample.stacktraces) {
@@ -228,8 +229,8 @@ class TreeTracker {
               color: titleBackground,
               child: Align(
                 child: Text(
-                  '${tracker.parent.name} Call Stack for Instance ${tracker.index} @ '
-                  '${prettyTimestamp(tracker.timestamp)}',
+                  '${tracker.parent!.name} Call Stack for Instance ${tracker.index} @ '
+                  '${prettyTimestamp(tracker.timestamp!)}',
                   textAlign: TextAlign.center,
                   style: TextStyle(backgroundColor: titleBackground),
                 ),
@@ -251,7 +252,7 @@ class TreeTracker {
                     '#$index ${stackTrace[index]}',
                     style: colorScheme.stackTraceCall,
                   ),
-                  Text(sources[index], style: colorScheme.stackTraceSource),
+                  Text(sources[index]!, style: colorScheme.stackTraceSource),
                 ],
               ),
               separatorBuilder: (context, index) => Divider(
@@ -305,7 +306,7 @@ class TreeTracker {
                       context,
                       controller,
                       scroller,
-                      trackerAllocation,
+                      trackerAllocation as TrackerAllocation,
                     ),
             ],
           );
