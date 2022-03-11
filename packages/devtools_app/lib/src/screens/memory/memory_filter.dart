@@ -143,7 +143,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
   }
 
   void addLibrary(String libraryName, {bool hideState = false}) {
-    final Map<String, List<LibraryFilter>> filteredGroup = {};
+    final filteredGroup = <String, List<LibraryFilter>>{};
     final filters = widget.controller.libraryFilters;
 
     final isFiltered = filters.isLibraryFiltered(libraryName);
