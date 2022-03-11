@@ -42,7 +42,7 @@ class TrackerClass extends Tracker {
   TrackerClass(String className) : super._internal(name: className);
 
   @override
-  String toString() => name!;
+  String toString() => name;
 }
 
 class TrackerAllocation extends Tracker {
@@ -294,7 +294,7 @@ class TreeTracker {
                 dataRoots: tree1.children,
                 treeColumn: treeColumn,
                 keyFactory: (d) {
-                  return Key(d.name!);
+                  return Key(d.name);
                 },
                 sortColumn: treeColumn,
                 sortDirection: SortDirection.ascending,
