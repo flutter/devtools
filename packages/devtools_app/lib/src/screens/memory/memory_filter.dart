@@ -125,7 +125,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
 
   late final bool oldFilterLibraryNoInstancesValue;
 
-  final oldFilteredLibraries = <String, bool?>{};
+  final oldFilteredLibraries = <String, bool>{};
 
   @override
   void didChangeDependencies() {
@@ -147,7 +147,7 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
     final filters = widget.controller.libraryFilters;
 
     final isFiltered = filters.isLibraryFiltered(libraryName);
-    String? groupedName = libraryName;
+    var groupedName = libraryName;
     bool hide = hideState;
     if (isFiltered) {
       if (filters.isDartLibraryName(libraryName)) {
