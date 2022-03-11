@@ -22,14 +22,14 @@ import 'memory_controller.dart';
 const defaultSpacerHeight = 12.0;
 
 class Tracker extends TreeNode<Tracker> {
-  factory Tracker({String? className}) {
+  factory Tracker({required String className}) {
     return Tracker._internal(name: className);
   }
 
-  Tracker._internal({this.name});
+  Tracker._internal({required this.name});
 
   /// Used for both class name and call stack entry value.
-  final String? name;
+  final String name;
 
   @override
   Tracker shallowCopy() {
@@ -47,7 +47,7 @@ class TrackerClass extends Tracker {
 
 class TrackerAllocation extends Tracker {
   TrackerAllocation(this.timestamp, this.stacktrace)
-      : super._internal(name: null);
+      : super._internal(name: '');
 
   final int? timestamp;
 
@@ -62,7 +62,7 @@ class TrackerCall extends Tracker {
   TrackerCall(String entry) : super._internal(name: entry);
 
   @override
-  String toString() => name ?? '';
+  String toString() => name;
 }
 
 class _TrackerClassColumn extends TreeColumnData<Tracker> {
