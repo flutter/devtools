@@ -486,12 +486,16 @@ class NetworkController
                               'secure': e.secure,
                             })
                         .toList(),
-                    'headers': e.requestHeaders.entries
-                        .map((h) => {
-                              'name': h.key,
-                              'value': h.value,
-                            })
-                        .toList(),
+                    'headers': e.requestHeaders.entries.map((h) {
+                      var value = h.value;
+                      if (value is List) {
+                        value = value.first;
+                      }
+                      return {
+                        'name': h.key,
+                        'value': value,
+                      };
+                    }).toList(),
                     'queryString': Uri.parse(e.uri)
                         .queryParameters
                         .entries
@@ -522,12 +526,16 @@ class NetworkController
                               'secure': e.secure,
                             })
                         .toList(),
-                    'headers': e.responseHeaders.entries
-                        .map((h) => {
-                              'name': h.key,
-                              'value': h.value,
-                            })
-                        .toList(),
+                    'headers': e.responseHeaders.entries.map((h) {
+                      var value = h.value;
+                      if (value is List) {
+                        value = value.first;
+                      }
+                      return {
+                        'name': h.key,
+                        'value': value,
+                      };
+                    }).toList(),
                     'content': {
                       'size': e.responseBody.length,
                       'mimeType': e.type,
