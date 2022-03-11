@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 import '../../shared/common_widgets.dart';
@@ -12,9 +10,9 @@ import '../../shared/theme.dart';
 import 'logging_controller.dart';
 
 class LogDetails extends StatefulWidget {
-  const LogDetails({Key key, @required this.log}) : super(key: key);
+  const LogDetails({Key? key, required this.log}) : super(key: key);
 
-  final LogData log;
+  final LogData? log;
 
   @override
   _LogDetailsState createState() => _LogDetailsState();
@@ -25,8 +23,8 @@ class LogDetails extends StatefulWidget {
 
 class _LogDetailsState extends State<LogDetails>
     with SingleTickerProviderStateMixin {
-  String _lastDetails;
-  ScrollController scrollController;
+  String? _lastDetails;
+  ScrollController? scrollController;
 
   @override
   void initState() {
@@ -45,7 +43,7 @@ class _LogDetailsState extends State<LogDetails>
 
   Future<void> _computeLogDetails() async {
     if (widget.log?.needsComputing ?? false) {
-      await widget.log.compute();
+      await widget.log!.compute();
       setState(() {});
     }
   }
@@ -59,7 +57,7 @@ class _LogDetailsState extends State<LogDetails>
     );
   }
 
-  Widget _buildContent(BuildContext context, LogData log) {
+  Widget _buildContent(BuildContext context, LogData? log) {
     // TODO(#1370): Handle showing flutter errors in a structured manner.
     return Stack(
       children: [
@@ -70,14 +68,14 @@ class _LogDetailsState extends State<LogDetails>
     );
   }
 
-  Widget _buildSimpleLog(BuildContext context, LogData log) {
-    final disabled = log?.details == null || log.details.isEmpty;
+  Widget _buildSimpleLog(BuildContext context, LogData? log) {
+    final disabled = log?.details == null || log!.details!.isEmpty;
 
     final details = log?.details;
     if (details != _lastDetails) {
-      if (scrollController.hasClients) {
+      if (scrollController!.hasClients) {
         // Make sure we change the scroll if the log details shown have changed.
-        scrollController.jumpTo(0);
+        scrollController!.jumpTo(0);
       }
       _lastDetails = details;
     }
@@ -89,7 +87,9 @@ class _LogDetailsState extends State<LogDetails>
           needsTopBorder: false,
           rightActions: [
             CopyToClipboardControl(
-              dataProvider: disabled ? null : () => log?.prettyPrinted,
+              dataProvider: disabled
+                  ? null
+                  : (() => log?.prettyPrinted!) as String Function()?,
               buttonKey: LogDetails.copyToClipboardButtonKey,
             ),
           ],
