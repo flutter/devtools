@@ -1123,9 +1123,10 @@ double safePositiveDouble(double value) {
 /// the user's locale). Tests will then pass when run in any timezone. All
 /// formatted timestamps are displayed using the UTC locale.
 String prettyTimestamp(
-  int timestamp, {
+  int? timestamp, {
   bool isUtc = false,
 }) {
+  if (timestamp == null) return '';
   final timestampDT = DateTime.fromMillisecondsSinceEpoch(
     timestamp,
     isUtc: isUtc,
