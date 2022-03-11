@@ -181,6 +181,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                   .hasServiceExtension(
                       extensions.toggleSelectWidgetMode.extension),
               builder: (_, selectModeSupported, __) {
+                serviceManager.sendDwdsEvent(
+                  screen: InspectorScreen.id,
+                  action: analytics_constants.pageReady,
+                );
                 return ServiceExtensionButtonGroup(
                   extensions: [
                     selectModeSupported
