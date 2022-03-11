@@ -4,10 +4,6 @@
 
 // @dart=2.9
 
-import 'dart:convert';
-import 'dart:html' as html;
-
-import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -253,109 +249,10 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           },
         ),
         const SizedBox(width: denseSpacing),
-        ExportNetButton(
+        ExportButton(
           minScreenWidthForTextBeforeScaling:
               _NetworkProfilerControls._includeTextWidth,
-          onPressed: () {
-            final reqs =
-                widget.controller.filteredData.value.cast<HttpRequestData>();
-            Map<String, dynamic> har = {
-              'log': {
-                'version': '1.2',
-                'creator': {
-                  'name': 'flutter_tool',
-                  'version': '0.0.1',
-                },
-                'entries': [
-                  reqs
-                      .map((e) => {
-                            'startedDateTime':
-                                e.startTimestamp.toIso8601String(),
-                            'time': e.duration.inMilliseconds,
-                            'request': {
-                              'method': e.method.toUpperCase(),
-                              'url': e.uri.toString(),
-                              'httpVersion': 'HTTP/1.1',
-                              'cookies': e.requestCookies
-                                  .map((e) => {
-                                        'name': e.name,
-                                        'value': e.value,
-                                        'path': e.path,
-                                        'domain': e.domain,
-                                        'expires': e.expires?.toIso8601String(),
-                                        'httpOnly': e.httpOnly,
-                                        'secure': e.secure,
-                                      })
-                                  .toList(),
-                              'headers': e.requestHeaders.entries
-                                  .map((h) => {
-                                        'name': h.key,
-                                        'value': h.value,
-                                      })
-                                  .toList(),
-                              'queryString': Uri.parse(e.uri)
-                                  .queryParameters
-                                  .entries
-                                  .map((q) => {
-                                        'name': q.key,
-                                        'value': q.value,
-                                      })
-                                  .toList(),
-                              'postData': {
-                                'mimeType': e.contentType,
-                                'text': e.requestBody,
-                              },
-                              'headersSize': -1,
-                              'bodySize': -1,
-                            },
-                            'response': {
-                              'status': e.status,
-                              'statusText': e.status,
-                              'httpVersion': 'HTTP/1.1',
-                              'cookies': e.responseCookies
-                                  .map((e) => {
-                                        'name': e.name,
-                                        'value': e.value,
-                                        'path': e.path,
-                                        'domain': e.domain,
-                                        'expires': e.expires?.toIso8601String(),
-                                        'httpOnly': e.httpOnly,
-                                        'secure': e.secure,
-                                      })
-                                  .toList(),
-                              'headers': e.responseHeaders.entries
-                                  .map((h) => {
-                                        'name': h.key,
-                                        'value': h.value,
-                                      })
-                                  .toList(),
-                              'content': {
-                                'size': e.responseBody.length,
-                                'mimeType': e.type,
-                                'text': e.responseBody,
-                              },
-                              'redirectURL': '',
-                              'headersSize': -1,
-                              'bodySize': -1,
-                            },
-                            'cache': {},
-                            'timings': {},
-                            'serverIPAddress': '10.0.0.1',
-                            'connection': e.hashCode.toString(),
-                            'comment': ''
-                          })
-                      .toList()
-                ],
-              },
-            };
-            html.AnchorElement()
-              ..href =
-                  '${Uri.dataFromString(json.encode(har), mimeType: 'text/plain', encoding: utf8)}'
-              ..download = 'network.har'
-              ..style.display = 'none'
-              ..click();
-            widget.controller.clear();
-          },
+          onPressed: widget.controller.exportAsHarFile,
         ),
         const SizedBox(width: defaultSpacing),
         const Expanded(child: SizedBox()),

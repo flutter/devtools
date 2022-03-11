@@ -5,10 +5,13 @@
 // @dart=2.9
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../config_specific/import_export/import_export.dart';
 import '../../config_specific/logger/allowed_error.dart';
 import '../../http/http_request_data.dart';
 import '../../http/http_service.dart';
@@ -56,6 +59,8 @@ class NetworkController
   @visibleForTesting
   NetworkService get networkService => _networkService;
   NetworkService _networkService;
+
+  final _exportController = ExportController();
 
   /// The timeline timestamps are relative to when the VM started.
   ///
@@ -438,5 +443,122 @@ class NetworkController
     if (r.didFail) {
       serviceManager.errorBadgeManager.incrementBadgeCount(NetworkScreen.id);
     }
+  }
+
+  String exportAsHarFile() {
+    final reqs = filteredData.value.cast<HttpRequestData>();
+    final har = {
+      'log': {
+        'version': '1.2',
+        'creator': {
+          'name': 'flutter_tool',
+          'version': '0.0.2',
+        },
+        'pages': [
+          {
+            'startedDateTime':
+                reqs.first.startTimestamp.toUtc().toIso8601String(),
+            'id': 'page_0',
+            'title': 'FlutterCapture',
+            'pageTimings': {
+              'onContentLoad': -1,
+              'onLoad': -1,
+            },
+          },
+        ],
+        'entries': [
+          reqs
+              .map((e) => {
+                    'pageref': 'page_0',
+                    'startedDateTime':
+                        e.startTimestamp.toUtc().toIso8601String(),
+                    'time': e.duration.inMilliseconds,
+                    'request': {
+                      'method': e.method.toUpperCase(),
+                      'url': e.uri.toString(),
+                      'httpVersion': 'HTTP/1.1',
+                      'cookies': e.requestCookies
+                          .map((e) => {
+                                'name': e.name,
+                                'value': e.value,
+                                'path': e.path,
+                                'domain': e.domain,
+                                'expires':
+                                    e.expires?.toUtc()?.toIso8601String(),
+                                'httpOnly': e.httpOnly,
+                                'secure': e.secure,
+                              })
+                          .toList(),
+                      'headers': e.requestHeaders.entries
+                          .map((h) => {
+                                'name': h.key,
+                                'value': h.value,
+                              })
+                          .toList(),
+                      'queryString': Uri.parse(e.uri)
+                          .queryParameters
+                          .entries
+                          .map((q) => {
+                                'name': q.key,
+                                'value': q.value,
+                              })
+                          .toList(),
+                      'postData': {
+                        'mimeType': e.contentType,
+                        'text': e.requestBody,
+                      },
+                      'headersSize': -1,
+                      'bodySize': -1,
+                    },
+                    'response': {
+                      'status': e.status,
+                      'statusText': '',
+                      'httpVersion': 'http/2.0',
+                      'cookies': e.responseCookies
+                          .map((e) => {
+                                'name': e.name,
+                                'value': e.value,
+                                'path': e.path,
+                                'domain': e.domain,
+                                'expires':
+                                    e.expires?.toUtc()?.toIso8601String(),
+                                'httpOnly': e.httpOnly,
+                                'secure': e.secure,
+                              })
+                          .toList(),
+                      'headers': e.responseHeaders.entries
+                          .map((h) => {
+                                'name': h.key,
+                                'value': h.value,
+                              })
+                          .toList(),
+                      'content': {
+                        'size': e.responseBody.length,
+                        'mimeType': e.type,
+                        'text': e.responseBody,
+                      },
+                      'redirectURL': '',
+                      'headersSize': -1,
+                      'bodySize': -1,
+                    },
+                    'cache': {},
+                    'timings': {
+                      'blocked': -1,
+                      'dns': -1,
+                      'connect': -1,
+                      'send': 1,
+                      'wait': e.duration.inMilliseconds - 2,
+                      'receive': 1,
+                      'ssl': -1,
+                    },
+                    'serverIPAddress': '10.0.0.1',
+                    'connection': e.hashCode.toString(),
+                    'comment': ''
+                  })
+              .toList()
+        ],
+      },
+    };
+    return _exportController.downloadFile(json.encode(har));
   }
 }

@@ -252,23 +252,6 @@ class ClearButton extends IconLabelButton {
         );
 }
 
-class ExportNetButton extends IconLabelButton {
-  const ExportNetButton({
-    Key? key,
-    double? minScreenWidthForTextBeforeScaling,
-    String tooltip = 'Export',
-    required VoidCallback? onPressed,
-  }) : super(
-          key: key,
-          icon: Icons.file_download,
-          label: 'Export',
-          tooltip: tooltip,
-          minScreenWidthForTextBeforeScaling:
-              minScreenWidthForTextBeforeScaling,
-          onPressed: onPressed,
-        );
-}
-
 class RefreshButton extends IconLabelButton {
   const RefreshButton({
     Key? key,
