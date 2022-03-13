@@ -48,7 +48,7 @@ class _LogDetailsState extends State<LogDetails>
     }
   }
 
-  bool showSimple(LogData log) => log != null && !log.needsComputing;
+  bool showSimple(LogData log) => !log.needsComputing;
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +89,8 @@ class _LogDetailsState extends State<LogDetails>
             CopyToClipboardControl(
               dataProvider: disabled
                   ? null
+                  // The parenthesis are actually needed.
+                  // ignore: unnecessary_parenthesis
                   : (() => log?.prettyPrinted!) as String Function()?,
               buttonKey: LogDetails.copyToClipboardButtonKey,
             ),
