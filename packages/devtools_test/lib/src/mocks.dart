@@ -708,6 +708,8 @@ class MockPerformanceController extends Mock implements PerformanceController {}
 class MockProfilerScreenController extends Mock
     implements ProfilerScreenController {}
 
+class MockStorage extends Mock implements Storage {}
+
 class TestDebuggerController extends DebuggerController {
   TestDebuggerController({bool initialSwitchToIsolate = true})
       : super(initialSwitchToIsolate: initialSwitchToIsolate);

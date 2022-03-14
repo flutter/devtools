@@ -425,7 +425,7 @@ class MemoryController extends DisposableController
   bool toggleLegendVisibility() =>
       _legendVisibleNotifier.value = !_legendVisibleNotifier.value;
 
-  MemoryTimeline? memoryTimeline;
+  late MemoryTimeline memoryTimeline;
 
   late MemoryLog memoryLog;
 
@@ -483,11 +483,10 @@ class MemoryController extends DisposableController
   /// Compute total timeline stops used by Timeline slider.
   int computeStops() {
     int stops = 0;
-    if (memoryTimeline!.data.isNotEmpty) {
-      final lastSampleTimestamp =
-          memoryTimeline!.data.last.timestamp.toDouble();
+    if (memoryTimeline.data.isNotEmpty) {
+      final lastSampleTimestamp = memoryTimeline.data.last.timestamp.toDouble();
       final firstSampleTimestamp =
-          memoryTimeline!.data.first.timestamp.toDouble();
+          memoryTimeline.data.first.timestamp.toDouble();
       stops =
           ((lastSampleTimestamp - firstSampleTimestamp) / intervalDurationInMs)
               .round();
@@ -529,7 +528,7 @@ class MemoryController extends DisposableController
     if (memorySource == MemoryController.liveFeed) {
       if (offline) {
         // User is switching back to 'Live Feed'.
-        memoryTimeline!.offlineData.clear();
+        memoryTimeline.offlineData.clear();
         offline = false; // We're live again...
       } else {
         // Still a live feed - keep collecting.
@@ -833,11 +832,11 @@ class MemoryController extends DisposableController
       // TODO(terry): Display events enabled in a settings page for now only these events.
       switch (extensionEventKind) {
         case 'Flutter.ImageSizesForFrame':
-          memoryTimeline!.addExtensionEvent(
+          memoryTimeline.addExtensionEvent(
               event.timestamp, event.extensionKind, jsonData);
           break;
         case MemoryTimeline.devToolsExtensionEvent:
-          memoryTimeline!.addExtensionEvent(
+          memoryTimeline.addExtensionEvent(
             event.timestamp,
             MemoryTimeline.customDevToolsEvent,
             jsonData,
@@ -1030,7 +1029,7 @@ class MemoryController extends DisposableController
   /// If offline and if any Android collected data then we can view the Android
   /// data.
   bool get isOfflineAndAndroidData {
-    return offline && memoryTimeline!.data.first.adbMemoryInfo.realtime > 0;
+    return offline && memoryTimeline.data.first.adbMemoryInfo.realtime > 0;
   }
 
   bool get isConnectedDeviceAndroid {
@@ -1103,15 +1102,14 @@ class MemoryController extends DisposableController
       ExternalReference? externalReference;
 
       if (externalReferences.children.isNotEmpty) {
-        externalReference = externalReferences.children.singleWhere(
-          (knownClass) => knownClass.name == classLive?.name,
-          orElse: () => null,
-        ) as ExternalReference?;
+        externalReference = externalReferences.children.singleWhereOrNull(
+                (knownClass) => knownClass.name == classLive?.name)
+            as ExternalReference?;
       }
 
       if (externalReference == null) {
         externalReference =
-            ExternalReference(this, classLive?.name, liveExternal);
+            ExternalReference(this, classLive?.name ?? '', liveExternal);
         externalReferences.addChild(externalReference);
       }
 
@@ -1467,7 +1465,7 @@ class MemoryLog {
   List<String> exportMemory() {
     ga.select(analytics_constants.memory, analytics_constants.export);
 
-    final liveData = controller.memoryTimeline!.liveData;
+    final liveData = controller.memoryTimeline.liveData;
 
     bool pseudoData = false;
     if (liveData.isEmpty) {
@@ -1535,8 +1533,8 @@ class MemoryLog {
     assert(memoryJson.isMemoryPayload);
 
     controller.offline = true;
-    controller.memoryTimeline!.offlineData.clear();
-    controller.memoryTimeline!.offlineData.addAll(memoryJson.data);
+    controller.memoryTimeline.offlineData.clear();
+    controller.memoryTimeline.offlineData.addAll(memoryJson.data);
   }
 
   @visibleForTesting

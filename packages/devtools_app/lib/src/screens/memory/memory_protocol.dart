@@ -197,7 +197,7 @@ class MemoryTracker {
     // Removes any isolate that is a sentinal.
     isolateHeaps.removeWhere((key, value) => keysToRemove.contains(key));
 
-    final memoryTimeline = memoryController.memoryTimeline!;
+    final memoryTimeline = memoryController.memoryTimeline;
 
     int time = DateTime.now().millisecondsSinceEpoch;
     if (memoryTimeline.data.isNotEmpty) {
