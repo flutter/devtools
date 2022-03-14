@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:collection';
 
@@ -35,22 +35,26 @@ Map<String, List<Reference>> collect(
     MemoryController controller, Snapshot snapshot) {
   final Map<String, List<Reference>> result = {};
 
+  if (snapshot.libraryRoot == null) return {};
+
   // Analyze the snapshot's heap memory information
-  final root = snapshot.libraryRoot;
+  final root = snapshot.libraryRoot!;
   final heapGraph = controller.heapGraph;
 
   for (final library in root.children) {
     if (library.isExternals) {
       final externalsToAnalyze = <ExternalReference>[];
 
-      final ExternalReferences externals = library;
-      for (final ExternalReference external in externals.children) {
+      final ExternalReferences externals = library as ExternalReferences;
+      for (final ExternalReference external
+          in externals.children as Iterable<ExternalReference>) {
         assert(external.isExternal);
 
         final liveExternal = external.liveExternal;
         final size = liveExternal.externalProperty.externalSize;
         final liveElement = liveExternal.live;
-        final HeapGraphClassLive liveClass = liveElement.theClass;
+        final HeapGraphClassLive liveClass =
+            liveElement.theClass as HeapGraphClassLive;
         if (_classMatcher(liveClass)) {
           final instances = liveClass.getInstances(heapGraph);
           externalsToAnalyze.add(external);
@@ -62,9 +66,11 @@ Map<String, List<Reference>> collect(
       result['externals'] = externalsToAnalyze;
     } else if (library.isFiltered) {
       final filtersToAnalyze = <ClassReference>[];
-      for (final LibraryReference libraryRef in library.children) {
-        for (final ClassReference classRef in libraryRef.children) {
-          final HeapGraphClassLive liveClass = classRef.actualClass;
+      for (final LibraryReference libraryRef
+          in library.children as Iterable<LibraryReference>) {
+        for (final ClassReference classRef
+            in libraryRef.children as Iterable<ClassReference>) {
+          final HeapGraphClassLive liveClass = classRef.actualClass!;
           if (_classMatcher(liveClass)) {
             filtersToAnalyze.add(classRef);
             final instances = liveClass.getInstances(heapGraph);
@@ -76,8 +82,9 @@ Map<String, List<Reference>> collect(
       }
     } else if (library.isLibrary) {
       final librariesToAnalyze = <ClassReference>[];
-      for (final ClassReference classRef in library.children) {
-        final HeapGraphClassLive liveClass = classRef.actualClass;
+      for (final ClassReference classRef
+          in library.children as Iterable<ClassReference>) {
+        final HeapGraphClassLive liveClass = classRef.actualClass!;
         if (_classMatcher(liveClass)) {
           librariesToAnalyze.add(classRef);
           final instances = liveClass.getInstances(heapGraph);
@@ -123,51 +130,53 @@ void imageAnalysis(
       case 'externals':
         final externalsNode = AnalysisReference('Externals');
         analysisSnapshot.addChild(externalsNode);
-        for (final ExternalReference ref in value) {
+        for (final ExternalReference ref
+            in value as Iterable<ExternalReference>) {
           final HeapGraphExternalLive liveExternal = ref.liveExternal;
           final HeapGraphElementLive liveElement = liveExternal.live;
 
           /// TODO(terry): Eliminate or show sentinels for total instances?
           final objectNode = AnalysisReference(
             '${ref.name}',
-            countNote: liveElement.theClass.instancesCount,
+            countNote: liveElement.theClass!.instancesCount,
           );
           externalsNode.addChild(objectNode);
           var childExternalSizes = 0;
           final bucketSizes = SplayTreeMap<String, Bucket>();
-          for (final ExternalObjectReference child in ref.children) {
+          for (final ExternalObjectReference child
+              in ref.children as Iterable<ExternalObjectReference>) {
             if (child.externalSize < 10000) {
               bucketSizes.putIfAbsent(bucket10K, () => Bucket(0, 0));
-              bucketSizes[bucket10K].totalCount += 1;
-              bucketSizes[bucket10K].totalBytes += child.externalSize;
+              bucketSizes[bucket10K]!.totalCount += 1;
+              bucketSizes[bucket10K]!.totalBytes += child.externalSize;
             } else if (child.externalSize < 50000) {
               bucketSizes.putIfAbsent(bucket50K, () => Bucket(0, 0));
-              bucketSizes[bucket50K].totalCount += 1;
-              bucketSizes[bucket50K].totalBytes += child.externalSize;
+              bucketSizes[bucket50K]!.totalCount += 1;
+              bucketSizes[bucket50K]!.totalBytes += child.externalSize;
             } else if (child.externalSize < 100000) {
               bucketSizes.putIfAbsent(bucket100K, () => Bucket(0, 0));
-              bucketSizes[bucket100K].totalCount += 1;
-              bucketSizes[bucket100K].totalBytes += child.externalSize;
+              bucketSizes[bucket100K]!.totalCount += 1;
+              bucketSizes[bucket100K]!.totalBytes += child.externalSize;
             } else if (child.externalSize < 500000) {
               bucketSizes.putIfAbsent(bucket500K, () => Bucket(0, 0));
-              bucketSizes[bucket500K].totalCount += 1;
-              bucketSizes[bucket500K].totalBytes += child.externalSize;
+              bucketSizes[bucket500K]!.totalCount += 1;
+              bucketSizes[bucket500K]!.totalBytes += child.externalSize;
             } else if (child.externalSize < 1000000) {
               bucketSizes.putIfAbsent(bucket1M, () => Bucket(0, 0));
-              bucketSizes[bucket1M].totalCount += 1;
-              bucketSizes[bucket1M].totalBytes += child.externalSize;
+              bucketSizes[bucket1M]!.totalCount += 1;
+              bucketSizes[bucket1M]!.totalBytes += child.externalSize;
             } else if (child.externalSize < 10000000) {
               bucketSizes.putIfAbsent(bucket10M, () => Bucket(0, 0));
-              bucketSizes[bucket10M].totalCount += 1;
-              bucketSizes[bucket10M].totalBytes += child.externalSize;
+              bucketSizes[bucket10M]!.totalCount += 1;
+              bucketSizes[bucket10M]!.totalBytes += child.externalSize;
             } else if (child.externalSize < 50000000) {
               bucketSizes.putIfAbsent(bucket50M, () => Bucket(0, 0));
-              bucketSizes[bucket50M].totalCount += 1;
-              bucketSizes[bucket50M].totalBytes += child.externalSize;
+              bucketSizes[bucket50M]!.totalCount += 1;
+              bucketSizes[bucket50M]!.totalBytes += child.externalSize;
             } else {
               bucketSizes.putIfAbsent(bucketBigM, () => Bucket(0, 0));
-              bucketSizes[bucketBigM].totalCount += 1;
-              bucketSizes[bucketBigM].totalBytes += child.externalSize;
+              bucketSizes[bucketBigM]!.totalCount += 1;
+              bucketSizes[bucketBigM]!.totalBytes += child.externalSize;
             }
 
             childExternalSizes += child.externalSize;
@@ -203,7 +212,7 @@ void imageAnalysis(
   });
 }
 
-AnalysisReference processMatches(
+AnalysisReference? processMatches(
   MemoryController controller,
   Map<String, List<String>> matches,
 ) {
@@ -311,7 +320,7 @@ bool _debugMonitorEnabled = false;
 final _debugMonitorClasses = ['ImageCache'];
 
 /// Class being monitored if its name is in the debugMonitorClasses.
-String _debugMonitorClass;
+String? _debugMonitorClass;
 
 void _debugMonitor(String msg) {
   if (!_debugMonitorEnabled || _debugMonitorClass == null) return;
@@ -321,7 +330,7 @@ void _debugMonitor(String msg) {
 ClassFields fieldsStack = ClassFields();
 
 Map<String, List<String>> drillIn(
-  MemoryController controller,
+  MemoryController? controller,
   AnalysisReference librariesNode,
   List<Reference> references, {
   createTreeNodes = false,
@@ -331,36 +340,40 @@ Map<String, List<String>> drillIn(
   final matcher = ObjectMatcher((className, fields, value) {
     final key = '$className.${fields.join(".")}';
     result.putIfAbsent(key, () => []);
-    result[key].add(value);
+    result[key]!.add(value);
   });
 
-  for (final ClassReference classRef in references) {
-    if (!matcher.isClassMatched(classRef.name)) continue;
+  for (final ClassReference classRef
+      in references as Iterable<ClassReference>) {
+    if (classRef.name == null || !matcher.isClassMatched(classRef.name!)) {
+      continue;
+    }
+
+    final name = classRef.name!;
 
     // Insure instances are realized (not Reference.empty).
     computeInstanceForClassReference(controller, classRef);
-    final HeapGraphClassLive liveClass = classRef.actualClass;
+    final HeapGraphClassLive? liveClass = classRef.actualClass;
 
-    AnalysisReference objectNode;
+    late AnalysisReference objectNode;
     if (createTreeNodes) {
       objectNode = AnalysisReference(
-        '${classRef.name}',
-        countNote: liveClass.instancesCount,
+        '$name',
+        countNote: liveClass!.instancesCount,
       );
       librariesNode.addChild(objectNode);
     }
 
     if (_debugMonitorEnabled) {
-      _debugMonitorClass = _debugMonitorClasses.contains(classRef.name)
-          ? '${classRef.name}'
-          : '';
+      _debugMonitorClass = _debugMonitorClasses.contains(name) ? name : '';
     }
 
-    fieldsStack.push(classRef.name);
+    fieldsStack.push(name);
 
     var instanceIndex = 0;
-    _debugMonitor('Class ${classRef.name} Instance=$instanceIndex');
-    for (final ObjectReference objRef in classRef.children) {
+    _debugMonitor('Class $name Instance=$instanceIndex');
+    for (final ObjectReference objRef
+        in classRef.children as Iterable<ObjectReference>) {
       final fields = objRef.instance.getFields();
       // Root __FIELDS__ is a container for children, the children
       // are added, later, to a treenode - if the treenode should
@@ -373,9 +386,9 @@ Map<String, List<String>> drillIn(
       for (final field in fields) {
         if (field.value.isSentinel) continue;
 
-        final HeapGraphElementLive live = field.value;
+        final HeapGraphElementLive live = field.value as HeapGraphElementLive;
 
-        if (live.references.isNotEmpty) {
+        if (live.references!.isNotEmpty) {
           _debugMonitor('${field.key} OBJECT Start');
 
           final fieldObjectNode = AnalysisField(field.key, '');
@@ -429,7 +442,7 @@ Map<String, List<String>> drillIn(
   return result;
 }
 
-bool displayObject(
+bool? displayObject(
   ObjectMatcher matcher,
   AnalysisField objectField,
   HeapGraphElementLive live, {
@@ -438,16 +451,16 @@ bool displayObject(
   createTreeNodes = false,
 }) {
   if (depth >= maxDepth) return null;
-  if (live.references.isEmpty) return true;
+  if (live.references?.isEmpty ?? true) return true;
 
   final fields = live.getFields();
   for (final field in fields) {
     if (field.value.isSentinel) continue;
 
-    final HeapGraphElementLive liveField = field.value;
-    for (final ref in liveField.references) {
+    final HeapGraphElementLive liveField = field.value as HeapGraphElementLive;
+    for (final ref in liveField.references ?? []) {
       if (ref.isSentinel) continue;
-      final HeapGraphElementLive liveRef = ref;
+      final HeapGraphElementLive liveRef = ref as HeapGraphElementLive;
       final objectFields = liveRef.getFields();
       if (objectFields.isEmpty) continue;
 
@@ -493,8 +506,8 @@ bool displayObject(
   return true;
 }
 
-String displayData(instance) {
-  String result;
+String? displayData(instance) {
+  String? result;
 
   switch (instance.origin.data.runtimeType) {
     case HeapSnapshotObjectNullData:
@@ -517,18 +530,19 @@ class AnalysisInstanceViewTable extends StatefulWidget {
 /// Table of the fields of an instance (type, name and value).
 class AnalysisInstanceViewState extends State<AnalysisInstanceViewTable>
     with AutoDisposeMixin {
-  MemoryController controller;
+  bool _initialized = false;
+  late MemoryController _controller;
 
-  final TreeColumnData<AnalysisField> treeColumn = _AnalysisFieldNameColumn();
-  final List<ColumnData<AnalysisField>> columns = [];
+  final TreeColumnData<AnalysisField> _treeColumn = _AnalysisFieldNameColumn();
+  final _columns = <ColumnData<AnalysisField>>[];
 
   @override
   void initState() {
     super.initState();
 
     // Setup the table columns.
-    columns.addAll([
-      treeColumn,
+    _columns.addAll([
+      _treeColumn,
       _AnalysisFieldValueColumn(),
     ]);
   }
@@ -538,31 +552,32 @@ class AnalysisInstanceViewState extends State<AnalysisInstanceViewTable>
     super.didChangeDependencies();
 
     final newController = Provider.of<MemoryController>(context);
-    if (newController == controller) return;
-    controller = newController;
+    if (_initialized && newController == _controller) return;
+    _initialized = true;
+    _controller = newController;
 
     cancelListeners();
 
     // Update the chart when the memorySource changes.
-    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
+    addAutoDisposeListener(_controller.selectedSnapshotNotifier, () {
       setState(() {
-        controller.computeAllLibraries(rebuild: true);
+        _controller.computeAllLibraries(rebuild: true);
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    controller.analysisFieldsTreeTable = TreeTable<AnalysisField>(
-      dataRoots: controller.analysisInstanceRoot,
-      columns: columns,
-      treeColumn: treeColumn,
-      keyFactory: (typeRef) => PageStorageKey<String>(typeRef.name),
-      sortColumn: columns[0],
+    _controller.analysisFieldsTreeTable = TreeTable<AnalysisField>(
+      dataRoots: _controller.analysisInstanceRoot!,
+      columns: _columns,
+      treeColumn: _treeColumn,
+      keyFactory: (typeRef) => PageStorageKey<String>(typeRef.name ?? ''),
+      sortColumn: _columns[0],
       sortDirection: SortDirection.ascending,
     );
 
-    return controller.analysisFieldsTreeTable;
+    return _controller.analysisFieldsTreeTable;
   }
 }
 
@@ -646,7 +661,10 @@ const imageCache = 'ImageCache';
 ///   value of the matched objectReference
 ///
 typedef CompletedFunction = void Function(
-    String className, List<String> fields, dynamic value);
+  String className,
+  List<String> fields,
+  dynamic value,
+);
 
 class ObjectMatcher {
   ObjectMatcher(this._matchCompleted);
@@ -664,7 +682,7 @@ class ObjectMatcher {
   bool isClassMatched(String className) =>
       matcherDrillIn.containsKey(className);
 
-  List<List<String>> _findClassMatch(String className) =>
+  List<List<String>>? _findClassMatch(String className) =>
       matcherDrillIn[className];
 
   // TODO(terry): Change to be less strict.  Look for subclass or parentage
