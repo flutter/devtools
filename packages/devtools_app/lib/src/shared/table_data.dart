@@ -48,13 +48,13 @@ abstract class ColumnData<T> {
   bool get supportsSorting => numeric;
 
   int compare(T a, T b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    final valueA = getValue(a);
+    final valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 
   /// Get the cell's value from the given [dataObject].
-  dynamic getValue(T dataObject);
+  Comparable<Object> getValue(T dataObject);
 
   /// Get the cell's display value from the given [dataObject].
   String getDisplayValue(T dataObject) => getValue(dataObject).toString();

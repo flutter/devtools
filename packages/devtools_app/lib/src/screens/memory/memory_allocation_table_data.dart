@@ -61,7 +61,8 @@ class FieldClassName extends ColumnData<ClassHeapDetailStats> {
   FieldClassName() : super('Class', fixedWidthPx: scaleByFontFactor(200.0));
 
   @override
-  String? getValue(ClassHeapDetailStats dataObject) => dataObject.classRef.name;
+  String getValue(ClassHeapDetailStats dataObject) =>
+      dataObject.classRef.name ?? '';
 
   @override
   String getDisplayValue(ClassHeapDetailStats dataObject) =>
@@ -87,7 +88,7 @@ class FieldInstanceCountColumn extends ColumnData<ClassHeapDetailStats> {
         );
 
   @override
-  dynamic getValue(ClassHeapDetailStats dataObject) =>
+  Comparable<Object> getValue(ClassHeapDetailStats dataObject) =>
       dataObject.instancesCurrent;
 
   @override
@@ -148,7 +149,8 @@ class FieldSizeColumn extends ColumnData<ClassHeapDetailStats> {
         );
 
   @override
-  dynamic getValue(ClassHeapDetailStats dataObject) => dataObject.bytesCurrent;
+  Comparable<Object> getValue(ClassHeapDetailStats dataObject) =>
+      dataObject.bytesCurrent;
 
   @override
   String getDisplayValue(ClassHeapDetailStats dataObject) =>

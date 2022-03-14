@@ -64,7 +64,7 @@ class _NameColumn extends TreeColumnData<TreemapNode> {
   final int currentRootLevel;
 
   @override
-  dynamic getValue(TreemapNode dataObject) => dataObject.name;
+  Comparable<Object> getValue(TreemapNode dataObject) => dataObject.name;
 
   @override
   bool get supportsSorting => true;
@@ -88,7 +88,7 @@ class _SizeColumn extends ColumnData<TreemapNode> {
         );
 
   @override
-  dynamic getValue(TreemapNode dataObject) => dataObject.byteSize;
+  Comparable<Object> getValue(TreemapNode dataObject) => dataObject.byteSize;
 
   @override
   String getDisplayValue(TreemapNode dataObject) {
@@ -121,12 +121,12 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
   final int totalSize;
 
   @override
-  dynamic getValue(TreemapNode dataObject) =>
+  Comparable<Object> getValue(TreemapNode dataObject) =>
       (dataObject.byteSize / totalSize) * 100;
 
   @override
   String getDisplayValue(TreemapNode dataObject) =>
-      '${getValue(dataObject).toStringAsFixed(2)} %';
+      '${(getValue(dataObject) as num).toStringAsFixed(2)} %';
 
   @override
   bool get supportsSorting => true;
@@ -197,7 +197,8 @@ class _DiffColumn extends ColumnData<TreemapNode> {
 
   // Ensure sort by absolute size.
   @override
-  dynamic getValue(TreemapNode dataObject) => dataObject.unsignedByteSize;
+  Comparable<Object> getValue(TreemapNode dataObject) =>
+      dataObject.unsignedByteSize;
 
 // TODO(peterdjlee): Add up or down arrows indicating increase or decrease for display value.
   @override

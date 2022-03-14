@@ -22,8 +22,8 @@ class MessageColumn extends ColumnData<LogData>
   bool get supportsSorting => false;
 
   @override
-  String? getValue(LogData dataObject) =>
-      dataObject.summary ?? dataObject.details;
+  String getValue(LogData dataObject) =>
+      dataObject.summary ?? dataObject.details ?? '';
 
   @override
   int compare(LogData a, LogData b) {

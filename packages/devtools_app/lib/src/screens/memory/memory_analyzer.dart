@@ -570,7 +570,7 @@ class _AnalysisFieldNameColumn extends TreeColumnData<AnalysisField> {
   _AnalysisFieldNameColumn() : super('Name');
 
   @override
-  dynamic getValue(AnalysisField dataObject) => dataObject.name;
+  Comparable<Object> getValue(AnalysisField dataObject) => dataObject.name;
 
   @override
   String getDisplayValue(AnalysisField dataObject) => '${getValue(dataObject)}';
@@ -597,7 +597,7 @@ class _AnalysisFieldValueColumn extends ColumnData<AnalysisField> {
         );
 
   @override
-  dynamic getValue(AnalysisField dataObject) => dataObject.value;
+  Comparable<Object> getValue(AnalysisField dataObject) => dataObject.value;
 
   @override
   String getDisplayValue(AnalysisField dataObject) {
