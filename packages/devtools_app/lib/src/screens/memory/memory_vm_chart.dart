@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -64,7 +62,7 @@ class VMChartController extends ChartController {
       trace.Data(timestamp, capacityValue),
     );
 
-    final rssValue = sample.rss?.toDouble();
+    final rssValue = sample.rss.toDouble();
     addDataToTrace(TraceName.rSS.index, trace.Data(timestamp, rssValue));
 
     final rasterLayerValue = sample.rasterCache.layerBytes.toDouble();
@@ -86,7 +84,7 @@ class VMChartController extends ChartController {
 }
 
 class MemoryVMChart extends StatefulWidget {
-  const MemoryVMChart(this.chartController, {Key key}) : super(key: key);
+  const MemoryVMChart(this.chartController, {Key? key}) : super(key: key);
 
   final VMChartController chartController;
 
@@ -106,15 +104,15 @@ enum TraceName {
 }
 
 class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
+  bool _initialized = false;
+
   /// Controller attached to the chart.
   VMChartController get _chartController => widget.chartController;
 
   /// Controller for managing memory collection.
-  MemoryController _memoryController;
+  late MemoryController _memoryController;
 
   MemoryTimeline get _memoryTimeline => _memoryController.memoryTimeline;
-
-  ColorScheme colorScheme;
 
   @override
   void initState() {
@@ -127,9 +125,11 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _memoryController = Provider.of<MemoryController>(context);
+    final newController = Provider.of<MemoryController>(context);
 
-    colorScheme = Theme.of(context).colorScheme;
+    if (_initialized && _memoryController == newController) return;
+    _memoryController = newController;
+    _initialized = true;
 
     cancelListeners();
 
@@ -137,28 +137,27 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
     _chartController.setupData();
 
     addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
-      setState(() {
-        _processHeapSample(_memoryTimeline.sampleAddedNotifier.value);
-      });
+      if (_memoryTimeline.sampleAddedNotifier.value != null)
+        setState(() {
+          _processHeapSample(_memoryTimeline.sampleAddedNotifier.value!);
+        });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_chartController != null) {
-      if (_chartController.timestamps.isNotEmpty) {
-        return Container(
-          height: defaultChartHeight,
-          child: Chart(_chartController),
-        );
-      }
+    if (_chartController.timestamps.isNotEmpty) {
+      return Container(
+        height: defaultChartHeight,
+        child: Chart(_chartController),
+      );
     }
 
     return const SizedBox(width: denseSpacing);
   }
 
   // TODO(terry): Move colors to theme?
-  static final capacityColor = Colors.grey[400];
+  static final capacityColor = Colors.grey[400]!;
   static const usedColor = Color(0xff33b5e5);
   static const externalColor = Color(0xff4ddeff);
   // TODO(terry): UX review of raster colors see https://github.com/flutter/devtools/issues/2616
