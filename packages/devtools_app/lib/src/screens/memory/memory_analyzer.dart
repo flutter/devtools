@@ -35,6 +35,8 @@ Map<String, List<Reference>> collect(
     MemoryController controller, Snapshot snapshot) {
   final Map<String, List<Reference>> result = {};
 
+  if (snapshot.libraryRoot == null) return {};
+
   // Analyze the snapshot's heap memory information
   final root = snapshot.libraryRoot!;
   final heapGraph = controller.heapGraph;
@@ -116,7 +118,7 @@ class Bucket {
 }
 
 void imageAnalysis(
-  MemoryController? controller,
+  MemoryController controller,
   AnalysisSnapshotReference analysisSnapshot,
   Map<String, List<Reference>> collectedData,
 ) {
@@ -211,7 +213,7 @@ void imageAnalysis(
 }
 
 AnalysisReference? processMatches(
-  MemoryController? controller,
+  MemoryController controller,
   Map<String, List<String>> matches,
 ) {
   // Root __FIELDS__ is a container for children, the children
@@ -343,8 +345,9 @@ Map<String, List<String>> drillIn(
 
   for (final ClassReference classRef
       in references as Iterable<ClassReference>) {
-    if (classRef.name == null || !matcher.isClassMatched(classRef.name))
+    if (classRef.name == null || !matcher.isClassMatched(classRef.name!)) {
       continue;
+    }
 
     final name = classRef.name!;
 
@@ -362,7 +365,7 @@ Map<String, List<String>> drillIn(
     }
 
     if (_debugMonitorEnabled) {
-      _debugMonitorClass = _debugMonitorClasses.contains(name) ? '$name' : '';
+      _debugMonitorClass = _debugMonitorClasses.contains(name) ? name : '';
     }
 
     fieldsStack.push(name);
@@ -448,14 +451,14 @@ bool? displayObject(
   createTreeNodes = false,
 }) {
   if (depth >= maxDepth) return null;
-  if (live.references!.isEmpty) return true;
+  if (live.references?.isEmpty != false) return true;
 
   final fields = live.getFields();
   for (final field in fields) {
     if (field.value.isSentinel) continue;
 
     final HeapGraphElementLive liveField = field.value as HeapGraphElementLive;
-    for (final ref in liveField.references!) {
+    for (final ref in liveField.references ?? []) {
       if (ref.isSentinel) continue;
       final HeapGraphElementLive liveRef = ref as HeapGraphElementLive;
       final objectFields = liveRef.getFields();
@@ -527,18 +530,19 @@ class AnalysisInstanceViewTable extends StatefulWidget {
 /// Table of the fields of an instance (type, name and value).
 class AnalysisInstanceViewState extends State<AnalysisInstanceViewTable>
     with AutoDisposeMixin {
-  MemoryController? controller;
+  bool _initialized = false;
+  late MemoryController _controller;
 
-  final TreeColumnData<AnalysisField> treeColumn = _AnalysisFieldNameColumn();
-  final List<ColumnData<AnalysisField>> columns = [];
+  final TreeColumnData<AnalysisField> _treeColumn = _AnalysisFieldNameColumn();
+  final List<ColumnData<AnalysisField>> _columns = [];
 
   @override
   void initState() {
     super.initState();
 
     // Setup the table columns.
-    columns.addAll([
-      treeColumn,
+    _columns.addAll([
+      _treeColumn,
       _AnalysisFieldValueColumn(),
     ]);
   }
@@ -548,31 +552,32 @@ class AnalysisInstanceViewState extends State<AnalysisInstanceViewTable>
     super.didChangeDependencies();
 
     final newController = Provider.of<MemoryController>(context);
-    if (newController == controller) return;
-    controller = newController;
+    if (_initialized && newController == _controller) return;
+    _initialized = true;
+    _controller = newController;
 
     cancelListeners();
 
     // Update the chart when the memorySource changes.
-    addAutoDisposeListener(controller!.selectedSnapshotNotifier, () {
+    addAutoDisposeListener(_controller.selectedSnapshotNotifier, () {
       setState(() {
-        controller!.computeAllLibraries(rebuild: true);
+        _controller.computeAllLibraries(rebuild: true);
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    controller!.analysisFieldsTreeTable = TreeTable<AnalysisField>(
-      dataRoots: controller!.analysisInstanceRoot!,
-      columns: columns,
-      treeColumn: treeColumn,
-      keyFactory: (typeRef) => PageStorageKey<String?>(typeRef.name),
-      sortColumn: columns[0],
+    _controller.analysisFieldsTreeTable = TreeTable<AnalysisField>(
+      dataRoots: _controller.analysisInstanceRoot!,
+      columns: _columns,
+      treeColumn: _treeColumn,
+      keyFactory: (typeRef) => PageStorageKey<String>(typeRef.name ?? ''),
+      sortColumn: _columns[0],
       sortDirection: SortDirection.ascending,
     );
 
-    return controller!.analysisFieldsTreeTable;
+    return _controller.analysisFieldsTreeTable;
   }
 }
 
@@ -591,7 +596,7 @@ class _AnalysisFieldNameColumn extends TreeColumnData<AnalysisField> {
   @override
   int compare(AnalysisField a, AnalysisField b) {
     final Comparable valueA = getValue(a);
-    final Comparable? valueB = getValue(b);
+    final Comparable valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 
@@ -624,7 +629,7 @@ class _AnalysisFieldValueColumn extends ColumnData<AnalysisField> {
   @override
   int compare(AnalysisField a, AnalysisField b) {
     final Comparable valueA = getValue(a);
-    final Comparable? valueB = getValue(b);
+    final Comparable valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 }
@@ -642,9 +647,9 @@ class ClassFields {
     _fields.add(name);
   }
 
-  String? pop() => _fields.removeLast();
+  String pop() => _fields.removeLast();
 
-  String? elementAt(int index) => _fields.elementAt(index);
+  String elementAt(int index) => _fields.elementAt(index);
 }
 
 const imageCache = 'ImageCache';
@@ -656,7 +661,7 @@ const imageCache = 'ImageCache';
 ///   value of the matched objectReference
 ///
 typedef CompletedFunction = void Function(
-    String? className, List<String> fields, dynamic value);
+    String className, List<String> fields, dynamic value);
 
 class ObjectMatcher {
   ObjectMatcher(this._matchCompleted);
@@ -671,11 +676,11 @@ class ObjectMatcher {
 
   final CompletedFunction _matchCompleted;
 
-  bool isClassMatched(String? className) =>
+  bool isClassMatched(String className) =>
       matcherDrillIn.containsKey(className);
 
-  List<List<String>>? _findClassMatch(String? className) =>
-      matcherDrillIn[className!];
+  List<List<String>>? _findClassMatch(String className) =>
+      matcherDrillIn[className];
 
   // TODO(terry): Change to be less strict.  Look for subclass or parentage
   //              relationships.  If a new field or subclass is added we can
