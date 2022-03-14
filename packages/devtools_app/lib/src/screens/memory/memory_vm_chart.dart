@@ -40,11 +40,11 @@ class VMChartController extends ChartController {
   }
 
   /// Loads all heap samples (live data or offline).
-  void addSample(HeapSample? sample) {
+  void addSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
     if (_memoryController.isPaused) return;
 
-    addTimestamp(sample!.timestamp);
+    addTimestamp(sample.timestamp);
 
     final timestamp = sample.timestamp;
     final externalValue = sample.external.toDouble();
@@ -141,9 +141,10 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
 
     assert(_memoryTimeline != null);
     addAutoDisposeListener(_memoryTimeline!.sampleAddedNotifier, () {
-      setState(() {
-        _processHeapSample(_memoryTimeline!.sampleAddedNotifier.value);
-      });
+      if (_memoryTimeline!.sampleAddedNotifier.value != null)
+        setState(() {
+          _processHeapSample(_memoryTimeline!.sampleAddedNotifier.value!);
+        });
     });
   }
 
@@ -160,7 +161,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   }
 
   // TODO(terry): Move colors to theme?
-  static final capacityColor = Colors.grey[400];
+  static final capacityColor = Colors.grey[400]!;
   static const usedColor = Color(0xff33b5e5);
   static const externalColor = Color(0xff4ddeff);
   // TODO(terry): UX review of raster colors see https://github.com/flutter/devtools/issues/2616
@@ -232,7 +233,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
     final capacityIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: capacityColor!,
+        color: capacityColor,
         diameter: 0.0,
         symbol: trace.ChartSymbol.dashedLine,
       ),
@@ -286,7 +287,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   }
 
   /// Loads all heap samples (live data or offline).
-  void _processHeapSample(HeapSample? sample) {
+  void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
     if (_memoryController.paused.value) return;
     _chartController.addSample(sample);
