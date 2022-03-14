@@ -20,7 +20,7 @@ class AppSizeAnalysisTable extends StatelessWidget {
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
       treeColumn,
       sizeColumn,
-      _SizePercentageColumn(totalSize: rootNode.root.byteSize),
+      _SizePercentageColumn(totalSize: rootNode._root.byteSize),
     ]);
 
     return AppSizeAnalysisTable._(

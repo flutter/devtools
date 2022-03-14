@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:flutter/widgets.dart' hide TextStyle;
 import 'package:provider/provider.dart';
@@ -26,37 +24,33 @@ class MemoryHeapTreemap extends StatefulWidget {
 
 class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
     with AutoDisposeMixin {
-  MemoryHeapTreemapState(this.controller);
+  MemoryHeapTreemapState(this._controller);
 
-  InstructionsSize sizes;
+  InstructionsSize? _sizes;
 
-  Map<String, Function> callbacks = {};
+  MemoryController? _controller;
 
-  MemoryController controller;
-
-  Widget snapshotDisplay;
-
-  TreemapNode root;
+  TreemapNode? _root;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     // TODO(terry): Unable to short-circuit need to investigate why?
-    controller = Provider.of<MemoryController>(context);
+    _controller = Provider.of<MemoryController>(context);
 
-    if (controller.heapGraph != null) {
-      sizes = InstructionsSize.fromSnapshot(controller);
-      root = sizes.root;
+    if (_controller!.heapGraph != null) {
+      _sizes = InstructionsSize.fromSnapshot(_controller!);
+      _root = _sizes!.root;
     }
 
     cancelListeners();
 
-    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
+    addAutoDisposeListener(_controller!.selectedSnapshotNotifier, () {
       setState(() {
-        controller.computeAllLibraries(rebuild: true);
+        _controller!.computeAllLibraries(rebuild: true);
 
-        sizes = InstructionsSize.fromSnapshot(controller);
+        _sizes = InstructionsSize.fromSnapshot(_controller!);
       });
     });
 
@@ -87,15 +81,15 @@ class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
     // });
   }
 
-  void _onRootChanged(TreemapNode newRoot) {
+  void _onRootChanged(TreemapNode? newRoot) {
     setState(() {
-      root = newRoot;
+      _root = newRoot;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (sizes == null) {
+    if (_sizes == null) {
       return Column(
         children: [
           const SizedBox(height: denseRowSpacing),
@@ -113,7 +107,7 @@ class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
       child: LayoutBuilder(
         builder: (context, constraints) {
           return Treemap.fromRoot(
-            rootNode: root,
+            rootNode: _root,
             levelsVisible: 2,
             isOutermostLevel: true,
             width: constraints.maxWidth,
@@ -156,21 +150,18 @@ class InstructionsSize {
       name: 'root',
       childrenMap: rootChildren,
     );
-    TreemapNode currentParent = root;
+    TreemapNode? currentParent = root;
 
     // TODO(terry): Should treemap be all memory or just the filtered group?
     //              Using rawGroup not graph.groupByLibrary.
 
-    controller.heapGraph.rawGroupByLibrary.forEach(
+    (controller.heapGraph?.rawGroupByLibrary ?? {}).forEach(
       (libraryGroup, value) {
         final classes = value;
         for (final theClass in classes) {
           final shallowSize = theClass.instancesTotalShallowSizes;
           var className = theClass.name;
-          if (shallowSize == 0 ||
-              libraryGroup == null ||
-              className == null ||
-              className == '::') {
+          if (shallowSize == 0 || className == '::') {
             continue;
           }
 
@@ -204,13 +195,13 @@ class InstructionsSize {
                   name: pathPart,
                   childrenMap: <String, TreemapNode>{},
                 );
-                currentParent.addChild(node);
+                currentParent!.addChild(node);
                 return node;
               },
             );
-            currentChildren[pathPart].byteSize += symbol.size;
+            currentChildren[pathPart]!.byteSize += symbol.size;
             currentParent = currentChildren[pathPart];
-            currentChildren = currentChildren[pathPart].childrenMap;
+            currentChildren = currentChildren[pathPart]!.childrenMap;
           }
           currentParent = parentReset;
         }
@@ -244,31 +235,30 @@ class InstructionsSize {
 
 class Symbol {
   const Symbol({
-    @required this.name,
-    @required this.size,
+    required this.name,
+    required this.size,
     this.libraryUri,
     this.className,
-  })  : assert(name != null),
-        assert(size != null);
+  });
 
   static Symbol fromMap(Map<String, dynamic> json) {
     return Symbol(
       name: json['n'] as String,
       size: json['s'] as int,
-      className: json['c'] as String,
-      libraryUri: json['l'] as String,
+      className: json['c'] as String?,
+      libraryUri: json['l'] as String?,
     );
   }
 
   final String name;
   final int size;
-  final String libraryUri;
-  final String className;
+  final String? libraryUri;
+  final String? className;
 
   List<String> get parts {
     return <String>[
-      if (libraryUri != null) ...libraryUri.split('/') else '@stubs',
-      if (className != null && className.isNotEmpty) className,
+      if (libraryUri != null) ...libraryUri!.split('/') else '@stubs',
+      if (className?.isNotEmpty == true) className!,
       name,
     ];
   }
