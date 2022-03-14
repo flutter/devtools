@@ -15,8 +15,7 @@ import 'memory_controller.dart';
 import 'memory_timeline.dart';
 
 class AndroidChartController extends ChartController {
-  AndroidChartController(this._memoryController,
-      {List<int> sharedLabels = const []})
+  AndroidChartController(this._memoryController, {sharedLabels = const <int>[]})
       : super(
           displayTopLine: false,
           name: 'Android',
@@ -144,7 +143,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     final newMemoryController = Provider.of<MemoryController>(context);
     if (_initialized && _memoryController == newMemoryController) return;
     _memoryController = newMemoryController;
-    _initialized = false;
+    _initialized = true;
 
     cancelListeners();
 
