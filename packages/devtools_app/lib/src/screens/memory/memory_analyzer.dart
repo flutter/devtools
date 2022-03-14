@@ -451,7 +451,7 @@ bool? displayObject(
   createTreeNodes = false,
 }) {
   if (depth >= maxDepth) return null;
-  if (live.references?.isEmpty != false) return true;
+  if (live.references?.isEmpty ?? true) return true;
 
   final fields = live.getFields();
   for (final field in fields) {
@@ -534,7 +534,7 @@ class AnalysisInstanceViewState extends State<AnalysisInstanceViewTable>
   late MemoryController _controller;
 
   final TreeColumnData<AnalysisField> _treeColumn = _AnalysisFieldNameColumn();
-  final List<ColumnData<AnalysisField>> _columns = [];
+  final _columns = <ColumnData<AnalysisField>>[];
 
   @override
   void initState() {
@@ -661,7 +661,10 @@ const imageCache = 'ImageCache';
 ///   value of the matched objectReference
 ///
 typedef CompletedFunction = void Function(
-    String className, List<String> fields, dynamic value);
+  String className,
+  List<String> fields,
+  dynamic value,
+);
 
 class ObjectMatcher {
   ObjectMatcher(this._matchCompleted);
