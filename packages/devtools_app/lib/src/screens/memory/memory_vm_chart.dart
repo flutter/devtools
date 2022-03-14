@@ -21,7 +21,7 @@ class VMChartController extends ChartController {
           name: 'VM Memory',
         );
 
-  late final MemoryController _memoryController;
+  final MemoryController _memoryController;
 
   // TODO(terry): Only load max visible data collected, when pruning of data
   //              charted is added.
@@ -29,9 +29,9 @@ class VMChartController extends ChartController {
   @override
   void setupData() {
     final chartDataLength = timestampsLength;
-    final dataLength = _memoryController.memoryTimeline!.data.length;
+    final dataLength = _memoryController.memoryTimeline.data.length;
 
-    final dataRange = _memoryController.memoryTimeline!.data.getRange(
+    final dataRange = _memoryController.memoryTimeline.data.getRange(
       chartDataLength,
       dataLength,
     );
@@ -112,9 +112,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   /// Controller for managing memory collection.
   late MemoryController _memoryController;
 
-  MemoryTimeline? get _memoryTimeline => _memoryController.memoryTimeline;
-
-  ColorScheme? colorScheme;
+  MemoryTimeline get _memoryTimeline => _memoryController.memoryTimeline;
 
   @override
   void initState() {
@@ -127,23 +125,21 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    if (_initialized) return;
+    final newController = Provider.of<MemoryController>(context);
+
+    if (_initialized && _memoryController == newController) return;
+    _memoryController = newController;
     _initialized = true;
-
-    _memoryController = Provider.of<MemoryController>(context);
-
-    colorScheme = Theme.of(context).colorScheme;
 
     cancelListeners();
 
     setupTraces();
     _chartController.setupData();
 
-    assert(_memoryTimeline != null);
-    addAutoDisposeListener(_memoryTimeline!.sampleAddedNotifier, () {
-      if (_memoryTimeline!.sampleAddedNotifier.value != null)
+    addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
+      if (_memoryTimeline.sampleAddedNotifier.value != null)
         setState(() {
-          _processHeapSample(_memoryTimeline!.sampleAddedNotifier.value!);
+          _processHeapSample(_memoryTimeline.sampleAddedNotifier.value!);
         });
     });
   }
