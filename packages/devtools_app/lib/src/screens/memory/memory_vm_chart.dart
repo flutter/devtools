@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +21,7 @@ class VMChartController extends ChartController {
           name: 'VM Memory',
         );
 
-  final MemoryController _memoryController;
+  late final MemoryController _memoryController;
 
   // TODO(terry): Only load max visible data collected, when pruning of data
   //              charted is added.
@@ -31,9 +29,9 @@ class VMChartController extends ChartController {
   @override
   void setupData() {
     final chartDataLength = timestampsLength;
-    final dataLength = _memoryController.memoryTimeline.data.length;
+    final dataLength = _memoryController.memoryTimeline!.data.length;
 
-    final dataRange = _memoryController.memoryTimeline.data.getRange(
+    final dataRange = _memoryController.memoryTimeline!.data.getRange(
       chartDataLength,
       dataLength,
     );
@@ -42,11 +40,11 @@ class VMChartController extends ChartController {
   }
 
   /// Loads all heap samples (live data or offline).
-  void addSample(HeapSample sample) {
+  void addSample(HeapSample? sample) {
     // If paused don't update the chart (data is still collected).
     if (_memoryController.isPaused) return;
 
-    addTimestamp(sample.timestamp);
+    addTimestamp(sample!.timestamp);
 
     final timestamp = sample.timestamp;
     final externalValue = sample.external.toDouble();
@@ -64,7 +62,7 @@ class VMChartController extends ChartController {
       trace.Data(timestamp, capacityValue),
     );
 
-    final rssValue = sample.rss?.toDouble();
+    final rssValue = sample.rss.toDouble();
     addDataToTrace(TraceName.rSS.index, trace.Data(timestamp, rssValue));
 
     final rasterLayerValue = sample.rasterCache.layerBytes.toDouble();
@@ -86,7 +84,7 @@ class VMChartController extends ChartController {
 }
 
 class MemoryVMChart extends StatefulWidget {
-  const MemoryVMChart(this.chartController, {Key key}) : super(key: key);
+  const MemoryVMChart(this.chartController, {Key? key}) : super(key: key);
 
   final VMChartController chartController;
 
@@ -106,15 +104,17 @@ enum TraceName {
 }
 
 class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
+  bool _initialized = false;
+
   /// Controller attached to the chart.
   VMChartController get _chartController => widget.chartController;
 
   /// Controller for managing memory collection.
-  MemoryController _memoryController;
+  late MemoryController _memoryController;
 
-  MemoryTimeline get _memoryTimeline => _memoryController.memoryTimeline;
+  MemoryTimeline? get _memoryTimeline => _memoryController.memoryTimeline;
 
-  ColorScheme colorScheme;
+  ColorScheme? colorScheme;
 
   @override
   void initState() {
@@ -127,6 +127,9 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    if (_initialized) return;
+    _initialized = true;
+
     _memoryController = Provider.of<MemoryController>(context);
 
     colorScheme = Theme.of(context).colorScheme;
@@ -136,22 +139,21 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
     setupTraces();
     _chartController.setupData();
 
-    addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
+    assert(_memoryTimeline != null);
+    addAutoDisposeListener(_memoryTimeline!.sampleAddedNotifier, () {
       setState(() {
-        _processHeapSample(_memoryTimeline.sampleAddedNotifier.value);
+        _processHeapSample(_memoryTimeline!.sampleAddedNotifier.value);
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_chartController != null) {
-      if (_chartController.timestamps.isNotEmpty) {
-        return Container(
-          height: defaultChartHeight,
-          child: Chart(_chartController),
-        );
-      }
+    if (_chartController.timestamps.isNotEmpty) {
+      return Container(
+        height: defaultChartHeight,
+        child: Chart(_chartController),
+      );
     }
 
     return const SizedBox(width: denseSpacing);
@@ -230,7 +232,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
     final capacityIndex = _chartController.createTrace(
       trace.ChartType.line,
       trace.PaintCharacteristics(
-        color: capacityColor,
+        color: capacityColor!,
         diameter: 0.0,
         symbol: trace.ChartSymbol.dashedLine,
       ),
@@ -284,7 +286,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   }
 
   /// Loads all heap samples (live data or offline).
-  void _processHeapSample(HeapSample sample) {
+  void _processHeapSample(HeapSample? sample) {
     // If paused don't update the chart (data is still collected).
     if (_memoryController.paused.value) return;
     _chartController.addSample(sample);
