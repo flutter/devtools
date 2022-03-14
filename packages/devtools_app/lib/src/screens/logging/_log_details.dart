@@ -48,8 +48,6 @@ class _LogDetailsState extends State<LogDetails>
     }
   }
 
-  bool showSimple(LogData log) => !log.needsComputing;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -91,7 +89,7 @@ class _LogDetailsState extends State<LogDetails>
                   ? null
                   // The parenthesis are actually needed.
                   // ignore: unnecessary_parenthesis
-                  : (() => log?.prettyPrinted!) as String Function()?,
+                  : (() => log?.prettyPrinted()!) as String Function()?,
               buttonKey: LogDetails.copyToClipboardButtonKey,
             ),
           ],
@@ -101,7 +99,7 @@ class _LogDetailsState extends State<LogDetails>
           child: SingleChildScrollView(
             controller: scrollController,
             child: SelectableText(
-              log?.prettyPrinted ?? '',
+              log?.prettyPrinted() ?? '',
               textAlign: TextAlign.left,
               style: Theme.of(context).fixedFontStyle,
             ),
