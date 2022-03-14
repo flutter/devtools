@@ -30,7 +30,7 @@ class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
 
   MemoryController? _controller;
 
-  TreemapNode? _root;
+  TreemapNode? root;
 
   @override
   void didChangeDependencies() {
@@ -41,7 +41,7 @@ class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
 
     if (_controller!.heapGraph != null) {
       _sizes = InstructionsSize.fromSnapshot(_controller!);
-      _root = _sizes!.root;
+      root = _sizes!.root;
     }
 
     cancelListeners();
@@ -83,7 +83,7 @@ class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
 
   void _onRootChanged(TreemapNode? newRoot) {
     setState(() {
-      _root = newRoot;
+      root = newRoot;
     });
   }
 
@@ -107,7 +107,7 @@ class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
       child: LayoutBuilder(
         builder: (context, constraints) {
           return Treemap.fromRoot(
-            rootNode: _root,
+            rootNode: root,
             levelsVisible: 2,
             isOutermostLevel: true,
             width: constraints.maxWidth,
