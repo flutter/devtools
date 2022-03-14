@@ -28,7 +28,8 @@ class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
 
   InstructionsSize? _sizes;
 
-  MemoryController? _controller;
+  bool _initialized = false;
+  late MemoryController _controller;
 
   TreemapNode? root;
 
@@ -37,20 +38,23 @@ class MemoryHeapTreemapState extends State<MemoryHeapTreemap>
     super.didChangeDependencies();
 
     // TODO(terry): Unable to short-circuit need to investigate why?
-    _controller = Provider.of<MemoryController>(context);
+    final newController = Provider.of<MemoryController>(context);
+    if (_initialized && _controller == newController) return;
+    _controller = newController;
+    _initialized = true;
 
-    if (_controller!.heapGraph != null) {
-      _sizes = InstructionsSize.fromSnapshot(_controller!);
+    if (_controller.heapGraph != null) {
+      _sizes = InstructionsSize.fromSnapshot(_controller);
       root = _sizes!.root;
     }
 
     cancelListeners();
 
-    addAutoDisposeListener(_controller!.selectedSnapshotNotifier, () {
+    addAutoDisposeListener(_controller.selectedSnapshotNotifier, () {
       setState(() {
-        _controller!.computeAllLibraries(rebuild: true);
+        _controller.computeAllLibraries(rebuild: true);
 
-        _sizes = InstructionsSize.fromSnapshot(_controller!);
+        _sizes = InstructionsSize.fromSnapshot(_controller);
       });
     });
 
@@ -258,7 +262,7 @@ class Symbol {
   List<String> get parts {
     return <String>[
       if (libraryUri != null) ...libraryUri!.split('/') else '@stubs',
-      if (className?.isNotEmpty == true) className!,
+      if (className?.isNotEmpty ?? false) className!,
       name,
     ];
   }
