@@ -186,7 +186,8 @@ class SnapshotFilterState extends State<SnapshotFilterDialog>
       // Don't include external and filtered these are a composite and can't be filtered out.
       if (library.name != externalLibraryName &&
           library.name != filteredLibrariesName) {
-        addLibrary(library.name);
+        assert(library.name != null);
+        addLibrary(library.name!);
       }
     }
   }
