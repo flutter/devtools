@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 import '../../shared/table.dart';
@@ -31,7 +29,7 @@ class KindColumn extends ColumnData<LogData>
     BuildContext context,
     LogData item, {
     bool isRowSelected = false,
-    VoidCallback onPressed,
+    VoidCallback? onPressed,
   }) {
     final String kind = item.kind;
 
