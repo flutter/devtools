@@ -13,6 +13,7 @@ export 'src/http/http_request_data.dart';
 export 'src/primitives/auto_dispose.dart';
 export 'src/primitives/auto_dispose_mixin.dart';
 export 'src/primitives/listenable.dart';
+export 'src/primitives/storage.dart';
 export 'src/primitives/trace_event.dart';
 export 'src/primitives/trees.dart';
 export 'src/primitives/utils.dart';
