@@ -110,7 +110,6 @@ class EventChartController extends ChartController {
     }
 
     if (sample.memoryEventInfo.isEventAllocationAccumulator) {
-      assert(events.allocationAccumulator != null);
       final allocationEvent = events.allocationAccumulator!;
       final data = trace.Data(
         sample.timestamp,
@@ -155,6 +154,8 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   /// Controller attached to this chart.
   EventChartController get _chartController => widget.chartController;
 
+  bool _initialized = false;
+
   /// Controller for managing memory collection.
   late MemoryController _memoryController;
 
@@ -187,8 +188,6 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
   MemoryTimeline get _memoryTimeline => _memoryController.memoryTimeline;
 
-  ColorScheme? colorScheme;
-
   @override
   void initState() {
     super.initState();
@@ -201,10 +200,12 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _memoryController = Provider.of<MemoryController>(context);
+    final newMemoryController = Provider.of<MemoryController>(context);
+    if (_initialized && newMemoryController == _memoryController) return;
+    _initialized = true;
+    _memoryController = newMemoryController;
 
     final themeData = Theme.of(context);
-    colorScheme = themeData.colorScheme;
 
     cancelListeners();
 
