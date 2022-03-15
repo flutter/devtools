@@ -22,13 +22,13 @@ class MessageColumn extends ColumnData<LogData>
   bool get supportsSorting => false;
 
   @override
-  String? getValue(LogData dataObject) =>
-      dataObject.summary ?? dataObject.details;
+  String getValue(LogData dataObject) =>
+      dataObject.summary ?? dataObject.details ?? '';
 
   @override
   int compare(LogData a, LogData b) {
-    final String valueA = getValue(a)!;
-    final String valueB = getValue(b)!;
+    final String valueA = getValue(a);
+    final String valueB = getValue(b);
     // Matches frame descriptions (e.g. '#12  11.4ms ')
     final regex = RegExp(r'#(\d+)\s+\d+.\d+ms\s*');
     final valueAIsFrameLog = valueA.startsWith(regex);
