@@ -60,10 +60,9 @@ $script''',
 
   final expression = '((){${filteredLines.join()}})()';
 
-  final result = await (group.inspectorLibrary.eval(expression, isAlive: group)
-      as FutureOr<InstanceRef>);
+  final result = await group.inspectorLibrary.eval(expression, isAlive: group);
   final encodedResult =
-      await group.inspectorLibrary.retrieveFullValueAsString(result);
+      await group.inspectorLibrary.retrieveFullValueAsString(result!);
   if (encodedResult != null) {
     final Map<String, Object> errors = json.decode(encodedResult);
     for (String name in errors.keys) {
