@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -24,20 +22,20 @@ class MessageColumn extends ColumnData<LogData>
   bool get supportsSorting => false;
 
   @override
-  String getValue(LogData dataObject) =>
+  String? getValue(LogData dataObject) =>
       dataObject.summary ?? dataObject.details;
 
   @override
   int compare(LogData a, LogData b) {
-    final String valueA = getValue(a);
-    final String valueB = getValue(b);
+    final String valueA = getValue(a)!;
+    final String valueB = getValue(b)!;
     // Matches frame descriptions (e.g. '#12  11.4ms ')
     final regex = RegExp(r'#(\d+)\s+\d+.\d+ms\s*');
     final valueAIsFrameLog = valueA.startsWith(regex);
     final valueBIsFrameLog = valueB.startsWith(regex);
     if (valueAIsFrameLog && valueBIsFrameLog) {
-      final frameNumberA = regex.firstMatch(valueA)[1];
-      final frameNumberB = regex.firstMatch(valueB)[1];
+      final frameNumberA = regex.firstMatch(valueA)![1]!;
+      final frameNumberB = regex.firstMatch(valueB)![1]!;
       return int.parse(frameNumberA).compareTo(int.parse(frameNumberB));
     } else if (valueAIsFrameLog && !valueBIsFrameLog) {
       return -1;
@@ -52,7 +50,7 @@ class MessageColumn extends ColumnData<LogData>
     BuildContext context,
     LogData data, {
     bool isRowSelected = false,
-    VoidCallback onPressed,
+    VoidCallback? onPressed,
   }) {
     TextStyle textStyle = Theme.of(context).fixedFontStyle;
     if (isRowSelected) {
@@ -69,7 +67,7 @@ class MessageColumn extends ColumnData<LogData>
 
       double frameLength = 0.0;
       try {
-        final int micros = jsonDecode(data.details)['elapsed'];
+        final int micros = jsonDecode(data.details!)['elapsed'];
         frameLength = micros * 3.0 / 1000.0;
       } catch (e) {
         // ignore
@@ -101,7 +99,7 @@ class MessageColumn extends ColumnData<LogData>
         maxLines: 1,
       );
     } else {
-      return null;
+      return const SizedBox.shrink();
     }
   }
 }
