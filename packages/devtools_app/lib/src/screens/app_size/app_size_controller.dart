@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_snapshot_analysis/precompiler_trace.dart';
@@ -34,41 +32,43 @@ class AppSizeController {
   static const identicalFilesError =
       'Failed to load diff: OLD and NEW files are identical.';
 
-  CallGraph _analysisCallGraph;
+  CallGraph? _analysisCallGraph;
 
-  ValueListenable<CallGraphNode> get analysisCallGraphRoot =>
+  ValueListenable<CallGraphNode?> get analysisCallGraphRoot =>
       _analysisCallGraphRoot;
-  final _analysisCallGraphRoot = ValueNotifier<CallGraphNode>(null);
+  final _analysisCallGraphRoot = ValueNotifier<CallGraphNode?>(null);
 
-  CallGraph _oldDiffCallGraph;
+  CallGraph? _oldDiffCallGraph;
 
-  CallGraph _newDiffCallGraph;
+  CallGraph? _newDiffCallGraph;
 
-  ValueListenable<CallGraphNode> get diffCallGraphRoot => _diffCallGraphRoot;
-  final _diffCallGraphRoot = ValueNotifier<CallGraphNode>(null);
+  ValueListenable<CallGraphNode?> get diffCallGraphRoot => _diffCallGraphRoot;
+  final _diffCallGraphRoot = ValueNotifier<CallGraphNode?>(null);
 
   /// The node set as the analysis tab root.
   ///
   /// Used to build the treemap and the tree table for the analysis tab.
-  ValueListenable<TreemapNode> get analysisRoot => _analysisRoot;
-  final _analysisRoot = ValueNotifier<TreemapNode>(null);
+  ValueListenable<TreemapNode?> get analysisRoot => _analysisRoot;
+  final _analysisRoot = ValueNotifier<TreemapNode?>(null);
 
-  void changeAnalysisRoot(TreemapNode newRoot) {
+  void changeAnalysisRoot(TreemapNode? newRoot) {
     _analysisRoot.value = newRoot;
+    if (newRoot == null) return;
 
     final programInfoNode =
-        _analysisCallGraph?.program?.lookup(newRoot.packagePath()) ??
-            _analysisCallGraph?.program?.root;
+        _analysisCallGraph?.program.lookup(newRoot.packagePath()) ??
+            _analysisCallGraph?.program.root;
 
     // If [programInfoNode is null, we don't have any call graph information
     // about [newRoot].
     if (programInfoNode != null) {
-      _analysisCallGraphRoot.value = _analysisCallGraph.lookup(programInfoNode);
+      _analysisCallGraphRoot.value =
+          _analysisCallGraph!.lookup(programInfoNode);
     }
   }
 
-  ValueListenable<DevToolsJsonFile> get analysisJsonFile => _analysisJsonFile;
-  final _analysisJsonFile = ValueNotifier<DevToolsJsonFile>(null);
+  ValueListenable<DevToolsJsonFile?> get analysisJsonFile => _analysisJsonFile;
+  final _analysisJsonFile = ValueNotifier<DevToolsJsonFile?>(null);
 
   void changeAnalysisJsonFile(DevToolsJsonFile newJson) {
     _analysisJsonFile.value = newJson;
@@ -77,57 +77,55 @@ class AppSizeController {
   /// The node set as the diff root.
   ///
   /// Used to build the treemap and the tree table for the diff tab.
-  ValueListenable<TreemapNode> get diffRoot => _diffRoot;
-  final _diffRoot = ValueNotifier<TreemapNode>(null);
+  ValueListenable<TreemapNode?> get diffRoot => _diffRoot;
+  final _diffRoot = ValueNotifier<TreemapNode?>(null);
 
-  void changeDiffRoot(TreemapNode newRoot) {
+  void changeDiffRoot(TreemapNode? newRoot) {
     _diffRoot.value = newRoot;
+    if (newRoot == null) return;
 
     final packagePath = newRoot.packagePath();
-    final newProgramInfoNode = _newDiffCallGraph?.program?.lookup(packagePath);
-    final newProgramInfoNodeRoot = _newDiffCallGraph?.program?.root;
-    final oldProgramInfoNode = _oldDiffCallGraph?.program?.lookup(packagePath);
+    final newProgramInfoNode = _newDiffCallGraph?.program.lookup(packagePath);
+    final newProgramInfoNodeRoot = _newDiffCallGraph?.program.root;
+    final oldProgramInfoNode = _oldDiffCallGraph?.program.lookup(packagePath);
 
     if (newProgramInfoNode != null) {
-      _diffCallGraphRoot.value = _newDiffCallGraph.lookup(newProgramInfoNode);
+      _diffCallGraphRoot.value = _newDiffCallGraph!.lookup(newProgramInfoNode);
     } else if (oldProgramInfoNode != null) {
-      _diffCallGraphRoot.value = _oldDiffCallGraph.lookup(oldProgramInfoNode);
+      _diffCallGraphRoot.value = _oldDiffCallGraph!.lookup(oldProgramInfoNode);
     } else if (newProgramInfoNodeRoot != null) {
       _diffCallGraphRoot.value =
-          _newDiffCallGraph.lookup(newProgramInfoNodeRoot);
+          _newDiffCallGraph!.lookup(newProgramInfoNodeRoot);
     }
   }
 
-  TreemapNode get _activeDiffRoot {
+  TreemapNode? get _activeDiffRoot {
     switch (_activeDiffTreeType.value) {
       case DiffTreeType.increaseOnly:
-        assert(_increasedDiffTreeRoot != null);
         return _increasedDiffTreeRoot;
       case DiffTreeType.decreaseOnly:
-        assert(_decreasedDiffTreeRoot != null);
         return _decreasedDiffTreeRoot;
       case DiffTreeType.combined:
       default:
-        assert(_combinedDiffTreeRoot != null);
         return _combinedDiffTreeRoot;
     }
   }
 
-  TreemapNode _increasedDiffTreeRoot;
-  TreemapNode _decreasedDiffTreeRoot;
-  TreemapNode _combinedDiffTreeRoot;
+  TreemapNode? _increasedDiffTreeRoot;
+  TreemapNode? _decreasedDiffTreeRoot;
+  TreemapNode? _combinedDiffTreeRoot;
 
-  ValueListenable<DevToolsJsonFile> get oldDiffJsonFile => _oldDiffJsonFile;
+  ValueListenable<DevToolsJsonFile?> get oldDiffJsonFile => _oldDiffJsonFile;
 
-  final _oldDiffJsonFile = ValueNotifier<DevToolsJsonFile>(null);
+  final _oldDiffJsonFile = ValueNotifier<DevToolsJsonFile?>(null);
 
   void changeOldDiffFile(DevToolsJsonFile newJsonFile) {
     _oldDiffJsonFile.value = newJsonFile;
   }
 
-  ValueListenable<DevToolsJsonFile> get newDiffJsonFile => _newDiffJsonFile;
+  ValueListenable<DevToolsJsonFile?> get newDiffJsonFile => _newDiffJsonFile;
 
-  final _newDiffJsonFile = ValueNotifier<DevToolsJsonFile>(null);
+  final _newDiffJsonFile = ValueNotifier<DevToolsJsonFile?>(null);
 
   void changeNewDiffFile(DevToolsJsonFile newJsonFile) {
     _newDiffJsonFile.value = newJsonFile;
@@ -174,12 +172,12 @@ class AppSizeController {
   }
 
   /// Notifies that the json files are currently being processed.
-  ValueListenable get processingNotifier => _processingNotifier;
+  ValueListenable<bool> get processingNotifier => _processingNotifier;
   final _processingNotifier = ValueNotifier<bool>(false);
 
   void loadTreeFromJsonFile({
-    @required DevToolsJsonFile jsonFile,
-    @required void Function(String error) onError,
+    required DevToolsJsonFile jsonFile,
+    required void Function(String error) onError,
   }) async {
     _processingNotifier.value = true;
 
@@ -191,7 +189,7 @@ class AppSizeController {
     Map<String, dynamic> processedJson;
     if (jsonFile.isAnalyzeSizeFile) {
       // APK analysis json should be processed already.
-      processedJson = jsonFile.data;
+      processedJson = jsonFile.data as Map<String, dynamic>;
 
       // Extract the precompiler trace, if it exists, and generate a call graph.
       final precompilerTrace = processedJson.remove('precompiler-trace');
@@ -219,7 +217,7 @@ class AppSizeController {
     processedJson['n'] = 'Root';
 
     // Build a tree with [TreemapNode] from [processedJsonMap].
-    final newRoot = generateTree(processedJson);
+    final newRoot = generateTree(processedJson)!;
 
     changeAnalysisRoot(newRoot);
 
@@ -231,9 +229,9 @@ class AppSizeController {
   //                   progress indicator on app size screen. Needs flutter
   //                   web to support working with isolates. See #33577.
   void loadDiffTreeFromJsonFiles({
-    @required DevToolsJsonFile oldFile,
-    @required DevToolsJsonFile newFile,
-    @required void Function(String error) onError,
+    required DevToolsJsonFile? oldFile,
+    required DevToolsJsonFile? newFile,
+    required void Function(String error) onError,
   }) async {
     if (oldFile == null || newFile == null) {
       return;
@@ -255,13 +253,13 @@ class AppSizeController {
     Map<String, dynamic> diffMap;
     if (oldFile.isAnalyzeSizeFile && newFile.isAnalyzeSizeFile) {
       final oldApkProgramInfo = ProgramInfo();
+      final oldFileJson = oldFile.data as Map<String, dynamic>;
       _apkJsonToProgramInfo(
         program: oldApkProgramInfo,
         parent: oldApkProgramInfo.root,
-        json: oldFile.data,
+        json: oldFileJson,
       );
 
-      final Map<String, dynamic> oldFileJson = oldFile.data;
       // Extract the precompiler trace from the old file, if it exists, and
       // generate a call graph.
       final oldPrecompilerTrace = oldFileJson.remove('precompiler-trace');
@@ -273,13 +271,13 @@ class AppSizeController {
       }
 
       final newApkProgramInfo = ProgramInfo();
+      final newFileJson = newFile.data as Map<String, dynamic>;
       _apkJsonToProgramInfo(
         program: newApkProgramInfo,
         parent: newApkProgramInfo.root,
-        json: newFile.data,
+        json: newFileJson,
       );
 
-      final Map<String, dynamic> newFileJson = newFile.data;
       // Extract the precompiler trace from the new file, if it exists, and
       // generate a call graph.
       final newPrecompilerTrace = newFileJson.remove('precompiler-trace');
@@ -303,7 +301,7 @@ class AppSizeController {
       }
     }
 
-    if (diffMap == null || (diffMap['children'] as List).isEmpty) {
+    if ((diffMap['children'] as List).isEmpty) {
       onError(identicalFilesError);
       _processingNotifier.value = false;
       return;
@@ -334,9 +332,9 @@ class AppSizeController {
   }
 
   ProgramInfoNode _apkJsonToProgramInfo({
-    @required ProgramInfo program,
-    @required ProgramInfoNode parent,
-    @required Map<String, dynamic> json,
+    required ProgramInfo program,
+    required ProgramInfoNode parent,
+    required Map<String, dynamic> json,
   }) {
     final bool isLeafNode = json['children'] == null;
     final node = program.makeNode(
@@ -347,7 +345,7 @@ class AppSizeController {
 
     if (!isLeafNode) {
       final List<dynamic> rawChildren = json['children'] as List<dynamic>;
-      for (Map<String, dynamic> childJson in rawChildren) {
+      for (final childJson in rawChildren.cast<Map<String, dynamic>>()) {
         _apkJsonToProgramInfo(program: program, parent: node, json: childJson);
       }
     } else {
@@ -356,7 +354,7 @@ class AppSizeController {
     return node;
   }
 
-  TreemapNode generateTree(Map<String, dynamic> treeJson) {
+  TreemapNode? generateTree(Map<String, dynamic> treeJson) {
     final isLeafNode = treeJson['children'] == null;
     if (!isLeafNode) {
       return _buildNodeWithChildren(treeJson);
@@ -379,7 +377,7 @@ class AppSizeController {
   /// * [DiffTreeType.increaseOnly]: returns a tree with nodes with positive [byteSize].
   /// * [DiffTreeType.decreaseOnly]: returns a tree with nodes with negative [byteSize].
   /// * [DiffTreeType.combined]: returns a tree with all nodes.
-  TreemapNode generateDiffTree(
+  TreemapNode? generateDiffTree(
     Map<String, dynamic> treeJson,
     DiffTreeType diffTreeType,
   ) {
@@ -417,11 +415,12 @@ class AppSizeController {
 
   /// Builds a node by recursively building all of its children first
   /// in order to calculate the sum of its children's sizes.
-  TreemapNode _buildNodeWithChildren(
+  TreemapNode? _buildNodeWithChildren(
     Map<String, dynamic> treeJson, {
     bool showDiff = false,
-    DiffTreeType diffTreeType,
+    DiffTreeType? diffTreeType,
   }) {
+    assert(showDiff ? diffTreeType != null : true);
     final rawChildren = treeJson['children'];
     final treemapNodeChildren = <TreemapNode>[];
     int totalByteSize = 0;
@@ -429,7 +428,7 @@ class AppSizeController {
     // Given a child, build its subtree.
     for (Map<String, dynamic> child in rawChildren) {
       final childTreemapNode = showDiff
-          ? generateDiffTree(child, diffTreeType)
+          ? generateDiffTree(child, diffTreeType!)
           : generateTree(child);
       if (childTreemapNode == null) {
         continue;

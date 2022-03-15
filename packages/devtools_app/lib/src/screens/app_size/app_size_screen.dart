@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -96,11 +94,13 @@ class _AppSizeBodyState extends State<AppSizeBody>
   );
   static final tabs = [analysisTab, diffTab];
 
-  AppSizeController controller;
+  late AppSizeController _controller;
 
-  TabController _tabController;
+  bool _controllerInitialized = false;
 
-  bool preLoadingData = false;
+  late final TabController _tabController;
+
+  bool _preLoadingData = false;
 
   @override
   void initState() {
@@ -112,28 +112,28 @@ class _AppSizeBodyState extends State<AppSizeBody>
 
   Future<void> maybeLoadAppSizeFiles() async {
     final queryParams = loadQueryParams();
-    if (queryParams.containsKey(baseAppSizeFilePropertyName)) {
+    final baseFilePath = queryParams[baseAppSizeFilePropertyName];
+    if (baseFilePath != null) {
       // TODO(kenz): does this have to be in a setState()?
-      preLoadingData = true;
-      final baseAppSizeFile = await server
-          .requestBaseAppSizeFile(queryParams[baseAppSizeFilePropertyName]);
-      DevToolsJsonFile testAppSizeFile;
-      if (queryParams.containsKey(testAppSizeFilePropertyName)) {
-        testAppSizeFile = await server
-            .requestTestAppSizeFile(queryParams[testAppSizeFilePropertyName]);
+      _preLoadingData = true;
+      final baseAppSizeFile = await server.requestBaseAppSizeFile(baseFilePath);
+      DevToolsJsonFile? testAppSizeFile;
+      final testFilePath = queryParams[testAppSizeFilePropertyName];
+      if (testFilePath != null) {
+        testAppSizeFile = await server.requestTestAppSizeFile(testFilePath);
       }
 
       // TODO(kenz): add error handling if the files are null
       if (baseAppSizeFile != null) {
         if (testAppSizeFile != null) {
-          controller.loadDiffTreeFromJsonFiles(
+          _controller.loadDiffTreeFromJsonFiles(
             oldFile: baseAppSizeFile,
             newFile: testAppSizeFile,
             onError: _pushErrorMessage,
           );
           _tabController.animateTo(tabs.indexOf(diffTab));
         } else {
-          controller.loadTreeFromJsonFile(
+          _controller.loadTreeFromJsonFile(
             jsonFile: baseAppSizeFile,
             onError: _pushErrorMessage,
           );
@@ -141,9 +141,9 @@ class _AppSizeBodyState extends State<AppSizeBody>
         }
       }
     }
-    if (preLoadingData) {
+    if (_preLoadingData) {
       setState(() {
-        preLoadingData = false;
+        _preLoadingData = false;
       });
     }
   }
@@ -155,7 +155,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
   }
 
   void _pushErrorMessage(String error) {
-    if (mounted) Notifications.of(context).push(error);
+    if (mounted) Notifications.of(context)!.push(error);
   }
 
   @override
@@ -163,17 +163,18 @@ class _AppSizeBodyState extends State<AppSizeBody>
     super.didChangeDependencies();
 
     final newController = Provider.of<AppSizeController>(context);
-    if (newController == controller) return;
-    controller = newController;
+    if (_controllerInitialized && newController == _controller) return;
+    _controller = newController;
+    _controllerInitialized = true;
 
     maybeLoadAppSizeFiles();
 
-    addAutoDisposeListener(controller.activeDiffTreeType);
+    addAutoDisposeListener(_controller.activeDiffTreeType);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (preLoadingData) {
+    if (_preLoadingData) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -199,7 +200,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TabBar(
-                labelColor: Theme.of(context).textTheme.bodyText1.color,
+                labelColor: Theme.of(context).textTheme.bodyText1!.color,
                 isScrollable: true,
                 controller: _tabController,
                 tabs: tabs,
@@ -209,7 +210,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
                   if (currentTab.key == AppSizeScreen.diffTabKey)
                     _buildDiffTreeTypeDropdown(),
                   const SizedBox(width: defaultSpacing),
-                  _buildClearButton(currentTab.key),
+                  _buildClearButton(currentTab.key!),
                 ],
               ),
             ],
@@ -233,20 +234,20 @@ class _AppSizeBodyState extends State<AppSizeBody>
     return DropdownButtonHideUnderline(
       key: AppSizeScreen.dropdownKey,
       child: DropdownButton<DiffTreeType>(
-        value: controller.activeDiffTreeType.value,
+        value: _controller.activeDiffTreeType.value,
         items: [
           _buildMenuItem(DiffTreeType.combined),
           _buildMenuItem(DiffTreeType.increaseOnly),
           _buildMenuItem(DiffTreeType.decreaseOnly),
         ],
         onChanged: (newDiffTreeType) {
-          controller.changeActiveDiffTreeType(newDiffTreeType);
+          _controller.changeActiveDiffTreeType(newDiffTreeType!);
         },
       ),
     );
   }
 
-  DropdownMenuItem _buildMenuItem(DiffTreeType diffTreeType) {
+  DropdownMenuItem<DiffTreeType> _buildMenuItem(DiffTreeType diffTreeType) {
     return DropdownMenuItem<DiffTreeType>(
       value: diffTreeType,
       child: Text(diffTreeType.display),
@@ -255,7 +256,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
 
   Widget _buildClearButton(Key activeTabKey) {
     return ClearButton(
-      onPressed: () => controller.clear(activeTabKey),
+      onPressed: () => _controller.clear(activeTabKey),
     );
   }
 }
@@ -273,26 +274,29 @@ class AnalysisView extends StatefulWidget {
 }
 
 class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
-  AppSizeController controller;
+  late AppSizeController _controller;
 
-  TreemapNode analysisRoot;
+  bool _controllerInitialized = false;
+
+  TreemapNode? analysisRoot;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     final newController = Provider.of<AppSizeController>(context);
-    if (newController == controller) return;
-    controller = newController;
+    if (_controllerInitialized && newController == _controller) return;
+    _controller = newController;
+    _controllerInitialized = true;
 
-    analysisRoot = controller.analysisRoot.value;
-    addAutoDisposeListener(controller.analysisRoot, () {
+    analysisRoot = _controller.analysisRoot.value;
+    addAutoDisposeListener(_controller.analysisRoot, () {
       setState(() {
-        analysisRoot = controller.analysisRoot.value;
+        analysisRoot = _controller.analysisRoot.value;
       });
     });
 
-    addAutoDisposeListener(controller.analysisJsonFile);
+    addAutoDisposeListener(_controller.analysisJsonFile);
   }
 
   @override
@@ -309,6 +313,7 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
   }
 
   Widget _buildTreemapAndTableSplitView() {
+    final analysisCallGraphRoot = _controller.analysisCallGraphRoot.value;
     return OutlineDecoration(
       child: Column(
         children: [
@@ -325,12 +330,12 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
                 Row(
                   children: [
                     Flexible(
-                      child: AppSizeAnalysisTable(rootNode: analysisRoot),
+                      child: AppSizeAnalysisTable(rootNode: analysisRoot!),
                     ),
-                    if (controller.analysisCallGraphRoot.value != null)
+                    if (analysisCallGraphRoot != null)
                       Flexible(
                         child: CallGraphWithDominators(
-                          callGraphRoot: controller.analysisCallGraphRoot.value,
+                          callGraphRoot: analysisCallGraphRoot,
                         ),
                       ),
                   ],
@@ -348,10 +353,11 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
   }
 
   String _generateSingleFileHeaderText() {
-    String output = controller.analysisJsonFile.value.isAnalyzeSizeFile
+    final analysisFile = _controller.analysisJsonFile.value!;
+    String output = analysisFile.isAnalyzeSizeFile
         ? 'Total size analysis: '
         : 'Dart AOT snapshot: ';
-    output += controller.analysisJsonFile.value.displayText;
+    output += analysisFile.displayText;
     return output;
   }
 
@@ -365,15 +371,15 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
           isOutermostLevel: true,
           width: constraints.maxWidth,
           height: constraints.maxHeight,
-          onRootChangedCallback: controller.changeAnalysisRoot,
+          onRootChangedCallback: _controller.changeAnalysisRoot,
         );
       },
     );
   }
 
   Widget _buildImportFileView() {
-    return ValueListenableBuilder(
-        valueListenable: controller.processingNotifier,
+    return ValueListenableBuilder<bool>(
+        valueListenable: _controller.processingNotifier,
         builder: (context, processing, _) {
           if (processing) {
             return Center(
@@ -381,7 +387,7 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
                 AppSizeScreen.loadingMessage,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Theme.of(context).textTheme.headline1.color,
+                  color: Theme.of(context).textTheme.headline1!.color,
                 ),
               ),
             );
@@ -394,10 +400,10 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
                     instructions: AnalysisView.importInstructions,
                     actionText: 'Analyze Size',
                     onAction: (jsonFile) {
-                      controller.loadTreeFromJsonFile(
+                      _controller.loadTreeFromJsonFile(
                         jsonFile: jsonFile,
                         onError: (error) {
-                          if (mounted) Notifications.of(context).push(error);
+                          if (mounted) Notifications.of(context)!.push(error);
                         },
                       );
                     },
@@ -425,29 +431,32 @@ class DiffView extends StatefulWidget {
 }
 
 class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
-  AppSizeController controller;
+  late AppSizeController _controller;
 
-  TreemapNode diffRoot;
+  bool _controllerInitialized = false;
+
+  TreemapNode? diffRoot;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     final newController = Provider.of<AppSizeController>(context);
-    if (newController == controller) return;
-    controller = newController;
+    if (_controllerInitialized && newController == _controller) return;
+    _controller = newController;
+    _controllerInitialized = true;
 
-    diffRoot = controller.diffRoot.value;
-    addAutoDisposeListener(controller.diffRoot, () {
+    diffRoot = _controller.diffRoot.value;
+    addAutoDisposeListener(_controller.diffRoot, () {
       setState(() {
-        diffRoot = controller.diffRoot.value;
+        diffRoot = _controller.diffRoot.value;
       });
     });
 
-    addAutoDisposeListener(controller.activeDiffTreeType);
+    addAutoDisposeListener(_controller.activeDiffTreeType);
 
-    addAutoDisposeListener(controller.oldDiffJsonFile);
-    addAutoDisposeListener(controller.newDiffJsonFile);
+    addAutoDisposeListener(_controller.oldDiffJsonFile);
+    addAutoDisposeListener(_controller.newDiffJsonFile);
   }
 
   @override
@@ -464,6 +473,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
   }
 
   Widget _buildTreemapAndTableSplitView() {
+    final diffCallGraphRoot = _controller.diffCallGraphRoot.value;
     return OutlineDecoration(
       child: Column(
         children: [
@@ -480,12 +490,12 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
                 Row(
                   children: [
                     Flexible(
-                      child: AppSizeDiffTable(rootNode: diffRoot),
+                      child: AppSizeDiffTable(rootNode: diffRoot!),
                     ),
-                    if (controller.diffCallGraphRoot.value != null)
+                    if (diffCallGraphRoot != null)
                       Flexible(
                         child: CallGraphWithDominators(
-                          callGraphRoot: controller.diffCallGraphRoot.value,
+                          callGraphRoot: diffCallGraphRoot,
                         ),
                       ),
                   ],
@@ -503,19 +513,21 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
   }
 
   String _generateDualFileHeaderText() {
+    final oldFile = _controller.oldDiffJsonFile.value!;
+    final newFile = _controller.newDiffJsonFile.value!;
     String output = 'Diffing ';
-    output += controller.oldDiffJsonFile.value.isAnalyzeSizeFile
+    output += oldFile.isAnalyzeSizeFile
         ? 'total size analyses: '
         : 'Dart AOT snapshots: ';
-    output += controller.oldDiffJsonFile.value.displayText;
+    output += oldFile.displayText;
     output += ' (OLD)    vs    (NEW) ';
-    output += controller.newDiffJsonFile.value.displayText;
+    output += newFile.displayText;
     return output;
   }
 
   Widget _buildImportDiffView() {
-    return ValueListenableBuilder(
-      valueListenable: controller.processingNotifier,
+    return ValueListenableBuilder<bool>(
+      valueListenable: _controller.processingNotifier,
       builder: (context, processing, _) {
         if (processing) {
           return _buildLoadingMessage();
@@ -532,7 +544,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
                   secondInstructions: DiffView.importNewInstructions,
                   actionText: 'Analyze Diff',
                   onAction: (oldFile, newFile, onError) =>
-                      controller.loadDiffTreeFromJsonFiles(
+                      _controller.loadDiffTreeFromJsonFiles(
                     oldFile: oldFile,
                     newFile: newFile,
                     onError: onError,
@@ -552,7 +564,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
         AppSizeScreen.loadingMessage,
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: Theme.of(context).textTheme.headline1.color,
+          color: Theme.of(context).textTheme.headline1!.color,
         ),
       ),
     );
@@ -568,7 +580,7 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
           isOutermostLevel: true,
           width: constraints.maxWidth,
           height: constraints.maxHeight,
-          onRootChangedCallback: controller.changeDiffRoot,
+          onRootChangedCallback: _controller.changeDiffRoot,
         );
       },
     );
