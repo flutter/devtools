@@ -130,7 +130,7 @@ class CustomIconMaker {
     final widgetTheme = WidgetTheme.fromName(name);
     if (widgetTheme.iconAsset != null) {
       return iconCache.putIfAbsent(name, () {
-        return AssetImageIcon(asset: widgetTheme.iconAsset);
+        return AssetImageIcon(asset: widgetTheme.iconAsset!);
       });
     }
 
