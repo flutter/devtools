@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/foundation.dart';
 
 import '../../primitives/utils.dart';
@@ -16,15 +14,15 @@ class PerformanceUtils {
     Map<int, String> threadNamesById,
   ) {
     if (event.groupKey != null) {
-      return event.groupKey;
+      return event.groupKey!;
     } else if (event.isAsyncEvent) {
-      return event.root.name;
+      return event.root.name!;
     } else if (event.isUiEvent) {
       return PerformanceData.uiKey;
     } else if (event.isRasterEvent) {
       return PerformanceData.rasterKey;
     } else if (threadNamesById[event.threadId] != null) {
-      return threadNamesById[event.threadId];
+      return threadNamesById[event.threadId]!;
     } else {
       return PerformanceData.unknownKey;
     }

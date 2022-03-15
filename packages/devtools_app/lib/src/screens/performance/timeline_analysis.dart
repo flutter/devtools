@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 import '../../analytics/constants.dart' as analytics_constants;
@@ -19,15 +17,15 @@ import 'performance_screen.dart';
 
 class TimelineAnalysisHeader extends StatelessWidget {
   const TimelineAnalysisHeader({
-    Key key,
-    @required this.controller,
-    @required this.selectedTab,
-    @required this.searchFieldBuilder,
+    Key? key,
+    required this.controller,
+    required this.selectedTab,
+    required this.searchFieldBuilder,
   }) : super(key: key);
 
   final PerformanceController controller;
 
-  final FlutterFrameAnalysisTabData selectedTab;
+  final FlutterFrameAnalysisTabData? selectedTab;
 
   final Widget Function() searchFieldBuilder;
 
@@ -37,9 +35,8 @@ class TimelineAnalysisHeader extends StatelessWidget {
         (controller.selectedFrame.value
                 ?.isUiJanky(controller.displayRefreshRate.value) ??
             false) &&
-        (controller.selectedFrame.value?.timelineEventData?.isNotEmpty ??
-            false);
-    return ValueListenableBuilder(
+        (controller.selectedFrame.value?.timelineEventData.isNotEmpty ?? false);
+    return ValueListenableBuilder<List<FlutterFrameAnalysisTabData>>(
       valueListenable: controller.analysisTabs,
       builder: (context, tabs, _) {
         return AreaPaneHeader(
@@ -79,11 +76,11 @@ class TimelineAnalysisHeader extends StatelessWidget {
 
 class FlutterFrameAnalysisTab extends StatelessWidget {
   const FlutterFrameAnalysisTab({
-    Key key,
-    this.tabData,
-    this.isSelected,
-    this.onSelected,
-    this.onClosed,
+    Key? key,
+    required this.tabData,
+    required this.isSelected,
+    required this.onSelected,
+    required this.onClosed,
   }) : super(key: key);
 
   static const selectionIndicatorHeight = 2.0;
@@ -108,7 +105,7 @@ class FlutterFrameAnalysisTab extends StatelessWidget {
         children: [
           Text(
             '|',
-            style: theme.textTheme.headline5.copyWith(
+            style: theme.textTheme.headline5!.copyWith(
               color: theme.unselectedWidgetColor,
             ),
           ),
@@ -161,8 +158,8 @@ class FlutterFrameAnalysisTab extends StatelessWidget {
 
 class FlutterFrameAnalysisView extends StatelessWidget {
   const FlutterFrameAnalysisView({
-    Key key,
-    @required this.frameAnalysis,
+    Key? key,
+    required this.frameAnalysis,
   }) : super(key: key);
 
   final FrameAnalysis frameAnalysis;
@@ -186,8 +183,8 @@ class FlutterFrameAnalysisView extends StatelessWidget {
 
 class FrameTimeVisualizer extends StatefulWidget {
   const FrameTimeVisualizer({
-    Key key,
-    @required this.frameAnalysis,
+    Key? key,
+    required this.frameAnalysis,
   }) : super(key: key);
 
   final FrameAnalysis frameAnalysis;
@@ -205,7 +202,7 @@ class _FrameTimeVisualizerState extends State<FrameTimeVisualizer> {
 
   static const _raster = 'Raster';
 
-  String _selectedBlockTitle;
+  late String _selectedBlockTitle;
 
   @override
   void initState() {
@@ -268,7 +265,7 @@ class _FrameTimeVisualizerState extends State<FrameTimeVisualizer> {
                 label: _raster,
                 icon: Icons.grid_on,
                 duration: widget.frameAnalysis.frame.timelineEventData
-                        .rasterEvent?.time?.duration ??
+                        .rasterEvent?.time.duration ??
                     Duration.zero,
                 isSelected: _selectedBlockTitle == _raster,
                 onSelected: _onBlockSelected,
@@ -293,12 +290,12 @@ class _FrameTimeVisualizerState extends State<FrameTimeVisualizer> {
 
 class FrameTimeVisualizerBlock extends StatelessWidget {
   const FrameTimeVisualizerBlock({
-    Key key,
-    @required this.label,
-    @required this.icon,
-    @required this.duration,
-    @required this.isSelected,
-    @required this.onSelected,
+    Key? key,
+    required this.label,
+    required this.icon,
+    required this.duration,
+    required this.isSelected,
+    required this.onSelected,
   }) : super(key: key);
 
   static const _height = 30.0;
@@ -365,8 +362,8 @@ class FrameTimeVisualizerBlock extends StatelessWidget {
 
 class FrameSectionProfile extends StatelessWidget {
   const FrameSectionProfile({
-    Key key,
-    this.selectedSection,
+    Key? key,
+    required this.selectedSection,
   }) : super(key: key);
 
   // TODO(kenz): pass the event to this section instead of the title.
@@ -385,8 +382,8 @@ class FrameSectionProfile extends StatelessWidget {
 
 class RefreshTimelineEventsButton extends StatelessWidget {
   const RefreshTimelineEventsButton({
-    Key key,
-    @required this.controller,
+    Key? key,
+    required this.controller,
   }) : super(key: key);
 
   final PerformanceController controller;
@@ -413,7 +410,7 @@ class AnalyzeFrameButton extends StatelessWidget {
     return DevToolsIconButton(
       iconData: Icons.saved_search,
       onPressed: () =>
-          controller.openAnalysisTab(controller.selectedFrame.value),
+          controller.openAnalysisTab(controller.selectedFrame.value!),
       tooltip: 'Analyze the selected frame',
       gaScreen: analytics_constants.performance,
       gaSelection: analytics_constants.analyzeSelectedFrame,

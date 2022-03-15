@@ -898,7 +898,7 @@ class _SearchField extends StatelessWidget {
                         height: _searchControlDividerHeight,
                         width: defaultIconSize,
                         child: Transform.rotate(
-                          angle: degToRad(90) as double,
+                          angle: degToRad(90),
                           child: PaddedDivider.vertical(),
                         ),
                       ),
@@ -1178,7 +1178,7 @@ class SearchNavigationControls extends StatelessWidget {
                     height: _searchControlDividerHeight,
                     width: defaultIconSize,
                     child: Transform.rotate(
-                      angle: degToRad(90) as double,
+                      angle: degToRad(90),
                       child: PaddedDivider.vertical(),
                     ),
                   ),

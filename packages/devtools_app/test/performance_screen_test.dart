@@ -5,6 +5,8 @@
 // @dart=2.9
 
 @TestOn('vm')
+import 'dart:async';
+
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/performance/event_details.dart';
@@ -40,6 +42,8 @@ void main() {
     );
     when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
         .thenReturn(ValueNotifier<int>(0));
+    when(fakeServiceManager.connectedApp.initialized)
+        .thenReturn(Completer()..complete(true));
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
     when(fakeServiceManager.connectedApp.flutterVersionNow).thenReturn(
