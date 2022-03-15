@@ -85,11 +85,7 @@ class _LogDetailsState extends State<LogDetails>
           needsTopBorder: false,
           rightActions: [
             CopyToClipboardControl(
-              dataProvider: disabled
-                  ? null
-                  // The parenthesis are actually needed.
-                  // ignore: unnecessary_parenthesis
-                  : (() => log?.prettyPrinted()!) as String Function()?,
+              dataProvider: disabled ? null : () => log?.prettyPrinted(),
               buttonKey: LogDetails.copyToClipboardButtonKey,
             ),
           ],
