@@ -80,10 +80,10 @@ class _FieldTypeColumn extends TreeColumnData<FieldReference> {
   _FieldTypeColumn() : super('Type');
 
   @override
-  Object? getValue(FieldReference dataObject) =>
+  String getValue(FieldReference dataObject) =>
       dataObject.isEmptyReference || dataObject.isSentinelReference
           ? ''
-          : dataObject.type;
+          : dataObject.type ?? '';
 
   @override
   String getDisplayValue(FieldReference dataObject) =>
@@ -94,8 +94,8 @@ class _FieldTypeColumn extends TreeColumnData<FieldReference> {
 
   @override
   int compare(FieldReference a, FieldReference b) {
-    final Comparable valueA = getValue(a) as Comparable<Object>;
-    final Comparable valueB = getValue(b) as Comparable<Object>;
+    final valueA = getValue(a);
+    final valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 
@@ -111,7 +111,7 @@ class _FieldNameColumn extends ColumnData<FieldReference> {
         );
 
   @override
-  Object? getValue(FieldReference dataObject) =>
+  String getValue(FieldReference dataObject) =>
       dataObject.isEmptyReference ? '' : dataObject.name;
 
   @override
@@ -123,8 +123,8 @@ class _FieldNameColumn extends ColumnData<FieldReference> {
 
   @override
   int compare(FieldReference a, FieldReference b) {
-    final valueA = getValue(a) as Comparable<Object>;
-    final valueB = getValue(b) as Comparable<Object>;
+    final valueA = getValue(a);
+    final valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 }
@@ -137,10 +137,10 @@ class _FieldValueColumn extends ColumnData<FieldReference> {
         );
 
   @override
-  Object? getValue(FieldReference dataObject) =>
+  String getValue(FieldReference dataObject) =>
       dataObject.isEmptyReference || dataObject.isSentinelReference
           ? ''
-          : dataObject.value;
+          : dataObject.value ?? '';
 
   @override
   String getDisplayValue(FieldReference dataObject) {
@@ -157,7 +157,7 @@ class _FieldValueColumn extends ColumnData<FieldReference> {
     //              text measurement so we accurately truncate the correct # of
     //              characters instead guessing that we only show 30 chars.
     var value = getValue(dataObject);
-    if (value is String && value.length > 30) {
+    if (value.length > 30) {
       value = '${value.substring(0, 13)}…${value.substring(value.length - 17)}';
     }
     return '$value';
@@ -168,8 +168,8 @@ class _FieldValueColumn extends ColumnData<FieldReference> {
 
   @override
   int compare(FieldReference a, FieldReference b) {
-    final valueA = getValue(a) as Comparable<Object>;
-    final valueB = getValue(b) as Comparable<Object>;
+    final valueA = getValue(a);
+    final valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 }
