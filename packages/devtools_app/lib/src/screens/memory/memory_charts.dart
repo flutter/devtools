@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
@@ -109,11 +107,11 @@ class ChartsValues {
     _getDataFromIndex();
   }
 
-  final MemoryController? controller;
+  final MemoryController controller;
 
   final int index;
 
-  final int? timestamp;
+  final int timestamp;
 
   final _event = <String, Object>{};
 
@@ -141,7 +139,7 @@ class ChartsValues {
   int get eventCount =>
       _event.entries.length -
       (extensionEventsLength > 0 ? 1 : 0) +
-      (hasGc! ? 1 : 0);
+      (hasGc ? 1 : 0);
 
   bool get hasSnapshot => _event.containsKey(snapshotJsonName);
 
@@ -155,14 +153,15 @@ class ChartsValues {
 
   bool get hasManualGc => _event.containsKey(manualGCJsonName);
 
-  bool? get hasGc => _vm[gcJsonName] as bool?;
+  bool get hasGc => _vm[gcJsonName] as bool;
 
   int get extensionEventsLength =>
       hasExtensionEvents ? extensionEvents.length : 0;
 
   List<Map<String, Object>> get extensionEvents {
     if (_extensionEvents.isEmpty) {
-      _extensionEvents.addAll(_event[extensionEventsJsonName] as Iterable<Map<String, Object>>);
+      final events = Map<String, Object>.from(_event[extensionEventsJsonName]);
+      _extensionEvents.addAll();
     }
     return _extensionEvents;
   }
@@ -179,7 +178,7 @@ class ChartsValues {
 
   void _getEventData(Map<String, Object> results) {
     // Use the detailed extension events data stored in the memoryTimeline.
-    final eventInfo = controller!.memoryTimeline.data[index].memoryEventInfo;
+    final eventInfo = controller.memoryTimeline.data[index].memoryEventInfo;
 
     if (eventInfo.isEmpty) return;
 
@@ -219,7 +218,7 @@ class ChartsValues {
   }
 
   void _getVMData(Map<String, Object> results) {
-    final HeapSample heapSample = controller!.memoryTimeline.data[index];
+    final HeapSample heapSample = controller.memoryTimeline.data[index];
 
     results[rssJsonName] = heapSample.rss;
     results[capacityJsonName] = heapSample.capacity;
@@ -232,7 +231,7 @@ class ChartsValues {
 
   void _getAndroidData(Map<String, Object> results) {
     final AdbMemoryInfo androidData =
-        controller!.memoryTimeline.data[index].adbMemoryInfo;
+        controller.memoryTimeline.data[index].adbMemoryInfo;
 
     results[adbTotalJsonName] = androidData.total;
     results[adbOtherJsonName] = androidData.other;
@@ -257,7 +256,7 @@ class ChartsValues {
           isLight ? events.resetLightLegend : events.resetDarkLegend;
     }
 
-    if (hasGc!) {
+    if (hasGc) {
       eventsDisplayed['GC'] = events.gcVMLegend;
     }
 
@@ -285,7 +284,8 @@ class ChartsValues {
   }
 
   Map<String, Map<String, Object?>> displayVmDataToDisplay(List<Trace> traces) {
-    final Map<String, Map<String, Object?>> vmDataDisplayed = <String, Map<String, Object>>{};
+    final Map<String, Map<String, Object?>> vmDataDisplayed =
+        <String, Map<String, Object>>{};
 
     final rssValueDisplay = formatNumeric(vmData[rssJsonName] as num?);
     vmDataDisplayed['$rssDisplay $rssValueDisplay'] = traceRender(
@@ -293,7 +293,8 @@ class ChartsValues {
       dashed: true,
     );
 
-    final capacityValueDisplay = formatNumeric(vmData[capacityJsonName] as num?);
+    final capacityValueDisplay =
+        formatNumeric(vmData[capacityJsonName] as num?);
     vmDataDisplayed['$allocatedDisplay $capacityValueDisplay'] = traceRender(
       color: traces[vm.TraceName.capacity.index].characteristics.color,
       dashed: true,
@@ -304,18 +305,21 @@ class ChartsValues {
       color: traces[vm.TraceName.used.index].characteristics.color,
     );
 
-    final externalValueDisplay = formatNumeric(vmData[externalJsonName] as num?);
+    final externalValueDisplay =
+        formatNumeric(vmData[externalJsonName] as num?);
     vmDataDisplayed['$externalDisplay $externalValueDisplay'] = traceRender(
       color: traces[vm.TraceName.external.index].characteristics.color,
     );
 
-    final layerValueDisplay = formatNumeric(vmData[rasterLayerJsonName] as num?);
+    final layerValueDisplay =
+        formatNumeric(vmData[rasterLayerJsonName] as num?);
     vmDataDisplayed['$layerDisplay $layerValueDisplay'] = traceRender(
       color: traces[vm.TraceName.rasterLayer.index].characteristics.color,
       dashed: true,
     );
 
-    final pictureValueDisplay = formatNumeric(vmData[rasterPictureJsonName] as num?);
+    final pictureValueDisplay =
+        formatNumeric(vmData[rasterPictureJsonName] as num?);
     vmDataDisplayed['$pictureDisplay $pictureValueDisplay'] = traceRender(
       color: traces[vm.TraceName.rasterPicture.index].characteristics.color,
       dashed: true,
@@ -325,9 +329,10 @@ class ChartsValues {
   }
 
   Map<String, Map<String, Object?>> androidDataToDisplay(List<Trace> traces) {
-    final Map<String, Map<String, Object?>> androidDataDisplayed = <String, Map<String, Object>>{};
+    final Map<String, Map<String, Object?>> androidDataDisplayed =
+        <String, Map<String, Object>>{};
 
-    if (controller!.isAndroidChartVisible) {
+    if (controller.isAndroidChartVisible) {
       final data = androidData;
 
       // Total trace
@@ -346,14 +351,16 @@ class ChartsValues {
       );
 
       // Native heap trace
-      final nativeValueDisplay = formatNumeric(data[adbNativeHeapJsonName] as num?);
+      final nativeValueDisplay =
+          formatNumeric(data[adbNativeHeapJsonName] as num?);
       androidDataDisplayed['$androidNativeDisplay $nativeValueDisplay'] =
           traceRender(
         color: traces[android.TraceName.nativeHeap.index].characteristics.color,
       );
 
       // Graphics trace
-      final graphicsValueDisplay = formatNumeric(data[adbGraphicsJsonName] as num?);
+      final graphicsValueDisplay =
+          formatNumeric(data[adbGraphicsJsonName] as num?);
       androidDataDisplayed['$androidGraphicsDisplay $graphicsValueDisplay'] =
           traceRender(
         color: traces[android.TraceName.graphics.index].characteristics.color,
@@ -384,7 +391,7 @@ class ChartsValues {
     return androidDataDisplayed;
   }
 
-  String? formatNumeric(num? number) => controller!.unitDisplayed.value
+  String? formatNumeric(num? number) => controller.unitDisplayed.value
       ? prettyPrintBytes(
           number,
           kbFractionDigits: 1,
