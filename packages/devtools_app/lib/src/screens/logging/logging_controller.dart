@@ -791,7 +791,7 @@ class LogData with DataSearchStateMixin {
     detailsComputer = null;
   }
 
-  String? get prettyPrinted {
+  String? prettyPrinted() {
     if (needsComputing) {
       return details;
     }
