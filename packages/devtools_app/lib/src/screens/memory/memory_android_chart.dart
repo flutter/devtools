@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -17,7 +15,7 @@ import 'memory_controller.dart';
 import 'memory_timeline.dart';
 
 class AndroidChartController extends ChartController {
-  AndroidChartController(this._memoryController, {List<int> sharedLabels})
+  AndroidChartController(this._memoryController, {sharedLabels = const <int>[]})
       : super(
           displayTopLine: false,
           name: 'Android',
@@ -100,7 +98,7 @@ class AndroidChartController extends ChartController {
 }
 
 class MemoryAndroidChart extends StatefulWidget {
-  const MemoryAndroidChart(this.chartController, {Key key}) : super(key: key);
+  const MemoryAndroidChart(this.chartController, {Key? key}) : super(key: key);
 
   final AndroidChartController chartController;
 
@@ -126,12 +124,12 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
   /// Controller attached to the chart.
   AndroidChartController get _chartController => widget.chartController;
 
+  bool _initialized = false;
+
   /// Controller for managing memory collection.
-  MemoryController _memoryController;
+  late MemoryController _memoryController;
 
   MemoryTimeline get _memoryTimeline => _memoryController.memoryTimeline;
-
-  ColorScheme colorScheme;
 
   @override
   void initState() {
@@ -142,29 +140,30 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _memoryController = Provider.of<MemoryController>(context);
-
-    colorScheme = Theme.of(context).colorScheme;
+    final newMemoryController = Provider.of<MemoryController>(context);
+    if (_initialized && _memoryController == newMemoryController) return;
+    _memoryController = newMemoryController;
+    _initialized = true;
 
     cancelListeners();
 
     setupTraces();
     _chartController.setupData();
 
-    addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
-      _processHeapSample(_memoryTimeline.sampleAddedNotifier.value);
-    });
+    if (_memoryTimeline.sampleAddedNotifier.value != null) {
+      addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
+        _processHeapSample(_memoryTimeline.sampleAddedNotifier.value!);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_chartController != null) {
-      if (_chartController.timestamps.isNotEmpty) {
-        return Container(
-          child: Chart(_chartController),
-          height: defaultChartHeight,
-        );
-      }
+    if (_chartController.timestamps.isNotEmpty) {
+      return Container(
+        child: Chart(_chartController),
+        height: defaultChartHeight,
+      );
     }
 
     return const SizedBox(width: denseSpacing);
