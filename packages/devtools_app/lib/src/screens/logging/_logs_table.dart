@@ -25,9 +25,9 @@ class LogsTable extends StatelessWidget {
 
   final List<LogData> data;
   final ItemCallback<LogData> onItemSelected;
-  final ValueListenable<LogData> selectionNotifier;
+  final ValueListenable<LogData?> selectionNotifier;
   final ValueListenable<List<LogData>> searchMatchesNotifier;
-  final ValueListenable<LogData> activeSearchMatchNotifier;
+  final ValueListenable<LogData?> activeSearchMatchNotifier;
 
   final ColumnData<LogData> when = WhenColumn();
   final ColumnData<LogData> kind = KindColumn();
