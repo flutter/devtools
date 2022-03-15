@@ -160,8 +160,9 @@ class ChartsValues {
 
   List<Map<String, Object>> get extensionEvents {
     if (_extensionEvents.isEmpty) {
-      final events = Map<String, Object>.from(_event[extensionEventsJsonName]);
-      _extensionEvents.addAll();
+      _extensionEvents.add(<String, Object>{
+        extensionEventsJsonName: _event[extensionEventsJsonName]!
+      });
     }
     return _extensionEvents;
   }
@@ -195,12 +196,12 @@ class ChartsValues {
     }
 
     if (eventInfo.hasExtensionEvents) {
-      final List<Map<String, Object?>> events = <Map<String, Object>>[];
-      for (ExtensionEvent event in eventInfo.extensionEvents!.theEvents) {
+      final events = <Map<String, Object>>[];
+      for (ExtensionEvent event in eventInfo.extensionEvents?.theEvents ?? []) {
         if (event.customEventName != null) {
           events.add(
             {
-              eventName: event.eventKind,
+              eventName: event.eventKind!,
               customEvent: {
                 customEventName: event.customEventName,
                 customEventData: event.data,
@@ -208,7 +209,8 @@ class ChartsValues {
             },
           );
         } else {
-          events.add({eventName: event.eventKind, eventData: event.data});
+          events
+              .add({eventName: event.eventKind!, eventData: event.data ?? {}});
         }
       }
       if (events.isNotEmpty) {
