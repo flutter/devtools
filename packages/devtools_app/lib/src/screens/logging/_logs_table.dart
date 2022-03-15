@@ -23,11 +23,11 @@ class LogsTable extends StatelessWidget {
     required this.activeSearchMatchNotifier,
   }) : super(key: key);
 
-  final List<LogData>? data;
-  final ItemCallback<LogData?> onItemSelected;
-  final ValueListenable<LogData?> selectionNotifier;
+  final List<LogData> data;
+  final ItemCallback<LogData> onItemSelected;
+  final ValueListenable<LogData> selectionNotifier;
   final ValueListenable<List<LogData>> searchMatchesNotifier;
-  final ValueListenable<LogData?> activeSearchMatchNotifier;
+  final ValueListenable<LogData> activeSearchMatchNotifier;
 
   final ColumnData<LogData> when = WhenColumn();
   final ColumnData<LogData> kind = KindColumn();
@@ -37,11 +37,11 @@ class LogsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlatTable<LogData?>(
+    return FlatTable<LogData>(
       columns: columns,
-      data: data ?? [],
+      data: data,
       autoScrollContent: true,
-      keyFactory: (LogData? data) => ValueKey<LogData?>(data),
+      keyFactory: (LogData data) => ValueKey<LogData>(data),
       onItemSelected: onItemSelected,
       selectionNotifier: selectionNotifier,
       sortColumn: when,
