@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'dart:ui' as ui;
 
@@ -29,7 +29,7 @@ import '../../inspector_data_models.dart';
 class OverflowIndicatorPainter extends CustomPainter {
   const OverflowIndicatorPainter(this.side, this.size);
 
-  final OverflowSide side;
+  final OverflowSide? side;
   final double size;
 
   /// These static variables  are taken from [DebugOverflowIndicatorMixin]
