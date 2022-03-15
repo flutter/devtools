@@ -85,7 +85,7 @@ class _LogDetailsState extends State<LogDetails>
           needsTopBorder: false,
           rightActions: [
             CopyToClipboardControl(
-              dataProvider: disabled ? null : () => log?.prettyPrinted(),
+              dataProvider: disabled ? null : log?.prettyPrinted,
               buttonKey: LogDetails.copyToClipboardButtonKey,
             ),
           ],
