@@ -815,8 +815,8 @@ class TimelineFlameChartState
           // Draw the horizontal guideline to the first child event that is not
           // an instant event, since it is guaranteed to be connected to
           // the main vertical we just created.
-          final TimelineEvent firstChild = event.children
-              .firstWhere((TimelineEvent e) => !e.isAsyncInstantEvent);
+          final firstChild =
+              event.children.firstWhere((e) => !e.isAsyncInstantEvent);
           final horizontalGuidelineEndX =
               chartNodesByEvent[firstChild]!.rect.left;
           final horizontalGuidelineY =
@@ -831,7 +831,7 @@ class TimelineFlameChartState
           for (int i = 1; i < event.children.length; i++) {
             double horizontalGuidelineStartX = verticalGuidelineX;
 
-            final TimelineEvent child = event.children[i];
+            final child = event.children[i];
             if (child.isAsyncInstantEvent) continue;
 
             final childNode = chartNodesByEvent[child]!;

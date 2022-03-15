@@ -723,31 +723,37 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 
   int get displayDepth => displayRows.length;
 
-  List<List<TimelineEvent>>? _displayRows;
-
-  List<List<TimelineEvent>> get displayRows =>
-      _displayRows ??= _calculateDisplayRows();
+  late List<List<TimelineEvent>> displayRows = _calculateDisplayRows();
 
   List<List<TimelineEvent>> _calculateDisplayRows();
 
-  void _expandDisplayRows(int newRowLength) {
-    _displayRows ??= [];
-    final currentLength = _displayRows!.length;
+  void _expandDisplayRows({
+    required List<List<TimelineEvent>> rows,
+    required int newRowLength,
+  }) {
+    final currentLength = rows.length;
     for (int i = currentLength; i < newRowLength; i++) {
-      _displayRows!.add([]);
+      rows.add([]);
     }
   }
 
-  void _mergeChildDisplayRows(int mergeStartLevel, TimelineEvent child) {
+  void _mergeChildDisplayRows({
+    required int mergeStartLevel,
+    required TimelineEvent child,
+    required List<List<TimelineEvent>> rows,
+  }) {
     assert(
-      mergeStartLevel <= _displayRows!.length,
+      mergeStartLevel <= rows.length,
       'mergeStartLevel $mergeStartLevel is greater than _displayRows.length'
-      ' ${_displayRows!.length}',
+      ' ${rows.length}',
     );
     final childDisplayRows = child.displayRows;
-    _expandDisplayRows(mergeStartLevel + childDisplayRows.length);
+    _expandDisplayRows(
+      rows: rows,
+      newRowLength: mergeStartLevel + childDisplayRows.length,
+    );
     for (int i = 0; i < childDisplayRows.length; i++) {
-      displayRows[mergeStartLevel + i].addAll(childDisplayRows[i]);
+      rows[mergeStartLevel + i].addAll(childDisplayRows[i]);
     }
     if (mergeStartLevel >= _lowestDisplayChildRow) {
       _lowestDisplayChildRow = mergeStartLevel;
@@ -961,14 +967,18 @@ class SyncTimelineEvent extends TimelineEvent {
 
   @override
   List<List<TimelineEvent>> _calculateDisplayRows() {
-    assert(_displayRows == null);
-    _expandDisplayRows(depth);
+    final rows = <List<TimelineEvent>>[];
+    _expandDisplayRows(rows: rows, newRowLength: depth);
 
-    _displayRows![0].add(this);
+    rows[0].add(this);
     for (final child in children) {
-      _mergeChildDisplayRows(1, child);
+      _mergeChildDisplayRows(
+        mergeStartLevel: 1,
+        child: child,
+        rows: rows,
+      );
     }
-    return _displayRows!;
+    return rows;
   }
 
   @override
@@ -1012,7 +1022,7 @@ class AsyncTimelineEvent extends TimelineEvent {
 
   static const parentIdKey = 'parentId';
 
-  String? get asyncId => traceEvents.first.event.id;
+  String get asyncId => traceEvents.first.event.id!;
 
   String get asyncUID => traceEvents.first.event.asyncUID;
 
@@ -1049,36 +1059,50 @@ class AsyncTimelineEvent extends TimelineEvent {
 
   @override
   List<List<TimelineEvent>> _calculateDisplayRows() {
-    assert(_displayRows == null);
-    _expandDisplayRows(1);
+    final rows = <List<TimelineEvent>>[];
+    _expandDisplayRows(rows: rows, newRowLength: 1);
 
     const currentRow = 0;
-    _displayRows![currentRow].add(this);
+    rows[currentRow].add(this);
 
     const mainChildRow = currentRow + 1;
     for (int i = 0; i < children.length; i++) {
       final AsyncTimelineEvent child = children[i] as AsyncTimelineEvent;
       if (i == 0 ||
-          _eventFitsAtDisplayRow(child, mainChildRow, _displayRows!.length)) {
-        _mergeChildDisplayRows(mainChildRow, child);
+          _eventFitsAtDisplayRow(
+            event: child,
+            displayRow: mainChildRow,
+            currentLargestRowIndex: rows.length,
+            rows: rows,
+          )) {
+        _mergeChildDisplayRows(
+          mergeStartLevel: mainChildRow,
+          child: child,
+          rows: rows,
+        );
       } else {
         // If [child] does not fit on the target row, add it below the current
         // deepest display row.
-        _mergeChildDisplayRows(displayRows.length, child);
+        _mergeChildDisplayRows(
+          mergeStartLevel: rows.length,
+          child: child,
+          rows: rows,
+        );
       }
     }
-    return _displayRows!;
+    return rows;
   }
 
-  bool _eventFitsAtDisplayRow(
-    AsyncTimelineEvent event,
-    int displayRow,
-    int currentLargestRowIndex,
-  ) {
+  bool _eventFitsAtDisplayRow({
+    required AsyncTimelineEvent event,
+    required int displayRow,
+    required int currentLargestRowIndex,
+    required List<List<TimelineEvent>> rows,
+  }) {
     final maxLevelToVerify =
         math.min(event.displayDepth, currentLargestRowIndex - displayRow);
     for (int level = 0; level < maxLevelToVerify; level++) {
-      final lastEventAtLevel = _displayRows![displayRow + level].safeLast;
+      final lastEventAtLevel = rows[displayRow + level].safeLast;
       final firstNewEventAtLevel = event.displayRows[level].safeFirst;
       if (lastEventAtLevel != null && firstNewEventAtLevel != null) {
         // Events overlap one another, so [event] does not fit at [displayRow].
@@ -1144,8 +1168,8 @@ class AsyncTimelineEvent extends TimelineEvent {
 
     if (endTime != null && eEndTime != null) {
       if (startTime == eStartTime && endTime == eEndTime) {
-        return int.parse(asyncId!, radix: 16) <
-            int.parse(asyncEvent.asyncId!, radix: 16);
+        return int.parse(asyncId, radix: 16) <
+            int.parse(asyncEvent.asyncId, radix: 16);
       }
       return startTime <= eStartTime && endTime >= eEndTime;
     } else if (endTime != null) {
@@ -1156,8 +1180,8 @@ class AsyncTimelineEvent extends TimelineEvent {
       // not be the parent of [e].
       return startTime <= eStartTime && endTime > eStartTime;
     } else if (startTime == eStartTime) {
-      return int.parse(asyncId!, radix: 16) <
-          int.parse(asyncEvent.asyncId!, radix: 16);
+      return int.parse(asyncId, radix: 16) <
+          int.parse(asyncEvent.asyncId, radix: 16);
     } else {
       return startTime < eStartTime;
     }

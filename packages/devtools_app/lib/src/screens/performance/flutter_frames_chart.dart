@@ -46,27 +46,27 @@ class FlutterFramesChart extends StatefulWidget {
 
 class _FlutterFramesChartState extends State<FlutterFramesChart>
     with AutoDisposeMixin {
-  static const defaultFrameWidthWithPadding =
+  static const _defaultFrameWidthWithPadding =
       FlutterFramesChartItem.defaultFrameWidth + densePadding * 2;
 
-  double get yAxisUnitsSpace => scaleByFontFactor(48.0);
+  static const _outlineBorderWidth = 1.0;
 
-  static const outlineBorderWidth = 1.0;
+  double get _yAxisUnitsSpace => scaleByFontFactor(48.0);
 
-  double get frameNumberSectionHeight => scaleByFontFactor(20.0);
+  double get _frameNumberSectionHeight => scaleByFontFactor(20.0);
 
-  double get frameChartScrollbarOffset =>
-      defaultScrollBarOffset + frameNumberSectionHeight;
+  double get _frameChartScrollbarOffset =>
+      defaultScrollBarOffset + _frameNumberSectionHeight;
 
   late PerformanceController _controller;
 
   bool _controllerInitialized = false;
 
-  late final LinkedScrollControllerGroup linkedScrollControllerGroup;
+  late final LinkedScrollControllerGroup _linkedScrollControllerGroup;
 
-  late final ScrollController framesScrollController;
+  late final ScrollController _framesScrollController;
 
-  late final ScrollController frameNumbersScrollController;
+  late final ScrollController _frameNumbersScrollController;
 
   FlutterFrame? _selectedFrame;
 
@@ -74,16 +74,16 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   ///
   /// This value will result in a y-axis time range spanning two times the
   /// target frame time for a single frame (e.g. 16.6 * 2 for a 60 FPS device).
-  double get msPerPx =>
+  double get _msPerPx =>
       // Multiply by two to reach two times the target frame time.
       1 / widget.displayRefreshRate * 1000 * 2 / defaultChartHeight;
 
   @override
   void initState() {
     super.initState();
-    linkedScrollControllerGroup = LinkedScrollControllerGroup();
-    framesScrollController = linkedScrollControllerGroup.addAndGet();
-    frameNumbersScrollController = linkedScrollControllerGroup.addAndGet();
+    _linkedScrollControllerGroup = LinkedScrollControllerGroup();
+    _framesScrollController = _linkedScrollControllerGroup.addAndGet();
+    _frameNumbersScrollController = _linkedScrollControllerGroup.addAndGet();
   }
 
   @override
@@ -108,9 +108,9 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
   @override
   void didUpdateWidget(FlutterFramesChart oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (linkedScrollControllerGroup.hasAttachedControllers &&
-        linkedScrollControllerGroup.atScrollBottom) {
-      linkedScrollControllerGroup.autoScrollToBottom();
+    if (_linkedScrollControllerGroup.hasAttachedControllers &&
+        _linkedScrollControllerGroup.atScrollBottom) {
+      _linkedScrollControllerGroup.autoScrollToBottom();
     }
 
     if (!collectionEquals(oldWidget.frames, widget.frames)) {
@@ -141,8 +141,8 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
 
   @override
   void dispose() {
-    framesScrollController.dispose();
-    frameNumbersScrollController.dispose();
+    _framesScrollController.dispose();
+    _frameNumbersScrollController.dispose();
     super.dispose();
   }
 
@@ -154,13 +154,13 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         right: denseSpacing,
         bottom: denseSpacing,
       ),
-      height: defaultChartHeight + frameChartScrollbarOffset,
+      height: defaultChartHeight + _frameChartScrollbarOffset,
       child: Row(
         children: [
           Expanded(child: _buildChart()),
           const SizedBox(width: defaultSpacing),
           Padding(
-            padding: EdgeInsets.only(bottom: frameChartScrollbarOffset),
+            padding: EdgeInsets.only(bottom: _frameChartScrollbarOffset),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,22 +196,22 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         final themeData = Theme.of(context);
         final chart = Scrollbar(
           isAlwaysShown: true,
-          controller: framesScrollController,
+          controller: _framesScrollController,
           child: Padding(
-            padding: EdgeInsets.only(bottom: frameChartScrollbarOffset),
+            padding: EdgeInsets.only(bottom: _frameChartScrollbarOffset),
             child: RoundedOutlinedBorder(
               child: ListView.builder(
-                controller: framesScrollController,
+                controller: _framesScrollController,
                 scrollDirection: Axis.horizontal,
                 itemCount: widget.frames.length,
-                itemExtent: defaultFrameWidthWithPadding,
+                itemExtent: _defaultFrameWidthWithPadding,
                 itemBuilder: (context, index) => FlutterFramesChartItem(
                   controller: _controller,
                   frame: widget.frames[index],
                   selected: widget.frames[index] == _selectedFrame,
-                  msPerPx: msPerPx,
+                  msPerPx: _msPerPx,
                   availableChartHeight:
-                      defaultChartHeight - 2 * outlineBorderWidth,
+                      defaultChartHeight - 2 * _outlineBorderWidth,
                   displayRefreshRate: widget.displayRefreshRate,
                 ),
               ),
@@ -219,17 +219,17 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
           ),
         );
         final frameNumbers = Container(
-          height: frameNumberSectionHeight,
-          padding: EdgeInsets.only(left: yAxisUnitsSpace),
+          height: _frameNumberSectionHeight,
+          padding: EdgeInsets.only(left: _yAxisUnitsSpace),
           child: ListView.builder(
-            controller: frameNumbersScrollController,
+            controller: _frameNumbersScrollController,
             scrollDirection: Axis.horizontal,
             itemCount: widget.frames.length,
-            itemExtent: defaultFrameWidthWithPadding,
+            itemExtent: _defaultFrameWidthWithPadding,
             shrinkWrap: true,
             itemBuilder: (context, index) {
               if (index % 2 == 1) {
-                return const SizedBox(width: defaultFrameWidthWithPadding);
+                return const SizedBox(width: _defaultFrameWidthWithPadding);
               }
               return Center(
                 child: Text(
@@ -243,21 +243,21 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
         final chartAxisPainter = CustomPaint(
           painter: ChartAxisPainter(
             constraints: constraints,
-            yAxisUnitsSpace: yAxisUnitsSpace,
+            yAxisUnitsSpace: _yAxisUnitsSpace,
             displayRefreshRate: widget.displayRefreshRate,
-            msPerPx: msPerPx,
+            msPerPx: _msPerPx,
             themeData: themeData,
-            bottomMargin: frameChartScrollbarOffset,
+            bottomMargin: _frameChartScrollbarOffset,
           ),
         );
         final fpsLinePainter = CustomPaint(
           painter: FPSLinePainter(
             constraints: constraints,
-            yAxisUnitsSpace: yAxisUnitsSpace,
+            yAxisUnitsSpace: _yAxisUnitsSpace,
             displayRefreshRate: widget.displayRefreshRate,
-            msPerPx: msPerPx,
+            msPerPx: _msPerPx,
             themeData: themeData,
-            bottomMargin: frameChartScrollbarOffset,
+            bottomMargin: _frameChartScrollbarOffset,
           ),
         );
         return Stack(
@@ -268,7 +268,7 @@ class _FlutterFramesChartState extends State<FlutterFramesChart>
               child: frameNumbers,
             ),
             Padding(
-              padding: EdgeInsets.only(left: yAxisUnitsSpace),
+              padding: EdgeInsets.only(left: _yAxisUnitsSpace),
               child: chart,
             ),
             fpsLinePainter,

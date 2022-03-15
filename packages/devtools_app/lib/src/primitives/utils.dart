@@ -424,7 +424,7 @@ extension JsonMap on Map<String, Object?> {
   String prettyPrint() => const JsonEncoder.withIndent('  ').convert(this);
 }
 
-typedef RateLimiterCallback = Future<dynamic> Function();
+typedef RateLimiterCallback = Future<void> Function();
 
 /// Rate limiter that ensures a [callback] is run no more  than the
 /// specified rate and that at most one async [callback] is running at a time.

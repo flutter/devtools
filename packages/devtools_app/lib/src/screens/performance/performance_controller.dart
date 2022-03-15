@@ -259,7 +259,7 @@ class PerformanceController extends DisposableController
 
       _timelinePollingRateLimiter = RateLimiter(
         timelinePollingRateLimit,
-        () async => _pullTraceEventsFromVmTimeline(),
+        _pullTraceEventsFromVmTimeline,
       );
 
       // Poll for new timeline events.
@@ -273,6 +273,7 @@ class PerformanceController extends DisposableController
   }
 
   Future<void> _initData() async {
+    await serviceManager.connectedApp!.initialized.future;
     data = serviceManager.connectedApp!.isFlutterAppNow!
         ? PerformanceData(
             displayRefreshRate: await serviceManager.queryDisplayRefreshRate,
@@ -297,7 +298,7 @@ class PerformanceController extends DisposableController
     _nextPollStartMicros = currentVmTime.timestamp! + 1;
 
     final threadNameEvents = <TraceEvent>[];
-    for (final event in timeline.traceEvents!) {
+    for (final event in timeline.traceEvents ?? []) {
       final traceEvent = TraceEvent(event.json!);
       final eventWrapper = TraceEventWrapper(
         traceEvent,

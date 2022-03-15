@@ -212,7 +212,7 @@ class EventSummary extends StatelessWidget {
     if (event is OfflineTimelineEvent) {
       asyncId = event.traceEvents.first.event.id;
     } else {
-      asyncId = (event as AsyncTimelineEvent).asyncId!;
+      asyncId = (event as AsyncTimelineEvent).asyncId;
     }
     return EventMetaData(
       title: 'Async id',
