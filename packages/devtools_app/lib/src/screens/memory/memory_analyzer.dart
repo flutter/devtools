@@ -47,9 +47,7 @@ Map<String, List<Reference>> collect(
 
       final ExternalReferences externals = library as ExternalReferences;
       for (final ExternalReference external
-          in externals.children as Iterable<ExternalReference>) {
-        assert(external.isExternal);
-
+          in externals.children.cast<ExternalReference>()) {
         final liveExternal = external.liveExternal;
         final size = liveExternal.externalProperty.externalSize;
         final liveElement = liveExternal.live;
@@ -66,10 +64,9 @@ Map<String, List<Reference>> collect(
       result['externals'] = externalsToAnalyze;
     } else if (library.isFiltered) {
       final filtersToAnalyze = <ClassReference>[];
-      for (final LibraryReference libraryRef
-          in library.children as Iterable<LibraryReference>) {
+      for (final Reference libraryRef in library.children) {
         for (final ClassReference classRef
-            in libraryRef.children as Iterable<ClassReference>) {
+            in libraryRef.children.cast<ClassReference>()) {
           final HeapGraphClassLive liveClass = classRef.actualClass!;
           if (_classMatcher(liveClass)) {
             filtersToAnalyze.add(classRef);
@@ -83,7 +80,7 @@ Map<String, List<Reference>> collect(
     } else if (library.isLibrary) {
       final librariesToAnalyze = <ClassReference>[];
       for (final ClassReference classRef
-          in library.children as Iterable<ClassReference>) {
+          in library.children.cast<ClassReference>()) {
         final HeapGraphClassLive liveClass = classRef.actualClass!;
         if (_classMatcher(liveClass)) {
           librariesToAnalyze.add(classRef);
@@ -130,8 +127,7 @@ void imageAnalysis(
       case 'externals':
         final externalsNode = AnalysisReference('Externals');
         analysisSnapshot.addChild(externalsNode);
-        for (final ExternalReference ref
-            in value as Iterable<ExternalReference>) {
+        for (final ExternalReference ref in value.cast<ExternalReference>()) {
           final HeapGraphExternalLive liveExternal = ref.liveExternal;
           final HeapGraphElementLive liveElement = liveExternal.live;
 
@@ -144,7 +140,7 @@ void imageAnalysis(
           var childExternalSizes = 0;
           final bucketSizes = SplayTreeMap<String, Bucket>();
           for (final ExternalObjectReference child
-              in ref.children as Iterable<ExternalObjectReference>) {
+              in ref.children.cast<ExternalObjectReference>()) {
             if (child.externalSize < 10000) {
               bucketSizes.putIfAbsent(bucket10K, () => Bucket(0, 0));
               bucketSizes[bucket10K]!.totalCount += 1;
@@ -343,8 +339,7 @@ Map<String, List<String>> drillIn(
     result[key]!.add(value);
   });
 
-  for (final ClassReference classRef
-      in references as Iterable<ClassReference>) {
+  for (final Reference classRef in references) {
     if (classRef.name == null || !matcher.isClassMatched(classRef.name!)) {
       continue;
     }
@@ -373,7 +368,7 @@ Map<String, List<String>> drillIn(
     var instanceIndex = 0;
     _debugMonitor('Class $name Instance=$instanceIndex');
     for (final ObjectReference objRef
-        in classRef.children as Iterable<ObjectReference>) {
+        in classRef.children.cast<ObjectReference>()) {
       final fields = objRef.instance.getFields();
       // Root __FIELDS__ is a container for children, the children
       // are added, later, to a treenode - if the treenode should
