@@ -385,8 +385,8 @@ class InspectorService extends InspectorServiceBase {
       for (var libraryRef in isolate.libraries!) {
         if (isLocalUri(libraryRef.uri!)) {
           try {
-            final Library library = await (inspectorLibrary.service
-                .getObject(isolate.id!, libraryRef.id!) as FutureOr<Library>);
+            final Library library = await inspectorLibrary.service
+                .getObject(isolate.id!, libraryRef.id!) as Library;
             for (var classRef in library.classes!) {
               localClasses[classRef.name] = classRef;
             }
@@ -787,15 +787,14 @@ abstract class ObjectGroupBase implements Disposable {
   Future<RemoteDiagnosticsNode?> parseDiagnosticsNodeDaemon(
       Future<Object?> json) async {
     if (disposed) return null;
-    return parseDiagnosticsNodeHelper(
-        await (json as FutureOr<Map<String, Object>?>));
+    return parseDiagnosticsNodeHelper(await json as Map<String, Object>?);
   }
 
   Future<RemoteDiagnosticsNode?> parseDiagnosticsNodeObservatory(
       FutureOr<InstanceRef?> instanceRefFuture) async {
     return parseDiagnosticsNodeHelper(
-        await (instanceRefToJson(await instanceRefFuture)
-            as FutureOr<Map<String, Object>?>));
+        await instanceRefToJson(await instanceRefFuture)
+            as Map<String, Object>?);
   }
 
   RemoteDiagnosticsNode? parseDiagnosticsNodeHelper(
@@ -814,7 +813,7 @@ abstract class ObjectGroupBase implements Disposable {
     final instanceRef = await instanceRefFuture;
     if (disposed || instanceRefFuture == null) return [];
     return parseDiagnosticsNodesHelper(
-      await (instanceRefToJson(instanceRef) as FutureOr<List<Object>?>),
+      await instanceRefToJson(instanceRef) as List<Object>?,
       parent,
       isProperty,
     );
@@ -842,7 +841,7 @@ abstract class ObjectGroupBase implements Disposable {
     if (disposed || jsonFuture == null) return const [];
 
     return parseDiagnosticsNodesHelper(
-        await (jsonFuture as FutureOr<List<Object>?>), parent, isProperty);
+        await jsonFuture as List<Object>?, parent, isProperty);
   }
 
   /// Requires that the InstanceRef is really referring to a String that is valid JSON.
@@ -883,8 +882,7 @@ abstract class ObjectGroupBase implements Disposable {
     if (disposed) {
       return null;
     }
-    return inspectorLibrary.getInstance(
-        await (instanceRef as FutureOr<InstanceRef>), this);
+    return inspectorLibrary.getInstance(await instanceRef as InstanceRef, this);
   }
 
   /// Returns a Future with a Map of property names to Observatory
@@ -972,13 +970,11 @@ abstract class ObjectGroupBase implements Disposable {
 
   Future<SourcePosition?> getPropertyLocationHelper(
       ClassRef classRef, String name) async {
-    final clazz =
-        await (inspectorLibrary.getClass(classRef, this) as FutureOr<Class>);
+    final clazz = await inspectorLibrary.getClass(classRef, this) as Class;
     for (FuncRef f in clazz.functions!) {
       // TODO(pq): check for properties that match name.
       if (f.name == name) {
-        final func =
-            await (inspectorLibrary.getFunc(f, this) as FutureOr<Func>);
+        final func = await inspectorLibrary.getFunc(f, this) as Func;
         final SourceLocation? location = func.location;
         throw UnimplementedError(
             'getSourcePosition not implemented. $location');
@@ -1357,10 +1353,10 @@ class ObjectGroup extends ObjectGroupBase {
   }
 
   Future<List<String>> getPubRootDirectories() async {
-    final List<Object>? directories = await (invokeServiceExtensionMethod(
+    final List<Object>? directories = await invokeServiceExtensionMethod(
       RegistrableServiceExtension.getPubRootDirectories,
       {},
-    ) as FutureOr<List<Object>?>);
+    ) as List<Object>?;
     return List.from(directories ?? []);
   }
 }
