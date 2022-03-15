@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'dart:math';
 
@@ -31,12 +31,12 @@ Axis axis(ArrowType type) => (type == ArrowType.up || type == ArrowType.down)
 @immutable
 class ArrowWrapper extends StatelessWidget {
   ArrowWrapper.unidirectional({
-    Key key,
+    Key? key,
     this.child,
-    @required ArrowType type,
+    required ArrowType type,
     this.arrowColor = defaultArrowColor,
     // ignore: always_require_non_null_named_parameters
-    double arrowHeadSize,
+    double? arrowHeadSize,
     this.arrowStrokeWidth = defaultArrowStrokeWidth,
     this.childMarginFromArrow = defaultDistanceToArrow,
   })  : assert(type != null),
@@ -51,18 +51,18 @@ class ArrowWrapper extends StatelessWidget {
         super(key: key);
 
   ArrowWrapper.bidirectional({
-    Key key,
+    Key? key,
     this.child,
-    @required this.direction,
+    required this.direction,
     this.arrowColor = defaultArrowColor,
     // ignore: always_require_non_null_named_parameters
-    double arrowHeadSize,
+    double? arrowHeadSize,
     this.arrowStrokeWidth = defaultArrowStrokeWidth,
     this.childMarginFromArrow = defaultDistanceToArrow,
   })  : assert(direction != null),
         assert(arrowColor != null),
         assert(arrowHeadSize != null && arrowHeadSize >= 0.0),
-        assert(arrowStrokeWidth != null && arrowHeadSize >= 0.0),
+        assert(arrowStrokeWidth != null && arrowHeadSize! >= 0.0),
         assert(childMarginFromArrow != null && childMarginFromArrow >= 0.0),
         isBidirectional = true,
         startArrowType =
@@ -75,7 +75,7 @@ class ArrowWrapper extends StatelessWidget {
   final Color arrowColor;
   final double arrowHeadSize;
   final double arrowStrokeWidth;
-  final Widget child;
+  final Widget? child;
 
   final Axis direction;
   final double childMarginFromArrow;
@@ -117,7 +117,7 @@ class ArrowWrapper extends StatelessWidget {
             ),
           ),
         ),
-        if (child != null) child,
+        if (child != null) child!,
         Expanded(
           child: Container(
             margin: EdgeInsets.only(
@@ -147,11 +147,11 @@ class ArrowWidget extends StatelessWidget {
   ArrowWidget({
     this.color = defaultArrowColor,
     // ignore: always_require_non_null_named_parameters
-    double headSize,
-    Key key,
+    required double headSize,
+    Key? key,
     this.shouldDrawHead = true,
     this.strokeWidth = defaultArrowStrokeWidth,
-    @required this.type,
+    required this.type,
   })  : assert(color != null),
         assert(headSize != null && headSize > 0.0),
         assert(strokeWidth != null && strokeWidth > 0.0),
@@ -192,11 +192,11 @@ class ArrowWidget extends StatelessWidget {
 class _ArrowPainter extends CustomPainter {
   _ArrowPainter({
     // ignore: always_require_non_null_named_parameters
-    double headSize,
+    required double headSize,
     this.strokeWidth = defaultArrowStrokeWidth,
     this.color = defaultArrowColor,
     this.shouldDrawHead = true,
-    @required this.type,
+    required this.type,
   })  : assert(headSize != null),
         assert(color != null),
         assert(strokeWidth != null),
