@@ -471,7 +471,9 @@ class InspectorService extends InspectorServiceBase {
     }
     List<RemoteDiagnosticsNode?>? children = await root.children;
 
-    if (children.isEmpty) {
+    // For some reason analyser belives children is non-nullable here.
+    // ignore: unnecessary_null_comparison
+    if (children == null || children.isEmpty) {
       children = await group.getChildren(root.dartDiagnosticRef, false, null);
     }
 
