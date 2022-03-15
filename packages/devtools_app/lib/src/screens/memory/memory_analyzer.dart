@@ -46,9 +46,11 @@ Map<String, List<Reference>> collect(
       final externalsToAnalyze = <ExternalReference>[];
 
       final ExternalReferences externals = library as ExternalReferences;
-      for (final ExternalReference external
-          in externals.children as Iterable<ExternalReference>) {
-        assert(external.isExternal);
+      for (final Reference external in externals.children) {
+        if (external is! ExternalReference) {
+          throw Exception('external is expected to be ExternalReference, '
+              'but is ${external.runtimeType}');
+        }
 
         final liveExternal = external.liveExternal;
         final size = liveExternal.externalProperty.externalSize;
@@ -66,10 +68,12 @@ Map<String, List<Reference>> collect(
       result['externals'] = externalsToAnalyze;
     } else if (library.isFiltered) {
       final filtersToAnalyze = <ClassReference>[];
-      for (final LibraryReference libraryRef
-          in library.children as Iterable<LibraryReference>) {
-        for (final ClassReference classRef
-            in libraryRef.children as Iterable<ClassReference>) {
+      for (final Reference libraryRef in library.children) {
+        for (final Reference classRef in libraryRef.children) {
+          if (classRef is! ClassReference) {
+            throw Exception('classRef is expected to be ClassReference, '
+                'but is ${classRef.runtimeType}');
+          }
           final HeapGraphClassLive liveClass = classRef.actualClass!;
           if (_classMatcher(liveClass)) {
             filtersToAnalyze.add(classRef);
@@ -82,8 +86,11 @@ Map<String, List<Reference>> collect(
       }
     } else if (library.isLibrary) {
       final librariesToAnalyze = <ClassReference>[];
-      for (final ClassReference classRef
-          in library.children as Iterable<ClassReference>) {
+      for (final Reference classRef in library.children) {
+        if (classRef is! ClassReference) {
+          throw Exception('classRef is expected to be ClassReference, '
+              'but is ${classRef.runtimeType}');
+        }
         final HeapGraphClassLive liveClass = classRef.actualClass!;
         if (_classMatcher(liveClass)) {
           librariesToAnalyze.add(classRef);
@@ -130,8 +137,12 @@ void imageAnalysis(
       case 'externals':
         final externalsNode = AnalysisReference('Externals');
         analysisSnapshot.addChild(externalsNode);
-        for (final ExternalReference ref
-            in value as Iterable<ExternalReference>) {
+        for (final Reference ref in value) {
+          if (ref is! ExternalReference) {
+            throw Exception('ref is expected to be ExternalReference, '
+                'but is ${ref.runtimeType}');
+          }
+
           final HeapGraphExternalLive liveExternal = ref.liveExternal;
           final HeapGraphElementLive liveElement = liveExternal.live;
 
@@ -143,8 +154,12 @@ void imageAnalysis(
           externalsNode.addChild(objectNode);
           var childExternalSizes = 0;
           final bucketSizes = SplayTreeMap<String, Bucket>();
-          for (final ExternalObjectReference child
-              in ref.children as Iterable<ExternalObjectReference>) {
+          for (final Reference child in ref.children) {
+            if (child is! ExternalObjectReference) {
+              throw Exception('ref is expected to be ExternalObjectReference, '
+                  'but is ${child.runtimeType}');
+            }
+
             if (child.externalSize < 10000) {
               bucketSizes.putIfAbsent(bucket10K, () => Bucket(0, 0));
               bucketSizes[bucket10K]!.totalCount += 1;
@@ -343,8 +358,7 @@ Map<String, List<String>> drillIn(
     result[key]!.add(value);
   });
 
-  for (final ClassReference classRef
-      in references as Iterable<ClassReference>) {
+  for (final Reference classRef in references) {
     if (classRef.name == null || !matcher.isClassMatched(classRef.name!)) {
       continue;
     }
@@ -372,8 +386,12 @@ Map<String, List<String>> drillIn(
 
     var instanceIndex = 0;
     _debugMonitor('Class $name Instance=$instanceIndex');
-    for (final ObjectReference objRef
-        in classRef.children as Iterable<ObjectReference>) {
+    for (final Reference objRef in classRef.children) {
+      if (objRef is! ObjectReference) {
+        throw Exception('classRef is expected to be ObjectReference, '
+            'but is ${objRef.runtimeType}');
+      }
+
       final fields = objRef.instance.getFields();
       // Root __FIELDS__ is a container for children, the children
       // are added, later, to a treenode - if the treenode should
