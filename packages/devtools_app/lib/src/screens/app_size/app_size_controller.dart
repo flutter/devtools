@@ -99,15 +99,15 @@ class AppSizeController {
     }
   }
 
-  TreemapNode get _activeDiffRoot {
+  TreemapNode? get _activeDiffRoot {
     switch (_activeDiffTreeType.value) {
       case DiffTreeType.increaseOnly:
-        return _increasedDiffTreeRoot!;
+        return _increasedDiffTreeRoot;
       case DiffTreeType.decreaseOnly:
-        return _decreasedDiffTreeRoot!;
+        return _decreasedDiffTreeRoot;
       case DiffTreeType.combined:
       default:
-        return _combinedDiffTreeRoot!;
+        return _combinedDiffTreeRoot;
     }
   }
 

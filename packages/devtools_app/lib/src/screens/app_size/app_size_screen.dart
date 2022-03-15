@@ -240,11 +240,9 @@ class _AppSizeBodyState extends State<AppSizeBody>
           _buildMenuItem(DiffTreeType.increaseOnly),
           _buildMenuItem(DiffTreeType.decreaseOnly),
         ],
-        onChanged: _controller.diffRoot.value != null
-            ? (newDiffTreeType) {
-                _controller.changeActiveDiffTreeType(newDiffTreeType!);
-              }
-            : null,
+        onChanged: (newDiffTreeType) {
+          _controller.changeActiveDiffTreeType(newDiffTreeType!);
+        },
       ),
     );
   }
