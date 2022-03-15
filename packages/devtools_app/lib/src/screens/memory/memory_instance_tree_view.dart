@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +23,7 @@ class InstanceTreeView extends StatefulWidget {
 /// Table of the fields of an instance (type, name and value).
 class InstanceTreeViewState extends State<InstanceTreeView>
     with AutoDisposeMixin {
-  MemoryController controller;
+  MemoryController? controller;
 
   final TreeColumnData<FieldReference> treeColumn = _FieldTypeColumn();
   final List<ColumnData<FieldReference>> columns = [];
@@ -54,17 +54,17 @@ class InstanceTreeViewState extends State<InstanceTreeView>
     //              controller. Have other ValueListenables on controller to
     //              listen to, so we don't need the setState calls.
     // Update the chart when the memorySource changes.
-    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
+    addAutoDisposeListener(controller!.selectedSnapshotNotifier, () {
       setState(() {
-        controller.computeAllLibraries(rebuild: true);
+        controller!.computeAllLibraries(rebuild: true);
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    controller.instanceFieldsTreeTable = TreeTable<FieldReference>(
-      dataRoots: controller.instanceRoot,
+    controller!.instanceFieldsTreeTable = TreeTable<FieldReference>(
+      dataRoots: controller!.instanceRoot!,
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (typeRef) => PageStorageKey<String>(typeRef.name),
@@ -72,7 +72,7 @@ class InstanceTreeViewState extends State<InstanceTreeView>
       sortDirection: SortDirection.ascending,
     );
 
-    return controller.instanceFieldsTreeTable;
+    return controller!.instanceFieldsTreeTable!;
   }
 }
 
@@ -95,7 +95,7 @@ class _FieldTypeColumn extends TreeColumnData<FieldReference> {
   @override
   int compare(FieldReference a, FieldReference b) {
     final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    final Comparable? valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 
@@ -169,7 +169,7 @@ class _FieldValueColumn extends ColumnData<FieldReference> {
   @override
   int compare(FieldReference a, FieldReference b) {
     final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    final Comparable? valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 }
