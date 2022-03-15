@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
@@ -45,10 +43,10 @@ class RebuildCountModel {
         final entries =
             (fileLocationsMap[file] as Map).cast<String, List<dynamic>>();
 
-        final ids = entries['ids'].cast<int>();
-        final lines = entries['lines'].cast<int>();
-        final columns = entries['columns'].cast<int>();
-        final names = entries['names'].cast<String>();
+        final ids = entries['ids']!.cast<int>();
+        final lines = entries['lines']!.cast<int>();
+        final columns = entries['columns']!.cast<int>();
+        final names = entries['names']!.cast<String>();
 
         for (var i = 0; i < ids.length; i++) {
           final location = RebuildLocation(
@@ -123,11 +121,11 @@ class RebuildCountModel {
 class RebuildLocation {
   RebuildLocation({this.id, this.path, this.line, this.column, this.name});
 
-  final int id;
-  final String path;
-  final int line;
-  final int column;
-  final String name;
+  final int? id;
+  final String? path;
+  final int? line;
+  final int? column;
+  final String? name;
 
   int buildCount = 0;
 }

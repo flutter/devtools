@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
@@ -26,7 +24,7 @@ class EventDetails extends StatelessWidget {
       'Select an event from the Timeline to view details';
   static const noEventSelected = '[No event selected]';
 
-  final TimelineEvent selectedEvent;
+  final TimelineEvent? selectedEvent;
 
   @override
   Widget build(BuildContext context) {
@@ -42,11 +40,11 @@ class EventDetails extends StatelessWidget {
         children: [
           AreaPaneHeader(
             needsTopBorder: false,
-            title: Text(_generateHeaderText(selectedEvent)),
+            title: Text(_generateHeaderText()),
           ),
           Expanded(
             child: selectedEvent != null
-                ? ValueListenableBuilder(
+                ? ValueListenableBuilder<bool>(
                     valueListenable: offlineController.offlineMode,
                     builder: (context, offline, _) => _buildDetails(
                       controller,
@@ -60,23 +58,25 @@ class EventDetails extends StatelessWidget {
     );
   }
 
-  String _generateHeaderText(TimelineEvent event) {
+  String _generateHeaderText() {
     if (selectedEvent == null) {
       return noEventSelected;
     }
-    return '${selectedEvent.isUiEvent ? 'CPU Profile: ' : ''}'
-        '${selectedEvent.name} (${msText(selectedEvent.time.duration)})';
+    final selected = selectedEvent!;
+    return '${selected.isUiEvent ? 'CPU Profile: ' : ''}'
+        '${selected.name} (${msText(selected.time.duration)})';
   }
 
   Widget _buildDetails(PerformanceController controller, bool offlineMode) {
-    if (selectedEvent.isUiEvent) {
+    final selected = selectedEvent!;
+    if (selected.isUiEvent) {
       // In [offlineController.offlineMode], we do not need to worry about
       // whether the profiler is enabled.
       if (offlineMode) {
         return _buildCpuProfiler(controller.cpuProfilerController);
       }
       return ValueListenableBuilder<Flag>(
-        valueListenable: controller.cpuProfilerController.profilerFlagNotifier,
+        valueListenable: controller.cpuProfilerController.profilerFlagNotifier!,
         builder: (context, profilerFlag, _) {
           return profilerFlag.valueAsString == 'true'
               ? _buildCpuProfiler(controller.cpuProfilerController)
@@ -84,20 +84,20 @@ class EventDetails extends StatelessWidget {
         },
       );
     }
-    return EventSummary(selectedEvent);
+    return EventSummary(selected);
   }
 
   Widget _buildCpuProfiler(CpuProfilerController cpuProfilerController) {
-    return ValueListenableBuilder<CpuProfileData>(
+    return ValueListenableBuilder<CpuProfileData?>(
       valueListenable: cpuProfilerController.dataNotifier,
       builder: (context, cpuProfileData, child) {
         if (cpuProfileData == null) {
-          return child;
+          return child!;
         }
         return CpuProfiler(
           data: cpuProfileData,
           controller: cpuProfilerController,
-          summaryView: EventSummary(selectedEvent),
+          summaryView: EventSummary(selectedEvent!),
         );
       },
       child: _buildProcessingInfo(cpuProfilerController),
@@ -105,7 +105,7 @@ class EventDetails extends StatelessWidget {
   }
 
   Widget _buildProcessingInfo(CpuProfilerController cpuProfilerController) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<double>(
       valueListenable: cpuProfilerController.transformer.progressNotifier,
       builder: (context, progress, _) {
         return ProcessingInfo(
@@ -130,10 +130,12 @@ class EventSummary extends StatelessWidget {
   EventSummary(this.event)
       : _connectedEvents = [
           if (event.isAsyncEvent)
-            ...event.children.where((e) => e.isAsyncInstantEvent)
+            ...event.children
+                .cast<AsyncTimelineEvent>()
+                .where((e) => e.isAsyncInstantEvent)
         ],
-        _eventArgs = Map.from(event.traceEvents.first.event.args)
-          ..addAll({for (var trace in event.traceEvents) ...trace.event.args});
+        _eventArgs = Map.from(event.traceEvents.first.event.args!)
+          ..addAll({for (var trace in event.traceEvents) ...trace.event.args!});
 
   final TimelineEvent event;
 
@@ -157,8 +159,8 @@ class EventSummary extends StatelessWidget {
             title: 'Time',
             inlineValue: msText(event.time.duration),
             child: SelectableText(
-              '[${event.time.start.inMicroseconds} μs —  '
-              '${event.time.end.inMicroseconds} μs]',
+              '[${event.time.start!.inMicroseconds} μs —  '
+              '${event.time.end!.inMicroseconds} μs]',
               style: Theme.of(context).subtleFixedFontStyle,
             ),
           ),
@@ -206,11 +208,11 @@ class EventSummary extends StatelessWidget {
   }
 
   Widget _asyncIdTile(BuildContext context) {
-    String asyncId;
+    late final String asyncId;
     if (event is OfflineTimelineEvent) {
       asyncId = event.traceEvents.first.event.id;
     } else {
-      asyncId = (event as AsyncTimelineEvent).asyncId;
+      asyncId = (event as AsyncTimelineEvent).asyncId!;
     }
     return EventMetaData(
       title: 'Async id',
@@ -229,11 +231,11 @@ class EventSummary extends StatelessWidget {
 
   Widget _buildConnectedEvent(BuildContext context, TimelineEvent e) {
     final eventArgs = {
-      'startTime': msText(e.time.start - event.time.start),
+      'startTime': msText(e.time.start! - event.time.start!),
       'args': e.traceEvents.first.event.args,
     };
     return EventMetaData(
-      title: e.name,
+      title: e.name ?? '',
       child: FormattedJson(
         json: eventArgs,
         useSubtleStyle: true,
@@ -256,8 +258,8 @@ class EventSummary extends StatelessWidget {
 
 class EventMetaData extends StatelessWidget {
   const EventMetaData({
-    Key key,
-    @required this.title,
+    Key? key,
+    required this.title,
     this.inlineValue,
     this.child,
   })  : assert(inlineValue != null || child != null),
@@ -265,9 +267,9 @@ class EventMetaData extends StatelessWidget {
 
   final String title;
 
-  final String inlineValue;
+  final String? inlineValue;
 
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -293,7 +295,7 @@ class EventMetaData extends StatelessWidget {
           ),
           if (child != null) ...[
             const SizedBox(height: densePadding),
-            child,
+            child!,
           ],
         ],
       ),
@@ -303,9 +305,9 @@ class EventMetaData extends StatelessWidget {
 
 class ExpandingEventMetaData extends StatelessWidget {
   const ExpandingEventMetaData({
-    Key key,
-    @required this.title,
-    @required this.children,
+    Key? key,
+    required this.title,
+    required this.children,
   }) : super(key: key);
 
   final String title;

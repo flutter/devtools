@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:pedantic/pedantic.dart';
 
@@ -59,13 +58,13 @@ class PerformanceController extends DisposableController
   final _exportController = ExportController();
 
   /// The currently selected timeline event.
-  ValueListenable<TimelineEvent> get selectedTimelineEvent =>
+  ValueListenable<TimelineEvent?> get selectedTimelineEvent =>
       _selectedTimelineEventNotifier;
-  final _selectedTimelineEventNotifier = ValueNotifier<TimelineEvent>(null);
+  final _selectedTimelineEventNotifier = ValueNotifier<TimelineEvent?>(null);
 
   /// The currently selected timeline frame.
-  ValueListenable<FlutterFrame> get selectedFrame => _selectedFrameNotifier;
-  final _selectedFrameNotifier = ValueNotifier<FlutterFrame>(null);
+  ValueListenable<FlutterFrame?> get selectedFrame => _selectedFrameNotifier;
+  final _selectedFrameNotifier = ValueNotifier<FlutterFrame?>(null);
 
   /// The flutter frames in the current timeline.
   ValueListenable<List<FlutterFrame>> get flutterFrames => _flutterFrames;
@@ -90,17 +89,19 @@ class PerformanceController extends DisposableController
 
   ValueListenable<List<FlutterFrameAnalysisTabData>> get analysisTabs =>
       _analysisTabs;
-  final _analysisTabs = ListValueNotifier<FlutterFrameAnalysisTabData>([]);
+  final _analysisTabs = ListValueNotifier<FlutterFrameAnalysisTabData>(
+    <FlutterFrameAnalysisTabData>[],
+  );
 
-  ValueListenable<FlutterFrameAnalysisTabData> get selectedAnalysisTab =>
+  ValueListenable<FlutterFrameAnalysisTabData?> get selectedAnalysisTab =>
       _selectedAnalysisTab;
-  final _selectedAnalysisTab = ValueNotifier<FlutterFrameAnalysisTabData>(null);
+  final _selectedAnalysisTab =
+      ValueNotifier<FlutterFrameAnalysisTabData?>(null);
 
   void openAnalysisTab(FlutterFrame frame) {
-    if (_selectedAnalysisTab.value?.frame?.id == frame.id) return;
-    final existingTabForFrame = _analysisTabs.value.firstWhere(
+    if (_selectedAnalysisTab.value?.frame.id == frame.id) return;
+    final existingTabForFrame = _analysisTabs.value.firstWhereOrNull(
       (tab) => tab.frame.id == frame.id,
-      orElse: () => null,
     );
     if (existingTabForFrame != null) {
       _selectedAnalysisTab.value = existingTabForFrame;
@@ -140,7 +141,7 @@ class PerformanceController extends DisposableController
   /// data from the imported file). If any modifications are made while the data
   /// is displayed (e.g. change in selected timeline event, selected frame,
   /// etc.), those changes will be tracked here.
-  PerformanceData data;
+  PerformanceData? data;
 
   /// Timeline data loaded via import.
   ///
@@ -151,14 +152,14 @@ class PerformanceController extends DisposableController
   /// will start as a copy of offlineTimelineData in this case, and will track
   /// any data modifications that occur while the data is displayed (e.g. change
   /// in selected timeline event, selected frame, etc.).
-  PerformanceData offlinePerformanceData;
+  PerformanceData? offlinePerformanceData;
 
-  TimelineEventProcessor processor;
+  late final TimelineEventProcessor processor;
 
   /// Trace events in the current timeline.
   ///
   /// This list is cleared and repopulated each time "Refresh" is clicked.
-  List<TraceEventWrapper> allTraceEvents = [];
+  final allTraceEvents = <TraceEventWrapper>[];
 
   /// The tracking index for the first unprocessed trace event collected.
   int _nextTraceIndexToProcess = 0;
@@ -192,7 +193,7 @@ class PerformanceController extends DisposableController
 
   final RebuildCountModel rebuildCountModel = RebuildCountModel();
 
-  Timer _pollingTimer;
+  Timer? _pollingTimer;
 
   int _nextPollStartMicros = 0;
 
@@ -200,9 +201,9 @@ class PerformanceController extends DisposableController
 
   static const timelinePollingInterval = Duration(seconds: 1);
 
-  RateLimiter _timelinePollingRateLimiter;
+  RateLimiter? _timelinePollingRateLimiter;
 
-  Future<void> _initialized;
+  late final Future<void> _initialized;
 
   Future<void> get initialized => _initialized;
 
@@ -217,10 +218,10 @@ class PerformanceController extends DisposableController
 
       // Default to true for profile builds only.
       _badgeTabForJankyFrames.value =
-          await serviceManager.connectedApp.isProfileBuild;
+          await serviceManager.connectedApp!.isProfileBuild;
 
       unawaited(allowedError(
-        serviceManager.service.setProfilePeriod(mediumProfilePeriod),
+        serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
         logError: false,
       ));
       await serviceManager.timelineStreamManager.setDefaultTimelineStreams();
@@ -234,12 +235,12 @@ class PerformanceController extends DisposableController
       // Listen for Flutter.Frame events with frame timing data.
       // Listen for Flutter.RebuiltWidgets events.
       autoDisposeStreamSubscription(
-          serviceManager.service.onExtensionEventWithHistory.listen((event) {
+          serviceManager.service!.onExtensionEventWithHistory.listen((event) {
         if (event.extensionKind == 'Flutter.Frame') {
-          final frame = FlutterFrame.parse(event.extensionData.data);
+          final frame = FlutterFrame.parse(event.extensionData!.data);
           addFrame(frame);
         } else if (event.extensionKind == 'Flutter.RebuiltWidgets') {
-          rebuildCountModel.processRebuildEvent(event.extensionData.data);
+          rebuildCountModel.processRebuildEvent(event.extensionData!.data);
         }
       }));
 
@@ -258,7 +259,7 @@ class PerformanceController extends DisposableController
 
       _timelinePollingRateLimiter = RateLimiter(
         timelinePollingRateLimit,
-        _pullTraceEventsFromVmTimeline,
+        () async => _pullTraceEventsFromVmTimeline(),
       );
 
       // Poll for new timeline events.
@@ -266,13 +267,13 @@ class PerformanceController extends DisposableController
       // because the event stream is sending out of order and duplicate events.
       // See https://github.com/dart-lang/sdk/issues/46605.
       _pollingTimer = Timer.periodic(timelinePollingInterval, (_) {
-        _timelinePollingRateLimiter.scheduleRequest();
+        _timelinePollingRateLimiter!.scheduleRequest();
       });
     }
   }
 
   Future<void> _initData() async {
-    data = serviceManager.connectedApp.isFlutterAppNow
+    data = serviceManager.connectedApp!.isFlutterAppNow!
         ? PerformanceData(
             displayRefreshRate: await serviceManager.queryDisplayRefreshRate,
           )
@@ -282,22 +283,22 @@ class PerformanceController extends DisposableController
   Future<void> _pullTraceEventsFromVmTimeline({
     bool isInitialPull = false,
   }) async {
-    final currentVmTime = await serviceManager.service.getVMTimelineMicros();
+    final currentVmTime = await serviceManager.service!.getVMTimelineMicros();
     debugTraceEventCallback(
       () => log(
         'pulling trace events from '
         '[$_nextPollStartMicros - ${currentVmTime.timestamp}]',
       ),
     );
-    final timeline = await serviceManager.service.getVMTimeline(
+    final timeline = await serviceManager.service!.getVMTimeline(
       timeOriginMicros: _nextPollStartMicros,
-      timeExtentMicros: currentVmTime.timestamp - _nextPollStartMicros,
+      timeExtentMicros: currentVmTime.timestamp! - _nextPollStartMicros,
     );
-    _nextPollStartMicros = currentVmTime.timestamp + 1;
+    _nextPollStartMicros = currentVmTime.timestamp! + 1;
 
     final threadNameEvents = <TraceEvent>[];
-    for (final event in timeline.traceEvents) {
-      final traceEvent = TraceEvent(event.json);
+    for (final event in timeline.traceEvents!) {
+      final traceEvent = TraceEvent(event.json!);
       final eventWrapper = TraceEventWrapper(
         traceEvent,
         DateTime.now().millisecondsSinceEpoch,
@@ -320,12 +321,12 @@ class PerformanceController extends DisposableController
   }
 
   Future<void> selectTimelineEvent(
-    TimelineEvent event, {
+    TimelineEvent? event, {
     bool updateProfiler = true,
   }) async {
-    if (event == null || data.selectedEvent == event) return;
+    if (event == null || data!.selectedEvent == event) return;
 
-    data.selectedEvent = event;
+    data!.selectedEvent = event;
     _selectedTimelineEventNotifier.value = event;
 
     if (event.isUiEvent && updateProfiler) {
@@ -339,18 +340,18 @@ class PerformanceController extends DisposableController
           shouldApplyFilters: true,
           shouldRefreshSearchMatches: true,
         );
-        data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+        data!.cpuProfileData = cpuProfilerController.dataNotifier.value;
       } else if ((!offlineController.offlineMode.value ||
               offlinePerformanceData == null) &&
           cpuProfilerController.profilerEnabled) {
         // Fetch a profile if not in offline mode and if the profiler is enabled
         cpuProfilerController.reset();
         await cpuProfilerController.pullAndProcessProfile(
-          startMicros: event.time.start.inMicroseconds,
+          startMicros: event.time.start!.inMicroseconds,
           extentMicros: event.time.duration.inMicroseconds,
           processId: '${event.traceEvents.first.wrapperId}',
         );
-        data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+        data!.cpuProfileData = cpuProfilerController.dataNotifier.value;
       }
     }
   }
@@ -361,23 +362,23 @@ class PerformanceController extends DisposableController
   /// Tracks the current frame undergoing selection so that we can equality
   /// check after async operations and bail out early if another frame has been
   /// selected during awaits.
-  FlutterFrame _currentFrameBeingSelected;
+  FlutterFrame? _currentFrameBeingSelected;
 
   Future<void> toggleSelectedFrame(FlutterFrame frame) async {
-    if (frame == null || data == null) {
+    if (data == null) {
       return;
     }
 
     _currentFrameBeingSelected = frame;
 
     // Unselect [frame] if is already selected.
-    if (data.selectedFrame == frame) {
-      data.selectedFrame = null;
+    if (data!.selectedFrame == frame) {
+      data!.selectedFrame = null;
       _selectedFrameNotifier.value = null;
       return;
     }
 
-    data.selectedFrame = frame;
+    data!.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
 
     // Default to viewing the timeline events flame chart when a new frame is
@@ -387,8 +388,8 @@ class PerformanceController extends DisposableController
     if (!offlineController.offlineMode.value) {
       final bool frameBeforeFirstWellFormedFrame =
           firstWellFormedFrameMicros != null &&
-              frame.timeFromFrameTiming.start.inMicroseconds <
-                  firstWellFormedFrameMicros;
+              frame.timeFromFrameTiming.start!.inMicroseconds <
+                  firstWellFormedFrameMicros!;
       if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
         // Only try to pull timeline events for frames that are after the first
         // well formed frame. Timeline events that occurred before this frame will
@@ -433,13 +434,13 @@ class PerformanceController extends DisposableController
       if (!offlineController.offlineMode.value &&
           frame.timeFromEventFlows.isWellFormed) {
         await cpuProfilerController.pullAndProcessProfile(
-          startMicros: frame.timeFromEventFlows.start.inMicroseconds,
+          startMicros: frame.timeFromEventFlows.start!.inMicroseconds,
           extentMicros: frame.timeFromEventFlows.duration.inMicroseconds,
           processId: 'Flutter frame ${frame.id}',
         );
       }
       if (_currentFrameBeingSelected != frame) return;
-      data.cpuProfileData = cpuProfilerController.dataNotifier.value;
+      data!.cpuProfileData = cpuProfilerController.dataNotifier.value;
     } else {
       if (!storedProfileForFrame.processed) {
         await cpuProfilerController.transformer.processData(
@@ -448,7 +449,7 @@ class PerformanceController extends DisposableController
         );
       }
       if (_currentFrameBeingSelected != frame) return;
-      data.cpuProfileData = storedProfileForFrame;
+      data!.cpuProfileData = storedProfileForFrame;
       cpuProfilerController.loadProcessedData(
         storedProfileForFrame,
         storeAsUserTagNone: true,
@@ -458,13 +459,13 @@ class PerformanceController extends DisposableController
     if (debugTimeline) {
       final buf = StringBuffer();
       buf.writeln('UI timeline event for frame ${frame.id}:');
-      frame.timelineEventData.uiEvent.format(buf, '  ');
+      frame.timelineEventData.uiEvent?.format(buf, '  ');
       buf.writeln('\nUI trace for frame ${frame.id}');
-      frame.timelineEventData.uiEvent.writeTraceToBuffer(buf);
+      frame.timelineEventData.uiEvent?.writeTraceToBuffer(buf);
       buf.writeln('\Raster timeline event frame ${frame.id}:');
-      frame.timelineEventData.rasterEvent.format(buf, '  ');
+      frame.timelineEventData.rasterEvent?.format(buf, '  ');
       buf.writeln('\nRaster trace for frame ${frame.id}');
-      frame.timelineEventData.rasterEvent.writeTraceToBuffer(buf);
+      frame.timelineEventData.rasterEvent?.writeTraceToBuffer(buf);
       log(buf.toString());
     }
   }
@@ -476,7 +477,7 @@ class PerformanceController extends DisposableController
         _addPendingFlutterFrames();
       }
       _maybeBadgeTabForJankyFrame(frame);
-      data.frames.add(frame);
+      data!.frames.add(frame);
       _flutterFrames.add(frame);
     } else {
       _pendingFlutterFrames.add(frame);
@@ -485,13 +486,13 @@ class PerformanceController extends DisposableController
 
   /// Timestamp in micros of the first well formed frame, or in other words,
   /// the first frame for which we have timeline event data.
-  int firstWellFormedFrameMicros;
+  int? firstWellFormedFrameMicros;
 
   void _updateFirstWellFormedFrameMicros(FlutterFrame frame) {
     assert(frame.isWellFormed);
     firstWellFormedFrameMicros = math.min(
       firstWellFormedFrameMicros ?? maxJsInt,
-      frame.timeFromFrameTiming.start.inMicroseconds,
+      frame.timeFromFrameTiming.start!.inMicroseconds,
     );
   }
 
@@ -518,20 +519,20 @@ class PerformanceController extends DisposableController
     FlutterFrame frame,
     TimelineEventType type,
   ) {
-    final event = _unassignedFlutterFrameEvents[frame.id].eventByType(type);
+    final event = _unassignedFlutterFrameEvents[frame.id]!.eventByType(type);
     if (event != null) {
       frame.setEventFlow(event, type: type);
     }
   }
 
   void _maybeAddEventToUnassignedFrame(
-    int frameNumber,
-    TimelineEvent event,
+    int? frameNumber,
+    SyncTimelineEvent event,
     TimelineEventType type,
   ) {
     if (frameNumber != null && (event.isUiEvent || event.isRasterEvent)) {
       if (_unassignedFlutterFrames.containsKey(frameNumber)) {
-        final frame = _unassignedFlutterFrames[frameNumber];
+        final frame = _unassignedFlutterFrames[frameNumber]!;
         frame.setEventFlow(event, type: type);
         if (frame.isWellFormed) {
           _unassignedFlutterFrames.remove(frameNumber);
@@ -554,7 +555,7 @@ class PerformanceController extends DisposableController
 
   void _addPendingFlutterFrames() {
     _pendingFlutterFrames.forEach(_maybeBadgeTabForJankyFrame);
-    data.frames.addAll(_pendingFlutterFrames);
+    data!.frames.addAll(_pendingFlutterFrames);
     _flutterFrames.addAll(_pendingFlutterFrames);
     _pendingFlutterFrames.clear();
   }
@@ -581,15 +582,15 @@ class PerformanceController extends DisposableController
   }) {
     final isFlutterApp = offlineController.offlineMode.value
         ? offlinePerformanceData != null &&
-            offlinePerformanceData.frames.isNotEmpty
-        : serviceManager.connectedApp.isFlutterAppNow;
+            offlinePerformanceData!.frames.isNotEmpty
+        : serviceManager.connectedApp!.isFlutterAppNow!;
 
     // TODO(kenz): Remove this logic once ui/raster distinction changes are
     // available in the engine.
-    int uiThreadId;
-    int rasterThreadId;
+    int? uiThreadId;
+    int? rasterThreadId;
     for (TraceEvent event in threadNameEvents) {
-      final name = event.args['name'];
+      final name = event.args!['name'];
 
       if (isFlutterApp && isInitialUpdate) {
         // Android: "1.ui (12652)"
@@ -620,7 +621,7 @@ class PerformanceController extends DisposableController
         }
       }
 
-      threadNamesById[event.threadId] = name;
+      threadNamesById[event.threadId!] = name;
     }
 
     if (isFlutterApp && isInitialUpdate) {
@@ -637,11 +638,11 @@ class PerformanceController extends DisposableController
   }
 
   void addTimelineEvent(TimelineEvent event) {
-    data.addTimelineEvent(event);
+    data!.addTimelineEvent(event);
     if (event is SyncTimelineEvent) {
       if (!offlineController.offlineMode.value &&
           serviceManager.hasConnection &&
-          !serviceManager.connectedApp.isFlutterAppNow) {
+          !serviceManager.connectedApp!.isFlutterAppNow!) {
         return;
       }
 
@@ -699,7 +700,7 @@ class PerformanceController extends DisposableController
           '$_nextTimelineEventIndexToProcess',
         ),
       );
-      data.initializeEventGroups(
+      data!.initializeEventGroups(
         threadNamesById,
         startIndex: _nextTimelineEventIndexToProcess,
       );
@@ -707,10 +708,10 @@ class PerformanceController extends DisposableController
         () => log(
           'after initializing event groups at startIndex '
           '$_nextTimelineEventIndexToProcess and now '
-          '_nextTimelineEventIndexToProcess = ${data.timelineEvents.length}',
+          '_nextTimelineEventIndexToProcess = ${data!.timelineEvents.length}',
         ),
       );
-      _nextTimelineEventIndexToProcess = data.timelineEvents.length;
+      _nextTimelineEventIndexToProcess = data!.timelineEvents.length;
     }
 
     // Process trace events [processTraceEventsHelper] and time the operation
@@ -749,14 +750,14 @@ class PerformanceController extends DisposableController
       rasterThreadId: rasterThreadId,
     );
     await processTraceEvents(traceEvents);
-    if (data.cpuProfileData != null) {
+    if (data!.cpuProfileData != null) {
       await cpuProfilerController.transformer.processData(
-        offlinePerformanceData.cpuProfileData,
+        offlinePerformanceData!.cpuProfileData!,
         processId: 'process offline data',
       );
     }
 
-    offlinePerformanceData.frames.forEach(_assignEventsToFrame);
+    offlinePerformanceData!.frames.forEach(_assignEventsToFrame);
 
     // Set offline data.
     setOfflineData();
@@ -768,46 +769,44 @@ class PerformanceController extends DisposableController
   ) {
     const invalidThreadId = -1;
     return traceEvents
-            .firstWhere(
+            .firstWhereOrNull(
               (trace) => targetEventNames.contains(trace.event.name),
-              orElse: () => null,
             )
             ?.event
-            ?.threadId ??
+            .threadId ??
         invalidThreadId;
   }
 
   void setOfflineData() {
     _flutterFrames
       ..clear()
-      ..addAll(offlinePerformanceData.frames);
-    final frameToSelect = offlinePerformanceData.frames.firstWhere(
-      (frame) => frame.id == offlinePerformanceData.selectedFrameId,
-      orElse: () => null,
+      ..addAll(offlinePerformanceData!.frames);
+    final frameToSelect = offlinePerformanceData!.frames.firstWhereOrNull(
+      (frame) => frame.id == offlinePerformanceData!.selectedFrameId,
     );
     if (frameToSelect != null) {
-      data.selectedFrame = frameToSelect;
+      data!.selectedFrame = frameToSelect;
       _selectedFrameNotifier.value = frameToSelect;
     }
-    if (offlinePerformanceData.selectedEvent != null) {
-      for (var timelineEvent in data.timelineEvents) {
+    if (offlinePerformanceData!.selectedEvent != null) {
+      for (var timelineEvent in data!.timelineEvents) {
         final eventToSelect = timelineEvent.firstChildWithCondition((event) {
-          return event.name == offlinePerformanceData.selectedEvent.name &&
-              event.time == offlinePerformanceData.selectedEvent.time;
+          return event.name == offlinePerformanceData!.selectedEvent!.name &&
+              event.time == offlinePerformanceData!.selectedEvent!.time;
         });
         if (eventToSelect != null) {
-          data
+          data!
             ..selectedEvent = eventToSelect
-            ..cpuProfileData = offlinePerformanceData.cpuProfileData;
+            ..cpuProfileData = offlinePerformanceData!.cpuProfileData;
           _selectedTimelineEventNotifier.value = eventToSelect;
           break;
         }
       }
     }
 
-    if (offlinePerformanceData.cpuProfileData != null) {
+    if (offlinePerformanceData!.cpuProfileData != null) {
       cpuProfilerController.loadProcessedData(
-        offlinePerformanceData.cpuProfileData,
+        offlinePerformanceData!.cpuProfileData!,
         storeAsUserTagNone: true,
       );
     }
@@ -818,7 +817,7 @@ class PerformanceController extends DisposableController
   /// This method returns the name of the file that was downloaded.
   String exportData() {
     final encodedData =
-        _exportController.encode(PerformanceScreen.id, data.json);
+        _exportController.encode(PerformanceScreen.id, data!.json);
     return _exportController.downloadFile(encodedData);
   }
 
@@ -827,22 +826,22 @@ class PerformanceController extends DisposableController
     String search, {
     bool searchPreviousMatches = false,
   }) {
-    if (search?.isEmpty ?? true) return [];
+    if (search.isEmpty) return <TimelineEvent>[];
     final matches = <TimelineEvent>[];
     if (searchPreviousMatches) {
-      final previousMatches = searchMatches.value;
+      final List<TimelineEvent> previousMatches = searchMatches.value;
       for (final previousMatch in previousMatches) {
-        if (previousMatch.name.caseInsensitiveContains(search)) {
+        if (previousMatch.name!.caseInsensitiveContains(search)) {
           matches.add(previousMatch);
         }
       }
     } else {
-      final events = List<TimelineEvent>.from(data.timelineEvents);
+      final events = List<TimelineEvent>.from(data!.timelineEvents);
       for (final event in events) {
         breadthFirstTraversal<TimelineEvent>(
           event,
           action: (TimelineEvent e) {
-            if (e.name.caseInsensitiveContains(search)) {
+            if (e.name!.caseInsensitiveContains(search)) {
               matches.add(e);
             }
           },
@@ -861,14 +860,14 @@ class PerformanceController extends DisposableController
   /// VM timeline if a connected app is present.
   Future<void> clearData() async {
     if (serviceManager.connectedAppInitialized) {
-      await serviceManager.service.clearVMTimeline();
+      await serviceManager.service!.clearVMTimeline();
     }
     allTraceEvents.clear();
     offlinePerformanceData = null;
     cpuProfilerController.reset();
     threadNamesById.clear();
     data?.clear();
-    processor?.reset();
+    processor.reset();
     _flutterFrames.clear();
     _nextTraceIndexToProcess = 0;
     _nextTimelineEventIndexToProcess = 0;
@@ -884,7 +883,7 @@ class PerformanceController extends DisposableController
   }
 
   void recordTrace(Map<String, dynamic> trace) {
-    data?.traceEvents?.add(trace);
+    data!.traceEvents.add(trace);
   }
 
   @override

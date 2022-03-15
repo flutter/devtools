@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:core';
 
@@ -54,8 +52,8 @@ class TimelineStreamManager extends Disposer {
         'Dart VM events (startup, shutdown, snapshot loading, etc.)',
   };
 
-  VmServiceWrapper get service => _service;
-  VmServiceWrapper _service;
+  VmServiceWrapper? get service => _service;
+  VmServiceWrapper? _service;
 
   final _streams = <String, TimelineStream>{};
 
@@ -72,25 +70,26 @@ class TimelineStreamManager extends Disposer {
     return _streams.values.where(condition).toList();
   }
 
-  ValueListenable<bool> timelineStreamListenable(String name) {
-    return _streams.containsKey(name) ? _streams[name].recorded : null;
+  ValueListenable<bool>? timelineStreamListenable(String name) {
+    return _streams.containsKey(name) ? _streams[name]!.recorded : null;
   }
 
   /// Initializes stream values from the vm service as a source of truth.
   Future<void> _initStreams() async {
-    final timelineFlags = await service.getVMTimelineFlags();
+    final timelineFlags = await service!.getVMTimelineFlags();
     _streams
       ..clear()
       ..addEntries(
         [
-          for (final streamName in timelineFlags.availableStreams)
+          for (final streamName in timelineFlags.availableStreams ?? <String>[])
             MapEntry(
               streamName,
               TimelineStream(
                 name: streamName,
                 description: _streamDescriptions[streamName] ?? '',
                 advanced: _advancedStreams.contains(streamName),
-                recorded: timelineFlags.recordedStreams.contains(streamName),
+                recorded: timelineFlags.recordedStreams?.contains(streamName) ??
+                    false,
               ),
             ),
         ],
@@ -105,7 +104,7 @@ class TimelineStreamManager extends Disposer {
   @visibleForTesting
   void handleTimelineEvent(Event event) async {
     if (event.kind == EventKind.kTimelineStreamSubscriptionsUpdate) {
-      final newRecordedStreams = event.updatedStreams;
+      final newRecordedStreams = event.updatedStreams ?? <String>[];
       for (final stream in _streams.values) {
         stream._toggle(newRecordedStreams.contains(stream.name));
         newRecordedStreams.remove(stream.name);
@@ -138,7 +137,7 @@ class TimelineStreamManager extends Disposer {
         service.onTimelineEvent.listen(handleTimelineEvent));
     unawaited(connectedApp.initialized.future.then((_) async {
       // The timeline is not supported for web applications.
-      if (!connectedApp.isDartWebAppNow) {
+      if (!connectedApp.isDartWebAppNow!) {
         await _initStreams();
       }
     }));
@@ -150,7 +149,7 @@ class TimelineStreamManager extends Disposer {
   }
 
   Future<void> setDefaultTimelineStreams() async {
-    await serviceManager.service.setVMTimelineFlags([
+    await serviceManager.service!.setVMTimelineFlags([
       dartTimelineStream,
       embedderTimelineStream,
       gcTimelineStream,
@@ -161,7 +160,7 @@ class TimelineStreamManager extends Disposer {
   /// should match [value].
   Future<void> updateTimelineStream(TimelineStream stream, bool value) async {
     final recordedStreamNames = _streams.keys
-        .where((streamName) => _streams[streamName].recorded.value)
+        .where((streamName) => _streams[streamName]!.recorded.value)
         .toList();
     final alreadyBeingRecorded = recordedStreamNames.contains(stream.name);
     if (alreadyBeingRecorded && !value) {
@@ -169,16 +168,16 @@ class TimelineStreamManager extends Disposer {
     } else if (!alreadyBeingRecorded && value) {
       recordedStreamNames.add(stream.name);
     }
-    await serviceManager.service.setVMTimelineFlags(recordedStreamNames);
+    await serviceManager.service!.setVMTimelineFlags(recordedStreamNames);
   }
 }
 
 class TimelineStream {
   TimelineStream({
-    @required this.name,
-    @required this.description,
-    @required this.advanced,
-    bool recorded,
+    required this.name,
+    required this.description,
+    required this.advanced,
+    bool recorded = false,
   }) : _recorded = ValueNotifier<bool>(recorded);
 
   final String name;
