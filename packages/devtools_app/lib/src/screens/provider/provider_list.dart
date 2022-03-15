@@ -22,41 +22,38 @@ final AutoDisposeStateNotifierProvider<StateController<String>, String>
     selectedProviderIdProvider =
     AutoDisposeStateNotifierProvider<StateController<String>, String>((ref) {
   final controller = StateController<String>(null);
-  final providerIdsNotifier = ref.watch(sortedProviderNodesProvider.notifier);
 
-  // TODO(rrousselGit): refactor to `ref.listen` when available
-  ref.onDispose(
-    providerIdsNotifier.addListener((asyncValue) {
-      final nodes = asyncValue.data?.value;
-      if (nodes == null) return;
+  ref.listen<AsyncValue<List<ProviderNode>>>(sortedProviderNodesProvider,
+      (prev, value) {
+    final nodes = value.asData?.value;
+    if (nodes == null) return;
 
-      if (controller.state == null) {
-        if (nodes.isNotEmpty) controller.state = nodes.first.id;
-        return;
-      }
+    if (controller.state == null) {
+      if (nodes.isNotEmpty) controller.state = nodes.first.id;
+      return;
+    }
 
-      if (nodes.isEmpty) {
-        controller.state = null;
-      }
+    if (nodes.isEmpty) {
+      controller.state = null;
+    }
 
-      /// The previously selected provider was unmounted
-      else if (!nodes.any((node) => node.id == controller.state)) {
-        controller.state = nodes.first.id;
-      }
-    }),
-  );
+    /// The previously selected provider was unmounted
+    else if (!nodes.any((node) => node.id == controller.state)) {
+      controller.state = nodes.first.id;
+    }
+  });
 
   return controller;
 }, name: 'selectedProviderIdProvider');
 
-class ProviderList extends StatefulWidget {
+class ProviderList extends ConsumerStatefulWidget {
   const ProviderList({Key key}) : super(key: key);
 
   @override
   _ProviderListState createState() => _ProviderListState();
 }
 
-class _ProviderListState extends State<ProviderList> {
+class _ProviderListState extends ConsumerState<ProviderList> {
   final scrollController = ScrollController();
 
   @override
@@ -67,34 +64,30 @@ class _ProviderListState extends State<ProviderList> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, watch, child) {
-        final nodes = watch(sortedProviderNodesProvider);
+    final nodes = ref.watch(sortedProviderNodesProvider);
 
-        return nodes.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => const Padding(
-            padding: _tilePadding,
-            child: Text('<unknown error>'),
+    return nodes.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => const Padding(
+        padding: _tilePadding,
+        child: Text('<unknown error>'),
+      ),
+      data: (nodes) {
+        return Scrollbar(
+          controller: scrollController,
+          isAlwaysShown: true,
+          child: ListView.builder(
+            primary: false,
+            controller: scrollController,
+            itemCount: nodes.length,
+            itemBuilder: (context, index) {
+              final node = nodes[index];
+              return ProviderNodeItem(
+                key: Key('provider-${node.id}'),
+                node: node,
+              );
+            },
           ),
-          data: (nodes) {
-            return Scrollbar(
-              controller: scrollController,
-              isAlwaysShown: true,
-              child: ListView.builder(
-                primary: false,
-                controller: scrollController,
-                itemCount: nodes.length,
-                itemBuilder: (context, index) {
-                  final node = nodes[index];
-                  return ProviderNodeItem(
-                    key: Key('provider-${node.id}'),
-                    node: node,
-                  );
-                },
-              ),
-            );
-          },
         );
       },
     );
@@ -110,8 +103,8 @@ class ProviderNodeItem extends ConsumerWidget {
   final ProviderNode node;
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    final isSelected = watch(selectedProviderIdProvider) == node.id;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isSelected = ref.watch(selectedProviderIdProvider) == node.id;
 
     final colorScheme = Theme.of(context).colorScheme;
     final backgroundColor =
@@ -120,7 +113,7 @@ class ProviderNodeItem extends ConsumerWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
-        context.read(selectedProviderIdProvider.notifier).state = node.id;
+        ref.read(selectedProviderIdProvider.notifier).state = node.id;
       },
       child: Container(
         color: backgroundColor,

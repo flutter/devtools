@@ -41,7 +41,7 @@ final estimatedChildCountProvider =
     int one(InstanceDetails instance) => 1;
 
     int expandableEstimatedChildCount(Iterable<PathToProperty> keys) {
-      if (!ref.watch(isExpandedProvider(path)).state) {
+      if (!ref.watch(isExpandedProvider(path))) {
         return 1;
       }
       return keys.fold(1, (acc, element) {
@@ -94,7 +94,7 @@ void showErrorSnackBar(BuildContext context, Object error) {
   );
 }
 
-class InstanceViewer extends StatefulWidget {
+class InstanceViewer extends ConsumerStatefulWidget {
   const InstanceViewer({
     Key key,
     this.rootPath,
@@ -108,7 +108,7 @@ class InstanceViewer extends StatefulWidget {
   _InstanceViewerState createState() => _InstanceViewerState();
 }
 
-class _InstanceViewerState extends State<InstanceViewer> {
+class _InstanceViewerState extends ConsumerState<InstanceViewer> {
   final scrollController = ScrollController();
 
   @override
@@ -131,49 +131,49 @@ class _InstanceViewerState extends State<InstanceViewer> {
 
   Iterable<Widget> _buildListViewItems(
     BuildContext context,
-    ScopedReader watch, {
+    WidgetRef ref, {
     @required InstancePath path,
     bool disableExpand = false,
   }) {
-    return watch(instanceProvider(path)).when(
-      loading: () => const [Text('loading...')],
-      error: (err, stack) => _buildError(err, stack, path),
-      data: (instance) sync* {
-        final isExpanded = watch(isExpandedProvider(path));
-        yield _buildHeader(
-          instance,
-          path: path,
-          isExpanded: isExpanded,
-          disableExpand: disableExpand,
-        );
+    return ref.watch(instanceProvider(path)).when(
+          loading: () => const [Text('loading...')],
+          error: (err, stack) => _buildError(err, stack, path),
+          data: (instance) sync* {
+            final isExpanded = ref.watch(isExpandedProvider(path).state);
+            yield _buildHeader(
+              instance,
+              path: path,
+              isExpanded: isExpanded,
+              disableExpand: disableExpand,
+            );
 
-        if (isExpanded.state) {
-          yield* instance.maybeMap(
-            object: (instance) => _buildObjectItem(
-              context,
-              watch,
-              instance,
-              path: path,
-            ),
-            list: (list) => _buildListItem(
-              context,
-              watch,
-              instance,
-              path: path,
-            ),
-            map: (map) => _buildMapItem(
-              context,
-              watch,
-              instance,
-              path: path,
-            ),
-            // string/numbers/bools have no children, but this code can be reached
-            // when the root of the instance tree (which is always expanded) is such primitive.
-            orElse: () => const [],
-          );
-        }
-      },
-    );
+            if (isExpanded.state) {
+              yield* instance.maybeMap(
+                object: (instance) => _buildObjectItem(
+                  context,
+                  ref,
+                  instance,
+                  path: path,
+                ),
+                list: (list) => _buildListItem(
+                  context,
+                  ref,
+                  instance,
+                  path: path,
+                ),
+                map: (map) => _buildMapItem(
+                  context,
+                  ref,
+                  instance,
+                  path: path,
+                ),
+                // string/numbers/bools have no children, but this code can be reached
+                // when the root of the instance tree (which is always expanded) is such primitive.
+                orElse: () => const [],
+              );
+            }
+          },
+        );
   }
 
   Widget _buildHeader(
@@ -273,14 +273,14 @@ class _InstanceViewerState extends State<InstanceViewer> {
 
   Iterable<Widget> _buildMapItem(
     BuildContext context,
-    ScopedReader watch,
+    WidgetRef ref,
     MapInstance instance, {
     @required InstancePath path,
   }) sync* {
     for (final key in instance.keys) {
       final value = _buildListViewItems(
         context,
-        watch,
+        ref,
         path: path.pathForChild(PathToProperty.mapKey(ref: key.instanceRefId)),
       );
 
@@ -313,14 +313,14 @@ class _InstanceViewerState extends State<InstanceViewer> {
 
   Iterable<Widget> _buildListItem(
     BuildContext context,
-    ScopedReader watch,
+    WidgetRef ref,
     ListInstance instance, {
     @required InstancePath path,
   }) sync* {
     for (var index = 0; index < instance.length; index++) {
       final children = _buildListViewItems(
         context,
-        watch,
+        ref,
         path: path.pathForChild(PathToProperty.listIndex(index)),
       );
 
@@ -350,7 +350,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
 
   Iterable<Widget> _buildObjectItem(
     BuildContext context,
-    ScopedReader watch,
+    WidgetRef ref,
     ObjectInstance instance, {
     @required InstancePath path,
   }) sync* {
@@ -364,7 +364,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
 
       final children = _buildListViewItems(
         context,
-        watch,
+        ref,
         path: path.pathForChild(PathToProperty.fromObjectField(field)),
       );
 
@@ -397,32 +397,28 @@ class _InstanceViewerState extends State<InstanceViewer> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, watch, _) {
-        return Scrollbar(
-          isAlwaysShown: true,
-          controller: scrollController,
-          child: ListView.custom(
-            controller: scrollController,
-            // TODO: item height should be based on font size
-            itemExtent: rowHeight,
-            padding: const EdgeInsets.symmetric(
-              vertical: denseSpacing,
-              horizontal: defaultSpacing,
-            ),
-            childrenDelegate: SliverIterableChildDelegate(
-              _buildListViewItems(
-                context,
-                watch,
-                path: widget.rootPath,
-                disableExpand: true,
-              ),
-              estimatedChildCount:
-                  watch(estimatedChildCountProvider(widget.rootPath)),
-            ),
+    return Scrollbar(
+      isAlwaysShown: true,
+      controller: scrollController,
+      child: ListView.custom(
+        controller: scrollController,
+        // TODO: item height should be based on font size
+        itemExtent: rowHeight,
+        padding: const EdgeInsets.symmetric(
+          vertical: denseSpacing,
+          horizontal: defaultSpacing,
+        ),
+        childrenDelegate: SliverIterableChildDelegate(
+          _buildListViewItems(
+            context,
+            ref,
+            path: widget.rootPath,
+            disableExpand: true,
           ),
-        );
-      },
+          estimatedChildCount:
+              ref.watch(estimatedChildCountProvider(widget.rootPath)),
+        ),
+      ),
     );
   }
 }

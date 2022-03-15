@@ -45,10 +45,12 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
     final container = ProviderContainer();
     addTearDown(container.dispose);
 
-    final providersSub =
-        container.listen(rawSortedProviderNodesProvider.future);
+    final providersSub = container.listen(
+      sortedProviderNodesProvider.future,
+      (prev, next) {},
+    );
     final countSub = container.listen(
-      rawInstanceProvider(
+      instanceProvider(
         const InstancePath.fromProviderId('0').pathForChild(
           const PathToProperty.objectProperty(
             name: '_count',
@@ -57,6 +59,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           ),
         ),
       ).future,
+      (prev, next) {},
     );
 
     await evalOnDartLibrary.asyncEval(
@@ -106,7 +109,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
       addTearDown(container.dispose);
 
       final sub = container.listen(
-        rawInstanceProvider(
+        instanceProvider(
           const InstancePath.fromProviderId('0').pathForChild(
             const PathToProperty.objectProperty(
               name: '_privateMixinProperty',
@@ -115,6 +118,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
             ),
           ),
         ).future,
+        (prev, next) {},
       );
 
       var instance = await sub.read();
@@ -136,11 +140,12 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
       );
     });
 
-    test('rawSortedProviderNodesProvider', () async {
+    test('sortedProviderNodesProvider', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      final sub = container.listen(rawSortedProviderNodesProvider.future);
+      final sub =
+          container.listen(sortedProviderNodesProvider.future, (prev, next) {});
 
       await evalOnDartLibrary.asyncEval(
         'await tester.tap(find.byKey(Key("add"))).then((_) => tester.pump())',
@@ -167,8 +172,8 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
 
         final counterFuture = container
             .listen(
-              rawInstanceProvider(const InstancePath.fromProviderId('0'))
-                  .future,
+              instanceProvider(const InstancePath.fromProviderId('0')).future,
+              (prev, next) {},
             )
             .read();
 
@@ -184,14 +189,17 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         );
 
         final complexFuture = await container
-            .listen(rawInstanceProvider(complexPath).future)
+            .listen(
+              instanceProvider(complexPath).future,
+              (prev, next) {},
+            )
             .read();
 
         final complexPropertiesFuture = Future.wait<MapEntry<String, Object>>([
           for (final field in (complexFuture as ObjectInstance).fields)
             container
                 .listen(
-                  rawInstanceProvider(
+                  instanceProvider(
                     complexPath.pathForChild(
                       PathToProperty.objectProperty(
                         name: field.name,
@@ -200,6 +208,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                       ),
                     ),
                   ).future,
+                  (prev, next) {},
                 )
                 .read()
                 .then(
@@ -217,7 +226,10 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         );
 
         final mapKeys = await container
-            .listen(rawInstanceProvider(mapPath).future)
+            .listen(
+              instanceProvider(mapPath).future,
+              (prev, next) {},
+            )
             .read()
             .then((value) => value as MapInstance);
 
@@ -225,11 +237,12 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           for (final key in mapKeys.keys)
             container
                 .listen(
-                  rawInstanceProvider(
+                  instanceProvider(
                     mapPath.pathForChild(
                       PathToProperty.mapKey(ref: key.instanceRefId),
                     ),
                   ).future,
+                  (prev, next) {},
                 )
                 .read()
         ]);
@@ -246,9 +259,10 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           for (var i = 0; i < 6; i++)
             container
                 .listen(
-                  rawInstanceProvider(
+                  instanceProvider(
                     listPath.pathForChild(PathToProperty.listIndex(i)),
                   ).future,
+                  (prev, next) {},
                 )
                 .read()
         ]);
@@ -256,7 +270,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         // Counter.complex.list[4].value
         final list4valueFuture = container
             .listen(
-              rawInstanceProvider(
+              instanceProvider(
                 listPath
                     .pathForChild(const PathToProperty.listIndex(4))
                     .pathForChild(
@@ -267,13 +281,14 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                       ),
                     ),
               ).future,
+              (prev, next) {},
             )
             .read();
 
         // Counter.complex.plainInstance.value
         final plainInstanceValueFuture = container
             .listen(
-              rawInstanceProvider(
+              instanceProvider(
                 complexPath
                     .pathForChild(
                       const PathToProperty.objectProperty(
@@ -290,6 +305,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                       ),
                     ),
               ).future,
+              (prev, next) {},
             )
             .read();
 
@@ -648,7 +664,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
 
         // Counter._count
         final counter_countSub = container.listen(
-          rawInstanceProvider(
+          instanceProvider(
             const InstancePath.fromProviderId(
               '0',
               pathToProperty: [
@@ -660,6 +676,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
               ],
             ),
           ).future,
+          (prev, next) {},
         );
 
         await expectLater(
@@ -717,9 +734,14 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
       );
 
       // wait for the list of providers to be obtained
-      await container.listen(rawSortedProviderNodesProvider.future).read();
+      await container
+          .listen(sortedProviderNodesProvider.future, (prev, next) {})
+          .read();
 
-      final countSub = container.listen(rawInstanceProvider(countPath).future);
+      final countSub = container.listen(
+        instanceProvider(countPath).future,
+        (prev, next) {},
+      );
 
       final instance = await countSub.read();
 

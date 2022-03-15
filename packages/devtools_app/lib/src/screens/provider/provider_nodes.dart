@@ -12,7 +12,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/eval_on_dart_library.dart';
 import 'instance_viewer/eval.dart';
-import 'provider_debounce.dart';
 
 @immutable
 class ProviderNode {
@@ -26,7 +25,7 @@ class ProviderNode {
 }
 
 final _providerListChanged = AutoDisposeStreamProvider<void>((ref) async* {
-  final service = await ref.watch(serviceProvider.last);
+  final service = await ref.watch(serviceProvider.future);
 
   yield* service.onExtensionEvent.where((event) {
     return event.extensionKind == 'provider:provider_list_changed';
@@ -93,7 +92,7 @@ final _rawProviderNodeProvider =
 
 /// Combines [providerIdsProvider] with [providerNodeProvider] to obtain all
 /// the [ProviderNode]s at once, sorted alphabetically.
-final rawSortedProviderNodesProvider =
+final sortedProviderNodesProvider =
     AutoDisposeFutureProvider<List<ProviderNode>>((ref) async {
   final ids = await ref.watch(_rawProviderIdsProvider.future);
 
@@ -103,9 +102,3 @@ final rawSortedProviderNodesProvider =
 
   return nodes.toList()..sort((a, b) => a.type.compareTo(b.type));
 });
-
-// // TODO(rrousselGit) refactor to use "debounce" when available
-final sortedProviderNodesProvider =
-    asyncDebounce<AsyncValue<List<ProviderNode>>>(
-  rawSortedProviderNodesProvider,
-);

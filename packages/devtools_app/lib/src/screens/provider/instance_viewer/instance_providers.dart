@@ -14,14 +14,13 @@ import 'package:vm_service/vm_service.dart' hide SentinelException;
 import '../../../primitives/utils.dart';
 import '../../../shared/eval_on_dart_library.dart';
 import '../../../shared/globals.dart';
-import '../provider_debounce.dart';
 import 'eval.dart';
 import 'instance_details.dart';
 import 'result.dart';
 
 Future<InstanceRef> _resolveInstanceRefForPath(
   InstancePath path, {
-  @required AutoDisposeProviderReference ref,
+  @required AutoDisposeRef ref,
   @required Disposable isAlive,
   @required InstanceDetails parent,
 }) async {
@@ -111,7 +110,7 @@ Future<InstanceRef> _resolveInstanceRefForPath(
 Future<void> _mutate(
   String newValueExpression, {
   @required InstancePath path,
-  @required AutoDisposeProviderReference ref,
+  @required AutoDisposeRef ref,
   @required Disposable isAlive,
   @required InstanceDetails parent,
 }) async {
@@ -164,18 +163,18 @@ Future<void> _mutate(
 
   // Since the same object can be used in multiple locations at once, we need
   // to refresh the entire tree instead of just the node that was modified.
-  unawaited(ref.container.refresh(rawInstanceProvider(path.root)));
+  ref.refresh(instanceProvider(path.root));
 
   // Forces the UI to rebuild after the state change
   await serviceManager.performHotReload();
 }
 
 Future<InstanceDetails> _resolveParent(
-  AutoDisposeProviderReference ref,
+  AutoDisposeRef ref,
   InstancePath path,
 ) async {
   return path.pathToProperty.isNotEmpty
-      ? await ref.watch(rawInstanceProvider(path.parent).future)
+      ? await ref.watch(instanceProvider(path.parent).future)
       : null;
 }
 
@@ -224,7 +223,7 @@ Future<EnumInstance> _tryParseEnum(
 
 Setter _parseSetter({
   @required InstancePath path,
-  @required ProviderReference ref,
+  @required Ref ref,
   @required Disposable isAlive,
   @required InstanceDetails parent,
 }) {
@@ -265,7 +264,7 @@ Setter _parseSetter({
 ///
 /// The UI should not be used directly. Instead, use [instanceProvider].
 final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
-    rawInstanceProvider =
+    instanceProvider =
     AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>(
         (ref, path) async {
   ref.watch(hotRestartEventProvider);
@@ -326,7 +325,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
       final keysFuture = Future.wait<InstanceDetails>([
         for (final keyRef in keysRef)
           ref.watch(
-            rawInstanceProvider(InstancePath.fromInstanceId(keyRef?.id)).future,
+            instanceProvider(InstancePath.fromInstanceId(keyRef?.id)).future,
           )
       ]);
 
@@ -386,14 +385,6 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
   }
 });
 
-/// [rawInstanceProvider] but the loading state is debounced for one second.
-///
-/// This avoids flickers when a state is refreshed
-final instanceProvider =
-    familyAsyncDebounce<AsyncValue<InstanceDetails>, InstancePath>(
-  rawInstanceProvider,
-);
-
 final _packageNameExp = RegExp(
   r'package:(.+?)/',
 );
@@ -403,7 +394,7 @@ String tryParsePackageName(String uri) {
 }
 
 Future<List<ObjectField>> _parseFields(
-  AutoDisposeProviderReference ref,
+  AutoDisposeRef ref,
   EvalOnDartLibrary eval,
   Instance instance,
   Class classInstance, {
@@ -443,7 +434,7 @@ Future<List<ObjectField>> _parseFields(
 
 final _providerChanged =
     AutoDisposeStreamProviderFamily<void, String>((ref, id) async* {
-  final service = await ref.watch(serviceProvider.last);
+  final service = await ref.watch(serviceProvider.future);
 
   yield* service.onExtensionEvent.where((event) {
     return event.extensionKind == 'provider:provider_changed' &&

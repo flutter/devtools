@@ -27,7 +27,7 @@ final counterProvider = StateNotifierProvider((ref) => Counter());
 
 class MyApp extends ConsumerWidget {
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -39,7 +39,7 @@ class MyApp extends ConsumerWidget {
             children: [
               const Text('You clicked this many times on the button:'),
               Text(
-                watch(counterProvider).toString(),
+                ref.watch(counterProvider).toString(),
                 style: Theme.of(context).textTheme.headline4,
               ),
             ],
@@ -47,7 +47,7 @@ class MyApp extends ConsumerWidget {
         ),
         floatingActionButton: FloatingActionButton(
           key: const Key('increment'),
-          onPressed: () => context.read(counterProvider).increment(),
+          onPressed: () => ref.read(counterProvider).increment(),
           child: const Icon(Icons.add),
         ),
       ),
