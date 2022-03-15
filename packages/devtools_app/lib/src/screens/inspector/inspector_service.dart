@@ -806,7 +806,7 @@ abstract class ObjectGroupBase implements Disposable {
     return RemoteDiagnosticsNode(jsonElement, this, false, null);
   }
 
-  Future<List<RemoteDiagnosticsNode?>> parseDiagnosticsNodesObservatory(
+  Future<List<RemoteDiagnosticsNode>> parseDiagnosticsNodesObservatory(
     FutureOr<InstanceRef?> instanceRefFuture,
     RemoteDiagnosticsNode? parent,
     bool isProperty,
@@ -821,13 +821,13 @@ abstract class ObjectGroupBase implements Disposable {
     );
   }
 
-  List<RemoteDiagnosticsNode?> parseDiagnosticsNodesHelper(
+  List<RemoteDiagnosticsNode> parseDiagnosticsNodesHelper(
     List<Object>? jsonObject,
     RemoteDiagnosticsNode? parent,
     bool isProperty,
   ) {
     if (disposed || jsonObject == null) return const [];
-    final List<RemoteDiagnosticsNode?> nodes = [];
+    final List<RemoteDiagnosticsNode> nodes = [];
     for (Map<String, Object> element
         in jsonObject.cast<Map<String, Object>>()) {
       nodes.add(RemoteDiagnosticsNode(element, this, isProperty, parent));
@@ -835,7 +835,7 @@ abstract class ObjectGroupBase implements Disposable {
     return nodes;
   }
 
-  Future<List<RemoteDiagnosticsNode?>> parseDiagnosticsNodesDaemon(
+  Future<List<RemoteDiagnosticsNode>> parseDiagnosticsNodesDaemon(
     FutureOr<Object?> jsonFuture,
     RemoteDiagnosticsNode? parent,
     bool isProperty,
@@ -990,7 +990,7 @@ abstract class ObjectGroupBase implements Disposable {
         : getPropertyLocationHelper(superClass, name);
   }
 
-  Future<List<RemoteDiagnosticsNode?>> getListHelper(
+  Future<List<RemoteDiagnosticsNode>> getListHelper(
     InspectorInstanceRef instanceRef,
     String methodName,
     RemoteDiagnosticsNode? parent,
@@ -1064,7 +1064,7 @@ abstract class ObjectGroupBase implements Disposable {
     );
   }
 
-  Future<List<RemoteDiagnosticsNode?>> getChildren(
+  Future<List<RemoteDiagnosticsNode>> getChildren(
     InspectorInstanceRef instanceRef,
     bool summaryTree,
     RemoteDiagnosticsNode? parent,
