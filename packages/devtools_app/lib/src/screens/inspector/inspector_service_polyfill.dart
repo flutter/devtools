@@ -1,4 +1,6 @@
-// @dart=2.9
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 import 'dart:convert';
 
@@ -19,11 +21,11 @@ final _polyfillReadyExpando = Expando<Future>();
 
 Future<void> invokeInspectorPolyfill(ObjectGroup group) {
   // Avoid invoking the polyfill more than once.
-  var polyFillReady = _polyfillReadyExpando[group.inspectorLibrary.isolate];
+  var polyFillReady = _polyfillReadyExpando[group.inspectorLibrary.isolate!];
   if (polyFillReady != null) return polyFillReady;
 
   polyFillReady = _invokeInspectorPolyfill(group);
-  _polyfillReadyExpando[group.inspectorLibrary.isolate] = polyFillReady;
+  _polyfillReadyExpando[group.inspectorLibrary.isolate!] = polyFillReady;
   return polyFillReady;
 }
 
@@ -58,7 +60,8 @@ $script''',
 
   final expression = '((){${filteredLines.join()}})()';
 
-  final result = await group.inspectorLibrary.eval(expression, isAlive: group);
+  final result = await (group.inspectorLibrary.eval(expression, isAlive: group)
+      as FutureOr<InstanceRef>);
   final encodedResult =
       await group.inspectorLibrary.retrieveFullValueAsString(result);
   if (encodedResult != null) {
