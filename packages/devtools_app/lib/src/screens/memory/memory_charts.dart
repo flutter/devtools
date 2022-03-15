@@ -160,9 +160,9 @@ class ChartsValues {
 
   List<Map<String, Object>> get extensionEvents {
     if (_extensionEvents.isEmpty) {
-      _extensionEvents.add(<String, Object>{
-        extensionEventsJsonName: _event[extensionEventsJsonName]!
-      });
+      final events =
+          _event[extensionEventsJsonName] as List<Map<String, Object>>;
+      _extensionEvents.addAll(events);
     }
     return _extensionEvents;
   }
@@ -209,8 +209,10 @@ class ChartsValues {
             },
           );
         } else {
-          events
-              .add({eventName: event.eventKind!, eventData: event.data ?? {}});
+          events.add({
+            eventName: event.eventKind!,
+            eventData: event.data ?? {},
+          });
         }
       }
       if (events.isNotEmpty) {
@@ -286,8 +288,7 @@ class ChartsValues {
   }
 
   Map<String, Map<String, Object?>> displayVmDataToDisplay(List<Trace> traces) {
-    final Map<String, Map<String, Object?>> vmDataDisplayed =
-        <String, Map<String, Object>>{};
+    final vmDataDisplayed = <String, Map<String, Object?>>{};
 
     final rssValueDisplay = formatNumeric(vmData[rssJsonName] as num?);
     vmDataDisplayed['$rssDisplay $rssValueDisplay'] = traceRender(
@@ -331,8 +332,7 @@ class ChartsValues {
   }
 
   Map<String, Map<String, Object?>> androidDataToDisplay(List<Trace> traces) {
-    final Map<String, Map<String, Object?>> androidDataDisplayed =
-        <String, Map<String, Object>>{};
+    final androidDataDisplayed = <String, Map<String, Object?>>{};
 
     if (controller.isAndroidChartVisible) {
       final data = androidData;
