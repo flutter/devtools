@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -84,7 +82,7 @@ class EventChartController extends ChartController {
       final data = trace.DataAggregate(
         sample.timestamp,
         MemoryEventsPaneState.extensionEvent,
-        events.extensionEvents.theEvents.length,
+        (events.extensionEvents?.theEvents ?? []).length,
       );
       addDataToTrace(TraceName.extensionEvents.index, data);
     }
@@ -112,7 +110,7 @@ class EventChartController extends ChartController {
     }
 
     if (sample.memoryEventInfo.isEventAllocationAccumulator) {
-      final allocationEvent = events.allocationAccumulator;
+      final allocationEvent = events.allocationAccumulator!;
       final data = trace.Data(
         sample.timestamp,
         MemoryEventsPaneState.visibleMonitorEvent,
@@ -131,7 +129,7 @@ class EventChartController extends ChartController {
 }
 
 class MemoryEventsPane extends StatefulWidget {
-  const MemoryEventsPane(this.chartController, {Key key}) : super(key: key);
+  const MemoryEventsPane(this.chartController, {Key? key}) : super(key: key);
 
   final EventChartController chartController;
 
@@ -156,8 +154,10 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   /// Controller attached to this chart.
   EventChartController get _chartController => widget.chartController;
 
+  bool _initialized = false;
+
   /// Controller for managing memory collection.
-  MemoryController _memoryController;
+  late MemoryController _memoryController;
 
   /// Note: The event pane is a fixed size chart (y-axis does not scale). The
   ///       Y-axis fixed range is (visibleVmEvent to extensionEvent) e.g.,
@@ -188,8 +188,6 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
   MemoryTimeline get _memoryTimeline => _memoryController.memoryTimeline;
 
-  ColorScheme colorScheme;
-
   @override
   void initState() {
     super.initState();
@@ -202,10 +200,12 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _memoryController = Provider.of<MemoryController>(context);
+    final newMemoryController = Provider.of<MemoryController>(context);
+    if (_initialized && newMemoryController == _memoryController) return;
+    _initialized = true;
+    _memoryController = newMemoryController;
 
     final themeData = Theme.of(context);
-    colorScheme = themeData.colorScheme;
 
     cancelListeners();
 
@@ -213,11 +213,14 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     _chartController.setupData();
 
     // Monitor heap samples.
-    addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
-      setState(() {
-        _processHeapSample(_memoryTimeline.sampleAddedNotifier.value);
+    if (_memoryTimeline.sampleAddedNotifier.value != null) {
+      addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
+        setState(() {
+          _processHeapSample(_memoryTimeline.sampleAddedNotifier.value!);
+        });
       });
-    });
+    }
+
     // Monitor event fired.
     addAutoDisposeListener(_memoryTimeline.eventNotifier, () {
       setState(() {
@@ -229,10 +232,8 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
   @override
   Widget build(BuildContext context) {
-    if (_chartController != null) {
-      if (_chartController.timestamps.isNotEmpty) {
-        return Chart(_chartController);
-      }
+    if (_chartController.timestamps.isNotEmpty) {
+      return Chart(_chartController);
     }
 
     return const SizedBox(width: denseSpacing);
@@ -276,7 +277,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     final extensionEventsIndex = _chartController.createTrace(
       trace.ChartType.symbol,
       trace.PaintCharacteristics(
-        color: Colors.purpleAccent[100],
+        color: Colors.purpleAccent[100]!,
         colorAggregate: Colors.purpleAccent[400],
         symbol: trace.ChartSymbol.filledTriangle,
         height: 20,
@@ -359,7 +360,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     final monitorResetIndex = _chartController.createTrace(
       trace.ChartType.symbol,
       trace.PaintCharacteristics.concentric(
-        color: Colors.grey[600],
+        color: Colors.grey[600]!,
         strokeWidth: 4,
         diameter: 6,
         fixedMinY: visibleVmEvent,
