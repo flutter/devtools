@@ -48,16 +48,17 @@ abstract class ColumnData<T> {
   bool get supportsSorting => numeric;
 
   int compare(T a, T b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    final valueA = getValue(a) as Comparable;
+    final valueB = getValue(b) as Comparable;
     return valueA.compareTo(valueB);
   }
 
   /// Get the cell's value from the given [dataObject].
-  dynamic getValue(T dataObject);
+  Object? getValue(T dataObject);
 
   /// Get the cell's display value from the given [dataObject].
-  String getDisplayValue(T dataObject) => getValue(dataObject).toString();
+  String getDisplayValue(T dataObject) =>
+      getValue(dataObject)?.toString() ?? '';
 
   // TODO(kenz): this isn't hooked up to the table elements. Do this.
   /// Get the cell's tooltip value from the given [dataObject].
