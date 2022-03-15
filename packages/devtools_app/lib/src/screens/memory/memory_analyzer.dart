@@ -46,12 +46,8 @@ Map<String, List<Reference>> collect(
       final externalsToAnalyze = <ExternalReference>[];
 
       final ExternalReferences externals = library as ExternalReferences;
-      for (final Reference external in externals.children) {
-        if (external is! ExternalReference) {
-          throw Exception('external is expected to be ExternalReference, '
-              'but is ${external.runtimeType}');
-        }
-
+      for (final ExternalReference external
+          in externals.children.cast<ExternalReference>()) {
         final liveExternal = external.liveExternal;
         final size = liveExternal.externalProperty.externalSize;
         final liveElement = liveExternal.live;
@@ -69,11 +65,8 @@ Map<String, List<Reference>> collect(
     } else if (library.isFiltered) {
       final filtersToAnalyze = <ClassReference>[];
       for (final Reference libraryRef in library.children) {
-        for (final Reference classRef in libraryRef.children) {
-          if (classRef is! ClassReference) {
-            throw Exception('classRef is expected to be ClassReference, '
-                'but is ${classRef.runtimeType}');
-          }
+        for (final ClassReference classRef
+            in libraryRef.children.cast<ClassReference>()) {
           final HeapGraphClassLive liveClass = classRef.actualClass!;
           if (_classMatcher(liveClass)) {
             filtersToAnalyze.add(classRef);
@@ -86,11 +79,8 @@ Map<String, List<Reference>> collect(
       }
     } else if (library.isLibrary) {
       final librariesToAnalyze = <ClassReference>[];
-      for (final Reference classRef in library.children) {
-        if (classRef is! ClassReference) {
-          throw Exception('classRef is expected to be ClassReference, '
-              'but is ${classRef.runtimeType}');
-        }
+      for (final ClassReference classRef
+          in library.children.cast<ClassReference>()) {
         final HeapGraphClassLive liveClass = classRef.actualClass!;
         if (_classMatcher(liveClass)) {
           librariesToAnalyze.add(classRef);
@@ -137,12 +127,7 @@ void imageAnalysis(
       case 'externals':
         final externalsNode = AnalysisReference('Externals');
         analysisSnapshot.addChild(externalsNode);
-        for (final Reference ref in value) {
-          if (ref is! ExternalReference) {
-            throw Exception('ref is expected to be ExternalReference, '
-                'but is ${ref.runtimeType}');
-          }
-
+        for (final ExternalReference ref in value.cast<ExternalReference>()) {
           final HeapGraphExternalLive liveExternal = ref.liveExternal;
           final HeapGraphElementLive liveElement = liveExternal.live;
 
@@ -154,12 +139,8 @@ void imageAnalysis(
           externalsNode.addChild(objectNode);
           var childExternalSizes = 0;
           final bucketSizes = SplayTreeMap<String, Bucket>();
-          for (final Reference child in ref.children) {
-            if (child is! ExternalObjectReference) {
-              throw Exception('ref is expected to be ExternalObjectReference, '
-                  'but is ${child.runtimeType}');
-            }
-
+          for (final ExternalObjectReference child
+              in ref.children.cast<ExternalObjectReference>()) {
             if (child.externalSize < 10000) {
               bucketSizes.putIfAbsent(bucket10K, () => Bucket(0, 0));
               bucketSizes[bucket10K]!.totalCount += 1;
@@ -386,12 +367,8 @@ Map<String, List<String>> drillIn(
 
     var instanceIndex = 0;
     _debugMonitor('Class $name Instance=$instanceIndex');
-    for (final Reference objRef in classRef.children) {
-      if (objRef is! ObjectReference) {
-        throw Exception('classRef is expected to be ObjectReference, '
-            'but is ${objRef.runtimeType}');
-      }
-
+    for (final ObjectReference objRef
+        in classRef.children.cast<ObjectReference>()) {
       final fields = objRef.instance.getFields();
       // Root __FIELDS__ is a container for children, the children
       // are added, later, to a treenode - if the treenode should
