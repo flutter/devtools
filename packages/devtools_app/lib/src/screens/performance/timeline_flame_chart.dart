@@ -438,13 +438,14 @@ class TimelineFlameChartState
   Future<void> _centerSelectedFrame() async {
     // TODO(kenz): consider using jumpTo for some of these animations to
     // improve performance.
-    if (_selectedFrame != null) {
+    final _selected = _selectedFrame;
+    if (_selected != null) {
       // Zoom and scroll to the frame's UI event.
-      final time = _selectedFrame!.timeToCenterFrame();
-      final event = _selectedFrame!.eventToCenterFrame();
+      final time = _selected.timeToCenterFrame();
+      final event = _selected.eventToCenterFrame();
       if (time == null || event == null) {
         if (_performanceController.firstWellFormedFrameMicros != null &&
-            _selectedFrame!.timeFromFrameTiming.start!.inMicroseconds <
+            _selected.timeFromFrameTiming.start!.inMicroseconds <
                 _performanceController.firstWellFormedFrameMicros!) {
           Notifications.of(context)!.push(
             'No timeline events available for the selected frame. Timeline '

@@ -273,8 +273,9 @@ class PerformanceController extends DisposableController
   }
 
   Future<void> _initData() async {
-    await serviceManager.connectedApp!.initialized.future;
-    data = serviceManager.connectedApp!.isFlutterAppNow!
+    final connectedApp = serviceManager.connectedApp!;
+    await connectedApp.initialized.future;
+    data = connectedApp.isFlutterAppNow!
         ? PerformanceData(
             displayRefreshRate: await serviceManager.queryDisplayRefreshRate,
           )
@@ -284,14 +285,15 @@ class PerformanceController extends DisposableController
   Future<void> _pullTraceEventsFromVmTimeline({
     bool isInitialPull = false,
   }) async {
-    final currentVmTime = await serviceManager.service!.getVMTimelineMicros();
+    final service = serviceManager.service!;
+    final currentVmTime = await service.getVMTimelineMicros();
     debugTraceEventCallback(
       () => log(
         'pulling trace events from '
         '[$_nextPollStartMicros - ${currentVmTime.timestamp}]',
       ),
     );
-    final timeline = await serviceManager.service!.getVMTimeline(
+    final timeline = await service.getVMTimeline(
       timeOriginMicros: _nextPollStartMicros,
       timeExtentMicros: currentVmTime.timestamp! - _nextPollStartMicros,
     );
@@ -325,9 +327,10 @@ class PerformanceController extends DisposableController
     TimelineEvent? event, {
     bool updateProfiler = true,
   }) async {
-    if (event == null || data!.selectedEvent == event) return;
+    final _data = data!;
+    if (event == null || _data.selectedEvent == event) return;
 
-    data!.selectedEvent = event;
+    _data.selectedEvent = event;
     _selectedTimelineEventNotifier.value = event;
 
     if (event.isUiEvent && updateProfiler) {
@@ -341,7 +344,7 @@ class PerformanceController extends DisposableController
           shouldApplyFilters: true,
           shouldRefreshSearchMatches: true,
         );
-        data!.cpuProfileData = cpuProfilerController.dataNotifier.value;
+        _data.cpuProfileData = cpuProfilerController.dataNotifier.value;
       } else if ((!offlineController.offlineMode.value ||
               offlinePerformanceData == null) &&
           cpuProfilerController.profilerEnabled) {
@@ -352,7 +355,7 @@ class PerformanceController extends DisposableController
           extentMicros: event.time.duration.inMicroseconds,
           processId: '${event.traceEvents.first.wrapperId}',
         );
-        data!.cpuProfileData = cpuProfilerController.dataNotifier.value;
+        _data.cpuProfileData = cpuProfilerController.dataNotifier.value;
       }
     }
   }
@@ -369,17 +372,18 @@ class PerformanceController extends DisposableController
     if (data == null) {
       return;
     }
+    final _data = data!;
 
     _currentFrameBeingSelected = frame;
 
     // Unselect [frame] if is already selected.
-    if (data!.selectedFrame == frame) {
-      data!.selectedFrame = null;
+    if (_data.selectedFrame == frame) {
+      _data.selectedFrame = null;
       _selectedFrameNotifier.value = null;
       return;
     }
 
-    data!.selectedFrame = frame;
+    _data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
 
     // Default to viewing the timeline events flame chart when a new frame is
@@ -441,7 +445,7 @@ class PerformanceController extends DisposableController
         );
       }
       if (_currentFrameBeingSelected != frame) return;
-      data!.cpuProfileData = cpuProfilerController.dataNotifier.value;
+      _data.cpuProfileData = cpuProfilerController.dataNotifier.value;
     } else {
       if (!storedProfileForFrame.processed) {
         await cpuProfilerController.transformer.processData(
@@ -450,7 +454,7 @@ class PerformanceController extends DisposableController
         );
       }
       if (_currentFrameBeingSelected != frame) return;
-      data!.cpuProfileData = storedProfileForFrame;
+      _data.cpuProfileData = storedProfileForFrame;
       cpuProfilerController.loadProcessedData(
         storedProfileForFrame,
         storeAsUserTagNone: true,
@@ -671,6 +675,7 @@ class PerformanceController extends DisposableController
     if (data == null) {
       await _initData();
     }
+    final _data = data!;
     final traceEventCount = traceEvents.length;
 
     debugTraceEventCallback(
@@ -701,7 +706,7 @@ class PerformanceController extends DisposableController
           '$_nextTimelineEventIndexToProcess',
         ),
       );
-      data!.initializeEventGroups(
+      _data.initializeEventGroups(
         threadNamesById,
         startIndex: _nextTimelineEventIndexToProcess,
       );
@@ -709,10 +714,10 @@ class PerformanceController extends DisposableController
         () => log(
           'after initializing event groups at startIndex '
           '$_nextTimelineEventIndexToProcess and now '
-          '_nextTimelineEventIndexToProcess = ${data!.timelineEvents.length}',
+          '_nextTimelineEventIndexToProcess = ${_data.timelineEvents.length}',
         ),
       );
-      _nextTimelineEventIndexToProcess = data!.timelineEvents.length;
+      _nextTimelineEventIndexToProcess = _data.timelineEvents.length;
     }
 
     // Process trace events [processTraceEventsHelper] and time the operation
@@ -779,35 +784,37 @@ class PerformanceController extends DisposableController
   }
 
   void setOfflineData() {
+    final _data = data!;
+    final _offlineData = offlinePerformanceData!;
     _flutterFrames
       ..clear()
-      ..addAll(offlinePerformanceData!.frames);
-    final frameToSelect = offlinePerformanceData!.frames.firstWhereOrNull(
-      (frame) => frame.id == offlinePerformanceData!.selectedFrameId,
+      ..addAll(_offlineData.frames);
+    final frameToSelect = _offlineData.frames.firstWhereOrNull(
+      (frame) => frame.id == _offlineData.selectedFrameId,
     );
     if (frameToSelect != null) {
-      data!.selectedFrame = frameToSelect;
+      _data.selectedFrame = frameToSelect;
       _selectedFrameNotifier.value = frameToSelect;
     }
-    if (offlinePerformanceData!.selectedEvent != null) {
-      for (var timelineEvent in data!.timelineEvents) {
+    if (_offlineData.selectedEvent != null) {
+      for (var timelineEvent in _data.timelineEvents) {
         final eventToSelect = timelineEvent.firstChildWithCondition((event) {
-          return event.name == offlinePerformanceData!.selectedEvent!.name &&
-              event.time == offlinePerformanceData!.selectedEvent!.time;
+          return event.name == _offlineData.selectedEvent!.name &&
+              event.time == _offlineData.selectedEvent!.time;
         });
         if (eventToSelect != null) {
-          data!
+          _data
             ..selectedEvent = eventToSelect
-            ..cpuProfileData = offlinePerformanceData!.cpuProfileData;
+            ..cpuProfileData = _offlineData.cpuProfileData;
           _selectedTimelineEventNotifier.value = eventToSelect;
           break;
         }
       }
     }
 
-    if (offlinePerformanceData!.cpuProfileData != null) {
+    if (_offlineData.cpuProfileData != null) {
       cpuProfilerController.loadProcessedData(
-        offlinePerformanceData!.cpuProfileData!,
+        _offlineData.cpuProfileData!,
         storeAsUserTagNone: true,
       );
     }

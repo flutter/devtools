@@ -603,10 +603,11 @@ class FrameTimelineEventData {
         // the event that 2) is true, do not set the frame end time here because
         // the end time for this frame will be set to the end time for
         // [uiEventFlow] once it finishes.
-        if (uiEvent != null) {
+        final _uiEvent = uiEvent;
+        if (_uiEvent != null) {
           time.end = Duration(
             microseconds: math.max(
-              uiEvent!.time.end!.inMicroseconds,
+              _uiEvent.time.end!.inMicroseconds,
               event.time.end?.inMicroseconds ?? 0,
             ),
           );
@@ -1232,13 +1233,15 @@ class FrameAnalysis {
   ///    [--Build--]     [----Build----]
   List<SyncTimelineEvent> get buildEvents {
     if (frame.timelineEventData.uiEvent == null) return <SyncTimelineEvent>[];
-    if (_buildEvents != null) return _buildEvents!;
+    final events = _buildEvents;
+    if (events != null) return events;
 
     _buildEvents = <SyncTimelineEvent>[];
 
-    final firstBuildEvent = frame.timelineEventData.uiEvent!
-        .firstChildWithCondition(
-            (event) => event.name!.caseInsensitiveEquals(buildEventName));
+    final firstBuildEvent =
+        frame.timelineEventData.uiEvent!.firstChildWithCondition(
+      (event) => event.name!.caseInsensitiveEquals(buildEventName),
+    );
     if (firstBuildEvent != null) {
       final buildParent = firstBuildEvent.parent;
       if (buildParent != null) {

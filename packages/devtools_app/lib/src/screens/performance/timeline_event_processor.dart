@@ -173,27 +173,26 @@ class TimelineEventProcessor {
 
     _addPendingCompleteRootToTimeline(force: true);
 
-    performanceController.data!.timelineEvents.sort(
+    final _data = performanceController.data!;
+    _data.timelineEvents.sort(
       (a, b) =>
           a.time.start!.inMicroseconds.compareTo(b.time.start!.inMicroseconds),
     );
-    if (performanceController.data!.timelineEvents.isNotEmpty) {
-      performanceController.data!.time = TimeRange()
+    if (_data.timelineEvents.isNotEmpty) {
+      _data.time = TimeRange()
         // We process trace events in timestamp order, so we can ensure the first
         // trace event has the earliest starting timestamp.
         ..start = Duration(
-          microseconds: performanceController
-              .data!.timelineEvents.first.time.start!.inMicroseconds,
+          microseconds: _data.timelineEvents.first.time.start!.inMicroseconds,
         )
         // We cannot guarantee that the last trace event is the latest timestamp
         // in the timeline. DurationComplete events' timestamps refer to their
         // starting timestamp, but their end time is derived from the same trace
         // via the "dur" field. For this reason, we use the cached value stored in
         // [timelineController.fullTimeline].
-        ..end = Duration(
-            microseconds: performanceController.data!.endTimestampMicros);
+        ..end = Duration(microseconds: _data.endTimestampMicros);
     } else {
-      performanceController.data!.time = TimeRange()
+      _data.time = TimeRange()
         ..start = Duration.zero
         ..end = Duration.zero;
     }

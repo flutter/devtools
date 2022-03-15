@@ -105,7 +105,7 @@ class FlutterFrameAnalysisTab extends StatelessWidget {
         children: [
           Text(
             '|',
-            style: theme.textTheme.headline5?.copyWith(
+            style: theme.textTheme.headline5!.copyWith(
               color: theme.unselectedWidgetColor,
             ),
           ),
