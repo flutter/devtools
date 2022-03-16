@@ -41,8 +41,8 @@ abstract class FlutterTestDriver {
   final StreamController<String> _allMessages =
       StreamController<String>.broadcast();
   final StringBuffer errorBuffer = StringBuffer();
-  String? lastResponse;
-  Uri? vmServiceWsUri;
+  late String lastResponse;
+  late Uri _vmServiceWsUri;
   bool hasExited = false;
 
   VmServiceWrapper? vmService;
@@ -52,7 +52,7 @@ abstract class FlutterTestDriver {
   Stream<String> get stderr => stderrController.stream;
   Stream<String> get stdout => stdoutController.stream;
 
-  Uri? get vmServiceUri => vmServiceWsUri;
+  Uri get vmServiceUri => _vmServiceWsUri;
 
   String debugPrint(String msg) {
     const int maxLength = 500;
@@ -66,7 +66,7 @@ abstract class FlutterTestDriver {
   }
 
   Future<void> setupProcess(
-    List<String?> args, {
+    List<String> args, {
     required String flutterExecutable,
     FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File? pidFile,
@@ -81,7 +81,7 @@ abstract class FlutterTestDriver {
 
     proc = await Process.start(
       flutterExecutable,
-      _args as List<String>,
+      _args,
       workingDirectory: projectFolder.path,
       environment: <String, String>{
         'FLUTTER_TEST': 'true',
@@ -124,19 +124,19 @@ abstract class FlutterTestDriver {
 
   String? flutterIsolateId;
 
-  Future<String?> getFlutterIsolateId() async {
+  Future<String> getFlutterIsolateId() async {
     // Currently these tests only have a single isolate. If this
     // ceases to be the case, this code will need changing.
     if (flutterIsolateId == null) {
       final VM vm = await vmService!.getVM();
-      flutterIsolateId = vm.isolates!.first.id;
+      flutterIsolateId = vm.isolates!.first.id!;
     }
-    return flutterIsolateId;
+    return flutterIsolateId!;
   }
 
   Future<Isolate> _getFlutterIsolate() async {
-    final Isolate isolate = await vmService!
-        .getIsolate(await (getFlutterIsolateId() as FutureOr<String>));
+    final Isolate isolate =
+        await vmService!.getIsolate(await getFlutterIsolateId());
     return isolate;
   }
 
@@ -175,9 +175,7 @@ abstract class FlutterTestDriver {
   Future<Isolate?> resume({String? step, bool wait = true}) async {
     debugPrint('Sending resume ($step)');
     await _timeoutWithMessages<dynamic>(
-        () async => vmService!.resume(
-            await (getFlutterIsolateId() as FutureOr<String>),
-            step: step),
+        () async => vmService!.resume(await getFlutterIsolateId(), step: step),
         message: 'Isolate did not respond to resume ($step)');
     return wait ? waitForPause() : null;
   }
@@ -223,8 +221,11 @@ abstract class FlutterTestDriver {
         .whenComplete(() => sub.cancel());
   }
 
-  Future<T> _timeoutWithMessages<T>(Future<T> Function() f,
-      {Duration? timeout, String? message}) {
+  Future<T> _timeoutWithMessages<T>(
+    Future<T> Function() f, {
+    Duration? timeout,
+    String? message,
+  }) {
     // Capture output to a buffer so if we don't get the response we want we can show
     // the output that did arrive in the timeout error.
     final StringBuffer messages = StringBuffer();
@@ -271,7 +272,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File? pidFile,
   }) async {
-    final args = <String?>[
+    final args = <String>[
       'run',
       '--machine',
     ];
@@ -279,7 +280,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       args.add('--track-widget-creation');
     }
     if (runConfig.entryScript != null) {
-      args.addAll(['-t', runConfig.entryScript]);
+      args.addAll(['-t', runConfig.entryScript ?? '']);
     }
     args.addAll(['-d', 'flutter-tester']);
     await setupProcess(
@@ -313,7 +314,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
   @override
   Future<void> setupProcess(
-    List<String?> args, {
+    List<String> args, {
     required String flutterExecutable,
     FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File? pidFile,
@@ -341,15 +342,15 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       final Map<String, dynamic> debugPort =
           await waitFor(event: 'app.debugPort', timeout: appStartTimeout);
       final String wsUriString = debugPort['params']['wsUri'];
-      vmServiceWsUri = Uri.parse(wsUriString);
+      _vmServiceWsUri = Uri.parse(wsUriString);
 
       // Map to WS URI.
-      vmServiceWsUri =
-          convertToWebSocketUrl(serviceProtocolUrl: vmServiceWsUri!);
+      _vmServiceWsUri =
+          convertToWebSocketUrl(serviceProtocolUrl: _vmServiceWsUri);
 
       vmService = VmServiceWrapper(
-        await vmServiceConnectUri(vmServiceWsUri.toString()),
-        vmServiceWsUri!,
+        await vmServiceConnectUri(_vmServiceWsUri.toString()),
+        _vmServiceWsUri,
         trackFutures: true,
       );
       vmService!.onSend.listen((String s) => debugPrint('==> $s'));
@@ -374,7 +375,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       await waitForPause();
       if (runConfig.pauseOnExceptions) {
         await vmService!.setIsolatePauseMode(
-          await (getFlutterIsolateId() as FutureOr<String>),
+          await getFlutterIsolateId(),
           exceptionPauseMode: ExceptionPauseMode.kUnhandled,
         );
       }
