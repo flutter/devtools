@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 @TestOn('vm')
 import 'dart:async';
 import 'dart:convert';
@@ -16,40 +14,40 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
 
 const bool verboseTesting = false;
 
-WebBuildFixture webBuildFixture;
-BrowserManager browserManager;
+late WebBuildFixture webBuildFixture;
+late BrowserManager browserManager;
 
 class DevtoolsManager {
   DevtoolsManager(this.tabInstance, this.baseUri);
 
-  final BrowserTabInstance tabInstance;
+  final BrowserTabInstance? tabInstance;
   final Uri baseUri;
 
   Future<void> start(
     AppFixture appFixture, {
-    Uri overrideUri,
+    Uri? overrideUri,
     bool waitForConnection = true,
   }) async {
     final Uri baseAppUri = baseUri.resolve(
         'index.html?uri=${Uri.encodeQueryComponent(appFixture.serviceUri.toString())}');
-    await tabInstance.tab.navigate('${overrideUri ?? baseAppUri}');
+    await tabInstance!.tab.navigate('${overrideUri ?? baseAppUri}');
 
     // wait for app initialization
     await Future.wait([
       waitForConnection
-          ? tabInstance.onEvent
+          ? tabInstance!.onEvent
               .firstWhere((msg) => msg.event == 'app.devToolsReady')
           : Future.value(),
-      tabInstance.getBrowserChannel(),
+      tabInstance!.getBrowserChannel(),
     ]);
   }
 
   Future<void> switchPage(String page) async {
-    await tabInstance.send('switchPage', page);
+    await tabInstance!.send('switchPage', page);
   }
 
-  Future<String> currentPageId() async {
-    final AppResponse response = await tabInstance.send('currentPageId');
+  Future<String?> currentPageId() async {
+    final AppResponse response = await tabInstance!.send('currentPageId');
     return response.result;
   }
 }
@@ -58,13 +56,14 @@ class BrowserManager {
   BrowserManager._(this.chromeProcess, this.tab);
 
   static Future<BrowserManager> create() async {
-    final Chrome chrome = Chrome.locate();
+    final Chrome? chrome = Chrome.locate();
     if (chrome == null) {
       throw 'unable to locate Chrome';
     }
 
     final ChromeProcess chromeProcess = await chrome.start();
-    final ChromeTab tab = await chromeProcess.getFirstTab();
+    final ChromeTab tab =
+        await (chromeProcess.getFirstTab() as FutureOr<ChromeTab>);
 
     await tab.connect();
 
@@ -79,13 +78,13 @@ class BrowserManager {
 
     await delay();
 
-    final ChromeTab tab =
-        await chromeProcess.connectToTabId('localhost', targetId);
+    final ChromeTab tab = await (chromeProcess.connectToTabId(
+        'localhost', targetId) as FutureOr<ChromeTab>);
     await tab.connect(verbose: true);
 
     await delay();
 
-    await tab.wipConnection.target.activateTarget(targetId);
+    await tab.wipConnection!.target.activateTarget(targetId);
 
     await delay();
 
@@ -122,7 +121,7 @@ class BrowserTabInstance {
 
   final ChromeTab tab;
 
-  RemoteObject _remote;
+  RemoteObject? _remote;
 
   Future<RemoteObject> getBrowserChannel() async {
     final DateTime start = DateTime.now();
@@ -144,7 +143,7 @@ class BrowserTabInstance {
   }
 
   Future<RemoteObject> _getAppChannelObject() {
-    return tab.wipConnection.runtime.evaluate('devtools');
+    return tab.wipConnection!.runtime.evaluate('devtools');
   }
 
   int _nextId = 1;
@@ -166,9 +165,9 @@ class BrowserTabInstance {
     _completers[id] = completer;
 
     try {
-      await tab.wipConnection.runtime.callFunctionOn(
+      await tab.wipConnection!.runtime.callFunctionOn(
         "function (method, id, params) { return window['devtools'].send(method, id, params); }",
-        objectId: _remote.objectId,
+        objectId: _remote!.objectId,
         arguments: <dynamic>[method, id, params],
       );
 
@@ -184,9 +183,9 @@ class BrowserTabInstance {
     // In Headless Chrome, we get Inspector.detached when we close the last
     // target rather than a response.
     await Future.any(<Future<Object>>[
-      tab.wipConnection.onNotification
+      tab.wipConnection!.onNotification
           .firstWhere((n) => n.method == 'Inspector.detached'),
-      tab.wipConnection.target.closeTarget(tab.wipTab.id),
+      tab.wipConnection!.target.closeTarget(tab.wipTab.id),
     ]);
   }
 
@@ -198,11 +197,11 @@ class BrowserTabInstance {
     if (message.containsKey('id')) {
       // handle a response: {id: 1}
       final AppResponse response = AppResponse(message);
-      final Completer<AppResponse> completer = _completers.remove(response.id);
+      final Completer<AppResponse>? completer = _completers.remove(response.id);
       if (response.hasError) {
-        completer.completeError(response.error);
+        completer!.completeError(response.error);
       } else {
-        completer.complete(response);
+        completer!.complete(response);
       }
     } else {
       // handle an event: {event: app.echo, params: foo}
@@ -216,7 +215,7 @@ class AppEvent {
 
   final Map<dynamic, dynamic> json;
 
-  String get event => json['event'];
+  String? get event => json['event'];
 
   dynamic get params => json['params'];
 
@@ -229,7 +228,7 @@ class AppResponse {
 
   final Map<dynamic, dynamic> json;
 
-  int get id => json['id'];
+  int? get id => json['id'];
 
   dynamic get result => json['result'];
 
@@ -246,11 +245,11 @@ class AppResponse {
 class AppError {
   AppError(this.json);
 
-  final Map<dynamic, dynamic> json;
+  final Map<dynamic, dynamic>? json;
 
-  String get message => json['message'];
+  String? get message => json!['message'];
 
-  String get stackTrace => json['stackTrace'];
+  String? get stackTrace => json!['stackTrace'];
 
   @override
   String toString() => '$message\n$stackTrace';

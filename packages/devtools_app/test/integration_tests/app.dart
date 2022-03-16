@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'integration.dart';
 
 void appTests() {
-  CliAppFixture appFixture;
-  BrowserTabInstance tabInstance;
+  late CliAppFixture appFixture;
+  late BrowserTabInstance tabInstance;
 
   setUp(() async {
     appFixture = await CliAppFixture.create('test/fixtures/logging_app.dart');
@@ -19,8 +17,8 @@ void appTests() {
   });
 
   tearDown(() async {
-    await tabInstance?.close();
-    await appFixture?.teardown();
+    await tabInstance.close();
+    await appFixture.teardown();
   });
 
   test('can switch pages', () async {
@@ -29,7 +27,7 @@ void appTests() {
     await tools.start(appFixture);
     await tools.switchPage('logging');
 
-    final String currentPageId = await tools.currentPageId();
+    final String? currentPageId = await tools.currentPageId();
     expect(currentPageId, 'logging');
   });
 
@@ -64,12 +62,12 @@ class ConnectDialogManager {
 
   Future<bool> isVisible() async {
     final AppResponse response =
-        await tools.tabInstance.send('connectDialog.isVisible');
+        await tools.tabInstance!.send('connectDialog.isVisible');
     return response.result;
   }
 
   Future connectTo(Uri uri) async {
     // We have to convert to String here as this goes over JSON.
-    await tools.tabInstance.send('connectDialog.connectTo', uri.toString());
+    await tools.tabInstance!.send('connectDialog.connectTo', uri.toString());
   }
 }
