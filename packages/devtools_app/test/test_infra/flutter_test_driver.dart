@@ -129,7 +129,7 @@ abstract class FlutterTestDriver {
     // ceases to be the case, this code will need changing.
     if (flutterIsolateId == null) {
       final VM vm = await vmService!.getVM();
-      flutterIsolateId = vm.isolates!.first.id;
+      flutterIsolateId = vm.isolates!.first.id!;
     }
     return flutterIsolateId!;
   }
