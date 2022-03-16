@@ -41,8 +41,8 @@ abstract class FlutterTestDriver {
   final StreamController<String> _allMessages =
       StreamController<String>.broadcast();
   final StringBuffer errorBuffer = StringBuffer();
-  String? lastResponse;
-  Uri? vmServiceWsUri;
+  late String lastResponse;
+  late Uri vmServiceWsUri;
   bool hasExited = false;
 
   VmServiceWrapper? vmService;
@@ -345,11 +345,11 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
       // Map to WS URI.
       vmServiceWsUri =
-          convertToWebSocketUrl(serviceProtocolUrl: vmServiceWsUri!);
+          convertToWebSocketUrl(serviceProtocolUrl: vmServiceWsUri);
 
       vmService = VmServiceWrapper(
         await vmServiceConnectUri(vmServiceWsUri.toString()),
-        vmServiceWsUri!,
+        vmServiceWsUri,
         trackFutures: true,
       );
       vmService!.onSend.listen((String s) => debugPrint('==> $s'));
