@@ -219,8 +219,11 @@ abstract class FlutterTestDriver {
         .whenComplete(() => sub.cancel());
   }
 
-  Future<T> _timeoutWithMessages<T>(Future<T> Function() f,
-      {Duration? timeout, String? message}) {
+  Future<T> _timeoutWithMessages<T>(
+    Future<T> Function() f, {
+    Duration? timeout,
+    String? message,
+  }) {
     // Capture output to a buffer so if we don't get the response we want we can show
     // the output that did arrive in the timeout error.
     final StringBuffer messages = StringBuffer();
@@ -370,7 +373,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       await waitForPause();
       if (runConfig.pauseOnExceptions) {
         await vmService!.setIsolatePauseMode(
-          await (getFlutterIsolateId() as FutureOr<String>),
+          await getFlutterIsolateId(),
           exceptionPauseMode: ExceptionPauseMode.kUnhandled,
         );
       }
