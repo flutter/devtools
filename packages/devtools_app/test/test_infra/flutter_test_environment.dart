@@ -41,8 +41,8 @@ class FlutterTestEnvironment {
   FlutterRunConfiguration get runConfig => _runConfig;
   FlutterRunTestDriver? _flutter;
   FlutterRunTestDriver? get flutter => _flutter;
-  VmServiceWrapper? _service;
-  VmServiceWrapper? get service => _service;
+  late VmServiceWrapper _service;
+  VmServiceWrapper get service => _service;
 
   /// Path relative to the `devtools_app` dir for the test fixture.
   final String testAppDirectory;
@@ -113,7 +113,7 @@ class FlutterTestEnvironment {
         runConfig: _runConfig,
       );
 
-      _service = _flutter!.vmService;
+      _service = _flutter!.vmService!;
       final preferencesController = PreferencesController();
       setGlobal(Storage, FlutterDesktopStorage());
       await preferencesController.init();
@@ -124,10 +124,10 @@ class FlutterTestEnvironment {
 
       // Clear out VM service calls from the test driver.
       // ignore: invalid_use_of_visible_for_testing_member
-      _service!.clearVmServiceCalls();
+      _service.clearVmServiceCalls();
 
       await serviceManager.vmServiceOpened(
-        _service!,
+        _service,
         onClosed: Completer().future,
       );
 
@@ -153,11 +153,11 @@ class FlutterTestEnvironment {
 
     serviceManager.manuallyDisconnect();
 
-    await _service!.allFuturesCompleted.timeout(const Duration(seconds: 20),
+    await _service.allFuturesCompleted.timeout(const Duration(seconds: 20),
         onTimeout: () {
       throw 'Timed out waiting for futures to complete during teardown. '
-          '${_service!.activeFutures.length} futures remained:\n\n'
-          '  ${_service!.activeFutures.map((tf) => tf.name).join('\n  ')}';
+          '${_service.activeFutures.length} futures remained:\n\n'
+          '  ${_service.activeFutures.map((tf) => tf.name).join('\n  ')}';
     });
     await _flutter!.stop();
 
