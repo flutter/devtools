@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:vm_service/vm_service.dart';
@@ -467,7 +467,7 @@ final Map<String, dynamic> testSocket3Json = {
   'writeBytes': 150,
 };
 
-final httpGetRequest = HttpProfileRequest.parse(httpGetJson);
+final httpGetRequest = HttpProfileRequest.parse(httpGetJson)!;
 final httpGet = DartIOHttpRequestData(0, httpGetRequest);
 final Map<String, dynamic> httpGetJson = {
   'type': 'HttpProfileRequest',
@@ -529,7 +529,7 @@ final Map<String, dynamic> httpGetJson = {
   'responseBody': httpGetResponseBodyData,
 };
 
-final httpPostRequest = HttpProfileRequest.parse(httpPostJson);
+final httpPostRequest = HttpProfileRequest.parse(httpPostJson)!;
 final httpPost = DartIOHttpRequestData(0, httpPostRequest);
 final Map<String, dynamic> httpPostJson = {
   'type': 'HttpProfileRequest',
@@ -604,7 +604,7 @@ final httpPostResponseBodyData = [
   ...[123, 10, 32, 32, 34, 105, 100, 34, 58, 32, 49, 48, 49, 10, 125],
 ];
 
-final httpPutRequest = HttpProfileRequest.parse(httpPutJson);
+final httpPutRequest = HttpProfileRequest.parse(httpPutJson)!;
 final httpPut = DartIOHttpRequestData(0, httpPutRequest);
 final Map<String, dynamic> httpPutJson = {
   'type': 'HttpProfileRequest',
@@ -679,7 +679,7 @@ final httpPutResponseBodyData = [
   ...[123, 10, 32, 32, 34, 105, 100, 34, 58, 32, 49, 48, 49, 10, 125],
 ];
 
-final httpPatchRequest = HttpProfileRequest.parse(httpPatchJson);
+final httpPatchRequest = HttpProfileRequest.parse(httpPatchJson)!;
 final httpPatch = DartIOHttpRequestData(0, httpPatchRequest);
 final Map<String, dynamic> httpPatchJson = {
   'type': 'HttpProfileRequest',
@@ -757,7 +757,7 @@ final httpPatchResponseBodyData = [
   ...[10, 125],
 ];
 
-final httpGetWithErrorRequest = HttpProfileRequest.parse(httpGetWithErrorJson);
+final httpGetWithErrorRequest = HttpProfileRequest.parse(httpGetWithErrorJson)!;
 final httpGetWithError = DartIOHttpRequestData(0, httpGetWithErrorRequest);
 final Map<String, dynamic> httpGetWithErrorJson = {
   'type': '@HttpProfileRequest',
@@ -773,7 +773,7 @@ final Map<String, dynamic> httpGetWithErrorJson = {
   },
 };
 
-final httpWsHandshakeRequest = HttpProfileRequest.parse(httpWsHandshakeJson);
+final httpWsHandshakeRequest = HttpProfileRequest.parse(httpWsHandshakeJson)!;
 final httpWsHandshake = DartIOHttpRequestData(0, httpWsHandshakeRequest);
 final Map<String, dynamic> httpWsHandshakeJson = {
   'type': 'HttpProfileRequest',
