@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -47,7 +45,7 @@ class NetworkScreen extends Screen {
   @override
   Widget buildStatus(BuildContext context, TextTheme textTheme) {
     final networkController = Provider.of<NetworkController>(context);
-    final color = Theme.of(context).textTheme.bodyText2.color;
+    final color = Theme.of(context).textTheme.bodyText2!.color!;
 
     return DualValueListenableBuilder<NetworkRequests, List<NetworkRequest>>(
       firstListenable: networkController.requests,
@@ -64,7 +62,7 @@ class NetworkScreen extends Screen {
               '${pluralize('request', totalCount)}',
             ),
             const SizedBox(width: denseSpacing),
-            child,
+            child!,
           ],
         );
       },
@@ -112,7 +110,8 @@ Example queries:
 
 class _NetworkScreenBodyState extends State<NetworkScreenBody>
     with AutoDisposeMixin {
-  NetworkController _networkController;
+  bool initialized = false;
+  late NetworkController _networkController;
 
   @override
   void initState() {
@@ -125,9 +124,10 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     super.didChangeDependencies();
 
     final newController = Provider.of<NetworkController>(context);
-    if (newController == _networkController) return;
+    if (initialized && newController == _networkController) return;
 
     _networkController = newController;
+    initialized = true;
     _networkController.startRecording();
   }
 
@@ -135,7 +135,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   void dispose() {
     // TODO(kenz): this won't work well if we eventually have multiple clients
     // that want to listen to network data.
-    _networkController?.stopRecording();
+    _networkController.stopRecording();
     super.dispose();
   }
 
@@ -157,8 +157,8 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 /// clear, search, filter, etc.).
 class _NetworkProfilerControls extends StatefulWidget {
   const _NetworkProfilerControls({
-    Key key,
-    @required this.controller,
+    Key? key,
+    required this.controller,
   }) : super(key: key);
 
   static const _includeTextWidth = 810.0;
@@ -172,11 +172,11 @@ class _NetworkProfilerControls extends StatefulWidget {
 
 class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
     with AutoDisposeMixin, SearchFieldMixin<_NetworkProfilerControls> {
-  NetworkRequests requests;
+  late NetworkRequests requests;
 
-  List<NetworkRequest> filteredRequests;
+  late List<NetworkRequest> filteredRequests;
 
-  bool recording;
+  bool recording = false;
 
   @override
   void initState() {
@@ -284,20 +284,21 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
 }
 
 class _NetworkProfilerBody extends StatelessWidget {
-  const _NetworkProfilerBody({Key key, this.controller}) : super(key: key);
+  const _NetworkProfilerBody({Key? key, required this.controller})
+      : super(key: key);
 
   final NetworkController controller;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusScope.of(context)?.unfocus(),
+      onTap: () => FocusScope.of(context).unfocus(),
       child: Split(
         initialFractions: const [0.5, 0.5],
         minSizes: const [200, 200],
         axis: Axis.horizontal,
         children: [
-          ValueListenableBuilder(
+          ValueListenableBuilder<List<NetworkRequest>>(
             valueListenable: controller.filteredData,
             builder: (context, filteredRequests, _) {
               return NetworkRequestsTable(
@@ -317,11 +318,11 @@ class _NetworkProfilerBody extends StatelessWidget {
 
 class NetworkRequestsTable extends StatelessWidget {
   const NetworkRequestsTable({
-    Key key,
-    @required this.networkController,
-    @required this.requests,
-    @required this.searchMatchesNotifier,
-    @required this.activeSearchMatchNotifier,
+    Key? key,
+    required this.networkController,
+    required this.requests,
+    required this.searchMatchesNotifier,
+    required this.activeSearchMatchNotifier,
   }) : super(key: key);
 
   static MethodColumn methodColumn = MethodColumn();
@@ -334,12 +335,12 @@ class NetworkRequestsTable extends StatelessWidget {
   final NetworkController networkController;
   final List<NetworkRequest> requests;
   final ValueListenable<List<NetworkRequest>> searchMatchesNotifier;
-  final ValueListenable<NetworkRequest> activeSearchMatchNotifier;
+  final ValueListenable<NetworkRequest?> activeSearchMatchNotifier;
 
   @override
   Widget build(BuildContext context) {
     return OutlineDecoration(
-      child: FlatTable<NetworkRequest>(
+      child: FlatTable<NetworkRequest?>(
         columns: [
           methodColumn,
           addressColumn,
@@ -349,7 +350,7 @@ class NetworkRequestsTable extends StatelessWidget {
           timestampColumn,
         ],
         data: requests,
-        keyFactory: (NetworkRequest data) => ValueKey<NetworkRequest>(data),
+        keyFactory: (NetworkRequest? data) => ValueKey<NetworkRequest?>(data),
         onItemSelected: (item) {
           networkController.selectRequest(item);
         },
@@ -382,7 +383,7 @@ class UriColumn extends ColumnData<NetworkRequest>
     BuildContext context,
     NetworkRequest data, {
     bool isRowSelected = false,
-    VoidCallback onPressed,
+    VoidCallback? onPressed,
   }) {
     final value = getDisplayValue(data);
 
@@ -431,7 +432,7 @@ class StatusColumn extends ColumnData<NetworkRequest>
     BuildContext context,
     NetworkRequest data, {
     bool isRowSelected = false,
-    VoidCallback onPressed,
+    VoidCallback? onPressed,
   }) {
     final theme = Theme.of(context);
     return Text(
@@ -502,6 +503,6 @@ class TimestampColumn extends ColumnData<NetworkRequest> {
 
   @override
   String getDisplayValue(NetworkRequest dataObject) {
-    return formatDateTime(dataObject.startTimestamp);
+    return formatDateTime(dataObject.startTimestamp!);
   }
 }

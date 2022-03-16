@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -16,23 +14,23 @@ abstract class NetworkRequest with DataSearchStateMixin {
 
   final int _timelineMicrosBase;
 
-  String get method;
+  String? get method;
 
-  String get uri;
+  String? get uri;
 
-  String get contentType;
+  String? get contentType;
 
   String get type;
 
-  Duration get duration;
+  Duration? get duration;
 
-  DateTime get startTimestamp;
+  DateTime? get startTimestamp;
 
-  DateTime get endTimestamp;
+  DateTime? get endTimestamp;
 
-  String get status;
+  String? get status;
 
-  int get port;
+  int? get port;
 
   bool get didFail;
 
@@ -40,7 +38,7 @@ abstract class NetworkRequest with DataSearchStateMixin {
   bool get inProgress;
 
   String get durationDisplay =>
-      'Duration: ${duration != null ? msText(duration) : 'Pending'}';
+      'Duration: ${duration != null ? msText(duration!) : 'Pending'}';
 
   int timelineMicrosecondsSinceEpoch(int micros) {
     return _timelineMicrosBase + micros;
@@ -86,11 +84,11 @@ class WebSocket extends NetworkRequest {
   int get id => _socket.id;
 
   @override
-  Duration get duration {
-    if (_socket.startTime == null || _socket.endTime == null) {
+  Duration? get duration {
+    if (_socket.endTime == null) {
       return null;
     }
-    return Duration(microseconds: _socket.endTime - _socket.startTime);
+    return Duration(microseconds: _socket.endTime! - _socket.startTime);
   }
 
   @override
@@ -98,19 +96,19 @@ class WebSocket extends NetworkRequest {
       timelineMicrosecondsSinceEpoch(_socket.startTime));
 
   @override
-  DateTime get endTimestamp => _socket.endTime != null
+  DateTime? get endTimestamp => _socket.endTime != null
       ? DateTime.fromMicrosecondsSinceEpoch(
-          timelineMicrosecondsSinceEpoch(_socket.endTime))
+          timelineMicrosecondsSinceEpoch(_socket.endTime!))
       : null;
 
-  DateTime get lastReadTimestamp => _socket.lastReadTime != null
+  DateTime? get lastReadTimestamp => _socket.lastReadTime != null
       ? DateTime.fromMicrosecondsSinceEpoch(
-          timelineMicrosecondsSinceEpoch(_socket.lastReadTime))
+          timelineMicrosecondsSinceEpoch(_socket.lastReadTime!))
       : null;
 
-  DateTime get lastWriteTimestamp => _socket.lastWriteTime != null
+  DateTime? get lastWriteTimestamp => _socket.lastWriteTime != null
       ? DateTime.fromMicrosecondsSinceEpoch(
-          timelineMicrosecondsSinceEpoch(_socket.lastWriteTime))
+          timelineMicrosecondsSinceEpoch(_socket.lastWriteTime!))
       : null;
 
   @override
@@ -161,9 +159,7 @@ class NetworkRequests {
     this.requests = const [],
     this.invalidHttpRequests = const [],
     this.outstandingHttpRequests = const {},
-  })  : assert(requests != null),
-        assert(invalidHttpRequests != null),
-        assert(outstandingHttpRequests != null);
+  });
 
   /// A list of network requests.
   ///

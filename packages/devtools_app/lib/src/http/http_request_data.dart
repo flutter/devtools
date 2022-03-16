@@ -513,7 +513,7 @@ class DartIOHttpRequestData extends HttpRequestData {
   bool get _hasError => _request.request?.hasError ?? false;
 
   int? get _endTime =>
-      _hasError ? _request.endTime : _request.response!.endTime;
+      _hasError ? _request.endTime : _request.response?.endTime;
 
   @override
   Duration? get duration {
@@ -539,8 +539,8 @@ class DartIOHttpRequestData extends HttpRequestData {
       'method': _request.method,
       'uri': _request.uri.toString(),
       if (!didFail) ...{
-        'connectionInfo': _request.request!.connectionInfo,
-        'contentLength': _request.request!.contentLength,
+        'connectionInfo': _request.request?.connectionInfo,
+        'contentLength': _request.request?.contentLength,
       },
       if (_request.response != null) ...{
         'compressionState': _request.response!.compressionState,
@@ -605,9 +605,11 @@ class DartIOHttpRequestData extends HttpRequestData {
   }
 
   @override
-  DateTime get endTimestamp => DateTime.fromMicrosecondsSinceEpoch(
-        timelineMicrosecondsSinceEpoch(_endTime!),
-      );
+  DateTime? get endTimestamp => _endTime == null
+      ? null
+      : DateTime.fromMicrosecondsSinceEpoch(
+          timelineMicrosecondsSinceEpoch(_endTime!),
+        );
 
   @override
   DateTime get startTimestamp => DateTime.fromMicrosecondsSinceEpoch(
