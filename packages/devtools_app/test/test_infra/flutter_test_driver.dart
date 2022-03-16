@@ -135,9 +135,7 @@ abstract class FlutterTestDriver {
   }
 
   Future<Isolate> _getFlutterIsolate() async {
-    final Isolate isolate = await vmService!
-        .getIsolate(await (getFlutterIsolateId() as FutureOr<String>));
-    return isolate;
+    return await vmService!.getIsolate(await getFlutterIsolateId());
   }
 
   Future<Isolate> waitForPause() async {
