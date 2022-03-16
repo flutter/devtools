@@ -42,7 +42,7 @@ abstract class FlutterTestDriver {
       StreamController<String>.broadcast();
   final StringBuffer errorBuffer = StringBuffer();
   late String lastResponse;
-  late Uri vmServiceWsUri;
+  late Uri _vmServiceWsUri;
   bool hasExited = false;
 
   VmServiceWrapper? vmService;
@@ -52,7 +52,7 @@ abstract class FlutterTestDriver {
   Stream<String> get stderr => stderrController.stream;
   Stream<String> get stdout => stdoutController.stream;
 
-  Uri? get vmServiceUri => vmServiceWsUri;
+  Uri get vmServiceUri => _vmServiceWsUri;
 
   String debugPrint(String msg) {
     const int maxLength = 500;
@@ -341,15 +341,15 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       final Map<String, dynamic> debugPort =
           await waitFor(event: 'app.debugPort', timeout: appStartTimeout);
       final String wsUriString = debugPort['params']['wsUri'];
-      vmServiceWsUri = Uri.parse(wsUriString);
+      _vmServiceWsUri = Uri.parse(wsUriString);
 
       // Map to WS URI.
-      vmServiceWsUri =
-          convertToWebSocketUrl(serviceProtocolUrl: vmServiceWsUri);
+      _vmServiceWsUri =
+          convertToWebSocketUrl(serviceProtocolUrl: _vmServiceWsUri);
 
       vmService = VmServiceWrapper(
-        await vmServiceConnectUri(vmServiceWsUri.toString()),
-        vmServiceWsUri,
+        await vmServiceConnectUri(_vmServiceWsUri.toString()),
+        _vmServiceWsUri,
         trackFutures: true,
       );
       vmService!.onSend.listen((String s) => debugPrint('==> $s'));
