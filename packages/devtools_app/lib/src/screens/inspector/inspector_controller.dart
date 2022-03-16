@@ -23,6 +23,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../analytics/constants.dart' as analytics_constants;
 import '../../config_specific/logger/logger.dart';
 import '../../config_specific/url/url.dart';
 import '../../primitives/auto_dispose.dart';
@@ -412,6 +413,12 @@ class InspectorController extends DisposableController
     }
 
     if (flutterAppFrameReady) {
+      // TODO: measure and send DevTools pageReady analytics:
+      // https://github.com/flutter/devtools/issues/3879
+      await serviceManager.sendDwdsEvent(
+        screen: InspectorScreen.id,
+        action: analytics_constants.pageReady,
+      );
       _rootDirectories = await inspectorService.inferPubRootDirectoryIfNeeded();
       if (_disposed) return;
       // We need to start by querying the inspector service to find out the
