@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
@@ -86,12 +84,12 @@ const renderLine = 'color';
 const renderDashed = 'dashed';
 const renderImage = 'image';
 
-Map<String, Object> traceRender({
-  String image,
-  Color color,
+Map<String, Object?> traceRender({
+  String? image,
+  Color? color,
   bool dashed = false,
 }) {
-  final result = <String, Object>{};
+  final result = <String, Object?>{};
 
   if (image != null) {
     result[renderImage] = image;
@@ -127,7 +125,7 @@ class ChartsValues {
 
   final _android = <String, Object>{};
 
-  Map<String, Object> toJson() {
+  Map<String, Object?> toJson() {
     return {
       indexPayloadJson: index,
       timestampPayloadJson: timestamp,
@@ -155,14 +153,16 @@ class ChartsValues {
 
   bool get hasManualGc => _event.containsKey(manualGCJsonName);
 
-  bool get hasGc => _vm[gcJsonName];
+  bool get hasGc => _vm[gcJsonName] as bool;
 
   int get extensionEventsLength =>
       hasExtensionEvents ? extensionEvents.length : 0;
 
   List<Map<String, Object>> get extensionEvents {
     if (_extensionEvents.isEmpty) {
-      _extensionEvents.addAll(_event[extensionEventsJsonName]);
+      final events =
+          _event[extensionEventsJsonName] as List<Map<String, Object>>;
+      _extensionEvents.addAll(events);
     }
     return _extensionEvents;
   }
@@ -187,21 +187,21 @@ class ChartsValues {
     if (eventInfo.isEventSnapshot) results[snapshotJsonName] = true;
     if (eventInfo.isEventSnapshotAuto) results[autoSnapshotJsonName] = true;
     if (eventInfo.isEventAllocationAccumulator) {
-      if (eventInfo.allocationAccumulator.isStart) {
+      if (eventInfo.allocationAccumulator!.isStart) {
         results[monitorStartJsonName] = true;
       }
-      if (eventInfo.allocationAccumulator.isReset) {
+      if (eventInfo.allocationAccumulator!.isReset) {
         results[monitorResetJsonName] = true;
       }
     }
 
     if (eventInfo.hasExtensionEvents) {
       final events = <Map<String, Object>>[];
-      for (ExtensionEvent event in eventInfo.extensionEvents.theEvents) {
+      for (ExtensionEvent event in eventInfo.extensionEvents?.theEvents ?? []) {
         if (event.customEventName != null) {
           events.add(
             {
-              eventName: event.eventKind,
+              eventName: event.eventKind!,
               customEvent: {
                 customEventName: event.customEventName,
                 customEventData: event.data,
@@ -209,7 +209,10 @@ class ChartsValues {
             },
           );
         } else {
-          events.add({eventName: event.eventKind, eventData: event.data});
+          events.add({
+            eventName: event.eventKind!,
+            eventData: event.data ?? {},
+          });
         }
       }
       if (events.isNotEmpty) {
@@ -284,38 +287,42 @@ class ChartsValues {
     return eventsDisplayed;
   }
 
-  Map<String, Map<String, Object>> displayVmDataToDisplay(List<Trace> traces) {
-    final vmDataDisplayed = <String, Map<String, Object>>{};
+  Map<String, Map<String, Object?>> displayVmDataToDisplay(List<Trace> traces) {
+    final vmDataDisplayed = <String, Map<String, Object?>>{};
 
-    final rssValueDisplay = formatNumeric(vmData[rssJsonName]);
+    final rssValueDisplay = formatNumeric(vmData[rssJsonName] as num?);
     vmDataDisplayed['$rssDisplay $rssValueDisplay'] = traceRender(
       color: traces[vm.TraceName.rSS.index].characteristics.color,
       dashed: true,
     );
 
-    final capacityValueDisplay = formatNumeric(vmData[capacityJsonName]);
+    final capacityValueDisplay =
+        formatNumeric(vmData[capacityJsonName] as num?);
     vmDataDisplayed['$allocatedDisplay $capacityValueDisplay'] = traceRender(
       color: traces[vm.TraceName.capacity.index].characteristics.color,
       dashed: true,
     );
 
-    final usedValueDisplay = formatNumeric(vmData[usedJsonName]);
+    final usedValueDisplay = formatNumeric(vmData[usedJsonName] as num?);
     vmDataDisplayed['$usedDisplay $usedValueDisplay'] = traceRender(
       color: traces[vm.TraceName.used.index].characteristics.color,
     );
 
-    final externalValueDisplay = formatNumeric(vmData[externalJsonName]);
+    final externalValueDisplay =
+        formatNumeric(vmData[externalJsonName] as num?);
     vmDataDisplayed['$externalDisplay $externalValueDisplay'] = traceRender(
       color: traces[vm.TraceName.external.index].characteristics.color,
     );
 
-    final layerValueDisplay = formatNumeric(vmData[rasterLayerJsonName]);
+    final layerValueDisplay =
+        formatNumeric(vmData[rasterLayerJsonName] as num?);
     vmDataDisplayed['$layerDisplay $layerValueDisplay'] = traceRender(
       color: traces[vm.TraceName.rasterLayer.index].characteristics.color,
       dashed: true,
     );
 
-    final pictureValueDisplay = formatNumeric(vmData[rasterPictureJsonName]);
+    final pictureValueDisplay =
+        formatNumeric(vmData[rasterPictureJsonName] as num?);
     vmDataDisplayed['$pictureDisplay $pictureValueDisplay'] = traceRender(
       color: traces[vm.TraceName.rasterPicture.index].characteristics.color,
       dashed: true,
@@ -324,14 +331,14 @@ class ChartsValues {
     return vmDataDisplayed;
   }
 
-  Map<String, Map<String, Object>> androidDataToDisplay(List<Trace> traces) {
-    final androidDataDisplayed = <String, Map<String, Object>>{};
+  Map<String, Map<String, Object?>> androidDataToDisplay(List<Trace> traces) {
+    final androidDataDisplayed = <String, Map<String, Object?>>{};
 
     if (controller.isAndroidChartVisible) {
       final data = androidData;
 
       // Total trace
-      final totalValueDisplay = formatNumeric(data[adbTotalJsonName]);
+      final totalValueDisplay = formatNumeric(data[adbTotalJsonName] as num?);
       androidDataDisplayed['$androidTotalDisplay $totalValueDisplay'] =
           traceRender(
         color: traces[android.TraceName.total.index].characteristics.color,
@@ -339,42 +346,44 @@ class ChartsValues {
       );
 
       // Other trace
-      final otherValueDisplay = formatNumeric(data[adbOtherJsonName]);
+      final otherValueDisplay = formatNumeric(data[adbOtherJsonName] as num?);
       androidDataDisplayed['$androidOtherDisplay $otherValueDisplay'] =
           traceRender(
         color: traces[android.TraceName.other.index].characteristics.color,
       );
 
       // Native heap trace
-      final nativeValueDisplay = formatNumeric(data[adbNativeHeapJsonName]);
+      final nativeValueDisplay =
+          formatNumeric(data[adbNativeHeapJsonName] as num?);
       androidDataDisplayed['$androidNativeDisplay $nativeValueDisplay'] =
           traceRender(
         color: traces[android.TraceName.nativeHeap.index].characteristics.color,
       );
 
       // Graphics trace
-      final graphicsValueDisplay = formatNumeric(data[adbGraphicsJsonName]);
+      final graphicsValueDisplay =
+          formatNumeric(data[adbGraphicsJsonName] as num?);
       androidDataDisplayed['$androidGraphicsDisplay $graphicsValueDisplay'] =
           traceRender(
         color: traces[android.TraceName.graphics.index].characteristics.color,
       );
 
       // Code trace
-      final codeValueDisplay = formatNumeric(data[adbCodeJsonName]);
+      final codeValueDisplay = formatNumeric(data[adbCodeJsonName] as num?);
       androidDataDisplayed['$androidCodeDisplay $codeValueDisplay'] =
           traceRender(
         color: traces[android.TraceName.code.index].characteristics.color,
       );
 
       // Java heap trace
-      final javaValueDisplay = formatNumeric(data[adbJavaHeapJsonName]);
+      final javaValueDisplay = formatNumeric(data[adbJavaHeapJsonName] as num?);
       androidDataDisplayed['$androidJavaDisplay $javaValueDisplay'] =
           traceRender(
         color: traces[android.TraceName.javaHeap.index].characteristics.color,
       );
 
       // Stack trace
-      final stackValueDisplay = formatNumeric(data[adbStackJsonName]);
+      final stackValueDisplay = formatNumeric(data[adbStackJsonName] as num?);
       androidDataDisplayed['$androidStackDisplay $stackValueDisplay'] =
           traceRender(
         color: traces[android.TraceName.stack.index].characteristics.color,
@@ -384,7 +393,7 @@ class ChartsValues {
     return androidDataDisplayed;
   }
 
-  String formatNumeric(num number) => controller.unitDisplayed.value
+  String? formatNumeric(num? number) => controller.unitDisplayed.value
       ? prettyPrintBytes(
           number,
           kbFractionDigits: 1,
