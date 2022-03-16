@@ -7,6 +7,7 @@
 import 'package:devtools_app/src/screens/performance/timeline_streams.dart';
 @TestOn('vm')
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
@@ -24,6 +25,10 @@ void main() async {
 
     test('timeline streams initialized on vm service opened', () async {
       await env.setupEnvironment();
+
+      // Await a short delay to make sure the timelineStreamManager is done
+      // initializing.
+      await delay();
 
       expect(serviceManager.service, equals(env.service));
       expect(serviceManager.timelineStreamManager, isNotNull);

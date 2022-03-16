@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -66,7 +64,9 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     with
         AutoDisposeMixin,
         OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData> {
-  PerformanceController controller;
+  late PerformanceController _controller;
+
+  bool _controllerInitialized = false;
 
   bool processing = false;
 
@@ -98,26 +98,27 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
 
     final newController = Provider.of<PerformanceController>(context);
-    if (newController == controller) return;
-    controller = newController;
+    if (_controllerInitialized && newController == _controller) return;
+    _controller = newController;
+    _controllerInitialized = true;
 
     cancelListeners();
 
-    processing = controller.processing.value;
-    addAutoDisposeListener(controller.processing, () {
+    processing = _controller.processing.value;
+    addAutoDisposeListener(_controller.processing, () {
       setState(() {
-        processing = controller.processing.value;
+        processing = _controller.processing.value;
       });
     });
 
-    processingProgress = controller.processor.progressNotifier.value;
-    addAutoDisposeListener(controller.processor.progressNotifier, () {
+    processingProgress = _controller.processor.progressNotifier.value;
+    addAutoDisposeListener(_controller.processor.progressNotifier, () {
       setState(() {
-        processingProgress = controller.processor.progressNotifier.value;
+        processingProgress = _controller.processor.progressNotifier.value;
       });
     });
 
-    addAutoDisposeListener(controller.selectedFrame);
+    addAutoDisposeListener(_controller.selectedFrame);
 
     // Load offline timeline data if available.
     if (shouldLoadOfflineData()) {
@@ -141,8 +142,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   @override
   Widget build(BuildContext context) {
     final isOfflineFlutterApp = offlineController.offlineMode.value &&
-        controller.offlinePerformanceData != null &&
-        controller.offlinePerformanceData.frames.isNotEmpty;
+        _controller.offlinePerformanceData != null &&
+        _controller.offlinePerformanceData!.frames.isNotEmpty;
 
     final performanceScreen = Column(
       children: [
@@ -150,10 +151,10 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         const SizedBox(height: denseRowSpacing),
         if (isOfflineFlutterApp ||
             (!offlineController.offlineMode.value &&
-                serviceManager.connectedApp.isFlutterAppNow))
+                serviceManager.connectedApp!.isFlutterAppNow!))
           DualValueListenableBuilder<List<FlutterFrame>, double>(
-            firstListenable: controller.flutterFrames,
-            secondListenable: controller.displayRefreshRate,
+            firstListenable: _controller.flutterFrames,
+            secondListenable: _controller.displayRefreshRate,
             builder: (context, frames, displayRefreshRate, child) {
               return FlutterFramesChart(
                 frames,
@@ -170,8 +171,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
                 processing: processing,
                 processingProgress: processingProgress,
               ),
-              ValueListenableBuilder(
-                valueListenable: controller.selectedTimelineEvent,
+              ValueListenableBuilder<TimelineEvent?>(
+                valueListenable: _controller.selectedTimelineEvent,
                 builder: (context, selectedEvent, _) {
                   return EventDetails(selectedEvent);
                 },
@@ -203,19 +204,19 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _PrimaryControls(
-          controller: controller,
+          controller: _controller,
           processing: processing,
           onClear: () => setState(() {}),
         ),
         const SizedBox(width: defaultSpacing),
-        _SecondaryControls(controller: controller),
+        _SecondaryControls(controller: _controller),
       ],
     );
   }
 
   @override
   FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
-    await controller.processOfflineData(offlineData);
+    await _controller.processOfflineData(offlineData);
   }
 
   @override
@@ -228,9 +229,9 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
 class _PrimaryControls extends StatelessWidget {
   const _PrimaryControls({
-    Key key,
-    @required this.controller,
-    @required this.processing,
+    Key? key,
+    required this.controller,
+    required this.processing,
     this.onClear,
   }) : super(key: key);
 
@@ -238,11 +239,11 @@ class _PrimaryControls extends StatelessWidget {
 
   final bool processing;
 
-  final VoidCallback onClear;
+  final VoidCallback? onClear;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<bool>(
       valueListenable: controller.recordingFrames,
       builder: (context, recording, child) {
         return Row(
@@ -259,7 +260,7 @@ class _PrimaryControls extends StatelessWidget {
               onPressed: recording ? null : _resumeFrameRecording,
             ),
             const SizedBox(width: denseSpacing),
-            child,
+            child!,
           ],
         );
       },
@@ -285,15 +286,15 @@ class _PrimaryControls extends StatelessWidget {
     ga.select(analytics_constants.performance, analytics_constants.clear);
     await controller.clearData();
     if (onClear != null) {
-      onClear();
+      onClear!();
     }
   }
 }
 
 class _SecondaryControls extends StatelessWidget {
   const _SecondaryControls({
-    Key key,
-    @required this.controller,
+    Key? key,
+    required this.controller,
   }) : super(key: key);
 
   static const minScreenWidthForTextBeforeScaling = 1075.0;
@@ -305,7 +306,7 @@ class _SecondaryControls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (serviceManager.connectedApp.isFlutterAppNow) ...[
+        if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
           ServiceExtensionButtonGroup(
             minScreenWidthForTextBeforeScaling:
                 minScreenWidthForTextBeforeScaling,
@@ -325,7 +326,7 @@ class _SecondaryControls extends StatelessWidget {
         ProfileGranularityDropdown(
           screenId: PerformanceScreen.id,
           profileGranularityFlagNotifier:
-              controller.cpuProfilerController.profileGranularityFlagNotifier,
+              controller.cpuProfilerController.profileGranularityFlagNotifier!,
         ),
         const SizedBox(width: defaultSpacing),
         OutlinedIconButton(
@@ -349,7 +350,7 @@ class _SecondaryControls extends StatelessWidget {
     // download always successful?
     // TODO(peterdjlee): find a way to push the notification logic into the
     // export controller.
-    Notifications.of(context).push(successfulExportMessage(exportedFile));
+    Notifications.of(context)!.push(successfulExportMessage(exportedFile));
   }
 
   void _openSettingsDialog(BuildContext context) {
@@ -361,7 +362,7 @@ class _SecondaryControls extends StatelessWidget {
 }
 
 class EnhanceTracingButton extends StatelessWidget {
-  const EnhanceTracingButton({Key key}) : super(key: key);
+  const EnhanceTracingButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -401,7 +402,7 @@ class EnhanceTracingButton extends StatelessWidget {
 }
 
 class MoreDebuggingOptionsButton extends StatelessWidget {
-  const MoreDebuggingOptionsButton({Key key}) : super(key: key);
+  const MoreDebuggingOptionsButton({Key? key}) : super(key: key);
 
   static const _width = 625.0;
 
@@ -448,7 +449,7 @@ class PerformanceSettingsDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TimelineStreamSettings(controller: controller),
-            if (serviceManager.connectedApp.isFlutterAppNow) ...[
+            if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
               const SizedBox(height: denseSpacing),
               FlutterSettings(controller: controller),
             ],
@@ -464,8 +465,8 @@ class PerformanceSettingsDialog extends StatelessWidget {
 
 class TimelineStreamSettings extends StatelessWidget {
   const TimelineStreamSettings({
-    Key key,
-    @required this.controller,
+    Key? key,
+    required this.controller,
   }) : super(key: key);
 
   final PerformanceController controller;
@@ -498,8 +499,9 @@ class TimelineStreamSettings extends StatelessWidget {
       CheckboxSetting(
         title: 'Network',
         description: 'Http traffic',
-        notifier: controller.httpTimelineLoggingEnabled,
-        onChanged: controller.toggleHttpRequestLogging,
+        notifier: controller.httpTimelineLoggingEnabled as ValueNotifier<bool?>,
+        onChanged: (value) =>
+            controller.toggleHttpRequestLogging(value ?? false),
       ),
     ];
   }
@@ -518,7 +520,7 @@ class TimelineStreamSettings extends StatelessWidget {
 
   List<Widget> _timelineStreams(
     ThemeData theme, {
-    @required bool advanced,
+    required bool advanced,
   }) {
     final streams = advanced
         ? serviceManager.timelineStreamManager.advancedStreams
@@ -528,11 +530,11 @@ class TimelineStreamSettings extends StatelessWidget {
           (stream) => CheckboxSetting(
             title: stream.name,
             description: stream.description,
-            notifier: stream.recorded,
+            notifier: stream.recorded as ValueNotifier<bool?>,
             onChanged: (newValue) =>
                 serviceManager.timelineStreamManager.updateTimelineStream(
               stream,
-              newValue,
+              newValue ?? false,
             ),
           ),
         )
@@ -542,7 +544,7 @@ class TimelineStreamSettings extends StatelessWidget {
 }
 
 class FlutterSettings extends StatelessWidget {
-  const FlutterSettings({Key key, @required this.controller}) : super(key: key);
+  const FlutterSettings({Key? key, required this.controller}) : super(key: key);
 
   final PerformanceController controller;
 
@@ -553,7 +555,7 @@ class FlutterSettings extends StatelessWidget {
       children: [
         ...dialogSubHeader(Theme.of(context), 'Additional Settings'),
         CheckboxSetting(
-          notifier: controller.badgeTabForJankyFrames,
+          notifier: controller.badgeTabForJankyFrames as ValueNotifier<bool?>,
           title: 'Badge Performance tab when Flutter UI jank is detected',
         ),
       ],
@@ -569,8 +571,8 @@ class PerformanceScreenMetrics extends ScreenAnalyticsMetrics {
     this.traceEventCount,
   });
 
-  final Duration uiDuration;
-  final Duration rasterDuration;
-  final Duration shaderCompilationDuration;
-  final int traceEventCount;
+  final Duration? uiDuration;
+  final Duration? rasterDuration;
+  final Duration? shaderCompilationDuration;
+  final int? traceEventCount;
 }

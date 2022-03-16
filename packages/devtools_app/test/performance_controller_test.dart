@@ -158,7 +158,6 @@ void main() async {
       await env.setupEnvironment();
 
       // Verify an empty list is returned for bad input.
-      expect(performanceController.matchesForSearch(null), isEmpty);
       expect(performanceController.matchesForSearch(''), isEmpty);
 
       await performanceController.clearData();

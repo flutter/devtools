@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
@@ -36,8 +34,8 @@ final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
 
 class TimelineAnalysisContainer extends StatefulWidget {
   const TimelineAnalysisContainer({
-    @required this.processing,
-    @required this.processingProgress,
+    required this.processing,
+    required this.processingProgress,
   });
 
   @visibleForTesting
@@ -54,23 +52,26 @@ class TimelineAnalysisContainer extends StatefulWidget {
 
 class _TimelineAnalysisContainerState extends State<TimelineAnalysisContainer>
     with AutoDisposeMixin, SearchFieldMixin<TimelineAnalysisContainer> {
-  PerformanceController controller;
+  late PerformanceController _controller;
 
-  FlutterFrameAnalysisTabData selectedTab;
+  bool _controllerInitialized = false;
+
+  FlutterFrameAnalysisTabData? selectedTab;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     final newController = Provider.of<PerformanceController>(context);
-    if (newController == controller) return;
-    controller = newController;
+    if (_controllerInitialized && newController == _controller) return;
+    _controller = newController;
+    _controllerInitialized = true;
 
     if (frameAnalysisSupported) {
-      selectedTab = controller.selectedAnalysisTab.value;
-      addAutoDisposeListener(controller.selectedAnalysisTab, () {
+      selectedTab = _controller.selectedAnalysisTab.value;
+      addAutoDisposeListener(_controller.selectedAnalysisTab, () {
         setState(() {
-          selectedTab = controller.selectedAnalysisTab.value;
+          selectedTab = _controller.selectedAnalysisTab.value;
         });
       });
     }
@@ -81,11 +82,11 @@ class _TimelineAnalysisContainerState extends State<TimelineAnalysisContainer>
     Widget content;
     if (frameAnalysisSupported && selectedTab != null) {
       content = FlutterFrameAnalysisView(
-        frameAnalysis: selectedTab.frameAnalysis,
+        frameAnalysis: selectedTab!.frameAnalysis,
       );
     } else {
-      final timelineEmpty = (controller.data?.isEmpty ?? true) ||
-          controller.data.eventGroups.isEmpty;
+      final timelineEmpty = (_controller.data?.isEmpty ?? true) ||
+          _controller.data!.eventGroups.isEmpty;
       if (widget.processing) {
         content = _buildProcessingInfo();
       } else if (timelineEmpty) {
@@ -113,13 +114,13 @@ class _TimelineAnalysisContainerState extends State<TimelineAnalysisContainer>
         content = LayoutBuilder(
           builder: (context, constraints) {
             return TimelineFlameChart(
-              controller.data,
+              _controller.data!,
               width: constraints.maxWidth,
               height: constraints.maxHeight,
-              selectionNotifier: controller.selectedTimelineEvent,
-              searchMatchesNotifier: controller.searchMatches,
-              activeSearchMatchNotifier: controller.activeSearchMatch,
-              onDataSelected: controller.selectTimelineEvent,
+              selectionNotifier: _controller.selectedTimelineEvent,
+              searchMatchesNotifier: _controller.searchMatches,
+              activeSearchMatchNotifier: _controller.activeSearchMatch,
+              onDataSelected: _controller.selectTimelineEvent,
             );
           },
         );
@@ -127,7 +128,7 @@ class _TimelineAnalysisContainerState extends State<TimelineAnalysisContainer>
     }
 
     final searchFieldEnabled = selectedTab == null &&
-        !(controller.data?.isEmpty ?? true) &&
+        !(_controller.data?.isEmpty ?? true) &&
         !widget.processing;
 
     return OutlineDecoration(
@@ -135,7 +136,7 @@ class _TimelineAnalysisContainerState extends State<TimelineAnalysisContainer>
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           TimelineAnalysisHeader(
-            controller: controller,
+            controller: _controller,
             selectedTab: selectedTab,
             searchFieldBuilder: () => _buildSearchField(searchFieldEnabled),
           ),
@@ -155,7 +156,7 @@ class _TimelineAnalysisContainerState extends State<TimelineAnalysisContainer>
       width: defaultSearchTextWidth,
       height: defaultTextFieldHeight,
       child: buildSearchField(
-        controller: controller,
+        controller: _controller,
         searchFieldKey: timelineSearchFieldKey,
         searchFieldEnabled: searchFieldEnabled,
         shouldRequestFocus: false,
@@ -180,12 +181,12 @@ class _TimelineAnalysisContainerState extends State<TimelineAnalysisContainer>
 class TimelineFlameChart extends FlameChart<PerformanceData, TimelineEvent> {
   TimelineFlameChart(
     PerformanceData data, {
-    @required double width,
-    @required double height,
-    @required ValueListenable<TimelineEvent> selectionNotifier,
-    @required ValueListenable<List<TimelineEvent>> searchMatchesNotifier,
-    @required ValueListenable<TimelineEvent> activeSearchMatchNotifier,
-    @required Function(TimelineEvent event) onDataSelected,
+    required double width,
+    required double height,
+    required ValueListenable<TimelineEvent?> selectionNotifier,
+    required ValueListenable<List<TimelineEvent>> searchMatchesNotifier,
+    required ValueListenable<TimelineEvent?> activeSearchMatchNotifier,
+    required Function(TimelineEvent event) onDataSelected,
   }) : super(
           data,
           time: data.time,
@@ -242,15 +243,17 @@ class TimelineFlameChartState
 
   int widestRow = -1;
 
-  PerformanceController _performanceController;
+  late PerformanceController _performanceController;
 
-  FlutterFrame _selectedFrame;
+  bool _controllerInitialized = false;
 
-  ScrollController _groupLabelScrollController;
+  FlutterFrame? _selectedFrame;
 
-  ScrollController _previousInGroupButtonsScrollController;
+  late final ScrollController _groupLabelScrollController;
 
-  ScrollController _nextInGroupButtonsScrollController;
+  late final ScrollController _previousInGroupButtonsScrollController;
+
+  late final ScrollController _nextInGroupButtonsScrollController;
 
   @override
   int get rowOffsetForTopPadding => TimelineFlameChart.rowOffsetForTopPadding;
@@ -267,14 +270,18 @@ class TimelineFlameChartState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
     final newController = Provider.of<PerformanceController>(context);
-    if (newController == _performanceController) return;
+    if (_controllerInitialized && newController == _performanceController) {
+      return;
+    }
     _performanceController = newController;
+    _controllerInitialized = true;
 
     // If there is already a selected frame, handle setting that data and
     // positioning/zooming the flame chart accordingly.
     _selectedFrame = _performanceController.selectedFrame.value;
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance!.addPostFrameCallback((_) async {
       await _centerSelectedFrame();
     });
 
@@ -295,28 +302,27 @@ class TimelineFlameChartState
 
   @override
   bool isDataHorizontallyInView(TimelineEvent data) {
-    return (visibleTimeRange.contains(data.time.start) &&
-            visibleTimeRange.contains(data.time.end)) ||
-        (data.time.start <= visibleTimeRange.start &&
-            data.time.end >= visibleTimeRange.end);
+    return (visibleTimeRange.contains(data.time.start!) &&
+            visibleTimeRange.contains(data.time.end!)) ||
+        (data.time.start! <= visibleTimeRange.start! &&
+            data.time.end! >= visibleTimeRange.end!);
   }
 
   @override
   double topYForData(TimelineEvent data) {
-    final eventGroup =
-        widget.data.eventGroups[PerformanceUtils.computeEventGroupKey(
+    final eventGroupKey = PerformanceUtils.computeEventGroupKey(
       data,
       _performanceController.threadNamesById,
-    )];
-    assert(eventGroup != null);
-    final rowOffsetInGroup = eventGroup.rowIndexForEvent[data];
-    return eventGroupStartYValues[eventGroup] +
+    );
+    final eventGroup = widget.data.eventGroups[eventGroupKey]!;
+    final rowOffsetInGroup = eventGroup.rowIndexForEvent[data]!;
+    return eventGroupStartYValues[eventGroup]! +
         rowOffsetInGroup * rowHeightWithPadding;
   }
 
   @override
   double startXForData(TimelineEvent data) {
-    final timeMicros = data.time.start.inMicroseconds;
+    final timeMicros = data.time.start!.inMicroseconds;
     // Horizontally scroll to the frame.
     final relativeStartTime = timeMicros - startTimeOffset;
     final ratio = relativeStartTime / widget.data.time.duration.inMicroseconds;
@@ -326,7 +332,7 @@ class TimelineFlameChartState
   int _indexOfFirstEventInView(TimelineEventGroup group) {
     final boundEvent = SyncTimelineEvent(
       TraceEventWrapper(
-        TraceEvent({'ts': visibleTimeRange.start.inMicroseconds})
+        TraceEvent({'ts': visibleTimeRange.start!.inMicroseconds})
           ..type = TimelineEventType.other,
         0, // This is arbitrary
       ),
@@ -335,7 +341,7 @@ class TimelineFlameChartState
       group.sortedEventRoots,
       boundEvent,
       compare: (TimelineEvent a, TimelineEvent b) =>
-          a.time.start.compareTo(b.time.start),
+          a.time.start!.compareTo(b.time.start!),
     );
   }
 
@@ -344,7 +350,7 @@ class TimelineFlameChartState
     if (firstInViewIndex > 0) {
       final event = group.sortedEventRoots[firstInViewIndex - 1];
       await zoomAndScrollToData(
-        startMicros: event.time.start.inMicroseconds,
+        startMicros: event.time.start!.inMicroseconds,
         durationMicros: event.time.duration.inMicroseconds,
         data: event,
         scrollVertically: false,
@@ -356,7 +362,7 @@ class TimelineFlameChartState
     // button when there are no more events out of view for the group. Leave
     // this here as a fallback though, so that we do not give the user a
     // completely broken experience if we regress or if there is a race.
-    Notifications.of(context).push(
+    Notifications.of(context)!.push(
       'There are no events on this thread that occurred before this time range.',
     );
   }
@@ -364,7 +370,7 @@ class TimelineFlameChartState
   Future<void> _viewNextEventInGroup(TimelineEventGroup group) async {
     final boundEvent = SyncTimelineEvent(
       TraceEventWrapper(
-        TraceEvent({'ts': visibleTimeRange.end.inMicroseconds})
+        TraceEvent({'ts': visibleTimeRange.end!.inMicroseconds})
           ..type = TimelineEventType.other,
         0, // This is arbitrary
       ),
@@ -375,10 +381,10 @@ class TimelineFlameChartState
       group.sortedEventRoots,
       boundEvent,
       compare: (TimelineEvent a, TimelineEvent b) =>
-          a.time.end.compareTo(b.time.end),
+          a.time.end!.compareTo(b.time.end!),
     );
 
-    TimelineEvent zoomTo;
+    TimelineEvent? zoomTo;
     // If there are no events in this group that occur after the visible time
     // range, and the first event in the visible time range is the first event
     // in the group, zoom to this event. This covers the case where a user is
@@ -397,7 +403,7 @@ class TimelineFlameChartState
 
     if (zoomTo != null) {
       await zoomAndScrollToData(
-        startMicros: zoomTo.time.start.inMicroseconds,
+        startMicros: zoomTo.time.start!.inMicroseconds,
         durationMicros: zoomTo.time.duration.inMicroseconds,
         data: zoomTo,
         scrollVertically: false,
@@ -414,7 +420,7 @@ class TimelineFlameChartState
     // button when there are no more events out of view for the group. Leave
     // this here as a fallback though, so that we do not give the user a
     // completely broken experience if we regress or if there is a race.
-    Notifications.of(context).push(
+    Notifications.of(context)!.push(
       'There are no events on this thread that occurred after this time range.',
     );
   }
@@ -432,15 +438,16 @@ class TimelineFlameChartState
   Future<void> _centerSelectedFrame() async {
     // TODO(kenz): consider using jumpTo for some of these animations to
     // improve performance.
-    if (_selectedFrame != null) {
+    final _selected = _selectedFrame;
+    if (_selected != null) {
       // Zoom and scroll to the frame's UI event.
-      final time = _selectedFrame.timeToCenterFrame();
-      final event = _selectedFrame.eventToCenterFrame();
+      final time = _selected.timeToCenterFrame();
+      final event = _selected.eventToCenterFrame();
       if (time == null || event == null) {
         if (_performanceController.firstWellFormedFrameMicros != null &&
-            _selectedFrame.timeFromFrameTiming.start.inMicroseconds <
-                _performanceController.firstWellFormedFrameMicros) {
-          Notifications.of(context).push(
+            _selected.timeFromFrameTiming.start!.inMicroseconds <
+                _performanceController.firstWellFormedFrameMicros!) {
+          Notifications.of(context)!.push(
             'No timeline events available for the selected frame. Timeline '
             'events occurred too long ago before DevTools could access them. '
             'To avoid this, open the DevTools Performance page sooner.',
@@ -448,12 +455,12 @@ class TimelineFlameChartState
           return;
         }
         // TODO(kenz): should we zoom to the latest available frame?
-        Notifications.of(context)
+        Notifications.of(context)!
             .push('No timeline events available for the selected frame');
         return;
       }
       await zoomAndScrollToData(
-        startMicros: time.start.inMicroseconds,
+        startMicros: time.start!.inMicroseconds,
         durationMicros: time.duration.inMicroseconds,
         data: event,
         jumpZoom: true,
@@ -466,13 +473,13 @@ class TimelineFlameChartState
     super.initFlameChartElements();
 
     double leftForEvent(TimelineEvent event) {
-      return (event.time.start.inMicroseconds - startTimeOffset) *
+      return (event.time.start!.inMicroseconds - startTimeOffset) *
               startingPxPerMicro +
           widget.startInset;
     }
 
     double rightForEvent(TimelineEvent event) {
-      return (event.time.end.inMicroseconds - startTimeOffset) *
+      return (event.time.end!.inMicroseconds - startTimeOffset) *
               startingPxPerMicro +
           widget.startInset;
     }
@@ -508,7 +515,7 @@ class TimelineFlameChartState
 
       final node = FlameChartNode<TimelineEvent>(
         key: Key('${event.name} ${event.traceEvents.first.wrapperId}'),
-        text: event.name,
+        text: event.name!,
         rect: Rect.fromLTRB(left, flameChartNodeTop, right, rowHeight),
         colorPair: ThemedColorPair.from(colorPair),
         data: event,
@@ -525,7 +532,7 @@ class TimelineFlameChartState
     int currentSectionIndex = 0;
     double yOffset = rowOffsetForTopPadding * sectionSpacing;
     for (String groupName in widget.data.eventGroups.keys) {
-      final TimelineEventGroup group = widget.data.eventGroups[groupName];
+      final group = widget.data.eventGroups[groupName]!;
       // Expand rows to fit nodes in [group].
       assert(rows.length == currentRowIndex);
       expandRows(rows.length + group.displaySize);
@@ -616,9 +623,9 @@ class TimelineFlameChartState
     ];
   }
 
-  Widget _buildSectionLabels({@required BoxConstraints constraints}) {
+  Widget _buildSectionLabels({required BoxConstraints constraints}) {
     final colorScheme = Theme.of(context).colorScheme;
-    final eventGroups = _performanceController.data.eventGroups;
+    final eventGroups = _performanceController.data!.eventGroups;
 
     final children = <Widget>[];
     for (int i = 0; i < eventGroups.length; i++) {
@@ -636,7 +643,7 @@ class TimelineFlameChartState
       }
 
       final groupName = eventGroups.keys.elementAt(i);
-      final group = eventGroups[groupName];
+      final group = eventGroups[groupName]!;
       final backgroundColor = alternatingColorForIndex(i, colorScheme);
       final backgroundWithOpacity = Color.fromRGBO(
         backgroundColor.red,
@@ -680,12 +687,12 @@ class TimelineFlameChartState
   }
 
   List<Widget> _buildEventThreadNavigationButtons({
-    @required BoxConstraints constraints,
+    required BoxConstraints constraints,
   }) {
     final threadButtonContainerWidth = buttonMinWidth + defaultSpacing;
-    final eventGroups = _performanceController.data.eventGroups;
+    final eventGroups = _performanceController.data!.eventGroups;
 
-    Widget buildNavigatorButton(int index, {@required bool isNext}) {
+    Widget buildNavigatorButton(int index, {required bool isNext}) {
       // Add spacing to account for timestamps at top of chart.
       final topSpacer = index == 0
           ? sectionSpacing * TimelineFlameChart.rowOffsetForTopPadding -
@@ -695,7 +702,7 @@ class TimelineFlameChartState
       final bottomSpacer = index == eventGroups.length - 1 ? rowHeight : 0.0;
 
       final groupName = eventGroups.keys.elementAt(index);
-      final group = eventGroups[groupName];
+      final group = eventGroups[groupName]!;
       final backgroundColor = alternatingColorForIndex(
         // Add 1 so that the color of the button contrasts with the group
         // background color.
@@ -755,17 +762,17 @@ class TimelineFlameChartState
 
   bool _shouldEnablePrevInThreadButton(TimelineEventGroup group) {
     return horizontalControllerGroup.hasAttachedControllers &&
-        group.earliestTimestampMicros < visibleTimeRange.start.inMicroseconds;
+        group.earliestTimestampMicros < visibleTimeRange.start!.inMicroseconds;
   }
 
   bool _shouldEnableNextInThreadButton(TimelineEventGroup group) {
     final firstEventInView = _indexOfFirstEventInView(group);
     final noEventsAfterVisibleTimeRange =
         horizontalControllerGroup.hasAttachedControllers &&
-            group.latestTimestampMicros <= visibleTimeRange.end.inMicroseconds;
+            group.latestTimestampMicros <= visibleTimeRange.end!.inMicroseconds;
     return (firstEventInView == 0 && noEventsAfterVisibleTimeRange) ||
         horizontalControllerGroup.hasAttachedControllers &&
-            group.latestTimestampMicros > visibleTimeRange.end.inMicroseconds;
+            group.latestTimestampMicros > visibleTimeRange.end!.inMicroseconds;
   }
 
   void _calculateAsyncGuidelines() {
@@ -809,10 +816,10 @@ class TimelineFlameChartState
           // Draw the horizontal guideline to the first child event that is not
           // an instant event, since it is guaranteed to be connected to
           // the main vertical we just created.
-          final firstChild = event.children
-              .firstWhere((TimelineEvent e) => !e.isAsyncInstantEvent);
+          final firstChild =
+              event.children.firstWhere((e) => !e.isAsyncInstantEvent);
           final horizontalGuidelineEndX =
-              chartNodesByEvent[firstChild].rect.left;
+              chartNodesByEvent[firstChild]!.rect.left;
           final horizontalGuidelineY =
               _calculateHorizontalGuidelineY(firstChild);
           horizontalGuidelines.add(HorizontalLineSegment(
@@ -828,7 +835,7 @@ class TimelineFlameChartState
             final child = event.children[i];
             if (child.isAsyncInstantEvent) continue;
 
-            final childNode = chartNodesByEvent[child];
+            final childNode = chartNodesByEvent[child]!;
 
             // Helper method to generate a vertical guideline for subsequent
             // children after the first child. We will create a new guideline
@@ -841,7 +848,7 @@ class TimelineFlameChartState
               // Otherwise, take the minimum of
               // [subsequentChildGuidelineOffset] and half the distance
               // between [previousXInRow] and child's left edge.
-              if (event.time.end < child.time.start) {
+              if (event.time.end! < child.time.start!) {
                 newVerticalGuidelineX = node.rect.right;
               } else {
                 newVerticalGuidelineX = childNode.rect.left -
@@ -860,17 +867,17 @@ class TimelineFlameChartState
               horizontalGuidelineStartX = newVerticalGuidelineX;
             }
 
-            FlameChartNode previousSiblingInRow(FlameChartNode child) {
+            FlameChartNode? previousSiblingInRow(FlameChartNode child) {
               final previousNodeIndex = child.row.nodes.indexOf(child) - 1;
               final previousNode = previousNodeIndex >= 0
                   ? child.row.nodes[previousNodeIndex]
                   : null;
-              final isSibling = previousNode?.data?.parent == node.data;
+              final isSibling = previousNode?.data.parent == node.data;
               return isSibling ? previousNode : null;
             }
 
             if (childNode.row.index == node.row.index + 1) {
-              FlameChartNode previousSibling = previousSiblingInRow(childNode);
+              FlameChartNode? previousSibling = previousSiblingInRow(childNode);
               // Look back until we find the first sibling in this row that is
               // not an instant event (if present).
               while (previousSibling != null &&
@@ -901,13 +908,13 @@ class TimelineFlameChartState
 
   int _spacerRowsBeforeEvent(TimelineEvent event) {
     // Add 1 to account for the first spacer row before section 0 begins.
-    return chartNodesByEvent[event].sectionIndex + rowOffsetForTopPadding;
+    return chartNodesByEvent[event]!.sectionIndex + rowOffsetForTopPadding;
   }
 
   double _calculateVerticalGuidelineStartY(TimelineEvent event) {
     final spacerRowsBeforeEvent = _spacerRowsBeforeEvent(event);
     return spacerRowsBeforeEvent * sectionSpacing +
-        (chartNodesByEvent[event].row.index - spacerRowsBeforeEvent) *
+        (chartNodesByEvent[event]!.row.index - spacerRowsBeforeEvent) *
             rowHeightWithPadding +
         rowHeight;
   }
@@ -915,7 +922,7 @@ class TimelineFlameChartState
   double _calculateHorizontalGuidelineY(TimelineEvent event) {
     final spacerRowsBeforeEvent = _spacerRowsBeforeEvent(event);
     return spacerRowsBeforeEvent * sectionSpacing +
-        (chartNodesByEvent[event].row.index - spacerRowsBeforeEvent) *
+        (chartNodesByEvent[event]!.row.index - spacerRowsBeforeEvent) *
             rowHeightWithPadding +
         rowHeight / 2;
   }
@@ -923,14 +930,14 @@ class TimelineFlameChartState
 
 class AsyncGuidelinePainter extends FlameChartPainter {
   AsyncGuidelinePainter({
-    @required double zoom,
-    @required BoxConstraints constraints,
-    @required double verticalScrollOffset,
-    @required double horizontalScrollOffset,
-    @required double chartStartInset,
-    @required this.verticalGuidelines,
-    @required this.horizontalGuidelines,
-    @required ColorScheme colorScheme,
+    required double zoom,
+    required BoxConstraints constraints,
+    required double verticalScrollOffset,
+    required double horizontalScrollOffset,
+    required double chartStartInset,
+    required this.verticalGuidelines,
+    required this.horizontalGuidelines,
+    required ColorScheme colorScheme,
   }) : super(
           zoom: zoom,
           constraints: constraints,
@@ -1058,15 +1065,15 @@ class AsyncGuidelinePainter extends FlameChartPainter {
 class SelectedFrameBracketPainter extends FlameChartPainter {
   SelectedFrameBracketPainter(
     this.selectedFrame, {
-    @required double zoom,
-    @required BoxConstraints constraints,
-    @required double verticalScrollOffset,
-    @required double horizontalScrollOffset,
-    @required double chartStartInset,
-    @required this.startTimeOffsetMicros,
-    @required this.startingPxPerMicro,
-    @required this.yForEvent,
-    @required ColorScheme colorScheme,
+    required double zoom,
+    required BoxConstraints constraints,
+    required double verticalScrollOffset,
+    required double horizontalScrollOffset,
+    required double chartStartInset,
+    required this.startTimeOffsetMicros,
+    required this.startingPxPerMicro,
+    required this.yForEvent,
+    required ColorScheme colorScheme,
   }) : super(
           zoom: zoom,
           constraints: constraints,
@@ -1081,7 +1088,7 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
   static const bracketCurveWidth = 8.0;
   static const bracketVerticalPadding = 8.0;
 
-  final FlutterFrame selectedFrame;
+  final FlutterFrame? selectedFrame;
 
   final int startTimeOffsetMicros;
 
@@ -1091,10 +1098,12 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (selectedFrame?.timelineEventData?.uiEvent == null &&
-        selectedFrame?.timelineEventData?.rasterEvent == null) {
+    if (selectedFrame?.timelineEventData.uiEvent == null &&
+        selectedFrame?.timelineEventData.rasterEvent == null) {
       return;
     }
+
+    final frame = selectedFrame!;
 
     canvas.clipRect(Rect.fromLTWH(
       0.0,
@@ -1108,18 +1117,18 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 
-    if (selectedFrame.timelineEventData.uiEvent != null) {
+    if (frame.timelineEventData.uiEvent != null) {
       _paintBrackets(
         canvas,
         paint,
-        event: selectedFrame.timelineEventData.uiEvent,
+        event: frame.timelineEventData.uiEvent!,
       );
     }
-    if (selectedFrame.timelineEventData.rasterEvent != null) {
+    if (frame.timelineEventData.rasterEvent != null) {
       _paintBrackets(
         canvas,
         paint,
-        event: selectedFrame.timelineEventData.rasterEvent,
+        event: frame.timelineEventData.rasterEvent!,
       );
     }
   }
@@ -1127,11 +1136,12 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
   void _paintBrackets(
     Canvas canvas,
     Paint paint, {
-    @required TimelineEvent event,
+    required TimelineEvent event,
   }) {
     final visible = visibleRect;
-    final startMicros = event.time.start.inMicroseconds - startTimeOffsetMicros;
-    final endMicros = event.time.end.inMicroseconds - startTimeOffsetMicros;
+    final startMicros =
+        event.time.start!.inMicroseconds - startTimeOffsetMicros;
+    final endMicros = event.time.end!.inMicroseconds - startTimeOffsetMicros;
     final startPx = startMicros * startingPxPerMicro * zoom + chartStartInset;
     final endPx = endMicros * startingPxPerMicro * zoom + chartStartInset;
 
@@ -1246,15 +1256,15 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
 
 class NavigateInThreadInButton extends StatefulWidget {
   const NavigateInThreadInButton({
-    @required this.group,
-    @required this.isNext,
-    @required this.topSpacer,
-    @required this.bottomSpacer,
-    @required this.backgroundColor,
-    @required this.threadButtonContainerWidth,
-    @required this.onPressed,
-    @required this.shouldEnableButton,
-    @required this.horizontalController,
+    required this.group,
+    required this.isNext,
+    required this.topSpacer,
+    required this.bottomSpacer,
+    required this.backgroundColor,
+    required this.threadButtonContainerWidth,
+    required this.onPressed,
+    required this.shouldEnableButton,
+    required this.horizontalController,
   });
 
   final TimelineEventGroup group;
@@ -1328,11 +1338,11 @@ class _NavigateInThreadInButtonState extends State<NavigateInThreadInButton>
 
 class ThreadNavigatorButton extends StatelessWidget {
   const ThreadNavigatorButton({
-    @required this.useSmallButton,
-    @required this.backgroundColor,
-    @required this.tooltip,
-    @required this.icon,
-    @required this.onPressed,
+    required this.useSmallButton,
+    required this.backgroundColor,
+    required this.tooltip,
+    required this.icon,
+    required this.onPressed,
   });
 
   final bool useSmallButton;
@@ -1343,7 +1353,7 @@ class ThreadNavigatorButton extends StatelessWidget {
 
   final IconData icon;
 
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -1378,7 +1388,7 @@ extension TimelineEventGroupDisplayExtension on TimelineEventGroup {
 }
 
 extension FlutterFrameExtension on FlutterFrame {
-  TimelineEvent eventToCenterFrame() {
+  TimelineEvent? eventToCenterFrame() {
     if (timelineEventData.uiEvent == null &&
         timelineEventData.rasterEvent == null) {
       return null;
@@ -1389,14 +1399,14 @@ extension FlutterFrameExtension on FlutterFrame {
     }
   }
 
-  TimeRange timeToCenterFrame() {
+  TimeRange? timeToCenterFrame() {
     if (timelineEventData.uiEvent != null &&
         timelineEventData.rasterEvent != null) {
       return timeFromEventFlows;
     } else if (timelineEventData.uiEvent != null) {
-      return timelineEventData.uiEvent.time;
+      return timelineEventData.uiEvent!.time;
     } else if (timelineEventData.rasterEvent != null) {
-      return timelineEventData.rasterEvent.time;
+      return timelineEventData.rasterEvent!.time;
     } else {
       return null;
     }
