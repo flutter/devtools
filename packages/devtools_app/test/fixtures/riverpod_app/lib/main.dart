@@ -4,6 +4,8 @@
 
 // ignore: unused_import, allows the tests to use functions from tester.dart
 
+// @dart=2.9
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
