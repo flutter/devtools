@@ -68,9 +68,9 @@ abstract class InspectorServiceBase extends DisposableController
           oneRequestAtATime: true,
           isolate: serviceManager.isolateManager.mainIsolate,
         ) {
-    _lastMainIsolate = serviceManager.isolateManager.mainIsolate.value;
+    _lastMainIsolate = serviceManager.isolateManager.mainIsolate.value!;
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      final mainIsolate = serviceManager.isolateManager.mainIsolate.value;
+      final mainIsolate = serviceManager.isolateManager.mainIsolate.value!;
       if (mainIsolate != _lastMainIsolate) {
         onIsolateStopped();
       }
@@ -92,7 +92,7 @@ abstract class InspectorServiceBase extends DisposableController
 
   final Set<InspectorServiceClient> clients;
   final EvalOnDartLibrary inspectorLibrary;
-  IsolateRef? _lastMainIsolate;
+  late IsolateRef _lastMainIsolate;
 
   /// Reference to the isolate running the inspector that [InspectorServiceBase]
   /// is connecting to. This isolate should always be the main isolate.
@@ -139,7 +139,7 @@ abstract class InspectorServiceBase extends DisposableController
   }
 
   Future<Object> forceRefresh() {
-    final List<Future<Object?>> futures = [];
+    final futures = <Future<void>>[];
     for (InspectorServiceClient client in clients) {
       try {
         futures.add(client.onForceRefresh());
@@ -160,8 +160,10 @@ abstract class InspectorServiceBase extends DisposableController
     }
   }
 
-  Future<Object?> invokeServiceMethodDaemonNoGroupArgs(String methodName,
-      [List<String>? args]) {
+  Future<Object?> invokeServiceMethodDaemonNoGroupArgs(
+    String methodName, [
+    List<String>? args,
+  ]) {
     final Map<String, Object> params = {};
     if (args != null) {
       for (int i = 0; i < args.length; ++i) {
@@ -172,7 +174,8 @@ abstract class InspectorServiceBase extends DisposableController
   }
 
   Future<InstanceRef?> invokeServiceMethodObservatoryNoGroup(
-      String methodName) {
+    String methodName,
+  ) {
     return inspectorLibrary.eval('$clientInspectorName.instance.$methodName()',
         isAlive: null);
   }
@@ -1282,9 +1285,12 @@ class ObjectGroup extends ObjectGroupBase {
   ) async {
     if (disposed) return false;
     // TODO(jacobr): we need to cancel if another inspect request comes in while we are trying this one.
-    final json = await setSelectionResult;
+    final isSelectionChanged = await setSelectionResult;
     if (disposed) return false;
-    return handleSetSelectionHelper(json as bool, uiAlreadyUpdated);
+    return handleSetSelectionHelper(
+      isSelectionChanged as bool,
+      uiAlreadyUpdated,
+    );
   }
 
   Future<RemoteDiagnosticsNode?> getDetailsSubtree(
@@ -1331,7 +1337,7 @@ class ObjectGroup extends ObjectGroupBase {
 
   Future<void> invokeSetFlexFit(
     InspectorInstanceRef ref,
-    FlexFit? flexFit,
+    FlexFit flexFit,
   ) async {
     await invokeServiceExtensionMethod(
       RegistrableServiceExtension.setFlexFit,
@@ -1374,7 +1380,7 @@ abstract class InspectorServiceClient {
 
   void onFlutterFrame();
 
-  Future<Object?> onForceRefresh();
+  Future<void> onForceRefresh();
 }
 
 /// Reference to a Dart object.
@@ -1399,7 +1405,7 @@ class InspectorInstanceRef {
   int get hashCode => id.hashCode;
 
   @override
-  String toString() => id!;
+  String toString() => '$id';
 
   final String? id;
 }
@@ -1421,7 +1427,7 @@ class InspectorInstanceRef {
 class InspectorObjectGroupManager {
   InspectorObjectGroupManager(this.inspectorService, this.debugName);
 
-  final InspectorService? inspectorService;
+  final InspectorService inspectorService;
   final String debugName;
   ObjectGroup? _current;
   ObjectGroup? _next;
@@ -1442,12 +1448,12 @@ class InspectorObjectGroupManager {
   }
 
   ObjectGroup? get current {
-    _current ??= inspectorService!.createObjectGroup(debugName);
+    _current ??= inspectorService.createObjectGroup(debugName);
     return _current;
   }
 
   ObjectGroup? get next {
-    _next ??= inspectorService!.createObjectGroup(debugName);
+    _next ??= inspectorService.createObjectGroup(debugName);
     return _next;
   }
 

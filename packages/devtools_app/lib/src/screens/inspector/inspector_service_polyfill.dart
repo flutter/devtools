@@ -20,12 +20,14 @@ Future<String> loadPolyfillScript() {
 final _polyfillReadyExpando = Expando<Future>();
 
 Future<void> invokeInspectorPolyfill(ObjectGroup group) {
+  final isolate = group.inspectorLibrary.isolate!;
+
   // Avoid invoking the polyfill more than once.
-  var polyFillReady = _polyfillReadyExpando[group.inspectorLibrary.isolate!];
+  var polyFillReady = _polyfillReadyExpando[isolate];
   if (polyFillReady != null) return polyFillReady;
 
   polyFillReady = _invokeInspectorPolyfill(group);
-  _polyfillReadyExpando[group.inspectorLibrary.isolate!] = polyFillReady;
+  _polyfillReadyExpando[isolate] = polyFillReady;
   return polyFillReady;
 }
 
