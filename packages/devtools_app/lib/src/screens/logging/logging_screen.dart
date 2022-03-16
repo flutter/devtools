@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -77,11 +75,13 @@ Example queries:
 
 class _LoggingScreenState extends State<LoggingScreenBody>
     with AutoDisposeMixin, SearchFieldMixin<LoggingScreenBody> {
-  LogData selected;
+  LogData? selected;
 
-  LoggingController controller;
+  bool _controllerInitialized = false;
 
-  List<LogData> filteredLogs;
+  late LoggingController _controller;
+
+  late List<LogData> filteredLogs;
 
   @override
   void initState() {
@@ -94,22 +94,23 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     super.didChangeDependencies();
 
     final newController = Provider.of<LoggingController>(context);
-    if (newController == controller) return;
-    controller = newController;
+    if (_controllerInitialized && newController == _controller) return;
+    _controller = newController;
+    _controllerInitialized = true;
 
     cancelListeners();
 
-    filteredLogs = controller.filteredData.value;
-    addAutoDisposeListener(controller.filteredData, () {
+    filteredLogs = _controller.filteredData.value;
+    addAutoDisposeListener(_controller.filteredData, () {
       setState(() {
-        filteredLogs = controller.filteredData.value;
+        filteredLogs = _controller.filteredData.value;
       });
     });
 
-    selected = controller.selectedLog.value;
-    addAutoDisposeListener(controller.selectedLog, () {
+    selected = _controller.selectedLog.value;
+    addAutoDisposeListener(_controller.selectedLog, () {
       setState(() {
-        selected = controller.selectedLog.value;
+        selected = _controller.selectedLog.value;
       });
     });
   }
@@ -126,10 +127,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   }
 
   Widget _buildLoggingControls() {
-    final hasData = controller.filteredData.value.isNotEmpty;
+    final hasData = _controller.filteredData.value.isNotEmpty;
     return Row(
       children: [
-        ClearButton(onPressed: controller.clear),
+        ClearButton(onPressed: _controller.clear),
         const Spacer(),
         StructuredErrorsToggle(),
         const SizedBox(width: denseSpacing),
@@ -138,7 +139,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
           width: wideSearchTextWidth,
           height: defaultTextFieldHeight,
           child: buildSearchField(
-            controller: controller,
+            controller: _controller,
             searchFieldKey: loggingSearchFieldKey,
             searchFieldEnabled: hasData,
             shouldRequestFocus: false,
@@ -148,7 +149,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         const SizedBox(width: denseSpacing),
         FilterButton(
           onPressed: _showFilterDialog,
-          isFilterActive: filteredLogs.length != controller.data.length,
+          isFilterActive: filteredLogs.length != _controller.data.length,
         ),
       ],
     );
@@ -162,10 +163,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         OutlineDecoration(
           child: LogsTable(
             data: filteredLogs,
-            onItemSelected: controller.selectLog,
-            selectionNotifier: controller.selectedLog,
-            searchMatchesNotifier: controller.searchMatches,
-            activeSearchMatchNotifier: controller.activeSearchMatch,
+            onItemSelected: _controller.selectLog,
+            selectionNotifier: _controller.selectedLog,
+            searchMatchesNotifier: _controller.searchMatches,
+            activeSearchMatchNotifier: _controller.activeSearchMatch,
           ),
         ),
         LogDetails(log: selected),
@@ -177,9 +178,9 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     showDialog(
       context: context,
       builder: (context) => FilterDialog<LoggingController, LogData>(
-        controller: controller,
+        controller: _controller,
         queryInstructions: LoggingScreenBody.filterQueryInstructions,
-        queryFilterArguments: controller.filterArgs,
+        queryFilterArguments: _controller.filterArgs,
       ),
     );
   }
