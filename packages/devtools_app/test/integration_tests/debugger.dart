@@ -323,77 +323,77 @@ class DebuggingManager {
   final DevtoolsManager tools;
 
   Future<void> resume() async {
-    await tools.tabInstance!.send('debugger.resume');
+    await tools.tabInstance.send('debugger.resume');
   }
 
   Future<void> pause() async {
-    await tools.tabInstance!.send('debugger.pause');
+    await tools.tabInstance.send('debugger.pause');
   }
 
   Future<void> step() async {
-    await tools.tabInstance!.send('debugger.step');
+    await tools.tabInstance.send('debugger.step');
   }
 
   Future<String?> getLocation() async {
     final AppResponse response =
-        await tools.tabInstance!.send('debugger.getLocation');
+        await tools.tabInstance.send('debugger.getLocation');
     return response.result as String?;
   }
 
   Future<List<String>> getVariables() async {
     final AppResponse response =
-        await tools.tabInstance!.send('debugger.getVariables');
+        await tools.tabInstance.send('debugger.getVariables');
     final List<dynamic> result = response.result as List;
     return result.cast<String>();
   }
 
   Future<String?> getState() async {
     final AppResponse response =
-        await tools.tabInstance!.send('debugger.getState');
+        await tools.tabInstance.send('debugger.getState');
     return response.result as String?;
   }
 
   Future<String?> getConsoleContents() async {
     final AppResponse response =
-        await tools.tabInstance!.send('debugger.getConsoleContents');
+        await tools.tabInstance.send('debugger.getConsoleContents');
     return response.result as String?;
   }
 
   Future<void> clearBreakpoints() async {
-    await tools.tabInstance!.send('debugger.clearBreakpoints');
+    await tools.tabInstance.send('debugger.clearBreakpoints');
   }
 
   Future<void> addBreakpoint(String path, int line) async {
-    await tools.tabInstance!.send('debugger.addBreakpoint', [path, line]);
+    await tools.tabInstance.send('debugger.addBreakpoint', [path, line]);
   }
 
   Future<void> setIsolatePauseMode(String mode) async {
-    await tools.tabInstance!.send('debugger.setIsolatePauseMode', mode);
+    await tools.tabInstance.send('debugger.setIsolatePauseMode', mode);
   }
 
   Future<List<String>> getBreakpoints() async {
     final AppResponse response =
-        await tools.tabInstance!.send('debugger.getBreakpoints');
+        await tools.tabInstance.send('debugger.getBreakpoints');
     final List<dynamic> result = response.result as List;
     return result.cast<String>();
   }
 
   Future<List<String>> getScripts() async {
     final AppResponse response =
-        await tools.tabInstance!.send('debugger.getScripts');
+        await tools.tabInstance.send('debugger.getScripts');
     final List<dynamic> result = response.result as List;
     return result.cast<String>();
   }
 
   Future<bool> supportsScripts() async {
     final AppResponse response =
-        await tools.tabInstance!.send('debugger.supportsScripts');
+        await tools.tabInstance.send('debugger.supportsScripts');
     return response.result as bool;
   }
 
   Future<List<String>> getCallStackFrames() async {
     final AppResponse response =
-        await tools.tabInstance!.send('debugger.getCallStackFrames');
+        await tools.tabInstance.send('debugger.getCallStackFrames');
     final List<dynamic> result = response.result as List;
     return result.cast<String>();
   }

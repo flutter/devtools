@@ -62,12 +62,12 @@ class ConnectDialogManager {
 
   Future<bool> isVisible() async {
     final AppResponse response =
-        await tools.tabInstance!.send('connectDialog.isVisible');
-    return response.result;
+        await tools.tabInstance.send('connectDialog.isVisible');
+    return response.result as bool;
   }
 
   Future connectTo(Uri uri) async {
     // We have to convert to String here as this goes over JSON.
-    await tools.tabInstance!.send('connectDialog.connectTo', uri.toString());
+    await tools.tabInstance.send('connectDialog.connectTo', uri.toString());
   }
 }

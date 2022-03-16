@@ -129,7 +129,7 @@ void main() {
         (tester) async {
       const objPath = InstancePath.fromInstanceId('obj');
 
-      InstancePath? pathForProperty(String name) {
+      InstancePath pathForProperty(String name) {
         return objPath.pathForChild(
           PathToProperty.objectProperty(
             name: name,
@@ -191,13 +191,13 @@ void main() {
                 ),
               ),
             ),
-            rawInstanceProvider(pathForProperty('first')!)
+            rawInstanceProvider(pathForProperty('first'))
                 .overrideWithValue(int42Instance),
-            rawInstanceProvider(pathForProperty('_second')!)
+            rawInstanceProvider(pathForProperty('_second'))
                 .overrideWithValue(int42Instance),
-            rawInstanceProvider(pathForProperty('third')!)
+            rawInstanceProvider(pathForProperty('third'))
                 .overrideWithValue(int42Instance),
-            rawInstanceProvider(pathForProperty('_forth')!)
+            rawInstanceProvider(pathForProperty('_forth'))
                 .overrideWithValue(int42Instance),
           ],
           child: const MaterialApp(

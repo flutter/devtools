@@ -79,12 +79,12 @@ class LoggingManager {
   final DevtoolsManager tools;
 
   Future<void> clearLogs() async {
-    await tools.tabInstance!.send('logging.clearLogs');
+    await tools.tabInstance.send('logging.clearLogs');
   }
 
   Future<int> logCount() async {
     final AppResponse response =
-        await tools.tabInstance!.send('logging.logCount');
-    return response.result;
+        await tools.tabInstance.send('logging.logCount');
+    return response.result as int;
   }
 }
