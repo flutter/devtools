@@ -37,8 +37,8 @@ class FlutterTestEnvironment {
     return flutterExe.isNotEmpty ? flutterExe : defaultFlutterExecutable;
   }
 
-  FlutterRunConfiguration? _runConfig;
-  FlutterRunConfiguration? get runConfig => _runConfig;
+  FlutterRunConfiguration _runConfig;
+  FlutterRunConfiguration get runConfig => _runConfig;
   FlutterRunTestDriver? _flutter;
   FlutterRunTestDriver? get flutter => _flutter;
   VmServiceWrapper? _service;
@@ -102,7 +102,7 @@ class FlutterTestEnvironment {
       if (_flutter != null) await tearDownEnvironment(force: true);
 
       // Update the run configuration if we have a new one.
-      if (_isNewRunConfig(config)) _runConfig = config;
+      if (_isNewRunConfig(config)) _runConfig = config!;
 
       _needsSetup = false;
 
@@ -110,7 +110,7 @@ class FlutterTestEnvironment {
           as FlutterRunTestDriver?;
       await _flutter!.run(
         flutterExecutable: _flutterExe,
-        runConfig: _runConfig!,
+        runConfig: _runConfig,
       );
 
       _service = _flutter!.vmService;
