@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
@@ -22,7 +22,7 @@ void main() {
   // Set a wide enough screen width that we do not run into overflow.
   const windowSize = Size(2225.0, 1000.0);
 
-  Widget providerScreen;
+  late Widget providerScreen;
   BannerMessagesController bannerMessagesController;
 
   setUpAll(() => loadFonts());

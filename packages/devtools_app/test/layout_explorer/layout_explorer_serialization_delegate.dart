@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -16,7 +14,7 @@ class LayoutExplorerSerializationDelegate
   LayoutExplorerSerializationDelegate({
     String groupName = '',
     int subtreeDepth = 1,
-    @required WidgetInspectorService service,
+    required WidgetInspectorService service,
   }) : super(
           groupName: groupName,
           subtreeDepth: subtreeDepth,
@@ -24,11 +22,11 @@ class LayoutExplorerSerializationDelegate
           summaryTree: true,
           addAdditionalPropertiesCallback: (node, delegate) {
             final Map<String, Object> additionalJson = <String, Object>{};
-            final Object value = node.value;
+            final Object? value = node.value;
             if (value is Element) {
-              final renderObject = value.renderObject;
+              final renderObject = value.renderObject!;
               additionalJson['renderObject'] =
-                  renderObject.toDiagnosticsNode()?.toJsonMap(
+                  renderObject.toDiagnosticsNode().toJsonMap(
                         delegate.copyWith(
                           subtreeDepth: 0,
                           includeProperties: true,
@@ -36,31 +34,30 @@ class LayoutExplorerSerializationDelegate
                       );
               // ignore: invalid_use_of_protected_member
               final Constraints constraints = renderObject.constraints;
-              if (constraints != null) {
-                final Map<String, Object> constraintsProperty =
-                    <String, Object>{
-                  'type': constraints.runtimeType.toString(),
-                  'description': constraints.toString(),
-                };
-                if (constraints is BoxConstraints) {
-                  constraintsProperty.addAll(<String, Object>{
-                    'minWidth': constraints.minWidth.toString(),
-                    'minHeight': constraints.minHeight.toString(),
-                    'maxWidth': constraints.maxWidth.toString(),
-                    'maxHeight': constraints.maxHeight.toString(),
-                  });
-                }
-                additionalJson['constraints'] = constraintsProperty;
+
+              final Map<String, Object> constraintsProperty = <String, Object>{
+                'type': constraints.runtimeType.toString(),
+                'description': constraints.toString(),
+              };
+              if (constraints is BoxConstraints) {
+                constraintsProperty.addAll(<String, Object>{
+                  'minWidth': constraints.minWidth.toString(),
+                  'minHeight': constraints.minHeight.toString(),
+                  'maxWidth': constraints.maxWidth.toString(),
+                  'maxHeight': constraints.maxHeight.toString(),
+                });
               }
+              additionalJson['constraints'] = constraintsProperty;
+
               if (renderObject is RenderBox) {
                 additionalJson['size'] = <String, Object>{
                   'width': renderObject.size.width.toString(),
                   'height': renderObject.size.height.toString(),
                 };
 
-                final ParentData parentData = renderObject.parentData;
+                final ParentData? parentData = renderObject.parentData;
                 if (parentData is FlexParentData) {
-                  additionalJson['flexFactor'] = parentData.flex;
+                  additionalJson['flexFactor'] = parentData.flex!;
                   additionalJson['flexFit'] =
                       describeEnum(parentData.fit ?? FlexFit.tight);
                 }
