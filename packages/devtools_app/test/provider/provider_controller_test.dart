@@ -217,7 +217,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         );
 
         final mapKeys = await container
-            .listen(rawInstanceProvider(mapPath!).future)
+            .listen(rawInstanceProvider(mapPath).future)
             .read()
             .then((value) => value as MapInstance);
 
