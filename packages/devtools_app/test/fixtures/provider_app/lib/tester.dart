@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 export 'package:flutter_test/flutter_test.dart';
 
 class _Tester extends WidgetController {
-  _Tester() : super(WidgetsBinding.instance);
+  _Tester() : super(WidgetsBinding.instance!);
 
   @override
   Future<List<Duration>> handlePointerEventRecord(
@@ -19,8 +19,8 @@ class _Tester extends WidgetController {
   }
 
   @override
-  Future<void> pump([Duration duration]) {
-    binding.renderViewElement.markNeedsBuild();
+  Future<void> pump([Duration? duration]) {
+    binding.renderViewElement!.markNeedsBuild();
 
     final completer = Completer<void>();
     binding.addPostFrameCallback((timeStamp) => completer.complete());
