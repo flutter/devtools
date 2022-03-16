@@ -66,7 +66,7 @@ abstract class FlutterTestDriver {
   }
 
   Future<void> setupProcess(
-    List<String?> args, {
+    List<String> args, {
     required String flutterExecutable,
     FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File? pidFile,
@@ -81,7 +81,7 @@ abstract class FlutterTestDriver {
 
     proc = await Process.start(
       flutterExecutable,
-      _args as List<String>,
+      _args,
       workingDirectory: projectFolder.path,
       environment: <String, String>{
         'FLUTTER_TEST': 'true',
@@ -271,7 +271,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File? pidFile,
   }) async {
-    final args = <String?>[
+    final args = <String>[
       'run',
       '--machine',
     ];
@@ -279,7 +279,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       args.add('--track-widget-creation');
     }
     if (runConfig.entryScript != null) {
-      args.addAll(['-t', runConfig.entryScript]);
+      args.addAll(['-t', runConfig.entryScript ?? '']);
     }
     args.addAll(['-d', 'flutter-tester']);
     await setupProcess(
@@ -313,7 +313,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
   @override
   Future<void> setupProcess(
-    List<String?> args, {
+    List<String> args, {
     required String flutterExecutable,
     FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File? pidFile,
