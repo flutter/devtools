@@ -173,9 +173,7 @@ abstract class FlutterTestDriver {
   Future<Isolate?> resume({String? step, bool wait = true}) async {
     debugPrint('Sending resume ($step)');
     await _timeoutWithMessages<dynamic>(
-        () async => vmService!.resume(
-            await (getFlutterIsolateId() as FutureOr<String>),
-            step: step),
+        () async => vmService!.resume(await getFlutterIsolateId(), step: step),
         message: 'Isolate did not respond to resume ($step)');
     return wait ? waitForPause() : null;
   }
