@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: implementation_imports
-
-// @dart=2.9
+// ignore_for_file: implementation_imports, import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 import 'dart:math';
@@ -17,7 +15,7 @@ const double fakeRowWidth = 200.0;
 class FakeInspectorTree extends InspectorTreeController {
   FakeInspectorTree();
 
-  final List<Rect> scrollToRequests = [];
+  final List<Rect?> scrollToRequests = [];
 
   @override
   Rect getBoundingBox(InspectorTreeRow row) {
@@ -30,17 +28,17 @@ class FakeInspectorTree extends InspectorTreeController {
   }
 
   @override
-  void scrollToRect(Rect targetRect) {
+  void scrollToRect(Rect? targetRect) {
     scrollToRequests.add(targetRect);
   }
 
-  Completer<void> setStateCalled;
+  Completer<void>? setStateCalled;
 
   /// Hack to allow tests to wait until the next time this UI is updated.
   Future<void> get nextUiFrame {
     setStateCalled ??= Completer();
 
-    return setStateCalled.future;
+    return setStateCalled!.future;
   }
 
   @override
@@ -61,7 +59,7 @@ class FakeInspectorTree extends InspectorTreeController {
     final StringBuffer sb = StringBuffer();
     for (int i = 0; i < numRows; i++) {
       final row = getCachedRow(i);
-      if (hidePropertyLines && row?.node?.diagnostic?.isProperty == true) {
+      if (hidePropertyLines && row.node?.diagnostic?.isProperty == true) {
         continue;
       }
       int last = 0;
@@ -90,14 +88,14 @@ class FakeInspectorTree extends InspectorTreeController {
           sb.write('  ' * delta);
         }
       }
-      final InspectorTreeNode node = row?.node;
+      final InspectorTreeNode? node = row.node;
       final diagnostic = node?.diagnostic;
       if (diagnostic == null) {
         sb.write('<empty>\n');
         continue;
       }
 
-      if (node.showExpandCollapse) {
+      if (node!.showExpandCollapse) {
         if (node.isExpanded) {
           sb.write('▼');
         } else {
