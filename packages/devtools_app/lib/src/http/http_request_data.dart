@@ -605,11 +605,14 @@ class DartIOHttpRequestData extends HttpRequestData {
   }
 
   @override
-  DateTime? get endTimestamp => _endTime == null
-      ? null
-      : DateTime.fromMicrosecondsSinceEpoch(
-          timelineMicrosecondsSinceEpoch(_endTime!),
-        );
+  DateTime? get endTimestamp {
+    final endTime = _endTime;
+    return endTime == null
+        ? null
+        : DateTime.fromMicrosecondsSinceEpoch(
+            timelineMicrosecondsSinceEpoch(endTime),
+          );
+  }
 
   @override
   DateTime get startTimestamp => DateTime.fromMicrosecondsSinceEpoch(

@@ -82,6 +82,9 @@ class HttpRequestHeadersView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final general = data.general;
+    final responseHeaders = data.responseHeaders;
+    final requestHeaders = data.requestHeaders;
     return LayoutBuilder(
       builder: (context, constraints) {
         return ListView(
@@ -89,23 +92,24 @@ class HttpRequestHeadersView extends StatelessWidget {
             _buildTile(
               'General',
               [
-                for (final entry in data.general!.entries)
-                  _buildRow(
-                    context,
-                    // TODO(kenz): ensure the default case of `entry.key` looks
-                    // fine.
-                    entry.key,
-                    entry.value.toString(),
-                    constraints,
-                  ),
+                if (general != null)
+                  for (final entry in general.entries)
+                    _buildRow(
+                      context,
+                      // TODO(kenz): ensure the default case of `entry.key` looks
+                      // fine.
+                      entry.key,
+                      entry.value.toString(),
+                      constraints,
+                    ),
               ],
               key: generalKey,
             ),
             _buildTile(
               'Response Headers',
               [
-                if (data.responseHeaders != null)
-                  for (final entry in data.responseHeaders!.entries)
+                if (responseHeaders != null)
+                  for (final entry in responseHeaders.entries)
                     _buildRow(
                       context,
                       entry.key,
@@ -118,8 +122,8 @@ class HttpRequestHeadersView extends StatelessWidget {
             _buildTile(
               'Request Headers',
               [
-                if (data.requestHeaders != null)
-                  for (final entry in data.requestHeaders!.entries)
+                if (requestHeaders != null)
+                  for (final entry in requestHeaders.entries)
                     _buildRow(
                       context,
                       entry.key,
@@ -316,13 +320,13 @@ class HttpRequestCookiesView extends StatelessWidget {
   }) {
     final theme = Theme.of(context);
     DataColumn _buildColumn(
-      String? title, {
+      String title, {
       bool numeric = false,
     }) {
       return DataColumn(
         label: Expanded(
           child: SelectableText(
-            title ?? '--',
+            title,
             // TODO(kenz): use top level overflow parameter if
             // https://github.com/flutter/flutter/issues/82722 is fixed.
             // TODO(kenz): add overflow after flutter 2.3.0 is stable. It was
@@ -507,7 +511,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
       const SizedBox(height: denseSpacing),
       _buildRow(
         context: context,
-        title: null,
+        title: '',
         child: _valueText(data.durationDisplay),
       ),
       const SizedBox(height: defaultSpacing),
@@ -607,7 +611,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
       result.addAll([
         _buildRow(
           context: context,
-          title: instant.name,
+          title: instant.name!,
           child: _valueText(
             '[${msText(timeRange.start! - instantEventStart)} - '
             '${msText(timeRange.end! - instantEventStart)}]'
@@ -684,7 +688,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
 
   Widget _buildRow({
     required BuildContext context,
-    required String? title,
+    required String title,
     required Widget child,
   }) {
     return Row(
@@ -693,7 +697,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
         Container(
           width: _keyWidth,
           child: SelectableText(
-            title != null ? '$title: ' : '',
+            title.isEmpty ? '' : '$title: ',
             style: Theme.of(context).textTheme.subtitle2,
           ),
         ),

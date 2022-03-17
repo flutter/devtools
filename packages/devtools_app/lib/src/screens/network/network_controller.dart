@@ -380,13 +380,13 @@ class NetworkController
   @override
   void filterData(Filter<NetworkRequest>? filter) {
     serviceManager.errorBadgeManager.clearErrors(NetworkScreen.id);
-    if (filter?.queryFilter == null) {
+    if (filter == null || filter.queryFilter == null) {
       _requests.value.requests.forEach(_checkForError);
       filteredData
         ..clear()
         ..addAll(_requests.value.requests);
     } else {
-      final queryFilter = filter!.queryFilter!;
+      final queryFilter = filter.queryFilter!;
       filteredData
         ..clear()
         ..addAll(_requests.value.requests.where((NetworkRequest r) {

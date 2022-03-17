@@ -44,13 +44,14 @@ class NetworkService {
     final sockets = await _refreshSockets();
     List<HttpProfileRequest>? httpRequests;
     Timeline? timeline;
-    if (await serviceManager.service!.isDartIoVersionSupported(
+    final service = serviceManager.service!;
+    if (await service.isDartIoVersionSupported(
       supportedVersion: SemanticVersion(major: 1, minor: 6),
       isolateId: serviceManager.isolateManager.selectedIsolate.value!.id!,
     )) {
       httpRequests = await _refreshHttpProfile();
     } else {
-      timeline = await serviceManager.service!.getVMTimeline(
+      timeline = await service.getVMTimeline(
         timeOriginMicros: networkController.lastRefreshMicros,
         timeExtentMicros: timestamp - networkController.lastRefreshMicros,
       );
@@ -65,11 +66,12 @@ class NetworkService {
 
   Future<List<HttpProfileRequest>> _refreshHttpProfile() async {
     assert(serviceManager.service != null);
-    if (serviceManager.service == null) return [];
+    final service = serviceManager.service;
+    if (service == null) return [];
 
     final requests = <HttpProfileRequest>[];
-    await serviceManager.service!.forEachIsolate((isolate) async {
-      final request = await serviceManager.service!.getHttpProfile(
+    await service.forEachIsolate((isolate) async {
+      final request = await service.getHttpProfile(
         isolate.id!,
         updatedSince: networkController.lastRefreshMicros,
       );
@@ -80,8 +82,8 @@ class NetworkService {
 
   Future<void> _clearHttpProfile() async {
     assert(serviceManager.service != null);
-    if (serviceManager.service == null) return;
-    final service = serviceManager.service!;
+    final service = serviceManager.service;
+    if (service == null) return;
     await service.forEachIsolate((isolate) async {
       final future = service.clearHttpProfile(isolate.id!);
       // The above call won't complete immediately if the isolate is paused, so
@@ -95,8 +97,8 @@ class NetworkService {
 
   Future<List<SocketStatistic>> _refreshSockets() async {
     assert(serviceManager.service != null);
-    if (serviceManager.service == null) return [];
-    final service = serviceManager.service!;
+    final service = serviceManager.service;
+    if (service == null) return [];
     final sockets = <SocketStatistic>[];
     await service.forEachIsolate((isolate) async {
       final socketProfile = await service.getSocketProfile(isolate.id!);
@@ -107,8 +109,8 @@ class NetworkService {
 
   Future<void> _clearSocketProfile() async {
     assert(serviceManager.service != null);
-    if (serviceManager.service == null) return;
-    final service = serviceManager.service!;
+    final service = serviceManager.service;
+    if (service == null) return;
     await service.forEachIsolate((isolate) async {
       final isolateId = isolate.id!;
       final socketProfilingAvailable =
@@ -128,8 +130,8 @@ class NetworkService {
   /// Enables or disables Socket profiling for all isolates.
   Future<void> toggleSocketProfiling(bool state) async {
     assert(serviceManager.service != null);
-    if (serviceManager.service == null) return;
-    final service = serviceManager.service!;
+    final service = serviceManager.service;
+    if (service == null) return;
     await service.forEachIsolate((isolate) async {
       final isolateId = isolate.id!;
       final socketProfilingAvailable =

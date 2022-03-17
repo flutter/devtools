@@ -37,8 +37,10 @@ abstract class NetworkRequest with DataSearchStateMixin {
   /// True if the request hasn't completed yet.
   bool get inProgress;
 
-  String get durationDisplay =>
-      'Duration: ${duration != null ? msText(duration!) : 'Pending'}';
+  String get durationDisplay {
+    final duration = this.duration;
+    return 'Duration: ${duration != null ? msText(duration) : 'Pending'}';
+  }
 
   int timelineMicrosecondsSinceEpoch(int micros) {
     return _timelineMicrosBase + micros;
@@ -85,10 +87,11 @@ class WebSocket extends NetworkRequest {
 
   @override
   Duration? get duration {
-    if (_socket.endTime == null) {
+    final endTime = _socket.endTime;
+    if (endTime == null) {
       return null;
     }
-    return Duration(microseconds: _socket.endTime! - _socket.startTime);
+    return Duration(microseconds: endTime - _socket.startTime);
   }
 
   @override
@@ -96,20 +99,29 @@ class WebSocket extends NetworkRequest {
       timelineMicrosecondsSinceEpoch(_socket.startTime));
 
   @override
-  DateTime? get endTimestamp => _socket.endTime != null
-      ? DateTime.fromMicrosecondsSinceEpoch(
-          timelineMicrosecondsSinceEpoch(_socket.endTime!))
-      : null;
+  DateTime? get endTimestamp {
+    final endTime = _socket.endTime;
+    return endTime != null
+        ? DateTime.fromMicrosecondsSinceEpoch(
+            timelineMicrosecondsSinceEpoch(endTime))
+        : null;
+  }
 
-  DateTime? get lastReadTimestamp => _socket.lastReadTime != null
-      ? DateTime.fromMicrosecondsSinceEpoch(
-          timelineMicrosecondsSinceEpoch(_socket.lastReadTime!))
-      : null;
+  DateTime? get lastReadTimestamp {
+    final lastReadTime = _socket.lastReadTime;
+    return lastReadTime != null
+        ? DateTime.fromMicrosecondsSinceEpoch(
+            timelineMicrosecondsSinceEpoch(lastReadTime))
+        : null;
+  }
 
-  DateTime? get lastWriteTimestamp => _socket.lastWriteTime != null
-      ? DateTime.fromMicrosecondsSinceEpoch(
-          timelineMicrosecondsSinceEpoch(_socket.lastWriteTime!))
-      : null;
+  DateTime? get lastWriteTimestamp {
+    final lastWriteTime = _socket.lastWriteTime;
+    return lastWriteTime != null
+        ? DateTime.fromMicrosecondsSinceEpoch(
+            timelineMicrosecondsSinceEpoch(lastWriteTime))
+        : null;
+  }
 
   @override
   String get contentType => 'websocket';
