@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
@@ -27,7 +27,7 @@ void main() {
     EventDetails eventDetails;
 
     Future<void> pumpEventDetails(
-      TimelineEvent selectedEvent,
+      TimelineEvent? selectedEvent,
       WidgetTester tester,
     ) async {
       eventDetails = EventDetails(selectedEvent);
@@ -43,7 +43,7 @@ void main() {
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
-      when(serviceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+      when(serviceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
     });
 
     testWidgetsWithWindowSize('builds for UI event', windowSize,
@@ -88,7 +88,7 @@ void main() {
 
     testWidgetsWithWindowSize('builds for disabled profiler', windowSize,
         (WidgetTester tester) async {
-      await serviceManager.service.setFlag(vm_flags.profiler, 'false');
+      await serviceManager.service!.setFlag(vm_flags.profiler, 'false');
       await pumpEventDetails(goldenUiTimelineEvent, tester);
       expect(find.byType(CpuProfiler), findsNothing);
       expect(find.byType(CpuProfilerDisabled), findsOneWidget);
