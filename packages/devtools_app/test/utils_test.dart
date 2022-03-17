@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -89,17 +87,17 @@ void main() {
     });
 
     test('nullSafeMin', () {
-      expect(nullSafeMin(1, 2), equals(1));
-      expect(nullSafeMin(1, null), equals(1));
-      expect(nullSafeMin(null, 2), equals(2));
-      expect(nullSafeMin(null, null), equals(null));
+      expect(nullSafeMin<int>(1, 2), equals(1));
+      expect(nullSafeMin<int>(1, null), equals(1));
+      expect(nullSafeMin<int>(null, 2), equals(2));
+      expect(nullSafeMin<int>(null, null), equals(null));
     });
 
     test('nullSafeMin', () {
-      expect(nullSafeMax(1, 2), equals(2));
-      expect(nullSafeMax(1, null), equals(1));
-      expect(nullSafeMax(null, 2), equals(2));
-      expect(nullSafeMax(null, null), equals(null));
+      expect(nullSafeMax<int>(1, 2), equals(2));
+      expect(nullSafeMax<int>(1, null), equals(1));
+      expect(nullSafeMax<int>(null, 2), equals(2));
+      expect(nullSafeMax<int>(null, null), equals(null));
     });
 
     test('log2', () {
@@ -123,7 +121,7 @@ void main() {
       const delayMs = 500;
       int n = 1;
       int start;
-      int end;
+      int? end;
 
       // Condition n >= 2 is false, so we should execute with a delay.
       start = DateTime.now().millisecondsSinceEpoch;
@@ -149,7 +147,7 @@ void main() {
       // we requested (checked above), but we don't want to be too strict because
       // shared CI CPUs can be slow.
       const epsilonMs = 1000;
-      expect((end - start - delayMs).abs(), lessThan(epsilonMs));
+      expect((end! - start - delayMs).abs(), lessThan(epsilonMs));
 
       // Condition n >= 2 is true, so we should not execute with a delay.
       end = null;
@@ -166,7 +164,7 @@ void main() {
       expect(end, isNotNull);
       // 400ms is arbitrary. It is less than 500, which is what matters. This
       // can be increased if this test starts to flake.
-      expect(end - start, lessThan(400));
+      expect(end! - start, lessThan(400));
     });
 
     group('TimeRange', () {
@@ -527,7 +525,7 @@ void main() {
 
     group('Reporter', () {
       int called = 0;
-      Reporter reporter;
+      late Reporter reporter;
       void call() {
         called++;
       }
@@ -588,7 +586,7 @@ void main() {
         called++;
       }
 
-      ValueReporter<String> reporter;
+      late ValueReporter<String?> reporter;
       setUp(() {
         reporter = ValueReporter(null);
       });
@@ -610,8 +608,8 @@ void main() {
 
     group('SafeAccess', () {
       test('safeFirst', () {
-        final list = <int>[];
-        final Iterable<int> iterable = list;
+        final list = <int?>[];
+        final Iterable<int?> iterable = list;
         expect(list.safeFirst, isNull);
         expect(iterable.safeFirst, isNull);
         list.addAll([1, 2, 3]);
@@ -623,7 +621,7 @@ void main() {
       });
 
       test('safeLast', () {
-        final list = <int>[];
+        final list = <int?>[];
         expect(list.safeLast, isNull);
         list.addAll([1, 2, 3]);
         expect(list.safeLast, equals(3));
@@ -1034,9 +1032,9 @@ void main() {
     });
 
     group('ListValueNotifier', () {
-      ListValueNotifier<int> notifier;
+      late ListValueNotifier<int> notifier;
 
-      bool didNotify;
+      bool didNotify = false;
 
       void setUpWithInitialValue(List<int> value) {
         didNotify = false;
@@ -1121,8 +1119,8 @@ void main() {
     });
 
     group('ImmutableList', () {
-      List<int> rawList;
-      ImmutableList<int> immutableList;
+      late List<int> rawList;
+      late ImmutableList<int> immutableList;
 
       setUp(() {
         rawList = [1, 2, 3];
