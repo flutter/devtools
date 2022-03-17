@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
+// @dart=2.9
 
 library diagnostics_node;
 
@@ -51,34 +51,34 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   static final CustomIconMaker iconMaker = CustomIconMaker();
 
-  static BoxConstraints? deserializeConstraints(Map<String, Object>? json) {
+  static BoxConstraints deserializeConstraints(Map<String, Object> json) {
     if (json == null) return null;
     return BoxConstraints(
-      minWidth: double.parse(json['minWidth'] as String? ?? '0.0'),
-      maxWidth: double.parse(json['maxWidth'] as String? ?? 'Infinity'),
-      minHeight: double.parse(json['minHeight'] as String? ?? '0.0'),
-      maxHeight: double.parse(json['maxHeight'] as String? ?? 'Infinity'),
+      minWidth: double.parse(json['minWidth'] ?? '0.0'),
+      maxWidth: double.parse(json['maxWidth'] ?? 'Infinity'),
+      minHeight: double.parse(json['minHeight'] ?? '0.0'),
+      maxHeight: double.parse(json['maxHeight'] ?? 'Infinity'),
     );
   }
 
-  static BoxParentData? deserializeParentData(Map<String, Object>? json) {
+  static BoxParentData deserializeParentData(Map<String, Object> json) {
     if (json == null) return null;
     return BoxParentData()
       ..offset = Offset(
-        double.parse(json['offsetX'] as String? ?? '0.0'),
-        double.parse(json['offsetY'] as String? ?? '0.0'),
+        double.parse(json['offsetX'] ?? '0.0'),
+        double.parse(json['offsetY'] ?? '0.0'),
       );
   }
 
-  static Size? deserializeSize(Map<String, Object>? json) {
+  static Size deserializeSize(Map<String, Object> json) {
     if (json == null) return null;
     return Size(
-      double.parse(json['width'] as String),
-      double.parse(json['height'] as String),
+      double.parse(json['width']),
+      double.parse(json['height']),
     );
   }
 
-  static FlexFit? deserializeFlexFit(String? flexFit) {
+  static FlexFit deserializeFlexFit(String flexFit) {
     if (flexFit == null) {
       return null;
     } else if (flexFit == 'tight') return FlexFit.tight;
@@ -86,20 +86,20 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   /// This node's parent (if it's been set).
-  RemoteDiagnosticsNode? parent;
+  RemoteDiagnosticsNode parent;
 
-  Future<String>? propertyDocFuture;
+  Future<String> propertyDocFuture;
 
-  List<RemoteDiagnosticsNode>? cachedProperties;
+  List<RemoteDiagnosticsNode> cachedProperties;
 
   /// Service used to retrieve more detailed information about the value of
   /// the property and its children and properties.
-  final ObjectGroupBase? inspectorService;
+  final ObjectGroupBase inspectorService;
 
   /// JSON describing the diagnostic node.
-  final Map<String, Object?> json;
+  final Map<String, Object> json;
 
-  Future<Map<String, InstanceRef>?>? _valueProperties;
+  Future<Map<String, InstanceRef>> _valueProperties;
 
   final bool isProperty;
 
@@ -108,38 +108,35 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   bool get isBox => json['isBox'] == true;
 
-  int? get flexFactor => json['flexFactor'] as int?;
+  int get flexFactor => json['flexFactor'];
 
-  FlexFit? get flexFit => deserializeFlexFit(json['flexFit'] as String?);
+  FlexFit get flexFit => deserializeFlexFit(json['flexFit']);
 
-  RemoteDiagnosticsNode? get renderObject {
+  RemoteDiagnosticsNode get renderObject {
     if (_renderObject != null) return _renderObject;
     final data = json['renderObject'];
     if (data == null) return null;
-    _renderObject = RemoteDiagnosticsNode(
-        data as Map<String, Object?>? ?? {}, inspectorService, false, null);
+    _renderObject = RemoteDiagnosticsNode(data, inspectorService, false, null);
     return _renderObject;
   }
 
-  RemoteDiagnosticsNode? _renderObject;
+  RemoteDiagnosticsNode _renderObject;
 
-  RemoteDiagnosticsNode? get parentRenderElement {
+  RemoteDiagnosticsNode get parentRenderElement {
     final data = json['parentRenderElement'];
     if (data == null) return null;
-    _parentRenderElement = RemoteDiagnosticsNode(
-        data as Map<String, Object?>? ?? {}, inspectorService, false, null);
+    _parentRenderElement =
+        RemoteDiagnosticsNode(data, inspectorService, false, null);
     return _parentRenderElement;
   }
 
-  RemoteDiagnosticsNode? _parentRenderElement;
+  RemoteDiagnosticsNode _parentRenderElement;
 
-  BoxConstraints? get constraints =>
-      deserializeConstraints(json['constraints'] as Map<String, Object>?);
+  BoxConstraints get constraints => deserializeConstraints(json['constraints']);
 
-  BoxParentData? get parentData =>
-      deserializeParentData(json['parentData'] as Map<String, Object>?);
+  BoxParentData get parentData => deserializeParentData(json['parentData']);
 
-  Size? get size => deserializeSize(json['size'] as Map<String, Object>?);
+  Size get size => deserializeSize(json['size']);
 
   bool get isLocalClass {
     final objectGroup = inspectorService;
@@ -153,7 +150,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     }
   }
 
-  bool? _isLocalClass;
+  bool _isLocalClass;
 
   @override
   bool operator ==(dynamic other) {
@@ -165,19 +162,19 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   int get hashCode => dartDiagnosticRef.hashCode;
 
   /// Separator text to show between property names and values.
-  String get separator => showSeparator! ? ':' : '';
+  String get separator => showSeparator ? ':' : '';
 
   /// Label describing the [RemoteDiagnosticsNode], typically shown before a separator
   /// (see [showSeparator]).
   ///
   /// The name should be omitted if the [showName] property is false.
-  String? get name => getStringMember('name');
+  String get name => getStringMember('name');
 
   /// Whether to show a separator between [name] and description.
   ///
   /// If false, name and description should be shown with no separation.
   /// `:` is typically used as a separator when displaying as text.
-  bool? get showSeparator => getBooleanMember('showSeparator', true);
+  bool get showSeparator => getBooleanMember('showSeparator', true);
 
   /// Returns a description with a short summary of the node itself not
   /// including children or properties.
@@ -185,7 +182,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// `parentConfiguration` specifies how the parent is rendered as text art.
   /// For example, if the parent does not line break between properties, the
   /// description of a property should also be a single line if possible.
-  String? get description => getStringMember('description');
+  String get description => getStringMember('description');
 
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.
@@ -203,17 +200,17 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   ///
   /// This could be set to false (hiding the name) if the value's description
   /// will make the name self-evident.
-  bool? get showName => getBooleanMember('showName', true);
+  bool get showName => getBooleanMember('showName', true);
 
   /// Description to show if the node has no displayed properties or children.
-  String? getEmptyBodyDescription() => getStringMember('emptyBodyDescription');
+  String getEmptyBodyDescription() => getStringMember('emptyBodyDescription');
 
   /// Hint for how the node should be displayed.
   DiagnosticsTreeStyle get style {
     return _style ??= getStyleMember('style', DiagnosticsTreeStyle.sparse);
   }
 
-  DiagnosticsTreeStyle? _style;
+  DiagnosticsTreeStyle _style;
 
   set style(DiagnosticsTreeStyle style) {
     _style = style;
@@ -223,12 +220,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// For example, DiagnosticProperty<Color>, IntProperty, StringProperty, etc.
   /// This should rarely be required except for cases where custom rendering is desired
   /// of a specific Dart diagnostic class.
-  String? get type => getStringMember('type');
+  String get type => getStringMember('type');
 
   /// Whether the description is enclosed in double quotes.
   ///
   /// Only relevant for String properties.
-  bool? get isQuoted => getBooleanMember('quoted', false);
+  bool get isQuoted => getBooleanMember('quoted', false);
 
   bool get hasIsQuoted => json.containsKey('quoted');
 
@@ -239,14 +236,14 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// [tooltip] not a [unit].
   ///
   /// Only specified for Number properties.
-  String? get unit => getStringMember('unit');
+  String get unit => getStringMember('unit');
 
   bool get hasUnit => json.containsKey('unit');
 
   /// String describing just the numeric [value] without a unit suffix.
   ///
   /// Only specified for Number properties.
-  String? get numberToString => getStringMember('numberToString');
+  String get numberToString => getStringMember('numberToString');
 
   bool get hasNumberToString => json.containsKey('numberToString');
 
@@ -256,7 +253,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// will be [DiagnosticLevel.hidden].
   ///
   /// Only applies to Flag properties.
-  String? get ifTrue => getStringMember('ifTrue');
+  String get ifTrue => getStringMember('ifTrue');
 
   bool get hasIfTrue => json.containsKey('ifTrue');
 
@@ -266,7 +263,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// will be [DiagnosticLevel.hidden].
   ///
   /// Only applies to Flag properties.
-  String? get ifFalse => getStringMember('ifFalse');
+  String get ifFalse => getStringMember('ifFalse');
 
   bool get hasIfFalse => json.containsKey('ifFalse');
 
@@ -275,8 +272,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// The raw value can always be extracted with the regular observatory protocol.
   ///
   /// Only applies to IterableProperty.
-  List<String>? get values {
-    final List<Object>? rawValues = json['values'] as List<Object>?;
+  List<String> get values {
+    final List<Object> rawValues = json['values'];
     if (rawValues == null) {
       return null;
     }
@@ -289,8 +286,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// non-primitive values, the user may want to view the value with an
   /// interactive object debugger view to get more information on what the value
   /// is.
-  List<bool>? get primitiveValues {
-    final List<Object>? rawValues = json['primitiveValues'] as List<Object>?;
+  List<bool> get primitiveValues {
+    final List<Object> rawValues = json['primitiveValues'];
     if (rawValues == null) {
       return null;
     }
@@ -306,7 +303,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// from superclass is used.
   ///
   /// Only specified for ObjectFlagProperty.
-  String? get ifPresent => getStringMember('ifPresent');
+  String get ifPresent => getStringMember('ifPresent');
 
   bool get hasIfPresent => json.containsKey('ifPresent');
 
@@ -322,7 +319,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Typically you shouldn't need to worry about the default value as the underlying
   /// machinery will generate appropriate description and priority level based on the
   /// default value.
-  String? get defaultValue => getStringMember('defaultValue');
+  String get defaultValue => getStringMember('defaultValue');
 
   /// Whether a property has a default value.
   bool get hasDefaultValue => json.containsKey('defaultValue');
@@ -331,12 +328,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   ///
   /// Consider showing the property value in gray in an IDE if the description matches
   /// ifEmpty.
-  String? get ifEmpty => getStringMember('ifEmpty');
+  String get ifEmpty => getStringMember('ifEmpty');
 
   /// Description if the property [value] is null.
-  String? get ifNull => getStringMember('ifNull');
+  String get ifNull => getStringMember('ifNull');
 
-  bool? get allowWrap => getBooleanMember('allowWrap', true);
+  bool get allowWrap => getBooleanMember('allowWrap', true);
 
   /// Optional tooltip typically describing the property.
   ///
@@ -350,11 +347,11 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Whether a [value] of null causes the property to have [level]
   /// [DiagnosticLevel.warning] warning that the property is missing a [value].
-  bool? get missingIfNull => getBooleanMember('missingIfNull', false);
+  bool get missingIfNull => getBooleanMember('missingIfNull', false);
 
   /// String representation of exception thrown if accessing the property
   /// [value] threw an exception.
-  String? get exception => getStringMember('exception');
+  String get exception => getStringMember('exception');
 
   /// Whether accessing the property throws an exception.
   bool get hasException => json.containsKey('exception');
@@ -366,21 +363,20 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Location id compatible with rebuild location tracking code.
   int get locationId => JsonUtils.getIntMember(json, 'locationId');
 
-  set creationLocation(InspectorSourceLocation? location) {
+  set creationLocation(InspectorSourceLocation location) {
     _creationLocation = location;
   }
 
-  InspectorSourceLocation? _creationLocation;
+  InspectorSourceLocation _creationLocation;
 
-  InspectorSourceLocation? get creationLocation {
+  InspectorSourceLocation get creationLocation {
     if (_creationLocation != null) {
       return _creationLocation;
     }
     if (!hasCreationLocation) {
       return null;
     }
-    _creationLocation = InspectorSourceLocation(
-        json['creationLocation'] as Map<String, Object>?, null);
+    _creationLocation = InspectorSourceLocation(json['creationLocation'], null);
     return _creationLocation;
   }
 
@@ -395,7 +391,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// null values in a manner consistent with the property type. For example, a
   /// tool might display a null [Color] value as an empty rectangle instead of
   /// the word "null".
-  String? get propertyType => getStringMember('propertyType');
+  String get propertyType => getStringMember('propertyType');
 
   /// If the [value] of the property equals [defaultValue] the priority [level]
   /// of the property is downgraded to [DiagnosticLevel.fine] as the property
@@ -415,11 +411,11 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// would return null. This will allow showing nested data for properties
   /// that don't show children by default in other debugging output but
   /// could.
-  bool? get isDiagnosticableValue {
+  bool get isDiagnosticableValue {
     return getBooleanMember('isDiagnosticableValue', false);
   }
 
-  String? getStringMember(String memberName) {
+  String getStringMember(String memberName) {
     return JsonUtils.getStringMember(json, memberName);
   }
 
@@ -427,18 +423,18 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (json[memberName] == null) {
       return defaultValue;
     }
-
-    return json[memberName] as bool;
+    return json[memberName];
   }
 
   DiagnosticLevel getLevelMember(
       String memberName, DiagnosticLevel defaultValue) {
-    final String? value = json[memberName] as String?;
+    final String value = json[memberName];
     if (value == null) {
       return defaultValue;
     }
-    final level = diagnosticLevelUtils.enumEntry(value)!;
-    return level;
+    final level = diagnosticLevelUtils.enumEntry(value);
+    assert(level != null, 'Unabled to find level for $value');
+    return level ?? defaultValue;
   }
 
   DiagnosticsTreeStyle getStyleMember(
@@ -446,20 +442,20 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (!json.containsKey(memberName)) {
       return defaultValue;
     }
-    final String? value = json[memberName] as String?;
+    final String value = json[memberName];
     if (value == null) {
       return defaultValue;
     }
-    final style = treeStyleUtils.enumEntry(value)!;
-    return style;
+    final style = treeStyleUtils.enumEntry(value);
+    assert(style != null);
+    return style ?? defaultValue;
   }
 
   /// Returns a reference to the value the DiagnosticsNode object is describing.
-  InspectorInstanceRef get valueRef =>
-      InspectorInstanceRef(json['valueId'] as String?);
+  InspectorInstanceRef get valueRef => InspectorInstanceRef(json['valueId']);
 
   bool isEnumProperty() {
-    return type != null && type!.startsWith('EnumProperty<');
+    return type != null && type.startsWith('EnumProperty<');
   }
 
   /// Returns a list of raw Dart property values of the Dart value of this
@@ -470,9 +466,9 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Instance object for the Dart value because much of the relevant
   /// information to display good visualizations of Flutter values is stored
   /// in properties not in fields.
-  Future<Map<String, InstanceRef>?>? get valueProperties async {
+  Future<Map<String, InstanceRef>> get valueProperties async {
     if (_valueProperties == null) {
-      if (propertyType == null || valueRef.id == null) {
+      if (propertyType == null || valueRef?.id == null) {
         _valueProperties = Future.value();
         return _valueProperties;
       }
@@ -501,54 +497,53 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return _valueProperties;
   }
 
-  Map<String, Object>? get valuePropertiesJson =>
-      json['valueProperties'] as Map<String, Object>?;
+  Map<String, Object> get valuePropertiesJson => json['valueProperties'];
 
-  bool? get hasChildren {
+  bool get hasChildren {
     // In the summary tree, json['hasChildren']==true when the node has details
     // tree children so we need to first check whether the list of children for
     // the node in the tree was specified. If there is an empty list of children
     // that indicates the node should have no children in the tree while if the
     // 'children' property is not specified it means we do not know whether
     // there is a list of children and need to query the server to find out.
-    final List? children = json['children'] as List<dynamic>?;
+    final List children = json['children'];
     if (children != null) {
       return children.isNotEmpty;
     }
     return getBooleanMember('hasChildren', false);
   }
 
-  bool? get isCreatedByLocalProject {
+  bool get isCreatedByLocalProject {
     return getBooleanMember('createdByLocalProject', false);
   }
 
   /// Whether this node is being displayed as a full tree or a filtered tree.
-  bool? get isSummaryTree => getBooleanMember('summaryTree', false);
+  bool get isSummaryTree => getBooleanMember('summaryTree', false);
 
   /// Whether this node is being displayed as a full tree or a filtered tree.
-  bool? get isStateful => getBooleanMember('stateful', false);
+  bool get isStateful => getBooleanMember('stateful', false);
 
-  String? get widgetRuntimeType => getStringMember('widgetRuntimeType');
+  String get widgetRuntimeType => getStringMember('widgetRuntimeType');
 
   /// Check whether children are already available.
   bool get childrenReady {
-    return json.containsKey('children') || _children != null || !hasChildren!;
+    return json.containsKey('children') || _children != null || !hasChildren;
   }
 
-  Future<List<RemoteDiagnosticsNode?>?> get children async {
+  Future<List<RemoteDiagnosticsNode>> get children async {
     await _computeChildren();
     if (_children != null) return _children;
     return await _childrenFuture;
   }
 
-  List<RemoteDiagnosticsNode>? get childrenNow {
+  List<RemoteDiagnosticsNode> get childrenNow {
     _maybePopulateChildren();
     return _children;
   }
 
   Future<void> _computeChildren() async {
     _maybePopulateChildren();
-    if (!hasChildren! || _children != null) {
+    if (!hasChildren || _children != null) {
       return;
     }
 
@@ -566,23 +561,22 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   Future<List<RemoteDiagnosticsNode>> _getChildrenHelper() async {
-    return inspectorService!.getChildren(
+    return inspectorService.getChildren(
       dartDiagnosticRef,
-      isSummaryTree!,
+      isSummaryTree,
       this,
     );
   }
 
   void _maybePopulateChildren() {
-    if (!hasChildren! || _children != null) {
+    if (!hasChildren || _children != null) {
       return;
     }
 
-    final List<Object>? jsonArray = json['children'] as List<Object>?;
+    final List<Object> jsonArray = json['children'];
     if (jsonArray?.isNotEmpty == true) {
       final List<RemoteDiagnosticsNode> nodes = [];
-      for (Map<String, Object> element
-          in jsonArray as Iterable<Map<String, Object>>) {
+      for (Map<String, Object> element in jsonArray) {
         final child =
             RemoteDiagnosticsNode(element, inspectorService, false, parent);
         child.parent = this;
@@ -592,23 +586,22 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     }
   }
 
-  Future<List<RemoteDiagnosticsNode>>? _childrenFuture;
-  List<RemoteDiagnosticsNode>? _children;
+  Future<List<RemoteDiagnosticsNode>> _childrenFuture;
+  List<RemoteDiagnosticsNode> _children;
 
   /// Reference the actual Dart DiagnosticsNode object this object is referencing.
   InspectorInstanceRef get dartDiagnosticRef {
-    return InspectorInstanceRef(json['objectId'] as String?);
+    return InspectorInstanceRef(json['objectId']);
   }
 
   /// Properties to show inline in the widget tree.
-  List<RemoteDiagnosticsNode>? get inlineProperties {
+  List<RemoteDiagnosticsNode> get inlineProperties {
     if (cachedProperties == null) {
       cachedProperties = [];
       if (json.containsKey('properties')) {
-        final List<Object> jsonArray = json['properties'] as List<Object>;
-        for (Map<String, Object> element
-            in jsonArray as Iterable<Map<String, Object>>) {
-          cachedProperties!.add(
+        final List<Object> jsonArray = json['properties'];
+        for (Map<String, Object> element in jsonArray) {
+          cachedProperties.add(
               RemoteDiagnosticsNode(element, inspectorService, true, parent));
         }
       }
@@ -616,12 +609,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return cachedProperties;
   }
 
-  Future<List<RemoteDiagnosticsNode?>> getProperties(
+  Future<List<RemoteDiagnosticsNode>> getProperties(
       ObjectGroupBase objectGroup) async {
     return await objectGroup.getProperties(dartDiagnosticRef);
   }
 
-  Widget? get icon {
+  Widget get icon {
     if (isProperty) return null;
 
     return iconMaker.fromWidgetName(widgetRuntimeType);
@@ -636,6 +629,9 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// some cases such as the 'created' property for an element, the property
   /// value is created dynamically each time 'getProperties' is called.
   bool identicalDisplay(RemoteDiagnosticsNode node) {
+    if (node == null) {
+      return false;
+    }
     final entries = json.entries;
     if (entries.length != node.json.entries.length) {
       return false;
@@ -655,7 +651,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    for (var property in inlineProperties!) {
+    for (var property in inlineProperties) {
       properties.add(DiagnosticsProperty(property.name, property));
     }
   }
@@ -672,8 +668,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   @override
-  DiagnosticsNode toDiagnosticsNode(
-      {String? name, DiagnosticsTreeStyle? style}) {
+  DiagnosticsNode toDiagnosticsNode({String name, DiagnosticsTreeStyle style}) {
     return super.toDiagnosticsNode(
       name: name ?? this.name,
       style: style ?? DiagnosticsTreeStyle.sparse,
@@ -682,7 +677,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   @override
   String toStringShort() {
-    return description!;
+    return description;
   }
 
   Future<void> setSelectionInspector(bool uiAlreadyUpdated) async {
@@ -696,27 +691,27 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 class InspectorSourceLocation {
   InspectorSourceLocation(this.json, this.parent);
 
-  final Map<String, Object>? json;
-  final InspectorSourceLocation? parent;
+  final Map<String, Object> json;
+  final InspectorSourceLocation parent;
 
-  String? get path => JsonUtils.getStringMember(json!, 'file');
+  String get path => JsonUtils.getStringMember(json, 'file');
 
-  String? getFile() {
+  String getFile() {
     final fileName = path;
     if (fileName == null) {
-      return parent != null ? parent!.getFile() : null;
+      return parent != null ? parent.getFile() : null;
     }
 
     return fileName;
   }
 
-  int getLine() => JsonUtils.getIntMember(json!, 'line');
+  int getLine() => JsonUtils.getIntMember(json, 'line');
 
-  String? getName() => JsonUtils.getStringMember(json!, 'name');
+  String getName() => JsonUtils.getStringMember(json, 'name');
 
-  int getColumn() => JsonUtils.getIntMember(json!, 'column');
+  int getColumn() => JsonUtils.getIntMember(json, 'column');
 
-  SourcePosition? getXSourcePosition() {
+  SourcePosition getXSourcePosition() {
     final file = getFile();
     if (file == null) {
       return null;
