@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/screens/app_size/app_size_screen.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
@@ -33,7 +33,7 @@ const allScreenIds = [
 ];
 
 void main() {
-  ErrorBadgeManager errorBadgeManager;
+  late ErrorBadgeManager errorBadgeManager;
 
   group('ErrorBadgeManager', () {
     setUp(() {
