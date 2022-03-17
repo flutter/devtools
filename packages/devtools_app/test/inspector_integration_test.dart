@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:io';
 
@@ -37,7 +37,7 @@ void main() async {
       // TODO(jacobr): add a proper method to WidgetInspectorService that does
       // this. setSelection currently ignores null selection requests which is
       // a misfeature.
-      await service.inspectorLibrary.eval(
+      await service!.inspectorLibrary.eval(
         'WidgetInspectorService.instance.selection.clear()',
         isAlive: null,
       );
@@ -65,9 +65,9 @@ void main() async {
       await tester.pump(const Duration(seconds: 1));
       final InspectorScreenBodyState state =
           tester.state(find.byType(InspectorScreenBody));
-      final controller = state.inspectorController;
+      final controller = state.inspectorController!;
       while (!controller.flutterAppFrameReady) {
-        await state.inspectorController.maybeLoadUI();
+        await state.inspectorController!.maybeLoadUI();
         await tester.pumpAndSettle();
       }
       // Give time for the initial animation to complete.
@@ -412,12 +412,12 @@ void main() async {
       await tester.pumpAndSettle(const Duration(seconds: 1));
       final InspectorScreenBodyState state =
           tester.state(find.byType(InspectorScreenBody));
-      final controller = state.inspectorController;
+      final controller = state.inspectorController!;
       while (!controller.flutterAppFrameReady) {
-        await state.inspectorController.maybeLoadUI();
+        await state.inspectorController!.maybeLoadUI();
         await tester.pumpAndSettle();
       }
-      await env.flutter.hotReload();
+      await env.flutter!.hotReload();
       // Give time for the initial animation to complete.
       await tester.pumpAndSettle(inspectorChangeSettleTime);
       await expectLater(

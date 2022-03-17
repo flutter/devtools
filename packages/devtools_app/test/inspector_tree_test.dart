@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_breadcrumbs.dart';
@@ -30,7 +30,7 @@ void main() {
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
-    mockIsFlutterApp(serviceManager.connectedApp);
+    mockIsFlutterApp(serviceManager.connectedApp as MockConnectedApp);
   });
 
   group('InspectorTreeController', () {
@@ -63,7 +63,7 @@ void main() {
         inspectorTreeController: InspectorTreeController(),
       )));
 
-      expect(controller.getRow(const Offset(0, -20)).index, 0);
+      expect(controller.getRow(const Offset(0, -20))!.index, 0);
       expect(controller.getRowOffset(-1), equals(0));
       expect(controller.getRow(const Offset(0, 0.0)), isNotNull);
       expect(controller.getRowOffset(0), equals(0));

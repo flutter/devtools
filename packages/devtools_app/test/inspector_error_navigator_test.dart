@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:collection';
 
@@ -24,10 +24,10 @@ void main() {
   group('Inspector Error Navigator', () {
     Future<void> testNavigate(
       WidgetTester tester, {
-      IconData tapIcon,
-      int errorCount,
-      int startIndex,
-      int expectedIndex,
+      required IconData tapIcon,
+      required int errorCount,
+      int? startIndex,
+      int? expectedIndex,
     }) async {
       var index = startIndex;
       final navigator = ErrorNavigator(
