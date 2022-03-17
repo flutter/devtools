@@ -110,7 +110,7 @@ Example queries:
 
 class _NetworkScreenBodyState extends State<NetworkScreenBody>
     with AutoDisposeMixin {
-  bool initialized = false;
+  bool _initialized = false;
   late NetworkController _networkController;
 
   @override
@@ -124,10 +124,10 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     super.didChangeDependencies();
 
     final newController = Provider.of<NetworkController>(context);
-    if (initialized && newController == _networkController) return;
+    if (_initialized && newController == _networkController) return;
 
     _networkController = newController;
-    initialized = true;
+    _initialized = true;
     _networkController.startRecording();
   }
 
@@ -172,46 +172,46 @@ class _NetworkProfilerControls extends StatefulWidget {
 
 class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
     with AutoDisposeMixin, SearchFieldMixin<_NetworkProfilerControls> {
-  late NetworkRequests requests;
+  late NetworkRequests _requests;
 
-  late List<NetworkRequest> filteredRequests;
+  late List<NetworkRequest> _filteredRequests;
 
-  bool recording = false;
+  bool _recording = false;
 
   @override
   void initState() {
     super.initState();
 
-    recording = widget.controller.recordingNotifier.value;
+    _recording = widget.controller.recordingNotifier.value;
     addAutoDisposeListener(widget.controller.recordingNotifier, () {
       setState(() {
-        recording = widget.controller.recordingNotifier.value;
+        _recording = widget.controller.recordingNotifier.value;
       });
     });
-    requests = widget.controller.requests.value;
+    _requests = widget.controller.requests.value;
     addAutoDisposeListener(widget.controller.requests, () {
       setState(() {
-        requests = widget.controller.requests.value;
+        _requests = widget.controller.requests.value;
       });
     });
-    filteredRequests = widget.controller.filteredData.value;
+    _filteredRequests = widget.controller.filteredData.value;
     addAutoDisposeListener(widget.controller.filteredData, () {
       setState(() {
-        filteredRequests = widget.controller.filteredData.value;
+        _filteredRequests = widget.controller.filteredData.value;
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final hasRequests = filteredRequests.isNotEmpty;
+    final hasRequests = _filteredRequests.isNotEmpty;
     return Row(
       children: [
         PauseButton(
           minScreenWidthForTextBeforeScaling:
               _NetworkProfilerControls._includeTextWidth,
           tooltip: 'Pause recording network traffic',
-          onPressed: recording
+          onPressed: _recording
               ? () {
                   ga.select(
                     analytics_constants.network,
@@ -226,7 +226,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           minScreenWidthForTextBeforeScaling:
               _NetworkProfilerControls._includeTextWidth,
           tooltip: 'Resume recording network traffic',
-          onPressed: recording
+          onPressed: _recording
               ? null
               : () {
                   ga.select(
@@ -265,7 +265,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         const SizedBox(width: denseSpacing),
         FilterButton(
           onPressed: _showFilterDialog,
-          isFilterActive: filteredRequests.length != requests.requests.length,
+          isFilterActive: _filteredRequests.length != _requests.requests.length,
         ),
       ],
     );
