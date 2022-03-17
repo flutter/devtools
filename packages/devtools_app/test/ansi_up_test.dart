@@ -104,8 +104,8 @@ void main() {
   });
 
   group('Logging Screen', () {
-    MockLoggingController? mockLoggingController;
-    FakeServiceManager fakeServiceManager;
+    late MockLoggingController mockLoggingController;
+    late FakeServiceManager fakeServiceManager;
     const windowSize = Size(1000.0, 1000.0);
 
     const totalLogs = 10;
@@ -164,14 +164,14 @@ void main() {
       // https://github.com/flutter/devtools/issues/3616.
       await ensureInspectorDependencies();
       mockLoggingController = MockLoggingController();
-      when(mockLoggingController!.data).thenReturn([]);
-      when(mockLoggingController!.search).thenReturn('');
-      when(mockLoggingController!.searchMatches)
+      when(mockLoggingController.data).thenReturn([]);
+      when(mockLoggingController.search).thenReturn('');
+      when(mockLoggingController.searchMatches)
           .thenReturn(ValueNotifier<List<LogData>>([]));
-      when(mockLoggingController!.searchInProgressNotifier)
+      when(mockLoggingController.searchInProgressNotifier)
           .thenReturn(ValueNotifier<bool>(false));
-      when(mockLoggingController!.matchIndex).thenReturn(ValueNotifier<int>(0));
-      when(mockLoggingController!.filteredData)
+      when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
+      when(mockLoggingController.filteredData)
           .thenReturn(ListValueNotifier<LogData>([]));
 
       fakeServiceManager = FakeServiceManager();
@@ -183,8 +183,8 @@ void main() {
       // when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
       //     .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      when(mockLoggingController!.data).thenReturn(fakeLogData);
-      when(mockLoggingController!.filteredData)
+      when(mockLoggingController.data).thenReturn(fakeLogData);
+      when(mockLoggingController.filteredData)
           .thenReturn(ListValueNotifier<LogData>(fakeLogData));
     });
 
