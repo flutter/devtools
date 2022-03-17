@@ -459,7 +459,7 @@ class TypeColumn extends ColumnData<NetworkRequest> {
 
   @override
   String getDisplayValue(NetworkRequest dataObject) {
-    return dataObject.type == null ? '--' : dataObject.type;
+    return dataObject.type;
   }
 }
 
