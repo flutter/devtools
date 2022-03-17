@@ -65,7 +65,6 @@ class NetworkService {
   }
 
   Future<List<HttpProfileRequest>> _refreshHttpProfile() async {
-    assert(serviceManager.service != null);
     final service = serviceManager.service;
     if (service == null) return [];
 
@@ -81,7 +80,6 @@ class NetworkService {
   }
 
   Future<void> _clearHttpProfile() async {
-    assert(serviceManager.service != null);
     final service = serviceManager.service;
     if (service == null) return;
     await service.forEachIsolate((isolate) async {
@@ -96,7 +94,6 @@ class NetworkService {
   }
 
   Future<List<SocketStatistic>> _refreshSockets() async {
-    assert(serviceManager.service != null);
     final service = serviceManager.service;
     if (service == null) return [];
     final sockets = <SocketStatistic>[];
@@ -108,7 +105,6 @@ class NetworkService {
   }
 
   Future<void> _clearSocketProfile() async {
-    assert(serviceManager.service != null);
     final service = serviceManager.service;
     if (service == null) return;
     await service.forEachIsolate((isolate) async {
@@ -129,7 +125,6 @@ class NetworkService {
 
   /// Enables or disables Socket profiling for all isolates.
   Future<void> toggleSocketProfiling(bool state) async {
-    assert(serviceManager.service != null);
     final service = serviceManager.service;
     if (service == null) return;
     await service.forEachIsolate((isolate) async {
