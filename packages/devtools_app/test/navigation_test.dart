@@ -47,7 +47,7 @@ void main() {
 
     testWidgets('Respects dark theme of the current route from the context',
         (WidgetTester tester) async {
-      String? generatedRoute;
+      late String generatedRoute;
       await tester.pumpWidget(
         routeTestingApp((context) {
           generatedRoute =
@@ -73,7 +73,7 @@ void main() {
     testWidgets(
         'Overrides dark theme of the current route when a replacement theme is given',
         (WidgetTester tester) async {
-      String? generatedRoute;
+      late String generatedRoute;
       await tester.pumpWidget(
         routeTestingApp((context) {
           generatedRoute = routeNameWithQueryParams(

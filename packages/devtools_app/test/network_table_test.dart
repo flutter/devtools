@@ -135,10 +135,10 @@ void main() {
   });
 
   group('NetworkScreen NetworkRequestsTable - Dart IO 1.6', () {
-    NetworkController controller;
-    FakeServiceManager fakeServiceManager;
-    SocketProfile socketProfile;
-    HttpProfile httpProfile;
+    late NetworkController controller;
+    late FakeServiceManager fakeServiceManager;
+    late SocketProfile socketProfile;
+    late HttpProfile httpProfile;
     late List<NetworkRequest> requests;
 
     setUpAll(() async {

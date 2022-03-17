@@ -95,7 +95,7 @@ void main() {
       const numRequests = 16;
 
       // Refresh network data and ensure requests are populated.
-      await controller.networkService!.refreshNetworkData();
+      await controller.networkService.refreshNetworkData();
       profile = requestsNotifier.value;
       expect(profile.requests.length, numRequests);
 
@@ -144,7 +144,7 @@ void main() {
 
       final requestsNotifier = controller.requests;
       // Refresh network data and ensure requests are populated.
-      await controller.networkService!.refreshNetworkData();
+      await controller.networkService.refreshNetworkData();
       final profile = requestsNotifier.value;
       expect(profile.requests.length, numRequests);
 
@@ -164,7 +164,7 @@ void main() {
       await controller.startRecording();
       final requestsNotifier = controller.requests;
       // Refresh network data and ensure requests are populated.
-      await controller.networkService!.refreshNetworkData();
+      await controller.networkService.refreshNetworkData();
       final profile = requestsNotifier.value;
       expect(profile.requests.length, numRequests);
 
@@ -185,7 +185,7 @@ void main() {
 
       final requestsNotifier = controller.requests;
       // Refresh network data and ensure requests are populated.
-      await controller.networkService!.refreshNetworkData();
+      await controller.networkService.refreshNetworkData();
       final profile = requestsNotifier.value;
 
       for (final r in profile.requests) {
@@ -354,7 +354,7 @@ void main() {
       };
 
       // Refresh network data and ensure requests are populated.
-      await controller.networkService!.refreshNetworkData();
+      await controller.networkService.refreshNetworkData();
       profile = requestsNotifier.value;
       expect(profile.requests.length, numRequests);
       expect(profile.outstandingHttpRequests.isEmpty, true);

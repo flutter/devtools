@@ -160,8 +160,12 @@ Future<void> collectSamples([int sampleCount = defaultSampleSize]) async {
   }
 }
 
-void checkHeapStat(ClassHeapDetailStats classStat, String className,
-    {int? instanceCount, int? accumulatorCount}) {
+void checkHeapStat(
+  ClassHeapDetailStats classStat,
+  String className, {
+  int? instanceCount,
+  int? accumulatorCount,
+}) {
   expect(classStat.classRef.name, equals(className));
   expect(classStat.instancesCurrent, equals(instanceCount));
   // TODO(terry): investigate this failure.
