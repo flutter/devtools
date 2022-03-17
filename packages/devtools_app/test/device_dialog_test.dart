@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
@@ -17,7 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  FakeServiceManager fakeServiceManager;
+  late FakeServiceManager fakeServiceManager;
 
   const windowSize = Size(2000.0, 1000.0);
 
@@ -71,9 +71,9 @@ void main() {
         (WidgetTester tester) async {
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isRunningOnDartVM).thenReturn(true);
-      mockIsFlutterApp(fakeServiceManager.connectedApp);
+      mockIsFlutterApp(fakeServiceManager.connectedApp as MockConnectedApp);
       final flutterVersion =
-          FlutterVersion.parse((await fakeServiceManager.flutterVersion).json);
+          FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!);
 
       deviceDialog = DeviceDialog(
         connectedApp: fakeServiceManager.connectedApp,
@@ -108,7 +108,7 @@ void main() {
       setGlobal(ServiceConnectionManager, fakeServiceManager);
     }
 
-    VMFlagsDialog vmFlagsDialog;
+    late VMFlagsDialog vmFlagsDialog;
 
     setUp(() {
       initServiceManager();
@@ -119,7 +119,7 @@ void main() {
     testWidgets('builds dialog', (WidgetTester tester) async {
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
       when(fakeServiceManager.connectedApp.isRunningOnDartVM).thenReturn(true);
-      mockIsFlutterApp(fakeServiceManager.connectedApp);
+      mockIsFlutterApp(fakeServiceManager.connectedApp as MockConnectedApp);
 
       await tester.pumpWidget(wrap(vmFlagsDialog));
       expect(find.text('VM Flags'), findsOneWidget);
