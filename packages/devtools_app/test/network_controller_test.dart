@@ -139,6 +139,7 @@ void main() {
     });
 
     test('matchesForSearch', () async {
+      await controller.startRecording();
       // The number of valid requests recorded in the test data.
       const numRequests = 16;
 
@@ -180,6 +181,7 @@ void main() {
     });
 
     test('filterData', () async {
+      await controller.startRecording();
       // The number of valid requests recorded in the test data.
       const numRequests = 16;
 
