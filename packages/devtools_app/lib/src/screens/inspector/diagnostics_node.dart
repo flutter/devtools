@@ -471,8 +471,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   Future<Map<String, InstanceRef>?> get valueProperties async {
     if (_valueProperties == null) {
       if (propertyType == null || valueRef.id == null) {
-        _valueProperties = Future.value();
-        return _valueProperties;
+        return _valueProperties = Future.value();
       }
       if (isEnumProperty()) {
         // Populate all the enum property values.
@@ -490,8 +489,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
           propertyNames = ['codePoint'];
           break;
         default:
-          _valueProperties = Future.value();
-          return _valueProperties;
+          return _valueProperties = Future.value();
       }
       _valueProperties =
           inspectorService?.getDartObjectProperties(valueRef, propertyNames);
@@ -509,7 +507,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     // that indicates the node should have no children in the tree while if the
     // 'children' property is not specified it means we do not know whether
     // there is a list of children and need to query the server to find out.
-    final List? children = json['children'] as List<dynamic>?;
+    final children = json['children'] as List<dynamic>?;
     if (children != null) {
       return children.isNotEmpty;
     }
@@ -524,7 +522,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   bool? get isSummaryTree => getBooleanMember('summaryTree', false);
 
   /// Whether this node is being displayed as a full tree or a filtered tree.
-  bool? get isStateful => getBooleanMember('stateful', false);
+  bool get isStateful => getBooleanMember('stateful', false);
 
   String? get widgetRuntimeType => getStringMember('widgetRuntimeType');
 
