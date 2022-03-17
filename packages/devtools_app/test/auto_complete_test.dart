@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,7 +13,7 @@ void main() {
     });
 
     // [caretPosition] if null (default) TextSelection is set to EOL.
-    EditingParts testEdit(String editing, [int caretPosition]) {
+    EditingParts testEdit(String editing, [int? caretPosition]) {
       final position = caretPosition == null ? editing.length : caretPosition;
       return AutoCompleteSearchControllerMixin.activeEditingParts(
         editing,

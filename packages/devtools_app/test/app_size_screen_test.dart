@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe, unused_import
 
 import 'dart:convert';
 
@@ -48,15 +48,15 @@ void main() {
     data: json.decode(newV8),
   );
 
-  AppSizeScreen screen;
-  AppSizeTestController appSizeController;
+  late AppSizeScreen screen;
+  late AppSizeTestController appSizeController;
   FakeServiceManager fakeServiceManager;
 
   const windowSize = Size(2560.0, 1338.0);
 
   Future<void> pumpAppSizeScreen(
     WidgetTester tester, {
-    AppSizeTestController controller,
+    required AppSizeTestController controller,
   }) async {
     await tester.pumpWidget(wrapWithControllers(
       const AppSizeBody(),
@@ -68,7 +68,7 @@ void main() {
 
   Future<void> loadDataAndPump(
     WidgetTester tester, {
-    DevToolsJsonFile data,
+    DevToolsJsonFile? data,
   }) async {
     data ??= newV8JsonFile;
     appSizeController.loadTreeFromJsonFile(
@@ -84,8 +84,8 @@ void main() {
       appSizeController = AppSizeTestController();
       fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
-          .thenReturn(ValueNotifier<int>(0));
+      // when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
+      //     .thenReturn(ValueNotifier<int>(0));
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -334,7 +334,7 @@ void main() {
   });
 
   group('AppSizeController', () {
-    BuildContext buildContext;
+    late BuildContext buildContext;
 
     setUp(() async {
       screen = const AppSizeScreen();
@@ -343,11 +343,11 @@ void main() {
 
     Future<void> pumpAppSizeScreenWithContext(
       WidgetTester tester, {
-      AppSizeTestController controller,
+      AppSizeTestController? controller,
     }) async {
       await tester.pumpWidget(wrapWithControllers(
         MaterialApp(
-          builder: (context, child) => Notifications(child: child),
+          builder: (context, child) => Notifications(child: child!),
           home: Builder(
             builder: (context) {
               buildContext = context;
@@ -377,7 +377,7 @@ void main() {
           lastModifiedTime: lastModifiedTime,
           data: json.decode(secondFile),
         ),
-        onError: (error) => Notifications.of(buildContext).push(error),
+        onError: (error) => Notifications.of(buildContext)!.push(error),
       );
       await tester.pumpAndSettle();
     }
@@ -396,7 +396,7 @@ void main() {
           lastModifiedTime: lastModifiedTime,
           data: unsupportedFile,
         ),
-        onError: (error) => Notifications.of(buildContext).push(error),
+        onError: (error) => Notifications.of(buildContext)!.push(error),
       );
       await tester.pumpAndSettle();
       expect(
@@ -439,8 +439,8 @@ void main() {
 class AppSizeTestController extends AppSizeController {
   @override
   void loadTreeFromJsonFile({
-    @required DevToolsJsonFile jsonFile,
-    @required void Function(String error) onError,
+    required DevToolsJsonFile jsonFile,
+    required void Function(String error) onError,
     bool delayed = false,
   }) async {
     if (delayed) {
@@ -451,9 +451,9 @@ class AppSizeTestController extends AppSizeController {
 
   @override
   void loadDiffTreeFromJsonFiles({
-    @required DevToolsJsonFile oldFile,
-    @required DevToolsJsonFile newFile,
-    @required void Function(String error) onError,
+    required DevToolsJsonFile? oldFile,
+    required DevToolsJsonFile? newFile,
+    required void Function(String error) onError,
     bool delayed = false,
   }) async {
     if (delayed) {

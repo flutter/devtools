@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:devtools_app/src/primitives/utils.dart';
@@ -26,11 +24,11 @@ void main() {
       expect(cpuProfileData.profileMetaData.sampleCount, equals(8));
       expect(cpuProfileData.profileMetaData.samplePeriod, equals(50));
       expect(
-        cpuProfileData.profileMetaData.time.start.inMicroseconds,
+        cpuProfileData.profileMetaData.time!.start!.inMicroseconds,
         equals(47377796685),
       );
       expect(
-        cpuProfileData.profileMetaData.time.end.inMicroseconds,
+        cpuProfileData.profileMetaData.time!.end!.inMicroseconds,
         equals(47377799685),
       );
     });
@@ -110,7 +108,7 @@ void main() {
           category: 'Dart',
           rawUrl: '',
           sourceLine: null,
-          parentId: null,
+          parentId: '',
           profileMetaData: profileMetaData,
         ).isNative,
         isFalse,

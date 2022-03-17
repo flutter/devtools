@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/charts/flame_chart.dart';
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
@@ -28,8 +28,8 @@ import 'test_data/cpu_profile_test_data.dart';
 
 void main() {
   CpuProfiler cpuProfiler;
-  CpuProfileData cpuProfileData;
-  CpuProfilerController controller;
+  late CpuProfileData cpuProfileData;
+  late CpuProfilerController controller;
   ServiceConnectionManager fakeServiceManager;
 
   setUp(() async {
@@ -42,7 +42,7 @@ void main() {
     );
 
     fakeServiceManager = FakeServiceManager();
-    when(fakeServiceManager.connectedApp.isFlutterNativeAppNow)
+    when(fakeServiceManager.connectedApp!.isFlutterNativeAppNow)
         .thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(OfflineModeController, OfflineModeController());
@@ -251,7 +251,7 @@ void main() {
     });
 
     group('UserTag filters', () {
-      ProfilerScreenController controller;
+      late ProfilerScreenController controller;
 
       setUp(() async {
         controller = ProfilerScreenController();
@@ -292,7 +292,7 @@ void main() {
 
         expect(
           controller
-              .cpuProfileData.profileMetaData.time.duration.inMicroseconds,
+              .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
           equals(250),
         );
         expect(find.text('Frame1'), findsOneWidget);
@@ -310,7 +310,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(
           controller
-              .cpuProfileData.profileMetaData.time.duration.inMicroseconds,
+              .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
           equals(100),
         );
         expect(find.text('Frame1'), findsNothing);
@@ -328,7 +328,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(
           controller
-              .cpuProfileData.profileMetaData.time.duration.inMicroseconds,
+              .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
           equals(50),
         );
         expect(find.text('Frame1'), findsNothing);
@@ -346,7 +346,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(
           controller
-              .cpuProfileData.profileMetaData.time.duration.inMicroseconds,
+              .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
           equals(100),
         );
         expect(find.text('Frame1'), findsNothing);

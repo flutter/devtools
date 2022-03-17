@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
@@ -121,9 +121,9 @@ void main() {
   });
 
   group('NotifierCheckbox', () {
-    bool findCheckboxValue() {
+    bool? findCheckboxValue() {
       final Checkbox checkboxWidget =
-          find.byType(Checkbox).evaluate().first.widget;
+          find.byType(Checkbox).evaluate().first.widget as Checkbox;
       return checkboxWidget.value;
     }
 
