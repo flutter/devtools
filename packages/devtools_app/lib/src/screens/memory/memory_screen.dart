@@ -1007,10 +1007,10 @@ class MemoryBodyState extends State<MemoryBody>
     if (event[eventName] == imageSizesForFrameEvent) {
       // TODO(terry): Need a more generic event displayer.
       // Flutter event emit the event name and value.
-      final Map<String, Object> data = event[eventData] as Map<String, Object>;
+      final data = event[eventData] as Map<String, Object>;
       final key = data.keys.first;
       output.writeln('${longValueToShort(key)}');
-      final Map values = data[key] as Map<dynamic, dynamic>;
+      final values = data[key] as Map<dynamic, dynamic>;
       final displaySize = values[displaySizeInBytesData];
       final decodeSize = values[decodedSizeInBytesData];
       final outputSizes = '$displaySize/$decodeSize';
@@ -1022,7 +1022,7 @@ class MemoryBodyState extends State<MemoryBody>
       }
     } else if (event[eventName] == devToolsEvent &&
         event.containsKey(customEvent)) {
-      final Map custom = event[customEvent] as Map<dynamic, dynamic>;
+      final custom = event[customEvent] as Map<dynamic, dynamic>;
       final data = custom[customEventData];
       for (var key in data.keys) {
         output.write('$key=');
@@ -1041,7 +1041,7 @@ class MemoryBodyState extends State<MemoryBody>
     String? name;
 
     if (event[eventName] == devToolsEvent && event.containsKey(customEvent)) {
-      final Map custom = event[customEvent] as Map<dynamic, dynamic>;
+      final custom = event[customEvent] as Map<dynamic, dynamic>;
       name = custom[customEventName];
     } else {
       name = event[eventName] as String?;
@@ -1202,8 +1202,7 @@ class MemoryBodyState extends State<MemoryBody>
     final focusColor = Theme.of(context).focusColor;
     final colorScheme = Theme.of(context).colorScheme;
 
-    final RenderBox box =
-        hoverKey.currentContext!.findRenderObject() as RenderBox;
+    final box = hoverKey.currentContext!.findRenderObject() as RenderBox;
     final renderBoxWidth = box.size.width;
 
     // Display hover to left of right side of position.
@@ -1289,8 +1288,7 @@ class MemoryBodyState extends State<MemoryBody>
   static const _legendTitlePadding = EdgeInsets.fromLTRB(5, 0, 0, 4);
 
   void showLegend(BuildContext context) {
-    final RenderBox box =
-        legendKey.currentContext!.findRenderObject() as RenderBox;
+    final box = legendKey.currentContext!.findRenderObject() as RenderBox;
 
     final colorScheme = Theme.of(context).colorScheme;
     final legendHeading = colorScheme.hoverTextStyle;
