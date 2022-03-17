@@ -236,7 +236,7 @@ class InspectorService extends InspectorServiceBase {
   late List<String> _rootPackagePrefixes;
 
   @visibleForTesting
-  final Map<String, ClassRef> localClasses = {};
+  final localClasses = <String, ClassRef>{};
 
   @override
   void onIsolateStopped() {
@@ -938,7 +938,7 @@ abstract class ObjectGroupBase implements Disposable {
     // property values. Convert it back to a map from property name to
     // property values.
 
-    final Map<String, InstanceRef?> properties = {};
+    final properties = <String, InstanceRef?>{};
     final List<InstanceRef?> values =
         instance!.elements!.toList().cast<InstanceRef?>();
     assert(values.length == propertyNames.length);
