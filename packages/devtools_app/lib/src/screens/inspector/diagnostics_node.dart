@@ -220,7 +220,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Whether the description is enclosed in double quotes.
   ///
   /// Only relevant for String properties.
-  bool? get isQuoted => getBooleanMember('quoted', false);
+  bool get isQuoted => getBooleanMember('quoted', false);
 
   bool get hasIsQuoted => json.containsKey('quoted');
 
