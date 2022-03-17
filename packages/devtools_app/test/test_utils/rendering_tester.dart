@@ -169,8 +169,10 @@ void layout(
 /// Pumps a single frame.
 ///
 /// If `onErrors` is not null, it is set as [TestRenderingFlutterBinding.onError].
-void pumpFrame(
-    {EnginePhase phase = EnginePhase.layout, VoidCallback? onErrors}) {
+void pumpFrame({
+  EnginePhase phase = EnginePhase.layout,
+  VoidCallback? onErrors,
+}) {
   assert(_renderer.renderView.child != null); // call layout() first!
 
   if (onErrors != null) {
