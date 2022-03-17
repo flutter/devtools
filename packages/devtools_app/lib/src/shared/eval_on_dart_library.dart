@@ -519,7 +519,7 @@ class EvalOnDartLibrary extends DisposableController
   /// for the Inspector so that it does not overload the service with stale requests.
   /// Stale requests will be generated if the user is quickly navigating through the
   /// UI to view specific details subtrees.
-  Future<T?> addRequest<T>(Disposable? isAlive, Future<T> request()) async {
+  Future<T?> addRequest<T>(Disposable? isAlive, Future<T?> request()) async {
     if (isAlive != null && isAlive.disposed) return null;
 
     if (!oneRequestAtATime) {
@@ -534,7 +534,7 @@ class EvalOnDartLibrary extends DisposableController
         return;
       }
       try {
-        final T value = await request();
+        final value = await request();
         if (!_disposed && value is! Sentinel) {
           response.complete(value);
         } else {
