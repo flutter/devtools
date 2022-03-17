@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/http/http_request_data.dart';
@@ -22,16 +22,16 @@ import 'test_utils/network_test_utils.dart';
 
 void main() {
   group('NetworkScreen NetworkRequestsTable', () {
-    List<NetworkRequest> requests;
+    late List<NetworkRequest> requests;
     NetworkController controller;
 
     setUpAll(() async {
       controller = NetworkController();
-      final timeline = await loadNetworkProfileTimeline();
+      final timeline = (await loadNetworkProfileTimeline())!;
       final sockets = loadSocketProfile().sockets;
       // Remove the last end event.
       timeline.traceEvents =
-          timeline.traceEvents.sublist(0, timeline.traceEvents.length - 1);
+          timeline.traceEvents!.sublist(0, timeline.traceEvents!.length - 1);
       final networkRequests = controller.processNetworkTrafficHelper(
         timeline,
         sockets,
@@ -139,7 +139,7 @@ void main() {
     FakeServiceManager fakeServiceManager;
     SocketProfile socketProfile;
     HttpProfile httpProfile;
-    List<NetworkRequest> requests;
+    late List<NetworkRequest> requests;
 
     setUpAll(() async {
       httpProfile = loadHttpProfile();

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_app/src/shared/navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -37,7 +35,7 @@ void main() {
     testWidgets(
         'Generates a route name with parameters with an empty route in the context',
         (WidgetTester tester) async {
-      String generatedRoute;
+      late String generatedRoute;
       await tester.pumpWidget(
         routeTestingApp((context) {
           generatedRoute = routeNameWithQueryParams(
@@ -49,7 +47,7 @@ void main() {
 
     testWidgets('Respects dark theme of the current route from the context',
         (WidgetTester tester) async {
-      String generatedRoute;
+      String? generatedRoute;
       await tester.pumpWidget(
         routeTestingApp((context) {
           generatedRoute =
@@ -62,7 +60,7 @@ void main() {
     testWidgets(
         'Removes redundant light theme of the current route from the context',
         (WidgetTester tester) async {
-      String generatedRoute;
+      late String generatedRoute;
       await tester.pumpWidget(
         routeTestingApp((context) {
           generatedRoute =
@@ -75,7 +73,7 @@ void main() {
     testWidgets(
         'Overrides dark theme of the current route when a replacement theme is given',
         (WidgetTester tester) async {
-      String generatedRoute;
+      String? generatedRoute;
       await tester.pumpWidget(
         routeTestingApp((context) {
           generatedRoute = routeNameWithQueryParams(
@@ -88,7 +86,7 @@ void main() {
     testWidgets(
         'Overrides other parameters of the current route from the context',
         (WidgetTester tester) async {
-      String generatedRoute;
+      late String generatedRoute;
       await tester.pumpWidget(
         routeTestingApp((context) {
           generatedRoute =

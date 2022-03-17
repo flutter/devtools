@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/screens/network/network_controller.dart';
@@ -20,10 +20,10 @@ import 'test_utils/network_test_utils.dart';
 
 void main() {
   group('NetworkController', () {
-    NetworkController controller;
-    FakeServiceManager fakeServiceManager;
-    Timeline timeline;
-    SocketProfile socketProfile;
+    late NetworkController controller;
+    late FakeServiceManager fakeServiceManager;
+    late Timeline timeline;
+    late SocketProfile socketProfile;
 
     setUp(() async {
       timeline = await loadNetworkProfileTimeline();
@@ -95,7 +95,7 @@ void main() {
       const numRequests = 16;
 
       // Refresh network data and ensure requests are populated.
-      await controller.networkService.refreshNetworkData();
+      await controller.networkService!.refreshNetworkData();
       profile = requestsNotifier.value;
       expect(profile.requests.length, numRequests);
 
@@ -118,7 +118,7 @@ void main() {
       for (final request in httpRequests) {
         expect(request.duration, isNotNull);
         expect(request.general, isNotNull);
-        expect(request.general.length, greaterThan(0));
+        expect(request.general!.length, greaterThan(0));
         expect(request.hasCookies, isNotNull);
         expect(request.inProgress, false);
         expect(request.instantEvents, isNotNull);
@@ -144,7 +144,7 @@ void main() {
 
       final requestsNotifier = controller.requests;
       // Refresh network data and ensure requests are populated.
-      await controller.networkService.refreshNetworkData();
+      await controller.networkService!.refreshNetworkData();
       final profile = requestsNotifier.value;
       expect(profile.requests.length, numRequests);
 
@@ -164,12 +164,12 @@ void main() {
       await controller.startRecording();
       final requestsNotifier = controller.requests;
       // Refresh network data and ensure requests are populated.
-      await controller.networkService.refreshNetworkData();
+      await controller.networkService!.refreshNetworkData();
       final profile = requestsNotifier.value;
       expect(profile.requests.length, numRequests);
 
       controller.search = 'year=2019';
-      var matches = controller.searchMatches.value;
+      List<NetworkRequest> matches = controller.searchMatches.value;
       expect(matches.length, equals(5));
       verifyIsSearchMatch(profile.requests, matches);
 
@@ -185,7 +185,7 @@ void main() {
 
       final requestsNotifier = controller.requests;
       // Refresh network data and ensure requests are populated.
-      await controller.networkService.refreshNetworkData();
+      await controller.networkService!.refreshNetworkData();
       final profile = requestsNotifier.value;
 
       for (final r in profile.requests) {
@@ -297,7 +297,7 @@ void main() {
   });
 
   group('NetworkController - dartIOVersion 1.6', () {
-    NetworkController controller;
+    late NetworkController controller;
     FakeServiceManager fakeServiceManager;
     SocketProfile socketProfile;
     HttpProfile httpProfile;
@@ -354,7 +354,7 @@ void main() {
       };
 
       // Refresh network data and ensure requests are populated.
-      await controller.networkService.refreshNetworkData();
+      await controller.networkService!.refreshNetworkData();
       profile = requestsNotifier.value;
       expect(profile.requests.length, numRequests);
       expect(profile.outstandingHttpRequests.isEmpty, true);
@@ -365,7 +365,7 @@ void main() {
       for (final request in httpRequests) {
         expect(request.duration, isNotNull);
         expect(request.general, isNotNull);
-        expect(request.general.length, greaterThan(0));
+        expect(request.general!.length, greaterThan(0));
         expect(request.hasCookies, isNotNull);
         expect(request.inProgress, false);
         expect(request.instantEvents, isNotNull);
