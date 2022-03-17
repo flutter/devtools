@@ -372,7 +372,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       return null;
     }
     _creationLocation = InspectorSourceLocation(
-      json['creationLocation'] as Map<String, Object>?,
+      json['creationLocation'] as Map<String, Object>? ?? {},
       null,
     );
     return _creationLocation;
@@ -531,7 +531,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return json.containsKey('children') || _children != null || !hasChildren!;
   }
 
-  Future<List<RemoteDiagnosticsNode?>?> get children async {
+  Future<List<RemoteDiagnosticsNode>?> get children async {
     await _computeChildren();
     if (_children != null) return _children;
     return await _childrenFuture;
@@ -574,11 +574,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       return;
     }
 
-    final List<Object>? jsonArray = json['children'] as List<Object>?;
+    final jsonArray = json['children'] as List<Object>?;
     if (jsonArray?.isNotEmpty == true) {
-      final List<RemoteDiagnosticsNode> nodes = [];
-      for (Map<String, Object> element
-          in jsonArray!.cast<Map<String, Object>>()) {
+      final nodes = <RemoteDiagnosticsNode>[];
+      for (var element in jsonArray!.cast<Map<String, Object>>()) {
         final child =
             RemoteDiagnosticsNode(element, inspectorService, false, parent);
         child.parent = this;
@@ -597,22 +596,21 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   /// Properties to show inline in the widget tree.
-  List<RemoteDiagnosticsNode>? get inlineProperties {
+  List<RemoteDiagnosticsNode> get inlineProperties {
     if (cachedProperties == null) {
       cachedProperties = [];
       if (json.containsKey('properties')) {
         final List<Object> jsonArray = json['properties'] as List<Object>;
-        for (Map<String, Object> element
-            in jsonArray.cast<Map<String, Object>>()) {
+        for (var element in jsonArray.cast<Map<String, Object>>()) {
           cachedProperties!.add(
               RemoteDiagnosticsNode(element, inspectorService, true, parent));
         }
       }
     }
-    return cachedProperties;
+    return cachedProperties!;
   }
 
-  Future<List<RemoteDiagnosticsNode?>> getProperties(
+  Future<List<RemoteDiagnosticsNode>> getProperties(
       ObjectGroupBase objectGroup) async {
     return await objectGroup.getProperties(dartDiagnosticRef);
   }
@@ -651,7 +649,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    for (var property in inlineProperties!) {
+    for (var property in inlineProperties) {
       properties.add(DiagnosticsProperty(property.name, property));
     }
   }
@@ -694,10 +692,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 class InspectorSourceLocation {
   InspectorSourceLocation(this.json, this.parent);
 
-  final Map<String, Object>? json;
+  final Map<String, Object> json;
   final InspectorSourceLocation? parent;
 
-  String? get path => JsonUtils.getStringMember(json!, 'file');
+  String? get path => JsonUtils.getStringMember(json, 'file');
 
   String? getFile() {
     final fileName = path;
@@ -708,11 +706,11 @@ class InspectorSourceLocation {
     return fileName;
   }
 
-  int getLine() => JsonUtils.getIntMember(json!, 'line');
+  int getLine() => JsonUtils.getIntMember(json, 'line');
 
-  String? getName() => JsonUtils.getStringMember(json!, 'name');
+  String? getName() => JsonUtils.getStringMember(json, 'name');
 
-  int getColumn() => JsonUtils.getIntMember(json!, 'column');
+  int getColumn() => JsonUtils.getIntMember(json, 'column');
 
   SourcePosition? getXSourcePosition() {
     final file = getFile();

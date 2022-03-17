@@ -960,7 +960,7 @@ abstract class ObjectGroupBase implements Disposable {
     final clazz = await inspectorLibrary.getClass(instance.classRef!, this);
     if (disposed || clazz == null) return null;
 
-    final Map<String, InstanceRef> properties = {};
+    final properties = <String, InstanceRef>{};
     for (FieldRef field in clazz.fields!) {
       final String name = field.name!;
       if (isPrivate(name)) {
@@ -1079,7 +1079,7 @@ abstract class ObjectGroupBase implements Disposable {
     }
   }
 
-  Future<List<RemoteDiagnosticsNode?>> getProperties(
+  Future<List<RemoteDiagnosticsNode>> getProperties(
     InspectorInstanceRef instanceRef,
   ) {
     return getListHelper(
