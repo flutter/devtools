@@ -105,7 +105,7 @@ class _InspectorBreadcrumb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Text(
-      data.text ?? '',
+      data.text,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: regular.copyWith(fontSize: scaleByFontFactor(11)),
@@ -194,7 +194,7 @@ class _InspectorBreadcrumbData {
   final String? alternativeText;
   final bool isSelected;
 
-  String? get text => alternativeText ?? node?.diagnostic?.description;
+  String get text => alternativeText ?? node?.diagnostic?.description ?? '';
 
   Widget? get icon {
     if (alternativeIcon != null) {
