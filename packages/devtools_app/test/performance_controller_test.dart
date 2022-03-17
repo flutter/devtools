@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 @TestOn('vm')
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
@@ -25,7 +25,7 @@ void main() async {
     const FlutterRunConfiguration(withDebugger: true),
   );
 
-  PerformanceController performanceController;
+  late PerformanceController performanceController;
   env.afterNewSetup = () async {
     setGlobal(OfflineModeController, OfflineModeController());
     performanceController = PerformanceController()..data = PerformanceData();
@@ -45,14 +45,14 @@ void main() async {
       await performanceController.processOfflineData(offlineTimelineData);
       expect(
         isPerformanceDataEqual(
-          performanceController.data,
+          performanceController.data!,
           offlineTimelineData,
         ),
         isTrue,
       );
       expect(
         isPerformanceDataEqual(
-          performanceController.offlinePerformanceData,
+          performanceController.offlinePerformanceData!,
           offlineTimelineData,
         ),
         isTrue,
@@ -74,39 +74,39 @@ void main() async {
       final frame1UiEvent = goldenUiTimelineEvent.deepCopy();
       final frame1RasterEvent = goldenRasterTimelineEvent.deepCopy();
       final frame1 = testFrame1.shallowCopy()
-        ..setEventFlow(frame1UiEvent)
-        ..setEventFlow(frame1RasterEvent);
+        ..setEventFlow(frame1UiEvent as SyncTimelineEvent)
+        ..setEventFlow(frame1RasterEvent as SyncTimelineEvent);
 
       // Select a frame.
-      expect(performanceController.data.selectedFrame, isNull);
+      expect(performanceController.data!.selectedFrame, isNull);
       await performanceController.toggleSelectedFrame(frame0);
       expect(
-        performanceController.data.selectedFrame,
+        performanceController.data!.selectedFrame,
         equals(frame0),
       );
       // Verify main UI event for the frame is selected automatically.
       expect(
-        performanceController.data.selectedEvent,
+        performanceController.data!.selectedEvent,
         equals(goldenUiTimelineEvent),
       );
-      expect(performanceController.data.cpuProfileData, isNotNull);
+      expect(performanceController.data!.cpuProfileData, isNotNull);
 
       // Select another timeline event.
       await performanceController.selectTimelineEvent(animatorBeginFrameEvent);
-      expect(performanceController.data.selectedEvent,
+      expect(performanceController.data!.selectedEvent,
           equals(animatorBeginFrameEvent));
 
       // Select a different frame.
       await performanceController.toggleSelectedFrame(frame1);
       expect(
-        performanceController.data.selectedFrame,
+        performanceController.data!.selectedFrame,
         equals(frame1),
       );
       expect(
-        performanceController.data.selectedEvent,
+        performanceController.data!.selectedEvent,
         equals(frame1UiEvent),
       );
-      expect(performanceController.data.cpuProfileData, isNotNull);
+      expect(performanceController.data!.cpuProfileData, isNotNull);
 
       await env.tearDownEnvironment();
     });
@@ -131,11 +131,13 @@ void main() async {
         'raster': 50,
         'vsyncOverhead': 10,
       });
-      frame.setEventFlow(rasterEvent, type: TimelineEventType.raster);
+      frame.setEventFlow(rasterEvent as SyncTimelineEvent,
+          type: TimelineEventType.raster);
       expect(frame.timeFromEventFlows.start, isNull);
       expect(frame.timeFromEventFlows.end, isNull);
 
-      frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
+      frame.setEventFlow(uiEvent as SyncTimelineEvent,
+          type: TimelineEventType.ui);
       expect(frame.timeFromEventFlows.start,
           equals(const Duration(microseconds: 5000)));
       expect(frame.timeFromEventFlows.end,
@@ -145,10 +147,10 @@ void main() async {
     test('add frame', () async {
       await env.setupEnvironment();
       await performanceController.clearData();
-      expect(performanceController.data.frames, isEmpty);
+      expect(performanceController.data!.frames, isEmpty);
       performanceController.addFrame(testFrame1);
       expect(
-        performanceController.data.frames.length,
+        performanceController.data!.frames.length,
         equals(1),
       );
       await env.tearDownEnvironment();
@@ -161,7 +163,7 @@ void main() async {
       expect(performanceController.matchesForSearch(''), isEmpty);
 
       await performanceController.clearData();
-      expect(performanceController.data.timelineEvents, isEmpty);
+      expect(performanceController.data!.timelineEvents, isEmpty);
       expect(performanceController.matchesForSearch('test'), isEmpty);
 
       performanceController.addTimelineEvent(goldenUiTimelineEvent..deepCopy());
@@ -186,7 +188,7 @@ void main() async {
       var matches = performanceController.searchMatches.value;
       expect(matches.length, equals(4));
       verifyIsSearchMatchForTreeData<TimelineEvent>(
-        performanceController.data.timelineEvents,
+        performanceController.data!.timelineEvents,
         matches,
       );
 
@@ -198,7 +200,7 @@ void main() async {
       matches = performanceController.searchMatches.value;
       expect(matches.length, equals(4));
       verifyIsSearchMatchForTreeData<TimelineEvent>(
-        performanceController.data.timelineEvents,
+        performanceController.data!.timelineEvents,
         matches,
       );
 
@@ -209,7 +211,7 @@ void main() async {
       matches = performanceController.searchMatches.value;
       expect(matches.length, equals(8));
       verifyIsSearchMatchForTreeData<TimelineEvent>(
-        performanceController.data.timelineEvents,
+        performanceController.data!.timelineEvents,
         matches,
       );
 
@@ -238,7 +240,7 @@ void main() async {
         performanceController.openAnalysisTab(testFrame0);
         expect(performanceController.analysisTabs.value.length, equals(1));
         expect(performanceController.selectedAnalysisTab.value, isNotNull);
-        expect(performanceController.selectedAnalysisTab.value.frame.id,
+        expect(performanceController.selectedAnalysisTab.value!.frame.id,
             equals(testFrame0.id));
       });
 
@@ -251,19 +253,19 @@ void main() async {
         performanceController.openAnalysisTab(testFrame0);
         expect(performanceController.analysisTabs.value.length, equals(1));
         expect(performanceController.selectedAnalysisTab.value, isNotNull);
-        expect(performanceController.selectedAnalysisTab.value.frame.id,
+        expect(performanceController.selectedAnalysisTab.value!.frame.id,
             equals(testFrame0.id));
 
         performanceController.openAnalysisTab(testFrame1);
         expect(performanceController.analysisTabs.value.length, equals(2));
         expect(performanceController.selectedAnalysisTab.value, isNotNull);
-        expect(performanceController.selectedAnalysisTab.value.frame.id,
+        expect(performanceController.selectedAnalysisTab.value!.frame.id,
             equals(testFrame1.id));
 
         performanceController.openAnalysisTab(testFrame0);
         expect(performanceController.analysisTabs.value.length, equals(2));
         expect(performanceController.selectedAnalysisTab.value, isNotNull);
-        expect(performanceController.selectedAnalysisTab.value.frame.id,
+        expect(performanceController.selectedAnalysisTab.value!.frame.id,
             equals(testFrame0.id));
       });
 
@@ -283,7 +285,7 @@ void main() async {
 
         final firstTab = performanceController.analysisTabs.value[0];
         expect(firstTab.frame.id, equals(testFrame0.id));
-        expect(performanceController.selectedAnalysisTab.value.frame.id,
+        expect(performanceController.selectedAnalysisTab.value!.frame.id,
             equals(testFrame0.id));
 
         // Close the first tab (index 0).
@@ -292,7 +294,7 @@ void main() async {
         // The selected tab should now be the next tab.
         expect(performanceController.analysisTabs.value[0].frame.id,
             equals(testFrame1.id));
-        expect(performanceController.selectedAnalysisTab.value.frame.id,
+        expect(performanceController.selectedAnalysisTab.value!.frame.id,
             equals(testFrame1.id));
       });
 
@@ -310,7 +312,7 @@ void main() async {
 
         final lastTab = performanceController.analysisTabs.value[2];
         expect(lastTab.frame.id, equals(testFrame2.id));
-        expect(performanceController.selectedAnalysisTab.value.frame.id,
+        expect(performanceController.selectedAnalysisTab.value!.frame.id,
             equals(testFrame2.id));
 
         // Close the last tab (index 2).
@@ -319,7 +321,7 @@ void main() async {
         // The selected tab should now be the previous tab.
         expect(performanceController.analysisTabs.value[1].frame.id,
             equals(testFrame1.id));
-        expect(performanceController.selectedAnalysisTab.value.frame.id,
+        expect(performanceController.selectedAnalysisTab.value!.frame.id,
             equals(testFrame1.id));
       });
 
@@ -337,7 +339,7 @@ void main() async {
         final firstTab = performanceController.analysisTabs.value[0];
         final lastTab = performanceController.analysisTabs.value[2];
         expect(firstTab.frame.id, equals(testFrame0.id));
-        expect(performanceController.selectedAnalysisTab.value.frame.id,
+        expect(performanceController.selectedAnalysisTab.value!.frame.id,
             equals(lastTab.frame.id));
 
         // Close the first tab (not selected).
@@ -346,7 +348,7 @@ void main() async {
         // The selected tab should still be the last tab.
         expect(performanceController.analysisTabs.value[1].frame.id,
             equals(lastTab.frame.id));
-        expect(performanceController.selectedAnalysisTab.value.frame.id,
+        expect(performanceController.selectedAnalysisTab.value!.frame.id,
             equals(lastTab.frame.id));
       });
 
@@ -362,7 +364,7 @@ void main() async {
         expect(performanceController.analysisTabs.value.length, equals(3));
 
         final lastTab = performanceController.analysisTabs.value[2];
-        expect(performanceController.selectedAnalysisTab.value.frame.id,
+        expect(performanceController.selectedAnalysisTab.value!.frame.id,
             equals(lastTab.frame.id));
 
         // Show the timeline.
@@ -384,14 +386,14 @@ void main() async {
         performanceController.openAnalysisTab(testFrame0);
         expect(performanceController.analysisTabs.value.length, equals(1));
         expect(performanceController.selectedAnalysisTab.value, isNotNull);
-        expect(performanceController.selectedAnalysisTab.value.frame.id,
+        expect(performanceController.selectedAnalysisTab.value!.frame.id,
             equals(testFrame0.id));
 
         // Select a frame.
-        expect(performanceController.data.selectedFrame, isNull);
+        expect(performanceController.data!.selectedFrame, isNull);
         await performanceController.toggleSelectedFrame(frame0);
         expect(
-          performanceController.data.selectedFrame,
+          performanceController.data!.selectedFrame,
           equals(frame0),
         );
 
@@ -406,7 +408,7 @@ bool isPerformanceDataEqual(PerformanceData a, PerformanceData b) {
   return a.traceEvents == b.traceEvents &&
       a.frames == b.frames &&
       a.selectedFrame == b.selectedFrame &&
-      a.selectedEvent.name == b.selectedEvent.name &&
-      a.selectedEvent.time == b.selectedEvent.time &&
+      a.selectedEvent!.name == b.selectedEvent!.name &&
+      a.selectedEvent!.time == b.selectedEvent!.time &&
       a.cpuProfileData == b.cpuProfileData;
 }
