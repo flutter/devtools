@@ -44,7 +44,7 @@ class HeapTree extends StatefulWidget {
     this.controller,
   );
 
-  final MemoryController? controller;
+  final MemoryController controller;
 
   @override
   HeapTreeViewState createState() => HeapTreeViewState();
@@ -101,7 +101,7 @@ String buildRegExs(Map<WildcardMatch, List<String>> matchingCriteria) {
   matchingCriteria.forEach((key, value) {
     if (value.isNotEmpty) {
       final name = value;
-      String? regEx;
+      late String regEx;
       // TODO(terry): Need to handle $ for identifier names e.g.,
       //              $FOO is a valid identifier.
       switch (key) {
@@ -188,7 +188,7 @@ class HeapTreeViewState extends State<HeapTree>
   /// Total memory that caused last snapshot.
   int lastSnapshotMemoryTotal = 0;
 
-  bool? treeMapVisible;
+  late bool treeMapVisible;
 
   late AnimationController _animation;
 
@@ -401,7 +401,7 @@ class HeapTreeViewState extends State<HeapTree>
       );
     } else if (_controller.snapshotByLibraryData != null) {
       snapshotDisplay =
-          treeMapVisible! ? MemoryHeapTreemap(_controller) : MemoryHeapTable();
+          treeMapVisible ? MemoryHeapTreemap(_controller) : MemoryHeapTable();
     } else {
       snapshotDisplay = null;
     }
@@ -479,7 +479,7 @@ class HeapTreeViewState extends State<HeapTree>
             ? Expanded(child: AnalysisInstanceViewTable())
             : helpScreen();
 
-    return treeMapVisible!
+    return treeMapVisible
         ? snapshotDisplay
         : Split(
             initialFractions: const [0.5, 0.5],
@@ -593,7 +593,7 @@ class HeapTreeViewState extends State<HeapTree>
             children: [
               const Text('Treemap'),
               Switch(
-                value: treeMapVisible!,
+                value: treeMapVisible,
                 onChanged: _controller.snapshotByLibraryData != null
                     ? (value) {
                         ga.select(
@@ -607,7 +607,7 @@ class HeapTreeViewState extends State<HeapTree>
               ),
             ],
           ),
-          if (!treeMapVisible!) ...[
+          if (!treeMapVisible) ...[
             const SizedBox(width: defaultSpacing),
             _groupByDropdown(textTheme),
             const SizedBox(width: defaultSpacing),
@@ -694,9 +694,8 @@ class HeapTreeViewState extends State<HeapTree>
           _animation.stop();
 
           // Keep the bubble displayed for a few seconds.
-          if (removeUpdateBubble != null) {
-            removeUpdateBubble!.cancel();
-          }
+          removeUpdateBubble?.cancel();
+
           removeUpdateBubble = Timer(const Duration(seconds: 5), () {
             _controller.lastMonitorTimestamp.value =
                 _controller.monitorTimestamp;
@@ -939,7 +938,7 @@ class HeapTreeViewState extends State<HeapTree>
 
   bool get _isSearchable {
     // Analysis tab and Snapshot exist or 'Allocations' tab allocations are monitored.
-    return (_tabController.index == analysisTabIndex && !treeMapVisible!) ||
+    return (_tabController.index == analysisTabIndex && !treeMapVisible) ||
         (_tabController.index == allocationsTabIndex &&
             _controller.monitorAllocations.isNotEmpty);
   }
@@ -1161,18 +1160,19 @@ class MemoryHeapTable extends StatefulWidget {
 /// A table of the Memory graph class top-down call tree.
 class MemoryHeapTableState extends State<MemoryHeapTable>
     with AutoDisposeMixin {
-  MemoryController? controller;
+  late MemoryController _controller;
+  bool _controllerInitialized = false;
 
-  final TreeColumnData<Reference> treeColumn = _LibraryRefColumn();
-  final List<ColumnData<Reference>> columns = [];
+  final TreeColumnData<Reference> _treeColumn = _LibraryRefColumn();
+  final List<ColumnData<Reference>> _columns = [];
 
   @override
   void initState() {
     super.initState();
 
     // Setup the table columns.
-    columns.addAll([
-      treeColumn,
+    _columns.addAll([
+      _treeColumn,
       _ClassOrInstanceCountColumn(),
       _ShallowSizeColumn(),
       // TODO(terry): Don't display until dominator is implemented
@@ -1186,58 +1186,59 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
     super.didChangeDependencies();
 
     final newController = Provider.of<MemoryController>(context);
-    if (newController == controller) return;
-    controller = newController;
+    if (_controllerInitialized && newController == _controller) return;
+    _controller = newController;
+    _controllerInitialized = true;
 
     cancelListeners();
 
     // Update the tree when the tree state changes e.g., expand, collapse, etc.
-    addAutoDisposeListener(controller!.treeChangedNotifier, () {
-      if (controller!.isTreeChanged) {
+    addAutoDisposeListener(_controller.treeChangedNotifier, () {
+      if (_controller.isTreeChanged) {
         setState(() {});
       }
     });
 
     // Update the tree when the memorySource changes.
-    addAutoDisposeListener(controller!.selectedSnapshotNotifier, () {
+    addAutoDisposeListener(_controller.selectedSnapshotNotifier, () {
       setState(() {
-        controller!.computeAllLibraries(rebuild: true);
+        _controller.computeAllLibraries(rebuild: true);
       });
     });
 
-    addAutoDisposeListener(controller!.filterNotifier, () {
+    addAutoDisposeListener(_controller.filterNotifier, () {
       setState(() {
-        controller!.computeAllLibraries(rebuild: true);
+        _controller.computeAllLibraries(rebuild: true);
       });
     });
 
-    addAutoDisposeListener(controller!.searchAutoCompleteNotifier);
+    addAutoDisposeListener(_controller.searchAutoCompleteNotifier);
 
-    addAutoDisposeListener(controller!.selectTheSearchNotifier, _handleSearch);
+    addAutoDisposeListener(_controller.selectTheSearchNotifier, _handleSearch);
 
-    addAutoDisposeListener(controller!.searchNotifier, _handleSearch);
+    addAutoDisposeListener(_controller.searchNotifier, _handleSearch);
   }
 
   void _handleSearch() {
-    final searchingValue = controller!.search;
+    final searchingValue = _controller.search;
     if (searchingValue.isNotEmpty) {
-      if (controller!.selectTheSearch) {
+      if (_controller.selectTheSearch) {
         // Found an exact match.
         selectItemInTree(searchingValue);
-        controller!.selectTheSearch = false;
-        controller!.resetSearch();
+        _controller.selectTheSearch = false;
+        _controller.resetSearch();
         return;
       }
 
       // No exact match, return the list of possible matches.
-      controller!.clearSearchAutoComplete();
+      _controller.clearSearchAutoComplete();
 
       final matches = _snapshotMatches(searchingValue);
 
       // Remove duplicates and sort the matches.
       final normalizedMatches = matches.toSet().toList()..sort();
       // Use the top 10 matches:
-      controller!.searchAutoComplete.value = normalizedMatches
+      _controller.searchAutoComplete.value = normalizedMatches
           .sublist(
               0,
               min(
@@ -1255,17 +1256,17 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
     final externalMatches = <String>[];
     final filteredMatches = <String>[];
 
-    switch (controller!.groupingBy.value) {
+    switch (_controller.groupingBy.value) {
       case MemoryController.groupByLibrary:
-        final searchRoot = controller!.activeSnapshot;
+        final searchRoot = _controller.activeSnapshot;
         for (final reference in searchRoot.children) {
           if (reference.isLibrary) {
-            matches.addAll(matchesInLibrary(
-                reference as LibraryReference, searchingValue));
+            matches.addAll(
+              matchesInLibrary(reference as LibraryReference, searchingValue),
+            );
           } else if (reference.isExternals) {
-            final ExternalReferences refs = reference as ExternalReferences;
-            for (final ExternalReference ext
-                in refs.children as Iterable<ExternalReference>) {
+            final refs = reference as ExternalReferences;
+            for (final ext in refs.children.cast<ExternalReference>()) {
               final match = matchSearch(ext, searchingValue);
               if (match != null) {
                 externalMatches.add(match);
@@ -1273,8 +1274,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
             }
           } else if (reference.isFiltered) {
             // Matches in the filtered nodes.
-            final FilteredReference filteredReference =
-                reference as FilteredReference;
+            final filteredReference = reference as FilteredReference;
             for (final library in filteredReference.children) {
               filteredMatches.addAll(matchesInLibrary(
                 library as LibraryReference,
@@ -1286,7 +1286,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
         break;
       case MemoryController.groupByClass:
         matches.addAll(matchClasses(
-            controller!.groupByTreeTable.dataRoots, searchingValue));
+            _controller.groupByTreeTable.dataRoots, searchingValue));
         break;
       case MemoryController.groupByInstance:
         // TODO(terry): TBD
@@ -1330,7 +1330,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
 
     // Check the class names in the library
     for (final ClassReference classReference
-        in classReferences as Iterable<ClassReference>) {
+        in classReferences.cast<ClassReference>()) {
       matches.addAll(_maybeAddMatch(classReference, searchingValue));
     }
 
@@ -1351,12 +1351,12 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
   /// Returns `true` if [searchingValue] is found in the tree.
   bool selectItemInTree(String searchingValue) {
     // Search the snapshots.
-    switch (controller!.groupingBy.value) {
+    switch (_controller.groupingBy.value) {
       case MemoryController.groupByLibrary:
-        final searchRoot = controller!.activeSnapshot;
-        if (controller!.selectionSnapshotNotifier.value.node == null) {
+        final searchRoot = _controller.activeSnapshot;
+        if (_controller.selectionSnapshotNotifier.value.node == null) {
           // No selected node, then select the snapshot we're searching.
-          controller!.selectionSnapshotNotifier.value = Selection(
+          _controller.selectionSnapshotNotifier.value = Selection(
             node: searchRoot,
             nodeIndex: searchRoot.index,
             scrollIntoView: true,
@@ -1370,8 +1370,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
             }
           } else if (reference.isFiltered) {
             // Matches in the filtered nodes.
-            final FilteredReference filteredReference =
-                reference as FilteredReference;
+            final filteredReference = reference as FilteredReference;
             for (final library in filteredReference.children) {
               final foundIt = _selectItemInTree(library, searchingValue);
               if (foundIt) {
@@ -1379,9 +1378,8 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
               }
             }
           } else if (reference.isExternals) {
-            final ExternalReferences refs = reference as ExternalReferences;
-            for (final ExternalReference external
-                in refs.children as Iterable<ExternalReference>) {
+            final refs = reference as ExternalReferences;
+            for (final external in refs.children.cast<ExternalReference>()) {
               final foundIt = _selectItemInTree(external, searchingValue);
               if (foundIt) {
                 return true;
@@ -1391,7 +1389,7 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
         }
         break;
       case MemoryController.groupByClass:
-        for (final reference in controller!.groupByTreeTable.dataRoots) {
+        for (final reference in _controller.groupByTreeTable.dataRoots) {
           if (reference.isClass) {
             return _selecteClassInTree(reference, searchingValue);
           }
@@ -1407,12 +1405,12 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
 
   bool _selectInTree(Reference reference, search) {
     if (reference.name == search) {
-      controller!.selectionSnapshotNotifier.value = Selection(
+      _controller.selectionSnapshotNotifier.value = Selection(
         node: reference,
         nodeIndex: reference.index,
         scrollIntoView: true,
       );
-      controller!.clearSearchAutoComplete();
+      _controller.clearSearchAutoComplete();
       return true;
     }
     return false;
@@ -1438,21 +1436,21 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
 
   @override
   Widget build(BuildContext context) {
-    final root = controller!.buildTreeFromAllData();
+    final root = _controller.buildTreeFromAllData();
 
     if (root != null && root.children.isNotEmpty) {
       // Snapshots and analyses exists display the trees.
-      controller!.groupByTreeTable = TreeTable<Reference>(
+      _controller.groupByTreeTable = TreeTable<Reference>(
         dataRoots: root.children,
-        columns: columns,
-        treeColumn: treeColumn,
+        columns: _columns,
+        treeColumn: _treeColumn,
         keyFactory: (libRef) => PageStorageKey<String?>(libRef.name),
-        sortColumn: columns[0],
+        sortColumn: _columns[0],
         sortDirection: SortDirection.ascending,
-        selectionNotifier: controller!.selectionSnapshotNotifier,
+        selectionNotifier: _controller.selectionSnapshotNotifier,
       );
 
-      return controller!.groupByTreeTable;
+      return _controller.groupByTreeTable;
     } else {
       // Nothing collected yet (snapshots/analyses) - return an empty area.
       return const SizedBox();
@@ -1464,22 +1462,20 @@ class _LibraryRefColumn extends TreeColumnData<Reference> {
   _LibraryRefColumn() : super('Library or Class');
 
   @override
-  dynamic getValue(Reference dataObject) {
+  String getValue(Reference dataObject) {
     // Should never be empty when we're displaying in table.
     assert(!dataObject.isEmptyReference);
 
-    String? value;
     if (dataObject.isLibrary) {
-      value = (dataObject as LibraryReference).name;
-      final splitValues = value!.split('/');
+      final value = (dataObject as LibraryReference).name ?? '';
+      final splitValues = value.split('/');
 
-      value = splitValues.length > 1
+      return splitValues.length > 1
           ? '${splitValues[0]}/${splitValues[1]}'
           : splitValues[0];
-    } else {
-      value = dataObject.name;
     }
-    return value;
+
+    return dataObject.name ?? '';
   }
 
   @override
@@ -1490,7 +1486,7 @@ class _LibraryRefColumn extends TreeColumnData<Reference> {
 
   @override
   String getTooltip(Reference dataObject) {
-    return dataObject.name!;
+    return dataObject.name ?? '';
   }
 
   @override
@@ -1506,7 +1502,7 @@ class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
         );
 
   @override
-  dynamic getValue(Reference dataObject) {
+  int getValue(Reference dataObject) {
     assert(!dataObject.isEmptyReference);
 
     // Although the method returns dynamic this implementatation only
@@ -1515,35 +1511,37 @@ class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
     if (dataObject.name == MemoryController.libraryRootNode ||
         dataObject.name == MemoryController.classRootNode) return 0;
 
-    int count = 0;
-
     if (dataObject.isExternal) {
-      count = dataObject.children.length;
-    } else if (dataObject.isAnalysis && dataObject is AnalysisReference) {
-      final AnalysisReference analysisReference = dataObject;
-      count = analysisReference.countNote ?? 0;
-    } else if (dataObject.isSnapshot && dataObject is SnapshotReference) {
-      final SnapshotReference snapshotRef = dataObject;
-      for (final child in snapshotRef.children) {
-        count += _computeCount(child)!;
-      }
-    } else {
-      count = _computeCount(dataObject) ?? 0;
+      return dataObject.children.length;
     }
 
-    return count;
+    if (dataObject.isAnalysis && dataObject is AnalysisReference) {
+      final AnalysisReference analysisReference = dataObject;
+      return analysisReference.countNote ?? 0;
+    }
+
+    if (dataObject.isSnapshot && dataObject is SnapshotReference) {
+      int count = 0;
+      final SnapshotReference snapshotRef = dataObject;
+      for (final child in snapshotRef.children) {
+        count += _computeCount(child);
+      }
+      return count;
+    }
+
+    return _computeCount(dataObject);
   }
 
   /// Return a count based on the Reference type e.g., library, filtered,
   /// class, externals, etc.  Only compute once, store in the Reference.
-  int? _computeCount(Reference ref) {
+  int _computeCount(Reference ref) {
     // Only compute the children counts once then store in the Reference.
-    if (ref.hasCount) return ref.count;
+    if (ref.hasCount) return ref.count!;
 
     int count = 0;
 
     if (ref.isClass) {
-      final ClassReference classRef = ref as ClassReference;
+      final classRef = ref as ClassReference;
       count = _computeClassInstances(classRef.actualClass!)!;
     } else if (ref.isLibrary) {
       // Return number of classes.
@@ -1554,14 +1552,14 @@ class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
     } else if (ref.isFiltered) {
       final FilteredReference filteredRef = ref as FilteredReference;
       for (final LibraryReference child
-          in filteredRef.children as Iterable<LibraryReference>) {
+          in filteredRef.children.cast<LibraryReference>()) {
         for (final heapClass in child.actualClasses!) {
           count += _computeClassInstances(heapClass)!;
         }
       }
     } else if (ref.isExternals) {
       for (ExternalReference externalRef
-          in ref.children as Iterable<ExternalReference>) {
+          in ref.children.cast<ExternalReference>()) {
         count += externalRef.children.length;
       }
     } else if (ref.isExternal) {
@@ -1592,7 +1590,7 @@ class _ClassOrInstanceCountColumn extends ColumnData<Reference> {
   int compare(Reference a, Reference b) {
     // Analysis is always before.
     final Comparable valueA = a.isAnalysis ? 0 : getValue(a);
-    final Comparable? valueB = b.isAnalysis ? 0 : getValue(b);
+    final Comparable valueB = b.isAnalysis ? 0 : getValue(b);
     return valueA.compareTo(valueB);
   }
 }
@@ -1650,7 +1648,7 @@ class _ShallowSizeColumn extends ColumnData<Reference> {
   int? _sumShallowSize(Reference ref) {
     if (ref.isLibrary) {
       // Return number of classes.
-      final LibraryReference libraryReference = ref as LibraryReference;
+      final libraryReference = ref as LibraryReference;
       var sum = 0;
       for (final actualClass in libraryReference.actualClasses!) {
         sum += actualClass.instancesTotalShallowSizes;
