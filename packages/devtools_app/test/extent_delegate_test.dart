@@ -135,7 +135,7 @@ void main() {
         offset: ViewportOffset.zero(),
         cacheExtent: 0,
         children: <RenderSliver>[
-          childManager.createRenderSliverExtentDelegate()!,
+          childManager.createRenderSliverExtentDelegate(),
         ],
       );
       layout(root);

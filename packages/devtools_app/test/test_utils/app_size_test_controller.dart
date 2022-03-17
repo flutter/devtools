@@ -22,8 +22,8 @@ class AppSizeTestController extends AppSizeController {
 
   @override
   void loadDiffTreeFromJsonFiles({
-    required DevToolsJsonFile? oldFile,
-    required DevToolsJsonFile? newFile,
+    required DevToolsJsonFile oldFile,
+    required DevToolsJsonFile newFile,
     required void Function(String error) onError,
     bool delayed = false,
   }) async {

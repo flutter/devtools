@@ -282,8 +282,8 @@ class DualFileImportContainer extends StatefulWidget {
   final String actionText;
 
   final Function(
-    DevToolsJsonFile? firstImportedFile,
-    DevToolsJsonFile? secondImportedFile,
+    DevToolsJsonFile firstImportedFile,
+    DevToolsJsonFile secondImportedFile,
     void Function(String error) onError,
   ) onAction;
 
@@ -370,8 +370,8 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
             ElevatedButton(
               onPressed: firstImportedFile != null && secondImportedFile != null
                   ? () => widget.onAction(
-                        firstImportedFile,
-                        secondImportedFile,
+                        firstImportedFile!,
+                        secondImportedFile!,
                         (error) => notifications.push(error),
                       )
                   : null,
