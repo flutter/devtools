@@ -232,14 +232,14 @@ void main() {
   });
 
   group('Debugger Screen', () {
-    FakeServiceManager fakeServiceManager;
-    MockDebuggerController? debuggerController;
+    late FakeServiceManager fakeServiceManager;
+    late MockDebuggerController debuggerController;
 
     const windowSize = Size(4000.0, 4000.0);
 
     Future<void> pumpConsole(
       WidgetTester tester,
-      DebuggerController? controller,
+      DebuggerController controller,
     ) async {
       await tester.pumpWidget(wrapWithControllers(
         Row(
