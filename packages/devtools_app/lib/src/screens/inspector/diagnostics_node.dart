@@ -165,7 +165,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   int get hashCode => dartDiagnosticRef.hashCode;
 
   /// Separator text to show between property names and values.
-  String get separator => showSeparator! ? ':' : '';
+  String get separator => showSeparator ? ':' : '';
 
   /// Label describing the [RemoteDiagnosticsNode], typically shown before a separator
   /// (see [showSeparator]).
@@ -177,7 +177,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   ///
   /// If false, name and description should be shown with no separation.
   /// `:` is typically used as a separator when displaying as text.
-  bool? get showSeparator => getBooleanMember('showSeparator', true);
+  bool get showSeparator => getBooleanMember('showSeparator', true);
 
   /// Returns a description with a short summary of the node itself not
   /// including children or properties.
@@ -203,21 +203,13 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   ///
   /// This could be set to false (hiding the name) if the value's description
   /// will make the name self-evident.
-  bool? get showName => getBooleanMember('showName', true);
+  bool get showName => getBooleanMember('showName', true);
 
   /// Description to show if the node has no displayed properties or children.
   String? getEmptyBodyDescription() => getStringMember('emptyBodyDescription');
 
-  /// Hint for how the node should be displayed.
-  DiagnosticsTreeStyle get style {
-    return _style ??= getStyleMember('style', DiagnosticsTreeStyle.sparse);
-  }
-
-  DiagnosticsTreeStyle? _style;
-
-  set style(DiagnosticsTreeStyle style) {
-    _style = style;
-  }
+  late DiagnosticsTreeStyle style =
+      getStyleMember('style', DiagnosticsTreeStyle.sparse);
 
   /// Dart class defining the diagnostic node.
   /// For example, DiagnosticProperty<Color>, IntProperty, StringProperty, etc.
@@ -276,7 +268,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   ///
   /// Only applies to IterableProperty.
   List<String>? get values {
-    final List<Object>? rawValues = json['values'] as List<Object>?;
+    final rawValues = json['values'] as List<Object>?;
     if (rawValues == null) {
       return null;
     }
@@ -290,7 +282,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// interactive object debugger view to get more information on what the value
   /// is.
   List<bool>? get primitiveValues {
-    final List<Object>? rawValues = json['primitiveValues'] as List<Object>?;
+    final rawValues = json['primitiveValues'] as List<Object>?;
     if (rawValues == null) {
       return null;
     }
@@ -336,7 +328,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Description if the property [value] is null.
   String? get ifNull => getStringMember('ifNull');
 
-  bool? get allowWrap => getBooleanMember('allowWrap', true);
+  bool get allowWrap => getBooleanMember('allowWrap', true);
 
   /// Optional tooltip typically describing the property.
   ///
@@ -350,7 +342,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Whether a [value] of null causes the property to have [level]
   /// [DiagnosticLevel.warning] warning that the property is missing a [value].
-  bool? get missingIfNull => getBooleanMember('missingIfNull', false);
+  bool get missingIfNull => getBooleanMember('missingIfNull', false);
 
   /// String representation of exception thrown if accessing the property
   /// [value] threw an exception.
@@ -380,7 +372,9 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       return null;
     }
     _creationLocation = InspectorSourceLocation(
-        json['creationLocation'] as Map<String, Object>?, null);
+      json['creationLocation'] as Map<String, Object>?,
+      null,
+    );
     return _creationLocation;
   }
 
@@ -415,7 +409,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// would return null. This will allow showing nested data for properties
   /// that don't show children by default in other debugging output but
   /// could.
-  bool? get isDiagnosticableValue {
+  bool get isDiagnosticableValue {
     return getBooleanMember('isDiagnosticableValue', false);
   }
 
@@ -432,8 +426,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   DiagnosticLevel getLevelMember(
-      String memberName, DiagnosticLevel defaultValue) {
-    final String? value = json[memberName] as String?;
+    String memberName,
+    DiagnosticLevel defaultValue,
+  ) {
+    final value = json[memberName] as String?;
     if (value == null) {
       return defaultValue;
     }
@@ -442,11 +438,13 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   DiagnosticsTreeStyle getStyleMember(
-      String memberName, DiagnosticsTreeStyle defaultValue) {
+    String memberName,
+    DiagnosticsTreeStyle defaultValue,
+  ) {
     if (!json.containsKey(memberName)) {
       return defaultValue;
     }
-    final String? value = json[memberName] as String?;
+    final value = json[memberName] as String?;
     if (value == null) {
       return defaultValue;
     }
@@ -459,7 +457,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       InspectorInstanceRef(json['valueId'] as String?);
 
   bool isEnumProperty() {
-    return type != null && type!.startsWith('EnumProperty<');
+    return type?.startsWith('EnumProperty<') ?? false;
   }
 
   /// Returns a list of raw Dart property values of the Dart value of this
@@ -470,7 +468,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Instance object for the Dart value because much of the relevant
   /// information to display good visualizations of Flutter values is stored
   /// in properties not in fields.
-  Future<Map<String, InstanceRef>?>? get valueProperties async {
+  Future<Map<String, InstanceRef>?> get valueProperties async {
     if (_valueProperties == null) {
       if (propertyType == null || valueRef.id == null) {
         _valueProperties = Future.value();
@@ -672,8 +670,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   @override
-  DiagnosticsNode toDiagnosticsNode(
-      {String? name, DiagnosticsTreeStyle? style}) {
+  DiagnosticsNode toDiagnosticsNode({
+    String? name,
+    DiagnosticsTreeStyle? style,
+  }) {
     return super.toDiagnosticsNode(
       name: name ?? this.name,
       style: style ?? DiagnosticsTreeStyle.sparse,
@@ -682,7 +682,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   @override
   String toStringShort() {
-    return description!;
+    return description ?? '';
   }
 
   Future<void> setSelectionInspector(bool uiAlreadyUpdated) async {

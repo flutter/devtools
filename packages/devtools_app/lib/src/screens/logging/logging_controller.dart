@@ -99,7 +99,7 @@ class LoggingDetailsController {
 
           // TODO(jacobr): node.diagnostic.isDiagnosticableValue isn't quite
           // right.
-          if (node.diagnostic.isDiagnosticableValue!) {
+          if (node.diagnostic.isDiagnosticableValue) {
             // TODO(jacobr): warn if the selection can't be set as the node is
             // stale which is likely if this is an old log entry.
             onShowInspector();
