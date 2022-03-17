@@ -55,11 +55,15 @@ void main() {
             PerformanceData.selectedEventKey: {},
           }));
 
-      performanceData = PerformanceData(displayRefreshRate: 60)
-        ..traceEvents.add({'name': 'FakeTraceEvent'})
-        ..cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson)
-        ..selectedEvent = vsyncEvent
-        ..frames = [testFrame0, testFrame1];
+      performanceData = PerformanceData(
+        traceEvents: [
+          {'name': 'FakeTraceEvent'}
+        ],
+        frames: [testFrame0, testFrame1],
+        selectedEvent: vsyncEvent,
+        cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
+        displayRefreshRate: 60,
+      );
       expect(
         performanceData.json,
         equals({

@@ -1010,6 +1010,27 @@ void main() {
         expect([1].joinWith(0), equals([1]));
         expect(['a', 'b'].joinWith('z'), equals(['a', 'z', 'b']));
       });
+
+      test('containsWhere', () {
+        final _list = [1, 2, 1, 2, 3, 4];
+        expect(_list.containsWhere((element) => element == 1), isTrue);
+        expect(_list.containsWhere((element) => element == 5), isFalse);
+        expect(_list.containsWhere((element) => element + 2 == 3), isTrue);
+
+        final otherList = ['hi', 'hey', 'foo', 'bar'];
+        expect(
+          otherList.containsWhere((element) => element.contains('h')),
+          isTrue,
+        );
+        expect(
+          otherList.containsWhere((element) => element.startsWith('ba')),
+          isTrue,
+        );
+        expect(
+          otherList.containsWhere((element) => element.endsWith('ba')),
+          isFalse,
+        );
+      });
     });
 
     group('ListValueNotifier', () {

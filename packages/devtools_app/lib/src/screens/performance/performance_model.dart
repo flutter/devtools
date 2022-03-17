@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:collection';
 import 'dart:math' as math;
 
@@ -21,17 +19,17 @@ import 'timeline_event_processor.dart';
 
 class PerformanceData {
   PerformanceData({
-    List<Map<String, dynamic>> traceEvents,
-    List<FlutterFrame> frames,
+    List<Map<String, dynamic>>? traceEvents,
+    List<FlutterFrame>? frames,
     this.selectedFrame,
     this.selectedEvent,
     this.cpuProfileData,
-    double displayRefreshRate,
-    List<TimelineEvent> timelineEvents,
-  })  : traceEvents = traceEvents ?? [],
-        frames = frames ?? [],
+    double? displayRefreshRate,
+    List<TimelineEvent>? timelineEvents,
+  })  : traceEvents = traceEvents ?? <Map<String, dynamic>>[],
+        frames = frames ?? <FlutterFrame>[],
         displayRefreshRate = displayRefreshRate ?? defaultRefreshRate,
-        timelineEvents = timelineEvents ?? [];
+        timelineEvents = timelineEvents ?? <TimelineEvent>[];
 
   static const traceEventsKey = 'traceEvents';
 
@@ -65,22 +63,22 @@ class PerformanceData {
   /// These events are scrubbed so that bad data from the engine does not hinder
   /// event processing or trace viewing. When the export timeline button is
   /// clicked, this will be part of the output.
-  List<Map<String, dynamic>> traceEvents = [];
+  final List<Map<String, dynamic>> traceEvents;
 
   bool get isEmpty => traceEvents.isEmpty;
 
-  TimelineEvent selectedEvent;
+  TimelineEvent? selectedEvent;
 
-  CpuProfileData cpuProfileData;
+  CpuProfileData? cpuProfileData;
 
   double displayRefreshRate;
 
   /// All frames currently visible in the timeline.
-  List<FlutterFrame> frames = [];
+  final List<FlutterFrame> frames;
 
-  FlutterFrame selectedFrame;
+  FlutterFrame? selectedFrame;
 
-  int get selectedFrameId => selectedFrame?.id;
+  int? get selectedFrameId => selectedFrame?.id;
 
   TimeRange time = TimeRange();
 
@@ -98,9 +96,9 @@ class PerformanceData {
     for (int i = startIndex; i < timelineEvents.length; i++) {
       final event = timelineEvents[i];
       eventGroups.putIfAbsent(
-          PerformanceUtils.computeEventGroupKey(event, threadNamesById),
-          () => TimelineEventGroup())
-        ..addEventAtCalculatedRow(event);
+        PerformanceUtils.computeEventGroupKey(event, threadNamesById),
+        () => TimelineEventGroup(),
+      )..addEventAtCalculatedRow(event);
     }
   }
 
@@ -111,7 +109,7 @@ class PerformanceData {
   }
 
   bool hasCpuProfileData() {
-    return cpuProfileData != null && cpuProfileData.stackFrames.isNotEmpty;
+    return cpuProfileData != null && cpuProfileData!.stackFrames.isNotEmpty;
   }
 
   void clear() {
@@ -163,17 +161,21 @@ class TimelineEventGroup {
 
   final rowIndexForEvent = <TimelineEvent, int>{};
 
-  int earliestTimestampMicros;
+  late int earliestTimestampMicros;
 
-  int latestTimestampMicros;
+  late int latestTimestampMicros;
+
+  bool _timestampsInitialized = false;
 
   List<TimelineEvent> get sortedEventRoots =>
       _sortedEventRoots ??= List<TimelineEvent>.from(rowIndexForEvent.keys)
           .where((event) => event.isRoot)
           .toList()
-        ..sort((a, b) =>
-            a.time.start.inMicroseconds.compareTo(b.time.start.inMicroseconds));
-  List<TimelineEvent> _sortedEventRoots;
+        ..sort(
+          (a, b) => a.time.start!.inMicroseconds
+              .compareTo(b.time.start!.inMicroseconds),
+        );
+  List<TimelineEvent>? _sortedEventRoots;
 
   int get displayDepth => rows.length;
 
@@ -214,7 +216,7 @@ class TimelineEventGroup {
 
         // [firstNewEventAtLevel] ends before [lastEventAtLevel] begins, so
         // [event] does not fit at [displayRow].
-        if (firstNewEventAtLevel.time.end < lastEventAtLevel.time.start) {
+        if (firstNewEventAtLevel.time.end! < lastEventAtLevel.time.start!) {
           return false;
         }
       }
@@ -222,7 +224,7 @@ class TimelineEventGroup {
     return true;
   }
 
-  void _addEventAtDisplayRow(TimelineEvent event, {@required int row}) {
+  void _addEventAtDisplayRow(TimelineEvent event, {required int row}) {
     if (row + event.displayDepth >= rows.length) {
       for (int i = rows.length; i < row + event.displayDepth; i++) {
         rows.add(TimelineRowData());
@@ -232,18 +234,18 @@ class TimelineEventGroup {
     for (int i = 0; i < event.displayDepth; i++) {
       final displayRow = event.displayRows[i];
       for (var e in displayRow) {
-        earliestTimestampMicros = math.min(
-          e.time.start.inMicroseconds,
-          earliestTimestampMicros ?? e.time.start.inMicroseconds,
-        );
-        latestTimestampMicros = math.max(
-          e.time.end.inMicroseconds,
-          latestTimestampMicros ?? e.time.end.inMicroseconds,
-        );
+        earliestTimestampMicros = _timestampsInitialized
+            ? math.min(e.time.start!.inMicroseconds, earliestTimestampMicros)
+            : e.time.start!.inMicroseconds;
+        latestTimestampMicros = _timestampsInitialized
+            ? math.max(e.time.end!.inMicroseconds, latestTimestampMicros)
+            : e.time.end!.inMicroseconds;
+        _timestampsInitialized = true;
+
         rows[row + i].events.add(e);
         rowIndexForEvent[e] = row + i;
-        if (e.time.end >
-            (rows[row + i].lastEvent?.time?.end ?? const Duration())) {
+        if (e.time.end! >
+            (rows[row + i].lastEvent?.time.end ?? const Duration())) {
           rows[row + i].lastEvent = e;
         }
       }
@@ -262,18 +264,18 @@ class TimelineRowData {
   /// The most recently added event for the row is not guaranteed to be the last
   /// event for the row, which is why we cannot just call [events.last] to get
   /// [lastEvent].
-  TimelineEvent lastEvent;
+  TimelineEvent? lastEvent;
 }
 
 class OfflinePerformanceData extends PerformanceData {
   OfflinePerformanceData._({
-    List<Map<String, dynamic>> traceEvents,
-    List<FlutterFrame> frames,
-    FlutterFrame selectedFrame,
-    int selectedFrameId,
-    TimelineEvent selectedEvent,
-    double displayRefreshRate,
-    CpuProfileData cpuProfileData,
+    List<Map<String, dynamic>>? traceEvents,
+    List<FlutterFrame>? frames,
+    FlutterFrame? selectedFrame,
+    int? selectedFrameId,
+    TimelineEvent? selectedEvent,
+    double? displayRefreshRate,
+    CpuProfileData? cpuProfileData,
   })  : _selectedFrameId = selectedFrameId,
         super(
           traceEvents: traceEvents,
@@ -285,16 +287,16 @@ class OfflinePerformanceData extends PerformanceData {
         );
 
   static OfflinePerformanceData parse(Map<String, dynamic> json) {
-    final List<dynamic> traceEvents =
+    final List<Map<String, dynamic>> traceEvents =
         (json[PerformanceData.traceEventsKey] ?? [])
             .cast<Map<String, dynamic>>();
 
     final Map<String, dynamic> cpuProfileJson =
-        json[PerformanceData.cpuProfileKey] ?? {};
-    final CpuProfileData cpuProfileData =
+        json[PerformanceData.cpuProfileKey] ?? <String, dynamic>{};
+    final CpuProfileData? cpuProfileData =
         cpuProfileJson.isNotEmpty ? CpuProfileData.parse(cpuProfileJson) : null;
 
-    final int selectedFrameId = json[PerformanceData.selectedFrameIdKey];
+    final int? selectedFrameId = json[PerformanceData.selectedFrameIdKey];
 
     final List<Map<String, dynamic>> framesJson =
         ((json[PerformanceData.flutterFramesKey] ?? []) as List<Object>)
@@ -306,7 +308,7 @@ class OfflinePerformanceData extends PerformanceData {
 
     final Map<String, dynamic> selectedEventJson =
         json[PerformanceData.selectedEventKey] ?? {};
-    final OfflineTimelineEvent selectedEvent = selectedEventJson.isNotEmpty
+    final OfflineTimelineEvent? selectedEvent = selectedEventJson.isNotEmpty
         ? OfflineTimelineEvent(
             (selectedEventJson[TimelineEvent.firstTraceKey] ?? {})
                 .cast<String, dynamic>())
@@ -326,8 +328,8 @@ class OfflinePerformanceData extends PerformanceData {
   }
 
   @override
-  int get selectedFrameId => _selectedFrameId;
-  final int _selectedFrameId;
+  int? get selectedFrameId => _selectedFrameId;
+  final int? _selectedFrameId;
 
   /// Creates a new instance of [OfflinePerformanceData] with references to the
   /// same objects contained in this instance.
@@ -410,25 +412,25 @@ class OfflineTimelineEvent extends TimelineEvent {
 /// * [rasterEventFlow] : flow of events showing the Raster work for the frame.
 class FlutterFrame {
   FlutterFrame._({
-    this.id,
-    this.timeFromFrameTiming,
-    this.buildTime,
-    this.rasterTime,
-    this.vsyncOverheadTime,
+    required this.id,
+    required this.timeFromFrameTiming,
+    required this.buildTime,
+    required this.rasterTime,
+    required this.vsyncOverheadTime,
   });
 
   factory FlutterFrame.parse(Map<String, dynamic> json) {
-    final timeStart = Duration(microseconds: json[startTimeKey]);
-    final timeEnd = timeStart + Duration(microseconds: json[elapsedKey]);
+    final timeStart = Duration(microseconds: json[startTimeKey]!);
+    final timeEnd = timeStart + Duration(microseconds: json[elapsedKey]!);
     final frameTime = TimeRange()
       ..start = timeStart
       ..end = timeEnd;
     return FlutterFrame._(
-      id: json[numberKey],
+      id: json[numberKey]!,
       timeFromFrameTiming: frameTime,
-      buildTime: Duration(microseconds: json[buildKey]),
-      rasterTime: Duration(microseconds: json[rasterKey]),
-      vsyncOverheadTime: Duration(microseconds: json[vsyncOverheadKey]),
+      buildTime: Duration(microseconds: json[buildKey]!),
+      rasterTime: Duration(microseconds: json[rasterKey]!),
+      vsyncOverheadTime: Duration(microseconds: json[vsyncOverheadKey]!),
     );
   }
 
@@ -480,7 +482,7 @@ class FlutterFrame {
   bool get isWellFormed => timelineEventData.wellFormed;
 
   Duration get shaderDuration {
-    if (_shaderTime != null) return _shaderTime;
+    if (_shaderTime != null) return _shaderTime!;
     if (timelineEventData.rasterEvent == null) return Duration.zero;
     int sumShaderMicros = 0;
     // TODO(kenz): add a helper class for performing efficient time interval
@@ -488,12 +490,12 @@ class FlutterFrame {
     // events interleaved with shader events. The time reported would be
     // inaccurately large.
     breadthFirstTraversal<TimelineEvent>(
-      timelineEventData.rasterEvent,
+      timelineEventData.rasterEvent!,
       action: (TimelineEvent event) {
         // Shader events with a shader event parent should not be included in the
         // sum because the parent event will encompass the time of [event].
         if (event.isShaderEvent &&
-            (event.parent == null || !event.parent.isShaderEvent)) {
+            (event.parent == null || !event.parent!.isShaderEvent)) {
           sumShaderMicros += event.time.duration.inMicroseconds;
         }
       },
@@ -501,18 +503,18 @@ class FlutterFrame {
     return _shaderTime = Duration(microseconds: sumShaderMicros);
   }
 
-  Duration _shaderTime;
+  Duration? _shaderTime;
 
   bool get hasShaderTime =>
       timelineEventData.rasterEvent != null && shaderDuration != Duration.zero;
 
-  void setEventFlow(SyncTimelineEvent event, {TimelineEventType type}) {
-    type ??= event?.type;
+  void setEventFlow(SyncTimelineEvent event, {TimelineEventType? type}) {
+    type ??= event.type;
     timelineEventData.setEventFlow(event: event, type: type);
-    event?.frameId = id;
+    event.frameId = id;
   }
 
-  TimelineEvent findTimelineEvent(TimelineEvent event) {
+  TimelineEvent? findTimelineEvent(TimelineEvent event) {
     final frameTimelineEvent = timelineEventData.eventByType(event.type);
     return frameTimelineEvent?.firstChildWithCondition(
         (e) => e.name == event.name && e.time == event.time);
@@ -543,7 +545,7 @@ class FlutterFrame {
 
   Map<String, dynamic> get json => {
         numberKey: id,
-        startTimeKey: timeFromFrameTiming.start.inMicroseconds,
+        startTimeKey: timeFromFrameTiming.start!.inMicroseconds,
         elapsedKey: timeFromFrameTiming.duration.inMicroseconds,
         buildKey: buildTime.inMicroseconds,
         rasterKey: rasterTime.inMicroseconds,
@@ -564,13 +566,13 @@ class FlutterFrame {
 
 class FrameTimelineEventData {
   /// Events describing the UI work for a [FlutterFrame].
-  SyncTimelineEvent get uiEvent => _eventFlows[TimelineEventType.ui.index];
+  SyncTimelineEvent? get uiEvent => _eventFlows[TimelineEventType.ui.index];
 
   /// Events describing the Raster work for a [FlutterFrame].
-  SyncTimelineEvent get rasterEvent =>
+  SyncTimelineEvent? get rasterEvent =>
       _eventFlows[TimelineEventType.raster.index];
 
-  final List<SyncTimelineEvent> _eventFlows = List.generate(2, (_) => null);
+  final List<SyncTimelineEvent?> _eventFlows = List.generate(2, (_) => null);
 
   bool get wellFormed => uiEvent != null && rasterEvent != null;
 
@@ -579,19 +581,18 @@ class FrameTimelineEventData {
   final time = TimeRange();
 
   void setEventFlow({
-    @required SyncTimelineEvent event,
-    @required TimelineEventType type,
+    required SyncTimelineEvent event,
+    required TimelineEventType type,
     bool setTimeData = true,
   }) {
-    if (type == null) return;
     _eventFlows[type.index] = event;
     if (setTimeData) {
       if (type == TimelineEventType.ui) {
-        time.start = event?.time?.start;
+        time.start = event.time.start;
         // If [rasterEventFlow] has already completed, set the end time for this
         // frame to [event]'s end time.
         if (rasterEvent != null) {
-          time.end = event?.time?.end;
+          time.end = event.time.end;
         }
       } else if (type == TimelineEventType.raster) {
         // If [uiEventFlow] is null, that means that this raster event flow
@@ -602,11 +603,12 @@ class FrameTimelineEventData {
         // the event that 2) is true, do not set the frame end time here because
         // the end time for this frame will be set to the end time for
         // [uiEventFlow] once it finishes.
-        if (uiEvent != null) {
+        final _uiEvent = uiEvent;
+        if (_uiEvent != null) {
           time.end = Duration(
             microseconds: math.max(
-              uiEvent.time.end.inMicroseconds,
-              event?.time?.end?.inMicroseconds ?? 0,
+              _uiEvent.time.end!.inMicroseconds,
+              event.time.end?.inMicroseconds ?? 0,
             ),
           );
         }
@@ -614,7 +616,7 @@ class FrameTimelineEventData {
     }
   }
 
-  TimelineEvent eventByType(TimelineEventType type) {
+  SyncTimelineEvent? eventByType(TimelineEventType type) {
     if (type == TimelineEventType.ui) return uiEvent;
     if (type == TimelineEventType.raster) return rasterEvent;
     return null;
@@ -629,7 +631,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   TimelineEvent(TraceEventWrapper firstTraceEvent)
       : traceEvents = [firstTraceEvent],
         type = firstTraceEvent.event.type {
-    time.start = Duration(microseconds: firstTraceEvent.event.timestampMicros);
+    time.start = Duration(microseconds: firstTraceEvent.event.timestampMicros!);
   }
 
   static const firstTraceKey = 'firstTrace';
@@ -652,25 +654,25 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   /// number of calls to [List.first].
   int get traceWrapperId => _traceWrapperId ??= traceEvents.first.wrapperId;
 
-  int _traceWrapperId;
+  int? _traceWrapperId;
 
   TimelineEventType type;
 
   TimeRange time = TimeRange();
 
-  int get frameId => _frameId ?? root._frameId;
+  int? get frameId => _frameId ?? root._frameId;
 
-  int _frameId;
+  int? _frameId;
 
-  set frameId(int id) => _frameId = id;
+  set frameId(int? id) => _frameId = id;
 
-  String get name => traceEvents.first.event.name;
+  String? get name => traceEvents.first.event.name;
 
-  String get groupKey => traceEvents.first.event.args['filterKey'];
+  String? get groupKey => traceEvents.first.event.args!['filterKey'];
 
   Map<String, dynamic> get beginTraceEventJson => traceEvents.first.json;
 
-  Map<String, dynamic> get endTraceEventJson =>
+  Map<String, dynamic>? get endTraceEventJson =>
       traceEvents.length > 1 ? traceEvents.last.json : null;
 
   bool get isUiEvent => type == TimelineEventType.ui;
@@ -692,7 +694,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 
   bool get isWellFormedDeep => _isWellFormedDeep(this);
 
-  int get threadId => traceEvents.first.event.threadId;
+  int? get threadId => traceEvents.first.event.threadId;
 
   @override
   String get tooltip => '$name - ${msText(time.duration)}';
@@ -718,34 +720,41 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   /// The child that is nearest the bottom of the visualization for this
   /// TimelineEvent.
   TimelineEvent get lowestDisplayChild => _lowestDisplayChild;
-  TimelineEvent _lowestDisplayChild;
+  late TimelineEvent _lowestDisplayChild;
 
   int get displayDepth => displayRows.length;
 
-  List<List<TimelineEvent>> _displayRows;
-  List<List<TimelineEvent>> get displayRows =>
-      _displayRows ??= _calculateDisplayRows();
+  late List<List<TimelineEvent>> displayRows = _calculateDisplayRows();
 
   List<List<TimelineEvent>> _calculateDisplayRows();
 
-  void _expandDisplayRows(int newRowLength) {
-    _displayRows ??= [];
-    final currentLength = _displayRows.length;
+  void _expandDisplayRows({
+    required List<List<TimelineEvent>> rows,
+    required int newRowLength,
+  }) {
+    final currentLength = rows.length;
     for (int i = currentLength; i < newRowLength; i++) {
-      _displayRows.add([]);
+      rows.add([]);
     }
   }
 
-  void _mergeChildDisplayRows(int mergeStartLevel, TimelineEvent child) {
+  void _mergeChildDisplayRows({
+    required int mergeStartLevel,
+    required TimelineEvent child,
+    required List<List<TimelineEvent>> rows,
+  }) {
     assert(
-      mergeStartLevel <= _displayRows.length,
+      mergeStartLevel <= rows.length,
       'mergeStartLevel $mergeStartLevel is greater than _displayRows.length'
-      ' ${_displayRows.length}',
+      ' ${rows.length}',
     );
     final childDisplayRows = child.displayRows;
-    _expandDisplayRows(mergeStartLevel + childDisplayRows.length);
+    _expandDisplayRows(
+      rows: rows,
+      newRowLength: mergeStartLevel + childDisplayRows.length,
+    );
     for (int i = 0; i < childDisplayRows.length; i++) {
-      displayRows[mergeStartLevel + i].addAll(childDisplayRows[i]);
+      rows[mergeStartLevel + i].addAll(childDisplayRows[i]);
     }
     if (mergeStartLevel >= _lowestDisplayChildRow) {
       _lowestDisplayChildRow = mergeStartLevel;
@@ -754,12 +763,12 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   }
 
   void addEndEvent(TraceEventWrapper eventWrapper) {
-    time.end = Duration(microseconds: eventWrapper.event.timestampMicros);
+    time.end = Duration(microseconds: eventWrapper.event.timestampMicros!);
     traceEvents.add(eventWrapper);
   }
 
   void maybeRemoveDuplicate() {
-    void _maybeRemoveDuplicate({@required TimelineEvent parent}) {
+    void _maybeRemoveDuplicate({required TimelineEvent parent}) {
       if (parent.children.length == 1 &&
           // [parent]'s DurationBegin trace is equal to that of its only child.
           collectionEquals(
@@ -781,7 +790,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
     }
     // Remove [this] event if it is a duplicate of [parent].
     if (parent != null) {
-      _maybeRemoveDuplicate(parent: parent);
+      _maybeRemoveDuplicate(parent: parent!);
     }
   }
 
@@ -793,7 +802,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   }
 
   @override
-  void addChild(TimelineEvent child, {int index}) {
+  void addChild(TimelineEvent child, {int? index}) {
     assert(index == null);
     void _putChildInTree(TimelineEvent root) {
       // [root] is a leaf. Add child here.
@@ -806,7 +815,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 
       // If [child] is the parent of some or all of the members in [_children],
       // those members will need to be reordered in the tree.
-      final childrenToReorder = [];
+      final childrenToReorder = <TimelineEvent>[];
       for (TimelineEvent otherChild in _children) {
         if (child.couldBeParentOf(otherChild)) {
           childrenToReorder.add(otherChild);
@@ -922,59 +931,64 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 class SyncTimelineEvent extends TimelineEvent {
   SyncTimelineEvent(TraceEventWrapper firstTraceEvent) : super(firstTraceEvent);
 
-  int get flutterFrameNumber {
+  int? get flutterFrameNumber {
     if (_flutterFrameNumber != null) {
       return _flutterFrameNumber;
     }
-    final frameNumber = traceEvents.first.event.args[TraceEvent.frameNumberArg];
+    final frameNumber =
+        traceEvents.first.event.args![TraceEvent.frameNumberArg];
     return _flutterFrameNumber =
         frameNumber != null ? int.tryParse(frameNumber) : null;
   }
 
-  int _flutterFrameNumber;
+  int? _flutterFrameNumber;
 
   /// Whether this event is contains the flutter frame identifier for the UI
   /// thread in its trace event args.
   bool get isUiFrameIdentifier =>
       _isUiFrameIdentifier ??= name == uiEventName &&
-          traceEvents.first.event.args.containsKey(TraceEvent.frameNumberArg);
+          traceEvents.first.event.args!.containsKey(TraceEvent.frameNumberArg);
 
-  bool _isUiFrameIdentifier;
+  bool? _isUiFrameIdentifier;
 
   /// Whether this event is contains the flutter frame identifier for the Raster
   /// thread in its trace event args.
   bool get isRasterFrameIdentifier =>
       _isRasterFrameIdentifier ??= name == rasterEventName &&
-          traceEvents.first.event.args.containsKey(TraceEvent.frameNumberArg);
+          traceEvents.first.event.args!.containsKey(TraceEvent.frameNumberArg);
 
-  bool _isRasterFrameIdentifier;
+  bool? _isRasterFrameIdentifier;
 
   final uiFrameEvents = <SyncTimelineEvent>[];
 
   final rasterFrameEvents = <SyncTimelineEvent>[];
 
   @override
-  int get maxEndMicros => time.end.inMicroseconds;
+  int get maxEndMicros => time.end!.inMicroseconds;
 
   @override
   List<List<TimelineEvent>> _calculateDisplayRows() {
-    assert(_displayRows == null);
-    _expandDisplayRows(depth);
+    final rows = <List<TimelineEvent>>[];
+    _expandDisplayRows(rows: rows, newRowLength: depth);
 
-    _displayRows[0].add(this);
+    rows[0].add(this);
     for (final child in children) {
-      _mergeChildDisplayRows(1, child);
+      _mergeChildDisplayRows(
+        mergeStartLevel: 1,
+        child: child,
+        rows: rows,
+      );
     }
-    return _displayRows;
+    return rows;
   }
 
   @override
   bool couldBeParentOf(TimelineEvent e) {
     // TODO(kenz): consider caching start and end times in the [TimeRange] class
     // since these can be looked up many times for a single [TimeRange] object.
-    final startTime = time.start.inMicroseconds;
+    final startTime = time.start!.inMicroseconds;
     final endTime = time.end?.inMicroseconds;
-    final eStartTime = e.time.start.inMicroseconds;
+    final eStartTime = e.time.start!.inMicroseconds;
     final eEndTime = e.time.end?.inMicroseconds;
     final eFirstTraceId = e.traceWrapperId;
 
@@ -1002,14 +1016,14 @@ class SyncTimelineEvent extends TimelineEvent {
 // code.
 class AsyncTimelineEvent extends TimelineEvent {
   AsyncTimelineEvent(TraceEventWrapper firstTraceEvent)
-      : _parentId = firstTraceEvent.event.args[parentIdKey],
+      : _parentId = firstTraceEvent.event.args![parentIdKey],
         super(firstTraceEvent) {
     type = TimelineEventType.async;
   }
 
   static const parentIdKey = 'parentId';
 
-  String get asyncId => traceEvents.first.event.id;
+  String get asyncId => traceEvents.first.event.id!;
 
   String get asyncUID => traceEvents.first.event.asyncUID;
 
@@ -1018,7 +1032,7 @@ class AsyncTimelineEvent extends TimelineEvent {
   /// Unique id for this async event's parent event.
   ///
   /// This field is not guaranteed to be non-null.
-  final String _parentId;
+  final String? _parentId;
 
   /// Async UID id for this async event's parent, including information about
   /// the event's category.
@@ -1029,16 +1043,16 @@ class AsyncTimelineEvent extends TimelineEvent {
         category: traceEvents.first.event.category,
       );
 
-  int _maxEndMicros;
+  int? _maxEndMicros;
   @override
   int get maxEndMicros => _maxEndMicros ?? _calculateMaxEndMicros();
 
   int _calculateMaxEndMicros() {
     if (children.isEmpty) {
-      return time.end.inMicroseconds;
+      return time.end!.inMicroseconds;
     }
-    var maxEnd = time.end.inMicroseconds;
-    for (AsyncTimelineEvent child in children) {
+    var maxEnd = time.end!.inMicroseconds;
+    for (AsyncTimelineEvent child in children.cast<AsyncTimelineEvent>()) {
       maxEnd = math.max(maxEnd, child._calculateMaxEndMicros());
     }
     return _maxEndMicros = maxEnd;
@@ -1046,36 +1060,50 @@ class AsyncTimelineEvent extends TimelineEvent {
 
   @override
   List<List<TimelineEvent>> _calculateDisplayRows() {
-    assert(_displayRows == null);
-    _expandDisplayRows(1);
+    final rows = <List<TimelineEvent>>[];
+    _expandDisplayRows(rows: rows, newRowLength: 1);
 
     const currentRow = 0;
-    _displayRows[currentRow].add(this);
+    rows[currentRow].add(this);
 
     const mainChildRow = currentRow + 1;
     for (int i = 0; i < children.length; i++) {
-      final AsyncTimelineEvent child = children[i];
+      final AsyncTimelineEvent child = children[i] as AsyncTimelineEvent;
       if (i == 0 ||
-          _eventFitsAtDisplayRow(child, mainChildRow, _displayRows.length)) {
-        _mergeChildDisplayRows(mainChildRow, child);
+          _eventFitsAtDisplayRow(
+            event: child,
+            displayRow: mainChildRow,
+            currentLargestRowIndex: rows.length,
+            rows: rows,
+          )) {
+        _mergeChildDisplayRows(
+          mergeStartLevel: mainChildRow,
+          child: child,
+          rows: rows,
+        );
       } else {
         // If [child] does not fit on the target row, add it below the current
         // deepest display row.
-        _mergeChildDisplayRows(displayRows.length, child);
+        _mergeChildDisplayRows(
+          mergeStartLevel: rows.length,
+          child: child,
+          rows: rows,
+        );
       }
     }
-    return _displayRows;
+    return rows;
   }
 
-  bool _eventFitsAtDisplayRow(
-    AsyncTimelineEvent event,
-    int displayRow,
-    int currentLargestRowIndex,
-  ) {
+  bool _eventFitsAtDisplayRow({
+    required AsyncTimelineEvent event,
+    required int displayRow,
+    required int currentLargestRowIndex,
+    required List<List<TimelineEvent>> rows,
+  }) {
     final maxLevelToVerify =
         math.min(event.displayDepth, currentLargestRowIndex - displayRow);
     for (int level = 0; level < maxLevelToVerify; level++) {
-      final lastEventAtLevel = _displayRows[displayRow + level].safeLast;
+      final lastEventAtLevel = rows[displayRow + level].safeLast;
       final firstNewEventAtLevel = event.displayRows[level].safeFirst;
       if (lastEventAtLevel != null && firstNewEventAtLevel != null) {
         // Events overlap one another, so [event] does not fit at [displayRow].
@@ -1085,7 +1113,7 @@ class AsyncTimelineEvent extends TimelineEvent {
 
         // [firstNewEventAtLevel] ends before [lastEventAtLevel] begins, so
         // [event] does not fit at [displayRow].
-        if (firstNewEventAtLevel.time.end < lastEventAtLevel.time.start) {
+        if (firstNewEventAtLevel.time.end! < lastEventAtLevel.time.start!) {
           return false;
         }
 
@@ -1098,7 +1126,7 @@ class AsyncTimelineEvent extends TimelineEvent {
         if (lastEventParent != null &&
             firstNewEventParent != null &&
             lastEventParent == firstNewEventParent &&
-            lastEventAtLevel.time.end >= lastEventParent.time.end) {
+            lastEventAtLevel.time.end! >= lastEventParent.time.end!) {
           return false;
         }
       }
@@ -1107,9 +1135,9 @@ class AsyncTimelineEvent extends TimelineEvent {
   }
 
   @override
-  void addChild(TimelineEvent child, {int index}) {
+  void addChild(TimelineEvent child, {int? index}) {
     assert(index == null);
-    final AsyncTimelineEvent _child = child;
+    final _child = child as AsyncTimelineEvent;
     // Short circuit if we are using an explicit parentId.
     if (_child.hasExplicitParent &&
         _child.parentAsyncUID == traceEvents.first.event.asyncUID) {
@@ -1121,7 +1149,7 @@ class AsyncTimelineEvent extends TimelineEvent {
 
   @override
   bool couldBeParentOf(TimelineEvent e) {
-    final AsyncTimelineEvent asyncEvent = e;
+    final asyncEvent = e as AsyncTimelineEvent;
 
     // If [asyncEvent] has an explicit parentId, use that as the truth.
     if (asyncEvent.hasExplicitParent) {
@@ -1134,9 +1162,9 @@ class AsyncTimelineEvent extends TimelineEvent {
 
     // When two events share an asyncId, determine parent / child relationships
     // based on timestamps.
-    final startTime = time.start.inMicroseconds;
+    final startTime = time.start!.inMicroseconds;
     final endTime = time.end?.inMicroseconds;
-    final eStartTime = e.time.start.inMicroseconds;
+    final eStartTime = e.time.start!.inMicroseconds;
     final eEndTime = e.time.end?.inMicroseconds;
 
     if (endTime != null && eEndTime != null) {
@@ -1179,7 +1207,7 @@ class AsyncTimelineEvent extends TimelineEvent {
       return true;
     }
 
-    for (AsyncTimelineEvent child in children) {
+    for (AsyncTimelineEvent child in children.cast<AsyncTimelineEvent>()) {
       final added = child.endAsyncEvent(eventWrapper);
       if (added) return true;
     }
@@ -1204,66 +1232,71 @@ class FrameAnalysis {
   /// [-----------------Layout-----------------]
   ///    [--Build--]     [----Build----]
   List<SyncTimelineEvent> get buildEvents {
-    if (frame.timelineEventData.uiEvent == null) return [];
-    if (_buildEvents != null) return _buildEvents;
+    if (frame.timelineEventData.uiEvent == null) return <SyncTimelineEvent>[];
+    final events = _buildEvents;
+    if (events != null) return events;
 
-    final firstBuildEvent = frame.timelineEventData.uiEvent
-        .firstChildWithCondition(
-            (event) => event.name.caseInsensitiveEquals(buildEventName));
+    _buildEvents = <SyncTimelineEvent>[];
+
+    final firstBuildEvent =
+        frame.timelineEventData.uiEvent!.firstChildWithCondition(
+      (event) => event.name!.caseInsensitiveEquals(buildEventName),
+    );
     if (firstBuildEvent != null) {
       final buildParent = firstBuildEvent.parent;
       if (buildParent != null) {
-        return _buildEvents = buildParent.children
-            .where((child) => child.name.caseInsensitiveEquals(buildEventName))
+        _buildEvents = buildParent.children
+            .where((child) => child.name!.caseInsensitiveEquals(buildEventName))
             .cast<SyncTimelineEvent>()
             .toList();
       }
     }
-    return _buildEvents = [];
+    return _buildEvents!;
   }
 
-  List<SyncTimelineEvent> _buildEvents;
+  List<SyncTimelineEvent>? _buildEvents;
 
-  Duration get buildTime => _buildTime ??=
-          buildEvents.fold(Duration.zero, (previous, SyncTimelineEvent event) {
+  Duration get buildTime => _buildTime ??= buildEvents
+          .fold<Duration>(Duration.zero, (previous, SyncTimelineEvent event) {
         return previous + event.time.duration;
       });
 
-  Duration _buildTime;
+  Duration? _buildTime;
 
-  SyncTimelineEvent get layoutEvent {
+  SyncTimelineEvent? get layoutEvent {
     if (frame.timelineEventData.uiEvent == null) return null;
     if (_layoutEvent != null) return _layoutEvent;
 
-    return _layoutEvent = frame.timelineEventData.uiEvent
-        .firstChildWithCondition(
-            (event) => event.name.caseInsensitiveEquals(layoutEventName));
+    return _layoutEvent = frame.timelineEventData.uiEvent!
+            .firstChildWithCondition(
+                (event) => event.name!.caseInsensitiveEquals(layoutEventName))
+        as SyncTimelineEvent?;
   }
 
-  SyncTimelineEvent _layoutEvent;
+  SyncTimelineEvent? _layoutEvent;
 
-  Duration get layoutTime => layoutEvent?.time?.duration ?? Duration.zero;
+  Duration get layoutTime => layoutEvent?.time.duration ?? Duration.zero;
 
-  SyncTimelineEvent get paintEvent {
+  SyncTimelineEvent? get paintEvent {
     if (frame.timelineEventData.uiEvent == null) return null;
     if (_paintEvent != null) return _paintEvent;
 
-    return _paintEvent = frame.timelineEventData.uiEvent
-        .firstChildWithCondition(
-            (event) => event.name.caseInsensitiveEquals(paintEventName));
+    return _paintEvent = frame.timelineEventData.uiEvent!
+            .firstChildWithCondition(
+                (event) => event.name!.caseInsensitiveEquals(paintEventName))
+        as SyncTimelineEvent?;
   }
 
-  SyncTimelineEvent _paintEvent;
+  SyncTimelineEvent? _paintEvent;
 
-  Duration get paintTime => paintEvent?.time?.duration ?? Duration.zero;
+  Duration get paintTime => paintEvent?.time.duration ?? Duration.zero;
 
   bool get canAnalyzeBuild =>
-      buildEvents.firstWhere((buildEvent) => buildEvent.children.isNotEmpty) !=
-      null;
+      buildEvents.containsWhere((buildEvent) => buildEvent.children.isNotEmpty);
 
-  bool get canAnalyzeLayout => layoutEvent.children.isNotEmpty;
+  bool get canAnalyzeLayout => layoutEvent?.children.isNotEmpty ?? false;
 
-  bool get canAnalyzePaint => paintEvent.children.isNotEmpty;
+  bool get canAnalyzePaint => paintEvent?.children.isNotEmpty ?? false;
 
   // TODO(kenz): calculate ratios to use as flex values. This will be a bit
   // tricky because sometimes the Build event(s) are children of Layout.

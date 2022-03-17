@@ -4,6 +4,9 @@
 
 // @dart=2.9
 
+// ignore_for_file: avoid_redundant_argument_values
+
+import 'dart:async';
 import 'dart:io';
 
 import 'package:devtools_app/src/charts/flame_chart.dart';
@@ -39,6 +42,8 @@ void main() {
         timelineData: vm_service.Timeline.parse(timelineJson),
       ),
     );
+    when(fakeServiceManager.connectedApp.initialized)
+        .thenReturn(Completer()..complete(true));
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
     when(fakeServiceManager.connectedApp.flutterVersionNow).thenReturn(

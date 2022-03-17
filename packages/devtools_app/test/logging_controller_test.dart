@@ -189,9 +189,9 @@ void main() {
           '  "otherValue": "value2"\n'
           '}';
 
-      expect(json.prettyPrinted, prettyJson);
-      expect(nonJson.prettyPrinted, 'Not json');
-      expect(nullDetails.prettyPrinted, null);
+      expect(json.prettyPrinted(), prettyJson);
+      expect(nonJson.prettyPrinted(), 'Not json');
+      expect(nullDetails.prettyPrinted(), null);
     });
   });
 }

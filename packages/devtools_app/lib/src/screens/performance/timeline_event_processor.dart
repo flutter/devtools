@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -11,10 +9,10 @@ import 'package:flutter/foundation.dart';
 import '../../config_specific/logger/logger.dart';
 import '../../primitives/trace_event.dart';
 import '../../primitives/utils.dart';
-//import '../simple_trace_example.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'performance_utils.dart';
+// import 'simple_trace_example.dart';
 
 // For documentation, see the Chrome "Trace Event Format" document:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU.
@@ -84,7 +82,7 @@ class TimelineEventProcessor {
   /// a timeline event on a single thread will be formed and completed before
   /// another timeline event on the same thread begins.
   @visibleForTesting
-  final currentDurationEventNodes = <int, SyncTimelineEvent>{};
+  final currentDurationEventNodes = <int, SyncTimelineEvent?>{};
 
   /// The previously handled DurationEnd events for each thread.
   ///
@@ -104,13 +102,13 @@ class TimelineEventProcessor {
   /// the timeline. Once we have processed events beyond a DC event's end
   /// timestamp, we know that the DC event has no more unprocessed children.
   /// This is guaranteed because we process the events in timestamp order.
-  SyncTimelineEvent _pendingRootCompleteEvent;
+  SyncTimelineEvent? _pendingRootCompleteEvent;
 
   // TODO(kenz): Remove the [uiThreadId] and [rasterThreadId] once ui/raster
   //  distinction changes and frame ids are available in the engine.
-  int uiThreadId;
+  int? uiThreadId;
 
-  int rasterThreadId;
+  int? rasterThreadId;
 
   /// Process the given trace events to create [TimelineEvent]s.
   ///
@@ -123,7 +121,7 @@ class TimelineEventProcessor {
     resetProcessingData();
 
 // Uncomment this code for testing the timeline.
-//    traceEvents = simpleTraceEvents['traceEvents']
+//    traceEvents = simpleTraceEvents['traceEvents']!
 //        .where((json) =>
 //            json.containsKey(TraceEvent.timestampKey)) // thread_name events
 //        .map((e) => TraceEventWrapper(
@@ -175,24 +173,26 @@ class TimelineEventProcessor {
 
     _addPendingCompleteRootToTimeline(force: true);
 
-    performanceController.data.timelineEvents.sort((a, b) =>
-        a.time.start.inMicroseconds.compareTo(b.time.start.inMicroseconds));
-    if (performanceController.data.timelineEvents.isNotEmpty) {
-      performanceController.data.time = TimeRange()
+    final _data = performanceController.data!;
+    _data.timelineEvents.sort(
+      (a, b) =>
+          a.time.start!.inMicroseconds.compareTo(b.time.start!.inMicroseconds),
+    );
+    if (_data.timelineEvents.isNotEmpty) {
+      _data.time = TimeRange()
         // We process trace events in timestamp order, so we can ensure the first
         // trace event has the earliest starting timestamp.
         ..start = Duration(
-            microseconds: performanceController
-                .data.timelineEvents.first.time.start.inMicroseconds)
+          microseconds: _data.timelineEvents.first.time.start!.inMicroseconds,
+        )
         // We cannot guarantee that the last trace event is the latest timestamp
         // in the timeline. DurationComplete events' timestamps refer to their
         // starting timestamp, but their end time is derived from the same trace
         // via the "dur" field. For this reason, we use the cached value stored in
         // [timelineController.fullTimeline].
-        ..end = Duration(
-            microseconds: performanceController.data.endTimestampMicros);
+        ..end = Duration(microseconds: _data.endTimestampMicros);
     } else {
-      performanceController.data.time = TimeRange()
+      _data.time = TimeRange()
         ..start = Duration.zero
         ..end = Duration.zero;
     }
@@ -243,15 +243,15 @@ class TimelineEventProcessor {
   }
 
   void _addPendingCompleteRootToTimeline({
-    int currentProcessingTime,
+    int? currentProcessingTime,
     bool force = false,
   }) {
     assert(currentProcessingTime != null || force);
     if (_pendingRootCompleteEvent != null &&
         (force ||
-            currentProcessingTime >
-                _pendingRootCompleteEvent.time.end.inMicroseconds)) {
-      performanceController.addTimelineEvent(_pendingRootCompleteEvent);
+            currentProcessingTime! >
+                _pendingRootCompleteEvent!.time.end!.inMicroseconds)) {
+      performanceController.addTimelineEvent(_pendingRootCompleteEvent!);
       _pendingRootCompleteEvent = null;
     }
   }
@@ -307,7 +307,7 @@ class TimelineEventProcessor {
   }
 
   void _endAsyncEvent(TraceEventWrapper eventWrapper) {
-    final AsyncTimelineEvent root =
+    final AsyncTimelineEvent? root =
         _asyncEventsById[eventWrapper.event.asyncUID];
     if (root == null) {
       // Since we process trace events in timestamp order, we can guarantee that
@@ -319,7 +319,8 @@ class TimelineEventProcessor {
   }
 
   void _handleDurationBeginEvent(TraceEventWrapper eventWrapper) {
-    final current = currentDurationEventNodes[eventWrapper.event.threadId];
+    final threadId = eventWrapper.event.threadId!;
+    final current = currentDurationEventNodes[threadId];
     final timelineEvent = SyncTimelineEvent(eventWrapper);
     if (current != null) {
       current.addChild(timelineEvent);
@@ -335,12 +336,14 @@ class TimelineEventProcessor {
           .add(timelineEvent);
     }
 
-    currentDurationEventNodes[eventWrapper.event.threadId] = timelineEvent;
+    currentDurationEventNodes[threadId] = timelineEvent;
   }
 
   void _handleDurationEndEvent(TraceEventWrapper eventWrapper) {
     final TraceEvent event = eventWrapper.event;
-    SyncTimelineEvent current = currentDurationEventNodes[event.threadId];
+    final eventThreadId = event.threadId!;
+    final eventJson = event.json;
+    SyncTimelineEvent? current = currentDurationEventNodes[eventThreadId];
 
     if (current == null) return;
 
@@ -349,8 +352,8 @@ class TimelineEventProcessor {
     // we can continue processing trace events for [current].
     if (event.name != current.name) {
       if (collectionEquals(
-        event.json,
-        _previousDurationEndEvents[event.threadId]?.json,
+        eventJson,
+        _previousDurationEndEvents[eventThreadId]?.json,
       )) {
         // This is a duplicate of the previous DurationEnd event we received.
         //
@@ -364,11 +367,11 @@ class TimelineEventProcessor {
         //
         if (debugTimeline) {
           debugFrameTracking
-              .writeln('Duplicate duration end event: ${event.json}');
+              .writeln('Duplicate duration end event: $eventJson');
         }
         return;
       } else if (current.name ==
-              _previousDurationEndEvents[event.threadId]?.name &&
+              _previousDurationEndEvents[eventThreadId]?.name &&
           current.parent?.name == event.name &&
           current.children.length == 1 &&
           collectionEquals(
@@ -392,9 +395,9 @@ class TimelineEventProcessor {
               'Duplicate duration begin event: ${current.beginTraceEventJson}');
         }
 
-        current.parent.removeChild(current);
-        current = current.parent;
-        currentDurationEventNodes[event.threadId] = current;
+        current.parent!.removeChild(current);
+        current = current.parent as SyncTimelineEvent?;
+        currentDurationEventNodes[eventThreadId] = current;
       } else {
         // The current event node has fallen into an unrecoverable state. Reset
         // the tracking node.
@@ -409,18 +412,18 @@ class TimelineEventProcessor {
         // VSYNC - DurationEnd
         if (debugTimeline) {
           debugFrameTracking.writeln('Cannot recover unbalanced event tree.');
-          debugFrameTracking.writeln('Event: ${event.json}');
+          debugFrameTracking.writeln('Event: $eventJson');
           debugFrameTracking
-              .writeln('Current: ${currentDurationEventNodes[event.threadId]}');
+              .writeln('Current: ${currentDurationEventNodes[eventThreadId]}');
         }
-        currentDurationEventNodes[event.threadId] = null;
+        currentDurationEventNodes[eventThreadId] = null;
         return;
       }
     }
 
-    _previousDurationEndEvents[event.threadId] = event;
+    _previousDurationEndEvents[eventThreadId] = event;
 
-    current.addEndEvent(eventWrapper);
+    current!.addEndEvent(eventWrapper);
 
     // Even if the event is well nested, we could still have a duplicate in the
     // tree that needs to be removed. Ex:
@@ -432,11 +435,12 @@ class TimelineEventProcessor {
 
     // Since this event is complete, move back up the tree to the nearest
     // incomplete event.
-    while (current.parent != null &&
-        current.parent.time.end?.inMicroseconds != null) {
-      current = current.parent;
+    while (current!.parent != null &&
+        current.parent!.time.end?.inMicroseconds != null) {
+      current = current.parent as SyncTimelineEvent?;
     }
-    currentDurationEventNodes[event.threadId] = current.parent;
+    currentDurationEventNodes[eventThreadId] =
+        current.parent as SyncTimelineEvent?;
 
     // If we have reached a null parent, this event is fully formed - add it to
     // the timeline and try to assign it to a Flutter frame.
@@ -453,7 +457,7 @@ class TimelineEventProcessor {
     final event = eventWrapper.event;
     final timelineEvent = SyncTimelineEvent(eventWrapper)
       ..time.end =
-          Duration(microseconds: event.timestampMicros + event.duration);
+          Duration(microseconds: event.timestampMicros! + event.duration!);
 
     final current = currentDurationEventNodes[event.threadId];
     if (current != null) {
@@ -473,7 +477,7 @@ class TimelineEventProcessor {
       if (_pendingRootCompleteEvent == null) {
         _pendingRootCompleteEvent = timelineEvent;
       } else {
-        _pendingRootCompleteEvent.addChild(timelineEvent);
+        _pendingRootCompleteEvent!.addChild(timelineEvent);
       }
     }
   }
@@ -492,8 +496,8 @@ class TimelineEventProcessor {
   }
 
   void primeThreadIds({
-    @required int uiThreadId,
-    @required int rasterThreadId,
+    required int? uiThreadId,
+    required int? rasterThreadId,
   }) {
     this.uiThreadId = uiThreadId;
     this.rasterThreadId = rasterThreadId;
@@ -505,9 +509,9 @@ class TimelineEventProcessor {
         event.phase == TraceEvent.asyncInstantPhase ||
         event.phase == TraceEvent.asyncEndPhase) {
       return TimelineEventType.async;
-    } else if (event.threadId == uiThreadId) {
+    } else if (event.threadId != null && event.threadId == uiThreadId) {
       return TimelineEventType.ui;
-    } else if (event.threadId == rasterThreadId) {
+    } else if (event.threadId != null && event.threadId == rasterThreadId) {
       return TimelineEventType.raster;
     } else {
       return TimelineEventType.other;

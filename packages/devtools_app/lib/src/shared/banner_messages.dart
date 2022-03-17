@@ -302,7 +302,7 @@ class ShaderJankMessage {
 
   final Duration jankDuration;
 
-  Widget build(BuildContext context) {
+  BannerMessage build(BuildContext context) {
     return _BannerError(
       key: Key('ShaderJankMessage - $screenId'),
       textSpans: [

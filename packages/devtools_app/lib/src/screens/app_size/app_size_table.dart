@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 import '../../charts/treemap.dart';
@@ -14,7 +12,7 @@ import '../../shared/utils.dart';
 import '../../ui/colors.dart';
 
 class AppSizeAnalysisTable extends StatelessWidget {
-  factory AppSizeAnalysisTable({@required rootNode}) {
+  factory AppSizeAnalysisTable({required TreemapNode rootNode}) {
     final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
     final sizeColumn = _SizeColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
@@ -59,12 +57,12 @@ class AppSizeAnalysisTable extends StatelessWidget {
 }
 
 class _NameColumn extends TreeColumnData<TreemapNode> {
-  _NameColumn({@required this.currentRootLevel}) : super('Library or Class');
+  _NameColumn({required this.currentRootLevel}) : super('Library or Class');
 
   final int currentRootLevel;
 
   @override
-  dynamic getValue(TreemapNode dataObject) => dataObject.name;
+  String getValue(TreemapNode dataObject) => dataObject.name;
 
   @override
   bool get supportsSorting => true;
@@ -96,7 +94,7 @@ class _SizeColumn extends ColumnData<TreemapNode> {
       dataObject.byteSize,
       kbFractionDigits: 1,
       includeUnit: true,
-    );
+    )!;
   }
 
   @override
@@ -111,7 +109,7 @@ class _SizeColumn extends ColumnData<TreemapNode> {
 }
 
 class _SizePercentageColumn extends ColumnData<TreemapNode> {
-  _SizePercentageColumn({@required this.totalSize})
+  _SizePercentageColumn({required this.totalSize})
       : super(
           '% of Total Size',
           alignment: ColumnAlignment.right,
@@ -121,7 +119,7 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
   final int totalSize;
 
   @override
-  dynamic getValue(TreemapNode dataObject) =>
+  double getValue(TreemapNode dataObject) =>
       (dataObject.byteSize / totalSize) * 100;
 
   @override
@@ -140,7 +138,7 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
 }
 
 class AppSizeDiffTable extends StatelessWidget {
-  factory AppSizeDiffTable({@required rootNode}) {
+  factory AppSizeDiffTable({required TreemapNode rootNode}) {
     final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
     final diffColumn = _DiffColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
