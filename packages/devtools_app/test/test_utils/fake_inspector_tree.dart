@@ -15,7 +15,7 @@ const double fakeRowWidth = 200.0;
 class FakeInspectorTree extends InspectorTreeController {
   FakeInspectorTree();
 
-  final List<Rect?> scrollToRequests = [];
+  final List<Rect> scrollToRequests = [];
 
   @override
   Rect getBoundingBox(InspectorTreeRow row) {
@@ -28,7 +28,7 @@ class FakeInspectorTree extends InspectorTreeController {
   }
 
   @override
-  void scrollToRect(Rect? targetRect) {
+  void scrollToRect(Rect targetRect) {
     scrollToRequests.add(targetRect);
   }
 

@@ -14,9 +14,9 @@ import '../test_data/http_request_timeline_test_data.dart';
 import '../test_data/network_test_data.dart';
 
 /// Creates an instance of [Timeline] which contains recorded HTTP events.
-Future<Timeline?> loadNetworkProfileTimeline() async {
+Future<Timeline> loadNetworkProfileTimeline() async {
   final httpTestData = jsonDecode(httpRequestTimelineTestData);
-  return Timeline.parse(httpTestData);
+  return Timeline.parse(httpTestData)!;
 }
 
 SocketProfile loadSocketProfile() {

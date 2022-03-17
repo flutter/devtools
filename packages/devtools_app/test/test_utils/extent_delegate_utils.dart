@@ -13,15 +13,17 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
     required this.extentDelegate,
   });
 
-  RenderSliverExtentDelegateBoxAdaptor? _renderObject;
+  late RenderSliverExtentDelegateBoxAdaptor _renderObject;
+  bool _renderObjectInitialized = false;
   List<RenderBox> children;
 
-  RenderSliverExtentDelegateBoxAdaptor? createRenderSliverExtentDelegate() {
-    assert(_renderObject == null);
+  RenderSliverExtentDelegateBoxAdaptor createRenderSliverExtentDelegate() {
+    assert(!_renderObjectInitialized);
     _renderObject = RenderSliverExtentDelegateBoxAdaptor(
       childManager: this,
       extentDelegate: extentDelegate,
     );
+    _renderObjectInitialized = true;
     return _renderObject;
   }
 
@@ -34,7 +36,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
     if (index < 0 || index >= children.length) return;
     try {
       _currentlyUpdatingChildIndex = index;
-      _renderObject!.insert(children[index], after: after);
+      _renderObject.insert(children[index], after: after);
     } finally {
       _currentlyUpdatingChildIndex = null;
     }
@@ -42,7 +44,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 
   @override
   void removeChild(RenderBox child) {
-    _renderObject!.remove(child);
+    _renderObject.remove(child);
   }
 
   @override
