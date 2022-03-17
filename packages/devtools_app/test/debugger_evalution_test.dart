@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 
@@ -23,15 +23,15 @@ void main() {
     const FlutterRunConfiguration(withDebugger: true),
   );
 
-  Disposable isAlive;
-  DebuggerController debuggerController;
-  EvalOnDartLibrary eval;
+  late Disposable isAlive;
+  late DebuggerController debuggerController;
+  late EvalOnDartLibrary eval;
   setUp(() async {
     isAlive = Disposable();
     await env.setupEnvironment();
     debuggerController = TestDebuggerController();
     eval = EvalOnDartLibrary(
-        'package:flutter_app/src/autocomplete.dart', serviceManager.service,
+        'package:flutter_app/src/autocomplete.dart', serviceManager.service!,
         disableBreakpoints: false);
   });
 
