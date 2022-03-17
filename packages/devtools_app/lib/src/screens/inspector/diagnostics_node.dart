@@ -582,7 +582,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (jsonArray?.isNotEmpty == true) {
       final List<RemoteDiagnosticsNode> nodes = [];
       for (Map<String, Object> element
-          in jsonArray as Iterable<Map<String, Object>>) {
+          in jsonArray!.cast<Map<String, Object>>()) {
         final child =
             RemoteDiagnosticsNode(element, inspectorService, false, parent);
         child.parent = this;
@@ -607,7 +607,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       if (json.containsKey('properties')) {
         final List<Object> jsonArray = json['properties'] as List<Object>;
         for (Map<String, Object> element
-            in jsonArray as Iterable<Map<String, Object>>) {
+            in jsonArray.cast<Map<String, Object>>()) {
           cachedProperties!.add(
               RemoteDiagnosticsNode(element, inspectorService, true, parent));
         }
