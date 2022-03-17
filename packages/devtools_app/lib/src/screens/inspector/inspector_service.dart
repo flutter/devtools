@@ -468,7 +468,7 @@ class InspectorService extends InspectorServiceBase {
       await group.dispose();
       return null;
     }
-    List<RemoteDiagnosticsNode?> children = await root.children;
+    List<RemoteDiagnosticsNode?> children = await root.children ?? [];
 
     if (children.isEmpty) {
       children = await group.getChildren(root.dartDiagnosticRef, false, null);
