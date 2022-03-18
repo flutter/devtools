@@ -131,8 +131,7 @@ class WidgetVisualizer extends StatelessWidget {
     this.child,
     this.overflowSide,
     this.largeTitle = false,
-  })  : assert(title != null),
-        super(key: key);
+  }) : super(key: key);
 
   final LayoutProperties? layoutProperties;
   final String title;
@@ -253,14 +252,12 @@ class WidgetVisualizer extends StatelessWidget {
 class AnimatedLayoutProperties<T extends LayoutProperties>
     implements LayoutProperties {
   AnimatedLayoutProperties(this.begin, this.end, this.animation)
-      : assert(begin != null),
-        assert(end != null),
-        assert(begin.children?.length == end.children?.length),
+      : assert(begin.children.length == end.children.length),
         _children = [
-          for (var i = 0; i < begin.children!.length; i++)
+          for (var i = 0; i < begin.children.length; i++)
             AnimatedLayoutProperties(
-              begin.children![i],
-              end.children![i],
+              begin.children[i],
+              end.children[i],
               animation,
             )
         ];
@@ -293,8 +290,8 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
 
   @override
   List<double?> childrenDimensions(Axis? axis) {
-    final beginDimensions = begin.childrenDimensions(axis)!;
-    final endDimensions = end.childrenDimensions(axis)!;
+    final beginDimensions = begin.childrenDimensions(axis);
+    final endDimensions = end.childrenDimensions(axis);
     return _lerpList(beginDimensions, endDimensions);
   }
 

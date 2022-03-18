@@ -484,7 +484,6 @@ class FlexLayoutProperties extends LayoutProperties {
             return false;
         }
     }
-    return true;
   }
 
   /// render properties for laying out rendered Flex & Flex children widgets
@@ -555,7 +554,7 @@ class FlexLayoutProperties extends LayoutProperties {
     }
 
     List<double> renderSizes(Axis axis) {
-      final sizes = childrenDimensions(axis) ?? [];
+      final sizes = childrenDimensions(axis);
       if (freeSpace > 0.0 && axis == direction) {
         /// include free space in the computation
         sizes.add(freeSpace);

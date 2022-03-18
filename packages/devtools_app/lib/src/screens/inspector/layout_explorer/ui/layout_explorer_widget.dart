@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -119,7 +121,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   AnimatedLayoutProperties<L> computeAnimatedProperties(L nextProperties);
   void updateHighlighted(L? newProperties);
 
-  String? id(RemoteDiagnosticsNode? node) => node?.dartDiagnosticRef?.id;
+  String? id(RemoteDiagnosticsNode? node) => node?.dartDiagnosticRef.id;
 
   void _registerInspectorControllerService() {
     inspectorController?.selectedNode?.addListener(_onSelectionChangedCallback);
@@ -202,11 +204,11 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
     if (!_dirty) return;
     _dirty = false;
     final updatedProperties = await fetchLayoutProperties();
-    if (updatedProperties != null) _changeProperties(updatedProperties);
+    _changeProperties(updatedProperties);
   }
 
   void _changeProperties(L nextProperties) {
-    if (!mounted || nextProperties == null) return;
+    if (!mounted) return;
     updateHighlighted(nextProperties);
     setState(() {
       _animatedProperties = computeAnimatedProperties(nextProperties);
