@@ -58,8 +58,8 @@ List<double> computeRenderSizes({
   required Iterable<double?> sizes,
   required double smallestSize,
   required double largestSize,
-  required double? smallestRenderSize,
-  required double? largestRenderSize,
+  required double smallestRenderSize,
+  required double largestRenderSize,
   required double maxSizeAvailable,
   bool useMaxSizeAvailable = true,
 }) {
@@ -69,14 +69,14 @@ List<double> computeRenderSizes({
     // It means that all widget have the same size
     // and we can just divide the size evenly
     // but it should be at least as big as [smallestRenderSize]
-    final renderSize = math.max(smallestRenderSize!, maxSizeAvailable / n);
+    final renderSize = math.max(smallestRenderSize, maxSizeAvailable / n);
     return [for (var _ in sizes) renderSize];
   }
 
-  List<double> transformToRenderSize(double? largestRenderSize) => [
+  List<double> transformToRenderSize(double largestRenderSize) => [
         for (var s in sizes)
           (s! - smallestSize) *
-                  (largestRenderSize! - smallestRenderSize!) /
+                  (largestRenderSize - smallestRenderSize) /
                   (largestSize - smallestSize) +
               smallestRenderSize
       ];
@@ -84,7 +84,7 @@ List<double> computeRenderSizes({
   var renderSizes = transformToRenderSize(largestRenderSize);
 
   if (useMaxSizeAvailable && sum(renderSizes) < maxSizeAvailable) {
-    largestRenderSize = (maxSizeAvailable - n * smallestRenderSize!) *
+    largestRenderSize = (maxSizeAvailable - n * smallestRenderSize) *
             (largestSize - smallestSize) /
             sum([for (var s in sizes) s! - smallestSize]) +
         smallestRenderSize;
@@ -372,7 +372,7 @@ class FlexLayoutProperties extends LayoutProperties {
     final Map<String, Object?>? renderObjectJson = node.renderObject?.json;
     if (renderObjectJson == null) return null;
     final properties = renderObjectJson['properties'] as List<dynamic>;
-    final Map<String?, Object?> data = Map<String?, Object?>.fromIterable(
+    final data = Map<String, Object?>.fromIterable(
       properties,
       key: (property) => property['name'],
       value: (property) => property['description'],
@@ -440,7 +440,7 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   Axis get crossAxisDirection {
-    return direction == Axis.horizontal ? Axis.vertical : Axis.horizontal;
+    return direction;
   }
 
   double? get mainAxisDimension => dimension(direction);
@@ -450,18 +450,17 @@ class FlexLayoutProperties extends LayoutProperties {
   @override
   bool get isOverflowWidth {
     if (direction == Axis.horizontal) {
-      return width! + overflowEpsilon < sum(childrenWidths as Iterable<double>);
+      return width! + overflowEpsilon < sum(childrenWidths!.cast<double>());
     }
-    return width! + overflowEpsilon < max(childrenWidths as Iterable<double>);
+    return width! + overflowEpsilon < max(childrenWidths!.cast<double>());
   }
 
   @override
   bool get isOverflowHeight {
     if (direction == Axis.vertical) {
-      return height! + overflowEpsilon <
-          sum(childrenHeights as Iterable<double>);
+      return height! + overflowEpsilon < sum(childrenHeights!.cast<double>());
     }
-    return height! + overflowEpsilon < max(childrenHeights as Iterable<double>);
+    return height! + overflowEpsilon < max(childrenHeights!.cast<double>());
   }
 
   bool get startIsTopLeft {
@@ -496,7 +495,7 @@ class FlexLayoutProperties extends LayoutProperties {
   }) {
     /// calculate the render empty spaces
     final freeSpace = dimension(direction)! -
-        sum(childrenDimensions(direction) as Iterable<double>);
+        sum(childrenDimensions(direction).cast<double>());
     final displayMainAxisAlignment =
         startIsTopLeft ? mainAxisAlignment : mainAxisAlignment.reversed;
 
@@ -539,17 +538,17 @@ class FlexLayoutProperties extends LayoutProperties {
       }
     }
 
-    double? smallestRenderSize(Axis axis) {
+    double smallestRenderSize(Axis axis) {
       return axis == Axis.horizontal
-          ? smallestRenderWidth
-          : smallestRenderHeight;
+          ? smallestRenderWidth!
+          : smallestRenderHeight!;
     }
 
-    double? largestRenderSize(Axis axis) {
+    double largestRenderSize(Axis axis) {
       final lrs =
           axis == Axis.horizontal ? largestRenderWidth : largestRenderHeight;
       // use all the space when visualizing cross axis
-      return (axis == direction) ? lrs : maxSizeAvailable(axis);
+      return (axis == direction) ? lrs! : maxSizeAvailable(axis);
     }
 
     List<double> renderSizes(Axis axis) {
@@ -558,8 +557,8 @@ class FlexLayoutProperties extends LayoutProperties {
         /// include free space in the computation
         sizes.add(freeSpace);
       }
-      final smallestSize = min(sizes as Iterable<double>);
-      final largestSize = max(sizes as Iterable<double>);
+      final smallestSize = min(sizes.cast<double>());
+      final largestSize = max(sizes.cast<double>());
       if (axis == direction ||
           (crossAxisAlignment != CrossAxisAlignment.stretch &&
               smallestSize != largestSize)) {
@@ -578,7 +577,7 @@ class FlexLayoutProperties extends LayoutProperties {
             : largestSize /
                 math.max(dimension(axis)!, 1.0) *
                 maxSizeAvailable(axis);
-        size = math.max(size, smallestRenderSize(axis)!);
+        size = math.max(size, smallestRenderSize(axis));
         return sizes.map((_) => size).toList();
       }
     }
