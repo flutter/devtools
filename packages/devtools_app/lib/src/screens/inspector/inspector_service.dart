@@ -845,8 +845,7 @@ abstract class ObjectGroupBase implements Disposable {
   ) {
     if (disposed || jsonObject == null) return const [];
     final nodes = <RemoteDiagnosticsNode>[];
-    for (Map<String, Object> element
-        in jsonObject.cast<Map<String, Object>>()) {
+    for (var element in jsonObject.cast<Map<String, Object>>()) {
       nodes.add(RemoteDiagnosticsNode(element, this, isProperty, parent));
     }
     return nodes;
