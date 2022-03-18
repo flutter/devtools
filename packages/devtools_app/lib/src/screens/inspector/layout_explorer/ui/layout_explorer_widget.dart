@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -33,7 +31,7 @@ abstract class LayoutExplorerWidget extends StatefulWidget {
 /// This class contains common code useful for visualizing all kinds of widgets.
 /// To implement
 abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
-        L extends LayoutProperties?> extends State<W>
+        L extends LayoutProperties> extends State<W>
     with TickerProviderStateMixin
     implements InspectorServiceClient {
   LayoutExplorerWidgetState() {
@@ -55,14 +53,16 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   AnimatedLayoutProperties<L>? get animatedProperties => _animatedProperties;
   AnimatedLayoutProperties<L>? _animatedProperties;
 
-  L? get properties => _previousProperties ?? _animatedProperties as L? ?? _properties;
+  L? get properties =>
+      _previousProperties ?? _animatedProperties as L? ?? _properties;
 
   RemoteDiagnosticsNode? get selectedNode =>
       inspectorController?.selectedNode?.value?.diagnostic;
 
   InspectorController? get inspectorController => widget.inspectorController;
 
-  InspectorService? get inspectorService => serviceManager.inspectorService as InspectorService?;
+  InspectorService? get inspectorService =>
+      serviceManager.inspectorService as InspectorService?;
 
   late RateLimiter rateLimiter;
 

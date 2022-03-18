@@ -475,10 +475,10 @@ class FlexLayoutProperties extends LayoutProperties {
           case TextDirection.rtl:
             return false;
         }
-        break;
       case Axis.vertical:
         switch (verticalDirection) {
           case VerticalDirection.down:
+          case null:
             return true;
           case VerticalDirection.up:
             return false;

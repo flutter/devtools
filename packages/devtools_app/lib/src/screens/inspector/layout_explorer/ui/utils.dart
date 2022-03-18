@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -157,7 +155,8 @@ class WidgetVisualizer extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final properties = layoutProperties!;
-    final borderColor = WidgetTheme.fromName(properties.node!.description).color;
+    final borderColor =
+        WidgetTheme.fromName(properties.node!.description).color;
     final boxAdjust = isSelected ? _selectedPadding : 0.0;
 
     return LayoutBuilder(
@@ -251,7 +250,7 @@ class WidgetVisualizer extends StatelessWidget {
   }
 }
 
-class AnimatedLayoutProperties<T extends LayoutProperties?>
+class AnimatedLayoutProperties<T extends LayoutProperties>
     implements LayoutProperties {
   AnimatedLayoutProperties(this.begin, this.end, this.animation)
       : assert(begin != null),
@@ -411,7 +410,7 @@ class AnimatedLayoutProperties<T extends LayoutProperties?>
   FlexFit? get flexFit => end.flexFit;
 
   @override
-  List<LayoutProperties>? get displayChildren => end.displayChildren;
+  List<LayoutProperties> get displayChildren => end.displayChildren;
 }
 
 class LayoutExplorerBackground extends StatelessWidget {
