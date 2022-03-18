@@ -512,12 +512,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return getBooleanMember('hasChildren', false);
   }
 
-  bool? get isCreatedByLocalProject {
+  bool get isCreatedByLocalProject {
     return getBooleanMember('createdByLocalProject', false);
   }
 
   /// Whether this node is being displayed as a full tree or a filtered tree.
-  bool? get isSummaryTree => getBooleanMember('summaryTree', false);
+  bool get isSummaryTree => getBooleanMember('summaryTree', false);
 
   /// Whether this node is being displayed as a full tree or a filtered tree.
   bool get isStateful => getBooleanMember('stateful', false);
@@ -535,9 +535,9 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return await _childrenFuture;
   }
 
-  List<RemoteDiagnosticsNode>? get childrenNow {
+  List<RemoteDiagnosticsNode> get childrenNow {
     _maybePopulateChildren();
-    return _children;
+    return _children ?? [];
   }
 
   Future<void> _computeChildren() async {
@@ -562,7 +562,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   Future<List<RemoteDiagnosticsNode>> _getChildrenHelper() async {
     return inspectorService!.getChildren(
       dartDiagnosticRef,
-      isSummaryTree!,
+      isSummaryTree,
       this,
     );
   }
@@ -655,7 +655,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     final children = childrenNow;
-    if (children == null || children.isEmpty) return const <DiagnosticsNode>[];
+    if (children.isEmpty) return const <DiagnosticsNode>[];
     final regularChildren = <DiagnosticsNode>[];
     for (var child in children) {
       regularChildren.add(child.toDiagnosticsNode());
