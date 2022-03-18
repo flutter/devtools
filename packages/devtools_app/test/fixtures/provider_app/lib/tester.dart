@@ -35,3 +35,5 @@ class _Tester extends WidgetController {
     return Future.error(UnimplementedError());
   }
 }
+
+final tester = _Tester();
