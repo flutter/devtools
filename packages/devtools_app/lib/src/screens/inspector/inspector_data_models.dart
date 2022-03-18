@@ -371,8 +371,7 @@ class FlexLayoutProperties extends LayoutProperties {
   static FlexLayoutProperties? _buildNode(RemoteDiagnosticsNode node) {
     final Map<String, Object?>? renderObjectJson = node.renderObject?.json;
     if (renderObjectJson == null) return null;
-    final List<dynamic> properties =
-        renderObjectJson['properties'] as List<dynamic>;
+    final properties = renderObjectJson['properties'] as List<dynamic>;
     final Map<String?, Object?> data = Map<String?, Object?>.fromIterable(
       properties,
       key: (property) => property['name'],

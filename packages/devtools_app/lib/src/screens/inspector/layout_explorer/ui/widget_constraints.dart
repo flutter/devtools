@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:flutter/material.dart';
 
 import '../../../../primitives/math_utils.dart';
@@ -110,10 +108,10 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
             if (!showChildrenWidthsSum) const TextSpan(text: '\n'),
             TextSpan(
               text: '(${properties!.describeWidthConstraints()})',
-              style:
-                  properties!.constraints!.hasBoundedWidth || !warnIfUnconstrained
-                      ? null
-                      : TextStyle(color: colorScheme.unconstrainedColor),
+              style: properties!.constraints!.hasBoundedWidth ||
+                      !warnIfUnconstrained
+                  ? null
+                  : TextStyle(color: colorScheme.unconstrainedColor),
             )
           ],
           if (showChildrenWidthsSum)

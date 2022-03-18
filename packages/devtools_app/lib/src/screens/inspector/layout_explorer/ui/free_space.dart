@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:flutter/material.dart';
 
 import '../../../../primitives/utils.dart';
@@ -26,7 +24,8 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final heightDescription =
         'h=${toStringAsFixed(renderProperties.realHeight!)}';
-    final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth!)}';
+    final widthDescription =
+        'w=${toStringAsFixed(renderProperties.realWidth!)}';
     final showWidth = renderProperties.realWidth !=
         (renderProperties.layoutProperties?.width);
     final widthWidget = Column(
@@ -105,7 +104,8 @@ class PaddingVisualizerWidget extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final heightDescription =
         'h=${toStringAsFixed(renderProperties.realHeight!)}';
-    final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth!)}';
+    final widthDescription =
+        'w=${toStringAsFixed(renderProperties.realWidth!)}';
     final widthWidget = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
