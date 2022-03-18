@@ -411,9 +411,10 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   }
 
   Future<int> detach() async {
-    if (vmService != null) {
+    final vmServiceLocal = vmService;
+    if (vmServiceLocal != null) {
       debugPrint('Closing VM service');
-      await vmService!.dispose();
+      await vmServiceLocal.dispose();
     }
     if (_currentRunningAppId != null) {
       debugPrint('Detaching from app');
@@ -436,9 +437,10 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   }
 
   Future<int> stop() async {
-    if (vmService != null) {
+    final vmServiceLocal = vmService;
+    if (vmServiceLocal != null) {
       debugPrint('Closing VM service');
-      await vmService!.dispose();
+      await vmServiceLocal.dispose();
     }
     if (_currentRunningAppId != null) {
       debugPrint('Stopping app');
@@ -456,9 +458,10 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       );
       _currentRunningAppId = null;
     }
-    if (proc != null) {
+    final procLocal = proc;
+    if (procLocal != null) {
       debugPrint('Waiting for process to end');
-      return proc!.exitCode.timeout(quitTimeout, onTimeout: killGracefully);
+      return procLocal.exitCode.timeout(quitTimeout, onTimeout: killGracefully);
     }
     return 0;
   }
