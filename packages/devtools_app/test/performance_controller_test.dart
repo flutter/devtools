@@ -78,35 +78,36 @@ void main() async {
         ..setEventFlow(frame1RasterEvent as SyncTimelineEvent);
 
       // Select a frame.
-      expect(performanceController.data!.selectedFrame, isNull);
+      final data = performanceController.data!;
+
+      expect(data.selectedFrame, isNull);
       await performanceController.toggleSelectedFrame(frame0);
       expect(
-        performanceController.data!.selectedFrame,
+        data.selectedFrame,
         equals(frame0),
       );
       // Verify main UI event for the frame is selected automatically.
       expect(
-        performanceController.data!.selectedEvent,
+        data.selectedEvent,
         equals(goldenUiTimelineEvent),
       );
-      expect(performanceController.data!.cpuProfileData, isNotNull);
+      expect(data.cpuProfileData, isNotNull);
 
       // Select another timeline event.
       await performanceController.selectTimelineEvent(animatorBeginFrameEvent);
-      expect(performanceController.data!.selectedEvent,
-          equals(animatorBeginFrameEvent));
+      expect(data.selectedEvent, equals(animatorBeginFrameEvent));
 
       // Select a different frame.
       await performanceController.toggleSelectedFrame(frame1);
       expect(
-        performanceController.data!.selectedFrame,
+        data.selectedFrame,
         equals(frame1),
       );
       expect(
-        performanceController.data!.selectedEvent,
+        data.selectedEvent,
         equals(frame1UiEvent),
       );
-      expect(performanceController.data!.cpuProfileData, isNotNull);
+      expect(data.cpuProfileData, isNotNull);
 
       await env.tearDownEnvironment();
     });
@@ -131,13 +132,17 @@ void main() async {
         'raster': 50,
         'vsyncOverhead': 10,
       });
-      frame.setEventFlow(rasterEvent as SyncTimelineEvent,
-          type: TimelineEventType.raster);
+      frame.setEventFlow(
+        rasterEvent as SyncTimelineEvent,
+        type: TimelineEventType.raster,
+      );
       expect(frame.timeFromEventFlows.start, isNull);
       expect(frame.timeFromEventFlows.end, isNull);
 
-      frame.setEventFlow(uiEvent as SyncTimelineEvent,
-          type: TimelineEventType.ui);
+      frame.setEventFlow(
+        uiEvent as SyncTimelineEvent,
+        type: TimelineEventType.ui,
+      );
       expect(frame.timeFromEventFlows.start,
           equals(const Duration(microseconds: 5000)));
       expect(frame.timeFromEventFlows.end,
@@ -147,10 +152,12 @@ void main() async {
     test('add frame', () async {
       await env.setupEnvironment();
       await performanceController.clearData();
-      expect(performanceController.data!.frames, isEmpty);
+
+      final data = performanceController.data!;
+      expect(data.frames, isEmpty);
       performanceController.addFrame(testFrame1);
       expect(
-        performanceController.data!.frames.length,
+        data.frames.length,
         equals(1),
       );
       await env.tearDownEnvironment();
@@ -184,11 +191,14 @@ void main() async {
 
       await performanceController.clearData();
       performanceController.addTimelineEvent(goldenUiTimelineEvent..deepCopy());
+
+      final data = performanceController.data!;
+
       performanceController.search = 'fram';
       var matches = performanceController.searchMatches.value;
       expect(matches.length, equals(4));
       verifyIsSearchMatchForTreeData<TimelineEvent>(
-        performanceController.data!.timelineEvents,
+        data.timelineEvents,
         matches,
       );
 
@@ -200,7 +210,7 @@ void main() async {
       matches = performanceController.searchMatches.value;
       expect(matches.length, equals(4));
       verifyIsSearchMatchForTreeData<TimelineEvent>(
-        performanceController.data!.timelineEvents,
+        data.timelineEvents,
         matches,
       );
 
@@ -211,7 +221,7 @@ void main() async {
       matches = performanceController.searchMatches.value;
       expect(matches.length, equals(8));
       verifyIsSearchMatchForTreeData<TimelineEvent>(
-        performanceController.data!.timelineEvents,
+        data.timelineEvents,
         matches,
       );
 
@@ -390,10 +400,12 @@ void main() async {
             equals(testFrame0.id));
 
         // Select a frame.
-        expect(performanceController.data!.selectedFrame, isNull);
+        final data = performanceController.data!;
+
+        expect(data.selectedFrame, isNull);
         await performanceController.toggleSelectedFrame(frame0);
         expect(
-          performanceController.data!.selectedFrame,
+          data.selectedFrame,
           equals(frame0),
         );
 

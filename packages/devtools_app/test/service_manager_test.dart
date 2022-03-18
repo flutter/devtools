@@ -451,8 +451,11 @@ Future<void> _serviceExtensionAvailable(String extensionName) async {
   listenable.removeListener(listener);
 }
 
-Future<void> _verifyExtensionStateOnTestDevice(String evalExpression,
-    String? expectedResult, EvalOnDartLibrary library) async {
+Future<void> _verifyExtensionStateOnTestDevice(
+  String evalExpression,
+  String? expectedResult,
+  EvalOnDartLibrary library,
+) async {
   final result = await library.eval(evalExpression, isAlive: null);
   if (result is InstanceRef) {
     expect(result.valueAsString, equals(expectedResult));

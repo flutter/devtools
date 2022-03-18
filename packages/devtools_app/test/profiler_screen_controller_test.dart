@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('ProfilerScreenController', () {
     late ProfilerScreenController controller;
-    FakeServiceManager fakeServiceManager;
+    late FakeServiceManager fakeServiceManager;
 
     setUp(() {
       fakeServiceManager = FakeServiceManager();
