@@ -140,7 +140,7 @@ class LayoutProperties {
       children: end.children,
       constraints: BoxConstraints.lerp(begin.constraints, end.constraints, t),
       description: end.description,
-      flexFactor: begin.flexFactor! + (begin.flexFactor! - end.flexFactor!) * t,
+      flexFactor: begin.flexFactor! * (t + 1) - end.flexFactor! * t,
       isFlex: begin.isFlex! && end.isFlex!,
       size: Size.lerp(begin.size, end.size, t)!,
       flexFit: end.flexFit,
@@ -160,7 +160,11 @@ class LayoutProperties {
   /// Represents the order of [children] to be displayed.
   List<LayoutProperties> get displayChildren => children;
 
-  bool get hasFlexFactor => flexFactor != null && flexFactor! > 0;
+  bool get hasFlexFactor {
+    final flexFactorLocal = flexFactor;
+    if (flexFactorLocal == null) return false;
+    return flexFactorLocal > 0;
+  }
 
   int get totalChildren => children.length;
 
@@ -181,16 +185,26 @@ class LayoutProperties {
   List<double?>? get childrenHeights => childrenDimensions(Axis.vertical);
 
   String describeWidthConstraints() {
-    if (constraints == null) return '';
-    return constraints!.hasBoundedWidth
-        ? describeAxis(constraints!.minWidth, constraints!.maxWidth, 'w')
+    final constraintsLocal = constraints;
+    if (constraintsLocal == null) return '';
+    return constraintsLocal.hasBoundedWidth
+        ? describeAxis(
+            constraintsLocal.minWidth,
+            constraintsLocal.maxWidth,
+            'w',
+          )
         : 'width is unconstrained';
   }
 
   String describeHeightConstraints() {
-    if (constraints == null) return '';
-    return constraints!.hasBoundedHeight
-        ? describeAxis(constraints!.minHeight, constraints!.maxHeight, 'h')
+    final constraintsLocal = constraints;
+    if (constraintsLocal == null) return '';
+    return constraintsLocal.hasBoundedHeight
+        ? describeAxis(
+            constraintsLocal.minHeight,
+            constraintsLocal.maxHeight,
+            'h',
+          )
         : 'height is unconstrained';
   }
 
