@@ -629,8 +629,7 @@ class MemoryBodyState extends State<MemoryBody>
           : 0);
 
   Map<String, Map<String, Object?>> eventLegend(bool isLight) {
-    final Map<String, Map<String, Object?>> result =
-        <String, Map<String, Object>>{};
+    final result = <String, Map<String, Object?>>{};
 
     result[events.manualSnapshotLegendName] = traceRender(
       image: events.snapshotManualLegend,
@@ -653,8 +652,7 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Map<String, Map<String, Object?>> vmLegend() {
-    final Map<String, Map<String, Object?>> result =
-        <String, Map<String, Object>>{};
+    final result = <String, Map<String, Object?>>{};
 
     final traces = _vmChartController.traces;
     // RSS trace
@@ -695,8 +693,7 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Map<String, Map<String, Object?>> androidLegend() {
-    final Map<String, Map<String, Object?>> result =
-        <String, Map<String, Object>>{};
+    final result = <String, Map<String, Object?>>{};
 
     final traces = _androidChartController.traces;
     // Total trace
@@ -852,7 +849,7 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Widget hoverRow({
-    String? name,
+    required String name,
     String? image,
     Color? colorPatch,
     bool dashed = false,
@@ -868,17 +865,17 @@ class MemoryBodyState extends State<MemoryBody>
         Theme.of(context).colorScheme.hoverSmallValueTextStyle;
 
     List<Widget> hoverPartImageLine(
-      String? name, {
+      String name, {
       String? image,
       Color? colorPatch,
       bool dashed = false,
       double leftEdge = 5.0,
     }) {
-      String? displayName = name;
+      String displayName = name;
       // Empty string overflows, default value space.
       String displayValue = ' ';
       if (hasNumeric) {
-        int startOfNumber = name!.lastIndexOf(' ');
+        int startOfNumber = name.lastIndexOf(' ');
         if (hasUnit) {
           final unitOrValue = name.substring(startOfNumber + 1);
           if (int.tryParse(unitOrValue) == null) {
@@ -916,7 +913,7 @@ class MemoryBodyState extends State<MemoryBody>
         const PaddedDivider(
           padding: EdgeInsets.only(left: denseRowSpacing),
         ),
-        Text(displayName!, style: bold ? hoverTitleEntry : hoverSmallEntry),
+        Text(displayName, style: bold ? hoverTitleEntry : hoverSmallEntry),
         Text(displayValue, style: hoverValueEntry),
       ];
     }
@@ -1469,7 +1466,7 @@ class DashedLine extends CustomPainter {
 class MemoryConfigurationsDialog extends StatelessWidget {
   const MemoryConfigurationsDialog(this.controller);
 
-  final MemoryController? controller;
+  final MemoryController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -1490,7 +1487,7 @@ class MemoryConfigurationsDialog extends StatelessWidget {
                 Row(
                   children: [
                     NotifierCheckbox(
-                        notifier: controller!.androidCollectionEnabled
+                        notifier: controller.androidCollectionEnabled
                             as ValueNotifier<bool?>),
                     RichText(
                       overflow: TextOverflow.visible,
@@ -1505,7 +1502,7 @@ class MemoryConfigurationsDialog extends StatelessWidget {
                   children: [
                     NotifierCheckbox(
                         notifier:
-                            controller!.unitDisplayed as ValueNotifier<bool?>),
+                            controller.unitDisplayed as ValueNotifier<bool?>),
                     RichText(
                       overflow: TextOverflow.visible,
                       text: TextSpan(
@@ -1526,7 +1523,7 @@ class MemoryConfigurationsDialog extends StatelessWidget {
                 Row(
                   children: [
                     NotifierCheckbox(
-                      notifier: controller!.advancedSettingsEnabled
+                      notifier: controller.advancedSettingsEnabled
                           as ValueNotifier<bool?>,
                     ),
                     RichText(
