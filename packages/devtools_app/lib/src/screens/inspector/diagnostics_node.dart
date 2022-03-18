@@ -433,8 +433,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (value == null) {
       return defaultValue;
     }
-    final level = diagnosticLevelUtils.enumEntry(value)!;
-    return level;
+    return diagnosticLevelUtils.enumEntry(value)!;
   }
 
   DiagnosticsTreeStyle getStyleMember(
@@ -448,8 +447,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (value == null) {
       return defaultValue;
     }
-    final style = treeStyleUtils.enumEntry(value)!;
-    return style;
+    return treeStyleUtils.enumEntry(value)!;
   }
 
   /// Returns a reference to the value the DiagnosticsNode object is describing.
@@ -500,7 +498,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   Map<String, Object>? get valuePropertiesJson =>
       json['valueProperties'] as Map<String, Object>?;
 
-  bool? get hasChildren {
+  bool get hasChildren {
     // In the summary tree, json['hasChildren']==true when the node has details
     // tree children so we need to first check whether the list of children for
     // the node in the tree was specified. If there is an empty list of children
@@ -528,7 +526,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Check whether children are already available.
   bool get childrenReady {
-    return json.containsKey('children') || _children != null || !hasChildren!;
+    return json.containsKey('children') || _children != null || !hasChildren;
   }
 
   Future<List<RemoteDiagnosticsNode>?> get children async {
@@ -544,7 +542,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   Future<void> _computeChildren() async {
     _maybePopulateChildren();
-    if (!hasChildren! || _children != null) {
+    if (!hasChildren || _children != null) {
       return;
     }
 
@@ -570,7 +568,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   void _maybePopulateChildren() {
-    if (!hasChildren! || _children != null) {
+    if (!hasChildren || _children != null) {
       return;
     }
 
