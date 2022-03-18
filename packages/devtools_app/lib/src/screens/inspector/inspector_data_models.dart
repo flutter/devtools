@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../primitives/enum_utils.dart';
 import '../../primitives/math_utils.dart';
@@ -106,19 +106,18 @@ class LayoutProperties {
         children = copyLevel == 0
             ? []
             : node?.childrenNow
-                ?.map((child) =>
-                    LayoutProperties(child, copyLevel: copyLevel - 1))
-                ?.toList(growable: false) {
-    if (children?.isNotEmpty ?? false) {
-      for (var child in children!) {
-        child.parent = this;
-      }
+                    .map((child) =>
+                        LayoutProperties(child, copyLevel: copyLevel - 1))
+                    .toList(growable: false) ??
+                [] {
+    for (var child in children) {
+      child.parent = this;
     }
   }
 
   LayoutProperties.values({
     required this.node,
-    required List<LayoutProperties> this.children,
+    required this.children,
     required this.constraints,
     required this.description,
     required this.flexFactor,
@@ -126,7 +125,7 @@ class LayoutProperties {
     required this.size,
     required this.flexFit,
   }) {
-    for (var child in children!) {
+    for (var child in children) {
       child.parent = this;
     }
   }
@@ -138,7 +137,7 @@ class LayoutProperties {
   ) {
     return LayoutProperties.values(
       node: end.node,
-      children: end.children!,
+      children: end.children,
       constraints: BoxConstraints.lerp(begin.constraints, end.constraints, t),
       description: end.description,
       flexFactor: begin.flexFactor! + (begin.flexFactor! - end.flexFactor!) * t,
@@ -150,22 +149,22 @@ class LayoutProperties {
 
   LayoutProperties? parent;
   final RemoteDiagnosticsNode? node;
-  final List<LayoutProperties>? children;
+  final List<LayoutProperties> children;
   final BoxConstraints? constraints;
   final String? description;
   final num? flexFactor;
   final FlexFit? flexFit;
   final bool? isFlex;
-  final Size size;
+  final Size? size;
 
   /// Represents the order of [children] to be displayed.
-  List<LayoutProperties>? get displayChildren => children;
+  List<LayoutProperties> get displayChildren => children;
 
   bool get hasFlexFactor => flexFactor != null && flexFactor! > 0;
 
-  int get totalChildren => children?.length ?? 0;
+  int get totalChildren => children.length;
 
-  bool get hasChildren => children?.isNotEmpty ?? false;
+  bool get hasChildren => children.isNotEmpty;
 
   double? get width => size?.width;
 
@@ -173,8 +172,8 @@ class LayoutProperties {
 
   double? dimension(Axis? axis) => axis == Axis.horizontal ? width : height;
 
-  List<double?>? childrenDimensions(Axis? axis) {
-    return displayChildren?.map((child) => child.dimension(axis))?.toList();
+  List<double?> childrenDimensions(Axis? axis) {
+    return displayChildren.map((child) => child.dimension(axis)).toList();
   }
 
   List<double?>? get childrenWidths => childrenDimensions(Axis.horizontal);
@@ -203,24 +202,24 @@ class LayoutProperties {
     final parentWidth = parent?.width;
     if (parentWidth == null) return false;
     final parentData = node!.parentData;
-    double widthUsed = width;
+    double widthUsed = width ?? 0;
     if (parentData != null) {
       widthUsed += parentData.offset.dx;
     }
     // TODO(jacobr): certain widgets may allow overflow so this may false
     // positive a bit for cases like Stack.
-    return widthUsed! > parentWidth + overflowEpsilon;
+    return widthUsed > parentWidth + overflowEpsilon;
   }
 
   bool get isOverflowHeight {
     final parentHeight = parent?.height;
     if (parentHeight == null) return false;
     final parentData = node!.parentData;
-    double? heightUsed = height;
+    double heightUsed = height ?? 0;
     if (parentData != null) {
       heightUsed += parentData.offset.dy;
     }
-    return heightUsed! > parentHeight + overflowEpsilon;
+    return heightUsed > parentHeight + overflowEpsilon;
   }
 
   static String describeAxis(double min, double max, String axis) {
@@ -239,7 +238,7 @@ class LayoutProperties {
   }) {
     return LayoutProperties.values(
       node: node,
-      children: children ?? this.children!,
+      children: children ?? this.children,
       constraints: constraints ?? this.constraints,
       description: description ?? this.description,
       flexFactor: flexFactor ?? this.flexFactor,
@@ -326,8 +325,7 @@ class FlexLayoutProperties extends LayoutProperties {
     this.textBaseline,
   }) : super(node);
 
-  factory FlexLayoutProperties.fromDiagnostics(RemoteDiagnosticsNode? node) {
-    if (node == null) return null;
+  factory FlexLayoutProperties.fromDiagnostics(RemoteDiagnosticsNode node) {
     // Cache the properties on an expando so that local tweaks to
     // FlexLayoutProperties persist across multiple lookups from an
     // RemoteDiagnosticsNode.
@@ -353,7 +351,7 @@ class FlexLayoutProperties extends LayoutProperties {
   }) {
     return FlexLayoutProperties(
       size: size ?? this.size,
-      children: children ?? this.children!,
+      children: children ?? this.children,
       node: node,
       constraints: constraints ?? this.constraints,
       isFlex: isFlex ?? this.isFlex,
@@ -371,7 +369,7 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   static FlexLayoutProperties? _buildNode(RemoteDiagnosticsNode node) {
-    final Map<String, Object?>? renderObjectJson = node?.renderObject?.json;
+    final Map<String, Object?>? renderObjectJson = node.renderObject?.json;
     if (renderObjectJson == null) return null;
     final List<dynamic> properties =
         renderObjectJson['properties'] as List<dynamic>;
@@ -409,10 +407,11 @@ class FlexLayoutProperties extends LayoutProperties {
   List<LayoutProperties>? _displayChildren;
 
   @override
-  List<LayoutProperties>? get displayChildren {
-    if (_displayChildren != null) return _displayChildren;
+  List<LayoutProperties> get displayChildren {
+    final displayChildren = _displayChildren;
+    if (displayChildren != null) return displayChildren;
     return _displayChildren =
-        startIsTopLeft ? children : children!.reversed.toList();
+        startIsTopLeft ? children : children.reversed.toList();
   }
 
   int? _totalFlex;
@@ -432,8 +431,8 @@ class FlexLayoutProperties extends LayoutProperties {
   String get type => direction.flexType;
 
   num? get totalFlex {
-    if (children?.isEmpty ?? true) return 0;
-    _totalFlex ??= children!
+    if (children.isEmpty) return 0;
+    _totalFlex ??= children
         .map((child) => child.flexFactor ?? 0)
         .reduce((value, element) => value + element)
         .toInt();
@@ -466,11 +465,12 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   bool get startIsTopLeft {
-    assert(direction != null);
-    switch (direction) {
+    final directionLocal = direction!;
+    switch (directionLocal) {
       case Axis.horizontal:
         switch (textDirection) {
           case TextDirection.ltr:
+          case null:
             return true;
           case TextDirection.rtl:
             return false;
@@ -503,7 +503,7 @@ class FlexLayoutProperties extends LayoutProperties {
         startIsTopLeft ? mainAxisAlignment : mainAxisAlignment.reversed;
 
     double leadingSpace(double freeSpace) {
-      if (children!.isEmpty) return 0.0;
+      if (children.isEmpty) return 0.0;
       switch (displayMainAxisAlignment) {
         case MainAxisAlignment.start:
         case MainAxisAlignment.end:
@@ -513,29 +513,29 @@ class FlexLayoutProperties extends LayoutProperties {
         case MainAxisAlignment.spaceBetween:
           return 0.0;
         case MainAxisAlignment.spaceAround:
-          final spaceBetweenChildren = freeSpace / children!.length;
+          final spaceBetweenChildren = freeSpace / children.length;
           return spaceBetweenChildren * 0.5;
         case MainAxisAlignment.spaceEvenly:
-          return freeSpace / (children!.length + 1);
+          return freeSpace / (children.length + 1);
         default:
           return 0.0;
       }
     }
 
     double betweenSpace(double freeSpace) {
-      if (children!.isEmpty) return 0.0;
+      if (children.isEmpty) return 0.0;
       switch (displayMainAxisAlignment) {
         case MainAxisAlignment.start:
         case MainAxisAlignment.end:
         case MainAxisAlignment.center:
           return 0.0;
         case MainAxisAlignment.spaceBetween:
-          if (children!.length == 1) return freeSpace;
-          return freeSpace / (children!.length - 1);
+          if (children.length == 1) return freeSpace;
+          return freeSpace / (children.length - 1);
         case MainAxisAlignment.spaceAround:
-          return freeSpace / children!.length;
+          return freeSpace / children.length;
         case MainAxisAlignment.spaceEvenly:
-          return freeSpace / (children!.length + 1);
+          return freeSpace / (children.length + 1);
         default:
           return 0.0;
       }
@@ -555,7 +555,7 @@ class FlexLayoutProperties extends LayoutProperties {
     }
 
     List<double> renderSizes(Axis axis) {
-      final sizes = childrenDimensions(axis)!;
+      final sizes = childrenDimensions(axis) ?? [];
       if (freeSpace > 0.0 && axis == direction) {
         /// include free space in the computation
         sizes.add(freeSpace);
@@ -632,17 +632,17 @@ class FlexLayoutProperties extends LayoutProperties {
       return emptySpace * 0.5;
     }
 
-    for (var i = 0; i < children!.length; ++i) {
+    for (var i = 0; i < children.length; ++i) {
       childrenRenderProps.add(
         RenderProperties(
           axis: direction,
           size: Size(widths[i], heights[i]),
           offset: Offset.zero,
-          realSize: displayChildren![i].size,
+          realSize: displayChildren[i].size,
         )
           ..mainAxisOffset = calculateMainAxisOffset(i)
           ..crossAxisOffset = calculateCrossAxisOffset(i)
-          ..layoutProperties = displayChildren![i],
+          ..layoutProperties = displayChildren[i],
       );
     }
 
@@ -689,9 +689,9 @@ class FlexLayoutProperties extends LayoutProperties {
   }) {
     if (crossAxisAlignment == CrossAxisAlignment.stretch) return [];
     final spaces = <RenderProperties>[];
-    for (var i = 0; i < children!.length; ++i) {
+    for (var i = 0; i < children.length; ++i) {
       if (dimension(crossAxisDirection) ==
-              displayChildren![i].dimension(crossAxisDirection) ||
+              displayChildren[i].dimension(crossAxisDirection) ||
           childrenRenderProperties![i].crossAxisDimension ==
               maxSizeAvailable!(crossAxisDirection)) continue;
 
@@ -705,7 +705,10 @@ class FlexLayoutProperties extends LayoutProperties {
       if (space.crossAxisDimension <= 0.0) continue;
       if (crossAxisAlignment == CrossAxisAlignment.center) {
         space.crossAxisDimension *= 0.5;
-        space.crossAxisRealDimension *= 0.5;
+        final crossAxisRealDimension = space.crossAxisRealDimension;
+        if (crossAxisRealDimension != null) {
+          space.crossAxisRealDimension = crossAxisRealDimension * 0.5;
+        }
         spaces.add(space.clone()..crossAxisOffset = 0.0);
         spaces.add(space.clone()
           ..crossAxisOffset = renderProperties.crossAxisDimension +
