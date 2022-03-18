@@ -70,14 +70,14 @@ class ErrorBadgeManager extends DisposableController
     final node =
         RemoteDiagnosticsNode(error.extensionData!.data, null, false, null);
 
-    final errorSummaryNode = node.inlineProperties
-        ?.firstWhereOrNull((p) => p.type == 'ErrorSummary');
+    final errorSummaryNode =
+        node.inlineProperties.firstWhereOrNull((p) => p.type == 'ErrorSummary');
     final errorMessage = errorSummaryNode?.description;
     if (errorMessage == null) {
       return null;
     }
 
-    final devToolsUrlNode = node.inlineProperties?.firstWhereOrNull(
+    final devToolsUrlNode = node.inlineProperties.firstWhereOrNull(
       (p) =>
           p.type == 'DevToolsDeepLinkProperty' &&
           p.getStringMember('value') != null,

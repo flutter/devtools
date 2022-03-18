@@ -823,7 +823,7 @@ abstract class ObjectGroupBase implements Disposable {
     return RemoteDiagnosticsNode(jsonElement, this, false, null);
   }
 
-  Future<List<RemoteDiagnosticsNode?>> parseDiagnosticsNodesObservatory(
+  Future<List<RemoteDiagnosticsNode>> parseDiagnosticsNodesObservatory(
     FutureOr<InstanceRef?> instanceRefFuture,
     RemoteDiagnosticsNode? parent,
     bool isProperty,
@@ -838,21 +838,20 @@ abstract class ObjectGroupBase implements Disposable {
     );
   }
 
-  List<RemoteDiagnosticsNode?> parseDiagnosticsNodesHelper(
+  List<RemoteDiagnosticsNode> parseDiagnosticsNodesHelper(
     List<Object>? jsonObject,
     RemoteDiagnosticsNode? parent,
     bool isProperty,
   ) {
     if (disposed || jsonObject == null) return const [];
-    final List<RemoteDiagnosticsNode?> nodes = [];
-    for (Map<String, Object> element
-        in jsonObject.cast<Map<String, Object>>()) {
+    final nodes = <RemoteDiagnosticsNode>[];
+    for (var element in jsonObject.cast<Map<String, Object>>()) {
       nodes.add(RemoteDiagnosticsNode(element, this, isProperty, parent));
     }
     return nodes;
   }
 
-  Future<List<RemoteDiagnosticsNode?>> parseDiagnosticsNodesDaemon(
+  Future<List<RemoteDiagnosticsNode>> parseDiagnosticsNodesDaemon(
     FutureOr<Object?> jsonFuture,
     RemoteDiagnosticsNode? parent,
     bool isProperty,
@@ -920,7 +919,7 @@ abstract class ObjectGroupBase implements Disposable {
   /// fields.
   ///
   /// The future will immediately complete to null if the inspectorInstanceRef is null.
-  Future<Map<String, InstanceRef?>?> getDartObjectProperties(
+  Future<Map<String, InstanceRef>?> getDartObjectProperties(
     InspectorInstanceRef inspectorInstanceRef,
     final List<String> propertyNames,
   ) async {
@@ -938,9 +937,9 @@ abstract class ObjectGroupBase implements Disposable {
     // property values. Convert it back to a map from property name to
     // property values.
 
-    final properties = <String, InstanceRef?>{};
-    final List<InstanceRef?> values =
-        instance!.elements!.toList().cast<InstanceRef?>();
+    final properties = <String, InstanceRef>{};
+    final List<InstanceRef> values =
+        instance!.elements!.toList().cast<InstanceRef>();
     assert(values.length == propertyNames.length);
     for (int i = 0; i < propertyNames.length; ++i) {
       properties[propertyNames[i]] = values[i];
@@ -948,7 +947,7 @@ abstract class ObjectGroupBase implements Disposable {
     return properties;
   }
 
-  Future<Map<String?, InstanceRef?>?> getEnumPropertyValues(
+  Future<Map<String, InstanceRef>?> getEnumPropertyValues(
     InspectorInstanceRef ref,
   ) async {
     if (disposed) return null;
@@ -960,7 +959,7 @@ abstract class ObjectGroupBase implements Disposable {
     final clazz = await inspectorLibrary.getClass(instance.classRef!, this);
     if (disposed || clazz == null) return null;
 
-    final Map<String, InstanceRef?> properties = {};
+    final properties = <String, InstanceRef>{};
     for (FieldRef field in clazz.fields!) {
       final String name = field.name!;
       if (isPrivate(name)) {
@@ -976,7 +975,7 @@ abstract class ObjectGroupBase implements Disposable {
         continue;
       }
       if (field.isConst! && field.isStatic!) {
-        properties[field.name!] = field.declaredType;
+        properties[field.name!] = field.declaredType!;
       }
     }
     return properties;
@@ -1015,7 +1014,7 @@ abstract class ObjectGroupBase implements Disposable {
         : getPropertyLocationHelper(superClass, name);
   }
 
-  Future<List<RemoteDiagnosticsNode?>> getListHelper(
+  Future<List<RemoteDiagnosticsNode>> getListHelper(
     InspectorInstanceRef instanceRef,
     String methodName,
     RemoteDiagnosticsNode? parent,
@@ -1079,7 +1078,7 @@ abstract class ObjectGroupBase implements Disposable {
     }
   }
 
-  Future<List<RemoteDiagnosticsNode?>> getProperties(
+  Future<List<RemoteDiagnosticsNode>> getProperties(
     InspectorInstanceRef instanceRef,
   ) {
     return getListHelper(
@@ -1090,7 +1089,7 @@ abstract class ObjectGroupBase implements Disposable {
     );
   }
 
-  Future<List<RemoteDiagnosticsNode?>> getChildren(
+  Future<List<RemoteDiagnosticsNode>> getChildren(
     InspectorInstanceRef instanceRef,
     bool summaryTree,
     RemoteDiagnosticsNode? parent,
