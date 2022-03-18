@@ -105,13 +105,14 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
 
   Future<L> fetchLayoutProperties() async {
     objectGroupManager?.cancelNext();
-    final nextObjectGroup = objectGroupManager!.next;
+    final manager = objectGroupManager!;
+    final nextObjectGroup = manager.next;
     final node = await nextObjectGroup.getLayoutExplorerNode(
       getRoot(selectedNode),
     );
     if (!nextObjectGroup.disposed) {
-      assert(objectGroupManager!.next == nextObjectGroup);
-      objectGroupManager!.promoteNext();
+      assert(manager.next == nextObjectGroup);
+      manager.promoteNext();
     }
     return computeLayoutProperties(node);
   }
@@ -129,7 +130,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   }
 
   void _unregisterInspectorControllerService() {
-    inspectorController?.selectedNode
+    inspectorController.selectedNode
         ?.removeListener(_onSelectionChangedCallback);
     inspectorService?.removeClient(this);
   }
@@ -188,7 +189,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
 
   // update selected widget and trigger selection listener event to change focus.
   void refreshSelection(RemoteDiagnosticsNode? node) {
-    inspectorController!.refreshSelection(node, node, true);
+    inspectorController.refreshSelection(node, node, true);
   }
 
   Future<void> onTap(LayoutProperties properties) async {

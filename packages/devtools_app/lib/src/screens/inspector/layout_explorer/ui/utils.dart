@@ -359,13 +359,17 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   double get height => size!.height;
 
   @override
-  bool get isFlex => begin.isFlex! && end.isFlex!;
+  bool get isFlex => begin.isFlex == true && end.isFlex == true;
 
   @override
   RemoteDiagnosticsNode? get node => end.node;
 
   @override
-  Size? get size => Size.lerp(begin.size, end.size, animation!.value);
+  Size? get size {
+    final animationLocal = animation;
+    if (animationLocal == null) return null;
+    return Size.lerp(begin.size, end.size, animationLocal.value);
+  }
 
   @override
   int get totalChildren => end.totalChildren;
