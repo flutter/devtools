@@ -162,8 +162,7 @@ void main() {
       expect(root.isExpanded, isTrue);
       expect(root.children.length, equals(18));
 
-      for (DominatorTreeNode child
-          in root.children as Iterable<DominatorTreeNode>) {
+      for (DominatorTreeNode child in root.children.cast<DominatorTreeNode>()) {
         expect(child.isExpanded, isFalse);
       }
     });
@@ -186,8 +185,7 @@ void main() {
       expect(root.children.length, equals(18));
 
       // Only the selected node should be expanded.
-      for (DominatorTreeNode child
-          in root.children as Iterable<DominatorTreeNode>) {
+      for (DominatorTreeNode child in root.children.cast<DominatorTreeNode>()) {
         expect(child.isExpanded,
             child.callGraphNode.display == 'package:code_size_package');
       }

@@ -27,10 +27,10 @@ import 'package:mockito/mockito.dart';
 import 'test_data/cpu_profile_test_data.dart';
 
 void main() {
-  CpuProfiler cpuProfiler;
+  late CpuProfiler cpuProfiler;
   late CpuProfileData cpuProfileData;
   late CpuProfilerController controller;
-  ServiceConnectionManager fakeServiceManager;
+  late ServiceConnectionManager fakeServiceManager;
 
   setUp(() async {
     final transformer = CpuProfileTransformer();

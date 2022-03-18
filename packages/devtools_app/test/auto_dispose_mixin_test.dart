@@ -140,8 +140,7 @@ void main() {
     final controller = StreamController();
     await tester.pumpWidget(AutoDisposedWidget(controller.stream, key: key));
 
-    final _AutoDisposedWidgetState state =
-        key.currentState as _AutoDisposedWidgetState;
+    final state = key.currentState as _AutoDisposedWidgetState;
     // Verify that the eventCount matches the number of events sent.
     expect(state.eventCount, 0);
     controller.add(null);

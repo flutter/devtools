@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 export 'package:flutter_test/flutter_test.dart';
 
 class _Tester extends WidgetController {
-  _Tester() : super(WidgetsBinding.instance);
+  _Tester() : super(WidgetsBinding.instance!);
 
   @override
   Future<List<Duration>> handlePointerEventRecord(
@@ -21,8 +19,8 @@ class _Tester extends WidgetController {
   }
 
   @override
-  Future<void> pump([Duration duration]) {
-    binding.renderViewElement.markNeedsBuild();
+  Future<void> pump([Duration? duration]) {
+    binding.renderViewElement!.markNeedsBuild();
 
     final completer = Completer<void>();
     binding.addPostFrameCallback((timeStamp) => completer.complete());
@@ -37,5 +35,3 @@ class _Tester extends WidgetController {
     return Future.error(UnimplementedError());
   }
 }
-
-final tester = _Tester();
