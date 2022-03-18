@@ -264,26 +264,31 @@ void main() {
     });
 
     testWidgetsWithWindowSize(
-        'builds flame chart with selected frame', windowSize,
-        (WidgetTester tester) async {
-      await tester.runAsync(() async {
-        await pumpPerformanceScreenBody(tester, runAsync: true);
-        controller
-          ..addFrame(testFrame1.shallowCopy())
-          ..addTimelineEvent(goldenUiTimelineEvent)
-          ..addTimelineEvent(goldenRasterTimelineEvent);
-        expect(controller.data!.frames.length, equals(1));
-        await controller.toggleSelectedFrame(controller.data!.frames.first);
-        await tester.pumpAndSettle();
-      });
-      expect(find.byType(TimelineFlameChart), findsOneWidget);
-      await expectLater(
-        find.byType(TimelineFlameChart),
-        matchesGoldenFile(
-            'goldens/timeline_flame_chart_with_selected_frame.png'),
-      );
-      // Await delay for golden comparison.
-      await tester.pumpAndSettle(const Duration(seconds: 2));
-    }, skip: kIsWeb || !Platform.isMacOS);
+      'builds flame chart with selected frame',
+      windowSize,
+      (WidgetTester tester) async {
+        final data = controller.data!;
+
+        await tester.runAsync(() async {
+          await pumpPerformanceScreenBody(tester, runAsync: true);
+          controller
+            ..addFrame(testFrame1.shallowCopy())
+            ..addTimelineEvent(goldenUiTimelineEvent)
+            ..addTimelineEvent(goldenRasterTimelineEvent);
+          expect(data.frames.length, equals(1));
+          await controller.toggleSelectedFrame(data.frames.first);
+          await tester.pumpAndSettle();
+        });
+        expect(find.byType(TimelineFlameChart), findsOneWidget);
+        await expectLater(
+          find.byType(TimelineFlameChart),
+          matchesGoldenFile(
+              'goldens/timeline_flame_chart_with_selected_frame.png'),
+        );
+        // Await delay for golden comparison.
+        await tester.pumpAndSettle(const Duration(seconds: 2));
+      },
+      skip: kIsWeb || !Platform.isMacOS,
+    );
   });
 }
