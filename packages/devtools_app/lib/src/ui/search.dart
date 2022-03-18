@@ -830,7 +830,6 @@ class _SearchField extends StatelessWidget {
     required this.searchTextFieldController,
     this.label = 'Search',
     this.supportsNavigation = false,
-    this.tracking = false,
     this.decoration,
     this.onClose,
     this.overlayXPositionBuilder,
@@ -846,7 +845,6 @@ class _SearchField extends StatelessWidget {
   final TextEditingController searchTextFieldController;
   final String label;
   final bool supportsNavigation;
-  final bool tracking;
   final InputDecoration? decoration;
   final VoidCallback? onClose;
   final OverlayXPositionBuilder? overlayXPositionBuilder;
