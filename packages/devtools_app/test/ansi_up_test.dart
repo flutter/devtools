@@ -179,7 +179,8 @@ void main() {
           .thenReturn(false);
       when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
       // TODO(polinach): when we start supporting browser tests, uncomment
-      // and fix this. See https://github.com/flutter/devtools/issues/3616.
+      // and fix the mock configuration.
+      // See https://github.com/flutter/devtools/issues/3616.
       // when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
       //     .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceManager);
@@ -270,7 +271,8 @@ void main() {
       fakeServiceManager.consoleService.ensureServiceInitialized();
 
       // TODO(polinach): when we start supporting browser tests, uncomment
-      // and fix this. See https://github.com/flutter/devtools/issues/3616.
+      // and fix the mock configuration.
+      // See https://github.com/flutter/devtools/issues/3616.
       // when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
       //     .thenReturn(ValueNotifier<int>(0));
 
