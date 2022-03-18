@@ -290,7 +290,7 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   }
 
   @override
-  List<double?> childrenDimensions(Axis? axis) {
+  List<double?> childrenDimensions(Axis axis) {
     final beginDimensions = begin.childrenDimensions(axis);
     final endDimensions = end.childrenDimensions(axis);
     return _lerpList(beginDimensions, endDimensions);
@@ -340,7 +340,7 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   String? get description => end.description;
 
   @override
-  double? dimension(Axis? axis) {
+  double? dimension(Axis axis) {
     return lerpDouble(
       begin.dimension(axis),
       end.dimension(axis),

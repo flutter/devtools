@@ -170,9 +170,9 @@ class LayoutProperties {
 
   double? get height => size?.height;
 
-  double? dimension(Axis? axis) => axis == Axis.horizontal ? width : height;
+  double? dimension(Axis axis) => axis == Axis.horizontal ? width : height;
 
-  List<double?> childrenDimensions(Axis? axis) {
+  List<double?> childrenDimensions(Axis axis) {
     return displayChildren.map((child) => child.dimension(axis)).toList();
   }
 
@@ -296,7 +296,7 @@ class FlexLayoutProperties extends LayoutProperties {
     String? description,
     num? flexFactor,
     FlexFit? flexFit,
-    this.direction,
+    this.direction = Axis.vertical,
     this.mainAxisAlignment,
     this.crossAxisAlignment,
     this.mainAxisSize,
@@ -316,7 +316,7 @@ class FlexLayoutProperties extends LayoutProperties {
 
   FlexLayoutProperties._fromNode(
     RemoteDiagnosticsNode node, {
-    this.direction,
+    this.direction = Axis.vertical,
     this.mainAxisAlignment,
     this.mainAxisSize,
     this.crossAxisAlignment,
@@ -379,7 +379,8 @@ class FlexLayoutProperties extends LayoutProperties {
     );
     return FlexLayoutProperties._fromNode(
       node,
-      direction: _directionUtils.enumEntry(data['direction'] as String),
+      direction: _directionUtils.enumEntry(data['direction'] as String) ??
+          Axis.vertical,
       mainAxisAlignment: _mainAxisAlignmentUtils
           .enumEntry(data['mainAxisAlignment'] as String),
       mainAxisSize:
@@ -395,7 +396,7 @@ class FlexLayoutProperties extends LayoutProperties {
     );
   }
 
-  final Axis? direction;
+  final Axis direction;
   final MainAxisAlignment? mainAxisAlignment;
   final CrossAxisAlignment? crossAxisAlignment;
   final MainAxisSize? mainAxisSize;
@@ -464,8 +465,7 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   bool get startIsTopLeft {
-    final directionLocal = direction!;
-    switch (directionLocal) {
+    switch (direction) {
       case Axis.horizontal:
         switch (textDirection) {
           case TextDirection.ltr:
