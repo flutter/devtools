@@ -229,14 +229,10 @@ class AppSizeController {
   //                   progress indicator on app size screen. Needs flutter
   //                   web to support working with isolates. See #33577.
   void loadDiffTreeFromJsonFiles({
-    required DevToolsJsonFile? oldFile,
-    required DevToolsJsonFile? newFile,
+    required DevToolsJsonFile oldFile,
+    required DevToolsJsonFile newFile,
     required void Function(String error) onError,
   }) async {
-    if (oldFile == null || newFile == null) {
-      return;
-    }
-
     if (oldFile.isAnalyzeSizeFile != newFile.isAnalyzeSizeFile ||
         oldFile.isV8Snapshot != newFile.isV8Snapshot) {
       onError(differentTypesError);

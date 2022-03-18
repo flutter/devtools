@@ -2,38 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 @TestOn('vm')
 import 'package:devtools_app/src/primitives/extent_delegate_list.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   TestRenderSliverBoxChildManager({
-    @required this.children,
-    @required this.extentDelegate,
+    required this.children,
+    required this.extentDelegate,
   });
 
-  RenderSliverExtentDelegateBoxAdaptor _renderObject;
+  late RenderSliverExtentDelegateBoxAdaptor _renderObject;
+  bool _renderObjectInitialized = false;
   List<RenderBox> children;
 
   RenderSliverExtentDelegateBoxAdaptor createRenderSliverExtentDelegate() {
-    assert(_renderObject == null);
+    assert(!_renderObjectInitialized);
     _renderObject = RenderSliverExtentDelegateBoxAdaptor(
       childManager: this,
       extentDelegate: extentDelegate,
     );
+    _renderObjectInitialized = true;
     return _renderObject;
   }
 
   final ExtentDelegate extentDelegate;
 
-  int _currentlyUpdatingChildIndex;
+  int? _currentlyUpdatingChildIndex;
 
   @override
-  void createChild(int index, {@required RenderBox after}) {
+  void createChild(int index, {required RenderBox? after}) {
     if (index < 0 || index >= children.length) return;
     try {
       _currentlyUpdatingChildIndex = index;
@@ -51,15 +50,15 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   @override
   double estimateMaxScrollOffset(
     SliverConstraints constraints, {
-    int firstIndex,
-    int lastIndex,
-    double leadingScrollOffset,
-    double trailingScrollOffset,
+    int? firstIndex,
+    int? lastIndex,
+    double? leadingScrollOffset,
+    double? trailingScrollOffset,
   }) {
-    assert(lastIndex >= firstIndex);
+    assert(lastIndex! >= firstIndex!);
     return children.length *
-        (trailingScrollOffset - leadingScrollOffset) /
-        (lastIndex - firstIndex + 1);
+        (trailingScrollOffset! - leadingScrollOffset!) /
+        (lastIndex! - firstIndex! + 1);
   }
 
   @override
