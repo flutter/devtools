@@ -161,6 +161,8 @@ class WidgetVisualizer extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        final hintLocal = hint;
+        final childLocal = child;
         return OverflowBox(
           minWidth: constraints.minWidth + boxAdjust,
           maxWidth: constraints.maxWidth + boxAdjust,
@@ -215,11 +217,11 @@ class WidgetVisualizer extends StatelessWidget {
                                 padding: const EdgeInsets.all(4.0),
                               ),
                             ),
-                            if (hint != null) Flexible(child: hint!),
+                            if (hintLocal != null) Flexible(child: hintLocal),
                           ],
                         ),
                       ),
-                      if (child != null) Expanded(child: child!),
+                      if (childLocal != null) Expanded(child: childLocal),
                     ],
                   ),
                 ),
@@ -283,9 +285,11 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
 
   List<double?> _lerpList(List<double?> l1, List<double?> l2) {
     assert(l1.length == l2.length);
+    if (l1.isEmpty) return [];
+    final animationLocal = animation!;
     return [
       for (var i = 0; i < children.length; i++)
-        lerpDouble(l1[i], l2[i], animation!.value)
+        lerpDouble(l1[i], l2[i], animationLocal.value)
     ];
   }
 
@@ -316,17 +320,19 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
 
   @override
   String describeWidthConstraints() {
-    return constraints!.hasBoundedWidth
+    final constraintsLocal = constraints!;
+    return constraintsLocal.hasBoundedWidth
         ? LayoutProperties.describeAxis(
-            constraints!.minWidth, constraints!.maxWidth, 'w')
+            constraintsLocal.minWidth, constraintsLocal.maxWidth, 'w')
         : 'w=unconstrained';
   }
 
   @override
   String describeHeightConstraints() {
-    return constraints!.hasBoundedHeight
+    final constraintsLocal = constraints!;
+    return constraintsLocal.hasBoundedHeight
         ? LayoutProperties.describeAxis(
-            constraints!.minHeight, constraints!.maxHeight, 'h')
+            constraintsLocal.minHeight, constraintsLocal.maxHeight, 'h')
         : 'h=unconstrained';
   }
 
