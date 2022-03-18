@@ -425,7 +425,7 @@ final httpInProgressEventTrace = [
   },
 ];
 
-final testSocket1 = WebSocket(SocketStatistic.parse(testSocket1Json), 0);
+final testSocket1 = WebSocket(SocketStatistic.parse(testSocket1Json)!, 0);
 final Map<String, dynamic> testSocket1Json = {
   'id': 0,
   'startTime': 1000000,
@@ -439,7 +439,7 @@ final Map<String, dynamic> testSocket1Json = {
   'writeBytes': 15,
 };
 
-final testSocket2 = WebSocket(SocketStatistic.parse(testSocket2Json), 0);
+final testSocket2 = WebSocket(SocketStatistic.parse(testSocket2Json)!, 0);
 final Map<String, dynamic> testSocket2Json = {
   'id': 1,
   'startTime': 3000000,
@@ -453,7 +453,7 @@ final Map<String, dynamic> testSocket2Json = {
   'writeBytes': 25,
 };
 
-final testSocket3 = WebSocket(SocketStatistic.parse(testSocket3Json), 0);
+final testSocket3 = WebSocket(SocketStatistic.parse(testSocket3Json)!, 0);
 final Map<String, dynamic> testSocket3Json = {
   'id': 0,
   'startTime': 1000000,
