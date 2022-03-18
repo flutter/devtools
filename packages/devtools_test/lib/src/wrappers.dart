@@ -144,9 +144,7 @@ void testWidgetsWithWindowSize(
 }
 
 Future<void> _setWindowSize(Size windowSize) async {
-  final TestWidgetsFlutterBinding binding =
-      TestWidgetsFlutterBinding.ensureInitialized()
-          as TestWidgetsFlutterBinding;
+  final binding = TestWidgetsFlutterBinding.ensureInitialized();
   await binding.setSurfaceSize(windowSize);
   binding.window.physicalSizeTestValue = windowSize;
   binding.window.devicePixelRatioTestValue = 1.0;
