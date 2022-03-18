@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 class MissingMaterialError extends StatelessWidget {
@@ -21,7 +19,7 @@ class MissingMaterialError extends StatelessWidget {
 
 /// Opens an [AlertDialog] showing what the user typed.
 class ExampleWidget extends StatefulWidget {
-  const ExampleWidget({Key key}) : super(key: key);
+  const ExampleWidget({Key? key}) : super(key: key);
 
   @override
   _ExampleWidgetState createState() => _ExampleWidgetState();

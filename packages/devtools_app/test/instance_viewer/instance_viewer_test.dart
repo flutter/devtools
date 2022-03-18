@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
@@ -70,8 +70,8 @@ final emptyMapInstance = AsyncValue.data(
 
 final map2Instance = AsyncValue.data(
   InstanceDetails.map([
-    stringInstance.data.value,
-    list2Instance.data.value,
+    stringInstance.data!.value,
+    list2Instance.data!.value,
   ], hash: 0, instanceRefId: '0', setter: null),
 );
 
