@@ -25,7 +25,7 @@ abstract class LayoutExplorerWidget extends StatefulWidget {
     Key? key,
   }) : super(key: key);
 
-  final InspectorController? inspectorController;
+  final InspectorController inspectorController;
 }
 
 /// Base class for state objects for layout widgets for all widget types.
@@ -59,9 +59,9 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
       _previousProperties ?? _animatedProperties as L? ?? _properties;
 
   RemoteDiagnosticsNode? get selectedNode =>
-      inspectorController?.selectedNode?.value?.diagnostic;
+      inspectorController.selectedNode?.value?.diagnostic;
 
-  InspectorController? get inspectorController => widget.inspectorController;
+  InspectorController get inspectorController => widget.inspectorController;
 
   InspectorService? get inspectorService =>
       serviceManager.inspectorService as InspectorService?;
@@ -124,7 +124,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   String? id(RemoteDiagnosticsNode? node) => node?.dartDiagnosticRef.id;
 
   void _registerInspectorControllerService() {
-    inspectorController?.selectedNode?.addListener(_onSelectionChangedCallback);
+    inspectorController.selectedNode?.addListener(_onSelectionChangedCallback);
     inspectorService?.addClient(this);
   }
 
