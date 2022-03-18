@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'dart:ui';
 
@@ -24,7 +24,7 @@ import 'widgets_theme.dart';
 @immutable
 class BorderLayout extends StatelessWidget {
   const BorderLayout({
-    Key key,
+    Key? key,
     this.left,
     this.leftWidth,
     this.top,
@@ -41,16 +41,16 @@ class BorderLayout extends StatelessWidget {
             center != null),
         super(key: key);
 
-  final Widget center;
-  final Widget top;
-  final Widget left;
-  final Widget right;
-  final Widget bottom;
+  final Widget? center;
+  final Widget? top;
+  final Widget? left;
+  final Widget? right;
+  final Widget? bottom;
 
-  final double leftWidth;
-  final double rightWidth;
-  final double topHeight;
-  final double bottomHeight;
+  final double? leftWidth;
+  final double? rightWidth;
+  final double? topHeight;
+  final double? bottomHeight;
 
   CrossAxisAlignment get crossAxisAlignment {
     if (left != null && right != null) {
@@ -106,14 +106,14 @@ class BorderLayout extends StatelessWidget {
 
 @immutable
 class Truncateable extends StatelessWidget {
-  const Truncateable({Key key, this.truncate, this.child}) : super(key: key);
+  const Truncateable({Key? key, this.truncate, this.child}) : super(key: key);
 
-  final Widget child;
-  final bool truncate;
+  final Widget? child;
+  final bool? truncate;
 
   @override
   Widget build(BuildContext context) {
-    return Flexible(flex: truncate ? 1 : 0, child: child);
+    return Flexible(flex: truncate! ? 1 : 0, child: child!);
   }
 }
 
@@ -125,25 +125,25 @@ class Truncateable extends StatelessWidget {
 /// [textColor] color for title text
 class WidgetVisualizer extends StatelessWidget {
   const WidgetVisualizer({
-    Key key,
-    @required this.title,
+    Key? key,
+    required this.title,
     this.hint,
-    @required this.isSelected,
-    @required this.layoutProperties,
+    required this.isSelected,
+    required this.layoutProperties,
     this.child,
     this.overflowSide,
     this.largeTitle = false,
   })  : assert(title != null),
         super(key: key);
 
-  final LayoutProperties layoutProperties;
+  final LayoutProperties? layoutProperties;
   final String title;
-  final Widget child;
-  final Widget hint;
+  final Widget? child;
+  final Widget? hint;
   final bool isSelected;
   final bool largeTitle;
 
-  final OverflowSide overflowSide;
+  final OverflowSide? overflowSide;
 
   static const _overflowIndicatorSize = 20.0;
   static const _borderUnselectedWidth = 1.0;
@@ -156,8 +156,8 @@ class WidgetVisualizer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final properties = layoutProperties;
-    final borderColor = WidgetTheme.fromName(properties.node.description).color;
+    final properties = layoutProperties!;
+    final borderColor = WidgetTheme.fromName(properties.node!.description).color;
     final boxAdjust = isSelected ? _selectedPadding : 0.0;
 
     return LayoutBuilder(
@@ -174,7 +174,7 @@ class WidgetVisualizer extends StatelessWidget {
                   Positioned.fill(
                     child: CustomPaint(
                       painter: OverflowIndicatorPainter(
-                        overflowSide,
+                        overflowSide!,
                         _overflowIndicatorSize,
                       ),
                     ),
@@ -216,11 +216,11 @@ class WidgetVisualizer extends StatelessWidget {
                                 padding: const EdgeInsets.all(4.0),
                               ),
                             ),
-                            if (hint != null) Flexible(child: hint),
+                            if (hint != null) Flexible(child: hint!),
                           ],
                         ),
                       ),
-                      if (child != null) Expanded(child: child),
+                      if (child != null) Expanded(child: child!),
                     ],
                   ),
                 ),
@@ -251,31 +251,31 @@ class WidgetVisualizer extends StatelessWidget {
   }
 }
 
-class AnimatedLayoutProperties<T extends LayoutProperties>
+class AnimatedLayoutProperties<T extends LayoutProperties?>
     implements LayoutProperties {
   AnimatedLayoutProperties(this.begin, this.end, this.animation)
       : assert(begin != null),
         assert(end != null),
         assert(begin.children?.length == end.children?.length),
         _children = [
-          for (var i = 0; i < begin.children.length; i++)
+          for (var i = 0; i < begin.children!.length; i++)
             AnimatedLayoutProperties(
-              begin.children[i],
-              end.children[i],
+              begin.children![i],
+              end.children![i],
               animation,
             )
         ];
 
   final T begin;
   final T end;
-  final Animation<double> animation;
+  final Animation<double>? animation;
   final List<LayoutProperties> _children;
 
   @override
-  LayoutProperties get parent => end.parent;
+  LayoutProperties? get parent => end.parent;
 
   @override
-  set parent(LayoutProperties _parent) {
+  set parent(LayoutProperties? _parent) {
     end.parent = _parent;
   }
 
@@ -284,34 +284,34 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
     return _children;
   }
 
-  List<double> _lerpList(List<double> l1, List<double> l2) {
+  List<double?> _lerpList(List<double?> l1, List<double?> l2) {
     assert(l1.length == l2.length);
     return [
       for (var i = 0; i < children.length; i++)
-        lerpDouble(l1[i], l2[i], animation.value)
+        lerpDouble(l1[i], l2[i], animation!.value)
     ];
   }
 
   @override
-  List<double> childrenDimensions(Axis axis) {
-    final beginDimensions = begin.childrenDimensions(axis);
-    final endDimensions = end.childrenDimensions(axis);
+  List<double?> childrenDimensions(Axis? axis) {
+    final beginDimensions = begin.childrenDimensions(axis)!;
+    final endDimensions = end.childrenDimensions(axis)!;
     return _lerpList(beginDimensions, endDimensions);
   }
 
   @override
-  List<double> get childrenHeights =>
-      _lerpList(begin.childrenHeights, end.childrenHeights);
+  List<double?> get childrenHeights =>
+      _lerpList(begin.childrenHeights!, end.childrenHeights!);
 
   @override
-  List<double> get childrenWidths =>
-      _lerpList(begin.childrenWidths, end.childrenWidths);
+  List<double?> get childrenWidths =>
+      _lerpList(begin.childrenWidths!, end.childrenWidths!);
 
   @override
-  BoxConstraints get constraints {
+  BoxConstraints? get constraints {
     try {
       return BoxConstraints.lerp(
-          begin.constraints, end.constraints, animation.value);
+          begin.constraints, end.constraints, animation!.value);
     } catch (e) {
       return end.constraints;
     }
@@ -319,75 +319,75 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
 
   @override
   String describeWidthConstraints() {
-    return constraints.hasBoundedWidth
+    return constraints!.hasBoundedWidth
         ? LayoutProperties.describeAxis(
-            constraints.minWidth, constraints.maxWidth, 'w')
+            constraints!.minWidth, constraints!.maxWidth, 'w')
         : 'w=unconstrained';
   }
 
   @override
   String describeHeightConstraints() {
-    return constraints.hasBoundedHeight
+    return constraints!.hasBoundedHeight
         ? LayoutProperties.describeAxis(
-            constraints.minHeight, constraints.maxHeight, 'h')
+            constraints!.minHeight, constraints!.maxHeight, 'h')
         : 'h=unconstrained';
   }
 
   @override
-  String describeWidth() => 'w=${toStringAsFixed(size.width)}';
+  String describeWidth() => 'w=${toStringAsFixed(size!.width)}';
 
   @override
-  String describeHeight() => 'h=${toStringAsFixed(size.height)}';
+  String describeHeight() => 'h=${toStringAsFixed(size!.height)}';
 
   @override
-  String get description => end.description;
+  String? get description => end.description;
 
   @override
-  double dimension(Axis axis) {
+  double? dimension(Axis? axis) {
     return lerpDouble(
       begin.dimension(axis),
       end.dimension(axis),
-      animation.value,
+      animation!.value,
     );
   }
 
   @override
-  num get flexFactor =>
-      lerpDouble(begin.flexFactor, end.flexFactor, animation.value);
+  num? get flexFactor =>
+      lerpDouble(begin.flexFactor, end.flexFactor, animation!.value);
 
   @override
   bool get hasChildren => children.isNotEmpty;
 
   @override
-  double get height => size.height;
+  double get height => size!.height;
 
   @override
-  bool get isFlex => begin.isFlex && end.isFlex;
+  bool get isFlex => begin.isFlex! && end.isFlex!;
 
   @override
-  RemoteDiagnosticsNode get node => end.node;
+  RemoteDiagnosticsNode? get node => end.node;
 
   @override
-  Size get size => Size.lerp(begin.size, end.size, animation.value);
+  Size? get size => Size.lerp(begin.size, end.size, animation!.value);
 
   @override
   int get totalChildren => end.totalChildren;
 
   @override
-  double get width => size.width;
+  double get width => size!.width;
 
   @override
   bool get hasFlexFactor => begin.hasFlexFactor && end.hasFlexFactor;
 
   @override
   LayoutProperties copyWith({
-    List<LayoutProperties> children,
-    BoxConstraints constraints,
-    String description,
-    int flexFactor,
-    FlexFit flexFit,
-    bool isFlex,
-    Size size,
+    List<LayoutProperties>? children,
+    BoxConstraints? constraints,
+    String? description,
+    int? flexFactor,
+    FlexFit? flexFit,
+    bool? isFlex,
+    Size? size,
   }) {
     return LayoutProperties.values(
       node: node,
@@ -408,16 +408,16 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   bool get isOverflowHeight => end.isOverflowHeight;
 
   @override
-  FlexFit get flexFit => end.flexFit;
+  FlexFit? get flexFit => end.flexFit;
 
   @override
-  List<LayoutProperties> get displayChildren => end.displayChildren;
+  List<LayoutProperties>? get displayChildren => end.displayChildren;
 }
 
 class LayoutExplorerBackground extends StatelessWidget {
   const LayoutExplorerBackground({
-    Key key,
-    @required this.colorScheme,
+    Key? key,
+    required this.colorScheme,
   }) : super(key: key);
 
   final ColorScheme colorScheme;

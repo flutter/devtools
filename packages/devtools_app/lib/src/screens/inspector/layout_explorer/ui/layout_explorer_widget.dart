@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -22,10 +22,10 @@ const maxRequestsPerSecond = 3.0;
 abstract class LayoutExplorerWidget extends StatefulWidget {
   const LayoutExplorerWidget(
     this.inspectorController, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
-  final InspectorController inspectorController;
+  final InspectorController? inspectorController;
 }
 
 /// Base class for state objects for layout widgets for all widget types.
@@ -33,40 +33,40 @@ abstract class LayoutExplorerWidget extends StatefulWidget {
 /// This class contains common code useful for visualizing all kinds of widgets.
 /// To implement
 abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
-        L extends LayoutProperties> extends State<W>
+        L extends LayoutProperties?> extends State<W>
     with TickerProviderStateMixin
     implements InspectorServiceClient {
   LayoutExplorerWidgetState() {
     _onSelectionChangedCallback = onSelectionChanged;
   }
 
-  AnimationController entranceController;
-  CurvedAnimation entranceCurve;
-  AnimationController changeController;
+  late AnimationController entranceController;
+  late CurvedAnimation entranceCurve;
+  late AnimationController changeController;
 
-  CurvedAnimation changeAnimation;
+  CurvedAnimation? changeAnimation;
 
-  L _previousProperties;
+  L? _previousProperties;
 
-  L _properties;
+  L? _properties;
 
-  InspectorObjectGroupManager objectGroupManager;
+  InspectorObjectGroupManager? objectGroupManager;
 
-  AnimatedLayoutProperties<L> get animatedProperties => _animatedProperties;
-  AnimatedLayoutProperties<L> _animatedProperties;
+  AnimatedLayoutProperties<L>? get animatedProperties => _animatedProperties;
+  AnimatedLayoutProperties<L>? _animatedProperties;
 
-  L get properties => _previousProperties ?? _animatedProperties ?? _properties;
+  L? get properties => _previousProperties ?? _animatedProperties as L? ?? _properties;
 
-  RemoteDiagnosticsNode get selectedNode =>
+  RemoteDiagnosticsNode? get selectedNode =>
       inspectorController?.selectedNode?.value?.diagnostic;
 
-  InspectorController get inspectorController => widget.inspectorController;
+  InspectorController? get inspectorController => widget.inspectorController;
 
-  InspectorService get inspectorService => serviceManager.inspectorService;
+  InspectorService? get inspectorService => serviceManager.inspectorService as InspectorService?;
 
-  RateLimiter rateLimiter;
+  late RateLimiter rateLimiter;
 
-  Future<void> Function() _onSelectionChangedCallback;
+  late Future<void> Function() _onSelectionChangedCallback;
 
   Future<void> onSelectionChanged() async {
     if (!mounted) return;
@@ -86,40 +86,40 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   }
 
   /// Whether this layout explorer can work with this kind of node.
-  bool shouldDisplay(RemoteDiagnosticsNode node);
+  bool shouldDisplay(RemoteDiagnosticsNode? node);
 
-  Size get size => properties.size;
+  Size? get size => properties!.size;
 
-  List<LayoutProperties> get children => properties.displayChildren;
+  List<LayoutProperties>? get children => properties!.displayChildren;
 
-  LayoutProperties highlighted;
+  LayoutProperties? highlighted;
 
   /// Returns the root widget to show.
   ///
   /// For cases such as Flex widgets or in the future ListView widgets we may
   /// want to show the layout for all widgets under a root that is the parent
   /// of the current widget.
-  RemoteDiagnosticsNode getRoot(RemoteDiagnosticsNode node);
+  RemoteDiagnosticsNode? getRoot(RemoteDiagnosticsNode? node);
 
   Future<L> fetchLayoutProperties() async {
     objectGroupManager?.cancelNext();
-    final nextObjectGroup = objectGroupManager.next;
+    final nextObjectGroup = objectGroupManager!.next;
     final node = await nextObjectGroup.getLayoutExplorerNode(
       getRoot(selectedNode),
     );
     if (!nextObjectGroup.disposed) {
-      assert(objectGroupManager.next == nextObjectGroup);
-      objectGroupManager.promoteNext();
+      assert(objectGroupManager!.next == nextObjectGroup);
+      objectGroupManager!.promoteNext();
     }
     return computeLayoutProperties(node);
   }
 
-  L computeLayoutProperties(RemoteDiagnosticsNode node);
+  L computeLayoutProperties(RemoteDiagnosticsNode? node);
 
   AnimatedLayoutProperties<L> computeAnimatedProperties(L nextProperties);
-  void updateHighlighted(L newProperties);
+  void updateHighlighted(L? newProperties);
 
-  String id(RemoteDiagnosticsNode node) => node?.dartDiagnosticRef?.id;
+  String? id(RemoteDiagnosticsNode? node) => node?.dartDiagnosticRef?.id;
 
   void _registerInspectorControllerService() {
     inspectorController?.selectedNode?.addListener(_onSelectionChangedCallback);
@@ -185,13 +185,13 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   }
 
   // update selected widget and trigger selection listener event to change focus.
-  void refreshSelection(RemoteDiagnosticsNode node) {
-    inspectorController.refreshSelection(node, node, true);
+  void refreshSelection(RemoteDiagnosticsNode? node) {
+    inspectorController!.refreshSelection(node, node, true);
   }
 
   Future<void> onTap(LayoutProperties properties) async {
     setState(() => highlighted = properties);
-    await setSelectionInspector(properties.node);
+    await setSelectionInspector(properties.node!);
   }
 
   void onDoubleTap(LayoutProperties properties) {
@@ -243,7 +243,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
           setState(() {
-            _properties = _animatedProperties.end;
+            _properties = _animatedProperties!.end;
             _animatedProperties = null;
             changeController.value = 0.0;
           });
@@ -256,7 +256,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
     final service = serviceManager.inspectorService;
     if (service != objectGroupManager?.inspectorService) {
       objectGroupManager = InspectorObjectGroupManager(
-        service,
+        service as InspectorService,
         'flex-layout',
       );
     }
@@ -275,14 +275,14 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
 
   // TODO(albertusangga): Investigate why onForceRefresh is not getting called.
   @override
-  Future<Object> onForceRefresh() async {
+  Future<Object?> onForceRefresh() async {
     _setProperties(await fetchLayoutProperties());
     return null;
   }
 
   /// Currently this is not working so we should listen to controller selection event instead.
   @override
-  Future<void> onInspectorSelectionChanged() {
+  Future<void>? onInspectorSelectionChanged() {
     return null;
   }
 

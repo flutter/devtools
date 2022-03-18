@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 
@@ -17,40 +17,40 @@ import 'utils.dart';
 
 class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
   VisualizeWidthAndHeightWithConstraints({
-    @required this.properties,
-    double arrowHeadSize,
-    @required this.child,
+    required this.properties,
+    double? arrowHeadSize,
+    required this.child,
     this.warnIfUnconstrained = true,
   }) : arrowHeadSize = arrowHeadSize ?? defaultIconSize;
 
-  final Widget child;
-  final LayoutProperties properties;
+  final Widget? child;
+  final LayoutProperties? properties;
   final double arrowHeadSize;
   final bool warnIfUnconstrained;
 
   @override
   Widget build(BuildContext context) {
     final showChildrenWidthsSum =
-        properties is FlexLayoutProperties && properties.isOverflowWidth;
+        properties is FlexLayoutProperties && properties!.isOverflowWidth;
     final bottomHeight = widthAndConstraintIndicatorSize;
     final rightWidth = heightAndConstraintIndicatorSize;
     final colorScheme = Theme.of(context).colorScheme;
 
     final showOverflowHeight =
-        properties is FlexLayoutProperties && properties.isOverflowHeight;
+        properties is FlexLayoutProperties && properties!.isOverflowHeight;
     final heightDescription = RotatedBox(
       quarterTurns: 1,
       child: dimensionDescription(
           TextSpan(
             children: [
               TextSpan(
-                text: '${properties.describeHeight()}',
+                text: '${properties!.describeHeight()}',
               ),
-              if (properties.constraints != null) ...[
+              if (properties!.constraints != null) ...[
                 if (!showOverflowHeight) const TextSpan(text: '\n'),
                 TextSpan(
-                  text: ' (${properties.describeHeightConstraints()})',
-                  style: properties.constraints.hasBoundedHeight ||
+                  text: ' (${properties!.describeHeightConstraints()})',
+                  style: properties!.constraints!.hasBoundedHeight ||
                           !warnIfUnconstrained
                       ? null
                       : TextStyle(
@@ -61,11 +61,11 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
               if (showOverflowHeight)
                 TextSpan(
                   text: '\nchildren take: '
-                      '${toStringAsFixed(sum(properties.childrenHeights))}',
+                      '${toStringAsFixed(sum(properties!.childrenHeights as Iterable<double>))}',
                 ),
             ],
           ),
-          properties.isOverflowHeight,
+          properties!.isOverflowHeight,
           colorScheme),
     );
     final right = Container(
@@ -105,13 +105,13 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
     final widthDescription = dimensionDescription(
       TextSpan(
         children: [
-          TextSpan(text: '${properties.describeWidth()}; '),
-          if (properties.constraints != null) ...[
+          TextSpan(text: '${properties!.describeWidth()}; '),
+          if (properties!.constraints != null) ...[
             if (!showChildrenWidthsSum) const TextSpan(text: '\n'),
             TextSpan(
-              text: '(${properties.describeWidthConstraints()})',
+              text: '(${properties!.describeWidthConstraints()})',
               style:
-                  properties.constraints.hasBoundedWidth || !warnIfUnconstrained
+                  properties!.constraints!.hasBoundedWidth || !warnIfUnconstrained
                       ? null
                       : TextStyle(color: colorScheme.unconstrainedColor),
             )
@@ -119,11 +119,11 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
           if (showChildrenWidthsSum)
             TextSpan(
               text: '\nchildren take '
-                  '${toStringAsFixed(sum(properties.childrenWidths))}',
+                  '${toStringAsFixed(sum(properties!.childrenWidths as Iterable<double>))}',
             )
         ],
       ),
-      properties.isOverflowWidth,
+      properties!.isOverflowWidth,
       colorScheme,
     );
     final bottom = Container(

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 
@@ -16,7 +16,7 @@ import 'theme.dart';
 class FreeSpaceVisualizerWidget extends StatelessWidget {
   const FreeSpaceVisualizerWidget(
     this.renderProperties, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   final RenderProperties renderProperties;
@@ -25,8 +25,8 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final heightDescription =
-        'h=${toStringAsFixed(renderProperties.realHeight)}';
-    final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth)}';
+        'h=${toStringAsFixed(renderProperties.realHeight!)}';
+    final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth!)}';
     final showWidth = renderProperties.realWidth !=
         (renderProperties.layoutProperties?.width);
     final widthWidget = Column(
@@ -93,8 +93,8 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
 class PaddingVisualizerWidget extends StatelessWidget {
   const PaddingVisualizerWidget(
     this.renderProperties, {
-    @required this.horizontal,
-    Key key,
+    required this.horizontal,
+    Key? key,
   }) : super(key: key);
 
   final RenderProperties renderProperties;
@@ -104,8 +104,8 @@ class PaddingVisualizerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final heightDescription =
-        'h=${toStringAsFixed(renderProperties.realHeight)}';
-    final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth)}';
+        'h=${toStringAsFixed(renderProperties.realHeight!)}';
+    final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth!)}';
     final widthWidget = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
