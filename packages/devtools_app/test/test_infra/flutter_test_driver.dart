@@ -32,8 +32,8 @@ abstract class FlutterTestDriver {
 
   final Directory projectFolder;
   final String _logPrefix;
-  Process? proc;
-  int? procPid;
+  late Process proc;
+  late int procPid;
   final StreamController<String> stdoutController =
       StreamController<String>.broadcast();
   final StreamController<String> stderrController =
@@ -90,13 +90,13 @@ abstract class FlutterTestDriver {
     );
     // This class doesn't use the result of the future. It's made available
     // via a getter for external uses.
-    unawaited(proc!.exitCode.then((int code) {
+    unawaited(proc.exitCode.then((int code) {
       debugPrint('Process exited ($code)');
       hasExited = true;
     }));
-    transformToLines(proc!.stdout)
+    transformToLines(proc.stdout)
         .listen((String line) => stdoutController.add(line));
-    transformToLines(proc!.stderr)
+    transformToLines(proc.stderr)
         .listen((String line) => stderrController.add(line));
 
     // Capture stderr to a buffer so we can show it all if any requests fail.
@@ -108,18 +108,15 @@ abstract class FlutterTestDriver {
   }
 
   Future<int> killGracefully() async {
-    if (procPid == null) {
-      return -1;
-    }
     debugPrint('Sending SIGTERM to $procPid..');
-    Process.killPid(procPid!);
-    return proc!.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
+    Process.killPid(procPid);
+    return proc.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
   }
 
   Future<int> _killForcefully() {
     debugPrint('Sending SIGKILL to $procPid..');
-    Process.killPid(procPid!, ProcessSignal.sigkill);
-    return proc!.exitCode;
+    Process.killPid(procPid, ProcessSignal.sigkill);
+    return proc.exitCode;
   }
 
   String? flutterIsolateId;
@@ -419,7 +416,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     if (_currentRunningAppId != null) {
       debugPrint('Detaching from app');
       await Future.any<void>(<Future<void>>[
-        proc!.exitCode,
+        proc.exitCode,
         _sendRequest(
           'app.detach',
           <String, dynamic>{'appId': _currentRunningAppId},
@@ -433,7 +430,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       _currentRunningAppId = null;
     }
     debugPrint('Waiting for process to end');
-    return proc!.exitCode.timeout(quitTimeout, onTimeout: killGracefully);
+    return proc.exitCode.timeout(quitTimeout, onTimeout: killGracefully);
   }
 
   Future<int> stop() async {
@@ -445,7 +442,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     if (_currentRunningAppId != null) {
       debugPrint('Stopping app');
       await Future.any<void>(<Future<void>>[
-        proc!.exitCode,
+        proc.exitCode,
         _sendRequest(
           'app.stop',
           <String, dynamic>{'appId': _currentRunningAppId},
@@ -458,12 +455,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       );
       _currentRunningAppId = null;
     }
-    final procLocal = proc;
-    if (procLocal != null) {
-      debugPrint('Waiting for process to end');
-      return procLocal.exitCode.timeout(quitTimeout, onTimeout: killGracefully);
-    }
-    return 0;
+
+    debugPrint('Waiting for process to end');
+    return proc.exitCode.timeout(quitTimeout, onTimeout: killGracefully);
   }
 
   int id = 1;
@@ -485,7 +479,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       id: requestId,
       ignoreAppStopEvent: method == 'app.stop',
     );
-    proc!.stdin.writeln(jsonEncoded);
+    proc.stdin.writeln(jsonEncoded);
     final Map<String, dynamic> response = await responseFuture;
 
     if (response['error'] != null || response['result'] == null) {
