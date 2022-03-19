@@ -349,16 +349,17 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         trackFutures: true,
       );
 
-      vmService!.onSend.listen((String s) => debugPrint('==> $s'));
-      vmService!.onReceive.listen((String s) => debugPrint('<== $s'));
+      final vmServiceLocal = vmService!;
+      vmServiceLocal.onSend.listen((String s) => debugPrint('==> $s'));
+      vmServiceLocal.onReceive.listen((String s) => debugPrint('<== $s'));
       await Future.wait(<Future<Success>>[
-        vmService!.streamListen(EventStreams.kIsolate),
-        vmService!.streamListen(EventStreams.kDebug),
+        vmServiceLocal.streamListen(EventStreams.kIsolate),
+        vmServiceLocal.streamListen(EventStreams.kDebug),
       ]);
 
       // On hot restarts, the isolate ID we have for the Flutter thread will
       // exit so we need to invalidate our cached ID.
-      vmService!.onIsolateEvent.listen((Event event) {
+      vmServiceLocal.onIsolateEvent.listen((Event event) {
         if (event.kind == EventKind.kIsolateExit &&
             event.isolate!.id == flutterIsolateId) {
           flutterIsolateId = null;
@@ -370,7 +371,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       // to hit breakpoints, etc.
       await waitForPause();
       if (runConfig.pauseOnExceptions) {
-        await vmService!.setIsolatePauseMode(
+        await vmServiceLocal.setIsolatePauseMode(
           await getFlutterIsolateId(),
           exceptionPauseMode: ExceptionPauseMode.kUnhandled,
         );
