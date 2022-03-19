@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -18,7 +16,7 @@ import 'program_explorer_model.dart';
 
 class ProgramExplorerController extends DisposableController
     with AutoDisposeControllerMixin {
-  ProgramExplorerController({@required this.debuggerController});
+  ProgramExplorerController({required this.debuggerController});
 
   /// The outline view nodes for the currently selected library.
   ValueListenable<List<VMServiceObjectNode>> get outlineNodes => _outlineNodes;
@@ -28,12 +26,12 @@ class ProgramExplorerController extends DisposableController
   final _isLoadingOutline = ValueNotifier<bool>(false);
 
   /// The currently selected node in the Program Explorer file picker.
-  VMServiceObjectNode _scriptSelection;
+  VMServiceObjectNode? _scriptSelection;
 
   /// The currently selected node in the Program Explorer outline.
-  ValueListenable<VMServiceObjectNode> get outlineSelection =>
+  ValueListenable<VMServiceObjectNode?> get outlineSelection =>
       _outlineSelection;
-  final _outlineSelection = ValueNotifier<VMServiceObjectNode>(null);
+  final _outlineSelection = ValueNotifier<VMServiceObjectNode?>(null);
 
   /// The processed roots of the tree.
   ValueListenable<List<VMServiceObjectNode>> get rootObjectNodes =>
@@ -43,7 +41,7 @@ class ProgramExplorerController extends DisposableController
   ValueListenable<int> get selectedNodeIndex => _selectedNodeIndex;
   final _selectedNodeIndex = ValueNotifier<int>(0);
 
-  IsolateRef _isolate;
+  IsolateRef? _isolate;
 
   /// Notifies that the controller has finished initializing.
   ValueListenable<bool> get initialized => _initialized;
@@ -73,9 +71,9 @@ class ProgramExplorerController extends DisposableController
     _isolate = serviceManager.isolateManager.selectedIsolate.value;
     final libraries = _isolate != null
         ? serviceManager.isolateManager
-            .isolateDebuggerState(_isolate)
-            .isolateNow
-            .libraries
+            .isolateDebuggerState(_isolate)!
+            .isolateNow!
+            .libraries!
         : <LibraryRef>[];
 
     // Build the initial tree.
@@ -97,7 +95,7 @@ class ProgramExplorerController extends DisposableController
     );
   }
 
-  Future<void> selectScriptNode(ScriptRef script) async {
+  Future<void> selectScriptNode(ScriptRef? script) async {
     if (!initialized.value) {
       return;
     }
@@ -106,10 +104,10 @@ class ProgramExplorerController extends DisposableController
   }
 
   Future<void> _selectScriptNode(
-    ScriptRef script,
+    ScriptRef? script,
     List<VMServiceObjectNode> nodes,
   ) async {
-    final searchCondition = (node) => node.script?.uri == script.uri;
+    final searchCondition = (node) => node.script?.uri == script!.uri;
     for (final node in nodes) {
       final result = node.firstChildWithCondition(searchCondition);
       if (result != null) {
@@ -125,7 +123,7 @@ class ProgramExplorerController extends DisposableController
   }
 
   int _calculateNodeIndex({
-    bool matchingNodeCondition(VMServiceObjectNode node),
+    bool matchingNodeCondition(VMServiceObjectNode node)?,
     bool includeCollapsedNodes = true,
   }) {
     // Index tracks the position of the node in the flat-list representation of
@@ -135,9 +133,10 @@ class ProgramExplorerController extends DisposableController
       final matchingNode = depthFirstTraversal(
         node,
         returnCondition: matchingNodeCondition,
-        exploreChildrenCondition:
-            includeCollapsedNodes ? null : (node) => node.isExpanded,
-        action: (_) => index++,
+        exploreChildrenCondition: includeCollapsedNodes
+            ? null
+            : (VMServiceObjectNode node) => node.isExpanded,
+        action: (VMServiceObjectNode _) => index++,
       );
       if (matchingNode != null) return index;
     }
@@ -169,7 +168,10 @@ class ProgramExplorerController extends DisposableController
       _scriptSelection = node;
       _isLoadingOutline.value = true;
       _outlineSelection.value = null;
-      _outlineNodes.replaceAll(await _scriptSelection.outline);
+      final newOutlineNodes = await _scriptSelection!.outline;
+      if (newOutlineNodes != null) {
+        _outlineNodes.replaceAll(newOutlineNodes);
+      }
       _isLoadingOutline.value = false;
     }
   }
@@ -192,23 +194,23 @@ class ProgramExplorerController extends DisposableController
   Future<void> populateNode(VMServiceObjectNode node) async {
     final object = node.object;
     final service = serviceManager.service;
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value.id;
+    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id;
 
     Future<List<Obj>> getObjects(Iterable<ObjRef> objs) {
       return Future.wait(
         objs.map(
-          (o) => service.getObject(isolateId, o.id),
+          (o) => service!.getObject(isolateId!, o.id!),
         ),
       );
     }
 
     Future<List<Func>> getFuncs(
       Iterable<FuncRef> funcs,
-      Iterable<FieldRef> fields,
+      Iterable<FieldRef>? fields,
     ) async {
       final res = await getObjects(
         funcs.where(
-          (f) => !_isSyntheticAccessor(f, fields),
+          (f) => !_isSyntheticAccessor(f, fields as List<FieldRef>),
         ),
       );
       return res.cast<Func>();
@@ -217,25 +219,25 @@ class ProgramExplorerController extends DisposableController
     if (object == null || object is Obj) {
       return;
     } else if (object is LibraryRef) {
-      final lib = await service.getObject(isolateId, object.id) as Library;
+      final lib = await service!.getObject(isolateId!, object.id!) as Library;
       final results = await Future.wait([
-        getObjects(lib.variables),
-        getFuncs(lib.functions, lib.variables),
+        getObjects(lib.variables!),
+        getFuncs(lib.functions!, lib.variables),
       ]);
       lib.variables = results[0].cast<Field>();
       lib.functions = results[1].cast<Func>();
       node.updateObject(lib);
     } else if (object is ClassRef) {
-      final clazz = await service.getObject(isolateId, object.id) as Class;
+      final clazz = await service!.getObject(isolateId!, object.id!) as Class;
       final results = await Future.wait([
-        getObjects(clazz.fields),
-        getFuncs(clazz.functions, clazz.fields),
+        getObjects(clazz.fields!),
+        getFuncs(clazz.functions!, clazz.fields),
       ]);
       clazz.fields = results[0].cast<Field>();
       clazz.functions = results[1].cast<Func>();
       node.updateObject(clazz);
     } else {
-      final obj = await service.getObject(isolateId, object.id);
+      final obj = await service!.getObject(isolateId!, object.id!);
       node.updateObject(obj);
     }
   }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +21,7 @@ import 'evaluate.dart';
 /// Display the stdout and stderr output from the process under debug.
 class DebuggerConsole extends StatefulWidget {
   const DebuggerConsole({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   static const copyToClipboardButtonKey =

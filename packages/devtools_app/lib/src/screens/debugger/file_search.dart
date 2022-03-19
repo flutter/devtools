@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -21,10 +21,10 @@ final _fileNamesCache = <String, String>{};
 
 class FileSearchField extends StatefulWidget {
   const FileSearchField({
-    @required this.debuggerController,
+    required this.debuggerController,
   });
 
-  final DebuggerController debuggerController;
+  final DebuggerController? debuggerController;
 
   @override
   FileSearchFieldState createState() => FileSearchFieldState();
@@ -32,14 +32,14 @@ class FileSearchField extends StatefulWidget {
 
 class FileSearchFieldState extends State<FileSearchField>
     with AutoDisposeMixin, SearchFieldMixin {
-  AutoCompleteController autoCompleteController;
+  late AutoCompleteController autoCompleteController;
 
-  final _scriptsCache = <String, ScriptRef>{};
+  final _scriptsCache = <String?, ScriptRef>{};
 
   final fileSearchFieldKey = GlobalKey(debugLabel: 'fileSearchFieldKey');
 
-  String _query;
-  FileSearchResults _searchResults;
+  late String _query;
+  late FileSearchResults _searchResults;
 
   @override
   void initState() {
@@ -56,11 +56,11 @@ class FileSearchFieldState extends State<FileSearchField>
     _query = autoCompleteController.search;
 
     _searchResults = FileSearchResults.emptyQuery(
-      widget.debuggerController.sortedScripts.value,
+      widget.debuggerController!.sortedScripts.value,
     );
 
     // Open the autocomplete results immediately before a query is entered:
-    SchedulerBinding.instance.addPostFrameCallback((_) => _handleSearch());
+    SchedulerBinding.instance!.addPostFrameCallback((_) => _handleSearch());
   }
 
   @override
@@ -93,7 +93,7 @@ class FileSearchFieldState extends State<FileSearchField>
     // filter down the previous matches. Otherwise search through all scripts:
     final scripts = currentQuery.startsWith(previousQuery)
         ? _searchResults.scriptRefs
-        : widget.debuggerController.sortedScripts.value;
+        : widget.debuggerController!.sortedScripts.value;
 
     final searchResults = _createSearchResults(currentQuery, scripts);
     if (searchResults.scriptRefs.isEmpty) {
@@ -121,14 +121,14 @@ class FileSearchFieldState extends State<FileSearchField>
   }
 
   void _onSelection(String scriptUri) {
-    final scriptRef = _scriptsCache[scriptUri];
-    widget.debuggerController.showScriptLocation(ScriptLocation(scriptRef));
+    final scriptRef = _scriptsCache[scriptUri]!;
+    widget.debuggerController!.showScriptLocation(ScriptLocation(scriptRef));
     _onClose();
   }
 
   void _onClose() {
     autoCompleteController.closeAutoCompleteOverlay();
-    widget.debuggerController.toggleFileOpenerVisibility(false);
+    widget.debuggerController!.toggleFileOpenerVisibility(false);
     _fileNamesCache.clear();
     _scriptsCache.clear();
   }
@@ -164,7 +164,7 @@ class FileQuery {
   bool isExactFileNameMatch(ScriptRef script) {
     if (isEmpty) return false;
 
-    final fileName = _fileName(script.uri);
+    final fileName = _fileName(script.uri!);
 
     if (isMultiToken) {
       return tokens.every((token) => fileName.caseInsensitiveContains(token));
@@ -174,67 +174,67 @@ class FileQuery {
   }
 
   AutoCompleteMatch createExactFileNameAutoCompleteMatch(ScriptRef script) {
-    if (isEmpty) return AutoCompleteMatch(script.uri);
+    if (isEmpty) return AutoCompleteMatch(script.uri!);
 
-    final fileName = _fileName(script.uri);
-    final fileNameIndex = script.uri.lastIndexOf(fileName);
+    final fileName = _fileName(script.uri!);
+    final fileNameIndex = script.uri!.lastIndexOf(fileName);
     final matchedSegments = _findExactSegments(fileName)
         .map((range) =>
             Range(range.begin + fileNameIndex, range.end + fileNameIndex))
         .toList();
-    return AutoCompleteMatch(script.uri, matchedSegments: matchedSegments);
+    return AutoCompleteMatch(script.uri!, matchedSegments: matchedSegments);
   }
 
   bool isExactFullPathMatch(ScriptRef script) {
     if (isEmpty) return false;
 
     if (isMultiToken) {
-      return tokens.every((token) => script.uri.caseInsensitiveContains(token));
+      return tokens.every((token) => script.uri!.caseInsensitiveContains(token));
     }
 
-    return script.uri.caseInsensitiveContains(query);
+    return script.uri!.caseInsensitiveContains(query);
   }
 
   AutoCompleteMatch createExactFullPathAutoCompleteMatch(ScriptRef script) {
-    if (isEmpty) return AutoCompleteMatch(script.uri);
+    if (isEmpty) return AutoCompleteMatch(script.uri!);
 
     final matchedSegments = _findExactSegments(script.uri);
-    return AutoCompleteMatch(script.uri, matchedSegments: matchedSegments);
+    return AutoCompleteMatch(script.uri!, matchedSegments: matchedSegments);
   }
 
   bool isFuzzyMatch(ScriptRef script) {
     if (isEmpty) return false;
 
     if (isMultiToken) {
-      return script.uri.caseInsensitiveFuzzyMatch(query.replaceAll(' ', ''));
+      return script.uri!.caseInsensitiveFuzzyMatch(query.replaceAll(' ', ''));
     }
 
-    return _fileName(script.uri).caseInsensitiveFuzzyMatch(query);
+    return _fileName(script.uri!).caseInsensitiveFuzzyMatch(query);
   }
 
   AutoCompleteMatch createFuzzyMatchAutoCompleteMatch(ScriptRef script) {
-    if (isEmpty) return AutoCompleteMatch(script.uri);
+    if (isEmpty) return AutoCompleteMatch(script.uri!);
 
     List<Range> matchedSegments;
     if (isMultiToken) {
       matchedSegments =
-          _findFuzzySegments(script.uri, query.replaceAll(' ', ''));
+          _findFuzzySegments(script.uri!, query.replaceAll(' ', ''));
     } else {
-      final fileName = _fileName(script.uri);
-      final fileNameIndex = script.uri.lastIndexOf(fileName);
+      final fileName = _fileName(script.uri!);
+      final fileNameIndex = script.uri!.lastIndexOf(fileName);
       matchedSegments = _findFuzzySegments(fileName, query)
           .map((range) =>
               Range(range.begin + fileNameIndex, range.end + fileNameIndex))
           .toList();
     }
 
-    return AutoCompleteMatch(script.uri, matchedSegments: matchedSegments);
+    return AutoCompleteMatch(script.uri!, matchedSegments: matchedSegments);
   }
 
-  List<Range> _findExactSegments(String file) {
+  List<Range> _findExactSegments(String? file) {
     final matchedSegments = <Range>[];
     for (final token in isMultiToken ? tokens : [query]) {
-      final start = file.indexOf(token);
+      final start = file!.indexOf(token);
       final end = start + token.length;
       matchedSegments.add(Range(start, end));
     }
@@ -276,8 +276,8 @@ class FileSearchResults {
   }
 
   factory FileSearchResults.withQuery({
-    @required FileQuery query,
-    @required List<ScriptRef> allScripts,
+    required FileQuery query,
+    required List<ScriptRef> allScripts,
   }) {
     assert(!query.isEmpty);
     final List<ScriptRef> exactFileNameMatches = [];
@@ -304,11 +304,11 @@ class FileSearchResults {
   }
 
   FileSearchResults._({
-    @required this.query,
-    @required this.allScripts,
-    @required List<ScriptRef> exactFileNameMatches,
-    @required List<ScriptRef> exactFullPathMatches,
-    @required List<ScriptRef> fuzzyMatches,
+    required this.query,
+    required this.allScripts,
+    required List<ScriptRef> exactFileNameMatches,
+    required List<ScriptRef> exactFullPathMatches,
+    required List<ScriptRef> fuzzyMatches,
   })  : _exactFileNameMatches = exactFileNameMatches,
         _exactFullPathMatches = exactFullPathMatches,
         _fuzzyMatches = fuzzyMatches;
@@ -330,7 +330,7 @@ class FileSearchResults {
         ];
 
   List<AutoCompleteMatch> get autoCompleteMatches => query.isEmpty
-      ? allScripts.map((script) => AutoCompleteMatch(script.uri)).toList()
+      ? allScripts.map((script) => AutoCompleteMatch(script.uri!)).toList()
       : [
           ..._exactFileNameMatches
               .map(query.createExactFileNameAutoCompleteMatch)
@@ -344,11 +344,11 @@ class FileSearchResults {
         ];
 
   FileSearchResults copyWith({
-    List<ScriptRef> allScripts,
-    FileQuery query,
-    List<ScriptRef> exactFileNameMatches,
-    List<ScriptRef> exactFullPathMatches,
-    List<ScriptRef> fuzzyMatches,
+    List<ScriptRef>? allScripts,
+    FileQuery? query,
+    List<ScriptRef>? exactFileNameMatches,
+    List<ScriptRef>? exactFullPathMatches,
+    List<ScriptRef>? fuzzyMatches,
   }) {
     return FileSearchResults._(
       query: query ?? this.query,

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file
 
-// @dart=2.9
+
 
 import 'dart:collection';
 import 'dart:convert';
@@ -17,21 +17,21 @@ class SyntaxHighlighter {
   SyntaxHighlighter({this.source});
 
   SyntaxHighlighter.withGrammar({
-    Grammar grammar,
+    Grammar? grammar,
     this.source,
   }) {
     _grammar = grammar;
   }
 
-  final String source;
+  final String? source;
 
   final _spanStack = ListQueue<ScopeSpan>();
 
-  int _currentPosition;
+  int? _currentPosition;
 
-  Map<String, TextStyle> _scopeStyles;
+  late Map<String, TextStyle> _scopeStyles;
 
-  static Grammar _grammar;
+  static Grammar? _grammar;
 
   static Future<void> initialize() async {
     if (_grammar == null) {
@@ -54,8 +54,8 @@ class SyntaxHighlighter {
     return TextSpan(
       children: _highlightLoopHelper(
         currentScope: null,
-        loopCondition: () => _currentPosition < source.length,
-        scopes: SpanParser.parse(_grammar, source),
+        loopCondition: () => _currentPosition! < source!.length,
+        scopes: SpanParser.parse(_grammar, source!),
       ),
     );
   }
@@ -74,11 +74,11 @@ class SyntaxHighlighter {
     if (scopes == null || scopes.isEmpty) {
       return const TextStyle();
     } else if (scopes.length == 1) {
-      return _scopeStyles[scopes.first] ?? const TextStyle();
+      return _scopeStyles[scopes.first!] ?? const TextStyle();
     } else {
       var style = const TextStyle();
       for (final scope in scopes) {
-        style = style.merge(_scopeStyles[scope] ?? const TextStyle());
+        style = style.merge(_scopeStyles[scope!] ?? const TextStyle());
       }
       return style;
     }
@@ -92,27 +92,27 @@ class SyntaxHighlighter {
   ) {
     return _highlightLoopHelper(
       currentScope: currentScope,
-      loopCondition: () => currentScope.contains(_currentPosition),
+      loopCondition: () => currentScope.contains(_currentPosition!),
       scopes: scopes,
     );
   }
 
   List<TextSpan> _highlightLoopHelper({
-    @required ScopeSpan currentScope,
-    @required bool Function() loopCondition,
-    @required List<ScopeSpan> scopes,
+    required ScopeSpan? currentScope,
+    required bool Function() loopCondition,
+    required List<ScopeSpan> scopes,
   }) {
     final sourceSpans = <TextSpan>[];
-    int currentScopeBegin = _currentPosition;
+    int? currentScopeBegin = _currentPosition;
     if (currentScope != null) {
       _spanStack.addLast(currentScope);
     }
     while (loopCondition()) {
-      if (scopes.isNotEmpty && scopes.first.contains(_currentPosition)) {
+      if (scopes.isNotEmpty && scopes.first.contains(_currentPosition!)) {
         // Encountered the next scoped span. Close the current span and enter
         // the next.
-        final text = source.substring(
-          currentScopeBegin,
+        final text = source!.substring(
+          currentScopeBegin!,
           _currentPosition,
         );
         if (text.isNotEmpty) {
@@ -135,7 +135,7 @@ class SyntaxHighlighter {
       } else if (_atNewline()) {
         currentScopeBegin = _processNewlines(
           sourceSpans,
-          currentScopeBegin,
+          currentScopeBegin!,
         );
       } else {
         ++_currentPosition;
@@ -143,8 +143,8 @@ class SyntaxHighlighter {
     }
     // Reached the end of the text covered by the current span. Close the span
     // and exit the scope.
-    final text = source.substring(
-      currentScopeBegin,
+    final text = source!.substring(
+      currentScopeBegin!,
       _currentPosition,
     );
     if (text.isNotEmpty) {
@@ -162,10 +162,10 @@ class SyntaxHighlighter {
   }
 
   bool _atNewline() =>
-      String.fromCharCode(source.codeUnitAt(_currentPosition)) == '\n';
+      String.fromCharCode(source!.codeUnitAt(_currentPosition!)) == '\n';
 
-  int _processNewlines(List<TextSpan> sourceSpans, int currentScopeBegin) {
-    final text = source.substring(
+  int? _processNewlines(List<TextSpan> sourceSpans, int currentScopeBegin) {
+    final text = source!.substring(
       currentScopeBegin,
       _currentPosition,
     );
@@ -173,7 +173,7 @@ class SyntaxHighlighter {
       sourceSpans.add(
         TextSpan(
           style: _getStyleForSpan(),
-          text: source.substring(
+          text: source!.substring(
             currentScopeBegin,
             _currentPosition,
           ),
@@ -185,8 +185,8 @@ class SyntaxHighlighter {
     do {
       sourceSpans.add(const TextSpan(text: '\n'));
       ++_currentPosition;
-    } while ((_currentPosition < source.length) &&
-        (String.fromCharCode(source.codeUnitAt(_currentPosition)) == '\n'));
+    } while ((_currentPosition! < source!.length) &&
+        (String.fromCharCode(source!.codeUnitAt(_currentPosition!)) == '\n'));
     return _currentPosition;
   }
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
@@ -14,14 +14,14 @@ import 'debugger_controller.dart';
 import 'debugger_model.dart';
 
 class CallStack extends StatefulWidget {
-  const CallStack({Key key}) : super(key: key);
+  const CallStack({Key? key}) : super(key: key);
 
   @override
   _CallStackState createState() => _CallStackState();
 }
 
 class _CallStackState extends State<CallStack> {
-  DebuggerController controller;
+  DebuggerController? controller;
 
   @override
   void didChangeDependencies() {
@@ -36,9 +36,9 @@ class _CallStackState extends State<CallStack> {
   @override
   Widget build(BuildContext context) {
     return DualValueListenableBuilder<List<StackFrameAndSourcePosition>,
-        StackFrameAndSourcePosition>(
-      firstListenable: controller.stackFramesWithLocation,
-      secondListenable: controller.selectedStackFrame,
+        StackFrameAndSourcePosition?>(
+      firstListenable: controller!.stackFramesWithLocation,
+      secondListenable: controller!.selectedStackFrame,
       builder: (context, stackFrames, selectedFrame, _) {
         return ListView.builder(
           itemCount: stackFrames.length,
@@ -131,6 +131,6 @@ class _CallStackState extends State<CallStack> {
   }
 
   Future<void> _onStackFrameSelected(StackFrameAndSourcePosition frame) async {
-    controller.selectStackFrame(frame);
+    controller!.selectStackFrame(frame);
   }
 }

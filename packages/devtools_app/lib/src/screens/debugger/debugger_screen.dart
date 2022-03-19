@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:codicon/codicon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
@@ -99,9 +97,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   static const variablesTitle = 'Variables';
   static const breakpointsTitle = 'Breakpoints';
 
-  DebuggerController controller;
+  DebuggerController? controller;
 
-  bool _shownFirstScript;
+  late bool _shownFirstScript;
 
   @override
   void initState() {
@@ -118,40 +116,40 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
     controller = newController;
-    controller.onFirstDebuggerScreenLoad();
+    controller!.onFirstDebuggerScreenLoad();
   }
 
   void _onLocationSelected(ScriptLocation location) {
     if (location != null) {
-      controller.showScriptLocation(location);
+      controller!.showScriptLocation(location);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final codeArea = ValueListenableBuilder(
-      valueListenable: controller.fileExplorerVisible,
-      builder: (context, visible, child) {
+      valueListenable: controller!.fileExplorerVisible,
+      builder: (context, bool visible, child) {
         if (visible) {
           // TODO(devoncarew): Animate this opening and closing.
           return Split(
             axis: Axis.horizontal,
             initialFractions: const [0.70, 0.30],
             children: [
-              child,
+              child!,
               ProgramExplorer(
-                debugController: controller,
+                debugController: controller!,
                 onSelected: _onLocationSelected,
               ),
             ],
           );
         } else {
-          return child;
+          return child!;
         }
       },
-      child: DualValueListenableBuilder<ScriptRef, ParsedScript>(
-        firstListenable: controller.currentScriptRef,
-        secondListenable: controller.currentParsedScript,
+      child: DualValueListenableBuilder<ScriptRef?, ParsedScript?>(
+        firstListenable: controller!.currentScriptRef,
+        secondListenable: controller!.currentParsedScript,
         builder: (context, scriptRef, parsedScript, _) {
           if (scriptRef != null && parsedScript != null && !_shownFirstScript) {
             ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
@@ -166,7 +164,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             controller: controller,
             scriptRef: scriptRef,
             parsedScript: parsedScript,
-            onSelected: controller.toggleBreakpoint,
+            onSelected: controller!.toggleBreakpoint,
           );
         },
       ),
@@ -203,7 +201,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               rightActions: [
                 CopyToClipboardControl(
                   dataProvider: () {
-                    final List<String> callStackList = controller
+                    final List<String> callStackList = controller!
                         .stackFramesWithLocation.value
                         .map((frame) => frame.callStackDisplay)
                         .toList();
@@ -238,16 +236,17 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   Widget _breakpointsRightChild() {
     return ValueListenableBuilder(
-      valueListenable: controller.breakpointsWithLocation,
-      builder: (context, breakpoints, _) {
+      valueListenable: controller!.breakpointsWithLocation,
+      builder: (context, List<BreakpointAndSourcePosition> breakpoints, _) {
         return Row(
           children: [
             BreakpointsCountBadge(breakpoints: breakpoints),
             DevToolsTooltip(
               child: ToolbarAction(
                 icon: Icons.delete,
-                onPressed:
-                    breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
+                onPressed: breakpoints.isNotEmpty
+                    ? controller!.clearBreakpoints
+                    : null,
               ),
               message: 'Remove all breakpoints',
             ),
@@ -318,8 +317,8 @@ class OpenFileAction extends Action<OpenFileIntent> {
 
 class DebuggerStatus extends StatefulWidget {
   const DebuggerStatus({
-    Key key,
-    @required this.controller,
+    Key? key,
+    required this.controller,
   }) : super(key: key);
 
   final DebuggerController controller;
@@ -329,7 +328,7 @@ class DebuggerStatus extends StatefulWidget {
 }
 
 class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
-  String _status;
+  String? _status;
 
   @override
   void initState() {
@@ -352,7 +351,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     return Text(
-      _status,
+      _status!,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
@@ -374,7 +373,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
       return 'running';
     }
 
-    final event = widget.controller.lastEvent;
+    final event = widget.controller.lastEvent!;
     final frame = event.topFrame;
     final reason =
         event.kind == EventKind.kPauseException ? ' on exception' : '';
@@ -383,10 +382,10 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
       return 'paused$reason';
     }
 
-    final fileName = ' at ' + frame.location.script.uri.split('/').last;
-    final script = await widget.controller.getScript(frame.location.script);
+    final fileName = ' at ' + frame.location!.script!.uri!.split('/').last;
+    final script = await widget.controller.getScript(frame.location!.script!)!;
     final pos =
-        SourcePosition.calculatePosition(script, frame.location.tokenPos);
+        SourcePosition.calculatePosition(script, frame.location!.tokenPos);
 
     return 'paused$reason$fileName $pos';
   }
@@ -400,11 +399,11 @@ class FloatingDebuggerControls extends StatefulWidget {
 
 class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
     with AutoDisposeMixin {
-  DebuggerController controller;
+  late DebuggerController controller;
 
-  bool paused;
+  late bool paused;
 
-  double controlHeight;
+  double? controlHeight;
 
   @override
   void didChangeDependencies() {

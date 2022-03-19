@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
@@ -29,20 +29,20 @@ double get _selectedNodeTopSpacing => _programExplorerRowHeight * 3;
 
 class _ProgramExplorerRow extends StatelessWidget {
   const _ProgramExplorerRow({
-    @required this.controller,
-    @required this.node,
+    required this.controller,
+    required this.node,
     this.onTap,
   });
 
-  final ProgramExplorerController controller;
+  final ProgramExplorerController? controller;
   final VMServiceObjectNode node;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    String text = node.name;
+    String? text = node.name;
     final toolTip = _tooltipForNode();
 
     if (node.object is ClassRef ||
@@ -64,7 +64,7 @@ class _ProgramExplorerRow extends StatelessWidget {
             const SizedBox(width: densePadding),
             Flexible(
               child: Text(
-                text,
+                text!,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.fixedFontStyle.copyWith(
@@ -80,21 +80,21 @@ class _ProgramExplorerRow extends StatelessWidget {
     );
   }
 
-  String _tooltipForNode() {
-    String toolTip;
+  String? _tooltipForNode() {
+    String? toolTip;
     if (node.object is ClassRef) {
       final clazz = node.object as ClassRef;
       toolTip = '${clazz.name}';
       if (clazz.typeParameters != null) {
         toolTip +=
-            '<' + clazz.typeParameters.map((e) => e.name).join(', ') + '>';
+            '<' + clazz.typeParameters!.map((e) => e.name).join(', ') + '>';
       }
     } else if (node.object is Func) {
       final func = node.object as Func;
       final isInstanceMethod = func.owner is ClassRef;
       final subtext = _buildFunctionTypeText(
         func.name,
-        func.signature,
+        func.signature!,
         isInstanceMethod: isInstanceMethod,
       );
       toolTip = '${func.name}$subtext';
@@ -103,7 +103,7 @@ class _ProgramExplorerRow extends StatelessWidget {
       final subtext = _buildFieldTypeText(field);
       toolTip = '$subtext${field.name}';
     } else if (node.script != null) {
-      toolTip = node.script.uri;
+      toolTip = node.script!.uri;
     }
     return toolTip;
   }
@@ -116,17 +116,17 @@ class _ProgramExplorerRow extends StatelessWidget {
   ///   - List<X0>
   String _buildFieldTypeText(Field field) {
     final buffer = StringBuffer();
-    if (field.isStatic) {
+    if (field.isStatic!) {
       buffer.write('static ');
     }
-    if (field.isConst) {
+    if (field.isConst!) {
       buffer.write('const ');
     }
-    if (field.isFinal && !field.isConst) {
+    if (field.isFinal! && !field.isConst!) {
       buffer.write('final ');
     }
-    if (field.declaredType.name != null) {
-      buffer.write('${field.declaredType.name} ');
+    if (field.declaredType!.name != null) {
+      buffer.write('${field.declaredType!.name} ');
     }
     return buffer.toString();
   }
@@ -139,13 +139,13 @@ class _ProgramExplorerRow extends StatelessWidget {
   ///   - Baz(String, [int]) -> void
   ///   - Faz(String, {String? bar, required int baz}) -> int
   String _buildFunctionTypeText(
-    String functionName,
+    String? functionName,
     InstanceRef signature, {
     bool isInstanceMethod = false,
   }) {
     final buffer = StringBuffer();
     if (signature.typeParameters != null) {
-      final typeParams = signature.typeParameters;
+      final typeParams = signature.typeParameters!;
       buffer.write('<');
       for (int i = 0; i < typeParams.length; ++i) {
         buffer.write(typeParams[i].name);
@@ -156,12 +156,12 @@ class _ProgramExplorerRow extends StatelessWidget {
       buffer.write('>');
     }
     buffer.write('(');
-    String closingTag;
+    String? closingTag;
     for (int i = isInstanceMethod ? 1 : 0;
-        i < signature.parameters.length;
+        i < signature.parameters!.length;
         ++i) {
-      final param = signature.parameters[i];
-      if (!param.fixed && closingTag == null) {
+      final param = signature.parameters![i];
+      if (!param.fixed! && closingTag == null) {
         if (param.name == null) {
           closingTag = ']';
           buffer.write('[');
@@ -170,28 +170,28 @@ class _ProgramExplorerRow extends StatelessWidget {
           buffer.write('{');
         }
       }
-      if (param.required != null && param.required) {
+      if (param.required != null && param.required!) {
         buffer.write('required ');
       }
-      if (param.parameterType.name == null) {
-        buffer.write(_buildFunctionTypeText('Function', param.parameterType));
+      if (param.parameterType!.name == null) {
+        buffer.write(_buildFunctionTypeText('Function', param.parameterType!));
       } else {
-        buffer.write(param.parameterType.name);
+        buffer.write(param.parameterType!.name);
       }
       if (param.name != null) {
         buffer.write(' ${param.name}');
       }
-      if (i + 1 != signature.parameters.length) {
+      if (i + 1 != signature.parameters!.length) {
         buffer.write(', ');
       } else if (closingTag != null) {
         buffer.write(closingTag);
       }
     }
     buffer.write(') → ');
-    if (signature.returnType.name == null) {
-      buffer.write(_buildFunctionTypeText('Function', signature.returnType));
+    if (signature.returnType!.name == null) {
+      buffer.write(_buildFunctionTypeText('Function', signature.returnType!));
     } else {
-      buffer.write(signature.returnType.name);
+      buffer.write(signature.returnType!.name);
     }
 
     return buffer.toString();
@@ -200,19 +200,19 @@ class _ProgramExplorerRow extends StatelessWidget {
 
 class ProgramStructureIcon extends StatelessWidget {
   const ProgramStructureIcon({
-    @required this.object,
+    required this.object,
   });
 
-  final ObjRef object;
+  final ObjRef? object;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    IconData icon;
-    String character;
+    IconData? icon;
+    String? character;
     Color color = colorScheme.functionSyntaxColor;
-    bool isShortCharacter;
+    bool? isShortCharacter;
     if (object is ClassRef) {
       character = 'c';
       isShortCharacter = true;
@@ -251,7 +251,7 @@ class ProgramStructureIcon extends StatelessWidget {
         child: icon == null
             ? Center(
                 child: Text(
-                  character,
+                  character!,
                   style: TextStyle(
                     height: 1,
                     fontFamily: theme.fixedFontStyle.fontFamily,
@@ -266,7 +266,7 @@ class ProgramStructureIcon extends StatelessWidget {
                   // want to disable this behavior so shorter characters don't
                   // appear to be slightly below center.
                   textHeightBehavior: TextHeightBehavior(
-                    applyHeightToFirstAscent: isShortCharacter,
+                    applyHeightToFirstAscent: isShortCharacter!,
                     applyHeightToLastDescent: false,
                   ),
                 ),
@@ -283,12 +283,12 @@ class ProgramStructureIcon extends StatelessWidget {
 
 class _FileExplorer extends StatefulWidget {
   const _FileExplorer({
-    @required this.controller,
-    @required this.onItemSelected,
-    @required this.onItemExpanded,
+    required this.controller,
+    required this.onItemSelected,
+    required this.onItemExpanded,
   });
 
-  final ProgramExplorerController controller;
+  final ProgramExplorerController? controller;
   final Function(VMServiceObjectNode) onItemSelected;
   final Function(VMServiceObjectNode) onItemExpanded;
 
@@ -299,16 +299,16 @@ class _FileExplorer extends StatefulWidget {
 class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
   final ScrollController _scrollController = ScrollController();
 
-  double get selectedNodeOffset => widget.controller.selectedNodeIndex.value ==
+  double get selectedNodeOffset => widget.controller!.selectedNodeIndex.value ==
           -1
       ? -1
-      : widget.controller.selectedNodeIndex.value * _programExplorerRowHeight;
+      : widget.controller!.selectedNodeIndex.value * _programExplorerRowHeight;
 
   @override
   void initState() {
     super.initState();
     addAutoDisposeListener(
-      widget.controller.selectedNodeIndex,
+      widget.controller!.selectedNodeIndex,
       _maybeScrollToSelectedNode,
     );
   }
@@ -320,7 +320,7 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
       controller: _scrollController,
       child: TreeView<VMServiceObjectNode>(
         itemExtent: _programExplorerRowHeight,
-        dataRootsListenable: widget.controller.rootObjectNodes,
+        dataRootsListenable: widget.controller!.rootObjectNodes,
         onItemSelected: widget.onItemSelected,
         onItemExpanded: widget.onItemExpanded,
         scrollController: _scrollController,
@@ -329,7 +329,7 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
             controller: widget.controller,
             node: node,
             onTap: () {
-              widget.controller.selectNode(node);
+              widget.controller!.selectNode(node);
               onTap();
             },
           );
@@ -358,26 +358,26 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
 
 class _ProgramOutlineView extends StatelessWidget {
   const _ProgramOutlineView({
-    @required this.controller,
-    @required this.onItemSelected,
-    @required this.onItemExpanded,
+    required this.controller,
+    required this.onItemSelected,
+    required this.onItemExpanded,
   });
 
-  final ProgramExplorerController controller;
+  final ProgramExplorerController? controller;
   final Function(VMServiceObjectNode) onItemSelected;
   final Function(VMServiceObjectNode) onItemExpanded;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: controller.isLoadingOutline,
+      valueListenable: controller!.isLoadingOutline,
       builder: (context, isLoadingOutline, _) {
         if (isLoadingOutline) {
           return const CenteredCircularProgressIndicator();
         }
         return TreeView<VMServiceObjectNode>(
           itemExtent: _programExplorerRowHeight,
-          dataRootsListenable: controller.outlineNodes,
+          dataRootsListenable: controller!.outlineNodes,
           onItemSelected: onItemSelected,
           onItemExpanded: onItemExpanded,
           dataDisplayProvider: (node, onTap) {
@@ -386,7 +386,7 @@ class _ProgramOutlineView extends StatelessWidget {
               node: node,
               onTap: () async {
                 await node.populateLocation();
-                controller.selectOutlineNode(node);
+                controller!.selectOutlineNode(node);
                 onTap();
               },
             );
@@ -404,20 +404,20 @@ class _ProgramOutlineView extends StatelessWidget {
 /// filtering.
 class ProgramExplorer extends StatelessWidget {
   ProgramExplorer({
-    Key key,
-    @required this.debugController,
-    @required this.onSelected,
+    Key? key,
+    required this.debugController,
+    required this.onSelected,
   })  : controller = debugController.programExplorerController,
         super(key: key);
 
-  final ProgramExplorerController controller;
+  final ProgramExplorerController? controller;
   final DebuggerController debugController;
-  final void Function(ScriptLocation) onSelected;
+  final void Function(ScriptLocation?) onSelected;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: controller.initialized,
+      valueListenable: controller!.initialized,
       builder: (context, initialized, _) {
         Widget body;
         if (!initialized) {
@@ -443,7 +443,7 @@ class ProgramExplorer extends StatelessWidget {
               // the above issues are resolved.
               //
               // See https://github.com/flutter/devtools/issues/3447.
-              return serviceManager.connectedApp.isDartWebAppNow
+              return serviceManager.connectedApp!.isDartWebAppNow!
                   ? Column(
                       children: [
                         fileExplorerHeader,
@@ -486,7 +486,7 @@ class ProgramExplorer extends StatelessWidget {
     await node.populateLocation();
 
     if (node.object != null && node.object is! Obj) {
-      await controller.populateNode(node);
+      await controller!.populateNode(node);
     }
 
     // If the node is collapsed and we select it, we'll always want to expand
@@ -500,7 +500,7 @@ class ProgramExplorer extends StatelessWidget {
 
   void onItemExpanded(VMServiceObjectNode node) async {
     if (node.object != null && node.object is! Obj) {
-      await controller.populateNode(node);
+      await controller!.populateNode(node);
     }
   }
 }

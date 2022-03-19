@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 
@@ -12,7 +12,7 @@ import '../../shared/theme.dart';
 /// Create a header area for a debugger component.
 ///
 /// Either one of [text] or [child] must be supplied.
-Container debuggerSectionTitle(ThemeData theme, {String text, Widget child}) {
+Container debuggerSectionTitle(ThemeData theme, {String? text, Widget? child}) {
   assert(text != null || child != null);
   assert(text == null || child == null);
 
@@ -26,11 +26,11 @@ Container debuggerSectionTitle(ThemeData theme, {String text, Widget child}) {
     padding: const EdgeInsets.only(left: defaultSpacing),
     alignment: Alignment.centerLeft,
     height: areaPaneHeaderHeight,
-    child: child != null ? child : Text(text, style: theme.textTheme.subtitle2),
+    child: child != null ? child : Text(text!, style: theme.textTheme.subtitle2),
   );
 }
 
-Widget createCircleWidget(double radius, Color color) {
+Widget createCircleWidget(double radius, Color? color) {
   return Container(
     width: radius,
     height: radius,
@@ -38,7 +38,7 @@ Widget createCircleWidget(double radius, Color color) {
   );
 }
 
-Widget createAnimatedCircleWidget(double radius, Color color) {
+Widget createAnimatedCircleWidget(double radius, Color? color) {
   return AnimatedContainer(
     width: radius,
     height: radius,

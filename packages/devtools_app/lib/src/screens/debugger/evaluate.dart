@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:math';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
@@ -21,7 +20,7 @@ import 'debugger_controller.dart';
 
 class ExpressionEvalField extends StatefulWidget {
   const ExpressionEvalField({
-    @required this.controller,
+    required this.controller,
   });
 
   final DebuggerController controller;
@@ -32,11 +31,11 @@ class ExpressionEvalField extends StatefulWidget {
 
 class _ExpressionEvalFieldState extends State<ExpressionEvalField>
     with AutoDisposeMixin, SearchFieldMixin {
-  AutoCompleteController _autoCompleteController;
+  late AutoCompleteController _autoCompleteController;
   int historyPosition = -1;
 
   String _activeWord = '';
-  List<String> _matches = [];
+  List<String?> _matches = [];
 
   final evalTextFieldKey = GlobalKey(debugLabel: 'evalTextFieldKey');
 
@@ -114,7 +113,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
               0,
               min(defaultTopMatchesLimit, matches.length),
             )
-            .map((match) => AutoCompleteMatch(match))
+            .map((match) => AutoCompleteMatch(match!))
             .toList();
 
         _autoCompleteController.searchAutoComplete.value = results;
@@ -162,7 +161,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
                 labelText: 'Eval',
               ),
               overlayXPositionBuilder:
-                  (String inputValue, TextStyle inputStyle) {
+                  (String inputValue, TextStyle? inputStyle) {
                 // X-coordinate is equivalent to the width of the input text
                 // up to the last "." or the insertion point (cursor):
                 final indexOfDot = inputValue.lastIndexOf('.');
@@ -218,9 +217,10 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
     );
   }
 
-  List<String> _filterMatches(List<String> previousMatches, String activeWord) {
+  List<String?> _filterMatches(
+      List<String?> previousMatches, String activeWord) {
     return previousMatches
-        .where((match) => match.startsWith(activeWord))
+        .where((match) => match!.startsWith(activeWord))
         .toList();
   }
 
@@ -233,8 +233,8 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
 
     // Only try to eval if we are paused.
     if (!serviceManager
-        .isolateManager.mainIsolateDebuggerState.isPaused.value) {
-      Notifications.of(context)
+        .isolateManager.mainIsolateDebuggerState!.isPaused.value!) {
+      Notifications.of(context)!
           .push('Application must be paused to support expression evaluation.');
       return;
     }
@@ -255,7 +255,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
       if (response is InstanceRef) {
         _emitRefToConsole(response, isolateRef);
       } else {
-        var value = response.toString();
+        String? value = response.toString();
 
         if (response is ErrorRef) {
           value = response.message;
@@ -263,7 +263,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
           value = response.valueAsString;
         }
 
-        _emitToConsole(value);
+        _emitToConsole(value!);
       }
     } catch (e) {
       // Display the error to the user.
@@ -280,7 +280,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
 
   void _emitRefToConsole(
     InstanceRef ref,
-    IsolateRef isolate,
+    IsolateRef? isolate,
   ) {
     serviceManager.consoleService.appendInstanceRef(
       value: ref,
@@ -305,7 +305,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
     setState(() {
       evalHistory.navigateUp();
 
-      final text = evalHistory.currentText;
+      final text = evalHistory.currentText!;
       searchTextFieldController.value = TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: text.length),
@@ -331,18 +331,17 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
   }
 }
 
-Future<List<String>> autoCompleteResultsFor(
+Future<List<String?>> autoCompleteResultsFor(
   EditingParts parts,
   DebuggerController controller,
 ) async {
-  final result = <String>{};
+  final result = <String?>{};
   if (!parts.isField) {
     final variables = controller.variables.value;
     result.addAll(variables.map((variable) => variable.name));
 
-    final thisVariable = variables.firstWhere(
+    final thisVariable = variables.firstWhereOrNull(
       (variable) => variable.name == 'this',
-      orElse: () => null,
     );
     if (thisVariable != null) {
       // If a variable named `this` is in scope, we should provide autocompletes
@@ -402,7 +401,7 @@ Future<List<String>> autoCompleteResultsFor(
       }
     } catch (_) {}
   }
-  return result.where((name) => name.startsWith(parts.activeWord)).toList();
+  return result.where((name) => name!.startsWith(parts.activeWord)).toList();
 }
 
 // Due to https://github.com/dart-lang/sdk/issues/46221
@@ -412,7 +411,7 @@ Future<List<String>> autoCompleteResultsFor(
 // dart:ui shows up as in scope from flutter:foundation when it should not be.
 bool debugIncludeExports = true;
 
-Future<Set<String>> libraryMemberAndImportsAutocompletes(
+Future<Set<String?>> libraryMemberAndImportsAutocompletes(
   LibraryRef libraryRef,
   DebuggerController controller,
 ) {
@@ -422,21 +421,22 @@ Future<Set<String>> libraryMemberAndImportsAutocompletes(
   );
 }
 
-Future<Set<String>> _libraryMemberAndImportsAutocompletes(
+Future<Set<String?>> _libraryMemberAndImportsAutocompletes(
   LibraryRef libraryRef,
   DebuggerController controller,
 ) async {
-  final result = <String>{};
+  final result = <String?>{};
   try {
-    final futures = <Future<Set<String>>>[];
+    final List<Future<Set<String?>>> futures = <Future<Set<String>>>[];
     futures.add(libraryMemberAutocompletes(
       controller,
       libraryRef,
       includePrivates: true,
     ));
 
-    final Library library = await controller.getObject(libraryRef);
-    for (var dependency in library.dependencies) {
+    final Library library =
+        await (controller.getObject(libraryRef) as Future<Library>);
+    for (var dependency in library.dependencies!) {
       if (dependency.prefix?.isNotEmpty ?? false) {
         // We won't give a list of autocompletes once you enter a prefix
         // but at least we do include the prefix in the autocompletes list.
@@ -456,38 +456,39 @@ Future<Set<String>> _libraryMemberAndImportsAutocompletes(
   return result;
 }
 
-Future<Set<String>> libraryMemberAutocompletes(
+Future<Set<String?>> libraryMemberAutocompletes(
   DebuggerController controller,
-  LibraryRef libraryRef, {
-  @required bool includePrivates,
+  LibraryRef? libraryRef, {
+  required bool includePrivates,
 }) async {
   var result = await controller.libraryMemberAutocompleteCache.putIfAbsent(
     libraryRef,
-    () => _libraryMemberAutocompletes(controller, libraryRef),
+    () => _libraryMemberAutocompletes(controller, libraryRef!),
   );
   if (!includePrivates) {
-    result = result.where((name) => !isPrivate(name)).toSet();
+    result = result.where((name) => !isPrivate(name!)).toSet();
   }
   return result;
 }
 
-Future<Set<String>> _libraryMemberAutocompletes(
+Future<Set<String?>> _libraryMemberAutocompletes(
   DebuggerController controller,
   LibraryRef libraryRef,
 ) async {
-  final result = <String>{};
-  final Library library = await controller.getObject(libraryRef);
-  result.addAll(library.variables.map((field) => field.name));
-  result.addAll(library.functions
+  final result = <String?>{};
+  final Library library =
+      await (controller.getObject(libraryRef) as Future<Library>);
+  result.addAll(library.variables!.map((field) => field.name));
+  result.addAll(library.functions!
       // The VM shows setters as `<member>=`.
-      .map((funcRef) => funcRef.name.replaceAll('=', '')));
+      .map((funcRef) => funcRef.name!.replaceAll('=', '')));
   // Autocomplete class names as well
-  result.addAll(library.classes.map((clazz) => clazz.name));
+  result.addAll(library.classes!.map((clazz) => clazz.name));
 
   if (debugIncludeExports) {
-    final futures = <Future<Set<String>>>[];
-    for (var dependency in library.dependencies) {
-      if (!dependency.isImport) {
+    final List<Future<Set<String?>>> futures = <Future<Set<String>>>[];
+    for (var dependency in library.dependencies!) {
+      if (!dependency.isImport!) {
         if (dependency.prefix?.isNotEmpty ?? false) {
           result.add(dependency.prefix);
         } else {
@@ -507,11 +508,12 @@ Future<Set<String>> _libraryMemberAutocompletes(
 }
 
 Future<void> _addAllInstanceMembersToAutocompleteList(
-  Set<String> result,
+  Set<String?> result,
   InstanceRef response,
   DebuggerController controller,
 ) async {
-  final Instance instance = await controller.getObject(response);
+  final Instance instance =
+      await (controller.getObject(response) as FutureOr<Instance>);
   result.addAll(
     await _autoCompleteMembersFor(
       instance.classRef,
@@ -521,37 +523,37 @@ Future<void> _addAllInstanceMembersToAutocompleteList(
   );
   // TODO(grouma) - This shouldn't be necessary but package:dwds does
   // not properly provide superclass information.
-  final clazz = await controller.classFor(instance.classRef);
-  result.addAll(instance.fields
-      .where((field) => !field.decl.isStatic)
-      .map((field) => field.decl.name)
-      .where((member) => _isAccessible(member, clazz, controller)));
+  final clazz = await controller.classFor(instance.classRef!);
+  result.addAll(instance.fields!
+      .where((field) => !field.decl!.isStatic!)
+      .map((field) => field.decl!.name)
+      .where((member) => _isAccessible(member!, clazz, controller)));
 }
 
-Future<Set<String>> _autoCompleteMembersFor(
-  ClassRef classRef,
+Future<Set<String?>> _autoCompleteMembersFor(
+  ClassRef? classRef,
   DebuggerController controller, {
-  @required bool staticContext,
+  required bool staticContext,
 }) async {
   if (classRef == null) {
     return {};
   }
 
-  final result = <String>{};
+  final result = <String?>{};
   final clazz = await controller.classFor(classRef);
   if (clazz != null) {
-    result.addAll(clazz.fields
+    result.addAll(clazz.fields!
         .where((f) => f.isStatic == staticContext)
         .map((field) => field.name));
-    for (var funcRef in clazz.functions) {
+    for (var funcRef in clazz.functions!) {
       if (_validFunction(funcRef, clazz, staticContext)) {
         final isConstructor = _isConstructor(funcRef, clazz);
         // The VM shows setters as `<member>=`.
-        var name = funcRef.name.replaceAll('=', '');
+        var name = funcRef.name!.replaceAll('=', '');
         if (isConstructor) {
-          assert(name.startsWith(clazz.name));
-          if (name.length <= clazz.name.length + 1) continue;
-          name = name.substring(clazz.name.length + 1);
+          assert(name.startsWith(clazz.name!));
+          if (name.length <= clazz.name!.length + 1) continue;
+          name = name.substring(clazz.name!.length + 1);
         }
         result.add(name);
       }
@@ -563,14 +565,14 @@ Future<Set<String>> _autoCompleteMembersFor(
         staticContext: staticContext,
       ));
     }
-    result.removeWhere((member) => !_isAccessible(member, clazz, controller));
+    result.removeWhere((member) => !_isAccessible(member!, clazz, controller));
   }
   return result;
 }
 
 bool _validFunction(FuncRef funcRef, Class clazz, bool staticContext) {
   // TODO(jacobr): we should include named constructors in static contexts.
-  return ((_isConstructor(funcRef, clazz) || funcRef.isStatic) ==
+  return ((_isConstructor(funcRef, clazz) || funcRef.isStatic!) ==
           staticContext) &&
       !_isOperator(funcRef);
 }
@@ -598,10 +600,10 @@ bool _isOperator(FuncRef funcRef) => const {
     }.contains(funcRef.name);
 
 bool _isConstructor(FuncRef funcRef, Class clazz) =>
-    funcRef.name == clazz.name || funcRef.name.startsWith('${clazz.name}.');
+    funcRef.name == clazz.name || funcRef.name!.startsWith('${clazz.name}.');
 
-bool _isAccessible(String member, Class clazz, DebuggerController controller) {
-  final frame = controller.frameForEval;
-  final currentScript = frame.location.script;
-  return !isPrivate(member) || currentScript.id == clazz?.location?.script?.id;
+bool _isAccessible(String member, Class? clazz, DebuggerController controller) {
+  final frame = controller.frameForEval!;
+  final currentScript = frame.location!.script;
+  return !isPrivate(member) || currentScript!.id == clazz?.location?.script?.id;
 }

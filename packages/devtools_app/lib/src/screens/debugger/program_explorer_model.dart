@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/trees.dart';
@@ -32,12 +30,12 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   static const packagePrefix = 'package:';
 
   final ProgramExplorerController controller;
-  final String name;
+  final String? name;
   bool isSelectable;
 
-  ObjRef object;
-  ScriptRef script;
-  ScriptLocation location;
+  ObjRef? object;
+  ScriptRef? script;
+  ScriptLocation? location;
 
   /// This exists to allow for O(1) lookup of children when building the tree.
   final _childrenAsMap = <String, VMServiceObjectNode>{};
@@ -53,8 +51,8 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
   bool get isDirectory => script == null && object == null;
 
-  List<VMServiceObjectNode> _outline;
-  Future<List<VMServiceObjectNode>> get outline async {
+  List<VMServiceObjectNode>? _outline;
+  Future<List<VMServiceObjectNode>?> get outline async {
     if (_outline != null) {
       return _outline;
     }
@@ -64,15 +62,15 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       ObjRef(id: '0'),
     );
 
-    String uri;
-    Library lib;
+    String? uri;
+    Library? lib;
     if (object is Library) {
-      lib = object as Library;
-      uri = lib.uri;
+      lib = object as Library?;
+      uri = lib!.uri;
     } else {
       // Try to find the library in the tree. If the current node isn't a
       // library node, it's likely one of its parents are.
-      VMServiceObjectNode libNode = this;
+      VMServiceObjectNode? libNode = this;
       while (libNode != null && libNode.object is! Library) {
         libNode = libNode.parent;
       }
@@ -81,26 +79,27 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       // We'll need to search for the library URI that is a prefix of the
       // script's URI.
       if (libNode == null) {
-        final service = serviceManager.service;
-        final isolate = serviceManager.isolateManager.selectedIsolate.value;
+        final service = serviceManager.service!;
+        final isolate = serviceManager.isolateManager.selectedIsolate.value!;
         final libRef = serviceManager.isolateManager
-            .isolateDebuggerState(isolate)
-            .isolateNow
-            .libraries
+            .isolateDebuggerState(isolate)!
+            .isolateNow!
+            .libraries!
             .firstWhere(
-              (lib) => script.uri.startsWith(lib.uri),
+              (lib) => script!.uri!.startsWith(lib.uri!),
             );
-        lib = await service.getObject(isolate.id, libRef.id);
+        lib = await (service.getObject(isolate.id!, libRef.id!)
+            as Future<Library?>);
       } else {
-        lib = libNode.object as Library;
+        lib = libNode.object as Library?;
       }
-      final ScriptRef s = (object is ScriptRef) ? object : script;
+      final ScriptRef s = (object is ScriptRef) ? object as ScriptRef : script!;
       uri = s.uri;
     }
 
-    for (final clazzRef in lib.classes) {
+    for (final clazzRef in lib!.classes!) {
       // Don't surface synthetic classes created by mixin applications.
-      if (clazzRef.name.contains('&')) {
+      if (clazzRef.name!.contains('&')) {
         continue;
       }
       if (clazzRef?.location?.script?.uri == uri) {
@@ -114,8 +113,8 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       }
     }
 
-    for (final function in lib.functions) {
-      if (function.location.script.uri == uri) {
+    for (final function in lib.functions!) {
+      if (function.location!.script!.uri == uri) {
         final node = VMServiceObjectNode(
           controller,
           function.name,
@@ -126,8 +125,8 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       }
     }
 
-    for (final field in lib.variables) {
-      if (field.location.script.uri == uri) {
+    for (final field in lib.variables!) {
+      if (field.location!.script!.uri == uri) {
         final node = VMServiceObjectNode(
           controller,
           field.name,
@@ -192,14 +191,14 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     // part of a package. Otherwise, it's a file path and its directory should
     // appear near the top of the list anyway.
     final rootLib = serviceManager
-        .isolateManager.mainIsolateDebuggerState.isolateNow.rootLib;
-    if (rootLib.uri.startsWith('package:') ||
-        rootLib.uri.startsWith('google3:')) {
-      final parts = rootLib.uri.split('/')..removeLast();
+        .isolateManager.mainIsolateDebuggerState!.isolateNow!.rootLib!;
+    if (rootLib.uri!.startsWith('package:') ||
+        rootLib.uri!.startsWith('google3:')) {
+      final parts = rootLib.uri!.split('/')..removeLast();
       final path = parts.join('/');
       for (int i = 0; i < root.children.length; ++i) {
-        if (root.children[i].name.startsWith(path)) {
-          final rootLibNode = root.removeChildAtIndex(i);
+        if (root.children[i].name!.startsWith(path)) {
+          final VMServiceObjectNode rootLibNode = root.removeChildAtIndex(i);
           root.addChild(rootLibNode, index: 0);
           break;
         }
@@ -212,9 +211,9 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   static VMServiceObjectNode _buildScriptNode(
     VMServiceObjectNode node,
     ScriptRef script, {
-    LibraryRef lib,
+    LibraryRef? lib,
   }) {
-    final parts = script.uri.split('/');
+    final parts = script.uri!.split('/');
     final name = parts.removeLast();
 
     for (final part in parts) {
@@ -242,7 +241,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
   VMServiceObjectNode _lookupOrCreateChild(
     String name,
-    ObjRef object, {
+    ObjRef? object, {
     bool isSelectable = true,
   }) {
     return _childrenAsMap.putIfAbsent(
@@ -252,8 +251,8 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   }
 
   VMServiceObjectNode _createChild(
-    String name,
-    ObjRef object, {
+    String? name,
+    ObjRef? object, {
     bool isSelectable = true,
   }) {
     final child = VMServiceObjectNode(
@@ -268,7 +267,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
   VMServiceObjectNode _collapseSingleChildDirectoryNodes() {
     if (children.length == 1) {
-      final child = children.first;
+      final VMServiceObjectNode child = children.first;
       if (child.isDirectory) {
         final collapsed = VMServiceObjectNode(
           controller,
@@ -293,10 +292,10 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
   void updateObject(Obj object) {
     if (this.object is! Class && object is Class) {
-      for (final function in object.functions) {
+      for (final function in object.functions!) {
         _createChild(function.name, function);
       }
-      for (final field in object.fields) {
+      for (final field in object.fields!) {
         _createChild(field.name, field);
       }
       _sortEntriesByType();
@@ -305,22 +304,22 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   }
 
   Future<void> populateLocation() async {
-    ScriptRef script = this.script;
-    int tokenPos = 0;
+    ScriptRef? scriptRef = this.script;
+    int? tokenPos = 0;
     if (object != null &&
         (object is FieldRef || object is FuncRef || object is ClassRef)) {
       final location = (object as dynamic).location;
       tokenPos = location.tokenPos;
-      script = location.script;
+      scriptRef = location.script;
     }
 
-    script = await controller.debuggerController.getScript(script);
+    final script = await controller.debuggerController.getScript(scriptRef!);
     final position = tokenPos == 0
         ? null
-        : SourcePosition.calculatePosition(script, tokenPos);
+        : SourcePosition.calculatePosition(script!, tokenPos);
 
     location = ScriptLocation(
-      script,
+      script!,
       location: position,
     );
   }
@@ -349,8 +348,8 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       if (child.object == null && child.script == null) {
         // Child is a directory node. Treat it as if it were a library/script
         // for sorting purposes.
-        if (child.name.startsWith(dartPrefix) ||
-            child.name.startsWith(packagePrefix)) {
+        if (child.name!.startsWith(dartPrefix) ||
+            child.name!.startsWith(packagePrefix)) {
           packageAndCoreLibDirectoryNodes.add(child);
         } else {
           userDirectoryNodes.add(child);
@@ -364,8 +363,8 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
           case LibraryRef:
           case Library:
             final obj = child.object as LibraryRef;
-            if (obj.uri.startsWith(dartPrefix) ||
-                obj.uri.startsWith(packagePrefix)) {
+            if (obj.uri!.startsWith(dartPrefix) ||
+                obj.uri!.startsWith(packagePrefix)) {
               packageAndCoreLibLibraryNodes.add(child);
             } else {
               userLibraryNodes.add(child);
@@ -391,41 +390,41 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     }
 
     userDirectoryNodes.sort((a, b) {
-      return a.name.compareTo(b.name);
+      return a.name!.compareTo(b.name!);
     });
 
     scriptNodes.sort((a, b) {
-      return a.name.compareTo(b.name);
+      return a.name!.compareTo(b.name!);
     });
 
     userLibraryNodes.sort((a, b) {
-      return a.name.compareTo(b.name);
+      return a.name!.compareTo(b.name!);
     });
 
     classNodes.sort((a, b) {
       final objA = a.object as ClassRef;
       final objB = b.object as ClassRef;
-      return objA.name.compareTo(objB.name);
+      return objA.name!.compareTo(objB.name!);
     });
 
     functionNodes.sort((a, b) {
       final objA = a.object as FuncRef;
       final objB = b.object as FuncRef;
-      return objA.name.compareTo(objB.name);
+      return objA.name!.compareTo(objB.name!);
     });
 
     variableNodes.sort((a, b) {
       final objA = a.object as FieldRef;
       final objB = b.object as FieldRef;
-      return objA.name.compareTo(objB.name);
+      return objA.name!.compareTo(objB.name!);
     });
 
     packageAndCoreLibDirectoryNodes.sort((a, b) {
-      return a.name.compareTo(b.name);
+      return a.name!.compareTo(b.name!);
     });
 
     packageAndCoreLibLibraryNodes.sort((a, b) {
-      return a.name.compareTo(b.name);
+      return a.name!.compareTo(b.name!);
     });
 
     children

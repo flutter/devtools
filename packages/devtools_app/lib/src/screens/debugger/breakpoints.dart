@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,14 +19,14 @@ double get executableLineRadius => scaleByFontFactor(1.5);
 double get breakpointRadius => scaleByFontFactor(6.0);
 
 class Breakpoints extends StatefulWidget {
-  const Breakpoints({Key key}) : super(key: key);
+  const Breakpoints({Key? key}) : super(key: key);
 
   @override
   _BreakpointsState createState() => _BreakpointsState();
 }
 
 class _BreakpointsState extends State<Breakpoints> {
-  DebuggerController controller;
+  DebuggerController? controller;
 
   @override
   void didChangeDependencies() {
@@ -40,9 +40,9 @@ class _BreakpointsState extends State<Breakpoints> {
   @override
   Widget build(BuildContext context) {
     return DualValueListenableBuilder<List<BreakpointAndSourcePosition>,
-        BreakpointAndSourcePosition>(
-      firstListenable: controller.breakpointsWithLocation,
-      secondListenable: controller.selectedBreakpoint,
+        BreakpointAndSourcePosition?>(
+      firstListenable: controller!.breakpointsWithLocation,
+      secondListenable: controller!.selectedBreakpoint,
       builder: (context, breakpoints, selectedBreakpoint, _) {
         return ListView.builder(
           itemCount: breakpoints.length,
@@ -60,7 +60,7 @@ class _BreakpointsState extends State<Breakpoints> {
 
   Widget buildBreakpoint(
     BreakpointAndSourcePosition bp,
-    BreakpointAndSourcePosition selectedBreakpoint,
+    BreakpointAndSourcePosition? selectedBreakpoint,
   ) {
     final theme = Theme.of(context);
     final isSelected = bp.id == selectedBreakpoint?.id;
@@ -114,11 +114,11 @@ class _BreakpointsState extends State<Breakpoints> {
   }
 
   void _onBreakpointSelected(BreakpointAndSourcePosition bp) {
-    controller.selectBreakpoint(bp);
+    controller!.selectBreakpoint(bp);
   }
 
   String _descriptionFor(BreakpointAndSourcePosition breakpoint) {
-    final fileName = breakpoint.scriptUri.split('/').last;
+    final fileName = breakpoint.scriptUri!.split('/').last;
 
     // Consider showing columns in the future if we allow multiple breakpoints
     // per line.
@@ -127,7 +127,7 @@ class _BreakpointsState extends State<Breakpoints> {
 }
 
 class BreakpointsCountBadge extends StatelessWidget {
-  const BreakpointsCountBadge({@required this.breakpoints});
+  const BreakpointsCountBadge({required this.breakpoints});
 
   final List<BreakpointAndSourcePosition> breakpoints;
 
