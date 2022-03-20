@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/material.dart';
 
@@ -14,9 +14,9 @@ import 'inspector_tree.dart';
 
 class InspectorBreadcrumbNavigator extends StatelessWidget {
   const InspectorBreadcrumbNavigator({
-    Key key,
-    @required this.items,
-    @required this.onTap,
+    Key? key,
+    required this.items,
+    required this.onTap,
   }) : super(key: key);
 
   /// Max number of visible breadcrumbs including root item but not 'more' item.
@@ -25,7 +25,7 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
   static const _maxNumberOfBreadcrumbs = 5;
 
   final List<InspectorTreeNode> items;
-  final Function(InspectorTreeNode) onTap;
+  final Function(InspectorTreeNode?) onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -89,11 +89,10 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
 
 class _InspectorBreadcrumb extends StatelessWidget {
   const _InspectorBreadcrumb({
-    Key key,
-    @required this.data,
-    @required this.onTap,
-  })  : assert(data != null),
-        super(key: key);
+    Key? key,
+    required this.data,
+    required this.onTap,
+  }) : super(key: key);
 
   static const BorderRadius _borderRadius =
       BorderRadius.all(Radius.circular(defaultBorderRadius));
@@ -150,15 +149,15 @@ class _InspectorBreadcrumb extends StatelessWidget {
 
 class _InspectorBreadcrumbData {
   const _InspectorBreadcrumbData._({
-    @required this.node,
-    @required this.isSelected,
-    @required this.alternativeText,
-    @required this.alternativeIcon,
+    required this.node,
+    required this.isSelected,
+    required this.alternativeText,
+    required this.alternativeIcon,
   });
 
   factory _InspectorBreadcrumbData.wrap({
-    @required InspectorTreeNode node,
-    @required bool isSelected,
+    required InspectorTreeNode node,
+    required bool isSelected,
   }) {
     return _InspectorBreadcrumbData._(
       node: node,
@@ -190,14 +189,14 @@ class _InspectorBreadcrumbData {
   static const _ellipsisValue = '…';
   static const _breadcrumbSeparatorIcon = Icons.chevron_right;
 
-  final InspectorTreeNode node;
-  final IconData alternativeIcon;
-  final String alternativeText;
+  final InspectorTreeNode? node;
+  final IconData? alternativeIcon;
+  final String? alternativeText;
   final bool isSelected;
 
-  String get text => alternativeText ?? node?.diagnostic?.description;
+  String get text => alternativeText ?? node?.diagnostic?.description ?? '';
 
-  Widget get icon {
+  Widget? get icon {
     if (alternativeIcon != null) {
       return Icon(
         _breadcrumbSeparatorIcon,
