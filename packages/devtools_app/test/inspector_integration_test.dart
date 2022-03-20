@@ -67,7 +67,7 @@ void main() async {
           tester.state(find.byType(InspectorScreenBody));
       final controller = state.inspectorController!;
       while (!controller.flutterAppFrameReady) {
-        await state.inspectorController!.maybeLoadUI();
+        await controller.maybeLoadUI();
         await tester.pumpAndSettle();
       }
       // Give time for the initial animation to complete.
@@ -414,7 +414,7 @@ void main() async {
           tester.state(find.byType(InspectorScreenBody));
       final controller = state.inspectorController!;
       while (!controller.flutterAppFrameReady) {
-        await state.inspectorController!.maybeLoadUI();
+        await controller.maybeLoadUI();
         await tester.pumpAndSettle();
       }
       await env.flutter!.hotReload();
