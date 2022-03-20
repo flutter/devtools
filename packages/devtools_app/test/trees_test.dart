@@ -270,9 +270,9 @@ void main() {
       group('BFS', () {
         test('traverses tree in correct order', () {
           var visitedCount = 0;
-          breadthFirstTraversal(
+          breadthFirstTraversal<TraversalTestTreeNode>(
             tree,
-            action: (dynamic node) => node.setVisitedOrder(++visitedCount),
+            action: (node) => node.setVisitedOrder(++visitedCount),
           );
           // BFS order: A, B, C, D, E, F, G, H, I, J
           expect(treeNodeA.visitedOrder, equals(1));
@@ -288,9 +288,9 @@ void main() {
         });
 
         test('finds the correct node', () {
-          final node = breadthFirstTraversal(
+          final node = breadthFirstTraversal<TraversalTestTreeNode>(
             tree,
-            returnCondition: (dynamic node) => node.id == 'H',
+            returnCondition: (node) => node.id == 'H',
           )!;
           expect(node.id, equals('H'));
         });
@@ -299,9 +299,9 @@ void main() {
       group('DFS', () {
         test('traverses tree in correct order', () {
           var visitedCount = 0;
-          depthFirstTraversal(
+          depthFirstTraversal<TraversalTestTreeNode>(
             tree,
-            action: (dynamic node) => node.setVisitedOrder(++visitedCount),
+            action: (node) => node.setVisitedOrder(++visitedCount),
           );
           // DFS order: A, B, E, H, F, C, D, G, I, J
           expect(treeNodeA.visitedOrder, equals(1));
@@ -317,19 +317,19 @@ void main() {
         });
 
         test('finds the correct node', () {
-          final node = depthFirstTraversal(
+          final node = depthFirstTraversal<TraversalTestTreeNode>(
             tree,
-            returnCondition: (dynamic node) => node.id == 'H',
+            returnCondition: (node) => node.id == 'H',
           )!;
           expect(node.id, equals('H'));
         });
 
         test('explores correct children', () {
           var visitedCount = 0;
-          depthFirstTraversal(
+          depthFirstTraversal<TraversalTestTreeNode>(
             tree,
-            action: (dynamic node) => node.setVisitedOrder(++visitedCount),
-            exploreChildrenCondition: (dynamic node) => node.id != 'B',
+            action: (node) => node.setVisitedOrder(++visitedCount),
+            exploreChildrenCondition: (node) => node.id != 'B',
           );
           // DFS order: A, B, [skip] E, H, F, [end skip], C, D, G, I, J
           expect(treeNodeA.visitedOrder, equals(1));

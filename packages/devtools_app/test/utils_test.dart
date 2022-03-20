@@ -120,11 +120,10 @@ void main() {
     test('executeWithDelay', () async {
       const delayMs = 500;
       int n = 1;
-      int start;
+      int start = DateTime.now().millisecondsSinceEpoch;
       int? end;
 
       // Condition n >= 2 is false, so we should execute with a delay.
-      start = DateTime.now().millisecondsSinceEpoch;
       executeWithDelay(
         const Duration(milliseconds: 500),
         () {
