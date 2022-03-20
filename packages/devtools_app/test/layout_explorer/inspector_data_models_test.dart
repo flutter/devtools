@@ -33,7 +33,7 @@ void main() {
         tester: tester,
         subtreeDepth: subtreeDepth,
       );
-      final flexDiagnostics = rootNodeDiagnostics.childrenNow!.first;
+      final flexDiagnostics = rootNodeDiagnostics.childrenNow.first;
       return FlexLayoutProperties.fromDiagnostics(flexDiagnostics);
     }
 
@@ -216,14 +216,14 @@ void main() {
           (tester) async {
         Row buildWidget({
           required bool flipMainAxis,
-          MainAxisAlignment? mainAxisAlignment,
+          required MainAxisAlignment mainAxisAlignment,
         }) =>
             Row(
               textDirection:
                   flipMainAxis ? TextDirection.rtl : TextDirection.ltr,
               mainAxisAlignment: flipMainAxis
                   ? mainAxisAlignment.reversed!
-                  : mainAxisAlignment!,
+                  : mainAxisAlignment,
               children: flipMainAxis
                   ? childrenWidgets.reversed.toList()
                   : childrenWidgets,
@@ -276,7 +276,7 @@ void main() {
         tester: tester,
         subtreeDepth: 2,
       );
-      final rowDiagnosticsNode = diagnosticsNode.childrenNow!.first;
+      final rowDiagnosticsNode = diagnosticsNode.childrenNow.first;
       final layoutProperties = LayoutProperties(rowDiagnosticsNode);
 
       expect(layoutProperties.size, size);
@@ -302,7 +302,7 @@ void main() {
           tester: tester,
         );
         final sizedBoxDiagnosticsNode =
-            constrainedBoxDiagnosticsNode.childrenNow!.first;
+            constrainedBoxDiagnosticsNode.childrenNow.first;
         final layoutProperties = LayoutProperties(sizedBoxDiagnosticsNode);
         expect(layoutProperties.describeHeightConstraints(), 'h=$height');
         expect(layoutProperties.describeWidthConstraints(), 'w=$width');
@@ -327,7 +327,7 @@ void main() {
           tester: tester,
         );
         final sizedBoxDiagnosticsNode =
-            constrainedBoxDiagnosticsNode.childrenNow!.first;
+            constrainedBoxDiagnosticsNode.childrenNow.first;
         final layoutProperties = LayoutProperties(sizedBoxDiagnosticsNode);
         expect(layoutProperties.describeHeightConstraints(),
             '$minHeight<=h<=$maxHeight');
@@ -344,7 +344,7 @@ void main() {
           widget: widget,
           tester: tester,
         );
-        final containerDiagnosticsNode = rowDiagnosticsNode.childrenNow!.first;
+        final containerDiagnosticsNode = rowDiagnosticsNode.childrenNow.first;
         final layoutProperties = LayoutProperties(containerDiagnosticsNode);
         expect(layoutProperties.describeWidthConstraints(),
             'width is unconstrained');
@@ -360,7 +360,7 @@ void main() {
           tester: tester,
         );
         final containerDiagnosticsNode =
-            columnDiagnosticsNode.childrenNow!.first;
+            columnDiagnosticsNode.childrenNow.first;
         final layoutProperties = LayoutProperties(containerDiagnosticsNode);
         expect(
           layoutProperties.describeHeightConstraints(),
@@ -378,7 +378,7 @@ void main() {
       );
       final sizedBoxNode = await widgetToLayoutExplorerRemoteDiagnosticsNode(
           widget: widget, tester: tester);
-      final containerNode = sizedBoxNode.childrenNow!.first;
+      final containerNode = sizedBoxNode.childrenNow.first;
       final layoutProperties = LayoutProperties(containerNode);
       expect(layoutProperties.describeHeight(), 'h=$height');
       expect(layoutProperties.describeWidth(), 'w=$width');

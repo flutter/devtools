@@ -23,7 +23,7 @@ void main() {
   const windowSize = Size(2225.0, 1000.0);
 
   late Widget providerScreen;
-  BannerMessagesController bannerMessagesController;
+  late BannerMessagesController bannerMessagesController;
 
   setUpAll(() => loadFonts());
 

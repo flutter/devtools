@@ -12,16 +12,15 @@ import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 RemoteDiagnosticsNode? findNodeMatching(
-    RemoteDiagnosticsNode node, String text) {
+  RemoteDiagnosticsNode node,
+  String text,
+) {
   if (node.name?.startsWith(text) == true ||
       node.description?.startsWith(text) == true) {
     return node;
   }
-  if (node.childrenNow == null) {
-    return null;
-  }
-  for (var child in node.childrenNow!) {
-    final match = findNodeMatching(child!, text);
+  for (var child in node.childrenNow) {
+    final match = findNodeMatching(child, text);
     if (match != null) {
       return match;
     }
@@ -72,7 +71,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
     }
   }
   late String path;
-  String? _value;
+  late String _value;
 
   static final Object _mismatchedValueKey = Object();
 
@@ -115,8 +114,12 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
   }
 
   @override
-  Description describeMismatch(dynamic item, Description mismatchDescription,
-      Map<dynamic, dynamic> matchState, bool verbose) {
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
     if (!matchState.containsKey(_mismatchedValueKey)) {
       return mismatchDescription;
     }

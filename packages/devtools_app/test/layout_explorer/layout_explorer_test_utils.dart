@@ -25,5 +25,5 @@ Future<RemoteDiagnosticsNode> widgetToLayoutExplorerRemoteDiagnosticsNode({
               service: WidgetInspectorService.instance,
             ),
           );
-  return RemoteDiagnosticsNode(nodeJson, null, null, null);
+  return RemoteDiagnosticsNode(nodeJson, null, false, null);
 }

@@ -35,7 +35,7 @@ class LayoutExplorerSerializationDelegate
               // ignore: invalid_use_of_protected_member
               final Constraints constraints = renderObject.constraints;
 
-              final Map<String, Object> constraintsProperty = <String, Object>{
+              final constraintsProperty = <String, Object>{
                 'type': constraints.runtimeType.toString(),
                 'description': constraints.toString(),
               };
