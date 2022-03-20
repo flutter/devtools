@@ -45,7 +45,7 @@ class TextmateGrammar {
 
   void _parseRules() {
     final Map repository = _definition['repository'];
-    for (String name in repository.keys as Iterable<String>) {
+    for (String name in repository.keys.cast<String>()) {
       _ruleMap[name] = Rule(name);
     }
 
@@ -58,7 +58,7 @@ class TextmateGrammar {
 
   void _parseFileRules() {
     final List<dynamic> patterns = _definition['patterns'];
-    for (Map info in patterns as Iterable<Map<dynamic, dynamic>>) {
+    for (Map info in patterns.cast<Map<dynamic, dynamic>>()) {
       _fileRules.add(Rule(info['name']).._parse(info));
     }
     print('fileRules: $_fileRules');

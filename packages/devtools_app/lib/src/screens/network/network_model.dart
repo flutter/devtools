@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -16,31 +14,33 @@ abstract class NetworkRequest with DataSearchStateMixin {
 
   final int _timelineMicrosBase;
 
-  String get method;
+  String? get method;
 
-  String get uri;
+  String? get uri;
 
-  String get contentType;
+  String? get contentType;
 
   String get type;
 
-  Duration get duration;
+  Duration? get duration;
 
-  DateTime get startTimestamp;
+  DateTime? get startTimestamp;
 
-  DateTime get endTimestamp;
+  DateTime? get endTimestamp;
 
-  String get status;
+  String? get status;
 
-  int get port;
+  int? get port;
 
   bool get didFail;
 
   /// True if the request hasn't completed yet.
   bool get inProgress;
 
-  String get durationDisplay =>
-      'Duration: ${duration != null ? msText(duration) : 'Pending'}';
+  String get durationDisplay {
+    final duration = this.duration;
+    return 'Duration: ${duration != null ? msText(duration) : 'Pending'}';
+  }
 
   int timelineMicrosecondsSinceEpoch(int micros) {
     return _timelineMicrosBase + micros;
@@ -86,11 +86,12 @@ class WebSocket extends NetworkRequest {
   int get id => _socket.id;
 
   @override
-  Duration get duration {
-    if (_socket.startTime == null || _socket.endTime == null) {
+  Duration? get duration {
+    final endTime = _socket.endTime;
+    if (endTime == null) {
       return null;
     }
-    return Duration(microseconds: _socket.endTime - _socket.startTime);
+    return Duration(microseconds: endTime - _socket.startTime);
   }
 
   @override
@@ -98,20 +99,29 @@ class WebSocket extends NetworkRequest {
       timelineMicrosecondsSinceEpoch(_socket.startTime));
 
   @override
-  DateTime get endTimestamp => _socket.endTime != null
-      ? DateTime.fromMicrosecondsSinceEpoch(
-          timelineMicrosecondsSinceEpoch(_socket.endTime))
-      : null;
+  DateTime? get endTimestamp {
+    final endTime = _socket.endTime;
+    return endTime != null
+        ? DateTime.fromMicrosecondsSinceEpoch(
+            timelineMicrosecondsSinceEpoch(endTime))
+        : null;
+  }
 
-  DateTime get lastReadTimestamp => _socket.lastReadTime != null
-      ? DateTime.fromMicrosecondsSinceEpoch(
-          timelineMicrosecondsSinceEpoch(_socket.lastReadTime))
-      : null;
+  DateTime? get lastReadTimestamp {
+    final lastReadTime = _socket.lastReadTime;
+    return lastReadTime != null
+        ? DateTime.fromMicrosecondsSinceEpoch(
+            timelineMicrosecondsSinceEpoch(lastReadTime))
+        : null;
+  }
 
-  DateTime get lastWriteTimestamp => _socket.lastWriteTime != null
-      ? DateTime.fromMicrosecondsSinceEpoch(
-          timelineMicrosecondsSinceEpoch(_socket.lastWriteTime))
-      : null;
+  DateTime? get lastWriteTimestamp {
+    final lastWriteTime = _socket.lastWriteTime;
+    return lastWriteTime != null
+        ? DateTime.fromMicrosecondsSinceEpoch(
+            timelineMicrosecondsSinceEpoch(lastWriteTime))
+        : null;
+  }
 
   @override
   String get contentType => 'websocket';
@@ -161,9 +171,7 @@ class NetworkRequests {
     this.requests = const [],
     this.invalidHttpRequests = const [],
     this.outstandingHttpRequests = const {},
-  })  : assert(requests != null),
-        assert(invalidHttpRequests != null),
-        assert(outstandingHttpRequests != null);
+  });
 
   /// A list of network requests.
   ///
