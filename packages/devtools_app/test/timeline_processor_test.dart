@@ -158,7 +158,7 @@ void main() {
       );
       await processor.processTraceEvents(traceEvents);
       expect(
-        events,
+        events.length,
         equals(4),
       );
       expect(
