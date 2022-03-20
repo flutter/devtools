@@ -28,11 +28,6 @@ self.addEventListener('install', (event) => {
     event.waitUntil(resetCache);
 });
 
-self.addEventListener('activate', (event) => {
-    // Have the service worker claim all DevTools tabs on activate:
-    event.waitUntil(clients.claim);
-});
-
 // The fetch handler redirects requests for RESOURCES_TO_CACHE to the service
 // worker cache.
 self.addEventListener('fetch', (event) => {

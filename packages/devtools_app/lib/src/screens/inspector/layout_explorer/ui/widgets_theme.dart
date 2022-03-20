@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 class WidgetTheme {
@@ -12,10 +10,10 @@ class WidgetTheme {
     this.color = otherWidgetColor,
   });
 
-  final String iconAsset;
+  final String? iconAsset;
   final Color color;
 
-  static WidgetTheme fromName(String widgetType) {
+  static WidgetTheme fromName(String? widgetType) {
     if (widgetType == null) {
       return const WidgetTheme();
     }

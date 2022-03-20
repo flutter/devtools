@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -17,19 +15,19 @@ import 'logging_controller.dart';
 
 class LogsTable extends StatelessWidget {
   LogsTable({
-    Key key,
-    @required this.data,
-    @required this.onItemSelected,
-    @required this.selectionNotifier,
-    @required this.searchMatchesNotifier,
-    @required this.activeSearchMatchNotifier,
+    Key? key,
+    required this.data,
+    required this.onItemSelected,
+    required this.selectionNotifier,
+    required this.searchMatchesNotifier,
+    required this.activeSearchMatchNotifier,
   }) : super(key: key);
 
   final List<LogData> data;
   final ItemCallback<LogData> onItemSelected;
-  final ValueListenable<LogData> selectionNotifier;
+  final ValueListenable<LogData?> selectionNotifier;
   final ValueListenable<List<LogData>> searchMatchesNotifier;
-  final ValueListenable<LogData> activeSearchMatchNotifier;
+  final ValueListenable<LogData?> activeSearchMatchNotifier;
 
   final ColumnData<LogData> when = WhenColumn();
   final ColumnData<LogData> kind = KindColumn();
