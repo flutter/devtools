@@ -40,8 +40,9 @@ class DebuggerController extends DisposableController
     _programExplorerController = ProgramExplorerController(
       debuggerController: this,
     );
-    autoDisposeStreamSubscription(serviceManager.onConnectionAvailable
-        .listen(_handleConnectionAvailable));
+    autoDisposeStreamSubscription(
+      serviceManager.onConnectionAvailable.listen(_handleConnectionAvailable),
+    );
     if (_service != null) {
       initialize();
     }
