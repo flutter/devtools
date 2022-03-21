@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -60,15 +60,15 @@ abstract class Result<T> with _$Result<T> {
       error: (err, stack) {
         // ignore: only_throw_errors
         throw err;
-      },
+      } as T Function(Object, StackTrace),
     );
   }
 }
 
-Result<T> parseSentinel<T>(Object value) {
+Result<T?> parseSentinel<T>(Object? value) {
   // TODO(rrousselGit) remove condition after migrating to NNBD
   if (value == null) return Result.data(null);
-  if (value is T) return Result.data(value);
+  if (value is T) return Result.data(value as T?);
 
   if (value is Sentinel) {
     return Result.error(

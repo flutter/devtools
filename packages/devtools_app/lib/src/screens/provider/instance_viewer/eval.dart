@@ -4,7 +4,7 @@
 
 /// A few utilities related to evaluating dart code
 
-// @dart=2.9
+
 
 library eval;
 
@@ -21,7 +21,7 @@ import '../../../shared/globals.dart';
 /// this ensures that providers reload properly when the devtool is connected
 /// to a different application.
 final serviceProvider = StreamProvider<VmServiceWrapper>((ref) async* {
-  yield serviceManager.service;
+  yield serviceManager.service!;
   yield* serviceManager.onConnectionAvailable;
 });
 
@@ -29,10 +29,10 @@ final serviceProvider = StreamProvider<VmServiceWrapper>((ref) async* {
 ///
 /// Not suitable to be used when evaluating third-party objects, as it would
 /// otherwise not be possible to read private properties.
-final evalProvider = libraryEvalProvider('dart:io');
+final FutureProvider<EvalOnDartLibrary>? evalProvider = libraryEvalProvider('dart:io');
 
 /// An [EvalOnDartLibrary] that has access to `provider`
-final providerEvalProvider =
+final FutureProvider<EvalOnDartLibrary>? providerEvalProvider =
     libraryEvalProvider('package:provider/src/provider.dart');
 
 /// An [EvalOnDartLibrary] for custom objects.
@@ -46,6 +46,6 @@ final libraryEvalProvider =
 });
 
 final hotRestartEventProvider =
-    ChangeNotifierProvider<ValueNotifier<IsolateRef>>((ref) {
-  return serviceManager.isolateManager.selectedIsolate;
+    ChangeNotifierProvider<ValueNotifier<IsolateRef?>>((ref) {
+  return serviceManager.isolateManager.selectedIsolate as ValueNotifier<IsolateRef?>;
 });

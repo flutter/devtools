@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'dart:async';
 
@@ -29,7 +29,7 @@ AutoDisposeStateNotifierProviderFamily<StateController<Listened>, Listened, Id>
         ref.read(family(id)),
       );
 
-      Timer timer;
+      Timer? timer;
       ref.onDispose(() => timer?.cancel());
 
       // TODO(rrousselGit): refactor to use `ref.listen` when available
@@ -87,7 +87,7 @@ AutoDisposeStateNotifierProvider<StateController<Listened>, Listened>
         ref.read(provider),
       );
 
-      Timer timer;
+      Timer? timer;
       ref.onDispose(() => timer?.cancel());
 
       // TODO(rrousselGit): refactor to use `ref.listen` when available

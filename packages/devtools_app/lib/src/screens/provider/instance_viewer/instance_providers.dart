@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:collection/collection.dart';
@@ -19,18 +17,18 @@ import 'eval.dart';
 import 'instance_details.dart';
 import 'result.dart';
 
-Future<InstanceRef> _resolveInstanceRefForPath(
+Future<InstanceRef?> _resolveInstanceRefForPath(
   InstancePath path, {
-  @required AutoDisposeProviderReference ref,
-  @required Disposable isAlive,
-  @required InstanceDetails parent,
+  required AutoDisposeProviderReference ref,
+  required Disposable isAlive,
+  required InstanceDetails? parent,
 }) async {
   if (path.pathToProperty.isEmpty) {
     // root of the provider tree
 
-    return path.map(
+    return path.map<Future<InstanceRef?>>(
       fromProviderId: (path) async {
-        final eval = await ref.watch(providerEvalProvider.future);
+        final eval = await ref.watch(providerEvalProvider!.future);
         // cause the instances to be re-evaluated when the devtool is notified
         // that a provider changed
         ref.watch(_providerChanged(path.providerId));
@@ -41,21 +39,19 @@ Future<InstanceRef> _resolveInstanceRefForPath(
         );
       },
       fromInstanceId: (path) async {
-        if (path.instanceId == null) return null;
-
-        final eval = await ref.watch(evalProvider.future);
+        final eval = await ref.watch(evalProvider!.future);
         return eval.safeEval(
           'value',
           isAlive: isAlive,
-          scope: {'value': path.instanceId},
+          scope: {'value': path.instanceId!},
         );
       },
     );
   }
 
-  final eval = await ref.watch(evalProvider.future);
+  final eval = await ref.watch(evalProvider!.future);
 
-  return parent.maybeMap(
+  return parent!.maybeMap(
     // TODO: support sets
     // TODO: iterables should use iterators / next() for iterable to navigate, to avoid recomputing the content
 
@@ -68,7 +64,7 @@ Future<InstanceRef> _resolveInstanceRefForPath(
         isAlive: isAlive,
         scope: {
           'parent': parent.instanceRefId,
-          if (keyPath.ref != null) 'key': keyPath.ref
+          if (keyPath.ref != null) 'key': keyPath.ref!
         },
       );
     },
@@ -91,7 +87,7 @@ Future<InstanceRef> _resolveInstanceRefForPath(
           element.ownerName == propertyPath.ownerName &&
           element.ownerUri == propertyPath.ownerUri);
 
-      final ref = field.ref.dataOrThrow;
+      final ref = field.ref!.dataOrThrow;
       if (ref == null) return null;
 
       // we cannot do `eval('parent.propertyName')` because it is possible for
@@ -110,14 +106,14 @@ Future<InstanceRef> _resolveInstanceRefForPath(
 /// fields are both defined in the same library.
 Future<void> _mutate(
   String newValueExpression, {
-  @required InstancePath path,
-  @required AutoDisposeProviderReference ref,
-  @required Disposable isAlive,
-  @required InstanceDetails parent,
+  required InstancePath path,
+  required AutoDisposeProviderReference ref,
+  required Disposable isAlive,
+  required InstanceDetails parent,
 }) async {
   await parent.maybeMap(
     list: (parent) async {
-      final eval = await ref.watch(evalProvider.future);
+      final eval = await ref.watch(evalProvider!.future);
       final indexPath = path.pathToProperty.last as ListIndexPath;
 
       return eval.safeEval(
@@ -129,7 +125,7 @@ Future<void> _mutate(
       );
     },
     map: (parent) async {
-      final eval = await ref.watch(evalProvider.future);
+      final eval = await ref.watch(evalProvider!.future);
       final keyPath = path.pathToProperty.last as MapKeyPath;
       final keyRefVar = keyPath.ref == null ? 'null' : 'key';
 
@@ -138,7 +134,7 @@ Future<void> _mutate(
         isAlive: isAlive,
         scope: {
           'parent': parent.instanceRefId,
-          if (keyPath.ref != null) 'key': keyPath.ref,
+          if (keyPath.ref != null) 'key': keyPath.ref!,
         },
       );
     },
@@ -164,34 +160,34 @@ Future<void> _mutate(
 
   // Since the same object can be used in multiple locations at once, we need
   // to refresh the entire tree instead of just the node that was modified.
-  unawaited(ref.container.refresh(rawInstanceProvider(path.root)));
+  unawaited(ref.container.refresh(rawInstanceProvider(path.root!)));
 
   // Forces the UI to rebuild after the state change
   await serviceManager.performHotReload();
 }
 
-Future<InstanceDetails> _resolveParent(
+Future<InstanceDetails?> _resolveParent(
   AutoDisposeProviderReference ref,
   InstancePath path,
 ) async {
   return path.pathToProperty.isNotEmpty
-      ? await ref.watch(rawInstanceProvider(path.parent).future)
+      ? await ref.watch(rawInstanceProvider(path.parent!).future)
       : null;
 }
 
-Future<EnumInstance> _tryParseEnum(
+Future<EnumInstance?> _tryParseEnum(
   Instance instance, {
-  @required EvalOnDartLibrary eval,
-  @required Disposable isAlive,
-  @required String instanceRefId,
-  @required Setter setter,
+  required EvalOnDartLibrary eval,
+  required Disposable isAlive,
+  required String? instanceRefId,
+  required Setter? setter,
 }) async {
   if (instance.kind != InstanceKind.kPlainInstance ||
-      instance.fields.length != 2) return null;
+      instance.fields!.length != 2) return null;
 
-  InstanceRef findPropertyWithName(String name) {
-    return instance.fields
-        .firstWhereOrNull((element) => element.decl.name == name)
+  InstanceRef? findPropertyWithName(String name) {
+    return instance.fields!
+        .firstWhereOrNull((element) => element.decl!.name == name)
         ?.value;
   }
 
@@ -203,30 +199,30 @@ Future<EnumInstance> _tryParseEnum(
   final nameInstanceFuture = eval.getInstance(_nameRef, isAlive);
   final indexInstanceFuture = eval.getInstance(indexRef, isAlive);
 
-  final index = await indexInstanceFuture;
+  final index = await (indexInstanceFuture as FutureOr<Instance>);
 
   if (index.kind != InstanceKind.kInt) return null;
 
-  final name = await nameInstanceFuture;
+  final name = await (nameInstanceFuture as FutureOr<Instance>);
   if (name.kind != InstanceKind.kString) return null;
 
-  final nameSplit = name.valueAsString.split('.');
+  final nameSplit = name.valueAsString!.split('.');
 
   if (nameSplit.length != 2) return null;
 
   return EnumInstance(
     type: nameSplit.first,
     value: nameSplit[1],
-    instanceRefId: instanceRefId,
+    instanceRefId: instanceRefId!,
     setter: setter,
   );
 }
 
-Setter _parseSetter({
-  @required InstancePath path,
-  @required ProviderReference ref,
-  @required Disposable isAlive,
-  @required InstanceDetails parent,
+Setter? _parseSetter({
+  required InstancePath path,
+  required ProviderReference ref,
+  required Disposable isAlive,
+  required InstanceDetails? parent,
 }) {
   if (parent == null) return null;
 
@@ -234,7 +230,7 @@ Setter _parseSetter({
     return _mutate(
       expression,
       path: path,
-      ref: ref,
+      ref: ref as AutoDisposeProviderReference,
       isAlive: isAlive,
       parent: parent,
     );
@@ -270,14 +266,14 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
         (ref, path) async {
   ref.watch(hotRestartEventProvider);
 
-  final eval = await ref.watch(evalProvider.future);
+  final eval = await ref.watch(evalProvider!.future);
 
   final isAlive = Disposable();
   ref.onDispose(isAlive.dispose);
 
   final parent = await _resolveParent(ref, path);
 
-  InstanceRef instanceRef;
+  InstanceRef? instanceRef;
 
   instanceRef = await _resolveInstanceRefForPath(
     path,
@@ -293,35 +289,36 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
     parent: parent,
   );
 
-  final instance = await eval.getInstance(instanceRef, isAlive);
+  final instance =
+      await (eval.getInstance(instanceRef!, isAlive) as FutureOr<Instance>);
 
   switch (instance.kind) {
     case InstanceKind.kNull:
       return InstanceDetails.nill(setter: setter);
     case InstanceKind.kBool:
       return InstanceDetails.boolean(
-        instance.valueAsString,
-        instanceRefId: instanceRef.id,
+        instance.valueAsString!,
+        instanceRefId: instanceRef.id!,
         setter: setter,
       );
     case InstanceKind.kInt:
     case InstanceKind.kDouble:
       return InstanceDetails.number(
-        instance.valueAsString,
-        instanceRefId: instanceRef.id,
+        instance.valueAsString!,
+        instanceRefId: instanceRef.id!,
         setter: setter,
       );
     case InstanceKind.kString:
       return InstanceDetails.string(
-        instance.valueAsString,
-        instanceRefId: instanceRef.id,
+        instance.valueAsString!,
+        instanceRefId: instanceRef.id!,
         setter: setter,
       );
 
     case InstanceKind.kMap:
 
       // voluntarily throw if a key failed to load
-      final keysRef = instance.associations.map((e) => e.key as InstanceRef);
+      final keysRef = instance.associations!.map((e) => e.key as InstanceRef?);
 
       final keysFuture = Future.wait<InstanceDetails>([
         for (final keyRef in keysRef)
@@ -332,8 +329,9 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
 
       return InstanceDetails.map(
         await keysFuture,
-        hash: await eval.getHashCode(instance, isAlive: isAlive),
-        instanceRefId: instanceRef.id,
+        hash: await (eval.getHashCode(instance, isAlive: isAlive)
+            as FutureOr<int>),
+        instanceRefId: instanceRef.id!,
         setter: setter,
       );
 
@@ -343,8 +341,9 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
     case InstanceKind.kList:
       return InstanceDetails.list(
         length: instance.length,
-        hash: await eval.getHashCode(instance, isAlive: isAlive),
-        instanceRefId: instanceRef.id,
+        hash: await (eval.getHashCode(instance, isAlive: isAlive)
+            as FutureOr<int>),
+        instanceRefId: instanceRef.id!,
         setter: setter,
       );
 
@@ -360,11 +359,12 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
 
       if (enumDetails != null) return enumDetails;
 
-      final classInstance = await eval.getClass(instance.classRef, isAlive);
+      final classInstance =
+          await (eval.getClass(instance.classRef!, isAlive) as FutureOr<Class>);
       final evalForInstance =
-          ref.watch(libraryEvalProvider(classInstance.library.uri).future);
+          ref.watch(libraryEvalProvider(classInstance.library!.uri!).future);
 
-      final appName = tryParsePackageName(eval.isolate.rootLib.uri);
+      final appName = tryParsePackageName(eval.isolate!.rootLib!.uri!);
 
       final fields = await _parseFields(
         ref,
@@ -377,9 +377,10 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
 
       return InstanceDetails.object(
         fields.sorted((a, b) => sortFieldsByName(a.name, b.name)),
-        hash: await eval.getHashCode(instance, isAlive: isAlive),
-        type: instance.classRef.name,
-        instanceRefId: instanceRef.id,
+        hash: await (eval.getHashCode(instance, isAlive: isAlive)
+            as FutureOr<int>),
+        type: instance.classRef!.name!,
+        instanceRefId: instanceRef.id!,
         evalForInstance: await evalForInstance,
         setter: setter,
       );
@@ -398,7 +399,7 @@ final _packageNameExp = RegExp(
   r'package:(.+?)/',
 );
 
-String tryParsePackageName(String uri) {
+String? tryParsePackageName(String uri) {
   return _packageNameExp.firstMatch(uri)?.group(1);
 }
 
@@ -407,33 +408,35 @@ Future<List<ObjectField>> _parseFields(
   EvalOnDartLibrary eval,
   Instance instance,
   Class classInstance, {
-  @required Disposable isAlive,
-  @required String appName,
+  required Disposable isAlive,
+  required String? appName,
 }) async {
-  final fields = instance.fields.map((field) async {
-    final owner = await eval.getClass(field.decl.owner, isAlive);
+  final fields = instance.fields!.map((field) async {
+    final owner = await (eval.getClass(field.decl!.owner as ClassRef, isAlive)
+        as FutureOr<Class>);
 
-    String ownerUri;
-    String ownerName;
+    String? ownerUri;
+    String? ownerName;
     if (owner.mixin == null) {
-      ownerUri = owner.library.uri;
+      ownerUri = owner.library!.uri;
       ownerName = owner.name;
     } else {
-      final mixinClass = await eval.getClass(owner.mixin.typeClass, isAlive);
+      final mixinClass = await (eval.getClass(owner.mixin!.typeClass!, isAlive)
+          as FutureOr<Class>);
 
-      ownerUri = mixinClass.library.uri;
+      ownerUri = mixinClass.library!.uri;
       ownerName = mixinClass.name;
     }
 
-    final ownerPackageName = tryParsePackageName(ownerUri);
+    final ownerPackageName = tryParsePackageName(ownerUri!);
 
     return ObjectField(
-      name: field.decl.name,
-      isFinal: field.decl.isFinal,
+      name: field.decl!.name!,
+      isFinal: field.decl!.isFinal!,
       ref: parseSentinel<InstanceRef>(field.value),
-      ownerName: ownerName,
+      ownerName: ownerName!,
       ownerUri: ownerUri,
-      eval: await ref.watch(libraryEvalProvider(owner.library.uri).future),
+      eval: await ref.watch(libraryEvalProvider(owner.library!.uri!).future),
       isDefinedByDependency: ownerPackageName != appName,
     );
   }).toList();
@@ -447,6 +450,6 @@ final _providerChanged =
 
   yield* service.onExtensionEvent.where((event) {
     return event.extensionKind == 'provider:provider_changed' &&
-        event.extensionData.data['id'] == id;
+        event.extensionData!.data['id'] == id;
   });
 });

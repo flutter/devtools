@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -27,7 +27,7 @@ abstract class PathToProperty with _$PathToProperty {
 
   // TODO test that mutating a Map does not collapse previously expanded keys
   const factory PathToProperty.mapKey({
-    @required @nullable String ref,
+    @nullable required String? ref,
   }) = MapKeyPath;
 
   /// Must not depend on [InstanceRef] and its ID, as they may change across
@@ -64,7 +64,7 @@ abstract class ObjectField with _$ObjectField {
     @required bool isFinal,
     @required String ownerName,
     @required String ownerUri,
-    @required @nullable Result<InstanceRef> ref,
+    @required @nullable Result<InstanceRef?> ref,
 
     /// An [EvalOnDartLibrary] that can access this field from the owner object
     @required EvalOnDartLibrary eval,
@@ -86,40 +86,40 @@ abstract class InstanceDetails with _$InstanceDetails {
 
   @Assert('instanceRefId == null')
   factory InstanceDetails.nill({
-    String instanceRefId,
-    @required @nullable Setter setter,
+    String? instanceRefId,
+    @nullable required Setter? setter,
   }) = NullInstance;
 
   factory InstanceDetails.boolean(
     String displayString, {
     @required String instanceRefId,
-    @required @nullable Setter setter,
+    @nullable required Setter? setter,
   }) = BoolInstance;
 
   factory InstanceDetails.number(
     String displayString, {
     @required String instanceRefId,
-    @required @nullable Setter setter,
+    @nullable required Setter? setter,
   }) = NumInstance;
 
   factory InstanceDetails.string(
     String displayString, {
     @required String instanceRefId,
-    @required @nullable Setter setter,
+    @nullable required Setter? setter,
   }) = StringInstance;
 
   factory InstanceDetails.map(
     List<InstanceDetails> keys, {
     @required int hash,
     @required String instanceRefId,
-    @required @nullable Setter setter,
+    @nullable required Setter? setter,
   }) = MapInstance;
 
   factory InstanceDetails.list({
-    @required @nullable int length,
+    @nullable required int? length,
     @required int hash,
     @required String instanceRefId,
-    @required @nullable Setter setter,
+    @nullable required Setter? setter,
   }) = ListInstance;
 
   factory InstanceDetails.object(
@@ -127,7 +127,7 @@ abstract class InstanceDetails with _$InstanceDetails {
     @required String type,
     @required int hash,
     @required String instanceRefId,
-    @required @nullable Setter setter,
+    @nullable required Setter? setter,
 
     /// An [EvalOnDartLibrary] associated with the library of this object
     ///
@@ -152,7 +152,7 @@ abstract class InstanceDetails with _$InstanceDetails {
       string: falsy,
       enumeration: falsy,
       map: (instance) => instance.keys.isNotEmpty,
-      list: (instance) => instance.length > 0,
+      list: (instance) => instance.length! > 0,
       object: (instance) => instance.fields.isNotEmpty,
     );
   }
@@ -164,7 +164,7 @@ abstract class InstancePath with _$InstancePath {
   const InstancePath._();
 
   const factory InstancePath.fromInstanceId(
-    @nullable String instanceId, {
+    @nullable String? instanceId, {
     @Default([]) List<PathToProperty> pathToProperty,
   }) = _InstancePathFromInstanceId;
 
@@ -173,9 +173,9 @@ abstract class InstancePath with _$InstancePath {
     @Default([]) List<PathToProperty> pathToProperty,
   }) = _InstancePathFromProviderId;
 
-  InstancePath get root => copyWith(pathToProperty: []);
+  InstancePath? get root => copyWith(pathToProperty: []);
 
-  InstancePath get parent {
+  InstancePath? get parent {
     if (pathToProperty.isEmpty) return null;
 
     return copyWith(
@@ -185,7 +185,7 @@ abstract class InstancePath with _$InstancePath {
     );
   }
 
-  InstancePath pathForChild(PathToProperty property) {
+  InstancePath? pathForChild(PathToProperty property) {
     return copyWith(
       pathToProperty: [...pathToProperty, property],
     );

@@ -7,7 +7,7 @@
 // We could instead remove the annotations, but that would make the process of
 // updating the generated files tedious.
 
-// @dart=2.9
+
 
 const nullable = Object();
 const freezed = Object();
@@ -22,7 +22,7 @@ class Assert {
 
 class JsonKey {
   const JsonKey({
-    bool ignore,
-    Object defaultValue,
+    bool? ignore,
+    Object? defaultValue,
   });
 }
