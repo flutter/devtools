@@ -14,7 +14,6 @@ import 'package:vm_service/vm_service.dart' hide Error;
 import '../config_specific/logger/logger.dart';
 import '../primitives/auto_dispose.dart';
 import '../shared/connected_app.dart';
-import '../shared/version.dart';
 import 'isolate_manager.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_extensions.dart';
@@ -377,19 +376,7 @@ class ServiceExtensionManager extends Disposer {
           // all. For example, some isolates may still be initializing so may
           // not expose the service extension yet.
           await _service!.forEachIsolate((isolate) async {
-            // TODO(kenz): stop special casing http timeline logging once
-            // dart io version 1.4 hits stable (when vm_service 5.3.0 hits
-            // Flutter stable).
-            // See https://github.com/dart-lang/sdk/issues/43628.
-            if (name == extensions.httpEnableTimelineLogging.extension &&
-                !(await _service!.isDartIoVersionSupported(
-                  supportedVersion: SemanticVersion(major: 1, minor: 4),
-                  isolateId: isolate.id!,
-                ))) {
-              await _service!.httpEnableTimelineLogging(isolate.id!, value);
-            } else {
-              await call(isolate.id, value);
-            }
+            await call(isolate.id, value);
           });
         } else {
           await call(mainIsolate?.id, value);

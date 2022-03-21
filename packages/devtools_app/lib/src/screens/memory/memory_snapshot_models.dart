@@ -757,8 +757,7 @@ FieldReference fieldToFieldReference(
   // Handle change in VM service to use 0 based vs/ 1 based indexing. Need to
   // support old semantics for old VMs.
   final classId = actual.origin.classId;
-  final int indexIntoClass =
-      controller.newSnapshotSemantics ? classId : classId - 1;
+  final int indexIntoClass = classId;
   if (!controller.heapGraph!.builtInClasses.containsValue(indexIntoClass)) {
     return objectToFieldReference(
       controller,
@@ -827,10 +826,9 @@ FieldReference createScalar(
       break;
     default:
       final originClassId = actual.origin.classId;
-      final classId =
-          controller!.newSnapshotSemantics ? originClassId : originClassId - 1;
+      final classId = originClassId;
       dataValue = data.toString();
-      final dataTypeClass = controller.heapGraph!.classes[classId];
+      final dataTypeClass = controller!.heapGraph!.classes[classId];
       final predefined = predefinedClasses[dataTypeClass.fullQualifiedName]!;
       dataType = predefined.prettyName;
   }

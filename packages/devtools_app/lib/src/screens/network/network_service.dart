@@ -6,7 +6,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
-import '../../shared/version.dart';
 import 'network_controller.dart';
 
 class NetworkService {
@@ -44,18 +43,7 @@ class NetworkService {
     final sockets = await _refreshSockets();
     List<HttpProfileRequest>? httpRequests;
     Timeline? timeline;
-    final service = serviceManager.service!;
-    if (await service.isDartIoVersionSupported(
-      supportedVersion: SemanticVersion(major: 1, minor: 6),
-      isolateId: serviceManager.isolateManager.selectedIsolate.value!.id!,
-    )) {
-      httpRequests = await _refreshHttpProfile();
-    } else {
-      timeline = await service.getVMTimeline(
-        timeOriginMicros: networkController.lastRefreshMicros,
-        timeExtentMicros: timestamp - networkController.lastRefreshMicros,
-      );
-    }
+    httpRequests = await _refreshHttpProfile();
     networkController.lastRefreshMicros = timestamp;
     networkController.processNetworkTraffic(
       timeline: timeline,

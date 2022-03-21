@@ -11,7 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../screens/profiler/cpu_profile_model.dart' hide CpuSample;
-import '../shared/version.dart';
 
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(
@@ -37,25 +36,6 @@ class VmServiceWrapper implements VmService {
   }
 
   late final VmService _vmService;
-  Version? _protocolVersion;
-  Version? _dartIoVersion;
-  Version? _ddsVersion;
-
-  Future<void> initServiceVersions() async {
-    // Note: We cannot init [_dartIoVersion] here because it requires an
-    // isolate. This is fine because there are not reasons for us to need
-    // [_dartIoVersion] in a synchronous context, like there are for
-    // [_protocolVersion] and [_ddsVersion].
-    _protocolVersion = await getVersion();
-    try {
-      // If DDS is not present, this will throw.
-      _ddsVersion = await getDartDevelopmentServiceVersion();
-    } on RPCError catch (e) {
-      if (e.code != RPCError.kMethodNotFound) {
-        rethrow;
-      }
-    }
-  }
 
   Uri get connectedUri => _connectedUri;
   final Uri _connectedUri;
@@ -145,31 +125,15 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Success> clearCpuSamples(String isolateId) async {
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 3, minor: 27))) {
-      return trackFuture(
-        'clearCpuSamples',
-        _vmService.clearCpuSamples(isolateId),
-      );
-    } else {
-      final response = await trackFuture(
-        'clearCpuSamples',
-        callMethod('_clearCpuProfile', isolateId: isolateId),
-      );
-      return response as Success;
-    }
+    return trackFuture(
+      'clearCpuSamples',
+      _vmService.clearCpuSamples(isolateId),
+    );
   }
 
   @override
   Future<Success> clearVMTimeline() async {
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 3, minor: 19))) {
-      return trackFuture('clearVMTimeline', _vmService.clearVMTimeline());
-    } else {
-      final response =
-          await trackFuture('clearVMTimeline', callMethod('_clearVMTimeline'));
-      return response as Success;
-    }
+    return trackFuture('clearVMTimeline', _vmService.clearVMTimeline());
   }
 
   @override
@@ -222,26 +186,10 @@ class VmServiceWrapper implements VmService {
     bool? reset,
     bool? gc,
   }) async {
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 3, minor: 18))) {
-      return trackFuture(
-        'getAllocationProfile',
-        _vmService.getAllocationProfile(isolateId, reset: reset, gc: gc),
-      );
-    } else {
-      final Map<String, dynamic> args = {};
-      if (gc != null && gc) {
-        args['gc'] = 'full';
-      }
-      if (reset != null && reset) {
-        args['reset'] = reset;
-      }
-      final response = await trackFuture(
-        'getAllocationProfile',
-        callMethod('_getAllocationProfile', isolateId: isolateId, args: args),
-      );
-      return AllocationProfile.parse(response.json)!;
-    }
+    return trackFuture(
+      'getAllocationProfile',
+      _vmService.getAllocationProfile(isolateId, reset: reset, gc: gc),
+    );
   }
 
   @override
@@ -257,99 +205,87 @@ class VmServiceWrapper implements VmService {
   }
 
   Future<CpuProfileData> getCpuProfileTimeline(
-      String isolateId, int origin, int extent) async {
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 3, minor: 27))) {
-      // As of service protocol version 3.27 _getCpuProfileTimeline does not exist
-      // and has been replaced by getCpuSamples. We need to do some processing to
-      // get back to the format we expect.
-      final cpuSamples = await getCpuSamples(isolateId, origin, extent);
+    String isolateId,
+    int origin,
+    int extent,
+  ) async {
+    // As of service protocol version 3.27 _getCpuProfileTimeline does not exist
+    // and has been replaced by getCpuSamples. We need to do some processing to
+    // get back to the format we expect.
+    final cpuSamples = await getCpuSamples(isolateId, origin, extent);
 
-      // The root ID is associated with an artificial frame / node that is the root
-      // of all stacks, regardless of entrypoint. This should never be seen in the
-      // final output from this method.
-      const int kRootId = 0;
-      int nextId = kRootId;
-      final traceObject = <String, dynamic>{
-        CpuProfileData.sampleCountKey: cpuSamples.sampleCount,
-        CpuProfileData.samplePeriodKey: cpuSamples.samplePeriod,
-        CpuProfileData.stackDepthKey: cpuSamples.maxStackDepth,
-        CpuProfileData.timeOriginKey: cpuSamples.timeOriginMicros,
-        CpuProfileData.timeExtentKey: cpuSamples.timeExtentMicros,
-        CpuProfileData.stackFramesKey: {},
-        CpuProfileData.traceEventsKey: [],
-      };
+    // The root ID is associated with an artificial frame / node that is the root
+    // of all stacks, regardless of entrypoint. This should never be seen in the
+    // final output from this method.
+    const int kRootId = 0;
+    int nextId = kRootId;
+    final traceObject = <String, dynamic>{
+      CpuProfileData.sampleCountKey: cpuSamples.sampleCount,
+      CpuProfileData.samplePeriodKey: cpuSamples.samplePeriod,
+      CpuProfileData.stackDepthKey: cpuSamples.maxStackDepth,
+      CpuProfileData.timeOriginKey: cpuSamples.timeOriginMicros,
+      CpuProfileData.timeExtentKey: cpuSamples.timeExtentMicros,
+      CpuProfileData.stackFramesKey: {},
+      CpuProfileData.traceEventsKey: [],
+    };
 
-      String? nameForStackFrame(_CpuProfileTimelineTree current) {
-        final className = current.className;
-        if (className != null) {
-          return '$className.${current.name}';
-        }
-        return current.name;
+    String? nameForStackFrame(_CpuProfileTimelineTree current) {
+      final className = current.className;
+      if (className != null) {
+        return '$className.${current.name}';
       }
-
-      void processStackFrame({
-        required _CpuProfileTimelineTree current,
-        required _CpuProfileTimelineTree? parent,
-      }) {
-        final id = nextId++;
-        current.frameId = id;
-
-        // Skip the root.
-        if (id != kRootId) {
-          final key = '$isolateId-$id';
-          traceObject[CpuProfileData.stackFramesKey][key] = {
-            CpuProfileData.categoryKey: 'Dart',
-            CpuProfileData.nameKey: nameForStackFrame(current),
-            CpuProfileData.resolvedUrlKey: current.resolvedUrl,
-            CpuProfileData.sourceLine: current.sourceLine,
-            if (parent != null && parent.frameId != 0)
-              CpuProfileData.parentIdKey: '$isolateId-${parent.frameId}',
-          };
-        }
-        for (final child in current.children) {
-          processStackFrame(current: child, parent: current);
-        }
-      }
-
-      final root = _CpuProfileTimelineTree.fromCpuSamples(cpuSamples);
-      processStackFrame(current: root, parent: null);
-
-      // Build the trace events.
-      for (final sample in cpuSamples.samples ?? <CpuSample>[]) {
-        final tree = _CpuProfileTimelineTree.getTreeFromSample(sample)!;
-        // Skip the root.
-        if (tree.frameId == kRootId) {
-          continue;
-        }
-        traceObject[CpuProfileData.traceEventsKey].add({
-          'ph': 'P', // kind = sample event
-          'name': '', // Blank to keep about:tracing happy
-          'pid': cpuSamples.pid,
-          'tid': sample.tid,
-          'ts': sample.timestamp,
-          'cat': 'Dart',
-          CpuProfileData.stackFrameIdKey: '$isolateId-${tree.frameId}',
-          'args': {
-            if (sample.userTag != null) 'userTag': sample.userTag,
-            if (sample.vmTag != null) 'vmTag': sample.vmTag,
-          },
-        });
-      }
-      return CpuProfileData.parse(traceObject);
-    } else {
-      return trackFuture(
-          'getCpuProfileTimeline',
-          callMethod(
-            '_getCpuProfileTimeline',
-            isolateId: isolateId,
-            args: {
-              'tags': 'None',
-              'timeOriginMicros': origin,
-              'timeExtentMicros': extent,
-            },
-          )).then((Response response) => CpuProfileData.parse(response.json!));
+      return current.name;
     }
+
+    void processStackFrame({
+      required _CpuProfileTimelineTree current,
+      required _CpuProfileTimelineTree? parent,
+    }) {
+      final id = nextId++;
+      current.frameId = id;
+
+      // Skip the root.
+      if (id != kRootId) {
+        final key = '$isolateId-$id';
+        traceObject[CpuProfileData.stackFramesKey][key] = {
+          CpuProfileData.categoryKey: 'Dart',
+          CpuProfileData.nameKey: nameForStackFrame(current),
+          CpuProfileData.resolvedUrlKey: current.resolvedUrl,
+          CpuProfileData.sourceLine: current.sourceLine,
+          if (parent != null && parent.frameId != 0)
+            CpuProfileData.parentIdKey: '$isolateId-${parent.frameId}',
+        };
+      }
+      for (final child in current.children) {
+        processStackFrame(current: child, parent: current);
+      }
+    }
+
+    final root = _CpuProfileTimelineTree.fromCpuSamples(cpuSamples);
+    processStackFrame(current: root, parent: null);
+
+    // Build the trace events.
+    for (final sample in cpuSamples.samples ?? <CpuSample>[]) {
+      final tree = _CpuProfileTimelineTree.getTreeFromSample(sample)!;
+      // Skip the root.
+      if (tree.frameId == kRootId) {
+        continue;
+      }
+      traceObject[CpuProfileData.traceEventsKey].add({
+        'ph': 'P', // kind = sample event
+        'name': '', // Blank to keep about:tracing happy
+        'pid': cpuSamples.pid,
+        'tid': sample.tid,
+        'ts': sample.timestamp,
+        'cat': 'Dart',
+        CpuProfileData.stackFrameIdKey: '$isolateId-${tree.frameId}',
+        'args': {
+          if (sample.userTag != null) 'userTag': sample.userTag,
+          if (sample.vmTag != null) 'vmTag': sample.vmTag,
+        },
+      });
+    }
+    return CpuProfileData.parse(traceObject);
   }
 
   @override
@@ -363,23 +299,10 @@ class VmServiceWrapper implements VmService {
     int limit, {
     String? classId,
   }) async {
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 3, minor: 20))) {
-      return trackFuture(
-        'getInstances',
-        _vmService.getInstances(isolateId, objectId, limit),
-      );
-    } else {
-      final response = await trackFuture(
-        'getInstances',
-        callMethod('_getInstances', args: {
-          'isolateId': isolateId,
-          'classId': classId,
-          'limit': limit,
-        }),
-      );
-      return InstanceSet.parse(response.json)!;
-    }
+    return trackFuture(
+      'getInstances',
+      _vmService.getInstances(isolateId, objectId, limit),
+    );
   }
 
   @override
@@ -451,16 +374,10 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Stack> getStack(String isolateId, {int? limit}) async {
-    if (await isProtocolVersionSupported(
-      supportedVersion: SemanticVersion(major: 3, minor: 42),
-    )) {
-      return trackFuture(
-        'getStack',
-        _vmService.getStack(isolateId, limit: limit),
-      );
-    } else {
-      return trackFuture('getStack', _vmService.getStack(isolateId));
-    }
+    return trackFuture(
+      'getStack',
+      _vmService.getStack(isolateId, limit: limit),
+    );
   }
 
   @override
@@ -471,20 +388,13 @@ class VmServiceWrapper implements VmService {
     int? timeOriginMicros,
     int? timeExtentMicros,
   }) async {
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 3, minor: 19))) {
-      return trackFuture(
-        'getVMTimeline',
-        _vmService.getVMTimeline(
-          timeOriginMicros: timeOriginMicros,
-          timeExtentMicros: timeExtentMicros,
-        ),
-      );
-    } else {
-      final Response response =
-          await trackFuture('getVMTimeline', callMethod('_getVMTimeline'));
-      return Timeline.parse(response.json)!;
-    }
+    return trackFuture(
+      'getVMTimeline',
+      _vmService.getVMTimeline(
+        timeOriginMicros: timeOriginMicros,
+        timeExtentMicros: timeExtentMicros,
+      ),
+    );
   }
 
   // TODO(kenz): move this method to
@@ -492,15 +402,7 @@ class VmServiceWrapper implements VmService {
   Future<bool> isHttpTimelineLoggingAvailable(String isolateId) async {
     final Isolate isolate = await getIsolate(isolateId);
     final rpcs = isolate.extensionRPCs ?? [];
-
-    if (await isDartIoVersionSupported(
-      supportedVersion: SemanticVersion(major: 1, minor: 3),
-      isolateId: isolateId,
-    )) {
-      return rpcs.contains('ext.dart.io.httpEnableTimelineLogging');
-    } else {
-      return rpcs.contains('ext.dart.io.setHttpEnableTimelineLogging');
-    }
+    return rpcs.contains('ext.dart.io.httpEnableTimelineLogging');
   }
 
   Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
@@ -508,26 +410,8 @@ class VmServiceWrapper implements VmService {
     bool? enabled,
   ]) async {
     assert(await isHttpTimelineLoggingAvailable(isolateId));
-    if (await isDartIoVersionSupported(
-      supportedVersion: SemanticVersion(major: 1, minor: 3),
-      isolateId: isolateId,
-    )) {
-      return trackFuture('httpEnableTimelineLogging',
-          _vmService.httpEnableTimelineLogging(isolateId, enabled));
-    } else {
-      if (enabled == null) {
-        return trackFuture(
-            'getHttpEnableTimelineLogging',
-            // ignore: deprecated_member_use
-            _vmService.getHttpEnableTimelineLogging(isolateId));
-      } else {
-        await trackFuture(
-            'setHttpEnableTimelineLogging',
-            // ignore: deprecated_member_use
-            _vmService.setHttpEnableTimelineLogging(isolateId, enabled));
-        return HttpTimelineLoggingState(enabled: enabled);
-      }
-    }
+    return trackFuture('httpEnableTimelineLogging',
+        _vmService.httpEnableTimelineLogging(isolateId, enabled));
   }
 
   // TODO(bkonyi): move this method to
@@ -592,34 +476,8 @@ class VmServiceWrapper implements VmService {
     bool? enabled,
   ]) async {
     assert(await isSocketProfilingAvailable(isolateId));
-    if (await isDartIoVersionSupported(
-      supportedVersion: SemanticVersion(major: 1, minor: 5),
-      isolateId: isolateId,
-    )) {
-      return trackFuture('socketProfilingEnabled',
-          _vmService.socketProfilingEnabled(isolateId, enabled));
-    } else {
-      if (enabled == null) {
-        // Before Dart IO version 1.5, there was not a getter, so return the
-        // default state of false.
-        return Future.value(SocketProfilingState(enabled: false));
-      } else {
-        if (enabled) {
-          await trackFuture(
-            'startSocketProfiling',
-            // ignore: deprecated_member_use
-            _vmService.startSocketProfiling(isolateId),
-          );
-        } else {
-          await trackFuture(
-            'pauseSocketProfiling',
-            // ignore: deprecated_member_use
-            _vmService.pauseSocketProfiling(isolateId),
-          );
-        }
-        return SocketProfilingState(enabled: enabled);
-      }
-    }
+    return trackFuture('socketProfilingEnabled',
+        _vmService.socketProfilingEnabled(isolateId, enabled));
   }
 
   Future<Success> clearSocketProfile(String isolateId) async {
@@ -641,21 +499,15 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Timestamp> getVMTimelineMicros() async {
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 3, minor: 21))) {
-      return trackFuture(
-        'getVMTimelineMicros',
-        _vmService.getVMTimelineMicros(),
-      );
-    } else {
-      throw Exception('Unsupported protocol version.');
-    }
+    return trackFuture(
+      'getVMTimelineMicros',
+      _vmService.getVMTimelineMicros(),
+    );
   }
 
   @override
   Future<Version> getVersion() async {
-    return (_protocolVersion ??=
-        await trackFuture('getVersion', _vmService.getVersion()))!;
+    return trackFuture('getVersion', _vmService.getVersion());
   }
 
   Future<Version> getDartIOVersion(String isolateId) =>
@@ -713,13 +565,8 @@ class VmServiceWrapper implements VmService {
   @override
   Stream<Event> get onExtensionEvent => _vmService.onExtensionEvent;
 
-  Stream<Event> get onExtensionEventWithHistory {
-    if (_isDdsVersionSupportedNow(
-        supportedVersion: SemanticVersion(major: 1, minor: 2))) {
-      return _vmService.onExtensionEventWithHistory;
-    }
-    return onExtensionEvent;
-  }
+  Stream<Event> get onExtensionEventWithHistory =>
+      _vmService.onExtensionEventWithHistory;
 
   @override
   Stream<Event> get onGCEvent => _vmService.onGCEvent;
@@ -730,13 +577,8 @@ class VmServiceWrapper implements VmService {
   @override
   Stream<Event> get onLoggingEvent => _vmService.onLoggingEvent;
 
-  Stream<Event> get onLoggingEventWithHistory {
-    if (_isDdsVersionSupportedNow(
-        supportedVersion: SemanticVersion(major: 1, minor: 2))) {
-      return _vmService.onLoggingEventWithHistory;
-    }
-    return onLoggingEvent;
-  }
+  Stream<Event> get onLoggingEventWithHistory =>
+      _vmService.onLoggingEventWithHistory;
 
   @override
   Stream<Event> get onTimelineEvent => _vmService.onTimelineEvent;
@@ -753,24 +595,14 @@ class VmServiceWrapper implements VmService {
   @override
   Stream<Event> get onStderrEvent => _vmService.onStderrEvent;
 
-  Stream<Event> get onStderrEventWithHistory {
-    if (_isDdsVersionSupportedNow(
-        supportedVersion: SemanticVersion(major: 1, minor: 2))) {
-      return _vmService.onStderrEventWithHistory;
-    }
-    return onStderrEvent;
-  }
+  Stream<Event> get onStderrEventWithHistory =>
+      _vmService.onStderrEventWithHistory;
 
   @override
   Stream<Event> get onStdoutEvent => _vmService.onStdoutEvent;
 
-  Stream<Event> get onStdoutEventWithHistory {
-    if (_isDdsVersionSupportedNow(
-        supportedVersion: SemanticVersion(major: 1, minor: 2))) {
-      return _vmService.onStdoutEventWithHistory;
-    }
-    return onStdoutEvent;
-  }
+  Stream<Event> get onStdoutEventWithHistory =>
+      _vmService.onStdoutEventWithHistory;
 
   @override
   Stream<Event> get onVMEvent => _vmService.onVMEvent;
@@ -785,26 +617,10 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Success> registerService(String service, String alias) async {
-    // Handle registerService method name change based on protocol version.
-    final registerServiceMethodName = await isProtocolVersionSupported(
-            supportedVersion: SemanticVersion(major: 3, minor: 22))
-        ? 'registerService'
-        : '_registerService';
-
-    final response = await trackFuture(
-      '$registerServiceMethodName $service',
-      callMethod(registerServiceMethodName,
-          args: {'service': service, 'alias': alias}),
+    return trackFuture(
+      'registerService $service',
+      _vmService.registerService(service, alias),
     );
-
-    return response as Success;
-
-    // TODO(dantup): When we no longer need to support clients on older VMs
-    // that don't support public registerService (added in July 2019, VM service
-    // v3.22) we can replace the above with a direct call to vm_service_lib's
-    // registerService (as long as we're pinned to version >= 3.22.0).
-    // return trackFuture(
-    //     'registerService $service', _vmService.registerService(service, alias));
   }
 
   @override
@@ -886,21 +702,10 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<Success> setVMTimelineFlags(List<String> recordedStreams) async {
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 3, minor: 19))) {
-      return trackFuture(
-        'setVMTimelineFlags',
-        _vmService.setVMTimelineFlags(recordedStreams),
-      );
-    } else {
-      final response = await trackFuture(
-          'setVMTimelineFlags',
-          callMethod(
-            '_setVMTimelineFlags',
-            args: {'recordedStreams': recordedStreams},
-          ));
-      return response as Success;
-    }
+    return trackFuture(
+      'setVMTimelineFlags',
+      _vmService.setVMTimelineFlags(recordedStreams),
+    );
   }
 
   @override
@@ -930,22 +735,10 @@ class VmServiceWrapper implements VmService {
     String targetId,
     int limit,
   ) async {
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 3, minor: 25))) {
-      return trackFuture(
-        'getInboundReferences',
-        _vmService.getInboundReferences(isolateId, targetId, limit),
-      );
-    } else {
-      return trackFuture(
-        'getInboundReferences',
-        _vmService.callMethod(
-          '_getInboundReferences',
-          isolateId: isolateId,
-          args: {'targetId': targetId, 'limit': limit},
-        ).then((value) => value as InboundReferences),
-      );
-    }
+    return trackFuture(
+      'getInboundReferences',
+      _vmService.getInboundReferences(isolateId, targetId, limit),
+    );
   }
 
   @override
@@ -975,25 +768,10 @@ class VmServiceWrapper implements VmService {
     String classId,
     bool enable,
   ) async {
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 3, minor: 43))) {
-      return trackFuture(
-        'setTraceClassAllocation',
-        _vmService.setTraceClassAllocation(isolateId, classId, enable),
-      );
-    } else {
-      final Map<String, dynamic> args = {};
-      args['classId'] = classId;
-      args['enable'] = enable ? true : false;
-
-      final response = await trackFuture(
-        '_setTraceClassAllocation',
-        callMethod('_setTraceClassAllocation',
-            isolateId: isolateId, args: args),
-      );
-
-      return response as Success;
-    }
+    return trackFuture(
+      'setTraceClassAllocation',
+      _vmService.setTraceClassAllocation(isolateId, classId, enable),
+    );
   }
 
   @override
@@ -1017,41 +795,26 @@ class VmServiceWrapper implements VmService {
 
   @override
   Future<ProtocolList> getSupportedProtocols() async {
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 3, minor: 35))) {
-      return trackFuture(
-        'getSupportedProtocols',
-        _vmService.getSupportedProtocols(),
-      );
-    } else {
-      throw Exception('Unsupported protocol version.');
-    }
+    return trackFuture(
+      'getSupportedProtocols',
+      _vmService.getSupportedProtocols(),
+    );
   }
 
   @override
   Future<PortList> getPorts(String isolateId) async {
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 3, minor: 42))) {
-      return trackFuture(
-        'getPorts',
-        _vmService.getPorts(isolateId),
-      );
-    } else {
-      throw Exception('Unsupported protocol version.');
-    }
+    return trackFuture(
+      'getPorts',
+      _vmService.getPorts(isolateId),
+    );
   }
 
   @override
   Future<UriList> lookupPackageUris(String isolateId, List<String> uris) async {
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 7, minor: 4))) {
-      return trackFuture(
-        'lookupPackageUris',
-        _vmService.lookupPackageUris(isolateId, uris),
-      );
-    } else {
-      throw Exception('Unsupported protocol version.');
-    }
+    return trackFuture(
+      'lookupPackageUris',
+      _vmService.lookupPackageUris(isolateId, uris),
+    );
   }
 
   @override
@@ -1059,15 +822,10 @@ class VmServiceWrapper implements VmService {
     String isolateId,
     List<String> uris,
   ) async {
-    if (await isProtocolVersionSupported(
-        supportedVersion: SemanticVersion(major: 7, minor: 4))) {
-      return trackFuture(
-        'lookupResolvedPackageUris',
-        _vmService.lookupResolvedPackageUris(isolateId, uris),
-      );
-    } else {
-      throw Exception('Unsupported protocol version.');
-    }
+    return trackFuture(
+      'lookupResolvedPackageUris',
+      _vmService.lookupResolvedPackageUris(isolateId, uris),
+    );
   }
 
   /// Testing only method to indicate that we don't really need to await all
@@ -1081,51 +839,6 @@ class VmServiceWrapper implements VmService {
     _allFuturesCompleter = Completer<bool>();
     _allFuturesCompleter.complete(true);
     activeFutures.clear();
-  }
-
-  Future<bool> isProtocolVersionSupported({
-    required SemanticVersion supportedVersion,
-  }) async {
-    _protocolVersion ??= await getVersion();
-    return isProtocolVersionSupportedNow(supportedVersion: supportedVersion);
-  }
-
-  bool isProtocolVersionSupportedNow({
-    required SemanticVersion supportedVersion,
-  }) {
-    return _versionSupported(
-      version: _protocolVersion!,
-      supportedVersion: supportedVersion,
-    );
-  }
-
-  bool _versionSupported({
-    required Version version,
-    required SemanticVersion supportedVersion,
-  }) {
-    return SemanticVersion(
-      major: version.major!,
-      minor: version.minor!,
-    ).isSupported(supportedVersion: supportedVersion);
-  }
-
-  Future<bool> isDartIoVersionSupported({
-    required SemanticVersion supportedVersion,
-    required String isolateId,
-  }) async {
-    _dartIoVersion ??= await getDartIOVersion(isolateId);
-    return _versionSupported(
-      version: _dartIoVersion!,
-      supportedVersion: supportedVersion,
-    );
-  }
-
-  bool _isDdsVersionSupportedNow({required SemanticVersion supportedVersion}) {
-    return _ddsVersion != null &&
-        _versionSupported(
-          version: _ddsVersion!,
-          supportedVersion: supportedVersion,
-        );
   }
 
   /// Retrieves the full string value of a [stringRef].

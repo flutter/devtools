@@ -167,7 +167,6 @@ class ServiceConnectionManager {
       return;
     }
     this.service = service;
-    await service.initServiceVersions();
     if (_serviceAvailable.isCompleted) {
       _serviceAvailable = Completer();
     }
@@ -300,7 +299,7 @@ class ServiceConnectionManager {
     _inspectorService = devToolsExtensionPoints.inspectorServiceProvider();
 
     // Set up analytics dimensions for the connected app.
-    await ga.setupUserApplicationDimensions();
+    ga.setupUserApplicationDimensions();
     if (service != this.service) {
       // A different service has been opened.
       return;
