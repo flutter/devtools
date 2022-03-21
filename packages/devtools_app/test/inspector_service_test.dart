@@ -370,6 +370,10 @@ void main() async {
                 'inspector_service_text_details_tree.txt'),
             equalsGoldenIgnoringHashCodes(
                 'inspector_service_text_details_tree_v2.txt'),
+            equalsGoldenIgnoringHashCodes(
+                'inspector_service_text_details_tree_v3.txt'),
+            equalsGoldenIgnoringHashCodes(
+                'inspector_service_text_details_tree_v4.txt'),
           ),
         );
         expect(nodeInDetailsTree.valueRef, equals(nodeInSummaryTree.valueRef));
