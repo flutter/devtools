@@ -255,7 +255,7 @@ void main() {
           findsNothing,
         );
 
-        final selection = controller.selectedRequest.value;
+        final selection = controller.selectedRequest.value!;
         if (selection is HttpRequestData) {
           await validateHeadersTab(selection);
           await validateResponseTab(selection);
@@ -418,14 +418,15 @@ void main() {
       expect(find.text('Start time: '), findsOneWidget);
       expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
       expect(find.text('End time: '), findsOneWidget);
-      expect(find.text(formatDateTime(data.endTimestamp)), findsOneWidget);
+      expect(find.text(formatDateTime(data.endTimestamp!)), findsOneWidget);
       expect(find.byKey(NetworkRequestOverviewView.socketTimingGraphKey),
           findsOneWidget);
       expect(find.text('Last read time: '), findsOneWidget);
-      expect(find.text(formatDateTime(data.lastReadTimestamp)), findsOneWidget);
+      expect(
+          find.text(formatDateTime(data.lastReadTimestamp!)), findsOneWidget);
       expect(find.text('Last write time: '), findsOneWidget);
       expect(
-          find.text(formatDateTime(data.lastWriteTimestamp)), findsOneWidget);
+          find.text(formatDateTime(data.lastWriteTimestamp!)), findsOneWidget);
     });
 
     testWidgetsWithWindowSize(
@@ -463,10 +464,11 @@ void main() {
       expect(find.byKey(NetworkRequestOverviewView.socketTimingGraphKey),
           findsOneWidget);
       expect(find.text('Last read time: '), findsOneWidget);
-      expect(find.text(formatDateTime(data.lastReadTimestamp)), findsOneWidget);
+      expect(
+          find.text(formatDateTime(data.lastReadTimestamp!)), findsOneWidget);
       expect(find.text('Last write time: '), findsOneWidget);
       expect(
-          find.text(formatDateTime(data.lastWriteTimestamp)), findsOneWidget);
+          find.text(formatDateTime(data.lastWriteTimestamp!)), findsOneWidget);
     });
   });
 }

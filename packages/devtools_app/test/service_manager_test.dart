@@ -127,7 +127,7 @@ void main() async {
         const evalExpression = 'debugPaintSizeEnabled';
         final library = EvalOnDartLibrary(
           'package:flutter/src/rendering/debug.dart',
-          env.service!,
+          env.service,
         );
 
         await _serviceExtensionAvailable(extensionName);
@@ -159,7 +159,7 @@ void main() async {
         const evalExpression = 'defaultTargetPlatform.toString()';
         final library = EvalOnDartLibrary(
           'package:flutter/src/foundation/platform.dart',
-          env.service!,
+          env.service,
         );
 
         await _verifyExtensionStateOnTestDevice(
@@ -201,7 +201,7 @@ void main() async {
           const evalExpression = 'timeDilation';
           final library = EvalOnDartLibrary(
             'package:flutter/src/scheduler/binding.dart',
-            env.service!,
+            env.service,
           );
 
           await _verifyExtensionStateOnTestDevice(

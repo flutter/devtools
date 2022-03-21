@@ -31,7 +31,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
     isAlive = Disposable();
     evalOnDartLibrary = EvalOnDartLibrary(
       'package:provider_app/main.dart',
-      env.service!,
+      env.service,
     );
   });
 
@@ -85,7 +85,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
 
     final evalOnDartLibrary2 = EvalOnDartLibrary(
       'package:provider_app/main.dart',
-      env.service!,
+      env.service,
     );
     addTearDown(evalOnDartLibrary2.dispose);
 

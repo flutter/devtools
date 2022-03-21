@@ -27,7 +27,7 @@ void main() {
 
     setUpAll(() async {
       controller = NetworkController();
-      final timeline = (await loadNetworkProfileTimeline())!;
+      final timeline = await loadNetworkProfileTimeline();
       final sockets = loadSocketProfile().sockets;
       // Remove the last end event.
       timeline.traceEvents =
