@@ -28,7 +28,7 @@ void main() async {
     assert(serviceManager.connectedAppInitialized);
 
     inspectorService = InspectorService();
-    if (env.runConfig!.trackWidgetCreation) {
+    if (env.runConfig.trackWidgetCreation) {
       await inspectorService!.inferPubRootDirectoryIfNeeded();
     }
   };
