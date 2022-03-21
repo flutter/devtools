@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe, unused_import
 
 @TestOn('vm')
 import 'dart:convert';
@@ -182,11 +182,11 @@ void main() {
 ''';
 
 void spanTester({
-  @required ScopeSpan span,
-  @required List<String> scopes,
-  @required int line,
-  @required int column,
-  @required int length,
+  required ScopeSpan span,
+  required List<String> scopes,
+  required int line,
+  required int column,
+  required int length,
 }) {
   expect(span.scopes, scopes);
   expect(span.line, line);
@@ -195,7 +195,7 @@ void spanTester({
 }
 
 void main() {
-  Grammar grammar;
+  late Grammar grammar;
   setUpAll(() async {
     final grammarFile = File('assets/dart_syntax.json');
     expect(grammarFile.existsSync(), true);
