@@ -9,7 +9,7 @@ Text
  │ maxLines: null
  │ textWidthBasis: null
  │ textHeightBehavior: null
- │ dependencies: [MediaQuery, DefaultTextStyle]
+ │ dependencies: [DefaultTextStyle, MediaQuery]
  │
  └─RichText
      softWrap: wrapping at box width
