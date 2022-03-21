@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_app/src/primitives/history_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
   group('HistoryManager', () {
-    HistoryManager history;
+    late HistoryManager history;
 
     final ScriptRef ref1 = ScriptRef(uri: 'package:foo/foo.dart', id: 'id-1');
     final ScriptRef ref2 = ScriptRef(uri: 'package:bar/bar.dart', id: 'id-2');

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
@@ -17,8 +17,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  BannerMessagesController controller;
-  FakeServiceManager fakeServiceManager;
+  late BannerMessagesController controller;
+  late FakeServiceManager fakeServiceManager;
 
   setUp(() {
     controller = BannerMessagesController();
@@ -28,7 +28,7 @@ void main() {
   });
 
   group('BannerMessages', () {
-    BuildContext buildContext;
+    late BuildContext buildContext;
 
     /// Pumps a test frame so that we can ensure post frame callbacks are
     /// executed.

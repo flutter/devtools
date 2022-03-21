@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:convert';
 
@@ -70,31 +70,31 @@ void main() {
     });
 
     test('duration returns correct value', () {
-      expect(httpGetEvent.duration.inMicroseconds, equals(900000));
-      expect(httpPutEvent.duration.inMicroseconds, equals(900000));
-      expect(httpGetEventWithError.duration.inMicroseconds, equals(100000));
+      expect(httpGetEvent.duration!.inMicroseconds, equals(900000));
+      expect(httpPutEvent.duration!.inMicroseconds, equals(900000));
+      expect(httpGetEventWithError.duration!.inMicroseconds, equals(100000));
       expect(httpInvalidEvent.duration, isNull);
       expect(httpInProgressEvent.duration, isNull);
 
-      expect(testSocket1.duration.inMicroseconds, equals(1000000));
+      expect(testSocket1.duration!.inMicroseconds, equals(1000000));
       expect(testSocket2.duration, isNull);
     });
 
     test('startTimestamp returns correct value', () {
       // Test these values in UTC to avoid timezone differences with the bots.
-      expect(formatDateTime(httpGetEvent.startTimestamp.toUtc()),
+      expect(formatDateTime(httpGetEvent.startTimestamp!.toUtc()),
           equals('8:51:09.000'));
       expect(
-        formatDateTime(httpPutEvent.startTimestamp.toUtc()),
+        formatDateTime(httpPutEvent.startTimestamp!.toUtc()),
         equals('8:51:11.000'),
       );
       expect(
-        formatDateTime(httpGetEventWithError.startTimestamp.toUtc()),
+        formatDateTime(httpGetEventWithError.startTimestamp!.toUtc()),
         equals('8:51:13.000'),
       );
       expect(httpInvalidEvent.startTimestamp, isNull);
       expect(
-        formatDateTime(httpInProgressEvent.startTimestamp.toUtc()),
+        formatDateTime(httpInProgressEvent.startTimestamp!.toUtc()),
         equals('8:51:17.000'),
       );
 
@@ -111,22 +111,22 @@ void main() {
     test('endTimestamp returns correct value', () {
       // Test these values in UTC to avoid timezone differences with the bots.
       expect(
-        formatDateTime(httpGetEvent.endTimestamp.toUtc()),
+        formatDateTime(httpGetEvent.endTimestamp!.toUtc()),
         equals('8:51:09.900'),
       );
       expect(
-        formatDateTime(httpPutEvent.endTimestamp.toUtc()),
+        formatDateTime(httpPutEvent.endTimestamp!.toUtc()),
         equals('8:51:11.900'),
       );
       expect(
-        formatDateTime(httpGetEventWithError.endTimestamp.toUtc()),
+        formatDateTime(httpGetEventWithError.endTimestamp!.toUtc()),
         equals('8:51:13.100'),
       );
       expect(httpInvalidEvent.endTimestamp, isNull);
       expect(httpInProgressEvent.endTimestamp, isNull);
 
       expect(
-        formatDateTime(testSocket1.endTimestamp.toUtc()),
+        formatDateTime(testSocket1.endTimestamp!.toUtc()),
         equals('0:00:02.000'),
       );
       expect(testSocket2.endTimestamp, isNull);
@@ -343,11 +343,11 @@ void main() {
     test('lastReadTimestamp returns correct value', () {
       // Test these values in UTC to avoid timezone differences with the bots.
       expect(
-        formatDateTime(testSocket1.lastReadTimestamp.toUtc()),
+        formatDateTime(testSocket1.lastReadTimestamp!.toUtc()),
         equals('0:00:01.800'),
       );
       expect(
-        formatDateTime(testSocket2.lastReadTimestamp.toUtc()),
+        formatDateTime(testSocket2.lastReadTimestamp!.toUtc()),
         equals('0:00:03.500'),
       );
     });
@@ -355,11 +355,11 @@ void main() {
     test('lastWriteTimestamp returns correct value', () {
       // Test these values in UTC to avoid timezone differences with the bots.
       expect(
-        formatDateTime(testSocket1.lastWriteTimestamp.toUtc()),
+        formatDateTime(testSocket1.lastWriteTimestamp!.toUtc()),
         equals('0:00:01.850'),
       );
       expect(
-        formatDateTime(testSocket2.lastWriteTimestamp.toUtc()),
+        formatDateTime(testSocket2.lastWriteTimestamp!.toUtc()),
         equals('0:00:03.600'),
       );
     });
@@ -450,12 +450,13 @@ void main() {
     });
 
     test('duration returns correct value', () {
-      expect(httpGet.duration.inMicroseconds, 6327091628 - 6326279935);
-      expect(httpGetWithError.duration.inMicroseconds, 5387256813 - 5385227316);
-      expect(httpPost.duration.inMicroseconds, 2401000670 - 2399492629);
-      expect(httpPut.duration.inMicroseconds, 1206609144 - 1205283313);
-      expect(httpPatch.duration.inMicroseconds, 1911420918 - 1910177192);
-      expect(httpWsHandshake.duration.inMicroseconds, 8140263470 - 8140222102);
+      expect(httpGet.duration!.inMicroseconds, 6327091628 - 6326279935);
+      expect(
+          httpGetWithError.duration!.inMicroseconds, 5387256813 - 5385227316);
+      expect(httpPost.duration!.inMicroseconds, 2401000670 - 2399492629);
+      expect(httpPut.duration!.inMicroseconds, 1206609144 - 1205283313);
+      expect(httpPatch.duration!.inMicroseconds, 1911420918 - 1910177192);
+      expect(httpWsHandshake.duration!.inMicroseconds, 8140263470 - 8140222102);
     });
 
     test('startTimestamp returns correct value', () {
@@ -489,27 +490,27 @@ void main() {
     test('endTimestamp returns correct value', () {
       // Test these values in UTC to avoid timezone differences with the bots.
       expect(
-        formatDateTime(httpGet.endTimestamp.toUtc()),
+        formatDateTime(httpGet.endTimestamp!.toUtc()),
         '1:45:27.091',
       );
       expect(
-        formatDateTime(httpGetWithError.endTimestamp.toUtc()),
+        formatDateTime(httpGetWithError.endTimestamp!.toUtc()),
         '1:29:47.256',
       );
       expect(
-        formatDateTime(httpPost.endTimestamp.toUtc()),
+        formatDateTime(httpPost.endTimestamp!.toUtc()),
         '0:40:01.000',
       );
       expect(
-        formatDateTime(httpPut.endTimestamp.toUtc()),
+        formatDateTime(httpPut.endTimestamp!.toUtc()),
         '0:20:06.609',
       );
       expect(
-        formatDateTime(httpPatch.endTimestamp.toUtc()),
+        formatDateTime(httpPatch.endTimestamp!.toUtc()),
         '0:31:51.420',
       );
       expect(
-        formatDateTime(httpWsHandshake.endTimestamp.toUtc()),
+        formatDateTime(httpWsHandshake.endTimestamp!.toUtc()),
         '2:15:40.263',
       );
     });

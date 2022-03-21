@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen_controller.dart';
@@ -13,8 +13,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ProfilerScreenController', () {
-    ProfilerScreenController controller;
-    FakeServiceManager fakeServiceManager;
+    late ProfilerScreenController controller;
+    late FakeServiceManager fakeServiceManager;
 
     setUp(() {
       fakeServiceManager = FakeServiceManager();

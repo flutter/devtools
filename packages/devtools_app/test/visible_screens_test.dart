@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/app.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
@@ -27,7 +27,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('visible_screens', () {
-    FakeServiceManager fakeServiceManager;
+    late FakeServiceManager fakeServiceManager;
 
     setUp(() async {
       fakeServiceManager = FakeServiceManager(availableLibraries: []);
@@ -43,14 +43,15 @@ void main() {
       bool web = false,
       bool flutter = false,
       bool debugMode = true,
-      SemanticVersion flutterVersion,
+      SemanticVersion? flutterVersion,
     }) {
-      mockIsDartVmApp(fakeServiceManager.connectedApp, !web);
+      mockIsDartVmApp(
+          fakeServiceManager.connectedApp as MockConnectedApp, !web);
       if (web) {
         fakeServiceManager.availableLibraries.add('dart:html');
       }
       mockIsFlutterApp(
-        fakeServiceManager.connectedApp,
+        fakeServiceManager.connectedApp as MockConnectedApp,
         isFlutterApp: flutter,
         isProfileBuild: !debugMode,
       );
@@ -59,7 +60,8 @@ void main() {
             .add('package:flutter/src/widgets/binding.dart');
       }
       flutterVersion ??= SemanticVersion(major: 2, minor: 3, patch: 1);
-      mockFlutterVersion(fakeServiceManager.connectedApp, flutterVersion);
+      mockFlutterVersion(
+          fakeServiceManager.connectedApp as MockConnectedApp, flutterVersion);
     }
 
     testWidgets('are correct for Dart CLI app', (WidgetTester tester) async {

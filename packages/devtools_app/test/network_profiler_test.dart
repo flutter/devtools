@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/http/http.dart';
@@ -41,13 +41,13 @@ Future<void> pumpNetworkScreen(WidgetTester tester) async {
 /// Clears the timeouts created when calling getHttpTimelineLogging and
 /// setHttpTimelineLogging RPCs.
 Future<void> clearTimeouts(WidgetTester tester) async {
-  return await tester.pumpAndSettle(const Duration(seconds: 1));
+  await tester.pumpAndSettle(const Duration(seconds: 1));
 }
 
 void main() {
-  FakeServiceManager fakeServiceManager;
-  SocketProfile socketProfile;
-  HttpProfile httpProfile;
+  late FakeServiceManager fakeServiceManager;
+  late SocketProfile socketProfile;
+  late HttpProfile httpProfile;
 
   const windowSize = Size(1599.0, 1000.0);
 
@@ -154,7 +154,7 @@ void main() {
         final ExpansionTile generalTile =
             tester.widget(find.byKey(HttpRequestHeadersView.generalKey));
 
-        final numGeneralEntries = data.general.length;
+        final numGeneralEntries = data.general!.length;
         expect(generalTile.children.length, numGeneralEntries);
 
         // Check contents of request headers.
@@ -255,7 +255,7 @@ void main() {
           findsNothing,
         );
 
-        final selection = controller.selectedRequest.value;
+        final selection = controller.selectedRequest.value!;
         if (selection is HttpRequestData) {
           await validateHeadersTab(selection);
           await validateResponseTab(selection);
@@ -286,7 +286,7 @@ void main() {
       final textElement = tester
           .element(find.text('https://jsonplaceholder.typicode.com/albums/1'));
       final selectableTextWidget =
-          textElement.findAncestorWidgetOfExactType<SelectableText>();
+          textElement.findAncestorWidgetOfExactType<SelectableText>()!;
       await tester.tap(find.byWidget(selectableTextWidget));
       await tester.pumpAndSettle();
 
@@ -345,9 +345,9 @@ void main() {
       // Verify timing information.
       expect(find.text('Timing: '), findsOneWidget);
       expect(find.text('Start time: '), findsOneWidget);
-      expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
+      expect(find.text(formatDateTime(data.startTimestamp!)), findsOneWidget);
       expect(find.text('End time: '), findsOneWidget);
-      expect(find.text(formatDateTime(data.endTimestamp)), findsOneWidget);
+      expect(find.text(formatDateTime(data.endTimestamp!)), findsOneWidget);
       expect(find.byKey(NetworkRequestOverviewView.httpTimingGraphKey),
           findsOneWidget);
       expect(find.text('Connection established: '), findsOneWidget);
@@ -377,9 +377,9 @@ void main() {
       // Verify timing information.
       expect(find.text('Timing: '), findsOneWidget);
       expect(find.text('Start time: '), findsOneWidget);
-      expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
+      expect(find.text(formatDateTime(data.startTimestamp!)), findsOneWidget);
       expect(find.text('End time: '), findsOneWidget);
-      expect(find.text(formatDateTime(data.endTimestamp)), findsOneWidget);
+      expect(find.text(formatDateTime(data.endTimestamp!)), findsOneWidget);
       expect(find.byKey(NetworkRequestOverviewView.httpTimingGraphKey),
           findsOneWidget);
       expect(find.text('Connection established: '), findsNothing);
@@ -418,14 +418,15 @@ void main() {
       expect(find.text('Start time: '), findsOneWidget);
       expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
       expect(find.text('End time: '), findsOneWidget);
-      expect(find.text(formatDateTime(data.endTimestamp)), findsOneWidget);
+      expect(find.text(formatDateTime(data.endTimestamp!)), findsOneWidget);
       expect(find.byKey(NetworkRequestOverviewView.socketTimingGraphKey),
           findsOneWidget);
       expect(find.text('Last read time: '), findsOneWidget);
-      expect(find.text(formatDateTime(data.lastReadTimestamp)), findsOneWidget);
+      expect(
+          find.text(formatDateTime(data.lastReadTimestamp!)), findsOneWidget);
       expect(find.text('Last write time: '), findsOneWidget);
       expect(
-          find.text(formatDateTime(data.lastWriteTimestamp)), findsOneWidget);
+          find.text(formatDateTime(data.lastWriteTimestamp!)), findsOneWidget);
     });
 
     testWidgetsWithWindowSize(
@@ -463,10 +464,11 @@ void main() {
       expect(find.byKey(NetworkRequestOverviewView.socketTimingGraphKey),
           findsOneWidget);
       expect(find.text('Last read time: '), findsOneWidget);
-      expect(find.text(formatDateTime(data.lastReadTimestamp)), findsOneWidget);
+      expect(
+          find.text(formatDateTime(data.lastReadTimestamp!)), findsOneWidget);
       expect(find.text('Last write time: '), findsOneWidget);
       expect(
-          find.text(formatDateTime(data.lastWriteTimestamp)), findsOneWidget);
+          find.text(formatDateTime(data.lastWriteTimestamp!)), findsOneWidget);
     });
   });
 }

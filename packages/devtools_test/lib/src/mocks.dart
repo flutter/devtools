@@ -78,6 +78,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
     when(errorBadgeManager.erroredItemsForPage(any)).thenReturn(
         FixedValueListenable(LinkedHashMap<String, DevToolsError>()));
+
+    when(errorBadgeManager.errorCountNotifier(any))
+        .thenReturn(ValueNotifier<int>(0));
   }
 
   Completer<void> flagsInitialized = Completer();
