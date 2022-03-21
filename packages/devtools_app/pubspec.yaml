@@ -60,7 +60,7 @@ dev_dependencies:
   devtools_test: 2.11.4
   flutter_test:
     sdk: flutter
-  mockito: ^5.0.9
+  mockito: ^5.1.0
   webkit_inspection_protocol: '>=0.5.0 <2.0.0'
 
 flutter:
