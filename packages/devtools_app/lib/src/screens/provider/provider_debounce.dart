@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,7 +33,7 @@ AutoDisposeStateNotifierProviderFamily<StateController<Listened>, Listened, Id>
       // TODO(rrousselGit): refactor to use `ref.listen` when available
       final sub = ref.container.listen<Listened>(
         family(id),
-        mayHaveChanged: (sub) {
+        mayHaveChanged: (sub) async {
           return Future.microtask(() {
             if (ref.mounted && listening) sub.flush();
           });
@@ -93,7 +91,7 @@ AutoDisposeStateNotifierProvider<StateController<Listened>, Listened>
       // TODO(rrousselGit): refactor to use `ref.listen` when available
       final sub = ref.container.listen<Listened>(
         provider,
-        mayHaveChanged: (sub) {
+        mayHaveChanged: (sub) async {
           return Future.microtask(() {
             if (ref.mounted && listening) sub.flush();
           });

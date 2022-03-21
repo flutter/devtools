@@ -43,7 +43,7 @@ Future<InstanceRef?> _resolveInstanceRefForPath(
         return eval.safeEval(
           'value',
           isAlive: isAlive,
-          scope: {'value': path.instanceId!},
+          scope: {'value': path.instanceId},
         );
       },
     );
@@ -51,7 +51,7 @@ Future<InstanceRef?> _resolveInstanceRefForPath(
 
   final eval = await ref.watch(evalProvider!.future);
 
-  return parent!.maybeMap(
+  return parent!.maybeMap<Future<InstanceRef?>>(
     // TODO: support sets
     // TODO: iterables should use iterators / next() for iterable to navigate, to avoid recomputing the content
 
@@ -180,7 +180,7 @@ Future<EnumInstance?> _tryParseEnum(
   required EvalOnDartLibrary eval,
   required Disposable isAlive,
   required String? instanceRefId,
-  required Setter? setter,
+  required Setter setter,
 }) async {
   if (instance.kind != InstanceKind.kPlainInstance ||
       instance.fields!.length != 2) return null;
@@ -250,7 +250,7 @@ Setter? _parseSetter({
       final field =
           parent.fields.firstWhere((field) => field.name == keyPath.name);
 
-      if (field.isFinal) return null;
+      if (field.isFinal) return (_) async => {};
       return mutate;
     },
     orElse: () => throw FallThroughError(),
@@ -287,7 +287,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
     isAlive: isAlive,
     ref: ref,
     parent: parent,
-  );
+  )!;
 
   final instance =
       await (eval.getInstance(instanceRef!, isAlive) as FutureOr<Instance>);
@@ -323,7 +323,8 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
       final keysFuture = Future.wait<InstanceDetails>([
         for (final keyRef in keysRef)
           ref.watch(
-            rawInstanceProvider(InstancePath.fromInstanceId(keyRef?.id)).future,
+            rawInstanceProvider(InstancePath.fromInstanceId(keyRef!.id!))
+                .future,
           )
       ]);
 

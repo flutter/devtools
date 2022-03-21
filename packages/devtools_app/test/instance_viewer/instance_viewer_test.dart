@@ -58,7 +58,7 @@ final object2Instance = AsyncValue.data(
     ],
     hash: 0,
     instanceRefId: 'object',
-    setter: null,
+    setter: (_) async => {},
     evalForInstance: FakeEvalOnDartLibrary(),
     type: 'MyClass',
   ),
@@ -104,14 +104,14 @@ final trueInstance = AsyncValue.data(
 );
 
 final int42Instance = AsyncValue.data(
-  NumInstance('42', instanceRefId: '42', setter: null),
+  NumInstance('42', instanceRefId: '42', setter: (_) async => {}),
 );
 
 final enumValueInstance = AsyncValue.data(
   InstanceDetails.enumeration(
     type: 'Enum',
     value: 'value',
-    setter: null,
+    setter: (_) async => {},
     instanceRefId: 'Enum.value',
   ),
 );
@@ -136,7 +136,7 @@ void main() {
             ownerUri: '',
             ownerName: '',
           ),
-        );
+        )!;
       }
 
       await tester.pumpWidget(
@@ -185,7 +185,7 @@ void main() {
                   ],
                   hash: 0,
                   instanceRefId: 'object',
-                  setter: null,
+                  setter: (_) async => {},
                   evalForInstance: FakeEvalOnDartLibrary(),
                   type: 'MyClass',
                 ),
@@ -225,7 +225,7 @@ void main() {
           ownerUri: '',
           ownerName: '',
         ),
-      );
+      )!;
 
       await tester.pumpWidget(
         ProviderScope(
@@ -246,7 +246,7 @@ void main() {
                   ],
                   hash: 0,
                   instanceRefId: 'object',
-                  setter: null,
+                  setter: (_) async => {},
                   evalForInstance: FakeEvalOnDartLibrary(),
                   type: 'MyClass',
                 ),

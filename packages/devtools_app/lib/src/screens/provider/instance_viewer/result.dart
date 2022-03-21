@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
 
 import '../../../shared/eval_on_dart_library.dart';
 
-import 'fake_freezed_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 // This part is generated using package:freezed, but without the devtool depending
 // on the package.
@@ -20,7 +18,7 @@ import 'fake_freezed_annotation.dart';
 part 'result.freezed.dart';
 
 @freezed
-abstract class Result<T> with _$Result<T> {
+abstract class Result<T extends Object> with _$Result<T> {
   Result._();
   factory Result.data(@nullable T value) = _ResultData<T>;
   factory Result.error(Object error, [StackTrace stackTrace]) = _ResultError<T>;
@@ -33,7 +31,8 @@ abstract class Result<T> with _$Result<T> {
     }
   }
 
-  static Future<Result<T>> guardFuture<T>(Future<T> Function() cb) async {
+  static Future<Result<T>> guardFuture<T extends Object>(
+      Future<T> Function() cb) async {
     try {
       return Result.data(await cb());
     } catch (err, stack) {
@@ -41,7 +40,7 @@ abstract class Result<T> with _$Result<T> {
     }
   }
 
-  Result<Res> chain<Res>(Res Function(T value) cb) {
+  Result<Res> chain<Res extends Object>(Res Function(T value) cb) {
     return when(
       data: (value) {
         try {
@@ -55,7 +54,7 @@ abstract class Result<T> with _$Result<T> {
   }
 
   T get dataOrThrow {
-    return when(
+    return when<T>(
       data: (value) => value,
       error: (err, stack) {
         // ignore: only_throw_errors
@@ -65,10 +64,10 @@ abstract class Result<T> with _$Result<T> {
   }
 }
 
-Result<T?> parseSentinel<T>(Object? value) {
+Result<T> parseSentinel<T extends Object>(Object value) {
   // TODO(rrousselGit) remove condition after migrating to NNBD
-  if (value == null) return Result.data(null);
-  if (value is T) return Result.data(value as T?);
+
+  if (value is T) return Result.data(value);
 
   if (value is Sentinel) {
     return Result.error(

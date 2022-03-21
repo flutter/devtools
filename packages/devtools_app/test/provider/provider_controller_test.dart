@@ -214,7 +214,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
             ownerUri: 'package:provider_app/main.dart',
             ownerName: 'ComplexObject',
           ),
-        );
+        )!;
 
         final mapKeys = await container
             .listen(rawInstanceProvider(mapPath).future)
