@@ -316,7 +316,7 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     return Scrollbar(
-      isAlwaysShown: true,
+      thumbVisibility: true,
       controller: _scrollController,
       child: TreeView<VMServiceObjectNode>(
         itemExtent: _programExplorerRowHeight,

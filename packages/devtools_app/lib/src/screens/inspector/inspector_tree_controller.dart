@@ -969,7 +969,7 @@ class _InspectorTreeState extends State<InspectorTree>
       builder: (context, constraints) {
         final viewportWidth = constraints.maxWidth;
         final Widget tree = Scrollbar(
-          isAlwaysShown: true,
+          thumbVisibility: true,
           controller: _scrollControllerX,
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
