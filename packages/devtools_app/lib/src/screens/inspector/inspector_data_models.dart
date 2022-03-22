@@ -285,8 +285,8 @@ extension LayoutPropertiesExtension on LayoutProperties {
 
 final Expando<FlexLayoutProperties> _flexLayoutExpando = Expando();
 
-extension MainAxisAlignmentExtension on MainAxisAlignment? {
-  MainAxisAlignment? get reversed {
+extension MainAxisAlignmentExtension on MainAxisAlignment {
+  MainAxisAlignment get reversed {
     switch (this) {
       case MainAxisAlignment.start:
         return MainAxisAlignment.end;
@@ -510,7 +510,7 @@ class FlexLayoutProperties extends LayoutProperties {
     final freeSpace = dimension(direction)! -
         sum(childrenDimensions(direction).cast<double>());
     final displayMainAxisAlignment =
-        startIsTopLeft ? mainAxisAlignment : mainAxisAlignment.reversed;
+        startIsTopLeft ? mainAxisAlignment : mainAxisAlignment?.reversed;
 
     double leadingSpace(double freeSpace) {
       if (children.isEmpty) return 0.0;
