@@ -97,19 +97,18 @@ List<double> computeRenderSizes({
 /// Represents parsed layout information for a specific [RemoteDiagnosticsNode].
 class LayoutProperties {
   LayoutProperties(this.node, {int copyLevel = 1})
-      : description = node?.description,
-        size = node?.size,
-        constraints = node?.constraints,
-        isFlex = node?.isFlex ?? false,
-        flexFactor = node?.flexFactor,
-        flexFit = node?.flexFit,
+      : description = node.description,
+        size = node.size,
+        constraints = node.constraints,
+        isFlex = node.isFlex,
+        flexFactor = node.flexFactor,
+        flexFit = node.flexFit,
         children = copyLevel == 0
             ? []
-            : node?.childrenNow
-                    .map((child) =>
-                        LayoutProperties(child, copyLevel: copyLevel - 1))
-                    .toList(growable: false) ??
-                [] {
+            : node.childrenNow
+                .map((child) =>
+                    LayoutProperties(child, copyLevel: copyLevel - 1))
+                .toList(growable: false) {
     for (var child in children) {
       child.parent = this;
     }
@@ -148,14 +147,14 @@ class LayoutProperties {
   }
 
   LayoutProperties? parent;
-  final RemoteDiagnosticsNode? node;
+  final RemoteDiagnosticsNode node;
   final List<LayoutProperties> children;
   final BoxConstraints? constraints;
   final String? description;
   final num? flexFactor;
   final FlexFit? flexFit;
   final bool isFlex;
-  final Size? size;
+  final Size size;
 
   /// Represents the order of [children] to be displayed.
   List<LayoutProperties> get displayChildren => children;
@@ -170,9 +169,9 @@ class LayoutProperties {
 
   bool get hasChildren => children.isNotEmpty;
 
-  double? get width => size?.width;
+  double? get width => size.width;
 
-  double? get height => size?.height;
+  double? get height => size.height;
 
   double? dimension(Axis axis) => axis == Axis.horizontal ? width : height;
 
@@ -208,14 +207,14 @@ class LayoutProperties {
         : 'height is unconstrained';
   }
 
-  String describeWidth() => 'w=${toStringAsFixed(size!.width)}';
+  String describeWidth() => 'w=${toStringAsFixed(size.width)}';
 
-  String describeHeight() => 'h=${toStringAsFixed(size!.height)}';
+  String describeHeight() => 'h=${toStringAsFixed(size.height)}';
 
   bool get isOverflowWidth {
     final parentWidth = parent?.width;
     if (parentWidth == null) return false;
-    final parentData = node!.parentData;
+    final parentData = node.parentData;
     double widthUsed = width ?? 0;
     if (parentData != null) {
       widthUsed += parentData.offset.dx;
@@ -228,7 +227,7 @@ class LayoutProperties {
   bool get isOverflowHeight {
     final parentHeight = parent?.height;
     if (parentHeight == null) return false;
-    final parentData = node!.parentData;
+    final parentData = node.parentData;
     double heightUsed = height ?? 0;
     if (parentData != null) {
       heightUsed += parentData.offset.dy;
@@ -302,9 +301,9 @@ extension MainAxisAlignmentExtension on MainAxisAlignment? {
 /// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 class FlexLayoutProperties extends LayoutProperties {
   FlexLayoutProperties({
-    Size? size,
+    required Size size,
     required List<LayoutProperties> children,
-    RemoteDiagnosticsNode? node,
+    required RemoteDiagnosticsNode node,
     BoxConstraints? constraints,
     bool isFlex = false,
     String? description,

@@ -194,7 +194,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
 
   Future<void> onTap(LayoutProperties properties) async {
     setState(() => highlighted = properties);
-    await setSelectionInspector(properties.node!);
+    await setSelectionInspector(properties.node);
   }
 
   void onDoubleTap(LayoutProperties properties) {

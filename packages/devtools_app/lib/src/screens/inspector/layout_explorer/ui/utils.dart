@@ -155,8 +155,7 @@ class WidgetVisualizer extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final properties = layoutProperties!;
-    final borderColor =
-        WidgetTheme.fromName(properties.node!.description).color;
+    final borderColor = WidgetTheme.fromName(properties.node.description).color;
     final boxAdjust = isSelected ? _selectedPadding : 0.0;
 
     return LayoutBuilder(
@@ -267,7 +266,7 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
 
   final T begin;
   final T end;
-  final Animation<double>? animation;
+  final Animation<double> animation;
   final List<LayoutProperties> _children;
 
   @override
@@ -286,7 +285,7 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   List<double?> _lerpList(List<double?> l1, List<double?> l2) {
     assert(l1.length == l2.length);
     if (l1.isEmpty) return [];
-    final animationLocal = animation!;
+    final animationLocal = animation;
     return [
       for (var i = 0; i < children.length; i++)
         lerpDouble(l1[i], l2[i], animationLocal.value)
@@ -312,7 +311,7 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   BoxConstraints? get constraints {
     try {
       return BoxConstraints.lerp(
-          begin.constraints, end.constraints, animation!.value);
+          begin.constraints, end.constraints, animation.value);
     } catch (e) {
       return end.constraints;
     }
@@ -337,10 +336,10 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   }
 
   @override
-  String describeWidth() => 'w=${toStringAsFixed(size!.width)}';
+  String describeWidth() => 'w=${toStringAsFixed(size.width)}';
 
   @override
-  String describeHeight() => 'h=${toStringAsFixed(size!.height)}';
+  String describeHeight() => 'h=${toStringAsFixed(size.height)}';
 
   @override
   String? get description => end.description;
@@ -350,38 +349,36 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
     return lerpDouble(
       begin.dimension(axis),
       end.dimension(axis),
-      animation!.value,
+      animation.value,
     );
   }
 
   @override
   num? get flexFactor =>
-      lerpDouble(begin.flexFactor, end.flexFactor, animation!.value);
+      lerpDouble(begin.flexFactor, end.flexFactor, animation.value);
 
   @override
   bool get hasChildren => children.isNotEmpty;
 
   @override
-  double get height => size!.height;
+  double get height => size.height;
 
   @override
   bool get isFlex => begin.isFlex == true && end.isFlex == true;
 
   @override
-  RemoteDiagnosticsNode? get node => end.node;
+  RemoteDiagnosticsNode get node => end.node;
 
   @override
-  Size? get size {
-    final animationLocal = animation;
-    if (animationLocal == null) return null;
-    return Size.lerp(begin.size, end.size, animationLocal.value);
+  Size get size {
+    return Size.lerp(begin.size, end.size, animation.value)!;
   }
 
   @override
   int get totalChildren => end.totalChildren;
 
   @override
-  double get width => size!.width;
+  double get width => size.width;
 
   @override
   bool get hasFlexFactor => begin.hasFlexFactor && end.hasFlexFactor;
