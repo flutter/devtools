@@ -342,7 +342,7 @@ class FlexLayoutProperties extends LayoutProperties {
     // Cache the properties on an expando so that local tweaks to
     // FlexLayoutProperties persist across multiple lookups from an
     // RemoteDiagnosticsNode.
-    return (_flexLayoutExpando[node] ??= _buildNode(node))!;
+    return _flexLayoutExpando[node] ??= _buildNode(node);
   }
 
   @override
@@ -381,9 +381,8 @@ class FlexLayoutProperties extends LayoutProperties {
     );
   }
 
-  static FlexLayoutProperties? _buildNode(RemoteDiagnosticsNode node) {
-    final Map<String, Object?>? renderObjectJson = node.renderObject?.json;
-    if (renderObjectJson == null) return null;
+  static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
+    final Map<String, Object?> renderObjectJson = node.renderObject!.json;
     final properties = renderObjectJson['properties'] as List<dynamic>;
     final data = Map<String, Object?>.fromIterable(
       properties,
