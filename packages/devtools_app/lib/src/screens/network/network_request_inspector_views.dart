@@ -51,7 +51,7 @@ class HttpRequestHeadersView extends StatelessWidget {
   @visibleForTesting
   static const responseHeadersKey = Key('Response Headers');
 
-  final HttpRequestData data;
+  final DartIOHttpRequestData data;
 
   Widget _buildRow(
     BuildContext context,
@@ -92,16 +92,15 @@ class HttpRequestHeadersView extends StatelessWidget {
             _buildTile(
               'General',
               [
-                if (general != null)
-                  for (final entry in general.entries)
-                    _buildRow(
-                      context,
-                      // TODO(kenz): ensure the default case of `entry.key` looks
-                      // fine.
-                      entry.key,
-                      entry.value.toString(),
-                      constraints,
-                    ),
+                for (final entry in general.entries)
+                  _buildRow(
+                    context,
+                    // TODO(kenz): ensure the default case of `entry.key` looks
+                    // fine.
+                    entry.key,
+                    entry.value.toString(),
+                    constraints,
+                  ),
               ],
               key: generalKey,
             ),
@@ -143,7 +142,7 @@ class HttpRequestHeadersView extends StatelessWidget {
 class HttpRequestView extends StatelessWidget {
   const HttpRequestView(this.data);
 
-  final HttpRequestData data;
+  final DartIOHttpRequestData data;
 
   @override
   Widget build(BuildContext context) {
@@ -161,7 +160,7 @@ class HttpRequestView extends StatelessWidget {
 class HttpResponseView extends StatelessWidget {
   const HttpResponseView(this.data);
 
-  final HttpRequestData data;
+  final DartIOHttpRequestData data;
 
   @override
   Widget build(BuildContext context) {
@@ -170,10 +169,8 @@ class HttpResponseView extends StatelessWidget {
     // timeline profiler since it's possible for response body data to get
     // dropped.
     final contentType = data.contentType;
-    if (data is DartIOHttpRequestData &&
-        contentType != null &&
-        contentType.contains('image')) {
-      child = ImageResponseView(data as DartIOHttpRequestData);
+    if (contentType != null && contentType.contains('image')) {
+      child = ImageResponseView(data);
     } else {
       child = FormattedJson(
         formattedString: data.responseBody,
@@ -283,7 +280,7 @@ class HttpRequestCookiesView extends StatelessWidget {
   @visibleForTesting
   static const responseCookiesKey = Key('Response Cookies');
 
-  final HttpRequestData data;
+  final DartIOHttpRequestData data;
 
   DataRow _buildRow(int index, Cookie cookie, {bool requestCookies = false}) {
     return DataRow.byIndex(
@@ -555,7 +552,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
   }
 
   Widget _buildHttpTimeGraph(BuildContext context) {
-    final data = this.data as HttpRequestData;
+    final data = this.data as DartIOHttpRequestData;
     if (data.duration == null || data.instantEvents.isEmpty) {
       return Container(
         key: httpTimingGraphKey,
@@ -583,12 +580,12 @@ class NetworkRequestOverviewView extends StatelessWidget {
     for (final instant in data.instantEvents) {
       final duration = instant.timeRange!.duration;
       timingWidgets.add(
-        _buildTimingRow(_nextColor(), instant.name!, duration),
+        _buildTimingRow(_nextColor(), instant.name, duration),
       );
     }
     final duration = Duration(
       microseconds: data.endTimestamp!.microsecondsSinceEpoch -
-          data.instantEvents.last.timestampMicros! -
+          data.instantEvents.last.timestampMicros -
           data.timelineMicrosecondsSinceEpoch(0),
     );
     timingWidgets.add(
@@ -603,7 +600,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
   // TODO(kenz): add a "waterfall" like visualization with the same colors that
   // are used in the timing graph.
   List<Widget> _buildHttpTimingRows(BuildContext context) {
-    final data = this.data as HttpRequestData;
+    final data = this.data as DartIOHttpRequestData;
     final result = <Widget>[];
     for (final instant in data.instantEvents) {
       final instantEventStart = data.instantEvents.first.timeRange!.start!;
@@ -611,7 +608,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
       result.addAll([
         _buildRow(
           context: context,
-          title: instant.name!,
+          title: instant.name,
           child: _valueText(
             '[${msText(timeRange.start! - instantEventStart)} - '
             '${msText(timeRange.end! - instantEventStart)}]'

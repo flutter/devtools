@@ -42,11 +42,9 @@ class NetworkService {
     final timestamp = timestampObj.timestamp!;
     final sockets = await _refreshSockets();
     List<HttpProfileRequest>? httpRequests;
-    Timeline? timeline;
     httpRequests = await _refreshHttpProfile();
     networkController.lastRefreshMicros = timestamp;
     networkController.processNetworkTraffic(
-      timeline: timeline,
       sockets: sockets,
       httpRequests: httpRequests,
     );

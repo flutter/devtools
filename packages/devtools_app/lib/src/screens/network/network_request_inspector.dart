@@ -51,7 +51,7 @@ class NetworkRequestInspector extends StatelessWidget {
       builder: (context, data, _) {
         final tabs = <DevToolsTab>[
           _buildTab(NetworkRequestInspector._overviewTabTitle),
-          if (data is HttpRequestData) ...[
+          if (data is DartIOHttpRequestData) ...[
             _buildTab(NetworkRequestInspector._headersTabTitle),
             if (data.requestBody != null)
               _buildTab(NetworkRequestInspector._requestTabTitle),
@@ -77,7 +77,7 @@ class NetworkRequestInspector extends StatelessWidget {
                     tabs: tabs,
                     tabViews: [
                       NetworkRequestOverviewView(data),
-                      if (data is HttpRequestData) ...[
+                      if (data is DartIOHttpRequestData) ...[
                         HttpRequestHeadersView(data),
                         if (data.requestBody != null) HttpRequestView(data),
                         if (data.responseBody != null) HttpResponseView(data),

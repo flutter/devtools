@@ -133,7 +133,7 @@ void main() {
 
       expectNoSelection();
 
-      Future<void> validateHeadersTab(HttpRequestData data) async {
+      Future<void> validateHeadersTab(DartIOHttpRequestData data) async {
         // Switch to headers tab.
         await tester.tap(find.byKey(NetworkRequestInspector.headersTabKey));
         await tester.pumpAndSettle();
@@ -154,7 +154,7 @@ void main() {
         final ExpansionTile generalTile =
             tester.widget(find.byKey(HttpRequestHeadersView.generalKey));
 
-        final numGeneralEntries = data.general!.length;
+        final numGeneralEntries = data.general.length;
         expect(generalTile.children.length, numGeneralEntries);
 
         // Check contents of request headers.
@@ -170,7 +170,7 @@ void main() {
         expect(responsesTile.children.length, numResponseHeaders);
       }
 
-      Future<void> validateResponseTab(HttpRequestData data) async {
+      Future<void> validateResponseTab(DartIOHttpRequestData data) async {
         if (data.responseBody != null) {
           // Switch to response tab.
           await tester.tap(find.byKey(NetworkRequestInspector.responseTabKey));
@@ -194,8 +194,9 @@ void main() {
         expect(find.byType(HttpRequestCookiesView), findsNothing);
       }
 
-      Future<void> validateCookiesTab(HttpRequestData data) async {
-        final httpRequest = controller.selectedRequest.value as HttpRequestData;
+      Future<void> validateCookiesTab(DartIOHttpRequestData data) async {
+        final httpRequest =
+            controller.selectedRequest.value as DartIOHttpRequestData;
         final hasCookies = httpRequest.hasCookies;
 
         if (hasCookies) {
@@ -256,7 +257,7 @@ void main() {
         );
 
         final selection = controller.selectedRequest.value!;
-        if (selection is HttpRequestData) {
+        if (selection is DartIOHttpRequestData) {
           await validateHeadersTab(selection);
           await validateResponseTab(selection);
           await validateCookiesTab(selection);
@@ -326,7 +327,7 @@ void main() {
     }
 
     testWidgets('displays for http request', (tester) async {
-      final data = httpGetEvent;
+      final data = httpGet;
       await pumpView(tester, data);
 
       // Verify general information.
@@ -345,7 +346,7 @@ void main() {
       // Verify timing information.
       expect(find.text('Timing: '), findsOneWidget);
       expect(find.text('Start time: '), findsOneWidget);
-      expect(find.text(formatDateTime(data.startTimestamp!)), findsOneWidget);
+      expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
       expect(find.text('End time: '), findsOneWidget);
       expect(find.text(formatDateTime(data.endTimestamp!)), findsOneWidget);
       expect(find.byKey(NetworkRequestOverviewView.httpTimingGraphKey),
@@ -361,7 +362,7 @@ void main() {
     });
 
     testWidgets('displays for http request with error', (tester) async {
-      final data = httpGetEventWithError;
+      final data = httpGetWithError;
       await pumpView(tester, data);
 
       // Verify general information.
@@ -377,7 +378,7 @@ void main() {
       // Verify timing information.
       expect(find.text('Timing: '), findsOneWidget);
       expect(find.text('Start time: '), findsOneWidget);
-      expect(find.text(formatDateTime(data.startTimestamp!)), findsOneWidget);
+      expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
       expect(find.text('End time: '), findsOneWidget);
       expect(find.text(formatDateTime(data.endTimestamp!)), findsOneWidget);
       expect(find.byKey(NetworkRequestOverviewView.httpTimingGraphKey),
