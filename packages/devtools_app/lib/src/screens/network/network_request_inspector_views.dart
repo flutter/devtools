@@ -462,13 +462,13 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Request uri',
-        child: _valueText(data.uri!),
+        child: _valueText(data.uri),
       ),
       const SizedBox(height: defaultSpacing),
       _buildRow(
         context: context,
         title: 'Method',
-        child: _valueText(data.method!),
+        child: _valueText(data.method),
       ),
       const SizedBox(height: defaultSpacing),
       _buildRow(

@@ -42,10 +42,11 @@ int _dartIoHttpRequestWrapperId = 0;
 class DartIOHttpRequestData extends NetworkRequest {
   DartIOHttpRequestData(
     int timelineMicrosBase,
-    this._request,
-  )   : wrapperId = _dartIoHttpRequestWrapperId++,
+    this._request, {
+    bool requestFullDataFromVmService = true,
+  })  : wrapperId = _dartIoHttpRequestWrapperId++,
         super(timelineMicrosBase) {
-    if (_request.isResponseComplete) {
+    if (requestFullDataFromVmService && _request.isResponseComplete) {
       getFullRequestData();
     }
   }

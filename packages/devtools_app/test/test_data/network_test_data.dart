@@ -117,7 +117,11 @@ final Map<String, dynamic> testSocket3Json = {
 };
 
 final httpGetRequest = HttpProfileRequest.parse(httpGetJson)!;
-final httpGet = DartIOHttpRequestData(0, httpGetRequest);
+final httpGet = DartIOHttpRequestData(
+  0,
+  httpGetRequest,
+  requestFullDataFromVmService: false,
+);
 final Map<String, dynamic> httpGetJson = {
   'type': 'HttpProfileRequest',
   'id': 1,
@@ -179,7 +183,11 @@ final Map<String, dynamic> httpGetJson = {
 };
 
 final httpPostRequest = HttpProfileRequest.parse(httpPostJson)!;
-final httpPost = DartIOHttpRequestData(0, httpPostRequest);
+final httpPost = DartIOHttpRequestData(
+  0,
+  httpPostRequest,
+  requestFullDataFromVmService: false,
+);
 final Map<String, dynamic> httpPostJson = {
   'type': 'HttpProfileRequest',
   'id': 2,
@@ -254,7 +262,11 @@ final httpPostResponseBodyData = [
 ];
 
 final httpPutRequest = HttpProfileRequest.parse(httpPutJson)!;
-final httpPut = DartIOHttpRequestData(0, httpPutRequest);
+final httpPut = DartIOHttpRequestData(
+  0,
+  httpPutRequest,
+  requestFullDataFromVmService: false,
+);
 final Map<String, dynamic> httpPutJson = {
   'type': 'HttpProfileRequest',
   'id': 3,
@@ -329,7 +341,11 @@ final httpPutResponseBodyData = [
 ];
 
 final httpPatchRequest = HttpProfileRequest.parse(httpPatchJson)!;
-final httpPatch = DartIOHttpRequestData(0, httpPatchRequest);
+final httpPatch = DartIOHttpRequestData(
+  0,
+  httpPatchRequest,
+  requestFullDataFromVmService: false,
+);
 final Map<String, dynamic> httpPatchJson = {
   'type': 'HttpProfileRequest',
   'id': 4,
@@ -407,7 +423,11 @@ final httpPatchResponseBodyData = [
 ];
 
 final httpGetWithErrorRequest = HttpProfileRequest.parse(httpGetWithErrorJson)!;
-final httpGetWithError = DartIOHttpRequestData(0, httpGetWithErrorRequest);
+final httpGetWithError = DartIOHttpRequestData(
+  0,
+  httpGetWithErrorRequest,
+  requestFullDataFromVmService: false,
+);
 final Map<String, dynamic> httpGetWithErrorJson = {
   'type': '@HttpProfileRequest',
   'id': 5,
@@ -423,7 +443,11 @@ final Map<String, dynamic> httpGetWithErrorJson = {
 };
 
 final httpWsHandshakeRequest = HttpProfileRequest.parse(httpWsHandshakeJson)!;
-final httpWsHandshake = DartIOHttpRequestData(0, httpWsHandshakeRequest);
+final httpWsHandshake = DartIOHttpRequestData(
+  0,
+  httpWsHandshakeRequest,
+  requestFullDataFromVmService: false,
+);
 final Map<String, dynamic> httpWsHandshakeJson = {
   'type': 'HttpProfileRequest',
   'id': 6,
@@ -484,14 +508,18 @@ final Map<String, dynamic> httpWsHandshakeJson = {
   'responseBody': [],
 };
 
-final httpGetPendingRequest = HttpProfileRequest.parse(httpGetJson)!;
-final httpGetPending = DartIOHttpRequestData(0, httpGetRequest);
+final httpGetPendingRequest = HttpProfileRequest.parse(httpGetPendingJson)!;
+final httpGetPending = DartIOHttpRequestData(
+  0,
+  httpGetPendingRequest,
+  requestFullDataFromVmService: false,
+);
 final Map<String, dynamic> httpGetPendingJson = {
   'type': 'HttpProfileRequest',
   'id': 7,
   'isolateId': 'isolates/2013291945734727',
   'method': 'GET',
-  'uri': 'https://jsonplaceholder.typicode.com/albums/1',
+  'uri': 'https://jsonplaceholder.typicode.com/albums/10',
   'startTime': 6326279935,
   'endTime': 6326808974,
   'request': {
@@ -517,30 +545,6 @@ final Map<String, dynamic> httpGetPendingJson = {
     'persistentConnection': true,
     'uri': 'https://jsonplaceholder.typicode.com/albums/1',
     'filterKey': 'HTTP/client',
-  },
-  'response': {
-    'startTime': 6327090749,
-    'headers': {
-      'content-encoding': ['gzip'],
-      'pragma': ['no-cache'],
-      'connection': ['keep-alive'],
-      'cache-control': ['max-age=43200'],
-      'content-type': ['application/json; charset=utf-8'],
-    },
-    'compressionState': 'HttpClientResponseCompressionState.decompressed',
-    'connectionInfo': {
-      'localPort': 45648,
-      'remoteAddress': '2606:4700:3033::ac43:bdd9',
-      'remotePort': 443,
-    },
-    'contentLength': -1,
-    'cookies': [],
-    'isRedirect': false,
-    'persistentConnection': true,
-    'reasonPhrase': 'OK',
-    'redirects': [],
-    'statusCode': 200,
-    'endTime': 6327091628,
   },
   'requestBody': [],
 };

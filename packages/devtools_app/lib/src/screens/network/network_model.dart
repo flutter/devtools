@@ -14,9 +14,9 @@ abstract class NetworkRequest with DataSearchStateMixin {
 
   final int _timelineMicrosBase;
 
-  String? get method;
+  String get method;
 
-  String? get uri;
+  String get uri;
 
   String? get contentType;
 

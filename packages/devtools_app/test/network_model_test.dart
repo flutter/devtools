@@ -10,7 +10,6 @@ import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/network/network_controller.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -90,10 +89,6 @@ void main() {
         ),
       );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      // Enables getHttpProfile support.
-      final fakeVmService = fakeServiceManager.service as FakeVmService;
-      fakeVmService.dartIoVersion = SemanticVersion(major: 1, minor: 6);
-      fakeVmService.httpEnableTimelineLoggingResult = false;
       controller = NetworkController();
       await controller.startRecording();
     });

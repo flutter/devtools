@@ -279,7 +279,7 @@ class NetworkController
 
     final currentRequests = filteredData.value;
     for (final request in currentRequests) {
-      if (request.uri!.toLowerCase().contains(caseInsensitiveSearch)) {
+      if (request.uri.toLowerCase().contains(caseInsensitiveSearch)) {
         matches.add(request);
         // TODO(kenz): use the value request.isSearchMatch in the network
         // requests table to improve performance. This will require some
@@ -304,13 +304,13 @@ class NetworkController
         ..addAll(_requests.value.requests.where((NetworkRequest r) {
           final methodArg = queryFilter.filterArguments[methodFilterId];
           if (methodArg != null &&
-              !methodArg.matchesValue(r.method!.toLowerCase())) {
+              !methodArg.matchesValue(r.method.toLowerCase())) {
             return false;
           }
 
           final statusArg = queryFilter.filterArguments[statusFilterId];
           if (statusArg != null &&
-              !statusArg.matchesValue(r.status!.toLowerCase())) {
+              !statusArg.matchesValue(r.status?.toLowerCase())) {
             return false;
           }
 

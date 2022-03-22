@@ -4,14 +4,15 @@
 
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
+@TestOn('vm')
+
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/http/http_request_data.dart';
 import 'package:devtools_app/src/screens/network/network_controller.dart';
 import 'package:devtools_app/src/screens/network/network_model.dart';
 import 'package:devtools_app/src/screens/network/network_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
-@TestOn('vm')
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -20,7 +21,7 @@ import 'test_data/network_test_data.dart';
 import 'test_utils/network_test_utils.dart';
 
 void main() {
-  group('NetworkScreen NetworkRequestsTable - Dart IO 1.6', () {
+  group('NetworkScreen NetworkRequestsTable', () {
     late NetworkController controller;
     late FakeServiceManager fakeServiceManager;
     late SocketProfile socketProfile;
@@ -36,11 +37,8 @@ void main() {
           socketProfile: socketProfile,
         ),
       );
-      // Create a fakeVmService because DartIOHttpRequestData.getFullRequestData needs one
-      final fakeVmService = fakeServiceManager.service as FakeVmService;
-      fakeVmService.dartIoVersion = SemanticVersion(major: 1, minor: 6);
-      fakeVmService.httpEnableTimelineLoggingResult = false;
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(IdeTheme, IdeTheme());
 
       // Bypass controller recording so timelineMicroOffset is not time dependant
       controller = NetworkController();
@@ -79,7 +77,6 @@ void main() {
     test('StatusColumn for http request', () {
       final column = StatusColumn();
       final getRequest = _findRequestById(1);
-
       expect(column.getDisplayValue(getRequest), httpGet.status);
 
       final pendingRequest = _findRequestById(7);

@@ -11,7 +11,6 @@ import 'package:devtools_app/src/screens/network/network_controller.dart';
 import 'package:devtools_app/src/screens/network/network_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_app/src/ui/filter.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,11 +19,11 @@ import 'package:vm_service/vm_service.dart';
 import 'test_utils/network_test_utils.dart';
 
 void main() {
-  group('NetworkController - dartIOVersion 1.6', () {
+  group('NetworkController', () {
     late NetworkController controller;
-    FakeServiceManager fakeServiceManager;
-    SocketProfile socketProfile;
-    HttpProfile httpProfile;
+    late FakeServiceManager fakeServiceManager;
+    late SocketProfile socketProfile;
+    late HttpProfile httpProfile;
 
     setUp(() async {
       socketProfile = loadSocketProfile();
@@ -36,11 +35,6 @@ void main() {
         ),
       );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      // Enables getHttpProfile support.
-      final fakeVmService = fakeServiceManager.service as FakeVmService;
-      fakeVmService.dartIoVersion = SemanticVersion(major: 1, minor: 6);
-      // Disables HTTP timeline logging
-      fakeVmService.httpEnableTimelineLoggingResult = false;
       controller = NetworkController();
     });
 
@@ -93,7 +87,7 @@ void main() {
 
       // The number of valid requests recorded in the test data.
       const numSockets = 2;
-      const numHttpProfile = 6;
+      const numHttpProfile = 7;
       const numRequests = numSockets + numHttpProfile;
 
       const httpMethods = <String>{
@@ -110,17 +104,16 @@ void main() {
       await controller.networkService.refreshNetworkData();
       profile = requestsNotifier.value;
       expect(profile.requests.length, numRequests);
-      expect(profile.outstandingHttpRequests.isEmpty, true);
+      expect(profile.outstandingHttpRequests.isEmpty, false);
       final List<DartIOHttpRequestData> httpRequests = profile.requests
           .whereType<DartIOHttpRequestData>()
           .cast<DartIOHttpRequestData>()
           .toList();
       for (final request in httpRequests) {
-        expect(request.duration, isNotNull);
+        expect(request.duration, request.inProgress ? isNull : isNotNull);
         expect(request.general.length, greaterThan(0));
-        expect(request.inProgress, false);
         expect(httpMethods.contains(request.method), true);
-        expect(request.status, isNotNull);
+        expect(request.status, request.inProgress ? isNull : isNotNull);
       }
 
       // Finally, call `clear()` and ensure the requests have been cleared.
@@ -134,7 +127,7 @@ void main() {
     test('matchesForSearch', () async {
       await controller.startRecording();
       // The number of valid requests recorded in the test data.
-      const numRequests = 16;
+      const numRequests = 9;
 
       final requestsNotifier = controller.requests;
       // Refresh network data and ensure requests are populated.
@@ -142,18 +135,17 @@ void main() {
       final profile = requestsNotifier.value;
       expect(profile.requests.length, numRequests);
 
-      expect(controller.matchesForSearch('year=2019').length, equals(5));
-      expect(controller.matchesForSearch('127.0.0.1').length, equals(14));
+      expect(controller.matchesForSearch('jsonplaceholder').length, equals(5));
       expect(controller.matchesForSearch('IPv6').length, equals(2));
       expect(controller.matchesForSearch('').length, equals(0));
 
       // Search with incorrect case.
-      expect(controller.matchesForSearch('YEAR').length, equals(5));
+      expect(controller.matchesForSearch('JSONPLACEHOLDER').length, equals(5));
     });
 
     test('matchesForSearch sets isSearchMatch property', () async {
       // The number of valid requests recorded in the test data.
-      const numRequests = 16;
+      const numRequests = 9;
 
       await controller.startRecording();
       final requestsNotifier = controller.requests;
@@ -162,7 +154,7 @@ void main() {
       final profile = requestsNotifier.value;
       expect(profile.requests.length, numRequests);
 
-      controller.search = 'year=2019';
+      controller.search = 'jsonplaceholder';
       List<NetworkRequest> matches = controller.searchMatches.value;
       expect(matches.length, equals(5));
       verifyIsSearchMatch(profile.requests, matches);
@@ -176,7 +168,7 @@ void main() {
     test('filterData', () async {
       await controller.startRecording();
       // The number of valid requests recorded in the test data.
-      const numRequests = 16;
+      const numRequests = 9;
 
       final requestsNotifier = controller.requests;
       // Refresh network data and ensure requests are populated.
@@ -191,9 +183,13 @@ void main() {
       expect(controller.filteredData.value, hasLength(numRequests));
 
       controller.filterData(Filter(
-          queryFilter: QueryFilter.parse('127.0.0.1', controller.filterArgs)));
+        queryFilter: QueryFilter.parse(
+          'jsonplaceholder',
+          controller.filterArgs,
+        ),
+      ));
       expect(profile.requests, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(14));
+      expect(controller.filteredData.value, hasLength(5));
 
       controller.filterData(
           Filter(queryFilter: QueryFilter.parse('', controller.filterArgs)));
@@ -201,41 +197,41 @@ void main() {
       expect(controller.filteredData.value, hasLength(numRequests));
 
       controller.filterData(Filter(
-          queryFilter: QueryFilter.parse('method:put', controller.filterArgs)));
+          queryFilter: QueryFilter.parse('method:get', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(2));
+      expect(controller.filteredData.value, hasLength(6));
 
       controller.filterData(Filter(
-          queryFilter: QueryFilter.parse('m:head', controller.filterArgs)));
+          queryFilter: QueryFilter.parse('m:put', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(2));
+      expect(controller.filteredData.value, hasLength(1));
 
       controller.filterData(Filter(
           queryFilter:
               QueryFilter.parse('-method:put', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(14));
+      expect(controller.filteredData.value, hasLength(8));
 
       controller.filterData(Filter(
           queryFilter:
               QueryFilter.parse('status:Error', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(7));
+      expect(controller.filteredData.value, hasLength(1));
 
       controller.filterData(Filter(
           queryFilter: QueryFilter.parse('s:101', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(2));
+      expect(controller.filteredData.value, hasLength(3));
 
       controller.filterData(Filter(
           queryFilter: QueryFilter.parse('-s:Error', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(9));
+      expect(controller.filteredData.value, hasLength(8));
 
       controller.filterData(Filter(
-          queryFilter: QueryFilter.parse('type:http', controller.filterArgs)));
+          queryFilter: QueryFilter.parse('type:json', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(7));
+      expect(controller.filteredData.value, hasLength(4));
 
       controller.filterData(Filter(
           queryFilter: QueryFilter.parse('t:ws', controller.filterArgs)));
@@ -245,7 +241,7 @@ void main() {
       controller.filterData(Filter(
           queryFilter: QueryFilter.parse('-t:ws', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(14));
+      expect(controller.filteredData.value, hasLength(7));
 
       controller.filterData(
           Filter(queryFilter: QueryFilter.parse('-', controller.filterArgs)));
@@ -269,7 +265,7 @@ void main() {
       controller.filterData(Filter(
           queryFilter: QueryFilter.parse('-t:ws,http', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(7));
+      expect(controller.filteredData.value, hasLength(4));
 
       controller.filterData(Filter(
           queryFilter: QueryFilter.parse(
@@ -281,13 +277,13 @@ void main() {
           queryFilter: QueryFilter.parse(
               '-status:error method:get', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(3));
+      expect(controller.filteredData.value, hasLength(5));
 
       controller.filterData(Filter(
           queryFilter: QueryFilter.parse(
-              '-status:error method:get t:txt', controller.filterArgs)));
+              '-status:error method:get t:http', controller.filterArgs)));
       expect(profile.requests, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(1));
+      expect(controller.filteredData.value, hasLength(2));
     });
   });
 }
