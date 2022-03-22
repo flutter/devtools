@@ -452,7 +452,7 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   Axis get crossAxisDirection {
-    return direction;
+    return direction == Axis.horizontal ? Axis.vertical : Axis.horizontal;
   }
 
   double? get mainAxisDimension => dimension(direction);
