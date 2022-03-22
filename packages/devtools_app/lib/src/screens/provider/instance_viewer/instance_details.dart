@@ -2,19 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/eval_on_dart_library.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'result.dart';
 
-// This part is generated using package:freezed, but without the devtool depending
-// on the package.
-// To update the generated files, temporarily add https://pub.dev/packages/freezed
-// as dependency; replace the `fake_freezed_annotation.dart` import with
-// 'package:freezed_annotation/freezed_annotation.dart', then execute `flutter pub run build_runner build`.
+// This part is generated using package:freezed, but without the devtool
+// depending on the package.
+// To update the generated files, temporarily add
+// https://pub.dev/packages/freezed as dependency; replace the
+// `fake_freezed_annotation.dart` import with
+// 'package:freezed_annotation/freezed_annotation.dart', then execute
+// `flutter pub run build_runner build`.
 part 'instance_details.freezed.dart';
 
 typedef Setter = Future<void> Function(String newValue);
@@ -25,7 +26,7 @@ abstract class PathToProperty with _$PathToProperty {
 
   // TODO test that mutating a Map does not collapse previously expanded keys
   const factory PathToProperty.mapKey({
-    required String ref,
+    required String? ref,
   }) = MapKeyPath;
 
   /// Must not depend on [InstanceRef] and its ID, as they may change across
@@ -62,7 +63,7 @@ abstract class ObjectField with _$ObjectField {
     required bool isFinal,
     required String ownerName,
     required String ownerUri,
-    required Result<InstanceRef> ref,
+    required Result<InstanceRef>? ref,
 
     /// An [EvalOnDartLibrary] that can access this field from the owner object
     required EvalOnDartLibrary eval,
@@ -84,40 +85,40 @@ abstract class InstanceDetails with _$InstanceDetails {
 
   @Assert('instanceRefId == null')
   factory InstanceDetails.nill({
-    String instanceRefId,
-    required Setter setter,
+    String? instanceRefId,
+    required Setter? setter,
   }) = NullInstance;
 
   factory InstanceDetails.boolean(
     String displayString, {
     required String instanceRefId,
-    required Setter setter,
+    required Setter? setter,
   }) = BoolInstance;
 
   factory InstanceDetails.number(
     String displayString, {
     required String instanceRefId,
-    required Setter setter,
+    required Setter? setter,
   }) = NumInstance;
 
   factory InstanceDetails.string(
     String displayString, {
     required String instanceRefId,
-    required Setter setter,
+    required Setter? setter,
   }) = StringInstance;
 
   factory InstanceDetails.map(
     List<InstanceDetails> keys, {
     required int hash,
     required String instanceRefId,
-    required Setter setter,
+    required Setter? setter,
   }) = MapInstance;
 
   factory InstanceDetails.list({
     required int? length,
     required int hash,
     required String instanceRefId,
-    required Setter setter,
+    required Setter? setter,
   }) = ListInstance;
 
   factory InstanceDetails.object(
@@ -125,20 +126,22 @@ abstract class InstanceDetails with _$InstanceDetails {
     required String type,
     required int hash,
     required String instanceRefId,
-    required Setter setter,
+    required Setter? setter,
 
     /// An [EvalOnDartLibrary] associated with the library of this object
     ///
     /// This allows to edit private properties.
-    @required EvalOnDartLibrary evalForInstance,
+    required EvalOnDartLibrary evalForInstance,
   }) = ObjectInstance;
 
   factory InstanceDetails.enumeration({
     required String type,
     required String value,
-    required Setter setter,
+    required Setter? setter,
     required String instanceRefId,
   }) = EnumInstance;
+
+  String get instanceRefId;
 
   bool get isExpandable {
     bool falsy(Object obj) => false;
@@ -162,7 +165,7 @@ abstract class InstancePath with _$InstancePath {
   const InstancePath._();
 
   const factory InstancePath.fromInstanceId(
-    String instanceId, {
+    String? instanceId, {
     @Default([]) List<PathToProperty> pathToProperty,
   }) = _InstancePathFromInstanceId;
 

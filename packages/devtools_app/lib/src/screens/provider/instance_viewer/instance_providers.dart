@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
 
@@ -43,7 +42,7 @@ Future<InstanceRef?> _resolveInstanceRefForPath(
         return eval.safeEval(
           'value',
           isAlive: isAlive,
-          scope: {'value': path.instanceId},
+          scope: {'value': path.instanceId!},
         );
       },
     );
@@ -87,7 +86,7 @@ Future<InstanceRef?> _resolveInstanceRefForPath(
           element.ownerName == propertyPath.ownerName &&
           element.ownerUri == propertyPath.ownerUri);
 
-      final ref = field.ref!.dataOrThrow;
+      final ref = field.ref?.dataOrThrow;
       if (ref == null) return null;
 
       // we cannot do `eval('parent.propertyName')` because it is possible for

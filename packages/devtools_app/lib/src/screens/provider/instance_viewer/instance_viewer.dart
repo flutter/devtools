@@ -4,8 +4,6 @@
 
 // TODO(rrousselGit) merge this code with the debugger view
 
-
-
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -422,7 +420,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
             ),
           ),
         );
-      } as Widget Function(BuildContext, T Function<T>(ProviderBase<Object?, T>), Widget?),
+      },
     );
   }
 }

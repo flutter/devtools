@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
 
 import '../../../shared/eval_on_dart_library.dart';
 
-import 'package:freezed_annotation/freezed_annotation.dart';
-
-// This part is generated using package:freezed, but without the devtool depending
-// on the package.
-// To update the generated files, temporarily add freezed/freezed_annotation/build_runner
-// as dependencies; replace the `fake_freezed_annotation.dart` import with the
-// real annotation package, then execute `pub run build_runner build`.
+// This part is generated using package:freezed, but without the devtool
+// depending on the package.
+// To update the generated files, temporarily add
+// https://pub.dev/packages/freezed as dependency; replace the
+// `fake_freezed_annotation.dart` import with
+// 'package:freezed_annotation/freezed_annotation.dart', then execute
+// `flutter pub run build_runner build`.
 part 'result.freezed.dart';
 
 @freezed
 abstract class Result<T extends Object> with _$Result<T> {
   Result._();
-  factory Result.data(@nullable T value) = _ResultData<T>;
-  factory Result.error(Object error, [StackTrace stackTrace]) = _ResultError<T>;
+  factory Result.data(T? value) = _ResultData<T>;
+  factory Result.error(Object error, [StackTrace? stackTrace]) =
+      _ResultError<T>;
 
   factory Result.guard(T Function() cb) {
     try {
@@ -44,7 +45,7 @@ abstract class Result<T extends Object> with _$Result<T> {
     return when(
       data: (value) {
         try {
-          return Result.data(cb(value));
+          return Result.data(cb(value!));
         } catch (err, stack) {
           return Result.error(err, stack);
         }
@@ -55,11 +56,11 @@ abstract class Result<T extends Object> with _$Result<T> {
 
   T get dataOrThrow {
     return when<T>(
-      data: (value) => value,
+      data: (value) => value!,
       error: (err, stack) {
         // ignore: only_throw_errors
         throw err;
-      } as T Function(Object, StackTrace),
+      },
     );
   }
 }
