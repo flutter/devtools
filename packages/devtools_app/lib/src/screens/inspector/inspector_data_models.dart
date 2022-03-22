@@ -100,7 +100,7 @@ class LayoutProperties {
       : description = node?.description,
         size = node?.size,
         constraints = node?.constraints,
-        isFlex = node?.isFlex,
+        isFlex = node?.isFlex ?? false,
         flexFactor = node?.flexFactor,
         flexFit = node?.flexFit,
         children = copyLevel == 0
@@ -141,7 +141,7 @@ class LayoutProperties {
       constraints: BoxConstraints.lerp(begin.constraints, end.constraints, t),
       description: end.description,
       flexFactor: begin.flexFactor! * (t + 1) - end.flexFactor! * t,
-      isFlex: begin.isFlex! && end.isFlex!,
+      isFlex: begin.isFlex && end.isFlex,
       size: Size.lerp(begin.size, end.size, t)!,
       flexFit: end.flexFit,
     );
@@ -154,7 +154,7 @@ class LayoutProperties {
   final String? description;
   final num? flexFactor;
   final FlexFit? flexFit;
-  final bool? isFlex;
+  final bool isFlex;
   final Size? size;
 
   /// Represents the order of [children] to be displayed.
@@ -306,7 +306,7 @@ class FlexLayoutProperties extends LayoutProperties {
     required List<LayoutProperties> children,
     RemoteDiagnosticsNode? node,
     BoxConstraints? constraints,
-    bool? isFlex,
+    bool isFlex = false,
     String? description,
     num? flexFactor,
     FlexFit? flexFit,
