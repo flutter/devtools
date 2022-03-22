@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
 import 'package:flutter/foundation.dart';
@@ -12,8 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'layout_explorer_serialization_delegate.dart';
 
 Future<RemoteDiagnosticsNode> widgetToLayoutExplorerRemoteDiagnosticsNode({
-  @required Widget widget,
-  @required WidgetTester tester,
+  required Widget widget,
+  required WidgetTester tester,
   int subtreeDepth = 1,
 }) async {
   await tester.pumpWidget(MaterialApp(home: Scaffold(body: widget)));
@@ -25,5 +25,5 @@ Future<RemoteDiagnosticsNode> widgetToLayoutExplorerRemoteDiagnosticsNode({
               service: WidgetInspectorService.instance,
             ),
           );
-  return RemoteDiagnosticsNode(nodeJson, null, null, null);
+  return RemoteDiagnosticsNode(nodeJson, null, false, null);
 }

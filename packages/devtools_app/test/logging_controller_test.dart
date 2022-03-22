@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 @TestOn('vm')
 import 'dart:convert';
@@ -17,7 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('LoggingController', () {
-    LoggingController controller;
+    late LoggingController controller;
     setGlobal(MessageBus, MessageBus());
 
     void addStdoutData(String message) {

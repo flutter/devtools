@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/primitives/math_utils.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_data_models.dart';
@@ -17,10 +17,10 @@ void main() {
   group('FlexLayoutProperties tests', () {
     Future<FlexLayoutProperties> toFlexLayoutProperties(
       Flex flex, {
-      @required WidgetTester tester,
+      required WidgetTester tester,
       int subtreeDepth = 2,
-      double width,
-      double height,
+      double? width,
+      double? height,
     }) async {
       final wrappedWidget = SizedBox(
         width: width,
@@ -81,8 +81,8 @@ void main() {
       ]);
       final properties = await toFlexLayoutProperties(widget, tester: tester);
       expect(properties.startIsTopLeft, true);
-      expect(properties.displayChildren[0].description, 'SizedBox');
-      expect(properties.displayChildren[1].description, 'Container');
+      expect(properties.displayChildren![0].description, 'SizedBox');
+      expect(properties.displayChildren![1].description, 'Container');
     });
 
     testWidgets(
@@ -97,8 +97,8 @@ void main() {
       );
       final properties = await toFlexLayoutProperties(widget, tester: tester);
       expect(properties.startIsTopLeft, false);
-      expect(properties.displayChildren[0].description, 'Container');
-      expect(properties.displayChildren[1].description, 'SizedBox');
+      expect(properties.displayChildren![0].description, 'Container');
+      expect(properties.displayChildren![1].description, 'SizedBox');
     });
 
     group('childrenRenderProperties tests', () {
@@ -215,14 +215,15 @@ void main() {
           'when the start is not top left, render properties should be equals to its mirrored version',
           (tester) async {
         Row buildWidget({
-          bool flipMainAxis,
-          MainAxisAlignment mainAxisAlignment,
+          required bool flipMainAxis,
+          required MainAxisAlignment mainAxisAlignment,
         }) =>
             Row(
               textDirection:
                   flipMainAxis ? TextDirection.rtl : TextDirection.ltr,
-              mainAxisAlignment:
-                  flipMainAxis ? mainAxisAlignment.reversed : mainAxisAlignment,
+              mainAxisAlignment: flipMainAxis
+                  ? mainAxisAlignment.reversed!
+                  : mainAxisAlignment,
               children: flipMainAxis
                   ? childrenWidgets.reversed.toList()
                   : childrenWidgets,

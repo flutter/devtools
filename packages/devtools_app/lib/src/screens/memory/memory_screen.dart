@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -81,19 +79,21 @@ class MemoryBody extends StatefulWidget {
 
 class MemoryBodyState extends State<MemoryBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  events.EventChartController eventChartController;
-  vm.VMChartController vmChartController;
-  android.AndroidChartController androidChartController;
+  late events.EventChartController _eventChartController;
+  late vm.VMChartController _vmChartController;
+  late android.AndroidChartController _androidChartController;
 
-  MemoryController controller;
+  late MemoryController _controller;
 
-  OverlayEntry hoverOverlayEntry;
-  OverlayEntry legendOverlayEntry;
+  bool _controllersInitialized = false;
 
-  bool isAdvancedSettingsEnabled = false;
+  OverlayEntry? _hoverOverlayEntry;
+  OverlayEntry? _legendOverlayEntry;
+
+  bool _isAdvancedSettingsEnabled = false;
 
   /// Updated when the MemoryController's _androidCollectionEnabled ValueNotifier changes.
-  bool isAndroidCollection = MemoryController.androidADBDefault;
+  bool _isAndroidCollection = MemoryController.androidADBDefault;
 
   final _focusNode = FocusNode(debugLabel: 'memory');
 
@@ -110,35 +110,36 @@ class MemoryBodyState extends State<MemoryBody>
     maybePushDebugModeMemoryMessage(context, MemoryScreen.id);
 
     final newController = Provider.of<MemoryController>(context);
-    if (newController == controller) return;
+    if (_controllersInitialized && newController == _controller) return;
+    _controllersInitialized = true;
 
-    controller = newController;
+    _controller = newController;
 
-    eventChartController = events.EventChartController(controller);
-    vmChartController = vm.VMChartController(controller);
+    _eventChartController = events.EventChartController(_controller);
+    _vmChartController = vm.VMChartController(_controller);
     // Android Chart uses the VM Chart's computed labels.
-    androidChartController = android.AndroidChartController(
-      controller,
-      sharedLabels: vmChartController.labelTimestamps,
+    _androidChartController = android.AndroidChartController(
+      _controller,
+      sharedLabels: _vmChartController.labelTimestamps,
     );
 
     // Update the chart when the memorySource changes.
-    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
+    addAutoDisposeListener(_controller.selectedSnapshotNotifier, () {
       setState(() {
         // TODO(terry): Create the snapshot data to display by Library,
         //              by Class or by Objects.
         // Create the snapshot data by Library.
-        controller.createSnapshotByLibrary();
+        _controller.createSnapshotByLibrary();
       });
     });
 
     // Update the chart when the memorySource changes.
-    addAutoDisposeListener(controller.memorySourceNotifier, () async {
+    addAutoDisposeListener(_controller.memorySourceNotifier, () async {
       try {
-        await controller.updatedMemorySource();
+        await _controller.updatedMemorySource();
       } catch (e) {
         final errorMessage = '$e';
-        controller.memorySource = MemoryController.liveFeed;
+        _controller.memorySource = MemoryController.liveFeed;
         // Display toast, unable to load the saved memory JSON payload.
         final notificationsState = Notifications.of(context);
         if (notificationsState != null) {
@@ -150,12 +151,12 @@ class MemoryBodyState extends State<MemoryBody>
         return;
       }
 
-      controller.refreshAllCharts();
+      _controller.refreshAllCharts();
     });
 
-    addAutoDisposeListener(controller.legendVisibleNotifier, () {
+    addAutoDisposeListener(_controller.legendVisibleNotifier, () {
       setState(() {
-        if (controller.isLegendVisible) {
+        if (_controller.isLegendVisible) {
           ga.select(
             analytics_constants.memory,
             analytics_constants.memoryLegend,
@@ -168,15 +169,15 @@ class MemoryBodyState extends State<MemoryBody>
       });
     });
 
-    addAutoDisposeListener(controller.androidChartVisibleNotifier, () {
+    addAutoDisposeListener(_controller.androidChartVisibleNotifier, () {
       setState(() {
-        if (controller.androidChartVisibleNotifier.value) {
+        if (_controller.androidChartVisibleNotifier.value) {
           ga.select(
             analytics_constants.memory,
             analytics_constants.androidChart,
           );
         }
-        if (controller.isLegendVisible) {
+        if (_controller.isLegendVisible) {
           // Recompute the legend with the new traces now visible.
           hideLegend();
           showLegend(context);
@@ -184,103 +185,103 @@ class MemoryBodyState extends State<MemoryBody>
       });
     });
 
-    addAutoDisposeListener(eventChartController.tapLocation, () {
-      if (eventChartController.tapLocation.value != null) {
-        if (hoverOverlayEntry != null) {
+    addAutoDisposeListener(_eventChartController.tapLocation, () {
+      if (_eventChartController.tapLocation.value != null) {
+        if (_hoverOverlayEntry != null) {
           hideHover();
         }
-        final tapLocation = eventChartController.tapLocation.value;
+        final tapLocation = _eventChartController.tapLocation.value;
         if (tapLocation?.tapDownDetails != null) {
-          final tapData = tapLocation;
+          final tapData = tapLocation!;
           final index = tapData.index;
-          final timestamp = tapData.timestamp;
+          final timestamp = tapData.timestamp!;
 
           final copied = TapLocation.copy(tapLocation);
-          vmChartController.tapLocation.value = copied;
-          androidChartController.tapLocation.value = copied;
+          _vmChartController.tapLocation.value = copied;
+          _androidChartController.tapLocation.value = copied;
 
-          final allValues = ChartsValues(controller, index, timestamp);
+          final allValues = ChartsValues(_controller, index, timestamp);
           if (MemoryScreen.isDebuggingEnabled) {
             debugLogger('Event Chart TapLocation '
                 '${allValues.toJson().prettyPrint()}');
           }
-          showHover(context, allValues, tapData.tapDownDetails.globalPosition);
+          showHover(context, allValues, tapData.tapDownDetails!.globalPosition);
         }
       }
     });
 
-    addAutoDisposeListener(vmChartController.tapLocation, () {
-      if (vmChartController.tapLocation.value != null) {
-        if (hoverOverlayEntry != null) {
+    addAutoDisposeListener(_vmChartController.tapLocation, () {
+      if (_vmChartController.tapLocation.value != null) {
+        if (_hoverOverlayEntry != null) {
           hideHover();
         }
-        final tapLocation = vmChartController.tapLocation.value;
+        final tapLocation = _vmChartController.tapLocation.value;
         if (tapLocation?.tapDownDetails != null) {
-          final tapData = tapLocation;
+          final tapData = tapLocation!;
           final index = tapData.index;
-          final timestamp = tapData.timestamp;
+          final timestamp = tapData.timestamp!;
 
           final copied = TapLocation.copy(tapLocation);
-          eventChartController.tapLocation.value = copied;
-          androidChartController.tapLocation.value = copied;
+          _eventChartController.tapLocation.value = copied;
+          _androidChartController.tapLocation.value = copied;
 
-          final allValues = ChartsValues(controller, index, timestamp);
+          final allValues = ChartsValues(_controller, index, timestamp);
           if (MemoryScreen.isDebuggingEnabled) {
             debugLogger('VM Chart TapLocation '
                 '${allValues.toJson().prettyPrint()}');
           }
-          showHover(context, allValues, tapData.tapDownDetails.globalPosition);
+          showHover(context, allValues, tapData.tapDownDetails!.globalPosition);
         }
       }
     });
 
-    addAutoDisposeListener(androidChartController.tapLocation, () {
-      if (androidChartController.tapLocation.value != null) {
-        if (hoverOverlayEntry != null) {
+    addAutoDisposeListener(_androidChartController.tapLocation, () {
+      if (_androidChartController.tapLocation.value != null) {
+        if (_hoverOverlayEntry != null) {
           hideHover();
         }
-        final tapLocation = androidChartController.tapLocation.value;
+        final tapLocation = _androidChartController.tapLocation.value;
         if (tapLocation?.tapDownDetails != null) {
-          final tapData = tapLocation;
+          final tapData = tapLocation!;
           final index = tapData.index;
-          final timestamp = tapData.timestamp;
+          final timestamp = tapData.timestamp!;
 
           final copied = TapLocation.copy(tapLocation);
-          eventChartController.tapLocation.value = copied;
-          vmChartController.tapLocation.value = copied;
+          _eventChartController.tapLocation.value = copied;
+          _vmChartController.tapLocation.value = copied;
 
-          final allValues = ChartsValues(controller, index, timestamp);
+          final allValues = ChartsValues(_controller, index, timestamp);
           if (MemoryScreen.isDebuggingEnabled) {
             debugLogger('Android Chart TapLocation '
                 '${allValues.toJson().prettyPrint()}');
           }
-          showHover(context, allValues, tapData.tapDownDetails.globalPosition);
+          showHover(context, allValues, tapData.tapDownDetails!.globalPosition);
         }
       }
     });
 
-    addAutoDisposeListener(controller.androidCollectionEnabled, () {
-      isAndroidCollection = controller.androidCollectionEnabled.value;
+    addAutoDisposeListener(_controller.androidCollectionEnabled, () {
+      _isAndroidCollection = _controller.androidCollectionEnabled.value;
       setState(() {
-        if (!isAndroidCollection && controller.isAndroidChartVisible) {
+        if (!_isAndroidCollection && _controller.isAndroidChartVisible) {
           // If we're no longer collecting android stats then hide the
           // chart and disable the Android Memory button.
-          controller.toggleAndroidChartVisibility();
+          _controller.toggleAndroidChartVisibility();
         }
       });
     });
 
-    addAutoDisposeListener(controller.advancedSettingsEnabled, () {
-      isAdvancedSettingsEnabled = controller.advancedSettingsEnabled.value;
+    addAutoDisposeListener(_controller.advancedSettingsEnabled, () {
+      _isAdvancedSettingsEnabled = _controller.advancedSettingsEnabled.value;
       setState(() {
-        if (!isAdvancedSettingsEnabled &&
-            controller.isAdvancedSettingsVisible) {
-          controller.toggleAdvancedSettingsVisibility();
+        if (!_isAdvancedSettingsEnabled &&
+            _controller.isAdvancedSettingsVisible) {
+          _controller.toggleAdvancedSettingsVisibility();
         }
       });
     });
 
-    addAutoDisposeListener(controller.refreshCharts, () {
+    addAutoDisposeListener(_controller.refreshCharts, () {
       setState(() {
         _refreshCharts();
       });
@@ -297,7 +298,7 @@ class MemoryBodyState extends State<MemoryBody>
     final mediaWidth = MediaQuery.of(context).size.width;
     final textTheme = Theme.of(context).textTheme;
 
-    controller.memorySourcePrefix = mediaWidth > verboseDropDownMinimumWidth
+    _controller.memorySourcePrefix = mediaWidth > verboseDropDownMinimumWidth
         ? MemoryScreen.memorySourceMenuItemPrefix
         : '';
 
@@ -324,20 +325,20 @@ class MemoryBodyState extends State<MemoryBody>
           const SizedBox(height: denseRowSpacing),
           SizedBox(
             height: scaleByFontFactor(70),
-            child: events.MemoryEventsPane(eventChartController),
+            child: events.MemoryEventsPane(_eventChartController),
           ),
           SizedBox(
-            child: vm.MemoryVMChart(vmChartController),
+            child: vm.MemoryVMChart(_vmChartController),
           ),
-          controller.isAndroidChartVisible
+          _controller.isAndroidChartVisible
               ? SizedBox(
                   height: defaultChartHeight,
-                  child: android.MemoryAndroidChart(androidChartController),
+                  child: android.MemoryAndroidChart(_androidChartController),
                 )
               : const SizedBox(),
           const SizedBox(width: defaultSpacing),
           Expanded(
-            child: HeapTree(controller),
+            child: HeapTree(_controller),
           ),
         ],
       ),
@@ -352,21 +353,21 @@ class MemoryBodyState extends State<MemoryBody>
 
   void _refreshCharts() {
     // Remove history of all plotted data in all charts.
-    eventChartController?.reset();
-    vmChartController?.reset();
-    androidChartController?.reset();
+    _eventChartController.reset();
+    _vmChartController.reset();
+    _androidChartController.reset();
 
     _recomputeChartData();
   }
 
   /// Recompute (attach data to the chart) for either live or offline data source.
   void _recomputeChartData() {
-    eventChartController.setupData();
-    eventChartController.dirty = true;
-    vmChartController.setupData();
-    vmChartController.dirty = true;
-    androidChartController.setupData();
-    androidChartController.dirty = true;
+    _eventChartController.setupData();
+    _eventChartController.dirty = true;
+    _vmChartController.setupData();
+    _vmChartController.dirty = true;
+    _androidChartController.setupData();
+    _androidChartController.dirty = true;
   }
 
   Widget _intervalDropdown(TextTheme textTheme) {
@@ -374,7 +375,7 @@ class MemoryBodyState extends State<MemoryBody>
     final isVerboseDropdown = mediaWidth > verboseDropDownMinimumWidth;
 
     final displayOneMinute =
-        chartDuration(ChartInterval.OneMinute).inMinutes.toString();
+        chartDuration(ChartInterval.OneMinute)!.inMinutes.toString();
 
     final _displayTypes = displayDurationsStrings.map<DropdownMenuItem<String>>(
       (
@@ -396,19 +397,19 @@ class MemoryBodyState extends State<MemoryBody>
     return RoundedDropDownButton<String>(
       isDense: true,
       style: textTheme.bodyText2,
-      value: displayDuration(controller.displayInterval),
-      onChanged: (String newValue) {
+      value: displayDuration(_controller.displayInterval),
+      onChanged: (String? newValue) {
         setState(() {
           ga.select(
             analytics_constants.memory,
             '${analytics_constants.memoryDisplayInterval}-$newValue',
           );
-          controller.displayInterval = chartInterval(newValue);
-          final duration = chartDuration(controller.displayInterval);
+          _controller.displayInterval = chartInterval(newValue!);
+          final duration = chartDuration(_controller.displayInterval);
 
-          eventChartController?.zoomDuration = duration;
-          vmChartController?.zoomDuration = duration;
-          androidChartController?.zoomDuration = duration;
+          _eventChartController.zoomDuration = duration;
+          _vmChartController.zoomDuration = duration;
+          _androidChartController.zoomDuration = duration;
         });
       },
       items: _displayTypes,
@@ -416,10 +417,10 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Widget _memorySourceDropdown(TextTheme textTheme) {
-    final files = controller.memoryLog.offlineFiles();
+    final files = _controller.memoryLog.offlineFiles();
 
     // Can we display dropdowns in verbose mode?
-    final isVerbose = controller.memorySourcePrefix ==
+    final isVerbose = _controller.memorySourcePrefix ==
         MemoryScreen.memorySourceMenuItemPrefix;
 
     // First item is 'Live Feed', then followed by memory log filenames.
@@ -436,7 +437,7 @@ class MemoryBodyState extends State<MemoryBody>
       return SourceDropdownMenuItem<String>(
         value: value,
         child: Text(
-          '${controller.memorySourcePrefix}$displayValue',
+          '${_controller.memorySourcePrefix}$displayValue',
           key: MemoryScreen.sourcesKey,
         ),
       );
@@ -446,14 +447,14 @@ class MemoryBodyState extends State<MemoryBody>
       key: MemoryScreen.sourcesDropdownKey,
       isDense: true,
       style: textTheme.bodyText2,
-      value: controller.memorySource,
-      onChanged: (String newValue) {
+      value: _controller.memorySource,
+      onChanged: (String? newValue) {
         setState(() {
           ga.select(
             analytics_constants.memory,
             analytics_constants.sourcesDropDown,
           );
-          controller.memorySource = newValue;
+          _controller.memorySource = newValue!;
         });
       },
       items: allMemorySources,
@@ -463,9 +464,9 @@ class MemoryBodyState extends State<MemoryBody>
   void _updateListeningState() async {
     await serviceManager.onServiceAvailable;
 
-    if (controller != null && controller.hasStarted) return;
+    if (_controller.hasStarted) return;
 
-    if (controller != null) await controller.startTimeline();
+    await _controller.startTimeline();
 
     // TODO(terry): Need to set the initial state of buttons.
 /*
@@ -481,8 +482,8 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Widget _buildPrimaryStateControls(TextTheme textTheme) {
-    return ValueListenableBuilder(
-      valueListenable: controller.paused,
+    return ValueListenableBuilder<bool>(
+      valueListenable: _controller.paused,
       builder: (context, paused, _) {
         return Row(
           mainAxisSize: MainAxisSize.min,
@@ -501,7 +502,7 @@ class MemoryBodyState extends State<MemoryBody>
             const SizedBox(width: defaultSpacing),
             ClearButton(
               // TODO(terry): Button needs to be Delete for offline data.
-              onPressed: controller.memorySource == MemoryController.liveFeed
+              onPressed: _controller.memorySource == MemoryController.liveFeed
                   ? _clearTimeline
                   : null,
               minScreenWidthForTextBeforeScaling:
@@ -517,10 +518,11 @@ class MemoryBodyState extends State<MemoryBody>
 
   Widget createToggleAdbMemoryButton() {
     return IconLabelButton(
-      icon: controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
+      icon: _controller.isAndroidChartVisible ? Icons.close : Icons.show_chart,
       label: 'Android Memory',
-      onPressed:
-          isAndroidCollection ? controller.toggleAndroidChartVisibility : null,
+      onPressed: _isAndroidCollection
+          ? _controller.toggleAndroidChartVisibility
+          : null,
       minScreenWidthForTextBeforeScaling: 900,
     );
   }
@@ -531,15 +533,15 @@ class MemoryBodyState extends State<MemoryBody>
       children: [
         _memorySourceDropdown(textTheme),
         const SizedBox(width: defaultSpacing),
-        if (controller.isConnectedDeviceAndroid ||
-            controller.isOfflineAndAndroidData)
+        if (_controller.isConnectedDeviceAndroid ||
+            _controller.isOfflineAndAndroidData)
           createToggleAdbMemoryButton(),
         const SizedBox(width: denseSpacing),
-        isAdvancedSettingsEnabled
+        _isAdvancedSettingsEnabled
             ? Row(
                 children: [
                   IconLabelButton(
-                    onPressed: controller.isGcing ? null : _gc,
+                    onPressed: _controller.isGcing ? null : _gc,
                     icon: Icons.delete,
                     label: 'GC',
                     minScreenWidthForTextBeforeScaling:
@@ -550,14 +552,14 @@ class MemoryBodyState extends State<MemoryBody>
               )
             : const SizedBox(),
         ExportButton(
-          onPressed: controller.offline ? null : _exportToFile,
+          onPressed: _controller.offline ? null : _exportToFile,
           minScreenWidthForTextBeforeScaling: _primaryControlsMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
         IconLabelButton(
           key: legendKey,
-          onPressed: controller.toggleLegendVisibility,
-          icon: legendOverlayEntry == null ? Icons.storage : Icons.close,
+          onPressed: _controller.toggleLegendVisibility,
+          icon: _legendOverlayEntry == null ? Icons.storage : Icons.close,
           label: 'Legend',
           tooltip: 'Legend',
           minScreenWidthForTextBeforeScaling: _primaryControlsMinVerboseWidth,
@@ -572,7 +574,7 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   void _exportToFile() {
-    final outputPath = controller.memoryLog.exportMemory();
+    final outputPath = _controller.memoryLog.exportMemory();
     final notificationsState = Notifications.of(context);
     if (notificationsState != null) {
       notificationsState.push(
@@ -584,7 +586,7 @@ class MemoryBodyState extends State<MemoryBody>
   void _openSettingsDialog() {
     showDialog(
       context: context,
-      builder: (context) => MemoryConfigurationsDialog(controller),
+      builder: (context) => MemoryConfigurationsDialog(_controller),
     );
   }
 
@@ -626,8 +628,8 @@ class MemoryBodyState extends State<MemoryBody>
               : hoverEventsHeight)
           : 0);
 
-  Map<String, Map<String, Object>> eventLegend(bool isLight) {
-    final result = <String, Map<String, Object>>{};
+  Map<String, Map<String, Object?>> eventLegend(bool isLight) {
+    final result = <String, Map<String, Object?>>{};
 
     result[events.manualSnapshotLegendName] = traceRender(
       image: events.snapshotManualLegend,
@@ -649,10 +651,10 @@ class MemoryBodyState extends State<MemoryBody>
     return result;
   }
 
-  Map<String, Map<String, Object>> vmLegend() {
-    final result = <String, Map<String, Object>>{};
+  Map<String, Map<String, Object?>> vmLegend() {
+    final result = <String, Map<String, Object?>>{};
 
-    final traces = vmChartController.traces;
+    final traces = _vmChartController.traces;
     // RSS trace
     result[rssDisplay] = traceRender(
       color: traces[vm.TraceName.rSS.index].characteristics.color,
@@ -690,10 +692,10 @@ class MemoryBodyState extends State<MemoryBody>
     return result;
   }
 
-  Map<String, Map<String, Object>> androidLegend() {
-    final result = <String, Map<String, Object>>{};
+  Map<String, Map<String, Object?>> androidLegend() {
+    final result = <String, Map<String, Object?>>{};
 
-    final traces = androidChartController.traces;
+    final traces = _androidChartController.traces;
     // Total trace
     result[androidTotalDisplay] = traceRender(
       color: traces[android.TraceName.total.index].characteristics.color,
@@ -734,8 +736,8 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Widget legendRow({
-    MapEntry<String, Map<String, Object>> entry1,
-    MapEntry<String, Map<String, Object>> entry2,
+    required MapEntry<String, Map<String, Object?>> entry1,
+    MapEntry<String, Map<String, Object?>>? entry2,
   }) {
     final legendEntry = Theme.of(context).colorScheme.legendTextStyle;
 
@@ -745,31 +747,29 @@ class MemoryBodyState extends State<MemoryBody>
       double leftEdge = 5.0,
     ]) {
       final rightSide = <Widget>[];
-      if (name != null && widget != null) {
-        rightSide.addAll([
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.fromLTRB(leftEdge, 0, 0, 2),
-              width: legendTextWidth + leftEdge,
-              child: Text(name, style: legendEntry),
-            ),
+      rightSide.addAll([
+        Expanded(
+          child: Container(
+            padding: EdgeInsets.fromLTRB(leftEdge, 0, 0, 2),
+            width: legendTextWidth + leftEdge,
+            child: Text(name, style: legendEntry),
           ),
-          const PaddedDivider(
-            padding: EdgeInsets.only(left: denseRowSpacing),
-          ),
-          widget,
-        ]);
-      }
+        ),
+        const PaddedDivider(
+          padding: EdgeInsets.only(left: denseRowSpacing),
+        ),
+        widget,
+      ]);
 
       return rightSide;
     }
 
-    Widget legendSymbol(Map<String, Object> dataToDisplay) {
+    Widget legendSymbol(Map<String, Object?> dataToDisplay) {
       final image = dataToDisplay.containsKey(renderImage)
-          ? dataToDisplay[renderImage] as String
+          ? dataToDisplay[renderImage] as String?
           : null;
       final color = dataToDisplay.containsKey(renderLine)
-          ? dataToDisplay[renderLine] as Color
+          ? dataToDisplay[renderLine] as Color?
           : null;
       final dashedLine = dataToDisplay.containsKey(renderDashed)
           ? dataToDisplay[renderDashed]
@@ -777,7 +777,7 @@ class MemoryBodyState extends State<MemoryBody>
 
       Widget traceColor;
       if (color != null) {
-        if (dashedLine) {
+        if (dashedLine as bool) {
           traceColor = createDashWidget(color);
         } else {
           traceColor = createSolidLine(color);
@@ -849,9 +849,9 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Widget hoverRow({
-    String name,
-    String image,
-    Color colorPatch,
+    required String name,
+    String? image,
+    Color? colorPatch,
     bool dashed = false,
     bool bold = true,
     bool hasNumeric = false,
@@ -866,8 +866,8 @@ class MemoryBodyState extends State<MemoryBody>
 
     List<Widget> hoverPartImageLine(
       String name, {
-      String image,
-      Color colorPatch,
+      String? image,
+      Color? colorPatch,
       bool dashed = false,
       double leftEdge = 5.0,
     }) {
@@ -1004,10 +1004,10 @@ class MemoryBodyState extends State<MemoryBody>
     if (event[eventName] == imageSizesForFrameEvent) {
       // TODO(terry): Need a more generic event displayer.
       // Flutter event emit the event name and value.
-      final Map<String, Object> data = event[eventData];
+      final data = event[eventData] as Map<String, Object>;
       final key = data.keys.first;
       output.writeln('${longValueToShort(key)}');
-      final Map values = data[key];
+      final values = data[key] as Map<dynamic, dynamic>;
       final displaySize = values[displaySizeInBytesData];
       final decodeSize = values[decodedSizeInBytesData];
       final outputSizes = '$displaySize/$decodeSize';
@@ -1019,7 +1019,7 @@ class MemoryBodyState extends State<MemoryBody>
       }
     } else if (event[eventName] == devToolsEvent &&
         event.containsKey(customEvent)) {
-      final Map custom = event[customEvent];
+      final custom = event[customEvent] as Map<dynamic, dynamic>;
       final data = custom[customEventData];
       for (var key in data.keys) {
         output.write('$key=');
@@ -1032,16 +1032,16 @@ class MemoryBodyState extends State<MemoryBody>
     return output.toString();
   }
 
-  String displayEvent(int index, Map<String, Object> event) {
+  String displayEvent(int? index, Map<String, Object> event) {
     final output = StringBuffer();
 
-    String name;
+    String? name;
 
     if (event[eventName] == devToolsEvent && event.containsKey(customEvent)) {
-      final Map custom = event[customEvent];
+      final custom = event[customEvent] as Map<dynamic, dynamic>;
       name = custom[customEventName];
     } else {
-      name = event[eventName];
+      name = event[eventName] as String?;
     }
 
     output.writeln(index == null ? name : '$index. $name');
@@ -1051,10 +1051,10 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   Widget listItem({
-    List<Map<String, Object>> allEvents,
-    int index,
-    String title,
-    IconData icon,
+    required List<Map<String, Object>> allEvents,
+    int? index,
+    required String title,
+    IconData? icon,
   }) {
     final widgets = <Widget>[];
     var index = 1;
@@ -1120,8 +1120,8 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   List<Widget> _dataToDisplay(
-    Map<String, Map<String, Object>> dataToDisplay, {
-    Widget firstWidget,
+    Map<String, Map<String, Object?>> dataToDisplay, {
+    Widget? firstWidget,
   }) {
     final results = <Widget>[];
 
@@ -1129,10 +1129,10 @@ class MemoryBodyState extends State<MemoryBody>
 
     for (var entry in dataToDisplay.entries) {
       final image = entry.value.keys.contains(renderImage)
-          ? entry.value[renderImage] as String
+          ? entry.value[renderImage] as String?
           : null;
       final color = entry.value.keys.contains(renderLine)
-          ? entry.value[renderLine] as Color
+          ? entry.value[renderLine] as Color?
           : null;
       final dashedLine = entry.value.keys.contains(renderDashed)
           ? entry.value[renderDashed]
@@ -1142,10 +1142,10 @@ class MemoryBodyState extends State<MemoryBody>
         hoverRow(
           name: entry.key,
           colorPatch: color,
-          dashed: dashedLine,
+          dashed: dashedLine == true,
           image: image,
           hasNumeric: true,
-          hasUnit: controller.unitDisplayed.value,
+          hasUnit: _controller.unitDisplayed.value,
           scaleImage: true,
         ),
       );
@@ -1156,7 +1156,7 @@ class MemoryBodyState extends State<MemoryBody>
 
   List<Widget> displayVmDataInHover(ChartsValues chartsValues) =>
       _dataToDisplay(
-        chartsValues.displayVmDataToDisplay(vmChartController.traces),
+        chartsValues.displayVmDataToDisplay(_vmChartController.traces),
       );
 
   List<Widget> displayAndroidDataInHover(ChartsValues chartsValues) {
@@ -1164,10 +1164,10 @@ class MemoryBodyState extends State<MemoryBody>
     const dividerLineHorizontalSpace = 20.0;
     const totalDividerLineHorizontalSpace = dividerLineHorizontalSpace * 2;
 
-    if (!controller.isAndroidChartVisible) return [];
+    if (!_controller.isAndroidChartVisible) return [];
 
     final androidDataDisplayed =
-        chartsValues.androidDataToDisplay(androidChartController.traces);
+        chartsValues.androidDataToDisplay(_androidChartController.traces);
 
     // Separator between Android data.
     // TODO(terry): Why Center widget doesn't work (parent width is bigger/centered too far right).
@@ -1199,7 +1199,7 @@ class MemoryBodyState extends State<MemoryBody>
     final focusColor = Theme.of(context).focusColor;
     final colorScheme = Theme.of(context).colorScheme;
 
-    final RenderBox box = hoverKey.currentContext.findRenderObject();
+    final box = hoverKey.currentContext!.findRenderObject() as RenderBox;
     final renderBoxWidth = box.size.width;
 
     // Display hover to left of right side of position.
@@ -1210,7 +1210,7 @@ class MemoryBodyState extends State<MemoryBody>
 
     double totalHoverHeight;
     int totalTraces;
-    if (controller.isAndroidChartVisible) {
+    if (_controller.isAndroidChartVisible) {
       totalTraces = chartsValues.vmData.entries.length -
           1 +
           chartsValues.androidData.entries.length;
@@ -1228,8 +1228,8 @@ class MemoryBodyState extends State<MemoryBody>
 
     final hoverHeading = colorScheme.hoverTitleTextStyle;
 
-    final OverlayState overlayState = Overlay.of(context);
-    hoverOverlayEntry ??= OverlayEntry(
+    final OverlayState overlayState = Overlay.of(context)!;
+    _hoverOverlayEntry ??= OverlayEntry(
       builder: (context) => Positioned(
         top: position.dy + hoverYOffset,
         left: xPosition,
@@ -1267,17 +1267,17 @@ class MemoryBodyState extends State<MemoryBody>
       ),
     );
 
-    overlayState.insert(hoverOverlayEntry);
+    overlayState.insert(_hoverOverlayEntry!);
   }
 
   void hideHover() {
-    if (hoverOverlayEntry != null) {
-      eventChartController.tapLocation.value = null;
-      vmChartController.tapLocation.value = null;
-      androidChartController.tapLocation.value = null;
+    if (_hoverOverlayEntry != null) {
+      _eventChartController.tapLocation.value = null;
+      _vmChartController.tapLocation.value = null;
+      _androidChartController.tapLocation.value = null;
 
-      hoverOverlayEntry?.remove();
-      hoverOverlayEntry = null;
+      _hoverOverlayEntry?.remove();
+      _hoverOverlayEntry = null;
     }
   }
 
@@ -1285,7 +1285,7 @@ class MemoryBodyState extends State<MemoryBody>
   static const _legendTitlePadding = EdgeInsets.fromLTRB(5, 0, 0, 4);
 
   void showLegend(BuildContext context) {
-    final RenderBox box = legendKey.currentContext.findRenderObject();
+    final box = legendKey.currentContext!.findRenderObject() as RenderBox;
 
     final colorScheme = Theme.of(context).colorScheme;
     final legendHeading = colorScheme.hoverTextStyle;
@@ -1322,7 +1322,7 @@ class MemoryBodyState extends State<MemoryBody>
       legendRows.add(legendRow(entry1: legendEntry));
     }
 
-    if (controller.isAndroidChartVisible) {
+    if (_controller.isAndroidChartVisible) {
       final androids = androidLegend();
       legendRows.add(
         Container(
@@ -1338,12 +1338,12 @@ class MemoryBodyState extends State<MemoryBody>
       }
     }
 
-    final OverlayState overlayState = Overlay.of(context);
-    legendOverlayEntry ??= OverlayEntry(
+    final OverlayState overlayState = Overlay.of(context)!;
+    _legendOverlayEntry ??= OverlayEntry(
       builder: (context) => Positioned(
         top: position.dy + box.size.height + legendYOffset,
         left: position.dx - legendWidth + box.size.width - legendXOffset,
-        height: controller.isAndroidChartVisible
+        height: _controller.isAndroidChartVisible
             ? legendHeight2Charts
             : legendHeight1Chart,
         child: Container(
@@ -1362,58 +1362,58 @@ class MemoryBodyState extends State<MemoryBody>
       ),
     );
 
-    overlayState.insert(legendOverlayEntry);
+    overlayState.insert(_legendOverlayEntry!);
   }
 
   void hideLegend() {
-    legendOverlayEntry?.remove();
-    legendOverlayEntry = null;
+    _legendOverlayEntry?.remove();
+    _legendOverlayEntry = null;
   }
 
   /// Callbacks for button actions:
 
   void _onPause() {
     ga.select(analytics_constants.memory, analytics_constants.pause);
-    controller.pauseLiveFeed();
+    _controller.pauseLiveFeed();
   }
 
   void _onResume() {
     ga.select(analytics_constants.memory, analytics_constants.resume);
-    controller.resumeLiveFeed();
+    _controller.resumeLiveFeed();
   }
 
   void _clearTimeline() {
     ga.select(analytics_constants.memory, analytics_constants.clear);
 
-    controller.memoryTimeline.reset();
+    _controller.memoryTimeline.reset();
 
     // Clear any current Allocation Profile collected.
-    controller.monitorAllocations = [];
-    controller.monitorTimestamp = null;
-    controller.lastMonitorTimestamp.value = null;
-    controller.trackAllocations.clear();
-    controller.allocationSamples.clear();
+    _controller.monitorAllocations = [];
+    _controller.monitorTimestamp = null;
+    _controller.lastMonitorTimestamp.value = null;
+    _controller.trackAllocations.clear();
+    _controller.allocationSamples.clear();
 
     // Clear all analysis and snapshots collected too.
-    controller.clearAllSnapshots();
-    controller.classRoot = null;
-    controller.topNode = null;
-    controller.selectedSnapshotTimestamp = null;
-    controller.selectedLeaf = null;
+    _controller.clearAllSnapshots();
+    _controller.classRoot = null;
+    _controller.topNode = null;
+    _controller.selectedSnapshotTimestamp = null;
+    _controller.selectedLeaf = null;
 
     // Remove history of all plotted data in all charts.
-    eventChartController?.reset();
-    vmChartController?.reset();
-    androidChartController?.reset();
+    _eventChartController.reset();
+    _vmChartController.reset();
+    _androidChartController.reset();
   }
 
   Future<void> _gc() async {
     try {
       ga.select(analytics_constants.memory, analytics_constants.gc);
 
-      controller.memoryTimeline.addGCEvent();
+      _controller.memoryTimeline.addGCEvent();
 
-      await controller.gc();
+      await _controller.gc();
     } catch (e) {
       // TODO(terry): Show toast?
       log('Unable to GC ${e.toString()}', LogLevel.error);
@@ -1425,7 +1425,7 @@ class MemoryBodyState extends State<MemoryBody>
 class DashedLine extends CustomPainter {
   DashedLine(
     this._totalWidth, [
-    Color color,
+    Color? color,
     this._dashHeight = defaultDashHeight,
     this._dashWidth = defaultDashWidth,
     this._dashSpace = defaultDashSpace,
@@ -1442,7 +1442,7 @@ class DashedLine extends CustomPainter {
   final double _dashSpace;
 
   double _totalWidth;
-  Color _color;
+  late Color _color;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1487,7 +1487,8 @@ class MemoryConfigurationsDialog extends StatelessWidget {
                 Row(
                   children: [
                     NotifierCheckbox(
-                        notifier: controller.androidCollectionEnabled),
+                        notifier: controller.androidCollectionEnabled
+                            as ValueNotifier<bool?>),
                     RichText(
                       overflow: TextOverflow.visible,
                       text: TextSpan(
@@ -1499,7 +1500,9 @@ class MemoryConfigurationsDialog extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    NotifierCheckbox(notifier: controller.unitDisplayed),
+                    NotifierCheckbox(
+                        notifier:
+                            controller.unitDisplayed as ValueNotifier<bool?>),
                     RichText(
                       overflow: TextOverflow.visible,
                       text: TextSpan(
@@ -1520,7 +1523,8 @@ class MemoryConfigurationsDialog extends StatelessWidget {
                 Row(
                   children: [
                     NotifierCheckbox(
-                      notifier: controller.advancedSettingsEnabled,
+                      notifier: controller.advancedSettingsEnabled
+                          as ValueNotifier<bool?>,
                     ),
                     RichText(
                       overflow: TextOverflow.visible,
@@ -1544,6 +1548,6 @@ class MemoryConfigurationsDialog extends StatelessWidget {
 }
 
 class SourceDropdownMenuItem<T> extends DropdownMenuItem<T> {
-  const SourceDropdownMenuItem({T value, @required Widget child})
+  const SourceDropdownMenuItem({T? value, required Widget child})
       : super(value: value, child: child);
 }

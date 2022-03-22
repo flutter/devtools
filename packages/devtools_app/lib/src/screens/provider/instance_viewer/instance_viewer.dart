@@ -400,7 +400,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
     return Consumer(
       builder: (context, watch, _) {
         return Scrollbar(
-          isAlwaysShown: true,
+          thumbVisibility: true,
           controller: scrollController,
           child: ListView.custom(
             controller: scrollController,

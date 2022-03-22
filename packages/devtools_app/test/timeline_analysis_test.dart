@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
-// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: avoid_redundant_argument_values, import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 import 'dart:io';
@@ -32,14 +30,14 @@ import 'test_data/performance_test_data.dart';
 
 void main() {
   FakeServiceManager fakeServiceManager;
-  PerformanceController controller;
+  late PerformanceController controller;
 
   Future<void> _setUpServiceManagerWithTimeline(
     Map<String, dynamic> timelineJson,
   ) async {
     fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(
-        timelineData: vm_service.Timeline.parse(timelineJson),
+        timelineData: vm_service.Timeline.parse(timelineJson)!,
       ),
     );
     when(fakeServiceManager.connectedApp.initialized)
@@ -47,7 +45,7 @@ void main() {
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
     when(fakeServiceManager.connectedApp.flutterVersionNow).thenReturn(
-        FlutterVersion.parse((await fakeServiceManager.flutterVersion).json));
+        FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!));
     when(fakeServiceManager.connectedApp.isProfileBuild)
         .thenAnswer((_) => Future.value(true));
     when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
@@ -55,7 +53,7 @@ void main() {
         .thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(OfflineModeController, OfflineModeController());
-    when(serviceManager.connectedApp.isDartWebApp)
+    when(serviceManager.connectedApp!.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
   }
 
@@ -68,7 +66,7 @@ void main() {
 
     Future<void> pumpHeader(
       WidgetTester tester, {
-      PerformanceController performanceController,
+      PerformanceController? performanceController,
       bool runAsync = false,
     }) async {
       controller = performanceController ?? PerformanceController()
@@ -195,7 +193,7 @@ void main() {
 
     Future<void> pumpPerformanceScreenBody(
       WidgetTester tester, {
-      PerformanceController performanceController,
+      PerformanceController? performanceController,
       bool runAsync = false,
     }) async {
       controller = performanceController ?? PerformanceController();
@@ -266,26 +264,31 @@ void main() {
     });
 
     testWidgetsWithWindowSize(
-        'builds flame chart with selected frame', windowSize,
-        (WidgetTester tester) async {
-      await tester.runAsync(() async {
-        await pumpPerformanceScreenBody(tester, runAsync: true);
-        controller
-          ..addFrame(testFrame1.shallowCopy())
-          ..addTimelineEvent(goldenUiTimelineEvent)
-          ..addTimelineEvent(goldenRasterTimelineEvent);
-        expect(controller.data.frames.length, equals(1));
-        await controller.toggleSelectedFrame(controller.data.frames.first);
-        await tester.pumpAndSettle();
-      });
-      expect(find.byType(TimelineFlameChart), findsOneWidget);
-      await expectLater(
-        find.byType(TimelineFlameChart),
-        matchesGoldenFile(
-            'goldens/timeline_flame_chart_with_selected_frame.png'),
-      );
-      // Await delay for golden comparison.
-      await tester.pumpAndSettle(const Duration(seconds: 2));
-    }, skip: kIsWeb || !Platform.isMacOS);
+      'builds flame chart with selected frame',
+      windowSize,
+      (WidgetTester tester) async {
+        final data = controller.data!;
+
+        await tester.runAsync(() async {
+          await pumpPerformanceScreenBody(tester, runAsync: true);
+          controller
+            ..addFrame(testFrame1.shallowCopy())
+            ..addTimelineEvent(goldenUiTimelineEvent)
+            ..addTimelineEvent(goldenRasterTimelineEvent);
+          expect(data.frames.length, equals(1));
+          await controller.toggleSelectedFrame(data.frames.first);
+          await tester.pumpAndSettle();
+        });
+        expect(find.byType(TimelineFlameChart), findsOneWidget);
+        await expectLater(
+          find.byType(TimelineFlameChart),
+          matchesGoldenFile(
+              'goldens/timeline_flame_chart_with_selected_frame.png'),
+        );
+        // Await delay for golden comparison.
+        await tester.pumpAndSettle(const Duration(seconds: 2));
+      },
+      skip: kIsWeb || !Platform.isMacOS,
+    );
   });
 }

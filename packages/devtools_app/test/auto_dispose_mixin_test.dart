@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:devtools_app/src/primitives/auto_dispose.dart';
@@ -12,7 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class AutoDisposedWidget extends StatefulWidget {
-  const AutoDisposedWidget(this.stream, {Key key}) : super(key: key);
+  const AutoDisposedWidget(this.stream, {Key? key}) : super(key: key);
 
   final Stream stream;
 
@@ -116,24 +114,6 @@ void main() {
       expect(values.length, equals(3));
       expect(values.last, equals(19));
     });
-
-    test('throws an error when disposing already-disposed listeners', () {
-      final disposer = Disposer();
-      final notifier = ValueNotifier<int>(42);
-      final values = <int>[];
-      void callback() {
-        values.add(notifier.value);
-      }
-
-      disposer.addAutoDisposeListener(notifier, callback);
-      notifier.value = 72;
-      expect(values, [72]);
-      // After disposal, all notifier methods will throw. Disposer needs
-      // to ignore this when cancelling.
-      notifier.dispose();
-      expect(() => disposer.cancelListeners(), throwsA(anything));
-      expect(values, [72]);
-    });
   });
 
   testWidgets('Test stream auto dispose', (WidgetTester tester) async {
@@ -142,7 +122,7 @@ void main() {
     final controller = StreamController();
     await tester.pumpWidget(AutoDisposedWidget(controller.stream, key: key));
 
-    final _AutoDisposedWidgetState state = key.currentState;
+    final state = key.currentState as _AutoDisposedWidgetState;
     // Verify that the eventCount matches the number of events sent.
     expect(state.eventCount, 0);
     controller.add(null);
