@@ -169,11 +169,11 @@ class LayoutProperties {
 
   bool get hasChildren => children.isNotEmpty;
 
-  double? get width => size.width;
+  double get width => size.width;
 
-  double? get height => size.height;
+  double get height => size.height;
 
-  double? dimension(Axis axis) => axis == Axis.horizontal ? width : height;
+  double dimension(Axis axis) => axis == Axis.horizontal ? width : height;
 
   List<double?> childrenDimensions(Axis axis) {
     return displayChildren.map((child) => child.dimension(axis)).toList();
@@ -215,7 +215,7 @@ class LayoutProperties {
     final parentWidth = parent?.width;
     if (parentWidth == null) return false;
     final parentData = node.parentData;
-    double widthUsed = width ?? 0;
+    double widthUsed = width;
     if (parentData != null) {
       widthUsed += parentData.offset.dx;
     }
@@ -228,7 +228,7 @@ class LayoutProperties {
     final parentHeight = parent?.height;
     if (parentHeight == null) return false;
     final parentData = node.parentData;
-    double heightUsed = height ?? 0;
+    double heightUsed = height;
     if (parentData != null) {
       heightUsed += parentData.offset.dy;
     }
@@ -462,17 +462,17 @@ class FlexLayoutProperties extends LayoutProperties {
   @override
   bool get isOverflowWidth {
     if (direction == Axis.horizontal) {
-      return width! + overflowEpsilon < sum(childrenWidths!.cast<double>());
+      return width + overflowEpsilon < sum(childrenWidths!.cast<double>());
     }
-    return width! + overflowEpsilon < max(childrenWidths!.cast<double>());
+    return width + overflowEpsilon < max(childrenWidths!.cast<double>());
   }
 
   @override
   bool get isOverflowHeight {
     if (direction == Axis.vertical) {
-      return height! + overflowEpsilon < sum(childrenHeights!.cast<double>());
+      return height + overflowEpsilon < sum(childrenHeights!.cast<double>());
     }
-    return height! + overflowEpsilon < max(childrenHeights!.cast<double>());
+    return height + overflowEpsilon < max(childrenHeights!.cast<double>());
   }
 
   bool get startIsTopLeft {
@@ -506,7 +506,7 @@ class FlexLayoutProperties extends LayoutProperties {
     required double Function(Axis) maxSizeAvailable,
   }) {
     /// calculate the render empty spaces
-    final freeSpace = dimension(direction)! -
+    final freeSpace = dimension(direction) -
         sum(childrenDimensions(direction).cast<double>());
     final displayMainAxisAlignment =
         startIsTopLeft ? mainAxisAlignment : mainAxisAlignment?.reversed;
@@ -587,7 +587,7 @@ class FlexLayoutProperties extends LayoutProperties {
         double size = crossAxisAlignment == CrossAxisAlignment.stretch
             ? maxSizeAvailable(axis)
             : largestSize /
-                math.max(dimension(axis)!, 1.0) *
+                math.max(dimension(axis), 1.0) *
                 maxSizeAvailable(axis);
         size = math.max(size, smallestRenderSize(axis));
         return sizes.map((_) => size).toList();

@@ -345,12 +345,12 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   String? get description => end.description;
 
   @override
-  double? dimension(Axis axis) {
+  double dimension(Axis axis) {
     return lerpDouble(
       begin.dimension(axis),
       end.dimension(axis),
       animation.value,
-    );
+    )!;
   }
 
   @override
