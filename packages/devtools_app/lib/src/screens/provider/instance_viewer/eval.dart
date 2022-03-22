@@ -4,8 +4,6 @@
 
 /// A few utilities related to evaluating dart code
 
-
-
 library eval;
 
 import 'package:flutter/foundation.dart';
@@ -29,7 +27,8 @@ final serviceProvider = StreamProvider<VmServiceWrapper>((ref) async* {
 ///
 /// Not suitable to be used when evaluating third-party objects, as it would
 /// otherwise not be possible to read private properties.
-final FutureProvider<EvalOnDartLibrary>? evalProvider = libraryEvalProvider('dart:io');
+final FutureProvider<EvalOnDartLibrary>? evalProvider =
+    libraryEvalProvider('dart:io');
 
 /// An [EvalOnDartLibrary] that has access to `provider`
 final FutureProvider<EvalOnDartLibrary>? providerEvalProvider =
@@ -47,5 +46,6 @@ final libraryEvalProvider =
 
 final hotRestartEventProvider =
     ChangeNotifierProvider<ValueNotifier<IsolateRef?>>((ref) {
-  return serviceManager.isolateManager.selectedIsolate as ValueNotifier<IsolateRef?>;
+  return serviceManager.isolateManager.selectedIsolate
+      as ValueNotifier<IsolateRef?>;
 });

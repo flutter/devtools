@@ -7,8 +7,6 @@
 // We could instead remove the annotations, but that would make the process of
 // updating the generated files tedious.
 
-
-
 const nullable = Object();
 const freezed = Object();
 
