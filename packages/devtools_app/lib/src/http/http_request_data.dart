@@ -68,7 +68,7 @@ class DartIOHttpRequestData extends NetworkRequest {
         .then((updated) => _request = updated);
   }
 
-  static List<Cookie> _parseCookies(List<dynamic>? cookies) {
+  static List<Cookie> _parseCookies(List<String>? cookies) {
     if (cookies == null) return [];
     return cookies.map((cookie) => Cookie.fromSetCookieValue(cookie)).toList();
   }
@@ -119,10 +119,11 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   @override
   String? get contentType {
-    if (responseHeaders == null || responseHeaders![_contentTypeKey] == null) {
+    final _headers = responseHeaders;
+    if (_headers == null || _headers[_contentTypeKey] == null) {
       return null;
     }
-    return responseHeaders![_contentTypeKey].toString();
+    return _headers[_contentTypeKey].toString();
   }
 
   @override
@@ -169,7 +170,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   }
 
   /// True if the HTTP request hasn't completed yet, determined by the lack of
-  /// an end event.
+  /// an end time in the response data.
   @override
   bool get inProgress =>
       _hasError ? !_request.isRequestComplete : !_request.isResponseComplete;
