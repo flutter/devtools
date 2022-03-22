@@ -54,18 +54,17 @@ dependencies:
   vm_snapshot_analysis: ^0.7.1
   web_socket_channel: ^2.1.0
   # widget_icons: ^0.0.1
-  freezed_annotation:
+  # freezed_annotation:
 
 dev_dependencies:
   build_runner: ^2.0.4
   
-  freezed:
+  # freezed:
   devtools_test: 2.11.4
   flutter_test:
     sdk: flutter
   mockito: ^5.1.0
   webkit_inspection_protocol: '>=0.5.0 <2.0.0'
-  
 
 flutter:
   uses-material-design: true
