@@ -92,7 +92,7 @@ if [ "$BOT" = "main" ]; then
     dart analyze --fatal-infos
 
     # Ensure we can build the app.
-    flutter pub run build_runner build -o web:build --release
+    flutter build web --release
 
     # Test the devtools_shared package tests on the main bot.
     popd
