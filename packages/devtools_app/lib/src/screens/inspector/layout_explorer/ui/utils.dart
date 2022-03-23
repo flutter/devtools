@@ -293,10 +293,10 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   }
 
   @override
-  List<double?> childrenDimensions(Axis axis) {
+  List<double> childrenDimensions(Axis axis) {
     final beginDimensions = begin.childrenDimensions(axis);
     final endDimensions = end.childrenDimensions(axis);
-    return _lerpList(beginDimensions, endDimensions);
+    return _lerpList(beginDimensions, endDimensions).cast<double>();
   }
 
   @override

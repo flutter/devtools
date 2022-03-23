@@ -55,7 +55,7 @@ const overflowEpsilon = 0.1;
 ///    sum(renderSize) = maxSizeAvailable
 ///
 List<double> computeRenderSizes({
-  required Iterable<double?> sizes,
+  required Iterable<double> sizes,
   required double smallestSize,
   required double largestSize,
   required double smallestRenderSize,
@@ -75,7 +75,7 @@ List<double> computeRenderSizes({
 
   List<double> transformToRenderSize(double largestRenderSize) => [
         for (var s in sizes)
-          (s! - smallestSize) *
+          (s - smallestSize) *
                   (largestRenderSize - smallestRenderSize) /
                   (largestSize - smallestSize) +
               smallestRenderSize
@@ -86,7 +86,7 @@ List<double> computeRenderSizes({
   if (useMaxSizeAvailable && sum(renderSizes) < maxSizeAvailable) {
     largestRenderSize = (maxSizeAvailable - n * smallestRenderSize) *
             (largestSize - smallestSize) /
-            sum([for (var s in sizes) s! - smallestSize]) +
+            sum([for (var s in sizes) s - smallestSize]) +
         smallestRenderSize;
     renderSizes = transformToRenderSize(largestRenderSize);
   }
@@ -175,7 +175,7 @@ class LayoutProperties {
 
   double dimension(Axis axis) => axis == Axis.horizontal ? width : height;
 
-  List<double?> childrenDimensions(Axis axis) {
+  List<double> childrenDimensions(Axis axis) {
     return displayChildren.map((child) => child.dimension(axis)).toList();
   }
 
