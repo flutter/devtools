@@ -44,7 +44,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   late CurvedAnimation entranceCurve;
   late AnimationController changeController;
 
-  CurvedAnimation? changeAnimation;
+  late CurvedAnimation changeAnimation;
 
   L? _previousProperties;
 
@@ -90,9 +90,9 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   /// Whether this layout explorer can work with this kind of node.
   bool shouldDisplay(RemoteDiagnosticsNode? node);
 
-  Size? get size => properties!.size;
+  Size get size => properties!.size;
 
-  List<LayoutProperties>? get children => properties!.displayChildren;
+  List<LayoutProperties> get children => properties!.displayChildren;
 
   LayoutProperties? highlighted;
 
@@ -107,9 +107,9 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
     objectGroupManager?.cancelNext();
     final manager = objectGroupManager!;
     final nextObjectGroup = manager.next;
-    final node = await nextObjectGroup.getLayoutExplorerNode(
+    final node = (await nextObjectGroup.getLayoutExplorerNode(
       getRoot(selectedNode),
-    );
+    ))!;
     if (!nextObjectGroup.disposed) {
       assert(manager.next == nextObjectGroup);
       manager.promoteNext();
@@ -117,7 +117,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
     return computeLayoutProperties(node);
   }
 
-  L computeLayoutProperties(RemoteDiagnosticsNode? node);
+  L computeLayoutProperties(RemoteDiagnosticsNode node);
 
   AnimatedLayoutProperties<L> computeAnimatedProperties(L nextProperties);
   void updateHighlighted(L? newProperties);

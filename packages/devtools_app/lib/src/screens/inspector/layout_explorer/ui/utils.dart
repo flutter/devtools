@@ -311,7 +311,7 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   BoxConstraints? get constraints {
     try {
       return BoxConstraints.lerp(
-          begin.constraints, end.constraints, animation.value);
+          begin.constraints, end.constraints, animation.value,);
     } catch (e) {
       return end.constraints;
     }
@@ -322,7 +322,7 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
     final constraintsLocal = constraints!;
     return constraintsLocal.hasBoundedWidth
         ? LayoutProperties.describeAxis(
-            constraintsLocal.minWidth, constraintsLocal.maxWidth, 'w')
+            constraintsLocal.minWidth, constraintsLocal.maxWidth, 'w',)
         : 'w=unconstrained';
   }
 
@@ -331,7 +331,7 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
     final constraintsLocal = constraints!;
     return constraintsLocal.hasBoundedHeight
         ? LayoutProperties.describeAxis(
-            constraintsLocal.minHeight, constraintsLocal.maxHeight, 'h')
+            constraintsLocal.minHeight, constraintsLocal.maxHeight, 'h',)
         : 'h=unconstrained';
   }
 
