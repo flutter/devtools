@@ -26,6 +26,7 @@ void main() {
     const debug = false;
 
     void outputResult(int num, EditingParts editingParts) {
+      // ignore: dead_code
       if (debug) {
         print('$num. left=${editingParts.leftSide}, '
             'active=${editingParts.activeWord}');

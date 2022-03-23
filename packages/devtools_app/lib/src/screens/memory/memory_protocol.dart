@@ -13,7 +13,6 @@ import 'package:vm_service/vm_service.dart';
 import '../../config_specific/logger/logger.dart' as logger;
 import '../../shared/globals.dart';
 import '../../shared/utils.dart';
-import '../../shared/version.dart';
 import 'memory_controller.dart';
 import 'memory_screen.dart';
 import 'memory_timeline.dart';
@@ -372,25 +371,11 @@ ClassHeapDetailStats parseJsonClassHeapStats(Map<String, dynamic> json) {
   int bytesCurrent = 0;
   int bytesDelta = 0;
 
-  void _update(List<dynamic> stats) {
-    instancesDelta += stats[ACCUMULATED] as int;
-    bytesDelta += stats[ACCUMULATED_SIZE] as int;
-    instancesCurrent += stats[LIVE_AFTER_GC] + stats[ALLOCATED_SINCE_GC] as int;
-    bytesCurrent +=
-        stats[LIVE_AFTER_GC_SIZE] + stats[ALLOCATED_SINCE_GC_SIZE] as int;
-  }
-
   final classRef = ClassRef.parse(json['class'])!;
-  if (serviceManager.service!.isProtocolVersionSupportedNow(
-      supportedVersion: SemanticVersion(major: 3, minor: 18))) {
-    instancesCurrent = json['instancesCurrent'];
-    instancesDelta = json['instancesAccumulated'];
-    bytesCurrent = json['bytesCurrent'];
-    bytesDelta = json['accumulatedSize'];
-  } else {
-    _update(json['new']);
-    _update(json['old']);
-  }
+  instancesCurrent = json['instancesCurrent'];
+  instancesDelta = json['instancesAccumulated'];
+  bytesCurrent = json['bytesCurrent'];
+  bytesDelta = json['accumulatedSize'];
 
   return ClassHeapDetailStats(
     classRef,

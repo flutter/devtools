@@ -281,7 +281,7 @@ class TimelineFlameChartState
     // If there is already a selected frame, handle setting that data and
     // positioning/zooming the flame chart accordingly.
     _selectedFrame = _performanceController.selectedFrame.value;
-    WidgetsBinding.instance!.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _centerSelectedFrame();
     });
 

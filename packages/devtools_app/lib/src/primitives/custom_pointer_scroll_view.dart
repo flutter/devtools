@@ -189,7 +189,7 @@ class CustomPointerScrollable extends StatefulWidget {
   ///
   /// Some subtypes of [ScrollView] can infer this value automatically. For
   /// example [ListView] will use the number of widgets in the child list,
-  /// while the [new ListView.separated] constructor will use half that amount.
+  /// while the [ListView.separated] constructor will use half that amount.
   ///
   /// For [CustomScrollView] and other types which do not receive a builder
   /// or list of widgets, the child count must be explicitly provided.
@@ -584,7 +584,7 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
           _targetScrollOffsetForPointerScroll(event);
       // Only express interest in the event if it would actually result in a scroll.
       if (targetScrollOffset != position!.pixels) {
-        GestureBinding.instance!.pointerSignalResolver
+        GestureBinding.instance.pointerSignalResolver
             .register(event, _handlePointerScroll);
       }
     }

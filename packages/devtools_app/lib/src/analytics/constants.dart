@@ -52,6 +52,7 @@ const String togglePlatform = 'togglePlatform';
 const String selectWidgetMode = 'selectWidgetMode';
 const String enableOnDeviceInspector = 'enableOnDeviceInspector';
 const String showOnDeviceInspector = 'showInspector';
+const String treeNodeSelection = 'treeNodeSelection';
 
 // Performance UX actions:
 const refreshTimelineEvents = 'refreshTimelineEvents';

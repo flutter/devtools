@@ -75,86 +75,11 @@ class NetworkController
     _selectedRequest.value = selection;
   }
 
-  void _processTimeline({
-    required Timeline timeline,
-    required int timelineMicrosOffset,
-    required List<NetworkRequest> currentValues,
-    required List<HttpRequestData> invalidRequests,
-    required Map<String, HttpRequestData> outstandingRequestsMap,
-  }) {
-    final events = timeline.traceEvents!;
-    // Group all HTTP timeline events with the same ID.
-    final httpEvents = <String, List<Map<String, Object>>>{};
-    final httpRequestIdToResponseId = <String, String>{};
-    for (final TimelineEvent event in events) {
-      final json = event.toJson();
-      final id = json['id'];
-      if (id == null) {
-        continue;
-      }
-      // The start event for HTTP contains a filter key which we can use.
-      // Note: only HTTP client requests are currently logged to the timeline.
-      if ((!json['args'].containsKey('filterKey') ||
-              json['args']['filterKey'] != 'HTTP/client') &&
-          !outstandingRequestsMap.containsKey(id)) {
-        continue;
-      }
-
-      // Any HTTP event with a specified 'parentId' is the response event of
-      // another request (the request with 'id' = 'parentId'). Store the
-      // relationship in [httpRequestIdToResponseId].
-      final parentId = json['args']['parentId'];
-      if (parentId != null) {
-        httpRequestIdToResponseId[parentId] = id;
-      }
-      httpEvents.putIfAbsent(id, () => []).add(json.cast<String, Object>());
-    }
-
-    // Build our list of network requests from the collected events.
-    for (final request in httpEvents.entries) {
-      final requestId = request.key;
-
-      // Do not handle response events - they are handled as part of the request
-      if (httpRequestIdToResponseId.values.contains(requestId)) continue;
-
-      final responseId = httpRequestIdToResponseId[requestId];
-      final responseEvents = <Map<String, Object>>[];
-      if (responseId != null) {
-        responseEvents.addAll(httpEvents[responseId] ?? []);
-      }
-
-      final requestData = TimelineHttpRequestData.fromTimeline(
-        timelineMicrosBase: timelineMicrosOffset,
-        requestEvents: request.value,
-        responseEvents: responseEvents,
-      );
-
-      // If there's a new event which matches a request that was previously in
-      // flight, update the associated HttpRequestData.
-      if (outstandingRequestsMap.containsKey(requestId)) {
-        final outstandingRequest = outstandingRequestsMap[requestId]!;
-        outstandingRequest.merge(requestData);
-        if (!outstandingRequest.inProgress) {
-          outstandingRequestsMap.remove(requestId);
-        }
-        continue;
-      } else if (requestData.inProgress) {
-        outstandingRequestsMap.putIfAbsent(requestId, () => requestData);
-      }
-      if (requestData.isValid) {
-        currentValues.add(requestData);
-      } else {
-        // Request is complete but missing some information
-        invalidRequests.add(requestData);
-      }
-    }
-  }
-
   void _processHttpProfileRequests({
     required int timelineMicrosOffset,
     required List<HttpProfileRequest> httpRequests,
     required List<NetworkRequest> currentValues,
-    required Map<String, HttpRequestData> outstandingRequestsMap,
+    required Map<String, DartIOHttpRequestData> outstandingRequestsMap,
   }) {
     for (final request in httpRequests) {
       final wrapped = DartIOHttpRequestData(
@@ -183,13 +108,12 @@ class NetworkController
 
   @visibleForTesting
   NetworkRequests processNetworkTrafficHelper(
-    Timeline? timeline,
     List<SocketStatistic> sockets,
     List<HttpProfileRequest>? httpRequests,
     int timelineMicrosOffset, {
     required List<NetworkRequest> currentValues,
-    required List<HttpRequestData> invalidRequests,
-    required Map<String, HttpRequestData> outstandingRequestsMap,
+    required List<DartIOHttpRequestData> invalidRequests,
+    required Map<String, DartIOHttpRequestData> outstandingRequestsMap,
   }) {
     // [currentValues] contains all the current requests we have in the
     // profiler, which will contain web socket requests if they exist. The new
@@ -207,22 +131,12 @@ class NetworkController
       currentValues.add(webSocket);
     }
 
-    if (timeline != null) {
-      _processTimeline(
-        timeline: timeline,
-        timelineMicrosOffset: timelineMicrosOffset,
-        currentValues: currentValues,
-        invalidRequests: invalidRequests,
-        outstandingRequestsMap: outstandingRequestsMap,
-      );
-    } else {
-      _processHttpProfileRequests(
-        timelineMicrosOffset: timelineMicrosOffset,
-        httpRequests: httpRequests!,
-        currentValues: currentValues,
-        outstandingRequestsMap: outstandingRequestsMap,
-      );
-    }
+    _processHttpProfileRequests(
+      timelineMicrosOffset: timelineMicrosOffset,
+      httpRequests: httpRequests!,
+      currentValues: currentValues,
+      outstandingRequestsMap: outstandingRequestsMap,
+    );
 
     return NetworkRequests(
       requests: currentValues,
@@ -232,13 +146,11 @@ class NetworkController
   }
 
   void processNetworkTraffic({
-    required Timeline? timeline,
     required List<SocketStatistic> sockets,
     required List<HttpProfileRequest>? httpRequests,
   }) {
     // Trigger refresh.
     _requests.value = processNetworkTrafficHelper(
-      timeline,
       sockets,
       httpRequests,
       _timelineMicrosOffset,
@@ -367,7 +279,7 @@ class NetworkController
 
     final currentRequests = filteredData.value;
     for (final request in currentRequests) {
-      if (request.uri!.toLowerCase().contains(caseInsensitiveSearch)) {
+      if (request.uri.toLowerCase().contains(caseInsensitiveSearch)) {
         matches.add(request);
         // TODO(kenz): use the value request.isSearchMatch in the network
         // requests table to improve performance. This will require some
@@ -392,13 +304,13 @@ class NetworkController
         ..addAll(_requests.value.requests.where((NetworkRequest r) {
           final methodArg = queryFilter.filterArguments[methodFilterId];
           if (methodArg != null &&
-              !methodArg.matchesValue(r.method!.toLowerCase())) {
+              !methodArg.matchesValue(r.method.toLowerCase())) {
             return false;
           }
 
           final statusArg = queryFilter.filterArguments[statusFilterId];
           if (statusArg != null &&
-              !statusArg.matchesValue(r.status!.toLowerCase())) {
+              !statusArg.matchesValue(r.status?.toLowerCase())) {
             return false;
           }
 

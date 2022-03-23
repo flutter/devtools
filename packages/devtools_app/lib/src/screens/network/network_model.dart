@@ -14,9 +14,9 @@ abstract class NetworkRequest with DataSearchStateMixin {
 
   final int _timelineMicrosBase;
 
-  String? get method;
+  String get method;
 
-  String? get uri;
+  String get uri;
 
   String? get contentType;
 
@@ -182,11 +182,11 @@ class NetworkRequests {
   ///
   /// These are requests that have completed but do not contain all the required
   /// information to display normally in the UI.
-  List<HttpRequestData> invalidHttpRequests;
+  List<DartIOHttpRequestData> invalidHttpRequests;
 
   /// A mapping of timeline IDs to instances of HttpRequestData which are
   /// currently in-progress.
-  Map<String, HttpRequestData> outstandingHttpRequests;
+  Map<String, DartIOHttpRequestData> outstandingHttpRequests;
 
   void clear() {
     requests.clear();

@@ -9,7 +9,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:flutter/foundation.dart';
 import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
@@ -136,7 +135,7 @@ abstract class FlutterTestDriver {
   }
 
   Future<Isolate> waitForPause() async {
-    debugPrint('Waiting for isolate to pause');
+    _debugPrint('Waiting for isolate to pause');
     final String flutterIsolate = await getFlutterIsolateId();
 
     Future<Isolate> waitForPause() async {
@@ -168,7 +167,7 @@ abstract class FlutterTestDriver {
   }
 
   Future<Isolate?> resume({String? step, bool wait = true}) async {
-    debugPrint('Sending resume ($step)');
+    _debugPrint('Sending resume ($step)');
     await _timeoutWithMessages<dynamic>(
         () async => vmService!.resume(await getFlutterIsolateId(), step: step),
         message: 'Isolate did not respond to resume ($step)');
@@ -350,8 +349,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       );
 
       final vmServiceLocal = vmService!;
-      vmServiceLocal.onSend.listen((String s) => debugPrint('==> $s'));
-      vmServiceLocal.onReceive.listen((String s) => debugPrint('<== $s'));
+      vmServiceLocal.onSend.listen((String s) => _debugPrint('==> $s'));
+      vmServiceLocal.onReceive.listen((String s) => _debugPrint('<== $s'));
       await Future.wait(<Future<Success>>[
         vmServiceLocal.streamListen(EventStreams.kIsolate),
         vmServiceLocal.streamListen(EventStreams.kDebug),
@@ -412,7 +411,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   Future<int> detach() async {
     final vmServiceLocal = vmService;
     if (vmServiceLocal != null) {
-      debugPrint('Closing VM service');
+      _debugPrint('Closing VM service');
       await vmServiceLocal.dispose();
     }
     if (_currentRunningAppId != null) {
