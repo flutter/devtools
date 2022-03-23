@@ -10,8 +10,6 @@
 /// This allows tests of the complicated logic in this class to run on the VM
 /// and will help simplify porting this code to work with Hummingbird.
 
-
-
 library inspector_tree;
 
 import 'package:flutter/foundation.dart';
@@ -94,9 +92,9 @@ class InspectorTreeNode {
     }
   }
 
-  bool? get shouldShow {
-    _shouldShow ??= parent == null || parent!.isExpanded && parent!.shouldShow!;
-    return _shouldShow;
+  bool get shouldShow {
+    _shouldShow ??= parent == null || parent!.isExpanded && parent!.shouldShow;
+    return _shouldShow!;
   }
 
   bool? _shouldShow;
@@ -217,8 +215,9 @@ class InspectorTreeNode {
           index: index,
           ticks: ticks,
           depth: depth,
-          lineToParent:
-              !node.isProperty && index != 0 && node.parent!.showLinesToChildren,
+          lineToParent: !node.isProperty &&
+              index != 0 &&
+              node.parent!.showLinesToChildren,
         );
       }
       assert(index > current);
