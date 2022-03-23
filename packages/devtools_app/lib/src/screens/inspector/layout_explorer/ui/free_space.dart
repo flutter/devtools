@@ -23,9 +23,8 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final heightDescription =
-        'h=${toStringAsFixed(renderProperties.realHeight!)}';
-    final widthDescription =
-        'w=${toStringAsFixed(renderProperties.realWidth!)}';
+        'h=${toStringAsFixed(renderProperties.realHeight)}';
+    final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth)}';
     final showWidth = renderProperties.realWidth !=
         (renderProperties.layoutProperties?.width);
     final widthWidget = Column(
@@ -103,9 +102,8 @@ class PaddingVisualizerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final heightDescription =
-        'h=${toStringAsFixed(renderProperties.realHeight!)}';
-    final widthDescription =
-        'w=${toStringAsFixed(renderProperties.realWidth!)}';
+        'h=${toStringAsFixed(renderProperties.realHeight)}';
+    final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth)}';
     final widthWidget = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

@@ -313,8 +313,8 @@ class FlexLayoutProperties extends LayoutProperties {
     this.mainAxisAlignment,
     this.crossAxisAlignment,
     this.mainAxisSize,
-    this.textDirection,
-    this.verticalDirection,
+    required this.textDirection,
+    required this.verticalDirection,
     this.textBaseline,
   }) : super.values(
           size: size,
@@ -333,8 +333,8 @@ class FlexLayoutProperties extends LayoutProperties {
     this.mainAxisAlignment,
     this.mainAxisSize,
     this.crossAxisAlignment,
-    this.textDirection,
-    this.verticalDirection,
+    required this.textDirection,
+    required this.verticalDirection,
     this.textBaseline,
   }) : super(node);
 
@@ -400,9 +400,11 @@ class FlexLayoutProperties extends LayoutProperties {
       crossAxisAlignment: _crossAxisAlignmentUtils
           .enumEntry(data['crossAxisAlignment'] as String),
       textDirection:
-          _textDirectionUtils.enumEntry(data['textDirection'] as String),
+          _textDirectionUtils.enumEntry(data['textDirection'] as String) ??
+              TextDirection.ltr,
       verticalDirection: _verticalDirectionUtils
-          .enumEntry(data['verticalDirection'] as String),
+              .enumEntry(data['verticalDirection'] as String) ??
+          VerticalDirection.down,
       textBaseline:
           _textBaselineUtils.enumEntry(data['textBaseline'] as String),
     );
@@ -412,8 +414,8 @@ class FlexLayoutProperties extends LayoutProperties {
   final MainAxisAlignment? mainAxisAlignment;
   final CrossAxisAlignment? crossAxisAlignment;
   final MainAxisSize? mainAxisSize;
-  final TextDirection? textDirection;
-  final VerticalDirection? verticalDirection;
+  final TextDirection textDirection;
+  final VerticalDirection verticalDirection;
   final TextBaseline? textBaseline;
 
   List<LayoutProperties>? _displayChildren;
@@ -480,7 +482,6 @@ class FlexLayoutProperties extends LayoutProperties {
       case Axis.horizontal:
         switch (textDirection) {
           case TextDirection.ltr:
-          case null:
             return true;
           case TextDirection.rtl:
             return false;
@@ -488,7 +489,6 @@ class FlexLayoutProperties extends LayoutProperties {
       case Axis.vertical:
         switch (verticalDirection) {
           case VerticalDirection.down:
-          case null:
             return true;
           case VerticalDirection.up:
             return false;
@@ -499,15 +499,14 @@ class FlexLayoutProperties extends LayoutProperties {
   /// render properties for laying out rendered Flex & Flex children widgets
   /// the computation is similar to [RenderFlex].performLayout() method
   List<RenderProperties> childrenRenderProperties({
-    required double? smallestRenderWidth,
-    required double? largestRenderWidth,
-    required double? smallestRenderHeight,
-    required double? largestRenderHeight,
+    required double smallestRenderWidth,
+    required double largestRenderWidth,
+    required double smallestRenderHeight,
+    required double largestRenderHeight,
     required double Function(Axis) maxSizeAvailable,
   }) {
     /// calculate the render empty spaces
-    final freeSpace = dimension(direction) -
-        sum(childrenDimensions(direction).cast<double>());
+    final freeSpace = dimension(direction) - sum(childrenDimensions(direction));
     final displayMainAxisAlignment =
         startIsTopLeft ? mainAxisAlignment : mainAxisAlignment?.reversed;
 
@@ -552,15 +551,15 @@ class FlexLayoutProperties extends LayoutProperties {
 
     double smallestRenderSize(Axis axis) {
       return axis == Axis.horizontal
-          ? smallestRenderWidth!
-          : smallestRenderHeight!;
+          ? smallestRenderWidth
+          : smallestRenderHeight;
     }
 
     double largestRenderSize(Axis axis) {
       final lrs =
           axis == Axis.horizontal ? largestRenderWidth : largestRenderHeight;
       // use all the space when visualizing cross axis
-      return (axis == direction) ? lrs! : maxSizeAvailable(axis);
+      return (axis == direction) ? lrs : maxSizeAvailable(axis);
     }
 
     List<double> renderSizes(Axis axis) {
@@ -569,8 +568,8 @@ class FlexLayoutProperties extends LayoutProperties {
         /// include free space in the computation
         sizes.add(freeSpace);
       }
-      final smallestSize = min(sizes.cast<double>());
-      final largestSize = max(sizes.cast<double>());
+      final smallestSize = min(sizes);
+      final largestSize = max(sizes);
       if (axis == direction ||
           (crossAxisAlignment != CrossAxisAlignment.stretch &&
               smallestSize != largestSize)) {
@@ -693,31 +692,29 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   List<RenderProperties> crossAxisSpaces({
-    required List<RenderProperties>? childrenRenderProperties,
-    required double Function(Axis)? maxSizeAvailable,
+    required List<RenderProperties> childrenRenderProperties,
+    required double Function(Axis) maxSizeAvailable,
   }) {
     if (crossAxisAlignment == CrossAxisAlignment.stretch) return [];
     final spaces = <RenderProperties>[];
     for (var i = 0; i < children.length; ++i) {
       if (dimension(crossAxisDirection) ==
               displayChildren[i].dimension(crossAxisDirection) ||
-          childrenRenderProperties![i].crossAxisDimension ==
-              maxSizeAvailable!(crossAxisDirection)) continue;
+          childrenRenderProperties[i].crossAxisDimension ==
+              maxSizeAvailable(crossAxisDirection)) continue;
 
       final renderProperties = childrenRenderProperties[i];
       final space = renderProperties.clone()..isFreeSpace = true;
 
       space.crossAxisRealDimension =
-          crossAxisDimension! - space.crossAxisRealDimension!;
+          crossAxisDimension! - space.crossAxisRealDimension;
       space.crossAxisDimension =
           maxSizeAvailable(crossAxisDirection) - space.crossAxisDimension;
       if (space.crossAxisDimension <= 0.0) continue;
       if (crossAxisAlignment == CrossAxisAlignment.center) {
         space.crossAxisDimension *= 0.5;
         final crossAxisRealDimension = space.crossAxisRealDimension;
-        if (crossAxisRealDimension != null) {
-          space.crossAxisRealDimension = crossAxisRealDimension * 0.5;
-        }
+        space.crossAxisRealDimension = crossAxisRealDimension * 0.5;
         spaces.add(space.clone()..crossAxisOffset = 0.0);
         spaces.add(space.clone()
           ..crossAxisOffset = renderProperties.crossAxisDimension +
@@ -763,20 +760,20 @@ class RenderProperties {
         dx = offset?.dx ?? 0.0,
         dy = offset?.dy ?? 0.0;
 
-  final Axis? axis;
+  final Axis axis;
 
   /// represents which node is rendered for this object.
   LayoutProperties? layoutProperties;
 
   double dx, dy;
   double width, height;
-  double? realWidth, realHeight;
+  double realWidth, realHeight;
 
   bool isFreeSpace;
 
   Size get size => Size(width, height);
 
-  Size get realSize => Size(realWidth!, realHeight!);
+  Size get realSize => Size(realWidth, realHeight);
 
   Offset get offset => Offset(dx, dy);
 
@@ -820,10 +817,10 @@ class RenderProperties {
     }
   }
 
-  double? get mainAxisRealDimension =>
+  double get mainAxisRealDimension =>
       axis == Axis.horizontal ? realWidth : realHeight;
 
-  set mainAxisRealDimension(double? newVal) {
+  set mainAxisRealDimension(double newVal) {
     if (axis == Axis.horizontal) {
       realWidth = newVal;
     } else {
@@ -831,10 +828,10 @@ class RenderProperties {
     }
   }
 
-  double? get crossAxisRealDimension =>
+  double get crossAxisRealDimension =>
       axis == Axis.horizontal ? realHeight : realWidth;
 
-  set crossAxisRealDimension(double? newVal) {
+  set crossAxisRealDimension(double newVal) {
     if (axis == Axis.horizontal) {
       realHeight = newVal;
     } else {
