@@ -141,7 +141,7 @@ abstract class InstanceDetails with _$InstanceDetails {
     required String instanceRefId,
   }) = EnumInstance;
 
-  String get instanceRefId;
+  String? get instanceRefId;
 
   bool get isExpandable {
     bool falsy(Object obj) => false;

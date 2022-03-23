@@ -227,7 +227,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                 .listen(
                   rawInstanceProvider(
                     mapPath.pathForChild(
-                      PathToProperty.mapKey(ref: key.instanceRefId),
+                      PathToProperty.mapKey(ref: key.instanceRefId!),
                     )!,
                   ).future,
                 )

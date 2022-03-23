@@ -63,7 +63,7 @@ final estimatedChildCountProvider =
               map: (instance) {
                 return expandableEstimatedChildCount(
                   instance.keys.map(
-                      (key) => PathToProperty.mapKey(ref: key.instanceRefId)),
+                      (key) => PathToProperty.mapKey(ref: key.instanceRefId!)),
                 );
               },
               list: (instance) {
@@ -279,7 +279,8 @@ class _InstanceViewerState extends State<InstanceViewer> {
       final value = _buildListViewItems(
         context,
         watch,
-        path: path!.pathForChild(PathToProperty.mapKey(ref: key.instanceRefId)),
+        path:
+            path!.pathForChild(PathToProperty.mapKey(ref: key.instanceRefId!)),
       );
 
       final keyHeader = _buildHeader(key, disableExpand: true, path: path);
@@ -350,7 +351,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
     BuildContext context,
     ScopedReader watch,
     ObjectInstance instance, {
-    required InstancePath? path,
+    required InstancePath path,
   }) sync* {
     for (final field in instance.fields) {
       if (!widget.showInternalProperties &&
@@ -363,7 +364,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
       final children = _buildListViewItems(
         context,
         watch,
-        path: path!.pathForChild(PathToProperty.fromObjectField(field)),
+        path: path.pathForChild(PathToProperty.fromObjectField(field)),
       );
 
       bool isFirst = true;
