@@ -38,7 +38,7 @@ Future<InstanceRef?> _resolveInstanceRefForPath(
         );
       },
       fromInstanceId: (path) async {
-        final eval = await ref.watch(evalProvider!.future);
+        final eval = await ref.watch(evalProvider.future);
         return eval.safeEval(
           'value',
           isAlive: isAlive,
@@ -48,7 +48,7 @@ Future<InstanceRef?> _resolveInstanceRefForPath(
     );
   }
 
-  final eval = await ref.watch(evalProvider!.future);
+  final eval = await ref.watch(evalProvider.future);
 
   return parent!.maybeMap<Future<InstanceRef?>>(
     // TODO: support sets
@@ -112,7 +112,7 @@ Future<void> _mutate(
 }) async {
   await parent.maybeMap(
     list: (parent) async {
-      final eval = await ref.watch(evalProvider!.future);
+      final eval = await ref.watch(evalProvider.future);
       final indexPath = path.pathToProperty.last as ListIndexPath;
 
       return eval.safeEval(
@@ -124,7 +124,7 @@ Future<void> _mutate(
       );
     },
     map: (parent) async {
-      final eval = await ref.watch(evalProvider!.future);
+      final eval = await ref.watch(evalProvider.future);
       final keyPath = path.pathToProperty.last as MapKeyPath;
       final keyRefVar = keyPath.ref == null ? 'null' : 'key';
 
@@ -265,7 +265,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
         (ref, path) async {
   ref.watch(hotRestartEventProvider);
 
-  final eval = await ref.watch(evalProvider!.future);
+  final eval = await ref.watch(evalProvider.future);
 
   final isAlive = Disposable();
   ref.onDispose(isAlive.dispose);

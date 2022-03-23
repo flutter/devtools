@@ -20,7 +20,7 @@ class Assert {
 
 class JsonKey {
   const JsonKey({
-    bool? ignore,
+    bool ignore = false,
     Object? defaultValue,
   });
 }

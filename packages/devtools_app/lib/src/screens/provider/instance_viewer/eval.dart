@@ -27,7 +27,7 @@ final serviceProvider = StreamProvider<VmServiceWrapper>((ref) async* {
 ///
 /// Not suitable to be used when evaluating third-party objects, as it would
 /// otherwise not be possible to read private properties.
-final FutureProvider<EvalOnDartLibrary>? evalProvider =
+final FutureProvider<EvalOnDartLibrary> evalProvider =
     libraryEvalProvider('dart:io');
 
 /// An [EvalOnDartLibrary] that has access to `provider`
