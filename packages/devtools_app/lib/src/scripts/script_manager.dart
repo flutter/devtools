@@ -37,7 +37,7 @@ class ScriptManager extends DisposableController
   IsolateRef get _currentIsolate =>
       serviceManager.isolateManager.selectedIsolate.value!;
 
-  final _ScriptCache _scriptCache = _ScriptCache();
+  final _scriptCache = _ScriptCache();
 
   /// Refreshes the current set of scripts, updating [sortedScripts]. Returns
   /// the updated value of [sortedScripts].
@@ -71,8 +71,8 @@ class ScriptManager extends DisposableController
 class _ScriptCache {
   _ScriptCache();
 
-  Map<String, Script> _scripts = {};
-  final Map<String, Future<Script>> _inProgress = {};
+  final _scripts = <String, Script>{};
+  final _inProgress = <String, Future<Script>>{};
 
   /// Return a cached [Script] for the given [ScriptRef], returning null
   /// if there is no cached [Script].
@@ -84,7 +84,10 @@ class _ScriptCache {
   ///
   /// This caches the script lookup for future invocations.
   Future<Script> getScript(
-      VmService vmService, IsolateRef isolateRef, ScriptRef scriptRef) {
+    VmService vmService,
+    IsolateRef isolateRef,
+    ScriptRef scriptRef,
+  ) {
     final scriptId = scriptRef.id!;
     if (_scripts.containsKey(scriptId)) {
       return Future.value(_scripts[scriptId]);
@@ -111,7 +114,7 @@ class _ScriptCache {
   }
 
   void clear() {
-    _scripts = {};
+    _scripts.clear();
     _inProgress.clear();
   }
 }
