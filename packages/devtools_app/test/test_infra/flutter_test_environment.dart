@@ -121,6 +121,7 @@ class FlutterTestEnvironment {
       setGlobal(PreferencesController, preferencesController);
       setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(MessageBus, MessageBus());
+      setGlobal(ScriptManager, ScriptManager());
 
       // Clear out VM service calls from the test driver.
       // ignore: invalid_use_of_visible_for_testing_member
