@@ -66,10 +66,8 @@ void main() async {
               // Filter out unawaited streamListen calls.
               .where((call) => call != 'streamListen')
               .toList()
-              .sublist(0, 5),
+              .sublist(0, 3),
           equals([
-            'getVersion',
-            'callMethod getDartDevelopmentServiceVersion',
             'getFlagList',
             'getVM',
             'getIsolate',

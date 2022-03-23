@@ -418,13 +418,6 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   }
 
   @override
-  bool isProtocolVersionSupportedNow({
-    @required SemanticVersion supportedVersion,
-  }) {
-    return true;
-  }
-
-  @override
   Future<Success> setFlag(String name, String value) {
     final List<Flag> flags = _flags['flags'];
     final existingFlag =
@@ -578,16 +571,6 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     }
     return Future.value(
         HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult));
-  }
-
-  @override
-  Future<bool> isDartIoVersionSupported({
-    String isolateId,
-    SemanticVersion supportedVersion,
-  }) {
-    return Future.value(
-      dartIoVersion.isSupported(supportedVersion: supportedVersion),
-    );
   }
 
   @override

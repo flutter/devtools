@@ -4,6 +4,8 @@
 
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
+@TestOn('vm')
+
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/http/http.dart';
 import 'package:devtools_app/src/http/http_request_data.dart';
@@ -14,11 +16,9 @@ import 'package:devtools_app/src/screens/network/network_request_inspector.dart'
 import 'package:devtools_app/src/screens/network/network_request_inspector_views.dart';
 import 'package:devtools_app/src/screens/network/network_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
-@TestOn('vm')
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/split.dart';
-import 'package:devtools_app/src/shared/version.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -65,9 +65,6 @@ void main() {
           httpProfile: httpProfile,
         ),
       );
-      (fakeServiceManager.service as FakeVmService)
-        ..httpEnableTimelineLoggingResult = false
-        ..dartIoVersion = SemanticVersion(major: 1, minor: 6);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
     });
 
@@ -133,7 +130,7 @@ void main() {
 
       expectNoSelection();
 
-      Future<void> validateHeadersTab(HttpRequestData data) async {
+      Future<void> validateHeadersTab(DartIOHttpRequestData data) async {
         // Switch to headers tab.
         await tester.tap(find.byKey(NetworkRequestInspector.headersTabKey));
         await tester.pumpAndSettle();
@@ -154,7 +151,7 @@ void main() {
         final ExpansionTile generalTile =
             tester.widget(find.byKey(HttpRequestHeadersView.generalKey));
 
-        final numGeneralEntries = data.general!.length;
+        final numGeneralEntries = data.general.length;
         expect(generalTile.children.length, numGeneralEntries);
 
         // Check contents of request headers.
@@ -170,7 +167,7 @@ void main() {
         expect(responsesTile.children.length, numResponseHeaders);
       }
 
-      Future<void> validateResponseTab(HttpRequestData data) async {
+      Future<void> validateResponseTab(DartIOHttpRequestData data) async {
         if (data.responseBody != null) {
           // Switch to response tab.
           await tester.tap(find.byKey(NetworkRequestInspector.responseTabKey));
@@ -194,8 +191,9 @@ void main() {
         expect(find.byType(HttpRequestCookiesView), findsNothing);
       }
 
-      Future<void> validateCookiesTab(HttpRequestData data) async {
-        final httpRequest = controller.selectedRequest.value as HttpRequestData;
+      Future<void> validateCookiesTab(DartIOHttpRequestData data) async {
+        final httpRequest =
+            controller.selectedRequest.value as DartIOHttpRequestData;
         final hasCookies = httpRequest.hasCookies;
 
         if (hasCookies) {
@@ -256,7 +254,7 @@ void main() {
         );
 
         final selection = controller.selectedRequest.value!;
-        if (selection is HttpRequestData) {
+        if (selection is DartIOHttpRequestData) {
           await validateHeadersTab(selection);
           await validateResponseTab(selection);
           await validateCookiesTab(selection);
@@ -283,8 +281,8 @@ void main() {
 
       expectNoSelection();
 
-      final textElement = tester
-          .element(find.text('https://jsonplaceholder.typicode.com/albums/1'));
+      final textElement = tester.element(
+          find.text('https://jsonplaceholder.typicode.com/albums/1').first);
       final selectableTextWidget =
           textElement.findAncestorWidgetOfExactType<SelectableText>()!;
       await tester.tap(find.byWidget(selectableTextWidget));
@@ -326,47 +324,48 @@ void main() {
     }
 
     testWidgets('displays for http request', (tester) async {
-      final data = httpGetEvent;
+      final data = httpGet;
       await pumpView(tester, data);
 
       // Verify general information.
       expect(find.text('Request uri: '), findsOneWidget);
-      expect(find.text('http://127.0.0.1:8011/foo/bar?foo=bar&year=2019'),
+      expect(find.text('https://jsonplaceholder.typicode.com/albums/1'),
           findsOneWidget);
       expect(find.text('Method: '), findsOneWidget);
       expect(find.text('GET'), findsOneWidget);
       expect(find.text('Status: '), findsOneWidget);
       expect(find.text('200'), findsOneWidget);
       expect(find.text('Port: '), findsOneWidget);
-      expect(find.text('35248'), findsOneWidget);
+      expect(find.text('45648'), findsOneWidget);
       expect(find.text('Content type: '), findsOneWidget);
-      expect(find.text('[text/plain; charset=utf-8]'), findsOneWidget);
+      expect(find.text('[application/json; charset=utf-8]'), findsOneWidget);
 
       // Verify timing information.
       expect(find.text('Timing: '), findsOneWidget);
       expect(find.text('Start time: '), findsOneWidget);
-      expect(find.text(formatDateTime(data.startTimestamp!)), findsOneWidget);
+      expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
       expect(find.text('End time: '), findsOneWidget);
       expect(find.text(formatDateTime(data.endTimestamp!)), findsOneWidget);
       expect(find.byKey(NetworkRequestOverviewView.httpTimingGraphKey),
           findsOneWidget);
       expect(find.text('Connection established: '), findsOneWidget);
-      expect(find.text('[0.0 ms - 100.0 ms] → 100.0 ms total'), findsOneWidget);
-      expect(find.text('Request initiated: '), findsOneWidget);
+      expect(find.text('[0.0 ms - 529.0 ms] → 529.0 ms total'), findsOneWidget);
+      expect(find.text('Request sent: '), findsOneWidget);
+      expect(find.text('[529.0 ms - 529.0 ms] → 0.0 ms total'), findsOneWidget);
+      expect(find.text('Waiting (TTFB): '), findsOneWidget);
       expect(
-          find.text('[100.0 ms - 200.0 ms] → 100.0 ms total'), findsOneWidget);
-      expect(find.text('Response received: '), findsOneWidget);
-      expect(
-          find.text('[200.0 ms - 400.0 ms] → 200.0 ms total'), findsOneWidget);
+          find.text('[529.0 ms - 810.7 ms] → 281.7 ms total'), findsOneWidget);
+      expect(find.text('Content Download: '), findsOneWidget);
+      expect(find.text('[810.7 ms - 811.7 ms] → 1.0 ms total'), findsOneWidget);
     });
 
     testWidgets('displays for http request with error', (tester) async {
-      final data = httpGetEventWithError;
+      final data = httpGetWithError;
       await pumpView(tester, data);
 
       // Verify general information.
       expect(find.text('Request uri: '), findsOneWidget);
-      expect(find.text('http://www.example.com/'), findsOneWidget);
+      expect(find.text('https://www.examplez.com/1'), findsOneWidget);
       expect(find.text('Method: '), findsOneWidget);
       expect(find.text('GET'), findsOneWidget);
       expect(find.text('Status: '), findsOneWidget);
@@ -377,14 +376,15 @@ void main() {
       // Verify timing information.
       expect(find.text('Timing: '), findsOneWidget);
       expect(find.text('Start time: '), findsOneWidget);
-      expect(find.text(formatDateTime(data.startTimestamp!)), findsOneWidget);
+      expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
       expect(find.text('End time: '), findsOneWidget);
       expect(find.text(formatDateTime(data.endTimestamp!)), findsOneWidget);
       expect(find.byKey(NetworkRequestOverviewView.httpTimingGraphKey),
           findsOneWidget);
       expect(find.text('Connection established: '), findsNothing);
-      expect(find.text('Request initiated: '), findsNothing);
-      expect(find.text('Response received: '), findsNothing);
+      expect(find.text('Request sent: '), findsNothing);
+      expect(find.text('Waiting (TTFB): '), findsNothing);
+      expect(find.text('Content Download: '), findsNothing);
     });
 
     testWidgetsWithWindowSize(

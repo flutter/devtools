@@ -7,98 +7,6 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:vm_service/vm_service.dart';
 
-const _getStartTime = 231935000000;
-final httpGetEvent = TimelineHttpRequestData.fromTimeline(
-  timelineMicrosBase: _getStartTime - 1000000, // - 1000000 is arbitrary.
-  requestEvents: httpGetEventTrace,
-  responseEvents: httpGetResponseEventTrace,
-);
-final httpGetEventTrace = [
-  {
-    'name': 'HTTP CLIENT GET',
-    'cat': 'Dart',
-    'tid': 52414,
-    'pid': 52406,
-    'ts': _getStartTime,
-    'ph': 'b',
-    'id': '1d',
-    'args': {
-      'filterKey': 'HTTP/client',
-      'method': 'GET',
-      'uri': 'http://127.0.0.1:8011/foo/bar?foo=bar&year=2019',
-      'isolateId': 'isolates/3907117677703047'
-    }
-  },
-  {
-    'name': 'Connection established',
-    'cat': 'Dart',
-    'tid': 52414,
-    'pid': 52406,
-    'ts': 231935100000,
-    'ph': 'n',
-    'id': '1d',
-    'args': {'isolateId': 'isolates/3907117677703047'}
-  },
-  {
-    'name': 'Request initiated',
-    'cat': 'Dart',
-    'tid': 52414,
-    'pid': 52406,
-    'ts': 231935200000,
-    'ph': 'n',
-    'id': '1d',
-    'args': {'isolateId': 'isolates/3907117677703047'}
-  },
-  {
-    'name': 'Response received',
-    'cat': 'Dart',
-    'tid': 52414,
-    'pid': 52406,
-    'ts': 231935400000,
-    'ph': 'n',
-    'id': '1d',
-    'args': {'isolateId': 'isolates/3907117677703047'}
-  },
-  {
-    'name': 'HTTP CLIENT GET',
-    'cat': 'Dart',
-    'tid': 52414,
-    'pid': 52406,
-    'ts': 231935900000,
-    'ph': 'e',
-    'id': '1d',
-    'args': {
-      'requestHeaders': {
-        'user-agent': ['Dart/2.8 (dart:io)'],
-        'accept-encoding': ['gzip'],
-        'content-length': ['0'],
-        'host': ['127.0.0.1:8011']
-      },
-      'compressionState': 'HttpClientResponseCompressionState.notCompressed',
-      'connectionInfo': {
-        'localPort': 35248,
-        'remoteAddress': '127.0.0.1',
-        'remotePort': 8011
-      },
-      'contentLength': 0,
-      'cookies': [],
-      'responseHeaders': {
-        'x-frame-options': ['SAMEORIGIN'],
-        'content-type': ['text/plain; charset=utf-8'],
-        'x-xss-protection': ['1; mode=block'],
-        'x-content-type-options': ['nosniff'],
-        'content-length': ['0']
-      },
-      'isRedirect': false,
-      'persistentConnection': true,
-      'reasonPhrase': 'OK',
-      'redirects': [],
-      'statusCode': 200,
-      'isolateId': 'isolates/3907117677703047'
-    }
-  },
-];
-
 final httpGetResponseBodyData = [
   123,
   10,
@@ -166,265 +74,6 @@ final httpGetResponseBodyData = [
   125
 ];
 
-final httpGetResponseEventTrace = [
-  {
-    'name': 'HTTP CLIENT response of GET',
-    'cat': 'Dart',
-    'tid': 9018,
-    'pid': 8985,
-    'ts': 465424288688,
-    'ph': 'b',
-    'id': '1e',
-    'args': {
-      'requestUri': 'https://jsonplaceholder.typicode.com/albums/1',
-      'statusCode': 200,
-      'reasonPhrase': 'OK',
-      'parentId': '1d',
-      'filterKey': 'HTTP/client',
-      'isolateId': 'isolates/1430600241264643',
-      'isolateGroupId': 'isolateGroups/1765553891304005367'
-    },
-  },
-  {
-    'name': 'Response body',
-    'cat': 'Dart',
-    'tid': 9018,
-    'pid': 8985,
-    'ts': 465424289902,
-    'ph': 'n',
-    'id': '1e',
-    'args': {
-      'data': httpGetResponseBodyData,
-      'filterKey': 'HTTP/client',
-      'isolateId': 'isolates/1430600241264643',
-      'isolateGroupId': 'isolateGroups/1765553891304005367'
-    },
-  },
-  {
-    'name': 'HTTP CLIENT response of GET',
-    'cat': 'Dart',
-    'tid': 9018,
-    'pid': 8985,
-    'ts': 465424291160,
-    'ph': 'e',
-    'id': '1e',
-    'args': {
-      'filterKey': 'HTTP/client',
-      'isolateId': 'isolates/1430600241264643',
-      'isolateGroupId': 'isolateGroups/1765553891304005367'
-    },
-  },
-];
-
-const _putStartTime = 231936000000;
-final httpPutEvent = TimelineHttpRequestData.fromTimeline(
-  timelineMicrosBase: _putStartTime - 1000000, // - 1000000 is arbitrary.
-  requestEvents: httpPutEventTrace,
-  responseEvents: [],
-);
-final httpPutEventTrace = [
-  {
-    'name': 'HTTP CLIENT PUT',
-    'cat': 'Dart',
-    'tid': 52414,
-    'pid': 52406,
-    'ts': _putStartTime,
-    'ph': 'b',
-    'id': '17',
-    'args': {
-      'filterKey': 'HTTP/client',
-      'method': 'PUT',
-      'uri': 'http://127.0.0.1:8011/foo/bar',
-      'isolateId': 'isolates/3907117677703047'
-    }
-  },
-  {
-    'name': 'Connection established',
-    'cat': 'Dart',
-    'tid': 52414,
-    'pid': 52406,
-    'ts': 231936300000,
-    'ph': 'n',
-    'id': '17',
-    'args': {'isolateId': 'isolates/3907117677703047'}
-  },
-  {
-    'name': 'Request initiated',
-    'cat': 'Dart',
-    'tid': 52414,
-    'pid': 52406,
-    'ts': 231936600000,
-    'ph': 'n',
-    'id': '17',
-    'args': {'isolateId': 'isolates/3907117677703047'}
-  },
-  {
-    'name': 'Response receieved',
-    'cat': 'Dart',
-    'tid': 52414,
-    'pid': 52406,
-    'ts': 231936800000,
-    'ph': 'n',
-    'id': '17',
-    'args': {'isolateId': 'isolates/3907117677703047'}
-  },
-  {
-    'name': 'HTTP CLIENT PUT',
-    'cat': 'Dart',
-    'tid': 52414,
-    'pid': 52406,
-    'ts': 231936900000,
-    'ph': 'e',
-    'id': '17',
-    'args': {
-      'requestHeaders': {
-        'user-agent': ['Dart/2.8 (dart:io)'],
-        'accept-encoding': ['gzip'],
-        'content-length': ['0'],
-        'host': ['127.0.0.1:8011']
-      },
-      'compressionState': 'HttpClientResponseCompressionState.notCompressed',
-      'connectionInfo': {
-        'localPort': 35246,
-        'remoteAddress': '127.0.0.1',
-        'remotePort': 8011
-      },
-      'contentLength': 0,
-      'cookies': ['Cookie-Monster=Me-want-cookie!; HttpOnly'],
-      'responseHeaders': {
-        'x-frame-options': ['SAMEORIGIN'],
-        'content-type': ['application/json; charset=utf-8'],
-        'x-xss-protection': ['1; mode=block'],
-        'set-cookie': ['Cookie-Monster=Me-want-cookie!; HttpOnly'],
-        'x-content-type-options': ['nosniff'],
-        'content-length': ['0']
-      },
-      'isRedirect': false,
-      'persistentConnection': true,
-      'reasonPhrase': 'OK',
-      'redirects': [],
-      'statusCode': 200,
-      'isolateId': 'isolates/3907117677703047'
-    }
-  },
-];
-
-const _getWithErrorStartTime = 231937000000;
-final httpGetEventWithError = TimelineHttpRequestData.fromTimeline(
-  timelineMicrosBase:
-      _getWithErrorStartTime - 1000000, // - 1000000 is arbitrary.
-  requestEvents: httpGetEventWithErrorTrace,
-  responseEvents: [],
-);
-final httpGetEventWithErrorTrace = [
-  {
-    'name': 'HTTP CLIENT GET',
-    'cat': 'Dart',
-    'tid': 21767,
-    'pid': 81479,
-    'ts': _getWithErrorStartTime,
-    'ph': 'b',
-    'id': 238,
-    'args': {
-      'method': 'GET',
-      'uri': 'http://www.example.com/',
-      'filterKey': 'HTTP/client',
-      'isolateId': 'isolates/3494935576149295',
-      'isolateGroupId': 'isolateGroups/12160347548294753697'
-    },
-    'type': 'TimelineEvent'
-  },
-  {
-    'name': 'HTTP CLIENT GET',
-    'cat': 'Dart',
-    'tid': 21767,
-    'pid': 81479,
-    'ts': 231937100000,
-    'ph': 'e',
-    'id': 238,
-    'args': {
-      'error':
-          'SocketException: Failed host lookup: \'www.example.com\' (OS Error: nodename nor servname provided, or not known, errno = 8)',
-      'filterKey': 'HTTP/client',
-      'isolateId': 'isolates/3494935576149295',
-      'isolateGroupId': 'isolateGroups/12160347548294753697'
-    },
-    'type': 'TimelineEvent'
-  },
-];
-
-const _invalidStartTime = 231938000000;
-final httpInvalidEvent = TimelineHttpRequestData.fromTimeline(
-  timelineMicrosBase: _invalidStartTime - 1000000, // - 1000000 is arbitrary.
-  requestEvents: httpInvalidEventTrace,
-  responseEvents: [],
-);
-final httpInvalidEventTrace = [
-  {
-    'name': 'HTTP CLIENT PUT',
-    'cat': 'Dart',
-    'tid': 52414,
-    'pid': 52406,
-    'ts': 231938100000,
-    'ph': 'e',
-    'id': '17',
-    'args': {
-      'requestHeaders': {
-        'user-agent': ['Dart/2.8 (dart:io)'],
-        'accept-encoding': ['gzip'],
-        'content-length': ['0'],
-        'host': ['127.0.0.1:8011']
-      },
-      'compressionState': 'HttpClientResponseCompressionState.notCompressed',
-      'connectionInfo': {
-        'localPort': 35246,
-        'remoteAddress': '127.0.0.1',
-        'remotePort': 8011
-      },
-      'contentLength': 0,
-      'cookies': ['Cookie-Monster=Me-want-cookie!; HttpOnly'],
-      'responseHeaders': {
-        'x-frame-options': ['SAMEORIGIN'],
-        'content-type': ['text/plain; charset=utf-8'],
-        'x-xss-protection': ['1; mode=block'],
-        'set-cookie': ['Cookie-Monster=Me-want-cookie!; HttpOnly'],
-        'x-content-type-options': ['nosniff'],
-        'content-length': ['0']
-      },
-      'isRedirect': false,
-      'persistentConnection': true,
-      'reasonPhrase': 'OK',
-      'redirects': [],
-      'statusCode': 200,
-      'isolateId': 'isolates/3907117677703047'
-    }
-  },
-];
-
-const _inProgressStartTime = 231939000000;
-final httpInProgressEvent = TimelineHttpRequestData.fromTimeline(
-  timelineMicrosBase: _inProgressStartTime - 1000000, // - 1000000 is arbitrary.
-  requestEvents: httpInProgressEventTrace,
-  responseEvents: [],
-);
-final httpInProgressEventTrace = [
-  {
-    'name': 'HTTP CLIENT GET',
-    'cat': 'Dart',
-    'tid': 52414,
-    'pid': 52406,
-    'ts': _inProgressStartTime,
-    'ph': 'b',
-    'id': '1d',
-    'args': {
-      'filterKey': 'HTTP/client',
-      'method': 'GET',
-      'uri': 'http://127.0.0.1:8011/foo/bar?foo=bar&year=2019',
-      'isolateId': 'isolates/3907117677703047'
-    }
-  },
-];
-
 final testSocket1 = WebSocket(SocketStatistic.parse(testSocket1Json)!, 0);
 final Map<String, dynamic> testSocket1Json = {
   'id': 0,
@@ -468,7 +117,11 @@ final Map<String, dynamic> testSocket3Json = {
 };
 
 final httpGetRequest = HttpProfileRequest.parse(httpGetJson)!;
-final httpGet = DartIOHttpRequestData(0, httpGetRequest);
+final httpGet = DartIOHttpRequestData(
+  0,
+  httpGetRequest,
+  requestFullDataFromVmService: false,
+);
 final Map<String, dynamic> httpGetJson = {
   'type': 'HttpProfileRequest',
   'id': 1,
@@ -530,7 +183,11 @@ final Map<String, dynamic> httpGetJson = {
 };
 
 final httpPostRequest = HttpProfileRequest.parse(httpPostJson)!;
-final httpPost = DartIOHttpRequestData(0, httpPostRequest);
+final httpPost = DartIOHttpRequestData(
+  0,
+  httpPostRequest,
+  requestFullDataFromVmService: false,
+);
 final Map<String, dynamic> httpPostJson = {
   'type': 'HttpProfileRequest',
   'id': 2,
@@ -605,7 +262,11 @@ final httpPostResponseBodyData = [
 ];
 
 final httpPutRequest = HttpProfileRequest.parse(httpPutJson)!;
-final httpPut = DartIOHttpRequestData(0, httpPutRequest);
+final httpPut = DartIOHttpRequestData(
+  0,
+  httpPutRequest,
+  requestFullDataFromVmService: false,
+);
 final Map<String, dynamic> httpPutJson = {
   'type': 'HttpProfileRequest',
   'id': 3,
@@ -680,7 +341,11 @@ final httpPutResponseBodyData = [
 ];
 
 final httpPatchRequest = HttpProfileRequest.parse(httpPatchJson)!;
-final httpPatch = DartIOHttpRequestData(0, httpPatchRequest);
+final httpPatch = DartIOHttpRequestData(
+  0,
+  httpPatchRequest,
+  requestFullDataFromVmService: false,
+);
 final Map<String, dynamic> httpPatchJson = {
   'type': 'HttpProfileRequest',
   'id': 4,
@@ -758,7 +423,11 @@ final httpPatchResponseBodyData = [
 ];
 
 final httpGetWithErrorRequest = HttpProfileRequest.parse(httpGetWithErrorJson)!;
-final httpGetWithError = DartIOHttpRequestData(0, httpGetWithErrorRequest);
+final httpGetWithError = DartIOHttpRequestData(
+  0,
+  httpGetWithErrorRequest,
+  requestFullDataFromVmService: false,
+);
 final Map<String, dynamic> httpGetWithErrorJson = {
   'type': '@HttpProfileRequest',
   'id': 5,
@@ -774,7 +443,11 @@ final Map<String, dynamic> httpGetWithErrorJson = {
 };
 
 final httpWsHandshakeRequest = HttpProfileRequest.parse(httpWsHandshakeJson)!;
-final httpWsHandshake = DartIOHttpRequestData(0, httpWsHandshakeRequest);
+final httpWsHandshake = DartIOHttpRequestData(
+  0,
+  httpWsHandshakeRequest,
+  requestFullDataFromVmService: false,
+);
 final Map<String, dynamic> httpWsHandshakeJson = {
   'type': 'HttpProfileRequest',
   'id': 6,
@@ -833,4 +506,45 @@ final Map<String, dynamic> httpWsHandshakeJson = {
   },
   'requestBody': [],
   'responseBody': [],
+};
+
+final httpGetPendingRequest = HttpProfileRequest.parse(httpGetPendingJson)!;
+final httpGetPending = DartIOHttpRequestData(
+  0,
+  httpGetPendingRequest,
+  requestFullDataFromVmService: false,
+);
+final Map<String, dynamic> httpGetPendingJson = {
+  'type': 'HttpProfileRequest',
+  'id': 7,
+  'isolateId': 'isolates/2013291945734727',
+  'method': 'GET',
+  'uri': 'https://jsonplaceholder.typicode.com/albums/10',
+  'startTime': 6326279935,
+  'endTime': 6326808974,
+  'request': {
+    'events': [
+      {'timestamp': 6326808941, 'event': 'Connection established'},
+      {'timestamp': 6326808965, 'event': 'Request sent'},
+      {'timestamp': 6327090622, 'event': 'Waiting (TTFB)'},
+      {'timestamp': 6327091650, 'event': 'Content Download'}
+    ],
+    'headers': {
+      'content-length': ['0'],
+    },
+    'connectionInfo': {
+      'localPort': 45648,
+      'remoteAddress': '2606:4700:3033::ac43:bdd9',
+      'remotePort': 443,
+    },
+    'contentLength': 0,
+    'cookies': [],
+    'followRedirects': true,
+    'maxRedirects': 5,
+    'method': 'GET',
+    'persistentConnection': true,
+    'uri': 'https://jsonplaceholder.typicode.com/albums/1',
+    'filterKey': 'HTTP/client',
+  },
+  'requestBody': [],
 };

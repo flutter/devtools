@@ -169,8 +169,7 @@ HeapGraph convertHeapGraph(
     } else {
       // Support for new snapshot class index is zero based (starts at
       // zero) and the previous snapshot classId is 1-based index.
-      final classId =
-          controller.newSnapshotSemantics ? o.classId : o.classId - 1;
+      final classId = o.classId;
       monitorClass(classId: classId);
       converted.theClass = classes[classId];
     }
@@ -182,7 +181,7 @@ HeapGraph convertHeapGraph(
         if (refId == 0) {
           ref = HeapGraph.elementSentinel;
         } else {
-          ref = elements[controller.newSnapshotSemantics ? refId : refId - 1]!;
+          ref = elements[refId]!;
         }
         converted.references!.add(ref);
       }

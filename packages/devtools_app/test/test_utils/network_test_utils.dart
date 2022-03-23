@@ -4,20 +4,9 @@
 
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
-import 'dart:async';
-import 'dart:convert';
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../test_data/http_request_timeline_test_data.dart';
 import '../test_data/network_test_data.dart';
-
-/// Creates an instance of [Timeline] which contains recorded HTTP events.
-Future<Timeline> loadNetworkProfileTimeline() async {
-  final httpTestData = jsonDecode(httpRequestTimelineTestData);
-  return Timeline.parse(httpTestData)!;
-}
 
 SocketProfile loadSocketProfile() {
   return SocketProfile(sockets: [
@@ -35,6 +24,7 @@ HttpProfile loadHttpProfile() {
       HttpProfileRequest.parse(httpPutJson)!,
       HttpProfileRequest.parse(httpPatchJson)!,
       HttpProfileRequest.parse(httpWsHandshakeJson)!,
+      HttpProfileRequest.parse(httpGetPendingJson)!,
     ],
     timestamp: 0,
   );
