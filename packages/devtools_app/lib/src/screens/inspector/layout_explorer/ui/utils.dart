@@ -300,12 +300,12 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   }
 
   @override
-  List<double?> get childrenHeights =>
-      _lerpList(begin.childrenHeights!, end.childrenHeights!);
+  List<double> get childrenHeights =>
+      _lerpList(begin.childrenHeights, end.childrenHeights).cast<double>();
 
   @override
-  List<double?> get childrenWidths =>
-      _lerpList(begin.childrenWidths!, end.childrenWidths!);
+  List<double> get childrenWidths =>
+      _lerpList(begin.childrenWidths, end.childrenWidths).cast<double>();
 
   @override
   BoxConstraints? get constraints {

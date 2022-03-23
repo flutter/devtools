@@ -60,7 +60,7 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
               if (showOverflowHeight)
                 TextSpan(
                   text: '\nchildren take: '
-                      '${toStringAsFixed(sum(propertiesLocal.childrenHeights!.cast<double>()))}',
+                      '${toStringAsFixed(sum(propertiesLocal.childrenHeights.cast<double>()))}',
                 ),
             ],
           ),
@@ -118,7 +118,7 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
           if (showChildrenWidthsSum)
             TextSpan(
               text: '\nchildren take '
-                  '${toStringAsFixed(sum(propertiesLocal.childrenWidths!.cast<double>()))}',
+                  '${toStringAsFixed(sum(propertiesLocal.childrenWidths.cast<double>()))}',
             )
         ],
       ),

@@ -179,9 +179,9 @@ class LayoutProperties {
     return displayChildren.map((child) => child.dimension(axis)).toList();
   }
 
-  List<double?>? get childrenWidths => childrenDimensions(Axis.horizontal);
+  List<double> get childrenWidths => childrenDimensions(Axis.horizontal);
 
-  List<double?>? get childrenHeights => childrenDimensions(Axis.vertical);
+  List<double> get childrenHeights => childrenDimensions(Axis.vertical);
 
   String describeWidthConstraints() {
     final constraintsLocal = constraints;
@@ -462,17 +462,17 @@ class FlexLayoutProperties extends LayoutProperties {
   @override
   bool get isOverflowWidth {
     if (direction == Axis.horizontal) {
-      return width + overflowEpsilon < sum(childrenWidths!.cast<double>());
+      return width + overflowEpsilon < sum(childrenWidths.cast<double>());
     }
-    return width + overflowEpsilon < max(childrenWidths!.cast<double>());
+    return width + overflowEpsilon < max(childrenWidths.cast<double>());
   }
 
   @override
   bool get isOverflowHeight {
     if (direction == Axis.vertical) {
-      return height + overflowEpsilon < sum(childrenHeights!.cast<double>());
+      return height + overflowEpsilon < sum(childrenHeights.cast<double>());
     }
-    return height + overflowEpsilon < max(childrenHeights!.cast<double>());
+    return height + overflowEpsilon < max(childrenHeights.cast<double>());
   }
 
   bool get startIsTopLeft {
