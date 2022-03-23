@@ -408,7 +408,7 @@ class ProgramExplorer extends StatelessWidget {
     @required this.controller,
     this.onSelected,
     this.title = 'File Explorer',
-  })  : super(key: key);
+  }) : super(key: key);
 
   final ProgramExplorerController controller;
   final void Function(ScriptLocation) onSelected;

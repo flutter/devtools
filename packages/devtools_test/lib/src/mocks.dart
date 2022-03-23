@@ -740,8 +740,7 @@ class MockDebuggerController extends Mock implements DebuggerController {
       MockProgramExplorerController.withDefaults();
 }
 
-class MockScriptManager extends Mock implements ScriptManager {
-}
+class MockScriptManager extends Mock implements ScriptManager {}
 
 class MockProgramExplorerController extends Mock
     implements ProgramExplorerController {
