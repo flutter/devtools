@@ -23,7 +23,6 @@ import '../../shared/globals.dart';
 import '../../shared/table.dart';
 import '../../shared/table_data.dart';
 import '../../shared/utils.dart';
-import '../../shared/version.dart';
 import '../../ui/search.dart';
 import 'memory_filter.dart';
 import 'memory_graph_model.dart';
@@ -241,16 +240,7 @@ class MemoryController extends DisposableController
   MemoryController() {
     memoryTimeline = MemoryTimeline(this);
     memoryLog = MemoryLog(this);
-
-    /// package:vm_service version 6.1.0+1 updated the VM Service protocol version
-    /// to 3.43.0. This changed snapshot indexes for classes, instances and
-    /// sentinels.  Primarily classes are indexed by a 0 based index not (1-based).
-    newSnapshotSemantics = serviceManager.service!
-        .isProtocolVersionSupportedNow(
-            supportedVersion: SemanticVersion(major: 3, minor: 43));
   }
-
-  late bool newSnapshotSemantics;
 
   static const logFilenamePrefix = 'memory_log_';
 
