@@ -26,7 +26,7 @@ abstract class PathToProperty with _$PathToProperty {
 
   // TODO test that mutating a Map does not collapse previously expanded keys
   const factory PathToProperty.mapKey({
-    required String? ref,
+    required String ref,
   }) = MapKeyPath;
 
   /// Must not depend on [InstanceRef] and its ID, as they may change across
@@ -141,7 +141,7 @@ abstract class InstanceDetails with _$InstanceDetails {
     required String instanceRefId,
   }) = EnumInstance;
 
-  String? get instanceRefId;
+  String get instanceRefId;
 
   bool get isExpandable {
     bool falsy(Object obj) => false;
