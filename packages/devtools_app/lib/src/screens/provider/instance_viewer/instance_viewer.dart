@@ -130,10 +130,10 @@ class _InstanceViewerState extends State<InstanceViewer> {
   Iterable<Widget> _buildListViewItems(
     BuildContext context,
     ScopedReader watch, {
-    required InstancePath? path,
+    required InstancePath path,
     bool disableExpand = false,
   }) {
-    return watch(instanceProvider(path!)).when(
+    return watch(instanceProvider(path)).when(
       loading: () => const [Text('loading...')],
       error: (err, stack) => _buildError(err, stack, path),
       data: (instance) sync* {
@@ -273,14 +273,14 @@ class _InstanceViewerState extends State<InstanceViewer> {
     BuildContext context,
     ScopedReader watch,
     MapInstance instance, {
-    required InstancePath? path,
+    required InstancePath path,
   }) sync* {
     for (final key in instance.keys) {
       final value = _buildListViewItems(
         context,
         watch,
         path:
-            path!.pathForChild(PathToProperty.mapKey(ref: key.instanceRefId!)),
+            path.pathForChild(PathToProperty.mapKey(ref: key.instanceRefId!))!,
       );
 
       final keyHeader = _buildHeader(key, disableExpand: true, path: path);
@@ -314,13 +314,13 @@ class _InstanceViewerState extends State<InstanceViewer> {
     BuildContext context,
     ScopedReader watch,
     ListInstance instance, {
-    required InstancePath? path,
+    required InstancePath path,
   }) sync* {
     for (var index = 0; index < instance.length!; index++) {
       final children = _buildListViewItems(
         context,
         watch,
-        path: path!.pathForChild(PathToProperty.listIndex(index)),
+        path: path.pathForChild(PathToProperty.listIndex(index))!,
       );
 
       bool isFirst = true;
@@ -364,7 +364,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
       final children = _buildListViewItems(
         context,
         watch,
-        path: path.pathForChild(PathToProperty.fromObjectField(field)),
+        path: path.pathForChild(PathToProperty.fromObjectField(field))!,
       );
 
       bool isFirst = true;
