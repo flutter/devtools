@@ -179,9 +179,10 @@ Future<EnumInstance?> _tryParseEnum(
   required EvalOnDartLibrary eval,
   required Disposable isAlive,
   required String? instanceRefId,
-  required Setter setter,
+  required Setter? setter,
 }) async {
-  if (instance.kind != InstanceKind.kPlainInstance ||
+  if (instanceRefId == null ||
+      instance.kind != InstanceKind.kPlainInstance ||
       instance.fields!.length != 2) return null;
 
   InstanceRef? findPropertyWithName(String name) {
@@ -198,21 +199,21 @@ Future<EnumInstance?> _tryParseEnum(
   final nameInstanceFuture = eval.getInstance(_nameRef, isAlive);
   final indexInstanceFuture = eval.getInstance(indexRef, isAlive);
 
-  final index = await (indexInstanceFuture as FutureOr<Instance>);
+  final index = (await indexInstanceFuture)!;
 
   if (index.kind != InstanceKind.kInt) return null;
 
-  final name = await (nameInstanceFuture as FutureOr<Instance>);
+  final name = (await nameInstanceFuture)!;
   if (name.kind != InstanceKind.kString) return null;
 
-  final nameSplit = name.valueAsString!.split('.');
+  final nameSplit = (name.valueAsString ?? '').split('.');
 
   if (nameSplit.length != 2) return null;
 
   return EnumInstance(
     type: nameSplit.first,
     value: nameSplit[1],
-    instanceRefId: instanceRefId!,
+    instanceRefId: instanceRefId,
     setter: setter,
   );
 }
@@ -249,7 +250,7 @@ Setter? _parseSetter({
       final field =
           parent.fields.firstWhere((field) => field.name == keyPath.name);
 
-      if (field.isFinal) return (_) async => {};
+      if (field.isFinal) return null;
       return mutate;
     },
     orElse: () => throw FallThroughError(),
@@ -286,10 +287,9 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
     isAlive: isAlive,
     ref: ref,
     parent: parent,
-  )!;
+  );
 
-  final instance =
-      await (eval.getInstance(instanceRef!, isAlive) as FutureOr<Instance>);
+  final instance = (await eval.getInstance(instanceRef!, isAlive))!;
 
   switch (instance.kind) {
     case InstanceKind.kNull:
@@ -322,8 +322,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
       final keysFuture = Future.wait<InstanceDetails>([
         for (final keyRef in keysRef)
           ref.watch(
-            rawInstanceProvider(InstancePath.fromInstanceId(keyRef!.id!))
-                .future,
+            rawInstanceProvider(InstancePath.fromInstanceId(keyRef?.id)).future,
           )
       ]);
 
@@ -415,26 +414,26 @@ Future<List<ObjectField>> _parseFields(
     final owner = await (eval.getClass(field.decl!.owner as ClassRef, isAlive)
         as FutureOr<Class>);
 
-    String? ownerUri;
-    String? ownerName;
+    late String ownerUri;
+    late String ownerName;
     if (owner.mixin == null) {
-      ownerUri = owner.library!.uri;
-      ownerName = owner.name;
+      ownerUri = owner.library!.uri!;
+      ownerName = owner.name!;
     } else {
       final mixinClass = await (eval.getClass(owner.mixin!.typeClass!, isAlive)
           as FutureOr<Class>);
 
-      ownerUri = mixinClass.library!.uri;
-      ownerName = mixinClass.name;
+      ownerUri = mixinClass.library!.uri!;
+      ownerName = mixinClass.name!;
     }
 
-    final ownerPackageName = tryParsePackageName(ownerUri!);
+    final ownerPackageName = tryParsePackageName(ownerUri);
 
     return ObjectField(
       name: field.decl!.name!,
       isFinal: field.decl!.isFinal!,
       ref: parseSentinel<InstanceRef>(field.value),
-      ownerName: ownerName!,
+      ownerName: ownerName,
       ownerUri: ownerUri,
       eval: await ref.watch(libraryEvalProvider(owner.library!.uri!).future),
       isDefinedByDependency: ownerPackageName != appName,

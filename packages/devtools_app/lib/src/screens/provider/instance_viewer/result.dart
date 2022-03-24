@@ -10,8 +10,8 @@ import '../../../shared/eval_on_dart_library.dart';
 
 // This part is generated using package:freezed, but without the devtool
 // depending on the package.
-// To update the generated files, temporarily add
-// https://pub.dev/packages/freezed as dependency; replace the
+// To update the generated files: temporarily add
+// https://pub.dev/packages/freezed to dependencies; replace the
 // `fake_freezed_annotation.dart` import with
 // 'package:freezed_annotation/freezed_annotation.dart', then execute
 // `flutter pub run build_runner build`.

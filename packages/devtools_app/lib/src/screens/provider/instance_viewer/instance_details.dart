@@ -11,8 +11,8 @@ import 'result.dart';
 
 // This part is generated using package:freezed, but without the devtool
 // depending on the package.
-// To update the generated files, temporarily add
-// https://pub.dev/packages/freezed as dependency; replace the
+// To update the generated files: temporarily add
+// https://pub.dev/packages/freezed to dependencies; replace the
 // `fake_freezed_annotation.dart` import with
 // 'package:freezed_annotation/freezed_annotation.dart', then execute
 // `flutter pub run build_runner build`.
@@ -26,7 +26,7 @@ abstract class PathToProperty with _$PathToProperty {
 
   // TODO test that mutating a Map does not collapse previously expanded keys
   const factory PathToProperty.mapKey({
-    required String ref,
+    required String? ref,
   }) = MapKeyPath;
 
   /// Must not depend on [InstanceRef] and its ID, as they may change across
@@ -174,7 +174,7 @@ abstract class InstancePath with _$InstancePath {
     @Default([]) List<PathToProperty> pathToProperty,
   }) = _InstancePathFromProviderId;
 
-  InstancePath? get root => copyWith(pathToProperty: []);
+  InstancePath get root => copyWith(pathToProperty: []);
 
   InstancePath? get parent {
     if (pathToProperty.isEmpty) return null;

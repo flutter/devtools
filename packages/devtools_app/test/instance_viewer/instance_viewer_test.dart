@@ -58,7 +58,7 @@ final object2Instance = AsyncValue.data(
     ],
     hash: 0,
     instanceRefId: 'object',
-    setter: (_) async => {},
+    setter: null,
     evalForInstance: FakeEvalOnDartLibrary(),
     type: 'MyClass',
   ),
@@ -104,14 +104,14 @@ final trueInstance = AsyncValue.data(
 );
 
 final int42Instance = AsyncValue.data(
-  NumInstance('42', instanceRefId: '42', setter: (_) async => {}),
+  NumInstance('42', instanceRefId: '42', setter: null),
 );
 
 final enumValueInstance = AsyncValue.data(
   InstanceDetails.enumeration(
     type: 'Enum',
     value: 'value',
-    setter: (_) async => {},
+    setter: null,
     instanceRefId: 'Enum.value',
   ),
 );
@@ -185,7 +185,7 @@ void main() {
                   ],
                   hash: 0,
                   instanceRefId: 'object',
-                  setter: (_) async => {},
+                  setter: null,
                   evalForInstance: FakeEvalOnDartLibrary(),
                   type: 'MyClass',
                 ),
@@ -246,7 +246,7 @@ void main() {
                   ],
                   hash: 0,
                   instanceRefId: 'object',
-                  setter: (_) async => {},
+                  setter: null,
                   evalForInstance: FakeEvalOnDartLibrary(),
                   type: 'MyClass',
                 ),

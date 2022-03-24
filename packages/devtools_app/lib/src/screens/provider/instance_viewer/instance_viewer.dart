@@ -35,22 +35,22 @@ final isExpandedProvider = StateProviderFamily<bool, InstancePath>((ref, path) {
 
 final estimatedChildCountProvider =
     AutoDisposeProviderFamily<int, InstancePath>((ref, rootPath) {
-  int estimatedChildCount(InstancePath? path) {
+  int estimatedChildCount(InstancePath path) {
     int one(InstanceDetails instance) => 1;
 
     int expandableEstimatedChildCount(Iterable<PathToProperty> keys) {
-      if (!ref.watch(isExpandedProvider(path!)).state) {
+      if (!ref.watch(isExpandedProvider(path)).state) {
         return 1;
       }
       return keys.fold(1, (acc, element) {
         return acc +
             estimatedChildCount(
-              path.pathForChild(element),
+              path.pathForChild(element)!,
             );
       });
     }
 
-    return ref.watch(instanceProvider(path!)).when(
+    return ref.watch(instanceProvider(path)).when(
           loading: () => 1,
           error: (err, stack) => 1,
           data: (instance) {
@@ -95,11 +95,11 @@ void showErrorSnackBar(BuildContext context, Object error) {
 class InstanceViewer extends StatefulWidget {
   const InstanceViewer({
     Key? key,
-    this.rootPath,
+    required this.rootPath,
     required this.showInternalProperties,
   }) : super(key: key);
 
-  final InstancePath? rootPath;
+  final InstancePath rootPath;
   final bool showInternalProperties;
 
   @override
