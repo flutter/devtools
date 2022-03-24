@@ -81,8 +81,8 @@ void main() {
       ]);
       final properties = await toFlexLayoutProperties(widget, tester: tester);
       expect(properties.startIsTopLeft, true);
-      expect(properties.displayChildren![0].description, 'SizedBox');
-      expect(properties.displayChildren![1].description, 'Container');
+      expect(properties.displayChildren[0].description, 'SizedBox');
+      expect(properties.displayChildren[1].description, 'Container');
     });
 
     testWidgets(
@@ -97,8 +97,8 @@ void main() {
       );
       final properties = await toFlexLayoutProperties(widget, tester: tester);
       expect(properties.startIsTopLeft, false);
-      expect(properties.displayChildren![0].description, 'Container');
-      expect(properties.displayChildren![1].description, 'SizedBox');
+      expect(properties.displayChildren[0].description, 'Container');
+      expect(properties.displayChildren[1].description, 'SizedBox');
     });
 
     group('childrenRenderProperties tests', () {
@@ -221,9 +221,8 @@ void main() {
             Row(
               textDirection:
                   flipMainAxis ? TextDirection.rtl : TextDirection.ltr,
-              mainAxisAlignment: flipMainAxis
-                  ? mainAxisAlignment.reversed!
-                  : mainAxisAlignment,
+              mainAxisAlignment:
+                  flipMainAxis ? mainAxisAlignment.reversed : mainAxisAlignment,
               children: flipMainAxis
                   ? childrenWidgets.reversed.toList()
                   : childrenWidgets,

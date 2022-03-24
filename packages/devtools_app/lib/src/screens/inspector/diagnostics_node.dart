@@ -139,7 +139,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   BoxParentData? get parentData =>
       deserializeParentData(json['parentData'] as Map<String, Object>?);
 
-  Size? get size => deserializeSize(json['size'] as Map<String, Object>?);
+  Size get size => deserializeSize(json['size'] as Map<String, Object>? ?? {})!;
 
   bool get isLocalClass {
     final objectGroup = inspectorService;
