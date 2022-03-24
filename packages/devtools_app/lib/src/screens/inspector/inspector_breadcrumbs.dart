@@ -194,7 +194,7 @@ class _InspectorBreadcrumbData {
   final String? alternativeText;
   final bool isSelected;
 
-  String get text => alternativeText ?? node?.diagnostic?.description ?? '';
+  String get text => alternativeText ?? node?.diagnostic.description ?? '';
 
   Widget? get icon {
     if (alternativeIcon != null) {
@@ -204,7 +204,7 @@ class _InspectorBreadcrumbData {
       );
     }
 
-    return node?.diagnostic?.icon;
+    return node?.diagnostic.icon;
   }
 
   bool get isChevron =>

@@ -13,8 +13,6 @@
 /// of view and controller. View specific portions of InspectorPanel.java have
 /// been moved to inspector.dart.
 
-// @dart=2.9
-
 library inspector_controller;
 
 import 'dart:async';
@@ -70,22 +68,21 @@ class InspectorController extends DisposableController
     with AutoDisposeControllerMixin
     implements InspectorServiceClient {
   InspectorController({
-    @required this.inspectorTree,
-    InspectorTreeController detailsTree,
-    @required this.treeType,
+    required this.inspectorTree,
+    InspectorTreeController? detailsTree,
+    required this.treeType,
     this.parent,
     this.isSummaryTree = true,
   })  : _treeGroups = InspectorObjectGroupManager(
-          serviceManager.inspectorService,
+          serviceManager.inspectorService as InspectorService,
           'tree',
         ),
         _selectionGroups = InspectorObjectGroupManager(
-          serviceManager.inspectorService,
+          serviceManager.inspectorService as InspectorService,
           'selection',
         ) {
     _refreshRateLimiter = RateLimiter(refreshFramesPerSecond, refresh);
 
-    assert(inspectorTree != null);
     inspectorTree.config = InspectorTreeConfig(
       summaryTree: isSummaryTree,
       treeType: treeType,
@@ -97,7 +94,7 @@ class InspectorController extends DisposableController
     );
     if (isSummaryTree) {
       details = InspectorController(
-        inspectorTree: detailsTree,
+        inspectorTree: detailsTree!,
         treeType: treeType,
         parent: this,
         isSummaryTree: false,
@@ -143,7 +140,7 @@ class InspectorController extends DisposableController
     serviceManager.consoleService.ensureServiceInitialized();
   }
 
-  void _handleConnectionStart(VmService service) {
+  void _handleConnectionStart(VmService? service) {
     // Clear any existing badge/errors for older errors that were collected.
     // Do this in a post frame callback so that we are not trying to clear the
     // error notifiers for this screen while the framework is already in the
@@ -163,7 +160,7 @@ class InspectorController extends DisposableController
     }
   }
 
-  IsolateRef _mainIsolate;
+  IsolateRef? _mainIsolate;
 
   ValueListenable<bool> get _supportsToggleSelectWidgetMode =>
       serviceManager.serviceExtensionManager
@@ -194,20 +191,20 @@ class InspectorController extends DisposableController
   final bool isSummaryTree;
 
   /// Parent InspectorController if this is a details subtree.
-  InspectorController parent;
+  InspectorController? parent;
 
-  InspectorController details;
+  InspectorController? details;
 
   InspectorTreeController inspectorTree;
   final FlutterTreeType treeType;
 
   bool _disposed = false;
 
-  RateLimiter _refreshRateLimiter;
+  late RateLimiter _refreshRateLimiter;
 
   /// Groups used to manage and cancel requests to load data to display directly
   /// in the tree.
-  InspectorObjectGroupManager _treeGroups;
+  InspectorObjectGroupManager? _treeGroups;
 
   /// Groups used to manage and cancel requests to determine what the current
   /// selection is.
@@ -215,25 +212,25 @@ class InspectorController extends DisposableController
   /// This group needs to be kept separate from treeGroups as the selection is
   /// shared more with the details subtree.
   /// TODO(jacobr): is there a way we can unify the selection and tree groups?
-  InspectorObjectGroupManager _selectionGroups;
+  InspectorObjectGroupManager? _selectionGroups;
 
   /// Node being highlighted due to the current hover.
-  InspectorTreeNode get currentShowNode => inspectorTree.hover;
+  InspectorTreeNode? get currentShowNode => inspectorTree.hover;
 
-  set currentShowNode(InspectorTreeNode node) => inspectorTree.hover = node;
+  set currentShowNode(InspectorTreeNode? node) => inspectorTree.hover = node;
 
   bool flutterAppFrameReady = false;
 
   bool treeLoadStarted = false;
 
-  RemoteDiagnosticsNode subtreeRoot;
+  RemoteDiagnosticsNode? subtreeRoot;
 
   bool programaticSelectionChangeInProgress = false;
 
-  ValueListenable<InspectorTreeNode> get selectedNode => _selectedNode;
-  final ValueNotifier<InspectorTreeNode> _selectedNode = ValueNotifier(null);
+  ValueListenable<InspectorTreeNode?> get selectedNode => _selectedNode;
+  final ValueNotifier<InspectorTreeNode?> _selectedNode = ValueNotifier(null);
 
-  InspectorTreeNode lastExpanded;
+  InspectorTreeNode? lastExpanded;
 
   bool isActive = false;
 
@@ -248,12 +245,12 @@ class InspectorController extends DisposableController
 
   bool get detailsSubtree => parent != null;
 
-  RemoteDiagnosticsNode get selectedDiagnostic =>
+  RemoteDiagnosticsNode? get selectedDiagnostic =>
       selectedNode.value?.diagnostic;
 
-  final ValueNotifier<int> _selectedErrorIndex = ValueNotifier<int>(null);
+  final ValueNotifier<int?> _selectedErrorIndex = ValueNotifier<int?>(null);
 
-  ValueListenable<int> get selectedErrorIndex => _selectedErrorIndex;
+  ValueListenable<int?> get selectedErrorIndex => _selectedErrorIndex;
 
   FlutterTreeType getTreeType() {
     return treeType;
@@ -278,7 +275,7 @@ class InspectorController extends DisposableController
     return valueToInspectorTreeNode.containsKey(ref);
   }
 
-  RemoteDiagnosticsNode findDiagnosticsValue(InspectorInstanceRef ref) {
+  RemoteDiagnosticsNode? findDiagnosticsValue(InspectorInstanceRef ref) {
     return valueToInspectorTreeNode[ref]?.diagnostic;
   }
 
@@ -290,23 +287,24 @@ class InspectorController extends DisposableController
     return highlightShowNode(valueToInspectorTreeNode[ref]);
   }
 
-  bool highlightShowNode(InspectorTreeNode node) {
+  bool highlightShowNode(InspectorTreeNode? node) {
     if (node == null && parent != null) {
       // If nothing is highlighted, highlight the node selected in the parent
       // tree so user has context of where the node selected in the parent is
       // in the details tree.
-      node = findMatchingInspectorTreeNode(parent.selectedDiagnostic);
+      node = findMatchingInspectorTreeNode(parent!.selectedDiagnostic);
     }
 
     currentShowNode = node;
     return true;
   }
 
-  InspectorTreeNode findMatchingInspectorTreeNode(RemoteDiagnosticsNode node) {
+  InspectorTreeNode? findMatchingInspectorTreeNode(
+      RemoteDiagnosticsNode? node) {
     if (node?.valueRef == null) {
       return null;
     }
-    return valueToInspectorTreeNode[node.valueRef];
+    return valueToInspectorTreeNode[node!.valueRef];
   }
 
   Future<void> getPendingUpdateDone() async {
@@ -326,7 +324,7 @@ class InspectorController extends DisposableController
     // TODO(jacobr): refresh the tree as well as just the properties.
     if (details != null) {
       return Future.wait(
-          [getPendingUpdateDone(), details.getPendingUpdateDone()]);
+          [getPendingUpdateDone(), details!.getPendingUpdateDone()]);
     } else {
       return getPendingUpdateDone();
     }
@@ -347,9 +345,9 @@ class InspectorController extends DisposableController
 
     subtreeRoot = null;
 
-    inspectorTree?.root = inspectorTree?.createNode();
+    inspectorTree.root = inspectorTree.createNode();
     programaticSelectionChangeInProgress = false;
-    valueToInspectorTreeNode?.clear();
+    valueToInspectorTreeNode.clear();
   }
 
   void onIsolateStopped() {
@@ -393,15 +391,16 @@ class InspectorController extends DisposableController
     }
 
     isActive = true;
-    inspectorService.addClient(this);
+    inspectorService!.addClient(this);
     maybeLoadUI();
   }
 
-  InspectorService get inspectorService => serviceManager.inspectorService;
+  InspectorService? get inspectorService =>
+      serviceManager.inspectorService as InspectorService?;
 
   List<String> get rootDirectories =>
-      _rootDirectories ?? parent.rootDirectories;
-  List<String> _rootDirectories;
+      _rootDirectories ?? parent!.rootDirectories;
+  List<String>? _rootDirectories;
 
   Future<void> maybeLoadUI() async {
     if (parent != null) {
@@ -419,7 +418,8 @@ class InspectorController extends DisposableController
         screen: InspectorScreen.id,
         action: analytics_constants.pageReady,
       );
-      _rootDirectories = await inspectorService.inferPubRootDirectoryIfNeeded();
+      _rootDirectories =
+          await inspectorService!.inferPubRootDirectoryIfNeeded();
       if (_disposed) return;
       // We need to start by querying the inspector service to find out the
       // current state of the UI.
@@ -431,7 +431,7 @@ class InspectorController extends DisposableController
       await updateSelectionFromService(
           firstFrame: true, inspectorRef: inspectorRef);
     } else {
-      final ready = await inspectorService.isWidgetTreeReady();
+      final ready = await inspectorService!.isWidgetTreeReady();
       if (_disposed) return;
       flutterAppFrameReady = ready;
       if (isActive && ready) {
@@ -441,8 +441,8 @@ class InspectorController extends DisposableController
   }
 
   Future<void> recomputeTreeRoot(
-    RemoteDiagnosticsNode newSelection,
-    RemoteDiagnosticsNode detailsSelection,
+    RemoteDiagnosticsNode? newSelection,
+    RemoteDiagnosticsNode? detailsSelection,
     bool setSubtreeRoot, {
     int subtreeDepth = 2,
   }) async {
@@ -450,9 +450,9 @@ class InspectorController extends DisposableController
     if (_disposed) {
       return;
     }
-    _treeGroups.cancelNext();
+    _treeGroups!.cancelNext();
     try {
-      final group = _treeGroups.next;
+      final group = _treeGroups!.next;
       final node = await (detailsSubtree
           ? group.getDetailsSubtree(subtreeRoot, subtreeDepth: subtreeDepth)
           : group.getRoot(treeType));
@@ -462,23 +462,21 @@ class InspectorController extends DisposableController
       // TODO(jacobr): as a performance optimization we should check if the
       // new tree is identical to the existing tree in which case we should
       // dispose the new tree and keep the old tree.
-      _treeGroups.promoteNext();
+      _treeGroups!.promoteNext();
       clearValueToInspectorTreeNodeMapping();
-      if (node != null) {
-        final InspectorTreeNode rootNode = inspectorTree.setupInspectorTreeNode(
-          inspectorTree.createNode(),
-          node,
-          expandChildren: true,
-          expandProperties: false,
-        );
-        inspectorTree.root = rootNode;
-      } else {
-        inspectorTree.root = inspectorTree.createNode();
-      }
+
+      final InspectorTreeNode rootNode = inspectorTree.setupInspectorTreeNode(
+        inspectorTree.createNode(),
+        node,
+        expandChildren: true,
+        expandProperties: false,
+      );
+      inspectorTree.root = rootNode;
+
       refreshSelection(newSelection, detailsSelection, setSubtreeRoot);
     } catch (error) {
       log(error.toString(), LogLevel.error);
-      _treeGroups.cancelNext();
+      _treeGroups!.cancelNext();
       return;
     }
   }
@@ -490,20 +488,20 @@ class InspectorController extends DisposableController
   /// Show the details subtree starting with node subtreeRoot highlighting
   /// node subtreeSelection.
   void showDetailSubtrees(
-    RemoteDiagnosticsNode subtreeRoot,
-    RemoteDiagnosticsNode subtreeSelection,
+    RemoteDiagnosticsNode? subtreeRoot,
+    RemoteDiagnosticsNode? subtreeSelection,
   ) {
     this.subtreeRoot = subtreeRoot;
     details?.setSubtreeRoot(subtreeRoot, subtreeSelection);
   }
 
-  InspectorInstanceRef getSubtreeRootValue() {
+  InspectorInstanceRef? getSubtreeRootValue() {
     return subtreeRoot?.valueRef;
   }
 
   void setSubtreeRoot(
-    RemoteDiagnosticsNode node,
-    RemoteDiagnosticsNode selection,
+    RemoteDiagnosticsNode? node,
+    RemoteDiagnosticsNode? selection,
   ) {
     assert(detailsSubtree);
     selection ??= node;
@@ -524,15 +522,15 @@ class InspectorController extends DisposableController
     recomputeTreeRoot(selection, null, false);
   }
 
-  InspectorTreeNode getSubtreeRootNode() {
+  InspectorTreeNode? getSubtreeRootNode() {
     if (subtreeRoot == null) {
       return null;
     }
-    return valueToInspectorTreeNode[subtreeRoot.valueRef];
+    return valueToInspectorTreeNode[subtreeRoot!.valueRef];
   }
 
-  void refreshSelection(RemoteDiagnosticsNode newSelection,
-      RemoteDiagnosticsNode detailsSelection, bool setSubtreeRoot) {
+  void refreshSelection(RemoteDiagnosticsNode? newSelection,
+      RemoteDiagnosticsNode? detailsSelection, bool setSubtreeRoot) {
     newSelection ??= selectedDiagnostic;
     setSelectedNode(findMatchingInspectorTreeNode(newSelection));
     syncSelectionHelper(
@@ -544,7 +542,7 @@ class InspectorController extends DisposableController
     if (details != null) {
       if (subtreeRoot != null && getSubtreeRootNode() == null) {
         subtreeRoot = newSelection;
-        details.setSubtreeRoot(newSelection, detailsSelection);
+        details!.setSubtreeRoot(newSelection, detailsSelection);
       }
     }
     syncTreeSelection();
@@ -558,7 +556,7 @@ class InspectorController extends DisposableController
     animateTo(selectedNode.value);
   }
 
-  void selectAndShowNode(RemoteDiagnosticsNode node) {
+  void selectAndShowNode(RemoteDiagnosticsNode? node) {
     if (node == null) {
       return;
     }
@@ -574,10 +572,7 @@ class InspectorController extends DisposableController
     syncTreeSelection();
   }
 
-  InspectorTreeNode getTreeNode(RemoteDiagnosticsNode node) {
-    if (node == null) {
-      return null;
-    }
+  InspectorTreeNode? getTreeNode(RemoteDiagnosticsNode node) {
     return valueToInspectorTreeNode[node.valueRef];
   }
 
@@ -612,9 +607,6 @@ class InspectorController extends DisposableController
     if (a == b) {
       return true;
     }
-    if (a == null || b == null) {
-      return false;
-    }
     return a.dartDiagnosticRef == b.dartDiagnosticRef;
   }
 
@@ -632,7 +624,7 @@ class InspectorController extends DisposableController
   }
 
   Future<void> updateSelectionFromService(
-      {@required bool firstFrame, String inspectorRef}) async {
+      {required bool firstFrame, String? inspectorRef}) async {
     if (parent != null) {
       // If we have a parent controller we should wait for the parent to update
       // our selection rather than updating it our self.
@@ -643,9 +635,9 @@ class InspectorController extends DisposableController
       return;
     }
     treeLoadStarted = true;
-    _selectionGroups.cancelNext();
+    _selectionGroups!.cancelNext();
 
-    final group = _selectionGroups.next;
+    final group = _selectionGroups!.next;
 
     if (inspectorRef != null) {
       await group.setSelectionInspector(
@@ -660,14 +652,14 @@ class InspectorController extends DisposableController
       isSummaryTree: isSummaryTree,
     );
 
-    final Future<RemoteDiagnosticsNode> pendingDetailsFuture = isSummaryTree
+    final Future<RemoteDiagnosticsNode?>? pendingDetailsFuture = isSummaryTree
         ? group.getSelection(selectedDiagnostic, treeType, isSummaryTree: false)
         : null;
 
     try {
-      final RemoteDiagnosticsNode newSelection = await pendingSelectionFuture;
+      final RemoteDiagnosticsNode? newSelection = await pendingSelectionFuture;
       if (_disposed || group.disposed) return;
-      RemoteDiagnosticsNode detailsSelection;
+      RemoteDiagnosticsNode? detailsSelection;
 
       if (pendingDetailsFuture != null) {
         detailsSelection = await pendingDetailsFuture;
@@ -678,28 +670,28 @@ class InspectorController extends DisposableController
           detailsSelection?.valueRef == details?.selectedDiagnostic?.valueRef &&
           newSelection?.valueRef == selectedDiagnostic?.valueRef) {
         // No need to change the selection as it didn't actually change.
-        _selectionGroups.cancelNext();
+        _selectionGroups!.cancelNext();
         return;
       }
-      _selectionGroups.promoteNext();
+      _selectionGroups!.promoteNext();
 
       subtreeRoot = newSelection;
 
       applyNewSelection(newSelection, detailsSelection, true);
     } catch (error) {
-      if (_selectionGroups.next == group) {
+      if (_selectionGroups!.next == group) {
         log(error.toString(), LogLevel.error);
-        _selectionGroups.cancelNext();
+        _selectionGroups!.cancelNext();
       }
     }
   }
 
   void applyNewSelection(
-    RemoteDiagnosticsNode newSelection,
-    RemoteDiagnosticsNode detailsSelection,
+    RemoteDiagnosticsNode? newSelection,
+    RemoteDiagnosticsNode? detailsSelection,
     bool setSubtreeRoot,
   ) {
-    final InspectorTreeNode nodeInTree =
+    final InspectorTreeNode? nodeInTree =
         findMatchingInspectorTreeNode(newSelection);
 
     if (nodeInTree == null) {
@@ -711,7 +703,7 @@ class InspectorController extends DisposableController
     refreshSelection(newSelection, detailsSelection, setSubtreeRoot);
   }
 
-  void animateTo(InspectorTreeNode node) {
+  void animateTo(InspectorTreeNode? node) {
     if (node == null) {
       return;
     }
@@ -720,7 +712,7 @@ class InspectorController extends DisposableController
     // Backtrack to the the first non-property parent so that all properties
     // for the node are visible if one property is animated to. This is helpful
     // as typically users want to view the properties of a node as a chunk.
-    while (node.parent != null && node.diagnostic?.isProperty == true) {
+    while (node!.parent != null && node.diagnostic.isProperty == true) {
       node = node.parent;
     }
     // Make sure we scroll so that immediate un-expanded children
@@ -737,14 +729,14 @@ class InspectorController extends DisposableController
         // to try to scroll into view.
         break;
       }
-      if (diagnosticsNode != null && !diagnosticsNode.isProperty) {
+      if (!diagnosticsNode.isProperty) {
         break;
       }
     }
     inspectorTree.animateToTargets(targets);
   }
 
-  void setSelectedNode(InspectorTreeNode newSelection) {
+  void setSelectedNode(InspectorTreeNode? newSelection) {
     if (newSelection == selectedNode.value) {
       return;
     }
@@ -754,9 +746,9 @@ class InspectorController extends DisposableController
     lastExpanded = null; // New selected node takes precedence.
     endShowNode();
     if (details != null) {
-      details.endShowNode();
+      details!.endShowNode();
     } else if (parent != null) {
-      parent.endShowNode();
+      parent!.endShowNode();
     }
 
     _updateSelectedErrorFromNode(_selectedNode.value);
@@ -765,8 +757,8 @@ class InspectorController extends DisposableController
 
   /// Update the index of the selected error based on a node that has been
   /// selected in the tree.
-  void _updateSelectedErrorFromNode(InspectorTreeNode node) {
-    final inspectorRef = node?.diagnostic?.valueRef?.id;
+  void _updateSelectedErrorFromNode(InspectorTreeNode? node) {
+    final inspectorRef = node?.diagnostic.valueRef.id;
 
     final errors = serviceManager.errorBadgeManager
         .erroredItemsForPage(InspectorScreen.id)
@@ -787,7 +779,7 @@ class InspectorController extends DisposableController
       // Mark the error as "seen" as this will render slightly differently
       // so the user can track which errored nodes they've viewed.
       serviceManager.errorBadgeManager
-          .markErrorAsRead(InspectorScreen.id, errors[inspectorRef]);
+          .markErrorAsRead(InspectorScreen.id, errors[inspectorRef!]!);
       // Also clear the error badge since new errors may have arrived while
       // the inspector was visible (normally they're cleared when visiting
       // the screen) and visiting an errored node seems an appropriate
@@ -799,8 +791,6 @@ class InspectorController extends DisposableController
   /// Updates the index of the selected error and selects its node in the tree.
   void selectErrorByIndex(int index) {
     _selectedErrorIndex.value = index;
-
-    if (index == null) return;
 
     final errors = serviceManager.errorBadgeManager
         .erroredItemsForPage(InspectorScreen.id)
@@ -816,20 +806,18 @@ class InspectorController extends DisposableController
 
   Future<void> _addNodeToConsole(InspectorTreeNode node) async {
     final valueRef = node.diagnostic.valueRef;
-    if (valueRef != null) {
-      final isolateRef = inspectorService.isolateRef;
-      final instanceRef = await node.diagnostic.inspectorService
-          ?.toObservatoryInstanceRef(valueRef);
-      if (_disposed) return;
+    final isolateRef = inspectorService!.isolateRef;
+    final instanceRef = await node.diagnostic.inspectorService
+        ?.toObservatoryInstanceRef(valueRef);
+    if (_disposed) return;
 
-      if (instanceRef != null) {
-        serviceManager.consoleService.appendInstanceRef(
-          value: instanceRef,
-          diagnostic: node.diagnostic,
-          isolateRef: isolateRef,
-          forceScrollIntoView: true,
-        );
-      }
+    if (instanceRef != null) {
+      serviceManager.consoleService.appendInstanceRef(
+        value: instanceRef,
+        diagnostic: node.diagnostic,
+        isolateRef: isolateRef,
+        forceScrollIntoView: true,
+      );
     }
   }
 
@@ -838,7 +826,7 @@ class InspectorController extends DisposableController
       return;
     }
 
-    final InspectorTreeNode node = inspectorTree.selection;
+    final InspectorTreeNode? node = inspectorTree.selection;
     if (node != null) {
       inspectorTree.maybePopulateChildren(node);
     }
@@ -853,7 +841,7 @@ class InspectorController extends DisposableController
       final bool maybeReroot = isSummaryTree &&
           details != null &&
           selectedDiagnostic != null &&
-          !details.hasDiagnosticsValue(selectedDiagnostic.valueRef);
+          !details!.hasDiagnosticsValue(selectedDiagnostic!.valueRef);
       syncSelectionHelper(
         maybeRerootDetailsTree: maybeReroot,
         selection: selectedDiagnostic,
@@ -862,24 +850,23 @@ class InspectorController extends DisposableController
 
       if (!maybeReroot) {
         if (isSummaryTree && details != null) {
-          details.selectAndShowNode(selectedDiagnostic);
+          details!.selectAndShowNode(selectedDiagnostic);
         } else if (parent != null) {
-          parent
+          parent!
               .selectAndShowNode(firstAncestorInParentTree(selectedNode.value));
         }
       }
     }
   }
 
-  RemoteDiagnosticsNode firstAncestorInParentTree(InspectorTreeNode node) {
+  RemoteDiagnosticsNode? firstAncestorInParentTree(InspectorTreeNode? node) {
     if (parent == null) {
-      return node.diagnostic;
+      return node!.diagnostic;
     }
     while (node != null) {
       final diagnostic = node.diagnostic;
-      if (diagnostic != null &&
-          parent.hasDiagnosticsValue(diagnostic.valueRef)) {
-        return parent.findDiagnosticsValue(diagnostic.valueRef);
+      if (parent!.hasDiagnosticsValue(diagnostic.valueRef)) {
+        return parent!.findDiagnosticsValue(diagnostic.valueRef);
       }
       node = node.parent;
     }
@@ -887,9 +874,9 @@ class InspectorController extends DisposableController
   }
 
   void syncSelectionHelper({
-    @required bool maybeRerootDetailsTree,
-    @required RemoteDiagnosticsNode selection,
-    @required RemoteDiagnosticsNode detailsSelection,
+    required bool maybeRerootDetailsTree,
+    required RemoteDiagnosticsNode? selection,
+    required RemoteDiagnosticsNode? detailsSelection,
   }) {
     if (selection != null) {
       if (selection.isCreatedByLocalProject) {
@@ -939,7 +926,7 @@ class InspectorController extends DisposableController
     super.dispose();
   }
 
-  static String treeTypeDisplayName(FlutterTreeType treeType) {
+  static String? treeTypeDisplayName(FlutterTreeType treeType) {
     switch (treeType) {
       case FlutterTreeType.widget:
         return 'Widget';
@@ -962,17 +949,17 @@ class InspectorController extends DisposableController
   }
 
   Future<void> expandAllNodesInDetailsTree() async {
-    await details.recomputeTreeRoot(
+    await details!.recomputeTreeRoot(
       inspectorTree.selection?.diagnostic,
-      details.inspectorTree.selection?.diagnostic ??
-          details.inspectorTree.root?.diagnostic,
+      details!.inspectorTree.selection?.diagnostic ??
+          details!.inspectorTree.root?.diagnostic,
       false,
       subtreeDepth: maxJsInt,
     );
   }
 
   Future<void> collapseDetailsToSelected() async {
-    details.inspectorTree.collapseToSelected();
-    details.animateTo(details.inspectorTree.selection);
+    details!.inspectorTree.collapseToSelected();
+    details!.animateTo(details!.inspectorTree.selection);
   }
 }

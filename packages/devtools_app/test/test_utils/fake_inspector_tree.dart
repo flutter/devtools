@@ -58,8 +58,8 @@ class FakeInspectorTree extends InspectorTreeController {
     // computation code will result in rendering artifacts in the text output.
     final StringBuffer sb = StringBuffer();
     for (int i = 0; i < numRows; i++) {
-      final row = getCachedRow(i);
-      if (hidePropertyLines && row.node?.diagnostic?.isProperty == true) {
+      final row = getCachedRow(i)!;
+      if (hidePropertyLines && row.node.diagnostic.isProperty == true) {
         continue;
       }
       int last = 0;

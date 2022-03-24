@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'dart:math' as math;
@@ -27,10 +25,10 @@ import '../ui/widgets_theme.dart';
 class BoxLayoutExplorerWidget extends LayoutExplorerWidget {
   const BoxLayoutExplorerWidget(
     InspectorController inspectorController, {
-    Key key,
+    Key? key,
   }) : super(inspectorController, key: key);
 
-  static bool shouldDisplay(RemoteDiagnosticsNode node) {
+  static bool shouldDisplay(RemoteDiagnosticsNode? node) {
     // Pretend this layout explorer is always available. This layout explorer
     // will gracefully fall back to an error message if the required properties
     // are not needed.
@@ -48,13 +46,13 @@ class BoxLayoutExplorerWidget extends LayoutExplorerWidget {
 class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     BoxLayoutExplorerWidget, LayoutProperties> {
   @override
-  RemoteDiagnosticsNode getRoot(RemoteDiagnosticsNode node) {
+  RemoteDiagnosticsNode? getRoot(RemoteDiagnosticsNode? node) {
     if (!shouldDisplay(node)) return null;
     return node;
   }
 
   @override
-  bool shouldDisplay(RemoteDiagnosticsNode node) {
+  bool shouldDisplay(RemoteDiagnosticsNode? node) {
     return BoxLayoutExplorerWidget.shouldDisplay(selectedNode);
   }
 
@@ -64,7 +62,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   ) {
     return AnimatedLayoutProperties(
       // If an animation is in progress, freeze it and start animating from there, else start a fresh animation from widget.properties.
-      animatedProperties?.copyWith() ?? properties,
+      animatedProperties?.copyWith() ?? properties!,
       nextProperties,
       changeAnimation,
     );
@@ -74,7 +72,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   LayoutProperties computeLayoutProperties(node) => LayoutProperties(node);
 
   @override
-  void updateHighlighted(LayoutProperties newProperties) {
+  void updateHighlighted(LayoutProperties? newProperties) {
     setState(() {
       // This implementation will need to change if we support showing more than
       // a single widget in the box visualization for the layout explorer.
@@ -121,9 +119,9 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   /// get the slightly smaller value of minFraction / (1 + minFraction)
   /// which is close enough for the simple values we need this for.
   static List<double> minFractionLayout({
-    @required double availableSize,
-    @required List<double> sizes,
-    @required List<double> minFractions,
+    required double availableSize,
+    required List<double?> sizes,
+    required List<double> minFractions,
   }) {
     assert(sizes.length == minFractions.length);
     final length = sizes.length;
@@ -161,18 +159,18 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final parentProperties = this.parentProperties ??
-        properties; // Fall back to this node's properties if there is no parent.
+        properties!; // Fall back to this node's properties if there is no parent.
 
     final parentSize = parentProperties.size;
-    final offset = properties.node?.parentData ??
+    final offset = properties!.node.parentData ??
         (BoxParentData()..offset = const Offset(0, 0));
 
-    if (properties.size == null) {
+    if (properties!.size == null) {
       // This should happen infrequently but it is better to show an error than
       // crash.
       return Center(
         child: Text(
-          'Visualizing layouts for ${properties.description} widgets is not yet supported.',
+          'Visualizing layouts for ${properties!.description} widgets is not yet supported.',
         ),
       );
     }
@@ -183,19 +181,19 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         final availableWidth = constraints.maxWidth - 2;
 
         final minFractions = [0.2, 0.5, 0.2];
-        double nullOutZero(double value) => value != 0.0 ? value : null;
+        double? nullOutZero(double value) => value != 0.0 ? value : null;
         final widths = [
           nullOutZero(offset.offset.dx),
-          properties.size.width,
+          properties!.size.width,
           nullOutZero(parentSize != null
-              ? parentSize.width - (properties.size.width + offset.offset.dx)
+              ? parentSize.width - (properties!.size.width + offset.offset.dx)
               : 0.0),
         ];
         final heights = [
           nullOutZero(offset.offset.dy),
-          properties.size.height,
+          properties!.size.height,
           nullOutZero(parentSize != null
-              ? parentSize.height - (properties.size.height + offset.offset.dy)
+              ? parentSize.height - (properties!.size.height + offset.offset.dy)
               : 0.0),
         ];
         // 3 element array with [left padding, widget width, right padding].
@@ -212,13 +210,12 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         );
         final widgetWidth = displayWidths[1];
         final widgetHeight = displayHeights[1];
-        final safeParentSize = parentSize ?? properties.size;
         return Container(
           width: constraints.maxWidth,
           height: constraints.maxHeight,
           decoration: BoxDecoration(
             border: Border.all(
-              color: WidgetTheme.fromName(properties.node.description).color,
+              color: WidgetTheme.fromName(properties!.node.description).color,
             ),
           ),
           child: Stack(
@@ -231,7 +228,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     axis: Axis.horizontal,
                     size: Size(displayWidths[0], widgetHeight),
                     offset: Offset(0, displayHeights[0]),
-                    realSize: Size(widths[0], safeParentSize.height),
+                    realSize: Size(widths[0]!, parentSize.height),
                     layoutProperties: properties,
                     isFreeSpace: true,
                   ),
@@ -244,7 +241,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     axis: Axis.horizontal,
                     size: Size(widgetWidth, displayHeights[0]),
                     offset: Offset(displayWidths[0], 0),
-                    realSize: Size(safeParentSize.width, heights[0]),
+                    realSize: Size(parentSize.width, heights[0]!),
                     layoutProperties: properties,
                     isFreeSpace: true,
                   ),
@@ -258,7 +255,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     size: Size(displayWidths[2], widgetHeight),
                     offset: Offset(
                         displayWidths[0] + displayWidths[1], displayHeights[0]),
-                    realSize: Size(widths[2], safeParentSize.height),
+                    realSize: Size(widths[2]!, parentSize.height),
                     layoutProperties: properties,
                     isFreeSpace: true,
                   ),
@@ -272,7 +269,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     size: Size(widgetWidth, displayHeights[2]),
                     offset: Offset(displayWidths[0],
                         displayHeights[0] + displayHeights[1]),
-                    realSize: Size(safeParentSize.width, heights[2]),
+                    realSize: Size(parentSize.width, heights[2]!),
                     layoutProperties: properties,
                     isFreeSpace: true,
                   ),
@@ -286,7 +283,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                   axis: Axis.horizontal,
                   size: Size(widgetWidth, widgetHeight),
                   offset: Offset(displayWidths[0], displayHeights[0]),
-                  realSize: properties.size,
+                  realSize: properties!.size,
                   layoutProperties: properties,
                 ),
               ),
@@ -297,8 +294,8 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     );
   }
 
-  LayoutProperties get parentProperties {
-    final parentElement = properties?.node?.parentRenderElement;
+  LayoutProperties? get parentProperties {
+    final parentElement = properties?.node.parentRenderElement;
     if (parentElement == null) return null;
     final parentProperties = computeLayoutProperties(parentElement);
     if (parentProperties.size == null) return null;
@@ -318,7 +315,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         // in the flex case the widget doesn't have its own RenderObject.
         // Consider showing the true ancestor for the summary tree that first
         // has a different render object.
-        title: describeBoxName(parentProperties),
+        title: describeBoxName(parentProperties)!,
         largeTitle: true,
         layoutProperties: parentProperties,
         isSelected: false,
@@ -339,7 +336,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   }
 }
 
-String describeBoxName(LayoutProperties properties) {
+String? describeBoxName(LayoutProperties properties) {
   // Displaying a high quality name is more ambiguous for the Box case than the
   // Flex case because the RenderObject for each widget is often quite
   // different than the user expected as not all widgets have RenderObjects.
@@ -347,8 +344,8 @@ String describeBoxName(LayoutProperties properties) {
   // This is clearer but risks more confusion
 
   // Widget name.
-  var title = properties.node.description;
-  final renderDescription = properties.node?.renderObject?.description;
+  var title = properties.node.description ?? '';
+  final renderDescription = properties.node.renderObject?.description;
   // TODO(jacobr): consider de-emphasizing the render object name by putting it
   // in more transparent text or just calling the widget Parent instead of
   // surfacing a widget name.
@@ -362,29 +359,29 @@ String describeBoxName(LayoutProperties properties) {
 /// Widget that represents and visualize a direct child of Flex widget.
 class BoxChildVisualizer extends StatelessWidget {
   const BoxChildVisualizer({
-    Key key,
-    @required this.state,
-    @required this.layoutProperties,
-    @required this.renderProperties,
-    @required this.isSelected,
+    Key? key,
+    required this.state,
+    required this.layoutProperties,
+    required this.renderProperties,
+    required this.isSelected,
   }) : super(key: key);
 
   final _BoxLayoutExplorerWidgetState state;
 
   final bool isSelected;
-  final LayoutProperties layoutProperties;
+  final LayoutProperties? layoutProperties;
   final RenderProperties renderProperties;
 
-  LayoutProperties get root => state.properties;
+  LayoutProperties? get root => state.properties;
 
-  LayoutProperties get properties => renderProperties.layoutProperties;
+  LayoutProperties? get properties => renderProperties.layoutProperties;
 
   @override
   Widget build(BuildContext context) {
     final renderSize = renderProperties.size;
     final renderOffset = renderProperties.offset;
 
-    Widget buildEntranceAnimation(BuildContext context, Widget child) {
+    Widget buildEntranceAnimation(BuildContext context, Widget? child) {
       final size = renderSize;
       // TODO(jacobr): does this entrance animation really add value.
       return Opacity(
@@ -403,9 +400,9 @@ class BoxChildVisualizer extends StatelessWidget {
       top: renderOffset.dy,
       left: renderOffset.dx,
       child: InkWell(
-        onTap: () => state.onTap(properties),
-        onDoubleTap: () => state.onDoubleTap(properties),
-        onLongPress: () => state.onDoubleTap(properties),
+        onTap: () => state.onTap(properties!),
+        onDoubleTap: () => state.onDoubleTap(properties!),
+        onLongPress: () => state.onDoubleTap(properties!),
         child: SizedBox(
           width: safePositiveDouble(renderSize.width),
           height: safePositiveDouble(renderSize.height),
@@ -414,8 +411,8 @@ class BoxChildVisualizer extends StatelessWidget {
             builder: buildEntranceAnimation,
             child: WidgetVisualizer(
               isSelected: isSelected,
-              layoutProperties: layoutProperties,
-              title: describeBoxName(properties),
+              layoutProperties: layoutProperties!,
+              title: describeBoxName(properties!)!,
               // TODO(jacobr): consider surfacing the overflow size information
               // if we determine
               // overflowSide: properties.overflowSide,
@@ -424,9 +421,9 @@ class BoxChildVisualizer extends StatelessWidget {
               largeTitle: true,
               child: VisualizeWidthAndHeightWithConstraints(
                 arrowHeadSize: arrowHeadSize,
-                properties: properties,
+                properties: properties!,
                 warnIfUnconstrained: false,
-                child: null,
+                child: const SizedBox.shrink(),
               ),
             ),
           ),
