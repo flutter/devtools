@@ -457,24 +457,24 @@ class FlexLayoutProperties extends LayoutProperties {
     return direction == Axis.horizontal ? Axis.vertical : Axis.horizontal;
   }
 
-  double? get mainAxisDimension => dimension(direction);
+  double get mainAxisDimension => dimension(direction);
 
-  double? get crossAxisDimension => dimension(crossAxisDirection);
+  double get crossAxisDimension => dimension(crossAxisDirection);
 
   @override
   bool get isOverflowWidth {
     if (direction == Axis.horizontal) {
-      return width + overflowEpsilon < sum(childrenWidths.cast<double>());
+      return width + overflowEpsilon < sum(childrenWidths);
     }
-    return width + overflowEpsilon < max(childrenWidths.cast<double>());
+    return width + overflowEpsilon < max(childrenWidths);
   }
 
   @override
   bool get isOverflowHeight {
     if (direction == Axis.vertical) {
-      return height + overflowEpsilon < sum(childrenHeights.cast<double>());
+      return height + overflowEpsilon < sum(childrenHeights);
     }
-    return height + overflowEpsilon < max(childrenHeights.cast<double>());
+    return height + overflowEpsilon < max(childrenHeights);
   }
 
   bool get startIsTopLeft {
@@ -707,7 +707,7 @@ class FlexLayoutProperties extends LayoutProperties {
       final space = renderProperties.clone()..isFreeSpace = true;
 
       space.crossAxisRealDimension =
-          crossAxisDimension! - space.crossAxisRealDimension;
+          crossAxisDimension - space.crossAxisRealDimension;
       space.crossAxisDimension =
           maxSizeAvailable(crossAxisDirection) - space.crossAxisDimension;
       if (space.crossAxisDimension <= 0.0) continue;
