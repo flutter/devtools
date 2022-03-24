@@ -49,11 +49,11 @@ final _rawProviderIdsProvider =
 
   final providerIdInstances = await Future.wait([
     for (final idRef in providerIdRefs.elements!.cast<InstanceRef>())
-      eval.getInstance(idRef, isAlive)
+      eval.safeGetInstance(idRef, isAlive)
   ]);
 
   return [
-    for (final idInstance in providerIdInstances) idInstance!.valueAsString!,
+    for (final idInstance in providerIdInstances) idInstance.valueAsString!,
   ];
 }, name: '_rawProviderIdsProvider');
 
@@ -72,8 +72,8 @@ final _rawProviderNodeProvider =
     isAlive: isAlive,
   );
 
-  Future<Instance?> getFieldWithName(String name) {
-    return eval.getInstance(
+  Future<Instance> getFieldWithName(String name) {
+    return eval.safeGetInstance(
       providerNodeInstance.fields!.firstWhere((e) => e.decl?.name == name).value
           as InstanceRef,
       isAlive,
@@ -84,7 +84,7 @@ final _rawProviderNodeProvider =
 
   return ProviderNode(
     id: id,
-    type: type!.valueAsString!,
+    type: type.valueAsString!,
   );
 }, name: '_rawProviderNodeProvider');
 
