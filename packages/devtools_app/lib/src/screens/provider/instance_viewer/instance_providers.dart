@@ -159,7 +159,7 @@ Future<void> _mutate(
 
   // Since the same object can be used in multiple locations at once, we need
   // to refresh the entire tree instead of just the node that was modified.
-  unawaited(ref.container.refresh(rawInstanceProvider(path.root!)));
+  unawaited(ref.container.refresh(rawInstanceProvider(path.root)));
 
   // Forces the UI to rebuild after the state change
   await serviceManager.performHotReload();

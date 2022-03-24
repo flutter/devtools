@@ -417,7 +417,7 @@ class _InstanceViewerState extends State<InstanceViewer> {
                 disableExpand: true,
               ),
               estimatedChildCount:
-                  watch(estimatedChildCountProvider(widget.rootPath!)),
+                  watch(estimatedChildCountProvider(widget.rootPath)),
             ),
           ),
         );
