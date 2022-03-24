@@ -21,14 +21,14 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
     this.warnIfUnconstrained = true,
   }) : arrowHeadSize = arrowHeadSize ?? defaultIconSize;
 
-  final Widget? child;
-  final LayoutProperties? properties;
+  final Widget child;
+  final LayoutProperties properties;
   final double arrowHeadSize;
   final bool warnIfUnconstrained;
 
   @override
   Widget build(BuildContext context) {
-    final propertiesLocal = properties!;
+    final propertiesLocal = properties;
     final showChildrenWidthsSum = propertiesLocal is FlexLayoutProperties &&
         propertiesLocal.isOverflowWidth;
     final bottomHeight = widthAndConstraintIndicatorSize;

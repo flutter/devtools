@@ -120,6 +120,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   L computeLayoutProperties(RemoteDiagnosticsNode node);
 
   AnimatedLayoutProperties<L> computeAnimatedProperties(L nextProperties);
+
   void updateHighlighted(L? newProperties);
 
   String? id(RemoteDiagnosticsNode? node) => node?.dartDiagnosticRef.id;
@@ -188,7 +189,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   }
 
   // update selected widget and trigger selection listener event to change focus.
-  void refreshSelection(RemoteDiagnosticsNode? node) {
+  void refreshSelection(RemoteDiagnosticsNode node) {
     inspectorController.refreshSelection(node, node, true);
   }
 
@@ -278,16 +279,13 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
 
   // TODO(albertusangga): Investigate why onForceRefresh is not getting called.
   @override
-  Future<Object?> onForceRefresh() async {
+  Future<void> onForceRefresh() async {
     _setProperties(await fetchLayoutProperties());
-    return null;
   }
 
   /// Currently this is not working so we should listen to controller selection event instead.
   @override
-  Future<void>? onInspectorSelectionChanged() {
-    return null;
-  }
+  Future<void> onInspectorSelectionChanged() async {}
 
   /// Register callback to be executed once Flutter frame is ready.
   void markAsDirty() {

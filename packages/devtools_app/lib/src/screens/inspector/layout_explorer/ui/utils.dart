@@ -104,15 +104,15 @@ class BorderLayout extends StatelessWidget {
 
 @immutable
 class Truncateable extends StatelessWidget {
-  const Truncateable({Key? key, this.truncate = false, this.child})
+  const Truncateable({Key? key, this.truncate = false, required this.child})
       : super(key: key);
 
-  final Widget? child;
+  final Widget child;
   final bool truncate;
 
   @override
   Widget build(BuildContext context) {
-    return Flexible(flex: truncate ? 1 : 0, child: child!);
+    return Flexible(flex: truncate ? 1 : 0, child: child);
   }
 }
 
@@ -129,14 +129,14 @@ class WidgetVisualizer extends StatelessWidget {
     this.hint,
     required this.isSelected,
     required this.layoutProperties,
-    this.child,
+    required this.child,
     this.overflowSide,
     this.largeTitle = false,
   }) : super(key: key);
 
-  final LayoutProperties? layoutProperties;
+  final LayoutProperties layoutProperties;
   final String title;
-  final Widget? child;
+  final Widget child;
   final Widget? hint;
   final bool isSelected;
   final bool largeTitle;
@@ -154,14 +154,13 @@ class WidgetVisualizer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final properties = layoutProperties!;
+    final properties = layoutProperties;
     final borderColor = WidgetTheme.fromName(properties.node.description).color;
     final boxAdjust = isSelected ? _selectedPadding : 0.0;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final hintLocal = hint;
-        final childLocal = child;
         return OverflowBox(
           minWidth: constraints.minWidth + boxAdjust,
           maxWidth: constraints.maxWidth + boxAdjust,
@@ -220,7 +219,7 @@ class WidgetVisualizer extends StatelessWidget {
                           ],
                         ),
                       ),
-                      if (childLocal != null) Expanded(child: childLocal),
+                      Expanded(child: child),
                     ],
                   ),
                 ),
@@ -282,13 +281,13 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
     return _children;
   }
 
-  List<double?> _lerpList(List<double?> l1, List<double?> l2) {
+  List<double> _lerpList(List<double> l1, List<double> l2) {
     assert(l1.length == l2.length);
     if (l1.isEmpty) return [];
     final animationLocal = animation;
     return [
       for (var i = 0; i < children.length; i++)
-        lerpDouble(l1[i], l2[i], animationLocal.value)
+        lerpDouble(l1[i], l2[i], animationLocal.value)!
     ];
   }
 
@@ -373,7 +372,7 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   double get height => size.height;
 
   @override
-  bool get isFlex => begin.isFlex == true && end.isFlex == true;
+  bool get isFlex => begin.isFlex && end.isFlex;
 
   @override
   RemoteDiagnosticsNode get node => end.node;
