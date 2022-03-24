@@ -194,7 +194,7 @@ class InspectorTreeController extends Object
   /// * contains every row in the tree (including collapsed rows)
   /// * items don't change when nodes are expanded or collapsed
   /// * items are populated only when root is changed
-  final _searchableCachedRows = <InspectorTreeRow?>[];
+  final _searchableCachedRows = <InspectorTreeRow>[];
 
   void setSearchTarget(SearchTargetType searchTarget) {
     _searchTarget = searchTarget;
@@ -215,7 +215,7 @@ class InspectorTreeController extends Object
   void _populateSearchableCachedRows() {
     _searchableCachedRows.clear();
     for (int i = 0; i < numRows; i++) {
-      _searchableCachedRows.add(getCachedRow(i));
+      _searchableCachedRows.add(getCachedRow(i)!);
     }
   }
 
@@ -331,7 +331,6 @@ class InspectorTreeController extends Object
   }
 
   void nodeChanged(InspectorTreeNode node) {
-    if (node == null) return;
     setState(() {
       node.isDirty = true;
     });
@@ -507,8 +506,6 @@ class InspectorTreeController extends Object
     required bool expandChildren,
     required bool expandProperties,
   }) {
-    assert(expandChildren != null);
-    assert(expandProperties != null);
     node.diagnostic = diagnosticsNode;
     if (config!.onNodeAdded != null) {
       config!.onNodeAdded!(node, diagnosticsNode);
@@ -541,8 +538,6 @@ class InspectorTreeController extends Object
     required bool expandChildren,
     required bool expandProperties,
   }) {
-    assert(expandChildren != null);
-    assert(expandProperties != null);
     treeNode.isExpanded = expandChildren;
     if (treeNode.children.isNotEmpty) {
       // Only case supported is this is the loading node.
@@ -551,21 +546,20 @@ class InspectorTreeController extends Object
     }
     final inlineProperties = parent.inlineProperties;
 
-    if (inlineProperties != null) {
-      for (RemoteDiagnosticsNode property in inlineProperties) {
-        appendChild(
-          treeNode,
-          setupInspectorTreeNode(
-            createNode(),
-            property,
-            // We are inside a property so only expand children if
-            // expandProperties is true.
-            expandChildren: expandProperties,
-            expandProperties: expandProperties,
-          ),
-        );
-      }
+    for (RemoteDiagnosticsNode property in inlineProperties) {
+      appendChild(
+        treeNode,
+        setupInspectorTreeNode(
+          createNode(),
+          property,
+          // We are inside a property so only expand children if
+          // expandProperties is true.
+          expandChildren: expandProperties,
+          expandProperties: expandProperties,
+        ),
+      );
     }
+
     if (children != null) {
       for (RemoteDiagnosticsNode child in children) {
         appendChild(
@@ -582,28 +576,29 @@ class InspectorTreeController extends Object
   }
 
   Future<void> maybePopulateChildren(InspectorTreeNode treeNode) async {
+    if (!treeNode.isDisgnosticInitialized) return;
     final RemoteDiagnosticsNode diagnostic = treeNode.diagnostic;
-    if (diagnostic != null &&
-        diagnostic.hasChildren &&
-        (treeNode.hasPlaceholderChildren || treeNode.children.isEmpty)) {
-      try {
-        final children = await diagnostic.children;
-        if (treeNode.hasPlaceholderChildren || treeNode.children.isEmpty) {
-          setupChildren(
-            diagnostic,
-            treeNode,
-            children,
-            expandChildren: true,
-            expandProperties: false,
-          );
-          nodeChanged(treeNode);
-          if (treeNode == selection) {
-            expandPath(treeNode);
-          }
+    if (!diagnostic.hasChildren ||
+        (!treeNode.hasPlaceholderChildren && treeNode.children.isNotEmpty))
+      return;
+
+    try {
+      final children = await diagnostic.children;
+      if (treeNode.hasPlaceholderChildren || treeNode.children.isEmpty) {
+        setupChildren(
+          diagnostic,
+          treeNode,
+          children,
+          expandChildren: true,
+          expandProperties: false,
+        );
+        nodeChanged(treeNode);
+        if (treeNode == selection) {
+          expandPath(treeNode);
         }
-      } catch (e) {
-        log(e.toString(), LogLevel.error);
       }
+    } catch (e) {
+      log(e.toString(), LogLevel.error);
     }
   }
 
@@ -658,13 +653,12 @@ class InspectorTreeController extends Object
     }());
 
     for (final row in _searchableCachedRows) {
-      final diagnostic = row!.node.diagnostic;
-      if (row.node == null || diagnostic == null) continue;
+      if (!row.node.isDisgnosticInitialized) continue;
 
       // Widget search begin
       if (_searchTarget == SearchTargetType.widget) {
         _debugStatsSearchOps++;
-        if (diagnostic.searchValue.caseInsensitiveContains(search)) {
+        if (row.node.diagnostic.searchValue.caseInsensitiveContains(search)) {
           matches.add(row);
           continue;
         }
@@ -1081,9 +1075,6 @@ class _RowPainter extends CustomPainter {
     double currentX = 0;
     final paint = _defaultPaint(colorScheme);
 
-    if (row == null) {
-      return;
-    }
     final InspectorTreeNode node = row.node;
     final bool showExpandCollapse = node.showExpandCollapse;
     for (int tick in row.ticks) {
@@ -1167,9 +1158,6 @@ class InspectorRowContent extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    if (row == null) {
-      return const SizedBox();
-    }
     Color? backgroundColor;
     if (row.isSelected) {
       backgroundColor =

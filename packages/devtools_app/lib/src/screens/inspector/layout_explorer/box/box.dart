@@ -165,15 +165,6 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     final offset = properties!.node.parentData ??
         (BoxParentData()..offset = const Offset(0, 0));
 
-    if (properties!.size == null) {
-      // This should happen infrequently but it is better to show an error than
-      // crash.
-      return Center(
-        child: Text(
-          'Visualizing layouts for ${properties!.description} widgets is not yet supported.',
-        ),
-      );
-    }
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         // Subtract out one pixel border on each side.
@@ -185,16 +176,16 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         final widths = [
           nullOutZero(offset.offset.dx),
           properties!.size.width,
-          nullOutZero(parentSize != null
-              ? parentSize.width - (properties!.size.width + offset.offset.dx)
-              : 0.0),
+          nullOutZero(
+            parentSize.width - (properties!.size.width + offset.offset.dx),
+          ),
         ];
         final heights = [
           nullOutZero(offset.offset.dy),
           properties!.size.height,
-          nullOutZero(parentSize != null
-              ? parentSize.height - (properties!.size.height + offset.offset.dy)
-              : 0.0),
+          nullOutZero(
+            parentSize.height - (properties!.size.height + offset.offset.dy),
+          ),
         ];
         // 3 element array with [left padding, widget width, right padding].
         final displayWidths = minFractionLayout(
@@ -298,7 +289,6 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     final parentElement = properties?.node.parentRenderElement;
     if (parentElement == null) return null;
     final parentProperties = computeLayoutProperties(parentElement);
-    if (parentProperties.size == null) return null;
     return parentProperties;
   }
 

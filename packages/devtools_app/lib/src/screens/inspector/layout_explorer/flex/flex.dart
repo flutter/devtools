@@ -101,7 +101,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
       } else {
         final idx =
             selectedNode?.parent?.childrenNow.indexOf(selectedNode!) ?? -1;
-        if (newProperties == null || newProperties.children == null) return;
+        if (newProperties == null) return;
         if (idx != -1) highlighted = newProperties.children[idx];
       }
     });

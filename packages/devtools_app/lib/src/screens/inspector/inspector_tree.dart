@@ -102,6 +102,11 @@ class InspectorTreeNode {
   bool selected = false;
 
   late RemoteDiagnosticsNode _diagnostic;
+
+  bool _isDisgnosticInitialized = false;
+
+  bool get isDisgnosticInitialized => _isDisgnosticInitialized;
+
   final List<InspectorTreeNode> _children;
 
   Iterable<InspectorTreeNode> get children => _children;
@@ -146,6 +151,7 @@ class InspectorTreeNode {
     _diagnostic = v;
     _isExpanded = v.childrenReady;
     isDirty = true;
+    _isDisgnosticInitialized = true;
   }
 
   int? get childrenCount {
@@ -164,7 +170,7 @@ class InspectorTreeNode {
   }
 
   bool get hasPlaceholderChildren {
-    return children.length == 1 && children.first.diagnostic == null;
+    return children.length == 1 && !children.first.isDisgnosticInitialized;
   }
 
   int? _childrenCount;
@@ -205,7 +211,7 @@ class InspectorTreeNode {
     }
     int current = 0;
     int depth = 0;
-    while (node != null) {
+    while (true) {
       final style = node.diagnostic.style;
       final bool indented = style != DiagnosticsTreeStyle.flat &&
           style != DiagnosticsTreeStyle.error;
@@ -245,13 +251,11 @@ class InspectorTreeNode {
         depth++;
       }
     }
-    assert(false); // internal error.
-    return null;
   }
 
   void removeChild(InspectorTreeNode child) {
     child.parent = null;
-    final removed = _children.remove(child);
+    _children.remove(child);
     isDirty = true;
   }
 
