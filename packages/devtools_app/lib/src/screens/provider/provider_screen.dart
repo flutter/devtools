@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider show Provider;
@@ -34,12 +33,11 @@ final _hasErrorProvider = Provider.autoDispose<bool>((ref) {
   return instance is AsyncError;
 });
 
-final _selectedProviderNode = AutoDisposeProvider<ProviderNode>((ref) {
+final _selectedProviderNode = AutoDisposeProvider<ProviderNode?>((ref) {
   final selectedId = ref.watch(selectedProviderIdProvider);
 
-  return ref.watch(sortedProviderNodesProvider).asData?.value?.firstWhere(
+  return ref.watch(sortedProviderNodesProvider).asData?.value.firstWhereOrNull(
         (node) => node.id == selectedId,
-        orElse: () => null,
       );
 });
 
@@ -64,7 +62,7 @@ class ProviderScreen extends Screen {
 }
 
 class ProviderScreenWrapper extends StatefulWidget {
-  const ProviderScreenWrapper({Key key}) : super(key: key);
+  const ProviderScreenWrapper({Key? key}) : super(key: key);
 
   @override
   _ProviderScreenWrapperState createState() => _ProviderScreenWrapperState();
@@ -84,7 +82,7 @@ class _ProviderScreenWrapperState extends State<ProviderScreenWrapper> {
 }
 
 class ProviderScreenBody extends ConsumerWidget {
-  const ProviderScreenBody({Key key}) : super(key: key);
+  const ProviderScreenBody({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

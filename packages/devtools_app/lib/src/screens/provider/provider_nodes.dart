@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -16,8 +14,8 @@ import 'instance_viewer/eval.dart';
 @immutable
 class ProviderNode {
   const ProviderNode({
-    @required this.id,
-    @required this.type,
+    required this.id,
+    required this.type,
   });
 
   final String id;
@@ -50,12 +48,12 @@ final _rawProviderIdsProvider =
   );
 
   final providerIdInstances = await Future.wait([
-    for (final idRef in providerIdRefs.elements.cast<InstanceRef>())
+    for (final idRef in providerIdRefs.elements!.cast<InstanceRef>())
       eval.getInstance(idRef, isAlive)
   ]);
 
   return [
-    for (final idInstance in providerIdInstances) idInstance.valueAsString,
+    for (final idInstance in providerIdInstances) idInstance!.valueAsString!,
   ];
 }, name: '_rawProviderIdsProvider');
 
@@ -74,9 +72,9 @@ final _rawProviderNodeProvider =
     isAlive: isAlive,
   );
 
-  Future<Instance> getFieldWithName(String name) {
+  Future<Instance?> getFieldWithName(String name) {
     return eval.getInstance(
-      providerNodeInstance.fields.firstWhere((e) => e.decl.name == name).value
+      providerNodeInstance.fields!.firstWhere((e) => e.decl?.name == name).value
           as InstanceRef,
       isAlive,
     );
@@ -86,7 +84,7 @@ final _rawProviderNodeProvider =
 
   return ProviderNode(
     id: id,
-    type: type.valueAsString,
+    type: type!.valueAsString!,
   );
 }, name: '_rawProviderNodeProvider');
 

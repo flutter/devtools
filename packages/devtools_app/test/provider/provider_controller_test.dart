@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/provider_nodes.dart';
@@ -15,18 +13,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
 
+// ignore: import_of_legacy_library_into_null_safe
 import '../test_infra/flutter_test_driver.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import '../test_infra/flutter_test_environment.dart';
 
 Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
-  EvalOnDartLibrary evalOnDartLibrary;
-  Disposable isAlive;
+  late EvalOnDartLibrary evalOnDartLibrary;
+  late Disposable isAlive;
 
   setUp(() async {
     await env.setupEnvironment(
       config: const FlutterRunConfiguration(withDebugger: true),
     );
-    await serviceManager.service.allFuturesCompleted;
+    await serviceManager.service!.allFuturesCompleted;
 
     isAlive = Disposable();
     evalOnDartLibrary = EvalOnDartLibrary(
@@ -128,7 +128,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         isA<NumInstance>().having((e) => e.displayString, 'displayString', '0'),
       );
 
-      await instance.setter('42');
+      await instance.setter!('42');
 
       // read the instance again since it should have changed
       instance = await sub.read();
@@ -752,7 +752,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
             .having((e) => e.setter, 'setter', isNotNull),
       );
 
-      await instance.setter('42');
+      await instance.setter!('42');
 
       await expectLater(
         countSub.read(),

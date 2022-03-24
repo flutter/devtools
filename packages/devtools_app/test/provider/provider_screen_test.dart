@@ -71,7 +71,7 @@ void main() {
       ]);
 
       // wait for the Banner to appear as it is mounted asynchronously
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       await expectLater(
         find.byType(ProviderScreenBody),
@@ -105,7 +105,7 @@ void main() {
         ),
       ]);
 
-      await container.pumpAndSettle();
+      await container.pump();
 
       expect(sub.read(), '0');
     });
@@ -124,7 +124,7 @@ void main() {
       );
 
       // wait for the error to be handled
-      await container.pumpAndSettle();
+      await container.pump();
 
       expect(sub.read(), isNull);
 
@@ -138,7 +138,7 @@ void main() {
       ]);
 
       // wait for the ids update to be handled
-      await container.pumpAndSettle(exclude: [selectedProviderIdProvider]);
+      await container.pump();
 
       expect(sub.read(), '0');
     });
@@ -160,7 +160,7 @@ void main() {
         (prev, next) {},
       );
 
-      await container.pumpAndSettle();
+      await container.pump();
 
       expect(sub.read(), '0');
 
@@ -172,7 +172,7 @@ void main() {
         ),
       ]);
 
-      await container.pumpAndSettle();
+      await container.pump();
 
       expect(sub.read(), '1');
     });
@@ -192,7 +192,7 @@ void main() {
         (prev, next) {},
       );
 
-      await container.pumpAndSettle();
+      await container.pump();
 
       expect(sub.read(), '0');
 
@@ -206,7 +206,7 @@ void main() {
         ),
       ]);
 
-      await container.pumpAndSettle();
+      await container.pump();
 
       expect(sub.read(), '0');
     });
@@ -229,7 +229,7 @@ void main() {
         (prev, next) {},
       );
 
-      await container.pumpAndSettle();
+      await container.pump();
 
       expect(sub.read(), '0');
 
@@ -239,7 +239,7 @@ void main() {
         ),
       ]);
 
-      await container.pumpAndSettle();
+      await container.pump();
 
       expect(sub.read(), isNull);
 
@@ -251,7 +251,7 @@ void main() {
         ),
       ]);
 
-      await container.pumpAndSettle();
+      await container.pump();
 
       expect(sub.read(), '1');
     });
@@ -306,7 +306,7 @@ void main() {
         ...getOverrides(),
       ]);
 
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(container.read(selectedProviderIdProvider), '0');
       expect(find.byType(ProviderNodeItem), findsNWidgets(2));
@@ -366,7 +366,7 @@ void main() {
             .overrideWithValue(AsyncValue.error(Error()))
       ]);
 
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(
         find.byKey(
@@ -382,26 +382,4 @@ void main() {
       );
     });
   });
-}
-
-extension on ProviderContainer {
-  // TODO(rrousselGit) remove this utility when riverpod v0.15.0 is released
-  @deprecated
-  Future<void> pumpAndSettle({
-    List<ProviderBase> exclude = const [],
-  }) {
-    return pump();
-    // bool hasDirtyProvider() {
-    //   return getAllProviderElements()
-    //       // ignore: invalid_use_of_protected_member
-    //       .any((e) => e.dirty && !exclude.contains(e.provider));
-    // }
-
-    // while (hasDirtyProvider()) {
-    //   for (final element in debugProviderElements) {
-    //     element.flush();
-    //   }
-    //   await Future(() {});
-    // }
-  }
 }

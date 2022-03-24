@@ -269,12 +269,34 @@ class EvalOnDartLibrary extends DisposableController
     log(stack.toString(), LogLevel.error);
   }
 
+  T _verifySaneValue<T>(T? value, Disposable? isAlive) {
+    /// Throwing when the request is cancelled instead of returning `null`
+    /// allows easily chaining eval calls, without having to check "disposed"
+    /// between each request.
+    /// It also removes the need for using `!` once the devtool is migrated to NNBD
+    if (isAlive?.disposed ?? true) {
+      // throw before _handleError as we don't want to log cancellations.
+      throw CancelledException();
+    }
+
+    if (value == null) {
+      throw StateError('Expected an instance of $T but received null');
+    }
+
+    return value;
+  }
+
   Future<Library?> getLibrary(LibraryRef instance, Disposable isAlive) {
     return getObjHelper(instance, isAlive);
   }
 
   Future<Class?> getClass(ClassRef instance, Disposable isAlive) {
     return getObjHelper(instance, isAlive);
+  }
+
+  Future<Class> safeGetClass(ClassRef instance, Disposable isAlive) async {
+    final value = await getObjHelper<Class>(instance, isAlive);
+    return _verifySaneValue(value, isAlive);
   }
 
   Future<Func?> getFunc(FuncRef instance, Disposable isAlive) {
@@ -288,29 +310,40 @@ class EvalOnDartLibrary extends DisposableController
     return await getObjHelper(await instanceRefFuture, isAlive);
   }
 
-  Future<int?> getHashCode(
+  Future<Instance> safeGetInstance(
+    FutureOr<InstanceRef> instanceRefFuture,
+    Disposable? isAlive,
+  ) async {
+    final instanceRef = await instanceRefFuture;
+    final value = await getObjHelper<Instance>(instanceRef, isAlive);
+    return _verifySaneValue(value, isAlive);
+  }
+
+  Future<int> getHashCode(
     InstanceRef instance, {
     required Disposable? isAlive,
   }) async {
     // identityHashCode will be -1 if the Flutter SDK is not recent enough
-    if (instance.identityHashCode != -1) return instance.identityHashCode;
+    if (instance.identityHashCode != -1 && instance.identityHashCode != null) {
+      return instance.identityHashCode!;
+    }
 
-    final hash = await (evalInstance(
+    final hash = await evalInstance(
       'instance.hashCode',
       isAlive: isAlive,
       scope: {'instance': instance.id!},
-    ) as FutureOr<Instance>);
+    );
 
     return int.parse(hash.valueAsString!);
   }
 
   /// Eval an expression and immediately obtain its [Instance].
-  Future<Instance?> evalInstance(
+  Future<Instance> evalInstance(
     String expression, {
     required Disposable? isAlive,
     Map<String, String>? scope,
-  }) async {
-    return getInstance(
+  }) {
+    return safeGetInstance(
       // This is safe to do because `safeEval` will throw instead of returning `null`
       // when the request is cancelled, so `getInstance` will not receive `null`
       // as parameter.
@@ -410,7 +443,7 @@ class EvalOnDartLibrary extends DisposableController
 
     await future;
 
-    final resultRef = await (evalInstance(
+    final resultRef = await evalInstance(
       '() {'
       '  final result = widgetInspectorService.toObject("$readerId", "$readerGroup") as List;'
       '  widgetInspectorService.disposeGroup("$readerGroup");'
@@ -418,7 +451,7 @@ class EvalOnDartLibrary extends DisposableController
       '}()',
       isAlive: isAlive,
       scope: {'widgetInspectorService': widgetInspectorServiceRef.id!},
-    ) as FutureOr<Instance>);
+    );
 
     assert(resultRef.length == 1 || resultRef.length == 2);
     if (resultRef.length == 2) {
@@ -490,7 +523,7 @@ class EvalOnDartLibrary extends DisposableController
       /// It also removes the need for using `!` once the devtool is migrated to NNBD
       if (isAlive?.disposed ?? true) {
         // throw before _handleError as we don't want to log cancellations.
-        throw CancelledException('safeEval');
+        throw CancelledException();
       }
 
       _handleError(err, stack);
@@ -616,16 +649,7 @@ class FutureFailedException implements Exception {
   }
 }
 
-class CancelledException implements Exception {
-  CancelledException(this.operationName);
-
-  final String operationName;
-
-  @override
-  String toString() {
-    return 'The operation $operationName was cancelled';
-  }
-}
+class CancelledException implements Exception {}
 
 class UnknownEvalException implements Exception {
   UnknownEvalException({

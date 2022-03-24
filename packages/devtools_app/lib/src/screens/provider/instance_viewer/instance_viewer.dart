@@ -4,8 +4,6 @@
 
 // TODO(rrousselGit) merge this code with the debugger view
 
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -17,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../primitives/sliver_iterable_child_delegate.dart';
 import '../../../shared/eval_on_dart_library.dart';
 import '../../../shared/theme.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import '../../inspector/inspector_text_styles.dart';
 import 'instance_details.dart';
 import 'instance_providers.dart';
@@ -65,7 +64,8 @@ final estimatedChildCountProvider =
               map: (instance) {
                 return expandableEstimatedChildCount(
                   instance.keys.map(
-                      (key) => PathToProperty.mapKey(ref: key.instanceRefId)),
+                    (key) => PathToProperty.mapKey(ref: key.instanceRefId!),
+                  ),
                 );
               },
               list: (instance) {
@@ -96,9 +96,9 @@ void showErrorSnackBar(BuildContext context, Object error) {
 
 class InstanceViewer extends ConsumerStatefulWidget {
   const InstanceViewer({
-    Key key,
-    this.rootPath,
-    @required this.showInternalProperties,
+    Key? key,
+    required this.rootPath,
+    required this.showInternalProperties,
   }) : super(key: key);
 
   final InstancePath rootPath;
@@ -119,11 +119,11 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
 
   Iterable<Widget> _buildError(
     Object error,
-    StackTrace stackTrace,
+    StackTrace? stackTrace,
     InstancePath path,
   ) {
     if (error is SentinelException) {
-      return [Text(error.sentinel.valueAsString)];
+      return [Text(error.sentinel.valueAsString!)];
     }
 
     return const [Text('<unknown error>')];
@@ -132,7 +132,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
   Iterable<Widget> _buildListViewItems(
     BuildContext context,
     WidgetRef ref, {
-    @required InstancePath path,
+    required InstancePath path,
     bool disableExpand = false,
   }) {
     return ref.watch(instanceProvider(path)).when(
@@ -158,13 +158,13 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
                 list: (list) => _buildListItem(
                   context,
                   ref,
-                  instance,
+                  list,
                   path: path,
                 ),
                 map: (map) => _buildMapItem(
                   context,
                   ref,
-                  instance,
+                  map,
                   path: path,
                 ),
                 // string/numbers/bools have no children, but this code can be reached
@@ -178,8 +178,8 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
 
   Widget _buildHeader(
     InstanceDetails instance, {
-    @required InstancePath path,
-    StateController<bool> isExpanded,
+    required InstancePath path,
+    StateController<bool>? isExpanded,
     bool disableExpand = false,
   }) {
     return _Expandable(
@@ -275,13 +275,13 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
     BuildContext context,
     WidgetRef ref,
     MapInstance instance, {
-    @required InstancePath path,
+    required InstancePath path,
   }) sync* {
     for (final key in instance.keys) {
       final value = _buildListViewItems(
         context,
         ref,
-        path: path.pathForChild(PathToProperty.mapKey(ref: key.instanceRefId)),
+        path: path.pathForChild(PathToProperty.mapKey(ref: key.instanceRefId!)),
       );
 
       final keyHeader = _buildHeader(key, disableExpand: true, path: path);
@@ -315,7 +315,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
     BuildContext context,
     WidgetRef ref,
     ListInstance instance, {
-    @required InstancePath path,
+    required InstancePath path,
   }) sync* {
     for (var index = 0; index < instance.length; index++) {
       final children = _buildListViewItems(
@@ -352,7 +352,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
     BuildContext context,
     WidgetRef ref,
     ObjectInstance instance, {
-    @required InstancePath path,
+    required InstancePath path,
   }) sync* {
     for (final field in instance.fields) {
       if (!widget.showInternalProperties &&
@@ -425,17 +425,17 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
 
 class _ObjectHeader extends StatelessWidget {
   const _ObjectHeader({
-    Key key,
+    Key? key,
     this.type,
-    @required this.hash,
-    @required this.meta,
-    @required this.startToken,
-    @required this.endToken,
+    required this.hash,
+    required this.meta,
+    required this.startToken,
+    required this.endToken,
   }) : super(key: key);
 
-  final String type;
+  final String? type;
   final int hash;
-  final String meta;
+  final String? meta;
   final String startToken;
   final String endToken;
 
@@ -466,15 +466,15 @@ class _ObjectHeader extends StatelessWidget {
 
 class _EditableField extends StatefulWidget {
   const _EditableField({
-    Key key,
-    @required this.setter,
-    @required this.child,
-    @required this.initialEditString,
+    Key? key,
+    required this.setter,
+    required this.child,
+    required this.initialEditString,
   }) : super(key: key);
 
   final Widget child;
   final String initialEditString;
-  final Future<void> Function(String) setter;
+  final Future<void> Function(String)? setter;
 
   @override
   _EditableFieldState createState() => _EditableFieldState();
@@ -512,7 +512,7 @@ class _EditableFieldState extends State<_EditableField> {
       onSubmitted: (value) async {
         try {
           if (widget.setter != null) {
-            await widget.setter(value);
+            await widget.setter!(value);
           }
         } catch (err) {
           showErrorSnackBar(context, err);
@@ -594,13 +594,13 @@ class _EditableFieldState extends State<_EditableField> {
 
 class _Expandable extends StatelessWidget {
   const _Expandable({
-    Key key,
-    @required this.isExpanded,
-    @required this.isExpandable,
-    @required this.title,
+    Key? key,
+    required this.isExpanded,
+    required this.isExpandable,
+    required this.title,
   }) : super(key: key);
 
-  final StateController isExpanded;
+  final StateController<bool>? isExpanded;
   final bool isExpandable;
   final Widget title;
 
@@ -614,12 +614,12 @@ class _Expandable extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap: () => isExpanded.state = !isExpanded.state,
+      onTap: () => isExpanded!.state = !isExpanded!.state,
       behavior: HitTestBehavior.opaque,
       child: Row(
         children: [
           TweenAnimationBuilder<double>(
-            tween: Tween(end: isExpanded.state ? 0 : -math.pi / 2),
+            tween: Tween(end: isExpanded!.state ? 0 : -math.pi / 2),
             duration: defaultDuration,
             builder: (context, angle, _) {
               return Transform.rotate(

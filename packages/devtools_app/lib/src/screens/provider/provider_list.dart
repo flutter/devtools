@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/theme.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import '../inspector/inspector_tree.dart';
 import 'provider_nodes.dart';
 
@@ -18,10 +17,10 @@ const _tilePadding = EdgeInsets.only(
   bottom: densePadding,
 );
 
-final AutoDisposeStateNotifierProvider<StateController<String>, String>
+final AutoDisposeStateNotifierProvider<StateController<String?>, String?>
     selectedProviderIdProvider =
-    AutoDisposeStateNotifierProvider<StateController<String>, String>((ref) {
-  final controller = StateController<String>(null);
+    AutoDisposeStateNotifierProvider<StateController<String?>, String?>((ref) {
+  final controller = StateController<String?>(null);
 
   ref.listen<AsyncValue<List<ProviderNode>>>(sortedProviderNodesProvider,
       (prev, value) {
@@ -47,7 +46,7 @@ final AutoDisposeStateNotifierProvider<StateController<String>, String>
 }, name: 'selectedProviderIdProvider');
 
 class ProviderList extends ConsumerStatefulWidget {
-  const ProviderList({Key key}) : super(key: key);
+  const ProviderList({Key? key}) : super(key: key);
 
   @override
   _ProviderListState createState() => _ProviderListState();
@@ -96,8 +95,8 @@ class _ProviderListState extends ConsumerState<ProviderList> {
 
 class ProviderNodeItem extends ConsumerWidget {
   const ProviderNodeItem({
-    Key key,
-    @required this.node,
+    Key? key,
+    required this.node,
   }) : super(key: key);
 
   final ProviderNode node;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: avoid_redundant_argument_values, false positive on required nullable parameters
 
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
@@ -43,7 +43,7 @@ final object2Instance = AsyncValue.data(
         ownerName: '',
         ownerUri: '',
         eval: FakeEvalOnDartLibrary(),
-        ref: Result.error(Error()),
+        ref: Result.error(Error(), StackTrace.empty),
         isDefinedByDependency: false,
       ),
       ObjectField(
@@ -52,7 +52,7 @@ final object2Instance = AsyncValue.data(
         ownerName: '',
         ownerUri: '',
         eval: FakeEvalOnDartLibrary(),
-        ref: Result.error(Error()),
+        ref: Result.error(Error(), StackTrace.empty),
         isDefinedByDependency: false,
       ),
     ],
@@ -70,8 +70,8 @@ final emptyMapInstance = AsyncValue.data(
 
 final map2Instance = AsyncValue.data(
   InstanceDetails.map([
-    stringInstance.value,
-    list2Instance.value,
+    stringInstance.value!,
+    list2Instance.value!,
   ], hash: 0, instanceRefId: '0', setter: null),
 );
 
@@ -152,7 +152,7 @@ void main() {
                       ownerName: '',
                       ownerUri: '',
                       eval: FakeEvalOnDartLibrary(),
-                      ref: Result.error(Error()),
+                      ref: Result.error(Error(), StackTrace.empty),
                       isDefinedByDependency: true,
                     ),
                     ObjectField(
@@ -161,7 +161,7 @@ void main() {
                       ownerName: '',
                       ownerUri: '',
                       eval: FakeEvalOnDartLibrary(),
-                      ref: Result.error(Error()),
+                      ref: Result.error(Error(), StackTrace.empty),
                       isDefinedByDependency: true,
                     ),
                     ObjectField(
@@ -170,7 +170,7 @@ void main() {
                       ownerName: '',
                       ownerUri: '',
                       eval: FakeEvalOnDartLibrary(),
-                      ref: Result.error(Error()),
+                      ref: Result.error(Error(), StackTrace.empty),
                       isDefinedByDependency: false,
                     ),
                     ObjectField(
@@ -179,7 +179,7 @@ void main() {
                       ownerName: '',
                       ownerUri: '',
                       eval: FakeEvalOnDartLibrary(),
-                      ref: Result.error(Error()),
+                      ref: Result.error(Error(), StackTrace.empty),
                       isDefinedByDependency: false,
                     ),
                   ],
@@ -240,7 +240,7 @@ void main() {
                       ownerName: '',
                       ownerUri: '',
                       eval: FakeEvalOnDartLibrary(),
-                      ref: Result.error(Error()),
+                      ref: Result.error(Error(), StackTrace.empty),
                       isDefinedByDependency: false,
                     ),
                   ],
