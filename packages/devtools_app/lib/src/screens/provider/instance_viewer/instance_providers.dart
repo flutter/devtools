@@ -37,8 +37,6 @@ Future<InstanceRef> _resolveInstanceRefForPath(
         );
       },
       fromInstanceId: (path) async {
-        // if (path.instanceId == null) return null;
-
         final eval = await ref.watch(evalProvider.future);
         return eval.safeEval(
           'value',
@@ -195,17 +193,17 @@ Future<EnumInstance?> _tryParseEnum(
 
   if (_nameRef == null || indexRef == null) return null;
 
-  final nameInstanceFuture = eval.getInstance(_nameRef, isAlive);
-  final indexInstanceFuture = eval.getInstance(indexRef, isAlive);
+  final nameInstanceFuture = eval.safeGetInstance(_nameRef, isAlive);
+  final indexInstanceFuture = eval.safeGetInstance(indexRef, isAlive);
 
   final index = await indexInstanceFuture;
 
-  if (index?.kind != InstanceKind.kInt) return null;
+  if (index.kind != InstanceKind.kInt) return null;
 
   final name = await nameInstanceFuture;
-  if (name?.kind != InstanceKind.kString) return null;
+  if (name.kind != InstanceKind.kString) return null;
 
-  final nameSplit = name!.valueAsString!.split('.');
+  final nameSplit = name.valueAsString!.split('.');
 
   if (nameSplit.length != 2) return null;
 
