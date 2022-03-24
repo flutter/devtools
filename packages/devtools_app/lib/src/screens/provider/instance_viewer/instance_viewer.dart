@@ -64,7 +64,7 @@ final estimatedChildCountProvider =
               map: (instance) {
                 return expandableEstimatedChildCount(
                   instance.keys.map(
-                    (key) => PathToProperty.mapKey(ref: key.instanceRefId!),
+                    (key) => PathToProperty.mapKey(ref: key.instanceRefId),
                   ),
                 );
               },
@@ -281,7 +281,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
       final value = _buildListViewItems(
         context,
         ref,
-        path: path.pathForChild(PathToProperty.mapKey(ref: key.instanceRefId!)),
+        path: path.pathForChild(PathToProperty.mapKey(ref: key.instanceRefId)),
       );
 
       final keyHeader = _buildHeader(key, disableExpand: true, path: path);
