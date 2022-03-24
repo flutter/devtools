@@ -78,6 +78,6 @@ void reportError(
 
 Future<void> setupDimensions() async {}
 
-Future<void> setupUserApplicationDimensions() async {}
+void setupUserApplicationDimensions() {}
 
 Map<String, dynamic> generateSurveyQueryParameters() => {};

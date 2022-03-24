@@ -74,7 +74,7 @@ class _ProviderListState extends ConsumerState<ProviderList> {
       data: (nodes) {
         return Scrollbar(
           controller: scrollController,
-          isAlwaysShown: true,
+          thumbVisibility: true,
           child: ListView.builder(
             primary: false,
             controller: scrollController,

@@ -14,6 +14,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../analytics/analytics.dart' as ga;
+import '../../analytics/constants.dart' as analytics_constants;
 import '../../config_specific/logger/logger.dart';
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
@@ -410,6 +412,10 @@ class InspectorTreeController extends Object
 
   void onSelectNode(InspectorTreeNode node) {
     selection = node;
+    ga.select(
+      analytics_constants.inspector,
+      analytics_constants.treeNodeSelection,
+    );
     expandPath(node);
   }
 
@@ -969,7 +975,7 @@ class _InspectorTreeState extends State<InspectorTree>
       builder: (context, constraints) {
         final viewportWidth = constraints.maxWidth;
         final Widget tree = Scrollbar(
-          isAlwaysShown: true,
+          thumbVisibility: true,
           controller: _scrollControllerX,
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,

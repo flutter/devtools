@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 @TestOn('vm')
 import 'package:devtools_app/src/shared/globals.dart';
@@ -37,10 +37,10 @@ void main() async {
 
       final flagManager = serviceManager.vmFlagManager;
       final initialFlags = flagManager.flags.value;
-      final profilerFlagNotifier = flagManager.flag(profiler);
+      final profilerFlagNotifier = flagManager.flag(profiler)!;
       expect(profilerFlagNotifier.value.valueAsString, equals('true'));
 
-      await serviceManager.service.setFlag(profiler, 'false');
+      await serviceManager.service!.setFlag(profiler, 'false');
       expect(profilerFlagNotifier.value.valueAsString, equals('false'));
 
       // Await a delay so the new flags have time to be pulled and set.

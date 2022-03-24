@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -23,7 +21,8 @@ class InstanceTreeView extends StatefulWidget {
 /// Table of the fields of an instance (type, name and value).
 class InstanceTreeViewState extends State<InstanceTreeView>
     with AutoDisposeMixin {
-  MemoryController controller;
+  late MemoryController _controller;
+  bool _controllerInitialized = false;
 
   final TreeColumnData<FieldReference> treeColumn = _FieldTypeColumn();
   final List<ColumnData<FieldReference>> columns = [];
@@ -45,8 +44,9 @@ class InstanceTreeViewState extends State<InstanceTreeView>
     super.didChangeDependencies();
 
     final newController = Provider.of<MemoryController>(context);
-    if (newController == controller) return;
-    controller = newController;
+    if (_controllerInitialized && newController == _controller) return;
+    _controller = newController;
+    _controllerInitialized = true;
 
     cancelListeners();
 
@@ -54,17 +54,17 @@ class InstanceTreeViewState extends State<InstanceTreeView>
     //              controller. Have other ValueListenables on controller to
     //              listen to, so we don't need the setState calls.
     // Update the chart when the memorySource changes.
-    addAutoDisposeListener(controller.selectedSnapshotNotifier, () {
+    addAutoDisposeListener(_controller.selectedSnapshotNotifier, () {
       setState(() {
-        controller.computeAllLibraries(rebuild: true);
+        _controller.computeAllLibraries(rebuild: true);
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    controller.instanceFieldsTreeTable = TreeTable<FieldReference>(
-      dataRoots: controller.instanceRoot,
+    _controller.instanceFieldsTreeTable = TreeTable<FieldReference>(
+      dataRoots: _controller.instanceRoot!,
       columns: columns,
       treeColumn: treeColumn,
       keyFactory: (typeRef) => PageStorageKey<String>(typeRef.name),
@@ -72,7 +72,7 @@ class InstanceTreeViewState extends State<InstanceTreeView>
       sortDirection: SortDirection.ascending,
     );
 
-    return controller.instanceFieldsTreeTable;
+    return _controller.instanceFieldsTreeTable!;
   }
 }
 
@@ -80,10 +80,10 @@ class _FieldTypeColumn extends TreeColumnData<FieldReference> {
   _FieldTypeColumn() : super('Type');
 
   @override
-  dynamic getValue(FieldReference dataObject) =>
+  String getValue(FieldReference dataObject) =>
       dataObject.isEmptyReference || dataObject.isSentinelReference
           ? ''
-          : dataObject.type;
+          : dataObject.type ?? '';
 
   @override
   String getDisplayValue(FieldReference dataObject) =>
@@ -94,8 +94,8 @@ class _FieldTypeColumn extends TreeColumnData<FieldReference> {
 
   @override
   int compare(FieldReference a, FieldReference b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    final valueA = getValue(a);
+    final valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 
@@ -111,7 +111,7 @@ class _FieldNameColumn extends ColumnData<FieldReference> {
         );
 
   @override
-  dynamic getValue(FieldReference dataObject) =>
+  String getValue(FieldReference dataObject) =>
       dataObject.isEmptyReference ? '' : dataObject.name;
 
   @override
@@ -123,8 +123,8 @@ class _FieldNameColumn extends ColumnData<FieldReference> {
 
   @override
   int compare(FieldReference a, FieldReference b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    final valueA = getValue(a);
+    final valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 }
@@ -137,10 +137,10 @@ class _FieldValueColumn extends ColumnData<FieldReference> {
         );
 
   @override
-  dynamic getValue(FieldReference dataObject) =>
+  String getValue(FieldReference dataObject) =>
       dataObject.isEmptyReference || dataObject.isSentinelReference
           ? ''
-          : dataObject.value;
+          : dataObject.value ?? '';
 
   @override
   String getDisplayValue(FieldReference dataObject) {
@@ -157,7 +157,7 @@ class _FieldValueColumn extends ColumnData<FieldReference> {
     //              text measurement so we accurately truncate the correct # of
     //              characters instead guessing that we only show 30 chars.
     var value = getValue(dataObject);
-    if (value is String && value.length > 30) {
+    if (value.length > 30) {
       value = '${value.substring(0, 13)}…${value.substring(value.length - 17)}';
     }
     return '$value';
@@ -168,8 +168,8 @@ class _FieldValueColumn extends ColumnData<FieldReference> {
 
   @override
   int compare(FieldReference a, FieldReference b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    final valueA = getValue(a);
+    final valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 }

@@ -169,7 +169,7 @@ void _mockFlutterAssets() {
   SystemChannels.navigation
       .setMockMethodCallHandler((MethodCall methodCall) async {});
 
-  ServicesBinding.instance!.defaultBinaryMessenger
+  ServicesBinding.instance.defaultBinaryMessenger
       .setMockMessageHandler('flutter/assets', (ByteData? message) async {
     assert(message != null);
     String key = utf8.decode(message!.buffer.asUint8List());

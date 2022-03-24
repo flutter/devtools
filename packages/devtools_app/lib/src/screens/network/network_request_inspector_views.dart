@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image;
 
@@ -29,7 +27,7 @@ const EdgeInsets _rowPadding =
 ExpansionTile _buildTile(
   String title,
   List<Widget> children, {
-  Key key,
+  Key? key,
 }) {
   return ExpansionTile(
     key: key,
@@ -53,7 +51,7 @@ class HttpRequestHeadersView extends StatelessWidget {
   @visibleForTesting
   static const responseHeadersKey = Key('Response Headers');
 
-  final HttpRequestData data;
+  final DartIOHttpRequestData data;
 
   Widget _buildRow(
     BuildContext context,
@@ -84,6 +82,9 @@ class HttpRequestHeadersView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final general = data.general;
+    final responseHeaders = data.responseHeaders;
+    final requestHeaders = data.requestHeaders;
     return LayoutBuilder(
       builder: (context, constraints) {
         return ListView(
@@ -91,7 +92,7 @@ class HttpRequestHeadersView extends StatelessWidget {
             _buildTile(
               'General',
               [
-                for (final entry in data.general.entries)
+                for (final entry in general.entries)
                   _buildRow(
                     context,
                     // TODO(kenz): ensure the default case of `entry.key` looks
@@ -106,8 +107,8 @@ class HttpRequestHeadersView extends StatelessWidget {
             _buildTile(
               'Response Headers',
               [
-                if (data.responseHeaders != null)
-                  for (final entry in data.responseHeaders.entries)
+                if (responseHeaders != null)
+                  for (final entry in responseHeaders.entries)
                     _buildRow(
                       context,
                       entry.key,
@@ -120,8 +121,8 @@ class HttpRequestHeadersView extends StatelessWidget {
             _buildTile(
               'Request Headers',
               [
-                if (data.requestHeaders != null)
-                  for (final entry in data.requestHeaders.entries)
+                if (requestHeaders != null)
+                  for (final entry in requestHeaders.entries)
                     _buildRow(
                       context,
                       entry.key,
@@ -141,7 +142,7 @@ class HttpRequestHeadersView extends StatelessWidget {
 class HttpRequestView extends StatelessWidget {
   const HttpRequestView(this.data);
 
-  final HttpRequestData data;
+  final DartIOHttpRequestData data;
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +160,7 @@ class HttpRequestView extends StatelessWidget {
 class HttpResponseView extends StatelessWidget {
   const HttpResponseView(this.data);
 
-  final HttpRequestData data;
+  final DartIOHttpRequestData data;
 
   @override
   Widget build(BuildContext context) {
@@ -167,9 +168,8 @@ class HttpResponseView extends StatelessWidget {
     // We shouldn't try and display an image response view when using the
     // timeline profiler since it's possible for response body data to get
     // dropped.
-    if (data is DartIOHttpRequestData &&
-        data.contentType != null &&
-        data.contentType.contains('image')) {
+    final contentType = data.contentType;
+    if (contentType != null && contentType.contains('image')) {
       child = ImageResponseView(data);
     } else {
       child = FormattedJson(
@@ -195,7 +195,8 @@ class ImageResponseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final img = image.decodeImage(data.encodedResponse);
+    final encodedResponse = data.encodedResponse!;
+    final img = image.decodeImage(encodedResponse)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -207,7 +208,7 @@ class ImageResponseView extends StatelessWidget {
                 denseSpacing,
               ),
               child: Image.memory(
-                data.encodedResponse,
+                encodedResponse,
               ),
             ),
           ],
@@ -224,9 +225,9 @@ class ImageResponseView extends StatelessWidget {
               context,
               'Size',
               prettyPrintBytes(
-                data.encodedResponse.lengthInBytes,
+                encodedResponse.lengthInBytes,
                 includeUnit: true,
-              ),
+              )!,
             ),
             _buildRow(
               context,
@@ -279,7 +280,7 @@ class HttpRequestCookiesView extends StatelessWidget {
   @visibleForTesting
   static const responseCookiesKey = Key('Response Cookies');
 
-  final HttpRequestData data;
+  final DartIOHttpRequestData data;
 
   DataRow _buildRow(int index, Cookie cookie, {bool requestCookies = false}) {
     return DataRow.byIndex(
@@ -293,7 +294,7 @@ class HttpRequestCookiesView extends StatelessWidget {
           _buildCell(cookie.domain),
           _buildCell(cookie.path),
           _buildCell(cookie.expires?.toString()),
-          _buildCell(cookie.value.length.toString()),
+          _buildCell(cookie.value!.length.toString()),
           _buildIconCell(!cookie.httpOnly ? Icons.check : Icons.close),
           _buildIconCell(!cookie.secure ? Icons.check : Icons.close),
         ],
@@ -301,7 +302,7 @@ class HttpRequestCookiesView extends StatelessWidget {
     );
   }
 
-  DataCell _buildCell(String value) => DataCell(SelectableText(value ?? '--'));
+  DataCell _buildCell(String? value) => DataCell(SelectableText(value ?? '--'));
 
   DataCell _buildIconCell(IconData icon) =>
       DataCell(Icon(icon, size: defaultIconSize));
@@ -322,7 +323,7 @@ class HttpRequestCookiesView extends StatelessWidget {
       return DataColumn(
         label: Expanded(
           child: SelectableText(
-            title ?? '--',
+            title,
             // TODO(kenz): use top level overflow parameter if
             // https://github.com/flutter/flutter/issues/82722 is fixed.
             // TODO(kenz): add overflow after flutter 2.3.0 is stable. It was
@@ -507,7 +508,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
       const SizedBox(height: denseSpacing),
       _buildRow(
         context: context,
-        title: null,
+        title: '',
         child: _valueText(data.durationDisplay),
       ),
       const SizedBox(height: defaultSpacing),
@@ -518,14 +519,14 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Start time',
-        child: _valueText(formatDateTime(data.startTimestamp)),
+        child: _valueText(formatDateTime(data.startTimestamp!)),
       ),
       const SizedBox(height: defaultSpacing),
       _buildRow(
         context: context,
         title: 'End time',
         child: _valueText(data.endTimestamp != null
-            ? formatDateTime(data.endTimestamp)
+            ? formatDateTime(data.endTimestamp!)
             : 'Pending'),
       ),
     ];
@@ -537,7 +538,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     Duration duration,
   ) {
     final flex =
-        (duration.inMicroseconds / data.duration.inMicroseconds * 100).round();
+        (duration.inMicroseconds / data.duration!.inMicroseconds * 100).round();
     return Flexible(
       flex: flex,
       child: DevToolsTooltip(
@@ -551,7 +552,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
   }
 
   Widget _buildHttpTimeGraph(BuildContext context) {
-    final data = this.data as HttpRequestData;
+    final data = this.data as DartIOHttpRequestData;
     if (data.duration == null || data.instantEvents.isEmpty) {
       return Container(
         key: httpTimingGraphKey,
@@ -577,13 +578,13 @@ class NetworkRequestOverviewView extends StatelessWidget {
     // flex so that we can set a minimum width for small timing chunks.
     final timingWidgets = <Widget>[];
     for (final instant in data.instantEvents) {
-      final duration = instant.timeRange.duration;
+      final duration = instant.timeRange!.duration;
       timingWidgets.add(
         _buildTimingRow(_nextColor(), instant.name, duration),
       );
     }
     final duration = Duration(
-      microseconds: data.endTimestamp.microsecondsSinceEpoch -
+      microseconds: data.endTimestamp!.microsecondsSinceEpoch -
           data.instantEvents.last.timestampMicros -
           data.timelineMicrosecondsSinceEpoch(0),
     );
@@ -599,21 +600,26 @@ class NetworkRequestOverviewView extends StatelessWidget {
   // TODO(kenz): add a "waterfall" like visualization with the same colors that
   // are used in the timing graph.
   List<Widget> _buildHttpTimingRows(BuildContext context) {
-    final data = this.data as HttpRequestData;
-    return [
-      for (final instant in data.instantEvents) ...[
+    final data = this.data as DartIOHttpRequestData;
+    final result = <Widget>[];
+    for (final instant in data.instantEvents) {
+      final instantEventStart = data.instantEvents.first.timeRange!.start!;
+      final timeRange = instant.timeRange!;
+      result.addAll([
         _buildRow(
           context: context,
           title: instant.name,
           child: _valueText(
-              '[${msText(instant.timeRange.start - data.instantEvents.first.timeRange.start)} - '
-              '${msText(instant.timeRange.end - data.instantEvents.first.timeRange.start)}]'
-              ' → ${msText(instant.timeRange.duration)} total'),
+            '[${msText(timeRange.start! - instantEventStart)} - '
+            '${msText(timeRange.end! - instantEventStart)}]'
+            ' → ${msText(timeRange.duration)} total',
+          ),
         ),
         if (instant != data.instantEvents.last)
           const SizedBox(height: defaultSpacing),
-      ]
-    ];
+      ]);
+    }
+    return result;
   }
 
   List<Widget> _buildSocketOverviewRows(BuildContext context) {
@@ -656,29 +662,31 @@ class NetworkRequestOverviewView extends StatelessWidget {
 
   List<Widget> _buildSocketTimingRows(BuildContext context) {
     final data = this.data as WebSocket;
+    final lastReadTimestamp = data.lastReadTimestamp;
+    final lastWriteTimestamp = data.lastWriteTimestamp;
     return [
       _buildRow(
         context: context,
         title: 'Last read time',
-        child: data.lastReadTimestamp != null
-            ? _valueText(formatDateTime(data.lastReadTimestamp))
+        child: lastReadTimestamp != null
+            ? _valueText(formatDateTime(lastReadTimestamp))
             : _valueText('--'),
       ),
       const SizedBox(height: defaultSpacing),
       _buildRow(
         context: context,
         title: 'Last write time',
-        child: data.lastWriteTimestamp != null
-            ? _valueText(formatDateTime(data.lastWriteTimestamp))
+        child: lastWriteTimestamp != null
+            ? _valueText(formatDateTime(lastWriteTimestamp))
             : _valueText('--'),
       ),
     ];
   }
 
   Widget _buildRow({
-    @required BuildContext context,
-    @required String title,
-    @required Widget child,
+    required BuildContext context,
+    required String title,
+    required Widget child,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -686,7 +694,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
         Container(
           width: _keyWidth,
           child: SelectableText(
-            title != null ? '$title: ' : '',
+            title.isEmpty ? '' : '$title: ',
             style: Theme.of(context).textTheme.subtitle2,
           ),
         ),

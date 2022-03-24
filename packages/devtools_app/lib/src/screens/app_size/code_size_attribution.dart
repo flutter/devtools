@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:vm_snapshot_analysis/precompiler_trace.dart';
 import 'package:vm_snapshot_analysis/program_info.dart';
@@ -16,7 +14,7 @@ import '../../shared/table_data.dart';
 import '../../shared/theme.dart';
 
 class CallGraphWithDominators extends StatefulWidget {
-  const CallGraphWithDominators({@required this.callGraphRoot});
+  const CallGraphWithDominators({required this.callGraphRoot});
 
   final CallGraphNode callGraphRoot;
 
@@ -28,7 +26,7 @@ class CallGraphWithDominators extends StatefulWidget {
 class _CallGraphWithDominatorsState extends State<CallGraphWithDominators> {
   bool showCallGraph = false;
 
-  DominatorTreeNode dominatorTreeRoot;
+  late DominatorTreeNode dominatorTreeRoot;
 
   @override
   void initState() {
@@ -83,7 +81,7 @@ class _CallGraphWithDominatorsState extends State<CallGraphWithDominators> {
 }
 
 class CallGraphView extends StatefulWidget {
-  const CallGraphView({@required this.node});
+  const CallGraphView({required this.node});
 
   static const Key fromTableKey = Key('CallGraphView - From table');
   static const Key toTableKey = Key('CallGraphView - To table');
@@ -99,7 +97,7 @@ class _CallGraphViewState extends State<CallGraphView> {
 
   final _toColumn = ToColumn();
 
-  CallGraphNode selectedNode;
+  late CallGraphNode selectedNode;
 
   @override
   void initState() {
@@ -220,20 +218,20 @@ class ToColumn extends ColumnData<CallGraphNode> {
   ColumnAlignment get alignment => ColumnAlignment.right;
 
   @override
-  String getValue(CallGraphNode dataObject) => dataObject.display;
+  String? getValue(CallGraphNode dataObject) => dataObject.display;
 }
 
 class DominatorTree extends StatelessWidget {
   DominatorTree({
-    @required this.dominatorTreeRoot,
-    @required this.selectedNode,
+    required this.dominatorTreeRoot,
+    required this.selectedNode,
   });
 
   static const dominatorTreeTableKey = Key('DominatorTree - table');
 
-  final DominatorTreeNode dominatorTreeRoot;
+  final DominatorTreeNode? dominatorTreeRoot;
 
-  final CallGraphNode selectedNode;
+  final CallGraphNode? selectedNode;
 
   final _packageColumn = _PackageColumn();
 
@@ -243,7 +241,7 @@ class DominatorTree extends StatelessWidget {
     // TODO(kenz): programmatically select [selectedNode] in the table.
     return TreeTable<DominatorTreeNode>(
       key: dominatorTreeTableKey,
-      dataRoots: [dominatorTreeRoot],
+      dataRoots: [dominatorTreeRoot!],
       columns: [_packageColumn],
       treeColumn: _packageColumn,
       keyFactory: (node) => PageStorageKey<String>('${node.callGraphNode.id}'),
@@ -254,8 +252,8 @@ class DominatorTree extends StatelessWidget {
   }
 
   void _expandToSelected() {
-    var selected = dominatorTreeRoot.firstChildWithCondition(
-        (node) => node.callGraphNode.id == selectedNode.id);
+    var selected = dominatorTreeRoot!.firstChildWithCondition(
+        (node) => node.callGraphNode.id == selectedNode!.id);
 
     while (selected != null) {
       selected.expand();
@@ -287,7 +285,7 @@ extension CallGraphNodeDisplay on CallGraphNode {
   CallGraphNode get dominatorRoot {
     var root = this;
     while (root.dominator != null) {
-      root = root.dominator;
+      root = root.dominator!;
     }
     return root;
   }

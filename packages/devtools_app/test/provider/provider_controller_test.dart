@@ -84,7 +84,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
       isA<NumInstance>().having((e) => e.displayString, 'displayString', '1'),
     );
 
-    await env.flutter.hotRestart();
+    await env.flutter!.hotRestart();
 
     final evalOnDartLibrary2 = EvalOnDartLibrary(
       'package:provider_app/main.dart',

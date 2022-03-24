@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -31,18 +29,14 @@ Axis axis(ArrowType type) => (type == ArrowType.up || type == ArrowType.down)
 @immutable
 class ArrowWrapper extends StatelessWidget {
   ArrowWrapper.unidirectional({
-    Key key,
+    Key? key,
     this.child,
-    @required ArrowType type,
+    required ArrowType type,
     this.arrowColor = defaultArrowColor,
-    // ignore: always_require_non_null_named_parameters
-    double arrowHeadSize,
+    double? arrowHeadSize,
     this.arrowStrokeWidth = defaultArrowStrokeWidth,
     this.childMarginFromArrow = defaultDistanceToArrow,
-  })  : assert(type != null),
-        assert(arrowColor != null),
-        assert(arrowStrokeWidth != null),
-        assert(childMarginFromArrow != null && childMarginFromArrow > 0.0),
+  })  : assert(childMarginFromArrow > 0.0),
         direction = axis(type),
         isBidirectional = false,
         startArrowType = type,
@@ -50,32 +44,27 @@ class ArrowWrapper extends StatelessWidget {
         arrowHeadSize = arrowHeadSize ?? defaultIconSize,
         super(key: key);
 
-  ArrowWrapper.bidirectional({
-    Key key,
+  const ArrowWrapper.bidirectional({
+    Key? key,
     this.child,
-    @required this.direction,
+    required this.direction,
     this.arrowColor = defaultArrowColor,
-    // ignore: always_require_non_null_named_parameters
-    double arrowHeadSize,
+    required this.arrowHeadSize,
     this.arrowStrokeWidth = defaultArrowStrokeWidth,
     this.childMarginFromArrow = defaultDistanceToArrow,
-  })  : assert(direction != null),
-        assert(arrowColor != null),
-        assert(arrowHeadSize != null && arrowHeadSize >= 0.0),
-        assert(arrowStrokeWidth != null && arrowHeadSize >= 0.0),
-        assert(childMarginFromArrow != null && childMarginFromArrow >= 0.0),
+  })  : assert(arrowHeadSize >= 0.0),
+        assert(childMarginFromArrow >= 0.0),
         isBidirectional = true,
         startArrowType =
             direction == Axis.horizontal ? ArrowType.left : ArrowType.up,
         endArrowType =
             direction == Axis.horizontal ? ArrowType.right : ArrowType.down,
-        arrowHeadSize = arrowHeadSize ?? defaultIconSize,
         super(key: key);
 
   final Color arrowColor;
   final double arrowHeadSize;
   final double arrowStrokeWidth;
-  final Widget child;
+  final Widget? child;
 
   final Axis direction;
   final double childMarginFromArrow;
@@ -117,7 +106,7 @@ class ArrowWrapper extends StatelessWidget {
             ),
           ),
         ),
-        if (child != null) child,
+        if (child != null) child!,
         Expanded(
           child: Container(
             margin: EdgeInsets.only(
@@ -147,16 +136,13 @@ class ArrowWidget extends StatelessWidget {
   ArrowWidget({
     this.color = defaultArrowColor,
     // ignore: always_require_non_null_named_parameters
-    double headSize,
-    Key key,
+    required this.headSize,
+    Key? key,
     this.shouldDrawHead = true,
     this.strokeWidth = defaultArrowStrokeWidth,
-    @required this.type,
-  })  : assert(color != null),
-        assert(headSize != null && headSize > 0.0),
-        assert(strokeWidth != null && strokeWidth > 0.0),
-        assert(shouldDrawHead != null),
-        assert(type != null),
+    required this.type,
+  })  : assert(headSize > 0.0),
+        assert(strokeWidth > 0.0),
         _painter = _ArrowPainter(
           headSize: headSize,
           color: color,
@@ -164,7 +150,6 @@ class ArrowWidget extends StatelessWidget {
           type: type,
           shouldDrawHead: shouldDrawHead,
         ),
-        headSize = headSize ?? defaultIconSize,
         super(key: key);
 
   final Color color;
@@ -192,19 +177,13 @@ class ArrowWidget extends StatelessWidget {
 class _ArrowPainter extends CustomPainter {
   _ArrowPainter({
     // ignore: always_require_non_null_named_parameters
-    double headSize,
+    required this.headSize,
     this.strokeWidth = defaultArrowStrokeWidth,
     this.color = defaultArrowColor,
     this.shouldDrawHead = true,
-    @required this.type,
-  })  : assert(headSize != null),
-        assert(color != null),
-        assert(strokeWidth != null),
-        assert(type != null),
-        assert(shouldDrawHead != null),
-        // the height of an equilateral triangle
-        headSize = headSize ?? defaultIconSize,
-        headHeight = 0.5 * sqrt(3) * (headSize ?? defaultIconSize);
+    required this.type,
+  }) : // the height of an equilateral triangle
+        headHeight = 0.5 * sqrt(3) * headSize;
 
   final Color color;
   final double headSize;

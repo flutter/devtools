@@ -20,7 +20,6 @@ import '../config_specific/url/url.dart';
 import '../screens/performance/performance_screen.dart';
 import '../screens/profiler/profiler_screen.dart';
 import '../shared/globals.dart';
-import '../shared/version.dart';
 import '../ui/gtags.dart';
 import 'analytics_common.dart';
 import 'constants.dart' as analytics_constants;
@@ -585,7 +584,7 @@ bool _computingUserApplicationDimensions = false;
 bool _userApplicationDimensionsComputed = false;
 
 // Computes the running application.
-Future<void> computeUserApplicationCustomGTagData() async {
+void _computeUserApplicationCustomGTagData() {
   if (_userApplicationDimensionsComputed) return;
 
   assert(serviceManager.connectedApp!.isFlutterAppNow != null);
@@ -594,11 +593,7 @@ Future<void> computeUserApplicationCustomGTagData() async {
 
   const unknownOS = 'unknown';
   if (serviceManager.connectedApp!.isFlutterAppNow!) {
-    userPlatformType = (await serviceManager.service!
-            .isProtocolVersionSupported(
-                supportedVersion: SemanticVersion(major: 3, minor: 24)))
-        ? serviceManager.vm?.operatingSystem ?? unknownOS
-        : unknownOS;
+    userPlatformType = serviceManager.vm?.operatingSystem ?? unknownOS;
   }
   if (serviceManager.connectedApp!.isFlutterWebAppNow) {
     userAppType = appTypeFlutterWeb;
@@ -710,12 +705,12 @@ Future<void> setupDimensions() async {
   }
 }
 
-Future<void> setupUserApplicationDimensions() async {
+void setupUserApplicationDimensions() {
   if (serviceManager.connectedApp != null &&
       !_userApplicationDimensionsComputed &&
       !_computingUserApplicationDimensions) {
     _computingUserApplicationDimensions = true;
-    await computeUserApplicationCustomGTagData();
+    _computeUserApplicationCustomGTagData();
     _userApplicationDimensionsComputed = true;
   }
 }

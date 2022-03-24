@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/app_size/code_size_attribution.dart';
@@ -18,7 +18,7 @@ import 'package:vm_snapshot_analysis/program_info.dart';
 import 'test_data/app_size_test_data/precompiler_trace.dart';
 
 void main() {
-  CallGraph callGraph;
+  late CallGraph callGraph;
 
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
@@ -30,7 +30,7 @@ void main() {
   });
 
   group('CallGraphWithDominators', () {
-    CallGraphWithDominators callGraphWithDominators;
+    late CallGraphWithDominators callGraphWithDominators;
     setUp(() async {
       callGraphWithDominators = CallGraphWithDominators(
         callGraphRoot: callGraph.root,
@@ -74,7 +74,7 @@ void main() {
   });
 
   group('CallGraphView', () {
-    CallGraphView callGraphView;
+    late CallGraphView callGraphView;
     setUp(() async {
       callGraphView = CallGraphView(node: callGraph.root);
     });
@@ -136,7 +136,7 @@ void main() {
   });
 
   group('DominatorTree', () {
-    DominatorTree dominatorTree;
+    late DominatorTree dominatorTree;
 
     setUp(() async {
       dominatorTree = DominatorTree(
@@ -162,7 +162,7 @@ void main() {
       expect(root.isExpanded, isTrue);
       expect(root.children.length, equals(18));
 
-      for (DominatorTreeNode child in root.children) {
+      for (DominatorTreeNode child in root.children.cast<DominatorTreeNode>()) {
         expect(child.isExpanded, isFalse);
       }
     });
@@ -185,7 +185,7 @@ void main() {
       expect(root.children.length, equals(18));
 
       // Only the selected node should be expanded.
-      for (DominatorTreeNode child in root.children) {
+      for (DominatorTreeNode child in root.children.cast<DominatorTreeNode>()) {
         expect(child.isExpanded,
             child.callGraphNode.display == 'package:code_size_package');
       }

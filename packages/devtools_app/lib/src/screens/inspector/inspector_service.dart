@@ -7,7 +7,7 @@
 // If you add methods to this class you should also add them to
 // InspectorService.java.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 import 'dart:convert';
@@ -49,15 +49,15 @@ class RegistrableServiceExtension {
 abstract class InspectorServiceBase extends DisposableController
     with AutoDisposeControllerMixin {
   InspectorServiceBase({
-    @required this.clientInspectorName,
-    @required this.serviceExtensionPrefix,
-    @required String inspectorLibraryUri,
+    required this.clientInspectorName,
+    required this.serviceExtensionPrefix,
+    required String inspectorLibraryUri,
   })  : assert(serviceManager.connectedAppInitialized),
         assert(serviceManager.service != null),
         clients = {},
         inspectorLibrary = EvalOnDartLibrary(
           inspectorLibraryUri,
-          serviceManager.service,
+          serviceManager.service!,
           // TODO(jacobr): evaluate whether oneRequestAtATime is really required.
           // The out of order request issues seen may have been isolated to Java
           // where requests could truly be out of order due to multiple threads.
@@ -68,9 +68,9 @@ abstract class InspectorServiceBase extends DisposableController
           oneRequestAtATime: true,
           isolate: serviceManager.isolateManager.mainIsolate,
         ) {
-    _lastMainIsolate = serviceManager.isolateManager.mainIsolate.value;
+    _lastMainIsolate = serviceManager.isolateManager.mainIsolate.value!;
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      final mainIsolate = serviceManager.isolateManager.mainIsolate.value;
+      final mainIsolate = serviceManager.isolateManager.mainIsolate.value!;
       if (mainIsolate != _lastMainIsolate) {
         onIsolateStopped();
       }
@@ -92,11 +92,11 @@ abstract class InspectorServiceBase extends DisposableController
 
   final Set<InspectorServiceClient> clients;
   final EvalOnDartLibrary inspectorLibrary;
-  IsolateRef _lastMainIsolate;
+  late IsolateRef _lastMainIsolate;
 
   /// Reference to the isolate running the inspector that [InspectorServiceBase]
   /// is connecting to. This isolate should always be the main isolate.
-  IsolateRef get isolateRef => inspectorLibrary.isolateRef;
+  IsolateRef? get isolateRef => inspectorLibrary.isolateRef;
 
   /// Called when the main isolate is stopped. Should be overridden in order to
   /// clear data that is obsolete on an isolate restart.
@@ -127,7 +127,7 @@ abstract class InspectorServiceBase extends DisposableController
   /// rendering.
   bool get useDaemonApi {
     return !(serviceManager
-            .isolateManager.mainIsolateDebuggerState?.isPaused?.value ??
+            .isolateManager.mainIsolateDebuggerState?.isPaused.value ??
         false);
   }
 
@@ -139,12 +139,12 @@ abstract class InspectorServiceBase extends DisposableController
   }
 
   Future<Object> forceRefresh() {
-    final List<Future<Object>> futures = [];
+    final futures = <Future<void>>[];
     for (InspectorServiceClient client in clients) {
       try {
         futures.add(client.onForceRefresh());
       } catch (e) {
-        log(e);
+        log(e.toString());
       }
     }
     return Future.wait(futures);
@@ -160,24 +160,32 @@ abstract class InspectorServiceBase extends DisposableController
     }
   }
 
-  Future<Object> invokeServiceMethodDaemonNoGroupArgs(String methodName,
-      [List<String> args]) {
+  Future<Object?> invokeServiceMethodDaemonNoGroupArgs(
+    String methodName, [
+    List<String>? args,
+  ]) {
     final Map<String, Object> params = {};
     if (args != null) {
       for (int i = 0; i < args.length; ++i) {
         params['arg$i'] = args[i];
       }
     }
-    return invokeServiceMethodDaemonNoGroup(methodName, params);
+    return invokeServiceMethodDaemonNoGroup(methodName, args: params);
   }
 
-  Future<InstanceRef> invokeServiceMethodObservatoryNoGroup(String methodName) {
-    return inspectorLibrary.eval('$clientInspectorName.instance.$methodName()',
-        isAlive: null);
+  Future<InstanceRef?> invokeServiceMethodObservatoryNoGroup(
+    String methodName,
+  ) {
+    return inspectorLibrary.eval(
+      '$clientInspectorName.instance.$methodName()',
+      isAlive: null,
+    );
   }
 
-  Future<Object> invokeServiceMethodDaemonNoGroup(
-      String methodName, Map<String, Object> args) async {
+  Future<Object?> invokeServiceMethodDaemonNoGroup(
+    String methodName, {
+    Map<String, Object>? args,
+  }) async {
     final callMethodName = '$serviceExtensionPrefix.$methodName';
     if (!serviceManager.serviceExtensionManager
         .isServiceExtensionAvailable(callMethodName)) {
@@ -186,12 +194,12 @@ abstract class InspectorServiceBase extends DisposableController
       if (!available) return {'result': null};
     }
 
-    final r = await serviceManager.service.callServiceExtension(
+    final r = await serviceManager.service!.callServiceExtension(
       callMethodName,
-      isolateId: isolateRef.id,
+      isolateId: isolateRef!.id,
       args: args,
     );
-    final json = r.json;
+    final json = r.json!;
     if (json['errorMessage'] != null) {
       throw Exception('$methodName -- ${json['errorMessage']}');
     }
@@ -210,10 +218,10 @@ class InspectorService extends InspectorServiceBase {
         ) {
     // Note: We do not need to listen to event history here because the
     // inspector uses a separate API to get the current inspector selection.
-    autoDisposeStreamSubscription(serviceManager.service.onExtensionEvent
+    autoDisposeStreamSubscription(serviceManager.service!.onExtensionEvent
         .listen(onExtensionVmServiceReceived));
     autoDisposeStreamSubscription(
-        serviceManager.service.onDebugEvent.listen(onDebugVmServiceReceived));
+        serviceManager.service!.onDebugEvent.listen(onDebugVmServiceReceived));
   }
 
   ValueListenable<List<String>> get rootDirectories => _rootDirectories;
@@ -221,14 +229,14 @@ class InspectorService extends InspectorServiceBase {
 
   @visibleForTesting
   Set<String> get rootPackages => _rootPackages;
-  Set<String> _rootPackages;
+  late Set<String> _rootPackages;
 
   @visibleForTesting
   List<String> get rootPackagePrefixes => _rootPackagePrefixes;
-  List<String> _rootPackagePrefixes;
+  late List<String> _rootPackagePrefixes;
 
   @visibleForTesting
-  final Map<String, ClassRef> localClasses = {};
+  final localClasses = <String, ClassRef>{};
 
   @override
   void onIsolateStopped() {
@@ -248,7 +256,7 @@ class InspectorService extends InspectorServiceBase {
     // widgetRuntimeType may contain some generic type arguments which we need
     // to strip out. If widgetRuntimeType is "FooWidget<Bar>" then we are only
     // interested in the raw type "FooWidget".
-    final rawType = node.widgetRuntimeType.split('<').first;
+    final rawType = node.widgetRuntimeType!.split('<').first;
     return localClasses.containsKey(rawType);
   }
 
@@ -312,7 +320,7 @@ class InspectorService extends InspectorServiceBase {
   /// This method is needed to avoid a race condition when there is a queue of
   /// inspector selection changes due to extremely rapidly navigating through
   /// the inspector tree such as when using the keyboard to navigate.
-  bool _isClientTriggeredSelectionChange(InspectorInstanceRef ref) {
+  bool _isClientTriggeredSelectionChange(InspectorInstanceRef? ref) {
     // TODO(jacobr): once https://github.com/flutter/flutter/issues/39366 is
     // fixed in all versions of flutter we support, remove this logic and
     // determine the source of the inspector selection change directly from the
@@ -320,7 +328,7 @@ class InspectorService extends InspectorServiceBase {
     final currentTime = DateTime.now().millisecondsSinceEpoch;
     if (ref != null) {
       if (_expectedSelectionChanges.containsKey(ref)) {
-        final times = _expectedSelectionChanges.remove(ref);
+        final times = _expectedSelectionChanges.remove(ref)!;
         while (times.isNotEmpty) {
           final time = times.removeAt(0);
           if (time + _maxTimeDelaySelectionNotification >= currentTime) {
@@ -380,19 +388,19 @@ class InspectorService extends InspectorServiceBase {
   Future<void> _updateLocalClasses() async {
     localClasses.clear();
     if (_rootDirectories.value.isNotEmpty) {
-      final isolate = inspectorLibrary.isolate;
-      for (var libraryRef in isolate.libraries) {
-        if (isLocalUri(libraryRef.uri)) {
+      final isolate = inspectorLibrary.isolate!;
+      for (var libraryRef in isolate.libraries!) {
+        if (isLocalUri(libraryRef.uri!)) {
           try {
             final Library library = await inspectorLibrary.service
-                .getObject(isolate.id, libraryRef.id);
-            for (var classRef in library.classes) {
-              localClasses[classRef.name] = classRef;
+                .getObject(isolate.id!, libraryRef.id!) as Library;
+            for (var classRef in library.classes!) {
+              localClasses[classRef.name!] = classRef;
             }
           } catch (e) {
             // Workaround until https://github.com/flutter/devtools/issues/3110
             // is fixed.
-            assert(serviceManager.connectedApp.isDartWebAppNow);
+            assert(serviceManager.connectedApp!.isDartWebAppNow!);
           }
         }
       }
@@ -433,21 +441,13 @@ class InspectorService extends InspectorServiceBase {
     );
   }
 
-  Future<List<String>> getPubRootDirectories() {
-    // No need to call this from a breakpoint.
-    assert(useDaemonApi);
-    final result =
-        invokeServiceMethodDaemonNoGroup('getPubRootDirectories', null);
-    return result ?? [];
-  }
-
   /// As we aren't running from an IDE, we don't know exactly what the pub root
   /// directories are for the current project so we make a best guess if needed
   /// based on the the root directory of the first non artifical widget in the
   /// tree.
   Future<List<String>> inferPubRootDirectoryIfNeeded() async {
     final group = createObjectGroup('temp');
-    List<String> directories = await group.getPubRootDirectories() ?? [];
+    List<String> directories = await group.getPubRootDirectories();
     if (directories.isEmpty) {
       final directory = await inferPubRootDirectoryIfNeededHelper();
       if (directory != null) {
@@ -459,7 +459,7 @@ class InspectorService extends InspectorServiceBase {
     return directories;
   }
 
-  Future<String> inferPubRootDirectoryIfNeededHelper() async {
+  Future<String?> inferPubRootDirectoryIfNeededHelper() async {
     final group = createObjectGroup('temp');
     final root = await group.getRoot(FlutterTreeType.widget);
 
@@ -468,17 +468,17 @@ class InspectorService extends InspectorServiceBase {
       await group.dispose();
       return null;
     }
-    List<RemoteDiagnosticsNode> children = await root.children;
+    List<RemoteDiagnosticsNode?> children = await root.children ?? [];
 
-    if (children?.isEmpty ?? true) {
+    if (children.isEmpty) {
       children = await group.getChildren(root.dartDiagnosticRef, false, null);
     }
 
-    if (children?.isEmpty ?? true) {
+    if (children.isEmpty) {
       await group.dispose();
       return null;
     }
-    final path = children.first.creationLocation?.path;
+    final path = children.first!.creationLocation?.path;
     if (path == null) {
       await group.dispose();
       return null;
@@ -494,7 +494,7 @@ class InspectorService extends InspectorServiceBase {
     // package root directory given that the root script of this project is in
     // this directory rather than guessing based on url structure.
     final parts = path.split('/');
-    String pubRootDirectory;
+    String? pubRootDirectory;
     for (int i = parts.length - 1; i >= 0; i--) {
       final part = parts[i];
       if (part == 'lib' || part == 'web') {
@@ -514,14 +514,14 @@ class InspectorService extends InspectorServiceBase {
     return pubRootDirectory;
   }
 
-  RemoteDiagnosticsNode _currentSelection;
+  RemoteDiagnosticsNode? _currentSelection;
 
   InspectorObjectGroupManager get _selectionGroups {
     return _cachedSelectionGroups ??=
         InspectorObjectGroupManager(this, 'selection');
   }
 
-  InspectorObjectGroupManager _cachedSelectionGroups;
+  InspectorObjectGroupManager? _cachedSelectionGroups;
 
   void notifySelectionChanged() async {
     // The previous selection changed event is obsolete.
@@ -593,14 +593,14 @@ abstract class ObjectGroupBase implements Disposable {
     return disposeComplete;
   }
 
-  Future<T> nullIfDisposed<T>(Future<T> supplier()) async {
+  Future<T?> nullIfDisposed<T>(Future<T> supplier()) async {
     if (disposed) {
       return null;
     }
     return await supplier();
   }
 
-  T nullValueIfDisposed<T>(T supplier()) {
+  T? nullValueIfDisposed<T>(T supplier()) {
     if (disposed) {
       return null;
     }
@@ -616,7 +616,7 @@ abstract class ObjectGroupBase implements Disposable {
     runnable();
   }
 
-  Future<RemoteDiagnosticsNode> invokeServiceMethodReturningNode(
+  Future<RemoteDiagnosticsNode?> invokeServiceMethodReturningNode(
       String methodName) async {
     if (disposed) return null;
     if (useDaemonApi) {
@@ -627,8 +627,10 @@ abstract class ObjectGroupBase implements Disposable {
     }
   }
 
-  Future<RemoteDiagnosticsNode> invokeServiceMethodReturningNodeInspectorRef(
-      String methodName, InspectorInstanceRef ref) {
+  Future<RemoteDiagnosticsNode?> invokeServiceMethodReturningNodeInspectorRef(
+    String methodName,
+    InspectorInstanceRef? ref,
+  ) async {
     if (disposed) return null;
     if (useDaemonApi) {
       return parseDiagnosticsNodeDaemon(
@@ -639,7 +641,7 @@ abstract class ObjectGroupBase implements Disposable {
     }
   }
 
-  Future<RemoteDiagnosticsNode> invokeServiceMethodWithArgReturningNode(
+  Future<RemoteDiagnosticsNode?> invokeServiceMethodWithArgReturningNode(
     String methodName,
     String arg,
   ) async {
@@ -654,7 +656,9 @@ abstract class ObjectGroupBase implements Disposable {
   }
 
   Future<void> invokeVoidServiceMethodInspectorRef(
-      String methodName, InspectorInstanceRef ref) async {
+    String methodName,
+    InspectorInstanceRef ref,
+  ) async {
     if (disposed) return;
     if (useDaemonApi) {
       await invokeServiceMethodDaemonInspectorRef(methodName, ref);
@@ -663,8 +667,11 @@ abstract class ObjectGroupBase implements Disposable {
     }
   }
 
-  Future<Object> invokeServiceMethodDaemonArg(
-      String methodName, String arg, String objectGroup) {
+  Future<Object?> invokeServiceMethodDaemonArg(
+    String methodName,
+    String? arg,
+    String objectGroup,
+  ) {
     final args = {'objectGroup': objectGroup};
     if (arg != null) {
       args['arg'] = arg;
@@ -672,13 +679,15 @@ abstract class ObjectGroupBase implements Disposable {
     return invokeServiceMethodDaemonParams(methodName, args);
   }
 
-  Future<Object> invokeServiceMethodDaemonInspectorRef(
-      String methodName, InspectorInstanceRef arg) {
+  Future<Object?> invokeServiceMethodDaemonInspectorRef(
+    String methodName,
+    InspectorInstanceRef? arg,
+  ) {
     return invokeServiceMethodDaemonArg(methodName, arg?.id, groupName);
   }
 
-  Future<InstanceRef> invokeServiceMethodObservatoryInspectorRef(
-      String methodName, InspectorInstanceRef arg) {
+  Future<InstanceRef?> invokeServiceMethodObservatoryInspectorRef(
+      String methodName, InspectorInstanceRef? arg) {
     return inspectorLibrary.eval(
       "${inspectorService.clientInspectorName}.instance.$methodName('${arg?.id}', '$groupName')",
       isAlive: this,
@@ -693,18 +702,14 @@ abstract class ObjectGroupBase implements Disposable {
   ///
   /// This method will always need to use the observatory service as the input
   /// parameter is an Observatory InstanceRef..
-  Future<InstanceRef> invokeServiceMethodOnRefObservatory(
-      String methodName, InstanceRef arg) {
-    if (arg == null) {
-      return inspectorLibrary.eval(
-        "${inspectorService.clientInspectorName}.instance.$methodName(null, '$groupName')",
-        isAlive: this,
-      );
-    }
+  Future<InstanceRef?> invokeServiceMethodOnRefObservatory(
+    String methodName,
+    InstanceRef arg,
+  ) {
     return inspectorLibrary.eval(
       "${inspectorService.clientInspectorName}.instance.$methodName(arg1, '$groupName')",
       isAlive: this,
-      scope: {'arg1': arg.id},
+      scope: {'arg1': arg.id!},
     );
   }
 
@@ -717,8 +722,10 @@ abstract class ObjectGroupBase implements Disposable {
     }
   }
 
-  Future<Object> invokeServiceMethodDaemon(String methodName,
-      [String objectGroup]) {
+  Future<Object?> invokeServiceMethodDaemon(
+    String methodName, [
+    String? objectGroup,
+  ]) {
     return invokeServiceMethodDaemonParams(
       methodName,
       {'objectGroup': objectGroup ?? groupName},
@@ -729,20 +736,24 @@ abstract class ObjectGroupBase implements Disposable {
   /// arguments.
   ///
   /// Intent is we could refactor how the API is invoked by only changing this call.
-  Future<InstanceRef> invokeServiceMethodObservatory(String methodName) {
+  Future<InstanceRef?> invokeServiceMethodObservatory(String methodName) {
     return invokeServiceMethodObservatory1(methodName, groupName);
   }
 
-  Future<InstanceRef> invokeServiceMethodObservatory1(
-      String methodName, String arg1) {
+  Future<InstanceRef?> invokeServiceMethodObservatory1(
+    String methodName,
+    String arg1,
+  ) {
     return inspectorLibrary.eval(
       "${inspectorService.clientInspectorName}.instance.$methodName('$arg1')",
       isAlive: this,
     );
   }
 
-  Future<InstanceRef> invokeServiceMethodObservatoryWithGroupName1(
-      String methodName, String arg1) {
+  Future<InstanceRef?> invokeServiceMethodObservatoryWithGroupName1(
+    String methodName,
+    String arg1,
+  ) {
     return inspectorLibrary.eval(
       "${inspectorService.clientInspectorName}.instance.$methodName('$arg1', '$groupName')",
       isAlive: this,
@@ -750,9 +761,9 @@ abstract class ObjectGroupBase implements Disposable {
   }
 
   // All calls to invokeServiceMethodDaemon bottom out to this call.
-  Future<Object> invokeServiceMethodDaemonParams(
+  Future<Object?> invokeServiceMethodDaemonParams(
     String methodName,
-    Map<String, Object> params,
+    Map<String, Object?> params,
   ) async {
     final callMethodName =
         '${inspectorService.serviceExtensionPrefix}.$methodName';
@@ -766,20 +777,22 @@ abstract class ObjectGroupBase implements Disposable {
     return await _callServiceExtension(callMethodName, params);
   }
 
-  Future<Object> _callServiceExtension(
-      String extension, Map<String, Object> args) {
+  Future<Object?> _callServiceExtension(
+    String extension,
+    Map<String, Object?> args,
+  ) {
     if (disposed) {
       return Future.value();
     }
 
     return inspectorLibrary.addRequest(this, () async {
-      final r = await serviceManager.service.callServiceExtension(
+      final r = await serviceManager.service!.callServiceExtension(
         extension,
-        isolateId: inspectorService.isolateRef.id,
+        isolateId: inspectorService.isolateRef!.id,
         args: args,
       );
       if (disposed) return null;
-      final json = r.json;
+      final json = r.json!;
       if (json['errorMessage'] != null) {
         throw Exception('$extension -- ${json['errorMessage']}');
       }
@@ -787,79 +800,87 @@ abstract class ObjectGroupBase implements Disposable {
     });
   }
 
-  Future<RemoteDiagnosticsNode> parseDiagnosticsNodeDaemon(
-      Future<Object> json) async {
+  Future<RemoteDiagnosticsNode?> parseDiagnosticsNodeDaemon(
+    Future<Object?> json,
+  ) async {
     if (disposed) return null;
-    return parseDiagnosticsNodeHelper(await json);
+    return parseDiagnosticsNodeHelper(await json as Map<String, Object>?);
   }
 
-  Future<RemoteDiagnosticsNode> parseDiagnosticsNodeObservatory(
-      FutureOr<InstanceRef> instanceRefFuture) async {
+  Future<RemoteDiagnosticsNode?> parseDiagnosticsNodeObservatory(
+    FutureOr<InstanceRef?> instanceRefFuture,
+  ) async {
     return parseDiagnosticsNodeHelper(
-        await instanceRefToJson(await instanceRefFuture));
+      await instanceRefToJson(await instanceRefFuture) as Map<String, Object>?,
+    );
   }
 
-  RemoteDiagnosticsNode parseDiagnosticsNodeHelper(
-      Map<String, Object> jsonElement) {
+  RemoteDiagnosticsNode? parseDiagnosticsNodeHelper(
+    Map<String, Object>? jsonElement,
+  ) {
     if (disposed) return null;
     if (jsonElement == null) return null;
     return RemoteDiagnosticsNode(jsonElement, this, false, null);
   }
 
   Future<List<RemoteDiagnosticsNode>> parseDiagnosticsNodesObservatory(
-    FutureOr<InstanceRef> instanceRefFuture,
-    RemoteDiagnosticsNode parent,
+    FutureOr<InstanceRef?> instanceRefFuture,
+    RemoteDiagnosticsNode? parent,
     bool isProperty,
   ) async {
     if (disposed || instanceRefFuture == null) return [];
     final instanceRef = await instanceRefFuture;
     if (disposed || instanceRefFuture == null) return [];
     return parseDiagnosticsNodesHelper(
-      await instanceRefToJson(instanceRef),
+      await instanceRefToJson(instanceRef) as List<Object>?,
       parent,
       isProperty,
     );
   }
 
   List<RemoteDiagnosticsNode> parseDiagnosticsNodesHelper(
-    List<Object> jsonObject,
-    RemoteDiagnosticsNode parent,
+    List<Object>? jsonObject,
+    RemoteDiagnosticsNode? parent,
     bool isProperty,
   ) {
     if (disposed || jsonObject == null) return const [];
-    final List<RemoteDiagnosticsNode> nodes = [];
-    for (Map<String, Object> element in jsonObject) {
+    final nodes = <RemoteDiagnosticsNode>[];
+    for (var element in jsonObject.cast<Map<String, Object>>()) {
       nodes.add(RemoteDiagnosticsNode(element, this, isProperty, parent));
     }
     return nodes;
   }
 
   Future<List<RemoteDiagnosticsNode>> parseDiagnosticsNodesDaemon(
-    FutureOr<Object> jsonFuture,
-    RemoteDiagnosticsNode parent,
+    FutureOr<Object?> jsonFuture,
+    RemoteDiagnosticsNode? parent,
     bool isProperty,
   ) async {
     if (disposed || jsonFuture == null) return const [];
 
-    return parseDiagnosticsNodesHelper(await jsonFuture, parent, isProperty);
+    return parseDiagnosticsNodesHelper(
+      await jsonFuture as List<Object>?,
+      parent,
+      isProperty,
+    );
   }
 
   /// Requires that the InstanceRef is really referring to a String that is valid JSON.
-  Future<Object> instanceRefToJson(InstanceRef instanceRef) async {
+  Future<Object?> instanceRefToJson(InstanceRef? instanceRef) async {
     if (disposed || instanceRef == null) return null;
     final instance = await inspectorLibrary.getInstance(instanceRef, this);
 
     if (disposed || instance == null) return null;
 
-    final String json = instance.valueAsString;
+    final String? json = instance.valueAsString;
     if (json == null) return null;
     return jsonDecode(json);
   }
 
-  Future<InstanceRef> toObservatoryInstanceRef(
+  Future<InstanceRef?> toObservatoryInstanceRef(
     InspectorInstanceRef inspectorInstanceRef,
   ) async {
-    if (inspectorInstanceRef == null || inspectorInstanceRef.id == null) {
+    if (inspectorInstanceRef.id == null) {
       return null;
     }
     return await invokeServiceMethodObservatoryInspectorRef(
@@ -868,21 +889,21 @@ abstract class ObjectGroupBase implements Disposable {
     );
   }
 
-  Future<InspectorInstanceRef> fromInstanceRef(InstanceRef instanceRef) async {
+  Future<InspectorInstanceRef?> fromInstanceRef(InstanceRef instanceRef) async {
     final inspectorIdRef = await inspectorLibrary.eval(
       "${inspectorService.clientInspectorName}.instance.toId(obj, '$groupName')",
-      scope: {'obj': instanceRef.id},
+      scope: {'obj': instanceRef.id!},
       isAlive: this,
     );
     if (inspectorIdRef is! InstanceRef) return null;
     return InspectorInstanceRef(inspectorIdRef.valueAsString);
   }
 
-  Future<Instance> getInstance(FutureOr<InstanceRef> instanceRef) async {
+  Future<Instance?> getInstance(FutureOr<InstanceRef?> instanceRef) async {
     if (disposed) {
       return null;
     }
-    return inspectorLibrary.getInstance(await instanceRef, this);
+    return inspectorLibrary.getInstance(await instanceRef as InstanceRef, this);
   }
 
   /// Returns a Future with a Map of property names to Observatory
@@ -898,7 +919,7 @@ abstract class ObjectGroupBase implements Disposable {
   /// fields.
   ///
   /// The future will immediately complete to null if the inspectorInstanceRef is null.
-  Future<Map<String, InstanceRef>> getDartObjectProperties(
+  Future<Map<String, InstanceRef>?> getDartObjectProperties(
     InspectorInstanceRef inspectorInstanceRef,
     final List<String> propertyNames,
   ) async {
@@ -907,7 +928,7 @@ abstract class ObjectGroupBase implements Disposable {
     const objectName = 'that';
     final expression =
         '[${propertyNames.map((propertyName) => '$objectName.$propertyName').join(',')}]';
-    final Map<String, String> scope = {objectName: instanceRef.id};
+    final Map<String, String> scope = {objectName: instanceRef!.id!};
     final instance = await getInstance(
         inspectorLibrary.eval(expression, isAlive: this, scope: scope));
     if (disposed) return null;
@@ -916,8 +937,9 @@ abstract class ObjectGroupBase implements Disposable {
     // property values. Convert it back to a map from property name to
     // property values.
 
-    final Map<String, InstanceRef> properties = {};
-    final List<InstanceRef> values = instance.elements.toList();
+    final properties = <String, InstanceRef>{};
+    final List<InstanceRef> values =
+        instance!.elements!.toList().cast<InstanceRef>();
     assert(values.length == propertyNames.length);
     for (int i = 0; i < propertyNames.length; ++i) {
       properties[propertyNames[i]] = values[i];
@@ -925,20 +947,21 @@ abstract class ObjectGroupBase implements Disposable {
     return properties;
   }
 
-  Future<Map<String, InstanceRef>> getEnumPropertyValues(
-      InspectorInstanceRef ref) async {
+  Future<Map<String, InstanceRef>?> getEnumPropertyValues(
+    InspectorInstanceRef ref,
+  ) async {
     if (disposed) return null;
-    if (ref?.id == null) return null;
+    if (ref.id == null) return null;
 
     final instance = await getInstance(await toObservatoryInstanceRef(ref));
     if (disposed || instance == null) return null;
 
-    final clazz = await inspectorLibrary.getClass(instance.classRef, this);
+    final clazz = await inspectorLibrary.getClass(instance.classRef!, this);
     if (disposed || clazz == null) return null;
 
-    final Map<String, InstanceRef> properties = {};
-    for (FieldRef field in clazz.fields) {
-      final String name = field.name;
+    final properties = <String, InstanceRef>{};
+    for (FieldRef field in clazz.fields!) {
+      final String name = field.name!;
       if (isPrivate(name)) {
         // Needed to filter out _deleted_enum_sentinel synthetic property.
         // If showing enum values is useful we could special case
@@ -951,37 +974,41 @@ abstract class ObjectGroupBase implements Disposable {
         // different and filter that way.
         continue;
       }
-      if (field.isConst && field.isStatic) {
-        properties[field.name] = field.declaredType;
+      if (field.isConst! && field.isStatic!) {
+        properties[field.name!] = field.declaredType!;
       }
     }
     return properties;
   }
 
-  Future<SourcePosition> getPropertyLocation(
-      InstanceRef instanceRef, String name) async {
-    final Instance instance = await getInstance(instanceRef);
+  Future<SourcePosition?> getPropertyLocation(
+    InstanceRef instanceRef,
+    String name,
+  ) async {
+    final Instance? instance = await getInstance(instanceRef);
     if (instance == null || disposed) {
       return null;
     }
-    return getPropertyLocationHelper(instance.classRef, name);
+    return getPropertyLocationHelper(instance.classRef!, name);
   }
 
-  Future<SourcePosition> getPropertyLocationHelper(
-      ClassRef classRef, String name) async {
-    final clazz = await inspectorLibrary.getClass(classRef, this);
-    for (FuncRef f in clazz.functions) {
+  Future<SourcePosition?> getPropertyLocationHelper(
+    ClassRef classRef,
+    String name,
+  ) async {
+    final clazz = await inspectorLibrary.getClass(classRef, this) as Class;
+    for (FuncRef f in clazz.functions!) {
       // TODO(pq): check for properties that match name.
       if (f.name == name) {
-        final func = await inspectorLibrary.getFunc(f, this);
-        final SourceLocation location = func.location;
+        final func = await inspectorLibrary.getFunc(f, this) as Func;
+        final SourceLocation? location = func.location;
         throw UnimplementedError(
             'getSourcePosition not implemented. $location');
 //        return inspectorLibrary.getSourcePosition(
 //            debugProcess, location.script, location.tokenPos, this);
       }
     }
-    final ClassRef superClass = clazz.superClass;
+    final ClassRef? superClass = clazz.superClass;
     return superClass == null
         ? null
         : getPropertyLocationHelper(superClass, name);
@@ -990,7 +1017,7 @@ abstract class ObjectGroupBase implements Disposable {
   Future<List<RemoteDiagnosticsNode>> getListHelper(
     InspectorInstanceRef instanceRef,
     String methodName,
-    RemoteDiagnosticsNode parent,
+    RemoteDiagnosticsNode? parent,
     bool isProperty,
   ) async {
     if (disposed) return const [];
@@ -1002,10 +1029,7 @@ abstract class ObjectGroupBase implements Disposable {
       );
     } else {
       return parseDiagnosticsNodesObservatory(
-        instanceRef == null
-            ? invokeServiceMethodObservatory(methodName)
-            : invokeServiceMethodObservatoryInspectorRef(
-                methodName, instanceRef),
+        invokeServiceMethodObservatoryInspectorRef(methodName, instanceRef),
         parent,
         isProperty,
       );
@@ -1018,26 +1042,23 @@ abstract class ObjectGroupBase implements Disposable {
   /// If both [inspectorRef] and [instanceRef] are passed in they are assumed to
   /// reference the same object and the [inspectorRef] is used as it is longer
   /// lived than an InstanceRef.
-  Future<InstanceRef> evalOnRef(
+  Future<InstanceRef?> evalOnRef(
     String expression,
-    GenericInstanceRef ref,
+    GenericInstanceRef? ref,
   ) async {
     final inspectorRef = ref?.diagnostic?.valueRef;
     if (inspectorRef != null && inspectorRef.id != null) {
       return await inspectorLibrary.eval(
-        "((object) => $expression)(${inspectorService.clientInspectorName}.instance.toObject('${inspectorRef?.id}'))",
+        "((object) => $expression)(${inspectorService.clientInspectorName}.instance.toObject('${inspectorRef.id}'))",
         isAlive: this,
       );
     }
-    final instanceRef = ref.instanceRef;
-    if (instanceRef != null) {
-      return await inspectorLibrary.eval(
-        expression,
-        isAlive: this,
-        scope: <String, String>{'object': instanceRef.id},
-      );
-    }
-    return null;
+    final instanceRef = ref!.instanceRef;
+    return await inspectorLibrary.eval(
+      expression,
+      isAlive: this,
+      scope: <String, String>{'object': instanceRef.id!},
+    );
   }
 
   Future<bool> isInspectable(GenericInstanceRef ref) async {
@@ -1058,7 +1079,8 @@ abstract class ObjectGroupBase implements Disposable {
   }
 
   Future<List<RemoteDiagnosticsNode>> getProperties(
-      InspectorInstanceRef instanceRef) {
+    InspectorInstanceRef instanceRef,
+  ) {
     return getListHelper(
       instanceRef,
       'getProperties',
@@ -1070,7 +1092,7 @@ abstract class ObjectGroupBase implements Disposable {
   Future<List<RemoteDiagnosticsNode>> getChildren(
     InspectorInstanceRef instanceRef,
     bool summaryTree,
-    RemoteDiagnosticsNode parent,
+    RemoteDiagnosticsNode? parent,
   ) {
     return getListHelper(
       instanceRef,
@@ -1096,9 +1118,9 @@ class ObjectGroup extends ObjectGroupBase {
   @override
   final InspectorService inspectorService;
 
-  Future<Object> invokeServiceExtensionMethod(
+  Future<Object?> invokeServiceExtensionMethod(
     RegistrableServiceExtension extension,
-    Map<String, String> parameters,
+    Map<String, String?> parameters,
   ) async {
     final name = extension.name;
     final fullName = '${inspectorService.serviceExtensionPrefix}.$name';
@@ -1124,7 +1146,7 @@ class ObjectGroup extends ObjectGroupBase {
     return invokeServiceMethodDaemonParams(name, parameters);
   }
 
-  Future<RemoteDiagnosticsNode> getRoot(FlutterTreeType type) {
+  Future<RemoteDiagnosticsNode?> getRoot(FlutterTreeType type) {
     // There is no excuse to call this method on a disposed group.
     assert(!disposed);
     switch (type) {
@@ -1133,26 +1155,25 @@ class ObjectGroup extends ObjectGroupBase {
       case FlutterTreeType.renderObject:
         return getRootRenderObject();
     }
-    throw Exception('Unexpected FlutterTreeType');
   }
 
-  Future<RemoteDiagnosticsNode> getRootWidget() {
+  Future<RemoteDiagnosticsNode?> getRootWidget() {
     return parseDiagnosticsNodeDaemon(invokeServiceExtensionMethod(
       RegistrableServiceExtension.getRootWidgetSummaryTreeWithPreviews,
       {'groupName': groupName},
     ));
   }
 
-  Future<RemoteDiagnosticsNode> getRootWidgetFullTree() {
+  Future<RemoteDiagnosticsNode?> getRootWidgetFullTree() {
     return invokeServiceMethodReturningNode('getRootWidget');
   }
 
-  Future<RemoteDiagnosticsNode> getSummaryTreeWithoutIds() {
+  Future<RemoteDiagnosticsNode?> getSummaryTreeWithoutIds() {
     return parseDiagnosticsNodeDaemon(
         invokeServiceMethodDaemon('getRootWidgetSummaryTree'));
   }
 
-  Future<RemoteDiagnosticsNode> getRootRenderObject() {
+  Future<RemoteDiagnosticsNode?> getRootRenderObject() {
     assert(!disposed);
     return invokeServiceMethodReturningNode('getRootRenderObject');
   }
@@ -1193,17 +1214,16 @@ class ObjectGroup extends ObjectGroupBase {
   }
 */
 
-  Future<RemoteDiagnosticsNode> getSelection(
-    RemoteDiagnosticsNode previousSelection,
+  Future<RemoteDiagnosticsNode?> getSelection(
+    RemoteDiagnosticsNode? previousSelection,
     FlutterTreeType treeType, {
-    @required bool isSummaryTree,
+    required bool isSummaryTree,
   }) async {
-    assert(isSummaryTree != null);
     // There is no reason to allow calling this method on a disposed group.
     assert(!disposed);
     if (disposed) return null;
-    RemoteDiagnosticsNode newSelection;
-    final InspectorInstanceRef previousSelectionRef =
+    RemoteDiagnosticsNode? newSelection;
+    final InspectorInstanceRef? previousSelectionRef =
         previousSelection != null ? previousSelection.dartDiagnosticRef : null;
 
     switch (treeType) {
@@ -1228,7 +1248,9 @@ class ObjectGroup extends ObjectGroupBase {
   }
 
   Future<bool> setSelectionInspector(
-      InspectorInstanceRef selection, bool uiAlreadyUpdated) {
+    InspectorInstanceRef selection,
+    bool uiAlreadyUpdated,
+  ) {
     if (disposed) {
       return Future.value(false);
     }
@@ -1247,9 +1269,9 @@ class ObjectGroup extends ObjectGroupBase {
     }
   }
 
-  Future<bool> setSelection(GenericInstanceRef selection) {
+  Future<bool> setSelection(GenericInstanceRef selection) async {
     if (disposed) {
-      return Future.value();
+      return true;
     }
     return handleSetSelectionObservatory(
       evalOnRef(
@@ -1261,7 +1283,7 @@ class ObjectGroup extends ObjectGroupBase {
   }
 
   Future<bool> handleSetSelectionObservatory(
-    Future<InstanceRef> setSelectionResult,
+    Future<InstanceRef?> setSelectionResult,
     bool uiAlreadyUpdated,
   ) async {
     // TODO(jacobr): we need to cancel if another inspect request comes in while we are trying this one.
@@ -1282,18 +1304,21 @@ class ObjectGroup extends ObjectGroupBase {
   }
 
   Future<bool> handleSetSelectionDaemon(
-    Future<Object> setSelectionResult,
+    Future<Object?> setSelectionResult,
     bool uiAlreadyUpdated,
   ) async {
     if (disposed) return false;
     // TODO(jacobr): we need to cancel if another inspect request comes in while we are trying this one.
-    final json = await setSelectionResult;
+    final isSelectionChanged = await setSelectionResult;
     if (disposed) return false;
-    return handleSetSelectionHelper(json, uiAlreadyUpdated);
+    return handleSetSelectionHelper(
+      isSelectionChanged as bool,
+      uiAlreadyUpdated,
+    );
   }
 
-  Future<RemoteDiagnosticsNode> getDetailsSubtree(
-    RemoteDiagnosticsNode node, {
+  Future<RemoteDiagnosticsNode?> getDetailsSubtree(
+    RemoteDiagnosticsNode? node, {
     int subtreeDepth = 2,
   }) async {
     if (node == null) return null;
@@ -1306,15 +1331,14 @@ class ObjectGroup extends ObjectGroupBase {
       'getDetailsSubtree',
       args,
     );
-    return parseDiagnosticsNodeHelper(json);
+    return parseDiagnosticsNodeHelper(json as Map<String, Object>?);
   }
 
   Future<void> invokeSetFlexProperties(
     InspectorInstanceRef ref,
-    MainAxisAlignment mainAxisAlignment,
-    CrossAxisAlignment crossAxisAlignment,
+    MainAxisAlignment? mainAxisAlignment,
+    CrossAxisAlignment? crossAxisAlignment,
   ) async {
-    if (ref == null) return null;
     await invokeServiceExtensionMethod(
       RegistrableServiceExtension.setFlexProperties,
       {
@@ -1327,9 +1351,8 @@ class ObjectGroup extends ObjectGroupBase {
 
   Future<void> invokeSetFlexFactor(
     InspectorInstanceRef ref,
-    int flexFactor,
+    int? flexFactor,
   ) async {
-    if (ref == null) return null;
     await invokeServiceExtensionMethod(
       RegistrableServiceExtension.setFlexFactor,
       {'id': ref.id, 'flexFactor': '$flexFactor'},
@@ -1340,15 +1363,14 @@ class ObjectGroup extends ObjectGroupBase {
     InspectorInstanceRef ref,
     FlexFit flexFit,
   ) async {
-    if (ref == null) return null;
     await invokeServiceExtensionMethod(
       RegistrableServiceExtension.setFlexFit,
       {'id': ref.id, 'flexFit': '$flexFit'},
     );
   }
 
-  Future<RemoteDiagnosticsNode> getLayoutExplorerNode(
-    RemoteDiagnosticsNode node, {
+  Future<RemoteDiagnosticsNode?> getLayoutExplorerNode(
+    RemoteDiagnosticsNode? node, {
     int subtreeDepth = 1,
   }) async {
     if (node == null) return null;
@@ -1363,10 +1385,10 @@ class ObjectGroup extends ObjectGroupBase {
   }
 
   Future<List<String>> getPubRootDirectories() async {
-    final List<Object> directories = await invokeServiceExtensionMethod(
+    final List<Object>? directories = await invokeServiceExtensionMethod(
       RegistrableServiceExtension.getPubRootDirectories,
       {},
-    );
+    ) as List<Object>?;
     return List.from(directories ?? []);
   }
 }
@@ -1382,7 +1404,7 @@ abstract class InspectorServiceClient {
 
   void onFlutterFrame();
 
-  Future<Object> onForceRefresh();
+  Future<void> onForceRefresh();
 }
 
 /// Reference to a Dart object.
@@ -1407,9 +1429,9 @@ class InspectorInstanceRef {
   int get hashCode => id.hashCode;
 
   @override
-  String toString() => id;
+  String toString() => '$id';
 
-  final String id;
+  final String? id;
 }
 
 /// Manager that simplifies preventing memory leaks when using the
@@ -1431,14 +1453,14 @@ class InspectorObjectGroupManager {
 
   final InspectorService inspectorService;
   final String debugName;
-  ObjectGroup _current;
-  ObjectGroup _next;
+  ObjectGroup? _current;
+  ObjectGroup? _next;
 
-  Completer<void> _pendingNext;
+  Completer<void>? _pendingNext;
 
   Future<void> get pendingUpdateDone {
     if (_pendingNext != null) {
-      return _pendingNext.future;
+      return _pendingNext!.future;
     }
     if (_next == null) {
       // There is no pending update.
@@ -1446,17 +1468,17 @@ class InspectorObjectGroupManager {
     }
 
     _pendingNext = Completer();
-    return _pendingNext.future;
+    return _pendingNext!.future;
   }
 
-  ObjectGroup get current {
+  ObjectGroup? get current {
     _current ??= inspectorService.createObjectGroup(debugName);
     return _current;
   }
 
   ObjectGroup get next {
     _next ??= inspectorService.createObjectGroup(debugName);
-    return _next;
+    return _next!;
   }
 
   void clear(bool isolateStopped) {
@@ -1478,14 +1500,14 @@ class InspectorObjectGroupManager {
 
   void clearCurrent() {
     if (_current != null) {
-      _current.dispose();
+      _current!.dispose();
       _current = null;
     }
   }
 
   void cancelNext() {
     if (_next != null) {
-      _next.dispose();
+      _next!.dispose();
       _setNextNull();
     }
   }
@@ -1493,7 +1515,7 @@ class InspectorObjectGroupManager {
   void _setNextNull() {
     _next = null;
     if (_pendingNext != null) {
-      _pendingNext.complete(null);
+      _pendingNext!.complete(null);
       _pendingNext = null;
     }
   }

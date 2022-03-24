@@ -4,8 +4,6 @@
 
 // ignore: unused_import, allows the tests to use functions from tester.dart
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
@@ -112,7 +110,7 @@ class ComplexObject {
   Object plainInstance = const _SubObject('hello world');
 
   int lateWithInitializer = 21;
-  int uninitializedLate;
+  late int uninitializedLate;
 
   final int finalVar = 42;
 
@@ -124,7 +122,7 @@ class ComplexObject {
   // ignore: unnecessary_getters_setters
   set getterAndSetter(int value) => _getterAndSetter = value;
 
-  var map = <Object, Object>{
+  var map = <Object?, Object?>{
     'list': [42],
     'string': 'string',
     42: 'number_key',
@@ -137,7 +135,7 @@ class ComplexObject {
     }
   };
 
-  var list = <Object>[
+  var list = <Object?>[
     42,
     'string',
     [],

@@ -485,7 +485,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
             FreeSpaceVisualizerWidget(renderProperties),
         ];
         return Scrollbar(
-          isAlwaysShown: true,
+          thumbVisibility: true,
           controller: widget.scrollController,
           child: SingleChildScrollView(
             scrollDirection: widget.properties.direction,

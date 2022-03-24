@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_app/src/primitives/trees.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -148,7 +146,7 @@ void main() {
     });
 
     test('filterTree', () {
-      final filteredTreeRoots =
+      final List<TestTreeNode> filteredTreeRoots =
           testTreeNode.filterWhere((node) => node.id.isEven);
       expect(filteredTreeRoots.length, equals(1));
       final filteredTree = filteredTreeRoots.first;
@@ -162,7 +160,7 @@ void main() {
     });
 
     test('filterTree when root should be filtered out', () {
-      final filteredTreeRoots =
+      final List<TestTreeNode> filteredTreeRoots =
           testTreeNode.filterWhere((node) => node.id.isOdd);
       expect(filteredTreeRoots.length, equals(2));
       final firstRoot = filteredTreeRoots.first;
@@ -180,13 +178,13 @@ void main() {
     });
 
     test('filterTree when zero nodes match', () {
-      final filteredTreeRoots =
+      final List<TestTreeNode> filteredTreeRoots =
           testTreeNode.filterWhere((node) => node.id > 10);
       expect(filteredTreeRoots, isEmpty);
     });
 
     test('filterTree when all nodes match', () {
-      final filteredTreeRoots =
+      final List<TestTreeNode> filteredTreeRoots =
           testTreeNode.filterWhere((node) => node.id < 10);
       expect(filteredTreeRoots.length, equals(1));
       final filteredTree = filteredTreeRoots.first;
@@ -205,18 +203,18 @@ void main() {
     });
 
     group('Tree traversal', () {
-      TraversalTestTreeNode treeNodeA;
-      TraversalTestTreeNode treeNodeB;
-      TraversalTestTreeNode treeNodeC;
-      TraversalTestTreeNode treeNodeD;
-      TraversalTestTreeNode treeNodeE;
-      TraversalTestTreeNode treeNodeF;
-      TraversalTestTreeNode treeNodeG;
-      TraversalTestTreeNode treeNodeH;
-      TraversalTestTreeNode treeNodeI;
-      TraversalTestTreeNode treeNodeJ;
+      late TraversalTestTreeNode treeNodeA;
+      late TraversalTestTreeNode treeNodeB;
+      late TraversalTestTreeNode treeNodeC;
+      late TraversalTestTreeNode treeNodeD;
+      late TraversalTestTreeNode treeNodeE;
+      late TraversalTestTreeNode treeNodeF;
+      late TraversalTestTreeNode treeNodeG;
+      late TraversalTestTreeNode treeNodeH;
+      late TraversalTestTreeNode treeNodeI;
+      late TraversalTestTreeNode treeNodeJ;
 
-      TraversalTestTreeNode tree;
+      late TraversalTestTreeNode tree;
 
       setUp(() {
         /// Traversal test tree structure:
@@ -272,7 +270,7 @@ void main() {
       group('BFS', () {
         test('traverses tree in correct order', () {
           var visitedCount = 0;
-          breadthFirstTraversal(
+          breadthFirstTraversal<TraversalTestTreeNode>(
             tree,
             action: (node) => node.setVisitedOrder(++visitedCount),
           );
@@ -290,10 +288,10 @@ void main() {
         });
 
         test('finds the correct node', () {
-          final node = breadthFirstTraversal(
+          final node = breadthFirstTraversal<TraversalTestTreeNode>(
             tree,
             returnCondition: (node) => node.id == 'H',
-          );
+          )!;
           expect(node.id, equals('H'));
         });
       });
@@ -301,7 +299,7 @@ void main() {
       group('DFS', () {
         test('traverses tree in correct order', () {
           var visitedCount = 0;
-          depthFirstTraversal(
+          depthFirstTraversal<TraversalTestTreeNode>(
             tree,
             action: (node) => node.setVisitedOrder(++visitedCount),
           );
@@ -319,16 +317,16 @@ void main() {
         });
 
         test('finds the correct node', () {
-          final node = depthFirstTraversal(
+          final node = depthFirstTraversal<TraversalTestTreeNode>(
             tree,
             returnCondition: (node) => node.id == 'H',
-          );
+          )!;
           expect(node.id, equals('H'));
         });
 
         test('explores correct children', () {
           var visitedCount = 0;
-          depthFirstTraversal(
+          depthFirstTraversal<TraversalTestTreeNode>(
             tree,
             action: (node) => node.setVisitedOrder(++visitedCount),
             exploreChildrenCondition: (node) => node.id != 'B',

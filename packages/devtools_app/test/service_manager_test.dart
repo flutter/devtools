@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 @TestOn('vm')
 import 'dart:async';
@@ -45,31 +45,29 @@ void main() async {
         // not cause bot flakiness.
         await Future.delayed(const Duration(seconds: 10));
         // Ensure all futures are completed before running checks.
-        await serviceManager.service.allFuturesCompleted;
+        await serviceManager.service!.allFuturesCompleted;
         expect(
           // Use a range instead of an exact number because service extension
           // calls are not consistent. This will still catch any spurious calls
           // that are unintentionally added at start up.
           const Range(15, 35)
-              .contains(serviceManager.service.vmServiceCallCount),
+              .contains(serviceManager.service!.vmServiceCallCount),
           isTrue,
           reason:
               'Unexpected number of vm service calls upon connection. If this '
               'is expected, please update this test to the new expected number '
               'of calls. Here are the calls for this test run:\n'
-              '${serviceManager.service.vmServiceCalls.toString()}',
+              '${serviceManager.service!.vmServiceCalls.toString()}',
         );
         // Check the ordering of the vm service calls we can expect to occur
         // in a stable order.
         expect(
-          serviceManager.service.vmServiceCalls
+          serviceManager.service!.vmServiceCalls
               // Filter out unawaited streamListen calls.
               .where((call) => call != 'streamListen')
               .toList()
-              .sublist(0, 5),
+              .sublist(0, 3),
           equals([
-            'getVersion',
-            'callMethod getDartDevelopmentServiceVersion',
             'getFlagList',
             'getVM',
             'getIsolate',
@@ -77,7 +75,7 @@ void main() async {
         );
 
         expect(
-          serviceManager.service.vmServiceCalls
+          serviceManager.service!.vmServiceCalls
               .where((call) => call == 'streamListen')
               .toList()
               .length,
@@ -97,7 +95,7 @@ void main() async {
         expect(serviceManager.isolateManager.isolates.value, isNotEmpty);
         expect(serviceManager.vmFlagManager.flags.value, isNotNull);
 
-        if (serviceManager.isolateManager.selectedIsolate == null) {
+        if (serviceManager.isolateManager.selectedIsolate.value == null) {
           await whenValueNonNull(serviceManager.isolateManager.selectedIsolate);
         }
 
@@ -108,8 +106,8 @@ void main() async {
         await env.setupEnvironment();
 
         await expectLater(
-          serviceManager.service.addBreakpoint(
-              serviceManager.isolateManager.selectedIsolate.value.id,
+          serviceManager.service!.addBreakpoint(
+              serviceManager.isolateManager.selectedIsolate.value!.id!,
               'fake-script-id',
               1),
           throwsA(const TypeMatcher<RPCError>()
@@ -121,7 +119,7 @@ void main() async {
 
       test('toggle boolean service extension', () async {
         await env.setupEnvironment();
-        await serviceManager.service.allFuturesCompleted;
+        await serviceManager.service!.allFuturesCompleted;
 
         final extensionName = extensions.debugPaint.extension;
         const evalExpression = 'debugPaintSizeEnabled';
@@ -152,7 +150,7 @@ void main() async {
 
       test('toggle String service extension', () async {
         await env.setupEnvironment();
-        await serviceManager.service.allFuturesCompleted;
+        await serviceManager.service!.allFuturesCompleted;
 
         final extensionName = extensions.togglePlatformMode.extension;
         await _serviceExtensionAvailable(extensionName);
@@ -194,7 +192,7 @@ void main() async {
         'toggle numeric service extension',
         () async {
           await env.setupEnvironment();
-          await serviceManager.service.allFuturesCompleted;
+          await serviceManager.service!.allFuturesCompleted;
 
           final extensionName = extensions.slowAnimations.extension;
           await _serviceExtensionAvailable(extensionName);
@@ -236,7 +234,7 @@ void main() async {
 
           await serviceManager.callService(
             registrations.hotReload.service,
-            isolateId: serviceManager.isolateManager.mainIsolate.value.id,
+            isolateId: serviceManager.isolateManager.mainIsolate.value!.id,
           );
 
           await env.tearDownEnvironment();
@@ -319,7 +317,7 @@ void main() async {
     test('all extension types', () async {
       await env.setupEnvironment();
 
-      final service = serviceManager.service;
+      final service = serviceManager.service!;
 
       /// Helper method to call an extension on the test device and verify that
       /// the device reflects the new extension state.
@@ -328,8 +326,8 @@ void main() async {
         Map<String, dynamic> args,
         String evalExpression,
         EvalOnDartLibrary library, {
-        String newValue,
-        String oldValue,
+        String? newValue,
+        String? oldValue,
       }) async {
         if (extensionDescription
             is extensions.ToggleableServiceExtensionDescription) {
@@ -347,7 +345,7 @@ void main() async {
         // Enable service extension on test device.
         await service.callServiceExtension(
           extensionDescription.extension,
-          isolateId: serviceManager.isolateManager.mainIsolate.value.id,
+          isolateId: serviceManager.isolateManager.mainIsolate.value!.id,
           args: args,
         );
 
@@ -451,8 +449,11 @@ Future<void> _serviceExtensionAvailable(String extensionName) async {
   listenable.removeListener(listener);
 }
 
-Future<void> _verifyExtensionStateOnTestDevice(String evalExpression,
-    String expectedResult, EvalOnDartLibrary library) async {
+Future<void> _verifyExtensionStateOnTestDevice(
+  String evalExpression,
+  String? expectedResult,
+  EvalOnDartLibrary library,
+) async {
   final result = await library.eval(evalExpression, isAlive: null);
   if (result is InstanceRef) {
     expect(result.valueAsString, equals(expectedResult));

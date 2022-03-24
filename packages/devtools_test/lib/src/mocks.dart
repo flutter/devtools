@@ -78,6 +78,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
     when(errorBadgeManager.erroredItemsForPage(any)).thenReturn(
         FixedValueListenable(LinkedHashMap<String, DevToolsError>()));
+
+    when(errorBadgeManager.errorCountNotifier(any))
+        .thenReturn(ValueNotifier<int>(0));
   }
 
   Completer<void> flagsInitialized = Completer();
@@ -415,13 +418,6 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   }
 
   @override
-  bool isProtocolVersionSupportedNow({
-    @required SemanticVersion supportedVersion,
-  }) {
-    return true;
-  }
-
-  @override
   Future<Success> setFlag(String name, String value) {
     final List<Flag> flags = _flags['flags'];
     final existingFlag =
@@ -578,16 +574,6 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<bool> isDartIoVersionSupported({
-    String isolateId,
-    SemanticVersion supportedVersion,
-  }) {
-    return Future.value(
-      dartIoVersion.isSupported(supportedVersion: supportedVersion),
-    );
-  }
-
-  @override
   Future<Timestamp> getVMTimelineMicros() async => Timestamp(timestamp: 0);
 
   @override
@@ -734,7 +720,6 @@ class MockDebuggerController extends Mock implements DebuggerController {
     when(debuggerController.fileExplorerVisible)
         .thenReturn(ValueNotifier(false));
     when(debuggerController.currentScriptRef).thenReturn(ValueNotifier(null));
-    when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
     when(debuggerController.selectedBreakpoint).thenReturn(ValueNotifier(null));
     when(debuggerController.stackFramesWithLocation)
         .thenReturn(ValueNotifier([]));
@@ -755,6 +740,8 @@ class MockDebuggerController extends Mock implements DebuggerController {
       MockProgramExplorerController.withDefaults();
 }
 
+class MockScriptManager extends Mock implements ScriptManager {}
+
 class MockProgramExplorerController extends Mock
     implements ProgramExplorerController {
   MockProgramExplorerController();
@@ -764,6 +751,7 @@ class MockProgramExplorerController extends Mock
     when(controller.initialized).thenReturn(ValueNotifier(true));
     when(controller.rootObjectNodes).thenReturn(ValueNotifier([]));
     when(controller.outlineNodes).thenReturn(ValueNotifier([]));
+    when(controller.outlineSelection).thenReturn(ValueNotifier(null));
     when(controller.isLoadingOutline).thenReturn(ValueNotifier(false));
 
     return controller;

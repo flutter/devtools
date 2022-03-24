@@ -92,9 +92,9 @@ class FlatTable<T> extends StatefulWidget {
 
   final ValueListenable<List<T>>? searchMatchesNotifier;
 
-  final ValueListenable<T>? activeSearchMatchNotifier;
+  final ValueListenable<T?>? activeSearchMatchNotifier;
 
-  final ValueListenable<T>? selectionNotifier;
+  final ValueListenable<T?>? selectionNotifier;
 
   int get numSpacers => max(0, columns.length - 1);
 
@@ -939,7 +939,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
             ),
             Expanded(
               child: Scrollbar(
-                isAlwaysShown: true,
+                thumbVisibility: true,
                 controller: scrollController,
                 child: GestureDetector(
                   behavior: HitTestBehavior.translucent,
@@ -1112,7 +1112,7 @@ class TableRow<T> extends StatefulWidget {
 
   final ValueListenable<List<T>>? searchMatchesNotifier;
 
-  final ValueListenable<T>? activeSearchMatchNotifier;
+  final ValueListenable<T?>? activeSearchMatchNotifier;
 
   int get numSpacers => max(0, columns.length - 1);
 
