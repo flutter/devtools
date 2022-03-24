@@ -158,7 +158,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     // The name of this node is not exposed to users.
     final root = VMServiceObjectNode(controller, '<root>', ObjRef(id: '0'));
 
-    final scripts = controller.debuggerController.sortedScripts.value;
+    final scripts = scriptManager.sortedScripts.value;
 
     for (final script in scripts) {
       _buildScriptNode(root, script);
@@ -314,7 +314,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       script = location.script;
     }
 
-    script = await controller.debuggerController.getScript(script);
+    script = await scriptManager.getScript(script);
     final position = tokenPos == 0
         ? null
         : SourcePosition.calculatePosition(script, tokenPos);

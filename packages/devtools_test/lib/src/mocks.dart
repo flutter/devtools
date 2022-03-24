@@ -720,7 +720,6 @@ class MockDebuggerController extends Mock implements DebuggerController {
     when(debuggerController.fileExplorerVisible)
         .thenReturn(ValueNotifier(false));
     when(debuggerController.currentScriptRef).thenReturn(ValueNotifier(null));
-    when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
     when(debuggerController.selectedBreakpoint).thenReturn(ValueNotifier(null));
     when(debuggerController.stackFramesWithLocation)
         .thenReturn(ValueNotifier([]));
@@ -741,6 +740,8 @@ class MockDebuggerController extends Mock implements DebuggerController {
       MockProgramExplorerController.withDefaults();
 }
 
+class MockScriptManager extends Mock implements ScriptManager {}
+
 class MockProgramExplorerController extends Mock
     implements ProgramExplorerController {
   MockProgramExplorerController();
@@ -750,6 +751,7 @@ class MockProgramExplorerController extends Mock
     when(controller.initialized).thenReturn(ValueNotifier(true));
     when(controller.rootObjectNodes).thenReturn(ValueNotifier([]));
     when(controller.outlineNodes).thenReturn(ValueNotifier([]));
+    when(controller.outlineSelection).thenReturn(ValueNotifier(null));
     when(controller.isLoadingOutline).thenReturn(ValueNotifier(false));
 
     return controller;

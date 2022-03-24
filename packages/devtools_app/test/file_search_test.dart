@@ -6,6 +6,7 @@
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/file_search.dart';
+import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -15,6 +16,7 @@ import 'package:mockito/mockito.dart';
 
 void main() {
   final debuggerController = MockDebuggerController.withDefaults();
+  final scriptManager = MockScriptManager();
 
   Widget buildFileSearch() {
     return MaterialApp(
@@ -30,9 +32,10 @@ void main() {
 
   group('File search', () {
     setUp(() {
-      when(debuggerController.sortedScripts)
+      when(scriptManager.sortedScripts)
           .thenReturn(ValueNotifier(mockScriptRefs));
       setGlobal(IdeTheme, IdeTheme());
+      setGlobal(ScriptManager, scriptManager);
     });
 
     testWidgetsWithWindowSize(
