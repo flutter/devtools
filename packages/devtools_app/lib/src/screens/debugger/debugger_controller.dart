@@ -230,8 +230,8 @@ class DebuggerController extends DisposableController
   }
 
   Future<Script?> getScriptForRef(ScriptRef? ref) async {
-    final cachedScript = getScriptCached(ref);
-    if (cachedScript == null && ref != null) {
+    final cachedScript = scriptManager.getScriptCached(ref!);
+    if (cachedScript == null) {
       return await scriptManager.getScript(ref);
     }
     return cachedScript;
@@ -321,7 +321,7 @@ class DebuggerController extends DisposableController
 
   ValueListenable<List<DartObjectNode>> get variables => _variables;
 
-  final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
+  final _breakpoints = ValueNotifier<List<Breakpoint>?>([]);
 
   ValueListenable<List<Breakpoint?>?> get breakpoints => _breakpoints;
 
@@ -592,7 +592,7 @@ class DebuggerController extends DisposableController
       // TODO(djshuckerow): switch the _breakpoints notifier to a 'ListNotifier'
       // that knows how to notify when performing a list edit operation.
       case EventKind.kBreakpointAdded:
-        _breakpoints.value = [..._breakpoints.value!, event.breakpoint];
+        _breakpoints.value = [..._breakpoints.value!, event.breakpoint!];
 
         // ignore: unawaited_futures
         _createBreakpointWithLocation(event.breakpoint).then((bp) {
@@ -665,7 +665,7 @@ class DebuggerController extends DisposableController
     // Refresh the list of scripts.
     final previousScriptRefs = scriptManager.sortedScripts.value;
     final currentScriptRefs =
-        await scriptManager.retrieveAndSortScripts(isolateRef);
+        await scriptManager.retrieveAndSortScripts(isolateRef!);
     final removedScripts =
         Set.of(previousScriptRefs).difference(Set.of(currentScriptRefs));
     final addedScripts =
