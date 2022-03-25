@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 import '../../../../primitives/utils.dart';
@@ -16,7 +14,7 @@ import 'theme.dart';
 class FreeSpaceVisualizerWidget extends StatelessWidget {
   const FreeSpaceVisualizerWidget(
     this.renderProperties, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   final RenderProperties renderProperties;
@@ -93,8 +91,8 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
 class PaddingVisualizerWidget extends StatelessWidget {
   const PaddingVisualizerWidget(
     this.renderProperties, {
-    @required this.horizontal,
-    Key key,
+    required this.horizontal,
+    Key? key,
   }) : super(key: key);
 
   final RenderProperties renderProperties;

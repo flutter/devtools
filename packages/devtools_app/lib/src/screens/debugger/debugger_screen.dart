@@ -138,7 +138,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             children: [
               child!,
               ProgramExplorer(
-                debugController: controller,
+                controller: controller.programExplorerController,
                 onSelected: _onLocationSelected,
               ),
             ],
@@ -382,7 +382,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     }
 
     final fileName = ' at ' + frame.location!.script!.uri!.split('/').last;
-    final script = await widget.controller.getScript(frame.location!.script!)!;
+    final script = await scriptManager.getScript(frame.location!.script!);
     final pos =
         SourcePosition.calculatePosition(script, frame.location!.tokenPos);
 

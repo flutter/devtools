@@ -300,10 +300,14 @@ class QueryFilterArgument {
     return false;
   }
 
-  bool matchesValue(String dataValue, {bool substringMatch = false}) {
+  bool matchesValue(String? dataValue, {bool substringMatch = false}) {
     // If there are no specified filter values, consider [dataValue] to match
     // this filter.
     if (values.isEmpty) return true;
+
+    if (dataValue == null) {
+      return isNegative;
+    }
 
     var matches = false;
     for (final value in values) {

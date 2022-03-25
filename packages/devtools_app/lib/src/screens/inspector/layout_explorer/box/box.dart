@@ -4,6 +4,8 @@
 
 // @dart=2.9
 
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';

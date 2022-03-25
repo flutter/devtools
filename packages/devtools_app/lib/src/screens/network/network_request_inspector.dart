@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 import '../../analytics/constants.dart' as analytics_constants;
@@ -11,6 +9,7 @@ import '../../http/http_request_data.dart';
 import '../../shared/common_widgets.dart';
 import '../../ui/tab.dart';
 import 'network_controller.dart';
+import 'network_model.dart';
 import 'network_request_inspector_views.dart';
 
 /// A [Widget] which displays information about a network request.
@@ -38,7 +37,7 @@ class NetworkRequestInspector extends StatelessWidget {
 
   final NetworkController controller;
 
-  Widget _buildTab(String tabName) {
+  DevToolsTab _buildTab(String tabName) {
     return DevToolsTab.create(
       tabName: tabName,
       gaPrefix: 'requestInspectorTab',
@@ -47,12 +46,12 @@ class NetworkRequestInspector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<NetworkRequest?>(
       valueListenable: controller.selectedRequest,
       builder: (context, data, _) {
         final tabs = <DevToolsTab>[
           _buildTab(NetworkRequestInspector._overviewTabTitle),
-          if (data is HttpRequestData) ...[
+          if (data is DartIOHttpRequestData) ...[
             _buildTab(NetworkRequestInspector._headersTabTitle),
             if (data.requestBody != null)
               _buildTab(NetworkRequestInspector._requestTabTitle),
@@ -60,15 +59,6 @@ class NetworkRequestInspector extends StatelessWidget {
               _buildTab(NetworkRequestInspector._responseTabTitle),
             if (data.hasCookies)
               _buildTab(NetworkRequestInspector._cookiesTabTitle),
-          ],
-        ];
-        final tabViews = [
-          NetworkRequestOverviewView(data),
-          if (data is HttpRequestData) ...[
-            HttpRequestHeadersView(data),
-            if (data.requestBody != null) HttpRequestView(data),
-            if (data.responseBody != null) HttpResponseView(data),
-            if (data.hasCookies) HttpRequestCookiesView(data),
           ],
         ];
         return Card(
@@ -85,7 +75,15 @@ class NetworkRequestInspector extends StatelessWidget {
                   )
                 : AnalyticsTabbedView(
                     tabs: tabs,
-                    tabViews: tabViews,
+                    tabViews: [
+                      NetworkRequestOverviewView(data),
+                      if (data is DartIOHttpRequestData) ...[
+                        HttpRequestHeadersView(data),
+                        if (data.requestBody != null) HttpRequestView(data),
+                        if (data.responseBody != null) HttpResponseView(data),
+                        if (data.hasCookies) HttpRequestCookiesView(data),
+                      ],
+                    ],
                     gaScreen: analytics_constants.network,
                   ),
           ),

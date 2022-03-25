@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
-import '../../shared/version.dart';
 import 'network_controller.dart';
 
 class NetworkService {
@@ -26,13 +23,14 @@ class NetworkService {
   /// Returns the current timestamp.
   Future<int> updateLastRefreshTime({bool alreadyRecordingHttp = false}) async {
     // Set the current timeline time as the time of the last refresh.
-    final timestamp = await serviceManager.service.getVMTimelineMicros();
+    final timestampObj = await serviceManager.service!.getVMTimelineMicros();
 
+    final timestamp = timestampObj.timestamp!;
     if (!alreadyRecordingHttp) {
       // Only include HTTP requests issued after the current time.
-      networkController.lastRefreshMicros = timestamp.timestamp;
+      networkController.lastRefreshMicros = timestamp;
     }
-    return timestamp.timestamp;
+    return timestamp;
   }
 
   /// Force refreshes the HTTP requests logged to the timeline as well as any
@@ -40,38 +38,26 @@ class NetworkService {
   Future<void> refreshNetworkData() async {
     if (serviceManager.service == null) return;
 
-    final timestamp = await serviceManager.service.getVMTimelineMicros();
+    final timestampObj = await serviceManager.service!.getVMTimelineMicros();
+    final timestamp = timestampObj.timestamp!;
     final sockets = await _refreshSockets();
-    List<HttpProfileRequest> httpRequests;
-    Timeline timeline;
-    if (await serviceManager.service.isDartIoVersionSupported(
-      supportedVersion: SemanticVersion(major: 1, minor: 6),
-      isolateId: serviceManager.isolateManager.selectedIsolate.value.id,
-    )) {
-      httpRequests = await _refreshHttpProfile();
-    } else {
-      timeline = await serviceManager.service.getVMTimeline(
-        timeOriginMicros: networkController.lastRefreshMicros,
-        timeExtentMicros:
-            timestamp.timestamp - networkController.lastRefreshMicros,
-      );
-    }
-    networkController.lastRefreshMicros = timestamp.timestamp;
+    List<HttpProfileRequest>? httpRequests;
+    httpRequests = await _refreshHttpProfile();
+    networkController.lastRefreshMicros = timestamp;
     networkController.processNetworkTraffic(
-      timeline: timeline,
       sockets: sockets,
       httpRequests: httpRequests,
     );
   }
 
   Future<List<HttpProfileRequest>> _refreshHttpProfile() async {
-    assert(serviceManager.service != null);
-    if (serviceManager.service == null) return [];
+    final service = serviceManager.service;
+    if (service == null) return [];
 
     final requests = <HttpProfileRequest>[];
-    await serviceManager.service.forEachIsolate((isolate) async {
-      final request = await serviceManager.service.getHttpProfile(
-        isolate.id,
+    await service.forEachIsolate((isolate) async {
+      final request = await service.getHttpProfile(
+        isolate.id!,
         updatedSince: networkController.lastRefreshMicros,
       );
       requests.addAll(request.requests);
@@ -80,11 +66,10 @@ class NetworkService {
   }
 
   Future<void> _clearHttpProfile() async {
-    assert(serviceManager.service != null);
-    if (serviceManager.service == null) return;
-
-    await serviceManager.service.forEachIsolate((isolate) async {
-      final future = serviceManager.service.clearHttpProfile(isolate.id);
+    final service = serviceManager.service;
+    if (service == null) return;
+    await service.forEachIsolate((isolate) async {
+      final future = service.clearHttpProfile(isolate.id!);
       // The above call won't complete immediately if the isolate is paused, so
       // give up waiting after 500ms. However, the call will complete eventually
       // if the isolate is eventually resumed.
@@ -95,27 +80,25 @@ class NetworkService {
   }
 
   Future<List<SocketStatistic>> _refreshSockets() async {
-    assert(serviceManager.service != null);
-    if (serviceManager.service == null) return [];
-
+    final service = serviceManager.service;
+    if (service == null) return [];
     final sockets = <SocketStatistic>[];
-    await serviceManager.service.forEachIsolate((isolate) async {
-      final socketProfile =
-          await serviceManager.service.getSocketProfile(isolate.id);
+    await service.forEachIsolate((isolate) async {
+      final socketProfile = await service.getSocketProfile(isolate.id!);
       sockets.addAll(socketProfile.sockets);
     });
     return sockets;
   }
 
   Future<void> _clearSocketProfile() async {
-    assert(serviceManager.service != null);
-    if (serviceManager.service == null) return;
-
-    await serviceManager.service.forEachIsolate((isolate) async {
+    final service = serviceManager.service;
+    if (service == null) return;
+    await service.forEachIsolate((isolate) async {
+      final isolateId = isolate.id!;
       final socketProfilingAvailable =
-          await serviceManager.service.isSocketProfilingAvailable(isolate.id);
+          await service.isSocketProfilingAvailable(isolateId);
       if (socketProfilingAvailable) {
-        final future = serviceManager.service.clearSocketProfile(isolate.id);
+        final future = service.clearSocketProfile(isolateId);
         // The above call won't complete immediately if the isolate is paused, so
         // give up waiting after 500ms. However, the call will complete eventually
         // if the isolate is eventually resumed.
@@ -128,15 +111,14 @@ class NetworkService {
 
   /// Enables or disables Socket profiling for all isolates.
   Future<void> toggleSocketProfiling(bool state) async {
-    assert(serviceManager.service != null);
-    if (serviceManager.service == null) return;
-
-    await serviceManager.service.forEachIsolate((isolate) async {
+    final service = serviceManager.service;
+    if (service == null) return;
+    await service.forEachIsolate((isolate) async {
+      final isolateId = isolate.id!;
       final socketProfilingAvailable =
-          await serviceManager.service.isSocketProfilingAvailable(isolate.id);
+          await service.isSocketProfilingAvailable(isolateId);
       if (socketProfilingAvailable) {
-        final future =
-            serviceManager.service.socketProfilingEnabled(isolate.id, state);
+        final future = service.socketProfilingEnabled(isolateId, state);
         // The above call won't complete immediately if the isolate is paused, so
         // give up waiting after 500ms. However, the call will complete eventually
         // if the isolate is eventually resumed.

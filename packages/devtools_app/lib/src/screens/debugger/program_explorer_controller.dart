@@ -11,13 +11,10 @@ import '../../primitives/auto_dispose.dart';
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
-import 'debugger_controller.dart';
 import 'program_explorer_model.dart';
 
 class ProgramExplorerController extends DisposableController
     with AutoDisposeControllerMixin {
-  ProgramExplorerController({required this.debuggerController});
-
   /// The outline view nodes for the currently selected library.
   ValueListenable<List<VMServiceObjectNode>> get outlineNodes => _outlineNodes;
   final _outlineNodes = ListValueNotifier<VMServiceObjectNode>([]);
@@ -47,8 +44,6 @@ class ProgramExplorerController extends DisposableController
   ValueListenable<bool> get initialized => _initialized;
   final _initialized = ValueNotifier<bool>(false);
   bool _initializing = false;
-
-  DebuggerController debuggerController;
 
   /// Returns true if [function] is a getter or setter that was not explicitly
   /// defined (e.g., `int foo` creates `int get foo` and `set foo(int)`).
@@ -90,7 +85,7 @@ class ProgramExplorerController extends DisposableController
     // TODO(elliette): If file was opened from before the reload, we should try
     // to open that one instead of the entrypoint file.
     addAutoDisposeListener(
-      debuggerController.sortedScripts,
+      scriptManager.sortedScripts,
       refresh,
     );
   }

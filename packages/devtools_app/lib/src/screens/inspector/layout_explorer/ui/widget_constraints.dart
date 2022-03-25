@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 import '../../../../primitives/math_utils.dart';
@@ -17,9 +15,9 @@ import 'utils.dart';
 
 class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
   VisualizeWidthAndHeightWithConstraints({
-    @required this.properties,
-    double arrowHeadSize,
-    @required this.child,
+    required this.properties,
+    double? arrowHeadSize,
+    required this.child,
     this.warnIfUnconstrained = true,
   }) : arrowHeadSize = arrowHeadSize ?? defaultIconSize;
 
@@ -30,27 +28,28 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final showChildrenWidthsSum =
-        properties is FlexLayoutProperties && properties.isOverflowWidth;
+    final propertiesLocal = properties;
+    final showChildrenWidthsSum = propertiesLocal is FlexLayoutProperties &&
+        propertiesLocal.isOverflowWidth;
     final bottomHeight = widthAndConstraintIndicatorSize;
     final rightWidth = heightAndConstraintIndicatorSize;
     final colorScheme = Theme.of(context).colorScheme;
 
     final showOverflowHeight =
-        properties is FlexLayoutProperties && properties.isOverflowHeight;
+        properties is FlexLayoutProperties && propertiesLocal.isOverflowHeight;
     final heightDescription = RotatedBox(
       quarterTurns: 1,
       child: dimensionDescription(
           TextSpan(
             children: [
               TextSpan(
-                text: '${properties.describeHeight()}',
+                text: '${propertiesLocal.describeHeight()}',
               ),
-              if (properties.constraints != null) ...[
+              if (propertiesLocal.constraints != null) ...[
                 if (!showOverflowHeight) const TextSpan(text: '\n'),
                 TextSpan(
-                  text: ' (${properties.describeHeightConstraints()})',
-                  style: properties.constraints.hasBoundedHeight ||
+                  text: ' (${propertiesLocal.describeHeightConstraints()})',
+                  style: propertiesLocal.constraints!.hasBoundedHeight ||
                           !warnIfUnconstrained
                       ? null
                       : TextStyle(
@@ -61,11 +60,11 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
               if (showOverflowHeight)
                 TextSpan(
                   text: '\nchildren take: '
-                      '${toStringAsFixed(sum(properties.childrenHeights))}',
+                      '${toStringAsFixed(sum(propertiesLocal.childrenHeights.cast<double>()))}',
                 ),
             ],
           ),
-          properties.isOverflowHeight,
+          propertiesLocal.isOverflowHeight,
           colorScheme),
     );
     final right = Container(
@@ -105,25 +104,25 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
     final widthDescription = dimensionDescription(
       TextSpan(
         children: [
-          TextSpan(text: '${properties.describeWidth()}; '),
-          if (properties.constraints != null) ...[
+          TextSpan(text: '${propertiesLocal.describeWidth()}; '),
+          if (propertiesLocal.constraints != null) ...[
             if (!showChildrenWidthsSum) const TextSpan(text: '\n'),
             TextSpan(
-              text: '(${properties.describeWidthConstraints()})',
-              style:
-                  properties.constraints.hasBoundedWidth || !warnIfUnconstrained
-                      ? null
-                      : TextStyle(color: colorScheme.unconstrainedColor),
+              text: '(${propertiesLocal.describeWidthConstraints()})',
+              style: propertiesLocal.constraints!.hasBoundedWidth ||
+                      !warnIfUnconstrained
+                  ? null
+                  : TextStyle(color: colorScheme.unconstrainedColor),
             )
           ],
           if (showChildrenWidthsSum)
             TextSpan(
               text: '\nchildren take '
-                  '${toStringAsFixed(sum(properties.childrenWidths))}',
+                  '${toStringAsFixed(sum(propertiesLocal.childrenWidths.cast<double>()))}',
             )
         ],
       ),
-      properties.isOverflowWidth,
+      propertiesLocal.isOverflowWidth,
       colorScheme,
     );
     final bottom = Container(

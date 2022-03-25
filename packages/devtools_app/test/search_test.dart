@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/ui/search.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 // TODO(https://github.com/flutter/devtools/issues/3514): increase test coverage
 
 void main() {
-  TestSearchController searchController;
+  late TestSearchController searchController;
 
   final testData = <TestSearchData>[
     TestSearchData('Foo'),
@@ -34,7 +32,7 @@ void main() {
 
       expect(searchController.search, equals('foo'));
       expect(searchController.searchMatches.value.length, equals(3));
-      expect(searchController.activeSearchMatch.value.name, equals('Foo'));
+      expect(searchController.activeSearchMatch.value!.name, equals('Foo'));
       expect(searchController.matchIndex.value, equals(1));
       for (final data in testData) {
         if (data.name.caseInsensitiveContains('foo')) {
@@ -49,7 +47,7 @@ void main() {
       searchController.search = 'foo';
       expect(searchController.search, equals('foo'));
       expect(searchController.searchMatches.value.length, equals(3));
-      expect(searchController.activeSearchMatch.value.name, equals('Foo'));
+      expect(searchController.activeSearchMatch.value!.name, equals('Foo'));
       expect(searchController.matchIndex.value, equals(1));
       for (final data in testData) {
         if (data.name.caseInsensitiveContains('foo')) {

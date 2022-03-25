@@ -11,6 +11,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/auto_dispose_mixin.dart';
 import '../../primitives/utils.dart';
+import '../../shared/globals.dart';
 import '../../ui/search.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
@@ -56,7 +57,7 @@ class FileSearchFieldState extends State<FileSearchField>
     _query = autoCompleteController.search;
 
     _searchResults = FileSearchResults.emptyQuery(
-      widget.debuggerController!.sortedScripts.value,
+      scriptManager.sortedScripts.value,
     );
 
     // Open the autocomplete results immediately before a query is entered:
@@ -93,7 +94,7 @@ class FileSearchFieldState extends State<FileSearchField>
     // filter down the previous matches. Otherwise search through all scripts:
     final scripts = currentQuery.startsWith(previousQuery)
         ? _searchResults.scriptRefs
-        : widget.debuggerController!.sortedScripts.value;
+        : scriptManager.sortedScripts.value;
 
     final searchResults = _createSearchResults(currentQuery, scripts);
     if (searchResults.scriptRefs.isEmpty) {

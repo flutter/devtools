@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/charts/chart.dart';
 import 'package:devtools_app/src/charts/chart_controller.dart';
@@ -30,12 +30,16 @@ void main() {
   group(
     'Chart Timeseries',
     () {
-      MemoryJson memoryJson;
+      late MemoryJson memoryJson;
+      bool memoryJasonInitialized = false;
 
       void loadData() {
         // Load canned data testHeapSampleData.
-        memoryJson ??=
-            SamplesMemoryJson.decode(argJsonString: testHeapSampleData);
+        if (!memoryJasonInitialized) {
+          memoryJson =
+              SamplesMemoryJson.decode(argJsonString: testHeapSampleData);
+          memoryJasonInitialized = true;
+        }
 
         expect(memoryJson.data.length, equals(104));
       }
@@ -50,10 +54,10 @@ void main() {
       final _rawCapacity = <Data>[];
       final _rawRSS = <Data>[];
 
-      int externalTraceIndex;
-      int usedTraceIndex;
-      int capacityTraceIndex;
-      int rssTraceIndex;
+      late int externalTraceIndex;
+      late int usedTraceIndex;
+      late int capacityTraceIndex;
+      late int rssTraceIndex;
 
       void setupTraces(ChartController controller) {
         // External Heap
@@ -71,7 +75,7 @@ void main() {
         usedTraceIndex = controller.createTrace(
           ChartType.line,
           PaintCharacteristics(
-            color: Colors.blue[200],
+            color: Colors.blue[200]!,
             symbol: ChartSymbol.disc,
             diameter: 1.5,
           ),
@@ -82,7 +86,7 @@ void main() {
         capacityTraceIndex = controller.createTrace(
           ChartType.line,
           PaintCharacteristics(
-            color: Colors.grey[400],
+            color: Colors.grey[400]!,
             diameter: 0.0,
             symbol: ChartSymbol.dashedLine,
           ),
@@ -414,12 +418,12 @@ void main() {
       final _rawSnapshotEvents = <Data>[];
       final _rawAutoSnapshotEvents = <Data>[];
 
-      int snapshotTraceIndex;
-      int autoSnapshotTraceIndex;
-      int manualGCTraceIndex;
-      int monitorTraceIndex;
-      int monitorResetTraceIndex;
-      int gcTraceIndex;
+      late int snapshotTraceIndex;
+      late int autoSnapshotTraceIndex;
+      late int manualGCTraceIndex;
+      late int monitorTraceIndex;
+      late int monitorResetTraceIndex;
+      late int gcTraceIndex;
 
       void setupFixedTraces(ChartController controller) {
         // Snapshot
@@ -477,7 +481,7 @@ void main() {
         monitorResetTraceIndex = controller.createTrace(
           ChartType.symbol,
           PaintCharacteristics.concentric(
-            color: Colors.grey[600],
+            color: Colors.grey[600]!,
             strokeWidth: 4,
             diameter: 6,
             fixedMinY: 0.4,

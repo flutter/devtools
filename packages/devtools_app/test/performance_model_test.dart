@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:convert';
 
@@ -19,7 +19,7 @@ import 'test_utils/test_utils.dart';
 
 void main() {
   group('PerformanceData', () {
-    PerformanceData performanceData;
+    late PerformanceData performanceData;
 
     setUp(() {
       performanceData = PerformanceData(
@@ -137,44 +137,46 @@ void main() {
       performanceData.initializeEventGroups(threadNamesById);
       expect(
         performanceData
-            .eventGroups[PerformanceData.uiKey].rows[0].events.length,
+            .eventGroups[PerformanceData.uiKey]!.rows[0].events.length,
         equals(1),
       );
       expect(
         performanceData
-            .eventGroups[PerformanceData.rasterKey].rows[0].events.length,
+            .eventGroups[PerformanceData.rasterKey]!.rows[0].events.length,
         equals(1),
       );
       expect(
         performanceData
-            .eventGroups[PerformanceData.unknownKey].rows[0].events.length,
+            .eventGroups[PerformanceData.unknownKey]!.rows[0].events.length,
         equals(1),
       );
-      expect(performanceData.eventGroups['A'].rows[0].events.length, equals(1));
+      expect(
+          performanceData.eventGroups['A']!.rows[0].events.length, equals(1));
 
       performanceData.addTimelineEvent(rasterTimelineEventWithSubtleShaderJank);
       performanceData.initializeEventGroups(threadNamesById, startIndex: 4);
       expect(
         performanceData
-            .eventGroups[PerformanceData.uiKey].rows[0].events.length,
+            .eventGroups[PerformanceData.uiKey]!.rows[0].events.length,
         equals(1),
       );
       expect(
         performanceData
-            .eventGroups[PerformanceData.rasterKey].rows[0].events.length,
+            .eventGroups[PerformanceData.rasterKey]!.rows[0].events.length,
         equals(1),
       );
       expect(
         performanceData
-            .eventGroups[PerformanceData.rasterKey].rows[2].events.length,
+            .eventGroups[PerformanceData.rasterKey]!.rows[2].events.length,
         equals(1),
       );
       expect(
         performanceData
-            .eventGroups[PerformanceData.unknownKey].rows[0].events.length,
+            .eventGroups[PerformanceData.unknownKey]!.rows[0].events.length,
         equals(1),
       );
-      expect(performanceData.eventGroups['A'].rows[0].events.length, equals(1));
+      expect(
+          performanceData.eventGroups['A']!.rows[0].events.length, equals(1));
     });
   });
 
@@ -206,12 +208,12 @@ void main() {
       expectedFirstTraceJson.addAll(
           {TraceEvent.durationKey: vsyncEvent.time.duration.inMicroseconds});
       expect(
-        offlineData.selectedEvent.json,
+        offlineData.selectedEvent!.json,
         equals({TimelineEvent.firstTraceKey: expectedFirstTraceJson}),
       );
       expect(offlineData.displayRefreshRate, equals(120));
       expect(
-          offlineData.cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
+          offlineData.cpuProfileData!.toJson, equals(goldenCpuProfileDataJson));
     });
 
     test('shallowClone', () {
@@ -375,7 +377,7 @@ void main() {
       event.addEndEvent(asyncEndATrace);
       expect(event.endTraceEventJson, equals(asyncEndATrace.event.json));
       expect(
-        event.time.end.inMicroseconds,
+        event.time.end!.inMicroseconds,
         asyncEndATrace.event.timestampMicros,
       );
     });

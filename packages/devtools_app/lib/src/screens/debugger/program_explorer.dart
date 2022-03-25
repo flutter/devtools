@@ -15,7 +15,6 @@ import '../../shared/globals.dart';
 import '../../shared/theme.dart';
 import '../../shared/tree.dart';
 import '../../shared/utils.dart';
-import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
 import 'program_explorer_model.dart';
@@ -316,7 +315,7 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     return Scrollbar(
-      isAlwaysShown: true,
+      thumbVisibility: true,
       controller: _scrollController,
       child: TreeView<VMServiceObjectNode>(
         itemExtent: _programExplorerRowHeight,
@@ -403,16 +402,16 @@ class _ProgramOutlineView extends StatelessWidget {
 /// Picker that displays the program's structure, allowing for navigation and
 /// filtering.
 class ProgramExplorer extends StatelessWidget {
-  ProgramExplorer({
-    Key? key,
-    required this.debugController,
-    required this.onSelected,
-  })  : controller = debugController.programExplorerController,
-        super(key: key);
+  const ProgramExplorer({
+    required Key key,
+    required this.controller,
+    this.onSelected,
+    this.title = 'File Explorer',
+  }) : super(key: key);
 
-  final ProgramExplorerController? controller;
-  final DebuggerController debugController;
-  final void Function(ScriptLocation?) onSelected;
+  final ProgramExplorerController controller;
+  final void Function(ScriptLocation)? onSelected;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -423,8 +422,8 @@ class ProgramExplorer extends StatelessWidget {
         if (!initialized) {
           body = const CenteredCircularProgressIndicator();
         } else {
-          const fileExplorerHeader = AreaPaneHeader(
-            title: Text('File Explorer'),
+          final fileExplorerHeader = AreaPaneHeader(
+            title: Text(title),
             needsTopBorder: false,
           );
           final fileExplorer = _FileExplorer(
@@ -454,9 +453,9 @@ class ProgramExplorer extends StatelessWidget {
                       totalHeight: constraints.maxHeight,
                       initialFractions: const [0.7, 0.3],
                       minSizes: const [0.0, 0.0],
-                      headers: const <PreferredSizeWidget>[
+                      headers: <PreferredSizeWidget>[
                         fileExplorerHeader,
-                        AreaPaneHeader(title: Text('Outline')),
+                        const AreaPaneHeader(title: Text('Outline')),
                       ],
                       children: [
                         fileExplorer,
@@ -495,7 +494,7 @@ class ProgramExplorer extends StatelessWidget {
       node.expand();
     }
 
-    onSelected(node.location);
+    if (onSelected != null) onSelected(node.location);
   }
 
   void onItemExpanded(VMServiceObjectNode node) async {

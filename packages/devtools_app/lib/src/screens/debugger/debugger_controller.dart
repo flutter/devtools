@@ -36,11 +36,10 @@ class DebuggerController extends DisposableController
   // `initialSwitchToIsolate` can be set to false for tests to skip the logic
   // in `switchToIsolate`.
   DebuggerController({this.initialSwitchToIsolate = true}) {
-    _programExplorerController = ProgramExplorerController(
-      debuggerController: this,
+    _programExplorerController = ProgramExplorerController();
+    autoDisposeStreamSubscription(
+      serviceManager.onConnectionAvailable.listen(_handleConnectionAvailable),
     );
-    autoDisposeStreamSubscription(serviceManager.onConnectionAvailable
-        .listen(_handleConnectionAvailable));
     if (_service != null) {
       initialize();
     }
@@ -93,11 +92,9 @@ class DebuggerController extends DisposableController
     _lastEvent = null;
     _currentScriptRef.value = null;
     _scriptLocation.value = null;
-    _uriToScriptMap.clear();
     _stackFramesWithLocation.value = [];
     _selectedStackFrame.value = null;
     _variables.value = [];
-    _sortedScripts.value = [];
     _breakpoints.value = [];
     _breakpointsWithLocation.value = [];
     _selectedBreakpoint.value = null;
@@ -158,8 +155,6 @@ class DebuggerController extends DisposableController
   ProgramExplorerController get programExplorerController =>
       _programExplorerController;
   late final ProgramExplorerController _programExplorerController;
-
-  final ScriptCache _scriptCache = ScriptCache();
 
   final ScriptsHistory scriptsHistory = ScriptsHistory();
   late VoidCallback _scriptHistoryListener;
@@ -237,7 +232,7 @@ class DebuggerController extends DisposableController
   Future<Script?> getScriptForRef(ScriptRef? ref) async {
     final cachedScript = getScriptCached(ref);
     if (cachedScript == null && ref != null) {
-      return await getScript(ref);
+      return await scriptManager.getScript(ref);
     }
     return cachedScript;
   }
@@ -307,9 +302,6 @@ class DebuggerController extends DisposableController
     return null;
   }
 
-  // A cached map of uris to ScriptRefs.
-  final Map<String?, ScriptRef> _uriToScriptMap = {};
-
   final _stackFramesWithLocation =
       ValueNotifier<List<StackFrameAndSourcePosition>>([]);
 
@@ -329,13 +321,7 @@ class DebuggerController extends DisposableController
 
   ValueListenable<List<DartObjectNode>> get variables => _variables;
 
-  final _sortedScripts = ValueNotifier<List<ScriptRef>>([]);
-
-  /// Return the sorted list of ScriptRefs active in the current isolate.
-  ValueListenable<List<ScriptRef>> get sortedScripts => _sortedScripts;
-
-  final ValueNotifier<List<Breakpoint?>?> _breakpoints =
-      ValueNotifier<List<Breakpoint>?>([]);
+  final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
 
   ValueListenable<List<Breakpoint?>?> get breakpoints => _breakpoints;
 
@@ -670,19 +656,6 @@ class DebuggerController extends DisposableController
     }
   }
 
-  Future<List<ScriptRef>> _retrieveAndSortScripts(IsolateRef? ref) async {
-    assert(isolateRef != null);
-    final scriptList = await _service!.getScripts(isolateRef!.id!);
-    // We filter out non-unique ScriptRefs here (dart-lang/sdk/issues/41661).
-    final scriptRefs = Set.of(scriptList.scripts!).toList();
-    scriptRefs.sort((a, b) {
-      // We sort uppercase so that items like dart:foo sort before items like
-      // dart:_foo.
-      return a.uri!.toUpperCase().compareTo(b.uri!.toUpperCase());
-    });
-    return scriptRefs;
-  }
-
   void _updateAfterIsolateReload(Event reloadEvent) async {
     // Generally this has the value 'success'; we update our data in any case.
     // ignore: unused_local_variable
@@ -690,17 +663,13 @@ class DebuggerController extends DisposableController
 
     _clearAutocompleteCaches();
     // Refresh the list of scripts.
-    final scriptRefs = await _retrieveAndSortScripts(isolateRef);
-    for (var scriptRef in scriptRefs) {
-      _uriToScriptMap[scriptRef.uri] = scriptRef;
-    }
-
+    final previousScriptRefs = scriptManager.sortedScripts.value;
+    final currentScriptRefs =
+        await scriptManager.retrieveAndSortScripts(isolateRef);
     final removedScripts =
-        Set.of(_sortedScripts.value).difference(Set.of(scriptRefs));
+        Set.of(previousScriptRefs).difference(Set.of(currentScriptRefs));
     final addedScripts =
-        Set.of(scriptRefs).difference(Set.of(_sortedScripts.value));
-
-    _sortedScripts.value = scriptRefs;
+        Set.of(currentScriptRefs).difference(Set.of(previousScriptRefs));
 
     // TODO(devoncarew): Show a message in the logging view.
 
@@ -730,7 +699,7 @@ class DebuggerController extends DisposableController
   /// This method ensures that the source for the script is populated in our
   /// cache, in order to reduce flashing in the editor view.
   void _populateScriptAndShowLocation(ScriptRef scriptRef) {
-    getScript(scriptRef)!.then((script) {
+    scriptManager.getScript(scriptRef).then((script) {
       showScriptLocation(ScriptLocation(scriptRef));
     });
   }
@@ -865,10 +834,8 @@ class DebuggerController extends DisposableController
   }
 
   void _clearCaches() {
-    _scriptCache.clear();
     _lastEvent = null;
     _breakPositionsMap.clear();
-    _uriToScriptMap.clear();
     _clearAutocompleteCaches();
   }
 
@@ -885,32 +852,9 @@ class DebuggerController extends DisposableController
     return _service!.getObject(isolateRef!.id!, objRef.id!);
   }
 
-  /// Return a cached [Script] for the given [ScriptRef], returning null
-  /// if there is no cached [Script].
-  Script? getScriptCached(ScriptRef? scriptRef) {
-    return _scriptCache.getScriptCached(scriptRef);
-  }
-
-  /// Retrieve the [Script] for the given [ScriptRef].
-  ///
-  /// This caches the script lookup for future invocations.
-  Future<Script>? getScript(ScriptRef scriptRef) {
-    return _scriptCache.getScript(_service, isolateRef, scriptRef);
-  }
-
-  /// Return the [ScriptRef] at the given [uri].
-  ScriptRef? scriptRefForUri(String uri) {
-    return _uriToScriptMap[uri];
-  }
-
   Future<void> _populateScripts(Isolate isolate) async {
     assert(isolate != null);
-    final scriptRefs = await _retrieveAndSortScripts(isolateRef);
-    _sortedScripts.value = scriptRefs;
-
-    for (var scriptRef in scriptRefs) {
-      _uriToScriptMap[scriptRef.uri] = scriptRef;
-    }
+    final scriptRefs = await scriptManager.retrieveAndSortScripts(isolateRef);
 
     // Update the selected script.
     final mainScriptRef = scriptRefs.firstWhereOrNull((ref) {
@@ -925,7 +869,7 @@ class DebuggerController extends DisposableController
       Breakpoint? breakpoint) async {
     if (breakpoint!.resolved!) {
       final bp = BreakpointAndSourcePosition.create(breakpoint);
-      return getScript(bp.scriptRef!)!.then((Script script) {
+      return scriptManager.getScript(bp.scriptRef).then((Script script) {
         final pos = SourcePosition.calculatePosition(script, bp.tokenPos);
         return BreakpointAndSourcePosition.create(breakpoint, pos);
       });
@@ -942,7 +886,7 @@ class DebuggerController extends DisposableController
       return StackFrameAndSourcePosition(frame);
     }
 
-    final script = await getScript(location.script!)!;
+    final script = await scriptManager.getScript(location.script);
     final position =
         SourcePosition.calculatePosition(script, location.tokenPos);
     return StackFrameAndSourcePosition(frame, position: position);
@@ -1094,53 +1038,6 @@ class DebuggerController extends DisposableController
       }
     }
     return matches;
-  }
-}
-
-class ScriptCache {
-  ScriptCache();
-
-  Map<String?, Script> _scripts = {};
-  final Map<String?, Future<Script>> _inProgress = {};
-
-  /// Return a cached [Script] for the given [ScriptRef], returning null
-  /// if there is no cached [Script].
-  Script? getScriptCached(ScriptRef? scriptRef) {
-    return _scripts[scriptRef?.id];
-  }
-
-  /// Retrieve the [Script] for the given [ScriptRef].
-  ///
-  /// This caches the script lookup for future invocations.
-  Future<Script>? getScript(
-      VmService? vmService, IsolateRef? isolateRef, ScriptRef scriptRef) {
-    if (_scripts.containsKey(scriptRef.id)) {
-      return Future.value(_scripts[scriptRef.id]);
-    }
-
-    if (_inProgress.containsKey(scriptRef.id)) {
-      return _inProgress[scriptRef.id];
-    }
-
-    // We make a copy here as the future could complete after a clear()
-    // operation is performed.
-    final scripts = _scripts;
-
-    final Future<Script> scriptFuture = vmService!
-        .getObject(isolateRef!.id!, scriptRef.id!)
-        .then((obj) => obj as Script);
-    _inProgress[scriptRef.id] = scriptFuture;
-
-    unawaited(scriptFuture.then((script) {
-      scripts[scriptRef.id] = script;
-    }));
-
-    return scriptFuture;
-  }
-
-  void clear() {
-    _scripts = {};
-    _inProgress.clear();
   }
 }
 

@@ -99,7 +99,7 @@ class LoggingDetailsController {
 
           // TODO(jacobr): node.diagnostic.isDiagnosticableValue isn't quite
           // right.
-          if (node.diagnostic.isDiagnosticableValue!) {
+          if (node.diagnostic.isDiagnosticableValue) {
             // TODO(jacobr): warn if the selection can't be set as the node is
             // stale which is likely if this is an old log entry.
             onShowInspector();
@@ -511,18 +511,16 @@ class LoggingController extends DisposableController
       return node;
     }
     RemoteDiagnosticsNode? summary;
-    if (node.inlineProperties != null) {
-      for (RemoteDiagnosticsNode property in node.inlineProperties!) {
-        summary = _findFirstSummary(property);
-        if (summary != null) return summary;
-      }
+    for (var property in node.inlineProperties) {
+      summary = _findFirstSummary(property);
+      if (summary != null) return summary;
     }
-    if (node.childrenNow != null) {
-      for (RemoteDiagnosticsNode child in node.childrenNow!) {
-        summary = _findFirstSummary(child);
-        if (summary != null) return summary;
-      }
+
+    for (RemoteDiagnosticsNode child in node.childrenNow) {
+      summary = _findFirstSummary(child);
+      if (summary != null) return summary;
     }
+
     return null;
   }
 

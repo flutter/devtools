@@ -26,16 +26,19 @@ void main() {
   DebuggerScreen screen;
   FakeServiceManager fakeServiceManager;
   MockDebuggerController debuggerController;
+  MockScriptManager scriptManager;
 
   const windowSize = Size(4000.0, 4000.0);
   const smallWindowSize = Size(1000.0, 1000.0);
 
   setUp(() {
     fakeServiceManager = FakeServiceManager();
+    scriptManager = MockScriptManager();
     when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
+    setGlobal(ScriptManager, scriptManager);
     fakeServiceManager.consoleService.ensureServiceInitialized();
   });
 
@@ -216,7 +219,7 @@ void main() {
 
       when(debuggerController.programExplorerController.selectedNodeIndex)
           .thenReturn(ValueNotifier(0));
-      when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
+      when(scriptManager.sortedScripts).thenReturn(ValueNotifier(scripts));
       when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
       // File Explorer view is hidden
@@ -234,7 +237,7 @@ void main() {
 
       when(debuggerController.programExplorerController.selectedNodeIndex)
           .thenReturn(ValueNotifier(0));
-      when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
+      when(scriptManager.sortedScripts).thenReturn(ValueNotifier(scripts));
       when(debuggerController.programExplorerController.rootObjectNodes)
           .thenReturn(
         ValueNotifier(
@@ -287,7 +290,7 @@ void main() {
       when(debuggerController.breakpointsWithLocation)
           .thenReturn(ValueNotifier(breakpointsWithLocation));
 
-      when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
+      when(scriptManager.sortedScripts).thenReturn(ValueNotifier([]));
       when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
       when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
