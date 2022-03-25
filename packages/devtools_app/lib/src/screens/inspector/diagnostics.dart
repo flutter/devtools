@@ -70,7 +70,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       final match = treeNodePrimaryDescriptionPattern.firstMatch(description);
       if (match != null) {
         yield TextSpan(text: match.group(1), style: textStyle);
-        if (match.group(2)!.isNotEmpty) {
+        if (match.group(2)?.isNotEmpty == true) {
           yield TextSpan(
             text: match.group(2),
             style:
@@ -126,15 +126,15 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       ).toList(),
     );
 
+    final inspectorService = serviceManager.inspectorService!;
     return HoverCardTooltip(
       enabled: () => diagnostic.inspectorService != null,
       onHover: (event) async {
-        final group =
-            serviceManager.inspectorService!.createObjectGroup('hover');
+        final group = inspectorService.createObjectGroup('hover');
         final value = await group.toObservatoryInstanceRef(diagnostic.valueRef);
         final variable = DartObjectNode.fromValue(
           value: value,
-          isolateRef: serviceManager.inspectorService!.isolateRef,
+          isolateRef: inspectorService.isolateRef,
           diagnostic: diagnostic,
         );
         await buildVariablesTree(variable);
