@@ -97,7 +97,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   static const variablesTitle = 'Variables';
   static const breakpointsTitle = 'Breakpoints';
 
-  DebuggerController? controller;
+  late DebuggerController controller;
 
   late bool _shownFirstScript;
 
@@ -116,19 +116,19 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
     controller = newController;
-    controller!.onFirstDebuggerScreenLoad();
+    controller.onFirstDebuggerScreenLoad();
   }
 
-  void _onLocationSelected(ScriptLocation location) {
+  void _onLocationSelected(ScriptLocation? location) {
     if (location != null) {
-      controller!.showScriptLocation(location);
+      controller.showScriptLocation(location);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final codeArea = ValueListenableBuilder(
-      valueListenable: controller!.fileExplorerVisible,
+      valueListenable: controller.fileExplorerVisible,
       builder: (context, bool visible, child) {
         if (visible) {
           // TODO(devoncarew): Animate this opening and closing.
@@ -138,7 +138,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             children: [
               child!,
               ProgramExplorer(
-                debugController: controller!,
+                debugController: controller,
                 onSelected: _onLocationSelected,
               ),
             ],
@@ -148,8 +148,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         }
       },
       child: DualValueListenableBuilder<ScriptRef?, ParsedScript?>(
-        firstListenable: controller!.currentScriptRef,
-        secondListenable: controller!.currentParsedScript,
+        firstListenable: controller.currentScriptRef,
+        secondListenable: controller.currentParsedScript,
         builder: (context, scriptRef, parsedScript, _) {
           if (scriptRef != null && parsedScript != null && !_shownFirstScript) {
             ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
@@ -164,7 +164,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             controller: controller,
             scriptRef: scriptRef,
             parsedScript: parsedScript,
-            onSelected: controller!.toggleBreakpoint,
+            onSelected: controller.toggleBreakpoint,
           );
         },
       ),
@@ -201,14 +201,14 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               rightActions: [
                 CopyToClipboardControl(
                   dataProvider: () {
-                    final List<String> callStackList = controller!
+                    final List<String> callStackList = controller
                         .stackFramesWithLocation.value
                         .map((frame) => frame.callStackDisplay)
                         .toList();
                     for (var i = 0; i < callStackList.length; i++) {
                       callStackList[i] = '#$i ${callStackList[i]}';
                     }
-                    return callStackList.join('\n') ?? '';
+                    return callStackList.join('\n');
                   },
                   buttonKey: DebuggerScreenBody.callStackCopyButtonKey,
                 ),
@@ -236,7 +236,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   Widget _breakpointsRightChild() {
     return ValueListenableBuilder(
-      valueListenable: controller!.breakpointsWithLocation,
+      valueListenable: controller.breakpointsWithLocation,
       builder: (context, List<BreakpointAndSourcePosition> breakpoints, _) {
         return Row(
           children: [
@@ -244,9 +244,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             DevToolsTooltip(
               child: ToolbarAction(
                 icon: Icons.delete,
-                onPressed: breakpoints.isNotEmpty
-                    ? controller!.clearBreakpoints
-                    : null,
+                onPressed:
+                    breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
               ),
               message: 'Remove all breakpoints',
             ),

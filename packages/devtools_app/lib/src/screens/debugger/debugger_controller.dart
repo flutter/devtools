@@ -68,13 +68,13 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> _maybeSetUpProgramExplorer() async {
-    if (!programExplorerController!.initialized.value) {
+    if (!programExplorerController.initialized.value) {
       programExplorerController
         ..initListeners()
         ..initialize();
     }
     if (currentScriptRef.value != null) {
-      await programExplorerController!.selectScriptNode(currentScriptRef.value);
+      await programExplorerController.selectScriptNode(currentScriptRef.value);
     }
   }
 
@@ -155,9 +155,9 @@ class DebuggerController extends DisposableController
   Map<LibraryRef, Future<Set<String?>>>
       libraryMemberAndImportsAutocompleteCache = {};
 
-  ProgramExplorerController? get programExplorerController =>
+  ProgramExplorerController get programExplorerController =>
       _programExplorerController;
-  ProgramExplorerController? _programExplorerController;
+  late final ProgramExplorerController _programExplorerController;
 
   final ScriptCache _scriptCache = ScriptCache();
 
@@ -221,7 +221,7 @@ class DebuggerController extends DisposableController
   /// Show the given script location (without updating the script navigation
   /// history).
   void _showScriptLocation(ScriptLocation scriptLocation) {
-    _currentScriptRef.value = scriptLocation?.scriptRef;
+    _currentScriptRef.value = scriptLocation.scriptRef;
     if (_currentScriptRef.value == null) {
       log('Trying to show a location with a null script ref', LogLevel.error);
     }
@@ -246,7 +246,7 @@ class DebuggerController extends DisposableController
   /// for syntax highlighting.
   Future<void> _parseCurrentScript() async {
     // Return early if the current script has not changed.
-    if (parsedScript.value?.script?.id == _currentScriptRef?.value?.id) return;
+    if (parsedScript.value?.script.id == _currentScriptRef.value?.id) return;
 
     final scriptRef = _currentScriptRef.value;
     final script = await getScriptForRef(scriptRef);
@@ -323,7 +323,7 @@ class DebuggerController extends DisposableController
 
   Frame? get frameForEval =>
       _selectedStackFrame.value?.frame ??
-      _stackFramesWithLocation.value?.safeFirst?.frame;
+      _stackFramesWithLocation.value.safeFirst?.frame;
 
   final _variables = ValueNotifier<List<DartObjectNode>>([]);
 
@@ -817,11 +817,11 @@ class DebuggerController extends DisposableController
     final stackInfo = await _getStackOperation!.value;
     _populateFrameInfo(
       stackInfo.frames,
-      truncated: stackInfo.truncated ?? false,
+      truncated: stackInfo.truncated,
     );
 
     // In the background, populate the rest of the frames.
-    if (stackInfo.truncated!) {
+    if (stackInfo.truncated) {
       unawaited(_getFullStack());
     }
   }

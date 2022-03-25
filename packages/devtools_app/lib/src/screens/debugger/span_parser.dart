@@ -489,10 +489,6 @@ class _MultilineMatcher extends _Matcher {
     }
     return ScopeSpan.applyScope(this, () {
       final beginSpans = _scanBegin(scanner);
-      if (beginSpans == null) {
-        return null;
-      }
-
       final results = <ScopeSpan>[
         if (contentName == null) ...beginSpans,
       ];

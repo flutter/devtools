@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
@@ -63,7 +61,8 @@ class ExpandableVariable extends StatelessWidget {
     // on stepping.
     return TreeView<DartObjectNode>(
       dataRootsListenable:
-          FixedValueListenable<List<DartObjectNode?>>([variable]) as ValueListenable<List<DartObjectNode>>,
+          FixedValueListenable<List<DartObjectNode?>>([variable])
+              as ValueListenable<List<DartObjectNode>>,
       shrinkWrap: true,
       dataDisplayProvider: (variable, onPressed) =>
           displayProvider(context, variable, onPressed, debuggerController),
@@ -174,7 +173,7 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return _TextSelectionControlsToolbar(
@@ -183,7 +182,7 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
       selectionMidpoint: selectionMidpoint,
       endpoints: endpoints,
       delegate: delegate,
-      clipboardStatus: clipboardStatus,
+      clipboardStatus: clipboardStatus!,
       handleCut:
           canCut(delegate) ? () => handleCut(delegate, clipboardStatus) : null,
       handleCopy: canCopy(delegate)

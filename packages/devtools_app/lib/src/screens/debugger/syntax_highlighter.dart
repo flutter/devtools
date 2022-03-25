@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file
 
-
-
 import 'dart:collection';
 import 'dart:convert';
 
@@ -27,7 +25,7 @@ class SyntaxHighlighter {
 
   final _spanStack = ListQueue<ScopeSpan>();
 
-  int? _currentPosition;
+  int _currentPosition = 0;
 
   late Map<String, TextStyle> _scopeStyles;
 
@@ -54,7 +52,7 @@ class SyntaxHighlighter {
     return TextSpan(
       children: _highlightLoopHelper(
         currentScope: null,
-        loopCondition: () => _currentPosition! < source!.length,
+        loopCondition: () => _currentPosition < source!.length,
         scopes: SpanParser.parse(_grammar, source!),
       ),
     );
@@ -92,7 +90,7 @@ class SyntaxHighlighter {
   ) {
     return _highlightLoopHelper(
       currentScope: currentScope,
-      loopCondition: () => currentScope.contains(_currentPosition!),
+      loopCondition: () => currentScope.contains(_currentPosition),
       scopes: scopes,
     );
   }
@@ -108,7 +106,7 @@ class SyntaxHighlighter {
       _spanStack.addLast(currentScope);
     }
     while (loopCondition()) {
-      if (scopes.isNotEmpty && scopes.first.contains(_currentPosition!)) {
+      if (scopes.isNotEmpty && scopes.first.contains(_currentPosition)) {
         // Encountered the next scoped span. Close the current span and enter
         // the next.
         final text = source!.substring(
@@ -162,7 +160,7 @@ class SyntaxHighlighter {
   }
 
   bool _atNewline() =>
-      String.fromCharCode(source!.codeUnitAt(_currentPosition!)) == '\n';
+      String.fromCharCode(source!.codeUnitAt(_currentPosition)) == '\n';
 
   int? _processNewlines(List<TextSpan> sourceSpans, int currentScopeBegin) {
     final text = source!.substring(
@@ -185,8 +183,8 @@ class SyntaxHighlighter {
     do {
       sourceSpans.add(const TextSpan(text: '\n'));
       ++_currentPosition;
-    } while ((_currentPosition! < source!.length) &&
-        (String.fromCharCode(source!.codeUnitAt(_currentPosition!)) == '\n'));
+    } while ((_currentPosition < source!.length) &&
+        (String.fromCharCode(source!.codeUnitAt(_currentPosition)) == '\n'));
     return _currentPosition;
   }
 
