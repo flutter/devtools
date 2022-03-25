@@ -36,7 +36,7 @@ const bool _showRenderObjectPropertiesAsLinks = false;
 class DiagnosticsNodeDescription extends StatelessWidget {
   const DiagnosticsNodeDescription(
     this.diagnostic, {
-    this.isSelected,
+    this.isSelected = false,
     this.searchValue,
     this.errorText,
     this.multiline = false,
@@ -46,7 +46,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   });
 
   final RemoteDiagnosticsNode diagnostic;
-  final bool? isSelected;
+  final bool isSelected;
   final String? errorText;
   final String? searchValue;
   final bool multiline;
@@ -351,7 +351,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           text: errorText,
           // When the node is selected, the background will be an error
           // color so don't render the text the same color.
-          style: isSelected!
+          style: isSelected
               ? inspector_text_styles.regular
               : inspector_text_styles.error(colorScheme),
         ),
