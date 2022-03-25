@@ -436,7 +436,9 @@ class InspectorController extends DisposableController
           ? queryParams[inspectorRefQueryParam]
           : null;
       await updateSelectionFromService(
-          firstFrame: true, inspectorRef: inspectorRef);
+        firstFrame: true,
+        inspectorRef: inspectorRef,
+      );
     } else {
       final ready = await inspectorService.isWidgetTreeReady();
       if (_disposed) return;
@@ -638,8 +640,10 @@ class InspectorController extends DisposableController
     updateSelectionFromService(firstFrame: false);
   }
 
-  Future<void> updateSelectionFromService(
-      {@required bool firstFrame, String inspectorRef}) async {
+  Future<void> updateSelectionFromService({
+    @required bool firstFrame,
+    String inspectorRef,
+  }) async {
     if (parent != null) {
       // If we have a parent controller we should wait for the parent to update
       // our selection rather than updating it our self.

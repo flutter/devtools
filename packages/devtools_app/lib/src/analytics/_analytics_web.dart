@@ -394,6 +394,14 @@ void timeEnd(
   );
 }
 
+void cancelTimingOperation(String screenName, String timedOperation) {
+  final operationKey = _operationKey(
+    screenName,
+    timedOperation,
+  );
+  _timedOperationsInProgress.remove(operationKey);
+}
+
 // Use this when a synchronous operation can be timed in a callback.
 void timeSync(
   String screenName,
