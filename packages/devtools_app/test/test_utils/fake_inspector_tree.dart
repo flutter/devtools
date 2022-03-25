@@ -103,7 +103,8 @@ class FakeInspectorTree extends InspectorTreeController {
         }
       }
 
-      final icon = node.diagnostic.icon;
+      final diagnosticLocal = node.diagnostic!;
+      final icon = diagnosticLocal.icon;
       if (icon is CustomIcon) {
         sb.write('[${icon.text}]');
       } else if (icon is ColorIcon) {
@@ -111,7 +112,7 @@ class FakeInspectorTree extends InspectorTreeController {
       } else if (icon is Image) {
         sb.write('[${(icon.image as AssetImage).assetName}]');
       }
-      sb.write(node.diagnostic.description);
+      sb.write(diagnosticLocal.description);
 
 //      // TODO(jacobr): optionally visualize colors as well.
 //      if (entry.text != null) {
