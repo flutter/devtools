@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 library inspector_tree;
 
@@ -331,7 +331,6 @@ class InspectorTreeController extends Object
   }
 
   void nodeChanged(InspectorTreeNode node) {
-    if (node == null) return;
     setState(() {
       node.isDirty = true;
     });
@@ -432,7 +431,7 @@ class InspectorTreeController extends Object
     );
   }
 
-  void scrollToRect(Rect? targetRect) {
+  void scrollToRect(Rect targetRect) {
     for (var client in _clients) {
       client.scrollToRect(targetRect);
     }
@@ -499,7 +498,6 @@ class InspectorTreeController extends Object
       case DiagnosticsTreeStyle.truncateChildren:
         return true;
     }
-    return true;
   }
 
   InspectorTreeNode setupInspectorTreeNode(
@@ -508,8 +506,6 @@ class InspectorTreeController extends Object
     required bool expandChildren,
     required bool expandProperties,
   }) {
-    assert(expandChildren != null);
-    assert(expandProperties != null);
     node.diagnostic = diagnosticsNode;
     if (config!.onNodeAdded != null) {
       config!.onNodeAdded!(node, diagnosticsNode);
@@ -542,8 +538,6 @@ class InspectorTreeController extends Object
     required bool expandChildren,
     required bool expandProperties,
   }) {
-    assert(expandChildren != null);
-    assert(expandProperties != null);
     treeNode.isExpanded = expandChildren;
     if (treeNode.children.isNotEmpty) {
       // Only case supported is this is the loading node.
@@ -552,20 +546,18 @@ class InspectorTreeController extends Object
     }
     final inlineProperties = parent.inlineProperties;
 
-    if (inlineProperties != null) {
-      for (RemoteDiagnosticsNode property in inlineProperties) {
-        appendChild(
-          treeNode,
-          setupInspectorTreeNode(
-            createNode(),
-            property,
-            // We are inside a property so only expand children if
-            // expandProperties is true.
-            expandChildren: expandProperties,
-            expandProperties: expandProperties,
-          ),
-        );
-      }
+    for (RemoteDiagnosticsNode property in inlineProperties) {
+      appendChild(
+        treeNode,
+        setupInspectorTreeNode(
+          createNode(),
+          property,
+          // We are inside a property so only expand children if
+          // expandProperties is true.
+          expandChildren: expandProperties,
+          expandProperties: expandProperties,
+        ),
+      );
     }
     if (children != null) {
       for (RemoteDiagnosticsNode child in children) {
@@ -622,11 +614,11 @@ class InspectorTreeController extends Object
   }
 
   @override
-  List<InspectorTreeRow?> matchesForSearch(
+  List<InspectorTreeRow> matchesForSearch(
     String search, {
     bool searchPreviousMatches = false,
   }) {
-    final matches = <InspectorTreeRow?>[];
+    final matches = <InspectorTreeRow>[];
 
     if (searchPreviousMatches) {
       final List<InspectorTreeRow> previousMatches = searchMatches.value;
@@ -643,8 +635,7 @@ class InspectorTreeController extends Object
     int _debugStatsSearchOps = 0;
     final _debugStatsWidgets = _searchableCachedRows.length;
 
-    if (search == null ||
-        search.isEmpty ||
+    if (search.isEmpty ||
         serviceManager.inspectorService == null ||
         serviceManager.inspectorService!.isDisposed) {
       assert(() {
@@ -661,7 +652,7 @@ class InspectorTreeController extends Object
 
     for (final row in _searchableCachedRows) {
       final diagnostic = row!.node.diagnostic;
-      if (row.node == null || diagnostic == null) continue;
+      if (diagnostic == null) continue;
 
       // Widget search begin
       if (_searchTarget == SearchTargetType.widget) {
@@ -1008,10 +999,9 @@ class _InspectorTreeState extends State<InspectorTree>
                           }
                           final InspectorTreeRow row =
                               controller!.getCachedRow(index)!;
-                          final inspectorRef =
-                              row.node.diagnostic?.valueRef?.id;
+                          final inspectorRef = row.node.diagnostic?.valueRef.id;
                           return _InspectorTreeRowWidget(
-                            key: PageStorageKey(row?.node),
+                            key: PageStorageKey(row.node),
                             inspectorTreeState: this,
                             row: row,
                             scrollControllerX: _scrollControllerX,
@@ -1084,9 +1074,6 @@ class _RowPainter extends CustomPainter {
     double currentX = 0;
     final paint = _defaultPaint(colorScheme);
 
-    if (row == null) {
-      return;
-    }
     final InspectorTreeNode node = row.node;
     final bool showExpandCollapse = node.showExpandCollapse;
     for (int tick in row.ticks) {
@@ -1170,9 +1157,6 @@ class InspectorRowContent extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    if (row == null) {
-      return const SizedBox();
-    }
     Color? backgroundColor;
     if (row.isSelected) {
       backgroundColor =

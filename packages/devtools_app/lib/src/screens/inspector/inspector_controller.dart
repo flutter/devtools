@@ -13,8 +13,6 @@
 /// of view and controller. View specific portions of InspectorPanel.java have
 /// been moved to inspector.dart.
 
-
-
 library inspector_controller;
 
 import 'dart:async';
@@ -85,7 +83,6 @@ class InspectorController extends DisposableController
         ) {
     _refreshRateLimiter = RateLimiter(refreshFramesPerSecond, refresh);
 
-    assert(inspectorTree != null);
     inspectorTree.config = InspectorTreeConfig(
       summaryTree: isSummaryTree,
       treeType: treeType,
@@ -302,7 +299,8 @@ class InspectorController extends DisposableController
     return true;
   }
 
-  InspectorTreeNode? findMatchingInspectorTreeNode(RemoteDiagnosticsNode? node) {
+  InspectorTreeNode? findMatchingInspectorTreeNode(
+      RemoteDiagnosticsNode? node) {
     if (node?.valueRef == null) {
       return null;
     }
@@ -347,9 +345,9 @@ class InspectorController extends DisposableController
 
     subtreeRoot = null;
 
-    inspectorTree?.root = inspectorTree?.createNode();
+    inspectorTree.root = inspectorTree.createNode();
     programaticSelectionChangeInProgress = false;
-    valueToInspectorTreeNode?.clear();
+    valueToInspectorTreeNode.clear();
   }
 
   void onIsolateStopped() {
@@ -397,7 +395,8 @@ class InspectorController extends DisposableController
     maybeLoadUI();
   }
 
-  InspectorService? get inspectorService => serviceManager.inspectorService as InspectorService?;
+  InspectorService? get inspectorService =>
+      serviceManager.inspectorService as InspectorService?;
 
   List<String> get rootDirectories =>
       _rootDirectories ?? parent!.rootDirectories;
@@ -419,7 +418,8 @@ class InspectorController extends DisposableController
         screen: InspectorScreen.id,
         action: analytics_constants.pageReady,
       );
-      _rootDirectories = await inspectorService!.inferPubRootDirectoryIfNeeded();
+      _rootDirectories =
+          await inspectorService!.inferPubRootDirectoryIfNeeded();
       if (_disposed) return;
       // We need to start by querying the inspector service to find out the
       // current state of the UI.
@@ -464,17 +464,15 @@ class InspectorController extends DisposableController
       // dispose the new tree and keep the old tree.
       _treeGroups!.promoteNext();
       clearValueToInspectorTreeNodeMapping();
-      if (node != null) {
-        final InspectorTreeNode rootNode = inspectorTree.setupInspectorTreeNode(
-          inspectorTree.createNode(),
-          node,
-          expandChildren: true,
-          expandProperties: false,
-        );
-        inspectorTree.root = rootNode;
-      } else {
-        inspectorTree.root = inspectorTree.createNode();
-      }
+
+      final InspectorTreeNode rootNode = inspectorTree.setupInspectorTreeNode(
+        inspectorTree.createNode(),
+        node,
+        expandChildren: true,
+        expandProperties: false,
+      );
+      inspectorTree.root = rootNode;
+
       refreshSelection(newSelection, detailsSelection, setSubtreeRoot);
     } catch (error) {
       log(error.toString(), LogLevel.error);
@@ -575,9 +573,6 @@ class InspectorController extends DisposableController
   }
 
   InspectorTreeNode? getTreeNode(RemoteDiagnosticsNode node) {
-    if (node == null) {
-      return null;
-    }
     return valueToInspectorTreeNode[node.valueRef];
   }
 
@@ -611,9 +606,6 @@ class InspectorController extends DisposableController
   ) {
     if (a == b) {
       return true;
-    }
-    if (a == null || b == null) {
-      return false;
     }
     return a.dartDiagnosticRef == b.dartDiagnosticRef;
   }
@@ -766,7 +758,7 @@ class InspectorController extends DisposableController
   /// Update the index of the selected error based on a node that has been
   /// selected in the tree.
   void _updateSelectedErrorFromNode(InspectorTreeNode? node) {
-    final inspectorRef = node?.diagnostic?.valueRef?.id;
+    final inspectorRef = node?.diagnostic?.valueRef.id;
 
     final errors = serviceManager.errorBadgeManager
         .erroredItemsForPage(InspectorScreen.id)
@@ -800,8 +792,6 @@ class InspectorController extends DisposableController
   void selectErrorByIndex(int index) {
     _selectedErrorIndex.value = index;
 
-    if (index == null) return;
-
     final errors = serviceManager.errorBadgeManager
         .erroredItemsForPage(InspectorScreen.id)
         .value;
@@ -816,20 +806,18 @@ class InspectorController extends DisposableController
 
   Future<void> _addNodeToConsole(InspectorTreeNode node) async {
     final valueRef = node.diagnostic!.valueRef;
-    if (valueRef != null) {
-      final isolateRef = inspectorService!.isolateRef;
-      final instanceRef = await node.diagnostic!.inspectorService
-          ?.toObservatoryInstanceRef(valueRef);
-      if (_disposed) return;
+    final isolateRef = inspectorService!.isolateRef;
+    final instanceRef = await node.diagnostic!.inspectorService
+        ?.toObservatoryInstanceRef(valueRef);
+    if (_disposed) return;
 
-      if (instanceRef != null) {
-        serviceManager.consoleService.appendInstanceRef(
-          value: instanceRef,
-          diagnostic: node.diagnostic,
-          isolateRef: isolateRef,
-          forceScrollIntoView: true,
-        );
-      }
+    if (instanceRef != null) {
+      serviceManager.consoleService.appendInstanceRef(
+        value: instanceRef,
+        diagnostic: node.diagnostic,
+        isolateRef: isolateRef,
+        forceScrollIntoView: true,
+      );
     }
   }
 

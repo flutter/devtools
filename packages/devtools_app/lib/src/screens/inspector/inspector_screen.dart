@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:collection';
 
@@ -242,18 +242,21 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                           key: summaryTreeKey,
                           controller: summaryTreeController,
                           isSummaryTree: true,
-                          widgetErrors: inspectableErrors as LinkedHashMap<String, InspectableWidgetError>?,
+                          widgetErrors: inspectableErrors
+                              as LinkedHashMap<String, InspectableWidgetError>?,
                           debuggerController: debuggerController,
                         ),
                         if (errors.isNotEmpty && inspectorController != null)
                           ValueListenableBuilder(
                             valueListenable:
                                 inspectorController!.selectedErrorIndex,
-                            builder: (_, dynamic selectedErrorIndex, __) => Positioned(
+                            builder: (_, dynamic selectedErrorIndex, __) =>
+                                Positioned(
                               top: 0,
                               right: 0,
                               child: ErrorNavigator(
-                                errors: inspectableErrors as LinkedHashMap<String, InspectableWidgetError>,
+                                errors: inspectableErrors as LinkedHashMap<
+                                    String, InspectableWidgetError>,
                                 errorIndex: selectedErrorIndex,
                                 onSelectError:
                                     inspectorController!.selectErrorByIndex,

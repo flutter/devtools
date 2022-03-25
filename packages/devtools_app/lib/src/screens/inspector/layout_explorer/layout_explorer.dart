@@ -27,7 +27,7 @@ class _LayoutExplorerTabState extends State<LayoutExplorerTab>
   InspectorController? get controller => widget.controller;
 
   RemoteDiagnosticsNode? get selected =>
-      controller?.selectedNode?.value?.diagnostic;
+      controller?.selectedNode.value?.diagnostic;
 
   RemoteDiagnosticsNode? previousSelection;
 

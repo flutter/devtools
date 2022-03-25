@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/material.dart';
 
@@ -21,7 +21,8 @@ import 'inspector_tree.dart';
 
 final ColorIconMaker _colorIconMaker = ColorIconMaker();
 final CustomIconMaker _customIconMaker = CustomIconMaker();
-final CustomIcon? defaultIcon = _customIconMaker.fromInfo('Default') as CustomIcon?;
+final CustomIcon? defaultIcon =
+    _customIconMaker.fromInfo('Default') as CustomIcon?;
 
 const bool _showRenderObjectPropertiesAsLinks = false;
 
@@ -128,14 +129,12 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     );
 
     return HoverCardTooltip(
-      enabled: () =>
-          diagnostic != null &&
-          diagnostic!.valueRef != null &&
-          diagnostic!.inspectorService != null,
+      enabled: () => diagnostic != null && diagnostic!.inspectorService != null,
       onHover: (event) async {
         final group =
             serviceManager.inspectorService!.createObjectGroup('hover');
-        final value = await group.toObservatoryInstanceRef(diagnostic!.valueRef);
+        final value =
+            await group.toObservatoryInstanceRef(diagnostic!.valueRef);
         final variable = DartObjectNode.fromValue(
           value: value,
           isolateRef: serviceManager.inspectorService!.isolateRef,
@@ -236,9 +235,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
                   codePoint,
                   colorScheme,
                 );
-                if (icon != null) {
-                  children.add(_paddedIcon(icon));
-                }
+                children.add(_paddedIcon(icon));
               }
               break;
             }
