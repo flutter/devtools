@@ -120,6 +120,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       treeType: FlutterTreeType.widget,
     );
 
+    if (!inspectorController.firstLoadCompleted) {
+      ga.timeStart(InspectorScreen.id, analytics_constants.pageReady);
+    }
+
     summaryTreeController.setSearchTarget(searchTarget);
 
     addAutoDisposeListener(searchFieldFocusNode, () {

@@ -31,6 +31,8 @@ import '../debugger/debugger_controller.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
 import 'inspector_breadcrumbs.dart';
+import 'inspector_controller.dart';
+import 'inspector_screen.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
 
@@ -109,6 +111,8 @@ class InspectorTreeController extends Object
     with SearchControllerMixin<InspectorTreeRow> {
   /// Clients the controller notifies to trigger changes to the UI.
   final Set<InspectorControllerClient> _clients = {};
+
+  InspectorController inspectorController;
 
   InspectorTreeNode createNode() => InspectorTreeNode();
 
@@ -971,6 +975,11 @@ class _InspectorTreeState extends State<InspectorTree>
       return const SizedBox();
     }
 
+    if (!controller.inspectorController.firstLoadCompleted &&
+        widget.isSummaryTree) {
+      ga.timeEnd(InspectorScreen.id, analytics_constants.pageReady);
+      controller.inspectorController.firstLoadCompleted = true;
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
         final viewportWidth = constraints.maxWidth;

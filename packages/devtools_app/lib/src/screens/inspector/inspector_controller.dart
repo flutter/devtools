@@ -85,6 +85,9 @@ class InspectorController extends DisposableController
         ) {
     _refreshRateLimiter = RateLimiter(refreshFramesPerSecond, refresh);
 
+    inspectorTree.inspectorController = this;
+    detailsTree?.inspectorController = this;
+
     assert(inspectorTree != null);
     inspectorTree.config = InspectorTreeConfig(
       summaryTree: isSummaryTree,
@@ -162,6 +165,12 @@ class InspectorController extends DisposableController
       dispose();
     }
   }
+
+  /// Tracks whether the first load of the inspector tree has been completed.
+  ///
+  /// This field is used to prevent sending multiple analytics events for
+  /// inspector tree load timing.
+  bool firstLoadCompleted = false;
 
   IsolateRef _mainIsolate;
 
@@ -413,8 +422,6 @@ class InspectorController extends DisposableController
     }
 
     if (flutterAppFrameReady) {
-      // TODO: measure and send DevTools pageReady analytics:
-      // https://github.com/flutter/devtools/issues/3879
       await serviceManager.sendDwdsEvent(
         screen: InspectorScreen.id,
         action: analytics_constants.pageReady,
