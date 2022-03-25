@@ -399,7 +399,11 @@ void cancelTimingOperation(String screenName, String timedOperation) {
     screenName,
     timedOperation,
   );
-  _timedOperationsInProgress.remove(operationKey);
+  final operation = _timedOperationsInProgress.remove(operationKey);
+  assert(
+    operation != null,
+    'The operation cannot be cancelled because it does not exist.',
+  );
 }
 
 // Use this when a synchronous operation can be timed in a callback.
