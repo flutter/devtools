@@ -21,8 +21,7 @@ import 'inspector_tree.dart';
 
 final ColorIconMaker _colorIconMaker = ColorIconMaker();
 final CustomIconMaker _customIconMaker = CustomIconMaker();
-final CustomIcon? defaultIcon =
-    _customIconMaker.fromInfo('Default') as CustomIcon?;
+final defaultIcon = _customIconMaker.fromInfo('Default') as CustomIcon;
 
 const bool _showRenderObjectPropertiesAsLinks = false;
 
@@ -46,7 +45,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.nodeDescriptionHighlightStyle,
   });
 
-  final RemoteDiagnosticsNode? diagnostic;
+  final RemoteDiagnosticsNode diagnostic;
   final bool? isSelected;
   final String? errorText;
   final String? searchValue;
@@ -67,7 +66,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     TextStyle textStyle,
     ColorScheme colorScheme,
   ) sync* {
-    if (diagnostic!.isDiagnosticableValue) {
+    if (diagnostic.isDiagnosticableValue) {
       final match = treeNodePrimaryDescriptionPattern.firstMatch(description!);
       if (match != null) {
         yield TextSpan(text: match.group(1), style: textStyle);
@@ -80,7 +79,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         }
         return;
       }
-    } else if (diagnostic!.type == 'ErrorDescription') {
+    } else if (diagnostic.type == 'ErrorDescription') {
       final match = assertionThrownBuildingError.firstMatch(description!);
       if (match != null) {
         yield TextSpan(text: match.group(1), style: textStyle);
@@ -93,7 +92,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       yield TextSpan(text: description, style: textStyle);
     }
 
-    final textPreview = diagnostic!.json['textPreview'];
+    final textPreview = diagnostic.json['textPreview'];
     if (textPreview is String) {
       final preview = textPreview.replaceAll('\n', ' ');
       yield TextSpan(
@@ -129,12 +128,11 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     );
 
     return HoverCardTooltip(
-      enabled: () => diagnostic != null && diagnostic!.inspectorService != null,
+      enabled: () => diagnostic.inspectorService != null,
       onHover: (event) async {
         final group =
             serviceManager.inspectorService!.createObjectGroup('hover');
-        final value =
-            await group.toObservatoryInstanceRef(diagnostic!.valueRef);
+        final value = await group.toObservatoryInstanceRef(diagnostic.valueRef);
         final variable = DartObjectNode.fromValue(
           value: value,
           isolateRef: serviceManager.inspectorService!.isolateRef,
@@ -148,7 +146,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         // TODO(jacobr): should we ensure the hover has not yet been cancelled?
 
         return HoverCardData(
-          title: diagnostic!.toStringShort(),
+          title: diagnostic.toStringShort(),
           contents: Material(
             child: ExpandableVariable(
               debuggerController: debuggerController!,
@@ -168,43 +166,40 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (diagnostic == null) {
-      return const SizedBox();
-    }
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final icon = diagnostic!.icon;
+    final icon = diagnostic.icon;
     final children = <Widget>[];
 
     if (icon != null) {
       children.add(_paddedIcon(icon));
     }
-    final String? name = diagnostic!.name;
+    final String? name = diagnostic.name;
 
     final defaultStyle = DefaultTextStyle.of(context).style;
     final baseStyle = style ?? defaultStyle;
     TextStyle textStyle =
-        baseStyle.merge(textStyleForLevel(diagnostic!.level, colorScheme));
+        baseStyle.merge(textStyleForLevel(diagnostic.level, colorScheme));
     var descriptionTextStyle = textStyle;
     // TODO(jacobr): use TextSpans and SelectableText instead of Text.
-    if (diagnostic!.isProperty) {
+    if (diagnostic.isProperty) {
       // Display of inline properties.
-      final String? propertyType = diagnostic!.propertyType;
-      final Map<String, Object>? properties = diagnostic!.valuePropertiesJson;
+      final String? propertyType = diagnostic.propertyType;
+      final Map<String, Object>? properties = diagnostic.valuePropertiesJson;
 
-      if (name?.isNotEmpty == true && diagnostic!.showName) {
-        children.add(Text('$name${diagnostic!.separator} ', style: textStyle));
+      if (name?.isNotEmpty == true && diagnostic.showName) {
+        children.add(Text('$name${diagnostic.separator} ', style: textStyle));
         // provide some contrast between the name and description if both are
         // present.
         descriptionTextStyle =
             descriptionTextStyle.merge(theme.subtleTextStyle);
       }
 
-      if (diagnostic!.isCreatedByLocalProject) {
+      if (diagnostic.isCreatedByLocalProject) {
         textStyle = textStyle.merge(inspector_text_styles.regularBold);
       }
 
-      String? description = diagnostic!.description;
+      String? description = diagnostic.description;
       if (propertyType != null && properties != null) {
         switch (propertyType) {
           case 'Color':
@@ -258,14 +253,14 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         ),
       ));
 
-      if (diagnostic!.level == DiagnosticLevel.fine &&
-          diagnostic!.hasDefaultValue) {
+      if (diagnostic.level == DiagnosticLevel.fine &&
+          diagnostic.hasDefaultValue) {
         children.add(const Text(' '));
         children.add(_paddedIcon(defaultIcon));
       }
     } else {
       // Non property, regular node case.
-      if (name?.isNotEmpty == true && diagnostic!.showName && name != 'child') {
+      if (name?.isNotEmpty == true && diagnostic.showName && name != 'child') {
         if (name!.startsWith('child ')) {
           children.add(Text(
             name,
@@ -275,13 +270,13 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           children.add(Text(name, style: textStyle));
         }
 
-        if (diagnostic!.showSeparator) {
+        if (diagnostic.showSeparator) {
           children.add(Text(
-            diagnostic!.separator,
+            diagnostic.separator,
             style: textStyle,
           ));
-          if (diagnostic!.separator != ' ' &&
-              (diagnostic!.description?.isNotEmpty ?? false)) {
+          if (diagnostic.separator != ' ' &&
+              (diagnostic.description?.isNotEmpty ?? false)) {
             children.add(Text(
               ' ',
               style: textStyle,
@@ -290,12 +285,12 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         }
       }
 
-      if (!diagnostic!.isSummaryTree && diagnostic!.isCreatedByLocalProject) {
+      if (!diagnostic.isSummaryTree && diagnostic.isCreatedByLocalProject) {
         textStyle = textStyle.merge(inspector_text_styles.regularBold);
       }
 
       var diagnosticDescription = buildDescription(
-        diagnostic!.description,
+        diagnostic.description,
         descriptionTextStyle,
         context,
         colorScheme,
@@ -313,8 +308,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           ],
         );
       } else if (multiline &&
-          diagnostic!.hasCreationLocation &&
-          !diagnostic!.isProperty) {
+          diagnostic.hasCreationLocation &&
+          !diagnostic.isProperty) {
         diagnosticDescription = Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -332,7 +327,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
   Widget _buildLocation(BuildContext context) {
     final theme = Theme.of(context);
-    final location = diagnostic!.creationLocation!;
+    final location = diagnostic.creationLocation!;
     return Flexible(
       child: RichText(
         textAlign: TextAlign.right,

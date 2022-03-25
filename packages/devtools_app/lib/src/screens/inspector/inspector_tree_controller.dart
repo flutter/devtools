@@ -1210,7 +1210,7 @@ class InspectorRowContent extends StatelessWidget {
                       child: Container(
                         height: rowHeight,
                         child: DiagnosticsNodeDescription(
-                          node.diagnostic,
+                          node.diagnostic!,
                           isSelected: row.isSelected,
                           searchValue: searchValue,
                           errorText: error?.errorMessage,
