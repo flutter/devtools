@@ -238,8 +238,7 @@ class _CodeViewState extends State<CodeView>
     // Ensure the syntax highlighter has been initialized.
     // TODO(bkonyi): process source for highlighting on a separate thread.
     if (parsedScript!.script.source != null) {
-      if (parsedScript!.script.source!.length < 500000 &&
-          parsedScript!.highlighter != null) {
+      if (parsedScript!.script.source!.length < 500000) {
         final highlighted = parsedScript!.highlighter.highlight(context);
 
         // Look for [TextSpan]s which only contain '\n' to manually break the
@@ -706,7 +705,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
               focused: isPausedLine || isFocusedLine,
               searchMatches: searchMatchesForLine(index),
               activeSearchMatch:
-                  activeSearch?.position?.line == index ? activeSearch : null,
+                  activeSearch?.position.line == index ? activeSearch : null,
             );
           },
         );

@@ -303,7 +303,8 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   }
 
   Future<void> populateLocation() async {
-    ScriptRef? scriptRef = this.script;
+    // ignore: unused_local_variable
+    ScriptRef? scriptRef = script;
     int? tokenPos = 0;
     if (object != null &&
         (object is FieldRef || object is FuncRef || object is ClassRef)) {

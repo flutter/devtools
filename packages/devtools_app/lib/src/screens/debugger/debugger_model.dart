@@ -77,7 +77,7 @@ class ScriptLocation {
   ScriptLocation(
     this.scriptRef, {
     this.location,
-  }) : assert(scriptRef != null);
+  });
 
   final ScriptRef scriptRef;
 

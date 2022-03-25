@@ -1455,10 +1455,12 @@ final mockScriptRef = ScriptRef(
         'libraries/@783137924/scripts/package%3Agallery%2Fmain.dart/17b557e5bc3"',
     id: 'test-script-long-lines');
 
+final mockSyntaxHighlighter = SyntaxHighlighter.withGrammar(
+    grammar: mockGrammar, source: mockScript.source);
+
 final mockParsedScript = ParsedScript(
     script: mockScript,
-    highlighter: SyntaxHighlighter.withGrammar(
-        grammar: mockGrammar, source: mockScript.source),
+    highlighter: mockSyntaxHighlighter,
     executableLines: <int>{});
 
 final mockScriptRefs = [

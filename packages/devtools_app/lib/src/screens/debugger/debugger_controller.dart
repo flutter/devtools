@@ -109,9 +109,7 @@ class DebuggerController extends DisposableController
     if (service == _lastService) return;
     _lastService = service;
     onServiceShutdown();
-    if (service != null) {
-      initialize();
-    }
+    initialize();
   }
 
   void initialize() {
@@ -1014,7 +1012,7 @@ class DebuggerController extends DisposableController
   // TODO(kenz): search through previous matches when possible.
   @override
   List<SourceToken> matchesForSearch(
-    String search, {
+    String? search, {
     bool searchPreviousMatches = false,
   }) {
     if (search == null || search.isEmpty || parsedScript.value == null) {

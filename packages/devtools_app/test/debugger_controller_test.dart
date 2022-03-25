@@ -274,7 +274,7 @@ void main() {
       );
       debuggerController.parsedScript.value = ParsedScript(
         script: testScript,
-        highlighter: null,
+        highlighter: mockSyntaxHighlighter,
         executableLines: {},
       );
     });

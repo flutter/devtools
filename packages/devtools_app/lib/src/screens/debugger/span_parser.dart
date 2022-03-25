@@ -580,7 +580,7 @@ class _MultilineMatcher extends _Matcher {
   Map<String, dynamic> toJson() {
     return {
       if (name != null) 'name': name,
-      if (begin != null) 'begin': begin.pattern,
+      'begin': begin.pattern,
       if (beginCaptures != null) 'beginCaptures': beginCaptures,
       if (end != null) 'end': end!.pattern,
       if (endCaptures != null) 'endCaptures': endCaptures,

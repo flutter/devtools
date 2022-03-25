@@ -15,7 +15,9 @@ import '../../shared/notifications.dart';
 import '../../shared/routing.dart';
 import '../../shared/theme.dart';
 import '../../shared/tree.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import '../inspector/diagnostics.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import '../inspector/inspector_screen.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
@@ -49,8 +51,7 @@ class ExpandableVariable extends StatelessWidget {
     Key? key,
     this.variable,
     required this.debuggerController,
-  })  : assert(debuggerController != null),
-        super(key: key);
+  }) : super(key: key);
 
   final DartObjectNode? variable;
   final DebuggerController debuggerController;
