@@ -76,7 +76,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   InspectorTreeController? get detailsTreeController =>
       inspectorController?.details?.inspectorTree;
 
-  DebuggerController? _debuggerController;
+  late DebuggerController _debuggerController;
+  bool _isDebuggerControllerInitialized = false;
 
   bool searchVisible = false;
 
@@ -145,7 +146,12 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _debuggerController = Provider.of<DebuggerController>(context);
+
+    final newDebuggerController = Provider.of<DebuggerController>(context);
+    if (_isDebuggerControllerInitialized &&
+        newDebuggerController == _debuggerController) return;
+    _isDebuggerControllerInitialized = true;
+    _debuggerController = newDebuggerController;
   }
 
   @override
@@ -205,7 +211,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 
   Widget _buildSummaryTreeColumn(
-    DebuggerController? debuggerController,
+    DebuggerController debuggerController,
   ) {
     return LayoutBuilder(
       builder: (context, constraints) {

@@ -51,7 +51,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final String? searchValue;
   final bool multiline;
   final TextStyle? style;
-  final DebuggerController? debuggerController;
+  final DebuggerController debuggerController;
   final TextStyle? nodeDescriptionHighlightStyle;
 
   Widget _paddedIcon(Widget? icon) {
@@ -149,7 +149,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           title: diagnostic.toStringShort(),
           contents: Material(
             child: ExpandableVariable(
-              debuggerController: debuggerController!,
+              debuggerController: debuggerController,
               variable: variable,
             ),
           ),
