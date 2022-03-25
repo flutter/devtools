@@ -169,7 +169,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     if (icon != null) {
       children.add(_paddedIcon(icon));
     }
-    final String? name = diagnostic.name;
+    final name = diagnostic.name;
 
     final defaultStyle = DefaultTextStyle.of(context).style;
     final baseStyle = style ?? defaultStyle;
@@ -179,7 +179,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     // TODO(jacobr): use TextSpans and SelectableText instead of Text.
     if (diagnostic.isProperty) {
       // Display of inline properties.
-      final String? propertyType = diagnostic.propertyType;
+      final propertyType = diagnostic.propertyType;
       final Map<String, Object>? properties = diagnostic.valuePropertiesJson;
 
       if (name?.isNotEmpty == true && diagnostic.showName) {
