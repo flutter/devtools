@@ -101,7 +101,7 @@ class InspectorTreeNode {
 
   bool selected = false;
 
-  late RemoteDiagnosticsNode? _diagnostic;
+  RemoteDiagnosticsNode? _diagnostic;
   final List<InspectorTreeNode> _children;
 
   Iterable<InspectorTreeNode> get children => _children;

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -159,8 +157,10 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     Flexible(
                       child: Image.asset(
                         (axis == direction)
-                            ? mainAxisAssetImageUrl(direction, alignment as MainAxisAlignment)
-                            : crossAxisAssetImageUrl(direction, alignment as CrossAxisAlignment),
+                            ? mainAxisAssetImageUrl(
+                                direction, alignment as MainAxisAlignment)
+                            : crossAxisAssetImageUrl(
+                                direction, alignment as CrossAxisAlignment),
                         height: axisAlignmentAssetImageHeight,
                         fit: BoxFit.fitHeight,
                         color: color,
@@ -190,8 +190,10 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                       Flexible(
                         child: Image.asset(
                           (axis == direction)
-                              ? mainAxisAssetImageUrl(direction, alignment as MainAxisAlignment)
-                              : crossAxisAssetImageUrl(direction, alignment as CrossAxisAlignment),
+                              ? mainAxisAssetImageUrl(
+                                  direction, alignment as MainAxisAlignment)
+                              : crossAxisAssetImageUrl(
+                                  direction, alignment as CrossAxisAlignment),
                           fit: BoxFit.fitHeight,
                           color: color,
                         ),
@@ -208,11 +210,11 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             // if the axis is the cross axis the type should be [CrossAxisAlignment]
             FlexLayoutProperties changedProperties;
             if (axis == direction) {
-              changedProperties =
-                  properties!.copyWith(mainAxisAlignment: newSelection as MainAxisAlignment?);
+              changedProperties = properties!.copyWith(
+                  mainAxisAlignment: newSelection as MainAxisAlignment?);
             } else {
-              changedProperties =
-                  properties!.copyWith(crossAxisAlignment: newSelection as CrossAxisAlignment?);
+              changedProperties = properties!.copyWith(
+                  crossAxisAlignment: newSelection as CrossAxisAlignment?);
             }
             final valueRef = properties!.node.valueRef;
             markAsDirty();
