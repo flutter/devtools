@@ -112,13 +112,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     }
   }
 
-  Widget buildDescription(
-    String? description,
-    TextStyle textStyle,
-    BuildContext context,
-    ColorScheme colorScheme, {
-    bool? isProperty,
-  }) {
+  Widget buildDescription(String? description, TextStyle textStyle,
+      BuildContext context, ColorScheme colorScheme) {
     final textSpan = TextSpan(
       children: _buildDescriptionTextSpans(
         description,
@@ -245,12 +240,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       // TODO(jacobr): custom display for units, iterables, and padding.
       children.add(Flexible(
         child: buildDescription(
-          description,
-          descriptionTextStyle,
-          context,
-          colorScheme,
-          isProperty: true,
-        ),
+            description, descriptionTextStyle, context, colorScheme),
       ));
 
       if (diagnostic.level == DiagnosticLevel.fine &&
@@ -290,12 +280,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
 
       var diagnosticDescription = buildDescription(
-        diagnostic.description,
-        descriptionTextStyle,
-        context,
-        colorScheme,
-        isProperty: false,
-      );
+          diagnostic.description, descriptionTextStyle, context, colorScheme);
 
       if (errorText != null) {
         // TODO(dantup): Find if there's a way to achieve this without
