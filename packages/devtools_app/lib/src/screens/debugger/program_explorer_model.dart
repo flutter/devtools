@@ -88,8 +88,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
             .firstWhere(
               (lib) => script!.uri!.startsWith(lib.uri!),
             );
-        lib = await (service.getObject(isolate.id!, libRef.id!)
-            as Future<Library?>);
+        lib = await service.getObject(isolate.id!, libRef.id!) as Library;
       } else {
         lib = libNode.object as Library?;
       }
