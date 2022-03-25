@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 
@@ -19,13 +19,13 @@ import 'layout_explorer/layout_explorer.dart';
 
 class InspectorDetails extends StatelessWidget {
   const InspectorDetails({
-    @required this.detailsTree,
-    @required this.controller,
-    Key key,
+    required this.detailsTree,
+    required this.controller,
+    Key? key,
   }) : super(key: key);
 
   final Widget detailsTree;
-  final InspectorController controller;
+  final InspectorController? controller;
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +69,7 @@ class InspectorDetails extends StatelessWidget {
     );
   }
 
-  DevToolsTab _buildTab({@required String tabName, Widget trailing}) {
+  DevToolsTab _buildTab({required String tabName, Widget? trailing}) {
     return DevToolsTab.create(
       tabName: tabName,
       gaPrefix: 'inspectorDetailsTab',
@@ -80,11 +80,11 @@ class InspectorDetails extends StatelessWidget {
 
 class InspectorExpandCollapseButtons extends StatefulWidget {
   const InspectorExpandCollapseButtons({
-    Key key,
-    @required this.controller,
+    Key? key,
+    required this.controller,
   }) : super(key: key);
 
-  final InspectorController controller;
+  final InspectorController? controller;
 
   @override
   State<InspectorExpandCollapseButtons> createState() =>
@@ -137,14 +137,14 @@ class _InspectorExpandCollapseButtonsState
   void _onExpandClick() {
     blockWhileInProgress(() async {
       ga.select(analytics_constants.inspector, analytics_constants.expandAll);
-      await widget.controller.expandAllNodesInDetailsTree();
+      await widget.controller!.expandAllNodesInDetailsTree();
     });
   }
 
   void _onCollapseClick() {
     blockWhileInProgress(() async {
       ga.select(analytics_constants.inspector, analytics_constants.collapseAll);
-      await widget.controller.collapseDetailsToSelected();
+      await widget.controller!.collapseDetailsToSelected();
     });
   }
 }
