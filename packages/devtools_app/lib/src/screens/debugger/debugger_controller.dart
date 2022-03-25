@@ -609,7 +609,7 @@ class DebuggerController extends DisposableController
         _breakpoints.value = [
           for (var b in _breakpoints.value!)
             if (b != event.breakpoint) b,
-          event.breakpoint
+          event.breakpoint!
         ];
 
         // ignore: unawaited_futures
@@ -853,8 +853,7 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
-    assert(isolate != null);
-    final scriptRefs = await scriptManager.retrieveAndSortScripts(isolateRef);
+    final scriptRefs = await scriptManager.retrieveAndSortScripts(isolateRef!);
 
     // Update the selected script.
     final mainScriptRef = scriptRefs.firstWhereOrNull((ref) {
@@ -869,7 +868,7 @@ class DebuggerController extends DisposableController
       Breakpoint? breakpoint) async {
     if (breakpoint!.resolved!) {
       final bp = BreakpointAndSourcePosition.create(breakpoint);
-      return scriptManager.getScript(bp.scriptRef).then((Script script) {
+      return scriptManager.getScript(bp.scriptRef!).then((Script script) {
         final pos = SourcePosition.calculatePosition(script, bp.tokenPos);
         return BreakpointAndSourcePosition.create(breakpoint, pos);
       });
@@ -886,7 +885,7 @@ class DebuggerController extends DisposableController
       return StackFrameAndSourcePosition(frame);
     }
 
-    final script = await scriptManager.getScript(location.script);
+    final script = await scriptManager.getScript(location.script!);
     final position =
         SourcePosition.calculatePosition(script, location.tokenPos);
     return StackFrameAndSourcePosition(frame, position: position);

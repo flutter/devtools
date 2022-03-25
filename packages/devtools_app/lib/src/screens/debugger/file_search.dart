@@ -61,7 +61,7 @@ class FileSearchFieldState extends State<FileSearchField>
     );
 
     // Open the autocomplete results immediately before a query is entered:
-    SchedulerBinding.instance!.addPostFrameCallback((_) => _handleSearch());
+    SchedulerBinding.instance.addPostFrameCallback((_) => _handleSearch());
   }
 
   @override

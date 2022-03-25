@@ -102,7 +102,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       if (clazzRef.name!.contains('&')) {
         continue;
       }
-      if (clazzRef?.location?.script?.uri == uri) {
+      if (clazzRef.location?.script?.uri == uri) {
         final clazzNode = VMServiceObjectNode(
           controller,
           clazzRef.name,
@@ -313,10 +313,10 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       scriptRef = location.script;
     }
 
-    script = await scriptManager.getScript(script);
+    script = await scriptManager.getScript(script!);
     final position = tokenPos == 0
         ? null
-        : SourcePosition.calculatePosition(script!, tokenPos);
+        : SourcePosition.calculatePosition(script as Script, tokenPos);
 
     location = ScriptLocation(
       script!,

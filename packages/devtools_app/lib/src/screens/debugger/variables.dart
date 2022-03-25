@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
@@ -139,7 +140,7 @@ Widget displayProvider(
                   if (inspectorService!.isDisposed) return;
                   final isInspectable = await variable.isInspectable;
                   if (inspectorService.isDisposed) return;
-                  if (isInspectable!) {
+                  if (isInspectable) {
                     notifications?.push(
                         'Widget is already the current inspector selection.');
                   } else {

@@ -416,7 +416,7 @@ class ProgramExplorer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: controller!.initialized,
+      valueListenable: controller.initialized,
       builder: (context, initialized, _) {
         Widget body;
         if (!initialized) {
@@ -485,7 +485,7 @@ class ProgramExplorer extends StatelessWidget {
     await node.populateLocation();
 
     if (node.object != null && node.object is! Obj) {
-      await controller!.populateNode(node);
+      await controller.populateNode(node);
     }
 
     // If the node is collapsed and we select it, we'll always want to expand
@@ -494,12 +494,12 @@ class ProgramExplorer extends StatelessWidget {
       node.expand();
     }
 
-    if (onSelected != null) onSelected(node.location);
+    if (onSelected != null) onSelected!(node.location!);
   }
 
   void onItemExpanded(VMServiceObjectNode node) async {
     if (node.object != null && node.object is! Obj) {
-      await controller!.populateNode(node);
+      await controller.populateNode(node);
     }
   }
 }

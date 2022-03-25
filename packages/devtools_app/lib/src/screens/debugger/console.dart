@@ -38,7 +38,7 @@ class DebuggerConsole extends StatefulWidget {
       rightActions: [
         CopyToClipboardControl(
           dataProvider: () =>
-              serviceManager.consoleService.stdio.value?.join('\n') ?? '',
+              serviceManager.consoleService.stdio.value.join('\n'),
           buttonKey: DebuggerConsole.copyToClipboardButtonKey,
         ),
         DeleteControl(

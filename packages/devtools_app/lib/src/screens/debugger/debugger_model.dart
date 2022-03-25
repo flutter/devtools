@@ -107,10 +107,6 @@ class SourcePosition {
   });
 
   factory SourcePosition.calculatePosition(Script script, int? tokenPos) {
-    if (script.tokenPosTable == null) {
-      return null;
-    }
-
     return SourcePosition(
       line: script.getLineNumberFromTokenPos(tokenPos!),
       column: script.getColumnNumberFromTokenPos(tokenPos),
@@ -200,9 +196,9 @@ abstract class BreakpointAndSourcePosition
     final result = scriptUri!.compareTo(other.scriptUri!);
     if (result != 0) return result;
 
-    if (resolved != other.resolved) return resolved! ? 1 : -1;
+    if (resolved != other.resolved) return resolved ? 1 : -1;
 
-    if (resolved!) {
+    if (resolved) {
       return tokenPos! - other.tokenPos!;
     } else {
       return line! - other.line!;
@@ -365,7 +361,7 @@ Future<void> buildVariablesTree(
       );
     }
 
-    if (diagnostic.inlineProperties?.isNotEmpty ?? false) {
+    if (diagnostic.inlineProperties.isNotEmpty) {
       await _addPropertiesHelper(diagnostic.inlineProperties);
     } else {
       assert(!service!.disposed);
@@ -376,7 +372,7 @@ Future<void> buildVariablesTree(
   }
   final existingNames = <String>{};
   for (var child in variable.children) {
-    final name = child?.name;
+    final name = child.name;
     if (name != null && name.isNotEmpty) {
       existingNames.add(name);
       if (!isPrivate(name)) {
@@ -395,7 +391,7 @@ Future<void> buildVariablesTree(
                 .floor()
             : DartObjectNode.MAX_CHILDREN_IN_GROUPING;
 
-    var start = variable.offset ?? 0;
+    var start = variable.offset;
     final end = start + variable.childCount!;
     while (start < end) {
       final count = min(end - start, numChildrenInGrouping);
@@ -806,8 +802,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     }
     final diagnostic = ref!.diagnostic;
     if (diagnostic != null &&
-        ((diagnostic.inlineProperties?.isNotEmpty ?? false) ||
-            diagnostic.hasChildren!)) return true;
+        ((diagnostic.inlineProperties.isNotEmpty) ||
+            diagnostic.hasChildren)) return true;
     // TODO(jacobr): do something smarter to avoid expandable variable flicker.
     final instanceRef = ref!.instanceRef;
     return instanceRef != null ? instanceRef.valueAsString == null : false;
@@ -830,7 +826,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       if (value.valueAsString == null) {
         valueStr = value.classRef!.name;
       } else {
-        valueStr = value.valueAsString;
+        valueStr = value.valueAsString ?? '';
         if (value.valueAsStringIsTruncated == true) {
           valueStr += '...';
         }
