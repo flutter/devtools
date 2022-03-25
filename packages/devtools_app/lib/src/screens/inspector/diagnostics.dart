@@ -54,7 +54,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final DebuggerController debuggerController;
   final TextStyle? nodeDescriptionHighlightStyle;
 
-  Widget _paddedIcon(Widget? icon) {
+  Widget _paddedIcon(Widget icon) {
     return Padding(
       padding: const EdgeInsets.only(right: iconPadding),
       child: icon,
