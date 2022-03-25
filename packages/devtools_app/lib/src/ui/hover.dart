@@ -114,7 +114,9 @@ class HoverCard {
     required double width,
     required Offset position,
     String? title,
+    double? maxCardHeight,
   }) {
+    maxCardHeight ??= maxHoverCardHeight;
     final overlayState = Overlay.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     final focusColor = Theme.of(context).focusColor;
@@ -157,7 +159,12 @@ class HoverCard {
                   ),
                   Divider(color: colorScheme.hoverTextStyle.color),
                 ],
-                contents,
+                SingleChildScrollView(
+                  child: Container(
+                    constraints: BoxConstraints(maxHeight: maxCardHeight!),
+                    child: contents,
+                  ),
+                ),
               ],
             ),
           ),
