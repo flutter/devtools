@@ -1126,8 +1126,7 @@ class ParsedScript {
     required this.script,
     required this.highlighter,
     required this.executableLines,
-  })  : assert(script != null),
-        lines = (script.source?.split('\n') ?? const []).toList();
+  }) : lines = (script.source?.split('\n') ?? const []).toList();
 
   final Script script;
 
