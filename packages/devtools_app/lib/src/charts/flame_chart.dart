@@ -13,6 +13,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import '../analytics/analytics.dart' as ga;
@@ -129,6 +130,7 @@ abstract class FlameChartState<T extends FlameChart,
   late final LinkedScrollControllerGroup horizontalControllerGroup;
 
   late final ScrollController _flameChartScrollController;
+  late final ScrollController _flameChartHorizontalController;
 
   /// Animation controller for animating flame chart zoom changes.
   @visibleForTesting
@@ -224,6 +226,7 @@ abstract class FlameChartState<T extends FlameChart,
     });
 
     _flameChartScrollController = verticalControllerGroup.addAndGet();
+    _flameChartHorizontalController = horizontalControllerGroup.addAndGet();
 
     zoomController = AnimationController(
       value: FlameChart.minZoomLevel,
@@ -314,54 +317,13 @@ abstract class FlameChartState<T extends FlameChart,
   }
 
   Widget _buildFlameChart(BoxConstraints constraints) {
-    return ExtentDelegateListView(
-      physics: const ClampingScrollPhysics(),
-      controller: _flameChartScrollController,
-      extentDelegate: verticalExtentDelegate,
-      customPointerSignalHandler: _handlePointerSignal,
-      childrenDelegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final nodes = rows[index].nodes;
-          var rowBackgroundColor = Colors.transparent;
-          if (index >= rowOffsetForTopPadding && nodes.isEmpty) {
-            // If this is a spacer row, we should use the background color of
-            // the previous row with nodes.
-            for (int i = index; i >= rowOffsetForTopPadding; i--) {
-              // Look back until we find the first non-empty row.
-              if (rows[i].nodes.isNotEmpty) {
-                rowBackgroundColor = alternatingColorForIndex(
-                  rows[i].nodes.first.sectionIndex,
-                  Theme.of(context).colorScheme,
-                );
-                break;
-              }
-            }
-          } else if (nodes.isNotEmpty) {
-            rowBackgroundColor = alternatingColorForIndex(
-              nodes.first.sectionIndex,
-              Theme.of(context).colorScheme,
-            );
-          }
-          // TODO(polinach): figure out how to get rid of the type cast.
-          // See https://github.com/flutter/devtools/pull/3738#discussion_r817135162
-          return ScrollingFlameChartRow<V>(
-            linkedScrollControllerGroup: horizontalControllerGroup,
-            nodes: nodes,
-            width: math.max(constraints.maxWidth, widthWithZoom),
-            startInset: widget.startInset,
-            selectionNotifier: widget.selectionNotifier as ValueListenable<V>,
-            searchMatchesNotifier:
-                widget.searchMatchesNotifier as ValueListenable<List<V>>?,
-            activeSearchMatchNotifier:
-                widget.activeSearchMatchNotifier as ValueListenable<V?>?,
-            onTapUp: focusNode.requestFocus,
-            backgroundColor: rowBackgroundColor,
-            zoom: currentZoom,
-          );
-        },
-        childCount: rows.length,
-        addAutomaticKeepAlives: false,
-      ),
+    return FlameChartGraph(
+      height: rowHeightWithPadding * rows.length,
+      width: math.max(constraints.maxWidth, widthWithZoom),
+      vertical: _flameChartScrollController,
+      horizontal: _flameChartHorizontalController,
+      rows: rows,
+      zoom: currentZoom,
     );
   }
 
@@ -747,16 +709,7 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
             controller: scrollController,
             scrollDirection: Axis.horizontal,
             children: [
-              FlameChartNodeRow(
-                nodes: nodes,
-                zoom: widget.zoom,
-                startInset: widget.startInset,
-                chartWidth: widget.width,
-                selected: selected,
-                hovered: hovered,
-                extentDelegate: extentDelegate,
-                controller: scrollController,
-              ),
+
             ],
           ),
         ),
@@ -810,191 +763,6 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
 
   void _resetHovered() {
     hovered = null;
-  }
-}
-
-class FlameChartNodeRow extends LeafRenderObjectWidget {
-  const FlameChartNodeRow({
-    Key? key,
-    required this.nodes,
-    required this.zoom,
-    required this.startInset,
-    required this.chartWidth,
-    required this.selected,
-    required this.hovered,
-    required this.extentDelegate,
-    required this.controller,
-  }) : super(key: key);
-
-  final List<FlameChartNode> nodes;
-
-  final double zoom;
-
-  final double startInset;
-
-  final double chartWidth;
-
-  final Object? selected;
-
-  final Object? hovered;
-
-  final _ScrollingFlameChartRowExtentDelegate extentDelegate;
-
-  final ScrollController controller;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderFlameRow()
-      ..nodes = nodes
-      ..zoom = zoom
-      ..startInset = startInset
-      ..chartWidth = chartWidth
-      ..selected = selected
-      ..hovered = hovered
-      ..extentDelegate = extentDelegate
-      ..controller = controller
-      ..colorScheme = Theme.of(context).colorScheme;
-  }
-
-  @override
-  void updateRenderObject(
-      BuildContext context, covariant _RenderFlameRow renderObject) {
-    renderObject
-      ..nodes = nodes
-      ..zoom = zoom
-      ..startInset = startInset
-      ..chartWidth = chartWidth
-      ..selected = selected
-      ..hovered = hovered
-      ..extentDelegate = extentDelegate
-      ..controller = controller
-      ..colorScheme = Theme.of(context).colorScheme;
-  }
-}
-
-class _RenderFlameRow extends RenderBox {
-  _RenderFlameRow();
-
-  _ScrollingFlameChartRowExtentDelegate? extentDelegate;
-
-  ScrollController? _controller;
-  set controller(ScrollController value) {
-    if (_controller == value) {
-      return;
-    }
-    _controller?.removeListener(markNeedsPaint);
-    _controller = value;
-    _controller?.addListener(markNeedsPaint);
-  }
-
-  List<FlameChartNode> get nodes => _nodes;
-  List<FlameChartNode> _nodes = [];
-  set nodes(List<FlameChartNode> values) {
-    if (identical(values, nodes)) {
-      return;
-    }
-    _nodes = values;
-    markNeedsLayout();
-  }
-
-  double get zoom => _zoom;
-  double _zoom = 0.5;
-  set zoom(double value) {
-    if (value == zoom) {
-      return;
-    }
-    _zoom = value;
-    markNeedsPaint();
-  }
-
-  double get startInset => _startInset;
-  double _startInset = 0;
-  set startInset(double value) {
-    if (value == startInset) {
-      return;
-    }
-    _startInset = value;
-    markNeedsLayout();
-  }
-
-  double get chartWidth => _chartWidth;
-  double _chartWidth = 0;
-  set chartWidth(double value) {
-    if (value == chartWidth) {
-      return;
-    }
-    _chartWidth = value;
-    markNeedsLayout();
-  }
-
-  Object? get selected => _selected;
-  Object? _selected;
-  set selected(Object? value) {
-    if (value == selected) {
-      return;
-    }
-    _selected = value;
-    markNeedsPaint();
-  }
-
-  Object? get hovered => _hovered;
-  Object? _hovered;
-  set hovered(Object? value) {
-    if (value == _hovered) {
-      return;
-    }
-    _hovered = value;
-    markNeedsPaint();
-  }
-
-  ColorScheme get colorScheme => _colorScheme!;
-  ColorScheme? _colorScheme;
-  set colorScheme(ColorScheme value) {
-    if (value == _colorScheme) {
-      return;
-    }
-    _colorScheme = value;
-    markNeedsPaint();
-  }
-
-  @override
-  void performLayout() {
-    final width = extentDelegate!.chartWidth;
-    size = Size(
-      width,
-      constraints.maxHeight,
-    );
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    var accumulated = 0.0;
-    var index = 0;
-    for (var node in nodes) {
-      final left = FlameChartUtils.leftPaddingForNode(
-        index,
-        nodes,
-        chartZoom: zoom,
-        chartStartInset: startInset,
-      );
-      final position =
-          offset + Offset(left + accumulated - _controller!.offset, 0);
-      final double extent = extentDelegate!.itemExtent(index);
-      if (position.dx + extent >= 0 && position.dx <= size.width) {
-        node.draw(
-          canvas: context.canvas,
-          topLeft: position,
-          selected: node == selected,
-          hovered: node == hovered,
-          searchMatch: node.data.isSearchMatch,
-          activeSearchMatch: node.data.isActiveSearchMatch,
-          zoom: zoom,
-          colorScheme: colorScheme,
-        );
-      }
-      accumulated += extent;
-      index += 1;
-    }
   }
 }
 
@@ -1763,5 +1531,264 @@ class EmptyFlameChartRow extends StatelessWidget {
       width: width,
       color: backgroundColor,
     );
+  }
+}
+
+class FlameChartGraph<V extends FlameChartDataMixin<V>> extends StatefulWidget {
+  const FlameChartGraph({
+    Key? key,
+    required this.width,
+    required this.height,
+    required this.vertical,
+    required this.horizontal,
+    required this.rows,
+    required this.zoom,
+  }) : super(key: key);
+
+  final double width;
+  final double height;
+  final double zoom;
+  final ScrollController vertical;
+  final ScrollController horizontal;
+  final List<FlameChartRow<V>> rows;
+
+  @override
+  State<FlameChartGraph> createState() => _FlameChartGraphState<V>();
+}
+
+class _FlameChartGraphState<V extends FlameChartDataMixin<V>> extends State<FlameChartGraph<V>> {
+  @override
+  Widget build(BuildContext context) {
+    return Scrollable(
+      controller: widget.vertical,
+      axisDirection: AxisDirection.down,
+      physics: const AlwaysScrollableScrollPhysics(),
+      scrollBehavior: const ScrollBehavior().copyWith(dragDevices: {...PointerDeviceKind.values}),
+      viewportBuilder: (context, verticalPosition) {
+        return Scrollable(
+          controller: widget.horizontal,
+          axisDirection: AxisDirection.right,
+          physics: const AlwaysScrollableScrollPhysics(),
+            scrollBehavior: const ScrollBehavior().copyWith(dragDevices: {...PointerDeviceKind.values}),
+          viewportBuilder: (context, horizontalPosition) {
+            return SizedBox(
+              width: widget.width,
+              height: widget.height,
+              child: _RawFlameChart<V>(
+                vertical: verticalPosition,
+                horizontal: horizontalPosition,
+                rows: widget.rows,
+                zoom: widget.zoom,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _RawFlameChart<V extends FlameChartDataMixin<V>> extends SingleChildRenderObjectWidget {
+  const _RawFlameChart({
+    required this.vertical,
+    required this.horizontal,
+    required this.rows,
+    required this.zoom,
+  });
+
+  final ViewportOffset vertical;
+  final ViewportOffset horizontal;
+  final List<FlameChartRow<V>> rows;
+  final double zoom;
+
+  @override
+  SingleChildRenderObjectElement createElement() => _RawFlameChartElement(this);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderFlameChart<V>(horizontal, vertical, rows)
+      ..zoom = zoom;
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderFlameChart<V> renderObject) {
+    renderObject
+      ..vertical = vertical
+      ..horizontal = horizontal
+      ..rows = rows
+      ..zoom = zoom;
+  }
+}
+
+class _RawFlameChartElement extends SingleChildRenderObjectElement with NotifiableElementMixin, ViewportElementMixin {
+  _RawFlameChartElement(SingleChildRenderObjectWidget widget) : super(widget);
+}
+
+class RenderFlameChart<V extends FlameChartDataMixin<V>> extends RenderBox {
+  RenderFlameChart(this._horizontal, this._vertical, this._rows);
+
+  final List<_ScrollingFlameChartRowExtentDelegate> _delegates = [];
+
+  bool _extentDelegateDirty = true;
+
+  void _initExtentDelegate() {
+    _delegates.clear();
+    for (var row in rows) {
+      _delegates.add(_ScrollingFlameChartRowExtentDelegate(
+        nodeIntervals: row.nodes.toPaddedZoomedIntervals(
+          zoom: zoom,
+          chartStartInset: 0, // TODO
+          chartWidth: size.width,
+        ),
+        zoom: zoom,
+        chartStartInset: 0, // TODO
+        chartWidth: size.width,
+      ));
+    }
+  }
+
+  void _updateExtentDelegate() {
+    for (var i = 0; i< rows.length; i++) {
+      var extentDelegate = _delegates[i];
+      var nodes = rows[i].nodes;
+      extentDelegate.recomputeWith(
+        nodeIntervals: nodes.toPaddedZoomedIntervals(
+          zoom: zoom,
+          chartStartInset: 0, // TODO
+          chartWidth: size.width,
+        ),
+        zoom: zoom,
+        chartStartInset: 0, // TODO
+        chartWidth: size.width,
+      );
+    }
+  }
+
+  @override
+  bool get isRepaintBoundary => true;
+
+  @override
+  bool get sizedByParent => true;
+
+  ViewportOffset get horizontal => _horizontal;
+  ViewportOffset _horizontal;
+  set horizontal(ViewportOffset value) {
+    if (horizontal == value) {
+      return;
+    }
+    _horizontal.removeListener(markNeedsLayout);
+    _horizontal = value;
+    _horizontal.addListener(markNeedsLayout);
+    markNeedsLayout();
+  }
+
+  ViewportOffset get vertical => _vertical;
+  ViewportOffset _vertical;
+  set vertical(ViewportOffset value) {
+    if (vertical == value) {
+      return;
+    }
+    _vertical.removeListener(markNeedsLayout);
+    _vertical = value;
+    _vertical.addListener(markNeedsLayout);
+    markNeedsLayout();
+  }
+
+  List<FlameChartRow<V>> get rows => _rows;
+  List<FlameChartRow<V>> _rows;
+  set rows(List<FlameChartRow<V>> values) {
+    if (values == rows) {
+      return;
+    }
+    _rows = values;
+    markNeedsLayout();
+  }
+
+  // TODO
+  Object? get selected => _selected;
+  Object? _selected;
+  set selected(Object? value) {
+    if (value == selected) {
+      return;
+    }
+    _selected = value;
+    markNeedsPaint();
+  }
+
+  // TODO
+  Object? get hovered => _hovered;
+  Object? _hovered;
+  set hovered(Object? value) {
+    if (value == _hovered) {
+      return;
+    }
+    _hovered = value;
+    markNeedsPaint();
+  }
+
+    // TODO
+  ColorScheme get colorScheme => _colorScheme!;
+  ColorScheme? _colorScheme = ColorScheme.dark();
+  set colorScheme(ColorScheme value) {
+    if (value == _colorScheme) {
+      return;
+    }
+    _colorScheme = value;
+    markNeedsPaint();
+  }
+
+  double get zoom => _zoom;
+  double _zoom = 1.0;
+  set zoom(double value) {
+    if (zoom == value) {
+      return;
+    }
+    _zoom = value;
+    _extentDelegateDirty = true;
+    markNeedsPaint();
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
+  }
+
+  @override
+  void performLayout() {
+    horizontal.applyContentDimensions(0, 1000);
+    horizontal.applyViewportDimension(size.width);
+    vertical.applyContentDimensions(0, rows.length * rowHeightWithPadding);
+    vertical.applyViewportDimension(size.height);
+    super.performLayout();
+    if (_extentDelegateDirty)
+      _initExtentDelegate();
+    _extentDelegateDirty = false;
+  }
+
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (_extentDelegateDirty) {
+      _updateExtentDelegate();
+    }
+    for (var j = 0; j < rows.length; j++) {
+      var row = rows[j];
+      var delegate = _delegates[j];
+      var offset = -horizontal.pixels;
+      for (var i = 0; i < row.nodes.length; i++) {
+        var node = row.nodes[i];
+        node.draw(
+          canvas: context.canvas,
+          topLeft: Offset(offset, j * rowHeightWithPadding - vertical.pixels),
+          selected: false,
+          hovered: false,
+          searchMatch: false,
+          activeSearchMatch: false,
+          zoom: zoom,
+          colorScheme: colorScheme,
+        );
+        offset += delegate.itemExtent(i);
+      }
+    }
   }
 }
