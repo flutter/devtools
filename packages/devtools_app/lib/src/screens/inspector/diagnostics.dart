@@ -180,7 +180,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     if (diagnostic.isProperty) {
       // Display of inline properties.
       final propertyType = diagnostic.propertyType;
-      final Map<String, Object>? properties = diagnostic.valuePropertiesJson;
+      final properties = diagnostic.valuePropertiesJson;
 
       if (name?.isNotEmpty == true && diagnostic.showName) {
         children.add(Text('$name${diagnostic.separator} ', style: textStyle));
@@ -195,7 +195,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
 
       String? description = diagnostic.description;
-      if (propertyType != null && properties != null) {
+      if (propertyType != null) {
         switch (propertyType) {
           case 'Color':
             {

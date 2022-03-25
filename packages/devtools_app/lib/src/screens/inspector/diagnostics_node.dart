@@ -495,8 +495,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return _valueProperties;
   }
 
-  Map<String, Object>? get valuePropertiesJson =>
-      json['valueProperties'] as Map<String, Object>?;
+  Map<String, Object> get valuePropertiesJson =>
+      json['valueProperties'] as Map<String, Object>? ?? <String, Object>{};
 
   bool get hasChildren {
     // In the summary tree, json['hasChildren']==true when the node has details
