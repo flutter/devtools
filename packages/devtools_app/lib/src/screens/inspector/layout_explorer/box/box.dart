@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: avoid_redundant_argument_values, import_of_legacy_library_into_null_safe
 
 import 'dart:math' as math;
 
@@ -162,18 +162,9 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         properties!; // Fall back to this node's properties if there is no parent.
 
     final parentSize = parentProperties.size;
-    final offset = properties!.node?.parentData ??
+    final offset = properties!.node.parentData ??
         (BoxParentData()..offset = const Offset(0, 0));
 
-    if (properties!.size == null) {
-      // This should happen infrequently but it is better to show an error than
-      // crash.
-      return Center(
-        child: Text(
-          'Visualizing layouts for ${properties!.description} widgets is not yet supported.',
-        ),
-      );
-    }
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         // Subtract out one pixel border on each side.
@@ -185,16 +176,16 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         final widths = [
           nullOutZero(offset.offset.dx),
           properties!.size.width,
-          nullOutZero(parentSize != null
-              ? parentSize.width - (properties!.size.width + offset.offset.dx)
-              : 0.0),
+          nullOutZero(
+            parentSize.width - (properties!.size.width + offset.offset.dx),
+          ),
         ];
         final heights = [
           nullOutZero(offset.offset.dy),
           properties!.size.height,
-          nullOutZero(parentSize != null
-              ? parentSize.height - (properties!.size.height + offset.offset.dy)
-              : 0.0),
+          nullOutZero(
+            parentSize.height - (properties!.size.height + offset.offset.dy),
+          ),
         ];
         // 3 element array with [left padding, widget width, right padding].
         final displayWidths = minFractionLayout(
@@ -210,7 +201,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         );
         final widgetWidth = displayWidths[1];
         final widgetHeight = displayHeights[1];
-        final safeParentSize = parentSize ?? properties!.size;
+        final safeParentSize = parentSize;
         return Container(
           width: constraints.maxWidth,
           height: constraints.maxHeight,
@@ -296,10 +287,9 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   }
 
   LayoutProperties? get parentProperties {
-    final parentElement = properties?.node?.parentRenderElement;
+    final parentElement = properties?.node.parentRenderElement;
     if (parentElement == null) return null;
     final parentProperties = computeLayoutProperties(parentElement);
-    if (parentProperties.size == null) return null;
     return parentProperties;
   }
 
@@ -346,7 +336,7 @@ String? describeBoxName(LayoutProperties properties) {
 
   // Widget name.
   var title = properties.node.description ?? '';
-  final renderDescription = properties.node?.renderObject?.description;
+  final renderDescription = properties.node.renderObject?.description;
   // TODO(jacobr): consider de-emphasizing the render object name by putting it
   // in more transparent text or just calling the widget Parent instead of
   // surfacing a widget name.

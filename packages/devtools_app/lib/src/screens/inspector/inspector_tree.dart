@@ -209,7 +209,7 @@ class InspectorTreeNode {
     }
     int current = 0;
     int depth = 0;
-    while (node != null) {
+    while (true) {
       final style = node.diagnostic?.style;
       final bool indented = style != DiagnosticsTreeStyle.flat &&
           style != DiagnosticsTreeStyle.error;
@@ -249,14 +249,11 @@ class InspectorTreeNode {
         depth++;
       }
     }
-    assert(false); // internal error.
-    return null;
   }
 
   void removeChild(InspectorTreeNode child) {
     child.parent = null;
-    final removed = _children.remove(child);
-    assert(removed != null);
+    _children.remove(child);
     isDirty = true;
   }
 

@@ -59,7 +59,7 @@ class FakeInspectorTree extends InspectorTreeController {
     final StringBuffer sb = StringBuffer();
     for (int i = 0; i < numRows; i++) {
       final row = getCachedRow(i);
-      if (hidePropertyLines && row.node?.diagnostic?.isProperty == true) {
+      if (hidePropertyLines && row.node.diagnostic?.isProperty == true) {
         continue;
       }
       int last = 0;

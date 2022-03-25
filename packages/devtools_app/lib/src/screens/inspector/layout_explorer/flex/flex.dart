@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -100,8 +102,8 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         highlighted = newProperties;
       } else {
         final idx =
-            selectedNode?.parent?.childrenNow?.indexOf(selectedNode!) ?? -1;
-        if (newProperties == null || newProperties.children == null) return;
+            selectedNode?.parent?.childrenNow.indexOf(selectedNode!) ?? -1;
+        if (newProperties == null) return;
         if (idx != -1) highlighted = newProperties.children[idx];
       }
     });
@@ -586,7 +588,7 @@ class FlexChildVisualizer extends StatelessWidget {
     }
 
     return DropdownButton<int>(
-      value: properties!.flexFactor?.toInt()?.clamp(0, maximumFlexFactor),
+      value: properties!.flexFactor?.toInt().clamp(0, maximumFlexFactor),
       onChanged: onChangeFlexFactor,
       iconEnabledColor: textColor,
       underline: buildUnderline(),
