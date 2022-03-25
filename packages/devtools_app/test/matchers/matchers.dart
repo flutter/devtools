@@ -16,7 +16,7 @@ RemoteDiagnosticsNode? findNodeMatching(
   String text,
 ) {
   if (node.name?.startsWith(text) == true ||
-      node.description?.startsWith(text) == true) {
+      node.description.startsWith(text) == true) {
     return node;
   }
   for (var child in node.childrenNow) {

@@ -185,7 +185,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// `parentConfiguration` specifies how the parent is rendered as text art.
   /// For example, if the parent does not line break between properties, the
   /// description of a property should also be a single line if possible.
-  String? get description => getStringMember('description');
+  String get description => getStringMember('description') ?? '';
 
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.
@@ -676,7 +676,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   @override
   String toStringShort() {
-    return description ?? '';
+    return description;
   }
 
   Future<void> setSelectionInspector(bool uiAlreadyUpdated) async {

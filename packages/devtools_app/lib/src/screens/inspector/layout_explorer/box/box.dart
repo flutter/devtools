@@ -335,7 +335,7 @@ String? describeBoxName(LayoutProperties properties) {
   // This is clearer but risks more confusion
 
   // Widget name.
-  var title = properties.node.description ?? '';
+  var title = properties.node.description;
   final renderDescription = properties.node.renderObject?.description;
   // TODO(jacobr): consider de-emphasizing the render object name by putting it
   // in more transparent text or just calling the widget Parent instead of

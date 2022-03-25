@@ -62,12 +62,12 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   }
 
   Iterable<TextSpan> _buildDescriptionTextSpans(
-    String? description,
+    String description,
     TextStyle textStyle,
     ColorScheme colorScheme,
   ) sync* {
     if (diagnostic.isDiagnosticableValue) {
-      final match = treeNodePrimaryDescriptionPattern.firstMatch(description!);
+      final match = treeNodePrimaryDescriptionPattern.firstMatch(description);
       if (match != null) {
         yield TextSpan(text: match.group(1), style: textStyle);
         if (match.group(2)!.isNotEmpty) {
@@ -80,7 +80,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         return;
       }
     } else if (diagnostic.type == 'ErrorDescription') {
-      final match = assertionThrownBuildingError.firstMatch(description!);
+      final match = assertionThrownBuildingError.firstMatch(description);
       if (match != null) {
         yield TextSpan(text: match.group(1), style: textStyle);
         yield TextSpan(text: match.group(3), style: textStyle);
@@ -88,7 +88,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
     }
 
-    if (description?.isNotEmpty == true) {
+    if (description.isNotEmpty == true) {
       yield TextSpan(text: description, style: textStyle);
     }
 
@@ -112,8 +112,12 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     }
   }
 
-  Widget buildDescription(String? description, TextStyle textStyle,
-      BuildContext context, ColorScheme colorScheme) {
+  Widget buildDescription(
+    String description,
+    TextStyle textStyle,
+    BuildContext context,
+    ColorScheme colorScheme,
+  ) {
     final textSpan = TextSpan(
       children: _buildDescriptionTextSpans(
         description,
@@ -176,6 +180,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     TextStyle textStyle =
         baseStyle.merge(textStyleForLevel(diagnostic.level, colorScheme));
     var descriptionTextStyle = textStyle;
+    var description = diagnostic.description;
+
     // TODO(jacobr): use TextSpans and SelectableText instead of Text.
     if (diagnostic.isProperty) {
       // Display of inline properties.
@@ -194,7 +200,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         textStyle = textStyle.merge(inspector_text_styles.regularBold);
       }
 
-      String? description = diagnostic.description;
       if (propertyType != null) {
         switch (propertyType) {
           case 'Color':
@@ -266,7 +271,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
             style: textStyle,
           ));
           if (diagnostic.separator != ' ' &&
-              (diagnostic.description?.isNotEmpty ?? false)) {
+              diagnostic.description.isNotEmpty) {
             children.add(Text(
               ' ',
               style: textStyle,
@@ -280,7 +285,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
 
       var diagnosticDescription = buildDescription(
-          diagnostic.description, descriptionTextStyle, context, colorScheme);
+          description, descriptionTextStyle, context, colorScheme);
 
       if (errorText != null) {
         // TODO(dantup): Find if there's a way to achieve this without
