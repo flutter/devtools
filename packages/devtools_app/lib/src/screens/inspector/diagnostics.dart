@@ -265,10 +265,11 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
     } else {
       // Non property, regular node case.
-      if (name?.isNotEmpty == true &&
+      if (name != null &&
+          name.isNotEmpty &&
           diagnosticLocal.showName &&
           name != 'child') {
-        if (name!.startsWith('child ')) {
+        if (name.startsWith('child ')) {
           children.add(Text(
             name,
             style: inspector_text_styles.unimportant(colorScheme),
