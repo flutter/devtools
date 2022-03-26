@@ -72,7 +72,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       final match = treeNodePrimaryDescriptionPattern.firstMatch(description);
       if (match != null) {
         yield TextSpan(text: match.group(1), style: textStyle);
-        if (match.group(2)!.isNotEmpty) {
+        if (match.group(2)?.isNotEmpty == true) {
           yield TextSpan(
             text: match.group(2),
             style:
@@ -124,17 +124,19 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       ).toList(),
     );
 
+    final diagnosticLocal = diagnostic!;
+    final inspectorService = serviceManager.inspectorService!;
+
     return HoverCardTooltip(
-      enabled: () => diagnostic != null && diagnostic!.inspectorService != null,
+      enabled: () => diagnosticLocal.inspectorService != null,
       onHover: (event) async {
-        final group =
-            serviceManager.inspectorService!.createObjectGroup('hover');
+        final group = inspectorService.createObjectGroup('hover');
         final value =
-            await group.toObservatoryInstanceRef(diagnostic!.valueRef);
+            await group.toObservatoryInstanceRef(diagnosticLocal.valueRef);
         final variable = DartObjectNode.fromValue(
           value: value,
-          isolateRef: serviceManager.inspectorService!.isolateRef,
-          diagnostic: diagnostic,
+          isolateRef: inspectorService.isolateRef,
+          diagnostic: diagnosticLocal,
         );
         await buildVariablesTree(variable);
         for (var child in variable.children) {
@@ -144,7 +146,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         // TODO(jacobr): should we ensure the hover has not yet been cancelled?
 
         return HoverCardData(
-          title: diagnostic!.toStringShort(),
+          title: diagnosticLocal.toStringShort(),
           contents: Material(
             child: ExpandableVariable(
               debuggerController: debuggerController,
@@ -188,9 +190,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     // TODO(jacobr): use TextSpans and SelectableText instead of Text.
     if (diagnosticLocal.isProperty) {
       // Display of inline properties.
-      final String? propertyType = diagnosticLocal.propertyType;
-      final Map<String, Object>? properties =
-          diagnosticLocal.valuePropertiesJson;
+      final propertyType = diagnosticLocal.propertyType;
+      final properties = diagnosticLocal.valuePropertiesJson;
 
       if (name?.isNotEmpty == true && diagnosticLocal.showName) {
         children
