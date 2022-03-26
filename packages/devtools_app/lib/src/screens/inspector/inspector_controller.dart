@@ -463,7 +463,7 @@ class InspectorController extends DisposableController
       // new tree is identical to the existing tree in which case we should
       // dispose the new tree and keep the old tree.
       treeGroupsLocal.promoteNext();
-      clearValueToInspectorTreeNodeMapping();
+      _clearValueToInspectorTreeNodeMapping();
 
       final InspectorTreeNode rootNode = inspectorTree.setupInspectorTreeNode(
         inspectorTree.createNode(),
@@ -481,7 +481,7 @@ class InspectorController extends DisposableController
     }
   }
 
-  void clearValueToInspectorTreeNodeMapping() {
+  void _clearValueToInspectorTreeNodeMapping() {
     valueToInspectorTreeNode.clear();
   }
 
@@ -518,7 +518,7 @@ class InspectorController extends DisposableController
     }
 
     // Clear now to eliminate frame of highlighted nodes flicker.
-    clearValueToInspectorTreeNodeMapping();
+    _clearValueToInspectorTreeNodeMapping();
     _recomputeTreeRoot(selection, null, false);
   }
 
@@ -929,14 +929,12 @@ class InspectorController extends DisposableController
     super.dispose();
   }
 
-  static String? treeTypeDisplayName(FlutterTreeType treeType) {
+  static String treeTypeDisplayName(FlutterTreeType treeType) {
     switch (treeType) {
       case FlutterTreeType.widget:
         return 'Widget';
       case FlutterTreeType.renderObject:
         return 'Render Objects';
-      default:
-        return null;
     }
   }
 
