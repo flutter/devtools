@@ -63,12 +63,13 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   }
 
   Iterable<TextSpan> _buildDescriptionTextSpans(
-    String? description,
+    String description,
     TextStyle textStyle,
     ColorScheme colorScheme,
   ) sync* {
-    if (diagnostic!.isDiagnosticableValue) {
-      final match = treeNodePrimaryDescriptionPattern.firstMatch(description!);
+    final diagnosticLocal = diagnostic!;
+    if (diagnosticLocal.isDiagnosticableValue) {
+      final match = treeNodePrimaryDescriptionPattern.firstMatch(description);
       if (match != null) {
         yield TextSpan(text: match.group(1), style: textStyle);
         if (match.group(2)!.isNotEmpty) {
@@ -80,8 +81,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         }
         return;
       }
-    } else if (diagnostic!.type == 'ErrorDescription') {
-      final match = assertionThrownBuildingError.firstMatch(description!);
+    } else if (diagnosticLocal.type == 'ErrorDescription') {
+      final match = assertionThrownBuildingError.firstMatch(description);
       if (match != null) {
         yield TextSpan(text: match.group(1), style: textStyle);
         yield TextSpan(text: match.group(3), style: textStyle);
@@ -89,11 +90,11 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
     }
 
-    if (description?.isNotEmpty == true) {
+    if (description.isNotEmpty == true) {
       yield TextSpan(text: description, style: textStyle);
     }
 
-    final textPreview = diagnostic!.json['textPreview'];
+    final textPreview = diagnosticLocal.json['textPreview'];
     if (textPreview is String) {
       final preview = textPreview.replaceAll('\n', ' ');
       yield TextSpan(
@@ -114,7 +115,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   }
 
   Widget buildDescription(
-    String? description,
+    String description,
     TextStyle textStyle,
     BuildContext context,
     ColorScheme colorScheme, {
@@ -171,40 +172,45 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     if (diagnostic == null) {
       return const SizedBox();
     }
+
+    final diagnosticLocal = diagnostic!;
+
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final icon = diagnostic!.icon;
+    final icon = diagnosticLocal.icon;
     final children = <Widget>[];
 
     if (icon != null) {
       children.add(_paddedIcon(icon));
     }
-    final String? name = diagnostic!.name;
+    final name = diagnosticLocal.name;
 
     final defaultStyle = DefaultTextStyle.of(context).style;
     final baseStyle = style ?? defaultStyle;
     TextStyle textStyle =
-        baseStyle.merge(textStyleForLevel(diagnostic!.level, colorScheme));
+        baseStyle.merge(textStyleForLevel(diagnosticLocal.level, colorScheme));
     var descriptionTextStyle = textStyle;
     // TODO(jacobr): use TextSpans and SelectableText instead of Text.
-    if (diagnostic!.isProperty) {
+    if (diagnosticLocal.isProperty) {
       // Display of inline properties.
-      final String? propertyType = diagnostic!.propertyType;
-      final Map<String, Object>? properties = diagnostic!.valuePropertiesJson;
+      final String? propertyType = diagnosticLocal.propertyType;
+      final Map<String, Object>? properties =
+          diagnosticLocal.valuePropertiesJson;
 
-      if (name?.isNotEmpty == true && diagnostic!.showName) {
-        children.add(Text('$name${diagnostic!.separator} ', style: textStyle));
+      if (name?.isNotEmpty == true && diagnosticLocal.showName) {
+        children
+            .add(Text('$name${diagnosticLocal.separator} ', style: textStyle));
         // provide some contrast between the name and description if both are
         // present.
         descriptionTextStyle =
             descriptionTextStyle.merge(theme.subtleTextStyle);
       }
 
-      if (diagnostic!.isCreatedByLocalProject) {
+      if (diagnosticLocal.isCreatedByLocalProject) {
         textStyle = textStyle.merge(inspector_text_styles.regularBold);
       }
 
-      String? description = diagnostic!.description;
+      String description = diagnosticLocal.description ?? '';
       if (propertyType != null && properties != null) {
         switch (propertyType) {
           case 'Color':
@@ -258,14 +264,16 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         ),
       ));
 
-      if (diagnostic!.level == DiagnosticLevel.fine &&
-          diagnostic!.hasDefaultValue) {
+      if (diagnosticLocal.level == DiagnosticLevel.fine &&
+          diagnosticLocal.hasDefaultValue) {
         children.add(const Text(' '));
         children.add(_paddedIcon(defaultIcon));
       }
     } else {
       // Non property, regular node case.
-      if (name?.isNotEmpty == true && diagnostic!.showName && name != 'child') {
+      if (name?.isNotEmpty == true &&
+          diagnosticLocal.showName &&
+          name != 'child') {
         if (name!.startsWith('child ')) {
           children.add(Text(
             name,
@@ -275,13 +283,13 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           children.add(Text(name, style: textStyle));
         }
 
-        if (diagnostic!.showSeparator) {
+        if (diagnosticLocal.showSeparator) {
           children.add(Text(
-            diagnostic!.separator,
+            diagnosticLocal.separator,
             style: textStyle,
           ));
-          if (diagnostic!.separator != ' ' &&
-              (diagnostic!.description?.isNotEmpty ?? false)) {
+          if (diagnosticLocal.separator != ' ' &&
+              (diagnosticLocal.description?.isNotEmpty ?? false)) {
             children.add(Text(
               ' ',
               style: textStyle,
@@ -290,12 +298,13 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         }
       }
 
-      if (!diagnostic!.isSummaryTree && diagnostic!.isCreatedByLocalProject) {
+      if (!diagnosticLocal.isSummaryTree &&
+          diagnosticLocal.isCreatedByLocalProject) {
         textStyle = textStyle.merge(inspector_text_styles.regularBold);
       }
 
       var diagnosticDescription = buildDescription(
-        diagnostic!.description,
+        diagnosticLocal.description ?? '',
         descriptionTextStyle,
         context,
         colorScheme,
