@@ -450,9 +450,10 @@ class InspectorController extends DisposableController
     if (_disposed) {
       return;
     }
-    _treeGroups!.cancelNext();
+    final treeGroupsLocal = _treeGroups!;
+    treeGroupsLocal.cancelNext();
     try {
-      final group = _treeGroups!.next;
+      final group = treeGroupsLocal.next;
       final node = await (detailsSubtree
           ? group.getDetailsSubtree(subtreeRoot, subtreeDepth: subtreeDepth)
           : group.getRoot(treeType));
@@ -462,7 +463,7 @@ class InspectorController extends DisposableController
       // TODO(jacobr): as a performance optimization we should check if the
       // new tree is identical to the existing tree in which case we should
       // dispose the new tree and keep the old tree.
-      _treeGroups!.promoteNext();
+      treeGroupsLocal.promoteNext();
       clearValueToInspectorTreeNodeMapping();
 
       final InspectorTreeNode rootNode = inspectorTree.setupInspectorTreeNode(
@@ -476,7 +477,7 @@ class InspectorController extends DisposableController
       refreshSelection(newSelection, detailsSelection, setSubtreeRoot);
     } catch (error) {
       log(error.toString(), LogLevel.error);
-      _treeGroups!.cancelNext();
+      treeGroupsLocal.cancelNext();
       return;
     }
   }
