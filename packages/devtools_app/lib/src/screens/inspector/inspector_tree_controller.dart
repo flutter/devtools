@@ -52,7 +52,7 @@ class _InspectorTreeRowWidget extends StatefulWidget {
 
   InspectorTreeNode get node => row.node;
   final InspectorTreeRow row;
-  final DebuggerController? debuggerController;
+  final DebuggerController debuggerController;
   final ScrollController? scrollControllerX;
   final double viewportWidth;
 
@@ -709,7 +709,7 @@ class InspectorTree extends StatefulWidget {
 
   final InspectorTreeController? controller;
   final InspectorTreeController? inspectorTreeController;
-  final DebuggerController? debuggerController;
+  final DebuggerController debuggerController;
   final bool isSummaryTree;
   final LinkedHashMap<String, InspectableWidgetError>? widgetErrors;
 
@@ -1137,7 +1137,7 @@ class InspectorRowContent extends StatelessWidget {
 
   final InspectorTreeRow row;
   final InspectorTreeController? controller;
-  final DebuggerController? debuggerController;
+  final DebuggerController debuggerController;
   final VoidCallback onToggle;
   final Animation<double> expandArrowAnimation;
   final ScrollController? scrollControllerX;
