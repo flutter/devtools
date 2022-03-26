@@ -114,13 +114,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     }
   }
 
-  Widget buildDescription(
-    String description,
-    TextStyle textStyle,
-    BuildContext context,
-    ColorScheme colorScheme, {
-    bool? isProperty,
-  }) {
+  Widget buildDescription(String description, TextStyle textStyle,
+      BuildContext context, ColorScheme colorScheme) {
     final textSpan = TextSpan(
       children: _buildDescriptionTextSpans(
         description,
@@ -260,7 +255,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           descriptionTextStyle,
           context,
           colorScheme,
-          isProperty: true,
         ),
       ));
 
@@ -308,7 +302,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         descriptionTextStyle,
         context,
         colorScheme,
-        isProperty: false,
       );
 
       if (errorText != null) {
