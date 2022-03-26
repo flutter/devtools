@@ -391,12 +391,12 @@ class InspectorController extends DisposableController
     }
 
     isActive = true;
-    inspectorService!.addClient(this);
+    inspectorService.addClient(this);
     maybeLoadUI();
   }
 
-  InspectorService? get inspectorService =>
-      serviceManager.inspectorService as InspectorService?;
+  InspectorService get inspectorService =>
+      serviceManager.inspectorService as InspectorService;
 
   List<String> get rootDirectories =>
       _rootDirectories ?? parent!.rootDirectories;
@@ -418,8 +418,7 @@ class InspectorController extends DisposableController
         screen: InspectorScreen.id,
         action: analytics_constants.pageReady,
       );
-      _rootDirectories =
-          await inspectorService!.inferPubRootDirectoryIfNeeded();
+      _rootDirectories = await inspectorService.inferPubRootDirectoryIfNeeded();
       if (_disposed) return;
       // We need to start by querying the inspector service to find out the
       // current state of the UI.
@@ -431,7 +430,7 @@ class InspectorController extends DisposableController
       await updateSelectionFromService(
           firstFrame: true, inspectorRef: inspectorRef);
     } else {
-      final ready = await inspectorService!.isWidgetTreeReady();
+      final ready = await inspectorService.isWidgetTreeReady();
       if (_disposed) return;
       flutterAppFrameReady = ready;
       if (isActive && ready) {
@@ -809,7 +808,7 @@ class InspectorController extends DisposableController
 
   Future<void> _addNodeToConsole(InspectorTreeNode node) async {
     final valueRef = node.diagnostic!.valueRef;
-    final isolateRef = inspectorService!.isolateRef;
+    final isolateRef = inspectorService.isolateRef;
     final instanceRef = await node.diagnostic!.inspectorService
         ?.toObservatoryInstanceRef(valueRef);
     if (_disposed) return;
@@ -919,7 +918,7 @@ class InspectorController extends DisposableController
   void dispose() {
     assert(!_disposed);
     _disposed = true;
-    if (inspectorService != null) {
+    if (serviceManager.inspectorService != null) {
       shutdownTree(false);
     }
     _treeGroups?.clear(false);
