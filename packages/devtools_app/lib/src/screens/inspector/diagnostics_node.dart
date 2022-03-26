@@ -61,8 +61,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     );
   }
 
-  static BoxParentData? deserializeParentData(Map<String, Object>? json) {
-    if (json == null) return null;
+  static BoxParentData deserializeParentData(Map<String, Object> json) {
     return BoxParentData()
       ..offset = Offset(
         double.parse(json['offsetX'] as String? ?? '0.0'),
@@ -70,18 +69,15 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       );
   }
 
-  static Size? deserializeSize(Map<String, Object>? json) {
-    if (json == null) return null;
+  static Size deserializeSize(Map<String, Object> json) {
     return Size(
       double.parse(json['width'] as String),
       double.parse(json['height'] as String),
     );
   }
 
-  static FlexFit? deserializeFlexFit(String? flexFit) {
-    if (flexFit == null) {
-      return null;
-    } else if (flexFit == 'tight') return FlexFit.tight;
+  static FlexFit deserializeFlexFit(String? flexFit) {
+    if (flexFit == 'tight') return FlexFit.tight;
     return FlexFit.loose;
   }
 
@@ -110,7 +106,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   int? get flexFactor => json['flexFactor'] as int?;
 
-  FlexFit? get flexFit => deserializeFlexFit(json['flexFit'] as String?);
+  FlexFit get flexFit => deserializeFlexFit(json['flexFit'] as String?);
 
   RemoteDiagnosticsNode? get renderObject {
     if (_renderObject != null) return _renderObject;
@@ -133,13 +129,13 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   RemoteDiagnosticsNode? _parentRenderElement;
 
-  BoxConstraints? get constraints =>
-      deserializeConstraints(json['constraints'] as Map<String, Object>?);
+  BoxConstraints get constraints => deserializeConstraints(
+      json['constraints'] as Map<String, Object>? ?? {})!;
 
-  BoxParentData? get parentData =>
-      deserializeParentData(json['parentData'] as Map<String, Object>?);
+  BoxParentData get parentData =>
+      deserializeParentData(json['parentData'] as Map<String, Object>? ?? {});
 
-  Size get size => deserializeSize(json['size'] as Map<String, Object>? ?? {})!;
+  Size get size => deserializeSize(json['size'] as Map<String, Object>? ?? {});
 
   bool get isLocalClass {
     final objectGroup = inspectorService;

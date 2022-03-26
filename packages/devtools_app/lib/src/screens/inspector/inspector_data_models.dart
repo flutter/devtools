@@ -216,9 +216,9 @@ class LayoutProperties {
     if (parentWidth == null) return false;
     final parentData = node.parentData;
     double widthUsed = width;
-    if (parentData != null) {
-      widthUsed += parentData.offset.dx;
-    }
+
+    widthUsed += parentData.offset.dx;
+
     // TODO(jacobr): certain widgets may allow overflow so this may false
     // positive a bit for cases like Stack.
     return widthUsed > parentWidth + overflowEpsilon;
@@ -229,9 +229,9 @@ class LayoutProperties {
     if (parentHeight == null) return false;
     final parentData = node.parentData;
     double heightUsed = height;
-    if (parentData != null) {
-      heightUsed += parentData.offset.dy;
-    }
+
+    heightUsed += parentData.offset.dy;
+
     return heightUsed > parentHeight + overflowEpsilon;
   }
 

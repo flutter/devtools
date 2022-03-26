@@ -317,8 +317,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           ],
         );
       } else if (multiline &&
-          diagnostic!.hasCreationLocation &&
-          !diagnostic!.isProperty) {
+          diagnosticLocal.hasCreationLocation &&
+          !diagnosticLocal.isProperty) {
         diagnosticDescription = Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

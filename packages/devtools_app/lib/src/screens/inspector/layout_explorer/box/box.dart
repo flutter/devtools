@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: avoid_redundant_argument_values, import_of_legacy_library_into_null_safe
+// ignore_for_file: avoid_redundant_argument_values, import_of_legacy_library_into_null_safe, unnecessary_import
 
 import 'dart:math' as math;
 
@@ -162,8 +162,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         properties!; // Fall back to this node's properties if there is no parent.
 
     final parentSize = parentProperties.size;
-    final offset = properties!.node.parentData ??
-        (BoxParentData()..offset = const Offset(0, 0));
+    final offset = properties!.node.parentData;
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
