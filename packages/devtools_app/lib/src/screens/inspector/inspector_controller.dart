@@ -631,14 +631,16 @@ class InspectorController extends DisposableController
       // our selection rather than updating it our self.
       return;
     }
-    if (_selectionGroups == null) {
+    final selectionGroupsLocal = _selectionGroups;
+    if (selectionGroupsLocal == null) {
       // Already disposed. Ignore this requested to update selection.
       return;
     }
     treeLoadStarted = true;
-    _selectionGroups!.cancelNext();
 
-    final group = _selectionGroups!.next;
+    selectionGroupsLocal.cancelNext();
+
+    final group = selectionGroupsLocal.next;
 
     if (inspectorRef != null) {
       await group.setSelectionInspector(
@@ -671,18 +673,18 @@ class InspectorController extends DisposableController
           detailsSelection?.valueRef == details?.selectedDiagnostic?.valueRef &&
           newSelection?.valueRef == selectedDiagnostic?.valueRef) {
         // No need to change the selection as it didn't actually change.
-        _selectionGroups!.cancelNext();
+        selectionGroupsLocal.cancelNext();
         return;
       }
-      _selectionGroups!.promoteNext();
+      selectionGroupsLocal.promoteNext();
 
       subtreeRoot = newSelection;
 
       applyNewSelection(newSelection, detailsSelection, true);
     } catch (error) {
-      if (_selectionGroups!.next == group) {
+      if (selectionGroupsLocal.next == group) {
         log(error.toString(), LogLevel.error);
-        _selectionGroups!.cancelNext();
+        selectionGroupsLocal.cancelNext();
       }
     }
   }
