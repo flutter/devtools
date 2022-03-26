@@ -307,7 +307,7 @@ class InspectorController extends DisposableController
     return valueToInspectorTreeNode[node!.valueRef];
   }
 
-  Future<void> getPendingUpdateDone() async {
+  Future<void> _makePendingUpdateDone() async {
     // Wait for the selection to be resolved followed by waiting for the tree to be computed.
     await _selectionGroups?.pendingUpdateDone;
     await _treeGroups?.pendingUpdateDone;
@@ -324,9 +324,9 @@ class InspectorController extends DisposableController
     // TODO(jacobr): refresh the tree as well as just the properties.
     if (details != null) {
       return Future.wait(
-          [getPendingUpdateDone(), details!.getPendingUpdateDone()]);
+          [_makePendingUpdateDone(), details!._makePendingUpdateDone()]);
     } else {
-      return getPendingUpdateDone();
+      return _makePendingUpdateDone();
     }
   }
 
@@ -369,7 +369,7 @@ class InspectorController extends DisposableController
 
     filterErrors();
 
-    return getPendingUpdateDone();
+    return _makePendingUpdateDone();
   }
 
   void filterErrors() {
