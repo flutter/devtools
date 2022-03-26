@@ -362,7 +362,7 @@ class InspectorController extends DisposableController
     if (!visibleToUser || _disposed) {
       return;
     }
-    await recomputeTreeRoot(null, null, false);
+    await _recomputeTreeRoot(null, null, false);
     if (_disposed) {
       return;
     }
@@ -439,7 +439,7 @@ class InspectorController extends DisposableController
     }
   }
 
-  Future<void> recomputeTreeRoot(
+  Future<void> _recomputeTreeRoot(
     RemoteDiagnosticsNode? newSelection,
     RemoteDiagnosticsNode? detailsSelection,
     bool setSubtreeRoot, {
@@ -487,7 +487,7 @@ class InspectorController extends DisposableController
 
   /// Show the details subtree starting with node subtreeRoot highlighting
   /// node subtreeSelection.
-  void showDetailSubtrees(
+  void _showDetailSubtrees(
     RemoteDiagnosticsNode? subtreeRoot,
     RemoteDiagnosticsNode? subtreeSelection,
   ) {
@@ -519,7 +519,7 @@ class InspectorController extends DisposableController
 
     // Clear now to eliminate frame of highlighted nodes flicker.
     clearValueToInspectorTreeNodeMapping();
-    recomputeTreeRoot(selection, null, false);
+    _recomputeTreeRoot(selection, null, false);
   }
 
   InspectorTreeNode? getSubtreeRootNode() {
@@ -699,7 +699,7 @@ class InspectorController extends DisposableController
     if (nodeInTree == null) {
       // The tree has probably changed since we last updated. Do a full refresh
       // so that the tree includes the new node we care about.
-      recomputeTreeRoot(newSelection, detailsSelection, setSubtreeRoot);
+      _recomputeTreeRoot(newSelection, detailsSelection, setSubtreeRoot);
     }
 
     refreshSelection(newSelection, detailsSelection, setSubtreeRoot);
@@ -902,7 +902,7 @@ class InspectorController extends DisposableController
     }
 
     if (maybeRerootDetailsTree) {
-      showDetailSubtrees(selection, detailsSelection);
+      _showDetailSubtrees(selection, detailsSelection);
     } else if (selection != null) {
       // We can't rely on the details tree to update the selection on the server in this case.
       selection.setSelectionInspector(true);
@@ -952,7 +952,7 @@ class InspectorController extends DisposableController
   }
 
   Future<void> expandAllNodesInDetailsTree() async {
-    await details!.recomputeTreeRoot(
+    await details!._recomputeTreeRoot(
       inspectorTree.selection?.diagnostic,
       details!.inspectorTree.selection?.diagnostic ??
           details!.inspectorTree.root?.diagnostic,
