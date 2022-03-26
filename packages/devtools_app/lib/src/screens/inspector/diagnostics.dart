@@ -21,8 +21,8 @@ import 'inspector_tree.dart';
 
 final ColorIconMaker _colorIconMaker = ColorIconMaker();
 final CustomIconMaker _customIconMaker = CustomIconMaker();
-final CustomIcon? defaultIcon =
-    _customIconMaker.fromInfo('Default') as CustomIcon?;
+final CustomIcon defaultIcon =
+    _customIconMaker.fromInfo('Default') as CustomIcon;
 
 const bool _showRenderObjectPropertiesAsLinks = false;
 
@@ -55,7 +55,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final DebuggerController debuggerController;
   final TextStyle? nodeDescriptionHighlightStyle;
 
-  Widget _paddedIcon(Widget? icon) {
+  Widget _paddedIcon(Widget icon) {
     return Padding(
       padding: const EdgeInsets.only(right: iconPadding),
       child: icon,
