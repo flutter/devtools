@@ -115,16 +115,17 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         : colorScheme.crossAxisTextColor;
     List<Object> alignmentEnumEntries;
     Object? selected;
+    final propertiesLocal = properties!;
     if (axis == direction) {
       alignmentEnumEntries = MainAxisAlignment.values;
-      selected = properties!.mainAxisAlignment;
+      selected = propertiesLocal.mainAxisAlignment;
     } else {
       alignmentEnumEntries = CrossAxisAlignment.values.toList(growable: true);
-      if (properties!.textBaseline == null) {
+      if (propertiesLocal.textBaseline == null) {
         // TODO(albertusangga): Look for ways to visualize baseline when it is null
         alignmentEnumEntries.remove(CrossAxisAlignment.baseline);
       }
-      selected = properties!.crossAxisAlignment;
+      selected = propertiesLocal.crossAxisAlignment;
     }
     return RotatedBox(
       quarterTurns: axis == Axis.vertical ? 3 : 0,
@@ -138,7 +139,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
           isExpanded: true,
           // Avoid showing an underline for the main axis and cross-axis drop downs.
           underline: const SizedBox(),
-          iconEnabledColor: axis == properties!.direction
+          iconEnabledColor: axis == propertiesLocal.direction
               ? colorScheme.mainAxisColor
               : colorScheme.crossAxisColor,
           selectedItemBuilder: (context) {
@@ -212,13 +213,13 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             // if the axis is the cross axis the type should be [CrossAxisAlignment]
             FlexLayoutProperties changedProperties;
             if (axis == direction) {
-              changedProperties = properties!.copyWith(
+              changedProperties = propertiesLocal.copyWith(
                   mainAxisAlignment: newSelection as MainAxisAlignment?);
             } else {
-              changedProperties = properties!.copyWith(
+              changedProperties = propertiesLocal.copyWith(
                   crossAxisAlignment: newSelection as CrossAxisAlignment?);
             }
-            final valueRef = properties!.node.valueRef;
+            final valueRef = propertiesLocal.node.valueRef;
             markAsDirty();
             await objectGroup!.invokeSetFlexProperties(
               valueRef,
@@ -250,6 +251,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     final colorScheme = Theme.of(context).colorScheme;
     final maxHeight = constraints.maxHeight;
     final maxWidth = constraints.maxWidth;
+    final propertiesLocal = properties!;
     final flexDescription = Align(
       alignment: Alignment.centerLeft,
       child: Container(
@@ -258,16 +260,16 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
           left: crossAxisArrowIndicatorSize + margin,
         ),
         child: InkWell(
-          onTap: () => onTap(properties!),
+          onTap: () => onTap(propertiesLocal),
           child: WidgetVisualizer(
             title: flexType,
-            layoutProperties: properties!,
+            layoutProperties: propertiesLocal,
             isSelected: highlighted == properties,
-            overflowSide: properties!.overflowSide,
+            overflowSide: propertiesLocal.overflowSide,
             hint: Container(
               padding: const EdgeInsets.all(4.0),
               child: Text(
-                'Total Flex Factor: ${properties?.totalFlex?.toInt()}',
+                'Total Flex Factor: ${propertiesLocal.totalFlex?.toInt()}',
                 textScaleFactor: largeTextScaleFactor,
                 style: const TextStyle(
                   color: emphasizedTextColor,
@@ -278,7 +280,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             ),
             child: VisualizeFlexChildren(
               state: this,
-              properties: properties,
+              properties: propertiesLocal,
               children: children,
               highlighted: highlighted,
               scrollController: scrollController,
@@ -304,7 +306,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                   child: RotatedBox(
                     quarterTurns: 3,
                     child: Text(
-                      properties!.verticalDirectionDescription,
+                      propertiesLocal.verticalDirectionDescription,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                       textScaleFactor: largeTextScaleFactor,
@@ -339,7 +341,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                 child: Truncateable(
                   truncate: maxWidth <= minWidthToAllowTruncating,
                   child: Text(
-                    properties!.horizontalDirectionDescription,
+                    propertiesLocal.horizontalDirectionDescription,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                     textScaleFactor: largeTextScaleFactor,
@@ -382,7 +384,7 @@ class VisualizeFlexChildren extends StatefulWidget {
     required this.direction,
   }) : super(key: key);
 
-  final FlexLayoutProperties? properties;
+  final FlexLayoutProperties properties;
   final List<LayoutProperties> children;
   final LayoutProperties? highlighted;
   final ScrollController scrollController;
@@ -416,7 +418,8 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
         });
       }
     }
-    if (!widget.properties!.hasChildren) {
+
+    if (!widget.properties.hasChildren) {
       return const Center(child: Text('No Children'));
     }
 
@@ -439,7 +442,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
         }
 
         final childrenAndMainAxisSpacesRenderProps =
-            widget.properties!.childrenRenderProperties(
+            widget.properties.childrenRenderProperties(
           smallestRenderWidth: minRenderWidth,
           largestRenderWidth: defaultMaxRenderWidth,
           smallestRenderHeight: minRenderHeight,
@@ -453,7 +456,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
         final mainAxisSpaces = childrenAndMainAxisSpacesRenderProps
             .where((renderProps) => renderProps.isFreeSpace)
             .toList();
-        final crossAxisSpaces = widget.properties!.crossAxisSpaces(
+        final crossAxisSpaces = widget.properties.crossAxisSpaces(
           childrenRenderProperties: renderProperties,
           maxSizeAvailable: maxSizeAvailable,
         );
@@ -492,7 +495,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
           thumbVisibility: true,
           controller: widget.scrollController,
           child: SingleChildScrollView(
-            scrollDirection: widget.properties!.direction,
+            scrollDirection: widget.properties.direction,
             controller: widget.scrollController,
             child: ConstrainedBox(
               constraints: BoxConstraints(
@@ -521,7 +524,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
     );
     return VisualizeWidthAndHeightWithConstraints(
       child: contents,
-      properties: widget.properties!,
+      properties: widget.properties,
     );
   }
 }
@@ -568,10 +571,12 @@ class FlexChildVisualizer extends StatelessWidget {
   }
 
   Widget _buildFlexFactorChangerDropdown(int maximumFlexFactor) {
+    final propertiesLocal = properties!;
+
     Widget buildMenuitemChild(int? flexFactor) {
       return Text(
         'flex: $flexFactor',
-        style: flexFactor == properties!.flexFactor
+        style: flexFactor == propertiesLocal.flexFactor
             ? const TextStyle(
                 fontWeight: FontWeight.bold,
                 color: emphasizedTextColor,
@@ -588,7 +593,7 @@ class FlexChildVisualizer extends StatelessWidget {
     }
 
     return DropdownButton<int>(
-      value: properties!.flexFactor?.toInt().clamp(0, maximumFlexFactor),
+      value: propertiesLocal.flexFactor?.toInt().clamp(0, maximumFlexFactor),
       onChanged: onChangeFlexFactor,
       iconEnabledColor: textColor,
       underline: buildUnderline(),
@@ -605,8 +610,10 @@ class FlexChildVisualizer extends StatelessWidget {
           style: const TextStyle(color: emphasizedTextColor),
         );
 
+    final propertiesLocal = properties!;
+
     // Disable FlexFit changer if widget is Expanded.
-    if (properties!.description == 'Expanded') {
+    if (propertiesLocal.description == 'Expanded') {
       return flexFitDescription(FlexFit.tight);
     }
 
@@ -618,13 +625,14 @@ class FlexChildVisualizer extends StatelessWidget {
     }
 
     return DropdownButton<FlexFit>(
-      value: properties!.flexFit,
+      value: propertiesLocal.flexFit,
       onChanged: onChangeFlexFit,
       underline: buildUnderline(),
       iconEnabledColor: emphasizedTextColor,
       items: <DropdownMenuItem<FlexFit>>[
         buildMenuItem(FlexFit.loose),
-        if (properties!.description != 'Expanded') buildMenuItem(FlexFit.tight)
+        if (propertiesLocal.description != 'Expanded')
+          buildMenuItem(FlexFit.tight)
       ],
     );
   }
@@ -664,26 +672,31 @@ class FlexChildVisualizer extends StatelessWidget {
   Widget build(BuildContext context) {
     final renderSize = renderProperties.size;
     final renderOffset = renderProperties.offset;
+    final propertiesLocal = properties!;
+    final rootLocal = root!;
 
     Widget buildEntranceAnimation(BuildContext context, Widget? child) {
-      final vertical = root!.isMainAxisVertical;
-      final horizontal = root!.isMainAxisHorizontal;
-      Size? size = renderSize;
-      if (properties!.hasFlexFactor) {
+      final vertical = rootLocal.isMainAxisVertical;
+      final horizontal = rootLocal.isMainAxisHorizontal;
+
+      late Size size;
+      if (propertiesLocal.hasFlexFactor) {
         size = SizeTween(
           begin: Size(
             horizontal ? minRenderWidth - entranceMargin : renderSize.width,
             vertical ? minRenderHeight - entranceMargin : renderSize.height,
           ),
           end: renderSize,
-        ).evaluate(state.entranceCurve);
+        ).evaluate(state.entranceCurve)!;
+      } else {
+        size = renderSize;
       }
       // Not-expanded widgets enter much faster.
       return Opacity(
         opacity: min([state.entranceCurve.value * 5, 1.0]),
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: math.max(0.0, (renderSize.width - size!.width) / 2),
+            horizontal: math.max(0.0, (renderSize.width - size.width) / 2),
             vertical: math.max(0.0, (renderSize.height - size.height) / 2),
           ),
           child: child,
@@ -697,9 +710,9 @@ class FlexChildVisualizer extends StatelessWidget {
       top: renderOffset.dy,
       left: renderOffset.dx,
       child: GestureDetector(
-        onTap: () => state.onTap(properties!),
-        onDoubleTap: () => state.onDoubleTap(properties!),
-        onLongPress: () => state.onDoubleTap(properties!),
+        onTap: () => state.onTap(propertiesLocal),
+        onDoubleTap: () => state.onDoubleTap(propertiesLocal),
+        onLongPress: () => state.onDoubleTap(propertiesLocal),
         child: SizedBox(
           width: renderSize.width,
           height: renderSize.height,
@@ -709,15 +722,15 @@ class FlexChildVisualizer extends StatelessWidget {
             child: WidgetVisualizer(
               isSelected: isSelected,
               layoutProperties: layoutProperties,
-              title: properties!.description!,
-              overflowSide: properties!.overflowSide,
+              title: propertiesLocal.description ?? '',
+              overflowSide: propertiesLocal.overflowSide,
               child: VisualizeWidthAndHeightWithConstraints(
                 arrowHeadSize: arrowHeadSize,
                 child: Align(
                   alignment: Alignment.topRight,
                   child: _buildContent(colorScheme),
                 ),
-                properties: properties!,
+                properties: propertiesLocal,
               ),
             ),
           ),
