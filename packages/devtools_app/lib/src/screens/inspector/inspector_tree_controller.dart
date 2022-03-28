@@ -392,16 +392,18 @@ class InspectorTreeController extends Object
   }
 
   InspectorTreeRow? getRow(Offset offset) {
-    if (root == null) return null;
+    final rootLocal = root;
+    if (rootLocal == null) return null;
     final int row = getRowIndex(offset.dy);
-    return row < root!.subtreeSize ? getCachedRow(row) : null;
+    return row < rootLocal.subtreeSize ? getCachedRow(row) : null;
   }
 
   void onExpandRow(InspectorTreeRow row) {
     setState(() {
+      final configLocal = config!;
       row.node.isExpanded = true;
-      if (config!.onExpand != null) {
-        config!.onExpand!(row.node);
+      if (configLocal.onExpand != null) {
+        configLocal.onExpand!(row.node);
       }
     });
   }
