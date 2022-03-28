@@ -92,12 +92,12 @@ class InspectorTreeNode {
     }
   }
 
-  bool? get shouldShow {
-    _shouldShow ??= parent == null || parent!.isExpanded && parent!.shouldShow!;
-    return _shouldShow;
+  bool get shouldShow {
+    _shouldShow ??= parent == null || parent!.isExpanded && parent!.shouldShow;
+    return _shouldShow!;
   }
 
-  bool? _shouldShow;
+  bool? _shouldShow = false;
 
   bool selected = false;
 

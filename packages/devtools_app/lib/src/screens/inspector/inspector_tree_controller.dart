@@ -102,7 +102,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
   }
 
   @override
-  bool shouldShow() => widget.node.shouldShow!;
+  bool shouldShow() => widget.node.shouldShow;
 }
 
 class InspectorTreeController extends Object
@@ -204,10 +204,11 @@ class InspectorTreeController extends Object
   // TODO: we should add a listener instead that clears the cache when the
   // root is marked as dirty.
   void _maybeClearCache() {
-    if (root != null && root!.isDirty) {
+    final rootLocal = root;
+    if (rootLocal != null && rootLocal.isDirty) {
       cachedRows.clear();
       _cachedSelectedRow = null;
-      root!.isDirty = false;
+      rootLocal.isDirty = false;
       lastContentWidth = null;
     }
   }
@@ -734,7 +735,7 @@ class _InspectorTreeState extends State<InspectorTree>
   Rect? _currentAnimateTarget;
 
   AnimationController? _constraintDisplayController;
-  FocusNode? _focusNode;
+  late FocusNode _focusNode;
 
   @override
   void initState() {
@@ -777,7 +778,7 @@ class _InspectorTreeState extends State<InspectorTree>
 
   @override
   void requestFocus() {
-    _focusNode!.requestFocus();
+    _focusNode.requestFocus();
   }
 
   // TODO(devoncarew): Commented out as per flutter/devtools/pull/2001.
@@ -979,7 +980,7 @@ class _InspectorTreeState extends State<InspectorTree>
               // the widest row (which is likely not visible). This may require some
               // refactoring.
               child: GestureDetector(
-                onTap: _focusNode!.requestFocus,
+                onTap: _focusNode.requestFocus,
                 child: Focus(
                   onKey: _handleKeyEvent,
                   autofocus: widget.isSummaryTree,
