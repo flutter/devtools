@@ -75,7 +75,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
         row: widget.row,
         error: widget.error,
         expandArrowAnimation: expandArrowAnimation,
-        controller: widget.inspectorTreeState.controller,
+        controller: widget.inspectorTreeState.controller!,
         scrollControllerX: widget.scrollControllerX,
         viewportWidth: widget.viewportWidth,
         onToggle: () {
@@ -1150,7 +1150,7 @@ class InspectorRowContent extends StatelessWidget {
   });
 
   final InspectorTreeRow row;
-  final InspectorTreeController? controller;
+  final InspectorTreeController controller;
   final DebuggerController debuggerController;
   final VoidCallback onToggle;
   final Animation<double> expandArrowAnimation;
@@ -1167,7 +1167,7 @@ class InspectorRowContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double currentX = controller!.getDepthIndent(row.depth) - columnWidth;
+    final double currentX = controller.getDepthIndent(row.depth) - columnWidth;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -1175,7 +1175,7 @@ class InspectorRowContent extends StatelessWidget {
     if (row.isSelected) {
       backgroundColor =
           hasError ? devtoolsError : colorScheme.selectedRowBackgroundColor;
-    } else if (row.node == controller!.hover) {
+    } else if (row.node == controller.hover) {
       backgroundColor = colorScheme.hoverColor;
     }
 
@@ -1184,7 +1184,7 @@ class InspectorRowContent extends StatelessWidget {
     Widget rowWidget = Padding(
       padding: EdgeInsets.only(left: currentX),
       child: ValueListenableBuilder<String>(
-        valueListenable: controller!.searchNotifier,
+        valueListenable: controller.searchNotifier,
         builder: (context, searchValue, _) {
           return Opacity(
             opacity: searchValue.isEmpty || row.isSearchMatch ? 1 : 0.2,
@@ -1215,11 +1215,11 @@ class InspectorRowContent extends StatelessWidget {
                     ),
                     child: InkWell(
                       onTap: () {
-                        controller!.onSelectRow(row);
+                        controller.onSelectRow(row);
                         // TODO(gmoothart): It may be possible to capture the tap
                         // and request focus directly from the InspectorTree. Then
                         // we wouldn't need this.
-                        controller!.requestFocus();
+                        controller.requestFocus();
                       },
                       child: Container(
                         height: rowHeight,

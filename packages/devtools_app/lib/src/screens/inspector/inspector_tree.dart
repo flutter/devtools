@@ -97,7 +97,7 @@ class InspectorTreeNode {
     return _shouldShow!;
   }
 
-  bool? _shouldShow = false;
+  bool? _shouldShow;
 
   bool selected = false;
 
