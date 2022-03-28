@@ -19,12 +19,11 @@ import 'inspector_controller.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
 
-final ColorIconMaker _colorIconMaker = ColorIconMaker();
-final CustomIconMaker _customIconMaker = CustomIconMaker();
-final CustomIcon defaultIcon =
-    _customIconMaker.fromInfo('Default') as CustomIcon;
+final _colorIconMaker = ColorIconMaker();
+final _customIconMaker = CustomIconMaker();
+final defaultIcon = _customIconMaker.fromInfo('Default') as CustomIcon;
 
-const bool _showRenderObjectPropertiesAsLinks = false;
+const _showRenderObjectPropertiesAsLinks = false;
 
 /// Presents the content of a single [RemoteDiagnosticsNode].
 ///
