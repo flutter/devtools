@@ -178,10 +178,10 @@ class InspectorTreeNode {
   bool get isLeaf => _children.isEmpty;
 
   // TODO(jacobr): move getRowIndex to the InspectorTree class.
-  int getRowIndex(InspectorTreeNode? node) {
+  int getRowIndex(InspectorTreeNode node) {
     int index = 0;
     while (true) {
-      final InspectorTreeNode? parent = node!.parent;
+      final InspectorTreeNode? parent = node.parent;
       if (parent == null) {
         break;
       }

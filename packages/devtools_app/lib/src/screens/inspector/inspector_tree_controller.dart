@@ -322,7 +322,7 @@ class InspectorTreeController extends Object
     final rootLocal = root!;
 
     selection = rootLocal
-        .getRow((rootLocal.getRowIndex(selection) + indexOffset)
+        .getRow((rootLocal.getRowIndex(selection!) + indexOffset)
             .clamp(0, numRows - 1))
         ?.node;
   }
