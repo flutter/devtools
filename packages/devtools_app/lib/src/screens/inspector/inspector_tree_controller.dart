@@ -726,14 +726,14 @@ class _InspectorTreeState extends State<InspectorTree>
     implements InspectorControllerClient {
   InspectorTreeController? get controller => widget.controller;
 
-  bool get isSummaryTree => widget.isSummaryTree;
+  bool get _isSummaryTree => widget.isSummaryTree;
 
   late ScrollController _scrollControllerY;
   late ScrollController _scrollControllerX;
-  Future<void>? currentAnimateY;
-  Rect? currentAnimateTarget;
+  Future<void>? _currentAnimateY;
+  Rect? _currentAnimateTarget;
 
-  AnimationController? constraintDisplayController;
+  AnimationController? _constraintDisplayController;
   FocusNode? _focusNode;
 
   @override
@@ -743,8 +743,8 @@ class _InspectorTreeState extends State<InspectorTree>
     _scrollControllerY = ScrollController();
     // TODO(devoncarew): Commented out as per flutter/devtools/pull/2001.
     //_scrollControllerY.addListener(_onScrollYChange);
-    if (isSummaryTree) {
-      constraintDisplayController = longAnimationController(this);
+    if (_isSummaryTree) {
+      _constraintDisplayController = longAnimationController(this);
     }
     _focusNode = FocusNode(debugLabel: 'inspector-tree');
     autoDisposeFocusNode(_focusNode);
@@ -772,7 +772,7 @@ class _InspectorTreeState extends State<InspectorTree>
     controller?.removeClient(this);
     _scrollControllerX.dispose();
     _scrollControllerY.dispose();
-    constraintDisplayController?.dispose();
+    _constraintDisplayController?.dispose();
   }
 
   @override
@@ -836,23 +836,23 @@ class _InspectorTreeState extends State<InspectorTree>
 
   @override
   Future<void> scrollToRect(Rect? rect) async {
-    if (rect == currentAnimateTarget) {
+    if (rect == _currentAnimateTarget) {
       // We are in the middle of an animation to this exact rectangle.
       return;
     }
-    currentAnimateTarget = rect;
+    _currentAnimateTarget = rect;
     final targetY = _computeTargetOffsetY(
       rect!.top,
       rect.bottom,
     );
     if (_scrollControllerY.hasClients) {
-      currentAnimateY = _scrollControllerY.animateTo(
+      _currentAnimateY = _scrollControllerY.animateTo(
         targetY,
         duration: longDuration,
         curve: defaultCurve,
       );
     } else {
-      currentAnimateY = null;
+      _currentAnimateY = null;
       _scrollControllerY = ScrollController(initialScrollOffset: targetY);
     }
 
@@ -870,12 +870,12 @@ class _InspectorTreeState extends State<InspectorTree>
     }
 
     try {
-      await currentAnimateY;
+      await _currentAnimateY;
     } catch (e) {
       // Doesn't matter if the animation was cancelled.
     }
-    currentAnimateY = null;
-    currentAnimateTarget = null;
+    _currentAnimateY = null;
+    _currentAnimateTarget = null;
   }
 
   // TODO(jacobr): resolve cases where we need to know the viewport height
