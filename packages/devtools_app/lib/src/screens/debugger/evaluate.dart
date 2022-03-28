@@ -477,8 +477,7 @@ Future<Set<String?>> _libraryMemberAutocompletes(
   LibraryRef libraryRef,
 ) async {
   final result = <String?>{};
-  final Library library =
-      await (controller.getObject(libraryRef) as Future<Library>);
+  final Library library = await controller.getObject(libraryRef) as Library;
   result.addAll(library.variables!.map((field) => field.name));
   result.addAll(library.functions!
       // The VM shows setters as `<member>=`.
@@ -513,8 +512,7 @@ Future<void> _addAllInstanceMembersToAutocompleteList(
   InstanceRef response,
   DebuggerController controller,
 ) async {
-  final Instance instance =
-      await (controller.getObject(response) as FutureOr<Instance>);
+  final Instance instance = await controller.getObject(response) as Instance;
   result.addAll(
     await _autoCompleteMembersFor(
       instance.classRef,
