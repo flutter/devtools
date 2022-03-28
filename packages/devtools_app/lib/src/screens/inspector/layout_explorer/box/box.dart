@@ -156,13 +156,15 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   }
 
   Widget _buildChild(BuildContext context) {
+    final propertiesLocal = properties!;
+
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final parentProperties = this.parentProperties ??
-        properties!; // Fall back to this node's properties if there is no parent.
+        propertiesLocal; // Fall back to this node's properties if there is no parent.
 
     final parentSize = parentProperties.size;
-    final offset = properties!.node.parentData;
+    final offset = propertiesLocal.node.parentData;
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -177,16 +179,17 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         double? nullOutZero(double value) => value != 0.0 ? value : null;
         final widths = [
           nullOutZero(offset.offset.dx),
-          properties!.size.width,
+          propertiesLocal.size.width,
           nullOutZero(
-            parentSize.width - (properties!.size.width + offset.offset.dx),
+            parentSize.width - (propertiesLocal.size.width + offset.offset.dx),
           ),
         ];
         final heights = [
           nullOutZero(offset.offset.dy),
-          properties!.size.height,
+          propertiesLocal.size.height,
           nullOutZero(
-            parentSize.height - (properties!.size.height + offset.offset.dy),
+            parentSize.height -
+                (propertiesLocal.size.height + offset.offset.dy),
           ),
         ];
         // 3 element array with [left padding, widget width, right padding].
@@ -204,67 +207,72 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         final widgetWidth = displayWidths[1];
         final widgetHeight = displayHeights[1];
         final safeParentSize = parentSize;
+        final width0 = widths[0];
+        final width2 = widths[2];
+        final height0 = heights[0];
+        final height2 = heights[2];
         return Container(
           width: constraints.maxWidth,
           height: constraints.maxHeight,
           decoration: BoxDecoration(
             border: Border.all(
-              color: WidgetTheme.fromName(properties!.node.description).color,
+              color:
+                  WidgetTheme.fromName(propertiesLocal.node.description).color,
             ),
           ),
           child: Stack(
             children: [
               LayoutExplorerBackground(colorScheme: colorScheme),
               // Left padding.
-              if (widths[0] != null)
+              if (width0 != null)
                 PaddingVisualizerWidget(
                   RenderProperties(
                     axis: Axis.horizontal,
                     size: Size(displayWidths[0], widgetHeight),
                     offset: Offset(0, displayHeights[0]),
-                    realSize: Size(widths[0]!, safeParentSize.height),
-                    layoutProperties: properties,
+                    realSize: Size(width0, safeParentSize.height),
+                    layoutProperties: propertiesLocal,
                     isFreeSpace: true,
                   ),
                   horizontal: true,
                 ),
               // Top padding.
-              if (heights[0] != null)
+              if (height0 != null)
                 PaddingVisualizerWidget(
                   RenderProperties(
                     axis: Axis.horizontal,
                     size: Size(widgetWidth, displayHeights[0]),
                     offset: Offset(displayWidths[0], 0),
-                    realSize: Size(safeParentSize.width, heights[0]!),
-                    layoutProperties: properties,
+                    realSize: Size(safeParentSize.width, height0),
+                    layoutProperties: propertiesLocal,
                     isFreeSpace: true,
                   ),
                   horizontal: false,
                 ),
               // Right padding.
-              if (widths[2] != null)
+              if (width2 != null)
                 PaddingVisualizerWidget(
                   RenderProperties(
                     axis: Axis.horizontal,
                     size: Size(displayWidths[2], widgetHeight),
                     offset: Offset(
                         displayWidths[0] + displayWidths[1], displayHeights[0]),
-                    realSize: Size(widths[2]!, safeParentSize.height),
-                    layoutProperties: properties,
+                    realSize: Size(width2, safeParentSize.height),
+                    layoutProperties: propertiesLocal,
                     isFreeSpace: true,
                   ),
                   horizontal: true,
                 ),
               // Bottom padding.
-              if (heights[2] != null)
+              if (height2 != null)
                 PaddingVisualizerWidget(
                   RenderProperties(
                     axis: Axis.horizontal,
                     size: Size(widgetWidth, displayHeights[2]),
                     offset: Offset(displayWidths[0],
                         displayHeights[0] + displayHeights[1]),
-                    realSize: Size(safeParentSize.width, heights[2]!),
-                    layoutProperties: properties,
+                    realSize: Size(safeParentSize.width, height2),
+                    layoutProperties: propertiesLocal,
                     isFreeSpace: true,
                   ),
                   horizontal: false,
@@ -272,13 +280,13 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               BoxChildVisualizer(
                 isSelected: true,
                 state: this,
-                layoutProperties: properties,
+                layoutProperties: propertiesLocal,
                 renderProperties: RenderProperties(
                   axis: Axis.horizontal,
                   size: Size(widgetWidth, widgetHeight),
                   offset: Offset(displayWidths[0], displayHeights[0]),
-                  realSize: properties!.size,
-                  layoutProperties: properties,
+                  realSize: propertiesLocal.size,
+                  layoutProperties: propertiesLocal,
                 ),
               ),
             ],
@@ -362,7 +370,7 @@ class BoxChildVisualizer extends StatelessWidget {
   final _BoxLayoutExplorerWidgetState state;
 
   final bool isSelected;
-  final LayoutProperties? layoutProperties;
+  final LayoutProperties layoutProperties;
   final RenderProperties renderProperties;
 
   LayoutProperties? get root => state.properties;
@@ -389,13 +397,15 @@ class BoxChildVisualizer extends StatelessWidget {
       );
     }
 
+    final propertiesLocal = properties!;
+
     return Positioned(
       top: renderOffset.dy,
       left: renderOffset.dx,
       child: InkWell(
-        onTap: () => state.onTap(properties!),
-        onDoubleTap: () => state.onDoubleTap(properties!),
-        onLongPress: () => state.onDoubleTap(properties!),
+        onTap: () => state.onTap(propertiesLocal),
+        onDoubleTap: () => state.onDoubleTap(propertiesLocal),
+        onLongPress: () => state.onDoubleTap(propertiesLocal),
         child: SizedBox(
           width: safePositiveDouble(renderSize.width),
           height: safePositiveDouble(renderSize.height),
@@ -404,8 +414,8 @@ class BoxChildVisualizer extends StatelessWidget {
             builder: buildEntranceAnimation,
             child: WidgetVisualizer(
               isSelected: isSelected,
-              layoutProperties: layoutProperties!,
-              title: describeBoxName(properties!),
+              layoutProperties: layoutProperties,
+              title: describeBoxName(propertiesLocal),
               // TODO(jacobr): consider surfacing the overflow size information
               // if we determine
               // overflowSide: properties.overflowSide,
@@ -414,7 +424,7 @@ class BoxChildVisualizer extends StatelessWidget {
               largeTitle: true,
               child: VisualizeWidthAndHeightWithConstraints(
                 arrowHeadSize: arrowHeadSize,
-                properties: properties!,
+                properties: propertiesLocal,
                 warnIfUnconstrained: false,
                 child: const SizedBox.shrink(),
               ),
