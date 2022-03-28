@@ -75,7 +75,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
         row: widget.row,
         error: widget.error,
         expandArrowAnimation: expandArrowAnimation,
-        controller: widget.inspectorTreeState.controller,
+        controller: widget.inspectorTreeState._controller,
         scrollControllerX: widget.scrollControllerX,
         viewportWidth: widget.viewportWidth,
         onToggle: () {
@@ -94,9 +94,9 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
     setState(() {
       final row = widget.row;
       if (expanded) {
-        widget.inspectorTreeState.controller!.onExpandRow(row);
+        widget.inspectorTreeState._controller!.onExpandRow(row);
       } else {
-        widget.inspectorTreeState.controller!.onCollapseRow(row);
+        widget.inspectorTreeState._controller!.onCollapseRow(row);
       }
     });
   }
@@ -454,7 +454,7 @@ class InspectorTreeController extends Object
   /// Maximum indent of the tree in pixels.
   double? _maxIndent;
 
-  double? get maxRowIndent {
+  double get maxRowIndent {
     if (lastContentWidth == null) {
       double maxIndent = 0;
       for (int i = 0; i < numRows; i++) {
@@ -466,7 +466,7 @@ class InspectorTreeController extends Object
       lastContentWidth = maxIndent + maxIndent;
       _maxIndent = maxIndent;
     }
-    return _maxIndent;
+    return _maxIndent!;
   }
 
   void animateToTargets(List<InspectorTreeNode> targets) {
@@ -516,8 +516,9 @@ class InspectorTreeController extends Object
     required bool expandProperties,
   }) {
     node.diagnostic = diagnosticsNode;
-    if (config!.onNodeAdded != null) {
-      config!.onNodeAdded!(node, diagnosticsNode);
+    final configLocal = config!;
+    if (configLocal.onNodeAdded != null) {
+      configLocal.onNodeAdded!(node, diagnosticsNode);
     }
 
     if (diagnosticsNode.hasChildren ||
@@ -733,7 +734,7 @@ class _InspectorTreeState extends State<InspectorTree>
         AutomaticKeepAliveClientMixin<InspectorTree>,
         AutoDisposeMixin
     implements InspectorControllerClient {
-  InspectorTreeController? get controller => widget.controller;
+  InspectorTreeController? get _controller => widget.controller;
 
   bool get _isSummaryTree => widget.isSummaryTree;
 
@@ -778,7 +779,7 @@ class _InspectorTreeState extends State<InspectorTree>
   @override
   void dispose() {
     super.dispose();
-    controller?.removeClient(this);
+    _controller?.removeClient(this);
     _scrollControllerX.dispose();
     _scrollControllerY.dispose();
     _constraintDisplayController?.dispose();
@@ -811,7 +812,8 @@ class _InspectorTreeState extends State<InspectorTree>
   /// This enables animating the x scroll as the y scroll changes which helps
   /// keep the relevant content in view while scrolling a large list.
   double _computeTargetX(double y) {
-    final rowIndex = controller!.getRowIndex(y);
+    final controllerLocal = _controller!;
+    final rowIndex = controllerLocal.getRowIndex(y);
     double? requiredOffset;
     double minOffset = double.infinity;
     // TODO(jacobr): use maxOffset as well to better handle the case where the
@@ -820,17 +822,17 @@ class _InspectorTreeState extends State<InspectorTree>
     // TODO(jacobr): if the first or last row is only partially visible, tween
     // between its indent and the next row to more smoothly change the target x
     // as the y coordinate changes.
-    if (rowIndex == controller!.numRows) {
+    if (rowIndex == controllerLocal.numRows) {
       return 0;
     }
     final endY = y += safeViewportHeight;
-    for (int i = rowIndex; i < controller!.numRows; i++) {
-      final rowY = controller!.getRowY(i);
+    for (int i = rowIndex; i < controllerLocal.numRows; i++) {
+      final rowY = controllerLocal.getRowY(i);
       if (rowY >= endY) break;
 
-      final row = controller!.getCachedRow(i);
+      final row = controllerLocal.getCachedRow(i);
       if (row == null) continue;
-      final rowOffset = controller!.getRowOffset(i);
+      final rowOffset = controllerLocal.getRowOffset(i);
       if (row.isSelected) {
         requiredOffset = rowOffset;
       }
@@ -933,16 +935,16 @@ class _InspectorTreeState extends State<InspectorTree>
     if (event is! RawKeyDownEvent) return KeyEventResult.ignored;
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-      controller!.navigateDown();
+      _controller!.navigateDown();
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      controller!.navigateUp();
+      _controller!.navigateUp();
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-      controller!.navigateLeft();
+      _controller!.navigateLeft();
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-      controller!.navigateRight();
+      _controller!.navigateRight();
       return KeyEventResult.handled;
     }
 
@@ -950,7 +952,7 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 
   void _bindToController() {
-    controller?.addClient(this);
+    _controller?.addClient(this);
   }
 
   @override
@@ -961,11 +963,12 @@ class _InspectorTreeState extends State<InspectorTree>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (controller == null) {
+    final controllerLocal = _controller;
+    if (controllerLocal == null) {
       // Indicate the tree is loading.
       return const CenteredCircularProgressIndicator();
     }
-    if (controller!.numRows == 0) {
+    if (controllerLocal.numRows == 0) {
       // This works around a bug when Scrollbars are present on a short lived
       // widget.
       return const SizedBox();
@@ -982,7 +985,8 @@ class _InspectorTreeState extends State<InspectorTree>
             controller: _scrollControllerX,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                  maxWidth: controller!.rowWidth + controller!.maxRowIndent!),
+                  maxWidth:
+                      controllerLocal.rowWidth + controllerLocal.maxRowIndent),
               // TODO(kenz): this scrollbar needs to be sticky to the right side of
               // the visible container - right now it is lined up to the right of
               // the widest row (which is likely not visible). This may require some
@@ -1003,11 +1007,11 @@ class _InspectorTreeState extends State<InspectorTree>
                       itemExtent: rowHeight,
                       childrenDelegate: SliverChildBuilderDelegate(
                         (context, index) {
-                          if (index == controller!.numRows) {
+                          if (index == controllerLocal.numRows) {
                             return SizedBox(height: rowHeight);
                           }
                           final InspectorTreeRow row =
-                              controller!.getCachedRow(index)!;
+                              controllerLocal.getCachedRow(index)!;
                           final inspectorRef = row.node.diagnostic?.valueRef.id;
                           return _InspectorTreeRowWidget(
                             key: PageStorageKey(row.node),
@@ -1022,7 +1026,7 @@ class _InspectorTreeState extends State<InspectorTree>
                             debuggerController: widget.debuggerController,
                           );
                         },
-                        childCount: controller!.numRows + 1,
+                        childCount: controllerLocal.numRows + 1,
                       ),
                       controller: _scrollControllerY,
                     ),
@@ -1035,14 +1039,15 @@ class _InspectorTreeState extends State<InspectorTree>
 
         final bool shouldShowBreadcrumbs = !widget.isSummaryTree;
         if (shouldShowBreadcrumbs) {
+          final inspectorTreeController = widget.inspectorTreeController!;
+
           final parents =
-              widget.inspectorTreeController!.getPathFromSelectedRowToRoot();
+              inspectorTreeController.getPathFromSelectedRowToRoot();
           return Column(
             children: [
               InspectorBreadcrumbNavigator(
                 items: parents,
-                onTap: (node) =>
-                    widget.inspectorTreeController!.onSelectNode(node),
+                onTap: (node) => inspectorTreeController.onSelectNode(node),
               ),
               Expanded(child: tree),
             ],
