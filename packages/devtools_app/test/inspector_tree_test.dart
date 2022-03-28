@@ -39,21 +39,20 @@ void main() {
   group('InspectorTreeController', () {
     testWidgets('Row with negative index regression test',
         (WidgetTester tester) async {
-      final controller =
-          InspectorTreeController(inspectorController: mockInspectorController)
-            ..config = InspectorTreeConfig(
-              summaryTree: false,
-              treeType: FlutterTreeType.widget,
-              onNodeAdded: (_, __) {},
-              onClientActiveChange: (_) {},
-            );
+      final controller = InspectorTreeController()
+        ..config = InspectorTreeConfig(
+          summaryTree: false,
+          treeType: FlutterTreeType.widget,
+          onNodeAdded: (_, __) {},
+          onClientActiveChange: (_) {},
+        )
+        ..inspectorController = mockInspectorController;
       final debuggerController = TestDebuggerController();
       await tester.pumpWidget(wrap(InspectorTree(
         controller: controller,
         debuggerController: debuggerController,
-        inspectorTreeController: InspectorTreeController(
-          inspectorController: mockInspectorController,
-        ),
+        inspectorTreeController: InspectorTreeController()
+          ..inspectorController = mockInspectorController,
       )));
 
       expect(controller.getRow(const Offset(0, -100.0)), isNull);
@@ -64,12 +63,10 @@ void main() {
 
       controller.root = InspectorTreeNode()..appendChild(InspectorTreeNode());
       await tester.pumpWidget(wrap(InspectorTree(
-        controller: controller,
-        debuggerController: debuggerController,
-        inspectorTreeController: InspectorTreeController(
-          inspectorController: mockInspectorController,
-        ),
-      )));
+          controller: controller,
+          debuggerController: debuggerController,
+          inspectorTreeController: InspectorTreeController()
+            ..inspectorController = mockInspectorController)));
 
       expect(controller.getRow(const Offset(0, -20))!.index, 0);
       expect(controller.getRowOffset(-1), equals(0));
@@ -96,9 +93,8 @@ void main() {
       await tester.pumpWidget(wrap(InspectorTree(
         controller: treeController,
         debuggerController: TestDebuggerController(),
-        inspectorTreeController: InspectorTreeController(
-          inspectorController: mockInspectorController,
-        ),
+        inspectorTreeController: InspectorTreeController()
+          ..inspectorController = mockInspectorController,
       )));
 
       expect(find.richText('Text: "Content"'), findsOneWidget);
@@ -124,9 +120,8 @@ void main() {
       await tester.pumpWidget(wrap(InspectorTree(
         controller: treeController,
         debuggerController: TestDebuggerController(),
-        inspectorTreeController: InspectorTreeController(
-          inspectorController: mockInspectorController,
-        ),
+        inspectorTreeController: InspectorTreeController()
+          ..inspectorController = mockInspectorController,
       )));
 
       expect(find.richText('Text: "Rich text"'), findsOneWidget);
@@ -148,9 +143,8 @@ void main() {
         wrap(InspectorTree(
           controller: treeController,
           debuggerController: TestDebuggerController(),
-          inspectorTreeController: InspectorTreeController(
-            inspectorController: mockInspectorController,
-          ),
+          inspectorTreeController: InspectorTreeController()
+            ..inspectorController = mockInspectorController,
         )),
       );
 
@@ -171,9 +165,8 @@ void main() {
         InspectorTree(
           controller: controller,
           debuggerController: TestDebuggerController(),
-          inspectorTreeController: InspectorTreeController(
-            inspectorController: mockInspectorController,
-          ),
+          inspectorTreeController: InspectorTreeController()
+            ..inspectorController = mockInspectorController,
           // ignore: avoid_redundant_argument_values
           isSummaryTree: false,
         ),

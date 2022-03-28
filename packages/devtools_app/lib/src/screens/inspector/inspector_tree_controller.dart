@@ -109,8 +109,6 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
 
 class InspectorTreeController extends Object
     with SearchControllerMixin<InspectorTreeRow> {
-  InspectorTreeController({this.inspectorController});
-
   /// Clients the controller notifies to trigger changes to the UI.
   final Set<InspectorControllerClient> _clients = {};
 

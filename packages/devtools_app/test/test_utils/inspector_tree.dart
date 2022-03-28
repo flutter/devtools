@@ -16,14 +16,14 @@ InspectorTreeController inspectorTreeControllerFromNode(
   RemoteDiagnosticsNode node, {
   InspectorController? inspectorController,
 }) {
-  final controller = InspectorTreeController(
-    inspectorController: inspectorController,
-  )..config = InspectorTreeConfig(
+  final controller = InspectorTreeController()
+    ..config = InspectorTreeConfig(
       summaryTree: false,
       treeType: FlutterTreeType.widget,
       onNodeAdded: (_, __) {},
       onClientActiveChange: (_) {},
-    );
+    )
+    ..inspectorController = inspectorController;
 
   controller.root = InspectorTreeNode()
     ..appendChild(
