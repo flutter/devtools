@@ -303,21 +303,19 @@ class VmServiceWrapper implements VmService {
       }
     }
 
-    final stackFrameKeyMap = Map<String, Map<String, dynamic>>.from(
-        traceObject[CpuProfileData.stackFramesKey]);
-    stackFrameKeyMap.forEach((key, value) {
-      if (value != null) {
-        final rawUrl = value[CpuProfileData.resolvedUrlKey] as String?;
+    final stackFrames =
+        (traceObject[CpuProfileData.stackFramesKey] as Map<String, dynamic>)
+            .values
+            .cast<Map<String, dynamic>>();
+    for (final stackFrameJson in stackFrames) {
+      final rawUrl = stackFrameJson[CpuProfileData.resolvedUrlKey] as String?;
+      if (rawUrl != null && rawUrl.isNotEmpty) {
         final processedUrl = processedUrlMapping[rawUrl];
-        if (processedUrl != null) {
-          print('Dake: ${{rawUrl: rawUrl, processedUrl: processedUrl}}');
-          value[CpuProfileData.processedUrlKey] = processedUrl;
-        } else {
-          value[CpuProfileData.processedUrlKey] = '';
+        if (processedUrl != null && processedUrl.isNotEmpty) {
+          stackFrameJson[CpuProfileData.processedUrlKey] = processedUrl;
         }
       }
-    });
-    print(stackFrameKeyMap);
+    }
     return CpuProfileData.parse(traceObject);
   }
 
