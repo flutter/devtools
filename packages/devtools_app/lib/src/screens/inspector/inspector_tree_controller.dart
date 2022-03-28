@@ -275,21 +275,23 @@ class InspectorTreeController extends Object
   }
 
   void navigateLeft() {
+    final selectionLocal = selection;
+
     // This logic is consistent with how IntelliJ handles tree navigation on
     // on left arrow key press.
-    if (selection == null) {
+    if (selectionLocal == null) {
       _navigateHelper(-1);
       return;
     }
 
-    if (selection!.isExpanded) {
+    if (selectionLocal.isExpanded) {
       setState(() {
-        selection!.isExpanded = false;
+        selectionLocal.isExpanded = false;
       });
       return;
     }
-    if (selection!.parent != null) {
-      selection = selection!.parent;
+    if (selectionLocal.parent != null) {
+      selection = selectionLocal.parent;
     }
   }
 
@@ -297,13 +299,15 @@ class InspectorTreeController extends Object
     // This logic is consistent with how IntelliJ handles tree navigation on
     // on right arrow key press.
 
-    if (selection == null || selection!.isExpanded) {
+    final selectionLocal = selection;
+
+    if (selectionLocal == null || selectionLocal.isExpanded) {
       _navigateHelper(1);
       return;
     }
 
     setState(() {
-      selection!.isExpanded = true;
+      selectionLocal.isExpanded = true;
     });
   }
 
@@ -315,9 +319,11 @@ class InspectorTreeController extends Object
       return;
     }
 
-    selection = root!
-        .getRow(
-            (root!.getRowIndex(selection) + indexOffset).clamp(0, numRows - 1))
+    final rootLocal = root!;
+
+    selection = rootLocal
+        .getRow((rootLocal.getRowIndex(selection) + indexOffset)
+            .clamp(0, numRows - 1))
         ?.node;
   }
 
