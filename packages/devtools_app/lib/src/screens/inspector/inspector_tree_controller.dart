@@ -53,7 +53,7 @@ class _InspectorTreeRowWidget extends StatefulWidget {
   InspectorTreeNode get node => row.node;
   final InspectorTreeRow row;
   final DebuggerController debuggerController;
-  final ScrollController? scrollControllerX;
+  final ScrollController scrollControllerX;
   final double viewportWidth;
 
   /// A [DevToolsError] that applies to the widget in this row.
@@ -728,8 +728,8 @@ class _InspectorTreeState extends State<InspectorTree>
 
   bool get isSummaryTree => widget.isSummaryTree;
 
-  ScrollController? _scrollControllerY;
-  ScrollController? _scrollControllerX;
+  late ScrollController _scrollControllerY;
+  late ScrollController _scrollControllerX;
   Future<void>? currentAnimateY;
   Rect? currentAnimateTarget;
 
@@ -770,8 +770,8 @@ class _InspectorTreeState extends State<InspectorTree>
   void dispose() {
     super.dispose();
     controller?.removeClient(this);
-    _scrollControllerX!.dispose();
-    _scrollControllerY!.dispose();
+    _scrollControllerX.dispose();
+    _scrollControllerY.dispose();
     constraintDisplayController?.dispose();
   }
 
@@ -845,8 +845,8 @@ class _InspectorTreeState extends State<InspectorTree>
       rect!.top,
       rect.bottom,
     );
-    if (_scrollControllerY!.hasClients) {
-      currentAnimateY = _scrollControllerY!.animateTo(
+    if (_scrollControllerY.hasClients) {
+      currentAnimateY = _scrollControllerY.animateTo(
         targetY,
         duration: longDuration,
         curve: defaultCurve,
@@ -859,8 +859,8 @@ class _InspectorTreeState extends State<InspectorTree>
     // Determine a target X coordinate consistent with the target Y coordinate
     // we will end up as so we get a smooth animation to the final destination.
     final targetX = _computeTargetX(targetY);
-    if (_scrollControllerX!.hasClients) {
-      unawaited(_scrollControllerX!.animateTo(
+    if (_scrollControllerX.hasClients) {
+      unawaited(_scrollControllerX.animateTo(
         targetX,
         duration: longDuration,
         curve: defaultCurve,
@@ -885,8 +885,8 @@ class _InspectorTreeState extends State<InspectorTree>
   static const _placeholderViewportHeight = 1000.0;
 
   double get safeViewportHeight {
-    return _scrollControllerY!.hasClients
-        ? _scrollControllerY!.position.viewportDimension
+    return _scrollControllerY.hasClients
+        ? _scrollControllerY.position.viewportDimension
         : _placeholderViewportHeight;
   }
 
@@ -895,9 +895,9 @@ class _InspectorTreeState extends State<InspectorTree>
     double minOffset,
     double maxOffset,
   ) {
-    final currentOffset = _scrollControllerY!.hasClients
-        ? _scrollControllerY!.offset
-        : _scrollControllerY!.initialScrollOffset;
+    final currentOffset = _scrollControllerY.hasClients
+        ? _scrollControllerY.offset
+        : _scrollControllerY.initialScrollOffset;
     final viewportDimension = safeViewportHeight;
     final currentEndOffset = viewportDimension + currentOffset;
 
@@ -987,8 +987,8 @@ class _InspectorTreeState extends State<InspectorTree>
                   child: OffsetScrollbar(
                     isAlwaysShown: true,
                     axis: Axis.vertical,
-                    controller: _scrollControllerY!,
-                    offsetController: _scrollControllerX!,
+                    controller: _scrollControllerY,
+                    offsetController: _scrollControllerX,
                     offsetControllerViewportDimension: viewportWidth,
                     child: ListView.custom(
                       itemExtent: rowHeight,
