@@ -171,6 +171,9 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         final availableWidth = constraints.maxWidth - 2;
 
         final minFractions = [0.2, 0.5, 0.2];
+        // TODO(polinach, jacobr): consider using zeros for zero values,
+        // without replacing them with nulls.
+        // See https://github.com/flutter/devtools/issues/3931.
         double? nullOutZero(double value) => value != 0.0 ? value : null;
         final widths = [
           nullOutZero(offset.offset.dx),
@@ -305,7 +308,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         // in the flex case the widget doesn't have its own RenderObject.
         // Consider showing the true ancestor for the summary tree that first
         // has a different render object.
-        title: describeBoxName(parentProperties)!,
+        title: describeBoxName(parentProperties),
         largeTitle: true,
         layoutProperties: parentProperties,
         isSelected: false,
@@ -326,7 +329,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   }
 }
 
-String? describeBoxName(LayoutProperties properties) {
+String describeBoxName(LayoutProperties properties) {
   // Displaying a high quality name is more ambiguous for the Box case than the
   // Flex case because the RenderObject for each widget is often quite
   // different than the user expected as not all widgets have RenderObjects.
@@ -402,7 +405,7 @@ class BoxChildVisualizer extends StatelessWidget {
             child: WidgetVisualizer(
               isSelected: isSelected,
               layoutProperties: layoutProperties!,
-              title: describeBoxName(properties!)!,
+              title: describeBoxName(properties!),
               // TODO(jacobr): consider surfacing the overflow size information
               // if we determine
               // overflowSide: properties.overflowSide,
