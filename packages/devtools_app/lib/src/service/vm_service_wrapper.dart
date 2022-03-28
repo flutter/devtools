@@ -219,13 +219,14 @@ class VmServiceWrapper implements VmService {
     // final output from this method.
     const int kRootId = 0;
     int nextId = kRootId;
+    final processedUrlMapping = <String, String>{};
     final traceObject = <String, dynamic>{
       CpuProfileData.sampleCountKey: cpuSamples.sampleCount,
       CpuProfileData.samplePeriodKey: cpuSamples.samplePeriod,
       CpuProfileData.stackDepthKey: cpuSamples.maxStackDepth,
       CpuProfileData.timeOriginKey: cpuSamples.timeOriginMicros,
       CpuProfileData.timeExtentKey: cpuSamples.timeExtentMicros,
-      CpuProfileData.stackFramesKey: {},
+      CpuProfileData.stackFramesKey: <String, dynamic>{},
       CpuProfileData.traceEventsKey: [],
     };
 
@@ -247,7 +248,7 @@ class VmServiceWrapper implements VmService {
       // Skip the root.
       if (id != kRootId) {
         final key = '$isolateId-$id';
-        traceObject[CpuProfileData.stackFramesKey][key] = {
+        traceObject[CpuProfileData.stackFramesKey][key] = <String, dynamic>{
           CpuProfileData.categoryKey: 'Dart',
           CpuProfileData.nameKey: nameForStackFrame(current),
           CpuProfileData.resolvedUrlKey: current.resolvedUrl,
@@ -255,6 +256,10 @@ class VmServiceWrapper implements VmService {
           if (parent != null && parent.frameId != 0)
             CpuProfileData.parentIdKey: '$isolateId-${parent.frameId}',
         };
+
+        if (current.resolvedUrl != null && current.resolvedUrl!.isNotEmpty) {
+          processedUrlMapping[current.resolvedUrl!] = '';
+        }
       }
       for (final child in current.children) {
         processStackFrame(current: child, parent: current);
@@ -285,6 +290,34 @@ class VmServiceWrapper implements VmService {
         },
       });
     }
+
+    final rawUrls = processedUrlMapping.keys.toList();
+    final uris = (await _vmService.lookupPackageUris(isolateId, rawUrls)).uris;
+    if (uris != null) {
+      for (var i = 0; i < uris.length; i++) {
+        final rawUrl = rawUrls[i];
+        final uri = uris[i];
+        if (uri != null && uri.isNotEmpty && rawUrl.isNotEmpty) {
+          processedUrlMapping[rawUrl] = uri;
+        }
+      }
+    }
+
+    final stackFrameKeyMap = Map<String, Map<String, dynamic>>.from(
+        traceObject[CpuProfileData.stackFramesKey]);
+    stackFrameKeyMap.forEach((key, value) {
+      if (value != null) {
+        final rawUrl = value[CpuProfileData.resolvedUrlKey] as String?;
+        final processedUrl = processedUrlMapping[rawUrl];
+        if (processedUrl != null) {
+          print('Dake: ${{rawUrl: rawUrl, processedUrl: processedUrl}}');
+          value[CpuProfileData.processedUrlKey] = processedUrl;
+        } else {
+          value[CpuProfileData.processedUrlKey] = '';
+        }
+      }
+    });
+    print(stackFrameKeyMap);
     return CpuProfileData.parse(traceObject);
   }
 

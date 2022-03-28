@@ -54,7 +54,7 @@ class CpuProfileData {
         jsonDecode(jsonEncode(json[stackFramesKey] ?? <String, dynamic>{}));
     for (final MapEntry<String, dynamic> entry in stackFramesJson.entries) {
       final stackFrameJson = entry.value;
-      final stackFrame = CpuStackFrame(
+      final stackFrame = CpuStackFrame._(
         id: entry.key,
         name: getSimpleStackFrameName(stackFrameJson[nameKey]),
         verboseName: stackFrameJson[nameKey],
@@ -63,6 +63,7 @@ class CpuProfileData {
         // included in the response, this will be null. If the frame is a native
         // frame, the this will be the empty string.
         rawUrl: stackFrameJson[resolvedUrlKey] ?? '',
+        processedUrl: stackFrameJson[processedUrlKey] ?? '',
         sourceLine: stackFrameJson[sourceLine],
         parentId: stackFrameJson[parentIdKey] ?? rootId,
         profileMetaData: profileMetaData,
@@ -283,6 +284,7 @@ class CpuProfileData {
   static const parentIdKey = 'parent';
   static const stackFrameIdKey = 'sf';
   static const resolvedUrlKey = 'resolvedUrl';
+  static const processedUrlKey = 'processedUrl';
   static const sourceLine = 'sourceLine';
   static const stackFramesKey = 'stackFrames';
   static const traceEventsKey = 'traceEvents';
