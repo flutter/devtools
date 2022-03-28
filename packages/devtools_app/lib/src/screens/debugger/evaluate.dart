@@ -370,10 +370,6 @@ Future<List<String?>> autoCompleteResultsFor(
       if (function != null) {
         final libraryRef = await controller.findOwnerLibrary(function);
         if (libraryRef != null) {
-          print('adding library members');
-          final libMems = await libraryMemberAndImportsAutocompletes(
-              libraryRef, controller);
-          print('lib mems $libMems');
           result.addAll(await libraryMemberAndImportsAutocompletes(
               libraryRef, controller));
         }
