@@ -232,7 +232,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         Router.neglect(context, () {
           routerDelegate.navigateIfNotCurrent(
             _currentScreen.screenId,
-            routerDelegate.currentConfiguration.args,
+            routerDelegate.currentConfiguration?.args,
           );
         });
       });

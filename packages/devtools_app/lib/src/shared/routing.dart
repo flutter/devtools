@@ -137,7 +137,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   /// If page and args would be the same, does nothing.
   /// Existing arguments (for example &uri=) will be preserved unless
   /// overwritten by [argUpdates].
-  void navigateIfNotCurrent(String page, [Map<String, String>? argUpdates]) {
+  void navigateIfNotCurrent(String page, [Map<String, String?>? argUpdates]) {
     final pageChanged = page != currentConfiguration!.page;
     final argsChanged = _changesArgs(argUpdates);
     if (!pageChanged && !argsChanged) {
@@ -209,7 +209,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
 
   /// Checks whether applying [changes] over the current routes args will result
   /// in any changes.
-  bool _changesArgs(Map<String, String>? changes) => !mapEquals(
+  bool _changesArgs(Map<String, String?>? changes) => !mapEquals(
         {...currentConfiguration!.args, ...?changes},
         {...currentConfiguration!.args},
       );
