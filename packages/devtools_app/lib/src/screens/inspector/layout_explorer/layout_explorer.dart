@@ -25,19 +25,19 @@ class LayoutExplorerTab extends StatefulWidget {
 
 class _LayoutExplorerTabState extends State<LayoutExplorerTab>
     with AutomaticKeepAliveClientMixin<LayoutExplorerTab>, AutoDisposeMixin {
-  InspectorController? get controller => widget.controller;
+  InspectorController get controller => widget.controller;
 
   RemoteDiagnosticsNode? get selected =>
-      controller?.selectedNode.value?.diagnostic;
+      controller.selectedNode.value?.diagnostic;
 
   RemoteDiagnosticsNode? previousSelection;
 
   Widget rootWidget(RemoteDiagnosticsNode? node) {
     if (FlexLayoutExplorerWidget.shouldDisplay(node)) {
-      return FlexLayoutExplorerWidget(controller!);
+      return FlexLayoutExplorerWidget(controller);
     }
     if (BoxLayoutExplorerWidget.shouldDisplay(node)) {
-      return BoxLayoutExplorerWidget(controller!);
+      return BoxLayoutExplorerWidget(controller);
     }
     return Center(
       child: Text(
@@ -60,7 +60,7 @@ class _LayoutExplorerTabState extends State<LayoutExplorerTab>
   @override
   void initState() {
     super.initState();
-    addAutoDisposeListener(controller!.selectedNode, onSelectionChanged);
+    addAutoDisposeListener(controller.selectedNode, onSelectionChanged);
   }
 
   @override
