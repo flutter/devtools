@@ -292,7 +292,7 @@ class InspectorController extends DisposableController
       // If nothing is highlighted, highlight the node selected in the parent
       // tree so user has context of where the node selected in the parent is
       // in the details tree.
-      node = findMatchingInspectorTreeNode(parent!.selectedDiagnostic);
+      node = findMatchingInspectorTreeNode(parent?.selectedDiagnostic);
     }
 
     currentShowNode = node;
@@ -304,7 +304,7 @@ class InspectorController extends DisposableController
     if (node?.valueRef == null) {
       return null;
     }
-    return valueToInspectorTreeNode[node!.valueRef];
+    return valueToInspectorTreeNode[node?.valueRef];
   }
 
   Future<void> _makePendingUpdateDone() async {
@@ -322,12 +322,11 @@ class InspectorController extends DisposableController
     }
 
     // TODO(jacobr): refresh the tree as well as just the properties.
-    if (details != null) {
-      return Future.wait(
-          [_makePendingUpdateDone(), details!._makePendingUpdateDone()]);
-    } else {
-      return _makePendingUpdateDone();
-    }
+    final detailsLocal = details;
+    if (detailsLocal == null) return _makePendingUpdateDone();
+
+    return Future.wait(
+        [_makePendingUpdateDone(), detailsLocal._makePendingUpdateDone()]);
   }
 
   // Note that this may be called after the controller is disposed.  We need to handle nulls in the fields.
@@ -851,10 +850,13 @@ class InspectorController extends DisposableController
       );
 
       if (!maybeReroot) {
-        if (isSummaryTree && details != null) {
-          details!.selectAndShowNode(selectedDiagnostic);
-        } else if (parent != null) {
-          parent!
+        final parantLocal = parent;
+        final detailsLocal = details;
+
+        if (isSummaryTree && detailsLocal != null) {
+          detailsLocal.selectAndShowNode(selectedDiagnostic);
+        } else if (parantLocal != null) {
+          parantLocal
               .selectAndShowNode(firstAncestorInParentTree(selectedNode.value));
         }
       }
@@ -862,14 +864,16 @@ class InspectorController extends DisposableController
   }
 
   RemoteDiagnosticsNode? firstAncestorInParentTree(InspectorTreeNode? node) {
-    if (parent == null) {
-      return node!.diagnostic;
+    final parentLocal = parent;
+
+    if (parentLocal == null) {
+      return node?.diagnostic;
     }
     while (node != null) {
       final diagnostic = node.diagnostic;
       if (diagnostic != null &&
-          parent!.hasDiagnosticsValue(diagnostic.valueRef)) {
-        return parent!.findDiagnosticsValue(diagnostic.valueRef);
+          parentLocal.hasDiagnosticsValue(diagnostic.valueRef)) {
+        return parentLocal.findDiagnosticsValue(diagnostic.valueRef);
       }
       node = node.parent;
     }
@@ -950,17 +954,19 @@ class InspectorController extends DisposableController
   }
 
   Future<void> expandAllNodesInDetailsTree() async {
-    await details!._recomputeTreeRoot(
+    final detailsLocal = details!;
+    await detailsLocal._recomputeTreeRoot(
       inspectorTree.selection?.diagnostic,
-      details!.inspectorTree.selection?.diagnostic ??
-          details!.inspectorTree.root?.diagnostic,
+      detailsLocal.inspectorTree.selection?.diagnostic ??
+          detailsLocal.inspectorTree.root?.diagnostic,
       false,
       subtreeDepth: maxJsInt,
     );
   }
 
   Future<void> collapseDetailsToSelected() async {
-    details!.inspectorTree.collapseToSelected();
-    details!.animateTo(details!.inspectorTree.selection);
+    final detailsLocal = details!;
+    detailsLocal.inspectorTree.collapseToSelected();
+    detailsLocal.animateTo(detailsLocal.inspectorTree.selection);
   }
 }

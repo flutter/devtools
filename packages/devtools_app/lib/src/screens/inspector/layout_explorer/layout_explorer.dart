@@ -14,9 +14,10 @@ import '../layout_explorer/flex/flex.dart';
 
 /// Tab that acts as a proxy to decide which widget to be displayed
 class LayoutExplorerTab extends StatefulWidget {
-  const LayoutExplorerTab({Key? key, this.controller}) : super(key: key);
+  const LayoutExplorerTab({Key? key, required this.controller})
+      : super(key: key);
 
-  final InspectorController? controller;
+  final InspectorController controller;
 
   @override
   _LayoutExplorerTabState createState() => _LayoutExplorerTabState();

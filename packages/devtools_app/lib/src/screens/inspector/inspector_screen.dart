@@ -68,13 +68,13 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         BlockingActionMixin,
         AutoDisposeMixin,
         SearchFieldMixin<InspectorScreenBody> {
-  InspectorController? inspectorController;
+  late InspectorController inspectorController;
 
   InspectorTreeController? get summaryTreeController =>
-      inspectorController?.inspectorTree;
+      inspectorController.inspectorTree;
 
   InspectorTreeController? get detailsTreeController =>
-      inspectorController?.details?.inspectorTree;
+      inspectorController.details?.inspectorTree;
 
   late DebuggerController _debuggerController;
   bool _isDebuggerControllerInitialized = false;
@@ -96,10 +96,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   @override
   void dispose() {
-    inspectorController!.inspectorTree.dispose();
-    if (inspectorController!.isSummaryTree &&
-        inspectorController!.details != null) {
-      inspectorController!.details!.inspectorTree.dispose();
+    inspectorController.inspectorTree.dispose();
+    if (inspectorController.isSummaryTree &&
+        inspectorController.details != null) {
+      inspectorController.details!.inspectorTree.dispose();
     }
     super.dispose();
   }
@@ -252,10 +252,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                               as LinkedHashMap<String, InspectableWidgetError>?,
                           debuggerController: debuggerController,
                         ),
-                        if (errors.isNotEmpty && inspectorController != null)
+                        if (errors.isNotEmpty)
                           ValueListenableBuilder(
                             valueListenable:
-                                inspectorController!.selectedErrorIndex,
+                                inspectorController.selectedErrorIndex,
                             builder: (_, dynamic selectedErrorIndex, __) =>
                                 Positioned(
                               top: 0,
@@ -265,7 +265,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                                     String, InspectableWidgetError>,
                                 errorIndex: selectedErrorIndex,
                                 onSelectError:
-                                    inspectorController!.selectErrorByIndex,
+                                    inspectorController.selectErrorByIndex,
                               ),
                             ),
                           ),
@@ -310,7 +310,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   void _refreshInspector() {
     ga.select(analytics_constants.inspector, analytics_constants.refresh);
     blockWhileInProgress(() async {
-      await inspectorController?.onForceRefresh();
+      await inspectorController.onForceRefresh();
     });
   }
 }

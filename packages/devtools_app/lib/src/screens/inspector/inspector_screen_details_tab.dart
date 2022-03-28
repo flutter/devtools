@@ -23,7 +23,7 @@ class InspectorDetails extends StatelessWidget {
   }) : super(key: key);
 
   final Widget detailsTree;
-  final InspectorController? controller;
+  final InspectorController controller;
 
   @override
   Widget build(BuildContext context) {
