@@ -75,7 +75,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
         row: widget.row,
         error: widget.error,
         expandArrowAnimation: expandArrowAnimation,
-        controller: widget.inspectorTreeState._controller,
+        controller: widget.inspectorTreeState.controller,
         scrollControllerX: widget.scrollControllerX,
         viewportWidth: widget.viewportWidth,
         onToggle: () {
@@ -94,9 +94,9 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
     setState(() {
       final row = widget.row;
       if (expanded) {
-        widget.inspectorTreeState._controller!.onExpandRow(row);
+        widget.inspectorTreeState.controller!.onExpandRow(row);
       } else {
-        widget.inspectorTreeState._controller!.onCollapseRow(row);
+        widget.inspectorTreeState.controller!.onCollapseRow(row);
       }
     });
   }
@@ -734,7 +734,7 @@ class _InspectorTreeState extends State<InspectorTree>
         AutomaticKeepAliveClientMixin<InspectorTree>,
         AutoDisposeMixin
     implements InspectorControllerClient {
-  InspectorTreeController? get _controller => widget.controller;
+  InspectorTreeController? get controller => widget.controller;
 
   bool get _isSummaryTree => widget.isSummaryTree;
 
@@ -779,7 +779,7 @@ class _InspectorTreeState extends State<InspectorTree>
   @override
   void dispose() {
     super.dispose();
-    _controller?.removeClient(this);
+    controller?.removeClient(this);
     _scrollControllerX.dispose();
     _scrollControllerY.dispose();
     _constraintDisplayController?.dispose();
@@ -812,7 +812,7 @@ class _InspectorTreeState extends State<InspectorTree>
   /// This enables animating the x scroll as the y scroll changes which helps
   /// keep the relevant content in view while scrolling a large list.
   double _computeTargetX(double y) {
-    final controllerLocal = _controller!;
+    final controllerLocal = controller!;
     final rowIndex = controllerLocal.getRowIndex(y);
     double? requiredOffset;
     double minOffset = double.infinity;
@@ -935,16 +935,16 @@ class _InspectorTreeState extends State<InspectorTree>
     if (event is! RawKeyDownEvent) return KeyEventResult.ignored;
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-      _controller!.navigateDown();
+      controller!.navigateDown();
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      _controller!.navigateUp();
+      controller!.navigateUp();
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-      _controller!.navigateLeft();
+      controller!.navigateLeft();
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-      _controller!.navigateRight();
+      controller!.navigateRight();
       return KeyEventResult.handled;
     }
 
@@ -952,7 +952,7 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 
   void _bindToController() {
-    _controller?.addClient(this);
+    controller?.addClient(this);
   }
 
   @override
@@ -963,7 +963,7 @@ class _InspectorTreeState extends State<InspectorTree>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final controllerLocal = _controller;
+    final controllerLocal = controller;
     if (controllerLocal == null) {
       // Indicate the tree is loading.
       return const CenteredCircularProgressIndicator();
@@ -1154,7 +1154,7 @@ class InspectorRowContent extends StatelessWidget {
   final DebuggerController debuggerController;
   final VoidCallback onToggle;
   final Animation<double> expandArrowAnimation;
-  final ScrollController? scrollControllerX;
+  final ScrollController scrollControllerX;
   final double viewportWidth;
 
   /// A [DevToolsError] that applies to the widget in this row.
@@ -1259,10 +1259,10 @@ class InspectorRowContent extends StatelessWidget {
       child: Align(
         alignment: Alignment.topLeft,
         child: AnimatedBuilder(
-          animation: scrollControllerX!,
+          animation: scrollControllerX,
           builder: (context, child) {
             final rowWidth =
-                scrollControllerX!.offset + viewportWidth - defaultSpacing;
+                scrollControllerX.offset + viewportWidth - defaultSpacing;
             return SizedBox(
               width: max(rowWidth, currentX + 100),
               child: rowWidth > currentX ? child : const SizedBox(),
