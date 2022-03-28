@@ -383,7 +383,7 @@ class InspectorTreeController extends Object
     root.children.forEach(_collapseAllNodes);
   }
 
-  int get numRows => root != null ? root!.subtreeSize : 0;
+  int get numRows => root?.subtreeSize ?? 0;
 
   int getRowIndex(double y) => max(0, (y - verticalPadding) ~/ rowHeight);
 
