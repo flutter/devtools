@@ -82,7 +82,7 @@ class InspectorExpandCollapseButtons extends StatefulWidget {
     required this.controller,
   }) : super(key: key);
 
-  final InspectorController? controller;
+  final InspectorController controller;
 
   @override
   State<InspectorExpandCollapseButtons> createState() =>
@@ -135,14 +135,14 @@ class _InspectorExpandCollapseButtonsState
   void _onExpandClick() {
     blockWhileInProgress(() async {
       ga.select(analytics_constants.inspector, analytics_constants.expandAll);
-      await widget.controller!.expandAllNodesInDetailsTree();
+      await widget.controller.expandAllNodesInDetailsTree();
     });
   }
 
   void _onCollapseClick() {
     blockWhileInProgress(() async {
       ga.select(analytics_constants.inspector, analytics_constants.collapseAll);
-      await widget.controller!.collapseDetailsToSelected();
+      await widget.controller.collapseDetailsToSelected();
     });
   }
 }
