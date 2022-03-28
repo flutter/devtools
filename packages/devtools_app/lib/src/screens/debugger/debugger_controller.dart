@@ -253,8 +253,8 @@ class DebuggerController extends DisposableController
 
     if (script != null) {
       try {
-        final positions = await (getBreakablePositions(script)
-            as FutureOr<List<SourcePosition>>);
+        final positions =
+            await getBreakablePositions(script) as List<SourcePosition>;
         executableLines = Set.from(positions.map((p) => p.line));
       } catch (e) {
         // Ignore - not supported for all vm service implementations.

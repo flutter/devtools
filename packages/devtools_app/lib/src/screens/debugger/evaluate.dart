@@ -370,6 +370,10 @@ Future<List<String?>> autoCompleteResultsFor(
       if (function != null) {
         final libraryRef = await controller.findOwnerLibrary(function);
         if (libraryRef != null) {
+          print('adding library members');
+          final libMems = await libraryMemberAndImportsAutocompletes(
+              libraryRef, controller);
+          print('lib mems $libMems');
           result.addAll(await libraryMemberAndImportsAutocompletes(
               libraryRef, controller));
         }
@@ -435,8 +439,7 @@ Future<Set<String?>> _libraryMemberAndImportsAutocompletes(
       includePrivates: true,
     ));
 
-    final Library library =
-        await (controller.getObject(libraryRef) as Future<Library>);
+    final Library library = await controller.getObject(libraryRef) as Library;
     for (var dependency in library.dependencies!) {
       if (dependency.prefix?.isNotEmpty ?? false) {
         // We won't give a list of autocompletes once you enter a prefix
