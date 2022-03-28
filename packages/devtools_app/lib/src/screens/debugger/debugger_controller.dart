@@ -294,8 +294,7 @@ class DebuggerController extends DisposableController
   /// May return null.
   Future<Class?> classFor(ClassRef classRef) async {
     try {
-      return _clazzCache[classRef] ??=
-          await (getObject(classRef) as FutureOr<Class>);
+      return _clazzCache[classRef] ??= await getObject(classRef) as Class;
     } catch (_) {}
     return null;
   }
