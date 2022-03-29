@@ -20,7 +20,7 @@ class LayoutExplorerTab extends StatefulWidget {
   final InspectorController controller;
 
   @override
-  _LayoutExplorerTabState createState() => _LayoutExplorerTabState();
+  _LayoutExplorerTabState createState() => _LayoutExplorerTabState();diagno
 }
 
 class _LayoutExplorerTabState extends State<LayoutExplorerTab>

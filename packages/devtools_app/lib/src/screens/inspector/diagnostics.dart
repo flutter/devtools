@@ -113,8 +113,12 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     }
   }
 
-  Widget buildDescription(String description, TextStyle textStyle,
-      BuildContext context, ColorScheme colorScheme) {
+  Widget buildDescription(
+    String description,
+    TextStyle textStyle,
+    BuildContext context,
+    ColorScheme colorScheme,
+  ) {
     final textSpan = TextSpan(
       children: _buildDescriptionTextSpans(
         description,
