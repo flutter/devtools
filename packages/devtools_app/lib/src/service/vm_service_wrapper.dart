@@ -226,7 +226,7 @@ class VmServiceWrapper implements VmService {
       CpuProfileData.stackDepthKey: cpuSamples.maxStackDepth,
       CpuProfileData.timeOriginKey: cpuSamples.timeOriginMicros,
       CpuProfileData.timeExtentKey: cpuSamples.timeExtentMicros,
-      CpuProfileData.stackFramesKey: {},
+      CpuProfileData.stackFramesKey: <String, dynamic>{},
       CpuProfileData.traceEventsKey: [],
     };
 
