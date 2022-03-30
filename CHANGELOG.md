@@ -1,5 +1,5 @@
 ## 2.12.0
-* Prep for 2.12.0 release TODO
+* Prep for 2.12.0 release [#3937](https://github.com/flutter/devtools/pull/3937)
 * Add documentation links to More Debugging Options menu [#3936](https://github.com/flutter/devtools/pull/3936)
 * Add documentation links to Enhance Tracing options [#3934](https://github.com/flutter/devtools/pull/3934)
 * Add scrolling support to all hover cards [#3923](https://github.com/flutter/devtools/pull/3923)
