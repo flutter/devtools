@@ -131,7 +131,7 @@ class InspectorController extends DisposableController
       serviceManager.onConnectionAvailable.listen(_handleConnectionStart),
     );
     if (serviceManager.connectedAppInitialized) {
-      _handleConnectionStart(serviceManager.service);
+      _handleConnectionStart(serviceManager.service!);
     }
     autoDisposeStreamSubscription(
       serviceManager.onConnectionClosed.listen(_handleConnectionStop),
@@ -140,7 +140,7 @@ class InspectorController extends DisposableController
     serviceManager.consoleService.ensureServiceInitialized();
   }
 
-  void _handleConnectionStart(VmService? service) {
+  void _handleConnectionStart(VmService service) {
     // Clear any existing badge/errors for older errors that were collected.
     // Do this in a post frame callback so that we are not trying to clear the
     // error notifiers for this screen while the framework is already in the
