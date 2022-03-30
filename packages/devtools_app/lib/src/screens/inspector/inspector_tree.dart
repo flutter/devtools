@@ -93,7 +93,9 @@ class InspectorTreeNode {
   }
 
   bool get shouldShow {
-    _shouldShow ??= parent == null || parent!.isExpanded && parent!.shouldShow;
+    final parentLocal = parent;
+    _shouldShow ??=
+        parentLocal == null || parentLocal.isExpanded && parentLocal.shouldShow;
     return _shouldShow!;
   }
 
