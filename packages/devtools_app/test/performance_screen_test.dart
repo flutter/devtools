@@ -233,31 +233,17 @@ void main() {
         await tester.tap(find.text('Enhance Tracing'));
         await tester.pumpAndSettle();
         expect(
-          find.textContaining(
-            'frame times may be negatively affected',
-            findRichText: true,
-          ),
+          find.richTextContaining('frame times may be negatively affected'),
           findsOneWidget,
         );
         expect(
-          find.textContaining(
-            'you will need to reproduce activity in your app',
-            findRichText: true,
-          ),
+          find.richTextContaining(
+              'you will need to reproduce activity in your app'),
           findsOneWidget,
         );
-        expect(
-          find.textContaining('Track Widget Builds', findRichText: true),
-          findsOneWidget,
-        );
-        expect(
-          find.textContaining('Track Layouts', findRichText: true),
-          findsOneWidget,
-        );
-        expect(
-          find.textContaining('Track Paints', findRichText: true),
-          findsOneWidget,
-        );
+        expect(find.richTextContaining('Track Widget Builds'), findsOneWidget);
+        expect(find.richTextContaining('Track Layouts'), findsOneWidget);
+        expect(find.richTextContaining('Track Paints'), findsOneWidget);
         expect(find.byType(MoreInfoLink), findsNWidgets(3));
       });
     });
