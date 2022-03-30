@@ -403,10 +403,10 @@ class InspectorTreeController extends Object
 
   void onExpandRow(InspectorTreeRow row) {
     setState(() {
-      final configLocal = config!;
+      final onExpand = config!.onExpand;
       row.node.isExpanded = true;
-      if (configLocal.onExpand != null) {
-        configLocal.onExpand!(row.node);
+      if (onExpand != null) {
+        onExpand(row.node);
       }
     });
   }
