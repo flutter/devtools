@@ -83,6 +83,8 @@ class _CodeViewState extends State<CodeView>
 
   ParsedScript? get parsedScript => widget.parsedScript;
 
+  ScriptLocation? get initialPosition => widget.initialPosition;
+
   // Used to ensure we don't update the scroll position when expanding or
   // collapsing the file explorer.
   ScriptRef? _lastScriptRef;
@@ -97,11 +99,10 @@ class _CodeViewState extends State<CodeView>
     horizontalController = ScrollController();
     _lastScriptRef = widget.scriptRef;
 
-    if (widget.initialPosition != null) {
-      final location = widget.initialPosition!.location!;
+    if (initialPosition?.location?.line != null) {
       // Lines are 1-indexed. Scrolling to line 1 required a scroll position of
       // 0.
-      final lineIndex = location.line! - 1;
+      final lineIndex = initialPosition!.location!.line! - 1;
       final scrollPosition = lineIndex * CodeView.rowHeight;
       verticalController.jumpTo(scrollPosition);
     }
@@ -176,7 +177,8 @@ class _CodeViewState extends State<CodeView>
 
     // TODO(devoncarew): Adjust this so we don't scroll if we're already in the
     // middle third of the screen.
-    if (parsedScript!.lineCount * CodeView.rowHeight > extent) {
+    if (parsedScript?.lineCount != null &&
+        parsedScript!.lineCount * CodeView.rowHeight > extent) {
       final lineIndex = location!.line! - 1;
       final scrollPosition =
           lineIndex * CodeView.rowHeight - ((extent - CodeView.rowHeight) / 2);
@@ -194,7 +196,9 @@ class _CodeViewState extends State<CodeView>
   }
 
   void _onPressed(int line) {
-    widget.onSelected!(scriptRef!, line);
+    if (widget.onSelected != null && scriptRef != null) {
+      widget.onSelected!(scriptRef!, line);
+    }
   }
 
   @override
@@ -237,8 +241,9 @@ class _CodeViewState extends State<CodeView>
 
     // Ensure the syntax highlighter has been initialized.
     // TODO(bkonyi): process source for highlighting on a separate thread.
-    if (parsedScript!.script.source != null) {
-      if (parsedScript!.script.source!.length < 500000) {
+    if (parsedScript?.script.source != null) {
+      final scriptSource = parsedScript!.script.source!;
+      if (scriptSource.length < 500000) {
         final highlighted = parsedScript!.highlighter.highlight(context);
 
         // Look for [TextSpan]s which only contain '\n' to manually break the
@@ -266,7 +271,7 @@ class _CodeViewState extends State<CodeView>
       } else {
         lines.addAll(
           [
-            for (final line in parsedScript!.script.source!.split('\n'))
+            for (final line in scriptSource.split('\n'))
               TextSpan(
                 style: theme.fixedFontStyle,
                 text: line,
@@ -622,10 +627,10 @@ class Lines extends StatefulWidget {
   }) : super(key: key);
 
   final double height;
-  final DebuggerController? debugController;
-  final ScrollController? scrollController;
+  final DebuggerController debugController;
+  final ScrollController scrollController;
   final List<TextSpan> lines;
-  final StackFrameAndSourcePosition? pausedFrame;
+  final StackFrameAndSourcePosition pausedFrame;
   final ValueListenable<List<SourceToken>> searchMatchesNotifier;
   final ValueListenable<SourceToken?> activeSearchMatchNotifier;
 
@@ -656,24 +661,20 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
         activeSearch = widget.activeSearchMatchNotifier.value;
       });
 
-      if (activeSearch != null) {
-        final isOutOfViewTop =
-            activeSearch!.position.line! * CodeView.rowHeight <
-                widget.scrollController!.offset + CodeView.rowHeight;
-        final isOutOfViewBottom =
-            activeSearch!.position.line! * CodeView.rowHeight >
-                widget.scrollController!.offset +
-                    widget.height -
-                    CodeView.rowHeight;
+      if (activeSearch?.position.line != null) {
+        final activeSearchLine = activeSearch!.position.line!;
+        final isOutOfViewTop = activeSearchLine * CodeView.rowHeight <
+            widget.scrollController.offset + CodeView.rowHeight;
+        final isOutOfViewBottom = activeSearchLine * CodeView.rowHeight >
+            widget.scrollController.offset + widget.height - CodeView.rowHeight;
 
         if (isOutOfViewTop || isOutOfViewBottom) {
           // Scroll this search token to the middle of the view.
           final targetOffset = math.max<double>(
-            activeSearch!.position.line! * CodeView.rowHeight -
-                widget.height / 2,
+            activeSearchLine * CodeView.rowHeight - widget.height / 2,
             0.0,
           );
-          widget.scrollController!.animateTo(
+          widget.scrollController.animateTo(
             targetOffset,
             duration: defaultDuration,
             curve: defaultCurve,
@@ -685,7 +686,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    final pausedLine = widget.pausedFrame?.line;
+    final pausedLine = widget.pausedFrame.line;
     return ListView.builder(
       controller: widget.scrollController,
       itemExtent: CodeView.rowHeight,
@@ -694,8 +695,8 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
         final lineNum = index + 1;
         final isPausedLine = pausedLine == lineNum;
         return ValueListenableBuilder<VMServiceObjectNode?>(
-          valueListenable: widget
-              .debugController!.programExplorerController.outlineSelection,
+          valueListenable:
+              widget.debugController.programExplorerController.outlineSelection,
           builder: (context, outlineNode, _) {
             final isFocusedLine =
                 (outlineNode?.location?.location?.line ?? -1) == lineNum;
@@ -827,7 +828,7 @@ class _LineItemState extends State<LineItem> {
     _debuggerController = Provider.of<DebuggerController>(context);
 
     Widget child;
-    if (widget.pausedFrame != null) {
+    if (widget.pausedFrame?.column != null) {
       final column = widget.pausedFrame!.column!;
 
       final foregroundColor =
@@ -895,8 +896,10 @@ class _LineItemState extends State<LineItem> {
   }
 
   TextSpan searchAwareLineContents() {
-    final activeSearchAwareContents = _activeSearchAwareLineContents(
-        widget.lineContents.children as List<TextSpan>?);
+    final children = widget.lineContents.children as List<TextSpan>?;
+    if (children == null) return const TextSpan();
+
+    final activeSearchAwareContents = _activeSearchAwareLineContents(children);
     final allSearchAwareContents =
         _searchMatchAwareLineContents(activeSearchAwareContents);
     return TextSpan(
@@ -907,14 +910,14 @@ class _LineItemState extends State<LineItem> {
 
   List<TextSpan> _contentsWithMatch(
     List<TextSpan> startingContents,
-    SourceToken? match,
+    SourceToken match,
     Color matchColor,
   ) {
     final contentsWithMatch = <TextSpan>[];
     var startColumnForSpan = 0;
     for (final span in startingContents) {
       final spanText = span.toPlainText();
-      final startColumnForMatch = match!.position.column!;
+      final startColumnForMatch = match.position.column!;
       if (startColumnForSpan <= startColumnForMatch &&
           startColumnForSpan + spanText.length > startColumnForMatch) {
         // The active search is part of this [span].
@@ -987,22 +990,23 @@ class _LineItemState extends State<LineItem> {
     if (widget.activeSearchMatch == null) return startingContents;
     return _contentsWithMatch(
       startingContents!,
-      widget.activeSearchMatch,
+      widget.activeSearchMatch!,
       activeSearchMatchColor,
     );
   }
 
-  List<TextSpan>? _searchMatchAwareLineContents(
-    List<TextSpan>? startingContents,
+  List<TextSpan> _searchMatchAwareLineContents(
+    List<TextSpan> startingContents,
   ) {
-    if (widget.searchMatches!.isEmpty) return startingContents;
+    if (widget.searchMatches == null || widget.searchMatches!.isEmpty)
+      return startingContents;
     final searchMatchesToFind = List<SourceToken>.from(widget.searchMatches!)
       ..remove(widget.activeSearchMatch);
 
     var contentsWithMatch = startingContents;
     for (final match in searchMatchesToFind) {
       contentsWithMatch = _contentsWithMatch(
-        contentsWithMatch!,
+        contentsWithMatch,
         match,
         searchMatchColor,
       );

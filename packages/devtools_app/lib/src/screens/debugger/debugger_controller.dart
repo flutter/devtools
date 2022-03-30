@@ -40,7 +40,7 @@ class DebuggerController extends DisposableController
     autoDisposeStreamSubscription(
       serviceManager.onConnectionAvailable.listen(_handleConnectionAvailable),
     );
-    if (_service != null) {
+    if (!serviceManager.hasService) {
       initialize();
     }
     _scriptHistoryListener = () {
@@ -99,7 +99,7 @@ class DebuggerController extends DisposableController
     _breakpointsWithLocation.value = [];
     _selectedBreakpoint.value = null;
     _librariesVisible.value = false;
-    isolateRef = null;
+    _isolateRef = null;
     _firstDebuggerScreenLoaded = false;
   }
 
@@ -122,9 +122,9 @@ class DebuggerController extends DisposableController
       switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
     });
     autoDisposeStreamSubscription(
-        _service!.onDebugEvent.listen(_handleDebugEvent));
+        _service.onDebugEvent.listen(_handleDebugEvent));
     autoDisposeStreamSubscription(
-        _service!.onIsolateEvent.listen(_handleIsolateEvent));
+        _service.onIsolateEvent.listen(_handleIsolateEvent));
   }
 
   final bool initialSwitchToIsolate;
@@ -132,7 +132,10 @@ class DebuggerController extends DisposableController
   IsolateState? get isolateDebuggerState =>
       serviceManager.isolateManager.isolateDebuggerState(isolateRef);
 
-  VmServiceWrapper? get _service => serviceManager.service;
+  VmServiceWrapper get _service {
+    assert(serviceManager.hasService);
+    return serviceManager.service!;
+  }
 
   /// Cache of autocomplete matches to show for a library when that library is
   /// imported.
@@ -349,13 +352,19 @@ class DebuggerController extends DisposableController
     _librariesVisible.value = !_librariesVisible.value;
   }
 
-  IsolateRef? isolateRef;
-  bool get isSystemIsolate => isolateRef?.isSystemIsolate ?? false;
+  IsolateRef get isolateRef {
+    assert(_isolateRef != null);
+    return _isolateRef!;
+  }
+
+  IsolateRef? _isolateRef;
+
+  bool get isSystemIsolate => isolateRef.isSystemIsolate ?? false;
 
   final EvalHistory evalHistory = EvalHistory();
 
   void switchToIsolate(IsolateRef? ref) async {
-    isolateRef = ref;
+    _isolateRef = ref;
     _isPaused.value = false;
     await _pause(false);
 
@@ -369,8 +378,8 @@ class DebuggerController extends DisposableController
       return;
     }
 
-    final isolate = await _service!.getIsolate(isolateRef!.id!);
-    if (isolate.id != isolateRef?.id) {
+    final isolate = await _service.getIsolate(isolateRef.id!);
+    if (isolate.id != isolateRef.id) {
       // Current request is obsolete.
       return;
     }
@@ -380,7 +389,7 @@ class DebuggerController extends DisposableController
       _lastEvent = isolate.pauseEvent;
       await _pause(true, pauseEvent: isolate.pauseEvent);
     }
-    if (isolate.id != isolateRef?.id) {
+    if (isolate.id != isolateRef.id) {
       // Current request is obsolete.
       return;
     }
@@ -392,7 +401,7 @@ class DebuggerController extends DisposableController
       // ignore: unawaited_futures
       Future.wait(_breakpoints.value!.map(_createBreakpointWithLocation))
           .then((list) {
-        if (isolate.id != isolateRef?.id) {
+        if (isolate.id != isolateRef.id) {
           // Current request is obsolete.
           return;
         }
@@ -402,19 +411,19 @@ class DebuggerController extends DisposableController
 
     _exceptionPauseMode.value = isolate.exceptionPauseMode;
 
-    if (isolate.id != isolateRef?.id) {
+    if (isolate.id != isolateRef.id) {
       // Current request is obsolete.
       return;
     }
     await _populateScripts(isolate);
   }
 
-  Future<Success> pause() => _service!.pause(isolateRef!.id!);
+  Future<Success> pause() => _service.pause(isolateRef.id!);
 
   Future<Success> resume() {
     _log.log('resume()');
     _resuming.value = true;
-    return _service!.resume(isolateRef!.id!);
+    return _service.resume(isolateRef.id!);
   }
 
   Future<Success> stepOver() {
@@ -423,9 +432,9 @@ class DebuggerController extends DisposableController
 
     // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
     final useAsyncStepping = _lastEvent?.atAsyncSuspension ?? false;
-    return _service!
+    return _service
         .resume(
-          isolateRef!.id!,
+          isolateRef.id!,
           step: useAsyncStepping
               ? StepOption.kOverAsyncSuspension
               : StepOption.kOver,
@@ -436,13 +445,13 @@ class DebuggerController extends DisposableController
   Future<Success> stepIn() {
     _resuming.value = true;
 
-    return _service!.resume(isolateRef!.id!, step: StepOption.kInto);
+    return _service.resume(isolateRef.id!, step: StepOption.kInto);
   }
 
   Future<Success> stepOut() {
     _resuming.value = true;
 
-    return _service!.resume(isolateRef!.id!, step: StepOption.kOut);
+    return _service.resume(isolateRef.id!, step: StepOption.kOut);
   }
 
   /// Evaluate the given expression in the context of the currently selected
@@ -467,8 +476,8 @@ class DebuggerController extends DisposableController
     final frame = selectedStackFrame.value?.frame ??
         stackFramesWithLocation.value.first.frame;
 
-    return _service!.evaluateInFrame(
-      isolateRef!.id!,
+    return _service.evaluateInFrame(
+      isolateRef.id!,
       frame.index!,
       expression,
       disableBreakpoints: true,
@@ -477,8 +486,8 @@ class DebuggerController extends DisposableController
 
   /// Call `toString()` on the given instance and return the result.
   Future<Response> invokeToString(InstanceRef instance) {
-    return _service!.invoke(
-      isolateRef!.id!,
+    return _service.invoke(
+      isolateRef.id!,
       instance.id!,
       'toString',
       <String>[],
@@ -491,8 +500,8 @@ class DebuggerController extends DisposableController
     InstanceRef stringRef, {
     String onUnavailable(String? truncatedValue)?,
   }) async {
-    return serviceManager.service!.retrieveFullStringValue(
-      isolateRef!.id!,
+    return _service.retrieveFullStringValue(
+      isolateRef.id!,
       stringRef,
       onUnavailable: onUnavailable,
     );
@@ -506,10 +515,10 @@ class DebuggerController extends DisposableController
   }
 
   Future<Breakpoint> addBreakpoint(String scriptId, int line) =>
-      _service!.addBreakpoint(isolateRef!.id!, scriptId, line);
+      _service.addBreakpoint(isolateRef.id!, scriptId, line);
 
   Future<void> removeBreakpoint(Breakpoint breakpoint) =>
-      _service!.removeBreakpoint(isolateRef!.id!, breakpoint.id!);
+      _service.removeBreakpoint(isolateRef.id!, breakpoint.id!);
 
   Future<void> toggleBreakpoint(ScriptRef script, int line) async {
     if (serviceManager.isolateManager.selectedIsolate.value == null) {
@@ -539,8 +548,8 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> setIsolatePauseMode(String mode) async {
-    await _service!
-        .setIsolatePauseMode(isolateRef!.id!, exceptionPauseMode: mode);
+    await _service.setIsolatePauseMode(isolateRef.id!,
+        exceptionPauseMode: mode);
     _exceptionPauseMode.value = mode;
   }
 
@@ -553,7 +562,7 @@ class DebuggerController extends DisposableController
 
     final id = event.isolate!.id!;
     _log.log('resume() $id');
-    return _service!.resume(id);
+    return _service.resume(id);
   }
 
   void _handleDebugEvent(Event event) {
@@ -562,12 +571,12 @@ class DebuggerController extends DisposableController
     // We're resuming and another isolate has started in a paused state,
     // resume any pauseState isolates.
     if (_resuming.value &&
-        event.isolate!.id != isolateRef?.id &&
+        event.isolate!.id != isolateRef.id &&
         event.kind == EventKind.kPauseStart) {
       _resumeIsolatePauseStart(event);
     }
 
-    if (event.isolate!.id != isolateRef?.id) return;
+    if (event.isolate!.id != isolateRef.id) return;
 
     _lastEvent = event;
 
@@ -645,7 +654,7 @@ class DebuggerController extends DisposableController
   }
 
   void _handleIsolateEvent(Event event) {
-    if (event.isolate!.id != isolateRef?.id) return;
+    if (event.isolate!.id != isolateRef.id) return;
     switch (event.kind) {
       case EventKind.kIsolateReload:
         _updateAfterIsolateReload(event);
@@ -662,7 +671,7 @@ class DebuggerController extends DisposableController
     // Refresh the list of scripts.
     final previousScriptRefs = scriptManager.sortedScripts.value;
     final currentScriptRefs =
-        await scriptManager.retrieveAndSortScripts(isolateRef!);
+        await scriptManager.retrieveAndSortScripts(isolateRef);
     final removedScripts =
         Set.of(previousScriptRefs).difference(Set.of(currentScriptRefs));
     final addedScripts =
@@ -794,7 +803,7 @@ class DebuggerController extends DisposableController
 
   Future<_StackInfo> _getStackInfo({int? limit}) async {
     _log.log('getStack() with limit: $limit');
-    final stack = await _service!.getStack(isolateRef!.id!, limit: limit);
+    final stack = await _service.getStack(isolateRef.id!, limit: limit);
     _log.log('getStack() completed (frames: ${stack.frames!.length})');
 
     final frames = _framesForCallStack(
@@ -846,11 +855,11 @@ class DebuggerController extends DisposableController
   ///
   /// The return value can be one of [Obj] or [Sentinel].
   Future<Obj> getObject(ObjRef objRef) {
-    return _service!.getObject(isolateRef!.id!, objRef.id!);
+    return _service.getObject(isolateRef.id!, objRef.id!);
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
-    final scriptRefs = await scriptManager.retrieveAndSortScripts(isolateRef!);
+    final scriptRefs = await scriptManager.retrieveAndSortScripts(isolateRef);
 
     // Update the selected script.
     final mainScriptRef = scriptRefs.firstWhereOrNull((ref) {
@@ -866,7 +875,7 @@ class DebuggerController extends DisposableController
     if (breakpoint!.resolved!) {
       final bp = BreakpointAndSourcePosition.create(breakpoint);
       return scriptManager.getScript(bp.scriptRef!).then((Script script) {
-        final pos = SourcePosition.calculatePosition(script, bp.tokenPos);
+        final pos = SourcePosition.calculatePosition(script, bp.tokenPos!);
         return BreakpointAndSourcePosition.create(breakpoint, pos);
       });
     } else {
@@ -884,7 +893,7 @@ class DebuggerController extends DisposableController
 
     final script = await scriptManager.getScript(location.script!);
     final position =
-        SourcePosition.calculatePosition(script, location.tokenPos);
+        SourcePosition.calculatePosition(script, location.tokenPos!);
     return StackFrameAndSourcePosition(frame, position: position);
   }
 
@@ -928,16 +937,17 @@ class DebuggerController extends DisposableController
     return variables;
   }
 
-  List<Frame>? _framesForCallStack(
+  List<Frame> _framesForCallStack(
     List<Frame>? stackFrames, {
     List<Frame>? asyncCausalFrames,
     InstanceRef? reportedException,
   }) {
+    assert(asyncCausalFrames != null || stackFrames != null);
     // Prefer asyncCausalFrames if they exist.
-    List<Frame>? frames = asyncCausalFrames ?? stackFrames;
+    List<Frame> frames = (asyncCausalFrames ?? stackFrames)!;
 
     // Include any reported exception as a variable in the first frame.
-    if (reportedException != null && frames!.isNotEmpty) {
+    if (reportedException != null && frames.isNotEmpty) {
       final frame = frames.first;
 
       final newFrame = Frame(
@@ -977,8 +987,8 @@ class DebuggerController extends DisposableController
   }
 
   Future<List<SourcePosition>> _getBreakablePositions(Script script) async {
-    final report = await _service!.getSourceReport(
-      isolateRef!.id!,
+    final report = await _service.getSourceReport(
+      isolateRef.id!,
       [SourceReportKind.kPossibleBreakpoints],
       scriptId: script.id,
       forceCompile: true,

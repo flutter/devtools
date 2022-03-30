@@ -285,7 +285,7 @@ class _FileExplorer extends StatefulWidget {
     required this.onItemExpanded,
   });
 
-  final ProgramExplorerController? controller;
+  final ProgramExplorerController controller;
   final Function(VMServiceObjectNode) onItemSelected;
   final Function(VMServiceObjectNode) onItemExpanded;
 
@@ -296,16 +296,16 @@ class _FileExplorer extends StatefulWidget {
 class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
   final ScrollController _scrollController = ScrollController();
 
-  double get selectedNodeOffset => widget.controller!.selectedNodeIndex.value ==
+  double get selectedNodeOffset => widget.controller.selectedNodeIndex.value ==
           -1
       ? -1
-      : widget.controller!.selectedNodeIndex.value * _programExplorerRowHeight;
+      : widget.controller.selectedNodeIndex.value * _programExplorerRowHeight;
 
   @override
   void initState() {
     super.initState();
     addAutoDisposeListener(
-      widget.controller!.selectedNodeIndex,
+      widget.controller.selectedNodeIndex,
       _maybeScrollToSelectedNode,
     );
   }
@@ -317,7 +317,7 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
       controller: _scrollController,
       child: TreeView<VMServiceObjectNode>(
         itemExtent: _programExplorerRowHeight,
-        dataRootsListenable: widget.controller!.rootObjectNodes,
+        dataRootsListenable: widget.controller.rootObjectNodes,
         onItemSelected: widget.onItemSelected,
         onItemExpanded: widget.onItemExpanded,
         scrollController: _scrollController,
@@ -326,7 +326,7 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
             controller: widget.controller,
             node: node,
             onTap: () {
-              widget.controller!.selectNode(node);
+              widget.controller.selectNode(node);
               onTap();
             },
           );
@@ -360,21 +360,21 @@ class _ProgramOutlineView extends StatelessWidget {
     required this.onItemExpanded,
   });
 
-  final ProgramExplorerController? controller;
+  final ProgramExplorerController controller;
   final Function(VMServiceObjectNode) onItemSelected;
   final Function(VMServiceObjectNode) onItemExpanded;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: controller!.isLoadingOutline,
+      valueListenable: controller.isLoadingOutline,
       builder: (context, isLoadingOutline, _) {
         if (isLoadingOutline) {
           return const CenteredCircularProgressIndicator();
         }
         return TreeView<VMServiceObjectNode>(
           itemExtent: _programExplorerRowHeight,
-          dataRootsListenable: controller!.outlineNodes,
+          dataRootsListenable: controller.outlineNodes,
           onItemSelected: onItemSelected,
           onItemExpanded: onItemExpanded,
           dataDisplayProvider: (node, onTap) {
@@ -383,7 +383,7 @@ class _ProgramOutlineView extends StatelessWidget {
               node: node,
               onTap: () async {
                 await node.populateLocation();
-                controller!.selectOutlineNode(node);
+                controller.selectOutlineNode(node);
                 onTap();
               },
             );

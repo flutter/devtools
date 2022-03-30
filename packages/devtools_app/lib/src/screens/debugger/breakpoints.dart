@@ -24,7 +24,8 @@ class Breakpoints extends StatefulWidget {
 }
 
 class _BreakpointsState extends State<Breakpoints> {
-  DebuggerController? controller;
+  DebuggerController get controller => _controller!;
+  DebuggerController? _controller;
 
   @override
   void didChangeDependencies() {
@@ -32,15 +33,15 @@ class _BreakpointsState extends State<Breakpoints> {
 
     final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
-    controller = newController;
+    _controller = newController;
   }
 
   @override
   Widget build(BuildContext context) {
     return DualValueListenableBuilder<List<BreakpointAndSourcePosition>,
         BreakpointAndSourcePosition?>(
-      firstListenable: controller!.breakpointsWithLocation,
-      secondListenable: controller!.selectedBreakpoint,
+      firstListenable: controller.breakpointsWithLocation,
+      secondListenable: controller.selectedBreakpoint,
       builder: (context, breakpoints, selectedBreakpoint, _) {
         return ListView.builder(
           itemCount: breakpoints.length,

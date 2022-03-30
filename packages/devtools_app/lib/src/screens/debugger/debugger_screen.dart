@@ -99,7 +99,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   static const variablesTitle = 'Variables';
   static const breakpointsTitle = 'Breakpoints';
 
-  DebuggerController? controller;
+  DebuggerController get controller => _controller!;
+  DebuggerController? _controller;
 
   late bool _shownFirstScript;
 
@@ -117,20 +118,20 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
     final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
-    controller = newController;
-    controller?.onFirstDebuggerScreenLoad();
+    _controller = newController;
+    controller.onFirstDebuggerScreenLoad();
   }
 
   void _onLocationSelected(ScriptLocation? location) {
     if (location != null) {
-      controller?.showScriptLocation(location);
+      controller.showScriptLocation(location);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final codeArea = ValueListenableBuilder(
-      valueListenable: controller!.fileExplorerVisible,
+      valueListenable: controller.fileExplorerVisible,
       builder: (context, bool visible, child) {
         if (visible) {
           // TODO(devoncarew): Animate this opening and closing.
@@ -151,8 +152,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         }
       },
       child: DualValueListenableBuilder<ScriptRef?, ParsedScript?>(
-        firstListenable: controller!.currentScriptRef,
-        secondListenable: controller!.currentParsedScript,
+        firstListenable: controller.currentScriptRef,
+        secondListenable: controller.currentParsedScript,
         builder: (context, scriptRef, parsedScript, _) {
           if (scriptRef != null && parsedScript != null && !_shownFirstScript) {
             ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
@@ -164,10 +165,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           }
           return CodeView(
             key: DebuggerScreenBody.codeViewKey,
-            controller: controller!,
+            controller: controller,
             scriptRef: scriptRef,
             parsedScript: parsedScript,
-            onSelected: controller!.toggleBreakpoint,
+            onSelected: controller.toggleBreakpoint,
           );
         },
       ),
@@ -239,7 +240,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   Widget _breakpointsRightChild() {
     return ValueListenableBuilder(
-      valueListenable: controller!.breakpointsWithLocation,
+      valueListenable: controller.breakpointsWithLocation,
       builder: (context, List<BreakpointAndSourcePosition> breakpoints, _) {
         return Row(
           children: [
@@ -247,9 +248,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
             DevToolsTooltip(
               child: ToolbarAction(
                 icon: Icons.delete,
-                onPressed: breakpoints.isNotEmpty
-                    ? controller!.clearBreakpoints
-                    : null,
+                onPressed:
+                    breakpoints.isNotEmpty ? controller.clearBreakpoints : null,
               ),
               message: 'Remove all breakpoints',
             ),
@@ -388,7 +388,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     final fileName = ' at ' + frame.location!.script!.uri!.split('/').last;
     final script = await scriptManager.getScript(frame.location!.script!);
     final pos =
-        SourcePosition.calculatePosition(script, frame.location!.tokenPos);
+        SourcePosition.calculatePosition(script, frame.location!.tokenPos!);
 
     return 'paused$reason$fileName $pos';
   }

@@ -23,7 +23,7 @@ class FileSearchField extends StatefulWidget {
     required this.debuggerController,
   });
 
-  final DebuggerController? debuggerController;
+  final DebuggerController debuggerController;
 
   @override
   FileSearchFieldState createState() => FileSearchFieldState();
@@ -121,13 +121,13 @@ class FileSearchFieldState extends State<FileSearchField>
 
   void _onSelection(String scriptUri) {
     final scriptRef = _scriptsCache[scriptUri]!;
-    widget.debuggerController!.showScriptLocation(ScriptLocation(scriptRef));
+    widget.debuggerController.showScriptLocation(ScriptLocation(scriptRef));
     _onClose();
   }
 
   void _onClose() {
     autoCompleteController.closeAutoCompleteOverlay();
-    widget.debuggerController!.toggleFileOpenerVisibility(false);
+    widget.debuggerController.toggleFileOpenerVisibility(false);
     _fileNamesCache.clear();
     _scriptsCache.clear();
   }
@@ -198,7 +198,7 @@ class FileQuery {
   AutoCompleteMatch createExactFullPathAutoCompleteMatch(ScriptRef script) {
     if (isEmpty) return AutoCompleteMatch(script.uri!);
 
-    final matchedSegments = _findExactSegments(script.uri);
+    final matchedSegments = _findExactSegments(script.uri!);
     return AutoCompleteMatch(script.uri!, matchedSegments: matchedSegments);
   }
 
@@ -231,10 +231,10 @@ class FileQuery {
     return AutoCompleteMatch(script.uri!, matchedSegments: matchedSegments);
   }
 
-  List<Range> _findExactSegments(String? file) {
+  List<Range> _findExactSegments(String file) {
     final matchedSegments = <Range>[];
     for (final token in isMultiToken ? tokens : [query]) {
-      final start = file!.indexOf(token);
+      final start = file.indexOf(token);
       final end = start + token.length;
       matchedSegments.add(Range(start, end));
     }

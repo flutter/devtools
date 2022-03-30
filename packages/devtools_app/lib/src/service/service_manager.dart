@@ -95,7 +95,9 @@ class ServiceConnectionManager {
   VM? vm;
   String? sdkVersion;
 
-  bool get hasConnection => service != null && connectedApp != null;
+  bool get hasService => service != null;
+
+  bool get hasConnection => hasService && connectedApp != null;
 
   bool get connectedAppInitialized =>
       hasConnection && connectedApp!.connectedAppInitialized;

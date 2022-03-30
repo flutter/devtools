@@ -22,23 +22,24 @@ class DebuggingControls extends StatefulWidget {
 
 class _DebuggingControlsState extends State<DebuggingControls>
     with AutoDisposeMixin {
-  DebuggerController? controller;
+  DebuggerController get controller => _controller!;
+  DebuggerController? _controller;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    controller = Provider.of<DebuggerController>(context);
-    addAutoDisposeListener(controller!.isPaused);
-    addAutoDisposeListener(controller!.resuming);
-    addAutoDisposeListener(controller!.stackFramesWithLocation);
+    _controller = Provider.of<DebuggerController>(context);
+    addAutoDisposeListener(controller.isPaused);
+    addAutoDisposeListener(controller.resuming);
+    addAutoDisposeListener(controller.stackFramesWithLocation);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isPaused = controller!.isPaused.value;
-    final resuming = controller!.resuming.value;
-    final hasStackFrames = controller!.stackFramesWithLocation.value.isNotEmpty;
-    final isSystemIsolate = controller!.isSystemIsolate;
+    final isPaused = controller.isPaused.value;
+    final resuming = controller.resuming.value;
+    final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
+    final isSystemIsolate = controller.isSystemIsolate;
     final canStep = isPaused && !resuming && hasStackFrames && !isSystemIsolate;
     return SizedBox(
       height: defaultButtonHeight,
@@ -60,7 +61,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
     required bool isPaused,
     required bool resuming,
   }) {
-    final isSystemIsolate = controller!.isSystemIsolate;
+    final isSystemIsolate = controller.isSystemIsolate;
     return RoundedOutlinedBorder(
       child: Row(
         children: [
@@ -69,7 +70,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
             icon: Codicons.debugPause,
             autofocus: true,
             // Disable when paused or selected isolate is a system isolate.
-            onPressed: (isPaused || isSystemIsolate) ? null : controller!.pause,
+            onPressed: (isPaused || isSystemIsolate) ? null : controller.pause,
           ),
           LeftBorder(
             child: DebuggerButton(
@@ -78,7 +79,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
               // Enable while paused + not resuming and selected isolate is not
               // a system isolate.
               onPressed: ((isPaused && !resuming) && !isSystemIsolate)
-                  ? controller!.resume
+                  ? controller.resume
                   : null,
             ),
           ),
@@ -94,20 +95,20 @@ class _DebuggingControlsState extends State<DebuggingControls>
           DebuggerButton(
             title: 'Step Over',
             icon: Codicons.debugStepOver,
-            onPressed: canStep ? controller!.stepOver : null,
+            onPressed: canStep ? controller.stepOver : null,
           ),
           LeftBorder(
             child: DebuggerButton(
               title: 'Step In',
               icon: Codicons.debugStepInto,
-              onPressed: canStep ? controller!.stepIn : null,
+              onPressed: canStep ? controller.stepIn : null,
             ),
           ),
           LeftBorder(
             child: DebuggerButton(
               title: 'Step Out',
               icon: Codicons.debugStepOut,
-              onPressed: canStep ? controller!.stepOut : null,
+              onPressed: canStep ? controller.stepOut : null,
             ),
           ),
         ],
@@ -117,7 +118,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
 
   Widget _librariesButton() {
     return ValueListenableBuilder(
-      valueListenable: controller!.fileExplorerVisible,
+      valueListenable: controller.fileExplorerVisible,
       builder: (context, bool visible, _) {
         const libraryIcon = Icons.insert_chart;
         return RoundedOutlinedBorder(
@@ -126,7 +127,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
             child: DebuggerButton(
               title: 'File Explorer',
               icon: libraryIcon,
-              onPressed: controller!.toggleLibrariesVisible,
+              onPressed: controller.toggleLibrariesVisible,
             ),
           ),
         );
@@ -141,20 +142,20 @@ class BreakOnExceptionsControl extends StatelessWidget {
     required this.controller,
   }) : super(key: key);
 
-  final DebuggerController? controller;
+  final DebuggerController controller;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: controller!.exceptionPauseMode,
+      valueListenable: controller.exceptionPauseMode,
       builder: (BuildContext context, String? modeId, _) {
         return RoundedDropDownButton<ExceptionMode>(
           value: ExceptionMode.from(modeId),
           // Cannot set exception pause mode for system isolates.
-          onChanged: controller!.isSystemIsolate
+          onChanged: controller.isSystemIsolate
               ? null
               : (ExceptionMode? mode) {
-                  controller!.setIsolatePauseMode(mode!.id);
+                  controller.setIsolatePauseMode(mode!.id);
                 },
           isDense: true,
           items: [

@@ -106,9 +106,9 @@ class SourcePosition {
     this.tokenPos,
   });
 
-  factory SourcePosition.calculatePosition(Script script, int? tokenPos) {
+  factory SourcePosition.calculatePosition(Script script, int tokenPos) {
     return SourcePosition(
-      line: script.getLineNumberFromTokenPos(tokenPos!),
+      line: script.getLineNumberFromTokenPos(tokenPos),
       column: script.getColumnNumberFromTokenPos(tokenPos),
       tokenPos: tokenPos,
     );
@@ -156,10 +156,10 @@ abstract class BreakpointAndSourcePosition
       [SourcePosition? sourcePosition]) {
     if (breakpoint.location is SourceLocation) {
       return _BreakpointAndSourcePositionResolved(
-          breakpoint, sourcePosition, breakpoint.location as SourceLocation?);
+          breakpoint, sourcePosition, breakpoint.location as SourceLocation);
     } else if (breakpoint.location is UnresolvedSourceLocation) {
       return _BreakpointAndSourcePositionUnresolved(breakpoint, sourcePosition,
-          breakpoint.location as UnresolvedSourceLocation?);
+          breakpoint.location as UnresolvedSourceLocation);
     } else {
       throw 'invalid value for breakpoint.location';
     }
@@ -211,16 +211,16 @@ class _BreakpointAndSourcePositionResolved extends BreakpointAndSourcePosition {
       Breakpoint breakpoint, SourcePosition? sourcePosition, this.location)
       : super._(breakpoint, sourcePosition);
 
-  final SourceLocation? location;
+  final SourceLocation location;
 
   @override
-  ScriptRef? get scriptRef => location!.script;
+  ScriptRef? get scriptRef => location.script;
 
   @override
-  String? get scriptUri => location!.script!.uri;
+  String? get scriptUri => location.script?.uri;
 
   @override
-  int? get tokenPos => location!.tokenPos;
+  int? get tokenPos => location.tokenPos;
 
   @override
   int? get line => sourcePosition?.line;
@@ -237,22 +237,22 @@ class _BreakpointAndSourcePositionUnresolved
     this.location,
   ) : super._(breakpoint, sourcePosition);
 
-  final UnresolvedSourceLocation? location;
+  final UnresolvedSourceLocation location;
 
   @override
-  ScriptRef? get scriptRef => location!.script;
+  ScriptRef? get scriptRef => location.script;
 
   @override
-  String? get scriptUri => location!.script?.uri ?? location!.scriptUri;
+  String? get scriptUri => location.script?.uri ?? location.scriptUri;
 
   @override
-  int? get tokenPos => location!.tokenPos;
+  int? get tokenPos => location.tokenPos;
 
   @override
-  int? get line => sourcePosition?.line ?? location!.line;
+  int? get line => sourcePosition?.line ?? location.line;
 
   @override
-  int? get column => sourcePosition?.column ?? location!.column;
+  int? get column => sourcePosition?.column ?? location.column;
 }
 
 /// A tuple of a stack frame and a source position.
@@ -383,16 +383,16 @@ Future<void> buildVariablesTree(
     }
   }
 
-  if (variable.childCount! > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
+  if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
     final numChildrenInGrouping =
-        variable.childCount! >= pow(DartObjectNode.MAX_CHILDREN_IN_GROUPING, 2)
-            ? (roundToNearestPow10(variable.childCount!) /
+        variable.childCount >= pow(DartObjectNode.MAX_CHILDREN_IN_GROUPING, 2)
+            ? (roundToNearestPow10(variable.childCount) /
                     DartObjectNode.MAX_CHILDREN_IN_GROUPING)
                 .floor()
             : DartObjectNode.MAX_CHILDREN_IN_GROUPING;
 
     var start = variable.offset;
-    final end = start + variable.childCount!;
+    final end = start + variable.childCount;
     while (start < end) {
       final count = min(end - start, numChildrenInGrouping);
       variable.addChild(
@@ -774,8 +774,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
   int? _offset;
 
-  int? get childCount {
-    if (_childCount != null) return _childCount;
+  int get childCount {
+    if (_childCount != null) return _childCount!;
 
     final value = this.value;
     if (value is InstanceRef) {
@@ -797,10 +797,10 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
   @override
   bool get isExpandable {
-    if (treeInitializeComplete || children.isNotEmpty || childCount! > 0) {
-      return children.isNotEmpty || childCount! > 0;
+    if (treeInitializeComplete || children.isNotEmpty || childCount > 0) {
+      return children.isNotEmpty || childCount > 0;
     }
-    final diagnostic = ref!.diagnostic;
+    final diagnostic = ref?.diagnostic;
     if (diagnostic != null &&
         ((diagnostic.inlineProperties.isNotEmpty) || diagnostic.hasChildren))
       return true;
@@ -874,7 +874,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   ///
   /// Returns whether the inspector selection was changed
   Future<bool> inspectWidget() async {
-    if (ref == null || ref!.instanceRef == null) {
+    if (ref?.instanceRef == null) {
       return false;
     }
     final inspectorService = serviceManager.inspectorService;

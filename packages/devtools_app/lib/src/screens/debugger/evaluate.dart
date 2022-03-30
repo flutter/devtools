@@ -306,7 +306,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
     setState(() {
       evalHistory.navigateUp();
 
-      final text = evalHistory.currentText!;
+      final text = evalHistory.currentText ?? '';
       searchTextFieldController.value = TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: text.length),

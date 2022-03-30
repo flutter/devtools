@@ -19,7 +19,8 @@ class CallStack extends StatefulWidget {
 }
 
 class _CallStackState extends State<CallStack> {
-  DebuggerController? controller;
+  DebuggerController get controller => _controller!;
+  DebuggerController? _controller;
 
   @override
   void didChangeDependencies() {
@@ -28,15 +29,15 @@ class _CallStackState extends State<CallStack> {
     final newController = Provider.of<DebuggerController>(context);
     if (newController == controller) return;
 
-    controller = newController;
+    _controller = newController;
   }
 
   @override
   Widget build(BuildContext context) {
     return DualValueListenableBuilder<List<StackFrameAndSourcePosition>,
         StackFrameAndSourcePosition?>(
-      firstListenable: controller!.stackFramesWithLocation,
-      secondListenable: controller!.selectedStackFrame,
+      firstListenable: controller.stackFramesWithLocation,
+      secondListenable: controller.selectedStackFrame,
       builder: (context, stackFrames, selectedFrame, _) {
         return ListView.builder(
           itemCount: stackFrames.length,
@@ -129,6 +130,6 @@ class _CallStackState extends State<CallStack> {
   }
 
   Future<void> _onStackFrameSelected(StackFrameAndSourcePosition frame) async {
-    controller!.selectStackFrame(frame);
+    controller.selectStackFrame(frame);
   }
 }
