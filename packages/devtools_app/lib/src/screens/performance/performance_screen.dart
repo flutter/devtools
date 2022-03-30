@@ -410,7 +410,7 @@ class EnhanceTracingButton extends StatelessWidget {
 class MoreDebuggingOptionsButton extends StatelessWidget {
   const MoreDebuggingOptionsButton({Key? key}) : super(key: key);
 
-  static const _width = 625.0;
+  static const _width = 720.0;
 
   @override
   Widget build(BuildContext context) {

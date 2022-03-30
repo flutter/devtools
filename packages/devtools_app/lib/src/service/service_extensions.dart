@@ -327,10 +327,12 @@ final disableClipLayers = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.disableOpacityLayersOption,
-  description: 'Render all clipping effects during paint',
+  description: 'Render all clipping effects during paint.',
   tooltip: '''Disable this option to check whether excessive use of clipping is
 affecting performance. If performance improves with this option
 disabled, try to reduce the use of clipping effects in your app.''',
+  documentationUrl:
+      'https://docs.flutter.dev/development/tools/devtools/performance#more-debugging-options',
 );
 
 final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>._(
@@ -349,10 +351,12 @@ final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.disableOpacityLayersOption,
-  description: 'Render all opacity effects during paint',
+  description: 'Render all opacity effects during paint.',
   tooltip: '''Disable this option to check whether excessive use of opacity
 effects is affecting performance. If performance improves with this
 option disabled, try to reduce the use of opacity effects in your app.''',
+  documentationUrl:
+      'https://docs.flutter.dev/development/tools/devtools/performance#more-debugging-options',
 );
 
 final disablePhysicalShapeLayers =
@@ -372,11 +376,13 @@ final disablePhysicalShapeLayers =
   disabledValue: false,
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.disableOpacityLayersOption,
-  description: 'Render all physical modeling effects during paint',
+  description: 'Render all physical modeling effects during paint.',
   tooltip: '''Disable this option to check whether excessive use of physical 
 modeling effects is affecting performance (shadows, elevations, etc.). 
 If performance improves with this option disabled, try to reduce the 
 use of physical modeling effects in your app.''',
+  documentationUrl:
+      'https://docs.flutter.dev/development/tools/devtools/performance#more-debugging-options',
 );
 
 final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(

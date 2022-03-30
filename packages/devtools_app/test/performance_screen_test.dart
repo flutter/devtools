@@ -247,5 +247,28 @@ void main() {
         expect(find.byType(MoreInfoLink), findsNWidgets(3));
       });
     });
+
+    testWidgetsWithWindowSize(
+        'opens more debugging options overlay', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(find.text('More debugging options'), findsOneWidget);
+        await tester.tap(find.text('More debugging options'));
+        await tester.pumpAndSettle();
+        expect(
+          find.richTextContaining(
+              'you will need to reproduce activity in your app'),
+          findsOneWidget,
+        );
+        expect(find.richTextContaining('Render Clip layers'), findsOneWidget);
+        expect(
+            find.richTextContaining('Render Opacity layers'), findsOneWidget);
+        expect(find.richTextContaining('Render Physical Shape layers'),
+            findsOneWidget);
+        expect(find.byType(MoreInfoLink), findsNWidgets(3));
+      });
+    });
   });
 }
