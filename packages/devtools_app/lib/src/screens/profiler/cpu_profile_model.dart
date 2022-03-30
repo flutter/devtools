@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import '../../charts/flame_chart.dart';
 import '../../primitives/trace_event.dart';
 import '../../primitives/trees.dart';
-import '../../primitives/url_utils.dart';
 import '../../primitives/utils.dart';
 import '../../ui/search.dart';
 import 'cpu_profile_transformer.dart';
@@ -54,6 +53,8 @@ class CpuProfileData {
         jsonDecode(jsonEncode(json[stackFramesKey] ?? <String, dynamic>{}));
     for (final MapEntry<String, dynamic> entry in stackFramesJson.entries) {
       final stackFrameJson = entry.value;
+      final resolvedUrl = stackFrameJson[resolvedUrlKey] ?? '';
+      final processedUrl = stackFrameJson[processedUrlKey] ?? resolvedUrl;
       final stackFrame = CpuStackFrame._(
         id: entry.key,
         name: getSimpleStackFrameName(stackFrameJson[nameKey]),
@@ -62,8 +63,8 @@ class CpuProfileData {
         // If the user is on a version of Flutter where resolvedUrl is not
         // included in the response, this will be null. If the frame is a native
         // frame, the this will be the empty string.
-        rawUrl: stackFrameJson[resolvedUrlKey] ?? '',
-        processedUrl: stackFrameJson[processedUrlKey] ?? '',
+        rawUrl: resolvedUrl,
+        processedUrl: processedUrl,
         sourceLine: stackFrameJson[sourceLine],
         parentId: stackFrameJson[parentIdKey] ?? rootId,
         profileMetaData: profileMetaData,
@@ -436,6 +437,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     required String? verboseName,
     required String? category,
     required String rawUrl,
+    required String processedUrl,
     required int? sourceLine,
     required String parentId,
     required CpuProfileMetaData profileMetaData,
@@ -446,8 +448,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       verboseName: verboseName,
       category: category,
       rawUrl: rawUrl,
-      processedUrl:
-          '${getSimplePackageUrl(rawUrl)}${sourceLine != null ? ':$sourceLine' : ''}',
+      processedUrl: processedUrl,
       sourceLine: sourceLine,
       parentId: parentId,
       profileMetaData: profileMetaData,
@@ -604,6 +605,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     String? verboseName,
     String? category,
     String? url,
+    String? processedUrl,
     String? parentId,
     CpuProfileMetaData? profileMetaData,
     bool copySampleCountsAndTags = true,
@@ -615,7 +617,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       verboseName: verboseName ?? this.verboseName,
       category: category ?? this.category,
       rawUrl: url ?? rawUrl,
-      processedUrl: url != null ? getSimplePackageUrl(url) : processedUrl,
+      processedUrl: processedUrl ?? this.processedUrl,
       sourceLine: sourceLine,
       parentId: parentId ?? this.parentId,
       profileMetaData: profileMetaData ?? this.profileMetaData,
@@ -667,6 +669,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
           CpuProfileData.nameKey: verboseName,
           CpuProfileData.categoryKey: category,
           CpuProfileData.resolvedUrlKey: rawUrl,
+          CpuProfileData.processedUrlKey: processedUrl,
           if (parentId != null) CpuProfileData.parentIdKey: parentId,
         }
       };

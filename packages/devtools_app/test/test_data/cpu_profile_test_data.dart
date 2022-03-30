@@ -40,6 +40,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'name': 'Frame1',
       'parent': 'cpuProfileRoot',
       'resolvedUrl': '',
+      'processedUrl': '',
     },
     '140357727781376-2': {
       'category': 'Dart',
@@ -53,12 +54,14 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'name': 'Frame3',
       'parent': '140357727781376-2',
       'resolvedUrl': '',
+      'processedUrl': '',
     },
     '140357727781376-4': {
       'category': 'Dart',
       'name': 'Frame4',
       'parent': '140357727781376-2',
       'resolvedUrl': '',
+      'processedUrl': '',
     },
     '140357727781376-5': {
       'category': 'Dart',
@@ -186,12 +189,15 @@ final Map<String, dynamic> goldenCpuProfileStackFrames =
           'parent': '140357727781376-9',
           'resolvedUrl':
               'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart',
+          'processedUrl': 'package:flutter/lib/src/rendering/proxy_box.dart'
         },
         '140357727781376-13': {
           'category': 'Dart',
           'name': 'RenderCustomMultiChildLayoutBox.paint',
           'parent': '140357727781376-12',
           'resolvedUrl':
+              'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
+          'processedUrl':
               'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
         },
         '140357727781376-14': {
@@ -200,12 +206,16 @@ final Map<String, dynamic> goldenCpuProfileStackFrames =
           'parent': '140357727781376-13',
           'resolvedUrl':
               'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/hash.dart',
+          'processedUrl':
+              'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/hash.dart',
         },
         '140357727781376-15': {
           'category': 'Dart',
           'name': 'RenderObject._paintWithContext',
           'parent': '140357727781376-14',
           'resolvedUrl':
+              'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+          'processedUrl':
               'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
         },
         '140357727781376-16': {
@@ -214,6 +224,8 @@ final Map<String, dynamic> goldenCpuProfileStackFrames =
           'parent': '140357727781376-14',
           'resolvedUrl':
               'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
+          'processedUrl':
+              'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
         },
         '140357727781376-17': {
           'category': '[Stub] OneArgCheckInlineCache',
@@ -221,6 +233,7 @@ final Map<String, dynamic> goldenCpuProfileStackFrames =
               '_WidgetsFlutterBinding&BindingBase&Gesture._invokeFrameCallback',
           'parent': '140357727781376-16',
           'resolvedUrl': '',
+          'processedUrl': '',
         }
       });
 
@@ -230,18 +243,22 @@ final subProfileStackFrames = {
     'name': 'thread_start',
     'parent': 'cpuProfileRoot',
     'resolvedUrl': '',
+    'processedUrl': '',
   },
   '140357727781376-2': {
     'category': 'Dart',
     'name': '_pthread_start',
     'parent': '140357727781376-1',
     'resolvedUrl': '',
+    'processedUrl': '',
   },
   '140357727781376-3': {
     'category': 'Dart',
     'name': '_drawFrame',
     'parent': '140357727781376-2',
     'resolvedUrl':
+        'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/compact_hash.dart',
+    'processedUrl':
         'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/compact_hash.dart',
   },
   '140357727781376-4': {
@@ -250,6 +267,8 @@ final subProfileStackFrames = {
     'parent': '140357727781376-3',
     'resolvedUrl':
         'file:///path/to/flutter/packages/flutter/lib/src/scheduler/binding.dart',
+    'processedUrl':
+        'file:///path/to/flutter/packages/flutter/lib/src/scheduler/binding.dart',
   },
   '140357727781376-5': {
     'category': 'Dart',
@@ -257,12 +276,15 @@ final subProfileStackFrames = {
     'parent': '140357727781376-4',
     'resolvedUrl':
         'path/to/flutter/packages/flutter/lib/src/rendering/binding.dart',
+    'processedUrl':
+        'path/to/flutter/packages/flutter/lib/src/rendering/binding.dart',
   },
   '140357727781376-6': {
     'category': 'Dart',
     'name': '_RenderProxyBox.paint',
     'parent': '140357727781376-3',
     'resolvedUrl': 'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/list.dart',
+    'processedUrl': 'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/list.dart',
   },
   '140357727781376-7': {
     'category': 'Dart',
@@ -270,18 +292,22 @@ final subProfileStackFrames = {
     'parent': '140357727781376-6',
     'resolvedUrl':
         'path/to/flutter/packages/flutter/lib/src/painting/context.dart',
+    'processedUrl':
+        'path/to/flutter/packages/flutter/lib/src/painting/context.dart',
   },
   '140357727781376-8': {
     'category': 'Dart',
     'name': '_SyncBlock.finish',
     'parent': '140357727781376-7',
     'resolvedUrl': '',
+    'processedUrl': '',
   },
   '140357727781376-9': {
     'category': 'Dart',
     'name': '[Truncated]',
     'parent': 'cpuProfileRoot',
     'resolvedUrl': '',
+    'processedUrl': '',
   },
   '140357727781376-10': {
     'category': 'Dart',
@@ -289,12 +315,16 @@ final subProfileStackFrames = {
     'parent': '140357727781376-9',
     'resolvedUrl':
         'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+    'processedUrl':
+        'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
   },
   '140357727781376-11': {
     'category': 'Dart',
     'name': 'RenderObject._getSemanticsForParent',
     'parent': '140357727781376-10',
     'resolvedUrl':
+        'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+    'processedUrl':
         'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
   },
 };
@@ -305,18 +335,22 @@ final filteredStackFrames = {
     'name': 'thread_start',
     'parent': 'cpuProfileRoot',
     'resolvedUrl': '',
+    'processedUrl': '',
   },
   '140357727781376-2': {
     'category': 'Dart',
     'name': '_pthread_start',
     'parent': '140357727781376-1',
     'resolvedUrl': '',
+    'processedUrl': '',
   },
   '140357727781376-4': {
     'category': 'Dart',
     'name': '_WidgetsFlutterBinding.draw',
     'parent': '140357727781376-2',
     'resolvedUrl':
+        'file:///path/to/flutter/packages/flutter/lib/src/scheduler/binding.dart',
+    'processedUrl':
         'file:///path/to/flutter/packages/flutter/lib/src/scheduler/binding.dart',
   },
   '140357727781376-5': {
@@ -325,6 +359,8 @@ final filteredStackFrames = {
     'parent': '140357727781376-4',
     'resolvedUrl':
         'path/to/flutter/packages/flutter/lib/src/rendering/binding.dart',
+    'processedUrl':
+        'path/to/flutter/packages/flutter/lib/src/rendering/binding.dart',
   },
   '140357727781376-7': {
     'category': 'Dart',
@@ -332,24 +368,30 @@ final filteredStackFrames = {
     'parent': '140357727781376-2',
     'resolvedUrl':
         'path/to/flutter/packages/flutter/lib/src/painting/context.dart',
+    'processedUrl':
+        'path/to/flutter/packages/flutter/lib/src/painting/context.dart',
   },
   '140357727781376-8': {
     'category': 'Dart',
     'name': '_SyncBlock.finish',
     'parent': '140357727781376-7',
     'resolvedUrl': '',
+    'processedUrl': '',
   },
   '140357727781376-9': {
     'category': 'Dart',
     'name': '[Truncated]',
     'parent': 'cpuProfileRoot',
     'resolvedUrl': '',
+    'processedUrl': '',
   },
   '140357727781376-10': {
     'category': 'Dart',
     'name': 'RenderObject._getSemanticsForParent.<closure>',
     'parent': '140357727781376-9',
     'resolvedUrl':
+        'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+    'processedUrl':
         'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
   },
   '140357727781376-11': {
@@ -358,12 +400,16 @@ final filteredStackFrames = {
     'parent': '140357727781376-10',
     'resolvedUrl':
         'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+    'processedUrl':
+        'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
   },
   '140357727781376-12': {
     'category': 'Dart',
     'name': 'RenderPhysicalModel.paint',
     'parent': '140357727781376-9',
     'resolvedUrl':
+        'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart',
+    'processedUrl':
         'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart',
   },
   '140357727781376-13': {
@@ -372,12 +418,16 @@ final filteredStackFrames = {
     'parent': '140357727781376-12',
     'resolvedUrl':
         'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
+    'processedUrl':
+        'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
   },
   '140357727781376-15': {
     'category': 'Dart',
     'name': 'RenderObject._paintWithContext',
     'parent': '140357727781376-13',
     'resolvedUrl':
+        'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+    'processedUrl':
         'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
   },
   '140357727781376-16': {
@@ -386,12 +436,15 @@ final filteredStackFrames = {
     'parent': '140357727781376-13',
     'resolvedUrl':
         'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
+    'processedUrl':
+        'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
   },
   '140357727781376-17': {
     'category': '[Stub] OneArgCheckInlineCache',
     'name': '_WidgetsFlutterBinding&BindingBase&Gesture._invokeFrameCallback',
     'parent': '140357727781376-16',
     'resolvedUrl': '',
+    'processedUrl': '',
   }
 };
 
@@ -581,12 +634,14 @@ final responseWithMissingLeafFrame = {
       'name': 'thread_start',
       'parent': 'cpuProfileRoot',
       'resolvedUrl': '',
+      'processerdUrl': '',
     },
     '140357727781376-2': {
       'category': 'Dart',
       'name': '_pthread_start',
       'parent': '140357727781376-1',
       'resolvedUrl': '',
+      'processedUrl': '',
     },
     '140357727781376-3': {
       'category': 'Dart',
@@ -652,6 +707,7 @@ final CpuStackFrame stackFrameA = CpuStackFrame(
   verboseName: 'A',
   category: 'Dart',
   rawUrl: '',
+  processedUrl: '',
   sourceLine: null,
   parentId: CpuProfileData.rootId,
   profileMetaData: profileMetaData,
@@ -663,6 +719,7 @@ final CpuStackFrame stackFrameB = CpuStackFrame(
   verboseName: 'B',
   category: 'Dart',
   rawUrl: 'org-dartlang-sdk:///third_party/dart/sdk/lib/async/zone.dart',
+  processedUrl: 'dart:async/zone.dart',
   sourceLine: null,
   parentId: 'id_0',
   profileMetaData: profileMetaData,
@@ -675,6 +732,8 @@ final CpuStackFrame stackFrameC = CpuStackFrame(
   category: 'Dart',
   rawUrl:
       'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+  processedUrl:
+      'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
   sourceLine: null,
   parentId: 'id_1',
   profileMetaData: profileMetaData,
@@ -685,6 +744,7 @@ final CpuStackFrame stackFrameD = CpuStackFrame(
   verboseName: 'D',
   category: 'Dart',
   rawUrl: 'flutter::AnimatorBeginFrame',
+  processedUrl: 'processedflutter::AnimatorBeginFrame',
   sourceLine: null,
   parentId: 'id_1',
   profileMetaData: profileMetaData,
@@ -696,6 +756,7 @@ final CpuStackFrame stackFrameE = CpuStackFrame(
   verboseName: 'E',
   category: 'Dart',
   rawUrl: 'url',
+  processedUrl: 'processedUrl',
   sourceLine: null,
   parentId: 'id_3',
   profileMetaData: profileMetaData,
@@ -706,6 +767,7 @@ final CpuStackFrame stackFrameF = CpuStackFrame(
   verboseName: 'F',
   category: 'Dart',
   rawUrl: 'url',
+  processedUrl: 'processsedUrl',
   sourceLine: null,
   parentId: 'id_4',
   profileMetaData: profileMetaData,
@@ -717,6 +779,7 @@ final CpuStackFrame stackFrameF2 = CpuStackFrame(
   verboseName: 'F',
   category: 'Dart',
   rawUrl: 'url',
+  processedUrl: 'processedUrl',
   sourceLine: null,
   parentId: 'id_3',
   profileMetaData: profileMetaData,
@@ -728,6 +791,8 @@ final CpuStackFrame stackFrameC2 = CpuStackFrame(
   verboseName: 'C',
   category: 'Dart',
   rawUrl:
+      'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+  processedUrl:
       'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
   sourceLine: null,
   parentId: 'id_5',
@@ -741,6 +806,7 @@ final CpuStackFrame stackFrameC3 = CpuStackFrame(
   category: 'Dart',
   rawUrl:
       'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+  processedUrl: '',
   sourceLine: null,
   parentId: 'id_6',
   profileMetaData: profileMetaData,
@@ -753,6 +819,8 @@ final CpuStackFrame stackFrameC4 = CpuStackFrame(
   category: 'Dart',
   rawUrl:
       'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+  processedUrl:
+      'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
   sourceLine: 47,
   parentId: 'id_6',
   profileMetaData: profileMetaData,
@@ -764,6 +832,8 @@ final CpuStackFrame stackFrameG = CpuStackFrame(
   verboseName: 'G',
   category: 'Dart',
   rawUrl:
+      'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
+  processedUrl:
       'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart',
   sourceLine: null,
   parentId: 'id_0',
@@ -867,6 +937,7 @@ final CpuStackFrame zeroStackFrame = CpuStackFrame(
   verboseName: 'A',
   category: 'Dart',
   rawUrl: '',
+  processedUrl: '',
   sourceLine: null,
   parentId: CpuProfileData.rootId,
   profileMetaData: zeroProfileMetaData,
@@ -878,6 +949,7 @@ final flutterEngineStackFrame = CpuStackFrame(
   verboseName: 'flutter::AnimatorBeginFrame',
   category: 'Dart',
   rawUrl: '',
+  processedUrl: '',
   sourceLine: null,
   parentId: CpuProfileData.rootId,
   profileMetaData: profileMetaData,

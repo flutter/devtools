@@ -79,6 +79,22 @@ void main() {
       expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
     });
 
+    test('to json defaults processedUrl to resolvedUrl', () {
+      final id = '140357727781376-12';
+      final profileData = Map<String, dynamic>.from(goldenCpuProfileDataJson);
+      profileData['stackFrames'] = Map<String, Map<String, String>>.from(
+          {'140357727781376-12': goldenCpuProfileStackFrames[id]});
+      profileData['stackFrames'][id].remove('processedUrl');
+      final parsedProfileData = CpuProfileData.parse(profileData);
+      final stackFrames = (parsedProfileData
+              .toJson[CpuProfileData.stackFramesKey] as Map<String, dynamic>)
+          .values
+          .cast<Map<String, dynamic>>();
+      final jsonProcessedUrl = stackFrames.first['processedUrl'];
+
+      expect(jsonProcessedUrl, goldenCpuProfileStackFrames[id]!['resolvedUrl']);
+    });
+
     test('stackFrameIdCompare', () {
       // iOS
       String idA = '140225212960768-2';
@@ -107,6 +123,7 @@ void main() {
           verboseName: 'all',
           category: 'Dart',
           rawUrl: '',
+          processedUrl: '',
           sourceLine: null,
           parentId: '',
           profileMetaData: profileMetaData,

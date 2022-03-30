@@ -298,12 +298,13 @@ class VmServiceWrapper implements VmService {
   }
 
   // Helper function for fetching simplified package urls for each of
-  // the [rawUrls] then mapping them to the [traceObject]
+  // the [resolvedUrls] then mapping them to the [traceObject].
   //
   // [isolateId] The id which is passed to the getIsolate RPC to load this isolate.
-  // [resolvedUrls] list of resolved urls that have been extracted from the [traceObject]'s
-  // stack frames. This is passed as a parameter since [resolvedUrls] can be
-  // extracted while [traceObject] is being created
+  // [resolvedUrlMap] A map of where each key is a resolved url that has been extracted from the [traceObject]'s
+  // stack frames. The values of the map will be overriden in this helper.
+  // This is passed as a parameter since [resolvedUrls] can be extracted
+  // while [traceObject] is being created.
   // [traceObject] A map where the CpuProfileData for each frame is stored.
   Future<void> _addProcessedUrlsToTraceObject(
       String isolateId,
@@ -333,6 +334,7 @@ class VmServiceWrapper implements VmService {
           final processedUrl = processedUrlMapping[resolvedUrl];
           if (processedUrl != null && processedUrl.isNotEmpty) {
             stackFrameJson[CpuProfileData.processedUrlKey] = processedUrl;
+            continue;
           }
         }
       }
