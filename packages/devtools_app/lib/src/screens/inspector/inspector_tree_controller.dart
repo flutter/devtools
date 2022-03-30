@@ -389,7 +389,9 @@ class InspectorTreeController extends Object
   int getRowIndex(double y) => max(0, (y - verticalPadding) ~/ rowHeight);
 
   InspectorTreeRow? getRowForNode(InspectorTreeNode node) {
-    return getCachedRow(root!.getRowIndex(node));
+    final rootLocal = root;
+    if (rootLocal == null) return null;
+    return getCachedRow(rootLocal.getRowIndex(node));
   }
 
   InspectorTreeRow? getRow(Offset offset) {
