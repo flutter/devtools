@@ -26,7 +26,7 @@ class ToggleableServiceExtensionDescription<T>
     required String? gaItem,
     required String tooltip,
     String? description,
-    String? tooltipUrl,
+    String? documentationUrl,
     bool shouldCallOnAllIsolates = false,
     this.inverted = false,
   }) : super(
@@ -40,7 +40,7 @@ class ToggleableServiceExtensionDescription<T>
           shouldCallOnAllIsolates: shouldCallOnAllIsolates,
           tooltip: tooltip,
           description: description ?? title,
-          tooltipUrl: tooltipUrl,
+          documentationUrl: documentationUrl,
         );
 
   static const enabledValueIndex = 0;
@@ -73,7 +73,7 @@ class ServiceExtensionDescription<T> {
     required this.gaItem,
     required this.tooltip,
     this.description,
-    this.tooltipUrl,
+    this.documentationUrl,
     this.shouldCallOnAllIsolates = false,
   })  : displayValues =
             displayValues ?? values.map((v) => v.toString()).toList(),
@@ -105,7 +105,7 @@ class ServiceExtensionDescription<T> {
 
   final String? description;
 
-  final String? tooltipUrl;
+  final String? documentationUrl;
 }
 
 final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
@@ -136,7 +136,7 @@ final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
   gaItem: analytics_constants.debugBanner,
   tooltip:
       'Highlight images that are using too much memory by inverting colors and flipping them.',
-  tooltipUrl:
+  documentationUrl:
       'https://flutter.dev/docs/development/tools/devtools/inspector#highlight-oversized-images',
 );
 
@@ -156,7 +156,7 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.debugPaint,
   tooltip: 'Overlay guidelines to assist with fixing layout issues.',
-  tooltipUrl:
+  documentationUrl:
       'https://flutter.dev/docs/development/tools/devtools/inspector#show-guidelines',
 );
 
@@ -177,7 +177,7 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   gaItem: analytics_constants.paintBaseline,
   tooltip:
       'Show baselines, which are used to position text. Can be useful for checking if text is aligned.',
-  tooltipUrl:
+  documentationUrl:
       'https://flutter.dev/docs/development/tools/devtools/inspector#show-baselines',
 );
 
@@ -197,7 +197,7 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   gaScreenName: analytics_constants.performance,
   gaItem: analytics_constants.performanceOverlay,
   tooltip: 'Overlay a performance chart on your app.',
-  tooltipUrl:
+  documentationUrl:
       'https://flutter.dev/docs/perf/rendering/ui-performance#the-performance-overlay',
 );
 
@@ -218,6 +218,8 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   gaItem: analytics_constants.trackRebuilds,
   description: 'Adds an event to the timeline for every Widget built.',
   tooltip: '',
+  documentationUrl:
+      'https://docs.flutter.dev/development/tools/devtools/performance#track-widget-builds',
 );
 
 final profileRenderObjectPaints = ToggleableServiceExtensionDescription<bool>._(
@@ -231,6 +233,8 @@ final profileRenderObjectPaints = ToggleableServiceExtensionDescription<bool>._(
   gaItem: analytics_constants.trackPaints,
   description: 'Adds an event to the timeline for every RenderObject painted.',
   tooltip: '',
+  documentationUrl:
+      'https://docs.flutter.dev/development/tools/devtools/performance#track-paints',
 );
 
 final profileRenderObjectLayouts =
@@ -245,6 +249,8 @@ final profileRenderObjectLayouts =
   gaItem: analytics_constants.trackLayouts,
   description: 'Adds an event to the timeline for every RenderObject layout.',
   tooltip: '',
+  documentationUrl:
+      'https://docs.flutter.dev/development/tools/devtools/performance#track-layouts',
 );
 
 final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
@@ -264,7 +270,7 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   gaItem: analytics_constants.repaintRainbow,
   tooltip:
       'Show borders that change color when elements repaint. Useful for finding unnecessary repaints.',
-  tooltipUrl:
+  documentationUrl:
       'https://flutter.dev/docs/development/tools/devtools/inspector#highlight-repaints',
 );
 
@@ -284,7 +290,7 @@ final slowAnimations = ToggleableServiceExtensionDescription<num>._(
   gaScreenName: analytics_constants.inspector,
   gaItem: analytics_constants.slowAnimation,
   tooltip: 'Run animations 5 times slower to help fine-tune them.',
-  tooltipUrl:
+  documentationUrl:
       'https://flutter.dev/docs/development/tools/devtools/inspector#slow-animations',
 );
 

@@ -809,6 +809,11 @@ class FakeServiceExtensionManager extends Fake
     return _serviceExtensions.contains(name);
   }
 
+  @override
+  Future<bool> waitForServiceExtensionAvailable(String name) {
+    return Future.value(true);
+  }
+
   /// Hook for tests to call to simulate adding a service extension.
   Future<void> fakeAddServiceExtension(String name) async {
     if (_firstFrameEventReceived) {
