@@ -174,8 +174,9 @@ class InspectorTreeController extends Object
       _selection?.selected = false;
       _selection = node;
       _selection?.selected = true;
-      if (config!.onSelectionChange != null) {
-        config!.onSelectionChange!();
+      final configLocal = config;
+      if (configLocal!.onSelectionChange != null) {
+        configLocal.onSelectionChange!();
       }
     });
   }
