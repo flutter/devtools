@@ -125,30 +125,34 @@ class GenerateChangelogCommand extends Command {
     print(
         'Adding entries to the changelog for all commits since $commitDate...');
 
-    // TODO(kenz): handle cases where there are more than 100 commits.
-    final uri = Uri.https(
-      '${auth}api.github.com',
-      '/repos/flutter/devtools/commits',
-      {
-        'since': commitDate,
-        'per_page': '100',
-      },
-    );
-    final commits = jsonDecode((await http.get(uri)).body);
+    const tryPages = 5;
     final changes = <String>[];
-    for (var commit in commits) {
-      if (commit['sha'] == taggedCommit['sha']) {
-        print(
-            'Skipping commit ${commit['sha']} because this is the commit of the previous tag');
-        continue;
+    for (var i = 1; i <= tryPages; i++) {
+      final uri = Uri.https(
+        '${auth}api.github.com',
+        '/repos/flutter/devtools/commits',
+        {
+          'since': commitDate,
+          'per_page': '100',
+          'page': '$i',
+        },
+      );
+      final githubResponse = await http.get(uri);
+      final commits = jsonDecode(githubResponse.body);
+      for (var commit in commits) {
+        if (commit['sha'] == taggedCommit['sha']) {
+          print(
+              'Skipping commit ${commit['sha']} because this is the commit of the previous tag');
+          continue;
+        }
+        final message = commit['commit']['message'];
+        if (_shouldSkip(commit['commit']['message'])) {
+          print('Skipping commit marked to be ignored: $message');
+          continue;
+        }
+        final entry = '* ' + _sanitize(commit['commit']['message']);
+        changes.add(entry);
       }
-      final message = commit['commit']['message'];
-      if (_shouldSkip(commit['commit']['message'])) {
-        print('Skipping commit marked to be ignored: $message');
-        continue;
-      }
-      final entry = '* ' + _sanitize(commit['commit']['message']);
-      changes.add(entry);
     }
 
     if (nextVersion != null) {
