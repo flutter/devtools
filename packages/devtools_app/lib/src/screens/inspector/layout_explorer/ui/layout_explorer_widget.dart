@@ -55,8 +55,8 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   AnimatedLayoutProperties<L>? get animatedProperties => _animatedProperties;
   AnimatedLayoutProperties<L>? _animatedProperties;
 
-  L get properties =>
-      _previousProperties ?? _animatedProperties as L? ?? _properties!;
+  L? get properties =>
+      _previousProperties ?? _animatedProperties as L? ?? _properties;
 
   RemoteDiagnosticsNode? get selectedNode =>
       inspectorController.selectedNode.value?.diagnostic;
@@ -90,9 +90,9 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   /// Whether this layout explorer can work with this kind of node.
   bool shouldDisplay(RemoteDiagnosticsNode node);
 
-  Size get size => properties.size;
+  Size get size => properties!.size;
 
-  List<LayoutProperties> get children => properties.displayChildren;
+  List<LayoutProperties> get children => properties!.displayChildren;
 
   LayoutProperties? highlighted;
 

@@ -66,7 +66,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   ) {
     return AnimatedLayoutProperties(
       // If an animation is in progress, freeze it and start animating from there, else start a fresh animation from widget.properties.
-      animatedProperties?.copyWith() ?? properties,
+      animatedProperties?.copyWith() ?? properties!,
       nextProperties,
       changeAnimation,
     );
@@ -90,6 +90,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
 
   @override
   Widget build(BuildContext context) {
+    if (properties == null) return const SizedBox();
     return Container(
       margin: const EdgeInsets.all(margin),
       padding: const EdgeInsets.only(bottom: margin, right: margin),
@@ -159,13 +160,15 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   }
 
   Widget _buildChild(BuildContext context) {
+    final propertiesLocal = properties!;
+
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final parentProperties = this.parentProperties ??
-        properties; // Fall back to this node's properties if there is no parent.
+        propertiesLocal; // Fall back to this node's properties if there is no parent.
 
     final parentSize = parentProperties.size;
-    final offset = properties.node.parentData;
+    final offset = propertiesLocal.node.parentData;
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -180,16 +183,17 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         double? nullOutZero(double value) => value != 0.0 ? value : null;
         final widths = [
           nullOutZero(offset.offset.dx),
-          properties.size.width,
+          propertiesLocal.size.width,
           nullOutZero(
-            parentSize.width - (properties.size.width + offset.offset.dx),
+            parentSize.width - (propertiesLocal.size.width + offset.offset.dx),
           ),
         ];
         final heights = [
           nullOutZero(offset.offset.dy),
-          properties.size.height,
+          propertiesLocal.size.height,
           nullOutZero(
-            parentSize.height - (properties.size.height + offset.offset.dy),
+            parentSize.height -
+                (propertiesLocal.size.height + offset.offset.dy),
           ),
         ];
         // 3 element array with [left padding, widget width, right padding].
@@ -216,7 +220,8 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
           height: constraints.maxHeight,
           decoration: BoxDecoration(
             border: Border.all(
-              color: WidgetTheme.fromName(properties.node.description).color,
+              color:
+                  WidgetTheme.fromName(propertiesLocal.node.description).color,
             ),
           ),
           child: Stack(
@@ -230,7 +235,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     size: Size(displayWidths[0], widgetHeight),
                     offset: Offset(0, displayHeights[0]),
                     realSize: Size(width0, safeParentSize.height),
-                    layoutProperties: properties,
+                    layoutProperties: propertiesLocal,
                     isFreeSpace: true,
                   ),
                   horizontal: true,
@@ -243,7 +248,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     size: Size(widgetWidth, displayHeights[0]),
                     offset: Offset(displayWidths[0], 0),
                     realSize: Size(safeParentSize.width, height0),
-                    layoutProperties: properties,
+                    layoutProperties: propertiesLocal,
                     isFreeSpace: true,
                   ),
                   horizontal: false,
@@ -257,7 +262,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     offset: Offset(
                         displayWidths[0] + displayWidths[1], displayHeights[0]),
                     realSize: Size(width2, safeParentSize.height),
-                    layoutProperties: properties,
+                    layoutProperties: propertiesLocal,
                     isFreeSpace: true,
                   ),
                   horizontal: true,
@@ -271,7 +276,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     offset: Offset(displayWidths[0],
                         displayHeights[0] + displayHeights[1]),
                     realSize: Size(safeParentSize.width, height2),
-                    layoutProperties: properties,
+                    layoutProperties: propertiesLocal,
                     isFreeSpace: true,
                   ),
                   horizontal: false,
@@ -279,13 +284,13 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               BoxChildVisualizer(
                 isSelected: true,
                 state: this,
-                layoutProperties: properties,
+                layoutProperties: propertiesLocal,
                 renderProperties: RenderProperties(
                   axis: Axis.horizontal,
                   size: Size(widgetWidth, widgetHeight),
                   offset: Offset(displayWidths[0], displayHeights[0]),
-                  realSize: properties.size,
-                  layoutProperties: properties,
+                  realSize: propertiesLocal.size,
+                  layoutProperties: propertiesLocal,
                 ),
               ),
             ],
@@ -296,7 +301,7 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   }
 
   LayoutProperties? get parentProperties {
-    final parentElement = properties.node.parentRenderElement;
+    final parentElement = properties?.node.parentRenderElement;
     if (parentElement == null) return null;
     final parentProperties = computeLayoutProperties(parentElement);
     return parentProperties;

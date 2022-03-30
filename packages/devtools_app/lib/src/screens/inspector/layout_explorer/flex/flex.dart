@@ -42,31 +42,31 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     FlexLayoutExplorerWidget, FlexLayoutProperties> {
   final scrollController = ScrollController();
 
-  Axis get direction => properties.direction;
+  Axis get direction => properties!.direction;
 
   ObjectGroup? get objectGroup =>
-      properties.node.inspectorService as ObjectGroup?;
+      properties!.node.inspectorService as ObjectGroup?;
 
   Color horizontalColor(ColorScheme colorScheme) =>
-      properties.isMainAxisHorizontal
+      properties!.isMainAxisHorizontal
           ? colorScheme.mainAxisColor
           : colorScheme.crossAxisColor;
 
-  Color verticalColor(ColorScheme colorScheme) => properties.isMainAxisVertical
+  Color verticalColor(ColorScheme colorScheme) => properties!.isMainAxisVertical
       ? colorScheme.mainAxisColor
       : colorScheme.crossAxisColor;
 
   Color horizontalTextColor(ColorScheme colorScheme) =>
-      properties.isMainAxisHorizontal
+      properties!.isMainAxisHorizontal
           ? colorScheme.mainAxisTextColor
           : colorScheme.crossAxisTextColor;
 
   Color verticalTextColor(ColorScheme colorScheme) =>
-      properties.isMainAxisVertical
+      properties!.isMainAxisVertical
           ? colorScheme.mainAxisTextColor
           : colorScheme.crossAxisTextColor;
 
-  String get flexType => properties.type;
+  String get flexType => properties!.type;
 
   @override
   RemoteDiagnosticsNode? getRoot(RemoteDiagnosticsNode? node) {
@@ -88,7 +88,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
       FlexLayoutProperties nextProperties) {
     return AnimatedFlexLayoutProperties(
       // If an animation is in progress, freeze it and start animating from there, else start a fresh animation from widget.properties.
-      animatedProperties?.copyWith() as FlexLayoutProperties? ?? properties,
+      animatedProperties?.copyWith() as FlexLayoutProperties? ?? properties!,
       nextProperties,
       changeAnimation,
     );
@@ -118,7 +118,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         : colorScheme.crossAxisTextColor;
     List<Object> alignmentEnumEntries;
     Object? selected;
-    final propertiesLocal = properties;
+    final propertiesLocal = properties!;
     if (axis == direction) {
       alignmentEnumEntries = MainAxisAlignment.values;
       selected = propertiesLocal.mainAxisAlignment;
@@ -237,6 +237,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
 
   @override
   Widget build(BuildContext context) {
+    if (properties == null) return const SizedBox();
     return Container(
       margin: const EdgeInsets.all(margin),
       padding: const EdgeInsets.only(bottom: margin, right: margin),
@@ -253,7 +254,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     final colorScheme = Theme.of(context).colorScheme;
     final maxHeight = constraints.maxHeight;
     final maxWidth = constraints.maxWidth;
-    final propertiesLocal = properties;
+    final propertiesLocal = properties!;
     final flexDescription = Align(
       alignment: Alignment.centerLeft,
       child: Container(
