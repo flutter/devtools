@@ -15,6 +15,7 @@ import 'package:devtools_app/src/screens/performance/performance_controller.dart
 import 'package:devtools_app/src/screens/performance/performance_screen.dart';
 import 'package:devtools_app/src/screens/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_app/src/shared/version.dart';
@@ -220,6 +221,44 @@ void main() {
         expect(find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
             findsOneWidget);
         expect(find.byType(EventDetails), findsOneWidget);
+      });
+    });
+
+    testWidgetsWithWindowSize('opens enhance tracing overlay', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(find.text('Enhance Tracing'), findsOneWidget);
+        await tester.tap(find.text('Enhance Tracing'));
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining(
+            'frame times may be negatively affected',
+            findRichText: true,
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining(
+            'you will need to reproduce activity in your app',
+            findRichText: true,
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('Track Widget Builds', findRichText: true),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('Track Layouts', findRichText: true),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('Track Paints', findRichText: true),
+          findsOneWidget,
+        );
+        expect(find.byType(MoreInfoLink), findsNWidgets(3));
       });
     });
   });
