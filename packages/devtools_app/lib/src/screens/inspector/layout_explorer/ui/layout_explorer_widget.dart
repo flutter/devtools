@@ -72,11 +72,11 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
 
   Future<void> onSelectionChanged() async {
     if (!mounted) return;
-    if (!shouldDisplay(selectedNode)) {
-      return;
-    }
+    final selectedNodeLocal = selectedNode;
+    if (selectedNodeLocal == null) return;
+    if (!shouldDisplay(selectedNodeLocal)) return;
     final prevRootId = id(_properties?.node);
-    final newRootId = id(getRoot(selectedNode));
+    final newRootId = id(getRoot(selectedNodeLocal));
     final shouldFetch = prevRootId != newRootId;
     if (shouldFetch) {
       _dirty = false;
@@ -88,7 +88,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   }
 
   /// Whether this layout explorer can work with this kind of node.
-  bool shouldDisplay(RemoteDiagnosticsNode? node);
+  bool shouldDisplay(RemoteDiagnosticsNode node);
 
   Size get size => properties.size;
 

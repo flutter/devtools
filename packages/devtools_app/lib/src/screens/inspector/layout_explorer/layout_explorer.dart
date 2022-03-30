@@ -33,10 +33,10 @@ class _LayoutExplorerTabState extends State<LayoutExplorerTab>
   RemoteDiagnosticsNode? previousSelection;
 
   Widget rootWidget(RemoteDiagnosticsNode? node) {
-    if (FlexLayoutExplorerWidget.shouldDisplay(node)) {
+    if (node != null && FlexLayoutExplorerWidget.shouldDisplay(node)) {
       return FlexLayoutExplorerWidget(controller);
     }
-    if (BoxLayoutExplorerWidget.shouldDisplay(node)) {
+    if (node != null && BoxLayoutExplorerWidget.shouldDisplay(node)) {
       return BoxLayoutExplorerWidget(controller);
     }
     return Center(

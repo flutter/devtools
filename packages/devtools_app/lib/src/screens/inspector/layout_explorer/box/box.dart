@@ -28,14 +28,14 @@ class BoxLayoutExplorerWidget extends LayoutExplorerWidget {
     Key? key,
   }) : super(inspectorController, key: key);
 
-  static bool shouldDisplay(RemoteDiagnosticsNode? node) {
+  static bool shouldDisplay(RemoteDiagnosticsNode node) {
     // Pretend this layout explorer is always available. This layout explorer
     // will gracefully fall back to an error message if the required properties
     // are not needed.
     // TODO(jacobr) pass a RemoteDiagnosticsNode to this method that contains
     // the layout explorer related supplemental properties so that we can
     // accurately determine whether the widget uses box layout.
-    return node != null;
+    return true;
   }
 
   @override
@@ -47,13 +47,17 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     BoxLayoutExplorerWidget, LayoutProperties> {
   @override
   RemoteDiagnosticsNode? getRoot(RemoteDiagnosticsNode? node) {
-    if (!shouldDisplay(node)) return null;
+    final nodeLocal = node;
+    if (nodeLocal == null) return null;
+    if (!shouldDisplay(nodeLocal)) return null;
     return node;
   }
 
   @override
-  bool shouldDisplay(RemoteDiagnosticsNode? node) {
-    return BoxLayoutExplorerWidget.shouldDisplay(selectedNode);
+  bool shouldDisplay(RemoteDiagnosticsNode node) {
+    final selectedNodeLocal = selectedNode;
+    if (selectedNodeLocal == null) return false;
+    return BoxLayoutExplorerWidget.shouldDisplay(selectedNodeLocal);
   }
 
   @override

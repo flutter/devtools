@@ -29,8 +29,8 @@ class FlexLayoutExplorerWidget extends LayoutExplorerWidget {
     Key? key,
   }) : super(inspectorController, key: key);
 
-  static bool shouldDisplay(RemoteDiagnosticsNode? node) {
-    return (node?.isFlex ?? false) || (node?.parent?.isFlex ?? false);
+  static bool shouldDisplay(RemoteDiagnosticsNode node) {
+    return (node.isFlex) || (node.parent?.isFlex ?? false);
   }
 
   @override
@@ -70,14 +70,17 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
 
   @override
   RemoteDiagnosticsNode? getRoot(RemoteDiagnosticsNode? node) {
+    if (node == null) return null;
     if (!shouldDisplay(node)) return null;
-    if (node!.isFlex) return node;
+    if (node.isFlex) return node;
     return node.parent;
   }
 
   @override
-  bool shouldDisplay(RemoteDiagnosticsNode? node) {
-    return FlexLayoutExplorerWidget.shouldDisplay(selectedNode);
+  bool shouldDisplay(RemoteDiagnosticsNode node) {
+    final selectedNodeLocal = selectedNode;
+    if (selectedNodeLocal == null) return false;
+    return FlexLayoutExplorerWidget.shouldDisplay(selectedNodeLocal);
   }
 
   @override
