@@ -704,7 +704,7 @@ extension RemoteDiagnosticsNodeExtension on RemoteDiagnosticsNode {
 abstract class InspectorControllerClient {
   void onChanged();
 
-  void scrollToRect(Rect? rect);
+  void scrollToRect(Rect rect);
 
   void requestFocus();
 }
@@ -849,14 +849,14 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 
   @override
-  Future<void> scrollToRect(Rect? rect) async {
+  Future<void> scrollToRect(Rect rect) async {
     if (rect == _currentAnimateTarget) {
       // We are in the middle of an animation to this exact rectangle.
       return;
     }
     _currentAnimateTarget = rect;
     final targetY = _computeTargetOffsetY(
-      rect!.top,
+      rect.top,
       rect.bottom,
     );
     if (_scrollControllerY.hasClients) {
