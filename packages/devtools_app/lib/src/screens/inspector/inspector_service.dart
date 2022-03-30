@@ -68,9 +68,9 @@ abstract class InspectorServiceBase extends DisposableController
           oneRequestAtATime: true,
           isolate: serviceManager.isolateManager.mainIsolate,
         ) {
-    _lastMainIsolate = serviceManager.isolateManager.mainIsolate.value!;
+    _lastMainIsolate = serviceManager.isolateManager.mainIsolate.value;
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      final mainIsolate = serviceManager.isolateManager.mainIsolate.value!;
+      final mainIsolate = serviceManager.isolateManager.mainIsolate.value;
       if (mainIsolate != _lastMainIsolate) {
         onIsolateStopped();
       }
@@ -92,7 +92,7 @@ abstract class InspectorServiceBase extends DisposableController
 
   final Set<InspectorServiceClient> clients;
   final EvalOnDartLibrary inspectorLibrary;
-  late IsolateRef _lastMainIsolate;
+  IsolateRef? _lastMainIsolate;
 
   /// Reference to the isolate running the inspector that [InspectorServiceBase]
   /// is connecting to. This isolate should always be the main isolate.

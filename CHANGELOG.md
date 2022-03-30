@@ -1,3 +1,6 @@
+## 2.12.1
+* Fix null safety errors and prep for 2.12.1 release TODO
+
 ## 2.12.0
 * Prep for 2.12.0 release [#3937](https://github.com/flutter/devtools/pull/3937)
 * Add documentation links to More Debugging Options menu [#3936](https://github.com/flutter/devtools/pull/3936)
