@@ -21,7 +21,7 @@ import 'inspector_tree.dart';
 
 final _colorIconMaker = ColorIconMaker();
 final _customIconMaker = CustomIconMaker();
-final defaultIcon = _customIconMaker.fromInfo('Default') as CustomIcon;
+final defaultIcon = _customIconMaker.fromInfo('Default');
 
 const _showRenderObjectPropertiesAsLinks = false;
 
