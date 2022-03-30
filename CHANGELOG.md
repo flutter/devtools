@@ -1,5 +1,5 @@
 ## 2.12.1
-* Fix null safety errors and prep for 2.12.1 release TODO
+* Fix null safety errors and prep for 2.12.1 release [#3939](https://github.com/flutter/devtools/pull/3939)
 
 ## 2.12.0
 * Prep for 2.12.0 release [#3937](https://github.com/flutter/devtools/pull/3937)
