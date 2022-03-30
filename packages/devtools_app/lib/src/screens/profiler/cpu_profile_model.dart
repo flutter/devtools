@@ -65,7 +65,7 @@ class CpuProfileData {
         // frame, the this will be the empty string.
         rawUrl: resolvedUrl,
         processedUrl: processedUrl,
-        sourceLine: stackFrameJson[sourceLine],
+        sourceLine: stackFrameJson[sourceLineKey],
         parentId: stackFrameJson[parentIdKey] ?? rootId,
         profileMetaData: profileMetaData,
       );
@@ -286,7 +286,7 @@ class CpuProfileData {
   static const stackFrameIdKey = 'sf';
   static const resolvedUrlKey = 'resolvedUrl';
   static const processedUrlKey = 'processedUrl';
-  static const sourceLine = 'sourceLine';
+  static const sourceLineKey = 'sourceLine';
   static const stackFramesKey = 'stackFrames';
   static const traceEventsKey = 'traceEvents';
   static const sampleCountKey = 'sampleCount';
@@ -606,6 +606,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     String? category,
     String? url,
     String? processedUrl,
+    int? sourceLine,
     String? parentId,
     CpuProfileMetaData? profileMetaData,
     bool copySampleCountsAndTags = true,
@@ -618,7 +619,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       category: category ?? this.category,
       rawUrl: url ?? rawUrl,
       processedUrl: processedUrl ?? this.processedUrl,
-      sourceLine: sourceLine,
+      sourceLine: sourceLine ?? this.sourceLine,
       parentId: parentId ?? this.parentId,
       profileMetaData: profileMetaData ?? this.profileMetaData,
     );
@@ -670,6 +671,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
           CpuProfileData.categoryKey: category,
           CpuProfileData.resolvedUrlKey: rawUrl,
           CpuProfileData.processedUrlKey: processedUrl,
+          CpuProfileData.sourceLineKey: sourceLine,
           if (parentId != null) CpuProfileData.parentIdKey: parentId,
         }
       };

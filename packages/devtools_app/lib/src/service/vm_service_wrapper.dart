@@ -42,6 +42,7 @@ class VmServiceWrapper implements VmService {
 
   final bool trackFutures;
   final Map<String, Future<Success>> _activeStreams = {};
+  final _resolvedUrlMap = <String, String?>{};
 
   final Set<TrackedFuture<Object>> activeFutures = {};
   Completer<bool> _allFuturesCompleter = Completer<bool>()
@@ -219,7 +220,6 @@ class VmServiceWrapper implements VmService {
     // final output from this method.
     const int kRootId = 0;
     int nextId = kRootId;
-    final resolvedUrlMap = <String, String?>{};
     final traceObject = <String, dynamic>{
       CpuProfileData.sampleCountKey: cpuSamples.sampleCount,
       CpuProfileData.samplePeriodKey: cpuSamples.samplePeriod,
@@ -252,13 +252,13 @@ class VmServiceWrapper implements VmService {
           CpuProfileData.categoryKey: 'Dart',
           CpuProfileData.nameKey: nameForStackFrame(current),
           CpuProfileData.resolvedUrlKey: current.resolvedUrl,
-          CpuProfileData.sourceLine: current.sourceLine,
+          CpuProfileData.sourceLineKey: current.sourceLine,
           if (parent != null && parent.frameId != 0)
             CpuProfileData.parentIdKey: '$isolateId-${parent.frameId}',
         };
 
         if (current.resolvedUrl != null && current.resolvedUrl!.isNotEmpty) {
-          resolvedUrlMap[current.resolvedUrl!] = null;
+          _resolvedUrlMap[current.resolvedUrl!] = null;
         }
       }
       for (final child in current.children) {
@@ -291,35 +291,38 @@ class VmServiceWrapper implements VmService {
       });
     }
 
-    await _addProcessedUrlsToTraceObject(
-        isolateId, resolvedUrlMap, traceObject);
+    await _addProcessedUrlsToTraceObject(isolateId, traceObject);
 
     return CpuProfileData.parse(traceObject);
   }
 
-  // Helper function for fetching simplified package urls for each of
-  // the [resolvedUrls] then mapping them to the [traceObject].
-  //
-  // [isolateId] The id which is passed to the getIsolate RPC to load this isolate.
-  // [resolvedUrlMap] A map of where each key is a resolved url that has been extracted from the [traceObject]'s
-  // stack frames. The values of the map will be overriden in this helper.
-  // This is passed as a parameter since [resolvedUrls] can be extracted
-  // while [traceObject] is being created.
-  // [traceObject] A map where the CpuProfileData for each frame is stored.
+  /// Helper function for fetching simplified package urls for each of
+  /// the [resolvedUrls] then mapping them to the [traceObject].
+  ///
+  /// [isolateId] The id which is passed to the getIsolate RPC to load this isolate.
+  /// [resolvedUrlMap] A map of where each key is a resolved url that has been extracted from the [traceObject]'s
+  /// stack frames. The values of the map will be overriden in this helper.
+  /// This is passed as a parameter since [resolvedUrls] can be extracted
+  /// while [traceObject] is being created.
+  /// [traceObject] A map where the CpuProfileData for each frame is stored.
   Future<void> _addProcessedUrlsToTraceObject(
-      String isolateId,
-      Map<String, String?> resolvedUrlMap,
-      Map<String, dynamic> traceObject) async {
-    final processedUrlMapping = <String, String>{};
-    final resolvedUrlList = resolvedUrlMap.keys.toList();
-    final uris =
-        (await _vmService.lookupPackageUris(isolateId, resolvedUrlList)).uris;
-    if (uris != null) {
-      for (var i = 0; i < resolvedUrlList.length; i++) {
-        final resolvedUrl = resolvedUrlList[i];
-        final uri = uris[i];
-        if (uri != null && uri.isNotEmpty && resolvedUrl.isNotEmpty) {
-          processedUrlMapping[resolvedUrl] = uri;
+    String isolateId,
+    Map<String, dynamic> traceObject,
+  ) async {
+    final resolvedUrls = _resolvedUrlMap.keys
+        .where((resolvedUrl) => _resolvedUrlMap[resolvedUrl] == null)
+        .toList();
+    final packageUris =
+        (await _vmService.lookupPackageUris(isolateId, resolvedUrls)).uris;
+
+    if (packageUris != null) {
+      for (var i = 0; i < resolvedUrls.length; i++) {
+        final resolvedUrl = resolvedUrls[i];
+        final packageUri = packageUris[i];
+        if (packageUri != null &&
+            packageUri.isNotEmpty &&
+            resolvedUrl.isNotEmpty) {
+          _resolvedUrlMap[resolvedUrl] = packageUri;
         }
       }
 
@@ -331,10 +334,9 @@ class VmServiceWrapper implements VmService {
         final resolvedUrl =
             stackFrameJson[CpuProfileData.resolvedUrlKey] as String?;
         if (resolvedUrl != null && resolvedUrl.isNotEmpty) {
-          final processedUrl = processedUrlMapping[resolvedUrl];
-          if (processedUrl != null && processedUrl.isNotEmpty) {
-            stackFrameJson[CpuProfileData.processedUrlKey] = processedUrl;
-            continue;
+          final packageUrl = _resolvedUrlMap[resolvedUrl];
+          if (packageUrl != null && packageUrl.isNotEmpty) {
+            stackFrameJson[CpuProfileData.processedUrlKey] = packageUrl;
           }
         }
       }
