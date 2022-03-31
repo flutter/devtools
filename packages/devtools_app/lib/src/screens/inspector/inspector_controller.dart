@@ -73,7 +73,8 @@ class InspectorController extends DisposableController
     required this.treeType,
     this.parent,
     this.isSummaryTree = true,
-  })  : _treeGroups = InspectorObjectGroupManager(
+  })  : assert((detailsTree != null) == isSummaryTree),
+        _treeGroups = InspectorObjectGroupManager(
           serviceManager.inspectorService as InspectorService,
           'tree',
         ),
@@ -304,11 +305,13 @@ class InspectorController extends DisposableController
   }
 
   InspectorTreeNode? findMatchingInspectorTreeNode(
-      RemoteDiagnosticsNode? node) {
-    if (node?.valueRef == null) {
+    RemoteDiagnosticsNode? node,
+  ) {
+    final valueRef = node?.valueRef;
+    if (valueRef == null) {
       return null;
     }
-    return valueToInspectorTreeNode[node?.valueRef];
+    return valueToInspectorTreeNode[valueRef];
   }
 
   Future<void> _makePendingUpdateDone() async {

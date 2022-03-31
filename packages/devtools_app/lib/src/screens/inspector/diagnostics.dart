@@ -197,8 +197,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       final properties = diagnosticLocal.valuePropertiesJson;
 
       if (name?.isNotEmpty == true && diagnosticLocal.showName) {
-        children
-            .add(Text('$name${diagnosticLocal.separator} ', style: textStyle));
+        children.add(Text(
+          '$name${diagnosticLocal.separator} ',
+          style: textStyle,
+        ));
         // provide some contrast between the name and description if both are
         // present.
         descriptionTextStyle =
