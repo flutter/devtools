@@ -96,14 +96,16 @@ class WebSocket extends NetworkRequest {
 
   @override
   DateTime get startTimestamp => DateTime.fromMicrosecondsSinceEpoch(
-      timelineMicrosecondsSinceEpoch(_socket.startTime));
+        timelineMicrosecondsSinceEpoch(_socket.startTime),
+      );
 
   @override
   DateTime? get endTimestamp {
     final endTime = _socket.endTime;
     return endTime != null
         ? DateTime.fromMicrosecondsSinceEpoch(
-            timelineMicrosecondsSinceEpoch(endTime))
+            timelineMicrosecondsSinceEpoch(endTime),
+          )
         : null;
   }
 
@@ -111,7 +113,8 @@ class WebSocket extends NetworkRequest {
     final lastReadTime = _socket.lastReadTime;
     return lastReadTime != null
         ? DateTime.fromMicrosecondsSinceEpoch(
-            timelineMicrosecondsSinceEpoch(lastReadTime))
+            timelineMicrosecondsSinceEpoch(lastReadTime),
+          )
         : null;
   }
 
@@ -119,7 +122,8 @@ class WebSocket extends NetworkRequest {
     final lastWriteTime = _socket.lastWriteTime;
     return lastWriteTime != null
         ? DateTime.fromMicrosecondsSinceEpoch(
-            timelineMicrosecondsSinceEpoch(lastWriteTime))
+            timelineMicrosecondsSinceEpoch(lastWriteTime),
+          )
         : null;
   }
 

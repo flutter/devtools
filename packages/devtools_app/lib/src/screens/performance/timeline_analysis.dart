@@ -374,7 +374,8 @@ class FrameSectionProfile extends StatelessWidget {
     return RoundedOutlinedBorder(
       child: Center(
         child: Text(
-            'flame chart / bottom up chart showing timeline events for $selectedSection'),
+          'flame chart / bottom up chart showing timeline events for $selectedSection',
+        ),
       ),
     );
   }

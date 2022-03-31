@@ -34,14 +34,15 @@ class DevToolsServerConnection {
       (e) => e.isNotEmpty,
     );
     final uri = Uri(
-        scheme: baseUri.scheme,
-        host: baseUri.host,
-        port: baseUri.port,
-        pathSegments: [
-          ...baseUriPathSegments,
-          'api',
-          'ping',
-        ]);
+      scheme: baseUri.scheme,
+      host: baseUri.host,
+      port: baseUri.port,
+      pathSegments: [
+        ...baseUriPathSegments,
+        'api',
+        'ping',
+      ],
+    );
 
     try {
       final response = await http.get(uri).timeout(const Duration(seconds: 5));
@@ -60,12 +61,14 @@ class DevToolsServerConnection {
       return null;
     }
 
-    final sseUri = Uri(pathSegments: [
-      '', // Leading '/'
-      ...baseUriPathSegments,
-      'api',
-      'sse'
-    ]);
+    final sseUri = Uri(
+      pathSegments: [
+        '', // Leading '/'
+        ...baseUriPathSegments,
+        'api',
+        'sse'
+      ],
+    );
     final client = SseClient(sseUri.toString());
     return DevToolsServerConnection._(client);
   }
