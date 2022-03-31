@@ -134,8 +134,8 @@ class AnimatedFlexLayoutProperties
   TextDirection get textDirection => end.textDirection;
 
   @override
-  double? get totalFlex =>
-      lerpDouble(begin.totalFlex, end.totalFlex, animation.value);
+  double get totalFlex =>
+      lerpDouble(begin.totalFlex, end.totalFlex, animation.value)!;
 
   @override
   String get type => end.type;
