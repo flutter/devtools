@@ -444,13 +444,13 @@ class FlexLayoutProperties extends LayoutProperties {
 
   String get type => direction.flexType;
 
-  num? get totalFlex {
+  num get totalFlex {
     if (children.isEmpty) return 0;
     _totalFlex ??= children
         .map((child) => child.flexFactor ?? 0)
         .reduce((value, element) => value + element)
         .toInt();
-    return _totalFlex;
+    return _totalFlex!;
   }
 
   Axis get crossAxisDirection {

@@ -272,7 +272,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             hint: Container(
               padding: const EdgeInsets.all(4.0),
               child: Text(
-                'Total Flex Factor: ${propertiesLocal.totalFlex?.toInt()}',
+                'Total Flex Factor: ${propertiesLocal.totalFlex.toInt()}',
                 textScaleFactor: largeTextScaleFactor,
                 style: const TextStyle(
                   color: emphasizedTextColor,
