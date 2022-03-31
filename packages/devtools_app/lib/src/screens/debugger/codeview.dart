@@ -371,7 +371,7 @@ class _CodeViewState extends State<CodeView>
                                       debugController: widget.controller,
                                       scrollController: textController,
                                       lines: lines,
-                                      pausedFrame: pausedFrame!,
+                                      pausedFrame: pausedFrame,
                                       searchMatchesNotifier:
                                           widget.controller.searchMatches,
                                       activeSearchMatchNotifier:
@@ -630,7 +630,7 @@ class Lines extends StatefulWidget {
   final DebuggerController debugController;
   final ScrollController scrollController;
   final List<TextSpan> lines;
-  final StackFrameAndSourcePosition pausedFrame;
+  final StackFrameAndSourcePosition? pausedFrame;
   final ValueListenable<List<SourceToken>> searchMatchesNotifier;
   final ValueListenable<SourceToken?> activeSearchMatchNotifier;
 
@@ -686,7 +686,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    final pausedLine = widget.pausedFrame.line;
+    final pausedLine = widget.pausedFrame?.line;
     return ListView.builder(
       controller: widget.scrollController,
       itemExtent: CodeView.rowHeight,

@@ -155,7 +155,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         firstListenable: controller.currentScriptRef,
         secondListenable: controller.currentParsedScript,
         builder: (context, scriptRef, parsedScript, _) {
-          print('REBUILDING scriptRef: $scriptRef, parsedScript: $parsedScript');
           if (scriptRef != null && parsedScript != null && !_shownFirstScript) {
             ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
             serviceManager.sendDwdsEvent(

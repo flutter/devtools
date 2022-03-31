@@ -40,7 +40,7 @@ class DebuggerController extends DisposableController
     autoDisposeStreamSubscription(
       serviceManager.onConnectionAvailable.listen(_handleConnectionAvailable),
     );
-    if (!serviceManager.hasService) {
+    if (serviceManager.hasService) {
       initialize();
     }
     _scriptHistoryListener = () {
