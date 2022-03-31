@@ -71,6 +71,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     VmServiceWrapper service,
     this.hasConnection = true,
     this.connectedAppInitialized = true,
+    this.hasService = true,
     this.availableServices = const [],
     this.availableLibraries = const [],
   }) : service = service ?? createFakeService() {
@@ -140,6 +141,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   bool hasConnection;
+
+  @override
+  bool hasService;
 
   @override
   bool connectedAppInitialized;
