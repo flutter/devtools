@@ -708,8 +708,11 @@ class LoggingController extends DisposableController
 /// we wait for up to 1ms when we get the `foo` event, to see if the next event
 /// is a single newline. If so, we add the newline to the previous log message.
 class _StdoutEventHandler {
-  _StdoutEventHandler(this.loggingController, this.name,
-      {this.isError = false,});
+  _StdoutEventHandler(
+    this.loggingController,
+    this.name, {
+    this.isError = false,
+  });
 
   final LoggingController loggingController;
   final String name;
