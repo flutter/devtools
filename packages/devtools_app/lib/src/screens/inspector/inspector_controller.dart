@@ -314,7 +314,7 @@ class InspectorController extends DisposableController
     return valueToInspectorTreeNode[valueRef];
   }
 
-  Future<void> _makePendingUpdateDone() async {
+  Future<void> _waitForPendingUpdateDone() async {
     // Wait for the selection to be resolved followed by waiting for the tree to be computed.
     await _selectionGroups?.pendingUpdateDone;
     await _treeGroups?.pendingUpdateDone;
@@ -330,10 +330,12 @@ class InspectorController extends DisposableController
 
     // TODO(jacobr): refresh the tree as well as just the properties.
     final detailsLocal = details;
-    if (detailsLocal == null) return _makePendingUpdateDone();
+    if (detailsLocal == null) return _waitForPendingUpdateDone();
 
-    return Future.wait(
-        [_makePendingUpdateDone(), detailsLocal._makePendingUpdateDone()]);
+    return Future.wait([
+      _waitForPendingUpdateDone(),
+      detailsLocal._waitForPendingUpdateDone()
+    ]);
   }
 
   // Note that this may be called after the controller is disposed.  We need to handle nulls in the fields.
@@ -375,7 +377,7 @@ class InspectorController extends DisposableController
 
     filterErrors();
 
-    return _makePendingUpdateDone();
+    return _waitForPendingUpdateDone();
   }
 
   void filterErrors() {
