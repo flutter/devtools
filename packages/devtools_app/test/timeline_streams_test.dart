@@ -36,7 +36,9 @@ void main() async {
         expect(serviceManager.timelineStreamManager, isNotNull);
         expect(serviceManager.timelineStreamManager.basicStreams, isNotEmpty);
         expect(
-            serviceManager.timelineStreamManager.advancedStreams, isNotEmpty);
+          serviceManager.timelineStreamManager.advancedStreams,
+          isNotEmpty,
+        );
 
         await env.tearDownEnvironment();
       },
