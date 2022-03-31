@@ -99,10 +99,11 @@ class _CodeViewState extends State<CodeView>
     horizontalController = ScrollController();
     _lastScriptRef = widget.scriptRef;
 
-    if (initialPosition?.location?.line != null) {
+    final lineCount = initialPosition?.location?.line;
+    if (lineCount != null) {
       // Lines are 1-indexed. Scrolling to line 1 required a scroll position of
       // 0.
-      final lineIndex = initialPosition!.location!.line! - 1;
+      final lineIndex = lineCount - 1;
       final scrollPosition = lineIndex * CodeView.rowHeight;
       verticalController.jumpTo(scrollPosition);
     }
@@ -177,9 +178,9 @@ class _CodeViewState extends State<CodeView>
 
     // TODO(devoncarew): Adjust this so we don't scroll if we're already in the
     // middle third of the screen.
-    if (parsedScript?.lineCount != null &&
-        parsedScript!.lineCount * CodeView.rowHeight > extent) {
-      final lineIndex = location!.line! - 1;
+    final lineCount = parsedScript?.lineCount;
+    if (lineCount != null && lineCount * CodeView.rowHeight > extent) {
+      final lineIndex = lineCount - 1;
       final scrollPosition =
           lineIndex * CodeView.rowHeight - ((extent - CodeView.rowHeight) / 2);
       if (animate) {
@@ -196,8 +197,10 @@ class _CodeViewState extends State<CodeView>
   }
 
   void _onPressed(int line) {
-    if (widget.onSelected != null && scriptRef != null) {
-      widget.onSelected!(scriptRef!, line);
+    final onSelected = widget.onSelected;
+    final script = scriptRef;
+    if (onSelected != null && script != null) {
+      onSelected(script, line);
     }
   }
 
@@ -241,10 +244,11 @@ class _CodeViewState extends State<CodeView>
 
     // Ensure the syntax highlighter has been initialized.
     // TODO(bkonyi): process source for highlighting on a separate thread.
-    if (parsedScript?.script.source != null) {
-      final scriptSource = parsedScript!.script.source!;
+    final script = parsedScript;
+    final scriptSource = parsedScript?.script.source;
+    if (script != null && scriptSource != null) {
       if (scriptSource.length < 500000) {
-        final highlighted = parsedScript!.highlighter.highlight(context);
+        final highlighted = script.highlighter.highlight(context);
 
         // Look for [TextSpan]s which only contain '\n' to manually break the
         // output from the syntax highlighter into individual lines.
@@ -292,7 +296,11 @@ class _CodeViewState extends State<CodeView>
 
     return HistoryViewport(
       history: widget.controller.scriptsHistory,
-      generateTitle: (dynamic script) => script.uri,
+      generateTitle: (ScriptRef? script) {
+        final scriptUri = script?.uri;
+        if (scriptUri == null) return '';
+        return scriptUri;
+      },
       onTitleTap: () => widget.controller.toggleFileOpenerVisibility(true),
       controls: [
         ScriptPopupMenu(widget.controller),
@@ -304,7 +312,7 @@ class _CodeViewState extends State<CodeView>
           enabled: widget.controller.scriptsHistory.hasScripts,
         ),
       ],
-      contentBuilder: (context, dynamic script) {
+      contentBuilder: (context, ScriptRef? script) {
         if (lines.isNotEmpty) {
           return DefaultTextStyle(
             style: theme.fixedFontStyle,
@@ -339,7 +347,9 @@ class _CodeViewState extends State<CodeView>
                               breakpoints: breakpoints
                                   .where((bp) => bp.scriptRef == scriptRef)
                                   .toList(),
-                              executableLines: parsedScript!.executableLines,
+                              executableLines: parsedScript != null
+                                  ? parsedScript!.executableLines
+                                  : <int>{},
                               onPressed: _onPressed,
                               // Disable dots for possible breakpoint locations.
                               allowInteraction:
@@ -465,7 +475,7 @@ class _CodeViewState extends State<CodeView>
               overflow: TextOverflow.ellipsis,
             ),
             Text(
-              scriptRef.uri!,
+              scriptRef.uri ?? '',
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
               style: Theme.of(context).subtleTextStyle,
@@ -558,9 +568,7 @@ class GutterItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final foregroundColor = theme.isDarkTheme
-        ? theme.textTheme.bodyText2!.color
-        : theme.primaryColor;
+    final breakpointColor = theme.colorScheme.breakpointColor;
     final subtleColor = theme.unselectedWidgetColor;
 
     final bpBoxSize = breakpointRadius * 2;
@@ -587,7 +595,7 @@ class GutterItem extends StatelessWidget {
                   child: Center(
                     child: createAnimatedCircleWidget(
                       isBreakpoint ? breakpointRadius : executableLineRadius,
-                      isBreakpoint ? foregroundColor : subtleColor,
+                      isBreakpoint ? breakpointColor : subtleColor,
                     ),
                   ),
                 ),
@@ -603,7 +611,7 @@ class GutterItem extends StatelessWidget {
                 child: Icon(
                   Icons.label,
                   size: defaultIconSize,
-                  color: foregroundColor,
+                  color: breakpointColor,
                 ),
               ),
             ),
@@ -661,8 +669,8 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
         activeSearch = widget.activeSearchMatchNotifier.value;
       });
 
-      if (activeSearch?.position.line != null) {
-        final activeSearchLine = activeSearch!.position.line!;
+      final activeSearchLine = activeSearch?.position.line;
+      if (activeSearchLine != null) {
         final isOutOfViewTop = activeSearchLine * CodeView.rowHeight <
             widget.scrollController.offset + CodeView.rowHeight;
         final isOutOfViewBottom = activeSearchLine * CodeView.rowHeight >
@@ -831,8 +839,7 @@ class _LineItemState extends State<LineItem> {
     if (widget.pausedFrame?.column != null) {
       final column = widget.pausedFrame!.column!;
 
-      final foregroundColor =
-          darkTheme ? theme.textTheme.bodyText2!.color : theme.primaryColor;
+      final breakpointColor = theme.colorScheme.breakpointColor;
 
       // The following constants are tweaked for using the
       // 'Icons.label_important' icon.
@@ -849,7 +856,7 @@ class _LineItemState extends State<LineItem> {
               // Create a hidden copy of the first column-1 characters of the
               // line as a hack to correctly compute where to place
               // the cursor. Approximating by using column-1 spaces instead
-              // of the correct characters and styles would be risky as it leads
+              // of the correct characters and style s would be risky as it leads
               // to small errors if the font is not fixed size or the font
               // styles vary depending on the syntax highlighting.
               // TODO(jacobr): there might be some api exposed on SelectedText
@@ -868,7 +875,7 @@ class _LineItemState extends State<LineItem> {
                   child: Icon(
                     Icons.label_important,
                     size: colIconSize,
-                    color: foregroundColor,
+                    color: breakpointColor,
                   ),
                 ),
               )
