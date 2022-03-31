@@ -755,10 +755,12 @@ class InspectorController extends DisposableController
 
     lastExpanded = null; // New selected node takes precedence.
     endShowNode();
-    if (details != null) {
-      details!.endShowNode();
-    } else if (parent != null) {
-      parent!.endShowNode();
+    final detailsLocal = details;
+    final parantLocal = parent;
+    if (detailsLocal != null) {
+      detailsLocal.endShowNode();
+    } else if (parantLocal != null) {
+      parantLocal.endShowNode();
     }
 
     _updateSelectedErrorFromNode(_selectedNode.value);

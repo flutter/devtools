@@ -51,8 +51,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   static final CustomIconMaker iconMaker = CustomIconMaker();
 
-  static BoxConstraints? deserializeConstraints(Map<String, Object>? json) {
-    if (json == null) return null;
+  static BoxConstraints deserializeConstraints(Map<String, Object> json) {
     return BoxConstraints(
       minWidth: double.parse(json['minWidth'] as String? ?? '0.0'),
       maxWidth: double.parse(json['maxWidth'] as String? ?? 'Infinity'),
@@ -129,8 +128,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   RemoteDiagnosticsNode? _parentRenderElement;
 
-  BoxConstraints get constraints => deserializeConstraints(
-      json['constraints'] as Map<String, Object>? ?? {})!;
+  BoxConstraints get constraints =>
+      deserializeConstraints(json['constraints'] as Map<String, Object>? ?? {});
 
   BoxParentData get parentData =>
       deserializeParentData(json['parentData'] as Map<String, Object>? ?? {});
