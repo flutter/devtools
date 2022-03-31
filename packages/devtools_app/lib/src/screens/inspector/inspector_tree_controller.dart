@@ -179,7 +179,7 @@ class InspectorTreeController extends Object
 
   double? lastContentWidth;
 
-  final List<InspectorTreeRow?> cachedRows = [];
+  final cachedRows = <InspectorTreeRow?>[];
   InspectorTreeRow? _cachedSelectedRow;
 
   /// All cached rows of the tree.
@@ -641,9 +641,10 @@ class InspectorTreeController extends Object
     int _debugStatsSearchOps = 0;
     final _debugStatsWidgets = _searchableCachedRows.length;
 
+    final inspectorService = serviceManager.inspectorService;
     if (search.isEmpty ||
-        serviceManager.inspectorService == null ||
-        serviceManager.inspectorService!.isDisposed) {
+        inspectorService == null ||
+        inspectorService.isDisposed) {
       assert(() {
         debugPrint('Search completed, no search');
         return true;
@@ -1075,7 +1076,7 @@ Paint _defaultPaint(ColorScheme colorScheme) => Paint()
 class _RowPainter extends CustomPainter {
   _RowPainter(this.row, this._controller, this.colorScheme);
 
-  final InspectorTreeController? _controller;
+  final InspectorTreeController _controller;
   final InspectorTreeRow row;
   final ColorScheme colorScheme;
 
@@ -1087,7 +1088,7 @@ class _RowPainter extends CustomPainter {
     final InspectorTreeNode node = row.node;
     final bool showExpandCollapse = node.showExpandCollapse;
     for (int tick in row.ticks) {
-      currentX = _controller!.getDepthIndent(tick) - columnWidth * 0.5;
+      currentX = _controller.getDepthIndent(tick) - columnWidth * 0.5;
       // Draw a vertical line for each tick identifying a connection between
       // an ancestor of this node and some other node in the tree.
       canvas.drawLine(
@@ -1099,7 +1100,7 @@ class _RowPainter extends CustomPainter {
     // If this row is itself connected to a parent then draw the L shaped line
     // to make that connection.
     if (row.lineToParent) {
-      currentX = _controller!.getDepthIndent(row.depth - 1) - columnWidth * 0.5;
+      currentX = _controller.getDepthIndent(row.depth - 1) - columnWidth * 0.5;
       final double width = showExpandCollapse ? columnWidth * 0.5 : columnWidth;
       canvas.drawLine(
         Offset(currentX, 0.0),
