@@ -169,11 +169,11 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (diagnostic == null) {
+    final diagnosticLocal = diagnostic;
+
+    if (diagnosticLocal == null) {
       return const SizedBox();
     }
-
-    final diagnosticLocal = diagnostic!;
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
