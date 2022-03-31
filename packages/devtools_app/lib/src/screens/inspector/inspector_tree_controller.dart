@@ -118,14 +118,14 @@ class InspectorTreeController extends Object
     final firstClient = _clients.isEmpty;
     _clients.add(value);
     if (firstClient) {
-      config!.onClientActiveChange?.call(true);
+      config.onClientActiveChange?.call(true);
     }
   }
 
   void removeClient(InspectorControllerClient value) {
     _clients.remove(value);
     if (_clients.isEmpty) {
-      config!.onClientActiveChange?.call(false);
+      config.onClientActiveChange?.call(false);
     }
   }
 
@@ -158,14 +158,7 @@ class InspectorTreeController extends Object
   InspectorTreeNode? get selection => _selection;
   InspectorTreeNode? _selection;
 
-  InspectorTreeConfig? get config => _config;
-  InspectorTreeConfig? _config;
-
-  set config(InspectorTreeConfig? value) {
-    // Only allow setting config once.
-    assert(_config == null);
-    _config = value;
-  }
+  late final InspectorTreeConfig config;
 
   set selection(InspectorTreeNode? node) {
     if (node == _selection) return;
@@ -175,7 +168,7 @@ class InspectorTreeController extends Object
       _selection = node;
       _selection?.selected = true;
       final configLocal = config;
-      if (configLocal!.onSelectionChange != null) {
+      if (configLocal.onSelectionChange != null) {
         configLocal.onSelectionChange!();
       }
     });
@@ -403,7 +396,7 @@ class InspectorTreeController extends Object
 
   void onExpandRow(InspectorTreeRow row) {
     setState(() {
-      final onExpand = config!.onExpand;
+      final onExpand = config.onExpand;
       row.node.isExpanded = true;
       if (onExpand != null) {
         onExpand(row.node);
@@ -519,7 +512,7 @@ class InspectorTreeController extends Object
     required bool expandProperties,
   }) {
     node.diagnostic = diagnosticsNode;
-    final configLocal = config!;
+    final configLocal = config;
     if (configLocal.onNodeAdded != null) {
       configLocal.onNodeAdded!(node, diagnosticsNode);
     }
