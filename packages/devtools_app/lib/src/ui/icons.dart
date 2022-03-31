@@ -141,12 +141,8 @@ class CustomIconMaker {
     });
   }
 
-  Widget? fromInfo(String name) {
-    if (name.isEmpty) {
-      return null;
-    }
-
-    return getCustomIcon(name, kind: IconKind.info);
+  CustomIcon fromInfo(String name) {
+    return getCustomIcon(name, kind: IconKind.info) as CustomIcon;
   }
 
   bool isAlphabetic(int char) {

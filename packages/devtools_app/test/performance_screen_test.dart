@@ -15,6 +15,7 @@ import 'package:devtools_app/src/screens/performance/performance_controller.dart
 import 'package:devtools_app/src/screens/performance/performance_screen.dart';
 import 'package:devtools_app/src/screens/performance/timeline_flame_chart.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_app/src/shared/version.dart';
@@ -220,6 +221,53 @@ void main() {
         expect(find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
             findsOneWidget);
         expect(find.byType(EventDetails), findsOneWidget);
+      });
+    });
+
+    testWidgetsWithWindowSize('opens enhance tracing overlay', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(find.text('Enhance Tracing'), findsOneWidget);
+        await tester.tap(find.text('Enhance Tracing'));
+        await tester.pumpAndSettle();
+        expect(
+          find.richTextContaining('frame times may be negatively affected'),
+          findsOneWidget,
+        );
+        expect(
+          find.richTextContaining(
+              'you will need to reproduce activity in your app'),
+          findsOneWidget,
+        );
+        expect(find.richTextContaining('Track Widget Builds'), findsOneWidget);
+        expect(find.richTextContaining('Track Layouts'), findsOneWidget);
+        expect(find.richTextContaining('Track Paints'), findsOneWidget);
+        expect(find.byType(MoreInfoLink), findsNWidgets(3));
+      });
+    });
+
+    testWidgetsWithWindowSize(
+        'opens more debugging options overlay', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(find.text('More debugging options'), findsOneWidget);
+        await tester.tap(find.text('More debugging options'));
+        await tester.pumpAndSettle();
+        expect(
+          find.richTextContaining(
+              'you will need to reproduce activity in your app'),
+          findsOneWidget,
+        );
+        expect(find.richTextContaining('Render Clip layers'), findsOneWidget);
+        expect(
+            find.richTextContaining('Render Opacity layers'), findsOneWidget);
+        expect(find.richTextContaining('Render Physical Shape layers'),
+            findsOneWidget);
+        expect(find.byType(MoreInfoLink), findsNWidgets(3));
       });
     });
   });

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -31,18 +29,18 @@ class AnimatedFlexLayoutProperties
       : super(begin, end, animation);
 
   @override
-  CrossAxisAlignment get crossAxisAlignment => end.crossAxisAlignment;
+  CrossAxisAlignment? get crossAxisAlignment => end.crossAxisAlignment;
 
   @override
-  MainAxisAlignment get mainAxisAlignment => end.mainAxisAlignment;
+  MainAxisAlignment? get mainAxisAlignment => end.mainAxisAlignment;
 
   @override
   List<RenderProperties> childrenRenderProperties({
-    double smallestRenderWidth,
-    double largestRenderWidth,
-    double smallestRenderHeight,
-    double largestRenderHeight,
-    double Function(Axis) maxSizeAvailable,
+    required double smallestRenderWidth,
+    required double largestRenderWidth,
+    required double smallestRenderHeight,
+    required double largestRenderHeight,
+    required double Function(Axis) maxSizeAvailable,
   }) {
     final beginRenderProperties = begin.childrenRenderProperties(
       smallestRenderHeight: smallestRenderHeight,
@@ -59,7 +57,7 @@ class AnimatedFlexLayoutProperties
       maxSizeAvailable: maxSizeAvailable,
     );
     final result = <RenderProperties>[];
-    for (var i = 0; i < children?.length; i++) {
+    for (var i = 0; i < children.length; i++) {
       final beginProps = beginRenderProperties[i];
       final endProps = endRenderProperties[i];
       final t = animation.value;
@@ -69,9 +67,10 @@ class AnimatedFlexLayoutProperties
           offset: Offset.lerp(beginProps.offset, endProps.offset, t),
           size: Size.lerp(beginProps.size, endProps.size, t),
           realSize: Size.lerp(beginProps.realSize, endProps.realSize, t),
+          // TODO(polina-c, jacob314): crnsider refactoring to get rid of `!`.
           layoutProperties: AnimatedLayoutProperties(
-            beginProps.layoutProperties,
-            endProps.layoutProperties,
+            beginProps.layoutProperties!,
+            endProps.layoutProperties!,
             animation,
           ),
         ),
@@ -89,15 +88,15 @@ class AnimatedFlexLayoutProperties
         begin.crossAxisDimension,
         end.crossAxisDimension,
         animation.value,
-      );
+      )!;
 
   @override
   Axis get crossAxisDirection => end.crossAxisDirection;
 
   @override
   List<RenderProperties> crossAxisSpaces({
-    List<RenderProperties> childrenRenderProperties,
-    double Function(Axis) maxSizeAvailable,
+    required List<RenderProperties> childrenRenderProperties,
+    required double Function(Axis) maxSizeAvailable,
   }) {
     return end.crossAxisSpaces(
       childrenRenderProperties: childrenRenderProperties,
@@ -123,20 +122,20 @@ class AnimatedFlexLayoutProperties
         begin.mainAxisDimension,
         end.mainAxisDimension,
         animation.value,
-      );
+      )!;
 
   @override
-  MainAxisSize get mainAxisSize => end.mainAxisSize;
+  MainAxisSize? get mainAxisSize => end.mainAxisSize;
 
   @override
-  TextBaseline get textBaseline => end.textBaseline;
+  TextBaseline? get textBaseline => end.textBaseline;
 
   @override
   TextDirection get textDirection => end.textDirection;
 
   @override
   double get totalFlex =>
-      lerpDouble(begin.totalFlex, end.totalFlex, animation.value);
+      lerpDouble(begin.totalFlex, end.totalFlex, animation.value)!;
 
   @override
   String get type => end.type;
@@ -152,20 +151,20 @@ class AnimatedFlexLayoutProperties
   /// Useful for interrupting an animation with a transition to another [FlexLayoutProperties].
   @override
   FlexLayoutProperties copyWith({
-    Size size,
-    List<LayoutProperties> children,
-    BoxConstraints constraints,
-    bool isFlex,
-    String description,
-    num flexFactor,
-    FlexFit flexFit,
-    Axis direction,
-    MainAxisAlignment mainAxisAlignment,
-    MainAxisSize mainAxisSize,
-    CrossAxisAlignment crossAxisAlignment,
-    TextDirection textDirection,
-    VerticalDirection verticalDirection,
-    TextBaseline textBaseline,
+    Size? size,
+    List<LayoutProperties>? children,
+    BoxConstraints? constraints,
+    bool? isFlex,
+    String? description,
+    num? flexFactor,
+    FlexFit? flexFit,
+    Axis? direction,
+    MainAxisAlignment? mainAxisAlignment,
+    MainAxisSize? mainAxisSize,
+    CrossAxisAlignment? crossAxisAlignment,
+    TextDirection? textDirection,
+    VerticalDirection? verticalDirection,
+    TextBaseline? textBaseline,
   }) {
     return FlexLayoutProperties(
       size: size ?? this.size,

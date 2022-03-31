@@ -10,8 +10,6 @@
 /// This allows tests of the complicated logic in this class to run on the VM
 /// and will help simplify porting this code to work with Hummingbird.
 
-// @dart=2.9
-
 library inspector_tree;
 
 import 'package:flutter/foundation.dart';
@@ -54,7 +52,7 @@ double get rowHeight => scaleByFontFactor(isDense() ? 20.0 : 24.0);
 // TODO(kenz): extend TreeNode class to share tree logic.
 class InspectorTreeNode {
   InspectorTreeNode({
-    InspectorTreeNode parent,
+    InspectorTreeNode? parent,
     bool expandChildren = true,
   })  : _children = <InspectorTreeNode>[],
         _parent = parent,
@@ -77,7 +75,7 @@ class InspectorTreeNode {
       }
       _childrenCount = null;
       if (parent != null) {
-        parent.isDirty = true;
+        parent!.isDirty = true;
       }
     } else {
       _isDirty = false;
@@ -95,22 +93,27 @@ class InspectorTreeNode {
   }
 
   bool get shouldShow {
-    _shouldShow ??= parent == null || parent.isExpanded && parent.shouldShow;
-    return _shouldShow;
+    final parentLocal = parent;
+    _shouldShow ??=
+        parentLocal == null || parentLocal.isExpanded && parentLocal.shouldShow;
+    return _shouldShow!;
   }
 
-  bool _shouldShow;
+  bool? _shouldShow;
 
   bool selected = false;
 
-  RemoteDiagnosticsNode _diagnostic;
+  RemoteDiagnosticsNode? _diagnostic;
   final List<InspectorTreeNode> _children;
 
   Iterable<InspectorTreeNode> get children => _children;
 
-  bool get isCreatedByLocalProject => _diagnostic.isCreatedByLocalProject;
+  bool get isCreatedByLocalProject => _diagnostic!.isCreatedByLocalProject;
 
-  bool get isProperty => diagnostic == null || diagnostic.isProperty;
+  bool get isProperty {
+    final diagnosticLocal = diagnostic;
+    return diagnosticLocal == null || diagnosticLocal.isProperty;
+  }
 
   bool get isExpanded => _isExpanded;
   bool _isExpanded;
@@ -134,19 +137,20 @@ class InspectorTreeNode {
     }
   }
 
-  InspectorTreeNode get parent => _parent;
-  InspectorTreeNode _parent;
+  InspectorTreeNode? get parent => _parent;
+  InspectorTreeNode? _parent;
 
-  set parent(InspectorTreeNode value) {
+  set parent(InspectorTreeNode? value) {
     _parent = value;
     _parent?.isDirty = true;
   }
 
-  RemoteDiagnosticsNode get diagnostic => _diagnostic;
+  RemoteDiagnosticsNode? get diagnostic => _diagnostic;
 
-  set diagnostic(RemoteDiagnosticsNode v) {
-    _diagnostic = v;
-    _isExpanded = v.childrenReady;
+  set diagnostic(RemoteDiagnosticsNode? v) {
+    final value = v!;
+    _diagnostic = value;
+    _isExpanded = value.childrenReady;
     isDirty = true;
   }
 
@@ -154,22 +158,22 @@ class InspectorTreeNode {
     if (!isExpanded) {
       _childrenCount = 0;
     }
-    if (_childrenCount != null) {
-      return _childrenCount;
+    final childrenCountLocal = _childrenCount;
+    if (childrenCountLocal != null) {
+      return childrenCountLocal;
     }
     int count = 0;
     for (InspectorTreeNode child in _children) {
       count += child.subtreeSize;
     }
-    _childrenCount = count;
-    return _childrenCount;
+    return _childrenCount = count;
   }
 
   bool get hasPlaceholderChildren {
     return children.length == 1 && children.first.diagnostic == null;
   }
 
-  int _childrenCount;
+  int? _childrenCount;
 
   int get subtreeSize => childrenCount + 1;
 
@@ -179,7 +183,7 @@ class InspectorTreeNode {
   int getRowIndex(InspectorTreeNode node) {
     int index = 0;
     while (true) {
-      final InspectorTreeNode parent = node.parent;
+      final InspectorTreeNode? parent = node.parent;
       if (parent == null) {
         break;
       }
@@ -199,15 +203,18 @@ class InspectorTreeNode {
   // TODO: optimize this method.
   /// Use [getCachedRow] wherever possible, as [getRow] is slow and can cause
   /// performance problems.
-  InspectorTreeRow getRow(int index) {
-    final List<int> ticks = <int>[];
-    InspectorTreeNode node = this;
+  InspectorTreeRow? getRow(int index) {
     if (subtreeSize <= index) {
       return null;
     }
+
+    final List<int> ticks = <int>[];
+    InspectorTreeNode node = this;
     int current = 0;
     int depth = 0;
-    while (node != null) {
+
+    // Iterate till getting the result to return.
+    while (true) {
       final style = node.diagnostic?.style;
       final bool indented = style != DiagnosticsTreeStyle.flat &&
           style != DiagnosticsTreeStyle.error;
@@ -217,8 +224,9 @@ class InspectorTreeNode {
           index: index,
           ticks: ticks,
           depth: depth,
-          lineToParent:
-              !node.isProperty && index != 0 && node.parent.showLinesToChildren,
+          lineToParent: !node.isProperty &&
+              index != 0 &&
+              node.parent!.showLinesToChildren,
         );
       }
       assert(index > current);
@@ -246,14 +254,12 @@ class InspectorTreeNode {
         depth++;
       }
     }
-    assert(false); // internal error.
-    return null;
   }
 
   void removeChild(InspectorTreeNode child) {
     child.parent = null;
     final removed = _children.remove(child);
-    assert(removed != null);
+    assert(removed);
     isDirty = true;
   }
 
@@ -272,11 +278,11 @@ class InspectorTreeNode {
 /// A row in the tree with all information required to render it.
 class InspectorTreeRow with DataSearchStateMixin {
   InspectorTreeRow({
-    @required this.node,
-    @required this.index,
-    @required this.ticks,
-    @required this.depth,
-    @required this.lineToParent,
+    required this.node,
+    required this.index,
+    required this.ticks,
+    required this.depth,
+    required this.lineToParent,
   });
 
   final InspectorTreeNode node;
@@ -296,8 +302,8 @@ typedef NodeAddedCallback = void Function(
 
 class InspectorTreeConfig {
   InspectorTreeConfig({
-    @required this.summaryTree,
-    @required this.treeType,
+    required this.summaryTree,
+    required this.treeType,
     this.onNodeAdded,
     this.onClientActiveChange,
     this.onSelectionChange,
@@ -307,11 +313,11 @@ class InspectorTreeConfig {
 
   final bool summaryTree;
   final FlutterTreeType treeType;
-  final NodeAddedCallback onNodeAdded;
-  final VoidCallback onSelectionChange;
-  final void Function(bool added) onClientActiveChange;
-  final TreeEventCallback onExpand;
-  final TreeEventCallback onHover;
+  final NodeAddedCallback? onNodeAdded;
+  final VoidCallback? onSelectionChange;
+  final void Function(bool added)? onClientActiveChange;
+  final TreeEventCallback? onExpand;
+  final TreeEventCallback? onHover;
 }
 
 enum SearchTargetType {

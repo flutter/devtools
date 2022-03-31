@@ -29,9 +29,6 @@ abstract class LayoutExplorerWidget extends StatefulWidget {
 }
 
 /// Base class for state objects for layout widgets for all widget types.
-///
-/// This class contains common code useful for visualizing all kinds of widgets.
-/// To implement
 abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
         L extends LayoutProperties> extends State<W>
     with TickerProviderStateMixin
@@ -59,7 +56,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
       _previousProperties ?? _animatedProperties as L? ?? _properties;
 
   RemoteDiagnosticsNode? get selectedNode =>
-      inspectorController.selectedNode?.value?.diagnostic;
+      inspectorController.selectedNode.value?.diagnostic;
 
   InspectorController get inspectorController => widget.inspectorController;
 
@@ -72,11 +69,11 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
 
   Future<void> onSelectionChanged() async {
     if (!mounted) return;
-    if (!shouldDisplay(selectedNode)) {
-      return;
-    }
+    final selectedNodeLocal = selectedNode;
+    if (selectedNodeLocal == null) return;
+    if (!shouldDisplay(selectedNodeLocal)) return;
     final prevRootId = id(_properties?.node);
-    final newRootId = id(getRoot(selectedNode));
+    final newRootId = id(getRoot(selectedNodeLocal));
     final shouldFetch = prevRootId != newRootId;
     if (shouldFetch) {
       _dirty = false;
@@ -88,7 +85,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   }
 
   /// Whether this layout explorer can work with this kind of node.
-  bool shouldDisplay(RemoteDiagnosticsNode? node);
+  bool shouldDisplay(RemoteDiagnosticsNode node);
 
   Size get size => properties!.size;
 
@@ -126,13 +123,13 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   String? id(RemoteDiagnosticsNode? node) => node?.dartDiagnosticRef.id;
 
   void _registerInspectorControllerService() {
-    inspectorController.selectedNode?.addListener(_onSelectionChangedCallback);
+    inspectorController.selectedNode.addListener(_onSelectionChangedCallback);
     inspectorService?.addClient(this);
   }
 
   void _unregisterInspectorControllerService() {
     inspectorController.selectedNode
-        ?.removeListener(_onSelectionChangedCallback);
+        .removeListener(_onSelectionChangedCallback);
     inspectorService?.removeClient(this);
   }
 
