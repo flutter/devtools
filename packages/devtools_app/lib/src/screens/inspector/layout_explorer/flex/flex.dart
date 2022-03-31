@@ -553,15 +553,16 @@ class FlexChildVisualizer extends StatelessWidget {
   // TODO(polina.c, jacob314): consider refactoring to remove `!`.
   FlexLayoutProperties get root => state.properties!;
 
-  LayoutProperties? get properties => renderProperties.layoutProperties;
+  // TODO(polina.c, jacob314): consider refactoring to remove `!`.
+  LayoutProperties get properties => renderProperties.layoutProperties!;
 
   ObjectGroup? get objectGroup =>
-      properties!.node.inspectorService as ObjectGroup?;
+      properties.node.inspectorService as ObjectGroup?;
 
   void onChangeFlexFactor(int? newFlexFactor) async {
     state.markAsDirty();
     await objectGroup!.invokeSetFlexFactor(
-      properties!.node.valueRef,
+      properties.node.valueRef,
       newFlexFactor,
     );
   }
@@ -569,13 +570,13 @@ class FlexChildVisualizer extends StatelessWidget {
   void onChangeFlexFit(FlexFit? newFlexFit) async {
     state.markAsDirty();
     await objectGroup!.invokeSetFlexFit(
-      properties!.node.valueRef,
+      properties.node.valueRef,
       newFlexFit!,
     );
   }
 
   Widget _buildFlexFactorChangerDropdown(int maximumFlexFactor) {
-    final propertiesLocal = properties!;
+    final propertiesLocal = properties;
 
     Widget buildMenuitemChild(int? flexFactor) {
       return Text(
@@ -614,7 +615,7 @@ class FlexChildVisualizer extends StatelessWidget {
           style: const TextStyle(color: emphasizedTextColor),
         );
 
-    final propertiesLocal = properties!;
+    final propertiesLocal = properties;
 
     // Disable FlexFit changer if widget is Expanded.
     if (propertiesLocal.description == 'Expanded') {
@@ -653,7 +654,7 @@ class FlexChildVisualizer extends StatelessWidget {
           Flexible(
             child: _buildFlexFactorChangerDropdown(maximumFlexFactorOptions),
           ),
-          if (!properties!.hasFlexFactor)
+          if (!properties.hasFlexFactor)
             Text(
               'unconstrained ${root.isMainAxisHorizontal ? 'horizontal' : 'vertical'}',
               style: TextStyle(
@@ -676,7 +677,7 @@ class FlexChildVisualizer extends StatelessWidget {
   Widget build(BuildContext context) {
     final renderSize = renderProperties.size;
     final renderOffset = renderProperties.offset;
-    final propertiesLocal = properties!;
+    final propertiesLocal = properties;
     final rootLocal = root;
 
     Widget buildEntranceAnimation(BuildContext context, Widget? child) {
