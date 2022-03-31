@@ -550,7 +550,8 @@ class FlexChildVisualizer extends StatelessWidget {
 
   final RenderProperties renderProperties;
 
-  FlexLayoutProperties? get root => state.properties;
+  // TODO(polina.c, jacob314): consider refactoring to remove `!`.
+  FlexLayoutProperties get root => state.properties!;
 
   LayoutProperties? get properties => renderProperties.layoutProperties;
 
@@ -654,7 +655,7 @@ class FlexChildVisualizer extends StatelessWidget {
           ),
           if (!properties!.hasFlexFactor)
             Text(
-              'unconstrained ${root!.isMainAxisHorizontal ? 'horizontal' : 'vertical'}',
+              'unconstrained ${root.isMainAxisHorizontal ? 'horizontal' : 'vertical'}',
               style: TextStyle(
                 color: colorScheme.unconstrainedColor,
                 fontStyle: FontStyle.italic,
@@ -676,7 +677,7 @@ class FlexChildVisualizer extends StatelessWidget {
     final renderSize = renderProperties.size;
     final renderOffset = renderProperties.offset;
     final propertiesLocal = properties!;
-    final rootLocal = root!;
+    final rootLocal = root;
 
     Widget buildEntranceAnimation(BuildContext context, Widget? child) {
       final vertical = rootLocal.isMainAxisVertical;
