@@ -27,7 +27,7 @@ class _CallStackState extends State<CallStack> {
     super.didChangeDependencies();
 
     final newController = Provider.of<DebuggerController>(context);
-    if (newController == controller) return;
+    if (newController == _controller) return;
 
     _controller = newController;
   }

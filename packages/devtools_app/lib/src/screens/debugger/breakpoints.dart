@@ -32,7 +32,7 @@ class _BreakpointsState extends State<Breakpoints> {
     super.didChangeDependencies();
 
     final newController = Provider.of<DebuggerController>(context);
-    if (newController == controller) return;
+    if (newController == _controller) return;
     _controller = newController;
   }
 
@@ -113,7 +113,7 @@ class _BreakpointsState extends State<Breakpoints> {
   }
 
   void _onBreakpointSelected(BreakpointAndSourcePosition bp) {
-    controller!.selectBreakpoint(bp);
+    controller.selectBreakpoint(bp);
   }
 
   String _descriptionFor(BreakpointAndSourcePosition breakpoint) {

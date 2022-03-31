@@ -117,7 +117,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     super.didChangeDependencies();
 
     final newController = Provider.of<DebuggerController>(context);
-    if (newController == controller) return;
+    if (newController == _controller) return;
     _controller = newController;
     controller.onFirstDebuggerScreenLoad();
   }
@@ -142,7 +142,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               child!,
               ProgramExplorer(
                 key: DebuggerScreenBody.programExplorerKey,
-                controller: controller!.programExplorerController,
+                controller: controller.programExplorerController,
                 onSelected: _onLocationSelected,
               ),
             ],
@@ -155,6 +155,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         firstListenable: controller.currentScriptRef,
         secondListenable: controller.currentParsedScript,
         builder: (context, scriptRef, parsedScript, _) {
+          print('REBUILDING scriptRef: $scriptRef, parsedScript: $parsedScript');
           if (scriptRef != null && parsedScript != null && !_shownFirstScript) {
             ga.timeEnd(DebuggerScreen.id, analytics_constants.pageReady);
             serviceManager.sendDwdsEvent(
@@ -205,7 +206,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               rightActions: [
                 CopyToClipboardControl(
                   dataProvider: () {
-                    final List<String> callStackList = controller!
+                    final List<String> callStackList = controller
                         .stackFramesWithLocation.value
                         .map((frame) => frame.callStackDisplay)
                         .toList();

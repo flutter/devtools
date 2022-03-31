@@ -371,7 +371,7 @@ class _CodeViewState extends State<CodeView>
                                       debugController: widget.controller,
                                       scrollController: textController,
                                       lines: lines,
-                                      pausedFrame: pausedFrame,
+                                      pausedFrame: pausedFrame!,
                                       searchMatchesNotifier:
                                           widget.controller.searchMatches,
                                       activeSearchMatchNotifier:
@@ -901,7 +901,7 @@ class _LineItemState extends State<LineItem> {
 
     final activeSearchAwareContents = _activeSearchAwareLineContents(children);
     final allSearchAwareContents =
-        _searchMatchAwareLineContents(activeSearchAwareContents);
+        _searchMatchAwareLineContents(activeSearchAwareContents!);
     return TextSpan(
       children: allSearchAwareContents,
       style: widget.lineContents.style,

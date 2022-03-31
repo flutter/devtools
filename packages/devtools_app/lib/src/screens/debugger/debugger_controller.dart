@@ -353,13 +353,12 @@ class DebuggerController extends DisposableController
   }
 
   IsolateRef get isolateRef {
-    assert(_isolateRef != null);
     return _isolateRef!;
   }
 
   IsolateRef? _isolateRef;
 
-  bool get isSystemIsolate => isolateRef.isSystemIsolate ?? false;
+  bool get isSystemIsolate => _isolateRef?.isSystemIsolate ?? false;
 
   final EvalHistory evalHistory = EvalHistory();
 
@@ -810,7 +809,7 @@ class DebuggerController extends DisposableController
       stack.frames,
       asyncCausalFrames: stack.asyncCausalFrames,
       reportedException: _lastEvent?.exception,
-    )!;
+    );
 
     return _StackInfo(
       await Future.wait(frames.map(_createStackFrameWithLocation)),
