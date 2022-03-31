@@ -406,10 +406,6 @@ class InspectorController extends DisposableController
   InspectorService get inspectorService =>
       serviceManager.inspectorService as InspectorService;
 
-  List<String> get rootDirectories =>
-      _rootDirectories ?? parent!.rootDirectories;
-  List<String>? _rootDirectories;
-
   Future<void> maybeLoadUI() async {
     if (parent != null) {
       // The parent controller will drive loading the UI.
@@ -426,7 +422,6 @@ class InspectorController extends DisposableController
         screen: InspectorScreen.id,
         action: analytics_constants.pageReady,
       );
-      _rootDirectories = await inspectorService.inferPubRootDirectoryIfNeeded();
       if (_disposed) return;
       // We need to start by querying the inspector service to find out the
       // current state of the UI.
