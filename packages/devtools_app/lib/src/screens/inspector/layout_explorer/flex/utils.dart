@@ -67,6 +67,7 @@ class AnimatedFlexLayoutProperties
           offset: Offset.lerp(beginProps.offset, endProps.offset, t),
           size: Size.lerp(beginProps.size, endProps.size, t),
           realSize: Size.lerp(beginProps.realSize, endProps.realSize, t),
+          // TODO(polina-c, jacob314): crnsider refactoring to get rid of `!`.
           layoutProperties: AnimatedLayoutProperties(
             beginProps.layoutProperties!,
             endProps.layoutProperties!,
