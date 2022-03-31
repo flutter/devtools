@@ -532,8 +532,11 @@ class InspectorController extends DisposableController
     return valueToInspectorTreeNode[subtreeRoot!.valueRef];
   }
 
-  void refreshSelection(RemoteDiagnosticsNode? newSelection,
-      RemoteDiagnosticsNode? detailsSelection, bool setSubtreeRoot) {
+  void refreshSelection(
+    RemoteDiagnosticsNode? newSelection,
+    RemoteDiagnosticsNode? detailsSelection,
+    bool setSubtreeRoot,
+  ) {
     newSelection ??= selectedDiagnostic;
     setSelectedNode(findMatchingInspectorTreeNode(newSelection));
     syncSelectionHelper(
