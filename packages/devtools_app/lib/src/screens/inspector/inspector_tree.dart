@@ -204,13 +204,16 @@ class InspectorTreeNode {
   /// Use [getCachedRow] wherever possible, as [getRow] is slow and can cause
   /// performance problems.
   InspectorTreeRow? getRow(int index) {
-    final List<int> ticks = <int>[];
-    InspectorTreeNode node = this;
     if (subtreeSize <= index) {
       return null;
     }
+
+    final List<int> ticks = <int>[];
+    InspectorTreeNode node = this;
     int current = 0;
     int depth = 0;
+
+    // Iterate till getting the result to return.
     while (true) {
       final style = node.diagnostic?.style;
       final bool indented = style != DiagnosticsTreeStyle.flat &&
