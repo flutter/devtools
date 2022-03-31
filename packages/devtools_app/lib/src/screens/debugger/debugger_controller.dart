@@ -125,9 +125,11 @@ class DebuggerController extends DisposableController
       switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
     });
     autoDisposeStreamSubscription(
-        _service.onDebugEvent.listen(_handleDebugEvent));
+      _service.onDebugEvent.listen(_handleDebugEvent),
+    );
     autoDisposeStreamSubscription(
-        _service.onIsolateEvent.listen(_handleIsolateEvent));
+      _service.onIsolateEvent.listen(_handleIsolateEvent),
+    );
   }
 
   final bool initialSwitchToIsolate;
@@ -455,14 +457,20 @@ class DebuggerController extends DisposableController
     if (!isPaused.value) {
       return Future.error(
         RPCError.withDetails(
-            'evaluateInFrame', RPCError.kInvalidParams, 'Isolate not paused'),
+          'evaluateInFrame',
+          RPCError.kInvalidParams,
+          'Isolate not paused',
+        ),
       );
     }
 
     if (stackFramesWithLocation.value.isEmpty) {
       return Future.error(
         RPCError.withDetails(
-            'evaluateInFrame', RPCError.kInvalidParams, 'No frames available'),
+          'evaluateInFrame',
+          RPCError.kInvalidParams,
+          'No frames available',
+        ),
       );
     }
 
@@ -525,9 +533,12 @@ class DebuggerController extends DisposableController
       return;
     }
 
-    final bp = breakpointsWithLocation.value.firstWhere((bp) {
-      return bp.scriptRef == script && bp.line == line;
-    }, orElse: () => null);
+    final bp = breakpointsWithLocation.value.firstWhere(
+      (bp) {
+        return bp.scriptRef == script && bp.line == line;
+      },
+      orElse: () => null,
+    );
 
     if (bp != null) {
       await removeBreakpoint(bp.breakpoint);
@@ -673,8 +684,12 @@ class DebuggerController extends DisposableController
 
     // Show a toast.
     final count = removedScripts.length + addedScripts.length;
-    messageBus.addEvent(BusEvent('toast',
-        data: '${nf.format(count)} ${pluralize('script', count)} updated.'));
+    messageBus.addEvent(
+      BusEvent(
+        'toast',
+        data: '${nf.format(count)} ${pluralize('script', count)} updated.',
+      ),
+    );
 
     // Update breakpoints.
     _updateBreakpointsAfterReload(removedScripts, addedScripts);
@@ -778,9 +793,11 @@ class DebuggerController extends DisposableController
     // of visible stack frames.
     const initialFrameRequestCount = 12;
 
-    _getStackOperation = CancelableOperation.fromFuture(_getStackInfo(
-      limit: initialFrameRequestCount,
-    ));
+    _getStackOperation = CancelableOperation.fromFuture(
+      _getStackInfo(
+        limit: initialFrameRequestCount,
+      ),
+    );
     final stackInfo = await _getStackOperation.value;
     _populateFrameInfo(
       stackInfo.frames,
@@ -855,16 +872,20 @@ class DebuggerController extends DisposableController
     final scriptRefs = await scriptManager.retrieveAndSortScripts(isolateRef);
 
     // Update the selected script.
-    final mainScriptRef = scriptRefs.firstWhere((ref) {
-      return ref.uri == isolate.rootLib.uri;
-    }, orElse: () => null);
+    final mainScriptRef = scriptRefs.firstWhere(
+      (ref) {
+        return ref.uri == isolate.rootLib.uri;
+      },
+      orElse: () => null,
+    );
 
     // Display the script location.
     _populateScriptAndShowLocation(mainScriptRef);
   }
 
   Future<BreakpointAndSourcePosition> _createBreakpointWithLocation(
-      Breakpoint breakpoint) async {
+    Breakpoint breakpoint,
+  ) async {
     if (breakpoint.resolved) {
       final bp = BreakpointAndSourcePosition.create(breakpoint);
       return scriptManager.getScript(bp.scriptRef).then((Script script) {
@@ -897,7 +918,8 @@ class DebuggerController extends DisposableController
       showScriptLocation(ScriptLocation(bp.scriptRef));
     } else {
       showScriptLocation(
-          ScriptLocation(bp.scriptRef, location: bp.sourcePosition));
+        ScriptLocation(bp.scriptRef, location: bp.sourcePosition),
+      );
     }
   }
 
@@ -912,7 +934,8 @@ class DebuggerController extends DisposableController
 
     if (frame?.scriptRef != null) {
       showScriptLocation(
-          ScriptLocation(frame.scriptRef, location: frame.position));
+        ScriptLocation(frame.scriptRef, location: frame.position),
+      );
     }
   }
 
@@ -1027,12 +1050,14 @@ class DebuggerController extends DisposableController
       final line = currentScript.lines[i].toLowerCase();
       final matchesForLine = caseInsensitiveSearch.allMatches(line);
       if (matchesForLine.isNotEmpty) {
-        matches.addAll(matchesForLine.map(
-          (m) => SourceToken(
-            position: SourcePosition(line: i, column: m.start),
-            length: m.end - m.start,
+        matches.addAll(
+          matchesForLine.map(
+            (m) => SourceToken(
+              position: SourcePosition(line: i, column: m.start),
+              length: m.end - m.start,
+            ),
           ),
-        ));
+        );
       }
     }
     return matches;

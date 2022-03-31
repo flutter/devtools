@@ -48,8 +48,10 @@ Color? _tryParseColor(String? input) {
   } catch (e) {
     // The user can manipulate the query string so if the value is invalid
     // print the value but otherwise continue.
-    log('Failed to parse "$input" as a color from the querystring, ignoring: $e',
-        LogLevel.warning);
+    log(
+      'Failed to parse "$input" as a color from the querystring, ignoring: $e',
+      LogLevel.warning,
+    );
     return null;
   }
 }
@@ -62,8 +64,10 @@ double? _tryParseDouble(String? input) {
   } catch (e) {
     // The user can manipulate the query string so if the value is invalid
     // print the value but otherwise continue.
-    log('Failed to parse "$input" as a double from the querystring, ignoring: $e',
-        LogLevel.warning);
+    log(
+      'Failed to parse "$input" as a double from the querystring, ignoring: $e',
+      LogLevel.warning,
+    );
   }
   return null;
 }

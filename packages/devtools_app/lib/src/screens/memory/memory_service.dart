@@ -35,7 +35,7 @@ Future<InstanceRef?> evaluate(String objectRef, String expression) async {
 }
 
 Future<InboundReferences?> getInboundReferences(
-    String objectRef, int maxInstances) async {
+    String objectRef, int maxInstances,) async {
   // TODO(terry): Expose a stream to reduce stalls querying 1000s of instances.
   final Response response = await serviceManager.service!
       .getInboundReferences(_isolateId!, objectRef, maxInstances);

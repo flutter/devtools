@@ -357,11 +357,13 @@ Future<List<String>> autoCompleteResultsFor(
           thisValue,
           controller,
         );
-        result.addAll(await _autoCompleteMembersFor(
-          thisValue.classRef,
-          controller,
-          staticContext: true,
-        ));
+        result.addAll(
+          await _autoCompleteMembersFor(
+            thisValue.classRef,
+            controller,
+            staticContext: true,
+          ),
+        );
       }
     }
     final frame = controller.frameForEval;
@@ -370,8 +372,12 @@ Future<List<String>> autoCompleteResultsFor(
       if (function != null) {
         final libraryRef = await controller.findOwnerLibrary(function);
         if (libraryRef != null) {
-          result.addAll(await libraryMemberAndImportsAutocompletes(
-              libraryRef, controller));
+          result.addAll(
+            await libraryMemberAndImportsAutocompletes(
+              libraryRef,
+              controller,
+            ),
+          );
         }
       }
     }
@@ -387,11 +393,13 @@ Future<List<String>> autoCompleteResultsFor(
           // Type object. This is reasonable as Type objects are rarely useful
           // in Dart and we will end up with accidental Type objects if the user
           // writes `SomeClass.` in the evaluate window.
-          result.addAll(await _autoCompleteMembersFor(
-            response.typeClass,
-            controller,
-            staticContext: true,
-          ));
+          result.addAll(
+            await _autoCompleteMembersFor(
+              response.typeClass,
+              controller,
+              staticContext: true,
+            ),
+          );
         } else {
           await _addAllInstanceMembersToAutocompleteList(
             result,
@@ -429,11 +437,13 @@ Future<Set<String>> _libraryMemberAndImportsAutocompletes(
   final result = <String>{};
   try {
     final futures = <Future<Set<String>>>[];
-    futures.add(libraryMemberAutocompletes(
-      controller,
-      libraryRef,
-      includePrivates: true,
-    ));
+    futures.add(
+      libraryMemberAutocompletes(
+        controller,
+        libraryRef,
+        includePrivates: true,
+      ),
+    );
 
     final Library library = await controller.getObject(libraryRef);
     for (var dependency in library.dependencies) {
@@ -442,11 +452,13 @@ Future<Set<String>> _libraryMemberAndImportsAutocompletes(
         // but at least we do include the prefix in the autocompletes list.
         result.add(dependency.prefix);
       } else {
-        futures.add(libraryMemberAutocompletes(
-          controller,
-          dependency.target,
-          includePrivates: false,
-        ));
+        futures.add(
+          libraryMemberAutocompletes(
+            controller,
+            dependency.target,
+            includePrivates: false,
+          ),
+        );
       }
     }
     (await Future.wait(futures)).forEach(result.addAll);
@@ -478,9 +490,11 @@ Future<Set<String>> _libraryMemberAutocompletes(
   final result = <String>{};
   final Library library = await controller.getObject(libraryRef);
   result.addAll(library.variables.map((field) => field.name));
-  result.addAll(library.functions
-      // The VM shows setters as `<member>=`.
-      .map((funcRef) => funcRef.name.replaceAll('=', '')));
+  result.addAll(
+    library.functions
+        // The VM shows setters as `<member>=`.
+        .map((funcRef) => funcRef.name.replaceAll('=', '')),
+  );
   // Autocomplete class names as well
   result.addAll(library.classes.map((clazz) => clazz.name));
 
@@ -491,11 +505,13 @@ Future<Set<String>> _libraryMemberAutocompletes(
         if (dependency.prefix?.isNotEmpty ?? false) {
           result.add(dependency.prefix);
         } else {
-          futures.add(libraryMemberAutocompletes(
-            controller,
-            dependency.target,
-            includePrivates: false,
-          ));
+          futures.add(
+            libraryMemberAutocompletes(
+              controller,
+              dependency.target,
+              includePrivates: false,
+            ),
+          );
         }
       }
     }
@@ -522,10 +538,12 @@ Future<void> _addAllInstanceMembersToAutocompleteList(
   // TODO(grouma) - This shouldn't be necessary but package:dwds does
   // not properly provide superclass information.
   final clazz = await controller.classFor(instance.classRef);
-  result.addAll(instance.fields
-      .where((field) => !field.decl.isStatic)
-      .map((field) => field.decl.name)
-      .where((member) => _isAccessible(member, clazz, controller)));
+  result.addAll(
+    instance.fields
+        .where((field) => !field.decl.isStatic)
+        .map((field) => field.decl.name)
+        .where((member) => _isAccessible(member, clazz, controller)),
+  );
 }
 
 Future<Set<String>> _autoCompleteMembersFor(
@@ -540,9 +558,11 @@ Future<Set<String>> _autoCompleteMembersFor(
   final result = <String>{};
   final clazz = await controller.classFor(classRef);
   if (clazz != null) {
-    result.addAll(clazz.fields
-        .where((f) => f.isStatic == staticContext)
-        .map((field) => field.name));
+    result.addAll(
+      clazz.fields
+          .where((f) => f.isStatic == staticContext)
+          .map((field) => field.name),
+    );
     for (var funcRef in clazz.functions) {
       if (_validFunction(funcRef, clazz, staticContext)) {
         final isConstructor = _isConstructor(funcRef, clazz);
@@ -557,11 +577,13 @@ Future<Set<String>> _autoCompleteMembersFor(
       }
     }
     if (!staticContext) {
-      result.addAll(await _autoCompleteMembersFor(
-        clazz.superClass,
-        controller,
-        staticContext: staticContext,
-      ));
+      result.addAll(
+        await _autoCompleteMembersFor(
+          clazz.superClass,
+          controller,
+          staticContext: staticContext,
+        ),
+      );
     }
     result.removeWhere((member) => !_isAccessible(member, clazz, controller));
   }

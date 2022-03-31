@@ -85,7 +85,8 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
 
   @override
   AnimatedFlexLayoutProperties computeAnimatedProperties(
-      FlexLayoutProperties nextProperties) {
+    FlexLayoutProperties nextProperties,
+  ) {
     return AnimatedFlexLayoutProperties(
       // If an animation is in progress, freeze it and start animating from there, else start a fresh animation from widget.properties.
       animatedProperties?.copyWith() as FlexLayoutProperties? ?? properties!,
@@ -164,9 +165,13 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                       child: Image.asset(
                         (axis == direction)
                             ? mainAxisAssetImageUrl(
-                                direction, alignment as MainAxisAlignment)
+                                direction,
+                                alignment as MainAxisAlignment,
+                              )
                             : crossAxisAssetImageUrl(
-                                direction, alignment as CrossAxisAlignment),
+                                direction,
+                                alignment as CrossAxisAlignment,
+                              ),
                         height: axisAlignmentAssetImageHeight,
                         fit: BoxFit.fitHeight,
                         color: color,
@@ -197,9 +202,13 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                         child: Image.asset(
                           (axis == direction)
                               ? mainAxisAssetImageUrl(
-                                  direction, alignment as MainAxisAlignment)
+                                  direction,
+                                  alignment as MainAxisAlignment,
+                                )
                               : crossAxisAssetImageUrl(
-                                  direction, alignment as CrossAxisAlignment),
+                                  direction,
+                                  alignment as CrossAxisAlignment,
+                                ),
                           fit: BoxFit.fitHeight,
                           color: color,
                         ),
@@ -217,10 +226,12 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             FlexLayoutProperties changedProperties;
             if (axis == direction) {
               changedProperties = propertiesLocal.copyWith(
-                  mainAxisAlignment: newSelection as MainAxisAlignment?);
+                mainAxisAlignment: newSelection as MainAxisAlignment?,
+              );
             } else {
               changedProperties = propertiesLocal.copyWith(
-                  crossAxisAlignment: newSelection as CrossAxisAlignment?);
+                crossAxisAlignment: newSelection as CrossAxisAlignment?,
+              );
             }
             final valueRef = propertiesLocal.node.valueRef;
             markAsDirty();
@@ -436,94 +447,103 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
         ),
       ),
       margin: const EdgeInsets.only(top: margin, left: margin),
-      child: LayoutBuilder(builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth;
-        final maxHeight = constraints.maxHeight;
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth;
+          final maxHeight = constraints.maxHeight;
 
-        double maxSizeAvailable(Axis axis) {
-          return axis == Axis.horizontal ? maxWidth : maxHeight;
-        }
+          double maxSizeAvailable(Axis axis) {
+            return axis == Axis.horizontal ? maxWidth : maxHeight;
+          }
 
-        final childrenAndMainAxisSpacesRenderProps =
-            widget.properties.childrenRenderProperties(
-          smallestRenderWidth: minRenderWidth,
-          largestRenderWidth: defaultMaxRenderWidth,
-          smallestRenderHeight: minRenderHeight,
-          largestRenderHeight: defaultMaxRenderHeight,
-          maxSizeAvailable: maxSizeAvailable,
-        );
-
-        final renderProperties = childrenAndMainAxisSpacesRenderProps
-            .where((renderProps) => !renderProps.isFreeSpace)
-            .toList();
-        final mainAxisSpaces = childrenAndMainAxisSpacesRenderProps
-            .where((renderProps) => renderProps.isFreeSpace)
-            .toList();
-        final crossAxisSpaces = widget.properties.crossAxisSpaces(
-          childrenRenderProperties: renderProperties,
-          maxSizeAvailable: maxSizeAvailable,
-        );
-
-        final childrenRenderWidgets = <Widget>[];
-        Widget? selectedWidget;
-        for (var i = 0; i < widget.children.length; i++) {
-          final child = widget.children[i];
-          final isSelected = widget.highlighted == child;
-
-          final visualizer = FlexChildVisualizer(
-            key: isSelected ? selectedChildKey : null,
-            state: widget.state,
-            layoutProperties: child,
-            isSelected: isSelected,
-            renderProperties: renderProperties[i],
+          final childrenAndMainAxisSpacesRenderProps =
+              widget.properties.childrenRenderProperties(
+            smallestRenderWidth: minRenderWidth,
+            largestRenderWidth: defaultMaxRenderWidth,
+            smallestRenderHeight: minRenderHeight,
+            largestRenderHeight: defaultMaxRenderHeight,
+            maxSizeAvailable: maxSizeAvailable,
           );
 
-          if (isSelected) {
-            selectedWidget = visualizer;
-          } else {
-            childrenRenderWidgets.add(visualizer);
+          final renderProperties = childrenAndMainAxisSpacesRenderProps
+              .where((renderProps) => !renderProps.isFreeSpace)
+              .toList();
+          final mainAxisSpaces = childrenAndMainAxisSpacesRenderProps
+              .where((renderProps) => renderProps.isFreeSpace)
+              .toList();
+          final crossAxisSpaces = widget.properties.crossAxisSpaces(
+            childrenRenderProperties: renderProperties,
+            maxSizeAvailable: maxSizeAvailable,
+          );
+
+          final childrenRenderWidgets = <Widget>[];
+          Widget? selectedWidget;
+          for (var i = 0; i < widget.children.length; i++) {
+            final child = widget.children[i];
+            final isSelected = widget.highlighted == child;
+
+            final visualizer = FlexChildVisualizer(
+              key: isSelected ? selectedChildKey : null,
+              state: widget.state,
+              layoutProperties: child,
+              isSelected: isSelected,
+              renderProperties: renderProperties[i],
+            );
+
+            if (isSelected) {
+              selectedWidget = visualizer;
+            } else {
+              childrenRenderWidgets.add(visualizer);
+            }
           }
-        }
 
-        // Selected widget needs to be last to draw its border over other children
-        if (selectedWidget != null) {
-          childrenRenderWidgets.add(selectedWidget);
-        }
+          // Selected widget needs to be last to draw its border over other children
+          if (selectedWidget != null) {
+            childrenRenderWidgets.add(selectedWidget);
+          }
 
-        final freeSpacesWidgets = [
-          for (var renderProperties in [...mainAxisSpaces, ...crossAxisSpaces])
-            FreeSpaceVisualizerWidget(renderProperties),
-        ];
-        return Scrollbar(
-          thumbVisibility: true,
-          controller: widget.scrollController,
-          child: SingleChildScrollView(
-            scrollDirection: widget.properties.direction,
+          final freeSpacesWidgets = [
+            for (var renderProperties in [
+              ...mainAxisSpaces,
+              ...crossAxisSpaces
+            ])
+              FreeSpaceVisualizerWidget(renderProperties),
+          ];
+          return Scrollbar(
+            thumbVisibility: true,
             controller: widget.scrollController,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: maxWidth,
-                minHeight: maxHeight,
-                maxWidth: widget.direction == Axis.horizontal
-                    ? sum(childrenAndMainAxisSpacesRenderProps
-                        .map((renderSize) => renderSize.width))
-                    : maxWidth,
-                maxHeight: widget.direction == Axis.vertical
-                    ? sum(childrenAndMainAxisSpacesRenderProps
-                        .map((renderSize) => renderSize.height))
-                    : maxHeight,
-              ).normalize(),
-              child: Stack(
-                children: [
-                  LayoutExplorerBackground(colorScheme: colorScheme),
-                  ...freeSpacesWidgets,
-                  ...childrenRenderWidgets,
-                ],
+            child: SingleChildScrollView(
+              scrollDirection: widget.properties.direction,
+              controller: widget.scrollController,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: maxWidth,
+                  minHeight: maxHeight,
+                  maxWidth: widget.direction == Axis.horizontal
+                      ? sum(
+                          childrenAndMainAxisSpacesRenderProps
+                              .map((renderSize) => renderSize.width),
+                        )
+                      : maxWidth,
+                  maxHeight: widget.direction == Axis.vertical
+                      ? sum(
+                          childrenAndMainAxisSpacesRenderProps
+                              .map((renderSize) => renderSize.height),
+                        )
+                      : maxHeight,
+                ).normalize(),
+                child: Stack(
+                  children: [
+                    LayoutExplorerBackground(colorScheme: colorScheme),
+                    ...freeSpacesWidgets,
+                    ...childrenRenderWidgets,
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
     );
     return VisualizeWidthAndHeightWithConstraints(
       child: contents,

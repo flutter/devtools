@@ -21,8 +21,11 @@ class FileSystemWeb implements FileIO {
   String exportDirectoryName({bool isMemory = false}) => 'LocalStorage';
 
   @override
-  void writeStringToFile(String filename, String contents,
-      {bool isMemory = false}) {
+  void writeStringToFile(
+    String filename,
+    String contents, {
+    bool isMemory = false,
+  }) {
     _files.putIfAbsent(filename, () => contents);
   }
 
