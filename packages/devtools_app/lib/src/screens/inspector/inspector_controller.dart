@@ -545,10 +545,11 @@ class InspectorController extends DisposableController
       detailsSelection: detailsSelection,
     );
 
-    if (details != null) {
+    final detailsLocal = details;
+    if (detailsLocal != null) {
       if (subtreeRoot != null && getSubtreeRootNode() == null) {
         subtreeRoot = newSelection;
-        details!.setSubtreeRoot(newSelection, detailsSelection);
+        detailsLocal.setSubtreeRoot(newSelection, detailsSelection);
       }
     }
     syncTreeSelection();
@@ -629,8 +630,10 @@ class InspectorController extends DisposableController
     updateSelectionFromService(firstFrame: false);
   }
 
-  Future<void> updateSelectionFromService(
-      {required bool firstFrame, String? inspectorRef}) async {
+  Future<void> updateSelectionFromService({
+    required bool firstFrame,
+    String? inspectorRef,
+  }) async {
     if (parent != null) {
       // If we have a parent controller we should wait for the parent to update
       // our selection rather than updating it our self.
