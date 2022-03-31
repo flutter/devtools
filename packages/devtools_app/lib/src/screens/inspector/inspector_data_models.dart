@@ -216,9 +216,9 @@ class LayoutProperties {
     if (parentWidth == null) return false;
     final parentData = node.parentData;
     double widthUsed = width;
-    if (parentData != null) {
-      widthUsed += parentData.offset.dx;
-    }
+
+    widthUsed += parentData.offset.dx;
+
     // TODO(jacobr): certain widgets may allow overflow so this may false
     // positive a bit for cases like Stack.
     return widthUsed > parentWidth + overflowEpsilon;
@@ -229,9 +229,9 @@ class LayoutProperties {
     if (parentHeight == null) return false;
     final parentData = node.parentData;
     double heightUsed = height;
-    if (parentData != null) {
-      heightUsed += parentData.offset.dy;
-    }
+
+    heightUsed += parentData.offset.dy;
+
     return heightUsed > parentHeight + overflowEpsilon;
   }
 
@@ -444,13 +444,13 @@ class FlexLayoutProperties extends LayoutProperties {
 
   String get type => direction.flexType;
 
-  num? get totalFlex {
+  num get totalFlex {
     if (children.isEmpty) return 0;
     _totalFlex ??= children
         .map((child) => child.flexFactor ?? 0)
         .reduce((value, element) => value + element)
         .toInt();
-    return _totalFlex;
+    return _totalFlex!;
   }
 
   Axis get crossAxisDirection {

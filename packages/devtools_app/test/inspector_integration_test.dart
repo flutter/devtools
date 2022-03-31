@@ -65,7 +65,7 @@ void main() async {
       await tester.pump(const Duration(seconds: 1));
       final InspectorScreenBodyState state =
           tester.state(find.byType(InspectorScreenBody));
-      final controller = state.inspectorController!;
+      final controller = state.inspectorController;
       while (!controller.flutterAppFrameReady) {
         await controller.maybeLoadUI();
         await tester.pumpAndSettle();
@@ -412,7 +412,7 @@ void main() async {
       await tester.pumpAndSettle(const Duration(seconds: 1));
       final InspectorScreenBodyState state =
           tester.state(find.byType(InspectorScreenBody));
-      final controller = state.inspectorController!;
+      final controller = state.inspectorController;
       while (!controller.flutterAppFrameReady) {
         await controller.maybeLoadUI();
         await tester.pumpAndSettle();

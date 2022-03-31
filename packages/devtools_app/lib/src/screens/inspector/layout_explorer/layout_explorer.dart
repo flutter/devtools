@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:flutter/widgets.dart';
 
@@ -14,7 +14,8 @@ import '../layout_explorer/flex/flex.dart';
 
 /// Tab that acts as a proxy to decide which widget to be displayed
 class LayoutExplorerTab extends StatefulWidget {
-  const LayoutExplorerTab({Key key, this.controller}) : super(key: key);
+  const LayoutExplorerTab({Key? key, required this.controller})
+      : super(key: key);
 
   final InspectorController controller;
 
@@ -26,16 +27,16 @@ class _LayoutExplorerTabState extends State<LayoutExplorerTab>
     with AutomaticKeepAliveClientMixin<LayoutExplorerTab>, AutoDisposeMixin {
   InspectorController get controller => widget.controller;
 
-  RemoteDiagnosticsNode get selected =>
-      controller?.selectedNode?.value?.diagnostic;
+  RemoteDiagnosticsNode? get selected =>
+      controller.selectedNode.value?.diagnostic;
 
-  RemoteDiagnosticsNode previousSelection;
+  RemoteDiagnosticsNode? previousSelection;
 
-  Widget rootWidget(RemoteDiagnosticsNode node) {
-    if (FlexLayoutExplorerWidget.shouldDisplay(node)) {
+  Widget rootWidget(RemoteDiagnosticsNode? node) {
+    if (node != null && FlexLayoutExplorerWidget.shouldDisplay(node)) {
       return FlexLayoutExplorerWidget(controller);
     }
-    if (BoxLayoutExplorerWidget.shouldDisplay(node)) {
+    if (node != null && BoxLayoutExplorerWidget.shouldDisplay(node)) {
       return BoxLayoutExplorerWidget(controller);
     }
     return Center(
