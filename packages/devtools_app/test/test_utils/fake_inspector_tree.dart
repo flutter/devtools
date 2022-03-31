@@ -51,8 +51,10 @@ class FakeInspectorTree extends InspectorTreeController {
   }
 
   // Debugging string to make it easy to write integration tests.
-  String toStringDeep(
-      {bool hidePropertyLines = false, bool includeTextStyles = false}) {
+  String toStringDeep({
+    bool hidePropertyLines = false,
+    bool includeTextStyles = false,
+  }) {
     if (root == null) return '<empty>\n';
     // Visualize the ticks computed for this node so that bugs in the tick
     // computation code will result in rendering artifacts in the text output.

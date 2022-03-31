@@ -13,7 +13,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Create an `InspectorTreeControllerFlutter` from a single `RemoteDiagnosticsNode`
 InspectorTreeController inspectorTreeControllerFromNode(
-    RemoteDiagnosticsNode node) {
+  RemoteDiagnosticsNode node,
+) {
   final controller = InspectorTreeController()
     ..config = InspectorTreeConfig(
       summaryTree: false,

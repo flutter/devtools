@@ -165,16 +165,18 @@ class CliAppFixture extends AppFixture {
     Isolate? foundIsolate;
     await waitFor(() async {
       final vm = await serviceConnection.getVM();
-      final List<Isolate?> isolates = await Future.wait(vm.isolates!.map(
-        (ref) => serviceConnection.getIsolate(ref.id!)
-            // Calling getIsolate() can sometimes return a collected sentinel
-            // for an isolate that hasn't started yet. We can just ignore these
-            // as on the next trip around the Isolate will be returned.
-            // https://github.com/dart-lang/sdk/issues/33747
-            .catchError((error) {
-          print('getIsolate(${ref.id}) failed, skipping\n$error');
-        }),
-      ));
+      final List<Isolate?> isolates = await Future.wait(
+        vm.isolates!.map(
+          (ref) => serviceConnection.getIsolate(ref.id!)
+              // Calling getIsolate() can sometimes return a collected sentinel
+              // for an isolate that hasn't started yet. We can just ignore these
+              // as on the next trip around the Isolate will be returned.
+              // https://github.com/dart-lang/sdk/issues/33747
+              .catchError((error) {
+            print('getIsolate(${ref.id}) failed, skipping\n$error');
+          }),
+        ),
+      );
       foundIsolate = isolates.firstWhere(
         (isolate) => isolate!.pauseEvent?.kind == pauseEventKind,
         orElse: () => null,

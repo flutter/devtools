@@ -28,14 +28,20 @@ void main() async {
       expect(notifications.messages.length, equals(1));
       expect(notifications.messages, contains(nonDevToolsFileMessage));
 
-      await Future.delayed(const Duration(
-          milliseconds: ImportController.repeatImportTimeBufferMs));
+      await Future.delayed(
+        const Duration(
+          milliseconds: ImportController.repeatImportTimeBufferMs,
+        ),
+      );
       importController.importData(nonDevToolsFileJsonWithListData);
       expect(notifications.messages.length, equals(2));
       expect(notifications.messages, contains(nonDevToolsFileMessage));
 
-      await Future.delayed(const Duration(
-          milliseconds: ImportController.repeatImportTimeBufferMs));
+      await Future.delayed(
+        const Duration(
+          milliseconds: ImportController.repeatImportTimeBufferMs,
+        ),
+      );
       importController.importData(devToolsFileJson);
       expect(notifications.messages.length, equals(3));
       expect(

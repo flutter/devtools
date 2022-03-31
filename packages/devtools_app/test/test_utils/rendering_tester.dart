@@ -85,8 +85,10 @@ class TestRenderingFlutterBinding extends BindingBase
 
   @override
   void drawFrame() {
-    assert(phase != EnginePhase.build,
-        'rendering_tester does not support testing the build phase; use flutter_test instead');
+    assert(
+      phase != EnginePhase.build,
+      'rendering_tester does not support testing the build phase; use flutter_test instead',
+    );
     final FlutterExceptionHandler? oldErrorHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       _errors.add(details);
@@ -102,8 +104,10 @@ class TestRenderingFlutterBinding extends BindingBase
       if (phase == EnginePhase.composite) return;
       pipelineOwner.flushSemantics();
       if (phase == EnginePhase.flushSemantics) return;
-      assert(phase == EnginePhase.flushSemantics ||
-          phase == EnginePhase.sendSemanticsUpdate);
+      assert(
+        phase == EnginePhase.flushSemantics ||
+            phase == EnginePhase.sendSemanticsUpdate,
+      );
     } finally {
       FlutterError.onError = oldErrorHandler;
       if (_errors.isNotEmpty) {
@@ -112,12 +116,14 @@ class TestRenderingFlutterBinding extends BindingBase
           if (_errors.isNotEmpty) {
             _errors.forEach(FlutterError.dumpErrorToConsole);
             fail(
-                'There are more errors than the test inspected using TestRenderingFlutterBinding.takeFlutterErrorDetails.');
+              'There are more errors than the test inspected using TestRenderingFlutterBinding.takeFlutterErrorDetails.',
+            );
           }
         } else {
           _errors.forEach(FlutterError.dumpErrorToConsole);
           fail(
-              'Caught error while rendering frame. See preceding logs for details.');
+            'Caught error while rendering frame. See preceding logs for details.',
+          );
         }
       }
     }
@@ -148,8 +154,9 @@ void layout(
   VoidCallback? onErrors,
 }) {
   // If you want to just repump the last box, call pumpFrame().
-  assert(box.parent ==
-      null); // We stick the box in another, so you can't reuse it easily, sorry.
+  assert(
+    box.parent == null,
+  ); // We stick the box in another, so you can't reuse it easily, sorry.
 
   _renderer.renderView.child = null;
   if (constraints != null) {
@@ -288,7 +295,10 @@ class FakeTicker implements Ticker {
 
   @override
   DiagnosticsNode describeForError(String name) {
-    return DiagnosticsProperty<Ticker>(name, this,
-        style: DiagnosticsTreeStyle.errorProperty);
+    return DiagnosticsProperty<Ticker>(
+      name,
+      this,
+      style: DiagnosticsTreeStyle.errorProperty,
+    );
   }
 }

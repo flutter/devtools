@@ -237,11 +237,12 @@ void main() {
 
       // '
       spanTester(
-          span: spans[3],
-          scopes: ['string.interpolated.single.dart'],
-          line: 2,
-          column: 9,
-          length: 13);
+        span: spans[3],
+        scopes: ['string.interpolated.single.dart'],
+        line: 2,
+        column: 9,
+        length: 13,
+      );
 
       // ;
       spanTester(
