@@ -29,9 +29,6 @@ abstract class LayoutExplorerWidget extends StatefulWidget {
 }
 
 /// Base class for state objects for layout widgets for all widget types.
-///
-/// This class contains common code useful for visualizing all kinds of widgets.
-/// To implement
 abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
         L extends LayoutProperties> extends State<W>
     with TickerProviderStateMixin
