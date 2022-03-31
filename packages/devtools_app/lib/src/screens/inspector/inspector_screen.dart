@@ -182,11 +182,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ValueListenableBuilder(
+            ValueListenableBuilder<bool>(
               valueListenable: serviceManager.serviceExtensionManager
                   .hasServiceExtension(
                       extensions.toggleSelectWidgetMode.extension),
-              builder: (_, dynamic selectModeSupported, __) {
+              builder: (_, selectModeSupported, __) {
                 return ServiceExtensionButtonGroup(
                   extensions: [
                     selectModeSupported
@@ -241,28 +241,26 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                   builder:
                       (_, LinkedHashMap<String, DevToolsError> errors, __) {
                     final inspectableErrors = errors.map((key, value) =>
-                        MapEntry(key, value as InspectableWidgetError));
+                            MapEntry(key, value as InspectableWidgetError))
+                        as LinkedHashMap<String, InspectableWidgetError>;
                     return Stack(
                       children: [
                         InspectorTree(
                           key: summaryTreeKey,
                           controller: _summaryTreeController,
                           isSummaryTree: true,
-                          widgetErrors: inspectableErrors
-                              as LinkedHashMap<String, InspectableWidgetError>?,
+                          widgetErrors: inspectableErrors,
                           debuggerController: debuggerController,
                         ),
                         if (errors.isNotEmpty)
-                          ValueListenableBuilder(
+                          ValueListenableBuilder<int?>(
                             valueListenable:
                                 inspectorController.selectedErrorIndex,
-                            builder: (_, dynamic selectedErrorIndex, __) =>
-                                Positioned(
+                            builder: (_, selectedErrorIndex, __) => Positioned(
                               top: 0,
                               right: 0,
                               child: ErrorNavigator(
-                                errors: inspectableErrors as LinkedHashMap<
-                                    String, InspectableWidgetError>,
+                                errors: inspectableErrors,
                                 errorIndex: selectedErrorIndex,
                                 onSelectError:
                                     inspectorController.selectErrorByIndex,

@@ -154,19 +154,19 @@ class InspectorTreeNode {
     isDirty = true;
   }
 
-  int? get childrenCount {
+  int get childrenCount {
     if (!isExpanded) {
       _childrenCount = 0;
     }
-    if (_childrenCount != null) {
-      return _childrenCount;
+    final childrenCountLocal = _childrenCount;
+    if (childrenCountLocal != null) {
+      return childrenCountLocal;
     }
     int count = 0;
     for (InspectorTreeNode child in _children) {
       count += child.subtreeSize;
     }
-    _childrenCount = count;
-    return _childrenCount;
+    return _childrenCount = count;
   }
 
   bool get hasPlaceholderChildren {
@@ -175,7 +175,7 @@ class InspectorTreeNode {
 
   int? _childrenCount;
 
-  int get subtreeSize => childrenCount! + 1;
+  int get subtreeSize => childrenCount + 1;
 
   bool get isLeaf => _children.isEmpty;
 
