@@ -125,16 +125,22 @@ class GenerateChangelogCommand extends Command {
     print(
         'Adding entries to the changelog for all commits since $commitDate...');
 
-    const tryPages = 5;
     final changes = <String>[];
-    for (var i = 1; i <= tryPages; i++) {
+
+    // TODO(kenz): consider traversing pages properly instead of using a while
+    // loop.
+    // See https://docs.github.com/en/rest/guides/traversing-with-pagination
+    const maxPerPage = 100;
+    var requestPage = 0;
+    bool lastPageReceived = false;
+    while (!lastPageReceived) {
       final uri = Uri.https(
         '${auth}api.github.com',
         '/repos/flutter/devtools/commits',
         {
           'since': commitDate,
-          'per_page': '100',
-          'page': '$i',
+          'per_page': '$maxPerPage',
+          'page': '$requestPage',
         },
       );
       final githubResponse = await http.get(uri);
@@ -152,6 +158,11 @@ class GenerateChangelogCommand extends Command {
         }
         final entry = '* ' + _sanitize(commit['commit']['message']);
         changes.add(entry);
+      }
+
+      requestPage++;
+      if (commits.length < maxPerPage) {
+        lastPageReceived = true;
       }
     }
 
