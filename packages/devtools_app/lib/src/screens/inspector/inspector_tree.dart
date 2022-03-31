@@ -258,7 +258,8 @@ class InspectorTreeNode {
 
   void removeChild(InspectorTreeNode child) {
     child.parent = null;
-    _children.remove(child);
+    final removed = _children.remove(child);
+    assert(removed);
     isDirty = true;
   }
 
