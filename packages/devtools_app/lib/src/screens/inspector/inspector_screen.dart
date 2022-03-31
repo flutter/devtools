@@ -70,11 +70,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         SearchFieldMixin<InspectorScreenBody> {
   late InspectorController inspectorController;
 
-  InspectorTreeController? get summaryTreeController =>
+  InspectorTreeController get _summaryTreeController =>
       inspectorController.inspectorTree;
 
-  InspectorTreeController? get detailsTreeController =>
-      inspectorController.details?.inspectorTree;
+  InspectorTreeController get _detailsTreeController =>
+      inspectorController.details!.inspectorTree;
 
   late DebuggerController _debuggerController;
   bool _isDebuggerControllerInitialized = false;
@@ -121,14 +121,14 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       treeType: FlutterTreeType.widget,
     );
 
-    summaryTreeController!.setSearchTarget(searchTarget);
+    _summaryTreeController.setSearchTarget(searchTarget);
 
     addAutoDisposeListener(searchFieldFocusNode, () {
       // Close the search once focus is lost and following conditions are met:
       //  1. Search string is empty.
       //  2. [searchPreventClose] == false (this is set true when searchTargetType Dropdown is opened).
       if (!searchFieldFocusNode.hasFocus &&
-          summaryTreeController!.search.isEmpty &&
+          _summaryTreeController.search.isEmpty &&
           !searchPreventClose) {
         setState(() {
           searchVisible = false;
@@ -160,9 +160,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
     final detailsTree = InspectorTree(
       key: detailsTreeKey,
-      controller: detailsTreeController,
+      controller: _detailsTreeController,
       debuggerController: _debuggerController,
-      inspectorTreeController: summaryTreeController,
+      inspectorTreeController: _summaryTreeController,
     );
 
     final splitAxis = Split.axisFor(context, 0.85);
@@ -224,7 +224,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                 onRefreshInspectorPressed: _refreshInspector,
                 onSearchVisibleToggle: _onSearchVisibleToggle,
                 searchFieldBuilder: () => buildSearchField(
-                  controller: summaryTreeController!,
+                  controller: _summaryTreeController,
                   searchFieldKey: GlobalKey(
                     debugLabel: 'inspectorScreenSearch',
                   ),
@@ -246,7 +246,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                       children: [
                         InspectorTree(
                           key: summaryTreeKey,
-                          controller: summaryTreeController,
+                          controller: _summaryTreeController,
                           isSummaryTree: true,
                           widgetErrors: inspectableErrors
                               as LinkedHashMap<String, InspectableWidgetError>?,
@@ -285,7 +285,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     setState(() {
       searchVisible = !searchVisible;
     });
-    summaryTreeController!.resetSearch();
+    _summaryTreeController.resetSearch();
     searchTextFieldController.clear();
   }
 
