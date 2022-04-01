@@ -554,15 +554,6 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<CpuProfileData> getCpuProfileTimeline(
-    String isolateId,
-    int origin,
-    int extent,
-  ) {
-    return Future.value(cpuProfileData);
-  }
-
-  @override
   Future<Success> clearCpuSamples(String isolateId) => Future.value(Success());
 
   @override
