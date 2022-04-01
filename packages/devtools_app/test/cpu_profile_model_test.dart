@@ -106,6 +106,9 @@ void main() {
           extent,
         )).thenAnswer(
           (_) async {
+            print('This is a buffer line');
+            print('This is a buffer line');
+            print('This is a buffer line');
             return samples;
           },
         );
