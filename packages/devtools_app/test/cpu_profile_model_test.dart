@@ -104,11 +104,13 @@ void main() {
             },
           ],
         };
-        when(service.getCpuSamples(
-          isolateId,
-          origin,
-          extent,
-        )).thenAnswer(
+        when(
+          service.getCpuSamples(
+            isolateId,
+            origin,
+            extent,
+          ),
+        ).thenAnswer(
           (_) async {
             print('This is a buffer line');
             print('This is a buffer line');
