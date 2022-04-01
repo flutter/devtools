@@ -317,6 +317,11 @@ class FakeVmService extends Fake implements VmServiceWrapper {
       ),
     ],
   };
+  @override
+  Future<CpuSamples> getCpuSamples(
+      String isolateId, int timeOriginMicros, int timeExtentMicros) {
+    return Future.value(MockCpuSamples());
+  }
 
   @override
   Uri get connectedUri => _connectedUri;
@@ -659,6 +664,8 @@ class MockVmService extends Mock implements VmServiceWrapper {
 class MockIsolate extends Mock implements Isolate {}
 
 class MockObj extends Mock implements Obj {}
+
+class MockCpuSamples extends Mock implements CpuSamples {}
 
 // TODO(kenz): make it easier to mock a connected app by adding a constructor
 // that will override the public getters on the class (e.g. isFlutterAppNow,

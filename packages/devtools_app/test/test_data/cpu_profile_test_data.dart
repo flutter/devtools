@@ -176,6 +176,54 @@ final Map<String, dynamic> cpuProfileResponseJson = {
   'stackFrames': goldenCpuProfileStackFrames,
   'traceEvents': goldenCpuProfileTraceEvents,
 };
+final Map<String, dynamic> cpuSamplesJson = {
+  'samplePeriod': 45,
+  'maxStackDepth': 12,
+  'sampleCount': 1,
+  'timeSpan': 100,
+  'timeOriginMicros': 47377796685,
+  'timeExtentMicros': 3000,
+  'pid': 54321,
+  'functions': [
+    {
+      'kind': 'Collected',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl':
+          'org-dartlang-sdk:///third_party/dart/sdk/lib/_internal/vm/bin/socket_patch.dart',
+      'function': {
+        'type': '@Function',
+        'id': 'classes/3695/functions/_startConnect%4014069316',
+        'name': '_startConnect',
+        'owner': {
+          'id': 'classes/3695',
+          'name': 'Socket',
+          'library': {
+            'id': 'libraries/@12312',
+            'name': 'dart.io',
+            'uri': 'dart.io',
+          }
+        },
+        'isStatic': true,
+        'isConst': false,
+        'implicit': false,
+      }
+    }
+  ],
+  'samples': [
+    {
+      'type': 'CpuSample',
+      'tid': 213,
+      'timestamp': 987312,
+      'vmTag': '__vmTag',
+      'userTag': '__userTag',
+      'truncated': false,
+      'stack': [0, 0, 0, 0],
+      'identityHashCode': 12312312,
+      'classId': 9329,
+    }
+  ],
+};
 
 final Map<String, dynamic> goldenCpuProfileStackFrames =
     Map.from(subProfileStackFrames)
