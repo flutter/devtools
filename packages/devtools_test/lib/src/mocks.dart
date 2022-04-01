@@ -319,7 +319,10 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   };
   @override
   Future<CpuSamples> getCpuSamples(
-      String isolateId, int timeOriginMicros, int timeExtentMicros) {
+    String isolateId,
+    int timeOriginMicros,
+    int timeExtentMicros,
+  ) {
     return Future.value(MockCpuSamples());
   }
 
