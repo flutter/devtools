@@ -42,6 +42,7 @@ const String feedbackButton = 'feedbackButton';
 
 // Inspector UX actions:
 const String refresh = 'refresh';
+const String refreshEmptyTree = 'refreshEmptyTree';
 const String performanceOverlay = 'performanceOverlay';
 const String debugPaint = 'debugPaint';
 const String paintBaseline = 'paintBaseline';

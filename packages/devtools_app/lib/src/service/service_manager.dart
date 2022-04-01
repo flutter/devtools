@@ -368,7 +368,6 @@ class ServiceConnectionManager {
     required String screen,
     required String action,
   }) async {
-    if (!kIsWeb) return;
     await _callServiceExtensionOnMainIsolate(
       registrations.dwdsSendEvent,
       args: {

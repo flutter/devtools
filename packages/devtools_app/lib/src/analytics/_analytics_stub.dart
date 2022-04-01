@@ -32,6 +32,8 @@ void timeEnd(
   ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {}
 
+void cancelTimingOperation(String screenName, String timedOperation) {}
+
 void timeSync(
   String screenName,
   String timedOperation, {
