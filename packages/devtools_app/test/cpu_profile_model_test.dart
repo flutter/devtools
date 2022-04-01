@@ -58,7 +58,7 @@ void main() {
         manager = FakeServiceManager(service: service);
         setGlobal(ServiceConnectionManager, manager);
       });
-      test('generateFromCpuSamples', () async {
+      test('basic test', () async {
         final samples = CpuSamples.parse(cpuSamplesJson);
         const isolateId = 'theIsolateId';
         const origin = 123;
