@@ -57,6 +57,7 @@ void main() {
         manager = FakeServiceManager(service: service);
         setGlobal(ServiceConnectionManager, manager);
       });
+
       test('basic test', () async {
         final samples = CpuSamples.parse(cpuSamplesJson);
         const isolateId = 'theIsolateId';
@@ -95,17 +96,23 @@ void main() {
               'ts': samples.samples![0].timestamp,
               'cat': 'Dart',
               'sf': '$isolateId-4',
-              'args': {'userTag': '__userTag', 'vmTag': '__vmTag'}
+              'args': {'userTag': '__userTag', 'vmTag': '__vmTag'},
             }
           ]
         };
-        when(service.getCpuSamples(isolateId, origin, extent))
-            .thenAnswer((_) async {
+        when(service.getCpuSamples(
+          isolateId,
+          origin,
+          extent,
+        )).thenAnswer((_) async {
           return samples;
         });
 
         final cpuProfileData = await CpuProfileData.generateFromCpuSamples(
-            isolateId, origin, extent);
+          isolateId,
+          origin,
+          extent,
+        );
 
         expect(
           cpuProfileData.toJson,
