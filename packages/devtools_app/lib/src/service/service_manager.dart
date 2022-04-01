@@ -368,6 +368,9 @@ class ServiceConnectionManager {
     required String screen,
     required String action,
   }) async {
+    final serviceRegistered = serviceManager.registeredMethodsForService
+        .containsKey(registrations.dwdsSendEvent);
+    if (!serviceRegistered) return;
     await _callServiceExtensionOnMainIsolate(
       registrations.dwdsSendEvent,
       args: {
