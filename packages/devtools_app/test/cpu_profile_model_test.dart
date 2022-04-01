@@ -104,9 +104,11 @@ void main() {
           isolateId,
           origin,
           extent,
-        )).thenAnswer((_) async {
-          return samples;
-        });
+        )).thenAnswer(
+          (_) async {
+            return samples;
+          },
+        );
 
         final cpuProfileData = await CpuProfileData.generateFromCpuSamples(
           isolateId,
