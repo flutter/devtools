@@ -112,7 +112,7 @@ class InspectorTreeController extends Object
   /// Clients the controller notifies to trigger changes to the UI.
   final Set<InspectorControllerClient> _clients = {};
 
-  InspectorController inspectorController;
+  late InspectorController inspectorController;
 
   InspectorTreeNode createNode() => InspectorTreeNode();
 
@@ -987,10 +987,10 @@ class _InspectorTreeState extends State<InspectorTree>
       return const SizedBox();
     }
 
-    if (!controller.inspectorController.firstLoadCompleted &&
+    if (!controllerLocal.inspectorController.firstLoadCompleted &&
         widget.isSummaryTree) {
       ga.timeEnd(InspectorScreen.id, analytics_constants.pageReady);
-      controller.inspectorController.firstLoadCompleted = true;
+      controllerLocal.inspectorController.firstLoadCompleted = true;
     }
     return LayoutBuilder(
       builder: (context, constraints) {

@@ -427,10 +427,14 @@ class InspectorController extends DisposableController
     }
 
     if (flutterAppFrameReady) {
-      await serviceManager.sendDwdsEvent(
-        screen: InspectorScreen.id,
-        action: analytics_constants.pageReady,
-      );
+      if (serviceManager.connectedApp!.isDartWebAppNow!) {
+        unawaited(
+          serviceManager.sendDwdsEvent(
+            screen: InspectorScreen.id,
+            action: analytics_constants.pageReady,
+          ),
+        );
+      }
       if (_disposed) return;
       // We need to start by querying the inspector service to find out the
       // current state of the UI.

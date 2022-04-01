@@ -16,6 +16,7 @@ InspectorTreeController inspectorTreeControllerFromNode(
   RemoteDiagnosticsNode node, {
   InspectorController? inspectorController,
 }) {
+  inspectorController ??= MockInspectorController();
   final controller = InspectorTreeController()
     ..config = InspectorTreeConfig(
       summaryTree: false,
