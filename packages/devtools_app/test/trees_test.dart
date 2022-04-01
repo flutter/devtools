@@ -37,22 +37,28 @@ void main() {
       testTreeNode.collapse();
       expect(testTreeNode.isExpanded, isFalse);
 
-      breadthFirstTraversal<TestTreeNode>(testTreeNode,
-          action: (TreeNode node) {
-        expect(node.isExpanded, isFalse);
-      });
+      breadthFirstTraversal<TestTreeNode>(
+        testTreeNode,
+        action: (TreeNode node) {
+          expect(node.isExpanded, isFalse);
+        },
+      );
 
       testTreeNode.expandCascading();
-      breadthFirstTraversal<TestTreeNode>(testTreeNode,
-          action: (TreeNode node) {
-        expect(node.isExpanded, isTrue);
-      });
+      breadthFirstTraversal<TestTreeNode>(
+        testTreeNode,
+        action: (TreeNode node) {
+          expect(node.isExpanded, isTrue);
+        },
+      );
 
       testTreeNode.collapseCascading();
-      breadthFirstTraversal<TestTreeNode>(testTreeNode,
-          action: (TreeNode node) {
-        expect(node.isExpanded, isFalse);
-      });
+      breadthFirstTraversal<TestTreeNode>(
+        testTreeNode,
+        action: (TreeNode node) {
+          expect(node.isExpanded, isFalse);
+        },
+      );
     });
 
     test('shouldShow determines if each node is visible', () {
@@ -65,19 +71,26 @@ void main() {
         treeNode6,
       ];
       void expectChildTreeNodesShouldShow(List<bool> expected) {
-        expect(childTreeNodes.length, expected.length,
-            reason: 'expected list of bool must have '
-                '${childTreeNodes.length} elements');
+        expect(
+          childTreeNodes.length,
+          expected.length,
+          reason: 'expected list of bool must have '
+              '${childTreeNodes.length} elements',
+        );
         for (var i = 0; i < childTreeNodes.length; i++) {
-          expect(childTreeNodes[i].shouldShow(), expected[i],
-              reason: 'treeNode${i + 1}.shouldShow() did not match '
-                  'the expected value.');
+          expect(
+            childTreeNodes[i].shouldShow(),
+            expected[i],
+            reason: 'treeNode${i + 1}.shouldShow() did not match '
+                'the expected value.',
+          );
         }
       }
 
       expect(treeNode0.shouldShow(), true);
       expectChildTreeNodesShouldShow(
-          [false, false, false, false, false, false]);
+        [false, false, false, false, false, false],
+      );
       treeNode0.expandCascading();
       treeNode5.collapse();
       expectChildTreeNodesShouldShow([true, true, true, true, true, false]);
@@ -150,13 +163,18 @@ void main() {
           testTreeNode.filterWhere((node) => node.id.isEven);
       expect(filteredTreeRoots.length, equals(1));
       final filteredTree = filteredTreeRoots.first;
-      expect(filteredTree.toString(), equals('''
+      expect(
+        filteredTree.toString(),
+        equals(
+          '''
 0
   2
   4
   6
   8
-'''));
+''',
+        ),
+      );
     });
 
     test('filterTree when root should be filtered out', () {
@@ -166,15 +184,25 @@ void main() {
       final firstRoot = filteredTreeRoots.first;
       final lastRoot = filteredTreeRoots.last;
 
-      expect(firstRoot.toString(), equals('''
+      expect(
+        firstRoot.toString(),
+        equals(
+          '''
 1
-'''));
-      expect(lastRoot.toString(), equals('''
+''',
+        ),
+      );
+      expect(
+        lastRoot.toString(),
+        equals(
+          '''
 3
   5
     7
     9
-'''));
+''',
+        ),
+      );
     });
 
     test('filterTree when zero nodes match', () {
@@ -188,7 +216,10 @@ void main() {
           testTreeNode.filterWhere((node) => node.id < 10);
       expect(filteredTreeRoots.length, equals(1));
       final filteredTree = filteredTreeRoots.first;
-      expect(filteredTree.toString(), equals('''
+      expect(
+        filteredTree.toString(),
+        equals(
+          '''
 0
   1
   2
@@ -199,7 +230,9 @@ void main() {
       7
       8
       9
-'''));
+''',
+        ),
+      );
     });
 
     group('Tree traversal', () {

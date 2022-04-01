@@ -5,7 +5,6 @@
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/devtools_app.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -136,11 +135,15 @@ void testWidgetsWithWindowSize(
   WidgetTesterCallback test, {
   bool skip = false,
 }) {
-  testWidgets(name, (WidgetTester tester) async {
-    await _setWindowSize(windowSize);
-    await test(tester);
-    await _resetWindowSize();
-  }, skip: skip);
+  testWidgets(
+    name,
+    (WidgetTester tester) async {
+      await _setWindowSize(windowSize);
+      await test(tester);
+      await _resetWindowSize();
+    },
+    skip: skip,
+  );
 }
 
 Future<void> _setWindowSize(Size windowSize) async {

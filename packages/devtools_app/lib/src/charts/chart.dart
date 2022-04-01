@@ -97,24 +97,25 @@ class ChartState extends State<Chart> with AutoDisposeMixin {
       child: LayoutBuilder(
         // Inner container
         builder: (_, constraints) => GestureDetector(
-            onTapDown: (TapDownDetails details) {
-              final xLocalPosition = details.localPosition.dx;
-              final timestampIndex =
-                  controller.xCoordToTimestampIndex(xLocalPosition);
-              final timestamp = controller.xCoordToTimestamp(xLocalPosition);
-              controller.tapLocation.value = TapLocation(
-                details,
-                timestamp,
-                timestampIndex,
-              );
-            },
-            child: Container(
-              width: constraints.widthConstraints().maxWidth,
-              height: constraints.widthConstraints().maxHeight,
-              child: CustomPaint(
-                painter: ChartPainter(controller, colorScheme),
-              ),
-            )),
+          onTapDown: (TapDownDetails details) {
+            final xLocalPosition = details.localPosition.dx;
+            final timestampIndex =
+                controller.xCoordToTimestampIndex(xLocalPosition);
+            final timestamp = controller.xCoordToTimestamp(xLocalPosition);
+            controller.tapLocation.value = TapLocation(
+              details,
+              timestamp,
+              timestampIndex,
+            );
+          },
+          child: Container(
+            width: constraints.widthConstraints().maxWidth,
+            height: constraints.widthConstraints().maxHeight,
+            child: CustomPaint(
+              painter: ChartPainter(controller, colorScheme),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -413,8 +414,10 @@ class ChartPainter extends CustomPainter {
 
     final elapsedTime = DateTime.now().difference(startTime).inMilliseconds;
     if (debugTrackPaintTime && elapsedTime > 500) {
-      logger.log('${chartController.name} ${chartController.timestampsLength} '
-          'CustomPainter paint elapsed time $elapsedTime');
+      logger.log(
+        '${chartController.name} ${chartController.timestampsLength} '
+        'CustomPainter paint elapsed time $elapsedTime',
+      );
     }
 
     // Once painted we're not dirty anymore.
@@ -726,8 +729,13 @@ class ChartPainter extends CustomPainter {
   }
 
   // TODO(terry): Use bezier path.
-  void drawDashed(Canvas canvas, PaintCharacteristics characteristics, double x,
-      double y, double tickWidth) {
+  void drawDashed(
+    Canvas canvas,
+    PaintCharacteristics characteristics,
+    double x,
+    double y,
+    double tickWidth,
+  ) {
     assert(characteristics.symbol == ChartSymbol.dashedLine);
     drawLine(
       canvas,

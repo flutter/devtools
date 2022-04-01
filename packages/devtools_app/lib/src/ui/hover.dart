@@ -122,55 +122,57 @@ class HoverCard {
     final focusColor = Theme.of(context).focusColor;
     final hoverHeading = colorScheme.hoverTitleTextStyle;
 
-    _overlayEntry = OverlayEntry(builder: (context) {
-      return Positioned(
-        left: position.dx,
-        top: position.dy,
-        child: MouseRegion(
-          onExit: (_) {
-            remove();
-          },
-          onEnter: (_) {
-            _hasMouseEntered = true;
-          },
-          child: Container(
-            padding: const EdgeInsets.all(denseSpacing),
-            decoration: BoxDecoration(
-              color: colorScheme.defaultBackgroundColor,
-              border: Border.all(
-                color: focusColor,
-                width: hoverCardBorderWidth,
+    _overlayEntry = OverlayEntry(
+      builder: (context) {
+        return Positioned(
+          left: position.dx,
+          top: position.dy,
+          child: MouseRegion(
+            onExit: (_) {
+              remove();
+            },
+            onEnter: (_) {
+              _hasMouseEntered = true;
+            },
+            child: Container(
+              padding: const EdgeInsets.all(denseSpacing),
+              decoration: BoxDecoration(
+                color: colorScheme.defaultBackgroundColor,
+                border: Border.all(
+                  color: focusColor,
+                  width: hoverCardBorderWidth,
+                ),
+                borderRadius: BorderRadius.circular(defaultBorderRadius),
               ),
-              borderRadius: BorderRadius.circular(defaultBorderRadius),
-            ),
-            width: width,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (title != null) ...[
-                  Container(
-                    width: width,
-                    child: Text(
-                      title,
-                      overflow: TextOverflow.ellipsis,
-                      style: hoverHeading,
-                      textAlign: TextAlign.center,
+              width: width,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (title != null) ...[
+                    Container(
+                      width: width,
+                      child: Text(
+                        title,
+                        overflow: TextOverflow.ellipsis,
+                        style: hoverHeading,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Divider(color: colorScheme.hoverTextStyle.color),
+                  ],
+                  SingleChildScrollView(
+                    child: Container(
+                      constraints: BoxConstraints(maxHeight: maxCardHeight!),
+                      child: contents,
                     ),
                   ),
-                  Divider(color: colorScheme.hoverTextStyle.color),
                 ],
-                SingleChildScrollView(
-                  child: Container(
-                    constraints: BoxConstraints(maxHeight: maxCardHeight!),
-                    child: contents,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
     overlayState.insert(_overlayEntry);
   }
 

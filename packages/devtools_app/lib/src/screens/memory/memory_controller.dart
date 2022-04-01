@@ -811,30 +811,35 @@ class MemoryController extends DisposableController
     // Note: We do not need to listen to event history here because we do not
     // have matching historical data about total memory usage.
     autoDisposeStreamSubscription(
-        serviceManager.service!.onExtensionEvent.listen((Event event) {
-      var extensionEventKind = event.extensionKind;
-      String? customEventKind;
-      if (MemoryTimeline.isCustomEvent(event.extensionKind!)) {
-        extensionEventKind = MemoryTimeline.devToolsExtensionEvent;
-        customEventKind = MemoryTimeline.customEventName(event.extensionKind!);
-      }
-      final jsonData = event.extensionData!.data as Map<String, Object>;
-      // TODO(terry): Display events enabled in a settings page for now only these events.
-      switch (extensionEventKind) {
-        case 'Flutter.ImageSizesForFrame':
-          memoryTimeline.addExtensionEvent(
-              event.timestamp, event.extensionKind, jsonData);
-          break;
-        case MemoryTimeline.devToolsExtensionEvent:
-          memoryTimeline.addExtensionEvent(
-            event.timestamp,
-            MemoryTimeline.customDevToolsEvent,
-            jsonData,
-            customEventName: customEventKind,
-          );
-          break;
-      }
-    }));
+      serviceManager.service!.onExtensionEvent.listen((Event event) {
+        var extensionEventKind = event.extensionKind;
+        String? customEventKind;
+        if (MemoryTimeline.isCustomEvent(event.extensionKind!)) {
+          extensionEventKind = MemoryTimeline.devToolsExtensionEvent;
+          customEventKind =
+              MemoryTimeline.customEventName(event.extensionKind!);
+        }
+        final jsonData = event.extensionData!.data as Map<String, Object>;
+        // TODO(terry): Display events enabled in a settings page for now only these events.
+        switch (extensionEventKind) {
+          case 'Flutter.ImageSizesForFrame':
+            memoryTimeline.addExtensionEvent(
+              event.timestamp,
+              event.extensionKind,
+              jsonData,
+            );
+            break;
+          case MemoryTimeline.devToolsExtensionEvent:
+            memoryTimeline.addExtensionEvent(
+              event.timestamp,
+              MemoryTimeline.customDevToolsEvent,
+              jsonData,
+              customEventName: customEventKind,
+            );
+            break;
+        }
+      }),
+    );
 
     autoDisposeStreamSubscription(
       _memoryTracker!.onChange.listen((_) {
@@ -851,11 +856,14 @@ class MemoryController extends DisposableController
     // memoryController dispose method.  Needed when a HOT RELOAD
     // will call dispose however, spinup (initState) doesn't seem
     // to happen David is working on scaffolding.
-    _memoryTrackerController.stream.listen((_) {}, onDone: () {
-      // Stop polling and reset memoryTracker.
-      _memoryTracker!.stop();
-      _memoryTracker = null;
-    });
+    _memoryTrackerController.stream.listen(
+      (_) {},
+      onDone: () {
+        // Stop polling and reset memoryTracker.
+        _memoryTracker!.stop();
+        _memoryTracker = null;
+      },
+    );
   }
 
   void _handleConnectionStop(dynamic event) {
@@ -888,7 +896,8 @@ class MemoryController extends DisposableController
     if (serviceManager.isolateManager.selectedIsolate.value == null)
       return null;
     return await serviceManager.service?.getHeapSnapshotGraph(
-        serviceManager.isolateManager.selectedIsolate.value!);
+      serviceManager.isolateManager.selectedIsolate.value!,
+    );
   }
 
   final _monitorAllocationsNotifier = ValueNotifier<int>(0);
@@ -989,8 +998,10 @@ class MemoryController extends DisposableController
     final lastReset = allocationProfile.dateLastAccumulatorReset;
     if (lastReset != null) {
       final resetTimestamp = DateTime.fromMillisecondsSinceEpoch(lastReset);
-      debugLogger('Last Allocation Reset @ '
-          '${MemoryController.formattedTimestamp(resetTimestamp)}');
+      debugLogger(
+        'Last Allocation Reset @ '
+        '${MemoryController.formattedTimestamp(resetTimestamp)}',
+      );
     }
 
     final allocations = allocationProfile.members!
@@ -1093,8 +1104,8 @@ class MemoryController extends DisposableController
 
       if (externalReferences.children.isNotEmpty) {
         externalReference = externalReferences.children.singleWhereOrNull(
-                (knownClass) => knownClass.name == classLive?.name)
-            as ExternalReference?;
+          (knownClass) => knownClass.name == classLive?.name,
+        ) as ExternalReference?;
       }
 
       if (externalReference == null) {
@@ -1172,7 +1183,9 @@ class MemoryController extends DisposableController
 
   // TODO(terry): Change to Set of known libraries so it's O(n) instead of O(n^2).
   void addAllToNode(
-      Reference root, Map<String, Set<HeapGraphClassLive>> allItems) {
+    Reference root,
+    Map<String, Set<HeapGraphClassLive>> allItems,
+  ) {
     allItems.forEach((libraryName, classes) {
       LibraryReference? libReference =
           root.children.singleWhereOrNull((library) {
@@ -1304,7 +1317,10 @@ class MemoryController extends DisposableController
   // of '_extra.hashCode' to fetch the hashCode of the object of that field.
   // Used to find the object which allocated/references the object being viewed.
   Future<bool> matchObject(
-      String objectRef, String fieldName, int instanceHashCode) async {
+    String objectRef,
+    String fieldName,
+    int instanceHashCode,
+  ) async {
     final dynamic object = await getObject(objectRef);
     if (object is Instance) {
       final Instance instance = object;
@@ -1461,17 +1477,19 @@ class MemoryLog {
     if (liveData.isEmpty) {
       // Used to create empty memory log for test.
       pseudoData = true;
-      liveData.add(HeapSample(
-        DateTime.now().millisecondsSinceEpoch,
-        0,
-        0,
-        0,
-        0,
-        false,
-        AdbMemoryInfo.empty(),
-        EventSample.empty(),
-        RasterCache.empty(),
-      ));
+      liveData.add(
+        HeapSample(
+          DateTime.now().millisecondsSinceEpoch,
+          0,
+          0,
+          0,
+          0,
+          false,
+          AdbMemoryInfo.empty(),
+          EventSample.empty(),
+          RasterCache.empty(),
+        ),
+      );
     }
 
     final jsonPayload = SamplesMemoryJson.encodeList(liveData);

@@ -106,8 +106,9 @@ class LayoutProperties {
         children = copyLevel == 0
             ? []
             : node.childrenNow
-                .map((child) =>
-                    LayoutProperties(child, copyLevel: copyLevel - 1))
+                .map(
+                  (child) => LayoutProperties(child, copyLevel: copyLevel - 1),
+                )
                 .toList(growable: false) {
     for (var child in children) {
       child.parent = this;
@@ -666,27 +667,33 @@ class FlexLayoutProperties extends LayoutProperties {
           ..layoutProperties = this;
     if (actualLeadingSpace > 0.0 &&
         displayMainAxisAlignment != MainAxisAlignment.start) {
-      spaces.add(renderPropsWithFullCrossAxisDimension.clone()
-        ..mainAxisOffset = 0.0
-        ..mainAxisDimension = renderLeadingSpace
-        ..mainAxisRealDimension = actualLeadingSpace);
+      spaces.add(
+        renderPropsWithFullCrossAxisDimension.clone()
+          ..mainAxisOffset = 0.0
+          ..mainAxisDimension = renderLeadingSpace
+          ..mainAxisRealDimension = actualLeadingSpace,
+      );
     }
     if (actualBetweenSpace > 0.0) {
       for (var i = 0; i < childrenRenderProps.length - 1; ++i) {
         final child = childrenRenderProps[i];
-        spaces.add(renderPropsWithFullCrossAxisDimension.clone()
-          ..mainAxisDimension = renderBetweenSpace
-          ..mainAxisRealDimension = actualBetweenSpace
-          ..mainAxisOffset = child.mainAxisOffset + child.mainAxisDimension);
+        spaces.add(
+          renderPropsWithFullCrossAxisDimension.clone()
+            ..mainAxisDimension = renderBetweenSpace
+            ..mainAxisRealDimension = actualBetweenSpace
+            ..mainAxisOffset = child.mainAxisOffset + child.mainAxisDimension,
+        );
       }
     }
     if (actualLeadingSpace > 0.0 &&
         displayMainAxisAlignment != MainAxisAlignment.end) {
-      spaces.add(renderPropsWithFullCrossAxisDimension.clone()
-        ..mainAxisOffset = childrenRenderProps.last.mainAxisDimension +
-            childrenRenderProps.last.mainAxisOffset
-        ..mainAxisDimension = renderLeadingSpace
-        ..mainAxisRealDimension = actualLeadingSpace);
+      spaces.add(
+        renderPropsWithFullCrossAxisDimension.clone()
+          ..mainAxisOffset = childrenRenderProps.last.mainAxisDimension +
+              childrenRenderProps.last.mainAxisOffset
+          ..mainAxisDimension = renderLeadingSpace
+          ..mainAxisRealDimension = actualLeadingSpace,
+      );
     }
     return [...childrenRenderProps, ...spaces];
   }
@@ -716,9 +723,11 @@ class FlexLayoutProperties extends LayoutProperties {
         final crossAxisRealDimension = space.crossAxisRealDimension;
         space.crossAxisRealDimension = crossAxisRealDimension * 0.5;
         spaces.add(space.clone()..crossAxisOffset = 0.0);
-        spaces.add(space.clone()
-          ..crossAxisOffset = renderProperties.crossAxisDimension +
-              renderProperties.crossAxisOffset);
+        spaces.add(
+          space.clone()
+            ..crossAxisOffset = renderProperties.crossAxisDimension +
+                renderProperties.crossAxisOffset,
+        );
       } else {
         space.crossAxisOffset = crossAxisAlignment == CrossAxisAlignment.end
             ? 0

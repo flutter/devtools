@@ -197,10 +197,12 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       final properties = diagnosticLocal.valuePropertiesJson;
 
       if (name?.isNotEmpty == true && diagnosticLocal.showName) {
-        children.add(Text(
-          '$name${diagnosticLocal.separator} ',
-          style: textStyle,
-        ));
+        children.add(
+          Text(
+            '$name${diagnosticLocal.separator} ',
+            style: textStyle,
+          ),
+        );
         // provide some contrast between the name and description if both are
         // present.
         descriptionTextStyle =
@@ -255,14 +257,16 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
 
       // TODO(jacobr): custom display for units, iterables, and padding.
-      children.add(Flexible(
-        child: buildDescription(
-          description,
-          descriptionTextStyle,
-          context,
-          colorScheme,
+      children.add(
+        Flexible(
+          child: buildDescription(
+            description,
+            descriptionTextStyle,
+            context,
+            colorScheme,
+          ),
         ),
-      ));
+      );
 
       if (diagnosticLocal.level == DiagnosticLevel.fine &&
           diagnosticLocal.hasDefaultValue) {
@@ -276,25 +280,31 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           diagnosticLocal.showName &&
           name != 'child') {
         if (name.startsWith('child ')) {
-          children.add(Text(
-            name,
-            style: inspector_text_styles.unimportant(colorScheme),
-          ));
+          children.add(
+            Text(
+              name,
+              style: inspector_text_styles.unimportant(colorScheme),
+            ),
+          );
         } else {
           children.add(Text(name, style: textStyle));
         }
 
         if (diagnosticLocal.showSeparator) {
-          children.add(Text(
-            diagnosticLocal.separator,
-            style: textStyle,
-          ));
+          children.add(
+            Text(
+              diagnosticLocal.separator,
+              style: textStyle,
+            ),
+          );
           if (diagnosticLocal.separator != ' ' &&
               (diagnosticLocal.description?.isNotEmpty ?? false)) {
-            children.add(Text(
-              ' ',
-              style: textStyle,
-            ));
+            children.add(
+              Text(
+                ' ',
+                style: textStyle,
+              ),
+            );
           }
         }
       }
@@ -406,24 +416,30 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     var previousItemEnd = 0;
     for (final match in matches) {
       if (match.start > previousItemEnd) {
-        spans.add(TextSpan(
-          text: textPreview.substring(previousItemEnd, match.start),
-          style: textStyle,
-        ));
+        spans.add(
+          TextSpan(
+            text: textPreview.substring(previousItemEnd, match.start),
+            style: textStyle,
+          ),
+        );
       }
 
-      spans.add(TextSpan(
-        text: textPreview.substring(match.start, match.end),
-        style: highlightTextStyle,
-      ));
+      spans.add(
+        TextSpan(
+          text: textPreview.substring(match.start, match.end),
+          style: highlightTextStyle,
+        ),
+      );
 
       previousItemEnd = match.end;
     }
 
-    spans.add(TextSpan(
-      text: textPreview.substring(previousItemEnd, textPreview.length),
-      style: textStyle,
-    ));
+    spans.add(
+      TextSpan(
+        text: textPreview.substring(previousItemEnd, textPreview.length),
+        style: textStyle,
+      ),
+    );
     spans.add(quoteSpan);
 
     return TextSpan(children: spans);

@@ -45,15 +45,16 @@ void main() {
 
     test('to json', () {
       expect(
-          performanceData.json,
-          equals({
-            PerformanceData.selectedFrameIdKey: null,
-            PerformanceData.flutterFramesKey: [],
-            PerformanceData.displayRefreshRateKey: 60,
-            PerformanceData.traceEventsKey: [],
-            PerformanceData.cpuProfileKey: {},
-            PerformanceData.selectedEventKey: {},
-          }));
+        performanceData.json,
+        equals({
+          PerformanceData.selectedFrameIdKey: null,
+          PerformanceData.flutterFramesKey: [],
+          PerformanceData.displayRefreshRateKey: 60,
+          PerformanceData.traceEventsKey: [],
+          PerformanceData.cpuProfileKey: {},
+          PerformanceData.selectedEventKey: {},
+        }),
+      );
 
       performanceData = PerformanceData(
         traceEvents: [
@@ -151,7 +152,9 @@ void main() {
         equals(1),
       );
       expect(
-          performanceData.eventGroups['A']!.rows[0].events.length, equals(1));
+        performanceData.eventGroups['A']!.rows[0].events.length,
+        equals(1),
+      );
 
       performanceData.addTimelineEvent(rasterTimelineEventWithSubtleShaderJank);
       performanceData.initializeEventGroups(threadNamesById, startIndex: 4);
@@ -176,7 +179,9 @@ void main() {
         equals(1),
       );
       expect(
-          performanceData.eventGroups['A']!.rows[0].events.length, equals(1));
+        performanceData.eventGroups['A']!.rows[0].events.length,
+        equals(1),
+      );
     });
   });
 
@@ -206,14 +211,17 @@ void main() {
       expectedFirstTraceJson[TraceEvent.argsKey]
           .addAll({TraceEvent.typeKey: TimelineEventType.ui});
       expectedFirstTraceJson.addAll(
-          {TraceEvent.durationKey: vsyncEvent.time.duration.inMicroseconds});
+        {TraceEvent.durationKey: vsyncEvent.time.duration.inMicroseconds},
+      );
       expect(
         offlineData.selectedEvent!.json,
         equals({TimelineEvent.firstTraceKey: expectedFirstTraceJson}),
       );
       expect(offlineData.displayRefreshRate, equals(120));
       expect(
-          offlineData.cpuProfileData!.toJson, equals(goldenCpuProfileDataJson));
+        offlineData.cpuProfileData!.toJson,
+        equals(goldenCpuProfileDataJson),
+      );
     });
 
     test('shallowClone', () {
@@ -391,9 +399,13 @@ void main() {
       expect(jankyFrameUiOnly.shaderDuration.inMicroseconds, equals(0));
       expect(jankyFrameRasterOnly.shaderDuration.inMicroseconds, equals(0));
       expect(
-          testFrameWithShaderJank.shaderDuration.inMicroseconds, equals(50000));
-      expect(testFrameWithSubtleShaderJank.shaderDuration.inMicroseconds,
-          equals(4000));
+        testFrameWithShaderJank.shaderDuration.inMicroseconds,
+        equals(50000),
+      );
+      expect(
+        testFrameWithSubtleShaderJank.shaderDuration.inMicroseconds,
+        equals(4000),
+      );
     });
 
     test('hasShaderTime', () {
@@ -413,8 +425,10 @@ void main() {
       expect(jankyFrameUiOnly.hasShaderJank(defaultRefreshRate), isFalse);
       expect(jankyFrameRasterOnly.hasShaderJank(defaultRefreshRate), isFalse);
       expect(testFrameWithShaderJank.hasShaderJank(defaultRefreshRate), isTrue);
-      expect(testFrameWithSubtleShaderJank.hasShaderJank(defaultRefreshRate),
-          isFalse);
+      expect(
+        testFrameWithSubtleShaderJank.hasShaderJank(defaultRefreshRate),
+        isFalse,
+      );
     });
   });
 }

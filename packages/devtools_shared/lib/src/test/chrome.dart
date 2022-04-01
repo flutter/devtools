@@ -154,9 +154,11 @@ class ChromeProcess {
       retryFor: timeout,
     );
 
-    unawaited(process.exitCode.then((_) {
-      _processAlive = false;
-    }));
+    unawaited(
+      process.exitCode.then((_) {
+        _processAlive = false;
+      }),
+    );
 
     return wipTab == null ? null : ChromeTab(wipTab);
   }
@@ -225,8 +227,10 @@ class ChromeTab {
       });
 
       onConsoleAPICalled.listen((entry) {
-        print('chrome • console:${entry.type} • '
-            '${entry.args.map((a) => a.value).join(', ')}');
+        print(
+          'chrome • console:${entry.type} • '
+          '${entry.args.map((a) => a.value).join(', ')}',
+        );
       });
 
       onExceptionThrown.listen((ex) {

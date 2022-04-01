@@ -40,12 +40,14 @@ class StatusLine extends StatelessWidget {
     final List<Widget> children = [];
 
     // Have an area for page specific help (always docked to the left).
-    children.add(Expanded(
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: buildHelpUrlStatus(context, currentScreen, textTheme),
+    children.add(
+      Expanded(
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: buildHelpUrlStatus(context, currentScreen, textTheme),
+        ),
       ),
-    ));
+    );
 
     children.add(const BulletSpacer());
 
@@ -77,22 +79,26 @@ class StatusLine extends StatelessWidget {
         buildPageStatus(context, currentScreen, textTheme);
 
     if (pageStatus != null) {
-      children.add(Expanded(
-        child: Align(
-          child: buildPageStatus(context, currentScreen, textTheme),
+      children.add(
+        Expanded(
+          child: Align(
+            child: buildPageStatus(context, currentScreen, textTheme),
+          ),
         ),
-      ));
+      );
 
       children.add(const BulletSpacer());
     }
 
     // Always display connection status (docked to the right).
-    children.add(Expanded(
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: buildConnectionStatus(textTheme),
+    children.add(
+      Expanded(
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: buildConnectionStatus(textTheme),
+        ),
       ),
-    ));
+    );
 
     return Container(
       height: statusLineHeight,
@@ -183,13 +189,15 @@ class StatusLine extends StatelessWidget {
                     final flutterVersion =
                         await InfoController.getFlutterVersion();
 
-                    unawaited(showDialog(
-                      context: context,
-                      builder: (context) => DeviceDialog(
-                        connectedApp: app,
-                        flutterVersion: flutterVersion,
+                    unawaited(
+                      showDialog(
+                        context: context,
+                        builder: (context) => DeviceDialog(
+                          connectedApp: app,
+                          flutterVersion: flutterVersion,
+                        ),
                       ),
-                    ));
+                    );
                   },
                   child: Row(
                     children: [

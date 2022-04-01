@@ -62,7 +62,9 @@ void main() {
       }
       expect(find.byType(ProfileGranularityDropdown), findsOneWidget);
       expect(
-          find.byKey(ProfilerScreen.recordingInstructionsKey), findsOneWidget);
+        find.byKey(ProfilerScreen.recordingInstructionsKey),
+        findsOneWidget,
+      );
       expect(find.byKey(ProfilerScreen.recordingStatusKey), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.byType(CpuProfiler), findsNothing);
@@ -72,17 +74,21 @@ void main() {
       WidgetTester tester,
       ProfilerScreenBody body,
     ) async {
-      await tester.pumpWidget(wrapWithControllers(
-        body,
-        profiler: ProfilerScreenController(),
-      ));
+      await tester.pumpWidget(
+        wrapWithControllers(
+          body,
+          profiler: ProfilerScreenController(),
+        ),
+      );
     }
 
     testWidgets('builds its tab', (WidgetTester tester) async {
-      await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: screen.buildTab),
-        profiler: ProfilerScreenController(),
-      ));
+      await tester.pumpWidget(
+        wrapWithControllers(
+          Builder(builder: screen.buildTab),
+          profiler: ProfilerScreenController(),
+        ),
+      );
       expect(find.text('CPU Profiler'), findsOneWidget);
     });
 
@@ -118,7 +124,9 @@ void main() {
         await tester.tap(find.byType(RecordButton));
         await tester.pump();
         expect(
-            find.byKey(ProfilerScreen.recordingInstructionsKey), findsNothing);
+          find.byKey(ProfilerScreen.recordingInstructionsKey),
+          findsNothing,
+        );
         expect(find.byKey(ProfilerScreen.recordingStatusKey), findsOneWidget);
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
         expect(find.byType(CpuProfiler), findsNothing);

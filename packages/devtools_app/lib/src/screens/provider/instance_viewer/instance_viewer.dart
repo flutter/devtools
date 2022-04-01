@@ -65,7 +65,8 @@ final estimatedChildCountProvider =
               map: (instance) {
                 return expandableEstimatedChildCount(
                   instance.keys.map(
-                      (key) => PathToProperty.mapKey(ref: key.instanceRefId)),
+                    (key) => PathToProperty.mapKey(ref: key.instanceRefId),
+                  ),
                 );
               },
               list: (instance) {

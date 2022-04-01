@@ -382,8 +382,10 @@ class InspectorController extends DisposableController
 
   void filterErrors() {
     if (isSummaryTree) {
-      serviceManager.errorBadgeManager.filterErrors(InspectorScreen.id,
-          (id) => hasDiagnosticsValue(InspectorInstanceRef(id)));
+      serviceManager.errorBadgeManager.filterErrors(
+        InspectorScreen.id,
+        (id) => hasDiagnosticsValue(InspectorInstanceRef(id)),
+      );
     }
   }
 
@@ -431,7 +433,9 @@ class InspectorController extends DisposableController
           ? queryParams[inspectorRefQueryParam]
           : null;
       await updateSelectionFromService(
-          firstFrame: true, inspectorRef: inspectorRef);
+        firstFrame: true,
+        inspectorRef: inspectorRef,
+      );
     } else {
       final ready = await inspectorService.isWidgetTreeReady();
       if (_disposed) return;
@@ -809,7 +813,9 @@ class InspectorController extends DisposableController
         .value;
 
     updateSelectionFromService(
-        firstFrame: false, inspectorRef: errors.keys.elementAt(index));
+      firstFrame: false,
+      inspectorRef: errors.keys.elementAt(index),
+    );
   }
 
   void _onExpand(InspectorTreeNode node) {

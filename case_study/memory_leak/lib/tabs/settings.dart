@@ -61,8 +61,10 @@ class SettingsState extends State<Settings> {
                 restfulApi = key;
               });
               // Display the data received.
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => MyGetHttpData()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MyGetHttpData()),
+              );
             },
           );
         }).toList(),
