@@ -42,40 +42,44 @@ The menu, on the main page, has options:
         title: const Text(aboutMenu),
       ),
       body: Container(
-          padding: const EdgeInsets.all(16.0),
-          child: RichText(
-            text: TextSpan(
-              style: defaultStyle,
-              children: const [
-                TextSpan(
-                    text: heading,
-                    style: TextStyle(
-                      color: Colors.blueGrey,
-                      fontSize: 38,
-                      fontWeight: FontWeight.w700,
-                    )),
-                TextSpan(
-                  text: helpText,
+        padding: const EdgeInsets.all(16.0),
+        child: RichText(
+          text: TextSpan(
+            style: defaultStyle,
+            children: const [
+              TextSpan(
+                text: heading,
+                style: TextStyle(
+                  color: Colors.blueGrey,
+                  fontSize: 38,
+                  fontWeight: FontWeight.w700,
                 ),
-                TextSpan(
-                    text: logOption,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                    )),
-                TextSpan(
-                  text: logDescr,
+              ),
+              TextSpan(
+                text: helpText,
+              ),
+              TextSpan(
+                text: logOption,
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
                 ),
-                TextSpan(
-                    text: aboutOption,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                    )),
-                TextSpan(
-                  text: aboutDescr,
+              ),
+              TextSpan(
+                text: logDescr,
+              ),
+              TextSpan(
+                text: aboutOption,
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
                 ),
-              ],
-            ),
-          )),
+              ),
+              TextSpan(
+                text: aboutDescr,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

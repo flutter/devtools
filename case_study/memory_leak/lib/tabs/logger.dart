@@ -84,32 +84,33 @@ class LoggerState extends State<Logger> {
 
   Widget _buildSuggestions() {
     return ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        // The itemBuilder callback is called once per suggested word pairing,
-        // and places each suggestion into a ListTile row.
-        // For even rows, the function adds a ListTile row for the word pairing.
-        // For odd rows, the function adds a Divider widget to visually
-        // separate the entries. Note that the divider may be difficult
-        // to see on smaller devices.
-        itemBuilder: (context, i) {
-          // Add a one-pixel-high divider widget before each row in theListView.
-          if (i.isOdd) return const Divider();
+      padding: const EdgeInsets.all(16.0),
+      // The itemBuilder callback is called once per suggested word pairing,
+      // and places each suggestion into a ListTile row.
+      // For even rows, the function adds a ListTile row for the word pairing.
+      // For odd rows, the function adds a Divider widget to visually
+      // separate the entries. Note that the divider may be difficult
+      // to see on smaller devices.
+      itemBuilder: (context, i) {
+        // Add a one-pixel-high divider widget before each row in theListView.
+        if (i.isOdd) return const Divider();
 
-          // The syntax "i ~/ 2" divides i by 2 and returns an integer result.
-          // For example: 1, 2, 3, 4, 5 becomes 0, 1, 1, 2, 2.
-          // This calculates the actual number of word pairings in the ListView,
-          // minus the divider widgets.
-          final index = i ~/ 2;
-          if (index < _logging.logs.length) {
-            return _buildRow(_logging.logs[index]);
-          } else {
-            return null;
-          }
+        // The syntax "i ~/ 2" divides i by 2 and returns an integer result.
+        // For example: 1, 2, 3, 4, 5 becomes 0, 1, 1, 2, 2.
+        // This calculates the actual number of word pairings in the ListView,
+        // minus the divider widgets.
+        final index = i ~/ 2;
+        if (index < _logging.logs.length) {
+          return _buildRow(_logging.logs[index]);
+        } else {
+          return null;
+        }
 
 //          // Emits Idle... lots of them every 100ms.
 //          // TOOD(terry): UI needs to appear sluggish clue to look for leaks, etc.
 //          else
 //            return _buildRow('Idle...');
-        });
+      },
+    );
   }
 }
