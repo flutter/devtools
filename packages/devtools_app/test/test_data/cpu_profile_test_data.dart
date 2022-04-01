@@ -176,6 +176,7 @@ final Map<String, dynamic> cpuProfileResponseJson = {
   'stackFrames': goldenCpuProfileStackFrames,
   'traceEvents': goldenCpuProfileTraceEvents,
 };
+
 final Map<String, dynamic> cpuSamplesJson = {
   'samplePeriod': 45,
   'maxStackDepth': 12,
