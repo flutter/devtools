@@ -63,6 +63,13 @@ class GenerateChangelogCommand extends Command {
       );
   }
 
+  static const _authorKey = 'author';
+  static const _commitKey = 'commit';
+  static const _dateKey = 'date';
+  static const _messageKey = 'message';
+  static const _nameKey = 'name';
+  static const _shaKey = 'sha';
+
   // You can authorize your access if you run into a github rate limit.
   // Don't check in your passwords or auth tokens.
   static const auth = '';
@@ -97,7 +104,7 @@ class GenerateChangelogCommand extends Command {
 
     bool isDevBuild(String tagName) => tagName.contains('dev');
     bool isCherryPickRelease(String tagName) => tagName.contains('+');
-    String nameOf(tag) => tag['name'];
+    String nameOf(tag) => tag[_nameKey];
 
     Map<String, dynamic>? closestTag;
     if (sinceTag != null) {
@@ -113,17 +120,20 @@ class GenerateChangelogCommand extends Command {
       }).first;
     }
 
-    final commitInfo = closestTag['commit'] as Map<String, dynamic>;
-    print('Getting the date of the tagged commit for ${closestTag['name']}...');
+    final commitInfo = closestTag[_commitKey] as Map<String, dynamic>;
+    print(
+      'Getting the date of the tagged commit for ${closestTag[_nameKey]}...',
+    );
     final taggedCommit = jsonDecode((await http.get(Uri.https(
       '${auth}api.github.com',
-      '/repos/flutter/devtools/commits/${commitInfo['sha']}',
+      '/repos/flutter/devtools/commits/${commitInfo[_shaKey]}',
     )))
         .body);
 
-    final commitDate = taggedCommit['commit']['author']['date'];
+    final commitDate = taggedCommit[_commitKey][_authorKey][_dateKey];
     print(
-        'Adding entries to the changelog for all commits since $commitDate...');
+      'Adding entries to the changelog for all commits since $commitDate...',
+    );
 
     final changes = <String>[];
 
@@ -145,18 +155,20 @@ class GenerateChangelogCommand extends Command {
       );
       final githubResponse = await http.get(uri);
       final commits = jsonDecode(githubResponse.body);
-      for (var commit in commits) {
-        if (commit['sha'] == taggedCommit['sha']) {
+      for (final commit in commits) {
+        if (commit[_shaKey] == taggedCommit[_shaKey]) {
           print(
-              'Skipping commit ${commit['sha']} because this is the commit of the previous tag');
+            'Skipping commit ${commit[_shaKey]} because this is the commit of '
+            'the previous tag',
+          );
           continue;
         }
-        final message = commit['commit']['message'];
-        if (_shouldSkip(commit['commit']['message'])) {
+        final message = commit[_commitKey][_messageKey];
+        if (_shouldSkip(commit[_commitKey][_messageKey])) {
           print('Skipping commit marked to be ignored: $message');
           continue;
         }
-        final entry = '* ' + _sanitize(commit['commit']['message']);
+        final entry = '* ' + _sanitize(commit[_commitKey][_messageKey]);
         changes.add(entry);
       }
 
