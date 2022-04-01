@@ -107,7 +107,10 @@ void main() {
         final cpuProfileData = await CpuProfileData.generateFromCpuSamples(
             isolateId, origin, extent);
 
-        expect(cpuProfileData.toJson, equals(expectedCpuProfileTimeline));
+        expect(
+          cpuProfileData.toJson,
+          equals(expectedCpuProfileTimeline),
+        );
       });
     });
 
