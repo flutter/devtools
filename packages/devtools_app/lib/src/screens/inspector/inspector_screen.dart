@@ -121,7 +121,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       treeType: FlutterTreeType.widget,
     );
 
-    if (!inspectorController.firstLoadCompleted) {
+    if (!firstInspectorTreeLoadCompleted) {
       ga.timeStart(InspectorScreen.id, analytics_constants.pageReady);
     }
 
@@ -317,7 +317,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // If the user is force refreshing the inspector before the first load has
       // completed, this could indicate a slow load time or that the inspector
       // failed to load the tree once available.
-      if (!inspectorController.firstLoadCompleted) {
+      if (!firstInspectorTreeLoadCompleted) {
         // We do not want to complete this timing operation because the force
         // refresh will skew the results.
         ga.cancelTimingOperation(
@@ -328,7 +328,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           analytics_constants.inspector,
           analytics_constants.refreshEmptyTree,
         );
-        inspectorController.firstLoadCompleted = true;
+        firstInspectorTreeLoadCompleted = true;
       }
       await inspectorController.onForceRefresh();
     });

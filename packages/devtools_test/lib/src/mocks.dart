@@ -50,8 +50,6 @@ class FakeInspectorService extends Fake implements InspectorService {
 class MockInspectorTreeController extends Mock
     implements InspectorTreeController {}
 
-class MockInspectorController extends Mock implements InspectorController {}
-
 class TestInspectorController extends Fake implements InspectorController {
   InspectorService service = FakeInspectorService();
 

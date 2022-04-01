@@ -6,6 +6,7 @@
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_breadcrumbs.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_service.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_tree_controller.dart';
@@ -21,12 +22,11 @@ import 'test_utils/inspector_tree.dart';
 
 void main() {
   late FakeServiceManager fakeServiceManager;
-  late MockInspectorController mockInspectorController;
 
   setUp(() {
     fakeServiceManager = FakeServiceManager();
     mockInspectorController = MockInspectorController();
-    when(mockInspectorController.firstLoadCompleted).thenReturn(true);
+    firstInspectorTreeLoadCompleted = true;
     when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
     when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
 
@@ -45,16 +45,14 @@ void main() {
           treeType: FlutterTreeType.widget,
           onNodeAdded: (_, __) {},
           onClientActiveChange: (_) {},
-        )
-        ..inspectorController = mockInspectorController;
+        );
       final debuggerController = TestDebuggerController();
       await tester.pumpWidget(
         wrap(
           InspectorTree(
             controller: controller,
             debuggerController: debuggerController,
-            inspectorTreeController: InspectorTreeController()
-              ..inspectorController = mockInspectorController,
+            inspectorTreeController: InspectorTreeController(),
           ),
         ),
       );
@@ -71,8 +69,7 @@ void main() {
           InspectorTree(
             controller: controller,
             debuggerController: debuggerController,
-            inspectorTreeController: InspectorTreeController()
-              ..inspectorController = mockInspectorController,
+            inspectorTreeController: InspectorTreeController(),
           ),
         ),
       );
@@ -95,17 +92,13 @@ void main() {
         tester: tester,
       );
 
-      final treeController = inspectorTreeControllerFromNode(
-        diagnosticNode,
-        inspectorController: mockInspectorController,
-      );
+      final treeController = inspectorTreeControllerFromNode(diagnosticNode);
       await tester.pumpWidget(
         wrap(
           InspectorTree(
             controller: treeController,
             debuggerController: TestDebuggerController(),
-            inspectorTreeController: InspectorTreeController()
-              ..inspectorController = mockInspectorController,
+            inspectorTreeController: InspectorTreeController(),
           ),
         ),
       );
@@ -126,17 +119,13 @@ void main() {
         tester: tester,
       );
 
-      final treeController = inspectorTreeControllerFromNode(
-        diagnosticNode,
-        inspectorController: mockInspectorController,
-      );
+      final treeController = inspectorTreeControllerFromNode(diagnosticNode);
       await tester.pumpWidget(
         wrap(
           InspectorTree(
             controller: treeController,
             debuggerController: TestDebuggerController(),
-            inspectorTreeController: InspectorTreeController()
-              ..inspectorController = mockInspectorController,
+            inspectorTreeController: InspectorTreeController(),
           ),
         ),
       );
@@ -151,18 +140,14 @@ void main() {
         tester: tester,
       );
 
-      final treeController = inspectorTreeControllerFromNode(
-        diagnosticNode,
-        inspectorController: mockInspectorController,
-      );
+      final treeController = inspectorTreeControllerFromNode(diagnosticNode);
 
       await tester.pumpWidget(
         wrap(
           InspectorTree(
             controller: treeController,
             debuggerController: TestDebuggerController(),
-            inspectorTreeController: InspectorTreeController()
-              ..inspectorController = mockInspectorController,
+            inspectorTreeController: InspectorTreeController(),
           ),
         ),
       );
@@ -176,17 +161,13 @@ void main() {
         tester: tester,
       );
 
-      final controller = inspectorTreeControllerFromNode(
-        diagnosticNode,
-        inspectorController: mockInspectorController,
-      );
+      final controller = inspectorTreeControllerFromNode(diagnosticNode);
       await tester.pumpWidget(
         wrap(
           InspectorTree(
             controller: controller,
             debuggerController: TestDebuggerController(),
-            inspectorTreeController: InspectorTreeController()
-              ..inspectorController = mockInspectorController,
+            inspectorTreeController: InspectorTreeController(),
             // ignore: avoid_redundant_argument_values
             isSummaryTree: false,
           ),
@@ -202,10 +183,7 @@ void main() {
         tester: tester,
       );
 
-      final controller = inspectorTreeControllerFromNode(
-        diagnosticNode,
-        inspectorController: mockInspectorController,
-      );
+      final controller = inspectorTreeControllerFromNode(diagnosticNode);
       await tester.pumpWidget(
         wrap(
           InspectorTree(
