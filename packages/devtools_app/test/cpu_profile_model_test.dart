@@ -36,6 +36,7 @@ void main() {
         equals(47377799685),
       );
     });
+
     group('generateFromCpuSamples', () {
       ServiceConnectionManager manager;
       final service = MockVmService();
@@ -111,6 +112,7 @@ void main() {
         expect(cpuProfileData.toJson, equals(expectedCpuProfileTimeline));
       });
     });
+
     test('subProfile', () {
       final subProfile = CpuProfileData.subProfile(
           cpuProfileData,
