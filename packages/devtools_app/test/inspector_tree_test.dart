@@ -25,7 +25,6 @@ void main() {
 
   setUp(() {
     fakeServiceManager = FakeServiceManager();
-    mockInspectorController = MockInspectorController();
     firstInspectorTreeLoadCompleted = true;
     when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
     when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
