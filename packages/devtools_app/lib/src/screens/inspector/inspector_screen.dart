@@ -120,6 +120,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       treeType: FlutterTreeType.widget,
     );
 
+    if (!firstInspectorTreeLoadCompleted) {
+      ga.timeStart(InspectorScreen.id, analytics_constants.pageReady);
+    }
     summaryTreeController.setSearchTarget(searchTarget);
 
     addAutoDisposeListener(searchFieldFocusNode, () {
@@ -301,6 +304,22 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   void _refreshInspector() {
     ga.select(analytics_constants.inspector, analytics_constants.refresh);
     blockWhileInProgress(() async {
+      // If the user is force refreshing the inspector before the first load has
+      // completed, this could indicate a slow load time or that the inspector
+      // failed to load the tree once available.
+      if (!firstInspectorTreeLoadCompleted) {
+        // We do not want to complete this timing operation because the force
+        // refresh will skew the results.
+        ga.cancelTimingOperation(
+          InspectorScreen.id,
+          analytics_constants.pageReady,
+        );
+        ga.select(
+          analytics_constants.inspector,
+          analytics_constants.refreshEmptyTree,
+        );
+        firstInspectorTreeLoadCompleted = true;
+      }
       await inspectorController?.onForceRefresh();
     });
   }

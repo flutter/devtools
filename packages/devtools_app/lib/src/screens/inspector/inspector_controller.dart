@@ -39,6 +39,15 @@ import 'inspector_tree_controller.dart';
 
 const inspectorRefQueryParam = 'inspectorRef';
 
+// TODO(https://github.com/flutter/devtools/issues/3950): move this field to the
+// [InspectorController] class once the controller is provided by
+// package:provider.
+/// Tracks whether the first load of the inspector tree has been completed.
+///
+/// This field is used to prevent sending multiple analytics events for
+/// inspector tree load timing.
+bool firstInspectorTreeLoadCompleted = false;
+
 TextStyle textStyleForLevel(DiagnosticLevel level, ColorScheme colorScheme) {
   switch (level) {
     case DiagnosticLevel.hidden:
@@ -413,12 +422,14 @@ class InspectorController extends DisposableController
     }
 
     if (flutterAppFrameReady) {
-      // TODO: measure and send DevTools pageReady analytics:
-      // https://github.com/flutter/devtools/issues/3879
-      await serviceManager.sendDwdsEvent(
-        screen: InspectorScreen.id,
-        action: analytics_constants.pageReady,
-      );
+      if (serviceManager.connectedApp.isDartWebAppNow) {
+        unawaited(
+          serviceManager.sendDwdsEvent(
+            screen: InspectorScreen.id,
+            action: analytics_constants.pageReady,
+          ),
+        );
+      }
       _rootDirectories = await inspectorService.inferPubRootDirectoryIfNeeded();
       if (_disposed) return;
       // We need to start by querying the inspector service to find out the

@@ -31,6 +31,8 @@ import '../debugger/debugger_controller.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
 import 'inspector_breadcrumbs.dart';
+import 'inspector_controller.dart';
+import 'inspector_screen.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
 
@@ -971,6 +973,10 @@ class _InspectorTreeState extends State<InspectorTree>
       return const SizedBox();
     }
 
+    if (!firstInspectorTreeLoadCompleted && widget.isSummaryTree) {
+      ga.timeEnd(InspectorScreen.id, analytics_constants.pageReady);
+      firstInspectorTreeLoadCompleted = true;
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
         final viewportWidth = constraints.maxWidth;
