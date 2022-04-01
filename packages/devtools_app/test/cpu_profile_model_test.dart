@@ -97,8 +97,8 @@ void main() {
               'cat': 'Dart',
               'sf': '$isolateId-4',
               'args': {'userTag': '__userTag', 'vmTag': '__vmTag'},
-            }
-          ]
+            },
+          ],
         };
         when(service.getCpuSamples(
           isolateId,
