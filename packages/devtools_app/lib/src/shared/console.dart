@@ -255,8 +255,10 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
               debuggerController: _debuggerController,
             );
           } else {
-            assert(false,
-                'ConsoleLine of unsupported type ${line.runtimeType} encountered');
+            assert(
+              false,
+              'ConsoleLine of unsupported type ${line.runtimeType} encountered',
+            );
             return const SizedBox();
           }
         },

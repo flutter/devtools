@@ -104,21 +104,29 @@ void main() {
 
       controller.toggleFilters[0].enabled.value = true;
       expect(
-          controller.generateToggleFilterSuffix(), equals('Hide Native code'));
+        controller.generateToggleFilterSuffix(),
+        equals('Hide Native code'),
+      );
 
       controller.toggleFilters[1].enabled.value = true;
-      expect(controller.generateToggleFilterSuffix(),
-          equals('Hide Native code,Hide core Dart libraries'));
+      expect(
+        controller.generateToggleFilterSuffix(),
+        equals('Hide Native code,Hide core Dart libraries'),
+      );
 
       controller.toggleFilters[2].enabled.value = true;
       expect(
-          controller.generateToggleFilterSuffix(),
-          equals(
-              'Hide Native code,Hide core Dart libraries,Hide core Flutter libraries'));
+        controller.generateToggleFilterSuffix(),
+        equals(
+          'Hide Native code,Hide core Dart libraries,Hide core Flutter libraries',
+        ),
+      );
 
       controller.toggleFilters[1].enabled.value = false;
-      expect(controller.generateToggleFilterSuffix(),
-          equals('Hide Native code,Hide core Flutter libraries'));
+      expect(
+        controller.generateToggleFilterSuffix(),
+        equals('Hide Native code,Hide core Flutter libraries'),
+      );
     });
 
     test('selectCpuStackFrame', () async {
@@ -156,7 +164,9 @@ void main() {
         processId: 'test',
       );
       expect(
-          controller.dataNotifier.value!.stackFrames.values.length, equals(17));
+        controller.dataNotifier.value!.stackFrames.values.length,
+        equals(17),
+      );
 
       // Match on name.
       expect(controller.matchesForSearch('').length, equals(0));
@@ -172,7 +182,9 @@ void main() {
 
       // Match with RegExp.
       expect(
-          controller.matchesForSearch('rendering/.*\.dart').length, equals(7));
+        controller.matchesForSearch('rendering/.*\.dart').length,
+        equals(7),
+      );
       expect(controller.matchesForSearch('RENDER.*\.paint').length, equals(6));
     });
 
@@ -228,9 +240,10 @@ void main() {
       final dataNotifierValue = controller.dataNotifier.value!;
 
       expect(
-          dataNotifierValue
-              .cpuProfileRoot.profileMetaData.time!.duration.inMicroseconds,
-          equals(250));
+        dataNotifierValue
+            .cpuProfileRoot.profileMetaData.time!.duration.inMicroseconds,
+        equals(250),
+      );
       expect(
         dataNotifierValue.cpuProfileRoot.toStringDeep(),
         equals(
@@ -301,8 +314,10 @@ void main() {
       );
 
       final cpuProfileRoot = controller.dataNotifier.value!.cpuProfileRoot;
-      expect(cpuProfileRoot.profileMetaData.time!.duration.inMicroseconds,
-          equals(250));
+      expect(
+        cpuProfileRoot.profileMetaData.time!.duration.inMicroseconds,
+        equals(250),
+      );
       expect(
         cpuProfileRoot.toStringDeep(),
         equals(
@@ -367,15 +382,24 @@ void main() {
 
     test('disposes', () {
       controller.dispose();
-      expect(() {
-        controller.dataNotifier.addListener(() {});
-      }, throwsA(anything));
-      expect(() {
-        controller.selectedCpuStackFrameNotifier.addListener(() {});
-      }, throwsA(anything));
-      expect(() {
-        controller.processingNotifier.addListener(() {});
-      }, throwsA(anything));
+      expect(
+        () {
+          controller.dataNotifier.addListener(() {});
+        },
+        throwsA(anything),
+      );
+      expect(
+        () {
+          controller.selectedCpuStackFrameNotifier.addListener(() {});
+        },
+        throwsA(anything),
+      );
+      expect(
+        () {
+          controller.processingNotifier.addListener(() {});
+        },
+        throwsA(anything),
+      );
     });
   });
 }

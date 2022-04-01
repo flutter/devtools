@@ -48,12 +48,16 @@ void main() {
         )
         ..inspectorController = mockInspectorController;
       final debuggerController = TestDebuggerController();
-      await tester.pumpWidget(wrap(InspectorTree(
-        controller: controller,
-        debuggerController: debuggerController,
-        inspectorTreeController: InspectorTreeController()
-          ..inspectorController = mockInspectorController,
-      )));
+      await tester.pumpWidget(
+        wrap(
+          InspectorTree(
+            controller: controller,
+            debuggerController: debuggerController,
+            inspectorTreeController: InspectorTreeController()
+              ..inspectorController = mockInspectorController,
+          ),
+        ),
+      );
 
       expect(controller.getRow(const Offset(0, -100.0)), isNull);
       expect(controller.getRowOffset(-1), equals(0));
@@ -62,11 +66,16 @@ void main() {
       expect(controller.getRowOffset(0), equals(0));
 
       controller.root = InspectorTreeNode()..appendChild(InspectorTreeNode());
-      await tester.pumpWidget(wrap(InspectorTree(
-          controller: controller,
-          debuggerController: debuggerController,
-          inspectorTreeController: InspectorTreeController()
-            ..inspectorController = mockInspectorController)));
+      await tester.pumpWidget(
+        wrap(
+          InspectorTree(
+            controller: controller,
+            debuggerController: debuggerController,
+            inspectorTreeController: InspectorTreeController()
+              ..inspectorController = mockInspectorController,
+          ),
+        ),
+      );
 
       expect(controller.getRow(const Offset(0, -20))!.index, 0);
       expect(controller.getRowOffset(-1), equals(0));
@@ -90,12 +99,16 @@ void main() {
         diagnosticNode,
         inspectorController: mockInspectorController,
       );
-      await tester.pumpWidget(wrap(InspectorTree(
-        controller: treeController,
-        debuggerController: TestDebuggerController(),
-        inspectorTreeController: InspectorTreeController()
-          ..inspectorController = mockInspectorController,
-      )));
+      await tester.pumpWidget(
+        wrap(
+          InspectorTree(
+            controller: treeController,
+            debuggerController: TestDebuggerController(),
+            inspectorTreeController: InspectorTreeController()
+              ..inspectorController = mockInspectorController,
+          ),
+        ),
+      );
 
       expect(find.richText('Text: "Content"'), findsOneWidget);
     });
@@ -117,12 +130,16 @@ void main() {
         diagnosticNode,
         inspectorController: mockInspectorController,
       );
-      await tester.pumpWidget(wrap(InspectorTree(
-        controller: treeController,
-        debuggerController: TestDebuggerController(),
-        inspectorTreeController: InspectorTreeController()
-          ..inspectorController = mockInspectorController,
-      )));
+      await tester.pumpWidget(
+        wrap(
+          InspectorTree(
+            controller: treeController,
+            debuggerController: TestDebuggerController(),
+            inspectorTreeController: InspectorTreeController()
+              ..inspectorController = mockInspectorController,
+          ),
+        ),
+      );
 
       expect(find.richText('Text: "Rich text"'), findsOneWidget);
     });
@@ -140,12 +157,14 @@ void main() {
       );
 
       await tester.pumpWidget(
-        wrap(InspectorTree(
-          controller: treeController,
-          debuggerController: TestDebuggerController(),
-          inspectorTreeController: InspectorTreeController()
-            ..inspectorController = mockInspectorController,
-        )),
+        wrap(
+          InspectorTree(
+            controller: treeController,
+            debuggerController: TestDebuggerController(),
+            inspectorTreeController: InspectorTreeController()
+              ..inspectorController = mockInspectorController,
+          ),
+        ),
       );
 
       expect(find.richText('Text: "Multiline text  content"'), findsOneWidget);
@@ -161,16 +180,18 @@ void main() {
         diagnosticNode,
         inspectorController: mockInspectorController,
       );
-      await tester.pumpWidget(wrap(
-        InspectorTree(
-          controller: controller,
-          debuggerController: TestDebuggerController(),
-          inspectorTreeController: InspectorTreeController()
-            ..inspectorController = mockInspectorController,
-          // ignore: avoid_redundant_argument_values
-          isSummaryTree: false,
+      await tester.pumpWidget(
+        wrap(
+          InspectorTree(
+            controller: controller,
+            debuggerController: TestDebuggerController(),
+            inspectorTreeController: InspectorTreeController()
+              ..inspectorController = mockInspectorController,
+            // ignore: avoid_redundant_argument_values
+            isSummaryTree: false,
+          ),
         ),
-      ));
+      );
 
       expect(find.byType(InspectorBreadcrumbNavigator), findsOneWidget);
     });
@@ -185,13 +206,15 @@ void main() {
         diagnosticNode,
         inspectorController: mockInspectorController,
       );
-      await tester.pumpWidget(wrap(
-        InspectorTree(
-          controller: controller,
-          debuggerController: TestDebuggerController(),
-          isSummaryTree: true,
+      await tester.pumpWidget(
+        wrap(
+          InspectorTree(
+            controller: controller,
+            debuggerController: TestDebuggerController(),
+            isSummaryTree: true,
+          ),
         ),
-      ));
+      );
 
       expect(find.byType(InspectorBreadcrumbNavigator), findsNothing);
     });

@@ -272,10 +272,12 @@ void main() {
         // We need to pump the entire `ProfilerScreenBody` widget because the
         // CpuProfiler widget has `cpuProfileData` passed in from there, and
         // CpuProfiler needs to be rebuilt on data updates.
-        await tester.pumpWidget(wrapWithControllers(
-          const ProfilerScreenBody(),
-          profiler: controller,
-        ));
+        await tester.pumpWidget(
+          wrapWithControllers(
+            const ProfilerScreenBody(),
+            profiler: controller,
+          ),
+        );
         expect(controller.cpuProfilerController.userTags.length, equals(3));
 
         expect(find.byType(UserTagDropdown), findsOneWidget);

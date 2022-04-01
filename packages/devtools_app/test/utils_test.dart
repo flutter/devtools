@@ -240,31 +240,43 @@ void main() {
       });
 
       test('start setter throws exception when single assignment is true', () {
-        expect(() {
-          final t = TimeRange()..start = Duration.zero;
-          t.start = Duration.zero;
-        }, throwsAssertionError);
+        expect(
+          () {
+            final t = TimeRange()..start = Duration.zero;
+            t.start = Duration.zero;
+          },
+          throwsAssertionError,
+        );
       });
 
       test('start setter throws exception when value is after end', () {
-        expect(() {
-          final t = TimeRange()..end = const Duration(seconds: 1);
-          t.start = const Duration(seconds: 2);
-        }, throwsAssertionError);
+        expect(
+          () {
+            final t = TimeRange()..end = const Duration(seconds: 1);
+            t.start = const Duration(seconds: 2);
+          },
+          throwsAssertionError,
+        );
       });
 
       test('end setter throws exception when single assignment is true', () {
-        expect(() {
-          final t = TimeRange()..end = Duration.zero;
-          t.end = Duration.zero;
-        }, throwsAssertionError);
+        expect(
+          () {
+            final t = TimeRange()..end = Duration.zero;
+            t.end = Duration.zero;
+          },
+          throwsAssertionError,
+        );
       });
 
       test('end setter throws exception when value is before start', () {
-        expect(() {
-          final t = TimeRange()..start = const Duration(seconds: 1);
-          t.end = Duration.zero;
-        }, throwsAssertionError);
+        expect(
+          () {
+            final t = TimeRange()..start = const Duration(seconds: 1);
+            t.end = Duration.zero;
+          },
+          throwsAssertionError,
+        );
       });
 
       test('isWellFormed', () {
@@ -441,7 +453,8 @@ void main() {
       );
       expect(
         devToolsQueryParams(
-            'http://localhost:9101/#/appsize?key=value.json&key2=123'),
+          'http://localhost:9101/#/appsize?key=value.json&key2=123',
+        ),
         equals({
           'key': 'value.json',
           'key2': '123',
@@ -452,8 +465,8 @@ void main() {
     test('getServiceUriFromQueryString', () {
       expect(
         getServiceUriFromQueryString(
-                'http://localhost:123/?uri=http://localhost:456')
-            .toString(),
+          'http://localhost:123/?uri=http://localhost:456',
+        ).toString(),
         equals('http://localhost:456'),
       );
       expect(
@@ -463,8 +476,8 @@ void main() {
       );
       expect(
         getServiceUriFromQueryString(
-                'http://localhost:123/?port=789&token=kjy78')
-            .toString(),
+          'http://localhost:123/?port=789&token=kjy78',
+        ).toString(),
         equals('ws://localhost:789/kjy78/ws'),
       );
     });
@@ -503,12 +516,13 @@ void main() {
       test('produces the safe value on infinite division', () {
         expect(safeDivide(double.infinity, 1.0), 0.0);
         expect(
-            safeDivide(
-              double.nan,
-              double.negativeInfinity,
-              ifNotFinite: 50.0,
-            ),
-            50.0);
+          safeDivide(
+            double.nan,
+            double.negativeInfinity,
+            ifNotFinite: 50.0,
+          ),
+          50.0,
+        );
       });
 
       test('produces the safe value on null division', () {
@@ -965,17 +979,25 @@ void main() {
         expect(parseCssHexColor('#000000ff'), equals(Colors.black));
         expect(parseCssHexColor('000000ff'), equals(Colors.black));
         expect(
-            parseCssHexColor('#00000000'), equals(Colors.black.withAlpha(0)));
+          parseCssHexColor('#00000000'),
+          equals(Colors.black.withAlpha(0)),
+        );
         expect(parseCssHexColor('00000000'), equals(Colors.black.withAlpha(0)));
         expect(parseCssHexColor('#ffffffff'), equals(Colors.white));
         expect(parseCssHexColor('ffffffff'), equals(Colors.white));
         expect(
-            parseCssHexColor('#ffffff00'), equals(Colors.white.withAlpha(0)));
+          parseCssHexColor('#ffffff00'),
+          equals(Colors.white.withAlpha(0)),
+        );
         expect(parseCssHexColor('ffffff00'), equals(Colors.white.withAlpha(0)));
-        expect(parseCssHexColor('#ff0000bb'),
-            equals(const Color(0xFF0000).withAlpha(0xbb)));
-        expect(parseCssHexColor('ff0000bb'),
-            equals(const Color(0xFF0000).withAlpha(0xbb)));
+        expect(
+          parseCssHexColor('#ff0000bb'),
+          equals(const Color(0xFF0000).withAlpha(0xbb)),
+        );
+        expect(
+          parseCssHexColor('ff0000bb'),
+          equals(const Color(0xFF0000).withAlpha(0xbb)),
+        );
       });
       test('parses 4 digit hex colors', () {
         expect(parseCssHexColor('#000f'), equals(Colors.black));
@@ -986,10 +1008,14 @@ void main() {
         expect(parseCssHexColor('ffff'), equals(Colors.white));
         expect(parseCssHexColor('#fff0'), equals(Colors.white.withAlpha(0)));
         expect(parseCssHexColor('ffffff00'), equals(Colors.white.withAlpha(0)));
-        expect(parseCssHexColor('#f00b'),
-            equals(const Color(0xFF0000).withAlpha(0xbb)));
-        expect(parseCssHexColor('f00b'),
-            equals(const Color(0xFF0000).withAlpha(0xbb)));
+        expect(
+          parseCssHexColor('#f00b'),
+          equals(const Color(0xFF0000).withAlpha(0xbb)),
+        );
+        expect(
+          parseCssHexColor('f00b'),
+          equals(const Color(0xFF0000).withAlpha(0xbb)),
+        );
       });
     });
 
@@ -1180,13 +1206,17 @@ void main() {
       });
 
       test('throws on removeWhere', () {
-        expect(() => immutableList.removeWhere((int n) => n == 1),
-            throwsException);
+        expect(
+          () => immutableList.removeWhere((int n) => n == 1),
+          throwsException,
+        );
       });
 
       test('throws on retainWhere', () {
-        expect(() => immutableList.retainWhere((int n) => n == 1),
-            throwsException);
+        expect(
+          () => immutableList.retainWhere((int n) => n == 1),
+          throwsException,
+        );
       });
 
       test('throws on insert', () {
@@ -1260,12 +1290,14 @@ void main() {
         );
         expect(
           str.caseInsensitiveContains(
-              RegExp('THIS IS.*TO/uri', caseSensitive: false)),
+            RegExp('THIS IS.*TO/uri', caseSensitive: false),
+          ),
           isTrue,
         );
         expect(
           str.caseInsensitiveContains(
-              RegExp('this.*does not match', caseSensitive: false)),
+            RegExp('this.*does not match', caseSensitive: false),
+          ),
           isFalse,
         );
       });

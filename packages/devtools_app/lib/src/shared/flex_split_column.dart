@@ -98,8 +98,10 @@ class FlexSplitColumn extends StatelessWidget {
       totalHeaderHeight += header.preferredSize.height;
     }
     final intendedContentHeight = totalHeight - totalHeaderHeight;
-    final intendedChildHeights = List<double>.generate(initialFractions.length,
-        (i) => intendedContentHeight * initialFractions[i]);
+    final intendedChildHeights = List<double>.generate(
+      initialFractions.length,
+      (i) => intendedContentHeight * initialFractions[i],
+    );
     final trueContentHeight =
         intendedContentHeight + headers[0].preferredSize.height;
     return List<double>.generate(initialFractions.length, (i) {

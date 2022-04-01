@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:collection';
 
@@ -68,15 +68,16 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         BlockingActionMixin,
         AutoDisposeMixin,
         SearchFieldMixin<InspectorScreenBody> {
-  InspectorController inspectorController;
+  late InspectorController inspectorController;
 
-  InspectorTreeController get summaryTreeController =>
-      inspectorController?.inspectorTree;
+  InspectorTreeController get _summaryTreeController =>
+      inspectorController.inspectorTree;
 
-  InspectorTreeController get detailsTreeController =>
-      inspectorController?.details?.inspectorTree;
+  InspectorTreeController get _detailsTreeController =>
+      inspectorController.details!.inspectorTree;
 
-  DebuggerController _debuggerController;
+  late DebuggerController _debuggerController;
+  bool _isDebuggerControllerInitialized = false;
 
   bool searchVisible = false;
 
@@ -98,7 +99,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     inspectorController.inspectorTree.dispose();
     if (inspectorController.isSummaryTree &&
         inspectorController.details != null) {
-      inspectorController.details.inspectorTree.dispose();
+      inspectorController.details!.inspectorTree.dispose();
     }
     super.dispose();
   }
@@ -124,14 +125,14 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       ga.timeStart(InspectorScreen.id, analytics_constants.pageReady);
     }
 
-    summaryTreeController.setSearchTarget(searchTarget);
+    _summaryTreeController.setSearchTarget(searchTarget);
 
     addAutoDisposeListener(searchFieldFocusNode, () {
       // Close the search once focus is lost and following conditions are met:
       //  1. Search string is empty.
       //  2. [searchPreventClose] == false (this is set true when searchTargetType Dropdown is opened).
       if (!searchFieldFocusNode.hasFocus &&
-          summaryTreeController.search.isEmpty &&
+          _summaryTreeController.search.isEmpty &&
           !searchPreventClose) {
         setState(() {
           searchVisible = false;
@@ -149,7 +150,12 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _debuggerController = Provider.of<DebuggerController>(context);
+
+    final newDebuggerController = Provider.of<DebuggerController>(context);
+    if (_isDebuggerControllerInitialized &&
+        _debuggerController == newDebuggerController) return;
+    _isDebuggerControllerInitialized = true;
+    _debuggerController = newDebuggerController;
   }
 
   @override
@@ -158,9 +164,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
     final detailsTree = InspectorTree(
       key: detailsTreeKey,
-      controller: detailsTreeController,
+      controller: _detailsTreeController,
       debuggerController: _debuggerController,
-      inspectorTreeController: summaryTreeController,
+      inspectorTreeController: _summaryTreeController,
     );
 
     final splitAxis = Split.axisFor(context, 0.85);
@@ -180,10 +186,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ValueListenableBuilder(
-              valueListenable: serviceManager.serviceExtensionManager
-                  .hasServiceExtension(
-                      extensions.toggleSelectWidgetMode.extension),
+            ValueListenableBuilder<bool>(
+              valueListenable:
+                  serviceManager.serviceExtensionManager.hasServiceExtension(
+                extensions.toggleSelectWidgetMode.extension,
+              ),
               builder: (_, selectModeSupported, __) {
                 return ServiceExtensionButtonGroup(
                   extensions: [
@@ -222,7 +229,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                 onRefreshInspectorPressed: _refreshInspector,
                 onSearchVisibleToggle: _onSearchVisibleToggle,
                 searchFieldBuilder: () => buildSearchField(
-                  controller: summaryTreeController,
+                  controller: _summaryTreeController,
                   searchFieldKey: GlobalKey(
                     debugLabel: 'inspectorScreenSearch',
                   ),
@@ -238,19 +245,21 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                       .erroredItemsForPage(InspectorScreen.id),
                   builder:
                       (_, LinkedHashMap<String, DevToolsError> errors, __) {
-                    final inspectableErrors = errors.map((key, value) =>
-                        MapEntry(key, value as InspectableWidgetError));
+                    final inspectableErrors = errors.map(
+                      (key, value) =>
+                          MapEntry(key, value as InspectableWidgetError),
+                    ) as LinkedHashMap<String, InspectableWidgetError>;
                     return Stack(
                       children: [
                         InspectorTree(
                           key: summaryTreeKey,
-                          controller: summaryTreeController,
+                          controller: _summaryTreeController,
                           isSummaryTree: true,
                           widgetErrors: inspectableErrors,
                           debuggerController: debuggerController,
                         ),
-                        if (errors.isNotEmpty && inspectorController != null)
-                          ValueListenableBuilder(
+                        if (errors.isNotEmpty)
+                          ValueListenableBuilder<int?>(
                             valueListenable:
                                 inspectorController.selectedErrorIndex,
                             builder: (_, selectedErrorIndex, __) => Positioned(
@@ -280,7 +289,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     setState(() {
       searchVisible = !searchVisible;
     });
-    summaryTreeController.resetSearch();
+    _summaryTreeController.resetSearch();
     searchTextFieldController.clear();
   }
 
@@ -321,19 +330,19 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         );
         inspectorController.firstLoadCompleted = true;
       }
-      await inspectorController?.onForceRefresh();
+      await inspectorController.onForceRefresh();
     });
   }
 }
 
 class InspectorSummaryTreeControls extends StatelessWidget {
   const InspectorSummaryTreeControls({
-    Key key,
-    @required this.constraints,
-    @required this.isSearchVisible,
-    @required this.onRefreshInspectorPressed,
-    @required this.onSearchVisibleToggle,
-    @required this.searchFieldBuilder,
+    Key? key,
+    required this.constraints,
+    required this.isSearchVisible,
+    required this.onRefreshInspectorPressed,
+    required this.onSearchVisibleToggle,
+    required this.searchFieldBuilder,
   }) : super(key: key);
 
   static const _searchBreakpoint = 375.0;
@@ -412,22 +421,22 @@ class InspectorSummaryTreeControls extends StatelessWidget {
 
 class ErrorNavigator extends StatelessWidget {
   const ErrorNavigator({
-    Key key,
-    @required this.errors,
-    @required this.errorIndex,
-    @required this.onSelectError,
+    Key? key,
+    required this.errors,
+    required this.errorIndex,
+    required this.onSelectError,
   }) : super(key: key);
 
   final LinkedHashMap<String, InspectableWidgetError> errors;
 
-  final int errorIndex;
+  final int? errorIndex;
 
   final Function(int) onSelectError;
 
   @override
   Widget build(BuildContext context) {
     final label = errorIndex != null
-        ? 'Error ${errorIndex + 1}/${errors.length}'
+        ? 'Error ${errorIndex! + 1}/${errors.length}'
         : 'Errors: ${errors.length}';
     return Container(
       color: devtoolsError,
@@ -463,7 +472,7 @@ class ErrorNavigator extends StatelessWidget {
   }
 
   void _previousError() {
-    var newIndex = errorIndex == null ? errors.length - 1 : errorIndex - 1;
+    var newIndex = errorIndex == null ? errors.length - 1 : errorIndex! - 1;
     while (newIndex < 0) {
       newIndex += errors.length;
     }
@@ -472,7 +481,7 @@ class ErrorNavigator extends StatelessWidget {
   }
 
   void _nextError() {
-    final newIndex = errorIndex == null ? 0 : (errorIndex + 1) % errors.length;
+    final newIndex = errorIndex == null ? 0 : (errorIndex! + 1) % errors.length;
 
     onSelectError(newIndex);
   }

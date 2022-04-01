@@ -86,10 +86,12 @@ Future<InstanceRef> _resolveInstanceRefForPath(
 
       // compare by both name and ref ID because an object may have multiple
       // fields with the same name
-      final field = parent.fields.firstWhere((element) =>
-          element.name == propertyPath.name &&
-          element.ownerName == propertyPath.ownerName &&
-          element.ownerUri == propertyPath.ownerUri);
+      final field = parent.fields.firstWhere(
+        (element) =>
+            element.name == propertyPath.name &&
+            element.ownerName == propertyPath.ownerName &&
+            element.ownerUri == propertyPath.ownerUri,
+      );
 
       final ref = field.ref.dataOrThrow;
       if (ref == null) return null;
@@ -146,8 +148,11 @@ Future<void> _mutate(
     object: (parent) {
       final propertyPath = path.pathToProperty.last as PropertyPath;
 
-      final field = parent.fields.firstWhere((f) =>
-          f.name == propertyPath.name && f.ownerName == propertyPath.ownerName);
+      final field = parent.fields.firstWhere(
+        (f) =>
+            f.name == propertyPath.name &&
+            f.ownerName == propertyPath.ownerName,
+      );
 
       return field.eval.safeEval(
         'parent.${propertyPath.name} = $newValueExpression',

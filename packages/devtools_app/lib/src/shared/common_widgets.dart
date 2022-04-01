@@ -1456,6 +1456,7 @@ class MoreInfoLink extends StatelessWidget {
     required this.url,
     required this.gaScreenName,
     required this.gaSelectedItemDescription,
+    this.padding,
   }) : super(key: key);
 
   final String url;
@@ -1464,6 +1465,8 @@ class MoreInfoLink extends StatelessWidget {
 
   final String gaSelectedItemDescription;
 
+  final EdgeInsets? padding;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1471,7 +1474,7 @@ class MoreInfoLink extends StatelessWidget {
       onTap: () => _onLinkTap(context),
       borderRadius: BorderRadius.circular(defaultBorderRadius),
       child: Padding(
-        padding: const EdgeInsets.all(denseSpacing),
+        padding: padding ?? const EdgeInsets.all(denseSpacing),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.end,

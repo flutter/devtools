@@ -223,7 +223,8 @@ class SliverExtentDelegateList extends SliverMultiBoxAdaptorWidget {
 
   @override
   RenderSliverExtentDelegateBoxAdaptor createRenderObject(
-      BuildContext context) {
+    BuildContext context,
+  ) {
     final SliverMultiBoxAdaptorElement element =
         context as SliverMultiBoxAdaptorElement;
     return RenderSliverExtentDelegateBoxAdaptor(
@@ -234,7 +235,9 @@ class SliverExtentDelegateList extends SliverMultiBoxAdaptorWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderSliverExtentDelegateBoxAdaptor renderObject) {
+    BuildContext context,
+    RenderSliverExtentDelegateBoxAdaptor renderObject,
+  ) {
     renderObject.markNeedsLayout();
     renderObject.extentDelegate = extentDelegate;
   }
@@ -438,9 +441,11 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
     final double trailingScrollOffset =
         _extentDelegate!.layoutOffset(lastIndex + 1);
 
-    assert(firstIndex == 0 ||
-        childScrollOffset(firstChild!)! - scrollOffset <=
-            precisionErrorTolerance);
+    assert(
+      firstIndex == 0 ||
+          childScrollOffset(firstChild!)! - scrollOffset <=
+              precisionErrorTolerance,
+    );
     assert(debugAssertChildListIsNonEmptyAndContiguous());
     assert(indexOf(firstChild!) == firstIndex);
     assert(targetLastIndex == null || lastIndex <= targetLastIndex);

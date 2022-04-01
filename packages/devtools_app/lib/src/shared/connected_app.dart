@@ -135,13 +135,18 @@ class ConnectedApp {
       final flutterVersionServiceListenable = serviceManager
           .registeredServiceListenable(registrations.flutterVersion.service);
       VoidCallback listener;
-      flutterVersionServiceListenable.addListener(listener = () async {
-        final registered = flutterVersionServiceListenable.value;
-        if (registered) {
-          _flutterVersionCompleter.complete(FlutterVersion.parse(
-              (await serviceManager.flutterVersion).json!));
-        }
-      });
+      flutterVersionServiceListenable.addListener(
+        listener = () async {
+          final registered = flutterVersionServiceListenable.value;
+          if (registered) {
+            _flutterVersionCompleter.complete(
+              FlutterVersion.parse(
+                (await serviceManager.flutterVersion).json!,
+              ),
+            );
+          }
+        },
+      );
 
       _flutterVersion = await _flutterVersionCompleter.future.timeout(
         _flutterVersionTimeout,

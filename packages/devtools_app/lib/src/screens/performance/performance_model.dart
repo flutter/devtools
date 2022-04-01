@@ -311,7 +311,8 @@ class OfflinePerformanceData extends PerformanceData {
     final OfflineTimelineEvent? selectedEvent = selectedEventJson.isNotEmpty
         ? OfflineTimelineEvent(
             (selectedEventJson[TimelineEvent.firstTraceKey] ?? {})
-                .cast<String, dynamic>())
+                .cast<String, dynamic>(),
+          )
         : null;
 
     final displayRefreshRate =
@@ -363,18 +364,22 @@ class OfflinePerformanceData extends PerformanceData {
 /// timeline event will work as it does when we are not loading from offline.
 class OfflineTimelineEvent extends TimelineEvent {
   OfflineTimelineEvent(Map<String, dynamic> firstTrace)
-      : super(TraceEventWrapper(
-          TraceEvent(firstTrace),
-          0, // 0 is an arbitrary value for [TraceEventWrapper.timeReceived].
-        )) {
+      : super(
+          TraceEventWrapper(
+            TraceEvent(firstTrace),
+            0, // 0 is an arbitrary value for [TraceEventWrapper.timeReceived].
+          ),
+        ) {
     time.end = Duration(
-        microseconds: firstTrace[TraceEvent.timestampKey] +
-            firstTrace[TraceEvent.durationKey]);
+      microseconds: firstTrace[TraceEvent.timestampKey] +
+          firstTrace[TraceEvent.durationKey],
+    );
     type = TimelineEventType.values.firstWhere(
-        (t) =>
-            t.toString() ==
-            firstTrace[TraceEvent.argsKey][TraceEvent.typeKey].toString(),
-        orElse: () => TimelineEventType.other);
+      (t) =>
+          t.toString() ==
+          firstTrace[TraceEvent.argsKey][TraceEvent.typeKey].toString(),
+      orElse: () => TimelineEventType.other,
+    );
   }
 
   // The following methods should never be called on an instance of
@@ -384,24 +389,30 @@ class OfflineTimelineEvent extends TimelineEvent {
 
   @override
   bool couldBeParentOf(TimelineEvent e) {
-    throw UnimplementedError('This method should never be called for an '
-        'instance of OfflineTimelineEvent');
+    throw UnimplementedError(
+      'This method should never be called for an '
+      'instance of OfflineTimelineEvent',
+    );
   }
 
   @override
-  int get maxEndMicros =>
-      throw UnimplementedError('This method should never be called for an '
-          'instance of OfflineTimelineEvent');
+  int get maxEndMicros => throw UnimplementedError(
+        'This method should never be called for an '
+        'instance of OfflineTimelineEvent',
+      );
 
   @override
-  List<List<TimelineEvent>> _calculateDisplayRows() =>
-      throw UnimplementedError('This method should never be called for an '
-          'instance of OfflineTimelineEvent');
+  List<List<TimelineEvent>> _calculateDisplayRows() => throw UnimplementedError(
+        'This method should never be called for an '
+        'instance of OfflineTimelineEvent',
+      );
 
   @override
   OfflineTimelineEvent shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
+    throw UnimplementedError(
+      'This method is not implemented. Implement if you '
+      'need to call `shallowCopy` on an instance of this class.',
+    );
   }
 }
 
@@ -517,7 +528,8 @@ class FlutterFrame {
   TimelineEvent? findTimelineEvent(TimelineEvent event) {
     final frameTimelineEvent = timelineEventData.eventByType(event.type);
     return frameTimelineEvent?.firstChildWithCondition(
-        (e) => e.name == event.name && e.time == event.time);
+      (e) => e.name == event.name && e.time == event.time,
+    );
   }
 
   bool isJanky(double displayRefreshRate) {
@@ -1267,10 +1279,10 @@ class FrameAnalysis {
     if (frame.timelineEventData.uiEvent == null) return null;
     if (_layoutEvent != null) return _layoutEvent;
 
-    return _layoutEvent = frame.timelineEventData.uiEvent!
-            .firstChildWithCondition(
-                (event) => event.name!.caseInsensitiveEquals(layoutEventName))
-        as SyncTimelineEvent?;
+    return _layoutEvent =
+        frame.timelineEventData.uiEvent!.firstChildWithCondition(
+      (event) => event.name!.caseInsensitiveEquals(layoutEventName),
+    ) as SyncTimelineEvent?;
   }
 
   SyncTimelineEvent? _layoutEvent;
@@ -1281,10 +1293,10 @@ class FrameAnalysis {
     if (frame.timelineEventData.uiEvent == null) return null;
     if (_paintEvent != null) return _paintEvent;
 
-    return _paintEvent = frame.timelineEventData.uiEvent!
-            .firstChildWithCondition(
-                (event) => event.name!.caseInsensitiveEquals(paintEventName))
-        as SyncTimelineEvent?;
+    return _paintEvent =
+        frame.timelineEventData.uiEvent!.firstChildWithCondition(
+      (event) => event.name!.caseInsensitiveEquals(paintEventName),
+    ) as SyncTimelineEvent?;
   }
 
   SyncTimelineEvent? _paintEvent;

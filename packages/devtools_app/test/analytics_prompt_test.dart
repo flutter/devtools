@@ -63,7 +63,9 @@ void main() {
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsNothing);
+            find.text('Send usage statistics for DevTools?'),
+            findsNothing,
+          );
           expect(_controller.analyticsEnabled.value, isTrue);
           expect(_didCallEnableAnalytics, isFalse);
         });
@@ -99,7 +101,9 @@ void main() {
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsNothing);
+            find.text('Send usage statistics for DevTools?'),
+            findsNothing,
+          );
           expect(_controller.analyticsEnabled.value, isTrue);
           expect(_didCallEnableAnalytics, isFalse);
         });
@@ -150,7 +154,9 @@ void main() {
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsOneWidget);
+            find.text('Send usage statistics for DevTools?'),
+            findsOneWidget,
+          );
           expect(_controller.analyticsEnabled.value, isTrue);
           expect(_didCallEnableAnalytics, isTrue);
         });
@@ -174,7 +180,9 @@ void main() {
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsOneWidget);
+            find.text('Send usage statistics for DevTools?'),
+            findsOneWidget,
+          );
           expect(_controller.analyticsEnabled.value, isTrue);
           expect(_didCallEnableAnalytics, isTrue);
 
@@ -183,7 +191,9 @@ void main() {
           await tester.tap(closeButtonFinder);
           await tester.pumpAndSettle();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsNothing);
+            find.text('Send usage statistics for DevTools?'),
+            findsNothing,
+          );
           expect(_controller.analyticsEnabled.value, isTrue);
         });
 
@@ -200,7 +210,9 @@ void main() {
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsOneWidget);
+            find.text('Send usage statistics for DevTools?'),
+            findsOneWidget,
+          );
           expect(_controller.analyticsEnabled.value, isTrue);
           expect(_didCallEnableAnalytics, isTrue);
 
@@ -209,7 +221,9 @@ void main() {
           await tester.tap(soundsGoodFinder);
           await tester.pumpAndSettle();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsNothing);
+            find.text('Send usage statistics for DevTools?'),
+            findsNothing,
+          );
           expect(_controller.analyticsEnabled.value, isTrue);
         });
 
@@ -226,7 +240,9 @@ void main() {
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsOneWidget);
+            find.text('Send usage statistics for DevTools?'),
+            findsOneWidget,
+          );
           expect(_controller.analyticsEnabled.value, isTrue);
           expect(_didCallEnableAnalytics, isTrue);
 
@@ -235,7 +251,9 @@ void main() {
           await tester.tap(noThanksFinder);
           await tester.pumpAndSettle();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsNothing);
+            find.text('Send usage statistics for DevTools?'),
+            findsNothing,
+          );
           expect(_controller.analyticsEnabled.value, isFalse);
         });
       });
@@ -264,7 +282,9 @@ void main() {
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsNothing);
+            find.text('Send usage statistics for DevTools?'),
+            findsNothing,
+          );
           expect(_controller.analyticsEnabled.value, isFalse);
           expect(_didCallEnableAnalytics, isFalse);
         });

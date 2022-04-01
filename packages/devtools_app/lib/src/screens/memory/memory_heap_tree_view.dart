@@ -302,9 +302,11 @@ class HeapTreeViewState extends State<HeapTree>
         .format(DateTime.fromMillisecondsSinceEpoch(heapSample.timestamp));
 
     if (debugSnapshots) {
-      debugLogger('AutoSnapshot $startDateTime heapSum=$heapSum, '
-          'first=${heapMovingAverage.dataSet.first}, '
-          'mean=${heapMovingAverage.mean}');
+      debugLogger(
+        'AutoSnapshot $startDateTime heapSum=$heapSum, '
+        'first=${heapMovingAverage.dataSet.first}, '
+        'mean=${heapMovingAverage.mean}',
+      );
     }
 
     bool takeSnapshot = false;
@@ -328,8 +330,10 @@ class HeapTreeViewState extends State<HeapTree>
           lastSnapshotMemoryTotal = heapSum;
 
           takeSnapshot = true;
-          debugLogger('AutoSnapshot - RSS exceeded '
-              '($rssPercentIncrease% increase) @ $startDateTime.');
+          debugLogger(
+            'AutoSnapshot - RSS exceeded '
+            '($rssPercentIncrease% increase) @ $startDateTime.',
+          );
         }
       }
     }
@@ -339,11 +343,15 @@ class HeapTreeViewState extends State<HeapTree>
           Duration(milliseconds: spikeSnapshotTime ?? heapSample.timestamp);
       spikeSnapshotTime = heapSample.timestamp;
       takeSnapshot = true;
-      logger.log('AutoSnapshot - memory spike @ $startDateTime} '
-          'last snapshot ${(sampleTime - snapshotTime).inSeconds} seconds ago.');
-      debugLogger('               '
-          'heap @ last snapshot = $lastSnapshotMemoryTotal, '
-          'heap total=$heapSum, RSS=${heapSample.rss}');
+      logger.log(
+        'AutoSnapshot - memory spike @ $startDateTime} '
+        'last snapshot ${(sampleTime - snapshotTime).inSeconds} seconds ago.',
+      );
+      debugLogger(
+        '               '
+        'heap @ last snapshot = $lastSnapshotMemoryTotal, '
+        'heap total=$heapSum, RSS=${heapSample.rss}',
+      );
     }
 
     if (takeSnapshot) {
@@ -807,8 +815,9 @@ class HeapTreeViewState extends State<HeapTree>
     renderObject.layout(constraints);
     final boxes = renderObject.getBoxesForSelection(
       TextSelection(
-          baseOffset: 0,
-          extentOffset: TextSpan(text: message).toPlainText().length),
+        baseOffset: 0,
+        extentOffset: TextSpan(text: message).toPlainText().length,
+      ),
     );
 
     final textWidth = boxes.last.right;
@@ -860,12 +869,14 @@ class HeapTreeViewState extends State<HeapTree>
 
           if (_debugAllocationMonitoring &&
               (instancesAccumulated != 0 || bytesAccumulated != 0)) {
-            debugLogger('previous,index=[$previousIndex][$currentIndex] '
-                'class ${currentAllocation.classRef.name}\n'
-                '    instancesCurrent=$instancesCurrent, '
-                '    instancesAccumulated=${currentAllocation.instancesDelta}\n'
-                '    bytesCurrent=$bytesCurrent, '
-                '    bytesAccumulated=${currentAllocation.bytesDelta}}\n');
+            debugLogger(
+              'previous,index=[$previousIndex][$currentIndex] '
+              'class ${currentAllocation.classRef.name}\n'
+              '    instancesCurrent=$instancesCurrent, '
+              '    instancesAccumulated=${currentAllocation.instancesDelta}\n'
+              '    bytesCurrent=$bytesCurrent, '
+              '    bytesAccumulated=${currentAllocation.bytesDelta}}\n',
+            );
           }
 
           previousIndex++;
@@ -1043,14 +1054,22 @@ class HeapTreeViewState extends State<HeapTree>
 
     _controller.selectedSnapshotTimestamp = snapshotTimestamp;
 
-    debugLogger('Total Snapshot completed in'
-        ' ${snapshotDoneTime.difference(snapshotTimestamp).inMilliseconds / 1000} seconds');
-    debugLogger('  Snapshot collected in'
-        ' ${snapshotCollectionTime.difference(snapshotTimestamp).inMilliseconds / 1000} seconds');
-    debugLogger('  Snapshot graph built in'
-        ' ${snapshotGraphTime.difference(snapshotCollectionTime).inMilliseconds / 1000} seconds');
-    debugLogger('  Snapshot grouping/libraries computed in'
-        ' ${snapshotDoneTime.difference(snapshotGraphTime).inMilliseconds / 1000} seconds');
+    debugLogger(
+      'Total Snapshot completed in'
+      ' ${snapshotDoneTime.difference(snapshotTimestamp).inMilliseconds / 1000} seconds',
+    );
+    debugLogger(
+      '  Snapshot collected in'
+      ' ${snapshotCollectionTime.difference(snapshotTimestamp).inMilliseconds / 1000} seconds',
+    );
+    debugLogger(
+      '  Snapshot graph built in'
+      ' ${snapshotGraphTime.difference(snapshotCollectionTime).inMilliseconds / 1000} seconds',
+    );
+    debugLogger(
+      '  Snapshot grouping/libraries computed in'
+      ' ${snapshotDoneTime.difference(snapshotGraphTime).inMilliseconds / 1000} seconds',
+    );
 
     setState(() {
       snapshotState = SnapshotStatus.done;
@@ -1085,21 +1104,23 @@ class HeapTreeViewState extends State<HeapTree>
 
   void _debugCheckAnalyses(DateTime currentSnapDateTime) {
     // Debug only check.
-    assert(() {
-      // Analysis already completed we're done.
-      final foundMatch = _controller.completedAnalyses.firstWhereOrNull(
-        (element) => element.dateTime.compareTo(currentSnapDateTime) == 0,
-      );
-      if (foundMatch != null) {
-        logger.log(
-          'Analysis '
-          '${MemoryController.formattedTimestamp(currentSnapDateTime)} '
-          'already computed.',
-          logger.LogLevel.warning,
+    assert(
+      () {
+        // Analysis already completed we're done.
+        final foundMatch = _controller.completedAnalyses.firstWhereOrNull(
+          (element) => element.dateTime.compareTo(currentSnapDateTime) == 0,
         );
-      }
-      return true;
-    }());
+        if (foundMatch != null) {
+          logger.log(
+            'Analysis '
+            '${MemoryController.formattedTimestamp(currentSnapDateTime)} '
+            'already computed.',
+            logger.LogLevel.warning,
+          );
+        }
+        return true;
+      }(),
+    );
   }
 
   void _analyze({Snapshot? snapshot}) {
@@ -1240,11 +1261,12 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
       // Use the top 10 matches:
       _controller.searchAutoComplete.value = normalizedMatches
           .sublist(
-              0,
-              min(
-                topMatchesLimit,
-                normalizedMatches.length,
-              ))
+            0,
+            min(
+              topMatchesLimit,
+              normalizedMatches.length,
+            ),
+          )
           .map((match) => AutoCompleteMatch(match))
           .toList();
     }
@@ -1276,17 +1298,23 @@ class MemoryHeapTableState extends State<MemoryHeapTable>
             // Matches in the filtered nodes.
             final filteredReference = reference as FilteredReference;
             for (final library in filteredReference.children) {
-              filteredMatches.addAll(matchesInLibrary(
-                library as LibraryReference,
-                searchingValue,
-              ));
+              filteredMatches.addAll(
+                matchesInLibrary(
+                  library as LibraryReference,
+                  searchingValue,
+                ),
+              );
             }
           }
         }
         break;
       case MemoryController.groupByClass:
-        matches.addAll(matchClasses(
-            _controller.groupByTreeTable.dataRoots, searchingValue));
+        matches.addAll(
+          matchClasses(
+            _controller.groupByTreeTable.dataRoots,
+            searchingValue,
+          ),
+        );
         break;
       case MemoryController.groupByInstance:
         // TODO(terry): TBD
