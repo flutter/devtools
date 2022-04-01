@@ -214,16 +214,17 @@ class EventSample {
         allocationAccumulator = null;
 
   factory EventSample.fromJson(Map<String, dynamic> json) => EventSample(
-      json['timestamp'] as int,
-      (json['gcEvent'] as bool?) ?? false,
-      (json['snapshotEvent'] as bool?) ?? false,
-      (json['snapshotAutoEvent'] as bool?) ?? false,
-      json['allocationAccumulatorEvent'] != null
-          ? AllocationAccumulator.fromJson(json['allocationAccumulatorEvent'])
-          : null,
-      json['extensionEvents'] != null
-          ? ExtensionEvents.fromJson(json['extensionEvents'])
-          : null);
+        json['timestamp'] as int,
+        (json['gcEvent'] as bool?) ?? false,
+        (json['snapshotEvent'] as bool?) ?? false,
+        (json['snapshotAutoEvent'] as bool?) ?? false,
+        json['allocationAccumulatorEvent'] != null
+            ? AllocationAccumulator.fromJson(json['allocationAccumulatorEvent'])
+            : null,
+        json['extensionEvents'] != null
+            ? ExtensionEvents.fromJson(json['extensionEvents'])
+            : null,
+      );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'timestamp': timestamp,

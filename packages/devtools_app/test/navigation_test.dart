@@ -14,13 +14,16 @@ void main() {
       expect(routeNameWithQueryParams(null, '/', {}), '/?');
       expect(routeNameWithQueryParams(null, '/', {'foo': 'bar'}), '/?foo=bar');
       expect(
-          routeNameWithQueryParams(null, '/', {'foo': 'bar', 'theme': 'dark'}),
-          '/?foo=bar&theme=dark');
+        routeNameWithQueryParams(null, '/', {'foo': 'bar', 'theme': 'dark'}),
+        '/?foo=bar&theme=dark',
+      );
     });
 
     /// Builds an app that calls [onBuild] when [initialRoute] loads.
-    Widget routeTestingApp(void Function(BuildContext) onBuild,
-        {String initialRoute = '/'}) {
+    Widget routeTestingApp(
+      void Function(BuildContext) onBuild, {
+      String initialRoute = '/',
+    }) {
       return MaterialApp(
         initialRoute: initialRoute,
         routes: {
@@ -39,7 +42,10 @@ void main() {
       await tester.pumpWidget(
         routeTestingApp((context) {
           generatedRoute = routeNameWithQueryParams(
-              context, '/home', {'foo': 'bar', 'theme': 'dark'});
+            context,
+            '/home',
+            {'foo': 'bar', 'theme': 'dark'},
+          );
         }),
       );
       expect(generatedRoute, '/home?foo=bar&theme=dark');
@@ -49,10 +55,13 @@ void main() {
         (WidgetTester tester) async {
       late String generatedRoute;
       await tester.pumpWidget(
-        routeTestingApp((context) {
-          generatedRoute =
-              routeNameWithQueryParams(context, '/home', {'foo': 'bar'});
-        }, initialRoute: '/?theme=dark'),
+        routeTestingApp(
+          (context) {
+            generatedRoute =
+                routeNameWithQueryParams(context, '/home', {'foo': 'bar'});
+          },
+          initialRoute: '/?theme=dark',
+        ),
       );
       expect(generatedRoute, '/home?foo=bar&theme=dark');
     });
@@ -62,10 +71,13 @@ void main() {
         (WidgetTester tester) async {
       late String generatedRoute;
       await tester.pumpWidget(
-        routeTestingApp((context) {
-          generatedRoute =
-              routeNameWithQueryParams(context, '/home', {'foo': 'bar'});
-        }, initialRoute: '/?theme=light'),
+        routeTestingApp(
+          (context) {
+            generatedRoute =
+                routeNameWithQueryParams(context, '/home', {'foo': 'bar'});
+          },
+          initialRoute: '/?theme=light',
+        ),
       );
       expect(generatedRoute, '/home?foo=bar');
     });
@@ -75,10 +87,16 @@ void main() {
         (WidgetTester tester) async {
       late String generatedRoute;
       await tester.pumpWidget(
-        routeTestingApp((context) {
-          generatedRoute = routeNameWithQueryParams(
-              context, '/home', {'foo': 'bar', 'theme': 'light'});
-        }, initialRoute: '/?snap=crackle&theme=dark'),
+        routeTestingApp(
+          (context) {
+            generatedRoute = routeNameWithQueryParams(
+              context,
+              '/home',
+              {'foo': 'bar', 'theme': 'light'},
+            );
+          },
+          initialRoute: '/?snap=crackle&theme=dark',
+        ),
       );
       expect(generatedRoute, '/home?foo=bar&theme=light');
     });
@@ -88,10 +106,13 @@ void main() {
         (WidgetTester tester) async {
       late String generatedRoute;
       await tester.pumpWidget(
-        routeTestingApp((context) {
-          generatedRoute =
-              routeNameWithQueryParams(context, '/home', {'foo': 'baz'});
-        }, initialRoute: '/?foo=bar&baz=quux'),
+        routeTestingApp(
+          (context) {
+            generatedRoute =
+                routeNameWithQueryParams(context, '/home', {'foo': 'baz'});
+          },
+          initialRoute: '/?foo=bar&baz=quux',
+        ),
       );
       expect(generatedRoute, '/home?foo=baz');
     });

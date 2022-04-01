@@ -277,13 +277,15 @@ class _TreemapState extends State<Treemap> {
     final list1Height =
         isHorizontalRectangle ? height : height * list1SizeRatio;
     if (list1.isNotEmpty) {
-      positionedTreemaps.addAll(buildTreemaps(
-        children: list1,
-        x: x,
-        y: y,
-        width: list1Width,
-        height: list1Height,
-      ));
+      positionedTreemaps.addAll(
+        buildTreemaps(
+          children: list1,
+          x: x,
+          y: y,
+          width: list1Width,
+          height: list1Height,
+        ),
+      );
     }
 
     // Construct list 2 sub-treemap.
@@ -294,13 +296,15 @@ class _TreemapState extends State<Treemap> {
     final list2XCoord = isHorizontalRectangle ? list1Width : 0.0;
     final list2YCoord = isHorizontalRectangle ? pivotBestHeight : list1Height;
     if (list2.isNotEmpty) {
-      positionedTreemaps.addAll(buildTreemaps(
-        children: list2,
-        x: x + list2XCoord,
-        y: y + list2YCoord,
-        width: list2Width,
-        height: list2Height,
-      ));
+      positionedTreemaps.addAll(
+        buildTreemaps(
+          children: list2,
+          x: x + list2XCoord,
+          y: y + list2YCoord,
+          width: list2Width,
+          height: list2Height,
+        ),
+      );
     }
 
     // Construct pivot cell.
@@ -336,13 +340,15 @@ class _TreemapState extends State<Treemap> {
         isHorizontalRectangle ? 0.0 : list1Height + pivotBestHeight;
 
     if (list3.isNotEmpty) {
-      positionedTreemaps.addAll(buildTreemaps(
-        children: list3,
-        x: x + list3XCoord,
-        y: y + list3YCoord,
-        width: list3Width,
-        height: list3Height,
-      ));
+      positionedTreemaps.addAll(
+        buildTreemaps(
+          children: list3,
+          x: x + list3XCoord,
+          y: y + list3YCoord,
+          width: list3Width,
+          height: list3Height,
+        ),
+      );
     }
 
     return positionedTreemaps;
@@ -687,8 +693,10 @@ class TreemapNode extends TreeNode<TreemapNode> {
 
   @override
   TreemapNode shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
+    throw UnimplementedError(
+      'This method is not implemented. Implement if you '
+      'need to call `shallowCopy` on an instance of this class.',
+    );
   }
 }
 

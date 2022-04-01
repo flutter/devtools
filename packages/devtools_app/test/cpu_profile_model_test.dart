@@ -18,7 +18,9 @@ void main() {
 
     test('init from parse', () {
       expect(
-          cpuProfileData.stackFramesJson, equals(goldenCpuProfileStackFrames));
+        cpuProfileData.stackFramesJson,
+        equals(goldenCpuProfileStackFrames),
+      );
       expect(
         cpuProfileData.cpuSamples.map((sample) => sample.json),
         equals(goldenCpuProfileTraceEvents),
@@ -128,10 +130,11 @@ void main() {
 
     test('subProfile', () {
       final subProfile = CpuProfileData.subProfile(
-          cpuProfileData,
-          TimeRange()
-            ..start = const Duration(microseconds: 47377796685)
-            ..end = const Duration(microseconds: 47377799063));
+        cpuProfileData,
+        TimeRange()
+          ..start = const Duration(microseconds: 47377796685)
+          ..end = const Duration(microseconds: 47377799063),
+      );
 
       expect(
         subProfile.stackFramesJson,

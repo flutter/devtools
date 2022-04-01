@@ -127,8 +127,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
       // require a top level field named "traceEvents". See how timeline data is
       // encoded in [ExportController.encode].
       final timelineJson = Map<String, dynamic>.from(
-          offlineController.offlineDataJson[PerformanceScreen.id])
-        ..addAll({
+        offlineController.offlineDataJson[PerformanceScreen.id],
+      )..addAll({
           PerformanceData.traceEventsKey:
               offlineController.offlineDataJson[PerformanceData.traceEventsKey]
         });

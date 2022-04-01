@@ -9,10 +9,12 @@ import 'package:vm_service/vm_service.dart';
 import '../test_data/network_test_data.dart';
 
 SocketProfile loadSocketProfile() {
-  return SocketProfile(sockets: [
-    SocketStatistic.parse(testSocket1Json)!,
-    SocketStatistic.parse(testSocket2Json)!,
-  ]);
+  return SocketProfile(
+    sockets: [
+      SocketStatistic.parse(testSocket1Json)!,
+      SocketStatistic.parse(testSocket2Json)!,
+    ],
+  );
 }
 
 HttpProfile loadHttpProfile() {

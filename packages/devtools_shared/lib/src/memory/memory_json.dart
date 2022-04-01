@@ -41,7 +41,8 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
       // TODO(terry): Consider moving config_specific/logger/ into shared to
       //              use logger instead of print.
       print(
-          'WARNING: Unable to convert JSON memory file payload version=$payloadVersion.');
+        'WARNING: Unable to convert JSON memory file payload version=$payloadVersion.',
+      );
       // TODO(terry): After conversion update payloadVersion to version;
     }
 

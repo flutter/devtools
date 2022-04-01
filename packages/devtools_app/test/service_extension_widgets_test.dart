@@ -41,22 +41,25 @@ void main() {
       setGlobal(IdeTheme, IdeTheme());
     });
 
-    testWidgetsWithContext('performs a hot reload when pressed',
-        (WidgetTester tester) async {
-      registerServiceExtension(mockServiceManager, hotReload);
-      final button = HotReloadButton();
-      await tester.pumpWidget(
-        wrap(wrapWithNotifications(Scaffold(body: Center(child: button)))),
-      );
-      expect(find.byWidget(button), findsOneWidget);
-      await tester.pumpAndSettle();
-      expect(reloads, 0);
-      await tester.tap(find.byWidget(button));
-      await tester.pumpAndSettle();
-      expect(reloads, 1);
-    }, context: {
-      MessageBus: MessageBus(),
-    });
+    testWidgetsWithContext(
+      'performs a hot reload when pressed',
+      (WidgetTester tester) async {
+        registerServiceExtension(mockServiceManager, hotReload);
+        final button = HotReloadButton();
+        await tester.pumpWidget(
+          wrap(wrapWithNotifications(Scaffold(body: Center(child: button)))),
+        );
+        expect(find.byWidget(button), findsOneWidget);
+        await tester.pumpAndSettle();
+        expect(reloads, 0);
+        await tester.tap(find.byWidget(button));
+        await tester.pumpAndSettle();
+        expect(reloads, 1);
+      },
+      context: {
+        MessageBus: MessageBus(),
+      },
+    );
 
     testWidgets(
         'does not perform a hot reload when the extension is not registered.',
@@ -88,22 +91,25 @@ void main() {
       });
     });
 
-    testWidgetsWithContext('performs a hot restart when pressed',
-        (WidgetTester tester) async {
-      registerServiceExtension(mockServiceManager, hotRestart);
-      final button = HotRestartButton();
-      await tester.pumpWidget(
-        wrap(wrapWithNotifications(Scaffold(body: Center(child: button)))),
-      );
-      expect(find.byWidget(button), findsOneWidget);
-      await tester.pumpAndSettle();
-      expect(restarts, 0);
-      await tester.tap(find.byWidget(button));
-      await tester.pumpAndSettle();
-      expect(restarts, 1);
-    }, context: {
-      MessageBus: MessageBus(),
-    });
+    testWidgetsWithContext(
+      'performs a hot restart when pressed',
+      (WidgetTester tester) async {
+        registerServiceExtension(mockServiceManager, hotRestart);
+        final button = HotRestartButton();
+        await tester.pumpWidget(
+          wrap(wrapWithNotifications(Scaffold(body: Center(child: button)))),
+        );
+        expect(find.byWidget(button), findsOneWidget);
+        await tester.pumpAndSettle();
+        expect(restarts, 0);
+        await tester.tap(find.byWidget(button));
+        await tester.pumpAndSettle();
+        expect(restarts, 1);
+      },
+      context: {
+        MessageBus: MessageBus(),
+      },
+    );
 
     testWidgets(
         'does not perform a hot restart when the service is not available',

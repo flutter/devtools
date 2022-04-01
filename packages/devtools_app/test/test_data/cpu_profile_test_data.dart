@@ -820,11 +820,15 @@ final CpuStackFrame stackFrameG = CpuStackFrame(
 )..exclusiveSampleCount = 1;
 
 final CpuStackFrame testStackFrame = stackFrameA
-  ..addChild(stackFrameB
-    ..addChild(stackFrameC)
-    ..addChild(stackFrameD
-      ..addChild(stackFrameE..addChild(stackFrameF..addChild(stackFrameC2)))
-      ..addChild(stackFrameF2..addChild(stackFrameC3))));
+  ..addChild(
+    stackFrameB
+      ..addChild(stackFrameC)
+      ..addChild(
+        stackFrameD
+          ..addChild(stackFrameE..addChild(stackFrameF..addChild(stackFrameC2)))
+          ..addChild(stackFrameF2..addChild(stackFrameC3)),
+      ),
+  );
 
 const String testStackFrameStringGolden = '''
   A - children: 1 - excl: 0 - incl: 10

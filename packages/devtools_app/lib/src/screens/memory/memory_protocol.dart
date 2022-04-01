@@ -288,10 +288,12 @@ class MemoryTracker {
         }
         // Throw away event, missed attempt to attach to a HeapSample.
         final ignoreEvent = memoryTimeline.pullEventSample();
-        logger.log('Event duration is lagging ignore event'
-            'timestamp: ${MemoryTimeline.fineGrainTimestampFormat(time)} '
-            'event: ${MemoryTimeline.fineGrainTimestampFormat(eventTime)}'
-            '\n$ignoreEvent');
+        logger.log(
+          'Event duration is lagging ignore event'
+          'timestamp: ${MemoryTimeline.fineGrainTimestampFormat(time)} '
+          'event: ${MemoryTimeline.fineGrainTimestampFormat(eventTime)}'
+          '\n$ignoreEvent',
+        );
         return null;
       }
 
@@ -317,12 +319,16 @@ class MemoryTracker {
 
       if (MemoryScreen.isDebuggingEnabled &&
           extensionEvents?.isNotEmpty == true) {
-        debugLogger('Receieved Extension Events '
-            '${extensionEvents!.theEvents.length}');
+        debugLogger(
+          'Receieved Extension Events '
+          '${extensionEvents!.theEvents.length}',
+        );
         for (var e in extensionEvents.theEvents) {
           final dt = DateTime.fromMillisecondsSinceEpoch(e.timestamp!);
-          debugLogger('  ${e.eventKind} ${e.customEventName} '
-              '$dt ${e.data!['param']}');
+          debugLogger(
+            '  ${e.eventKind} ${e.customEventName} '
+            '$dt ${e.data!['param']}',
+          );
         }
       }
       return EventSample.extensionEvent(time, extensionEvents);

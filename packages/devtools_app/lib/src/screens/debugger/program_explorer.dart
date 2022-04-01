@@ -234,8 +234,10 @@ class ProgramStructureIcon extends StatelessWidget {
       icon = containerIcon;
     }
 
-    assert((icon == null && character != null && isShortCharacter != null) ||
-        (icon != null && character == null && isShortCharacter == null));
+    assert(
+      (icon == null && character != null && isShortCharacter != null) ||
+          (icon != null && character == null && isShortCharacter == null),
+    );
 
     return SizedBox(
       height: defaultIconSize,

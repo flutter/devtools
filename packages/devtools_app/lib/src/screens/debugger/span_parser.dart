@@ -252,14 +252,16 @@ abstract class _Matcher {
     final end = scanner.lastMatch.end;
     if (captures != null) {
       if (scanner.lastMatch.groupCount <= 1) {
-        spans.add(ScopeSpan(
-          scope: captures['0']['name'],
-          start: start,
-          end: end,
-          // Lines and columns are 0 indexed.
-          line: line + 1,
-          column: column + 1,
-        ));
+        spans.add(
+          ScopeSpan(
+            scope: captures['0']['name'],
+            start: start,
+            end: end,
+            // Lines and columns are 0 indexed.
+            line: line + 1,
+            column: column + 1,
+          ),
+        );
       } else {
         final match = scanner.substring(start, end);
         for (int i = 1; i <= scanner.lastMatch.groupCount; ++i) {
@@ -269,27 +271,31 @@ abstract class _Matcher {
               continue;
             }
             final startOffset = match.indexOf(capture);
-            spans.add(ScopeSpan(
-              scope: captures[i.toString()]['name'],
-              start: start + startOffset,
-              end: start + startOffset + capture.length,
-              // Lines and columns are 0 indexed.
-              line: line + 1,
-              column: column + startOffset + 1,
-            ));
+            spans.add(
+              ScopeSpan(
+                scope: captures[i.toString()]['name'],
+                start: start + startOffset,
+                end: start + startOffset + capture.length,
+                // Lines and columns are 0 indexed.
+                line: line + 1,
+                column: column + startOffset + 1,
+              ),
+            );
           }
         }
       }
     } else {
       // Don't include the scope name here if we're not applying captures. This
       // is already included in the scope stack.
-      spans.add(ScopeSpan(
-        start: start,
-        end: end,
-        // Lines and columns are 0 indexed.
-        line: line + 1,
-        column: column + 1,
-      ));
+      spans.add(
+        ScopeSpan(
+          start: start,
+          end: end,
+          // Lines and columns are 0 indexed.
+          line: line + 1,
+          column: column + 1,
+        ),
+      );
     }
     return spans;
   }
@@ -509,13 +515,15 @@ class _MultilineMatcher extends _Matcher {
           // disabling this for cases where we only care about moving the
           // scanner forward.
           _scanUpToEndMatch(grammar, scanner);
-          results.add(ScopeSpan(
-            scope: contentName,
-            column: column,
-            line: line,
-            start: start,
-            end: scanner.position,
-          ));
+          results.add(
+            ScopeSpan(
+              scope: contentName,
+              column: column,
+              line: line,
+              start: start,
+              end: scanner.position,
+            ),
+          );
         } else {
           results.addAll(_scanUpToEndMatch(grammar, scanner));
         }
@@ -562,9 +570,11 @@ class _MultilineMatcher extends _Matcher {
         // isn't applied to characters matching the loop condition (e.g.,
         // comment blocks with inline code samples shouldn't apply inline code
         // formatting to the leading '///').
-        results.addAll(contentResults.expand(
-          (e) => e.split(scanner, whileCond),
-        ));
+        results.addAll(
+          contentResults.expand(
+            (e) => e.split(scanner, whileCond),
+          ),
+        );
 
         if (beginSpans.isNotEmpty) {
           assert(beginSpans.length == 1);
@@ -573,7 +583,8 @@ class _MultilineMatcher extends _Matcher {
         return results;
       } else {
         throw StateError(
-            "One of 'end' or 'while' must be provided for rule: $name");
+          "One of 'end' or 'while' must be provided for rule: $name",
+        );
       }
     });
   }
