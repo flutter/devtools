@@ -69,9 +69,6 @@ void main() {
           'resolvedUrl':
               'org-dartlang-sdk:///third_party/dart/sdk/lib/_internal/vm/bin/socket_patch.dart',
         };
-        print('This is a buffer line');
-        print('This is a buffer line');
-        print('This is a buffer line');
 
         final stackFrames = {
           '$isolateId-1': Map<String, String>.from(frameTemplate),
@@ -112,9 +109,6 @@ void main() {
           ),
         ).thenAnswer(
           (_) async {
-            print('This is a buffer line');
-            print('This is a buffer line');
-            print('This is a buffer line');
             return samples;
           },
         );
