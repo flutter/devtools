@@ -100,11 +100,11 @@ void main() {
             }
           ]
         };
-
         when(service.getCpuSamples(isolateId, origin, extent))
             .thenAnswer((_) async {
           return samples;
         });
+
         final cpuProfileData = await CpuProfileData.generateFromCpuSamples(
             isolateId, origin, extent);
 
