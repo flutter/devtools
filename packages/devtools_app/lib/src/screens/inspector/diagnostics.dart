@@ -134,11 +134,11 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       enabled: () => diagnosticLocal.inspectorService != null,
       onHover: (event) async {
         final group = inspectorService.createObjectGroup('hover');
-        final value =
-            await group.toObservatoryInstanceRef(diagnosticLocal.valueRef);
+        final Object value =
+            (await group.toObservatoryInstanceRef(diagnosticLocal.valueRef)) as Object;
         final variable = DartObjectNode.fromValue(
           value: value,
-          isolateRef: inspectorService.isolateRef,
+          isolateRef: inspectorService.isolateRef!,
           diagnostic: diagnosticLocal,
         );
         await buildVariablesTree(variable);
