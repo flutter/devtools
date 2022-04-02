@@ -81,10 +81,10 @@ class ConsoleService extends Disposer {
   }) async {
     _stdioTrailingNewline = false;
     final variable = DartObjectNode.fromValue(
-      name: name,
-      value: value,
+      name: name!,
+      value: value!,
       diagnostic: diagnostic,
-      isolateRef: isolateRef,
+      isolateRef: isolateRef!,
     );
     // TODO(jacobr): fix out of order issues by tracking raw order.
     await buildVariablesTree(variable, expandAll: expandAll);
@@ -265,7 +265,7 @@ class ConsoleService extends Disposer {
         try {
           if (await inspector.isInspectable(
             GenericInstanceRef(
-              isolateRef: event.isolate,
+              isolateRef: event.isolate!,
               value: event.inspectee,
             ),
           )) {

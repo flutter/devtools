@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -48,7 +46,7 @@ bool includeDiagnosticChildren = false;
 /// Sentinel, or primitive type.
 class GenericInstanceRef {
   GenericInstanceRef({
-    @required this.isolateRef,
+    required this.isolateRef,
     this.value,
     this.diagnostic,
   }) : assert(value == null ||
@@ -61,14 +59,14 @@ class GenericInstanceRef {
             value is Float32x4 ||
             value is Float64x2);
 
-  final Object value;
+  final Object? value;
 
-  InstanceRef get instanceRef => value is InstanceRef ? value : null;
+  InstanceRef? get instanceRef => value is InstanceRef ? value as InstanceRef : null;
 
   /// If both [diagnostic] and [instanceRef] are provided, [diagnostic.valueRef]
   /// must reference the same underlying object just using the
   /// [InspectorInstanceRef] scheme.
-  final RemoteDiagnosticsNode diagnostic;
+  final RemoteDiagnosticsNode? diagnostic;
 
   final IsolateRef isolateRef;
 }
@@ -80,10 +78,10 @@ class ScriptLocation {
     this.location,
   }) : assert(scriptRef != null);
 
-  final ScriptRef scriptRef;
+  final ScriptRef? scriptRef;
 
   /// This field can be null.
-  final SourcePosition location;
+  final SourcePosition? location;
 
   @override
   bool operator ==(other) {
@@ -96,33 +94,33 @@ class ScriptLocation {
   int get hashCode => hashValues(scriptRef, location);
 
   @override
-  String toString() => '${scriptRef.uri} $location';
+  String toString() => '${scriptRef!.uri} $location';
 }
 
 class SourcePosition {
   const SourcePosition({
-    @required this.line,
-    @required this.column,
+    required this.line,
+    required this.column,
     this.file,
     this.tokenPos,
   });
 
-  factory SourcePosition.calculatePosition(Script script, int tokenPos) {
+  static SourcePosition? calculatePosition(Script script, int tokenPos) {
     if (script.tokenPosTable == null) {
       return null;
     }
 
     return SourcePosition(
-      line: script.getLineNumberFromTokenPos(tokenPos),
-      column: script.getColumnNumberFromTokenPos(tokenPos),
+      line: script.getLineNumberFromTokenPos(tokenPos)!,
+      column: script.getColumnNumberFromTokenPos(tokenPos)!,
       tokenPos: tokenPos,
     );
   }
 
-  final String file;
+  final String? file;
   final int line;
   final int column;
-  final int tokenPos;
+  final int? tokenPos;
 
   @override
   bool operator ==(other) {
@@ -140,7 +138,7 @@ class SourcePosition {
 }
 
 class SourceToken with DataSearchStateMixin {
-  SourceToken({@required this.position, @required this.length});
+  SourceToken({required this.position, required this.length});
 
   final SourcePosition position;
 
@@ -158,22 +156,22 @@ abstract class BreakpointAndSourcePosition
   BreakpointAndSourcePosition._(this.breakpoint, [this.sourcePosition]);
 
   factory BreakpointAndSourcePosition.create(Breakpoint breakpoint,
-      [SourcePosition sourcePosition]) {
+      [SourcePosition? sourcePosition]) {
     if (breakpoint.location is SourceLocation) {
       return _BreakpointAndSourcePositionResolved(
-          breakpoint, sourcePosition, breakpoint.location as SourceLocation);
+          breakpoint, sourcePosition!, breakpoint.location as SourceLocation);
     } else if (breakpoint.location is UnresolvedSourceLocation) {
-      return _BreakpointAndSourcePositionUnresolved(breakpoint, sourcePosition,
+      return _BreakpointAndSourcePositionUnresolved(breakpoint, sourcePosition!,
           breakpoint.location as UnresolvedSourceLocation);
     } else {
       throw 'invalid value for breakpoint.location';
     }
   }
 
-  final Breakpoint breakpoint;
-  final SourcePosition sourcePosition;
+  final Breakpoint? breakpoint;
+  final SourcePosition? sourcePosition;
 
-  bool get resolved => breakpoint.resolved;
+  bool get resolved => breakpoint!.resolved!;
 
   ScriptRef get scriptRef;
 
@@ -185,7 +183,7 @@ abstract class BreakpointAndSourcePosition
 
   int get tokenPos;
 
-  String get id => breakpoint.id;
+  String get id => breakpoint!.id!;
 
   @override
   int get hashCode => breakpoint.hashCode;
@@ -219,45 +217,60 @@ class _BreakpointAndSourcePositionResolved extends BreakpointAndSourcePosition {
   final SourceLocation location;
 
   @override
-  ScriptRef get scriptRef => location.script;
+  ScriptRef get scriptRef => location.script!;
 
   @override
-  String get scriptUri => location.script.uri;
+  String get scriptUri => location.script!.uri!;
 
   @override
-  int get tokenPos => location.tokenPos;
+  int get tokenPos => location.tokenPos!;
 
   @override
-  int get line => sourcePosition?.line;
+  int get line => sourcePosition!.line;
 
   @override
-  int get column => sourcePosition?.column;
+  int get column => sourcePosition!.column;
 }
 
 class _BreakpointAndSourcePositionUnresolved
     extends BreakpointAndSourcePosition {
   _BreakpointAndSourcePositionUnresolved(
     Breakpoint breakpoint,
-    SourcePosition sourcePosition,
+    SourcePosition? sourcePosition,
     this.location,
   ) : super._(breakpoint, sourcePosition);
 
   final UnresolvedSourceLocation location;
 
   @override
-  ScriptRef get scriptRef => location.script;
+  ScriptRef get scriptRef => location.script!;
 
   @override
-  String get scriptUri => location.script?.uri ?? location.scriptUri;
+  String get scriptUri => location.script?.uri ?? location.scriptUri!;
 
   @override
-  int get tokenPos => location.tokenPos;
+  int get tokenPos => location.tokenPos!;
 
   @override
-  int get line => sourcePosition?.line ?? location.line;
+  int get line {
+
+    if(sourcePosition != null && sourcePosition!.line != null) {
+      return sourcePosition!.line;
+    }
+
+    return location.line!;
+  }
 
   @override
-  int get column => sourcePosition?.column ?? location.column;
+  int get column {
+
+    if(sourcePosition != null && sourcePosition!.column != null) {
+
+      return sourcePosition!.column;
+    }
+
+    return location.column!;
+  }
 }
 
 /// A tuple of a stack frame and a source position.
@@ -267,21 +280,21 @@ class StackFrameAndSourcePosition {
     this.position,
   });
 
-  final Frame frame;
+  final Frame? frame;
 
   /// This can be null.
-  final SourcePosition position;
+  final SourcePosition? position;
 
-  ScriptRef get scriptRef => frame.location?.script;
+  ScriptRef? get scriptRef => frame!.location?.script;
 
-  String get scriptUri => frame.location?.script?.uri;
+  String? get scriptUri => frame!.location?.script?.uri;
 
-  int get line => position?.line;
+  int? get line => position!.line;
 
-  int get column => position?.column;
+  int? get column => position!.column;
 
   String get callStackDisplay {
-    final asyncMarker = frame.kind == FrameKind.kAsyncSuspensionMarker;
+    final asyncMarker = frame!.kind == FrameKind.kAsyncSuspensionMarker;
     return '$description${asyncMarker ? null : ' ($location)'}';
   }
 
@@ -292,11 +305,11 @@ class StackFrameAndSourcePosition {
     const closure = '<closure>';
     const asyncBreak = '<async break>';
 
-    if (frame.kind == FrameKind.kAsyncSuspensionMarker) {
+    if (frame!.kind == FrameKind.kAsyncSuspensionMarker) {
       return asyncBreak;
     }
 
-    var name = frame.code?.name ?? none;
+    var name = frame!.code?.name ?? none;
     if (name.startsWith(unoptimized)) {
       name = name.substring(unoptimized.length);
     }
@@ -308,7 +321,7 @@ class StackFrameAndSourcePosition {
   String get location {
     final uri = scriptUri;
     if (uri == null) {
-      return uri;
+      return uri!;
     }
     final file = uri.split('/').last;
     return line == null ? file : '$file:$line';
@@ -358,7 +371,7 @@ Future<void> buildVariablesTree(
       await addExpandableChildren(
         variable,
         await _createVariablesForDiagnostics(
-          service,
+          service!,
           properties,
           isolateRef,
         ),
@@ -366,18 +379,18 @@ Future<void> buildVariablesTree(
       );
     }
 
-    if (diagnostic.inlineProperties?.isNotEmpty ?? false) {
+    if (diagnostic.inlineProperties.isNotEmpty ?? false) {
       await _addPropertiesHelper(diagnostic.inlineProperties);
     } else {
-      assert(!service.disposed);
-      if (!service.disposed) {
+      assert(!service!.disposed);
+      if (!service!.disposed) {
         await _addPropertiesHelper(await diagnostic.getProperties(service));
       }
     }
   }
   final existingNames = <String>{};
   for (var child in variable.children) {
-    final name = child?.name;
+    final name = child.name;
     if (name != null && name.isNotEmpty) {
       existingNames.add(name);
       if (!isPrivate(name)) {
@@ -408,7 +421,7 @@ Future<void> buildVariablesTree(
   } else if (instanceRef != null && serviceManager.service != null) {
     try {
       final dynamic result =
-          await _getObjectWithRetry(instanceRef.id, variable);
+          await _getObjectWithRetry(instanceRef.id!, variable);
       if (result is Instance) {
         if (result.associations != null) {
           variable.addAllChildren(
@@ -431,11 +444,11 @@ Future<void> buildVariablesTree(
   }
   if (diagnostic != null && includeDiagnosticChildren) {
     // Always add children last after properties to avoid confusion.
-    final ObjectGroupBase service = diagnostic.inspectorService;
+    final ObjectGroupBase service = diagnostic.inspectorService!;
     final diagnosticChildren = await diagnostic.children;
     if (diagnosticChildren?.isNotEmpty ?? false) {
       final childrenNode = DartObjectNode.text(
-        pluralize('child', diagnosticChildren.length, plural: 'children'),
+        pluralize('child', diagnosticChildren!.length, plural: 'children'),
       );
       variable.addChild(childrenNode);
 
@@ -453,7 +466,7 @@ Future<void> buildVariablesTree(
   final inspectorService = serviceManager.inspectorService;
   if (inspectorService != null) {
     final tasks = <Future>[];
-    ObjectGroupBase group;
+    late ObjectGroupBase group;
     Future<void> _maybeUpdateRef(DartObjectNode child) async {
       if (child.ref == null) return;
       if (child.ref.diagnostic == null) {
@@ -477,7 +490,7 @@ Future<void> buildVariablesTree(
             // TODO(jacobr): add the Diagnostics properties as well?
             child._ref = GenericInstanceRef(
               isolateRef: isolateRef,
-              value: valueInstanceRef,
+              value: valueInstanceRef!,
             );
           } catch (e) {
             if (e is! SentinelException) {
@@ -494,7 +507,7 @@ Future<void> buildVariablesTree(
     }
     if (tasks.isNotEmpty) {
       await Future.wait(tasks);
-      unawaited(group?.dispose());
+      unawaited(group.dispose());
     }
   }
   variable.treeInitializeComplete = true;
@@ -508,13 +521,13 @@ Future<Obj> _getObjectWithRetry(
   DartObjectNode variable,
 ) async {
   try {
-    final dynamic result = await serviceManager.service.getObject(
-        variable.ref.isolateRef.id, objectId,
+    final dynamic result = await serviceManager.service!.getObject(
+        variable.ref.isolateRef.id!, objectId,
         offset: variable.offset, count: variable.childCount);
     return result;
   } catch (e) {
     final dynamic result = await serviceManager.service
-        .getObject(variable.ref.isolateRef.id, objectId);
+        ?.getObject(variable.ref.isolateRef.id!, objectId);
     return result;
   }
 }
@@ -527,8 +540,8 @@ Future<DartObjectNode> _buildVariable(
   final instanceRef =
       await inspectorService.toObservatoryInstanceRef(diagnostic.valueRef);
   return DartObjectNode.fromValue(
-    name: diagnostic.name,
-    value: instanceRef,
+    name: diagnostic.name!,
+    value: instanceRef!,
     diagnostic: diagnostic,
     isolateRef: isolateRef,
   );
@@ -557,8 +570,8 @@ List<DartObjectNode> _createVariablesForAssociations(
   IsolateRef isolateRef,
 ) {
   final variables = <DartObjectNode>[];
-  for (var i = 0; i < instance.associations.length; i++) {
-    final association = instance.associations[i];
+  for (var i = 0; i < instance.associations!.length; i++) {
+    final association = instance.associations![i];
     if (association.key is! InstanceRef) {
       continue;
     }
@@ -572,7 +585,7 @@ List<DartObjectNode> _createVariablesForAssociations(
       value: association.value,
       isolateRef: isolateRef,
     );
-    final entryNum = instance.offset == null ? i : i + instance.offset;
+    final entryNum = instance.offset == null ? i : i + instance.offset!;
     variables.add(
       DartObjectNode.text('[Entry $entryNum]')
         ..addChild(key)
@@ -592,7 +605,7 @@ List<DartObjectNode> _createVariablesForBytes(
   Instance instance,
   IsolateRef isolateRef,
 ) {
-  final bytes = base64.decode(instance.bytes);
+  final bytes = base64.decode(instance.bytes!);
   final variables = <DartObjectNode>[];
   List<dynamic> result;
   switch (instance.kind) {
@@ -649,7 +662,7 @@ List<DartObjectNode> _createVariablesForBytes(
   }
 
   for (int i = 0; i < result.length; i++) {
-    final name = instance.offset == null ? i : i + instance.offset;
+    final name = instance.offset == null ? i : i + instance.offset!;
     variables.add(
       DartObjectNode.fromValue(
         name: '[$name]',
@@ -666,12 +679,12 @@ List<DartObjectNode> _createVariablesForElements(
   IsolateRef isolateRef,
 ) {
   final variables = <DartObjectNode>[];
-  for (int i = 0; i < instance.elements.length; i++) {
-    final name = instance.offset == null ? i : i + instance.offset;
+  for (int i = 0; i < instance.elements!.length; i++) {
+    final name = instance.offset == null ? i : i + instance.offset!;
     variables.add(
       DartObjectNode.fromValue(
         name: '[$name]',
-        value: instance.elements[i],
+        value: instance.elements![i],
         isolateRef: isolateRef,
       ),
     );
@@ -682,15 +695,15 @@ List<DartObjectNode> _createVariablesForElements(
 List<DartObjectNode> _createVariablesForFields(
   Instance instance,
   IsolateRef isolateRef, {
-  Set<String> existingNames,
+  Set<String>? existingNames,
 }) {
   final variables = <DartObjectNode>[];
-  for (var field in instance.fields) {
-    final name = field.decl.name;
+  for (var field in instance.fields!) {
+    final name = field.decl!.name;
     if (existingNames != null && existingNames.contains(name)) continue;
     variables.add(
       DartObjectNode.fromValue(
-        name: name,
+        name: name!,
         value: field.value,
         isolateRef: isolateRef,
       ),
@@ -703,15 +716,16 @@ List<DartObjectNode> _createVariablesForFields(
 // InstanceRef objects have become sentinels.
 class DartObjectNode extends TreeNode<DartObjectNode> {
   DartObjectNode._({
-    this.name,
-    this.text,
-    GenericInstanceRef ref,
-    int offset,
-    int childCount,
-  })  : _ref = ref,
-        _offset = offset,
-        _childCount = childCount {
-    indentChildren = ref?.diagnostic?.style != DiagnosticsTreeStyle.flat;
+    required this.name,
+    required this.text,
+    GenericInstanceRef? ref,
+    int? offset,
+    int? childCount,
+  })  : _ref = ref!,
+        _offset = offset!,
+        _isInspectable = false,
+        _childCount = childCount! {
+    indentChildren = ref.diagnostic!.style != DiagnosticsTreeStyle.flat;
   }
 
   /// Creates a variable from a value that must be an InstanceRef or a primitive
@@ -721,15 +735,16 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   /// [ObjRef] or primitive type such as num or String.
   factory DartObjectNode.fromValue({
     String name = '',
-    @required Object value,
-    RemoteDiagnosticsNode diagnostic,
-    @required IsolateRef isolateRef,
+    required Object value,
+    RemoteDiagnosticsNode? diagnostic,
+    required IsolateRef isolateRef,
   }) {
     return DartObjectNode._(
       name: name,
+      text: '',
       ref: GenericInstanceRef(
         isolateRef: isolateRef,
-        diagnostic: diagnostic,
+        diagnostic: diagnostic!,
         value: value,
       ),
     );
@@ -741,7 +756,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   ) {
     final value = variable.value;
     return DartObjectNode._(
-      name: variable.name,
+      name: variable.name!,
+      text: '',
       ref: GenericInstanceRef(
         isolateRef: isolateRef,
         value: value,
@@ -750,16 +766,17 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   }
 
   factory DartObjectNode.text(String text) {
-    return DartObjectNode._(text: text);
+    return DartObjectNode._(text: text, name: '');
   }
 
   factory DartObjectNode.grouping(
     GenericInstanceRef ref, {
-    @required int offset,
-    @required int count,
+    required int offset,
+    required int count,
   }) {
     return DartObjectNode._(
       ref: ref,
+      name: '',
       text: '[$offset - ${offset + count - 1}]',
       offset: offset,
       childCount: count,
@@ -785,7 +802,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     final value = this.value;
     if (value is InstanceRef) {
       if (value.kind != null &&
-          (value.kind.endsWith('List') ||
+          (value.kind!.endsWith('List') ||
               value.kind == InstanceKind.kList ||
               value.kind == InstanceKind.kMap)) {
         return value.length ?? 0;
@@ -807,31 +824,30 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     }
     final diagnostic = ref.diagnostic;
     if (diagnostic != null &&
-        ((diagnostic.inlineProperties?.isNotEmpty ?? false) ||
+        ((diagnostic.inlineProperties.isNotEmpty ?? false) ||
             diagnostic.hasChildren)) return true;
     // TODO(jacobr): do something smarter to avoid expandable variable flicker.
     final instanceRef = ref.instanceRef;
     return instanceRef != null ? instanceRef.valueAsString == null : false;
   }
 
-  Object get value => ref?.value;
+  Object get value => ref.value!;
 
   // TODO(kenz): add custom display for lists with more than 100 elements
-  String get displayValue {
+  String? get displayValue {
     if (text != null) {
       return text;
     }
-    final value = this.value;
+
+    final Object value = this.value;
 
     String valueStr;
 
-    if (value == null) return null;
-
     if (value is InstanceRef) {
       if (value.valueAsString == null) {
-        valueStr = value.classRef.name;
+        valueStr = value.classRef!.name!;
       } else {
-        valueStr = value.valueAsString;
+        valueStr = value.valueAsString!;
         if (value.valueAsStringIsTruncated == true) {
           valueStr += '...';
         }
@@ -842,17 +858,17 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       }
 
       if (value.kind == InstanceKind.kList) {
-        valueStr = '$valueStr (${_itemCount(value.length)})';
+        valueStr = '$valueStr (${_itemCount(value.length!)})';
       } else if (value.kind == InstanceKind.kMap) {
-        valueStr = '$valueStr (${_itemCount(value.length)})';
-      } else if (value.kind != null && value.kind.endsWith('List')) {
+        valueStr = '$valueStr (${_itemCount(value.length!)})';
+      } else if (value.kind != null && value.kind!.endsWith('List')) {
         // Uint8List, Uint16List, ...
-        valueStr = '$valueStr (${_itemCount(value.length)})';
+        valueStr = '$valueStr (${_itemCount(value.length!)})';
       }
     } else if (value is Sentinel) {
-      valueStr = value.valueAsString;
+      valueStr = value.valueAsString!;
     } else if (value is TypeArgumentsRef) {
-      valueStr = value.name;
+      valueStr = value.name!;
     } else {
       valueStr = value.toString();
     }
@@ -870,7 +886,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
     final instanceRef = ref.instanceRef;
     final value = ref.instanceRef is InstanceRef
-        ? instanceRef.valueAsString
+        ? instanceRef!.valueAsString
         : instanceRef;
     return '$name - $value';
   }
@@ -946,7 +962,7 @@ class FileNode extends TreeNode<FileNode> {
   final String name;
 
   // This can be null.
-  ScriptRef scriptRef;
+  ScriptRef? scriptRef;
 
   /// This exists to allow for O(1) lookup of children when building the tree.
   final Map<String, FileNode> _childrenAsMap = {};
@@ -1028,14 +1044,14 @@ class FileNode extends TreeNode<FileNode> {
 // ignore: avoid_classes_with_only_static_members
 class ScriptRefUtils {
   static String fileName(ScriptRef scriptRef) =>
-      Uri.parse(scriptRef.uri).path.split('/').last;
+      Uri.parse(scriptRef.uri!).path.split('/').last;
 
   /// Return the Uri for the given ScriptRef split into path segments.
   ///
   /// This is useful for converting a flat list of scripts into a directory tree
   /// structure.
   static List<String> splitDirectoryParts(ScriptRef scriptRef) {
-    final uri = Uri.parse(scriptRef.uri);
+    final uri = Uri.parse(scriptRef.uri!);
     final scheme = uri.scheme;
     var parts = uri.path.split('/');
 

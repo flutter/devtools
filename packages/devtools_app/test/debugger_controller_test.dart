@@ -4,9 +4,7 @@
 
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
-import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -272,9 +270,9 @@ void main() {
       debuggerController = TestDebuggerController(
         initialSwitchToIsolate: false,
       );
-      debuggerController.parsedScript.value = ParsedScript(
+      debuggerController.parsedScript!.value = ParsedScript(
         script: testScript,
-        highlighter: null,
+        highlighter: null as SyntaxHighlighter,
         executableLines: {},
       );
     });
@@ -301,7 +299,7 @@ void main() {
         equals('[]'),
       );
       expect(
-        debuggerController.matchesForSearch(null).toString(),
+        debuggerController.matchesForSearch(null as String).toString(),
         equals('[]'),
       );
     });
