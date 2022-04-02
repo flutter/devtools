@@ -163,7 +163,8 @@ class FileQuery {
   bool isExactFileNameMatch(ScriptRef script) {
     if (isEmpty) return false;
 
-    final fileName = _fileName(script.uri!);
+    final scriptUri = script.uri!;
+    final fileName = _fileName(scriptUri);
 
     if (isMultiToken) {
       return tokens.every((token) => fileName.caseInsensitiveContains(token));
@@ -173,62 +174,66 @@ class FileQuery {
   }
 
   AutoCompleteMatch createExactFileNameAutoCompleteMatch(ScriptRef script) {
-    if (isEmpty) return AutoCompleteMatch(script.uri!);
+    final scriptUri = script.uri!;
+    if (isEmpty) return AutoCompleteMatch(scriptUri);
 
-    final fileName = _fileName(script.uri!);
-    final fileNameIndex = script.uri!.lastIndexOf(fileName);
+    final fileName = _fileName(scriptUri);
+    final fileNameIndex = scriptUri.lastIndexOf(fileName);
     final matchedSegments = _findExactSegments(fileName)
         .map((range) =>
             Range(range.begin + fileNameIndex, range.end + fileNameIndex))
         .toList();
-    return AutoCompleteMatch(script.uri!, matchedSegments: matchedSegments);
+    return AutoCompleteMatch(scriptUri, matchedSegments: matchedSegments);
   }
 
   bool isExactFullPathMatch(ScriptRef script) {
     if (isEmpty) return false;
 
+    final scriptUri = script.uri!;
     if (isMultiToken) {
-      return tokens
-          .every((token) => script.uri!.caseInsensitiveContains(token));
+      return tokens.every((token) => scriptUri.caseInsensitiveContains(token));
     }
 
-    return script.uri!.caseInsensitiveContains(query);
+    return scriptUri.caseInsensitiveContains(query);
   }
 
   AutoCompleteMatch createExactFullPathAutoCompleteMatch(ScriptRef script) {
-    if (isEmpty) return AutoCompleteMatch(script.uri!);
+    final scriptUri = script.uri!;
+    if (isEmpty) return AutoCompleteMatch(scriptUri);
 
-    final matchedSegments = _findExactSegments(script.uri!);
-    return AutoCompleteMatch(script.uri!, matchedSegments: matchedSegments);
+    final matchedSegments = _findExactSegments(scriptUri);
+    return AutoCompleteMatch(scriptUri, matchedSegments: matchedSegments);
   }
 
   bool isFuzzyMatch(ScriptRef script) {
     if (isEmpty) return false;
+    final scriptUri = script.uri!;
 
     if (isMultiToken) {
-      return script.uri!.caseInsensitiveFuzzyMatch(query.replaceAll(' ', ''));
+      return scriptUri.caseInsensitiveFuzzyMatch(query.replaceAll(' ', ''));
     }
 
-    return _fileName(script.uri!).caseInsensitiveFuzzyMatch(query);
+    return _fileName(scriptUri).caseInsensitiveFuzzyMatch(query);
   }
 
   AutoCompleteMatch createFuzzyMatchAutoCompleteMatch(ScriptRef script) {
-    if (isEmpty) return AutoCompleteMatch(script.uri!);
+    final scriptUri = script.uri!;
+    if (isEmpty) return AutoCompleteMatch(scriptUri);
 
     List<Range> matchedSegments;
     if (isMultiToken) {
       matchedSegments =
-          _findFuzzySegments(script.uri!, query.replaceAll(' ', ''));
+          _findFuzzySegments(scriptUri, query.replaceAll(' ', ''));
     } else {
-      final fileName = _fileName(script.uri!);
-      final fileNameIndex = script.uri!.lastIndexOf(fileName);
+      final fileName = _fileName(scriptUri);
+      final fileNameIndex = scriptUri.lastIndexOf(fileName);
       matchedSegments = _findFuzzySegments(fileName, query)
           .map((range) =>
               Range(range.begin + fileNameIndex, range.end + fileNameIndex))
           .toList();
     }
 
-    return AutoCompleteMatch(script.uri!, matchedSegments: matchedSegments);
+    return AutoCompleteMatch(scriptUri, matchedSegments: matchedSegments);
   }
 
   List<Range> _findExactSegments(String file) {

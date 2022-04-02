@@ -502,7 +502,7 @@ class Gutter extends StatelessWidget {
   });
 
   final double gutterWidth;
-  final ScrollController? scrollController;
+  final ScrollController scrollController;
   final int lineCount;
   final StackFrameAndSourcePosition? pausedFrame;
   final List<BreakpointAndSourcePosition> breakpoints;
@@ -836,9 +836,8 @@ class _LineItemState extends State<LineItem> {
     _debuggerController = Provider.of<DebuggerController>(context);
 
     Widget child;
-    if (widget.pausedFrame?.column != null) {
-      final column = widget.pausedFrame!.column!;
-
+    final column = widget.pausedFrame?.column;
+    if (column != null) {
       final breakpointColor = theme.colorScheme.breakpointColor;
 
       // The following constants are tweaked for using the
@@ -1005,9 +1004,10 @@ class _LineItemState extends State<LineItem> {
   List<TextSpan> _searchMatchAwareLineContents(
     List<TextSpan> startingContents,
   ) {
-    if (widget.searchMatches == null || widget.searchMatches!.isEmpty)
+    final searchMatches = widget.searchMatches;
+    if (searchMatches == null || searchMatches.isEmpty)
       return startingContents;
-    final searchMatchesToFind = List<SourceToken>.from(widget.searchMatches!)
+    final searchMatchesToFind = List<SourceToken>.from(searchMatches)
       ..remove(widget.activeSearchMatch);
 
     var contentsWithMatch = startingContents;

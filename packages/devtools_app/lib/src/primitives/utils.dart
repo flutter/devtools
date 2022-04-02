@@ -1403,3 +1403,7 @@ extension UriExtension on Uri {
     );
   }
 }
+
+Iterable<T> removeNullValues<T>(Iterable<T?> values) {
+  return values.whereType<T>();
+}

@@ -81,7 +81,6 @@ class ScriptLocation {
 
   final ScriptRef scriptRef;
 
-  /// This field can be null.
   final SourcePosition? location;
 
   @override
@@ -128,7 +127,8 @@ class SourcePosition {
   }
 
   @override
-  int get hashCode => (line! << 7) ^ column!;
+  int get hashCode =>
+      line != null && column != null ? (line! << 7) ^ column! : super.hashCode;
 
   @override
   String toString() => '$line:$column';
@@ -184,7 +184,6 @@ abstract class BreakpointAndSourcePosition
 
   @override
   int get hashCode => breakpoint.hashCode;
-
   @override
   bool operator ==(other) {
     return other is BreakpointAndSourcePosition &&
@@ -199,17 +198,26 @@ abstract class BreakpointAndSourcePosition
     if (resolved != other.resolved) return resolved ? 1 : -1;
 
     if (resolved) {
-      return tokenPos! - other.tokenPos!;
+      final otherTokenPos = other.tokenPos;
+      if (tokenPos != null && otherTokenPos != null) {
+        return tokenPos! - otherTokenPos;
+      }
     } else {
-      return line! - other.line!;
+      final otherLine = other.line;
+      if (line != null && otherLine != null) {
+        return line! - otherLine;
+      }
     }
+    return 0;
   }
 }
 
 class _BreakpointAndSourcePositionResolved extends BreakpointAndSourcePosition {
   _BreakpointAndSourcePositionResolved(
-      Breakpoint breakpoint, SourcePosition? sourcePosition, this.location)
-      : super._(breakpoint, sourcePosition);
+    Breakpoint breakpoint,
+    SourcePosition? sourcePosition,
+    this.location,
+  ) : super._(breakpoint, sourcePosition);
 
   final SourceLocation location;
 
@@ -348,8 +356,8 @@ Future<void> buildVariablesTree(
   if (diagnostic != null && includeDiagnosticPropertiesInDebugger) {
     final service = diagnostic.inspectorService;
     Future<void> _addPropertiesHelper(
-        List<RemoteDiagnosticsNode?>? properties) async {
-      if (properties == null) return;
+        List<RemoteDiagnosticsNode>? properties) async {
+      if (properties == null || service == null || isolateRef == null) return;
       await addExpandableChildren(
         variable,
         await _createVariablesForDiagnostics(
@@ -428,21 +436,22 @@ Future<void> buildVariablesTree(
     // Always add children last after properties to avoid confusion.
     final ObjectGroupBase? service = diagnostic.inspectorService;
     final diagnosticChildren = await diagnostic.children;
-    if (diagnosticChildren?.isNotEmpty ?? false) {
+    if (diagnosticChildren != null && diagnosticChildren.isNotEmpty) {
       final childrenNode = DartObjectNode.text(
-        pluralize('child', diagnosticChildren!.length, plural: 'children'),
+        pluralize('child', diagnosticChildren.length, plural: 'children'),
       );
       variable.addChild(childrenNode);
-
-      await addExpandableChildren(
-        childrenNode,
-        await _createVariablesForDiagnostics(
-          service,
-          diagnosticChildren,
-          isolateRef,
-        ),
-        expandAll: expandAll,
-      );
+      if (service != null && isolateRef != null) {
+        await addExpandableChildren(
+          childrenNode,
+          await _createVariablesForDiagnostics(
+            service,
+            diagnosticChildren,
+            isolateRef,
+          ),
+          expandAll: expandAll,
+        );
+      }
     }
   }
   final inspectorService = serviceManager.inspectorService;
@@ -530,15 +539,16 @@ Future<DartObjectNode> _buildVariable(
 }
 
 Future<List<DartObjectNode>> _createVariablesForDiagnostics(
-  ObjectGroupBase? inspectorService,
+  ObjectGroupBase inspectorService,
   List<RemoteDiagnosticsNode?> diagnostics,
-  IsolateRef? isolateRef,
+  IsolateRef isolateRef,
 ) async {
   final variables = <Future<DartObjectNode>>[];
   for (var diagnostic in diagnostics) {
+    if (diagnostic == null) continue;
     // Omit hidden properties.
-    if (diagnostic!.level == DiagnosticLevel.hidden) continue;
-    variables.add(_buildVariable(diagnostic, inspectorService!, isolateRef));
+    if (diagnostic.level == DiagnosticLevel.hidden) continue;
+    variables.add(_buildVariable(diagnostic, inspectorService, isolateRef));
   }
   if (variables.isNotEmpty) {
     return await Future.wait(variables);
@@ -552,8 +562,9 @@ List<DartObjectNode> _createVariablesForAssociations(
   IsolateRef? isolateRef,
 ) {
   final variables = <DartObjectNode>[];
-  for (var i = 0; i < instance.associations!.length; i++) {
-    final association = instance.associations![i];
+  final associations = instance.associations ?? [];
+  for (var i = 0; i < associations.length; i++) {
+    final association = associations[i];
     if (association.key is! InstanceRef) {
       continue;
     }
@@ -715,11 +726,12 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   /// [value] should typically be an [InstanceRef] but can also be a [Sentinel]
   /// [ObjRef] or primitive type such as num or String.
   factory DartObjectNode.fromValue({
-    String? name = '',
+    String? name,
     required Object? value,
     RemoteDiagnosticsNode? diagnostic,
     required IsolateRef? isolateRef,
   }) {
+    name = name ?? '';
     return DartObjectNode._(
       name: name,
       ref: GenericInstanceRef(
@@ -823,26 +835,26 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     if (value == null) return null;
 
     if (value is InstanceRef) {
+      final kind = value.kind;
       if (value.valueAsString == null) {
-        valueStr = value.classRef!.name;
+        valueStr = value.classRef?.name ?? '';
       } else {
         valueStr = value.valueAsString ?? '';
         if (value.valueAsStringIsTruncated == true) {
           valueStr += '...';
         }
-        if (value.kind == InstanceKind.kString) {
+        if (kind == InstanceKind.kString) {
           // TODO(devoncarew): Handle multi-line strings.
           valueStr = "'$valueStr'";
         }
       }
-
-      if (value.kind == InstanceKind.kList) {
-        valueStr = '$valueStr (${_itemCount(value.length!)})';
-      } else if (value.kind == InstanceKind.kMap) {
-        valueStr = '$valueStr (${_itemCount(value.length!)})';
-      } else if (value.kind != null && value.kind!.endsWith('List')) {
-        // Uint8List, Uint16List, ...
-        valueStr = '$valueStr (${_itemCount(value.length!)})';
+      // List, Map, Uint8List, Uint16List, etc...
+      if (kind != null && kind == InstanceKind.kList ||
+          kind == InstanceKind.kMap ||
+          kind!.endsWith('List')) {
+        final itemLength = value.length;
+        if (itemLength == null) return valueStr;
+        return '$valueStr (${_itemCount(itemLength)})';
       }
     } else if (value is Sentinel) {
       valueStr = value.valueAsString;
@@ -864,8 +876,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     if (text != null) return text!;
 
     final instanceRef = ref!.instanceRef;
-    final value = ref!.instanceRef is InstanceRef
-        ? instanceRef!.valueAsString
+    final value = instanceRef is InstanceRef
+        ? instanceRef.valueAsString
         : instanceRef;
     return '$name - $value';
   }
@@ -940,7 +952,6 @@ class FileNode extends TreeNode<FileNode> {
 
   final String name;
 
-  // This can be null.
   ScriptRef? scriptRef;
 
   /// This exists to allow for O(1) lookup of children when building the tree.

@@ -117,8 +117,8 @@ class _BreakpointsState extends State<Breakpoints> {
   }
 
   String _descriptionFor(BreakpointAndSourcePosition breakpoint) {
-    final fileName = breakpoint.scriptUri!.split('/').last;
-
+    final scriptUri = breakpoint.scriptUri;
+    final fileName = scriptUri == null ? 'file' : scriptUri.split('/').last;
     // Consider showing columns in the future if we allow multiple breakpoints
     // per line.
     return '$fileName:${breakpoint.line}';

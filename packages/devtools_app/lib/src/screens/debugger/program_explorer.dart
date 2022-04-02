@@ -31,7 +31,7 @@ class _ProgramExplorerRow extends StatelessWidget {
     this.onTap,
   });
 
-  final ProgramExplorerController? controller;
+  final ProgramExplorerController controller;
   final VMServiceObjectNode node;
   final VoidCallback? onTap;
 

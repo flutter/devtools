@@ -117,9 +117,9 @@ class _DebuggingControlsState extends State<DebuggingControls>
   }
 
   Widget _librariesButton() {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<bool>(
       valueListenable: controller.fileExplorerVisible,
-      builder: (context, bool visible, _) {
+      builder: (context, visible, _) {
         const libraryIcon = Icons.insert_chart;
         return RoundedOutlinedBorder(
           child: Container(
@@ -146,9 +146,9 @@ class BreakOnExceptionsControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<String?>(
       valueListenable: controller.exceptionPauseMode,
-      builder: (BuildContext context, String? modeId, _) {
+      builder: (BuildContext context, modeId, _) {
         return RoundedDropDownButton<ExceptionMode>(
           value: ExceptionMode.from(modeId),
           // Cannot set exception pause mode for system isolates.

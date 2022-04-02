@@ -130,9 +130,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    final codeArea = ValueListenableBuilder(
+    final codeArea = ValueListenableBuilder<bool>(
       valueListenable: controller.fileExplorerVisible,
-      builder: (context, bool visible, child) {
+      builder: (context, visible, child) {
         if (visible) {
           // TODO(devoncarew): Animate this opening and closing.
           return Split(
@@ -239,9 +239,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   }
 
   Widget _breakpointsRightChild() {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<List<BreakpointAndSourcePosition>>(
       valueListenable: controller.breakpointsWithLocation,
-      builder: (context, List<BreakpointAndSourcePosition> breakpoints, _) {
+      builder: (context, breakpoints, _) {
         return Row(
           children: [
             BreakpointsCountBadge(breakpoints: breakpoints),
@@ -331,7 +331,7 @@ class DebuggerStatus extends StatefulWidget {
 }
 
 class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
-  String? _status;
+  String _status = '';
 
   @override
   void initState() {
@@ -339,7 +339,6 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
 
     addAutoDisposeListener(widget.controller.isPaused, _updateStatus);
 
-    _status = '';
     _updateStatus();
   }
 
@@ -354,7 +353,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     return Text(
-      _status!,
+      _status,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
@@ -381,14 +380,21 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     final reason =
         event.kind == EventKind.kPauseException ? ' on exception' : '';
 
-    if (frame == null) {
+    final scriptUri = frame?.location?.script?.uri;
+    if (scriptUri == null)  {
       return 'paused$reason';
     }
 
-    final fileName = ' at ' + frame.location!.script!.uri!.split('/').last;
-    final script = await scriptManager.getScript(frame.location!.script!);
+    final fileName = ' at ' + scriptUri.split('/').last;
+    final tokenPos = frame?.location?.tokenPos;
+    final scriptRef = frame?.location?.script;
+    if (tokenPos == null || scriptRef == null) {
+      return 'paused$reason$fileName';
+    }
+
+    final script = await scriptManager.getScript(scriptRef);
     final pos =
-        SourcePosition.calculatePosition(script, frame.location!.tokenPos!);
+        SourcePosition.calculatePosition(script, tokenPos);
 
     return 'paused$reason$fileName $pos';
   }
@@ -406,7 +412,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
 
   late bool paused;
 
-  double? controlHeight;
+  late double controlHeight;
 
   @override
   void didChangeDependencies() {
