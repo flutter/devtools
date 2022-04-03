@@ -1057,7 +1057,7 @@ abstract class ObjectGroupBase implements Disposable {
     return await inspectorLibrary.eval(
       expression,
       isAlive: this,
-      scope: <String, String>{'object': instanceRef.id!},
+      scope: <String, String>{'object': instanceRef!.id!},
     );
   }
 
