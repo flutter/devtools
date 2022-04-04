@@ -6,6 +6,7 @@
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_breadcrumbs.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_service.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_tree_controller.dart';
@@ -20,10 +21,11 @@ import 'package:mockito/mockito.dart';
 import 'test_utils/inspector_tree.dart';
 
 void main() {
-  FakeServiceManager fakeServiceManager;
+  late FakeServiceManager fakeServiceManager;
 
   setUp(() {
     fakeServiceManager = FakeServiceManager();
+    firstInspectorTreeLoadCompleted = true;
     when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
     when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
 
