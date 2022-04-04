@@ -143,6 +143,16 @@ class CpuProfilerController
     return serviceManager.service!.enableCpuProfiler();
   }
 
+  Future<CpuProfileData> getCpuProfile({
+    required int startMicros,
+    required int extentMicros,
+  }) async {
+    return serviceManager.service!.getCpuProfile(
+      startMicros: startMicros,
+      extentMicros: extentMicros,
+    );
+  }
+
   Future<void> pullAndProcessProfile({
     required int startMicros,
     required int extentMicros,
@@ -161,7 +171,7 @@ class CpuProfilerController
     Future<void> pullAndProcessHelper() async {
       // TODO(kenz): add a cancel button to the processing UI in case pulling a
       // large payload from the vm service takes a long time.
-      cpuProfileData = await serviceManager.service!.getCpuProfile(
+      cpuProfileData = await getCpuProfile(
         startMicros: startMicros,
         extentMicros: extentMicros,
       );
