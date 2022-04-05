@@ -1336,7 +1336,7 @@ class FrameAnalysis {
   late FramePhase longestFramePhase = _calculateLongestFramePhase();
 
   FramePhase _calculateLongestFramePhase() {
-    if (frame.rasterTime > frame.buildTime) {
+    if (rasterPhase.duration > frame.buildTime) {
       return rasterPhase;
     }
     var longestPhaseTime = Duration.zero;

@@ -405,6 +405,8 @@ class _EnhanceTracingHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final phasePrefix =
+        longestPhase.title != FrameAnalysis.rasterEventName ? 'UI ' : '';
     return RichText(
       maxLines: 2,
       text: TextSpan(
@@ -415,7 +417,7 @@ class _EnhanceTracingHint extends StatelessWidget {
             style: theme.fixedFontStyle,
           ),
           TextSpan(
-            text: ' was the longest phase in this frame. ',
+            text: ' was the longest ${phasePrefix}phase in this frame. ',
             style: theme.regularTextStyle,
           ),
           ..._hintForPhase(longestPhase, theme),
@@ -429,13 +431,22 @@ class _EnhanceTracingHint extends StatelessWidget {
     ThemeData theme,
   ) {
     switch (phase.title) {
-      case 'Build':
-        return _enhanceTracingHint('Track Widget Builds', theme);
-      case 'Layout':
-        return _enhanceTracingHint('Track Layouts', theme);
-      case 'Paint':
-        return _enhanceTracingHint('Track Paints', theme);
-      case 'Raster':
+      case FrameAnalysis.buildEventName:
+        return _enhanceTracingHint(
+          extensions.profileWidgetBuilds.title,
+          theme,
+        );
+      case FrameAnalysis.layoutEventName:
+        return _enhanceTracingHint(
+          extensions.profileRenderObjectLayouts.title,
+          theme,
+        );
+      case FrameAnalysis.paintEventName:
+        return _enhanceTracingHint(
+          extensions.profileRenderObjectPaints.title,
+          theme,
+        );
+      case FrameAnalysis.rasterEventName:
         // TODO(kenz): link to shader compilation docs. In the future, integrate
         // with the work @iskakaushik is doing.
         return [];
@@ -472,6 +483,8 @@ class _EnhanceTracingHint extends StatelessWidget {
 class _SmallEnhanceTracingButton extends StatelessWidget {
   const _SmallEnhanceTracingButton({Key? key}) : super(key: key);
 
+  static const labelPadding = 6.0;
+
   @override
   Widget build(BuildContext context) {
     // TODO(kenz): find a way to handle taps on this widget and redirect to
@@ -479,7 +492,7 @@ class _SmallEnhanceTracingButton extends StatelessWidget {
     // screen.
     return RoundedOutlinedBorder(
       child: Padding(
-        padding: const EdgeInsets.all(6.0),
+        padding: const EdgeInsets.all(labelPadding),
         child: MaterialIconLabel(
           label: EnhanceTracingButton.title,
           iconData: EnhanceTracingButton.icon,

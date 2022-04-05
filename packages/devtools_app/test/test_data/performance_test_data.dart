@@ -163,6 +163,10 @@ final buildEvent = testSyncTimelineEvent(buildTrace)
   ..time.end = const Duration(microseconds: 193938741291)
   ..type = TimelineEventType.ui;
 
+final buildEvent2 = testSyncTimelineEvent(buildTrace2)
+  ..time.end = const Duration(microseconds: 193938741350)
+  ..type = TimelineEventType.ui;
+
 final compositingBitsEvent = testSyncTimelineEvent(compositingBitsTrace)
   ..time.end = const Duration(microseconds: 193938741364)
   ..type = TimelineEventType.ui;
@@ -200,7 +204,10 @@ final goldenUiTimelineEvent = vsyncEvent
                     animateEvent..parent = frameEvent,
                     layoutEvent
                       ..parent = frameEvent
-                      ..addChild(buildEvent..parent = layoutEvent),
+                      ..addAllChildren([
+                        buildEvent..parent = layoutEvent,
+                        buildEvent2..parent = layoutEvent
+                      ]),
                     compositingBitsEvent..parent = frameEvent,
                     paintEvent..parent = frameEvent,
                     compositingEvent..parent = frameEvent,
@@ -233,6 +240,7 @@ final goldenUiTraceEvents = [
   engineBeginFrameTrace,
   animateTrace,
   buildTrace,
+  buildTrace2,
   layoutTrace,
   compositingBitsTrace,
   paintTrace,
@@ -356,6 +364,16 @@ final buildTrace = testTraceEventWrapper({
   'ts': 193938741258,
   'ph': 'X',
   'dur': 33,
+  'args': {'mode': 'basic', 'isolateNumber': '993728060'}
+});
+final buildTrace2 = testTraceEventWrapper({
+  'name': 'Build',
+  'cat': 'Dart',
+  'tid': testUiThreadId,
+  'pid': 94955,
+  'ts': 193938741300,
+  'ph': 'X',
+  'dur': 50,
   'args': {'mode': 'basic', 'isolateNumber': '993728060'}
 });
 final layoutTrace = testTraceEventWrapper({
