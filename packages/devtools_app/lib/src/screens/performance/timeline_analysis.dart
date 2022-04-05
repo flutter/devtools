@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../analytics/constants.dart' as analytics_constants;
 import '../../charts/flame_chart.dart';
 import '../../primitives/utils.dart';
+import '../../service/service_extensions.dart' as extensions;
 import '../../shared/common_widgets.dart';
 import '../../shared/theme.dart';
 import '../../ui/colors.dart';
@@ -15,7 +16,6 @@ import '../../ui/utils.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
-import 'timeline_events_profile.dart';
 
 class TimelineAnalysisHeader extends StatelessWidget {
   const TimelineAnalysisHeader({
