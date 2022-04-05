@@ -461,7 +461,7 @@ class PerformanceController extends DisposableController
       );
     }
 
-    if (debugTimeline) {
+    debugTraceEventCallback(() {
       final buf = StringBuffer();
       buf.writeln('UI timeline event for frame ${frame.id}:');
       frame.timelineEventData.uiEvent?.format(buf, '  ');
@@ -472,7 +472,7 @@ class PerformanceController extends DisposableController
       buf.writeln('\nRaster trace for frame ${frame.id}');
       frame.timelineEventData.rasterEvent?.writeTraceToBuffer(buf);
       log(buf.toString());
-    }
+    });
   }
 
   void addFrame(FlutterFrame frame) {

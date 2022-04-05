@@ -20,24 +20,6 @@ import 'performance_utils.dart';
 // engine. That dependency is tracked at
 // https://github.com/flutter/flutter/issues/27609.
 
-/// Switch this flag to true collect debug info from the timeline protocol.
-///
-/// This will add a button to the timeline page that will download files with
-/// debug info on click.
-bool debugTimeline = false;
-
-/// List that will store trace event json in the order we handle the events.
-///
-/// This list is for debug purposes. When [debugTimeline] is true, we will be
-/// able to dump this data to a downloadable text file.
-List<Map<String, dynamic>> debugHandledTraceEvents = [];
-
-/// Buffer that will store significant events in the frame tracking process.
-///
-/// This buffer is for debug purposes. When [debugTimeline] is true, we will
-/// be able to dump this buffer to a downloadable text file.
-StringBuffer debugFrameTracking = StringBuffer();
-
 const String rasterEventName = 'GPURasterizer::Draw';
 
 const String uiEventName = 'Animator::BeginFrame';
@@ -131,14 +113,8 @@ class TimelineEventProcessor {
     final _traceEvents = (traceEvents.sublist(startIndex)
           // Events need to be in increasing timestamp order.
           ..sort())
-        .where(
-      (event) {
-        debugTraceEventCallback(
-          () => log('attempting to process ${event.event.json.toString()}'),
-        );
-        return event.event.timestampMicros != null;
-      },
-    ).toList();
+        .where((event) => event.event.timestampMicros != null)
+        .toList();
 
     for (final trace in _traceEvents) {
       performanceController.recordTrace(trace.event.json);
@@ -365,39 +341,98 @@ class TimelineEventProcessor {
         // Animator::BeginFrame - DurationEnd ([event] - duplicate)
         // VSYNC - DurationEnd
         //
-        if (debugTimeline) {
-          debugFrameTracking
-              .writeln('Duplicate duration end event: $eventJson');
-        }
+        debugTraceEventCallback(
+          () => log(
+            'Duplicate duration end event - skipping processing: $eventJson',
+          ),
+        );
         return;
-      } else if (current.name ==
-              _previousDurationEndEvents[eventThreadId]?.name &&
-          current.parent?.name == event.name &&
-          current.children.length == 1 &&
-          collectionEquals(
-            current.beginTraceEventJson,
-            current.children.first.beginTraceEventJson,
-          )) {
-        // There was a duplicate DurationBegin event associated with
-        // [previousDurationEndEvent]. [event] is actually the DurationEnd event
-        // for [current.parent]. Trim the extra layer created by the duplicate.
-        //
-        // Trace example:
-        // VSYNC - DurationBegin
-        // Animator::BeginFrame - DurationBegin (duplicate - remove this node)
-        // Animator::BeginFrame - DurationBegin
-        // ...
-        // Animator::BeginFrame - DurationEnd [previousDurationEndEvent]
-        // VSYNC - DurationEnd [event]
-        //
-        if (debugTimeline) {
-          debugFrameTracking.writeln(
-              'Duplicate duration begin event: ${current.beginTraceEventJson}');
-        }
+      } else if (current.parent?.name == event.name) {
+        if (current.name == _previousDurationEndEvents[eventThreadId]?.name &&
+            current.children.length == 1 &&
+            collectionEquals(
+              current.beginTraceEventJson,
+              current.children.first.beginTraceEventJson,
+            )) {
+          // There was a duplicate DurationBegin event associated with
+          // [previousDurationEndEvent]. [event] is actually the DurationEnd event
+          // for [current.parent]. Trim the extra layer created by the duplicate.
+          //
+          // Trace example:
+          // VSYNC - DurationBegin
+          // Animator::BeginFrame - DurationBegin [current] (duplicate - remove this node)
+          // Animator::BeginFrame - DurationBegin
+          // ...
+          // Animator::BeginFrame - DurationEnd [previousDurationEndEvent]
+          // VSYNC - DurationEnd [event]
+          //
+          debugTraceEventCallback(
+            () => log(
+              'Duplicate duration begin event - removing duplicate:'
+              ' ${current?.beginTraceEventJson}',
+            ),
+          );
 
-        current.parent!.removeChild(current);
-        current = current.parent as SyncTimelineEvent?;
-        currentDurationEventNodes[eventThreadId] = current;
+          current.parent!.removeChild(current);
+          current = current.parent as SyncTimelineEvent?;
+          currentDurationEventNodes[eventThreadId] = current;
+        } else {
+          // We have a valid begin event that is missing a matching end event.
+          // Create a fake end event to re-balance the tree.
+          //
+          // Trace example:
+          // VSYNC - DurationBegin
+          // BUILD - DurationBegin [current] (missing a matching end event)
+          // Animator::BeginFrame - DurationBegin
+          // ...
+          // Animator::BeginFrame - DurationEnd [previousDurationEndEvent]
+          // <this is where the DurationEnd BUILD event should be>
+          // VSYNC - DurationEnd [event]
+          //
+          final currentBeginTrace = current.traceEvents.first.event;
+
+          // For the fake end timestamp, split the difference between the end
+          // time of the last child of [current] and the end time of the [event]
+          // we are currently trying to process. Or, if [current] has no
+          // children, use the end timestamp [event] with a small buffer to
+          // ensure the fake event ends before the [event].
+          final lastChildOfCurrentEndTime = current
+              .children.safeLast?.endTraceEventJson?[TraceEvent.timestampKey];
+          final eventEndTime = event.timestampMicros!;
+          const fakeEndEventTimeBuffer = 1;
+          final fakeTimestampMicros = lastChildOfCurrentEndTime != null
+              ? eventEndTime -
+                  ((eventEndTime - lastChildOfCurrentEndTime) / 2).round()
+              : eventEndTime - fakeEndEventTimeBuffer;
+
+          final fakeEndEvent = TraceEventWrapper(
+            currentBeginTrace.copy(
+              phase: TraceEvent.durationEndPhase,
+              timestampMicros: fakeTimestampMicros,
+              args: {
+                'message': 'Warning - the end time of this event may be '
+                    'innacurate. The end trace event was missing, so the end '
+                    'time was inferred.',
+              },
+            ),
+            // Use the same time received as the current event we are trying to
+            // process.
+            eventWrapper.timeReceived,
+          );
+
+          debugTraceEventCallback(() {
+            log(
+              'Missing DurationEnd event - adding fake end event $fakeEndEvent',
+            );
+          });
+
+          current.addEndEvent(fakeEndEvent);
+          current = current.parent as SyncTimelineEvent?;
+
+          // Do not return early. Now that the tree is rebalanced, we can
+          // continue processing [event].
+          assert(current != null && event.name != current.name);
+        }
       } else {
         // The current event node has fallen into an unrecoverable state. Reset
         // the tracking node.
@@ -410,12 +445,11 @@ class TimelineEventProcessor {
         //     ...
         //  Animator::BeginFrame - DurationEnd
         // VSYNC - DurationEnd
-        if (debugTimeline) {
-          debugFrameTracking.writeln('Cannot recover unbalanced event tree.');
-          debugFrameTracking.writeln('Event: $eventJson');
-          debugFrameTracking
-              .writeln('Current: ${currentDurationEventNodes[eventThreadId]}');
-        }
+        debugTraceEventCallback(() {
+          log('Cannot recover unbalanced event tree.');
+          log('Event: $eventJson');
+          log('Current: $current');
+        });
         currentDurationEventNodes[eventThreadId] = null;
         return;
       }
@@ -445,10 +479,6 @@ class TimelineEventProcessor {
     // If we have reached a null parent, this event is fully formed - add it to
     // the timeline and try to assign it to a Flutter frame.
     if (current.parent == null) {
-      if (debugTimeline) {
-        debugFrameTracking.writeln('Trying to add event after DurationEnd:');
-        current.format(debugFrameTracking, '   ');
-      }
       performanceController.addTimelineEvent(current);
     }
   }
