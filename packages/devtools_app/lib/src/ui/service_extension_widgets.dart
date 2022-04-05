@@ -419,19 +419,22 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
 class ServiceExtensionCheckbox extends _ServiceExtensionWidget {
   ServiceExtensionCheckbox({
     Key? key,
-    required this.service,
+    required this.serviceExtension,
   }) : super(
           key: key,
           // Don't show messages on success or when this toggle is in progress.
           completedText: null,
-          describeError: (error) => _errorMessage(service.extension, error),
+          describeError: (error) => _errorMessage(
+            serviceExtension.extension,
+            error,
+          ),
         );
 
   static String _errorMessage(String extensionName, dynamic error) {
     return 'Failed to update $extensionName setting: $error';
   }
 
-  final ToggleableServiceExtensionDescription service;
+  final ToggleableServiceExtensionDescription serviceExtension;
 
   @override
   _ServiceExtensionMixin<_ServiceExtensionWidget> createState() =>
@@ -454,19 +457,19 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
     super.initState();
 
     if (serviceManager.serviceExtensionManager
-        .isServiceExtensionAvailable(widget.service.extension)) {
+        .isServiceExtensionAvailable(widget.serviceExtension.extension)) {
       final state = serviceManager.serviceExtensionManager
-          .getServiceExtensionState(widget.service.extension);
+          .getServiceExtensionState(widget.serviceExtension.extension);
       _setValueFromState(state.value);
     }
 
     serviceManager.serviceExtensionManager
-        .waitForServiceExtensionAvailable(widget.service.extension)
+        .waitForServiceExtensionAvailable(widget.serviceExtension.extension)
         .then((isServiceAvailable) {
       if (isServiceAvailable) {
         extensionAvailable.value = true;
         final state = serviceManager.serviceExtensionManager
-            .getServiceExtensionState(widget.service.extension);
+            .getServiceExtensionState(widget.serviceExtension.extension);
         _setValueFromState(state.value);
         addAutoDisposeListener(state, () {
           _setValueFromState(state.value);
@@ -477,21 +480,36 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
 
   void _setValueFromState(ServiceExtensionState state) {
     final valueFromState = state.enabled;
-    value.value = widget.service.inverted ? !valueFromState : valueFromState;
+    value.value =
+        widget.serviceExtension.inverted ? !valueFromState : valueFromState;
   }
 
   @override
   Widget build(BuildContext context) {
+    final docsUrl = widget.serviceExtension.documentationUrl;
     return ValueListenableBuilder<bool>(
       valueListenable: extensionAvailable,
       builder: (context, available, _) {
-        return CheckboxSetting(
-          notifier: value,
-          title: widget.service.title,
-          description: widget.service.description,
-          tooltip: widget.service.tooltip,
-          onChanged: _onChanged,
-          enabled: available,
+        return Row(
+          children: [
+            Expanded(
+              child: CheckboxSetting(
+                notifier: value,
+                title: widget.serviceExtension.title,
+                description: widget.serviceExtension.description,
+                tooltip: widget.serviceExtension.tooltip,
+                onChanged: _onChanged,
+                enabled: available,
+              ),
+            ),
+            if (docsUrl != null)
+              MoreInfoLink(
+                url: docsUrl,
+                gaScreenName: widget.serviceExtension.gaScreenName!,
+                gaSelectedItemDescription: widget.serviceExtension.gaItem!,
+                padding: const EdgeInsets.symmetric(vertical: denseSpacing),
+              )
+          ],
         );
       },
     );
@@ -500,13 +518,13 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
   void _onChanged(bool? value) {
     invokeAndCatchErrors(() async {
       var enabled = value == true;
-      if (widget.service.inverted) enabled = !enabled;
+      if (widget.serviceExtension.inverted) enabled = !enabled;
       await serviceManager.serviceExtensionManager.setServiceExtensionState(
-        widget.service.extension,
+        widget.serviceExtension.extension,
         enabled: enabled,
         value: enabled
-            ? widget.service.enabledValue
-            : widget.service.disabledValue,
+            ? widget.serviceExtension.enabledValue
+            : widget.serviceExtension.disabledValue,
       );
     });
   }
@@ -550,7 +568,7 @@ class ServiceExtensionCheckboxGroupButton extends StatefulWidget {
 
   final double overlayWidth;
 
-  static const _defaultWidth = 600.0;
+  static const _defaultWidth = 700.0;
 
   @override
   State<ServiceExtensionCheckboxGroupButton> createState() =>
@@ -740,7 +758,7 @@ class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
             description,
             const SizedBox(height: denseSpacing),
             for (final serviceExtension in extensions)
-              ServiceExtensionCheckbox(service: serviceExtension),
+              ServiceExtensionCheckbox(serviceExtension: serviceExtension),
           ],
         ),
       ),
@@ -825,7 +843,7 @@ class ServiceExtensionTooltip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (description.tooltipUrl != null) {
+    if (description.documentationUrl != null) {
       return ServiceExtensionRichTooltip(
         description: description,
         child: child,
@@ -890,12 +908,12 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
                 description.tooltip,
                 style: TextStyle(color: textColor),
               ),
-              if (description.tooltipUrl != null &&
+              if (description.documentationUrl != null &&
                   description.gaScreenName != null)
                 Align(
                   alignment: Alignment.bottomRight,
                   child: MoreInfoLink(
-                    url: description.tooltipUrl!,
+                    url: description.documentationUrl!,
                     gaScreenName: description.gaScreenName!,
                     gaSelectedItemDescription: description.gaItemTooltipLink,
                   ),

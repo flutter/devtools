@@ -199,9 +199,10 @@ class Cookie {
           codeUnit >= 127 ||
           separators.indexOf(newName[i]) >= 0) {
         throw new FormatException(
-            "Invalid character in cookie name, code unit: '$codeUnit'",
-            newName,
-            i);
+          "Invalid character in cookie name, code unit: '$codeUnit'",
+          newName,
+          i,
+        );
       }
     }
     return newName;
@@ -228,9 +229,10 @@ class Cookie {
           (codeUnit >= 0x3C && codeUnit <= 0x5B) ||
           (codeUnit >= 0x5D && codeUnit <= 0x7E))) {
         throw new FormatException(
-            "Invalid character in cookie value, code unit: '$codeUnit'",
-            newValue,
-            i);
+          "Invalid character in cookie value, code unit: '$codeUnit'",
+          newValue,
+          i,
+        );
       }
     }
     return newValue;

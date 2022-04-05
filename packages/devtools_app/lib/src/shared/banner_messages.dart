@@ -86,7 +86,9 @@ class BannerMessagesController {
 
   ValueNotifier<List<BannerMessage>> _messagesForScreen(String screenId) {
     return _messages.putIfAbsent(
-        screenId, () => ValueNotifier<List<BannerMessage>>([]));
+      screenId,
+      () => ValueNotifier<List<BannerMessage>>([]),
+    );
   }
 
   ValueListenable<List<BannerMessage>> messagesForScreen(String screenId) {
@@ -175,9 +177,9 @@ class BannerMessage extends StatelessWidget {
                   foregroundColor: foregroundColor,
                   // TODO(kenz): animate the removal of this message.
                   onPressed: () => Provider.of<BannerMessagesController>(
-                          context,
-                          listen: false)
-                      .removeMessage(this, dismiss: true),
+                    context,
+                    listen: false,
+                  ).removeMessage(this, dismiss: true),
                 ),
               ],
             ),

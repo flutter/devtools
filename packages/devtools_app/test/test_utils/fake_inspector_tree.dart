@@ -51,15 +51,17 @@ class FakeInspectorTree extends InspectorTreeController {
   }
 
   // Debugging string to make it easy to write integration tests.
-  String toStringDeep(
-      {bool hidePropertyLines = false, bool includeTextStyles = false}) {
+  String toStringDeep({
+    bool hidePropertyLines = false,
+    bool includeTextStyles = false,
+  }) {
     if (root == null) return '<empty>\n';
     // Visualize the ticks computed for this node so that bugs in the tick
     // computation code will result in rendering artifacts in the text output.
     final StringBuffer sb = StringBuffer();
     for (int i = 0; i < numRows; i++) {
-      final row = getCachedRow(i);
-      if (hidePropertyLines && row.node?.diagnostic?.isProperty == true) {
+      final row = getCachedRow(i)!;
+      if (hidePropertyLines && row.node.diagnostic?.isProperty == true) {
         continue;
       }
       int last = 0;
@@ -103,7 +105,8 @@ class FakeInspectorTree extends InspectorTreeController {
         }
       }
 
-      final icon = node.diagnostic.icon;
+      final diagnosticLocal = node.diagnostic!;
+      final icon = diagnosticLocal.icon;
       if (icon is CustomIcon) {
         sb.write('[${icon.text}]');
       } else if (icon is ColorIcon) {
@@ -111,7 +114,7 @@ class FakeInspectorTree extends InspectorTreeController {
       } else if (icon is Image) {
         sb.write('[${(icon.image as AssetImage).assetName}]');
       }
-      sb.write(node.diagnostic.description);
+      sb.write(diagnosticLocal.description);
 
 //      // TODO(jacobr): optionally visualize colors as well.
 //      if (entry.text != null) {

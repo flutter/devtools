@@ -181,7 +181,8 @@ void main() {
               ideTheme: getIdeTheme(),
             ),
             routerDelegate: DevToolsRouterDelegate(
-                (a, b, c) => const CupertinoPage(child: SizedBox.shrink())),
+              (a, b, c) => const CupertinoPage(child: SizedBox.shrink()),
+            ),
             routeInformationParser: DevToolsRouteInformationParser(),
             builder: (context, _) {
               callback(context);

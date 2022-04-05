@@ -33,10 +33,12 @@ void main() {
     FakeServiceManager fakeServiceManager;
 
     Future<void> pumpLoggingScreen(WidgetTester tester) async {
-      await tester.pumpWidget(wrapWithControllers(
-        const LoggingScreenBody(),
-        logging: mockLoggingController,
-      ));
+      await tester.pumpWidget(
+        wrapWithControllers(
+          const LoggingScreenBody(),
+          logging: mockLoggingController,
+        ),
+      );
     }
 
     setUp(() async {

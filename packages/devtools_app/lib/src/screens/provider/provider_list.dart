@@ -20,34 +20,37 @@ const _tilePadding = EdgeInsets.only(
 
 final AutoDisposeStateNotifierProvider<StateController<String>, String>
     selectedProviderIdProvider =
-    AutoDisposeStateNotifierProvider<StateController<String>, String>((ref) {
-  final controller = StateController<String>(null);
-  final providerIdsNotifier = ref.watch(sortedProviderNodesProvider.notifier);
+    AutoDisposeStateNotifierProvider<StateController<String>, String>(
+  (ref) {
+    final controller = StateController<String>(null);
+    final providerIdsNotifier = ref.watch(sortedProviderNodesProvider.notifier);
 
-  // TODO(rrousselGit): refactor to `ref.listen` when available
-  ref.onDispose(
-    providerIdsNotifier.addListener((asyncValue) {
-      final nodes = asyncValue.data?.value;
-      if (nodes == null) return;
+    // TODO(rrousselGit): refactor to `ref.listen` when available
+    ref.onDispose(
+      providerIdsNotifier.addListener((asyncValue) {
+        final nodes = asyncValue.data?.value;
+        if (nodes == null) return;
 
-      if (controller.state == null) {
-        if (nodes.isNotEmpty) controller.state = nodes.first.id;
-        return;
-      }
+        if (controller.state == null) {
+          if (nodes.isNotEmpty) controller.state = nodes.first.id;
+          return;
+        }
 
-      if (nodes.isEmpty) {
-        controller.state = null;
-      }
+        if (nodes.isEmpty) {
+          controller.state = null;
+        }
 
-      /// The previously selected provider was unmounted
-      else if (!nodes.any((node) => node.id == controller.state)) {
-        controller.state = nodes.first.id;
-      }
-    }),
-  );
+        /// The previously selected provider was unmounted
+        else if (!nodes.any((node) => node.id == controller.state)) {
+          controller.state = nodes.first.id;
+        }
+      }),
+    );
 
-  return controller;
-}, name: 'selectedProviderIdProvider');
+    return controller;
+  },
+  name: 'selectedProviderIdProvider',
+);
 
 class ProviderList extends StatefulWidget {
   const ProviderList({Key key}) : super(key: key);

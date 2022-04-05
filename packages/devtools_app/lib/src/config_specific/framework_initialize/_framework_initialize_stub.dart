@@ -5,5 +5,6 @@
 /// Return the url the application is launched from.
 Future<String> initializePlatform() {
   throw UnimplementedError(
-      'Attempting to initialize framework for unrecognized platform');
+    'Attempting to initialize framework for unrecognized platform',
+  );
 }

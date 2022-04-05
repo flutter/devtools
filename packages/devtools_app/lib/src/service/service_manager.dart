@@ -368,15 +368,19 @@ class ServiceConnectionManager {
     required String screen,
     required String action,
   }) async {
-    if (!kIsWeb) return;
-    await _callServiceExtensionOnMainIsolate(registrations.dwdsSendEvent,
-        args: {
-          'type': 'DevtoolsEvent',
-          'payload': {
-            'screen': screen,
-            'action': action,
-          },
-        });
+    final serviceRegistered = serviceManager.registeredMethodsForService
+        .containsKey(registrations.dwdsSendEvent);
+    if (!serviceRegistered) return;
+    await _callServiceExtensionOnMainIsolate(
+      registrations.dwdsSendEvent,
+      args: {
+        'type': 'DevtoolsEvent',
+        'payload': {
+          'screen': screen,
+          'action': action,
+        },
+      },
+    );
   }
 
   Future<Response> _callServiceOnMainIsolate(String name) async {
@@ -407,7 +411,8 @@ class ServiceConnectionManager {
   /// @throws Exception if no 'FlutterView'.
   Future<String> get flutterViewId async {
     final flutterViewListResponse = await _callServiceExtensionOnMainIsolate(
-        registrations.flutterListViews);
+      registrations.flutterListViews,
+    );
     final List<dynamic> views =
         flutterViewListResponse.json!['views'].cast<Map<String, dynamic>>();
 

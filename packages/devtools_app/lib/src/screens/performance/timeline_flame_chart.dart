@@ -808,10 +808,12 @@ class TimelineFlameChartState
               _calculateVerticalGuidelineStartY(event);
           final verticalGuidelineEndY =
               _calculateHorizontalGuidelineY(event.lowestDisplayChild);
-          verticalGuidelines.add(VerticalLineSegment(
-            Offset(verticalGuidelineX, verticalGuidelineStartY),
-            Offset(verticalGuidelineX, verticalGuidelineEndY),
-          ));
+          verticalGuidelines.add(
+            VerticalLineSegment(
+              Offset(verticalGuidelineX, verticalGuidelineStartY),
+              Offset(verticalGuidelineX, verticalGuidelineEndY),
+            ),
+          );
 
           // Draw the horizontal guideline to the first child event that is not
           // an instant event, since it is guaranteed to be connected to
@@ -822,10 +824,12 @@ class TimelineFlameChartState
               chartNodesByEvent[firstChild]!.rect.left;
           final horizontalGuidelineY =
               _calculateHorizontalGuidelineY(firstChild);
-          horizontalGuidelines.add(HorizontalLineSegment(
-            Offset(verticalGuidelineX, horizontalGuidelineY),
-            Offset(horizontalGuidelineEndX, horizontalGuidelineY),
-          ));
+          horizontalGuidelines.add(
+            HorizontalLineSegment(
+              Offset(verticalGuidelineX, horizontalGuidelineY),
+              Offset(horizontalGuidelineEndX, horizontalGuidelineY),
+            ),
+          );
 
           // Horizontal guidelines connecting each child to the vertical
           // guideline above.
@@ -859,10 +863,12 @@ class TimelineFlameChartState
               }
               final newVerticalGuidelineEndY =
                   _calculateHorizontalGuidelineY(child);
-              verticalGuidelines.add(VerticalLineSegment(
-                Offset(newVerticalGuidelineX, verticalGuidelineStartY),
-                Offset(newVerticalGuidelineX, newVerticalGuidelineEndY),
-              ));
+              verticalGuidelines.add(
+                VerticalLineSegment(
+                  Offset(newVerticalGuidelineX, verticalGuidelineStartY),
+                  Offset(newVerticalGuidelineX, newVerticalGuidelineEndY),
+                ),
+              );
 
               horizontalGuidelineStartX = newVerticalGuidelineX;
             }
@@ -892,10 +898,12 @@ class TimelineFlameChartState
 
             final horizontalGuidelineEndX = childNode.rect.left;
             final horizontalGuidelineY = _calculateHorizontalGuidelineY(child);
-            horizontalGuidelines.add(HorizontalLineSegment(
-              Offset(horizontalGuidelineStartX, horizontalGuidelineY),
-              Offset(horizontalGuidelineEndX, horizontalGuidelineY),
-            ));
+            horizontalGuidelines.add(
+              HorizontalLineSegment(
+                Offset(horizontalGuidelineStartX, horizontalGuidelineY),
+                Offset(horizontalGuidelineEndX, horizontalGuidelineY),
+              ),
+            );
           }
         }
       }
@@ -1105,12 +1113,14 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
 
     final frame = selectedFrame!;
 
-    canvas.clipRect(Rect.fromLTWH(
-      0.0,
-      rowHeight, // We do not want to paint inside the timestamp section.
-      constraints.maxWidth,
-      constraints.maxHeight - rowHeight,
-    ));
+    canvas.clipRect(
+      Rect.fromLTWH(
+        0.0,
+        rowHeight, // We do not want to paint inside the timestamp section.
+        constraints.maxWidth,
+        constraints.maxHeight - rowHeight,
+      ),
+    );
 
     final paint = Paint()
       ..color = defaultSelectionColor

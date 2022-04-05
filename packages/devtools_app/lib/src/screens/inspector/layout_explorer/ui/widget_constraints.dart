@@ -40,32 +40,33 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
     final heightDescription = RotatedBox(
       quarterTurns: 1,
       child: dimensionDescription(
-          TextSpan(
-            children: [
+        TextSpan(
+          children: [
+            TextSpan(
+              text: '${propertiesLocal.describeHeight()}',
+            ),
+            if (propertiesLocal.constraints != null) ...[
+              if (!showOverflowHeight) const TextSpan(text: '\n'),
               TextSpan(
-                text: '${propertiesLocal.describeHeight()}',
-              ),
-              if (propertiesLocal.constraints != null) ...[
-                if (!showOverflowHeight) const TextSpan(text: '\n'),
-                TextSpan(
-                  text: ' (${propertiesLocal.describeHeightConstraints()})',
-                  style: propertiesLocal.constraints!.hasBoundedHeight ||
-                          !warnIfUnconstrained
-                      ? null
-                      : TextStyle(
-                          color: colorScheme.unconstrainedColor,
-                        ),
-                )
-              ],
-              if (showOverflowHeight)
-                TextSpan(
-                  text: '\nchildren take: '
-                      '${toStringAsFixed(sum(propertiesLocal.childrenHeights.cast<double>()))}',
-                ),
+                text: ' (${propertiesLocal.describeHeightConstraints()})',
+                style: propertiesLocal.constraints!.hasBoundedHeight ||
+                        !warnIfUnconstrained
+                    ? null
+                    : TextStyle(
+                        color: colorScheme.unconstrainedColor,
+                      ),
+              )
             ],
-          ),
-          propertiesLocal.isOverflowHeight,
-          colorScheme),
+            if (showOverflowHeight)
+              TextSpan(
+                text: '\nchildren take: '
+                    '${toStringAsFixed(sum(propertiesLocal.childrenHeights.cast<double>()))}',
+              ),
+          ],
+        ),
+        propertiesLocal.isOverflowHeight,
+        colorScheme,
+      ),
     );
     final right = Container(
       margin: EdgeInsets.only(
@@ -74,31 +75,33 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
         bottom: bottomHeight,
         right: minPadding, // custom margin for not sticking to the corner
       ),
-      child: LayoutBuilder(builder: (context, constraints) {
-        final displayHeightOutsideArrow =
-            constraints.maxHeight < minHeightToDisplayHeightInsideArrow;
-        return Row(
-          children: [
-            Truncateable(
-              truncate: !displayHeightOutsideArrow,
-              child: Container(
-                margin: EdgeInsets.symmetric(horizontal: arrowMargin),
-                child: ArrowWrapper.bidirectional(
-                  arrowColor: heightIndicatorColor,
-                  arrowStrokeWidth: arrowStrokeWidth,
-                  arrowHeadSize: arrowHeadSize,
-                  direction: Axis.vertical,
-                  child: displayHeightOutsideArrow ? null : heightDescription,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final displayHeightOutsideArrow =
+              constraints.maxHeight < minHeightToDisplayHeightInsideArrow;
+          return Row(
+            children: [
+              Truncateable(
+                truncate: !displayHeightOutsideArrow,
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: arrowMargin),
+                  child: ArrowWrapper.bidirectional(
+                    arrowColor: heightIndicatorColor,
+                    arrowStrokeWidth: arrowStrokeWidth,
+                    arrowHeadSize: arrowHeadSize,
+                    direction: Axis.vertical,
+                    child: displayHeightOutsideArrow ? null : heightDescription,
+                  ),
                 ),
               ),
-            ),
-            if (displayHeightOutsideArrow)
-              Flexible(
-                child: heightDescription,
-              ),
-          ],
-        );
-      }),
+              if (displayHeightOutsideArrow)
+                Flexible(
+                  child: heightDescription,
+                ),
+            ],
+          );
+        },
+      ),
     );
 
     final widthDescription = dimensionDescription(
@@ -132,35 +135,37 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
         right: rightWidth,
         bottom: minPadding,
       ),
-      child: LayoutBuilder(builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth;
-        final displayWidthOutsideArrow =
-            maxWidth < minWidthToDisplayWidthInsideArrow;
-        return Column(
-          children: [
-            Truncateable(
-              truncate: !displayWidthOutsideArrow,
-              child: Container(
-                margin: EdgeInsets.symmetric(vertical: arrowMargin),
-                child: ArrowWrapper.bidirectional(
-                  arrowColor: widthIndicatorColor,
-                  arrowHeadSize: arrowHeadSize,
-                  arrowStrokeWidth: arrowStrokeWidth,
-                  direction: Axis.horizontal,
-                  child: displayWidthOutsideArrow ? null : widthDescription,
-                ),
-              ),
-            ),
-            if (displayWidthOutsideArrow)
-              Flexible(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth;
+          final displayWidthOutsideArrow =
+              maxWidth < minWidthToDisplayWidthInsideArrow;
+          return Column(
+            children: [
+              Truncateable(
+                truncate: !displayWidthOutsideArrow,
                 child: Container(
-                  padding: const EdgeInsets.only(top: minPadding),
-                  child: widthDescription,
+                  margin: EdgeInsets.symmetric(vertical: arrowMargin),
+                  child: ArrowWrapper.bidirectional(
+                    arrowColor: widthIndicatorColor,
+                    arrowHeadSize: arrowHeadSize,
+                    arrowStrokeWidth: arrowStrokeWidth,
+                    direction: Axis.horizontal,
+                    child: displayWidthOutsideArrow ? null : widthDescription,
+                  ),
                 ),
               ),
-          ],
-        );
-      }),
+              if (displayWidthOutsideArrow)
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.only(top: minPadding),
+                    child: widthDescription,
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
     );
     return BorderLayout(
       center: child,

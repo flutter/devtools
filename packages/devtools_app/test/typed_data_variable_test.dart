@@ -189,40 +189,45 @@ void main() {
     ]);
   });
 
-  test('Creates bound variables for Uint64List instance', () async {
-    final bytes = Uint64List.fromList([0, 4294967296, 4294967297, 4294967298]);
-    final instance = Instance(
-      kind: InstanceKind.kUint64List,
-      id: '123',
-      classRef: null,
-      bytes: base64.encode(bytes.buffer.asUint8List()),
-      identityHashCode: null,
-      length: 4,
-    );
-    final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-        declarationTokenPos: null,
-        scopeEndTokenPos: null,
-        scopeStartTokenPos: null,
-      ),
-      isolateRef,
-    );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
-        .thenAnswer((_) async {
-      return instance;
-    });
+  test(
+    'Creates bound variables for Uint64List instance',
+    () async {
+      final bytes =
+          Uint64List.fromList([0, 4294967296, 4294967297, 4294967298]);
+      final instance = Instance(
+        kind: InstanceKind.kUint64List,
+        id: '123',
+        classRef: null,
+        bytes: base64.encode(bytes.buffer.asUint8List()),
+        identityHashCode: null,
+        length: 4,
+      );
+      final variable = DartObjectNode.create(
+        BoundVariable(
+          name: 'test',
+          value: instance,
+          declarationTokenPos: null,
+          scopeEndTokenPos: null,
+          scopeStartTokenPos: null,
+        ),
+        isolateRef,
+      );
+      when(manager.service.getObject(any, any, offset: 0, count: 4))
+          .thenAnswer((_) async {
+        return instance;
+      });
 
-    await buildVariablesTree(variable);
+      await buildVariablesTree(variable);
 
-    expect(variable.children, [
-      matchesVariable(name: '[0]', value: 0),
-      matchesVariable(name: '[1]', value: 4294967296),
-      matchesVariable(name: '[2]', value: 4294967297),
-      matchesVariable(name: '[3]', value: 4294967298),
-    ]);
-  }, skip: kIsWeb);
+      expect(variable.children, [
+        matchesVariable(name: '[0]', value: 0),
+        matchesVariable(name: '[1]', value: 4294967296),
+        matchesVariable(name: '[2]', value: 4294967297),
+        matchesVariable(name: '[3]', value: 4294967298),
+      ]);
+    },
+    skip: kIsWeb,
+  );
 
   test('Creates bound variables for Int8List instance', () async {
     final bytes = Int8List.fromList([0, 1, -2, 3]);
@@ -329,40 +334,45 @@ void main() {
     ]);
   });
 
-  test('Creates bound variables for Int64List instance', () async {
-    final bytes = Int64List.fromList([0, 4294967296, -4294967297, 4294967298]);
-    final instance = Instance(
-      kind: InstanceKind.kInt64List,
-      id: '123',
-      classRef: null,
-      bytes: base64.encode(bytes.buffer.asUint8List()),
-      identityHashCode: null,
-      length: 4,
-    );
-    final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-        declarationTokenPos: null,
-        scopeEndTokenPos: null,
-        scopeStartTokenPos: null,
-      ),
-      isolateRef,
-    );
-    when(manager.service.getObject(any, any, offset: 0, count: 4))
-        .thenAnswer((_) async {
-      return instance;
-    });
+  test(
+    'Creates bound variables for Int64List instance',
+    () async {
+      final bytes =
+          Int64List.fromList([0, 4294967296, -4294967297, 4294967298]);
+      final instance = Instance(
+        kind: InstanceKind.kInt64List,
+        id: '123',
+        classRef: null,
+        bytes: base64.encode(bytes.buffer.asUint8List()),
+        identityHashCode: null,
+        length: 4,
+      );
+      final variable = DartObjectNode.create(
+        BoundVariable(
+          name: 'test',
+          value: instance,
+          declarationTokenPos: null,
+          scopeEndTokenPos: null,
+          scopeStartTokenPos: null,
+        ),
+        isolateRef,
+      );
+      when(manager.service.getObject(any, any, offset: 0, count: 4))
+          .thenAnswer((_) async {
+        return instance;
+      });
 
-    await buildVariablesTree(variable);
+      await buildVariablesTree(variable);
 
-    expect(variable.children, [
-      matchesVariable(name: '[0]', value: 0),
-      matchesVariable(name: '[1]', value: 4294967296),
-      matchesVariable(name: '[2]', value: -4294967297),
-      matchesVariable(name: '[3]', value: 4294967298),
-    ]);
-  }, skip: kIsWeb); // Int64List cannot be instantiated on the web.
+      expect(variable.children, [
+        matchesVariable(name: '[0]', value: 0),
+        matchesVariable(name: '[1]', value: 4294967296),
+        matchesVariable(name: '[2]', value: -4294967297),
+        matchesVariable(name: '[3]', value: 4294967298),
+      ]);
+    },
+    skip: kIsWeb,
+  ); // Int64List cannot be instantiated on the web.
 
   test('Creates bound variables for Float32List instance', () async {
     final bytes =
@@ -462,17 +472,23 @@ void main() {
     });
     await buildVariablesTree(variable);
 
-    expect(variable.children.first.displayValue,
-        '[ffffffff, 00000000, ffffffff, 00000000]',
-        skip: kIsWeb);
+    expect(
+      variable.children.first.displayValue,
+      '[ffffffff, 00000000, ffffffff, 00000000]',
+      skip: kIsWeb,
+    );
     // Formatting is different on the web.
-    expect(variable.children.first.displayValue, '[-1, 0, -1, 0]',
-        skip: !kIsWeb);
+    expect(
+      variable.children.first.displayValue,
+      '[-1, 0, -1, 0]',
+      skip: !kIsWeb,
+    );
   });
 
   test('Creates bound variables for Float32x4List instance', () async {
     final bytes = Float32x4List.fromList(
-        [Float32x4(0.0, -232.1999969482422, 2.3299999237060547, 9.0)]);
+      [Float32x4(0.0, -232.1999969482422, 2.3299999237060547, 9.0)],
+    );
     final instance = Instance(
       kind: InstanceKind.kFloat32x4List,
       id: '123',
@@ -499,12 +515,16 @@ void main() {
 
     await buildVariablesTree(variable);
 
-    expect(variable.children.first.displayValue,
-        '[0.000000, -232.199997, 2.330000, 9.000000]',
-        skip: kIsWeb);
-    expect(variable.children.first.displayValue,
-        '[0, -232.1999969482422, 2.3299999237060547, 9]',
-        skip: !kIsWeb);
+    expect(
+      variable.children.first.displayValue,
+      '[0.000000, -232.199997, 2.330000, 9.000000]',
+      skip: kIsWeb,
+    );
+    expect(
+      variable.children.first.displayValue,
+      '[0, -232.1999969482422, 2.3299999237060547, 9]',
+      skip: !kIsWeb,
+    );
   });
 
   test('Creates bound variables for Float64x2List instance', () async {
@@ -535,10 +555,16 @@ void main() {
 
     await buildVariablesTree(variable);
 
-    expect(variable.children.first.displayValue, '[0.000000, -1232.222000]',
-        skip: kIsWeb);
-    expect(variable.children.first.displayValue, '[0, -1232.222]',
-        skip: !kIsWeb);
+    expect(
+      variable.children.first.displayValue,
+      '[0.000000, -1232.222000]',
+      skip: kIsWeb,
+    );
+    expect(
+      variable.children.first.displayValue,
+      '[0, -1232.222]',
+      skip: !kIsWeb,
+    );
   });
 
   test('Retries getObject calls with no offset/count if error is thrown',
@@ -563,12 +589,14 @@ void main() {
       isolateRef,
     );
 
-    when(manager.service.getObject(
-      any,
-      any,
-      offset: 0,
-      count: 4,
-    )).thenThrow('Unrecognized parameters offset / count.');
+    when(
+      manager.service.getObject(
+        any,
+        any,
+        offset: 0,
+        count: 4,
+      ),
+    ).thenThrow('Unrecognized parameters offset / count.');
 
     when(manager.service.getObject(any, any)).thenAnswer((_) async {
       return instance;
@@ -663,11 +691,12 @@ Matcher matchesVariable({
   @required Object value,
 }) {
   return const TypeMatcher<DartObjectNode>().having(
-      (v) => v,
-      'boundVar',
-      const TypeMatcher<DartObjectNode>()
-          .having((v) => v.name, 'name', equals(name))
-          .having((v) => v.ref.value, 'value', equals(value)));
+    (v) => v,
+    'boundVar',
+    const TypeMatcher<DartObjectNode>()
+        .having((v) => v.name, 'name', equals(name))
+        .having((v) => v.ref.value, 'value', equals(value)),
+  );
 }
 
 Matcher matchesVariableGroup({
@@ -675,8 +704,9 @@ Matcher matchesVariableGroup({
   @required int end,
 }) {
   return const TypeMatcher<DartObjectNode>().having(
-      (v) => v,
-      'boundVar',
-      const TypeMatcher<DartObjectNode>()
-          .having((v) => v.text, 'text', equals('[$start - $end]')));
+    (v) => v,
+    'boundVar',
+    const TypeMatcher<DartObjectNode>()
+        .having((v) => v.text, 'text', equals('[$start - $end]')),
+  );
 }
