@@ -1253,13 +1253,16 @@ class FrameAnalysis {
     _selectedPhase.value = block;
   }
 
-  /// Data for the build portion of [frame].
+  /// Data for the build phase of [frame].
   ///
-  /// For a single flutter frame there can be more than one build event.
+  /// This is drawn from all the "Build" events on the UI thread. For a single
+  /// flutter frame, there can be more than one build event, and this data may
+  /// overlap with a portion of the [layoutPhase] if "Build" timeline events are
+  /// children of the "Layout" event.
   ///
   /// Example:
-  /// [-----------------Layout-----------------]
-  ///    [--Build--]     [----Build----]
+  /// [-----Build----][-----------------Layout-----------------]
+  ///                       [--Build--]     [----Build----]
   late FramePhase buildPhase = _generateBuildPhase();
 
   FramePhase _generateBuildPhase() {
@@ -1275,12 +1278,11 @@ class FrameAnalysis {
     return FramePhase.build(events: buildEvents);
   }
 
-  // TODO(kenz): subtract build time.
-  /// Data for the layout portion of [frame].
+  /// Data for the layout phase of [frame].
   ///
-  /// This is drawn from the "Layout" timeline event on the UI thread, excluding
-  /// any "Build" events that are direct children. The "Build" timeline events
-  /// will be accounted for in [buildPhase].
+  /// This is drawn from the "Layout" timeline event on the UI thread. This data
+  /// may overlap with a portion of the [buildPhase] if "Build" timeline events
+  /// are children of the "Layout" event.
   ///
   /// Example:
   /// [-----------------Layout-----------------]
@@ -1302,7 +1304,7 @@ class FrameAnalysis {
     );
   }
 
-  /// Data for the Paint portion of [frame].
+  /// Data for the Paint phase of [frame].
   ///
   /// This is drawn from the "Paint" timeline event on the UI thread
   late FramePhase paintPhase = _generatePaintPhase();
@@ -1321,7 +1323,7 @@ class FrameAnalysis {
     );
   }
 
-  /// Data for the raster portion of [frame].
+  /// Data for the raster phase of [frame].
   ///
   /// This is drawn from all events for this frame from the raster thread.
   late FramePhase rasterPhase = FramePhase.raster(

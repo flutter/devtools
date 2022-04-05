@@ -436,6 +436,8 @@ class _EnhanceTracingHint extends StatelessWidget {
       case 'Paint':
         return _enhanceTracingHint('Track Paints', theme);
       case 'Raster':
+        // TODO(kenz): link to shader compilation docs. In the future, integrate
+        // with the work @iskakaushik is doing.
         return [];
       default:
         return [];
