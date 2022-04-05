@@ -1272,7 +1272,7 @@ class FrameAnalysis {
     }
     final buildEvents = uiEvent
         .childrenWithCondition(
-          (event) => event.name!.caseInsensitiveEquals(buildEventName),
+          (event) => event.name?.caseInsensitiveEquals(buildEventName) ?? false,
         )
         .cast<SyncTimelineEvent>();
     return FramePhase.build(events: buildEvents);
@@ -1290,12 +1290,12 @@ class FrameAnalysis {
   late FramePhase layoutPhase = _generateLayoutPhase();
 
   FramePhase _generateLayoutPhase() {
-    if (frame.timelineEventData.uiEvent == null) {
+    final uiEvent = frame.timelineEventData.uiEvent;
+    if (uiEvent == null) {
       return FramePhase.layout(events: <SyncTimelineEvent>[]);
     }
-    final layoutEvent =
-        frame.timelineEventData.uiEvent!.firstChildWithCondition(
-      (event) => event.name!.caseInsensitiveEquals(layoutEventName),
+    final layoutEvent = uiEvent.firstChildWithCondition(
+      (event) => event.name?.caseInsensitiveEquals(layoutEventName) ?? false,
     );
     return FramePhase.layout(
       events: <SyncTimelineEvent>[
@@ -1310,11 +1310,12 @@ class FrameAnalysis {
   late FramePhase paintPhase = _generatePaintPhase();
 
   FramePhase _generatePaintPhase() {
-    if (frame.timelineEventData.uiEvent == null) {
+    final uiEvent = frame.timelineEventData.uiEvent;
+    if (uiEvent == null) {
       return FramePhase.paint(events: <SyncTimelineEvent>[]);
     }
-    final paintEvent = frame.timelineEventData.uiEvent!.firstChildWithCondition(
-      (event) => event.name!.caseInsensitiveEquals(paintEventName),
+    final paintEvent = uiEvent.firstChildWithCondition(
+      (event) => event.name?.caseInsensitiveEquals(paintEventName) ?? false,
     );
     return FramePhase.paint(
       events: <SyncTimelineEvent>[
