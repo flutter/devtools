@@ -167,6 +167,19 @@ abstract class TreeNode<T extends TreeNode<T>> {
     return childWithCondition != null;
   }
 
+  List<T> childrenWithCondition(bool condition(T node)) {
+    final _children = <T>[];
+    breadthFirstTraversal<T>(
+      this as T,
+      action: (node) {
+        if (condition(node)) {
+          _children.add(node);
+        }
+      },
+    );
+    return _children;
+  }
+
   T? firstChildWithCondition(bool condition(T node)) {
     return breadthFirstTraversal<T>(
       this as T,

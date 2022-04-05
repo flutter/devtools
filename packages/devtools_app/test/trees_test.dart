@@ -111,6 +111,26 @@ void main() {
       expect(child.parent, equals(parent));
     });
 
+    test('childrenWithCondition', () {
+      var nodes = testTreeNode.childrenWithCondition((TestTreeNode node) {
+        return node.id.isEven;
+      });
+      var nodeIds = nodes.map((TestTreeNode node) => node.id).toList();
+      expect(nodeIds, equals([0, 2, 4, 6, 8]));
+
+      nodes = testTreeNode.childrenWithCondition((TestTreeNode node) {
+        return node.tag == 'test-tag';
+      });
+      nodeIds = nodes.map((TestTreeNode node) => node.id).toList();
+      expect(nodeIds, equals([0, 3, 9]));
+
+      nodes = testTreeNode.childrenWithCondition((TestTreeNode node) {
+        return node.parent?.id == 5;
+      });
+      nodeIds = nodes.map((TestTreeNode node) => node.id).toList();
+      expect(nodeIds, equals([6, 7, 8, 9]));
+    });
+
     test('containsChildWithCondition', () {
       expect(
         treeNode0.subtreeHasNodeWithCondition((TestTreeNode node) {
@@ -381,16 +401,16 @@ void main() {
   });
 }
 
-final treeNode0 = TestTreeNode(0);
+final treeNode0 = TestTreeNode(0, tag: 'test-tag');
 final treeNode1 = TestTreeNode(1);
 final treeNode2 = TestTreeNode(2);
-final treeNode3 = TestTreeNode(3);
+final treeNode3 = TestTreeNode(3, tag: 'test-tag');
 final treeNode4 = TestTreeNode(4);
 final treeNode5 = TestTreeNode(5);
 final treeNode6 = TestTreeNode(6);
 final treeNode7 = TestTreeNode(7);
 final treeNode8 = TestTreeNode(8);
-final treeNode9 = TestTreeNode(9);
+final treeNode9 = TestTreeNode(9, tag: 'test-tag');
 final TestTreeNode testTreeNode = treeNode0
   ..addAllChildren([
     treeNode1,
@@ -409,9 +429,11 @@ final TestTreeNode testTreeNode = treeNode0
   ]);
 
 class TestTreeNode extends TreeNode<TestTreeNode> {
-  TestTreeNode(this.id);
+  TestTreeNode(this.id, {this.tag});
 
   final int id;
+
+  final String? tag;
 
   @override
   TestTreeNode shallowCopy() => TestTreeNode(id);

@@ -78,8 +78,8 @@ void main() async {
       final frame1UiEvent = goldenUiTimelineEvent.deepCopy();
       final frame1RasterEvent = goldenRasterTimelineEvent.deepCopy();
       final frame1 = testFrame1.shallowCopy()
-        ..setEventFlow(frame1UiEvent as SyncTimelineEvent)
-        ..setEventFlow(frame1RasterEvent as SyncTimelineEvent);
+        ..setEventFlow(frame1UiEvent)
+        ..setEventFlow(frame1RasterEvent);
 
       // Select a frame.
       final data = performanceController.data!;
@@ -136,17 +136,11 @@ void main() async {
         'raster': 50,
         'vsyncOverhead': 10,
       });
-      frame.setEventFlow(
-        rasterEvent as SyncTimelineEvent,
-        type: TimelineEventType.raster,
-      );
+      frame.setEventFlow(rasterEvent, type: TimelineEventType.raster);
       expect(frame.timeFromEventFlows.start, isNull);
       expect(frame.timeFromEventFlows.end, isNull);
 
-      frame.setEventFlow(
-        uiEvent as SyncTimelineEvent,
-        type: TimelineEventType.ui,
-      );
+      frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
       expect(
         frame.timeFromEventFlows.start,
         equals(const Duration(microseconds: 5000)),

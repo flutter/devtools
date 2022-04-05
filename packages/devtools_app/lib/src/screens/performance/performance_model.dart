@@ -1022,6 +1022,11 @@ class SyncTimelineEvent extends TimelineEvent {
       return startTime < eStartTime;
     }
   }
+
+  @override
+  SyncTimelineEvent deepCopy() {
+    return super.deepCopy() as SyncTimelineEvent;
+  }
 }
 
 // TODO(kenz): calculate and store async guidelines here instead of in the UI
@@ -1238,77 +1243,113 @@ class FrameAnalysis {
 
   static const paintEventName = 'Paint';
 
-  /// For a single flutter frame there can be more than one build event.
+  static const rasterEventName = 'Raster';
+
+  ValueListenable<FramePhase?> get selectedPhase => _selectedPhase;
+
+  final _selectedPhase = ValueNotifier<FramePhase?>(null);
+
+  void selectFramePhase(FramePhase block) {
+    _selectedPhase.value = block;
+  }
+
+  /// Data for the build phase of [frame].
+  ///
+  /// This is drawn from all the "Build" events on the UI thread. For a single
+  /// flutter frame, there can be more than one build event, and this data may
+  /// overlap with a portion of the [layoutPhase] if "Build" timeline events are
+  /// children of the "Layout" event.
+  ///
+  /// Example:
+  /// [-----Build----][-----------------Layout-----------------]
+  ///                       [--Build--]     [----Build----]
+  late FramePhase buildPhase = _generateBuildPhase();
+
+  FramePhase _generateBuildPhase() {
+    final uiEvent = frame.timelineEventData.uiEvent;
+    if (uiEvent == null) {
+      return FramePhase.build(events: <SyncTimelineEvent>[]);
+    }
+    final buildEvents = uiEvent
+        .childrenWithCondition(
+          (event) => event.name?.caseInsensitiveEquals(buildEventName) ?? false,
+        )
+        .cast<SyncTimelineEvent>();
+    return FramePhase.build(events: buildEvents);
+  }
+
+  /// Data for the layout phase of [frame].
+  ///
+  /// This is drawn from the "Layout" timeline event on the UI thread. This data
+  /// may overlap with a portion of the [buildPhase] if "Build" timeline events
+  /// are children of the "Layout" event.
   ///
   /// Example:
   /// [-----------------Layout-----------------]
   ///    [--Build--]     [----Build----]
-  List<SyncTimelineEvent> get buildEvents {
-    if (frame.timelineEventData.uiEvent == null) return <SyncTimelineEvent>[];
-    final events = _buildEvents;
-    if (events != null) return events;
+  late FramePhase layoutPhase = _generateLayoutPhase();
 
-    _buildEvents = <SyncTimelineEvent>[];
-
-    final firstBuildEvent =
-        frame.timelineEventData.uiEvent!.firstChildWithCondition(
-      (event) => event.name!.caseInsensitiveEquals(buildEventName),
+  FramePhase _generateLayoutPhase() {
+    final uiEvent = frame.timelineEventData.uiEvent;
+    if (uiEvent == null) {
+      return FramePhase.layout(events: <SyncTimelineEvent>[]);
+    }
+    final layoutEvent = uiEvent.firstChildWithCondition(
+      (event) => event.name?.caseInsensitiveEquals(layoutEventName) ?? false,
     );
-    if (firstBuildEvent != null) {
-      final buildParent = firstBuildEvent.parent;
-      if (buildParent != null) {
-        _buildEvents = buildParent.children
-            .where((child) => child.name!.caseInsensitiveEquals(buildEventName))
-            .cast<SyncTimelineEvent>()
-            .toList();
+    return FramePhase.layout(
+      events: <SyncTimelineEvent>[
+        if (layoutEvent != null) layoutEvent as SyncTimelineEvent,
+      ],
+    );
+  }
+
+  /// Data for the Paint phase of [frame].
+  ///
+  /// This is drawn from the "Paint" timeline event on the UI thread
+  late FramePhase paintPhase = _generatePaintPhase();
+
+  FramePhase _generatePaintPhase() {
+    final uiEvent = frame.timelineEventData.uiEvent;
+    if (uiEvent == null) {
+      return FramePhase.paint(events: <SyncTimelineEvent>[]);
+    }
+    final paintEvent = uiEvent.firstChildWithCondition(
+      (event) => event.name?.caseInsensitiveEquals(paintEventName) ?? false,
+    );
+    return FramePhase.paint(
+      events: <SyncTimelineEvent>[
+        if (paintEvent != null) paintEvent as SyncTimelineEvent,
+      ],
+    );
+  }
+
+  /// Data for the raster phase of [frame].
+  ///
+  /// This is drawn from all events for this frame from the raster thread.
+  late FramePhase rasterPhase = FramePhase.raster(
+    events: [
+      if (frame.timelineEventData.rasterEvent != null)
+        frame.timelineEventData.rasterEvent!,
+    ],
+  );
+
+  late FramePhase longestFramePhase = _calculateLongestFramePhase();
+
+  FramePhase _calculateLongestFramePhase() {
+    if (rasterPhase.duration > frame.buildTime) {
+      return rasterPhase;
+    }
+    var longestPhaseTime = Duration.zero;
+    late FramePhase longestPhase;
+    for (final block in [buildPhase, layoutPhase, paintPhase]) {
+      if (block.duration > longestPhaseTime) {
+        longestPhase = block;
+        longestPhaseTime = block.duration;
       }
     }
-    return _buildEvents!;
+    return longestPhase;
   }
-
-  List<SyncTimelineEvent>? _buildEvents;
-
-  Duration get buildTime => _buildTime ??= buildEvents
-          .fold<Duration>(Duration.zero, (previous, SyncTimelineEvent event) {
-        return previous + event.time.duration;
-      });
-
-  Duration? _buildTime;
-
-  SyncTimelineEvent? get layoutEvent {
-    if (frame.timelineEventData.uiEvent == null) return null;
-    if (_layoutEvent != null) return _layoutEvent;
-
-    return _layoutEvent =
-        frame.timelineEventData.uiEvent!.firstChildWithCondition(
-      (event) => event.name!.caseInsensitiveEquals(layoutEventName),
-    ) as SyncTimelineEvent?;
-  }
-
-  SyncTimelineEvent? _layoutEvent;
-
-  Duration get layoutTime => layoutEvent?.time.duration ?? Duration.zero;
-
-  SyncTimelineEvent? get paintEvent {
-    if (frame.timelineEventData.uiEvent == null) return null;
-    if (_paintEvent != null) return _paintEvent;
-
-    return _paintEvent =
-        frame.timelineEventData.uiEvent!.firstChildWithCondition(
-      (event) => event.name!.caseInsensitiveEquals(paintEventName),
-    ) as SyncTimelineEvent?;
-  }
-
-  SyncTimelineEvent? _paintEvent;
-
-  Duration get paintTime => paintEvent?.time.duration ?? Duration.zero;
-
-  bool get canAnalyzeBuild =>
-      buildEvents.containsWhere((buildEvent) => buildEvent.children.isNotEmpty);
-
-  bool get canAnalyzeLayout => layoutEvent?.children.isNotEmpty ?? false;
-
-  bool get canAnalyzePaint => paintEvent?.children.isNotEmpty ?? false;
 
   // TODO(kenz): calculate ratios to use as flex values. This will be a bit
   // tricky because sometimes the Build event(s) are children of Layout.
@@ -1337,4 +1378,64 @@ class FrameAnalysis {
   //       frame.timelineEventData.uiEvent.time.duration.inMicroseconds;
   //   return ((totalPaintTimeMicros / totalUiTimeMicros) * 1000000).round();
   // }
+}
+
+class FramePhase {
+  FramePhase._({
+    required this.title,
+    required this.events,
+    Duration? duration,
+  }) : duration = duration ??
+            events.fold(Duration.zero, (previous, SyncTimelineEvent event) {
+              return previous + event.time.duration;
+            });
+
+  factory FramePhase.build({
+    required List<SyncTimelineEvent> events,
+    Duration? duration,
+  }) {
+    return FramePhase._(
+      title: FrameAnalysis.buildEventName,
+      events: events,
+      duration: duration,
+    );
+  }
+
+  factory FramePhase.layout({
+    required List<SyncTimelineEvent> events,
+    Duration? duration,
+  }) {
+    return FramePhase._(
+      title: FrameAnalysis.layoutEventName,
+      events: events,
+      duration: duration,
+    );
+  }
+
+  factory FramePhase.paint({
+    required List<SyncTimelineEvent> events,
+    Duration? duration,
+  }) {
+    return FramePhase._(
+      title: FrameAnalysis.paintEventName,
+      events: events,
+      duration: duration,
+    );
+  }
+
+  factory FramePhase.raster({
+    required List<SyncTimelineEvent> events,
+    Duration? duration,
+  }) {
+    return FramePhase._(
+      title: FrameAnalysis.rasterEventName,
+      events: events,
+      duration: duration,
+    );
+  }
+  final String title;
+
+  final List<SyncTimelineEvent> events;
+
+  final Duration duration;
 }
