@@ -342,9 +342,6 @@ class TimelineEventProcessor {
         // Animator::BeginFrame - DurationEnd ([event] - duplicate)
         // VSYNC - DurationEnd
         //
-        if (debugTimeline) {
-          debugFrameTracking
-              .writeln('Duplicate duration end event: $eventJson');
         debugTraceEventCallback(
           () => log(
             'Duplicate duration end event - skipping processing: $eventJson',
