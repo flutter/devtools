@@ -389,8 +389,8 @@ class _Hint extends StatelessWidget {
           Icons.lightbulb_outline,
           size: defaultIconSize,
         ),
-        const SizedBox(width: densePadding),
-        message,
+        const SizedBox(width: denseSpacing),
+        Expanded(child: message),
       ],
     );
   }
@@ -406,6 +406,7 @@ class _EnhanceTracingHint extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return RichText(
+      maxLines: 2,
       text: TextSpan(
         text: '',
         children: [

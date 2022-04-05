@@ -1263,29 +1263,16 @@ class FrameAnalysis {
   late FramePhase buildPhase = _generateBuildPhase();
 
   FramePhase _generateBuildPhase() {
-    if (frame.timelineEventData.uiEvent == null) {
+    final uiEvent = frame.timelineEventData.uiEvent;
+    if (uiEvent == null) {
       return FramePhase.build(events: <SyncTimelineEvent>[]);
     }
-
-    final firstBuildEvent =
-        frame.timelineEventData.uiEvent!.firstChildWithCondition(
-      (event) => event.name!.caseInsensitiveEquals(buildEventName),
-    );
-    if (firstBuildEvent != null) {
-      final buildParent = firstBuildEvent.parent;
-      if (buildParent != null) {
-        final originalEvents = buildParent.children
-            .where((child) => child.name!.caseInsensitiveEquals(buildEventName))
-            .cast<SyncTimelineEvent>()
-            .toList();
-        final _buildEvents = originalEvents
-            .map((event) => event.deepCopy())
-            .cast<SyncTimelineEvent>()
-            .toList();
-        return FramePhase.build(events: _buildEvents);
-      }
-    }
-    return FramePhase.build(events: <SyncTimelineEvent>[]);
+    final buildEvents = uiEvent
+        .childrenWithCondition(
+          (event) => event.name!.caseInsensitiveEquals(buildEventName),
+        )
+        .cast<SyncTimelineEvent>();
+    return FramePhase.build(events: buildEvents);
   }
 
   // TODO(kenz): subtract build time.

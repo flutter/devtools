@@ -141,10 +141,14 @@ void main() async {
       expect(frame.timeFromEventFlows.end, isNull);
 
       frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
-      expect(frame.timeFromEventFlows.start,
-          equals(const Duration(microseconds: 5000)));
-      expect(frame.timeFromEventFlows.end,
-          equals(const Duration(microseconds: 8000)));
+      expect(
+        frame.timeFromEventFlows.start,
+        equals(const Duration(microseconds: 5000)),
+      );
+      expect(
+        frame.timeFromEventFlows.end,
+        equals(const Duration(microseconds: 8000)),
+      );
     });
 
     test('add frame', () async {
