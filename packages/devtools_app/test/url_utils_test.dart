@@ -33,7 +33,8 @@ void main() {
 
       test('parses the current page from the query string', () {
         final page = extractCurrentPageFromUrl(
-            'http://localhost:9000/?uri=x&page=inspector&theme=dark');
+          'http://localhost:9000/?uri=x&page=inspector&theme=dark',
+        );
         expect(page, 'inspector');
       });
 
@@ -41,7 +42,8 @@ void main() {
           'parses the current page from the path even if query string is populated',
           () {
         final page = extractCurrentPageFromUrl(
-            'http://localhost:9000/memory?uri=x&page=inspector&theme=dark');
+          'http://localhost:9000/memory?uri=x&page=inspector&theme=dark',
+        );
         expect(page, 'memory');
       });
     });
