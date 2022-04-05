@@ -45,6 +45,45 @@ void main() {
         expect(page, 'memory');
       });
     });
+
+    group('mapLegacyUrl', () {
+      for (final prefix in [
+        'http://localhost:123',
+        'http://localhost:123/authToken=/devtools'
+      ]) {
+        group(' with $prefix prefix', () {
+          test('does not map new-style URLs', () {
+            expect(mapLegacyUrl('$prefix'), isNull);
+            expect(mapLegacyUrl('$prefix/'), isNull);
+            expect(mapLegacyUrl('$prefix/foo?uri=ws://foo'), isNull);
+            expect(mapLegacyUrl('$prefix?uri=ws://foo'), isNull);
+            expect(mapLegacyUrl('$prefix/?uri=ws://foo'), isNull);
+            expect(mapLegacyUrl('$prefix/?uri=ws://foo#'), isNull);
+          });
+
+          test('maps legacy URIs with page names in path', () {
+            expect(
+              mapLegacyUrl('$prefix/#/inspector?foo=bar'),
+              '$prefix/inspector?foo=bar',
+            );
+          });
+
+          test('maps legacy URIs with page names in querystring', () {
+            expect(
+              mapLegacyUrl('$prefix/#/?page=inspector&foo=bar'),
+              '$prefix/inspector?foo=bar',
+            );
+          });
+
+          test('maps legacy URIs with no page names', () {
+            expect(
+              mapLegacyUrl('$prefix/#/?foo=bar'),
+              '$prefix/?foo=bar',
+            );
+          });
+        });
+      }
+    });
   });
 }
 

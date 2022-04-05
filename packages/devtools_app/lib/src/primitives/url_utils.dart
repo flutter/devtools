@@ -47,3 +47,38 @@ String extractCurrentPageFromUrl(String url) {
       ? uri.queryParameters['page'] ?? ''
       : uri.path.substring(1);
 }
+
+/// Maps DevTools URLs in the original fragment format onto the equivalent URLs
+/// in the new URL format.
+///
+/// Returns `null` if [url] is not a legacy URL.
+String? mapLegacyUrl(String url) {
+  final uri = Uri.parse(url);
+  // Old formats include:
+  //   http://localhost:123/#/inspector?uri=ws://...
+  //   http://localhost:123/#/?page=inspector&uri=ws://...
+  final isRootRequest = uri.path == '/' || uri.path.endsWith('/devtools/');
+  if (isRootRequest && uri.fragment.isNotEmpty) {
+    final basePath = uri.path;
+    // Convert the URL by removing the fragment separator.
+    final newUrl = url
+        // Handle localhost:123/#/inspector?uri=xxx
+        .replaceFirst('/#/', '/')
+        // Handle localhost:123/#?page=inspector&uri=xxx
+        .replaceFirst('/#', '');
+
+    // Move page names from the querystring into the path.
+    var newUri = Uri.parse(newUrl);
+    final page = newUri.queryParameters['page'];
+    if (newUri.path == basePath && page != null) {
+      final newParams = {...newUri.queryParameters}..remove('page');
+      newUri = newUri.replace(
+        path: '$basePath$page',
+        queryParameters: newParams,
+      );
+    }
+    return newUri.toString();
+  }
+
+  return null;
+}
