@@ -21,7 +21,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../analytics/constants.dart' as analytics_constants;
 import '../../config_specific/logger/logger.dart';
 import '../../config_specific/url/url.dart';
 import '../../primitives/auto_dispose.dart';
