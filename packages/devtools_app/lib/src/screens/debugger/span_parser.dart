@@ -11,12 +11,12 @@ import 'package:string_scanner/string_scanner.dart';
 abstract class SpanParser {
   /// Takes a TextMate [Grammar] and a [String] and outputs a list of
   /// [ScopeSpan]s corresponding to the parsed input.
-  static List<ScopeSpan> parse(Grammar? grammar, String src) {
+  static List<ScopeSpan> parse(Grammar grammar, String src) {
     final scanner = LineScanner(src);
     final spans = <ScopeSpan>[];
     while (!scanner.isDone) {
       bool foundMatch = false;
-      for (final pattern in grammar!.topLevelMatchers!) {
+      for (final pattern in grammar.topLevelMatchers!) {
         final result = pattern.scan(grammar, scanner);
         if (result != null) {
           spans.addAll(result);
@@ -138,7 +138,7 @@ class ScopeSpan {
   /// This is useful for post-processing the results from a rule with a while
   /// condition as formatting should not be applied to the characters that
   /// match the while condition.
-  List<ScopeSpan> split(LineScanner scanner, RegExp? cond) {
+  List<ScopeSpan> split(LineScanner scanner, RegExp cond) {
     final splitSpans = <ScopeSpan>[];
 
     // Create a temporary scanner, copying [0, _end] to ensure that line/column
@@ -158,7 +158,7 @@ class ScopeSpan {
     );
 
     while (!splitScanner.isDone) {
-      if (splitScanner.matches(cond!)) {
+      if (splitScanner.matches(cond)) {
         // Update the end position for this span as it's been fully processed.
         current._end = splitScanner.position;
         splitSpans.add(current);
@@ -213,10 +213,11 @@ class Repository {
 
   final patterns = <String?, List<_Matcher>>{};
 
-  Map<String?, dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       for (final entry in patterns.entries)
-        entry.key: entry.value.map((e) => e.toJson()).toList(),
+        if (entry.key != null)
+          entry.key!: entry.value.map((e) => e.toJson()).toList(),
     };
   }
 }
@@ -237,7 +238,7 @@ abstract class _Matcher {
 
   final String? name;
 
-  List<ScopeSpan>? scan(Grammar? grammar, LineScanner scanner);
+  List<ScopeSpan>? scan(Grammar grammar, LineScanner scanner);
 
   List<ScopeSpan> _applyCapture(
     LineScanner scanner,
@@ -311,7 +312,7 @@ class _SimpleMatcher extends _Matcher {
   final Map<String, dynamic>? captures;
 
   @override
-  List<ScopeSpan>? scan(Grammar? grammar, LineScanner scanner) {
+  List<ScopeSpan>? scan(Grammar grammar, LineScanner scanner) {
     final line = scanner.line;
     final column = scanner.column;
     if (scanner.scan(match)) {
@@ -411,7 +412,7 @@ class _MultilineMatcher extends _Matcher {
     return _processCaptureHelper(scanner, beginCaptures, line, column);
   }
 
-  List<ScopeSpan> _scanToEndOfLine(Grammar? grammar, LineScanner scanner) {
+  List<ScopeSpan> _scanToEndOfLine(Grammar grammar, LineScanner scanner) {
     final results = <ScopeSpan>[];
     while (!scanner.isDone) {
       if (String.fromCharCode(scanner.peekChar()!) == '\n') {
@@ -434,7 +435,7 @@ class _MultilineMatcher extends _Matcher {
     return results;
   }
 
-  List<ScopeSpan> _scanUpToEndMatch(Grammar? grammar, LineScanner scanner) {
+  List<ScopeSpan> _scanUpToEndMatch(Grammar grammar, LineScanner scanner) {
     final results = <ScopeSpan>[];
     while (!scanner.isDone && !scanner.matches(end!)) {
       bool foundMatch = false;
@@ -481,7 +482,7 @@ class _MultilineMatcher extends _Matcher {
   }
 
   @override
-  List<ScopeSpan>? scan(Grammar? grammar, LineScanner scanner) {
+  List<ScopeSpan>? scan(Grammar grammar, LineScanner scanner) {
     if (!scanner.matches(begin)) {
       return null;
     }
@@ -557,7 +558,7 @@ class _MultilineMatcher extends _Matcher {
         // comment blocks with inline code samples shouldn't apply inline code
         // formatting to the leading '///').
         results.addAll(contentResults.expand(
-          (e) => e.split(scanner, whileCond),
+          (e) => e.split(scanner, whileCond!),
         ));
 
         if (beginSpans.isNotEmpty) {
@@ -606,8 +607,8 @@ class _IncludeMatcher extends _Matcher {
   }
 
   @override
-  List<ScopeSpan>? scan(Grammar? grammar, LineScanner scanner) {
-    final patterns = grammar!.repository!.patterns[include];
+  List<ScopeSpan>? scan(Grammar grammar, LineScanner scanner) {
+    final patterns = grammar.repository!.patterns[include];
     if (patterns == null) {
       throw StateError('Could not find $include in the repository.');
     }
