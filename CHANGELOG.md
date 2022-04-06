@@ -1,3 +1,6 @@
+## 2.12.2
+* Recover from missing trace events [#3960](https://github.com/flutter/devtools/pull/3960)
+
 ## 2.12.1
 * Fix null safety errors and prep for 2.12.1 release [#3939](https://github.com/flutter/devtools/pull/3939)
 
