@@ -178,17 +178,19 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
     ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
+    final clipboardStatusNotifier = clipboardStatus!;
     return _TextSelectionControlsToolbar(
       globalEditableRegion: globalEditableRegion,
       textLineHeight: textLineHeight,
       selectionMidpoint: selectionMidpoint,
       endpoints: endpoints,
       delegate: delegate,
-      clipboardStatus: clipboardStatus!,
-      handleCut:
-          canCut(delegate) ? () => handleCut(delegate, clipboardStatus) : null,
+      clipboardStatus: clipboardStatusNotifier,
+      handleCut: canCut(delegate)
+          ? () => handleCut(delegate, clipboardStatusNotifier)
+          : null,
       handleCopy: canCopy(delegate)
-          ? () => handleCopy(delegate, clipboardStatus)
+          ? () => handleCopy(delegate, clipboardStatusNotifier)
           : null,
       handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
       handleSelectAll:
