@@ -155,9 +155,7 @@ class _ProgramExplorerRow extends StatelessWidget {
     buffer.write('(');
     String? closingTag;
     final params = signature.parameters ?? [];
-    for (int i = isInstanceMethod ? 1 : 0;
-        i < params.length;
-        ++i) {
+    for (int i = isInstanceMethod ? 1 : 0; i < params.length; ++i) {
       final param = params[i];
       if (!param.fixed! && closingTag == null) {
         if (param.name == null) {
