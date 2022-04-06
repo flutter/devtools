@@ -1465,7 +1465,9 @@ final mockScriptRef = ScriptRef(
     id: 'test-script-long-lines');
 
 final mockSyntaxHighlighter = SyntaxHighlighter.withGrammar(
-    grammar: mockGrammar, source: mockScript.source);
+  grammar: mockGrammar,
+  source: mockScript.source,
+);
 
 final mockParsedScript = ParsedScript(
     script: mockScript,
