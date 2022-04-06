@@ -987,6 +987,10 @@ class _InspectorTreeState extends State<InspectorTree>
 
     if (!firstInspectorTreeLoadCompleted && widget.isSummaryTree) {
       ga.timeEnd(InspectorScreen.id, analytics_constants.pageReady);
+      serviceManager.sendDwdsEvent(
+        screen: InspectorScreen.id,
+        action: analytics_constants.pageReady,
+      );
       firstInspectorTreeLoadCompleted = true;
     }
     return LayoutBuilder(
