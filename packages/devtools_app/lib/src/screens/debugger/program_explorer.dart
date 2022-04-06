@@ -154,10 +154,11 @@ class _ProgramExplorerRow extends StatelessWidget {
     }
     buffer.write('(');
     String? closingTag;
+    final params = signature.parameters ?? [];
     for (int i = isInstanceMethod ? 1 : 0;
-        i < signature.parameters!.length;
+        i < params.length;
         ++i) {
-      final param = signature.parameters![i];
+      final param = params[i];
       if (!param.fixed! && closingTag == null) {
         if (param.name == null) {
           closingTag = ']';
@@ -167,28 +168,37 @@ class _ProgramExplorerRow extends StatelessWidget {
           buffer.write('{');
         }
       }
-      if (param.required != null && param.required!) {
+      final required = param.required;
+      if (required != null && required) {
         buffer.write('required ');
       }
-      if (param.parameterType!.name == null) {
-        buffer.write(_buildFunctionTypeText('Function', param.parameterType!));
-      } else {
-        buffer.write(param.parameterType!.name);
+      final paramType = param.parameterType;
+      if (paramType != null) {
+        final paramTypeName = param.parameterType?.name;
+        if (paramTypeName == null) {
+          buffer.write(_buildFunctionTypeText('Function', paramType));
+        } else {
+          buffer.write(paramTypeName);
+        }
       }
       if (param.name != null) {
         buffer.write(' ${param.name}');
       }
-      if (i + 1 != signature.parameters!.length) {
+      if (i + 1 != params.length) {
         buffer.write(', ');
       } else if (closingTag != null) {
         buffer.write(closingTag);
       }
     }
     buffer.write(') → ');
-    if (signature.returnType!.name == null) {
-      buffer.write(_buildFunctionTypeText('Function', signature.returnType!));
-    } else {
-      buffer.write(signature.returnType!.name);
+    final returnType = signature.returnType;
+    if (returnType != null) {
+      final returnTypeName = signature.returnType?.name;
+      if (returnTypeName == null) {
+        buffer.write(_buildFunctionTypeText('Function', returnType));
+      } else {
+        buffer.write(returnTypeName);
+      }
     }
 
     return buffer.toString();

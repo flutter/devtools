@@ -114,7 +114,7 @@ class _ExpressionEvalFieldState extends State<ExpressionEvalField>
               0,
               min(defaultTopMatchesLimit, matches.length),
             )
-            .map((match) => AutoCompleteMatch(match!))
+            .map((match) => AutoCompleteMatch(match))
             .toList();
 
         _autoCompleteController.searchAutoComplete.value = results;
@@ -387,13 +387,14 @@ Future<List<String>> autoCompleteResultsFor(
     try {
       final response = await controller.evalAtCurrentFrame(left);
       if (response is InstanceRef) {
-        if (response.typeClass != null) {
+        final typeClass = response.typeClass;
+        if (typeClass != null) {
           // Assume we want static members for a type class not members of the
           // Type object. This is reasonable as Type objects are rarely useful
           // in Dart and we will end up with accidental Type objects if the user
           // writes `SomeClass.` in the evaluate window.
           result.addAll(await _autoCompleteMembersFor(
-            response.typeClass,
+            typeClass,
             controller,
             staticContext: true,
           ));
