@@ -1,5 +1,8 @@
 ## 2.12.2
+* Prep for 2.12.2 cherrypick release [#3961](https://github.com/flutter/devtools/pull/3961)
 * Recover from missing trace events [#3960](https://github.com/flutter/devtools/pull/3960)
+* Only send the dwds event when the service is registered [#3953](https://github.com/flutter/devtools/pull/3953)
+* Add analytics to track inspector tree first load time [#3924](https://github.com/flutter/devtools/pull/3924)
 
 ## 2.12.1
 * Fix null safety errors and prep for 2.12.1 release [#3939](https://github.com/flutter/devtools/pull/3939)
