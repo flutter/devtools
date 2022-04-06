@@ -21,16 +21,16 @@ import 'program_explorer_controller.dart';
 class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   VMServiceObjectNode(
     this.controller,
-    this.name,
+    name,
     this.object, {
     this.isSelectable = true,
-  });
+  }) : name = name ?? '';
 
   static const dartPrefix = 'dart:';
   static const packagePrefix = 'package:';
 
   final ProgramExplorerController controller;
-  final String? name;
+  final String name;
   bool isSelectable;
 
   ObjRef? object;
@@ -196,7 +196,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       final parts = rootLib.uri!.split('/')..removeLast();
       final path = parts.join('/');
       for (int i = 0; i < root.children.length; ++i) {
-        if (root.children[i].name!.startsWith(path)) {
+        if (root.children[i].name.startsWith(path)) {
           final VMServiceObjectNode rootLibNode = root.removeChildAtIndex(i);
           root.addChild(rootLibNode, index: 0);
           break;
@@ -303,8 +303,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   }
 
   Future<void> populateLocation() async {
-    // ignore: unused_local_variable
-    ScriptRef? scriptRef = script;
+    ScriptRef scriptRef = script!;
     int? tokenPos = 0;
     if (object != null &&
         (object is FieldRef || object is FuncRef || object is ClassRef)) {
@@ -313,13 +312,13 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       scriptRef = location.script;
     }
 
-    script = await scriptManager.getScript(script!);
+    final fetchedScript = await scriptManager.getScript(scriptRef);
     final position = tokenPos == 0
         ? null
-        : SourcePosition.calculatePosition(script as Script, tokenPos!);
+        : SourcePosition.calculatePosition(fetchedScript, tokenPos!);
 
     location = ScriptLocation(
-      script!,
+      scriptRef,
       location: position,
     );
   }
@@ -348,8 +347,8 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       if (child.object == null && child.script == null) {
         // Child is a directory node. Treat it as if it were a library/script
         // for sorting purposes.
-        if (child.name!.startsWith(dartPrefix) ||
-            child.name!.startsWith(packagePrefix)) {
+        if (child.name.startsWith(dartPrefix) ||
+            child.name.startsWith(packagePrefix)) {
           packageAndCoreLibDirectoryNodes.add(child);
         } else {
           userDirectoryNodes.add(child);
@@ -390,15 +389,15 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     }
 
     userDirectoryNodes.sort((a, b) {
-      return a.name!.compareTo(b.name!);
+      return a.name.compareTo(b.name);
     });
 
     scriptNodes.sort((a, b) {
-      return a.name!.compareTo(b.name!);
+      return a.name.compareTo(b.name);
     });
 
     userLibraryNodes.sort((a, b) {
-      return a.name!.compareTo(b.name!);
+      return a.name.compareTo(b.name);
     });
 
     classNodes.sort((a, b) {
@@ -420,11 +419,11 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     });
 
     packageAndCoreLibDirectoryNodes.sort((a, b) {
-      return a.name!.compareTo(b.name!);
+      return a.name.compareTo(b.name);
     });
 
     packageAndCoreLibLibraryNodes.sort((a, b) {
-      return a.name!.compareTo(b.name!);
+      return a.name.compareTo(b.name);
     });
 
     children
