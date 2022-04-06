@@ -120,13 +120,12 @@ class _DebuggingControlsState extends State<DebuggingControls>
     return ValueListenableBuilder<bool>(
       valueListenable: controller.fileExplorerVisible,
       builder: (context, visible, _) {
-        const libraryIcon = Icons.insert_chart;
         return RoundedOutlinedBorder(
           child: Container(
             color: visible ? Theme.of(context).highlightColor : null,
             child: DebuggerButton(
               title: 'File Explorer',
-              icon: libraryIcon,
+              icon: Icons.folder,
               onPressed: controller.toggleLibrariesVisible,
             ),
           ),
@@ -202,8 +201,10 @@ class ExceptionMode {
   ];
 
   static ExceptionMode from(String? id) {
-    return modes.singleWhere((mode) => mode.id == id,
-        orElse: () => modes.first);
+    return modes.singleWhere(
+      (mode) => mode.id == id,
+      orElse: () => modes.first,
+    );
   }
 
   final String id;

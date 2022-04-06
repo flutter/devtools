@@ -6,19 +6,21 @@ import 'package:devtools_app/src/ui/hover.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const _textSpan = TextSpan(children: [
-  TextSpan(text: 'hello', style: TextStyle(fontWeight: FontWeight.bold)),
-  TextSpan(text: ' '),
-  TextSpan(text: 'world'),
-  TextSpan(text: ' '),
-  TextSpan(text: 'foo', style: TextStyle(fontWeight: FontWeight.bold)),
-  TextSpan(text: '.'),
-  TextSpan(text: 'bar'),
-  TextSpan(text: '.'),
-  TextSpan(text: 'baz', style: TextStyle(fontWeight: FontWeight.w100)),
-  TextSpan(text: ' '),
-  TextSpan(text: 'blah'),
-]);
+const _textSpan = TextSpan(
+  children: [
+    TextSpan(text: 'hello', style: TextStyle(fontWeight: FontWeight.bold)),
+    TextSpan(text: ' '),
+    TextSpan(text: 'world'),
+    TextSpan(text: ' '),
+    TextSpan(text: 'foo', style: TextStyle(fontWeight: FontWeight.bold)),
+    TextSpan(text: '.'),
+    TextSpan(text: 'bar'),
+    TextSpan(text: '.'),
+    TextSpan(text: 'baz', style: TextStyle(fontWeight: FontWeight.w100)),
+    TextSpan(text: ' '),
+    TextSpan(text: 'blah'),
+  ],
+);
 
 void main() {
   test('wordForHover returns the correct word given the provided x offset', () {

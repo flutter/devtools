@@ -127,8 +127,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
       // require a top level field named "traceEvents". See how timeline data is
       // encoded in [ExportController.encode].
       final timelineJson = Map<String, dynamic>.from(
-          offlineController.offlineDataJson[PerformanceScreen.id])
-        ..addAll({
+        offlineController.offlineDataJson[PerformanceScreen.id],
+      )..addAll({
           PerformanceData.traceEventsKey:
               offlineController.offlineDataJson[PerformanceData.traceEventsKey]
         });
@@ -364,13 +364,16 @@ class _SecondaryControls extends StatelessWidget {
 class EnhanceTracingButton extends StatelessWidget {
   const EnhanceTracingButton({Key? key}) : super(key: key);
 
+  static const title = 'Enhance Tracing';
+  static const icon = Icons.auto_awesome;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textStyle = theme.subtleTextStyle;
     return ServiceExtensionCheckboxGroupButton(
-      title: 'Enhance Tracing',
-      icon: Icons.auto_awesome,
+      title: title,
+      icon: icon,
       tooltip: 'Add more detail to the Timeline trace',
       minScreenWidthForTextBeforeScaling:
           _SecondaryControls.minScreenWidthForTextBeforeScaling,

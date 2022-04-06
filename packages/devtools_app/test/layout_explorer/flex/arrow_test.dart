@@ -29,38 +29,54 @@ void main() {
               ),
             ),
           );
-      testWidgets('left', (WidgetTester tester) async {
-        final widget = buildUnidirectionalArrowWrapper(ArrowType.left);
-        await tester.pumpWidget(widget);
-        await expectLater(
-          find.byWidget(widget),
-          matchesGoldenFile('goldens/arrow_unidirectional_left.png'),
-        );
-      }, skip: kIsWeb);
-      testWidgets('up', (WidgetTester tester) async {
-        final widget = buildUnidirectionalArrowWrapper(ArrowType.up);
-        await tester.pumpWidget(widget);
-        await expectLater(
-          find.byWidget(widget),
-          matchesGoldenFile('goldens/arrow_unidirectional_up.png'),
-        );
-      }, skip: kIsWeb);
-      testWidgets('right', (WidgetTester tester) async {
-        final widget = buildUnidirectionalArrowWrapper(ArrowType.right);
-        await tester.pumpWidget(widget);
-        await expectLater(
-          find.byWidget(widget),
-          matchesGoldenFile('goldens/arrow_unidirectional_right.png'),
-        );
-      }, skip: kIsWeb);
-      testWidgets('down', (WidgetTester tester) async {
-        final widget = buildUnidirectionalArrowWrapper(ArrowType.down);
-        await tester.pumpWidget(widget);
-        await expectLater(
-          find.byWidget(widget),
-          matchesGoldenFile('goldens/arrow_unidirectional_down.png'),
-        );
-      }, skip: kIsWeb);
+      testWidgets(
+        'left',
+        (WidgetTester tester) async {
+          final widget = buildUnidirectionalArrowWrapper(ArrowType.left);
+          await tester.pumpWidget(widget);
+          await expectLater(
+            find.byWidget(widget),
+            matchesGoldenFile('goldens/arrow_unidirectional_left.png'),
+          );
+        },
+        skip: kIsWeb,
+      );
+      testWidgets(
+        'up',
+        (WidgetTester tester) async {
+          final widget = buildUnidirectionalArrowWrapper(ArrowType.up);
+          await tester.pumpWidget(widget);
+          await expectLater(
+            find.byWidget(widget),
+            matchesGoldenFile('goldens/arrow_unidirectional_up.png'),
+          );
+        },
+        skip: kIsWeb,
+      );
+      testWidgets(
+        'right',
+        (WidgetTester tester) async {
+          final widget = buildUnidirectionalArrowWrapper(ArrowType.right);
+          await tester.pumpWidget(widget);
+          await expectLater(
+            find.byWidget(widget),
+            matchesGoldenFile('goldens/arrow_unidirectional_right.png'),
+          );
+        },
+        skip: kIsWeb,
+      );
+      testWidgets(
+        'down',
+        (WidgetTester tester) async {
+          final widget = buildUnidirectionalArrowWrapper(ArrowType.down);
+          await tester.pumpWidget(widget);
+          await expectLater(
+            find.byWidget(widget),
+            matchesGoldenFile('goldens/arrow_unidirectional_down.png'),
+          );
+        },
+        skip: kIsWeb,
+      );
     });
 
     group('Bidirectional', () {
@@ -81,22 +97,30 @@ void main() {
               ),
             ),
           );
-      testWidgets('horizontal', (WidgetTester tester) async {
-        final widget = buildBidirectionalArrowWrapper(Axis.horizontal);
-        await tester.pumpWidget(widget);
-        await expectLater(
-          find.byWidget(widget),
-          matchesGoldenFile('goldens/arrow_bidirectional_horizontal.png'),
-        );
-      }, skip: kIsWeb);
-      testWidgets('vertical', (WidgetTester tester) async {
-        final widget = buildBidirectionalArrowWrapper(Axis.vertical);
-        await tester.pumpWidget(widget);
-        await expectLater(
-          find.byWidget(widget),
-          matchesGoldenFile('goldens/arrow_bidirectional_vertical.png'),
-        );
-      }, skip: kIsWeb);
+      testWidgets(
+        'horizontal',
+        (WidgetTester tester) async {
+          final widget = buildBidirectionalArrowWrapper(Axis.horizontal);
+          await tester.pumpWidget(widget);
+          await expectLater(
+            find.byWidget(widget),
+            matchesGoldenFile('goldens/arrow_bidirectional_horizontal.png'),
+          );
+        },
+        skip: kIsWeb,
+      );
+      testWidgets(
+        'vertical',
+        (WidgetTester tester) async {
+          final widget = buildBidirectionalArrowWrapper(Axis.vertical);
+          await tester.pumpWidget(widget);
+          await expectLater(
+            find.byWidget(widget),
+            matchesGoldenFile('goldens/arrow_bidirectional_vertical.png'),
+          );
+        },
+        skip: kIsWeb,
+      );
     });
   });
 }

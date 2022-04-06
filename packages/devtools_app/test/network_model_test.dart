@@ -132,7 +132,9 @@ void main() {
     test('duration returns correct value', () {
       expect(httpGet.duration!.inMicroseconds, 6327091628 - 6326279935);
       expect(
-          httpGetWithError.duration!.inMicroseconds, 5387256813 - 5385227316);
+        httpGetWithError.duration!.inMicroseconds,
+        5387256813 - 5385227316,
+      );
       expect(httpPost.duration!.inMicroseconds, 2401000670 - 2399492629);
       expect(httpPut.duration!.inMicroseconds, 1206609144 - 1205283313);
       expect(httpPatch.duration!.inMicroseconds, 1911420918 - 1910177192);

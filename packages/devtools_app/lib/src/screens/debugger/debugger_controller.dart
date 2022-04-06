@@ -123,9 +123,11 @@ class DebuggerController extends DisposableController
       switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
     });
     autoDisposeStreamSubscription(
-        _service.onDebugEvent.listen(_handleDebugEvent));
+      _service.onDebugEvent.listen(_handleDebugEvent),
+    );
     autoDisposeStreamSubscription(
-        _service.onIsolateEvent.listen(_handleIsolateEvent));
+      _service.onIsolateEvent.listen(_handleIsolateEvent),
+    );
   }
 
   final bool initialSwitchToIsolate;
@@ -461,14 +463,20 @@ class DebuggerController extends DisposableController
     if (!isPaused.value) {
       return Future.error(
         RPCError.withDetails(
-            'evaluateInFrame', RPCError.kInvalidParams, 'Isolate not paused'),
+          'evaluateInFrame',
+          RPCError.kInvalidParams,
+          'Isolate not paused',
+        ),
       );
     }
 
     if (stackFramesWithLocation.value.isEmpty) {
       return Future.error(
         RPCError.withDetails(
-            'evaluateInFrame', RPCError.kInvalidParams, 'No frames available'),
+          'evaluateInFrame',
+          RPCError.kInvalidParams,
+          'No frames available',
+        ),
       );
     }
 
@@ -684,8 +692,12 @@ class DebuggerController extends DisposableController
 
     // Show a toast.
     final count = removedScripts.length + addedScripts.length;
-    messageBus.addEvent(BusEvent('toast',
-        data: '${nf.format(count)} ${pluralize('script', count)} updated.'));
+    messageBus.addEvent(
+      BusEvent(
+        'toast',
+        data: '${nf.format(count)} ${pluralize('script', count)} updated.',
+      ),
+    );
 
     // Update breakpoints.
     _updateBreakpointsAfterReload(removedScripts, addedScripts);
@@ -1050,12 +1062,14 @@ class DebuggerController extends DisposableController
       final line = currentScript.lines[i].toLowerCase();
       final matchesForLine = caseInsensitiveSearch.allMatches(line);
       if (matchesForLine.isNotEmpty) {
-        matches.addAll(matchesForLine.map(
-          (m) => SourceToken(
-            position: SourcePosition(line: i, column: m.start),
-            length: m.end - m.start,
+        matches.addAll(
+          matchesForLine.map(
+            (m) => SourceToken(
+              position: SourcePosition(line: i, column: m.start),
+              length: m.end - m.start,
+            ),
           ),
-        ));
+        );
       }
     }
     return matches;

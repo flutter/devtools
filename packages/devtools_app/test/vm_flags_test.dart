@@ -21,34 +21,42 @@ void main() async {
       await env.tearDownEnvironment(force: true);
     });
 
-    test('flags initialized on vm service opened', () async {
-      await env.setupEnvironment();
+    test(
+      'flags initialized on vm service opened',
+      () async {
+        await env.setupEnvironment();
 
-      expect(serviceManager.service, equals(env.service));
-      expect(serviceManager.vmFlagManager, isNotNull);
-      expect(serviceManager.vmFlagManager.flags.value, isNotNull);
+        expect(serviceManager.service, equals(env.service));
+        expect(serviceManager.vmFlagManager, isNotNull);
+        expect(serviceManager.vmFlagManager.flags.value, isNotNull);
 
-      await env.tearDownEnvironment();
-    }, timeout: const Timeout.factor(4));
+        await env.tearDownEnvironment();
+      },
+      timeout: const Timeout.factor(4),
+    );
 
-    test('notifies on flag change', () async {
-      await env.setupEnvironment();
-      const profiler = 'profiler';
+    test(
+      'notifies on flag change',
+      () async {
+        await env.setupEnvironment();
+        const profiler = 'profiler';
 
-      final flagManager = serviceManager.vmFlagManager;
-      final initialFlags = flagManager.flags.value;
-      final profilerFlagNotifier = flagManager.flag(profiler)!;
-      expect(profilerFlagNotifier.value.valueAsString, equals('true'));
+        final flagManager = serviceManager.vmFlagManager;
+        final initialFlags = flagManager.flags.value;
+        final profilerFlagNotifier = flagManager.flag(profiler)!;
+        expect(profilerFlagNotifier.value.valueAsString, equals('true'));
 
-      await serviceManager.service!.setFlag(profiler, 'false');
-      expect(profilerFlagNotifier.value.valueAsString, equals('false'));
+        await serviceManager.service!.setFlag(profiler, 'false');
+        expect(profilerFlagNotifier.value.valueAsString, equals('false'));
 
-      // Await a delay so the new flags have time to be pulled and set.
-      await Future.delayed(const Duration(milliseconds: 5000));
-      final newFlags = flagManager.flags.value;
-      expect(newFlags, isNot(equals(initialFlags)));
+        // Await a delay so the new flags have time to be pulled and set.
+        await Future.delayed(const Duration(milliseconds: 5000));
+        final newFlags = flagManager.flags.value;
+        expect(newFlags, isNot(equals(initialFlags)));
 
-      await env.tearDownEnvironment();
-    }, timeout: const Timeout.factor(4));
+        await env.tearDownEnvironment();
+      },
+      timeout: const Timeout.factor(4),
+    );
   });
 }

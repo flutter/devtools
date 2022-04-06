@@ -55,14 +55,17 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
     final startTime = DateTime.now();
 
     final response = await http.get(
-        // Encode the url
-        Uri.encodeFull(api.uri()),
-        // Only accept JSON response
-        headers: {'Accept': 'application/json'});
+      // Encode the url
+      Uri.encodeFull(api.uri()),
+      // Only accept JSON response
+      headers: {'Accept': 'application/json'},
+    );
 
-    logs.add('Packet received on ${response.headers['date']} '
-        'content-size ${response.contentLength} bytes '
-        'elapsed time ${DateTime.now().difference(startTime)}');
+    logs.add(
+      'Packet received on ${response.headers['date']} '
+      'content-size ${response.contentLength} bytes '
+      'elapsed time ${DateTime.now().difference(startTime)}',
+    );
 
     // To modify the state of the app, use this method
     setState(() {
@@ -105,10 +108,10 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
       ),
       // Create a Listview and load the data when available
       body: ListView.builder(
-          itemCount: data == null ? 0 : data.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Center(
-                child: Column(
+        itemCount: data == null ? 0 : data.length,
+        itemBuilder: (BuildContext context, int index) {
+          return Center(
+            child: Column(
               // Stretch the cards in horizontal axis
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -120,15 +123,19 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
 
                       // set some style to text
                       style: const TextStyle(
-                          fontSize: 20.0, color: Colors.lightBlueAccent),
+                        fontSize: 20.0,
+                        color: Colors.lightBlueAccent,
+                      ),
                     ),
                     // added padding
                     padding: const EdgeInsets.all(15.0),
                   ),
                 )
               ],
-            ));
-          }),
+            ),
+          );
+        },
+      ),
     );
   }
 

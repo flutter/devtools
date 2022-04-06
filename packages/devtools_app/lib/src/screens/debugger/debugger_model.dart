@@ -49,15 +49,17 @@ class GenericInstanceRef {
     required this.isolateRef,
     this.value,
     this.diagnostic,
-  }) : assert(value == null ||
-            value is ObjRef ||
-            value is Sentinel ||
-            value is num ||
-            value is String ||
-            value is bool ||
-            value is Int32x4 ||
-            value is Float32x4 ||
-            value is Float64x2);
+  }) : assert(
+          value == null ||
+              value is ObjRef ||
+              value is Sentinel ||
+              value is num ||
+              value is String ||
+              value is bool ||
+              value is Int32x4 ||
+              value is Float32x4 ||
+              value is Float64x2,
+        );
 
   final Object? value;
 
@@ -156,10 +158,16 @@ abstract class BreakpointAndSourcePosition
       [SourcePosition? sourcePosition]) {
     if (breakpoint.location is SourceLocation) {
       return _BreakpointAndSourcePositionResolved(
-          breakpoint, sourcePosition, breakpoint.location as SourceLocation);
+        breakpoint,
+        sourcePosition,
+        breakpoint.location as SourceLocation,
+      );
     } else if (breakpoint.location is UnresolvedSourceLocation) {
-      return _BreakpointAndSourcePositionUnresolved(breakpoint, sourcePosition,
-          breakpoint.location as UnresolvedSourceLocation);
+      return _BreakpointAndSourcePositionUnresolved(
+        breakpoint,
+        sourcePosition,
+        breakpoint.location as UnresolvedSourceLocation,
+      );
     } else {
       throw 'invalid value for breakpoint.location';
     }
@@ -415,7 +423,8 @@ Future<void> buildVariablesTree(
       if (result is Instance) {
         if (result.associations != null) {
           variable.addAllChildren(
-              _createVariablesForAssociations(result, isolateRef));
+            _createVariablesForAssociations(result, isolateRef),
+          );
         } else if (result.elements != null) {
           variable
               .addAllChildren(_createVariablesForElements(result, isolateRef));
@@ -424,8 +433,13 @@ Future<void> buildVariablesTree(
           // Check fields last, as all instanceRefs may have a non-null fields
           // with no entries.
         } else if (result.fields != null) {
-          variable.addAllChildren(_createVariablesForFields(result, isolateRef,
-              existingNames: existingNames));
+          variable.addAllChildren(
+            _createVariablesForFields(
+              result,
+              isolateRef,
+              existingNames: existingNames,
+            ),
+          );
         }
       }
     } on SentinelException {
@@ -485,8 +499,10 @@ Future<void> buildVariablesTree(
             );
           } catch (e) {
             if (e is! SentinelException) {
-              log('Caught $e accessing the value of an object',
-                  LogLevel.warning);
+              log(
+                'Caught $e accessing the value of an object',
+                LogLevel.warning,
+              );
             }
           }
         }
@@ -937,8 +953,10 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
   @override
   DartObjectNode shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
+    throw UnimplementedError(
+      'This method is not implemented. Implement if you '
+      'need to call `shallowCopy` on an instance of this class.',
+    );
   }
 }
 
@@ -1011,8 +1029,10 @@ class FileNode extends TreeNode<FileNode> {
 
   @override
   FileNode shallowCopy() {
-    throw UnimplementedError('This method is not implemented. Implement if you '
-        'need to call `shallowCopy` on an instance of this class.');
+    throw UnimplementedError(
+      'This method is not implemented. Implement if you '
+      'need to call `shallowCopy` on an instance of this class.',
+    );
   }
 
   @override

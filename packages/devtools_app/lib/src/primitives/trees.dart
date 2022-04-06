@@ -134,9 +134,12 @@ abstract class TreeNode<T extends TreeNode<T>> {
 
   /// Expands this node and all of its children (cascading).
   void expandCascading() {
-    breadthFirstTraversal<T>(this as T, action: (T node) {
-      node.expand();
-    });
+    breadthFirstTraversal<T>(
+      this as T,
+      action: (T node) {
+        node.expand();
+      },
+    );
   }
 
   /// Expands this node and each parent node recursively.
@@ -147,9 +150,12 @@ abstract class TreeNode<T extends TreeNode<T>> {
 
   /// Collapses this node and all of its children (cascading).
   void collapseCascading() {
-    breadthFirstTraversal<T>(this as T, action: (T node) {
-      node.collapse();
-    });
+    breadthFirstTraversal<T>(
+      this as T,
+      action: (T node) {
+        node.collapse();
+      },
+    );
   }
 
   void removeLastChild() {
@@ -159,6 +165,19 @@ abstract class TreeNode<T extends TreeNode<T>> {
   bool subtreeHasNodeWithCondition(bool condition(T node)) {
     final T? childWithCondition = firstChildWithCondition(condition);
     return childWithCondition != null;
+  }
+
+  List<T> childrenWithCondition(bool condition(T node)) {
+    final _children = <T>[];
+    breadthFirstTraversal<T>(
+      this as T,
+      action: (node) {
+        if (condition(node)) {
+          _children.add(node);
+        }
+      },
+    );
+    return _children;
   }
 
   T? firstChildWithCondition(bool condition(T node)) {
@@ -211,12 +230,13 @@ abstract class TreeNode<T extends TreeNode<T>> {
   /// E.lastSubNodeAtLevel(1) => G
   T? lastChildNodeAtLevel(int level) {
     return _childNodeAtLevelWithCondition(
-        level,
-        // When this condition is called, we have already ensured that
-        // [level] < [depth], so at least one child is guaranteed to meet the
-        // lastWhere condition.
-        (currentNode, levelWithOffset) => currentNode.children
-            .lastWhere((n) => n.depth + n.level > levelWithOffset));
+      level,
+      // When this condition is called, we have already ensured that
+      // [level] < [depth], so at least one child is guaranteed to meet the
+      // lastWhere condition.
+      (currentNode, levelWithOffset) => currentNode.children
+          .lastWhere((n) => n.depth + n.level > levelWithOffset),
+    );
   }
 
   // TODO(kenz): We should audit this method with a very large tree:

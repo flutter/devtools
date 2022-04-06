@@ -28,8 +28,10 @@ void main() {
     void outputResult(int num, EditingParts editingParts) {
       // ignore: dead_code
       if (debug) {
-        print('$num. left=${editingParts.leftSide}, '
-            'active=${editingParts.activeWord}');
+        print(
+          '$num. left=${editingParts.leftSide}, '
+          'active=${editingParts.activeWord}',
+        );
       }
     }
 
@@ -170,7 +172,8 @@ void main() {
       expect(parts.isField, isFalse);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[addOne,addTwo]');
+        'baseObject.close + 1000/2000 + chart.traces[addOne,addTwo]',
+      );
       outputResult(18, parts);
       expect(parts.activeWord.isEmpty, isTrue);
       expect(
@@ -181,7 +184,8 @@ void main() {
       expect(parts.isField, isFalse);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[addOne,addTwo].xNam');
+        'baseObject.close + 1000/2000 + chart.traces[addOne,addTwo].xNam',
+      );
       outputResult(19, parts);
       expect(parts.activeWord, 'xNam');
       expect(
@@ -192,7 +196,8 @@ void main() {
       expect(parts.isField, isTrue);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[10].yName + compute');
+        'baseObject.close + 1000/2000 + chart.traces[10].yName + compute',
+      );
       outputResult(20, parts);
       expect(parts.activeWord, 'compute');
       expect(
@@ -203,7 +208,8 @@ void main() {
       expect(parts.isField, isFalse);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[10].yName + compute()');
+        'baseObject.close + 1000/2000 + chart.traces[10].yName + compute()',
+      );
       outputResult(21, parts);
       expect(parts.activeWord.isEmpty, isTrue);
       expect(
@@ -226,7 +232,8 @@ void main() {
       expect(parts.isField, isFalse);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[10].yName + compute(foo,bar');
+        'baseObject.close + 1000/2000 + chart.traces[10].yName + compute(foo,bar',
+      );
       outputResult(23, parts);
       expect(parts.activeWord, 'bar');
       expect(
@@ -237,7 +244,8 @@ void main() {
       expect(parts.isField, isFalse);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[10].yName + compute(foo,bar)');
+        'baseObject.close + 1000/2000 + chart.traces[10].yName + compute(foo,bar)',
+      );
       outputResult(24, parts);
       expect(parts.activeWord.isEmpty, isTrue);
       expect(
@@ -248,7 +256,8 @@ void main() {
       expect(parts.isField, isFalse);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[10].yName + compute() + foo');
+        'baseObject.close + 1000/2000 + chart.traces[10].yName + compute() + foo',
+      );
       outputResult(25, parts);
       expect(parts.activeWord, 'foo');
       expect(
@@ -259,7 +268,8 @@ void main() {
       expect(parts.isField, isFalse);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[10].yName + compute() + foobar.');
+        'baseObject.close + 1000/2000 + chart.traces[10].yName + compute() + foobar.',
+      );
       outputResult(26, parts);
       expect(parts.activeWord.isEmpty, isTrue);
       expect(
@@ -270,7 +280,8 @@ void main() {
       expect(parts.isField, isTrue);
 
       parts = testEdit(
-          'baseObject.close + 1000/2000 + chart.traces[10].yName + compute() + foobar.length');
+        'baseObject.close + 1000/2000 + chart.traces[10].yName + compute() + foobar.length',
+      );
       outputResult(27, parts);
       expect(parts.activeWord, 'length');
       expect(

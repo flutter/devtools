@@ -122,7 +122,9 @@ class _CodeViewState extends State<CodeView>
       cancelListeners();
 
       addAutoDisposeListener(
-          widget.controller.scriptLocation, _handleScriptLocationChanged);
+        widget.controller.scriptLocation,
+        _handleScriptLocationChanged,
+      );
     }
   }
 

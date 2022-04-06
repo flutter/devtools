@@ -129,7 +129,8 @@ abstract class ExportController {
     // require a top level field named "traceEvents".
     if (activeScreenId == PerformanceScreen.id) {
       final traceEvents = List<Map<String, dynamic>>.from(
-          contents[PerformanceData.traceEventsKey]);
+        contents[PerformanceData.traceEventsKey],
+      );
       _contents[PerformanceData.traceEventsKey] = traceEvents;
       contents.remove(PerformanceData.traceEventsKey);
     }

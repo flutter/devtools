@@ -81,7 +81,8 @@ const overflowTextColorDark = Color(0xfff5846b);
 const overflowTextColorLight = Color(0xffdea089);
 
 const backgroundColorSelectedDark = Color(
-    0x4d474747); // TODO(jacobr): we would like Color(0x4dedeeef) but that makes the background show through.
+  0x4d474747,
+); // TODO(jacobr): we would like Color(0x4dedeeef) but that makes the background show through.
 const backgroundColorSelectedLight = Color(0x4dedeeef);
 
 extension LayoutExplorerColorScheme on ColorScheme {

@@ -31,6 +31,8 @@ import '../debugger/debugger_controller.dart';
 import 'diagnostics.dart';
 import 'diagnostics_node.dart';
 import 'inspector_breadcrumbs.dart';
+import 'inspector_controller.dart';
+import 'inspector_screen.dart';
 import 'inspector_text_styles.dart' as inspector_text_styles;
 import 'inspector_tree.dart';
 
@@ -316,8 +318,10 @@ class InspectorTreeController extends Object
     final rootLocal = root!;
 
     selection = rootLocal
-        .getRow((rootLocal.getRowIndex(selection!) + indexOffset)
-            .clamp(0, numRows - 1))
+        .getRow(
+          (rootLocal.getRowIndex(selection!) + indexOffset)
+              .clamp(0, numRows - 1),
+        )
         ?.node;
   }
 
@@ -645,17 +649,21 @@ class InspectorTreeController extends Object
     if (search.isEmpty ||
         inspectorService == null ||
         inspectorService.isDisposed) {
-      assert(() {
-        debugPrint('Search completed, no search');
-        return true;
-      }());
+      assert(
+        () {
+          debugPrint('Search completed, no search');
+          return true;
+        }(),
+      );
       return matches;
     }
 
-    assert(() {
-      debugPrint('Search started: ' + _searchTarget.toString());
-      return true;
-    }());
+    assert(
+      () {
+        debugPrint('Search started: ' + _searchTarget.toString());
+        return true;
+      }(),
+    );
 
     for (final row in _searchableCachedRows) {
       final diagnostic = row!.node.diagnostic;
@@ -672,14 +680,18 @@ class InspectorTreeController extends Object
       // Widget search end
     }
 
-    assert(() {
-      debugPrint('Search completed with ' +
-          _debugStatsWidgets.toString() +
-          ' widgets, ' +
-          _debugStatsSearchOps.toString() +
-          ' ops');
-      return true;
-    }());
+    assert(
+      () {
+        debugPrint(
+          'Search completed with ' +
+              _debugStatsWidgets.toString() +
+              ' widgets, ' +
+              _debugStatsSearchOps.toString() +
+              ' ops',
+        );
+        return true;
+      }(),
+    );
 
     return matches;
   }
@@ -868,11 +880,13 @@ class _InspectorTreeState extends State<InspectorTree>
     // we will end up as so we get a smooth animation to the final destination.
     final targetX = _computeTargetX(targetY);
     if (_scrollControllerX.hasClients) {
-      unawaited(_scrollControllerX.animateTo(
-        targetX,
-        duration: longDuration,
-        curve: defaultCurve,
-      ));
+      unawaited(
+        _scrollControllerX.animateTo(
+          targetX,
+          duration: longDuration,
+          curve: defaultCurve,
+        ),
+      );
     } else {
       _scrollControllerX = ScrollController(initialScrollOffset: targetX);
     }
@@ -971,6 +985,10 @@ class _InspectorTreeState extends State<InspectorTree>
       return const SizedBox();
     }
 
+    if (!firstInspectorTreeLoadCompleted && widget.isSummaryTree) {
+      ga.timeEnd(InspectorScreen.id, analytics_constants.pageReady);
+      firstInspectorTreeLoadCompleted = true;
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
         final viewportWidth = constraints.maxWidth;
@@ -982,8 +1000,9 @@ class _InspectorTreeState extends State<InspectorTree>
             controller: _scrollControllerX,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                  maxWidth:
-                      controllerLocal.rowWidth + controllerLocal.maxRowIndent),
+                maxWidth:
+                    controllerLocal.rowWidth + controllerLocal.maxRowIndent,
+              ),
               // TODO(kenz): this scrollbar needs to be sticky to the right side of
               // the visible container - right now it is lined up to the right of
               // the widest row (which is likely not visible). This may require some

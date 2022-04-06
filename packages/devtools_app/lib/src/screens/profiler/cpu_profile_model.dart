@@ -44,7 +44,8 @@ class CpuProfileData {
           ? (TimeRange()
             ..start = Duration(microseconds: json[timeOriginKey])
             ..end = Duration(
-                microseconds: json[timeOriginKey] + json[timeExtentKey]))
+              microseconds: json[timeOriginKey] + json[timeExtentKey],
+            ))
           : null,
     );
 
@@ -92,8 +93,10 @@ class CpuProfileData {
     // Each sample in [subSamples] will have the leaf stack
     // frame id for a cpu sample within [subTimeRange].
     final subSamples = superProfile.cpuSamples
-        .where((sample) => subTimeRange
-            .contains(Duration(microseconds: sample.timestampMicros!)))
+        .where(
+          (sample) => subTimeRange
+              .contains(Duration(microseconds: sample.timestampMicros!)),
+        )
         .toList();
 
     // Use a SplayTreeMap so that map iteration will be in sorted key order.
@@ -547,9 +550,10 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   double? _totalTimeRatio;
 
   Duration get totalTime => _totalTime ??= Duration(
-      microseconds:
-          (totalTimeRatio * profileMetaData.time!.duration.inMicroseconds)
-              .round());
+        microseconds:
+            (totalTimeRatio * profileMetaData.time!.duration.inMicroseconds)
+                .round(),
+      );
 
   Duration? _totalTime;
 
@@ -559,9 +563,10 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   double? _selfTimeRatio;
 
   Duration get selfTime => _selfTime ??= Duration(
-      microseconds:
-          (selfTimeRatio * profileMetaData.time!.duration.inMicroseconds)
-              .round());
+        microseconds:
+            (selfTimeRatio * profileMetaData.time!.duration.inMicroseconds)
+                .round(),
+      );
 
   Duration? _selfTime;
 
@@ -652,9 +657,11 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       sourceLine == other.sourceLine;
 
   void _format(StringBuffer buf, String indent) {
-    buf.writeln('$indent$name - children: ${children.length} - excl: '
-            '$exclusiveSampleCount - incl: $inclusiveSampleCount'
-        .trimRight());
+    buf.writeln(
+      '$indent$name - children: ${children.length} - excl: '
+              '$exclusiveSampleCount - incl: $inclusiveSampleCount'
+          .trimRight(),
+    );
     for (CpuStackFrame child in children) {
       child._format(buf, '  $indent');
     }

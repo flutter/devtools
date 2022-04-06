@@ -170,28 +170,40 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
       assert(_chartController.traces.length == TraceName.values.length);
 
       final externalIndex = TraceName.external.index;
-      assert(_chartController.trace(externalIndex).name ==
-          TraceName.values[externalIndex].toString());
+      assert(
+        _chartController.trace(externalIndex).name ==
+            TraceName.values[externalIndex].toString(),
+      );
 
       final usedIndex = TraceName.used.index;
-      assert(_chartController.trace(usedIndex).name ==
-          TraceName.values[usedIndex].toString());
+      assert(
+        _chartController.trace(usedIndex).name ==
+            TraceName.values[usedIndex].toString(),
+      );
 
       final capacityIndex = TraceName.capacity.index;
-      assert(_chartController.trace(capacityIndex).name ==
-          TraceName.values[capacityIndex].toString());
+      assert(
+        _chartController.trace(capacityIndex).name ==
+            TraceName.values[capacityIndex].toString(),
+      );
 
       final rSSIndex = TraceName.rSS.index;
-      assert(_chartController.trace(rSSIndex).name ==
-          TraceName.values[rSSIndex].toString());
+      assert(
+        _chartController.trace(rSSIndex).name ==
+            TraceName.values[rSSIndex].toString(),
+      );
 
       final rasterLayerIndex = TraceName.rasterLayer.index;
-      assert(_chartController.trace(rasterLayerIndex).name ==
-          TraceName.values[rasterLayerIndex].toString());
+      assert(
+        _chartController.trace(rasterLayerIndex).name ==
+            TraceName.values[rasterLayerIndex].toString(),
+      );
 
       final rasterPictureIndex = TraceName.rasterPicture.index;
-      assert(_chartController.trace(rasterPictureIndex).name ==
-          TraceName.values[rasterPictureIndex].toString());
+      assert(
+        _chartController.trace(rasterPictureIndex).name ==
+            TraceName.values[rasterPictureIndex].toString(),
+      );
 
       return;
     }
@@ -207,8 +219,10 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
       name: TraceName.external.toString(),
     );
     assert(externalIndex == TraceName.external.index);
-    assert(_chartController.trace(externalIndex).name ==
-        TraceName.values[externalIndex].toString());
+    assert(
+      _chartController.trace(externalIndex).name ==
+          TraceName.values[externalIndex].toString(),
+    );
 
     // Used Heap
     final usedIndex = _chartController.createTrace(
@@ -222,8 +236,10 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
       name: TraceName.used.toString(),
     );
     assert(usedIndex == TraceName.used.index);
-    assert(_chartController.trace(usedIndex).name ==
-        TraceName.values[usedIndex].toString());
+    assert(
+      _chartController.trace(usedIndex).name ==
+          TraceName.values[usedIndex].toString(),
+    );
 
     // Heap Capacity
     final capacityIndex = _chartController.createTrace(
@@ -236,8 +252,10 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
       name: TraceName.capacity.toString(),
     );
     assert(capacityIndex == TraceName.capacity.index);
-    assert(_chartController.trace(capacityIndex).name ==
-        TraceName.values[capacityIndex].toString());
+    assert(
+      _chartController.trace(capacityIndex).name ==
+          TraceName.values[capacityIndex].toString(),
+    );
 
     // RSS
     final rSSIndex = _chartController.createTrace(
@@ -250,8 +268,10 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
       name: TraceName.rSS.toString(),
     );
     assert(rSSIndex == TraceName.rSS.index);
-    assert(_chartController.trace(rSSIndex).name ==
-        TraceName.values[rSSIndex].toString());
+    assert(
+      _chartController.trace(rSSIndex).name ==
+          TraceName.values[rSSIndex].toString(),
+    );
 
     final rasterLayerIndex = _chartController.createTrace(
       trace.ChartType.line,
@@ -263,8 +283,10 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
       name: TraceName.rasterLayer.toString(),
     );
     assert(rasterLayerIndex == TraceName.rasterLayer.index);
-    assert(_chartController.trace(rasterLayerIndex).name ==
-        TraceName.values[rasterLayerIndex].toString());
+    assert(
+      _chartController.trace(rasterLayerIndex).name ==
+          TraceName.values[rasterLayerIndex].toString(),
+    );
 
     final rasterPictureIndex = _chartController.createTrace(
       trace.ChartType.line,
@@ -276,8 +298,10 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
       name: TraceName.rasterPicture.toString(),
     );
     assert(rasterPictureIndex == TraceName.rasterPicture.index);
-    assert(_chartController.trace(rasterPictureIndex).name ==
-        TraceName.values[rasterPictureIndex].toString());
+    assert(
+      _chartController.trace(rasterPictureIndex).name ==
+          TraceName.values[rasterPictureIndex].toString(),
+    );
 
     assert(_chartController.traces.length == TraceName.values.length);
   }

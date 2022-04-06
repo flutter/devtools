@@ -37,6 +37,15 @@ import 'inspector_tree_controller.dart';
 
 const inspectorRefQueryParam = 'inspectorRef';
 
+// TODO(https://github.com/flutter/devtools/issues/3950): move this field to the
+// [InspectorController] class once the controller is provided by
+// package:provider.
+/// Tracks whether the first load of the inspector tree has been completed.
+///
+/// This field is used to prevent sending multiple analytics events for
+/// inspector tree load timing.
+bool firstInspectorTreeLoadCompleted = false;
+
 TextStyle textStyleForLevel(DiagnosticLevel level, ColorScheme colorScheme) {
   switch (level) {
     case DiagnosticLevel.hidden:
@@ -382,8 +391,10 @@ class InspectorController extends DisposableController
 
   void filterErrors() {
     if (isSummaryTree) {
-      serviceManager.errorBadgeManager.filterErrors(InspectorScreen.id,
-          (id) => hasDiagnosticsValue(InspectorInstanceRef(id)));
+      serviceManager.errorBadgeManager.filterErrors(
+        InspectorScreen.id,
+        (id) => hasDiagnosticsValue(InspectorInstanceRef(id)),
+      );
     }
   }
 
@@ -416,12 +427,13 @@ class InspectorController extends DisposableController
     }
 
     if (flutterAppFrameReady) {
-      // TODO: measure and send DevTools pageReady analytics:
-      // https://github.com/flutter/devtools/issues/3879
-      await serviceManager.sendDwdsEvent(
-        screen: InspectorScreen.id,
-        action: analytics_constants.pageReady,
+      unawaited(
+        serviceManager.sendDwdsEvent(
+          screen: InspectorScreen.id,
+          action: analytics_constants.pageReady,
+        ),
       );
+
       if (_disposed) return;
       // We need to start by querying the inspector service to find out the
       // current state of the UI.
@@ -431,7 +443,9 @@ class InspectorController extends DisposableController
           ? queryParams[inspectorRefQueryParam]
           : null;
       await updateSelectionFromService(
-          firstFrame: true, inspectorRef: inspectorRef);
+        firstFrame: true,
+        inspectorRef: inspectorRef,
+      );
     } else {
       final ready = await inspectorService.isWidgetTreeReady();
       if (_disposed) return;
@@ -809,7 +823,9 @@ class InspectorController extends DisposableController
         .value;
 
     updateSelectionFromService(
-        firstFrame: false, inspectorRef: errors.keys.elementAt(index));
+      firstFrame: false,
+      inspectorRef: errors.keys.elementAt(index),
+    );
   }
 
   void _onExpand(InspectorTreeNode node) {

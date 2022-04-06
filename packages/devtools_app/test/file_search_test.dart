@@ -75,8 +75,10 @@ void main() {
 
       await tester.tap(tileFinder.at(3));
 
-      expect(autoCompleteController.search,
-          equals('kitchen:food/catering/party.dart'));
+      expect(
+        autoCompleteController.search,
+        equals('kitchen:food/catering/party.dart'),
+      );
     });
 
     testWidgetsWithWindowSize(

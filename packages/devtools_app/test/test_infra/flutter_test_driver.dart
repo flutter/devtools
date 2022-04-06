@@ -89,10 +89,12 @@ abstract class FlutterTestDriver {
     );
     // This class doesn't use the result of the future. It's made available
     // via a getter for external uses.
-    unawaited(proc.exitCode.then((int code) {
-      _debugPrint('Process exited ($code)');
-      hasExited = true;
-    }));
+    unawaited(
+      proc.exitCode.then((int code) {
+        _debugPrint('Process exited ($code)');
+        hasExited = true;
+      }),
+    );
     transformToLines(proc.stdout)
         .listen((String line) => stdoutController.add(line));
     transformToLines(proc.stderr)
@@ -143,9 +145,11 @@ abstract class FlutterTestDriver {
 
       // Start listening for pause events.
       final StreamSubscription<Event> pauseSub = vmService!.onDebugEvent
-          .where((Event event) =>
-              event.isolate!.id == flutterIsolate &&
-              event.kind!.startsWith('Pause'))
+          .where(
+            (Event event) =>
+                event.isolate!.id == flutterIsolate &&
+                event.kind!.startsWith('Pause'),
+          )
           .listen(pauseEvent.complete);
 
       // But also check if the isolate was already paused (only after we've set
@@ -162,15 +166,18 @@ abstract class FlutterTestDriver {
       return _getFlutterIsolate();
     }
 
-    return _timeoutWithMessages<Isolate>(waitForPause,
-        message: 'Isolate did not pause');
+    return _timeoutWithMessages<Isolate>(
+      waitForPause,
+      message: 'Isolate did not pause',
+    );
   }
 
   Future<Isolate?> resume({String? step, bool wait = true}) async {
     _debugPrint('Sending resume ($step)');
     await _timeoutWithMessages<dynamic>(
-        () async => vmService!.resume(await getFlutterIsolateId(), step: step),
-        message: 'Isolate did not respond to resume ($step)');
+      () async => vmService!.resume(await getFlutterIsolateId(), step: step),
+      message: 'Isolate did not respond to resume ($step)',
+    );
     return wait ? waitForPause() : null;
   }
 
@@ -196,7 +203,8 @@ abstract class FlutterTestDriver {
         final StringBuffer error = StringBuffer();
         error.write('Received app.stop event while waiting for ');
         error.write(
-            '${event != null ? '$event event' : 'response to request $id.'}.\n\n');
+          '${event != null ? '$event event' : 'response to request $id.'}.\n\n',
+        );
         if (json['params'] != null && json['params']['error'] != null) {
           error.write('${json['params']['error']}\n\n');
         }
@@ -207,12 +215,13 @@ abstract class FlutterTestDriver {
       }
     });
 
-    return _timeoutWithMessages<Map<String, dynamic>>(() => response.future,
-            timeout: timeout,
-            message: event != null
-                ? 'Did not receive expected $event event.'
-                : 'Did not receive response to request "$id".')
-        .whenComplete(() => sub.cancel());
+    return _timeoutWithMessages<Map<String, dynamic>>(
+      () => response.future,
+      timeout: timeout,
+      message: event != null
+          ? 'Did not receive expected $event event.'
+          : 'Did not receive response to request "$id".',
+    ).whenComplete(() => sub.cancel());
   }
 
   Future<T> _timeoutWithMessages<T>(
@@ -232,10 +241,13 @@ abstract class FlutterTestDriver {
     final StreamSubscription<String> sub =
         _allMessages.stream.listen(logMessage);
 
-    return f().timeout(timeout ?? defaultTimeout, onTimeout: () {
-      logMessage('<timed out>');
-      throw '$message';
-    }).catchError((dynamic error) {
+    return f().timeout(
+      timeout ?? defaultTimeout,
+      onTimeout: () {
+        logMessage('<timed out>');
+        throw '$message';
+      },
+    ).catchError((dynamic error) {
       throw '$error\nReceived:\n${messages.toString()}';
     }).whenComplete(() => sub.cancel());
   }
@@ -404,7 +416,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
     if (hotReloadResp == null || hotReloadResp['code'] != 0) {
       _throwErrorResponse(
-          'Hot ${fullRestart ? 'restart' : 'reload'} request failed');
+        'Hot ${fullRestart ? 'restart' : 'reload'} request failed',
+      );
     }
   }
 

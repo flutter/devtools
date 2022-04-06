@@ -33,63 +33,68 @@ final _providerListChanged = AutoDisposeStreamProvider<void>((ref) async* {
   });
 });
 
-final _rawProviderIdsProvider =
-    AutoDisposeFutureProvider<List<String>>((ref) async {
-  // recompute the list of providers on hot-restart
-  ref.watch(hotRestartEventProvider);
-  // cause the list of providers to be re-evaluated when notified of a change
-  ref.watch(_providerListChanged);
+final _rawProviderIdsProvider = AutoDisposeFutureProvider<List<String>>(
+  (ref) async {
+    // recompute the list of providers on hot-restart
+    ref.watch(hotRestartEventProvider);
+    // cause the list of providers to be re-evaluated when notified of a change
+    ref.watch(_providerListChanged);
 
-  final isAlive = Disposable();
-  ref.onDispose(isAlive.dispose);
+    final isAlive = Disposable();
+    ref.onDispose(isAlive.dispose);
 
-  final eval = await ref.watch(providerEvalProvider.future);
+    final eval = await ref.watch(providerEvalProvider.future);
 
-  final providerIdRefs = await eval.evalInstance(
-    'ProviderBinding.debugInstance.providerDetails.keys.toList()',
-    isAlive: isAlive,
-  );
+    final providerIdRefs = await eval.evalInstance(
+      'ProviderBinding.debugInstance.providerDetails.keys.toList()',
+      isAlive: isAlive,
+    );
 
-  final providerIdInstances = await Future.wait([
-    for (final idRef in providerIdRefs.elements.cast<InstanceRef>())
-      eval.getInstance(idRef, isAlive)
-  ]);
+    final providerIdInstances = await Future.wait([
+      for (final idRef in providerIdRefs.elements.cast<InstanceRef>())
+        eval.getInstance(idRef, isAlive)
+    ]);
 
-  return [
-    for (final idInstance in providerIdInstances) idInstance.valueAsString,
-  ];
-}, name: '_rawProviderIdsProvider');
+    return [
+      for (final idInstance in providerIdInstances) idInstance.valueAsString,
+    ];
+  },
+  name: '_rawProviderIdsProvider',
+);
 
 final _rawProviderNodeProvider =
-    AutoDisposeFutureProviderFamily<ProviderNode, String>((ref, id) async {
-  // recompute the providers informations on hot-restart
-  ref.watch(hotRestartEventProvider);
+    AutoDisposeFutureProviderFamily<ProviderNode, String>(
+  (ref, id) async {
+    // recompute the providers informations on hot-restart
+    ref.watch(hotRestartEventProvider);
 
-  final isAlive = Disposable();
-  ref.onDispose(isAlive.dispose);
+    final isAlive = Disposable();
+    ref.onDispose(isAlive.dispose);
 
-  final eval = await ref.watch(providerEvalProvider.future);
+    final eval = await ref.watch(providerEvalProvider.future);
 
-  final providerNodeInstance = await eval.evalInstance(
-    "ProviderBinding.debugInstance.providerDetails['$id']",
-    isAlive: isAlive,
-  );
-
-  Future<Instance> getFieldWithName(String name) {
-    return eval.getInstance(
-      providerNodeInstance.fields.firstWhere((e) => e.decl.name == name).value
-          as InstanceRef,
-      isAlive,
+    final providerNodeInstance = await eval.evalInstance(
+      "ProviderBinding.debugInstance.providerDetails['$id']",
+      isAlive: isAlive,
     );
-  }
 
-  final type = await getFieldWithName('type');
+    Future<Instance> getFieldWithName(String name) {
+      return eval.getInstance(
+        providerNodeInstance.fields.firstWhere((e) => e.decl.name == name).value
+            as InstanceRef,
+        isAlive,
+      );
+    }
 
-  return ProviderNode(
-    id: id,
-    type: type.valueAsString,
-  );
-}, name: '_rawProviderNodeProvider');
+    final type = await getFieldWithName('type');
+
+    return ProviderNode(
+      id: id,
+      type: type.valueAsString,
+    );
+  },
+  name: '_rawProviderNodeProvider',
+);
 
 /// Combines [providerIdsProvider] with [providerNodeProvider] to obtain all
 /// the [ProviderNode]s at once, sorted alphabetically.

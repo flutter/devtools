@@ -375,8 +375,12 @@ Future<List<String>> autoCompleteResultsFor(
       if (function != null) {
         final libraryRef = await controller.findOwnerLibrary(function);
         if (libraryRef != null) {
-          result.addAll(await libraryMemberAndImportsAutocompletes(
-              libraryRef, controller));
+          result.addAll(
+            await libraryMemberAndImportsAutocompletes(
+              libraryRef,
+              controller,
+            ),
+          );
         }
       }
     }
