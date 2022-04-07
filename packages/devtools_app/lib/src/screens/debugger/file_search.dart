@@ -33,7 +33,7 @@ class FileSearchFieldState extends State<FileSearchField>
     with AutoDisposeMixin, SearchFieldMixin {
   late AutoCompleteController autoCompleteController;
 
-  final _scriptsCache = <String?, ScriptRef>{};
+  final _scriptsCache = <String, ScriptRef>{};
 
   final fileSearchFieldKey = GlobalKey(debugLabel: 'fileSearchFieldKey');
 
@@ -120,7 +120,9 @@ class FileSearchFieldState extends State<FileSearchField>
   }
 
   void _addScriptRefToCache(ScriptRef scriptRef) {
-    _scriptsCache.putIfAbsent(scriptRef.uri, () => scriptRef);
+    final uri = scriptRef.uri;
+    if (uri == null) return;
+    _scriptsCache.putIfAbsent(uri, () => scriptRef);
   }
 
   void _onSelection(String scriptUri) {

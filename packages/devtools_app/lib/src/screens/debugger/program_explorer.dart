@@ -166,8 +166,8 @@ class _ProgramExplorerRow extends StatelessWidget {
           buffer.write('{');
         }
       }
-      final required = param.required;
-      if (required != null && required) {
+      final paramRequired = param.required;
+      if (paramRequired ?? false) {
         buffer.write('required ');
       }
       final paramType = param.parameterType;

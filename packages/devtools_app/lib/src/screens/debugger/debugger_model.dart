@@ -476,11 +476,12 @@ Future<void> buildVariablesTree(
     final tasks = <Future>[];
     ObjectGroupBase? group;
     Future<void> _maybeUpdateRef(DartObjectNode child) async {
-      if (child.ref == null) return;
-      if (child.ref!.diagnostic == null) {
+      final childRef = child.ref;
+      if (childRef == null) return;
+      if (childRef.diagnostic == null) {
         // TODO(jacobr): also check whether the InstanceRef is an instance of
         // Diagnosticable and show the Diagnosticable properties in that case.
-        final instanceRef = child.ref!.instanceRef;
+        final instanceRef = childRef.instanceRef;
         // This is an approximation of eval('instanceRef is DiagnosticsNode')
         // TODO(jacobr): cache the full class hierarchy so we can cheaply check
         // instanceRef is DiagnosticsNode without having to do an eval.
@@ -493,7 +494,7 @@ Future<void> buildVariablesTree(
             group ??= inspectorService.createObjectGroup('temp');
             final valueInstanceRef = await group!.evalOnRef(
               'object.value',
-              child.ref,
+              childRef,
             );
             // TODO(jacobr): add the Diagnostics properties as well?
             child._ref = GenericInstanceRef(
@@ -530,17 +531,18 @@ Future<Obj> _getObjectWithRetry(
   String objectId,
   DartObjectNode variable,
 ) async {
+  final variableId = variable.ref!.isolateRef!.id!;
   try {
     final dynamic result = await serviceManager.service!.getObject(
-      variable.ref!.isolateRef!.id!,
+      variableId,
       objectId,
       offset: variable.offset,
       count: variable.childCount,
     );
     return result;
   } catch (e) {
-    final dynamic result = await serviceManager.service!
-        .getObject(variable.ref!.isolateRef!.id!, objectId);
+    final dynamic result =
+        await serviceManager.service!.getObject(variableId, objectId);
     return result;
   }
 }
@@ -562,12 +564,11 @@ Future<DartObjectNode> _buildVariable(
 
 Future<List<DartObjectNode>> _createVariablesForDiagnostics(
   ObjectGroupBase inspectorService,
-  List<RemoteDiagnosticsNode?> diagnostics,
+  List<RemoteDiagnosticsNode> diagnostics,
   IsolateRef isolateRef,
 ) async {
   final variables = <Future<DartObjectNode>>[];
   for (var diagnostic in diagnostics) {
-    if (diagnostic == null) continue;
     // Omit hidden properties.
     if (diagnostic.level == DiagnosticLevel.hidden) continue;
     variables.add(_buildVariable(diagnostic, inspectorService, isolateRef));
@@ -694,12 +695,13 @@ List<DartObjectNode> _createVariablesForElements(
   IsolateRef? isolateRef,
 ) {
   final variables = <DartObjectNode>[];
-  for (int i = 0; i < instance.elements!.length; i++) {
+  final elements = instance.elements ?? [];
+  for (int i = 0; i < elements.length; i++) {
     final name = instance.offset == null ? i : i + instance.offset!;
     variables.add(
       DartObjectNode.fromValue(
         name: '[$name]',
-        value: instance.elements![i],
+        value: elements[i],
         isolateRef: isolateRef,
       ),
     );

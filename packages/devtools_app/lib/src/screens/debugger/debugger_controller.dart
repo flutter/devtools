@@ -257,8 +257,7 @@ class DebuggerController extends DisposableController
 
     if (script != null) {
       try {
-        final positions =
-            await getBreakablePositions(script) as List<SourcePosition>;
+        final positions = await getBreakablePositions(script);
         executableLines = Set.from(positions.map((p) => p.line));
       } catch (e) {
         // Ignore - not supported for all vm service implementations.
@@ -516,8 +515,8 @@ class DebuggerController extends DisposableController
 
   Future<void> clearBreakpoints() async {
     final breakpoints = _breakpoints.value.toList();
-    await Future.forEach(breakpoints, (Breakpoint? breakpoint) {
-      return removeBreakpoint(breakpoint!);
+    await Future.forEach(breakpoints, (Breakpoint breakpoint) {
+      return removeBreakpoint(breakpoint);
     });
   }
 
@@ -607,10 +606,11 @@ class DebuggerController extends DisposableController
       // TODO(djshuckerow): switch the _breakpoints notifier to a 'ListNotifier'
       // that knows how to notify when performing a list edit operation.
       case EventKind.kBreakpointAdded:
-        _breakpoints.value = [..._breakpoints.value, event.breakpoint!];
+        final breakpoint = event.breakpoint!;
+        _breakpoints.value = [..._breakpoints.value, breakpoint];
 
         // ignore: unawaited_futures
-        _createBreakpointWithLocation(event.breakpoint).then((bp) {
+        _createBreakpointWithLocation(breakpoint).then((bp) {
           final list = [
             ..._breakpointsWithLocation.value,
             bp,
@@ -621,14 +621,15 @@ class DebuggerController extends DisposableController
 
         break;
       case EventKind.kBreakpointResolved:
+        final breakpoint = event.breakpoint!;
         _breakpoints.value = [
           for (var b in _breakpoints.value)
             if (b != event.breakpoint) b,
-          event.breakpoint!
+          breakpoint
         ];
 
         // ignore: unawaited_futures
-        _createBreakpointWithLocation(event.breakpoint).then((bp) {
+        _createBreakpointWithLocation(breakpoint).then((bp) {
           final list = _breakpointsWithLocation.value.toList();
           // Remote the bp with the older, unresolved information from the list.
           list.removeWhere((breakpoint) => bp.breakpoint.id == bp.id);
@@ -891,9 +892,9 @@ class DebuggerController extends DisposableController
   }
 
   Future<BreakpointAndSourcePosition> _createBreakpointWithLocation(
-    Breakpoint? breakpoint,
+    Breakpoint breakpoint,
   ) async {
-    if (breakpoint!.resolved!) {
+    if (breakpoint.resolved!) {
       final bp = BreakpointAndSourcePosition.create(breakpoint);
       return scriptManager.getScript(bp.scriptRef!).then((Script script) {
         final pos = SourcePosition.calculatePosition(script, bp.tokenPos!);
@@ -1006,14 +1007,14 @@ class DebuggerController extends DisposableController
   final Map<String, List<SourcePosition>> _breakPositionsMap = {};
 
   /// Return the list of valid positions for breakpoints for a given script.
-  Future<List<SourcePosition>?> getBreakablePositions(Script script) async {
+  Future<List<SourcePosition>> getBreakablePositions(Script script) async {
     final key = script.id;
     if (key == null) return [];
     if (!_breakPositionsMap.containsKey(key)) {
       _breakPositionsMap[key] = await _getBreakablePositions(script);
     }
 
-    return _breakPositionsMap[key];
+    return _breakPositionsMap[key] ?? [];
   }
 
   Future<List<SourcePosition>> _getBreakablePositions(Script script) async {
@@ -1027,8 +1028,9 @@ class DebuggerController extends DisposableController
     final positions = <SourcePosition>[];
 
     for (SourceReportRange range in report.ranges!) {
-      if (range.possibleBreakpoints != null) {
-        for (int tokenPos in range.possibleBreakpoints!) {
+      final possibleBreakpoints = range.possibleBreakpoints;
+      if (possibleBreakpoints != null) {
+        for (int tokenPos in possibleBreakpoints) {
           positions.add(SourcePosition.calculatePosition(script, tokenPos));
         }
       }

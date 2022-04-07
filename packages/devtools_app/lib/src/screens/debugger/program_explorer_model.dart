@@ -62,11 +62,11 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       ObjRef(id: '0'),
     );
 
-    String? uri;
-    Library? lib;
+    String uri;
+    Library lib;
     if (object is Library) {
-      lib = object as Library?;
-      uri = lib!.uri;
+      lib = object as Library;
+      uri = lib.uri ?? '';
     } else {
       // Try to find the library in the tree. If the current node isn't a
       // library node, it's likely one of its parents are.
@@ -90,13 +90,13 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
             );
         lib = await service.getObject(isolate.id!, libRef.id!) as Library;
       } else {
-        lib = libNode.object as Library?;
+        lib = libNode.object as Library;
       }
       final ScriptRef s = (object is ScriptRef) ? object as ScriptRef : script!;
-      uri = s.uri;
+      uri = s.uri ?? '';
     }
 
-    for (final clazzRef in lib!.classes!) {
+    for (final clazzRef in lib.classes!) {
       // Don't surface synthetic classes created by mixin applications.
       if (clazzRef.name!.contains('&')) {
         continue;
@@ -113,7 +113,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     }
 
     for (final function in lib.functions!) {
-      if (function.location!.script!.uri == uri) {
+      if (function.location?.script?.uri == uri) {
         final node = VMServiceObjectNode(
           controller,
           function.name,
@@ -125,7 +125,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     }
 
     for (final field in lib.variables!) {
-      if (field.location!.script!.uri == uri) {
+      if (field.location?.script?.uri == uri) {
         final node = VMServiceObjectNode(
           controller,
           field.name,
@@ -189,17 +189,19 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     // Place the root library's parent node at the top of the explorer if it's
     // part of a package. Otherwise, it's a file path and its directory should
     // appear near the top of the list anyway.
-    final rootLib = serviceManager
-        .isolateManager.mainIsolateDebuggerState!.isolateNow!.rootLib!;
-    if (rootLib.uri!.startsWith('package:') ||
-        rootLib.uri!.startsWith('google3:')) {
-      final parts = rootLib.uri!.split('/')..removeLast();
-      final path = parts.join('/');
-      for (int i = 0; i < root.children.length; ++i) {
-        if (root.children[i].name.startsWith(path)) {
-          final VMServiceObjectNode rootLibNode = root.removeChildAtIndex(i);
-          root.addChild(rootLibNode, index: 0);
-          break;
+    final rootLibUri = serviceManager
+        .isolateManager.mainIsolateDebuggerState?.isolateNow?.rootLib?.uri;
+    if (rootLibUri != null) {
+      if (rootLibUri.startsWith('package:') ||
+          rootLibUri.startsWith('google3:')) {
+        final parts = rootLibUri.split('/')..removeLast();
+        final path = parts.join('/');
+        for (int i = 0; i < root.children.length; ++i) {
+          if (root.children[i].name.startsWith(path)) {
+            final VMServiceObjectNode rootLibNode = root.removeChildAtIndex(i);
+            root.addChild(rootLibNode, index: 0);
+            break;
+          }
         }
       }
     }
@@ -291,10 +293,10 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
   void updateObject(Obj object) {
     if (this.object is! Class && object is Class) {
-      for (final function in object.functions!) {
+      for (final function in object.functions ?? []) {
         _createChild(function.name, function);
       }
-      for (final field in object.fields!) {
+      for (final field in object.fields ?? []) {
         _createChild(field.name, field);
       }
       _sortEntriesByType();

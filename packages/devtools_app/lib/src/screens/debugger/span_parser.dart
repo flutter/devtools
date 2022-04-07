@@ -84,7 +84,12 @@ class Grammar {
 
 /// A representation of a span of text which has `scope` applied to it.
 class ScopeSpan {
-  ScopeSpan({String? scope, int? start, int? end, this.line, this.column})
+  ScopeSpan(
+      {String? scope,
+      required int start,
+      required int end,
+      this.line,
+      this.column})
       : scopes = [
           ..._scopeStack.toList(),
           if (scope != null) scope,
@@ -94,8 +99,8 @@ class ScopeSpan {
 
   ScopeSpan.copy({
     this.scopes,
-    int? start,
-    int? end,
+    required int start,
+    required int end,
     this.line,
     this.column,
   })  : _start = start,
@@ -120,11 +125,11 @@ class ScopeSpan {
 
   static final ListQueue<String?> _scopeStack = ListQueue<String?>();
 
-  int get length => _end! - _start!;
+  int get length => _end - _start;
 
-  final int? _start;
+  final int _start;
 
-  int? _end;
+  int _end;
 
   final int? line;
 
@@ -132,7 +137,7 @@ class ScopeSpan {
 
   final List<String?>? scopes;
 
-  bool contains(int token) => (_start! <= token) && (token < _end!);
+  bool contains(int token) => (_start <= token) && (token < _end);
 
   /// Splits the current [ScopeSpan] into multiple spans separated by [cond].
   /// This is useful for post-processing the results from a rule with a while
@@ -247,10 +252,11 @@ abstract class _Matcher {
     int column,
   ) {
     final spans = <ScopeSpan>[];
-    final start = scanner.lastMatch!.start;
-    final end = scanner.lastMatch!.end;
+    final lastMatch = scanner.lastMatch!;
+    final start = lastMatch.start;
+    final end = lastMatch.end;
     if (captures != null) {
-      if (scanner.lastMatch!.groupCount <= 1) {
+      if (lastMatch.groupCount <= 1) {
         spans.add(
           ScopeSpan(
             scope: captures['0']['name'],
@@ -426,7 +432,7 @@ class _MultilineMatcher extends _Matcher {
         break;
       }
       bool foundMatch = false;
-      for (final pattern in patterns!) {
+      for (final pattern in patterns ?? []) {
         final result = pattern.scan(grammar, scanner);
         if (result != null) {
           results.addAll(result);
@@ -443,16 +449,14 @@ class _MultilineMatcher extends _Matcher {
 
   List<ScopeSpan> _scanUpToEndMatch(Grammar grammar, LineScanner scanner) {
     final results = <ScopeSpan>[];
-    while (!scanner.isDone && !scanner.matches(end!)) {
+    while (!scanner.isDone && end != null && !scanner.matches(end!)) {
       bool foundMatch = false;
-      if (patterns != null) {
-        for (final pattern in patterns!) {
-          final result = pattern.scan(grammar, scanner);
-          if (result != null) {
-            results.addAll(result);
-            foundMatch = true;
-            break;
-          }
+      for (final pattern in patterns ?? []) {
+        final result = pattern.scan(grammar, scanner);
+        if (result != null) {
+          results.addAll(result);
+          foundMatch = true;
+          break;
         }
       }
       if (!foundMatch) {
@@ -466,7 +470,7 @@ class _MultilineMatcher extends _Matcher {
   List<ScopeSpan>? _scanEnd(LineScanner scanner) {
     final line = scanner.line;
     final column = scanner.column;
-    if (!scanner.scan(end!)) {
+    if (end != null && !scanner.scan(end!)) {
       return null;
     }
     return _processCaptureHelper(scanner, beginCaptures, line, column);
@@ -540,7 +544,8 @@ class _MultilineMatcher extends _Matcher {
         // Find the range of the string that is matched by the while condition.
         final start = scanner.position;
         _skipLine(scanner);
-        while (!scanner.isDone && scanner.scan(whileCond!)) {
+        while (
+            !scanner.isDone && whileCond != null && scanner.scan(whileCond!)) {
           _skipLine(scanner);
         }
         final end = scanner.position;
@@ -557,7 +562,9 @@ class _MultilineMatcher extends _Matcher {
         contentResults.addAll(_scanToEndOfLine(grammar, contentScanner));
 
         // Process each line until the `while` condition fails.
-        while (!contentScanner.isDone && contentScanner.scan(whileCond!)) {
+        while (!contentScanner.isDone &&
+            whileCond != null &&
+            contentScanner.scan(whileCond!)) {
           contentResults.addAll(_scanToEndOfLine(grammar, contentScanner));
         }
 
@@ -619,7 +626,7 @@ class _IncludeMatcher extends _Matcher {
 
   @override
   List<ScopeSpan>? scan(Grammar grammar, LineScanner scanner) {
-    final patterns = grammar.repository!.patterns[include];
+    final patterns = grammar.repository?.patterns[include];
     if (patterns == null) {
       throw StateError('Could not find $include in the repository.');
     }

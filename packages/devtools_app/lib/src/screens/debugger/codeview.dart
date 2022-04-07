@@ -256,6 +256,8 @@ class _CodeViewState extends State<CodeView>
         // output from the syntax highlighter into individual lines.
         var currentLine = <TextSpan>[];
         highlighted.visitChildren((span) {
+          // TODO(elliette): Switch to using TextSpans instead of InlineSpans so
+          // type-casting isn't necessary.
           currentLine.add(span as TextSpan);
           if (span.toPlainText() == '\n') {
             lines.add(
@@ -904,6 +906,8 @@ class _LineItemState extends State<LineItem> {
   }
 
   TextSpan searchAwareLineContents() {
+    // TODO(elliette): Switch to using TextSpans instead of InlineSpans so
+    // type-casting isn't necessary.
     final children = widget.lineContents.children as List<TextSpan>?;
     if (children == null) return const TextSpan();
 
@@ -993,12 +997,13 @@ class _LineItemState extends State<LineItem> {
   }
 
   List<TextSpan>? _activeSearchAwareLineContents(
-    List<TextSpan>? startingContents,
+    List<TextSpan> startingContents,
   ) {
-    if (widget.activeSearchMatch == null) return startingContents;
+    final activeSearchMatch = widget.activeSearchMatch;
+    if (activeSearchMatch == null) return startingContents;
     return _contentsWithMatch(
-      startingContents!,
-      widget.activeSearchMatch!,
+      startingContents,
+      activeSearchMatch,
       activeSearchMatchColor,
     );
   }
@@ -1173,12 +1178,14 @@ class GoToLineDialog extends StatelessWidget {
           TextField(
             autofocus: true,
             onSubmitted: (value) {
-              if (value.isNotEmpty) {
+              final scriptRef =
+                  _debuggerController.scriptLocation.value?.scriptRef;
+              if (value.isNotEmpty && scriptRef != null) {
                 Navigator.of(context).pop(dialogDefaultContext);
                 final line = int.parse(value);
                 _debuggerController.showScriptLocation(
                   ScriptLocation(
-                    _debuggerController.scriptLocation.value!.scriptRef,
+                    scriptRef,
                     location: SourcePosition(line: line, column: 0),
                   ),
                 );
