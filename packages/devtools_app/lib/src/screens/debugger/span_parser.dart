@@ -84,13 +84,13 @@ class Grammar {
 
 /// A representation of a span of text which has `scope` applied to it.
 class ScopeSpan {
-  ScopeSpan(
-      {String? scope,
-      required int start,
-      required int end,
-      this.line,
-      this.column})
-      : scopes = [
+  ScopeSpan({
+    String? scope,
+    required int start,
+    required int end,
+    this.line,
+    this.column,
+  })  : scopes = [
           ..._scopeStack.toList(),
           if (scope != null) scope,
         ],
