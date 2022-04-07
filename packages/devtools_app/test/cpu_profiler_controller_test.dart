@@ -11,18 +11,9 @@ import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'test_data/cpu_profile_test_data.dart';
-
-class TestCpuProfilerController extends CpuProfilerController {
-  @override
-  Future<CpuProfileData> getCpuProfile({
-    required int startMicros,
-    required int extentMicros,
-  }) {
-    return Future.value(CpuProfileData.parse(goldenCpuProfileDataJson));
-  }
-}
 
 void main() {
   group('CpuProfileController', () {
@@ -31,12 +22,12 @@ void main() {
     setUp(() {
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(
-          cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
+          cpuSamples: CpuSamples.parse(goldenSamplesJson),
         ),
       );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
-      controller = TestCpuProfilerController();
+      controller = CpuProfilerController();
     });
 
     Future<void> pullProfileAndSelectFrame() async {

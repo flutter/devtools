@@ -19,6 +19,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'test_data/cpu_profile_test_data.dart';
 
@@ -32,7 +33,7 @@ void main() {
     setUp(() async {
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(
-          cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
+          cpuSamples: CpuSamples.parse(goldenSamplesJson),
         ),
       );
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);

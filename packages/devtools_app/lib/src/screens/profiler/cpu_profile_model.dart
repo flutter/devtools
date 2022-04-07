@@ -17,7 +17,7 @@ import '../../shared/globals.dart';
 import '../../ui/search.dart';
 import 'cpu_profile_transformer.dart';
 
-/// Data model for DevTools CPU profile.
+/// Data model for DevTools traceEventsU profile.
 class CpuProfileData {
   CpuProfileData._({
     required this.stackFrames,
@@ -288,15 +288,8 @@ class CpuProfileData {
   /// [extent] extent time
   static Future<CpuProfileData> generateFromCpuSamples(
     String isolateId,
-    int origin,
-    int extent,
+    CpuSamples cpuSamples,
   ) async {
-    // As of service protocol version 3.27 _getCpuProfileTimeline does not exist
-    // and has been replaced by getCpuSamples. We need to do some processing to
-    // get back to the format we expect.
-    final cpuSamples =
-        await serviceManager.service!.getCpuSamples(isolateId, origin, extent);
-
     // The root ID is associated with an artificial frame / node that is the root
     // of all stacks, regardless of entrypoint. This should never be seen in the
     // final output from this method.
@@ -365,6 +358,7 @@ class CpuProfileData {
         'args': {
           if (sample.userTag != null) 'userTag': sample.userTag,
           if (sample.vmTag != null) 'vmTag': sample.vmTag,
+          'mode': 'basic', // TODO: remove basic from examples instead
         },
       });
     }
@@ -496,6 +490,7 @@ class ProfileDataCpuSample extends TraceEvent {
     required this.leafId,
     this.userTag,
     required Map<String, dynamic> traceJson,
+    this.vmTag,
   }) : super(traceJson);
 
   factory ProfileDataCpuSample.parse(Map<String, dynamic> traceJson) {
@@ -503,16 +498,22 @@ class ProfileDataCpuSample extends TraceEvent {
     final userTag = traceJson[TraceEvent.argsKey] != null
         ? traceJson[TraceEvent.argsKey][CpuProfileData.userTagKey]
         : null;
+    final vmTag = traceJson[TraceEvent.argsKey] != null
+        ? traceJson[TraceEvent.argsKey]['vmTag']
+        : null;
     return ProfileDataCpuSample(
       leafId: leafId,
       userTag: userTag,
       traceJson: traceJson,
+      vmTag: vmTag,
     );
   }
 
   final String leafId;
 
   final String? userTag;
+
+  final String? vmTag;
 
   Map<String, dynamic> get toJson {
     // [leafId] is the source of truth for the leaf id of this sample.

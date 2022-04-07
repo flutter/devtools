@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:vm_service/vm_service.dart';
+
 import '../../service/vm_flags.dart' as vm_flags;
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
@@ -13,11 +18,10 @@ extension CpuProfilerExtension on VmServiceWrapper {
     required int startMicros,
     required int extentMicros,
   }) async {
-    return await CpuProfileData.generateFromCpuSamples(
-      serviceManager.isolateManager.selectedIsolate.value!.id!,
-      startMicros,
-      extentMicros,
-    );
+    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
+    final cpuSamples = await serviceManager.service!
+        .getCpuSamples(isolateId, startMicros, extentMicros);
+    return CpuProfileData.generateFromCpuSamples(isolateId, cpuSamples);
   }
 
   Future clearSamples() {

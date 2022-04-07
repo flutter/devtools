@@ -12,6 +12,7 @@ import 'package:devtools_app/src/screens/performance/performance_model.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
 import 'test_data/cpu_profile_test_data.dart';
 import 'test_data/performance_test_data.dart';
@@ -62,7 +63,7 @@ void main() {
         ],
         frames: [testFrame0, testFrame1],
         selectedEvent: vsyncEvent,
-        cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
+        cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJsonZZZ),
         displayRefreshRate: 60,
       );
       expect(
@@ -90,7 +91,10 @@ void main() {
               'vsyncOverhead': 1000
             },
           ],
-          PerformanceData.cpuProfileKey: goldenCpuProfileDataJson,
+          PerformanceData.cpuProfileKey: CpuProfileData.generateFromCpuSamples(
+            goldenSamplesIsolate,
+            CpuSamples.parse(goldenSamplesJson)!,
+          ),
           PerformanceData.selectedEventKey: vsyncEvent.json,
           PerformanceData.displayRefreshRateKey: 60,
         }),
@@ -220,7 +224,7 @@ void main() {
       expect(offlineData.displayRefreshRate, equals(120));
       expect(
         offlineData.cpuProfileData!.toJson,
-        equals(goldenCpuProfileDataJson),
+        equals(goldenCpuProfileDataJsonZZZ),
       );
     });
 

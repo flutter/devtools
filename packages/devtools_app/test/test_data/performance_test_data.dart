@@ -1125,7 +1125,7 @@ final goldenTraceEventsJson = List<Map<String, dynamic>>.from(
 
 final offlinePerformanceDataJson = {
   PerformanceData.traceEventsKey: goldenTraceEventsJson,
-  PerformanceData.cpuProfileKey: goldenCpuProfileDataJson,
+  PerformanceData.cpuProfileKey: goldenCpuProfileDataJsonZZZ,
   PerformanceData.selectedFrameIdKey: 1,
   PerformanceData.selectedEventKey: vsyncEvent.json,
   PerformanceData.displayRefreshRateKey: 120.0,

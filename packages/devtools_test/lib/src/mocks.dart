@@ -98,6 +98,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     SamplesMemoryJson memoryData,
     AllocationMemoryJson allocationData,
     CpuProfileData cpuProfileData,
+    CpuSamples cpuSamples,
   }) =>
       FakeVmService(
         _flagManager,
@@ -106,7 +107,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
         httpProfile,
         memoryData,
         allocationData,
-        cpuProfileData,
+        cpuSamples,
       );
 
   final List<String> availableServices;
@@ -256,19 +257,23 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     this._httpProfile,
     this._memoryData,
     this._allocationData,
-    CpuProfileData cpuProfileData,
+    CpuSamples cpuSamples,
   )   : _startingSockets = _socketProfile?.sockets ?? [],
         _startingRequests = _httpProfile?.requests ?? [],
-        cpuProfileData = cpuProfileData ??
-            CpuProfileData.parse(<String, dynamic>{
-              'type': '_CpuProfileTimeline',
+        cpuSamples = cpuSamples ??
+            CpuSamples.parse({
               'samplePeriod': 50,
+              'maxStackDepth': 12,
               'sampleCount': 0,
-              'stackDepth': 128,
+              'timeSpan': -1,
               'timeOriginMicros': 47377796685,
               'timeExtentMicros': 3000,
-              'traceEvents': <Map<String, dynamic>>[],
+              'pid': 54321,
+              'functions': [],
+              'samples': [],
             });
+
+  CpuSamples cpuSamples;
 
   /// Specifies the return value of `httpEnableTimelineLogging`.
   bool httpEnableTimelineLoggingResult = true;
@@ -290,7 +295,6 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   final List<HttpProfileRequest> _startingRequests;
   final SamplesMemoryJson _memoryData;
   final AllocationMemoryJson _allocationData;
-  final CpuProfileData cpuProfileData;
 
   final _flags = <String, dynamic>{
     'flags': <Flag>[
@@ -328,7 +332,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     int timeOriginMicros,
     int timeExtentMicros,
   ) {
-    return Future.value(MockCpuSamples());
+    return Future.value(cpuSamples);
   }
 
   @override

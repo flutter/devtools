@@ -5,7 +5,7 @@
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 
-final Map<String, dynamic> goldenCpuProfileDataJson = {
+final Map<String, dynamic> goldenCpuProfileDataJsonZZZ = {
   'type': '_CpuProfileTimeline',
   'samplePeriod': 50,
   'sampleCount': 8,
@@ -176,54 +176,336 @@ final Map<String, dynamic> cpuProfileResponseJson = {
   'stackFrames': goldenCpuProfileStackFrames,
   'traceEvents': goldenCpuProfileTraceEvents,
 };
-
-final Map<String, dynamic> cpuSamplesJson = {
-  'samplePeriod': 45,
-  'maxStackDepth': 12,
-  'sampleCount': 1,
-  'timeSpan': 100,
+final String goldenSamplesIsolate = '140357727781376';
+final Map<String, dynamic> goldenSamplesJson = {
+  'type': 'CpuSamples',
+  'samplePeriod': 50,
+  'maxStackDepth': 128,
+  'sampleCount': 8,
+  'timeSpan': -1,
   'timeOriginMicros': 47377796685,
   'timeExtentMicros': 3000,
-  'pid': 54321,
+  'pid': 77616,
   'functions': [
     {
-      'kind': 'Collected',
+      'kind': 'Native',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl': '',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': 'thread_start',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
+      }
+    },
+    {
+      'kind': 'Native',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl': '',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': '_pthread_start',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
+      }
+    },
+    {
+      'kind': 'Native',
       'inclusiveTicks': 0,
       'exclusiveTicks': 0,
       'resolvedUrl':
-          'org-dartlang-sdk:///third_party/dart/sdk/lib/_internal/vm/bin/socket_patch.dart',
+          'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/compact_hash.dart',
       'function': {
         'type': '@Function',
-        'id': 'classes/3695/functions/_startConnect%4014069316',
-        'name': '_startConnect',
-        'owner': {
-          'id': 'classes/3695',
-          'name': 'Socket',
-          'library': {
-            'id': 'libraries/@12312',
-            'name': 'dart.io',
-            'uri': 'dart.io',
-          }
-        },
-        'isStatic': true,
-        'isConst': false,
-        'implicit': false,
+        'id': '',
+        'name': '_drawFrame',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
+      }
+    },
+    {
+      'kind': 'Native',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl':
+          'file:///path/to/flutter/packages/flutter/lib/src/scheduler/binding.dart',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': '_WidgetsFlutterBinding.draw',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
+      }
+    },
+    {
+      'kind': 'Native',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/binding.dart',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': 'RendererBinding.drawFrame',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
+      }
+    },
+    {
+      'kind': 'Native',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl':
+          'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/list.dart',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': '_RenderProxyBox.paint',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
+      }
+    },
+    {
+      'kind': 'Native',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/painting/context.dart',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': 'PaintingContext.paintChild',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
+      }
+    },
+    {
+      'kind': 'Native',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl': '',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': '_SyncBlock.finish',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
+      }
+    },
+    {
+      'kind': 'Native',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl': '',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': '[Truncated]',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
+      }
+    },
+    {
+      'kind': 'Native',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl':
+          'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': 'RenderObject._getSemanticsForParent.<closure>',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
+      }
+    },
+    {
+      'kind': 'Native',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl':
+          'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': 'RenderObject._getSemanticsForParent',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
+      }
+    },
+    {
+      'kind': 'Native',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': 'RenderPhysicalModel.paint',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
+      }
+    },
+    {
+      'kind': 'Native',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': 'RenderCustomMultiChildLayoutBox.paint',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
+      }
+    },
+    {
+      'kind': 'Native',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl':
+          'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/hash.dart',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': '_RenderCustomMultiChildLayoutBox.defaultPaint',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
+      }
+    },
+    {
+      'kind': 'Native',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': 'RenderObject._paintWithContext',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
+      }
+    },
+    {
+      'kind': 'Native',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name': 'RenderStack.paintStack',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
+      }
+    },
+    {
+      'kind': 'Native',
+      'inclusiveTicks': 0,
+      'exclusiveTicks': 0,
+      'resolvedUrl': '',
+      'function': {
+        'type': '@Function',
+        'id': '',
+        'name':
+            '_WidgetsFlutterBinding&BindingBase&Gesture._invokeFrameCallback',
+        'owner': null,
+        'static': false,
+        'const': null,
+        'implicit': false
       }
     }
   ],
   'samples': [
     {
-      'type': 'CpuSample',
-      'tid': 213,
-      'timestamp': 987312,
-      'vmTag': '__vmTag',
-      'userTag': '__userTag',
-      'truncated': false,
-      'stack': [0, 0, 0, 0],
-      'identityHashCode': 12312312,
-      'classId': 9329,
+      'tid': 42247,
+      'timestamp': 47377796685,
+      'stack': [4, 3, 2, 1, 0],
+      'truncated': true
+    },
+    {
+      'tid': 42247,
+      'timestamp': 47377797975,
+      'stack': [7, 6, 5, 2, 1, 0],
+      'truncated': true
+    },
+    {
+      'tid': 42247,
+      'timestamp': 47377799063,
+      'stack': [10, 9, 8],
+      'truncated': true
+    },
+    {
+      'tid': 42247,
+      'timestamp': 47377800363,
+      'stack': [13, 12, 11, 8],
+      'truncated': true
+    },
+    {
+      'tid': 42247,
+      'timestamp': 47377800463,
+      'stack': [13, 12, 11, 8],
+      'truncated': true
+    },
+    {
+      'tid': 42247,
+      'timestamp': 47377800563,
+      'stack': [13, 12, 11, 8],
+      'truncated': true
+    },
+    {
+      'tid': 42247,
+      'timestamp': 47377800663,
+      'stack': [14, 13, 12, 11, 8],
+      'truncated': true
+    },
+    {
+      'tid': 42247,
+      'timestamp': 47377800763,
+      'stack': [16, 15, 13, 12, 11, 8],
+      'truncated': true
     }
-  ],
+  ]
 };
 
 final Map<String, dynamic> goldenCpuProfileStackFrames =
@@ -265,7 +547,8 @@ final Map<String, dynamic> goldenCpuProfileStackFrames =
               'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
         },
         '140357727781376-17': {
-          'category': '[Stub] OneArgCheckInlineCache',
+          'category':
+              'Dart', // TODO: Double check this is getting done properly
           'name':
               '_WidgetsFlutterBinding&BindingBase&Gesture._invokeFrameCallback',
           'parent': '140357727781376-16',
