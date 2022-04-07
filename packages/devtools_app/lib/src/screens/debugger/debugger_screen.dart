@@ -381,7 +381,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
         event.kind == EventKind.kPauseException ? ' on exception' : '';
 
     final scriptUri = frame?.location?.script?.uri;
-    if (scriptUri == null)  {
+    if (scriptUri == null) {
       return 'paused$reason';
     }
 
@@ -393,8 +393,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     }
 
     final script = await scriptManager.getScript(scriptRef);
-    final pos =
-        SourcePosition.calculatePosition(script, tokenPos);
+    final pos = SourcePosition.calculatePosition(script, tokenPos);
 
     return 'paused$reason$fileName $pos';
   }

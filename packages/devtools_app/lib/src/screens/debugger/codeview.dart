@@ -1007,8 +1007,7 @@ class _LineItemState extends State<LineItem> {
     List<TextSpan> startingContents,
   ) {
     final searchMatches = widget.searchMatches;
-    if (searchMatches == null || searchMatches.isEmpty)
-      return startingContents;
+    if (searchMatches == null || searchMatches.isEmpty) return startingContents;
     final searchMatchesToFind = List<SourceToken>.from(searchMatches)
       ..remove(widget.activeSearchMatch);
 
