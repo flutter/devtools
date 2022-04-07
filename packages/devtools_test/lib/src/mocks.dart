@@ -1490,9 +1490,10 @@ final mockSyntaxHighlighter = SyntaxHighlighter.withGrammar(
 );
 
 final mockParsedScript = ParsedScript(
-    script: mockScript,
-    highlighter: mockSyntaxHighlighter,
-    executableLines: <int>{});
+  script: mockScript,
+  highlighter: mockSyntaxHighlighter,
+  executableLines: <int>{},
+);
 
 final mockScriptRefs = [
   ScriptRef(uri: 'zoo:animals/cats/meow.dart', id: 'fake/id/1'),
