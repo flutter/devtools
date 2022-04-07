@@ -300,10 +300,6 @@ void main() {
         debuggerController.matchesForSearch('').toString(),
         equals('[]'),
       );
-      expect(
-        debuggerController.matchesForSearch(null).toString(),
-        equals('[]'),
-      );
     });
   });
 }

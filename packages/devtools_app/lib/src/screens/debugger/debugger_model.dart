@@ -154,8 +154,10 @@ abstract class BreakpointAndSourcePosition
     implements Comparable<BreakpointAndSourcePosition> {
   BreakpointAndSourcePosition._(this.breakpoint, [this.sourcePosition]);
 
-  factory BreakpointAndSourcePosition.create(Breakpoint breakpoint,
-      [SourcePosition? sourcePosition]) {
+  factory BreakpointAndSourcePosition.create(
+    Breakpoint breakpoint, [
+    SourcePosition? sourcePosition,
+  ]) {
     if (breakpoint.location is SourceLocation) {
       return _BreakpointAndSourcePositionResolved(
         breakpoint,
@@ -364,7 +366,8 @@ Future<void> buildVariablesTree(
   if (diagnostic != null && includeDiagnosticPropertiesInDebugger) {
     final service = diagnostic.inspectorService;
     Future<void> _addPropertiesHelper(
-        List<RemoteDiagnosticsNode>? properties) async {
+      List<RemoteDiagnosticsNode>? properties,
+    ) async {
       if (properties == null || service == null || isolateRef == null) return;
       await addExpandableChildren(
         variable,
@@ -529,8 +532,11 @@ Future<Obj> _getObjectWithRetry(
 ) async {
   try {
     final dynamic result = await serviceManager.service!.getObject(
-        variable.ref!.isolateRef!.id!, objectId,
-        offset: variable.offset, count: variable.childCount);
+      variable.ref!.isolateRef!.id!,
+      objectId,
+      offset: variable.offset,
+      count: variable.childCount,
+    );
     return result;
   } catch (e) {
     final dynamic result = await serviceManager.service!
@@ -892,9 +898,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     if (text != null) return text!;
 
     final instanceRef = ref!.instanceRef;
-    final value = instanceRef is InstanceRef
-        ? instanceRef.valueAsString
-        : instanceRef;
+    final value =
+        instanceRef is InstanceRef ? instanceRef.valueAsString : instanceRef;
     return '$name - $value';
   }
 

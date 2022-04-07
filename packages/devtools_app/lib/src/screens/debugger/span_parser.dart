@@ -251,14 +251,16 @@ abstract class _Matcher {
     final end = scanner.lastMatch!.end;
     if (captures != null) {
       if (scanner.lastMatch!.groupCount <= 1) {
-        spans.add(ScopeSpan(
-          scope: captures['0']['name'],
-          start: start,
-          end: end,
-          // Lines and columns are 0 indexed.
-          line: line + 1,
-          column: column + 1,
-        ));
+        spans.add(
+          ScopeSpan(
+            scope: captures['0']['name'],
+            start: start,
+            end: end,
+            // Lines and columns are 0 indexed.
+            line: line + 1,
+            column: column + 1,
+          ),
+        );
       } else {
         final match = scanner.substring(start, end);
         for (int i = 1; i <= scanner.lastMatch!.groupCount; ++i) {
@@ -563,9 +565,11 @@ class _MultilineMatcher extends _Matcher {
         // isn't applied to characters matching the loop condition (e.g.,
         // comment blocks with inline code samples shouldn't apply inline code
         // formatting to the leading '///').
-        results.addAll(contentResults.expand(
-          (e) => e.split(scanner, whileCond!),
-        ));
+        results.addAll(
+          contentResults.expand(
+            (e) => e.split(scanner, whileCond!),
+          ),
+        );
 
         if (beginSpans.isNotEmpty) {
           assert(beginSpans.length == 1);

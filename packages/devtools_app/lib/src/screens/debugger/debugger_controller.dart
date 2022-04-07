@@ -801,9 +801,11 @@ class DebuggerController extends DisposableController
     // of visible stack frames.
     const initialFrameRequestCount = 12;
 
-    _getStackOperation = CancelableOperation.fromFuture(_getStackInfo(
-      limit: initialFrameRequestCount,
-    ));
+    _getStackOperation = CancelableOperation.fromFuture(
+      _getStackInfo(
+        limit: initialFrameRequestCount,
+      ),
+    );
     final stackInfo = await _getStackOperation!.value;
     _populateFrameInfo(
       stackInfo.frames,
@@ -926,7 +928,8 @@ class DebuggerController extends DisposableController
       showScriptLocation(ScriptLocation(scriptRef));
     } else {
       showScriptLocation(
-          ScriptLocation(scriptRef, location: bp.sourcePosition));
+        ScriptLocation(scriptRef, location: bp.sourcePosition),
+      );
     }
   }
 
