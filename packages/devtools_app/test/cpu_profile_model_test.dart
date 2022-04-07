@@ -60,64 +60,64 @@ void main() {
         setGlobal(ServiceConnectionManager, manager);
       });
 
-    // TODO: test that cpusamples generates cpupd?
-    // TODO: re-enable and test the generation is done correctly
-    //   test('basic test', () async {
-    //     final samples = CpuSamples.parse(goldenSamplesJson);
-    //     const isolateId = 'theIsolateId';
-    //     const origin = 123;
-    //     const extent = 456;
-    //     final frameTemplate = {
-    //       'name': '_startConnect',
-    //       'category': 'Dart',
-    //       'resolvedUrl':
-    //           'org-dartlang-sdk:///third_party/dart/sdk/lib/_internal/vm/bin/socket_patch.dart',
-    //     };
+      // TODO: test that cpusamples generates cpupd?
+      // TODO: re-enable and test the generation is done correctly
+      //   test('basic test', () async {
+      //     final samples = CpuSamples.parse(goldenSamplesJson);
+      //     const isolateId = 'theIsolateId';
+      //     const origin = 123;
+      //     const extent = 456;
+      //     final frameTemplate = {
+      //       'name': '_startConnect',
+      //       'category': 'Dart',
+      //       'resolvedUrl':
+      //           'org-dartlang-sdk:///third_party/dart/sdk/lib/_internal/vm/bin/socket_patch.dart',
+      //     };
 
-    //     final stackFrames = {
-    //       '$isolateId-1': Map<String, String>.from(frameTemplate),
-    //       '$isolateId-2': Map<String, String>.from(frameTemplate),
-    //       '$isolateId-3': Map<String, String>.from(frameTemplate),
-    //       '$isolateId-4': Map<String, String>.from(frameTemplate),
-    //     };
-    //     stackFrames['$isolateId-1']!['parent'] = 'cpuProfileRoot';
-    //     stackFrames['$isolateId-2']!['parent'] = '$isolateId-1';
-    //     stackFrames['$isolateId-3']!['parent'] = '$isolateId-2';
-    //     stackFrames['$isolateId-4']!['parent'] = '$isolateId-3';
-    //     final expectedCpuProfileTimeline = {
-    //       'type': '_CpuProfileTimeline',
-    //       'samplePeriod': samples!.samplePeriod,
-    //       'sampleCount': samples.sampleCount,
-    //       'stackDepth': samples.maxStackDepth,
-    //       'timeOriginMicros': samples.timeOriginMicros,
-    //       'timeExtentMicros': samples.timeExtentMicros,
-    //       'stackFrames': stackFrames,
-    //       'traceEvents': [
-    //         {
-    //           'ph': 'P',
-    //           'name': '',
-    //           'pid': samples.pid,
-    //           'tid': samples.samples![0].tid,
-    //           'ts': samples.samples![0].timestamp,
-    //           'cat': 'Dart',
-    //           'sf': '$isolateId-4',
-    //           'args': {'userTag': '__userTag', 'vmTag': '__vmTag'},
-    //         },
-    //       ],
-    //     };
+      //     final stackFrames = {
+      //       '$isolateId-1': Map<String, String>.from(frameTemplate),
+      //       '$isolateId-2': Map<String, String>.from(frameTemplate),
+      //       '$isolateId-3': Map<String, String>.from(frameTemplate),
+      //       '$isolateId-4': Map<String, String>.from(frameTemplate),
+      //     };
+      //     stackFrames['$isolateId-1']!['parent'] = 'cpuProfileRoot';
+      //     stackFrames['$isolateId-2']!['parent'] = '$isolateId-1';
+      //     stackFrames['$isolateId-3']!['parent'] = '$isolateId-2';
+      //     stackFrames['$isolateId-4']!['parent'] = '$isolateId-3';
+      //     final expectedCpuProfileTimeline = {
+      //       'type': '_CpuProfileTimeline',
+      //       'samplePeriod': samples!.samplePeriod,
+      //       'sampleCount': samples.sampleCount,
+      //       'stackDepth': samples.maxStackDepth,
+      //       'timeOriginMicros': samples.timeOriginMicros,
+      //       'timeExtentMicros': samples.timeExtentMicros,
+      //       'stackFrames': stackFrames,
+      //       'traceEvents': [
+      //         {
+      //           'ph': 'P',
+      //           'name': '',
+      //           'pid': samples.pid,
+      //           'tid': samples.samples![0].tid,
+      //           'ts': samples.samples![0].timestamp,
+      //           'cat': 'Dart',
+      //           'sf': '$isolateId-4',
+      //           'args': {'userTag': '__userTag', 'vmTag': '__vmTag'},
+      //         },
+      //       ],
+      //     };
 
-    //     final cpuProfileData = await CpuProfileData.generateFromCpuSamples(
-    //       isolateId,
-    //       origin,
-    //       extent,
-    //     );
+      //     final cpuProfileData = await CpuProfileData.generateFromCpuSamples(
+      //       isolateId,
+      //       origin,
+      //       extent,
+      //     );
 
-    //     expect(
-    //       cpuProfileData.toJson,
-    //       equals(expectedCpuProfileTimeline),
-    //     );
-    //   });
-    // });
+      //     expect(
+      //       cpuProfileData.toJson,
+      //       equals(expectedCpuProfileTimeline),
+      //     );
+      //   });
+    });
 
     test('subProfile', () {
       final subProfile = CpuProfileData.subProfile(
@@ -163,7 +163,7 @@ void main() {
     });
 
     test('to json', () {
-      expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
+      expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJsonZZZ));
     });
 
     test('stackFrameIdCompare', () {
