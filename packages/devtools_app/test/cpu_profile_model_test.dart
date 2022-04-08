@@ -8,7 +8,6 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart';
 
 import 'test_data/cpu_profile_test_data.dart';
 

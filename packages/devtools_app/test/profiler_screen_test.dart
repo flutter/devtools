@@ -6,7 +6,6 @@
 
 import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen_controller.dart';
