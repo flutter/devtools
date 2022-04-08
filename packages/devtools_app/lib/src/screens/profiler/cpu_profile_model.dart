@@ -357,7 +357,6 @@ class CpuProfileData {
         'args': {
           if (sample.userTag != null) 'userTag': sample.userTag,
           if (sample.vmTag != null) 'vmTag': sample.vmTag,
-          'mode': 'basic', // TODO: remove basic from examples instead
         },
       });
     }

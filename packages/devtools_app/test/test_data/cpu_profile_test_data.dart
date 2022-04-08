@@ -84,7 +84,6 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'ts': 50,
       'cat': 'Dart',
       'args': {
-        'mode': 'basic',
         'userTag': 'userTagA',
       },
       'sf': '140357727781376-3'
@@ -97,7 +96,6 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'ts': 100,
       'cat': 'Dart',
       'args': {
-        'mode': 'basic',
         'userTag': 'userTagB',
       },
       'sf': '140357727781376-4'
@@ -110,7 +108,6 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'ts': 150,
       'cat': 'Dart',
       'args': {
-        'mode': 'basic',
         'userTag': 'userTagA',
       },
       'sf': '140357727781376-5'
@@ -123,7 +120,6 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'ts': 200,
       'cat': 'Dart',
       'args': {
-        'mode': 'basic',
         'userTag': 'userTagC',
       },
       'sf': '140357727781376-5'
@@ -136,7 +132,6 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'ts': 250,
       'cat': 'Dart',
       'args': {
-        'mode': 'basic',
         'userTag': 'userTagC',
       },
       'sf': '140357727781376-6'
@@ -735,7 +730,7 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377796685,
     'cat': 'Dart',
-    'args': {'mode': 'basic'},
+    'args': <String, dynamic>{},
     'sf': '140357727781376-5'
   },
   {
@@ -745,7 +740,7 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377797975,
     'cat': 'Dart',
-    'args': {'mode': 'basic'},
+    'args': <String, dynamic>{},
     'sf': '140357727781376-8'
   },
   {
@@ -755,7 +750,7 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377799063,
     'cat': 'Dart',
-    'args': {'mode': 'basic'},
+    'args': <String, dynamic>{},
     'sf': '140357727781376-11'
   },
   {
@@ -765,7 +760,7 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377800363,
     'cat': 'Dart',
-    'args': {'mode': 'basic'},
+    'args': <String, dynamic>{},
     'sf': '140357727781376-13'
   },
   {
@@ -775,7 +770,7 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377800463,
     'cat': 'Dart',
-    'args': {'mode': 'basic'},
+    'args': <String, dynamic>{},
     'sf': '140357727781376-13'
   },
   {
@@ -785,7 +780,7 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377800563,
     'cat': 'Dart',
-    'args': {'mode': 'basic'},
+    'args': <String, dynamic>{},
     'sf': '140357727781376-13'
   },
   {
@@ -795,7 +790,7 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377800663,
     'cat': 'Dart',
-    'args': {'mode': 'basic'},
+    'args': <String, dynamic>{},
     'sf': '140357727781376-15'
   },
   {
@@ -805,7 +800,7 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377800763,
     'cat': 'Dart',
-    'args': {'mode': 'basic'},
+    'args': <String, dynamic>{},
     'sf': '140357727781376-17'
   }
 ];
@@ -820,7 +815,7 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
           'tid': 42247,
           'ts': 47377800363,
           'cat': 'Dart',
-          'args': {'mode': 'basic'},
+          'args': <String, dynamic>{},
           'sf': '140357727781376-14'
         },
         {
@@ -830,7 +825,7 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
           'tid': 42247,
           'ts': 47377800463,
           'cat': 'Dart',
-          'args': {'mode': 'basic'},
+          'args': <String, dynamic>{},
           'sf': '140357727781376-14'
         },
         {
@@ -840,7 +835,7 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
           'tid': 42247,
           'ts': 47377800563,
           'cat': 'Dart',
-          'args': {'mode': 'basic'},
+          'args': <String, dynamic>{},
           'sf': '140357727781376-14'
         },
         {
@@ -850,7 +845,7 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
           'tid': 42247,
           'ts': 47377800663,
           'cat': 'Dart',
-          'args': {'mode': 'basic'},
+          'args': <String, dynamic>{},
           'sf': '140357727781376-15'
         },
         {
@@ -860,7 +855,7 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
           'tid': 42247,
           'ts': 47377800763,
           'cat': 'Dart',
-          'args': {'mode': 'basic'},
+          'args': <String, dynamic>{},
           'sf': '140357727781376-17'
         }
       ]);
@@ -873,7 +868,7 @@ final subProfileTraceEvents = [
     'tid': 42247,
     'ts': 47377796685,
     'cat': 'Dart',
-    'args': {'mode': 'basic'},
+    'args': <String, dynamic>{},
     'sf': '140357727781376-5'
   },
   {
@@ -883,7 +878,7 @@ final subProfileTraceEvents = [
     'tid': 42247,
     'ts': 47377797975,
     'cat': 'Dart',
-    'args': {'mode': 'basic'},
+    'args': <String, dynamic>{},
     'sf': '140357727781376-8'
   },
   {
@@ -893,7 +888,7 @@ final subProfileTraceEvents = [
     'tid': 42247,
     'ts': 47377799063,
     'cat': 'Dart',
-    'args': {'mode': 'basic'},
+    'args': <String, dynamic>{},
     'sf': '140357727781376-11'
   },
 ];
@@ -943,7 +938,7 @@ final responseWithMissingLeafFrame = {
       'tid': 42247,
       'ts': 47377796685,
       'cat': 'Dart',
-      'args': {'mode': 'basic'},
+      'args': <String, dynamic>{},
       'sf': '140357727781376-0'
     },
     {
@@ -953,7 +948,7 @@ final responseWithMissingLeafFrame = {
       'tid': 42247,
       'ts': 47377797975,
       'cat': 'Dart',
-      'args': {'mode': 'basic'},
+      'args': <String, dynamic>{},
       'sf': '140357727781376-2'
     },
     {
@@ -963,7 +958,7 @@ final responseWithMissingLeafFrame = {
       'tid': 42247,
       'ts': 47377799063,
       'cat': 'Dart',
-      'args': {'mode': 'basic'},
+      'args': <String, dynamic>{},
       'sf': '140357727781376-4'
     },
   ]
