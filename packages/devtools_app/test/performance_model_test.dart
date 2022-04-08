@@ -94,7 +94,7 @@ void main() {
           PerformanceData.cpuProfileKey:
               (await CpuProfileData.generateFromCpuSamples(
             goldenSamplesIsolate,
-            CpuSamples.parse(goldenSamplesJson)!,
+            CpuSamples.parse(goldenCpuSamplesJson)!,
           ))
                   .toJson,
           PerformanceData.selectedEventKey: vsyncEvent.json,

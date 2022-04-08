@@ -5,9 +5,7 @@
 // ignore_for_file: avoid_redundant_argument_values, import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'test_data/cpu_profile_test_data.dart';
@@ -15,7 +13,7 @@ import 'test_data/cpu_profile_test_data.dart';
 void main() {
   group('CpuProfileData', () {
     final cpuProfileData = CpuProfileData.parse(cpuProfileResponseJson);
-    final cpuSamples = CpuSamples.parse(goldenSamplesJson)!;
+    final cpuSamples = CpuSamples.parse(goldenCpuSamplesJson)!;
 
     test('init from parse', () {
       expect(
@@ -36,88 +34,6 @@ void main() {
         cpuProfileData.profileMetaData.time!.end!.inMicroseconds,
         equals(47377799685),
       );
-    });
-
-    group('generateFromCpuSamples', () {
-      ServiceConnectionManager manager;
-      final service = MockVmService();
-      setUp(() {
-        when(service.onDebugEvent).thenAnswer((_) {
-          return const Stream.empty();
-        });
-        when(service.onVMEvent).thenAnswer((_) {
-          return const Stream.empty();
-        });
-        when(service.onIsolateEvent).thenAnswer((_) {
-          return const Stream.empty();
-        });
-        when(service.onStdoutEvent).thenAnswer((_) {
-          return const Stream.empty();
-        });
-        when(service.onStderrEvent).thenAnswer((_) {
-          return const Stream.empty();
-        });
-        manager = FakeServiceManager(service: service);
-        setGlobal(ServiceConnectionManager, manager);
-      });
-
-      // TODO: test that cpusamples generates cpupd?
-      // TODO: re-enable and test the generation is done correctly
-      //   test('basic test', () async {
-      //     final samples = CpuSamples.parse(goldenSamplesJson);
-      //     const isolateId = 'theIsolateId';
-      //     const origin = 123;
-      //     const extent = 456;
-      //     final frameTemplate = {
-      //       'name': '_startConnect',
-      //       'category': 'Dart',
-      //       'resolvedUrl':
-      //           'org-dartlang-sdk:///third_party/dart/sdk/lib/_internal/vm/bin/socket_patch.dart',
-      //     };
-
-      //     final stackFrames = {
-      //       '$isolateId-1': Map<String, String>.from(frameTemplate),
-      //       '$isolateId-2': Map<String, String>.from(frameTemplate),
-      //       '$isolateId-3': Map<String, String>.from(frameTemplate),
-      //       '$isolateId-4': Map<String, String>.from(frameTemplate),
-      //     };
-      //     stackFrames['$isolateId-1']!['parent'] = 'cpuProfileRoot';
-      //     stackFrames['$isolateId-2']!['parent'] = '$isolateId-1';
-      //     stackFrames['$isolateId-3']!['parent'] = '$isolateId-2';
-      //     stackFrames['$isolateId-4']!['parent'] = '$isolateId-3';
-      //     final expectedCpuProfileTimeline = {
-      //       'type': '_CpuProfileTimeline',
-      //       'samplePeriod': samples!.samplePeriod,
-      //       'sampleCount': samples.sampleCount,
-      //       'stackDepth': samples.maxStackDepth,
-      //       'timeOriginMicros': samples.timeOriginMicros,
-      //       'timeExtentMicros': samples.timeExtentMicros,
-      //       'stackFrames': stackFrames,
-      //       'traceEvents': [
-      //         {
-      //           'ph': 'P',
-      //           'name': '',
-      //           'pid': samples.pid,
-      //           'tid': samples.samples![0].tid,
-      //           'ts': samples.samples![0].timestamp,
-      //           'cat': 'Dart',
-      //           'sf': '$isolateId-4',
-      //           'args': {'userTag': '__userTag', 'vmTag': '__vmTag'},
-      //         },
-      //       ],
-      //     };
-
-      //     final cpuProfileData = await CpuProfileData.generateFromCpuSamples(
-      //       isolateId,
-      //       origin,
-      //       extent,
-      //     );
-
-      //     expect(
-      //       cpuProfileData.toJson,
-      //       equals(expectedCpuProfileTimeline),
-      //     );
-      //   });
     });
 
     test('subProfile', () {
@@ -164,15 +80,16 @@ void main() {
     });
 
     test('samples to json', () {
-      expect(cpuSamples.toJson(), equals(CpuSamples.parse(goldenSamplesJson)));
+      expect(cpuSamples.toJson(), equals(goldenCpuSamplesJson));
     });
 
     test('converts golden samples to golden cpu profile data', () async {
-      final cpuProfileData = await CpuProfileData.generateFromCpuSamples(
+      final generatedCpuProfileData =
+          await CpuProfileData.generateFromCpuSamples(
         goldenSamplesIsolate,
-        CpuSamples.parse(goldenSamplesJson)!,
+        CpuSamples.parse(goldenCpuSamplesJson)!,
       );
-      expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
+      expect(generatedCpuProfileData.toJson, equals(goldenCpuProfileDataJson));
     });
 
     test('stackFrameIdCompare', () {

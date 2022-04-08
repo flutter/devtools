@@ -32,7 +32,7 @@ void main() {
     setUp(() async {
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(
-          cpuSamples: CpuSamples.parse(goldenSamplesJson),
+          cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
         ),
       );
       when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);

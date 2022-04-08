@@ -23,7 +23,6 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart';
 
 import 'test_data/cpu_profile_test_data.dart';
 
@@ -36,10 +35,7 @@ void main() {
   setUp(() async {
     final transformer = CpuProfileTransformer();
     controller = CpuProfilerController();
-    cpuProfileData = await CpuProfileData.generateFromCpuSamples(
-      goldenSamplesIsolate,
-      CpuSamples.parse(goldenSamplesJson)!,
-    );
+    cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson);
     await transformer.processData(
       cpuProfileData,
       processId: 'test',

@@ -177,7 +177,7 @@ final Map<String, dynamic> cpuProfileResponseJson = {
   'traceEvents': goldenCpuProfileTraceEvents,
 };
 const String goldenSamplesIsolate = '140357727781376';
-final Map<String, dynamic> goldenSamplesJson = {
+final Map<String, dynamic> goldenCpuSamplesJson = {
   'type': 'CpuSamples',
   'samplePeriod': 50,
   'maxStackDepth': 128,
@@ -198,7 +198,7 @@ final Map<String, dynamic> goldenSamplesJson = {
         'name': 'thread_start',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     },
@@ -213,7 +213,7 @@ final Map<String, dynamic> goldenSamplesJson = {
         'name': '_pthread_start',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     },
@@ -229,7 +229,7 @@ final Map<String, dynamic> goldenSamplesJson = {
         'name': '_drawFrame',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     },
@@ -245,7 +245,7 @@ final Map<String, dynamic> goldenSamplesJson = {
         'name': '_WidgetsFlutterBinding.draw',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     },
@@ -261,7 +261,7 @@ final Map<String, dynamic> goldenSamplesJson = {
         'name': 'RendererBinding.drawFrame',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     },
@@ -277,7 +277,7 @@ final Map<String, dynamic> goldenSamplesJson = {
         'name': '_RenderProxyBox.paint',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     },
@@ -293,7 +293,7 @@ final Map<String, dynamic> goldenSamplesJson = {
         'name': 'PaintingContext.paintChild',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     },
@@ -308,7 +308,7 @@ final Map<String, dynamic> goldenSamplesJson = {
         'name': '_SyncBlock.finish',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     },
@@ -323,7 +323,7 @@ final Map<String, dynamic> goldenSamplesJson = {
         'name': '[Truncated]',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     },
@@ -339,7 +339,7 @@ final Map<String, dynamic> goldenSamplesJson = {
         'name': 'RenderObject._getSemanticsForParent.<closure>',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     },
@@ -355,7 +355,7 @@ final Map<String, dynamic> goldenSamplesJson = {
         'name': 'RenderObject._getSemanticsForParent',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     },
@@ -371,7 +371,7 @@ final Map<String, dynamic> goldenSamplesJson = {
         'name': 'RenderPhysicalModel.paint',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     },
@@ -387,7 +387,7 @@ final Map<String, dynamic> goldenSamplesJson = {
         'name': 'RenderCustomMultiChildLayoutBox.paint',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     },
@@ -403,7 +403,7 @@ final Map<String, dynamic> goldenSamplesJson = {
         'name': '_RenderCustomMultiChildLayoutBox.defaultPaint',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     },
@@ -419,7 +419,7 @@ final Map<String, dynamic> goldenSamplesJson = {
         'name': 'RenderObject._paintWithContext',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     },
@@ -435,7 +435,7 @@ final Map<String, dynamic> goldenSamplesJson = {
         'name': 'RenderStack.paintStack',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     },
@@ -451,7 +451,7 @@ final Map<String, dynamic> goldenSamplesJson = {
             '_WidgetsFlutterBinding&BindingBase&Gesture._invokeFrameCallback',
         'owner': null,
         'static': false,
-        'const': null,
+        'const': false,
         'implicit': false
       }
     }

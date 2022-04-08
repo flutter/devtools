@@ -88,8 +88,6 @@ if [ "$BOT" = "main" ]; then
     # Make sure the app versions are in sync.
     repo_tool repo-check
 
-    cat test/cpu_profile_model_test.dart
-
     # Analyze the source.
     dart analyze --fatal-infos
 

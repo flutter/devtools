@@ -19,10 +19,11 @@ void main() {
   group('CpuProfileController', () {
     late CpuProfilerController controller;
     FakeServiceManager fakeServiceManager;
+
     setUp(() {
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(
-          cpuSamples: CpuSamples.parse(goldenSamplesJson),
+          cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
         ),
       );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
