@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: avoid_redundant_argument_values, import_of_legacy_library_into_null_safe
+// ignore_for_file: avoid_redundant_argument_values
 
-import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
