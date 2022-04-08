@@ -44,7 +44,7 @@ void main() {
       expect(performanceData.cpuProfileData, isNull);
     });
 
-    test('to json', () {
+    test('to json', () async {
       expect(
         performanceData.json,
         equals({
@@ -91,10 +91,12 @@ void main() {
               'vsyncOverhead': 1000
             },
           ],
-          PerformanceData.cpuProfileKey: CpuProfileData.generateFromCpuSamples(
+          PerformanceData.cpuProfileKey:
+              (await CpuProfileData.generateFromCpuSamples(
             goldenSamplesIsolate,
             CpuSamples.parse(goldenSamplesJson)!,
-          ),
+          ))
+                  .toJson,
           PerformanceData.selectedEventKey: vsyncEvent.json,
           PerformanceData.displayRefreshRateKey: 60,
         }),
