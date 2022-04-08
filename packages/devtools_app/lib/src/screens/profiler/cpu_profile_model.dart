@@ -6,7 +6,7 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../charts/flame_chart.dart';
 import '../../primitives/trace_event.dart';
@@ -16,7 +16,7 @@ import '../../primitives/utils.dart';
 import '../../ui/search.dart';
 import 'cpu_profile_transformer.dart';
 
-/// Data model for DevTools traceEventsU profile.
+/// Data model for DevTools CPU profile.
 class CpuProfileData {
   CpuProfileData._({
     required this.stackFrames,
@@ -76,9 +76,9 @@ class CpuProfileData {
     final stackTraceEvents =
         (json[traceEventsKey] ?? []).cast<Map<String, dynamic>>();
     final samples = stackTraceEvents
-        .map((trace) => ProfileDataCpuSample.parse(trace))
+        .map((trace) => CpuSample.parse(trace))
         .toList()
-        .cast<ProfileDataCpuSample>();
+        .cast<CpuSample>();
 
     return CpuProfileData._(
       stackFrames: stackFrames,
@@ -197,15 +197,15 @@ class CpuProfileData {
     CpuProfileData originalData,
     bool Function(CpuStackFrame) includeFilter,
   ) {
-    final filteredCpuSamples = <ProfileDataCpuSample>[];
+    final filteredCpuSamples = <CpuSample>[];
     void includeSampleOrWalkUp(
-      ProfileDataCpuSample sample,
+      CpuSample sample,
       Map<String, Object> sampleJson,
       CpuStackFrame stackFrame,
     ) {
       if (includeFilter(stackFrame)) {
         filteredCpuSamples.add(
-          ProfileDataCpuSample(
+          CpuSample(
             leafId: stackFrame.id,
             userTag: sample.userTag,
             traceJson: sampleJson,
@@ -287,7 +287,7 @@ class CpuProfileData {
   /// [extent] extent time
   static Future<CpuProfileData> generateFromCpuSamples(
     String isolateId,
-    CpuSamples cpuSamples,
+    vm_service.CpuSamples cpuSamples,
   ) async {
     // The root ID is associated with an artificial frame / node that is the root
     // of all stacks, regardless of entrypoint. This should never be seen in the
@@ -340,7 +340,7 @@ class CpuProfileData {
     processStackFrame(current: root, parent: null);
 
     // Build the trace events.
-    for (final sample in cpuSamples.samples ?? <CpuSample>[]) {
+    for (final sample in cpuSamples.samples ?? <vm_service.CpuSample>[]) {
       final tree = _CpuProfileTimelineTree.getTreeFromSample(sample)!;
       // Skip the root.
       if (tree.frameId == kRootId) {
@@ -386,7 +386,7 @@ class CpuProfileData {
 
   final Map<String, CpuStackFrame> stackFrames;
 
-  final List<ProfileDataCpuSample> cpuSamples;
+  final List<CpuSample> cpuSamples;
 
   final CpuProfileMetaData profileMetaData;
 
@@ -484,15 +484,15 @@ class CpuProfileMetaData {
   }
 }
 
-class ProfileDataCpuSample extends TraceEvent {
-  ProfileDataCpuSample({
+class CpuSample extends TraceEvent {
+  CpuSample({
     required this.leafId,
     this.userTag,
     required Map<String, dynamic> traceJson,
     this.vmTag,
   }) : super(traceJson);
 
-  factory ProfileDataCpuSample.parse(Map<String, dynamic> traceJson) {
+  factory CpuSample.parse(Map<String, dynamic> traceJson) {
     final leafId = traceJson[CpuProfileData.stackFrameIdKey];
     final userTag = traceJson[TraceEvent.argsKey] != null
         ? traceJson[TraceEvent.argsKey][CpuProfileData.userTagKey]
@@ -500,7 +500,7 @@ class ProfileDataCpuSample extends TraceEvent {
     final vmTag = traceJson[TraceEvent.argsKey] != null
         ? traceJson[TraceEvent.argsKey]['vmTag']
         : null;
-    return ProfileDataCpuSample(
+    return CpuSample(
       leafId: leafId,
       userTag: userTag,
       traceJson: traceJson,
@@ -913,7 +913,8 @@ class CpuProfileStore {
 }
 
 class _CpuProfileTimelineTree {
-  factory _CpuProfileTimelineTree.fromCpuSamples(CpuSamples cpuSamples) {
+  factory _CpuProfileTimelineTree.fromCpuSamples(
+      vm_service.CpuSamples cpuSamples) {
     final root = _CpuProfileTimelineTree._fromIndex(cpuSamples, kRootIndex);
     _CpuProfileTimelineTree current;
     // TODO(bkonyi): handle truncated?
@@ -933,7 +934,7 @@ class _CpuProfileTimelineTree {
   static final _timelineTreeExpando = Expando<_CpuProfileTimelineTree>();
   static const kRootIndex = -1;
   static const kNoFrameId = -1;
-  final CpuSamples samples;
+  final vm_service.CpuSamples samples;
   final int index;
   int frameId = kNoFrameId;
 
@@ -941,9 +942,9 @@ class _CpuProfileTimelineTree {
 
   String? get className {
     final function = samples.functions![index].function;
-    if (function is FuncRef) {
+    if (function is vm_service.FuncRef) {
       final owner = function.owner;
-      if (owner is ClassRef) {
+      if (owner is vm_service.ClassRef) {
         return owner.name;
       }
     }
@@ -966,7 +967,8 @@ class _CpuProfileTimelineTree {
 
   final children = <_CpuProfileTimelineTree>[];
 
-  static _CpuProfileTimelineTree? getTreeFromSample(CpuSample sample) =>
+  static _CpuProfileTimelineTree? getTreeFromSample(
+          vm_service.CpuSample sample) =>
       _timelineTreeExpando[sample];
 
   _CpuProfileTimelineTree _getChild(int index) {
