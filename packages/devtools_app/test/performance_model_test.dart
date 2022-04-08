@@ -92,8 +92,8 @@ void main() {
             },
           ],
           PerformanceData.cpuProfileKey: CpuProfileData.generateFromCpuSamples(
-            goldenSamplesIsolate,
-            CpuSamples.parse(goldenCpuSamplesJson)!,
+            isolateId: goldenSamplesIsolate,
+            cpuSamples: CpuSamples.parse(goldenCpuSamplesJson)!,
           ).toJson,
           PerformanceData.selectedEventKey: vsyncEvent.json,
           PerformanceData.displayRefreshRateKey: 60,

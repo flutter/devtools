@@ -16,7 +16,10 @@ extension CpuProfilerExtension on VmServiceWrapper {
     final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
     final cpuSamples = await serviceManager.service!
         .getCpuSamples(isolateId, startMicros, extentMicros);
-    return CpuProfileData.generateFromCpuSamples(isolateId, cpuSamples);
+    return CpuProfileData.generateFromCpuSamples(
+      isolateId: isolateId,
+      cpuSamples: cpuSamples,
+    );
   }
 
   Future clearSamples() {

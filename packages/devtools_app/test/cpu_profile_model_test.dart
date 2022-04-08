@@ -86,8 +86,8 @@ void main() {
 
     test('converts golden samples to golden cpu profile data', () {
       final generatedCpuProfileData = CpuProfileData.generateFromCpuSamples(
-        goldenSamplesIsolate,
-        CpuSamples.parse(goldenCpuSamplesJson)!,
+        isolateId: goldenSamplesIsolate,
+        cpuSamples: CpuSamples.parse(goldenCpuSamplesJson)!,
       );
       expect(generatedCpuProfileData.toJson, equals(goldenCpuProfileDataJson));
     });
