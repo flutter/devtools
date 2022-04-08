@@ -24,19 +24,23 @@ Future<void> copyToClipboard(
   String successMessage,
   BuildContext context,
 ) async {
-  await Clipboard.setData(ClipboardData(
-    text: data,
-  ));
+  await Clipboard.setData(
+    ClipboardData(
+      text: data,
+    ),
+  );
 
   Notifications.of(context)?.push(successMessage);
 }
 
 /// Logging to debug console only in debug runs.
 void debugLogger(String message) {
-  assert(() {
-    logger.log('$message');
-    return true;
-  }());
+  assert(
+    () {
+      logger.log('$message');
+      return true;
+    }(),
+  );
 }
 
 double scaleByFontFactor(double original) {

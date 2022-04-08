@@ -257,7 +257,8 @@ bool shouldShowScreen(Screen screen) {
   if (screen.shouldShowForFlutterVersion != null) {
     if (serviceManager.connectedApp!.isFlutterAppNow == true &&
         !screen.shouldShowForFlutterVersion!(
-            serviceManager.connectedApp!.flutterVersionNow)) {
+          serviceManager.connectedApp!.flutterVersionNow,
+        )) {
       return false;
     }
   }

@@ -43,65 +43,87 @@ void main() {
     }
 
     testWidgets('shows count when no selection', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(
-        ErrorNavigator(
+      await tester.pumpWidget(
+        wrap(
+          ErrorNavigator(
             errorIndex: null,
             errors: _generateErrors(10),
-            onSelectError: (_) {}),
-      ));
+            onSelectError: (_) {},
+          ),
+        ),
+      );
       expect(find.text('Errors: 10'), findsOneWidget);
     });
 
     testWidgets('shows x/y when selected error', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(
-        ErrorNavigator(
-            errorIndex: 0, errors: _generateErrors(10), onSelectError: (_) {}),
-      ));
+      await tester.pumpWidget(
+        wrap(
+          ErrorNavigator(
+            errorIndex: 0,
+            errors: _generateErrors(10),
+            onSelectError: (_) {},
+          ),
+        ),
+      );
       expect(find.text('Error 1/10'), findsOneWidget);
     });
 
     testWidgets(
-        'can navigate forwards',
-        (WidgetTester tester) => testNavigate(tester,
-            tapIcon: Icons.keyboard_arrow_down,
-            errorCount: 10,
-            startIndex: 5,
-            expectedIndex: 6));
+      'can navigate forwards',
+      (WidgetTester tester) => testNavigate(
+        tester,
+        tapIcon: Icons.keyboard_arrow_down,
+        errorCount: 10,
+        startIndex: 5,
+        expectedIndex: 6,
+      ),
+    );
 
     testWidgets(
-        'can navigate backwards',
-        (WidgetTester tester) => testNavigate(tester,
-            tapIcon: Icons.keyboard_arrow_up,
-            errorCount: 10,
-            startIndex: 5,
-            expectedIndex: 4));
+      'can navigate backwards',
+      (WidgetTester tester) => testNavigate(
+        tester,
+        tapIcon: Icons.keyboard_arrow_up,
+        errorCount: 10,
+        startIndex: 5,
+        expectedIndex: 4,
+      ),
+    );
 
     testWidgets(
-        'wraps forwards',
-        (WidgetTester tester) => testNavigate(tester,
-            tapIcon: Icons.keyboard_arrow_down,
-            errorCount: 10,
-            startIndex: 9,
-            expectedIndex: 0));
+      'wraps forwards',
+      (WidgetTester tester) => testNavigate(
+        tester,
+        tapIcon: Icons.keyboard_arrow_down,
+        errorCount: 10,
+        startIndex: 9,
+        expectedIndex: 0,
+      ),
+    );
 
     testWidgets(
-        'wraps backwards',
-        (WidgetTester tester) => testNavigate(tester,
-            tapIcon: Icons.keyboard_arrow_up,
-            errorCount: 10,
-            startIndex: 0,
-            expectedIndex: 9));
+      'wraps backwards',
+      (WidgetTester tester) => testNavigate(
+        tester,
+        tapIcon: Icons.keyboard_arrow_up,
+        errorCount: 10,
+        startIndex: 0,
+        expectedIndex: 9,
+      ),
+    );
   });
 }
 
 LinkedHashMap<String, InspectableWidgetError> _generateErrors(int count) =>
-    LinkedHashMap<String, InspectableWidgetError>.fromEntries(List.generate(
-      count,
-      (index) => MapEntry(
-        'error-$index',
-        InspectableWidgetError(
-          'Error $index',
+    LinkedHashMap<String, InspectableWidgetError>.fromEntries(
+      List.generate(
+        count,
+        (index) => MapEntry(
           'error-$index',
+          InspectableWidgetError(
+            'Error $index',
+            'error-$index',
+          ),
         ),
       ),
-    ));
+    );

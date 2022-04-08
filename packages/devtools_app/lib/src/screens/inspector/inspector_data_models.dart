@@ -106,8 +106,9 @@ class LayoutProperties {
         children = copyLevel == 0
             ? []
             : node.childrenNow
-                .map((child) =>
-                    LayoutProperties(child, copyLevel: copyLevel - 1))
+                .map(
+                  (child) => LayoutProperties(child, copyLevel: copyLevel - 1),
+                )
                 .toList(growable: false) {
     for (var child in children) {
       child.parent = this;
@@ -216,9 +217,9 @@ class LayoutProperties {
     if (parentWidth == null) return false;
     final parentData = node.parentData;
     double widthUsed = width;
-    if (parentData != null) {
-      widthUsed += parentData.offset.dx;
-    }
+
+    widthUsed += parentData.offset.dx;
+
     // TODO(jacobr): certain widgets may allow overflow so this may false
     // positive a bit for cases like Stack.
     return widthUsed > parentWidth + overflowEpsilon;
@@ -229,9 +230,9 @@ class LayoutProperties {
     if (parentHeight == null) return false;
     final parentData = node.parentData;
     double heightUsed = height;
-    if (parentData != null) {
-      heightUsed += parentData.offset.dy;
-    }
+
+    heightUsed += parentData.offset.dy;
+
     return heightUsed > parentHeight + overflowEpsilon;
   }
 
@@ -444,13 +445,13 @@ class FlexLayoutProperties extends LayoutProperties {
 
   String get type => direction.flexType;
 
-  num? get totalFlex {
+  num get totalFlex {
     if (children.isEmpty) return 0;
     _totalFlex ??= children
         .map((child) => child.flexFactor ?? 0)
         .reduce((value, element) => value + element)
         .toInt();
-    return _totalFlex;
+    return _totalFlex!;
   }
 
   Axis get crossAxisDirection {
@@ -666,27 +667,33 @@ class FlexLayoutProperties extends LayoutProperties {
           ..layoutProperties = this;
     if (actualLeadingSpace > 0.0 &&
         displayMainAxisAlignment != MainAxisAlignment.start) {
-      spaces.add(renderPropsWithFullCrossAxisDimension.clone()
-        ..mainAxisOffset = 0.0
-        ..mainAxisDimension = renderLeadingSpace
-        ..mainAxisRealDimension = actualLeadingSpace);
+      spaces.add(
+        renderPropsWithFullCrossAxisDimension.clone()
+          ..mainAxisOffset = 0.0
+          ..mainAxisDimension = renderLeadingSpace
+          ..mainAxisRealDimension = actualLeadingSpace,
+      );
     }
     if (actualBetweenSpace > 0.0) {
       for (var i = 0; i < childrenRenderProps.length - 1; ++i) {
         final child = childrenRenderProps[i];
-        spaces.add(renderPropsWithFullCrossAxisDimension.clone()
-          ..mainAxisDimension = renderBetweenSpace
-          ..mainAxisRealDimension = actualBetweenSpace
-          ..mainAxisOffset = child.mainAxisOffset + child.mainAxisDimension);
+        spaces.add(
+          renderPropsWithFullCrossAxisDimension.clone()
+            ..mainAxisDimension = renderBetweenSpace
+            ..mainAxisRealDimension = actualBetweenSpace
+            ..mainAxisOffset = child.mainAxisOffset + child.mainAxisDimension,
+        );
       }
     }
     if (actualLeadingSpace > 0.0 &&
         displayMainAxisAlignment != MainAxisAlignment.end) {
-      spaces.add(renderPropsWithFullCrossAxisDimension.clone()
-        ..mainAxisOffset = childrenRenderProps.last.mainAxisDimension +
-            childrenRenderProps.last.mainAxisOffset
-        ..mainAxisDimension = renderLeadingSpace
-        ..mainAxisRealDimension = actualLeadingSpace);
+      spaces.add(
+        renderPropsWithFullCrossAxisDimension.clone()
+          ..mainAxisOffset = childrenRenderProps.last.mainAxisDimension +
+              childrenRenderProps.last.mainAxisOffset
+          ..mainAxisDimension = renderLeadingSpace
+          ..mainAxisRealDimension = actualLeadingSpace,
+      );
     }
     return [...childrenRenderProps, ...spaces];
   }
@@ -716,9 +723,11 @@ class FlexLayoutProperties extends LayoutProperties {
         final crossAxisRealDimension = space.crossAxisRealDimension;
         space.crossAxisRealDimension = crossAxisRealDimension * 0.5;
         spaces.add(space.clone()..crossAxisOffset = 0.0);
-        spaces.add(space.clone()
-          ..crossAxisOffset = renderProperties.crossAxisDimension +
-              renderProperties.crossAxisOffset);
+        spaces.add(
+          space.clone()
+            ..crossAxisOffset = renderProperties.crossAxisDimension +
+                renderProperties.crossAxisOffset,
+        );
       } else {
         space.crossAxisOffset = crossAxisAlignment == CrossAxisAlignment.end
             ? 0

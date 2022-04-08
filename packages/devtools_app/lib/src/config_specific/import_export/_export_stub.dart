@@ -6,5 +6,6 @@ import 'import_export.dart';
 
 ExportController createExportController() {
   throw Exception(
-      'Attempting to create ExportController for unrecognized platform.');
+    'Attempting to create ExportController for unrecognized platform.',
+  );
 }

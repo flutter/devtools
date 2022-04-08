@@ -213,7 +213,8 @@ class TimelineEventProcessor {
 
       // Add [pendingRootCompleteEvent] to the timeline if it is ready.
       _addPendingCompleteRootToTimeline(
-          currentProcessingTime: eventWrapper.event.timestampMicros);
+        currentProcessingTime: eventWrapper.event.timestampMicros,
+      );
 
       switch (eventWrapper.event.phase) {
         case TraceEvent.asyncBeginPhase:
@@ -392,7 +393,8 @@ class TimelineEventProcessor {
         //
         if (debugTimeline) {
           debugFrameTracking.writeln(
-              'Duplicate duration begin event: ${current.beginTraceEventJson}');
+            'Duplicate duration begin event: ${current.beginTraceEventJson}',
+          );
         }
 
         current.parent!.removeChild(current);
@@ -462,10 +464,11 @@ class TimelineEventProcessor {
     final current = currentDurationEventNodes[event.threadId];
     if (current != null) {
       if (current.subtreeHasNodeWithCondition(
-          (TimelineEvent event) => collectionEquals(
-                event.beginTraceEventJson,
-                timelineEvent.beginTraceEventJson,
-              ))) {
+        (TimelineEvent event) => collectionEquals(
+          event.beginTraceEventJson,
+          timelineEvent.beginTraceEventJson,
+        ),
+      )) {
         // This is a duplicate DurationComplete event. Return early.
         return;
       }

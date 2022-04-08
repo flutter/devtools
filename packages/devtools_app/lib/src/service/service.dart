@@ -31,10 +31,12 @@ Future<VmServiceWrapper> _connectWithSse(
     uri,
   );
 
-  unawaited(client.sink!.done.whenComplete(() {
-    finishedCompleter.complete();
-    service.dispose();
-  }));
+  unawaited(
+    client.sink!.done.whenComplete(() {
+      finishedCompleter.complete();
+      service.dispose();
+    }),
+  );
   serviceCompleter.complete(service);
 
   unawaited(stream.drain().catchError(onError));
@@ -63,10 +65,15 @@ Future<VmServiceWrapper> _connectWithWebSocket(
     onError(null);
     return service;
   }
-  unawaited(ws.sink.done.then((_) {
-    finishedCompleter.complete();
-    service.dispose();
-  }, onError: onError));
+  unawaited(
+    ws.sink.done.then(
+      (_) {
+        finishedCompleter.complete();
+        service.dispose();
+      },
+      onError: onError,
+    ),
+  );
   return service;
 }
 

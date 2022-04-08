@@ -16,7 +16,8 @@ import 'flutter_test_driver.dart';
 final flutterVersion = Platform.environment['FLUTTER_VERSION'];
 
 typedef FlutterDriverFactory = FlutterTestDriver Function(
-    Directory testAppDirectory);
+  Directory testAppDirectory,
+);
 
 /// The default [FlutterDriverFactory] method. Runs a normal flutter app.
 FlutterRunTestDriver defaultFlutterRunDriver(Directory appDir) =>
@@ -154,12 +155,14 @@ class FlutterTestEnvironment {
 
     serviceManager.manuallyDisconnect();
 
-    await _service.allFuturesCompleted.timeout(const Duration(seconds: 20),
-        onTimeout: () {
-      throw 'Timed out waiting for futures to complete during teardown. '
-          '${_service.activeFutures.length} futures remained:\n\n'
-          '  ${_service.activeFutures.map((tf) => tf.name).join('\n  ')}';
-    });
+    await _service.allFuturesCompleted.timeout(
+      const Duration(seconds: 20),
+      onTimeout: () {
+        throw 'Timed out waiting for futures to complete during teardown. '
+            '${_service.activeFutures.length} futures remained:\n\n'
+            '  ${_service.activeFutures.map((tf) => tf.name).join('\n  ')}';
+      },
+    );
     await _flutter!.stop();
 
     _flutter = null;

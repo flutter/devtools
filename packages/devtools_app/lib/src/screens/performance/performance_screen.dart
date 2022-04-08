@@ -127,8 +127,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
       // require a top level field named "traceEvents". See how timeline data is
       // encoded in [ExportController.encode].
       final timelineJson = Map<String, dynamic>.from(
-          offlineController.offlineDataJson[PerformanceScreen.id])
-        ..addAll({
+        offlineController.offlineDataJson[PerformanceScreen.id],
+      )..addAll({
           PerformanceData.traceEventsKey:
               offlineController.offlineDataJson[PerformanceData.traceEventsKey]
         });
@@ -391,9 +391,15 @@ class EnhanceTracingButton extends StatelessWidget {
                   textStyle.copyWith(color: theme.colorScheme.errorTextColor),
             ),
             TextSpan(
-              text: '.',
+              text: '.\n\n',
               style: textStyle,
             ),
+            TextSpan(
+              text: 'When toggling on/off a tracing option, you will need '
+                  'to reproduce activity in your app to see the enhanced '
+                  'tracing in the timeline.',
+              style: textStyle,
+            )
           ],
         ),
       ),
@@ -404,7 +410,7 @@ class EnhanceTracingButton extends StatelessWidget {
 class MoreDebuggingOptionsButton extends StatelessWidget {
   const MoreDebuggingOptionsButton({Key? key}) : super(key: key);
 
-  static const _width = 625.0;
+  static const _width = 720.0;
 
   @override
   Widget build(BuildContext context) {

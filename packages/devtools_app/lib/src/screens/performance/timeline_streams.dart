@@ -134,13 +134,16 @@ class TimelineStreamManager extends Disposer {
     // Listen for timeline events immediately, but wait until [connectedApp]
     // has been initialized to initialize timeline stream values.
     autoDisposeStreamSubscription(
-        service.onTimelineEvent.listen(handleTimelineEvent));
-    unawaited(connectedApp.initialized.future.then((_) async {
-      // The timeline is not supported for web applications.
-      if (!connectedApp.isDartWebAppNow!) {
-        await _initStreams();
-      }
-    }));
+      service.onTimelineEvent.listen(handleTimelineEvent),
+    );
+    unawaited(
+      connectedApp.initialized.future.then((_) async {
+        // The timeline is not supported for web applications.
+        if (!connectedApp.isDartWebAppNow!) {
+          await _initStreams();
+        }
+      }),
+    );
   }
 
   void vmServiceClosed() {

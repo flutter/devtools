@@ -298,7 +298,8 @@ class ServiceExtensionManager extends Disposer {
           case int:
           case double:
             final num value = num.parse(
-                response.json![name.substring(name.lastIndexOf('.') + 1)]);
+              response.json![name.substring(name.lastIndexOf('.') + 1)],
+            );
             await _maybeRestoreExtension(name, value);
             return;
           default:
@@ -519,7 +520,9 @@ class ServiceExtensionManager extends Disposer {
   }
 
   void vmServiceOpened(
-      VmServiceWrapper service, ConnectedApp connectedApp) async {
+    VmServiceWrapper service,
+    ConnectedApp connectedApp,
+  ) async {
     _checkForFirstFrameStarted = false;
     cancelStreamSubscriptions();
     cancelListeners();
@@ -527,16 +530,19 @@ class ServiceExtensionManager extends Disposer {
     _service = service;
     // TODO(kenz): do we want to listen with event history here?
     autoDisposeStreamSubscription(
-        service.onExtensionEvent.listen(_handleExtensionEvent));
+      service.onExtensionEvent.listen(_handleExtensionEvent),
+    );
     addAutoDisposeListener(
       hasServiceExtension(extensions.didSendFirstFrameEvent),
       _maybeCheckForFirstFlutterFrame,
     );
     addAutoDisposeListener(_isolateManager.mainIsolate, _onMainIsolateChanged);
     autoDisposeStreamSubscription(
-        service.onDebugEvent.listen(_handleDebugEvent));
+      service.onDebugEvent.listen(_handleDebugEvent),
+    );
     autoDisposeStreamSubscription(
-        service.onIsolateEvent.listen(_handleIsolateEvent));
+      service.onIsolateEvent.listen(_handleIsolateEvent),
+    );
     final mainIsolateRef = _isolateManager.mainIsolate.value;
     if (mainIsolateRef != null) {
       _checkForFirstFrameStarted = false;

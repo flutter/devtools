@@ -379,40 +379,41 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
 
   Widget _buildImportFileView() {
     return ValueListenableBuilder<bool>(
-        valueListenable: _controller.processingNotifier,
-        builder: (context, processing, _) {
-          if (processing) {
-            return Center(
-              child: Text(
-                AppSizeScreen.loadingMessage,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.headline1!.color,
+      valueListenable: _controller.processingNotifier,
+      builder: (context, processing, _) {
+        if (processing) {
+          return Center(
+            child: Text(
+              AppSizeScreen.loadingMessage,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.headline1!.color,
+              ),
+            ),
+          );
+        } else {
+          return Column(
+            children: [
+              Flexible(
+                child: FileImportContainer(
+                  title: 'Size analysis',
+                  instructions: AnalysisView.importInstructions,
+                  actionText: 'Analyze Size',
+                  onAction: (jsonFile) {
+                    _controller.loadTreeFromJsonFile(
+                      jsonFile: jsonFile,
+                      onError: (error) {
+                        if (mounted) Notifications.of(context)!.push(error);
+                      },
+                    );
+                  },
                 ),
               ),
-            );
-          } else {
-            return Column(
-              children: [
-                Flexible(
-                  child: FileImportContainer(
-                    title: 'Size analysis',
-                    instructions: AnalysisView.importInstructions,
-                    actionText: 'Analyze Size',
-                    onAction: (jsonFile) {
-                      _controller.loadTreeFromJsonFile(
-                        jsonFile: jsonFile,
-                        onError: (error) {
-                          if (mounted) Notifications.of(context)!.push(error);
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          }
-        });
+            ],
+          );
+        }
+      },
+    );
   }
 }
 

@@ -23,39 +23,54 @@ void main() async {
       await env.tearDownEnvironment(force: true);
     });
 
-    test('timeline streams initialized on vm service opened', () async {
-      await env.setupEnvironment();
+    test(
+      'timeline streams initialized on vm service opened',
+      () async {
+        await env.setupEnvironment();
 
-      // Await a short delay to make sure the timelineStreamManager is done
-      // initializing.
-      await delay();
+        // Await a short delay to make sure the timelineStreamManager is done
+        // initializing.
+        await delay();
 
-      expect(serviceManager.service, equals(env.service));
-      expect(serviceManager.timelineStreamManager, isNotNull);
-      expect(serviceManager.timelineStreamManager.basicStreams, isNotEmpty);
-      expect(serviceManager.timelineStreamManager.advancedStreams, isNotEmpty);
+        expect(serviceManager.service, equals(env.service));
+        expect(serviceManager.timelineStreamManager, isNotNull);
+        expect(serviceManager.timelineStreamManager.basicStreams, isNotEmpty);
+        expect(
+          serviceManager.timelineStreamManager.advancedStreams,
+          isNotEmpty,
+        );
 
-      await env.tearDownEnvironment();
-    }, timeout: const Timeout.factor(4));
+        await env.tearDownEnvironment();
+      },
+      timeout: const Timeout.factor(4),
+    );
 
-    test('notifies on stream change', () async {
-      await env.setupEnvironment();
+    test(
+      'notifies on stream change',
+      () async {
+        await env.setupEnvironment();
 
-      final initialStreams =
-          serviceManager.timelineStreamManager.recordedStreams;
-      expect(initialStreams.map((stream) => stream.name).toList(),
-          equals(['Dart', 'Embedder', 'GC']));
+        final initialStreams =
+            serviceManager.timelineStreamManager.recordedStreams;
+        expect(
+          initialStreams.map((stream) => stream.name).toList(),
+          equals(['Dart', 'Embedder', 'GC']),
+        );
 
-      await serviceManager.service!.setVMTimelineFlags([
-        TimelineStreamManager.apiTimelineStream,
-        TimelineStreamManager.compilerTimelineStream,
-        TimelineStreamManager.isolateTimelineStream,
-      ]);
-      final newStreams = serviceManager.timelineStreamManager.recordedStreams;
-      expect(newStreams.map((stream) => stream.name).toList(),
-          equals(['API', 'Compiler', 'Isolate']));
+        await serviceManager.service!.setVMTimelineFlags([
+          TimelineStreamManager.apiTimelineStream,
+          TimelineStreamManager.compilerTimelineStream,
+          TimelineStreamManager.isolateTimelineStream,
+        ]);
+        final newStreams = serviceManager.timelineStreamManager.recordedStreams;
+        expect(
+          newStreams.map((stream) => stream.name).toList(),
+          equals(['API', 'Compiler', 'Isolate']),
+        );
 
-      await env.tearDownEnvironment();
-    }, timeout: const Timeout.factor(4));
+        await env.tearDownEnvironment();
+      },
+      timeout: const Timeout.factor(4),
+    );
   });
 }

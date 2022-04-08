@@ -104,8 +104,10 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
   }
 
   @override
-  void addAutoDisposeListener(Listenable? listenable,
-      [VoidCallback? listener]) {
+  void addAutoDisposeListener(
+    Listenable? listenable, [
+    VoidCallback? listener,
+  ]) {
     _delegate.addAutoDisposeListener(listenable, listener);
   }
 

@@ -125,7 +125,8 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     // Load offline profiler data if available.
     if (shouldLoadOfflineData()) {
       final profilerJson = Map<String, dynamic>.from(
-          offlineController.offlineDataJson[ProfilerScreen.id]);
+        offlineController.offlineDataJson[ProfilerScreen.id],
+      );
       final offlineProfilerData = CpuProfileData.parse(profilerJson);
       if (!offlineProfilerData.isEmpty) {
         loadOfflineData(offlineProfilerData);

@@ -39,8 +39,11 @@ typedef IndexedScrollableWidgetBuilder = Widget Function(
   List<double> columnWidths,
 );
 
-typedef TableKeyEventHandler = KeyEventResult Function(RawKeyEvent event,
-    ScrollController scrollController, BoxConstraints constraints);
+typedef TableKeyEventHandler = KeyEventResult Function(
+  RawKeyEvent event,
+  ScrollController scrollController,
+  BoxConstraints constraints,
+);
 
 enum ScrollKind { up, down, parent }
 
@@ -650,8 +653,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       );
     }
 
-    assert(selectionNotifier.value.node ==
-        items[selectionNotifier.value.nodeIndex!]);
+    assert(
+      selectionNotifier.value.node == items[selectionNotifier.value.nodeIndex!],
+    );
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
       _moveSelection(ScrollKind.down, scrollController, constraints.maxHeight);
@@ -917,56 +921,58 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
       }
     }
 
-    return LayoutBuilder(builder: (context, constraints) {
-      return SizedBox(
-        width: max(
-          constraints.widthConstraints().maxWidth,
-          tableWidth,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TableRow<T>.tableHeader(
-              key: const Key('Table header'),
-              linkedScrollControllerGroup:
-                  _linkedHorizontalScrollControllerGroup,
-              columns: widget.columns,
-              columnWidths: widget.columnWidths,
-              sortColumn: sortColumn,
-              sortDirection: sortDirection,
-              secondarySortColumn: widget.secondarySortColumn,
-              onSortChanged: _sortData,
-            ),
-            Expanded(
-              child: Scrollbar(
-                thumbVisibility: true,
-                controller: scrollController,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTapDown: (a) => widget.focusNode?.requestFocus(),
-                  child: Focus(
-                    autofocus: true,
-                    onKey: (_, event) => widget.handleKeyEvent != null
-                        ? widget.handleKeyEvent!(
-                            event,
-                            scrollController,
-                            constraints,
-                          )
-                        : KeyEventResult.ignored,
-                    focusNode: widget.focusNode,
-                    child: ListView.builder(
-                      controller: scrollController,
-                      itemCount: widget.data.length,
-                      itemBuilder: _buildItem,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SizedBox(
+          width: max(
+            constraints.widthConstraints().maxWidth,
+            tableWidth,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TableRow<T>.tableHeader(
+                key: const Key('Table header'),
+                linkedScrollControllerGroup:
+                    _linkedHorizontalScrollControllerGroup,
+                columns: widget.columns,
+                columnWidths: widget.columnWidths,
+                sortColumn: sortColumn,
+                sortDirection: sortDirection,
+                secondarySortColumn: widget.secondarySortColumn,
+                onSortChanged: _sortData,
+              ),
+              Expanded(
+                child: Scrollbar(
+                  thumbVisibility: true,
+                  controller: scrollController,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTapDown: (a) => widget.focusNode?.requestFocus(),
+                    child: Focus(
+                      autofocus: true,
+                      onKey: (_, event) => widget.handleKeyEvent != null
+                          ? widget.handleKeyEvent!(
+                              event,
+                              scrollController,
+                              constraints,
+                            )
+                          : KeyEventResult.ignored,
+                      focusNode: widget.focusNode,
+                      child: ListView.builder(
+                        controller: scrollController,
+                        itemCount: widget.data.length,
+                        itemBuilder: _buildItem,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      );
-    });
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _sortData(

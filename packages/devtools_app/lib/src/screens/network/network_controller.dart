@@ -204,7 +204,8 @@ class NetworkController
     // fewer flags risks breaking functionality on the timeline view that
     // assumes that all flags are set.
     await allowedError(
-        serviceManager.service!.setVMTimelineFlags(['GC', 'Dart', 'Embedder']));
+      serviceManager.service!.setVMTimelineFlags(['GC', 'Dart', 'Embedder']),
+    );
 
     // TODO(kenz): only call these if http logging and socket profiling are not
     // already enabled. Listen to service manager streams for this info.
@@ -301,48 +302,51 @@ class NetworkController
     } else {
       filteredData
         ..clear()
-        ..addAll(_requests.value.requests.where((NetworkRequest r) {
-          final methodArg = queryFilter.filterArguments[methodFilterId];
-          if (methodArg != null &&
-              !methodArg.matchesValue(r.method.toLowerCase())) {
-            return false;
-          }
-
-          final statusArg = queryFilter.filterArguments[statusFilterId];
-          if (statusArg != null &&
-              !statusArg.matchesValue(r.status?.toLowerCase())) {
-            return false;
-          }
-
-          final typeArg = queryFilter.filterArguments[typeFilterId];
-          if (typeArg != null && !typeArg.matchesValue(r.type.toLowerCase())) {
-            return false;
-          }
-
-          if (queryFilter.substrings.isNotEmpty) {
-            for (final substring in queryFilter.substrings) {
-              final caseInsensitiveSubstring = substring.toLowerCase();
-              bool matches(String? stringToMatch) {
-                if (stringToMatch
-                        ?.toLowerCase()
-                        .contains(caseInsensitiveSubstring) ==
-                    true) {
-                  _checkForError(r);
-                  return true;
-                }
-                return false;
-              }
-
-              if (matches(r.uri)) return true;
-              if (matches(r.method)) return true;
-              if (matches(r.status)) return true;
-              if (matches(r.type)) return true;
+        ..addAll(
+          _requests.value.requests.where((NetworkRequest r) {
+            final methodArg = queryFilter.filterArguments[methodFilterId];
+            if (methodArg != null &&
+                !methodArg.matchesValue(r.method.toLowerCase())) {
+              return false;
             }
-            return false;
-          }
-          _checkForError(r);
-          return true;
-        }).toList());
+
+            final statusArg = queryFilter.filterArguments[statusFilterId];
+            if (statusArg != null &&
+                !statusArg.matchesValue(r.status?.toLowerCase())) {
+              return false;
+            }
+
+            final typeArg = queryFilter.filterArguments[typeFilterId];
+            if (typeArg != null &&
+                !typeArg.matchesValue(r.type.toLowerCase())) {
+              return false;
+            }
+
+            if (queryFilter.substrings.isNotEmpty) {
+              for (final substring in queryFilter.substrings) {
+                final caseInsensitiveSubstring = substring.toLowerCase();
+                bool matches(String? stringToMatch) {
+                  if (stringToMatch
+                          ?.toLowerCase()
+                          .contains(caseInsensitiveSubstring) ==
+                      true) {
+                    _checkForError(r);
+                    return true;
+                  }
+                  return false;
+                }
+
+                if (matches(r.uri)) return true;
+                if (matches(r.method)) return true;
+                if (matches(r.status)) return true;
+                if (matches(r.type)) return true;
+              }
+              return false;
+            }
+            _checkForError(r);
+            return true;
+          }).toList(),
+        );
     }
     activeFilter.value = filter;
   }

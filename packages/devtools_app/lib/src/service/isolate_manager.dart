@@ -170,10 +170,12 @@ class IsolateManager extends Disposer {
   }
 
   void _sendToMessageBus(Event event) {
-    messageBus.addEvent(BusEvent(
-      'debugger',
-      data: event,
-    ));
+    messageBus.addEvent(
+      BusEvent(
+        'debugger',
+        data: event,
+      ),
+    );
   }
 
   Future<void> _initSelectedIsolate() async {
@@ -243,9 +245,11 @@ class IsolateManager extends Disposer {
     cancelStreamSubscriptions();
     _service = service;
     autoDisposeStreamSubscription(
-        service.onIsolateEvent.listen(_handleIsolateEvent));
+      service.onIsolateEvent.listen(_handleIsolateEvent),
+    );
     autoDisposeStreamSubscription(
-        service.onDebugEvent.listen(_handleDebugEvent));
+      service.onDebugEvent.listen(_handleDebugEvent),
+    );
 
     // We don't yet known the main isolate.
     _mainIsolate.value = null;

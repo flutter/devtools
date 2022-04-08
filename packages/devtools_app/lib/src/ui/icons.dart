@@ -88,7 +88,9 @@ class CircleIcon extends StatelessWidget {
         text,
         textAlign: TextAlign.center,
         style: TextStyle(
-            fontSize: scaleByFontFactor(9.0), color: const Color(0xFF231F20)),
+          fontSize: scaleByFontFactor(9.0),
+          color: const Color(0xFF231F20),
+        ),
       ),
     );
   }
@@ -141,12 +143,8 @@ class CustomIconMaker {
     });
   }
 
-  Widget? fromInfo(String name) {
-    if (name.isEmpty) {
-      return null;
-    }
-
-    return getCustomIcon(name, kind: IconKind.info);
+  CustomIcon fromInfo(String name) {
+    return getCustomIcon(name, kind: IconKind.info) as CustomIcon;
   }
 
   bool isAlphabetic(int char) {
