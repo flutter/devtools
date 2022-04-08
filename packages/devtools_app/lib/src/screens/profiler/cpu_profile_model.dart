@@ -284,10 +284,10 @@ class CpuProfileData {
   /// [isolateId] The isolate id which was used to get the [cpuSamples].
   /// This will be used to tag the stack frames and trace events.
   /// [cpuSamples] The CPU samples that will be used to generate the [CpuProfileData]
-  static Future<CpuProfileData> generateFromCpuSamples(
+  factory CpuProfileData.generateFromCpuSamples(
     String isolateId,
     vm_service.CpuSamples cpuSamples,
-  ) async {
+  ) {
     // The root ID is associated with an artificial frame / node that is the root
     // of all stacks, regardless of entrypoint. This should never be seen in the
     // final output from this method.

@@ -91,12 +91,10 @@ void main() {
               'vsyncOverhead': 1000
             },
           ],
-          PerformanceData.cpuProfileKey:
-              (await CpuProfileData.generateFromCpuSamples(
+          PerformanceData.cpuProfileKey: CpuProfileData.generateFromCpuSamples(
             goldenSamplesIsolate,
             CpuSamples.parse(goldenCpuSamplesJson)!,
-          ))
-                  .toJson,
+          ).toJson,
           PerformanceData.selectedEventKey: vsyncEvent.json,
           PerformanceData.displayRefreshRateKey: 60,
         }),

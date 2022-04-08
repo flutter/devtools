@@ -84,9 +84,8 @@ void main() {
       expect(cpuSamples.toJson(), equals(goldenCpuSamplesJson));
     });
 
-    test('converts golden samples to golden cpu profile data', () async {
-      final generatedCpuProfileData =
-          await CpuProfileData.generateFromCpuSamples(
+    test('converts golden samples to golden cpu profile data', () {
+      final generatedCpuProfileData = CpuProfileData.generateFromCpuSamples(
         goldenSamplesIsolate,
         CpuSamples.parse(goldenCpuSamplesJson)!,
       );
