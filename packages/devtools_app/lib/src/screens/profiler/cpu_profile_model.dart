@@ -489,7 +489,6 @@ class CpuSample extends TraceEvent {
     required this.leafId,
     this.userTag,
     required Map<String, dynamic> traceJson,
-    this.vmTag,
   }) : super(traceJson);
 
   factory CpuSample.parse(Map<String, dynamic> traceJson) {
@@ -497,22 +496,16 @@ class CpuSample extends TraceEvent {
     final userTag = traceJson[TraceEvent.argsKey] != null
         ? traceJson[TraceEvent.argsKey][CpuProfileData.userTagKey]
         : null;
-    final vmTag = traceJson[TraceEvent.argsKey] != null
-        ? traceJson[TraceEvent.argsKey]['vmTag']
-        : null;
     return CpuSample(
       leafId: leafId,
       userTag: userTag,
       traceJson: traceJson,
-      vmTag: vmTag,
     );
   }
 
   final String leafId;
 
   final String? userTag;
-
-  final String? vmTag;
 
   Map<String, dynamic> get toJson {
     // [leafId] is the source of truth for the leaf id of this sample.
