@@ -1066,7 +1066,7 @@ abstract class ObjectGroupBase implements Disposable {
         isAlive: this,
       );
     }
-    final instanceRef = ref!.instanceRef;
+    final instanceRef = ref!.instanceRef!;
     return await inspectorLibrary.eval(
       expression,
       isAlive: this,

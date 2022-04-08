@@ -274,7 +274,7 @@ void main() {
       );
       debuggerController.parsedScript.value = ParsedScript(
         script: testScript,
-        highlighter: null,
+        highlighter: mockSyntaxHighlighter,
         executableLines: {},
       );
     });
@@ -298,10 +298,6 @@ void main() {
       );
       expect(
         debuggerController.matchesForSearch('').toString(),
-        equals('[]'),
-      );
-      expect(
-        debuggerController.matchesForSearch(null).toString(),
         equals('[]'),
       );
     });
