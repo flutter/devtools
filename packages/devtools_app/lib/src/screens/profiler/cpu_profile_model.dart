@@ -277,14 +277,13 @@ class CpuProfileData {
 
   factory CpuProfileData.empty() => CpuProfileData.parse({});
 
-  /// Generates [CpuProfileData] by fetching [CpuSamples] from the [VmService]
-  /// that is stored in the global [ServiceConnectionManager].
+  /// Generates [CpuProfileData] from the provided [CpuSamples].
   ///
   /// Only samples collected in the time range [origin, origin + extent] will be reported.
   ///
-  /// [isolateId] The id which is passed to the getIsolate RPC to load this isolate.
-  /// [origin] origin time
-  /// [extent] extent time
+  /// [isolateId] The isolate id which was used to get the [cpuSamples].
+  /// This will be used to tag the stack frames and trace events.
+  /// [cpuSamples] The CPU samples that will be used to generate the [CpuProfileData]
   static Future<CpuProfileData> generateFromCpuSamples(
     String isolateId,
     vm_service.CpuSamples cpuSamples,
