@@ -720,7 +720,7 @@ final filteredStackFrames = {
         'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
   },
   '140357727781376-17': {
-    'category': '[Stub] OneArgCheckInlineCache',
+    'category': 'Dart',
     'name': '_WidgetsFlutterBinding&BindingBase&Gesture._invokeFrameCallback',
     'parent': '140357727781376-16',
     'resolvedUrl': '',
