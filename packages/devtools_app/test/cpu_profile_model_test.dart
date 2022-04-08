@@ -8,12 +8,14 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'test_data/cpu_profile_test_data.dart';
 
 void main() {
   group('CpuProfileData', () {
     final cpuProfileData = CpuProfileData.parse(cpuProfileResponseJson);
+    final cpuSamples = CpuSamples.parse(goldenSamplesJson)!;
 
     test('init from parse', () {
       expect(
@@ -161,8 +163,16 @@ void main() {
       );
     });
 
-    test('to json', () {
-      expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJsonZZZ));
+    test('samples to json', () {
+      expect(cpuSamples.toJson(), equals(CpuSamples.parse(goldenSamplesJson)));
+    });
+
+    test('converts golden samples to golden cpu profile data', () async {
+      final cpuProfileData = await CpuProfileData.generateFromCpuSamples(
+        goldenSamplesIsolate,
+        CpuSamples.parse(goldenSamplesJson)!,
+      );
+      expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
     });
 
     test('stackFrameIdCompare', () {

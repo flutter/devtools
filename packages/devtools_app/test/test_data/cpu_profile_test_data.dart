@@ -5,7 +5,7 @@
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 
-final Map<String, dynamic> goldenCpuProfileDataJsonZZZ = {
+final Map<String, dynamic> goldenCpuProfileDataJson = {
   'type': '_CpuProfileTimeline',
   'samplePeriod': 50,
   'sampleCount': 8,

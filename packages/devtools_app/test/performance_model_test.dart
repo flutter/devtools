@@ -63,7 +63,7 @@ void main() {
         ],
         frames: [testFrame0, testFrame1],
         selectedEvent: vsyncEvent,
-        cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJsonZZZ),
+        cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
         displayRefreshRate: 60,
       );
       expect(
@@ -226,7 +226,7 @@ void main() {
       expect(offlineData.displayRefreshRate, equals(120));
       expect(
         offlineData.cpuProfileData!.toJson,
-        equals(goldenCpuProfileDataJsonZZZ),
+        equals(goldenCpuProfileDataJson),
       );
     });
 
