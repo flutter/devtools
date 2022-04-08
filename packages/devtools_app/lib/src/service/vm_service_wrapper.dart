@@ -10,8 +10,6 @@ import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../devtools_app.dart';
-
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(
     this._vmService,
