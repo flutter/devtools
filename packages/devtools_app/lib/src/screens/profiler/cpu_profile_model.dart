@@ -914,7 +914,8 @@ class CpuProfileStore {
 
 class _CpuProfileTimelineTree {
   factory _CpuProfileTimelineTree.fromCpuSamples(
-      vm_service.CpuSamples cpuSamples) {
+    vm_service.CpuSamples cpuSamples,
+  ) {
     final root = _CpuProfileTimelineTree._fromIndex(cpuSamples, kRootIndex);
     _CpuProfileTimelineTree current;
     // TODO(bkonyi): handle truncated?
@@ -968,7 +969,8 @@ class _CpuProfileTimelineTree {
   final children = <_CpuProfileTimelineTree>[];
 
   static _CpuProfileTimelineTree? getTreeFromSample(
-          vm_service.CpuSample sample) =>
+    vm_service.CpuSample sample,
+  ) =>
       _timelineTreeExpando[sample];
 
   _CpuProfileTimelineTree _getChild(int index) {
