@@ -269,7 +269,6 @@ class FakeVmService extends Fake implements VmServiceWrapper {
               'samplePeriod': 50,
               'maxStackDepth': 12,
               'sampleCount': 0,
-              'timeSpan': -1,
               'timeOriginMicros': 47377796685,
               'timeExtentMicros': 3000,
               'pid': 54321,

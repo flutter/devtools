@@ -542,8 +542,7 @@ final Map<String, dynamic> goldenCpuProfileStackFrames =
               'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
         },
         '140357727781376-17': {
-          'category':
-              'Dart', // TODO: Double check this is getting done properly
+          'category': 'Dart',
           'name':
               '_WidgetsFlutterBinding&BindingBase&Gesture._invokeFrameCallback',
           'parent': '140357727781376-16',
