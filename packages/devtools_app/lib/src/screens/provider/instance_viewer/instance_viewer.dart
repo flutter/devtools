@@ -167,8 +167,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
                   map,
                   path: path,
                 ),
-                // string/numbers/bools have no children, but this code can be reached
-                // when the root of the instance tree (which is always expanded) is such primitive.
+                // Reaches when the root of the instance tree is a string/numbers/bool/....
                 orElse: () => const [],
               );
             }
