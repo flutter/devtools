@@ -406,12 +406,13 @@ Future<List<ObjectField>> _parseFields(
 
     String ownerUri;
     String ownerName;
-    if (owner.mixin == null) {
+    final ownerMixin = owner.mixin;
+    if (ownerMixin == null) {
       ownerUri = owner.library!.uri!;
       ownerName = owner.name!;
     } else {
       final mixinClass =
-          await eval.safeGetClass(owner.mixin!.typeClass!, isAlive);
+          await eval.safeGetClass(ownerMixin.typeClass!, isAlive);
 
       ownerUri = mixinClass.library!.uri!;
       ownerName = mixinClass.name!;
