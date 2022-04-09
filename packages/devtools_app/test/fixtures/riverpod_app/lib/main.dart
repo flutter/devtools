@@ -21,7 +21,7 @@ void main() {
   );
 }
 
-final counterProvider = StateNotifierProvider((ref) => Counter());
+final counterProvider = StateNotifierProvider<Counter, int>((ref) => Counter());
 
 class MyApp extends ConsumerWidget {
   @override
@@ -45,7 +45,7 @@ class MyApp extends ConsumerWidget {
         ),
         floatingActionButton: FloatingActionButton(
           key: const Key('increment'),
-          onPressed: () => ref.read(counterProvider).increment(),
+          onPressed: () => ref.read(counterProvider.notifier).increment(),
           child: const Icon(Icons.add),
         ),
       ),
