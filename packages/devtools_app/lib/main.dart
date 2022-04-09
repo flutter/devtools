@@ -12,6 +12,7 @@ import 'src/app.dart';
 import 'src/config_specific/framework_initialize/framework_initialize.dart';
 import 'src/config_specific/ide_theme/ide_theme.dart';
 import 'src/config_specific/url/url.dart';
+import 'src/config_specific/url_strategy/url_strategy.dart';
 import 'src/extension_points/extensions_base.dart';
 import 'src/extension_points/extensions_external.dart';
 import 'src/primitives/url_utils.dart';
@@ -20,7 +21,6 @@ import 'src/screens/provider/riverpod_error_logger_observer.dart';
 import 'src/shared/app_error_handling.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/preferences.dart';
-import 'src/url_strategy/url_strategy.dart';
 
 void main() async {
   // Before switching to URL path strategy, check if this URL is in the legacy
