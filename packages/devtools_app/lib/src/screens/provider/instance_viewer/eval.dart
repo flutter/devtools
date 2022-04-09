@@ -44,7 +44,7 @@ final libraryEvalProvider =
 });
 
 final hotRestartEventProvider =
-    ChangeNotifierProvider<ValueNotifier<IsolateRef?>>((ref) {
+    ChangeNotifierProvider<ValueNotifier<void>>((ref) {
   return serviceManager.isolateManager.selectedIsolate
       as ValueNotifier<IsolateRef?>;
 });

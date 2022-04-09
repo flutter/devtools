@@ -23,7 +23,7 @@ class _$ResultTearOff {
     );
   }
 
-  _ResultError<T> error<T>(Object? error, StackTrace stackTrace) {
+  _ResultError<T> error<T>(Object error, StackTrace stackTrace) {
     return _ResultError<T>(
       error,
       stackTrace,
@@ -39,19 +39,19 @@ mixin _$Result<T> {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(T value) data,
-    required TResult Function(Object? error, StackTrace stackTrace) error,
+    required TResult Function(Object error, StackTrace stackTrace) error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult Function(T value)? data,
-    TResult Function(Object? error, StackTrace stackTrace)? error,
+    TResult Function(Object error, StackTrace stackTrace)? error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(T value)? data,
-    TResult Function(Object? error, StackTrace stackTrace)? error,
+    TResult Function(Object error, StackTrace stackTrace)? error,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -164,7 +164,7 @@ class _$_ResultData<T> extends _ResultData<T> with DiagnosticableTreeMixin {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(T value) data,
-    required TResult Function(Object? error, StackTrace stackTrace) error,
+    required TResult Function(Object error, StackTrace stackTrace) error,
   }) {
     return data(value);
   }
@@ -173,7 +173,7 @@ class _$_ResultData<T> extends _ResultData<T> with DiagnosticableTreeMixin {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult Function(T value)? data,
-    TResult Function(Object? error, StackTrace stackTrace)? error,
+    TResult Function(Object error, StackTrace stackTrace)? error,
   }) {
     return data?.call(value);
   }
@@ -182,7 +182,7 @@ class _$_ResultData<T> extends _ResultData<T> with DiagnosticableTreeMixin {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(T value)? data,
-    TResult Function(Object? error, StackTrace stackTrace)? error,
+    TResult Function(Object error, StackTrace stackTrace)? error,
     required TResult orElse(),
   }) {
     if (data != null) {
@@ -238,7 +238,7 @@ abstract class _$ResultErrorCopyWith<T, $Res> {
   factory _$ResultErrorCopyWith(
           _ResultError<T> value, $Res Function(_ResultError<T>) then) =
       __$ResultErrorCopyWithImpl<T, $Res>;
-  $Res call({Object? error, StackTrace stackTrace});
+  $Res call({Object error, StackTrace stackTrace});
 }
 
 /// @nodoc
@@ -257,7 +257,10 @@ class __$ResultErrorCopyWithImpl<T, $Res> extends _$ResultCopyWithImpl<T, $Res>
     Object? stackTrace = freezed,
   }) {
     return _then(_ResultError<T>(
-      error == freezed ? _value.error : error,
+      error == freezed
+          ? _value.error
+          : error // ignore: cast_nullable_to_non_nullable
+              as Object,
       stackTrace == freezed
           ? _value.stackTrace
           : stackTrace // ignore: cast_nullable_to_non_nullable
@@ -272,7 +275,7 @@ class _$_ResultError<T> extends _ResultError<T> with DiagnosticableTreeMixin {
   _$_ResultError(this.error, this.stackTrace) : super._();
 
   @override
-  final Object? error;
+  final Object error;
   @override
   final StackTrace stackTrace;
 
@@ -315,7 +318,7 @@ class _$_ResultError<T> extends _ResultError<T> with DiagnosticableTreeMixin {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(T value) data,
-    required TResult Function(Object? error, StackTrace stackTrace) error,
+    required TResult Function(Object error, StackTrace stackTrace) error,
   }) {
     return error(this.error, stackTrace);
   }
@@ -324,7 +327,7 @@ class _$_ResultError<T> extends _ResultError<T> with DiagnosticableTreeMixin {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult Function(T value)? data,
-    TResult Function(Object? error, StackTrace stackTrace)? error,
+    TResult Function(Object error, StackTrace stackTrace)? error,
   }) {
     return error?.call(this.error, stackTrace);
   }
@@ -333,7 +336,7 @@ class _$_ResultError<T> extends _ResultError<T> with DiagnosticableTreeMixin {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(T value)? data,
-    TResult Function(Object? error, StackTrace stackTrace)? error,
+    TResult Function(Object error, StackTrace stackTrace)? error,
     required TResult orElse(),
   }) {
     if (error != null) {
@@ -375,11 +378,10 @@ class _$_ResultError<T> extends _ResultError<T> with DiagnosticableTreeMixin {
 }
 
 abstract class _ResultError<T> extends Result<T> {
-  factory _ResultError(Object? error, StackTrace stackTrace) =
-      _$_ResultError<T>;
+  factory _ResultError(Object error, StackTrace stackTrace) = _$_ResultError<T>;
   _ResultError._() : super._();
 
-  Object? get error;
+  Object get error;
   StackTrace get stackTrace;
   @JsonKey(ignore: true)
   _$ResultErrorCopyWith<T, _ResultError<T>> get copyWith =>

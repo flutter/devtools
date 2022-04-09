@@ -123,7 +123,8 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
     InstancePath path,
   ) {
     if (error is SentinelException) {
-      return [Text(error.sentinel.valueAsString!)];
+      final valueAsString = error.sentinel.valueAsString;
+      if (valueAsString != null) return [Text(valueAsString)];
     }
 
     return const [Text('<unknown error>')];
@@ -498,9 +499,7 @@ class _EditableFieldState extends State<_EditableField> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.setter == null) {
-      return widget.child;
-    }
+    if (widget.setter == null) return widget.child;
 
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -510,9 +509,8 @@ class _EditableFieldState extends State<_EditableField> {
       focusNode: textFieldFocusNode,
       onSubmitted: (value) async {
         try {
-          if (widget.setter != null) {
-            await widget.setter!(value);
-          }
+          final setter = widget.setter;
+          if (setter != null) await setter(value);
         } catch (err) {
           showErrorSnackBar(context, err);
         }
@@ -612,13 +610,15 @@ class _Expandable extends StatelessWidget {
       );
     }
 
+    final isExpanded = this.isExpanded!;
+
     return GestureDetector(
-      onTap: () => isExpanded!.state = !isExpanded!.state,
+      onTap: () => isExpanded.state = !isExpanded.state,
       behavior: HitTestBehavior.opaque,
       child: Row(
         children: [
           TweenAnimationBuilder<double>(
-            tween: Tween(end: isExpanded!.state ? 0 : -math.pi / 2),
+            tween: Tween(end: isExpanded.state ? 0 : -math.pi / 2),
             duration: defaultDuration,
             builder: (context, angle, _) {
               return Transform.rotate(

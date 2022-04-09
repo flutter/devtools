@@ -21,7 +21,7 @@ Future<InstanceRef> _resolveInstanceRefForPath(
   required Disposable isAlive,
   required InstanceDetails? parent,
 }) async {
-  if (path.pathToProperty.isEmpty) {
+  if (parent == null) {
     // root of the provider tree
 
     return path.map(
@@ -49,20 +49,21 @@ Future<InstanceRef> _resolveInstanceRefForPath(
 
   final eval = await ref.watch(evalProvider.future);
 
-  return parent!.maybeMap(
+  return parent.maybeMap(
     // TODO: support sets
     // TODO: iterables should use iterators / next() for iterable to navigate, to avoid recomputing the content
 
     map: (parent) {
       final keyPath = path.pathToProperty.last as MapKeyPath;
       final key = keyPath.ref == null ? 'null' : 'key';
+      final keyPathRef = keyPath.ref;
 
       return eval.safeEval(
         'parent[$key]',
         isAlive: isAlive,
         scope: {
           'parent': parent.instanceRefId,
-          if (keyPath.ref != null) 'key': keyPath.ref!
+          if (keyPathRef != null) 'key': keyPathRef,
         },
       );
     },
@@ -127,13 +128,14 @@ Future<void> _mutate(
       final eval = await ref.watch(evalProvider.future);
       final keyPath = path.pathToProperty.last as MapKeyPath;
       final keyRefVar = keyPath.ref == null ? 'null' : 'key';
+      final keyPathRef = keyPath.ref;
 
       return eval.safeEval(
         'parent[$keyRefVar] = $newValueExpression',
         isAlive: isAlive,
         scope: {
           'parent': parent.instanceRefId,
-          if (keyPath.ref != null) 'key': keyPath.ref!,
+          if (keyPathRef != null) 'key': keyPathRef,
         },
       );
     },
@@ -195,21 +197,18 @@ Future<EnumInstance?> _tryParseEnum(
 
   final _nameRef = findPropertyWithName('_name');
   final indexRef = findPropertyWithName('index');
-
   if (_nameRef == null || indexRef == null) return null;
 
   final nameInstanceFuture = eval.safeGetInstance(_nameRef, isAlive);
   final indexInstanceFuture = eval.safeGetInstance(indexRef, isAlive);
 
   final index = await indexInstanceFuture;
-
   if (index.kind != InstanceKind.kInt) return null;
 
   final name = await nameInstanceFuture;
   if (name.kind != InstanceKind.kString) return null;
 
   final nameSplit = name.valueAsString!.split('.');
-
   if (nameSplit.length != 2) return null;
 
   return EnumInstance(
@@ -376,7 +375,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
       return InstanceDetails.object(
         fields.sorted((a, b) => sortFieldsByName(a.name, b.name)),
         hash: await eval.getHashCode(instance, isAlive: isAlive),
-        type: instance.classRef!.name!,
+        type: classInstance.name!,
         instanceRefId: instanceRef.id!,
         evalForInstance: await evalForInstance,
         setter: setter,
@@ -401,8 +400,9 @@ Future<List<ObjectField>> _parseFields(
   required String? appName,
 }) async {
   final fields = instance.fields!.map((field) async {
+    final fieldDeclaration = field.decl!;
     final owner =
-        await eval.safeGetClass(field.decl!.owner! as ClassRef, isAlive);
+        await eval.safeGetClass(fieldDeclaration.owner! as ClassRef, isAlive);
 
     String ownerUri;
     String ownerName;
@@ -420,8 +420,8 @@ Future<List<ObjectField>> _parseFields(
     final ownerPackageName = tryParsePackageName(ownerUri);
 
     return ObjectField(
-      name: field.decl!.name!,
-      isFinal: field.decl!.isFinal!,
+      name: fieldDeclaration.name!,
+      isFinal: fieldDeclaration.isFinal!,
       ref: parseSentinel<InstanceRef>(field.value),
       ownerName: ownerName,
       ownerUri: ownerUri,

@@ -8,7 +8,7 @@ version: 2.12.2
 homepage: https://github.com/flutter/devtools
 
 environment:
-  sdk: '>=2.15.0 <3.0.0'
+  sdk: '>=2.16.0 <3.0.0'
   # The flutter desktop support interacts with build scripts on the Flutter
   # side that are not yet stable, so it requires a very recent version of
   # Flutter. This version will increase regularly as the build scripts change.
