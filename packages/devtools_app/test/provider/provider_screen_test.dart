@@ -89,7 +89,7 @@ void main() {
       ]);
       addTearDown(container.dispose);
 
-      final sub = container.listen(
+      final sub = container.listen<String?>(
         selectedProviderIdProvider,
         (prev, next) {},
       );
@@ -118,7 +118,7 @@ void main() {
       ]);
       addTearDown(container.dispose);
 
-      final sub = container.listen(
+      final sub = container.listen<String?>(
         selectedProviderIdProvider,
         (prev, next) {},
       );
@@ -155,7 +155,7 @@ void main() {
       ]);
       addTearDown(container.dispose);
 
-      final sub = container.listen(
+      final sub = container.listen<String?>(
         selectedProviderIdProvider,
         (prev, next) {},
       );
@@ -187,7 +187,7 @@ void main() {
       ]);
       addTearDown(container.dispose);
 
-      final sub = container.listen(
+      final sub = container.listen<String?>(
         selectedProviderIdProvider,
         (prev, next) {},
       );
@@ -224,7 +224,7 @@ void main() {
       ]);
       addTearDown(container.dispose);
 
-      final sub = container.listen(
+      final sub = container.listen<String?>(
         selectedProviderIdProvider,
         (prev, next) {},
       );
