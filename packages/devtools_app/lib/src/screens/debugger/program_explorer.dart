@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
@@ -28,20 +26,20 @@ double get _selectedNodeTopSpacing => _programExplorerRowHeight * 3;
 
 class _ProgramExplorerRow extends StatelessWidget {
   const _ProgramExplorerRow({
-    @required this.controller,
-    @required this.node,
+    required this.controller,
+    required this.node,
     this.onTap,
   });
 
   final ProgramExplorerController controller;
   final VMServiceObjectNode node;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    String text = node.name;
+    String? text = node.name;
     final toolTip = _tooltipForNode();
 
     if (node.object is ClassRef ||
@@ -63,7 +61,7 @@ class _ProgramExplorerRow extends StatelessWidget {
             const SizedBox(width: densePadding),
             Flexible(
               child: Text(
-                text,
+                text!,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.fixedFontStyle.copyWith(
@@ -79,21 +77,21 @@ class _ProgramExplorerRow extends StatelessWidget {
     );
   }
 
-  String _tooltipForNode() {
-    String toolTip;
+  String? _tooltipForNode() {
+    String? toolTip;
     if (node.object is ClassRef) {
       final clazz = node.object as ClassRef;
       toolTip = '${clazz.name}';
       if (clazz.typeParameters != null) {
         toolTip +=
-            '<' + clazz.typeParameters.map((e) => e.name).join(', ') + '>';
+            '<' + clazz.typeParameters!.map((e) => e.name).join(', ') + '>';
       }
     } else if (node.object is Func) {
       final func = node.object as Func;
       final isInstanceMethod = func.owner is ClassRef;
       final subtext = _buildFunctionTypeText(
         func.name,
-        func.signature,
+        func.signature!,
         isInstanceMethod: isInstanceMethod,
       );
       toolTip = '${func.name}$subtext';
@@ -102,7 +100,7 @@ class _ProgramExplorerRow extends StatelessWidget {
       final subtext = _buildFieldTypeText(field);
       toolTip = '$subtext${field.name}';
     } else if (node.script != null) {
-      toolTip = node.script.uri;
+      toolTip = node.script!.uri;
     }
     return toolTip;
   }
@@ -115,17 +113,17 @@ class _ProgramExplorerRow extends StatelessWidget {
   ///   - List<X0>
   String _buildFieldTypeText(Field field) {
     final buffer = StringBuffer();
-    if (field.isStatic) {
+    if (field.isStatic!) {
       buffer.write('static ');
     }
-    if (field.isConst) {
+    if (field.isConst!) {
       buffer.write('const ');
     }
-    if (field.isFinal && !field.isConst) {
+    if (field.isFinal! && !field.isConst!) {
       buffer.write('final ');
     }
-    if (field.declaredType.name != null) {
-      buffer.write('${field.declaredType.name} ');
+    if (field.declaredType!.name != null) {
+      buffer.write('${field.declaredType!.name} ');
     }
     return buffer.toString();
   }
@@ -138,13 +136,13 @@ class _ProgramExplorerRow extends StatelessWidget {
   ///   - Baz(String, [int]) -> void
   ///   - Faz(String, {String? bar, required int baz}) -> int
   String _buildFunctionTypeText(
-    String functionName,
+    String? functionName,
     InstanceRef signature, {
     bool isInstanceMethod = false,
   }) {
     final buffer = StringBuffer();
     if (signature.typeParameters != null) {
-      final typeParams = signature.typeParameters;
+      final typeParams = signature.typeParameters!;
       buffer.write('<');
       for (int i = 0; i < typeParams.length; ++i) {
         buffer.write(typeParams[i].name);
@@ -155,12 +153,11 @@ class _ProgramExplorerRow extends StatelessWidget {
       buffer.write('>');
     }
     buffer.write('(');
-    String closingTag;
-    for (int i = isInstanceMethod ? 1 : 0;
-        i < signature.parameters.length;
-        ++i) {
-      final param = signature.parameters[i];
-      if (!param.fixed && closingTag == null) {
+    String? closingTag;
+    final params = signature.parameters ?? [];
+    for (int i = isInstanceMethod ? 1 : 0; i < params.length; ++i) {
+      final param = params[i];
+      if (!param.fixed! && closingTag == null) {
         if (param.name == null) {
           closingTag = ']';
           buffer.write('[');
@@ -169,28 +166,37 @@ class _ProgramExplorerRow extends StatelessWidget {
           buffer.write('{');
         }
       }
-      if (param.required != null && param.required) {
+      final paramRequired = param.required;
+      if (paramRequired ?? false) {
         buffer.write('required ');
       }
-      if (param.parameterType.name == null) {
-        buffer.write(_buildFunctionTypeText('Function', param.parameterType));
-      } else {
-        buffer.write(param.parameterType.name);
+      final paramType = param.parameterType;
+      if (paramType != null) {
+        final paramTypeName = param.parameterType?.name;
+        if (paramTypeName == null) {
+          buffer.write(_buildFunctionTypeText('Function', paramType));
+        } else {
+          buffer.write(paramTypeName);
+        }
       }
       if (param.name != null) {
         buffer.write(' ${param.name}');
       }
-      if (i + 1 != signature.parameters.length) {
+      if (i + 1 != params.length) {
         buffer.write(', ');
       } else if (closingTag != null) {
         buffer.write(closingTag);
       }
     }
     buffer.write(') → ');
-    if (signature.returnType.name == null) {
-      buffer.write(_buildFunctionTypeText('Function', signature.returnType));
-    } else {
-      buffer.write(signature.returnType.name);
+    final returnType = signature.returnType;
+    if (returnType != null) {
+      final returnTypeName = signature.returnType?.name;
+      if (returnTypeName == null) {
+        buffer.write(_buildFunctionTypeText('Function', returnType));
+      } else {
+        buffer.write(returnTypeName);
+      }
     }
 
     return buffer.toString();
@@ -199,19 +205,19 @@ class _ProgramExplorerRow extends StatelessWidget {
 
 class ProgramStructureIcon extends StatelessWidget {
   const ProgramStructureIcon({
-    @required this.object,
+    required this.object,
   });
 
-  final ObjRef object;
+  final ObjRef? object;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    IconData icon;
-    String character;
+    IconData? icon;
+    String? character;
     Color color = colorScheme.functionSyntaxColor;
-    bool isShortCharacter;
+    bool? isShortCharacter;
     if (object is ClassRef) {
       character = 'c';
       isShortCharacter = true;
@@ -234,8 +240,10 @@ class ProgramStructureIcon extends StatelessWidget {
       icon = containerIcon;
     }
 
-    assert((icon == null && character != null && isShortCharacter != null) ||
-        (icon != null && character == null && isShortCharacter == null));
+    assert(
+      (icon == null && character != null && isShortCharacter != null) ||
+          (icon != null && character == null && isShortCharacter == null),
+    );
 
     return SizedBox(
       height: defaultIconSize,
@@ -250,7 +258,7 @@ class ProgramStructureIcon extends StatelessWidget {
         child: icon == null
             ? Center(
                 child: Text(
-                  character,
+                  character!,
                   style: TextStyle(
                     height: 1,
                     fontFamily: theme.fixedFontStyle.fontFamily,
@@ -265,7 +273,7 @@ class ProgramStructureIcon extends StatelessWidget {
                   // want to disable this behavior so shorter characters don't
                   // appear to be slightly below center.
                   textHeightBehavior: TextHeightBehavior(
-                    applyHeightToFirstAscent: isShortCharacter,
+                    applyHeightToFirstAscent: isShortCharacter!,
                     applyHeightToLastDescent: false,
                   ),
                 ),
@@ -282,9 +290,9 @@ class ProgramStructureIcon extends StatelessWidget {
 
 class _FileExplorer extends StatefulWidget {
   const _FileExplorer({
-    @required this.controller,
-    @required this.onItemSelected,
-    @required this.onItemExpanded,
+    required this.controller,
+    required this.onItemSelected,
+    required this.onItemExpanded,
   });
 
   final ProgramExplorerController controller;
@@ -357,9 +365,9 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
 
 class _ProgramOutlineView extends StatelessWidget {
   const _ProgramOutlineView({
-    @required this.controller,
-    @required this.onItemSelected,
-    @required this.onItemExpanded,
+    required this.controller,
+    required this.onItemSelected,
+    required this.onItemExpanded,
   });
 
   final ProgramExplorerController controller;
@@ -403,14 +411,14 @@ class _ProgramOutlineView extends StatelessWidget {
 /// filtering.
 class ProgramExplorer extends StatelessWidget {
   const ProgramExplorer({
-    Key key,
-    @required this.controller,
+    required Key key,
+    required this.controller,
     this.onSelected,
     this.title = 'File Explorer',
   }) : super(key: key);
 
   final ProgramExplorerController controller;
-  final void Function(ScriptLocation) onSelected;
+  final void Function(ScriptLocation)? onSelected;
   final String title;
 
   @override
@@ -442,7 +450,7 @@ class ProgramExplorer extends StatelessWidget {
               // the above issues are resolved.
               //
               // See https://github.com/flutter/devtools/issues/3447.
-              return serviceManager.connectedApp.isDartWebAppNow
+              return serviceManager.connectedApp!.isDartWebAppNow!
                   ? Column(
                       children: [
                         fileExplorerHeader,
@@ -494,7 +502,7 @@ class ProgramExplorer extends StatelessWidget {
       node.expand();
     }
 
-    if (onSelected != null) onSelected(node.location);
+    if (onSelected != null) onSelected!(node.location!);
   }
 
   void onItemExpanded(VMServiceObjectNode node) async {

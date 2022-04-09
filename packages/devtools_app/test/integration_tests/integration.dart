@@ -29,7 +29,8 @@ class DevtoolsManager {
     bool waitForConnection = true,
   }) async {
     final Uri baseAppUri = baseUri.resolve(
-        'index.html?uri=${Uri.encodeQueryComponent(appFixture.serviceUri.toString())}');
+      'index.html?uri=${Uri.encodeQueryComponent(appFixture.serviceUri.toString())}',
+    );
     await tabInstance.tab.navigate('${overrideUri ?? baseAppUri}');
 
     // wait for app initialization
@@ -279,8 +280,10 @@ class WebBuildFixture {
 
     _toLines(process.stderr).listen((String line) {
       if (verbose || hasUrl.isCompleted) {
-        print('pub run build_runner serve • ${process.pid}'
-            ' • STDERR • ${line.trim()}');
+        print(
+          'pub run build_runner serve • ${process.pid}'
+          ' • STDERR • ${line.trim()}',
+        );
       }
 
       final err = 'error starting webdev: $line';
@@ -369,15 +372,17 @@ class WebBuildFixture {
       }
     });
 
-    unawaited(process.exitCode.then((code) {
-      if (!buildFinished.isCompleted) {
-        if (code == 0) {
-          buildFinished.complete();
-        } else {
-          buildFinished.completeError('Exited with code $code');
+    unawaited(
+      process.exitCode.then((code) {
+        if (!buildFinished.isCompleted) {
+          if (code == 0) {
+            buildFinished.complete();
+          } else {
+            buildFinished.completeError('Exited with code $code');
+          }
         }
-      }
-    }));
+      }),
+    );
 
     await buildFinished.future.catchError((e) {
       fail('Build failed: $e');
@@ -423,7 +428,8 @@ class WebBuildFixture {
 
     if (verbose) {
       print(
-          'Running "$executable" with args: ${buildArgs.join(' ')} from ${Directory.current.path}');
+        'Running "$executable" with args: ${buildArgs.join(' ')} from ${Directory.current.path}',
+      );
     }
     return Process.start(
       executable,

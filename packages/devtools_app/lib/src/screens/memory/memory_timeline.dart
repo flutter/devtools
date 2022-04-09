@@ -121,27 +121,33 @@ class MemoryTimeline {
   }
 
   void addSnapshotEvent({bool auto = false}) {
-    postEventSample(EventSample.snapshotEvent(
-      DateTime.now().millisecondsSinceEpoch,
-      snapshotAuto: auto,
-      events: extensionEvents,
-    ));
+    postEventSample(
+      EventSample.snapshotEvent(
+        DateTime.now().millisecondsSinceEpoch,
+        snapshotAuto: auto,
+        events: extensionEvents,
+      ),
+    );
   }
 
   void addGCEvent() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    postEventSample(EventSample.gcEvent(
-      timestamp,
-      events: extensionEvents,
-    ));
+    postEventSample(
+      EventSample.gcEvent(
+        timestamp,
+        events: extensionEvents,
+      ),
+    );
   }
 
   void addMonitorStartEvent() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    postEventSample(EventSample.accumulatorStart(
-      timestamp,
-      events: extensionEvents,
-    ));
+    postEventSample(
+      EventSample.accumulatorStart(
+        timestamp,
+        events: extensionEvents,
+      ),
+    );
   }
 
   void addMonitorResetEvent() {
@@ -149,10 +155,12 @@ class MemoryTimeline {
     // TODO(terry): Enable to make continuous events visible?
     // displayContinousEvents();
 
-    postEventSample(EventSample.accumulatorReset(
-      timestamp,
-      events: extensionEvents,
-    ));
+    postEventSample(
+      EventSample.accumulatorReset(
+        timestamp,
+        events: extensionEvents,
+      ),
+    );
   }
 
   void displayContinousEvents() {
@@ -166,8 +174,10 @@ class MemoryTimeline {
               flipIndex < liveData.length;
               flipIndex++) {
             final continuousEvent = liveData[flipIndex];
-            assert(continuousEvent
-                .memoryEventInfo.allocationAccumulator!.isContinues);
+            assert(
+              continuousEvent
+                  .memoryEventInfo.allocationAccumulator!.isContinues,
+            );
             continuousEvent
                 .memoryEventInfo.allocationAccumulator!.continuesVisible = true;
           }
@@ -265,10 +275,16 @@ class MemoryTimeline {
     // ignore: dead_code
     if (!true) {
       final DateFormat mFormat = DateFormat('HH:mm:ss.SSS');
-      final startDT = mFormat.format(DateTime.fromMillisecondsSinceEpoch(
-          data[startingIndex].timestamp.toInt()));
-      final endDT = mFormat.format(DateTime.fromMillisecondsSinceEpoch(
-          data[endingIndex].timestamp.toInt()));
+      final startDT = mFormat.format(
+        DateTime.fromMillisecondsSinceEpoch(
+          data[startingIndex].timestamp.toInt(),
+        ),
+      );
+      final endDT = mFormat.format(
+        DateTime.fromMillisecondsSinceEpoch(
+          data[endingIndex].timestamp.toInt(),
+        ),
+      );
       log('Recompute Time range Offline data start: $startDT, end: $endDT');
     }
   }

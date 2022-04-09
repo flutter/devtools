@@ -22,7 +22,9 @@ void main() {
             Platform.environment['WEBDEV_RELEASE'] == 'true';
 
         webBuildFixture = await WebBuildFixture.serve(
-            release: testInReleaseMode, verbose: true);
+          release: testInReleaseMode,
+          verbose: true,
+        );
         browserManager = await BrowserManager.create();
       });
 

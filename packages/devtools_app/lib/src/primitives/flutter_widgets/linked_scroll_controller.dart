@@ -155,13 +155,16 @@ class _LinkedScrollController extends ScrollController {
   @override
   void attach(ScrollPosition position) {
     assert(
-        position is _LinkedScrollPosition,
-        '_LinkedScrollControllers can only be used with'
-        ' _LinkedScrollPositions.');
+      position is _LinkedScrollPosition,
+      '_LinkedScrollControllers can only be used with'
+      ' _LinkedScrollPositions.',
+    );
     final _LinkedScrollPosition linkedPosition =
         position as _LinkedScrollPosition;
-    assert(linkedPosition.owner == this,
-        '_LinkedScrollPosition cannot change controllers once created.');
+    assert(
+      linkedPosition.owner == this,
+      '_LinkedScrollPosition cannot change controllers once created.',
+    );
     super.attach(position);
   }
 
@@ -263,9 +266,11 @@ class _LinkedScrollPosition extends ScrollPositionWithSingleContext {
     if (newPixels == pixels) {
       return 0.0;
     }
-    updateUserScrollDirection(newPixels - pixels > 0.0
-        ? ScrollDirection.forward
-        : ScrollDirection.reverse);
+    updateUserScrollDirection(
+      newPixels - pixels > 0.0
+          ? ScrollDirection.forward
+          : ScrollDirection.reverse,
+    );
 
     if (owner.canLinkWithPeers) {
       _peerActivities.addAll(owner.linkWithPeers(this));
@@ -286,9 +291,9 @@ class _LinkedScrollPosition extends ScrollPositionWithSingleContext {
     if (value == pixels) {
       return;
     }
-    updateUserScrollDirection(value - pixels > 0.0
-        ? ScrollDirection.forward
-        : ScrollDirection.reverse);
+    updateUserScrollDirection(
+      value - pixels > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
+    );
 
     if (owner.canLinkWithPeers) {
       _peerActivities.addAll(owner.linkWithPeers(this));

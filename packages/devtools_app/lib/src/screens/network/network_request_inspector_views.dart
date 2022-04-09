@@ -525,9 +525,11 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'End time',
-        child: _valueText(data.endTimestamp != null
-            ? formatDateTime(data.endTimestamp!)
-            : 'Pending'),
+        child: _valueText(
+          data.endTimestamp != null
+              ? formatDateTime(data.endTimestamp!)
+              : 'Pending',
+        ),
       ),
     ];
   }

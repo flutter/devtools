@@ -202,8 +202,10 @@ class MemoryBodyState extends State<MemoryBody>
 
           final allValues = ChartsValues(_controller, index, timestamp);
           if (MemoryScreen.isDebuggingEnabled) {
-            debugLogger('Event Chart TapLocation '
-                '${allValues.toJson().prettyPrint()}');
+            debugLogger(
+              'Event Chart TapLocation '
+              '${allValues.toJson().prettyPrint()}',
+            );
           }
           showHover(context, allValues, tapData.tapDownDetails!.globalPosition);
         }
@@ -227,8 +229,10 @@ class MemoryBodyState extends State<MemoryBody>
 
           final allValues = ChartsValues(_controller, index, timestamp);
           if (MemoryScreen.isDebuggingEnabled) {
-            debugLogger('VM Chart TapLocation '
-                '${allValues.toJson().prettyPrint()}');
+            debugLogger(
+              'VM Chart TapLocation '
+              '${allValues.toJson().prettyPrint()}',
+            );
           }
           showHover(context, allValues, tapData.tapDownDetails!.globalPosition);
         }
@@ -252,8 +256,10 @@ class MemoryBodyState extends State<MemoryBody>
 
           final allValues = ChartsValues(_controller, index, timestamp);
           if (MemoryScreen.isDebuggingEnabled) {
-            debugLogger('Android Chart TapLocation '
-                '${allValues.toJson().prettyPrint()}');
+            debugLogger(
+              'Android Chart TapLocation '
+              '${allValues.toJson().prettyPrint()}',
+            );
           }
           showHover(context, allValues, tapData.tapDownDetails!.globalPosition);
         }
@@ -920,18 +926,21 @@ class MemoryBodyState extends State<MemoryBody>
 
     final rowChildren = <Widget>[];
 
-    rowChildren.addAll(hoverPartImageLine(
-      name,
-      image: image,
-      colorPatch: colorPatch,
-      dashed: dashed,
-      leftEdge: leftPadding,
-    ));
+    rowChildren.addAll(
+      hoverPartImageLine(
+        name,
+        image: image,
+        colorPatch: colorPatch,
+        dashed: dashed,
+        leftEdge: leftPadding,
+      ),
+    );
     return Container(
-        padding: const EdgeInsets.fromLTRB(5, 0, 0, 2),
-        child: Row(
-          children: rowChildren,
-        ));
+      padding: const EdgeInsets.fromLTRB(5, 0, 0, 2),
+      child: Row(
+        children: rowChildren,
+      ),
+    );
   }
 
   List<Widget> displayExtensionEventsInHover(ChartsValues chartsValues) {
@@ -941,20 +950,22 @@ class MemoryBodyState extends State<MemoryBody>
 
     for (var entry in eventsDisplayed.entries) {
       if (entry.key.endsWith(eventsDisplayName)) {
-        widgets.add(Container(
-          height: hoverEventsHeight,
-          child: ListView(
-            shrinkWrap: true,
-            primary: false,
-            children: [
-              listItem(
-                allEvents: chartsValues.extensionEvents,
-                title: entry.key,
-                icon: Icons.dashboard,
-              ),
-            ],
+        widgets.add(
+          Container(
+            height: hoverEventsHeight,
+            child: ListView(
+              shrinkWrap: true,
+              primary: false,
+              children: [
+                listItem(
+                  allEvents: chartsValues.extensionEvents,
+                  title: entry.key,
+                  icon: Icons.dashboard,
+                ),
+              ],
+            ),
           ),
-        ));
+        );
       } else {
         widgets.add(hoverRow(name: entry.key, image: entry.value));
 
@@ -1182,11 +1193,12 @@ class MemoryBodyState extends State<MemoryBody>
       firstWidget: Align(
         alignment: Alignment.topLeft,
         child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: dividerLineVerticalSpace,
-              horizontal: dividerLineHorizontalSpace,
-            ),
-            child: CustomPaint(painter: DashedLine(width, dashedColor))),
+          padding: const EdgeInsets.symmetric(
+            vertical: dividerLineVerticalSpace,
+            horizontal: dividerLineHorizontalSpace,
+          ),
+          child: CustomPaint(painter: DashedLine(width, dashedColor)),
+        ),
       ),
     );
   }
@@ -1296,10 +1308,12 @@ class MemoryBodyState extends State<MemoryBody>
     final legendRows = <Widget>[];
 
     final events = eventLegend(colorScheme.isLight);
-    legendRows.add(Container(
-      padding: _legendTitlePadding,
-      child: Text('Events Legend', style: legendHeading),
-    ));
+    legendRows.add(
+      Container(
+        padding: _legendTitlePadding,
+        child: Text('Events Legend', style: legendHeading),
+      ),
+    );
 
     var iterator = events.entries.iterator;
     while (iterator.moveNext()) {
@@ -1487,8 +1501,9 @@ class MemoryConfigurationsDialog extends StatelessWidget {
                 Row(
                   children: [
                     NotifierCheckbox(
-                        notifier: controller.androidCollectionEnabled
-                            as ValueNotifier<bool?>),
+                      notifier: controller.androidCollectionEnabled
+                          as ValueNotifier<bool?>,
+                    ),
                     RichText(
                       overflow: TextOverflow.visible,
                       text: TextSpan(
@@ -1501,8 +1516,9 @@ class MemoryConfigurationsDialog extends StatelessWidget {
                 Row(
                   children: [
                     NotifierCheckbox(
-                        notifier:
-                            controller.unitDisplayed as ValueNotifier<bool?>),
+                      notifier:
+                          controller.unitDisplayed as ValueNotifier<bool?>,
+                    ),
                     RichText(
                       overflow: TextOverflow.visible,
                       text: TextSpan(

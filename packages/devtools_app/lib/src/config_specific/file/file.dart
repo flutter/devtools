@@ -16,8 +16,11 @@ abstract class FileIO {
   /// Create file in a directory (default Downloads).
   // TODO(terry): Better directory for Flutter Desktop when API available.
   // TODO(terry): Flutter Web/HTML port code to create file in Download directory.
-  void writeStringToFile(String filename, String contents,
-      {bool isMemory = false});
+  void writeStringToFile(
+    String filename,
+    String contents, {
+    bool isMemory = false,
+  });
 
   /// Returns content of filename or null if file is unknown or content empty.
   String? readStringFromFile(String filename, {bool isMemory = false});

@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../primitives/enum_utils.dart';
 import '../../primitives/math_utils.dart';
@@ -57,12 +55,12 @@ const overflowEpsilon = 0.1;
 ///    sum(renderSize) = maxSizeAvailable
 ///
 List<double> computeRenderSizes({
-  @required Iterable<double> sizes,
-  @required double smallestSize,
-  @required double largestSize,
-  @required double smallestRenderSize,
-  @required double largestRenderSize,
-  @required double maxSizeAvailable,
+  required Iterable<double> sizes,
+  required double smallestSize,
+  required double largestSize,
+  required double smallestRenderSize,
+  required double largestRenderSize,
+  required double maxSizeAvailable,
   bool useMaxSizeAvailable = true,
 }) {
   final n = sizes.length;
@@ -99,34 +97,33 @@ List<double> computeRenderSizes({
 /// Represents parsed layout information for a specific [RemoteDiagnosticsNode].
 class LayoutProperties {
   LayoutProperties(this.node, {int copyLevel = 1})
-      : description = node?.description,
-        size = node?.size,
-        constraints = node?.constraints,
-        isFlex = node?.isFlex,
-        flexFactor = node?.flexFactor,
-        flexFit = node?.flexFit,
+      : description = node.description,
+        size = node.size,
+        constraints = node.constraints,
+        isFlex = node.isFlex,
+        flexFactor = node.flexFactor,
+        flexFit = node.flexFit,
         children = copyLevel == 0
             ? []
-            : node?.childrenNow
-                ?.map((child) =>
-                    LayoutProperties(child, copyLevel: copyLevel - 1))
-                ?.toList(growable: false) {
-    if (children?.isNotEmpty ?? false) {
-      for (var child in children) {
-        child.parent = this;
-      }
+            : node.childrenNow
+                .map(
+                  (child) => LayoutProperties(child, copyLevel: copyLevel - 1),
+                )
+                .toList(growable: false) {
+    for (var child in children) {
+      child.parent = this;
     }
   }
 
   LayoutProperties.values({
-    @required this.node,
-    @required this.children,
-    @required this.constraints,
-    @required this.description,
-    @required this.flexFactor,
-    @required this.isFlex,
-    @required this.size,
-    @required this.flexFit,
+    required this.node,
+    required this.children,
+    required this.constraints,
+    required this.description,
+    required this.flexFactor,
+    required this.isFlex,
+    required this.size,
+    required this.flexFit,
   }) {
     for (var child in children) {
       child.parent = this;
@@ -143,40 +140,44 @@ class LayoutProperties {
       children: end.children,
       constraints: BoxConstraints.lerp(begin.constraints, end.constraints, t),
       description: end.description,
-      flexFactor: begin.flexFactor + (begin.flexFactor - end.flexFactor) * t,
+      flexFactor: begin.flexFactor! * (t + 1) - end.flexFactor! * t,
       isFlex: begin.isFlex && end.isFlex,
-      size: Size.lerp(begin.size, end.size, t),
+      size: Size.lerp(begin.size, end.size, t)!,
       flexFit: end.flexFit,
     );
   }
 
-  LayoutProperties parent;
+  LayoutProperties? parent;
   final RemoteDiagnosticsNode node;
   final List<LayoutProperties> children;
-  final BoxConstraints constraints;
-  final String description;
-  final num flexFactor;
-  final FlexFit flexFit;
+  final BoxConstraints? constraints;
+  final String? description;
+  final num? flexFactor;
+  final FlexFit? flexFit;
   final bool isFlex;
   final Size size;
 
   /// Represents the order of [children] to be displayed.
   List<LayoutProperties> get displayChildren => children;
 
-  bool get hasFlexFactor => flexFactor != null && flexFactor > 0;
+  bool get hasFlexFactor {
+    final flexFactorLocal = flexFactor;
+    if (flexFactorLocal == null) return false;
+    return flexFactorLocal > 0;
+  }
 
-  int get totalChildren => children?.length ?? 0;
+  int get totalChildren => children.length;
 
-  bool get hasChildren => children?.isNotEmpty ?? false;
+  bool get hasChildren => children.isNotEmpty;
 
-  double get width => size?.width;
+  double get width => size.width;
 
-  double get height => size?.height;
+  double get height => size.height;
 
   double dimension(Axis axis) => axis == Axis.horizontal ? width : height;
 
   List<double> childrenDimensions(Axis axis) {
-    return displayChildren?.map((child) => child.dimension(axis))?.toList();
+    return displayChildren.map((child) => child.dimension(axis)).toList();
   }
 
   List<double> get childrenWidths => childrenDimensions(Axis.horizontal);
@@ -184,16 +185,26 @@ class LayoutProperties {
   List<double> get childrenHeights => childrenDimensions(Axis.vertical);
 
   String describeWidthConstraints() {
-    if (constraints == null) return '';
-    return constraints.hasBoundedWidth
-        ? describeAxis(constraints.minWidth, constraints.maxWidth, 'w')
+    final constraintsLocal = constraints;
+    if (constraintsLocal == null) return '';
+    return constraintsLocal.hasBoundedWidth
+        ? describeAxis(
+            constraintsLocal.minWidth,
+            constraintsLocal.maxWidth,
+            'w',
+          )
         : 'width is unconstrained';
   }
 
   String describeHeightConstraints() {
-    if (constraints == null) return '';
-    return constraints.hasBoundedHeight
-        ? describeAxis(constraints.minHeight, constraints.maxHeight, 'h')
+    final constraintsLocal = constraints;
+    if (constraintsLocal == null) return '';
+    return constraintsLocal.hasBoundedHeight
+        ? describeAxis(
+            constraintsLocal.minHeight,
+            constraintsLocal.maxHeight,
+            'h',
+          )
         : 'height is unconstrained';
   }
 
@@ -206,9 +217,9 @@ class LayoutProperties {
     if (parentWidth == null) return false;
     final parentData = node.parentData;
     double widthUsed = width;
-    if (parentData != null) {
-      widthUsed += parentData.offset.dx;
-    }
+
+    widthUsed += parentData.offset.dx;
+
     // TODO(jacobr): certain widgets may allow overflow so this may false
     // positive a bit for cases like Stack.
     return widthUsed > parentWidth + overflowEpsilon;
@@ -219,9 +230,9 @@ class LayoutProperties {
     if (parentHeight == null) return false;
     final parentData = node.parentData;
     double heightUsed = height;
-    if (parentData != null) {
-      heightUsed += parentData.offset.dy;
-    }
+
+    heightUsed += parentData.offset.dy;
+
     return heightUsed > parentHeight + overflowEpsilon;
   }
 
@@ -231,13 +242,13 @@ class LayoutProperties {
   }
 
   LayoutProperties copyWith({
-    List<LayoutProperties> children,
-    BoxConstraints constraints,
-    String description,
-    int flexFactor,
-    FlexFit flexFit,
-    bool isFlex,
-    Size size,
+    List<LayoutProperties>? children,
+    BoxConstraints? constraints,
+    String? description,
+    int? flexFactor,
+    FlexFit? flexFit,
+    bool? isFlex,
+    Size? size,
   }) {
     return LayoutProperties.values(
       node: node,
@@ -266,7 +277,7 @@ enum OverflowSide {
 // layouts? We need to audit the Flutter semantics for determining overflow to
 // make sure we are consistent.
 extension LayoutPropertiesExtension on LayoutProperties {
-  OverflowSide get overflowSide {
+  OverflowSide? get overflowSide {
     if (isOverflowWidth) return OverflowSide.right;
     if (isOverflowHeight) return OverflowSide.bottom;
     return null;
@@ -291,20 +302,20 @@ extension MainAxisAlignmentExtension on MainAxisAlignment {
 /// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 class FlexLayoutProperties extends LayoutProperties {
   FlexLayoutProperties({
-    Size size,
-    List<LayoutProperties> children,
-    RemoteDiagnosticsNode node,
-    BoxConstraints constraints,
-    bool isFlex,
-    String description,
-    num flexFactor,
-    FlexFit flexFit,
-    this.direction,
+    required Size size,
+    required List<LayoutProperties> children,
+    required RemoteDiagnosticsNode node,
+    BoxConstraints? constraints,
+    bool isFlex = false,
+    String? description,
+    num? flexFactor,
+    FlexFit? flexFit,
+    this.direction = Axis.vertical,
     this.mainAxisAlignment,
     this.crossAxisAlignment,
     this.mainAxisSize,
-    this.textDirection,
-    this.verticalDirection,
+    required this.textDirection,
+    required this.verticalDirection,
     this.textBaseline,
   }) : super.values(
           size: size,
@@ -319,17 +330,16 @@ class FlexLayoutProperties extends LayoutProperties {
 
   FlexLayoutProperties._fromNode(
     RemoteDiagnosticsNode node, {
-    this.direction,
+    this.direction = Axis.vertical,
     this.mainAxisAlignment,
     this.mainAxisSize,
     this.crossAxisAlignment,
-    this.textDirection,
-    this.verticalDirection,
+    required this.textDirection,
+    required this.verticalDirection,
     this.textBaseline,
   }) : super(node);
 
   factory FlexLayoutProperties.fromDiagnostics(RemoteDiagnosticsNode node) {
-    if (node == null) return null;
     // Cache the properties on an expando so that local tweaks to
     // FlexLayoutProperties persist across multiple lookups from an
     // RemoteDiagnosticsNode.
@@ -338,20 +348,20 @@ class FlexLayoutProperties extends LayoutProperties {
 
   @override
   FlexLayoutProperties copyWith({
-    Size size,
-    List<LayoutProperties> children,
-    BoxConstraints constraints,
-    bool isFlex,
-    String description,
-    num flexFactor,
-    FlexFit flexFit,
-    Axis direction,
-    MainAxisAlignment mainAxisAlignment,
-    MainAxisSize mainAxisSize,
-    CrossAxisAlignment crossAxisAlignment,
-    TextDirection textDirection,
-    VerticalDirection verticalDirection,
-    TextBaseline textBaseline,
+    Size? size,
+    List<LayoutProperties>? children,
+    BoxConstraints? constraints,
+    bool? isFlex,
+    String? description,
+    num? flexFactor,
+    FlexFit? flexFit,
+    Axis? direction,
+    MainAxisAlignment? mainAxisAlignment,
+    MainAxisSize? mainAxisSize,
+    CrossAxisAlignment? crossAxisAlignment,
+    TextDirection? textDirection,
+    VerticalDirection? verticalDirection,
+    TextBaseline? textBaseline,
   }) {
     return FlexLayoutProperties(
       size: size ?? this.size,
@@ -373,47 +383,53 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
-    final Map<String, Object> renderObjectJson = node?.renderObject?.json;
-    if (renderObjectJson == null) return null;
-    final List<dynamic> properties = renderObjectJson['properties'];
-    final Map<String, Object> data = Map<String, Object>.fromIterable(
+    final Map<String, Object?> renderObjectJson = node.renderObject!.json;
+    final properties = renderObjectJson['properties'] as List<dynamic>;
+    final data = Map<String, Object?>.fromIterable(
       properties,
       key: (property) => property['name'],
       value: (property) => property['description'],
     );
     return FlexLayoutProperties._fromNode(
       node,
-      direction: _directionUtils.enumEntry(data['direction']),
-      mainAxisAlignment:
-          _mainAxisAlignmentUtils.enumEntry(data['mainAxisAlignment']),
-      mainAxisSize: _mainAxisSizeUtils.enumEntry(data['mainAxisSize']),
-      crossAxisAlignment:
-          _crossAxisAlignmentUtils.enumEntry(data['crossAxisAlignment']),
-      textDirection: _textDirectionUtils.enumEntry(data['textDirection']),
-      verticalDirection:
-          _verticalDirectionUtils.enumEntry(data['verticalDirection']),
-      textBaseline: _textBaselineUtils.enumEntry(data['textBaseline']),
+      direction: _directionUtils.enumEntry(data['direction'] as String) ??
+          Axis.vertical,
+      mainAxisAlignment: _mainAxisAlignmentUtils
+          .enumEntry(data['mainAxisAlignment'] as String),
+      mainAxisSize:
+          _mainAxisSizeUtils.enumEntry(data['mainAxisSize'] as String),
+      crossAxisAlignment: _crossAxisAlignmentUtils
+          .enumEntry(data['crossAxisAlignment'] as String),
+      textDirection:
+          _textDirectionUtils.enumEntry(data['textDirection'] as String) ??
+              TextDirection.ltr,
+      verticalDirection: _verticalDirectionUtils
+              .enumEntry(data['verticalDirection'] as String) ??
+          VerticalDirection.down,
+      textBaseline:
+          _textBaselineUtils.enumEntry(data['textBaseline'] as String),
     );
   }
 
   final Axis direction;
-  final MainAxisAlignment mainAxisAlignment;
-  final CrossAxisAlignment crossAxisAlignment;
-  final MainAxisSize mainAxisSize;
+  final MainAxisAlignment? mainAxisAlignment;
+  final CrossAxisAlignment? crossAxisAlignment;
+  final MainAxisSize? mainAxisSize;
   final TextDirection textDirection;
   final VerticalDirection verticalDirection;
-  final TextBaseline textBaseline;
+  final TextBaseline? textBaseline;
 
-  List<LayoutProperties> _displayChildren;
+  List<LayoutProperties>? _displayChildren;
 
   @override
   List<LayoutProperties> get displayChildren {
-    if (_displayChildren != null) return _displayChildren;
+    final displayChildren = _displayChildren;
+    if (displayChildren != null) return displayChildren;
     return _displayChildren =
         startIsTopLeft ? children : children.reversed.toList();
   }
 
-  int _totalFlex;
+  int? _totalFlex;
 
   bool get isMainAxisHorizontal => direction == Axis.horizontal;
 
@@ -430,12 +446,12 @@ class FlexLayoutProperties extends LayoutProperties {
   String get type => direction.flexType;
 
   num get totalFlex {
-    if (children?.isEmpty ?? true) return 0;
+    if (children.isEmpty) return 0;
     _totalFlex ??= children
         .map((child) => child.flexFactor ?? 0)
         .reduce((value, element) => value + element)
         .toInt();
-    return _totalFlex;
+    return _totalFlex!;
   }
 
   Axis get crossAxisDirection {
@@ -463,7 +479,6 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   bool get startIsTopLeft {
-    assert(direction != null);
     switch (direction) {
       case Axis.horizontal:
         switch (textDirection) {
@@ -472,7 +487,6 @@ class FlexLayoutProperties extends LayoutProperties {
           case TextDirection.rtl:
             return false;
         }
-        break;
       case Axis.vertical:
         switch (verticalDirection) {
           case VerticalDirection.down:
@@ -481,22 +495,21 @@ class FlexLayoutProperties extends LayoutProperties {
             return false;
         }
     }
-    return true;
   }
 
   /// render properties for laying out rendered Flex & Flex children widgets
   /// the computation is similar to [RenderFlex].performLayout() method
   List<RenderProperties> childrenRenderProperties({
-    @required double smallestRenderWidth,
-    @required double largestRenderWidth,
-    @required double smallestRenderHeight,
-    @required double largestRenderHeight,
-    @required double Function(Axis) maxSizeAvailable,
+    required double smallestRenderWidth,
+    required double largestRenderWidth,
+    required double smallestRenderHeight,
+    required double largestRenderHeight,
+    required double Function(Axis) maxSizeAvailable,
   }) {
     /// calculate the render empty spaces
     final freeSpace = dimension(direction) - sum(childrenDimensions(direction));
     final displayMainAxisAlignment =
-        startIsTopLeft ? mainAxisAlignment : mainAxisAlignment.reversed;
+        startIsTopLeft ? mainAxisAlignment : mainAxisAlignment?.reversed;
 
     double leadingSpace(double freeSpace) {
       if (children.isEmpty) return 0.0;
@@ -654,34 +667,40 @@ class FlexLayoutProperties extends LayoutProperties {
           ..layoutProperties = this;
     if (actualLeadingSpace > 0.0 &&
         displayMainAxisAlignment != MainAxisAlignment.start) {
-      spaces.add(renderPropsWithFullCrossAxisDimension.clone()
-        ..mainAxisOffset = 0.0
-        ..mainAxisDimension = renderLeadingSpace
-        ..mainAxisRealDimension = actualLeadingSpace);
+      spaces.add(
+        renderPropsWithFullCrossAxisDimension.clone()
+          ..mainAxisOffset = 0.0
+          ..mainAxisDimension = renderLeadingSpace
+          ..mainAxisRealDimension = actualLeadingSpace,
+      );
     }
     if (actualBetweenSpace > 0.0) {
       for (var i = 0; i < childrenRenderProps.length - 1; ++i) {
         final child = childrenRenderProps[i];
-        spaces.add(renderPropsWithFullCrossAxisDimension.clone()
-          ..mainAxisDimension = renderBetweenSpace
-          ..mainAxisRealDimension = actualBetweenSpace
-          ..mainAxisOffset = child.mainAxisOffset + child.mainAxisDimension);
+        spaces.add(
+          renderPropsWithFullCrossAxisDimension.clone()
+            ..mainAxisDimension = renderBetweenSpace
+            ..mainAxisRealDimension = actualBetweenSpace
+            ..mainAxisOffset = child.mainAxisOffset + child.mainAxisDimension,
+        );
       }
     }
     if (actualLeadingSpace > 0.0 &&
         displayMainAxisAlignment != MainAxisAlignment.end) {
-      spaces.add(renderPropsWithFullCrossAxisDimension.clone()
-        ..mainAxisOffset = childrenRenderProps.last.mainAxisDimension +
-            childrenRenderProps.last.mainAxisOffset
-        ..mainAxisDimension = renderLeadingSpace
-        ..mainAxisRealDimension = actualLeadingSpace);
+      spaces.add(
+        renderPropsWithFullCrossAxisDimension.clone()
+          ..mainAxisOffset = childrenRenderProps.last.mainAxisDimension +
+              childrenRenderProps.last.mainAxisOffset
+          ..mainAxisDimension = renderLeadingSpace
+          ..mainAxisRealDimension = actualLeadingSpace,
+      );
     }
     return [...childrenRenderProps, ...spaces];
   }
 
   List<RenderProperties> crossAxisSpaces({
-    @required List<RenderProperties> childrenRenderProperties,
-    @required double Function(Axis) maxSizeAvailable,
+    required List<RenderProperties> childrenRenderProperties,
+    required double Function(Axis) maxSizeAvailable,
   }) {
     if (crossAxisAlignment == CrossAxisAlignment.stretch) return [];
     final spaces = <RenderProperties>[];
@@ -701,11 +720,14 @@ class FlexLayoutProperties extends LayoutProperties {
       if (space.crossAxisDimension <= 0.0) continue;
       if (crossAxisAlignment == CrossAxisAlignment.center) {
         space.crossAxisDimension *= 0.5;
-        space.crossAxisRealDimension *= 0.5;
+        final crossAxisRealDimension = space.crossAxisRealDimension;
+        space.crossAxisRealDimension = crossAxisRealDimension * 0.5;
         spaces.add(space.clone()..crossAxisOffset = 0.0);
-        spaces.add(space.clone()
-          ..crossAxisOffset = renderProperties.crossAxisDimension +
-              renderProperties.crossAxisOffset);
+        spaces.add(
+          space.clone()
+            ..crossAxisOffset = renderProperties.crossAxisDimension +
+                renderProperties.crossAxisOffset,
+        );
       } else {
         space.crossAxisOffset = crossAxisAlignment == CrossAxisAlignment.end
             ? 0
@@ -734,10 +756,10 @@ class FlexLayoutProperties extends LayoutProperties {
 /// RenderProperties contains information for rendering a [LayoutProperties] node
 class RenderProperties {
   RenderProperties({
-    @required this.axis,
-    Size size,
-    Offset offset,
-    Size realSize,
+    required this.axis,
+    Size? size,
+    Offset? offset,
+    Size? realSize,
     this.layoutProperties,
     this.isFreeSpace = false,
   })  : width = size?.width ?? 0.0,
@@ -750,7 +772,7 @@ class RenderProperties {
   final Axis axis;
 
   /// represents which node is rendered for this object.
-  LayoutProperties layoutProperties;
+  LayoutProperties? layoutProperties;
 
   double dx, dy;
   double width, height;

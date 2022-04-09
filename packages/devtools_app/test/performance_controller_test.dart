@@ -58,9 +58,13 @@ void main() async {
         isTrue,
       );
       expect(
-          performanceController.processor.uiThreadId, equals(testUiThreadId));
-      expect(performanceController.processor.rasterThreadId,
-          equals(testRasterThreadId));
+        performanceController.processor.uiThreadId,
+        equals(testUiThreadId),
+      );
+      expect(
+        performanceController.processor.rasterThreadId,
+        equals(testRasterThreadId),
+      );
 
       await env.tearDownEnvironment();
     });
@@ -74,8 +78,8 @@ void main() async {
       final frame1UiEvent = goldenUiTimelineEvent.deepCopy();
       final frame1RasterEvent = goldenRasterTimelineEvent.deepCopy();
       final frame1 = testFrame1.shallowCopy()
-        ..setEventFlow(frame1UiEvent as SyncTimelineEvent)
-        ..setEventFlow(frame1RasterEvent as SyncTimelineEvent);
+        ..setEventFlow(frame1UiEvent)
+        ..setEventFlow(frame1RasterEvent);
 
       // Select a frame.
       final data = performanceController.data!;
@@ -132,21 +136,19 @@ void main() async {
         'raster': 50,
         'vsyncOverhead': 10,
       });
-      frame.setEventFlow(
-        rasterEvent as SyncTimelineEvent,
-        type: TimelineEventType.raster,
-      );
+      frame.setEventFlow(rasterEvent, type: TimelineEventType.raster);
       expect(frame.timeFromEventFlows.start, isNull);
       expect(frame.timeFromEventFlows.end, isNull);
 
-      frame.setEventFlow(
-        uiEvent as SyncTimelineEvent,
-        type: TimelineEventType.ui,
+      frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
+      expect(
+        frame.timeFromEventFlows.start,
+        equals(const Duration(microseconds: 5000)),
       );
-      expect(frame.timeFromEventFlows.start,
-          equals(const Duration(microseconds: 5000)));
-      expect(frame.timeFromEventFlows.end,
-          equals(const Duration(microseconds: 8000)));
+      expect(
+        frame.timeFromEventFlows.end,
+        equals(const Duration(microseconds: 8000)),
+      );
     });
 
     test('add frame', () async {
@@ -250,8 +252,10 @@ void main() async {
         performanceController.openAnalysisTab(testFrame0);
         expect(performanceController.analysisTabs.value.length, equals(1));
         expect(performanceController.selectedAnalysisTab.value, isNotNull);
-        expect(performanceController.selectedAnalysisTab.value!.frame.id,
-            equals(testFrame0.id));
+        expect(
+          performanceController.selectedAnalysisTab.value!.frame.id,
+          equals(testFrame0.id),
+        );
       });
 
       test('openAnalysisTab opens an existing tab and selects it', () async {
@@ -263,20 +267,26 @@ void main() async {
         performanceController.openAnalysisTab(testFrame0);
         expect(performanceController.analysisTabs.value.length, equals(1));
         expect(performanceController.selectedAnalysisTab.value, isNotNull);
-        expect(performanceController.selectedAnalysisTab.value!.frame.id,
-            equals(testFrame0.id));
+        expect(
+          performanceController.selectedAnalysisTab.value!.frame.id,
+          equals(testFrame0.id),
+        );
 
         performanceController.openAnalysisTab(testFrame1);
         expect(performanceController.analysisTabs.value.length, equals(2));
         expect(performanceController.selectedAnalysisTab.value, isNotNull);
-        expect(performanceController.selectedAnalysisTab.value!.frame.id,
-            equals(testFrame1.id));
+        expect(
+          performanceController.selectedAnalysisTab.value!.frame.id,
+          equals(testFrame1.id),
+        );
 
         performanceController.openAnalysisTab(testFrame0);
         expect(performanceController.analysisTabs.value.length, equals(2));
         expect(performanceController.selectedAnalysisTab.value, isNotNull);
-        expect(performanceController.selectedAnalysisTab.value!.frame.id,
-            equals(testFrame0.id));
+        expect(
+          performanceController.selectedAnalysisTab.value!.frame.id,
+          equals(testFrame0.id),
+        );
       });
 
       test('closeAnalysisTab closes a selected tab at index 0', () async {
@@ -295,17 +305,23 @@ void main() async {
 
         final firstTab = performanceController.analysisTabs.value[0];
         expect(firstTab.frame.id, equals(testFrame0.id));
-        expect(performanceController.selectedAnalysisTab.value!.frame.id,
-            equals(testFrame0.id));
+        expect(
+          performanceController.selectedAnalysisTab.value!.frame.id,
+          equals(testFrame0.id),
+        );
 
         // Close the first tab (index 0).
         performanceController.closeAnalysisTab(firstTab);
 
         // The selected tab should now be the next tab.
-        expect(performanceController.analysisTabs.value[0].frame.id,
-            equals(testFrame1.id));
-        expect(performanceController.selectedAnalysisTab.value!.frame.id,
-            equals(testFrame1.id));
+        expect(
+          performanceController.analysisTabs.value[0].frame.id,
+          equals(testFrame1.id),
+        );
+        expect(
+          performanceController.selectedAnalysisTab.value!.frame.id,
+          equals(testFrame1.id),
+        );
       });
 
       test('closeAnalysisTab closes a selected tab at a non-zero index',
@@ -322,17 +338,23 @@ void main() async {
 
         final lastTab = performanceController.analysisTabs.value[2];
         expect(lastTab.frame.id, equals(testFrame2.id));
-        expect(performanceController.selectedAnalysisTab.value!.frame.id,
-            equals(testFrame2.id));
+        expect(
+          performanceController.selectedAnalysisTab.value!.frame.id,
+          equals(testFrame2.id),
+        );
 
         // Close the last tab (index 2).
         performanceController.closeAnalysisTab(lastTab);
 
         // The selected tab should now be the previous tab.
-        expect(performanceController.analysisTabs.value[1].frame.id,
-            equals(testFrame1.id));
-        expect(performanceController.selectedAnalysisTab.value!.frame.id,
-            equals(testFrame1.id));
+        expect(
+          performanceController.analysisTabs.value[1].frame.id,
+          equals(testFrame1.id),
+        );
+        expect(
+          performanceController.selectedAnalysisTab.value!.frame.id,
+          equals(testFrame1.id),
+        );
       });
 
       test('closeAnalysisTab closes a non-selected tab', () async {
@@ -349,17 +371,23 @@ void main() async {
         final firstTab = performanceController.analysisTabs.value[0];
         final lastTab = performanceController.analysisTabs.value[2];
         expect(firstTab.frame.id, equals(testFrame0.id));
-        expect(performanceController.selectedAnalysisTab.value!.frame.id,
-            equals(lastTab.frame.id));
+        expect(
+          performanceController.selectedAnalysisTab.value!.frame.id,
+          equals(lastTab.frame.id),
+        );
 
         // Close the first tab (not selected).
         performanceController.closeAnalysisTab(firstTab);
 
         // The selected tab should still be the last tab.
-        expect(performanceController.analysisTabs.value[1].frame.id,
-            equals(lastTab.frame.id));
-        expect(performanceController.selectedAnalysisTab.value!.frame.id,
-            equals(lastTab.frame.id));
+        expect(
+          performanceController.analysisTabs.value[1].frame.id,
+          equals(lastTab.frame.id),
+        );
+        expect(
+          performanceController.selectedAnalysisTab.value!.frame.id,
+          equals(lastTab.frame.id),
+        );
       });
 
       test('showTimeline un-selects the selected tab', () async {
@@ -374,8 +402,10 @@ void main() async {
         expect(performanceController.analysisTabs.value.length, equals(3));
 
         final lastTab = performanceController.analysisTabs.value[2];
-        expect(performanceController.selectedAnalysisTab.value!.frame.id,
-            equals(lastTab.frame.id));
+        expect(
+          performanceController.selectedAnalysisTab.value!.frame.id,
+          equals(lastTab.frame.id),
+        );
 
         // Show the timeline.
         performanceController.showTimeline();
@@ -396,8 +426,10 @@ void main() async {
         performanceController.openAnalysisTab(testFrame0);
         expect(performanceController.analysisTabs.value.length, equals(1));
         expect(performanceController.selectedAnalysisTab.value, isNotNull);
-        expect(performanceController.selectedAnalysisTab.value!.frame.id,
-            equals(testFrame0.id));
+        expect(
+          performanceController.selectedAnalysisTab.value!.frame.id,
+          equals(testFrame0.id),
+        );
 
         // Select a frame.
         final data = performanceController.data!;

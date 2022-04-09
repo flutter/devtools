@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 import '../../analytics/analytics.dart' as ga;
@@ -19,9 +17,9 @@ import 'layout_explorer/layout_explorer.dart';
 
 class InspectorDetails extends StatelessWidget {
   const InspectorDetails({
-    @required this.detailsTree,
-    @required this.controller,
-    Key key,
+    required this.detailsTree,
+    required this.controller,
+    Key? key,
   }) : super(key: key);
 
   final Widget detailsTree;
@@ -69,7 +67,7 @@ class InspectorDetails extends StatelessWidget {
     );
   }
 
-  DevToolsTab _buildTab({@required String tabName, Widget trailing}) {
+  DevToolsTab _buildTab({required String tabName, Widget? trailing}) {
     return DevToolsTab.create(
       tabName: tabName,
       gaPrefix: 'inspectorDetailsTab',
@@ -80,8 +78,8 @@ class InspectorDetails extends StatelessWidget {
 
 class InspectorExpandCollapseButtons extends StatefulWidget {
   const InspectorExpandCollapseButtons({
-    Key key,
-    @required this.controller,
+    Key? key,
+    required this.controller,
   }) : super(key: key);
 
   final InspectorController controller;

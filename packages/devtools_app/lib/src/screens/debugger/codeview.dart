@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -44,8 +42,8 @@ final debuggerCodeViewSearchKey =
 // controller.
 class CodeView extends StatefulWidget {
   const CodeView({
-    Key key,
-    this.controller,
+    Key? key,
+    required this.controller,
     this.initialPosition,
     this.scriptRef,
     this.parsedScript,
@@ -62,11 +60,11 @@ class CodeView extends StatefulWidget {
   static double get assumedCharacterWidth => scaleByFontFactor(16.0);
 
   final DebuggerController controller;
-  final ScriptLocation initialPosition;
-  final ScriptRef scriptRef;
-  final ParsedScript parsedScript;
+  final ScriptLocation? initialPosition;
+  final ScriptRef? scriptRef;
+  final ParsedScript? parsedScript;
 
-  final void Function(ScriptRef scriptRef, int line) onSelected;
+  final void Function(ScriptRef scriptRef, int line)? onSelected;
 
   @override
   _CodeViewState createState() => _CodeViewState();
@@ -76,18 +74,20 @@ class _CodeViewState extends State<CodeView>
     with AutoDisposeMixin, SearchFieldMixin<CodeView> {
   static const searchFieldRightPadding = 75.0;
 
-  LinkedScrollControllerGroup verticalController;
-  ScrollController gutterController;
-  ScrollController textController;
-  ScrollController horizontalController;
+  late final LinkedScrollControllerGroup verticalController;
+  late final ScrollController gutterController;
+  late final ScrollController textController;
+  late final ScrollController horizontalController;
 
-  ScriptRef get scriptRef => widget.scriptRef;
+  ScriptRef? get scriptRef => widget.scriptRef;
 
-  ParsedScript get parsedScript => widget.parsedScript;
+  ParsedScript? get parsedScript => widget.parsedScript;
+
+  ScriptLocation? get initialPosition => widget.initialPosition;
 
   // Used to ensure we don't update the scroll position when expanding or
   // collapsing the file explorer.
-  ScriptRef _lastScriptRef;
+  ScriptRef? _lastScriptRef;
 
   @override
   void initState() {
@@ -99,11 +99,11 @@ class _CodeViewState extends State<CodeView>
     horizontalController = ScrollController();
     _lastScriptRef = widget.scriptRef;
 
-    if (widget.initialPosition != null) {
-      final location = widget.initialPosition.location;
+    final lineCount = initialPosition?.location?.line;
+    if (lineCount != null) {
       // Lines are 1-indexed. Scrolling to line 1 required a scroll position of
       // 0.
-      final lineIndex = location.line - 1;
+      final lineIndex = lineCount - 1;
       final scrollPosition = lineIndex * CodeView.rowHeight;
       verticalController.jumpTo(scrollPosition);
     }
@@ -122,7 +122,9 @@ class _CodeViewState extends State<CodeView>
       cancelListeners();
 
       addAutoDisposeListener(
-          widget.controller.scriptLocation, _handleScriptLocationChanged);
+        widget.controller.scriptLocation,
+        _handleScriptLocationChanged,
+      );
     }
   }
 
@@ -143,7 +145,7 @@ class _CodeViewState extends State<CodeView>
   }
 
   void _updateScrollPosition({bool animate = true}) {
-    if (widget.controller.scriptLocation.value?.scriptRef?.uri !=
+    if (widget.controller.scriptLocation.value?.scriptRef.uri !=
         scriptRef?.uri) {
       return;
     }
@@ -178,8 +180,9 @@ class _CodeViewState extends State<CodeView>
 
     // TODO(devoncarew): Adjust this so we don't scroll if we're already in the
     // middle third of the screen.
-    if (parsedScript.lineCount * CodeView.rowHeight > extent) {
-      final lineIndex = location.line - 1;
+    final lineCount = parsedScript?.lineCount;
+    if (lineCount != null && lineCount * CodeView.rowHeight > extent) {
+      final lineIndex = lineCount - 1;
       final scrollPosition =
           lineIndex * CodeView.rowHeight - ((extent - CodeView.rowHeight) / 2);
       if (animate) {
@@ -196,7 +199,11 @@ class _CodeViewState extends State<CodeView>
   }
 
   void _onPressed(int line) {
-    widget.onSelected(scriptRef, line);
+    final onSelected = widget.onSelected;
+    final script = scriptRef;
+    if (onSelected != null && script != null) {
+      onSelected(script, line);
+    }
   }
 
   @override
@@ -239,16 +246,19 @@ class _CodeViewState extends State<CodeView>
 
     // Ensure the syntax highlighter has been initialized.
     // TODO(bkonyi): process source for highlighting on a separate thread.
-    if (parsedScript.script.source != null) {
-      if (parsedScript.script.source.length < 500000 &&
-          parsedScript.highlighter != null) {
-        final highlighted = parsedScript.highlighter.highlight(context);
+    final script = parsedScript;
+    final scriptSource = parsedScript?.script.source;
+    if (script != null && scriptSource != null) {
+      if (scriptSource.length < 500000) {
+        final highlighted = script.highlighter.highlight(context);
 
         // Look for [TextSpan]s which only contain '\n' to manually break the
         // output from the syntax highlighter into individual lines.
         var currentLine = <TextSpan>[];
         highlighted.visitChildren((span) {
-          currentLine.add(span);
+          // TODO(elliette): Switch to using TextSpans instead of InlineSpans so
+          // type-casting isn't necessary.
+          currentLine.add(span as TextSpan);
           if (span.toPlainText() == '\n') {
             lines.add(
               TextSpan(
@@ -269,7 +279,7 @@ class _CodeViewState extends State<CodeView>
       } else {
         lines.addAll(
           [
-            for (final line in parsedScript.script.source.split('\n'))
+            for (final line in scriptSource.split('\n'))
               TextSpan(
                 style: theme.fixedFontStyle,
                 text: line,
@@ -290,7 +300,11 @@ class _CodeViewState extends State<CodeView>
 
     return HistoryViewport(
       history: widget.controller.scriptsHistory,
-      generateTitle: (script) => script.uri,
+      generateTitle: (ScriptRef? script) {
+        final scriptUri = script?.uri;
+        if (scriptUri == null) return '';
+        return scriptUri;
+      },
       onTitleTap: () => widget.controller.toggleFileOpenerVisibility(true),
       controls: [
         ScriptPopupMenu(widget.controller),
@@ -302,7 +316,7 @@ class _CodeViewState extends State<CodeView>
           enabled: widget.controller.scriptsHistory.hasScripts,
         ),
       ],
-      contentBuilder: (context, script) {
+      contentBuilder: (context, ScriptRef? script) {
         if (lines.isNotEmpty) {
           return DefaultTextStyle(
             style: theme.fixedFontStyle,
@@ -315,7 +329,7 @@ class _CodeViewState extends State<CodeView>
                 // from the nested horizontal SingleChildScrollView):
                 notificationPredicate: (ScrollNotification notification) =>
                     notification.depth == 1,
-                child: ValueListenableBuilder<StackFrameAndSourcePosition>(
+                child: ValueListenableBuilder<StackFrameAndSourcePosition?>(
                   valueListenable: widget.controller.selectedStackFrame,
                   builder: (context, frame, _) {
                     final pausedFrame = frame == null
@@ -337,7 +351,9 @@ class _CodeViewState extends State<CodeView>
                               breakpoints: breakpoints
                                   .where((bp) => bp.scriptRef == scriptRef)
                                   .toList(),
-                              executableLines: parsedScript.executableLines,
+                              executableLines: parsedScript != null
+                                  ? parsedScript!.executableLines
+                                  : <int>{},
                               onPressed: _onPressed,
                               // Disable dots for possible breakpoint locations.
                               allowInteraction:
@@ -463,7 +479,7 @@ class _CodeViewState extends State<CodeView>
               overflow: TextOverflow.ellipsis,
             ),
             Text(
-              scriptRef.uri,
+              scriptRef.uri ?? '',
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
               style: Theme.of(context).subtleTextStyle,
@@ -479,20 +495,20 @@ typedef IntCallback = void Function(int value);
 
 class Gutter extends StatelessWidget {
   const Gutter({
-    @required this.gutterWidth,
-    @required this.scrollController,
-    @required this.lineCount,
-    @required this.pausedFrame,
-    @required this.breakpoints,
-    @required this.executableLines,
-    @required this.onPressed,
-    @required this.allowInteraction,
+    required this.gutterWidth,
+    required this.scrollController,
+    required this.lineCount,
+    required this.pausedFrame,
+    required this.breakpoints,
+    required this.executableLines,
+    required this.onPressed,
+    required this.allowInteraction,
   });
 
   final double gutterWidth;
   final ScrollController scrollController;
   final int lineCount;
-  final StackFrameAndSourcePosition pausedFrame;
+  final StackFrameAndSourcePosition? pausedFrame;
   final List<BreakpointAndSourcePosition> breakpoints;
   final Set<int> executableLines;
   final IntCallback onPressed;
@@ -530,13 +546,13 @@ class Gutter extends StatelessWidget {
 
 class GutterItem extends StatelessWidget {
   const GutterItem({
-    Key key,
-    @required this.lineNumber,
-    @required this.isBreakpoint,
-    @required this.isExecutable,
-    @required this.isPausedHere,
-    @required this.onPressed,
-    @required this.allowInteraction,
+    Key? key,
+    required this.lineNumber,
+    required this.isBreakpoint,
+    required this.isExecutable,
+    required this.isPausedHere,
+    required this.onPressed,
+    required this.allowInteraction,
   }) : super(key: key);
 
   final int lineNumber;
@@ -556,9 +572,7 @@ class GutterItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final foregroundColor = theme.isDarkTheme
-        ? theme.textTheme.bodyText2.color
-        : theme.primaryColor;
+    final breakpointColor = theme.colorScheme.breakpointColor;
     final subtleColor = theme.unselectedWidgetColor;
 
     final bpBoxSize = breakpointRadius * 2;
@@ -585,7 +599,7 @@ class GutterItem extends StatelessWidget {
                   child: Center(
                     child: createAnimatedCircleWidget(
                       isBreakpoint ? breakpointRadius : executableLineRadius,
-                      isBreakpoint ? foregroundColor : subtleColor,
+                      isBreakpoint ? breakpointColor : subtleColor,
                     ),
                   ),
                 ),
@@ -601,7 +615,7 @@ class GutterItem extends StatelessWidget {
                 child: Icon(
                   Icons.label,
                   size: defaultIconSize,
-                  color: foregroundColor,
+                  color: breakpointColor,
                 ),
               ),
             ),
@@ -614,32 +628,32 @@ class GutterItem extends StatelessWidget {
 
 class Lines extends StatefulWidget {
   const Lines({
-    Key key,
-    @required this.height,
-    @required this.debugController,
-    @required this.scrollController,
-    @required this.lines,
-    @required this.pausedFrame,
-    @required this.searchMatchesNotifier,
-    @required this.activeSearchMatchNotifier,
+    Key? key,
+    required this.height,
+    required this.debugController,
+    required this.scrollController,
+    required this.lines,
+    required this.pausedFrame,
+    required this.searchMatchesNotifier,
+    required this.activeSearchMatchNotifier,
   }) : super(key: key);
 
   final double height;
   final DebuggerController debugController;
   final ScrollController scrollController;
   final List<TextSpan> lines;
-  final StackFrameAndSourcePosition pausedFrame;
+  final StackFrameAndSourcePosition? pausedFrame;
   final ValueListenable<List<SourceToken>> searchMatchesNotifier;
-  final ValueListenable<SourceToken> activeSearchMatchNotifier;
+  final ValueListenable<SourceToken?> activeSearchMatchNotifier;
 
   @override
   _LinesState createState() => _LinesState();
 }
 
 class _LinesState extends State<Lines> with AutoDisposeMixin {
-  List<SourceToken> searchMatches;
+  late List<SourceToken> searchMatches;
 
-  SourceToken activeSearch;
+  SourceToken? activeSearch;
 
   @override
   void initState() {
@@ -659,17 +673,17 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
         activeSearch = widget.activeSearchMatchNotifier.value;
       });
 
-      if (activeSearch != null) {
-        final isOutOfViewTop = activeSearch.position.line * CodeView.rowHeight <
+      final activeSearchLine = activeSearch?.position.line;
+      if (activeSearchLine != null) {
+        final isOutOfViewTop = activeSearchLine * CodeView.rowHeight <
             widget.scrollController.offset + CodeView.rowHeight;
-        final isOutOfViewBottom = activeSearch.position.line *
-                CodeView.rowHeight >
+        final isOutOfViewBottom = activeSearchLine * CodeView.rowHeight >
             widget.scrollController.offset + widget.height - CodeView.rowHeight;
 
         if (isOutOfViewTop || isOutOfViewBottom) {
           // Scroll this search token to the middle of the view.
           final targetOffset = math.max<double>(
-            activeSearch.position.line * CodeView.rowHeight - widget.height / 2,
+            activeSearchLine * CodeView.rowHeight - widget.height / 2,
             0.0,
           );
           widget.scrollController.animateTo(
@@ -692,7 +706,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
       itemBuilder: (context, index) {
         final lineNum = index + 1;
         final isPausedLine = pausedLine == lineNum;
-        return ValueListenableBuilder<VMServiceObjectNode>(
+        return ValueListenableBuilder<VMServiceObjectNode?>(
           valueListenable:
               widget.debugController.programExplorerController.outlineSelection,
           builder: (context, outlineNode, _) {
@@ -704,7 +718,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
               focused: isPausedLine || isFocusedLine,
               searchMatches: searchMatchesForLine(index),
               activeSearchMatch:
-                  activeSearch?.position?.line == index ? activeSearch : null,
+                  activeSearch?.position.line == index ? activeSearch : null,
             );
           },
         );
@@ -721,10 +735,10 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
 
 class LineItem extends StatefulWidget {
   const LineItem({
-    Key key,
-    @required this.lineContents,
+    Key? key,
+    required this.lineContents,
     this.pausedFrame,
-    this.focused,
+    this.focused = false,
     this.searchMatches,
     this.activeSearchMatch,
   }) : super(key: key);
@@ -734,10 +748,10 @@ class LineItem extends StatefulWidget {
   static double get _hoverWidth => scaleByFontFactor(400.0);
 
   final TextSpan lineContents;
-  final StackFrameAndSourcePosition pausedFrame;
+  final StackFrameAndSourcePosition? pausedFrame;
   final bool focused;
-  final List<SourceToken> searchMatches;
-  final SourceToken activeSearchMatch;
+  final List<SourceToken>? searchMatches;
+  final SourceToken? activeSearchMatch;
 
   @override
   _LineItemState createState() => _LineItemState();
@@ -745,15 +759,15 @@ class LineItem extends StatefulWidget {
 
 class _LineItemState extends State<LineItem> {
   /// A timer that shows a [HoverCard] with an evaluation result when completed.
-  Timer _showTimer;
+  Timer? _showTimer;
 
   /// A timer that removes a [HoverCard] when completed.
-  Timer _removeTimer;
+  Timer? _removeTimer;
 
   /// Displays the evaluation result of a source code item.
-  HoverCard _hoverCard;
+  HoverCard? _hoverCard;
 
-  DebuggerController _debuggerController;
+  late DebuggerController _debuggerController;
 
   String _previousHoverWord = '';
   bool _hasMouseExited = false;
@@ -793,15 +807,10 @@ class _LineItemState extends State<LineItem> {
           if (_hasMouseExited) return;
           _hoverCard?.remove();
           _hoverCard = HoverCard.fromHoverEvent(
-            contents: SingleChildScrollView(
-              child: Container(
-                constraints: BoxConstraints(maxHeight: maxHoverCardHeight),
-                child: Material(
-                  child: ExpandableVariable(
-                    debuggerController: _debuggerController,
-                    variable: variable,
-                  ),
-                ),
+            contents: Material(
+              child: ExpandableVariable(
+                debuggerController: _debuggerController,
+                variable: variable,
               ),
             ),
             event: event,
@@ -831,11 +840,9 @@ class _LineItemState extends State<LineItem> {
     _debuggerController = Provider.of<DebuggerController>(context);
 
     Widget child;
-    if (widget.pausedFrame != null) {
-      final column = widget.pausedFrame.column;
-
-      final foregroundColor =
-          darkTheme ? theme.textTheme.bodyText2.color : theme.primaryColor;
+    final column = widget.pausedFrame?.column;
+    if (column != null) {
+      final breakpointColor = theme.colorScheme.breakpointColor;
 
       // The following constants are tweaked for using the
       // 'Icons.label_important' icon.
@@ -852,7 +859,7 @@ class _LineItemState extends State<LineItem> {
               // Create a hidden copy of the first column-1 characters of the
               // line as a hack to correctly compute where to place
               // the cursor. Approximating by using column-1 spaces instead
-              // of the correct characters and styles would be risky as it leads
+              // of the correct characters and style s would be risky as it leads
               // to small errors if the font is not fixed size or the font
               // styles vary depending on the syntax highlighting.
               // TODO(jacobr): there might be some api exposed on SelectedText
@@ -871,7 +878,7 @@ class _LineItemState extends State<LineItem> {
                   child: Icon(
                     Icons.label_important,
                     size: colIconSize,
-                    color: foregroundColor,
+                    color: breakpointColor,
                   ),
                 ),
               )
@@ -899,10 +906,14 @@ class _LineItemState extends State<LineItem> {
   }
 
   TextSpan searchAwareLineContents() {
-    final activeSearchAwareContents =
-        _activeSearchAwareLineContents(widget.lineContents.children);
+    // TODO(elliette): Switch to using TextSpans instead of InlineSpans so
+    // type-casting isn't necessary.
+    final children = widget.lineContents.children as List<TextSpan>?;
+    if (children == null) return const TextSpan();
+
+    final activeSearchAwareContents = _activeSearchAwareLineContents(children);
     final allSearchAwareContents =
-        _searchMatchAwareLineContents(activeSearchAwareContents);
+        _searchMatchAwareLineContents(activeSearchAwareContents!);
     return TextSpan(
       children: allSearchAwareContents,
       style: widget.lineContents.style,
@@ -918,7 +929,7 @@ class _LineItemState extends State<LineItem> {
     var startColumnForSpan = 0;
     for (final span in startingContents) {
       final spanText = span.toPlainText();
-      final startColumnForMatch = match.position.column;
+      final startColumnForMatch = match.position.column!;
       if (startColumnForSpan <= startColumnForMatch &&
           startColumnForSpan + spanText.length > startColumnForMatch) {
         // The active search is part of this [span].
@@ -985,13 +996,14 @@ class _LineItemState extends State<LineItem> {
     return contentsWithMatch;
   }
 
-  List<TextSpan> _activeSearchAwareLineContents(
+  List<TextSpan>? _activeSearchAwareLineContents(
     List<TextSpan> startingContents,
   ) {
-    if (widget.activeSearchMatch == null) return startingContents;
+    final activeSearchMatch = widget.activeSearchMatch;
+    if (activeSearchMatch == null) return startingContents;
     return _contentsWithMatch(
       startingContents,
-      widget.activeSearchMatch,
+      activeSearchMatch,
       activeSearchMatchColor,
     );
   }
@@ -999,8 +1011,9 @@ class _LineItemState extends State<LineItem> {
   List<TextSpan> _searchMatchAwareLineContents(
     List<TextSpan> startingContents,
   ) {
-    if (widget.searchMatches.isEmpty) return startingContents;
-    final searchMatchesToFind = List<SourceToken>.from(widget.searchMatches)
+    final searchMatches = widget.searchMatches;
+    if (searchMatches == null || searchMatches.isEmpty) return startingContents;
+    final searchMatchesToFind = List<SourceToken>.from(searchMatches)
       ..remove(widget.activeSearchMatch);
 
     var contentsWithMatch = startingContents;
@@ -1051,9 +1064,9 @@ class ScriptPopupMenu extends StatelessWidget {
 
 class ScriptHistoryPopupMenu extends StatelessWidget {
   const ScriptHistoryPopupMenu({
-    @required this.itemBuilder,
-    @required this.onSelected,
-    @required this.enabled,
+    required this.itemBuilder,
+    required this.onSelected,
+    required this.enabled,
   });
 
   final PopupMenuItemBuilder<ScriptRef> itemBuilder;
@@ -1083,8 +1096,8 @@ class ScriptHistoryPopupMenu extends StatelessWidget {
 
 class ScriptPopupMenuOption {
   const ScriptPopupMenuOption({
-    @required this.label,
-    @required this.onSelected,
+    required this.label,
+    required this.onSelected,
     this.icon,
   });
 
@@ -1092,7 +1105,7 @@ class ScriptPopupMenuOption {
 
   final void Function(BuildContext, DebuggerController) onSelected;
 
-  final IconData icon;
+  final IconData? icon;
 
   PopupMenuItem<ScriptPopupMenuOption> build(BuildContext context) {
     return PopupMenuItem<ScriptPopupMenuOption>(
@@ -1122,7 +1135,7 @@ final copyScriptNameOption = ScriptPopupMenuOption(
   label: 'Copy filename',
   icon: Icons.content_copy,
   onSelected: (_, controller) => Clipboard.setData(
-    ClipboardData(text: controller.scriptLocation.value?.scriptRef?.uri),
+    ClipboardData(text: controller.scriptLocation.value?.scriptRef.uri),
   ),
 );
 
@@ -1165,12 +1178,14 @@ class GoToLineDialog extends StatelessWidget {
           TextField(
             autofocus: true,
             onSubmitted: (value) {
-              if (value.isNotEmpty) {
+              final scriptRef =
+                  _debuggerController.scriptLocation.value?.scriptRef;
+              if (value.isNotEmpty && scriptRef != null) {
                 Navigator.of(context).pop(dialogDefaultContext);
                 final line = int.parse(value);
                 _debuggerController.showScriptLocation(
                   ScriptLocation(
-                    _debuggerController.scriptLocation.value.scriptRef,
+                    scriptRef,
                     location: SourcePosition(line: line, column: 0),
                   ),
                 );

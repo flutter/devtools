@@ -45,7 +45,8 @@ void main() {
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
     when(fakeServiceManager.connectedApp.flutterVersionNow).thenReturn(
-        FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!));
+      FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!),
+    );
     when(fakeServiceManager.connectedApp.isProfileBuild)
         .thenAnswer((_) => Future.value(true));
     when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
@@ -137,9 +138,13 @@ void main() {
         final frame0 = jankyFrame.shallowCopy();
         frame0.timelineEventData
           ..setEventFlow(
-              event: goldenUiTimelineEvent, type: TimelineEventType.ui)
+            event: goldenUiTimelineEvent,
+            type: TimelineEventType.ui,
+          )
           ..setEventFlow(
-              event: goldenRasterTimelineEvent, type: TimelineEventType.raster);
+            event: goldenRasterTimelineEvent,
+            type: TimelineEventType.raster,
+          );
 
         controller = PerformanceController()..data = PerformanceData();
         await controller.toggleSelectedFrame(frame0);
@@ -163,9 +168,13 @@ void main() {
         final frame0 = jankyFrame.shallowCopy();
         frame0.timelineEventData
           ..setEventFlow(
-              event: goldenUiTimelineEvent, type: TimelineEventType.ui)
+            event: goldenUiTimelineEvent,
+            type: TimelineEventType.ui,
+          )
           ..setEventFlow(
-              event: goldenRasterTimelineEvent, type: TimelineEventType.raster);
+            event: goldenRasterTimelineEvent,
+            type: TimelineEventType.raster,
+          );
 
         controller = PerformanceController()..data = PerformanceData();
         await controller.toggleSelectedFrame(frame0);
@@ -204,10 +213,12 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
       }
 
-      await tester.pumpWidget(wrapWithControllers(
-        const PerformanceScreenBody(),
-        performance: controller,
-      ));
+      await tester.pumpWidget(
+        wrapWithControllers(
+          const PerformanceScreenBody(),
+          performance: controller,
+        ),
+      );
       await tester.pumpAndSettle();
     }
 
@@ -246,8 +257,10 @@ void main() {
       await tester.runAsync(() async {
         await pumpPerformanceScreenBody(tester, runAsync: true);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
-        expect(find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
-            findsNothing);
+        expect(
+          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          findsNothing,
+        );
       });
     });
 
@@ -258,8 +271,10 @@ void main() {
         await pumpPerformanceScreenBody(tester, runAsync: true);
         await tester.pumpAndSettle();
         expect(find.byType(TimelineFlameChart), findsNothing);
-        expect(find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
-            findsOneWidget);
+        expect(
+          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          findsOneWidget,
+        );
       });
     });
 
@@ -283,7 +298,8 @@ void main() {
         await expectLater(
           find.byType(TimelineFlameChart),
           matchesGoldenFile(
-              'goldens/timeline_flame_chart_with_selected_frame.png'),
+            'goldens/timeline_flame_chart_with_selected_frame.png',
+          ),
         );
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));

@@ -395,15 +395,19 @@ abstract class FlameChartState<T extends FlameChart,
       // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
       // if the key is held currently.
       if (keyLabel == 'w') {
-        zoomTo(math.min(
-          maxZoomLevel,
-          currentZoom + keyboardZoomInUnit,
-        ));
+        zoomTo(
+          math.min(
+            maxZoomLevel,
+            currentZoom + keyboardZoomInUnit,
+          ),
+        );
       } else if (keyLabel == 's') {
-        zoomTo(math.max(
-          FlameChart.minZoomLevel,
-          currentZoom - keyboardZoomOutUnit,
-        ));
+        zoomTo(
+          math.max(
+            FlameChart.minZoomLevel,
+            currentZoom - keyboardZoomOutUnit,
+          ),
+        );
       } else if (keyLabel == 'a') {
         scrollToX(horizontalControllerGroup.offset - keyboardScrollUnit);
       } else if (keyLabel == 'd') {
@@ -418,13 +422,15 @@ abstract class FlameChartState<T extends FlameChart,
       double deltaY = event.scrollDelta.dy;
       if (deltaY.abs() >= deltaX.abs()) {
         if (_altKeyPressed) {
-          verticalControllerGroup.jumpTo(math.max(
-            math.min(
-              verticalControllerGroup.offset + deltaY,
-              verticalControllerGroup.position.maxScrollExtent,
+          verticalControllerGroup.jumpTo(
+            math.max(
+              math.min(
+                verticalControllerGroup.offset + deltaY,
+                verticalControllerGroup.position.maxScrollExtent,
+              ),
+              0.0,
             ),
-            0.0,
-          ));
+          );
         } else {
           deltaY = deltaY.clamp(
             -FlameChart.maxScrollWheelDelta,
@@ -1238,7 +1244,8 @@ class _ScrollingFlameChartRowExtentDelegate extends ExtentDelegate {
       index--;
     }
     assert(
-        nodeIntervals[index].begin <= scrollOffset + precisionErrorTolerance);
+      nodeIntervals[index].begin <= scrollOffset + precisionErrorTolerance,
+    );
     return index;
   }
 

@@ -174,14 +174,15 @@ class _InitializerState extends State<Initializer>
               const SizedBox(height: defaultSpacing),
               if (widget.allowConnectionScreenOnDisconnect)
                 ElevatedButton(
-                    onPressed: () {
-                      hideDisconnectedOverlay();
-                      DevToolsRouterDelegate.of(context).navigateHome(
-                        clearUriParam: true,
-                        clearScreenParam: true,
-                      );
-                    },
-                    child: const Text(connectToNewAppText))
+                  onPressed: () {
+                    hideDisconnectedOverlay();
+                    DevToolsRouterDelegate.of(context).navigateHome(
+                      clearUriParam: true,
+                      clearScreenParam: true,
+                    );
+                  },
+                  child: const Text(connectToNewAppText),
+                )
               else
                 Text(
                   'Run a new debug session to reconnect',

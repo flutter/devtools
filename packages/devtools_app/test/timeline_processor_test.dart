@@ -86,8 +86,10 @@ void main() {
       //  Animator::BeginFrame
       // VSYNC
       traceEvents = List.of(goldenUiTraceEvents);
-      traceEvents.insert(goldenUiTraceEvents.length - 2,
-          goldenUiTraceEvents[goldenUiTraceEvents.length - 2]);
+      traceEvents.insert(
+        goldenUiTraceEvents.length - 2,
+        goldenUiTraceEvents[goldenUiTraceEvents.length - 2],
+      );
 
       await processor.processTraceEvents(traceEvents);
       expect(events.length, equals(1));

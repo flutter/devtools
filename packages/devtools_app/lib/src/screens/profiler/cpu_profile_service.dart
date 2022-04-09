@@ -22,7 +22,8 @@ extension CpuProfilerExtension on VmServiceWrapper {
 
   Future clearSamples() {
     return serviceManager.service!.clearCpuSamples(
-        serviceManager.isolateManager.selectedIsolate.value!.id!);
+      serviceManager.isolateManager.selectedIsolate.value!.id!,
+    );
   }
 
   Future<dynamic> setProfilePeriod(String value) {

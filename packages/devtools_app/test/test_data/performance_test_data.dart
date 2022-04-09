@@ -163,6 +163,10 @@ final buildEvent = testSyncTimelineEvent(buildTrace)
   ..time.end = const Duration(microseconds: 193938741291)
   ..type = TimelineEventType.ui;
 
+final buildEvent2 = testSyncTimelineEvent(buildTrace2)
+  ..time.end = const Duration(microseconds: 193938741350)
+  ..type = TimelineEventType.ui;
+
 final compositingBitsEvent = testSyncTimelineEvent(compositingBitsTrace)
   ..time.end = const Duration(microseconds: 193938741364)
   ..type = TimelineEventType.ui;
@@ -200,7 +204,10 @@ final goldenUiTimelineEvent = vsyncEvent
                     animateEvent..parent = frameEvent,
                     layoutEvent
                       ..parent = frameEvent
-                      ..addChild(buildEvent..parent = layoutEvent),
+                      ..addAllChildren([
+                        buildEvent..parent = layoutEvent,
+                        buildEvent2..parent = layoutEvent
+                      ]),
                     compositingBitsEvent..parent = frameEvent,
                     paintEvent..parent = frameEvent,
                     compositingEvent..parent = frameEvent,
@@ -220,6 +227,7 @@ const goldenUiString = '  VSYNC [193938741076 μs - 193938742696 μs]\n'
     '            Animate [193938741112 μs - 193938741145 μs]\n'
     '            Layout [193938741150 μs - 193938741361 μs]\n'
     '              Build [193938741258 μs - 193938741291 μs]\n'
+    '              Build [193938741300 μs - 193938741350 μs]\n'
     '            Compositing bits [193938741362 μs - 193938741364 μs]\n'
     '            Paint [193938741365 μs - 193938741439 μs]\n'
     '            Compositing [193938741440 μs - 193938741734 μs]\n'
@@ -233,6 +241,7 @@ final goldenUiTraceEvents = [
   engineBeginFrameTrace,
   animateTrace,
   buildTrace,
+  buildTrace2,
   layoutTrace,
   compositingBitsTrace,
   paintTrace,
@@ -356,6 +365,16 @@ final buildTrace = testTraceEventWrapper({
   'ts': 193938741258,
   'ph': 'X',
   'dur': 33,
+  'args': {'mode': 'basic', 'isolateNumber': '993728060'}
+});
+final buildTrace2 = testTraceEventWrapper({
+  'name': 'Build',
+  'cat': 'Dart',
+  'tid': testUiThreadId,
+  'pid': 94955,
+  'ts': 193938741300,
+  'ph': 'X',
+  'dur': 50,
   'args': {'mode': 'basic', 'isolateNumber': '993728060'}
 });
 final layoutTrace = testTraceEventWrapper({
@@ -583,36 +602,48 @@ final endGpuRasterizerDrawWithSubtleShaderJankTrace = testTraceEventWrapper({
 });
 
 // Mark: AsyncTimelineData
-final asyncEventWithInstantChildren = AsyncTimelineEvent(TraceEventWrapper(
-  TraceEvent(jsonDecode(jsonEncode({
-    'name': 'PipelineItem',
-    'cat': 'Embedder',
-    'tid': 19333,
-    'pid': 94955,
-    'ts': 193938741080,
-    'ph': 's',
-    'id': 'f1',
-    'args': {
-      'isolateId': 'id_001',
-      'parentId': '07bf',
-    },
-  }))),
-  0,
-))
-  ..addEndEvent(TraceEventWrapper(
-    TraceEvent(jsonDecode(jsonEncode({
-      'name': 'PipelineItem',
-      'cat': 'Embedder',
-      'tid': 19334,
-      'pid': 94955,
-      'ts': 193938770146,
-      'ph': 'f',
-      'bp': 'e',
-      'id': 'f1',
-      'args': {},
-    }))),
-    1,
-  ))
+final asyncEventWithInstantChildren = AsyncTimelineEvent(
+  TraceEventWrapper(
+    TraceEvent(
+      jsonDecode(
+        jsonEncode({
+          'name': 'PipelineItem',
+          'cat': 'Embedder',
+          'tid': 19333,
+          'pid': 94955,
+          'ts': 193938741080,
+          'ph': 's',
+          'id': 'f1',
+          'args': {
+            'isolateId': 'id_001',
+            'parentId': '07bf',
+          },
+        }),
+      ),
+    ),
+    0,
+  ),
+)
+  ..addEndEvent(
+    TraceEventWrapper(
+      TraceEvent(
+        jsonDecode(
+          jsonEncode({
+            'name': 'PipelineItem',
+            'cat': 'Embedder',
+            'tid': 19334,
+            'pid': 94955,
+            'ts': 193938770146,
+            'ph': 'f',
+            'bp': 'e',
+            'id': 'f1',
+            'args': {},
+          }),
+        ),
+      ),
+      1,
+    ),
+  )
   ..type = TimelineEventType.async
   ..addAllChildren([
     instantAsync1..time.end = instantAsync1.time.start,
@@ -620,53 +651,71 @@ final asyncEventWithInstantChildren = AsyncTimelineEvent(TraceEventWrapper(
     instantAsync3..time.end = instantAsync3.time.start,
   ]);
 
-final instantAsync1 = AsyncTimelineEvent(TraceEventWrapper(
-  TraceEvent(jsonDecode(jsonEncode({
-    'name': 'Connection established',
-    'cat': 'Dart',
-    'tid': 19333,
-    'pid': 94955,
-    'ts': 193938751080,
-    'ph': 'n',
-    'id': 'f1',
-    'args': {
-      'isolateId': 'id_001',
-    },
-  }))),
-  0,
-));
+final instantAsync1 = AsyncTimelineEvent(
+  TraceEventWrapper(
+    TraceEvent(
+      jsonDecode(
+        jsonEncode({
+          'name': 'Connection established',
+          'cat': 'Dart',
+          'tid': 19333,
+          'pid': 94955,
+          'ts': 193938751080,
+          'ph': 'n',
+          'id': 'f1',
+          'args': {
+            'isolateId': 'id_001',
+          },
+        }),
+      ),
+    ),
+    0,
+  ),
+);
 
-final instantAsync2 = AsyncTimelineEvent(TraceEventWrapper(
-  TraceEvent(jsonDecode(jsonEncode({
-    'name': 'Connection established',
-    'cat': 'Dart',
-    'tid': 19334,
-    'pid': 94955,
-    'ts': 193938756080,
-    'ph': 'n',
-    'id': 'f1',
-    'args': {
-      'isolateId': 'id_001',
-    },
-  }))),
-  1,
-));
+final instantAsync2 = AsyncTimelineEvent(
+  TraceEventWrapper(
+    TraceEvent(
+      jsonDecode(
+        jsonEncode({
+          'name': 'Connection established',
+          'cat': 'Dart',
+          'tid': 19334,
+          'pid': 94955,
+          'ts': 193938756080,
+          'ph': 'n',
+          'id': 'f1',
+          'args': {
+            'isolateId': 'id_001',
+          },
+        }),
+      ),
+    ),
+    1,
+  ),
+);
 
-final instantAsync3 = AsyncTimelineEvent(TraceEventWrapper(
-  TraceEvent(jsonDecode(jsonEncode({
-    'name': 'Connection established',
-    'cat': 'Dart',
-    'tid': 19334,
-    'pid': 94955,
-    'ts': 193938761080,
-    'ph': 'n',
-    'id': 'f1',
-    'args': {
-      'isolateId': 'id_001',
-    },
-  }))),
-  1,
-));
+final instantAsync3 = AsyncTimelineEvent(
+  TraceEventWrapper(
+    TraceEvent(
+      jsonDecode(
+        jsonEncode({
+          'name': 'Connection established',
+          'cat': 'Dart',
+          'tid': 19334,
+          'pid': 94955,
+          'ts': 193938761080,
+          'ph': 'n',
+          'id': 'f1',
+          'args': {
+            'isolateId': 'id_001',
+          },
+        }),
+      ),
+    ),
+    1,
+  ),
+);
 
 final goldenAsyncTimelineEvent = asyncEventA
   ..addAllChildren([
@@ -700,7 +749,8 @@ final asyncEventD = AsyncTimelineEvent(asyncStartDTrace)
   ..addEndEvent(asyncEndDTrace);
 
 final asyncEventWithDeepOverlap = AsyncTimelineEvent(
-    asyncStartTraceEventWithDeepOverlap)
+  asyncStartTraceEventWithDeepOverlap,
+)
   ..addEndEvent(asyncEndTraceEventWithDeepOverlap)
   ..addAllChildren([asyncEventWithDeepOverlap1, asyncEventWithDeepOverlap2]);
 final asyncEventWithDeepOverlap1 = AsyncTimelineEvent(asyncStart1Trace)
@@ -1088,8 +1138,9 @@ final unknownEventEndTrace = testTraceEventWrapper({
 
 // Mark: OfflinePerformanceData.
 final goldenTraceEventsJson = List<Map<String, dynamic>>.from(
-    goldenUiTraceEvents.map((trace) => trace.json).toList()
-      ..addAll(goldenRasterTraceEvents.map((trace) => trace.json).toList()));
+  goldenUiTraceEvents.map((trace) => trace.json).toList()
+    ..addAll(goldenRasterTraceEvents.map((trace) => trace.json).toList()),
+);
 
 final offlinePerformanceDataJson = {
   PerformanceData.traceEventsKey: goldenTraceEventsJson,

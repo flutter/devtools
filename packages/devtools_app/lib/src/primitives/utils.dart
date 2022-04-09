@@ -183,8 +183,11 @@ String? funcRefName(FuncRef ref) {
   }
 }
 
-void executeWithDelay(Duration delay, void callback(),
-    {bool executeNow = false}) {
+void executeWithDelay(
+  Duration delay,
+  void callback(), {
+  bool executeNow = false,
+}) {
   if (executeNow || delay.inMilliseconds <= 0) {
     callback();
   } else {
@@ -207,9 +210,10 @@ Future<void> delayForBatchProcessing({int micros = 0}) async {
 Future<T> timeout<T>(Future<T> operation, int timeoutMillis) => Future.any<T>([
       operation,
       Future<T>.delayed(
-          Duration(milliseconds: timeoutMillis),
-          // ignore: unnecessary_parenthesis
-          (() => null) as FutureOr<T> Function()?)
+        Duration(milliseconds: timeoutMillis),
+        // ignore: unnecessary_parenthesis
+        (() => null) as FutureOr<T> Function()?,
+      )
     ]);
 
 String longestFittingSubstring(
@@ -478,8 +482,8 @@ class RateLimiter {
     requestScheduledButNotStarted = true;
     _activeTimer = Timer(
         Duration(
-            milliseconds:
-                currentTime - _lastRequestTime! + delayBetweenRequests), () {
+          milliseconds: currentTime - _lastRequestTime! + delayBetweenRequests,
+        ), () {
       _activeTimer = null;
       requestScheduledButNotStarted = false;
       _performRequest();
@@ -589,10 +593,12 @@ String formatDateTime(DateTime time) {
 
 bool isDebugBuild() {
   bool debugBuild = false;
-  assert((() {
-    debugBuild = true;
-    return true;
-  })());
+  assert(
+    (() {
+      debugBuild = true;
+      return true;
+    })(),
+  );
   return debugBuild;
 }
 
@@ -1402,4 +1408,8 @@ extension UriExtension on Uri {
       fragment: fragment ?? this.fragment,
     );
   }
+}
+
+Iterable<T> removeNullValues<T>(Iterable<T?> values) {
+  return values.whereType<T>();
 }

@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: avoid_redundant_argument_values
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +23,7 @@ import 'debugger_controller.dart';
 import 'debugger_model.dart';
 
 class Variables extends StatelessWidget {
-  const Variables({Key key}) : super(key: key);
+  const Variables({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -47,13 +48,12 @@ class Variables extends StatelessWidget {
 
 class ExpandableVariable extends StatelessWidget {
   const ExpandableVariable({
-    Key key,
+    Key? key,
     this.variable,
-    @required this.debuggerController,
-  })  : assert(debuggerController != null),
-        super(key: key);
+    required this.debuggerController,
+  }) : super(key: key);
 
-  final DartObjectNode variable;
+  final DartObjectNode? variable;
   final DebuggerController debuggerController;
 
   @override
@@ -63,7 +63,8 @@ class ExpandableVariable extends StatelessWidget {
     // on stepping.
     return TreeView<DartObjectNode>(
       dataRootsListenable:
-          FixedValueListenable<List<DartObjectNode>>([variable]),
+          FixedValueListenable<List<DartObjectNode?>>([variable])
+              as ValueListenable<List<DartObjectNode>>,
       shrinkWrap: true,
       dataDisplayProvider: (variable, onPressed) =>
           displayProvider(context, variable, onPressed, debuggerController),
@@ -137,15 +138,17 @@ Widget displayProvider(
                 if (await variable.inspectWidget()) {
                   router.navigateIfNotCurrent(InspectorScreen.id);
                 } else {
-                  if (inspectorService.isDisposed) return;
+                  if (inspectorService!.isDisposed) return;
                   final isInspectable = await variable.isInspectable;
                   if (inspectorService.isDisposed) return;
                   if (isInspectable) {
                     notifications?.push(
-                        'Widget is already the current inspector selection.');
+                      'Widget is already the current inspector selection.',
+                    );
                   } else {
                     notifications?.push(
-                        'Only Elements and RenderObjects can currently be inspected');
+                      'Only Elements and RenderObjects can currently be inspected',
+                    );
                   }
                 }
               }
@@ -159,10 +162,10 @@ Widget displayProvider(
 /// Android Material styled text selection controls.
 class VariableSelectionControls extends MaterialTextSelectionControls {
   VariableSelectionControls({
-    @required this.handleInspect,
+    required this.handleInspect,
   });
 
-  final void Function(TextSelectionDelegate delegate) handleInspect;
+  final void Function(TextSelectionDelegate delegate)? handleInspect;
 
   /// Builder for material-style copy/paste text selection toolbar with added
   /// Dart DevTools specific functionality.
@@ -174,26 +177,28 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
-    Offset lastSecondaryTapDownPosition,
+    ClipboardStatusNotifier? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
   ) {
+    final clipboardStatusNotifier = clipboardStatus!;
     return _TextSelectionControlsToolbar(
       globalEditableRegion: globalEditableRegion,
       textLineHeight: textLineHeight,
       selectionMidpoint: selectionMidpoint,
       endpoints: endpoints,
       delegate: delegate,
-      clipboardStatus: clipboardStatus,
-      handleCut:
-          canCut(delegate) ? () => handleCut(delegate, clipboardStatus) : null,
+      clipboardStatus: clipboardStatusNotifier,
+      handleCut: canCut(delegate)
+          ? () => handleCut(delegate, clipboardStatusNotifier)
+          : null,
       handleCopy: canCopy(delegate)
-          ? () => handleCopy(delegate, clipboardStatus)
+          ? () => handleCopy(delegate, clipboardStatusNotifier)
           : null,
       handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
       handleSelectAll:
           canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
       handleInspect:
-          handleInspect != null ? () => handleInspect(delegate) : null,
+          handleInspect != null ? () => handleInspect!(delegate) : null,
     );
   }
 }
@@ -201,29 +206,29 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
 /// The highest level toolbar widget, built directly by buildToolbar.
 class _TextSelectionControlsToolbar extends StatefulWidget {
   const _TextSelectionControlsToolbar({
-    Key key,
-    @required this.clipboardStatus,
-    @required this.delegate,
-    @required this.endpoints,
-    @required this.globalEditableRegion,
-    @required this.handleInspect,
-    @required this.handleCut,
-    @required this.handleCopy,
-    @required this.handlePaste,
-    @required this.handleSelectAll,
-    @required this.selectionMidpoint,
-    @required this.textLineHeight,
+    Key? key,
+    required this.clipboardStatus,
+    required this.delegate,
+    required this.endpoints,
+    required this.globalEditableRegion,
+    required this.handleInspect,
+    required this.handleCut,
+    required this.handleCopy,
+    required this.handlePaste,
+    required this.handleSelectAll,
+    required this.selectionMidpoint,
+    required this.textLineHeight,
   }) : super(key: key);
 
   final ClipboardStatusNotifier clipboardStatus;
   final TextSelectionDelegate delegate;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;
-  final VoidCallback handleInspect;
-  final VoidCallback handleCut;
-  final VoidCallback handleCopy;
-  final VoidCallback handlePaste;
-  final VoidCallback handleSelectAll;
+  final VoidCallback? handleInspect;
+  final VoidCallback? handleCut;
+  final VoidCallback? handleCopy;
+  final VoidCallback? handlePaste;
+  final VoidCallback? handleSelectAll;
   final Offset selectionMidpoint;
   final double textLineHeight;
 
@@ -296,11 +301,12 @@ class _TextSelectionControlsToolbarState
     final endTextSelectionPoint =
         widget.endpoints.length > 1 ? widget.endpoints[1] : widget.endpoints[0];
     final anchorAbove = Offset(
-        widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
-        widget.globalEditableRegion.top +
-            startTextSelectionPoint.point.dy -
-            widget.textLineHeight -
-            _kToolbarContentDistance);
+      widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
+      widget.globalEditableRegion.top +
+          startTextSelectionPoint.point.dy -
+          widget.textLineHeight -
+          _kToolbarContentDistance,
+    );
     final anchorBelow = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
       widget.globalEditableRegion.top +
@@ -356,7 +362,9 @@ class _TextSelectionControlsToolbarState
           .map((MapEntry<int, _TextSelectionToolbarItemData> entry) {
         return TextSelectionToolbarTextButton(
           padding: TextSelectionToolbarTextButton.getPadding(
-              entry.key, itemDatas.length),
+            entry.key,
+            itemDatas.length,
+          ),
           onPressed: entry.value.onPressed,
           child: Text(entry.value.label),
         );
@@ -368,10 +376,10 @@ class _TextSelectionControlsToolbarState
 /// The label and callback for the available default text selection menu buttons.
 class _TextSelectionToolbarItemData {
   const _TextSelectionToolbarItemData({
-    @required this.label,
-    @required this.onPressed,
+    required this.label,
+    required this.onPressed,
   });
 
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 }
