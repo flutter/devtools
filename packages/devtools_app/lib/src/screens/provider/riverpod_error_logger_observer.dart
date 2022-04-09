@@ -34,8 +34,9 @@ class ErrorLoggerObserver extends ProviderObserver {
       if (value.error is SentinelException) return;
       log('Provider $provider failed with "${value.error}"', LogLevel.error);
 
-      if (value.stackTrace != null) {
-        log(value.stackTrace!);
+      final stackTrace = value.stackTrace;
+      if (stackTrace != null) {
+        log(stackTrace);
       }
     }
   }
