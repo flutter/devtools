@@ -327,60 +327,6 @@ void main() {
       );
     });
 
-    testWidgets(
-        'once valid data was fetched, going back to loading shows the previous value for 1 second',
-        (tester) async {
-      const app = MaterialApp(
-        home: Scaffold(
-          body: InstanceViewer(
-            showInternalProperties: true,
-            rootPath: InstancePath.fromInstanceId('0'),
-          ),
-        ),
-      );
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(const InstancePath.fromInstanceId('0'))
-                .overrideWithValue(nullInstance),
-          ],
-          child: app,
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesGoldenFile('../goldens/instance_viewer/null.png'),
-      );
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(const InstancePath.fromInstanceId('0'))
-                .overrideWithValue(const AsyncValue.loading()),
-          ],
-          child: app,
-        ),
-      );
-
-      await tester.pump();
-
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesGoldenFile('../goldens/instance_viewer/null.png'),
-      );
-
-      await tester.pump(const Duration(seconds: 1));
-
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesGoldenFile('../goldens/instance_viewer/loading.png'),
-      );
-    });
-
     // TODO(rrousselGit) find a way to test "data then loading then wait then loading then wait shows "loading" after a total of one second"
     // This is tricky because tester.pump(duration) completes the Timer even if the duration is < 1 second
 
