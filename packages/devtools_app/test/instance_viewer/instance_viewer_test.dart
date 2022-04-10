@@ -4,13 +4,12 @@
 
 // ignore_for_file: avoid_redundant_argument_values, false positive on required nullable parameters, import_of_legacy_library_into_null_safe
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_viewer.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/result.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,7 +34,7 @@ final emptyObjectInstance = AsyncValue.data(
 );
 
 final object2Instance = AsyncValue.data(
-  ObjectInstance(
+  InstanceDetails.object(
     [
       ObjectField(
         name: 'first',
@@ -109,7 +108,7 @@ final trueInstance = AsyncValue.data(
 );
 
 final int42Instance = AsyncValue.data(
-  NumInstance('42', instanceRefId: '42', setter: null),
+  InstanceDetails.number('42', instanceRefId: '42', setter: null),
 );
 
 final enumValueInstance = AsyncValue.data(
@@ -125,6 +124,7 @@ void main() {
   setUpAll(() => loadFonts());
 
   setUp(() {
+    setGlobal(IdeTheme, getIdeTheme());
     setGlobal(ServiceConnectionManager, FakeServiceManager());
   });
 
@@ -330,25 +330,22 @@ void main() {
     testWidgets(
         'once valid data was fetched, going back to loading shows the previous value for 1 second',
         (tester) async {
-      final container = ProviderContainer(
-        overrides: [
-          instanceProvider(const InstancePath.fromInstanceId('0'))
-              .overrideWithValue(nullInstance),
-        ],
+      const app = MaterialApp(
+        home: Scaffold(
+          body: InstanceViewer(
+            showInternalProperties: true,
+            rootPath: InstancePath.fromInstanceId('0'),
+          ),
+        ),
       );
-      addTearDown(container.dispose);
 
       await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(
-            home: Scaffold(
-              body: InstanceViewer(
-                showInternalProperties: true,
-                rootPath: InstancePath.fromInstanceId('0'),
-              ),
-            ),
-          ),
+        ProviderScope(
+          overrides: [
+            instanceProvider(const InstancePath.fromInstanceId('0'))
+                .overrideWithValue(nullInstance),
+          ],
+          child: app,
         ),
       );
 
@@ -359,10 +356,15 @@ void main() {
         matchesGoldenFile('../goldens/instance_viewer/null.png'),
       );
 
-      container.updateOverrides([
-        instanceProvider(const InstancePath.fromInstanceId('0'))
-            .overrideWithValue(const AsyncValue.loading()),
-      ]);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            instanceProvider(const InstancePath.fromInstanceId('0'))
+                .overrideWithValue(const AsyncValue.loading()),
+          ],
+          child: app,
+        ),
+      );
 
       await tester.pump();
 
@@ -385,35 +387,34 @@ void main() {
     testWidgets(
         'once valid data was fetched, going back to loading and emiting an error immediately updates the UI',
         (tester) async {
-      final container = ProviderContainer(
-        overrides: [
-          instanceProvider(const InstancePath.fromInstanceId('0'))
-              .overrideWithValue(nullInstance),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(
-            home: Scaffold(
-              body: InstanceViewer(
-                showInternalProperties: true,
-                rootPath: InstancePath.fromInstanceId('0'),
-              ),
-            ),
+      const app = MaterialApp(
+        home: Scaffold(
+          body: InstanceViewer(
+            showInternalProperties: true,
+            rootPath: InstancePath.fromInstanceId('0'),
           ),
         ),
       );
 
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            instanceProvider(const InstancePath.fromInstanceId('0'))
+                .overrideWithValue(nullInstance),
+          ],
+          child: app,
+        ),
+      );
       await tester.pumpAndSettle();
-
-      container.updateOverrides([
-        instanceProvider(const InstancePath.fromInstanceId('0'))
-            .overrideWithValue(const AsyncValue.loading()),
-      ]);
-
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            instanceProvider(const InstancePath.fromInstanceId('0'))
+                .overrideWithValue(const AsyncValue.loading()),
+          ],
+          child: app,
+        ),
+      );
       await tester.pump();
 
       await expectLater(
@@ -421,11 +422,15 @@ void main() {
         matchesGoldenFile('../goldens/instance_viewer/null.png'),
       );
 
-      container.updateOverrides([
-        instanceProvider(const InstancePath.fromInstanceId('0'))
-            .overrideWithValue(AsyncValue.error(StateError('test error'))),
-      ]);
-
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            instanceProvider(const InstancePath.fromInstanceId('0'))
+                .overrideWithValue(AsyncValue.error(StateError('test error'))),
+          ],
+          child: app,
+        ),
+      );
       await tester.pumpAndSettle();
 
       await expectLater(
@@ -437,35 +442,34 @@ void main() {
     testWidgets(
         'once valid data was fetched, going back to loading and emiting a new value immediately updates the UI',
         (tester) async {
-      final container = ProviderContainer(
-        overrides: [
-          instanceProvider(const InstancePath.fromInstanceId('0'))
-              .overrideWithValue(nullInstance),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(
-            home: Scaffold(
-              body: InstanceViewer(
-                showInternalProperties: true,
-                rootPath: InstancePath.fromInstanceId('0'),
-              ),
-            ),
+      const app = MaterialApp(
+        home: Scaffold(
+          body: InstanceViewer(
+            showInternalProperties: true,
+            rootPath: InstancePath.fromInstanceId('0'),
           ),
         ),
       );
 
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            instanceProvider(const InstancePath.fromInstanceId('0'))
+                .overrideWithValue(nullInstance),
+          ],
+          child: app,
+        ),
+      );
       await tester.pumpAndSettle();
-
-      container.updateOverrides([
-        instanceProvider(const InstancePath.fromInstanceId('0'))
-            .overrideWithValue(const AsyncValue.loading()),
-      ]);
-
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            instanceProvider(const InstancePath.fromInstanceId('0'))
+                .overrideWithValue(const AsyncValue.loading()),
+          ],
+          child: app,
+        ),
+      );
       await tester.pump();
 
       await expectLater(
@@ -473,11 +477,15 @@ void main() {
         matchesGoldenFile('../goldens/instance_viewer/null.png'),
       );
 
-      container.updateOverrides([
-        instanceProvider(const InstancePath.fromInstanceId('0'))
-            .overrideWithValue(int42Instance),
-      ]);
-
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            instanceProvider(const InstancePath.fromInstanceId('0'))
+                .overrideWithValue(int42Instance),
+          ],
+          child: app,
+        ),
+      );
       await tester.pumpAndSettle();
 
       await expectLater(
