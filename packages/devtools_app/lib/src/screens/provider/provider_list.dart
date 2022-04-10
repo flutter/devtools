@@ -23,25 +23,28 @@ final AutoDisposeStateNotifierProvider<StateController<String?>, String?>
   (ref) {
     final controller = StateController<String?>(null);
 
-    ref.listen<AsyncValue<List<ProviderNode>>>(sortedProviderNodesProvider,
-        (prev, value) {
-      final nodes = value.asData?.value;
-      if (nodes == null) return;
+    ref.listen<AsyncValue<List<ProviderNode>>>(
+      sortedProviderNodesProvider,
+      (prev, value) {
+        final nodes = value.asData?.value;
+        if (nodes == null) return;
 
-      if (controller.state == null) {
-        if (nodes.isNotEmpty) controller.state = nodes.first.id;
-        return;
-      }
+        if (controller.state == null) {
+          if (nodes.isNotEmpty) controller.state = nodes.first.id;
+          return;
+        }
 
-      if (nodes.isEmpty) {
-        controller.state = null;
-      }
+        if (nodes.isEmpty) {
+          controller.state = null;
+        }
 
-      /// The previously selected provider was unmounted
-      else if (!nodes.any((node) => node.id == controller.state)) {
-        controller.state = nodes.first.id;
-      }
-    });
+        /// The previously selected provider was unmounted
+        else if (!nodes.any((node) => node.id == controller.state)) {
+          controller.state = nodes.first.id;
+        }
+      },
+      fireImmediately: true,
+    );
 
     return controller;
   },

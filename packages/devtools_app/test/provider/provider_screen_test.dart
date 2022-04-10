@@ -4,6 +4,7 @@
 
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/provider_list.dart';
@@ -28,6 +29,7 @@ void main() {
   setUpAll(() => loadFonts());
 
   setUp(() {
+    setGlobal(IdeTheme, getIdeTheme());
     setGlobal(ServiceConnectionManager, FakeServiceManager());
   });
 
@@ -50,27 +52,27 @@ void main() {
     testWidgetsWithWindowSize(
         'shows ProviderUnknownErrorBanner if the devtool failed to fetch the list of providers',
         windowSize, (tester) async {
-      final container = ProviderContainer(
-        overrides: [
-          sortedProviderNodesProvider.overrideWithValue(
-            const AsyncValue.loading(),
-          ),
-        ],
-      );
-      addTearDown(container.dispose);
-
       await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
+        ProviderScope(
+          overrides: [
+            sortedProviderNodesProvider.overrideWithValue(
+              const AsyncValue.loading(),
+            ),
+          ],
           child: providerScreen,
         ),
       );
 
-      container.updateOverrides([
-        sortedProviderNodesProvider.overrideWithValue(
-          AsyncValue.error(StateError('')),
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sortedProviderNodesProvider.overrideWithValue(
+              AsyncValue.error(StateError('')),
+            ),
+          ],
+          child: providerScreen,
         ),
-      ]);
+      );
 
       // wait for the Banner to appear as it is mounted asynchronously
       await tester.pump();
@@ -168,8 +170,6 @@ void main() {
         (prev, next) {},
       );
 
-      await container.pump();
-
       expect(sub.read(), '0');
 
       container.updateOverrides([
@@ -179,8 +179,6 @@ void main() {
           ]),
         ),
       ]);
-
-      await container.pump();
 
       expect(sub.read(), '1');
     });
@@ -361,28 +359,29 @@ void main() {
         ...getOverrides(),
       ];
 
-      final container = ProviderContainer(
-        overrides: [
-          ...overrides,
-          instanceProvider(const InstancePath.fromProviderId('0'))
-              .overrideWithValue(const AsyncValue.loading())
-        ],
-      );
-      addTearDown(container.dispose);
-
       await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
+        ProviderScope(
+          overrides: [
+            ...overrides,
+            instanceProvider(const InstancePath.fromProviderId('0'))
+                .overrideWithValue(const AsyncValue.loading()),
+          ],
           child: providerScreen,
         ),
       );
 
-      container.updateOverrides([
-        ...overrides,
-        instanceProvider(const InstancePath.fromProviderId('0'))
-            .overrideWithValue(AsyncValue.error(Error()))
-      ]);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ...overrides,
+            instanceProvider(const InstancePath.fromProviderId('0'))
+                .overrideWithValue(AsyncValue.error(Error())),
+          ],
+          child: providerScreen,
+        ),
+      );
 
+      // await for the modal to be mounted as it is rendered asynchronously
       await tester.pump();
 
       expect(
