@@ -150,7 +150,7 @@ Future<void> _mutate(
       );
 
       return field.eval.safeEval(
-        'parent.${propertyPath.name} = $newValueExpression',
+        '(parent as ${propertyPath.ownerName}).${propertyPath.name} = $newValueExpression',
         isAlive: isAlive,
         scope: {
           'parent': parent.instanceRefId,
@@ -208,12 +208,13 @@ Future<EnumInstance?> _tryParseEnum(
   final name = await nameInstanceFuture;
   if (name.kind != InstanceKind.kString) return null;
 
+  // Some Dart versions have for name "EnumType.valueName", others only have "valueName".
+  // So we have to strip the type manually
   final nameSplit = name.valueAsString!.split('.');
-  if (nameSplit.length != 2) return null;
 
   return EnumInstance(
-    type: nameSplit.first,
-    value: nameSplit[1],
+    type: instance.classRef!.name!,
+    value: nameSplit.last,
     instanceRefId: instanceRefId,
     setter: setter,
   );
@@ -248,8 +249,10 @@ Setter? _parseSetter({
       // This may edit the wrong property when an object has two properties with
       // with the same name.
       // TODO use ownerUri
-      final field =
-          parent.fields.firstWhere((field) => field.name == keyPath.name);
+      final field = parent.fields.firstWhere(
+        (field) =>
+            field.name == keyPath.name && field.ownerName == keyPath.ownerName,
+      );
 
       if (field.isFinal) return null;
       return mutate;
@@ -426,7 +429,7 @@ Future<List<ObjectField>> _parseFields(
       ref: parseSentinel<InstanceRef>(field.value),
       ownerName: ownerName,
       ownerUri: ownerUri,
-      eval: await ref.watch(libraryEvalProvider(owner.library!.uri!).future),
+      eval: await ref.watch(libraryEvalProvider(ownerUri).future),
       isDefinedByDependency: ownerPackageName != appName,
     );
   }).toList();

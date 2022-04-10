@@ -45,6 +45,17 @@ final libraryEvalProvider =
 
 final hotRestartEventProvider =
     ChangeNotifierProvider<ValueNotifier<void>>((ref) {
-  return serviceManager.isolateManager.selectedIsolate
-      as ValueNotifier<IsolateRef?>;
+  final selectedIsolateListenable =
+      serviceManager.isolateManager.selectedIsolate;
+
+  // Since ChangeNotifierProvider calls `dispose` on the returned ChangeNotifier
+  // when the provider is destroyed, we can't simply return `selectedIsolateListenable`.
+  // So we're making a copy of it instead.
+  final notifier = ValueNotifier<IsolateRef?>(selectedIsolateListenable.value);
+
+  void listener() => notifier.value = selectedIsolateListenable.value;
+  selectedIsolateListenable.addListener(listener);
+  ref.onDispose(() => selectedIsolateListenable.removeListener(listener));
+
+  return notifier;
 });
