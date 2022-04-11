@@ -46,6 +46,7 @@
 // ignore_for_file: invalid_use_of_protected_member
 
 // This annotation should stay here for compatibility with legacy code.
+// @dart=2.9
 
 import 'dart:async';
 import 'dart:convert';
@@ -81,8 +82,8 @@ import 'package:vector_math/vector_math_64.dart';
 // WidgetInspectorService show up as in scope as far as the analysis server is
 // concerned.
 extension WidgetInspectorServicePrivateMethods on WidgetInspectorService {
-  Map<String, Object?>? _nodeToJson(
-    DiagnosticsNode? node,
+  Map<String, Object /*?*/ > /*?*/ _nodeToJson(
+    DiagnosticsNode /*?*/ node,
     InspectorSerializationDelegate delegate,
   ) {
     throw 'Dummy extension method to make the code type check when it calls private members';
@@ -92,7 +93,7 @@ extension WidgetInspectorServicePrivateMethods on WidgetInspectorService {
     throw 'Dummy extension method to make the code type check when it calls private members';
   }
 
-  List<String>? get _pubRootDirectories {
+  List<String> /*?*/ get _pubRootDirectories {
     throw 'Dummy extension method to make the code type check when it calls private members';
   }
 }
@@ -103,7 +104,7 @@ extension WidgetInspectorServicePrivateMethods on WidgetInspectorService {
 // {'extension_name_a': 'exception message_a', 'extension_name_b', 'exception_message_b', ...}
 String addServiceExtensions() {
   // INSPECTOR_POLYFILL_SCRIPT_START
-  T toEnumEntry<T>(List<T> enumEntries, String? name) {
+  T toEnumEntry<T>(List<T> enumEntries, String name) {
     for (T entry in enumEntries) {
       if (entry.toString() == name) {
         return entry;
@@ -121,7 +122,7 @@ String addServiceExtensions() {
     final groupName = parameters['groupName'];
 
     final result = instance._nodeToJson(
-      WidgetsBinding.instance.renderViewElement?.toDiagnosticsNode(),
+      WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(),
       InspectorSerializationDelegate(
         groupName: groupName,
         subtreeDepth: 1000000,
@@ -154,7 +155,7 @@ String addServiceExtensions() {
     final id = parameters['id'];
     final subtreeDepth = int.parse(parameters['subtreeDepth'] as String);
     final groupName = parameters['groupName'];
-    Map<String, dynamic>? result = <String, dynamic>{};
+    var result = <String, dynamic>{};
     final instance = WidgetInspectorService.instance;
     final root = instance.toObject(id);
     if (root == null) {
@@ -257,15 +258,15 @@ String addServiceExtensions() {
           return additionalJson;
         },
       ),
-    ) as Map<String, dynamic>?;
+    ) as Map<String, dynamic>;
     return Future.value(<String, dynamic>{
       'result': result,
     });
   }
 
   Future<Map<String, dynamic>> setFlexFit(Map<String, String> parameters) {
-    final String? id = parameters['id'] as String?;
-    final parameter = parameters['flexFit'] as String?;
+    final String id = parameters['id'] as String;
+    final parameter = parameters['flexFit'] as String;
     final FlexFit flexFit = toEnumEntry<FlexFit>(FlexFit.values, parameter);
     final dynamic object = WidgetInspectorService.instance.toObject(id);
     bool succeed = false;
@@ -284,9 +285,9 @@ String addServiceExtensions() {
   }
 
   Future<Map<String, dynamic>> setFlexFactor(Map<String, String> parameters) {
-    final String? id = parameters['id'] as String?;
-    final String? flexFactor = parameters['flexFactor'] as String?;
-    final factor = flexFactor == 'null' ? null : int.parse(flexFactor!);
+    final String id = parameters['id'] as String;
+    final String flexFactor = parameters['flexFactor'] as String;
+    final factor = flexFactor == 'null' ? null : int.parse(flexFactor);
     final dynamic object = WidgetInspectorService.instance.toObject(id);
     bool succeed = false;
     if (object != null) {
@@ -304,15 +305,15 @@ String addServiceExtensions() {
   Future<Map<String, dynamic>> setFlexProperties(
     Map<String, String> parameters,
   ) {
-    final String? id = parameters['id'] as String?;
+    final String id = parameters['id'] as String;
     final MainAxisAlignment mainAxisAlignment = toEnumEntry<MainAxisAlignment>(
       MainAxisAlignment.values,
-      parameters['mainAxisAlignment'] as String?,
+      parameters['mainAxisAlignment'] as String,
     );
     final CrossAxisAlignment crossAxisAlignment =
         toEnumEntry<CrossAxisAlignment>(
       CrossAxisAlignment.values,
-      parameters['crossAxisAlignment'] as String?,
+      parameters['crossAxisAlignment'] as String,
     );
     final dynamic object = WidgetInspectorService.instance.toObject(id);
     bool succeed = false;
