@@ -12,6 +12,7 @@ import '../../charts/flame_chart.dart';
 import '../../primitives/trace_event.dart';
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
+import '../../shared/globals.dart';
 import '../../ui/search.dart';
 import 'cpu_profile_transformer.dart';
 
@@ -284,10 +285,10 @@ class CpuProfileData {
   /// [isolateId] The isolate id which was used to get the [cpuSamples].
   /// This will be used to tag the stack frames and trace events.
   /// [cpuSamples] The CPU samples that will be used to generate the [CpuProfileData]
-  factory CpuProfileData.generateFromCpuSamples({
+  static Future<CpuProfileData> generateFromCpuSamples({
     required String isolateId,
     required vm_service.CpuSamples cpuSamples,
-  }) {
+  }) async {
     // The root ID is associated with an artificial frame / node that is the root
     // of all stacks, regardless of entrypoint. This should never be seen in the
     // final output from this method.
@@ -325,7 +326,7 @@ class CpuProfileData {
           CpuProfileData.categoryKey: 'Dart',
           CpuProfileData.nameKey: nameForStackFrame(current),
           CpuProfileData.resolvedUrlKey: current.resolvedUrl,
-          CpuProfileData.sourceLine: current.sourceLine,
+          CpuProfileData.sourceLineKey: current.sourceLine,
           if (parent != null && parent.frameId != 0)
             CpuProfileData.parentIdKey: '$isolateId-${parent.frameId}',
         };
@@ -365,49 +366,43 @@ class CpuProfileData {
     return CpuProfileData.parse(traceObject);
   }
 
-  /// Helper function for fetching simplified package urls for each of
-  /// the [resolvedUrls] then mapping them to the [traceObject].
+  /// Helper function for determining and updating the
+  /// [CpuProfileData.processedUrlKey] entry for each stack frame in
+  /// [traceObject].
   ///
-  /// [isolateId] The id which is passed to the getIsolate RPC to load this isolate.
-  /// [resolvedUrlMap] A map of where each key is a resolved url that has been extracted from the [traceObject]'s
-  /// stack frames. The values of the map will be overriden in this helper.
-  /// This is passed as a parameter since [resolvedUrls] can be extracted
-  /// while [traceObject] is being created.
-  /// [traceObject] A map where the CpuProfileData for each frame is stored.
-  Future<void> _addProcessedUrlsToTraceObject(
+  /// [isolateId] The id which is passed to the getIsolate RPC to load this
+  /// isolate.
+  /// [traceObject] A map where the cpu profile data for each frame is stored.
+  static Future<void> _addProcessedUrlsToTraceObject(
     String isolateId,
     Map<String, dynamic> traceObject,
   ) async {
-    final resolvedUrls = _resolvedUrlMap.keys
-        .where((resolvedUrl) => _resolvedUrlMap[resolvedUrl] == null)
-        .toList();
-    final packageUris =
-        (await _vmService.lookupPackageUris(isolateId, resolvedUrls)).uris;
-
-    if (packageUris != null) {
-      for (var i = 0; i < resolvedUrls.length; i++) {
-        final resolvedUrl = resolvedUrls[i];
-        final packageUri = packageUris[i];
-        if (packageUri != null &&
-            packageUri.isNotEmpty &&
-            resolvedUrl.isNotEmpty) {
-          _resolvedUrlMap[resolvedUrl] = packageUri;
+    final stackFrames = traceObject[CpuProfileData.stackFramesKey]
+        .values
+        .cast<Map<String, dynamic>>();
+    final stackFramesWaitingOnPackageUri = <Map<String, dynamic>>[];
+    for (final stackFrameJson in stackFrames) {
+      final resolvedUrl =
+          stackFrameJson[CpuProfileData.resolvedUrlKey] as String?;
+      if (resolvedUrl != null && resolvedUrl.isNotEmpty) {
+        final packageUri =
+            serviceManager.resolvedUriManager.getPackageUri(resolvedUrl);
+        if (packageUri != null) {
+          stackFrameJson[CpuProfileData.processedUrlKey] = packageUri;
+        } else {
+          stackFramesWaitingOnPackageUri.add(stackFrameJson);
         }
       }
+    }
 
-      final stackFrames =
-          (traceObject[CpuProfileData.stackFramesKey] as Map<String, dynamic>)
-              .values
-              .cast<Map<String, dynamic>>();
-      for (final stackFrameJson in stackFrames) {
-        final resolvedUrl =
-            stackFrameJson[CpuProfileData.resolvedUrlKey] as String?;
-        if (resolvedUrl != null && resolvedUrl.isNotEmpty) {
-          final packageUrl = _resolvedUrlMap[resolvedUrl];
-          if (packageUrl != null && packageUrl.isNotEmpty) {
-            stackFrameJson[CpuProfileData.processedUrlKey] = packageUrl;
-          }
-        }
+    await serviceManager.resolvedUriManager.fetchUnknownUris(isolateId);
+
+    for (var stackFrameJson in stackFramesWaitingOnPackageUri) {
+      final resolvedUri = stackFrameJson[CpuProfileData.resolvedUrlKey];
+      final packageUri =
+          serviceManager.resolvedUriManager.getPackageUri(resolvedUri);
+      if (packageUri != null) {
+        stackFrameJson[CpuProfileData.processedUrlKey] = packageUri;
       }
     }
   }

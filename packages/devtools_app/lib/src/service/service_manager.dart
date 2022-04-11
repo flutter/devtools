@@ -44,6 +44,8 @@ class ServiceConnectionManager {
     _serviceExtensionManager = ServiceExtensionManager(isolateManager);
   }
 
+  final ResolvedUriManager resolvedUriManager = ResolvedUriManager();
+
   final StreamController<VmServiceWrapper> _connectionAvailableController =
       StreamController<VmServiceWrapper>.broadcast();
 
@@ -493,6 +495,36 @@ class ServiceConnectionManager {
     assert(_serviceAvailable.isCompleted);
     await whenValueNonNull(isolateManager.mainIsolate);
     return libraryUriAvailableNow(uri);
+  }
+}
+
+class ResolvedUriManager {
+  final _resolvedUrlMap = <String, String?>{};
+  final _unknownUris = <String>[];
+  VmServiceWrapper? service;
+
+  Future<void> fetchUnknownUris(
+    String isolateId,
+  ) async {
+    final packageUris = (await serviceManager.service!
+            .lookupPackageUris(isolateId, _unknownUris))
+        .uris;
+    if (packageUris != null) {
+      for (var i = 0; i < _unknownUris.length; i++) {
+        final unknownUri = _unknownUris[i];
+        final resolvedUri = packageUris[i];
+        _resolvedUrlMap[unknownUri] = resolvedUri!;
+      }
+      _unknownUris.clear();
+    }
+  }
+
+  String? getPackageUri(String uri) {
+    final packageUri = _resolvedUrlMap[uri];
+    if (packageUri == null) {
+      _unknownUris.add(uri);
+    }
+    return packageUri;
   }
 }
 

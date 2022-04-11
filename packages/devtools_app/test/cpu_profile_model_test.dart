@@ -84,8 +84,9 @@ void main() {
       expect(cpuSamples.toJson(), equals(goldenCpuSamplesJson));
     });
 
-    test('converts golden samples to golden cpu profile data', () {
-      final generatedCpuProfileData = CpuProfileData.generateFromCpuSamples(
+    test('converts golden samples to golden cpu profile data', () async {
+      final generatedCpuProfileData =
+          await CpuProfileData.generateFromCpuSamples(
         isolateId: goldenSamplesIsolate,
         cpuSamples: CpuSamples.parse(goldenCpuSamplesJson)!,
       );
@@ -96,7 +97,8 @@ void main() {
       final id = '140357727781376-12';
       final profileData = Map<String, dynamic>.from(goldenCpuProfileDataJson);
       profileData['stackFrames'] = Map<String, Map<String, String>>.from(
-          {'140357727781376-12': goldenCpuProfileStackFrames[id]});
+        {'140357727781376-12': goldenCpuProfileStackFrames[id]},
+      );
       profileData['stackFrames'][id].remove('processedUrl');
       final parsedProfileData = CpuProfileData.parse(profileData);
       final stackFrames = (parsedProfileData
