@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -86,16 +84,16 @@ class DevToolsApp extends StatefulWidget {
 class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
 
-  bool get isDarkThemeEnabled => _isDarkThemeEnabled;
-  bool _isDarkThemeEnabled;
+  bool? get isDarkThemeEnabled => _isDarkThemeEnabled;
+  bool? _isDarkThemeEnabled;
 
-  bool get vmDeveloperModeEnabled => _vmDeveloperModeEnabled;
-  bool _vmDeveloperModeEnabled;
+  bool? get vmDeveloperModeEnabled => _vmDeveloperModeEnabled;
+  bool? _vmDeveloperModeEnabled;
 
-  bool get denseModeEnabled => _denseModeEnabled;
-  bool _denseModeEnabled;
+  bool? get denseModeEnabled => _denseModeEnabled;
+  bool? _denseModeEnabled;
 
-  ReleaseNotesController releaseNotesController;
+  late ReleaseNotesController releaseNotesController;
 
   @override
   void initState() {
@@ -140,10 +138,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   }
 
   /// Gets the page for a given page/path and args.
-  Page _getPage(BuildContext context, String page, Map<String, String> args) {
+  Page _getPage(BuildContext context, String? page, Map<String, String?> args) {
     // Provide the appropriate page route.
     if (pages.containsKey(page)) {
-      Widget widget = pages[page](
+      Widget widget = pages[page!]!(
         context,
         page,
         args,
@@ -151,7 +149,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       assert(
         () {
           widget = _AlternateCheckedModeBanner(
-            builder: (context) => pages[page](
+            builder: (context) => pages[page]!(
               context,
               page,
               args,
@@ -175,8 +173,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   Widget _buildTabbedPage(
     BuildContext context,
-    String page,
-    Map<String, String> params,
+    String? page,
+    Map<String, String?> params,
   ) {
     final vmServiceUri = params['uri'];
 
@@ -215,7 +213,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                 .where((p) => embed && page != null ? p.screenId == page : true)
                 .where((p) => !hide.contains(p.screenId))
                 .toList();
-            if (tabs.isEmpty) return child;
+            if (tabs.isEmpty) return child!;
             return _providedControllers(
               child: DevToolsScaffold(
                 embed: embed,
@@ -224,7 +222,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                 tabs: tabs,
                 actions: [
                   // TODO(https://github.com/flutter/devtools/issues/1941)
-                  if (serviceManager.connectedApp.isFlutterAppNow) ...[
+                  if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
                     HotReloadButton(),
                     HotRestartButton(),
                   ],
@@ -282,7 +280,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     };
   }
 
-  Map<String, UrlParametersBuilder> _routes;
+  Map<String, UrlParametersBuilder>? _routes;
 
   void _clearCachedRoutes() {
     _routes = null;
@@ -290,7 +288,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   List<Screen> _visibleScreens() => _screens.where(shouldShowScreen).toList();
 
-  Widget _providedControllers({@required Widget child, bool offline = false}) {
+  Widget _providedControllers({required Widget child, bool offline = false}) {
     final _providers = widget.screens
         .where(
           (s) => s.providesController && (offline ? s.supportsOffline : true),
@@ -309,7 +307,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       theme: themeFor(
-        isDarkTheme: isDarkThemeEnabled,
+        isDarkTheme: isDarkThemeEnabled!,
         ideTheme: ideTheme,
         theme: Theme.of(context),
       ),
@@ -318,7 +316,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         child: Notifications(
           child: ReleaseNotesViewer(
             releaseNotesController: releaseNotesController,
-            child: child,
+            child: child!,
           ),
         ),
       ),
@@ -355,7 +353,7 @@ class DevToolsScreen<C> {
   ///
   /// If [createController] and [controller] are both null, [screen] will be
   /// responsible for creating and maintaining its own controller.
-  final C Function() createController;
+  final C Function()? createController;
 
   /// A provided controller for this screen, if non-null.
   ///
@@ -365,7 +363,7 @@ class DevToolsScreen<C> {
   ///
   /// If [createController] and [controller] are both null, [screen] will be
   /// responsible for creating and maintaining its own controller.
-  final C controller;
+  final C? controller;
 
   /// Returns true if a controller was provided for [screen]. If false,
   /// [screen] is responsible for creating and maintaining its own controller.
@@ -376,15 +374,15 @@ class DevToolsScreen<C> {
   /// Defaults to false.
   final bool supportsOffline;
 
-  Provider<C> get controllerProvider {
+  Provider<C?> get controllerProvider {
     assert(
       (createController != null && controller == null) ||
           (createController == null && controller != null),
     );
     if (controller != null) {
-      return Provider<C>.value(value: controller);
+      return Provider<C?>.value(value: controller);
     }
-    return Provider<C>(create: (_) => createController());
+    return Provider<C>(create: (_) => createController!());
   }
 }
 
@@ -392,8 +390,8 @@ class DevToolsScreen<C> {
 /// args.
 typedef UrlParametersBuilder = Widget Function(
   BuildContext,
-  String,
-  Map<String, String>,
+  String?,
+  Map<String, String?>,
 );
 
 /// Displays the checked mode banner in the bottom end corner instead of the
@@ -402,8 +400,8 @@ typedef UrlParametersBuilder = Widget Function(
 /// This avoids issues with widgets in the appbar being hidden by the banner
 /// in a web or desktop app.
 class _AlternateCheckedModeBanner extends StatelessWidget {
-  const _AlternateCheckedModeBanner({Key key, this.builder}) : super(key: key);
-  final WidgetBuilder builder;
+  const _AlternateCheckedModeBanner({Key? key, this.builder}) : super(key: key);
+  final WidgetBuilder? builder;
 
   @override
   Widget build(BuildContext context) {
@@ -412,7 +410,7 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
       textDirection: TextDirection.ltr,
       location: BannerLocation.topStart,
       child: Builder(
-        builder: builder,
+        builder: builder!,
       ),
     );
   }
@@ -599,18 +597,18 @@ class SettingsDialog extends StatelessWidget {
 
 class CheckboxSetting extends StatelessWidget {
   const CheckboxSetting({
-    Key key,
-    @required this.label,
-    @required this.listenable,
-    @required this.toggle,
-    @required this.gaItem,
+    Key? key,
+    required this.label,
+    required this.listenable,
+    required this.toggle,
+    required this.gaItem,
   }) : super(key: key);
 
   final Text label;
 
   final ValueListenable<bool> listenable;
 
-  final Function(bool) toggle;
+  final Function(bool?) toggle;
 
   final String gaItem;
 
@@ -632,10 +630,10 @@ class CheckboxSetting extends StatelessWidget {
     );
   }
 
-  void toggleSetting(bool newValue) {
+  void toggleSetting(bool? newValue) {
     ga.select(
       analytics_constants.settingsDialog,
-      '$gaItem-${newValue ? 'enabled' : 'disabled'}',
+      '$gaItem-${newValue! ? 'enabled' : 'disabled'}',
     );
     toggle(newValue);
   }
