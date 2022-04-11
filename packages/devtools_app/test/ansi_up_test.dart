@@ -181,9 +181,10 @@ void main() {
           .thenReturn(ListValueNotifier<LogData>([]));
 
       fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp.isFlutterWebAppNow)
+      when(fakeServiceManager.connectedApp!.isFlutterWebAppNow)
           .thenReturn(false);
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp!.isProfileBuildNow)
+          .thenReturn(false);
       // TODO(polinach): when we start supporting browser tests, uncomment
       // and fix the mock configuration.
       // See https://github.com/flutter/devtools/issues/3616.
@@ -273,8 +274,9 @@ void main() {
       // TODO(polinach): remove unnecessary setup steps after fixing
       // https://github.com/flutter/devtools/issues/3616.
       fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp!.isProfileBuildNow)
+          .thenReturn(false);
+      when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       fakeServiceManager.consoleService.ensureServiceInitialized();
 

@@ -33,8 +33,8 @@ void main() {
         availableServices: availableServices,
       );
       when(fakeServiceManager.vm.version).thenReturn('1.9.1');
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isRunningOnDartVM).thenReturn(true);
+      when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp!.isRunningOnDartVM).thenReturn(true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
     }
@@ -47,11 +47,12 @@ void main() {
 
     testWidgetsWithWindowSize('builds dialog dart web', windowSize,
         (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(true);
-      when(fakeServiceManager.connectedApp.isRunningOnDartVM).thenReturn(false);
+      when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(true);
+      when(fakeServiceManager.connectedApp!.isRunningOnDartVM)
+          .thenReturn(false);
 
       deviceDialog = DeviceDialog(
-        connectedApp: fakeServiceManager.connectedApp,
+        connectedApp: fakeServiceManager.connectedApp!,
         // The parameter is required.
         // ignore: avoid_redundant_argument_values
         flutterVersion: null,
@@ -69,14 +70,14 @@ void main() {
 
     testWidgetsWithWindowSize('builds dialog flutter', windowSize,
         (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isRunningOnDartVM).thenReturn(true);
+      when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp!.isRunningOnDartVM).thenReturn(true);
       mockIsFlutterApp(fakeServiceManager.connectedApp as MockConnectedApp);
       final flutterVersion =
           FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!);
 
       deviceDialog = DeviceDialog(
-        connectedApp: fakeServiceManager.connectedApp,
+        connectedApp: fakeServiceManager.connectedApp!,
         flutterVersion: flutterVersion,
       );
 
@@ -103,8 +104,8 @@ void main() {
         availableServices: availableServices,
       );
       when(fakeServiceManager.vm.version).thenReturn('1.9.1');
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isRunningOnDartVM).thenReturn(true);
+      when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp!.isRunningOnDartVM).thenReturn(true);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
     }
 
@@ -117,8 +118,8 @@ void main() {
     });
 
     testWidgets('builds dialog', (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp.isRunningOnDartVM).thenReturn(true);
+      when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+      when(fakeServiceManager.connectedApp!.isRunningOnDartVM).thenReturn(true);
       mockIsFlutterApp(fakeServiceManager.connectedApp as MockConnectedApp);
 
       await tester.pumpWidget(wrap(vmFlagsDialog));
