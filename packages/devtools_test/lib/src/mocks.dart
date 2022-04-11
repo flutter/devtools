@@ -122,7 +122,8 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   VmServiceWrapper? service;
 
   @override
-  Future<VmService> onServiceAvailable = Future.value();
+  Future<VmService> onServiceAvailable =
+      Future.value(VmService(const Stream.empty(), (_) {}));
 
   @override
   bool get isServiceAvailable => hasConnection;
@@ -235,7 +236,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
       ValueNotifier(const ConnectedState(false));
 
   void changeState(bool value, {bool manual = false}) {
-    hasConnection = value ?? false;
+    hasConnection = value;
     _connectedState.value =
         ConnectedState(value, userInitiatedConnectionState: manual);
   }
@@ -561,7 +562,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Future<Success> clearHttpProfile(String isolateId) {
-    _httpProfile?.requests?.clear();
+    _httpProfile?.requests.clear();
     return Future.value(Success());
   }
 
@@ -929,7 +930,7 @@ class FakeServiceExtensionManager extends Fake
               : ServiceExtensionState(enabled: false, value: null),
         );
       },
-    )!;
+    );
   }
 
   Future<void> _restoreExtensionFromDevice(String name) async {
