@@ -44,7 +44,7 @@ void main() {
     });
 
     final fakeServiceManager = FakeServiceManager(
-      service: VmServiceWrapper(service!, Uri()),
+      service: VmServiceWrapper(service, Uri()),
     );
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     VmServicePrivate.enablePrivateRpcs = false;
