@@ -71,6 +71,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     VmServiceWrapper service,
     this.hasConnection = true,
     this.connectedAppInitialized = true,
+    this.hasService = true,
     this.availableServices = const [],
     this.availableLibraries = const [],
   }) : service = service ?? createFakeService() {
@@ -98,6 +99,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     SamplesMemoryJson memoryData,
     AllocationMemoryJson allocationData,
     CpuProfileData cpuProfileData,
+    CpuSamples cpuSamples,
   }) =>
       FakeVmService(
         _flagManager,
@@ -106,7 +108,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
         httpProfile,
         memoryData,
         allocationData,
-        cpuProfileData,
+        cpuSamples,
       );
 
   final List<String> availableServices;
@@ -141,6 +143,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   bool hasConnection;
+
+  @override
+  bool hasService;
 
   @override
   bool connectedAppInitialized;
@@ -256,19 +261,22 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     this._httpProfile,
     this._memoryData,
     this._allocationData,
-    CpuProfileData cpuProfileData,
+    CpuSamples cpuSamples,
   )   : _startingSockets = _socketProfile?.sockets ?? [],
         _startingRequests = _httpProfile?.requests ?? [],
-        cpuProfileData = cpuProfileData ??
-            CpuProfileData.parse(<String, dynamic>{
-              'type': '_CpuProfileTimeline',
+        cpuSamples = cpuSamples ??
+            CpuSamples.parse({
               'samplePeriod': 50,
+              'maxStackDepth': 12,
               'sampleCount': 0,
-              'stackDepth': 128,
               'timeOriginMicros': 47377796685,
               'timeExtentMicros': 3000,
-              'traceEvents': <Map<String, dynamic>>[],
+              'pid': 54321,
+              'functions': [],
+              'samples': [],
             });
+
+  CpuSamples cpuSamples;
 
   /// Specifies the return value of `httpEnableTimelineLogging`.
   bool httpEnableTimelineLoggingResult = true;
@@ -290,7 +298,6 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   final List<HttpProfileRequest> _startingRequests;
   final SamplesMemoryJson _memoryData;
   final AllocationMemoryJson _allocationData;
-  final CpuProfileData cpuProfileData;
 
   final _flags = <String, dynamic>{
     'flags': <Flag>[
@@ -322,6 +329,14 @@ class FakeVmService extends Fake implements VmServiceWrapper {
       ),
     ],
   };
+  @override
+  Future<CpuSamples> getCpuSamples(
+    String isolateId,
+    int timeOriginMicros,
+    int timeExtentMicros,
+  ) {
+    return Future.value(cpuSamples);
+  }
 
   @override
   Uri get connectedUri => _connectedUri;
@@ -554,15 +569,6 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<CpuProfileData> getCpuProfileTimeline(
-    String isolateId,
-    int origin,
-    int extent,
-  ) {
-    return Future.value(cpuProfileData);
-  }
-
-  @override
   Future<Success> clearCpuSamples(String isolateId) => Future.value(Success());
 
   @override
@@ -668,6 +674,8 @@ class MockVmService extends Mock implements VmServiceWrapper {
 class MockIsolate extends Mock implements Isolate {}
 
 class MockObj extends Mock implements Obj {}
+
+class MockCpuSamples extends Mock implements CpuSamples {}
 
 // TODO(kenz): make it easier to mock a connected app by adding a constructor
 // that will override the public getters on the class (e.g. isFlutterAppNow,
@@ -1480,12 +1488,14 @@ final mockScriptRef = ScriptRef(
   id: 'test-script-long-lines',
 );
 
+final mockSyntaxHighlighter = SyntaxHighlighter.withGrammar(
+  grammar: mockGrammar,
+  source: mockScript.source,
+);
+
 final mockParsedScript = ParsedScript(
   script: mockScript,
-  highlighter: SyntaxHighlighter.withGrammar(
-    grammar: mockGrammar,
-    source: mockScript.source,
-  ),
+  highlighter: mockSyntaxHighlighter,
   executableLines: <int>{},
 );
 

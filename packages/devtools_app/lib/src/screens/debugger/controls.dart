@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'package:codicon/codicon.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
@@ -16,7 +14,7 @@ import '../../ui/label.dart';
 import 'debugger_controller.dart';
 
 class DebuggingControls extends StatefulWidget {
-  const DebuggingControls({Key key}) : super(key: key);
+  const DebuggingControls({Key? key}) : super(key: key);
 
   @override
   _DebuggingControlsState createState() => _DebuggingControlsState();
@@ -24,12 +22,13 @@ class DebuggingControls extends StatefulWidget {
 
 class _DebuggingControlsState extends State<DebuggingControls>
     with AutoDisposeMixin {
-  DebuggerController controller;
+  DebuggerController get controller => _controller!;
+  DebuggerController? _controller;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    controller = Provider.of<DebuggerController>(context);
+    _controller = Provider.of<DebuggerController>(context);
     addAutoDisposeListener(controller.isPaused);
     addAutoDisposeListener(controller.resuming);
     addAutoDisposeListener(controller.stackFramesWithLocation);
@@ -59,8 +58,8 @@ class _DebuggingControlsState extends State<DebuggingControls>
   }
 
   Widget _pauseAndResumeButtons({
-    @required bool isPaused,
-    @required bool resuming,
+    required bool isPaused,
+    required bool resuming,
   }) {
     final isSystemIsolate = controller.isSystemIsolate;
     return RoundedOutlinedBorder(
@@ -89,7 +88,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
     );
   }
 
-  Widget _stepButtons({@required bool canStep}) {
+  Widget _stepButtons({required bool canStep}) {
     return RoundedOutlinedBorder(
       child: Row(
         children: [
@@ -118,7 +117,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
   }
 
   Widget _librariesButton() {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<bool>(
       valueListenable: controller.fileExplorerVisible,
       builder: (context, visible, _) {
         return RoundedOutlinedBorder(
@@ -138,24 +137,24 @@ class _DebuggingControlsState extends State<DebuggingControls>
 
 class BreakOnExceptionsControl extends StatelessWidget {
   const BreakOnExceptionsControl({
-    Key key,
-    @required this.controller,
+    Key? key,
+    required this.controller,
   }) : super(key: key);
 
   final DebuggerController controller;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<String?>(
       valueListenable: controller.exceptionPauseMode,
-      builder: (BuildContext context, String modeId, _) {
+      builder: (BuildContext context, modeId, _) {
         return RoundedDropDownButton<ExceptionMode>(
           value: ExceptionMode.from(modeId),
           // Cannot set exception pause mode for system isolates.
           onChanged: controller.isSystemIsolate
               ? null
-              : (ExceptionMode mode) {
-                  controller.setIsolatePauseMode(mode.id);
+              : (ExceptionMode? mode) {
+                  controller.setIsolatePauseMode(mode!.id);
                 },
           isDense: true,
           items: [
@@ -201,7 +200,7 @@ class ExceptionMode {
     ),
   ];
 
-  static ExceptionMode from(String id) {
+  static ExceptionMode from(String? id) {
     return modes.singleWhere(
       (mode) => mode.id == id,
       orElse: () => modes.first,
@@ -216,15 +215,15 @@ class ExceptionMode {
 @visibleForTesting
 class DebuggerButton extends StatelessWidget {
   const DebuggerButton({
-    @required this.title,
-    @required this.icon,
-    @required this.onPressed,
+    required this.title,
+    required this.icon,
+    required this.onPressed,
     this.autofocus = false,
   });
 
   final String title;
   final IconData icon;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final bool autofocus;
 
   @override

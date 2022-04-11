@@ -13,10 +13,15 @@ extension CpuProfilerExtension on VmServiceWrapper {
     required int startMicros,
     required int extentMicros,
   }) async {
-    return await serviceManager.service!.getCpuProfileTimeline(
-      serviceManager.isolateManager.selectedIsolate.value!.id!,
+    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
+    final cpuSamples = await serviceManager.service!.getCpuSamples(
+      isolateId,
       startMicros,
       extentMicros,
+    );
+    return CpuProfileData.generateFromCpuSamples(
+      isolateId: isolateId,
+      cpuSamples: cpuSamples,
     );
   }
 
