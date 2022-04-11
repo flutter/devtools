@@ -6,6 +6,7 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../charts/flame_chart.dart';
 import '../../primitives/trace_event.dart';
@@ -275,6 +276,89 @@ class CpuProfileData {
   }
 
   factory CpuProfileData.empty() => CpuProfileData.parse({});
+
+  /// Generates [CpuProfileData] from the provided [CpuSamples].
+  ///
+  /// [isolateId] The isolate id which was used to get the [cpuSamples].
+  /// This will be used to tag the stack frames and trace events.
+  /// [cpuSamples] The CPU samples that will be used to generate the [CpuProfileData]
+  factory CpuProfileData.generateFromCpuSamples({
+    required String isolateId,
+    required vm_service.CpuSamples cpuSamples,
+  }) {
+    // The root ID is associated with an artificial frame / node that is the root
+    // of all stacks, regardless of entrypoint. This should never be seen in the
+    // final output from this method.
+    const int kRootId = 0;
+    int nextId = kRootId;
+    final traceObject = <String, dynamic>{
+      CpuProfileData.sampleCountKey: cpuSamples.sampleCount,
+      CpuProfileData.samplePeriodKey: cpuSamples.samplePeriod,
+      CpuProfileData.stackDepthKey: cpuSamples.maxStackDepth,
+      CpuProfileData.timeOriginKey: cpuSamples.timeOriginMicros,
+      CpuProfileData.timeExtentKey: cpuSamples.timeExtentMicros,
+      CpuProfileData.stackFramesKey: {},
+      CpuProfileData.traceEventsKey: [],
+    };
+
+    String? nameForStackFrame(_CpuProfileTimelineTree current) {
+      final className = current.className;
+      if (className != null) {
+        return '$className.${current.name}';
+      }
+      return current.name;
+    }
+
+    void processStackFrame({
+      required _CpuProfileTimelineTree current,
+      required _CpuProfileTimelineTree? parent,
+    }) {
+      final id = nextId++;
+      current.frameId = id;
+
+      // Skip the root.
+      if (id != kRootId) {
+        final key = '$isolateId-$id';
+        traceObject[CpuProfileData.stackFramesKey][key] = {
+          CpuProfileData.categoryKey: 'Dart',
+          CpuProfileData.nameKey: nameForStackFrame(current),
+          CpuProfileData.resolvedUrlKey: current.resolvedUrl,
+          CpuProfileData.sourceLine: current.sourceLine,
+          if (parent != null && parent.frameId != 0)
+            CpuProfileData.parentIdKey: '$isolateId-${parent.frameId}',
+        };
+      }
+      for (final child in current.children) {
+        processStackFrame(current: child, parent: current);
+      }
+    }
+
+    final root = _CpuProfileTimelineTree.fromCpuSamples(cpuSamples);
+    processStackFrame(current: root, parent: null);
+
+    // Build the trace events.
+    for (final sample in cpuSamples.samples ?? <vm_service.CpuSample>[]) {
+      final tree = _CpuProfileTimelineTree.getTreeFromSample(sample)!;
+      // Skip the root.
+      if (tree.frameId == kRootId) {
+        continue;
+      }
+      traceObject[CpuProfileData.traceEventsKey].add({
+        'ph': 'P', // kind = sample event
+        'name': '', // Blank to keep about:tracing happy
+        'pid': cpuSamples.pid,
+        'tid': sample.tid,
+        'ts': sample.timestamp,
+        'cat': 'Dart',
+        CpuProfileData.stackFrameIdKey: '$isolateId-${tree.frameId}',
+        'args': {
+          if (sample.userTag != null) 'userTag': sample.userTag,
+          if (sample.vmTag != null) 'vmTag': sample.vmTag,
+        },
+      });
+    }
+    return CpuProfileData.parse(traceObject);
+  }
 
   static const rootId = 'cpuProfileRoot';
 
@@ -814,5 +898,89 @@ class CpuProfileStore {
   void clear() {
     _profilesByTime.clear();
     _profilesByLabel.clear();
+  }
+}
+
+class _CpuProfileTimelineTree {
+  factory _CpuProfileTimelineTree.fromCpuSamples(
+    vm_service.CpuSamples cpuSamples,
+  ) {
+    final root = _CpuProfileTimelineTree._fromIndex(cpuSamples, kRootIndex);
+    _CpuProfileTimelineTree current;
+    // TODO(bkonyi): handle truncated?
+    for (final sample in cpuSamples.samples ?? []) {
+      current = root;
+      // Build an inclusive trie.
+      for (final index in sample.stack!.reversed) {
+        current = current._getChild(index);
+      }
+      _timelineTreeExpando[sample] = current;
+    }
+    return root;
+  }
+
+  _CpuProfileTimelineTree._fromIndex(this.samples, this.index);
+
+  static final _timelineTreeExpando = Expando<_CpuProfileTimelineTree>();
+  static const kRootIndex = -1;
+  static const kNoFrameId = -1;
+  final vm_service.CpuSamples samples;
+  final int index;
+  int frameId = kNoFrameId;
+
+  String? get name => samples.functions![index].function.name;
+
+  String? get className {
+    final function = samples.functions![index].function;
+    if (function is vm_service.FuncRef) {
+      final owner = function.owner;
+      if (owner is vm_service.ClassRef) {
+        return owner.name;
+      }
+    }
+    return null;
+  }
+
+  String? get resolvedUrl => samples.functions![index].resolvedUrl;
+
+  int? get sourceLine {
+    final function = samples.functions![index].function;
+    try {
+      return function.location?.line;
+    } catch (_) {
+      // Fail gracefully if `function` has no getter `location` (for example, if
+      // the function is an instance of [NativeFunction]) or generally if
+      // `function.location.line` throws an exception.
+      return null;
+    }
+  }
+
+  final children = <_CpuProfileTimelineTree>[];
+
+  static _CpuProfileTimelineTree? getTreeFromSample(
+    vm_service.CpuSample sample,
+  ) =>
+      _timelineTreeExpando[sample];
+
+  _CpuProfileTimelineTree _getChild(int index) {
+    final length = children.length;
+    int i;
+    for (i = 0; i < length; ++i) {
+      final child = children[i];
+      final childIndex = child.index;
+      if (childIndex == index) {
+        return child;
+      }
+      if (childIndex > index) {
+        break;
+      }
+    }
+    final child = _CpuProfileTimelineTree._fromIndex(samples, index);
+    if (i < length) {
+      children.insert(i, child);
+    } else {
+      children.add(child);
+    }
+    return child;
   }
 }
