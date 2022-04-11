@@ -33,70 +33,92 @@ class MockErrorBadgeManager extends _i1.Mock implements _i3.ErrorBadgeManager {
   }
 
   @override
-  void vmServiceOpened(_i4.VmServiceWrapper? service) =>
-      super.noSuchMethod(Invocation.method(#vmServiceOpened, [service]),
-          returnValueForMissingStub: null);
+  void vmServiceOpened(_i4.VmServiceWrapper? service) => super.noSuchMethod(
+        Invocation.method(#vmServiceOpened, [service]),
+        returnValueForMissingStub: null,
+      );
   @override
-  void incrementBadgeCount(String? screenId) =>
-      super.noSuchMethod(Invocation.method(#incrementBadgeCount, [screenId]),
-          returnValueForMissingStub: null);
+  void incrementBadgeCount(String? screenId) => super.noSuchMethod(
+        Invocation.method(#incrementBadgeCount, [screenId]),
+        returnValueForMissingStub: null,
+      );
   @override
   void appendError(String? screenId, _i3.DevToolsError? error) =>
-      super.noSuchMethod(Invocation.method(#appendError, [screenId, error]),
-          returnValueForMissingStub: null);
+      super.noSuchMethod(
+        Invocation.method(#appendError, [screenId, error]),
+        returnValueForMissingStub: null,
+      );
   @override
   _i2.ValueListenable<int> errorCountNotifier(String? screenId) =>
-      (super.noSuchMethod(Invocation.method(#errorCountNotifier, [screenId]),
-              returnValue: _FakeValueListenable_0<int>())
-          as _i2.ValueListenable<int>);
+      (super.noSuchMethod(
+        Invocation.method(#errorCountNotifier, [screenId]),
+        returnValue: _FakeValueListenable_0<int>(),
+      ) as _i2.ValueListenable<int>);
   @override
   _i2.ValueListenable<_i5.LinkedHashMap<String, _i3.DevToolsError>>
       erroredItemsForPage(String? screenId) => (super.noSuchMethod(
-              Invocation.method(#erroredItemsForPage, [screenId]),
-              returnValue: _FakeValueListenable_0<
-                  _i5.LinkedHashMap<String, _i3.DevToolsError>>())
-          as _i2.ValueListenable<_i5.LinkedHashMap<String, _i3.DevToolsError>>);
+            Invocation.method(#erroredItemsForPage, [screenId]),
+            returnValue: _FakeValueListenable_0<
+                _i5.LinkedHashMap<String, _i3.DevToolsError>>(),
+          ) as _i2
+              .ValueListenable<_i5.LinkedHashMap<String, _i3.DevToolsError>>);
   @override
-  void clearErrors(String? screenId) =>
-      super.noSuchMethod(Invocation.method(#clearErrors, [screenId]),
-          returnValueForMissingStub: null);
+  void clearErrors(String? screenId) => super.noSuchMethod(
+        Invocation.method(#clearErrors, [screenId]),
+        returnValueForMissingStub: null,
+      );
   @override
   void filterErrors(String? screenId, bool Function(String)? isValid) =>
-      super.noSuchMethod(Invocation.method(#filterErrors, [screenId, isValid]),
-          returnValueForMissingStub: null);
+      super.noSuchMethod(
+        Invocation.method(#filterErrors, [screenId, isValid]),
+        returnValueForMissingStub: null,
+      );
   @override
   void markErrorAsRead(String? screenId, _i3.DevToolsError? error) =>
-      super.noSuchMethod(Invocation.method(#markErrorAsRead, [screenId, error]),
-          returnValueForMissingStub: null);
-  @override
-  void dispose() => super.noSuchMethod(Invocation.method(#dispose, []),
-      returnValueForMissingStub: null);
-  @override
-  void addAutoDisposeListener(_i2.Listenable? listenable,
-          [_i6.VoidCallback? listener]) =>
       super.noSuchMethod(
-          Invocation.method(#addAutoDisposeListener, [listenable, listener]),
-          returnValueForMissingStub: null);
+        Invocation.method(#markErrorAsRead, [screenId, error]),
+        returnValueForMissingStub: null,
+      );
+  @override
+  void dispose() => super.noSuchMethod(
+        Invocation.method(#dispose, []),
+        returnValueForMissingStub: null,
+      );
+  @override
+  void addAutoDisposeListener(
+    _i2.Listenable? listenable, [
+    _i6.VoidCallback? listener,
+  ]) =>
+      super.noSuchMethod(
+        Invocation.method(#addAutoDisposeListener, [listenable, listener]),
+        returnValueForMissingStub: null,
+      );
   @override
   void autoDisposeStreamSubscription(
-          _i7.StreamSubscription<dynamic>? subscription) =>
+    _i7.StreamSubscription<dynamic>? subscription,
+  ) =>
       super.noSuchMethod(
-          Invocation.method(#autoDisposeStreamSubscription, [subscription]),
-          returnValueForMissingStub: null);
+        Invocation.method(#autoDisposeStreamSubscription, [subscription]),
+        returnValueForMissingStub: null,
+      );
   @override
-  void autoDisposeFocusNode(_i8.FocusNode? node) =>
-      super.noSuchMethod(Invocation.method(#autoDisposeFocusNode, [node]),
-          returnValueForMissingStub: null);
+  void autoDisposeFocusNode(_i8.FocusNode? node) => super.noSuchMethod(
+        Invocation.method(#autoDisposeFocusNode, [node]),
+        returnValueForMissingStub: null,
+      );
   @override
-  void cancelStreamSubscriptions() =>
-      super.noSuchMethod(Invocation.method(#cancelStreamSubscriptions, []),
-          returnValueForMissingStub: null);
+  void cancelStreamSubscriptions() => super.noSuchMethod(
+        Invocation.method(#cancelStreamSubscriptions, []),
+        returnValueForMissingStub: null,
+      );
   @override
-  void cancelListeners() =>
-      super.noSuchMethod(Invocation.method(#cancelListeners, []),
-          returnValueForMissingStub: null);
+  void cancelListeners() => super.noSuchMethod(
+        Invocation.method(#cancelListeners, []),
+        returnValueForMissingStub: null,
+      );
   @override
-  void cancelFocusNodes() =>
-      super.noSuchMethod(Invocation.method(#cancelFocusNodes, []),
-          returnValueForMissingStub: null);
+  void cancelFocusNodes() => super.noSuchMethod(
+        Invocation.method(#cancelFocusNodes, []),
+        returnValueForMissingStub: null,
+      );
 }
