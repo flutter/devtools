@@ -21,6 +21,9 @@ void main() {
   test('Ensure private RPCs can only be enabled with VM Developer Mode enabled',
       () async {
     final service = MockVmServiceWrapper();
+    when(service.trackFuture(any, any)).thenAnswer(
+      (invocation) => invocation.positionalArguments[1],
+    );
     when(service.callMethod(argThat(equals('_collectAllGarbage')))).thenAnswer(
       (_) => Future.value(Success()),
     );
