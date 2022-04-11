@@ -84,14 +84,14 @@ class DevToolsApp extends StatefulWidget {
 class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
 
-  bool? get isDarkThemeEnabled => _isDarkThemeEnabled;
-  bool? _isDarkThemeEnabled;
+  bool get isDarkThemeEnabled => _isDarkThemeEnabled;
+  bool _isDarkThemeEnabled = true;
 
-  bool? get vmDeveloperModeEnabled => _vmDeveloperModeEnabled;
-  bool? _vmDeveloperModeEnabled;
+  bool get vmDeveloperModeEnabled => _vmDeveloperModeEnabled;
+  bool _vmDeveloperModeEnabled = false;
 
-  bool? get denseModeEnabled => _denseModeEnabled;
-  bool? _denseModeEnabled;
+  bool get denseModeEnabled => _denseModeEnabled;
+  bool _denseModeEnabled = false;
 
   late ReleaseNotesController releaseNotesController;
 
@@ -307,7 +307,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       theme: themeFor(
-        isDarkTheme: isDarkThemeEnabled!,
+        isDarkTheme: isDarkThemeEnabled,
         ideTheme: ideTheme,
         theme: Theme.of(context),
       ),
