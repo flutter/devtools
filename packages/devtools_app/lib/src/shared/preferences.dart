@@ -43,18 +43,18 @@ class PreferencesController {
   }
 
   /// Change the value for the dark mode setting.
-  void toggleDarkModeTheme(bool? useDarkMode) {
-    _darkModeTheme.value = useDarkMode == true;
+  void toggleDarkModeTheme(bool useDarkMode) {
+    _darkModeTheme.value = useDarkMode;
   }
 
   /// Change the value for the VM developer mode setting.
-  void toggleVmDeveloperMode(bool? enableVmDeveloperMode) {
-    _vmDeveloperMode.value = enableVmDeveloperMode == true;
-    VmServicePrivate.enablePrivateRpcs = enableVmDeveloperMode == true;
+  void toggleVmDeveloperMode(bool enableVmDeveloperMode) {
+    _vmDeveloperMode.value = enableVmDeveloperMode;
+    VmServicePrivate.enablePrivateRpcs = enableVmDeveloperMode;
   }
 
   /// Change the value for the dense mode setting.
-  void toggleDenseMode(bool? enableDenseMode) {
-    _denseMode.value = enableDenseMode == true;
+  void toggleDenseMode(bool enableDenseMode) {
+    _denseMode.value = enableDenseMode;
   }
 }

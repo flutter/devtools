@@ -400,8 +400,9 @@ typedef UrlParametersBuilder = Widget Function(
 /// This avoids issues with widgets in the appbar being hidden by the banner
 /// in a web or desktop app.
 class _AlternateCheckedModeBanner extends StatelessWidget {
-  const _AlternateCheckedModeBanner({Key? key, this.builder}) : super(key: key);
-  final WidgetBuilder? builder;
+  const _AlternateCheckedModeBanner({Key? key, required this.builder})
+      : super(key: key);
+  final WidgetBuilder builder;
 
   @override
   Widget build(BuildContext context) {
@@ -410,7 +411,7 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
       textDirection: TextDirection.ltr,
       location: BannerLocation.topStart,
       child: Builder(
-        builder: builder!,
+        builder: builder,
       ),
     );
   }
@@ -608,7 +609,7 @@ class CheckboxSetting extends StatelessWidget {
 
   final ValueListenable<bool> listenable;
 
-  final Function(bool?) toggle;
+  final Function(bool) toggle;
 
   final String gaItem;
 
@@ -633,9 +634,9 @@ class CheckboxSetting extends StatelessWidget {
   void toggleSetting(bool? newValue) {
     ga.select(
       analytics_constants.settingsDialog,
-      '$gaItem-${newValue! ? 'enabled' : 'disabled'}',
+      '$gaItem-${newValue == true ? 'enabled' : 'disabled'}',
     );
-    toggle(newValue);
+    toggle(newValue == true);
   }
 }
 
