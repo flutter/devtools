@@ -2,21 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/provider_nodes.dart';
-// ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member, non_constant_identifier_names
 
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
 
-// ignore: import_of_legacy_library_into_null_safe
 import '../test_infra/flutter_test_driver.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import '../test_infra/flutter_test_environment.dart';
 
 Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
@@ -769,8 +766,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           final container = ProviderContainer();
           addTearDown(container.dispose);
 
-          // Counter._count
-          final counter_countSub = container.listen(
+          final _countSub = container.listen(
             instanceProvider(
               const InstancePath.fromProviderId(
                 '0',
@@ -787,7 +783,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           );
 
           await expectLater(
-            counter_countSub.read(),
+            _countSub.read(),
             completion(
               isA<NumInstance>()
                   .having((e) => e.displayString, 'displayString', '0'),
@@ -800,7 +796,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           );
 
           await expectLater(
-            counter_countSub.read(),
+            _countSub.read(),
             completion(
               isA<NumInstance>()
                   .having((e) => e.displayString, 'displayString', '1'),
