@@ -11,6 +11,7 @@ import 'dart:typed_data';
 
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/service/vm_service_wrapper.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
@@ -29,12 +30,12 @@ final isolateRef = IsolateRef(
   isSystemIsolate: false,
 );
 
-@GenerateMocks([VmService])
+@GenerateMocks([VmServiceWrapper])
 void main() {
   ServiceConnectionManager manager;
 
   setUp(() {
-    final service = MockVmService();
+    final service = MockVmServiceWrapper();
     when(service.onDebugEvent).thenAnswer((_) {
       return const Stream.empty();
     });

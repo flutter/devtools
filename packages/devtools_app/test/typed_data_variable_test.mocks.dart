@@ -4,8 +4,8 @@
 
 // @dart=2.9
 
+import 'package:devtools_app/src/service/vm_service_wrapper.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:vm_service/src/vm_service.dart' as _i2;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -17,11 +17,11 @@ import 'package:vm_service/src/vm_service.dart' as _i2;
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
 
-/// A class which mocks [VmService].
+/// A class which mocks [VmServiceWrapper].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockVmService extends _i1.Mock implements _i2.VmService {
-  MockVmService() {
+class MockVmServiceWrapper extends _i1.Mock implements _i2.VmServiceWrapper {
+  MockVmServiceWrapper() {
     _i1.throwOnMissingStub(this);
   }
 }
