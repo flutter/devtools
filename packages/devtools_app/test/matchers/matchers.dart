@@ -2,23 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: implementation_imports
+// ignore_for_file: implementation_imports, import_of_legacy_library_into_null_safe
 
 library matchers;
 
 import 'dart:io' as io;
 
-import 'package:devtools_app/src/inspector/diagnostics_node.dart';
+import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-RemoteDiagnosticsNode findNodeMatching(
-    RemoteDiagnosticsNode node, String text) {
+RemoteDiagnosticsNode? findNodeMatching(
+  RemoteDiagnosticsNode node,
+  String text,
+) {
   if (node.name?.startsWith(text) == true ||
       node.description?.startsWith(text) == true) {
     return node;
-  }
-  if (node.childrenNow == null) {
-    return null;
   }
   for (var child in node.childrenNow) {
     final match = findNodeMatching(child, text);
@@ -71,8 +70,8 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
       _value = 'Error reading $path: $e';
     }
   }
-  String path;
-  String _value;
+  late String path;
+  late String _value;
 
   static final Object _mismatchedValueKey = Object();
 
@@ -87,18 +86,24 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    final String description = _normalize(object);
-    if (_value != description) {
-      if (updateGoldens) {
-        io.File(path).writeAsStringSync(description);
-        print('Updated golden file $path\nto\n$description');
-        // Act like the match succeeded so all goldens are updated instead of
-        // just the first failure.
-        return true;
-      }
+    const shouldCheckForMatchingGoldens = bool.fromEnvironment(
+      'SHOULD_TEST_GOLDENS',
+      defaultValue: true,
+    );
+    if (shouldCheckForMatchingGoldens) {
+      final String description = _normalize(object);
+      if (_value != description) {
+        if (updateGoldens) {
+          io.File(path).writeAsStringSync(description);
+          print('Updated golden file $path\nto\n$description');
+          // Act like the match succeeded so all goldens are updated instead of
+          // just the first failure.
+          return true;
+        }
 
-      matchState[_mismatchedValueKey] = description;
-      return false;
+        matchState[_mismatchedValueKey] = description;
+        return false;
+      }
     }
     return true;
   }
@@ -109,21 +114,26 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
   }
 
   @override
-  Description describeMismatch(dynamic item, Description mismatchDescription,
-      Map<dynamic, dynamic> matchState, bool verbose) {
-    if (matchState.containsKey(_mismatchedValueKey)) {
-      final String actualValue = matchState[_mismatchedValueKey];
-      // Leading whitespace is added so that lines in the multi-line
-      // description returned by addDescriptionOf are all indented equally
-      // which makes the output easier to read for this case.
-      return mismatchDescription
-          .add('expected golden file \'$path\' with normalized value\n  ')
-          .addDescriptionOf(_value)
-          .add('\nbut got\n  ')
-          .addDescriptionOf(actualValue)
-          .add('\nTo update golden files run:\n')
-          .add('  tool/update_goldens.sh"\n');
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    if (!matchState.containsKey(_mismatchedValueKey)) {
+      return mismatchDescription;
     }
-    return null;
+
+    final String? actualValue = matchState[_mismatchedValueKey];
+    // Leading whitespace is added so that lines in the multi-line
+    // description returned by addDescriptionOf are all indented equally
+    // which makes the output easier to read for this case.
+    return mismatchDescription
+        .add('expected golden file \'$path\' with normalized value\n  ')
+        .addDescriptionOf(_value)
+        .add('\nbut got\n  ')
+        .addDescriptionOf(actualValue)
+        .add('\nTo update golden files run:\n')
+        .add('  tool/update_goldens.sh"\n');
   }
 }

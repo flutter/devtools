@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/notifications.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Notifications', () {
+    setGlobal(IdeTheme, IdeTheme());
+
     Widget buildNotificationsWithButtonToPush(String text) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -15,7 +19,7 @@ void main() {
           child: Builder(
             builder: (context) {
               return ElevatedButton(
-                onPressed: () => Notifications.of(context).push(text),
+                onPressed: () => Notifications.of(context)!.push(text),
                 child: const SizedBox(),
               );
             },
@@ -54,13 +58,13 @@ void main() {
       var timesPressed = 0;
       Widget build() {
         return MaterialApp(
-          builder: (context, child) => Notifications(child: child),
+          builder: (context, child) => Notifications(child: child!),
           routes: {
             '/': (context) {
               return ElevatedButton(
                 onPressed: () {
                   if (timesPressed == 0) {
-                    Notifications.of(context).push(notification);
+                    Notifications.of(context)!.push(notification);
                   } else {
                     Navigator.of(context).pushNamed('/details');
                   }

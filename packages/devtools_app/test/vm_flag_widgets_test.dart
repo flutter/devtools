@@ -2,17 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/banner_messages.dart';
-import 'package:devtools_app/src/common_widgets.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/profiler/profile_granularity.dart';
-import 'package:devtools_app/src/profiler/profiler_screen.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/theme.dart';
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
+import 'package:collection/collection.dart' show IterableExtension;
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/profiler/profile_granularity.dart';
+import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
+import 'package:devtools_app/src/shared/banner_messages.dart';
+import 'package:devtools_app/src/shared/common_widgets.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/theme.dart';
 import 'package:devtools_app/src/ui/vm_flag_widgets.dart';
-import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -20,25 +23,26 @@ import 'package:vm_service/vm_service.dart';
 
 void main() {
   group('Profile Granularity Dropdown', () {
-    FakeServiceManager fakeServiceManager;
-    ProfileGranularityDropdown dropdown;
-    BuildContext buildContext;
+    late FakeServiceManager fakeServiceManager;
+    late ProfileGranularityDropdown dropdown;
+    late BuildContext buildContext;
 
     setUp(() async {
       fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(IdeTheme, IdeTheme());
       await fakeServiceManager.flagsInitialized.future;
       dropdown = ProfileGranularityDropdown(
         screenId: ProfilerScreen.id,
         profileGranularityFlagNotifier:
-            fakeServiceManager.vmFlagManager.flag(vm_flags.profilePeriod),
+            fakeServiceManager.vmFlagManager.flag(vm_flags.profilePeriod)!,
       );
     });
 
     Future<void> pumpDropdown(WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: themeFor(isDarkTheme: false, ideTheme: null),
+          theme: themeFor(isDarkTheme: false, ideTheme: IdeTheme()),
           home: Material(
             child: wrapWithControllers(
               Builder(
@@ -80,7 +84,7 @@ void main() {
       expect(dropdownButton.value, equals(ProfileGranularity.medium.value));
 
       var profilePeriodFlag =
-          await getProfileGranularityFlag(fakeServiceManager);
+          (await getProfileGranularityFlag(fakeServiceManager))!;
       expect(
         profilePeriodFlag.valueAsString,
         equals(ProfileGranularity.medium.value),
@@ -95,7 +99,8 @@ void main() {
           tester.widget(find.byKey(ProfileGranularityDropdown.dropdownKey));
       expect(dropdownButton.value, equals(ProfileGranularity.high.value));
 
-      profilePeriodFlag = await getProfileGranularityFlag(fakeServiceManager);
+      profilePeriodFlag =
+          (await getProfileGranularityFlag(fakeServiceManager))!;
       expect(profilePeriodFlag.name, equals(vm_flags.profilePeriod));
       expect(
         profilePeriodFlag.valueAsString,
@@ -119,7 +124,8 @@ void main() {
           tester.widget(find.byKey(ProfileGranularityDropdown.dropdownKey));
       expect(dropdownButton.value, equals(ProfileGranularity.low.value));
 
-      profilePeriodFlag = await getProfileGranularityFlag(fakeServiceManager);
+      profilePeriodFlag =
+          (await getProfileGranularityFlag(fakeServiceManager))!;
       expect(profilePeriodFlag.name, equals(vm_flags.profilePeriod));
       expect(
         profilePeriodFlag.valueAsString,
@@ -136,8 +142,8 @@ void main() {
 
     void testUpdatesForFlagChange(
       WidgetTester tester, {
-      @required String newFlagValue,
-      @required String expectedFlagValue,
+      required String newFlagValue,
+      required String expectedFlagValue,
     }) async {
       await pumpDropdown(tester);
       expect(find.byWidget(dropdown), findsOneWidget);
@@ -147,7 +153,7 @@ void main() {
           tester.widget(dropdownButtonFinder);
       expect(dropdownButton.value, equals(ProfileGranularity.medium.value));
 
-      await serviceManager.service.setFlag(
+      await serviceManager.service!.setFlag(
         vm_flags.profilePeriod,
         newFlagValue,
       );
@@ -181,12 +187,11 @@ BannerMessagesController bannerMessagesController(BuildContext context) {
   return Provider.of<BannerMessagesController>(context, listen: false);
 }
 
-Future<Flag> getProfileGranularityFlag(
+Future<Flag?> getProfileGranularityFlag(
   FakeServiceManager serviceManager,
 ) async {
-  final flagList = (await serviceManager.service.getFlagList()).flags;
-  return flagList.firstWhere(
+  final flagList = (await serviceManager.service.getFlagList()).flags!;
+  return flagList.firstWhereOrNull(
     (flag) => flag.name == vm_flags.profilePeriod,
-    orElse: () => null,
   );
 }

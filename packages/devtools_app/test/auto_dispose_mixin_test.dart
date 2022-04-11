@@ -4,13 +4,13 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/src/auto_dispose.dart';
-import 'package:devtools_app/src/auto_dispose_mixin.dart';
+import 'package:devtools_app/src/primitives/auto_dispose.dart';
+import 'package:devtools_app/src/primitives/auto_dispose_mixin.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class AutoDisposedWidget extends StatefulWidget {
-  const AutoDisposedWidget(this.stream, {Key key}) : super(key: key);
+  const AutoDisposedWidget(this.stream, {Key? key}) : super(key: key);
 
   final Stream stream;
 
@@ -27,7 +27,7 @@ class _AutoDisposedWidgetState extends State<AutoDisposedWidget>
   @override
   void initState() {
     super.initState();
-    autoDispose(widget.stream.listen(_onData));
+    autoDisposeStreamSubscription(widget.stream.listen(_onData));
   }
 
   void _onData(dynamic data) {
@@ -48,12 +48,16 @@ void main() {
       final controller2 = StreamController(sync: true);
       var c1Events = 0;
       var c2Events = 0;
-      disposer.autoDispose(controller1.stream.listen((data) {
-        c1Events++;
-      }));
-      disposer.autoDispose(controller2.stream.listen((data) {
-        c2Events++;
-      }));
+      disposer.autoDisposeStreamSubscription(
+        controller1.stream.listen((data) {
+          c1Events++;
+        }),
+      );
+      disposer.autoDisposeStreamSubscription(
+        controller2.stream.listen((data) {
+          c2Events++;
+        }),
+      );
       expect(c1Events, 0);
       expect(c2Events, 0);
       controller1.add(null);
@@ -63,7 +67,7 @@ void main() {
       controller2.add(null);
       expect(c1Events, 2);
       expect(c2Events, 1);
-      disposer.cancel();
+      disposer.cancelStreamSubscriptions();
 
       // Make sure stream subscriptions are cancelled.
       controller1.add(null);
@@ -89,7 +93,7 @@ void main() {
       expect(values.last, equals(15));
       // ignore: invalid_use_of_protected_member
       expect(notifier.hasListeners, isTrue);
-      disposer.cancel();
+      disposer.cancelListeners();
       // ignore: invalid_use_of_protected_member
       expect(notifier.hasListeners, isFalse);
       notifier.value = 17;
@@ -106,31 +110,13 @@ void main() {
       notifier.value = 19;
       expect(values.length, equals(3));
       expect(values.last, equals(19));
-      disposer.cancel();
+      disposer.cancelListeners();
 
       // ignore: invalid_use_of_protected_member
       expect(notifier.hasListeners, isFalse);
       notifier.value = 21;
       expect(values.length, equals(3));
       expect(values.last, equals(19));
-    });
-
-    test('throws an error when disposing already-disposed listeners', () {
-      final disposer = Disposer();
-      final notifier = ValueNotifier<int>(42);
-      final values = <int>[];
-      void callback() {
-        values.add(notifier.value);
-      }
-
-      disposer.addAutoDisposeListener(notifier, callback);
-      notifier.value = 72;
-      expect(values, [72]);
-      // After disposal, all notifier methods will throw. Disposer needs
-      // to ignore this when cancelling.
-      notifier.dispose();
-      expect(() => disposer.cancel(), throwsA(anything));
-      expect(values, [72]);
     });
   });
 
@@ -140,7 +126,7 @@ void main() {
     final controller = StreamController();
     await tester.pumpWidget(AutoDisposedWidget(controller.stream, key: key));
 
-    final _AutoDisposedWidgetState state = key.currentState;
+    final state = key.currentState as _AutoDisposedWidgetState;
     // Verify that the eventCount matches the number of events sent.
     expect(state.eventCount, 0);
     controller.add(null);
@@ -176,7 +162,7 @@ void main() {
     expect(values.last, equals(15));
     // ignore: invalid_use_of_protected_member
     expect(notifier.hasListeners, isTrue);
-    controller.cancel();
+    controller.cancelListeners();
     // ignore: invalid_use_of_protected_member
     expect(notifier.hasListeners, isFalse);
     notifier.value = 17;

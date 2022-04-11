@@ -20,7 +20,7 @@ class ExportControllerWeb extends ExportController {
     element.setAttribute('href', Url.createObjectUrl(Blob([contents])));
     element.setAttribute('download', fileName);
     element.style.display = 'none';
-    document.body.append(element);
+    document.body!.append(element);
     element.click();
     element.remove();
     return fileName;

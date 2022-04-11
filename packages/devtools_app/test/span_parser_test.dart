@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe, unused_import
+
 @TestOn('vm')
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/src/debugger/span_parser.dart';
+import 'package:devtools_app/src/screens/debugger/span_parser.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -180,11 +182,11 @@ void main() {
 ''';
 
 void spanTester({
-  @required ScopeSpan span,
-  @required List<String> scopes,
-  @required int line,
-  @required int column,
-  @required int length,
+  required ScopeSpan span,
+  required List<String> scopes,
+  required int line,
+  required int column,
+  required int length,
 }) {
   expect(span.scopes, scopes);
   expect(span.line, line);
@@ -193,7 +195,7 @@ void spanTester({
 }
 
 void main() {
-  Grammar grammar;
+  late Grammar grammar;
   setUpAll(() async {
     final grammarFile = File('assets/dart_syntax.json');
     expect(grammarFile.existsSync(), true);
@@ -235,11 +237,12 @@ void main() {
 
       // '
       spanTester(
-          span: spans[3],
-          scopes: ['string.interpolated.single.dart'],
-          line: 2,
-          column: 9,
-          length: 13);
+        span: spans[3],
+        scopes: ['string.interpolated.single.dart'],
+        line: 2,
+        column: 9,
+        length: 13,
+      );
 
       // ;
       spanTester(

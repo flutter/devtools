@@ -21,5 +21,5 @@ class HttpException {
   }
 
   final String message;
-  final Uri uri;
+  final Uri? uri;
 }

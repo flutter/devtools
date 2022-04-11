@@ -2,99 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/url_utils.dart';
+import 'package:devtools_app/src/primitives/url_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('url utils', () {
-    test('getSimplePackageUrl', () {
-      expect(getSimplePackageUrl(''), equals(''));
-      expect(getSimplePackageUrl(dartSdkUrl), equals('dart:async/zone.dart'));
-      expect(
-        getSimplePackageUrl(flutterUrl),
-        equals('package:flutter/widgets/binding.dart'),
-      );
-      expect(
-        getSimplePackageUrl(flutterUrlFromNonFlutterDir),
-        equals('package:flutter/widgets/binding.dart'),
-      );
-      expect(
-        getSimplePackageUrl('org-dartlang-sdk:///flutter/lib/ui/hooks.dart'),
-        equals('dart:ui/hooks.dart'),
-      );
-    });
-
-    group('normalizeVmServiceUri', () {
-      test('normalizes simple URIs', () {
-        expect(
-          normalizeVmServiceUri('http://127.0.0.1:60667/72K34Xmq0X0=')
-              .toString(),
-          equals('http://127.0.0.1:60667/72K34Xmq0X0='),
-        );
-        expect(
-          normalizeVmServiceUri('http://127.0.0.1:60667/72K34Xmq0X0=/   ')
-              .toString(),
-          equals('http://127.0.0.1:60667/72K34Xmq0X0=/'),
-        );
-        expect(
-          normalizeVmServiceUri('http://127.0.0.1:60667').toString(),
-          equals('http://127.0.0.1:60667'),
-        );
-        expect(
-          normalizeVmServiceUri('http://127.0.0.1:60667/').toString(),
-          equals('http://127.0.0.1:60667/'),
-        );
-      });
-
-      test('properly strips leading whitespace and trailing URI fragments', () {
-        expect(
-          normalizeVmServiceUri('  http://127.0.0.1:60667/72K34Xmq0X0=/#/vm')
-              .toString(),
-          equals('http://127.0.0.1:60667/72K34Xmq0X0=/'),
-        );
-        expect(
-          normalizeVmServiceUri('  http://127.0.0.1:60667/72K34Xmq0X0=/#/vm  ')
-              .toString(),
-          equals('http://127.0.0.1:60667/72K34Xmq0X0=/'),
-        );
-      });
-
-      test('properly handles encoded urls', () {
-        expect(
-          normalizeVmServiceUri(
-                  'http%3A%2F%2F127.0.0.1%3A58824%2FCnvgRrQJG7w%3D')
-              .toString(),
-          equals('http://127.0.0.1:58824/CnvgRrQJG7w='),
-        );
-
-        expect(
-          normalizeVmServiceUri(
-            'http%3A%2F%2F127.0.0.1%3A58824%2FCnvgRrQJG7w%3D  ',
-          ).toString(),
-          equals('http://127.0.0.1:58824/CnvgRrQJG7w='),
-        );
-
-        expect(
-          normalizeVmServiceUri(
-            '  http%3A%2F%2F127.0.0.1%3A58824%2FCnvgRrQJG7w%3D   ',
-          ).toString(),
-          equals('http://127.0.0.1:58824/CnvgRrQJG7w='),
-        );
-      });
-
-      test('handles prefixed devtools server uris', () {
-        expect(
-          normalizeVmServiceUri(
-            'http://127.0.0.1:9101?uri=http%3A%2F%2F127.0.0.1%3A56142%2FHOwgrxalK00%3D%2F',
-          ).toString(),
-          equals('http://127.0.0.1:56142/HOwgrxalK00=/'),
-        );
-      });
-
-      test('Returns null when given a non-absolute url', () {
-        expect(normalizeVmServiceUri('my/page'), null);
-      });
-    });
+  test('getSimplePackageUrl', () {
+    expect(getSimplePackageUrl(''), equals(''));
+    expect(getSimplePackageUrl(dartSdkUrl), equals('dart:async/zone.dart'));
+    expect(
+      getSimplePackageUrl(flutterUrl),
+      equals('package:flutter/widgets/binding.dart'),
+    );
+    expect(
+      getSimplePackageUrl(flutterUrlFromNonFlutterDir),
+      equals('package:flutter/widgets/binding.dart'),
+    );
+    expect(
+      getSimplePackageUrl('org-dartlang-sdk:///flutter/lib/ui/hooks.dart'),
+      equals('dart:ui/hooks.dart'),
+    );
   });
 }
 

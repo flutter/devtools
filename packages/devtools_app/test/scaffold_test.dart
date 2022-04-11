@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
 import 'package:devtools_app/src/analytics/analytics_controller.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/debugger/debugger_screen.dart';
-import 'package:devtools_app/src/framework_controller.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/scaffold.dart';
-import 'package:devtools_app/src/screen.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/survey.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/framework_controller.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/scaffold.dart';
+import 'package:devtools_app/src/shared/screen.dart';
+import 'package:devtools_app/src/shared/survey.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -26,7 +28,8 @@ void main() {
       when(mockServiceManager.service).thenReturn(null);
       when(mockServiceManager.connectedAppInitialized).thenReturn(false);
       when(mockServiceManager.connectedState).thenReturn(
-          ValueNotifier<ConnectedState>(const ConnectedState(false)));
+        ValueNotifier<ConnectedState>(const ConnectedState(false)),
+      );
 
       final mockErrorBadgeManager = MockErrorBadgeManager();
       when(mockServiceManager.errorBadgeManager)
@@ -38,6 +41,7 @@ void main() {
       setGlobal(FrameworkController, FrameworkController());
       setGlobal(SurveyService, SurveyService());
       setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(IdeTheme, IdeTheme());
     });
 
     Widget wrapScaffold(Widget child) {
@@ -47,12 +51,16 @@ void main() {
     testWidgetsWithWindowSize(
         'displays in narrow mode without error', const Size(200.0, 1200.0),
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrapScaffold(
-        const DevToolsScaffold(
-          tabs: [screen1, screen2, screen3, screen4, screen5],
-          ideTheme: null,
+      await tester.pumpWidget(
+        wrapScaffold(
+          wrapWithNotifications(
+            DevToolsScaffold(
+              tabs: const [screen1, screen2, screen3, screen4, screen5],
+              ideTheme: IdeTheme(),
+            ),
+          ),
         ),
-      ));
+      );
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.fullWidthKey), findsNothing);
@@ -61,12 +69,16 @@ void main() {
     testWidgetsWithWindowSize(
         'displays in full-width mode without error', const Size(1200.0, 1200.0),
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrapScaffold(
-        const DevToolsScaffold(
-          tabs: [screen1, screen2, screen3, screen4, screen5],
-          ideTheme: null,
+      await tester.pumpWidget(
+        wrapScaffold(
+          wrapWithNotifications(
+            DevToolsScaffold(
+              tabs: const [screen1, screen2, screen3, screen4, screen5],
+              ideTheme: IdeTheme(),
+            ),
+          ),
         ),
-      ));
+      );
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.fullWidthKey), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsNothing);
@@ -74,23 +86,31 @@ void main() {
 
     testWidgets('displays no tabs when only one is given',
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrapScaffold(
-        const DevToolsScaffold(
-          tabs: [screen1],
-          ideTheme: null,
+      await tester.pumpWidget(
+        wrapScaffold(
+          wrapWithNotifications(
+            DevToolsScaffold(
+              tabs: const [screen1],
+              ideTheme: IdeTheme(),
+            ),
+          ),
         ),
-      ));
+      );
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(t1), findsNothing);
     });
 
     testWidgets('displays only the selected tab', (WidgetTester tester) async {
-      await tester.pumpWidget(wrapScaffold(
-        const DevToolsScaffold(
-          tabs: [screen1, screen2],
-          ideTheme: null,
+      await tester.pumpWidget(
+        wrapScaffold(
+          wrapWithNotifications(
+            DevToolsScaffold(
+              tabs: const [screen1, screen2],
+              ideTheme: IdeTheme(),
+            ),
+          ),
         ),
-      ));
+      );
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(k2), findsNothing);
 
@@ -110,13 +130,17 @@ void main() {
 
     testWidgets('displays the requested initial page',
         (WidgetTester tester) async {
-      await tester.pumpWidget(wrapScaffold(
-        DevToolsScaffold(
-          tabs: const [screen1, screen2],
-          page: screen2.screenId,
-          ideTheme: null,
+      await tester.pumpWidget(
+        wrapScaffold(
+          wrapWithNotifications(
+            DevToolsScaffold(
+              tabs: const [screen1, screen2],
+              page: screen2.screenId,
+              ideTheme: IdeTheme(),
+            ),
+          ),
         ),
-      ));
+      );
 
       expect(find.byKey(k1), findsNothing);
       expect(find.byKey(k2), findsOneWidget);
@@ -135,9 +159,9 @@ void main() {
 
       await tester.pumpWidget(
         wrapWithControllers(
-          const DevToolsScaffold(
-            tabs: [screen1, screen2],
-            ideTheme: null,
+          DevToolsScaffold(
+            tabs: const [screen1, screen2],
+            ideTheme: IdeTheme(),
           ),
           debugger: mockDebuggerController,
           analytics: AnalyticsController(enabled: false, firstRun: false),
@@ -161,9 +185,9 @@ void main() {
 
       await tester.pumpWidget(
         wrapWithControllers(
-          const DevToolsScaffold(
-            tabs: [screen1, screen2],
-            ideTheme: null,
+          DevToolsScaffold(
+            tabs: const [screen1, screen2],
+            ideTheme: IdeTheme(),
           ),
           debugger: mockDebuggerController,
           analytics: AnalyticsController(enabled: false, firstRun: false),
@@ -190,8 +214,8 @@ void main() {
       const debuggerTabKey = Key('debugger tab');
       await tester.pumpWidget(
         wrapWithControllers(
-          const DevToolsScaffold(
-            tabs: [
+          DevToolsScaffold(
+            tabs: const [
               _TestScreen(
                 DebuggerScreen.id,
                 debuggerScreenKey,
@@ -200,7 +224,7 @@ void main() {
               ),
               screen2,
             ],
-            ideTheme: null,
+            ideTheme: IdeTheme(),
           ),
           debugger: mockDebuggerController,
           analytics: AnalyticsController(enabled: false, firstRun: false),
@@ -231,12 +255,16 @@ void main() {
         'does not display floating debugger tab controls when no app is connected',
         (WidgetTester tester) async {
       when(mockServiceManager.connectedAppInitialized).thenReturn(false);
-      await tester.pumpWidget(wrapScaffold(
-        const DevToolsScaffold(
-          tabs: [screen1, screen2],
-          ideTheme: null,
+      await tester.pumpWidget(
+        wrapScaffold(
+          wrapWithNotifications(
+            DevToolsScaffold(
+              tabs: const [screen1, screen2],
+              ideTheme: IdeTheme(),
+            ),
+          ),
         ),
-      ));
+      );
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(k2), findsNothing);
       expect(find.byType(FloatingDebuggerControls), findsNothing);

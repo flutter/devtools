@@ -2,31 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import 'package:devtools_app/src/app.dart';
-import 'package:devtools_app/src/app_size/app_size_screen.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/debugger/debugger_screen.dart';
-import 'package:devtools_app/src/framework_controller.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/inspector/inspector_screen.dart';
-import 'package:devtools_app/src/logging/logging_screen.dart';
-import 'package:devtools_app/src/memory/memory_screen.dart';
-import 'package:devtools_app/src/network/network_screen.dart';
-import 'package:devtools_app/src/performance/legacy/performance_screen.dart';
-import 'package:devtools_app/src/performance/performance_screen.dart';
-import 'package:devtools_app/src/preferences.dart';
-import 'package:devtools_app/src/profiler/profiler_screen.dart';
-import 'package:devtools_app/src/screen.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_app/src/version.dart';
-import 'package:devtools_app/src/vm_developer/vm_developer_tools_screen.dart';
-import 'package:devtools_test/mocks.dart';
+import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/screens/app_size/app_size_screen.dart';
+import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';
+import 'package:devtools_app/src/screens/logging/logging_screen.dart';
+import 'package:devtools_app/src/screens/memory/memory_screen.dart';
+import 'package:devtools_app/src/screens/network/network_screen.dart';
+import 'package:devtools_app/src/screens/performance/performance_screen.dart';
+import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
+import 'package:devtools_app/src/screens/vm_developer/vm_developer_tools_screen.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/framework_controller.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/preferences.dart';
+import 'package:devtools_app/src/shared/screen.dart';
+import 'package:devtools_app/src/shared/version.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('visible_screens', () {
-    FakeServiceManager fakeServiceManager;
+    late FakeServiceManager fakeServiceManager;
 
     setUp(() async {
       fakeServiceManager = FakeServiceManager(availableLibraries: []);
@@ -42,14 +43,17 @@ void main() {
       bool web = false,
       bool flutter = false,
       bool debugMode = true,
-      SemanticVersion flutterVersion,
+      SemanticVersion? flutterVersion,
     }) {
-      mockIsDartVmApp(fakeServiceManager.connectedApp, !web);
+      mockIsDartVmApp(
+        fakeServiceManager.connectedApp as MockConnectedApp,
+        !web,
+      );
       if (web) {
         fakeServiceManager.availableLibraries.add('dart:html');
       }
       mockIsFlutterApp(
-        fakeServiceManager.connectedApp,
+        fakeServiceManager.connectedApp as MockConnectedApp,
         isFlutterApp: flutter,
         isProfileBuild: !debugMode,
       );
@@ -58,45 +62,50 @@ void main() {
             .add('package:flutter/src/widgets/binding.dart');
       }
       flutterVersion ??= SemanticVersion(major: 2, minor: 3, patch: 1);
-      mockFlutterVersion(fakeServiceManager.connectedApp, flutterVersion);
+      mockFlutterVersion(
+        fakeServiceManager.connectedApp as MockConnectedApp,
+        flutterVersion,
+      );
     }
 
     testWidgets('are correct for Dart CLI app', (WidgetTester tester) async {
       setupMockValues();
 
       expect(
-          visibleScreenTypes,
-          equals([
-            // InspectorScreen,
-            // LegacyPerformanceScreen,
-            PerformanceScreen,
-            ProfilerScreen,
-            MemoryScreen,
-            DebuggerScreen,
-            NetworkScreen,
-            LoggingScreen,
-            AppSizeScreen,
-            // VMDeveloperToolsScreen,
-          ]));
+        visibleScreenTypes,
+        equals([
+          // InspectorScreen,
+          // LegacyPerformanceScreen,
+          PerformanceScreen,
+          ProfilerScreen,
+          MemoryScreen,
+          DebuggerScreen,
+          NetworkScreen,
+          LoggingScreen,
+          AppSizeScreen,
+          // VMDeveloperToolsScreen,
+        ]),
+      );
     });
 
     testWidgets('are correct for Dart Web app', (WidgetTester tester) async {
       setupMockValues(web: true);
 
       expect(
-          visibleScreenTypes,
-          equals([
-            // InspectorScreen,
-            // LegacyPerformanceScreen,
-            // PerformanceScreen,
-            // ProfilerScreen,
-            // MemoryScreen,
-            DebuggerScreen,
-            // NetworkScreen,
-            LoggingScreen,
-            // AppSizeScreen,
-            // VMDeveloperToolsScreen,
-          ]));
+        visibleScreenTypes,
+        equals([
+          // InspectorScreen,
+          // LegacyPerformanceScreen,
+          // PerformanceScreen,
+          // ProfilerScreen,
+          // MemoryScreen,
+          DebuggerScreen,
+          // NetworkScreen,
+          LoggingScreen,
+          // AppSizeScreen,
+          // VMDeveloperToolsScreen,
+        ]),
+      );
     });
 
     testWidgets('are correct for Flutter (non-web) debug app',
@@ -104,19 +113,20 @@ void main() {
       setupMockValues(flutter: true);
 
       expect(
-          visibleScreenTypes,
-          equals([
-            InspectorScreen,
-            // LegacyPerformanceScreen,
-            PerformanceScreen,
-            ProfilerScreen,
-            MemoryScreen,
-            DebuggerScreen,
-            NetworkScreen,
-            LoggingScreen,
-            AppSizeScreen,
-            // VMDeveloperToolsScreen,
-          ]));
+        visibleScreenTypes,
+        equals([
+          InspectorScreen,
+          // LegacyPerformanceScreen,
+          PerformanceScreen,
+          ProfilerScreen,
+          MemoryScreen,
+          DebuggerScreen,
+          NetworkScreen,
+          LoggingScreen,
+          AppSizeScreen,
+          // VMDeveloperToolsScreen,
+        ]),
+      );
     });
 
     testWidgets('are correct for Flutter (non-web) profile app',
@@ -124,19 +134,20 @@ void main() {
       setupMockValues(flutter: true, debugMode: false);
 
       expect(
-          visibleScreenTypes,
-          equals([
-            // InspectorScreen,
-            // LegacyPerformanceScreen,
-            PerformanceScreen,
-            ProfilerScreen,
-            MemoryScreen,
-            // DebuggerScreen,
-            NetworkScreen,
-            LoggingScreen,
-            AppSizeScreen,
-            // VMDeveloperToolsScreen,
-          ]));
+        visibleScreenTypes,
+        equals([
+          // InspectorScreen,
+          // LegacyPerformanceScreen,
+          PerformanceScreen,
+          ProfilerScreen,
+          MemoryScreen,
+          // DebuggerScreen,
+          NetworkScreen,
+          LoggingScreen,
+          AppSizeScreen,
+          // VMDeveloperToolsScreen,
+        ]),
+      );
     });
 
     testWidgets('are correct for Flutter web debug app',
@@ -144,19 +155,20 @@ void main() {
       setupMockValues(flutter: true, web: true);
 
       expect(
-          visibleScreenTypes,
-          equals([
-            InspectorScreen,
-            // LegacyPerformanceScreen,
-            // PerformanceScreen,
-            // ProfilerScreen,
-            // MemoryScreen,
-            DebuggerScreen,
-            // NetworkScreen,
-            LoggingScreen,
-            // AppSizeScreen,
-            // VMDeveloperToolsScreen,
-          ]));
+        visibleScreenTypes,
+        equals([
+          InspectorScreen,
+          // LegacyPerformanceScreen,
+          // PerformanceScreen,
+          // ProfilerScreen,
+          // MemoryScreen,
+          DebuggerScreen,
+          // NetworkScreen,
+          LoggingScreen,
+          // AppSizeScreen,
+          // VMDeveloperToolsScreen,
+        ]),
+      );
     });
 
     testWidgets('are correct for Flutter app on old Flutter version',
@@ -175,19 +187,19 @@ void main() {
       );
 
       expect(
-          visibleScreenTypes,
-          equals([
-            InspectorScreen,
-            LegacyPerformanceScreen,
-            // PerformanceScreen,
-            ProfilerScreen,
-            MemoryScreen,
-            DebuggerScreen,
-            NetworkScreen,
-            LoggingScreen,
-            AppSizeScreen,
-            // VMDeveloperToolsScreen,
-          ]));
+        visibleScreenTypes,
+        equals([
+          InspectorScreen,
+          PerformanceScreen,
+          ProfilerScreen,
+          MemoryScreen,
+          DebuggerScreen,
+          NetworkScreen,
+          LoggingScreen,
+          AppSizeScreen,
+          // VMDeveloperToolsScreen,
+        ]),
+      );
     });
 
     testWidgets('are correct when offline', (WidgetTester tester) async {
@@ -195,19 +207,19 @@ void main() {
       setupMockValues(web: true); // Web apps would normally hide
 
       expect(
-          visibleScreenTypes,
-          equals([
-            // InspectorScreen,
-            LegacyPerformanceScreen, // Works offline, so appears regardless of web flag
-            PerformanceScreen, // Works offline, so appears regardless of web flag
-            ProfilerScreen, // Works offline, so appears regardless of web flag
-            // MemoryScreen,
-            // DebuggerScreen,
-            // NetworkScreen,
-            // LoggingScreen,
-            // AppSizeScreen,
-            // VMDeveloperToolsScreen,
-          ]));
+        visibleScreenTypes,
+        equals([
+          // InspectorScreen,
+          PerformanceScreen, // Works offline, so appears regardless of web flag
+          ProfilerScreen, // Works offline, so appears regardless of web flag
+          // MemoryScreen,
+          // DebuggerScreen,
+          // NetworkScreen,
+          // LoggingScreen,
+          // AppSizeScreen,
+          // VMDeveloperToolsScreen,
+        ]),
+      );
       offlineController.exitOfflineMode();
     });
 
@@ -216,19 +228,20 @@ void main() {
       preferences.toggleVmDeveloperMode(true);
       setupMockValues();
       expect(
-          visibleScreenTypes,
-          equals([
-            // InspectorScreen,
-            // LegacyPerformanceScreen,
-            PerformanceScreen,
-            ProfilerScreen,
-            MemoryScreen,
-            DebuggerScreen,
-            NetworkScreen,
-            LoggingScreen,
-            AppSizeScreen,
-            VMDeveloperToolsScreen,
-          ]));
+        visibleScreenTypes,
+        equals([
+          // InspectorScreen,
+          // LegacyPerformanceScreen,
+          PerformanceScreen,
+          ProfilerScreen,
+          MemoryScreen,
+          DebuggerScreen,
+          NetworkScreen,
+          LoggingScreen,
+          AppSizeScreen,
+          VMDeveloperToolsScreen,
+        ]),
+      );
       preferences.toggleVmDeveloperMode(false);
     });
   });

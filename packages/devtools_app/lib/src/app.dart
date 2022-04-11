@@ -2,54 +2,55 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:provider/provider.dart';
 
 import '../devtools.dart' as devtools;
 import 'analytics/analytics.dart' as ga;
 import 'analytics/analytics_controller.dart';
 import 'analytics/constants.dart' as analytics_constants;
-import 'app_size/app_size_controller.dart';
-import 'app_size/app_size_screen.dart';
-import 'auto_dispose_mixin.dart';
-import 'common_widgets.dart';
 import 'config_specific/launch_url/launch_url.dart';
 import 'config_specific/server/server.dart';
-import 'debugger/debugger_controller.dart';
-import 'debugger/debugger_screen.dart';
-import 'dialogs.dart';
 import 'example/conditional_screen.dart';
 import 'framework/framework_core.dart';
-import 'globals.dart';
-import 'initializer.dart';
-import 'inspector/inspector_controller.dart';
-import 'inspector/inspector_screen.dart';
-import 'landing_screen.dart';
-import 'logging/logging_controller.dart';
-import 'logging/logging_screen.dart';
-import 'memory/memory_controller.dart';
-import 'memory/memory_screen.dart';
-import 'network/network_controller.dart';
-import 'network/network_screen.dart';
-import 'notifications.dart';
-import 'performance/legacy/performance_controller.dart';
-import 'performance/legacy/performance_screen.dart';
-import 'performance/performance_controller.dart';
-import 'performance/performance_screen.dart';
-import 'profiler/profiler_screen.dart';
-import 'profiler/profiler_screen_controller.dart';
-import 'provider/provider_screen.dart';
-import 'routing.dart';
-import 'scaffold.dart';
-import 'screen.dart';
-import 'snapshot_screen.dart';
-import 'theme.dart';
+import 'primitives/auto_dispose_mixin.dart';
+import 'screens/app_size/app_size_controller.dart';
+import 'screens/app_size/app_size_screen.dart';
+import 'screens/debugger/debugger_controller.dart';
+import 'screens/debugger/debugger_screen.dart';
+import 'screens/inspector/inspector_controller.dart';
+import 'screens/inspector/inspector_screen.dart';
+import 'screens/logging/logging_controller.dart';
+import 'screens/logging/logging_screen.dart';
+import 'screens/memory/memory_controller.dart';
+import 'screens/memory/memory_screen.dart';
+import 'screens/network/network_controller.dart';
+import 'screens/network/network_screen.dart';
+import 'screens/performance/performance_controller.dart';
+import 'screens/performance/performance_screen.dart';
+import 'screens/profiler/profiler_screen.dart';
+import 'screens/profiler/profiler_screen_controller.dart';
+import 'screens/provider/provider_screen.dart';
+import 'screens/vm_developer/vm_developer_tools_controller.dart';
+import 'screens/vm_developer/vm_developer_tools_screen.dart';
+import 'shared/common_widgets.dart';
+import 'shared/dialogs.dart';
+import 'shared/globals.dart';
+import 'shared/initializer.dart';
+import 'shared/landing_screen.dart';
+import 'shared/notifications.dart';
+import 'shared/release_notes/release_notes.dart';
+import 'shared/routing.dart';
+import 'shared/scaffold.dart';
+import 'shared/screen.dart';
+import 'shared/snapshot_screen.dart';
+import 'shared/theme.dart';
 import 'ui/service_extension_widgets.dart';
-import 'utils.dart';
-import 'vm_developer/vm_developer_tools_controller.dart';
-import 'vm_developer/vm_developer_tools_screen.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
@@ -60,13 +61,6 @@ const showVmDeveloperMode = false;
 
 /// Whether this DevTools build is external.
 bool isExternalBuild = true;
-
-// TODO(kenz): remove the pub warning code after devtools version 2.8.0 ships
-/// Whether DevTools should warn users to stop launching DevTools from Pub.
-///
-/// This flag will be turned on for the final release of DevTools on pub, but
-/// should remain off at HEAD.
-const showPubWarning = false;
 
 /// Top-level configuration for the app.
 @immutable
@@ -101,6 +95,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   bool get denseModeEnabled => _denseModeEnabled;
   bool _denseModeEnabled;
 
+  ReleaseNotesController releaseNotesController;
+
   @override
   void initState() {
     super.initState();
@@ -133,6 +129,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         _denseModeEnabled = preferences.denseModeEnabled.value;
       });
     });
+
+    releaseNotesController = ReleaseNotesController();
   }
 
   @override
@@ -150,16 +148,18 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         page,
         args,
       );
-      assert(() {
-        widget = _AlternateCheckedModeBanner(
-          builder: (context) => pages[page](
-            context,
-            page,
-            args,
-          ),
-        );
-        return true;
-      }());
+      assert(
+        () {
+          widget = _AlternateCheckedModeBanner(
+            builder: (context) => pages[page](
+              context,
+              page,
+              args,
+            ),
+          );
+          return true;
+        }(),
+      );
       return MaterialPage(child: widget);
     }
 
@@ -210,21 +210,12 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         // enabled.
         return ValueListenableBuilder<bool>(
           valueListenable: preferences.vmDeveloperModeEnabled,
-          builder: (_, __, ___) {
+          builder: (_, __, child) {
             final tabs = _visibleScreens()
                 .where((p) => embed && page != null ? p.screenId == page : true)
                 .where((p) => !hide.contains(p.screenId))
                 .toList();
-            if (tabs.isEmpty) {
-              return DevToolsScaffold.withChild(
-                child: CenteredMessage(
-                  page != null
-                      ? 'The "$page" screen is not available for this application.'
-                      : 'No tabs available for this application.',
-                ),
-                ideTheme: ideTheme,
-              );
-            }
+            if (tabs.isEmpty) return child;
             return _providedControllers(
               child: DevToolsScaffold(
                 embed: embed,
@@ -244,6 +235,14 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               ),
             );
           },
+          child: DevToolsScaffold.withChild(
+            child: CenteredMessage(
+              page != null
+                  ? 'The "$page" screen is not available for this application.'
+                  : 'No tabs available for this application.',
+            ),
+            ideTheme: ideTheme,
+          ),
         );
       },
     );
@@ -294,7 +293,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   Widget _providedControllers({@required Widget child, bool offline = false}) {
     final _providers = widget.screens
         .where(
-            (s) => s.providesController && (offline ? s.supportsOffline : true))
+          (s) => s.providesController && (offline ? s.supportsOffline : true),
+        )
         .map((s) => s.controllerProvider)
         .toList();
 
@@ -315,7 +315,12 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       ),
       builder: (context, child) => Provider<AnalyticsController>.value(
         value: widget.analyticsController,
-        child: Notifications(child: child),
+        child: Notifications(
+          child: ReleaseNotesViewer(
+            releaseNotesController: releaseNotesController,
+            child: child,
+          ),
+        ),
       ),
       routerDelegate: DevToolsRouterDelegate(_getPage),
       routeInformationParser: DevToolsRouteInformationParser(),
@@ -372,8 +377,10 @@ class DevToolsScreen<C> {
   final bool supportsOffline;
 
   Provider<C> get controllerProvider {
-    assert((createController != null && controller == null) ||
-        (createController == null && controller != null));
+    assert(
+      (createController != null && controller == null) ||
+          (createController == null && controller != null),
+    );
     if (controller != null) {
       return Provider<C>.value(value: controller);
     }
@@ -418,10 +425,12 @@ class OpenAboutAction extends StatelessWidget {
       message: 'About DevTools',
       child: InkWell(
         onTap: () async {
-          unawaited(showDialog(
-            context: context,
-            builder: (context) => DevToolsAboutDialog(),
-          ));
+          unawaited(
+            showDialog(
+              context: context,
+              builder: (context) => DevToolsAboutDialog(),
+            ),
+          );
         },
         child: Container(
           width: DevToolsScaffold.actionWidgetSize,
@@ -444,10 +453,12 @@ class OpenSettingsAction extends StatelessWidget {
       message: 'Settings',
       child: InkWell(
         onTap: () async {
-          unawaited(showDialog(
-            context: context,
-            builder: (context) => SettingsDialog(),
-          ));
+          unawaited(
+            showDialog(
+              context: context,
+              builder: (context) => SettingsDialog(),
+            ),
+          );
         },
         child: Container(
           width: DevToolsScaffold.actionWidgetSize,
@@ -475,7 +486,9 @@ class ReportFeedbackButton extends StatelessWidget {
             analytics_constants.feedbackButton,
           );
           await launchUrl(
-              devToolsExtensionPoints.issueTrackerLink().url, context);
+            devToolsExtensionPoints.issueTrackerLink().url,
+            context,
+          );
         },
         child: Container(
           width: DevToolsScaffold.actionWidgetSize,
@@ -503,10 +516,6 @@ class DevToolsAboutDialog extends StatelessWidget {
         children: [
           _aboutDevTools(context),
           const SizedBox(height: defaultSpacing),
-          if (shouldShowPubWarning()) ...[
-            const PubWarningText(),
-            const SizedBox(height: defaultSpacing),
-          ],
           ...dialogSubHeader(theme, 'Feedback'),
           Wrap(
             children: [
@@ -645,11 +654,6 @@ List<DevToolsScreen> get defaultScreens {
     DevToolsScreen<InspectorSettingsController>(
       const InspectorScreen(),
       createController: () => InspectorSettingsController(),
-    ),
-    DevToolsScreen<LegacyPerformanceController>(
-      const LegacyPerformanceScreen(),
-      createController: () => LegacyPerformanceController(),
-      supportsOffline: true,
     ),
     DevToolsScreen<PerformanceController>(
       const PerformanceScreen(),

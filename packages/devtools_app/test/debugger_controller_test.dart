@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_test/mocks.dart';
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
+import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
@@ -68,7 +70,7 @@ void main() {
   });
 
   group('ScriptsHistory', () {
-    ScriptsHistory history;
+    late ScriptsHistory history;
 
     final ScriptRef ref1 = ScriptRef(uri: 'package:foo/foo.dart', id: 'id-1');
     final ScriptRef ref2 = ScriptRef(uri: 'package:bar/bar.dart', id: 'id-2');
@@ -171,7 +173,7 @@ void main() {
   });
 
   group('EvalHistory', () {
-    EvalHistory evalHistory;
+    late EvalHistory evalHistory;
 
     setUp(() {
       evalHistory = EvalHistory();
@@ -264,7 +266,7 @@ void main() {
   });
 
   group('search', () {
-    DebuggerController debuggerController;
+    late DebuggerController debuggerController;
 
     setUp(() {
       debuggerController = TestDebuggerController(
@@ -272,7 +274,7 @@ void main() {
       );
       debuggerController.parsedScript.value = ParsedScript(
         script: testScript,
-        highlighter: null,
+        highlighter: mockSyntaxHighlighter,
         executableLines: {},
       );
     });
@@ -296,10 +298,6 @@ void main() {
       );
       expect(
         debuggerController.matchesForSearch('').toString(),
-        equals('[]'),
-      );
-      expect(
-        debuggerController.matchesForSearch(null).toString(),
         equals('[]'),
       );
     });

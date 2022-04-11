@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
@@ -83,5 +83,5 @@ Map<String, Function> navigateCallbacks = {};
 
 // Hook to navigate to a specific screen.
 void navigateToScreen(String title) {
-  navigateCallbacks[title]();
+  navigateCallbacks[title]!();
 }

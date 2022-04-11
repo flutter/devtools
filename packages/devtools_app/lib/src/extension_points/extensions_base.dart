@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../common_widgets.dart';
-import '../debugger/codeview.dart';
-import '../inspector/inspector_service.dart';
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
+import '../screens/debugger/codeview.dart';
+import '../screens/inspector/inspector_service.dart';
+import '../shared/common_widgets.dart';
 
 abstract class DevToolsExtensionPoints {
   List<ScriptPopupMenuOption> buildExtraDebuggerScriptPopupMenuOptions();
@@ -13,5 +15,5 @@ abstract class DevToolsExtensionPoints {
 
   String loadingAppSizeDataMessage();
 
-  InspectorServiceBase inspectorServiceProvider();
+  InspectorServiceBase? inspectorServiceProvider();
 }

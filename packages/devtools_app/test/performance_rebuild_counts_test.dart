@@ -4,12 +4,12 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/performance/rebuild_counts.dart';
+import 'package:devtools_app/src/screens/performance/rebuild_counts.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('rebuild counts', () {
-    RebuildCountModel rebuildCountModel;
+    late RebuildCountModel rebuildCountModel;
 
     setUp(() {
       rebuildCountModel = RebuildCountModel();

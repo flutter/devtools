@@ -3,7 +3,7 @@
 // in the LICENSE file.
 
 class Notification {
-  Notification(String title, {String body}) {
+  Notification(String title, {String? body}) {
     throw Exception('unsupported platform');
   }
 

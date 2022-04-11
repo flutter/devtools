@@ -17,21 +17,24 @@ on:
 # track the latest Flutter dev release. Dev releases come out ~weekly;
 # the versions can be viewed at https://github.com/flutter/flutter/tags.
 env:
-  CHANNEL: 2.8.0-3.1.pre
+  PINNED_FLUTTER_CHANNEL: 2.12.0-4.1.pre
 
 jobs:
-
   main:
     name: main
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      matrix:
+        flutter-test-env:
+          - pinned
     steps:
       - name: git clone
         uses: actions/checkout@v2
       - name: tool/bots.sh
         env:
           BOT: main
+          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
         run: ./tool/bots.sh
 
   packages:
@@ -39,16 +42,20 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      matrix:
+        flutter-test-env:
+          - pinned
     steps:
       - name: git clone
         uses: actions/checkout@v2
       - name: tool/bots.sh
         env:
           BOT: packages
+          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
         run: ./tool/bots.sh
 
   test:
-    name: test ${{ matrix.bot }}
+    name: test ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -56,6 +63,9 @@ jobs:
         bot:
           - test_ddc
           - test_dart2js
+        flutter-test-env:
+          - pinned
+          - master
     steps:
       - name: git clone
         uses: actions/checkout@v2
@@ -64,6 +74,7 @@ jobs:
         env:
           BOT: ${{ matrix.bot }}
           PLATFORM: vm
+          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
         run: ./tool/bots.sh
 
       - name: image failures
@@ -75,27 +86,33 @@ jobs:
           name: test-image-failures-${{ matrix.os }} # Name for the artifact
           path: packages/devtools_app/test/failures # Path to upload
 
-  integration:
-    name: integration ${{ matrix.bot }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        bot:
-          - integration_ddc
-          - integration_dart2js
-    steps:
-      - name: git clone
-        uses: actions/checkout@v2
-      - name: tool/bots.sh
-        env:
-          BOT: ${{ matrix.bot }}
-        run: ./tool/bots.sh
+# TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
+#  integration:
+#    name: integration ${{ matrix.bot }} - (flutter ${{ matrix.flutter-test-env }})
+#    runs-on: ubuntu-latest
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        bot:
+#          - integration_ddc
+#          - integration_dart2js
+#        flutter-test-env:
+#          - pinned
+#          - master
+#    steps:
+#      - name: git clone
+#        uses: actions/checkout@v2
+#      - name: tool/bots.sh
+#        env:
+#          BOT: ${{ matrix.bot }}
+#          FLUTTER_TEST_ENV: ${{ matrix.flutter-test-env }}
+#        run: ./tool/bots.sh
 
 # TODO(https://github.com/flutter/devtools/issues/2437):
 # PLATFORM=chrome is going away. We need to move these tests to run with
-# chromedriver. 
+# chromedriver.
 #    - BOT=test_ddc            PLATFORM=chrome
 # PLATFORM=chrome is going away. We need to move these tests to run with
 # chromedriver.
 #   - BOT=test_dart2js        PLATFORM=chrome
+

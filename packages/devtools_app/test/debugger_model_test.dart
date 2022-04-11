@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/debugger/debugger_model.dart';
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
+import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -27,7 +29,7 @@ void main() {
         expect(root.name, 'package:foo');
         expect(root.scriptRef, isNull);
         expect(root.children, hasLength(1));
-        final child = root.children.first;
+        final FileNode child = root.children.first;
         expect(child.name, 'foo.dart');
         expect(child.scriptRef, isNotNull);
         expect(child.children, isEmpty);
@@ -98,12 +100,14 @@ void main() {
         );
         expect(
           ScriptRefUtils.splitDirectoryParts(
-              ScriptRef(uri: 'package:foo.bar.baz/qux.dart', id: 'id-5')),
+            ScriptRef(uri: 'package:foo.bar.baz/qux.dart', id: 'id-5'),
+          ),
           orderedEquals(['package:foo', 'bar/baz/qux.dart']),
         );
         expect(
           ScriptRefUtils.splitDirectoryParts(
-              ScriptRef(uri: 'google3:///foo/bar/baz.dart', id: 'id-6')),
+            ScriptRef(uri: 'google3:///foo/bar/baz.dart', id: 'id-6'),
+          ),
           orderedEquals(['google3:foo', 'bar/baz.dart']),
         );
       });

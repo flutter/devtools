@@ -1,10 +1,14 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
-import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_test/cpu_profile_test_data.dart';
+
+// ignore_for_file: avoid_redundant_argument_values
+
+import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_data/cpu_profile_test_data.dart';
 
 void main() {
   group('CpuProfileData', () {
@@ -12,7 +16,9 @@ void main() {
 
     test('init from parse', () {
       expect(
-          cpuProfileData.stackFramesJson, equals(goldenCpuProfileStackFrames));
+        cpuProfileData.stackFramesJson,
+        equals(goldenCpuProfileStackFrames),
+      );
       expect(
         cpuProfileData.cpuSamples.map((sample) => sample.json),
         equals(goldenCpuProfileTraceEvents),
@@ -20,21 +26,22 @@ void main() {
       expect(cpuProfileData.profileMetaData.sampleCount, equals(8));
       expect(cpuProfileData.profileMetaData.samplePeriod, equals(50));
       expect(
-        cpuProfileData.profileMetaData.time.start.inMicroseconds,
+        cpuProfileData.profileMetaData.time!.start!.inMicroseconds,
         equals(47377796685),
       );
       expect(
-        cpuProfileData.profileMetaData.time.end.inMicroseconds,
+        cpuProfileData.profileMetaData.time!.end!.inMicroseconds,
         equals(47377799685),
       );
     });
 
     test('subProfile', () {
       final subProfile = CpuProfileData.subProfile(
-          cpuProfileData,
-          TimeRange()
-            ..start = const Duration(microseconds: 47377796685)
-            ..end = const Duration(microseconds: 47377799063));
+        cpuProfileData,
+        TimeRange()
+          ..start = const Duration(microseconds: 47377796685)
+          ..end = const Duration(microseconds: 47377799063),
+      );
 
       expect(
         subProfile.stackFramesJson,
@@ -103,7 +110,8 @@ void main() {
           verboseName: 'all',
           category: 'Dart',
           rawUrl: '',
-          parentId: null,
+          sourceLine: null,
+          parentId: '',
           profileMetaData: profileMetaData,
         ).isNative,
         isFalse,
@@ -211,5 +219,6 @@ void main() {
   test('matches', () {
     expect(stackFrameC.matches(stackFrameC2), isTrue);
     expect(stackFrameC.matches(stackFrameG), isFalse);
+    expect(stackFrameC.matches(stackFrameC4), isFalse);
   });
 }

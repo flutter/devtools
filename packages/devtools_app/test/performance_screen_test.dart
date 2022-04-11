@@ -2,30 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
 @TestOn('vm')
+import 'dart:async';
+
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/performance/event_details.dart';
-import 'package:devtools_app/src/performance/flutter_frames_chart.dart';
-import 'package:devtools_app/src/performance/performance_controller.dart';
-import 'package:devtools_app/src/performance/performance_screen.dart';
-import 'package:devtools_app/src/performance/timeline_flame_chart.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/split.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/performance_test_data.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/src/screens/performance/event_details.dart';
+import 'package:devtools_app/src/screens/performance/flutter_frames_chart.dart';
+import 'package:devtools_app/src/screens/performance/performance_controller.dart';
+import 'package:devtools_app/src/screens/performance/performance_screen.dart';
+import 'package:devtools_app/src/screens/performance/timeline_flame_chart.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/common_widgets.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/split.dart';
+import 'package:devtools_app/src/shared/version.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'test_data/performance_test_data.dart';
+
 void main() {
+  setGlobal(IdeTheme, IdeTheme());
   PerformanceScreen screen;
   PerformanceController controller;
   FakeServiceManager fakeServiceManager;
 
-  void _setUpServiceManagerWithTimeline(Map<String, dynamic> timelineJson) {
+  Future<void> _setUpServiceManagerWithTimeline(
+    Map<String, dynamic> timelineJson,
+  ) async {
     fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(
         timelineData: vm_service.Timeline.parse(timelineJson),
@@ -33,8 +43,13 @@ void main() {
     );
     when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
         .thenReturn(ValueNotifier<int>(0));
+    when(fakeServiceManager.connectedApp.initialized)
+        .thenReturn(Completer()..complete(true));
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
+    when(fakeServiceManager.connectedApp.flutterVersionNow).thenReturn(
+      FlutterVersion.parse((await fakeServiceManager.flutterVersion).json),
+    );
     when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
         .thenReturn(false);
@@ -48,11 +63,13 @@ void main() {
     PerformanceController performanceController,
     bool runAsync = false,
   }) async {
-    await tester.pumpWidget(wrapWithControllers(
-      const PerformanceScreenBody(),
-      performance: controller =
-          performanceController ?? PerformanceController(),
-    ));
+    await tester.pumpWidget(
+      wrapWithControllers(
+        const PerformanceScreenBody(),
+        performance: controller =
+            performanceController ?? PerformanceController(),
+      ),
+    );
     await tester.pumpAndSettle();
 
     if (runAsync) {
@@ -69,16 +86,18 @@ void main() {
   group('PerformanceScreen', () {
     setUp(() async {
       await ensureInspectorDependencies();
-      _setUpServiceManagerWithTimeline(testTimelineJson);
+      await _setUpServiceManagerWithTimeline(testTimelineJson);
       setGlobal(OfflineModeController, OfflineModeController());
       screen = const PerformanceScreen();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
-      await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: screen.buildTab),
-        performance: PerformanceController(),
-      ));
+      await tester.pumpWidget(
+        wrapWithControllers(
+          Builder(builder: screen.buildTab),
+          performance: PerformanceController(),
+        ),
+      );
       expect(find.text('Performance'), findsOneWidget);
     });
 
@@ -89,8 +108,10 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
-        expect(find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
-            findsNothing);
+        expect(
+          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          findsNothing,
+        );
         expect(find.byType(EventDetails), findsOneWidget);
         expect(find.byIcon(Icons.pause), findsOneWidget);
         expect(find.byIcon(Icons.play_arrow), findsOneWidget);
@@ -113,13 +134,15 @@ void main() {
         'builds initial content for empty timeline', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        _setUpServiceManagerWithTimeline({});
+        await _setUpServiceManagerWithTimeline({});
         await pumpPerformanceScreen(tester, runAsync: true);
         await tester.pumpAndSettle();
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsNothing);
-        expect(find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
-            findsOneWidget);
+        expect(
+          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          findsOneWidget,
+        );
         expect(find.byType(EventDetails), findsOneWidget);
         expect(find.byIcon(Icons.pause), findsOneWidget);
         expect(find.byIcon(Icons.play_arrow), findsOneWidget);
@@ -148,8 +171,10 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byType(FlutterFramesChart), findsNothing);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
-        expect(find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
-            findsNothing);
+        expect(
+          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          findsNothing,
+        );
         expect(find.byType(EventDetails), findsOneWidget);
         expect(find.byIcon(Icons.pause), findsOneWidget);
         expect(find.byIcon(Icons.play_arrow), findsOneWidget);
@@ -195,8 +220,10 @@ void main() {
         expect(controller.allTraceEvents, isNotEmpty);
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
-        expect(find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
-            findsNothing);
+        expect(
+          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          findsNothing,
+        );
         expect(find.byType(EventDetails), findsOneWidget);
 
         await tester.tap(find.byIcon(Icons.block));
@@ -204,9 +231,64 @@ void main() {
         expect(controller.allTraceEvents, isEmpty);
         expect(find.byType(FlutterFramesChart), findsOneWidget);
         expect(find.byType(TimelineFlameChart), findsNothing);
-        expect(find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
-            findsOneWidget);
+        expect(
+          find.byKey(TimelineAnalysisContainer.emptyTimelineKey),
+          findsOneWidget,
+        );
         expect(find.byType(EventDetails), findsOneWidget);
+      });
+    });
+
+    testWidgetsWithWindowSize('opens enhance tracing overlay', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(find.text('Enhance Tracing'), findsOneWidget);
+        await tester.tap(find.text('Enhance Tracing'));
+        await tester.pumpAndSettle();
+        expect(
+          find.richTextContaining('frame times may be negatively affected'),
+          findsOneWidget,
+        );
+        expect(
+          find.richTextContaining(
+            'you will need to reproduce activity in your app',
+          ),
+          findsOneWidget,
+        );
+        expect(find.richTextContaining('Track Widget Builds'), findsOneWidget);
+        expect(find.richTextContaining('Track Layouts'), findsOneWidget);
+        expect(find.richTextContaining('Track Paints'), findsOneWidget);
+        expect(find.byType(MoreInfoLink), findsNWidgets(3));
+      });
+    });
+
+    testWidgetsWithWindowSize(
+        'opens more debugging options overlay', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(find.text('More debugging options'), findsOneWidget);
+        await tester.tap(find.text('More debugging options'));
+        await tester.pumpAndSettle();
+        expect(
+          find.richTextContaining(
+            'you will need to reproduce activity in your app',
+          ),
+          findsOneWidget,
+        );
+        expect(find.richTextContaining('Render Clip layers'), findsOneWidget);
+        expect(
+          find.richTextContaining('Render Opacity layers'),
+          findsOneWidget,
+        );
+        expect(
+          find.richTextContaining('Render Physical Shape layers'),
+          findsOneWidget,
+        );
+        expect(find.byType(MoreInfoLink), findsNWidgets(3));
       });
     });
   });

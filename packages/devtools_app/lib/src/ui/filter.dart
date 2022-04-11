@@ -1,10 +1,14 @@
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 
-import '../auto_dispose_mixin.dart';
-import '../common_widgets.dart';
-import '../dialogs.dart';
-import '../theme.dart';
-import '../utils.dart';
+import '../primitives/auto_dispose_mixin.dart';
+import '../primitives/utils.dart';
+import '../shared/common_widgets.dart';
+import '../shared/dialogs.dart';
+import '../shared/theme.dart';
 import 'label.dart';
 
 // TODO(kenz): consider breaking this up flat data filtering and tree data
@@ -12,7 +16,7 @@ import 'label.dart';
 mixin FilterControllerMixin<T> {
   final filteredData = ListValueNotifier<T>([]);
 
-  final activeFilter = ValueNotifier<Filter<T>>(null);
+  final activeFilter = ValueNotifier<Filter<T>?>(null);
 
   // TODO(kenz): refactor this so that `filterData` returns the filtered data
   // and does not have side effects other than filtering data. Add a
@@ -28,26 +32,28 @@ mixin FilterControllerMixin<T> {
 
 class FilterDialog<FilterControllerMixin, T> extends StatefulWidget {
   FilterDialog({
-    @required this.controller,
+    required this.controller,
     this.onCancel,
     this.includeQueryFilter = true,
     this.queryInstructions,
     this.queryFilterArguments,
     this.toggleFilters,
-    double dialogWidth,
-  })  : assert(!includeQueryFilter ||
-            (queryInstructions != null && queryFilterArguments != null)),
+    double? dialogWidth,
+  })  : assert(
+          !includeQueryFilter ||
+              (queryInstructions != null && queryFilterArguments != null),
+        ),
         dialogWidth = dialogWidth ?? defaultDialogWidth;
 
   final FilterControllerMixin controller;
 
-  final VoidCallback onCancel;
+  final VoidCallback? onCancel;
 
-  final String queryInstructions;
+  final String? queryInstructions;
 
-  final Map<String, QueryFilterArgument> queryFilterArguments;
+  final Map<String, QueryFilterArgument>? queryFilterArguments;
 
-  final List<ToggleFilter<T>> toggleFilters;
+  final List<ToggleFilter<T>>? toggleFilters;
 
   final bool includeQueryFilter;
 
@@ -57,14 +63,17 @@ class FilterDialog<FilterControllerMixin, T> extends StatefulWidget {
   _FilterDialogState<T> createState() => _FilterDialogState<T>();
 }
 
-class _FilterDialogState<T> extends State<FilterDialog> with AutoDisposeMixin {
-  TextEditingController queryTextFieldController;
+class _FilterDialogState<T>
+    extends State<FilterDialog<FilterControllerMixin, T>>
+    with AutoDisposeMixin {
+  late final TextEditingController queryTextFieldController;
 
   @override
   void initState() {
     super.initState();
     queryTextFieldController = TextEditingController(
-        text: widget.controller.activeFilter.value?.query ?? '');
+      text: widget.controller.activeFilter.value?.queryFilter?.query ?? '',
+    );
   }
 
   @override
@@ -93,7 +102,7 @@ class _FilterDialogState<T> extends State<FilterDialog> with AutoDisposeMixin {
               const SizedBox(height: defaultSpacing),
             ],
             if (widget.toggleFilters != null)
-              for (final toggleFilter in widget.toggleFilters) ...[
+              for (final toggleFilter in widget.toggleFilters!) ...[
                 ToggleFilterElement(filter: toggleFilter),
               ],
           ],
@@ -104,8 +113,10 @@ class _FilterDialogState<T> extends State<FilterDialog> with AutoDisposeMixin {
           onPressed: () => widget.controller.filterData(
             Filter<T>(
               queryFilter: widget.includeQueryFilter
-                  ? QueryFilter.parse(queryTextFieldController.value.text,
-                      widget.queryFilterArguments)
+                  ? QueryFilter.parse(
+                      queryTextFieldController.value.text,
+                      widget.queryFilterArguments!,
+                    )
                   : null,
               toggleFilters: widget.toggleFilters,
             ),
@@ -150,21 +161,21 @@ class _FilterDialogState<T> extends State<FilterDialog> with AutoDisposeMixin {
 
   Widget _buildQueryInstructions() {
     return Text(
-      widget.queryInstructions,
+      widget.queryInstructions!,
       style: Theme.of(context).subtleTextStyle,
     );
   }
 
   void _resetFilters() {
     queryTextFieldController.clear();
-    for (final toggleFilter in widget.toggleFilters) {
+    for (final toggleFilter in widget.toggleFilters ?? []) {
       toggleFilter.enabled.value = toggleFilter.enabledByDefault;
     }
   }
 }
 
 class ToggleFilterElement extends StatelessWidget {
-  const ToggleFilterElement({Key key, @required this.filter}) : super(key: key);
+  const ToggleFilterElement({Key? key, required this.filter}) : super(key: key);
 
   final ToggleFilter filter;
 
@@ -195,15 +206,15 @@ class Filter<T> {
     this.toggleFilters = const [],
   });
 
-  final QueryFilter queryFilter;
+  final QueryFilter? queryFilter;
 
-  final List<ToggleFilter<T>> toggleFilters;
+  final List<ToggleFilter<T>>? toggleFilters;
 }
 
 class ToggleFilter<T> {
   ToggleFilter({
-    @required this.name,
-    @required this.includeCallback,
+    required this.name,
+    required this.includeCallback,
     this.tooltip,
     this.enabledByDefault = false,
   }) : enabled = ValueNotifier<bool>(enabledByDefault);
@@ -212,7 +223,7 @@ class ToggleFilter<T> {
 
   final bool Function(T element) includeCallback;
 
-  final String tooltip;
+  final String? tooltip;
 
   final bool enabledByDefault;
 
@@ -221,7 +232,7 @@ class ToggleFilter<T> {
 
 class QueryFilter {
   QueryFilter({
-    @required this.filterArguments,
+    required this.filterArguments,
     this.substrings = const [],
   });
 
@@ -268,7 +279,7 @@ class QueryFilter {
 
 class QueryFilterArgument {
   QueryFilterArgument({
-    @required this.keys,
+    required this.keys,
     this.values = const [],
     this.isNegative = false,
   });
@@ -294,10 +305,14 @@ class QueryFilterArgument {
     return false;
   }
 
-  bool matchesValue(String dataValue, {bool substringMatch = false}) {
+  bool matchesValue(String? dataValue, {bool substringMatch = false}) {
     // If there are no specified filter values, consider [dataValue] to match
     // this filter.
     if (values.isEmpty) return true;
+
+    if (dataValue == null) {
+      return isNegative;
+    }
 
     var matches = false;
     for (final value in values) {

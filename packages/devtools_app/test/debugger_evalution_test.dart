@@ -2,34 +2,39 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/debugger/evaluate.dart';
-import 'package:devtools_app/src/eval_on_dart_library.dart';
-import 'package:devtools_app/src/globals.dart';
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
+import 'dart:async';
+
+import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
+import 'package:devtools_app/src/screens/debugger/evaluate.dart';
+import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/ui/search.dart';
-import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_test/flutter_test_driver.dart';
-import 'package:devtools_test/flutter_test_environment.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/utils.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pedantic/pedantic.dart';
+
+import 'test_infra/flutter_test_driver.dart';
+import 'test_infra/flutter_test_environment.dart';
 
 void main() {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
 
-  Disposable isAlive;
-  DebuggerController debuggerController;
-  EvalOnDartLibrary eval;
+  late Disposable isAlive;
+  late DebuggerController debuggerController;
+  late EvalOnDartLibrary eval;
   setUp(() async {
     isAlive = Disposable();
     await env.setupEnvironment();
     debuggerController = TestDebuggerController();
     eval = EvalOnDartLibrary(
-        'package:flutter_app/src/autocomplete.dart', serviceManager.service,
-        disableBreakpoints: false);
+      'package:flutter_app/src/autocomplete.dart',
+      serviceManager.service!,
+      disableBreakpoints: false,
+    );
   });
 
   tearDown(() async {
@@ -56,7 +61,8 @@ void main() {
         'returns scoped variables when EditingParts is not a field',
         () async {
           await runMethodAndWaitForPause(
-              'AnotherClass().pauseWithScopedVariablesMethod()');
+            'AnotherClass().pauseWithScopedVariablesMethod()',
+          );
           expect(
             await autoCompleteResultsFor(
               EditingParts(
@@ -87,27 +93,30 @@ void main() {
         'returns filtered members when EditingParts is a field ',
         () async {
           await runMethodAndWaitForPause(
-              'AnotherClass().pauseWithScopedVariablesMethod()');
+            'AnotherClass().pauseWithScopedVariablesMethod()',
+          );
           expect(
-              await autoCompleteResultsFor(
-                EditingParts(
-                  activeWord: 'f',
-                  leftSide: 'foo.',
-                  rightSide: '',
-                ),
-                debuggerController,
+            await autoCompleteResultsFor(
+              EditingParts(
+                activeWord: 'f',
+                leftSide: 'foo.',
+                rightSide: '',
               ),
-              equals(['field1', 'field2', 'func1', 'func2']));
+              debuggerController,
+            ),
+            equals(['field1', 'field2', 'func1', 'func2']),
+          );
           expect(
-              await autoCompleteResultsFor(
-                EditingParts(
-                  activeWord: 'fu',
-                  leftSide: 'foo.',
-                  rightSide: '',
-                ),
-                debuggerController,
+            await autoCompleteResultsFor(
+              EditingParts(
+                activeWord: 'fu',
+                leftSide: 'foo.',
+                rightSide: '',
               ),
-              equals(['func1', 'func2']));
+              debuggerController,
+            ),
+            equals(['func1', 'func2']),
+          );
         },
         timeout: const Timeout.factor(8),
       );
@@ -116,12 +125,13 @@ void main() {
         'returns filtered members when EditingParts is a class name ',
         () async {
           await runMethodAndWaitForPause(
-              'AnotherClass().pauseWithScopedVariablesMethod()');
+            'AnotherClass().pauseWithScopedVariablesMethod()',
+          );
           expect(
             await autoCompleteResultsFor(
               EditingParts(
-                activeWord: '',
                 leftSide: 'FooClass.',
+                activeWord: '',
                 rightSide: '',
               ),
               debuggerController,
@@ -152,7 +162,8 @@ void main() {
         'returns privates only from library',
         () async {
           await runMethodAndWaitForPause(
-              'AnotherClass().pauseWithScopedVariablesMethod()');
+            'AnotherClass().pauseWithScopedVariablesMethod()',
+          );
           expect(
             collectionEquals(
               await autoCompleteResultsFor(
@@ -179,7 +190,8 @@ void main() {
         'returns exported members from import',
         () async {
           await runMethodAndWaitForPause(
-              'AnotherClass().pauseWithScopedVariablesMethod()');
+            'AnotherClass().pauseWithScopedVariablesMethod()',
+          );
           expect(
             await autoCompleteResultsFor(
               EditingParts(
@@ -240,7 +252,8 @@ void main() {
         'returns prefixes of libraries imported',
         () async {
           await runMethodAndWaitForPause(
-              'AnotherClass().pauseWithScopedVariablesMethod()');
+            'AnotherClass().pauseWithScopedVariablesMethod()',
+          );
           expect(
             await autoCompleteResultsFor(
               EditingParts(
@@ -276,12 +289,13 @@ void main() {
         'returns no operators for int',
         () async {
           await runMethodAndWaitForPause(
-              'AnotherClass().pauseWithScopedVariablesMethod()');
+            'AnotherClass().pauseWithScopedVariablesMethod()',
+          );
           expect(
             await autoCompleteResultsFor(
               EditingParts(
-                activeWord: '',
                 leftSide: '7.',
+                activeWord: '',
                 rightSide: '',
               ),
               debuggerController,

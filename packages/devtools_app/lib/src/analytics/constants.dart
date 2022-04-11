@@ -4,11 +4,14 @@
 
 // Type of events (event_category):
 
-import '../inspector/inspector_screen.dart';
-import '../logging/logging_screen.dart';
-import '../memory/memory_screen.dart';
-import '../performance/performance_screen.dart';
-import '../profiler/profiler_screen.dart';
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
+import '../screens/inspector/inspector_screen.dart';
+import '../screens/logging/logging_screen.dart';
+import '../screens/memory/memory_screen.dart';
+import '../screens/network/network_screen.dart';
+import '../screens/performance/performance_screen.dart';
+import '../screens/profiler/profiler_screen.dart';
 
 const String screenViewEvent = 'screen'; // Active screen (tab selected).
 const String selectEvent = 'select'; // User selected something.
@@ -22,6 +25,7 @@ const String inspector = InspectorScreen.id;
 const String performance = PerformanceScreen.id;
 const String cpuProfiler = ProfilerScreen.id;
 const String memory = MemoryScreen.id;
+const String network = NetworkScreen.id;
 const String logging = LoggingScreen.id;
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
@@ -38,6 +42,7 @@ const String feedbackButton = 'feedbackButton';
 
 // Inspector UX actions:
 const String refresh = 'refresh';
+const String refreshEmptyTree = 'refreshEmptyTree';
 const String performanceOverlay = 'performanceOverlay';
 const String debugPaint = 'debugPaint';
 const String paintBaseline = 'paintBaseline';
@@ -48,6 +53,7 @@ const String togglePlatform = 'togglePlatform';
 const String selectWidgetMode = 'selectWidgetMode';
 const String enableOnDeviceInspector = 'enableOnDeviceInspector';
 const String showOnDeviceInspector = 'showInspector';
+const String treeNodeSelection = 'treeNodeSelection';
 
 // Performance UX actions:
 const refreshTimelineEvents = 'refreshTimelineEvents';

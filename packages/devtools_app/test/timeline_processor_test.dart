@@ -2,15 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/performance/performance_controller.dart';
-import 'package:devtools_app/src/performance/performance_model.dart';
-import 'package:devtools_app/src/performance/timeline_event_processor.dart';
-import 'package:devtools_app/src/trace_event.dart';
-import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_test/performance_test_data.dart';
-import 'package:devtools_test/test_utils.dart';
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
+import 'package:devtools_app/src/primitives/trace_event.dart';
+import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/screens/performance/performance_controller.dart';
+import 'package:devtools_app/src/screens/performance/performance_model.dart';
+import 'package:devtools_app/src/screens/performance/timeline_event_processor.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+
+import 'test_data/performance_test_data.dart';
+import 'test_utils/test_utils.dart';
 
 void main() {
   final originalGoldenUiEvent = goldenUiTimelineEvent.deepCopy();
@@ -35,7 +38,7 @@ void main() {
   });
 
   group('TimelineProcessor', () {
-    TimelineEventProcessor processor;
+    late TimelineEventProcessor processor;
 
     setUp(() {
       processor = TimelineEventProcessor(MockTimelineController())
@@ -49,7 +52,7 @@ void main() {
       await processor.processTraceEvents(goldenUiTraceEvents);
 
       final processedUiEvent =
-          processor.performanceController.data.timelineEvents.first;
+          processor.performanceController.data!.timelineEvents.first;
       expect(processedUiEvent.toString(), equals(goldenUiString));
     });
 
@@ -63,12 +66,12 @@ void main() {
       // VSYNC
       var traceEvents = List.of(goldenUiTraceEvents);
       traceEvents.insert(1, goldenUiTraceEvents[1]);
+      final events = processor.performanceController.data!.timelineEvents;
 
       await processor.processTraceEvents(traceEvents);
-      expect(processor.performanceController.data.timelineEvents.length,
-          equals(1));
+      expect(events.length, equals(1));
       expect(
-        processor.performanceController.data.timelineEvents.first.toString(),
+        events.first.toString(),
         equals(goldenUiString),
       );
 
@@ -83,14 +86,15 @@ void main() {
       //  Animator::BeginFrame
       // VSYNC
       traceEvents = List.of(goldenUiTraceEvents);
-      traceEvents.insert(goldenUiTraceEvents.length - 2,
-          goldenUiTraceEvents[goldenUiTraceEvents.length - 2]);
+      traceEvents.insert(
+        goldenUiTraceEvents.length - 2,
+        goldenUiTraceEvents[goldenUiTraceEvents.length - 2],
+      );
 
       await processor.processTraceEvents(traceEvents);
-      expect(processor.performanceController.data.timelineEvents.length,
-          equals(1));
+      expect(events.length, equals(1));
       expect(
-        processor.performanceController.data.timelineEvents.first.toString(),
+        events.first.toString(),
         equals(goldenUiString),
       );
 
@@ -147,29 +151,32 @@ void main() {
         ...goldenUiTraceEvents,
         ...goldenRasterTraceEvents,
       ]..sort();
+
+      final events = processor.performanceController.data!.timelineEvents;
+
       expect(
-        processor.performanceController.data.timelineEvents,
+        events,
         isEmpty,
       );
       await processor.processTraceEvents(traceEvents);
       expect(
-        processor.performanceController.data.timelineEvents.length,
+        events.length,
         equals(4),
       );
       expect(
-        processor.performanceController.data.timelineEvents[0].toString(),
+        events[0].toString(),
         equals(goldenAsyncString),
       );
       expect(
-        processor.performanceController.data.timelineEvents[1].toString(),
+        events[1].toString(),
         equals('  D [193937061035 μs - 193938741076 μs]\n'),
       );
       expect(
-        processor.performanceController.data.timelineEvents[2].toString(),
+        events[2].toString(),
         equals(goldenUiString),
       );
       expect(
-        processor.performanceController.data.timelineEvents[3].toString(),
+        events[3].toString(),
         equals(goldenRasterString),
       );
     });
@@ -180,24 +187,24 @@ void main() {
         ...goldenRasterTraceEvents,
       ]..sort();
 
+      final events = processor.performanceController.data!.timelineEvents;
+
       await processor.processTraceEvents(traceEvents);
       expect(
-        processor.performanceController.data.timelineEvents.length,
+        events.length,
         equals(2),
       );
       expect(
-        processor.performanceController.data.timelineEvents[0].toString(),
+        events[0].toString(),
         equals(goldenUiString),
       );
       expect(
-        processor.performanceController.data.timelineEvents[1].toString(),
+        events[1].toString(),
         equals(goldenRasterString),
       );
 
-      final uiEvent = processor.performanceController.data.timelineEvents[0]
-          as SyncTimelineEvent;
-      final rasterEvent = processor.performanceController.data.timelineEvents[1]
-          as SyncTimelineEvent;
+      final uiEvent = events[0] as SyncTimelineEvent;
+      final rasterEvent = events[1] as SyncTimelineEvent;
       expect(uiEvent.uiFrameEvents.length, equals(1));
       expect(uiEvent.rasterFrameEvents, isEmpty);
       expect(rasterEvent.uiFrameEvents, isEmpty);
@@ -205,15 +212,16 @@ void main() {
     });
 
     test('processes trace with duplicate events', () async {
+      final events = processor.performanceController.data!.timelineEvents;
       expect(
-        processor.performanceController.data.timelineEvents,
+        events,
         isEmpty,
       );
       await processor.processTraceEvents(durationEventsWithDuplicateTraces);
       // If the processor is not handling duplicates properly, this value would
       // be 0.
       expect(
-        processor.performanceController.data.timelineEvents.length,
+        events.length,
         equals(1),
       );
     });
@@ -258,16 +266,16 @@ class MockTimelineController extends Mock implements PerformanceController {
 
   @override
   void addTimelineEvent(TimelineEvent event) {
-    data.addTimelineEvent(event);
+    data!.addTimelineEvent(event);
   }
 
   @override
   void addFrame(FlutterFrame frame) {
-    data.frames.add(frame);
+    data!.frames.add(frame);
   }
 
   @override
   Future<void> clearData({bool clearVmTimeline = true}) async {
-    data.clear();
+    data!.clear();
   }
 }

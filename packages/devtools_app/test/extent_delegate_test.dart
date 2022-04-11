@@ -2,79 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 @TestOn('vm')
-import 'package:devtools_app/src/extent_delegate_list.dart';
-import 'package:devtools_test/rendering_tester.dart';
-import 'package:flutter/foundation.dart';
+import 'package:devtools_app/src/primitives/extent_delegate_list.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
-  TestRenderSliverBoxChildManager({
-    @required this.children,
-    @required this.extentDelegate,
-  });
-
-  RenderSliverExtentDelegateBoxAdaptor _renderObject;
-  List<RenderBox> children;
-
-  RenderSliverExtentDelegateBoxAdaptor createRenderSliverExtentDelegate() {
-    assert(_renderObject == null);
-    _renderObject = RenderSliverExtentDelegateBoxAdaptor(
-      childManager: this,
-      extentDelegate: extentDelegate,
-    );
-    return _renderObject;
-  }
-
-  final ExtentDelegate extentDelegate;
-
-  int _currentlyUpdatingChildIndex;
-
-  @override
-  void createChild(int index, {@required RenderBox after}) {
-    if (index < 0 || index >= children.length) return;
-    try {
-      _currentlyUpdatingChildIndex = index;
-      _renderObject.insert(children[index], after: after);
-    } finally {
-      _currentlyUpdatingChildIndex = null;
-    }
-  }
-
-  @override
-  void removeChild(RenderBox child) {
-    _renderObject.remove(child);
-  }
-
-  @override
-  double estimateMaxScrollOffset(
-    SliverConstraints constraints, {
-    int firstIndex,
-    int lastIndex,
-    double leadingScrollOffset,
-    double trailingScrollOffset,
-  }) {
-    assert(lastIndex >= firstIndex);
-    return children.length *
-        (trailingScrollOffset - leadingScrollOffset) /
-        (lastIndex - firstIndex + 1);
-  }
-
-  @override
-  int get childCount => children.length;
-
-  @override
-  void didAdoptChild(RenderBox child) {
-    assert(_currentlyUpdatingChildIndex != null);
-    final SliverMultiBoxAdaptorParentData childParentData =
-        child.parentData as SliverMultiBoxAdaptorParentData;
-    childParentData.index = _currentlyUpdatingChildIndex;
-  }
-
-  @override
-  void setDidUnderflow(bool value) {}
-}
+import 'test_utils/extent_delegate_utils.dart';
+import 'test_utils/rendering_tester.dart';
 
 void main() {
   group('RenderSliverFixedExtentDelgate', () {
@@ -82,9 +18,10 @@ void main() {
       test('itemExtent', () {
         final extents = [100.0, 200.0, 50.0, 100.0];
         final extentDelegate = FixedExtentDelegate(
-            // Create items with increasing extents.
-            computeExtent: (index) => extents[index],
-            computeLength: () => extents.length);
+          // Create items with increasing extents.
+          computeExtent: (index) => extents[index],
+          computeLength: () => extents.length,
+        );
 
         expect(extentDelegate.length, equals(4));
         for (int i = 0; i < extents.length; i++) {
@@ -99,9 +36,10 @@ void main() {
       test('getMinChildIndexForScrollOffset', () {
         final extents = [100.0, 200.0, 50.0, 100.0];
         final extentDelegate = FixedExtentDelegate(
-            // Create items with increasing extents.
-            computeExtent: (index) => extents[index],
-            computeLength: () => extents.length);
+          // Create items with increasing extents.
+          computeExtent: (index) => extents[index],
+          computeLength: () => extents.length,
+        );
 
         expect(extentDelegate.minChildIndexForScrollOffset(0), 0);
         expect(extentDelegate.minChildIndexForScrollOffset(-1000), 0);
@@ -123,9 +61,10 @@ void main() {
         test('getMaxChildIndexForScrollOffset', () {
           final extents = [100.0, 200.0, 50.0, 100.0];
           final extentDelegate = FixedExtentDelegate(
-              // Create items with increasing extents.
-              computeExtent: (index) => extents[index],
-              computeLength: () => extents.length);
+            // Create items with increasing extents.
+            computeExtent: (index) => extents[index],
+            computeLength: () => extents.length,
+          );
 
           expect(extentDelegate.maxChildIndexForScrollOffset(0), 0);
           expect(extentDelegate.maxChildIndexForScrollOffset(-1000), 0);
@@ -135,11 +74,15 @@ void main() {
           // actually intentionally less than the min child for the case that
           // the child is right on the boundary.
           expect(
-              extentDelegate.maxChildIndexForScrollOffset(99.99999999999), 0);
+            extentDelegate.maxChildIndexForScrollOffset(99.99999999999),
+            0,
+          );
           expect(extentDelegate.maxChildIndexForScrollOffset(250), 1);
           expect(extentDelegate.maxChildIndexForScrollOffset(299), 1);
           expect(
-              extentDelegate.maxChildIndexForScrollOffset(299.99999999999), 1);
+            extentDelegate.maxChildIndexForScrollOffset(299.99999999999),
+            1,
+          );
           expect(extentDelegate.maxChildIndexForScrollOffset(300), 1);
           expect(extentDelegate.maxChildIndexForScrollOffset(330), 2);
           expect(extentDelegate.maxChildIndexForScrollOffset(350), 2);

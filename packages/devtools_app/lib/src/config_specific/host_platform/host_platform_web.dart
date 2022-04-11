@@ -9,9 +9,9 @@ class HostPlatform {
     _isMacOS = window.navigator.userAgent.contains('Macintosh');
   }
 
-  static final HostPlatform instance = HostPlatform._();
+  static late final HostPlatform instance = HostPlatform._();
 
-  bool _isMacOS;
+  late final bool _isMacOS;
 
   bool get isMacOS => _isMacOS;
 }

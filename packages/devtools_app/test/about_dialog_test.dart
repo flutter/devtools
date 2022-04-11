@@ -2,25 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import 'package:devtools_app/devtools.dart' as devtools;
 import 'package:devtools_app/src/app.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/extension_points/extensions_base.dart';
 import 'package:devtools_app/src/extension_points/extensions_external.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/utils.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  DevToolsAboutDialog aboutDialog;
+  late DevToolsAboutDialog aboutDialog;
 
   group('About Dialog', () {
     setUp(() {
       aboutDialog = DevToolsAboutDialog();
       setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(ServiceConnectionManager, FakeServiceManager());
+      setGlobal(IdeTheme, IdeTheme());
     });
 
     testWidgets('builds dialog', (WidgetTester tester) async {
@@ -37,8 +39,10 @@ void main() {
     testWidgets('Feedback section', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(aboutDialog));
       expect(find.text('Feedback'), findsOneWidget);
-      expect(findSubstring(aboutDialog, 'github.com/flutter/devtools'),
-          findsOneWidget);
+      expect(
+        findSubstring(aboutDialog, 'github.com/flutter/devtools'),
+        findsOneWidget,
+      );
     });
   });
 }

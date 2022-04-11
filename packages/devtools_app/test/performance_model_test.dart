@@ -1,21 +1,25 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import 'dart:convert';
 
-import 'package:devtools_app/src/performance/performance_model.dart';
-import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/trace_event.dart';
-import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_test/cpu_profile_test_data.dart';
-import 'package:devtools_test/performance_test_data.dart';
-import 'package:devtools_test/test_utils.dart';
+import 'package:devtools_app/src/primitives/trace_event.dart';
+import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/screens/performance/performance_model.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_data/cpu_profile_test_data.dart';
+import 'test_data/performance_test_data.dart';
+import 'test_utils/test_utils.dart';
 
 void main() {
   group('PerformanceData', () {
-    PerformanceData performanceData;
+    late PerformanceData performanceData;
 
     setUp(() {
       performanceData = PerformanceData(
@@ -41,21 +45,26 @@ void main() {
 
     test('to json', () {
       expect(
-          performanceData.json,
-          equals({
-            PerformanceData.selectedFrameIdKey: null,
-            PerformanceData.flutterFramesKey: [],
-            PerformanceData.displayRefreshRateKey: 60,
-            PerformanceData.traceEventsKey: [],
-            PerformanceData.cpuProfileKey: {},
-            PerformanceData.selectedEventKey: {},
-          }));
+        performanceData.json,
+        equals({
+          PerformanceData.selectedFrameIdKey: null,
+          PerformanceData.flutterFramesKey: [],
+          PerformanceData.displayRefreshRateKey: 60,
+          PerformanceData.traceEventsKey: [],
+          PerformanceData.cpuProfileKey: {},
+          PerformanceData.selectedEventKey: {},
+        }),
+      );
 
-      performanceData = PerformanceData(displayRefreshRate: 60)
-        ..traceEvents.add({'name': 'FakeTraceEvent'})
-        ..cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson)
-        ..selectedEvent = vsyncEvent
-        ..frames = [testFrame0, testFrame1];
+      performanceData = PerformanceData(
+        traceEvents: [
+          {'name': 'FakeTraceEvent'}
+        ],
+        frames: [testFrame0, testFrame1],
+        selectedEvent: vsyncEvent,
+        cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
+        displayRefreshRate: 60,
+      );
       expect(
         performanceData.json,
         equals({
@@ -129,44 +138,50 @@ void main() {
       performanceData.initializeEventGroups(threadNamesById);
       expect(
         performanceData
-            .eventGroups[PerformanceData.uiKey].rows[0].events.length,
+            .eventGroups[PerformanceData.uiKey]!.rows[0].events.length,
         equals(1),
       );
       expect(
         performanceData
-            .eventGroups[PerformanceData.rasterKey].rows[0].events.length,
+            .eventGroups[PerformanceData.rasterKey]!.rows[0].events.length,
         equals(1),
       );
       expect(
         performanceData
-            .eventGroups[PerformanceData.unknownKey].rows[0].events.length,
+            .eventGroups[PerformanceData.unknownKey]!.rows[0].events.length,
         equals(1),
       );
-      expect(performanceData.eventGroups['A'].rows[0].events.length, equals(1));
+      expect(
+        performanceData.eventGroups['A']!.rows[0].events.length,
+        equals(1),
+      );
 
       performanceData.addTimelineEvent(rasterTimelineEventWithSubtleShaderJank);
       performanceData.initializeEventGroups(threadNamesById, startIndex: 4);
       expect(
         performanceData
-            .eventGroups[PerformanceData.uiKey].rows[0].events.length,
+            .eventGroups[PerformanceData.uiKey]!.rows[0].events.length,
         equals(1),
       );
       expect(
         performanceData
-            .eventGroups[PerformanceData.rasterKey].rows[0].events.length,
+            .eventGroups[PerformanceData.rasterKey]!.rows[0].events.length,
         equals(1),
       );
       expect(
         performanceData
-            .eventGroups[PerformanceData.rasterKey].rows[2].events.length,
+            .eventGroups[PerformanceData.rasterKey]!.rows[2].events.length,
         equals(1),
       );
       expect(
         performanceData
-            .eventGroups[PerformanceData.unknownKey].rows[0].events.length,
+            .eventGroups[PerformanceData.unknownKey]!.rows[0].events.length,
         equals(1),
       );
-      expect(performanceData.eventGroups['A'].rows[0].events.length, equals(1));
+      expect(
+        performanceData.eventGroups['A']!.rows[0].events.length,
+        equals(1),
+      );
     });
   });
 
@@ -196,14 +211,17 @@ void main() {
       expectedFirstTraceJson[TraceEvent.argsKey]
           .addAll({TraceEvent.typeKey: TimelineEventType.ui});
       expectedFirstTraceJson.addAll(
-          {TraceEvent.durationKey: vsyncEvent.time.duration.inMicroseconds});
+        {TraceEvent.durationKey: vsyncEvent.time.duration.inMicroseconds},
+      );
       expect(
-        offlineData.selectedEvent.json,
+        offlineData.selectedEvent!.json,
         equals({TimelineEvent.firstTraceKey: expectedFirstTraceJson}),
       );
       expect(offlineData.displayRefreshRate, equals(120));
       expect(
-          offlineData.cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
+        offlineData.cpuProfileData!.toJson,
+        equals(goldenCpuProfileDataJson),
+      );
     });
 
     test('shallowClone', () {
@@ -367,7 +385,7 @@ void main() {
       event.addEndEvent(asyncEndATrace);
       expect(event.endTraceEventJson, equals(asyncEndATrace.event.json));
       expect(
-        event.time.end.inMicroseconds,
+        event.time.end!.inMicroseconds,
         asyncEndATrace.event.timestampMicros,
       );
     });
@@ -381,9 +399,13 @@ void main() {
       expect(jankyFrameUiOnly.shaderDuration.inMicroseconds, equals(0));
       expect(jankyFrameRasterOnly.shaderDuration.inMicroseconds, equals(0));
       expect(
-          testFrameWithShaderJank.shaderDuration.inMicroseconds, equals(50000));
-      expect(testFrameWithSubtleShaderJank.shaderDuration.inMicroseconds,
-          equals(4000));
+        testFrameWithShaderJank.shaderDuration.inMicroseconds,
+        equals(50000),
+      );
+      expect(
+        testFrameWithSubtleShaderJank.shaderDuration.inMicroseconds,
+        equals(4000),
+      );
     });
 
     test('hasShaderTime', () {
@@ -403,8 +425,54 @@ void main() {
       expect(jankyFrameUiOnly.hasShaderJank(defaultRefreshRate), isFalse);
       expect(jankyFrameRasterOnly.hasShaderJank(defaultRefreshRate), isFalse);
       expect(testFrameWithShaderJank.hasShaderJank(defaultRefreshRate), isTrue);
-      expect(testFrameWithSubtleShaderJank.hasShaderJank(defaultRefreshRate),
-          isFalse);
+      expect(
+        testFrameWithSubtleShaderJank.hasShaderJank(defaultRefreshRate),
+        isFalse,
+      );
+    });
+  });
+
+  group('FrameAnalysis', () {
+    late FlutterFrame frame;
+    late FrameAnalysis frameAnalysis;
+
+    setUp(() {
+      frame = testFrame0.shallowCopy()
+        ..setEventFlow(goldenUiTimelineEvent)
+        ..setEventFlow(goldenRasterTimelineEvent);
+      frameAnalysis = FrameAnalysis(frame);
+    });
+
+    test('buildPhase', () {
+      final buildPhase = frameAnalysis.buildPhase;
+      expect(buildPhase.events.length, equals(2));
+      expect(buildPhase.duration.inMicroseconds, equals(83));
+    });
+
+    test('layoutPhase', () {
+      final layoutPhase = frameAnalysis.layoutPhase;
+      expect(layoutPhase.events.length, equals(1));
+      expect(layoutPhase.duration.inMicroseconds, equals(211));
+    });
+
+    test('paintPhase', () {
+      final paintPhase = frameAnalysis.paintPhase;
+      expect(paintPhase.events.length, equals(1));
+      expect(paintPhase.duration.inMicroseconds, equals(74));
+    });
+
+    test('rasterPhase', () {
+      final rasterPhase = frameAnalysis.rasterPhase;
+      expect(rasterPhase.events.length, equals(1));
+      expect(rasterPhase.duration.inMicroseconds, equals(28404));
+    });
+
+    test('longestFramePhase', () {
+      expect(frameAnalysis.longestFramePhase.title, equals('Raster'));
+
+      frame = testFrame0.shallowCopy()..setEventFlow(goldenUiTimelineEvent);
+      frameAnalysis = FrameAnalysis(frame);
+      expect(frameAnalysis.longestFramePhase.title, equals('Layout'));
     });
   });
 }

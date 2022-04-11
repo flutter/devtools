@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 // ignore: unused_import, allows the tests to use functions from tester.dart
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

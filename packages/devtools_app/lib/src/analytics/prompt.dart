@@ -6,15 +6,15 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../common_widgets.dart';
 import '../config_specific/launch_url/launch_url.dart';
-import '../theme.dart';
+import '../shared/common_widgets.dart';
+import '../shared/theme.dart';
 import 'analytics_controller.dart';
 
 /// Conditionally displays a prompt to request permission for collection of
 /// usage analytics.
 class AnalyticsPrompt extends StatefulWidget {
-  const AnalyticsPrompt({@required this.child});
+  const AnalyticsPrompt({required this.child});
 
   final Widget child;
 
@@ -23,7 +23,7 @@ class AnalyticsPrompt extends StatefulWidget {
 }
 
 class _AnalyticsPromptState extends State<AnalyticsPrompt> {
-  AnalyticsController _controller;
+  AnalyticsController? _controller;
 
   @override
   void didChangeDependencies() {
@@ -38,59 +38,58 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    return ValueListenableBuilder(
-      valueListenable: _controller.shouldPrompt,
-      builder: (context, showPrompt, _) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: _controller!.shouldPrompt,
+      builder: (context, showPrompt, child) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (showPrompt)
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(defaultBorderRadius),
-                  side: BorderSide(
-                    color: theme.focusColor,
-                  ),
-                ),
-                color: theme.canvasColor,
-                margin: const EdgeInsets.only(bottom: denseSpacing),
-                child: Padding(
-                  padding: const EdgeInsets.all(defaultSpacing),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Send usage statistics for DevTools?',
-                            style: textTheme.headline5,
-                          ),
-                          CircularIconButton(
-                            icon: Icons.close,
-                            onPressed: _controller.hidePrompt,
-                            backgroundColor: theme.canvasColor,
-                            foregroundColor:
-                                theme.colorScheme.contrastForeground,
-                          ),
-                        ],
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.only(top: defaultSpacing),
-                      ),
-                      _analyticsDescription(textTheme),
-                      const SizedBox(height: denseRowSpacing),
-                      _actionButtons(),
-                    ],
-                  ),
-                ),
-              ),
+            if (showPrompt) child!,
             Expanded(child: widget.child),
           ],
         );
       },
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(defaultBorderRadius),
+          side: BorderSide(
+            color: theme.focusColor,
+          ),
+        ),
+        color: theme.canvasColor,
+        margin: const EdgeInsets.only(bottom: denseSpacing),
+        child: Padding(
+          padding: const EdgeInsets.all(defaultSpacing),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Send usage statistics for DevTools?',
+                    style: textTheme.headline5,
+                  ),
+                  CircularIconButton(
+                    icon: Icons.close,
+                    onPressed: _controller!.hidePrompt,
+                    backgroundColor: theme.canvasColor,
+                    foregroundColor: theme.colorScheme.contrastForeground,
+                  ),
+                ],
+              ),
+              const Padding(
+                padding: EdgeInsets.only(top: defaultSpacing),
+              ),
+              _analyticsDescription(textTheme),
+              const SizedBox(height: denseRowSpacing),
+              _actionButtons(),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -106,7 +105,8 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
           ),
           TextSpan(
             text: 'privacy policy',
-            style: textTheme.subtitle1.copyWith(color: const Color(0xFF54C1EF)),
+            style:
+                textTheme.subtitle1?.copyWith(color: const Color(0xFF54C1EF)),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
                 launchUrl(
@@ -131,7 +131,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
         ElevatedButton(
           onPressed: () {
             // This will also hide the prompt.
-            _controller.toggleAnalyticsEnabled(false);
+            _controller!.toggleAnalyticsEnabled(false);
           },
           style: ElevatedButton.styleFrom(primary: Colors.grey),
           child: const Text('No thanks.'),
@@ -141,7 +141,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
         ),
         ElevatedButton(
           onPressed: () {
-            _controller
+            _controller!
               ..toggleAnalyticsEnabled(true)
               ..hidePrompt();
           },

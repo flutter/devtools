@@ -2,20 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/performance/event_details.dart';
-import 'package:devtools_app/src/performance/performance_controller.dart';
-import 'package:devtools_app/src/performance/performance_model.dart';
-import 'package:devtools_app/src/profiler/cpu_profiler.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/vm_flags.dart' as vm_flags;
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/performance_test_data.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/src/screens/performance/event_details.dart';
+import 'package:devtools_app/src/screens/performance/performance_controller.dart';
+import 'package:devtools_app/src/screens/performance/performance_model.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+
+import 'test_data/performance_test_data.dart';
 
 void main() {
   const windowSize = Size(2000.0, 1000.0);
@@ -24,14 +27,16 @@ void main() {
     EventDetails eventDetails;
 
     Future<void> pumpEventDetails(
-      TimelineEvent selectedEvent,
+      TimelineEvent? selectedEvent,
       WidgetTester tester,
     ) async {
       eventDetails = EventDetails(selectedEvent);
-      await tester.pumpWidget(wrapWithControllers(
-        eventDetails,
-        performance: PerformanceController(),
-      ));
+      await tester.pumpWidget(
+        wrapWithControllers(
+          eventDetails,
+          performance: PerformanceController(),
+        ),
+      );
       expect(find.byType(EventDetails), findsOneWidget);
     }
 
@@ -39,7 +44,8 @@ void main() {
       final fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
-      when(serviceManager.connectedApp.isDartWebAppNow).thenReturn(false);
+      setGlobal(IdeTheme, IdeTheme());
+      when(serviceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
     });
 
     testWidgetsWithWindowSize('builds for UI event', windowSize,
@@ -84,7 +90,7 @@ void main() {
 
     testWidgetsWithWindowSize('builds for disabled profiler', windowSize,
         (WidgetTester tester) async {
-      await serviceManager.service.setFlag(vm_flags.profiler, 'false');
+      await serviceManager.service!.setFlag(vm_flags.profiler, 'false');
       await pumpEventDetails(goldenUiTimelineEvent, tester);
       expect(find.byType(CpuProfiler), findsNothing);
       expect(find.byType(CpuProfilerDisabled), findsOneWidget);

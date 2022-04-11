@@ -53,16 +53,13 @@ Checkout the commit you just created, or remain on the branch you just landed th
 git checkout 8881a7caa9067471008a8e00750b161f53cdb843
 ```
 
-Build the DevTools binary.
+Build the DevTools binary and run it from your local Dart SDK. From the main devtools/ directory.
 ```shell
-./tool/build_release.sh
+dart ./tool/build_e2e.dart
 ```
 
 Launch DevTools and verify that everything generally works.
-```shell
-dart packages/devtools/bin/devtools.dart
-```
-- open the page in a browser (http://localhost:9100)
+- open the page in a browser (http://localhost:53432)
 - `flutter run` an application
 - connect to the running app from DevTools, verify that the pages
   generally work and that there are no exceptions in the chrome devtools log
@@ -114,3 +111,18 @@ gclient sync -D
 ./tools/build.py -mrelease -ax64 create_sdk
 out/ReleaseX64/dart-sdk/bin/dart devtools  # On OSX replace 'out' with 'xcodebuild'
 ```
+
+### Publish package:devtools_shared on pub
+
+`package:devtools_shared` is the only DevTools package that is published on pub.
+From the devtools/packages/devtools_shared directory, run:
+```shell
+pub publish
+```
+
+### Write release notes for the release
+Release notes should contain details about the user-facing changes included in the release.
+These notes are shown directly in DevTools when a user opens a new version of DevTools. Please
+see the release notes
+[README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/shared/release_notes/README.md)
+for details on where to add release notes and how to test them.

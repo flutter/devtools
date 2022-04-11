@@ -2,23 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/app_size/code_size_attribution.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/table.dart';
-import 'package:devtools_test/app_size_test_data/precompiler_trace.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/wrappers.dart';
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/app_size/code_size_attribution.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/table.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_snapshot_analysis/precompiler_trace.dart';
 import 'package:vm_snapshot_analysis/program_info.dart';
 
+import 'test_data/app_size_test_data/precompiler_trace.dart';
+
 void main() {
-  CallGraph callGraph;
+  late CallGraph callGraph;
 
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(IdeTheme, IdeTheme());
     callGraph = generateCallGraphWithDominators(
       precompilerTrace,
       NodeType.packageNode,
@@ -26,7 +30,7 @@ void main() {
   });
 
   group('CallGraphWithDominators', () {
-    CallGraphWithDominators callGraphWithDominators;
+    late CallGraphWithDominators callGraphWithDominators;
     setUp(() async {
       callGraphWithDominators = CallGraphWithDominators(
         callGraphRoot: callGraph.root,
@@ -70,7 +74,7 @@ void main() {
   });
 
   group('CallGraphView', () {
-    CallGraphView callGraphView;
+    late CallGraphView callGraphView;
     setUp(() async {
       callGraphView = CallGraphView(node: callGraph.root);
     });
@@ -132,7 +136,7 @@ void main() {
   });
 
   group('DominatorTree', () {
-    DominatorTree dominatorTree;
+    late DominatorTree dominatorTree;
 
     setUp(() async {
       dominatorTree = DominatorTree(
@@ -158,7 +162,7 @@ void main() {
       expect(root.isExpanded, isTrue);
       expect(root.children.length, equals(18));
 
-      for (DominatorTreeNode child in root.children) {
+      for (DominatorTreeNode child in root.children.cast<DominatorTreeNode>()) {
         expect(child.isExpanded, isFalse);
       }
     });
@@ -181,15 +185,19 @@ void main() {
       expect(root.children.length, equals(18));
 
       // Only the selected node should be expanded.
-      for (DominatorTreeNode child in root.children) {
-        expect(child.isExpanded,
-            child.callGraphNode.display == 'package:code_size_package');
+      for (DominatorTreeNode child in root.children.cast<DominatorTreeNode>()) {
+        expect(
+          child.isExpanded,
+          child.callGraphNode.display == 'package:code_size_package',
+        );
       }
 
       // The selected node's children should not be expanded.
       final selectedNode = root.children.first as DominatorTreeNode;
-      expect(selectedNode.callGraphNode.display,
-          equals('package:code_size_package'));
+      expect(
+        selectedNode.callGraphNode.display,
+        equals('package:code_size_package'),
+      );
       expect(selectedNode.children.length, equals(3));
 
       for (DominatorTreeNode child in selectedNode.children) {

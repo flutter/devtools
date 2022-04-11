@@ -161,6 +161,15 @@ class DevToolsUsage {
     final prop = properties[activeSurvey!];
     rewriteActiveSurvey(value, prop[_surveyShownCount]);
   }
+
+  String get lastReleaseNotesVersion {
+    final version = properties['lastReleaseNotesVersion'] ??= '';
+    return version;
+  }
+
+  set lastReleaseNotesVersion(String value) {
+    properties['lastReleaseNotesVersion'] = value;
+  }
 }
 
 abstract class PersistentProperties {

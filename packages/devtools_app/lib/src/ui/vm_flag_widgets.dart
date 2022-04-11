@@ -2,25 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as analytics_constants;
-import '../banner_messages.dart';
-import '../common_widgets.dart';
-import '../globals.dart';
-import '../profiler/cpu_profile_service.dart';
-import '../profiler/profile_granularity.dart';
+import '../screens/profiler/cpu_profile_service.dart';
+import '../screens/profiler/profile_granularity.dart';
+import '../shared/banner_messages.dart';
+import '../shared/common_widgets.dart';
+import '../shared/globals.dart';
 
 /// DropdownButton that controls the value of the 'profile_period' vm flag.
 ///
 /// This flag controls the rate at which the vm samples the CPU call stack.
 class ProfileGranularityDropdown extends StatelessWidget {
   const ProfileGranularityDropdown({
-    @required this.screenId,
-    @required this.profileGranularityFlagNotifier,
+    required this.screenId,
+    required this.profileGranularityFlagNotifier,
   });
 
   final String screenId;
@@ -42,7 +44,8 @@ class ProfileGranularityDropdown extends StatelessWidget {
         // dropdown list. We default to [ProfileGranularity.medium] if the flag
         // value is not one of the three defaults in DevTools (50, 250, 1000).
         final safeValue =
-            ProfileGranularityExtension.fromValue(flag.valueAsString).value;
+            ProfileGranularityExtension.fromValue(flag.valueAsString ?? '')
+                .value;
         // Set the vm flag value to the [safeValue] if we get to this state.
         if (safeValue != flag.valueAsString) {
           _onProfileGranularityChanged(safeValue);
@@ -76,19 +79,21 @@ class ProfileGranularityDropdown extends StatelessWidget {
     );
   }
 
-  DropdownMenuItem _buildMenuItem(ProfileGranularity granularity) {
+  DropdownMenuItem<String> _buildMenuItem(ProfileGranularity granularity) {
     return DropdownMenuItem<String>(
       value: granularity.value,
       child: Text(granularity.display),
     );
   }
 
-  Future<void> _onProfileGranularityChanged(String newValue) async {
+  Future<void> _onProfileGranularityChanged(String? newValue) async {
     ga.select(
       screenId,
       '${analytics_constants.profileGranularityPrefix}'
-      '${ProfileGranularityExtension.fromValue(newValue).displayShort}',
+      '${ProfileGranularityExtension.fromValue(newValue ?? '').displayShort}',
     );
-    await serviceManager.service.setProfilePeriod(newValue);
+    await serviceManager.service!.setProfilePeriod(
+      newValue ?? mediumProfilePeriod,
+    );
   }
 }

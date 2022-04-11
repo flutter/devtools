@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import 'dart:convert';
 
-import 'package:devtools_app/src/inspector/diagnostics_node.dart';
-import 'package:devtools_app/src/inspector/inspector_tree.dart';
-import 'package:devtools_app/src/inspector/layout_explorer/flex/flex.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_tree.dart';
+import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,7 +19,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   const windowSize = Size(1750, 1750);
 
-  Map<String, Object> buildDiagnosticsNodeJson(Axis axis) => jsonDecode('''
+  Map<String, Object> buildDiagnosticsNodeJson(Axis axis) => jsonDecode(
+        '''
       {
         "description": "${axis == Axis.horizontal ? 'Row' : 'Column'}",
         "type": "_ElementDiagnosticableTreeNode",
@@ -226,7 +228,8 @@ void main() {
         ]
       }
     }
-    ''');
+    ''',
+      );
 
   Widget wrap(Widget widget) {
     return MaterialApp(
@@ -240,7 +243,7 @@ void main() {
     await tester.runAsync(() async {
       await tester.pumpWidget(w);
       for (var element in find.byType(Image).evaluate()) {
-        final Image widget = element.widget;
+        final Image widget = element.widget as Image;
         final ImageProvider image = widget.image;
         await precacheImage(image, element);
         await tester.pumpAndSettle();
@@ -248,34 +251,42 @@ void main() {
     });
   }
 
-  testWidgetsWithWindowSize('Row golden test', windowSize,
-      (WidgetTester tester) async {
-    final rowWidgetJsonNode = buildDiagnosticsNodeJson(Axis.horizontal);
-    final diagnostic =
-        RemoteDiagnosticsNode(rowWidgetJsonNode, null, false, null);
-    final treeNode = InspectorTreeNode()..diagnostic = diagnostic;
-    final controller = TestInspectorController()..setSelectedNode(treeNode);
-    final widget = wrap(FlexLayoutExplorerWidget(controller));
-    await pump(tester, widget);
-    await tester.pumpAndSettle();
-    await expectLater(
-      find.byWidget(widget),
-      matchesGoldenFile('goldens/story_of_row_layout.png'),
-    );
-  }, skip: true);
+  testWidgetsWithWindowSize(
+    'Row golden test',
+    windowSize,
+    (WidgetTester tester) async {
+      final rowWidgetJsonNode = buildDiagnosticsNodeJson(Axis.horizontal);
+      final diagnostic =
+          RemoteDiagnosticsNode(rowWidgetJsonNode, null, false, null);
+      final treeNode = InspectorTreeNode()..diagnostic = diagnostic;
+      final controller = TestInspectorController()..setSelectedNode(treeNode);
+      final widget = wrap(FlexLayoutExplorerWidget(controller));
+      await pump(tester, widget);
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byWidget(widget),
+        matchesGoldenFile('goldens/story_of_row_layout.png'),
+      );
+    },
+    skip: true,
+  );
 
-  testWidgetsWithWindowSize('Column golden test', windowSize,
-      (WidgetTester tester) async {
-    final columnWidgetJsonNode = buildDiagnosticsNodeJson(Axis.vertical);
-    final diagnostic =
-        RemoteDiagnosticsNode(columnWidgetJsonNode, null, false, null);
-    final treeNode = InspectorTreeNode()..diagnostic = diagnostic;
-    final controller = TestInspectorController()..setSelectedNode(treeNode);
-    final widget = wrap(FlexLayoutExplorerWidget(controller));
-    await pump(tester, widget);
-    await expectLater(
-      find.byWidget(widget),
-      matchesGoldenFile('goldens/story_of_column_layout.png'),
-    );
-  }, skip: true);
+  testWidgetsWithWindowSize(
+    'Column golden test',
+    windowSize,
+    (WidgetTester tester) async {
+      final columnWidgetJsonNode = buildDiagnosticsNodeJson(Axis.vertical);
+      final diagnostic =
+          RemoteDiagnosticsNode(columnWidgetJsonNode, null, false, null);
+      final treeNode = InspectorTreeNode()..diagnostic = diagnostic;
+      final controller = TestInspectorController()..setSelectedNode(treeNode);
+      final widget = wrap(FlexLayoutExplorerWidget(controller));
+      await pump(tester, widget);
+      await expectLater(
+        find.byWidget(widget),
+        matchesGoldenFile('goldens/story_of_column_layout.png'),
+      );
+    },
+    skip: true,
+  );
 }

@@ -2,37 +2,44 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 @TestOn('vm')
 import 'dart:convert';
 
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/logging/logging_controller.dart';
-import 'package:devtools_app/src/service_manager.dart';
+import 'package:devtools_app/src/primitives/message_bus.dart';
+import 'package:devtools_app/src/screens/logging/logging_controller.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/ui/filter.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/utils.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('LoggingController', () {
-    LoggingController controller;
+    late LoggingController controller;
+    setGlobal(MessageBus, MessageBus());
 
     void addStdoutData(String message) {
-      controller.log(LogData(
-        'stdout',
-        jsonEncode({'kind': 'stdout', 'message': message}),
-        0,
-        summary: message,
-      ));
+      controller.log(
+        LogData(
+          'stdout',
+          jsonEncode({'kind': 'stdout', 'message': message}),
+          0,
+          summary: message,
+        ),
+      );
     }
 
     void addGcData(String message) {
-      controller.log(LogData(
-        'gc',
-        jsonEncode({'kind': 'gc', 'message': message}),
-        0,
-        summary: message,
-      ));
+      controller.log(
+        LogData(
+          'gc',
+          jsonEncode({'kind': 'gc', 'message': message}),
+          0,
+          summary: message,
+        ),
+      );
     }
 
     setUp(() async {
@@ -124,46 +131,66 @@ void main() {
       expect(controller.filteredData.value, hasLength(5));
 
       controller.filterData(
-          Filter(queryFilter: QueryFilter.parse('abc', controller.filterArgs)));
+        Filter(queryFilter: QueryFilter.parse('abc', controller.filterArgs)),
+      );
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(2));
 
       controller.filterData(
-          Filter(queryFilter: QueryFilter.parse('def', controller.filterArgs)));
+        Filter(queryFilter: QueryFilter.parse('def', controller.filterArgs)),
+      );
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(1));
 
-      controller.filterData(Filter(
+      controller.filterData(
+        Filter(
           queryFilter:
-              QueryFilter.parse('k:stdout abc def', controller.filterArgs)));
+              QueryFilter.parse('k:stdout abc def', controller.filterArgs),
+        ),
+      );
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(3));
 
-      controller.filterData(Filter(
-          queryFilter: QueryFilter.parse('kind:gc', controller.filterArgs)));
+      controller.filterData(
+        Filter(
+          queryFilter: QueryFilter.parse('kind:gc', controller.filterArgs),
+        ),
+      );
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller.filterData(Filter(
-          queryFilter:
-              QueryFilter.parse('k:stdout abc', controller.filterArgs)));
+      controller.filterData(
+        Filter(
+          queryFilter: QueryFilter.parse('k:stdout abc', controller.filterArgs),
+        ),
+      );
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller.filterData(Filter(
-          queryFilter: QueryFilter.parse('-k:gc', controller.filterArgs)));
+      controller.filterData(
+        Filter(
+          queryFilter: QueryFilter.parse('-k:gc', controller.filterArgs),
+        ),
+      );
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(3));
 
-      controller.filterData(Filter(
-          queryFilter:
-              QueryFilter.parse('-k:gc,stdout', controller.filterArgs)));
+      controller.filterData(
+        Filter(
+          queryFilter: QueryFilter.parse('-k:gc,stdout', controller.filterArgs),
+        ),
+      );
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(0));
 
-      controller.filterData(Filter(
+      controller.filterData(
+        Filter(
           queryFilter: QueryFilter.parse(
-              'k:gc,stdout,stdin,flutter.frame', controller.filterArgs)));
+            'k:gc,stdout,stdin,flutter.frame',
+            controller.filterArgs,
+          ),
+        ),
+      );
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(5));
 
@@ -179,16 +206,19 @@ void main() {
         () {
       final nonJson = LogData('some kind', 'Not json', 0);
       final json = LogData(
-          'some kind', '{"firstValue": "value", "otherValue": "value2"}', 1);
+        'some kind',
+        '{"firstValue": "value", "otherValue": "value2"}',
+        1,
+      );
       final nullDetails = LogData('some kind', null, 1);
       const prettyJson = '{\n'
           '  "firstValue": "value",\n'
           '  "otherValue": "value2"\n'
           '}';
 
-      expect(json.prettyPrinted, prettyJson);
-      expect(nonJson.prettyPrinted, 'Not json');
-      expect(nullDetails.prettyPrinted, null);
+      expect(json.prettyPrinted(), prettyJson);
+      expect(nonJson.prettyPrinted(), 'Not json');
+      expect(nullDetails.prettyPrinted(), null);
     });
   });
 }

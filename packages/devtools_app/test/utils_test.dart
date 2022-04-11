@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/utils.dart';
+import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -87,17 +87,17 @@ void main() {
     });
 
     test('nullSafeMin', () {
-      expect(nullSafeMin(1, 2), equals(1));
-      expect(nullSafeMin(1, null), equals(1));
-      expect(nullSafeMin(null, 2), equals(2));
-      expect(nullSafeMin(null, null), equals(null));
+      expect(nullSafeMin<int>(1, 2), equals(1));
+      expect(nullSafeMin<int>(1, null), equals(1));
+      expect(nullSafeMin<int>(null, 2), equals(2));
+      expect(nullSafeMin<int>(null, null), equals(null));
     });
 
     test('nullSafeMin', () {
-      expect(nullSafeMax(1, 2), equals(2));
-      expect(nullSafeMax(1, null), equals(1));
-      expect(nullSafeMax(null, 2), equals(2));
-      expect(nullSafeMax(null, null), equals(null));
+      expect(nullSafeMax<int>(1, 2), equals(2));
+      expect(nullSafeMax<int>(1, null), equals(1));
+      expect(nullSafeMax<int>(null, 2), equals(2));
+      expect(nullSafeMax<int>(null, null), equals(null));
     });
 
     test('log2', () {
@@ -120,11 +120,10 @@ void main() {
     test('executeWithDelay', () async {
       const delayMs = 500;
       int n = 1;
-      int start;
-      int end;
+      int start = DateTime.now().millisecondsSinceEpoch;
+      int? end;
 
       // Condition n >= 2 is false, so we should execute with a delay.
-      start = DateTime.now().millisecondsSinceEpoch;
       executeWithDelay(
         const Duration(milliseconds: 500),
         () {
@@ -147,7 +146,7 @@ void main() {
       // we requested (checked above), but we don't want to be too strict because
       // shared CI CPUs can be slow.
       const epsilonMs = 1000;
-      expect((end - start - delayMs).abs(), lessThan(epsilonMs));
+      expect((end! - start - delayMs).abs(), lessThan(epsilonMs));
 
       // Condition n >= 2 is true, so we should not execute with a delay.
       end = null;
@@ -164,7 +163,7 @@ void main() {
       expect(end, isNotNull);
       // 400ms is arbitrary. It is less than 500, which is what matters. This
       // can be increased if this test starts to flake.
-      expect(end - start, lessThan(400));
+      expect(end! - start, lessThan(400));
     });
 
     group('TimeRange', () {
@@ -241,31 +240,43 @@ void main() {
       });
 
       test('start setter throws exception when single assignment is true', () {
-        expect(() {
-          final t = TimeRange()..start = Duration.zero;
-          t.start = Duration.zero;
-        }, throwsAssertionError);
+        expect(
+          () {
+            final t = TimeRange()..start = Duration.zero;
+            t.start = Duration.zero;
+          },
+          throwsAssertionError,
+        );
       });
 
       test('start setter throws exception when value is after end', () {
-        expect(() {
-          final t = TimeRange()..end = const Duration(seconds: 1);
-          t.start = const Duration(seconds: 2);
-        }, throwsAssertionError);
+        expect(
+          () {
+            final t = TimeRange()..end = const Duration(seconds: 1);
+            t.start = const Duration(seconds: 2);
+          },
+          throwsAssertionError,
+        );
       });
 
       test('end setter throws exception when single assignment is true', () {
-        expect(() {
-          final t = TimeRange()..end = Duration.zero;
-          t.end = Duration.zero;
-        }, throwsAssertionError);
+        expect(
+          () {
+            final t = TimeRange()..end = Duration.zero;
+            t.end = Duration.zero;
+          },
+          throwsAssertionError,
+        );
       });
 
       test('end setter throws exception when value is before start', () {
-        expect(() {
-          final t = TimeRange()..start = const Duration(seconds: 1);
-          t.end = Duration.zero;
-        }, throwsAssertionError);
+        expect(
+          () {
+            final t = TimeRange()..start = const Duration(seconds: 1);
+            t.end = Duration.zero;
+          },
+          throwsAssertionError,
+        );
       });
 
       test('isWellFormed', () {
@@ -282,7 +293,7 @@ void main() {
     });
 
     test('formatDateTime', () {
-      expect(formatDateTime(DateTime(2020, 1, 16, 13)), '1:00:00.000 PM');
+      expect(formatDateTime(DateTime(2020, 1, 16, 13)), '13:00:00.000');
     });
 
     test('longestFittingSubstring', () {
@@ -442,7 +453,8 @@ void main() {
       );
       expect(
         devToolsQueryParams(
-            'http://localhost:9101/#/appsize?key=value.json&key2=123'),
+          'http://localhost:9101/#/appsize?key=value.json&key2=123',
+        ),
         equals({
           'key': 'value.json',
           'key2': '123',
@@ -453,8 +465,8 @@ void main() {
     test('getServiceUriFromQueryString', () {
       expect(
         getServiceUriFromQueryString(
-                'http://localhost:123/?uri=http://localhost:456')
-            .toString(),
+          'http://localhost:123/?uri=http://localhost:456',
+        ).toString(),
         equals('http://localhost:456'),
       );
       expect(
@@ -464,8 +476,8 @@ void main() {
       );
       expect(
         getServiceUriFromQueryString(
-                'http://localhost:123/?port=789&token=kjy78')
-            .toString(),
+          'http://localhost:123/?port=789&token=kjy78',
+        ).toString(),
         equals('ws://localhost:789/kjy78/ws'),
       );
     });
@@ -504,12 +516,13 @@ void main() {
       test('produces the safe value on infinite division', () {
         expect(safeDivide(double.infinity, 1.0), 0.0);
         expect(
-            safeDivide(
-              double.nan,
-              double.negativeInfinity,
-              ifNotFinite: 50.0,
-            ),
-            50.0);
+          safeDivide(
+            double.nan,
+            double.negativeInfinity,
+            ifNotFinite: 50.0,
+          ),
+          50.0,
+        );
       });
 
       test('produces the safe value on null division', () {
@@ -525,7 +538,7 @@ void main() {
 
     group('Reporter', () {
       int called = 0;
-      Reporter reporter;
+      late Reporter reporter;
       void call() {
         called++;
       }
@@ -586,7 +599,7 @@ void main() {
         called++;
       }
 
-      ValueReporter<String> reporter;
+      late ValueReporter<String?> reporter;
       setUp(() {
         reporter = ValueReporter(null);
       });
@@ -608,8 +621,8 @@ void main() {
 
     group('SafeAccess', () {
       test('safeFirst', () {
-        final list = <int>[];
-        final Iterable<int> iterable = list;
+        final list = <int?>[];
+        final Iterable<int?> iterable = list;
         expect(list.safeFirst, isNull);
         expect(iterable.safeFirst, isNull);
         list.addAll([1, 2, 3]);
@@ -621,7 +634,7 @@ void main() {
       });
 
       test('safeLast', () {
-        final list = <int>[];
+        final list = <int?>[];
         expect(list.safeLast, isNull);
         list.addAll([1, 2, 3]);
         expect(list.safeLast, equals(3));
@@ -966,17 +979,25 @@ void main() {
         expect(parseCssHexColor('#000000ff'), equals(Colors.black));
         expect(parseCssHexColor('000000ff'), equals(Colors.black));
         expect(
-            parseCssHexColor('#00000000'), equals(Colors.black.withAlpha(0)));
+          parseCssHexColor('#00000000'),
+          equals(Colors.black.withAlpha(0)),
+        );
         expect(parseCssHexColor('00000000'), equals(Colors.black.withAlpha(0)));
         expect(parseCssHexColor('#ffffffff'), equals(Colors.white));
         expect(parseCssHexColor('ffffffff'), equals(Colors.white));
         expect(
-            parseCssHexColor('#ffffff00'), equals(Colors.white.withAlpha(0)));
+          parseCssHexColor('#ffffff00'),
+          equals(Colors.white.withAlpha(0)),
+        );
         expect(parseCssHexColor('ffffff00'), equals(Colors.white.withAlpha(0)));
-        expect(parseCssHexColor('#ff0000bb'),
-            equals(const Color(0xFF0000).withAlpha(0xbb)));
-        expect(parseCssHexColor('ff0000bb'),
-            equals(const Color(0xFF0000).withAlpha(0xbb)));
+        expect(
+          parseCssHexColor('#ff0000bb'),
+          equals(const Color(0xFF0000).withAlpha(0xbb)),
+        );
+        expect(
+          parseCssHexColor('ff0000bb'),
+          equals(const Color(0xFF0000).withAlpha(0xbb)),
+        );
       });
       test('parses 4 digit hex colors', () {
         expect(parseCssHexColor('#000f'), equals(Colors.black));
@@ -987,10 +1008,14 @@ void main() {
         expect(parseCssHexColor('ffff'), equals(Colors.white));
         expect(parseCssHexColor('#fff0'), equals(Colors.white.withAlpha(0)));
         expect(parseCssHexColor('ffffff00'), equals(Colors.white.withAlpha(0)));
-        expect(parseCssHexColor('#f00b'),
-            equals(const Color(0xFF0000).withAlpha(0xbb)));
-        expect(parseCssHexColor('f00b'),
-            equals(const Color(0xFF0000).withAlpha(0xbb)));
+        expect(
+          parseCssHexColor('#f00b'),
+          equals(const Color(0xFF0000).withAlpha(0xbb)),
+        );
+        expect(
+          parseCssHexColor('f00b'),
+          equals(const Color(0xFF0000).withAlpha(0xbb)),
+        );
       });
     });
 
@@ -1008,12 +1033,33 @@ void main() {
         expect([1].joinWith(0), equals([1]));
         expect(['a', 'b'].joinWith('z'), equals(['a', 'z', 'b']));
       });
+
+      test('containsWhere', () {
+        final _list = [1, 2, 1, 2, 3, 4];
+        expect(_list.containsWhere((element) => element == 1), isTrue);
+        expect(_list.containsWhere((element) => element == 5), isFalse);
+        expect(_list.containsWhere((element) => element + 2 == 3), isTrue);
+
+        final otherList = ['hi', 'hey', 'foo', 'bar'];
+        expect(
+          otherList.containsWhere((element) => element.contains('h')),
+          isTrue,
+        );
+        expect(
+          otherList.containsWhere((element) => element.startsWith('ba')),
+          isTrue,
+        );
+        expect(
+          otherList.containsWhere((element) => element.endsWith('ba')),
+          isFalse,
+        );
+      });
     });
 
     group('ListValueNotifier', () {
-      ListValueNotifier<int> notifier;
+      late ListValueNotifier<int> notifier;
 
-      bool didNotify;
+      bool didNotify = false;
 
       void setUpWithInitialValue(List<int> value) {
         didNotify = false;
@@ -1098,8 +1144,8 @@ void main() {
     });
 
     group('ImmutableList', () {
-      List<int> rawList;
-      ImmutableList<int> immutableList;
+      late List<int> rawList;
+      late ImmutableList<int> immutableList;
 
       setUp(() {
         rawList = [1, 2, 3];
@@ -1160,13 +1206,17 @@ void main() {
       });
 
       test('throws on removeWhere', () {
-        expect(() => immutableList.removeWhere((int n) => n == 1),
-            throwsException);
+        expect(
+          () => immutableList.removeWhere((int n) => n == 1),
+          throwsException,
+        );
       });
 
       test('throws on retainWhere', () {
-        expect(() => immutableList.retainWhere((int n) => n == 1),
-            throwsException);
+        expect(
+          () => immutableList.retainWhere((int n) => n == 1),
+          throwsException,
+        );
       });
 
       test('throws on insert', () {
@@ -1240,14 +1290,55 @@ void main() {
         );
         expect(
           str.caseInsensitiveContains(
-              RegExp('THIS IS.*TO/uri', caseSensitive: false)),
+            RegExp('THIS IS.*TO/uri', caseSensitive: false),
+          ),
           isTrue,
         );
         expect(
           str.caseInsensitiveContains(
-              RegExp('this.*does not match', caseSensitive: false)),
+            RegExp('this.*does not match', caseSensitive: false),
+          ),
           isFalse,
         );
+      });
+
+      test('caseInsensitiveEquals', () {
+        const str = 'hello, world!';
+        expect(str.caseInsensitiveEquals(str), isTrue);
+        expect(str.caseInsensitiveEquals('HELLO, WORLD!'), isTrue);
+        expect(str.caseInsensitiveEquals('hElLo, WoRlD!'), isTrue);
+        expect(str.caseInsensitiveEquals('hello'), isFalse);
+        expect(str.caseInsensitiveEquals(''), isFalse);
+        expect(str.caseInsensitiveEquals(null), isFalse);
+        expect(''.caseInsensitiveEquals(''), isTrue);
+        expect(''.caseInsensitiveEquals(null), isFalse);
+      });
+
+      test('caseInsensitiveAllMatches', () {
+        const str = 'This is a TEST. Test string is "test"';
+        final matches = 'test'.caseInsensitiveAllMatches(str).toList();
+        expect(matches.length, equals(3));
+
+        // First match: 'TEST'
+        expect(matches[0].start, equals(10));
+        expect(matches[0].end, equals(14));
+
+        // Second match: 'Test'
+        expect(matches[1].start, equals(16));
+        expect(matches[1].end, equals(20));
+
+        // Third match: 'test'
+        expect(matches[2].start, equals(32));
+        expect(matches[2].end, equals(36));
+
+        // Dart's allMatches returns 1 char matches when pattern is an empty string
+        expect(
+          ''.caseInsensitiveAllMatches('hello world').length,
+          equals('hello world'.length + 1),
+        );
+        expect('*'.caseInsensitiveAllMatches('hello world'), isEmpty);
+        expect('test'.caseInsensitiveAllMatches(''), isEmpty);
+        expect('test'.caseInsensitiveAllMatches(null), isEmpty);
       });
     });
 

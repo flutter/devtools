@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../globals.dart';
-import '../utils.dart';
+import '../primitives/utils.dart';
+import '../shared/globals.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class HttpService {
   /// Enables or disables HTTP logging for all isolates.
   static Future<void> toggleHttpRequestLogging(bool state) async {
-    await serviceManager.service.forEachIsolate((isolate) async {
-      final httpLoggingAvailable = await serviceManager.service
-          .isHttpTimelineLoggingAvailable(isolate.id);
+    await serviceManager.service!.forEachIsolate((isolate) async {
+      final httpLoggingAvailable = await serviceManager.service!
+          .isHttpTimelineLoggingAvailable(isolate.id!);
       if (httpLoggingAvailable) {
-        final future = serviceManager.service.httpEnableTimelineLogging(
-          isolate.id,
+        final future = serviceManager.service!.httpEnableTimelineLogging(
+          isolate.id!,
           state,
         );
         // The above call won't complete immediately if the isolate is paused, so

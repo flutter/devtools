@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/trees.dart';
+import 'package:devtools_app/src/primitives/trees.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -37,22 +37,28 @@ void main() {
       testTreeNode.collapse();
       expect(testTreeNode.isExpanded, isFalse);
 
-      breadthFirstTraversal<TestTreeNode>(testTreeNode,
-          action: (TreeNode node) {
-        expect(node.isExpanded, isFalse);
-      });
+      breadthFirstTraversal<TestTreeNode>(
+        testTreeNode,
+        action: (TreeNode node) {
+          expect(node.isExpanded, isFalse);
+        },
+      );
 
       testTreeNode.expandCascading();
-      breadthFirstTraversal<TestTreeNode>(testTreeNode,
-          action: (TreeNode node) {
-        expect(node.isExpanded, isTrue);
-      });
+      breadthFirstTraversal<TestTreeNode>(
+        testTreeNode,
+        action: (TreeNode node) {
+          expect(node.isExpanded, isTrue);
+        },
+      );
 
       testTreeNode.collapseCascading();
-      breadthFirstTraversal<TestTreeNode>(testTreeNode,
-          action: (TreeNode node) {
-        expect(node.isExpanded, isFalse);
-      });
+      breadthFirstTraversal<TestTreeNode>(
+        testTreeNode,
+        action: (TreeNode node) {
+          expect(node.isExpanded, isFalse);
+        },
+      );
     });
 
     test('shouldShow determines if each node is visible', () {
@@ -65,19 +71,26 @@ void main() {
         treeNode6,
       ];
       void expectChildTreeNodesShouldShow(List<bool> expected) {
-        expect(childTreeNodes.length, expected.length,
-            reason: 'expected list of bool must have '
-                '${childTreeNodes.length} elements');
+        expect(
+          childTreeNodes.length,
+          expected.length,
+          reason: 'expected list of bool must have '
+              '${childTreeNodes.length} elements',
+        );
         for (var i = 0; i < childTreeNodes.length; i++) {
-          expect(childTreeNodes[i].shouldShow(), expected[i],
-              reason: 'treeNode${i + 1}.shouldShow() did not match '
-                  'the expected value.');
+          expect(
+            childTreeNodes[i].shouldShow(),
+            expected[i],
+            reason: 'treeNode${i + 1}.shouldShow() did not match '
+                'the expected value.',
+          );
         }
       }
 
       expect(treeNode0.shouldShow(), true);
       expectChildTreeNodesShouldShow(
-          [false, false, false, false, false, false]);
+        [false, false, false, false, false, false],
+      );
       treeNode0.expandCascading();
       treeNode5.collapse();
       expectChildTreeNodesShouldShow([true, true, true, true, true, false]);
@@ -96,6 +109,26 @@ void main() {
       expect(parent.children, isNotEmpty);
       expect(parent.children.first, equals(child));
       expect(child.parent, equals(parent));
+    });
+
+    test('childrenWithCondition', () {
+      var nodes = testTreeNode.childrenWithCondition((TestTreeNode node) {
+        return node.id.isEven;
+      });
+      var nodeIds = nodes.map((TestTreeNode node) => node.id).toList();
+      expect(nodeIds, equals([0, 2, 4, 6, 8]));
+
+      nodes = testTreeNode.childrenWithCondition((TestTreeNode node) {
+        return node.tag == 'test-tag';
+      });
+      nodeIds = nodes.map((TestTreeNode node) => node.id).toList();
+      expect(nodeIds, equals([0, 3, 9]));
+
+      nodes = testTreeNode.childrenWithCondition((TestTreeNode node) {
+        return node.parent?.id == 5;
+      });
+      nodeIds = nodes.map((TestTreeNode node) => node.id).toList();
+      expect(nodeIds, equals([6, 7, 8, 9]));
     });
 
     test('containsChildWithCondition', () {
@@ -146,49 +179,67 @@ void main() {
     });
 
     test('filterTree', () {
-      final filteredTreeRoots =
+      final List<TestTreeNode> filteredTreeRoots =
           testTreeNode.filterWhere((node) => node.id.isEven);
       expect(filteredTreeRoots.length, equals(1));
       final filteredTree = filteredTreeRoots.first;
-      expect(filteredTree.toString(), equals('''
+      expect(
+        filteredTree.toString(),
+        equals(
+          '''
 0
   2
   4
   6
   8
-'''));
+''',
+        ),
+      );
     });
 
     test('filterTree when root should be filtered out', () {
-      final filteredTreeRoots =
+      final List<TestTreeNode> filteredTreeRoots =
           testTreeNode.filterWhere((node) => node.id.isOdd);
       expect(filteredTreeRoots.length, equals(2));
       final firstRoot = filteredTreeRoots.first;
       final lastRoot = filteredTreeRoots.last;
 
-      expect(firstRoot.toString(), equals('''
+      expect(
+        firstRoot.toString(),
+        equals(
+          '''
 1
-'''));
-      expect(lastRoot.toString(), equals('''
+''',
+        ),
+      );
+      expect(
+        lastRoot.toString(),
+        equals(
+          '''
 3
   5
     7
     9
-'''));
+''',
+        ),
+      );
     });
 
     test('filterTree when zero nodes match', () {
-      final filteredTreeRoots =
+      final List<TestTreeNode> filteredTreeRoots =
           testTreeNode.filterWhere((node) => node.id > 10);
       expect(filteredTreeRoots, isEmpty);
     });
 
     test('filterTree when all nodes match', () {
-      final filteredTreeRoots =
+      final List<TestTreeNode> filteredTreeRoots =
           testTreeNode.filterWhere((node) => node.id < 10);
       expect(filteredTreeRoots.length, equals(1));
       final filteredTree = filteredTreeRoots.first;
-      expect(filteredTree.toString(), equals('''
+      expect(
+        filteredTree.toString(),
+        equals(
+          '''
 0
   1
   2
@@ -199,21 +250,167 @@ void main() {
       7
       8
       9
-'''));
+''',
+        ),
+      );
+    });
+
+    group('Tree traversal', () {
+      late TraversalTestTreeNode treeNodeA;
+      late TraversalTestTreeNode treeNodeB;
+      late TraversalTestTreeNode treeNodeC;
+      late TraversalTestTreeNode treeNodeD;
+      late TraversalTestTreeNode treeNodeE;
+      late TraversalTestTreeNode treeNodeF;
+      late TraversalTestTreeNode treeNodeG;
+      late TraversalTestTreeNode treeNodeH;
+      late TraversalTestTreeNode treeNodeI;
+      late TraversalTestTreeNode treeNodeJ;
+
+      late TraversalTestTreeNode tree;
+
+      setUp(() {
+        /// Traversal test tree structure:
+        ///
+        /// [level 0]                A
+        ///                      /   |   \
+        /// [level 1]           B    C    D
+        ///                   /   \       |
+        /// [level 2]        E    F       G
+        ///                 /            / \
+        /// [level 3]      H            I   J
+        ///
+        /// BFS traversal order: A, B, C, D, E, F, G, H, I, J
+        /// DFS traversal order: A, B, E, H, F, C, D, G, I, J
+
+        treeNodeA = TraversalTestTreeNode('A');
+        treeNodeB = TraversalTestTreeNode('B');
+        treeNodeC = TraversalTestTreeNode('C');
+        treeNodeD = TraversalTestTreeNode('D');
+        treeNodeE = TraversalTestTreeNode('E');
+        treeNodeF = TraversalTestTreeNode('F');
+        treeNodeG = TraversalTestTreeNode('G');
+        treeNodeH = TraversalTestTreeNode('H');
+        treeNodeI = TraversalTestTreeNode('I');
+        treeNodeJ = TraversalTestTreeNode('J');
+
+        tree = treeNodeA
+          ..addAllChildren(
+            [
+              treeNodeB
+                ..addAllChildren(
+                  [
+                    treeNodeE
+                      ..addAllChildren([
+                        treeNodeH,
+                      ]),
+                    treeNodeF,
+                  ],
+                ),
+              treeNodeC,
+              treeNodeD
+                ..addAllChildren([
+                  treeNodeG
+                    ..addAllChildren([
+                      treeNodeI,
+                      treeNodeJ,
+                    ])
+                ])
+            ],
+          );
+      });
+
+      group('BFS', () {
+        test('traverses tree in correct order', () {
+          var visitedCount = 0;
+          breadthFirstTraversal<TraversalTestTreeNode>(
+            tree,
+            action: (node) => node.setVisitedOrder(++visitedCount),
+          );
+          // BFS order: A, B, C, D, E, F, G, H, I, J
+          expect(treeNodeA.visitedOrder, equals(1));
+          expect(treeNodeB.visitedOrder, equals(2));
+          expect(treeNodeC.visitedOrder, equals(3));
+          expect(treeNodeD.visitedOrder, equals(4));
+          expect(treeNodeE.visitedOrder, equals(5));
+          expect(treeNodeF.visitedOrder, equals(6));
+          expect(treeNodeG.visitedOrder, equals(7));
+          expect(treeNodeH.visitedOrder, equals(8));
+          expect(treeNodeI.visitedOrder, equals(9));
+          expect(treeNodeJ.visitedOrder, equals(10));
+        });
+
+        test('finds the correct node', () {
+          final node = breadthFirstTraversal<TraversalTestTreeNode>(
+            tree,
+            returnCondition: (node) => node.id == 'H',
+          )!;
+          expect(node.id, equals('H'));
+        });
+      });
+
+      group('DFS', () {
+        test('traverses tree in correct order', () {
+          var visitedCount = 0;
+          depthFirstTraversal<TraversalTestTreeNode>(
+            tree,
+            action: (node) => node.setVisitedOrder(++visitedCount),
+          );
+          // DFS order: A, B, E, H, F, C, D, G, I, J
+          expect(treeNodeA.visitedOrder, equals(1));
+          expect(treeNodeB.visitedOrder, equals(2));
+          expect(treeNodeE.visitedOrder, equals(3));
+          expect(treeNodeH.visitedOrder, equals(4));
+          expect(treeNodeF.visitedOrder, equals(5));
+          expect(treeNodeC.visitedOrder, equals(6));
+          expect(treeNodeD.visitedOrder, equals(7));
+          expect(treeNodeG.visitedOrder, equals(8));
+          expect(treeNodeI.visitedOrder, equals(9));
+          expect(treeNodeJ.visitedOrder, equals(10));
+        });
+
+        test('finds the correct node', () {
+          final node = depthFirstTraversal<TraversalTestTreeNode>(
+            tree,
+            returnCondition: (node) => node.id == 'H',
+          )!;
+          expect(node.id, equals('H'));
+        });
+
+        test('explores correct children', () {
+          var visitedCount = 0;
+          depthFirstTraversal<TraversalTestTreeNode>(
+            tree,
+            action: (node) => node.setVisitedOrder(++visitedCount),
+            exploreChildrenCondition: (node) => node.id != 'B',
+          );
+          // DFS order: A, B, [skip] E, H, F, [end skip], C, D, G, I, J
+          expect(treeNodeA.visitedOrder, equals(1));
+          expect(treeNodeB.visitedOrder, equals(2));
+          expect(treeNodeE.visitedOrder, equals(-1));
+          expect(treeNodeH.visitedOrder, equals(-1));
+          expect(treeNodeF.visitedOrder, equals(-1));
+          expect(treeNodeC.visitedOrder, equals(3));
+          expect(treeNodeD.visitedOrder, equals(4));
+          expect(treeNodeG.visitedOrder, equals(5));
+          expect(treeNodeI.visitedOrder, equals(6));
+          expect(treeNodeJ.visitedOrder, equals(7));
+        });
+      });
     });
   });
 }
 
-final treeNode0 = TestTreeNode(0);
+final treeNode0 = TestTreeNode(0, tag: 'test-tag');
 final treeNode1 = TestTreeNode(1);
 final treeNode2 = TestTreeNode(2);
-final treeNode3 = TestTreeNode(3);
+final treeNode3 = TestTreeNode(3, tag: 'test-tag');
 final treeNode4 = TestTreeNode(4);
 final treeNode5 = TestTreeNode(5);
 final treeNode6 = TestTreeNode(6);
 final treeNode7 = TestTreeNode(7);
 final treeNode8 = TestTreeNode(8);
-final treeNode9 = TestTreeNode(9);
+final treeNode9 = TestTreeNode(9, tag: 'test-tag');
 final TestTreeNode testTreeNode = treeNode0
   ..addAllChildren([
     treeNode1,
@@ -232,9 +429,11 @@ final TestTreeNode testTreeNode = treeNode0
   ]);
 
 class TestTreeNode extends TreeNode<TestTreeNode> {
-  TestTreeNode(this.id);
+  TestTreeNode(this.id, {this.tag});
 
   final int id;
+
+  final String? tag;
 
   @override
   TestTreeNode shallowCopy() => TestTreeNode(id);
@@ -250,5 +449,21 @@ class TestTreeNode extends TreeNode<TestTreeNode> {
 
     writeNode(this);
     return buf.toString();
+  }
+}
+
+class TraversalTestTreeNode extends TreeNode<TraversalTestTreeNode> {
+  TraversalTestTreeNode(this.id);
+
+  final String id;
+
+  int get visitedOrder => _visitedOrder;
+  int _visitedOrder = -1;
+
+  @override
+  TraversalTestTreeNode shallowCopy() => TraversalTestTreeNode(id);
+
+  void setVisitedOrder(int order) {
+    _visitedOrder = order;
   }
 }

@@ -2,73 +2,56 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import 'package:devtools_app/src/charts/flame_chart.dart';
-import 'package:devtools_app/src/common_widgets.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/profiler/cpu_profile_bottom_up.dart';
-import 'package:devtools_app/src/profiler/cpu_profile_call_tree.dart';
-import 'package:devtools_app/src/profiler/cpu_profile_controller.dart';
-import 'package:devtools_app/src/profiler/cpu_profile_flame_chart.dart';
-import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
-import 'package:devtools_app/src/profiler/cpu_profile_transformer.dart';
-import 'package:devtools_app/src/profiler/cpu_profiler.dart';
-import 'package:devtools_app/src/profiler/profiler_screen.dart';
-import 'package:devtools_app/src/profiler/profiler_screen_controller.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_test/cpu_profile_test_data.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_bottom_up.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_call_tree.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_flame_chart.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_transformer.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
+import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
+import 'package:devtools_app/src/screens/profiler/profiler_screen_controller.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/common_widgets.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+import 'test_data/cpu_profile_test_data.dart';
+
 void main() {
-  CpuProfiler cpuProfiler;
-  CpuProfileData cpuProfileData;
-  CpuProfilerController controller;
-  ServiceConnectionManager fakeServiceManager;
+  late CpuProfiler cpuProfiler;
+  late CpuProfileData cpuProfileData;
+  late CpuProfilerController controller;
+  late ServiceConnectionManager fakeServiceManager;
 
   setUp(() async {
     final transformer = CpuProfileTransformer();
     controller = CpuProfilerController();
     cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson);
-    await transformer.processData(cpuProfileData);
+    await transformer.processData(
+      cpuProfileData,
+      processId: 'test',
+    );
 
     fakeServiceManager = FakeServiceManager();
-    when(fakeServiceManager.connectedApp.isFlutterNativeAppNow)
+    when(fakeServiceManager.connectedApp!.isFlutterNativeAppNow)
         .thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(IdeTheme, IdeTheme());
   });
 
   group('CpuProfiler', () {
     const windowSize = Size(2000.0, 1000.0);
     final searchFieldKey = GlobalKey(debugLabel: 'test search field key');
-
-    testWidgetsWithWindowSize('builds for null cpuProfileData', windowSize,
-        (WidgetTester tester) async {
-      cpuProfiler = CpuProfiler(
-        data: null,
-        controller: controller,
-        searchFieldKey: searchFieldKey,
-      );
-      await tester.pumpWidget(wrap(cpuProfiler));
-      expect(find.byType(TabBar), findsOneWidget);
-      expect(find.byKey(CpuProfiler.dataProcessingKey), findsOneWidget);
-      expect(find.byType(CpuProfileFlameChart), findsNothing);
-      expect(find.byType(CpuCallTreeTable), findsNothing);
-      expect(find.byType(CpuBottomUpTable), findsNothing);
-      expect(find.byType(UserTagDropdown), findsNothing);
-      expect(find.byType(ExpandAllButton), findsNothing);
-      expect(find.byType(CollapseAllButton), findsNothing);
-      expect(find.byType(FlameChartHelpButton), findsNothing);
-      expect(find.byKey(searchFieldKey), findsNothing);
-      expect(find.byKey(CpuProfiler.flameChartTab), findsNothing);
-      expect(find.byKey(CpuProfiler.callTreeTab), findsNothing);
-      expect(find.byKey(CpuProfiler.bottomUpTab), findsNothing);
-      expect(find.byKey(CpuProfiler.summaryTab), findsNothing);
-    });
 
     testWidgetsWithWindowSize('builds for empty cpuProfileData', windowSize,
         (WidgetTester tester) async {
@@ -268,13 +251,15 @@ void main() {
     });
 
     group('UserTag filters', () {
-      ProfilerScreenController controller;
+      late ProfilerScreenController controller;
 
       setUp(() async {
         controller = ProfilerScreenController();
         cpuProfileData = CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
-        await controller.cpuProfilerController.transformer
-            .processData(cpuProfileData);
+        await controller.cpuProfilerController.transformer.processData(
+          cpuProfileData,
+          processId: 'test',
+        );
         // Call this to force the value of `_dataByTag[userTagNone]` to be set.
         controller.cpuProfilerController.loadProcessedData(
           cpuProfileData,
@@ -287,10 +272,12 @@ void main() {
         // We need to pump the entire `ProfilerScreenBody` widget because the
         // CpuProfiler widget has `cpuProfileData` passed in from there, and
         // CpuProfiler needs to be rebuilt on data updates.
-        await tester.pumpWidget(wrapWithControllers(
-          const ProfilerScreenBody(),
-          profiler: controller,
-        ));
+        await tester.pumpWidget(
+          wrapWithControllers(
+            const ProfilerScreenBody(),
+            profiler: controller,
+          ),
+        );
         expect(controller.cpuProfilerController.userTags.length, equals(3));
 
         expect(find.byType(UserTagDropdown), findsOneWidget);
@@ -307,7 +294,7 @@ void main() {
 
         expect(
           controller
-              .cpuProfileData.profileMetaData.time.duration.inMicroseconds,
+              .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
           equals(250),
         );
         expect(find.text('Frame1'), findsOneWidget);
@@ -325,7 +312,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(
           controller
-              .cpuProfileData.profileMetaData.time.duration.inMicroseconds,
+              .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
           equals(100),
         );
         expect(find.text('Frame1'), findsNothing);
@@ -343,7 +330,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(
           controller
-              .cpuProfileData.profileMetaData.time.duration.inMicroseconds,
+              .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
           equals(50),
         );
         expect(find.text('Frame1'), findsNothing);
@@ -361,7 +348,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(
           controller
-              .cpuProfileData.profileMetaData.time.duration.inMicroseconds,
+              .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
           equals(100),
         );
         expect(find.text('Frame1'), findsNothing);

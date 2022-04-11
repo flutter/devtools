@@ -2,44 +2,50 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import 'dart:io';
 
 import 'package:devtools_app/src/charts/treemap.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_test/app_size_test_data/apk_analysis.dart';
-import 'package:devtools_test/app_size_test_data/new_v8.dart';
-import 'package:devtools_test/app_size_test_data/sizes.dart';
-import 'package:devtools_test/app_size_test_data/small_sizes.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/utils.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void main() {
-  TreemapNode root;
+import 'test_data/app_size_test_data/apk_analysis.dart';
+import 'test_data/app_size_test_data/new_v8.dart';
+import 'test_data/app_size_test_data/sizes.dart';
+import 'test_data/app_size_test_data/small_sizes.dart';
 
-  void changeRoot(TreemapNode newRoot) {
+void main() {
+  TreemapNode? root;
+
+  void changeRoot(TreemapNode? newRoot) {
     root = newRoot;
   }
 
   // Pump treemap widget with tree built with test data.
   Future<void> pumpTreemapWidget(WidgetTester tester, Key treemapKey) async {
-    await tester.pumpWidget(wrap(LayoutBuilder(
-      key: treemapKey,
-      builder: (context, constraints) {
-        return Treemap.fromRoot(
-          rootNode: root,
-          levelsVisible: 2,
-          isOutermostLevel: true,
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          onRootChangedCallback: changeRoot,
-        );
-      },
-    )));
+    await tester.pumpWidget(
+      wrap(
+        LayoutBuilder(
+          key: treemapKey,
+          builder: (context, constraints) {
+            return Treemap.fromRoot(
+              rootNode: root,
+              levelsVisible: 2,
+              isOutermostLevel: true,
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+              onRootChangedCallback: changeRoot,
+            );
+          },
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
   }
 
@@ -47,6 +53,7 @@ void main() {
 
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(IdeTheme, IdeTheme());
   });
 
   group('TreemapNode', () {
@@ -80,12 +87,14 @@ void main() {
     final nodeWithDuplicatePackageNameChild2 = TreemapNode(name: '<Type>');
     final nodeWithDuplicatePackageName = TreemapNode(name: 'package:a');
     TreemapNode(name: 'libapp.so (Dart AOT)')
-      ..addChild(nodeWithDuplicatePackageName
-        ..addAllChildren([
-          nodeWithDuplicatePackageNameChild1
-            ..addChild(nodeWithDuplicatePackageNameGrandchild),
-          nodeWithDuplicatePackageNameChild2,
-        ]));
+      ..addChild(
+        nodeWithDuplicatePackageName
+          ..addAllChildren([
+            nodeWithDuplicatePackageNameChild1
+              ..addChild(nodeWithDuplicatePackageNameGrandchild),
+            nodeWithDuplicatePackageNameChild2,
+          ]),
+      );
 
     final dartLibraryChild = TreemapNode(name: 'dart lib child');
     final dartLibraryNode = TreemapNode(name: 'dart:core');
@@ -95,22 +104,29 @@ void main() {
     test('packagePath returns correct values', () {
       expect(testRoot.packagePath(), equals([]));
       expect(grandchild1.packagePath(), equals(['package:child1']));
-      expect(grandchild2.packagePath(),
-          equals(['package:child2', 'package:grandchild2']));
-      expect(greatGrandchild1.packagePath(),
-          equals(['package:child1', 'package:greatGrandchild1']));
       expect(
-          greatGrandchild2.packagePath(),
-          equals([
-            'package:child2',
-            'package:grandchild2',
-            'package:greatGrandchild2',
-          ]));
+        grandchild2.packagePath(),
+        equals(['package:child2', 'package:grandchild2']),
+      );
+      expect(
+        greatGrandchild1.packagePath(),
+        equals(['package:child1', 'package:greatGrandchild1']),
+      );
+      expect(
+        greatGrandchild2.packagePath(),
+        equals([
+          'package:child2',
+          'package:grandchild2',
+          'package:greatGrandchild2',
+        ]),
+      );
     });
 
     test('packagePath returns correct values for duplicate package name', () {
-      expect(nodeWithDuplicatePackageNameGrandchild.packagePath(),
-          equals(['package:a']));
+      expect(
+        nodeWithDuplicatePackageNameGrandchild.packagePath(),
+        equals(['package:a']),
+      );
     });
 
     test('packagePath returns correct value for dart library node', () {

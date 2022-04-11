@@ -1,8 +1,9 @@
 // Copyright 2020 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'package:devtools_app/src/flex_split_column.dart';
-import 'package:devtools_app/src/utils.dart';
+
+import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/shared/flex_split_column.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -63,8 +64,10 @@ void main() {
         minSizes,
         headers,
       );
-      expect(collectionEquals(adjustedFractions, [60.0, 10.0, 10.0, 10.0]),
-          isTrue);
+      expect(
+        collectionEquals(adjustedFractions, [60.0, 10.0, 10.0, 10.0]),
+        isTrue,
+      );
     });
 
     testWidgets('buildChildrenWithFirstHeader', (WidgetTester tester) async {

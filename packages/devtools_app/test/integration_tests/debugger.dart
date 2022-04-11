@@ -2,23 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_test/cli_test_driver.dart';
-import 'package:devtools_test/utils.dart';
+import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'integration.dart';
 
 void debuggingTests() {
-  CliAppFixture appFixture;
-  BrowserTabInstance tabInstance;
+  late CliAppFixture appFixture;
+  late BrowserTabInstance tabInstance;
 
   setUp(() async {
     tabInstance = await browserManager.createNewTab();
   });
 
   tearDown(() async {
-    await tabInstance?.close();
-    await appFixture?.teardown();
+    await tabInstance.close();
+    await appFixture.teardown();
   });
 
   test('lists scripts', () async {
@@ -29,7 +28,7 @@ void debuggingTests() {
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
-    final String currentPageId = await tools.currentPageId();
+    final String? currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
     final DebuggingManager debuggingManager = DebuggingManager(tools);
@@ -57,7 +56,7 @@ void debuggingTests() {
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
-    final String currentPageId = await tools.currentPageId();
+    final String? currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
     final DebuggingManager debuggingManager = DebuggingManager(tools);
@@ -125,7 +124,7 @@ void debuggingTests() {
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
-    final String currentPageId = await tools.currentPageId();
+    final String? currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
     final DebuggingManager debuggingManager = DebuggingManager(tools);
@@ -138,7 +137,9 @@ void debuggingTests() {
 
     // set and verify breakpoint
     await debuggingManager.addBreakpoint(
-        appFixture.appScriptPath, breakpointLine);
+      appFixture.appScriptPath,
+      breakpointLine,
+    );
 
     breakpoints = await debuggingManager.getBreakpoints();
     expect(breakpoints, hasLength(1));
@@ -193,7 +194,8 @@ void debuggingTests() {
 
   test('break on exceptions', () async {
     appFixture = await CliAppFixture.create(
-        'test/fixtures/debugging_app_exception.dart');
+      'test/fixtures/debugging_app_exception.dart',
+    );
 
     final String source = appFixture.scriptSource;
     final int exceptionLine = CliAppFixture.parseExceptionLines(source).first;
@@ -203,7 +205,7 @@ void debuggingTests() {
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
-    final String currentPageId = await tools.currentPageId();
+    final String? currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
     final DebuggingManager debuggingManager = DebuggingManager(tools);
@@ -243,7 +245,8 @@ void debuggingTests() {
 
   test('console output', () async {
     appFixture = await CliAppFixture.create(
-        'test/fixtures/color_console_output_app.dart');
+      'test/fixtures/color_console_output_app.dart',
+    );
 
     final tools = DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
@@ -261,8 +264,11 @@ void debuggingTests() {
     expect(await debuggingManager.getState(), 'running');
 
     // Wait until there is enough console output.
-    await waitFor(() async =>
-        (await debuggingManager.getConsoleContents()).split('\n').length >= 13);
+    await waitFor(
+      () async =>
+          (await debuggingManager.getConsoleContents())!.split('\n').length >=
+          13,
+    );
     // Verify the console contents.
     expect(
       await debuggingManager.getConsoleContents(),
@@ -292,7 +298,7 @@ void debuggingTests() {
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
-    final String currentPageId = await tools.currentPageId();
+    final String? currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
     final DebuggingManager debuggingManager = DebuggingManager(tools);
@@ -334,10 +340,10 @@ class DebuggingManager {
     await tools.tabInstance.send('debugger.step');
   }
 
-  Future<String> getLocation() async {
+  Future<String?> getLocation() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.getLocation');
-    return response.result as String;
+    return response.result as String?;
   }
 
   Future<List<String>> getVariables() async {
@@ -347,16 +353,16 @@ class DebuggingManager {
     return result.cast<String>();
   }
 
-  Future<String> getState() async {
+  Future<String?> getState() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.getState');
-    return response.result as String;
+    return response.result as String?;
   }
 
-  Future<String> getConsoleContents() async {
+  Future<String?> getConsoleContents() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.getConsoleContents');
-    return response.result as String;
+    return response.result as String?;
   }
 
   Future<void> clearBreakpoints() async {

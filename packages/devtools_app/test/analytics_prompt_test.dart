@@ -2,45 +2,50 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import 'package:devtools_app/src/analytics/analytics_controller.dart';
 import 'package:devtools_app/src/analytics/prompt.dart';
-import 'package:devtools_app/src/common_widgets.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/common_widgets.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const windowSize = Size(2000.0, 1000.0);
 
 void main() {
-  AnalyticsController _controller;
+  late AnalyticsController _controller;
 
-  bool didCallEnableAnalytics;
+  late bool _didCallEnableAnalytics;
 
   Widget _wrapWithAnalytics(
     Widget child, {
-    AnalyticsController controller,
+    AnalyticsController? controller,
   }) {
-    _controller ??= controller;
+    if (controller != null) {
+      _controller = controller;
+    }
     return wrapWithAnalytics(child, controller: _controller);
   }
 
   group('AnalyticsPrompt', () {
     setUp(() {
-      didCallEnableAnalytics = false;
+      _didCallEnableAnalytics = false;
       setGlobal(ServiceConnectionManager, FakeServiceManager());
+      setGlobal(IdeTheme, IdeTheme());
     });
     group('with analytics enabled', () {
       group('on first run', () {
         setUp(() {
-          didCallEnableAnalytics = false;
+          _didCallEnableAnalytics = false;
           _controller = AnalyticsController(
             enabled: true,
             firstRun: true,
             onEnableAnalytics: () async {
-              didCallEnableAnalytics = true;
+              _didCallEnableAnalytics = true;
             },
           );
         });
@@ -49,7 +54,7 @@ void main() {
             'does not display prompt or call enable analytics', windowSize,
             (WidgetTester tester) async {
           expect(_controller.analyticsEnabled.value, isTrue);
-          expect(didCallEnableAnalytics, isFalse);
+          expect(_didCallEnableAnalytics, isFalse);
           final prompt = _wrapWithAnalytics(
             const AnalyticsPrompt(
               child: Text('Child Text'),
@@ -58,9 +63,11 @@ void main() {
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsNothing);
+            find.text('Send usage statistics for DevTools?'),
+            findsNothing,
+          );
           expect(_controller.analyticsEnabled.value, isTrue);
-          expect(didCallEnableAnalytics, isFalse);
+          expect(_didCallEnableAnalytics, isFalse);
         });
 
         testWidgetsWithWindowSize(
@@ -76,7 +83,7 @@ void main() {
             enabled: true,
             firstRun: false,
             onEnableAnalytics: () async {
-              didCallEnableAnalytics = true;
+              _didCallEnableAnalytics = true;
             },
           );
         });
@@ -85,7 +92,7 @@ void main() {
             'does not display prompt or call enable analytics', windowSize,
             (WidgetTester tester) async {
           expect(_controller.analyticsEnabled.value, isTrue);
-          expect(didCallEnableAnalytics, isFalse);
+          expect(_didCallEnableAnalytics, isFalse);
           final prompt = _wrapWithAnalytics(
             const AnalyticsPrompt(
               child: Text('Child Text'),
@@ -94,9 +101,11 @@ void main() {
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsNothing);
+            find.text('Send usage statistics for DevTools?'),
+            findsNothing,
+          );
           expect(_controller.analyticsEnabled.value, isTrue);
-          expect(didCallEnableAnalytics, isFalse);
+          expect(_didCallEnableAnalytics, isFalse);
         });
 
         testWidgetsWithWindowSize(
@@ -127,7 +136,7 @@ void main() {
             enabled: false,
             firstRun: true,
             onEnableAnalytics: () async {
-              didCallEnableAnalytics = true;
+              _didCallEnableAnalytics = true;
             },
           );
         });
@@ -136,7 +145,7 @@ void main() {
             'displays prompt and calls enables analytics', windowSize,
             (WidgetTester tester) async {
           expect(_controller.analyticsEnabled.value, isTrue);
-          expect(didCallEnableAnalytics, isTrue);
+          expect(_didCallEnableAnalytics, isTrue);
           final prompt = _wrapWithAnalytics(
             const AnalyticsPrompt(
               child: Text('Child Text'),
@@ -145,9 +154,11 @@ void main() {
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsOneWidget);
+            find.text('Send usage statistics for DevTools?'),
+            findsOneWidget,
+          );
           expect(_controller.analyticsEnabled.value, isTrue);
-          expect(didCallEnableAnalytics, isTrue);
+          expect(_didCallEnableAnalytics, isTrue);
         });
 
         testWidgetsWithWindowSize(
@@ -160,7 +171,7 @@ void main() {
             'close button closes prompt without disabling analytics',
             windowSize, (WidgetTester tester) async {
           expect(_controller.analyticsEnabled.value, isTrue);
-          expect(didCallEnableAnalytics, isTrue);
+          expect(_didCallEnableAnalytics, isTrue);
           final prompt = _wrapWithAnalytics(
             const AnalyticsPrompt(
               child: Text('Child Text'),
@@ -169,16 +180,20 @@ void main() {
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsOneWidget);
+            find.text('Send usage statistics for DevTools?'),
+            findsOneWidget,
+          );
           expect(_controller.analyticsEnabled.value, isTrue);
-          expect(didCallEnableAnalytics, isTrue);
+          expect(_didCallEnableAnalytics, isTrue);
 
           final closeButtonFinder = find.byType(CircularIconButton);
           expect(closeButtonFinder, findsOneWidget);
           await tester.tap(closeButtonFinder);
           await tester.pumpAndSettle();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsNothing);
+            find.text('Send usage statistics for DevTools?'),
+            findsNothing,
+          );
           expect(_controller.analyticsEnabled.value, isTrue);
         });
 
@@ -186,7 +201,7 @@ void main() {
             'Sounds Good button closes prompt without disabling analytics',
             windowSize, (WidgetTester tester) async {
           expect(_controller.analyticsEnabled.value, isTrue);
-          expect(didCallEnableAnalytics, isTrue);
+          expect(_didCallEnableAnalytics, isTrue);
           final prompt = _wrapWithAnalytics(
             const AnalyticsPrompt(
               child: Text('Child Text'),
@@ -195,16 +210,20 @@ void main() {
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsOneWidget);
+            find.text('Send usage statistics for DevTools?'),
+            findsOneWidget,
+          );
           expect(_controller.analyticsEnabled.value, isTrue);
-          expect(didCallEnableAnalytics, isTrue);
+          expect(_didCallEnableAnalytics, isTrue);
 
           final soundsGoodFinder = find.text('Sounds good!');
           expect(soundsGoodFinder, findsOneWidget);
           await tester.tap(soundsGoodFinder);
           await tester.pumpAndSettle();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsNothing);
+            find.text('Send usage statistics for DevTools?'),
+            findsNothing,
+          );
           expect(_controller.analyticsEnabled.value, isTrue);
         });
 
@@ -212,7 +231,7 @@ void main() {
             'No Thanks button closes prompt and disables analytics', windowSize,
             (WidgetTester tester) async {
           expect(_controller.analyticsEnabled.value, isTrue);
-          expect(didCallEnableAnalytics, isTrue);
+          expect(_didCallEnableAnalytics, isTrue);
           final prompt = _wrapWithAnalytics(
             const AnalyticsPrompt(
               child: Text('Child Text'),
@@ -221,16 +240,20 @@ void main() {
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsOneWidget);
+            find.text('Send usage statistics for DevTools?'),
+            findsOneWidget,
+          );
           expect(_controller.analyticsEnabled.value, isTrue);
-          expect(didCallEnableAnalytics, isTrue);
+          expect(_didCallEnableAnalytics, isTrue);
 
           final noThanksFinder = find.text('No thanks.');
           expect(noThanksFinder, findsOneWidget);
           await tester.tap(noThanksFinder);
           await tester.pumpAndSettle();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsNothing);
+            find.text('Send usage statistics for DevTools?'),
+            findsNothing,
+          );
           expect(_controller.analyticsEnabled.value, isFalse);
         });
       });
@@ -241,7 +264,7 @@ void main() {
             enabled: false,
             firstRun: false,
             onEnableAnalytics: () async {
-              didCallEnableAnalytics = true;
+              _didCallEnableAnalytics = true;
             },
           );
         });
@@ -250,7 +273,7 @@ void main() {
             'does not display prompt or enable analytics from prompt',
             windowSize, (WidgetTester tester) async {
           expect(_controller.analyticsEnabled.value, isFalse);
-          expect(didCallEnableAnalytics, isFalse);
+          expect(_didCallEnableAnalytics, isFalse);
           final prompt = _wrapWithAnalytics(
             const AnalyticsPrompt(
               child: Text('Child Text'),
@@ -259,9 +282,11 @@ void main() {
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();
           expect(
-              find.text('Send usage statistics for DevTools?'), findsNothing);
+            find.text('Send usage statistics for DevTools?'),
+            findsNothing,
+          );
           expect(_controller.analyticsEnabled.value, isFalse);
-          expect(didCallEnableAnalytics, isFalse);
+          expect(_didCallEnableAnalytics, isFalse);
         });
 
         testWidgetsWithWindowSize(

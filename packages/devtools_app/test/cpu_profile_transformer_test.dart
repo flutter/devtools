@@ -1,15 +1,17 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'package:devtools_app/src/profiler/cpu_profile_model.dart';
-import 'package:devtools_app/src/profiler/cpu_profile_transformer.dart';
-import 'package:devtools_test/cpu_profile_test_data.dart';
+
+import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_transformer.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_data/cpu_profile_test_data.dart';
 
 void main() {
   group('CpuProfileTransformer', () {
-    CpuProfileTransformer cpuProfileTransformer;
-    CpuProfileData cpuProfileData;
+    late CpuProfileTransformer cpuProfileTransformer;
+    late CpuProfileData cpuProfileData;
 
     setUp(() {
       cpuProfileTransformer = CpuProfileTransformer();
@@ -18,7 +20,10 @@ void main() {
 
     test('processData', () async {
       expect(cpuProfileData.processed, isFalse);
-      await cpuProfileTransformer.processData(cpuProfileData);
+      await cpuProfileTransformer.processData(
+        cpuProfileData,
+        processId: 'test',
+      );
       expect(cpuProfileData.processed, isTrue);
       expect(
         cpuProfileData.cpuProfileRoot.toStringDeep(),
@@ -32,8 +37,10 @@ void main() {
             CpuProfileData.parse(responseWithMissingLeafFrame);
         expect(
           () async {
-            await cpuProfileTransformer
-                .processData(cpuProfileDataWithMissingLeaf);
+            await cpuProfileTransformer.processData(
+              cpuProfileDataWithMissingLeaf,
+              processId: 'test',
+            );
           },
           throwsA(const TypeMatcher<AssertionError>()),
         );
@@ -46,9 +53,12 @@ void main() {
 
     test('dispose', () {
       cpuProfileTransformer.dispose();
-      expect(() {
-        cpuProfileTransformer.progressNotifier.addListener(() {});
-      }, throwsA(anything));
+      expect(
+        () {
+          cpuProfileTransformer.progressNotifier.addListener(() {});
+        },
+        throwsA(anything),
+      );
     });
   });
 

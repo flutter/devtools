@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import 'dart:html';
 
 import 'package:flutter/widgets.dart';
 
-import '../../utils.dart';
+import '../../primitives/utils.dart';
+import '../../shared/theme.dart';
 import '../logger/logger.dart';
 import '../url/url.dart';
 import 'ide_theme.dart';
@@ -18,39 +21,42 @@ IdeTheme getIdeTheme() {
   final overrides = IdeTheme(
     backgroundColor: _tryParseColor(queryParams['backgroundColor']),
     foregroundColor: _tryParseColor(queryParams['foregroundColor']),
-    fontSize: _tryParseDouble(queryParams['fontSize']),
+    fontSize:
+        _tryParseDouble(queryParams['fontSize']) ?? unscaledDefaultFontSize,
     embed: queryParams['embed'] == 'true',
   );
 
   // If the environment has provided a background color, set it immediately
   // to avoid a white page until the first Flutter frame is rendered.
   if (overrides.backgroundColor != null) {
-    document.body.style.backgroundColor =
-        toCssHexColor(overrides.backgroundColor);
+    document.body!.style.backgroundColor =
+        toCssHexColor(overrides.backgroundColor!);
   }
 
   return overrides;
 }
 
-Color backgroundColor;
-Color foregroundColor;
-double fontSize;
+// TODO(polinach): this field seems to be not used, but the app fails without it:
+// https://github.com/flutter/devtools/pull/3748#discussion_r817269768
+Color? foregroundColor;
 
-Color _tryParseColor(String input) {
+Color? _tryParseColor(String? input) {
+  if (input == null) return null;
+
   try {
-    if (input != null) {
-      return parseCssHexColor(input);
-    }
+    return parseCssHexColor(input);
   } catch (e) {
     // The user can manipulate the query string so if the value is invalid
     // print the value but otherwise continue.
-    log('Failed to parse "$input" as a color from the querystring, ignoring: $e',
-        LogLevel.warning);
+    log(
+      'Failed to parse "$input" as a color from the querystring, ignoring: $e',
+      LogLevel.warning,
+    );
+    return null;
   }
-  return null;
 }
 
-double _tryParseDouble(String input) {
+double? _tryParseDouble(String? input) {
   try {
     if (input != null) {
       return double.parse(input);
@@ -58,8 +64,10 @@ double _tryParseDouble(String input) {
   } catch (e) {
     // The user can manipulate the query string so if the value is invalid
     // print the value but otherwise continue.
-    log('Failed to parse "$input" as a double from the querystring, ignoring: $e',
-        LogLevel.warning);
+    log(
+      'Failed to parse "$input" as a double from the querystring, ignoring: $e',
+      LogLevel.warning,
+    );
   }
   return null;
 }

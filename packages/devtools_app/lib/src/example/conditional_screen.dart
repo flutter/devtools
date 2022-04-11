@@ -7,9 +7,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../common_widgets.dart';
-import '../globals.dart';
-import '../screen.dart';
+import '../shared/common_widgets.dart';
+import '../shared/globals.dart';
+import '../shared/screen.dart';
 
 /// This is an example implementation of a conditional screen that supports
 /// offline mode and uses a provided controller [ExampleController].
@@ -44,7 +44,7 @@ class _ExampleConditionalScreenBody extends StatefulWidget {
 class _ExampleConditionalScreenBodyState
     extends State<_ExampleConditionalScreenBody>
     with OfflineScreenMixin<_ExampleConditionalScreenBody, String> {
-  ExampleController controller;
+  ExampleController? controller;
 
   @override
   void didChangeDependencies() {
@@ -64,9 +64,9 @@ class _ExampleConditionalScreenBodyState
 
   @override
   Widget build(BuildContext context) {
-    final exampleScreen = ValueListenableBuilder(
-      valueListenable: controller.title,
-      builder: (context, value, _) {
+    final exampleScreen = ValueListenableBuilder<String>(
+      valueListenable: controller!.title,
+      builder: (context, String value, _) {
         return Center(child: Text(value));
       },
     );
@@ -89,7 +89,7 @@ class _ExampleConditionalScreenBodyState
 
   @override
   FutureOr<void> processOfflineData(String offlineData) async {
-    await controller.processOfflineData(offlineData);
+    await controller!.processOfflineData(offlineData);
   }
 
   @override

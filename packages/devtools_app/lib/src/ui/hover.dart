@@ -8,9 +8,9 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../eval_on_dart_library.dart';
-import '../theme.dart';
-import '../utils.dart';
+import '../shared/eval_on_dart_library.dart';
+import '../shared/theme.dart';
+import '../shared/utils.dart';
 import 'utils.dart';
 
 /// Regex for valid Dart identifiers.
@@ -90,12 +90,12 @@ enum HoverCardPosition {
 class HoverCardData {
   HoverCardData({
     this.title,
-    @required this.contents,
-    double width,
+    required this.contents,
+    double? width,
     this.position = HoverCardPosition.cursor,
   }) : width = width ?? HoverCardTooltip.defaultHoverWidth;
 
-  final String title;
+  final String? title;
   final Widget contents;
   final double width;
   final HoverCardPosition position;
@@ -109,70 +109,79 @@ class HoverCardData {
 /// Note that if a mouse has never entered, it will not remove itself.
 class HoverCard {
   HoverCard({
-    @required BuildContext context,
-    @required Widget contents,
-    @required double width,
-    @required Offset position,
-    String title,
+    required BuildContext context,
+    required Widget contents,
+    required double width,
+    required Offset position,
+    String? title,
+    double? maxCardHeight,
   }) {
-    final overlayState = Overlay.of(context);
+    maxCardHeight ??= maxHoverCardHeight;
+    final overlayState = Overlay.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     final focusColor = Theme.of(context).focusColor;
     final hoverHeading = colorScheme.hoverTitleTextStyle;
 
-    _overlayEntry = OverlayEntry(builder: (context) {
-      return Positioned(
-        left: position.dx,
-        top: position.dy,
-        child: MouseRegion(
-          onExit: (_) {
-            remove();
-          },
-          onEnter: (_) {
-            _hasMouseEntered = true;
-          },
-          child: Container(
-            padding: const EdgeInsets.all(denseSpacing),
-            decoration: BoxDecoration(
-              color: colorScheme.defaultBackgroundColor,
-              border: Border.all(
-                color: focusColor,
-                width: hoverCardBorderWidth,
+    _overlayEntry = OverlayEntry(
+      builder: (context) {
+        return Positioned(
+          left: position.dx,
+          top: position.dy,
+          child: MouseRegion(
+            onExit: (_) {
+              remove();
+            },
+            onEnter: (_) {
+              _hasMouseEntered = true;
+            },
+            child: Container(
+              padding: const EdgeInsets.all(denseSpacing),
+              decoration: BoxDecoration(
+                color: colorScheme.defaultBackgroundColor,
+                border: Border.all(
+                  color: focusColor,
+                  width: hoverCardBorderWidth,
+                ),
+                borderRadius: BorderRadius.circular(defaultBorderRadius),
               ),
-              borderRadius: BorderRadius.circular(defaultBorderRadius),
-            ),
-            width: width,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (title != null) ...[
-                  Container(
-                    width: width,
-                    child: Text(
-                      title,
-                      overflow: TextOverflow.ellipsis,
-                      style: hoverHeading,
-                      textAlign: TextAlign.center,
+              width: width,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (title != null) ...[
+                    Container(
+                      width: width,
+                      child: Text(
+                        title,
+                        overflow: TextOverflow.ellipsis,
+                        style: hoverHeading,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Divider(color: colorScheme.hoverTextStyle.color),
+                  ],
+                  SingleChildScrollView(
+                    child: Container(
+                      constraints: BoxConstraints(maxHeight: maxCardHeight!),
+                      child: contents,
                     ),
                   ),
-                  Divider(color: colorScheme.hoverTextStyle.color),
                 ],
-                contents,
-              ],
+              ),
             ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
     overlayState.insert(_overlayEntry);
   }
 
   HoverCard.fromHoverEvent({
-    @required BuildContext context,
-    @required PointerHoverEvent event,
-    @required Widget contents,
-    @required double width,
-    String title,
+    required BuildContext context,
+    required PointerHoverEvent event,
+    required Widget contents,
+    required double width,
+    String? title,
   }) : this(
           context: context,
           contents: contents,
@@ -184,7 +193,7 @@ class HoverCard {
           title: title,
         );
 
-  OverlayEntry _overlayEntry;
+  late OverlayEntry _overlayEntry;
 
   bool _isRemoved = false;
 
@@ -209,9 +218,9 @@ class HoverCard {
 /// A hover card based tooltip.
 class HoverCardTooltip extends StatefulWidget {
   const HoverCardTooltip({
-    @required this.enabled,
-    @required this.onHover,
-    @required this.child,
+    required this.enabled,
+    required this.onHover,
+    required this.child,
     this.disposable,
   });
 
@@ -227,7 +236,7 @@ class HoverCardTooltip extends StatefulWidget {
   final Widget child;
 
   /// Disposable object to be disposed when the group is closed.
-  final Disposable disposable;
+  final Disposable? disposable;
 
   @override
   _HoverCardTooltipState createState() => _HoverCardTooltipState();
@@ -235,13 +244,13 @@ class HoverCardTooltip extends StatefulWidget {
 
 class _HoverCardTooltipState extends State<HoverCardTooltip> {
   /// A timer that shows a [HoverCard] with an evaluation result when completed.
-  Timer _showTimer;
+  Timer? _showTimer;
 
   /// A timer that removes a [HoverCard] when completed.
-  Timer _removeTimer;
+  Timer? _removeTimer;
 
   /// Displays the evaluation result of a source code item.
-  HoverCard _hoverCard;
+  HoverCard? _hoverCard;
 
   void _onHoverExit() {
     _showTimer?.cancel();
@@ -262,31 +271,29 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
       _hoverCard = null;
       final hoverCardData = await widget.onHover(event);
       if (!mounted) return;
-      if (hoverCardData != null) {
-        if (hoverCardData.position == HoverCardPosition.cursor) {
-          _hoverCard = HoverCard.fromHoverEvent(
-            context: context,
-            title: hoverCardData.title,
-            contents: hoverCardData.contents,
-            width: hoverCardData.width,
-            event: event,
-          );
-        } else {
-          _hoverCard = HoverCard(
-            context: context,
-            title: hoverCardData.title,
-            contents: hoverCardData.contents,
-            width: hoverCardData.width,
-            position: _calculateTooltipPosition(hoverCardData.width),
-          );
-        }
+      if (hoverCardData.position == HoverCardPosition.cursor) {
+        _hoverCard = HoverCard.fromHoverEvent(
+          context: context,
+          title: hoverCardData.title,
+          contents: hoverCardData.contents,
+          width: hoverCardData.width,
+          event: event,
+        );
+      } else {
+        _hoverCard = HoverCard(
+          context: context,
+          title: hoverCardData.title,
+          contents: hoverCardData.contents,
+          width: hoverCardData.width,
+          position: _calculateTooltipPosition(hoverCardData.width),
+        );
       }
     });
   }
 
   Offset _calculateTooltipPosition(double width) {
     final overlayBox =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
+        Overlay.of(context)!.context.findRenderObject() as RenderBox;
     final box = context.findRenderObject() as RenderBox;
 
     final maxX = overlayBox.size.width - _hoverMargin - width;

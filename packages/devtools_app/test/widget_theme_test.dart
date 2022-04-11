@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/inspector/layout_explorer/ui/widgets_theme.dart';
+import 'package:devtools_app/src/screens/inspector/layout_explorer/ui/widgets_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

@@ -1,7 +1,13 @@
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/vm_service_wrapper.dart';
-import 'package:devtools_test/mocks.dart';
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/service/vm_service_wrapper.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';

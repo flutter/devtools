@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import '../../framework/framework_core.dart';
 import '_framework_initialize_stub.dart'
     if (dart.library.html) '_framework_initialize_web.dart'
@@ -9,6 +11,6 @@ import '_framework_initialize_stub.dart'
 
 Future initializeFramework() async {
   FrameworkCore.initGlobals();
-  final url = await initializePlatform();
-  FrameworkCore.init(url: url);
+  await initializePlatform();
+  FrameworkCore.init();
 }

@@ -2,18 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
 import 'dart:convert';
 
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/inspector/diagnostics_node.dart';
-import 'package:devtools_app/src/inspector/inspector_screen.dart';
-import 'package:devtools_app/src/inspector/inspector_tree.dart';
-import 'package:devtools_app/src/inspector/layout_explorer/flex/flex.dart';
-import 'package:devtools_app/src/inspector/layout_explorer/layout_explorer.dart';
-import 'package:devtools_app/src/service_extensions.dart' as extensions;
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_tree.dart';
+import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dart';
+import 'package:devtools_app/src/screens/inspector/layout_explorer/layout_explorer.dart';
+import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/preferences.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart' hide Fake;
 import 'package:mockito/mockito.dart';
@@ -43,6 +46,8 @@ void main() {
           .thenReturn(ValueNotifier<int>(0));
 
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(IdeTheme, IdeTheme());
+      setGlobal(PreferencesController, PreferencesController());
       fakeServiceManager.consoleService.ensureServiceInitialized();
     });
 
@@ -55,7 +60,8 @@ void main() {
       };
       fakeExtensionManager
         ..fakeAddServiceExtension(
-            extensions.toggleOnDeviceWidgetInspector.extension)
+          extensions.toggleOnDeviceWidgetInspector.extension,
+        )
         ..fakeAddServiceExtension(extensions.toggleSelectWidgetMode.extension)
         ..fakeAddServiceExtension(extensions.enableOnDeviceInspector.extension)
         ..fakeAddServiceExtension(extensions.debugPaint.extension)
@@ -73,7 +79,8 @@ void main() {
       fakeExtensionManager.fakeFrame();
     }
 
-    testWidgets('builds its tab', (WidgetTester tester) async {
+    testWidgetsWithWindowSize('builds its tab', windowSize,
+        (WidgetTester tester) async {
       await tester.pumpWidget(buildInspectorScreen());
       await tester.pumpAndSettle();
       expect(find.byType(InspectorScreenBody), findsOneWidget);
@@ -97,7 +104,7 @@ void main() {
 
       await tester.pumpWidget(buildInspectorScreen());
       expect(find.byType(InspectorScreenBody), findsOneWidget);
-      expect(find.text('Refresh Tree'), findsOneWidget);
+      expect(find.byTooltip('Refresh Tree'), findsOneWidget);
       expect(find.text(extensions.debugPaint.title), findsOneWidget);
       // Make sure there is not an overflow if the window is narrow.
       // TODO(jacobr): determine why there are overflows in the test environment
@@ -184,8 +191,10 @@ void main() {
       await tester.pumpWidget(buildInspectorScreen());
       await tester.pump();
       expect(find.byType(InspectorScreenBody), findsOneWidget);
-      expect(find.text(extensions.toggleOnDeviceWidgetInspector.title),
-          findsOneWidget);
+      expect(
+        find.text(extensions.toggleOnDeviceWidgetInspector.title),
+        findsOneWidget,
+      );
       expect(find.text(extensions.debugPaint.title), findsOneWidget);
       await tester.pump();
 
@@ -193,23 +202,26 @@ void main() {
           .tap(find.text(extensions.toggleOnDeviceWidgetInspector.title));
       // Verify the service extension state has not changed.
       expect(
-          fakeExtensionManager.extensionValueOnDevice[
-              extensions.toggleOnDeviceWidgetInspector.extension],
-          isTrue);
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleOnDeviceWidgetInspector.extension],
+        isTrue,
+      );
       await tester
           .tap(find.text(extensions.toggleOnDeviceWidgetInspector.title));
       // Verify the service extension state has not changed.
       expect(
-          fakeExtensionManager.extensionValueOnDevice[
-              extensions.toggleOnDeviceWidgetInspector.extension],
-          isTrue);
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleOnDeviceWidgetInspector.extension],
+        isTrue,
+      );
 
       // TODO(jacobr): also verify that the service extension buttons look
       // visually disabled.
     });
 
     group('LayoutDetailsTab', () {
-      final renderObjectJson = jsonDecode('''
+      final renderObjectJson = jsonDecode(
+        '''
         {
           "properties": [
             {
@@ -238,7 +250,8 @@ void main() {
             }
           ]
         }
-      ''');
+      ''',
+      );
       final diagnostic = RemoteDiagnosticsNode(
         <String, Object>{
           'widgetRuntimeType': 'Row',

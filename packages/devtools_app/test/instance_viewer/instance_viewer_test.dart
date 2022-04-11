@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/eval_on_dart_library.dart';
-import 'package:devtools_app/src/provider/instance_viewer/instance_details.dart';
-import 'package:devtools_app/src/provider/instance_viewer/instance_providers.dart';
-import 'package:devtools_app/src/provider/instance_viewer/instance_viewer.dart';
-import 'package:devtools_app/src/provider/instance_viewer/result.dart';
-import 'package:devtools_test/utils.dart';
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
+import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
+import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
+import 'package:devtools_app/src/screens/provider/instance_viewer/instance_viewer.dart';
+import 'package:devtools_app/src/screens/provider/instance_viewer/result.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -65,10 +69,15 @@ final emptyMapInstance = AsyncValue.data(
 );
 
 final map2Instance = AsyncValue.data(
-  InstanceDetails.map([
-    stringInstance.data.value,
-    list2Instance.data.value,
-  ], hash: 0, instanceRefId: '0', setter: null),
+  InstanceDetails.map(
+    [
+      stringInstance.data!.value,
+      list2Instance.data!.value,
+    ],
+    hash: 0,
+    instanceRefId: '0',
+    setter: null,
+  ),
 );
 
 final emptyListInstance = AsyncValue.data(
@@ -114,6 +123,10 @@ final enumValueInstance = AsyncValue.data(
 
 void main() {
   setUpAll(() => loadFonts());
+
+  setUp(() {
+    setGlobal(ServiceConnectionManager, FakeServiceManager());
+  });
 
   group('InstanceViewer', () {
     testWidgets(
@@ -317,10 +330,12 @@ void main() {
     testWidgets(
         'once valid data was fetched, going back to loading shows the previous value for 1 second',
         (tester) async {
-      final container = ProviderContainer(overrides: [
-        rawInstanceProvider(const InstancePath.fromInstanceId('0'))
-            .overrideWithValue(nullInstance),
-      ]);
+      final container = ProviderContainer(
+        overrides: [
+          rawInstanceProvider(const InstancePath.fromInstanceId('0'))
+              .overrideWithValue(nullInstance),
+        ],
+      );
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
@@ -370,10 +385,12 @@ void main() {
     testWidgets(
         'once valid data was fetched, going back to loading and emiting an error immediately updates the UI',
         (tester) async {
-      final container = ProviderContainer(overrides: [
-        rawInstanceProvider(const InstancePath.fromInstanceId('0'))
-            .overrideWithValue(nullInstance),
-      ]);
+      final container = ProviderContainer(
+        overrides: [
+          rawInstanceProvider(const InstancePath.fromInstanceId('0'))
+              .overrideWithValue(nullInstance),
+        ],
+      );
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
@@ -420,10 +437,12 @@ void main() {
     testWidgets(
         'once valid data was fetched, going back to loading and emiting a new value immediately updates the UI',
         (tester) async {
-      final container = ProviderContainer(overrides: [
-        rawInstanceProvider(const InstancePath.fromInstanceId('0'))
-            .overrideWithValue(nullInstance),
-      ]);
+      final container = ProviderContainer(
+        overrides: [
+          rawInstanceProvider(const InstancePath.fromInstanceId('0'))
+              .overrideWithValue(nullInstance),
+        ],
+      );
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
@@ -468,10 +487,12 @@ void main() {
     });
 
     testWidgets('renders enums', (tester) async {
-      final container = ProviderContainer(overrides: [
-        rawInstanceProvider(const InstancePath.fromInstanceId('enum'))
-            .overrideWithValue(enumValueInstance),
-      ]);
+      final container = ProviderContainer(
+        overrides: [
+          rawInstanceProvider(const InstancePath.fromInstanceId('enum'))
+              .overrideWithValue(enumValueInstance),
+        ],
+      );
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
@@ -497,10 +518,12 @@ void main() {
     });
 
     testWidgets('renders null', (tester) async {
-      final container = ProviderContainer(overrides: [
-        rawInstanceProvider(const InstancePath.fromInstanceId('null'))
-            .overrideWithValue(nullInstance),
-      ]);
+      final container = ProviderContainer(
+        overrides: [
+          rawInstanceProvider(const InstancePath.fromInstanceId('null'))
+              .overrideWithValue(nullInstance),
+        ],
+      );
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
@@ -526,10 +549,12 @@ void main() {
     });
 
     testWidgets('renders bools', (tester) async {
-      final container = ProviderContainer(overrides: [
-        rawInstanceProvider(const InstancePath.fromInstanceId('bool'))
-            .overrideWithValue(trueInstance),
-      ]);
+      final container = ProviderContainer(
+        overrides: [
+          rawInstanceProvider(const InstancePath.fromInstanceId('bool'))
+              .overrideWithValue(trueInstance),
+        ],
+      );
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
@@ -555,10 +580,12 @@ void main() {
     });
 
     testWidgets('renders strings', (tester) async {
-      final container = ProviderContainer(overrides: [
-        rawInstanceProvider(const InstancePath.fromInstanceId('string'))
-            .overrideWithValue(stringInstance),
-      ]);
+      final container = ProviderContainer(
+        overrides: [
+          rawInstanceProvider(const InstancePath.fromInstanceId('string'))
+              .overrideWithValue(stringInstance),
+        ],
+      );
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
@@ -584,10 +611,12 @@ void main() {
     });
 
     testWidgets('renders numbers', (tester) async {
-      final container = ProviderContainer(overrides: [
-        rawInstanceProvider(const InstancePath.fromInstanceId('num'))
-            .overrideWithValue(int42Instance),
-      ]);
+      final container = ProviderContainer(
+        overrides: [
+          rawInstanceProvider(const InstancePath.fromInstanceId('num'))
+              .overrideWithValue(int42Instance),
+        ],
+      );
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
@@ -613,33 +642,43 @@ void main() {
     });
 
     testWidgets('renders maps', (tester) async {
-      final container = ProviderContainer(overrides: [
-        rawInstanceProvider(const InstancePath.fromInstanceId('map'))
-            .overrideWithValue(map2Instance),
-        // {'string': 42, [...]: ['string', null]}
-        rawInstanceProvider(const InstancePath.fromInstanceId(
-          'map',
-          pathToProperty: [PathToProperty.mapKey(ref: 'string')],
-        )).overrideWithValue(int42Instance),
-        rawInstanceProvider(const InstancePath.fromInstanceId(
-          'map',
-          pathToProperty: [PathToProperty.mapKey(ref: 'list2')],
-        )).overrideWithValue(list2Instance),
-        rawInstanceProvider(const InstancePath.fromInstanceId(
-          'map',
-          pathToProperty: [
-            PathToProperty.mapKey(ref: 'list2'),
-            PathToProperty.listIndex(0),
-          ],
-        )).overrideWithValue(stringInstance),
-        rawInstanceProvider(const InstancePath.fromInstanceId(
-          'map',
-          pathToProperty: [
-            PathToProperty.mapKey(ref: 'list2'),
-            PathToProperty.listIndex(1),
-          ],
-        )).overrideWithValue(nullInstance),
-      ]);
+      final container = ProviderContainer(
+        overrides: [
+          rawInstanceProvider(const InstancePath.fromInstanceId('map'))
+              .overrideWithValue(map2Instance),
+          // {'string': 42, [...]: ['string', null]}
+          rawInstanceProvider(
+            const InstancePath.fromInstanceId(
+              'map',
+              pathToProperty: [PathToProperty.mapKey(ref: 'string')],
+            ),
+          ).overrideWithValue(int42Instance),
+          rawInstanceProvider(
+            const InstancePath.fromInstanceId(
+              'map',
+              pathToProperty: [PathToProperty.mapKey(ref: 'list2')],
+            ),
+          ).overrideWithValue(list2Instance),
+          rawInstanceProvider(
+            const InstancePath.fromInstanceId(
+              'map',
+              pathToProperty: [
+                PathToProperty.mapKey(ref: 'list2'),
+                PathToProperty.listIndex(0),
+              ],
+            ),
+          ).overrideWithValue(stringInstance),
+          rawInstanceProvider(
+            const InstancePath.fromInstanceId(
+              'map',
+              pathToProperty: [
+                PathToProperty.mapKey(ref: 'list2'),
+                PathToProperty.listIndex(1),
+              ],
+            ),
+          ).overrideWithValue(nullInstance),
+        ],
+      );
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
@@ -664,10 +703,14 @@ void main() {
       );
 
       container
-          .read(isExpandedProvider(const InstancePath.fromInstanceId(
-            'map',
-            pathToProperty: [PathToProperty.mapKey(ref: 'list2')],
-          )))
+          .read(
+            isExpandedProvider(
+              const InstancePath.fromInstanceId(
+                'map',
+                pathToProperty: [PathToProperty.mapKey(ref: 'list2')],
+              ),
+            ),
+          )
           .state = true;
 
       await tester.pumpAndSettle();
@@ -679,53 +722,63 @@ void main() {
     });
 
     testWidgets('renders objects', (tester) async {
-      final container = ProviderContainer(overrides: [
-        rawInstanceProvider(const InstancePath.fromInstanceId('object'))
-            .overrideWithValue(object2Instance),
-        // MyClass(first: 42, second: ['string', null])
-        rawInstanceProvider(const InstancePath.fromInstanceId(
-          'object',
-          pathToProperty: [
-            PathToProperty.objectProperty(
-              name: 'first',
-              ownerUri: '',
-              ownerName: '',
+      final container = ProviderContainer(
+        overrides: [
+          rawInstanceProvider(const InstancePath.fromInstanceId('object'))
+              .overrideWithValue(object2Instance),
+          // MyClass(first: 42, second: ['string', null])
+          rawInstanceProvider(
+            const InstancePath.fromInstanceId(
+              'object',
+              pathToProperty: [
+                PathToProperty.objectProperty(
+                  name: 'first',
+                  ownerUri: '',
+                  ownerName: '',
+                ),
+              ],
             ),
-          ],
-        )).overrideWithValue(int42Instance),
-        rawInstanceProvider(const InstancePath.fromInstanceId(
-          'object',
-          pathToProperty: [
-            PathToProperty.objectProperty(
-              name: 'second',
-              ownerUri: '',
-              ownerName: '',
+          ).overrideWithValue(int42Instance),
+          rawInstanceProvider(
+            const InstancePath.fromInstanceId(
+              'object',
+              pathToProperty: [
+                PathToProperty.objectProperty(
+                  name: 'second',
+                  ownerUri: '',
+                  ownerName: '',
+                ),
+              ],
             ),
-          ],
-        )).overrideWithValue(list2Instance),
-        rawInstanceProvider(const InstancePath.fromInstanceId(
-          'object',
-          pathToProperty: [
-            PathToProperty.objectProperty(
-              name: 'second',
-              ownerUri: '',
-              ownerName: '',
+          ).overrideWithValue(list2Instance),
+          rawInstanceProvider(
+            const InstancePath.fromInstanceId(
+              'object',
+              pathToProperty: [
+                PathToProperty.objectProperty(
+                  name: 'second',
+                  ownerUri: '',
+                  ownerName: '',
+                ),
+                PathToProperty.listIndex(0),
+              ],
             ),
-            PathToProperty.listIndex(0),
-          ],
-        )).overrideWithValue(stringInstance),
-        rawInstanceProvider(const InstancePath.fromInstanceId(
-          'object',
-          pathToProperty: [
-            PathToProperty.objectProperty(
-              name: 'second',
-              ownerUri: '',
-              ownerName: '',
+          ).overrideWithValue(stringInstance),
+          rawInstanceProvider(
+            const InstancePath.fromInstanceId(
+              'object',
+              pathToProperty: [
+                PathToProperty.objectProperty(
+                  name: 'second',
+                  ownerUri: '',
+                  ownerName: '',
+                ),
+                PathToProperty.listIndex(1),
+              ],
             ),
-            PathToProperty.listIndex(1),
-          ],
-        )).overrideWithValue(nullInstance),
-      ]);
+          ).overrideWithValue(nullInstance),
+        ],
+      );
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
@@ -750,16 +803,20 @@ void main() {
       );
 
       container
-          .read(isExpandedProvider(const InstancePath.fromInstanceId(
-            'object',
-            pathToProperty: [
-              PathToProperty.objectProperty(
-                name: 'second',
-                ownerUri: '',
-                ownerName: '',
+          .read(
+            isExpandedProvider(
+              const InstancePath.fromInstanceId(
+                'object',
+                pathToProperty: [
+                  PathToProperty.objectProperty(
+                    name: 'second',
+                    ownerUri: '',
+                    ownerName: '',
+                  ),
+                ],
               ),
-            ],
-          )))
+            ),
+          )
           .state = true;
 
       await tester.pumpAndSettle();
@@ -771,37 +828,47 @@ void main() {
     });
 
     testWidgets('renders lists', (tester) async {
-      final container = ProviderContainer(overrides: [
-        rawInstanceProvider(const InstancePath.fromInstanceId('list'))
-            .overrideWithValue(list2Instance),
-        // [true, {'string': 42, [...]: null}]
-        rawInstanceProvider(const InstancePath.fromInstanceId(
-          'list',
-          pathToProperty: [
-            PathToProperty.listIndex(0),
-          ],
-        )).overrideWithValue(trueInstance),
-        rawInstanceProvider(const InstancePath.fromInstanceId(
-          'list',
-          pathToProperty: [
-            PathToProperty.listIndex(1),
-          ],
-        )).overrideWithValue(map2Instance),
-        rawInstanceProvider(const InstancePath.fromInstanceId(
-          'list',
-          pathToProperty: [
-            PathToProperty.listIndex(1),
-            PathToProperty.mapKey(ref: 'string'),
-          ],
-        )).overrideWithValue(int42Instance),
-        rawInstanceProvider(const InstancePath.fromInstanceId(
-          'list',
-          pathToProperty: [
-            PathToProperty.listIndex(1),
-            PathToProperty.mapKey(ref: 'list2'),
-          ],
-        )).overrideWithValue(nullInstance),
-      ]);
+      final container = ProviderContainer(
+        overrides: [
+          rawInstanceProvider(const InstancePath.fromInstanceId('list'))
+              .overrideWithValue(list2Instance),
+          // [true, {'string': 42, [...]: null}]
+          rawInstanceProvider(
+            const InstancePath.fromInstanceId(
+              'list',
+              pathToProperty: [
+                PathToProperty.listIndex(0),
+              ],
+            ),
+          ).overrideWithValue(trueInstance),
+          rawInstanceProvider(
+            const InstancePath.fromInstanceId(
+              'list',
+              pathToProperty: [
+                PathToProperty.listIndex(1),
+              ],
+            ),
+          ).overrideWithValue(map2Instance),
+          rawInstanceProvider(
+            const InstancePath.fromInstanceId(
+              'list',
+              pathToProperty: [
+                PathToProperty.listIndex(1),
+                PathToProperty.mapKey(ref: 'string'),
+              ],
+            ),
+          ).overrideWithValue(int42Instance),
+          rawInstanceProvider(
+            const InstancePath.fromInstanceId(
+              'list',
+              pathToProperty: [
+                PathToProperty.listIndex(1),
+                PathToProperty.mapKey(ref: 'list2'),
+              ],
+            ),
+          ).overrideWithValue(nullInstance),
+        ],
+      );
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
@@ -826,10 +893,14 @@ void main() {
       );
 
       container
-          .read(isExpandedProvider(const InstancePath.fromInstanceId(
-            'list',
-            pathToProperty: [PathToProperty.listIndex(1)],
-          )))
+          .read(
+            isExpandedProvider(
+              const InstancePath.fromInstanceId(
+                'list',
+                pathToProperty: [PathToProperty.listIndex(1)],
+              ),
+            ),
+          )
           .state = true;
 
       await tester.pumpAndSettle();
@@ -841,11 +912,13 @@ void main() {
     });
 
     testWidgets('does not listen to unexpanded nodes', (tester) async {
-      final container = ProviderContainer(overrides: [
-        neverExpandedOverride,
-        rawInstanceProvider(const InstancePath.fromInstanceId('list2'))
-            .overrideWithValue(list2Instance),
-      ]);
+      final container = ProviderContainer(
+        overrides: [
+          neverExpandedOverride,
+          rawInstanceProvider(const InstancePath.fromInstanceId('list2'))
+              .overrideWithValue(list2Instance),
+        ],
+      );
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
@@ -872,23 +945,27 @@ void main() {
       );
       expect(
         container
-            .readProviderElement(rawInstanceProvider(
-              const InstancePath.fromInstanceId(
-                'list2',
-                pathToProperty: [PathToProperty.listIndex(0)],
+            .readProviderElement(
+              rawInstanceProvider(
+                const InstancePath.fromInstanceId(
+                  'list2',
+                  pathToProperty: [PathToProperty.listIndex(0)],
+                ),
               ),
-            ))
+            )
             .hasListeners,
         isFalse,
       );
       expect(
         container
-            .readProviderElement(rawInstanceProvider(
-              const InstancePath.fromInstanceId(
-                'list2',
-                pathToProperty: [PathToProperty.listIndex(1)],
+            .readProviderElement(
+              rawInstanceProvider(
+                const InstancePath.fromInstanceId(
+                  'list2',
+                  pathToProperty: [PathToProperty.listIndex(1)],
+                ),
               ),
-            ))
+            )
             .hasListeners,
         isFalse,
       );
@@ -898,98 +975,122 @@ void main() {
   group('estimatedChildCountProvider', () {
     group('primitives', () {
       test('count for one line when not expanded', () {
-        final container = ProviderContainer(overrides: [
-          neverExpandedOverride,
-          rawInstanceProvider(const InstancePath.fromInstanceId('string'))
-              .overrideWithValue(stringInstance),
-          rawInstanceProvider(const InstancePath.fromInstanceId('null'))
-              .overrideWithValue(nullInstance),
-          rawInstanceProvider(const InstancePath.fromInstanceId('bool'))
-              .overrideWithValue(trueInstance),
-          rawInstanceProvider(const InstancePath.fromInstanceId('num'))
-              .overrideWithValue(int42Instance),
-          rawInstanceProvider(const InstancePath.fromInstanceId('enum'))
-              .overrideWithValue(enumValueInstance),
-        ]);
+        final container = ProviderContainer(
+          overrides: [
+            neverExpandedOverride,
+            rawInstanceProvider(const InstancePath.fromInstanceId('string'))
+                .overrideWithValue(stringInstance),
+            rawInstanceProvider(const InstancePath.fromInstanceId('null'))
+                .overrideWithValue(nullInstance),
+            rawInstanceProvider(const InstancePath.fromInstanceId('bool'))
+                .overrideWithValue(trueInstance),
+            rawInstanceProvider(const InstancePath.fromInstanceId('num'))
+                .overrideWithValue(int42Instance),
+            rawInstanceProvider(const InstancePath.fromInstanceId('enum'))
+                .overrideWithValue(enumValueInstance),
+          ],
+        );
         addTearDown(container.dispose);
 
         expect(
-          container.read(estimatedChildCountProvider(
-            const InstancePath.fromInstanceId('string'),
-          )),
+          container.read(
+            estimatedChildCountProvider(
+              const InstancePath.fromInstanceId('string'),
+            ),
+          ),
           1,
         );
         expect(
-          container.read(estimatedChildCountProvider(
-            const InstancePath.fromInstanceId('null'),
-          )),
+          container.read(
+            estimatedChildCountProvider(
+              const InstancePath.fromInstanceId('null'),
+            ),
+          ),
           1,
         );
         expect(
-          container.read(estimatedChildCountProvider(
-            const InstancePath.fromInstanceId('bool'),
-          )),
+          container.read(
+            estimatedChildCountProvider(
+              const InstancePath.fromInstanceId('bool'),
+            ),
+          ),
           1,
         );
         expect(
-          container.read(estimatedChildCountProvider(
-            const InstancePath.fromInstanceId('num'),
-          )),
+          container.read(
+            estimatedChildCountProvider(
+              const InstancePath.fromInstanceId('num'),
+            ),
+          ),
           1,
         );
         expect(
-          container.read(estimatedChildCountProvider(
-            const InstancePath.fromInstanceId('enum'),
-          )),
+          container.read(
+            estimatedChildCountProvider(
+              const InstancePath.fromInstanceId('enum'),
+            ),
+          ),
           1,
         );
       });
 
       test('count for one line when expanded', () {
-        final container = ProviderContainer(overrides: [
-          // force expanded status
-          alwaysExpandedOverride,
-          rawInstanceProvider(const InstancePath.fromInstanceId('string'))
-              .overrideWithValue(stringInstance),
-          rawInstanceProvider(const InstancePath.fromInstanceId('null'))
-              .overrideWithValue(nullInstance),
-          rawInstanceProvider(const InstancePath.fromInstanceId('bool'))
-              .overrideWithValue(trueInstance),
-          rawInstanceProvider(const InstancePath.fromInstanceId('num'))
-              .overrideWithValue(int42Instance),
-          rawInstanceProvider(const InstancePath.fromInstanceId('enum'))
-              .overrideWithValue(enumValueInstance),
-        ]);
+        final container = ProviderContainer(
+          overrides: [
+            // force expanded status
+            alwaysExpandedOverride,
+            rawInstanceProvider(const InstancePath.fromInstanceId('string'))
+                .overrideWithValue(stringInstance),
+            rawInstanceProvider(const InstancePath.fromInstanceId('null'))
+                .overrideWithValue(nullInstance),
+            rawInstanceProvider(const InstancePath.fromInstanceId('bool'))
+                .overrideWithValue(trueInstance),
+            rawInstanceProvider(const InstancePath.fromInstanceId('num'))
+                .overrideWithValue(int42Instance),
+            rawInstanceProvider(const InstancePath.fromInstanceId('enum'))
+                .overrideWithValue(enumValueInstance),
+          ],
+        );
         addTearDown(container.dispose);
 
         expect(
-          container.read(estimatedChildCountProvider(
-            const InstancePath.fromInstanceId('string'),
-          )),
+          container.read(
+            estimatedChildCountProvider(
+              const InstancePath.fromInstanceId('string'),
+            ),
+          ),
           1,
         );
         expect(
-          container.read(estimatedChildCountProvider(
-            const InstancePath.fromInstanceId('null'),
-          )),
+          container.read(
+            estimatedChildCountProvider(
+              const InstancePath.fromInstanceId('null'),
+            ),
+          ),
           1,
         );
         expect(
-          container.read(estimatedChildCountProvider(
-            const InstancePath.fromInstanceId('bool'),
-          )),
+          container.read(
+            estimatedChildCountProvider(
+              const InstancePath.fromInstanceId('bool'),
+            ),
+          ),
           1,
         );
         expect(
-          container.read(estimatedChildCountProvider(
-            const InstancePath.fromInstanceId('num'),
-          )),
+          container.read(
+            estimatedChildCountProvider(
+              const InstancePath.fromInstanceId('num'),
+            ),
+          ),
           1,
         );
         expect(
-          container.read(estimatedChildCountProvider(
-            const InstancePath.fromInstanceId('enum'),
-          )),
+          container.read(
+            estimatedChildCountProvider(
+              const InstancePath.fromInstanceId('enum'),
+            ),
+          ),
           1,
         );
       });
@@ -998,67 +1099,82 @@ void main() {
     group('lists', () {
       test('count for one line when not expanded regarless of the list length',
           () {
-        final container = ProviderContainer(overrides: [
-          neverExpandedOverride,
-          rawInstanceProvider(const InstancePath.fromInstanceId('empty'))
-              .overrideWithValue(emptyListInstance),
-          rawInstanceProvider(const InstancePath.fromInstanceId('list-2'))
-              .overrideWithValue(emptyListInstance)
-        ]);
+        final container = ProviderContainer(
+          overrides: [
+            neverExpandedOverride,
+            rawInstanceProvider(const InstancePath.fromInstanceId('empty'))
+                .overrideWithValue(emptyListInstance),
+            rawInstanceProvider(const InstancePath.fromInstanceId('list-2'))
+                .overrideWithValue(emptyListInstance)
+          ],
+        );
         addTearDown(container.dispose);
 
         expect(
           container.read(
             estimatedChildCountProvider(
-                const InstancePath.fromInstanceId('empty')),
+              const InstancePath.fromInstanceId('empty'),
+            ),
           ),
           1,
         );
         expect(
           container.read(
             estimatedChildCountProvider(
-                const InstancePath.fromInstanceId('list-2')),
+              const InstancePath.fromInstanceId('list-2'),
+            ),
           ),
           1,
         );
       });
 
       test('when expanded, recursively traverse the list content', () {
-        final container = ProviderContainer(overrides: [
-          rawInstanceProvider(const InstancePath.fromInstanceId('empty'))
-              .overrideWithValue(emptyListInstance),
-          // ['string', [42, true]]
-          rawInstanceProvider(const InstancePath.fromInstanceId('list-2'))
-              .overrideWithValue(list2Instance),
-          rawInstanceProvider(const InstancePath.fromInstanceId(
-            'list-2',
-            pathToProperty: [PathToProperty.listIndex(0)],
-          )).overrideWithValue(stringInstance),
-          rawInstanceProvider(const InstancePath.fromInstanceId(
-            'list-2',
-            pathToProperty: [PathToProperty.listIndex(1)],
-          )).overrideWithValue(list2Instance),
-          rawInstanceProvider(const InstancePath.fromInstanceId(
-            'list-2',
-            pathToProperty: [
-              PathToProperty.listIndex(1),
-              PathToProperty.listIndex(0),
-            ],
-          )).overrideWithValue(int42Instance),
-          rawInstanceProvider(const InstancePath.fromInstanceId(
-            'list-2',
-            pathToProperty: [
-              PathToProperty.listIndex(1),
-              PathToProperty.listIndex(1),
-            ],
-          )).overrideWithValue(trueInstance),
-        ]);
+        final container = ProviderContainer(
+          overrides: [
+            rawInstanceProvider(const InstancePath.fromInstanceId('empty'))
+                .overrideWithValue(emptyListInstance),
+            // ['string', [42, true]]
+            rawInstanceProvider(const InstancePath.fromInstanceId('list-2'))
+                .overrideWithValue(list2Instance),
+            rawInstanceProvider(
+              const InstancePath.fromInstanceId(
+                'list-2',
+                pathToProperty: [PathToProperty.listIndex(0)],
+              ),
+            ).overrideWithValue(stringInstance),
+            rawInstanceProvider(
+              const InstancePath.fromInstanceId(
+                'list-2',
+                pathToProperty: [PathToProperty.listIndex(1)],
+              ),
+            ).overrideWithValue(list2Instance),
+            rawInstanceProvider(
+              const InstancePath.fromInstanceId(
+                'list-2',
+                pathToProperty: [
+                  PathToProperty.listIndex(1),
+                  PathToProperty.listIndex(0),
+                ],
+              ),
+            ).overrideWithValue(int42Instance),
+            rawInstanceProvider(
+              const InstancePath.fromInstanceId(
+                'list-2',
+                pathToProperty: [
+                  PathToProperty.listIndex(1),
+                  PathToProperty.listIndex(1),
+                ],
+              ),
+            ).overrideWithValue(trueInstance),
+          ],
+        );
         addTearDown(container.dispose);
 
         expect(
           container.read(
             estimatedChildCountProvider(
-                const InstancePath.fromInstanceId('empty')),
+              const InstancePath.fromInstanceId('empty'),
+            ),
           ),
           1,
         );
@@ -1076,10 +1192,12 @@ void main() {
         // expand the nested list
         container
             .read(
-              isExpandedProvider(const InstancePath.fromInstanceId(
-                'list-2',
-                pathToProperty: [PathToProperty.listIndex(1)],
-              )),
+              isExpandedProvider(
+                const InstancePath.fromInstanceId(
+                  'list-2',
+                  pathToProperty: [PathToProperty.listIndex(1)],
+                ),
+              ),
             )
             .state = true;
 
@@ -1087,7 +1205,8 @@ void main() {
         expect(
           container.read(
             estimatedChildCountProvider(
-                const InstancePath.fromInstanceId('list-2')),
+              const InstancePath.fromInstanceId('list-2'),
+            ),
           ),
           // header + string + sub-list header + sub-list 2 items
           5,
@@ -1098,67 +1217,82 @@ void main() {
     group('maps', () {
       test('count for one line when not expanded regarless of the map length',
           () {
-        final container = ProviderContainer(overrides: [
-          neverExpandedOverride,
-          rawInstanceProvider(const InstancePath.fromInstanceId('empty'))
-              .overrideWithValue(emptyMapInstance),
-          rawInstanceProvider(const InstancePath.fromInstanceId('map-2'))
-              .overrideWithValue(map2Instance)
-        ]);
+        final container = ProviderContainer(
+          overrides: [
+            neverExpandedOverride,
+            rawInstanceProvider(const InstancePath.fromInstanceId('empty'))
+                .overrideWithValue(emptyMapInstance),
+            rawInstanceProvider(const InstancePath.fromInstanceId('map-2'))
+                .overrideWithValue(map2Instance)
+          ],
+        );
         addTearDown(container.dispose);
 
         expect(
           container.read(
             estimatedChildCountProvider(
-                const InstancePath.fromInstanceId('empty')),
+              const InstancePath.fromInstanceId('empty'),
+            ),
           ),
           1,
         );
         expect(
           container.read(
             estimatedChildCountProvider(
-                const InstancePath.fromInstanceId('map-2')),
+              const InstancePath.fromInstanceId('map-2'),
+            ),
           ),
           1,
         );
       });
 
       test('when expanded, recursively traverse the map content', () {
-        final container = ProviderContainer(overrides: [
-          rawInstanceProvider(const InstancePath.fromInstanceId('empty'))
-              .overrideWithValue(emptyMapInstance),
-          // {'string': 'string', [...]: [42, true]]
-          rawInstanceProvider(const InstancePath.fromInstanceId('map-2'))
-              .overrideWithValue(map2Instance),
-          rawInstanceProvider(const InstancePath.fromInstanceId(
-            'map-2',
-            pathToProperty: [PathToProperty.mapKey(ref: 'string')],
-          )).overrideWithValue(stringInstance),
-          rawInstanceProvider(const InstancePath.fromInstanceId(
-            'map-2',
-            pathToProperty: [PathToProperty.mapKey(ref: 'list2')],
-          )).overrideWithValue(list2Instance),
-          rawInstanceProvider(const InstancePath.fromInstanceId(
-            'map-2',
-            pathToProperty: [
-              PathToProperty.mapKey(ref: 'list2'),
-              PathToProperty.listIndex(0),
-            ],
-          )).overrideWithValue(int42Instance),
-          rawInstanceProvider(const InstancePath.fromInstanceId(
-            'map-2',
-            pathToProperty: [
-              PathToProperty.mapKey(ref: 'list2'),
-              PathToProperty.listIndex(1),
-            ],
-          )).overrideWithValue(trueInstance),
-        ]);
+        final container = ProviderContainer(
+          overrides: [
+            rawInstanceProvider(const InstancePath.fromInstanceId('empty'))
+                .overrideWithValue(emptyMapInstance),
+            // {'string': 'string', [...]: [42, true]]
+            rawInstanceProvider(const InstancePath.fromInstanceId('map-2'))
+                .overrideWithValue(map2Instance),
+            rawInstanceProvider(
+              const InstancePath.fromInstanceId(
+                'map-2',
+                pathToProperty: [PathToProperty.mapKey(ref: 'string')],
+              ),
+            ).overrideWithValue(stringInstance),
+            rawInstanceProvider(
+              const InstancePath.fromInstanceId(
+                'map-2',
+                pathToProperty: [PathToProperty.mapKey(ref: 'list2')],
+              ),
+            ).overrideWithValue(list2Instance),
+            rawInstanceProvider(
+              const InstancePath.fromInstanceId(
+                'map-2',
+                pathToProperty: [
+                  PathToProperty.mapKey(ref: 'list2'),
+                  PathToProperty.listIndex(0),
+                ],
+              ),
+            ).overrideWithValue(int42Instance),
+            rawInstanceProvider(
+              const InstancePath.fromInstanceId(
+                'map-2',
+                pathToProperty: [
+                  PathToProperty.mapKey(ref: 'list2'),
+                  PathToProperty.listIndex(1),
+                ],
+              ),
+            ).overrideWithValue(trueInstance),
+          ],
+        );
         addTearDown(container.dispose);
 
         expect(
           container.read(
             estimatedChildCountProvider(
-                const InstancePath.fromInstanceId('empty')),
+              const InstancePath.fromInstanceId('empty'),
+            ),
           ),
           1,
         );
@@ -1176,10 +1310,12 @@ void main() {
         // expand the nested list
         container
             .read(
-              isExpandedProvider(const InstancePath.fromInstanceId(
-                'map-2',
-                pathToProperty: [PathToProperty.mapKey(ref: 'list2')],
-              )),
+              isExpandedProvider(
+                const InstancePath.fromInstanceId(
+                  'map-2',
+                  pathToProperty: [PathToProperty.mapKey(ref: 'list2')],
+                ),
+              ),
             )
             .state = true;
 
@@ -1187,7 +1323,8 @@ void main() {
         expect(
           container.read(
             estimatedChildCountProvider(
-                const InstancePath.fromInstanceId('map-2')),
+              const InstancePath.fromInstanceId('map-2'),
+            ),
           ),
           // header + string + sub-list header + sub-list 2 items
           5,
@@ -1199,87 +1336,102 @@ void main() {
       test(
           'count for one line when not expanded regarless of the number of fields',
           () {
-        final container = ProviderContainer(overrides: [
-          neverExpandedOverride,
-          rawInstanceProvider(const InstancePath.fromInstanceId('empty'))
-              .overrideWithValue(emptyObjectInstance),
-          rawInstanceProvider(const InstancePath.fromInstanceId('object-2'))
-              .overrideWithValue(object2Instance)
-        ]);
+        final container = ProviderContainer(
+          overrides: [
+            neverExpandedOverride,
+            rawInstanceProvider(const InstancePath.fromInstanceId('empty'))
+                .overrideWithValue(emptyObjectInstance),
+            rawInstanceProvider(const InstancePath.fromInstanceId('object-2'))
+                .overrideWithValue(object2Instance)
+          ],
+        );
         addTearDown(container.dispose);
 
         expect(
           container.read(
             estimatedChildCountProvider(
-                const InstancePath.fromInstanceId('empty')),
+              const InstancePath.fromInstanceId('empty'),
+            ),
           ),
           1,
         );
         expect(
           container.read(
             estimatedChildCountProvider(
-                const InstancePath.fromInstanceId('object-2')),
+              const InstancePath.fromInstanceId('object-2'),
+            ),
           ),
           1,
         );
       });
 
       test('when expanded, recursively traverse the object content', () {
-        final container = ProviderContainer(overrides: [
-          rawInstanceProvider(const InstancePath.fromInstanceId('empty'))
-              .overrideWithValue(emptyObjectInstance),
-          // Class(first: 'string', second: [42, true])
-          rawInstanceProvider(const InstancePath.fromInstanceId('object-2'))
-              .overrideWithValue(object2Instance),
-          rawInstanceProvider(const InstancePath.fromInstanceId(
-            'object-2',
-            pathToProperty: [
-              PathToProperty.objectProperty(
-                name: 'first',
-                ownerUri: '',
-                ownerName: '',
-              )
-            ],
-          )).overrideWithValue(stringInstance),
-          rawInstanceProvider(const InstancePath.fromInstanceId(
-            'object-2',
-            pathToProperty: [
-              PathToProperty.objectProperty(
-                name: 'second',
-                ownerUri: '',
-                ownerName: '',
-              )
-            ],
-          )).overrideWithValue(list2Instance),
-          rawInstanceProvider(const InstancePath.fromInstanceId(
-            'object-2',
-            pathToProperty: [
-              PathToProperty.objectProperty(
-                name: 'second',
-                ownerUri: '',
-                ownerName: '',
+        final container = ProviderContainer(
+          overrides: [
+            rawInstanceProvider(const InstancePath.fromInstanceId('empty'))
+                .overrideWithValue(emptyObjectInstance),
+            // Class(first: 'string', second: [42, true])
+            rawInstanceProvider(const InstancePath.fromInstanceId('object-2'))
+                .overrideWithValue(object2Instance),
+            rawInstanceProvider(
+              const InstancePath.fromInstanceId(
+                'object-2',
+                pathToProperty: [
+                  PathToProperty.objectProperty(
+                    name: 'first',
+                    ownerUri: '',
+                    ownerName: '',
+                  )
+                ],
               ),
-              PathToProperty.listIndex(0),
-            ],
-          )).overrideWithValue(int42Instance),
-          rawInstanceProvider(const InstancePath.fromInstanceId(
-            'object-2',
-            pathToProperty: [
-              PathToProperty.objectProperty(
-                name: 'second',
-                ownerUri: '',
-                ownerName: '',
+            ).overrideWithValue(stringInstance),
+            rawInstanceProvider(
+              const InstancePath.fromInstanceId(
+                'object-2',
+                pathToProperty: [
+                  PathToProperty.objectProperty(
+                    name: 'second',
+                    ownerUri: '',
+                    ownerName: '',
+                  )
+                ],
               ),
-              PathToProperty.listIndex(1),
-            ],
-          )).overrideWithValue(trueInstance),
-        ]);
+            ).overrideWithValue(list2Instance),
+            rawInstanceProvider(
+              const InstancePath.fromInstanceId(
+                'object-2',
+                pathToProperty: [
+                  PathToProperty.objectProperty(
+                    name: 'second',
+                    ownerUri: '',
+                    ownerName: '',
+                  ),
+                  PathToProperty.listIndex(0),
+                ],
+              ),
+            ).overrideWithValue(int42Instance),
+            rawInstanceProvider(
+              const InstancePath.fromInstanceId(
+                'object-2',
+                pathToProperty: [
+                  PathToProperty.objectProperty(
+                    name: 'second',
+                    ownerUri: '',
+                    ownerName: '',
+                  ),
+                  PathToProperty.listIndex(1),
+                ],
+              ),
+            ).overrideWithValue(trueInstance),
+          ],
+        );
         addTearDown(container.dispose);
 
         expect(
           container.read(
             estimatedChildCountProvider(
-                const InstancePath.fromInstanceId('empty')),
+              const InstancePath.fromInstanceId('empty'),
+            ),
           ),
           1,
         );
@@ -1297,16 +1449,18 @@ void main() {
         // expand the nested list
         container
             .read(
-              isExpandedProvider(const InstancePath.fromInstanceId(
-                'object-2',
-                pathToProperty: [
-                  PathToProperty.objectProperty(
-                    name: 'second',
-                    ownerUri: '',
-                    ownerName: '',
-                  ),
-                ],
-              )),
+              isExpandedProvider(
+                const InstancePath.fromInstanceId(
+                  'object-2',
+                  pathToProperty: [
+                    PathToProperty.objectProperty(
+                      name: 'second',
+                      ownerUri: '',
+                      ownerName: '',
+                    ),
+                  ],
+                ),
+              ),
             )
             .state = true;
 
@@ -1314,7 +1468,8 @@ void main() {
         expect(
           container.read(
             estimatedChildCountProvider(
-                const InstancePath.fromInstanceId('object-2')),
+              const InstancePath.fromInstanceId('object-2'),
+            ),
           ),
           // header + string + sub-list header + sub-list 2 items
           5,
@@ -1349,12 +1504,14 @@ void main() {
 
       expect(
         container
-            .read(isExpandedProvider(
-              const InstancePath.fromProviderId(
-                '0',
-                pathToProperty: [PathToProperty.listIndex(0)],
+            .read(
+              isExpandedProvider(
+                const InstancePath.fromProviderId(
+                  '0',
+                  pathToProperty: [PathToProperty.listIndex(0)],
+                ),
               ),
-            ))
+            )
             .state,
         isFalse,
       );
@@ -1362,10 +1519,12 @@ void main() {
       expect(
         container
             .read(
-              isExpandedProvider(const InstancePath.fromInstanceId(
-                '0',
-                pathToProperty: [PathToProperty.listIndex(0)],
-              )),
+              isExpandedProvider(
+                const InstancePath.fromInstanceId(
+                  '0',
+                  pathToProperty: [PathToProperty.listIndex(0)],
+                ),
+              ),
             )
             .state,
         isFalse,

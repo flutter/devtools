@@ -1,4 +1,8 @@
-import 'package:devtools_app/src/navigation.dart';
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:devtools_app/src/shared/navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,13 +14,16 @@ void main() {
       expect(routeNameWithQueryParams(null, '/', {}), '/?');
       expect(routeNameWithQueryParams(null, '/', {'foo': 'bar'}), '/?foo=bar');
       expect(
-          routeNameWithQueryParams(null, '/', {'foo': 'bar', 'theme': 'dark'}),
-          '/?foo=bar&theme=dark');
+        routeNameWithQueryParams(null, '/', {'foo': 'bar', 'theme': 'dark'}),
+        '/?foo=bar&theme=dark',
+      );
     });
 
     /// Builds an app that calls [onBuild] when [initialRoute] loads.
-    Widget routeTestingApp(void Function(BuildContext) onBuild,
-        {String initialRoute = '/'}) {
+    Widget routeTestingApp(
+      void Function(BuildContext) onBuild, {
+      String initialRoute = '/',
+    }) {
       return MaterialApp(
         initialRoute: initialRoute,
         routes: {
@@ -31,11 +38,14 @@ void main() {
     testWidgets(
         'Generates a route name with parameters with an empty route in the context',
         (WidgetTester tester) async {
-      String generatedRoute;
+      late String generatedRoute;
       await tester.pumpWidget(
         routeTestingApp((context) {
           generatedRoute = routeNameWithQueryParams(
-              context, '/home', {'foo': 'bar', 'theme': 'dark'});
+            context,
+            '/home',
+            {'foo': 'bar', 'theme': 'dark'},
+          );
         }),
       );
       expect(generatedRoute, '/home?foo=bar&theme=dark');
@@ -43,12 +53,15 @@ void main() {
 
     testWidgets('Respects dark theme of the current route from the context',
         (WidgetTester tester) async {
-      String generatedRoute;
+      late String generatedRoute;
       await tester.pumpWidget(
-        routeTestingApp((context) {
-          generatedRoute =
-              routeNameWithQueryParams(context, '/home', {'foo': 'bar'});
-        }, initialRoute: '/?theme=dark'),
+        routeTestingApp(
+          (context) {
+            generatedRoute =
+                routeNameWithQueryParams(context, '/home', {'foo': 'bar'});
+          },
+          initialRoute: '/?theme=dark',
+        ),
       );
       expect(generatedRoute, '/home?foo=bar&theme=dark');
     });
@@ -56,12 +69,15 @@ void main() {
     testWidgets(
         'Removes redundant light theme of the current route from the context',
         (WidgetTester tester) async {
-      String generatedRoute;
+      late String generatedRoute;
       await tester.pumpWidget(
-        routeTestingApp((context) {
-          generatedRoute =
-              routeNameWithQueryParams(context, '/home', {'foo': 'bar'});
-        }, initialRoute: '/?theme=light'),
+        routeTestingApp(
+          (context) {
+            generatedRoute =
+                routeNameWithQueryParams(context, '/home', {'foo': 'bar'});
+          },
+          initialRoute: '/?theme=light',
+        ),
       );
       expect(generatedRoute, '/home?foo=bar');
     });
@@ -69,12 +85,18 @@ void main() {
     testWidgets(
         'Overrides dark theme of the current route when a replacement theme is given',
         (WidgetTester tester) async {
-      String generatedRoute;
+      late String generatedRoute;
       await tester.pumpWidget(
-        routeTestingApp((context) {
-          generatedRoute = routeNameWithQueryParams(
-              context, '/home', {'foo': 'bar', 'theme': 'light'});
-        }, initialRoute: '/?snap=crackle&theme=dark'),
+        routeTestingApp(
+          (context) {
+            generatedRoute = routeNameWithQueryParams(
+              context,
+              '/home',
+              {'foo': 'bar', 'theme': 'light'},
+            );
+          },
+          initialRoute: '/?snap=crackle&theme=dark',
+        ),
       );
       expect(generatedRoute, '/home?foo=bar&theme=light');
     });
@@ -82,12 +104,15 @@ void main() {
     testWidgets(
         'Overrides other parameters of the current route from the context',
         (WidgetTester tester) async {
-      String generatedRoute;
+      late String generatedRoute;
       await tester.pumpWidget(
-        routeTestingApp((context) {
-          generatedRoute =
-              routeNameWithQueryParams(context, '/home', {'foo': 'baz'});
-        }, initialRoute: '/?foo=bar&baz=quux'),
+        routeTestingApp(
+          (context) {
+            generatedRoute =
+                routeNameWithQueryParams(context, '/home', {'foo': 'baz'});
+          },
+          initialRoute: '/?foo=bar&baz=quux',
+        ),
       );
       expect(generatedRoute, '/home?foo=baz');
     });

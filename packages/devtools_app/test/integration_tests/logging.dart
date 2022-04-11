@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_test/cli_test_driver.dart';
-import 'package:devtools_test/utils.dart';
+import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'integration.dart';
 
 void loggingTests() {
-  CliAppFixture appFixture;
-  BrowserTabInstance tabInstance;
+  late CliAppFixture appFixture;
+  late BrowserTabInstance tabInstance;
 
   setUp(() async {
     appFixture = await CliAppFixture.create('test/fixtures/logging_app.dart');
@@ -18,8 +17,8 @@ void loggingTests() {
   });
 
   tearDown(() async {
-    await tabInstance?.close();
-    await appFixture?.teardown();
+    await tabInstance.close();
+    await appFixture.teardown();
   });
 
   test('displays log data', () async {
@@ -28,7 +27,7 @@ void loggingTests() {
     await tools.start(appFixture);
     await tools.switchPage('logging');
 
-    final String currentPageId = await tools.currentPageId();
+    final String? currentPageId = await tools.currentPageId();
     expect(currentPageId, 'logging');
 
     // Cause app to log.
@@ -38,7 +37,7 @@ void loggingTests() {
     await appFixture.invoke('controller.emitLog()');
 
     // Verify the log data shows up in the UI.
-    await waitFor(() async => await logs.logCount() > 0);
+    await waitFor(() async => (await logs.logCount()) > 0);
     expect(await logs.logCount(), greaterThan(0));
   });
 
@@ -48,7 +47,7 @@ void loggingTests() {
     await tools.start(appFixture);
     await tools.switchPage('logging');
 
-    final String currentPageId = await tools.currentPageId();
+    final String? currentPageId = await tools.currentPageId();
     expect(currentPageId, 'logging');
 
     final LoggingManager logs = LoggingManager(tools);
@@ -69,7 +68,7 @@ void loggingTests() {
     await tools.switchPage('logging');
 
     // Verify the log data shows up in the UI.
-    await waitFor(() async => await logs.logCount() > 0);
+    await waitFor(() async => (await logs.logCount()) > 0);
     expect(await logs.logCount(), greaterThan(0));
   });
 }
@@ -86,6 +85,6 @@ class LoggingManager {
   Future<int> logCount() async {
     final AppResponse response =
         await tools.tabInstance.send('logging.logCount');
-    return response.result;
+    return response.result as int;
   }
 }

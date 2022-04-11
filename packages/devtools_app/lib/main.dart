@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'src/analytics/analytics_controller.dart';
 import 'src/app.dart';
-import 'src/app_error_handling.dart';
 import 'src/config_specific/framework_initialize/framework_initialize.dart';
 import 'src/config_specific/ide_theme/ide_theme.dart';
-import 'src/debugger/syntax_highlighter.dart';
 import 'src/extension_points/extensions_base.dart';
 import 'src/extension_points/extensions_external.dart';
-import 'src/globals.dart';
-import 'src/preferences.dart';
-import 'src/provider/riverpod_error_logger_observer.dart';
+import 'src/screens/debugger/syntax_highlighter.dart';
+import 'src/screens/provider/riverpod_error_logger_observer.dart';
+import 'src/shared/app_error_handling.dart';
+import 'src/shared/globals.dart';
+import 'src/shared/preferences.dart';
 
 void main() async {
   // Initialize the framework before we do anything else, otherwise the

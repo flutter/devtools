@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'package:devtools_app/src/extent_delegate_list.dart';
+import 'package:devtools_app/src/primitives/extent_delegate_list.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,10 +16,12 @@ void main() {
       WidgetTester tester,
       ExtentDelegateListView listView,
     ) async {
-      await tester.pumpWidget(Directionality(
-        textDirection: TextDirection.ltr,
-        child: listView,
-      ));
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: listView,
+        ),
+      );
     }
 
     testWidgets('builds successfully', (tester) async {
@@ -77,25 +79,6 @@ void main() {
         testPointer.scroll(const Offset(0.0, 10.0)),
       );
       expect(pointerSignalEventCount, equals(1));
-    });
-
-    testWidgets('throws for null childrenDelegate', (tester) async {
-      expect(
-        () async {
-          await pumpList(
-            tester,
-            ExtentDelegateListView(
-              controller: ScrollController(),
-              extentDelegate: FixedExtentDelegate(
-                computeLength: () => children.length,
-                computeExtent: (index) => children[index],
-              ),
-              childrenDelegate: null,
-            ),
-          );
-        },
-        throwsAssertionError,
-      );
     });
   });
 }

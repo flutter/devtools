@@ -2,18 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_app/src/utils.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() async {
   group('ImportControllerTest', () {
-    ImportController importController;
-    TestNotifications notifications;
+    late ImportController importController;
+    late TestNotifications notifications;
     setUp(() {
       notifications = TestNotifications();
       importController = ImportController(notifications, (_) {});
@@ -27,14 +28,20 @@ void main() async {
       expect(notifications.messages.length, equals(1));
       expect(notifications.messages, contains(nonDevToolsFileMessage));
 
-      await Future.delayed(const Duration(
-          milliseconds: ImportController.repeatImportTimeBufferMs));
+      await Future.delayed(
+        const Duration(
+          milliseconds: ImportController.repeatImportTimeBufferMs,
+        ),
+      );
       importController.importData(nonDevToolsFileJsonWithListData);
       expect(notifications.messages.length, equals(2));
       expect(notifications.messages, contains(nonDevToolsFileMessage));
 
-      await Future.delayed(const Duration(
-          milliseconds: ImportController.repeatImportTimeBufferMs));
+      await Future.delayed(
+        const Duration(
+          milliseconds: ImportController.repeatImportTimeBufferMs,
+        ),
+      );
       importController.importData(devToolsFileJson);
       expect(notifications.messages.length, equals(3));
       expect(

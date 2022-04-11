@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/version.dart';
+// Ignoring redundant argument values makes the test easier to read.
+// ignore_for_file: avoid_redundant_argument_values
+
+import 'package:devtools_app/src/shared/version.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -87,8 +90,8 @@ void main() {
     test('parse', () {
       expect(
         SemanticVersion.parse(
-                '2.15.0-233.0.dev (dev) (Mon Oct 18 14:06:26 2021 -0700) on "ios_x64"')
-            .toString(),
+          '2.15.0-233.0.dev (dev) (Mon Oct 18 14:06:26 2021 -0700) on "ios_x64"',
+        ).toString(),
         equals('2.15.0-233.0'),
       );
       expect(
@@ -98,6 +101,60 @@ void main() {
       expect(
         SemanticVersion.parse('2.6.0-12.0.pre.443').toString(),
         equals('2.6.0-12.0'),
+      );
+
+      expect(
+        SemanticVersion.parse('2.6.0-1.2.dev+build.metadata').toString(),
+        equals('2.6.0-1.2'),
+      );
+
+      expect(
+        SemanticVersion.parse('2.6.0+build.metadata').toString(),
+        equals('2.6.0'),
+      );
+    });
+
+    test('downgrade', () {
+      var version = SemanticVersion(
+        major: 3,
+        minor: 2,
+        patch: 1,
+        preReleaseMajor: 1,
+        preReleaseMinor: 2,
+      );
+      expect(
+        version.downgrade().toString(),
+        equals('3.2.1'),
+      );
+
+      version = SemanticVersion(major: 3, minor: 2, patch: 1);
+      expect(
+        version.downgrade().toString(),
+        equals('3.2.1'),
+      );
+      expect(
+        version.downgrade(downgradeMajor: true).toString(),
+        equals('2.2.1'),
+      );
+      expect(
+        version.downgrade(downgradeMinor: true).toString(),
+        equals('3.1.1'),
+      );
+      expect(
+        version.downgrade(downgradePatch: true).toString(),
+        equals('3.2.0'),
+      );
+
+      version = SemanticVersion(major: 3, minor: 0, patch: 0);
+      expect(
+        version
+            .downgrade(
+              downgradeMajor: true,
+              downgradeMinor: true,
+              downgradePatch: true,
+            )
+            .toString(),
+        equals('2.0.0'),
       );
     });
 
@@ -124,7 +181,8 @@ void main() {
       );
       expect(
         SemanticVersion(major: 2, minor: 1, patch: 1).isSupported(
-            supportedVersion: SemanticVersion(major: 2, minor: 2, patch: 1)),
+          supportedVersion: SemanticVersion(major: 2, minor: 2, patch: 1),
+        ),
         isFalse,
       );
     });
@@ -152,19 +210,22 @@ void main() {
         equals(0),
       );
       expect(
-        version.compareTo(SemanticVersion(
-          major: 1,
-          minor: 1,
-          patch: 1,
-          preReleaseMajor: 0,
-          preReleaseMinor: 0,
-        )),
+        version.compareTo(
+          SemanticVersion(
+            major: 1,
+            minor: 1,
+            patch: 1,
+            preReleaseMajor: 0,
+            preReleaseMinor: 0,
+          ),
+        ),
         equals(0),
       );
 
       expect(
         version.compareTo(
-            SemanticVersion(major: 1, minor: 1, patch: 1, preReleaseMajor: 1)),
+          SemanticVersion(major: 1, minor: 1, patch: 1, preReleaseMajor: 1),
+        ),
         equals(1),
       );
 
@@ -177,17 +238,20 @@ void main() {
       );
       expect(
         version.compareTo(
-            SemanticVersion(major: 1, minor: 1, patch: 1, preReleaseMajor: 1)),
+          SemanticVersion(major: 1, minor: 1, patch: 1, preReleaseMajor: 1),
+        ),
         equals(1),
       );
       expect(
-        version.compareTo(SemanticVersion(
-          major: 1,
-          minor: 1,
-          patch: 1,
-          preReleaseMajor: 2,
-          preReleaseMinor: 1,
-        )),
+        version.compareTo(
+          SemanticVersion(
+            major: 1,
+            minor: 1,
+            patch: 1,
+            preReleaseMajor: 2,
+            preReleaseMinor: 1,
+          ),
+        ),
         equals(-1),
       );
     });

@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.9
+
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'dart:io';
 
 import 'package:ansicolor/ansicolor.dart';
-import 'package:devtools_app/src/debugger/console.dart';
-import 'package:devtools_app/src/debugger/controls.dart';
-import 'package:devtools_app/src/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/debugger/debugger_model.dart';
-import 'package:devtools_app/src/debugger/debugger_screen.dart';
-import 'package:devtools_app/src/debugger/program_explorer_model.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_test/mocks.dart';
-import 'package:devtools_test/utils.dart';
-import 'package:devtools_test/wrappers.dart';
+import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/debugger/console.dart';
+import 'package:devtools_app/src/screens/debugger/controls.dart';
+import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
+import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
+import 'package:devtools_app/src/screens/debugger/program_explorer_model.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,15 +26,19 @@ void main() {
   DebuggerScreen screen;
   FakeServiceManager fakeServiceManager;
   MockDebuggerController debuggerController;
+  MockScriptManager scriptManager;
 
   const windowSize = Size(4000.0, 4000.0);
   const smallWindowSize = Size(1000.0, 1000.0);
 
   setUp(() {
     fakeServiceManager = FakeServiceManager();
+    scriptManager = MockScriptManager();
     when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(ScriptManager, scriptManager);
     fakeServiceManager.consoleService.ensureServiceInitialized();
   });
 
@@ -43,25 +47,29 @@ void main() {
       WidgetTester tester,
       DebuggerController controller,
     ) async {
-      await tester.pumpWidget(wrapWithControllers(
-        const DebuggerScreenBody(),
-        debugger: controller,
-      ));
+      await tester.pumpWidget(
+        wrapWithControllers(
+          const DebuggerScreenBody(),
+          debugger: controller,
+        ),
+      );
     }
 
     Future<void> pumpConsole(
       WidgetTester tester,
       DebuggerController controller,
     ) async {
-      await tester.pumpWidget(wrapWithControllers(
-        Row(
-          children: [
-            Flexible(child: DebuggerConsole.buildHeader()),
-            const Expanded(child: DebuggerConsole()),
-          ],
+      await tester.pumpWidget(
+        wrapWithControllers(
+          Row(
+            children: [
+              Flexible(child: DebuggerConsole.buildHeader()),
+              const Expanded(child: DebuggerConsole()),
+            ],
+          ),
+          debugger: controller,
         ),
-        debugger: controller,
-      ));
+      );
     }
 
     setUp(() {
@@ -88,32 +96,6 @@ void main() {
 
       // test for stdio output.
       expect(find.selectableText('test stdio'), findsOneWidget);
-    });
-
-    testWidgetsWithWindowSize(
-        'Console area shows processed ansi text', windowSize,
-        (WidgetTester tester) async {
-      serviceManager.consoleService.appendStdio(_ansiCodesOutput());
-
-      await pumpConsole(tester, debuggerController);
-
-      final finder =
-          find.selectableText('Ansi color codes processed for console');
-      expect(finder, findsOneWidget);
-      finder.evaluate().forEach((element) {
-        final selectableText = element.widget as SelectableText;
-        final textSpan = selectableText.textSpan;
-        final secondSpan = textSpan.children[1] as TextSpan;
-        expect(
-          secondSpan.text,
-          'console',
-          reason: 'Text with ansi code should be in separate span',
-        );
-        expect(
-          secondSpan.style.backgroundColor,
-          const Color.fromRGBO(215, 95, 135, 1),
-        );
-      });
     });
 
     group('ConsoleControls', () {
@@ -210,27 +192,38 @@ void main() {
       });
 
       testWidgetsWithWindowSize(
-          'has a horizontal and a vertical scrollbar', smallWindowSize,
-          (WidgetTester tester) async {
-        await pumpDebuggerScreen(tester, debuggerController);
+        'has a horizontal and a vertical scrollbar',
+        smallWindowSize,
+        (WidgetTester tester) async {
+          await pumpDebuggerScreen(tester, debuggerController);
 
-        // TODO(elliette): https://github.com/flutter/flutter/pull/88152 fixes
-        // this so that forcing a scroll event is no longer necessary. Remove
-        // once the change is in the stable release.
-        debuggerController.showScriptLocation(ScriptLocation(mockScriptRef,
-            location: const SourcePosition(line: 50, column: 50)));
-        await tester.pumpAndSettle();
+          // TODO(elliette): https://github.com/flutter/flutter/pull/88152 fixes
+          // this so that forcing a scroll event is no longer necessary. Remove
+          // once the change is in the stable release.
+          debuggerController.showScriptLocation(
+            ScriptLocation(
+              mockScriptRef,
+              location: const SourcePosition(line: 50, column: 50),
+            ),
+          );
+          await tester.pumpAndSettle();
 
-        expect(find.byType(Scrollbar), findsNWidgets(2));
-        expect(find.byKey(const Key('debuggerCodeViewVerticalScrollbarKey')),
-            findsOneWidget);
-        expect(find.byKey(const Key('debuggerCodeViewHorizontalScrollbarKey')),
-            findsOneWidget);
-        await expectLater(
-          find.byKey(DebuggerScreenBody.codeViewKey),
-          matchesGoldenFile('goldens/codeview_scrollbars.png'),
-        );
-      }, skip: !Platform.isMacOS);
+          expect(find.byType(Scrollbar), findsNWidgets(2));
+          expect(
+            find.byKey(const Key('debuggerCodeViewVerticalScrollbarKey')),
+            findsOneWidget,
+          );
+          expect(
+            find.byKey(const Key('debuggerCodeViewHorizontalScrollbarKey')),
+            findsOneWidget,
+          );
+          await expectLater(
+            find.byKey(DebuggerScreenBody.codeViewKey),
+            matchesGoldenFile('goldens/codeview_scrollbars.png'),
+          );
+        },
+        skip: !Platform.isMacOS,
+      );
     });
 
     testWidgetsWithWindowSize('File Explorer hidden', windowSize,
@@ -239,7 +232,9 @@ void main() {
         ScriptRef(uri: 'package:/test/script.dart', id: 'test-script')
       ];
 
-      when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
+      when(debuggerController.programExplorerController.selectedNodeIndex)
+          .thenReturn(ValueNotifier(0));
+      when(scriptManager.sortedScripts).thenReturn(ValueNotifier(scripts));
       when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
       // File Explorer view is hidden
@@ -255,7 +250,9 @@ void main() {
         ScriptRef(uri: 'package:test/script.dart', id: 'test-script')
       ];
 
-      when(debuggerController.sortedScripts).thenReturn(ValueNotifier(scripts));
+      when(debuggerController.programExplorerController.selectedNodeIndex)
+          .thenReturn(ValueNotifier(0));
+      when(scriptManager.sortedScripts).thenReturn(ValueNotifier(scripts));
       when(debuggerController.programExplorerController.rootObjectNodes)
           .thenReturn(
         ValueNotifier(
@@ -308,7 +305,7 @@ void main() {
       when(debuggerController.breakpointsWithLocation)
           .thenReturn(ValueNotifier(breakpointsWithLocation));
 
-      when(debuggerController.sortedScripts).thenReturn(ValueNotifier([]));
+      when(scriptManager.sortedScripts).thenReturn(ValueNotifier([]));
       when(debuggerController.scriptLocation).thenReturn(ValueNotifier(null));
       when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
 
@@ -318,9 +315,11 @@ void main() {
 
       // test for items in the breakpoint list
       expect(
-        find.byWidgetPredicate((Widget widget) =>
-            widget is RichText &&
-            widget.text.toPlainText().contains('script.dart:10')),
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RichText &&
+              widget.text.toPlainText().contains('script.dart:10'),
+        ),
         findsOneWidget,
       );
     });
@@ -331,7 +330,10 @@ void main() {
         Frame(
           index: 0,
           code: CodeRef(
-              name: 'testCodeRef', id: 'testCodeRef', kind: CodeKind.kDart),
+            name: 'testCodeRef',
+            id: 'testCodeRef',
+            kind: CodeKind.kDart,
+          ),
           location: SourceLocation(
             script:
                 ScriptRef(uri: 'package:test/script.dart', id: 'script.dart'),
@@ -408,9 +410,11 @@ void main() {
 
       // Stack frame 0
       expect(
-        find.byWidgetPredicate((Widget widget) =>
-            widget is RichText &&
-            widget.text.toPlainText().contains('testCodeRef script.dart:0')),
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RichText &&
+              widget.text.toPlainText().contains('testCodeRef script.dart:0'),
+        ),
         findsOneWidget,
       );
 
@@ -422,25 +426,31 @@ void main() {
 
       // Stack frame 1
       expect(
-        find.byWidgetPredicate((Widget widget) =>
-            widget is RichText &&
-            widget.text.toPlainText().contains('<none> script1.dart:1')),
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RichText &&
+              widget.text.toPlainText().contains('<none> script1.dart:1'),
+        ),
         findsOneWidget,
       );
       // Stack frame 2
       expect(
-        find.byWidgetPredicate((Widget widget) =>
-            widget is RichText &&
-            widget.text.toPlainText().contains('testCodeRef2 script2.dart:2')),
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RichText &&
+              widget.text.toPlainText().contains('testCodeRef2 script2.dart:2'),
+        ),
         findsOneWidget,
       );
       // Stack frame 3
       expect(
-        find.byWidgetPredicate((Widget widget) =>
-            widget is RichText &&
-            widget.text
-                .toPlainText()
-                .contains('testCodeRef3.<closure> script3.dart:3')),
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RichText &&
+              widget.text
+                  .toPlainText()
+                  .contains('testCodeRef3.<closure> script3.dart:3'),
+        ),
         findsOneWidget,
       );
       // Stack frame 4
@@ -479,7 +489,8 @@ void main() {
         );
 
         final mapFinder = find.selectableTextContaining(
-            'Root 2: _InternalLinkedHashmap (2 items)');
+          'Root 2: _InternalLinkedHashmap (2 items)',
+        );
         final mapElement1Finder =
             find.selectableTextContaining("['key1']: 1.0");
         final mapElement2Finder =
@@ -645,21 +656,29 @@ void main() {
     testWidgetsWithWindowSize('debugger controls running', windowSize,
         (WidgetTester tester) async {
       when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
-      await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: screen.build),
-        debugger: debuggerController,
-      ));
+      await tester.pumpWidget(
+        wrapWithControllers(
+          Builder(builder: screen.build),
+          debugger: debuggerController,
+        ),
+      );
 
-      expect(find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
-          findsOneWidget);
+      expect(
+        find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
+        findsOneWidget,
+      );
       final DebuggerButton pause = getWidgetFromFinder(
-          find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')));
+        find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
+      );
       expect(pause.onPressed, isNotNull);
 
-      expect(find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
-          findsOneWidget);
+      expect(
+        find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
+        findsOneWidget,
+      );
       final DebuggerButton resume = getWidgetFromFinder(
-          find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')));
+        find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
+      );
       expect(resume.onPressed, isNull);
     });
 
@@ -667,42 +686,56 @@ void main() {
         (WidgetTester tester) async {
       when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
       when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
-      when(debuggerController.stackFramesWithLocation)
-          .thenReturn(ValueNotifier([
-        StackFrameAndSourcePosition(
-          Frame(
-            index: 0,
-            code: CodeRef(
-                name: 'testCodeRef', id: 'testCodeRef', kind: CodeKind.kDart),
-            location: SourceLocation(
-              script:
-                  ScriptRef(uri: 'package:test/script.dart', id: 'script.dart'),
-              tokenPos: 10,
+      when(debuggerController.stackFramesWithLocation).thenReturn(
+        ValueNotifier([
+          StackFrameAndSourcePosition(
+            Frame(
+              index: 0,
+              code: CodeRef(
+                name: 'testCodeRef',
+                id: 'testCodeRef',
+                kind: CodeKind.kDart,
+              ),
+              location: SourceLocation(
+                script: ScriptRef(
+                  uri: 'package:test/script.dart',
+                  id: 'script.dart',
+                ),
+                tokenPos: 10,
+              ),
+              kind: FrameKind.kRegular,
             ),
-            kind: FrameKind.kRegular,
-          ),
-          position: const SourcePosition(
-            line: 1,
-            column: 10,
-          ),
-        )
-      ]));
+            position: const SourcePosition(
+              line: 1,
+              column: 10,
+            ),
+          )
+        ]),
+      );
 
-      await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: screen.build),
-        debugger: debuggerController,
-      ));
+      await tester.pumpWidget(
+        wrapWithControllers(
+          Builder(builder: screen.build),
+          debugger: debuggerController,
+        ),
+      );
 
-      expect(find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
-          findsOneWidget);
+      expect(
+        find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
+        findsOneWidget,
+      );
       final DebuggerButton pause = getWidgetFromFinder(
-          find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')));
+        find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
+      );
       expect(pause.onPressed, isNull);
 
-      expect(find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
-          findsOneWidget);
+      expect(
+        find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
+        findsOneWidget,
+      );
       final DebuggerButton resume = getWidgetFromFinder(
-          find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')));
+        find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
+      );
       expect(resume.onPressed, isNotNull);
     });
 
@@ -710,10 +743,12 @@ void main() {
         'debugger controls break on exceptions', windowSize,
         (WidgetTester tester) async {
       when(debuggerController.showFileOpener).thenReturn(ValueNotifier(false));
-      await tester.pumpWidget(wrapWithControllers(
-        Builder(builder: screen.build),
-        debugger: debuggerController,
-      ));
+      await tester.pumpWidget(
+        wrapWithControllers(
+          Builder(builder: screen.build),
+          debugger: debuggerController,
+        ),
+      );
       expect(find.text('Ignore'), findsOneWidget);
     });
   });
@@ -725,10 +760,12 @@ void main() {
     });
 
     Future<void> pumpControls(WidgetTester tester) async {
-      await tester.pumpWidget(wrapWithControllers(
-        FloatingDebuggerControls(),
-        debugger: debuggerController,
-      ));
+      await tester.pumpWidget(
+        wrapWithControllers(
+          FloatingDebuggerControls(),
+          debugger: debuggerController,
+        ),
+      );
       await tester.pumpAndSettle();
     }
 
@@ -740,7 +777,9 @@ void main() {
           animatedOpacityFinder.evaluate().first.widget;
       expect(animatedOpacity.opacity, equals(1.0));
       expect(
-          find.text('Main isolate is paused in the debugger'), findsOneWidget);
+        find.text('Main isolate is paused in the debugger'),
+        findsOneWidget,
+      );
       expect(find.byTooltip('Resume'), findsOneWidget);
       expect(find.byTooltip('Step over'), findsOneWidget);
     });
@@ -870,7 +909,10 @@ DartObjectNode buildListVariable({int length = 2}) {
             id: incrementRef(),
             kind: InstanceKind.kInt,
             classRef: ClassRef(
-                name: 'Integer', id: incrementRef(), library: libraryRef),
+              name: 'Integer',
+              id: incrementRef(),
+              library: libraryRef,
+            ),
             valueAsString: '$i',
             valueAsStringIsTruncated: false,
             identityHashCode: null,
@@ -895,9 +937,10 @@ DartObjectNode buildParentMapVariable({int length = 2}) {
         id: incrementRef(),
         kind: InstanceKind.kMap,
         classRef: ClassRef(
-            name: '_InternalLinkedHashmap',
-            id: incrementRef(),
-            library: libraryRef),
+          name: '_InternalLinkedHashmap',
+          id: incrementRef(),
+          library: libraryRef,
+        ),
         length: length,
         identityHashCode: null,
       ),
@@ -921,7 +964,10 @@ DartObjectNode buildMapVariable({int length = 2}) {
             id: incrementRef(),
             kind: InstanceKind.kDouble,
             classRef: ClassRef(
-                name: 'Double', id: incrementRef(), library: libraryRef),
+              name: 'Double',
+              id: incrementRef(),
+              library: libraryRef,
+            ),
             valueAsString: '${i + 1}.0',
             valueAsStringIsTruncated: false,
             identityHashCode: null,

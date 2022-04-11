@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/preferences.dart';
+import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('PreferencesController', () {
-    PreferencesController controller;
+    late PreferencesController controller;
 
     setUp(() {
       controller = PreferencesController();

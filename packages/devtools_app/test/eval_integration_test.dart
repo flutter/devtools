@@ -2,18 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/eval_on_dart_library.dart';
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_test/flutter_test_driver.dart';
-import 'package:devtools_test/flutter_test_environment.dart';
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
+import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_infra/flutter_test_driver.dart';
+import 'test_infra/flutter_test_environment.dart';
 
 void main() {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
 
-  Disposable isAlive;
+  late Disposable isAlive;
 
   setUp(() {
     isAlive = Disposable();
@@ -27,7 +30,7 @@ void main() {
   group('EvalOnDartLibrary', () {
     test('getHashCode', () async {
       await env.setupEnvironment();
-      final eval = EvalOnDartLibrary('dart:core', serviceManager.service);
+      final eval = EvalOnDartLibrary('dart:core', serviceManager.service!);
 
       final instance = await eval.safeEval('42', isAlive: isAlive);
 
@@ -44,15 +47,15 @@ void main() {
 
         final eval = EvalOnDartLibrary(
           'dart:core',
-          serviceManager.service,
+          serviceManager.service!,
         );
 
-        final instance = await eval.asyncEval('42', isAlive: isAlive);
+        final instance = (await eval.asyncEval('42', isAlive: isAlive))!;
         expect(instance.valueAsString, '42');
 
         final instance2 =
-            await eval.asyncEval('Future.value(42)', isAlive: isAlive);
-        expect(instance2.classRef.name, '_Future');
+            (await eval.asyncEval('Future.value(42)', isAlive: isAlive))!;
+        expect(instance2.classRef!.name, '_Future');
       });
 
       test('returns the result of the future completion', () async {
@@ -62,15 +65,15 @@ void main() {
 
         final eval = EvalOnDartLibrary(
           'dart:core',
-          serviceManager.service,
+          serviceManager.service!,
           isolate: mainIsolate,
         );
 
-        final instance = await eval.asyncEval(
+        final instance = (await eval.asyncEval(
           // The delay asserts that there is no issue with garbage collection
           'await Future<int>.delayed(const Duration(milliseconds: 500), () => 42)',
           isAlive: isAlive,
-        );
+        ))!;
 
         expect(instance.valueAsString, '42');
       });
@@ -81,7 +84,7 @@ void main() {
 
         final eval = EvalOnDartLibrary(
           'dart:core',
-          serviceManager.service,
+          serviceManager.service!,
         );
 
         final instance = await eval
@@ -103,7 +106,7 @@ void main() {
           'stack.toString()',
           isAlive: isAlive,
           scope: {
-            'stack': instance.stacktraceRef.id,
+            'stack': instance.stacktraceRef.id!,
           },
         );
         expect(
@@ -114,7 +117,7 @@ void main() {
         final error = await eval.safeEval(
           'error.message',
           isAlive: isAlive,
-          scope: {'error': instance.errorRef.id},
+          scope: {'error': instance.errorRef.id!},
         );
         expect(error.valueAsString, 'foo');
       });

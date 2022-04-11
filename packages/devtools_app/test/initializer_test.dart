@@ -2,33 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: import_of_legacy_library_into_null_safe
+
+import 'package:devtools_app/src/service/service_manager.dart';
 @TestOn('vm')
-import 'package:devtools_app/src/globals.dart';
-import 'package:devtools_app/src/initializer.dart';
-import 'package:devtools_app/src/service_manager.dart';
-import 'package:devtools_test/mocks.dart';
+import 'package:devtools_app/src/shared/framework_controller.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/initializer.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
   group('Initializer', () {
-    MaterialApp app;
+    late MaterialApp app;
     const Key initializedKey = Key('initialized');
     setUp(() async {
       await ensureInspectorDependencies();
       final serviceManager = FakeServiceManager();
       when(serviceManager.connectedApp.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
-      setGlobal(
-        ServiceConnectionManager,
-        serviceManager,
-      );
+      setGlobal(ServiceConnectionManager, serviceManager);
+      setGlobal(FrameworkController, FrameworkController());
 
       app = MaterialApp(
         initialRoute: '/init',
         routes: {
           '/init': (_) => Initializer(
+                // ignore: avoid_redundant_argument_values
                 url: null,
                 builder: (_) => const SizedBox(key: initializedKey),
               ),

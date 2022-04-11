@@ -4,7 +4,7 @@
 
 import 'dart:html';
 
-import '../../utils.dart';
+import '../../primitives/utils.dart';
 
 Map<String, String> loadQueryParams() {
   return devToolsQueryParams(window.location.toString());
