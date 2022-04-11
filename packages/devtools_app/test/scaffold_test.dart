@@ -4,21 +4,22 @@
 
 // @dart=2.9
 
-import 'package:devtools_app/src/analytics/analytics_controller.dart';
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/scaffold.dart';
-import 'package:devtools_app/src/shared/screen.dart';
 import 'package:devtools_app/src/shared/survey.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
+// See https://github.com/dart-lang/mockito/blob/master/NULL_SAFETY_README.md.
+import 'scaffold_test.mocks.dart';
+
+@GenerateMocks([ErrorBadgeManager])
 void main() {
   group('DevToolsScaffold widget', () {
     MockServiceManager mockServiceManager;

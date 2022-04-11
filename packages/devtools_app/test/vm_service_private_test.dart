@@ -9,16 +9,18 @@ import 'package:devtools_app/src/service/vm_service_wrapper.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
+// See https://github.com/dart-lang/mockito/blob/master/NULL_SAFETY_README.md.
+import 'vm_service_private_test.mocks.dart';
+
+@GenerateMocks([VmService])
 void main() {
   test('Ensure private RPCs can only be enabled with VM Developer Mode enabled',
       () async {
     final service = MockVmService();
-    when(service.trackFuture(any, any)).thenAnswer(
-      (invocation) => invocation.positionalArguments[1],
-    );
     when(service.callMethod(argThat(equals('_collectAllGarbage')))).thenAnswer(
       (_) => Future.value(Success()),
     );
@@ -38,11 +40,13 @@ void main() {
       return const Stream.empty();
     });
 
-    final fakeServiceManager = FakeServiceManager(service: service);
+    final fakeServiceManager = FakeServiceManager(
+      service: VmServiceWrapper(service!, Uri()),
+    );
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     VmServicePrivate.enablePrivateRpcs = false;
     try {
-      await fakeServiceManager.service.collectAllGarbage();
+      await fakeServiceManager.service!.collectAllGarbage();
       fail('Should not be able to invoke private RPCs');
     } on StateError {
       /* expected */
@@ -50,7 +54,7 @@ void main() {
 
     VmServicePrivate.enablePrivateRpcs = true;
     try {
-      await fakeServiceManager.service.collectAllGarbage();
+      await fakeServiceManager.service!.collectAllGarbage();
     } on StateError {
       fail('Should be able to invoke private RPCs');
     }

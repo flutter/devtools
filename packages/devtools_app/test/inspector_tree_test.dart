@@ -26,8 +26,8 @@ void main() {
   setUp(() {
     fakeServiceManager = FakeServiceManager();
     firstInspectorTreeLoadCompleted = true;
-    when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
-    when(fakeServiceManager.connectedApp.isProfileBuildNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(true);
+    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
 
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());

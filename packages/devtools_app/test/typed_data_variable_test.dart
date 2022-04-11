@@ -15,8 +15,12 @@ import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
+
+// See https://github.com/dart-lang/mockito/blob/master/NULL_SAFETY_README.md.
+import 'typed_data_variable_test.mocks.dart';
 
 final isolateRef = IsolateRef(
   id: '1',
@@ -25,6 +29,7 @@ final isolateRef = IsolateRef(
   isSystemIsolate: false,
 );
 
+@GenerateMocks([VmService])
 void main() {
   ServiceConnectionManager manager;
 

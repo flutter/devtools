@@ -15,6 +15,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
+// See https://github.com/dart-lang/mockito/blob/master/NULL_SAFETY_README.md.
 import 'mocks.mocks.dart';
 
 class FakeInspectorService extends Fake implements InspectorService {
@@ -663,11 +664,6 @@ class FakeIsolateManager extends Fake implements IsolateManager {
 class MockIsolateState extends Mock implements IsolateState {}
 
 class MockServiceManager extends Mock implements ServiceConnectionManager {}
-
-class MockVmService extends Mock implements VmServiceWrapper {
-  @override
-  Future<FlagList> getFlagList() => Future.value(FlagList(flags: []));
-}
 
 class MockIsolate extends Mock implements Isolate {}
 
