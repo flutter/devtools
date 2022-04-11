@@ -279,8 +279,6 @@ class CpuProfileData {
 
   /// Generates [CpuProfileData] from the provided [CpuSamples].
   ///
-  /// Only samples collected in the time range [origin, origin + extent] will be reported.
-  ///
   /// [isolateId] The isolate id which was used to get the [cpuSamples].
   /// This will be used to tag the stack frames and trace events.
   /// [cpuSamples] The CPU samples that will be used to generate the [CpuProfileData]
