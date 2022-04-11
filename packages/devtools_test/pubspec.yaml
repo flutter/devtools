@@ -42,3 +42,6 @@ dependency_overrides:
     path: ../devtools_app #OVERRIDE_FOR_DEVELOPMENT
   devtools_shared: #OVERRIDE_FOR_DEVELOPMENT
     path: ../devtools_shared #OVERRIDE_FOR_DEVELOPMENT
+
+dev_dependencies:
+  build_runner: ^2.0.4

@@ -5,15 +5,17 @@
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
+
+import 'mocks.mocks.dart';
 
 class FakeInspectorService extends Fake implements InspectorService {
   @override
@@ -67,6 +69,7 @@ class TestInspectorController extends Fake implements InspectorController {
   InspectorService get inspectorService => service;
 }
 
+@GenerateMocks([ErrorBadgeManager])
 class FakeServiceManager extends Fake implements ServiceConnectionManager {
   FakeServiceManager({
     VmServiceWrapper? service,
@@ -77,13 +80,6 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     this.availableLibraries = const [],
   }) : service = service ?? createFakeService() {
     initFlagManager();
-
-    when(errorBadgeManager.erroredItemsForPage(any)).thenReturn(
-      FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
-    );
-
-    when(errorBadgeManager.errorCountNotifier(any))
-        .thenReturn(ValueNotifier<int>(0));
   }
 
   Completer<void> flagsInitialized = Completer();
@@ -701,8 +697,6 @@ class MockLoggingController extends Mock implements LoggingController {
     _selectedLog.value = data;
   }
 }
-
-class MockErrorBadgeManager extends Mock implements ErrorBadgeManager {}
 
 class MockMemoryController extends Mock implements MemoryController {}
 
