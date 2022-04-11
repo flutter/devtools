@@ -4,6 +4,7 @@
 
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/provider_list.dart';
@@ -28,6 +29,7 @@ void main() {
   setUpAll(() => loadFonts());
 
   setUp(() {
+    setGlobal(IdeTheme, getIdeTheme());
     setGlobal(ServiceConnectionManager, FakeServiceManager());
   });
 
@@ -50,30 +52,30 @@ void main() {
     testWidgetsWithWindowSize(
         'shows ProviderUnknownErrorBanner if the devtool failed to fetch the list of providers',
         windowSize, (tester) async {
-      final container = ProviderContainer(
-        overrides: [
-          rawSortedProviderNodesProvider.overrideWithValue(
-            const AsyncValue.loading(),
-          ),
-        ],
-      );
-      addTearDown(container.dispose);
-
       await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
+        ProviderScope(
+          overrides: [
+            sortedProviderNodesProvider.overrideWithValue(
+              const AsyncValue.loading(),
+            ),
+          ],
           child: providerScreen,
         ),
       );
 
-      container.updateOverrides([
-        rawSortedProviderNodesProvider.overrideWithValue(
-          AsyncValue.error(StateError('')),
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sortedProviderNodesProvider.overrideWithValue(
+              AsyncValue.error(StateError('')),
+            ),
+          ],
+          child: providerScreen,
         ),
-      ]);
+      );
 
       // wait for the Banner to appear as it is mounted asynchronously
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       await expectLater(
         find.byType(ProviderScreenBody),
@@ -86,19 +88,22 @@ void main() {
     test('selects the first provider available', () async {
       final container = ProviderContainer(
         overrides: [
-          rawSortedProviderNodesProvider.overrideWithValue(
+          sortedProviderNodesProvider.overrideWithValue(
             const AsyncValue.loading(),
           ),
         ],
       );
       addTearDown(container.dispose);
 
-      final sub = container.listen(selectedProviderIdProvider);
+      final sub = container.listen<String?>(
+        selectedProviderIdProvider,
+        (prev, next) {},
+      );
 
       expect(sub.read(), isNull);
 
       container.updateOverrides([
-        rawSortedProviderNodesProvider.overrideWithValue(
+        sortedProviderNodesProvider.overrideWithValue(
           const AsyncValue.data([
             ProviderNode(id: '0', type: 'Provider<A>'),
             ProviderNode(id: '1', type: 'Provider<B>'),
@@ -106,7 +111,7 @@ void main() {
         ),
       ]);
 
-      await container.pumpAndSettle();
+      await container.pump();
 
       expect(sub.read(), '0');
     });
@@ -114,22 +119,25 @@ void main() {
     test('selects the first provider available after an error', () async {
       final container = ProviderContainer(
         overrides: [
-          rawSortedProviderNodesProvider.overrideWithValue(
+          sortedProviderNodesProvider.overrideWithValue(
             AsyncValue.error(Error()),
           ),
         ],
       );
       addTearDown(container.dispose);
 
-      final sub = container.listen(selectedProviderIdProvider);
+      final sub = container.listen<String?>(
+        selectedProviderIdProvider,
+        (prev, next) {},
+      );
 
       // wait for the error to be handled
-      await container.pumpAndSettle();
+      await container.pump();
 
       expect(sub.read(), isNull);
 
       container.updateOverrides([
-        rawSortedProviderNodesProvider.overrideWithValue(
+        sortedProviderNodesProvider.overrideWithValue(
           const AsyncValue.data([
             ProviderNode(id: '0', type: 'Provider<A>'),
             ProviderNode(id: '1', type: 'Provider<B>'),
@@ -138,7 +146,7 @@ void main() {
       ]);
 
       // wait for the ids update to be handled
-      await container.pumpAndSettle(exclude: [selectedProviderIdProvider]);
+      await container.pump();
 
       expect(sub.read(), '0');
     });
@@ -148,7 +156,7 @@ void main() {
         () async {
       final container = ProviderContainer(
         overrides: [
-          rawSortedProviderNodesProvider.overrideWithValue(
+          sortedProviderNodesProvider.overrideWithValue(
             const AsyncValue.data([
               ProviderNode(id: '0', type: 'Provider<A>'),
             ]),
@@ -157,21 +165,20 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      final sub = container.listen(selectedProviderIdProvider);
-
-      await container.pumpAndSettle();
+      final sub = container.listen<String?>(
+        selectedProviderIdProvider,
+        (prev, next) {},
+      );
 
       expect(sub.read(), '0');
 
       container.updateOverrides([
-        rawSortedProviderNodesProvider.overrideWithValue(
+        sortedProviderNodesProvider.overrideWithValue(
           const AsyncValue.data([
             ProviderNode(id: '1', type: 'Provider<B>'),
           ]),
         ),
       ]);
-
-      await container.pumpAndSettle();
 
       expect(sub.read(), '1');
     });
@@ -179,7 +186,7 @@ void main() {
     test('Once a provider is selected, further updates are no-op', () async {
       final container = ProviderContainer(
         overrides: [
-          rawSortedProviderNodesProvider.overrideWithValue(
+          sortedProviderNodesProvider.overrideWithValue(
             const AsyncValue.data([
               ProviderNode(id: '0', type: 'Provider<A>'),
             ]),
@@ -188,14 +195,17 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      final sub = container.listen(selectedProviderIdProvider);
+      final sub = container.listen<String?>(
+        selectedProviderIdProvider,
+        (prev, next) {},
+      );
 
-      await container.pumpAndSettle();
+      await container.pump();
 
       expect(sub.read(), '0');
 
       container.updateOverrides([
-        rawSortedProviderNodesProvider.overrideWithValue(
+        sortedProviderNodesProvider.overrideWithValue(
           // '0' is no-longer the first provider on purpose
           const AsyncValue.data([
             ProviderNode(id: '1', type: 'Provider<B>'),
@@ -204,7 +214,7 @@ void main() {
         ),
       ]);
 
-      await container.pumpAndSettle();
+      await container.pump();
 
       expect(sub.read(), '0');
     });
@@ -215,7 +225,7 @@ void main() {
         () async {
       final container = ProviderContainer(
         overrides: [
-          rawSortedProviderNodesProvider.overrideWithValue(
+          sortedProviderNodesProvider.overrideWithValue(
             const AsyncValue.data([
               ProviderNode(id: '0', type: 'Provider<A>'),
             ]),
@@ -224,31 +234,34 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      final sub = container.listen(selectedProviderIdProvider);
+      final sub = container.listen<String?>(
+        selectedProviderIdProvider,
+        (prev, next) {},
+      );
 
-      await container.pumpAndSettle();
+      await container.pump();
 
       expect(sub.read(), '0');
 
       container.updateOverrides([
-        rawSortedProviderNodesProvider.overrideWithValue(
+        sortedProviderNodesProvider.overrideWithValue(
           const AsyncValue.data([]),
         ),
       ]);
 
-      await container.pumpAndSettle();
+      await container.pump();
 
       expect(sub.read(), isNull);
 
       container.updateOverrides([
-        rawSortedProviderNodesProvider.overrideWithValue(
+        sortedProviderNodesProvider.overrideWithValue(
           const AsyncValue.data([
             ProviderNode(id: '1', type: 'Provider<B>'),
           ]),
         ),
       ]);
 
-      await container.pumpAndSettle();
+      await container.pump();
 
       expect(sub.read(), '1');
     });
@@ -257,7 +270,7 @@ void main() {
   group('ProviderList', () {
     List<Override> getOverrides() {
       return [
-        rawInstanceProvider(const InstancePath.fromProviderId('0'))
+        instanceProvider(const InstancePath.fromProviderId('0'))
             .overrideWithValue(
           AsyncValue.data(
             InstanceDetails.string(
@@ -275,7 +288,7 @@ void main() {
         windowSize, (tester) async {
       final container = ProviderContainer(
         overrides: [
-          rawSortedProviderNodesProvider
+          sortedProviderNodesProvider
               .overrideWithValue(const AsyncValue.loading()),
           ...getOverrides(),
         ],
@@ -288,9 +301,7 @@ void main() {
         ),
       );
 
-      final context = tester.element(find.byType(ProviderScreenBody));
-
-      expect(context.read(selectedProviderIdProvider), isNull);
+      expect(container.read(selectedProviderIdProvider), isNull);
       expect(find.byType(ProviderNodeItem), findsNothing);
 
       await expectLater(
@@ -301,7 +312,7 @@ void main() {
       );
 
       container.updateOverrides([
-        rawSortedProviderNodesProvider.overrideWithValue(
+        sortedProviderNodesProvider.overrideWithValue(
           const AsyncValue.data([
             ProviderNode(id: '0', type: 'Provider<A>'),
             ProviderNode(id: '1', type: 'Provider<B>'),
@@ -310,9 +321,9 @@ void main() {
         ...getOverrides(),
       ]);
 
-      await tester.pumpAndSettle();
+      await tester.pump();
 
-      expect(context.read(selectedProviderIdProvider), '0');
+      expect(container.read(selectedProviderIdProvider), '0');
       expect(find.byType(ProviderNodeItem), findsNWidgets(2));
       expect(
         find.descendant(
@@ -339,7 +350,7 @@ void main() {
         'shows ProviderUnknownErrorBanner if the devtool failed to fetch the selected provider',
         windowSize, (tester) async {
       final overrides = [
-        rawSortedProviderNodesProvider.overrideWithValue(
+        sortedProviderNodesProvider.overrideWithValue(
           const AsyncValue.data([
             ProviderNode(id: '0', type: 'Provider<A>'),
             ProviderNode(id: '1', type: 'Provider<B>'),
@@ -348,29 +359,30 @@ void main() {
         ...getOverrides(),
       ];
 
-      final container = ProviderContainer(
-        overrides: [
-          ...overrides,
-          rawInstanceProvider(const InstancePath.fromProviderId('0'))
-              .overrideWithValue(const AsyncValue.loading())
-        ],
-      );
-      addTearDown(container.dispose);
-
       await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
+        ProviderScope(
+          overrides: [
+            ...overrides,
+            instanceProvider(const InstancePath.fromProviderId('0'))
+                .overrideWithValue(const AsyncValue.loading()),
+          ],
           child: providerScreen,
         ),
       );
 
-      container.updateOverrides([
-        ...overrides,
-        rawInstanceProvider(const InstancePath.fromProviderId('0'))
-            .overrideWithValue(AsyncValue.error(Error()))
-      ]);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ...overrides,
+            instanceProvider(const InstancePath.fromProviderId('0'))
+                .overrideWithValue(AsyncValue.error(Error())),
+          ],
+          child: providerScreen,
+        ),
+      );
 
-      await tester.pumpAndSettle();
+      // await for the modal to be mounted as it is rendered asynchronously
+      await tester.pump();
 
       expect(
         find.byKey(
@@ -387,24 +399,4 @@ void main() {
       );
     });
   });
-}
-
-extension on ProviderContainer {
-  // TODO(rrousselGit) remove this utility when riverpod v0.15.0 is released
-  Future<void> pumpAndSettle({
-    List<ProviderBase> exclude = const [],
-  }) async {
-    bool hasDirtyProvider() {
-      return debugProviderElements
-          // ignore: invalid_use_of_protected_member
-          .any((e) => e.dirty && !exclude.contains(e.provider));
-    }
-
-    while (hasDirtyProvider()) {
-      for (final element in debugProviderElements) {
-        element.flush();
-      }
-      await Future(() {});
-    }
-  }
 }

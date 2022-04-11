@@ -2,30 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
 
 import '../../../primitives/utils.dart';
 import '../../../shared/eval_on_dart_library.dart';
 import '../../../shared/globals.dart';
-import '../provider_debounce.dart';
 import 'eval.dart';
 import 'instance_details.dart';
 import 'result.dart';
 
 Future<InstanceRef> _resolveInstanceRefForPath(
   InstancePath path, {
-  @required AutoDisposeProviderReference ref,
-  @required Disposable isAlive,
-  @required InstanceDetails parent,
+  required AutoDisposeRef ref,
+  required Disposable isAlive,
+  required InstanceDetails? parent,
 }) async {
-  if (path.pathToProperty.isEmpty) {
+  if (parent == null) {
     // root of the provider tree
 
     return path.map(
@@ -41,8 +37,6 @@ Future<InstanceRef> _resolveInstanceRefForPath(
         );
       },
       fromInstanceId: (path) async {
-        if (path.instanceId == null) return null;
-
         final eval = await ref.watch(evalProvider.future);
         return eval.safeEval(
           'value',
@@ -62,13 +56,14 @@ Future<InstanceRef> _resolveInstanceRefForPath(
     map: (parent) {
       final keyPath = path.pathToProperty.last as MapKeyPath;
       final key = keyPath.ref == null ? 'null' : 'key';
+      final keyPathRef = keyPath.ref;
 
       return eval.safeEval(
         'parent[$key]',
         isAlive: isAlive,
         scope: {
           'parent': parent.instanceRefId,
-          if (keyPath.ref != null) 'key': keyPath.ref
+          if (keyPathRef != null) 'key': keyPathRef,
         },
       );
     },
@@ -94,11 +89,10 @@ Future<InstanceRef> _resolveInstanceRefForPath(
       );
 
       final ref = field.ref.dataOrThrow;
-      if (ref == null) return null;
 
       // we cannot do `eval('parent.propertyName')` because it is possible for
       // objects to have multiple properties with the same name
-      return eval.getInstance(ref, isAlive);
+      return eval.safeGetInstance(ref, isAlive);
     },
     orElse: () => throw FallThroughError(),
   );
@@ -112,10 +106,10 @@ Future<InstanceRef> _resolveInstanceRefForPath(
 /// fields are both defined in the same library.
 Future<void> _mutate(
   String newValueExpression, {
-  @required InstancePath path,
-  @required AutoDisposeProviderReference ref,
-  @required Disposable isAlive,
-  @required InstanceDetails parent,
+  required InstancePath path,
+  required AutoDisposeRef ref,
+  required Disposable isAlive,
+  required InstanceDetails parent,
 }) async {
   await parent.maybeMap(
     list: (parent) async {
@@ -134,13 +128,14 @@ Future<void> _mutate(
       final eval = await ref.watch(evalProvider.future);
       final keyPath = path.pathToProperty.last as MapKeyPath;
       final keyRefVar = keyPath.ref == null ? 'null' : 'key';
+      final keyPathRef = keyPath.ref;
 
       return eval.safeEval(
         'parent[$keyRefVar] = $newValueExpression',
         isAlive: isAlive,
         scope: {
           'parent': parent.instanceRefId,
-          if (keyPath.ref != null) 'key': keyPath.ref,
+          if (keyPathRef != null) 'key': keyPathRef,
         },
       );
     },
@@ -155,7 +150,7 @@ Future<void> _mutate(
       );
 
       return field.eval.safeEval(
-        'parent.${propertyPath.name} = $newValueExpression',
+        '(parent as ${propertyPath.ownerName}).${propertyPath.name} = $newValueExpression',
         isAlive: isAlive,
         scope: {
           'parent': parent.instanceRefId,
@@ -169,69 +164,67 @@ Future<void> _mutate(
 
   // Since the same object can be used in multiple locations at once, we need
   // to refresh the entire tree instead of just the node that was modified.
-  unawaited(ref.container.refresh(rawInstanceProvider(path.root)));
+  ref.refresh(instanceProvider(path.root));
 
   // Forces the UI to rebuild after the state change
   await serviceManager.performHotReload();
 }
 
-Future<InstanceDetails> _resolveParent(
-  AutoDisposeProviderReference ref,
+Future<InstanceDetails?> _resolveParent(
+  AutoDisposeRef ref,
   InstancePath path,
 ) async {
   return path.pathToProperty.isNotEmpty
-      ? await ref.watch(rawInstanceProvider(path.parent).future)
+      ? await ref.watch(instanceProvider(path.parent!).future)
       : null;
 }
 
-Future<EnumInstance> _tryParseEnum(
+Future<EnumInstance?> _tryParseEnum(
   Instance instance, {
-  @required EvalOnDartLibrary eval,
-  @required Disposable isAlive,
-  @required String instanceRefId,
-  @required Setter setter,
+  required EvalOnDartLibrary eval,
+  required Disposable isAlive,
+  required String instanceRefId,
+  required Setter? setter,
 }) async {
   if (instance.kind != InstanceKind.kPlainInstance ||
-      instance.fields.length != 2) return null;
+      instance.fields?.length != 2) return null;
 
-  InstanceRef findPropertyWithName(String name) {
+  InstanceRef? findPropertyWithName(String name) {
     return instance.fields
-        .firstWhereOrNull((element) => element.decl.name == name)
+        ?.firstWhereOrNull((element) => element.decl?.name == name)
         ?.value;
   }
 
   final _nameRef = findPropertyWithName('_name');
   final indexRef = findPropertyWithName('index');
-
   if (_nameRef == null || indexRef == null) return null;
 
-  final nameInstanceFuture = eval.getInstance(_nameRef, isAlive);
-  final indexInstanceFuture = eval.getInstance(indexRef, isAlive);
+  final nameInstanceFuture = eval.safeGetInstance(_nameRef, isAlive);
+  final indexInstanceFuture = eval.safeGetInstance(indexRef, isAlive);
 
   final index = await indexInstanceFuture;
-
   if (index.kind != InstanceKind.kInt) return null;
 
   final name = await nameInstanceFuture;
   if (name.kind != InstanceKind.kString) return null;
 
-  final nameSplit = name.valueAsString.split('.');
-
-  if (nameSplit.length != 2) return null;
+  // Some Dart versions have for name "EnumType.valueName", others only have "valueName".
+  // So we have to strip the type manually
+  final nameSplit = name.valueAsString!.split('.');
 
   return EnumInstance(
-    type: nameSplit.first,
-    value: nameSplit[1],
+    type: instance.classRef!.name!,
+    value: nameSplit.last,
     instanceRefId: instanceRefId,
     setter: setter,
   );
 }
 
-Setter _parseSetter({
-  @required InstancePath path,
-  @required ProviderReference ref,
-  @required Disposable isAlive,
-  @required InstanceDetails parent,
+Setter? _parseSetter({
+  required InstancePath path,
+  required AutoDisposeRef ref,
+  required Disposable isAlive,
+  required InstanceDetails? parent,
 }) {
   if (parent == null) return null;
 
@@ -256,8 +249,10 @@ Setter _parseSetter({
       // This may edit the wrong property when an object has two properties with
       // with the same name.
       // TODO use ownerUri
-      final field =
-          parent.fields.firstWhere((field) => field.name == keyPath.name);
+      final field = parent.fields.firstWhere(
+        (field) =>
+            field.name == keyPath.name && field.ownerName == keyPath.ownerName,
+      );
 
       if (field.isFinal) return null;
       return mutate;
@@ -270,7 +265,7 @@ Setter _parseSetter({
 ///
 /// The UI should not be used directly. Instead, use [instanceProvider].
 final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
-    rawInstanceProvider =
+    instanceProvider =
     AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>(
         (ref, path) async {
   ref.watch(hotRestartEventProvider);
@@ -282,9 +277,7 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
 
   final parent = await _resolveParent(ref, path);
 
-  InstanceRef instanceRef;
-
-  instanceRef = await _resolveInstanceRefForPath(
+  final instanceRef = await _resolveInstanceRefForPath(
     path,
     ref: ref,
     parent: parent,
@@ -298,47 +291,47 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
     parent: parent,
   );
 
-  final instance = await eval.getInstance(instanceRef, isAlive);
+  final instance = await eval.safeGetInstance(instanceRef, isAlive);
 
   switch (instance.kind) {
     case InstanceKind.kNull:
       return InstanceDetails.nill(setter: setter);
     case InstanceKind.kBool:
       return InstanceDetails.boolean(
-        instance.valueAsString,
-        instanceRefId: instanceRef.id,
+        instance.valueAsString!,
+        instanceRefId: instanceRef.id!,
         setter: setter,
       );
     case InstanceKind.kInt:
     case InstanceKind.kDouble:
       return InstanceDetails.number(
-        instance.valueAsString,
-        instanceRefId: instanceRef.id,
+        instance.valueAsString!,
+        instanceRefId: instanceRef.id!,
         setter: setter,
       );
     case InstanceKind.kString:
       return InstanceDetails.string(
-        instance.valueAsString,
-        instanceRefId: instanceRef.id,
+        instance.valueAsString!,
+        instanceRefId: instanceRef.id!,
         setter: setter,
       );
 
     case InstanceKind.kMap:
 
       // voluntarily throw if a key failed to load
-      final keysRef = instance.associations.map((e) => e.key as InstanceRef);
+      final keysRef = instance.associations!.map((e) => e.key as InstanceRef);
 
       final keysFuture = Future.wait<InstanceDetails>([
         for (final keyRef in keysRef)
           ref.watch(
-            rawInstanceProvider(InstancePath.fromInstanceId(keyRef?.id)).future,
+            instanceProvider(InstancePath.fromInstanceId(keyRef.id!)).future,
           )
       ]);
 
       return InstanceDetails.map(
         await keysFuture,
         hash: await eval.getHashCode(instance, isAlive: isAlive),
-        instanceRefId: instanceRef.id,
+        instanceRefId: instanceRef.id!,
         setter: setter,
       );
 
@@ -347,9 +340,9 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
     // TODO(rrousselGit): support Type
     case InstanceKind.kList:
       return InstanceDetails.list(
-        length: instance.length,
+        length: instance.length!,
         hash: await eval.getHashCode(instance, isAlive: isAlive),
-        instanceRefId: instanceRef.id,
+        instanceRefId: instanceRef.id!,
         setter: setter,
       );
 
@@ -359,17 +352,19 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
         instance,
         eval: eval,
         isAlive: isAlive,
-        instanceRefId: instanceRef.id,
+        instanceRefId: instanceRef.id!,
         setter: setter,
       );
 
       if (enumDetails != null) return enumDetails;
 
-      final classInstance = await eval.getClass(instance.classRef, isAlive);
+      final classInstance =
+          await eval.safeGetClass(instance.classRef!, isAlive);
       final evalForInstance =
-          ref.watch(libraryEvalProvider(classInstance.library.uri).future);
+          // TODO(rrousselGit) when can `library` be null?
+          ref.watch(libraryEvalProvider(classInstance.library!.uri!).future);
 
-      final appName = tryParsePackageName(eval.isolate.rootLib.uri);
+      final appName = tryParsePackageName(eval.isolate!.rootLib!.uri!);
 
       final fields = await _parseFields(
         ref,
@@ -383,62 +378,58 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
       return InstanceDetails.object(
         fields.sorted((a, b) => sortFieldsByName(a.name, b.name)),
         hash: await eval.getHashCode(instance, isAlive: isAlive),
-        type: instance.classRef.name,
-        instanceRefId: instanceRef.id,
+        type: classInstance.name!,
+        instanceRefId: instanceRef.id!,
         evalForInstance: await evalForInstance,
         setter: setter,
       );
   }
 });
 
-/// [rawInstanceProvider] but the loading state is debounced for one second.
-///
-/// This avoids flickers when a state is refreshed
-final instanceProvider =
-    familyAsyncDebounce<AsyncValue<InstanceDetails>, InstancePath>(
-  rawInstanceProvider,
-);
-
 final _packageNameExp = RegExp(
   r'package:(.+?)/',
 );
 
-String tryParsePackageName(String uri) {
+String? tryParsePackageName(String uri) {
   return _packageNameExp.firstMatch(uri)?.group(1);
 }
 
 Future<List<ObjectField>> _parseFields(
-  AutoDisposeProviderReference ref,
+  AutoDisposeRef ref,
   EvalOnDartLibrary eval,
   Instance instance,
   Class classInstance, {
-  @required Disposable isAlive,
-  @required String appName,
+  required Disposable isAlive,
+  required String? appName,
 }) async {
-  final fields = instance.fields.map((field) async {
-    final owner = await eval.getClass(field.decl.owner, isAlive);
+  final fields = instance.fields!.map((field) async {
+    final fieldDeclaration = field.decl!;
+    final owner =
+        await eval.safeGetClass(fieldDeclaration.owner! as ClassRef, isAlive);
 
     String ownerUri;
     String ownerName;
-    if (owner.mixin == null) {
-      ownerUri = owner.library.uri;
-      ownerName = owner.name;
+    final ownerMixin = owner.mixin;
+    if (ownerMixin == null) {
+      ownerUri = owner.library!.uri!;
+      ownerName = owner.name!;
     } else {
-      final mixinClass = await eval.getClass(owner.mixin.typeClass, isAlive);
+      final mixinClass =
+          await eval.safeGetClass(ownerMixin.typeClass!, isAlive);
 
-      ownerUri = mixinClass.library.uri;
-      ownerName = mixinClass.name;
+      ownerUri = mixinClass.library!.uri!;
+      ownerName = mixinClass.name!;
     }
 
     final ownerPackageName = tryParsePackageName(ownerUri);
 
     return ObjectField(
-      name: field.decl.name,
-      isFinal: field.decl.isFinal,
+      name: fieldDeclaration.name!,
+      isFinal: fieldDeclaration.isFinal!,
       ref: parseSentinel<InstanceRef>(field.value),
       ownerName: ownerName,
       ownerUri: ownerUri,
-      eval: await ref.watch(libraryEvalProvider(owner.library.uri).future),
+      eval: await ref.watch(libraryEvalProvider(ownerUri).future),
       isDefinedByDependency: ownerPackageName != appName,
     );
   }).toList();
@@ -448,10 +439,10 @@ Future<List<ObjectField>> _parseFields(
 
 final _providerChanged =
     AutoDisposeStreamProviderFamily<void, String>((ref, id) async* {
-  final service = await ref.watch(serviceProvider.last);
+  final service = await ref.watch(serviceProvider.future);
 
   yield* service.onExtensionEvent.where((event) {
     return event.extensionKind == 'provider:provider_changed' &&
-        event.extensionData.data['id'] == id;
+        event.extensionData?.data['id'] == id;
   });
 });

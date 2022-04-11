@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
+import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/provider_nodes.dart';
-// ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member, non_constant_identifier_names
 
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -20,9 +18,10 @@ import '../test_infra/flutter_test_environment.dart';
 
 Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
   late EvalOnDartLibrary evalOnDartLibrary;
-  Disposable? isAlive;
+  late Disposable isAlive;
 
   setUp(() async {
+    setGlobal(IdeTheme, getIdeTheme());
     await env.setupEnvironment(
       config: const FlutterRunConfiguration(withDebugger: true),
     );
@@ -36,7 +35,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
   });
 
   tearDown(() async {
-    isAlive!.dispose();
+    isAlive.dispose();
     evalOnDartLibrary.dispose();
     await env.tearDownEnvironment(force: true);
   });
@@ -47,18 +46,21 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      final providersSub =
-          container.listen(rawSortedProviderNodesProvider.future);
+      final providersSub = container.listen(
+        sortedProviderNodesProvider.future,
+        (prev, next) {},
+      );
       final countSub = container.listen(
-        rawInstanceProvider(
+        instanceProvider(
           const InstancePath.fromProviderId('0').pathForChild(
             const PathToProperty.objectProperty(
               name: '_count',
               ownerUri: 'package:provider_app/main.dart',
               ownerName: 'Counter',
             ),
-          )!,
+          ),
         ).future,
+        (prev, next) {},
       );
 
       await evalOnDartLibrary.asyncEval(
@@ -106,48 +108,57 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
   );
 
   group('Provider controllers', () {
-    test('can mutate private properties from mixins', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      final sub = container.listen(
-        rawInstanceProvider(
-          const InstancePath.fromProviderId('0').pathForChild(
-            const PathToProperty.objectProperty(
-              name: '_privateMixinProperty',
-              ownerUri: 'package:provider_app/mixin.dart',
-              ownerName: 'Mixin',
-            ),
-          )!,
-        ).future,
-      );
-
-      var instance = await sub.read();
-
-      expect(
-        instance,
-        isA<NumInstance>().having((e) => e.displayString, 'displayString', '0'),
-      );
-
-      await instance.setter!('42');
-
-      // read the instance again since it should have changed
-      instance = await sub.read();
-
-      expect(
-        instance,
-        isA<NumInstance>()
-            .having((e) => e.displayString, 'displayString', '42'),
-      );
-    });
-
     test(
-      'rawSortedProviderNodesProvider',
+      'can mutate private properties from mixins',
       () async {
         final container = ProviderContainer();
         addTearDown(container.dispose);
 
-        final sub = container.listen(rawSortedProviderNodesProvider.future);
+        final sub = container.listen(
+          instanceProvider(
+            const InstancePath.fromProviderId('0').pathForChild(
+              const PathToProperty.objectProperty(
+                name: '_privateMixinProperty',
+                ownerUri: 'package:provider_app/mixin.dart',
+                ownerName: 'Mixin',
+              ),
+            ),
+          ).future,
+          (prev, next) {},
+        );
+
+        var instance = await sub.read();
+
+        expect(
+          instance,
+          isA<NumInstance>()
+              .having((e) => e.displayString, 'displayString', '0'),
+        );
+
+        await instance.setter!('42');
+
+        // read the instance again since it should have changed
+        instance = await sub.read();
+
+        expect(
+          instance,
+          isA<NumInstance>()
+              .having((e) => e.displayString, 'displayString', '42'),
+        );
+      },
+      skip: 'wait https://github.com/dart-lang/sdk/issues/45093 to be fixed',
+    );
+
+    test(
+      'sortedProviderNodesProvider',
+      () async {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+
+        final sub = container.listen(
+          sortedProviderNodesProvider.future,
+          (prev, next) {},
+        );
 
         await evalOnDartLibrary.asyncEval(
           'await tester.tap(find.byKey(Key("add"))).then((_) => tester.pump())',
@@ -180,8 +191,8 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
 
           final counterFuture = container
               .listen(
-                rawInstanceProvider(const InstancePath.fromProviderId('0'))
-                    .future,
+                instanceProvider(const InstancePath.fromProviderId('0')).future,
+                (prev, next) {},
               )
               .read();
 
@@ -197,7 +208,10 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           );
 
           final complexFuture = await container
-              .listen(rawInstanceProvider(complexPath).future)
+              .listen(
+                instanceProvider(complexPath).future,
+                (prev, next) {},
+              )
               .read();
 
           final complexPropertiesFuture =
@@ -205,15 +219,16 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
             for (final field in (complexFuture as ObjectInstance).fields)
               container
                   .listen(
-                    rawInstanceProvider(
+                    instanceProvider(
                       complexPath.pathForChild(
                         PathToProperty.objectProperty(
                           name: field.name,
                           ownerUri: 'package:provider_app/main.dart',
                           ownerName: 'ComplexObject',
                         ),
-                      )!,
+                      ),
                     ).future,
+                    (prev, next) {},
                   )
                   .read()
                   .then(
@@ -231,7 +246,10 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           );
 
           final mapKeys = await container
-              .listen(rawInstanceProvider(mapPath).future)
+              .listen(
+                instanceProvider(mapPath).future,
+                (prev, next) {},
+              )
               .read()
               .then((value) => value as MapInstance);
 
@@ -239,11 +257,12 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
             for (final key in mapKeys.keys)
               container
                   .listen(
-                    rawInstanceProvider(
+                    instanceProvider(
                       mapPath.pathForChild(
                         PathToProperty.mapKey(ref: key.instanceRefId),
-                      )!,
+                      ),
                     ).future,
+                    (prev, next) {},
                   )
                   .read()
           ]);
@@ -254,15 +273,16 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
               ownerUri: 'package:provider_app/main.dart',
               ownerName: 'ComplexObject',
             ),
-          )!;
+          );
 
           final listItems = Future.wait([
             for (var i = 0; i < 6; i++)
               container
                   .listen(
-                    rawInstanceProvider(
-                      listPath.pathForChild(PathToProperty.listIndex(i))!,
+                    instanceProvider(
+                      listPath.pathForChild(PathToProperty.listIndex(i)),
                     ).future,
+                    (prev, next) {},
                   )
                   .read()
           ]);
@@ -270,24 +290,25 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           // Counter.complex.list[4].value
           final list4valueFuture = container
               .listen(
-                rawInstanceProvider(
+                instanceProvider(
                   listPath
-                      .pathForChild(const PathToProperty.listIndex(4))!
+                      .pathForChild(const PathToProperty.listIndex(4))
                       .pathForChild(
                         const PathToProperty.objectProperty(
                           name: 'value',
                           ownerUri: 'package:provider_app/main.dart',
                           ownerName: '_SubObject',
                         ),
-                      )!,
+                      ),
                 ).future,
+                (prev, next) {},
               )
               .read();
 
           // Counter.complex.plainInstance.value
           final plainInstanceValueFuture = container
               .listen(
-                rawInstanceProvider(
+                instanceProvider(
                   complexPath
                       .pathForChild(
                         const PathToProperty.objectProperty(
@@ -295,15 +316,16 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                           ownerUri: 'package:provider_app/main.dart',
                           ownerName: 'ComplexObject',
                         ),
-                      )!
+                      )
                       .pathForChild(
                         const PathToProperty.objectProperty(
                           name: 'value',
                           ownerUri: 'package:provider_app/main.dart',
                           ownerName: '_SubObject',
                         ),
-                      )!,
+                      ),
                 ).future,
+                (prev, next) {},
               )
               .read();
 
@@ -377,7 +399,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                           .having(
                             (e) => e.isDefinedByDependency,
                             'isDefinedByDependency',
-                            true,
+                            false,
                           ),
                     ]),
                   ),
@@ -550,11 +572,9 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
 
           expect(
             complexProperties['lateWithInitializer'],
-            isA<SentinelException>().having(
-              (e) => e.sentinel.kind,
-              'sentinel.kind',
-              SentinelKind.kNotInitialized,
-            ),
+            isA<NumInstance>()
+                .having((e) => e.displayString, 'displayString', '21')
+                .having((e) => e.setter, 'setter', isNotNull),
           );
 
           expect(
@@ -746,9 +766,8 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           final container = ProviderContainer();
           addTearDown(container.dispose);
 
-          // Counter._count
-          final counter_countSub = container.listen(
-            rawInstanceProvider(
+          final _countSub = container.listen(
+            instanceProvider(
               const InstancePath.fromProviderId(
                 '0',
                 pathToProperty: [
@@ -760,10 +779,11 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
                 ],
               ),
             ).future,
+            (prev, next) {},
           );
 
           await expectLater(
-            counter_countSub.read(),
+            _countSub.read(),
             completion(
               isA<NumInstance>()
                   .having((e) => e.displayString, 'displayString', '0'),
@@ -776,7 +796,7 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
           );
 
           await expectLater(
-            counter_countSub.read(),
+            _countSub.read(),
             completion(
               isA<NumInstance>()
                   .having((e) => e.displayString, 'displayString', '1'),
@@ -824,10 +844,14 @@ Future<void> runProviderControllerTests(FlutterTestEnvironment env) async {
         );
 
         // wait for the list of providers to be obtained
-        await container.listen(rawSortedProviderNodesProvider.future).read();
+        await container
+            .listen(sortedProviderNodesProvider.future, (prev, next) {})
+            .read();
 
-        final countSub =
-            container.listen(rawInstanceProvider(countPath).future);
+        final countSub = container.listen(
+          instanceProvider(countPath).future,
+          (prev, next) {},
+        );
 
         final instance = await countSub.read();
 
