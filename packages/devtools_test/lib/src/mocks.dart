@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+// ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
@@ -54,11 +55,11 @@ class TestInspectorController extends Fake implements InspectorController {
   InspectorService service = FakeInspectorService();
 
   @override
-  ValueListenable<InspectorTreeNode> get selectedNode => _selectedNode;
-  final ValueNotifier<InspectorTreeNode> _selectedNode = ValueNotifier(null);
+  ValueListenable<InspectorTreeNode?> get selectedNode => _selectedNode;
+  final ValueNotifier<InspectorTreeNode?> _selectedNode = ValueNotifier(null);
 
   @override
-  void setSelectedNode(InspectorTreeNode newSelection) {
+  void setSelectedNode(InspectorTreeNode? newSelection) {
     _selectedNode.value = newSelection;
   }
 
@@ -68,7 +69,7 @@ class TestInspectorController extends Fake implements InspectorController {
 
 class FakeServiceManager extends Fake implements ServiceConnectionManager {
   FakeServiceManager({
-    VmServiceWrapper service,
+    VmServiceWrapper? service,
     this.hasConnection = true,
     this.connectedAppInitialized = true,
     this.hasService = true,
@@ -88,18 +89,18 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   Completer<void> flagsInitialized = Completer();
 
   Future<void> initFlagManager() async {
-    await _flagManager.vmServiceOpened(service);
+    await _flagManager.vmServiceOpened(service!);
     flagsInitialized.complete();
   }
 
   static FakeVmService createFakeService({
-    Timeline timelineData,
-    SocketProfile socketProfile,
-    HttpProfile httpProfile,
-    SamplesMemoryJson memoryData,
-    AllocationMemoryJson allocationData,
-    CpuProfileData cpuProfileData,
-    CpuSamples cpuSamples,
+    Timeline? timelineData,
+    SocketProfile? socketProfile,
+    HttpProfile? httpProfile,
+    SamplesMemoryJson? memoryData,
+    AllocationMemoryJson? allocationData,
+    CpuProfileData? cpuProfileData,
+    CpuSamples? cpuSamples,
   }) =>
       FakeVmService(
         _flagManager,
@@ -118,7 +119,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final MockVM _mockVM = MockVM();
 
   @override
-  VmServiceWrapper service;
+  VmServiceWrapper? service;
 
   @override
   Future<VmService> onServiceAvailable = Future.value();
@@ -127,7 +128,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   bool get isServiceAvailable => hasConnection;
 
   @override
-  ConnectedApp connectedApp = MockConnectedApp();
+  ConnectedApp? connectedApp = MockConnectedApp();
 
   @override
   final ConsoleService consoleService = ConsoleService();
@@ -136,7 +137,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   Stream<VmServiceWrapper> get onConnectionClosed => const Stream.empty();
 
   @override
-  Stream<VmServiceWrapper> get onConnectionAvailable => Stream.value(service);
+  Stream<VmServiceWrapper> get onConnectionAvailable => Stream.value(service!);
 
   @override
   Future<double> get queryDisplayRefreshRate => Future.value(60.0);
@@ -192,8 +193,8 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   }
 
   @override
-  bool libraryUriAvailableNow(String uri) {
-    return availableLibraries.any((u) => u.startsWith(uri));
+  bool libraryUriAvailableNow(String? uri) {
+    return availableLibraries.any((u) => u.startsWith(uri!));
   }
 
   @override
@@ -216,8 +217,8 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   Future<void> sendDwdsEvent({
-    @required String screen,
-    @required String action,
+    required String screen,
+    required String action,
   }) {
     return Future.value();
   }
@@ -247,7 +248,7 @@ class FakeVM extends Fake implements VM {
   FakeVM();
 
   @override
-  Map<String, dynamic> json = {
+  Map<String, dynamic>? json = {
     '_FAKE_VM': true,
     '_currentRSS': 0,
   };
@@ -261,7 +262,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     this._httpProfile,
     this._memoryData,
     this._allocationData,
-    CpuSamples cpuSamples,
+    CpuSamples? cpuSamples,
   )   : _startingSockets = _socketProfile?.sockets ?? [],
         _startingRequests = _httpProfile?.requests ?? [],
         cpuSamples = cpuSamples ??
@@ -276,7 +277,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
               'samples': [],
             });
 
-  CpuSamples cpuSamples;
+  CpuSamples? cpuSamples;
 
   /// Specifies the return value of `httpEnableTimelineLogging`.
   bool httpEnableTimelineLoggingResult = true;
@@ -291,13 +292,13 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   SemanticVersion dartIoVersion = SemanticVersion(major: 1, minor: 3);
 
   final VmFlagManager _vmFlagManager;
-  final Timeline _timelineData;
-  SocketProfile _socketProfile;
+  final Timeline? _timelineData;
+  SocketProfile? _socketProfile;
   final List<SocketStatistic> _startingSockets;
-  HttpProfile _httpProfile;
+  HttpProfile? _httpProfile;
   final List<HttpProfileRequest> _startingRequests;
-  final SamplesMemoryJson _memoryData;
-  final AllocationMemoryJson _allocationData;
+  final SamplesMemoryJson? _memoryData;
+  final AllocationMemoryJson? _allocationData;
 
   final _flags = <String, dynamic>{
     'flags': <Flag>[
@@ -349,17 +350,17 @@ class FakeVmService extends Fake implements VmServiceWrapper {
           {
             'id': 'fake_isolate_id',
           },
-        ),
+        )!,
       );
 
   @override
   Future<AllocationProfile> getAllocationProfile(
     String isolateId, {
-    bool reset,
-    bool gc,
+    bool? reset,
+    bool? gc,
   }) async {
     final memberStats = <ClassHeapStats>[];
-    for (var data in _allocationData.data) {
+    for (var data in _allocationData!.data) {
       final stats = ClassHeapStats(
         classRef: data.classRef,
         accumulatedSize: data.bytesDelta,
@@ -395,7 +396,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   Future<HeapSnapshotGraph> getHeapSnapshotGraph(IsolateRef isolateRef) async {
     // Simulate a snapshot that takes .5 seconds.
     await Future.delayed(const Duration(milliseconds: 500));
-    return null;
+    return HeapSnapshotGraph.fromChunks([]);
   }
 
   @override
@@ -407,8 +408,8 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   Future<Obj> getObject(
     String isolateId,
     String objectId, {
-    int offset,
-    int count,
+    int? offset,
+    int? count,
   }) {
     return Future.value(MockObj());
   }
@@ -419,7 +420,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
       throw StateError('_memoryData was not provided to FakeServiceManager');
     }
 
-    final heapSample = _memoryData.data.first;
+    final heapSample = _memoryData!.data.first;
     return MemoryUsage(
       externalUsage: heapSample.external,
       heapCapacity: heapSample.capacity,
@@ -433,15 +434,15 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<Stack> getStack(String isolateId, {int limit}) {
+  Future<Stack> getStack(String isolateId, {int? limit}) {
     return Future.value(Stack(frames: [], messages: [], truncated: false));
   }
 
   @override
   Future<Success> setFlag(String name, String value) {
-    final List<Flag> flags = _flags['flags'];
+    final List<Flag?> flags = _flags['flags'];
     final existingFlag =
-        flags.firstWhere((f) => f.name == name, orElse: () => null);
+        flags.firstWhere((f) => f!.name == name, orElse: () => null);
     if (existingFlag != null) {
       existingFlag.valueAsString = value;
     } else {
@@ -491,13 +492,14 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Future<Timeline> getVMTimeline({
-    int timeOriginMicros,
-    int timeExtentMicros,
+    int? timeOriginMicros,
+    int? timeExtentMicros,
   }) async {
-    if (_timelineData == null) {
+    final result = _timelineData;
+    if (result == null) {
       throw StateError('timelineData was not provided to FakeServiceManager');
     }
-    return _timelineData;
+    return result;
   }
 
   @override
@@ -511,7 +513,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   @override
   Future<SocketProfilingState> socketProfilingEnabled(
     String isolateId, [
-    bool enabled,
+    bool? enabled,
   ]) {
     if (enabled != null) {
       return Future.value(SocketProfilingState(enabled: enabled));
@@ -523,7 +525,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Future<Success> clearSocketProfile(String isolateId) async {
-    _socketProfile.sockets.clear();
+    _socketProfile!.sockets.clear();
     return Future.value(Success());
   }
 
@@ -546,13 +548,12 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   ) async {
     final httpProfile = await getHttpProfile(isolateId);
     return Future.value(
-      httpProfile.requests
-          .firstWhere((request) => request.id == id, orElse: () => null),
+      httpProfile.requests.firstWhereOrNull((request) => request.id == id),
     );
   }
 
   @override
-  Future<HttpProfile> getHttpProfile(String isolateId, {int updatedSince}) {
+  Future<HttpProfile> getHttpProfile(String isolateId, {int? updatedSince}) {
     return Future.value(
       _httpProfile ?? HttpProfile(requests: [], timestamp: 0),
     );
@@ -578,7 +579,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   @override
   Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
     String isolateId, [
-    bool enabled,
+    bool? enabled,
   ]) async {
     if (enabled != null) {
       return Future.value(HttpTimelineLoggingState(enabled: enabled));
@@ -636,24 +637,24 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
 class FakeIsolateManager extends Fake implements IsolateManager {
   @override
-  ValueListenable<IsolateRef> get selectedIsolate => _selectedIsolate;
+  ValueListenable<IsolateRef?> get selectedIsolate => _selectedIsolate;
   final _selectedIsolate =
       ValueNotifier(IsolateRef.parse({'id': 'fake_isolate_id'}));
 
   @override
-  ValueListenable<IsolateRef> get mainIsolate => _mainIsolate;
+  ValueListenable<IsolateRef?> get mainIsolate => _mainIsolate;
   final _mainIsolate =
-      ValueNotifier(IsolateRef.parse({'id': 'fake_main_isolate_id'}));
+      ValueNotifier(IsolateRef.parse({'id': 'fake_main_isolate_id'})!);
 
   @override
   ValueNotifier<List<IsolateRef>> get isolates {
-    return _isolates ??= ValueNotifier([_selectedIsolate.value]);
+    return _isolates ??= ValueNotifier([_selectedIsolate.value!]);
   }
 
-  ValueNotifier<List<IsolateRef>> _isolates;
+  ValueNotifier<List<IsolateRef>>? _isolates;
 
   @override
-  IsolateState isolateDebuggerState(IsolateRef isolate) {
+  IsolateState isolateDebuggerState(IsolateRef? isolate) {
     final state = MockIsolateState();
     final mockIsolate = MockIsolate();
     when(mockIsolate.libraries).thenReturn([]);
@@ -690,9 +691,9 @@ class MockBannerMessagesController extends Mock
 
 class MockLoggingController extends Mock implements LoggingController {
   @override
-  ValueListenable<LogData> get selectedLog => _selectedLog;
+  ValueListenable<LogData?> get selectedLog => _selectedLog;
 
-  final _selectedLog = ValueNotifier<LogData>(null);
+  final _selectedLog = ValueNotifier<LogData?>(null);
 
   @override
   void selectLog(LogData data) {
@@ -748,12 +749,12 @@ class MockDebuggerController extends Mock implements DebuggerController {
         .thenReturn(ValueNotifier('Unhandled'));
     when(debuggerController.variables).thenReturn(ValueNotifier([]));
     when(debuggerController.currentParsedScript)
-        .thenReturn(ValueNotifier<ParsedScript>(null));
+        .thenReturn(ValueNotifier<ParsedScript?>(null));
     return debuggerController;
   }
 
   @override
-  final programExplorerController =
+  final ProgramExplorerController programExplorerController =
       MockProgramExplorerController.withDefaults();
 }
 
@@ -785,7 +786,8 @@ class FakeServiceExtensionManager extends Fake
     implements ServiceExtensionManager {
   bool _firstFrameEventReceived = false;
 
-  final _serviceExtensionStateController =
+  final Map<String, ValueNotifier<ServiceExtensionState>>
+      _serviceExtensionStateController =
       <String, ValueNotifier<ServiceExtensionState>>{};
 
   final _serviceExtensionAvailable = <String, ValueNotifier<bool>>{};
@@ -869,7 +871,7 @@ class FakeServiceExtensionManager extends Fake
 
   dynamic _getExtensionValueFromJson(String name, String valueFromJson) {
     final expectedValueType =
-        serviceExtensionsAllowlist[name].values.first.runtimeType;
+        serviceExtensionsAllowlist[name]!.values.first.runtimeType;
     switch (expectedValueType) {
       case bool:
         return valueFromJson == 'true' ? true : false;
@@ -904,7 +906,7 @@ class FakeServiceExtensionManager extends Fake
       // extension. This will restore extension states on the device after a hot
       // restart. [_enabledServiceExtensions] will be empty on page refresh or
       // initial start.
-      return callServiceExtension(name, _enabledServiceExtensions[name].value);
+      return callServiceExtension(name, _enabledServiceExtensions[name]!.value);
     } else {
       // Set any extensions that are already enabled on the device. This will
       // enable extension states in DevTools on page refresh or initial start.
@@ -923,11 +925,11 @@ class FakeServiceExtensionManager extends Fake
       () {
         return ValueNotifier<ServiceExtensionState>(
           _enabledServiceExtensions.containsKey(name)
-              ? _enabledServiceExtensions[name]
+              ? _enabledServiceExtensions[name]!
               : ServiceExtensionState(enabled: false, value: null),
         );
       },
-    );
+    )!;
   }
 
   Future<void> _restoreExtensionFromDevice(String name) async {
@@ -973,8 +975,8 @@ class FakeServiceExtensionManager extends Fake
   @override
   Future<void> setServiceExtensionState(
     String name, {
-    @required bool enabled,
-    @required dynamic value,
+    required bool enabled,
+    required dynamic value,
     bool callExtension = true,
   }) async {
     if (callExtension && _serviceExtensions.contains(name)) {
@@ -1061,7 +1063,7 @@ final Grammar mockGrammar = Grammar.fromJson(
   ),
 );
 
-final Script mockScript = Script.parse(
+final Script? mockScript = Script.parse(
   jsonDecode(
     """
 {
@@ -1490,11 +1492,11 @@ final mockScriptRef = ScriptRef(
 
 final mockSyntaxHighlighter = SyntaxHighlighter.withGrammar(
   grammar: mockGrammar,
-  source: mockScript.source,
+  source: mockScript!.source,
 );
 
 final mockParsedScript = ParsedScript(
-  script: mockScript,
+  script: mockScript!,
   highlighter: mockSyntaxHighlighter,
   executableLines: <int>{},
 );
