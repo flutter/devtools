@@ -5,5 +5,6 @@
 // @dart=2.9
 
 export 'src/mocks.dart';
+export 'src/mocks_legacy.dart';
 export 'src/utils.dart';
 export 'src/wrappers.dart';

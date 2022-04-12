@@ -41,8 +41,9 @@ void main() {
     final fakeServiceManager = FakeServiceManager(service: service);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     VmServicePrivate.enablePrivateRpcs = false;
+
     try {
-      await fakeServiceManager.service.collectAllGarbage();
+      await service.collectAllGarbage();
       fail('Should not be able to invoke private RPCs');
     } on StateError {
       /* expected */
@@ -50,7 +51,7 @@ void main() {
 
     VmServicePrivate.enablePrivateRpcs = true;
     try {
-      await fakeServiceManager.service.collectAllGarbage();
+      await service.collectAllGarbage();
     } on StateError {
       fail('Should be able to invoke private RPCs');
     }

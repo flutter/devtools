@@ -190,7 +190,7 @@ BannerMessagesController bannerMessagesController(BuildContext context) {
 Future<Flag?> getProfileGranularityFlag(
   FakeServiceManager serviceManager,
 ) async {
-  final flagList = (await serviceManager.service.getFlagList()).flags!;
+  final flagList = (await serviceManager.service!.getFlagList()).flags!;
   return flagList.firstWhereOrNull(
     (flag) => flag.name == vm_flags.profilePeriod,
   );

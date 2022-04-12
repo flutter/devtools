@@ -40,18 +40,16 @@ void main() {
         timelineData: vm_service.Timeline.parse(timelineJson)!,
       ),
     );
-    when(fakeServiceManager.connectedApp.initialized)
-        .thenReturn(Completer()..complete(true));
-    when(fakeServiceManager.connectedApp.isDartWebAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp.isFlutterAppNow).thenReturn(true);
-    when(fakeServiceManager.connectedApp.flutterVersionNow).thenReturn(
+    final app = fakeServiceManager.connectedApp!;
+    when(app.initialized).thenReturn(Completer()..complete(true));
+    when(app.isDartWebAppNow).thenReturn(false);
+    when(app.isFlutterAppNow).thenReturn(true);
+    when(app.flutterVersionNow).thenReturn(
       FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!),
     );
-    when(fakeServiceManager.connectedApp.isProfileBuild)
-        .thenAnswer((_) => Future.value(true));
-    when(fakeServiceManager.connectedApp.isDartCliAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp.isDebugFlutterAppNow)
-        .thenReturn(false);
+    when(app.isProfileBuild).thenAnswer((_) => Future.value(true));
+    when(app.isDartCliAppNow).thenReturn(false);
+    when(app.isDebugFlutterAppNow).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(OfflineModeController, OfflineModeController());
     when(serviceManager.connectedApp!.isDartWebApp)
