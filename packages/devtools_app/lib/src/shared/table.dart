@@ -1126,7 +1126,7 @@ class TableRow<T> extends StatefulWidget {
   _TableRowState<T> createState() => _TableRowState<T>();
 }
 
-class _TableRowState<T> extends State<TableRow<T?>>
+class _TableRowState<T> extends State<TableRow<T>>
     with
         TickerProviderStateMixin,
         CollapsibleAnimationMixin,
@@ -1432,7 +1432,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
             return const SizedBox(width: defaultSpacing);
           }
           return columnFor(
-            widget.columns[i ~/ 2] as ColumnData<T>,
+            widget.columns[i ~/ 2],
             widget.columnWidths[i ~/ 2],
           );
         },
