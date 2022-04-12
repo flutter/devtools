@@ -11,11 +11,6 @@ import 'package:vm_service/vm_service.dart';
 
 import 'mocks.dart';
 
-class MockVmService extends Mock implements VmServiceWrapper {
-  @override
-  Future<FlagList> getFlagList() => Future.value(FlagList(flags: []));
-}
-
 class FakeServiceManager extends Fake implements ServiceConnectionManager {
   FakeServiceManager({
     VmServiceWrapper service,
