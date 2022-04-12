@@ -1180,24 +1180,29 @@ class _TableRowState<T> extends State<TableRow<T?>>
 
   @override
   Widget build(BuildContext context) {
-    final onPressed = widget.onPressed;
-    final row = tableRowFor(
-      context,
-      onPressed: onPressed != null ? () => onPressed(widget.node) : null,
-    );
+    final node = widget.node;
+    final widgetOnPressed = widget.onPressed;
+
+    Function()? onPressed;
+    if (node != null && widgetOnPressed != null) {
+      onPressed = () => widgetOnPressed(node);
+    }
 
     final box = SizedBox(
-      height: widget.node == null ? areaPaneHeaderHeight : defaultRowHeight,
+      height: node == null ? areaPaneHeaderHeight : defaultRowHeight,
       child: Material(
         color: _searchAwareBackgroundColor(),
-        child: widget.onPressed != null
+        child: onPressed != null
             ? InkWell(
                 canRequestFocus: false,
                 key: contentKey,
-                onTap: () => widget.onPressed!(widget.node),
-                child: row,
+                onTap: onPressed,
+                child: tableRowFor(
+                  context,
+                  onPressed: onPressed,
+                ),
               )
-            : row,
+            : tableRowFor(context),
       ),
     );
     if (widget.expansionChildren == null) return box;
