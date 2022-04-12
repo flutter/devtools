@@ -2,6 +2,8 @@
 // in devtools_test/src/mocks/generated.dart.
 // Do not manually edit this file.
 
+// ignore_for_file: require_trailing_commas
+
 import 'dart:async' as _i4;
 
 import 'package:devtools_app/src/service/vm_service_wrapper.dart' as _i3;
