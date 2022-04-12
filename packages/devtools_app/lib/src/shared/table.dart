@@ -1180,11 +1180,10 @@ class _TableRowState<T> extends State<TableRow<T?>>
 
   @override
   Widget build(BuildContext context) {
+    final onPressed = widget.onPressed;
     final row = tableRowFor(
       context,
-      onPressed: widget.onPressed != null
-          ? () => widget.onPressed!(widget.node)
-          : null,
+      onPressed: onPressed != null ? () => onPressed(widget.node) : null,
     );
 
     final box = SizedBox(

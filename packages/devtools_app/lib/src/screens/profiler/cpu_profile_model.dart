@@ -39,8 +39,8 @@ class CpuProfileData {
   factory CpuProfileData.parse(Map<String, dynamic> json) {
     final profileMetaData = CpuProfileMetaData(
       sampleCount: json[sampleCountKey] ?? 0,
-      samplePeriod: json[samplePeriodKey],
-      stackDepth: json[stackDepthKey],
+      samplePeriod: json[samplePeriodKey] ?? 0,
+      stackDepth: json[stackDepthKey] ?? 0,
       time: (json[timeOriginKey] != null && json[timeExtentKey] != null)
           ? (TimeRange()
             ..start = Duration(microseconds: json[timeOriginKey])
