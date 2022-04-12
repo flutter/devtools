@@ -213,7 +213,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                 .where((p) => embed && page != null ? p.screenId == page : true)
                 .where((p) => !hide.contains(p.screenId))
                 .toList();
-            if (tabs.isEmpty) return child!;
+            if (tabs.isEmpty) return child ?? const SizedBox.shrink();
             return _providedControllers(
               child: DevToolsScaffold(
                 embed: embed,
@@ -311,15 +311,21 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         ideTheme: ideTheme,
         theme: Theme.of(context),
       ),
-      builder: (context, child) => Provider<AnalyticsController>.value(
-        value: widget.analyticsController,
-        child: Notifications(
-          child: ReleaseNotesViewer(
-            releaseNotesController: releaseNotesController,
-            child: child!,
-          ),
-        ),
-      ),
+      builder: (context, child) {
+        Notifications? notifications;
+        if (child != null) {
+          notifications = Notifications(
+            child: ReleaseNotesViewer(
+              releaseNotesController: releaseNotesController,
+              child: child,
+            ),
+          );
+        }
+        return Provider<AnalyticsController>.value(
+          value: widget.analyticsController,
+          child: notifications,
+        );
+      },
       routerDelegate: DevToolsRouterDelegate(_getPage),
       routeInformationParser: DevToolsRouteInformationParser(),
       // Disable default scrollbar behavior on web to fix duplicate scrollbars
