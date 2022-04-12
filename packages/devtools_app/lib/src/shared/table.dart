@@ -1188,6 +1188,11 @@ class _TableRowState<T> extends State<TableRow<T?>>
       onPressed = () => widgetOnPressed(node);
     }
 
+    final row = tableRowFor(
+      context,
+      onPressed: onPressed,
+    );
+
     final box = SizedBox(
       height: node == null ? areaPaneHeaderHeight : defaultRowHeight,
       child: Material(
@@ -1197,12 +1202,9 @@ class _TableRowState<T> extends State<TableRow<T?>>
                 canRequestFocus: false,
                 key: contentKey,
                 onTap: onPressed,
-                child: tableRowFor(
-                  context,
-                  onPressed: onPressed,
-                ),
+                child: row,
               )
-            : tableRowFor(context),
+            : row,
       ),
     );
     if (widget.expansionChildren == null) return box;
