@@ -32,7 +32,7 @@ class ReleaseNotesViewer extends StatefulWidget {
 
   final ReleaseNotesController releaseNotesController;
 
-  final Widget child;
+  final Widget? child;
 
   @override
   _ReleaseNotesViewerState createState() => _ReleaseNotesViewerState();

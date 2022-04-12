@@ -312,18 +312,14 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         theme: Theme.of(context),
       ),
       builder: (context, child) {
-        Notifications? notifications;
-        if (child != null) {
-          notifications = Notifications(
+        return Provider<AnalyticsController>.value(
+          value: widget.analyticsController,
+          child: Notifications(
             child: ReleaseNotesViewer(
               releaseNotesController: releaseNotesController,
               child: child,
             ),
-          );
-        }
-        return Provider<AnalyticsController>.value(
-          value: widget.analyticsController,
-          child: notifications,
+          ),
         );
       },
       routerDelegate: DevToolsRouterDelegate(_getPage),
@@ -380,13 +376,14 @@ class DevToolsScreen<C> {
   /// Defaults to false.
   final bool supportsOffline;
 
-  Provider<C?> get controllerProvider {
+  Provider<C> get controllerProvider {
     assert(
       (createController != null && controller == null) ||
           (createController == null && controller != null),
     );
-    if (controller != null) {
-      return Provider<C?>.value(value: controller);
+    final controllerLocal = controller;
+    if (controllerLocal != null) {
+      return Provider<C>.value(value: controllerLocal);
     }
     return Provider<C>(create: (_) => createController!());
   }
