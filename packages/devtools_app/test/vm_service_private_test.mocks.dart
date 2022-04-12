@@ -97,10 +97,6 @@ class _FakeUriList_33 extends _i1.Fake implements _i2.UriList {}
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockVmServiceWrapper extends _i1.Mock implements _i3.VmServiceWrapper {
-  MockVmServiceWrapper() {
-    _i1.throwOnMissingStub(this);
-  }
-
   @override
   bool get trackFutures =>
       (super.noSuchMethod(Invocation.getter(#trackFutures), returnValue: false)

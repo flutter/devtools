@@ -16,11 +16,16 @@ import 'package:vm_service/vm_service.dart';
 // See https://github.com/dart-lang/mockito/blob/master/NULL_SAFETY_README.md
 import 'vm_service_private_test.mocks.dart';
 
-@GenerateMocks([VmServiceWrapper])
+@GenerateMocks(
+  [VmServiceWrapper],
+  //customMocks: [MockSpec<VmServiceWrapper>(returnNullOnMissingStub: true)],
+)
 void main() {
   test('Ensure private RPCs can only be enabled with VM Developer Mode enabled',
       () async {
     final service = MockVmServiceWrapper();
+    when(service.getFlagList())
+        .thenAnswer((_) => Future.value(FlagList(flags: [])));
     when(service.trackFuture(any, any)).thenAnswer(
       (invocation) => invocation.positionalArguments[1],
     );
