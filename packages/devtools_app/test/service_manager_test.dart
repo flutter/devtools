@@ -519,27 +519,12 @@ void main() async {
       resolvedUriManager = ResolvedUriManager();
     });
 
-    test('getPackageUri when uri is unknown', () {
-      final packageUriResult = resolvedUriManager!.getPackageUri('some/uri');
+    test('lookupPackageUri when uri is unknown', () {
+      final packageUriResult = resolvedUriManager!.lookupPackageUri('some/uri');
       expect(packageUriResult, isNull);
     });
 
-    test('fetchUnknownUris', () async {
-      const uri = 'this/is/a/uri';
-      const packageUri = 'uri/am/i';
-      when(serviceManager.service!.lookupPackageUris(isolateId, [uri]))
-          .thenAnswer(
-        (realInvocation) => Future.value(UriList(uris: [packageUri])),
-      );
-
-      resolvedUriManager!.getPackageUri(uri);
-      await resolvedUriManager!.fetchUnknownUris(isolateId);
-      final packageUriResult = resolvedUriManager!.getPackageUri(uri);
-
-      expect(packageUriResult, equals(packageUri));
-    });
-
-    test('does not fetch duplicate unknown uris', () async {
+    test('lookupPackageUris', () async {
       const uri1 = 'this/is/a/uri1';
       const uri2 = 'this/is/a/uri2';
       const packageUri1 = 'uri/am/i1';
@@ -550,16 +535,32 @@ void main() async {
             Future.value(UriList(uris: [packageUri1, packageUri2])),
       );
 
-      resolvedUriManager!.getPackageUri(uri1);
-      resolvedUriManager!.getPackageUri(uri1);
-      resolvedUriManager!.getPackageUri(uri2);
-      resolvedUriManager!.getPackageUri(uri2);
-      await resolvedUriManager!.fetchUnknownUris(isolateId);
-      final packageUriResult1 = resolvedUriManager!.getPackageUri(uri1);
-      final packageUriResult2 = resolvedUriManager!.getPackageUri(uri2);
+      await resolvedUriManager!.fetchPackageUris(isolateId, [uri1, uri2]);
 
-      expect(packageUriResult1, equals(packageUri1));
-      expect(packageUriResult2, equals(packageUri2));
+      expect(resolvedUriManager!.lookupPackageUri(uri1), equals(packageUri1));
+      expect(resolvedUriManager!.lookupPackageUri(uri2), equals(packageUri2));
+    });
+
+    test('remembersPackageUris', () async {
+      const uri1 = 'this/is/a/uri1';
+      const uri2 = 'this/is/a/uri2';
+      const packageUri1 = 'uri/am/i1';
+      const packageUri2 = 'uri/am/i2';
+      when(serviceManager.service!.lookupPackageUris(isolateId, [uri1]))
+          .thenAnswer(
+        (realInvocation) => Future.value(UriList(uris: [packageUri1])),
+      );
+      when(serviceManager.service!.lookupPackageUris(isolateId, [uri2]))
+          .thenAnswer(
+        (realInvocation) => Future.value(UriList(uris: [packageUri2])),
+      );
+
+      await resolvedUriManager!.fetchPackageUris(isolateId, [uri1]);
+      expect(resolvedUriManager!.lookupPackageUri(uri1), equals(packageUri1));
+
+      await resolvedUriManager!.fetchPackageUris(isolateId, [uri2]);
+      expect(resolvedUriManager!.lookupPackageUri(uri1), equals(packageUri1));
+      expect(resolvedUriManager!.lookupPackageUri(uri2), equals(packageUri2));
     });
   });
 }

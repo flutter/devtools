@@ -380,27 +380,30 @@ class CpuProfileData {
     final stackFrames = traceObject[CpuProfileData.stackFramesKey]
         .values
         .cast<Map<String, dynamic>>();
-    final stackFramesWaitingOnPackageUri = <Map<String, dynamic>>[];
+    final stackFramesWaitingOnPackageUri = <String, Map<String, dynamic>>{};
     for (final stackFrameJson in stackFrames) {
       final resolvedUrl =
           stackFrameJson[CpuProfileData.resolvedUrlKey] as String?;
       if (resolvedUrl != null && resolvedUrl.isNotEmpty) {
         final packageUri =
-            serviceManager.resolvedUriManager.getPackageUri(resolvedUrl);
+            serviceManager.resolvedUriManager.lookupPackageUri(resolvedUrl);
         if (packageUri != null) {
           stackFrameJson[CpuProfileData.processedUrlKey] = packageUri;
         } else {
-          stackFramesWaitingOnPackageUri.add(stackFrameJson);
+          stackFramesWaitingOnPackageUri[resolvedUrl] = stackFrameJson;
         }
       }
     }
 
-    await serviceManager.resolvedUriManager.fetchUnknownUris(isolateId);
+    await serviceManager.resolvedUriManager.fetchPackageUris(
+      isolateId,
+      stackFramesWaitingOnPackageUri.keys.toList(),
+    );
 
-    for (var stackFrameJson in stackFramesWaitingOnPackageUri) {
+    for (var stackFrameJson in stackFramesWaitingOnPackageUri.values) {
       final resolvedUri = stackFrameJson[CpuProfileData.resolvedUrlKey];
       final packageUri =
-          serviceManager.resolvedUriManager.getPackageUri(resolvedUri);
+          serviceManager.resolvedUriManager.lookupPackageUri(resolvedUri);
       if (packageUri != null) {
         stackFrameJson[CpuProfileData.processedUrlKey] = packageUri;
       }
