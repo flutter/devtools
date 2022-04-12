@@ -11,11 +11,14 @@ import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_extension_manager.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
+import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/service/service_registrations.dart'
     as registrations;
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
@@ -489,6 +492,75 @@ void main() async {
       },
       timeout: const Timeout.factor(4),
     );
+  });
+
+  group('ResolvedUriManager', () {
+    String isolateId = 'anIsolateId';
+    ResolvedUriManager? resolvedUriManager;
+
+    setUp(() {
+      final service = MockVmService();
+      when(service.onDebugEvent).thenAnswer((_) {
+        return const Stream.empty();
+      });
+      when(service.onVMEvent).thenAnswer((_) {
+        return const Stream.empty();
+      });
+      when(service.onIsolateEvent).thenAnswer((_) {
+        return const Stream.empty();
+      });
+      when(service.onStdoutEvent).thenAnswer((_) {
+        return const Stream.empty();
+      });
+      when(service.onStderrEvent).thenAnswer((_) {
+        return const Stream.empty();
+      });
+      setGlobal(ServiceConnectionManager, FakeServiceManager(service: service));
+      resolvedUriManager = ResolvedUriManager();
+    });
+
+    test('getPackageUri when uri is unknown', () {
+      final packageUriResult = resolvedUriManager!.getPackageUri('some/uri');
+      expect(packageUriResult, isNull);
+    });
+
+    test('fetchUnknownUris', () async {
+      const uri = 'this/is/a/uri';
+      const packageUri = 'uri/am/i';
+      when(serviceManager.service!.lookupPackageUris(isolateId, [uri]))
+          .thenAnswer(
+        (realInvocation) => Future.value(UriList(uris: [packageUri])),
+      );
+
+      resolvedUriManager!.getPackageUri(uri);
+      await resolvedUriManager!.fetchUnknownUris(isolateId);
+      final packageUriResult = resolvedUriManager!.getPackageUri(uri);
+
+      expect(packageUriResult, equals(packageUri));
+    });
+
+    test('does not fetch duplicate unknown uris', () async {
+      const uri1 = 'this/is/a/uri1';
+      const uri2 = 'this/is/a/uri2';
+      const packageUri1 = 'uri/am/i1';
+      const packageUri2 = 'uri/am/i2';
+      when(serviceManager.service!.lookupPackageUris(isolateId, [uri1, uri2]))
+          .thenAnswer(
+        (realInvocation) =>
+            Future.value(UriList(uris: [packageUri1, packageUri2])),
+      );
+
+      resolvedUriManager!.getPackageUri(uri1);
+      resolvedUriManager!.getPackageUri(uri1);
+      resolvedUriManager!.getPackageUri(uri2);
+      resolvedUriManager!.getPackageUri(uri2);
+      await resolvedUriManager!.fetchUnknownUris(isolateId);
+      final packageUriResult1 = resolvedUriManager!.getPackageUri(uri1);
+      final packageUriResult2 = resolvedUriManager!.getPackageUri(uri2);
+
+      expect(packageUriResult1, equals(packageUri1));
+      expect(packageUriResult2, equals(packageUri2));
+    });
   });
 }
 

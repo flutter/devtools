@@ -500,18 +500,19 @@ class ServiceConnectionManager {
 
 class ResolvedUriManager {
   final _resolvedUrlMap = <String, String?>{};
-  final _unknownUris = <String>[];
+  final _unknownUris = <String>{};
   VmServiceWrapper? service;
 
   Future<void> fetchUnknownUris(
     String isolateId,
   ) async {
+    final unknownUris = _unknownUris.toList();
     final packageUris = (await serviceManager.service!
-            .lookupPackageUris(isolateId, _unknownUris))
+            .lookupPackageUris(isolateId, unknownUris))
         .uris;
     if (packageUris != null) {
-      for (var i = 0; i < _unknownUris.length; i++) {
-        final unknownUri = _unknownUris[i];
+      for (var i = 0; i < unknownUris.length; i++) {
+        final unknownUri = unknownUris[i];
         final resolvedUri = packageUris[i];
         _resolvedUrlMap[unknownUri] = resolvedUri!;
       }

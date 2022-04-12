@@ -40,7 +40,6 @@ class VmServiceWrapper implements VmService {
 
   final bool trackFutures;
   final Map<String, Future<Success>> _activeStreams = {};
-  final _resolvedUrlMap = <String, String?>{};
 
   final Set<TrackedFuture<Object>> activeFutures = {};
   Completer<bool> _allFuturesCompleter = Completer<bool>()
