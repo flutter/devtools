@@ -14,8 +14,10 @@ class ResolvedUriManager {
     if (packageUris != null) {
       for (var i = 0; i < uris.length; i++) {
         final unknownUri = uris[i];
-        final resolvedUri = packageUris[i];
-        _resolvedUrlMap[unknownUri] = resolvedUri!;
+        final packageUri = packageUris[i];
+        if (packageUri != null) {
+          _resolvedUrlMap[unknownUri] = packageUri;
+        }
       }
     }
   }

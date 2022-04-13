@@ -100,6 +100,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     AllocationMemoryJson allocationData,
     CpuProfileData cpuProfileData,
     CpuSamples cpuSamples,
+    Map<String, String> resolvedUriMap,
   }) =>
       FakeVmService(
         _flagManager,
@@ -109,6 +110,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
         memoryData,
         allocationData,
         cpuSamples,
+        resolvedUriMap,
       );
 
   final List<String> availableServices;
@@ -116,6 +118,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final List<String> availableLibraries;
 
   final MockVM _mockVM = MockVM();
+
+  @override
+  ResolvedUriManager resolvedUriManager = ResolvedUriManager();
 
   @override
   VmServiceWrapper service;
@@ -262,6 +267,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     this._memoryData,
     this._allocationData,
     CpuSamples cpuSamples,
+    this._resolvedUriMap,
   )   : _startingSockets = _socketProfile?.sockets ?? [],
         _startingRequests = _httpProfile?.requests ?? [],
         cpuSamples = cpuSamples ??
@@ -277,6 +283,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
             });
 
   CpuSamples cpuSamples;
+  final Map<String, String> _resolvedUriMap;
 
   /// Specifies the return value of `httpEnableTimelineLogging`.
   bool httpEnableTimelineLoggingResult = true;
@@ -336,6 +343,17 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     int timeExtentMicros,
   ) {
     return Future.value(cpuSamples);
+  }
+
+  @override
+  Future<UriList> lookupPackageUris(String isolateId, List<String> uris) {
+    return Future.value(
+      UriList(
+        uris: _resolvedUriMap != null
+            ? (uris.map((e) => _resolvedUriMap[e]).toList())
+            : null,
+      ),
+    );
   }
 
   @override

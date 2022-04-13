@@ -105,15 +105,15 @@ class SourceColumn extends ColumnData<CpuStackFrame> {
   SourceColumn() : super.wide('Source', alignment: ColumnAlignment.right);
 
   @override
-  dynamic getValue(CpuStackFrame dataObject) => dataObject.processedUrl;
+  dynamic getValue(CpuStackFrame dataObject) => dataObject.packageUri;
 
   @override
   String getDisplayValue(CpuStackFrame dataObject) {
-    return dataObject.processedUrl;
+    return dataObject.packageUri;
   }
 
   @override
-  String getTooltip(CpuStackFrame dataObject) => dataObject.processedUrl;
+  String getTooltip(CpuStackFrame dataObject) => dataObject.packageUri;
 
   @override
   bool get supportsSorting => true;

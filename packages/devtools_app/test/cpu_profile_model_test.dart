@@ -6,6 +6,9 @@
 
 import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -16,6 +19,16 @@ void main() {
     final cpuProfileData = CpuProfileData.parse(cpuProfileResponseJson);
     final cpuSamples = CpuSamples.parse(goldenCpuSamplesJson)!;
 
+    setUp(() {
+      setGlobal(
+        ServiceConnectionManager,
+        FakeServiceManager(
+          service: FakeServiceManager.createFakeService(
+            resolvedUriMap: goldenResolvedUriMap,
+          ),
+        ),
+      );
+    });
     test('init from parse', () {
       expect(
         cpuProfileData.stackFramesJson,
@@ -63,7 +76,7 @@ void main() {
     test('filterFrom', () {
       final filteredProfile = CpuProfileData.filterFrom(
         cpuProfileData,
-        (stackFrame) => !stackFrame.processedUrl.startsWith('dart:'),
+        (stackFrame) => !stackFrame.packageUri.startsWith('dart:'),
       );
       expect(
         filteredProfile.stackFramesJson,
@@ -93,21 +106,21 @@ void main() {
       expect(generatedCpuProfileData.toJson, equals(goldenCpuProfileDataJson));
     });
 
-    test('to json defaults processedUrl to resolvedUrl', () {
-      final id = '140357727781376-12';
+    test('to json defaults packageUri to resolvedUrl', () {
+      const id = '140357727781376-12';
       final profileData = Map<String, dynamic>.from(goldenCpuProfileDataJson);
       profileData['stackFrames'] = Map<String, Map<String, String>>.from(
         {'140357727781376-12': goldenCpuProfileStackFrames[id]},
       );
-      profileData['stackFrames'][id].remove('processedUrl');
+      profileData['stackFrames'][id].remove(CpuProfileData.packageUriKey);
       final parsedProfileData = CpuProfileData.parse(profileData);
       final stackFrames = (parsedProfileData
               .toJson[CpuProfileData.stackFramesKey] as Map<String, dynamic>)
           .values
           .cast<Map<String, dynamic>>();
-      final jsonProcessedUrl = stackFrames.first['processedUrl'];
+      final jsonPackageUri = stackFrames.first[CpuProfileData.packageUriKey];
 
-      expect(jsonProcessedUrl, goldenCpuProfileStackFrames[id]!['resolvedUrl']);
+      expect(jsonPackageUri, goldenCpuProfileStackFrames[id]!['resolvedUrl']);
     });
 
     test('stackFrameIdCompare', () {
@@ -138,7 +151,7 @@ void main() {
           verboseName: 'all',
           category: 'Dart',
           rawUrl: '',
-          processedUrl: '',
+          packageUri: '',
           sourceLine: null,
           parentId: '',
           profileMetaData: profileMetaData,
