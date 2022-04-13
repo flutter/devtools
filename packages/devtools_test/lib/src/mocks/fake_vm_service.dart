@@ -1,0 +1,391 @@
+// @dart=2.9
+
+import 'dart:async';
+
+import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_shared/devtools_shared.dart';
+import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
+
+import 'mocks.dart';
+
+class FakeVmService extends Fake implements VmServiceWrapper {
+  FakeVmService(
+    this._vmFlagManager,
+    this._timelineData,
+    this._socketProfile,
+    this._httpProfile,
+    this._memoryData,
+    this._allocationData,
+    CpuSamples cpuSamples,
+  )   : _startingSockets = _socketProfile?.sockets ?? [],
+        _startingRequests = _httpProfile?.requests ?? [],
+        cpuSamples = cpuSamples ??
+            CpuSamples.parse({
+              'samplePeriod': 50,
+              'maxStackDepth': 12,
+              'sampleCount': 0,
+              'timeOriginMicros': 47377796685,
+              'timeExtentMicros': 3000,
+              'pid': 54321,
+              'functions': [],
+              'samples': [],
+            });
+
+  CpuSamples cpuSamples;
+
+  /// Specifies the return value of `httpEnableTimelineLogging`.
+  bool httpEnableTimelineLoggingResult = true;
+
+  /// Specifies the return value of isHttpProfilingAvailable.
+  bool isHttpProfilingAvailableResult = false;
+
+  /// Specifies the return value of `socketProfilingEnabled`.
+  bool socketProfilingEnabledResult = true;
+
+  /// Specifies the dart:io service extension version.
+  SemanticVersion dartIoVersion = SemanticVersion(major: 1, minor: 3);
+
+  final VmFlagManager _vmFlagManager;
+  final Timeline _timelineData;
+  SocketProfile _socketProfile;
+  final List<SocketStatistic> _startingSockets;
+  HttpProfile _httpProfile;
+  final List<HttpProfileRequest> _startingRequests;
+  final SamplesMemoryJson _memoryData;
+  final AllocationMemoryJson _allocationData;
+
+  final _flags = <String, dynamic>{
+    'flags': <Flag>[
+      Flag(
+        name: 'flag 1 name',
+        comment: 'flag 1 comment contains some very long text '
+            'that the renderer will have to wrap around to prevent '
+            'it from overflowing the screen. This will cause a '
+            'failure if one of the two Row entries the flags lay out '
+            'in is not wrapped in an Expanded(), which tells the Row '
+            'allocate only the remaining space to the Expanded. '
+            'Without the expanded, the underlying RichTexts will try '
+            'to consume as much of the layout as they can and cause '
+            'an overflow.',
+        valueAsString: 'flag 1 value',
+        modified: false,
+      ),
+      Flag(
+        name: profiler,
+        comment: 'Mock Flag',
+        valueAsString: 'true',
+        modified: false,
+      ),
+      Flag(
+        name: profilePeriod,
+        comment: 'Mock Flag',
+        valueAsString: ProfileGranularity.medium.value,
+        modified: false,
+      ),
+    ],
+  };
+  @override
+  Future<CpuSamples> getCpuSamples(
+    String isolateId,
+    int timeOriginMicros,
+    int timeExtentMicros,
+  ) {
+    return Future.value(cpuSamples);
+  }
+
+  @override
+  Uri get connectedUri => _connectedUri;
+  final _connectedUri = Uri.parse('ws://127.0.0.1:56137/ISsyt6ki0no=/ws');
+
+  @override
+  Future<void> forEachIsolate(Future<void> Function(IsolateRef) callback) =>
+      callback(
+        IsolateRef.parse(
+          {
+            'id': 'fake_isolate_id',
+          },
+        ),
+      );
+
+  @override
+  Future<AllocationProfile> getAllocationProfile(
+    String isolateId, {
+    bool reset,
+    bool gc,
+  }) async {
+    final memberStats = <ClassHeapStats>[];
+    for (var data in _allocationData.data) {
+      final stats = ClassHeapStats(
+        classRef: data.classRef,
+        accumulatedSize: data.bytesDelta,
+        bytesCurrent: data.bytesCurrent,
+        instancesAccumulated: data.instancesDelta,
+        instancesCurrent: data.instancesCurrent,
+      );
+      stats.json = stats.toJson();
+      memberStats.add(stats);
+    }
+    final allocationProfile = AllocationProfile(
+      members: memberStats,
+      memoryUsage: MemoryUsage(
+        externalUsage: 10000000,
+        heapCapacity: 20000000,
+        heapUsage: 7777777,
+      ),
+    );
+
+    allocationProfile.json = allocationProfile.toJson();
+    return allocationProfile;
+  }
+
+  @override
+  Future<Success> setTraceClassAllocation(
+    String isolateId,
+    String classId,
+    bool enable,
+  ) async =>
+      Future.value(Success());
+
+  @override
+  Future<HeapSnapshotGraph> getHeapSnapshotGraph(IsolateRef isolateRef) async {
+    // Simulate a snapshot that takes .5 seconds.
+    await Future.delayed(const Duration(milliseconds: 500));
+    return null;
+  }
+
+  @override
+  Future<Isolate> getIsolate(String isolateId) {
+    return Future.value(MockIsolate());
+  }
+
+  @override
+  Future<Obj> getObject(
+    String isolateId,
+    String objectId, {
+    int offset,
+    int count,
+  }) {
+    return Future.value(MockObj());
+  }
+
+  @override
+  Future<MemoryUsage> getMemoryUsage(String isolateId) async {
+    if (_memoryData == null) {
+      throw StateError('_memoryData was not provided to FakeServiceManager');
+    }
+
+    final heapSample = _memoryData.data.first;
+    return MemoryUsage(
+      externalUsage: heapSample.external,
+      heapCapacity: heapSample.capacity,
+      heapUsage: heapSample.used,
+    );
+  }
+
+  @override
+  Future<ScriptList> getScripts(String isolateId) {
+    return Future.value(ScriptList(scripts: []));
+  }
+
+  @override
+  Future<Stack> getStack(String isolateId, {int limit}) {
+    return Future.value(Stack(frames: [], messages: [], truncated: false));
+  }
+
+  @override
+  Future<Success> setFlag(String name, String value) {
+    final List<Flag> flags = _flags['flags'];
+    final existingFlag =
+        flags.firstWhere((f) => f.name == name, orElse: () => null);
+    if (existingFlag != null) {
+      existingFlag.valueAsString = value;
+    } else {
+      flags.add(
+        Flag.parse({
+          'name': name,
+          'comment': 'Mock Flag',
+          'modified': true,
+          'valueAsString': value,
+        }),
+      );
+    }
+
+    final fakeVmFlagUpdateEvent = Event(
+      kind: EventKind.kVMFlagUpdate,
+      flag: name,
+      newValue: value,
+      timestamp: 1, // 1 is arbitrary.
+    );
+    // ignore: invalid_use_of_visible_for_testing_member
+    _vmFlagManager.handleVmEvent(fakeVmFlagUpdateEvent);
+    return Future.value(Success());
+  }
+
+  @override
+  Future<FlagList> getFlagList() =>
+      Future.value(FlagList.parse(_flags) ?? FlagList(flags: []));
+
+  final _vmTimelineFlags = <String, dynamic>{
+    'type': 'TimelineFlags',
+    'recordedStreams': [],
+    'availableStreams': [],
+  };
+
+  @override
+  Future<FakeVM> getVM() => Future.value(FakeVM());
+
+  @override
+  Future<Success> setVMTimelineFlags(List<String> recordedStreams) async {
+    _vmTimelineFlags['recordedStreams'] = recordedStreams;
+    return Future.value(Success());
+  }
+
+  @override
+  Future<TimelineFlags> getVMTimelineFlags() =>
+      Future.value(TimelineFlags.parse(_vmTimelineFlags));
+
+  @override
+  Future<Timeline> getVMTimeline({
+    int timeOriginMicros,
+    int timeExtentMicros,
+  }) async {
+    if (_timelineData == null) {
+      throw StateError('timelineData was not provided to FakeServiceManager');
+    }
+    return _timelineData;
+  }
+
+  @override
+  Future<Success> clearVMTimeline() => Future.value(Success());
+
+  @override
+  Future<bool> isSocketProfilingAvailable(String isolateId) {
+    return Future.value(true);
+  }
+
+  @override
+  Future<SocketProfilingState> socketProfilingEnabled(
+    String isolateId, [
+    bool enabled,
+  ]) {
+    if (enabled != null) {
+      return Future.value(SocketProfilingState(enabled: enabled));
+    }
+    return Future.value(
+      SocketProfilingState(enabled: socketProfilingEnabledResult),
+    );
+  }
+
+  @override
+  Future<Success> clearSocketProfile(String isolateId) async {
+    _socketProfile.sockets.clear();
+    return Future.value(Success());
+  }
+
+  @override
+  Future<SocketProfile> getSocketProfile(String isolateId) {
+    return Future.value(_socketProfile ?? SocketProfile(sockets: []));
+  }
+
+  void restoreFakeSockets() {
+    _socketProfile = SocketProfile(sockets: _startingSockets);
+  }
+
+  @override
+  Future<bool> isHttpProfilingAvailable(String isolateId) => Future.value(true);
+
+  @override
+  Future<HttpProfileRequest> getHttpProfileRequest(
+    String isolateId,
+    int id,
+  ) async {
+    final httpProfile = await getHttpProfile(isolateId);
+    return Future.value(
+      httpProfile.requests
+          .firstWhere((request) => request.id == id, orElse: () => null),
+    );
+  }
+
+  @override
+  Future<HttpProfile> getHttpProfile(String isolateId, {int updatedSince}) {
+    return Future.value(
+      _httpProfile ?? HttpProfile(requests: [], timestamp: 0),
+    );
+  }
+
+  @override
+  Future<Success> clearHttpProfile(String isolateId) {
+    _httpProfile?.requests?.clear();
+    return Future.value(Success());
+  }
+
+  void restoreFakeHttpProfileRequests() {
+    _httpProfile = HttpProfile(requests: _startingRequests, timestamp: 0);
+  }
+
+  @override
+  Future<Success> clearCpuSamples(String isolateId) => Future.value(Success());
+
+  @override
+  Future<bool> isHttpTimelineLoggingAvailable(String isolateId) =>
+      Future.value(isHttpProfilingAvailableResult);
+
+  @override
+  Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
+    String isolateId, [
+    bool enabled,
+  ]) async {
+    if (enabled != null) {
+      return Future.value(HttpTimelineLoggingState(enabled: enabled));
+    }
+    return Future.value(
+      HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult),
+    );
+  }
+
+  @override
+  Future<Timestamp> getVMTimelineMicros() async => Timestamp(timestamp: 0);
+
+  @override
+  Stream<Event> onEvent(String streamName) => const Stream.empty();
+
+  @override
+  Stream<Event> get onStdoutEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onStdoutEventWithHistory => const Stream.empty();
+
+  @override
+  Stream<Event> get onStderrEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onStderrEventWithHistory => const Stream.empty();
+
+  @override
+  Stream<Event> get onGCEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onVMEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onLoggingEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onLoggingEventWithHistory => const Stream.empty();
+
+  @override
+  Stream<Event> get onExtensionEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onExtensionEventWithHistory => const Stream.empty();
+
+  @override
+  Stream<Event> get onDebugEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onTimelineEvent => const Stream.empty();
+
+  @override
+  Stream<Event> get onIsolateEvent => const Stream.empty();
+}
