@@ -5,6 +5,10 @@ import 'dart:async';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:mockito/mockito.dart';
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:vm_service/vm_service.dart';
 
 import 'mocks.dart';
