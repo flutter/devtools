@@ -114,7 +114,8 @@ void main() {
       profileData['stackFrames'] = Map<String, Map<String, String>>.from(
         {id: goldenCpuProfileStackFrames[id]},
       );
-      profileData['stackFrames'][id].remove(CpuProfileData.packageUriKey);
+      profileData['stackFrames'][id]
+          .remove(CpuProfileData.resolvedPackageUriKey);
 
       final parsedProfileData = CpuProfileData.parse(profileData);
 

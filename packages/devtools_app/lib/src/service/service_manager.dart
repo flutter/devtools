@@ -311,6 +311,8 @@ class ServiceConnectionManager {
     }
 
     _connectionAvailableController.add(service);
+
+    resolvedUriManager.vmServiceOpened();
   }
 
   void manuallyDisconnect() {
@@ -347,6 +349,8 @@ class ServiceConnectionManager {
     _inspectorService?.onIsolateStopped();
     _inspectorService?.dispose();
     _inspectorService = null;
+
+    resolvedUriManager.vmServiceClosed();
   }
 
   /// This can throw an [RPCError].

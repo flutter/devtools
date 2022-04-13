@@ -57,7 +57,7 @@ class CpuProfileData {
     for (final MapEntry<String, dynamic> entry in stackFramesJson.entries) {
       final stackFrameJson = entry.value;
       final resolvedUrl = stackFrameJson[resolvedUrlKey] ?? '';
-      final packageUri = stackFrameJson[packageUriKey] ?? resolvedUrl;
+      final packageUri = stackFrameJson[resolvedPackageUriKey] ?? resolvedUrl;
       final stackFrame = CpuStackFrame._(
         id: entry.key,
         name: getSimpleStackFrameName(stackFrameJson[nameKey]),
@@ -367,7 +367,7 @@ class CpuProfileData {
   }
 
   /// Helper function for determining and updating the
-  /// [CpuProfileData.packageUriKey] entry for each stack frame in
+  /// [CpuProfileData.resolvedPackageUriKey] entry for each stack frame in
   /// [traceObject].
   ///
   /// [isolateId] The id which is passed to the getIsolate RPC to load this
@@ -388,7 +388,7 @@ class CpuProfileData {
         final packageUri =
             serviceManager.resolvedUriManager.lookupPackageUri(resolvedUrl);
         if (packageUri != null) {
-          stackFrameJson[CpuProfileData.packageUriKey] = packageUri;
+          stackFrameJson[CpuProfileData.resolvedPackageUriKey] = packageUri;
         } else {
           stackFramesWaitingOnPackageUri[resolvedUrl] = stackFrameJson;
         }
@@ -405,7 +405,7 @@ class CpuProfileData {
       final packageUri =
           serviceManager.resolvedUriManager.lookupPackageUri(resolvedUri);
       if (packageUri != null) {
-        stackFrameJson[CpuProfileData.packageUriKey] = packageUri;
+        stackFrameJson[CpuProfileData.resolvedPackageUriKey] = packageUri;
       }
     }
   }
@@ -420,7 +420,7 @@ class CpuProfileData {
   static const parentIdKey = 'parent';
   static const stackFrameIdKey = 'sf';
   static const resolvedUrlKey = 'resolvedUrl';
-  static const packageUriKey = 'packageUri';
+  static const resolvedPackageUriKey = 'packageUri';
   static const sourceLineKey = 'sourceLine';
   static const stackFramesKey = 'stackFrames';
   static const traceEventsKey = 'traceEvents';
@@ -808,7 +808,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
           CpuProfileData.nameKey: verboseName,
           CpuProfileData.categoryKey: category,
           CpuProfileData.resolvedUrlKey: rawUrl,
-          CpuProfileData.packageUriKey: packageUri,
+          CpuProfileData.resolvedPackageUriKey: packageUri,
           if (parentId != null) CpuProfileData.parentIdKey: parentId,
         }
       };

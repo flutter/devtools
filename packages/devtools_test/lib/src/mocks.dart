@@ -83,6 +83,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
     when(errorBadgeManager.errorCountNotifier(any))
         .thenReturn(ValueNotifier<int>(0));
+    vmServiceOpened(service);
   }
 
   Completer<void> flagsInitialized = Completer();
@@ -246,6 +247,15 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   ValueListenable<bool> get deviceBusy => ValueNotifier(false);
+
+  @override
+  Future<void> vmServiceOpened(
+    VmServiceWrapper service, {
+    Future<void> onClosed,
+  }) {
+    resolvedUriManager.vmServiceOpened();
+    return Future.value();
+  }
 }
 
 class FakeVM extends Fake implements VM {
