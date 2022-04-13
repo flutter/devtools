@@ -13,6 +13,7 @@ import '../../primitives/trace_event.dart';
 import '../../primitives/trees.dart';
 import '../../primitives/url_utils.dart';
 import '../../primitives/utils.dart';
+import '../../shared/profiler_utils.dart';
 import '../../ui/search.dart';
 import 'cpu_profile_transformer.dart';
 
@@ -479,17 +480,6 @@ class CpuProfileMetaData extends ProfileMetaData {
   }
 }
 
-class ProfileMetaData {
-  const ProfileMetaData({
-    required this.sampleCount,
-    required this.time,
-  });
-
-  final int sampleCount;
-
-  final TimeRange? time;
-}
-
 class CpuSample extends TraceEvent {
   CpuSample({
     required this.leafId,
@@ -729,78 +719,6 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     buf.write(inclusiveSampleCount == 1 ? 'sample' : 'samples');
     buf.write(', ${percent2(totalTimeRatio)})');
     return buf.toString();
-  }
-}
-
-mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
-  ProfileMetaData get profileMetaData;
-
-  String get displayName;
-
-  /// How many cpu samples for which this frame is a leaf.
-  int exclusiveSampleCount = 0;
-
-  int get inclusiveSampleCount {
-    final inclusiveSampleCountLocal = _inclusiveSampleCount;
-    if (inclusiveSampleCountLocal != null) {
-      return inclusiveSampleCountLocal;
-    }
-    return calculateInclusiveSampleCount();
-  }
-
-  /// How many cpu samples this frame is included in.
-  int? _inclusiveSampleCount;
-
-  set inclusiveSampleCount(int? count) => _inclusiveSampleCount = count;
-
-  late double totalTimeRatio =
-      safeDivide(inclusiveSampleCount, profileMetaData.sampleCount);
-
-  late Duration totalTime = Duration(
-    microseconds:
-        (totalTimeRatio * profileMetaData.time!.duration.inMicroseconds)
-            .round(),
-  );
-
-  late double selfTimeRatio =
-      safeDivide(exclusiveSampleCount, profileMetaData.sampleCount);
-
-  late Duration selfTime = Duration(
-    microseconds:
-        (selfTimeRatio * profileMetaData.time!.duration.inMicroseconds).round(),
-  );
-
-  /// Returns the number of samples this data node is a part of.
-  ///
-  /// This will be equal to the number of leaf nodes under this data node.
-  int calculateInclusiveSampleCount() {
-    int count = exclusiveSampleCount;
-    for (int i = 0; i < children.length; i++) {
-      final child = children[i] as ProfilableDataMixin<T>;
-      count += child.inclusiveSampleCount;
-    }
-    _inclusiveSampleCount = count;
-    return _inclusiveSampleCount!;
-  }
-
-  T deepCopy();
-
-  @visibleForTesting
-  String profileAsString() {
-    final buf = StringBuffer();
-    _format(buf, '  ');
-    return buf.toString();
-  }
-
-  void _format(StringBuffer buf, String indent) {
-    buf.writeln(
-      '$indent$displayName - children: ${children.length} - excl: '
-              '$exclusiveSampleCount - incl: $inclusiveSampleCount'
-          .trimRight(),
-    );
-    for (T child in children) {
-      (child as ProfilableDataMixin<T>)._format(buf, '  $indent');
-    }
   }
 }
 
