@@ -56,7 +56,7 @@ void main() async {
       expect(resolvedUriManager!.lookupPackageUri(uri2), equals(packageUri2));
     });
 
-    test('remembersPackageUris', () async {
+    test('remembers already fetched uris', () async {
       const uri1 = 'this/is/a/uri1';
       const uri2 = 'this/is/a/uri2';
       const packageUri1 = 'uri/am/i1';

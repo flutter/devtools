@@ -505,6 +505,7 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
     }
   ]
 };
+
 final Map<String, String> goldenResolvedUriMap = {
   'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart':
       'package:flutter/lib/src/rendering/proxy_box.dart',

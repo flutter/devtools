@@ -104,6 +104,7 @@ void main() {
         isolateId: goldenSamplesIsolate,
         cpuSamples: CpuSamples.parse(goldenCpuSamplesJson)!,
       );
+
       expect(generatedCpuProfileData.toJson, equals(goldenCpuProfileDataJson));
     });
 
@@ -111,16 +112,13 @@ void main() {
       const id = '140357727781376-12';
       final profileData = Map<String, dynamic>.from(goldenCpuProfileDataJson);
       profileData['stackFrames'] = Map<String, Map<String, String>>.from(
-        {'140357727781376-12': goldenCpuProfileStackFrames[id]},
+        {id: goldenCpuProfileStackFrames[id]},
       );
       profileData['stackFrames'][id].remove(CpuProfileData.packageUriKey);
-      final parsedProfileData = CpuProfileData.parse(profileData);
-      final stackFrames = (parsedProfileData
-              .toJson[CpuProfileData.stackFramesKey] as Map<String, dynamic>)
-          .values
-          .cast<Map<String, dynamic>>();
-      final jsonPackageUri = stackFrames.first[CpuProfileData.packageUriKey];
 
+      final parsedProfileData = CpuProfileData.parse(profileData);
+
+      final jsonPackageUri = parsedProfileData.stackFrames[id]!.packageUri;
       expect(jsonPackageUri, goldenCpuProfileStackFrames[id]!['resolvedUrl']);
     });
 
