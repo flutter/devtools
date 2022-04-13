@@ -1,3 +1,7 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 // @dart=2.9
 
 import 'dart:async';
@@ -10,10 +14,6 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'fake_isolate_manager.dart';
-// Copyright 2019 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'fake_service_extension_manager.dart';
 import 'fake_vm_service.dart';
 import 'mocks.dart';
