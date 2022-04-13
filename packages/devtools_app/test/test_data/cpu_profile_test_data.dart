@@ -536,7 +536,6 @@ final Map<String, dynamic> goldenCpuProfileStackFrames =
           'resolvedUrl':
               'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart',
           'packageUri': 'package:flutter/lib/src/rendering/proxy_box.dart',
-          'sourceLine': null,
         },
         '140357727781376-13': {
           'category': 'Dart',
@@ -545,7 +544,6 @@ final Map<String, dynamic> goldenCpuProfileStackFrames =
           'resolvedUrl':
               'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
           'packageUri': 'package:flutter/rendering/custom_layout.dart',
-          'sourceLine': null,
         },
         '140357727781376-14': {
           'category': 'Dart',
@@ -554,7 +552,6 @@ final Map<String, dynamic> goldenCpuProfileStackFrames =
           'resolvedUrl':
               'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/hash.dart',
           'packageUri': 'dart:vm/hash.dart',
-          'sourceLine': null,
         },
         '140357727781376-15': {
           'category': 'Dart',
@@ -563,7 +560,6 @@ final Map<String, dynamic> goldenCpuProfileStackFrames =
           'resolvedUrl':
               'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
           'packageUri': 'package:flutter/rendering/object.dart',
-          'sourceLine': null,
         },
         '140357727781376-16': {
           'category': 'Dart',
@@ -572,7 +568,6 @@ final Map<String, dynamic> goldenCpuProfileStackFrames =
           'resolvedUrl':
               'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
           'packageUri': 'package:flutter/rendering/stack.dart',
-          'sourceLine': null,
         },
         '140357727781376-17': {
           'category': 'Dart',
@@ -581,7 +576,6 @@ final Map<String, dynamic> goldenCpuProfileStackFrames =
           'parent': '140357727781376-16',
           'resolvedUrl': '',
           'packageUri': '',
-          'sourceLine': null,
         }
       });
 
@@ -592,7 +586,6 @@ final subProfileStackFrames = {
     'parent': 'cpuProfileRoot',
     'resolvedUrl': '',
     'packageUri': '',
-    'sourceLine': null,
   },
   '140357727781376-2': {
     'category': 'Dart',
@@ -600,7 +593,6 @@ final subProfileStackFrames = {
     'parent': '140357727781376-1',
     'resolvedUrl': '',
     'packageUri': '',
-    'sourceLine': null,
   },
   '140357727781376-3': {
     'category': 'Dart',
@@ -609,7 +601,6 @@ final subProfileStackFrames = {
     'resolvedUrl':
         'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/compact_hash.dart',
     'packageUri': 'dart:vm/compact_hash.dart',
-    'sourceLine': null,
   },
   '140357727781376-4': {
     'category': 'Dart',
@@ -619,7 +610,6 @@ final subProfileStackFrames = {
         'file:///path/to/flutter/packages/flutter/lib/src/scheduler/binding.dart',
     'packageUri':
         'file:///path/to/flutter/packages/flutter/lib/src/scheduler/binding.dart',
-    'sourceLine': null,
   },
   '140357727781376-5': {
     'category': 'Dart',
@@ -629,7 +619,6 @@ final subProfileStackFrames = {
         'path/to/flutter/packages/flutter/lib/src/rendering/binding.dart',
     'packageUri':
         'path/to/flutter/packages/flutter/lib/src/rendering/binding.dart',
-    'sourceLine': null,
   },
   '140357727781376-6': {
     'category': 'Dart',
@@ -637,7 +626,6 @@ final subProfileStackFrames = {
     'parent': '140357727781376-3',
     'resolvedUrl': 'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/list.dart',
     'packageUri': 'dart:vm/list.dart',
-    'sourceLine': null,
   },
   '140357727781376-7': {
     'category': 'Dart',
@@ -646,7 +634,6 @@ final subProfileStackFrames = {
     'resolvedUrl':
         'path/to/flutter/packages/flutter/lib/src/painting/context.dart',
     'packageUri': 'package:flutter/painting/context.dart',
-    'sourceLine': null,
   },
   '140357727781376-8': {
     'category': 'Dart',
@@ -654,7 +641,6 @@ final subProfileStackFrames = {
     'parent': '140357727781376-7',
     'resolvedUrl': '',
     'packageUri': '',
-    'sourceLine': null,
   },
   '140357727781376-9': {
     'category': 'Dart',
@@ -662,7 +648,6 @@ final subProfileStackFrames = {
     'parent': 'cpuProfileRoot',
     'resolvedUrl': '',
     'packageUri': '',
-    'sourceLine': null,
   },
   '140357727781376-10': {
     'category': 'Dart',
@@ -672,7 +657,6 @@ final subProfileStackFrames = {
         'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
     'packageUri':
         'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
-    'sourceLine': null,
   },
   '140357727781376-11': {
     'category': 'Dart',
@@ -682,7 +666,6 @@ final subProfileStackFrames = {
         'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
     'packageUri':
         'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
-    'sourceLine': null,
   },
 };
 
@@ -693,7 +676,6 @@ final filteredStackFrames = {
     'parent': 'cpuProfileRoot',
     'resolvedUrl': '',
     'packageUri': '',
-    'sourceLine': null,
   },
   '140357727781376-2': {
     'category': 'Dart',
@@ -701,7 +683,6 @@ final filteredStackFrames = {
     'parent': '140357727781376-1',
     'resolvedUrl': '',
     'packageUri': '',
-    'sourceLine': null,
   },
   '140357727781376-4': {
     'category': 'Dart',
@@ -711,7 +692,6 @@ final filteredStackFrames = {
         'file:///path/to/flutter/packages/flutter/lib/src/scheduler/binding.dart',
     'packageUri':
         'file:///path/to/flutter/packages/flutter/lib/src/scheduler/binding.dart',
-    'sourceLine': null,
   },
   '140357727781376-5': {
     'category': 'Dart',
@@ -721,7 +701,6 @@ final filteredStackFrames = {
         'path/to/flutter/packages/flutter/lib/src/rendering/binding.dart',
     'packageUri':
         'path/to/flutter/packages/flutter/lib/src/rendering/binding.dart',
-    'sourceLine': null,
   },
   '140357727781376-7': {
     'category': 'Dart',
@@ -730,7 +709,6 @@ final filteredStackFrames = {
     'resolvedUrl':
         'path/to/flutter/packages/flutter/lib/src/painting/context.dart',
     'packageUri': 'package:flutter/painting/context.dart',
-    'sourceLine': null,
   },
   '140357727781376-8': {
     'category': 'Dart',
@@ -738,7 +716,6 @@ final filteredStackFrames = {
     'parent': '140357727781376-7',
     'resolvedUrl': '',
     'packageUri': '',
-    'sourceLine': null,
   },
   '140357727781376-9': {
     'category': 'Dart',
@@ -746,7 +723,6 @@ final filteredStackFrames = {
     'parent': 'cpuProfileRoot',
     'resolvedUrl': '',
     'packageUri': '',
-    'sourceLine': null,
   },
   '140357727781376-10': {
     'category': 'Dart',
@@ -756,7 +732,6 @@ final filteredStackFrames = {
         'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
     'packageUri':
         'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
-    'sourceLine': null,
   },
   '140357727781376-11': {
     'category': 'Dart',
@@ -766,7 +741,6 @@ final filteredStackFrames = {
         'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
     'packageUri':
         'file:///path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
-    'sourceLine': null,
   },
   '140357727781376-12': {
     'category': 'Dart',
@@ -775,7 +749,6 @@ final filteredStackFrames = {
     'resolvedUrl':
         'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart',
     'packageUri': 'package:flutter/lib/src/rendering/proxy_box.dart',
-    'sourceLine': null,
   },
   '140357727781376-13': {
     'category': 'Dart',
@@ -784,7 +757,6 @@ final filteredStackFrames = {
     'resolvedUrl':
         'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
     'packageUri': 'package:flutter/rendering/custom_layout.dart',
-    'sourceLine': null,
   },
   '140357727781376-15': {
     'category': 'Dart',
@@ -793,7 +765,6 @@ final filteredStackFrames = {
     'resolvedUrl':
         'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
     'packageUri': 'package:flutter/rendering/object.dart',
-    'sourceLine': null,
   },
   '140357727781376-16': {
     'category': 'Dart',
@@ -802,7 +773,6 @@ final filteredStackFrames = {
     'resolvedUrl':
         'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
     'packageUri': 'package:flutter/rendering/stack.dart',
-    'sourceLine': null,
   },
   '140357727781376-17': {
     'category': 'Dart',
@@ -810,7 +780,6 @@ final filteredStackFrames = {
     'parent': '140357727781376-16',
     'resolvedUrl': '',
     'packageUri': '',
-    'sourceLine': null,
   }
 };
 
