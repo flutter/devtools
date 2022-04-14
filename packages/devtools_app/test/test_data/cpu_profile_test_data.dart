@@ -632,7 +632,7 @@ final subProfileStackFrames = {
     'name': '_RenderProxyBox.paint',
     'parent': '140357727781376-3',
     'resolvedUrl': 'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/list.dart',
-    'packageUri': 'dart:vm/list.dart:123',
+    'packageUri': 'dart:vm/list.dart',
   },
   '140357727781376-7': {
     'category': 'Dart',

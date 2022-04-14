@@ -761,7 +761,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
           CpuProfileData.nameKey: verboseName,
           CpuProfileData.categoryKey: category,
           CpuProfileData.resolvedUrlKey: rawUrl,
-          CpuProfileData.resolvedPackageUriKey: packageUriWithSourceLine,
+          CpuProfileData.resolvedPackageUriKey: packageUri,
           if (parentId != null) CpuProfileData.parentIdKey: parentId,
         }
       };

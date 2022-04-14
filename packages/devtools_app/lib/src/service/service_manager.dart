@@ -183,6 +183,7 @@ class ServiceConnectionManager {
     isolateManager.vmServiceOpened(service);
     consoleService.vmServiceOpened(service);
     serviceExtensionManager.vmServiceOpened(service, connectedApp!);
+    resolvedUriManager.vmServiceOpened();
     await vmFlagManager.vmServiceOpened(service);
     await timelineStreamManager.vmServiceOpened(service, connectedApp!);
     // This needs to be called last in the above group of `vmServiceOpened`
@@ -311,8 +312,6 @@ class ServiceConnectionManager {
     }
 
     _connectionAvailableController.add(service);
-
-    resolvedUriManager.vmServiceOpened();
   }
 
   void manuallyDisconnect() {
@@ -336,6 +335,7 @@ class ServiceConnectionManager {
     vmFlagManager.vmServiceClosed();
     timelineStreamManager.vmServiceClosed();
     serviceExtensionManager.vmServiceClosed();
+    resolvedUriManager.vmServiceClosed();
 
     serviceTrafficLogger?.dispose();
 
@@ -349,8 +349,6 @@ class ServiceConnectionManager {
     _inspectorService?.onIsolateStopped();
     _inspectorService?.dispose();
     _inspectorService = null;
-
-    resolvedUriManager.vmServiceClosed();
   }
 
   /// This can throw an [RPCError].
