@@ -19,9 +19,7 @@ class ResolvedUriManager {
   }
 
   /// Cleans up the resources of the [ResolvedUriManager]
-  void vmServiceClosed() {
-    _isolateResolvedUrlMap = null;
-  }
+  void vmServiceClosed() => _isolateResolvedUrlMap = null;
 
   /// Calls out to the [VmService] to lookup unknown uri to package uri mappings.
   ///
