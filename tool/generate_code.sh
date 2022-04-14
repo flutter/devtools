@@ -14,6 +14,7 @@ echo $(pwd)
 pushd packages
 
 pushd devtools_test
+flutter pub get
 flutter pub run build_runner build
 
 echo "Adding 'ignore_for_file: require_trailing_commas' to generated mocks..."

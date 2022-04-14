@@ -88,6 +88,11 @@ if [ "$BOT" = "main" ]; then
     # Make sure the app versions are in sync.
     repo_tool repo-check
 
+    # Generate code.
+    pushd ../..
+    bash tool/generate_code.sh
+    popd
+
     # Analyze the source.
     dart analyze --fatal-infos
 
@@ -109,11 +114,6 @@ if [ "$BOT" = "main" ]; then
 elif [ "$BOT" = "test_ddc" ]; then
 
     flutter pub get
-
-    # Generate code.
-    pushd ../..
-    bash tool/generate_code.sh
-    popd
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
     flutter config --enable-web
