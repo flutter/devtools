@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../shared/globals.dart';
-import 'vm_service_wrapper.dart';
 
 /// Manager for handling package Uri lookup and caching.
 class ResolvedUriManager {
