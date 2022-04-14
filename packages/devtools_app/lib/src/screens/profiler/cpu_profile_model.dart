@@ -381,7 +381,8 @@ class CpuProfileData {
     final stackFrames = traceObject[CpuProfileData.stackFramesKey]
         .values
         .cast<Map<String, dynamic>>();
-    final stackFramesWaitingOnPackageUri = <String, Map<String, dynamic>>{};
+    final stackFramesWaitingOnPackageUri = <Map<String, dynamic>>[];
+    final urisWithoutPackageUri = <String>{};
     for (final stackFrameJson in stackFrames) {
       final resolvedUrl =
           stackFrameJson[CpuProfileData.resolvedUrlKey] as String?;
@@ -391,17 +392,18 @@ class CpuProfileData {
         if (packageUri != null) {
           stackFrameJson[CpuProfileData.resolvedPackageUriKey] = packageUri;
         } else {
-          stackFramesWaitingOnPackageUri[resolvedUrl] = stackFrameJson;
+          stackFramesWaitingOnPackageUri.add(stackFrameJson);
+          urisWithoutPackageUri.add(resolvedUrl);
         }
       }
     }
 
     await serviceManager.resolvedUriManager.fetchPackageUris(
       isolateId,
-      stackFramesWaitingOnPackageUri.keys.toList(),
+      urisWithoutPackageUri.toList(),
     );
 
-    for (var stackFrameJson in stackFramesWaitingOnPackageUri.values) {
+    for (var stackFrameJson in stackFramesWaitingOnPackageUri) {
       final resolvedUri = stackFrameJson[CpuProfileData.resolvedUrlKey];
       final packageUri =
           serviceManager.resolvedUriManager.lookupPackageUri(resolvedUri);

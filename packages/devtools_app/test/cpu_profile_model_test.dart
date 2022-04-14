@@ -127,6 +127,42 @@ void main() {
       expect(jsonPackageUri, goldenCpuProfileStackFrames[id]!['resolvedUrl']);
     });
 
+    test('generateFromCpuSamples handles duplicate resolvedUrls', () async {
+      const resolvedUrl = 'the/resolved/Url';
+      const packageUri = 'the/package/Uri';
+      setGlobal(
+        ServiceConnectionManager,
+        FakeServiceManager(
+          service: FakeServiceManager.createFakeService(
+            resolvedUriMap: {resolvedUrl: packageUri},
+          ),
+        ),
+      );
+      final cpuSamples = CpuSamples.parse(goldenCpuSamplesJson);
+      cpuSamples!.functions = cpuSamples.functions!.sublist(0, 3);
+      cpuSamples.samples = cpuSamples.samples!.sublist(0, 2);
+      cpuSamples.samples![0].stack = [0];
+      cpuSamples.samples![1].stack = [1];
+      cpuSamples.functions![0].resolvedUrl = resolvedUrl;
+      cpuSamples.functions![1].resolvedUrl = resolvedUrl;
+      cpuSamples.sampleCount = 2;
+
+      final cpuProfileData = await CpuProfileData.generateFromCpuSamples(
+        isolateId: goldenSamplesIsolate,
+        cpuSamples: cpuSamples,
+      );
+
+      expect(cpuProfileData.stackFrames.length, equals(2));
+      expect(
+        cpuProfileData.stackFrames.values.toList()[0].packageUri,
+        equals(packageUri),
+      );
+      expect(
+        cpuProfileData.stackFrames.values.toList()[1].packageUri,
+        equals(packageUri),
+      );
+    });
+
     test('stackFrameIdCompare', () {
       // iOS
       String idA = '140225212960768-2';
