@@ -586,7 +586,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       verboseName: verboseName,
       category: category,
       rawUrl: rawUrl,
-      packageUri: '$packageUri${sourceLine != null ? ':$sourceLine' : ''}',
+      packageUri: packageUri,
       sourceLine: sourceLine,
       parentId: parentId,
       profileMetaData: profileMetaData,
@@ -628,6 +628,9 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   final String rawUrl;
 
   final String packageUri;
+
+  String get packageUriWithSourceLine =>
+      '$packageUri${sourceLine != null ? ':$sourceLine' : ''}';
 
   final int? sourceLine;
 
@@ -691,7 +694,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     return [
       nameWithPrefix,
       msText(totalTime),
-      if (packageUri.isNotEmpty) packageUri,
+      if (packageUriWithSourceLine.isNotEmpty) packageUriWithSourceLine,
     ].join(' - ');
   }
 
@@ -758,7 +761,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
           CpuProfileData.nameKey: verboseName,
           CpuProfileData.categoryKey: category,
           CpuProfileData.resolvedUrlKey: rawUrl,
-          CpuProfileData.resolvedPackageUriKey: packageUri,
+          CpuProfileData.resolvedPackageUriKey: packageUriWithSourceLine,
           if (parentId != null) CpuProfileData.parentIdKey: parentId,
         }
       };
