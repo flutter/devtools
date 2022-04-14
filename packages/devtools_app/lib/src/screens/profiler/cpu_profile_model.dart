@@ -58,7 +58,7 @@ class CpuProfileData {
       final stackFrameJson = entry.value;
       final resolvedUrl = stackFrameJson[resolvedUrlKey] ?? '';
       final packageUri = stackFrameJson[resolvedPackageUriKey] ?? resolvedUrl;
-      final stackFrame = CpuStackFrame._(
+      final stackFrame = CpuStackFrame(
         id: entry.key,
         name: getSimpleStackFrameName(stackFrameJson[nameKey]),
         verboseName: stackFrameJson[nameKey],

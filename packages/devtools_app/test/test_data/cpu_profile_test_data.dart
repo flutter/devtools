@@ -276,7 +276,13 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'owner': null,
         'static': false,
         'const': false,
-        'implicit': false
+        'implicit': false,
+        'location': {
+          'type': 'SourceLocation',
+          'script': null,
+          'tokenPos': -1,
+          'line': 123
+        }
       }
     },
     {
@@ -626,7 +632,7 @@ final subProfileStackFrames = {
     'name': '_RenderProxyBox.paint',
     'parent': '140357727781376-3',
     'resolvedUrl': 'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/list.dart',
-    'packageUri': 'dart:vm/list.dart',
+    'packageUri': 'dart:vm/list.dart:123',
   },
   '140357727781376-7': {
     'category': 'Dart',
