@@ -15,7 +15,7 @@ pushd packages
 
 pushd devtools_test
 flutter pub get
-flutter pub run build_runner build
+flutter pub run build_runner build --delete-conflicting-outputs
 
 echo "Adding 'ignore_for_file: require_trailing_commas' to generated mocks..."
 TMP_FILE=/tmp/generated.mocks.dart

@@ -71,6 +71,10 @@ dart --version
 export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | awk '{print $2}')
 echo "Flutter version is '$FLUTTER_VERSION'"
 
+
+# Generate code.
+bash tool/generate_code.sh
+
 # Change the CI to the packages/devtools_app directory.
 pushd packages/devtools_app
 echo `pwd`
@@ -87,11 +91,6 @@ if [ "$BOT" = "main" ]; then
 
     # Make sure the app versions are in sync.
     repo_tool repo-check
-
-    # Generate code.
-    pushd ../..
-    bash tool/generate_code.sh
-    popd
 
     # Analyze the source.
     dart analyze --fatal-infos
