@@ -89,8 +89,9 @@ if [ "$BOT" = "main" ]; then
     repo_tool repo-check
 
     # Generate code.
-    echo `pwd`
-    sh generate_code.sh
+    pushd ../..
+    sh tool/generate_code.sh
+    popd
 
     # Analyze the source.
     dart analyze --fatal-infos
