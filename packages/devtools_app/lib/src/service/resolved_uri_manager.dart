@@ -14,9 +14,8 @@ class ResolvedUriManager {
   Map<String, Map<String, String?>>? _isolateResolvedUrlMap;
 
   /// Initializes the [ResolvedUriManager]
-  void vmServiceOpened() {
-    _isolateResolvedUrlMap = <String, Map<String, String?>>{};
-  }
+  void vmServiceOpened() =>
+      _isolateResolvedUrlMap = <String, Map<String, String?>>{};
 
   /// Cleans up the resources of the [ResolvedUriManager]
   void vmServiceClosed() => _isolateResolvedUrlMap = null;
@@ -28,10 +27,7 @@ class ResolvedUriManager {
   ///
   /// [isolateId] The id of the isolate that the [uris] were generated on.
   /// [uris] List of uris to fetch package uris for.
-  Future<void> fetchPackageUris(
-    String isolateId,
-    List<String> uris,
-  ) async {
+  Future<void> fetchPackageUris(String isolateId, List<String> uris) async {
     if (_isolateResolvedUrlMap != null) {
       final packageUris =
           (await serviceManager.service!.lookupPackageUris(isolateId, uris))
@@ -57,7 +53,6 @@ class ResolvedUriManager {
   ///
   /// [isolateId] The id of the isolate that the [uris] were generated on.
   /// [uri] Absolute path uri to look up in the package uri mapping cache.
-  String? lookupPackageUri(String isolateId, String uri) {
-    return _isolateResolvedUrlMap?[isolateId]?[uri];
-  }
+  String? lookupPackageUri(String isolateId, String uri) =>
+      _isolateResolvedUrlMap?[isolateId]?[uri];
 }
