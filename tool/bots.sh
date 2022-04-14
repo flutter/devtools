@@ -90,7 +90,7 @@ if [ "$BOT" = "main" ]; then
 
     # Generate code.
     echo `pwd`
-    generate_code
+    sh generate_code.sh
 
     # Analyze the source.
     dart analyze --fatal-infos
