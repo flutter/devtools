@@ -90,7 +90,7 @@ if [ "$BOT" = "main" ]; then
 
     # Generate code.
     pushd ../..
-    sh tool/generate_code.sh
+    bash tool/generate_code.sh
     popd
 
     # Analyze the source.
