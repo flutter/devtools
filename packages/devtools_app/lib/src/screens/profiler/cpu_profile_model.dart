@@ -13,6 +13,7 @@ import '../../primitives/trace_event.dart';
 import '../../primitives/trees.dart';
 import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
+import '../../shared/profiler_utils.dart';
 import '../../ui/search.dart';
 import 'cpu_profile_transformer.dart';
 
@@ -39,8 +40,8 @@ class CpuProfileData {
   factory CpuProfileData.parse(Map<String, dynamic> json) {
     final profileMetaData = CpuProfileMetaData(
       sampleCount: json[sampleCountKey] ?? 0,
-      samplePeriod: json[samplePeriodKey],
-      stackDepth: json[stackDepthKey],
+      samplePeriod: json[samplePeriodKey] ?? 0,
+      stackDepth: json[stackDepthKey] ?? 0,
       time: (json[timeOriginKey] != null && json[timeExtentKey] != null)
           ? (TimeRange()
             ..start = Duration(microseconds: json[timeOriginKey])
@@ -450,7 +451,10 @@ class CpuProfileData {
   List<CpuStackFrame> get bottomUpRoots {
     if (!processed) return <CpuStackFrame>[];
     return _bottomUpRoots ??=
-        BottomUpProfileTransformer.processData(_cpuProfileRoot);
+        BottomUpTransformer<CpuStackFrame>().bottomUpRootsFor(
+      topDownRoot: _cpuProfileRoot,
+      mergeSamples: mergeCpuProfileRoots,
+    );
   }
 
   List<CpuStackFrame>? _bottomUpRoots;
@@ -500,21 +504,17 @@ class CpuProfileData {
   }
 }
 
-class CpuProfileMetaData {
+class CpuProfileMetaData extends ProfileMetaData {
   CpuProfileMetaData({
-    required this.sampleCount,
+    required int sampleCount,
     required this.samplePeriod,
     required this.stackDepth,
-    required this.time,
-  });
-
-  final int sampleCount;
+    required TimeRange? time,
+  }) : super(sampleCount: sampleCount, time: time);
 
   final int samplePeriod;
 
   final int stackDepth;
-
-  final TimeRange? time;
 
   CpuProfileMetaData copyWith({
     int? sampleCount,
@@ -563,6 +563,7 @@ class CpuSample extends TraceEvent {
 
 class CpuStackFrame extends TreeNode<CpuStackFrame>
     with
+        ProfilableDataMixin<CpuStackFrame>,
         DataSearchStateMixin,
         TreeDataSearchStateMixin<CpuStackFrame>,
         FlameChartDataMixin {
@@ -599,8 +600,8 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     required this.packageUri,
     required this.sourceLine,
     required this.parentId,
-    required this.profileMetaData,
-  });
+    required CpuProfileMetaData profileMetaData,
+  }) : _profileMetaData = profileMetaData;
 
   /// Prefix for packages from the core Dart libraries.
   static const dartPackagePrefix = 'dart:';
@@ -630,7 +631,13 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
 
   final String? parentId;
 
-  final CpuProfileMetaData profileMetaData;
+  @override
+  CpuProfileMetaData get profileMetaData => _profileMetaData;
+
+  final CpuProfileMetaData _profileMetaData;
+
+  @override
+  String get displayName => name;
 
   bool get isNative => _isNative ??= id != CpuProfileData.rootId &&
       packageUri.isEmpty &&
@@ -668,43 +675,6 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     }
   }
 
-  /// How many cpu samples for which this frame is a leaf.
-  int exclusiveSampleCount = 0;
-
-  int get inclusiveSampleCount =>
-      _inclusiveSampleCount ??= _calculateInclusiveSampleCount();
-
-  /// How many cpu samples this frame is included in.
-  int? _inclusiveSampleCount;
-
-  set inclusiveSampleCount(int? count) => _inclusiveSampleCount = count;
-
-  double get totalTimeRatio => _totalTimeRatio ??=
-      safeDivide(inclusiveSampleCount, profileMetaData.sampleCount);
-
-  double? _totalTimeRatio;
-
-  Duration get totalTime => _totalTime ??= Duration(
-        microseconds:
-            (totalTimeRatio * profileMetaData.time!.duration.inMicroseconds)
-                .round(),
-      );
-
-  Duration? _totalTime;
-
-  double get selfTimeRatio => _selfTimeRatio ??=
-      safeDivide(exclusiveSampleCount, profileMetaData.sampleCount);
-
-  double? _selfTimeRatio;
-
-  Duration get selfTime => _selfTime ??= Duration(
-        microseconds:
-            (selfTimeRatio * profileMetaData.time!.duration.inMicroseconds)
-                .round(),
-      );
-
-  Duration? _selfTime;
-
   @override
   String get tooltip {
     var prefix = '';
@@ -721,18 +691,6 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       msText(totalTime),
       if (packageUri.isNotEmpty) packageUri,
     ].join(' - ');
-  }
-
-  /// Returns the number of cpu samples this stack frame is a part of.
-  ///
-  /// This will be equal to the number of leaf nodes under this stack frame.
-  int _calculateInclusiveSampleCount() {
-    int count = exclusiveSampleCount;
-    for (CpuStackFrame child in children) {
-      count += child.inclusiveSampleCount;
-    }
-    _inclusiveSampleCount = count;
-    return _inclusiveSampleCount!;
   }
 
   @override
@@ -774,6 +732,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// Returns a deep copy from this stack frame down to the leaves of the tree.
   ///
   /// The returned copy stack frame will have a null parent.
+  @override
   CpuStackFrame deepCopy() {
     final copy = shallowCopy(resetInclusiveSampleCount: false);
     for (CpuStackFrame child in children) {
@@ -792,17 +751,6 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       category == other.category &&
       sourceLine == other.sourceLine;
 
-  void _format(StringBuffer buf, String indent) {
-    buf.writeln(
-      '$indent$name - children: ${children.length} - excl: '
-              '$exclusiveSampleCount - incl: $inclusiveSampleCount'
-          .trimRight(),
-    );
-    for (CpuStackFrame child in children) {
-      child._format(buf, '  $indent');
-    }
-  }
-
   Map<String, Object> get toJson => {
         id: {
           CpuProfileData.nameKey: verboseName,
@@ -812,13 +760,6 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
           if (parentId != null) CpuProfileData.parentIdKey: parentId,
         }
       };
-
-  @visibleForTesting
-  String toStringDeep() {
-    final buf = StringBuffer();
-    _format(buf, '  ');
-    return buf.toString();
-  }
 
   @override
   String toString() {

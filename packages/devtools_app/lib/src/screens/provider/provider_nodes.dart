@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -12,13 +10,12 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/eval_on_dart_library.dart';
 import 'instance_viewer/eval.dart';
-import 'provider_debounce.dart';
 
 @immutable
 class ProviderNode {
   const ProviderNode({
-    @required this.id,
-    @required this.type,
+    required this.id,
+    required this.type,
   });
 
   final String id;
@@ -26,7 +23,7 @@ class ProviderNode {
 }
 
 final _providerListChanged = AutoDisposeStreamProvider<void>((ref) async* {
-  final service = await ref.watch(serviceProvider.last);
+  final service = await ref.watch(serviceProvider.future);
 
   yield* service.onExtensionEvent.where((event) {
     return event.extensionKind == 'provider:provider_list_changed';
@@ -51,12 +48,12 @@ final _rawProviderIdsProvider = AutoDisposeFutureProvider<List<String>>(
     );
 
     final providerIdInstances = await Future.wait([
-      for (final idRef in providerIdRefs.elements.cast<InstanceRef>())
-        eval.getInstance(idRef, isAlive)
+      for (final idRef in providerIdRefs.elements!.cast<InstanceRef>())
+        eval.safeGetInstance(idRef, isAlive)
     ]);
 
     return [
-      for (final idInstance in providerIdInstances) idInstance.valueAsString,
+      for (final idInstance in providerIdInstances) idInstance.valueAsString!,
     ];
   },
   name: '_rawProviderIdsProvider',
@@ -79,9 +76,10 @@ final _rawProviderNodeProvider =
     );
 
     Future<Instance> getFieldWithName(String name) {
-      return eval.getInstance(
-        providerNodeInstance.fields.firstWhere((e) => e.decl.name == name).value
-            as InstanceRef,
+      return eval.safeGetInstance(
+        providerNodeInstance.fields!
+            .firstWhere((e) => e.decl?.name == name)
+            .value as InstanceRef,
         isAlive,
       );
     }
@@ -90,7 +88,7 @@ final _rawProviderNodeProvider =
 
     return ProviderNode(
       id: id,
-      type: type.valueAsString,
+      type: type.valueAsString!,
     );
   },
   name: '_rawProviderNodeProvider',
@@ -98,7 +96,7 @@ final _rawProviderNodeProvider =
 
 /// Combines [providerIdsProvider] with [providerNodeProvider] to obtain all
 /// the [ProviderNode]s at once, sorted alphabetically.
-final rawSortedProviderNodesProvider =
+final sortedProviderNodesProvider =
     AutoDisposeFutureProvider<List<ProviderNode>>((ref) async {
   final ids = await ref.watch(_rawProviderIdsProvider.future);
 
@@ -108,9 +106,3 @@ final rawSortedProviderNodesProvider =
 
   return nodes.toList()..sort((a, b) => a.type.compareTo(b.type));
 });
-
-// // TODO(rrousselGit) refactor to use "debounce" when available
-final sortedProviderNodesProvider =
-    asyncDebounce<AsyncValue<List<ProviderNode>>>(
-  rawSortedProviderNodesProvider,
-);

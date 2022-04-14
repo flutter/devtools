@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider show Provider;
@@ -28,18 +27,17 @@ final _hasErrorProvider = Provider.autoDispose<bool>((ref) {
   if (selectedProviderId == null) return false;
 
   final instance = ref.watch(
-    rawInstanceProvider(InstancePath.fromProviderId(selectedProviderId)),
+    instanceProvider(InstancePath.fromProviderId(selectedProviderId)),
   );
 
   return instance is AsyncError;
 });
 
-final _selectedProviderNode = AutoDisposeProvider<ProviderNode>((ref) {
+final _selectedProviderNode = AutoDisposeProvider<ProviderNode?>((ref) {
   final selectedId = ref.watch(selectedProviderIdProvider);
 
-  return ref.watch(sortedProviderNodesProvider).data?.value?.firstWhere(
+  return ref.watch(sortedProviderNodesProvider).asData?.value.firstWhereOrNull(
         (node) => node.id == selectedId,
-        orElse: () => null,
       );
 });
 
@@ -64,7 +62,7 @@ class ProviderScreen extends Screen {
 }
 
 class ProviderScreenWrapper extends StatefulWidget {
-  const ProviderScreenWrapper({Key key}) : super(key: key);
+  const ProviderScreenWrapper({Key? key}) : super(key: key);
 
   @override
   _ProviderScreenWrapperState createState() => _ProviderScreenWrapperState();
@@ -84,69 +82,68 @@ class _ProviderScreenWrapperState extends State<ProviderScreenWrapper> {
 }
 
 class ProviderScreenBody extends ConsumerWidget {
-  const ProviderScreenBody({Key key}) : super(key: key);
+  const ProviderScreenBody({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final splitAxis = Split.axisFor(context, 0.85);
 
     // A provider will automatically be selected as soon as one is detected
-    final selectedProviderId = watch(selectedProviderIdProvider);
+    final selectedProviderId = ref.watch(selectedProviderIdProvider);
     final detailsTitleText = selectedProviderId != null
-        ? watch(_selectedProviderNode)?.type ?? ''
+        ? ref.watch(_selectedProviderNode)?.type ?? ''
         : '[No provider selected]';
-    return ProviderListener<bool>(
-      provider: _hasErrorProvider,
-      onChange: (context, hasError) {
-        if (hasError) showProviderErrorBanner(context);
-      },
-      child: Split(
-        axis: splitAxis,
-        initialFractions: const [0.33, 0.67],
-        children: [
-          OutlineDecoration(
-            child: Column(
-              children: const [
-                AreaPaneHeader(
-                  needsTopBorder: false,
-                  title: Text('Providers'),
-                ),
-                Expanded(
-                  child: ProviderList(),
-                ),
-              ],
-            ),
+
+    ref.listen<bool>(_hasErrorProvider, (_, hasError) {
+      if (hasError) showProviderErrorBanner(context);
+    });
+
+    return Split(
+      axis: splitAxis,
+      initialFractions: const [0.33, 0.67],
+      children: [
+        OutlineDecoration(
+          child: Column(
+            children: const [
+              AreaPaneHeader(
+                needsTopBorder: false,
+                title: Text('Providers'),
+              ),
+              Expanded(
+                child: ProviderList(),
+              ),
+            ],
           ),
-          OutlineDecoration(
-            child: Column(
-              children: [
-                AreaPaneHeader(
-                  needsTopBorder: false,
-                  title: Text(detailsTitleText),
-                  rightActions: [
-                    SettingsOutlinedButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) => _StateInspectorSettingsDialog(),
-                        );
-                      },
-                      label: _StateInspectorSettingsDialog.title,
-                    ),
-                  ],
-                ),
-                if (selectedProviderId != null)
-                  Expanded(
-                    child: InstanceViewer(
-                      rootPath: InstancePath.fromProviderId(selectedProviderId),
-                      showInternalProperties: watch(_showInternals).state,
-                    ),
-                  )
-              ],
-            ),
-          )
-        ],
-      ),
+        ),
+        OutlineDecoration(
+          child: Column(
+            children: [
+              AreaPaneHeader(
+                needsTopBorder: false,
+                title: Text(detailsTitleText),
+                rightActions: [
+                  SettingsOutlinedButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => _StateInspectorSettingsDialog(),
+                      );
+                    },
+                    label: _StateInspectorSettingsDialog.title,
+                  ),
+                ],
+              ),
+              if (selectedProviderId != null)
+                Expanded(
+                  child: InstanceViewer(
+                    rootPath: InstancePath.fromProviderId(selectedProviderId),
+                    showInternalProperties: ref.watch(_showInternals),
+                  ),
+                )
+            ],
+          ),
+        )
+      ],
     );
   }
 }
@@ -165,7 +162,7 @@ class _StateInspectorSettingsDialog extends ConsumerWidget {
   static const title = 'State inspector configurations';
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     return DevToolsDialog(
@@ -175,12 +172,15 @@ class _StateInspectorSettingsDialog extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InkWell(
-            onTap: () => _toggleShowInternals(context),
+            onTap: () =>
+                ref.read(_showInternals.notifier).update((state) => !state),
             child: Row(
               children: [
                 Checkbox(
-                  value: watch(_showInternals).state,
-                  onChanged: (_) => _toggleShowInternals(context),
+                  value: ref.watch(_showInternals),
+                  onChanged: (_) => ref
+                      .read(_showInternals.notifier)
+                      .update((state) => !state),
                 ),
                 const Text(
                   'Show private properties inherited from SDKs/packages',
@@ -194,10 +194,5 @@ class _StateInspectorSettingsDialog extends ConsumerWidget {
         DialogCloseButton(),
       ],
     );
-  }
-
-  void _toggleShowInternals(BuildContext context) {
-    final showInternals = context.read(_showInternals);
-    showInternals.state = !showInternals.state;
   }
 }

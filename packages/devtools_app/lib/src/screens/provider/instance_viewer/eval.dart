@@ -4,8 +4,6 @@
 
 /// A few utilities related to evaluating dart code
 
-// @dart=2.9
-
 library eval;
 
 import 'package:flutter/foundation.dart';
@@ -21,7 +19,7 @@ import '../../../shared/globals.dart';
 /// this ensures that providers reload properly when the devtool is connected
 /// to a different application.
 final serviceProvider = StreamProvider<VmServiceWrapper>((ref) async* {
-  yield serviceManager.service;
+  yield serviceManager.service!;
   yield* serviceManager.onConnectionAvailable;
 });
 
@@ -38,7 +36,7 @@ final providerEvalProvider =
 /// An [EvalOnDartLibrary] for custom objects.
 final libraryEvalProvider =
     FutureProviderFamily<EvalOnDartLibrary, String>((ref, libraryPath) async {
-  final service = await ref.watch(serviceProvider.last);
+  final service = await ref.watch(serviceProvider.future);
 
   final eval = EvalOnDartLibrary(libraryPath, service);
   ref.onDispose(eval.dispose);
@@ -46,6 +44,18 @@ final libraryEvalProvider =
 });
 
 final hotRestartEventProvider =
-    ChangeNotifierProvider<ValueNotifier<IsolateRef>>((ref) {
-  return serviceManager.isolateManager.selectedIsolate;
+    ChangeNotifierProvider<ValueNotifier<void>>((ref) {
+  final selectedIsolateListenable =
+      serviceManager.isolateManager.selectedIsolate;
+
+  // Since ChangeNotifierProvider calls `dispose` on the returned ChangeNotifier
+  // when the provider is destroyed, we can't simply return `selectedIsolateListenable`.
+  // So we're making a copy of it instead.
+  final notifier = ValueNotifier<IsolateRef?>(selectedIsolateListenable.value);
+
+  void listener() => notifier.value = selectedIsolateListenable.value;
+  selectedIsolateListenable.addListener(listener);
+  ref.onDispose(() => selectedIsolateListenable.removeListener(listener));
+
+  return notifier;
 });

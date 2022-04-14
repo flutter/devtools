@@ -34,7 +34,8 @@ function initializeGA() {
       'metric3': 'shader_compilation_duration_micros',
       'metric4': 'cpu_sample_count',
       'metric5': 'cpu_stack_depth',
-    }
+    },
+    cookie_flags: 'SameSite=None;Secure',
   });
 }
 
