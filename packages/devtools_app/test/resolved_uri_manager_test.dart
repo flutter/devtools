@@ -60,6 +60,7 @@ void main() async {
         await resolvedUriManager!.fetchPackageUris(isolateId, [uri1]);
 
         expect(resolvedUriManager!.lookupPackageUri(uri1), isNull);
+        verifyNever(service.lookupPackageUris(any, any));
       });
     });
 
