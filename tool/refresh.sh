@@ -12,4 +12,8 @@ echo "Refreshing local clone..."
 git pull upstream master
 bash tool/generate_code.sh
 
+pushd packages/devtools_app
+flutter pub upgrade
+popd
+
 echo "Refreshed local clone."
