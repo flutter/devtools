@@ -47,9 +47,9 @@ const sinceArg = 'since-tag';
 /// version number will be used for the CHANGELOG entry.
 ///
 /// If `--since-tag` is specified from the command
-/// (e.g. dart tool/bin/repo_tool.dart generate-changelog --version=2.5.2), this
-/// tag version will be used as the lower bound for commit history instead of
-/// using the most recent tagged version as the lower bound.
+/// (e.g. dart tool/bin/repo_tool.dart generate-changelog --since-tag=v2.5.2),
+/// this tag version will be used as the lower bound for commit history instead
+/// of using the most recent tagged version as the lower bound.
 class GenerateChangelogCommand extends Command {
   GenerateChangelogCommand() {
     argParser
