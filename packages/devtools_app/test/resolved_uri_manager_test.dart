@@ -1,3 +1,7 @@
+// Copyright 2022 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'package:devtools_app/src/service/resolved_uri_manager.dart';
@@ -49,7 +53,7 @@ void main() async {
       test('does nothing before vmServiceOpened', () async {
         await resolvedUriManager!.fetchPackageUris(isolateId, [uri1]);
 
-        expect(resolvedUriManager!.lookupPackageUri(uri1), isNull);
+        expect(resolvedUriManager!.lookupPackageUri(isolateId, uri1), isNull);
         verifyNever(service.lookupPackageUris(any, any));
       });
 
@@ -59,7 +63,7 @@ void main() async {
 
         await resolvedUriManager!.fetchPackageUris(isolateId, [uri1]);
 
-        expect(resolvedUriManager!.lookupPackageUri(uri1), isNull);
+        expect(resolvedUriManager!.lookupPackageUri(isolateId, uri1), isNull);
         verifyNever(service.lookupPackageUris(any, any));
       });
     });
@@ -70,7 +74,7 @@ void main() async {
       });
       test('lookupPackageUri when uri is unknown', () {
         final packageUriResult =
-            resolvedUriManager!.lookupPackageUri('some/uri');
+            resolvedUriManager!.lookupPackageUri(isolateId, 'some/uri');
         expect(packageUriResult, isNull);
       });
 
@@ -83,8 +87,14 @@ void main() async {
 
         await resolvedUriManager!.fetchPackageUris(isolateId, [uri1, uri2]);
 
-        expect(resolvedUriManager!.lookupPackageUri(uri1), equals(packageUri1));
-        expect(resolvedUriManager!.lookupPackageUri(uri2), equals(packageUri2));
+        expect(
+          resolvedUriManager!.lookupPackageUri(isolateId, uri1),
+          equals(packageUri1),
+        );
+        expect(
+          resolvedUriManager!.lookupPackageUri(isolateId, uri2),
+          equals(packageUri2),
+        );
       });
 
       test('remembers already fetched uris', () async {
@@ -98,11 +108,47 @@ void main() async {
         );
 
         await resolvedUriManager!.fetchPackageUris(isolateId, [uri1]);
-        expect(resolvedUriManager!.lookupPackageUri(uri1), equals(packageUri1));
+        expect(
+          resolvedUriManager!.lookupPackageUri(isolateId, uri1),
+          equals(packageUri1),
+        );
 
         await resolvedUriManager!.fetchPackageUris(isolateId, [uri2]);
-        expect(resolvedUriManager!.lookupPackageUri(uri1), equals(packageUri1));
-        expect(resolvedUriManager!.lookupPackageUri(uri2), equals(packageUri2));
+        expect(
+          resolvedUriManager!.lookupPackageUri(isolateId, uri1),
+          equals(packageUri1),
+        );
+        expect(
+          resolvedUriManager!.lookupPackageUri(isolateId, uri2),
+          equals(packageUri2),
+        );
+      });
+
+      test('caches different mappings between different isolates', () async {
+        const String isolateId2 = 'anIsolateId2';
+        const String packageUriFromDifferentIsolate =
+            'this/is/a/third/packageUri3';
+        when(serviceManager.service!.lookupPackageUris(isolateId, [uri1]))
+            .thenAnswer(
+          (realInvocation) => Future.value(UriList(uris: [packageUri1])),
+        );
+        when(serviceManager.service!.lookupPackageUris(isolateId2, [uri1]))
+            .thenAnswer(
+          (realInvocation) =>
+              Future.value(UriList(uris: [packageUriFromDifferentIsolate])),
+        );
+
+        await resolvedUriManager!.fetchPackageUris(isolateId, [uri1]);
+        await resolvedUriManager!.fetchPackageUris(isolateId2, [uri1]);
+
+        expect(
+          resolvedUriManager!.lookupPackageUri(isolateId, uri1),
+          equals(packageUri1),
+        );
+        expect(
+          resolvedUriManager!.lookupPackageUri(isolateId2, uri1),
+          equals(packageUriFromDifferentIsolate),
+        );
       });
     });
   });
