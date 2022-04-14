@@ -45,8 +45,6 @@ class ServiceConnectionManager {
     _serviceExtensionManager = ServiceExtensionManager(isolateManager);
   }
 
-  final ResolvedUriManager resolvedUriManager = ResolvedUriManager();
-
   final StreamController<VmServiceWrapper> _connectionAvailableController =
       StreamController<VmServiceWrapper>.broadcast();
 
@@ -81,6 +79,8 @@ class ServiceConnectionManager {
   final isolateManager = IsolateManager();
 
   final consoleService = ConsoleService();
+
+  final resolvedUriManager = ResolvedUriManager();
 
   InspectorServiceBase? get inspectorService => _inspectorService;
   InspectorServiceBase? _inspectorService;

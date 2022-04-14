@@ -583,7 +583,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       verboseName: verboseName,
       category: category,
       rawUrl: rawUrl,
-      packageUri: packageUri,
+      packageUri: '$packageUri${sourceLine != null ? ':$sourceLine' : ''}',
       sourceLine: sourceLine,
       parentId: parentId,
       profileMetaData: profileMetaData,
