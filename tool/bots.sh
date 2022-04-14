@@ -89,7 +89,7 @@ if [ "$BOT" = "main" ]; then
     repo_tool repo-check
 
     # Generate code.
-    generate_code
+    sh generate_code.sh
 
     # Analyze the source.
     dart analyze --fatal-infos
