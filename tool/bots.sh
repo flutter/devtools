@@ -89,6 +89,7 @@ if [ "$BOT" = "main" ]; then
     repo_tool repo-check
 
     # Generate code.
+    echo pwd
     sh generate_code.sh
 
     # Analyze the source.
