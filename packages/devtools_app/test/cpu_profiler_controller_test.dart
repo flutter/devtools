@@ -246,7 +246,7 @@ void main() {
         equals(250),
       );
       expect(
-        dataNotifierValue.cpuProfileRoot.toStringDeep(),
+        dataNotifierValue.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 5
@@ -262,7 +262,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagA');
       expect(
-        controller.dataNotifier.value!.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 2
@@ -276,7 +276,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagB');
       expect(
-        controller.dataNotifier.value!.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 1
@@ -289,7 +289,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagC');
       expect(
-        controller.dataNotifier.value!.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 2
@@ -320,7 +320,7 @@ void main() {
         equals(250),
       );
       expect(
-        cpuProfileRoot.toStringDeep(),
+        cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 5
@@ -336,7 +336,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagA');
       expect(
-        controller.dataNotifier.value!.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 2 - excl: 0 - incl: 2
@@ -348,7 +348,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagB');
       expect(
-        controller.dataNotifier.value!.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 1
@@ -359,7 +359,7 @@ void main() {
 
       await controller.loadDataWithTag('userTagC');
       expect(
-        controller.dataNotifier.value!.cpuProfileRoot.toStringDeep(),
+        controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
         equals(
           '''
   all - children: 1 - excl: 0 - incl: 2

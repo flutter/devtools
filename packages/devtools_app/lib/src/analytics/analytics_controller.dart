@@ -46,8 +46,8 @@ class AnalyticsController {
 
   final VoidCallback? onSetupAnalytics;
 
-  Future<void> toggleAnalyticsEnabled(bool enable) async {
-    if (enable) {
+  Future<void> toggleAnalyticsEnabled(bool? enable) async {
+    if (enable == true) {
       _analyticsEnabled.value = true;
       if (!_analyticsInitialized) {
         setUpAnalytics();

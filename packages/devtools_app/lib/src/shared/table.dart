@@ -1126,7 +1126,7 @@ class TableRow<T> extends StatefulWidget {
   _TableRowState<T> createState() => _TableRowState<T>();
 }
 
-class _TableRowState<T> extends State<TableRow<T?>>
+class _TableRowState<T> extends State<TableRow<T>>
     with
         TickerProviderStateMixin,
         CollapsibleAnimationMixin,
@@ -1180,22 +1180,28 @@ class _TableRowState<T> extends State<TableRow<T?>>
 
   @override
   Widget build(BuildContext context) {
+    final node = widget.node;
+    final widgetOnPressed = widget.onPressed;
+
+    Function()? onPressed;
+    if (node != null && widgetOnPressed != null) {
+      onPressed = () => widgetOnPressed(node);
+    }
+
     final row = tableRowFor(
       context,
-      onPressed: widget.onPressed != null
-          ? () => widget.onPressed!(widget.node)
-          : null,
+      onPressed: onPressed,
     );
 
     final box = SizedBox(
-      height: widget.node == null ? areaPaneHeaderHeight : defaultRowHeight,
+      height: node == null ? areaPaneHeaderHeight : defaultRowHeight,
       child: Material(
         color: _searchAwareBackgroundColor(),
-        child: widget.onPressed != null
+        child: onPressed != null
             ? InkWell(
                 canRequestFocus: false,
                 key: contentKey,
-                onTap: () => widget.onPressed!(widget.node),
+                onTap: onPressed,
                 child: row,
               )
             : row,
@@ -1426,7 +1432,7 @@ class _TableRowState<T> extends State<TableRow<T?>>
             return const SizedBox(width: defaultSpacing);
           }
           return columnFor(
-            widget.columns[i ~/ 2] as ColumnData<T>,
+            widget.columns[i ~/ 2],
             widget.columnWidths[i ~/ 2],
           );
         },
