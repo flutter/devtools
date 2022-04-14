@@ -88,6 +88,9 @@ if [ "$BOT" = "main" ]; then
     # Make sure the app versions are in sync.
     repo_tool repo-check
 
+    # Generate code.
+    generate_code
+
     # Analyze the source.
     dart analyze --fatal-infos
 
