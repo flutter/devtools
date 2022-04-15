@@ -7,12 +7,5 @@
 # Fast fail the script on failures.
 set -ex
 
-echo "Refreshing local clone..."
-
-bash tool/generate_code.sh
-
-pushd packages/devtools_app
-flutter pub upgrade
-popd
-
-echo "Refreshed local clone."
+git pull upstream master
+bash tool/refresh.sh
