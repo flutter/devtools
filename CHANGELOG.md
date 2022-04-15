@@ -21,16 +21,6 @@
 * Migrate inspector to null safety [#3928](https://github.com/flutter/devtools/pull/3928)
 * Fix null safety errors and prep for 2.12.1 release [#3939](https://github.com/flutter/devtools/pull/3939)
 
-## 2.12.3-dev.1
-* Move shared profiler code to profiler_utils.dart [#3977](https://github.com/flutter/devtools/pull/3977)
-* Set same-site cookie for Google Analytics [#3975](https://github.com/flutter/devtools/pull/3975)
-* Create ProfilableDataMixin and generalize bottom up transformer code [#3976](https://github.com/flutter/devtools/pull/3976)
-* Migrate remaining in dev_tools lib to null safety [#3971](https://github.com/flutter/devtools/pull/3971)
-* Migrate provider screen to null-safety [#3915](https://github.com/flutter/devtools/pull/3915)
-* Move getCpuProfileTimeline from VmServiceWrapper to CpuProfileModel [#3946](https://github.com/flutter/devtools/pull/3946)
-* Migrate the debugger panel to null-safety [#3927](https://github.com/flutter/devtools/pull/3927)
-* Move dwds pageReady event in the inspector [#3963](https://github.com/flutter/devtools/pull/3963)
-
 ## 2.12.2
 * Prep for 2.12.2 cherrypick release [#3961](https://github.com/flutter/devtools/pull/3961)
 * Recover from missing trace events [#3960](https://github.com/flutter/devtools/pull/3960)
