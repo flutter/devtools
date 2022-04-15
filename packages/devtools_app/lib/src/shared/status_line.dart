@@ -220,7 +220,6 @@ class IsolateSelector extends StatelessWidget {
             },
           ).toList(),
         );
-        // );
       },
     );
   }
