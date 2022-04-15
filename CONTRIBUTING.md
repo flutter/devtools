@@ -142,7 +142,7 @@ this flag.  For example, it is OK to do the following:
 flutter test test/ui/ --no-sound-null-safety
 ```
 
-If you run the tests on other that linux environment, first time add the flag `--update-goldens`, 
+If you run the tests on other than Linux environment, first time add the flag `--update-goldens`, 
 because goldens on your machine will be little different.
 
 ### Updating golden files
