@@ -84,8 +84,7 @@ class CpuProfilerController
   final _userTagFilter = ValueNotifier<String>(userTagNone);
 
   Iterable<String> get userTags =>
-      cpuProfileStore.lookupProfile(label: userTagNone)?.userTags
-          as Iterable<String>? ??
+      cpuProfileStore.lookupProfile(label: userTagNone)?.userTags ??
       const <String>[];
 
   bool get isToggleFilterActive =>

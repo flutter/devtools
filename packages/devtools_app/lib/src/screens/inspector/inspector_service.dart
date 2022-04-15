@@ -822,7 +822,7 @@ abstract class ObjectGroupBase implements Disposable {
     FutureOr<InstanceRef?> instanceRefFuture,
   ) async {
     return parseDiagnosticsNodeHelper(
-      await instanceRefToJson(await instanceRefFuture) as Map<String, Object>?,
+      await instanceRefToJson(await instanceRefFuture) as Map<String, Object?>?,
     );
   }
 
@@ -850,13 +850,13 @@ abstract class ObjectGroupBase implements Disposable {
   }
 
   List<RemoteDiagnosticsNode> parseDiagnosticsNodesHelper(
-    List<Object>? jsonObject,
+    List<Object?>? jsonObject,
     RemoteDiagnosticsNode? parent,
     bool isProperty,
   ) {
     if (disposed || jsonObject == null) return const [];
     final nodes = <RemoteDiagnosticsNode>[];
-    for (var element in jsonObject.cast<Map<String, Object>>()) {
+    for (var element in jsonObject.cast<Map<String, Object?>>()) {
       nodes.add(RemoteDiagnosticsNode(element, this, isProperty, parent));
     }
     return nodes;
@@ -870,7 +870,7 @@ abstract class ObjectGroupBase implements Disposable {
     if (disposed || jsonFuture == null) return const [];
 
     return parseDiagnosticsNodesHelper(
-      await jsonFuture as List<Object>?,
+      await jsonFuture as List<Object?>?,
       parent,
       isProperty,
     );
@@ -1355,7 +1355,7 @@ class ObjectGroup extends ObjectGroupBase {
       'getDetailsSubtree',
       args,
     );
-    return parseDiagnosticsNodeHelper(json as Map<String, Object>?);
+    return parseDiagnosticsNodeHelper(json as Map<String, Object?>?);
   }
 
   Future<void> invokeSetFlexProperties(

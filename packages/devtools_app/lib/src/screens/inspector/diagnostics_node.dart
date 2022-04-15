@@ -51,7 +51,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   static final CustomIconMaker iconMaker = CustomIconMaker();
 
-  static BoxConstraints deserializeConstraints(Map<String, Object> json) {
+  static BoxConstraints deserializeConstraints(Map<String, Object?> json) {
     return BoxConstraints(
       minWidth: double.parse(json['minWidth'] as String? ?? '0.0'),
       maxWidth: double.parse(json['maxWidth'] as String? ?? 'Infinity'),
@@ -60,7 +60,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     );
   }
 
-  static BoxParentData deserializeParentData(Map<String, Object> json) {
+  static BoxParentData deserializeParentData(Map<String, Object?> json) {
     return BoxParentData()
       ..offset = Offset(
         double.parse(json['offsetX'] as String? ?? '0.0'),
@@ -137,12 +137,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   RemoteDiagnosticsNode? _parentRenderElement;
 
   BoxConstraints get constraints =>
-      deserializeConstraints(json['constraints'] as Map<String, Object>? ?? {});
+      deserializeConstraints(json['constraints'] as Map<String, Object?>? ?? {});
 
   BoxParentData get parentData =>
-      deserializeParentData(json['parentData'] as Map<String, Object>? ?? {});
+      deserializeParentData(json['parentData'] as Map<String, Object?>? ?? {});
 
-  Size get size => deserializeSize(json['size'] as Map<String, Object>? ?? {});
+  Size get size => deserializeSize((json['size'] as Map?)?.cast<String, Object>() ?? {});
 
   bool get isLocalClass {
     final objectGroup = inspectorService;
@@ -375,7 +375,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       return null;
     }
     _creationLocation = InspectorSourceLocation(
-      json['creationLocation'] as Map<String, Object>? ?? {},
+      json['creationLocation'] as Map<String, Object?>? ?? {},
       null,
     );
     return _creationLocation;
@@ -498,8 +498,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return _valueProperties;
   }
 
-  Map<String, Object>? get valuePropertiesJson =>
-      json['valueProperties'] as Map<String, Object>?;
+  Map<String, Object?>? get valuePropertiesJson =>
+      json['valueProperties'] as Map<String, Object?>?;
 
   bool get hasChildren {
     // In the summary tree, json['hasChildren']==true when the node has details
@@ -601,8 +601,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (cachedProperties == null) {
       cachedProperties = [];
       if (json.containsKey('properties')) {
-        final List<Object> jsonArray = json['properties'] as List<Object>;
-        for (var element in jsonArray.cast<Map<String, Object>>()) {
+        final jsonArray = json['properties'] as List<Object?>;
+        for (var element in jsonArray.cast<Map<String, Object?>>()) {
           cachedProperties!.add(
             RemoteDiagnosticsNode(element, inspectorService, true, parent),
           );
@@ -695,7 +695,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 class InspectorSourceLocation {
   InspectorSourceLocation(this.json, this.parent);
 
-  final Map<String, Object> json;
+  final Map<String, Object?> json;
   final InspectorSourceLocation? parent;
 
   String? get path => JsonUtils.getStringMember(json, 'file');

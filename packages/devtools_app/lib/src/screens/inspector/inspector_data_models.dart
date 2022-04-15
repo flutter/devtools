@@ -392,22 +392,22 @@ class FlexLayoutProperties extends LayoutProperties {
     );
     return FlexLayoutProperties._fromNode(
       node,
-      direction: _directionUtils.enumEntry(data['direction'] as String) ??
+      direction: _directionUtils.enumEntry(data['direction'] as String?) ??
           Axis.vertical,
       mainAxisAlignment: _mainAxisAlignmentUtils
-          .enumEntry(data['mainAxisAlignment'] as String),
+          .enumEntry(data['mainAxisAlignment'] as String?),
       mainAxisSize:
-          _mainAxisSizeUtils.enumEntry(data['mainAxisSize'] as String),
+          _mainAxisSizeUtils.enumEntry(data['mainAxisSize'] as String?),
       crossAxisAlignment: _crossAxisAlignmentUtils
-          .enumEntry(data['crossAxisAlignment'] as String),
+          .enumEntry(data['crossAxisAlignment'] as String?),
       textDirection:
-          _textDirectionUtils.enumEntry(data['textDirection'] as String) ??
+          _textDirectionUtils.enumEntry(data['textDirection'] as String?) ??
               TextDirection.ltr,
       verticalDirection: _verticalDirectionUtils
-              .enumEntry(data['verticalDirection'] as String) ??
+              .enumEntry(data['verticalDirection'] as String?) ??
           VerticalDirection.down,
       textBaseline:
-          _textBaselineUtils.enumEntry(data['textBaseline'] as String),
+          _textBaselineUtils.enumEntry(data['textBaseline'] as String?),
     );
   }
 
