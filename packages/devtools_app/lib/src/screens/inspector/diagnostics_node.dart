@@ -136,13 +136,14 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   RemoteDiagnosticsNode? _parentRenderElement;
 
-  BoxConstraints get constraints =>
-      deserializeConstraints(json['constraints'] as Map<String, Object?>? ?? {});
+  BoxConstraints get constraints => deserializeConstraints(
+      json['constraints'] as Map<String, Object?>? ?? {});
 
   BoxParentData get parentData =>
       deserializeParentData(json['parentData'] as Map<String, Object?>? ?? {});
 
-  Size get size => deserializeSize((json['size'] as Map?)?.cast<String, Object>() ?? {});
+  Size get size =>
+      deserializeSize((json['size'] as Map?)?.cast<String, Object>() ?? {});
 
   bool get isLocalClass {
     final objectGroup = inspectorService;
