@@ -137,13 +137,18 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   RemoteDiagnosticsNode? _parentRenderElement;
 
   BoxConstraints get constraints => deserializeConstraints(
-      json['constraints'] as Map<String, Object?>? ?? {});
+        json['constraints'] as Map<String, Object?>? ?? {},
+      );
 
   BoxParentData get parentData =>
       deserializeParentData(json['parentData'] as Map<String, Object?>? ?? {});
 
-  Size get size =>
-      deserializeSize((json['size'] as Map?)?.cast<String, Object>() ?? {});
+  // [deserializeSize] expects a parameter of type Map<String, Object> (note the
+  // non-nullable Object), so we need to first type check as a Map and then we
+  // can cast to the expected type.
+  Size get size => deserializeSize(
+        (json['size'] as Map?)?.cast<String, Object>() ?? <String, Object>{},
+      );
 
   bool get isLocalClass {
     final objectGroup = inspectorService;
