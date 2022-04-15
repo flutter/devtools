@@ -326,7 +326,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Future<Success> clearHttpProfile(String isolateId) {
-    _httpProfile?.requests?.clear();
+    _httpProfile?.requests.clear();
     return Future.value(Success());
   }
 
