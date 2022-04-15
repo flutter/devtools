@@ -6,7 +6,8 @@
 
 import 'package:devtools_app/src/service/vm_service_wrapper.dart';
 import 'package:mockito/annotations.dart';
+import 'package:vm_service/vm_service.dart';
 
 // See https://github.com/dart-lang/mockito/blob/master/NULL_SAFETY_README.md
-@GenerateMocks([VmServiceWrapper])
+@GenerateMocks([VmServiceWrapper, HeapSnapshotGraph])
 void main() {}
