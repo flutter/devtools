@@ -71,7 +71,6 @@ dart --version
 export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | awk '{print $2}')
 echo "Flutter version is '$FLUTTER_VERSION'"
 
-
 # Generate code.
 bash tool/generate_code.sh
 
