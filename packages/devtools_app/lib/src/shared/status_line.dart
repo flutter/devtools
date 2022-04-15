@@ -35,78 +35,44 @@ class StatusLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    return ValueListenableBuilder<bool>(
+      valueListenable: currentScreen.showIsolateSelector,
+      builder: (context, showIsolateSelector, _) {
+        final textTheme = Theme.of(context).textTheme;
 
-    final List<Widget> children = [];
+        final children = <Widget>[];
 
-    // Have an area for page specific help (always docked to the left).
-    children.add(
-      Expanded(
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: buildHelpUrlStatus(context, currentScreen, textTheme),
-        ),
-      ),
-    );
-
-    children.add(const BulletSpacer());
-
+        // Have an area for page specific help (always docked to the left).
+        children.addAll([
+          buildHelpUrlStatus(context, currentScreen, textTheme),
+          const BulletSpacer()
+        ]);
     // Display an isolate selector.
-    children.add(
-      ValueListenableBuilder<bool>(
-        valueListenable: currentScreen.showIsolateSelector,
-        builder: (context, showIsolateSelector, _) {
-          return showIsolateSelector
-              ? Flexible(
-                  child: Row(
-                    children: const [
-                      Expanded(
-                        child: Center(
-                          child: IsolateSelector(),
-                        ),
-                      ),
-                      BulletSpacer(),
-                    ],
-                  ),
-                )
-              : Container();
-        },
-      ),
-    );
+        if (showIsolateSelector) {
+          children.addAll([const IsolateSelector(), const BulletSpacer()]);
+        }
 
-    // Display page specific status.
-    final Widget? pageStatus =
-        buildPageStatus(context, currentScreen, textTheme);
+        // Display page specific status.
+        final Widget? pageStatus =
+            buildPageStatus(context, currentScreen, textTheme);
+        if (pageStatus != null) {
+          children.addAll([pageStatus, const BulletSpacer()]);
+        }
 
-    if (pageStatus != null) {
-      children.add(
-        Expanded(
-          child: Align(
-            child: buildPageStatus(context, currentScreen, textTheme),
+        // Always display connection status (docked to the right).
+        children.add(
+          buildConnectionStatus(textTheme),
+        );
+
+        return Container(
+          height: statusLineHeight,
+          alignment: Alignment.centerLeft,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: children,
           ),
-        ),
-      );
-
-      children.add(const BulletSpacer());
-    }
-
-    // Always display connection status (docked to the right).
-    children.add(
-      Expanded(
-        child: Align(
-          alignment: Alignment.centerRight,
-          child: buildConnectionStatus(textTheme),
-        ),
-      ),
-    );
-
-    return Container(
-      height: statusLineHeight,
-      alignment: Alignment.centerLeft,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: children,
-      ),
+        );
+      },
     );
   }
 
@@ -234,42 +200,53 @@ class IsolateSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     final IsolateManager isolateManager = serviceManager.isolateManager;
     return DualValueListenableBuilder<List<IsolateRef?>, IsolateRef?>(
       firstListenable: isolateManager.isolates,
       secondListenable: isolateManager.selectedIsolate,
       builder: (context, isolates, selectedIsolateRef, _) {
-        return DevToolsTooltip(
-          message: 'Selected Isolate',
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<IsolateRef?>(
-              value: selectedIsolateRef,
-              onChanged: isolateManager.selectIsolate,
-              isDense: true,
-              items: isolates.where((ref) => ref != null).map(
-                (ref) {
-                  return DropdownMenuItem<IsolateRef>(
-                    value: ref,
-                    child: Row(
-                      children: [
-                        ref!.isSystemIsolate ?? false
-                            ? const Icon(Icons.settings_applications)
-                            : const Icon(Icons.call_split),
-                        const SizedBox(width: denseSpacing),
-                        Text(
-                          _isolateName(ref),
-                          style: textTheme.bodyText2,
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ).toList(),
-            ),
-          ),
+        return PopupMenuButton<IsolateRef?>(
+          child: IsolateOption(isolateManager.selectedIsolate.value),
+          tooltip: 'Selected Isolate',
+          initialValue: selectedIsolateRef,
+          onSelected: isolateManager.selectIsolate,
+          itemBuilder: (BuildContext context) =>
+              isolates.where((ref) => ref != null).map(
+            (ref) {
+              return PopupMenuItem<IsolateRef>(
+                value: ref,
+                child: IsolateOption(ref!),
+              );
+            },
+          ).toList(),
         );
+        // );
       },
+    );
+  }
+}
+
+class IsolateOption extends StatelessWidget {
+  const IsolateOption(
+    this.ref,
+  );
+
+  final IsolateRef? ref;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Row(
+      children: [
+        ref?.isSystemIsolate ?? false
+            ? const Icon(Icons.settings_applications)
+            : const Icon(Icons.call_split),
+        const SizedBox(width: denseSpacing),
+        Text(
+          ref == null ? 'isolate' : _isolateName(ref!),
+          style: textTheme.bodyText2,
+        ),
+      ],
     );
   }
 
