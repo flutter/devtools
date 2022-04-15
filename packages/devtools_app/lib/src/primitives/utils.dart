@@ -211,7 +211,6 @@ Future<T?> timeout<T>(Future<T> operation, int timeoutMillis) => Future.any<T>([
       operation,
       Future<T>.delayed(
         Duration(milliseconds: timeoutMillis),
-        // ignore: unnecessary_parenthesis
         () => Future.value(),
       )
     ]);
