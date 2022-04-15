@@ -43,11 +43,11 @@ From a separate terminal, start running a flutter app to connect to DevTools:
 
 To pull fresh version, regenerate code and upgrade dependencies:
 
-- sh tool/pull_and_refresh.sh
+- `sh tool/pull_and_refresh.sh`
 
 To regenerate mocks and upgrade dependencies (after switching branches, for example):
 
-- sh tool/refresh.sh
+- `sh tool/refresh.sh`
 
 To run DevTools as a Flutter web app, from the packages/devtools_app directory:
 
