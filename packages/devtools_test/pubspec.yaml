@@ -6,7 +6,7 @@ description: A package containing shared test helpers for Dart DevTools tests.
 # When publishing new versions of this package be sure to publish a new version
 # of package:devtools as well. package:devtools contains a compiled snapshot of
 # this package.
-version: 2.12.2
+version: 2.13.0-dev.1
 
 homepage: https://github.com/flutter/devtools
 
@@ -20,8 +20,8 @@ environment:
 dependencies:
   async: ^2.0.0
   collection: ^1.15.0
-  devtools_shared: 2.12.2
-  devtools_app: 2.12.2
+  devtools_shared: 2.13.0-dev.1
+  devtools_app: 2.13.0-dev.1
   flutter:
     sdk: flutter
   flutter_test:
