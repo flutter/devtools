@@ -47,7 +47,7 @@ class StatusLine extends StatelessWidget {
           buildHelpUrlStatus(context, currentScreen, textTheme),
           const BulletSpacer()
         ]);
-    // Display an isolate selector.
+        // Display an isolate selector.
         if (showIsolateSelector) {
           children.addAll([const IsolateSelector(), const BulletSpacer()]);
         }
