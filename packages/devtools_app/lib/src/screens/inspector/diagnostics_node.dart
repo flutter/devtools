@@ -575,10 +575,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       return;
     }
 
-    final jsonArray = json['children'] as List<Object>?;
+    final jsonArray = json['children'] as List<Object?>?;
     if (jsonArray?.isNotEmpty == true) {
       final nodes = <RemoteDiagnosticsNode>[];
-      for (var element in jsonArray!.cast<Map<String, Object>>()) {
+      for (var element in jsonArray!.cast<Map<String, Object?>>()) {
         final child =
             RemoteDiagnosticsNode(element, inspectorService, false, parent);
         child.parent = this;

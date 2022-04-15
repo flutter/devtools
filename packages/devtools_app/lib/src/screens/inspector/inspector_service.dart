@@ -815,7 +815,7 @@ abstract class ObjectGroupBase implements Disposable {
     Future<Object?> json,
   ) async {
     if (disposed) return null;
-    return parseDiagnosticsNodeHelper(await json as Map<String, Object>?);
+    return parseDiagnosticsNodeHelper(await json as Map<String, Object?>?);
   }
 
   Future<RemoteDiagnosticsNode?> parseDiagnosticsNodeObservatory(
@@ -827,7 +827,7 @@ abstract class ObjectGroupBase implements Disposable {
   }
 
   RemoteDiagnosticsNode? parseDiagnosticsNodeHelper(
-    Map<String, Object>? jsonElement,
+    Map<String, Object?>? jsonElement,
   ) {
     if (disposed) return null;
     if (jsonElement == null) return null;
