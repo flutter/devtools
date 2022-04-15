@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:mockito/mockito.dart';
@@ -21,7 +20,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     this._httpProfile,
     this._memoryData,
     this._allocationData,
-    CpuSamples cpuSamples,
+    CpuSamples? cpuSamples,
   )   : _startingSockets = _socketProfile?.sockets ?? [],
         _startingRequests = _httpProfile?.requests ?? [],
         cpuSamples = cpuSamples ??
@@ -36,7 +35,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
               'samples': [],
             });
 
-  CpuSamples cpuSamples;
+  CpuSamples? cpuSamples;
 
   /// Specifies the return value of `httpEnableTimelineLogging`.
   bool httpEnableTimelineLoggingResult = true;
@@ -51,13 +50,13 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   SemanticVersion dartIoVersion = SemanticVersion(major: 1, minor: 3);
 
   final VmFlagManager _vmFlagManager;
-  final Timeline _timelineData;
-  SocketProfile _socketProfile;
+  final Timeline? _timelineData;
+  SocketProfile? _socketProfile;
   final List<SocketStatistic> _startingSockets;
-  HttpProfile _httpProfile;
+  HttpProfile? _httpProfile;
   final List<HttpProfileRequest> _startingRequests;
-  final SamplesMemoryJson _memoryData;
-  final AllocationMemoryJson _allocationData;
+  final SamplesMemoryJson? _memoryData;
+  final AllocationMemoryJson? _allocationData;
 
   final _flags = <String, dynamic>{
     'flags': <Flag>[
@@ -109,17 +108,17 @@ class FakeVmService extends Fake implements VmServiceWrapper {
           {
             'id': 'fake_isolate_id',
           },
-        ),
+        )!,
       );
 
   @override
   Future<AllocationProfile> getAllocationProfile(
     String isolateId, {
-    bool reset,
-    bool gc,
+    bool? reset,
+    bool? gc,
   }) async {
     final memberStats = <ClassHeapStats>[];
-    for (var data in _allocationData.data) {
+    for (var data in _allocationData!.data) {
       final stats = ClassHeapStats(
         classRef: data.classRef,
         accumulatedSize: data.bytesDelta,
@@ -155,7 +154,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   Future<HeapSnapshotGraph> getHeapSnapshotGraph(IsolateRef isolateRef) async {
     // Simulate a snapshot that takes .5 seconds.
     await Future.delayed(const Duration(milliseconds: 500));
-    return null;
+    return Future.value(HeapSnapshotGraph.fromChunks([]));
   }
 
   @override
@@ -167,8 +166,8 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   Future<Obj> getObject(
     String isolateId,
     String objectId, {
-    int offset,
-    int count,
+    int? offset,
+    int? count,
   }) {
     return Future.value(MockObj());
   }
@@ -179,7 +178,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
       throw StateError('_memoryData was not provided to FakeServiceManager');
     }
 
-    final heapSample = _memoryData.data.first;
+    final heapSample = _memoryData!.data.first;
     return MemoryUsage(
       externalUsage: heapSample.external,
       heapCapacity: heapSample.capacity,
@@ -193,15 +192,15 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<Stack> getStack(String isolateId, {int limit}) {
+  Future<Stack> getStack(String isolateId, {int? limit}) {
     return Future.value(Stack(frames: [], messages: [], truncated: false));
   }
 
   @override
   Future<Success> setFlag(String name, String value) {
-    final List<Flag> flags = _flags['flags'];
+    final List<Flag?> flags = _flags['flags'];
     final existingFlag =
-        flags.firstWhere((f) => f.name == name, orElse: () => null);
+        flags.firstWhere((f) => f!.name == name, orElse: () => null);
     if (existingFlag != null) {
       existingFlag.valueAsString = value;
     } else {
@@ -251,13 +250,14 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Future<Timeline> getVMTimeline({
-    int timeOriginMicros,
-    int timeExtentMicros,
+    int? timeOriginMicros,
+    int? timeExtentMicros,
   }) async {
-    if (_timelineData == null) {
+    final result = _timelineData;
+    if (result == null) {
       throw StateError('timelineData was not provided to FakeServiceManager');
     }
-    return _timelineData;
+    return result;
   }
 
   @override
@@ -271,7 +271,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   @override
   Future<SocketProfilingState> socketProfilingEnabled(
     String isolateId, [
-    bool enabled,
+    bool? enabled,
   ]) {
     if (enabled != null) {
       return Future.value(SocketProfilingState(enabled: enabled));
@@ -283,7 +283,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Future<Success> clearSocketProfile(String isolateId) async {
-    _socketProfile.sockets.clear();
+    _socketProfile!.sockets.clear();
     return Future.value(Success());
   }
 
@@ -306,13 +306,12 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   ) async {
     final httpProfile = await getHttpProfile(isolateId);
     return Future.value(
-      httpProfile.requests
-          .firstWhere((request) => request.id == id, orElse: () => null),
+      httpProfile.requests.firstWhereOrNull((request) => request.id == id),
     );
   }
 
   @override
-  Future<HttpProfile> getHttpProfile(String isolateId, {int updatedSince}) {
+  Future<HttpProfile> getHttpProfile(String isolateId, {int? updatedSince}) {
     return Future.value(
       _httpProfile ?? HttpProfile(requests: [], timestamp: 0),
     );
@@ -320,7 +319,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
 
   @override
   Future<Success> clearHttpProfile(String isolateId) {
-    _httpProfile?.requests?.clear();
+    _httpProfile?.requests.clear();
     return Future.value(Success());
   }
 
@@ -338,7 +337,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   @override
   Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
     String isolateId, [
-    bool enabled,
+    bool? enabled,
   ]) async {
     if (enabled != null) {
       return Future.value(HttpTimelineLoggingState(enabled: enabled));
