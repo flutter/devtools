@@ -72,6 +72,7 @@ export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | aw
 echo "Flutter version is '$FLUTTER_VERSION'"
 
 # Generate code.
+flutter pub get
 bash tool/generate_code.sh
 
 # Change the CI to the packages/devtools_app directory.
@@ -79,9 +80,6 @@ pushd packages/devtools_app
 echo `pwd`
 
 if [ "$BOT" = "main" ]; then
-
-    # Provision our packages.
-    flutter pub get
 
     # Verify that dart format has been run.
     echo "Checking formatting..."
@@ -111,8 +109,6 @@ if [ "$BOT" = "main" ]; then
 
 elif [ "$BOT" = "test_ddc" ]; then
 
-    flutter pub get
-
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
     flutter config --enable-web
     flutter build web --pwa-strategy=none --no-tree-shake-icons
@@ -129,7 +125,6 @@ elif [ "$BOT" = "test_ddc" ]; then
         exit 1
     fi
 elif [ "$BOT" = "test_dart2js" ]; then
-    flutter pub get
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
     flutter config --enable-web
@@ -150,8 +145,6 @@ elif [ "$BOT" = "test_dart2js" ]; then
 
 elif [ "$BOT" = "integration_ddc" ]; then
 
-    # Provision our packages.
-    flutter pub get
     flutter config --enable-web
 
     # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
@@ -160,7 +153,6 @@ elif [ "$BOT" = "integration_ddc" ]; then
 
 elif [ "$BOT" = "integration_dart2js" ]; then
 
-    flutter pub get
     flutter config --enable-web
 
     # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.

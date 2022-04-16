@@ -9,10 +9,10 @@ set -ex
 
 echo "Refreshing local clone..."
 
-bash tool/generate_code.sh
-
 pushd packages/devtools_app
 flutter pub upgrade
 popd
+
+bash tool/generate_code.sh
 
 echo "Refreshed local clone."
