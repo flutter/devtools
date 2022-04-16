@@ -11,8 +11,7 @@ echo "Generating code..."
 
 echo $(pwd)
 
-pushd packages
-pushd devtools_test
+pushd packages/devtools_test
 
 flutter pub run build_runner build --delete-conflicting-outputs
 
@@ -24,7 +23,6 @@ if  ! grep -q require_trailing_commas "$MOCK_FILE" ; then
   mv $TMP_FILE $MOCK_FILE
 fi
 
-popd
 popd
 
 echo "Done generating code."

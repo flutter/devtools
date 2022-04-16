@@ -72,6 +72,9 @@ export FLUTTER_VERSION=$(flutter --version | awk -F '•' 'NR==1{print $1}' | aw
 echo "Flutter version is '$FLUTTER_VERSION'"
 
 # Generate code.
+pushd packages/devtools_app
+flutter pub get
+popd
 bash tool/generate_code.sh
 
 # Change the CI to the packages/devtools_app directory.
