@@ -112,8 +112,6 @@ class MockLoggingController extends Mock implements LoggingController {
   }
 }
 
-class MockErrorBadgeManager extends Mock implements ErrorBadgeManager {}
-
 class MockMemoryController extends Mock implements MemoryController {}
 
 class MockFlutterMemoryController extends Mock implements MemoryController {}

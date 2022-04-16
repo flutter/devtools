@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -16,11 +13,12 @@ import 'package:vm_service/vm_service.dart';
 import 'fake_isolate_manager.dart';
 import 'fake_service_extension_manager.dart';
 import 'fake_vm_service.dart';
+import 'generated.mocks.dart';
 import 'mocks.dart';
 
 class FakeServiceManager extends Fake implements ServiceConnectionManager {
   FakeServiceManager({
-    VmServiceWrapper service,
+    VmServiceWrapper? service,
     this.hasConnection = true,
     this.connectedAppInitialized = true,
     this.hasService = true,
@@ -28,30 +26,23 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     this.availableLibraries = const [],
   }) : service = service ?? createFakeService() {
     initFlagManager();
-
-    when(errorBadgeManager.erroredItemsForPage(any)).thenReturn(
-      FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
-    );
-
-    when(errorBadgeManager.errorCountNotifier(any))
-        .thenReturn(ValueNotifier<int>(0));
   }
 
   Completer<void> flagsInitialized = Completer();
 
   Future<void> initFlagManager() async {
-    await _flagManager.vmServiceOpened(service);
+    await _flagManager.vmServiceOpened(service!);
     flagsInitialized.complete();
   }
 
   static FakeVmService createFakeService({
-    Timeline timelineData,
-    SocketProfile socketProfile,
-    HttpProfile httpProfile,
-    SamplesMemoryJson memoryData,
-    AllocationMemoryJson allocationData,
-    CpuProfileData cpuProfileData,
-    CpuSamples cpuSamples,
+    Timeline? timelineData,
+    SocketProfile? socketProfile,
+    HttpProfile? httpProfile,
+    SamplesMemoryJson? memoryData,
+    AllocationMemoryJson? allocationData,
+    CpuProfileData? cpuProfileData,
+    CpuSamples? cpuSamples,
   }) =>
       FakeVmService(
         _flagManager,
@@ -70,16 +61,16 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final MockVM _mockVM = MockVM();
 
   @override
-  VmServiceWrapper service;
+  VmServiceWrapper? service;
 
   @override
-  Future<VmService> onServiceAvailable = Future.value();
+  Future<VmService> onServiceAvailable = Future.error('not provided');
 
   @override
   bool get isServiceAvailable => hasConnection;
 
   @override
-  ConnectedApp connectedApp = MockConnectedApp();
+  ConnectedApp? connectedApp = MockConnectedApp();
 
   @override
   final ConsoleService consoleService = ConsoleService();
@@ -88,7 +79,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   Stream<VmServiceWrapper> get onConnectionClosed => const Stream.empty();
 
   @override
-  Stream<VmServiceWrapper> get onConnectionAvailable => Stream.value(service);
+  Stream<VmServiceWrapper> get onConnectionAvailable => Stream.value(service!);
 
   @override
   Future<double> get queryDisplayRefreshRate => Future.value(60.0);
@@ -106,7 +97,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final IsolateManager isolateManager = FakeIsolateManager();
 
   @override
-  final ErrorBadgeManager errorBadgeManager = MockErrorBadgeManager();
+  final errorBadgeManager = MockErrorBadgeManager();
 
   @override
   final InspectorService inspectorService = FakeInspectorService();
@@ -144,8 +135,8 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   }
 
   @override
-  bool libraryUriAvailableNow(String uri) {
-    return availableLibraries.any((u) => u.startsWith(uri));
+  bool libraryUriAvailableNow(String? uri) {
+    return availableLibraries.any((u) => u.startsWith(uri!));
   }
 
   @override
@@ -168,8 +159,8 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   Future<void> sendDwdsEvent({
-    @required String screen,
-    @required String action,
+    required String screen,
+    required String action,
   }) {
     return Future.value();
   }
@@ -186,7 +177,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
       ValueNotifier(const ConnectedState(false));
 
   void changeState(bool value, {bool manual = false}) {
-    hasConnection = value ?? false;
+    hasConnection = value;
     _connectedState.value =
         ConnectedState(value, userInitiatedConnectionState: manual);
   }
