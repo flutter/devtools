@@ -4,7 +4,6 @@
 
 // @dart=2.9
 
-export 'src/mocks/fake_isolate_manager.dart';
 export 'src/mocks/fake_service_extension_manager.dart';
 export 'src/mocks/fake_service_manager.dart';
 export 'src/mocks/fake_vm_service_wrapper.dart';
