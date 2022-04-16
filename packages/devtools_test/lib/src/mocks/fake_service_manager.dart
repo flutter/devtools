@@ -12,7 +12,7 @@ import 'package:vm_service/vm_service.dart';
 
 import 'fake_isolate_manager.dart';
 import 'fake_service_extension_manager.dart';
-import 'fake_vm_service.dart';
+import 'fake_vm_service_wrapper.dart';
 import 'generated.mocks.dart';
 import 'mocks.dart';
 
@@ -35,7 +35,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     flagsInitialized.complete();
   }
 
-  static FakeVmService createFakeService({
+  static FakeVmServiceWrapper createFakeService({
     Timeline? timelineData,
     SocketProfile? socketProfile,
     HttpProfile? httpProfile,
@@ -44,7 +44,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     CpuProfileData? cpuProfileData,
     CpuSamples? cpuSamples,
   }) =>
-      FakeVmService(
+      FakeVmServiceWrapper(
         _flagManager,
         timelineData,
         socketProfile,
@@ -64,7 +64,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   VmServiceWrapper? service;
 
   @override
-  Future<VmService> onServiceAvailable = Future.error('not provided');
+  Future<VmService> onServiceAvailable = Future.value(MockVmService());
 
   @override
   bool get isServiceAvailable => hasConnection;

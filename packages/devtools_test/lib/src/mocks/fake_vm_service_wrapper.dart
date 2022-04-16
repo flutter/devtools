@@ -13,8 +13,8 @@ import 'package:vm_service/vm_service.dart';
 import 'generated.mocks.dart';
 import 'mocks.dart';
 
-class FakeVmService extends Fake implements VmServiceWrapper {
-  FakeVmService(
+class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
+  FakeVmServiceWrapper(
     this._vmFlagManager,
     this._timelineData,
     this._socketProfile,
