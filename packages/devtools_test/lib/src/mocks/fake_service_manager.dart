@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -25,6 +26,10 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     this.availableLibraries = const [],
   }) : service = service ?? createFakeService() {
     initFlagManager();
+
+    when(errorBadgeManager.erroredItemsForPage('inspector')).thenReturn(
+      FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
+    );
   }
 
   Completer<void> flagsInitialized = Completer();
