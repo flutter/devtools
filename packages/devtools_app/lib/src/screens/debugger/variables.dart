@@ -52,18 +52,23 @@ class ExpandableVariable extends StatelessWidget {
     required this.debuggerController,
   }) : super(key: key);
 
+  @visibleForTesting
+  static const emptyExpandableVariableKey = Key('empty expandable variable');
+
   final DartObjectNode? variable;
+
   final DebuggerController debuggerController;
 
   @override
   Widget build(BuildContext context) {
-    final _variable = variable;
-    if (_variable == null) return const SizedBox();
+    final variable = this.variable;
+    if (variable == null)
+      return const SizedBox(key: emptyExpandableVariableKey);
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
     return TreeView<DartObjectNode>(
       dataRootsListenable:
-          FixedValueListenable<List<DartObjectNode>>([_variable]),
+          FixedValueListenable<List<DartObjectNode>>([variable]),
       shrinkWrap: true,
       dataDisplayProvider: (variable, onPressed) =>
           displayProvider(context, variable, onPressed, debuggerController),
