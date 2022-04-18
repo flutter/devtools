@@ -52,16 +52,16 @@ class StatusLine extends StatelessWidget {
   }
 
   List<Widget> _getStatusItems(BuildContext context, bool showIsolateSelector) {
-    final isSmall = ScreenSize(context).width == MediaSize.extraSmall;
+    final isNarrow = ScreenSize(context).width == MediaSize.extraSmall;
     final Widget? pageStatus = currentScreen.buildStatus(context);
     return [
       buildHelpUrlStatus(context, currentScreen),
       const BulletSpacer(),
-      if (!isSmall && showIsolateSelector) ...[
+      if (!isNarrow && showIsolateSelector) ...[
         const IsolateSelector(),
         const BulletSpacer(),
       ],
-      if (!isSmall && pageStatus != null) ...[
+      if (!isNarrow && pageStatus != null) ...[
         pageStatus,
         const BulletSpacer(),
       ],
