@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -164,6 +165,26 @@ void main() {
       // 400ms is arbitrary. It is less than 500, which is what matters. This
       // can be increased if this test starts to flake.
       expect(end! - start, lessThan(400));
+    });
+
+    test('timeout', () async {
+      int value = 0;
+      Future<int> operation() async {
+        await Future.delayed(const Duration(milliseconds: 200));
+        return ++value;
+      }
+
+      expect(value, equals(0));
+
+      var result = await timeout<int>(operation(), 100);
+      await delay();
+      expect(value, equals(1));
+      expect(result, isNull);
+
+      result = await timeout<int>(operation(), 500);
+      await delay();
+      expect(value, equals(2));
+      expect(result, equals(2));
     });
 
     group('TimeRange', () {
