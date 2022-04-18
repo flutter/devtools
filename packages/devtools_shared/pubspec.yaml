@@ -3,7 +3,7 @@ description: Package of shared structures between devtools_app, dds, and other t
 
 version: 2.13.0-dev.1
 
-homepage: https://github.com/flutter/devtools
+repository: https://github.com/flutter/devtools/tree/master/packages/devtools_shared
 
 environment:
   sdk: '>=2.12.0 <3.0.0'

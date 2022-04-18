@@ -5,7 +5,7 @@ description: Web-based performance tooling for Dart and Flutter.
 # that updates all versions of devtools packages (devtools_app, devtools_test).
 version: 2.13.0-dev.1
 
-homepage: https://github.com/flutter/devtools
+repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
 environment:
   sdk: '>=2.16.0 <3.0.0'
