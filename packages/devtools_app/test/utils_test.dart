@@ -173,6 +173,7 @@ void main() {
         await Future.delayed(const Duration(milliseconds: 200));
         return ++value;
       }
+
       expect(value, equals(0));
 
       var result = await timeout<int>(operation(), 100);
