@@ -52,12 +52,13 @@ class StatusLine extends StatelessWidget {
   }
 
   List<Widget> _getStatusItems(BuildContext context, bool showIsolateSelector) {
-    final isNarrow = ScreenSize(context).width == MediaSize.xs;
+    final isExtraNarrow = ScreenSize(context).width == MediaSize.xxs;
+    final isNarrow = isExtraNarrow || ScreenSize(context).width == MediaSize.xs;
     final Widget? pageStatus = currentScreen.buildStatus(context);
     return [
-      buildHelpUrlStatus(context, currentScreen),
+      buildHelpUrlStatus(context, currentScreen, isNarrow),
       const BulletSpacer(),
-      if (!isNarrow && showIsolateSelector) ...[
+      if (!isExtraNarrow && showIsolateSelector) ...[
         const IsolateSelector(),
         const BulletSpacer(),
       ],
@@ -65,20 +66,21 @@ class StatusLine extends StatelessWidget {
         pageStatus,
         const BulletSpacer(),
       ],
-      buildConnectionStatus(context)
+      buildConnectionStatus(context, isNarrow)
     ];
   }
 
   Widget buildHelpUrlStatus(
     BuildContext context,
     Screen currentScreen,
+    bool isNarrow,
   ) {
     final String? docPageId = currentScreen.docPageId;
     if (docPageId != null) {
       return RichText(
         text: LinkTextSpan(
           link: Link(
-            display: 'flutter.dev/devtools/$docPageId',
+            display: isNarrow ? docPageId : 'flutter.dev/devtools/$docPageId',
             url: 'https://flutter.dev/devtools/$docPageId',
           ),
           onTap: () {
@@ -96,7 +98,7 @@ class StatusLine extends StatelessWidget {
     }
   }
 
-  Widget buildConnectionStatus(BuildContext context) {
+  Widget buildConnectionStatus(BuildContext context, bool isNarrow) {
     final textTheme = Theme.of(context).textTheme;
     return ValueListenableBuilder<ConnectedState>(
       valueListenable: serviceManager.connectedState,
@@ -156,12 +158,13 @@ class StatusLine extends StatelessWidget {
                         Icons.info_outline,
                         size: actionsIconSize,
                       ),
-                      const SizedBox(width: denseSpacing),
-                      Text(
-                        description,
-                        style: textTheme.bodyText2,
-                        overflow: TextOverflow.clip,
-                      ),
+                      if (!isNarrow) const SizedBox(width: denseSpacing),
+                      if (!isNarrow)
+                        Text(
+                          description,
+                          style: textTheme.bodyText2,
+                          overflow: TextOverflow.clip,
+                        ),
                     ],
                   ),
                 ),
