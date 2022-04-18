@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 
@@ -10,13 +10,13 @@ void main() => runApp(const OverflowingApp());
 
 class OverflowingApp extends StatefulWidget {
   const OverflowingApp({
-    Key key,
+    Key? key,
     this.initialRoute,
     this.isTestMode = false,
   }) : super(key: key);
 
   final bool isTestMode;
-  final String initialRoute;
+  final String? initialRoute;
 
   @override
   _OverflowingAppState createState() => _OverflowingAppState();
