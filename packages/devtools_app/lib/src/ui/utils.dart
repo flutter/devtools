@@ -222,7 +222,7 @@ class ThemedColor {
   }
 }
 
-// TODO(elliette): Add mixin for comparing enums. Eg, size > MediaSize.small
+// TODO(elliette): Add mixin for comparing enums. Eg, size > MediaSize.s
 // Requires enhanced enums feature in Dart SDK >= 2.17.
 enum MediaSize {
   xs,
@@ -245,23 +245,23 @@ class ScreenSize {
 
   MediaSize _calculateWidth(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    if (width < 600) return MediaSize.extraSmall;
-    if (width >= 600 && width < 900) return MediaSize.small;
-    if (width >= 900 && width < 1200) return MediaSize.medium;
+    if (width < 600) return MediaSize.xs;
+    if (width >= 600 && width < 900) return MediaSize.s;
+    if (width >= 900 && width < 1200) return MediaSize.m;
     if (width >= 1200 && width < 1500)
-      return MediaSize.large;
+      return MediaSize.l;
     else
-      return MediaSize.extraLarge;
+      return MediaSize.xl;
   }
 
   MediaSize _calculateHeight(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    if (width < 300) return MediaSize.extraSmall;
-    if (width >= 300 && width < 500) return MediaSize.small;
-    if (width >= 500 && width < 700) return MediaSize.medium;
+    if (width < 300) return MediaSize.xs;
+    if (width >= 300 && width < 500) return MediaSize.s;
+    if (width >= 500 && width < 700) return MediaSize.m;
     if (width >= 700 && width < 900)
-      return MediaSize.large;
+      return MediaSize.l;
     else
-      return MediaSize.extraLarge;
+      return MediaSize.xl;
   }
 }
