@@ -247,22 +247,22 @@ class ScreenSize {
   MediaSize _calculateWidth(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     if (width < 300) return MediaSize.xxs;
-    if (width >= 300 && width < 600) return MediaSize.xs;
-    if (width >= 600 && width < 900) return MediaSize.s;
-    if (width >= 900 && width < 1200) return MediaSize.m;
-    if (width >= 1200 && width < 1500)
+    if (width < 600) return MediaSize.xs;
+    if (width < 900) return MediaSize.s;
+    if (width < 1200) return MediaSize.m;
+    if (width < 1500)
       return MediaSize.l;
     else
       return MediaSize.xl;
   }
 
   MediaSize _calculateHeight(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (width < 300) return MediaSize.xxs;
-    if (width >= 300 && width < 450) return MediaSize.xs;
-    if (width >= 450 && width < 600) return MediaSize.s;
-    if (width >= 600 && width < 750) return MediaSize.m;
-    if (width >= 750 && width < 900)
+    final height = MediaQuery.of(context).size.height;
+    if (height < 300) return MediaSize.xxs;
+    if (height < 450) return MediaSize.xs;
+    if (height < 600) return MediaSize.s;
+    if (height < 750) return MediaSize.m;
+    if (height < 900)
       return MediaSize.l;
     else
       return MediaSize.xl;

@@ -158,13 +158,14 @@ class StatusLine extends StatelessWidget {
                         Icons.info_outline,
                         size: actionsIconSize,
                       ),
-                      if (!isNarrow) const SizedBox(width: denseSpacing),
-                      if (!isNarrow)
+                      if (!isNarrow) ...[
+                        const SizedBox(width: denseSpacing),
                         Text(
                           description,
                           style: textTheme.bodyText2,
                           overflow: TextOverflow.clip,
                         ),
+                      ]
                     ],
                   ),
                 ),
