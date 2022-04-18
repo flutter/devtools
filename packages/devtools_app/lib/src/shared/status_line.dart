@@ -15,6 +15,7 @@ import '../analytics/constants.dart' as analytics_constants;
 import '../info/info_controller.dart';
 import '../service/isolate_manager.dart';
 import '../service/service_manager.dart';
+import '../ui/utils.dart';
 import 'common_widgets.dart';
 import 'device_dialog.dart';
 import 'globals.dart';
@@ -38,48 +39,39 @@ class StatusLine extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: currentScreen.showIsolateSelector,
       builder: (context, showIsolateSelector, _) {
-        final textTheme = Theme.of(context).textTheme;
-
-        final children = <Widget>[];
-
-        // Have an area for page specific help (always docked to the left).
-        children.addAll([
-          buildHelpUrlStatus(context, currentScreen, textTheme),
-          const BulletSpacer()
-        ]);
-        // Display an isolate selector.
-        if (showIsolateSelector) {
-          children.addAll([const IsolateSelector(), const BulletSpacer()]);
-        }
-
-        // Display page specific status.
-        final Widget? pageStatus =
-            buildPageStatus(context, currentScreen, textTheme);
-        if (pageStatus != null) {
-          children.addAll([pageStatus, const BulletSpacer()]);
-        }
-
-        // Always display connection status (docked to the right).
-        children.add(
-          buildConnectionStatus(textTheme),
-        );
-
         return Container(
           height: statusLineHeight,
           alignment: Alignment.centerLeft,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: children,
+            children: _getStatusItems(context, showIsolateSelector),
           ),
         );
       },
     );
   }
 
+  List<Widget> _getStatusItems(BuildContext context, bool showIsolateSelector) {
+    final isSmall = ScreenSize(context).width == MediaSize.extraSmall;
+    final Widget? pageStatus = currentScreen.buildStatus(context);
+    return [
+      buildHelpUrlStatus(context, currentScreen),
+      const BulletSpacer(),
+      if (!isSmall && showIsolateSelector) ...[
+        const IsolateSelector(),
+        const BulletSpacer(),
+      ],
+      if (!isSmall && pageStatus != null) ...[
+        pageStatus,
+        const BulletSpacer(),
+      ],
+      buildConnectionStatus(context)
+    ];
+  }
+
   Widget buildHelpUrlStatus(
     BuildContext context,
     Screen currentScreen,
-    TextTheme textTheme,
   ) {
     final String? docPageId = currentScreen.docPageId;
     if (docPageId != null) {
@@ -104,15 +96,8 @@ class StatusLine extends StatelessWidget {
     }
   }
 
-  Widget? buildPageStatus(
-    BuildContext context,
-    Screen currentScreen,
-    TextTheme textTheme,
-  ) {
-    return currentScreen.buildStatus(context, textTheme);
-  }
-
-  Widget buildConnectionStatus(TextTheme textTheme) {
+  Widget buildConnectionStatus(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return ValueListenableBuilder<ConnectedState>(
       valueListenable: serviceManager.connectedState,
       builder: (context, connectedState, child) {
@@ -128,7 +113,7 @@ class StatusLine extends StatelessWidget {
                 '${vm.targetCPU}-${vm.architectureBits} ${vm.operatingSystem}';
           }
 
-          final color = Theme.of(context).textTheme.bodyText2!.color;
+          final color = textTheme.bodyText2!.color;
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
