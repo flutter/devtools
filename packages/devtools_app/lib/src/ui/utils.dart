@@ -225,11 +225,11 @@ class ThemedColor {
 // TODO(elliette): Add mixin for comparing enums. Eg, size > MediaSize.small
 // Requires enhanced enums feature in Dart SDK >= 2.17.
 enum MediaSize {
-  extraSmall,
-  small,
-  medium,
-  large,
-  extraLarge,
+  xs,
+  s,
+  m,
+  l,
+  xl,
 }
 
 class ScreenSize {

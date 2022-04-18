@@ -52,7 +52,7 @@ class StatusLine extends StatelessWidget {
   }
 
   List<Widget> _getStatusItems(BuildContext context, bool showIsolateSelector) {
-    final isNarrow = ScreenSize(context).width == MediaSize.extraSmall;
+    final isNarrow = ScreenSize(context).width == MediaSize.xs;
     final Widget? pageStatus = currentScreen.buildStatus(context);
     return [
       buildHelpUrlStatus(context, currentScreen),
