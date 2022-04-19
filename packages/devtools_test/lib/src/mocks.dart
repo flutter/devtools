@@ -75,14 +75,13 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     this.availableServices = const [],
     this.availableLibraries = const [],
   }) : service = service ?? createFakeService() {
-    initFlagManager();
-
     when(errorBadgeManager.erroredItemsForPage(any)).thenReturn(
       FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
     );
 
     when(errorBadgeManager.errorCountNotifier(any))
         .thenReturn(ValueNotifier<int>(0));
+    vmServiceOpened(service);
   }
 
   Completer<void> flagsInitialized = Completer();
@@ -100,6 +99,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     AllocationMemoryJson allocationData,
     CpuProfileData cpuProfileData,
     CpuSamples cpuSamples,
+    Map<String, String> resolvedUriMap,
   }) =>
       FakeVmService(
         _flagManager,
@@ -109,6 +109,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
         memoryData,
         allocationData,
         cpuSamples,
+        resolvedUriMap,
       );
 
   final List<String> availableServices;
@@ -116,6 +117,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final List<String> availableLibraries;
 
   final MockVM _mockVM = MockVM();
+
+  @override
+  final resolvedUriManager = ResolvedUriManager();
 
   @override
   VmServiceWrapper service;
@@ -241,6 +245,16 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   ValueListenable<bool> get deviceBusy => ValueNotifier(false);
+
+  @override
+  Future<void> vmServiceOpened(
+    VmServiceWrapper service, {
+    Future<void> onClosed,
+  }) {
+    resolvedUriManager.vmServiceOpened();
+    initFlagManager();
+    return Future.value();
+  }
 }
 
 class FakeVM extends Fake implements VM {
@@ -262,6 +276,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     this._memoryData,
     this._allocationData,
     CpuSamples cpuSamples,
+    this._resolvedUriMap,
   )   : _startingSockets = _socketProfile?.sockets ?? [],
         _startingRequests = _httpProfile?.requests ?? [],
         cpuSamples = cpuSamples ??
@@ -298,6 +313,7 @@ class FakeVmService extends Fake implements VmServiceWrapper {
   final List<HttpProfileRequest> _startingRequests;
   final SamplesMemoryJson _memoryData;
   final AllocationMemoryJson _allocationData;
+  final Map<String, String> _resolvedUriMap;
 
   final _flags = <String, dynamic>{
     'flags': <Flag>[
@@ -336,6 +352,17 @@ class FakeVmService extends Fake implements VmServiceWrapper {
     int timeExtentMicros,
   ) {
     return Future.value(cpuSamples);
+  }
+
+  @override
+  Future<UriList> lookupPackageUris(String isolateId, List<String> uris) {
+    return Future.value(
+      UriList(
+        uris: _resolvedUriMap != null
+            ? (uris.map((e) => _resolvedUriMap[e]).toList())
+            : null,
+      ),
+    );
   }
 
   @override
