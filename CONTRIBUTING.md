@@ -13,14 +13,15 @@ file.
 ## Workflow for making changes
 
 - Create a branch from your cloned repo: `git checkout -b myBranch`
+- Refresh local code: `sh tool/refresh.sh`
+- Implement your changes
 - Commit work to your branch: `git commit -m “description”`
 - Push to your branch: `git push origin myBranch`
 - Navigate to the Pull Requests tab in the main [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull request from the branch in your cloned repo to DevTools master. Create a pull request.
 
 ### Keeping your fork in-sync
 
-- Fetch branches/commits from the upstream DevTools: `git fetch upstream`
-- From your local branch, merge in the upstream master branch: `git merge upstream/master`
+- Pull the code from the upstream DevTools and refresh local code: `sh tool/pull_and_refresh.sh`
 
 ## Development prep
 
