@@ -121,7 +121,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final MockVM _mockVM = MockVM();
 
   @override
-  ResolvedUriManager resolvedUriManager = ResolvedUriManager();
+  final resolvedUriManager = ResolvedUriManager();
 
   @override
   VmServiceWrapper service;
